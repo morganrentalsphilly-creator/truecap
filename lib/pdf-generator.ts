@@ -198,6 +198,14 @@ const COLOR = {
   warn: "#D97706",
   warnSoft: "#FFFBEB",
   violet: "#7C3AED",
+  // TEXT variants of the semantic colours. #16A34A and #D97706 clear contrast
+  // at an 18pt stat value but are also used for the SMALLEST type in the pack
+  // (8.2pt table columns, a 7.5pt gauge label, 6.5pt micro-labels) where they
+  // measure ~3.2:1 on white — under the 4.5:1 floor and genuinely hard to read
+  // in print. These darker pairs clear it. Bars, stripes and chart series keep
+  // the brighter values above.
+  successText: "#15803D",
+  warnText: "#B45309",
   violetSoft: "#F5F3FF",
   gold: "#B8860B",
   navy: "#0F172A",
@@ -341,6 +349,45 @@ function colorLuminance(hex: string): number {
     0.7152 * toLinear(g) +
     0.0722 * toLinear(b)
   );
+}
+
+/** WCAG contrast ratio of a colour against white. */
+function contrastOnWhite(hex: string): number {
+  return 1.05 / (colorLuminance(hex) + 0.05);
+}
+
+/**
+ * A brand colour that is safe to set as TEXT on white.
+ *
+ * resolveThemeColor returns whatever hex the user saved, and that value is used
+ * as the text colour of every section kicker and — on six tables — the column
+ * headers, over a near-white fill. A Pro agent whose brand is yellow, cyan or
+ * a light green therefore shipped client-facing packs with unreadable headers.
+ *
+ * Darkens toward black until the ratio clears 4.5:1, preserving hue. The hero
+ * PANEL already has an equivalent guard (colorLuminance < 0.45); this is the
+ * same idea for the text uses, which had none.
+ *
+ * Fills, accent bars, stripes and chart series keep the raw brand colour —
+ * they are not text and do not carry the contrast requirement.
+ */
+function resolveThemeTextColor(branding?: BrandingConfig | null): string {
+  const base = resolveThemeColor(branding);
+  if (contrastOnWhite(base) >= 4.5) return base;
+
+  const [r, g, b] = hexToRgb(base);
+  // 20 steps is finer than the eye can resolve and always terminates: at
+  // factor 0 the colour is black, which is 21:1.
+  for (let step = 1; step <= 20; step += 1) {
+    const factor = 1 - step / 20;
+    const candidate =
+      "#" +
+      [r, g, b]
+        .map((c) => Math.round(c * factor).toString(16).padStart(2, "0"))
+        .join("");
+    if (contrastOnWhite(candidate) >= 4.5) return candidate;
+  }
+  return COLOR.ink;
 }
 
 /**
@@ -522,8 +569,15 @@ function sectionTitle(
   // section divider chrome reads as part of the user's identity, not
   // TrueCap's. Falls back to COLOR.primary (TrueCap blue) when no
   // theme color is provided.
-  const kickerColor =
+  //
+  // Passed through the contrast floor because this is TEXT on white: a light
+  // brand colour (yellow, cyan, pale green) would otherwise render a section
+  // heading that is effectively invisible. The underline rule below keeps the
+  // raw brand colour — a rule carries no contrast requirement.
+  const rawKicker =
     themeColor && isValidHex(themeColor) ? themeColor : COLOR.primary;
+  const kickerColor =
+    contrastOnWhite(rawKicker) >= 4.5 ? rawKicker : resolveThemeTextColor({ primaryColorHex: rawKicker });
   if (kicker) {
     setText(doc, kickerColor);
     doc.setFont("helvetica", "bold");
@@ -1242,50 +1296,6 @@ function pageInputs(
   // Property & Inputs immediately below).
   y += (ch + gap) * 2 + 22;
 
-  // Property & Inputs — moved to second position. Reader has already
-  // seen the headline metrics above; now sees the assumptions that
-  // produced them.
-  y = sectionTitle(doc, "Property & Inputs", y, undefined, themeColor);
-  const colW = (SAFE.w - 12) / 2;
-  const rowH = 92;
-
-  drawInputBlock(doc, M.left, y, colW, rowH, "Property", [
-    ["Type", formatPropertyType(d.property.type)],
-    ["Year built", String(d.property.yearBuilt)],
-    ["Purchase price", fmtCurrency(d.property.purchasePrice)],
-    ["Template", d.property.template],
-  ], themeColor);
-  drawInputBlock(doc, M.left + colW + 12, y, colW, rowH, "Financing", [
-    ["Down payment", `${d.financing.downPaymentPct}% (${fmtCurrency(d.financing.downPayment)})`],
-    ["Interest rate", `${d.financing.interestRate}%`],
-    ["Loan term", `${d.financing.loanTerm} yrs`],
-    ["Closing costs", `${d.financing.closingCostsPct}% (${fmtCurrency(d.financing.closingCosts)})`],
-  ], themeColor);
-  y += rowH + 10;
-  drawInputBlock(doc, M.left, y, colW, rowH, "Operating Expenses", [
-    // Annual-$ tax mode prints the customer's actual bill — printing the
-    // unused percent field here used to render "0%" on a paid PDF.
-    [
-      "Property tax / Insurance",
-      `${
-        d.expenses.propertyTaxAnnualBill != null
-          ? `${fmtCurrency(d.expenses.propertyTaxAnnualBill)}/yr (annual bill)`
-          : `${d.expenses.propertyTaxPct}%`
-      } / ${d.expenses.insurancePct}%`,
-    ],
-    ["Maintenance / Vacancy", `${d.expenses.maintenancePct}% / ${d.expenses.vacancyPct}%`],
-    ["Management / CapEx", `${d.expenses.managementPct}% / ${d.expenses.capexPct}%`],
-    ["HOA / Utilities", `${fmtCurrency(d.expenses.hoaMonthly)}/mo  ·  ${fmtCurrency(d.expenses.utilitiesMonthly)}/mo`],
-  ], themeColor);
-  drawInputBlock(doc, M.left + colW + 12, y, colW, rowH, "Assumptions", [
-    ["Rent growth / Expense growth", `${d.expenses.rentGrowth}% / ${d.expenses.expenseGrowth}%`],
-    ["Appreciation", `${d.expenses.appreciation}%/yr`],
-    ["Selling cost", `${d.expenses.sellingCost}%`],
-    ["Tax rate", `${d.expenses.taxRate}%`],
-  ], themeColor);
-  y += rowH + 22;
-
-  // Units
   y = sectionTitle(doc, "Units", y, undefined, themeColor);
   if (d.units.length <= 2) {
     // 1-2 units fit cleanly as side-by-side cards.
@@ -1395,6 +1405,16 @@ function pageInputs(
     78,
     Math.round(50 + rationaleLines.length * lineHeight + 16)
   );
+
+  // PAGE-FIT BACKSTOP. The card is the only element here whose height depends
+  // on content, so it must never assume it fits where it lands. Headers and
+  // footers are painted AFTER the body, so an overflowing card gets the footer
+  // rule and "Page N of M" printed straight across it.
+  const cardFooterLineY = PAGE.h - M.bottom + 20; // non-cover footer rule
+  if (y + cardHeight > cardFooterLineY - 12) {
+    doc.addPage();
+    y = M.top + 12;
+  }
   card(doc, M.left, y, SAFE.w, cardHeight);
   // Thinner left stripe (3pt vs 4pt) for a more refined feel.
   setFill(doc, tierColor);
@@ -1457,13 +1477,6 @@ function pageInputs(
   doc.setFontSize(9);
   doc.text(rationaleLines, M.left + 16, y + 50, { lineHeightFactor: 1.35 });
 
-  // PREPARED BY card was removed — the header subtitle now renders
-  // "Prepared by [Name]" bold under the logo, and the footer of every
-  // page shows the full "Prepared by [Name] · [Company]" attribution.
-  // A third card on page 1 was redundant chrome. Page 1 now ends with
-  // the AI Recommendation card; the attribution lives in the header
-  // and footer where it belongs.
-
   // "Your buy box" — the owner's personal verdict, directly under the AI
   // recommendation (the same pairing as the app dashboard: Deal Score
   // verdict first, buy-box fit right after). Renders ONLY when the
@@ -1481,6 +1494,74 @@ function pageInputs(
     }
     drawBuyBoxVerdictCard(doc, buyBox, M.left, by, SAFE.w);
   }
+
+  // ── PAGE BREAK ──────────────────────────────────────────────────────────
+  // The verdict ends this page; the assumptions behind it start the next one.
+  //
+  // This page used to carry everything — hero, six metrics, four input blocks,
+  // units AND the verdict card — and the arithmetic did not work. Every block
+  // above the card is fixed-height, so the card always began at y≈700 with
+  // ~89pt of room, which fits barely two wrapped lines of rationale. Any real
+  // rationale (deal-score's appreciation branch, verdict.ts's fallback) drew
+  // the card through the footer and off the bottom of the sheet.
+  //
+  // Splitting here fixes that at the cause rather than leaning on the backstop
+  // above, and it reads better: the answer and the numbers behind it stand on
+  // their own, then the inputs that produced them.
+  doc.addPage();
+  y = M.top + 12;
+
+
+  // Property & Inputs. The reader has seen the verdict and the numbers behind
+  // it; this page is the assumptions that produced them.
+  y = sectionTitle(doc, "Property & Inputs", y, undefined, themeColor);
+  const colW = (SAFE.w - 12) / 2;
+  const rowH = 92;
+
+  drawInputBlock(doc, M.left, y, colW, rowH, "Property", [
+    ["Type", formatPropertyType(d.property.type)],
+    ["Year built", String(d.property.yearBuilt)],
+    ["Purchase price", fmtCurrency(d.property.purchasePrice)],
+    ["Template", d.property.template],
+  ], themeColor);
+  drawInputBlock(doc, M.left + colW + 12, y, colW, rowH, "Financing", [
+    ["Down payment", `${d.financing.downPaymentPct}% (${fmtCurrency(d.financing.downPayment)})`],
+    ["Interest rate", `${d.financing.interestRate}%`],
+    ["Loan term", `${d.financing.loanTerm} yrs`],
+    ["Closing costs", `${d.financing.closingCostsPct}% (${fmtCurrency(d.financing.closingCosts)})`],
+  ], themeColor);
+  y += rowH + 10;
+  drawInputBlock(doc, M.left, y, colW, rowH, "Operating Expenses", [
+    // Annual-$ tax mode prints the customer's actual bill — printing the
+    // unused percent field here used to render "0%" on a paid PDF.
+    [
+      "Property tax / Insurance",
+      `${
+        d.expenses.propertyTaxAnnualBill != null
+          ? `${fmtCurrency(d.expenses.propertyTaxAnnualBill)}/yr (annual bill)`
+          : `${d.expenses.propertyTaxPct}%`
+      } / ${d.expenses.insurancePct}%`,
+    ],
+    ["Maintenance / Vacancy", `${d.expenses.maintenancePct}% / ${d.expenses.vacancyPct}%`],
+    ["Management / CapEx", `${d.expenses.managementPct}% / ${d.expenses.capexPct}%`],
+    ["HOA / Utilities", `${fmtCurrency(d.expenses.hoaMonthly)}/mo  ·  ${fmtCurrency(d.expenses.utilitiesMonthly)}/mo`],
+  ], themeColor);
+  drawInputBlock(doc, M.left + colW + 12, y, colW, rowH, "Assumptions", [
+    ["Rent growth / Expense growth", `${d.expenses.rentGrowth}% / ${d.expenses.expenseGrowth}%`],
+    ["Appreciation", `${d.expenses.appreciation}%/yr`],
+    ["Selling cost", `${d.expenses.sellingCost}%`],
+    ["Tax rate", `${d.expenses.taxRate}%`],
+  ], themeColor);
+  y += rowH + 22;
+
+  // Units
+  // PREPARED BY card was removed — the header subtitle now renders
+  // "Prepared by [Name]" bold under the logo, and the footer of every
+  // page shows the full "Prepared by [Name] · [Company]" attribution.
+  // A third card on page 1 was redundant chrome. Page 1 now ends with
+  // the AI Recommendation card; the attribution lives in the header
+  // and footer where it belongs.
+
 }
 
 function pageDecisionReadiness(
@@ -1620,6 +1701,7 @@ function pageProjection(
 ) {
   let y = M.top + 12;
   const themeColor = resolveThemeColor(branding);
+  const themeTextColor = resolveThemeTextColor(branding);
   y = sectionTitle(doc, "10-Year Projection", y, undefined, themeColor);
   setText(doc, COLOR.sub);
   doc.setFont("helvetica", "normal");
@@ -1726,16 +1808,20 @@ function pageProjection(
       fmtCurrency(r.rental),
       fmtCurrency(r.opex),
       fmtCurrency(r.debt),
-      { content: fmtCurrency(r.net), styles: { textColor: r.net >= 0 ? hexToRgb(COLOR.success) : hexToRgb(COLOR.danger) } },
+      { content: fmtCurrency(r.net), styles: { textColor: r.net >= 0 ? hexToRgb(COLOR.successText) : hexToRgb(COLOR.danger) } },
       fmtCurrency(r.tax),
-      { content: fmtCurrency(r.after), styles: { textColor: hexToRgb(COLOR.success), fontStyle: "bold" } },
+      { content: fmtCurrency(r.after), styles: { textColor: hexToRgb(COLOR.successText), fontStyle: "bold" } },
       fmtCurrency(r.cum),
     ]),
     theme: "plain",
     styles: { font: "helvetica", fontSize: 8.2, cellPadding: 4, lineColor: hexToRgb(COLOR.line), lineWidth: 0.3 },
-    headStyles: { fillColor: hexToRgb(COLOR.cardSoft), textColor: hexToRgb(themeColor), fontStyle: "bold", fontSize: 7.5, halign: "left", lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 }, lineColor: hexToRgb(themeColor) },
-    columnStyles: { 0: { fontStyle: "bold", textColor: hexToRgb(COLOR.ink) } },
+    headStyles: { fillColor: hexToRgb(COLOR.cardSoft), textColor: hexToRgb(themeTextColor), fontStyle: "bold", fontSize: 7.5, lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 }, lineColor: hexToRgb(themeColor) },
+    columnStyles: {
+      0: { fontStyle: "bold", textColor: hexToRgb(COLOR.ink) },
+      ...Object.fromEntries([1, 2, 3, 4, 5, 6, 7].map((i) => [i, { halign: "right" as const }])),
+    },
     alternateRowStyles: { fillColor: [252, 253, 255] },
+    didParseCell: alignNumericHeaders,
   });
 }
 
@@ -1747,6 +1833,7 @@ function pageDownside(
   if (!d.downsideScenario) return;
   let y = M.top + 12;
   const themeColor = resolveThemeColor(branding);
+  const themeTextColor = resolveThemeTextColor(branding);
   y = sectionTitle(doc, "Downside Scenario", y, undefined, themeColor);
 
   setText(doc, COLOR.sub);
@@ -1849,12 +1936,13 @@ function pageDownside(
     ],
     theme: "plain",
     styles: { font: "helvetica", fontSize: 9, cellPadding: 6, lineColor: hexToRgb(COLOR.line), lineWidth: 0.3 },
-    headStyles: { fillColor: hexToRgb(COLOR.cardSoft), textColor: hexToRgb(themeColor), fontStyle: "bold", fontSize: 8, lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 }, lineColor: hexToRgb(themeColor) },
+    headStyles: { fillColor: hexToRgb(COLOR.cardSoft), textColor: hexToRgb(themeTextColor), fontStyle: "bold", fontSize: 8, lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 }, lineColor: hexToRgb(themeColor) },
     columnStyles: {
       0: { fontStyle: "bold", textColor: hexToRgb(COLOR.ink) },
       2: { textColor: hexToRgb(verdictTone === "success" ? COLOR.success : COLOR.danger), fontStyle: "bold" },
     },
     alternateRowStyles: { fillColor: [252, 253, 255] },
+    didParseCell: alignNumericHeaders,
   });
 }
 
@@ -1865,6 +1953,19 @@ function pageDownside(
  * and hands it the plot rectangle, so the chart is real PDF geometry — sharp
  * at any zoom, a fraction of the bytes, and renderable without a DOM.
  */
+/**
+ * Right-align every head cell except the first (the label column).
+ *
+ * autoTable applies `columnStyles` to BODY cells but not to head cells in this
+ * version, so setting halign there alone produced right-aligned figures under
+ * left-aligned headers — worse than the original, because the mismatch reads
+ * as a mistake rather than a convention. This hook aligns the header to its
+ * own column.
+ */
+const alignNumericHeaders = (data: { section: string; column: { index: number }; cell: { styles: { halign?: string } } }) => {
+  if (data.section === "head" && data.column.index > 0) data.cell.styles.halign = "right";
+};
+
 function drawChartCard(
   doc: jsPDF,
   x: number,
@@ -1893,6 +1994,7 @@ function pageTax(
 ) {
   let y = M.top + 12;
   const themeColor = resolveThemeColor(branding);
+  const themeTextColor = resolveThemeTextColor(branding);
   y = sectionTitle(doc, "Illustrative Tax Impact", y, undefined, themeColor);
   setText(doc, COLOR.sub);
   doc.setFont("helvetica", "normal");
@@ -1985,15 +2087,19 @@ function pageTax(
       fmtCurrency(r.interest),
       fmtCurrency(r.dep),
       fmtCurrency(r.total),
-      { content: fmtCurrency(r.taxable), styles: { textColor: r.taxable < 0 ? hexToRgb(COLOR.success) : hexToRgb(COLOR.danger) } },
-      { content: fmtCurrency(r.savings), styles: { textColor: hexToRgb(COLOR.success), fontStyle: "bold" } },
-      { content: fmtCurrency(r.benefit), styles: { textColor: r.benefit >= 0 ? hexToRgb(COLOR.success) : hexToRgb(COLOR.danger) } },
+      { content: fmtCurrency(r.taxable), styles: { textColor: r.taxable < 0 ? hexToRgb(COLOR.successText) : hexToRgb(COLOR.danger) } },
+      { content: fmtCurrency(r.savings), styles: { textColor: hexToRgb(COLOR.successText), fontStyle: "bold" } },
+      { content: fmtCurrency(r.benefit), styles: { textColor: r.benefit >= 0 ? hexToRgb(COLOR.successText) : hexToRgb(COLOR.danger) } },
     ]),
     theme: "plain",
     styles: { font: "helvetica", fontSize: 7.8, cellPadding: 3.5, lineColor: hexToRgb(COLOR.line), lineWidth: 0.3 },
-    headStyles: { fillColor: hexToRgb(COLOR.cardSoft), textColor: hexToRgb(themeColor), fontStyle: "bold", fontSize: 7.2, halign: "left", lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 }, lineColor: hexToRgb(themeColor) },
-    columnStyles: { 0: { fontStyle: "bold", textColor: hexToRgb(COLOR.ink) } },
+    headStyles: { fillColor: hexToRgb(COLOR.cardSoft), textColor: hexToRgb(themeTextColor), fontStyle: "bold", fontSize: 7.2, lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 }, lineColor: hexToRgb(themeColor) },
+    columnStyles: {
+      0: { fontStyle: "bold", textColor: hexToRgb(COLOR.ink) },
+      ...Object.fromEntries([1, 2, 3, 4, 5, 6, 7, 8].map((i) => [i, { halign: "right" as const }])),
+    },
     alternateRowStyles: { fillColor: [252, 253, 255] },
+    didParseCell: alignNumericHeaders,
   });
 }
 
@@ -2004,6 +2110,7 @@ function pageExit(
 ) {
   let y = M.top + 12;
   const themeColor = resolveThemeColor(branding);
+  const themeTextColor = resolveThemeTextColor(branding);
   y = sectionTitle(doc, "Exit Scenarios", y, undefined, themeColor);
   setText(doc, COLOR.sub);
   doc.setFont("helvetica", "normal");
@@ -2111,24 +2218,27 @@ function pageExit(
       showPoints: false,
     })
   );
-  drawChartCard(doc, M.left + chW + 12, y, chW, chH, "Profit Breakdown", (box) =>
-    drawStackedBarChart(doc, {
+  // WAS a stacked "Profit Breakdown" of Net Sale Proceeds + Total Profit. That
+  // chart was wrong twice over: profit is DERIVED from net sale proceeds
+  // (lib/exit-scenarios.ts), so stacking them double-counted and the bar's
+  // total height was a number with no financial meaning; and the profit series
+  // was clamped with Math.max(profit, 0) while the legend still said "Total
+  // Profit", so a loss-making exit year rendered as a zero-height segment
+  // indistinguishable from break-even. Hiding the downside is the one thing a
+  // lender-facing document must never do.
+  //
+  // Profit already has an honest home in "Profit Over Time" above, signed and
+  // against a zero line. This slot now shows the other half of the exit — what
+  // the sale actually nets after costs and loan payoff — as a plain series.
+  drawChartCard(doc, M.left + chW + 12, y, chW, chH, "Net Sale Proceeds", (box) =>
+    drawBarChart(doc, {
       box,
-      labels,
-      series: [
-        {
-          label: "Net Sale Proceeds",
-          values: d.exitScenarios.rows.map((r) => r.netSale),
-          color: themeColor,
-        },
-        {
-          label: "Total Profit",
-          // Clamped at the call site: a stacked segment cannot be negative
-          // (see drawStackedBarChart's contract).
-          values: d.exitScenarios.rows.map((r) => Math.max(r.profit, 0)),
-          color: COLOR.success,
-        },
-      ],
+      data: d.exitScenarios.rows.map((r) => ({
+        label: `Y${r.y}`,
+        value: r.netSale,
+        color: r.netSale >= 0 ? themeColor : COLOR.danger,
+      })),
+      showValues: false,
     })
   );
   y += chH + 20;
@@ -2141,15 +2251,19 @@ function pageExit(
       `Y${r.y}`,
       fmtCurrency(r.value),
       fmtCurrency(r.loan),
-      { content: fmtCurrency(r.equity), styles: { textColor: hexToRgb(COLOR.success), fontStyle: "bold" } },
+      { content: fmtCurrency(r.equity), styles: { textColor: hexToRgb(COLOR.successText), fontStyle: "bold" } },
       fmtCurrency(r.netSale),
-      { content: fmtCurrency(r.profit), styles: { textColor: r.profit >= 0 ? hexToRgb(COLOR.success) : hexToRgb(COLOR.danger), fontStyle: "bold" } },
+      { content: fmtCurrency(r.profit), styles: { textColor: r.profit >= 0 ? hexToRgb(COLOR.successText) : hexToRgb(COLOR.danger), fontStyle: "bold" } },
     ]),
     theme: "plain",
     styles: { font: "helvetica", fontSize: 8.5, cellPadding: 4.5, lineColor: hexToRgb(COLOR.line), lineWidth: 0.3 },
-    headStyles: { fillColor: hexToRgb(COLOR.cardSoft), textColor: hexToRgb(themeColor), fontStyle: "bold", fontSize: 7.5, halign: "left", lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 }, lineColor: hexToRgb(themeColor) },
-    columnStyles: { 0: { fontStyle: "bold", textColor: hexToRgb(COLOR.ink) } },
+    headStyles: { fillColor: hexToRgb(COLOR.cardSoft), textColor: hexToRgb(themeTextColor), fontStyle: "bold", fontSize: 7.5, lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 }, lineColor: hexToRgb(themeColor) },
+    columnStyles: {
+      0: { fontStyle: "bold", textColor: hexToRgb(COLOR.ink) },
+      ...Object.fromEntries([1, 2, 3, 4, 5].map((i) => [i, { halign: "right" as const }])),
+    },
     alternateRowStyles: { fillColor: [252, 253, 255] },
+    didParseCell: alignNumericHeaders,
   });
 }
 
@@ -2158,6 +2272,7 @@ function pageComps(doc: jsPDF, d: ReportData, branding?: BrandingConfig | null) 
   if (!c) return;
   let y = M.top + 12;
   const themeColor = resolveThemeColor(branding);
+  const themeTextColor = resolveThemeTextColor(branding);
   y = sectionTitle(doc, "Sale & Rent Comps", y, undefined, themeColor);
   setText(doc, COLOR.sub);
   doc.setFont("helvetica", "normal");
@@ -2222,9 +2337,13 @@ function pageComps(doc: jsPDF, d: ReportData, branding?: BrandingConfig | null) 
       body: c.saleComps.map(rowOf),
       theme: "plain",
       styles: { font: "helvetica", fontSize: 8.5, cellPadding: 4.5, lineColor: hexToRgb(COLOR.line), lineWidth: 0.3 },
-      headStyles: { fillColor: hexToRgb(COLOR.cardSoft), textColor: hexToRgb(themeColor), fontStyle: "bold", fontSize: 7.5, halign: "left", lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 }, lineColor: hexToRgb(themeColor) },
-      columnStyles: { 1: { fontStyle: "bold", textColor: hexToRgb(COLOR.ink) } },
+      headStyles: { fillColor: hexToRgb(COLOR.cardSoft), textColor: hexToRgb(themeTextColor), fontStyle: "bold", fontSize: 7.5, lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 }, lineColor: hexToRgb(themeColor) },
+      columnStyles: {
+        1: { fontStyle: "bold", textColor: hexToRgb(COLOR.ink), halign: "right" },
+        ...Object.fromEntries([2, 3, 4, 5].map((i) => [i, { halign: "right" as const }])),
+      },
       alternateRowStyles: { fillColor: [252, 253, 255] },
+      didParseCell: alignNumericHeaders,
     });
     y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 18;
   }
@@ -2242,9 +2361,13 @@ function pageComps(doc: jsPDF, d: ReportData, branding?: BrandingConfig | null) 
       body: c.rentComps.map(rowOf),
       theme: "plain",
       styles: { font: "helvetica", fontSize: 8.5, cellPadding: 4.5, lineColor: hexToRgb(COLOR.line), lineWidth: 0.3 },
-      headStyles: { fillColor: hexToRgb(COLOR.cardSoft), textColor: hexToRgb(themeColor), fontStyle: "bold", fontSize: 7.5, halign: "left", lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 }, lineColor: hexToRgb(themeColor) },
-      columnStyles: { 1: { fontStyle: "bold", textColor: hexToRgb(COLOR.ink) } },
+      headStyles: { fillColor: hexToRgb(COLOR.cardSoft), textColor: hexToRgb(themeTextColor), fontStyle: "bold", fontSize: 7.5, lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 }, lineColor: hexToRgb(themeColor) },
+      columnStyles: {
+        1: { fontStyle: "bold", textColor: hexToRgb(COLOR.ink), halign: "right" },
+        ...Object.fromEntries([2, 3, 4, 5].map((i) => [i, { halign: "right" as const }])),
+      },
       alternateRowStyles: { fillColor: [252, 253, 255] },
+      didParseCell: alignNumericHeaders,
     });
   }
 }

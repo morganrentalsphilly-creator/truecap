@@ -26,6 +26,20 @@ import { writeFileSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import type { ReportData } from "@/lib/pdf-generator";
 
+/**
+ * A REAL long rationale, not filler. lib/deal-score.ts's appreciation-play
+ * branch and lib/verdict.ts's buildAutoVerdict fallback both emit strings in
+ * this range, and the recommendation card is sized from the wrapped line
+ * count — so this is the input that exposes page-overflow bugs.
+ */
+const LONG_RATIONALE =
+  "This deal clears debt service today, but the margin is thinner than the headline cap rate suggests: " +
+  "the vacancy assumption sits below what this submarket has actually run over the last three years, the " +
+  "property-tax bill is a live reassessment risk given the sale price is well above the current assessed " +
+  "value, and the maintenance reserve is a default rather than a figure taken from an inspection. Treat " +
+  "the projected cash flow as an upper bound until rents are confirmed by signed leases and the tax " +
+  "exposure is checked against the county's most recent assessment cycle.";
+
 function buildSampleReport(): ReportData {
   const purchasePrice = 265_000;
   // Fixed, hand-written figures. This script must NEVER import the calc engine
@@ -118,8 +132,7 @@ function buildSampleReport(): ReportData {
       recommendation: "Buy",
       dealScore: 74,
       risk: "Moderate",
-      rationale:
-        "Rent covers debt service with room to spare, but the tax bill and a thin vacancy assumption leave less margin than the headline cap rate suggests.",
+      rationale: LONG_RATIONALE,
       monthlyCashFlow: 170,
       cocReturn: 3.4,
       capRate: 7.5,
