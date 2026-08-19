@@ -666,7 +666,24 @@ fallbacks that mask a missing secret.
 | Unit tests (Vitest) | `npm test` |
 | Production build (heavy, slowest) | `npm run build` |
 | Lint | `npm run lint` |
+| Build-chain integrity | `node scripts/verify-build-integrity.mjs` |
 | Dev server | `npm run dev` |
+
+- **Build-chain integrity guard** — CI job `build-chain-guard` hashes the
+  files that execute during `next build` (`next.config.mjs`,
+  `package.json`, `postcss.config.mjs`, …) against
+  `scripts/build-integrity-manifest.json`. It exists because a
+  blockchain-C2 loader was smuggled into `postcss.config.mjs` inside a
+  34-file commit and ran on every production build for six weeks
+  (2026-06-01, `15eb1b5` → removed in `ab02311`).
+
+  **If you edit any of those files, the guard fails CI and `main` goes
+  red — a green local `npm run build` will not warn you.** The fix is
+  not to disable it: read the diff of every listed file line by line,
+  then `node scripts/verify-build-integrity.mjs --update` and commit the
+  manifest bump **on its own**, with a message saying what changed in the
+  build-executed file and why. If you did NOT make the change, do not
+  update the manifest.
 
 - **Unit tests** live in `lib/__tests__/`. Run them when you touch
   `calc-analysis.ts`, `analysis-template-schema.ts`,
