@@ -1004,55 +1004,7 @@ export function AnalysisDashboard({
             onUpgrade={goToBilling}
           />
         ) : null
-      ) : decisionFirst ? (
-        /* REGION 2 · WHY THIS NUMBER — the reasoning paragraph, the risk
-           bullets, the make-your-price-work inverse, and the ranked
-           drivers, behind ONE collapsed disclosure. Previously four
-           separate top-level blocks that each restated the conclusion. */
-        <ResultsRegion
-          id="why-this-number"
-          question="Why this number"
-          payoff="The reasoning, the risks, and what would have to change"
-          openEvent="why_this_number_opened"
-        >
-          <div className="space-y-4">
-            <AnswerHeroCard
-          isLoading={isLoading}
-          isLoadingDealScore={isLoadingDealScore}
-          dealScoreResult={dealScoreResult}
-          result={result}
-          propertyType={propertyType}
-          isAppreciationPlay={appreciationPlay}
-          verdictNarrative={verdictNarrative}
-          nextAction={nextAction}
-          buyBoxFit={buyBoxAnyPass}
-          showAllTips={showAllTips}
-          onToggleShowAllTips={() => setShowAllTips((prev) => !prev)}
-          onSave={handleSaveClick}
-          isSaving={isSaving}
-          isSaveLocked={isSaveLockedByPlan}
-          saveLockedHint={saveLockedHint}
-          hasUnsavedChanges={isExistingSavedDeal && !isSaved}
-            purchasePrice={values?.purchasePrice ?? null}
-            maxOffer={maoQaContext?.maxOffer ?? null}
-            decisionOwnedUpstream
-            />
-            {/* RESTORED: this panel lived inside MaxOfferCard and vanished
-                from the DOM when the Decision-tier merge suppressed that
-                card. It is the answer to "but what if I still want this
-                house at this price". */}
-            {/* Pro-gated: this solve lived inside MaxOfferCard, which only
-                ever rendered under canUseMaxOffer. Restoring it ungated
-                leaked the required-rent / required-rate answer to free. */}
-            {canUseMaxOffer ? (
-              <MakePriceWorkCard values={values} target={decisionTarget} />
-            ) : null}
-            {result && values && !isLoading && canUseMaxOffer ? (
-              <AssumptionImpactCard values={values} />
-            ) : null}
-          </div>
-        </ResultsRegion>
-      ) : (
+      ) : decisionFirst ? null : (
         <AnswerHeroCard
           isLoading={isLoading}
           isLoadingDealScore={isLoadingDealScore}
@@ -1776,6 +1728,61 @@ export function AnalysisDashboard({
         ) : null}
       </div>
       </ResultsRegionOrFragment>
+
+      {/* REGION 3 · WHY THIS NUMBER — deliberately AFTER "The numbers".
+          The reader sees the metrics first, then the reasoning that
+          explains them; the justification lands better once the figures
+          it refers to are already on screen. */}
+      {decisionFirst && !strategyLeadsOutput ? (
+        /* REGION 2 · WHY THIS NUMBER — the reasoning paragraph, the risk
+           bullets, the make-your-price-work inverse, and the ranked
+           drivers, behind ONE collapsed disclosure. Previously four
+           separate top-level blocks that each restated the conclusion. */
+        <ResultsRegion
+          id="why-this-number"
+          question="Why this number"
+          payoff="The reasoning, the risks, and what would have to change"
+          openEvent="why_this_number_opened"
+        >
+          <div className="space-y-4">
+            <AnswerHeroCard
+          isLoading={isLoading}
+          isLoadingDealScore={isLoadingDealScore}
+          dealScoreResult={dealScoreResult}
+          result={result}
+          propertyType={propertyType}
+          isAppreciationPlay={appreciationPlay}
+          verdictNarrative={verdictNarrative}
+          nextAction={nextAction}
+          buyBoxFit={buyBoxAnyPass}
+          showAllTips={showAllTips}
+          onToggleShowAllTips={() => setShowAllTips((prev) => !prev)}
+          onSave={handleSaveClick}
+          isSaving={isSaving}
+          isSaveLocked={isSaveLockedByPlan}
+          saveLockedHint={saveLockedHint}
+          hasUnsavedChanges={isExistingSavedDeal && !isSaved}
+            purchasePrice={values?.purchasePrice ?? null}
+            maxOffer={maoQaContext?.maxOffer ?? null}
+            decisionOwnedUpstream
+            />
+            {/* RESTORED: this panel lived inside MaxOfferCard and vanished
+                from the DOM when the Decision-tier merge suppressed that
+                card. It is the answer to "but what if I still want this
+                house at this price". */}
+            {/* Pro-gated: this solve lived inside MaxOfferCard, which only
+                ever rendered under canUseMaxOffer. Restoring it ungated
+                leaked the required-rent / required-rate answer to free. */}
+            {canUseMaxOffer ? (
+              <MakePriceWorkCard values={values} target={decisionTarget} />
+            ) : null}
+            {result && values && !isLoading && canUseMaxOffer ? (
+              <AssumptionImpactCard values={values} />
+            ) : null}
+          </div>
+        </ResultsRegion>
+      ) : null}
+
 
       {/* Sale & rent comps moved into the ledger below ("Check rent
           against the market" row) - Phase 5. The card itself is
