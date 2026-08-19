@@ -508,7 +508,7 @@ export default async function PricingPage() {
           }}
         />
       </main>
-      <SiteFooter />
+      <SiteFooter hideAccountLinks={Boolean(user)} />
       <ScrollDepthTracker />
     </>
   );

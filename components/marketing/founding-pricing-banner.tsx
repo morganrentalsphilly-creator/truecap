@@ -35,9 +35,13 @@ import { trackEvent } from "@/lib/analytics";
 const DISMISS_KEY = "truecap_founding_pricing_dismissed_v1";
 
 // Prefix-matched. /settings, /profile and /admin are AUTHENTICATED product
-// surfaces — a founding-pricing pitch does not belong over the app, and
-// "/settings" covers /settings/branding automatically.
-const HIDE_ON_PATHS = ["/auth", "/embed", "/dashboard", "/settings", "/profile", "/admin"];
+// surfaces. /d, /s and /portal are SHARED pages a stranger (or an agent's
+// client) opens: they carry their own promo strip, and on a co-branded
+// portal TrueCap's price bar would sit above the agent's own branding.
+const HIDE_ON_PATHS = [
+  "/auth", "/embed", "/dashboard", "/settings", "/profile", "/admin",
+  "/d", "/s", "/portal",
+];
 const HIDE_EXACT_PATHS = ["/"];
 
 export function FoundingPricingBanner() {

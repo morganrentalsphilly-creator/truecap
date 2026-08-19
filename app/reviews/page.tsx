@@ -30,6 +30,7 @@ import {
 } from "@/lib/proof-records";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { getSiteUrl } from "@/lib/site-url";
+import { getRequestUser } from "@/lib/request-auth";
 
 export const revalidate = 3600;
 
@@ -49,7 +50,11 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
-export default function ReviewsPage() {
+export default async function ReviewsPage() {
+  // Only to suppress the footer's Sign in / Create account column for a
+  // signed-in visitor — no gating, no personalization.
+  const user = await getRequestUser();
+
   const siteUrl = getSiteUrl();
   const { guaranteeEnabled } = getMarketingOfferConfig();
   const publishedCount =
@@ -84,6 +89,15 @@ export default function ReviewsPage() {
               No invented praise, no stock-photo customers. Public math, a real
               guarantee — and customer quotes only after we&apos;ve verified
               them and the customer has approved publication.
+            </p>
+            {/* NARROW EXCEPTION to the founder call that stripped the ticker's
+                composition note everywhere. This page's entire claim is "only
+                what we can prove", and the run count is mostly an attested
+                pre-counter baseline — stating that here is what makes the
+                headline true. One clause, this page only. */}
+            <p className="mx-auto mt-2 max-w-xl text-xs text-muted-foreground">
+              That run count includes 50,000 historical analyses attested by
+              TrueCap before live counting began, plus every measured run since.
             </p>
             <div className="mt-6 flex justify-center">
               <DealsAnalyzedTicker
@@ -180,7 +194,7 @@ export default function ReviewsPage() {
           </div>
         </section>
       </main>
-      <SiteFooter />
+      <SiteFooter hideAccountLinks={Boolean(user)} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(reviewsLd) }}

@@ -362,7 +362,10 @@ export function Header({
 
 
           {/* Center - Pro upsell pill (free / non-premium only, desktop) */}
-          {isPremiumStatusReady && !isPremium && (
+          {/* `user &&` matches the sibling upsell bar at :325. Without it a
+              signed-OUT visitor saw this pill AND the founding-pricing bar —
+              two promotional elements on one page. */}
+          {user && isPremiumStatusReady && !isPremium && (
              <Link href="/pricing"
             >
             <div className="hidden xl:flex items-center gap-2 bg-muted/60 border border-border/70 rounded-full px-3.5 py-1.5">

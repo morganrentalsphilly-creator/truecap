@@ -477,17 +477,26 @@ textarea,
   }
 }
 
-/* Disclosure markers: the app supplies its own chevron on every <summary>.
-   Safari/Chrome also paint a native triangle unless BOTH of these are set
-   (list-style alone is not enough on WebKit), which produced doubled
-   "▶ >" markers at some viewports. Global + defensive by design — a
-   per-component fix would keep missing new disclosures. */
-summary {
+/* Disclosure markers.
+   Most summaries in this app draw their OWN affordance (a lucide chevron, or
+   a "+" span that rotates on open). WebKit also paints a native triangle
+   unless it is explicitly suppressed, which produced doubled "▶ >" markers.
+
+   SCOPED, NOT GLOBAL — deliberately. A blanket `summary { list-style: none }`
+   also strips the native triangle from the ~31 summaries that have NO custom
+   marker (every blog + market FAQ accordion, and the tool widgets'
+   "Breakdown" disclosures), leaving bold text with no sign it expands.
+   `:has()` suppresses the native marker only where a replacement exists:
+   an inline SVG icon, or any child with a rotate-* utility. */
+summary:has(svg),
+summary:has([class*="rotate-"]) {
   list-style: none;
 }
-summary::-webkit-details-marker {
+summary:has(svg)::-webkit-details-marker,
+summary:has([class*="rotate-"])::-webkit-details-marker {
   display: none;
 }
-summary::marker {
+summary:has(svg)::marker,
+summary:has([class*="rotate-"])::marker {
   content: "";
 }

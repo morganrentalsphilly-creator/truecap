@@ -39,6 +39,7 @@ import {
   formatCapRateBenchmarkSubline,
 } from "@/lib/market-benchmarks";
 import type { AnalysisDashboardTab } from "./analysis-dashboard";
+import { APPRECIATION_PLAY_MIN_ANNUAL_RETURN_PCT } from "@/lib/deal-score";
 
 /**
  * Inline market-context labels surfaced under each metric tile.
@@ -354,9 +355,16 @@ export function buildMetricTiles({
             ? "Unusually high — verify assumptions"
             : "Total return incl. appreciation"
         }
+        // THRESHOLD-DRIVEN, not sign-driven. This used to go green on any
+        // value >= 0, so ~1%/yr rendered as a win while the lens card beside
+        // it called the same number "limited". The bar is the one already
+        // published in lib/strategy-lens-outcome (>11 strong / 8-11 solid /
+        // 5-8 modest / <5 limited) and in deal-score's
+        // APPRECIATION_PLAY_MIN_ANNUAL_RETURN_PCT: green only at "solid" or
+        // better. Everything below is neutral — never green by default.
         color={
           annualizedReturnPct != null &&
-          annualizedReturnPct >= 0 &&
+          annualizedReturnPct >= APPRECIATION_PLAY_MIN_ANNUAL_RETURN_PCT &&
           !isExtremeAnnualizedRoi(annualizedReturnPct)
             ? "text-[var(--metric-positive)]"
             : undefined

@@ -41,6 +41,7 @@ import type { CompareSnapshotV1 } from "@/lib/compare-result-snapshot";
 import {
   METRIC_ROWS,
   SIGNAL_LABELS,
+  WINNER_TALLY_EXCLUDED_KEYS,
   formatCurrency,
   formatMetric,
   getBadgeClasses,
@@ -516,6 +517,9 @@ function getLongTermHighlightedWinCounts(deals: CompareDealViewModel[]): Map<str
 function getShortTermHighlightedWinCounts(deals: CompareDealViewModel[]): Map<string, number> {
   const counts = new Map<string, number>(deals.map((deal) => [deal.id, 0]));
   for (const row of METRIC_ROWS) {
+    // Max Offer scales with price/NOI, not deal quality — leaving it in the
+    // tally handed the most expensive property a free win on every compare.
+    if (WINNER_TALLY_EXCLUDED_KEYS.has(row.key)) continue;
     // For DSCR, only rank financed deals against each other - a cash
     // purchase's stored dscr=0 isn't comparable to a real ratio.
     const eligibleDeals =
@@ -1156,7 +1160,9 @@ export function CompareDealsClient({
       const metrics: BuyBoxDealMetrics = {
         capRatePct: deal.metrics.capRate ?? null,
         cocPct: deal.metrics.cocReturn ?? null,
-        dscr: deal.metrics.dscr ?? null,
+        // DSCR 0 means N/A for a cash purchase, not "worst possible" —
+        // passing it through plotted all-cash deals as the riskiest.
+        dscr: (deal.metrics.monthlyPayment ?? 0) <= 0 ? null : deal.metrics.dscr ?? null,
         cashFlowMonthly: deal.metrics.netCashFlow ?? null,
         purchasePrice: deal.purchasePrice,
         propertyType: deal.propertyType,
@@ -1265,7 +1271,9 @@ export function CompareDealsClient({
         type: deal.propertyType ?? undefined,
         coc: deal.metrics.cocReturn ?? null,
         roi: deal.compareSnapshot?.longTermSummary?.totalROI ?? null,
-        dscr: deal.metrics.dscr ?? null,
+        // DSCR 0 means N/A for a cash purchase, not "worst possible" —
+        // passing it through plotted all-cash deals as the riskiest.
+        dscr: (deal.metrics.monthlyPayment ?? 0) <= 0 ? null : deal.metrics.dscr ?? null,
         isCashPurchase: (deal.metrics.monthlyPayment ?? 0) <= 0,
         size: deal.purchasePrice ?? 0,
         score: deal.score ?? undefined,

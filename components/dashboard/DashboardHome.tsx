@@ -979,6 +979,11 @@ export function DashboardHome({
         {focusedDashboard ? (
           <>
             <YourDealsTable deals={data.allDeals} />
+            {/* Truthfulness: the table shows a bounded recent sample. Without
+                this line a 40-deal user reads 20 rows as their whole book. */}
+            {sampledNote ? (
+              <p className="px-1 text-[11px] text-muted-foreground">{sampledNote}</p>
+            ) : null}
             <ScreeningRecord deals={data.allDeals} totalSavedDeals={data.savedTotalCount ?? data.stats.totalDeals} />
           </>
         ) : null}

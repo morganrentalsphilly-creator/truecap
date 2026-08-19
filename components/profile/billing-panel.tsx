@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { GuaranteeBadge } from "@/components/marketing/guarantee-badge";
 
 type BillingPlan = {
   slug: "pro_monthly" | "pro_annual" | "agent_pro_monthly" | "agent_pro_annual";
@@ -369,6 +370,9 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
                       ? "Switch to this plan"
                       : "Subscribe"}
                 </Button>
+                {/* This button opens Stripe checkout — a direct paid CTA that
+                    carried no risk reversal at all. */}
+                {!isCurrent ? <GuaranteeBadge className="mt-2.5" /> : null}
               </CardContent>
             </Card>
           );

@@ -18,6 +18,7 @@ import { trackEvent } from "@/lib/analytics";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { scrollBehavior } from "@/lib/utils";
 import { usePostCheckoutUpsellSuppression } from "@/hooks/use-post-checkout-upsell-suppression";
+import { GuaranteeBadge } from "@/components/marketing/guarantee-badge";
 
 interface MomentOfValueUpsellProps {
   purchasePrice: number;
@@ -209,6 +210,7 @@ export function MomentOfValueUpsell({
           </span>
           <ArrowRight className="mt-0.5 size-4 shrink-0 text-primary transition-transform group-hover:translate-x-0.5" />
         </Link>
+          <GuaranteeBadge align="start" className="mt-3" />
       </div>
 
       {/* Inline note — softens the upsell */}

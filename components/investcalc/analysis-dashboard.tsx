@@ -414,7 +414,9 @@ export function AnalysisDashboard({
       openRow(id);
       requestAnimationFrame(() => {
         document
-          .getElementById(id === "stress-test" && canUseMaxOffer ? "max-offer-result" : `analysis-tab-${id}`)
+          // #max-offer-result lived in the pre-rebuild layout; the jump
+          // silently no-oped once that branch retired.
+          .getElementById(`analysis-tab-${id}`)
           ?.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
       });
     },
@@ -643,9 +645,9 @@ export function AnalysisDashboard({
       goToLogin();
       return;
     }
-    // Retention signal for the rebuild: does leading with the decision
-    // change how often a run becomes a saved deal?
-    trackEvent("deal_saved", { is_update: isExistingSavedDeal });
+    // NOTE: deal_saved is emitted on the SUCCESS path in investcalc-page —
+    // firing it here too double-counted every real save and counted every
+    // rejected one.
     void onSaveDeal();
   };
   const handlePrepareOffer = () => {
@@ -881,7 +883,11 @@ export function AnalysisDashboard({
   // Tier 1's "More" popover so exactly one primary action remains.
   const decisionOverflowActions = (
     <>
-      {canExportPdf && onExportPdf ? (
+      {/* UNGATED on purpose. The button this replaced was deliberately
+          clickable without canExportPdf so the click opens the Pro-vs-$5
+          purchase dialog — gating it here deleted the $5 Deal Decision
+          Pack entry point for exactly the users it is sold to. */}
+      {onExportPdf ? (
         <button
           type="button"
           onClick={() => {
@@ -891,8 +897,15 @@ export function AnalysisDashboard({
           className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm font-semibold text-foreground hover:bg-muted"
         >
           <FileDown aria-hidden className="size-4" />
-          Export PDF
+          {canExportPdf ? "Export PDF" : "Get the full report"}
         </button>
+      ) : null}
+      {/* The share link is the FREE growth loop (/d/[encoded]); it had a
+          single mount and the kill-switch wrap made it unreachable. */}
+      {values ? (
+        <div className="px-1 py-1">
+          <ShareLinkButton values={values} savedDealId={savedDealId} />
+        </div>
       ) : null}
       {canCompareDeals ? (
         <Link
@@ -1027,7 +1040,12 @@ export function AnalysisDashboard({
                 from the DOM when the Decision-tier merge suppressed that
                 card. It is the answer to "but what if I still want this
                 house at this price". */}
-            <MakePriceWorkCard values={values} target={decisionTarget} />
+            {/* Pro-gated: this solve lived inside MaxOfferCard, which only
+                ever rendered under canUseMaxOffer. Restoring it ungated
+                leaked the required-rent / required-rate answer to free. */}
+            {canUseMaxOffer ? (
+              <MakePriceWorkCard values={values} target={decisionTarget} />
+            ) : null}
             {result && values && !isLoading && canUseMaxOffer ? (
               <AssumptionImpactCard values={values} />
             ) : null}

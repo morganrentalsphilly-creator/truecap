@@ -23,6 +23,7 @@ import { GuaranteeViewTracker } from "@/components/analytics/guarantee-view-trac
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 import { getSiteUrl } from "@/lib/site-url";
 import { TRIAL_DAYS } from "@/lib/trial";
+import { getRequestUser } from "@/lib/request-auth";
 
 export const metadata: Metadata = {
   title: "The Never Overpay Guarantee",
@@ -67,7 +68,11 @@ const GUARANTEE_FAQS: { q: string; a: string }[] = [
   },
 ];
 
-export default function GuaranteePage() {
+export default async function GuaranteePage() {
+  // Only to suppress the footer's Sign in / Create account column for a
+  // signed-in visitor — no gating, no personalization.
+  const user = await getRequestUser();
+
   const siteUrl = getSiteUrl();
   const agentProConfigured = isAgentProConfigured();
 
@@ -235,7 +240,7 @@ export default function GuaranteePage() {
           </div>
         </section>
       </main>
-      <SiteFooter />
+      <SiteFooter hideAccountLinks={Boolean(user)} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(guaranteeLd) }}

@@ -24,6 +24,7 @@ import { TRIAL_DAYS } from "@/lib/trial";
 import { AgentProPageTracker } from "@/components/analytics/agent-pro-page-tracker";
 import { AgentProofSection } from "@/components/marketing/testimonial-card";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
+import { GuaranteeBadge } from "@/components/marketing/guarantee-badge";
 
 export const metadata: Metadata = {
   title: "Agent Pro — Become the Agent Investors Call First",
@@ -151,6 +152,9 @@ export default async function ForAgentsPage() {
           <p className="mt-3 text-xs text-muted-foreground">
             Screen deals free with no card. Agent Pro is a separate plan for client workflows; cancel anytime.
           </p>
+          {/* Risk reversal at the hero CTA. The only refund mention used to
+              sit in the pricing band far below the fold. */}
+          <GuaranteeBadge align="start" className="mt-3" />
         </section>
 
         {/* Commission math — the buying logic stated plainly, first
@@ -376,8 +380,9 @@ export default async function ForAgentsPage() {
           {agentProConfigured && guaranteeEnabled ? (
             <p className="mt-4 text-xs text-primary-foreground/90">
               The agent guarantee: send 5 branded analyses in your first 30
-              days as a paying subscriber — if they don&apos;t change your
-              investor-client conversations, email us for a full refund.{" "}
+              days as a paying Agent Pro subscriber — if they don&apos;t change
+              your investor-client conversations, email us within those 30 days
+              for a full refund.{" "}
               <Link href="/guarantee" className="font-bold underline underline-offset-4">
                 Full terms
               </Link>

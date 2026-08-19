@@ -16,6 +16,7 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { trackEvent } from "@/lib/analytics";
 import { usePostCheckoutUpsellSuppression } from "@/hooks/use-post-checkout-upsell-suppression";
+import { GuaranteeBadge } from "@/components/marketing/guarantee-badge";
 
 interface ProInlineGateProps {
   /** Brand-color icon at the top - same icon as the gated feature uses. */
@@ -97,6 +98,9 @@ export function ProInlineGate({ icon: Icon, title, description, previewBullets }
         See {title} for this deal · Compare Pro plans
         <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
       </Link>
+      {/* Risk reversal at the moment of the ask, same as every paid CTA on
+          the marketing side. */}
+      <GuaranteeBadge align="start" className="mt-3" />
     </div>
   );
 }

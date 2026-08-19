@@ -106,7 +106,10 @@ const FOOTER_COLS: Array<{
   },
 ];
 
-export function SiteFooter() {
+export function SiteFooter({ hideAccountLinks = false }: { hideAccountLinks?: boolean } = {}) {
+  // The "Account" column offers Sign in / Create account / Forgot password.
+  // Rendering it to a signed-in user invites them to sign in from inside the
+  // product. Callers that know the session pass hideAccountLinks.
   const year = new Date().getFullYear();
   return (
     // data-site-footer: globals.css pads the footer's bottom while a sticky
@@ -149,7 +152,7 @@ export function SiteFooter() {
           </div>
 
           {/* Sitemap columns */}
-          {FOOTER_COLS.map((col) => (
+          {FOOTER_COLS.filter((col) => !(hideAccountLinks && col.title === "Account")).map((col) => (
             <div key={col.title}>
               <h3 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
                 {col.title}

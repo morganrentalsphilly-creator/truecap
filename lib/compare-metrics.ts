@@ -66,9 +66,21 @@ export function formatCurrency(value: number | null, signed = false): string {
   return formatted;
 }
 
+/** Rows whose ranking direction must NOT imply a +/- delta on screen.
+ *  Max Offer is a PRICE (direction "higher" only means "a higher ceiling is
+ *  better"), so signing it rendered "+$297,400" like a change figure. */
+const UNSIGNED_KEYS = new Set(["maxOffer"]);
+
+/** Rows excluded from the "most wins" tally. Max Offer scales with price and
+ *  NOI, not deal quality, so the most expensive property collected a free
+ *  trophy on every comparison. The row still renders and still highlights
+ *  its own best value — it just doesn't vote for the winner. */
+export const WINNER_TALLY_EXCLUDED_KEYS = new Set(["maxOffer"]);
+
 export function formatMetric(value: number | null, row: MetricRow): string {
   if (value == null) return "-";
-  if (row.kind === "currency") return formatCurrency(value, row.direction === "higher");
+  if (row.kind === "currency")
+    return formatCurrency(value, row.direction === "higher" && !UNSIGNED_KEYS.has(row.key));
   if (row.kind === "percent") {
     const decimals = row.decimals ?? 1;
     return `${row.direction === "higher" && value > 0 ? "+" : ""}${value.toFixed(decimals)}%`;
