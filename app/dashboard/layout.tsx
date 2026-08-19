@@ -24,7 +24,7 @@ import {
   hasDashboardAccess,
 } from "@/lib/entitlements";
 import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
-import { getSavedAnalysesTotalCount } from "@/lib/saved-analyses-count";
+import { getActiveSavedAnalysesCount } from "@/lib/saved-analyses-count";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
@@ -40,13 +40,13 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     redirect("/");
   }
 
-  const [navAccess, savedDealTotalCount] = [
+  const [navAccess, activeDealCount] = [
     getDashboardNavAccess(entitlements),
-    await getSavedAnalysesTotalCount(supabase, user.id),
+    await getActiveSavedAnalysesCount(supabase, user.id),
   ];
 
   return (
-    <DashboardShell savedDealCount={savedDealTotalCount} navAccess={navAccess}>
+    <DashboardShell activeDealCount={activeDealCount} navAccess={navAccess}>
       {children}
     </DashboardShell>
   );

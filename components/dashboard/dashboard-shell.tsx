@@ -24,7 +24,7 @@ export type DashboardNavAccess = {
 };
 
 export function DashboardShell({
-  savedDealCount,
+  activeDealCount,
   navAccess = {
     dashboard: true,
     overview: true,
@@ -37,7 +37,7 @@ export function DashboardShell({
   },
   children,
 }: {
-  savedDealCount: number;
+  activeDealCount: number;
   navAccess?: DashboardNavAccess;
   children: ReactNode;
 }) {
@@ -56,8 +56,8 @@ export function DashboardShell({
       >
         Skip to content
       </a>
-      <Sidebar savedDealCount={savedDealCount} navAccess={navAccess} />
-      <DashboardSheet savedDealCount={savedDealCount} navAccess={navAccess}>
+      <Sidebar activeDealCount={activeDealCount} navAccess={navAccess} />
+      <DashboardSheet activeDealCount={activeDealCount} navAccess={navAccess}>
         {children}
       </DashboardSheet>
     </div>

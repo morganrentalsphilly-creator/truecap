@@ -17,7 +17,7 @@ import { AppLogo } from "@/components/brand/app-logo";
 import type { DashboardNavAccess } from "@/components/dashboard/dashboard-shell";
 
 type SidebarProps = {
-  savedDealCount: number;
+  activeDealCount: number;
   navAccess: DashboardNavAccess;
   mobile?: boolean;
   /** Mobile drawer: fired when any nav link is tapped, so the drawer can close
@@ -25,7 +25,7 @@ type SidebarProps = {
   onNavigate?: () => void;
 };
 
-export function Sidebar({ savedDealCount, navAccess, mobile = false, onNavigate }: SidebarProps) {
+export function Sidebar({ activeDealCount, navAccess, mobile = false, onNavigate }: SidebarProps) {
   // Live route — drives the `active` highlight on whichever nav item
   // matches. Previously `Dashboard` was hardcoded `active: true`, which
   // left the sidebar lying about the current route on every other page
@@ -48,7 +48,10 @@ export function Sidebar({ savedDealCount, navAccess, mobile = false, onNavigate 
     // still reach the dashboard area via the "My Deals" item just below.
     { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard", enabled: navAccess.overview },
     { icon: PlusCircle, label: "New Analysis", href: "/dashboard/new", enabled: true },
-    { icon: Briefcase, label: "My Deals", href: "/dashboard/saved-analyses", badge: String(savedDealCount), enabled: navAccess.myDeals },
+    // ACTIVE deals only — the badge must agree with what /dashboard/saved-analyses
+    // shows on arrival, which defaults to the Active filter. Counting archived
+    // and completed deals here made the badge read higher than the list.
+    { icon: Briefcase, label: "My Deals", href: "/dashboard/saved-analyses", badge: String(activeDealCount), enabled: navAccess.myDeals },
     { icon: ListTodo, label: "Compare Deals", href: "/dashboard/compare", enabled: navAccess.compareDeals },
     // Batch triage — the power-tool tier, same gate as Compare.
     { icon: ListChecks, label: "Screen a shortlist", href: "/dashboard/triage", enabled: navAccess.compareDeals },

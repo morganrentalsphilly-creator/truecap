@@ -24,11 +24,11 @@ import type { DashboardNavAccess } from "@/components/dashboard/dashboard-shell"
  *     dashboard with no visible way out (rotate an iPad, widen a window).
  */
 export function DashboardSheet({
-  savedDealCount,
+  activeDealCount,
   navAccess,
   children,
 }: {
-  savedDealCount: number;
+  activeDealCount: number;
   navAccess: DashboardNavAccess;
   children: ReactNode;
 }) {
@@ -59,7 +59,7 @@ export function DashboardSheet({
       >
         <SheetTitle className="sr-only">Dashboard navigation</SheetTitle>
         <Sidebar
-          savedDealCount={savedDealCount}
+          activeDealCount={activeDealCount}
           navAccess={navAccess}
           mobile
           onNavigate={() => setOpen(false)}

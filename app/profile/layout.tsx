@@ -28,7 +28,7 @@ import {
   hasPaidPlanSubscription,
 } from "@/lib/entitlements";
 import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
-import { getSavedAnalysesTotalCount } from "@/lib/saved-analyses-count";
+import { getActiveSavedAnalysesCount } from "@/lib/saved-analyses-count";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 type ProfileRow = {
@@ -59,8 +59,8 @@ export default async function ProfileLayout({ children }: { children: ReactNode 
   const entitlements = await getRequestEntitlements(user.id);
   const navAccess = getDashboardNavAccess(entitlements);
 
-  const [savedDealTotalCount, { data: profile }, isPremium] = await Promise.all([
-    getSavedAnalysesTotalCount(supabase, user.id),
+  const [activeDealCount, { data: profile }, isPremium] = await Promise.all([
+    getActiveSavedAnalysesCount(supabase, user.id),
     supabase
       .from("profiles")
       .select("first_name, last_name, display_name, avatar_url")
@@ -72,7 +72,7 @@ export default async function ProfileLayout({ children }: { children: ReactNode 
   const displayName = getDisplayName((profile as ProfileRow | null) ?? null, user.email);
 
   return (
-    <DashboardShell savedDealCount={savedDealTotalCount} navAccess={navAccess}>
+    <DashboardShell activeDealCount={activeDealCount} navAccess={navAccess}>
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar
           displayName={displayName}
