@@ -18,6 +18,7 @@ import {
   type ChartBox,
 } from "@/lib/pdf/vector-charts";
 import { loadPdfImage } from "@/lib/pdf/load-image";
+import type { ReportOperatingStatement } from "@/lib/report-operating-statement";
 
 export interface ReportData {
   generatedAt: Date;
@@ -167,6 +168,12 @@ export interface ReportData {
       profit: number;
     }>;
   };
+  /** Year-1 operating statement — the lender view: EGI → operating expenses →
+   *  NOI → debt service → net cash flow, plus the financing facts. Optional
+   *  for legacy/cached report payloads, in which case the section is skipped.
+   *  Built by lib/report-operating-statement.ts from the engine's own fields;
+   *  nothing here is computed in the PDF layer. */
+  operatingStatement?: ReportOperatingStatement | null;
   /** RentCast sale + rent comps (reference data; never feeds the analysis math).
    *  Optional — the comps page renders only when present + non-empty. */
   comps?: {
@@ -174,8 +181,10 @@ export interface ReportData {
     valueRange: { low: number | null; high: number | null } | null;
     rentEstimate: number | null;
     rentRange: { low: number | null; high: number | null } | null;
-    saleComps: Array<{ address: string; price: number | null; bedrooms: number | null; bathrooms: number | null; squareFootage: number | null; distanceMiles: number | null }>;
-    rentComps: Array<{ address: string; price: number | null; bedrooms: number | null; bathrooms: number | null; squareFootage: number | null; distanceMiles: number | null }>;
+    saleComps: Array<{ address: string; price: number | null; bedrooms: number | null; bathrooms: number | null; squareFootage: number | null; distanceMiles: number | null; pricePerSqft?: number | null }>;
+    rentComps: Array<{ address: string; price: number | null; bedrooms: number | null; bathrooms: number | null; squareFootage: number | null; distanceMiles: number | null; pricePerSqft?: number | null }>;
+    /** When RentCast returned this. A lender needs to know how stale it is. */
+    fetchedAt?: string | null;
   } | null;
 }
 
@@ -770,7 +779,7 @@ function buildThesis(d: ReportData): string {
 /**
  * Cover page — the "arrival" beat a premium report earns before the data.
  * Big address headline, an "Investment Analysis" kicker, then a full-width
- * "THE BOTTOM LINE" panel that states the verdict, a one-sentence thesis,
+ * "UNDERWRITING VERDICT" panel that states the verdict, a one-sentence thesis,
  * the deal-score gauge, and the three numbers that matter — so a reader
  * knows the answer in five seconds. Brand-aware; self-contained (the running
  * header/footer is skipped on this page). Anchored attribution + confidential
@@ -811,6 +820,22 @@ function pageCover(
     doc.setFont("helvetica", "bold");
     doc.setFontSize(18);
     doc.text(branding.companyName.trim(), M.left, 54);
+  }
+
+  // Tagline, under the wordmark or logo.
+  //
+  // This field was collected in the branding form, declared on BrandingConfig,
+  // threaded through to here — and then never drawn anywhere. A Pro user typed
+  // their tagline, saved it, and it appeared in nothing. Exactly the
+  // state-written-never-read pattern this codebase keeps hitting.
+  const tagline = branding?.tagline?.trim();
+  if (tagline) {
+    setText(doc, COLOR.sub);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    // One line only: the cover's vertical rhythm is fixed, and a wrapped
+    // tagline would push into the title zone below.
+    doc.text(truncateToWidth(doc, tagline, SAFE.w * 0.55), M.left, logoData ? 76 : 68);
   }
 
   // Date, top-right.
@@ -868,7 +893,13 @@ function pageCover(
   );
   y += 36;
 
-  // ---- "THE BOTTOM LINE" panel ----
+  // ---- "UNDERWRITING VERDICT" panel ----
+  // One name for the verdict across the whole pack: the cover panel, the
+  // page-2 card and the disclosures all used to call it something different
+  // ("THE BOTTOM LINE" / "AI RECOMMENDATION" / the underwriting standard).
+  // "AI" was also simply untrue — lib/deal-score.ts's buildExplanation is a
+  // deterministic rule tree, and calling a rule tree "AI" invites a reader to
+  // discount a number that is actually reproducible.
   const tierColor = getRecommendationRiskTextColor(d.performance.recommendation, d.performance.risk);
   const thesis = buildThesis(d);
   const panelX = M.left;
@@ -895,7 +926,7 @@ function pageCover(
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
   doc.setCharSpace(0.8);
-  doc.text("THE BOTTOM LINE", panelX + 20, py);
+  doc.text("UNDERWRITING VERDICT", panelX + 20, py);
   doc.setCharSpace(0);
   drawScoreGauge(doc, {
     rightX: panelX + panelW - 20,
@@ -939,7 +970,10 @@ function pageCover(
     doc.setCharSpace(0.6);
     doc.text(m[0], mx, py);
     doc.setCharSpace(0);
-    setText(doc, i === 0 ? (d.performance.monthlyCashFlow >= 0 ? COLOR.success : COLOR.danger) : i === 3 ? COLOR.primary : COLOR.ink);
+    // MAX OFFER picks up the BRAND colour, not a hardcoded TrueCap blue — on
+    // a white-label pack this cell was another company's blue sitting between
+    // three neutral ones, for no reason a reader could infer.
+    setText(doc, i === 0 ? (d.performance.monthlyCashFlow >= 0 ? COLOR.successText : COLOR.danger) : i === 3 ? themeColor : COLOR.ink);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
     doc.text(m[1], mx, py + 18);
@@ -1174,6 +1208,101 @@ function drawBuyBoxVerdictCard(doc: jsPDF, v: BuyBoxPdfVerdict, x: number, y: nu
   doc.setLineWidth(0.5);
 }
 
+/**
+ * Year-1 operating statement: EGI → operating expenses → NOI → debt service →
+ * net cash flow, with the financing facts beside it.
+ *
+ * Pure layout. Every number arrives precomputed on the statement object (see
+ * lib/report-operating-statement.ts); this function does no arithmetic beyond
+ * positioning.
+ */
+function drawOperatingStatement(
+  doc: jsPDF,
+  st: ReportOperatingStatement,
+  startY: number,
+  themeColor: string
+): number {
+  let y = sectionTitle(doc, "Year 1 Operating Statement", startY, undefined, themeColor);
+  setText(doc, COLOR.sub);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.text(
+    st.isCashPurchase
+      ? "Annualized. No financing, so NOI is the bottom line."
+      : "Annualized. NOI excludes CapEx, debt service and income tax — the lender-standard definition.",
+    M.left,
+    y
+  );
+  y += 16;
+
+  const colW = (SAFE.w - 12) / 2;
+  const left = M.left;
+  const right = M.left + colW + 12;
+
+  type Line = { label: string; value: number; strong?: boolean; rule?: boolean; muted?: boolean };
+  const lines: Line[] = [
+    { label: "Gross scheduled rent", value: st.grossScheduledIncome },
+    { label: "Less vacancy allowance", value: -st.vacancyAllowance },
+    { label: "Effective gross income", value: st.effectiveGrossIncome, strong: true, rule: true },
+    ...st.operatingExpenses.map((e) => ({ label: e.label, value: -e.amount })),
+    { label: "Total operating expenses", value: -st.operatingExpensesTotal, rule: true },
+    { label: "Net operating income (NOI)", value: st.noi, strong: true, rule: true },
+  ];
+  if (!st.isCashPurchase) {
+    lines.push({ label: "Less debt service (P&I)", value: -st.annualDebtService });
+    if (st.pmiAnnual > 0) lines.push({ label: "Less PMI", value: -st.pmiAnnual });
+  }
+  if (st.capexReserve > 0) {
+    lines.push({ label: "Less CapEx reserve", value: -st.capexReserve, muted: true });
+  }
+  lines.push({ label: "Net cash flow", value: st.netCashFlowAnnual, strong: true, rule: true });
+
+  const lineH = 14;
+  const boxH = lines.length * lineH + 20;
+  card(doc, left, y, colW, boxH);
+  let ly = y + 18;
+  for (const line of lines) {
+    if (line.rule) {
+      setStroke(doc, COLOR.line);
+      doc.setLineWidth(0.4);
+      doc.line(left + 12, ly - 10, left + colW - 12, ly - 10);
+    }
+    doc.setFont("helvetica", line.strong ? "bold" : "normal");
+    doc.setFontSize(8.5);
+    setText(doc, line.muted ? COLOR.sub : line.strong ? COLOR.ink : COLOR.text);
+    doc.text(line.label, left + 12, ly);
+    setText(
+      doc,
+      line.strong
+        ? line.value >= 0
+          ? COLOR.successText
+          : COLOR.danger
+        : line.muted
+          ? COLOR.sub
+          : COLOR.text
+    );
+    doc.text(fmtCurrency(line.value), left + colW - 12, ly, { align: "right" });
+    ly += lineH;
+  }
+
+  // Financing facts — the other half of what a lender asks for up front.
+  const facts: Array<[string, string]> = st.isCashPurchase
+    ? [
+        ["Purchase type", "Cash — no financing"],
+        ["Total cash required", fmtCurrency(st.totalCashRequired)],
+      ]
+    : [
+        ["Loan amount", fmtCurrency(st.loanAmount)],
+        ["Monthly payment (P&I)", fmtCurrency(st.monthlyPayment)],
+        ["PMI (monthly)", st.pmiAnnual > 0 ? fmtCurrency(Math.round(st.pmiAnnual / 12)) : "None"],
+        ["Annual debt service", fmtCurrency(st.annualDebtService)],
+        ["Total cash to close", fmtCurrency(st.totalCashRequired)],
+      ];
+  drawInputBlock(doc, right, y, colW, Math.min(boxH, 92 + facts.length * 4), "Financing", facts, themeColor);
+
+  return y + boxH + 22;
+}
+
 function pageInputs(
   doc: jsPDF,
   d: ReportData,
@@ -1303,7 +1432,9 @@ function pageInputs(
     d.units.forEach((u, i) => {
       const x = M.left + i * (uW + 12);
       card(doc, x, y, uW, 60);
-      setFill(doc, i === 0 ? COLOR.primarySoft : COLOR.cardSoft);
+      // The first unit's header band followed TrueCap blue on a page that had
+      // already resolved the user's theme colour. Neutral for both.
+      setFill(doc, COLOR.cardSoft);
       doc.roundedRect(x, y, uW, 22, 8, 8, "F");
       setText(doc, COLOR.ink);
       doc.setFont("helvetica", "bold");
@@ -1376,7 +1507,7 @@ function pageInputs(
   // 5-6 sentences but left ~70pt of empty space inside the card on
   // 1-sentence rationales.
   //
-  // The left stripe + the "AI RECOMMENDATION" kicker text both pick up
+  // The left stripe + the "UNDERWRITING VERDICT" kicker text both pick up
   // the verdict tier color (green for Strong Buy / Buy, orange for
   // Neutral / Risky, red for Avoid) so they match the headline text.
   const tierColor = getRecommendationRiskTextColor(
@@ -1393,7 +1524,7 @@ function pageInputs(
     SAFE.w - 32
   ).slice(0, 7); // hard cap at 7 lines to prevent absurdly long rationales
   // Vertical accounting inside the card:
-  //   y + 16  → "AI RECOMMENDATION" kicker (8pt)
+  //   y + 16  → "UNDERWRITING VERDICT" kicker (8pt)
   //   y + 34  → headline (13pt)
   //   y + 50  → first rationale line
   //   each line ≈ 9pt × 1.35 leading ≈ 12.15pt
@@ -1424,7 +1555,7 @@ function pageInputs(
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7);
   doc.setCharSpace(0.8);
-  doc.text("AI RECOMMENDATION", M.left + 16, y + 16);
+  doc.text("UNDERWRITING VERDICT", M.left + 16, y + 16);
   doc.setCharSpace(0);
   // Headline — slightly tighter (14pt vs 13pt) for confident statement.
   setText(doc, tierColor);
@@ -1554,7 +1685,14 @@ function pageInputs(
   ], themeColor);
   y += rowH + 22;
 
-  // Units
+  // ── Year-1 operating statement ──────────────────────────────────────────
+  // The lender view. Everything above states assumptions; this states what
+  // they produce, in the order an underwriter reads it. Skipped entirely for
+  // legacy report payloads that predate the field.
+  if (d.operatingStatement) {
+    y = drawOperatingStatement(doc, d.operatingStatement, y, themeColor);
+  }
+
   // PREPARED BY card was removed — the header subtitle now renders
   // "Prepared by [Name]" bold under the logo, and the footer of every
   // page shows the full "Prepared by [Name] · [Company]" attribution.
@@ -1872,7 +2010,8 @@ function pageDownside(
 
   if (d.maxOffer) {
     card(doc, M.left, y, SAFE.w, 92, { soft: true });
-    setText(doc, COLOR.primary);
+    // Brand colour, not a fixed TrueCap blue — this page already resolved it.
+    setText(doc, themeColor);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(8);
     doc.setCharSpace(0.7);
@@ -2277,12 +2416,15 @@ function pageComps(doc: jsPDF, d: ReportData, branding?: BrandingConfig | null) 
   setText(doc, COLOR.sub);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9.5);
-  doc.text(
-    "Comparable sales and rentals near this property (RentCast). Reference only — not used in the analysis math.",
-    M.left,
-    y
-  );
-  y += 22;
+  // WRAPPED, not a single text call. Adding the pull date pushed this line
+  // past the right margin and it silently clipped mid-word — a one-line
+  // subtitle only fits until the day someone lengthens it.
+  const compsSubtitle = c.fetchedAt
+    ? `Comparable sales and rentals near this property. Pulled ${new Date(c.fetchedAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })} via RentCast — reference only, not used in the analysis math.`
+    : "Comparable sales and rentals near this property (RentCast). Reference only — not used in the analysis math.";
+  const compsSubtitleLines = doc.splitTextToSize(compsSubtitle, SAFE.w) as string[];
+  doc.text(compsSubtitleLines, M.left, y, { lineHeightFactor: 1.35 });
+  y += 22 + (compsSubtitleLines.length - 1) * 12;
 
   const cw = (SAFE.w - 12) / 2;
   const ch = 60;
@@ -2308,16 +2450,25 @@ function pageComps(doc: jsPDF, d: ReportData, branding?: BrandingConfig | null) 
   }
   y += 4;
 
-  const rowOf = (s: {
+  // $/sqft is the normalizer every comp conversation runs on — without it the
+  // reader has to divide six rows in their head to know whether a comp is
+  // actually comparable. Computed in lib/report-comps.ts, never here.
+  const rowOf = (perSqftDecimals: 0 | 2) => (s: {
     address: string;
     price: number | null;
     bedrooms: number | null;
     bathrooms: number | null;
     squareFootage: number | null;
     distanceMiles: number | null;
+    pricePerSqft?: number | null;
   }) => [
     s.address,
     s.price != null ? fmtCurrency(s.price) : "—",
+    s.pricePerSqft != null
+      ? perSqftDecimals === 0
+        ? fmtCurrency(s.pricePerSqft)
+        : `$${s.pricePerSqft.toFixed(2)}`
+      : "—",
     s.bedrooms != null ? String(s.bedrooms) : "—",
     s.bathrooms != null ? String(s.bathrooms) : "—",
     s.squareFootage != null ? s.squareFootage.toLocaleString("en-US") : "—",
@@ -2333,14 +2484,16 @@ function pageComps(doc: jsPDF, d: ReportData, branding?: BrandingConfig | null) 
     autoTable(doc, {
       startY: y,
       margin: { left: M.left, right: M.right },
-      head: [["Address", "Sale Price", "Bd", "Ba", "Sq Ft", "Dist (mi)"]],
-      body: c.saleComps.map(rowOf),
+      head: [["Address", "Sale Price", "$/sqft", "Bd", "Ba", "Sq Ft", "Dist (mi)"]],
+      body: c.saleComps.map(rowOf(0)),
       theme: "plain",
       styles: { font: "helvetica", fontSize: 8.5, cellPadding: 4.5, lineColor: hexToRgb(COLOR.line), lineWidth: 0.3 },
       headStyles: { fillColor: hexToRgb(COLOR.cardSoft), textColor: hexToRgb(themeTextColor), fontStyle: "bold", fontSize: 7.5, lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 }, lineColor: hexToRgb(themeColor) },
       columnStyles: {
         1: { fontStyle: "bold", textColor: hexToRgb(COLOR.ink), halign: "right" },
-        ...Object.fromEntries([2, 3, 4, 5].map((i) => [i, { halign: "right" as const }])),
+        // 2..6 — the $/sqft column added one, and a stale range left the
+        // distance column alone on the left.
+        ...Object.fromEntries([2, 3, 4, 5, 6].map((i) => [i, { halign: "right" as const }])),
       },
       alternateRowStyles: { fillColor: [252, 253, 255] },
       didParseCell: alignNumericHeaders,
@@ -2357,14 +2510,16 @@ function pageComps(doc: jsPDF, d: ReportData, branding?: BrandingConfig | null) 
     autoTable(doc, {
       startY: y,
       margin: { left: M.left, right: M.right },
-      head: [["Address", "Rent / mo", "Bd", "Ba", "Sq Ft", "Dist (mi)"]],
-      body: c.rentComps.map(rowOf),
+      head: [["Address", "Rent / mo", "$/sqft", "Bd", "Ba", "Sq Ft", "Dist (mi)"]],
+      body: c.rentComps.map(rowOf(2)),
       theme: "plain",
       styles: { font: "helvetica", fontSize: 8.5, cellPadding: 4.5, lineColor: hexToRgb(COLOR.line), lineWidth: 0.3 },
       headStyles: { fillColor: hexToRgb(COLOR.cardSoft), textColor: hexToRgb(themeTextColor), fontStyle: "bold", fontSize: 7.5, lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 }, lineColor: hexToRgb(themeColor) },
       columnStyles: {
         1: { fontStyle: "bold", textColor: hexToRgb(COLOR.ink), halign: "right" },
-        ...Object.fromEntries([2, 3, 4, 5].map((i) => [i, { halign: "right" as const }])),
+        // 2..6 — the $/sqft column added one, and a stale range left the
+        // distance column alone on the left.
+        ...Object.fromEntries([2, 3, 4, 5, 6].map((i) => [i, { halign: "right" as const }])),
       },
       alternateRowStyles: { fillColor: [252, 253, 255] },
       didParseCell: alignNumericHeaders,

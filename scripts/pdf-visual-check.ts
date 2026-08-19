@@ -123,6 +123,30 @@ function buildSampleReport(): ReportData {
       sellingCost: 6,
       taxRate: 24,
     },
+    // Hand-written to match the other sample figures; the real builders call
+    // buildReportOperatingStatement(result) off the engine.
+    operatingStatement: {
+      grossScheduledIncome: 43_200,
+      vacancyAllowance: 2_592,
+      effectiveGrossIncome: 40_608,
+      operatingExpenses: [
+        { label: "Property tax", amount: 3_710 },
+        { label: "Insurance", amount: 1_325 },
+        { label: "Maintenance", amount: 2_160 },
+        { label: "Management", amount: 3_456 },
+        { label: "Utilities", amount: 1_440 },
+      ],
+      operatingExpensesTotal: 12_091,
+      noi: 28_517,
+      annualDebtService: 16_704,
+      pmiAnnual: 0,
+      capexReserve: 2_160,
+      netCashFlowAnnual: 2_040,
+      loanAmount: 212_000,
+      monthlyPayment: 1_392,
+      totalCashRequired: 60_950,
+      isCashPurchase: false,
+    },
     units: [
       { label: "Unit 1", beds: 2, baths: 1, sqft: 900, rent: 1_300 },
       { label: "Unit 2", beds: 2, baths: 1, sqft: 880, rent: 1_275 },
@@ -203,14 +227,15 @@ function buildSampleReport(): ReportData {
       rentEstimate: 3_640,
       rentRange: { low: 3_380, high: 3_910 },
       saleComps: [
-        { address: "1712 W Erie Ave", price: 249_000, bedrooms: 5, bathrooms: 3, squareFootage: 2_380, distanceMiles: 0.05 },
-        { address: "1633 W Venango St", price: 272_500, bedrooms: 6, bathrooms: 3, squareFootage: 2_540, distanceMiles: 0.22 },
-        { address: "3401 N 18th St", price: 238_000, bedrooms: 5, bathrooms: 2, squareFootage: 2_210, distanceMiles: 0.31 },
+        { address: "1712 W Erie Ave", price: 249_000, bedrooms: 5, bathrooms: 3, squareFootage: 2_380, distanceMiles: 0.05, pricePerSqft: 104.6218 },
+        { address: "1633 W Venango St", price: 272_500, bedrooms: 6, bathrooms: 3, squareFootage: 2_540, distanceMiles: 0.22, pricePerSqft: 107.2835 },
+        { address: "3401 N 18th St", price: 238_000, bedrooms: 5, bathrooms: 2, squareFootage: 2_210, distanceMiles: 0.31, pricePerSqft: 107.6923 },
       ],
+      fetchedAt: "2026-08-12T00:00:00Z",
       rentComps: [
-        { address: "1720 W Erie Ave Unit 2", price: 1_295, bedrooms: 2, bathrooms: 1, squareFootage: 890, distanceMiles: 0.06 },
-        { address: "3350 N 17th St Unit A", price: 1_250, bedrooms: 2, bathrooms: 1, squareFootage: 860, distanceMiles: 0.18 },
-        { address: "1655 W Venango St Unit 1", price: 1_050, bedrooms: 1, bathrooms: 1, squareFootage: 620, distanceMiles: 0.25 },
+        { address: "1720 W Erie Ave Unit 2", price: 1_295, bedrooms: 2, bathrooms: 1, squareFootage: 890, distanceMiles: 0.06, pricePerSqft: 1.4551 },
+        { address: "3350 N 17th St Unit A", price: 1_250, bedrooms: 2, bathrooms: 1, squareFootage: 860, distanceMiles: 0.18, pricePerSqft: 1.4535 },
+        { address: "1655 W Venango St Unit 1", price: 1_050, bedrooms: 1, bathrooms: 1, squareFootage: 620, distanceMiles: 0.25, pricePerSqft: 1.6935 },
       ],
     },
   };

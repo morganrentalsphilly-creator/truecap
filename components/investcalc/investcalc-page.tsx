@@ -39,6 +39,7 @@ import {
   normalizeInvestmentFormSnapshot,
 } from "@/lib/investcalc-schema";
 import { calculateAnalysis, AnalysisResult } from "@/lib/calc-analysis";
+import { buildReportOperatingStatement } from "@/lib/report-operating-statement";
 import { getDealTier, type DealTier } from "@/lib/verdict";
 import { applyWhatIfAdjustments, WORST_CASE_PRESET } from "./what-if-sliders";
 import { PropertyTypeSection } from "./property-type-section";
@@ -558,6 +559,8 @@ function toPdfReportData(args: {
       taxRate: Number(values.taxRatePct ?? result.effectiveTaxRate * 100),
     },
     units,
+    // Lender view of year 1, from the engine's own fields (no new math).
+    operatingStatement: buildReportOperatingStatement(result),
     performance: {
       recommendation,
       dealScore: score,

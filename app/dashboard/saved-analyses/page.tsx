@@ -199,13 +199,20 @@ function mapSavedRow(
     recommendation: fresh ? fresh.recommendation : storedRecommendation,
     riskLevel: fresh ? fresh.riskLevel : storedRiskLevel,
     breakdown: fresh?.breakdown ?? frozenScore?.breakdown ?? null,
+    // Only when there is something NOTABLE to say. This used to return a
+    // string on every branch, so the common path printed "Standard v1.0" as a
+    // dedicated line on every single row — the same words, every time, telling
+    // the reader nothing and costing a line of vertical space per deal. A
+    // provenance note is worth space when the analysis is FROZEN or LEGACY;
+    // otherwise the standard is simply the current one, which the report and
+    // the disclosures already state.
     methodologyLabel: resolution.shouldFreeze
       ? `Frozen Standard v${resolution.storedMethodologyVersion}`
       : isLegacySavedMethodologyVersion(resolution.storedMethodologyVersion)
         ? resolution.didRecompute
           ? `Legacy analysis · recomputed with current v${TRUECAP_UNDERWRITING_STANDARD_VERSION}`
           : `Legacy analysis · stored snapshot (current v${TRUECAP_UNDERWRITING_STANDARD_VERSION} recompute unavailable)`
-        : `Standard v${resolution.storedMethodologyVersion}`,
+        : undefined,
     pipelineStage: isPipelineStage(row.pipeline_stage) ? row.pipeline_stage : DEFAULT_PIPELINE_STAGE,
     tags: Array.isArray(row.tags) ? row.tags.filter((t): t is string => typeof t === "string") : [],
     clientId: row.client_id ?? null,

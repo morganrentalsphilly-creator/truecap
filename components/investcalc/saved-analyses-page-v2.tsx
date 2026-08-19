@@ -77,6 +77,7 @@ import {
   type InvestmentFormValues,
 } from "@/lib/investcalc-schema";
 import { calculateAnalysis, type AnalysisResult } from "@/lib/calc-analysis";
+import { buildReportOperatingStatement } from "@/lib/report-operating-statement";
 import {
   type DealScoreBreakdown,
 } from "@/lib/deal-score";
@@ -841,6 +842,8 @@ function buildReportDataFromSavedSnapshot(args: {
       taxRate: Number(values.taxRatePct ?? result.effectiveTaxRate * 100),
     },
     units,
+    // Lender view of year 1, from the engine's own fields (no new math).
+    operatingStatement: buildReportOperatingStatement(result),
     performance: {
       recommendation,
       dealScore: score,
