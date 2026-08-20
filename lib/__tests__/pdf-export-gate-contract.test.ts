@@ -40,6 +40,22 @@ const CLIENT_SURFACES: Array<[string, string]> = [
   ["saved-analyses-page-v2", savedAnalyses],
 ];
 
+/**
+ * WHAT THIS FILE PROVES, AND WHAT IT DOES NOT.
+ *
+ * These are SOURCE-TEXT assertions. They prove the gate is still wired into
+ * the action — which a unit test of a pure function cannot, and which matters
+ * because the failure mode is a refactor quietly dropping the call.
+ *
+ * They do NOT prove the gate is CORRECT. A grep for `fingerprintOneTimePdfDeal`
+ * passed for the entire time the one-time claim was fingerprinting a field the
+ * renderer never read, so one $5 purchase could render unlimited arbitrary
+ * reports. Behaviour lives in the sibling suites:
+ *   lib/__tests__/report-claim-binding.test.ts   — claim <-> document binding
+ *   lib/__tests__/report-payload-schema.test.ts  — no field silently stripped
+ *
+ * When you add a rule to the gate, add it in BOTH places.
+ */
 describe("PDF export gate lives on the server", () => {
   it("declares the action as a server module", () => {
     expect(serverAction.trimStart().startsWith('"use server"')).toBe(true);
@@ -73,6 +89,28 @@ describe("PDF export gate lives on the server", () => {
     expect(serverAction).toContain("claimSecretMatches");
     expect(serverAction).toContain("fingerprintOneTimePdfDeal");
     expect(serverAction).toContain("data.consumed_at");
+  });
+
+  it("binds the claim to the DOCUMENT it renders, not just to claim.values", () => {
+    // This is the assertion that was missing while the bypass shipped. The
+    // fingerprint above is computed over `claim.values`, but the PDF is built
+    // from `parsed.data.report` — so a claim could be paired with any other
+    // report. Grepping for fingerprintOneTimePdfDeal passed the whole time.
+    //
+    // The BEHAVIOUR is covered by lib/__tests__/report-claim-binding.test.ts,
+    // which exercises the real comparison. This only proves it is still wired
+    // into the gate, which a behavioural test of a pure function cannot.
+    expect(serverAction).toContain("reportMatchesClaimedDeal(input.report");
+    expect(serverAction.indexOf("reportMatchesClaimedDeal")).toBeLessThan(
+      serverAction.indexOf("generateInvestmentPDFBlob")
+    );
+  });
+
+  it("applies branding only to a caller entitled to custom_branding", () => {
+    // getBranding() deliberately does NOT gate reads (a downgraded user should
+    // still see their saved branding), so the gate has to live here. For a
+    // while each layer's comment claimed the other one did it.
+    expect(serverAction).toContain('hasPlanFeature(entitlements, "custom_branding")');
   });
 
   it("resolves branding server-side rather than trusting the caller", () => {

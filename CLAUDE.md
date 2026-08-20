@@ -28,6 +28,15 @@ shareable read-only link.
   TypeScript 5.7 (strict), Supabase (Auth + Postgres + Storage), Stripe
   (subscriptions), Resend (Broadcasts API), Sentry, Tailwind v4,
   shadcn/Radix UI, Zod, react-hook-form, Recharts, jsPDF.
+- **The investment PDF is composed on the SERVER** (`app/actions/generate-report-pdf.ts`),
+  which is where its paid gate is enforced. `lib/pdf-generator.ts` is
+  DOM-free — charts are drawn as jsPDF vectors by `lib/pdf/vector-charts.ts`,
+  not rasterised with chart.js — so it renders under Node. Verify with
+  `npm run pdf:check -- --branches`, which also exercises the cash-purchase,
+  all-zero, single-row, all-negative, sparse and long-string deal shapes.
+  When you add a field to `ReportData` that the report renders, DECLARE IT in
+  `lib/report-payload-schema.ts`: every nested `z.object()` there strips
+  undeclared keys in silence, and only the top level is `.passthrough()`.
 - **Solo founder**: Morgan (`morganrentalsphilly@gmail.com`).
   ~6 months of intensive work, ~320 completed tasks. Conventions are
   consistent but mostly tribal — that's what this doc is for.
@@ -325,15 +334,20 @@ deal-score, dashboard rollups, etc.) calls this function. Do not
 duplicate cash-flow / cap-rate / DSCR math in a component.
 
 Verdict thresholds (Strong / Solid / Mixed / Marginal / Negative, and
-the OG image's "Strong Buy / Buy / Neutral / Risky / Avoid" tier) live
-in `lib/verdict.ts`. The OG image classifier in
-`app/d/[encoded]/opengraph-image.tsx` mirrors `verdict.ts` — if you
-change one, change the other (the OG file calls this out in a comment).
+the "Strong Buy / Buy / Neutral / Risky / Avoid" tier) live in
+`lib/verdict.ts`. **There is no second classifier to keep in sync.**
+`app/d/[encoded]/opengraph-image.tsx` used to carry its own copy, it
+drifted on cash purchases — the share card said "Strong Buy" while the
+page said otherwise — and it was deleted in favour of importing
+`getDealTier` from `lib/verdict.ts`. That file now says "Don't
+reintroduce a local classifier"; this section previously told you to
+maintain one, which is how the bug would come back.
 
 Cash purchases are a load-bearing edge case: `monthlyPayment <= 0`
 means DSCR is undefined. `calc-analysis` returns 0 for DSCR in that
-case and the verdict + OG classifiers treat it as N/A. Don't simplify
-this away.
+case and `getDealTier` treats it as N/A. Note that a FINANCED deal with
+negative NOI has a NEGATIVE dscr, not zero — so `dscr > 0` is not a
+test for "is this financed"; use `!== 0`. Don't simplify this away.
 
 ### 3.5 Stripe webhook — signature verified, idempotent via `stripe_webhook_events`
 

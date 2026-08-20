@@ -69,6 +69,11 @@ export interface ReportData {
     baths: number;
     sqft: number;
     rent: number;
+    /** The owner's own unit on a house hack. calc-analysis EXCLUDES it from
+     *  rental income, so the report must exclude it from gross rent too or
+     *  the cover contradicts the operating statement. Optional for legacy
+     *  payloads, where it is simply absent. */
+    isOwnerOccupied?: boolean;
   }>;
   performance: {
     recommendation: string;
@@ -1312,6 +1317,17 @@ function drawOperatingStatement(
   return y + boxH + 22;
 }
 
+/**
+ * Cash purchase, from the report payload alone.
+ *
+ * The operating statement carries the engine's own flag; everything else falls
+ * back to the down-payment share, which is what the cover strip already uses.
+ */
+function isCashPurchaseReport(d: ReportData): boolean {
+  if (d.operatingStatement) return d.operatingStatement.isCashPurchase;
+  return d.financing.downPaymentPct >= 100;
+}
+
 function pageInputs(
   doc: jsPDF,
   d: ReportData,
@@ -1458,7 +1474,7 @@ function pageInputs(
       setText(doc, COLOR.ink);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(10);
-      doc.text(u.label, x + 12, y + 15);
+      doc.text(u.isOwnerOccupied ? `${u.label} — owner occupied` : u.label, x + 12, y + 15);
       setText(doc, COLOR.sub);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(7.5);
@@ -1468,7 +1484,14 @@ function pageInputs(
       setText(doc, COLOR.ink);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(11);
-      [String(u.beds), String(u.baths), String(u.sqft), u.rent ? `${fmtCurrency(u.rent)}/mo` : "$0"].forEach((v, j) => {
+      // The owner's unit shows no rent: the engine does not count it, so
+      // printing its form value here would restate the contradiction.
+      [
+        String(u.beds),
+        String(u.baths),
+        String(u.sqft),
+        u.isOwnerOccupied ? "—" : u.rent ? `${fmtCurrency(u.rent)}/mo` : "$0",
+      ].forEach((v, j) => {
         doc.text(v, x + 12 + j * ((uW - 24) / 4), y + 52);
       });
     });
@@ -1481,8 +1504,17 @@ function pageInputs(
     // the same vertical band conveys EVERY unit, always fits the cover,
     // and is how a lender scans a multifamily.
     const stripH = 60;
-    const grossRent = d.units.reduce((sum, u) => sum + (u.rent || 0), 0);
-    const avgRent = grossRent / d.units.length;
+    // GROSS RENT counts only the units that actually produce income.
+    // calc-analysis drops the owner-occupied unit (`propertyType ===
+    // "owner-occupant" && u.isOwnerOccupied`), but the form keeps its rent
+    // value, so summing every unit here printed a gross rent that no other
+    // figure in the document could reconcile with — the operating statement
+    // on the next page showed the engine's smaller number. On a pack a
+    // lender reads, two contradicting gross rents is worse than either.
+    const incomeUnits = d.units.filter((u) => !u.isOwnerOccupied);
+    const ownerUnits = d.units.length - incomeUnits.length;
+    const grossRent = incomeUnits.reduce((sum, u) => sum + (u.rent || 0), 0);
+    const avgRent = incomeUnits.length > 0 ? grossRent / incomeUnits.length : 0;
     const mix = new Map<string, number>();
     d.units.forEach((u) => {
       const k = `${u.beds}/${u.baths}`;
@@ -1493,8 +1525,16 @@ function pageInputs(
     const cols = [
       { label: "UNITS", value: String(d.units.length), big: true },
       { label: "UNIT MIX (BD/BA)", value: mixStr, big: false },
-      { label: "GROSS RENT", value: `${fmtCurrency(grossRent)}/mo`, big: true },
-      { label: "AVG / UNIT", value: `${fmtCurrency(avgRent)}/mo`, big: true },
+      {
+        label: ownerUnits > 0 ? "GROSS RENT (RENTED)" : "GROSS RENT",
+        value: `${fmtCurrency(grossRent)}/mo`,
+        big: true,
+      },
+      {
+        label: ownerUnits > 0 ? "AVG / RENTED UNIT" : "AVG / UNIT",
+        value: `${fmtCurrency(avgRent)}/mo`,
+        big: true,
+      },
     ];
     const colW = SAFE.w / cols.length;
     cols.forEach((c, k) => {
@@ -1676,8 +1716,12 @@ function pageInputs(
   ], themeColor);
   drawInputBlock(doc, M.left + colW + 12, y, colW, rowH, "Financing", [
     ["Down payment", `${d.financing.downPaymentPct}% (${fmtCurrency(d.financing.downPayment)})`],
-    ["Interest rate", `${d.financing.interestRate}%`],
-    ["Loan term", `${d.financing.loanTerm} yrs`],
+    // A cash purchase has no loan, but loanTermYears is schema-required and
+    // interestRate keeps whatever default was on the form — so this block
+    // printed "7% / 30 yrs" on a page whose own cover strip already said
+    // "Cash purchase".
+    ["Interest rate", isCashPurchaseReport(d) ? "—" : `${d.financing.interestRate}%`],
+    ["Loan term", isCashPurchaseReport(d) ? "—" : `${d.financing.loanTerm} yrs`],
     ["Closing costs", `${d.financing.closingCostsPct}% (${fmtCurrency(d.financing.closingCosts)})`],
   ], themeColor);
   y += rowH + 10;
@@ -1829,7 +1873,15 @@ function drawInputBlock(
   // (ANALYSIS REPORT, stat card labels, section title kickers, etc.).
   const kickerColor =
     themeColor && isValidHex(themeColor) ? themeColor : COLOR.primary;
-  setText(doc, kickerColor);
+  // Same 4.5:1 floor sectionTitle applies. Without it a light brand colour
+  // (a yellow at ~1.2:1 on white) rendered PROPERTY / FINANCING / OPERATING
+  // EXPENSES / ASSUMPTIONS effectively invisible — the section titles stayed
+  // readable, so only these six labels vanished.
+  const safeKickerColor =
+    contrastOnWhite(kickerColor) >= 4.5
+      ? kickerColor
+      : resolveThemeTextColor({ primaryColorHex: kickerColor });
+  setText(doc, safeKickerColor);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
   doc.setCharSpace(0.8);
@@ -1967,7 +2019,18 @@ function pageProjection(
       fmtCurrency(r.debt),
       { content: fmtCurrency(r.net), styles: { textColor: r.net >= 0 ? hexToRgb(COLOR.successText) : hexToRgb(COLOR.danger) } },
       fmtCurrency(r.tax),
-      { content: fmtCurrency(r.after), styles: { textColor: hexToRgb(COLOR.successText), fontStyle: "bold" } },
+      {
+        // Tone follows the SIGN. after-tax CF is netCashFlow + taxSavings with
+        // savings floored at 0, so it is negative on any negative-cash-flow
+        // deal — and printing a loss in bold green, directly beside a "Net CF"
+        // column that correctly renders red, told the reader the opposite of
+        // the truth.
+        content: fmtCurrency(r.after),
+        styles: {
+          textColor: hexToRgb(r.after >= 0 ? COLOR.successText : COLOR.danger),
+          fontStyle: "bold",
+        },
+      },
       fmtCurrency(r.cum),
     ]),
     theme: "plain",

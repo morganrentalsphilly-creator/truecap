@@ -719,6 +719,10 @@ function buildReportDataFromSavedSnapshot(args: {
           baths: Number(unit.bathrooms ?? 0),
           sqft: Number(unit.sqft ?? 0),
           rent: Number(unit.monthlyRent ?? 0),
+          // Carried so the report can exclude it from gross rent, exactly as
+          // calc-analysis excludes it from rental income.
+          isOwnerOccupied:
+            values.propertyType === "owner-occupant" && Boolean(unit.isOwnerOccupied),
         }));
 
   const projectionRows = projectionYears.map((row) => ({

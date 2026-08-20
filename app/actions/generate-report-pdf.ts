@@ -33,6 +33,7 @@
  */
 
 import { z } from "zod";
+import { money, reportDataSchema } from "@/lib/report-payload-schema";
 import * as Sentry from "@sentry/nextjs";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
@@ -57,141 +58,6 @@ export type GenerateReportPdfResult =
     };
 
 // ── Payload validation ──────────────────────────────────────────────────────
-
-const money = z.number().finite();
-const row = <T extends z.ZodRawShape>(shape: T) => z.object(shape).strict();
-
-const projectionRow = row({
-  y: z.number().int(),
-  rental: money,
-  opex: money,
-  debt: money,
-  net: money,
-  tax: money,
-  after: money,
-  cum: money,
-});
-
-const taxRow = row({
-  y: z.number().int(),
-  rental: money,
-  opex: money,
-  interest: money,
-  dep: money,
-  total: money,
-  taxable: money,
-  savings: money,
-  benefit: money,
-});
-
-const exitRow = row({
-  y: z.number().int(),
-  value: money,
-  loan: money,
-  equity: money,
-  netSale: money,
-  profit: money,
-});
-
-const compRow = z.object({
-  address: z.string().max(300),
-  price: money.nullable(),
-  bedrooms: z.number().nullable(),
-  bathrooms: z.number().nullable(),
-  squareFootage: z.number().nullable(),
-  distanceMiles: z.number().nullable(),
-  // Declared, or zod strips it. z.object() drops unknown keys unless the
-  // object is .passthrough(), and only the TOP-LEVEL reportDataSchema is —
-  // so an undeclared key here silently never reaches the renderer. That is
-  // what blanked the whole $/sqft column on every paid export.
-  pricePerSqft: z.number().nullable().optional(),
-});
-
-/**
- * Shape-only validation of the report payload.
- *
- * Bounded arrays and string lengths matter here: this action renders whatever
- * it is handed, so an unbounded `rows` array is a cheap way to make the server
- * draw a 10,000-page document. The caps are far above any real report (a hold
- * period is 10 years, not 120) and exist purely to keep a hostile payload from
- * turning into CPU and memory.
- */
-const reportDataSchema = z
-  .object({
-    generatedAt: z.coerce.date(),
-    methodologyVersion: z.string().max(40).optional(),
-    methodologyLabel: z.string().max(120).optional(),
-    property: z.object({
-      address: z.string().max(300),
-      type: z.string().max(60),
-      yearBuilt: z.number(),
-      purchasePrice: money,
-      template: z.string().max(120),
-    }),
-    financing: z.record(z.string(), z.number()),
-    expenses: z.record(z.string(), z.number().nullable()),
-    units: z
-      .array(
-        z.object({
-          label: z.string().max(80),
-          beds: z.number(),
-          baths: z.number(),
-          sqft: z.number(),
-          rent: money,
-        })
-      )
-      .max(60),
-    performance: z.object({
-      recommendation: z.string().max(40),
-      dealScore: z.number(),
-      risk: z.string().max(40),
-      rationale: z.string().max(2000),
-      monthlyCashFlow: money,
-      cocReturn: z.number(),
-      capRate: z.number(),
-      dscr: z.number(),
-      taxSavings: money,
-      afterTaxCF: money,
-    }),
-    inputConfidence: z.unknown().optional(),
-    maxOffer: z.unknown().optional(),
-    downsideScenario: z.unknown().optional(),
-    projection10y: z.object({
-      cumulativeCF: money,
-      bestAnnualAfterTax: money,
-      totalAfterTax: money,
-      rows: z.array(projectionRow).max(120),
-    }),
-    taxStrategy: z.object({
-      year1Taxable: money,
-      year1Savings: money,
-      totalBenefit10y: money,
-      annualDepreciation: money,
-      rows: z.array(taxRow).max(120),
-    }),
-    exitScenarios: z.object({
-      bestYear: z.number(),
-      year5Profit: money,
-      year10Profit: money,
-      totalROI: z.number(),
-      rows: z.array(exitRow).max(120),
-    }),
-    comps: z
-      .object({
-        valueEstimate: money.nullable(),
-        valueRange: z.object({ low: money.nullable(), high: money.nullable() }).nullable(),
-        rentEstimate: money.nullable(),
-        rentRange: z.object({ low: money.nullable(), high: money.nullable() }).nullable(),
-        saleComps: z.array(compRow).max(50),
-        rentComps: z.array(compRow).max(50),
-        // Same trap as pricePerSqft above: undeclared meant the "Pulled
-        // <date> via RentCast" provenance line never rendered.
-        fetchedAt: z.string().max(40).nullable().optional(),
-      })
-      .nullable()
-      .optional(),
-  })
-  .passthrough();
 
 const inputSchema = z
   .object({
