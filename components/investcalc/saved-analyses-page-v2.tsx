@@ -3183,8 +3183,23 @@ export function SavedAnalysesPage({
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-44">
-                              <DropdownMenuItem onSelect={() => handleExportPdfClick(item.id)}>
-                                <FileDown className="mr-2 h-3.5 w-3.5" />
+                              {/* In-flight state, matching the mobile card.
+                                  The desktop menu closes on select and nothing
+                                  in the row showed work was happening, while
+                                  the handler recomputes the analysis, rebuilds
+                                  exit scenarios, fetches comps and composes the
+                                  PDF server-side — so a user with no feedback
+                                  reasonably clicks again and pays for a second
+                                  render. */}
+                              <DropdownMenuItem
+                                onSelect={() => handleExportPdfClick(item.id)}
+                                disabled={exportingPdfDealId === item.id}
+                              >
+                                {exportingPdfDealId === item.id ? (
+                                  <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <FileDown className="mr-2 h-3.5 w-3.5" />
+                                )}
                                 {!canExportPdf && item.hasSavedPdf ? "Download saved PDF" : "Export PDF"}
                                 {!canExportPdf && !item.hasSavedPdf ? (
                                   <span className="ml-auto rounded-full bg-primary/10 px-1.5 py-0 text-[9px] font-bold text-primary">
