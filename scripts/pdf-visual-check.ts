@@ -3,6 +3,10 @@
  *
  *   npm run pdf:check              → .pdf-check/report.pdf
  *   npm run pdf:check -- --out x.pdf
+ *   npm run pdf:check -- --branches   also renders every non-happy-path deal
+ *                                     shape (cash, all-zero, single-row,
+ *                                     all-negative, sparse, long strings) and
+ *                                     exits non-zero if any of them throws
  *
  * TWO JOBS:
  *
@@ -241,10 +245,76 @@ function buildSampleReport(): ReportData {
   };
 }
 
+/**
+ * Deal shapes that are NOT the happy path.
+ *
+ * The report was originally verified against exactly one deal — a financed
+ * multi-family — which left the branches most likely to break layout entirely
+ * unexercised. Each variant below is a shape that reaches different code:
+ * a cash purchase suppresses the debt lines and makes DSCR meaningless;
+ * all-zero data drives the chart engine's degenerate axis path; a single row
+ * makes every series length 1; negatives flip bar directions and label
+ * placement; and a very long address stresses the cover's fixed rhythm.
+ *
+ * These only assert that the report RENDERS. Rendering is not correctness —
+ * but a throw here is always a bug, and it is the cheap half of the check.
+ */
+function variants(): Record<string, () => ReportData> {
+  return {
+    baseline: buildSampleReport,
+    cashPurchase: () => {
+      const d = buildSampleReport();
+      d.financing = { ...d.financing, downPaymentPct: 100, downPayment: d.property.purchasePrice, interestRate: 0, loanTerm: 0 };
+      d.performance = { ...d.performance, dscr: 0 };
+      d.projection10y.rows.forEach((r) => { r.debt = 0; r.net = r.rental - r.opex; r.after = r.net + r.tax; });
+      if (d.operatingStatement) {
+        d.operatingStatement = { ...d.operatingStatement, isCashPurchase: true, annualDebtService: 0, pmiAnnual: 0, loanAmount: 0, monthlyPayment: 0 };
+      }
+      return d;
+    },
+    allZero: () => {
+      const d = buildSampleReport();
+      d.projection10y.rows.forEach((r) => { r.rental = 0; r.opex = 0; r.debt = 0; r.net = 0; r.tax = 0; r.after = 0; r.cum = 0; });
+      d.taxStrategy.rows.forEach((r) => { r.opex = 0; r.interest = 0; r.dep = 0; r.taxable = 0; r.savings = 0; });
+      d.exitScenarios.rows.forEach((r) => { r.value = 0; r.loan = 0; r.equity = 0; r.netSale = 0; r.profit = 0; });
+      return d;
+    },
+    singleRow: () => {
+      const d = buildSampleReport();
+      d.projection10y.rows = d.projection10y.rows.slice(0, 1);
+      d.taxStrategy.rows = d.taxStrategy.rows.slice(0, 1);
+      d.exitScenarios.rows = d.exitScenarios.rows.slice(0, 1);
+      return d;
+    },
+    allNegative: () => {
+      const d = buildSampleReport();
+      d.projection10y.rows.forEach((r, i) => { r.net = -5000; r.after = -6000; r.cum = -6000 * (i + 1); });
+      d.exitScenarios.rows.forEach((r) => { r.profit = -50000; r.equity = -2000; });
+      d.performance = { ...d.performance, monthlyCashFlow: -900, cocReturn: -40, dscr: 0.4, recommendation: "Avoid" };
+      return d;
+    },
+    sparse: () => {
+      const d = buildSampleReport();
+      // Legacy / cached payloads predate these fields.
+      d.comps = null;
+      d.inputConfidence = null;
+      d.maxOffer = null;
+      d.operatingStatement = null;
+      return d;
+    },
+    longStrings: () => {
+      const d = buildSampleReport();
+      d.property.address = "12345 Extraordinarily Long Boulevard Of Testing Names, Apartment Complex Building 7B, Philadelphia, Pennsylvania 19140-1234";
+      return d;
+    },
+  };
+}
+
 async function main() {
   const args = process.argv.slice(2);
   const outIndex = args.indexOf("--out");
   const outPath = outIndex >= 0 ? args[outIndex + 1]! : ".pdf-check/report.pdf";
+  const allBranches = args.includes("--branches");
 
   // Fail loudly if anything reaches for a DOM. Without this the report can
   // regress to browser-only and nobody notices until the server action 500s.
@@ -272,6 +342,27 @@ async function main() {
   console.log(`✓ rendered under Node in ${elapsed}ms`);
   console.log(`  ${outPath} — ${(bytes.length / 1024).toFixed(1)} KB`);
   console.log(`  inspect: pdftoppm -png -r 130 ${outPath} ${outPath.replace(/\.pdf$/, "")}`);
+
+  if (!allBranches) return;
+
+  // Render every non-happy-path shape. A throw here is always a bug.
+  let failed = 0;
+  for (const [name, make] of Object.entries(variants())) {
+    if (name === "baseline") continue;
+    try {
+      const variantBlob = await generateInvestmentPDFBlob(make(), null, "personal");
+      const size = (await variantBlob.arrayBuffer()).byteLength;
+      console.log(`  \u2713 ${name.padEnd(14)} ${(size / 1024).toFixed(0)} KB`);
+    } catch (error) {
+      failed += 1;
+      console.error(`  \u2717 ${name.padEnd(14)} ${(error as Error).message}`);
+    }
+  }
+  if (failed > 0) {
+    console.error(`\n${failed} deal shape(s) failed to render.`);
+    process.exit(1);
+  }
+  console.log("\nAll deal shapes rendered.");
 }
 
 void main().catch((error) => {
