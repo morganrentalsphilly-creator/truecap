@@ -117,13 +117,36 @@ export function niceScale(
   return { min: niceMin, max: niceMax, step, ticks };
 }
 
-/** Compact money for axis ticks: 1_250_000 → "$1.3M", -4200 → "-$4.2K". */
+/** Compact money for a standalone value: 1_250_000 → "$1.3M", -4200 → "-$4.2K". */
 export function formatAxisMoney(value: number): string {
   const abs = Math.abs(value);
   const sign = value < 0 ? "-" : "";
   if (abs >= 1_000_000) return `${sign}$${(abs / 1_000_000).toFixed(abs >= 10_000_000 ? 0 : 1)}M`;
   if (abs >= 1_000) return `${sign}$${(abs / 1_000).toFixed(abs >= 10_000 ? 0 : 1)}K`;
   return `${sign}$${Math.round(abs)}`;
+}
+
+/**
+ * A money formatter with ONE precision for a whole axis.
+ *
+ * formatAxisMoney decides per VALUE, so an axis spanning 10K printed
+ * "$0 / $2.0K / $4.0K / $6.0K / $8.0K / $10K" — two different formats on one
+ * ruler, which reads as a rendering bug. Deciding from the axis MAXIMUM makes
+ * every tick agree.
+ */
+function axisMoneyFormatter(scale: { min: number; max: number }): AxisFormatter {
+  const peak = Math.max(Math.abs(scale.min), Math.abs(scale.max));
+  const unit = peak >= 1_000_000 ? 1_000_000 : peak >= 1_000 ? 1_000 : 1;
+  const suffix = unit === 1_000_000 ? "M" : unit === 1_000 ? "K" : "";
+  // One decimal only when the axis top needs it to stay distinguishable.
+  const decimals = unit === 1 ? 0 : peak / unit >= 10 ? 0 : 1;
+  return (value: number) => {
+    // Zero has no magnitude to scale, and "$0.0K" reads like a rounding error.
+    if (value === 0) return "$0";
+    const sign = value < 0 ? "-" : "";
+    const scaled = Math.abs(value) / unit;
+    return `${sign}$${scaled.toFixed(decimals)}${suffix}`;
+  };
 }
 
 // ── Internals ───────────────────────────────────────────────────────────────
@@ -308,7 +331,8 @@ export function drawBarChart(doc: jsPDF, opts: BarChartOptions): void {
   const span = Math.max(...highs) - Math.min(...lows) || 1;
   const scale = niceScale(Math.min(...lows), Math.max(...highs) + (showValues ? span * 0.12 : 0));
 
-  const plot = drawGrid(doc, box, scale, palette, format, gutterLeft);
+  const tickFormat = format === formatAxisMoney ? axisMoneyFormatter(scale) : format;
+  const plot = drawGrid(doc, box, scale, palette, tickFormat, gutterLeft);
   const toY = (v: number) => plot.y + plot.h - ((v - scale.min) / (scale.max - scale.min)) * plot.h;
 
   const slot = plot.w / data.length;
@@ -320,14 +344,21 @@ export function drawBarChart(doc: jsPDF, opts: BarChartOptions): void {
     const base = d.from ?? 0;
     const yTop = toY(Math.max(base, d.value));
     const yBottom = toY(Math.min(base, d.value));
-    const height = Math.max(0.8, yBottom - yTop);
+    // An EXACTLY-zero bar draws nothing. The 0.8pt floor exists so a tiny but
+    // real value stays visible; applied to a true zero it painted a mark on
+    // the baseline while the table directly below printed "$0", which reads as
+    // the chart disagreeing with its own data.
+    const isZeroBar = d.value === base;
+    const height = isZeroBar ? 0 : Math.max(0.8, yBottom - yTop);
     const x = centers[i]! - barW / 2;
 
     setFill(doc, d.color);
-    if (radius > 0 && height > radius * 2) {
-      doc.roundedRect(x, yTop, barW, height, radius, radius, "F");
-    } else {
-      doc.rect(x, yTop, barW, height, "F");
+    if (!isZeroBar) {
+      if (radius > 0 && height > radius * 2) {
+        doc.roundedRect(x, yTop, barW, height, radius, radius, "F");
+      } else {
+        doc.rect(x, yTop, barW, height, "F");
+      }
     }
 
     if (showValues && d.valueLabel !== null) {
@@ -401,7 +432,7 @@ export function drawStackedBarChart(doc: jsPDF, opts: StackedBarChartOptions): v
   const clamp = (v: number) => (Number.isFinite(v) && v > 0 ? v : 0);
   const totals = labels.map((_, i) => series.reduce((sum, s) => sum + clamp(s.values[i] ?? 0), 0));
   const scale = niceScale(0, Math.max(...totals, 0));
-  const plot = drawGrid(doc, plotBox, scale, palette, format, gutterLeft);
+  const plot = drawGrid(doc, plotBox, scale, palette, format === formatAxisMoney ? axisMoneyFormatter(scale) : format, gutterLeft);
   const toY = (v: number) => plot.y + plot.h - ((v - scale.min) / (scale.max - scale.min)) * plot.h;
 
   const slot = plot.w / labels.length;
@@ -469,7 +500,7 @@ export function drawLineChart(doc: jsPDF, opts: LineChartOptions): void {
 
   const all = live.flatMap((s) => s.values).filter((v) => Number.isFinite(v));
   const scale = niceScale(Math.min(...all), Math.max(...all));
-  const plot = drawGrid(doc, plotBox, scale, palette, format, gutterLeft);
+  const plot = drawGrid(doc, plotBox, scale, palette, format === formatAxisMoney ? axisMoneyFormatter(scale) : format, gutterLeft);
   const toY = (v: number) => plot.y + plot.h - ((v - scale.min) / (scale.max - scale.min)) * plot.h;
 
   const n = Math.max(...live.map((s) => s.values.length));

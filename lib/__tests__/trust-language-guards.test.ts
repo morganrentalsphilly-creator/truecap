@@ -24,7 +24,14 @@ describe("trust-language guards", () => {
     const constants = read("../pdf-export-constants.ts");
     const generator = read("../pdf-generator.ts");
 
-    expect(constants).toContain("PDF_SNAPSHOT_VERSION = 6");
+    // Pinned so a bump is always a DELIBERATE act with a changelog entry
+    // above it, never an accident — cached PDFs are invalidated by this
+    // number, so changing it silently either strands users on a stale
+    // document or throws away every cache for nothing.
+    // Bumped to 7 for the vector-chart port + Year 1 Operating Statement.
+    expect(constants).toContain("PDF_SNAPSHOT_VERSION = 7");
+    // The changelog comment must actually document the current version.
+    expect(constants).toMatch(/\/\/\s+7 - /);
     expect(generator).toContain("TRUECAP_UNDERWRITING_STANDARD_VERSION");
     expect(generator).toContain("area rent benchmark");
     expect(generator).toContain("owner-occupied national mortgage benchmark");

@@ -38,7 +38,7 @@ import {
   type RentAlertDeal,
 } from "@/lib/rent-alerts";
 import { fetchRentCastRentEstimate } from "@/lib/property-enrichment/rentcast";
-import { investmentFormSchema } from "@/lib/investcalc-schema";
+import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
 import { getPaidUserIds } from "@/lib/paid-user-ids";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { getSiteUrl } from "@/lib/site-url";
@@ -132,9 +132,15 @@ export async function GET(request: Request) {
     // look up. We never spend a RentCast call on a deal the rent core can't
     // price (multi-family) or that has no address.
     const priceable = (dealRows ?? []).flatMap((row) => {
-      const parsed = investmentFormSchema.safeParse(row.form_snapshot);
-      if (!parsed.success) return [];
-      if (parsed.data.propertyType !== "single-family") return [];
+      // NORMALIZE, don't raw-parse. investmentFormSchema requires fields added
+      // after some saved deals were written (insuranceInputMode has no
+      // .default()), so a raw safeParse REJECTS every pre-v9 snapshot and this
+      // filter dropped those deals in silence — a paying customer simply never
+      // received a rent alert, with nothing logged. Every other read path
+      // already goes through normalizeInvestmentFormSnapshot.
+      const values = normalizeInvestmentFormSnapshot(row.form_snapshot);
+      if (!values) return []; // genuinely unreadable, not merely old
+      if (values.propertyType !== "single-family") return [];
       const address = (row.address as string | null)?.trim();
       if (!address) return [];
       return [{
@@ -142,7 +148,7 @@ export async function GET(request: Request) {
         userId: row.user_id as string,
         title: row.title as string | null,
         address,
-        values: parsed.data,
+        values,
       }];
     });
 

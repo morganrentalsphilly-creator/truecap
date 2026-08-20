@@ -107,3 +107,58 @@ export function decideOneTimePdfClaimBinding(input: {
 
   return { ok: true, mode: "consume" };
 }
+
+/** Just the identity fields; keeps this lib free of the PDF/report types. */
+export type ClaimedReportIdentity = {
+  property: { address: string; purchasePrice: number };
+  units?: Array<{ rent?: number | null }> | null;
+};
+export type ClaimedFormIdentity = {
+  address?: string | null;
+  purchasePrice?: number | null;
+  units?: Array<{ monthlyRent?: number | null } | null | undefined> | null;
+};
+
+/**
+ * Does the report we are about to RENDER describe the same property the claim
+ * was bought for?
+ *
+ * THE BUG THIS CLOSES: the fingerprint below is computed over `claim.values`,
+ * but the document is composed from `parsed.data.report` — two independent
+ * client-supplied objects that nothing compared. A buyer could keep the claim
+ * for the deal they actually paid for and post any other report alongside it,
+ * turning one $5 purchase into unlimited paid PDFs for arbitrary properties,
+ * signed out, for the life of the claim. The comment on the fingerprint check
+ * asserted exactly the property the code did not enforce.
+ *
+ * Comparison only — this reads values, it never recomputes or alters one.
+ * Deliberately compares IDENTITY, not the whole document: the report legitimately
+ * carries derived figures the form does not (projections, scores, comps), and
+ * the buyer is entitled to re-render their own deal after the engine changes.
+ */
+export function reportMatchesClaimedDeal(
+  report: ClaimedReportIdentity,
+  values: ClaimedFormIdentity
+): boolean {
+  const normalizeAddress = (a: string) => a.trim().toLowerCase().replace(/\s+/g, " ");
+  if (normalizeAddress(report.property.address) !== normalizeAddress(values.address ?? "")) {
+    return false;
+  }
+  if (Math.round(report.property.purchasePrice) !== Math.round(Number(values.purchasePrice ?? 0))) {
+    return false;
+  }
+  // Rent roll: the other lever big enough to make it a materially different
+  // property. Totals, not per-unit, so unit re-ordering is not a false reject.
+  const claimedRent = (values.units ?? []).reduce(
+    (sum, u) => sum + Math.round(Number(u?.monthlyRent ?? 0)),
+    0
+  );
+  const reportedRent = (report.units ?? []).reduce(
+    (sum, u) => sum + Math.round(Number(u?.rent ?? 0)),
+    0
+  );
+  // Single-family deals carry their rent outside `units` in the form, so only
+  // enforce this when the claim actually has a unit-level rent roll.
+  if (claimedRent > 0 && claimedRent !== reportedRent) return false;
+  return true;
+}

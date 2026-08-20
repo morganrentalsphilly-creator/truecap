@@ -29,6 +29,14 @@ import { TEN_YEAR_PROJECTION_SNAPSHOT_VERSION } from "@/lib/ten-year-projections
 //       over-sheltered after-tax numbers the dashboard no longer shows.
 //   6 - Trust-language pass: versioned underwriting-standard stamp plus
 //       explicit HUD/FRED, illustrative-tax, and modeled-exit disclosures.
+//   7 - The report itself changed shape, so every cached copy is now stale:
+//       charts became jsPDF vectors instead of chart.js rasters, a Year 1
+//       Operating Statement block was added to the inputs page, the comps
+//       table gained a $/sqft column and a RentCast pull date, the verdict
+//       panels were renamed to one label, and document metadata was set.
+//       Without this bump a Pro user re-exporting a previously-cached deal
+//       would keep receiving the OLD document — no charts changes, no
+//       operating statement — with no way to tell it was stale.
 //
 // NOT bumped for the July 2026 "Your buy box" block: that block renders
 // ONLY for users with an active buy box, and those users' exports bypass
@@ -37,7 +45,7 @@ import { TEN_YEAR_PROJECTION_SNAPSHOT_VERSION } from "@/lib/ten-year-projections
 // block-carrying PDFs are stored uncacheable (see
 // PDF_CACHE_VERSION_UNCACHEABLE). Box-less users' PDFs stay byte-identical,
 // so flushing their caches with a bump would be pure regeneration waste.
-export const PDF_SNAPSHOT_VERSION = 6;
+export const PDF_SNAPSHOT_VERSION = 7;
 export const ANALYSIS_PDF_BUCKET = "analysis-pdfs";
 
 /**

@@ -5,7 +5,11 @@ import { analysisTemplateSchema, type AnalysisTemplateBuyBox } from "@/lib/analy
 import { getEntitlementsForUser } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { DEFAULT_APPRECIATION_RATE, DEFAULT_SELLING_COST_PCT } from "@/lib/exit-scenarios";
-import { investmentFormSchema, type InvestmentFormValues } from "@/lib/investcalc-schema";
+import {
+  investmentFormSchema,
+  normalizeInvestmentFormSnapshot,
+  type InvestmentFormValues,
+} from "@/lib/investcalc-schema";
 import { saveDealAction } from "@/app/actions/saved-analyses";
 
 /** Columns shared with `saved_analyses` / investment form (camelCase in app). */
@@ -853,13 +857,20 @@ export async function applyTemplateToDealAction(
   }
   const template = mapTemplateRow(tplRow as unknown as Record<string, unknown>);
 
-  const parsed = investmentFormSchema.safeParse((dealRow as { form_snapshot?: unknown }).form_snapshot);
-  if (!parsed.success) {
+  // NORMALIZE, don't raw-parse. A pre-v9 snapshot (insuranceInputMode has no
+  // .default()) fails a raw safeParse, so applying a template to an older deal
+  // hard-failed with "can't be re-run" — on a deal that opens, recomputes and
+  // exports fine everywhere else, because every other read path already goes
+  // through the normalizer.
+  const values = normalizeInvestmentFormSnapshot(
+    (dealRow as { form_snapshot?: unknown }).form_snapshot
+  );
+  if (!values) {
     return { ok: false, code: "VALIDATION_ERROR", message: "This deal's saved inputs can't be re-run." };
   }
 
   const merged: InvestmentFormValues = {
-    ...applyTemplateAssumptions(parsed.data, template),
+    ...applyTemplateAssumptions(values, template),
     templateId,
   };
 

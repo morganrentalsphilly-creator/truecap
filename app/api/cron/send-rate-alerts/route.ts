@@ -35,7 +35,9 @@ import {
   rateAlertSubject,
   type RateAlertDeal,
 } from "@/lib/rate-alerts";
-import { investmentFormSchema } from "@/lib/investcalc-schema";
+import { investmentFormSchema,
+  normalizeInvestmentFormSnapshot,
+} from "@/lib/investcalc-schema";
 import { resolveRateAlertsMode } from "@/lib/rate-alerts-mode";
 import { getPaidUserIds } from "@/lib/paid-user-ids";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
@@ -149,13 +151,20 @@ export async function GET(request: Request) {
     // 5. Re-underwrite per deal; group alerts per user.
     const alertsByUser = new Map<string, RateAlertDeal[]>();
     for (const row of dealRows ?? []) {
-      const parsed = investmentFormSchema.safeParse(row.form_snapshot);
-      if (!parsed.success) continue; // pre-snapshot or partial save — skip quietly
+      // NORMALIZE, don't raw-parse. investmentFormSchema requires fields that
+      // were added after some saved deals were written (insuranceInputMode has
+      // no .default()), so a raw safeParse REJECTS every pre-v9 snapshot and
+      // this loop skipped those users in silence — a paying customer simply
+      // never received an alert, with nothing logged. Every other read path
+      // (dashboard, My Deals, the portal, the deal workspace) already goes
+      // through normalizeInvestmentFormSnapshot; the crons were the outlier.
+      const values = normalizeInvestmentFormSnapshot(row.form_snapshot);
+      if (!values) continue; // genuinely unreadable, not merely old
       const alert = buildRateAlertForDeal({
         id: row.id as string,
         title: row.title as string | null,
         address: row.address as string | null,
-        values: parsed.data,
+        values,
         currentRatePct: rates.current,
       });
       if (!alert) continue;

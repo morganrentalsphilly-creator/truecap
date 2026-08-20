@@ -486,7 +486,11 @@ function drawHeader(
     setText(doc, COLOR.ink);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
-    doc.text(branding.companyName.trim(), M.left, 40);
+    // Bounded to the LEFT HALF of the header. branding-values allows a
+    // 120-character company name, and the document title block ("ANALYSIS
+    // REPORT" / "Investment Analysis") is right-aligned in the same band —
+    // an unbounded wordmark printed straight through it and off the page.
+    doc.text(truncateToWidth(doc, branding.companyName.trim(), SAFE.w * 0.52), M.left, 40);
   }
 
   // Header subtitle ("Prepared by [Name]") was removed per design
@@ -560,7 +564,10 @@ function drawHeader(
   if (branding?.companyName?.trim()) {
     footerLeft = branding.companyName.trim();
   }
-  if (footerLeft.length > 80) footerLeft = footerLeft.slice(0, 77) + "…";
+  // Measured, not counted: 80 CHARACTERS of wide glyphs still overruns the
+  // centred "Confidential …" label. Bound it to the third of the footer this
+  // cell actually owns.
+  footerLeft = truncateToWidth(doc, footerLeft, SAFE.w / 3);
 
   doc.text(footerLeft, M.left, footerTextY);
   doc.text("Confidential — for the named recipient only", PAGE.w / 2, footerTextY, { align: "center" });
@@ -819,7 +826,9 @@ function pageCover(
     setText(doc, COLOR.ink);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(18);
-    doc.text(branding.companyName.trim(), M.left, 54);
+    // Same bound as the running header: the date sits right-aligned in this
+    // band, and a 120-character company name would print straight through it.
+    doc.text(truncateToWidth(doc, branding.companyName.trim(), SAFE.w * 0.6), M.left, 54);
   }
 
   // Tagline, under the wordmark or logo.
@@ -1357,7 +1366,17 @@ function pageInputs(
   setText(doc, "#FFFFFF");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(22);
-  doc.text(addressParts.primary, M.left + 22, y + 28);
+  // TRUNCATED to the panel. The cover's copy of this address wraps via
+  // splitTextToSize, but the hero panel is a fixed-height band, so a long
+  // street line ("2100 Northeast Martin Luther King Junior Boulevard" measures
+  // 544pt at 22pt bold) simply ran off the right edge of the page. The panel
+  // spans M.left..PAGE.w-M.right and the text starts 22pt in, with a matching
+  // 22pt gutter on the right.
+  doc.text(
+    truncateToWidth(doc, addressParts.primary, SAFE.w - 44),
+    M.left + 22,
+    y + 28
+  );
 
   if (addressParts.secondary) {
     setText(doc, "#CBD5E1");
@@ -1985,7 +2004,12 @@ function pageDownside(
   y += intro.length * 12 + 18;
 
   const stressed = d.downsideScenario;
-  const financed = d.performance.dscr > 0 || stressed.dscr > 0;
+  // A financed deal with NEGATIVE NOI has a NEGATIVE dscr, not zero
+  // (calc-analysis: `annualDebtService > 0 ? noiAnnual / annualDebtService : 0`),
+  // so `dscr > 0` classified the worst deals in the product as cash purchases
+  // and printed "Cash purchase" in the DSCR row of a mortgaged property.
+  // Non-zero is the real test for "there is debt service".
+  const financed = d.performance.dscr !== 0 || stressed.dscr !== 0;
   const survives = stressed.monthlyCashFlow >= 0 && (!financed || stressed.dscr >= 1);
   const verdictTone = survives ? "success" : "danger";
 

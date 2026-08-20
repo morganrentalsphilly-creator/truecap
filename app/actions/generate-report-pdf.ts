@@ -40,6 +40,7 @@ import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
 import { investmentFormSchema } from "@/lib/investcalc-schema";
 import {
   claimSecretMatches,
+  reportMatchesClaimedDeal,
   fingerprintOneTimePdfDeal,
   ONE_TIME_PDF_CLAIM_LIFETIME_MS,
 } from "@/lib/one-time-pdf-claims";
@@ -99,6 +100,11 @@ const compRow = z.object({
   bathrooms: z.number().nullable(),
   squareFootage: z.number().nullable(),
   distanceMiles: z.number().nullable(),
+  // Declared, or zod strips it. z.object() drops unknown keys unless the
+  // object is .passthrough(), and only the TOP-LEVEL reportDataSchema is —
+  // so an undeclared key here silently never reaches the renderer. That is
+  // what blanked the whole $/sqft column on every paid export.
+  pricePerSqft: z.number().nullable().optional(),
 });
 
 /**
@@ -178,6 +184,9 @@ const reportDataSchema = z
         rentRange: z.object({ low: money.nullable(), high: money.nullable() }).nullable(),
         saleComps: z.array(compRow).max(50),
         rentComps: z.array(compRow).max(50),
+        // Same trap as pricePerSqft above: undeclared meant the "Pulled
+        // <date> via RentCast" provenance line never rendered.
+        fetchedAt: z.string().max(40).nullable().optional(),
       })
       .nullable()
       .optional(),
@@ -260,7 +269,15 @@ async function claimGrantsExport(claim: {
 }
 
 async function checkGate(input: z.infer<typeof inputSchema>): Promise<GateOutcome> {
-  if (input.claim && (await claimGrantsExport(input.claim))) return { allowed: true };
+  if (
+    input.claim &&
+    // Bind the CLAIM to the DOCUMENT before honouring it. Without this the
+    // fingerprint below guards a field that is never rendered.
+    reportMatchesClaimedDeal(input.report, input.claim.values) &&
+    (await claimGrantsExport(input.claim))
+  ) {
+    return { allowed: true };
+  }
 
   const supabase = await createServerSupabaseClient();
   const {
@@ -319,14 +336,33 @@ export async function generateReportPdfAction(input: unknown): Promise<GenerateR
   if (!gate.allowed) return gate.result;
 
   try {
-    // Branding is resolved HERE, never accepted from the caller. getBranding
-    // is itself entitlement-aware (null for unentitled users), so co-branding
+    // Branding is resolved HERE, never accepted from the caller, so co-branding
     // cannot be granted by posting a companyName and logoUrl — and the logo
     // host still goes through the allowlist in lib/pdf/load-image.
+    //
+    // AND IT IS ENTITLEMENT-GATED HERE. It previously was not, anywhere:
+    // getBranding()'s comment says it deliberately does not gate reads because
+    // "the PDF generator gates application separately at export time", while
+    // this file's comment claimed "getBranding is itself entitlement-aware".
+    // Each deferred to the other and neither actually checked, so a user who
+    // subscribed, saved branding, then cancelled kept getting co-branded PDFs —
+    // custom_branding is a paid feature (lib/entitlements-catalog.ts).
+    // Export time is where getBranding says the gate belongs, so here it is.
     const { getBranding } = await import("@/app/actions/branding");
-    const brandingResult = await getBranding();
+    const [brandingResult, brandingEntitled] = await Promise.all([
+      getBranding(),
+      (async () => {
+        const supabase = await createServerSupabaseClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) return false;
+        const entitlements = await getEntitlementsForUser(supabase, user.id);
+        return hasPlanFeature(entitlements, "custom_branding");
+      })(),
+    ]);
     const branding =
-      brandingResult.ok && brandingResult.branding
+      brandingEntitled && brandingResult.ok && brandingResult.branding
         ? {
             logoUrl: brandingResult.branding.logo_url,
             primaryColorHex: brandingResult.branding.primary_color_hex,

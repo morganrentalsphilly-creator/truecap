@@ -351,7 +351,11 @@ async function main() {
     if (name === "baseline") continue;
     try {
       const variantBlob = await generateInvestmentPDFBlob(make(), null, "personal");
-      const size = (await variantBlob.arrayBuffer()).byteLength;
+      const variantBytes = Buffer.from(await variantBlob.arrayBuffer());
+      const size = variantBytes.byteLength;
+      // Written next to the baseline so a suspicious shape can be opened and
+      // looked at, not just counted.
+      writeFileSync(outPath.replace(/\.pdf$/, `-${name}.pdf`), variantBytes);
       console.log(`  \u2713 ${name.padEnd(14)} ${(size / 1024).toFixed(0)} KB`);
     } catch (error) {
       failed += 1;

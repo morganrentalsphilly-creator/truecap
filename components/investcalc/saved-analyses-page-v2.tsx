@@ -956,8 +956,14 @@ function DealTags({
             disabled={disabled}
             className={cn(
               "inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2 py-0.5 text-[11px] font-medium text-muted-foreground hover:text-foreground disabled:opacity-50",
+              // pointer-events-none at rest, or opacity-0 leaves an INVISIBLE
+              // BUT CLICKABLE target: the cell reserves the button's height,
+              // so clicking that apparently-blank strip opened a tag popover
+              // out of nowhere. Keyboard access is unaffected — opacity does
+              // not remove tab order, focus reveals the control, and Enter
+              // activates it regardless of pointer-events.
               revealOnHover && tags.length === 0
-                ? "opacity-0 transition-opacity group-hover/row:opacity-100 focus:opacity-100 focus-visible:opacity-100"
+                ? "pointer-events-none opacity-0 transition-opacity group-hover/row:pointer-events-auto group-hover/row:opacity-100 focus:pointer-events-auto focus:opacity-100 focus-visible:pointer-events-auto focus-visible:opacity-100"
                 : null
             )}
           >
@@ -1394,8 +1400,12 @@ export function SavedAnalysesPage({
       enrichedItems.filter((item) => {
         const typeLabel = item.propertyType ? getTypeLabel(item.propertyType).toLowerCase() : "";
         const typeSlug = (item.propertyType ?? "").toLowerCase();
+        // `nickname` is included because it is the text the ROW ACTUALLY SHOWS
+        // as its bold main line once set — searching for the name you can see
+        // and getting no results is the worst kind of empty state. `tags` too:
+        // they are user-authored labels whose whole purpose is retrieval.
         const text =
-          `${item.address ?? ""} ${item.title ?? ""} ${item.scenarioName ?? ""} ${item.id} ${typeLabel} ${typeSlug}`.toLowerCase();
+          `${item.address ?? ""} ${item.title ?? ""} ${item.nickname ?? ""} ${item.scenarioName ?? ""} ${(item.tags ?? []).join(" ")} ${item.id} ${typeLabel} ${typeSlug}`.toLowerCase();
         const matchesSearch = text.includes(searchQuery.toLowerCase().trim());
         const matchesSignal = selectedSignal === "all" ? true : item.signal === selectedSignal;
         const matchesType = selectedType === "all" ? true : item.propertyType === selectedType;
@@ -2328,7 +2338,12 @@ export function SavedAnalysesPage({
       let reachedLimit = false;
       for (const item of pagedItems) {
         if (prev.includes(item.id)) continue;
-        if (merged.size >= 4) {
+        // The 4-item cap is a COMPARE constraint, so it must not apply to a
+        // user who cannot compare. PAGE_SIZE is 7, so on any page with 5+ rows
+        // a free user clicking "select all" to bulk-archive or bulk-delete
+        // silently got only 4 rows selected, plus a toast about a Compare
+        // limit for a feature they do not have.
+        if (canCompareDeals && merged.size >= 4) {
           reachedLimit = true;
           break;
         }
