@@ -35,7 +35,7 @@ const SERP_TITLE = "DSCR loans explained: costs & when they fit (2026)";
 const DESCRIPTION =
   "DSCR loans primarily underwrite a rental property's coverage instead of using personal DTI as the main ratio. Learn the borrower checks, program variation, costs, and trade-offs.";
 const PUBLISHED_AT = "2026-05-24";
-const MODIFIED_AT = "2026-08-15";
+const MODIFIED_AT = "2026-08-21";
 const READING_TIME_MIN = 10;
 
 export const metadata: Metadata = {
@@ -184,7 +184,9 @@ export default function BlogPost() {
             <Link href="/glossary/dscr" className="text-primary font-semibold hover:underline">DSCR</Link> stands for <strong>Debt Service Coverage Ratio</strong> —
             the property&apos;s annual net operating income divided by its
             annual debt service. A DSCR of 1.25 means the property earns
-            $1.25 of <Link href="/glossary/noi" className="text-primary font-semibold hover:underline">NOI</Link> for every $1.00 of mortgage payment.
+            $1.25 of <Link href="/glossary/noi" className="text-primary font-semibold hover:underline">NOI</Link> for every $1.00 of mortgage payment — see
+            our breakdown of <Link href="/blog/what-is-a-good-dscr" className="text-primary font-semibold hover:underline">what counts as a good DSCR</Link> for
+            what that threshold means for your offer price.
           </p>
           <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
             <div className="text-sm sm:text-base font-mono">
@@ -282,7 +284,9 @@ export default function BlogPost() {
             <li>
               <strong>Property and use.</strong> Unit count, short-term-rental
               use, rural or condo status, loan size, and market can affect the
-              matrix.
+              matrix. Coverage is easier to clear in high-rent-to-price
+              markets like <Link href="/markets/memphis" className="text-primary font-semibold hover:underline">Memphis</Link> than in appreciation-driven metros
+              where rent lags the purchase price.
             </li>
           </ul>
 
