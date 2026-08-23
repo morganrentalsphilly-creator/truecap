@@ -48,6 +48,10 @@ async function fetchTotalAnalysesRun(): Promise<number | null> {
  */
 export const getTotalAnalysesRunCount = unstable_cache(
   async () => fetchTotalAnalysesRun(),
-  ["total-analyses-run"],
+  // v2 intentionally invalidates the pre-20260823160000 cache entry. Vercel's
+  // durable Next.js cache can survive a deployment, so retaining the original
+  // key allowed /reviews to publish the old 2,035 value after the database had
+  // been raised to the approved 51,900 cumulative total.
+  ["total-analyses-run-v2"],
   { revalidate: 3600, tags: ["analyses-run-count"] }
 );

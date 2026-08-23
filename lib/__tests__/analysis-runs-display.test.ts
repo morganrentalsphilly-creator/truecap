@@ -38,6 +38,7 @@ describe("analysis runs display baseline", () => {
     expect(tickerSource).toContain("toPublicAnalysisRunCount(rawCount)");
     expect(tickerSource).not.toMatch(/display floor|rawCount \?\? 0/i);
     expect(counterSource).toContain("migration 20260823160000");
+    expect(counterSource).toContain('["total-analyses-run-v2"]');
     expect(reviewsSource).not.toMatch(/50,000 historical|historical analyses attested/i);
   });
 
