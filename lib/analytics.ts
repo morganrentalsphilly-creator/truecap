@@ -29,7 +29,6 @@
 
 import type { PostHog } from "posthog-js";
 import {
-  SENSITIVE_PUBLIC_SHARE_ROUTE_PATTERN,
   redactSensitiveQueryValuesInText,
   sanitizeAnalyticsUrlProperties,
   sanitizeSensitiveUrl,
@@ -51,6 +50,8 @@ export type FunnelEvent =
   | "report_viewed"
   | "signup_started"
   | "signup_completed"
+  | "signup_prompt_viewed"
+  | "analysis_saved_after_signup"
   | "trial_started"
   | "paid_conversion"
   | "embed_code_copied" // properties: calculator
@@ -59,13 +60,18 @@ export type FunnelEvent =
   | "landing_view"
   | "homepage_viewed"
   | "homepage_primary_cta" // properties: source (hero_address | sticky | final)
+  | "hero_address_started"
+  | "hero_sample_opened"
   | "analyzer_started"
+  | "analyzer_autofill_completed"
   | "address_submitted"
   | "instant_screen_generated"
   | "assumptions_opened"
   | "assumptions_updated"
   | "analysis_completed"
   | "analyzer_completed"
+  | "decision_viewed"
+  | "targets_opened"
   | "verdict_viewed"
   | "deal_fit_viewed" // properties: score_band, methodology_version
   | "input_confidence_viewed" // properties: score_band, stage, sensitivity_risk, method_version
@@ -93,8 +99,8 @@ export type FunnelEvent =
   | "deal_compared"
   | "pro_checkout_started"
   | "pro_subscribed"
-  | "deal_saved"        // properties: property_type, purchase_price, cap_rate, monthly_cash_flow
-  | "pdf_exported"      // properties: property_type, purchase_price, has_deal_score
+  | "deal_saved"        // properties: property_type
+  | "pdf_exported"      // properties: property_type, has_deal_score
   | "share_link_copied" // properties: has_address
   // ── Conversion-improvement events ──────────────────────────────
   // Fired by the 5 free-tier conversion improvements shipped after
@@ -129,7 +135,7 @@ export type FunnelEvent =
   // address string, only coarse signals (state, has_components).
   | "hero_address_submit"      // properties: has_components (Places state/zip captured)
   | "hero_sample_clicked"
-  | "address_selected"         // properties: state (coarse; never the full address)
+  | "address_selected"         // properties: has_state (boolean; never location data)
   | "optional_section_opened"  // properties: source ("toggle" | "edit_link")
   | "result_assumptions_edited"
   // ── Investor-OS saved-deal workflow (P1-12) ────────────────────
@@ -152,6 +158,9 @@ export type FunnelEvent =
   | "upgrade_modal_viewed"     // properties: feature, placement
   | "pricing_view"          // properties: path
   | "pricing_viewed"
+  | "checkout_started"     // server-side properties: plan_slug only
+  | "checkout_returned"    // properties: plan_tier (pro | agent_pro | unknown)
+  | "subscription_activated" // server-side properties: plan_slug, trial_granted
   | "shared_deal_viewed"    // properties: has_address
   // ── Agent Loop: co-branded share lead capture (T6) ─────────────
   | "lead_form_shown"       // properties: owner_present
@@ -422,14 +431,12 @@ export function initAnalytics(): Promise<PostHog | null> {
         posthog.init(key, {
           api_host: POSTHOG_HOST,
           person_profiles: "identified_only",
-          // Explicit typed funnel events cover the decisions we need. DOM
-          // autocapture stays available for coarse interaction analysis, but
-          // never on a URL-encoded report/bearer-link route. Text and element
-          // attributes are masked globally so addresses, client details, and
-          // deal values rendered elsewhere cannot become event properties.
-          autocapture: {
-            url_ignorelist: [SENSITIVE_PUBLIC_SHARE_ROUTE_PATTERN],
-          },
+          // Addresses and underwriting inputs are visible in the calculator
+          // DOM. Explicit typed funnel events are sufficient; broad autocapture
+          // can attach nearby text or attributes to click events. Keep the
+          // latest URL/text/attribute protections below as defense in depth for
+          // typed events and any SDK-generated metadata.
+          autocapture: false,
           mask_all_text: true,
           mask_all_element_attributes: true,
           // The app owns attribution explicitly (landing path + coarse host)
@@ -444,11 +451,11 @@ export function initAnalytics(): Promise<PostHog | null> {
           // Router transitions — Next doesn't fire native pageviews
           // between routes, only on first load.
           capture_pageview: false,
-          capture_pageleave: true,
-          // Autocapture adds the browser's raw $current_url to every event.
+          // Page-leave events can inherit full URLs (encoded shared deals or
+          // checkout query tokens). Route-only pageviews are safer.
+          capture_pageleave: false,
           // Scrub credentials/checkout capabilities at the final SDK boundary
-          // as defense in depth, including events not routed through our
-          // trackEvent wrapper.
+          // as defense in depth, including SDK-generated event properties.
           before_send: (event) => {
             if (!event) return null;
             const sanitized = {
@@ -555,9 +562,8 @@ export function trackPageview(currentUrl: string): void {
  * with this distinct_id, and back-fills earlier anonymous events from
  * the same browser session (anonymous → identified merge).
  *
- * The user-id is the Supabase auth.users.id (UUID). Email goes in
- * properties so PostHog can render it in the dashboard, but PII
- * propagation respects PostHog's account-level privacy settings.
+ * The user-id is an opaque Supabase UUID. Never attach email, address, or
+ * underwriting inputs to identification.
  */
 export function identifyUser(userId: string, properties?: Record<string, unknown>): void {
   if (typeof window === "undefined") return;

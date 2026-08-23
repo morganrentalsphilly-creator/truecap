@@ -24,6 +24,7 @@ export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
   const [loaded, setLoaded] = useState(false);
   const [migrationPending, setMigrationPending] = useState(false);
   const [isSaving, startSaving] = useTransition();
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
 
   useEffect(() => {
     let cancelled = false;
@@ -48,6 +49,7 @@ export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
   // never clobbers another whose latest value isn't in this render's state.
   const save = (patch: Partial<DealLabels>) => {
     const dealAtSubmit = savedDealId;
+    setSaveStatus("saving");
     startSaving(async () => {
       try {
         const r = await updateDealLabelsAction(dealAtSubmit, patch);
@@ -55,9 +57,11 @@ export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
         if (!r.ok) {
           if (r.code === "MIGRATION_PENDING") setMigrationPending(true);
           else toast({ title: "Could not save deal details", description: r.message, variant: "destructive" });
+          setSaveStatus("error");
           return;
         }
         setLabels(r.labels);
+        setSaveStatus("saved");
         // The nickname leads the workspace h1 and the My Deals rows — both are
         // server-rendered, so without a refresh the Router Cache keeps serving
         // the old name on back-navigation until some other mutation purges it.
@@ -70,6 +74,7 @@ export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
         // retryable; the stale-deal guard mirrors the success path.
         Sentry.captureException(err, { tags: { feature: "deal-details" } });
         if (dealAtSubmit !== savedDealId) return;
+        setSaveStatus("error");
         toast({
           title: "Could not save deal details",
           description: "Something interrupted the request. Check your connection and try again.",
@@ -106,13 +111,19 @@ export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
           <MapPin className="size-4 text-primary" />
           <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">Deal details</h3>
         </div>
-        {isSaving ? (
-          <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+        <span aria-live="polite" aria-atomic="true" className="inline-flex min-h-6 items-center gap-1 text-[11px] text-muted-foreground">
+          {isSaving || saveStatus === "saving" ? (
+            <>
             <Loader2 className="size-3 animate-spin" /> Saving…
-          </span>
-        ) : (
-          <span className="text-[11px] text-muted-foreground">Saves on blur</span>
-        )}
+            </>
+          ) : saveStatus === "saved" ? (
+            "Saved just now"
+          ) : saveStatus === "error" ? (
+            <span className="font-semibold text-destructive">Couldn’t save</span>
+          ) : (
+            "Not edited"
+          )}
+        </span>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
@@ -124,6 +135,7 @@ export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
               defaultValue={labels[f.key] ?? ""}
               placeholder={f.placeholder}
               maxLength={80}
+              className="min-h-11"
               onBlur={(e) => {
                 const value = e.target.value.trim();
                 if ((labels[f.key] ?? "") === value) return; // unchanged

@@ -240,7 +240,7 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
           <ClipboardCheck className="size-4 text-primary" />
           <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">Due diligence</h3>
         </div>
-        <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+        <div role="status" aria-live="polite" className="flex items-center gap-2 text-[11px] text-muted-foreground">
           {dueSummary.overdue > 0 ? (
             <span className="rounded-full bg-[var(--metric-negative)]/10 px-2 py-0.5 font-semibold text-[var(--metric-negative)]">
               {dueSummary.overdue} overdue
@@ -276,13 +276,14 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
           return (
             <li key={item.id} className="group">
               <div className="flex items-center gap-2.5">
-              <input
-                type="checkbox"
-                checked={item.done}
-                onChange={() => toggle(item.id)}
-                className="size-4 shrink-0 rounded border-border accent-[var(--brand-green)]"
-                aria-label={item.label}
-              />
+              <label className="flex size-11 shrink-0 cursor-pointer items-center justify-center" aria-label={`Mark ${item.label} ${item.done ? "incomplete" : "complete"}`}>
+                <input
+                  type="checkbox"
+                  checked={item.done}
+                  onChange={() => toggle(item.id)}
+                  className="size-4 rounded border-border accent-[var(--brand-green)]"
+                />
+              </label>
               {/* WS-3: the label is the expand/collapse control (big tap
                   target on mobile; a real <button>, so Enter/Space work).
                   aria-expanded + aria-controls tie it to the note region. */}
@@ -324,7 +325,7 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
                 onChange={(e) => setDueDate(item.id, e.target.value)}
                 aria-label={`Due date for ${item.label}`}
                 className={cn(
-                  "h-7 shrink-0 rounded-md border border-input bg-transparent px-1.5 text-[11px] outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+                  "h-11 shrink-0 rounded-md border border-input bg-transparent px-1.5 text-[11px] outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
                   status === "overdue"
                     ? "text-[var(--metric-negative)]"
                     : item.dueDate
@@ -363,7 +364,7 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
                     maxLength={500}
                     placeholder="Add a note — inspector, quote, contact…"
                     aria-label={`Note for ${item.label}`}
-                    className="h-8 text-xs"
+                    className="min-h-11 text-xs"
                     // Just expanded via the label/chevron — put the caret in
                     // the editor so keyboard users don't have to Tab-hunt.
                     autoFocus
@@ -376,7 +377,11 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
       </ul>
 
       <div className="mt-3 flex gap-2">
+        <label htmlFor="new-due-diligence-item" className="sr-only">
+          New due-diligence checklist item
+        </label>
         <Input
+          id="new-due-diligence-item"
           value={newLabel}
           onChange={(e) => setNewLabel(e.target.value)}
           onKeyDown={(e) => {
@@ -386,10 +391,10 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
             }
           }}
           placeholder="Add a checklist item…"
-          className="h-9 text-sm"
+          className="h-11 text-sm"
         />
-        <Button type="button" size="sm" variant="outline" className="h-9" onClick={add} disabled={!newLabel.trim()}>
-          <Plus className="size-4" />
+        <Button type="button" size="sm" variant="outline" className="h-11" onClick={add} disabled={!newLabel.trim()} aria-label="Add checklist item">
+          <Plus className="size-4" aria-hidden />
         </Button>
       </div>
     </section>

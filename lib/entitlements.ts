@@ -204,3 +204,28 @@ export async function hasAnySubscriptionHistory(
   }
   return (count ?? 0) > 0;
 }
+
+/**
+ * Does local billing state require recovery instead of a new Checkout?
+ * Unpaid and paused subscriptions are not entitled to Pro, but they still
+ * exist in Stripe; offering another subscription could create parallel
+ * billing. Query failures fail closed so pricing routes to account recovery.
+ */
+export async function hasCheckoutRecoverySubscription(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<boolean> {
+  const { count, error } = await supabase
+    .from("subscriptions")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .in("status", ["unpaid", "paused"]);
+  if (error) {
+    Sentry.captureException(error, {
+      tags: { feature: "entitlements" },
+      extra: { userId, query: "has_checkout_recovery_subscription" },
+    });
+    return true;
+  }
+  return (count ?? 0) > 0;
+}

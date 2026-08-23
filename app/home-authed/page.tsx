@@ -40,12 +40,6 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { TrackLandingView } from "@/components/analytics/track-landing-view";
 import { StickyConversionBar } from "@/components/marketing/sticky-conversion-bar";
 import { SiteFooter } from "@/components/marketing/site-footer";
-import {
-  getEntitlementsForUser,
-  hasPaidPlanSubscription,
-  hasPlanFeature,
-  hasSavedDealCapacity,
-} from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getAnalyzerCapabilities } from "@/lib/analyzer-capabilities";
 import { getStripe } from "@/lib/stripe/client";
@@ -205,7 +199,7 @@ export default async function AuthedHome({
           (the live analyzer above is the product proof). Lockstep is enforced
           by lib/__tests__/homepage-lockstep.test.ts. */}
       {!user && (
-        <>
+        <div className="truecap-marketing-tail contents">
           <ProblemBlock />
           <HowTrueCapWorks />
           <SocialProof />
@@ -217,11 +211,11 @@ export default async function AuthedHome({
           <Personas />
           <HomepageFaq />
           <FinalCta />
-        </>
+          <StickyConversionBar />
+        </div>
       )}
       {/* Sticky scroll-activated CTA bar for cold visitors only. Renders
           nothing for auth'd users. */}
-      {!user && <StickyConversionBar />}
       {/* Onboarding tour — only fires for signed-in users with zero
           saved deals (the clear first-time-signup signal). 3-step
           floating card that walks them through Try Sample → Save →

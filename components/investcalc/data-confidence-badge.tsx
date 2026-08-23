@@ -51,7 +51,7 @@ export function DataConfidenceBadge({
           type="button"
           aria-label={`Data confidence: ${confidenceLabel(level)}`}
           className={cn(
-            "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-semibold",
+            "inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-full border px-2 py-0.5 font-semibold",
             size === "xs" ? "text-[10px]" : "text-[11px]",
             tone
           )}

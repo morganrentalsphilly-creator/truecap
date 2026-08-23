@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { UseFormReturn } from "react-hook-form";
+import { Controller, UseFormReturn } from "react-hook-form";
 import { Home, DollarSign, CalendarClock, Percent, Sofa } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +9,7 @@ import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
 import { FieldError } from "@/components/investcalc/form-field-helpers";
 import { GlossaryTip } from "@/components/investcalc/glossary-tip";
+import { CurrencyInput } from "@/components/ui/currency-input";
 
 /**
  * Which fields to render:
@@ -148,11 +149,14 @@ export function SingleFamilyUnitSection({
               id="bedrooms"
               type="number"
               inputMode="numeric"
+              min={0}
+              max={20}
+              step={1}
               placeholder="3"
               aria-invalid={!!errors.bedrooms}
               aria-describedby={errors.bedrooms ? "bedrooms-error" : undefined}
               className={cn(
-                "border-input bg-background",
+                "min-h-11 border-input bg-background",
                 errors.bedrooms && "border-destructive"
               )}
             />
@@ -167,19 +171,29 @@ export function SingleFamilyUnitSection({
             </Label>
             <div className="relative">
               <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                {...register("monthlyRent", { valueAsNumber: true })}
-                id="monthlyRent"
-                type="number"
-                inputMode="decimal"
-                step="0.01"
-                placeholder="2800"
-                aria-required="true"
-                aria-invalid={!!errors.monthlyRent}
-                aria-describedby={errors.monthlyRent ? "monthlyRent-error" : undefined}
-                className={cn(
-                  "pl-8 border-input bg-background",
-                  errors.monthlyRent && "border-destructive"
+              <Controller
+                control={form.control}
+                name="monthlyRent"
+                render={({ field }) => (
+                  <CurrencyInput
+                    ref={field.ref}
+                    name={field.name}
+                    value={field.value}
+                    onBlur={field.onBlur}
+                    onValueChange={field.onChange}
+                    id="monthlyRent"
+                    min={0}
+                    max={1_000_000}
+                    step={50}
+                    placeholder="2,800"
+                    aria-required="true"
+                    aria-invalid={!!errors.monthlyRent}
+                    aria-describedby={errors.monthlyRent ? "monthlyRent-error" : undefined}
+                    className={cn(
+                      "min-h-11 border-input bg-background pl-8",
+                      errors.monthlyRent && "border-destructive"
+                    )}
+                  />
                 )}
               />
             </div>
@@ -204,11 +218,14 @@ export function SingleFamilyUnitSection({
               id="bathrooms"
               type="number"
               inputMode="decimal"
+              min={0}
+              max={20}
+              step={0.5}
               placeholder="2"
               aria-invalid={!!errors.bathrooms}
               aria-describedby={errors.bathrooms ? "bathrooms-error" : undefined}
               className={cn(
-                "border-input bg-background",
+                "min-h-11 border-input bg-background",
                 errors.bathrooms && "border-destructive"
               )}
             />
@@ -226,11 +243,14 @@ export function SingleFamilyUnitSection({
               id="sqft"
               type="number"
               inputMode="numeric"
+              min={50}
+              max={100_000}
+              step={1}
               placeholder="1850"
               aria-invalid={!!errors.sqft}
               aria-describedby={errors.sqft ? "sqft-error" : undefined}
               className={cn(
-                "border-input bg-background",
+                "min-h-11 border-input bg-background",
                 errors.sqft && "border-destructive"
               )}
             />

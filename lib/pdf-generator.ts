@@ -967,13 +967,13 @@ function pageCover(
   doc.text(thesisLines, panelX + 20, py, { lineHeightFactor: 1.4 });
   py += thesisH + 22;
 
-  // Four acquisition answers across the foot of the panel. Max Offer belongs
+  // Four acquisition answers across the foot of the panel. The price ceiling belongs
   // on the cover of the paid decision package—not buried as a small metric.
   const metrics: Array<[string, string]> = [
     ["MONTHLY CASH FLOW", fmtCurrency(d.performance.monthlyCashFlow, true)],
     ["CAP RATE", fmtPct(d.performance.capRate)],
     ["CASH-ON-CASH", fmtPct(d.performance.cocReturn)],
-    ["MAX OFFER", d.maxOffer ? fmtCurrency(d.maxOffer.maxPrice) : "Not solvable"],
+    ["PRICE CEILING", d.maxOffer ? fmtCurrency(d.maxOffer.maxPrice) : "Not solvable"],
   ];
   const mColW = (panelW - 40) / 4;
   metrics.forEach((m, i) => {
@@ -992,6 +992,17 @@ function pageCover(
     doc.setFontSize(16);
     doc.text(m[1], mx, py + 18);
   });
+  if (d.maxOffer) {
+    setText(doc, COLOR.sub);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7);
+    doc.text(`Criteria: ${d.maxOffer.basis}`, panelX + 20, py + 32);
+    doc.text(
+      "Calculated from your selected targets. This is not a recommended offer.",
+      panelX + 20,
+      py + 42,
+    );
+  }
 
   // ---- Deal terms strip — financing snapshot below the panel. Balances the
   // cover (no longer a void above the footer) and adds the at-a-glance terms a
@@ -1443,7 +1454,7 @@ function pageInputs(
     isCashPurchase ? "neutral" : d.performance.dscr >= 1.2 ? "success" : "warn";
   const dscrSub = isCashPurchase ? "cash purchase" : "debt cover";
   const cards: Array<[string, string, "primary" | "success" | "danger" | "neutral" | "violet" | "warn", string?]> = [
-    ["Max Offer", d.maxOffer ? fmtCurrency(d.maxOffer.maxPrice) : "Not solvable", "primary", d.maxOffer ? "canonical target" : "review inputs"],
+    ["Price Ceiling", d.maxOffer ? fmtCurrency(d.maxOffer.maxPrice) : "Not solvable", "primary", d.maxOffer ? "selected targets" : "review inputs"],
     ["Monthly Cash Flow", fmtCurrency(d.performance.monthlyCashFlow), d.performance.monthlyCashFlow >= 0 ? "success" : "danger", "/month"],
     ["CoC Return", fmtPct(d.performance.cocReturn, true), "primary", "year 1"],
     ["Cap Rate", fmtPct(d.performance.capRate, true), "violet", "NOI basis"],
@@ -1455,10 +1466,22 @@ function pageInputs(
     const row = Math.floor(i / 3);
     statCard(doc, M.left + col * (cw + gap), y + row * (ch + gap), cw, ch, c[0], c[1], { tone: c[2], sub: c[3], themeColor });
   });
+  if (d.maxOffer) {
+    const criteriaY = y + (ch + gap) * 2 + 2;
+    setText(doc, COLOR.sub);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7.5);
+    doc.text(`Price ceiling criteria: ${d.maxOffer.basis}`, M.left, criteriaY);
+    doc.text(
+      "Calculated from your selected targets. This is not a recommended offer.",
+      M.left,
+      criteriaY + 11,
+    );
+  }
   // Section spacing rationalized to a consistent +22pt across all
   // page-1 transitions (was +6 here previously, which visibly cramped
   // Property & Inputs immediately below).
-  y += (ch + gap) * 2 + 22;
+  y += (ch + gap) * 2 + (d.maxOffer ? 42 : 22);
 
   y = sectionTitle(doc, "Units", y, undefined, themeColor);
   if (d.units.length <= 2) {
@@ -2096,7 +2119,7 @@ function pageDownside(
   y += 88;
 
   if (d.maxOffer) {
-    card(doc, M.left, y, SAFE.w, 92, { soft: true });
+    card(doc, M.left, y, SAFE.w, 108, { soft: true });
     // Brand colour, not a fixed TrueCap blue — this page already resolved it.
     setText(doc, themeColor);
     doc.setFont("helvetica", "bold");
@@ -2106,7 +2129,7 @@ function pageDownside(
     doc.setCharSpace(0);
     setText(doc, COLOR.ink);
     doc.setFontSize(14);
-    doc.text(`Max Offer ${fmtCurrency(d.maxOffer.maxPrice)}`, M.left + 16, y + 42);
+    doc.text(`Price ceiling ${fmtCurrency(d.maxOffer.maxPrice)}`, M.left + 16, y + 42);
     setText(doc, COLOR.sub);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.5);
@@ -2120,11 +2143,11 @@ function pageDownside(
         ? `interest rate at or below ${rateFix.value.toFixed(2)}%`
         : null,
     ].filter((value): value is string => Boolean(value));
-    const doctorText = `${d.maxOffer.basis}. At the current asking price${
+    const doctorText = `Criteria: ${d.maxOffer.basis}. At the current asking price${
       alternatives.length ? `, the same target could also be reached with ${alternatives.join(" or ")}.` : ", review the verified inputs before negotiating."
-    }`;
+    } Calculated from your selected targets. This is not a recommended offer.`;
     doc.text(doc.splitTextToSize(doctorText, SAFE.w - 32), M.left + 16, y + 61);
-    y += 116;
+    y += 132;
   }
 
   card(doc, M.left, y, SAFE.w, 78, { soft: true });

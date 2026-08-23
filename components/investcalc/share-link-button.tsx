@@ -3,9 +3,8 @@
 /**
  * Share-link button + inline popover.
  *
- * Encodes the current analysis form values into a URL-safe payload,
- * generates a public /d/[encoded] URL, and surfaces it to the user
- * with a copy-to-clipboard button. No server roundtrip, no DB.
+ * Mints an opaque, server-backed public URL and surfaces it with a
+ * copy-to-clipboard button. Deal inputs never enter the URL.
  */
 
 import { useState } from "react";
@@ -21,9 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
-import { encodeShareLink, buildShareUrl } from "@/lib/share-link";
 import { createPublicShareAction } from "@/app/actions/public-shares";
-import { getSignedShareAttribution } from "@/app/actions/share-attribution";
 import { trackEvent } from "@/lib/analytics";
 import { useToast } from "@/hooks/use-toast";
 
@@ -57,56 +54,18 @@ export function ShareLinkButton({
     if (!values) return;
     setIsPreparing(true);
     try {
-      // OPAQUE-FIRST (Fable 5 brief): mint a server-backed share whose URL is
+      // Mint a server-backed share whose URL is
       // just a random token — no address, rent, or assumptions in the path.
-      // Falls through to the legacy encoded link only when the share table
-      // isn't provisioned yet, so sharing never breaks mid-migration.
-      try {
-        const opaque = await createPublicShareAction({
-          values,
-          title: values.address || undefined,
-          dealId: savedDealId ?? undefined,
-        });
-        if (opaque.ok) {
-          setShareUrl(opaque.url);
-          setOpen(true);
-          setCopied(false);
-          return;
-        }
-      } catch {
-        /* fall through to the legacy path */
-      }
-
-      // LEGACY fallback — being retired; kept so pre-migration deployments and
-      // transient failures still produce a working link.
-      // Mint a SIGNED owner attribution server-side (the only place that holds
-      // SHARE_LINK_SECRET). It lets the public viewer co-brand the page + route
-      // a captured lead back to the owner — but only because the signature
-      // proves the owner actually generated this link. Anonymous sharers, or a
-      // server without the secret, get null and the page stays generic.
-      let attribution: Awaited<ReturnType<typeof getSignedShareAttribution>> = null;
-      try {
-        attribution = await getSignedShareAttribution({ values, savedDealId: savedDealId ?? undefined });
-      } catch {
-        /* signing failed → share stays generic */
-      }
-      const encoded = encodeShareLink({
-        v: 1,
+      // Fail closed if storage is unavailable. Falling back to /d/<base64>
+      // would put the address and financial snapshot into browser, referrer,
+      // proxy, and telemetry URLs.
+      const opaque = await createPublicShareAction({
         values,
-        meta: {
-          sharedAt: new Date().toISOString(),
-          title: values.address || "Shared deal",
-          ...(attribution
-            ? {
-                ownerId: attribution.ownerId,
-                sig: attribution.sig,
-                // Only present when the owner actually owns this saved deal.
-                ...(attribution.dealId ? { dealId: attribution.dealId } : {}),
-              }
-            : {}),
-        },
+        title: values.address || undefined,
+        dealId: savedDealId ?? undefined,
       });
-      setShareUrl(buildShareUrl(encoded));
+      if (!opaque.ok) throw new Error(opaque.code);
+      setShareUrl(opaque.url);
       setOpen(true);
       setCopied(false);
     } catch (err) {
@@ -164,12 +123,12 @@ export function ShareLinkButton({
         {isPreparing ? (
           <>
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            <span className="hidden sm:inline">Preparing…</span>
+            <span>Preparing…</span>
           </>
         ) : (
           <>
             <Share2 className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">
+            <span>
               {context === "client-report" ? "Client report" : "Share"}
             </span>
           </>
@@ -192,7 +151,7 @@ export function ShareLinkButton({
             <DialogDescription>
               {context === "client-report"
                 ? "Send this read-only analysis to the assigned client. Anyone with the link can view the snapshot; saved public branding is included when configured, and no account is needed to open it."
-                : "Anyone with the link can view a read-only version — the details are encoded in the URL, no account needed to open it."}
+                : "Anyone with the link can view a read-only snapshot. Deal inputs stay behind an opaque, revocable URL; no account is needed to open it."}
             </DialogDescription>
           </DialogHeader>
 
@@ -223,10 +182,10 @@ export function ShareLinkButton({
           </div>
 
           <p className="text-[11px] text-muted-foreground">
-            Note: the link contains a snapshot of the analysis at this moment. If
+            The link opens a snapshot of the analysis at this moment. If
             you change inputs later and want viewers to see updates, generate a
-            new share link. Links do not currently expire or revoke, so treat one
-            like a document you chose to share.
+            new share link. Saved links can be revoked from your account and expire
+            automatically; still treat one like a document you chose to share.
           </p>
         </DialogContent>
       </Dialog>

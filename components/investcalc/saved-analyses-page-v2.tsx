@@ -179,6 +179,8 @@ export type SavedAnalysisListItem = {
    * then renders exactly as before.
    */
   offerLine?: DealOfferLine | null;
+  /** Exact return criteria used to solve offerLine's price ceiling. */
+  offerBasisLabel?: string | null;
   /** Agent Pro: which client this deal is assigned to (drives their portal). */
   clientId?: string | null;
   /** Optional investor labels (Phase 2 #11). nickname displays in place of
@@ -243,7 +245,13 @@ function fmtMoney0(n: number): string {
  * no price-solvable bar we fall back to TrueCap's default target, and saying
  * "your buy box" there would attribute our number to their rules.
  */
-function OfferLineRow({ offer }: { offer?: DealOfferLine | null }) {
+function OfferLineRow({
+  offer,
+  basisLabel,
+}: {
+  offer?: DealOfferLine | null;
+  basisLabel?: string | null;
+}) {
   if (!offer) return null;
 
   // No price fixes a wrong market or property type — so don't quote one.
@@ -258,37 +266,53 @@ function OfferLineRow({ offer }: { offer?: DealOfferLine | null }) {
 
   if (offer.kind === "clears") {
     return (
-      <p className="mt-1.5 text-xs text-muted-foreground">
-        <span className="font-semibold text-success">
-          {offer.basis === "buy-box" ? "Clears your buy box" : "Cash-flows at asking"}
-        </span>
-        {offer.maxPrice != null ? (
+      <div className="mt-1.5 text-xs text-muted-foreground">
+        <div>
+          <span className="font-semibold text-success">
+            {offer.basis === "buy-box" ? "Clears your buy box" : "Cash-flows at asking"}
+          </span>
+          {offer.maxPrice != null ? (
+            <>
+              {" · "}Price ceiling: <span className="tabular-nums">{fmtMoney0(offer.maxPrice)}</span>
+            </>
+          ) : null}
+        </div>
+        {offer.maxPrice != null && basisLabel ? (
           <>
-            {" · "}up to <span className="tabular-nums">{fmtMoney0(offer.maxPrice)}</span>
+            <div className="mt-0.5">Criteria: {basisLabel}</div>
+            <div className="mt-0.5 text-[11px]">
+              Calculated from your selected targets. This is not a recommended offer.
+            </div>
           </>
         ) : null}
-      </p>
+      </div>
     );
   }
 
   const gap =
     offer.asking != null && offer.asking > offer.maxPrice ? offer.asking - offer.maxPrice : null;
   return (
-    <p className="mt-1.5 text-xs text-muted-foreground">
-      <span className="font-semibold text-foreground">
-        Your number: <span className="tabular-nums">{fmtMoney0(offer.maxPrice)}</span>
-      </span>
-      {gap != null ? (
-        <>
-          {" · "}
-          <span className="tabular-nums text-[var(--metric-negative)]">
-            −{fmtMoney0(gap)}
-            {offer.discountPct != null && offer.discountPct > 0 ? ` (−${offer.discountPct}%)` : ""}
-          </span>{" "}
-          {offer.basis === "buy-box" ? "to pass your buy box" : "to break even"}
-        </>
-      ) : null}
-    </p>
+    <div className="mt-1.5 text-xs text-muted-foreground">
+      <div>
+        <span className="font-semibold text-foreground">
+          Price ceiling: <span className="tabular-nums">{fmtMoney0(offer.maxPrice)}</span>
+        </span>
+        {gap != null ? (
+          <>
+            {" · "}
+            <span className="tabular-nums text-[var(--metric-negative)]">
+              −{fmtMoney0(gap)}
+              {offer.discountPct != null && offer.discountPct > 0 ? ` (−${offer.discountPct}%)` : ""}
+            </span>{" "}
+            {offer.basis === "buy-box" ? "to pass your buy box" : "to break even"}
+          </>
+        ) : null}
+      </div>
+      {basisLabel ? <div className="mt-0.5">Criteria: {basisLabel}</div> : null}
+      <div className="mt-0.5 text-[11px]">
+        Calculated from your selected targets. This is not a recommended offer.
+      </div>
+    </div>
   );
 }
 
@@ -2422,7 +2446,11 @@ export function SavedAnalysesPage({
           <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
             <div className="relative flex-1 max-w-xl">
               <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+              <label htmlFor="saved-analysis-search" className="sr-only">
+                Search saved analyses by address
+              </label>
               <Input
+                id="saved-analysis-search"
                 placeholder="Search by address..."
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
@@ -2720,18 +2748,19 @@ export function SavedAnalysesPage({
                         </p>
                       ) : null}
                       <p className="mt-1 text-xs text-muted-foreground">{getTypeLabel(item.propertyType)}</p>
-                      <OfferLineRow offer={item.offerLine} />
+                      <OfferLineRow offer={item.offerLine} basisLabel={item.offerBasisLabel} />
                       <NextActionLine recommendation={item.recommendation} netCashFlow={item.netCashFlowMonthly} stage={item.status === "completed" ? "closed" : item.pipelineStage} meetsBuyBox={buyBoxFitById?.get(item.id)?.anyPass ?? null} hasCloseDate={item.closeDate != null} className="mt-1.5" />
                       <OwnedEquityCell item={item} enabled={ownedEquityEnabled} />
                     </div>
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={() => toggleOne(item.id)}
-                      
-                      aria-label={`Select analysis ${address.main}`}
-                      className="mt-1 h-4 w-4 shrink-0 rounded border-border disabled:cursor-not-allowed disabled:opacity-40"
-                    />
+                    <label className="flex size-11 shrink-0 cursor-pointer items-center justify-center">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleOne(item.id)}
+                        aria-label={`Select analysis ${address.main}`}
+                        className="size-4 rounded border-border disabled:cursor-not-allowed disabled:opacity-40"
+                      />
+                    </label>
                   </div>
 
                   <div className="mt-4 grid grid-cols-2 gap-2">
@@ -2915,14 +2944,15 @@ export function SavedAnalysesPage({
               <thead className="bg-muted/40 border-b border-border">
                 <tr className="h-12">
                   <th className="w-10 px-3">
-                    <input
-                      type="checkbox"
-                      checked={allVisibleSelected}
-                      onChange={toggleAllVisible}
-                      
-                      aria-label="Select all visible analyses"
-                      className="h-4 w-4 rounded border-border disabled:cursor-not-allowed disabled:opacity-40"
-                    />
+                    <label className="flex size-11 cursor-pointer items-center justify-center">
+                      <input
+                        type="checkbox"
+                        checked={allVisibleSelected}
+                        onChange={toggleAllVisible}
+                        aria-label="Select all visible analyses"
+                        className="size-4 rounded border-border disabled:cursor-not-allowed disabled:opacity-40"
+                      />
+                    </label>
                   </th>
                   <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">Property</th>
                   <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">Signal</th>
@@ -2956,14 +2986,15 @@ export function SavedAnalysesPage({
                   return (
                     <tr key={item.id} className={cn("group/row h-16 border-b border-border/80 transition-colors", isSelected ? "bg-primary/5" : "hover:bg-muted/40")}>
                       <td className="px-3 align-middle">
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => toggleOne(item.id)}
-                          
-                          aria-label={`Select analysis ${address.main}`}
-                          className="h-4 w-4 rounded border-border disabled:cursor-not-allowed disabled:opacity-40"
-                        />
+                        <label className="flex size-11 cursor-pointer items-center justify-center">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => toggleOne(item.id)}
+                            aria-label={`Select analysis ${address.main}`}
+                            className="size-4 rounded border-border disabled:cursor-not-allowed disabled:opacity-40"
+                          />
+                        </label>
                       </td>
                       <td className="pr-2">
                         <div className="flex items-start gap-2">
@@ -3014,7 +3045,7 @@ export function SavedAnalysesPage({
                                 .filter(Boolean)
                                 .join(" · ")}
                             </p>
-                            <OfferLineRow offer={item.offerLine} />
+                            <OfferLineRow offer={item.offerLine} basisLabel={item.offerBasisLabel} />
                             {/* The "Next:" nudge moved into the verdict popover
                                 (see the Signal cell). On a scanning list it was
                                 a full line per row restating the verdict as a

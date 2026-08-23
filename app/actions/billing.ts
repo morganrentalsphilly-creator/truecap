@@ -6,7 +6,13 @@ import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { hasPaidPlanSubscription } from "@/lib/entitlements";
 import { getStripe } from "@/lib/stripe/client";
-import { getPrimaryPlanPriceId, type PaidPlanSlug } from "@/lib/stripe/plan-prices";
+import { withTrueCapCheckoutBranding } from "@/lib/stripe/checkout-branding";
+import {
+  getPrimaryPlanPriceId,
+  isPaidPlanSlug,
+  type PaidPlanSlug,
+} from "@/lib/stripe/plan-prices";
+import { verifyCheckoutReturnCandidate } from "@/lib/stripe/checkout-return";
 import { captureServerEvent } from "@/lib/posthog-server";
 import { TRIAL_DAYS } from "@/lib/trial";
 import { resolvePostAnalysisOfferCoupon } from "@/lib/post-analysis-offer";
@@ -23,6 +29,12 @@ const checkoutSchema = z.object({
 const switchPlanSchema = z.object({
   targetPlanSlug: z.enum(["pro_monthly", "pro_annual", "agent_pro_monthly", "agent_pro_annual"]),
 });
+
+const checkoutReturnSchema = z
+  .object({
+    sessionId: z.string().regex(/^cs_[a-zA-Z0-9_]{8,240}$/),
+  })
+  .strict();
 
 export type BillingActionResult =
   | { ok: true; url: string }
@@ -139,19 +151,30 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
   // subscription and double-bill them. Plan changes (monthly ↔ annual)
   // go through the billing portal, which prorates correctly. Callers
   // route ALREADY_SUBSCRIBED to the portal.
-  const { data: existingSubscription } = await supabase
+  const { data: existingSubscription, error: existingSubscriptionError } = await supabase
     .from("subscriptions")
     .select("id")
     .eq("user_id", user.id)
-    .in("status", ["active", "trialing", "past_due"])
+    .in("status", ["active", "trialing", "past_due", "unpaid", "paused"])
     .limit(1)
     .maybeSingle();
+  if (existingSubscriptionError) {
+    Sentry.captureException(existingSubscriptionError, {
+      tags: { feature: "billing-checkout", guard: "local-subscription" },
+      extra: { userId: user.id },
+    });
+    return {
+      ok: false,
+      code: "SERVER_ERROR",
+      message: "We couldn't safely verify your billing status. Please try again shortly.",
+    };
+  }
   if (existingSubscription) {
     return {
       ok: false,
       code: "ALREADY_SUBSCRIBED",
       message:
-        "You already have an active TrueCap plan. Use Manage billing to switch between monthly and annual — Stripe prorates automatically.",
+        "You already have a TrueCap subscription. Use Manage billing to switch plans or restore billing safely.",
     };
   }
 
@@ -159,12 +182,23 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
   // who ever subscribed before (any status, incl. canceled/incomplete) does NOT
   // get it again — otherwise cancel-and-resubscribe farms a fresh trial each
   // cycle. Only grant the trial when there's no prior subscription row at all.
-  const { data: priorSubscription } = await supabase
+  const { data: priorSubscription, error: priorSubscriptionError } = await supabase
     .from("subscriptions")
     .select("id")
     .eq("user_id", user.id)
     .limit(1)
     .maybeSingle();
+  if (priorSubscriptionError) {
+    Sentry.captureException(priorSubscriptionError, {
+      tags: { feature: "billing-checkout", guard: "trial-history" },
+      extra: { userId: user.id },
+    });
+    return {
+      ok: false,
+      code: "SERVER_ERROR",
+      message: "We couldn't safely verify trial eligibility. Please try again shortly.",
+    };
+  }
   const grantTrial = !priorSubscription;
 
   const [{ data: profile }, { data: plan, error: planError }] = await Promise.all([
@@ -206,25 +240,29 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
         limit: 10,
       });
       const hasLiveStripeSubscription = stripeSubs.data.some((sub) =>
-        ["active", "trialing", "past_due"].includes(sub.status)
+        ["active", "trialing", "past_due", "unpaid", "paused"].includes(sub.status)
       );
       if (hasLiveStripeSubscription) {
         return {
           ok: false,
           code: "ALREADY_SUBSCRIBED",
           message:
-            "You already have an active TrueCap plan. Use Manage billing to switch between monthly and annual — Stripe prorates automatically.",
+            "You already have a TrueCap subscription. Use Manage billing to switch plans or restore billing safely.",
         };
       }
     } catch (error) {
-      // Don't block checkout on a Stripe API blip — the local-row check
-      // above already passed, so fall through to it. But a degraded guard
-      // must be visible: if this fires alongside checkout traffic, the
-      // double-billing backstop is off.
+      // Fail closed: if Stripe cannot confirm that the customer has no live,
+      // unpaid, or paused subscription, creating a checkout could double-bill
+      // them. A retryable error is safer than a parallel subscription.
       Sentry.captureException(error, {
         tags: { feature: "billing-checkout" },
         extra: { userId: user.id, guard: "stripe_subscriptions_list" },
       });
+      return {
+        ok: false,
+        code: "SERVER_ERROR",
+        message: "We couldn't safely verify your Stripe subscriptions. Please try again shortly.",
+      };
     }
   }
 
@@ -319,7 +357,7 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
     // other.
     const proTrialDays = TRIAL_DAYS;
     const stripe = getStripe();
-    const session = await stripe.checkout.sessions.create({
+    const session = await stripe.checkout.sessions.create(withTrueCapCheckoutBranding({
       mode: "subscription",
       customer: customerId,
       client_reference_id: user.id,
@@ -362,7 +400,7 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
         },
         ...(grantTrial && proTrialDays > 0 ? { trial_period_days: proTrialDays } : {}),
       },
-    });
+    }));
 
     if (!session.url) {
       console.error("[billing] Stripe checkout session missing URL");
@@ -384,7 +422,13 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
       event: "pro_checkout_started",
       properties: {
         plan_slug: parsed.data.planSlug,
-        stripe_session_id: session.id,
+      },
+    });
+    await captureServerEvent({
+      distinctId: user.id,
+      event: "checkout_started",
+      properties: {
+        plan_slug: parsed.data.planSlug,
       },
     });
     if (parsed.data.planSlug.startsWith("agent_pro")) {
@@ -418,6 +462,123 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
 export type ProActiveResult =
   | { ok: true; active: boolean }
   | { ok: false; code: "SIGN_IN_REQUIRED" | "SERVER_ERROR"; message: string };
+
+export type CheckoutReturnVerificationResult =
+  | {
+      ok: true;
+      purchasedPlanSlug: PaidPlanSlug;
+      conversionValue?: number;
+    }
+  | {
+      ok: false;
+      code: "SIGN_IN_REQUIRED" | "INVALID_RETURN" | "SERVER_ERROR";
+      message: string;
+    };
+
+/**
+ * Verify the attacker-controlled success URL before any banner, conversion,
+ * analytics event, or entitlement poll runs in the browser. This is read-only:
+ * it retrieves the Checkout Session and current plan Price but never creates,
+ * mutates, or charges anything in Stripe.
+ */
+export async function verifyCheckoutReturnAction(
+  input: unknown
+): Promise<CheckoutReturnVerificationResult> {
+  const parsed = checkoutReturnSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      code: "INVALID_RETURN",
+      message: "This checkout return could not be verified.",
+    };
+  }
+
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return {
+      ok: false,
+      code: "SIGN_IN_REQUIRED",
+      message: "Sign in to verify this checkout return.",
+    };
+  }
+
+  try {
+    const stripe = getStripe();
+    const session = await stripe.checkout.sessions.retrieve(parsed.data.sessionId, {
+      expand: ["line_items"],
+    });
+    const metadataPlanSlug = session.metadata?.plan_slug ?? null;
+    if (!isPaidPlanSlug(metadataPlanSlug)) {
+      return {
+        ok: false,
+        code: "INVALID_RETURN",
+        message: "This checkout return could not be verified.",
+      };
+    }
+
+    const { data: plan, error: planError } = await supabase
+      .from("plans")
+      .select("stripe_price_id")
+      .eq("slug", metadataPlanSlug)
+      .eq("is_active", true)
+      .maybeSingle();
+    if (planError) throw planError;
+
+    const expectedPriceId = getPlanPriceId(metadataPlanSlug, plan?.stripe_price_id);
+    if (!expectedPriceId) {
+      Sentry.captureMessage("billing: checkout return plan has no current Price", {
+        level: "error",
+        tags: { feature: "billing-checkout-return" },
+        extra: { planSlug: metadataPlanSlug },
+      });
+      return {
+        ok: false,
+        code: "SERVER_ERROR",
+        message: "Checkout verification is temporarily unavailable.",
+      };
+    }
+
+    const purchasedPrice = session.line_items?.data[0]?.price;
+    const verified = verifyCheckoutReturnCandidate({
+      candidate: {
+        mode: session.mode,
+        status: session.status,
+        clientReferenceId: session.client_reference_id,
+        metadataUserId: session.metadata?.user_id ?? null,
+        metadataPlanSlug,
+        priceId: purchasedPrice?.id ?? null,
+        unitAmount: purchasedPrice?.unit_amount ?? null,
+        currency: purchasedPrice?.currency ?? null,
+        createdAtSeconds: session.created,
+        hasSubscription: Boolean(session.subscription),
+      },
+      expectedUserId: user.id,
+      expectedPriceId,
+    });
+    if (!verified) {
+      return {
+        ok: false,
+        code: "INVALID_RETURN",
+        message: "This checkout return could not be verified.",
+      };
+    }
+
+    return { ok: true, ...verified };
+  } catch (error) {
+    Sentry.captureException(error, {
+      tags: { feature: "billing-checkout-return" },
+      extra: { userId: user.id },
+    });
+    return {
+      ok: false,
+      code: "SERVER_ERROR",
+      message: "Checkout verification is temporarily unavailable.",
+    };
+  }
+}
 
 /**
  * Lightweight post-checkout status poll: "has the Stripe webhook landed my

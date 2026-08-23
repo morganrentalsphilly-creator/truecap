@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { UseFormReturn } from "react-hook-form";
+import { Controller, UseFormReturn } from "react-hook-form";
 import { Home, DollarSign, Sparkles, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
 import { FieldError, optionalNumberSetValueAs } from "@/components/investcalc/form-field-helpers";
 import { AddressAutocomplete, type SelectedAddress } from "@/components/investcalc/address-autocomplete";
+import { CurrencyInput } from "@/components/ui/currency-input";
 
 interface PropertyDetailsSectionProps {
   form: UseFormReturn<InvestmentFormValues>;
@@ -63,7 +64,6 @@ export function PropertyDetailsSection({
   sampleSlot,
 }: PropertyDetailsSectionProps) {
   const {
-    register,
     formState: { errors },
   } = form;
   const bare = chrome === "bare";
@@ -132,19 +132,29 @@ export function PropertyDetailsSection({
         </Label>
         <div className="relative">
           <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            {...register("purchasePrice", { valueAsNumber: true })}
-            id="purchasePrice"
-            type="number"
-            inputMode="decimal"
-            step="0.01"
-            placeholder="385000"
-            aria-required="true"
-            aria-invalid={!!errors.purchasePrice}
-            aria-describedby={errors.purchasePrice ? "purchasePrice-error" : undefined}
-            className={cn(
-              "pl-8 border-input bg-background",
-              errors.purchasePrice && "border-destructive focus-visible:ring-destructive"
+          <Controller
+            control={form.control}
+            name="purchasePrice"
+            render={({ field }) => (
+              <CurrencyInput
+                ref={field.ref}
+                name={field.name}
+                value={field.value}
+                onBlur={field.onBlur}
+                onValueChange={field.onChange}
+                id="purchasePrice"
+                min={10_000}
+                max={100_000_000}
+                step={100}
+                placeholder="385,000"
+                aria-required="true"
+                aria-invalid={!!errors.purchasePrice}
+                aria-describedby={errors.purchasePrice ? "purchasePrice-error" : undefined}
+                className={cn(
+                  "min-h-11 border-input bg-background pl-8",
+                  errors.purchasePrice && "border-destructive focus-visible:ring-destructive"
+                )}
+              />
             )}
           />
         </div>
@@ -209,11 +219,14 @@ export function YearBuiltField({ form }: { form: UseFormReturn<InvestmentFormVal
         id="yearBuilt"
         type="number"
         inputMode="decimal"
+        min={1800}
+        max={new Date().getFullYear() + 5}
+        step={1}
         placeholder="2015"
         aria-invalid={!!errors.yearBuilt}
         aria-describedby={errors.yearBuilt ? "yearBuilt-error" : undefined}
         className={cn(
-          "border-input bg-background",
+          "min-h-11 border-input bg-background",
           errors.yearBuilt && "border-destructive focus-visible:ring-destructive"
         )}
       />

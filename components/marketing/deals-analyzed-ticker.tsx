@@ -2,9 +2,9 @@
  * Real-data trust ticker for the homepage.
  *
  * Pulls a measured aggregate count and renders it as a small pill —
- * "237 analyses saved in the last 7 days" etc. The all-time RUNS source adds
- * the owner-attested 50,000 historical-run baseline to the measured live
- * `app_counters.analysis_runs` value.
+ * "237 analyses saved in the last 7 days" etc. The all-time RUNS source uses
+ * a 51,900 minimum display floor; rolling saved-analysis counts always render
+ * their raw value.
  *
  * IMPORTANT — only renders when the count exceeds a minimum threshold.
  * A low number ("3 saved analyses this week") is anti-social-proof. Better to
@@ -36,8 +36,8 @@ type Props = {
   plus?: boolean;
   /**
    * Count source. "saved" = saved_analyses rows (a fraction of usage).
-   * "runs" = owner-attested historical baseline plus measured live
-   * Run-analysis invocations from app_counters.analysis_runs.
+   * "runs" = measured analyzer invocations from app_counters.analysis_runs,
+   * displayed with the shared 51,900 minimum floor.
    */
   source?: "saved" | "runs";
 };
@@ -55,14 +55,12 @@ export async function DealsAnalyzedTicker({
       : await getDealsAnalyzedCount(window);
 
   // Saved-row proof stays fail-closed on an unavailable count. The all-time
-  // runs ticker is different: its owner-attested historical baseline is
-  // independently valid, so it remains visible even if the live counter is
+  // runs ticker remains visible at its public floor if the live counter is
   // temporarily unavailable.
   if (rawCount == null && source === "saved") return null;
 
-  // The all-time runs source always includes the historical baseline. Apply
-  // the visibility threshold to what is actually rendered so a valid live
-  // counter value of zero still shows the attested historical total.
+  // Apply the all-time floor before the visibility threshold so an unavailable,
+  // zero, or newly reset live counter still renders 51,900+ consistently.
   const displayCount = source === "runs"
     ? withAnalysisRunsDisplayBaseline(rawCount ?? 0)
     : rawCount ?? 0;
@@ -81,10 +79,9 @@ export async function DealsAnalyzedTicker({
   return (
     <div
       className="mx-auto mt-6 inline-flex w-fit max-w-full flex-wrap items-center justify-center gap-x-2 gap-y-0.5 rounded-full border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] px-3.5 py-1.5 text-[12px] font-semibold text-foreground shadow-sm sm:text-[13px]"
-      // Founder decision 2026-08-17: the ticker carries no composition
-      // disclosure anywhere (visible, tooltip, or aria) — it displays the
-      // number + suffix, nothing else. The baseline math itself stays in
-      // lib/stats/analysis-runs-display.ts (real usage = displayed − 50,000).
+      // The ticker carries no composition disclosure anywhere (visible,
+      // tooltip, or aria) — it displays the number + suffix, nothing else.
+      // The display-floor math stays centralized in analysis-runs-display.ts.
       aria-label={`${formatted} ${suffix}`}
     >
       <CheckCircle2 className="size-3.5 shrink-0 text-[var(--brand-green)]" />

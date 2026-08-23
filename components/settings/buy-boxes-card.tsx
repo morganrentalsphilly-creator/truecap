@@ -767,7 +767,7 @@ function BoxEditorForm({
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-4">
-        <label className="flex items-center gap-2.5 text-sm text-foreground">
+        <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-sm text-foreground">
           <input
             type="checkbox"
             checked={editor.isActive}
@@ -776,7 +776,7 @@ function BoxEditorForm({
           />
           Active (show its verdict)
         </label>
-        <label className="flex items-center gap-2.5 text-sm text-foreground">
+        <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-sm text-foreground">
           <input
             type="checkbox"
             checked={editor.isDefault}

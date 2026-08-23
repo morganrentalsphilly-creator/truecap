@@ -16,15 +16,24 @@
  * hero computing from this shared constant, the two can never diverge
  * again.
  *
- * The inputs below are tuned so the demo is a genuinely strong deal
- * under the REAL engine (≈$555/mo cash flow, ≈8.6% cap, DSCR ≈1.41,
- * CoC ≈11%): $265k purchase, $3,050 rent, 20% down at 6.6%. If you
- * edit any value, the hero updates itself — but sanity-check that the
- * verdict tier stays Strong/Solid, because this deal IS the first
- * impression of the product.
+ * The inputs below run through the REAL engine at ≈$554/mo cash flow,
+ * ≈9.33% cap rate, and ≈1.52 DSCR: $265k purchase, $3,050 rent, 20% down
+ * at 6.6%. The $265k asking price intentionally sits above the $236k price
+ * ceiling produced by the visible $750/mo cash-flow + 1.25 DSCR targets, so
+ * the first experience demonstrates both "worth pursuing" fundamentals and
+ * the discipline to pass at the current price. If any input changes, update
+ * the pinned regression snapshot and verify every sample surface together.
  */
 
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
+import type { MaoTarget } from "@/lib/max-allowable-offer";
+
+/** The product lens and exact acquisition criteria demonstrated by the sample. */
+export const SAMPLE_DEAL_STRATEGY_KEY = "buy-hold" as const;
+export const SAMPLE_DEAL_MAO_TARGET: MaoTarget = {
+  monthlyCashFlow: 750,
+  dscr: 1.25,
+};
 
 export const SAMPLE_DEAL_VALUES = {
   propertyType: "single-family",
@@ -64,4 +73,16 @@ export const SAMPLE_DEAL_VALUES = {
 export const SAMPLE_DEAL_DISPLAY = {
   shortAddress: "1700 W Erie · Philadelphia",
   subtitle: `Single Family · $${SAMPLE_DEAL_VALUES.purchasePrice.toLocaleString("en-US")} · Built ${SAMPLE_DEAL_VALUES.yearBuilt}`,
+} as const;
+
+/**
+ * Complete sample contract. Keep the legacy named exports above for existing
+ * callers, but new sample surfaces should consume this object so inputs,
+ * strategy, and target criteria cannot drift independently.
+ */
+export const SAMPLE_DEAL_FIXTURE = {
+  values: SAMPLE_DEAL_VALUES,
+  strategyKey: SAMPLE_DEAL_STRATEGY_KEY,
+  maoTarget: SAMPLE_DEAL_MAO_TARGET,
+  display: SAMPLE_DEAL_DISPLAY,
 } as const;

@@ -85,9 +85,9 @@ export async function createPublicShareAction(input: unknown): Promise<CreatePub
     dealId: dealId ?? null,
   });
   if (!path) {
-    // Table not applied yet (migration pending) or insert failed — the caller
-    // falls back to the legacy encoded link so sharing keeps working.
-    return { ok: false, code: "NOT_CONFIGURED", message: "Opaque shares aren't enabled yet." };
+    // Never fall back to a URL containing the analysis payload. Existing /d
+    // links remain readable, but all newly minted links fail closed to opaque.
+    return { ok: false, code: "NOT_CONFIGURED", message: "Secure sharing is temporarily unavailable." };
   }
   return { ok: true, url: `${getSiteUrl()}${path}` };
 }

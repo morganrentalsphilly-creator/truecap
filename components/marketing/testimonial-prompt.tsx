@@ -206,7 +206,7 @@ export function TestimonialPrompt() {
             aria-hidden="true"
             className="absolute -left-[9999px] top-0 h-px w-px opacity-0"
           />
-          <label className="mt-2.5 flex items-start gap-2 text-xs text-muted-foreground">
+          <label className="mt-2.5 flex min-h-11 cursor-pointer items-start gap-2 text-xs text-muted-foreground">
             <input
               type="checkbox"
               checked={consent}

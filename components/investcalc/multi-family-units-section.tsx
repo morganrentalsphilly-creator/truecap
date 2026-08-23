@@ -1,6 +1,6 @@
 "use client";
 
-import { UseFormReturn, useFieldArray, useFormState } from "react-hook-form";
+import { Controller, UseFormReturn, useFieldArray, useFormState } from "react-hook-form";
 import { Building2, Plus, Trash2, DollarSign } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +10,7 @@ import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { checkUnitRentsAgainstFmr, unitRentHint } from "@/lib/multi-family-rent-check";
 import { cn } from "@/lib/utils";
 import { FieldError } from "@/components/investcalc/form-field-helpers";
+import { CurrencyInput } from "@/components/ui/currency-input";
 
 interface MultiFamilyUnitsSectionProps {
   form: UseFormReturn<InvestmentFormValues>;
@@ -217,11 +218,14 @@ export function MultiFamilyUnitsSection({
                     id={`unit-${index}-bedrooms`}
                     type="number"
                     inputMode="decimal"
+                    min={0}
+                    max={20}
+                    step={1}
                     placeholder="2"
                     aria-invalid={!!unitErrors?.bedrooms}
                     aria-describedby={unitErrors?.bedrooms ? `unit-${index}-bedrooms-error` : undefined}
                     className={cn(
-                      "border-input bg-background text-base h-11 md:h-9 md:text-sm",
+                      "h-11 border-input bg-background text-base md:text-sm",
                       unitErrors?.bedrooms && "border-destructive"
                     )}
                   />
@@ -238,11 +242,14 @@ export function MultiFamilyUnitsSection({
                     id={`unit-${index}-bathrooms`}
                     type="number"
                     inputMode="decimal"
+                    min={0}
+                    max={20}
+                    step={0.5}
                     placeholder="1"
                     aria-invalid={!!unitErrors?.bathrooms}
                     aria-describedby={unitErrors?.bathrooms ? `unit-${index}-bathrooms-error` : undefined}
                     className={cn(
-                      "border-input bg-background text-base h-11 md:h-9 md:text-sm",
+                      "h-11 border-input bg-background text-base md:text-sm",
                       unitErrors?.bathrooms && "border-destructive"
                     )}
                   />
@@ -259,11 +266,14 @@ export function MultiFamilyUnitsSection({
                     id={`unit-${index}-sqft`}
                     type="number"
                     inputMode="decimal"
+                    min={50}
+                    max={100_000}
+                    step={1}
                     placeholder="850"
                     aria-invalid={!!unitErrors?.sqft}
                     aria-describedby={unitErrors?.sqft ? `unit-${index}-sqft-error` : undefined}
                     className={cn(
-                      "border-input bg-background text-base h-11 md:h-9 md:text-sm",
+                      "h-11 border-input bg-background text-base md:text-sm",
                       unitErrors?.sqft && "border-destructive"
                     )}
                   />
@@ -276,18 +286,28 @@ export function MultiFamilyUnitsSection({
                   </Label>
                   <div className="relative">
                     <DollarSign className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                    <Input
-                      {...register(`units.${index}.monthlyRent`, { valueAsNumber: true })}
-                      id={`unit-${index}-monthlyRent`}
-                      type="number"
-                      inputMode="decimal"
-                      step="0.01"
-                      placeholder="1800"
-                      aria-invalid={!!unitErrors?.monthlyRent}
-                      aria-describedby={unitErrors?.monthlyRent ? `unit-${index}-monthlyRent-error` : undefined}
-                      className={cn(
-                        "pl-7 border-input bg-background text-base h-11 md:h-9 md:text-sm",
-                        unitErrors?.monthlyRent && "border-destructive"
+                    <Controller
+                      control={control}
+                      name={`units.${index}.monthlyRent`}
+                      render={({ field }) => (
+                        <CurrencyInput
+                          ref={field.ref}
+                          name={field.name}
+                          value={field.value}
+                          onBlur={field.onBlur}
+                          onValueChange={field.onChange}
+                          id={`unit-${index}-monthlyRent`}
+                          min={0}
+                          max={1_000_000}
+                          step={50}
+                          placeholder="1,800"
+                          aria-invalid={!!unitErrors?.monthlyRent}
+                          aria-describedby={unitErrors?.monthlyRent ? `unit-${index}-monthlyRent-error` : undefined}
+                          className={cn(
+                            "h-11 border-input bg-background pl-7 text-base md:text-sm",
+                            unitErrors?.monthlyRent && "border-destructive"
+                          )}
+                        />
                       )}
                     />
                   </div>

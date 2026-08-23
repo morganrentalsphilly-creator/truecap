@@ -154,7 +154,7 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
             Deal notes
           </h3>
         </div>
-        <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+        <div role="status" aria-live="polite" className="flex items-center gap-2 text-[11px] text-muted-foreground">
           {isPending ? (
             <span className="inline-flex items-center gap-1">
               <Loader2 className="size-3 animate-spin" /> Saving…
@@ -166,7 +166,11 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
           )}
         </div>
       </div>
+      <label htmlFor="deal-notes" className="sr-only">
+        Deal notes
+      </label>
       <textarea
+        id="deal-notes"
         value={notes}
         onChange={(event) => {
           const next = event.target.value;

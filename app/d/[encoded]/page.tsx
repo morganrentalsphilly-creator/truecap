@@ -17,6 +17,7 @@ import { SharedDealShell } from "@/components/investcalc/shared-deal-shell";
 import { getPublicAgentBranding } from "@/lib/agent-share";
 import { verifyShareAttribution, hashShareValues } from "@/lib/share-attribution";
 import { getPublicDealComps } from "@/lib/public-deal-comps";
+import { canShowSharedProAnalysis } from "@/lib/public-share-access";
 
 // Next.js 15+ makes `params` async (Promise). Without awaiting it, accessing
 // .encoded synchronously throws in dev and silently breaks in prod.
@@ -91,9 +92,10 @@ export default async function PublicDealPage({ params }: Props) {
   const verifiedOwnerId = attributionVerified ? payload.meta?.ownerId : undefined;
   const verifiedDealId = attributionVerified ? payload.meta?.dealId : undefined;
 
-  const [agent, comps] = await Promise.all([
+  const [agent, comps, showProAnalysis] = await Promise.all([
     getPublicAgentBranding(verifiedOwnerId),
     getPublicDealComps(verifiedDealId, verifiedOwnerId),
+    canShowSharedProAnalysis(verifiedOwnerId),
   ]);
 
   return (
@@ -102,6 +104,7 @@ export default async function PublicDealPage({ params }: Props) {
       result={result}
       comps={comps}
       agent={agent}
+      showProAnalysis={showProAnalysis}
       leadCapture={
         agent && verifiedOwnerId
           ? {

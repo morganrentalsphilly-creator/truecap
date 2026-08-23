@@ -30,12 +30,12 @@ export function StrategyChips({
           </p>
         </div>
         {active ? (
-          // min-h-8 + canceling negative margin: the same touch band the
+          // 44px minimum: strategy selection is a primary setup control.
           // strategy chips below carry, without growing the header row.
           <button
             type="button"
             onClick={() => onSelect(null)}
-            className="-my-1.5 inline-flex min-h-8 shrink-0 items-center text-xs font-semibold text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+            className="inline-flex min-h-11 shrink-0 items-center px-2 text-xs font-semibold text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
           >
             Clear
           </button>
@@ -58,7 +58,7 @@ export function StrategyChips({
               title={s.tagline}
               onClick={() => onSelect(isActive ? null : s.key)}
               className={cn(
-                "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors sm:shrink",
+                "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-semibold transition-colors sm:shrink",
                 isActive
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-border bg-background text-foreground hover:bg-muted"

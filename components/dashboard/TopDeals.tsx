@@ -9,6 +9,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ScoreBreakdown } from "@/components/investcalc/score-breakdown";
 import { BuyBoxFitBadge } from "@/components/investcalc/buy-box-fit-badge";
 import type { BuyBoxFitSummary } from "@/lib/buy-box";
+import type { DataConfidence } from "@/lib/data-confidence";
+import { DataConfidenceBadge } from "@/components/investcalc/data-confidence-badge";
 
 export type DashboardTopDeal = {
   id?: string;
@@ -34,6 +36,9 @@ export type DashboardTopDeal = {
    *  the badge and the Fit sort stay invisible for them. */
   fit?: BuyBoxFitSummary | null;
   methodologyLabel?: string;
+  /** Input provenance and freshness. Kept beside every decision score so a
+   *  weak autofill cannot look as trustworthy as verified assumptions. */
+  dataConfidence?: DataConfidence | null;
 };
 
 const typeIcon: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -168,7 +173,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                 type="button"
                 aria-pressed={sortBy === option.id}
                 onClick={() => setSortBy(option.id)}
-                className={`px-3 py-2 text-xs font-semibold rounded-md transition sm:py-1 ${
+                className={`min-h-11 px-3 py-2 text-xs font-semibold rounded-md transition ${
                   sortBy === option.id ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -276,10 +281,11 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                 {/* Buy-box fit (PV-6) — the shared My Deals pill; renders
                     nothing for users without an active box. */}
                 <BuyBoxFitBadge fit={d.fit ?? undefined} />
+                <DataConfidenceBadge confidence={d.dataConfidence} size="xs" propertyType={d.propertyType} />
                 {d.breakdown && d.score != null ? (
                   <Popover>
                     <PopoverTrigger asChild>
-                      <button type="button" className="text-[11px] font-semibold text-primary underline-offset-2 hover:underline">Why?</button>
+                      <button type="button" className="inline-flex min-h-11 min-w-11 items-center justify-center text-[11px] font-semibold text-primary underline-offset-2 hover:underline">Why?</button>
                     </PopoverTrigger>
                     <PopoverContent align="start" className="w-auto p-3">
                       <ScoreBreakdown breakdown={d.breakdown} score={d.score} propertyType={d.propertyType} />
@@ -399,13 +405,14 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                       {/* Buy-box fit (PV-6) — the shared My Deals pill;
                           renders nothing for users without an active box. */}
                       <BuyBoxFitBadge fit={d.fit ?? undefined} />
+                      <DataConfidenceBadge confidence={d.dataConfidence} size="xs" propertyType={d.propertyType} />
                       {d.signal ? (
                         <span className="inline-flex items-center justify-end gap-1.5">
                           <span className={`text-[11px] font-semibold px-2 py-1 rounded-md ring-1 ${signalStyle[d.signal] ?? "bg-muted text-muted-foreground ring-border"}`}>{recommendationLabel(d.signal)}</span>
                           {d.breakdown && d.score != null ? (
                             <Popover>
                               <PopoverTrigger asChild>
-                                <button type="button" className="text-[11px] font-semibold text-primary underline-offset-2 hover:underline">Why?</button>
+                                <button type="button" className="inline-flex min-h-11 min-w-11 items-center justify-center text-[11px] font-semibold text-primary underline-offset-2 hover:underline">Why?</button>
                               </PopoverTrigger>
                               <PopoverContent align="end" className="w-auto p-3">
                                 <ScoreBreakdown breakdown={d.breakdown} score={d.score} propertyType={d.propertyType} />

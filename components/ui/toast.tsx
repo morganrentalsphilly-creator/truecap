@@ -80,6 +80,7 @@ const ToastClose = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitives.Close
     ref={ref}
+    aria-label="Close notification"
     className={cn(
       'absolute right-3 top-3 rounded-full p-1 text-muted-foreground transition-all hover:bg-background/70 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring group-[.success]:text-emerald-700 group-[.success]:hover:text-emerald-800 group-[.warning]:text-amber-700 group-[.warning]:hover:text-amber-800 group-[.destructive]:text-red-700 group-[.destructive]:hover:text-red-800',
       className,
@@ -87,7 +88,7 @@ const ToastClose = React.forwardRef<
     toast-close=""
     {...props}
   >
-    <X className="h-4 w-4" />
+    <X className="h-4 w-4" aria-hidden />
   </ToastPrimitives.Close>
 ))
 ToastClose.displayName = ToastPrimitives.Close.displayName

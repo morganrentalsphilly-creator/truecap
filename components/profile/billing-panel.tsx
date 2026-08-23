@@ -20,6 +20,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { buildSubscriptionDisplay } from "@/lib/subscription-display";
+import type { StripeDisplayPriceDetails } from "@/lib/stripe/display-prices";
 import { cn } from "@/lib/utils";
 import { GuaranteeBadge } from "@/components/marketing/guarantee-badge";
 
@@ -40,6 +42,8 @@ type CurrentSubscription = {
   currentPeriodStart: string | null;
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
+  subscribedPrice: StripeDisplayPriceDetails | null;
+  standardMonthlyPrice: StripeDisplayPriceDetails | null;
 } | null;
 
 type BillingPanelProps = {
@@ -82,11 +86,38 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
     ["active", "trialing", "past_due"].includes(currentSubscription.status)
       ? currentSubscription.planSlug
       : null;
+  // Stripe's unpaid/paused records still represent an existing subscription.
+  // A second Checkout Session would create a parallel subscription instead of
+  // repairing the first, so these states route only to the billing portal.
+  const needsBillingRecovery = Boolean(
+    currentSubscription && ["unpaid", "paused"].includes(currentSubscription.status)
+  );
+  const canCancelSubscription = Boolean(
+    currentSubscription &&
+      ["active", "trialing", "past_due", "unpaid", "paused"].includes(
+        currentSubscription.status
+      ) &&
+      !currentSubscription.cancelAtPeriodEnd
+  );
 
   const currentPlanTitle = useMemo(() => {
-    if (!currentSubscription || !activePlanSlug) return "Free";
+    if (!currentSubscription) return "Free";
+    if (!activePlanSlug && !needsBillingRecovery) return "Free";
     return currentSubscription.planName;
-  }, [activePlanSlug, currentSubscription]);
+  }, [activePlanSlug, currentSubscription, needsBillingRecovery]);
+  const subscriptionDisplay = useMemo(
+    () =>
+      currentSubscription
+        ? buildSubscriptionDisplay({
+            status: currentSubscription.status,
+            planSlug: currentSubscription.planSlug,
+            cancelAtPeriodEnd: currentSubscription.cancelAtPeriodEnd,
+            subscribedPrice: currentSubscription.subscribedPrice,
+            standardMonthlyPrice: currentSubscription.standardMonthlyPrice,
+          })
+        : null,
+    [currentSubscription]
+  );
 
   // Subscribers clicking the OTHER plan are switching, not buying — a fresh
   // checkout would create a second parallel subscription (double billing).
@@ -263,6 +294,23 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
           <div className="rounded-2xl border border-border bg-card p-3">
             <p className="text-sm text-muted-foreground">Current plan</p>
             <p className="mt-1 text-xl font-bold text-foreground">{currentPlanTitle}</p>
+            {subscriptionDisplay?.rateHeadline ? (
+              <div
+                className={cn(
+                  "mt-2 rounded-xl border px-3 py-2.5",
+                  subscriptionDisplay.isGrandfatheredTwenty
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-950"
+                    : "border-border bg-muted/30 text-foreground"
+                )}
+              >
+                <p className="font-bold">{subscriptionDisplay.rateHeadline}</p>
+                {subscriptionDisplay.detailLines.map((line) => (
+                  <p key={line} className="mt-1 text-xs leading-relaxed opacity-80">
+                    {line}
+                  </p>
+                ))}
+              </div>
+            ) : null}
             {currentSubscription ? (
               <div className="mt-2 space-y-1 text-sm text-muted-foreground">
                 <p>Status: {currentSubscription.cancelAtPeriodEnd ? "cancellation scheduled" : statusLabel(currentSubscription.status).toLowerCase()}</p>
@@ -285,7 +333,7 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
               {isPortalPending ? <Loader2 className="animate-spin" /> : <CreditCard />}
               Manage billing
             </Button>
-            {currentSubscription && !currentSubscription.cancelAtPeriodEnd ? (
+            {canCancelSubscription ? (
               <Button
                 type="button"
                 variant="outline"
@@ -361,10 +409,14 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
                   className="w-full rounded-xl"
                   variant={isCurrent ? "outline" : "default"}
                   disabled={isCurrent || isPending || isPortalPending}
-                  onClick={() => handleCheckout(plan.slug)}
+                  onClick={() =>
+                    needsBillingRecovery ? handlePortal() : handleCheckout(plan.slug)
+                  }
                 >
                   {isPending ? <Loader2 className="animate-spin" /> : null}
-                  {isCurrent
+                  {needsBillingRecovery
+                    ? "Manage billing to reactivate"
+                    : isCurrent
                     ? "Current plan"
                     : activePlanSlug
                       ? "Switch to this plan"
@@ -372,7 +424,9 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
                 </Button>
                 {/* This button opens Stripe checkout — a direct paid CTA that
                     carried no risk reversal at all. */}
-                {!isCurrent ? <GuaranteeBadge className="mt-2.5" /> : null}
+                {!isCurrent && !needsBillingRecovery ? (
+                  <GuaranteeBadge className="mt-2.5" />
+                ) : null}
               </CardContent>
             </Card>
           );

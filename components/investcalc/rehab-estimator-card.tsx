@@ -220,7 +220,7 @@ export function RehabEstimatorCard({
                     <label
                       key={item.id}
                       className={cn(
-                        "flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2 cursor-pointer transition-colors",
+                        "flex min-h-11 items-center justify-between gap-3 rounded-lg border border-border px-3 py-2 cursor-pointer transition-colors",
                         isOn
                           ? "bg-[var(--brand-blue-light)] border-primary"
                           : "bg-background hover:bg-accent/40"

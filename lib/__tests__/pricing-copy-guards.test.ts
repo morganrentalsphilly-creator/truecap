@@ -125,23 +125,21 @@ describe("trial copy — mirrors the checkout repeat-trial guard", () => {
   });
 
   it("states the card, billing, cancellation, and repeat-trial terms before checkout", () => {
-    const page = read("../../app/pricing/page.tsx");
     const plans = read("../../components/marketing/pricing-toggle-plans.tsx");
     const landing = read("../../components/marketing/landing-sections.tsx");
 
     expect(plans).toContain("Card required at checkout");
     expect(plans).toContain("Subscription billing starts after");
     expect(plans).toContain("unless you cancel first");
-    expect(page).toContain("Returning subscribers start paid access immediately");
+    expect(plans).toContain("The free trial is a first-time offer");
     expect(landing).toContain("not eligible for another free trial");
   });
 });
 
 describe("pricing offer hierarchy", () => {
-  it("describes comps as conditional on a saved comp set", () => {
+  it("does not imply that every Decision Pack PDF includes comps", () => {
     const plans = read("../../components/marketing/pricing-toggle-plans.tsx");
-    expect(plans).toContain("PDF reports that can include saved comps");
-    expect(plans).not.toContain("PDF reports, with comps");
+    expect(plans).not.toMatch(/report[^\n]*with[^\n]*comps/i);
   });
 
   it("does not market white-label embeds while that license is on hold", () => {
@@ -149,21 +147,55 @@ describe("pricing offer hierarchy", () => {
     expect(agentPage).not.toMatch(/white-label embeds/i);
   });
 
-  it("keeps the anchoring order: Pro first on phones, Agent Pro → Pro → Free on desktop", () => {
+  it("keeps Free → Pro → Agent order at every viewport", () => {
     const plans = read("../../components/marketing/pricing-toggle-plans.tsx");
-    // Pro leads on narrow screens; Free is always the last card.
-    expect(plans).toContain("order-1 -mt-2");
-    expect(plans).toContain("order-3 rounded-3xl");
-    // Desktop anchoring: Agent Pro takes the left column when configured,
-    // Pro sits center (or left in the 2-card layout), Free is rightmost.
-    expect(plans).toContain('order-2 rounded-3xl border border-border bg-card p-6 shadow-sm lg:order-1');
-    expect(plans).toContain('${showAgentPro ? "lg:order-2" : "lg:order-1"}');
-    expect(plans).toContain('${showAgentPro ? "lg:order-3" : "lg:order-2"}');
+    expect(plans).not.toMatch(/\border-[123]\b/);
+    expect(plans).not.toMatch(/\blg:order-[123]\b/);
+  });
+
+  it("keeps the Decision Pack in the secondary non-subscription section", () => {
+    const page = read("../../app/pricing/page.tsx");
+    expect(page).toContain("Not ready for a subscription?");
+    expect(page.indexOf("<PricingTogglePlans")).toBeLessThan(
+      page.indexOf("Not ready for a subscription?")
+    );
   });
 
   it("does not manufacture scarcity around the permanent annual plan", () => {
     const banner = read("../../components/marketing/annual-promo-banner.tsx");
     expect(banner).toContain("Annual plan");
     expect(banner).not.toMatch(/limited|expires|countdown/i);
+  });
+});
+
+describe("billing recovery safety", () => {
+  it("blocks a second checkout for unpaid and paused subscriptions", () => {
+    const billing = read("../../app/actions/billing.ts");
+    const panel = read("../../components/profile/billing-panel.tsx");
+    const pricing = read("../../app/pricing/page.tsx");
+    const plans = read("../../components/marketing/pricing-toggle-plans.tsx");
+
+    expect(billing).toContain(
+      '["active", "trialing", "past_due", "unpaid", "paused"]'
+    );
+    expect(panel).toContain('["unpaid", "paused"]');
+    expect(panel).toContain("Manage billing to reactivate");
+    expect(pricing).toContain("hasCheckoutRecoverySubscription");
+    expect(plans).toContain("billingRecoveryRequired");
+    expect(plans).toContain('href="/profile#billing"');
+  });
+
+  it("fails closed when Stripe cannot verify existing subscriptions", () => {
+    const billing = read("../../app/actions/billing.ts");
+    expect(billing).toContain("guard: \"stripe_subscriptions_list\"");
+    expect(billing).toContain("We couldn't safely verify your Stripe subscriptions");
+  });
+
+  it("loads canceled history so the inactive actual-rate display can render", () => {
+    const profile = read("../../app/profile/page.tsx");
+    expect(profile).toContain(
+      '["active", "trialing", "past_due", "unpaid", "paused", "canceled"]'
+    );
+    expect(profile).toContain("subscriptions.find");
   });
 });

@@ -90,10 +90,9 @@ function PostHogTracker() {
   // ── Pageview on every App Router transition ────────
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const search = searchParams?.toString();
-    const url = `${pathname}${search ? `?${search}` : ""}`;
-    // Buffered pre-init, so the landing pageview is delayed, not lost.
-    trackPageview(`${window.location.origin}${url}`);
+    // Query strings can contain Checkout IDs, encoded shared-deal inputs, or
+    // campaign-provided personal data. Funnel analysis only needs the route.
+    trackPageview(`${window.location.origin}${pathname}`);
   }, [pathname, searchParams]);
 
   // First-party organic attribution. Store only the landing path and referrer
@@ -185,9 +184,7 @@ function PostHogTracker() {
           .getUser()
           .then(({ data }) => {
             if (cancelled || !data.user) return;
-            identifyUser(data.user.id, {
-              email: data.user.email ?? undefined,
-            });
+            identifyUser(data.user.id);
           })
           .catch((err) => {
             console.warn("[posthog-provider] initial identify failed:", err);
@@ -196,9 +193,7 @@ function PostHogTracker() {
         const { data: sub } = supabase.auth.onAuthStateChange(
           (event, session) => {
             if (event === "SIGNED_IN" && session?.user) {
-              identifyUser(session.user.id, {
-                email: session.user.email ?? undefined,
-              });
+              identifyUser(session.user.id);
             } else if (event === "SIGNED_OUT") {
               resetAnalytics();
             }

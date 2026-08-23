@@ -2,16 +2,14 @@
  * Public Terms of Service.
  *
  * Required by Google OAuth verification, Stripe seller agreement,
- * and basic SaaS hygiene. NOT lawyer-reviewed — covers the standard
- * SaaS bases (acceptable use, payment terms, no warranty, limited
- * liability, governing law) but Morgan should engage a lawyer
- * before TrueCap materially scales or starts handling sensitive
- * client data on behalf of agents.
+ * and basic SaaS hygiene. Product-specific Agent Pro, trial, one-time
+ * Decision Pack, refund, and guarantee language approved 2026-08-23.
  */
 
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { TRIAL_DAYS } from "@/lib/trial";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
@@ -32,7 +30,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
-const LAST_UPDATED = "May 24, 2026";
+const LAST_UPDATED = "August 23, 2026";
 
 export default function TermsPage() {
   return (
@@ -65,8 +63,8 @@ export default function TermsPage() {
           <p>
             TrueCap provides software for analyzing rental real estate investments — cap rate,
             cash-on-cash return, debt service coverage, multi-year projections, exit modeling,
-            and related calculators. The Service includes a free tier and paid Pro tiers
-            (monthly and annual).
+            and related calculators. The Service includes a free tier, paid TrueCap Pro
+            and Agent Pro subscriptions, and an optional one-time Deal Decision Pack.
           </p>
           <p>
             The Service uses public market data (HUD Fair Market Rent, FRED interest rates)
@@ -110,7 +108,8 @@ export default function TermsPage() {
           <h2 className="text-2xl">4. Paid subscriptions</h2>
           <h3>Plans &amp; billing</h3>
           <p>
-            Pro plans are billed in advance on a monthly or annual cadence by Stripe. By
+            TrueCap Pro and Agent Pro plans are billed in advance on the cadence shown at
+            checkout by Stripe. By
             subscribing, you authorize us (via Stripe) to charge the recurring fee to your
             payment method until you cancel. Prices are listed at{" "}
             <Link href="/pricing" className="font-medium text-primary hover:underline">
@@ -118,6 +117,14 @@ export default function TermsPage() {
             </Link>{" "}
             and may change with notice — your existing billing cycle will run at the price
             you signed up at.
+          </p>
+          <h3>Free trials</h3>
+          <p>
+            Eligible new subscribers may receive a {TRIAL_DAYS}-day free trial when the
+            checkout page expressly offers one. Unless you cancel before the trial ends,
+            the subscription automatically converts to the paid plan and billing cadence
+            shown at checkout. Trial eligibility is limited to one introductory trial per
+            customer and is not restored by canceling and subscribing again.
           </p>
           <h3>Cancellation</h3>
           <p>
@@ -128,12 +135,25 @@ export default function TermsPage() {
           </p>
           <h3>Refunds</h3>
           <p>
-            Charges are non-refundable except where required by law. If you believe you were
-            charged in error, email{" "}
+            Subscription charges are non-refundable except where required by law, for billing
+            errors we confirm, or when a customer satisfies the published terms of the{" "}
+            <Link href="/guarantee" className="font-medium text-primary hover:underline">
+              Never Overpay Guarantee
+            </Link>
+            . If you believe you were charged in error, email{" "}
             <a href="mailto:hello@usetruecap.com" className="font-medium text-primary hover:underline">
               hello@usetruecap.com
             </a>{" "}
             and we&apos;ll review.
+          </p>
+          <h3>One-time Deal Decision Pack</h3>
+          <p>
+            A Deal Decision Pack is a one-time purchase for the analysis identified at
+            checkout. It does not create a recurring subscription and does not include future
+            analyses or ongoing Pro access. Because the digital report is generated and made
+            available immediately after payment, Pack purchases are final once delivered,
+            except where required by law or when we confirm that the purchased report could
+            not be delivered because of a TrueCap error.
           </p>
           <h3>Taxes</h3>
           <p>
@@ -141,7 +161,18 @@ export default function TermsPage() {
             at checkout.
           </p>
 
-          <h2 className="text-2xl">5. Your content</h2>
+          <h2 className="text-2xl">5. Agent Pro and client information</h2>
+          <p>
+            Agent Pro provides client-workspace and co-branded reporting tools. If you enter
+            information about a client, lead, or other person, you represent that you have a
+            lawful basis and any required permission to provide and use that information. You
+            remain responsible for your communications, fair-housing and advertising
+            compliance, professional licensing obligations, and every recommendation you make
+            to a client. Co-branding does not transfer ownership of TrueCap or authorize a
+            white-label, resale, or sublicensing arrangement.
+          </p>
+
+          <h2 className="text-2xl">6. Your content</h2>
           <p>
             You retain ownership of any data you enter into the Service (the
             &ldquo;Your Content&rdquo;). You grant us a limited license to store, process, and
@@ -150,7 +181,7 @@ export default function TermsPage() {
             without your explicit consent.
           </p>
 
-          <h2 className="text-2xl">6. Our intellectual property</h2>
+          <h2 className="text-2xl">7. Our intellectual property</h2>
           <p>
             The Service — including the calculators, math, UI design, marketing copy, and the
             TrueCap brand — is owned by us and protected by copyright and trademark law. We
@@ -158,7 +189,7 @@ export default function TermsPage() {
             accordance with these Terms.
           </p>
 
-          <h2 className="text-2xl">7. NOT financial, legal, or tax advice</h2>
+          <h2 className="text-2xl">8. NOT financial, legal, or tax advice</h2>
           <p>
             <strong>This is the most important section. Read it.</strong>
           </p>
@@ -177,7 +208,7 @@ export default function TermsPage() {
             investment decisions you make.
           </p>
 
-          <h2 className="text-2xl">8. Disclaimer of warranties</h2>
+          <h2 className="text-2xl">9. Disclaimer of warranties</h2>
           <p>
             The Service is provided <strong>&ldquo;as is&rdquo; and &ldquo;as available&rdquo;</strong>
             without warranties of any kind, express or implied, including but not limited to
@@ -186,7 +217,7 @@ export default function TermsPage() {
             that any data we surface (rents, rates, tax assessments) will be current or correct.
           </p>
 
-          <h2 className="text-2xl">9. Limitation of liability</h2>
+          <h2 className="text-2xl">10. Limitation of liability</h2>
           <p>
             To the maximum extent permitted by law, TrueCap and its founders, employees, and
             contractors will not be liable for any indirect, incidental, special, consequential,
@@ -200,7 +231,7 @@ export default function TermsPage() {
             giving rise to the claim, or $100, whichever is greater.
           </p>
 
-          <h2 className="text-2xl">10. Indemnification</h2>
+          <h2 className="text-2xl">11. Indemnification</h2>
           <p>
             You agree to indemnify, defend, and hold harmless TrueCap from any claim, loss,
             liability, or expense (including reasonable attorneys&apos; fees) arising from your
@@ -208,7 +239,7 @@ export default function TermsPage() {
             third-party right.
           </p>
 
-          <h2 className="text-2xl">11. Termination</h2>
+          <h2 className="text-2xl">12. Termination</h2>
           <p>
             You can stop using the Service and delete your account anytime. We may suspend or
             terminate your access if you violate these Terms or use the Service in a way that
@@ -217,14 +248,14 @@ export default function TermsPage() {
             liability) continue to apply.
           </p>
 
-          <h2 className="text-2xl">12. Changes to these Terms</h2>
+          <h2 className="text-2xl">13. Changes to these Terms</h2>
           <p>
             We may update these Terms. Material changes will be announced in-product or by email
             at least 14 days before they take effect. Continued use of the Service after a
             change takes effect constitutes acceptance.
           </p>
 
-          <h2 className="text-2xl">13. Governing law &amp; disputes</h2>
+          <h2 className="text-2xl">14. Governing law &amp; disputes</h2>
           <p>
             These Terms are governed by the laws of the Commonwealth of Pennsylvania, without
             regard to its conflict-of-laws rules. Any dispute arising out of or relating to the
@@ -233,7 +264,7 @@ export default function TermsPage() {
             jurisdiction of those courts.
           </p>
 
-          <h2 className="text-2xl">14. Contact</h2>
+          <h2 className="text-2xl">15. Contact</h2>
           <p>
             Questions about these Terms? Email{" "}
             <a href="mailto:hello@usetruecap.com" className="font-medium text-primary hover:underline">

@@ -32,12 +32,15 @@ export function SharedDealShell({
   result,
   comps,
   agent,
+  showProAnalysis,
   leadCapture,
 }: {
   values: InvestmentFormValues;
   result: AnalysisResult;
   comps: ReportComps | null;
   agent: PublicAgentBranding | null;
+  /** Pro analysis follows the verified creator's current paid entitlement. */
+  showProAnalysis: boolean;
   /** Present only when owner attribution is VERIFIED (legacy HMAC or a
    *  server-backed share row) — powers the co-branded lead form. */
   leadCapture?: SharedDealLeadCapture;
@@ -88,7 +91,12 @@ export function SharedDealShell({
           )}
         </header>
 
-        <ReadOnlyAnalysisView values={values} result={result} comps={comps} />
+        <ReadOnlyAnalysisView
+          values={values}
+          result={result}
+          comps={comps}
+          showProAnalysis={showProAnalysis}
+        />
 
         {/* Agent lead capture (co-branded shares) OR the generic Pro upsell. */}
         {agent && leadCapture ? (

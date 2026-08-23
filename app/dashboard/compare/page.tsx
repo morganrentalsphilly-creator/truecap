@@ -43,6 +43,8 @@ import { computeDealOfferLine } from "@/lib/deal-offer-line";
 import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 import type { NamedBuyBox } from "@/lib/buy-box";
+import { normalizeDataConfidence, type DataConfidence } from "@/lib/data-confidence";
+import { DEFAULT_PIPELINE_STAGE, type PipelineStage } from "@/lib/pipeline";
 
 const MAX_COMPARE_ITEMS = 4;
 
@@ -104,6 +106,8 @@ type SavedAnalysisRow = {
   /** Workspace-scenario label (optional; ships with the properties/scenarios
    *  migration). Sibling scenarios share one address — this tells them apart. */
   scenario_name?: string | null;
+  pipeline_stage?: PipelineStage | null;
+  data_confidence?: unknown;
 };
 
 function isMissingColumnError(error: { code?: string; message?: string } | null): boolean {
@@ -253,6 +257,8 @@ function mapDeal(
     // trick above can't tell them apart — the scenario name rides separately.
     scenarioName:
       typeof row.scenario_name === "string" && row.scenario_name.trim() ? row.scenario_name.trim() : null,
+    pipelineStage: row.pipeline_stage ?? DEFAULT_PIPELINE_STAGE,
+    dataConfidence: normalizeDataConfidence(row.data_confidence) as DataConfidence | null,
     createdAt: row.created_at,
     propertyType: row.property_type,
     purchasePrice,
@@ -408,7 +414,18 @@ export default async function DashboardComparePage() {
       .eq("is_completed", false)
       .eq("is_archived", false)
       .in("id", ids);
-  let { data: rows, error } = await runCompareQuery(`${COMPARE_SELECT}, scenario_name`);
+  // Confidence + prior stage power trust badges and a genuine Undo. Both
+  // columns are additive migrations, so an older environment falls back to
+  // the stable core select instead of breaking comparison entirely.
+  let { data: rows, error } = await runCompareQuery(
+    `${COMPARE_SELECT}, scenario_name, pipeline_stage, data_confidence`
+  );
+  if (isMissingColumnError(error)) {
+    ({ data: rows, error } = await runCompareQuery(`${COMPARE_SELECT}, scenario_name, pipeline_stage`));
+  }
+  if (isMissingColumnError(error)) {
+    ({ data: rows, error } = await runCompareQuery(`${COMPARE_SELECT}, scenario_name`));
+  }
   if (isMissingColumnError(error)) {
     ({ data: rows, error } = await runCompareQuery(COMPARE_SELECT));
   }

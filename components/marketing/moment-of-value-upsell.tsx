@@ -140,7 +140,7 @@ export function MomentOfValueUpsell({
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest text-primary">
-              <Target className="size-3.5" /> Your Max Offer
+              <Target className="size-3.5" /> Interactive target solver
             </div>
             <div className="mt-1 flex items-center gap-2 text-2xl font-extrabold text-foreground">
               <Lock className="size-5 text-primary" aria-hidden /> Unlock
@@ -151,9 +151,9 @@ export function MomentOfValueUpsell({
           </span>
         </div>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-          What is the highest price you can pay and still hit your cash-flow,
-          cash-on-cash, cap-rate, or DSCR target? TrueCap solves it from the
-          assumptions you just reviewed.
+          Your result includes a fixed price ceiling for the displayed criteria.
+          Upgrade to change cash-flow, cash-on-cash, cap-rate, or DSCR targets
+          and re-solve the ceiling instantly.
         </p>
       </div>
 
@@ -205,7 +205,7 @@ export function MomentOfValueUpsell({
         >
           <Lock className="mt-0.5 size-4 shrink-0 text-primary" />
           <span className="flex-1 text-foreground">
-            <strong>Unlock Your Max Offer with {proOfferName}</strong> — set your Buy Box,
+            <strong>Tune your price ceiling with {proOfferName}</strong> — set your Buy Box,
             stress-test downside, compare opportunities, and act on the best ones.
           </span>
           <ArrowRight className="mt-0.5 size-4 shrink-0 text-primary transition-transform group-hover:translate-x-0.5" />

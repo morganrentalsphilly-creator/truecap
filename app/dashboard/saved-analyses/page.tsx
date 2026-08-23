@@ -33,7 +33,7 @@ import {
 import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
 import { computeRowEquity } from "@/lib/owned-equity-series";
 import { DEFAULT_PIPELINE_STAGE, isActiveStage, isPipelineStage } from "@/lib/pipeline";
-import { computeDealOfferLine, type DealOfferLine } from "@/lib/deal-offer-line";
+import { computeDealOfferLine, type DealOfferResult } from "@/lib/deal-offer-line";
 import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
 import { buyBoxHasCriteria, type NamedBuyBox } from "@/lib/buy-box";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
@@ -120,7 +120,7 @@ function offerLineForRow(
   row: SavedAnalysisRow,
   activeBuyBoxes: NamedBuyBox[],
   isShoppingStage: boolean
-): DealOfferLine | null {
+): Pick<DealOfferResult, "offer" | "basisLabel"> | null {
   // The deal's own client scopes which boxes may screen it (lib/buy-box
   // boxesForDealClient) — another buyer's criteria must never drive this
   // deal's number.
@@ -133,10 +133,11 @@ function offerLineForRow(
   // exactly the older deals a long-time user has most of.
   const values = normalizeInvestmentFormSnapshot(row.form_snapshot);
   if (!values) return null;
-  return computeDealOfferLine(values, activeBuyBoxes, {
+  const result = computeDealOfferLine(values, activeBuyBoxes, {
     isShoppingStage,
     dealClientId: row.client_id ?? null,
-  }).offer;
+  });
+  return { offer: result.offer, basisLabel: result.basisLabel };
 }
 
 function mapSavedRow(
@@ -178,6 +179,13 @@ function mapSavedRow(
   // null score → renders as a neutral row, data intact and clickable).
   const storedRecommendation = snapshot.recommendation ?? "Neutral";
   const storedRiskLevel = snapshot.riskLevel ?? "Medium Risk";
+  const offerResult = offerLineForRow(
+    row,
+    activeBuyBoxes,
+    !resolution.shouldFreeze && !row.is_completed && !row.is_archived && isActiveStage(
+      isPipelineStage(row.pipeline_stage) ? row.pipeline_stage : DEFAULT_PIPELINE_STAGE
+    )
+  );
 
   return {
     id: row.id,
@@ -230,13 +238,8 @@ function mapSavedRow(
     ownedEquity: resolution.shouldFreeze ? null : computeRowEquity(row),
     // Shopping stages only: an owned/closed/passed deal has no offer left to
     // make. Mirrors the same guard the deal workspace applies.
-    offerLine: offerLineForRow(
-      row,
-      activeBuyBoxes,
-      !resolution.shouldFreeze && !row.is_completed && !row.is_archived && isActiveStage(
-        isPipelineStage(row.pipeline_stage) ? row.pipeline_stage : DEFAULT_PIPELINE_STAGE
-      )
-    ),
+    offerLine: offerResult?.offer ?? null,
+    offerBasisLabel: offerResult?.basisLabel || null,
   };
 }
 

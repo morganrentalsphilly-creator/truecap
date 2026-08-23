@@ -38,6 +38,7 @@ const FOOTER_COLS: Array<{
       { label: "Free analyzer", href: "/" },
       { label: "Pricing", href: "/pricing" },
       { label: "Why TrueCap", href: "/why-truecap" },
+      { label: "Customer reviews", href: "/reviews" },
       // /methodology (every formula + data source) had zero inbound links
       // from the product itself before the Jul 2026 trust-polish audit —
       // it is the page a skeptical investor wants, so it stays.
@@ -64,6 +65,7 @@ const FOOTER_COLS: Array<{
     links: [
       { label: "All free tools", href: "/tools" },
       { label: "Blog", href: "/blog" },
+      { label: "Rental analysis playbook", href: "/playbook" },
       { label: "Rental markets", href: "/markets" },
       { label: "Investing by state", href: "/states" },
       // Glossary was reachable only from its own hub; surfacing it here

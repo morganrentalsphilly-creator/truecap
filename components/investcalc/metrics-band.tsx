@@ -246,6 +246,7 @@ export function getSecondaryMetricKeys(strategy: DealStrategy): string[] {
 export function buildMetricTiles({
   displayResult,
   result,
+  isScenarioActive = false,
   isLoading,
   address,
   propertyType,
@@ -254,6 +255,8 @@ export function buildMetricTiles({
 }: {
   displayResult: AnalysisResult | null;
   result: AnalysisResult | null;
+  /** Labels every tile by its source while a temporary what-if is active. */
+  isScenarioActive?: boolean;
   isLoading: boolean;
   address?: string | null;
   propertyType: "single-family" | "multi-family" | "owner-occupant";
@@ -262,11 +265,15 @@ export function buildMetricTiles({
 }): Record<string, ReactNode> {
   const jump = (key: string) =>
     onMetricSelect ? () => onMetricSelect(METRIC_JUMP_TARGETS[key] ?? "cash-flow") : undefined;
+  const sourcedLabel = (label: string, source: "scenario" | "base") =>
+    isScenarioActive
+      ? `${source === "scenario" ? "Scenario" : "Base"} ${label}`
+      : label;
   return {
     cashFlow: (
       <MetricCard
         key="cashFlow"
-        label="Monthly Cash Flow"
+        label={sourcedLabel("Monthly Cash Flow", "scenario")}
         glossaryTerm="cashFlow"
         value={displayResult ? (displayResult.netCashFlow >= 0 ? `+${fmt(displayResult.netCashFlow)}` : `-${fmt(displayResult.netCashFlow)}`) : "—"}
         sub={displayResult ? cashFlowSubLabel(displayResult) : undefined}
@@ -288,7 +295,7 @@ export function buildMetricTiles({
     coc: (
       <MetricCard
         key="coc"
-        label="CoC Return"
+        label={sourcedLabel("CoC Return", "scenario")}
         glossaryTerm="coc"
         value={displayResult ? `${displayResult.cocReturn >= 0 ? "+" : ""}${displayResult.cocReturn.toFixed(1)}%` : "—"}
         sub={displayResult ? cocBenchmarkLabel(displayResult.cocReturn) : undefined}
@@ -311,7 +318,7 @@ export function buildMetricTiles({
     capRate: (
       <MetricCard
         key="capRate"
-        label="Cap Rate"
+        label={sourcedLabel("Cap Rate", "scenario")}
         glossaryTerm="capRate"
         // No "+" prefix: cap rate is a ratio, not a signed delta — "+7.2%"
         // reads like a change vs baseline to a first-timer. Cash flow and
@@ -327,7 +334,7 @@ export function buildMetricTiles({
     dscr: (
       <MetricCard
         key="dscr"
-        label="DSCR"
+        label={sourcedLabel("DSCR", "scenario")}
         glossaryTerm="dscr"
         value={displayResult ? (displayResult.monthlyPayment <= 0 ? "—" : displayResult.dscr.toFixed(2)) : "—"}
         sub={
@@ -369,7 +376,7 @@ export function buildMetricTiles({
     return: (
       <MetricCard
         key="return"
-        label="10-Yr Return"
+        label={sourcedLabel("10-Yr Return", "base")}
         glossaryTerm="tenYearReturn"
         value={annualizedReturnPct != null ? `~${Math.round(annualizedReturnPct)}%/yr` : "—"}
         // Extreme annualized return (finding 5): the per-year figure stays
@@ -402,7 +409,7 @@ export function buildMetricTiles({
     afterTax: (
       <MetricCard
         key="afterTax"
-        label="After-Tax CF"
+        label={sourcedLabel("After-Tax CF", "base")}
         glossaryTerm="afterTaxCF"
         value={result ? `${result.afterTaxCF >= 0 ? "+" : "-"}${fmt(result.afterTaxCF)}` : "—"}
         sub="/mo"
@@ -416,7 +423,7 @@ export function buildMetricTiles({
     annualCf: (
       <MetricCard
         key="annualCf"
-        label="Annual CF"
+        label={sourcedLabel("Annual CF", "base")}
         glossaryTerm="cashFlow"
         value={result ? `${result.annualCashFlow >= 0 ? "+" : "-"}${fmt(result.annualCashFlow)}` : "—"}
         sub="/yr"
@@ -429,7 +436,7 @@ export function buildMetricTiles({
     taxSavings: (
       <MetricCard
         key="taxSavings"
-        label="Tax Savings"
+        label={sourcedLabel("Tax Savings", "base")}
         glossaryTerm="taxSavings"
         // Signed net tax effect since the after-tax formula fix — a healthy
         // deal can OWE tax, so the sign must survive fmt()'s Math.abs and
@@ -655,7 +662,7 @@ export function MetricsBand({
         <DealStrategyToggle strategy={strategy} onChange={onStrategyChange} />
       </div>
       <details className="group/lens px-1 md:hidden">
-        <summary className="flex min-h-8 cursor-pointer list-none items-center gap-1 text-[11px] font-semibold text-muted-foreground hover:text-foreground">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center gap-1 text-[11px] font-semibold text-muted-foreground hover:text-foreground">
           <ChevronRight
             aria-hidden
             className="size-3 shrink-0 transition-transform group-open/lens:rotate-90"

@@ -76,11 +76,11 @@ export default async function DashboardTriagePage() {
         isPremium={isPremium}
         canAccessDashboard={navAccess.dashboard}
       />
-      <div className="flex-1">
+      <main id="main" className="flex-1">
         {/* Auto-extract shows only when the AI key is present (graceful-absent,
             like Deal Q&A) — read server-side, passed to the client. */}
         <BatchTriageClient aiEnabled={Boolean(process.env.ANTHROPIC_API_KEY)} />
-      </div>
+      </main>
     </div>
   );
 }

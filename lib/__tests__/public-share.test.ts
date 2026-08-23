@@ -77,13 +77,12 @@ describe("the share-route privacy contract", () => {
     expect(portal).not.toContain("encodeShareLink");
   });
 
-  it("the share button prefers opaque shares and keeps the legacy fallback", () => {
+  it("new share links fail closed to opaque URLs", () => {
     const btn = read("components/investcalc/share-link-button.tsx");
     expect(btn).toContain("createPublicShareAction");
-    // The legacy path must remain until the migration is applied everywhere.
-    expect(btn).toContain("encodeShareLink");
-    // Opaque attempt must come first.
-    expect(btn.indexOf("createPublicShareAction(")).toBeLessThan(btn.indexOf("getSignedShareAttribution("));
+    expect(btn).not.toContain("encodeShareLink");
+    expect(btn).not.toContain("getSignedShareAttribution");
+    expect(btn).toContain("if (!opaque.ok) throw new Error(opaque.code)");
   });
 
   it("legacy /d/ keeps decoding (CLAUDE.md §8.8 — links in the wild)", () => {

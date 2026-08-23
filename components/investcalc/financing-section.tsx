@@ -1,6 +1,6 @@
 "use client";
 
-import { UseFormReturn } from "react-hook-form";
+import { Controller, UseFormReturn } from "react-hook-form";
 import { DollarSign, Percent } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +11,7 @@ import { GlossaryTip } from "@/components/investcalc/glossary-tip";
 import { FinancingProfileSelector } from "@/components/investcalc/financing-profile-selector";
 import { isFeatureEnabled } from "@/lib/feature-flags";
 import type { FinancingProfileSnapshot } from "@/lib/financing-profiles";
+import { CurrencyInput } from "@/components/ui/currency-input";
 
 interface FinancingSectionProps {
   form: UseFormReturn<InvestmentFormValues>;
@@ -25,6 +26,7 @@ export function FinancingSection({
 }: FinancingSectionProps) {
   const {
     register,
+    control,
     formState: { errors },
   } = form;
 
@@ -73,6 +75,8 @@ export function FinancingSection({
               type="number"
               inputMode="decimal"
               step="0.01"
+              min={0}
+              max={100}
               placeholder="20"
               aria-invalid={!!errors.downPaymentPct}
               aria-describedby={errors.downPaymentPct ? "downPaymentPct-error" : undefined}
@@ -102,6 +106,8 @@ export function FinancingSection({
               type="number"
               inputMode="decimal"
               step="0.01"
+              min={0}
+              max={30}
               placeholder="6.75"
               aria-invalid={!!errors.interestRate}
               aria-describedby={errors.interestRate ? "interestRate-error" : undefined}
@@ -123,7 +129,10 @@ export function FinancingSection({
             {...register("loanTermYears", { valueAsNumber: true })}
             id="loanTermYears"
             type="number"
-            inputMode="decimal"
+            inputMode="numeric"
+            step={1}
+            min={1}
+            max={50}
             placeholder="30"
             aria-invalid={!!errors.loanTermYears}
             aria-describedby={errors.loanTermYears ? "loanTermYears-error" : undefined}
@@ -172,19 +181,28 @@ export function FinancingSection({
           </Label>
           <div className="relative">
             <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              {...register("rehabBudget", { setValueAs: optionalNumberSetValueAs })}
-              id="rehabBudget"
-              type="number"
-              inputMode="decimal"
-              step="100"
-              min={0}
-              placeholder="0"
-              aria-invalid={!!errors.rehabBudget}
-              aria-describedby={errors.rehabBudget ? "rehabBudget-error" : undefined}
-              className={cn(
-                "pl-8 border-[var(--brand-green)]/30 bg-background focus-visible:ring-[var(--brand-green)]/30",
-                errors.rehabBudget && "border-destructive"
+            <Controller
+              name="rehabBudget"
+              control={control}
+              render={({ field }) => (
+                <CurrencyInput
+                  id="rehabBudget"
+                  name={field.name}
+                  ref={field.ref}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  onBlur={field.onBlur}
+                  step={100}
+                  min={0}
+                  max={1_000_000}
+                  placeholder="0"
+                  aria-invalid={!!errors.rehabBudget}
+                  aria-describedby={errors.rehabBudget ? "rehabBudget-error" : undefined}
+                  className={cn(
+                    "pl-8 border-[var(--brand-green)]/30 bg-background focus-visible:ring-[var(--brand-green)]/30",
+                    errors.rehabBudget && "border-destructive"
+                  )}
+                />
               )}
             />
           </div>

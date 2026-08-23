@@ -20,8 +20,9 @@
   --accent-foreground: oklch(0.3 0.04 255);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(0.89 0.01 240);
-  --input: oklch(0.93 0.01 240);
+  /* 3.22:1 against white so input/card boundaries remain perceivable. */
+  --border: oklch(0.65 0.02 240);
+  --input: oklch(0.65 0.02 240);
   --ring: oklch(0.52 0.18 240);
   --chart-1: oklch(0.52 0.18 240);
   --chart-2: oklch(0.6 0.16 155);
@@ -47,7 +48,8 @@
   --brand-blue-text: oklch(0.49 0.18 240);
   --brand-green: oklch(0.50 0.15 155);
   --brand-green-light: oklch(0.95 0.04 155);
-  --brand-orange: oklch(0.65 0.18 42);
+  /* One AA-safe orange: 4.63:1 against white for both text and badges. */
+  --brand-orange: oklch(0.58 0.18 42);
   --brand-orange-light: oklch(0.96 0.04 42);
   /* The display orange is intentionally bright, but it cannot carry small
      text. These two narrowly scoped variants clear WCAG AA: orange text on
@@ -212,6 +214,19 @@ textarea,
   button, [role='button'], input, select, textarea {
     touch-action: manipulation;
   }
+  /* WCAG 2.1 AA interaction baseline. Component variants can be visually
+     compact, but the actual button hit area never drops below 44×44. */
+  button {
+    min-inline-size: 2.75rem !important;
+    min-block-size: 2.75rem !important;
+  }
+  :where(input:not([type='checkbox']):not([type='radio']):not([type='hidden']), select, textarea) {
+    min-block-size: 2.75rem;
+  }
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
+  }
   /* The homepage's mobile StickyCalculateBar and the StickyConversionBar are
      both fixed bottom-0. PRIORITY: the product bar wins — while the user is
      inside the calculator form (the calc bar publishes data-calc-bar on <html>
@@ -303,6 +318,24 @@ textarea,
   .whatif-range:focus-visible::-moz-range-thumb {
     outline: 2px solid var(--primary);
     outline-offset: 2px;
+  }
+  /* Keep the visual rail slim while making the native range input itself a
+     full 44px-high hit target. A 44px wrapper alone does not enlarge the
+     input's interactive box, so the previous 8px element still failed touch
+     target inspection even though it looked generously spaced. */
+  .whatif-range {
+    height: 44px !important;
+    background: transparent !important;
+  }
+  .whatif-range::-webkit-slider-runnable-track {
+    height: 8px;
+    border-radius: 9999px;
+    background: var(--muted);
+  }
+  .whatif-range::-moz-range-track {
+    height: 8px;
+    border-radius: 9999px;
+    background: var(--muted);
   }
 }
 
@@ -460,6 +493,14 @@ textarea,
   transform: translateX(-100%);
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
   animation: tc-shimmer 1.6s ease-in-out infinite;
+}
+
+/* A completed analysis becomes a focused product workspace. The calculator
+   owns the body flag; server-rendered marketing remains in the document for
+   the normal landing state but cannot trail thousands of pixels below results. */
+body[data-truecap-results-mode="true"] .truecap-marketing-shell,
+body[data-truecap-results-mode="true"] .truecap-marketing-tail {
+  display: none !important;
 }
 
 @media (prefers-reduced-motion: no-preference) {

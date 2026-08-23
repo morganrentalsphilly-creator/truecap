@@ -45,15 +45,18 @@ type Props = {
    * can't kick off two parallel auth flows.
    */
   disabled?: boolean;
+  /** Runs synchronously before leaving for OAuth (e.g. persist save intent). */
+  onBeforeStart?: () => void;
 };
 
-export function GoogleAuthButton({ label = "Continue with Google", disabled = false }: Props) {
+export function GoogleAuthButton({ label = "Continue with Google", disabled = false, onBeforeStart }: Props) {
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const [isPending, setIsPending] = useState(false);
 
   async function handleClick() {
     if (isPending || disabled) return;
+    onBeforeStart?.();
     setIsPending(true);
 
     // Preserve any ?next= param the user arrived with so post-auth they

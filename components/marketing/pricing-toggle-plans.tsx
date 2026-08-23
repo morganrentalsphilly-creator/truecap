@@ -15,7 +15,8 @@
  */
 
 import { useEffect, useRef, useState } from "react";
-import { Check, Sparkles, X } from "lucide-react";
+import { Check, Sparkles } from "lucide-react";
+import Link from "next/link";
 import { PricingPlanButtons } from "@/components/marketing/pricing-plan-buttons";
 import { GuaranteeBadge } from "@/components/marketing/guarantee-badge";
 import { trackEvent } from "@/lib/analytics";
@@ -43,6 +44,8 @@ interface PricingTogglePlansProps {
    * false for anonymous visitors.
    */
   hadPriorSubscription: boolean;
+  /** An unpaid/paused Stripe subscription must be repaired, not duplicated. */
+  billingRecoveryRequired?: boolean;
   /**
    * Agent Pro is configured (env + plan rows). Distinct from "its price
    * resolved this request" — a transient Stripe failure must not delete a live
@@ -51,40 +54,20 @@ interface PricingTogglePlansProps {
   agentProConfigured?: boolean;
   /** Marketing-only Pro name experiment; billing slots stay unchanged. */
   proOfferName?: string;
-  /** Server truth from RATE_ALERTS_MODE. Dormant alert infrastructure must
-   * never appear in the list of benefits a visitor is buying today. */
-  rateAlertsLive?: boolean;
 }
 
-const FREE_FEATURES: { label: string; included: boolean }[] = [
-  { label: "Unlimited cash-flow analyses", included: true },
-  { label: "Cap rate, CoC, DSCR, monthly cash flow", included: true },
-  { label: "Auto-fill rent benchmark + owner-occupied rate benchmark + tax estimate", included: true },
-  // The personalization wedge, free tier: the strategy lens tunes the
-  // verdict/score to the investor's play, and saved defaults pre-fill every
-  // new deal. Both are free (signed-in) — claimed here, inherited by Pro
-  // via "Everything in Free". The buy-box Personal Verdict is Pro-only, so
-  // it rides in the strikethrough group below.
-  { label: "Plain-English verdict — read through your strategy lens", included: true },
-  { label: "Your saved defaults on every new deal", included: true },
-  { label: "Deal Score (0-100) with breakdown", included: true },
-  { label: "1 free sale + rent comps lookup", included: true },
-  // Honest caveat: the runtime lets Free CREATE up to 5 deals but Pro-gates
-  // UPDATING a saved deal (app/actions/saved-analyses.ts update path). Don't
-  // drop the parenthetical without changing that gate — the bare bullet
-  // promised editing the product doesn't deliver.
-  { label: "Save up to 5 deals (editing saved deals is Pro)", included: true },
-  { label: "MAO solver", included: false },
-  { label: "Sensitivity grid", included: false },
-  { label: "Strategies (BRRRR + flip + rehab)", included: false },
-  { label: "Shareable read-only deal links", included: true },
-  { label: "Personal Verdict — pass/fail against your buy box", included: false },
-  { label: "10-year projections", included: false },
-  { label: "Illustrative tax impact", included: false },
-  { label: "Modeled exit comparisons", included: false },
-  { label: "Compare deals", included: false },
-  { label: "Custom PDF branding (logo, color, contact)", included: false },
-];
+// Plan cards summarize the outcome; the single comparison table below carries
+// the exhaustive inventory. Keeping one detailed feature list prevents users
+// from reconciling the same twenty claims in three different places.
+const FREE_FEATURES = [
+  "Unlimited cash-flow analyses",
+  "Cap rate, CoC, DSCR, cash flow, Deal Score, and verdict",
+  "Auto-fill starting assumptions from the address",
+  "Shareable read-only deal links",
+  // Honest caveat: Free can create five saves, while editing a saved deal is
+  // currently Pro-gated.
+  "Save up to 5 deals (editing saved deals is Pro)",
+] as const;
 
 /**
  * Derived from the entitlement catalog — the labels of exactly the features
@@ -92,7 +75,6 @@ const FREE_FEATURES: { label: string; included: boolean }[] = [
  * historically drifted from the gates (see lib/entitlements-catalog.ts).
  */
 const AGENT_PRO_FEATURES: string[] = [
-  "Everything in Pro, plus —",
   ...featuresForTier("agent_pro")
     .filter((f) => !f.tiers.includes("pro"))
     // Don't advertise an entitlement that is not marketable yet. This covers
@@ -114,42 +96,22 @@ const AGENT_PRO_FEATURES: string[] = [
  * Every item still names a real, shipped capability — the grouping changed,
  * not the claims.
  */
-const PRO_OUTCOMES: { outcome: string; items: string[] }[] = [
+const PRO_OUTCOMES: { outcome: string; detail: string }[] = [
   {
     outcome: "Find the right price",
-    items: [
-      "MAO solver — reverse-solve your max offer",
-      "Sale + rent comps from the address (50/mo)",
-      "Sensitivity grid — stress-test the deal",
-      "Personal Verdict — pass/fail against YOUR buy box on every deal",
-    ],
+    detail: "Reverse-solve a target-backed price ceiling, then check it against your Buy Box and market comps.",
   },
   {
-    outcome: "Underwrite deeper",
-    items: [
-      "10-year cash flow + equity projection",
-      "Illustrative tax impact: depreciation + interest modeling",
-      "Modeled exit comparison: highest profit under your assumptions",
-      "Strategies — BRRRR, fix-and-flip, rehab estimator",
-    ],
+    outcome: "See what could break",
+    detail: "Stress rent, vacancy, rate, and price; then inspect the downside, tax, and exit cases.",
   },
   {
-    outcome: "Save your work",
-    items: [
-      "Save unlimited deals · compare up to 4",
-      "Deal pipeline + tags (lightweight CRM)",
-      "Saved analysis templates",
-      "Due-diligence checklist + document vault",
-      "Rate-drop alerts on your saved deals",
-    ],
+    outcome: "Run a repeatable workflow",
+    detail: "Save unlimited deals, compare the best four, and carry each one through due diligence.",
   },
   {
-    outcome: "Share the deal",
-    items: [
-      "Lender · partner · personal PDF reports that can include saved comps",
-      "Custom PDF branding — your logo, color, contact",
-      "Co-branded share links with lead capture",
-    ],
+    outcome: "Present the decision",
+    detail: "Send a lender-ready report or co-branded share page with the assumptions and risks intact.",
   },
 ];
 
@@ -175,11 +137,11 @@ export function PricingTogglePlans({
   isAuthenticated,
   activePaidPlanSlug,
   hadPriorSubscription,
+  billingRecoveryRequired = false,
   agentProConfigured = false,
   proOfferName = "TrueCap Pro",
-  rateAlertsLive = false,
 }: PricingTogglePlansProps) {
-  const isPaid = activePaidPlanSlug != null;
+  const isPaid = activePaidPlanSlug != null || billingRecoveryRequired;
   // An explicit trial promise requires BOTH authenticated identity and a clean
   // subscription-history check. Anonymous visitors may be signed-out returning
   // customers, so their copy stays conditional until signup confirms identity.
@@ -283,31 +245,27 @@ export function PricingTogglePlans({
       {/* The upgrade logic in one line, before the cards. Without it a visitor
           has to infer the difference between the tiers from the feature lists;
           with it, the cards below are just the detail. */}
-      {/* Strip order mirrors the desktop card anchoring below: the highest
-          tier reads first so the Pro price is judged against Agent Pro, not
-          against $0. */}
+      {/* Keep the same Free → Pro → Agent order in the summary and cards. */}
       <div className="mb-5 grid gap-2 rounded-2xl border border-border bg-muted/30 p-4 sm:grid-cols-3 sm:gap-4">
+        <p className="text-sm">
+          <span className="font-bold text-foreground">Free</span>{" "}
+          <span className="text-muted-foreground">— screen deals</span>
+        </p>
+        <p className="text-sm">
+          <span className="font-bold text-foreground">{proOfferName}</span>{" "}
+          <span className="text-muted-foreground">— underwrite and make offers</span>
+        </p>
         {showAgentPro ? (
           <p className="text-sm">
             <span className="font-bold text-foreground">Agent Pro</span>{" "}
             <span className="text-muted-foreground">— underwrite for your clients</span>
           </p>
         ) : null}
-        <p className="text-sm">
-          <span className="font-bold text-foreground">{proOfferName}</span>{" "}
-          <span className="text-muted-foreground">— underwrite and make offers</span>
-        </p>
-        <p className="text-sm">
-          <span className="font-bold text-foreground">Free</span>{" "}
-          <span className="text-muted-foreground">— screen deals</span>
-        </p>
       </div>
       <div className={showAgentPro ? "grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5" : "grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-5"}>
-        {/* FREE — last everywhere (2026-08 anchoring: Agent Pro → Pro → Free,
-            so the Pro price is read against the tier above it, not against
-            $0). On narrow screens a high-intent visitor still sees the paid
-            offer first. */}
-        <div className={`relative order-3 rounded-3xl border border-border bg-card p-6 shadow-sm ${showAgentPro ? "lg:order-3" : "lg:order-2"}`}>
+        {/* Keep the same Free → Pro → Agent order at every viewport so the
+            comparison never changes meaning as the layout wraps. */}
+        <div className="relative rounded-3xl border border-border bg-card p-6 shadow-sm">
           <div className="flex items-baseline justify-between">
             <h3 className="text-lg font-extrabold text-foreground">Free</h3>
             {/* "Current" only means something for a signed-in free user.
@@ -335,40 +293,20 @@ export function PricingTogglePlans({
             />
           </div>
           <ul className="mt-6 space-y-2.5">
-            {FREE_FEATURES.map((f) => (
-              <li key={f.label} className="flex items-start gap-2 text-sm">
-                {/* sr-only prefix: without it, screen readers and
-                    crawlers read the struck-through Pro items as if
-                    they were included in Free — the icons + line-
-                    through are visual-only signals. */}
-                {f.included ? (
-                  <>
-                    <Check aria-hidden className="mt-0.5 size-4 shrink-0 text-[var(--metric-positive)]" />
-                    <span className="sr-only">Included:</span>
-                  </>
-                ) : (
-                  <>
-                    <X aria-hidden className="mt-0.5 size-4 shrink-0 text-muted-foreground/40" />
-                    <span className="sr-only">Not included (Pro only):</span>
-                  </>
-                )}
-                <span
-                  className={
-                    f.included
-                      ? "text-foreground"
-                      : "text-muted-foreground/60 line-through"
-                  }
-                >
-                  {f.label}
+            {FREE_FEATURES.map((feature) => (
+              <li key={feature} className="flex items-start gap-2 text-sm">
+                <Check aria-hidden className="mt-0.5 size-4 shrink-0 text-[var(--metric-positive)]" />
+                <span className="sr-only">Included:</span>
+                <span className="text-foreground">
+                  {feature}
                 </span>
               </li>
             ))}
           </ul>
         </div>
 
-        {/* PRO (with toggle) — mobile-first, center column on desktop when
-            Agent Pro anchors the left, left column otherwise. */}
-        <div className={`relative order-1 -mt-2 rounded-3xl border-2 border-primary bg-card p-6 shadow-[0_24px_70px_rgba(0,112,196,0.18)] lg:scale-[1.03] ${showAgentPro ? "lg:order-2" : "lg:order-1"}`}>
+        {/* PRO (with toggle) */}
+        <div className="relative -mt-2 rounded-3xl border-2 border-primary bg-card p-6 shadow-[0_24px_70px_rgba(0,112,196,0.18)] lg:scale-[1.03]">
           {/* Savings badge — prefer the dollar-amount savings when
               available because concrete numbers convert better than
               percentages. Falls back to "X months free" or % savings. */}
@@ -397,7 +335,11 @@ export function PricingTogglePlans({
               <span className="rounded-full bg-[var(--metric-positive)]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[var(--metric-positive)]">
                 Current
               </span>
-            ) : null}
+            ) : (
+              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-primary">
+                Recommended
+              </span>
+            )}
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
             Turn every address into a defensible acquisition decision.
@@ -452,9 +394,11 @@ export function PricingTogglePlans({
           <div className="mt-1 text-xs text-muted-foreground">{proCard.subline}</div>
           <div className="mt-3 flex justify-center">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--metric-positive)]/12 px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-[var(--metric-positive)]">
-              <Sparkles className="size-3" />{
-                verifiedTrialEligible
-                  ? `Full Pro · ${TRIAL_DAYS} days free`
+               <Sparkles className="size-3" />{
+                 billingRecoveryRequired
+                   ? "Billing attention needed"
+                   : verifiedTrialEligible
+                   ? `Full Pro · ${TRIAL_DAYS} days free`
                   : !isAuthenticated
                     ? `Full Pro · ${TRIAL_DAYS}-day trial for new subscribers`
                     : "Full Pro access"
@@ -474,14 +418,23 @@ export function PricingTogglePlans({
                 </div>
               ))}
             </div>
-          </div>
-          <div className="mt-5">
-            <PricingPlanButtons
-              slot={proCard.slot}
-              isAuthenticated={isAuthenticated}
-              activePaidPlanSlug={activePaidPlanSlug}
-              hadPriorSubscription={hadPriorSubscription}
-            />
+           </div>
+           <div className="mt-5">
+             {billingRecoveryRequired ? (
+               <Link
+                 href="/profile#billing"
+                 className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-center text-sm font-bold text-primary-foreground transition hover:bg-primary/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+               >
+                 Manage billing to reactivate
+               </Link>
+             ) : (
+               <PricingPlanButtons
+                 slot={proCard.slot}
+                 isAuthenticated={isAuthenticated}
+                 activePaidPlanSlug={activePaidPlanSlug}
+                 hadPriorSubscription={hadPriorSubscription}
+               />
+             )}
           </div>
           {!isPaid ? (
             <PricingTrialTerms
@@ -489,26 +442,14 @@ export function PricingTogglePlans({
               verifiedTrialEligible={verifiedTrialEligible}
             />
           ) : null}
-          <p className="mt-6 text-sm font-semibold text-foreground">Everything in Free, plus —</p>
-          <div className="mt-3 space-y-4">
-            {PRO_OUTCOMES.map((group) => ({
-              ...group,
-              items: group.items.filter(
-                (item) => rateAlertsLive || !item.startsWith("Rate-drop alerts")
-              ),
-            })).map((group) => (
-              <div key={group.outcome}>
-                <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
+          <p className="mt-6 text-sm font-semibold text-foreground">Everything in Free, plus four outcomes —</p>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+            {PRO_OUTCOMES.map((group) => (
+              <div key={group.outcome} className="rounded-xl border border-border bg-muted/25 p-3">
+                <p className="text-xs font-bold text-primary">
                   {group.outcome}
                 </p>
-                <ul className="mt-1.5 space-y-1.5">
-                  {group.items.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm">
-                      <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" />
-                      <span className="text-foreground">{f}</span>
-                    </li>
-                  ))}
-                </ul>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{group.detail}</p>
               </div>
             ))}
           </div>
@@ -519,8 +460,8 @@ export function PricingTogglePlans({
             "Everything in Pro" + exactly the agent_pro-only feature labels,
             so this card can never promise something the tier doesn't gate. */}
         {showAgentPro ? (
-          <div className="relative order-2 rounded-3xl border border-border bg-card p-6 shadow-sm lg:order-1">
-            <div className="flex items-start justify-between gap-3">
+          <div className="relative rounded-3xl border border-border bg-card p-6 shadow-sm">
+            <div className="flex items-baseline justify-between">
               <h3 className="text-lg font-extrabold text-foreground">Agent Pro</h3>
               <div className="flex flex-wrap justify-end gap-1.5">
                 {agentCardDecision.kind === "current" ? (
@@ -534,7 +475,7 @@ export function PricingTogglePlans({
               </div>
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
-              Run every client&rsquo;s buy box. Send co-branded deals that come back to you.
+              Give every buyer their own criteria, screen the right deals for them, and keep each client&rsquo;s shortlist organized.
             </p>
             <div className="mt-5 flex items-baseline gap-1.5">
               <span className="font-mono text-4xl font-extrabold tabular-nums tracking-tight text-foreground sm:text-5xl">
@@ -545,22 +486,33 @@ export function PricingTogglePlans({
             <div className="mt-1 text-xs text-muted-foreground">{agentCard.subline}</div>
             <div className="mt-3 flex justify-center">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-primary">
-                <Sparkles className="size-3" />{
-                  verifiedTrialEligible
-                    ? `Agent Pro · ${TRIAL_DAYS} days free`
+                 <Sparkles className="size-3" />{
+                   billingRecoveryRequired
+                     ? "Billing attention needed"
+                     : verifiedTrialEligible
+                     ? `Agent Pro · ${TRIAL_DAYS} days free`
                     : !isAuthenticated
                       ? `${TRIAL_DAYS}-day trial for new subscribers`
                       : "Agent Pro access"
                 }
               </span>
-            </div>
-            <div className="mt-5">
-              <PricingPlanButtons
-                slot={agentCard.slot}
-                isAuthenticated={isAuthenticated}
-                activePaidPlanSlug={activePaidPlanSlug}
-                hadPriorSubscription={hadPriorSubscription}
-              />
+             </div>
+             <div className="mt-5">
+               {billingRecoveryRequired ? (
+                 <Link
+                   href="/profile#billing"
+                   className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-center text-sm font-bold text-primary-foreground transition hover:bg-primary/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                 >
+                   Manage billing to reactivate
+                 </Link>
+               ) : (
+                 <PricingPlanButtons
+                   slot={agentCard.slot}
+                   isAuthenticated={isAuthenticated}
+                   activePaidPlanSlug={activePaidPlanSlug}
+                   hadPriorSubscription={hadPriorSubscription}
+                 />
+               )}
             </div>
             {!isPaid ? (
               <PricingTrialTerms
@@ -568,14 +520,17 @@ export function PricingTogglePlans({
                 verifiedTrialEligible={verifiedTrialEligible}
               />
             ) : null}
-            <ul className="mt-6 space-y-2.5">
-              {AGENT_PRO_FEATURES.map((f) => (
-                <li key={f} className="flex items-start gap-2 text-sm">
-                  <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" />
-                  <span className="text-foreground">{f}</span>
-                </li>
-              ))}
-            </ul>
+            <div className="mt-6 rounded-2xl border border-primary/15 bg-primary/[0.04] p-4">
+              <p className="text-xs font-extrabold uppercase tracking-widest text-primary">What changes for your workflow</p>
+              <ul className="mt-3 space-y-2.5">
+                {AGENT_PRO_FEATURES.map((f) => (
+                  <li key={f} className="flex items-start gap-2 text-sm">
+                    <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" />
+                    <span className="text-foreground">{f}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         ) : null}
       </div>
@@ -621,8 +576,8 @@ function PricingTrialTerms({
   return (
     <>
       <p className="mt-2.5 text-center text-xs text-muted-foreground">
-        <strong className="text-foreground">Paid access starts immediately.</strong> The free trial
-        is a first-time offer. Cancel online anytime; no contract. Your saved work stays in your
+        <strong className="text-foreground">Paid access starts immediately.</strong>{" "}
+        <span>The free trial is a first-time offer.</span> Cancel online anytime; no contract. Your saved work stays in your
         account if you downgrade.
       </p>
       <GuaranteeBadge className="mt-2.5" />

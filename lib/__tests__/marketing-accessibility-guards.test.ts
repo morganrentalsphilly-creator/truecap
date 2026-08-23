@@ -110,11 +110,12 @@ describe("marketing landmarks and mobile targets", () => {
     );
   });
 
-  it("keeps centralized primary inputs and buttons at least 44px tall on mobile", () => {
+  it("keeps centralized primary inputs and buttons at least 44px tall", () => {
     const input = read("components/ui/input.tsx");
-    expect(input).toMatch(/border-input h-11 .* md:h-9 md:text-sm/);
+    expect(input).toMatch(/border-input h-9 min-h-11 /);
 
     const button = read("components/ui/button.tsx");
+    expect(button).toContain("inline-flex min-h-11 min-w-11");
     expect(button).toContain("default: 'h-11 px-4 py-2 has-[>svg]:px-3 md:h-9'");
     expect(button).toContain("lg: 'h-11 rounded-md px-6 has-[>svg]:px-4 md:h-10'");
 

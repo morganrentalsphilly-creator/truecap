@@ -45,6 +45,10 @@ type Props = {
    * exactly as it did before this prop existed.
    */
   livePreview?: LivePreviewSnapshot | null;
+  /** Role/property-aware label shared with the in-form primary action. */
+  ctaLabel?: string;
+  /** When supplied, the no-property action loads the shared sample. */
+  onTrySample?: () => void;
 };
 
 export function StickyCalculateBar({
@@ -52,6 +56,8 @@ export function StickyCalculateBar({
   hasResults = false,
   contextLabel,
   livePreview = null,
+  ctaLabel = "Run analysis",
+  onTrySample,
 }: Props) {
   const [pastFold, setPastFold] = useState(false);
   const [formInView, setFormInView] = useState(true);
@@ -269,18 +275,20 @@ export function StickyCalculateBar({
             />
           </button>
           <button
-            type="submit"
+            type={onTrySample ? "button" : "submit"}
+            onClick={onTrySample}
             disabled={isCalculating}
             className="flex h-12 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground shadow-md hover:bg-primary/95 disabled:opacity-70"
           >
             <Calculator className="size-4" />
-            Run
+            {onTrySample ? "Try sample" : "Run"}
             <ArrowUpRight className="size-4" />
           </button>
         </div>
       ) : (
         <button
-          type="submit"
+          type={onTrySample ? "button" : "submit"}
+          onClick={onTrySample}
           disabled={isCalculating}
           className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-bold text-primary-foreground shadow-md hover:bg-primary/95 disabled:opacity-70"
         >
@@ -292,7 +300,7 @@ export function StickyCalculateBar({
           ) : (
             <>
               <Calculator className="size-4" />
-              Run analysis
+              {ctaLabel}
               <ArrowUpRight className="size-4" />
             </>
           )}

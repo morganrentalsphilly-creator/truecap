@@ -34,8 +34,12 @@ import {
 } from "@/lib/buy-box";
 import { BuyBoxFitBadge } from "@/components/investcalc/buy-box-fit-badge";
 import { RiskReturn, type RiskReturnDeal } from "@/components/dashboard/RiskReturn";
+import { DataConfidenceBadge } from "@/components/investcalc/data-confidence-badge";
 import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 import type { DealAssumptions } from "@/lib/compare-assumptions";
+import type { DataConfidence } from "@/lib/data-confidence";
+import type { PipelineStage } from "@/lib/pipeline";
 import { formatRoiHeadline } from "@/lib/extreme-value-format";
 import type { CompareSnapshotV1 } from "@/lib/compare-result-snapshot";
 import {
@@ -97,6 +101,10 @@ export type CompareDealViewModel = {
   /** Workspace-scenario label (DM-1). Sibling scenarios share one address, so
    *  compare labels suffix this to stay tellable apart. */
   scenarioName?: string | null;
+  /** Current stage before any bulk Pass action; retained so Undo restores the
+   *  exact workflow state instead of guessing at "Analyzing". */
+  pipelineStage?: PipelineStage;
+  dataConfidence?: DataConfidence | null;
   createdAt: string | null;
   propertyType: PropertyType | null;
   purchasePrice: number | null;
@@ -641,6 +649,41 @@ function WinnerActions({
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [isPassing, startPassing] = useTransition();
 
+  const undoPassedDeals = async (
+    passed: Array<{ deal: CompareDealViewModel; previousStage: PipelineStage }>
+  ) => {
+    try {
+      const results = await Promise.all(
+        passed.map(async (entry) => ({
+          entry,
+          result: await updateSavedDealStageAction(entry.deal.id, entry.previousStage),
+        }))
+      );
+      const failures = results.filter(({ result }) => !result.ok);
+      const restoredCount = results.length - failures.length;
+      toast({
+        title:
+          failures.length === 0
+            ? `Restored ${restoredCount} deal${restoredCount === 1 ? "" : "s"}`
+            : `Restored ${restoredCount} of ${results.length} deals`,
+        description:
+          failures.length === 0
+            ? "Each deal is back in its previous pipeline stage."
+            : "One or more deals could not be restored. Open My Deals to review their stages.",
+        variant: failures.length === 0 ? "success" : "destructive",
+      });
+      router.refresh();
+    } catch (err) {
+      Sentry.captureException(err, { tags: { feature: "compare-undo-pass" } });
+      toast({
+        title: "Could not undo Passed deals",
+        description: "Check your connection and try again from My Deals.",
+        variant: "destructive",
+      });
+      router.refresh();
+    }
+  };
+
   const markOthersPassed = () => {
     setConfirmOpen(false);
     startPassing(async () => {
@@ -652,19 +695,35 @@ function WinnerActions({
           }))
         );
         const failures = results.filter(({ result }) => !result.ok);
+        const passed = results
+          .filter(({ result }) => result.ok)
+          .map(({ deal }) => ({
+            deal,
+            previousStage: deal.pipelineStage ?? ("analyzing" as const),
+          }));
         const passedCount = results.length - failures.length;
         if (passedCount > 0) {
           toast({
             title: `Marked ${passedCount} deal${passedCount === 1 ? "" : "s"} as Passed`,
-            description: "They leave this comparison — find them under Passed in My Deals.",
-            variant: "success",
+            description:
+              failures.length === 0
+                ? "They moved to Passed. Undo restores each deal’s previous stage."
+                : `${failures.length} deal${failures.length === 1 ? "" : "s"} could not be moved.`,
+            variant: failures.length === 0 ? "success" : "destructive",
+            action: (
+              <ToastAction
+                altText="Undo marking deals as Passed"
+                onClick={() => void undoPassedDeals(passed)}
+              >
+                Undo
+              </ToastAction>
+            ),
           });
         }
-        for (const { deal, result } of failures) {
-          if (result.ok) continue;
+        if (passedCount === 0) {
           toast({
-            title: `Could not mark ${getShortAddress(deal.address)} as Passed`,
-            description: result.message,
+            title: "Could not mark deals as Passed",
+            description: failures[0]?.result.ok === false ? failures[0].result.message : "Try again in a moment.",
             variant: "destructive",
           });
         }
@@ -1105,12 +1164,14 @@ function CompareMobileHighlights({
           ) : null}
           <div className="mt-4 grid grid-cols-2 gap-2">
             <div className="rounded-2xl bg-muted/40 p-3">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Short Score</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Near-term score</p>
               <p className="mt-1 text-lg font-extrabold text-foreground">{shortTermHighlightedWinCounts.get(bestDeal.id) ?? 0}</p>
+              <p className="mt-1 text-[10px] leading-snug text-muted-foreground">Wins across cash flow, DSCR, cap rate, and cash required.</p>
             </div>
             <div className="rounded-2xl bg-muted/40 p-3">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Long Score</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Long-term score</p>
               <p className="mt-1 text-lg font-extrabold text-foreground">{longTermHighlightedWinCounts.get(bestDeal.id) ?? 0}</p>
+              <p className="mt-1 text-[10px] leading-snug text-muted-foreground">Wins across 10-year cash flow, equity, profit, and return.</p>
             </div>
           </div>
           <WinnerActions winner={bestDeal} others={otherDeals} canUsePipeline={canUsePipeline} />
@@ -1348,6 +1409,7 @@ export function CompareDealsClient({
                               {getDealLabel(deal, { short: true })}
                             </span>
                             <BuyBoxFitBadge fit={entry?.fit} />
+                            <DataConfidenceBadge confidence={deal.dataConfidence} size="xs" propertyType={deal.propertyType} />
                           </div>
                           {entry?.personalLine ? (
                             <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
@@ -1525,6 +1587,7 @@ export function CompareDealsClient({
                   ) : null}
                   <p className="mt-6 text-sm font-semibold text-muted-foreground">{formatCurrency(deal.purchasePrice)}</p>
                   <div className="mt-4 flex flex-wrap items-center gap-2">
+                    <DataConfidenceBadge confidence={deal.dataConfidence} size="xs" propertyType={deal.propertyType} />
                     {deal.scoringComplete && deal.signal ? (
                       <Badge
                         className={cn("rounded-full border px-2.5 py-1 text-xs font-bold", getBadgeClasses(deal.signal))}
@@ -1615,7 +1678,7 @@ export function CompareDealsClient({
                       )}
                     >
                       <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
-                        Short-Term
+                        Near-term score
                       </p>
                       <p
                         className={cn(
@@ -1638,7 +1701,7 @@ export function CompareDealsClient({
                       )}
                     >
                       <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
-                        Long-Term
+                        Long-term score
                       </p>
                       <p
                         className={cn(
