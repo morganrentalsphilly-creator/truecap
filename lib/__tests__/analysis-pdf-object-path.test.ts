@@ -25,6 +25,7 @@ import {
 const OWNER = "5deb3957-957c-480d-b793-bcd0618ef1f6";
 const OTHER = "fe357995-65bd-490e-8576-7c4f5c9ef382";
 const DEAL = "06e8d13c-5eb5-46a8-8f79-cae7db6ced2d";
+const RENDER_FINGERPRINT = "0123456789abcdef0123456789abcdef";
 
 describe("buildAnalysisPdfObjectPath", () => {
   it("puts the owner id first — every analysis-pdfs RLS policy keys off segment 1", () => {
@@ -36,6 +37,23 @@ describe("buildAnalysisPdfObjectPath", () => {
   it("embeds the cache version so a bump writes a new object instead of upserting", () => {
     expect(buildAnalysisPdfObjectPath(OWNER, DEAL, 1)).not.toBe(
       buildAnalysisPdfObjectPath(OWNER, DEAL, 2)
+    );
+  });
+
+  it("content-addresses current exports to the exact render fingerprint", () => {
+    const path = buildAnalysisPdfObjectPath(OWNER, DEAL, 42, RENDER_FINGERPRINT);
+    expect(path).toBe(
+      `${OWNER}/${DEAL}/investment-analysis-v42-${RENDER_FINGERPRINT}.pdf`
+    );
+    expect(resolveAnalysisPdfObjectPath(path, OWNER)).toBe(path);
+  });
+
+  it("rejects an unsafe or malformed render fingerprint instead of placing it in a path", () => {
+    expect(() => buildAnalysisPdfObjectPath(OWNER, DEAL, 42, "../other.pdf")).toThrow(
+      /render fingerprint/i
+    );
+    expect(() => buildAnalysisPdfObjectPath(OWNER, DEAL, 42, "ABCDEF")).toThrow(
+      /render fingerprint/i
     );
   });
 

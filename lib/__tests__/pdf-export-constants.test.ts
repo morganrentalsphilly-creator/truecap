@@ -30,6 +30,13 @@ const CURRENT_COMPONENTS: readonly number[] = [
 ];
 
 describe("PDF_CACHE_VERSION", () => {
+  it("invalidates pre-content-bound My Deals reports with snapshot version 9", () => {
+    expect(PDF_SNAPSHOT_VERSION).toBe(9);
+    expect(
+      encodePdfCacheVersion([8, ...CURRENT_COMPONENTS.slice(1)])
+    ).not.toBe(PDF_CACHE_VERSION);
+  });
+
   it("fits the existing numeric column (positive int, within Postgres integer)", () => {
     expect(Number.isSafeInteger(PDF_CACHE_VERSION)).toBe(true);
     expect(PDF_CACHE_VERSION).toBeGreaterThan(0);

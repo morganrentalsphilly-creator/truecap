@@ -18,15 +18,16 @@ import { getPublicAgentBranding } from "@/lib/agent-share";
 import { verifyShareAttribution, hashShareValues } from "@/lib/share-attribution";
 import { getPublicDealComps } from "@/lib/public-deal-comps";
 import { canShowSharedProAnalysis } from "@/lib/public-share-access";
+import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
 
 // Next.js 15+ makes `params` async (Promise). Without awaiting it, accessing
 // .encoded synchronously throws in dev and silently breaks in prod.
 type Props = { params: Promise<{ encoded: string }> };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { encoded } = await params;
-  const payload = decodeShareLink(encoded);
-  const title = payload?.meta?.title || payload?.values?.address || "Shared deal";
+export async function generateMetadata(): Promise<Metadata> {
+  // Legacy URLs contain the full snapshot. Never decode it for metadata:
+  // unfurlers cache titles and images outside TrueCap's privacy boundary.
+  const title = "Legacy shared rental analysis — TrueCap";
   return {
     title: title,
     description:
@@ -36,7 +37,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     // another copy for crawlers, browser extensions, or downstream tooling.
     robots: { index: false, follow: false }, // share links shouldn't be indexed
     openGraph: {
-      title: `${title} — Rental property analysis`,
+      title,
       description: "Shared via TrueCap.",
       // No images: [] here — the sibling opengraph-image.tsx file is
       // auto-detected by Next.js and generates a per-deal preview card
@@ -44,8 +45,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       // dynamic image wins over any static URL declared here.
     },
     twitter: {
-      card: "summary_large_image",
-      title: `${title} — Rental property analysis`,
+      card: "summary",
+      title,
       description: "Shared via TrueCap.",
     },
   };
@@ -105,6 +106,8 @@ export default async function PublicDealPage({ params }: Props) {
       comps={comps}
       agent={agent}
       showProAnalysis={showProAnalysis}
+      methodologyVersion={TRUECAP_UNDERWRITING_STANDARD_VERSION}
+      legacyMethodologyWarning
       leadCapture={
         agent && verifiedOwnerId
           ? {

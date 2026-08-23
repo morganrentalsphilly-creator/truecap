@@ -67,7 +67,7 @@ export function GlossaryTip({
             tabIndex={0}
             aria-label={`${entry.term} - what's this?`}
             className={cn(
-              "inline-flex items-center gap-1 cursor-help rounded-sm underline decoration-dotted decoration-muted-foreground/40 underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              "inline-flex min-h-11 min-w-11 items-center justify-center gap-1 cursor-help rounded-sm underline decoration-dotted decoration-muted-foreground/40 underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
               className
             )}
             onClick={(e) => {

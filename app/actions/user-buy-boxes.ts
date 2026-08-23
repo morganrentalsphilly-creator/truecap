@@ -44,6 +44,7 @@ import {
 import { resolveSavedAnalysisSnapshot } from "@/lib/saved-analysis-methodology";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { MAX_PURCHASE_PRICE } from "@/lib/investcalc-schema";
 
 const KNOWN_STATE_ABBRS = new Set(US_STATE_OPTIONS.map((s) => s.abbr));
 const MAX_BUY_BOXES = 12;
@@ -78,10 +79,10 @@ const boxSchema = z
     name: z.string().trim().min(1, "Name your buy box").max(80).default("My Buy Box"),
     strategyKind: z.string().nullable().default(null),
     minCapRatePct: nullableNumber(0, 100),
-    minCocPct: nullableNumber(-100, 1000),
+    minCocPct: nullableNumber(0, 1000),
     minDscr: nullableNumber(0, 100),
     minCashFlowMonthly: nullableNumber(-1_000_000, 1_000_000),
-    maxPurchasePrice: nullableNumber(0, 1_000_000_000),
+    maxPurchasePrice: nullableNumber(0, MAX_PURCHASE_PRICE),
     propertyTypes: z
       .array(z.enum(["single-family", "multi-family", "owner-occupant"]))
       .max(3)

@@ -23,6 +23,7 @@ import * as Sentry from "@sentry/nextjs";
 import { render } from "@react-email/render";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import LifecycleEmail from "@/emails/lifecycle-email";
+import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 
 const CONTENT_DIR = path.join(process.cwd(), "emails", "lifecycle-content");
 
@@ -75,6 +76,12 @@ export async function scheduleTrialOnboardingEmails(
   input: { userId: string; email: string | null | undefined }
 ): Promise<TrialEmailsResult> {
   if (!lifecycleEmailsLive()) return { scheduled: 0, skipped: 2, reason: "mode_off" };
+  // Both approved lifecycle templates currently restate the optional refund
+  // guarantee. Never schedule them while that separate marketing promise is
+  // dark; a later guarantee-free template can replace this fail-closed gate.
+  if (!getMarketingOfferConfig().guaranteeEnabled) {
+    return { scheduled: 0, skipped: 2, reason: "guarantee_disabled" };
+  }
   if (!input.email) return { scheduled: 0, skipped: 2, reason: "no_email" };
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return { scheduled: 0, skipped: 2, reason: "no_api_key" };

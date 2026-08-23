@@ -45,6 +45,7 @@ import {
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 import { computeDealOfferLine } from "@/lib/deal-offer-line";
 import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
+import { normalizeMaoTarget } from "@/lib/mao-target-editor";
 import type { DashboardDeal } from "@/lib/dashboard-deal-mapping";
 import {
   boxesForDealClient,
@@ -57,6 +58,16 @@ import {
 } from "@/lib/buy-box";
 
 const DASHBOARD_ACTIVE_DEALS_LIMIT = 20;
+const DASHBOARD_DEALS_SELECT =
+  "id, address, title, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, created_at, methodology_version, result_snapshot, form_snapshot, pipeline_stage, tags, data_confidence";
+const DASHBOARD_DEALS_SELECT_WITH_CLIENT = `${DASHBOARD_DEALS_SELECT}, client_id`;
+
+function isMissingDashboardClientColumn(error: { code?: string; message?: string } | null): boolean {
+  return Boolean(
+    error &&
+      (error.code === "42703" || /column .*client_id.* does not exist/i.test(error.message ?? ""))
+  );
+}
 
 /**
  * Current 30-yr mortgage rate (FRED MORTGAGE30US), cached 6h. FRED prints
@@ -226,9 +237,7 @@ export default async function DashboardPage() {
     hasPaidPlanSubscription(supabase, user.id),
     supabase
       .from("saved_analyses")
-      .select(
-        "id, address, title, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, created_at, methodology_version, result_snapshot, form_snapshot, pipeline_stage, tags, data_confidence"
-      )
+      .select(DASHBOARD_DEALS_SELECT_WITH_CLIENT)
       .eq("user_id", user.id)
       .is("deleted_at", null)
       .eq("is_completed", false)
@@ -296,7 +305,27 @@ export default async function DashboardPage() {
   ]);
 
   const profileRow = (profile as ProfileRow | null) ?? null;
-  const { data: rows, error } = dealsResult;
+  // Widen the selected row shape before the compatibility retry: the primary
+  // query includes client_id while the pre-migration fallback intentionally
+  // cannot, and both are normalized through SavedAnalysisDashboardRow below.
+  let rows = dealsResult.data as unknown[] | null;
+  let error = dealsResult.error;
+  // client_id belongs to the newest Agent Pro migration. Older/partially
+  // migrated environments still get the dashboard; they simply have no
+  // client-specific box scope to apply.
+  if (isMissingDashboardClientColumn(error)) {
+    const fallbackDealsResult = await supabase
+      .from("saved_analyses")
+      .select(DASHBOARD_DEALS_SELECT)
+      .eq("user_id", user.id)
+      .is("deleted_at", null)
+      .eq("is_completed", false)
+      .eq("is_archived", false)
+      .order("created_at", { ascending: false })
+      .limit(DASHBOARD_ACTIVE_DEALS_LIMIT);
+    rows = fallbackDealsResult.data as unknown[] | null;
+    error = fallbackDealsResult.error;
+  }
 
   // Full-portfolio aggregates (see query note above). Null on error —
   // getPortfolioTotals falls back to the 20-deal sample, same as before.
@@ -530,18 +559,47 @@ export default async function DashboardPage() {
     buyBoxesResult && buyBoxesResult.ok && buyBoxesResult.canUse
       ? buyBoxesResult.boxes.filter((b) => b.isActive && buyBoxHasCriteria(b))
       : [];
+  const buyBoxesResolved = Boolean(buyBoxesResult?.ok);
+  // FEATURE_CATALOG marks MAO as `gate: "paid"`; production Pro plan JSON has
+  // no `mao` feature flag. Paid subscription status is therefore the complete
+  // and fail-closed gate here.
+  const canShowMao = isPremium;
 
   // Max Offer per DETAILED row (bounded set). Same lib/deal-offer-line path
-  // My Deals uses, so the two screens can never quote different numbers.
-  {
+  // My Deals uses, so the two screens can never quote different numbers. The
+  // paid gate wraps the entire solve, not only its rendering, so a free user
+  // cannot receive a hidden MAO value in the dashboard payload.
+  if (canShowMao) {
     const offerById = new Map<string, number | null>();
     const basisById = new Map<string, DashboardDeal["maxOfferBasis"]>();
+    const basisLabelById = new Map<string, string | null>();
     for (const row of (rows ?? []) as SavedAnalysisDashboardRow[]) {
+      const recomputed = recomputeSavedDealVerdict(row.form_snapshot);
+      const methodologyResolution = resolveSavedAnalysisSnapshot({
+        methodologyVersion: row.methodology_version,
+        resultSnapshot: row.result_snapshot,
+        recomputedSnapshot: recomputed
+          ? toRecomputedSavedAnalysisSnapshot(recomputed)
+          : undefined,
+      });
+      // Do not mix today's inverse solver with metrics intentionally frozen
+      // under an incompatible historical methodology. Re-underwriting is the
+      // explicit transition that makes a new ceiling trustworthy.
+      if (methodologyResolution.shouldFreeze) continue;
       const values = normalizeInvestmentFormSnapshot(row.form_snapshot);
       if (!values) continue;
+      const persistedMaoTarget = normalizeMaoTarget(
+        row.result_snapshot?.maxOfferTarget
+      );
+      // A stored target is self-contained. A legacy row is not: if the
+      // account Buy Box lookup failed, hide its ceiling instead of silently
+      // substituting TrueCap's canonical default.
+      if (!persistedMaoTarget && !buyBoxesResolved) continue;
       try {
-        const { offer } = computeDealOfferLine(values, activeBuyBoxes, {
+        const { offer, basisLabel } = computeDealOfferLine(values, activeBuyBoxes, {
           isShoppingStage: true,
+          dealClientId: row.client_id ?? null,
+          persistedMaoTarget,
         });
         // "blocked" carries no price by design — no dollar figure can fix a
         // wrong-market miss, so it must stay null rather than invent one.
@@ -557,6 +615,10 @@ export default async function DashboardPage() {
           row.id,
           offer && offer.kind !== "blocked" ? offer.basis : null
         );
+        basisLabelById.set(
+          row.id,
+          offer && offer.kind !== "blocked" ? basisLabel || null : null
+        );
       } catch {
         // One unsolvable deal must never take down the dashboard.
       }
@@ -565,6 +627,7 @@ export default async function DashboardPage() {
       ...deal,
       maxOffer: offerById.get(deal.id) ?? null,
       maxOfferBasis: basisById.get(deal.id) ?? null,
+      maxOfferBasisLabel: basisLabelById.get(deal.id) ?? null,
     });
     dashboardData.allDeals = dashboardData.allDeals.map(withOffer);
     dashboardData.topDeals = dashboardData.topDeals.map(withOffer);

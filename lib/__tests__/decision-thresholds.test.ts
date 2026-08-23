@@ -61,6 +61,17 @@ function expectExactPass(
 }
 
 describe("What Needs To Be True — canonical one-variable boundaries", () => {
+  it("accepts a hard purchase-price cap as a complete decision target", () => {
+    const result = buildWhatNeedsToBeTrue(singleFamily(), {
+      maxPurchasePrice: 200_000,
+    });
+
+    expect(result).not.toBeNull();
+    expect(result?.maxPrice.status).toBe("change_required");
+    expect(result?.maxPrice.thresholdValue).toBe(200_000);
+    expect(result?.maxPrice.rechecked).toBe(true);
+  });
+
   it("returns conservative price, rent, rate, and expense boundaries and ranks exact gaps", () => {
     const values = singleFamily();
     const target: MaoTarget = { monthlyCashFlow: 0, dscr: 1.25 };

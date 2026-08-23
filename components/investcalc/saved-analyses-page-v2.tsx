@@ -78,6 +78,7 @@ import {
 } from "@/lib/investcalc-schema";
 import { calculateAnalysis, type AnalysisResult } from "@/lib/calc-analysis";
 import { buildReportOperatingStatement } from "@/lib/report-operating-statement";
+import { buildReportMaxOffer } from "@/lib/report-max-offer";
 import {
   type DealScoreBreakdown,
 } from "@/lib/deal-score";
@@ -265,11 +266,17 @@ function OfferLineRow({
   }
 
   if (offer.kind === "clears") {
+    const clearsLabel =
+      offer.basis === "buy-box"
+        ? "Clears your buy box"
+        : offer.basis === "saved-target"
+          ? "Clears your selected targets"
+          : "Clears TrueCap’s default targets";
     return (
       <div className="mt-1.5 text-xs text-muted-foreground">
         <div>
           <span className="font-semibold text-success">
-            {offer.basis === "buy-box" ? "Clears your buy box" : "Cash-flows at asking"}
+            {clearsLabel}
           </span>
           {offer.maxPrice != null ? (
             <>
@@ -291,6 +298,12 @@ function OfferLineRow({
 
   const gap =
     offer.asking != null && offer.asking > offer.maxPrice ? offer.asking - offer.maxPrice : null;
+  const gapLabel =
+    offer.basis === "buy-box"
+      ? "to pass your buy box"
+      : offer.basis === "saved-target"
+        ? "to meet your selected targets"
+        : "to meet TrueCap’s default targets";
   return (
     <div className="mt-1.5 text-xs text-muted-foreground">
       <div>
@@ -304,7 +317,7 @@ function OfferLineRow({
               −{fmtMoney0(gap)}
               {offer.discountPct != null && offer.discountPct > 0 ? ` (−${offer.discountPct}%)` : ""}
             </span>{" "}
-            {offer.basis === "buy-box" ? "to pass your buy box" : "to break even"}
+            {gapLabel}
           </>
         ) : null}
       </div>
@@ -713,6 +726,10 @@ function buildReportDataFromSavedSnapshot(args: {
   templateFallback: { templateName: string } | null;
   exitYears: ExitScenarioYear[];
   includeDerivedScenarios?: boolean;
+  /** Max Offer + Deal Doctor are inverse solves. Omit them when the report is
+   * frozen to a different methodology unless a solved acquisition block was
+   * itself frozen (historical snapshots currently persist only the target). */
+  includeDerivedMaxOffer?: boolean;
   methodologyLabel?: string;
 }): ReportData {
   const {
@@ -721,6 +738,7 @@ function buildReportDataFromSavedSnapshot(args: {
     templateFallback,
     exitYears,
     includeDerivedScenarios = true,
+    includeDerivedMaxOffer = true,
     methodologyLabel,
   } = args;
   const projectionYears = Array.isArray(result.tenYearProjection) ? result.tenYearProjection : [];
@@ -796,6 +814,14 @@ function buildReportDataFromSavedSnapshot(args: {
       address: values.address,
       purchasePrice: values.purchasePrice,
     });
+  const maxOffer = includeDerivedMaxOffer
+    ? buildReportMaxOffer({
+        values,
+        result,
+        targetInput: result.maxOfferTarget,
+        targetSourceInput: result.maxOfferTargetSource,
+      })
+    : undefined;
 
   const downsideRatePp = result.monthlyPayment > 0 ? WORST_CASE_PRESET.ratePp : 0;
   let downsideScenario: ReportData["downsideScenario"] | undefined;
@@ -884,6 +910,7 @@ function buildReportDataFromSavedSnapshot(args: {
       taxSavings: result.taxSavingsMonthly,
       afterTaxCF: result.afterTaxCF,
     },
+    maxOffer,
     downsideScenario,
     projection10y: {
       cumulativeCF: projectionRows[projectionRows.length - 1]?.cum ?? 0,
@@ -2224,31 +2251,36 @@ export function SavedAnalysesPage({
           // A stress case was not frozen in historical snapshots. Omitting it
           // is honest; recomputing it would mix methodology versions.
           includeDerivedScenarios: !resolved.shouldFreeze,
+          // A frozen historical result does not carry a frozen inverse-solver
+          // output. Re-solving its target with today's engine would mix
+          // methodologies inside a PDF explicitly labeled "Frozen".
+          includeDerivedMaxOffer: !resolved.shouldFreeze,
           methodologyLabel: resolved.shouldFreeze
             ? `Frozen TrueCap Underwriting Standard v${resolved.storedMethodologyVersion}`
             : isLegacySavedMethodologyVersion(resolved.storedMethodologyVersion)
               ? `Legacy analysis · recomputed with current v${TRUECAP_UNDERWRITING_STANDARD_VERSION}`
               : `TrueCap Underwriting Standard v${resolved.storedMethodologyVersion}`,
         });
-        // Attach this deal's stored RentCast comps (no API call - reads the
-        // saved set) so the report includes the sale + rent comp tables.
-        // Best-effort: comps are optional reference data, never block export.
-        try {
-          const { getSavedDealCompsAction } = await import("@/app/actions/property-comps");
-          const compsRes = await getSavedDealCompsAction(id);
-          if (compsRes.ok && compsRes.enrichment) {
-            const { enrichmentToReportComps } = await import("@/lib/report-comps");
-            reportData.comps = enrichmentToReportComps(compsRes.enrichment);
-          }
-        } catch {
-          /* report proceeds without comps */
-        }
+        // Use the exact comp table returned with—and bound into—the server's
+        // render fingerprint. A second browser-triggered read here would allow
+        // comps to change between fingerprint issuance and PDF generation,
+        // creating a stale artifact that could later look current.
+        reportData.comps = exportResult.reportComps;
         // Composed SERVER-SIDE, where the pdf_export entitlement is actually
         // enforced and branding is resolved from the signed-in user's own row.
         // Building it in the browser meant the only gate was a React prop.
         const { generateReportPdfAction } = await import("@/app/actions/generate-report-pdf");
         const { downloadPdfFromBase64 } = await import("@/lib/pdf/download");
-        const pdfResult = await generateReportPdfAction({ report: reportData, mode: "personal" });
+        const pdfResult = await generateReportPdfAction({
+          values: parsed.data,
+          report: reportData,
+          maxOfferTarget: resultSnapshot.maxOfferTarget,
+          savedExport: {
+            id: exportResult.id,
+            renderFingerprint: exportResult.renderFingerprint,
+          },
+          mode: "personal",
+        });
         if (!pdfResult.ok) {
           toast({
             title: "Export failed",
@@ -2288,15 +2320,16 @@ export function SavedAnalysesPage({
               data: { user },
             } = await supabase.auth.getUser();
             if (!user) return;
-            // Path embeds the composite cache version so an engine bump writes
-            // a NEW object instead of upserting over the old path — a cached
-            // copy of the old object can never be re-served as the "fresh"
-            // PDF. Built by the shared helper because the server re-derives
-            // the identical path when it records the export.
+            // Path embeds both the composite cache version and the server-issued
+            // fingerprint of the exact saved snapshots used above. An engine
+            // bump OR a target/input edit therefore writes a different object;
+            // the completion action rechecks the fingerprint + row version
+            // before it records that object as current.
             const filePath = buildAnalysisPdfObjectPath(
               user.id,
               exportResult.id,
-              PDF_CACHE_VERSION
+              PDF_CACHE_VERSION,
+              exportResult.renderFingerprint
             );
             const { error: uploadError } = await supabase.storage
               .from(ANALYSIS_PDF_BUCKET)
@@ -2316,9 +2349,13 @@ export function SavedAnalysesPage({
             // 20260802120000). The server records the object path and mints a
             // short-lived signed URL at read time.
             const completeResult = await completeSavedAnalysisPdfExportAction(
-              exportResult.id
+              exportResult.id,
+              exportResult.renderFingerprint,
+              pdfResult.hasBranding,
+              pdfResult.hasBuyBoxVerdict,
+              pdfResult.buyBoxStateResolved
             );
-            if (!completeResult.ok) {
+            if (!completeResult.ok && completeResult.code !== "STALE_EXPORT") {
               Sentry.captureMessage("pdf-cache-write complete action failed", {
                 level: "warning",
                 tags: { feature: "pdf-cache-write" },

@@ -37,6 +37,13 @@ import { TEN_YEAR_PROJECTION_SNAPSHOT_VERSION } from "@/lib/ten-year-projections
 //       Without this bump a Pro user re-exporting a previously-cached deal
 //       would keep receiving the OLD document — no charts changes, no
 //       operating statement — with no way to tell it was stale.
+//   8 - Saved-deal exports now include the persisted, user-selected Max Offer
+//       target plus the matching Deal Doctor thresholds. Version 7 artifacts
+//       were built without that acquisition block, so they must regenerate.
+//   9 - Cached exports are content-addressed to the exact saved snapshots and
+//       target used to render them. Also removes current-engine Max Offer / Deal
+//       Doctor math from reports frozen to an incompatible methodology. Any v8
+//       artifact could predate either guard and must not be re-served.
 //
 // NOT bumped for the July 2026 "Your buy box" block: that block renders
 // ONLY for users with an active buy box, and those users' exports bypass
@@ -45,7 +52,7 @@ import { TEN_YEAR_PROJECTION_SNAPSHOT_VERSION } from "@/lib/ten-year-projections
 // block-carrying PDFs are stored uncacheable (see
 // PDF_CACHE_VERSION_UNCACHEABLE). Box-less users' PDFs stay byte-identical,
 // so flushing their caches with a bump would be pure regeneration waste.
-export const PDF_SNAPSHOT_VERSION = 7;
+export const PDF_SNAPSHOT_VERSION = 9;
 export const ANALYSIS_PDF_BUCKET = "analysis-pdfs";
 
 /**
@@ -65,16 +72,26 @@ export const ANALYSIS_PDF_SIGNED_URL_TTL_SECONDS = 120;
  *
  * The first segment MUST be the owner's user id: every `analysis-pdfs` RLS
  * policy is a `(storage.foldername(name))[1] = auth.uid()::text` check.
- * The version is embedded so an engine/template bump writes a NEW object
- * instead of upserting over the old one (a CDN-cached copy of the old path
- * can never be re-served as the "fresh" PDF).
+ * The version is embedded so an engine/template bump writes a NEW object.
+ * Current saved-analysis exports also pass a server-issued render fingerprint,
+ * content-addressing the object to the exact form/result/target snapshots. A
+ * stale background render can therefore never overwrite the current object's
+ * path even before the server rejects its completion.
  */
 export function buildAnalysisPdfObjectPath(
   userId: string,
   analysisId: string,
-  cacheVersion: number
+  cacheVersion: number,
+  renderFingerprint?: string
 ): string {
-  return `${userId}/${analysisId}/investment-analysis-v${cacheVersion}.pdf`;
+  if (
+    renderFingerprint !== undefined &&
+    !/^[a-f0-9]{32}$/.test(renderFingerprint)
+  ) {
+    throw new Error("Invalid saved-analysis PDF render fingerprint");
+  }
+  const renderSuffix = renderFingerprint ? `-${renderFingerprint}` : "";
+  return `${userId}/${analysisId}/investment-analysis-v${cacheVersion}${renderSuffix}.pdf`;
 }
 
 /**

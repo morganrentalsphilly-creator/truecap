@@ -14,14 +14,26 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import type { AnalysisResult } from "@/lib/calc-analysis";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
-import { MaxOfferCard } from "@/components/investcalc/max-offer-card";
 import { SensitivityGrid } from "@/components/investcalc/sensitivity-grid";
 import { StrategiesPanel } from "@/components/investcalc/strategies-panel";
 import { SharedDealViewerBuyBox } from "@/components/investcalc/shared-deal-viewer-buy-box";
 import type { ReportComp, ReportComps } from "@/lib/report-comps";
+import type { MaoTarget } from "@/lib/max-allowable-offer";
+import { meetsMaoTarget } from "@/lib/mao-target-evaluation";
+import {
+  clearPendingMaoTarget,
+  maoTargetAnalysisFingerprint,
+  writePendingMaoTarget,
+} from "@/lib/mao-target-editor";
+import { describeMaoTarget } from "@/lib/mao-targets";
+import type { OfferCeilingAccessPayload } from "@/lib/offer-ceiling-access-contract";
+import type { OfferCeilingTargetSource } from "@/lib/offer-ceiling-contract";
+import { computeAssumptionImpact } from "@/lib/assumption-impact";
+import { trackEvent } from "@/lib/analytics";
 
 interface ReadOnlyAnalysisViewProps {
   values: InvestmentFormValues;
@@ -31,6 +43,14 @@ interface ReadOnlyAnalysisViewProps {
   comps?: ReportComps | null;
   /** True only when the verified share owner currently has a paid plan. */
   showProAnalysis: boolean;
+  /** Exact acquisition criteria captured with the share. */
+  maoTarget?: MaoTarget;
+  /** Frozen provenance for the shared target. */
+  maoTargetSource?: OfferCeilingTargetSource;
+  /** Exact-or-preview result already authorized and calculated by the server. */
+  offerCeilingAccess?: OfferCeilingAccessPayload | null;
+  /** False when the sharer kept the exact property identity private. */
+  addressIncluded?: boolean;
 }
 
 const fmtCash = (n: number) =>
@@ -144,22 +164,185 @@ function SharedDealComps({ comps }: { comps: ReportComps }) {
   );
 }
 
-export function ReadOnlyAnalysisView({ values, result, comps, showProAnalysis }: ReadOnlyAnalysisViewProps) {
+export function ReadOnlyAnalysisView({
+  values,
+  result,
+  comps,
+  showProAnalysis,
+  maoTarget,
+  maoTargetSource = "selected-targets",
+  offerCeilingAccess = null,
+  addressIncluded = true,
+}: ReadOnlyAnalysisViewProps) {
   const router = useRouter();
+  const offerCeiling =
+    offerCeilingAccess?.access === "exact"
+      ? offerCeilingAccess.exact?.presentation ?? null
+      : null;
+  const rangePreview =
+    offerCeilingAccess?.access === "preview"
+      ? offerCeilingAccess.range
+      : null;
+  const assumptionBreakpoints = useMemo(
+    () => computeAssumptionImpact(values).slice(0, 3),
+    [values]
+  );
+  const criteriaMet = maoTarget ? meetsMaoTarget(result, maoTarget) : null;
+  const decisionLabel =
+    criteriaMet === false
+      ? "Pass at this price"
+      : "Conditional — verify assumptions";
+  const ceilingDisplay = offerCeiling
+    ? fmtCash(offerCeiling.ceiling)
+    : offerCeilingAccess?.access === "exact" && maoTarget
+      ? "Not reachable"
+      : rangePreview
+        ? `${fmtCash(rangePreview.lower)}–${fmtCash(rangePreview.upper)}`
+        : "Unavailable";
+  const priceGap = offerCeiling
+    ? offerCeiling.listPriceGap > 0
+      ? `${fmtCash(offerCeiling.listPriceGap)} above ceiling`
+      : offerCeiling.listPriceGap < 0
+        ? `${fmtCash(Math.abs(offerCeiling.listPriceGap))} below ceiling`
+        : "At the ceiling"
+    : rangePreview
+      ? Number(values.purchasePrice) > rangePreview.upper
+        ? `${fmtCash(Number(values.purchasePrice) - rangePreview.upper)} above preview`
+        : Number(values.purchasePrice) < rangePreview.lower
+          ? `${fmtCash(rangePreview.lower - Number(values.purchasePrice))} below preview`
+          : "Inside preview range"
+      : "Not available";
   // "Make this mine": hand the FULL deal to the calculator via its autosave
   // draft (restored on mount via normalizeInvestmentFormSnapshot), so the
   // highest-intent viewer lands on a populated analysis instead of a blank
   // homepage. Key must match CALC_FORM_DRAFT_KEY in investcalc-page.tsx.
   const makeThisMine = () => {
+    const cloneValues = addressIncluded ? values : { ...values, address: "" };
     try {
-      window.localStorage.setItem("truecap_calc_form_draft_v1", JSON.stringify(values));
+      window.localStorage.setItem("truecap_calc_form_draft_v1", JSON.stringify(cloneValues));
     } catch {
       /* storage unavailable — fall through to a clean calculator */
     }
+    const analysisFingerprint = maoTargetAnalysisFingerprint(cloneValues);
+    if (addressIncluded && maoTarget && analysisFingerprint) {
+      writePendingMaoTarget(maoTarget, {
+        analysisFingerprint,
+        source: maoTargetSource,
+      });
+    } else {
+      clearPendingMaoTarget();
+    }
+    trackEvent("shared_scenario_forked", {});
     router.push("/?utm_source=shared_deal&utm_medium=clone");
   };
   return (
     <div className="space-y-5">
+      <section
+        aria-labelledby="shared-decision-title"
+        className="rounded-2xl border-2 border-primary/30 bg-card p-5 shadow-sm sm:p-6"
+      >
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.8fr)]">
+          <div>
+            <p className="text-[11px] font-extrabold uppercase tracking-widest text-muted-foreground">
+              Decision
+            </p>
+            <h2
+              id="shared-decision-title"
+              className="mt-1 text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl"
+            >
+              {decisionLabel}
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Asking {fmtCash(Number(values.purchasePrice))}. This read-only share is a
+              screening decision; independently verify every material assumption before
+              offering.
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-primary/25 bg-[var(--brand-blue-light)] p-4">
+            <p className="text-[11px] font-extrabold uppercase tracking-widest text-primary">
+              Offer Ceiling
+            </p>
+            <p className="mt-1 font-mono text-3xl font-extrabold tabular-nums text-primary">
+              {ceilingDisplay}
+            </p>
+            {maoTarget ? (
+              <>
+                <p className="mt-1 text-xs font-semibold text-foreground">
+                  Under the targets captured with this share
+                  {offerCeiling ? " · exact ceiling" : rangePreview ? " · coarse range preview" : ""}
+                </p>
+                <p className="mt-1 text-[11px] leading-relaxed text-foreground">
+                  Targets: {describeMaoTarget(maoTarget)}
+                </p>
+                {offerCeiling ? (
+                  <div className="mt-2 space-y-1 text-[11px] leading-relaxed text-muted-foreground">
+                    <p>
+                      Binding: {offerCeiling.bindingConstraints.map((item) => item.criterion).join(" + ") || "No constraint resolved"}
+                    </p>
+                    {offerCeiling.nextConstraint ? (
+                      <p>Next constraint: {offerCeiling.nextConstraint.criterion}</p>
+                    ) : null}
+                    <p>
+                      Screening range: {offerCeiling.range.lower == null ? "no feasible downside price" : fmtCash(offerCeiling.range.lower)}–{offerCeiling.range.upper == null ? "no feasible upside price" : fmtCash(offerCeiling.range.upper)} if {offerCeiling.range.label}.
+                    </p>
+                  </div>
+                ) : null}
+              </>
+            ) : (
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                Offer Ceiling unavailable — this older share did not capture its target
+                criteria. Open a new analysis to select targets without rewriting this
+                historical result.
+              </p>
+            )}
+            <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
+              Calculated from the targets shown above when available. This is not a
+              recommended offer.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="rounded-xl border border-border bg-muted/30 p-3">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Criteria fit</p>
+            <p className="mt-1 text-sm font-extrabold text-foreground">
+              {criteriaMet == null ? "No captured target" : criteriaMet ? "Meets" : "Misses"}
+            </p>
+          </div>
+          <div className="rounded-xl border border-border bg-muted/30 p-3">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Decision readiness</p>
+            <p className="mt-1 text-sm font-extrabold text-foreground">Screening only</p>
+          </div>
+          <div className="rounded-xl border border-border bg-muted/30 p-3">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Margin of safety</p>
+            <p className="mt-1 text-sm font-extrabold text-foreground">{priceGap}</p>
+          </div>
+          <div className="rounded-xl border border-primary/20 bg-[var(--brand-blue-light)] p-3">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Next action</p>
+            <p className="mt-1 text-sm font-extrabold text-foreground">
+              {assumptionBreakpoints[0]
+                ? `Verify ${assumptionBreakpoints[0].label.toLowerCase()}`
+                : "Verify material assumptions"}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-4 rounded-xl border border-amber-500/25 bg-amber-500/5 p-3">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            What could break the deal
+          </p>
+          <ol className="mt-2 grid gap-1 text-sm font-semibold text-foreground sm:grid-cols-3">
+            {assumptionBreakpoints.map((driver, index) => (
+              <li key={`${driver.label}-${index}`}>
+                <span className="text-muted-foreground">{index + 1}.</span>{" "}
+                {driver.label} {driver.deltaLabel} moves cash flow about ±{fmtCash(driver.cashFlowSwing / 2)}/mo
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
       {/* Headline metric tiles */}
       <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2 sm:gap-3">
         <MetricTile
@@ -190,7 +373,7 @@ export function ReadOnlyAnalysisView({ values, result, comps, showProAnalysis }:
             result.monthlyPayment <= 0
               ? "Cash purchase"
               : result.dscr >= 1.25
-              ? "Bankable (≥1.25)"
+              ? "Common screening threshold (≥1.25)"
               : result.dscr >= 1.0
               ? "Tight (≥1.0)"
               : "Underwater"
@@ -214,7 +397,7 @@ export function ReadOnlyAnalysisView({ values, result, comps, showProAnalysis }:
           for a signed-in viewer with an active buy box; anonymous viewers see
           nothing here. Sits right above "Make this mine" so a personal miss
           ("0.8pp short") flows into "import it and adjust". */}
-      <SharedDealViewerBuyBox values={values} result={result} />
+      {addressIncluded ? <SharedDealViewerBuyBox values={values} result={result} /> : null}
 
       {/* Primary conversion action for a high-intent viewer: clone the deal
           into the calculator (full inputs preloaded) instead of sending them
@@ -224,31 +407,33 @@ export function ReadOnlyAnalysisView({ values, result, comps, showProAnalysis }:
         onClick={makeThisMine}
         className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
       >
-        Make this deal mine — open it in the calculator →
+        {addressIncluded
+          ? "Make this deal mine — open it in the calculator →"
+          : "Open these assumptions — add the property address →"}
       </button>
 
       {comps ? <SharedDealComps comps={comps} /> : null}
 
       {showProAnalysis ? (
         <>
-          <MaxOfferCard values={values} />
           <SensitivityGrid values={values} />
 
-          {/* Strategies section - embedded inline rather than in a tab so the
-              read-only viewer doesn't have hidden content. */}
-          <div className="bg-card rounded-2xl border border-border shadow-sm">
-            <div className="border-b border-border px-5 py-3">
-              <h2 className="text-sm font-semibold text-foreground">
-                Strategy calculators
-              </h2>
-            </div>
+          <details className="bg-card rounded-2xl border border-border shadow-sm">
+            <summary className="flex min-h-11 cursor-pointer items-center px-5 py-3 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+              Advanced/Beta strategy modeling
+            </summary>
+            <p className="border-t border-border px-5 pt-4 text-xs leading-relaxed text-muted-foreground">
+              Rehab, refinance, flip, and short-term-rental outputs are secondary
+              scenarios with incomplete market, lender, regulatory, or contractor
+              evidence. Verify them independently.
+            </p>
             <StrategiesPanel values={values} result={result} />
-          </div>
+          </details>
         </>
       ) : (
         <section className="rounded-2xl border border-primary/25 bg-[var(--brand-blue-light)] p-5 sm:p-6" aria-labelledby="shared-pro-analysis-title">
           <h2 id="shared-pro-analysis-title" className="text-base font-bold text-foreground">
-            Max Offer, sensitivity, and strategy modeling are Pro tools
+            Exact Offer Ceiling, sensitivity, and advanced strategy modeling are paid tools
           </h2>
           <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
             This free shared view includes the deal&rsquo;s core underwriting. Open the

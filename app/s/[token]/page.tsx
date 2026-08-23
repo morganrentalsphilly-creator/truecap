@@ -27,13 +27,18 @@ import { getPublicDealComps } from "@/lib/public-deal-comps";
 import { hashShareValues, signShareAttribution } from "@/lib/share-attribution";
 import { SharedDealShell } from "@/components/investcalc/shared-deal-shell";
 import { canShowSharedProAnalysis } from "@/lib/public-share-access";
+import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
+import { resolveOfferCeilingForAccess } from "@/lib/offer-ceiling-server";
+import { normalizeMaoTargetForFinancing } from "@/lib/mao-target-editor";
+import Link from "next/link";
 
 type Props = { params: Promise<{ token: string }> };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { token } = await params;
-  const resolved = await resolvePublicShare(token);
-  const title = resolved?.snapshot.meta.title || resolved?.snapshot.values.address || "Shared deal";
+export async function generateMetadata(): Promise<Metadata> {
+  // Never resolve the private snapshot for metadata. Link unfurlers cache OG
+  // fields outside TrueCap's access boundary, so the address/title belongs
+  // only in the authorized page body.
+  const title = "Shared rental analysis — TrueCap";
   return {
     title,
     description:
@@ -46,12 +51,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       nosnippet: true,
     },
     openGraph: {
-      title: `${title} — Rental property analysis`,
+      title,
       description: "Shared via TrueCap.",
     },
     twitter: {
       card: "summary",
-      title: `${title} — Rental property analysis`,
+      title,
       description: "Shared via TrueCap.",
     },
   };
@@ -61,6 +66,31 @@ export default async function OpaqueSharePage({ params }: Props) {
   const { token } = await params;
   const resolved = await resolvePublicShare(token);
   if (!resolved) notFound();
+
+  // Never silently recompute a pinned historical share under a different
+  // formula contract. Version adapters can be added here when Standard v2
+  // ships; until then the preserved snapshot fails closed and asks for a new
+  // share rather than changing its financial answer.
+  if (
+    resolved.methodologyVersion &&
+    resolved.methodologyVersion !== TRUECAP_UNDERWRITING_STANDARD_VERSION
+  ) {
+    return (
+      <main id="main" className="mx-auto flex min-h-screen max-w-xl items-center px-5 py-16">
+        <section className="w-full rounded-2xl border border-border bg-card p-6 shadow-sm">
+          <h1 className="text-2xl font-extrabold text-foreground">This analysis is preserved</h1>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            It was created with TrueCap Underwriting Standard v{resolved.methodologyVersion}.
+            This viewer runs v{TRUECAP_UNDERWRITING_STANDARD_VERSION}, so it will not silently
+            recalculate the historical decision. Ask the owner to create a refreshed share.
+          </p>
+          <Link href="/" className="mt-4 inline-flex min-h-11 items-center font-bold text-primary hover:underline">
+            Open TrueCap
+          </Link>
+        </section>
+      </main>
+    );
+  }
 
   const parsed = investmentFormSchema.safeParse(resolved.snapshot.values);
   if (!parsed.success) notFound();
@@ -72,8 +102,11 @@ export default async function OpaqueSharePage({ params }: Props) {
     notFound();
   }
 
-  const ownerId = resolved.snapshot.meta.ownerId;
-  const dealId = resolved.snapshot.meta.dealId;
+  // Access, branding, comps, and lead attribution are bound to immutable,
+  // typed row columns selected by the service-role resolver. Snapshot JSON is
+  // owner-readable and must never be an authorization or attribution source.
+  const ownerId = resolved.ownerId ?? undefined;
+  const dealId = resolved.dealId ?? undefined;
 
   const [agent, comps, showProAnalysis] = await Promise.all([
     getPublicAgentBranding(ownerId),
@@ -81,20 +114,46 @@ export default async function OpaqueSharePage({ params }: Props) {
     canShowSharedProAnalysis(ownerId),
   ]);
 
-  // Bridge to the legacy-hardened lead write path: it verifies an HMAC over
-  // {ownerId, dealId, valuesHash}, so mint one with the server secret. If the
-  // secret is unset, sig is null and the form simply won't verify — same
-  // fail-safe as legacy shares.
-  const valuesHash = hashShareValues(parsed.data);
+  const addressVisible = resolved.snapshot.meta.addressVisibility === "full";
+  const displayValues = addressVisible
+    ? parsed.data
+    : { ...parsed.data, address: "Property address hidden by sharer" };
+  // Never serialize a deterministic digest of a hidden address to the
+  // recipient. The lead HMAC binds the exact values visible on the page;
+  // otherwise the digest plus the remaining inputs becomes an offline address
+  // oracle for anyone testing candidate listings.
+  const valuesHash = hashShareValues(displayValues);
   const sig = ownerId ? signShareAttribution({ ownerId, dealId, valuesHash }) : null;
+  const displayMaoTarget = resolved.snapshot.maoTarget
+    ? normalizeMaoTargetForFinancing(resolved.snapshot.maoTarget, {
+        isCashPurchase: result.monthlyPayment <= 0,
+      }) ?? undefined
+    : undefined;
+  const offerCeilingAccess = displayMaoTarget
+    ? resolveOfferCeilingForAccess({
+        values: parsed.data,
+        target: displayMaoTarget,
+        source:
+          resolved.snapshot.maoTargetSource ?? "selected-targets",
+        paidAccess: showProAnalysis,
+      })
+    : null;
 
   return (
     <SharedDealShell
-      values={parsed.data}
+      values={displayValues}
       result={result}
-      comps={comps}
+      comps={addressVisible ? comps : null}
       agent={agent}
       showProAnalysis={showProAnalysis}
+      maoTarget={displayMaoTarget}
+      maoTargetSource={
+        resolved.snapshot.maoTargetSource ?? "selected-targets"
+      }
+      offerCeilingAccess={offerCeilingAccess}
+      methodologyVersion={resolved.methodologyVersion ?? TRUECAP_UNDERWRITING_STANDARD_VERSION}
+      legacyMethodologyWarning={resolved.legacyUnpinned}
+      addressIncluded={addressVisible}
       leadCapture={
         agent && ownerId
           ? { ownerId, dealId, valuesHash, sig: sig ?? undefined }

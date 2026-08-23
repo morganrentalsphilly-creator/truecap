@@ -65,7 +65,7 @@ const STEPS = [
     paragraphs: [
       "The investors who close aren't better pickers; they screen more property. A workable rhythm for a W-2 schedule: fifteen minutes a day, every listing that's new in your target market, each one through a 60-second screen. Most fail instantly — that's the system working, not failing. A pass in 60 seconds costs you nothing; a maybe you carry around for two weeks costs you the next deal.",
       "Where to source: the listing portals for what's public, an investor-friendly agent for what's coming (tell them your Buy Box numbers — a specific ask gets specific answers), and your market's property-tax and pre-foreclosure lists when you're ready to go deeper. Start with the portals; volume beats cleverness at this stage.",
-      "Track everything you screen, even the fails. Ten screened deals teach you what your market actually offers at your price point — which is exactly the calibration your Buy Box needs. This is also the honest reason TrueCap's guarantee is conditioned on analyzing ten deals: reps are where confidence comes from.",
+      "Track everything you screen, even the fails. Ten screened deals teach you what your market actually offers at your price point — which is exactly the calibration your Buy Box needs. Repetition turns a vague preference into a usable acquisition rule.",
     ],
     action: "Screen every new listing in your market this week — aim for ten.",
   },
@@ -89,7 +89,7 @@ const STEPS = [
     paragraphs: [
       "Here is the single most protective habit in real estate investing: decide the most you can pay BEFORE you negotiate, and never cross it. Asking price is the seller's opening position; your Max Offer is arithmetic — the highest price at which the deal still clears every number in your Buy Box, with honest expenses and your verified inputs.",
       "Work the math backwards: hold your required cash flow and cash-on-cash fixed, and solve for the purchase price that still delivers them. TrueCap Pro's Max Offer Engine computes this deterministically on every analysis (and the $5 Deal Decision Pack includes it for a single property) — but even by hand in a spreadsheet, the discipline is the same: the number exists before the negotiation starts.",
-      "If the Max Offer comes out under asking, that's not a dead deal — that's your opening bid and your ceiling, both known. If it comes out way under asking, you just avoided the expensive mistake, in sixty seconds, for free. Overpaying by even 3% on a $250,000 property is $7,500 gone before the first rent check; the walk-away number is what stands between you and that.",
+      "If the Max Offer comes out under asking, that's not a dead deal — that's your opening bid and your ceiling, both known. If it comes out way under asking, you just avoided the expensive mistake before making an offer. TrueCap Pro or the one-time Deal Decision Pack puts that ceiling in front of you in about sixty seconds. Overpaying by even 3% on a $250,000 property is $7,500 gone before the first rent check; the walk-away number is what stands between you and that.",
     ],
     action: "Compute the Max Offer on your best candidate. Write it where you'll see it during negotiation.",
   },
@@ -186,7 +186,7 @@ export default function PlaybookPage() {
             <div className="rounded-2xl border border-border bg-card p-5 text-center sm:p-6">
               <p className="text-sm leading-relaxed text-muted-foreground">
                 Want the reps to be easier? Pro runs the whole playbook on every
-                address — Buy Box verdict, downside test, Max Offer, lender-ready
+                address — Buy Box verdict, downside test, Offer Ceiling, lender-facing
                 report{getMarketingOfferConfig().guaranteeEnabled
                   ? " — and the risk is ours, not yours."
                   : "."}

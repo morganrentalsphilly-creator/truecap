@@ -50,6 +50,12 @@ import { CloudRain, RotateCcw, Sparkles } from "lucide-react";
 import { calculateAnalysis, type AnalysisResult } from "@/lib/calc-analysis";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { getDealTier, type DealTier } from "@/lib/verdict";
+import {
+  applyWhatIfAdjustments,
+  WORST_CASE_PRESET,
+} from "@/lib/what-if-adjustments";
+
+export { applyWhatIfAdjustments, WORST_CASE_PRESET } from "@/lib/what-if-adjustments";
 
 export interface WhatIfState {
   /** The result to render in the Overview tier - adjusted if user has dragged a slider, otherwise the base result. */
@@ -72,8 +78,6 @@ export interface WhatIfState {
  * Every leg matches a slider's domain + step, so the same scenario is
  * reachable by hand. On cash purchases the rate leg is skipped.
  */
-export const WORST_CASE_PRESET = { rentPct: -10, vacancyPp: 5, ratePp: 1 } as const;
-
 interface Props {
   values: InvestmentFormValues;
   baseResult: AnalysisResult;
@@ -89,57 +93,6 @@ interface Props {
  * the same input-mutation logic without duplicating field walks
  * across property types.
  */
-export function applyWhatIfAdjustments(
-  values: InvestmentFormValues,
-  rentPct: number,
-  pricePct: number,
-  ratePp = 0,
-  vacancyPp = 0
-): InvestmentFormValues {
-  const rentMul = 1 + rentPct / 100;
-  const priceMul = 1 + pricePct / 100;
-  // Clone shallowly + walk rent fields. We don't deep-clone the entire
-  // object because calculateAnalysis only reads - never mutates.
-  const next: InvestmentFormValues = {
-    ...values,
-    purchasePrice:
-      typeof values.purchasePrice === "number"
-        ? Math.round(values.purchasePrice * priceMul)
-        : values.purchasePrice,
-    // pp deltas clamped to the schema bounds (rate 0–30, vacancy 0–50) so a
-    // stressed re-run can never feed calculateAnalysis an out-of-range input.
-    interestRate:
-      ratePp !== 0 && typeof values.interestRate === "number"
-        ? Math.min(30, Math.max(0, Math.round((values.interestRate + ratePp) * 100) / 100))
-        : values.interestRate,
-    vacancyPct:
-      vacancyPp !== 0 && typeof values.vacancyPct === "number"
-        ? Math.min(50, Math.max(0, Math.round((values.vacancyPct + vacancyPp) * 100) / 100))
-        : values.vacancyPct,
-  };
-  if (next.propertyType === "single-family") {
-    if (typeof next.monthlyRent === "number") {
-      next.monthlyRent = Math.round(next.monthlyRent * rentMul);
-    }
-    // STR income model: when a nightly rate is set, calc-analysis derives
-    // income from ADR × occupancy and IGNORES monthlyRent — the rent
-    // stress must scale the ADR too, or "rent −10%" is a silent no-op and
-    // the survivability card would claim a stress it never applied.
-    if (typeof next.avgDailyRate === "number" && next.avgDailyRate > 0) {
-      next.avgDailyRate = Math.round(next.avgDailyRate * rentMul * 100) / 100;
-    }
-  } else if (Array.isArray(next.units)) {
-    next.units = next.units.map((u) => ({
-      ...u,
-      monthlyRent:
-        typeof u.monthlyRent === "number"
-          ? Math.round(u.monthlyRent * rentMul)
-          : u.monthlyRent,
-    }));
-  }
-  return next;
-}
-
 export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
   const [rentPct, setRentPct] = useState(0);
   const [pricePct, setPricePct] = useState(0);

@@ -31,6 +31,12 @@ import {
   type BuyBoxReturnThresholds,
 } from "@/lib/mao-targets";
 import {
+  applyMaoTargetInput,
+  EMPTY_MAO_TARGET_ERROR,
+  MAO_TARGET_BOUNDS,
+  type MaoTargetField,
+} from "@/lib/mao-target-editor";
+import {
   WhatNeedsToBeTrueCard,
   type ApplicableDecisionThreshold,
 } from "@/components/investcalc/what-needs-to-be-true-card";
@@ -52,11 +58,17 @@ interface MaxOfferCardProps {
   onTargetChange?: (target: MaoTarget) => void;
 }
 
-const numberOrUndefined = (s: string): number | undefined => {
-  if (s.trim() === "") return undefined;
-  const n = Number(s);
-  return Number.isFinite(n) ? n : undefined;
-};
+function inputsFromTarget(target: MaoTarget): Record<MaoTargetField, string> {
+  return {
+    capRate: target.capRate == null ? "" : String(target.capRate),
+    cocReturn: target.cocReturn == null ? "" : String(target.cocReturn),
+    monthlyCashFlow:
+      target.monthlyCashFlow == null ? "" : String(target.monthlyCashFlow),
+    dscr: target.dscr == null ? "" : String(target.dscr),
+    maxPurchasePrice:
+      target.maxPurchasePrice == null ? "" : String(target.maxPurchasePrice),
+  };
+}
 
 const money = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
 
@@ -93,69 +105,74 @@ export function MaxOfferCard({
   }, [initialTarget, buyBoxThresholds, isCashDeal]);
 
   // Initial targets = the buy-box seed when present, else the canonical MAO
-  // basis (break-even cash flow + DSCR 1.25 — see lib/mao-targets, CONFLICT
-  // #6) so the first number this solver shows equals the wholesale
-  // StrategyOutcomeCard headline and the deal workspace's max-offer line.
-  // Every field stays user-editable.
-  const [capRateInput, setCapRateInput] = useState(() =>
-    seedTarget?.capRate != null ? String(seedTarget.capRate) : ""
+  // basis. Keep a validated committed target separate from raw inputs: an
+  // out-of-range draft or an attempt to remove the final criterion is shown
+  // with an inline error but never reaches the solver, Save, Share, or PDF.
+  const resolvedSeedTarget = useMemo<MaoTarget>(
+    () =>
+      seedTarget ??
+      (isCashDeal ? { monthlyCashFlow: 0 } : { monthlyCashFlow: 0, dscr: 1.25 }),
+    [isCashDeal, seedTarget]
   );
-  const [cocInput, setCocInput] = useState(() =>
-    seedTarget?.cocReturn != null ? String(seedTarget.cocReturn) : ""
+  const [target, setTarget] = useState<MaoTarget>(() => resolvedSeedTarget);
+  const [targetInputs, setTargetInputs] = useState<Record<MaoTargetField, string>>(() =>
+    inputsFromTarget(resolvedSeedTarget)
   );
-  const [cashFlowInput, setCashFlowInput] = useState(() =>
-    seedTarget ? (seedTarget.monthlyCashFlow != null ? String(seedTarget.monthlyCashFlow) : "") : "0"
-  );
-  const [dscrInput, setDscrInput] = useState(() =>
-    seedTarget ? (seedTarget.dscr != null ? String(seedTarget.dscr) : "") : "1.25"
-  );
+  const [targetErrors, setTargetErrors] = useState<
+    Partial<Record<MaoTargetField, string>>
+  >({});
 
   // The box report arrives async (BuyBoxVerdictCard fetches it), so this
   // card can mount before the seed exists. Apply a late-arriving seed once
   // — and never clobber targets the user already edited. State (not a
   // ref) because the "From your buy box" label renders from it.
   const [touched, setTouched] = useState(false);
-  const seedKey = seedTarget ? JSON.stringify(seedTarget) : null;
-  const [appliedSeedKey, setAppliedSeedKey] = useState<string | null>(seedKey);
+  const seedKey = JSON.stringify(resolvedSeedTarget);
+  const [appliedSeedKey, setAppliedSeedKey] = useState(seedKey);
   useEffect(() => {
-    if (!seedTarget || touched || seedKey === appliedSeedKey) return;
+    if (seedKey === appliedSeedKey) return;
     setAppliedSeedKey(seedKey);
-    setCapRateInput(seedTarget.capRate != null ? String(seedTarget.capRate) : "");
-    setCocInput(seedTarget.cocReturn != null ? String(seedTarget.cocReturn) : "");
-    setCashFlowInput(seedTarget.monthlyCashFlow != null ? String(seedTarget.monthlyCashFlow) : "");
-    setDscrInput(seedTarget.dscr != null ? String(seedTarget.dscr) : "");
-  }, [seedTarget, seedKey, touched, appliedSeedKey]);
+    setTarget(resolvedSeedTarget);
+    setTargetInputs(inputsFromTarget(resolvedSeedTarget));
+    setTargetErrors({});
+  }, [appliedSeedKey, resolvedSeedTarget, seedKey]);
 
   // Label the seed source only while the inputs still ARE the seed — one
   // edit and the targets are the user's, not the box's.
   const showBuyBoxSeedLabel =
     !initialTarget && seedTarget != null && !touched && seedKey === appliedSeedKey;
 
-  // Shared onChange wrapper: any edit marks the targets as the user's own.
   const edit =
-    (set: (v: string) => void) => (e: ChangeEvent<HTMLInputElement>) => {
+    (field: MaoTargetField) => (event: ChangeEvent<HTMLInputElement>) => {
       setTouched(true);
-      set(e.target.value);
-    };
+      const rawValue = event.target.value;
+      const update = applyMaoTargetInput(target, field, rawValue);
+      if (!update.ok) {
+        if (rawValue.trim()) {
+          setTargetInputs((current) => ({ ...current, [field]: rawValue }));
+        }
+        setTargetErrors((current) => ({ ...current, [field]: update.error }));
+        return;
+      }
 
-  const target: MaoTarget = useMemo(
-    () => ({
-      capRate: numberOrUndefined(capRateInput),
-      cocReturn: numberOrUndefined(cocInput),
-      monthlyCashFlow: numberOrUndefined(cashFlowInput),
-      dscr: isCashDeal ? undefined : numberOrUndefined(dscrInput),
-    }),
-    [capRateInput, cocInput, cashFlowInput, dscrInput, isCashDeal]
-  );
-  useEffect(() => {
-    onTargetChange?.(target);
-  }, [onTargetChange, target]);
+      setTargetInputs((current) => ({ ...current, [field]: rawValue }));
+      setTargetErrors((current) => {
+        const next = { ...current, [field]: undefined };
+        for (const key of Object.keys(next) as MaoTargetField[]) {
+          if (next[key] === EMPTY_MAO_TARGET_ERROR) next[key] = undefined;
+        }
+        return next;
+      });
+      setTarget(update.target);
+      onTargetChange?.(update.target);
+    };
 
   const noneSet =
     target.capRate === undefined &&
     target.cocReturn === undefined &&
     target.monthlyCashFlow === undefined &&
-    target.dscr === undefined;
+    target.dscr === undefined &&
+    target.maxPurchasePrice === undefined;
 
   const active = Boolean(values) && !noneSet;
   const mao = useMemo(() => (active ? calculateMaxAllowableOffer(values!, target) : null), [active, values, target]);
@@ -182,6 +199,7 @@ export function MaxOfferCard({
   const cocId = `${uid}-coc`;
   const cashFlowId = `${uid}-cash-flow`;
   const dscrId = `${uid}-dscr`;
+  const maxPurchasePriceId = `${uid}-max-purchase-price`;
 
   return (
     <div className="bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-6">
@@ -201,24 +219,60 @@ export function MaxOfferCard({
         make your current price work. Uses your current rent, financing, and operating assumptions.
       </p>
 
-      <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2 sm:grid-cols-4 sm:gap-4">
+      <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2 sm:grid-cols-3 sm:gap-4 xl:grid-cols-5">
         <div>
           <Label htmlFor={capRateId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
             Target Cap Rate <span className="sr-only">percent, </span><span className="font-normal lowercase tracking-normal">(opt)</span>
           </Label>
           <div className="relative">
-            <Input id={capRateId} type="number" inputMode="decimal" step="0.1" value={capRateInput} onChange={edit(setCapRateInput)} placeholder="Any" className="h-11 border-input bg-background pr-7" />
+            <Input
+              id={capRateId}
+              type="number"
+              inputMode="decimal"
+              min={MAO_TARGET_BOUNDS.capRate.min}
+              max={MAO_TARGET_BOUNDS.capRate.max}
+              step={MAO_TARGET_BOUNDS.capRate.step}
+              value={targetInputs.capRate}
+              onChange={edit("capRate")}
+              placeholder="Any"
+              aria-invalid={Boolean(targetErrors.capRate)}
+              aria-describedby={targetErrors.capRate ? `${capRateId}-error` : undefined}
+              className="h-11 border-input bg-background pr-7"
+            />
             <span aria-hidden className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
           </div>
+          {targetErrors.capRate ? (
+            <p id={`${capRateId}-error`} role="alert" className="mt-1 text-xs font-medium text-destructive">
+              {targetErrors.capRate}
+            </p>
+          ) : null}
         </div>
         <div>
           <Label htmlFor={cocId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
             Target Cash-on-Cash <span className="sr-only">percent, </span><span className="font-normal lowercase tracking-normal">(opt)</span>
           </Label>
           <div className="relative">
-            <Input id={cocId} type="number" inputMode="decimal" step="0.1" value={cocInput} onChange={edit(setCocInput)} placeholder="Any" className="h-11 border-input bg-background pr-7" />
+            <Input
+              id={cocId}
+              type="number"
+              inputMode="decimal"
+              min={MAO_TARGET_BOUNDS.cocReturn.min}
+              max={MAO_TARGET_BOUNDS.cocReturn.max}
+              step={MAO_TARGET_BOUNDS.cocReturn.step}
+              value={targetInputs.cocReturn}
+              onChange={edit("cocReturn")}
+              placeholder="Any"
+              aria-invalid={Boolean(targetErrors.cocReturn)}
+              aria-describedby={targetErrors.cocReturn ? `${cocId}-error` : undefined}
+              className="h-11 border-input bg-background pr-7"
+            />
             <span aria-hidden className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
           </div>
+          {targetErrors.cocReturn ? (
+            <p id={`${cocId}-error`} role="alert" className="mt-1 text-xs font-medium text-destructive">
+              {targetErrors.cocReturn}
+            </p>
+          ) : null}
         </div>
         <div>
           <Label htmlFor={cashFlowId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
@@ -226,8 +280,26 @@ export function MaxOfferCard({
           </Label>
           <div className="relative">
             <span aria-hidden className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">$</span>
-            <Input id={cashFlowId} type="number" inputMode="numeric" step="50" value={cashFlowInput} onChange={edit(setCashFlowInput)} placeholder="0" className="h-11 border-input bg-background pl-7" />
+            <Input
+              id={cashFlowId}
+              type="number"
+              inputMode="numeric"
+              min={MAO_TARGET_BOUNDS.monthlyCashFlow.min}
+              max={MAO_TARGET_BOUNDS.monthlyCashFlow.max}
+              step={MAO_TARGET_BOUNDS.monthlyCashFlow.step}
+              value={targetInputs.monthlyCashFlow}
+              onChange={edit("monthlyCashFlow")}
+              placeholder="0"
+              aria-invalid={Boolean(targetErrors.monthlyCashFlow)}
+              aria-describedby={targetErrors.monthlyCashFlow ? `${cashFlowId}-error` : undefined}
+              className="h-11 border-input bg-background pl-7"
+            />
           </div>
+          {targetErrors.monthlyCashFlow ? (
+            <p id={`${cashFlowId}-error`} role="alert" className="mt-1 text-xs font-medium text-destructive">
+              {targetErrors.monthlyCashFlow}
+            </p>
+          ) : null}
         </div>
         <div>
           <Label htmlFor={dscrId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
@@ -236,7 +308,55 @@ export function MaxOfferCard({
               {isCashDeal ? "(n/a — cash purchase)" : "(opt)"}
             </span>
           </Label>
-          <Input id={dscrId} type="number" inputMode="decimal" step="0.05" value={dscrInput} onChange={edit(setDscrInput)} placeholder="1.25" disabled={isCashDeal} className="h-11 border-input bg-background" />
+          <Input
+            id={dscrId}
+            type="number"
+            inputMode="decimal"
+            min={MAO_TARGET_BOUNDS.dscr.min}
+            max={MAO_TARGET_BOUNDS.dscr.max}
+            step={MAO_TARGET_BOUNDS.dscr.step}
+            value={isCashDeal ? "" : targetInputs.dscr}
+            onChange={edit("dscr")}
+            placeholder={isCashDeal ? "N/A — cash" : "1.25"}
+            disabled={isCashDeal}
+            aria-invalid={Boolean(targetErrors.dscr)}
+            aria-describedby={targetErrors.dscr ? `${dscrId}-error` : undefined}
+            className="h-11 border-input bg-background"
+          />
+          {targetErrors.dscr ? (
+            <p id={`${dscrId}-error`} role="alert" className="mt-1 text-xs font-medium text-destructive">
+              {targetErrors.dscr}
+            </p>
+          ) : null}
+        </div>
+        <div>
+          <Label htmlFor={maxPurchasePriceId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+            Max Purchase Price <span className="font-normal lowercase tracking-normal">(opt)</span>
+          </Label>
+          <div className="relative">
+            <span aria-hidden className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">$</span>
+            <Input
+              id={maxPurchasePriceId}
+              type="number"
+              inputMode="numeric"
+              min={MAO_TARGET_BOUNDS.maxPurchasePrice.min}
+              max={MAO_TARGET_BOUNDS.maxPurchasePrice.max}
+              step={MAO_TARGET_BOUNDS.maxPurchasePrice.step}
+              value={targetInputs.maxPurchasePrice}
+              onChange={edit("maxPurchasePrice")}
+              placeholder="Any"
+              aria-invalid={Boolean(targetErrors.maxPurchasePrice)}
+              aria-describedby={
+                targetErrors.maxPurchasePrice ? `${maxPurchasePriceId}-error` : undefined
+              }
+              className="h-11 border-input bg-background pl-7"
+            />
+          </div>
+          {targetErrors.maxPurchasePrice ? (
+            <p id={`${maxPurchasePriceId}-error`} role="alert" className="mt-1 text-xs font-medium text-destructive">
+              {targetErrors.maxPurchasePrice}
+            </p>
+          ) : null}
         </div>
       </div>
 

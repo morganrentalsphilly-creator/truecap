@@ -143,7 +143,7 @@ export function HeroAddressForm() {
           className="group inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] disabled:opacity-70 sm:h-14"
         >
           <Calculator className="size-4" />
-          Analyze this property free
+          Analyze a Deal
           <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
         </button>
       </form>
@@ -173,7 +173,7 @@ export function HeroAddressForm() {
           className="group inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-4 py-2 font-medium text-muted-foreground shadow-sm transition-colors hover:border-primary/40 hover:text-foreground"
         >
           <Sparkles className="size-4" />
-          No address yet? See a sample analysis
+          View a Sample Decision
           <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
         </button>
         {/* Pill treatment (was a bare text link): sitting beside two real

@@ -41,7 +41,11 @@ import {
   describeMaoTarget,
   solveBuyBoxClearingPrice,
 } from "@/lib/mao-targets";
-import { calculateMaxAllowableOffer, meetsTarget } from "@/lib/max-allowable-offer";
+import {
+  calculateMaxAllowableOffer,
+  meetsTarget,
+  type MaoTarget,
+} from "@/lib/max-allowable-offer";
 
 /**
  * The offer line for a shopping-stage deal:
@@ -55,11 +59,13 @@ import { calculateMaxAllowableOffer, meetsTarget } from "@/lib/max-allowable-off
 /**
  * What the number is measured against. The distinction is load-bearing: the
  * UI may only say "your buy box" when it really IS the user's box.
+ *   - "saved-target" — solved against the exact target persisted with this
+ *     analysis after the user tuned it.
  *   - "buy-box" — solved against the user's own criteria.
  *   - "default" — solved against TrueCap's canonical bar (break-even cash flow
  *     + DSCR 1.25) because the user's boxes set no price-solvable target.
  */
-export type DealOfferBasis = "buy-box" | "default";
+export type DealOfferBasis = "saved-target" | "buy-box" | "default";
 
 export type DealOfferLine =
   | { kind: "cut"; maxPrice: number; asking: number | null; discountPct: number | null; basis: DealOfferBasis }
@@ -73,6 +79,10 @@ export type DealOfferLine =
 
 export type DealOfferResult = {
   offer: DealOfferLine | null;
+  /** Exact return target used by the MAO solver. Null when no offer is shown
+   *  or when the line is driven only by a non-MAO rule such as a buy-box
+   *  purchase-price cap. */
+  resolvedMaoTarget: MaoTarget | null;
   /** The one number-carrying line from the deciding box, e.g.
    *  "Biggest gap — Cap rate: 5.2% vs ≥ 6.0% (0.8pp short)". */
   personalLine: string | null;
@@ -96,21 +106,47 @@ function toBuyBoxPropertyType(pt: unknown): BuyBoxPropertyType | null {
  * @param opts.isShoppingStage  false for owned/closed/passed deals, which have
  *                    no offer to make — the offer line is suppressed but the
  *                    fit/personalLine still compute.
+ * @param opts.persistedMaoTarget  a caller-normalized target saved with this
+ *                    analysis. When present it is the authoritative price-
+ *                    ceiling basis; buy boxes still compute fit separately.
  */
 export function computeDealOfferLine(
   formValues: InvestmentFormValues,
   activeBuyBoxes: NamedBuyBox[],
-  opts: { isShoppingStage: boolean; dealClientId?: string | null } = { isShoppingStage: true },
+  opts: {
+    isShoppingStage: boolean;
+    dealClientId?: string | null;
+    persistedMaoTarget?: MaoTarget | null;
+  } = { isShoppingStage: true },
 ): DealOfferResult {
   let analysis;
   try {
     analysis = calculateAnalysis(formValues);
   } catch {
     // Unparseable/legacy snapshot — nothing to show, never throw to the caller.
-    return { offer: null, personalLine: null, fit: null, basisLabel: "" };
+    return {
+      offer: null,
+      resolvedMaoTarget: null,
+      personalLine: null,
+      fit: null,
+      basisLabel: "",
+    };
   }
 
   const isCashPurchase = analysis.monthlyPayment <= 0;
+  // DSCR has no meaning without debt service. Mirror the workspace restore
+  // path by omitting it for cash deals; if it was the only saved criterion,
+  // fall through to the normal buy-box/default resolution instead of showing
+  // an empty or misleading saved-target basis.
+  const persistedMaoTarget = opts.persistedMaoTarget
+    ? { ...opts.persistedMaoTarget }
+    : null;
+  if (persistedMaoTarget && isCashPurchase) delete persistedMaoTarget.dscr;
+  const usablePersistedMaoTarget =
+    persistedMaoTarget &&
+    Object.values(persistedMaoTarget).some((value) => value !== undefined)
+      ? persistedMaoTarget
+      : null;
 
   let fit: BuyBoxFitSummary | null = null;
   let personalLine: string | null = null;
@@ -148,6 +184,7 @@ export function computeDealOfferLine(
   }
 
   let offer: DealOfferLine | null = null;
+  let resolvedMaoTarget: MaoTarget | null = null;
   let basisLabel = "";
   if (opts.isShoppingStage) {
     const asking =
@@ -155,13 +192,46 @@ export function computeDealOfferLine(
         ? formValues.purchasePrice
         : null;
 
-    // THE VERDICT COMES FROM THE REAL FIT, not from the MAO target. A MaoTarget
-    // can only carry return thresholds (cap rate / CoC / cash flow / DSCR), so
-    // deciding "clears" from meetsTarget() would ignore the box's own budget
-    // cap, property types and markets — and cheerfully report "clears your buy
-    // box" on a deal the very same card marks as missing it.
-    if (fit && decidingBox) {
+    // A tuned target persisted with the analysis is the authoritative price
+    // ceiling basis on every saved-deal surface. Buy-box fit above remains
+    // independent: a deal may hit its tuned return targets while missing a
+    // market/property rule, and those two facts must not be conflated.
+    if (usablePersistedMaoTarget) {
+      resolvedMaoTarget = usablePersistedMaoTarget;
+      basisLabel = `your saved targets — ${describeMaoTarget(usablePersistedMaoTarget)}`;
+      let clearsAtAsking = false;
+      try {
+        clearsAtAsking = meetsTarget(analysis, usablePersistedMaoTarget);
+      } catch {
+        // Fall through to the solver alone. A bad row never crashes the list.
+      }
+      const mao = calculateMaxAllowableOffer(formValues, usablePersistedMaoTarget);
+      if (clearsAtAsking) {
+        offer = { kind: "clears", maxPrice: mao?.maxPrice ?? null, basis: "saved-target" };
+      } else if (mao) {
+        const discountPct =
+          asking != null && asking > mao.maxPrice
+            ? Math.round(((asking - mao.maxPrice) / asking) * 100)
+            : null;
+        offer = {
+          kind: "cut",
+          maxPrice: mao.maxPrice,
+          asking,
+          discountPct,
+          basis: "saved-target",
+        };
+      }
+      // THE VERDICT COMES FROM THE REAL FIT, not from the MAO target. A MaoTarget
+      // can only carry return thresholds (cap rate / CoC / cash flow / DSCR), so
+      // deciding "clears" from meetsTarget() would ignore the box's own budget
+      // cap, property types and markets — and cheerfully report "clears your buy
+      // box" on a deal the very same card marks as missing it.
+    } else if (fit && decidingBox) {
       const target = chooseMaoTargetFromBuyBox(decidingBox.box, { isCashPurchase });
+      // The target carries both return thresholds and the box's hard budget,
+      // so Save/Share/PDF reproduce this exact ceiling instead of silently
+      // solving an uncapped variant.
+      resolvedMaoTarget = target;
       basisLabel = target
         ? `your “${decidingBox.box.name}” buy box — ${describeMaoTarget(target)}`
         : `your “${decidingBox.box.name}” buy box`;
@@ -194,6 +264,7 @@ export function computeDealOfferLine(
       // No usable box shaped a target — fall back to TrueCap's canonical bar,
       // and mark the basis so the UI never calls this "your buy box".
       const maoTarget = buildMaoTarget(null, { isCashPurchase });
+      resolvedMaoTarget = maoTarget;
       basisLabel = describeMaoTarget(maoTarget);
       let clearsAtAsking = false;
       try {
@@ -214,5 +285,5 @@ export function computeDealOfferLine(
     }
   }
 
-  return { offer, personalLine, fit, basisLabel };
+  return { offer, resolvedMaoTarget, personalLine, fit, basisLabel };
 }

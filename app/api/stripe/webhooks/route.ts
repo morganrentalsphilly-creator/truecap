@@ -14,6 +14,10 @@ import {
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { captureServerEvent } from "@/lib/posthog-server";
 import { scheduleTrialOnboardingEmails } from "@/lib/email/trial-emails";
+import {
+  completeSubscriptionCheckoutIntentFromWebhook,
+  expireSubscriptionCheckoutIntentFromWebhook,
+} from "@/lib/stripe/subscription-checkout-intent";
 
 export const runtime = "nodejs";
 
@@ -165,16 +169,26 @@ export async function POST(req: Request) {
         }
         const checkoutSyncResult = await handleCheckoutSessionCompleted(admin, session);
         syncSkippedReason = checkoutSyncResult.synced ? null : checkoutSyncResult.reason;
-        // Pack credit redemption: the billing action stamped the eligible
-        // claim id on the session; mark it applied so it can't be redeemed
-        // twice. Best-effort — a failure here leaves the claim 'eligible'
-        // (worst case: one extra $5 credit inside its 7-day window), which is
-        // preferable to failing a successfully-synced subscription event.
-        // The status guard keeps this inside the DB's credit state machine.
-        if (checkoutSyncResult.synced && session.metadata?.pack_credit_claim_id) {
-          const creditedUserId =
-            session.client_reference_id || session.metadata?.user_id || null;
-          const { error: creditApplyError } = await admin
+        const completedIntent = checkoutSyncResult.synced
+          ? await completeSubscriptionCheckoutIntentFromWebhook(admin, session)
+          : null;
+        // New Sessions derive credit authority from the exclusive DB
+        // reservation, not attacker-visible metadata alone. Sessions created
+        // during the rolling deploy have no intent id and retain the legacy
+        // metadata path. The eligible→applied CAS makes retries idempotent.
+        const reservedPackCreditClaimId = completedIntent
+          ? completedIntent.pack_credit_claim_id
+          : session.metadata?.checkout_intent_id
+            ? null
+            : session.metadata?.pack_credit_claim_id ?? null;
+        if (checkoutSyncResult.synced && reservedPackCreditClaimId) {
+          const creditedUserId = completedIntent?.user_id ?? [
+            session.client_reference_id,
+            session.metadata?.user_id,
+          ].find((candidate): candidate is string =>
+            typeof candidate === "string" && SUPABASE_USER_ID_RE.test(candidate)
+          ) ?? null;
+          const creditUpdate = admin
             .from("one_time_pdf_purchase_claims")
             .update({
               pro_credit_status: "applied",
@@ -182,25 +196,31 @@ export async function POST(req: Request) {
               pro_credit_reference: session.id,
               ...(creditedUserId ? { pro_credit_user_id: creditedUserId } : {}),
             })
-            .eq("id", session.metadata.pack_credit_claim_id)
+            .eq("id", reservedPackCreditClaimId)
             .eq("pro_credit_status", "eligible");
+          const boundCreditUpdate = creditedUserId
+            ? creditUpdate.or(
+                `user_id.eq.${creditedUserId},pro_credit_user_id.eq.${creditedUserId}`
+              )
+            : creditUpdate;
+          const { data: appliedCredit, error: creditApplyError } = await boundCreditUpdate
+            .select("id")
+            .maybeSingle();
           if (creditApplyError) {
             Sentry.captureMessage("Pack credit eligible→applied transition failed", {
               level: "error",
               tags: { feature: "billing-webhook", stage: "pack-credit-apply" },
               extra: {
-                claim_id: session.metadata.pack_credit_claim_id,
+                claim_id: reservedPackCreditClaimId,
                 database_code: creditApplyError.code ?? "unknown",
               },
             });
-          } else if (creditedUserId) {
+          } else if (appliedCredit && creditedUserId) {
             await captureServerEvent({
               distinctId: creditedUserId,
-              event: "pack_credit_applied",
+              event: "upgrade_credit_applied",
               properties: {
-                claim_id: session.metadata.pack_credit_claim_id,
-                plan_slug: session.metadata?.plan_slug ?? undefined,
-                stripe_session_id: session.id,
+                destination_plan: session.metadata?.plan_slug ?? "unknown",
               },
             });
           }
@@ -238,7 +258,21 @@ export async function POST(req: Request) {
             distinctId,
             event: "subscription_activated",
             properties: {
-              plan_slug: session.metadata?.plan_slug ?? undefined,
+              plan: session.metadata?.plan_slug ?? "unknown",
+              interval: session.metadata?.plan_slug?.endsWith("_annual")
+                ? "annual"
+                : "monthly",
+              trial_granted: session.metadata?.trial_granted === "true",
+            },
+          });
+          await captureServerEvent({
+            distinctId,
+            event: "subscription_started",
+            properties: {
+              plan: session.metadata?.plan_slug ?? "unknown",
+              interval: session.metadata?.plan_slug?.endsWith("_annual")
+                ? "annual"
+                : "monthly",
               trial_granted: session.metadata?.trial_granted === "true",
             },
           });
@@ -329,7 +363,10 @@ export async function POST(req: Request) {
           await captureServerEvent({
             distinctId: cancelDistinctId,
             event: "subscription_cancelled",
-            properties: {},
+            properties: {
+              plan: cancelledSub.metadata?.plan_slug ?? "unknown",
+              effective_timing: "immediate",
+            },
           });
         }
         break;
@@ -367,6 +404,7 @@ export async function POST(req: Request) {
         if (session.metadata?.purpose === "one_time_pdf") {
           break;
         }
+        await expireSubscriptionCheckoutIntentFromWebhook(admin, session);
         // PostHog event so the funnel shows the drop-off.
         const abandonDistinctId = [
           session.client_reference_id,

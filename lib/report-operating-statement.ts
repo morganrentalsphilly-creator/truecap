@@ -3,7 +3,7 @@ import type { AnalysisResult } from "@/lib/calc-analysis";
 /**
  * The Year-1 operating statement, shaped for the PDF.
  *
- * WHY: the report is sold as lender-ready and has a dedicated `mode:
+ * WHY: the report is prepared for lender review and has a dedicated `mode:
  * "lender"` variant, yet it never printed NOI, the loan amount, the monthly
  * payment, PMI, or cash to close — the first five numbers a lender asks for.
  * Worse, they were not recoverable from what WAS printed: the 10-year table's

@@ -19,6 +19,9 @@ import type { ReportComps } from "@/lib/report-comps";
 import { ReadOnlyAnalysisView } from "@/components/investcalc/read-only-analysis-view";
 import { TrackSharedDealView } from "@/components/analytics/track-shared-deal-view";
 import { LeadCaptureForm } from "@/components/investcalc/lead-capture-form";
+import type { MaoTarget } from "@/lib/max-allowable-offer";
+import type { OfferCeilingAccessPayload } from "@/lib/offer-ceiling-access-contract";
+import type { OfferCeilingTargetSource } from "@/lib/offer-ceiling-contract";
 
 export type SharedDealLeadCapture = {
   ownerId: string;
@@ -33,7 +36,13 @@ export function SharedDealShell({
   comps,
   agent,
   showProAnalysis,
+  maoTarget,
+  maoTargetSource,
+  offerCeilingAccess,
   leadCapture,
+  methodologyVersion,
+  legacyMethodologyWarning = false,
+  addressIncluded = true,
 }: {
   values: InvestmentFormValues;
   result: AnalysisResult;
@@ -41,13 +50,22 @@ export function SharedDealShell({
   agent: PublicAgentBranding | null;
   /** Pro analysis follows the verified creator's current paid entitlement. */
   showProAnalysis: boolean;
+  /** Exact acquisition criteria captured with an opaque share, when present. */
+  maoTarget?: MaoTarget;
+  /** Frozen provenance for the captured acquisition criteria. */
+  maoTargetSource?: OfferCeilingTargetSource;
+  /** Server-authorized exact result or coarse preview. */
+  offerCeilingAccess?: OfferCeilingAccessPayload | null;
   /** Present only when owner attribution is VERIFIED (legacy HMAC or a
    *  server-backed share row) — powers the co-branded lead form. */
   leadCapture?: SharedDealLeadCapture;
+  methodologyVersion?: string;
+  legacyMethodologyWarning?: boolean;
+  addressIncluded?: boolean;
 }) {
   return (
     <div className="min-h-screen bg-background">
-      <TrackSharedDealView hasAddress={Boolean(values.address)} />
+      <TrackSharedDealView hasAddress={addressIncluded} />
       {/* Top banner — agent-branded when a Pro owner shared it, else TrueCap. */}
       {agent ? (
         <div
@@ -89,6 +107,16 @@ export function SharedDealShell({
               {values.yearBuilt ? ` · built ${values.yearBuilt}` : ""}
             </p>
           )}
+          <p className="mt-2 text-xs text-muted-foreground">
+            TrueCap Underwriting Standard v{methodologyVersion ?? result.methodologyVersion}
+          </p>
+          {legacyMethodologyWarning ? (
+            <p role="status" className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs leading-relaxed text-foreground">
+              Legacy share: this link did not capture a formula-version pin. It has been
+              recalculated with the current standard and should be refreshed before it is
+              used for a decision.
+            </p>
+          ) : null}
         </header>
 
         <ReadOnlyAnalysisView
@@ -96,6 +124,10 @@ export function SharedDealShell({
           result={result}
           comps={comps}
           showProAnalysis={showProAnalysis}
+          maoTarget={maoTarget}
+          maoTargetSource={maoTargetSource}
+          offerCeilingAccess={offerCeilingAccess}
+          addressIncluded={addressIncluded}
         />
 
         {/* Agent lead capture (co-branded shares) OR the generic Pro upsell. */}
@@ -115,7 +147,7 @@ export function SharedDealShell({
               <Lock className="w-5 h-5 text-primary mt-0.5 shrink-0" />
               <div className="min-w-0 flex-1">
                 <div className="font-bold text-foreground">
-                  See 10-year projections, illustrative tax impact, modeled exit comparisons, and Deal Score
+                  See 10-year projections, illustrative tax impact, modeled exit comparisons, and the secondary Screening Index
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
                   The full analysis with multi-year cash flow projections,

@@ -92,9 +92,9 @@ describe("1700 W Erie shared sample", () => {
     const launch = source.slice(launchStart, launchEnd);
 
     expect(launch).toContain(
-      "setSampleMaoTarget({ ...SAMPLE_DEAL_FIXTURE.maoTarget })"
+      "setAnalysisMaoTarget({ ...SAMPLE_DEAL_FIXTURE.maoTarget })"
     );
-    expect(launch.indexOf("setSampleMaoTarget")).toBeLessThan(
+    expect(launch.indexOf("setAnalysisMaoTarget")).toBeLessThan(
       launch.indexOf("form.handleSubmit")
     );
   });

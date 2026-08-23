@@ -54,16 +54,16 @@ import { VERIFIED_CASE_STUDIES } from "@/lib/verified-case-studies";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  // Outcome-led title per the 2026-08 repositioning (founder-directed):
-  // the homepage sells the decision ("know your Max Offer"), while the
+  // Outcome-led title per the approved Rental Acquisition Decision System
+  // positioning; keyword-led /tools pages remain the SEO acquisition layer.
   // /tools/* pages keep their keyword-led "Free ... Calculator" titles as
   // the SEO traffic source. `absolute` opts out of the layout's
   // "%s | TrueCap" template.
   title: {
-    absolute: "TrueCap — Know Your Max Offer on Any Rental in 60 Seconds",
+    absolute: "TrueCap — Know Your Number Before You Make the Offer",
   },
   description:
-    "Never overpay for a rental again. Enter any address for a sourced 60-second analysis; Pro solves the exact maximum offer that still hits your targets.",
+    "Paste a rental listing. See whether it fits your Buy Box, the highest price that works, and which assumptions you must verify.",
   keywords: [
     "rental property analysis",
     "investment property calculator",
@@ -80,9 +80,9 @@ export const metadata: Metadata = {
     // Keep og:title aligned with the <title> — Google falls back to
     // og:title when rewriting SERP titles, so a mismatched og:title
     // resurfaces stale phrasing on brand queries.
-    title: "TrueCap — Know Your Max Offer on Any Rental in 60 Seconds",
+    title: "TrueCap — Know Your Number Before You Make the Offer",
     description:
-      "Never overpay for a rental again. Screen the property, check it against your criteria, stress-test the downside, and know the highest price that still works.",
+      "A rental acquisition decision system for Buy Box fit, an Offer Ceiling under explicit targets, downside risk, and verification.",
     url: "/",
     type: "website",
     // Re-declare images because page-level openGraph fully replaces the
@@ -99,9 +99,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "TrueCap — Know Your Max Offer on Any Rental in 60 Seconds",
+    title: "TrueCap — Know Your Number Before You Make the Offer",
     description:
-      "Never overpay for a rental again. Screen the property, check it against your criteria, stress-test the downside, and know the highest price that still works.",
+      "A rental acquisition decision system for Buy Box fit, an Offer Ceiling under explicit targets, downside risk, and verification.",
     images: ["/home.jpg"],
   },
 };
@@ -125,7 +125,7 @@ export default function Home() {
         operatingSystem: "Web",
         url: siteUrl,
         description:
-          "A rental acquisition decision engine for property screening, editable underwriting, Buy Box evaluation, downside analysis, and Max Offer calculations.",
+          "A Rental Acquisition Decision System for property screening, editable underwriting, Buy Box evaluation, Offer Ceiling calculations, downside analysis, and verification.",
         offers: {
           "@type": "Offer",
           price: "0",

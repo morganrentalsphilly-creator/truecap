@@ -65,7 +65,7 @@ export async function schedulePackCreditEmails(input: {
         purchase is credited to your first Pro invoice automatically at
         checkout. No code to remember.</p>
         <p>Pro is the repeat version of the report you just bought: Max Offer,
-        Buy Box verdict, downside stress test, and lender-ready exports on
+        Buy Box verdict, downside stress test, and lender-facing review exports on
         every deal — with a ${escapeHtml(String(TRIAL_DAYS))}-day free trial for new
         subscribers${
           getMarketingOfferConfig().guaranteeEnabled

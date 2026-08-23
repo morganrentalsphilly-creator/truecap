@@ -74,13 +74,13 @@ describe("chooseMaoTargetFromBuyBox", () => {
   it("returns null when the box wouldn't shape the target (no silent default attribution)", () => {
     expect(chooseMaoTargetFromBuyBox(null, { isCashPurchase: false })).toBeNull();
     expect(chooseMaoTargetFromBuyBox(EMPTY_BUY_BOX, { isCashPurchase: false })).toBeNull();
-    // Price/type/market-only box: buildMaoTarget would fall back to defaults.
+    // A hard budget is itself a price-solvable acquisition target.
     expect(
       chooseMaoTargetFromBuyBox(
         box({ maxPurchasePrice: 300_000, targetStates: ["PA"] }),
         { isCashPurchase: false }
       )
-    ).toBeNull();
+    ).toEqual({ maxPurchasePrice: 300_000 });
     // DSCR-only box on a cash deal: its sole threshold is dropped.
     expect(chooseMaoTargetFromBuyBox(box({ minDscr: 1.3 }), { isCashPurchase: true })).toBeNull();
   });

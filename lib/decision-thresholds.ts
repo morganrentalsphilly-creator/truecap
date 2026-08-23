@@ -135,7 +135,8 @@ function hasAnyTarget(target: MaoTarget): boolean {
     target.capRate !== undefined ||
     target.cocReturn !== undefined ||
     target.monthlyCashFlow !== undefined ||
-    target.dscr !== undefined
+    target.dscr !== undefined ||
+    target.maxPurchasePrice !== undefined
   );
 }
 

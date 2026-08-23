@@ -78,6 +78,100 @@ describe("computeDealOfferLine", () => {
     expect(r.offer).toBeNull();
     expect(r.fit).toBeNull();
   });
+
+  it("uses the exact persisted Tune target ahead of a buy-box target", () => {
+    const persistedMaoTarget = { monthlyCashFlow: 750, dscr: 1.25 };
+    const r = computeDealOfferLine(deal, [box({ minCapRatePct: 20 })], {
+      isShoppingStage: true,
+      persistedMaoTarget,
+    });
+    const solved = calculateMaxAllowableOffer(deal, persistedMaoTarget);
+
+    expect(r.fit?.anyPass).toBe(false); // buy-box fit still reports independently
+    expect(r.offer?.kind).toBe("cut");
+    if (r.offer?.kind === "cut") {
+      expect(r.offer.basis).toBe("saved-target");
+      expect(r.offer.maxPrice).toBe(solved?.maxPrice);
+    }
+    expect(r.basisLabel).toBe("your saved targets — cash flow ≥ $750/mo · DSCR ≥ 1.25");
+  });
+
+  it("does not let an unrelated market rule block a persisted target ceiling", () => {
+    const r = computeDealOfferLine(
+      deal,
+      [box({ minCapRatePct: 1, targetStates: ["OH"] })],
+      {
+        isShoppingStage: true,
+        persistedMaoTarget: { monthlyCashFlow: 750, dscr: 1.25 },
+      }
+    );
+
+    expect(r.fit?.anyPass).toBe(false);
+    expect(r.offer?.kind).not.toBe("blocked");
+    if (r.offer && r.offer.kind !== "blocked") {
+      expect(r.offer.basis).toBe("saved-target");
+    }
+  });
+
+  it("drops a saved DSCR-only target for a cash purchase instead of labeling an ignored criterion", () => {
+    const cashDeal = { ...deal, downPaymentPct: 100 };
+    const r = computeDealOfferLine(cashDeal, [], {
+      isShoppingStage: true,
+      persistedMaoTarget: { dscr: 2 },
+    });
+
+    expect(r.offer?.kind).not.toBe("blocked");
+    if (r.offer && r.offer.kind !== "blocked") {
+      expect(r.offer.basis).toBe("default");
+    }
+    expect(r.basisLabel).toBe("break-even cash flow");
+  });
+
+  it("uses only the assigned client's buy box for a target-less legacy deal", () => {
+    const otherClientBox = box({
+      id: "box-other-client",
+      name: "Other client",
+      clientId: "client-a",
+      minCapRatePct: 20,
+    });
+    const assignedClientBox = box({
+      id: "box-assigned-client",
+      name: "Assigned client",
+      clientId: "client-b",
+      minCashFlowMonthly: 250,
+    });
+    const expectedTarget = buildMaoTarget(assignedClientBox, { isCashPurchase: false });
+    const expected = calculateMaxAllowableOffer(deal, expectedTarget);
+
+    const r = computeDealOfferLine(deal, [otherClientBox, assignedClientBox], {
+      isShoppingStage: true,
+      dealClientId: "client-b",
+    });
+
+    expect(r.basisLabel).toContain("Assigned client");
+    expect(r.basisLabel).not.toContain("Other client");
+    expect(r.resolvedMaoTarget).toEqual(expectedTarget);
+    if (r.offer && r.offer.kind !== "blocked") {
+      expect(r.offer.maxPrice).toBe(expected?.maxPrice);
+    }
+  });
+
+  it("preserves a Buy Box price cap with its return target on every later surface", () => {
+    const cappedBox = box({
+      minCashFlowMonthly: 250,
+      maxPurchasePrice: 150_000,
+    });
+
+    const r = computeDealOfferLine(deal, [cappedBox], {
+      isShoppingStage: true,
+    });
+
+    expect(r.offer?.kind).not.toBe("blocked");
+    expect(r.resolvedMaoTarget).toEqual({
+      monthlyCashFlow: 250,
+      maxPurchasePrice: 150_000,
+    });
+  });
 });
 
 describe("the offer line never contradicts the buy-box verdict (audit regressions)", () => {

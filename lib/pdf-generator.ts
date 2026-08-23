@@ -3,7 +3,6 @@
 // changed — silently failing PDF export.
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
-import { recommendationLabel } from "@/lib/deal-score";
 import { formatRoiHeadline } from "@/lib/extreme-value-format";
 import type { ReportMode } from "@/lib/pdf-export-constants";
 import type { BuyBoxPdfVerdict } from "@/lib/pdf-buy-box";
@@ -31,7 +30,7 @@ export interface ReportData {
   property: {
     address: string;
     type: string;
-    yearBuilt: number;
+    yearBuilt: number | null;
     purchasePrice: number;
     template: string;
   };
@@ -87,6 +86,16 @@ export interface ReportData {
     taxSavings: number;
     afterTaxCF: number;
   };
+  /** Primary acquisition decision. Canonical server-built reports always
+   * include it; optional only so frozen legacy payloads remain renderable. */
+  decision?: {
+    label: "Pursue" | "Conditional — verify first" | "Pass at this price";
+    readiness: "Ready" | "Verify first" | "Screening only";
+    clearsSelectedTargets: boolean;
+    targetSource: "buy-box" | "screening-defaults" | "selected-targets";
+    targetBasis: string;
+    rationale: string;
+  };
   /** Deterministic input-readiness evidence captured when the report is
    * generated. Optional for legacy/cached report payloads. */
   inputConfidence?: {
@@ -102,13 +111,25 @@ export interface ReportData {
       reason: string;
     }>;
   } | null;
-  /** Deterministic acquisition threshold included in every complete report.
-   *  A null value means the canonical target was unreachable inside the
-   *  solver's supported price range; the report must never invent a number. */
+  /** Deterministic acquisition threshold for reports whose methodology can be
+   *  solved by the running engine. A null value means the target was
+   *  unreachable inside the supported price range. Undefined means the block
+   *  was intentionally omitted (for example, a frozen incompatible snapshot
+   *  that did not persist its own solved acquisition result). */
   maxOffer?: {
     maxPrice: number;
     basis: string;
+    source?: "buy-box" | "screening-defaults" | "selected-targets";
+    sourceLabel?: string;
     currentPriceGap: number;
+    bindingConstraints?: string[];
+    nextConstraint?: string | null;
+    range?: {
+      lower: number | null;
+      base: number;
+      upper: number | null;
+      label: string;
+    };
     achieved: {
       monthlyCashFlow: number;
       cocReturn: number;
@@ -256,6 +277,10 @@ function formatPropertyType(type: string): string {
   return PROPERTY_TYPE_LABELS[type] ?? type;
 }
 
+function formatYearBuilt(yearBuilt: number | null): string {
+  return yearBuilt == null ? "Unknown" : String(yearBuilt);
+}
+
 /**
  * Splits an address into "primary" (street) and "secondary" (city, state,
  * zip, country) on the first comma. Used to render the hero panel with
@@ -279,21 +304,6 @@ function splitAddress(address: string): {
 const setFill = (doc: jsPDF, hex: string) => doc.setFillColor(...hexToRgb(hex));
 const setStroke = (doc: jsPDF, hex: string) => doc.setDrawColor(...hexToRgb(hex));
 const setText = (doc: jsPDF, hex: string) => doc.setTextColor(...hexToRgb(hex));
-
-function getRecommendationRiskTextColor(recommendation: string, risk: string): string {
-  const normalizedRecommendation = recommendation.trim().toLowerCase();
-  const normalizedRisk = risk.trim().toLowerCase();
-
-  if (normalizedRecommendation === "avoid" || normalizedRisk === "high risk") return COLOR.danger;
-  if (normalizedRecommendation === "risky" || normalizedRisk === "medium risk" || normalizedRisk === "moderate") {
-    return COLOR.warn;
-  }
-  if (normalizedRisk === "balanced" || normalizedRisk === "low return" || normalizedRecommendation === "neutral") {
-    return COLOR.warn;
-  }
-  if (normalizedRecommendation === "buy") return COLOR.primary;
-  return COLOR.success;
-}
 
 // getRecommendationPillColor + getRiskPillColor were removed when the
 // 3 verdict pills inside the hero panel were cut. getScorePillColor
@@ -776,7 +786,7 @@ function drawScoreGauge(
  * with the body of the report.
  */
 function buildThesis(d: ReportData): string {
-  const r = (d.performance.rationale || "").trim();
+  const r = (d.decision?.rationale || d.performance.rationale || "").trim();
   if (!r) return "";
   // Split on sentence terminators that are followed by whitespace or end of
   // string, so a decimal like "1.28 DSCR" is NOT treated as a sentence break
@@ -786,6 +796,28 @@ function buildThesis(d: ReportData): string {
   if (out.length < 90 && parts[1]) out = `${out} ${parts[1].trim()}`.trim();
   if (out.length > 230) out = `${out.slice(0, 227).trimEnd()}…`;
   return out;
+}
+
+function reportDecision(d: ReportData): NonNullable<ReportData["decision"]> {
+  if (d.decision) return d.decision;
+  // Legacy direct-render payloads predate the decision contract. Keep them
+  // readable without claiming that their Screening Index is the new primary
+  // acquisition decision.
+  return {
+    label: "Conditional — verify first",
+    readiness: "Screening only",
+    clearsSelectedTargets: false,
+    targetSource: "screening-defaults",
+    targetBasis: d.maxOffer?.basis ?? "legacy screening criteria",
+    rationale:
+      "Legacy screening output. Verify the material assumptions and rerun under the current decision standard before pursuing.",
+  };
+}
+
+function decisionColor(decision: NonNullable<ReportData["decision"]>): string {
+  if (decision.label === "Pursue") return COLOR.successText;
+  if (decision.label === "Pass at this price") return COLOR.danger;
+  return COLOR.warnText;
 }
 
 /**
@@ -901,7 +933,7 @@ function pageCover(
   doc.setFontSize(10.5);
   const unitsLabel = d.units.length === 1 ? "1 unit" : `${d.units.length} units`;
   doc.text(
-    `${formatPropertyType(d.property.type)}   ·   Built ${d.property.yearBuilt}   ·   ${unitsLabel}   ·   ${fmtCurrency(d.property.purchasePrice)}`,
+    `${formatPropertyType(d.property.type)}   ·   Built ${formatYearBuilt(d.property.yearBuilt)}   ·   ${unitsLabel}   ·   ${fmtCurrency(d.property.purchasePrice)}`,
     M.left,
     y
   );
@@ -914,7 +946,8 @@ function pageCover(
   // "AI" was also simply untrue — lib/deal-score.ts's buildExplanation is a
   // deterministic rule tree, and calling a rule tree "AI" invites a reader to
   // discount a number that is actually reproducible.
-  const tierColor = getRecommendationRiskTextColor(d.performance.recommendation, d.performance.risk);
+  const decision = reportDecision(d);
+  const tierColor = decisionColor(decision);
   const thesis = buildThesis(d);
   const panelX = M.left;
   const panelW = SAFE.w;
@@ -925,7 +958,7 @@ function pageCover(
   doc.setFontSize(11);
   const thesisLines = (doc.splitTextToSize(thesis, textW) as string[]).slice(0, 4);
   const thesisH = thesisLines.length * 11 * 1.4;
-  const panelH = Math.round(152 + thesisH);
+  const panelH = Math.round(152 + thesisH + (d.maxOffer ? 12 : 0));
 
   setFill(doc, COLOR.cardSoft);
   setStroke(doc, COLOR.border);
@@ -940,7 +973,7 @@ function pageCover(
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
   doc.setCharSpace(0.8);
-  doc.text("UNDERWRITING VERDICT", panelX + 20, py);
+  doc.text("ACQUISITION DECISION", panelX + 20, py);
   doc.setCharSpace(0);
   drawScoreGauge(doc, {
     rightX: panelX + panelW - 20,
@@ -955,7 +988,7 @@ function pageCover(
   doc.setFont("helvetica", "bold");
   doc.setFontSize(17);
   doc.text(
-    `${recommendationLabel(d.performance.recommendation)} — ${d.performance.risk}`,
+    decision.label,
     panelX + 20,
     py
   );
@@ -967,15 +1000,21 @@ function pageCover(
   doc.text(thesisLines, panelX + 20, py, { lineHeightFactor: 1.4 });
   py += thesisH + 22;
 
-  // Four acquisition answers across the foot of the panel. The price ceiling belongs
-  // on the cover of the paid decision package—not buried as a small metric.
+  // Acquisition answers across the foot of the panel. When the methodology is
+  // compatible, the price ceiling belongs on the cover—not buried as a small
+  // metric. Frozen incompatible snapshots omit it instead of mixing engines.
   const metrics: Array<[string, string]> = [
     ["MONTHLY CASH FLOW", fmtCurrency(d.performance.monthlyCashFlow, true)],
     ["CAP RATE", fmtPct(d.performance.capRate)],
     ["CASH-ON-CASH", fmtPct(d.performance.cocReturn)],
-    ["PRICE CEILING", d.maxOffer ? fmtCurrency(d.maxOffer.maxPrice) : "Not solvable"],
   ];
-  const mColW = (panelW - 40) / 4;
+  if (d.maxOffer !== undefined) {
+    metrics.push([
+      "PRICE CEILING",
+      d.maxOffer ? fmtCurrency(d.maxOffer.maxPrice) : "Not solvable",
+    ]);
+  }
+  const mColW = (panelW - 40) / metrics.length;
   metrics.forEach((m, i) => {
     const mx = panelX + 20 + i * mColW;
     setText(doc, COLOR.sub);
@@ -987,7 +1026,7 @@ function pageCover(
     // MAX OFFER picks up the BRAND colour, not a hardcoded TrueCap blue — on
     // a white-label pack this cell was another company's blue sitting between
     // three neutral ones, for no reason a reader could infer.
-    setText(doc, i === 0 ? (d.performance.monthlyCashFlow >= 0 ? COLOR.successText : COLOR.danger) : i === 3 ? themeColor : COLOR.ink);
+    setText(doc, i === 0 ? (d.performance.monthlyCashFlow >= 0 ? COLOR.successText : COLOR.danger) : m[0] === "PRICE CEILING" ? themeColor : COLOR.ink);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
     doc.text(m[1], mx, py + 18);
@@ -996,11 +1035,20 @@ function pageCover(
     setText(doc, COLOR.sub);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7);
-    doc.text(`Criteria: ${d.maxOffer.basis}`, panelX + 20, py + 32);
     doc.text(
-      "Calculated from your selected targets. This is not a recommended offer.",
+      `${d.maxOffer.sourceLabel ?? "Captured targets"}: ${d.maxOffer.basis}`,
+      panelX + 20,
+      py + 32,
+    );
+    doc.text(
+      `Binding: ${d.maxOffer.bindingConstraints?.join(" + ") || "not resolved"}${d.maxOffer.nextConstraint ? ` · Next: ${d.maxOffer.nextConstraint}` : ""}`,
       panelX + 20,
       py + 42,
+    );
+    doc.text(
+      "Calculated from the targets shown. This is not a recommended offer.",
+      panelX + 20,
+      py + 52,
     );
   }
 
@@ -1083,33 +1131,6 @@ function pageCover(
 }
 
 // ===================== "Your buy box" block =====================
-
-/**
- * Derive the buy-box evaluation input from the report payload. These
- * performance numbers ARE the recomputed calculateAnalysis outputs (both
- * export flows rebuild them fresh at export time), so the buy box is
- * checked against the same numbers this report prints.
- */
-function buildBuyBoxMetricsInput(d: ReportData) {
-  const num = (v: number | null | undefined): number | null =>
-    typeof v === "number" && Number.isFinite(v) ? v : null;
-  const t = d.property.type;
-  const propertyType =
-    t === "single-family" || t === "multi-family" || t === "owner-occupant" ? t : null;
-  return {
-    capRatePct: num(d.performance.capRate),
-    cocPct: num(d.performance.cocReturn),
-    dscr: num(d.performance.dscr),
-    cashFlowMonthly: num(d.performance.monthlyCashFlow),
-    purchasePrice: num(d.property.purchasePrice),
-    propertyType,
-    // Capped to the action's schema limit so an oversized address degrades
-    // to a truncated state lookup instead of dropping the whole block.
-    address: d.property.address?.trim() ? d.property.address.slice(0, 500) : null,
-    // Canonical cash signal in the report payload (same as pageInputs' DSCR N/A).
-    isCashPurchase: d.financing.downPaymentPct >= 100,
-  };
-}
 
 /** Ellipsis-truncate a single line to a max width at the CURRENT font. */
 function truncateToWidth(doc: jsPDF, text: string, maxW: number): string {
@@ -1426,7 +1447,7 @@ function pageInputs(
   // ("single-family" → "Single Family").
   const unitsLabel = d.units.length === 1 ? "1 unit" : `${d.units.length} units`;
   doc.text(
-    `${formatPropertyType(d.property.type)}  ·  Built ${d.property.yearBuilt}  ·  ${unitsLabel}  ·  Purchase ${fmtCurrency(d.property.purchasePrice)}`,
+    `${formatPropertyType(d.property.type)}  ·  Built ${formatYearBuilt(d.property.yearBuilt)}  ·  ${unitsLabel}  ·  Purchase ${fmtCurrency(d.property.purchasePrice)}`,
     M.left + 22,
     y + 63,
   );
@@ -1454,13 +1475,20 @@ function pageInputs(
     isCashPurchase ? "neutral" : d.performance.dscr >= 1.2 ? "success" : "warn";
   const dscrSub = isCashPurchase ? "cash purchase" : "debt cover";
   const cards: Array<[string, string, "primary" | "success" | "danger" | "neutral" | "violet" | "warn", string?]> = [
-    ["Price Ceiling", d.maxOffer ? fmtCurrency(d.maxOffer.maxPrice) : "Not solvable", "primary", d.maxOffer ? "selected targets" : "review inputs"],
     ["Monthly Cash Flow", fmtCurrency(d.performance.monthlyCashFlow), d.performance.monthlyCashFlow >= 0 ? "success" : "danger", "/month"],
     ["CoC Return", fmtPct(d.performance.cocReturn, true), "primary", "year 1"],
     ["Cap Rate", fmtPct(d.performance.capRate, true), "violet", "NOI basis"],
     ["DSCR", dscrValue, dscrTone, dscrSub],
     ["Modeled After-Tax CF", fmtCurrency(d.performance.afterTaxCF), "primary", "/month"],
   ];
+  if (d.maxOffer !== undefined) {
+    cards.unshift([
+      "Price Ceiling",
+      d.maxOffer ? fmtCurrency(d.maxOffer.maxPrice) : "Not solvable",
+      "primary",
+      d.maxOffer ? d.maxOffer.sourceLabel ?? "captured targets" : "review inputs",
+    ]);
+  }
   cards.forEach((c, i) => {
     const col = i % 3;
     const row = Math.floor(i / 3);
@@ -1471,17 +1499,26 @@ function pageInputs(
     setText(doc, COLOR.sub);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7.5);
-    doc.text(`Price ceiling criteria: ${d.maxOffer.basis}`, M.left, criteriaY);
     doc.text(
-      "Calculated from your selected targets. This is not a recommended offer.",
+      `Price ceiling — ${d.maxOffer.sourceLabel ?? "captured targets"}: ${d.maxOffer.basis}`,
+      M.left,
+      criteriaY,
+    );
+    doc.text(
+      `Binding: ${d.maxOffer.bindingConstraints?.join(" + ") || "not resolved"}${d.maxOffer.nextConstraint ? ` · Next: ${d.maxOffer.nextConstraint}` : ""}`,
       M.left,
       criteriaY + 11,
+    );
+    doc.text(
+      "Calculated from the targets shown. This is not a recommended offer.",
+      M.left,
+      criteriaY + 22,
     );
   }
   // Section spacing rationalized to a consistent +22pt across all
   // page-1 transitions (was +6 here previously, which visibly cramped
   // Property & Inputs immediately below).
-  y += (ch + gap) * 2 + (d.maxOffer ? 42 : 22);
+  y += (ch + gap) * 2 + (d.maxOffer ? 53 : 22);
 
   y = sectionTitle(doc, "Units", y, undefined, themeColor);
   if (d.units.length <= 2) {
@@ -1592,17 +1629,15 @@ function pageInputs(
   // The left stripe + the "UNDERWRITING VERDICT" kicker text both pick up
   // the verdict tier color (green for Strong Buy / Buy, orange for
   // Neutral / Risky, red for Avoid) so they match the headline text.
-  const tierColor = getRecommendationRiskTextColor(
-    d.performance.recommendation,
-    d.performance.risk
-  );
+  const decision = reportDecision(d);
+  const tierColor = decisionColor(decision);
   // Compute the rationale lines first so we can size the card to fit.
   // splitTextToSize needs the font already set, so set the body font
   // before measuring.
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   const rationaleLines = doc.splitTextToSize(
-    d.performance.rationale,
+    decision.rationale,
     SAFE.w - 32
   ).slice(0, 7); // hard cap at 7 lines to prevent absurdly long rationales
   // Vertical accounting inside the card:
@@ -1637,13 +1672,13 @@ function pageInputs(
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7);
   doc.setCharSpace(0.8);
-  doc.text("UNDERWRITING VERDICT", M.left + 16, y + 16);
+  doc.text("ACQUISITION DECISION", M.left + 16, y + 16);
   doc.setCharSpace(0);
   // Headline — slightly tighter (14pt vs 13pt) for confident statement.
   setText(doc, tierColor);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
-  doc.text(`${recommendationLabel(d.performance.recommendation)} — ${d.performance.risk}`, M.left + 16, y + 34);
+  doc.text(decision.label, M.left + 16, y + 34);
 
   // Deal Score badge — refined right-aligned typography.
   // Reads as "52 / 100" with the score number prominent on the LEFT
@@ -1655,7 +1690,7 @@ function pageInputs(
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7);
   doc.setCharSpace(0.8);
-  doc.text("DEAL SCORE", PAGE.w - M.right - 16, y + 16, { align: "right" });
+  doc.text("SCREENING INDEX", PAGE.w - M.right - 16, y + 16, { align: "right" });
   doc.setCharSpace(0);
 
   // Render "/ 100" first (rightmost), measure its width, then render
@@ -1733,7 +1768,7 @@ function pageInputs(
 
   drawInputBlock(doc, M.left, y, colW, rowH, "Property", [
     ["Type", formatPropertyType(d.property.type)],
-    ["Year built", String(d.property.yearBuilt)],
+    ["Year built", formatYearBuilt(d.property.yearBuilt)],
     ["Purchase price", fmtCurrency(d.property.purchasePrice)],
     ["Template", d.property.template],
   ], themeColor);
@@ -2809,25 +2844,13 @@ async function buildInvestmentPDFDocument(
     logoData = await loadLogoDataUrl(); // TrueCap default
   }
 
-  // The owner's buy-box verdict — evaluated server-side (RLS-scoped, via
-  // the lib/buy-box primitives) against this report's recomputed metrics.
-  // Strictly additive and fail-soft: any failure (signed out, offline,
-  // migration pending) yields null and the report renders exactly as
-  // before — the export never blocks on buy-box state.
-  let buyBoxVerdict: BuyBoxPdfVerdict | null = null;
-  try {
-    // LAZY import, deliberately. Statically importing a server action dragged
-    // app/actions/saved-analyses — and its transitive `server-only` modules —
-    // into this module's graph, which both bloated the client bundle and made
-    // the report impossible to render in a plain Node process. Loading it here
-    // keeps the dependency inside the fail-soft path that already tolerates it
-    // being unavailable.
-    const { getBuyBoxPdfVerdictAction } = await import("@/app/actions/saved-analyses");
-    const buyBoxRes = await getBuyBoxPdfVerdictAction(buildBuyBoxMetricsInput(d));
-    if (buyBoxRes.ok) buyBoxVerdict = buyBoxRes.verdict;
-  } catch {
-    // no block — never fail the export over the buy-box lookup
-  }
+  // Never evaluate the owner's *current* mutable Buy Boxes while rendering a
+  // historical report. The canonical Decision + Offer Ceiling above are bound
+  // to the captured target/source; mixing in today's box could contradict the
+  // saved decision. A frozen rule-by-rule Buy Box snapshot can be reintroduced
+  // only once its identity/version is persisted with the analysis.
+  const buyBoxVerdict: BuyBoxPdfVerdict | null = null;
+  const buyBoxStateResolved = true;
 
   // Cover page first — the "arrival" beat (address + verdict + bottom line).
   // Self-contained: the running header/footer loop skips page 1.
@@ -2875,7 +2898,33 @@ async function buildInvestmentPDFDocument(
     drawHeader(doc, i, total, d.generatedAt, logoData, branding ?? null);
   }
 
-  return doc;
+  return {
+    doc,
+    hasBuyBoxVerdict: buyBoxVerdict !== null,
+    buyBoxStateResolved,
+  };
+}
+
+export type InvestmentPdfArtifact = {
+  blob: Blob;
+  hasBuyBoxVerdict: boolean;
+  buyBoxStateResolved: boolean;
+};
+
+/** Server renderer output plus the exact mutable-state metadata needed by
+ *  the saved-PDF completion step. Keeping this beside the bytes closes the
+ *  render→completion delete/downgrade race without trusting a later lookup. */
+export async function generateInvestmentPDFArtifact(
+  data: ReportData,
+  branding?: BrandingConfig | null,
+  mode: ReportMode = "personal"
+): Promise<InvestmentPdfArtifact> {
+  const rendered = await buildInvestmentPDFDocument(data, branding, mode);
+  return {
+    blob: rendered.doc.output("blob"),
+    hasBuyBoxVerdict: rendered.hasBuyBoxVerdict,
+    buyBoxStateResolved: rendered.buyBoxStateResolved,
+  };
 }
 
 export async function generateInvestmentPDFBlob(
@@ -2883,6 +2932,5 @@ export async function generateInvestmentPDFBlob(
   branding?: BrandingConfig | null,
   mode: ReportMode = "personal"
 ): Promise<Blob> {
-  const doc = await buildInvestmentPDFDocument(data, branding, mode);
-  return doc.output("blob");
+  return (await generateInvestmentPDFArtifact(data, branding, mode)).blob;
 }

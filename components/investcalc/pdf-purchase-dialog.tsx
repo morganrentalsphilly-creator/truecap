@@ -94,7 +94,7 @@ export function PdfPurchaseDialog({
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                 The complete TrueCap decision package for this property. One
                 payment, no account, no subscription. Includes assumptions,
-                Max Offer, What Needs to Be True rent/rate thresholds, Deal Score,
+                Offer Ceiling, What Needs to Be True rent/rate thresholds, Screening Index,
                 downside scenario, 10-year, tax, and exit views.
               </p>
             </div>
@@ -113,7 +113,7 @@ export function PdfPurchaseDialog({
           <div className="rounded-xl border border-border/70 bg-muted/35 px-3 py-2.5 text-[11px] leading-relaxed text-muted-foreground">
             <p>
               <strong className="text-foreground">One-deal access:</strong> unlocks one PDF
-              generation for these exact analysis inputs. Complete checkout and return to this
+              decision memo for these exact analysis inputs. Complete checkout and return to this
               same browser tab within 30 days. If delivery fails after redemption, this bound
               tab can retry for 24 hours. The purchase does not create an account or cloud copy.
             </p>

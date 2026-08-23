@@ -33,6 +33,7 @@ import {
   sanitizeAnalyticsUrlProperties,
   sanitizeSensitiveUrl,
 } from "@/lib/sensitive-url";
+import { sanitizeAnalyticsEventProperties } from "@/lib/analytics-event-dictionary";
 
 /**
  * Named events tracked client-side. Adding a new one? Add it here AND
@@ -44,6 +45,43 @@ import {
  * lib/posthog-server.ts and don't need to appear here.
  */
 export type FunnelEvent =
+  | "analysis_started"
+  | "property_input_method_selected"
+  | "second_unique_property_analyzed"
+  | "material_assumption_overridden"
+  | "material_input_verified"
+  | "activation_completed"
+  | "offer_ceiling_viewed"
+  | "binding_constraint_viewed"
+  | "verification_task_created"
+  | "verification_task_completed"
+  | "decision_recorded"
+  | "comparison_completed"
+  | "shortlist_item_promoted"
+  | "paywall_viewed"
+  | "complete_decision_trial_started"
+  | "complete_decision_trial_completed"
+  | "complete_decision_checkout_started"
+  | "complete_decision_purchased"
+  | "upgrade_credit_applied"
+  | "subscription_checkout_started"
+  | "subscription_started"
+  | "plan_changed"
+  | "subscription_cancelled"
+  | "decision_memo_generated"
+  | "share_created"
+  | "share_viewed"
+  | "share_revoked"
+  | "shared_scenario_forked"
+  | "client_decision_assigned"
+  | "client_decision_approved"
+  | "data_lookup_started"
+  | "data_lookup_succeeded"
+  | "data_lookup_failed"
+  | "evidence_grade_changed"
+  | "decision_readiness_changed"
+  | "material_change_detected"
+  | "calculation_parity_failed"
   | "organic_landing" // properties: landing_page, referrer_host, attribution_medium
   | "calculator_started" // properties: calculator, landing_page?
   | "calculator_completed" // properties: calculator, landing_page?
@@ -517,7 +555,10 @@ function captureRaw(
   if (typeof window === "undefined") return false;
   try {
     const attribution = organicAttribution();
-    const safeProperties = sanitizeAnalyticsUrlProperties(properties);
+    const safeProperties = sanitizeAnalyticsEventProperties(
+      event,
+      sanitizeAnalyticsUrlProperties(properties)
+    );
     const attributedProperties = attribution
       ? { ...attribution, ...safeProperties }
       : safeProperties;

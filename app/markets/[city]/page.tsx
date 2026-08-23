@@ -330,7 +330,7 @@ export default async function MarketCityPage({
             </div>
           </div>
           <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-            Rent is HUD Fair Market Rent where available, otherwise a market estimate; price is a market estimate. Cap-rate and tax are the defaults TrueCap applies — enter a specific address for exact, auto-filled numbers.
+            Rent is HUD Fair Market Rent where available, otherwise a market estimate; price is a market estimate. Cap-rate and tax are screening defaults — enter a specific address for editable property-screening estimates and verify them independently.
           </p>
           <SourceMethodologyBox
             className="mt-4"

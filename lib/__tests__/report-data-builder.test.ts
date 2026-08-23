@@ -1,0 +1,220 @@
+import { describe, expect, it } from "vitest";
+
+import {
+  buildCanonicalReportData,
+  type CanonicalReportBuildInput,
+} from "@/lib/report-data-builder";
+import { SAMPLE_DEAL_MAO_TARGET, SAMPLE_DEAL_VALUES } from "@/lib/sample-deal";
+import {
+  TRUECAP_UNDERWRITING_STANDARD_NAME,
+  TRUECAP_UNDERWRITING_STANDARD_VERSION,
+} from "@/lib/underwriting-methodology";
+import type { ReportData } from "@/lib/pdf-generator";
+
+const NOW = new Date("2026-08-23T12:00:00.000Z");
+
+function canonical(): ReportData {
+  return buildCanonicalReportData({
+    values: SAMPLE_DEAL_VALUES,
+    maxOfferTarget: SAMPLE_DEAL_MAO_TARGET,
+    maxOfferTargetSource: "buy-box",
+    generatedAt: NOW,
+  });
+}
+
+describe("server-owned PDF report data", () => {
+  it("recomputes every deterministic section instead of rendering forged client results", () => {
+    const expected = canonical();
+    const forged: ReportData = {
+      ...expected,
+      methodologyVersion: "forged-methodology",
+      methodologyLabel: "Forged underwriting standard",
+      property: {
+        ...expected.property,
+        address: "999 Forged St",
+        purchasePrice: 99_999_999,
+      },
+      financing: {
+        ...expected.financing,
+        downPayment: 7_777_777,
+        closingCosts: 7_777_777,
+      },
+      expenses: { ...expected.expenses, propertyTaxPct: 777_777 },
+      performance: {
+        recommendation: "Strong Buy",
+        dealScore: 100,
+        risk: "No Risk",
+        rationale: "forged-rationale-sentinel",
+        monthlyCashFlow: 7_777_777,
+        cocReturn: 7_777_777,
+        capRate: 7_777_777,
+        dscr: 7_777_777,
+        taxSavings: 7_777_777,
+        afterTaxCF: 7_777_777,
+      },
+      inputConfidence: {
+        score: 100,
+        stageLabel: "Everything verified",
+        sensitivityRisk: "low",
+        methodVersion: "forged",
+        verifiedAssumptions: ["forged verification"],
+        unverifiedAssumptions: [],
+      },
+      comps: {
+        valueEstimate: 7_777_777,
+        valueRange: null,
+        rentEstimate: 7_777_777,
+        rentRange: null,
+        saleComps: [],
+        rentComps: [],
+        fetchedAt: "forged-rentcast-provenance",
+      },
+      operatingStatement: expected.operatingStatement
+        ? { ...expected.operatingStatement, noi: 7_777_777 }
+        : null,
+      maxOffer: expected.maxOffer
+        ? { ...expected.maxOffer, maxPrice: 7_777_777 }
+        : null,
+      downsideScenario: expected.downsideScenario
+        ? { ...expected.downsideScenario, monthlyCashFlow: 7_777_777 }
+        : undefined,
+      projection10y: {
+        ...expected.projection10y,
+        cumulativeCF: 7_777_777,
+        rows: expected.projection10y.rows.map((row) => ({
+          ...row,
+          net: 7_777_777,
+        })),
+      },
+      taxStrategy: {
+        ...expected.taxStrategy,
+        totalBenefit10y: 7_777_777,
+        rows: expected.taxStrategy.rows.map((row) => ({
+          ...row,
+          benefit: 7_777_777,
+        })),
+      },
+      exitScenarios: {
+        ...expected.exitScenarios,
+        year10Profit: 7_777_777,
+        rows: expected.exitScenarios.rows.map((row) => ({
+          ...row,
+          profit: 7_777_777,
+        })),
+      },
+    };
+
+    const rebuilt = buildCanonicalReportData({
+      values: { ...SAMPLE_DEAL_VALUES, browserOnlyResult: 7_777_777 },
+      // Simulate a hostile action payload carrying a now-disallowed property.
+      // Runtime object extras are ignored as firmly as the type rejects them.
+      submittedReport: forged,
+      maxOfferTarget: SAMPLE_DEAL_MAO_TARGET,
+      maxOfferTargetSource: "buy-box",
+      generatedAt: NOW,
+    } as unknown as CanonicalReportBuildInput);
+
+    expect(rebuilt.methodologyVersion).toBe(
+      TRUECAP_UNDERWRITING_STANDARD_VERSION,
+    );
+    expect(rebuilt.methodologyLabel).toBe(
+      `${TRUECAP_UNDERWRITING_STANDARD_NAME} v${TRUECAP_UNDERWRITING_STANDARD_VERSION}`,
+    );
+    expect(rebuilt.property).toEqual(expected.property);
+    expect(rebuilt.financing).toEqual(expected.financing);
+    expect(rebuilt.expenses).toEqual(expected.expenses);
+    expect(rebuilt.performance).toEqual(expected.performance);
+    expect(rebuilt.operatingStatement).toEqual(expected.operatingStatement);
+    expect(rebuilt.maxOffer).toEqual(expected.maxOffer);
+    expect(rebuilt.downsideScenario).toEqual(expected.downsideScenario);
+    expect(rebuilt.projection10y).toEqual(expected.projection10y);
+    expect(rebuilt.taxStrategy).toEqual(expected.taxStrategy);
+    expect(rebuilt.exitScenarios).toEqual(expected.exitScenarios);
+    expect(rebuilt.inputConfidence).toBeNull();
+    expect(rebuilt.comps).toBeNull();
+    expect(JSON.stringify(rebuilt)).not.toContain("forged-rationale-sentinel");
+    expect(JSON.stringify(rebuilt)).not.toContain("forged-rentcast-provenance");
+    expect(JSON.stringify(rebuilt)).not.toContain("7777777");
+  });
+
+  it("uses only the normalized target, never a submitted Max Offer result", () => {
+    const forged = canonical();
+    forged.maxOffer = forged.maxOffer
+      ? { ...forged.maxOffer, maxPrice: 98_765_432 }
+      : null;
+
+    const rebuilt = buildCanonicalReportData({
+      values: SAMPLE_DEAL_VALUES,
+      maxOfferTarget: SAMPLE_DEAL_MAO_TARGET,
+      generatedAt: NOW,
+      submittedReport: forged,
+    } as unknown as CanonicalReportBuildInput);
+
+    expect(rebuilt.maxOffer?.maxPrice).toBe(canonical().maxOffer?.maxPrice);
+    expect(rebuilt.maxOffer?.maxPrice).not.toBe(98_765_432);
+  });
+
+  it("makes the target-based decision primary and keeps Screening Index secondary", () => {
+    const passAtThisPrice = buildCanonicalReportData({
+      values: SAMPLE_DEAL_VALUES,
+      maxOfferTarget: { monthlyCashFlow: 1_000_000 },
+      maxOfferTargetSource: "selected-targets",
+      generatedAt: NOW,
+    });
+    expect(passAtThisPrice.decision?.label).toBe("Pass at this price");
+    expect(passAtThisPrice.decision?.clearsSelectedTargets).toBe(false);
+    expect(passAtThisPrice.decision?.targetSource).toBe("selected-targets");
+    expect(passAtThisPrice.decision?.rationale).toContain("does not clear");
+
+    const screeningOnly = buildCanonicalReportData({
+      values: SAMPLE_DEAL_VALUES,
+      maxOfferTarget: { monthlyCashFlow: -1_000_000 },
+      maxOfferTargetSource: "selected-targets",
+      generatedAt: NOW,
+    });
+    expect(screeningOnly.decision?.label).toBe("Conditional — verify first");
+    expect(screeningOnly.decision?.readiness).toBe("Screening only");
+    expect(screeningOnly.maxOffer?.source).toBe("selected-targets");
+  });
+
+  it("prints canonical STR revenue and leaves a missing construction year unknown", () => {
+    const rebuilt = buildCanonicalReportData({
+      values: {
+        ...SAMPLE_DEAL_VALUES,
+        yearBuilt: undefined,
+        monthlyRent: 1_000,
+        avgDailyRate: 200,
+        occupancyPct: 50,
+      },
+      generatedAt: NOW,
+    });
+
+    expect(rebuilt.property.yearBuilt).toBeNull();
+    expect(rebuilt.units[0]?.rent).toBeCloseTo((200 * 365 * 0.5) / 12);
+    expect(rebuilt.units[0]?.rent).not.toBe(1_000);
+    expect(rebuilt.performance.monthlyCashFlow).not.toBe(7_777_777);
+  });
+
+  it("includes comps only through explicit server-trusted presentation data", () => {
+    const trusted = canonical().comps ?? {
+      valueEstimate: 265_000,
+      valueRange: null,
+      rentEstimate: 3_050,
+      rentRange: null,
+      saleComps: [],
+      rentComps: [],
+      fetchedAt: "2026-08-23T00:00:00.000Z",
+    };
+    const rebuilt = buildCanonicalReportData({
+      values: SAMPLE_DEAL_VALUES,
+      trustedPresentation: {
+        comps: trusted,
+        templateLabel: "Owner-scoped template",
+      },
+      generatedAt: NOW,
+    });
+
+    expect(rebuilt.comps).toEqual(trusted);
+    expect(rebuilt.property.template).toBe("Owner-scoped template");
+  });
+});

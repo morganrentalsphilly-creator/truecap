@@ -142,14 +142,17 @@ describe("buildBuyBoxQaReport", () => {
     expect(report!.context.summary).toBeUndefined();
   });
 
-  it("includes the box name + rollup summary only with multiple boxes", () => {
+  it("uses the passing box for both fit and Offer Ceiling while keeping the rollup", () => {
     const boxes = [
       namedBox(),
       namedBox({ id: "box-2", name: "Anything cheap", isDefault: false, sortOrder: 1, minCapRatePct: 1, minCashFlowMonthly: null }),
     ];
     const results = evaluateBuyBoxes(boxes, dealMetrics());
     const report = buildBuyBoxQaReport(results, summarizeBuyBoxFit(results));
-    expect(report!.context.boxName).toBe("Philly cash flow");
+    expect(report!.context.boxName).toBe("Anything cheap");
+    expect(report!.context.passes).toBe(true);
+    expect(report!.selectedBox).toEqual({ id: "box-2", name: "Anything cheap" });
+    expect(report!.maoThresholds.minCapRatePct).toBe(1);
     expect(report!.context.summary).toContain("1 of 2");
   });
 

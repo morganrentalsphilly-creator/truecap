@@ -36,8 +36,14 @@ import {
   ONE_TIME_PDF_CLAIM_LIFETIME_MS,
   decideOneTimePdfClaimBinding,
   fingerprintOneTimePdfDeal,
+  fingerprintOneTimePdfReportBinding,
   hashOneTimePdfClaimSecret,
 } from "@/lib/one-time-pdf-claims";
+import {
+  resolveLegacyCompatibleOneTimePdfReportBinding,
+  resolveOneTimePdfReportBinding,
+  type OneTimePdfReportBinding,
+} from "@/lib/one-time-pdf-report-binding";
 import { evaluateOneTimePdfProCredit } from "@/lib/one-time-pdf-credit";
 import {
   buildPackCreditPolicy,
@@ -74,7 +80,28 @@ async function getCurrentUserId(): Promise<string | null> {
   }
 }
 
-const createCheckoutSchema = z.object({ values: investmentFormSchema }).strict();
+const createCheckoutSchema = z
+  .object({
+    values: investmentFormSchema,
+    maxOfferTarget: z.unknown(),
+    maxOfferTargetSource: z.enum([
+      "buy-box",
+      "screening-defaults",
+      "selected-targets",
+    ]),
+  })
+  .strict();
+
+function normalizeClaimReportBinding(
+  input: {
+    values: InvestmentFormValues;
+    maxOfferTarget?: unknown;
+    maxOfferTargetSource?: unknown;
+  },
+  options: { allowLegacyDefault: boolean } = { allowLegacyDefault: false }
+): OneTimePdfReportBinding | null {
+  return resolveOneTimePdfReportBinding(input, options);
+}
 
 export type OneTimePdfCheckoutResult =
   | { ok: true; url: string; claim: { id: string; secret: string } }
@@ -102,6 +129,14 @@ export async function createOneTimePdfCheckoutAction(
 ): Promise<OneTimePdfCheckoutResult> {
   const parsed = createCheckoutSchema.safeParse(input);
   if (!parsed.success) {
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "Run a valid analysis before purchasing its report.",
+    };
+  }
+  const reportBinding = normalizeClaimReportBinding(parsed.data);
+  if (!reportBinding) {
     return {
       ok: false,
       code: "VALIDATION_ERROR",
@@ -144,6 +179,12 @@ export async function createOneTimePdfCheckoutAction(
     const claimSecret = randomBytes(32).toString("base64url");
     const claimSecretHash = hashOneTimePdfClaimSecret(claimSecret);
     const dealFingerprint = fingerprintOneTimePdfDeal(parsed.data.values, claimSecret);
+    const reportFingerprint = fingerprintOneTimePdfReportBinding(
+      parsed.data.values,
+      reportBinding.target,
+      reportBinding.source,
+      claimSecret
+    );
     const checkoutCreatedAt = new Date();
     const expiresAt = new Date(
       checkoutCreatedAt.getTime() + ONE_TIME_PDF_CLAIM_LIFETIME_MS
@@ -176,6 +217,7 @@ export async function createOneTimePdfCheckoutAction(
         checkout_session_id: session.id,
         claim_secret_hash: claimSecretHash,
         deal_fingerprint: dealFingerprint,
+        report_fingerprint: reportFingerprint,
         deal_schema_version: INVESTCALC_SCHEMA_VERSION,
         user_id: userId,
         price_variant: offer.singleDealPriceVariant,
@@ -237,6 +279,14 @@ const verifySchema = z
     claimId: z.string().uuid(),
     claimSecret: z.string().regex(/^[A-Za-z0-9_-]{43}$/),
     values: investmentFormSchema,
+    // Both fields are absent only for claims created by the pre-binding client.
+    // The shared resolver maps that exact legacy shape to historical defaults.
+    maxOfferTarget: z.unknown().optional(),
+    maxOfferTargetSource: z.enum([
+      "buy-box",
+      "screening-defaults",
+      "selected-targets",
+    ]).optional(),
   })
   .strict();
 
@@ -245,6 +295,7 @@ type ClaimRow = {
   checkout_session_id: string;
   claim_secret_hash: string;
   deal_fingerprint: string;
+  report_fingerprint: string | null;
   user_id: string | null;
   price_variant: string | null;
   expires_at: string;
@@ -353,12 +404,45 @@ async function loadClaim(
   const { data, error } = await admin
     .from("one_time_pdf_purchase_claims")
     .select(
-      "id, checkout_session_id, claim_secret_hash, deal_fingerprint, user_id, price_variant, expires_at, consumed_at, pro_credit_status, pro_credit_amount_cents, pro_credit_eligible_until"
+      "id, checkout_session_id, claim_secret_hash, deal_fingerprint, report_fingerprint, user_id, price_variant, expires_at, consumed_at, pro_credit_status, pro_credit_amount_cents, pro_credit_eligible_until"
     )
     .eq("id", claimId)
     .maybeSingle();
   if (error) return { row: null, errorCode: error.code ?? "unknown" };
   return { row: (data as ClaimRow | null) ?? null };
+}
+
+/**
+ * Existing claims created before report_fingerprint shipped are bound once,
+ * at their first successful consumption/recovery. The database trigger permits
+ * only null -> value in that lifecycle window and makes the value immutable.
+ */
+async function ensureClaimReportBinding(
+  admin: ReturnType<typeof createAdminSupabaseClient>,
+  row: ClaimRow,
+  expectedFingerprint: string
+): Promise<boolean> {
+  if (row.report_fingerprint) {
+    return row.report_fingerprint === expectedFingerprint;
+  }
+  if (!row.consumed_at) return true;
+
+  const { data, error } = await admin
+    .from("one_time_pdf_purchase_claims")
+    .update({ report_fingerprint: expectedFingerprint })
+    .eq("id", row.id)
+    .eq("claim_secret_hash", row.claim_secret_hash)
+    .eq("consumed_at", row.consumed_at)
+    .is("report_fingerprint", null)
+    .select("report_fingerprint")
+    .maybeSingle();
+  if (error) return false;
+  if (data?.report_fingerprint === expectedFingerprint) return true;
+
+  // A simultaneous recovery may have won the null -> value race. It is safe
+  // only when it chose the same immutable report binding.
+  const raced = await loadClaim(admin, row.id);
+  return raced.row?.report_fingerprint === expectedFingerprint;
 }
 
 /**
@@ -474,6 +558,12 @@ export async function verifyOneTimePdfPaymentAction(
   if (!parsed.success) {
     return { ok: false, code: "VALIDATION_ERROR", message: "Invalid secure report claim." };
   }
+  const submittedReportBinding = normalizeClaimReportBinding(parsed.data, {
+    allowLegacyDefault: true,
+  });
+  if (!submittedReportBinding) {
+    return { ok: false, code: "VALIDATION_ERROR", message: "Invalid secure report claim." };
+  }
 
   try {
     const admin = createAdminSupabaseClient();
@@ -499,6 +589,20 @@ export async function verifyOneTimePdfPaymentAction(
       return { ok: false, code: "VALIDATION_ERROR", message: "Invalid secure report claim." };
     }
 
+    // A null fingerprint proves this row predates target-aware checkout. Bind
+    // it only to the canonical target/source the historical Pack actually used;
+    // a holder may not turn migration recovery into a new target selection.
+    const reportBinding = initial.row.report_fingerprint
+      ? submittedReportBinding
+      : resolveLegacyCompatibleOneTimePdfReportBinding(parsed.data);
+    if (!reportBinding) return bindingFailureResult("BINDING_MISMATCH");
+    const reportFingerprint = fingerprintOneTimePdfReportBinding(
+      parsed.data.values,
+      reportBinding.target,
+      reportBinding.source,
+      parsed.data.claimSecret
+    );
+
     const firstDecision = decideOneTimePdfClaimBinding({
       record: {
         claimSecretHash: initial.row.claim_secret_hash,
@@ -512,7 +616,16 @@ export async function verifyOneTimePdfPaymentAction(
       currentUserId,
     });
     if (!firstDecision.ok) return bindingFailureResult(firstDecision.code);
+    if (
+      initial.row.report_fingerprint &&
+      initial.row.report_fingerprint !== reportFingerprint
+    ) {
+      return bindingFailureResult("BINDING_MISMATCH");
+    }
     if (firstDecision.mode === "bound-recovery") {
+      if (!(await ensureClaimReportBinding(admin, initial.row, reportFingerprint))) {
+        return bindingFailureResult("BINDING_MISMATCH");
+      }
       // Credit (if any) was granted when the claim was first consumed;
       // re-surface it so a retried download still shows the offer.
       return successfulVerification(initial.row, true, liveProCredit(initial.row));
@@ -552,7 +665,7 @@ export async function verifyOneTimePdfPaymentAction(
     }
 
     const consumedAt = new Date().toISOString();
-    const { data: consumedRows, error: consumeError } = await admin
+    let consumeQuery = admin
       .from("one_time_pdf_purchase_claims")
       .update({
         user_id: initial.row.user_id ?? currentUserId,
@@ -560,13 +673,23 @@ export async function verifyOneTimePdfPaymentAction(
         consumed_at: consumedAt,
         purchase_amount_cents: session.amount_total,
         purchase_currency: session.currency.toLowerCase(),
+        // New rows are already bound at checkout. This also atomically binds
+        // a pre-migration row to the first report target/source it consumes.
+        report_fingerprint: reportFingerprint,
       })
       .eq("id", initial.row.id)
       .eq("claim_secret_hash", initial.row.claim_secret_hash)
       .eq("deal_fingerprint", initial.row.deal_fingerprint)
       .gt("expires_at", consumedAt)
-      .is("consumed_at", null)
-      .select("id, price_variant");
+      .is("consumed_at", null);
+    consumeQuery = initial.row.report_fingerprint
+      ? consumeQuery.eq(
+          "report_fingerprint",
+          initial.row.report_fingerprint
+        )
+      : consumeQuery.is("report_fingerprint", null);
+    const { data: consumedRows, error: consumeError } = await consumeQuery
+      .select("id, price_variant, report_fingerprint");
 
     if (consumeError) {
       Sentry.captureMessage("One-time PDF atomic claim consumption failed", {
@@ -625,6 +748,9 @@ export async function verifyOneTimePdfPaymentAction(
         code: "SERVER_ERROR",
         message: "Could not confirm secure report release. Please retry.",
       };
+    }
+    if (!(await ensureClaimReportBinding(admin, raced.row, reportFingerprint))) {
+      return bindingFailureResult("BINDING_MISMATCH");
     }
     return successfulVerification(raced.row, true, liveProCredit(raced.row));
   } catch (error) {

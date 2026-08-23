@@ -72,6 +72,70 @@ describe("MAO — DSCR price target", () => {
   });
 });
 
+describe("MAO — explicit purchase-price ceiling", () => {
+  it("treats a hard price cap as a first-class target and recomputes achieved metrics there", () => {
+    const values = baseSingleFamily();
+    const target: MaoTarget = { monthlyCashFlow: -99_999, maxPurchasePrice: 180_250 };
+    const res = calculateMaxAllowableOffer(values, target);
+
+    expect(res).not.toBeNull();
+    expect(res?.maxPrice).toBe(180_000);
+    if (res) {
+      const atDisplayedPrice = calculateAnalysis({ ...values, purchasePrice: res.maxPrice });
+      expect(meetsTarget(atDisplayedPrice, target)).toBe(true);
+      expect(res.achieved.netCashFlow).toBe(atDisplayedPrice.netCashFlow);
+      expect(res.achieved.dscr).toBe(atDisplayedPrice.dscr);
+    }
+  });
+
+  it("uses the price cap by itself instead of silently falling back to a return target", () => {
+    const capOnly: MaoTarget = { maxPurchasePrice: 200_000 };
+    const res = calculateMaxAllowableOffer(baseSingleFamily(), capOnly);
+
+    expect(res?.maxPrice).toBe(200_000);
+    expect(res && meetsTarget(res.achieved, capOnly)).toBe(true);
+    expect(meetsTarget(calculateAnalysis(baseSingleFamily()), capOnly)).toBe(false);
+  });
+
+  it("uses an explicit price cap above the default $10M return-only search bound", () => {
+    const capOnly: MaoTarget = { maxPurchasePrice: 50_000_000 };
+    const res = calculateMaxAllowableOffer(baseSingleFamily(), capOnly);
+
+    expect(res?.maxPrice).toBe(50_000_000);
+    expect(res && meetsTarget(res.achieved, capOnly)).toBe(true);
+  });
+
+  it("fails closed instead of quoting the supported-price boundary as an exact ceiling", () => {
+    const res = calculateMaxAllowableOffer(baseSingleFamily(), {
+      maxPurchasePrice: 200_000_000,
+    });
+    expect(res).toBeNull();
+  });
+
+  it("does not claim rent or rate can repair a current price above a hard cap", () => {
+    const values = baseSingleFamily({ purchasePrice: 245_000 });
+    const target: MaoTarget = { maxPurchasePrice: 200_000 };
+
+    expect(solveRequiredMonthlyRent(values, target)?.unreachable).toBe(true);
+    expect(solveRequiredInterestRate(values, target)?.unreachable).toBe(true);
+  });
+});
+
+describe("MAO — product price search bound", () => {
+  it("does not truncate a return-only Offer Ceiling at the former $10M limit", () => {
+    const values = baseSingleFamily({
+      purchasePrice: 20_000_000,
+      monthlyRent: 1_000_000,
+    });
+    const target: MaoTarget = { monthlyCashFlow: 0 };
+    const res = calculateMaxAllowableOffer(values, target);
+
+    expect(res).not.toBeNull();
+    expect(res?.maxPrice).toBeGreaterThan(10_000_000);
+    expect(res && meetsTarget(res.achieved, target)).toBe(true);
+  });
+});
+
 describe("MAO — returned price honors its own target (no round-up overshoot)", () => {
   // The UI quotes maxPrice as "the highest price that clears this" ("Your
   // number", "Max offer", the break-even hint). Rounding to NEAREST $500 used

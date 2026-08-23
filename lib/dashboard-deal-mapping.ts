@@ -2,6 +2,7 @@ import { getTypeLabel, type PropertyType, type StoredRecommendation, type Stored
 import type { DealScoreBreakdown } from "@/lib/deal-score";
 import { DEFAULT_PIPELINE_STAGE, isPipelineStage, type PipelineStage } from "@/lib/pipeline";
 import { normalizeDataConfidence, type DataConfidence } from "@/lib/data-confidence";
+import type { DealOfferBasis } from "@/lib/deal-offer-line";
 
 type NumericLike = number | string | null | undefined;
 
@@ -50,6 +51,9 @@ export type ResultSnapshot = {
   tags?: string[] | null;
   compareSnapshot?: CompareSnapshotLike;
   compare_snapshot?: CompareSnapshotLike;
+  /** Exact Tune-target persisted with this analysis; untrusted JSON until the
+   *  server page validates it with normalizeMaoTarget. */
+  maxOfferTarget?: unknown;
 } | null;
 
 export type SavedAnalysisDashboardRow = {
@@ -70,23 +74,27 @@ export type SavedAnalysisDashboardRow = {
   pipeline_stage?: string | null;
   tags?: string[] | null;
   data_confidence?: unknown;
+  /** Agent Pro assignment used to scope client-specific buy boxes. */
+  client_id?: string | null;
 };
 
 export type DashboardDeal = {
   /**
-   * Solved Max Offer, recomputed on read from form_snapshot — it is NOT
-   * persisted anywhere (no column, not in ResultSnapshot). Computed by the
-   * SAME lib/deal-offer-line path My Deals uses, so the dashboard and the
-   * list can never quote different numbers. Null = legacy/unparseable
-   * snapshot, or no buy box + no solvable target.
+   * Solved Max Offer, recomputed on read from form_snapshot against the exact
+   * persisted target when one exists. Computed by the SAME
+   * lib/deal-offer-line path My Deals uses, so the dashboard and the list can
+   * never quote different numbers. Null = legacy/unparseable snapshot or an
+   * unsolvable target.
    */
   maxOffer?: number | null;
   /**
-   * Which bar the max offer was solved against: the user's own buy box, or
-   * TrueCap's canonical default (break-even cash flow + DSCR 1.25). The
-   * table's footnote says "your targets" — that is only true for "buy-box".
+   * Which bar the max offer was solved against: the analysis's saved Tune
+   * targets, the user's own buy box, or TrueCap's canonical default
+   * (break-even cash flow + DSCR 1.25).
    */
-  maxOfferBasis?: "buy-box" | "default" | null;
+  maxOfferBasis?: DealOfferBasis | null;
+  /** Human-readable exact criteria for the max-offer number. */
+  maxOfferBasisLabel?: string | null;
   id: string;
   address: string;
   propertyType: "single-family" | "multi-family" | "owner-occupant" | null;

@@ -15,6 +15,21 @@ export function oneTimePdfClaimSecretKey(claimId: string): string {
   return `truecap:one-time-pdf-claim:${claimId}`;
 }
 
+/** Decode the versioned same-tab secret envelope written before Checkout. */
+export function parseOneTimePdfClaimSecret(raw: string | null): string | null {
+  if (!raw) return null;
+  try {
+    const value = JSON.parse(raw) as Record<string, unknown>;
+    return value.v === 1 &&
+      typeof value.secret === "string" &&
+      /^[A-Za-z0-9_-]{43}$/.test(value.secret)
+      ? value.secret
+      : null;
+  } catch {
+    return null;
+  }
+}
+
 export type OneTimePdfReturnState =
   | { v: 2; kind: "claim"; claimId: string; capturedAt: number }
   | { v: 2; kind: "cancelled"; capturedAt: number }

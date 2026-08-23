@@ -26,7 +26,7 @@ describe("what-if scenario safety", () => {
     expect(dashboard).toContain("previousBaseAssumptionsRef");
     expect(dashboard).toContain("setWhatIfState(null)");
     expect(dashboard).toContain("Scenario reset because the base assumptions changed.");
-    expect(focusedSummary).toContain('"Base price ceiling"');
+    expect(focusedSummary).toContain('"Base Offer Ceiling"');
     expect(dashboard).toContain('"Scenario numbers"');
     expect(metricsBand).toContain(
       'source === "scenario" ? "Scenario" : "Base"'

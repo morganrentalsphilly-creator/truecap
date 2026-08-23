@@ -90,7 +90,7 @@ const SEQUENCE: Array<{
       most you can pay before the deal stops working. Overpaying by even 3%
       on a $250,000 rental is $7,500 gone before you collect a dollar of rent.</p>
       <p>TrueCap Pro computes that walk-away price on every deal — plus the
-      downside stress test, your Buy Box verdict, and a lender-ready report.</p>
+      downside stress test, your Buy Box verdict, and a lender-facing review report.</p>
       ${
         guaranteeEnabled
           ? `<p>And the risk is ours: analyze 10 deals in your first 30 days as a

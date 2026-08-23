@@ -35,6 +35,7 @@ import { computeRowEquity } from "@/lib/owned-equity-series";
 import { DEFAULT_PIPELINE_STAGE, isActiveStage, isPipelineStage } from "@/lib/pipeline";
 import { computeDealOfferLine, type DealOfferResult } from "@/lib/deal-offer-line";
 import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
+import { normalizeMaoTarget } from "@/lib/mao-target-editor";
 import { buyBoxHasCriteria, type NamedBuyBox } from "@/lib/buy-box";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 import { listAgentClientsAction } from "@/app/actions/agent-clients";
@@ -70,6 +71,7 @@ type SavedAnalysisRow = {
     score?: number | string | null;
     recommendation?: StoredRecommendation | null;
     riskLevel?: StoredRiskLevel | null;
+    maxOfferTarget?: unknown;
   } | null;
   methodology_version?: string | null;
   form_snapshot?: unknown;
@@ -113,18 +115,28 @@ function getInitials(displayName: string, email: string): string {
  * user's buy boxes. Shipping every row's full snapshot to the client just to
  * render one line would bloat the payload; only the small result crosses.
  *
- * Returns null (line hidden) when the user has no usable buy box, the snapshot
- * doesn't validate, or the deal is no longer shopping — never throws.
+ * Returns null (line hidden) without the paid MAO entitlement, when the
+ * snapshot doesn't validate, or when the deal is no longer shopping — never
+ * throws.
  */
 function offerLineForRow(
   row: SavedAnalysisRow,
   activeBuyBoxes: NamedBuyBox[],
-  isShoppingStage: boolean
+  isShoppingStage: boolean,
+  canShowMao: boolean,
+  buyBoxesResolved: boolean
 ): Pick<DealOfferResult, "offer" | "basisLabel"> | null {
   // The deal's own client scopes which boxes may screen it (lib/buy-box
   // boxesForDealClient) — another buyer's criteria must never drive this
   // deal's number.
-  if (activeBuyBoxes.length === 0) return null;
+  // A saved Tune-target is authoritative even when the user has no buy box.
+  // Normalize the untrusted JSON snapshot and, critically, only read it for a
+  // paid MAO entitlement so free My Deals rows never reveal the solver.
+  const persistedMaoTarget = canShowMao
+    ? normalizeMaoTarget(row.result_snapshot?.maxOfferTarget)
+    : null;
+  if (!canShowMao) return null;
+  if (!persistedMaoTarget && !buyBoxesResolved) return null;
   // The RESILIENT normalizer, not a raw safeParse — the same one
   // recomputeSavedDealVerdict uses 30 lines below on this very row, and the
   // one the deal workspace uses. insuranceInputMode is a required enum with no
@@ -136,13 +148,16 @@ function offerLineForRow(
   const result = computeDealOfferLine(values, activeBuyBoxes, {
     isShoppingStage,
     dealClientId: row.client_id ?? null,
+    persistedMaoTarget,
   });
   return { offer: result.offer, basisLabel: result.basisLabel };
 }
 
 function mapSavedRow(
   row: SavedAnalysisRow,
-  activeBuyBoxes: NamedBuyBox[] = []
+  activeBuyBoxes: NamedBuyBox[] = [],
+  canShowMao = false,
+  buyBoxesResolved = true
 ): SavedAnalysisListItem | null {
   const recomputed = recomputeSavedDealVerdict(row.form_snapshot);
   const resolution = resolveSavedAnalysisSnapshot({
@@ -184,7 +199,9 @@ function mapSavedRow(
     activeBuyBoxes,
     !resolution.shouldFreeze && !row.is_completed && !row.is_archived && isActiveStage(
       isPipelineStage(row.pipeline_stage) ? row.pipeline_stage : DEFAULT_PIPELINE_STAGE
-    )
+    ),
+    canShowMao,
+    buyBoxesResolved
   );
 
   return {
@@ -308,6 +325,12 @@ export default async function DashboardSavedAnalysesPage({
     buyBoxesResult && buyBoxesResult.ok && buyBoxesResult.canUse
       ? buyBoxesResult.boxes.filter((b) => b.isActive && buyBoxHasCriteria(b))
       : [];
+  const buyBoxesResolved =
+    !hasPlanFeature(entitlements, "buy_box") || Boolean(buyBoxesResult?.ok);
+  // MAO is catalogued as a paid-status gate, not a plan-feature flag. The
+  // production Pro plan JSON intentionally has no `mao` string, so combining
+  // these checks would hide the feature from every legitimate Pro customer.
+  const canShowMao = isPremium;
 
   const resolvedSearchParams = (await searchParams) ?? {};
   const sortField = normalizeSortField(resolvedSearchParams.sort) ?? "saved";
@@ -400,7 +423,14 @@ export default async function DashboardSavedAnalysesPage({
   // Dynamic string selects (for the labels fallback) defeat Supabase's row-type
   // inference, so the rows come back loosely typed — cast through unknown.
   const mappedItems = ((rows ?? []) as unknown[])
-    .map((row) => mapSavedRow(row as SavedAnalysisRow, activeBuyBoxes))
+    .map((row) =>
+      mapSavedRow(
+        row as SavedAnalysisRow,
+        activeBuyBoxes,
+        canShowMao,
+        buyBoxesResolved
+      )
+    )
     .filter((row): row is SavedAnalysisListItem => Boolean(row));
   const displayName = getDisplayName((profile as ProfileRow | null) ?? null, user.email);
   const initials = getInitials(displayName, user.email ?? "");

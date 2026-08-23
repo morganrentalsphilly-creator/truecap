@@ -197,6 +197,9 @@ export function parseSaleListing(raw: unknown): SaleListing | null {
 async function fetchJson(path: string, apiKey: string): Promise<unknown | null> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REMOTE_TIMEOUT_MS);
+  // `path` contains the URL-encoded subject address. Logs must retain only
+  // the endpoint so provider failures cannot leak a prospect's property.
+  const endpoint = path.split("?", 1)[0] || "/unknown";
   try {
     const res = await fetch(`${BASE_URL}${path}`, {
       headers: { accept: "application/json", "X-Api-Key": apiKey },
@@ -204,12 +207,12 @@ async function fetchJson(path: string, apiKey: string): Promise<unknown | null> 
       signal: controller.signal,
     });
     if (!res.ok) {
-      console.warn(`[rentcast] ${path} → HTTP ${res.status}`);
+      console.warn(`[rentcast] ${endpoint} → HTTP ${res.status}`);
       return null;
     }
     return await res.json();
   } catch (err) {
-    console.warn(`[rentcast] ${path} failed:`, (err as Error)?.message ?? err);
+    console.warn(`[rentcast] ${endpoint} failed:`, (err as Error)?.message ?? err);
     return null;
   } finally {
     clearTimeout(timer);

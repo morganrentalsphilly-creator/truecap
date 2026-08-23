@@ -57,11 +57,17 @@ export interface InvestorStrategy {
   /** STR: collect nightly rate × occupancy (+ furnishing) instead of a hand-
    *  typed monthly rent; calc-analysis derives the income from them. */
   incomeMode?: "str";
+  /** Product prominence. Advanced/beta strategies remain available by direct
+   * link, but do not compete with long-term rentals in the primary selector. */
+  productStage: "core" | "secondary" | "advanced-beta";
+  /** Honest boundary rendered anywhere a non-core strategy is selected. */
+  limitation?: string;
 }
 
 export const INVESTOR_STRATEGIES: InvestorStrategy[] = [
   {
     key: "buy-hold",
+    productStage: "core",
     label: "Buy & Hold",
     tagline: "Long-term cash flow",
     Icon: Building2,
@@ -73,6 +79,8 @@ export const INVESTOR_STRATEGIES: InvestorStrategy[] = [
   },
   {
     key: "house-hack",
+    productStage: "secondary",
+    limitation: "Models the live-in period. Model a later move-out as a separate saved scenario; automatic year-two transition logic is not included.",
     runCta: "Run house-hack numbers",
     label: "House Hack",
     tagline: "Live in one unit",
@@ -85,6 +93,8 @@ export const INVESTOR_STRATEGIES: InvestorStrategy[] = [
   },
   {
     key: "brrrr",
+    productStage: "advanced-beta",
+    limitation: "Advanced screening model. Verify rehab, ARV, seasoning, refinance proceeds, and lender terms independently.",
     runCta: "Run BRRRR numbers",
     rentLabel: "Stabilized rent (after rehab)",
     label: "BRRRR",
@@ -98,6 +108,8 @@ export const INVESTOR_STRATEGIES: InvestorStrategy[] = [
   },
   {
     key: "wholesale-mao",
+    productStage: "advanced-beta",
+    limitation: "Advanced wholesale view. The rental Offer Ceiling is target-dependent and is not an assignment-fee or buyer-demand forecast.",
     runCta: "Solve my max offer",
     priceLabel: "Asking price",
     rentLabel: "Market rent",
@@ -112,6 +124,8 @@ export const INVESTOR_STRATEGIES: InvestorStrategy[] = [
   },
   {
     key: "fix-flip",
+    productStage: "advanced-beta",
+    limitation: "Advanced screening model. Verify rehab scope, ARV, holding period, financing, selling costs, and local comps independently.",
     runCta: "Run flip numbers",
     rentLabel: "Rent (only if you hold)",
     label: "Fix & Flip",
@@ -125,6 +139,8 @@ export const INVESTOR_STRATEGIES: InvestorStrategy[] = [
   },
   {
     key: "short-term",
+    productStage: "advanced-beta",
+    limitation: "Beta revenue screen only. It does not fully model platform fees, turnover, lodging tax, seasonality, or local STR eligibility.",
     runCta: "Run STR numbers",
     incomeMode: "str",
     label: "Short-term Rental",
@@ -137,6 +153,18 @@ export const INVESTOR_STRATEGIES: InvestorStrategy[] = [
     focusHint: "STR defaults applied — enter your nightly rate and occupancy; we'll model the revenue (ADR × occupancy) with higher vacancy and management baked in.",
   },
 ];
+
+export const CORE_INVESTOR_STRATEGIES = INVESTOR_STRATEGIES.filter(
+  (strategy) => strategy.productStage === "core"
+);
+
+export const SECONDARY_INVESTOR_STRATEGIES = INVESTOR_STRATEGIES.filter(
+  (strategy) => strategy.productStage === "secondary"
+);
+
+export const ADVANCED_INVESTOR_STRATEGIES = INVESTOR_STRATEGIES.filter(
+  (strategy) => strategy.productStage === "advanced-beta"
+);
 
 /** Resolve a strategy by key; null/unknown returns null (used for "clear"). */
 export function getStrategyByKey(key: string | null | undefined): InvestorStrategy | null {

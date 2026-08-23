@@ -23,37 +23,61 @@
  *
  * Everyone else gets ENTITLEMENT_REQUIRED and no bytes.
  *
- * ─── KNOWN RESIDUAL, deliberately accepted ──────────────────────────────────
- * The report PAYLOAD is computed in the browser and posted here, so the caller
- * controls the numbers printed on their own report. That is unchanged from the
- * previous browser-only design and is not a cross-user issue — a user can only
- * ever render their own deal. Recomputing every projection server-side from
- * raw form values would close it, but that is a much larger change and is
- * tracked separately. What this action fixes is ACCESS, not provenance.
+ * ─── PROVENANCE ────────────────────────────────────────────────────────────
+ * Raw form values are validated and every deterministic report figure is
+ * rebuilt on this server through the canonical calculation engines. The
+ * browser report object is retained only for bounded presentation evidence;
+ * its financial figures and methodology labels never reach the renderer.
  */
 
 import { z } from "zod";
-import { money, reportDataSchema } from "@/lib/report-payload-schema";
+import { reportDataSchema } from "@/lib/report-payload-schema";
 import * as Sentry from "@sentry/nextjs";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
-import { investmentFormSchema } from "@/lib/investcalc-schema";
+import {
+  investmentFormSchema,
+  normalizeInvestmentFormSnapshot,
+  type InvestmentFormValues,
+} from "@/lib/investcalc-schema";
 import {
   claimSecretMatches,
-  reportMatchesClaimedDeal,
   fingerprintOneTimePdfDeal,
-  ONE_TIME_PDF_CLAIM_LIFETIME_MS,
+  fingerprintOneTimePdfReportBinding,
+  isOneTimePdfRecoveryAllowed,
 } from "@/lib/one-time-pdf-claims";
 import { createIpRateLimit, getRequestIp } from "@/lib/ip-rate-limit";
-import type { ReportData } from "@/lib/pdf-generator";
 import type { ReportMode } from "@/lib/pdf-export-constants";
+import { buildCanonicalReportData } from "@/lib/report-data-builder";
+import { shouldFreezeSavedMethodology } from "@/lib/saved-analysis-methodology";
+import {
+  normalizeOfferCeilingTargetSource,
+} from "@/lib/offer-ceiling-contract";
+import {
+  resolveLegacyCompatibleOneTimePdfReportBinding,
+  resolveOneTimePdfReportBinding,
+} from "@/lib/one-time-pdf-report-binding";
 
 export type GenerateReportPdfResult =
-  | { ok: true; filename: string; pdfBase64: string; hasBranding: boolean }
+  | {
+      ok: true;
+      filename: string;
+      pdfBase64: string;
+      hasBranding: boolean;
+      hasBuyBoxVerdict: boolean;
+      buyBoxStateResolved: boolean;
+    }
   | {
       ok: false;
-      code: "SIGN_IN_REQUIRED" | "ENTITLEMENT_REQUIRED" | "VALIDATION_ERROR" | "RATE_LIMITED" | "SERVER_ERROR";
+      code:
+        | "SIGN_IN_REQUIRED"
+        | "ENTITLEMENT_REQUIRED"
+        | "VALIDATION_ERROR"
+        | "RATE_LIMITED"
+        | "FROZEN_METHODOLOGY"
+        | "STALE_EXPORT"
+        | "SERVER_ERROR";
       message: string;
     };
 
@@ -61,8 +85,25 @@ export type GenerateReportPdfResult =
 
 const inputSchema = z
   .object({
-    report: reportDataSchema,
-    mode: z.enum(["personal", "lender", "partner", "agent"]).default("personal"),
+    values: investmentFormSchema,
+    // Legacy callers may still send this display payload, but the server
+    // discards it and rebuilds every financial output. New callers omit it so
+    // paid Offer Ceiling math never has to run in the browser.
+    report: reportDataSchema.optional(),
+    maxOfferTarget: z.unknown().optional(),
+    maxOfferTargetSource: z
+      .enum(["buy-box", "screening-defaults", "selected-targets"])
+      .optional(),
+    savedExport: z
+      .object({
+        id: z.string().uuid(),
+        renderFingerprint: z.string().regex(/^[a-f0-9]{32}$/),
+      })
+      .strict()
+      .optional(),
+    mode: z
+      .enum(["personal", "lender", "partner", "agent"])
+      .default("personal"),
     /** The $5 pack path: proves purchase without an entitlement. */
     claim: z
       .object({
@@ -81,11 +122,16 @@ const inputSchema = z
  * this app to do on demand. A human exports a handful per session; this cap is
  * far above that and exists so a script cannot pin a serverless instance.
  */
-const pdfRateLimit = createIpRateLimit({ windowMs: 60 * 60 * 1000, maxPerWindow: 60 });
+const pdfRateLimit = createIpRateLimit({
+  windowMs: 60 * 60 * 1000,
+  maxPerWindow: 60,
+});
 
 // ── Gate ────────────────────────────────────────────────────────────────────
 
-type GateOutcome = { allowed: true } | { allowed: false; result: GenerateReportPdfResult };
+type GateOutcome =
+  | { allowed: true }
+  | { allowed: false; result: GenerateReportPdfResult };
 
 /**
  * Verify a one-time pack claim WITHOUT consuming it.
@@ -95,52 +141,146 @@ type GateOutcome = { allowed: true } | { allowed: false; result: GenerateReportP
  * 24-hour re-download recovery window. This only answers "does this caller
  * genuinely hold a paid claim for this deal?"
  */
-async function claimGrantsExport(claim: {
-  id: string;
-  secret: string;
-  values: z.infer<typeof investmentFormSchema>;
-}): Promise<boolean> {
+async function claimGrantsExport(
+  claim: {
+    id: string;
+    secret: string;
+    values: z.infer<typeof investmentFormSchema>;
+  },
+  valuesToRender: z.infer<typeof investmentFormSchema>,
+  rawMaxOfferTarget: unknown,
+  rawMaxOfferTargetSource: unknown,
+): Promise<boolean> {
   try {
+    const submittedReportBinding = resolveOneTimePdfReportBinding(
+      {
+        values: valuesToRender,
+        maxOfferTarget: rawMaxOfferTarget,
+        maxOfferTargetSource: rawMaxOfferTargetSource,
+      },
+      { allowLegacyDefault: true }
+    );
+    if (!submittedReportBinding) return false;
+
     const admin = createAdminSupabaseClient();
     const { data, error } = await admin
       .from("one_time_pdf_purchase_claims")
-      .select("claim_secret_hash, deal_fingerprint, consumed_at, expires_at")
+      .select(
+        "claim_secret_hash, deal_fingerprint, report_fingerprint, user_id, consumed_at, expires_at"
+      )
       .eq("id", claim.id)
       .maybeSingle();
     if (error || !data) return false;
 
+    // Null fingerprints exist only on claims created by the pre-target client.
+    // Their first recovery render is restricted to the historical default.
+    const reportBinding = data.report_fingerprint
+      ? submittedReportBinding
+      : resolveLegacyCompatibleOneTimePdfReportBinding({
+          values: valuesToRender,
+          maxOfferTarget: rawMaxOfferTarget,
+          maxOfferTargetSource: rawMaxOfferTargetSource,
+        });
+    if (!reportBinding) return false;
+
+    // An authenticated checkout stays bound to that account in addition to
+    // the browser secret. Auth lookup failure is a rejection, never an
+    // anonymous downgrade of an identity-bound purchase.
+    if (data.user_id) {
+      const supabase = await createServerSupabaseClient();
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+      if (authError || user?.id !== data.user_id) return false;
+    }
+
     // The secret is the bearer credential; compare against the stored hash.
-    if (!claimSecretMatches(claim.secret, data.claim_secret_hash as string)) return false;
+    if (!claimSecretMatches(claim.secret, data.claim_secret_hash as string))
+      return false;
 
     // Bind to THIS deal, so one purchase cannot render an unlimited series of
     // different properties.
-    const fingerprint = fingerprintOneTimePdfDeal(claim.values, claim.secret);
-    if (fingerprint !== data.deal_fingerprint) return false;
+    const fingerprint = fingerprintOneTimePdfDeal(valuesToRender, claim.secret);
+    const claimedFingerprint = fingerprintOneTimePdfDeal(
+      claim.values,
+      claim.secret,
+    );
+    if (
+      fingerprint !== data.deal_fingerprint ||
+      claimedFingerprint !== data.deal_fingerprint
+    ) {
+      return false;
+    }
 
     // Only a PAID claim is consumed; an unconsumed row is an abandoned
     // checkout, not a purchase.
     if (!data.consumed_at) return false;
 
-    const expiresAt = data.expires_at ? Date.parse(data.expires_at as string) : NaN;
-    const horizon = Number.isFinite(expiresAt)
-      ? expiresAt
-      : Date.parse(data.consumed_at as string) + ONE_TIME_PDF_CLAIM_LIFETIME_MS;
-    if (Number.isFinite(horizon) && Date.now() > horizon) return false;
+    if (
+      !data.expires_at ||
+      !isOneTimePdfRecoveryAllowed({
+        consumedAt: data.consumed_at as string,
+        expiresAt: data.expires_at as string,
+      })
+    ) {
+      return false;
+    }
 
-    return true;
+    const reportFingerprint = fingerprintOneTimePdfReportBinding(
+      valuesToRender,
+      reportBinding.target,
+      reportBinding.source,
+      claim.secret
+    );
+    if (data.report_fingerprint) {
+      return data.report_fingerprint === reportFingerprint;
+    }
+
+    // A row consumed before report binding shipped is made immutable on its
+    // first bounded recovery render. The database permits null -> value once.
+    const { data: bound, error: bindError } = await admin
+      .from("one_time_pdf_purchase_claims")
+      .update({ report_fingerprint: reportFingerprint })
+      .eq("id", claim.id)
+      .eq("claim_secret_hash", data.claim_secret_hash as string)
+      .eq("deal_fingerprint", data.deal_fingerprint as string)
+      .eq("consumed_at", data.consumed_at as string)
+      .is("report_fingerprint", null)
+      .select("report_fingerprint")
+      .maybeSingle();
+    if (bindError) return false;
+    if (bound?.report_fingerprint === reportFingerprint) return true;
+
+    // A simultaneous request may have won the bind race. Accept only if it
+    // chose the exact same target/source fingerprint.
+    const { data: raced, error: raceError } = await admin
+      .from("one_time_pdf_purchase_claims")
+      .select("report_fingerprint")
+      .eq("id", claim.id)
+      .maybeSingle();
+    if (raceError) return false;
+    return raced?.report_fingerprint === reportFingerprint;
   } catch {
     // FAIL CLOSED. An unreadable ledger must not hand out paid reports.
     return false;
   }
 }
 
-async function checkGate(input: z.infer<typeof inputSchema>): Promise<GateOutcome> {
+async function checkGate(
+  input: z.infer<typeof inputSchema>,
+): Promise<GateOutcome> {
   if (
     input.claim &&
-    // Bind the CLAIM to the DOCUMENT before honouring it. Without this the
-    // fingerprint below guards a field that is never rendered.
-    reportMatchesClaimedDeal(input.report, input.claim.values) &&
-    (await claimGrantsExport(input.claim))
+    // Bind the claim to the exact normalized form values the server will
+    // calculate and render. Browser-derived report numbers are never part of
+    // the authority decision because they are never rendered.
+    (await claimGrantsExport(
+      input.claim,
+      input.values,
+      input.maxOfferTarget,
+      input.maxOfferTargetSource
+    ))
   ) {
     return { allowed: true };
   }
@@ -168,7 +308,8 @@ async function checkGate(input: z.infer<typeof inputSchema>): Promise<GateOutcom
       result: {
         ok: false,
         code: "ENTITLEMENT_REQUIRED",
-        message: "PDF export is a Pro feature. Upgrade, or buy this single report.",
+        message:
+          "PDF export is a Pro feature. Upgrade, or buy this single report.",
       },
     };
   }
@@ -177,17 +318,147 @@ async function checkGate(input: z.infer<typeof inputSchema>): Promise<GateOutcom
 
 // ── Action ──────────────────────────────────────────────────────────────────
 
-function safeFilename(companyName: string | null | undefined, mode: ReportMode): string {
-  const prefix = companyName?.trim().replace(/[^A-Za-z0-9_-]+/g, "-") || "TrueCap";
+function safeFilename(
+  companyName: string | null | undefined,
+  mode: ReportMode,
+): string {
+  const prefix =
+    companyName?.trim().replace(/[^A-Za-z0-9_-]+/g, "-") || "TrueCap";
   const label =
-    mode === "lender" ? "Lender" : mode === "partner" ? "Partner" : mode === "agent" ? "Agent" : "Investment";
+    mode === "lender"
+      ? "Lender"
+      : mode === "partner"
+        ? "Partner"
+        : mode === "agent"
+          ? "Agent"
+          : "Investment";
   return `${prefix}-${label}-Report-${Date.now()}.pdf`;
 }
 
-export async function generateReportPdfAction(input: unknown): Promise<GenerateReportPdfResult> {
+type PreparedReportInput =
+  | {
+      ok: true;
+      values: InvestmentFormValues;
+      maxOfferTarget: unknown;
+      maxOfferTargetSource: unknown;
+      trustedPresentation?: Parameters<
+        typeof buildCanonicalReportData
+      >[0]["trustedPresentation"];
+    }
+  | { ok: false; result: GenerateReportPdfResult };
+
+function normalizedValuesJson(raw: unknown): string | null {
+  const normalized = normalizeInvestmentFormSnapshot(raw);
+  if (!normalized) return null;
+  const parsed = investmentFormSchema.safeParse(normalized);
+  return parsed.success ? JSON.stringify(parsed.data) : null;
+}
+
+/**
+ * A saved-list export carries a server-issued render fingerprint. Re-read the
+ * owned row here before rendering: the browser may not choose a historical
+ * methodology, swap the deal inputs behind that fingerprint, or inject comps.
+ */
+async function prepareReportInput(
+  input: z.infer<typeof inputSchema>,
+): Promise<PreparedReportInput> {
+  if (!input.savedExport) {
+    return {
+      ok: true,
+      values: input.values,
+      maxOfferTarget: input.maxOfferTarget,
+      maxOfferTargetSource: input.maxOfferTargetSource,
+    };
+  }
+
+  const { getSavedAnalysisPdfExportAction } =
+    await import("@/app/actions/saved-analyses");
+  const authority = await getSavedAnalysisPdfExportAction(input.savedExport.id);
+  if (!authority.ok) {
+    return {
+      ok: false,
+      result: {
+        ok: false,
+        code:
+          authority.code === "SIGN_IN_REQUIRED"
+            ? "SIGN_IN_REQUIRED"
+            : authority.code === "ENTITLEMENT_REQUIRED"
+              ? "ENTITLEMENT_REQUIRED"
+              : "STALE_EXPORT",
+        message: authority.message,
+      },
+    };
+  }
+  if (
+    authority.source !== "regenerate" ||
+    authority.renderFingerprint !== input.savedExport.renderFingerprint
+  ) {
+    return {
+      ok: false,
+      result: {
+        ok: false,
+        code: "STALE_EXPORT",
+        message:
+          "This saved analysis changed before the report was rendered. Start the export again.",
+      },
+    };
+  }
+  if (shouldFreezeSavedMethodology(authority.methodologyVersion)) {
+    return {
+      ok: false,
+      result: {
+        ok: false,
+        code: "FROZEN_METHODOLOGY",
+        message:
+          "This deal uses a different saved underwriting standard. Re-underwrite it with the current standard before creating a new PDF.",
+      },
+    };
+  }
+
+  const trustedValues = normalizeInvestmentFormSnapshot(authority.formSnapshot);
+  if (
+    !trustedValues ||
+    normalizedValuesJson(input.values) !== normalizedValuesJson(trustedValues)
+  ) {
+    return {
+      ok: false,
+      result: {
+        ok: false,
+        code: "STALE_EXPORT",
+        message:
+          "This saved analysis changed before the report was rendered. Start the export again.",
+      },
+    };
+  }
+  const resultSnapshot =
+    authority.resultSnapshot && typeof authority.resultSnapshot === "object"
+      ? authority.resultSnapshot
+      : {};
+
+  return {
+    ok: true,
+    values: trustedValues,
+    maxOfferTarget: (resultSnapshot as Record<string, unknown>).maxOfferTarget,
+    maxOfferTargetSource: normalizeOfferCeilingTargetSource(
+      (resultSnapshot as Record<string, unknown>).maxOfferTargetSource
+    ),
+    trustedPresentation: {
+      templateLabel: authority.templateFallback?.templateName ?? null,
+      comps: authority.reportComps,
+    },
+  };
+}
+
+export async function generateReportPdfAction(
+  input: unknown,
+): Promise<GenerateReportPdfResult> {
   const parsed = inputSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, code: "VALIDATION_ERROR", message: "Could not build this report." };
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "Could not build this report.",
+    };
   }
 
   if (pdfRateLimit.isOverLimit(await getRequestIp())) {
@@ -202,6 +473,19 @@ export async function generateReportPdfAction(input: unknown): Promise<GenerateR
   if (!gate.allowed) return gate.result;
 
   try {
+    const prepared = await prepareReportInput(parsed.data);
+    if (!prepared.ok) return prepared.result;
+
+    // This is the report provenance boundary. Submitted result fields are
+    // intentionally discarded; the renderer only receives canonical server
+    // computations reconstructed from the validated form values.
+    const canonicalReport = buildCanonicalReportData({
+      values: prepared.values,
+      maxOfferTarget: prepared.maxOfferTarget,
+      maxOfferTargetSource: prepared.maxOfferTargetSource,
+      trustedPresentation: prepared.trustedPresentation,
+    });
+
     // Branding is resolved HERE, never accepted from the caller, so co-branding
     // cannot be granted by posting a companyName and logoUrl — and the logo
     // host still goes through the allowlist in lib/pdf/load-image.
@@ -241,21 +525,29 @@ export async function generateReportPdfAction(input: unknown): Promise<GenerateR
           }
         : null;
 
-    const { generateInvestmentPDFBlob } = await import("@/lib/pdf-generator");
-    const blob = await generateInvestmentPDFBlob(
-      parsed.data.report as unknown as ReportData,
+    const { generateInvestmentPDFArtifact } =
+      await import("@/lib/pdf-generator");
+    const artifact = await generateInvestmentPDFArtifact(
+      canonicalReport,
       branding as never,
-      parsed.data.mode as ReportMode
+      parsed.data.mode as ReportMode,
     );
-    const bytes = Buffer.from(await blob.arrayBuffer());
+    const bytes = Buffer.from(await artifact.blob.arrayBuffer());
     return {
       ok: true,
-      filename: safeFilename(branding?.companyName, parsed.data.mode as ReportMode),
+      filename: safeFilename(
+        branding?.companyName,
+        parsed.data.mode as ReportMode,
+      ),
       pdfBase64: bytes.toString("base64"),
       hasBranding: Boolean(branding),
+      hasBuyBoxVerdict: artifact.hasBuyBoxVerdict,
+      buyBoxStateResolved: artifact.buyBoxStateResolved,
     };
   } catch (error) {
-    Sentry.captureException(error, { tags: { feature: "pdf-export", stage: "server-render" } });
+    Sentry.captureException(error, {
+      tags: { feature: "pdf-export", stage: "server-render" },
+    });
     return {
       ok: false,
       code: "SERVER_ERROR",

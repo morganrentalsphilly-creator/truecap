@@ -7,7 +7,7 @@
  *
  * The point of the screen: this is the first surface in the dashboard's
  * history to show a MAX OFFER per deal, and the gap between it and the
- * asking price. A portfolio dashboard for a product sold on "never overpay"
+ * asking price. A portfolio dashboard for an acquisition decision system
  * had no column for the number that answers it.
  *
  * PRESENTATION ONLY. maxOffer arrives already solved from
@@ -17,7 +17,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { DashboardDeal } from "@/lib/dashboard-deal-mapping";
 import { Verdict } from "@/components/investcalc/verdict";
@@ -71,7 +71,7 @@ function SortableTh({
       <button
         type="button"
         onClick={() => onToggle(sortKey)}
-        className="inline-flex min-h-8 items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-md text-[11px] font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         {label}
         <span className="sr-only">
@@ -117,18 +117,157 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
     }
   };
 
+  const mobileDirectionLabel =
+    sortKey === "address"
+      ? desc
+        ? "Z to A"
+        : "A to Z"
+      : desc
+        ? "High to low"
+        : "Low to high";
+
   return (
     <section aria-labelledby="your-deals-heading" className="rounded-2xl border border-border bg-card shadow-sm">
       <div className="flex items-baseline justify-between gap-3 px-4 py-3 sm:px-5">
         <h2 id="your-deals-heading" className="text-base font-extrabold text-foreground">
           Your deals
         </h2>
-        <Link href="/dashboard/saved-analyses" className="text-xs font-semibold text-primary hover:underline">
+        <Link
+          href="/dashboard/saved-analyses"
+          className="inline-flex min-h-11 items-center rounded-md px-1 text-xs font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
           View all
         </Link>
       </div>
-      {/* Wide table scrolls inside its own container so the page never does. */}
-      <div className="overflow-x-auto border-t border-border" tabIndex={0}>
+
+      {/* Phones and tablets get real deal cards rather than a clipped six-column
+          table. The same `sorted` array powers both layouts, so changing the
+          compact sort controls preserves the exact desktop ordering contract. */}
+      <div data-deal-layout="cards" className="border-t border-border lg:hidden">
+        <div className="flex flex-wrap items-end gap-2 border-b border-border bg-muted/20 px-4 py-3 sm:px-5">
+          <label className="min-w-0 flex-1 text-xs font-bold text-muted-foreground">
+            Sort deals
+            <select
+              value={sortKey}
+              onChange={(event) => {
+                setSortKey(event.target.value as SortKey);
+                setDesc(true);
+              }}
+              className="mt-1 min-h-11 w-full rounded-lg border border-input bg-background px-3 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <option value="gap">Gap to ceiling</option>
+              <option value="maxOffer">Max offer</option>
+              <option value="score">Deal score</option>
+              <option value="address">Property</option>
+            </select>
+          </label>
+          <button
+            type="button"
+            onClick={() => setDesc((current) => !current)}
+            aria-label={`Sort ${mobileDirectionLabel}. Activate to reverse the order.`}
+            className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-input bg-background px-3 text-xs font-bold text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <ArrowUpDown aria-hidden className="size-4" />
+            <span>{mobileDirectionLabel}</span>
+          </button>
+        </div>
+
+        <div className="space-y-3 p-3 sm:p-4">
+          {sorted.map((deal) => {
+            const gap = gapOf(deal);
+            const dealHeadingId = `dashboard-deal-${deal.id}`;
+            return (
+              <article
+                key={deal.id}
+                aria-labelledby={dealHeadingId}
+                className="rounded-xl border border-border bg-background p-4 shadow-sm"
+              >
+                <Link
+                  id={dealHeadingId}
+                  href={`/dashboard/saved-analyses/${deal.id}`}
+                  className="flex min-h-11 min-w-0 items-center justify-between gap-3 rounded-md font-bold text-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  title={deal.address ?? undefined}
+                >
+                  <span className="min-w-0 break-words">{deal.address ?? "Untitled deal"}</span>
+                  <ArrowUpRight aria-hidden className="size-4 shrink-0" />
+                </Link>
+
+                <dl className="mt-3 grid grid-cols-2 gap-3">
+                  <div className="rounded-lg bg-muted/30 p-3">
+                    <dt className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      Max offer
+                    </dt>
+                    <dd className="mt-1 font-mono text-lg font-extrabold tabular-nums text-foreground">
+                      {money(deal.maxOffer)}
+                    </dd>
+                  </div>
+                  <div className="rounded-lg bg-muted/30 p-3">
+                    <dt className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      Asking
+                    </dt>
+                    <dd className="mt-1 font-mono text-lg font-bold tabular-nums text-foreground">
+                      {money(deal.purchasePrice)}
+                    </dd>
+                  </div>
+                  {deal.maxOffer != null && deal.maxOfferBasisLabel ? (
+                    <div className="col-span-2 rounded-lg border border-primary/15 bg-[var(--brand-blue-light)] p-3">
+                      <dt className="text-[10px] font-bold uppercase tracking-wider text-primary">
+                        Price-ceiling criteria
+                      </dt>
+                      <dd className="mt-1 break-words text-xs leading-relaxed text-foreground">
+                        {deal.maxOfferBasisLabel}
+                      </dd>
+                    </div>
+                  ) : null}
+                  <div className="rounded-lg border border-border p-3">
+                    <dt className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      Gap
+                    </dt>
+                    <dd
+                      className={cn(
+                        "mt-1 font-mono text-sm font-bold tabular-nums",
+                        gap == null
+                          ? "text-muted-foreground"
+                          : gap > 0
+                            ? "text-[var(--metric-negative)]"
+                            : "text-[var(--metric-positive)]"
+                      )}
+                    >
+                      {gap == null
+                        ? "—"
+                        : gap > 0
+                          ? `${money(Math.abs(gap))} over`
+                          : gap < 0
+                            ? `${money(Math.abs(gap))} under`
+                            : "At ceiling"}
+                    </dd>
+                  </div>
+                  <div className="rounded-lg border border-border p-3">
+                    <dt className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      Deal score
+                    </dt>
+                    <dd className="mt-1 font-mono text-sm font-bold tabular-nums text-foreground">
+                      {deal.score ?? "—"}
+                    </dd>
+                  </div>
+                </dl>
+
+                <div className="mt-3 flex min-h-11 items-center border-t border-border pt-3">
+                  {deal.recommendation ? (
+                    <Verdict recommendation={deal.recommendation} variant="compact" />
+                  ) : (
+                    <span className="text-xs text-muted-foreground">Not scored</span>
+                  )}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Desktop keeps the dense sortable comparison table. At narrower
+          breakpoints the card renderer above is the only visible layout. */}
+      <div data-deal-layout="table" className="hidden overflow-x-auto border-t border-border lg:block" tabIndex={0}>
         <table className="w-full min-w-[720px] text-sm">
           <caption className="sr-only">
             Your saved deals with max offer, asking price, and the gap between them
@@ -155,14 +294,21 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                   <td className="max-w-[240px] px-3 py-2.5">
                     <Link
                       href={`/dashboard/saved-analyses/${deal.id}`}
-                      className="block truncate font-semibold text-foreground hover:text-primary"
+                      className="flex min-h-11 items-center truncate rounded-md font-semibold text-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       title={deal.address ?? undefined}
                     >
                       {deal.address ?? "Untitled deal"}
                     </Link>
                   </td>
-                  <td className="whitespace-nowrap px-3 py-2.5 text-right font-mono font-bold tabular-nums text-foreground">
-                    {money(deal.maxOffer)}
+                  <td className="px-3 py-2.5 text-right text-foreground">
+                    <div className="whitespace-nowrap font-mono font-bold tabular-nums">
+                      {money(deal.maxOffer)}
+                    </div>
+                    {deal.maxOffer != null && deal.maxOfferBasisLabel ? (
+                      <div className="ml-auto mt-0.5 max-w-[220px] text-[10px] leading-tight text-muted-foreground">
+                        Criteria: {deal.maxOfferBasisLabel}
+                      </div>
+                    ) : null}
                   </td>
                   <td className="whitespace-nowrap px-3 py-2.5 text-right font-mono tabular-nums text-muted-foreground">
                     {money(deal.purchasePrice)}
@@ -213,16 +359,13 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
           </tbody>
         </table>
       </div>
-      {/* The footnote must name the bar the offer was actually solved
-          against. Saying "your targets" to a user with no buy box asserts
-          criteria they never set. */}
+      {/* Exact per-deal criteria render beneath each ceiling; the footer can
+          therefore explain the gap without pretending a mixed table shares
+          one target basis. */}
       <p className="border-t border-border px-4 py-2 text-[11px] text-muted-foreground sm:px-5">
         Gap is the asking price minus your max offer. A positive gap means the
-        asking price is above what{" "}
-        {deals.some((d) => d.maxOfferBasis === "buy-box")
-          ? "your buy box supports"
-          : "TrueCap's default bar supports (break-even cash flow, DSCR 1.25) — set a buy box to use your own criteria"}
-        .
+        asking price is above the price ceiling calculated from the criteria
+        shown for that deal. This is not a recommended offer.
       </p>
     </section>
   );

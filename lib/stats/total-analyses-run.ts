@@ -7,15 +7,13 @@ import { createAdminSupabaseClient } from "@/lib/supabase/admin";
  * Total number of analyses RUN across all users, all time — the count behind
  * the homepage "analysis runs recorded on TrueCap" ticker.
  *
- * This returns the raw stored figure: it counts every time someone clicks Run
- * analysis (incremented once per run via the increment_analysis_runs RPC — see
- * app/actions/track-analysis-run.ts). The public all-time ticker separately
- * adds the owner-attested 50,000 historical-run display baseline.
+ * This returns the raw stored cumulative figure: the owner-confirmed 51,900
+ * total is persisted once by migration 20260823160000, then every subsequent
+ * Run analysis increments the same row via increment_analysis_runs().
  *
  * Reads a single counter row via the service-role client (RLS-bypassing,
  * count-only — no row data or PII leaves this function). On the static homepage
  * this runs at build / hourly revalidation, never per visitor. The public
- * ticker combines this measured value with the historical display baseline.
  * Returns null on ANY error or
  * if the counter row is absent (e.g. the migration hasn't been applied yet) so
  * the ticker hides gracefully rather than showing a fabricated or stale number.

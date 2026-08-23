@@ -37,11 +37,17 @@ describe("TrueCap Stripe Checkout branding", () => {
 
   it("is applied to both repository Checkout Session construction paths", () => {
     const root = join(__dirname, "..", "..");
-    for (const relative of ["app/actions/billing.ts", "app/actions/one-time-pdf.ts"]) {
-      const source = readFileSync(join(root, relative), "utf8");
-      expect(source, relative).toMatch(
-        /stripe\.checkout\.sessions\.create\(withTrueCapCheckoutBranding\(\{/
-      );
-    }
+    const billing = readFileSync(join(root, "app/actions/billing.ts"), "utf8");
+    expect(billing).toMatch(
+      /function buildSubscriptionCheckoutSessionParams[\s\S]*return withTrueCapCheckoutBranding\(\{/
+    );
+    expect(billing).toMatch(
+      /stripe\.checkout\.sessions\.create\(\s*buildSubscriptionCheckoutSessionParams\(\{/
+    );
+
+    const oneTimePdf = readFileSync(join(root, "app/actions/one-time-pdf.ts"), "utf8");
+    expect(oneTimePdf).toMatch(
+      /stripe\.checkout\.sessions\.create\(\s*withTrueCapCheckoutBranding\(\{/
+    );
   });
 });

@@ -28,10 +28,11 @@ describe("trust-language guards", () => {
     // above it, never an accident — cached PDFs are invalidated by this
     // number, so changing it silently either strands users on a stale
     // document or throws away every cache for nothing.
-    // Bumped to 7 for the vector-chart port + Year 1 Operating Statement.
-    expect(constants).toContain("PDF_SNAPSHOT_VERSION = 7");
+    // Bumped to 9 because saved-deal exports are now content-addressed and a
+    // frozen historical report may not mix in today's inverse-solver math.
+    expect(constants).toContain("PDF_SNAPSHOT_VERSION = 9");
     // The changelog comment must actually document the current version.
-    expect(constants).toMatch(/\/\/\s+7 - /);
+    expect(constants).toMatch(/\/\/\s+9 - /);
     expect(generator).toContain("TRUECAP_UNDERWRITING_STANDARD_VERSION");
     expect(generator).toContain("area rent benchmark");
     expect(generator).toContain("owner-occupied national mortgage benchmark");
@@ -224,6 +225,9 @@ describe("trust-language guards", () => {
   it("never renders a refund guarantee without published terms", () => {
     const landing = read("../../components/marketing/landing-sections.tsx");
     const config = read("../../lib/marketing-offer-config.ts");
+    const guaranteePage = read("../../app/guarantee/page.tsx");
+    const reviewsPage = read("../../app/reviews/page.tsx");
+    const termsPage = read("../../app/terms/page.tsx");
 
     expect(landing).not.toContain('"The 5-Deal Guarantee"');
     expect(landing).not.toContain("fiveDealGuaranteeEnabled,");
@@ -234,6 +238,10 @@ describe("trust-language guards", () => {
     expect(landing).toContain("if (!guaranteeEnabled) return null");
     expect(landing).toContain("Read the full guarantee");
     expect(config).toMatch(/safePublicUrl\([\s\S]*\?\?\s*\n?\s*"\/guarantee"/);
+    expect(guaranteePage).toContain("if (!getMarketingOfferConfig().guaranteeEnabled) notFound()");
+    expect(guaranteePage).toContain("No public TrueCap refund guarantee is currently offered.");
+    expect(reviewsPage).toContain("const { guaranteeEnabled } = getMarketingOfferConfig()");
+    expect(termsPage).toContain("{guaranteeEnabled ? (");
     // The refund promise stays a software-satisfaction claim.
     expect(landing).toContain("not a guarantee of");
   });
