@@ -102,7 +102,7 @@ export function ToolsConversionCta({ calculatorName, hook }: ToolsConversionCtaP
             href="/"
             className="inline-flex h-11 items-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted"
           >
-            Get My Max Offer
+            Analyze a property free
           </Link>
         </div>
       </section>

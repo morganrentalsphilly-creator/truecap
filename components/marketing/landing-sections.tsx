@@ -154,7 +154,7 @@ export function HowTrueCapWorks() {
         </ol>
         <div className="mt-10 text-center">
           <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform">
-            Get My Max Offer
+            Analyze a property free
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
           </ScrollToFormButton>
           <p className="mt-2 text-xs text-muted-foreground">Free · no card · no signup</p>
@@ -286,7 +286,7 @@ export function FinalCta() {
           needed. Projections, tax, exit scenarios and the max-offer solver are Pro.
         </p>
         <ScrollToFormButton analyticsSource="final_cta" className="group mt-6 inline-flex h-12 items-center gap-1.5 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform">
-          Get My Max Offer
+          Analyze a property free
           <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
         </ScrollToFormButton>
       </div>
@@ -868,7 +868,7 @@ export function PdfProUpsell() {
             </p>
             <div className="mt-5">
               <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl border border-border bg-background px-5 text-sm font-bold text-foreground hover:bg-muted">
-                Get My Max Offer
+                Analyze a property
                 <ArrowRight aria-hidden className="size-4 transition-transform group-hover:translate-x-0.5" />
               </ScrollToFormButton>
             </div>
@@ -1059,7 +1059,7 @@ export function Personas() {
         </div>
         <div className="mt-10 text-center">
           <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_10px_24px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform">
-            Get My Max Offer
+            Analyze a property free
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
           </ScrollToFormButton>
         </div>

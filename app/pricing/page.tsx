@@ -247,7 +247,7 @@ export default async function PricingPage() {
                 href="/#main"
                 className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-[0_8px_22px_rgba(0,112,196,0.24)] transition hover:bg-primary/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
-                Get My Max Offer
+                Analyze a property free
               </Link>
               <Link
                 href="#plans"

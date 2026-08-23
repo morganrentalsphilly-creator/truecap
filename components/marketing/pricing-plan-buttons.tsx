@@ -3,7 +3,7 @@
 /**
  * Plan CTAs for /pricing. Three behaviors:
  *
- *  - slot=free      → "Analyze a deal free" → the no-signup homepage analyzer
+ *  - slot=free      → "Analyze a property free" → the no-signup homepage analyzer
  *  - slot=pro_*     → cold visitor: "Get Pro" → /auth/sign-up?next=/pricing?checkout=<slot>#plans
  *                     authed free:  "Upgrade"  → triggers Stripe checkout
  *                     authed paid:  exact-plan manage / period switch /
@@ -140,7 +140,7 @@ export function PricingPlanButtons({
         href="/#main"
         className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-bold text-foreground hover:bg-muted"
       >
-        Get My Max Offer <ArrowRight className="size-4" />
+        Analyze a property free <ArrowRight className="size-4" />
       </Link>
     );
   }

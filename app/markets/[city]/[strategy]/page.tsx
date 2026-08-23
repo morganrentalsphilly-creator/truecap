@@ -237,7 +237,7 @@ export default async function CityStrategyPage({
             )}#main`}
             className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
           >
-            Get My Max Offer <ArrowRight className="size-4" />
+            Analyze a property free <ArrowRight className="size-4" />
           </Link>
         </section>
 

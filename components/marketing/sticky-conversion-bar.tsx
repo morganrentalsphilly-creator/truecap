@@ -106,7 +106,7 @@ export function StickyConversionBar() {
           {/* Standardized to match the homepage's primary CTA verb.
               Sub-380px tiny phones fall back to "Try it" because the
               full label wraps. */}
-          <span className="hidden min-[380px]:inline">Get My Max Offer</span>
+          <span className="hidden min-[380px]:inline">Analyze free</span>
           <span className="min-[380px]:hidden">Try it</span>
           <ArrowRight className="size-3.5 sm:size-4" />
         </button>
