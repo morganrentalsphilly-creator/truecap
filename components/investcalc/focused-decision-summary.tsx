@@ -212,7 +212,20 @@ export function FocusedDecisionSummary({
   ].filter((label, index, all) => all.indexOf(label) === index).slice(0, 3);
   const nextVerification = inputConfidence?.verificationQueue[0];
   const resolvedNextAction =
-    clearsTargets && readinessLabel !== "Ready" && nextVerification
+    !clearsTargets
+      ? offerCeiling
+        ? {
+            label: `Negotiate to ${money(offerCeiling.ceiling)} or less — or pass`,
+            reason:
+              offerCeiling.listPriceGap > 0
+                ? `${money(offerCeiling.listPriceGap)} above the ceiling for your selected targets`
+                : "the current price misses at least one selected target",
+          }
+        : {
+            label: "Change the price or assumptions before proceeding",
+            reason: "the current assumptions miss your selected targets",
+          }
+      : readinessLabel !== "Ready" && nextVerification
       ? {
           label: nextVerification.verifyAction ?? `Verify ${nextVerification.label}`,
           reason: `${nextVerification.label} is a material ${nextVerification.sourceLabel.toLowerCase()} input`,

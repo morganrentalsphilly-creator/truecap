@@ -32,6 +32,9 @@ describe("focused decision safety", () => {
     expect(summary).toContain("canTunePriceCeiling ? (");
     expect(summary).toContain("applyMaoTargetInput(target, field, rawValue)");
     expect(summary).toContain("if (rawValue.trim())");
+    expect(summary).toContain("!clearsTargets");
+    expect(summary).toContain("Negotiate to ${money(offerCeiling.ceiling)} or less — or pass");
+    expect(summary).toContain("above the ceiling for your selected targets");
     expect(dashboard).toContain('currentOfferCeilingPayload?.access === "exact"');
     expect(dashboard).toContain("canTunePriceCeiling={canUseMaxOffer}");
     expect(dashboard).toContain("onTargetChange={handleMaoTargetChange}");
