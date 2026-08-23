@@ -149,8 +149,10 @@ import {
   ONE_TIME_PDF_LEGACY_DRAFT_KEY,
   ONE_TIME_PDF_RETURN_KEY,
   oneTimePdfClaimSecretKey,
+  parseOneTimePdfClaimSecret,
   parseOneTimePdfReturnState,
 } from "@/lib/one-time-pdf-return";
+import { parseOneTimePdfDraft } from "@/lib/one-time-pdf-report-binding";
 import { PdfPurchaseDialog } from "@/components/investcalc/pdf-purchase-dialog";
 import {
   DuplicateAddressDialog,
@@ -4225,8 +4227,10 @@ export function InvestCalcPage({
         const redemption = oneTimePdfRedemptionRef.current;
         if (redemption) {
           try {
-            const secret = window.sessionStorage.getItem(
-              oneTimePdfClaimSecretKey(redemption.claimId)
+            const secret = parseOneTimePdfClaimSecret(
+              window.sessionStorage.getItem(
+                oneTimePdfClaimSecretKey(redemption.claimId)
+              )
             );
             if (secret) claimPayload = { id: redemption.claimId, secret, values };
           } catch {
@@ -4540,33 +4544,14 @@ export function InvestCalcPage({
       const secretRaw = window.sessionStorage.getItem(
         oneTimePdfClaimSecretKey(returnState.claimId)
       );
-      if (secretRaw) {
-        const secretRecord = JSON.parse(secretRaw) as { v?: unknown; secret?: unknown };
-        if (
-          secretRecord.v === 1 &&
-          typeof secretRecord.secret === "string" &&
-          /^[A-Za-z0-9_-]{43}$/.test(secretRecord.secret)
-        ) {
-          claimSecret = secretRecord.secret;
-        }
-      }
+      claimSecret = parseOneTimePdfClaimSecret(secretRaw);
       const draftRaw = window.sessionStorage.getItem(ONE_TIME_PDF_DRAFT_KEY);
-      if (draftRaw) {
-        const parsedDraft = JSON.parse(draftRaw) as {
-          values?: unknown;
-          maxOfferTarget?: unknown;
-          maxOfferTargetSource?: unknown;
-        };
-        const parsedValues = investmentFormSchema.safeParse(parsedDraft.values);
-        if (parsedValues.success) {
-          restoredValues = parsedValues.data;
-          restoredMaoTarget = normalizeMaoTarget(parsedDraft.maxOfferTarget);
-          restoredMaoTargetSource =
-            normalizeOfferCeilingTargetSource(
-              parsedDraft.maxOfferTargetSource
-            ) ?? "selected-targets";
-          boundFormJson = formSnapshotForCompare(parsedValues.data);
-        }
+      const restoredDraft = parseOneTimePdfDraft(draftRaw);
+      if (restoredDraft) {
+        restoredValues = restoredDraft.values;
+        restoredMaoTarget = restoredDraft.target;
+        restoredMaoTargetSource = restoredDraft.source;
+        boundFormJson = formSnapshotForCompare(restoredDraft.values);
       }
     } catch {
       // Corrupt/missing binding data is handled by the fail-closed branch.

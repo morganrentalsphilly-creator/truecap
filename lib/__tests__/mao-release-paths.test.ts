@@ -27,9 +27,9 @@ describe("MAO release-path safety", () => {
     expect(calculator).toContain(
       "maxOfferTargetSource: checkoutMaoTargetSource"
     );
-    expect(calculator).toContain(
-      "restoredMaoTarget = normalizeMaoTarget(parsedDraft.maxOfferTarget)"
-    );
+    expect(calculator).toContain("const restoredDraft = parseOneTimePdfDraft(draftRaw)");
+    expect(calculator).toContain("restoredMaoTarget = restoredDraft.target");
+    expect(calculator).toContain("restoredMaoTargetSource = restoredDraft.source");
     expect(calculator).toContain("analysisMaoTargetRef.current = restoredMaoTarget");
     expect(calculator).toContain("setAnalysisMaoTarget(restoredMaoTarget)");
     expect(calculator).toContain(

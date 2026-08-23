@@ -53,13 +53,11 @@ import { buildCanonicalReportData } from "@/lib/report-data-builder";
 import { shouldFreezeSavedMethodology } from "@/lib/saved-analysis-methodology";
 import {
   normalizeOfferCeilingTargetSource,
-  type OfferCeilingTargetSource,
 } from "@/lib/offer-ceiling-contract";
 import {
-  normalizeMaoTarget,
-  normalizeMaoTargetForFinancing,
-} from "@/lib/mao-target-editor";
-import { calculateAnalysis } from "@/lib/calc-analysis";
+  resolveLegacyCompatibleOneTimePdfReportBinding,
+  resolveOneTimePdfReportBinding,
+} from "@/lib/one-time-pdf-report-binding";
 
 export type GenerateReportPdfResult =
   | {
@@ -154,15 +152,15 @@ async function claimGrantsExport(
   rawMaxOfferTargetSource: unknown,
 ): Promise<boolean> {
   try {
-    const parsedTarget = normalizeMaoTarget(rawMaxOfferTarget);
-    const source = normalizeOfferCeilingTargetSource(
-      rawMaxOfferTargetSource
+    const submittedReportBinding = resolveOneTimePdfReportBinding(
+      {
+        values: valuesToRender,
+        maxOfferTarget: rawMaxOfferTarget,
+        maxOfferTargetSource: rawMaxOfferTargetSource,
+      },
+      { allowLegacyDefault: true }
     );
-    if (!parsedTarget || !source) return false;
-    const maxOfferTarget = normalizeMaoTargetForFinancing(parsedTarget, {
-      isCashPurchase: calculateAnalysis(valuesToRender).monthlyPayment <= 0,
-    });
-    if (!maxOfferTarget) return false;
+    if (!submittedReportBinding) return false;
 
     const admin = createAdminSupabaseClient();
     const { data, error } = await admin
@@ -173,6 +171,17 @@ async function claimGrantsExport(
       .eq("id", claim.id)
       .maybeSingle();
     if (error || !data) return false;
+
+    // Null fingerprints exist only on claims created by the pre-target client.
+    // Their first recovery render is restricted to the historical default.
+    const reportBinding = data.report_fingerprint
+      ? submittedReportBinding
+      : resolveLegacyCompatibleOneTimePdfReportBinding({
+          values: valuesToRender,
+          maxOfferTarget: rawMaxOfferTarget,
+          maxOfferTargetSource: rawMaxOfferTargetSource,
+        });
+    if (!reportBinding) return false;
 
     // An authenticated checkout stays bound to that account in addition to
     // the browser secret. Auth lookup failure is a rejection, never an
@@ -220,8 +229,8 @@ async function claimGrantsExport(
 
     const reportFingerprint = fingerprintOneTimePdfReportBinding(
       valuesToRender,
-      maxOfferTarget,
-      source as OfferCeilingTargetSource,
+      reportBinding.target,
+      reportBinding.source,
       claim.secret
     );
     if (data.report_fingerprint) {

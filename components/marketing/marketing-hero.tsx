@@ -110,7 +110,7 @@ export function MarketingHero() {
                   source="runs"
                   minimum={1}
                   plus
-                  labelSuffix="cumulative analyses represented in TrueCap"
+                  labelSuffix="property analyses run with TrueCap"
                 />
               </div>
             </div>

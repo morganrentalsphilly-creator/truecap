@@ -15,6 +15,7 @@ const reportBindingMigration = read(
   "supabase/migrations/20260823180000_bind_one_time_pdf_report_target.sql"
 );
 const action = read("app/actions/one-time-pdf.ts");
+const generatorAction = read("app/actions/generate-report-pdf.ts");
 const client = read("components/investcalc/investcalc-page.tsx");
 const layout = read("app/layout.tsx");
 const sentryClient = read("instrumentation-client.ts");
@@ -56,6 +57,20 @@ describe("one-time PDF security contract", () => {
     expect(reportBindingMigration).toContain("interval '24 hours'");
     expect(client).toContain("maxOfferTargetSource: checkoutMaoTargetSource");
     expect(client).toContain("maxOfferTargetSource: restoredMaoTargetSource");
+  });
+
+  it("restores pre-binding drafts through the same default resolver at every gate", () => {
+    expect(client).toContain("parseOneTimePdfDraft(draftRaw)");
+    expect(action).toContain("allowLegacyDefault: true");
+    expect(generatorAction).toContain("allowLegacyDefault: true");
+    expect(action).toContain("resolveLegacyCompatibleOneTimePdfReportBinding");
+    expect(generatorAction).toContain(
+      "resolveLegacyCompatibleOneTimePdfReportBinding"
+    );
+    expect(action).toContain("report_fingerprint: reportFingerprint");
+    expect(generatorAction).toContain(
+      "data.report_fingerprint === reportFingerprint"
+    );
   });
 
   it("keeps the ledger server-only under RLS with no end-user policy", () => {
@@ -118,6 +133,8 @@ describe("one-time PDF security contract", () => {
     expect(returnHandler).toContain("window.sessionStorage.setItem");
     expect(returnHandler).not.toContain("window.localStorage.setItem");
     expect(returnHandler).toContain("oneTimePdfClaimSecretKey(result.claim.id)");
+    expect(returnHandler).toContain("parseOneTimePdfClaimSecret(secretRaw)");
+    expect(client.match(/parseOneTimePdfClaimSecret\(/g)?.length).toBeGreaterThanOrEqual(2);
   });
 
   it("leaves Pro credit dormant but preserves an auditable future ledger", () => {

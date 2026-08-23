@@ -172,6 +172,88 @@ create trigger set_subscription_checkout_intents_updated_at
   before update on public.subscription_checkout_intents
   for each row execute function public.set_updated_at();
 
+-- Replace a stale, Session-unbound creator and reserve its successor in one
+-- database transaction. Before reconciling Stripe, the caller CAS-renews the
+-- stale lease; that exact future lease plus the observed Customer binding are
+-- fencing tokens. If another worker won or progressed the row, this function
+-- does nothing and the caller must inspect the new winner instead.
+--
+-- Customer-bound callers must first converge the old Stripe idempotency key
+-- to a known complete/expired Session or a definitive pre-creation rejection.
+-- PostgreSQL cannot prove that external fact, but it can guarantee there is no
+-- gap between releasing the old user / Pack-credit locks and acquiring the
+-- replacement locks.
+create or replace function public.replace_stale_subscription_checkout_intent(
+  p_stale_intent_id uuid,
+  p_expected_lease_expires_at timestamptz,
+  p_expected_stripe_customer_id text,
+  p_replacement_stripe_customer_id text,
+  p_user_id uuid,
+  p_plan_slug text,
+  p_stripe_price_id text,
+  p_stripe_discount_coupon_id text,
+  p_trial_days integer,
+  p_pack_credit_claim_id uuid
+)
+returns public.subscription_checkout_intents
+language plpgsql
+set search_path = ''
+as $$
+declare
+  replacement public.subscription_checkout_intents;
+begin
+  if p_replacement_stripe_customer_id is not null
+     and p_replacement_stripe_customer_id is distinct from p_expected_stripe_customer_id then
+    raise exception using
+      errcode = '23514',
+      message = 'replacement Customer must retain or clear the reconciled binding';
+  end if;
+
+  update public.subscription_checkout_intents
+  set
+    status = 'failed',
+    pack_credit_claim_id = null
+  where id = p_stale_intent_id
+    and user_id = p_user_id
+    and status = 'creating'
+    and stripe_checkout_session_id is null
+    and lease_expires_at = p_expected_lease_expires_at
+    -- A future lease proves the caller claimed this stale row before doing
+    -- external reconciliation; an unclaimed expired row cannot be replaced.
+    and lease_expires_at > clock_timestamp()
+    and stripe_customer_id is not distinct from p_expected_stripe_customer_id;
+
+  if not found then
+    return null;
+  end if;
+
+  insert into public.subscription_checkout_intents (
+    user_id,
+    plan_slug,
+    stripe_price_id,
+    stripe_discount_coupon_id,
+    trial_days,
+    status,
+    lease_expires_at,
+    stripe_customer_id,
+    pack_credit_claim_id
+  ) values (
+    p_user_id,
+    p_plan_slug,
+    p_stripe_price_id,
+    p_stripe_discount_coupon_id,
+    p_trial_days,
+    'creating',
+    clock_timestamp() + interval '5 minutes',
+    p_replacement_stripe_customer_id,
+    p_pack_credit_claim_id
+  )
+  returning * into replacement;
+
+  return replacement;
+end;
+$$;
+
 alter table public.subscription_checkout_intents enable row level security;
 alter table public.subscription_checkout_intents force row level security;
 
@@ -181,3 +263,9 @@ revoke all on table public.subscription_checkout_intents from public, anon, auth
 grant select, insert, update on table public.subscription_checkout_intents to service_role;
 revoke all on function public.enforce_subscription_checkout_intent_integrity() from public;
 grant execute on function public.enforce_subscription_checkout_intent_integrity() to service_role;
+revoke all on function public.replace_stale_subscription_checkout_intent(
+  uuid, timestamptz, text, text, uuid, text, text, text, integer, uuid
+) from public, anon, authenticated;
+grant execute on function public.replace_stale_subscription_checkout_intent(
+  uuid, timestamptz, text, text, uuid, text, text, text, integer, uuid
+) to service_role;

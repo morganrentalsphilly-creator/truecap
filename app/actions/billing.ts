@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import * as Sentry from "@sentry/nextjs";
+import type Stripe from "stripe";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { hasPaidPlanSubscription } from "@/lib/entitlements";
@@ -20,11 +21,14 @@ import { findEligiblePackCredit, getPackCreditCouponId } from "@/lib/pack-credit
 import {
   acquireSubscriptionCheckoutIntent,
   bindSubscriptionCheckoutCustomer,
+  claimStaleSubscriptionCheckoutIntentForReplacement,
   completeSubscriptionCheckoutIntentFromWebhook,
   expireSubscriptionCheckoutIntentFromWebhook,
   failSubscriptionCheckoutIntent,
   isReusableSubscriptionCheckoutSession,
   markSubscriptionCheckoutIntentOpen,
+  replaceStaleSubscriptionCheckoutIntent,
+  subscriptionCheckoutIntentLeaseIsStale,
   subscriptionCheckoutIntentMatchesConfiguration,
   type SubscriptionCheckoutIntent,
 } from "@/lib/stripe/subscription-checkout-intent";
@@ -63,6 +67,63 @@ export type BillingActionResult =
 
 function getSiteUrl(): string {
   return (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+}
+
+function buildSubscriptionCheckoutSessionParams(args: {
+  intent: SubscriptionCheckoutIntent;
+  customerId: string;
+  siteUrl: string;
+}): Stripe.Checkout.SessionCreateParams {
+  const { intent, customerId, siteUrl } = args;
+  return withTrueCapCheckoutBranding({
+    mode: "subscription",
+    customer: customerId,
+    client_reference_id: intent.user_id,
+    expand: ["line_items.data.price", "discounts.coupon"],
+    line_items: [
+      {
+        price: intent.stripe_price_id,
+        quantity: 1,
+      },
+    ],
+    discounts: intent.stripe_discount_coupon_id
+      ? [{ coupon: intent.stripe_discount_coupon_id }]
+      : undefined,
+    allow_promotion_codes: intent.stripe_discount_coupon_id ? undefined : true,
+    success_url: `${siteUrl}/?billing=success&session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${siteUrl}/pricing?billing=checkout_cancelled#plans`,
+    metadata: {
+      checkout_intent_id: intent.id,
+      checkout_price_id: intent.stripe_price_id,
+      checkout_discount_coupon_id: intent.stripe_discount_coupon_id ?? "none",
+      checkout_trial_days: String(intent.trial_days),
+      user_id: intent.user_id,
+      plan_slug: intent.plan_slug,
+      trial_granted: String(intent.trial_days > 0),
+      ...(intent.pack_credit_claim_id
+        ? { pack_credit_claim_id: intent.pack_credit_claim_id }
+        : {}),
+    },
+    subscription_data: {
+      metadata: {
+        user_id: intent.user_id,
+        plan_slug: intent.plan_slug,
+      },
+      ...(intent.trial_days > 0 ? { trial_period_days: intent.trial_days } : {}),
+    },
+  });
+}
+
+function isDefinitiveStripeSessionRejection(error: unknown): boolean {
+  // A missing Customer/Price/Coupon is rejected before Stripe creates a
+  // Session. Ambiguous transport/API failures and idempotency mismatches must
+  // stay fail-closed because the original request may have succeeded.
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error as { code?: unknown }).code === "resource_missing"
+  );
 }
 
 function getPlanPriceId(planSlug: PaidPlanSlug, dbPriceId?: string | null): string | null {
@@ -128,8 +189,10 @@ async function getOrCreateStripeCustomer(args: {
 
   const customer = await stripe.customers.create(
     {
-      email: args.email ?? undefined,
-      name: args.name,
+      // Keep the idempotent CREATE payload immutable for the lifetime of the
+      // intent. Email/name can change while a stale lease is being recovered;
+      // including them here would make Stripe reject the replay as a parameter
+      // mismatch and recreate the permanent lock the ledger is meant to heal.
       metadata: {
         user_id: args.userId,
       },
@@ -141,6 +204,16 @@ async function getOrCreateStripeCustomer(args: {
       idempotencyKey: `truecap-subscription-customer:${args.intentId}`,
     }
   );
+
+  // Enrichment cannot duplicate a Customer, so it does not share the durable
+  // CREATE idempotency key. A failure is retryable: replaying CREATE returns
+  // the same Customer, then this update is attempted again with current data.
+  if (args.email || args.name) {
+    await stripe.customers.update(customer.id, {
+      email: args.email ?? undefined,
+      name: args.name,
+    });
+  }
 
   const admin = createAdminSupabaseClient();
   const { error } = await admin
@@ -372,6 +445,7 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
     // other.
     const proTrialDays = TRIAL_DAYS;
     const stripe = getStripe();
+    let checkoutProfileCustomerId = profile?.stripe_customer_id ?? null;
     const acquireInput = {
       userId: user.id,
       planSlug: parsed.data.planSlug,
@@ -389,17 +463,137 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
       packCreditClaimId: acquireInput.packCreditClaimId,
     };
 
+    const siteUrl = getSiteUrl();
     // A completed/expired Stripe Session can race its webhook. Resolve Stripe
-    // truth before deciding whether an existing ledger row is reusable. At
-    // most one retry is needed after closing an expired intent.
-    for (let attempt = 0; !acquisition.acquired && attempt < 2; attempt += 1) {
-      const existingIntent = acquisition.intent;
-      if (
-        !subscriptionCheckoutIntentMatchesConfiguration(
-          existingIntent,
-          requestedCheckoutConfiguration
-        )
-      ) {
+    // truth before deciding whether an existing ledger row is reusable. A
+    // stale creator with changed terms is also reconciled here: if a Customer
+    // was already bound, replaying the OLD idempotency key converges any
+    // ambiguous/resumed worker on one old Session before that intent is
+    // retired. Without this fence, replacing the DB row could orphan a late
+    // old Session and allow two parallel subscription checkouts.
+    for (let attempt = 0; !acquisition.acquired && attempt < 3; attempt += 1) {
+      let existingIntent = acquisition.intent;
+      const configurationMatches = subscriptionCheckoutIntentMatchesConfiguration(
+        existingIntent,
+        requestedCheckoutConfiguration
+      );
+      if (!configurationMatches && existingIntent.status === "creating") {
+        if (!subscriptionCheckoutIntentLeaseIsStale(existingIntent)) {
+          return {
+            ok: false,
+            code: "CHECKOUT_IN_PROGRESS",
+            message:
+              "Another checkout with different pricing or trial terms is already being prepared. Please try again in a moment.",
+          };
+        }
+
+        const reconciliationClaim =
+          await claimStaleSubscriptionCheckoutIntentForReplacement(admin, existingIntent);
+        if (!reconciliationClaim.acquired) {
+          acquisition = reconciliationClaim;
+          continue;
+        }
+        existingIntent = reconciliationClaim.intent;
+
+        // Converge Customer creation too. A stale worker may be paused after
+        // Stripe accepted the Customer request but before it bound the row;
+        // replacing a null-customer intent immediately would let that worker
+        // overwrite profiles with an orphan Customer after the successor won.
+        if (!existingIntent.stripe_customer_id) {
+          const recoveredCustomerId = await getOrCreateStripeCustomer({
+            intentId: existingIntent.id,
+            userId: existingIntent.user_id,
+            email: user.email ?? null,
+            name: getDisplayName(profile),
+            existingCustomerId: checkoutProfileCustomerId,
+          });
+          checkoutProfileCustomerId = recoveredCustomerId;
+          existingIntent = await bindSubscriptionCheckoutCustomer(
+            admin,
+            existingIntent.id,
+            recoveredCustomerId
+          );
+        }
+
+        let safeToReplace = false;
+        let replacementStripeCustomerId = existingIntent.stripe_customer_id;
+        if (existingIntent.stripe_customer_id) {
+          let staleSession: Stripe.Checkout.Session | undefined;
+          try {
+            staleSession = await stripe.checkout.sessions.create(
+              buildSubscriptionCheckoutSessionParams({
+                intent: existingIntent,
+                customerId: existingIntent.stripe_customer_id,
+                siteUrl,
+              }),
+              { idempotencyKey: `truecap-subscription-checkout:${existingIntent.id}` }
+            );
+          } catch (error) {
+            if (!isDefinitiveStripeSessionRejection(error)) throw error;
+            // Determine whether the missing resource was the Customer itself
+            // or the old Price/Coupon. Preserve a proven-live Customer; clear
+            // a missing/deleted one so the successor can bind a replacement.
+            // Any ambiguous Customer read remains fail-closed.
+            try {
+              const staleCustomer = await stripe.customers.retrieve(
+                existingIntent.stripe_customer_id
+              );
+              replacementStripeCustomerId =
+                "deleted" in staleCustomer && staleCustomer.deleted
+                  ? null
+                  : staleCustomer.id;
+            } catch (customerError) {
+              if (!isDefinitiveStripeSessionRejection(customerError)) throw customerError;
+              replacementStripeCustomerId = null;
+            }
+            // Stripe definitively rejected before creating a Session, so the
+            // old intent may now be retired with the classified Customer.
+            safeToReplace = true;
+          }
+
+          if (staleSession?.status === "open") {
+            if (!isReusableSubscriptionCheckoutSession({
+              session: staleSession,
+              intent: existingIntent,
+            })) {
+              throw new Error("stale checkout-intent Session failed exact binding");
+            }
+            try {
+              staleSession = await stripe.checkout.sessions.expire(staleSession.id);
+            } catch (expireError) {
+              // Completion may win the expire request. Retrieve Stripe truth;
+              // any other error/status remains fail-closed.
+              const currentSession = await stripe.checkout.sessions.retrieve(staleSession.id);
+              if (currentSession.status === "open") throw expireError;
+              staleSession = currentSession;
+            }
+          }
+          if (staleSession?.status === "complete") {
+            await completeSubscriptionCheckoutIntentFromWebhook(admin, staleSession);
+            return {
+              ok: false,
+              code: "ALREADY_SUBSCRIBED",
+              message: "This checkout is already complete. Your subscription is being activated.",
+            };
+          }
+          if (staleSession?.status === "expired") {
+            await expireSubscriptionCheckoutIntentFromWebhook(admin, staleSession);
+            acquisition = await acquireSubscriptionCheckoutIntent(admin, acquireInput);
+            continue;
+          }
+        }
+
+        if (safeToReplace) {
+          acquisition = await replaceStaleSubscriptionCheckoutIntent(admin, {
+            ...acquireInput,
+            staleIntent: existingIntent,
+            replacementStripeCustomerId,
+          });
+          continue;
+        }
+        throw new Error("stale checkout-intent could not be reconciled");
+      }
+      if (!configurationMatches) {
         return {
           ok: false,
           code: "CHECKOUT_IN_PROGRESS",
@@ -470,8 +664,8 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
     }
     if (
       intent.stripe_customer_id &&
-      profile?.stripe_customer_id &&
-      intent.stripe_customer_id !== profile.stripe_customer_id
+      checkoutProfileCustomerId &&
+      intent.stripe_customer_id !== checkoutProfileCustomerId
     ) {
       throw new Error("checkout-intent customer disagrees with the user profile");
     }
@@ -480,7 +674,7 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
       userId: user.id,
       email: user.email ?? null,
       name: getDisplayName(profile),
-      existingCustomerId: intent.stripe_customer_id ?? profile?.stripe_customer_id ?? null,
+      existingCustomerId: intent.stripe_customer_id ?? checkoutProfileCustomerId,
     });
     intent = await bindSubscriptionCheckoutCustomer(admin, intent.id, customerId);
 
@@ -569,46 +763,8 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
       };
     }
 
-    const siteUrl = getSiteUrl();
-    const session = await stripe.checkout.sessions.create(withTrueCapCheckoutBranding({
-        mode: "subscription",
-        customer: customerId,
-        client_reference_id: user.id,
-        expand: ["line_items.data.price", "discounts.coupon"],
-        line_items: [
-          {
-            price: intent.stripe_price_id,
-            quantity: 1,
-          },
-        ],
-        discounts: intent.stripe_discount_coupon_id
-          ? [{ coupon: intent.stripe_discount_coupon_id }]
-          : undefined,
-        allow_promotion_codes: intent.stripe_discount_coupon_id ? undefined : true,
-        // Land the new subscriber back on the calculator ("/") where their
-        // auto-saved draft + welcome-back banner are waiting.
-        success_url: `${siteUrl}/?billing=success&session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${siteUrl}/pricing?billing=checkout_cancelled#plans`,
-        metadata: {
-          checkout_intent_id: intent.id,
-          checkout_price_id: intent.stripe_price_id,
-          checkout_discount_coupon_id: intent.stripe_discount_coupon_id ?? "none",
-          checkout_trial_days: String(intent.trial_days),
-          user_id: user.id,
-          plan_slug: intent.plan_slug,
-          trial_granted: String(intent.trial_days > 0),
-          ...(intent.pack_credit_claim_id
-            ? { pack_credit_claim_id: intent.pack_credit_claim_id }
-            : {}),
-        },
-        subscription_data: {
-          metadata: {
-            user_id: user.id,
-            plan_slug: intent.plan_slug,
-          },
-          ...(intent.trial_days > 0 ? { trial_period_days: intent.trial_days } : {}),
-        },
-      }),
+    const session = await stripe.checkout.sessions.create(
+      buildSubscriptionCheckoutSessionParams({ intent, customerId, siteUrl }),
       {
         // Stable for this durable intent only. An ambiguous retry returns the
         // same hosted Session; a later legitimate subscription gets a new
@@ -714,9 +870,10 @@ export type CheckoutReturnVerificationResult =
 
 /**
  * Verify the attacker-controlled success URL before any banner, conversion,
- * analytics event, or entitlement poll runs in the browser. This is read-only:
- * it retrieves the Checkout Session and current plan Price but never creates,
- * mutates, or charges anything in Stripe.
+ * analytics event, or entitlement poll runs in the browser. It never creates,
+ * mutates, or charges anything in Stripe. After full verification it may close
+ * the server-only intent ledger, which heals a Session whose completion event
+ * was processed by an older webhook instance during a rolling deployment.
  */
 export async function verifyCheckoutReturnAction(
   input: unknown
@@ -802,6 +959,16 @@ export async function verifyCheckoutReturnAction(
         message: "This checkout return could not be verified.",
       };
     }
+
+    // Reverse rolling-deploy compatibility: a new checkout action can create
+    // an intent-stamped Session while an old webhook instance is still
+    // draining. The old handler activates billing but cannot close the new
+    // ledger. The authenticated, fully verified success return is a second
+    // idempotent closure path; the current webhook can still apply Pack credit.
+    await completeSubscriptionCheckoutIntentFromWebhook(
+      createAdminSupabaseClient(),
+      session
+    );
 
     return { ok: true, ...verified };
   } catch (error) {

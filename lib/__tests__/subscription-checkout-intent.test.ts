@@ -1,10 +1,14 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type Stripe from "stripe";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   SUBSCRIPTION_CHECKOUT_CREATING_LEASE_MS,
+  claimStaleSubscriptionCheckoutIntentForReplacement,
   isReusableSubscriptionCheckoutSession,
+  replaceStaleSubscriptionCheckoutIntent,
+  subscriptionCheckoutIntentLeaseIsStale,
   subscriptionCheckoutIntentMatchesConfiguration,
   type SubscriptionCheckoutIntent,
 } from "@/lib/stripe/subscription-checkout-intent";
@@ -134,6 +138,34 @@ describe("subscription Checkout Session reuse policy", () => {
     expect(SUBSCRIPTION_CHECKOUT_CREATING_LEASE_MS).toBe(5 * 60 * 1000);
   });
 
+  it("treats only creating intents at or beyond the lease boundary as stale", () => {
+    const now = new Date("2026-08-24T00:00:00.000Z");
+    expect(
+      subscriptionCheckoutIntentLeaseIsStale(
+        intent({ status: "creating", lease_expires_at: now.toISOString() }),
+        now
+      )
+    ).toBe(true);
+    expect(
+      subscriptionCheckoutIntentLeaseIsStale(
+        intent({ status: "creating", lease_expires_at: "2026-08-24T00:00:00.001Z" }),
+        now
+      )
+    ).toBe(false);
+    expect(
+      subscriptionCheckoutIntentLeaseIsStale(
+        intent({ status: "open", lease_expires_at: "2026-08-23T23:59:59.999Z" }),
+        now
+      )
+    ).toBe(false);
+    expect(
+      subscriptionCheckoutIntentLeaseIsStale(
+        intent({ status: "creating", lease_expires_at: "not-a-date" }),
+        now
+      )
+    ).toBe(false);
+  });
+
   it("never reuses a full-price Pro intent for a later ANALYZE20 request", () => {
     expect(
       subscriptionCheckoutIntentMatchesConfiguration(
@@ -165,6 +197,68 @@ describe("subscription Checkout atomicity contract", () => {
     expect(migration).toMatch(/unique index[\s\S]*\(pack_credit_claim_id\)/i);
   });
 
+  it("atomically fences, retires, and replaces a stale changed-configuration creator", () => {
+    const replacementFunction = migration.match(
+      /create or replace function public\.replace_stale_subscription_checkout_intent[\s\S]*?\$\$;/i
+    )?.[0];
+    expect(replacementFunction).toBeTruthy();
+    expect(replacementFunction).toContain("p_expected_lease_expires_at");
+    expect(replacementFunction).toContain("p_expected_stripe_customer_id");
+    expect(replacementFunction).toContain("p_replacement_stripe_customer_id");
+    expect(replacementFunction).toMatch(/status = 'creating'[\s\S]*stripe_checkout_session_id is null/i);
+    expect(replacementFunction).toMatch(
+      /lease_expires_at = p_expected_lease_expires_at[\s\S]*lease_expires_at > clock_timestamp\(\)/i
+    );
+    expect(replacementFunction).toContain(
+      "stripe_customer_id is not distinct from p_expected_stripe_customer_id"
+    );
+    expect(replacementFunction).toMatch(
+      /status = 'failed'[\s\S]*pack_credit_claim_id = null[\s\S]*if not found then[\s\S]*return null[\s\S]*insert into public\.subscription_checkout_intents/i
+    );
+    expect(replacementFunction).toMatch(
+      /stripe_customer_id,[\s\S]*p_replacement_stripe_customer_id,[\s\S]*p_pack_credit_claim_id/i
+    );
+    expect(replacementFunction).toContain("p_pack_credit_claim_id");
+  });
+
+  it("replays the old Stripe idempotency key before replacing a customer-bound stale row", () => {
+    const changedConfigurationBranch = billing.indexOf(
+      'if (!configurationMatches && existingIntent.status === "creating")'
+    );
+    const replay = billing.indexOf("buildSubscriptionCheckoutSessionParams({", changedConfigurationBranch);
+    const leaseClaim = billing.indexOf(
+      "claimStaleSubscriptionCheckoutIntentForReplacement(admin",
+      changedConfigurationBranch
+    );
+    const customerReplay = billing.indexOf(
+      "intentId: existingIntent.id",
+      changedConfigurationBranch
+    );
+    const customerBind = billing.indexOf(
+      "existingIntent = await bindSubscriptionCheckoutCustomer",
+      changedConfigurationBranch
+    );
+    const replacement = billing.indexOf(
+      "replaceStaleSubscriptionCheckoutIntent(admin",
+      changedConfigurationBranch
+    );
+    expect(changedConfigurationBranch).toBeGreaterThan(-1);
+    expect(leaseClaim).toBeGreaterThan(changedConfigurationBranch);
+    expect(customerReplay).toBeGreaterThan(leaseClaim);
+    expect(customerReplay).toBeGreaterThan(changedConfigurationBranch);
+    expect(customerBind).toBeGreaterThan(customerReplay);
+    expect(replay).toBeGreaterThan(customerBind);
+    expect(replay).toBeGreaterThan(changedConfigurationBranch);
+    expect(replacement).toBeGreaterThan(replay);
+    expect(billing).toContain(
+      "idempotencyKey: `truecap-subscription-checkout:${existingIntent.id}`"
+    );
+    expect(billing).toContain('code === "resource_missing"');
+    expect(billing).toContain("stripe.customers.retrieve(");
+    expect(billing).toContain("replacementStripeCustomerId = null");
+    expect(billing).toContain("stripe.checkout.sessions.expire(staleSession.id)");
+  });
+
   it("keeps the ledger unavailable to browser-authenticated roles", () => {
     expect(migration).toContain("force row level security");
     expect(migration).toContain(
@@ -184,10 +278,173 @@ describe("subscription Checkout atomicity contract", () => {
     expect(billing).toContain('recentSession.status === "open"');
   });
 
+  it("keeps mutable email/name out of the idempotent Customer CREATE replay", () => {
+    const createStart = billing.indexOf("const customer = await stripe.customers.create(");
+    const createEnd = billing.indexOf("const admin = createAdminSupabaseClient();", createStart);
+    const createAndEnrich = billing.slice(createStart, createEnd);
+    const createCallEnd = createAndEnrich.indexOf("await stripe.customers.update");
+    const stableCreate = createAndEnrich.slice(0, createCallEnd);
+    expect(createStart).toBeGreaterThan(-1);
+    expect(createCallEnd).toBeGreaterThan(-1);
+    expect(stableCreate).toContain("metadata:");
+    expect(stableCreate).toContain("user_id: args.userId");
+    expect(stableCreate).not.toContain("email: args.email");
+    expect(stableCreate).not.toContain("name: args.name");
+    expect(createAndEnrich).toContain("email: args.email ?? undefined");
+    expect(createAndEnrich).toContain("name: args.name");
+  });
+
+  it("closes a new intent on the verified return path during a mixed-version webhook rollout", () => {
+    const verification = billing.indexOf("const verified = verifyCheckoutReturnCandidate");
+    const rejection = billing.indexOf("if (!verified)", verification);
+    const closure = billing.indexOf(
+      "completeSubscriptionCheckoutIntentFromWebhook(",
+      rejection
+    );
+    expect(verification).toBeGreaterThan(-1);
+    expect(rejection).toBeGreaterThan(verification);
+    expect(closure).toBeGreaterThan(rejection);
+  });
+
   it("applies only the DB-reserved Pack claim and releases it on expiry", () => {
     expect(webhook).toContain("completedIntent.pack_credit_claim_id");
     expect(webhook).toContain("expireSubscriptionCheckoutIntentFromWebhook(admin, session)");
     expect(webhook).toContain('.select("id")');
     expect(webhook).toContain("else if (appliedCredit && creditedUserId)");
+  });
+});
+
+describe("stale checkout replacement RPC mapping", () => {
+  it("CAS-claims the exact stale lease and null Customer before Stripe recovery", async () => {
+    const staleIntent = intent({
+      status: "creating",
+      lease_expires_at: "2026-08-23T23:00:00.000Z",
+      stripe_customer_id: null,
+      stripe_checkout_session_id: null,
+      stripe_expires_at: null,
+    });
+    const claimedIntent = intent({
+      ...staleIntent,
+      lease_expires_at: "2026-08-24T00:05:00.000Z",
+    });
+    const maybeSingle = vi.fn().mockResolvedValue({ data: claimedIntent, error: null });
+    const builder = {
+      update: vi.fn(),
+      eq: vi.fn(),
+      lte: vi.fn(),
+      is: vi.fn(),
+      select: vi.fn(),
+      maybeSingle,
+    };
+    builder.update.mockReturnValue(builder);
+    builder.eq.mockReturnValue(builder);
+    builder.lte.mockReturnValue(builder);
+    builder.is.mockReturnValue(builder);
+    builder.select.mockReturnValue(builder);
+    const from = vi.fn().mockReturnValue(builder);
+    const admin = { from } as unknown as SupabaseClient;
+
+    const result = await claimStaleSubscriptionCheckoutIntentForReplacement(
+      admin,
+      staleIntent,
+      new Date("2026-08-24T00:00:00.000Z")
+    );
+
+    expect(result).toEqual({ acquired: true, intent: claimedIntent });
+    expect(from).toHaveBeenCalledWith("subscription_checkout_intents");
+    expect(builder.eq).toHaveBeenCalledWith("id", staleIntent.id);
+    expect(builder.eq).toHaveBeenCalledWith("lease_expires_at", staleIntent.lease_expires_at);
+    expect(builder.lte).toHaveBeenCalledWith(
+      "lease_expires_at",
+      "2026-08-24T00:00:00.000Z"
+    );
+    expect(builder.is).toHaveBeenCalledWith("stripe_customer_id", null);
+  });
+
+  it("passes both observed fencing values and the replacement Pack reservation", async () => {
+    const staleIntent = intent({
+      status: "creating",
+      lease_expires_at: "2026-08-23T23:00:00.000Z",
+      stripe_customer_id: "cus_truecap_1",
+      stripe_checkout_session_id: null,
+      stripe_expires_at: null,
+    });
+    const replacement = intent({
+      id: "bd2e82b7-157c-4d7f-b952-700b1122e21d",
+      status: "creating",
+      plan_slug: "pro_annual",
+      stripe_price_id: "price_new_annual",
+      stripe_discount_coupon_id: null,
+      trial_days: 0,
+      lease_expires_at: "2026-08-24T00:05:00.000Z",
+      stripe_customer_id: staleIntent.stripe_customer_id,
+      stripe_checkout_session_id: null,
+      stripe_expires_at: null,
+    });
+    const rpc = vi.fn().mockResolvedValue({ data: replacement, error: null });
+    const admin = { rpc } as unknown as SupabaseClient;
+
+    const result = await replaceStaleSubscriptionCheckoutIntent(admin, {
+      staleIntent,
+      replacementStripeCustomerId: staleIntent.stripe_customer_id,
+      userId: USER_ID,
+      planSlug: "pro_annual",
+      stripePriceId: "price_new_annual",
+      stripeDiscountCouponId: null,
+      trialDays: 0,
+      packCreditClaimId: staleIntent.pack_credit_claim_id,
+    });
+
+    expect(result).toEqual({ acquired: true, intent: replacement });
+    expect(rpc).toHaveBeenCalledWith("replace_stale_subscription_checkout_intent", {
+      p_stale_intent_id: staleIntent.id,
+      p_expected_lease_expires_at: staleIntent.lease_expires_at,
+      p_expected_stripe_customer_id: staleIntent.stripe_customer_id,
+      p_replacement_stripe_customer_id: staleIntent.stripe_customer_id,
+      p_user_id: USER_ID,
+      p_plan_slug: "pro_annual",
+      p_stripe_price_id: "price_new_annual",
+      p_stripe_discount_coupon_id: null,
+      p_trial_days: 0,
+      p_pack_credit_claim_id: staleIntent.pack_credit_claim_id,
+    });
+  });
+
+  it("keeps the missing old Customer as the fence while clearing it on the successor", async () => {
+    const staleIntent = intent({
+      status: "creating",
+      lease_expires_at: "2026-08-23T23:00:00.000Z",
+      stripe_customer_id: "cus_deleted_old",
+      stripe_checkout_session_id: null,
+      stripe_expires_at: null,
+    });
+    const replacement = intent({
+      ...staleIntent,
+      id: "cd2e82b7-157c-4d7f-b952-700b1122e21d",
+      stripe_customer_id: null,
+      lease_expires_at: "2026-08-24T00:05:00.000Z",
+    });
+    const rpc = vi.fn().mockResolvedValue({ data: replacement, error: null });
+    const admin = { rpc } as unknown as SupabaseClient;
+
+    const result = await replaceStaleSubscriptionCheckoutIntent(admin, {
+      staleIntent,
+      replacementStripeCustomerId: null,
+      userId: USER_ID,
+      planSlug: staleIntent.plan_slug,
+      stripePriceId: staleIntent.stripe_price_id,
+      stripeDiscountCouponId: staleIntent.stripe_discount_coupon_id,
+      trialDays: staleIntent.trial_days,
+      packCreditClaimId: staleIntent.pack_credit_claim_id,
+    });
+
+    expect(result).toEqual({ acquired: true, intent: replacement });
+    expect(rpc).toHaveBeenCalledWith(
+      "replace_stale_subscription_checkout_intent",
+      expect.objectContaining({
+        p_expected_stripe_customer_id: "cus_deleted_old",
+        p_replacement_stripe_customer_id: null,
+      })
+    );
   });
 });

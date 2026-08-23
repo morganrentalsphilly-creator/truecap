@@ -72,6 +72,18 @@ export type SubscriptionCheckoutConfiguration = Omit<
   "userId" | "now"
 >;
 
+export function subscriptionCheckoutIntentLeaseIsStale(
+  intent: SubscriptionCheckoutIntent,
+  now: Date = new Date()
+): boolean {
+  const leaseExpiresAt = Date.parse(intent.lease_expires_at);
+  return (
+    intent.status === "creating" &&
+    Number.isFinite(leaseExpiresAt) &&
+    leaseExpiresAt <= now.getTime()
+  );
+}
+
 function isUniqueViolation(error: { code?: string } | null): boolean {
   return error?.code === "23505";
 }
@@ -208,10 +220,7 @@ export async function acquireSubscriptionCheckoutIntent(
     throw new Error("checkout-intent Pack credit is already reserved");
   }
 
-  const leaseIsStale =
-    active.status === "creating" &&
-    Number.isFinite(Date.parse(active.lease_expires_at)) &&
-    Date.parse(active.lease_expires_at) <= now.getTime();
+  const leaseIsStale = subscriptionCheckoutIntentLeaseIsStale(active, now);
   if (!leaseIsStale) return { acquired: false, intent: active };
 
   // Never steal a stale lease for a different commercial promise. Reusing
@@ -247,6 +256,82 @@ export async function acquireSubscriptionCheckoutIntent(
   const winner = await loadActiveIntent(admin, input.userId);
   if (!winner) throw new Error("checkout-intent lease winner could not be loaded");
   return { acquired: false, intent: winner };
+}
+
+/**
+ * Claims a stale creator for changed-configuration reconciliation. Renewing
+ * the exact observed lease before touching Stripe prevents a same-config
+ * worker from becoming leader midway through reconciliation.
+ */
+export async function claimStaleSubscriptionCheckoutIntentForReplacement(
+  admin: SupabaseClient,
+  staleIntent: SubscriptionCheckoutIntent,
+  now: Date = new Date()
+): Promise<AcquireSubscriptionCheckoutIntentResult> {
+  const leaseExpiresAt = new Date(
+    now.getTime() + SUBSCRIPTION_CHECKOUT_CREATING_LEASE_MS
+  ).toISOString();
+  let claimQuery = admin
+    .from("subscription_checkout_intents")
+    .update({ lease_expires_at: leaseExpiresAt })
+    .eq("id", staleIntent.id)
+    .eq("status", "creating")
+    .eq("lease_expires_at", staleIntent.lease_expires_at)
+    .lte("lease_expires_at", now.toISOString());
+  claimQuery = staleIntent.stripe_customer_id
+    ? claimQuery.eq("stripe_customer_id", staleIntent.stripe_customer_id)
+    : claimQuery.is("stripe_customer_id", null);
+  const { data, error } = await claimQuery.select(INTENT_COLUMNS).maybeSingle();
+  if (error) {
+    throw new Error(`checkout-intent reconciliation claim failed: ${error.code ?? "unknown"}`);
+  }
+  if (data) {
+    return { acquired: true, intent: data as unknown as SubscriptionCheckoutIntent };
+  }
+
+  const winner = await loadActiveIntent(admin, staleIntent.user_id);
+  if (!winner) throw new Error("checkout-intent reconciliation winner could not be loaded");
+  return { acquired: false, intent: winner };
+}
+
+/**
+ * Atomically retires a reconciled stale creator and inserts its replacement.
+ * The database compares both the observed lease and Customer binding so a
+ * worker that made progress while Stripe was being checked cannot be retired.
+ */
+export async function replaceStaleSubscriptionCheckoutIntent(
+  admin: SupabaseClient,
+  input: AcquireSubscriptionCheckoutIntentInput & {
+    staleIntent: SubscriptionCheckoutIntent;
+    replacementStripeCustomerId: string | null;
+  }
+): Promise<AcquireSubscriptionCheckoutIntentResult> {
+  const { staleIntent } = input;
+  const { data, error } = await admin.rpc("replace_stale_subscription_checkout_intent", {
+    p_stale_intent_id: staleIntent.id,
+    p_expected_lease_expires_at: staleIntent.lease_expires_at,
+    p_expected_stripe_customer_id: staleIntent.stripe_customer_id,
+    p_replacement_stripe_customer_id: input.replacementStripeCustomerId,
+    p_user_id: input.userId,
+    p_plan_slug: input.planSlug,
+    p_stripe_price_id: input.stripePriceId,
+    p_stripe_discount_coupon_id: input.stripeDiscountCouponId,
+    p_trial_days: input.trialDays,
+    p_pack_credit_claim_id: input.packCreditClaimId,
+  });
+  if (error && !isUniqueViolation(error)) {
+    throw new Error(`checkout-intent stale replacement failed: ${error.code ?? "unknown"}`);
+  }
+  if (!error && data) {
+    return { acquired: true, intent: data as unknown as SubscriptionCheckoutIntent };
+  }
+
+  // A lease/customer CAS loss or a competing replacement is expected. Load
+  // the database winner; if the old row became terminal without a successor,
+  // fall back to the ordinary insert path so the caller still makes progress.
+  const winner = await loadActiveIntent(admin, input.userId);
+  if (winner) return { acquired: false, intent: winner };
+  return acquireSubscriptionCheckoutIntent(admin, input);
 }
 
 export async function bindSubscriptionCheckoutCustomer(

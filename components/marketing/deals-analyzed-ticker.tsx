@@ -65,7 +65,7 @@ export async function DealsAnalyzedTicker({
   const suffix =
     labelSuffix ??
     (source === "runs"
-      ? "cumulative analyses represented in TrueCap"
+      ? "property analyses run with TrueCap"
       : window === "all"
       ? "analyses saved on TrueCap"
       : window === "30d"
@@ -75,17 +75,12 @@ export async function DealsAnalyzedTicker({
   return (
     <div
       className="mx-auto mt-6 inline-flex w-fit max-w-full flex-wrap items-center justify-center gap-x-2 gap-y-0.5 rounded-full border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] px-3.5 py-1.5 text-[12px] font-semibold text-foreground shadow-sm sm:text-[13px]"
-      aria-label={`${formatted} ${suffix}${source === "runs" ? ". Owner-confirmed cumulative total; subsequent analyzer runs increment automatically." : ""}`}
+      aria-label={`${formatted} ${suffix}`}
     >
       <CheckCircle2 className="size-3.5 shrink-0 text-[var(--brand-green)]" />
       <span>
         <strong className="font-extrabold tabular-nums">{formatted}</strong>{" "}
         <span className="text-muted-foreground">{suffix}</span>
-        {source === "runs" ? (
-          <span className="block text-[9px] font-medium leading-tight text-muted-foreground">
-            Owner-confirmed cumulative total; subsequent analyzer runs increment automatically.
-          </span>
-        ) : null}
       </span>
     </div>
   );

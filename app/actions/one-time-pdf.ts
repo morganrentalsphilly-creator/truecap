@@ -40,14 +40,10 @@ import {
   hashOneTimePdfClaimSecret,
 } from "@/lib/one-time-pdf-claims";
 import {
-  normalizeMaoTarget,
-  normalizeMaoTargetForFinancing,
-} from "@/lib/mao-target-editor";
-import {
-  normalizeOfferCeilingTargetSource,
-  type OfferCeilingTargetSource,
-} from "@/lib/offer-ceiling-contract";
-import { calculateAnalysis } from "@/lib/calc-analysis";
+  resolveLegacyCompatibleOneTimePdfReportBinding,
+  resolveOneTimePdfReportBinding,
+  type OneTimePdfReportBinding,
+} from "@/lib/one-time-pdf-report-binding";
 import { evaluateOneTimePdfProCredit } from "@/lib/one-time-pdf-credit";
 import {
   buildPackCreditPolicy,
@@ -96,29 +92,15 @@ const createCheckoutSchema = z
   })
   .strict();
 
-function normalizeClaimReportBinding(input: {
-  values: InvestmentFormValues;
-  maxOfferTarget?: unknown;
-  maxOfferTargetSource: unknown;
-}): {
-  target: NonNullable<ReturnType<typeof normalizeMaoTarget>>;
-  source: OfferCeilingTargetSource;
-} | null {
-  try {
-    const target = normalizeMaoTarget(input.maxOfferTarget);
-    const source = normalizeOfferCeilingTargetSource(
-      input.maxOfferTargetSource
-    );
-    if (!target || !source) return null;
-    const financingSafeTarget = normalizeMaoTargetForFinancing(target, {
-      isCashPurchase: calculateAnalysis(input.values).monthlyPayment <= 0,
-    });
-    return financingSafeTarget
-      ? { target: financingSafeTarget, source }
-      : null;
-  } catch {
-    return null;
-  }
+function normalizeClaimReportBinding(
+  input: {
+    values: InvestmentFormValues;
+    maxOfferTarget?: unknown;
+    maxOfferTargetSource?: unknown;
+  },
+  options: { allowLegacyDefault: boolean } = { allowLegacyDefault: false }
+): OneTimePdfReportBinding | null {
+  return resolveOneTimePdfReportBinding(input, options);
 }
 
 export type OneTimePdfCheckoutResult =
@@ -297,12 +279,14 @@ const verifySchema = z
     claimId: z.string().uuid(),
     claimSecret: z.string().regex(/^[A-Za-z0-9_-]{43}$/),
     values: investmentFormSchema,
-    maxOfferTarget: z.unknown(),
+    // Both fields are absent only for claims created by the pre-binding client.
+    // The shared resolver maps that exact legacy shape to historical defaults.
+    maxOfferTarget: z.unknown().optional(),
     maxOfferTargetSource: z.enum([
       "buy-box",
       "screening-defaults",
       "selected-targets",
-    ]),
+    ]).optional(),
   })
   .strict();
 
@@ -574,8 +558,10 @@ export async function verifyOneTimePdfPaymentAction(
   if (!parsed.success) {
     return { ok: false, code: "VALIDATION_ERROR", message: "Invalid secure report claim." };
   }
-  const reportBinding = normalizeClaimReportBinding(parsed.data);
-  if (!reportBinding) {
+  const submittedReportBinding = normalizeClaimReportBinding(parsed.data, {
+    allowLegacyDefault: true,
+  });
+  if (!submittedReportBinding) {
     return { ok: false, code: "VALIDATION_ERROR", message: "Invalid secure report claim." };
   }
 
@@ -584,12 +570,6 @@ export async function verifyOneTimePdfPaymentAction(
     const currentUserId = await getCurrentUserId();
     const dealFingerprint = fingerprintOneTimePdfDeal(
       parsed.data.values,
-      parsed.data.claimSecret
-    );
-    const reportFingerprint = fingerprintOneTimePdfReportBinding(
-      parsed.data.values,
-      reportBinding.target,
-      reportBinding.source,
       parsed.data.claimSecret
     );
     const initial = await loadClaim(admin, parsed.data.claimId);
@@ -608,6 +588,20 @@ export async function verifyOneTimePdfPaymentAction(
     if (!initial.row) {
       return { ok: false, code: "VALIDATION_ERROR", message: "Invalid secure report claim." };
     }
+
+    // A null fingerprint proves this row predates target-aware checkout. Bind
+    // it only to the canonical target/source the historical Pack actually used;
+    // a holder may not turn migration recovery into a new target selection.
+    const reportBinding = initial.row.report_fingerprint
+      ? submittedReportBinding
+      : resolveLegacyCompatibleOneTimePdfReportBinding(parsed.data);
+    if (!reportBinding) return bindingFailureResult("BINDING_MISMATCH");
+    const reportFingerprint = fingerprintOneTimePdfReportBinding(
+      parsed.data.values,
+      reportBinding.target,
+      reportBinding.source,
+      parsed.data.claimSecret
+    );
 
     const firstDecision = decideOneTimePdfClaimBinding({
       record: {
