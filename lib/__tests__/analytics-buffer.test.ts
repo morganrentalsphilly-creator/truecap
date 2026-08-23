@@ -133,25 +133,9 @@ describe("pre-init buffering", () => {
     expect(options?.persistence).toBe("localStorage");
     expect(options?.property_denylist).toContain("title");
     expect(options?.advanced_disable_flags).toBe(true);
-    const ignorelist =
-      typeof options?.autocapture === "object"
-        ? options.autocapture.url_ignorelist ?? []
-        : [];
-    expect(
-      ignorelist.some((pattern) =>
-        pattern.test("https://usetruecap.com/d/private-snapshot")
-      )
-    ).toBe(true);
-    expect(
-      ignorelist.some((pattern) =>
-        pattern.test("https://usetruecap.com/portal/private-token")
-      )
-    ).toBe(true);
-    expect(
-      ignorelist.some((pattern) =>
-        pattern.test("https://usetruecap.com/embed/brand/private-token")
-      )
-    ).toBe(true);
+    // No DOM autocapture is safer than a route ignorelist: property inputs
+    // and bearer URLs never enter an autocapture payload on any route.
+    expect(options?.autocapture).toBe(false);
 
     const beforeSend = options?.before_send;
     expect(beforeSend).toBeTypeOf("function");

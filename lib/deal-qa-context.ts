@@ -267,11 +267,12 @@ function buyBoxSection(b: DealQaBuyBoxContext): string {
 
 function maoSection(m: DealQaMaoContext): string {
   return [
-    "YOUR MAX ALLOWABLE OFFER (the user's max offer for this deal):",
-    `Max offer: ${money(m.maxOffer)} — the highest price that still hits: ${m.basis}${
+    "YOUR MAX ALLOWABLE OFFER (the user's price ceiling for this deal):",
+    `Price ceiling: ${money(m.maxOffer)} — the highest price that still hits: ${m.basis}${
       m.fromBuyBox ? " (targets from the user's buy box)" : " (TrueCap's default floor)"
     }.`,
-    "Compare it to the purchase price in THE DEAL to judge whether the asking price is above or below the user's max.",
+    "Calculated from your selected targets. This is not a recommended offer.",
+    "Compare it to the purchase price in THE DEAL to judge whether the asking price is above or below the user's price ceiling.",
   ].join("\n");
 }
 

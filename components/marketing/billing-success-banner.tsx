@@ -20,15 +20,17 @@
  *    (plan list price from the Stripe session) for value-based bidding.
  *
  * Behavior when billing=success:
- *  1. Fires the `paid_subscribed` Google Ads conversion EXACTLY ONCE via
- *     BillingConversionTracker — deduped in sessionStorage on the Stripe
- *     checkout session id, which is stable across both render paths and
- *     across refreshes.
- *  2. Shows a one-time dismissible "Pro unlocked" banner. The initial copy
+ *  1. Verifies the Checkout Session server-side against Stripe, the signed-in
+ *     user, the current plan Price, and a 24-hour return window. Crafted query
+ *     strings fail closed and trigger no banner, analytics, conversion, or poll.
+ *  2. Fires the `paid_subscribed` Google Ads conversion EXACTLY ONCE via
+ *     BillingConversionTracker — deduped in sessionStorage on the verified
+ *     Stripe checkout session id.
+ *  3. Shows a one-time dismissible "Pro unlocked" banner. The initial copy
  *     says Pro is ACTIVATING on purpose: entitlements land via the Stripe
  *     webhook ~1-2s after the redirect, so we never claim the features
  *     are already usable at render time.
- *  3. ENTITLEMENT SELF-HEAL: polls isProActiveAction (a read-only wrapper
+ *  4. ENTITLEMENT SELF-HEAL: polls isProActiveAction (a read-only wrapper
  *     around hasPaidPlanSubscription) every ~2s for up to ~20s. The moment
  *     the webhook-written subscription row is visible, router.refresh()
  *     re-reads the server-resolved entitlements — the page stops treating
@@ -36,7 +38,7 @@
  *     upgrades to "Pro is live" with deep links into what they unlocked.
  *     This is refresh-on-detect ONLY: nothing client-side ever grants an
  *     entitlement; the server gates stay authoritative.
- *  4. While the poll is pending it raises the post-checkout upsell
+ *  5. While the poll is pending it raises the post-checkout upsell
  *     suppression signal (hooks/use-post-checkout-upsell-suppression.ts)
  *     so MomentOfValueUpsell / ProInlineGate never pitch a free trial to
  *     someone who paid seconds ago. The signal fails OPEN: it's cleared on
@@ -52,8 +54,9 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Sparkles } from "lucide-react";
 import { BillingConversionTracker } from "@/components/marketing/billing-conversion-tracker";
-import { isProActiveAction } from "@/app/actions/billing";
+import { isProActiveAction, verifyCheckoutReturnAction } from "@/app/actions/billing";
 import { setPostCheckoutUpsellSuppression } from "@/hooks/use-post-checkout-upsell-suppression";
+import { trackEvent } from "@/lib/analytics";
 import { scrollBehavior } from "@/lib/utils";
 
 /** First check fires immediately, then ~2s apart up to 10 total ≈ an 18s
@@ -74,7 +77,10 @@ export function BillingSuccessBanner({
    *  tier-neutral rather than guessing. */
   purchasedPlanSlug?: string;
 }) {
-  const boughtAgentPro = purchasedPlanSlug?.startsWith("agent_pro") ?? false;
+  // Server-rendered values are hints only. The browser action below rechecks
+  // Stripe and is the sole authority for every post-checkout side effect.
+  void conversionValue;
+  void purchasedPlanSlug;
   const router = useRouter();
   const searchParams = useSearchParams();
   // Capture the params ONCE via a lazy useState initializer — the cleanup
@@ -88,6 +94,12 @@ export function BillingSuccessBanner({
   }));
 
   const [showBanner, setShowBanner] = useState(false);
+  const [verifiedReturn, setVerifiedReturn] = useState<{
+    conversionValue?: number;
+    purchasedPlanSlug: string;
+  } | null>(null);
+  const boughtAgentPro =
+    verifiedReturn?.purchasedPlanSlug.startsWith("agent_pro") ?? false;
   // Flips true the moment the poll sees the subscription row — upgrades the
   // banner copy from "activating…" to "Pro is live" with unlock deep links.
   const [proLive, setProLive] = useState(false);
@@ -98,24 +110,73 @@ export function BillingSuccessBanner({
   // so the dismissal survives the tab.
   const dismissKey = `tc_pro_unlocked_ack_${sessionId ?? "unknown"}`;
 
+  // Query parameters are untrusted. Do not acknowledge a purchase or emit any
+  // event until the server has retrieved this recent Session from Stripe and
+  // bound it to the signed-in user and exact plan Price.
   useEffect(() => {
-    if (billing !== "success") return;
+    if (
+      billing !== "success" ||
+      !sessionId ||
+      !/^cs_[a-zA-Z0-9_]{8,240}$/.test(sessionId)
+    ) {
+      return;
+    }
+
+    let cancelled = false;
+    void verifyCheckoutReturnAction({ sessionId })
+      .then((result) => {
+        if (!cancelled && result.ok) {
+          setVerifiedReturn({
+            purchasedPlanSlug: result.purchasedPlanSlug,
+            ...(result.conversionValue != null
+              ? { conversionValue: result.conversionValue }
+              : {}),
+          });
+        }
+      })
+      .catch(() => {
+        // Fail closed. A transient verification failure produces no success
+        // UI or analytics; the Stripe webhook remains the entitlement source.
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [billing, sessionId]);
+
+  // Canonical Checkout return event. The Stripe Session id is used only in
+  // local sessionStorage for deduplication; it is never sent to PostHog.
+  useEffect(() => {
+    if (!verifiedReturn) return;
+    const key = `tc_checkout_returned_${sessionId ?? "unknown"}`;
+    try {
+      if (window.sessionStorage.getItem(key) === "1") return;
+      window.sessionStorage.setItem(key, "1");
+    } catch {
+      // Storage unavailable — the analytics wrapper remains a safe no-op when
+      // consent or configuration does not permit capture.
+    }
+    trackEvent("checkout_returned", {
+      plan_tier: boughtAgentPro ? "agent_pro" : "pro",
+    });
+  }, [boughtAgentPro, sessionId, verifiedReturn]);
+
+  useEffect(() => {
+    if (!verifiedReturn) return;
     try {
       if (window.localStorage.getItem(dismissKey) === "1") return;
     } catch {
       // localStorage unavailable — still show; dismissal just won't persist.
     }
     setShowBanner(true);
-    // Mount-only: `billing`/`dismissKey` are captured from the initial URL.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [dismissKey, verifiedReturn]);
 
   // Entitlement self-heal poll. Runs whenever billing=success — even if the
   // banner itself was previously dismissed — because the stale-entitlement
   // page is the problem, not the banner. Hard-stops on: detection (refresh),
   // attempt cap (fail open), or unmount (cleanup clears interval + signal).
   useEffect(() => {
-    if (billing !== "success") return;
+    if (!verifiedReturn) return;
 
     let cancelled = false;
     let inFlight = false;
@@ -168,9 +229,7 @@ export function BillingSuccessBanner({
       clearInterval(intervalId);
       setPostCheckoutUpsellSuppression(false);
     };
-    // Mount-only: `billing` is captured from the initial URL.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [router, verifiedReturn]);
 
   // Strip the billing params from the address bar after mount. Runs in a
   // PARENT effect, i.e. after the child tracker's effect has already
@@ -223,11 +282,12 @@ export function BillingSuccessBanner({
     <>
       {/* The conversion tracker fires regardless of banner visibility —
           a previously-dismissed banner must never suppress the Ads event
-          (the tracker has its own session-id dedup). */}
+          (the tracker has its own session-id dedup). It receives "success"
+          only after the Stripe-bound server verification succeeds. */}
       <BillingConversionTracker
-        billingStatus={billing ?? undefined}
-        value={conversionValue}
-        transactionId={sessionId ?? undefined}
+        billingStatus={verifiedReturn ? "success" : undefined}
+        value={verifiedReturn?.conversionValue}
+        transactionId={verifiedReturn ? sessionId ?? undefined : undefined}
       />
       {showBanner ? (
         <div role="status" className="mx-auto w-full max-w-6xl px-4 pt-4 sm:px-6">

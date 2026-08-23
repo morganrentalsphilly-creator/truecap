@@ -26,6 +26,7 @@ import { getPublicAgentBranding } from "@/lib/agent-share";
 import { getPublicDealComps } from "@/lib/public-deal-comps";
 import { hashShareValues, signShareAttribution } from "@/lib/share-attribution";
 import { SharedDealShell } from "@/components/investcalc/shared-deal-shell";
+import { canShowSharedProAnalysis } from "@/lib/public-share-access";
 
 type Props = { params: Promise<{ token: string }> };
 
@@ -74,9 +75,10 @@ export default async function OpaqueSharePage({ params }: Props) {
   const ownerId = resolved.snapshot.meta.ownerId;
   const dealId = resolved.snapshot.meta.dealId;
 
-  const [agent, comps] = await Promise.all([
+  const [agent, comps, showProAnalysis] = await Promise.all([
     getPublicAgentBranding(ownerId),
     getPublicDealComps(dealId, ownerId),
+    canShowSharedProAnalysis(ownerId),
   ]);
 
   // Bridge to the legacy-hardened lead write path: it verifies an HMAC over
@@ -92,6 +94,7 @@ export default async function OpaqueSharePage({ params }: Props) {
       result={result}
       comps={comps}
       agent={agent}
+      showProAnalysis={showProAnalysis}
       leadCapture={
         agent && ownerId
           ? { ownerId, dealId, valuesHash, sig: sig ?? undefined }

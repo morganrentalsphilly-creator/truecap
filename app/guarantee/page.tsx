@@ -234,7 +234,7 @@ export default async function GuaranteePage() {
                 href="/#main"
                 className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-card px-5 py-3 text-sm font-bold text-foreground transition hover:bg-muted"
               >
-                Get My Max Offer
+                Analyze a property free
               </Link>
             </div>
           </div>

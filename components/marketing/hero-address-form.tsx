@@ -73,6 +73,7 @@ export function HeroAddressForm() {
   });
   // Last suggestion the user actually picked (carries state/county/zip).
   const selectedRef = useRef<SelectedAddress | null>(null);
+  const addressStartedRef = useRef(false);
   const [submitting, setSubmitting] = useState(false);
 
   const handleAnalyze = (e: React.FormEvent) => {
@@ -106,6 +107,7 @@ export function HeroAddressForm() {
 
   const handleTrySample = () => {
     trackEvent("hero_sample_clicked");
+    trackEvent("hero_sample_opened");
     dispatchHeroAnalyze({ token: newToken(), address: "", sample: true });
     scrollToCalculator();
   };
@@ -114,12 +116,18 @@ export function HeroAddressForm() {
     <div className="mt-7 w-full max-w-xl">
       <form
         onSubmit={handleAnalyze}
+        onFocusCapture={() => {
+          if (addressStartedRef.current) return;
+          addressStartedRef.current = true;
+          trackEvent("hero_address_started");
+        }}
         className="flex flex-col items-stretch gap-2.5 sm:flex-row"
       >
         <div className="min-w-0 flex-1">
           <AddressAutocomplete
             form={form}
             placeholder="Enter a property address"
+            ariaLabel="Property address"
             inputClassName="h-12 rounded-xl px-4 text-base shadow-sm sm:h-14"
             onPlaceSelected={(place) => {
               // Capture the picked suggestion's parsed components so
@@ -135,7 +143,7 @@ export function HeroAddressForm() {
           className="group inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] disabled:opacity-70 sm:h-14"
         >
           <Calculator className="size-4" />
-          Get My Max Offer
+          Analyze this property free
           <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
         </button>
       </form>

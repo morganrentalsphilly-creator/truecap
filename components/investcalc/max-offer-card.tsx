@@ -25,7 +25,11 @@ import {
   solveRequiredInterestRate,
   type MaoTarget,
 } from "@/lib/max-allowable-offer";
-import { chooseMaoTargetFromBuyBox, type BuyBoxReturnThresholds } from "@/lib/mao-targets";
+import {
+  chooseMaoTargetFromBuyBox,
+  describeMaoTarget,
+  type BuyBoxReturnThresholds,
+} from "@/lib/mao-targets";
 import {
   WhatNeedsToBeTrueCard,
   type ApplicableDecisionThreshold,
@@ -42,6 +46,10 @@ interface MaxOfferCardProps {
   buyBoxThresholds?: BuyBoxReturnThresholds | null;
   /** Applies an exact, rechecked one-variable boundary back to the live form. */
   onApplyThreshold?: (change: ApplicableDecisionThreshold) => void;
+  /** Exact criteria carried by a sample or focused decision summary. */
+  initialTarget?: MaoTarget | null;
+  /** Keep the focused price-ceiling summary synchronized with edits. */
+  onTargetChange?: (target: MaoTarget) => void;
 }
 
 const numberOrUndefined = (s: string): number | undefined => {
@@ -52,7 +60,13 @@ const numberOrUndefined = (s: string): number | undefined => {
 
 const money = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
 
-export function MaxOfferCard({ values, buyBoxThresholds, onApplyThreshold }: MaxOfferCardProps) {
+export function MaxOfferCard({
+  values,
+  buyBoxThresholds,
+  onApplyThreshold,
+  initialTarget = null,
+  onTargetChange,
+}: MaxOfferCardProps) {
   const showDecisionThresholds = isFeatureEnabled("what_needs_to_be_true_v2");
   // Cash purchases have no debt service: calc-analysis reports dscr 0, so a
   // DSCR floor could never pass. Omit that target at this call site (the
@@ -69,10 +83,14 @@ export function MaxOfferCard({ values, buyBoxThresholds, onApplyThreshold }: Max
   // Buy-box seed: when the user's box carries return thresholds, THOSE are
   // the initial targets (lib/mao-targets rule 2 — their criteria beat our
   // defaults). Null = seed the canonical basis instead.
-  const seedTarget = useMemo(
-    () => chooseMaoTargetFromBuyBox(buyBoxThresholds, { isCashPurchase: isCashDeal }),
-    [buyBoxThresholds, isCashDeal]
-  );
+  const seedTarget = useMemo(() => {
+    if (initialTarget) {
+      const target = { ...initialTarget };
+      if (isCashDeal) delete target.dscr;
+      return target;
+    }
+    return chooseMaoTargetFromBuyBox(buyBoxThresholds, { isCashPurchase: isCashDeal });
+  }, [initialTarget, buyBoxThresholds, isCashDeal]);
 
   // Initial targets = the buy-box seed when present, else the canonical MAO
   // basis (break-even cash flow + DSCR 1.25 — see lib/mao-targets, CONFLICT
@@ -110,7 +128,8 @@ export function MaxOfferCard({ values, buyBoxThresholds, onApplyThreshold }: Max
 
   // Label the seed source only while the inputs still ARE the seed — one
   // edit and the targets are the user's, not the box's.
-  const showBuyBoxSeedLabel = seedTarget != null && !touched && seedKey === appliedSeedKey;
+  const showBuyBoxSeedLabel =
+    !initialTarget && seedTarget != null && !touched && seedKey === appliedSeedKey;
 
   // Shared onChange wrapper: any edit marks the targets as the user's own.
   const edit =
@@ -128,6 +147,9 @@ export function MaxOfferCard({ values, buyBoxThresholds, onApplyThreshold }: Max
     }),
     [capRateInput, cocInput, cashFlowInput, dscrInput, isCashDeal]
   );
+  useEffect(() => {
+    onTargetChange?.(target);
+  }, [onTargetChange, target]);
 
   const noneSet =
     target.capRate === undefined &&
@@ -175,7 +197,7 @@ export function MaxOfferCard({ values, buyBoxThresholds, onApplyThreshold }: Max
         ) : null}
       </div>
       <p className="text-xs text-muted-foreground mb-4">
-        Set your return targets - we solve the highest price you should pay, and what it&apos;d take to
+        Set your return targets - we solve the price ceiling that still clears them, and what it&apos;d take to
         make your current price work. Uses your current rent, financing, and operating assumptions.
       </p>
 
@@ -222,7 +244,7 @@ export function MaxOfferCard({ values, buyBoxThresholds, onApplyThreshold }: Max
       <div className="mt-5 rounded-xl border border-border bg-[var(--background)] p-4 sm:p-5">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
           <div>
-            <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Max offer</div>
+            <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Price ceiling</div>
             <div className={cn("mt-1 font-mono text-3xl font-extrabold tabular-nums tracking-tight sm:text-4xl", mao ? "text-primary" : "text-muted-foreground")}>
               {!values ? "—" : noneSet ? "Set a target" : mao ? money(mao.maxPrice) : "No price hits these targets"}
             </div>
@@ -244,6 +266,14 @@ export function MaxOfferCard({ values, buyBoxThresholds, onApplyThreshold }: Max
             Try loosening one of your targets - these returns aren&apos;t reachable at any reasonable price given the rent and expenses entered.
           </p>
         )}
+        {!noneSet ? (
+          <div className="mt-3 border-t border-border pt-3">
+            <p className="text-xs font-semibold text-foreground">Criteria: {describeMaoTarget(target)}</p>
+            <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+              Calculated from your selected targets. This is not a recommended offer.
+            </p>
+          </div>
+        ) : null}
       </div>
 
       {/* Inverse: make the current price work */}

@@ -1,5 +1,5 @@
 /**
- * SEO-page analyzer module — the "Get My Max Offer" bridge from every
+ * SEO-page analyzer module — the free-analysis bridge from every
  * content page into the analyzer, with geographic prefill where the page
  * implies one (2026-08-17 offer rollout, Phase 4c).
  *
@@ -53,7 +53,7 @@ export function SeoAnalyzerCta({
         className="mt-3 inline-flex h-10 shrink-0 items-center gap-1.5 rounded-lg bg-primary px-4 text-sm font-bold text-primary-foreground shadow-[0_8px_22px_rgba(0,112,196,0.24)] hover:bg-primary/95 sm:mt-0"
       >
         <Calculator className="size-4" />
-        Get My Max Offer
+        Analyze a property free
         <ArrowRight className="size-4" />
       </Link>
     </div>

@@ -43,6 +43,13 @@ const nextConfig = {
       "@radix-ui/react-icons",
     ],
   },
+  // Local release verification can opt out of webpack's multi-gigabyte
+  // persistent cache on disk-constrained machines. CI/Vercel behavior is
+  // unchanged unless the explicit environment flag is present.
+  webpack(config) {
+    if (process.env.TRUECAP_DISABLE_WEBPACK_CACHE === "1") config.cache = false;
+    return config;
+  },
   // Permanent redirects for known-broken historical URLs.
   // Add new entries here when 404 instrumentation surfaces real
   // traffic hitting a malformed URL.

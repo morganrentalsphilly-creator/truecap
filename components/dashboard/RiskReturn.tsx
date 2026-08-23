@@ -166,13 +166,12 @@ export function RiskReturn({ deals = [] }: { deals?: RiskReturnDeal[] }) {
             One point per saved deal — top-right (safe + strong return) is the target. Bigger dots need more cash to close; dashed lines mark the lender DSCR bar and a solid return.
           </p>
         </div>
-        <div className="flex items-center gap-1 p-1 rounded-lg bg-muted" role="tablist" aria-label="Return metric">
+        <div className="flex items-center gap-1 p-1 rounded-lg bg-muted" role="group" aria-label="Return metric">
           {RETURN_METRICS.map((m) => (
             <button
               key={m.id}
               type="button"
-              role="tab"
-              aria-selected={metric === m.id}
+              aria-pressed={metric === m.id}
               onClick={() => setMetric(m.id)}
               className={`px-3 py-2 text-xs font-semibold rounded-md transition sm:py-1 ${
                 metric === m.id ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"

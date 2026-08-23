@@ -70,9 +70,9 @@ export function AuthShell({
               />
 
               <div className="max-w-[300px]">
-                <h2 className="text-3xl font-semibold leading-tight tracking-tight text-white">
+                <p className="text-3xl font-semibold leading-tight tracking-tight text-white">
                   {panelTitle}
-                </h2>
+                </p>
                 <p className="mt-6 text-sm leading-relaxed text-white/78">{panelDescription}</p>
               </div>
 

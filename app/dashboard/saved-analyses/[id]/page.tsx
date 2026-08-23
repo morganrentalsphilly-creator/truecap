@@ -706,7 +706,7 @@ export default async function DealWorkspacePage({
                 <Target aria-hidden className="mt-0.5 size-5 shrink-0 text-primary" />
                 <div className="min-w-0 flex-1">
                   <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    Your max offer
+                    Price ceiling
                   </div>
                   {maoLine.kind === "clears" ? (
                     <>
@@ -725,9 +725,8 @@ export default async function DealWorkspacePage({
                     </>
                   ) : (
                     <div className="text-sm font-bold text-foreground">
-                      Works at ≤{" "}
-                      <span className="tabular-nums">{fmtMoney(maoLine.maxPrice)}</span> — your max
-                      offer
+                      Ceiling ≤{" "}
+                      <span className="tabular-nums">{fmtMoney(maoLine.maxPrice)}</span>
                       {maoLine.asking != null ? (
                         <span className="font-medium text-muted-foreground">
                           {" "}
@@ -742,6 +741,9 @@ export default async function DealWorkspacePage({
                   )}
                   <div className="mt-0.5 text-xs text-muted-foreground">
                     Targets: {maoBasisLabel}
+                  </div>
+                  <div className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                    Calculated from your selected targets. This is not a recommended offer.
                   </div>
                 </div>
               </div>

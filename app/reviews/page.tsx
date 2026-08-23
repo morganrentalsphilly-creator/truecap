@@ -189,7 +189,7 @@ export default async function ReviewsPage() {
               href="/#main"
               className="mt-6 inline-flex h-12 items-center gap-1.5 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5"
             >
-              Get My Max Offer
+              Analyze a property free
             </Link>
           </div>
         </section>

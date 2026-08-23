@@ -15,9 +15,9 @@ import "server-only";
  * module — never the row id, token hash, or owner row.
  *
  * Every function is tolerant of the table not existing yet (migration
- * 20260817150658 pending): minting reports NOT_CONFIGURED-style null so the
- * caller can fall back to a legacy encoded link, and resolution returns null
- * (→ 404). The feature lights up when the SQL is applied, with zero deploys.
+ * 20260817150658 pending): minting returns null and the caller fails closed
+ * rather than putting the snapshot back into a URL. Resolution returns null
+ * (→ 404). Existing legacy links stay readable for compatibility.
  */
 
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
@@ -56,8 +56,7 @@ function isMissingTable(error: { code?: string; message?: string } | null): bool
 
 /**
  * Mint a share. Returns the public path (`/s/<token>`) or null when the table
- * doesn't exist yet or the insert fails — callers fall back to the legacy
- * encoded link so sharing never breaks.
+ * doesn't exist yet or the insert fails. Callers must fail closed.
  */
 export async function mintPublicShare(input: {
   values: InvestmentFormValues;
@@ -85,13 +84,11 @@ export async function mintPublicShare(input: {
       calc_version: INVESTCALC_SCHEMA_VERSION,
     });
     if (error) {
-      // The caller falls back to the legacy /d link, which puts the WHOLE
-      // analysis in the URL — a real privacy downgrade. A pre-migration
-      // missing table is the one expected cause and stays quiet; anything
-      // else (FK failure, RLS change, column drift) was silently invisible,
-      // so every user would be handed /d links with nobody alerted.
+      // A pre-migration missing table is the one expected cause and stays
+      // quiet; anything else (FK failure, RLS change, column drift) is an
+      // operational error. The UI fails closed and never mints a /d payload.
       if (!isMissingTable(error)) {
-        Sentry.captureMessage("public_shares insert failed — falling back to legacy /d link", {
+        Sentry.captureMessage("public_shares insert failed — share creation failed closed", {
           level: "error",
           tags: { feature: "public-share", stage: "mint-insert" },
           extra: { database_code: error.code ?? "unknown" },

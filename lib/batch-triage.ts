@@ -17,7 +17,7 @@
  */
 
 import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
-import { defaultValues } from "@/lib/investcalc-schema";
+import { defaultValues, normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
 import {
   deriveStateFromAddress,
   evaluateBuyBoxes,
@@ -32,6 +32,17 @@ import {
   isFeatureEnabled,
   type FeatureFlagState,
 } from "@/lib/feature-flags";
+import {
+  calculateMaxAllowableOffer,
+  solveRequiredMonthlyRent,
+  type MaoTarget,
+} from "@/lib/max-allowable-offer";
+import {
+  buildMaoTarget,
+  buyBoxHasReturnTargets,
+  describeMaoTarget,
+} from "@/lib/mao-targets";
+import { parseLocationFromAddress } from "@/lib/market-benchmarks";
 
 /** A single parsed listing (single-family v1). */
 export interface TriageListingInput {
@@ -53,6 +64,31 @@ export interface TriageParseResult {
   errors: TriageParseError[];
 }
 
+export type TriagePreviewField = "address" | "purchasePrice" | "monthlyRent" | "bedrooms" | "row";
+
+export type TriagePreviewIssue = {
+  field: TriagePreviewField;
+  severity: "error" | "warning";
+  message: string;
+};
+
+/**
+ * Editable, lossless-enough representation of one pasted row. Values stay as
+ * strings so an invalid partial value ("$2x0", an empty price, etc.) remains
+ * visible and editable instead of being silently coerced or dropped.
+ */
+export interface TriagePreviewRow {
+  id: string;
+  sourceLine: number;
+  address: string;
+  purchasePrice: string;
+  monthlyRent: string;
+  bedrooms: string;
+  /** Parser-only ambiguity that field validation cannot infer later. */
+  sourceIssue?: string;
+  issues: TriagePreviewIssue[];
+}
+
 /** Assumption overrides the server action fills from enrichment (rate / tax). */
 export interface TriageEnrichment {
   interestRate?: number;
@@ -70,6 +106,21 @@ export interface TriageRowResult {
   capRatePct: number | null;
   dscr: number | null;
   isCashPurchase: boolean;
+  /** Canonical MAO target used for this row (buy-box return targets when set,
+   * otherwise break-even cash flow + 1.25 DSCR). */
+  target: MaoTarget | null;
+  targetLabel: string | null;
+  /** Price ceiling at `target`, computed by the shared MAO solver. */
+  maxOffer: number | null;
+  /** Asking price minus price ceiling. Positive means asking is over ceiling. */
+  askingGap: number | null;
+  /** Lowest monthly rent that clears `target` at asking, when solvable. */
+  requiredMonthlyRent: number | null;
+  requiredRentDelta: number | null;
+  requiredRentUnreachable: boolean;
+  /** Unitless distance used only to break tied scores by "closest to working".
+   *  Zero already clears the target; smaller positive values are closer. */
+  viabilityDistance: number | null;
   /** Buy-box fit summary, or null when the user has no active box. */
   buyBoxFit: BuyBoxFitSummary | null;
 }
@@ -106,6 +157,149 @@ function isBareNumber(raw: string): boolean {
   return t !== "" && /^\$?\s*[\d,]+(\.\d+)?$/.test(t);
 }
 
+function cleanedNumber(raw: string): number | null {
+  return parseMoney(raw);
+}
+
+/** Validate an editable preview row without discarding its original text. */
+export function validateTriagePreviewRow(
+  row: Omit<TriagePreviewRow, "issues">
+): TriagePreviewRow {
+  const issues: TriagePreviewIssue[] = [];
+  const address = row.address.trim();
+  const price = cleanedNumber(row.purchasePrice);
+  const rent = row.monthlyRent.trim() === "" ? null : cleanedNumber(row.monthlyRent);
+  const beds = row.bedrooms.trim() === "" ? null : cleanedNumber(row.bedrooms);
+
+  if (address.length < 5) {
+    issues.push({ field: "address", severity: "error", message: "Enter a complete address." });
+  } else if (!parseLocationFromAddress(address).state) {
+    issues.push({ field: "address", severity: "warning", message: "City/state could not be resolved; verify the location used for tax assumptions." });
+  }
+  if (row.purchasePrice.trim() === "") {
+    issues.push({ field: "purchasePrice", severity: "error", message: "Purchase price is required." });
+  } else if (price == null || price < 1_000 || price > 100_000_000) {
+    issues.push({ field: "purchasePrice", severity: "error", message: "Enter a purchase price from $1,000 to $100,000,000." });
+  }
+  if (row.monthlyRent.trim() === "") {
+    issues.push({ field: "monthlyRent", severity: "warning", message: "Rent is missing; this row will need rent before it can be underwritten." });
+  } else if (rent == null || rent < 0 || rent > 1_000_000) {
+    issues.push({ field: "monthlyRent", severity: "error", message: "Enter a monthly rent from $0 to $1,000,000." });
+  }
+  if (row.bedrooms.trim() === "") {
+    issues.push({ field: "bedrooms", severity: "warning", message: "Beds are missing; market-rent context may be less precise." });
+  } else if (beds == null || !Number.isInteger(beds) || beds < 0 || beds > 20) {
+    issues.push({ field: "bedrooms", severity: "error", message: "Enter a whole number from 0 to 20." });
+  }
+  if (row.sourceIssue) {
+    issues.push({ field: "row", severity: "warning", message: row.sourceIssue });
+  }
+
+  return { ...row, issues };
+}
+
+/**
+ * Parse every nonblank pasted line into an editable row, including partial or
+ * ambiguous lines. Unlike parseTriageInput, this function never drops a line:
+ * the user gets a chance to repair it in the preview before screening.
+ */
+export function parseTriagePreviewInput(text: string): TriagePreviewRow[] {
+  const rows: TriagePreviewRow[] = [];
+  const lines = (text ?? "").split(/\r?\n/);
+
+  lines.forEach((rawLine, i) => {
+    const line = rawLine.trim();
+    if (line === "") return;
+    const lineNo = i + 1;
+    let cells: string[];
+    let sourceIssue: string | undefined;
+
+    if (line.includes("\t")) {
+      cells = line.split("\t");
+      if (cells.length > 4) sourceIssue = "Extra tab-separated columns detected; verify this row.";
+    } else if (line.includes("|")) {
+      cells = line.split("|");
+      if (cells.length > 4) sourceIssue = "Extra pipe-separated columns detected; verify this row.";
+    } else {
+      const parts = line.split(",").map((p) => p.trim());
+      let cut = parts.length;
+      while (cut > 0 && isBareNumber(parts[cut - 1]!)) cut--;
+      const numeric = parts.slice(cut);
+      if (numeric.length === 0) {
+        cells = [line, "", "", ""];
+        sourceIssue = "Could not identify the numeric columns. Verify the address, price, rent, and beds.";
+      } else {
+        cells = [parts.slice(0, cut).join(", "), ...numeric.slice(0, 3)];
+        if (numeric.length > 3) sourceIssue = "More than three trailing numbers were found; verify the columns.";
+      }
+    }
+
+    const trimmed = cells.map((cell) => cell.trim());
+    rows.push(
+      validateTriagePreviewRow({
+        id: `line-${lineNo}`,
+        sourceLine: lineNo,
+        address: trimmed[0] ?? "",
+        purchasePrice: trimmed[1] ?? "",
+        monthlyRent: trimmed[2] ?? "",
+        bedrooms: trimmed[3] ?? "",
+        sourceIssue,
+      })
+    );
+  });
+
+  return rows;
+}
+
+export function previewRowToListing(row: TriagePreviewRow): TriageListingInput | null {
+  const validated = validateTriagePreviewRow(row);
+  if (validated.issues.some((issue) => issue.severity === "error")) return null;
+  const price = cleanedNumber(validated.purchasePrice);
+  if (price == null) return null;
+  const rent = cleanedNumber(validated.monthlyRent);
+  const beds = cleanedNumber(validated.bedrooms);
+  return {
+    address: validated.address.trim(),
+    purchasePrice: Math.round(price),
+    ...(rent != null ? { monthlyRent: Math.round(rent) } : {}),
+    ...(beds != null ? { bedrooms: Math.round(beds) } : {}),
+  };
+}
+
+/**
+ * Convert an editable row only when it can produce an actual underwrite.
+ * Address + price alone remain valid preview data, but rent is required by
+ * triageListing; counting that partial row in the Screen CTA would promise an
+ * analysis that can only return "Needs rent."
+ */
+export function previewRowToScreenableListing(
+  row: TriagePreviewRow
+): TriageListingInput | null {
+  const listing = previewRowToListing(row);
+  return listing?.monthlyRent == null ? null : listing;
+}
+
+/** Serialize only underwritable rows; invalid partial rows remain in preview. */
+export function formatScreenableTriageRows(rows: TriagePreviewRow[]): string {
+  return formatTriageRowsAsText(
+    rows
+      .map(previewRowToScreenableListing)
+      .filter((row): row is TriageListingInput => row != null)
+  );
+}
+
+/** Keep every editable row (including invalid partials) in the paste buffer. */
+export function formatTriagePreviewRowsAsText(rows: TriagePreviewRow[]): string {
+  return rows
+    .map((row) => [row.address, row.purchasePrice, row.monthlyRent, row.bedrooms].join("\t"))
+    .join("\n");
+}
+
+export function resolvedTriageLocation(address: string): { city: string | null; state: string | null; label: string | null } {
+  const { city, state } = parseLocationFromAddress(address);
+  return { city, state, label: city && state ? `${city}, ${state}` : state };
+}
+
 /**
  * Parse pasted listings into structured rows. One listing per line.
  *
@@ -120,54 +314,22 @@ function isBareNumber(raw: string): boolean {
  * silently dropped.
  */
 export function parseTriageInput(text: string): TriageParseResult {
+  const preview = parseTriagePreviewInput(text);
   const rows: TriageListingInput[] = [];
   const errors: TriageParseError[] = [];
-  const lines = (text ?? "").split(/\r?\n/);
-
-  lines.forEach((rawLine, i) => {
-    const line = rawLine.trim();
-    if (line === "") return;
-    const lineNo = i + 1;
-
-    let cells: string[];
-    if (line.includes("\t")) cells = line.split("\t");
-    else if (line.includes("|")) cells = line.split("|");
-    else {
-      // Comma mode: peel the trailing bare-number run (price/rent/beds) off
-      // the right; the rest (which may contain commas) is the address.
-      const parts = line.split(",").map((p) => p.trim());
-      let cut = parts.length;
-      while (cut > 0 && isBareNumber(parts[cut - 1]!)) cut--;
-      const numeric = parts.slice(cut);
-      // Need at least the price; too many trailing numbers is ambiguous.
-      if (numeric.length === 0 || numeric.length > 3) {
-        errors.push({ line: lineNo, raw: line, reason: "Couldn't read address + price. Use: Address, Price, Rent, Beds." });
-        return;
-      }
-      cells = [parts.slice(0, cut).join(", "), ...numeric];
+  for (const row of preview) {
+    const listing = previewRowToListing(row);
+    if (listing) {
+      rows.push(listing);
+      continue;
     }
-
-    cells = cells.map((c) => c.trim());
-    const address = (cells[0] ?? "").trim();
-    const price = parseMoney(cells[1] ?? "");
-    const rent = cells[2] != null && cells[2] !== "" ? parseMoney(cells[2]) : undefined;
-    const bedsRaw = cells[3] != null && cells[3] !== "" ? parseMoney(cells[3]) : undefined;
-
-    if (address.length < 5) {
-      errors.push({ line: lineNo, raw: line, reason: "Address must be at least 5 characters." });
-      return;
-    }
-    if (price == null || price < 1000) {
-      errors.push({ line: lineNo, raw: line, reason: "Enter a purchase price (e.g. 265000)." });
-      return;
-    }
-
-    const row: TriageListingInput = { address, purchasePrice: Math.round(price) };
-    if (rent != null && rent >= 0) row.monthlyRent = Math.round(rent);
-    if (bedsRaw != null && bedsRaw >= 0 && bedsRaw <= 20) row.bedrooms = Math.round(bedsRaw);
-    rows.push(row);
-  });
-
+    const firstError = row.issues.find((issue) => issue.severity === "error");
+    errors.push({
+      line: row.sourceLine,
+      raw: [row.address, row.purchasePrice, row.monthlyRent, row.bedrooms].join("\t"),
+      reason: firstError?.message ?? "Verify this row before screening.",
+    });
+  }
   return { rows, errors };
 }
 
@@ -219,6 +381,14 @@ const EMPTY_ROW = (input: TriageListingInput): TriageRowResult => ({
   capRatePct: null,
   dscr: null,
   isCashPurchase: false,
+  target: null,
+  targetLabel: null,
+  maxOffer: null,
+  askingGap: null,
+  requiredMonthlyRent: null,
+  requiredRentDelta: null,
+  requiredRentUnreachable: false,
+  viabilityDistance: null,
   buyBoxFit: null,
 });
 
@@ -232,6 +402,10 @@ export function triageListing(
   input: TriageListingInput,
   opts?: { enrichment?: TriageEnrichment; buyBoxes?: NamedBuyBox[] | null }
 ): TriageRowResult {
+  // Never let the schema's demonstration/default rent turn a missing pasted
+  // rent into a real-looking underwrite. The preview flags this row and the
+  // result asks for rent; the canonical engine only runs once rent is real.
+  if (input.monthlyRent === undefined) return EMPTY_ROW(input);
   const snapshot = buildTriageSnapshot(input, opts?.enrichment);
   const verdict = recomputeSavedDealVerdict(snapshot);
   if (!verdict) return EMPTY_ROW(input);
@@ -253,6 +427,48 @@ export function triageListing(
     if (results.length > 0) buyBoxFit = summarizeBuyBoxFit(results);
   }
 
+  // Decision path — reuse the exact target builder + MAO/inverse solvers used
+  // by the full deal workspace. No financial formula is duplicated here.
+  const values = normalizeInvestmentFormSnapshot(snapshot);
+  let target: MaoTarget | null = null;
+  let targetLabel: string | null = null;
+  let maxOffer: number | null = null;
+  let askingGap: number | null = null;
+  let requiredMonthlyRent: number | null = null;
+  let requiredRentDelta: number | null = null;
+  let requiredRentUnreachable = false;
+  let viabilityDistance: number | null = null;
+  if (values) {
+    const targetBox = boxes?.find(buyBoxHasReturnTargets) ?? null;
+    target = buildMaoTarget(targetBox, { isCashPurchase: verdict.isCashPurchase });
+    targetLabel = describeMaoTarget(target);
+    const mao = calculateMaxAllowableOffer(values, target);
+    maxOffer = mao?.maxPrice ?? null;
+    askingGap = maxOffer == null ? null : input.purchasePrice - maxOffer;
+
+    const rentPath = solveRequiredMonthlyRent(values, target);
+    if (rentPath) {
+      requiredRentUnreachable = rentPath.unreachable;
+      if (!rentPath.unreachable) {
+        requiredMonthlyRent = rentPath.value;
+        const currentRent = input.monthlyRent ?? 0;
+        requiredRentDelta = Math.max(0, Math.round(rentPath.value - currentRent));
+        viabilityDistance = rentPath.alreadyMet
+          ? 0
+          : currentRent > 0
+            ? requiredRentDelta / currentRent
+            : requiredRentDelta;
+      }
+    }
+    if (viabilityDistance == null) {
+      // Fallback for an unreachable/missing inverse solve: price gap is still
+      // a canonical, comparable distance to the same target.
+      viabilityDistance = askingGap == null
+        ? null
+        : Math.max(0, askingGap) / Math.max(1, input.purchasePrice);
+    }
+  }
+
   return {
     input,
     ok: true,
@@ -263,6 +479,14 @@ export function triageListing(
     capRatePct: verdict.capRatePct,
     dscr: verdict.dscr,
     isCashPurchase: verdict.isCashPurchase,
+    target,
+    targetLabel,
+    maxOffer,
+    askingGap,
+    requiredMonthlyRent,
+    requiredRentDelta,
+    requiredRentUnreachable,
+    viabilityDistance,
     buyBoxFit,
   };
 }
@@ -273,11 +497,12 @@ export function triageListing(
  * Rank the shortlist. Unscored (ok:false) rows always sink to the bottom.
  * "fit" leads with buy-box passers, then score — the "which of these meet MY
  * criteria" shortlist; "score" and "cashFlow" are the generic power sorts.
- * Stable within equal keys (a stable input order is preserved).
+ * Exact metric ties finish alphabetically, never by arbitrary paste order.
  */
 export function rankTriageRows(rows: TriageRowResult[], sort: TriageSort): TriageRowResult[] {
   const keyed = rows.map((row, index) => ({ row, index }));
   const scoreOf = (r: TriageRowResult) => r.score ?? Number.NEGATIVE_INFINITY;
+  const distanceOf = (r: TriageRowResult) => r.viabilityDistance ?? Number.POSITIVE_INFINITY;
   keyed.sort((a, b) => {
     // ok:false rows last, regardless of sort.
     if (a.row.ok !== b.row.ok) return a.row.ok ? -1 : 1;
@@ -293,7 +518,19 @@ export function rankTriageRows(rows: TriageRowResult[], sort: TriageSort): Triag
     } else {
       if (scoreOf(a.row) !== scoreOf(b.row)) return scoreOf(b.row) - scoreOf(a.row);
     }
-    return a.index - b.index; // stable
+    // A tied/zero score must still answer "which is closest to working?".
+    // Smaller target distance wins, then stronger DSCR and cash flow. The
+    // address is the final deterministic tie-break — never arbitrary paste
+    // order. (Input index remains only for duplicate-identical rows.)
+    if (distanceOf(a.row) !== distanceOf(b.row)) return distanceOf(a.row) - distanceOf(b.row);
+    const aDscr = a.row.isCashPurchase ? Number.POSITIVE_INFINITY : (a.row.dscr ?? Number.NEGATIVE_INFINITY);
+    const bDscr = b.row.isCashPurchase ? Number.POSITIVE_INFINITY : (b.row.dscr ?? Number.NEGATIVE_INFINITY);
+    if (aDscr !== bDscr) return bDscr - aDscr;
+    const aCf = a.row.netCashFlowMonthly ?? Number.NEGATIVE_INFINITY;
+    const bCf = b.row.netCashFlowMonthly ?? Number.NEGATIVE_INFINITY;
+    if (aCf !== bCf) return bCf - aCf;
+    const byAddress = a.row.input.address.localeCompare(b.row.input.address, "en-US", { sensitivity: "base" });
+    return byAddress || a.index - b.index;
   });
   return keyed.map((k) => k.row);
 }

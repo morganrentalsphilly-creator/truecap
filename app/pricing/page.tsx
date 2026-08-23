@@ -23,12 +23,12 @@ import {
   getEntitlementsForUser,
   getActivePaidPlanSlug,
   hasAnySubscriptionHistory,
+  hasCheckoutRecoverySubscription,
 } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 import { loadStripeDisplayPrice } from "@/lib/stripe/display-prices";
 
-import { PricingValueStack } from "@/components/marketing/pricing-value-stack";
 import { isPackCreditConfigured, PACK_CREDIT_WINDOW_DAYS } from "@/lib/pack-credit";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -100,6 +100,33 @@ const FAQS: { q: string; a: string }[] = [
   },
 ];
 
+const FEATURE_COMPARISON: Array<[
+  label: string,
+  free: boolean | string,
+  pro: boolean | string,
+]> = [
+  ["Unlimited analyses", true, true],
+  ["Cap rate · CoC · DSCR · cash flow", true, true],
+  ["Auto-fill (HUD rent · FRED rate · state tax)", true, true],
+  ["Deal Score (0–100) with breakdown", true, true],
+  ["Sale + rent comps from the address", "1 free", "50 / mo"],
+  ["MAO solver · Sensitivity grid", false, true],
+  ["BRRRR + fix-and-flip + rehab estimator", false, true],
+  ["Shareable read-only deal links", true, true],
+  ["10-year cash flow projection", false, true],
+  ["Illustrative tax impact + depreciation", false, true],
+  ["Modeled exit-year comparison", false, true],
+  ["Buy Box auto-screening", false, true],
+  ["Deal pipeline + tags (CRM)", false, true],
+  ["Saved analysis templates", false, true],
+  ["Due-diligence checklist + document vault", false, true],
+  ["Rate-drop alerts on saved deals", false, true],
+  ["Lender · partner · personal PDF reports", false, true],
+  ["Save deals", "Up to 5", "Unlimited"],
+  ["Compare deals side-by-side", false, "Up to 4"],
+  ["Priority support", false, true],
+];
+
 export default async function PricingPage() {
   const { proOfferName, singleDeal, singleDealPriceVariant, guaranteeEnabled } =
     getMarketingOfferConfig();
@@ -132,13 +159,22 @@ export default async function PricingPage() {
   const faqs = guaranteeEnabled
     ? FAQS
     : FAQS.filter((f) => f.q !== "What is the Never Overpay Guarantee?");
-  const [monthly, annual, agentMonthly, agentAnnual, activePaidPlanSlug, hadPriorSubscription] = await Promise.all([
+  const [
+    monthly,
+    annual,
+    agentMonthly,
+    agentAnnual,
+    activePaidPlanSlug,
+    hadPriorSubscription,
+    billingRecoveryRequired,
+  ] = await Promise.all([
     loadStripeDisplayPrice("pro_monthly"),
     loadStripeDisplayPrice("pro_annual"),
     agentProConfigured ? loadStripeDisplayPrice("agent_pro_monthly") : Promise.resolve(null),
     agentProConfigured ? loadStripeDisplayPrice("agent_pro_annual") : Promise.resolve(null),
     user ? getActivePaidPlanSlug(supabase, user.id) : Promise.resolve(null),
     user ? hasAnySubscriptionHistory(supabase, user.id) : Promise.resolve(false),
+    user ? hasCheckoutRecoverySubscription(supabase, user.id) : Promise.resolve(false),
   ]);
   const entitlements = user ? await getEntitlementsForUser(supabase, user.id) : null;
   const siteUrl = getSiteUrl();
@@ -211,7 +247,7 @@ export default async function PricingPage() {
                 href="/#main"
                 className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-[0_8px_22px_rgba(0,112,196,0.24)] transition hover:bg-primary/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
-                Get My Max Offer
+                Analyze a property free
               </Link>
               <Link
                 href="#plans"
@@ -239,10 +275,9 @@ export default async function PricingPage() {
               Which stage are you at?
             </h2>
           </div>
-          <div className={`mt-7 grid gap-3 ${agentProConfigured ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-3"}`}>
+          <div className={`mt-7 grid gap-3 ${agentProConfigured ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
             {[
               { job: "Screen", product: "Free", answer: "Is this worth investigating?" },
-              { job: "Decide", product: `Deal Decision Pack · ${singleDeal.priceLabel}`, answer: "Should I offer, and what should I offer?" },
               { job: "Acquire", product: proOfferName, answer: "Repeat the decision workflow across every deal." },
               ...(agentProConfigured
                 ? [{ job: "Win investor clients", product: "Agent Pro", answer: "Match, present, and follow up professionally." }]
@@ -278,10 +313,50 @@ export default async function PricingPage() {
             isAuthenticated={Boolean(user)}
             activePaidPlanSlug={activePaidPlanSlug}
             hadPriorSubscription={hadPriorSubscription}
+            billingRecoveryRequired={billingRecoveryRequired}
             agentProConfigured={agentProConfigured}
             proOfferName={proOfferName}
-            rateAlertsLive={alertsLive}
           />
+
+          {/* Secondary one-time path. It sits below the subscription choices,
+              outside the tier cards, so it cannot be mistaken for Free. */}
+          <div className="mx-auto mt-8 max-w-3xl">
+            <p className="text-center text-xs font-extrabold uppercase tracking-[0.18em] text-muted-foreground">
+              Not ready for a subscription?
+            </p>
+            <div className="mt-3 rounded-2xl border border-border bg-card p-6 sm:p-7">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+                <div className="flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="text-xl font-extrabold text-foreground">Decision Pack</h2>
+                    <span className="rounded-full bg-[var(--brand-green)]/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[var(--brand-green)]">
+                      {singleDeal.priceLabel} once
+                    </span>
+                  </div>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    Unlock one complete property decision: price ceiling, risk thresholds,
+                    assumptions, downside case, long-term projections, illustrative tax view,
+                    modeled exit scenarios, and a lender-ready report. No subscription required.
+                    {packCreditConfigured ? (
+                      <>
+                        {" "}
+                        <strong className="text-foreground">
+                          Buy while signed in and your {singleDeal.priceLabel} is credited toward Pro
+                        </strong>{" "}
+                        if you upgrade within {PACK_CREDIT_WINDOW_DAYS} days.
+                      </>
+                    ) : null}
+                  </p>
+                </div>
+                <Link
+                  href="/#main"
+                  className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-bold text-foreground transition-transform hover:-translate-y-0.5 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]"
+                >
+                  Analyze a property
+                </Link>
+              </div>
+            </div>
+          </div>
 
           {/* Avoided-mistake frame (2026-08 offer rollout): the price
               objection is answered against the cost of overpaying on the
@@ -331,9 +406,7 @@ export default async function PricingPage() {
               )}
             </span>
             <span aria-hidden className="text-muted-foreground/40">·</span>
-            <span><strong className="text-foreground">Cancel online anytime</strong> from your profile</span>
-            <span aria-hidden className="text-muted-foreground/40">·</span>
-            <span>Powered by <strong className="text-foreground">Stripe</strong></span>
+            <span>Secure billing by <strong className="text-foreground">Stripe</strong></span>
           </div>
         </section>
 
@@ -346,25 +419,28 @@ export default async function PricingPage() {
             Free answers whether the deal deserves attention. Pro answers what
             to offer, what could break, and what to do next.
           </p>
-          {/* Outcome-framed value stack leads; the exhaustive table below is
-              the secondary reference for line-item shoppers. */}
-          <div className="mt-8">
-            <PricingValueStack
-              proOfferName={proOfferName}
-              agentProConfigured={agentProConfigured}
-            />
+          {/* Phones use stacked comparison cards; tablet and desktop keep the
+              denser semantic table. No narrow viewport has to pan sideways. */}
+          <div className="tc-reveal mt-8 space-y-2 sm:hidden">
+            {FEATURE_COMPARISON.map(([label, free, pro]) =>
+              !alertsLive && label === "Rate-drop alerts on saved deals" ? null : (
+              <article key={label} className="rounded-2xl border border-border bg-card p-4">
+                <h3 className="text-sm font-bold text-foreground">{label}</h3>
+                <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                  <div className="rounded-xl bg-muted/30 p-3">
+                    <dt className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Free</dt>
+                    <dd className="mt-1"><MobileFeatureValue value={free} /></dd>
+                  </div>
+                  <div className="rounded-xl bg-primary/5 p-3">
+                    <dt className="text-[10px] font-bold uppercase tracking-wider text-primary">Pro</dt>
+                    <dd className="mt-1"><MobileFeatureValue value={pro} pro /></dd>
+                  </div>
+                </dl>
+              </article>
+            ))}
           </div>
-          {/* overflow-x-auto so narrow viewports scroll horizontally
-              instead of clipping columns. The inner min-w-[520px] keeps
-              the column widths legible at the smallest phones — without
-              it, three columns squeezed into 320px is unreadable. */}
-          <div
-            role="region"
-            aria-label="Free and Pro feature comparison"
-            tabIndex={0}
-            className="tc-reveal mt-8 overflow-x-auto rounded-2xl border border-border bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <table className="w-full min-w-[520px] text-sm">
+          <div className="tc-reveal mt-8 hidden overflow-x-auto rounded-2xl border border-border bg-card sm:block">
+            <table className="w-full text-sm">
               <caption className="sr-only">Features included with TrueCap Free and TrueCap Pro</caption>
               <thead>
                 <tr className="border-b border-border bg-muted/30">
@@ -374,29 +450,8 @@ export default async function PricingPage() {
                 </tr>
               </thead>
               <tbody>
-                {[
-                  ["Unlimited analyses", true, true],
-                  ["Cap rate · CoC · DSCR · cash flow", true, true],
-                  ["Auto-fill screening benchmarks (HUD rent · FRED owner-occupied rate · state tax)", true, true],
-                  ["Deal Score (0–100) with breakdown", true, true],
-                  ["Sale + rent comps from the address", "1 free", "50 / mo"],
-                  ["MAO solver · Sensitivity grid", false, true],
-                  ["BRRRR + fix-and-flip + rehab estimator", false, true],
-                  ["Shareable read-only deal links", true, true],
-                  ["10-year cash flow projection", false, true],
-                  ["Illustrative tax impact + depreciation", false, true],
-                  ["Modeled exit-year comparison", false, true],
-                  ["Buy Box auto-screening", false, true],
-                  ["Deal pipeline + tags (CRM)", false, true],
-                  ["Saved analysis templates", false, true],
-                  ["Due-diligence checklist + document vault", false, true],
-                  ...(alertsLive
-                    ? [["Rate-drop alerts on saved deals", false, true] as const]
-                    : []),
-                  ["Lender · partner · personal PDF reports", `${singleDeal.priceLabel} one-time`, true],
-                  ["Save deals", "Up to 5", "Unlimited"],
-                  ["Compare deals side-by-side", false, "Up to 4"],
-                ].map(([label, free, pro], i) => (
+                {FEATURE_COMPARISON.map(([label, free, pro], i) =>
+                  !alertsLive && label === "Rate-drop alerts on saved deals" ? null : (
                   <tr key={String(label)} className={i % 2 === 0 ? "bg-card" : "bg-muted/20"}>
                     <td className="px-4 py-3 text-foreground sm:px-6">{String(label)}</td>
                     <Cell value={free} />
@@ -405,55 +460,6 @@ export default async function PricingPage() {
                 ))}
               </tbody>
             </table>
-          </div>
-        </section>
-
-        {/* Deal Decision Pack — one complete acquisition decision
-            package without committing to a subscription.
-            Fully automated since Jun 2026: run a free analysis, click
-            Export PDF, complete Stripe Checkout, and the full report
-            downloads instantly (see app/actions/one-time-pdf.ts +
-            PdfPurchaseDialog). Replaced the old mailto + "1 business
-            day" manual flow. */}
-        <section className="mx-auto max-w-3xl px-4 pb-12 sm:px-6 sm:pb-16">
-          <div className="rounded-2xl border border-border bg-card p-6 sm:p-7">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="rounded-full bg-[var(--brand-green)]/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[var(--brand-green)]">
-                    One-time · {singleDeal.priceLabel}
-                  </span>
-                  <span className="text-[11px] text-muted-foreground">No subscription · No account</span>
-                </div>
-                <h3 className="text-xl font-extrabold text-foreground">
-                  Just need one property decided?
-                </h3>
-                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                  Run your analysis free, then unlock the Deal Decision Pack once.
-                  The report includes your deterministic Max Offer, Deal Doctor
-                  rent/rate thresholds, assumptions, verdict, downside scenario,
-                  10-year projection, illustrative tax-impact view, and modeled exit comparisons.
-                  {packCreditConfigured ? (
-                    <>
-                      {" "}
-                      <strong className="text-foreground">
-                        Buy while signed in and your {singleDeal.priceLabel} is
-                        credited toward Pro
-                      </strong>{" "}
-                      if you upgrade within {PACK_CREDIT_WINDOW_DAYS} days.
-                    </>
-                  ) : (
-                    <> Use Pro for the repeat decision workflow.</>
-                  )}
-                </p>
-              </div>
-              <Link
-                href="/#main"
-                className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-bold text-foreground transition-transform hover:-translate-y-0.5 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]"
-              >
-                Get My Max Offer
-              </Link>
-            </div>
           </div>
         </section>
 
@@ -535,4 +541,22 @@ function Cell({ value, pro }: { value: boolean | string; pro?: boolean }) {
       )}
     </td>
   );
+}
+
+function MobileFeatureValue({ value, pro }: { value: boolean | string; pro?: boolean }) {
+  if (value === true) {
+    return (
+      <span className={`inline-flex items-center gap-1.5 font-semibold ${pro ? "text-primary" : "text-foreground"}`}>
+        <Check aria-hidden className="size-4" /> Included
+      </span>
+    );
+  }
+  if (value === false) {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+        <X aria-hidden className="size-4" /> Not included
+      </span>
+    );
+  }
+  return <span className={pro ? "font-semibold text-primary" : "font-semibold text-foreground"}>{value}</span>;
 }

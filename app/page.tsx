@@ -222,27 +222,29 @@ export default function Home() {
           who it's for → pricing → closing ask. The FAQ stays last: it
           emits FAQPage JSON-LD for rich results.
           MUST stay in lockstep with app/home-authed/page.tsx. */}
-      {/* 2026-08 conversion order: problem (dollar-denominated stake) →
-          how it works → proof → trust → offer stack → guarantee →
-          segmented paths → FAQ (objection-ordered) → closing ask. */}
-      <ProblemBlock />
-      <HowTrueCapWorks />
-      <SocialProof />
-      <CaseStudiesSection studies={VERIFIED_CASE_STUDIES} />
-      {/* Trust: transparent methodology, editable assumptions, sources shown. */}
-      <DataSourcesSection />
-      <OfferEngineSection />
-      {/* Pricing: Free → $5 report → Pro → Agent Pro. */}
-      <PdfProUpsell />
-      <NeverOverpayGuarantee />
-      {/* Segmented paths — investor / agent / house-hacker self-ID. */}
-      <Personas />
-      <HomepageFaq />
-      {/* Closing ask — back to the address field. */}
-      <FinalCta />
-      {/* Sticky scroll-activated CTA bar — cold visitors only, and this
-          page only serves cold visitors. */}
-      <StickyConversionBar />
+      <div className="truecap-marketing-tail contents">
+        {/* 2026-08 conversion order: problem (dollar-denominated stake) →
+            how it works → proof → trust → offer stack → guarantee →
+            segmented paths → FAQ (objection-ordered) → closing ask. */}
+        <ProblemBlock />
+        <HowTrueCapWorks />
+        <SocialProof />
+        <CaseStudiesSection studies={VERIFIED_CASE_STUDIES} />
+        {/* Trust: transparent methodology, editable assumptions, sources shown. */}
+        <DataSourcesSection />
+        <OfferEngineSection />
+        {/* Pricing: Free → $5 report → Pro → Agent Pro. */}
+        <PdfProUpsell />
+        <NeverOverpayGuarantee />
+        {/* Segmented paths — investor / agent / house-hacker self-ID. */}
+        <Personas />
+        <HomepageFaq />
+        {/* Closing ask — back to the address field. */}
+        <FinalCta />
+        {/* Sticky scroll-activated CTA bar — cold visitors only, and this
+            page only serves cold visitors. */}
+        <StickyConversionBar />
+      </div>
       {/* Engagement signal pump for Google Ads — fires dataLayer scroll
           depth events so the bidding algorithm has something to
           optimize against beyond rare conversions. */}

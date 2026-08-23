@@ -111,12 +111,15 @@ export function StrategyOutcomeCard({
       asking && asking > 0 && spread != null ? Math.round((spread / asking) * 100) : null;
 
     return (
-      <OutcomeShell icon={Target} eyebrow="Wholesale / MAO" title="Max allowable offer">
+      <OutcomeShell icon={Target} eyebrow="Wholesale / MAO" title="Price ceiling">
         <p className="text-4xl sm:text-5xl font-extrabold leading-none text-foreground">
           {usd(mao.maxPrice)}
         </p>
         <p className="mt-2 text-sm text-muted-foreground">
-          The most you can pay and still hit your targets — {targetsLabel}.
+          Criteria: {targetsLabel}.
+        </p>
+        <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+          Calculated from your selected targets. This is not a recommended offer.
         </p>
         {asking != null ? (
           <div className="mt-4 rounded-xl border border-border bg-card/70 p-3">
@@ -133,7 +136,7 @@ export function StrategyOutcomeCard({
               />
             </div>
             <div className="flex items-center justify-between text-xs">
-              <span className="font-bold tabular-nums text-primary">Your max {usd(mao.maxPrice)}</span>
+              <span className="font-bold tabular-nums text-primary">Price ceiling {usd(mao.maxPrice)}</span>
               {spread != null && spread > 0 ? (
                 <span className="font-medium text-muted-foreground">
                   {usd(spread)}
@@ -145,7 +148,7 @@ export function StrategyOutcomeCard({
             </div>
             <p className="mt-2 text-xs leading-snug text-muted-foreground">
               {spread != null && spread > 0
-                ? "Offer at or below your max - negotiate down or pass."
+                ? "The asking price exceeds the ceiling—negotiate down or pass."
                 : "At the asking price this already hits your return targets."}
             </p>
           </div>

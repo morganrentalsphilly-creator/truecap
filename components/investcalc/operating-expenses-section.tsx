@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { CurrencyInput } from "@/components/ui/currency-input";
 import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
@@ -43,7 +44,7 @@ type FieldLabelWithTooltipProps = {
 };
 
 const inputClassName =
-  "h-10 rounded-lg border-[var(--brand-orange)]/15 bg-background shadow-sm focus-visible:ring-[var(--brand-orange)]/25";
+  "min-h-11 rounded-lg border-[var(--brand-orange)]/15 bg-background shadow-sm focus-visible:ring-[var(--brand-orange)]/25";
 
 function FieldLabelWithTooltip({ label, term, tooltip }: FieldLabelWithTooltipProps) {
   // If a glossary term is provided, build the tooltip content from the
@@ -220,7 +221,8 @@ export function OperatingExpensesSection({
           variant="outline"
           size="sm"
           onClick={() => setShowAdvanced((v) => !v)}
-          className="h-8 rounded-full border-[var(--brand-orange)]/20 bg-background px-4 text-xs font-medium text-foreground shadow-sm hover:bg-background"
+          className="min-h-11 rounded-full border-[var(--brand-orange)]/20 bg-background px-4 text-xs font-medium text-foreground shadow-sm hover:bg-background"
+          aria-expanded={showAdvanced}
         >
           {showAdvanced ? (
             <>
@@ -359,8 +361,9 @@ export function OperatingExpensesSection({
                         key={option.value}
                         type="button"
                         onClick={() => field.onChange(option.value)}
+                        aria-pressed={field.value === option.value}
                         className={cn(
-                          "h-8 flex-1 rounded-md px-3 text-xs font-semibold transition-colors",
+                          "min-h-11 flex-1 rounded-md px-3 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-orange)]/30",
                           field.value === option.value
                             ? "bg-[var(--brand-orange)] text-white"
                             : "text-muted-foreground hover:text-foreground"
@@ -374,38 +377,43 @@ export function OperatingExpensesSection({
               />
               <div className="relative">
                 {propertyTaxInputMode === "annual" ? <DollarIcon /> : null}
-                <Input
-                  {...register(propertyTaxInputMode === "annual" ? "propertyTaxAnnual" : "propertyTaxPct", {
-                    setValueAs: optionalNumberSetValueAs,
-                  })}
-                  id="propertyTaxAmount"
-                  type="number"
-                  inputMode="decimal"
-                  step="0.01"
-                  min={0}
-                  {...(propertyTaxInputMode === "annual" ? {} : { max: 100 })}
-                  placeholder={
-                    propertyTaxInputMode === "annual"
-                      ? hasPrice
-                        ? String(Math.round(purchasePriceForEstimate * 0.011))
-                        : "3000"
-                      : "1.1"
-                  }
-                  aria-invalid={
-                    !!(propertyTaxInputMode === "annual" ? errors.propertyTaxAnnual : errors.propertyTaxPct)
-                  }
-                  aria-describedby={
-                    (propertyTaxInputMode === "annual" ? errors.propertyTaxAnnual : errors.propertyTaxPct)
-                      ? "propertyTaxAmount-error"
-                      : undefined
-                  }
-                  className={cn(
-                    inputClassName,
-                    propertyTaxInputMode === "annual" ? "pl-8" : "pr-8",
-                    (propertyTaxInputMode === "annual" ? errors.propertyTaxAnnual : errors.propertyTaxPct) &&
-                      "border-destructive"
-                  )}
-                />
+                {propertyTaxInputMode === "annual" ? (
+                  <Controller
+                    name="propertyTaxAnnual"
+                    control={control}
+                    render={({ field }) => (
+                      <CurrencyInput
+                        id="propertyTaxAmount"
+                        name={field.name}
+                        ref={field.ref}
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        onBlur={field.onBlur}
+                        step={1}
+                        min={0}
+                        max={1_000_000}
+                        placeholder={hasPrice ? String(Math.round(purchasePriceForEstimate * 0.011)) : "3,000"}
+                        aria-invalid={!!errors.propertyTaxAnnual}
+                        aria-describedby={errors.propertyTaxAnnual ? "propertyTaxAmount-error" : undefined}
+                        className={cn(inputClassName, "pl-8", errors.propertyTaxAnnual && "border-destructive")}
+                      />
+                    )}
+                  />
+                ) : (
+                  <Input
+                    {...register("propertyTaxPct", { setValueAs: optionalNumberSetValueAs })}
+                    id="propertyTaxAmount"
+                    type="number"
+                    inputMode="decimal"
+                    step="0.01"
+                    min={0}
+                    max={100}
+                    placeholder="1.1"
+                    aria-invalid={!!errors.propertyTaxPct}
+                    aria-describedby={errors.propertyTaxPct ? "propertyTaxAmount-error" : undefined}
+                    className={cn(inputClassName, "pr-8", errors.propertyTaxPct && "border-destructive")}
+                  />
+                )}
                 {propertyTaxInputMode === "percent" ? <PercentIcon /> : null}
               </div>
               <FieldHint>
@@ -445,8 +453,9 @@ export function OperatingExpensesSection({
                         key={option.value}
                         type="button"
                         onClick={() => field.onChange(option.value)}
+                        aria-pressed={field.value === option.value}
                         className={cn(
-                          "h-8 flex-1 rounded-md px-3 text-xs font-semibold transition-colors",
+                          "min-h-11 flex-1 rounded-md px-3 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-orange)]/30",
                           field.value === option.value
                             ? "bg-[var(--brand-orange)] text-white"
                             : "text-muted-foreground hover:text-foreground"
@@ -460,31 +469,43 @@ export function OperatingExpensesSection({
               />
               <div className="relative">
                 {insuranceInputMode === "monthly" ? <DollarIcon /> : null}
-                <Input
-                  {...register(insuranceInputMode === "monthly" ? "insuranceMonthly" : "insurancePct", {
-                    setValueAs: optionalNumberSetValueAs,
-                  })}
-                  id="insuranceAmount"
-                  type="number"
-                  inputMode="decimal"
-                  step="0.01"
-                  min={0}
-                  placeholder={insuranceInputMode === "monthly" ? String(insuranceEst) : "0.50"}
-                  aria-invalid={
-                    !!(insuranceInputMode === "monthly" ? errors.insuranceMonthly : errors.insurancePct)
-                  }
-                  aria-describedby={
-                    (insuranceInputMode === "monthly" ? errors.insuranceMonthly : errors.insurancePct)
-                      ? "insuranceAmount-error"
-                      : undefined
-                  }
-                  className={cn(
-                    inputClassName,
-                    insuranceInputMode === "monthly" ? "pl-8" : "pr-8",
-                    (insuranceInputMode === "monthly" ? errors.insuranceMonthly : errors.insurancePct) &&
-                      "border-destructive"
-                  )}
-                />
+                {insuranceInputMode === "monthly" ? (
+                  <Controller
+                    name="insuranceMonthly"
+                    control={control}
+                    render={({ field }) => (
+                      <CurrencyInput
+                        id="insuranceAmount"
+                        name={field.name}
+                        ref={field.ref}
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        onBlur={field.onBlur}
+                        step={1}
+                        min={0}
+                        max={1_000_000}
+                        placeholder={String(insuranceEst)}
+                        aria-invalid={!!errors.insuranceMonthly}
+                        aria-describedby={errors.insuranceMonthly ? "insuranceAmount-error" : undefined}
+                        className={cn(inputClassName, "pl-8", errors.insuranceMonthly && "border-destructive")}
+                      />
+                    )}
+                  />
+                ) : (
+                  <Input
+                    {...register("insurancePct", { setValueAs: optionalNumberSetValueAs })}
+                    id="insuranceAmount"
+                    type="number"
+                    inputMode="decimal"
+                    step="0.01"
+                    min={0}
+                    max={100}
+                    placeholder="0.50"
+                    aria-invalid={!!errors.insurancePct}
+                    aria-describedby={errors.insurancePct ? "insuranceAmount-error" : undefined}
+                    className={cn(inputClassName, "pr-8", errors.insurancePct && "border-destructive")}
+                  />
+                )}
                 {insuranceInputMode === "percent" ? <PercentIcon /> : null}
               </div>
               <FieldHint>
@@ -508,17 +529,26 @@ export function OperatingExpensesSection({
               </FieldLabel>
               <div className="relative">
                 <DollarIcon />
-                <Input
-                  {...register("hoaMonthly", { setValueAs: optionalNumberSetValueAs })}
-                  id="hoaMonthly"
-                  type="number"
-                  inputMode="decimal"
-                  step="0.01"
-                  min={0}
-                  placeholder="0"
-                  aria-invalid={!!errors.hoaMonthly}
-                  aria-describedby={errors.hoaMonthly ? "hoaMonthly-error" : undefined}
-                  className={cn(inputClassName, "pl-8", errors.hoaMonthly && "border-destructive")}
+                <Controller
+                  name="hoaMonthly"
+                  control={control}
+                  render={({ field }) => (
+                    <CurrencyInput
+                      id="hoaMonthly"
+                      name={field.name}
+                      ref={field.ref}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      onBlur={field.onBlur}
+                      step={1}
+                      min={0}
+                      max={1_000_000}
+                      placeholder="0"
+                      aria-invalid={!!errors.hoaMonthly}
+                      aria-describedby={errors.hoaMonthly ? "hoaMonthly-error" : undefined}
+                      className={cn(inputClassName, "pl-8", errors.hoaMonthly && "border-destructive")}
+                    />
+                  )}
                 />
               </div>
               <FieldHint>Monthly homeowners association fees if applicable.</FieldHint>
@@ -538,17 +568,26 @@ export function OperatingExpensesSection({
               </FieldLabel>
               <div className="relative">
                 <DollarIcon />
-                <Input
-                  {...register("utilitiesMonthly", { setValueAs: optionalNumberSetValueAs })}
-                  id="utilitiesMonthly"
-                  type="number"
-                  inputMode="decimal"
-                  step="0.01"
-                  min={0}
-                  placeholder="0"
-                  aria-invalid={!!errors.utilitiesMonthly}
-                  aria-describedby={errors.utilitiesMonthly ? "utilitiesMonthly-error" : undefined}
-                  className={cn(inputClassName, "pl-8", errors.utilitiesMonthly && "border-destructive")}
+                <Controller
+                  name="utilitiesMonthly"
+                  control={control}
+                  render={({ field }) => (
+                    <CurrencyInput
+                      id="utilitiesMonthly"
+                      name={field.name}
+                      ref={field.ref}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      onBlur={field.onBlur}
+                      step={1}
+                      min={0}
+                      max={1_000_000}
+                      placeholder="0"
+                      aria-invalid={!!errors.utilitiesMonthly}
+                      aria-describedby={errors.utilitiesMonthly ? "utilitiesMonthly-error" : undefined}
+                      className={cn(inputClassName, "pl-8", errors.utilitiesMonthly && "border-destructive")}
+                    />
+                  )}
                 />
               </div>
               <FieldError id="utilitiesMonthly-error" message={errors.utilitiesMonthly?.message} />
@@ -571,6 +610,8 @@ export function OperatingExpensesSection({
                   type="number"
                   inputMode="decimal"
                   step="0.01"
+                  min={0}
+                  max={50}
                   placeholder="10"
                   aria-invalid={!!errors.maintenancePct}
                   aria-describedby={errors.maintenancePct ? "maintenancePct-error" : undefined}
@@ -592,6 +633,8 @@ export function OperatingExpensesSection({
                   type="number"
                   inputMode="decimal"
                   step="0.01"
+                  min={0}
+                  max={50}
                   placeholder="5"
                   aria-invalid={!!errors.vacancyPct}
                   aria-describedby={errors.vacancyPct ? "vacancyPct-error" : undefined}
@@ -613,6 +656,8 @@ export function OperatingExpensesSection({
                   type="number"
                   inputMode="decimal"
                   step="0.01"
+                  min={0}
+                  max={50}
                   placeholder="8"
                   aria-invalid={!!errors.mgmtPct}
                   aria-describedby={errors.mgmtPct ? "mgmtPct-error" : undefined}
@@ -634,6 +679,8 @@ export function OperatingExpensesSection({
                   type="number"
                   inputMode="decimal"
                   step="0.01"
+                  min={0}
+                  max={50}
                   placeholder="5"
                   aria-invalid={!!errors.capexPct}
                   aria-describedby={errors.capexPct ? "capexPct-error" : undefined}
@@ -688,7 +735,7 @@ export function OperatingExpensesSection({
                   // text-base below md: iOS Safari zooms the whole page in on
                   // any form control under 16px and never zooms back out.
                   // Same rule the Input primitive already encodes.
-                  "h-10 w-full rounded-lg border border-[var(--brand-orange)]/15 bg-background px-3 text-base shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-orange)]/25 md:text-sm",
+                  "min-h-11 w-full rounded-lg border border-[var(--brand-orange)]/15 bg-background px-3 text-base shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-orange)]/25 md:text-sm",
                   errors.depreciationYears && "border-destructive"
                 )}
               >
@@ -711,6 +758,7 @@ export function OperatingExpensesSection({
                   inputMode="decimal"
                   step="0.01"
                   min={0}
+                  max={20}
                   placeholder="2.5"
                   aria-invalid={!!errors.expenseGrowthPct}
                   aria-describedby={errors.expenseGrowthPct ? "expenseGrowthPct-error" : undefined}
@@ -734,6 +782,7 @@ export function OperatingExpensesSection({
                   inputMode="decimal"
                   step="0.01"
                   min={0}
+                  max={20}
                   placeholder="2.5"
                   aria-invalid={!!errors.rentGrowthPct}
                   aria-describedby={errors.rentGrowthPct ? "rentGrowthPct-error" : undefined}
@@ -830,7 +879,7 @@ export function OperatingExpensesSection({
                     <TooltipTrigger asChild>
                       <button
                         type="button"
-                        className="inline-flex size-3.5 items-center justify-center rounded-full text-[var(--brand-orange)]/70 hover:text-[var(--brand-orange)]"
+                        className="inline-flex size-11 items-center justify-center rounded-full text-[var(--brand-orange)]/70 hover:text-[var(--brand-orange)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-orange)]/30"
                         aria-label="Include interest deduction guidance"
                       >
                         <Info className="size-3.5" />

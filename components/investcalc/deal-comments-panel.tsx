@@ -133,18 +133,22 @@ export function DealCommentsPanel({ savedDealId }: { savedDealId: string }) {
           <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">Comments</h3>
         </div>
         {isBusy ? (
-          <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+          <span role="status" aria-live="polite" className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
             <Loader2 className="size-3 animate-spin" /> Saving…
           </span>
         ) : (
-          <span className="text-[11px] text-muted-foreground">
+          <span role="status" aria-live="polite" className="text-[11px] text-muted-foreground">
             {comments.length} {comments.length === 1 ? "entry" : "entries"}
           </span>
         )}
       </div>
 
       <div className="flex gap-2">
+        <label htmlFor="deal-comment-draft" className="sr-only">
+          Add a deal comment
+        </label>
         <textarea
+          id="deal-comment-draft"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => {
@@ -158,8 +162,8 @@ export function DealCommentsPanel({ savedDealId }: { savedDealId: string }) {
           placeholder="Log an update - seller motivation, agent call, a decision… (⌘/Ctrl+Enter)"
           className="min-h-[2.5rem] flex-1 resize-y rounded-md border border-input bg-transparent px-2.5 py-2 text-sm text-foreground outline-none transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
         />
-        <Button type="button" size="sm" variant="outline" className="h-9 self-end" onClick={add} disabled={!draft.trim() || isBusy}>
-          <Send className="size-4" />
+        <Button type="button" size="sm" variant="outline" className="h-11 self-end" onClick={add} disabled={!draft.trim() || isBusy} aria-label="Add comment">
+          <Send className="size-4" aria-hidden />
         </Button>
       </div>
 

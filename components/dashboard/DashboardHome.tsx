@@ -239,6 +239,7 @@ function getTopDeals(data: DashboardHomeData): DashboardTopDeal[] {
       breakdown: deal.breakdown,
       propertyType: deal.propertyType,
       tags: deal.tags,
+      dataConfidence: deal.dataConfidence,
       // Buy-box fit (PV-6) — undefined for users without an active box, so
       // the badge and the Fit sort stay invisible for them.
       fit: data.buyBox?.fitByDealId[deal.id] ?? null,
@@ -1134,11 +1135,7 @@ export function DashboardHome({
                 label="Monthly Cash Flow"
                 value={formatSignedCurrency(portfolio.totalCashFlow)}
                 change={null}
-                // "~" + a negative currency rendered as "~-$2,016" — the
-                // tilde and minus read as one broken glyph. The word carries
-                // the approximation without colliding with the sign.
-                // (Value unchanged; formatting only.)
-                changeLabel={`About ${formatSignedCurrency(portfolio.totalCashFlow * 12)} annualized`}
+                changeLabel={`If all ${portfolio.activeCount} active ${portfolio.activeCount === 1 ? "deal" : "deals"} closed at current assumptions: ${formatSignedCurrency(portfolio.totalCashFlow)}/month.`}
                 icon={DollarSign}
                 spark={[]}
                 tone="success"

@@ -86,13 +86,12 @@ export function PortfolioChart({ data = [] }: { data?: DealComparisonPoint[] }) 
           </div>
           <p className="text-sm text-muted-foreground mt-0.5">Compare saved deals by score, monthly cash flow, or 10-yr ROI</p>
         </div>
-        <div className="flex items-center gap-1 p-1 rounded-lg bg-muted" role="tablist" aria-label="Comparison metric">
+        <div className="flex items-center gap-1 p-1 rounded-lg bg-muted" role="group" aria-label="Comparison metric">
           {metrics.map((item) => (
             <button
               key={item.id}
               type="button"
-              role="tab"
-              aria-selected={metric === item.id}
+              aria-pressed={metric === item.id}
               onClick={() => setMetric(item.id)}
               className={`px-3 py-2 text-xs font-semibold rounded-md transition sm:py-1 ${
                 metric === item.id ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"

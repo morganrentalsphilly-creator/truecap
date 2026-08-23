@@ -277,7 +277,7 @@ export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
           type="button"
           onClick={applyWorstCase}
           aria-pressed={isWorstCase}
-          className={`inline-flex min-h-8 items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold transition-colors ${
+          className={`inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold transition-colors ${
             isWorstCase
               ? "border-primary bg-primary/10 text-primary"
               : "border-border bg-background text-foreground/80 hover:bg-muted"
@@ -294,7 +294,7 @@ export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
           onClick={reset}
           aria-pressed={!isAdjusted}
           disabled={!isAdjusted}
-          className={`inline-flex min-h-8 items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold transition-colors ${
+          className={`inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold transition-colors ${
             !isAdjusted
               ? "border-primary bg-primary/10 text-primary"
               : "border-border bg-background text-foreground/80 hover:bg-muted"

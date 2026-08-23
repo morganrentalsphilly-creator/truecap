@@ -29,6 +29,8 @@ interface ReadOnlyAnalysisViewProps {
   /** Owner's stored sale/rent comps (when a saved deal was shared). Backs the
    *  rent/value with real comparables; null hides the section. */
   comps?: ReportComps | null;
+  /** True only when the verified share owner currently has a paid plan. */
+  showProAnalysis: boolean;
 }
 
 const fmtCash = (n: number) =>
@@ -142,7 +144,7 @@ function SharedDealComps({ comps }: { comps: ReportComps }) {
   );
 }
 
-export function ReadOnlyAnalysisView({ values, result, comps }: ReadOnlyAnalysisViewProps) {
+export function ReadOnlyAnalysisView({ values, result, comps, showProAnalysis }: ReadOnlyAnalysisViewProps) {
   const router = useRouter();
   // "Make this mine": hand the FULL deal to the calculator via its autosave
   // draft (restored on mount via normalizeInvestmentFormSnapshot), so the
@@ -227,19 +229,36 @@ export function ReadOnlyAnalysisView({ values, result, comps }: ReadOnlyAnalysis
 
       {comps ? <SharedDealComps comps={comps} /> : null}
 
-      <MaxOfferCard values={values} />
-      <SensitivityGrid values={values} />
+      {showProAnalysis ? (
+        <>
+          <MaxOfferCard values={values} />
+          <SensitivityGrid values={values} />
 
-      {/* Strategies section - embedded inline rather than in a tab so the
-          read-only viewer doesn't have hidden content. */}
-      <div className="bg-card rounded-2xl border border-border shadow-sm">
-        <div className="border-b border-border px-5 py-3">
-          <h2 className="text-sm font-semibold text-foreground">
-            Strategy calculators
+          {/* Strategies section - embedded inline rather than in a tab so the
+              read-only viewer doesn't have hidden content. */}
+          <div className="bg-card rounded-2xl border border-border shadow-sm">
+            <div className="border-b border-border px-5 py-3">
+              <h2 className="text-sm font-semibold text-foreground">
+                Strategy calculators
+              </h2>
+            </div>
+            <StrategiesPanel values={values} result={result} />
+          </div>
+        </>
+      ) : (
+        <section className="rounded-2xl border border-primary/25 bg-[var(--brand-blue-light)] p-5 sm:p-6" aria-labelledby="shared-pro-analysis-title">
+          <h2 id="shared-pro-analysis-title" className="text-base font-bold text-foreground">
+            Max Offer, sensitivity, and strategy modeling are Pro tools
           </h2>
-        </div>
-        <StrategiesPanel values={values} result={result} />
-      </div>
+          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+            This free shared view includes the deal&rsquo;s core underwriting. Open the
+            property in TrueCap to tune assumptions or unlock the advanced decision tools.
+          </p>
+          <Link href="/?utm_source=shared_deal&utm_medium=pro_gate" className="mt-3 inline-flex min-h-11 items-center font-bold text-primary hover:underline">
+            Analyze this property in TrueCap →
+          </Link>
+        </section>
+      )}
 
       {/* Viral loop: this public share page is seen by partners, lenders,
           and other investors. Convert them into TrueCap users. */}

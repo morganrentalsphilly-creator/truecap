@@ -15,11 +15,29 @@
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import * as Sentry from "@sentry/nextjs";
 import Link from "next/link";
-import { ArrowUpRight, ListChecks, Loader2, SlidersHorizontal, Sparkles } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowUpRight,
+  CheckCircle2,
+  ListChecks,
+  Loader2,
+  MapPin,
+  PencilLine,
+  SlidersHorizontal,
+  Sparkles,
+} from "lucide-react";
 import { screenBatchAction, extractTriageListingsAction, type BatchTriageResult } from "@/app/actions/batch-triage";
 import {
   MAX_TRIAGE_ROWS,
+  formatScreenableTriageRows,
+  formatTriagePreviewRowsAsText,
+  parseTriagePreviewInput,
+  previewRowToScreenableListing,
   rankTriageRows,
+  resolvedTriageLocation,
+  validateTriagePreviewRow,
+  type TriagePreviewField,
+  type TriagePreviewRow,
   type TriageRowResult,
   type TriageSort,
 } from "@/lib/batch-triage";
@@ -51,6 +69,26 @@ function ratio(n: number | null, isCash: boolean): string {
   return n == null ? "—" : n.toFixed(2);
 }
 
+function gapToAsking(row: TriageRowResult): string {
+  if (row.askingGap == null) return "—";
+  if (Math.abs(row.askingGap) < 1) return "At ceiling";
+  return row.askingGap > 0
+    ? `${money(row.askingGap)} over`
+    : `${money(Math.abs(row.askingGap))} below`;
+}
+
+function fastestPath(row: TriageRowResult): string {
+  if (!row.ok) return "Add monthly rent";
+  if (row.requiredRentUnreachable) return "Rent alone won’t clear targets";
+  if (row.requiredMonthlyRent == null) return "Verify assumptions";
+  if ((row.requiredRentDelta ?? 0) <= 0) return "Works at current rent";
+  return `${money(row.requiredMonthlyRent)}/mo rent (+${money(row.requiredRentDelta)})`;
+}
+
+function issueFor(row: TriagePreviewRow, field: TriagePreviewField) {
+  return row.issues.find((issue) => issue.field === field);
+}
+
 /**
  * Screening-context verdict label. The override that used to live here (and
  * the reasoning behind it) now lives in lib/verdict-display.ts as
@@ -79,12 +117,81 @@ function openUrl(row: TriageRowResult): string {
   );
 }
 
+type EditablePreviewField = Exclude<TriagePreviewField, "row">;
+
+function PreviewInput({
+  row,
+  field,
+  label,
+  surface,
+  onChange,
+}: {
+  row: TriagePreviewRow;
+  field: EditablePreviewField;
+  label: string;
+  surface: "card" | "table";
+  onChange: (value: string) => void;
+}) {
+  const issue = issueFor(row, field);
+  const inputId = `${row.id}-${field}-${surface}`;
+  const issueId = issue ? `${inputId}-issue` : undefined;
+  const value = row[field];
+  const numeric = field !== "address";
+  return (
+    <div className="min-w-0">
+      <label htmlFor={inputId} className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-muted-foreground lg:sr-only">
+        {label}
+      </label>
+      <input
+        id={inputId}
+        type="text"
+        inputMode={numeric ? "decimal" : "text"}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        aria-invalid={issue?.severity === "error" || undefined}
+        aria-describedby={issueId}
+        className={cn(
+          "h-11 w-full min-w-0 rounded-lg border bg-background px-3 text-base text-foreground outline-none transition focus-visible:ring-2 focus-visible:ring-ring md:text-sm",
+          issue?.severity === "error" ? "border-destructive" : "border-border"
+        )}
+      />
+      {issue ? (
+        <p id={issueId} className={cn("mt-1 text-[10px] leading-snug", issue.severity === "error" ? "text-destructive" : "text-amber-700")}>
+          {issue.message}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function PreviewRowContext({ row }: { row: TriagePreviewRow }) {
+  const location = resolvedTriageLocation(row.address);
+  const rowIssues = row.issues.filter((issue) => issue.field === "row");
+  return (
+    <div className="mt-2 space-y-1 text-[11px]">
+      <p className={cn("inline-flex items-center gap-1.5", location.label ? "text-muted-foreground" : "text-amber-700")}>
+        <MapPin className="size-3.5" aria-hidden />
+        {location.label
+          ? `Assumption location: ${location.label} · ${location.state} tax assumptions`
+          : "Location unresolved — verify city/state before screening"}
+      </p>
+      {rowIssues.map((issue) => (
+        <p key={issue.message} className="flex items-start gap-1.5 text-amber-700">
+          <AlertTriangle className="mt-0.5 size-3 shrink-0" aria-hidden />
+          {issue.message}
+        </p>
+      ))}
+    </div>
+  );
+}
+
 export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }) {
   const { toast } = useToast();
   const [text, setText] = useState("");
   const [pending, startScreening] = useTransition();
   const [extracting, startExtracting] = useTransition();
   const [result, setResult] = useState<Extract<BatchTriageResult, { ok: true }> | null>(null);
+  const [previewRows, setPreviewRows] = useState<TriagePreviewRow[] | null>(null);
   const [sort, setSort] = useState<TriageSort>("score");
   const [passersOnly, setPassersOnly] = useState(false);
 
@@ -96,6 +203,7 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
       const stored = parseStoredTriageBatch(window.sessionStorage.getItem(TRIAGE_STORAGE_KEY));
       if (!stored) return;
       setText(stored.text);
+      setPreviewRows(parseTriagePreviewInput(stored.text));
       if (stored.result) {
         setResult(stored.result);
         setSort(stored.result.sort);
@@ -127,15 +235,59 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
     }
   }, [text, result]);
 
+  const review = () => {
+    const parsed = parseTriagePreviewInput(text);
+    if (parsed.length === 0) {
+      toast({ title: "Nothing to review", description: "Paste at least one listing first." });
+      return;
+    }
+    setPreviewRows(parsed.slice(0, MAX_TRIAGE_ROWS));
+    setResult(null);
+  };
+
+  const updatePreviewRow = (id: string, field: Exclude<TriagePreviewField, "row">, value: string) => {
+    setPreviewRows((current) => {
+      if (!current) return current;
+      const next = current.map((row) =>
+        row.id === id
+          ? validateTriagePreviewRow({
+              ...row,
+              [field]: value,
+              // Editing is an explicit human review of the extracted columns,
+              // so parser ambiguity is resolved once the row is touched.
+              sourceIssue: undefined,
+            })
+          : row
+      );
+      setText(formatTriagePreviewRowsAsText(next));
+      return next;
+    });
+    setResult(null);
+  };
+
   const screen = () => {
+    if (!previewRows) {
+      review();
+      return;
+    }
+    const screenableText = formatScreenableTriageRows(previewRows);
+    if (!screenableText) {
+      toast({
+        title: "Fix the highlighted rows",
+        description: "At least one row needs a complete address, valid purchase price, and monthly rent.",
+        variant: "warning",
+      });
+      return;
+    }
     startScreening(async () => {
       try {
-        const r = await screenBatchAction({ text });
+        const r = await screenBatchAction({ text: screenableText });
         if (!r.ok) {
           toast({ title: "Couldn't screen", description: r.message, variant: "destructive" });
           return;
         }
         setResult(r);
+        setText(formatTriagePreviewRowsAsText(previewRows));
         setSort(r.sort);
         setPassersOnly(false);
         trackEvent("shortlist_screened", { rows: r.rows?.length ?? 0 });
@@ -170,6 +322,8 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
           return;
         }
         setText(r.text);
+        setPreviewRows(parseTriagePreviewInput(r.text));
+        setResult(null);
         toast({
           title: `Extracted ${r.count} ${r.count === 1 ? "listing" : "listings"}`,
           description: "Review the rows, then Screen deals.",
@@ -196,6 +350,15 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
     return passersOnly ? ranked.filter((r) => r.buyBoxFit?.anyPass) : ranked;
   }, [result, sort, passersOnly]);
 
+  const previewScreenableCount = useMemo(
+    () => previewRows?.filter((row) => previewRowToScreenableListing(row) != null).length ?? 0,
+    [previewRows]
+  );
+  const previewErrorCount = useMemo(
+    () => previewRows?.reduce((count, row) => count + row.issues.filter((issue) => issue.severity === "error").length, 0) ?? 0,
+    [previewRows]
+  );
+
   const sortOptions: { id: TriageSort; label: string }[] = [
     { id: "score", label: "Score" },
     { id: "cashFlow", label: "Cash flow" },
@@ -220,12 +383,16 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
 
       <textarea
         value={text}
-        onChange={(e) => setText(e.target.value)}
+        onChange={(e) => {
+          setText(e.target.value);
+          setPreviewRows(null);
+          setResult(null);
+        }}
         rows={6}
         spellCheck={false}
         placeholder={PLACEHOLDER}
         aria-label="Listings to screen"
-        className="w-full resize-y rounded-xl border border-border bg-card p-3 font-mono text-xs text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="min-h-32 w-full resize-y rounded-xl border border-border bg-card p-3 font-mono text-base text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-sm"
       />
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
         <p className="text-[11px] text-muted-foreground">
@@ -239,7 +406,7 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
               type="button"
               onClick={extract}
               disabled={extracting || pending || text.trim() === ""}
-              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground hover:bg-muted disabled:opacity-60"
+              className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
             >
               {extracting ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4 text-primary" />}
               Auto-extract from text
@@ -247,15 +414,96 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
           ) : null}
           <button
             type="button"
-            onClick={screen}
+            onClick={previewRows ? screen : review}
             disabled={pending || extracting || text.trim() === ""}
-            className="inline-flex h-10 shrink-0 items-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-md hover:bg-primary/95 disabled:opacity-60"
+            className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-md outline-none hover:bg-primary/95 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-60"
           >
-            {pending ? <Loader2 className="size-4 animate-spin" /> : <ListChecks className="size-4" />}
-            Screen deals
+            {pending ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : previewRows ? (
+              <ListChecks className="size-4" />
+            ) : (
+              <PencilLine className="size-4" />
+            )}
+            {previewRows
+              ? `Screen ${previewScreenableCount} ${previewScreenableCount === 1 ? "deal" : "deals"}`
+              : "Review listings"}
           </button>
         </div>
       </div>
+
+      {previewRows ? (
+        <section aria-labelledby="triage-review-heading" className="mt-8 rounded-2xl border border-border bg-card p-4 sm:p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 id="triage-review-heading" className="text-base font-extrabold text-foreground">
+                Review before screening
+              </h2>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Confirm the four inputs and the resolved market. Missing rent is kept visible but won&apos;t be underwritten with a made-up default.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 text-xs" aria-live="polite">
+              <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2.5 py-1 font-semibold text-success">
+                <CheckCircle2 className="size-3.5" aria-hidden /> {previewScreenableCount} included
+              </span>
+              {previewErrorCount > 0 ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2.5 py-1 font-semibold text-destructive">
+                  <AlertTriangle className="size-3.5" aria-hidden /> {previewErrorCount} {previewErrorCount === 1 ? "error" : "errors"}
+                </span>
+              ) : null}
+            </div>
+          </div>
+
+          {/* Cards through tablet widths; the editable table only takes over
+              when its four columns fit without horizontal overflow. */}
+          <div className="mt-4 space-y-3 lg:hidden">
+            {previewRows.map((row, index) => (
+              <article key={row.id} className="rounded-xl border border-border bg-background p-3">
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  Listing {index + 1}
+                </p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="sm:col-span-2">
+                    <PreviewInput row={row} field="address" label="Address" surface="card" onChange={(value) => updatePreviewRow(row.id, "address", value)} />
+                  </div>
+                  <PreviewInput row={row} field="purchasePrice" label="Price" surface="card" onChange={(value) => updatePreviewRow(row.id, "purchasePrice", value)} />
+                  <PreviewInput row={row} field="monthlyRent" label="Monthly rent" surface="card" onChange={(value) => updatePreviewRow(row.id, "monthlyRent", value)} />
+                  <PreviewInput row={row} field="bedrooms" label="Beds" surface="card" onChange={(value) => updatePreviewRow(row.id, "bedrooms", value)} />
+                </div>
+                <PreviewRowContext row={row} />
+              </article>
+            ))}
+          </div>
+
+          <div className="mt-4 hidden lg:block">
+            <table className="w-full table-fixed text-sm">
+              <caption className="sr-only">Editable listing preview</caption>
+              <thead>
+                <tr className="text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  <th scope="col" className="w-[42%] pb-2 pr-2">Address</th>
+                  <th scope="col" className="w-[18%] px-2 pb-2">Price</th>
+                  <th scope="col" className="w-[18%] px-2 pb-2">Rent</th>
+                  <th scope="col" className="w-[12%] px-2 pb-2">Beds</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {previewRows.map((row) => (
+                  <tr key={row.id} className="align-top">
+                    <td className="py-3 pr-2">
+                      <PreviewInput row={row} field="address" label="Address" surface="table" onChange={(value) => updatePreviewRow(row.id, "address", value)} />
+                      <PreviewRowContext row={row} />
+                    </td>
+                    <td className="px-2 py-3"><PreviewInput row={row} field="purchasePrice" label="Price" surface="table" onChange={(value) => updatePreviewRow(row.id, "purchasePrice", value)} /></td>
+                    <td className="px-2 py-3"><PreviewInput row={row} field="monthlyRent" label="Monthly rent" surface="table" onChange={(value) => updatePreviewRow(row.id, "monthlyRent", value)} /></td>
+                    <td className="px-2 py-3"><PreviewInput row={row} field="bedrooms" label="Beds" surface="table" onChange={(value) => updatePreviewRow(row.id, "bedrooms", value)} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ) : null}
 
       {result ? (
         <div className="mt-8">
@@ -263,6 +511,9 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
             <p className="text-sm font-semibold text-foreground">
               Screened {result.screenedCount} {result.screenedCount === 1 ? "listing" : "listings"}
               {result.truncated ? ` (first ${MAX_TRIAGE_ROWS} of your paste)` : ""}
+              <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
+                Calculated from your selected targets. This is not a recommended offer.
+              </span>
             </p>
             <div className="flex flex-wrap items-center gap-2">
               {result.buyBoxActive ? (
@@ -271,7 +522,7 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
                   onClick={() => setPassersOnly((v) => !v)}
                   aria-pressed={passersOnly}
                   className={cn(
-                    "inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors",
+                    "inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
                     passersOnly
                       ? "border-[var(--brand-green)]/40 bg-[var(--brand-green-light)] text-[var(--brand-green)]"
                       : "border-border bg-background text-muted-foreground hover:text-foreground"
@@ -289,7 +540,7 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
                     aria-pressed={sort === o.id}
                     onClick={() => setSort(o.id)}
                     className={cn(
-                      "rounded-md px-3 py-1 text-xs font-semibold transition",
+                      "min-h-11 rounded-md px-3 py-2 text-xs font-semibold outline-none transition focus-visible:ring-2 focus-visible:ring-ring",
                       sort === o.id ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                     )}
                   >
@@ -307,18 +558,19 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
           ) : (
             <>
               {/* Desktop table */}
-              <div className="mt-4 hidden overflow-x-auto rounded-2xl border border-border sm:block">
+              <div className="mt-4 hidden overflow-hidden rounded-2xl border border-border lg:block">
                 <table className="w-full text-sm">
                   <thead className="bg-muted/50 text-left text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
                     <tr>
-                      <th className="px-4 py-2.5">Listing</th>
-                      <th className="px-3 py-2.5">Verdict</th>
-                      <th className="px-3 py-2.5 text-right">Score</th>
-                      <th className="px-3 py-2.5 text-right">Cash flow</th>
-                      <th className="px-3 py-2.5 text-right">CoC</th>
-                      <th className="px-3 py-2.5 text-right">Cap</th>
-                      <th className="px-3 py-2.5 text-right">DSCR</th>
-                      <th className="px-3 py-2.5" />
+                      <th scope="col" className="px-4 py-2.5">Listing</th>
+                      <th scope="col" className="px-3 py-2.5">Verdict</th>
+                      <th scope="col" className="px-3 py-2.5 text-right">Score</th>
+                      <th scope="col" className="px-3 py-2.5 text-right">Cash flow</th>
+                      <th scope="col" className="px-3 py-2.5 text-right">DSCR</th>
+                      <th scope="col" className="px-3 py-2.5 text-right">Price ceiling</th>
+                      <th scope="col" className="px-3 py-2.5 text-right">Gap</th>
+                      <th scope="col" className="px-3 py-2.5">Fastest path</th>
+                      <th scope="col" className="px-3 py-2.5"><span className="sr-only">Action</span></th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
@@ -346,9 +598,17 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
                         <td className={cn("px-3 py-3 text-right font-mono tabular-nums", (row.netCashFlowMonthly ?? 0) >= 0 ? "text-success" : "text-[var(--metric-negative)]")}>
                           {money(row.netCashFlowMonthly)}
                         </td>
-                        <td className="px-3 py-3 text-right font-mono tabular-nums text-foreground">{pct(row.cocReturnPct)}</td>
-                        <td className="px-3 py-3 text-right font-mono tabular-nums text-foreground">{pct(row.capRatePct)}</td>
                         <td className="px-3 py-3 text-right font-mono tabular-nums text-foreground">{ratio(row.dscr, row.isCashPurchase)}</td>
+                        <td className="px-3 py-3 text-right font-mono font-semibold tabular-nums text-foreground" title={row.targetLabel ?? undefined}>
+                          <span>{money(row.maxOffer)}</span>
+                          {row.targetLabel ? <span className="mt-0.5 block max-w-40 text-[9px] font-sans font-normal leading-tight text-muted-foreground">{row.targetLabel}</span> : null}
+                        </td>
+                        <td className={cn("px-3 py-3 text-right text-xs font-semibold tabular-nums", (row.askingGap ?? 0) > 0 ? "text-destructive" : "text-success")}>
+                          {gapToAsking(row)}
+                        </td>
+                        <td className="max-w-[180px] px-3 py-3 text-xs leading-snug text-foreground">
+                          {fastestPath(row)}
+                        </td>
                         <td className="px-3 py-3 text-right">
                           {/* New tab (the My Deals "Open Analysis" convention,
                               see refresh-on-return.tsx): the screened batch
@@ -361,7 +621,7 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
                             prefetch={false}
                             target="_blank"
                             rel="noopener"
-                            className="-my-2 inline-flex min-h-11 items-center gap-1 py-2 text-xs font-semibold text-primary hover:underline"
+                            className="-my-2 inline-flex min-h-11 items-center gap-1 rounded-md py-2 text-xs font-semibold text-primary outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
                           >
                             Open <ArrowUpRight className="size-3.5" />
                           </Link>
@@ -373,7 +633,7 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
               </div>
 
               {/* Mobile cards */}
-              <div className="mt-4 space-y-3 sm:hidden">
+              <div className="mt-4 space-y-3 lg:hidden">
                 {rows.map((row, i) => (
                   <div key={`${row.input.address}-${i}`} className={cn("rounded-2xl border border-border bg-card p-4", !row.ok && "opacity-60")}>
                     <div className="flex items-start justify-between gap-2">
@@ -382,9 +642,14 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
                         <div className="mt-0.5 text-xs text-muted-foreground">{money(row.input.purchasePrice)}</div>
                       </div>
                       {row.ok ? (
-                        <span className={cn("shrink-0 rounded-full border px-2 py-0.5 text-xs font-semibold", verdictClasses(row.recommendation))}>
-                          {row.score}
-                        </span>
+                        <div className="flex shrink-0 flex-col items-end gap-1">
+                          <span className={cn("rounded-full border px-2 py-0.5 text-xs font-semibold", verdictClasses(row.recommendation))}>
+                            {row.recommendation ? triageVerdictLabel(row.recommendation) : "—"}
+                          </span>
+                          <span className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                            Score {row.score ?? "—"}
+                          </span>
+                        </div>
                       ) : (
                         <span className="shrink-0 text-xs text-muted-foreground">Needs rent</span>
                       )}
@@ -394,11 +659,26 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
                       <div><div className="text-[10px] uppercase tracking-wide text-muted-foreground">CoC</div><div className="font-mono font-semibold text-foreground">{pct(row.cocReturnPct)}</div></div>
                       <div><div className="text-[10px] uppercase tracking-wide text-muted-foreground">DSCR</div><div className="font-mono font-semibold text-foreground">{ratio(row.dscr, row.isCashPurchase)}</div></div>
                     </div>
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                      <div className="rounded-xl bg-muted/40 p-3">
+                        <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Price ceiling</div>
+                        <div className="mt-0.5 font-mono font-semibold text-foreground" title={row.targetLabel ?? undefined}>{money(row.maxOffer)}</div>
+                        {row.targetLabel ? <div className="mt-1 text-[10px] leading-snug text-muted-foreground">{row.targetLabel}</div> : null}
+                      </div>
+                      <div className="rounded-xl bg-muted/40 p-3">
+                        <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Gap to asking</div>
+                        <div className={cn("mt-0.5 font-semibold", (row.askingGap ?? 0) > 0 ? "text-destructive" : "text-success")}>{gapToAsking(row)}</div>
+                      </div>
+                    </div>
+                    <div className="mt-2 rounded-xl border border-border bg-background p-3 text-xs">
+                      <span className="font-bold text-foreground">Fastest path: </span>
+                      <span className="text-muted-foreground">{fastestPath(row)}</span>
+                    </div>
                     <div className="mt-3 flex items-center justify-between gap-2">
                       <BuyBoxFitBadge fit={row.buyBoxFit ?? undefined} />
                       {/* 44px touch band (min-h-11 + canceling -my/py) — this is
                           the card's only action; visual height unchanged. */}
-                      <Link href={openUrl(row)} prefetch={false} target="_blank" rel="noopener" className="-my-2 ml-auto inline-flex min-h-11 items-center gap-1 py-2 text-xs font-semibold text-primary hover:underline">
+                      <Link href={openUrl(row)} prefetch={false} target="_blank" rel="noopener" className="-my-2 ml-auto inline-flex min-h-11 items-center gap-1 rounded-md py-2 text-xs font-semibold text-primary outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring">
                         Open in analyzer <ArrowUpRight className="size-3.5" />
                       </Link>
                     </div>

@@ -20,10 +20,9 @@
 import { Check, Database, Sparkles, Target, TrendingUp } from "lucide-react";
 import { HeroAddressForm } from "@/components/marketing/hero-address-form";
 import { DealsAnalyzedTicker } from "@/components/marketing/deals-analyzed-ticker";
-import { calculateAnalysis } from "@/lib/calc-analysis";
-import { buildDealScoreInputFromAnalysis, computeDealScore, recommendationLabel } from "@/lib/deal-score";
-import { SAMPLE_DEAL_DISPLAY, SAMPLE_DEAL_VALUES } from "@/lib/sample-deal";
-import { calculateMaxAllowableOffer } from "@/lib/max-allowable-offer";
+import { SAMPLE_DEAL_FIXTURE } from "@/lib/sample-deal";
+import { calculateSampleDealOutcome } from "@/lib/sample-deal-analysis";
+import { describeMaoTarget } from "@/lib/mao-targets";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { buildInputConfidence } from "@/lib/input-confidence";
 import { buildWhatNeedsToBeTrue } from "@/lib/decision-thresholds";
@@ -31,7 +30,7 @@ import { buildWhatNeedsToBeTrue } from "@/lib/decision-thresholds";
 export function MarketingHero() {
   const { homepageHeadline, newHomepagePositioningEnabled } = getMarketingOfferConfig();
   return (
-    <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-[var(--brand-blue-light)] via-background to-background">
+    <section className="truecap-marketing-shell relative overflow-hidden border-b border-border bg-gradient-to-b from-[var(--brand-blue-light)] via-background to-background">
       {/* Soft ambient accent behind the preview — a single tinted blob,
           no neon glow. Sits to the right so the composition reads
           asymmetric rather than a centered halo. */}
@@ -204,30 +203,26 @@ function HeroProductMock({ decisionPositioning }: { decisionPositioning: boolean
   // lib/sample-deal.ts + computing here makes card/analysis divergence
   // impossible. Server component, so this runs at build/ISR time — zero
   // client cost.
-  const result = calculateAnalysis(SAMPLE_DEAL_VALUES);
-  const score = computeDealScore(buildDealScoreInputFromAnalysis(SAMPLE_DEAL_VALUES, result));
+  const { analysis: result, dealScore: score, maxOffer } = calculateSampleDealOutcome();
   const cf = Math.round(result.netCashFlow);
   const cfLabel = `${cf >= 0 ? "+" : "-"}$${Math.abs(cf).toLocaleString("en-US")}`;
   const capLabel = `${result.capRate.toFixed(1)}%`;
   // Clearly labeled example targets, solved by the same deterministic MAO
   // engine used in the product. The target is intentionally above the
   // sample's list-price cash flow so the card demonstrates the decision.
-  const targetCashFlow = 750;
-  const maxOffer = calculateMaxAllowableOffer(SAMPLE_DEAL_VALUES, {
-    monthlyCashFlow: targetCashFlow,
-    dscr: 1.25,
-  });
+  const targetCashFlow = SAMPLE_DEAL_FIXTURE.maoTarget.monthlyCashFlow ?? 0;
+  const targetLabel = describeMaoTarget(SAMPLE_DEAL_FIXTURE.maoTarget);
   const maxOfferLabel = maxOffer
     ? `$${maxOffer.maxPrice.toLocaleString("en-US")}`
     : "Not reachable";
-  const listPrice = Number(SAMPLE_DEAL_VALUES.purchasePrice);
+  const listPrice = Number(SAMPLE_DEAL_FIXTURE.values.purchasePrice);
   const gap = maxOffer ? listPrice - maxOffer.maxPrice : null;
   const sampleConfidence = buildInputConfidence({
-    values: SAMPLE_DEAL_VALUES,
-    touchedFields: new Set(Object.keys(SAMPLE_DEAL_VALUES)),
+    values: SAMPLE_DEAL_FIXTURE.values,
+    touchedFields: new Set(Object.keys(SAMPLE_DEAL_FIXTURE.values)),
   });
   const target = { monthlyCashFlow: targetCashFlow, dscr: 1.25 };
-  const decisionThresholds = buildWhatNeedsToBeTrue(SAMPLE_DEAL_VALUES, target);
+  const decisionThresholds = buildWhatNeedsToBeTrue(SAMPLE_DEAL_FIXTURE.values, target);
   const askingClears = decisionThresholds?.targetAlreadyMet ?? false;
   const requiredRent = decisionThresholds?.requiredRent ?? null;
   const maxRate = decisionThresholds?.maxInterestRate ?? null;
@@ -247,7 +242,7 @@ function HeroProductMock({ decisionPositioning }: { decisionPositioning: boolean
           <span className="size-2.5 rounded-full bg-emerald-400/80" />
           <span className="ml-3 min-w-0 flex-1 truncate rounded-full bg-muted px-3 py-0.5 text-[10px] font-medium text-muted-foreground">
             <span className="sm:hidden">usetruecap.com</span>
-            <span className="hidden sm:inline">usetruecap.com / {SAMPLE_DEAL_DISPLAY.shortAddress}</span>
+            <span className="hidden sm:inline">usetruecap.com / {SAMPLE_DEAL_FIXTURE.display.shortAddress}</span>
           </span>
           <span
             aria-label="Example analysis"
@@ -261,22 +256,19 @@ function HeroProductMock({ decisionPositioning }: { decisionPositioning: boolean
         {/* address + verdict row. */}
         <div className="flex flex-col gap-2 border-b border-border pb-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-3">
           <div className="tc-hero-step-1 min-w-0 sm:flex-1">
-            <div className="text-base font-extrabold text-foreground sm:text-lg">{SAMPLE_DEAL_DISPLAY.shortAddress}</div>
-            <div className="text-xs text-muted-foreground">{SAMPLE_DEAL_DISPLAY.subtitle}</div>
+            <div className="text-base font-extrabold text-foreground sm:text-lg">{SAMPLE_DEAL_FIXTURE.display.shortAddress}</div>
+            <div className="text-xs text-muted-foreground">{SAMPLE_DEAL_FIXTURE.display.subtitle}</div>
           </div>
           <div className="tc-hero-step-5 flex flex-wrap items-center gap-1.5 sm:gap-2">
-            <span className="rounded-full bg-[var(--brand-green)] px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white sm:px-2.5 sm:py-1 sm:text-[10px]">
-              {/* "Pass at asking" meant the deal CLEARS — the exact opposite
-                  of the deal-score label rendered from the same component.
-                  "Clears at asking" says it without the collision. */}
-              {decisionPositioning
-                ? askingClears
-                  ? "Clears at asking"
-                  : "Negotiate"
-                : recommendationLabel(score.recommendation)}
+            <span
+              className={`rounded-full px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white sm:px-2.5 sm:py-1 sm:text-[10px] ${
+                askingClears ? "bg-[var(--brand-green)]" : "bg-[var(--brand-orange)]"
+              }`}
+            >
+              {askingClears ? "Pursue at this price" : "Pass at this price"}
             </span>
             <span className="rounded-full bg-primary px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white sm:px-2.5 sm:py-1 sm:text-[10px]">
-              Deal Score {Math.round(score.score)}
+              Strong fundamentals · Score {Math.round(score.score)}/100
             </span>
             <span className="rounded-full bg-[var(--brand-green)] px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white sm:px-2.5 sm:py-1 sm:text-[10px]">
               {score.riskLevel}
@@ -299,6 +291,10 @@ function HeroProductMock({ decisionPositioning }: { decisionPositioning: boolean
                   ${gap.toLocaleString("en-US")} below the ${listPrice.toLocaleString("en-US")} list price
                 </div>
               ) : null}
+              <p className="mt-1 text-xs text-muted-foreground">Price ceiling for {targetLabel}.</p>
+              <p className="mt-1 text-[10px] leading-relaxed text-muted-foreground">
+                Calculated from your selected targets. This is not a recommended offer.
+              </p>
             </div>
             <span className="rounded-full bg-[var(--brand-green)] px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white">
               Example targets

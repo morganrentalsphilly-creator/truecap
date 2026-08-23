@@ -12,6 +12,7 @@ import {
   ListTodo,
   CircleUserRound,
   Users,
+  Target,
 } from "lucide-react";
 import { AppLogo } from "@/components/brand/app-logo";
 import type { DashboardNavAccess } from "@/components/dashboard/dashboard-shell";
@@ -55,11 +56,17 @@ export function Sidebar({ activeDealCount, navAccess, mobile = false, onNavigate
     { icon: ListTodo, label: "Compare Deals", href: "/dashboard/compare", enabled: navAccess.compareDeals },
     // Batch triage — the power-tool tier, same gate as Compare.
     { icon: ListChecks, label: "Screen a shortlist", href: "/dashboard/triage", enabled: navAccess.compareDeals },
+    { icon: FileBarChart, label: "Strategy Profiles", href: "/dashboard/templates", enabled: navAccess.templates },
     { icon: Users, label: "Clients", href: "/dashboard/clients", enabled: navAccess.clients },
+    // Buy Boxes are decision criteria, not an account setting. Give them a
+    // first-class route in the workspace while keeping the existing settings
+    // editor as the single source of truth.
+    { icon: Target, label: "Buy Boxes", href: "/settings#buy-boxes", enabled: true },
     // Settings promoted from the avatar dropdown into the main sidebar.
     // Pro users pay for Branding (configured at /settings/branding); it
     // shouldn't be 3 clicks deep in a Topbar dropdown. /settings is the
     // hub that links to Branding, Defaults, and Billing sub-pages.
+    { icon: Settings, label: "Settings", href: "/settings", enabled: true },
   ].map((item) => ({ ...item, active: isActive(item.href) }));
 
   return (
@@ -115,7 +122,7 @@ export function Sidebar({ activeDealCount, navAccess, mobile = false, onNavigate
                 aria-current={item.active ? "page" : undefined}
                 tabIndex={item.enabled ? undefined : -1}
                 onClick={onNavigate}
-                className={`group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                className={`group flex min-h-11 items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                   item.active
                     ? "bg-sidebar-accent text-white shadow-[inset_0_1px_0_oklch(1_0_0_/_0.06)]"
                     : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-white"
@@ -142,7 +149,7 @@ export function Sidebar({ activeDealCount, navAccess, mobile = false, onNavigate
           href="/profile"
           prefetch={false}
           onClick={onNavigate}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-sidebar-foreground/70 hover:text-white hover:bg-sidebar-accent/50 transition"
+          className="flex min-h-11 w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-sidebar-foreground/70 transition hover:bg-sidebar-accent/50 hover:text-white"
         >
           <CircleUserRound className="h-[18px] w-[18px]" />
           <span>Profile</span>

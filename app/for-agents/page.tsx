@@ -146,7 +146,7 @@ export default async function ForAgentsPage() {
               href="/#main"
               className="inline-flex h-12 items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted"
             >
-              Get My Max Offer
+              Analyze a property free
             </Link>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">

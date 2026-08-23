@@ -22,7 +22,11 @@ import {
   type NamedBuyBox,
 } from "@/lib/buy-box";
 import { buildBuyBoxQaReport, type DealQaBuyBoxReport } from "@/lib/deal-qa-context";
-import { solveBuyBoxClearingPrice } from "@/lib/mao-targets";
+import {
+  chooseMaoTargetFromBuyBox,
+  describeMaoTarget,
+  solveBuyBoxClearingPrice,
+} from "@/lib/mao-targets";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
 
@@ -164,6 +168,17 @@ export function BuyBoxVerdictCard({
   const r = primary.result;
   const multi = evaluated.results.length > 1;
   const { summary } = evaluated;
+  const yourNumberCriteria = (() => {
+    if (!yourNumber || yourNumber.kind !== "price" || !metrics) return null;
+    const target = chooseMaoTargetFromBuyBox(primary.box, {
+      isCashPurchase: metrics.isCashPurchase,
+    });
+    const criteria = target ? [describeMaoTarget(target)] : [];
+    if (primary.box.maxPurchasePrice != null) {
+      criteria.push(`purchase price ≤ ${money(primary.box.maxPurchasePrice)}`);
+    }
+    return criteria.join(" · ") || "this buy box’s price criteria";
+  })();
 
   const headline = r.passes
     ? "Meets your buy box"
@@ -243,10 +258,18 @@ export function BuyBoxVerdictCard({
         yourNumber.kind === "price" ? (
           <p className="mt-1.5 text-xs text-foreground/80">
             <span className="font-bold text-foreground">
-              Your number: {money(yourNumber.maxPrice)}
+              Price ceiling: {money(yourNumber.maxPrice)}
             </span>{" "}
             — the highest price that clears this box, holding your current rent and financing
             assumptions.
+            {yourNumberCriteria ? (
+              <>
+                <span className="mt-0.5 block">Criteria: {yourNumberCriteria}</span>
+                <span className="mt-0.5 block text-[11px] text-muted-foreground">
+                  Calculated from your selected targets. This is not a recommended offer.
+                </span>
+              </>
+            ) : null}
           </p>
         ) : (
           <p className="mt-1.5 text-xs text-muted-foreground">

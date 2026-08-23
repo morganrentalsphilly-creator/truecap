@@ -3,11 +3,20 @@ import { redirect } from "next/navigation";
 import { BillingConversionTracker } from "@/components/marketing/billing-conversion-tracker";
 import { BillingPanel } from "@/components/profile/billing-panel";
 import { ProfileForm } from "@/components/profile/profile-form";
-import { getEntitlementsForUser } from "@/lib/entitlements";
 import { featuresForTier } from "@/lib/entitlements-catalog";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { getStripe } from "@/lib/stripe/client";
-import { getPrimaryPlanPriceId, isAgentProConfigured, isPaidPlanSlug, PAID_PLAN_SLUGS, type PaidPlanSlug } from "@/lib/stripe/plan-prices";
+import {
+  loadStripeDisplayPriceById,
+  type StripeDisplayPriceDetails,
+} from "@/lib/stripe/display-prices";
+import {
+  getPrimaryPlanPriceId,
+  isAgentProConfigured,
+  isPaidPlanSlug,
+  PAID_PLAN_SLUGS,
+  planSlugFromPriceId,
+  type PaidPlanSlug,
+} from "@/lib/stripe/plan-prices";
 
 export const metadata: Metadata = {
   title: "Profile & Billing",
@@ -21,15 +30,12 @@ type PlanRow = {
   stripe_price_id: string | null;
 };
 
-type StripePriceDisplay = {
-  priceLabel: string;
-  intervalLabel: string;
-  currency: string;
-} | null;
+type StripePriceDisplay = StripeDisplayPriceDetails | null;
 
 type SubscriptionRow = {
   status: string;
   stripe_subscription_id: string | null;
+  stripe_price_id: string | null;
   current_period_start: string | null;
   current_period_end: string | null;
   cancel_at_period_end: boolean;
@@ -43,16 +49,8 @@ type SubscriptionRow = {
     | null;
 };
 
-function formatCurrency(cents: number, currency: string): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency,
-    maximumFractionDigits: cents % 100 === 0 ? 0 : 2,
-  }).format(cents / 100);
-}
-
 function formatPrice(planSlug: PaidPlanSlug, stripePrice?: StripePriceDisplay): string {
-  if (stripePrice) return stripePrice.priceLabel;
+  if (stripePrice) return stripePrice.amountLabel;
   if (planSlug === "pro_annual") return "17% off";
   if (planSlug.startsWith("agent_pro")) return "Agent Pro";
   return "Pro";
@@ -68,35 +66,17 @@ function getPlanPriceId(planSlug: PaidPlanSlug, dbPriceId?: string | null): stri
 async function getStripePriceDisplays(
   plans: PlanRow[] | null
 ): Promise<Record<PaidPlanSlug, StripePriceDisplay>> {
-  const fallback = { pro_monthly: null, pro_annual: null, agent_pro_monthly: null, agent_pro_annual: null };
-  if (!process.env.STRIPE_SECRET_KEY) return fallback;
-
-  const stripe = getStripe();
   const entries = await Promise.all(
     PAID_PLAN_SLUGS.map(async (slug) => {
       const dbPriceId = plans?.find((plan) => plan.slug === slug)?.stripe_price_id ?? null;
       const priceId = getPlanPriceId(slug, dbPriceId);
       if (!priceId) return [slug, null] as const;
-
-      try {
-        const price = await stripe.prices.retrieve(priceId);
-        if (price.unit_amount == null) return [slug, null] as const;
-
-        return [
-          slug,
-          {
-            priceLabel: formatCurrency(price.unit_amount, price.currency),
-            intervalLabel: price.recurring?.interval ?? (slug.endsWith("_annual") ? "year" : "month"),
-            currency: price.currency,
-          },
-        ] as const;
-      } catch (error) {
-        console.error(
-          `[billing] Could not load Stripe price for ${slug} (${priceId.slice(0, 12)}...):`,
-          error instanceof Error ? error.message : error
-        );
-        return [slug, null] as const;
-      }
+      const display = await loadStripeDisplayPriceById(
+        priceId,
+        slug.endsWith("_annual") ? "year" : "month",
+        slug
+      );
+      return [slug, display] as const;
     })
   );
 
@@ -135,7 +115,7 @@ export default async function ProfilePage({
     redirect("/auth/login");
   }
 
-  const [{ data: profile }, { data: subscription }, { data: planRows }] = await Promise.all([
+  const [{ data: profile }, { data: subscriptionRows }, { data: planRows }] = await Promise.all([
     supabase
       .from("profiles")
       .select("first_name, last_name, display_name, avatar_url")
@@ -143,12 +123,13 @@ export default async function ProfilePage({
       .maybeSingle(),
     supabase
       .from("subscriptions")
-      .select("status, stripe_subscription_id, current_period_start, current_period_end, cancel_at_period_end, plans(slug)")
+      .select("status, stripe_subscription_id, stripe_price_id, current_period_start, current_period_end, cancel_at_period_end, plans(slug)")
       .eq("user_id", user.id)
-      .in("status", ["active", "trialing", "past_due", "unpaid", "paused"])
+      // Keep inactive history available for honest actual-rate display while
+      // still preferring any recoverable/live subscription below.
+      .in("status", ["active", "trialing", "past_due", "unpaid", "paused", "canceled"])
       .order("updated_at", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
+      .limit(10),
     supabase
       .from("plans")
       .select("slug, stripe_price_id")
@@ -156,9 +137,23 @@ export default async function ProfilePage({
       .eq("is_active", true)
       .order("slug", { ascending: true }),
   ]);
-  const stripePriceDisplays = await getStripePriceDisplays((planRows as PlanRow[] | null) ?? null);
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
-
+  const subscriptions = (subscriptionRows as SubscriptionRow[] | null) ?? [];
+  const actionableStatuses = new Set(["active", "trialing", "past_due", "unpaid", "paused"]);
+  const subscription =
+    subscriptions.find((row) => actionableStatuses.has(row.status)) ?? subscriptions[0] ?? null;
+  const subscriptionRow = (subscription as SubscriptionRow | null) ?? null;
+  const currentPlan = getPlanObject(subscriptionRow);
+  const subscribedPlanSlug = isPaidPlanSlug(currentPlan?.slug)
+    ? currentPlan.slug
+    : planSlugFromPriceId(subscriptionRow?.stripe_price_id);
+  const [stripePriceDisplays, subscribedPriceDisplay] = await Promise.all([
+    getStripePriceDisplays((planRows as PlanRow[] | null) ?? null),
+    loadStripeDisplayPriceById(
+      subscriptionRow?.stripe_price_id,
+      subscribedPlanSlug?.endsWith("_annual") ? "year" : "month",
+      "current_subscription"
+    ),
+  ]);
   const fallbackName =
     (user.user_metadata?.full_name as string | undefined)?.trim() ||
     (user.user_metadata?.name as string | undefined)?.trim() ||
@@ -167,8 +162,6 @@ export default async function ProfilePage({
 
   const firstName = profile?.first_name ?? fallbackName.split(" ")[0] ?? "";
   const lastName = profile?.last_name ?? fallbackName.split(" ").slice(1).join(" ");
-  const subscriptionRow = (subscription as SubscriptionRow | null) ?? null;
-  const currentPlan = getPlanObject(subscriptionRow);
   const resolvedSearchParams = (await searchParams) ?? {};
   const isSubscriptionCancelReturn = resolvedSearchParams.billing === "subscription_cancelled";
   const availablePlanSlugs = new Set(
@@ -190,13 +183,13 @@ export default async function ProfilePage({
     .map((slug) => ({
       slug,
       title: getPlanTitle(slug),
-      intervalLabel: stripePriceDisplays[slug]?.intervalLabel ?? (slug.endsWith("_annual") ? "year" : "month"),
+      intervalLabel: stripePriceDisplays[slug]?.period ?? (slug.endsWith("_annual") ? "year" : "month"),
       priceLabel: formatPrice(slug, stripePriceDisplays[slug]),
       badge: slug === "pro_annual" ? "17% off" : undefined,
       description: slug.startsWith("agent_pro")
         ? slug.endsWith("_annual")
-          ? "Everything in Pro + the agent toolkit, billed yearly."
-          : "Everything in Pro + the agent toolkit, billed monthly."
+          ? "Give every buyer separate criteria and keep their deals organized, billed yearly."
+          : "Give every buyer separate criteria and keep their deals organized, billed monthly."
         : slug === "pro_annual"
           ? "Full Pro access billed yearly."
           : "Full Pro access billed monthly.",
@@ -213,14 +206,13 @@ export default async function ProfilePage({
   // Pull the matching plan price so the Google Ads conversion event
   // carries a meaningful value for value-based bidding strategies.
   const justSubscribedSlug = (subscriptionRow?.status === "active" || subscriptionRow?.status === "trialing")
-    ? (currentPlan?.slug as PaidPlanSlug | undefined)
+    ? (subscribedPlanSlug ?? undefined)
     : undefined;
   const subscriptionValue = justSubscribedSlug
     ? (() => {
         const display = stripePriceDisplays[justSubscribedSlug];
         if (!display) return undefined;
-        const parsed = parseFloat(display.priceLabel.replace(/[^0-9.]/g, ""));
-        return Number.isFinite(parsed) ? parsed : undefined;
+        return display.unitAmount;
       })()
     : undefined;
 
@@ -253,17 +245,23 @@ export default async function ProfilePage({
             subscription
               ? {
                   status: String(subscription.status),
-                  planSlug: currentPlan?.slug ?? null,
+                  // Legacy subscriptions can predate (or temporarily lose)
+                  // the relational plans join. The immutable Stripe Price ID
+                  // is the authoritative fallback, especially for the
+                  // grandfathered $20 monthly plan display.
+                  planSlug: subscribedPlanSlug ?? null,
                   // getPlanTitle knows every paid slug — the old inline ternary
                   // only knew the two pro_* slugs, so the first Agent Pro
                   // subscriber saw their $59.99 plan labeled "Pro" ($29.99's
                   // name) right next to the switcher card that knew better.
-                  planName: isPaidPlanSlug(currentPlan?.slug)
-                    ? getPlanTitle(currentPlan.slug)
+                  planName: subscribedPlanSlug
+                    ? getPlanTitle(subscribedPlanSlug)
                     : "Pro",
                   currentPeriodStart: subscription.current_period_start,
                   currentPeriodEnd: subscription.current_period_end,
                   cancelAtPeriodEnd: Boolean(subscription.cancel_at_period_end) || isSubscriptionCancelReturn,
+                  subscribedPrice: subscribedPriceDisplay,
+                  standardMonthlyPrice: stripePriceDisplays.pro_monthly,
                 }
               : null
           }

@@ -308,7 +308,8 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
         </section>
 
         {/* Save bar */}
-        <div className="sticky bottom-0 -mx-4 flex items-center justify-end gap-3 border-t border-border bg-background/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-2xl sm:border">
+        <div role="status" aria-live="polite" className="sticky bottom-0 -mx-4 flex items-center justify-end gap-3 border-t border-border bg-background/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-2xl sm:border">
+          {isPending ? <span className="sr-only">Saving branding</span> : null}
           {status.kind === "saved" && (
             <span className="text-sm font-semibold text-[var(--metric-positive,#16a34a)]">
               Saved
@@ -408,13 +409,13 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-1.5">
-      <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+    <fieldset className="space-y-1.5">
+      <legend className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         {label}
-      </label>
+      </legend>
       {children}
       {hint ? <p className="text-[11px] text-muted-foreground">{hint}</p> : null}
-    </div>
+    </fieldset>
   );
 }
 

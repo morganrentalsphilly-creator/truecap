@@ -17,6 +17,9 @@ import { scheduleTrialOnboardingEmails } from "@/lib/email/trial-emails";
 
 export const runtime = "nodejs";
 
+const SUPABASE_USER_ID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 export async function POST(req: Request) {
   const stripe = getStripe();
   const body = await req.text();
@@ -210,10 +213,15 @@ export async function POST(req: Request) {
         // events from the same user's earlier sessions.
         // Skipped syncs (unverifiable binding) must NOT fire it — analytics
         // would report a conversion the DB doesn't have, masking the failure.
-        const distinctId =
-          session.client_reference_id ||
-          session.metadata?.user_id ||
-          (typeof session.customer === "string" ? session.customer : null);
+        // Analytics identity must remain the opaque Supabase UUID already
+        // used by the browser provider. A Stripe customer id is payment-system
+        // data and must never become PostHog's cross-session distinct id.
+        const distinctId = [
+          session.client_reference_id,
+          session.metadata?.user_id,
+        ].find((candidate): candidate is string =>
+          typeof candidate === "string" && SUPABASE_USER_ID_RE.test(candidate)
+        ) ?? null;
         if (distinctId && checkoutSyncResult.synced) {
           // Don't block the webhook response on PostHog — its flush is
           // awaited but capped to a few seconds by the SDK, and errors
@@ -224,11 +232,14 @@ export async function POST(req: Request) {
             event: "pro_subscribed",
             properties: {
               plan_slug: session.metadata?.plan_slug ?? undefined,
-              amount_total: session.amount_total ?? undefined,
-              currency: session.currency ?? undefined,
-              stripe_session_id: session.id,
-              stripe_customer_id:
-                typeof session.customer === "string" ? session.customer : undefined,
+            },
+          });
+          await captureServerEvent({
+            distinctId,
+            event: "subscription_activated",
+            properties: {
+              plan_slug: session.metadata?.plan_slug ?? undefined,
+              trial_granted: session.metadata?.trial_granted === "true",
             },
           });
           await captureServerEvent({
@@ -237,9 +248,6 @@ export async function POST(req: Request) {
             properties: {
               plan_slug: session.metadata?.plan_slug ?? undefined,
               trial_granted: session.metadata?.trial_granted === "true",
-              amount_total: session.amount_total ?? undefined,
-              currency: session.currency ?? undefined,
-              stripe_session_id: session.id,
             },
           });
           if (session.metadata?.trial_granted === "true") {
@@ -248,7 +256,6 @@ export async function POST(req: Request) {
               event: "pro_trial_started",
               properties: {
                 plan_slug: session.metadata?.plan_slug ?? undefined,
-                stripe_session_id: session.id,
               },
             });
             await captureServerEvent({
@@ -275,8 +282,6 @@ export async function POST(req: Request) {
               event: "paid_conversion",
               properties: {
                 plan_slug: session.metadata?.plan_slug ?? undefined,
-                amount_total: session.amount_total ?? undefined,
-                currency: session.currency ?? undefined,
                 attribution_source: "stripe_checkout",
               },
             });
@@ -316,18 +321,15 @@ export async function POST(req: Request) {
         const cancelledSub = event.data.object as Stripe.Subscription;
         const cancelSyncResult = await markSubscriptionCanceled(admin, cancelledSub);
         syncSkippedReason = cancelSyncResult.synced ? null : cancelSyncResult.reason;
-        const cancelDistinctId =
-          cancelledSub.metadata?.user_id ??
-          (typeof cancelledSub.customer === "string" ? cancelledSub.customer : null);
+        const cancelDistinctId = [cancelledSub.metadata?.user_id].find(
+          (candidate): candidate is string =>
+            typeof candidate === "string" && SUPABASE_USER_ID_RE.test(candidate)
+        ) ?? null;
         if (cancelDistinctId) {
           await captureServerEvent({
             distinctId: cancelDistinctId,
             event: "subscription_cancelled",
-            properties: {
-              stripe_subscription_id: cancelledSub.id,
-              stripe_customer_id:
-                typeof cancelledSub.customer === "string" ? cancelledSub.customer : undefined,
-            },
+            properties: {},
           });
         }
         break;
@@ -366,19 +368,17 @@ export async function POST(req: Request) {
           break;
         }
         // PostHog event so the funnel shows the drop-off.
-        const abandonDistinctId =
-          session.client_reference_id ||
-          session.metadata?.user_id ||
-          (typeof session.customer === "string" ? session.customer : null);
+        const abandonDistinctId = [
+          session.client_reference_id,
+          session.metadata?.user_id,
+        ].find((candidate): candidate is string =>
+          typeof candidate === "string" && SUPABASE_USER_ID_RE.test(candidate)
+        ) ?? null;
         if (abandonDistinctId) {
           await captureServerEvent({
             distinctId: abandonDistinctId,
             event: "checkout_abandoned",
-            properties: {
-              stripe_session_id: session.id,
-              had_email:
-                (session.customer_details?.email ?? session.customer_email) != null,
-            },
+            properties: {},
           });
         }
         break;

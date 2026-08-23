@@ -101,6 +101,8 @@ interface AddressAutocompleteProps {
   placeholder?: string;
   /** id for the <input>, so a visible <Label htmlFor> can associate with it. */
   inputId?: string;
+  /** Accessible name for standalone placements without a visible <Label>. */
+  ariaLabel?: string;
   /** id of the field's error node, wired to aria-describedby when hasError. */
   errorId?: string;
   /** Marks the field aria-required for assistive tech. */
@@ -122,6 +124,7 @@ export function AddressAutocomplete({
   placeholder = "123 Main Street, Austin, TX 78701",
   inputClassName,
   inputId,
+  ariaLabel,
   errorId,
   required,
   onPlaceSelected,
@@ -485,6 +488,7 @@ export function AddressAutocomplete({
         inputMode="text"
         enterKeyHint="search"
         role="combobox"
+        aria-label={ariaLabel}
         aria-autocomplete="list"
         aria-expanded={hasSuggestions}
         aria-controls={hasSuggestions ? listboxId : undefined}

@@ -40,7 +40,7 @@ import {
 } from "@/lib/investcalc-schema";
 import { calculateAnalysis, AnalysisResult } from "@/lib/calc-analysis";
 import { buildReportOperatingStatement } from "@/lib/report-operating-statement";
-import { getDealTier, type DealTier } from "@/lib/verdict";
+import { getDealTier } from "@/lib/verdict";
 import { applyWhatIfAdjustments, WORST_CASE_PRESET } from "./what-if-sliders";
 import { PropertyTypeSection } from "./property-type-section";
 import { PropertyDetailsSection, YearBuiltField } from "./property-details-section";
@@ -50,8 +50,7 @@ import { ListingLinkInput } from "./listing-link-input";
 import { FinancingSection } from "./financing-section";
 import { OperatingExpensesSection } from "./operating-expenses-section";
 import { SaveAsDefaultsChip } from "./save-as-defaults-chip";
-// StrategyChips now renders inside AssumptionsStrip (the "Analyzing as:"
-// pill's inline picker) — the page passes state/handlers down instead.
+import { StrategyChips } from "./strategy-chips";
 import { AssumptionsStrip } from "./assumptions-strip";
 import { EnrichmentReceipt } from "./enrichment-receipt";
 import {
@@ -121,6 +120,7 @@ import {
   calculateMaxAllowableOffer,
   solveRequiredInterestRate,
   solveRequiredMonthlyRent,
+  type MaoTarget,
 } from "@/lib/max-allowable-offer";
 import { buildMaoTarget, describeMaoTarget } from "@/lib/mao-targets";
 import { isFeatureEnabled } from "@/lib/feature-flags";
@@ -154,7 +154,7 @@ import {
   DuplicateAddressDialog,
   type DuplicateAddressChoice,
 } from "@/components/investcalc/duplicate-address-dialog";
-import { SAMPLE_DEAL_VALUES } from "@/lib/sample-deal";
+import { SAMPLE_DEAL_FIXTURE } from "@/lib/sample-deal";
 import { estimatePurchasePrice } from "@/lib/estimate-price";
 import { parseListingUrl } from "@/lib/listing-url";
 import { parseAddressLocation } from "@/lib/parse-address";
@@ -185,7 +185,12 @@ import {
 import { trackConversion } from "@/lib/analytics/track-conversion";
 import { trackEvent } from "@/lib/analytics";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
-import { consumePendingSaveIntent, setPendingSaveIntent } from "@/lib/save-intent";
+import { getAnalyzerCta } from "@/lib/analyzer-cta";
+import {
+  clearPendingSaveIntent,
+  hasPendingSaveIntent,
+  setPendingSaveIntent,
+} from "@/lib/save-intent";
 import dynamic from "next/dynamic";
 
 // ── AnalysisDashboard is post-Run-only, so keep it out of the anon
@@ -769,9 +774,7 @@ export function InvestCalcPage({
    *  engine's built-in defaults at form initialization + on every
    *  resetToNewAnalysis. */
   userAnalysisDefaults?: Record<string, number> | null;
-  /** True when ANTHROPIC_API_KEY is configured - shows the Deal Q&A
-   *  panel. Per-user limits enforced server-side in the action. */
-}) {
+  }) {
   const router = useRouter();
   const [activeInputTab, setActiveInputTab] = useState<InputTab>("cash-flow");
   const [activeDashboardTab, setActiveDashboardTab] = useState<AnalysisDashboardTab>("cash-flow");
@@ -824,6 +827,7 @@ export function InvestCalcPage({
     useState<FinancingProfileSnapshot | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const [isEditingAssumptions, setIsEditingAssumptions] = useState(false);
   // True when a full result is on screen but the CURRENT form no longer
   // parses (e.g. the user cleared Purchase Price to retype it and got
   // interrupted). The live recompute deliberately keeps the last good
@@ -926,12 +930,14 @@ export function InvestCalcPage({
    */
   const [restoredAddress, setRestoredAddress] = useState<string | null>(null);
   const [isSavingDeal, setIsSavingDeal] = useState(false);
+  const [isAutoSaveResuming, setIsAutoSaveResuming] = useState(false);
   // Duplicate-address collision from the save flow. Non-null opens the
   // chooser dialog with the user's own colliding saved deal so they can
   // overwrite it or keep both as scenarios.
   const [duplicateCollision, setDuplicateCollision] = useState<{
     existingId: string;
     existingTitle?: string;
+    autoAfterAuth?: boolean;
   } | null>(null);
   const [duplicateChoiceBusy, setDuplicateChoiceBusy] = useState<DuplicateAddressChoice | null>(null);
   // Address-changed collision from the update path: the loaded saved deal's
@@ -962,7 +968,13 @@ export function InvestCalcPage({
   // The flag clears whenever outputs are invalidated (form drift, reset,
   // loading a saved deal) or a normal non-sample run happens.
   const [isSampleProPreview, setIsSampleProPreview] = useState(false);
+  const [sampleMaoTarget, setSampleMaoTarget] = useState<MaoTarget | null>(null);
   const pendingSamplePreviewRef = useRef(false);
+  const pendingSampleRunRef = useRef(false);
+  const autoSaveAfterAuthRef = useRef(false);
+  // State updates do not synchronously disable a button. This ref closes the
+  // same-tick window where a double click could otherwise submit two saves.
+  const saveInFlightRef = useRef(false);
   // ── One-time PDF purchase ($5, Stripe Checkout) ────────────────────
   // A verified, server-consumed purchase unlocks exactly the deal that was
   // fingerprinted at checkout. The high-entropy binding secret and draft
@@ -1213,6 +1225,8 @@ export function InvestCalcPage({
     // Editing away from the sample deal ends the Pro preview - the
     // unlock is for the demo numbers only, not the user's own deal.
     setIsSampleProPreview(false);
+    setSampleMaoTarget(null);
+    setIsEditingAssumptions(false);
   }, []);
 
   // Live recompute: once a result is on screen, editing any input updates the
@@ -1635,6 +1649,12 @@ export function InvestCalcPage({
             : filled.join("  ·  "),
         });
       }
+      if (filled.length > 0) {
+        trackEvent("analyzer_autofill_completed", {
+          property_type: currentPropertyType,
+          fields_filled: filled.length,
+        });
+      }
     },
     [form, toast]
   );
@@ -1648,8 +1668,8 @@ export function InvestCalcPage({
       setMarketRentEstimate(null);
       setUnitFmrByBedrooms(null);
       unitFmrKeyRef.current = null;
-      // Funnel step - coarse only (state), never the full address (PII).
-      trackEvent("address_selected", { state: place.state });
+      // Funnel step - boolean only; never location/address data.
+      trackEvent("address_selected", { has_state: Boolean(place.state) });
       await runPropertyEnrichment(place);
     },
     [runPropertyEnrichment]
@@ -3111,12 +3131,14 @@ export function InvestCalcPage({
           // but inert form and must re-Calculate + re-Save manually — a
           // conversion leak at the moment of highest intent. Double-RAF
           // mirrors the PDF-return flow: let RHF flush before submitting.
-          if (isAuthenticated && consumePendingSaveIntent()) {
+          if (isAuthenticated && hasPendingSaveIntent()) {
+            autoSaveAfterAuthRef.current = true;
+            setIsAutoSaveResuming(true);
             toast({
-              title: "Welcome back — your deal is ready",
+              title: "Welcome back — saving your deal",
               description: addr
-                ? `Re-running your analysis for ${addr.slice(0, 60)}. Hit Save to keep it.`
-                : "Re-running your analysis. Hit Save to keep it.",
+                ? `Re-running the analysis for ${addr.slice(0, 60)}, then saving it automatically.`
+                : "Re-running your analysis, then saving it automatically.",
               variant: "success",
             });
             requestAnimationFrame(() => {
@@ -3370,6 +3392,7 @@ export function InvestCalcPage({
     // roundtrip must not fire "Analysis Complete" for the deal the user just
     // left (TOAST_LIMIT=1 — it would evict the fork's "Assumptions kept").
     const runGeneration = forkGenerationRef.current;
+    let autoSavedAfterAuth = false;
 
     // Consume the sample-deal Pro preview arm flag FIRST so it can never
     // leak onto a later run if anything below throws. One sample click =
@@ -3378,6 +3401,9 @@ export function InvestCalcPage({
       pendingSamplePreviewRef.current &&
       !(canUseProjections && canUseTaxStrategy && canUseExitScenarios && canUseDealScore);
     pendingSamplePreviewRef.current = false;
+    const isSampleRun = pendingSampleRunRef.current;
+    pendingSampleRunRef.current = false;
+    if (isSampleRun) setSampleMaoTarget({ ...SAMPLE_DEAL_FIXTURE.maoTarget });
 
     // PostHog funnel event - fires the moment the user commits to
     // analyzing a deal (form passed validation, calculation started).
@@ -3386,7 +3412,6 @@ export function InvestCalcPage({
     // by property type / cash purchase / etc. - no PII (no address).
     trackEvent("analyzer_started", {
       property_type: values.propertyType,
-      purchase_price: values.purchasePrice,
       is_cash_purchase: !values.downPaymentPct || values.downPaymentPct >= 100,
       input_tab: activeInputTab,
     });
@@ -3484,10 +3509,7 @@ export function InvestCalcPage({
       });
       trackEvent("analysis_completed", {
         property_type: values.propertyType,
-        cap_rate: result.capRate,
-        coc_return: result.cocReturn,
-        dscr: result.dscr,
-        monthly_cash_flow: Math.round(result.netCashFlow),
+        verdict: getDealTier(result),
         is_cash_purchase: result.monthlyPayment <= 0,
         input_tab: activeInputTab,
       });
@@ -3517,6 +3539,7 @@ export function InvestCalcPage({
       if (computedFingerprint) lastComputedFormJsonRef.current = computedFingerprint;
       setIsCalculating(false);
       setShowResults(true);
+      setIsEditingAssumptions(false);
       // Every explicit Run brings the ANSWER to the user (the existing
       // results-scroll effect consumes this). Without it, only the
       // saved-deal reopen path scrolled — on phones and short windows the
@@ -3537,19 +3560,26 @@ export function InvestCalcPage({
       } else {
         await loadDealScore(values, result);
       }
+      if (autoSaveAfterAuthRef.current) {
+        const savedAutomatically = await performSaveDeal({ autoAfterAuth: true });
+        autoSavedAfterAuth = savedAutomatically === true;
+      }
       // Forked away while the score loaded → the toast (and the results
       // scroll below, which no-ops on the unmounted dashboard) belong to a
       // deal that's no longer on screen.
       if (forkGenerationRef.current !== runGeneration) return;
       toast({
-        title: "Analysis Complete",
+        title: autoSavedAfterAuth ? "Deal saved automatically" : "Analysis Complete",
         // Rounded like every other surface that shows this number (an
         // unrounded float renders "$1,234.567/mo" — reads like a bug), and
         // "Cash-on-cash" spelled out: the toast is the one line every
         // first-run user reads, so no unexpanded jargon.
         // Sign keyed off the SAME rounded value (live-verdict-panel pattern)
         // so a sub-dollar negative never renders "-$0".
-        description: `Net cash flow: ${Math.round(result.netCashFlow) < 0 ? "-" : ""}$${Math.abs(Math.round(result.netCashFlow)).toLocaleString()}/mo | Cash-on-cash: ${result.cocReturn.toFixed(1)}%`,
+        description: autoSavedAfterAuth
+          ? "Your underwriting is now available from any device."
+          : `Net cash flow: ${Math.round(result.netCashFlow) < 0 ? "-" : ""}$${Math.abs(Math.round(result.netCashFlow)).toLocaleString()}/mo | Cash-on-cash: ${result.cocReturn.toFixed(1)}%`,
+        variant: autoSavedAfterAuth ? "success" : undefined,
       });
       // Scroll to the TOP of the results dashboard, not the bottom of
       // the page. The previous behavior dumped users at the footer past
@@ -3710,6 +3740,8 @@ export function InvestCalcPage({
       /** Update path only: let the server move the loaded deal to the
        *  form's (changed) address instead of returning ADDRESS_CHANGED. */
       allowAddressChange?: boolean;
+      /** Completing the explicit anonymous Save click after authentication. */
+      autoAfterAuth?: boolean;
     } = {}
   ) => {
     // Snapshot the fork generation: if "Analyze another like this" fires
@@ -3718,9 +3750,12 @@ export function InvestCalcPage({
     // fork's draft) — that silently turned the NEXT deal's save into an
     // overwrite of the source.
     const saveGeneration = forkGenerationRef.current;
-    const targetExistingId = options.forceInsert
-      ? null
-      : options.existingIdOverride ?? savedDealId;
+    // An explicit chooser target must win even while completing the post-auth
+    // auto-save. Otherwise "Update existing" retries an insert and loops back
+    // into the duplicate dialog. Only the initial auto-save ignores a stale id.
+    const targetExistingId =
+      options.existingIdOverride ??
+      (options.autoAfterAuth || options.forceInsert ? null : savedDealId);
     if (targetExistingId && !canUpdateSavedDeals) {
       toast({
         title: "Upgrade required",
@@ -3731,6 +3766,10 @@ export function InvestCalcPage({
       return;
     }
 
+    if (saveInFlightRef.current) return false;
+    saveInFlightRef.current = true;
+
+    let awaitingResolution = false;
     setIsSavingDeal(true);
     try {
       const currentValues = form.getValues();
@@ -3754,6 +3793,12 @@ export function InvestCalcPage({
         }
       );
       if (result.ok) {
+        if (options.autoAfterAuth) {
+          clearPendingSaveIntent();
+          autoSaveAfterAuthRef.current = false;
+          setIsAutoSaveResuming(false);
+          trackEvent("analysis_saved_after_signup", { property_type: currentValues.propertyType });
+        }
         // A save that came from a chooser dialog succeeded - close it.
         setDuplicateCollision(null);
         setAddressChangedPrompt(null);
@@ -3784,7 +3829,7 @@ export function InvestCalcPage({
             description: "Saved before you moved on — find it in My Deals.",
             variant: "success",
           });
-          return;
+          return true;
         }
         setSavedDealId(result.id);
         savedDealIdRef.current = result.id;
@@ -3815,9 +3860,6 @@ export function InvestCalcPage({
           trackConversion("deal_saved");
           trackEvent("deal_saved", {
             property_type: currentValues.propertyType,
-            purchase_price: currentValues.purchasePrice,
-            cap_rate: analysisResult?.capRate,
-            monthly_cash_flow: analysisResult ? Math.round(analysisResult.netCashFlow) : undefined,
           });
         }
         // The persisted baseline is the payload the server actually stored
@@ -3887,7 +3929,7 @@ export function InvestCalcPage({
               </ToastAction>
             ) : undefined,
         });
-        return;
+        return true;
       }
       if (result.code === "SIGN_IN_REQUIRED") {
         // Server-side backstop (the UI normally gates anon saves before this
@@ -3995,10 +4037,12 @@ export function InvestCalcPage({
         // already has its own saved deal, and only one dialog may own the
         // screen. Without an id (a lookup miss) keep the actionable toast.
         if (result.existingId) {
+          awaitingResolution = true;
           setAddressChangedPrompt(null);
           setDuplicateCollision({
             existingId: result.existingId,
             existingTitle: result.existingTitle,
+            autoAfterAuth: options.autoAfterAuth,
           });
           return;
         }
@@ -4021,6 +4065,7 @@ export function InvestCalcPage({
         variant: "destructive",
       });
     } catch {
+      if (options.autoAfterAuth) setIsAutoSaveResuming(false);
       // The action REJECTED rather than returning {ok:false} — a network blip
       // mid-save, a cold-start 500, or a tab one deploy behind main (Next 16
       // throws on an unrecognized Server Action). The finally below already
@@ -4034,8 +4079,13 @@ export function InvestCalcPage({
         variant: "destructive",
       });
     } finally {
+      saveInFlightRef.current = false;
       setIsSavingDeal(false);
+      if (options.autoAfterAuth && !awaitingResolution && hasPendingSaveIntent()) {
+        setIsAutoSaveResuming(false);
+      }
     }
+    return false;
   };
 
   const handleSaveDeal = async () => performSaveDeal();
@@ -4050,7 +4100,10 @@ export function InvestCalcPage({
     try {
       await performSaveDeal(
         choice === "update"
-          ? { existingIdOverride: duplicateCollision.existingId }
+          ? {
+              existingIdOverride: duplicateCollision.existingId,
+              autoAfterAuth: duplicateCollision.autoAfterAuth,
+            }
           : // forceInsert alongside saveAsNewScenario: "save as scenario"
             // always means INSERT a sibling at this address. Without it, a
             // collision reached while a saved deal is attached (the
@@ -4059,7 +4112,11 @@ export function InvestCalcPage({
             // path (which ignores saveAsNewScenario), and bounce back into
             // the ADDRESS_CHANGED dialog — a chooser loop. When no deal is
             // attached (the plain duplicate flow), forceInsert is a no-op.
-            { saveAsNewScenario: true, forceInsert: true }
+            {
+              saveAsNewScenario: true,
+              forceInsert: true,
+              autoAfterAuth: duplicateCollision.autoAfterAuth,
+            }
       );
     } finally {
       setDuplicateChoiceBusy(null);
@@ -4316,7 +4373,6 @@ export function InvestCalcPage({
       trackConversion("pdf_exported");
       trackEvent("pdf_exported", {
         property_type: values.propertyType,
-        purchase_price: values.purchasePrice,
         has_deal_score: Boolean(dealScoreResult?.ok && dealScoreResult.tier === "pro"),
       });
       // A completed export is the other high-signal testimonial moment
@@ -4965,7 +5021,16 @@ export function InvestCalcPage({
     // values, so the demo can never contradict the marketing card
     // again (it did once: 'Strong Buy · 84' on the card, 'Risky · 20'
     // in the actual analysis).
-    const sample: Partial<InvestmentFormValues> = SAMPLE_DEAL_VALUES;
+    const sample: Partial<InvestmentFormValues> = SAMPLE_DEAL_FIXTURE.values;
+    // Seed the sample's exact acquisition targets before any form mutation or
+    // deferred submit. React may render intermediate form updates while the
+    // requestAnimationFrame submit is waiting; setting this only inside
+    // onSubmit allowed the focused result to mount once with the canonical
+    // break-even target ($0 cash flow), which its MaxOfferCard could then feed
+    // back into the dashboard. The early seed makes the launch atomic from
+    // the user's perspective. onSubmit reasserts the same fixture after
+    // validation as a defense against any intervening reset.
+    setSampleMaoTarget({ ...SAMPLE_DEAL_FIXTURE.maoTarget });
     // Apply each field via setValue so RHF dirties and the form's
     // controlled inputs re-render with the new values immediately.
     Object.entries(sample).forEach(([key, value]) => {
@@ -4978,6 +5043,10 @@ export function InvestCalcPage({
 
     // Arm the one-shot Pro preview for this run - consumed in onSubmit.
     pendingSamplePreviewRef.current = true;
+    pendingSampleRunRef.current = true;
+    strategyAppliedRef.current = null;
+    strategyRevertRef.current = null;
+    setActiveStrategyKey(SAMPLE_DEAL_FIXTURE.strategyKey);
 
     // Show the toast right away so the user sees confirmation that
     // the demo loaded - important because the submit fires async and
@@ -5066,7 +5135,7 @@ export function InvestCalcPage({
     // submit a bare string — recover the state (+ ZIP) from it so they still get
     // the instant verdict instead of dead-ending on a blank form.
     let resolvedState = detail.state;
-    let resolvedCounty = detail.county;
+    const resolvedCounty = detail.county;
     let resolvedZip = detail.zip;
     if (!(resolvedState || resolvedCounty || resolvedZip)) {
       const parsed = parseAddressLocation(address);
@@ -5327,28 +5396,6 @@ export function InvestCalcPage({
   };
 
   /**
-   * "Edit assumptions" from the result-state trust strip: open the
-   * advanced assumptions region (financing + expenses behind the
-   * assumptions strip) and jump back to the form so refining a
-   * default is one click from the numbers the user is judging.
-   */
-  const handleEditAssumptions = () => {
-    setAdvancedOpen(true);
-    try {
-      window.localStorage.setItem(CALC_ADVANCED_OPEN_KEY, "1");
-    } catch {
-      /* ignore */
-    }
-    trackEvent("result_assumptions_edited", {});
-    trackEvent("optional_section_opened", { source: "edit_link" });
-    trackEvent("assumptions_opened", { source: "edit_link" });
-    if (typeof window !== "undefined") {
-      const el = document.getElementById("main");
-      if (el) window.scrollTo({ top: el.offsetTop - 64, behavior: scrollBehavior() });
-    }
-  };
-
-  /**
    * Input-phase gate — the SAME expression the LiveVerdictPanel /
    * EnrichmentReceipt `active` props and the sticky dock readout use
    * (kept inline there; aliased here for the cockpit grid only).
@@ -5381,6 +5428,23 @@ export function InvestCalcPage({
     );
   const showEmptyStateSampleLine =
     isInputPhase && isAuthenticated && !hasMeaningfulInput && !listingLinkOpen;
+  const hasPropertyAvailable = Boolean(watchedAddress?.trim());
+  const analyzerCta = getAnalyzerCta({
+    hasProperty: hasPropertyAvailable,
+    canCalculateMaxOffer: canUseMaxOffer,
+  });
+  const focusedResultsMode =
+    Boolean(analysisResult) && showResults && !isCalculating && !isEditingAssumptions;
+  const postAnalysisMode = Boolean(analysisResult) && showResults && !isCalculating;
+
+  useEffect(() => {
+    if (postAnalysisMode) {
+      document.body.setAttribute("data-truecap-results-mode", "true");
+    } else {
+      document.body.removeAttribute("data-truecap-results-mode");
+    }
+    return () => document.body.removeAttribute("data-truecap-results-mode");
+  }, [postAnalysisMode]);
 
   // Tell the marketing chrome the visitor is now USING the analyzer. The
   // homepage's sticky conversion bar ("Ready to underwrite a deal? It's
@@ -5399,14 +5463,10 @@ export function InvestCalcPage({
     liveFormValues,
     form.formState.dirtyFields as Record<string, unknown>
   );
-  const liveResultTouchedFields = Object.fromEntries(
-    liveResultSourceContext.touchedInputFields.map((key) => [key, true])
-  ) as Record<string, unknown>;
-
   return (
     <div className="min-h-screen bg-background">
       {/* Hero section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-4 sm:pb-6">
+      <section className={cn("max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-4 sm:pb-6", focusedResultsMode && "hidden")}>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
           <div className="min-w-0">
             {/* Heading level is auth-aware: for cold visitors the
@@ -5451,7 +5511,7 @@ export function InvestCalcPage({
             <button
               type="button"
               onClick={handleTrySampleDeal}
-              className="group inline-flex shrink-0 flex-col items-start gap-0.5 self-start rounded-xl bg-primary px-5 py-3 text-left shadow-[0_10px_24px_rgba(0,_112,_196,0.28)] transition-transform hover:-translate-y-0.5 sm:self-end"
+              className="group inline-flex min-h-11 shrink-0 flex-col items-start gap-0.5 self-start rounded-xl bg-primary px-5 py-3 text-left shadow-[0_10px_24px_rgba(0,_112,_196,0.28)] transition-transform hover:-translate-y-0.5 sm:self-end"
               aria-label="Try a sample rental - preview a sample Pro report on a real Philadelphia rental"
             >
               <span className="inline-flex items-center gap-1.5 text-sm font-bold text-primary-foreground">
@@ -5464,6 +5524,12 @@ export function InvestCalcPage({
             </button>
           )}
         </div>
+
+        {!focusedResultsMode ? (
+          <div className="mt-4">
+            <StrategyChips activeKey={activeStrategyKey} onSelect={handleSelectStrategy} />
+          </div>
+        ) : null}
 
         {/* "Welcome back" banner - only shown when the form was just
             restored from a localStorage auto-save draft. Without this
@@ -5608,6 +5674,7 @@ export function InvestCalcPage({
             }
           }}
           noValidate
+          className={focusedResultsMode ? "hidden" : undefined}
         >
           <div className="space-y-5">
             {/* Guided step rail (AN-1) - sticky orientation + jump navigation
@@ -5655,10 +5722,6 @@ export function InvestCalcPage({
                 isInputPhase && "lg:grid lg:grid-cols-5 lg:gap-x-8"
               )}
             >
-            {/* "What's your play?" strategy chips — demoted from a top-of-form
-                card into the assumptions strip below (the "Analyzing as:" pill
-                opens the same StrategyChips picker; behavior unchanged). */}
-
             {/* HERO CARD — "Analyze a deal" (Phase 4, hero unification).
                 ONE bordered card wrapping the three core field groups with
                 question-language group headers (the Three Questions graft):
@@ -5721,7 +5784,7 @@ export function InvestCalcPage({
                         <button
                           type="button"
                           onClick={handleTrySampleDeal}
-                          className="font-semibold text-primary underline-offset-2 hover:underline"
+                          className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-2 hover:underline"
                         >
                           See a sample deal →
                         </button>
@@ -5833,7 +5896,6 @@ export function InvestCalcPage({
               onNavigate={handleChipNavigate}
               onHideDetails={toggleAdvanced}
               activeStrategyKey={activeStrategyKey}
-              onSelectStrategy={handleSelectStrategy}
               // The play's starter-written field set + label, so chips over
               // strategy-set values badge as the play's defaults instead of
               // "yours" (BROWSER-2). Read fresh each render — the strip
@@ -5927,7 +5989,8 @@ export function InvestCalcPage({
                 downstream). Copy standardized to "Run analysis" to
                 match the homepage "Run a deal - 60 seconds" register. */}
             <Button
-              type="submit"
+              type={hasPropertyAvailable ? "submit" : "button"}
+              onClick={hasPropertyAvailable ? undefined : handleTrySampleDeal}
               disabled={isCalculating}
               data-inform-submit="true"
               className={cn(
@@ -5944,7 +6007,7 @@ export function InvestCalcPage({
               ) : (
                 <>
                   <Calculator className="w-5 h-5 mr-2" />
-                  {activeStrategy?.runCta ?? "Run analysis"}
+                  {analyzerCta}
                   <ArrowUpRight className="w-5 h-5 ml-2" />
                 </>
               )}
@@ -5979,6 +6042,8 @@ export function InvestCalcPage({
           <StickyCalculateBar
             isCalculating={isCalculating}
             hasResults={analysisResult !== null}
+            ctaLabel={analyzerCta}
+            onTrySample={hasPropertyAvailable ? undefined : handleTrySampleDeal}
             // Verdict dock readout: only pre-results (same gate as the
             // in-form LiveVerdictPanel), and suppressed while a solve-
             // oriented play is active (showGenericLivePreview). Once a real
@@ -6078,7 +6143,6 @@ export function InvestCalcPage({
                   : null
               }
               inputConfidence={currentInputConfidence}
-              onEditAssumptions={handleEditAssumptions}
               onToggleInputVerified={handleToggleInputVerified}
               onApplyDecisionThreshold={handleApplyDecisionThreshold}
               isLoading={isCalculating}
@@ -6089,15 +6153,32 @@ export function InvestCalcPage({
               projectionSource={projectionSource}
               taxStrategySource={taxStrategySource}
               exitScenarioSource={exitScenarioSource}
-              onSaveDeal={handleSaveDeal}
+              onSaveDeal={() => {
+                void handleSaveDeal();
+              }}
               onCompareDeals={handleCompareDeals}
               onExportPdf={handleExportPdf}
               onNewAnalysis={handleNewAnalysis}
               onAnalyzeAnotherLikeThis={handleAnalyzeAnotherLikeThis}
+              onPrepareAuthSave={() => {
+                const snapshot = investmentFormSchema.safeParse(form.getValues());
+                const exactValues = snapshot.success ? snapshot.data : analysisValues;
+                if (exactValues) writeCalcDraftRaw(JSON.stringify(exactValues));
+              }}
+              onEditAssumptions={() => {
+                setIsEditingAssumptions(true);
+                setAdvancedOpen(true);
+                requestAnimationFrame(() => {
+                  document.querySelector('[data-calc-form="true"]')?.scrollIntoView({
+                    behavior: scrollBehavior(),
+                    block: "start",
+                  });
+                });
+              }}
               onApplyComps={handleApplyComps}
               onApplyRehab={handleApplyRehab}
               currentRehabBudget={form.watch("rehabBudget") ?? null}
-              isSaving={isSavingDeal}
+              isSaving={isSavingDeal || isAutoSaveResuming}
               isComparing={isComparingDeals}
               isExporting={isExportingPdf}
               isSaved={Boolean(savedDealId) && !hasUnsavedChanges}
@@ -6119,6 +6200,7 @@ export function InvestCalcPage({
               canUseSensitivity={canUseSensitivity || isSampleProPreview}
               canUseStrategies={canUseStrategies || isSampleProPreview}
               isSampleProPreview={isSampleProPreview}
+              maoTargetOverride={sampleMaoTarget}
               activeTab={activeDashboardTab}
               activeTabNonce={activeTabNonce}
               activeStrategy={activeStrategy}
@@ -6165,7 +6247,22 @@ export function InvestCalcPage({
       <DuplicateAddressDialog
         open={duplicateCollision !== null}
         onOpenChange={(next) => {
-          if (!next) setDuplicateCollision(null);
+          if (!next) {
+            const cancelledAutoSave = Boolean(duplicateCollision?.autoAfterAuth);
+            setDuplicateCollision(null);
+            if (cancelledAutoSave) {
+              // Cancel means "do not complete this automatic save." Release
+              // the focused-results Save controls and acknowledge the intent
+              // so reload does not reopen the same collision forever.
+              autoSaveAfterAuthRef.current = false;
+              setIsAutoSaveResuming(false);
+              clearPendingSaveIntent();
+              toast({
+                title: "Automatic save canceled",
+                description: "Your analysis is still here. You can save it whenever you’re ready.",
+              });
+            }
+          }
         }}
         existingTitle={duplicateCollision?.existingTitle}
         busyChoice={duplicateChoiceBusy}

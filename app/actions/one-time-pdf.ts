@@ -23,6 +23,7 @@ import { randomBytes, randomUUID } from "node:crypto";
 import { z } from "zod";
 import * as Sentry from "@sentry/nextjs";
 import { getStripe } from "@/lib/stripe/client";
+import { withTrueCapCheckoutBranding } from "@/lib/stripe/checkout-branding";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import {
@@ -139,7 +140,6 @@ export async function createOneTimePdfCheckoutAction(
         message: "This single-deal offer is temporarily unavailable. Please try Pro or contact support.",
       };
     }
-
     const claimId = randomUUID();
     const claimSecret = randomBytes(32).toString("base64url");
     const claimSecretHash = hashOneTimePdfClaimSecret(claimSecret);
@@ -150,7 +150,7 @@ export async function createOneTimePdfCheckoutAction(
     );
     const userId = await getCurrentUserId();
 
-    const session = await stripe.checkout.sessions.create({
+    const session = await stripe.checkout.sessions.create(withTrueCapCheckoutBranding({
       mode: "payment",
       line_items: [{ price: priceId, quantity: 1 }],
       // This public lookup id is useless without the separately-held browser
@@ -164,7 +164,7 @@ export async function createOneTimePdfCheckoutAction(
         price_variant: offer.singleDealPriceVariant,
         claim_id: claimId,
       },
-    });
+    }));
     createdStripeSessionId = session.id;
 
     if (!session.url) throw new Error("Stripe checkout session missing URL");

@@ -24,15 +24,13 @@
  * transition against a baseline recorded on mount, so programmatic restores
  * that land before first paint never pulse.
  *
- * The "Strategy" strategy picker demotes into this card as the
- * "Analyzing as:" pill — the existing StrategyChips component renders
- * inside (kept mounted, CSS-toggled), behavior unchanged. SaveAsDefaultsChip
- * relocates to the strip footer via the `footer` slot (it self-gates).
+ * Strategy selection lives in the initial setup above this strip; this card
+ * stays focused on progressive disclosure of the assumptions it produced.
  */
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { UseFormReturn } from "react-hook-form";
-import { Check, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
+import { Check, ChevronUp } from "lucide-react";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import type { EnrichmentProvenanceInput } from "@/lib/data-confidence";
 import {
@@ -45,7 +43,6 @@ import {
   type StrategyAppliedSnapshot,
 } from "@/lib/assumption-chips";
 import { getStrategyByKey } from "@/lib/investor-strategies";
-import { StrategyChips } from "./strategy-chips";
 import { cn } from "@/lib/utils";
 
 const PULSE_MS = 1600;
@@ -71,7 +68,6 @@ type Props = {
   onHideDetails: () => void;
   /** Active "Strategy" strategy (null = default flow). */
   activeStrategyKey: string | null;
-  onSelectStrategy: (key: string | null) => void;
   /** What the play's starter set wrote (label + field → value), so chips
    *  over strategy-set values badge as the play's defaults instead of
    *  "yours" — the starter writes are RHF-dirty on purpose (BROWSER-2). */
@@ -92,7 +88,6 @@ export function AssumptionsStrip({
   onNavigate,
   onHideDetails,
   activeStrategyKey,
-  onSelectStrategy,
   strategyApplied = null,
   templateOptions,
   savedTemplateFallback,
@@ -189,12 +184,6 @@ export function AssumptionsStrip({
     }
   }, [pulseSignature]);
 
-  // ── "Analyzing as:" strategy pill + inline picker ─────────────────────
-  // The existing StrategyChips card stays MOUNTED and is CSS-toggled (the
-  // same hidden-not-unmounted pattern as the advanced block), so strategy
-  // behavior — including handleSelectStrategy's form writes — is unchanged.
-  const [strategyOpen, setStrategyOpen] = useState(false);
-
   // Focus landing zone for the "Hide details" collapse (see the button).
   const headingRef = useRef<HTMLParagraphElement | null>(null);
 
@@ -285,40 +274,7 @@ export function AssumptionsStrip({
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
         {beforeExtras.map(renderChip)}
-        {/* Strategy pill — the demoted "Strategy" entry point. */}
-        <button
-          type="button"
-          onClick={() => setStrategyOpen((v) => !v)}
-          aria-expanded={strategyOpen}
-          aria-controls="assumptions-strip-strategy"
-          className={cn(
-            "inline-flex min-h-8 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
-            activeStrategy
-              ? "border-primary/50 bg-primary/5 text-foreground hover:bg-primary/10"
-              : "border-border bg-background text-foreground hover:bg-muted"
-          )}
-        >
-          <Sparkles className="size-3 shrink-0 text-primary" aria-hidden />
-          <span className="max-w-56 truncate">
-            {activeStrategy ? `Analyzing as: ${activeStrategy.label}` : "Strategy"}
-          </span>
-          <ChevronDown
-            className={cn(
-              "size-3.5 shrink-0 text-muted-foreground transition-transform",
-              strategyOpen && "rotate-180"
-            )}
-            aria-hidden
-          />
-        </button>
         {extrasChip ? renderChip(extrasChip) : null}
-      </div>
-
-      {/* Existing strategy picker — mounted always, visibility-toggled. */}
-      <div
-        id="assumptions-strip-strategy"
-        className={cn("mt-3", strategyOpen ? "block" : "hidden")}
-      >
-        <StrategyChips activeKey={activeStrategyKey} onSelect={onSelectStrategy} />
       </div>
 
       {/* Footer slot: SaveAsDefaultsChip (renders null until a chip value is
