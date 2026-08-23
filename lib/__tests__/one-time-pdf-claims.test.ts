@@ -5,7 +5,9 @@ import {
   claimSecretMatches,
   decideOneTimePdfClaimBinding,
   fingerprintOneTimePdfDeal,
+  fingerprintOneTimePdfReportBinding,
   hashOneTimePdfClaimSecret,
+  isOneTimePdfRecoveryAllowed,
 } from "@/lib/one-time-pdf-claims";
 
 const SECRET = "a".repeat(43);
@@ -36,6 +38,45 @@ describe("one-time PDF claim binding", () => {
     expect(fingerprintOneTimePdfDeal(a, SECRET)).not.toBe(
       fingerprintOneTimePdfDeal(a, "z".repeat(43))
     );
+  });
+
+  it("immutably distinguishes report target criteria and provenance", () => {
+    const values = {
+      address: "123 Main",
+      purchasePrice: 100_000,
+    } as InvestmentFormValues;
+    const target = { monthlyCashFlow: 200, dscr: 1.25 };
+    const selected = fingerprintOneTimePdfReportBinding(
+      values,
+      target,
+      "selected-targets",
+      SECRET
+    );
+    expect(selected).toMatch(/^[0-9a-f]{64}$/);
+    expect(
+      fingerprintOneTimePdfReportBinding(
+        { purchasePrice: 100_000, address: "123 Main" } as InvestmentFormValues,
+        { dscr: 1.25, monthlyCashFlow: 200 },
+        "selected-targets",
+        SECRET
+      )
+    ).toBe(selected);
+    expect(
+      fingerprintOneTimePdfReportBinding(
+        values,
+        { monthlyCashFlow: 250, dscr: 1.25 },
+        "selected-targets",
+        SECRET
+      )
+    ).not.toBe(selected);
+    expect(
+      fingerprintOneTimePdfReportBinding(
+        values,
+        target,
+        "buy-box",
+        SECRET
+      )
+    ).not.toBe(selected);
   });
 
   it("stores a one-way secret hash and compares it safely", () => {
@@ -124,5 +165,32 @@ describe("one-time PDF claim binding", () => {
         now: NOW,
       })
     ).toEqual({ ok: false, code: "ALREADY_REDEEMED" });
+  });
+
+  it("ends recovery at the earlier of claim expiry and consumed + 24 hours", () => {
+    const consumedAt = "2026-08-15T12:00:00.000Z";
+    const expiresAt = "2026-08-15T13:00:00.000Z";
+    expect(
+      isOneTimePdfRecoveryAllowed({
+        consumedAt,
+        expiresAt,
+        nowMs: Date.parse("2026-08-15T12:59:59.999Z"),
+      })
+    ).toBe(true);
+    expect(
+      isOneTimePdfRecoveryAllowed({
+        consumedAt,
+        expiresAt,
+        nowMs: Date.parse("2026-08-15T13:00:00.001Z"),
+      })
+    ).toBe(false);
+    expect(
+      isOneTimePdfRecoveryAllowed({
+        consumedAt,
+        expiresAt: "2026-09-15T12:00:00.000Z",
+        nowMs:
+          Date.parse(consumedAt) + ONE_TIME_PDF_RECOVERY_WINDOW_MS + 1,
+      })
+    ).toBe(false);
   });
 });

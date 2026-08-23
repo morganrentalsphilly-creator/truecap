@@ -24,7 +24,11 @@ import { z } from "zod";
 import type { AnalysisResult } from "@/lib/calc-analysis";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { buildDealQaContext } from "@/lib/deal-qa";
-import type { BuyBoxFitSummary, NamedBuyBoxResult } from "@/lib/buy-box";
+import {
+  selectDecidingBuyBoxResult,
+  type BuyBoxFitSummary,
+  type NamedBuyBoxResult,
+} from "@/lib/buy-box";
 import type { PropertyEnrichment } from "@/lib/property-enrichment/rentcast";
 import type { ReturnSummary } from "@/lib/returns";
 
@@ -120,11 +124,14 @@ const fin = (n: number | null | undefined): number | null =>
  *  lib/mao-targets). */
 export type DealQaBuyBoxReport = {
   context: DealQaBuyBoxContext;
+  /** The one box whose pass/fail and thresholds own the decision. */
+  selectedBox: { id: string; name: string };
   maoThresholds: {
     minCapRatePct: number | null;
     minCocPct: number | null;
     minDscr: number | null;
     minCashFlowMonthly: number | null;
+    maxPurchasePrice: number | null;
   };
 };
 
@@ -137,7 +144,7 @@ export function buildBuyBoxQaReport(
   results: NamedBuyBoxResult[],
   summary: BuyBoxFitSummary
 ): DealQaBuyBoxReport | null {
-  const primary = results[0];
+  const primary = selectDecidingBuyBoxResult(results);
   if (!primary || !primary.result.active) return null;
   const r = primary.result;
   const multi = results.length > 1;
@@ -169,11 +176,16 @@ export function buildBuyBoxQaReport(
         ...(c.gapText ? { gapText: clip(c.gapText, 80) } : {}),
       })),
     },
+    selectedBox: {
+      id: primary.box.id,
+      name: boxName || "Buy Box",
+    },
     maoThresholds: {
       minCapRatePct: primary.box.minCapRatePct,
       minCocPct: primary.box.minCocPct,
       minDscr: primary.box.minDscr,
       minCashFlowMonthly: primary.box.minCashFlowMonthly,
+      maxPurchasePrice: primary.box.maxPurchasePrice,
     },
   };
 }

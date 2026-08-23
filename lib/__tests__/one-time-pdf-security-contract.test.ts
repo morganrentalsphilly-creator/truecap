@@ -11,6 +11,9 @@ const read = (path: string) => readFileSync(join(ROOT, path), "utf8");
 const migration = read(
   "supabase/migrations/20260815150000_one_time_pdf_purchase_claims.sql"
 );
+const reportBindingMigration = read(
+  "supabase/migrations/20260823180000_bind_one_time_pdf_report_target.sql"
+);
 const action = read("app/actions/one-time-pdf.ts");
 const client = read("components/investcalc/investcalc-page.tsx");
 const layout = read("app/layout.tsx");
@@ -32,11 +35,27 @@ describe("one-time PDF security contract", () => {
   it("binds redemption to a secret, exact deal, optional user, and an atomic consume", () => {
     expect(action).toContain("claim_secret_hash: claimSecretHash");
     expect(action).toContain("deal_fingerprint: dealFingerprint");
+    expect(action).toContain("report_fingerprint: reportFingerprint");
     expect(action).toContain("user_id: userId");
     expect(action).toContain('.gt("expires_at", consumedAt)');
     expect(action).toContain('.is("consumed_at", null)');
     expect(action).toContain("session.metadata?.claim_id !== initial.row.id");
     expect(action).toContain('session.payment_status !== "paid"');
+  });
+
+  it("binds the purchased report target/source and keeps recovery to 24 hours", () => {
+    expect(action).toContain("fingerprintOneTimePdfReportBinding(");
+    expect(action).toContain("maxOfferTargetSource");
+    expect(action).toContain("report_fingerprint: reportFingerprint");
+    expect(reportBindingMigration).toContain(
+      "old.report_fingerprint is not null"
+    );
+    expect(reportBindingMigration).toContain(
+      "one-time PDF report binding is immutable"
+    );
+    expect(reportBindingMigration).toContain("interval '24 hours'");
+    expect(client).toContain("maxOfferTargetSource: checkoutMaoTargetSource");
+    expect(client).toContain("maxOfferTargetSource: restoredMaoTargetSource");
   });
 
   it("keeps the ledger server-only under RLS with no end-user policy", () => {
@@ -119,5 +138,16 @@ describe("one-time PDF security contract", () => {
     expect(purchaseDialog).toContain('href="/terms"');
     expect(purchaseDialog).toContain("Terms");
     expect(purchaseDialog).toContain("hello@usetruecap.com");
+  });
+
+  it("retains the bound claim after generation so the advertised recovery works", () => {
+    const successStart = client.indexOf("downloadPdfFromBase64(pdfResult.pdfBase64");
+    const successEnd = client.indexOf('trackConversion("pdf_exported")', successStart);
+    const success = client.slice(successStart, successEnd);
+    expect(success).toContain("24-hour recovery path");
+    expect(success).not.toContain("oneTimePdfUnlockedRef.current = false");
+    expect(success).not.toContain("oneTimePdfRedemptionRef.current = null");
+    expect(success).not.toContain("removeItem(ONE_TIME_PDF_RETURN_KEY)");
+    expect(success).not.toContain("oneTimePdfClaimSecretKey(redemption.claimId)");
   });
 });

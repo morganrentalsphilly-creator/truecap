@@ -49,8 +49,8 @@ export function MarketingHero() {
             {/* Friction-removal eyebrow: answers cost, signup, and card
                 objections before the visitor reaches the address field. */}
             <div className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-card/70 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-primary shadow-sm backdrop-blur">
-              <Sparkles className="size-3 shrink-0" />
-              <span>Free analysis · No signup · No card</span>
+              <Target className="size-3 shrink-0" />
+              <span>Rental Acquisition Decision System</span>
             </div>
 
             {/* Headline: 2 lines max, hierarchy by weight + accent color,
@@ -60,7 +60,7 @@ export function MarketingHero() {
             </h1>
             <p className="mt-4 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
               {newHomepagePositioningEnabled
-                ? "Paste a rental listing. Free shows whether it deserves attention; Pro checks it against your Buy Box, solves what must be true, and calculates the highest price that meets your selected targets."
+                ? "Paste a rental listing. See whether it fits your Buy Box, the highest price that works, and which assumptions you must verify."
                 : "Enter any address. In 60 seconds, TrueCap shows whether the deal cash flows — and Pro solves the exact maximum offer that still hits your targets. Every assumption sourced, every assumption editable."}
             </p>
 
@@ -110,7 +110,7 @@ export function MarketingHero() {
                   source="runs"
                   minimum={1}
                   plus
-                  labelSuffix="analysis runs recorded on TrueCap"
+                  labelSuffix="cumulative analyses represented in TrueCap"
                 />
               </div>
             </div>

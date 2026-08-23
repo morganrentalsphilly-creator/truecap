@@ -40,14 +40,12 @@ import {
   recomputeSavedDealVerdict,
   toRecomputedSavedAnalysisSnapshot,
 } from "@/lib/recompute-saved-deal-verdict";
-import { calculateAnalysis } from "@/lib/calc-analysis";
-import { calculateMaxAllowableOffer, meetsTarget } from "@/lib/max-allowable-offer";
+import { normalizeMaoTarget } from "@/lib/mao-target-editor";
 import {
-  buildMaoTarget,
-  buyBoxContributesToMaoTarget,
-  buyBoxHasReturnTargets,
-  describeMaoTarget,
-} from "@/lib/mao-targets";
+  normalizeOfferCeilingTargetSource,
+  type OfferCeilingTargetSource,
+} from "@/lib/offer-ceiling-contract";
+import { computeDealOfferLine, type DealOfferLine } from "@/lib/deal-offer-line";
 import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
 import type { OwnedEquitySummary } from "@/lib/owned-equity";
 import { computeRowEquity } from "@/lib/owned-equity-series";
@@ -62,7 +60,6 @@ import {
   type BuyBoxDealMetrics,
   type BuyBoxFitSummary,
   type BuyBoxPropertyType,
-  type NamedBuyBox,
 } from "@/lib/buy-box";
 import { isActiveStage, isPipelineStage, DEFAULT_PIPELINE_STAGE } from "@/lib/pipeline";
 import {
@@ -429,6 +426,7 @@ export default async function DealWorkspacePage({
           dealRow.client_id ?? null
         )
       : [];
+  const buyBoxesResolved = Boolean(buyBoxesResult?.ok);
   let buyBoxFit: BuyBoxFitSummary | null = null;
   // The fit's one personal, number-carrying line ("Biggest gap — Cap rate:
   // 5.2% vs ≥ 6.0% (0.8pp short)") from the box that decides the verdict:
@@ -436,10 +434,6 @@ export default async function DealWorkspacePage({
   // (evaluateBuyBoxes returns default-first). Null when no numeric
   // criterion applied.
   let buyBoxPersonalLine: string | null = null;
-  // Highest-priority active box that sets numeric RETURN thresholds — those
-  // become the MAO target basis (CONFLICT #6: their criteria beat defaults,
-  // and the basis is labeled inline either way).
-  let maoBasisBox: NamedBuyBox | null = null;
   if (activeBuyBoxes.length > 0) {
     const propertyType: BuyBoxPropertyType | null =
       dealRow.property_type === "single-family" ||
@@ -464,7 +458,6 @@ export default async function DealWorkspacePage({
       buyBoxFit = summarizeBuyBoxFit(boxResults);
       const leadResult = boxResults.find((r) => r.result.passes) ?? boxResults[0];
       buyBoxPersonalLine = leadResult?.result.personalLine ?? null;
-      maoBasisBox = boxResults.map((r) => r.box).find(buyBoxHasReturnTargets) ?? null;
     }
   }
 
@@ -476,38 +469,43 @@ export default async function DealWorkspacePage({
   // hides the line. Shopping stages only — a closed, completed, or passed
   // deal has no offer left to make (a status-completed deal keeps stage null,
   // so the stage check alone would show shopping advice on an owned deal).
-  type MaoLine =
-    | { kind: "cut"; maxPrice: number; asking: number | null; discountPct: number | null }
-    | { kind: "clears"; maxPrice: number | null };
-  let maoLine: MaoLine | null = null;
+  let maoLine: DealOfferLine | null = null;
   let maoBasisLabel = "";
-  if (formValues && !isClosedDeal && (stage == null || isActiveStage(stage))) {
-    const maoTarget = buildMaoTarget(maoBasisBox, { isCashPurchase });
-    // Credit the buy box only when it actually shaped the target — a
-    // DSCR-only box on a cash deal falls back to the default floor, and
-    // attributing that default to "your buy box" would be false.
-    maoBasisLabel = buyBoxContributesToMaoTarget(maoBasisBox, { isCashPurchase })
-      ? `your “${maoBasisBox!.name}” buy box — ${describeMaoTarget(maoTarget)}`
-      : describeMaoTarget(maoTarget);
-    let clearsAtAsking = false;
-    try {
-      clearsAtAsking = meetsTarget(calculateAnalysis(formValues), maoTarget);
-    } catch {
-      // Unparseable math at asking → fall through to the solver alone.
-    }
-    const mao = calculateMaxAllowableOffer(formValues, maoTarget);
-    if (clearsAtAsking) {
-      maoLine = { kind: "clears", maxPrice: mao?.maxPrice ?? null };
-    } else if (mao) {
-      const asking =
-        typeof formValues.purchasePrice === "number" && formValues.purchasePrice > 0
-          ? formValues.purchasePrice
-          : null;
-      const discountPct =
-        asking != null && asking > mao.maxPrice
-          ? Math.round(((asking - mao.maxPrice) / asking) * 100)
-          : null;
-      maoLine = { kind: "cut", maxPrice: mao.maxPrice, asking, discountPct };
+  const rawStoredMaoTarget = normalizeMaoTarget(dealRow.result_snapshot?.maxOfferTarget);
+  const storedMaoTargetSource =
+    normalizeOfferCeilingTargetSource(
+      dealRow.result_snapshot?.maxOfferTargetSource
+    ) ?? "selected-targets";
+  const storedMaoTarget =
+    rawStoredMaoTarget && isCashPurchase
+      ? normalizeMaoTarget({ ...rawStoredMaoTarget, dscr: undefined })
+      : rawStoredMaoTarget;
+  let shareMaoTarget = storedMaoTarget;
+  let shareMaoTargetSource: OfferCeilingTargetSource | undefined =
+    storedMaoTarget ? storedMaoTargetSource : undefined;
+  if (
+    isPremium &&
+    !isFrozenMethodologySnapshot &&
+    formValues &&
+    !isClosedDeal &&
+    (storedMaoTarget != null || buyBoxesResolved) &&
+    (stage == null || isActiveStage(stage))
+  ) {
+    const offerResolution = computeDealOfferLine(formValues, activeBuyBoxes, {
+      isShoppingStage: true,
+      dealClientId: dealRow.client_id ?? null,
+      persistedMaoTarget: storedMaoTarget,
+    });
+    maoLine = offerResolution.offer;
+    maoBasisLabel = offerResolution.basisLabel;
+    shareMaoTarget = storedMaoTarget ?? offerResolution.resolvedMaoTarget;
+    if (!storedMaoTarget && offerResolution.resolvedMaoTarget) {
+      shareMaoTargetSource =
+        offerResolution.offer &&
+        "basis" in offerResolution.offer &&
+        offerResolution.offer.basis === "buy-box"
+          ? "buy-box"
+          : "screening-defaults";
     }
   }
 
@@ -621,6 +619,8 @@ export default async function DealWorkspacePage({
                   <ShareLinkButton
                     values={formValues}
                     savedDealId={dealRow.id}
+                    maoTarget={shareMaoTarget}
+                    maoTargetSource={shareMaoTargetSource}
                     context={
                       canUseClientWorkflow && dealRow.client_id
                         ? "client-report"
@@ -708,7 +708,16 @@ export default async function DealWorkspacePage({
                   <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                     Price ceiling
                   </div>
-                  {maoLine.kind === "clears" ? (
+                  {maoLine.kind === "blocked" ? (
+                    <div className="text-sm font-bold text-foreground">
+                      Price cannot fix this
+                      {maoLine.reasons.length > 0 ? (
+                        <span className="font-medium text-muted-foreground">
+                          {" "}— misses on {maoLine.reasons.join(" and ")}
+                        </span>
+                      ) : null}
+                    </div>
+                  ) : maoLine.kind === "clears" ? (
                     <>
                       <div className="text-sm font-bold text-foreground">
                         Asking price works at your targets
@@ -739,12 +748,16 @@ export default async function DealWorkspacePage({
                       ) : null}
                     </div>
                   )}
-                  <div className="mt-0.5 text-xs text-muted-foreground">
-                    Targets: {maoBasisLabel}
-                  </div>
-                  <div className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-                    Calculated from your selected targets. This is not a recommended offer.
-                  </div>
+                  {maoLine.kind !== "blocked" ? (
+                    <>
+                      <div className="mt-0.5 text-xs text-muted-foreground">
+                        Targets: {maoBasisLabel}
+                      </div>
+                      <div className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                        Calculated from your selected targets. This is not a recommended offer.
+                      </div>
+                    </>
+                  ) : null}
                 </div>
               </div>
             ) : null}

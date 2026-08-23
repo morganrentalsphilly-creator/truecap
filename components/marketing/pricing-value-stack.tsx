@@ -18,7 +18,7 @@ const PRO_STACK = [
   [ShieldCheck, "Buy Box Autopilot", "Your criteria screen every deal automatically — instant pass/fail, with reasons."],
   [BarChart3, "10-Year Wealth View", "Cash flow, equity, and illustrative tax impact across a decade of ownership."],
   [GitCompareArrows, "Comparison + Pipeline", "Every candidate ranked side by side, and nothing slips between research and offer."],
-  [FileText, "Lender-Ready Reports", "Walk into the bank with an underwrite, not a hunch."],
+  [FileText, "Lender-Facing Review Reports", "Bring a transparent input summary for your lender to review."],
 ] as const;
 
 const AGENT_PRO_STACK = [

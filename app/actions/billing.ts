@@ -17,6 +17,17 @@ import { captureServerEvent } from "@/lib/posthog-server";
 import { TRIAL_DAYS } from "@/lib/trial";
 import { resolvePostAnalysisOfferCoupon } from "@/lib/post-analysis-offer";
 import { findEligiblePackCredit, getPackCreditCouponId } from "@/lib/pack-credit";
+import {
+  acquireSubscriptionCheckoutIntent,
+  bindSubscriptionCheckoutCustomer,
+  completeSubscriptionCheckoutIntentFromWebhook,
+  expireSubscriptionCheckoutIntentFromWebhook,
+  failSubscriptionCheckoutIntent,
+  isReusableSubscriptionCheckoutSession,
+  markSubscriptionCheckoutIntentOpen,
+  subscriptionCheckoutIntentMatchesConfiguration,
+  type SubscriptionCheckoutIntent,
+} from "@/lib/stripe/subscription-checkout-intent";
 
 const checkoutSchema = z.object({
   planSlug: z.enum(["pro_monthly", "pro_annual", "agent_pro_monthly", "agent_pro_annual"]),
@@ -45,6 +56,7 @@ export type BillingActionResult =
         | "PLAN_NOT_FOUND"
         | "MISSING_PRICE"
         | "ALREADY_SUBSCRIBED"
+        | "CHECKOUT_IN_PROGRESS"
         | "SERVER_ERROR";
       message: string;
     };
@@ -71,6 +83,7 @@ function getDisplayName(profile: {
 }
 
 async function getOrCreateStripeCustomer(args: {
+  intentId: string;
   userId: string;
   email: string | null;
   name?: string;
@@ -113,13 +126,21 @@ async function getOrCreateStripeCustomer(args: {
     }
   }
 
-  const customer = await stripe.customers.create({
-    email: args.email ?? undefined,
-    name: args.name,
-    metadata: {
-      user_id: args.userId,
+  const customer = await stripe.customers.create(
+    {
+      email: args.email ?? undefined,
+      name: args.name,
+      metadata: {
+        user_id: args.userId,
+      },
     },
-  });
+    {
+      // A timeout after Stripe accepted customer creation is ambiguous. The
+      // durable intent key makes a retry return that same Customer instead of
+      // minting a second, orphaned billing identity.
+      idempotencyKey: `truecap-subscription-customer:${args.intentId}`,
+    }
+  );
 
   const admin = createAdminSupabaseClient();
   const { error } = await admin
@@ -305,13 +326,7 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
   }
 
   try {
-    const customerId = await getOrCreateStripeCustomer({
-      userId: user.id,
-      email: user.email ?? null,
-      name: getDisplayName(profile),
-      existingCustomerId: profile?.stripe_customer_id ?? null,
-    });
-    const siteUrl = getSiteUrl();
+    const admin = createAdminSupabaseClient();
     // A campaign coupon from the URL (e.g. the post-analysis ANALYZE20) takes
     // precedence over the standard annual coupon, and applies to monthly OR
     // annual. Both resolve to a Stripe coupon id we control.
@@ -340,7 +355,7 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
     const packCreditCouponId = getPackCreditCouponId();
     if (packCreditCouponId && !parsed.data.planSlug.startsWith("agent_pro")) {
       try {
-        packCredit = await findEligiblePackCredit(createAdminSupabaseClient(), user.id);
+        packCredit = await findEligiblePackCredit(admin, user.id);
       } catch (error) {
         Sentry.captureException(error, {
           tags: { feature: "billing-checkout", flow: "pack_credit_lookup" },
@@ -357,50 +372,264 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
     // other.
     const proTrialDays = TRIAL_DAYS;
     const stripe = getStripe();
-    const session = await stripe.checkout.sessions.create(withTrueCapCheckoutBranding({
-      mode: "subscription",
+    const acquireInput = {
+      userId: user.id,
+      planSlug: parsed.data.planSlug,
+      stripePriceId: priceId,
+      stripeDiscountCouponId: appliedCoupon ?? null,
+      trialDays: grantTrial && proTrialDays > 0 ? proTrialDays : 0,
+      packCreditClaimId: packCredit?.claimId ?? null,
+    };
+    let acquisition = await acquireSubscriptionCheckoutIntent(admin, acquireInput);
+    const requestedCheckoutConfiguration = {
+      planSlug: acquireInput.planSlug,
+      stripePriceId: acquireInput.stripePriceId,
+      stripeDiscountCouponId: acquireInput.stripeDiscountCouponId,
+      trialDays: acquireInput.trialDays,
+      packCreditClaimId: acquireInput.packCreditClaimId,
+    };
+
+    // A completed/expired Stripe Session can race its webhook. Resolve Stripe
+    // truth before deciding whether an existing ledger row is reusable. At
+    // most one retry is needed after closing an expired intent.
+    for (let attempt = 0; !acquisition.acquired && attempt < 2; attempt += 1) {
+      const existingIntent = acquisition.intent;
+      if (
+        !subscriptionCheckoutIntentMatchesConfiguration(
+          existingIntent,
+          requestedCheckoutConfiguration
+        )
+      ) {
+        return {
+          ok: false,
+          code: "CHECKOUT_IN_PROGRESS",
+          message:
+            "Another checkout with different pricing or trial terms is already open. Finish or let it expire before starting this offer.",
+        };
+      }
+      if (existingIntent.status === "creating") {
+        return {
+          ok: false,
+          code: "CHECKOUT_IN_PROGRESS",
+          message: "Your secure checkout is already being prepared. Please try again in a moment.",
+        };
+      }
+      if (!existingIntent.stripe_checkout_session_id) {
+        throw new Error("open checkout-intent is missing its Stripe Session id");
+      }
+
+      const existingSession = await stripe.checkout.sessions.retrieve(
+        existingIntent.stripe_checkout_session_id,
+        { expand: ["line_items.data.price", "discounts.coupon"] }
+      );
+      if (isReusableSubscriptionCheckoutSession({ session: existingSession, intent: existingIntent })) {
+        return { ok: true, url: existingSession.url! };
+      }
+      if (existingSession.status === "complete") {
+        await completeSubscriptionCheckoutIntentFromWebhook(admin, existingSession);
+        return {
+          ok: false,
+          code: "ALREADY_SUBSCRIBED",
+          message: "This checkout is already complete. Your subscription is being activated.",
+        };
+      }
+      if (existingSession.status === "expired") {
+        await expireSubscriptionCheckoutIntentFromWebhook(admin, existingSession);
+        acquisition = await acquireSubscriptionCheckoutIntent(admin, acquireInput);
+        continue;
+      }
+
+      Sentry.captureMessage("billing: existing Checkout Session failed intent binding", {
+        level: "error",
+        tags: { feature: "billing-checkout", guard: "open-session-binding" },
+        extra: { intentId: existingIntent.id, stripeSessionId: existingSession.id },
+      });
+      return {
+        ok: false,
+        code: "SERVER_ERROR",
+        message: "We couldn't safely resume your existing checkout. Please contact support.",
+      };
+    }
+
+    if (!acquisition.acquired) {
+      return {
+        ok: false,
+        code: "CHECKOUT_IN_PROGRESS",
+        message: "Your secure checkout is already being prepared. Please try again in a moment.",
+      };
+    }
+
+    let intent: SubscriptionCheckoutIntent = acquisition.intent;
+    if (!subscriptionCheckoutIntentMatchesConfiguration(intent, requestedCheckoutConfiguration)) {
+      return {
+        ok: false,
+        code: "CHECKOUT_IN_PROGRESS",
+        message:
+          "Another checkout with different pricing or trial terms is already open. Finish or let it expire before starting this offer.",
+      };
+    }
+    if (
+      intent.stripe_customer_id &&
+      profile?.stripe_customer_id &&
+      intent.stripe_customer_id !== profile.stripe_customer_id
+    ) {
+      throw new Error("checkout-intent customer disagrees with the user profile");
+    }
+    const customerId = await getOrCreateStripeCustomer({
+      intentId: intent.id,
+      userId: user.id,
+      email: user.email ?? null,
+      name: getDisplayName(profile),
+      existingCustomerId: intent.stripe_customer_id ?? profile?.stripe_customer_id ?? null,
+    });
+    intent = await bindSubscriptionCheckoutCustomer(admin, intent.id, customerId);
+
+    // Recheck immediately before creating a Session. This closes the race
+    // where a legacy/open Checkout completes after the earlier guard but
+    // before this request becomes the sole intent leader.
+    const stripeSubs = await stripe.subscriptions.list({
       customer: customerId,
-      client_reference_id: user.id,
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      discounts: appliedCoupon ? [{ coupon: appliedCoupon }] : undefined,
-      allow_promotion_codes: appliedCoupon ? undefined : true,
-      // Land the new subscriber back on the calculator ("/") where their
-      // auto-saved draft + welcome-back banner are waiting, so the first
-      // post-purchase act is completing the save they paid for (previously
-      // /profile — a name/avatar form with zero purchase acknowledgment).
-      // The params drive the Google Ads purchase conversion AND the
-      // "Pro unlocked" banner (components/marketing/billing-success-banner.tsx,
-      // mounted on BOTH homepage variants). {CHECKOUT_SESSION_ID} is
-      // substituted by Stripe and doubles as the conversion dedup key.
-      // Signed-in "/" requests are rewritten to /home-authed by proxy.ts
-      // (query string preserved), where the conversion value is resolved
-      // server-side from the checkout session.
-      success_url: `${siteUrl}/?billing=success&session_id={CHECKOUT_SESSION_ID}`,
-      // Cancel lands back on /pricing at the plan cards (not /profile, a
-      // name/avatar form that acknowledged nothing) — the page built to
-      // re-handle whatever objection caused the bail. The param drives a
-      // small "no charge was made" banner (checkout-cancelled-banner.tsx).
-      cancel_url: `${siteUrl}/pricing?billing=checkout_cancelled#plans`,
-      metadata: {
-        user_id: user.id,
-        plan_slug: parsed.data.planSlug,
-        trial_granted: String(grantTrial && proTrialDays > 0),
-        // The webhook transitions this claim eligible→applied on completion.
-        ...(packCredit ? { pack_credit_claim_id: packCredit.claimId } : {}),
-      },
-      subscription_data: {
+      status: "all",
+      limit: 10,
+    });
+    if (
+      stripeSubs.data.some((sub) =>
+        ["active", "trialing", "past_due", "unpaid", "paused"].includes(sub.status)
+      )
+    ) {
+      await failSubscriptionCheckoutIntent(admin, intent.id);
+      return {
+        ok: false,
+        code: "ALREADY_SUBSCRIBED",
+        message:
+          "You already have a TrueCap subscription. Use Manage billing to switch plans or restore billing safely.",
+      };
+    }
+
+    // Recover an open Session from an ambiguous prior response. Returning its
+    // URL is safe only with exact actual Price/discount plus immutable
+    // user/plan/trial/Pack bindings. A pre-ledger or otherwise unverifiable
+    // Session blocks creation rather than risking a wrong offer or duplicate.
+    const recentSessions = await stripe.checkout.sessions.list({
+      customer: customerId,
+      limit: 100,
+      // Hosted Sessions expire within 24 hours. Include a small clock-skew
+      // buffer so a pre-ledger Session that completed between the two Stripe
+      // guards cannot disappear from the `status=open` result and race a new
+      // subscription into existence.
+      created: { gte: Math.floor(Date.now() / 1000) - 26 * 60 * 60 },
+      expand: ["data.line_items.data.price", "data.discounts.coupon"],
+    });
+    for (const recentSession of recentSessions.data.filter(
+      (candidate) => candidate.mode === "subscription"
+    )) {
+      if (recentSession.status === "open" &&
+        isReusableSubscriptionCheckoutSession({
+          session: recentSession,
+          intent,
+        })
+      ) {
+        intent = await markSubscriptionCheckoutIntentOpen(admin, intent.id, recentSession);
+        return { ok: true, url: recentSession.url! };
+      }
+      if (recentSession.status === "complete") {
+        if (recentSession.metadata?.checkout_intent_id === intent.id) {
+          await completeSubscriptionCheckoutIntentFromWebhook(admin, recentSession);
+        } else {
+          await failSubscriptionCheckoutIntent(admin, intent.id);
+        }
+        return {
+          ok: false,
+          code: "ALREADY_SUBSCRIBED",
+          message: "A recent checkout is already complete. Your subscription is being activated.",
+        };
+      }
+      if (recentSession.status === "expired") {
+        if (recentSession.metadata?.checkout_intent_id === intent.id) {
+          await expireSubscriptionCheckoutIntentFromWebhook(admin, recentSession);
+          return {
+            ok: false,
+            code: "CHECKOUT_IN_PROGRESS",
+            message: "Your prior checkout just expired. Please try once more to start a fresh one.",
+          };
+        }
+        continue;
+      }
+
+      Sentry.captureMessage("billing: another open subscription Checkout Session blocked creation", {
+        level: "warning",
+        tags: { feature: "billing-checkout", guard: "open-session-list" },
+        extra: { intentId: intent.id, stripeSessionId: recentSession.id },
+      });
+      return {
+        ok: false,
+        code: "CHECKOUT_IN_PROGRESS",
+        message:
+          "Another subscription checkout is already open. Finish that checkout or wait for it to expire before starting another.",
+      };
+    }
+
+    const siteUrl = getSiteUrl();
+    const session = await stripe.checkout.sessions.create(withTrueCapCheckoutBranding({
+        mode: "subscription",
+        customer: customerId,
+        client_reference_id: user.id,
+        expand: ["line_items.data.price", "discounts.coupon"],
+        line_items: [
+          {
+            price: intent.stripe_price_id,
+            quantity: 1,
+          },
+        ],
+        discounts: intent.stripe_discount_coupon_id
+          ? [{ coupon: intent.stripe_discount_coupon_id }]
+          : undefined,
+        allow_promotion_codes: intent.stripe_discount_coupon_id ? undefined : true,
+        // Land the new subscriber back on the calculator ("/") where their
+        // auto-saved draft + welcome-back banner are waiting.
+        success_url: `${siteUrl}/?billing=success&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${siteUrl}/pricing?billing=checkout_cancelled#plans`,
         metadata: {
+          checkout_intent_id: intent.id,
+          checkout_price_id: intent.stripe_price_id,
+          checkout_discount_coupon_id: intent.stripe_discount_coupon_id ?? "none",
+          checkout_trial_days: String(intent.trial_days),
           user_id: user.id,
-          plan_slug: parsed.data.planSlug,
+          plan_slug: intent.plan_slug,
+          trial_granted: String(intent.trial_days > 0),
+          ...(intent.pack_credit_claim_id
+            ? { pack_credit_claim_id: intent.pack_credit_claim_id }
+            : {}),
         },
-        ...(grantTrial && proTrialDays > 0 ? { trial_period_days: proTrialDays } : {}),
-      },
-    }));
+        subscription_data: {
+          metadata: {
+            user_id: user.id,
+            plan_slug: intent.plan_slug,
+          },
+          ...(intent.trial_days > 0 ? { trial_period_days: intent.trial_days } : {}),
+        },
+      }),
+      {
+        // Stable for this durable intent only. An ambiguous retry returns the
+        // same hosted Session; a later legitimate subscription gets a new
+        // intent id and therefore a new key.
+        idempotencyKey: `truecap-subscription-checkout:${intent.id}`,
+      }
+    );
+
+    if (!isReusableSubscriptionCheckoutSession({ session, intent })) {
+      Sentry.captureMessage("billing: created Checkout Session failed intent binding", {
+        level: "error",
+        tags: { feature: "billing-checkout", guard: "created-session-binding" },
+        extra: { intentId: intent.id, stripeSessionId: session.id },
+      });
+      return {
+        ok: false,
+        code: "SERVER_ERROR",
+        message: "We couldn't safely verify the new checkout. Please contact support.",
+      };
+    }
+    await markSubscriptionCheckoutIntentOpen(admin, intent.id, session);
 
     if (!session.url) {
       console.error("[billing] Stripe checkout session missing URL");
@@ -429,6 +658,14 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
       event: "checkout_started",
       properties: {
         plan_slug: parsed.data.planSlug,
+      },
+    });
+    await captureServerEvent({
+      distinctId: user.id,
+      event: "subscription_checkout_started",
+      properties: {
+        plan: parsed.data.planSlug,
+        interval: parsed.data.planSlug.endsWith("_annual") ? "annual" : "monthly",
       },
     });
     if (parsed.data.planSlug.startsWith("agent_pro")) {

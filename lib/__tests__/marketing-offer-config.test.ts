@@ -10,6 +10,7 @@ const ORIGINAL = {
   singleDeal: process.env.NEXT_PUBLIC_SINGLE_DEAL_PRICE_VARIANT,
   newHomepage: process.env.NEXT_PUBLIC_TRUECAP_NEW_HOMEPAGE_POSITIONING,
   guaranteeDisabled: process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_DISABLED,
+  guaranteeEnabled: process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_ENABLED,
   guaranteeTerms: process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_TERMS_URL,
 };
 
@@ -24,6 +25,7 @@ afterEach(() => {
   restore("NEXT_PUBLIC_SINGLE_DEAL_PRICE_VARIANT", ORIGINAL.singleDeal);
   restore("NEXT_PUBLIC_TRUECAP_NEW_HOMEPAGE_POSITIONING", ORIGINAL.newHomepage);
   restore("NEXT_PUBLIC_TRUECAP_GUARANTEE_DISABLED", ORIGINAL.guaranteeDisabled);
+  restore("NEXT_PUBLIC_TRUECAP_GUARANTEE_ENABLED", ORIGINAL.guaranteeEnabled);
   restore("NEXT_PUBLIC_TRUECAP_GUARANTEE_TERMS_URL", ORIGINAL.guaranteeTerms);
 });
 
@@ -34,22 +36,21 @@ describe("marketing offer configuration", () => {
     delete process.env.NEXT_PUBLIC_SINGLE_DEAL_PRICE_VARIANT;
     delete process.env.NEXT_PUBLIC_TRUECAP_NEW_HOMEPAGE_POSITIONING;
     delete process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_DISABLED;
+    delete process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_ENABLED;
     delete process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_TERMS_URL;
 
     const config = getMarketingOfferConfig();
 
-    expect(config.homepageHeadline).toBe(HOMEPAGE_HEADLINES.never_overpay);
+    expect(config.homepageHeadline).toBe(HOMEPAGE_HEADLINES.decision_system);
     expect(config.proOfferName).toBe("TrueCap Pro");
     expect(config.singleDeal).toMatchObject({ amount: 5, priceLabel: "$5" });
-    // The Never Overpay Guarantee defaults ON with the in-repo /guarantee
-    // terms page — the published-terms invariant holds structurally because
-    // the route ships in the same deploy as this config.
-    expect(config.guaranteeEnabled).toBe(true);
+    expect(config.guaranteeEnabled).toBe(false);
     expect(config.guaranteeTermsUrl).toBe("/guarantee");
   });
 
   it("selects the documented offer experiments without touching subscription billing", () => {
     process.env.NEXT_PUBLIC_TRUECAP_HOMEPAGE_HEADLINE = "b";
+    process.env.NEXT_PUBLIC_TRUECAP_NEW_HOMEPAGE_POSITIONING = "false";
     process.env.NEXT_PUBLIC_TRUECAP_PRO_NAME = "offer_engine";
     process.env.NEXT_PUBLIC_SINGLE_DEAL_PRICE_VARIANT = "p19";
 
@@ -74,19 +75,28 @@ describe("marketing offer configuration", () => {
     });
   });
 
-  it("keeps the new walk-away positioning dark until its rollout flag is enabled", () => {
+  it("uses the approved decision-system positioning by default and retains a rollback switch", () => {
     process.env.NEXT_PUBLIC_TRUECAP_HOMEPAGE_HEADLINE = "b";
-    process.env.NEXT_PUBLIC_TRUECAP_NEW_HOMEPAGE_POSITIONING = "true";
+    delete process.env.NEXT_PUBLIC_TRUECAP_NEW_HOMEPAGE_POSITIONING;
 
-    const config = getMarketingOfferConfig();
+    expect(getMarketingOfferConfig()).toMatchObject({
+      newHomepagePositioningEnabled: true,
+      homepageHeadlineVariant: "decision_system",
+      homepageHeadline: HOMEPAGE_HEADLINES.decision_system,
+    });
 
-    expect(config.newHomepagePositioningEnabled).toBe(true);
-    expect(config.homepageHeadlineVariant).toBe("walkaway");
-    expect(config.homepageHeadline).toBe(HOMEPAGE_HEADLINES.walkaway);
+    process.env.NEXT_PUBLIC_TRUECAP_NEW_HOMEPAGE_POSITIONING = "false";
+    expect(getMarketingOfferConfig()).toMatchObject({
+      newHomepagePositioningEnabled: false,
+      homepageHeadlineVariant: "b",
+      homepageHeadline: HOMEPAGE_HEADLINES.b,
+    });
   });
 
   it("honors the guarantee kill switch and keeps the terms link safe", () => {
-    // Kill switch turns every guarantee surface off in one env var.
+    // An explicit, reviewed opt-in is required; the kill switch still wins.
+    process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_ENABLED = "1";
+    expect(getMarketingOfferConfig().guaranteeEnabled).toBe(true);
     process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_DISABLED = "1";
     expect(getMarketingOfferConfig().guaranteeEnabled).toBe(false);
     delete process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_DISABLED;

@@ -53,7 +53,7 @@ export const analysisTemplateSchema = z.object({
   buyBox: z
     .object({
       minCapRatePct: z.number().min(0).max(100).nullish(),
-      minCocPct: z.number().min(-100).max(1000).nullish(),
+      minCocPct: z.number().min(0).max(1000).nullish(),
       minDscr: z.number().min(0).max(100).nullish(),
       minCashFlowMonthly: z.number().min(-1_000_000).max(1_000_000).nullish(),
       maxPurchasePrice: z.number().min(0).max(1_000_000_000).nullish(),

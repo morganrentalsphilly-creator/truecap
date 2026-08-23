@@ -17,6 +17,7 @@ import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 import {
   buyBoxHasCriteria,
   evaluateBuyBoxes,
+  selectDecidingBuyBoxResult,
   summarizeBuyBoxFit,
   type BuyBoxDealMetrics,
   type NamedBuyBox,
@@ -44,6 +45,7 @@ export function BuyBoxVerdictCard({
   values,
   onFitChange,
   onQaContextChange,
+  onLoadStateChange,
 }: {
   enabled: boolean;
   metrics: BuyBoxDealMetrics | null;
@@ -63,35 +65,67 @@ export function BuyBoxVerdictCard({
    *  so AI answers are grounded in exactly what this card shows on screen.
    *  null = no active box / not evaluated. */
   onQaContextChange?: (report: DealQaBuyBoxReport | null) => void;
+  /** True only after the current user's usable Buy Boxes have resolved. The
+   *  parent uses this to prevent Save/Share/PDF from capturing the fallback
+   *  target during the async account lookup. */
+  onLoadStateChange?: (state: "loading" | "ready" | "error") => void;
 }) {
   const [boxes, setBoxes] = useState<NamedBuyBox[] | null>(null);
+  const [lookupState, setLookupState] = useState<"idle" | "loading" | "resolved" | "error">(
+    "idle"
+  );
   // Mobile-only progressive disclosure for the per-criterion grid — the
   // headline + personal line answer "does it fit?"; the grid is detail.
   const [showChecks, setShowChecks] = useState(false);
 
   useEffect(() => {
     if (!enabled) {
-      setBoxes(null);
+      setBoxes([]);
+      setLookupState("resolved");
       return;
     }
+    setBoxes(null);
+    setLookupState("loading");
+    onFitChange?.(null);
+    onQaContextChange?.(null);
+    onLoadStateChange?.("loading");
     let cancelled = false;
     void listBuyBoxesAction()
       .then((result) => {
         if (cancelled) return;
+        if (!result.ok) {
+          setBoxes([]);
+          setLookupState("error");
+          onFitChange?.(null);
+          onQaContextChange?.(null);
+          onLoadStateChange?.("error");
+          return;
+        }
         // Only adopt boxes the user can use, that are switched on and have ≥1 rule.
-        if (result.ok && result.canUse) {
+        if (result.canUse) {
           setBoxes(result.boxes.filter((b) => b.isActive && buyBoxHasCriteria(b)));
         } else {
-          setBoxes(null);
+          setBoxes([]);
         }
+        setLookupState("resolved");
       })
       .catch((err) => {
-        if (!cancelled) console.warn("[buy-box-verdict] load failed:", err);
+        if (!cancelled) {
+          console.warn("[buy-box-verdict] load failed:", err);
+          setBoxes([]);
+          setLookupState("error");
+          onFitChange?.(null);
+          onQaContextChange?.(null);
+          // Fail closed: a transient account lookup must never let Save,
+          // Share, or PDF capture a canonical fallback that silently drops
+          // the user's Buy Box criteria.
+          onLoadStateChange?.("error");
+        }
       });
     return () => {
       cancelled = true;
     };
-  }, [enabled]);
+  }, [enabled, onFitChange, onLoadStateChange, onQaContextChange]);
 
   const evaluated = useMemo(() => {
     if (!boxes || boxes.length === 0 || !metrics) return null;
@@ -100,11 +134,8 @@ export function BuyBoxVerdictCard({
     return { results, summary: summarizeBuyBoxFit(results) };
   }, [boxes, metrics]);
 
-  // Effect (not inline) so the parent isn't set-stated mid-render.
-  const anyPass = evaluated ? evaluated.summary.anyPass : null;
-  useEffect(() => {
-    onFitChange?.(anyPass);
-  }, [anyPass, onFitChange]);
+  const decidingBox = evaluated ? selectDecidingBuyBoxResult(evaluated.results) : null;
+  const anyPass = decidingBox ? decidingBox.result.passes : null;
 
   // Deal Q&A grounding report — same evaluation, prompt-ready shape. The
   // JSON key guard makes re-sends idempotent even if `metrics` (an inline
@@ -114,14 +145,19 @@ export function BuyBoxVerdictCard({
     () => (evaluated ? buildBuyBoxQaReport(evaluated.results, evaluated.summary) : null),
     [evaluated]
   );
-  const lastQaKeyRef = useRef<string | null>(null);
+  const lastDeliveryKeyRef = useRef<string | null | undefined>(undefined);
   useEffect(() => {
-    if (!onQaContextChange) return;
-    const key = qaReport ? JSON.stringify(qaReport) : null;
-    if (key === lastQaKeyRef.current) return;
-    lastQaKeyRef.current = key;
-    onQaContextChange(qaReport);
-  }, [qaReport, onQaContextChange]);
+    if (lookupState !== "resolved") return;
+    const key = JSON.stringify({ anyPass, qaReport });
+    if (key === lastDeliveryKeyRef.current) return;
+    lastDeliveryKeyRef.current = key;
+    // Deliver fit + exact target report before marking the lookup ready. React
+    // batches these parent updates, so no committed frame can enable
+    // Save/Share/PDF against the fallback target.
+    onFitChange?.(anyPass);
+    onQaContextChange?.(qaReport);
+    onLoadStateChange?.("ready");
+  }, [anyPass, lookupState, onFitChange, onLoadStateChange, onQaContextChange, qaReport]);
 
   // "Your number" — computed ONLY in the fail state (the memo body bails
   // first, so the iterative solver never runs on a passing deal). Closes
@@ -132,7 +168,8 @@ export function BuyBoxVerdictCard({
   // instead (it's already on screen in the failed checks, so it's free).
   const yourNumber = useMemo<YourNumberLine | null>(() => {
     if (!values || !metrics || !evaluated) return null;
-    const primary = evaluated.results[0]!;
+    const primary = selectDecidingBuyBoxResult(evaluated.results);
+    if (!primary) return null;
     const r = primary.result;
     if (r.passes || r.failedLabels.length === 0) return null;
     const nonPrice = r.checks.filter(
@@ -163,8 +200,11 @@ export function BuyBoxVerdictCard({
 
   if (!evaluated) return null;
 
-  // Detail the default box (the action returns default-first).
-  const primary = evaluated.results[0]!;
+  // Detail the same deciding box that supplies the Offer Ceiling: the first
+  // passing box, otherwise the highest-priority box. The N-of-M line remains
+  // an aggregate summary and is deliberately labeled separately.
+  const primary = selectDecidingBuyBoxResult(evaluated.results);
+  if (!primary) return null;
   const r = primary.result;
   const multi = evaluated.results.length > 1;
   const { summary } = evaluated;
@@ -173,11 +213,7 @@ export function BuyBoxVerdictCard({
     const target = chooseMaoTargetFromBuyBox(primary.box, {
       isCashPurchase: metrics.isCashPurchase,
     });
-    const criteria = target ? [describeMaoTarget(target)] : [];
-    if (primary.box.maxPurchasePrice != null) {
-      criteria.push(`purchase price ≤ ${money(primary.box.maxPurchasePrice)}`);
-    }
-    return criteria.join(" · ") || "this buy box’s price criteria";
+    return target ? describeMaoTarget(target) : "this buy box’s price criteria";
   })();
 
   const headline = r.passes

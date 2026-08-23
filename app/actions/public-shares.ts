@@ -19,9 +19,19 @@ import { z } from "zod";
 import * as Sentry from "@sentry/nextjs";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { investmentFormSchema } from "@/lib/investcalc-schema";
-import { mintPublicShare } from "@/lib/public-share";
+import {
+  mintPublicShare,
+  type PublicShareAddressVisibility,
+  type PublicShareAudience,
+} from "@/lib/public-share";
 import { getSiteUrl } from "@/lib/site-url";
 import { createIpRateLimit, getRequestIp } from "@/lib/ip-rate-limit";
+import {
+  normalizeMaoTarget,
+  normalizeMaoTargetForFinancing,
+} from "@/lib/mao-target-editor";
+import { calculateAnalysis } from "@/lib/calc-analysis";
+import { captureServerEvent } from "@/lib/posthog-server";
 
 export type CreatePublicShareResult =
   | { ok: true; url: string }
@@ -45,11 +55,27 @@ export async function createPublicShareAction(input: unknown): Promise<CreatePub
       values: investmentFormSchema,
       title: z.string().trim().max(200).optional(),
       dealId: z.string().uuid().optional(),
+      maoTarget: z.unknown().optional(),
+      maoTargetSource: z
+        .enum(["buy-box", "screening-defaults", "selected-targets"])
+        .optional(),
+      audience: z.enum(["investment-partner", "client", "lender-review"]).optional(),
+      addressVisibility: z.enum(["hidden", "full"]).optional(),
     })
     .safeParse(input);
   if (!parsed.success) {
     return { ok: false, code: "VALIDATION_ERROR", message: "Couldn't read this analysis." };
   }
+  const parsedMaoTarget =
+    parsed.data.maoTarget === undefined ? undefined : normalizeMaoTarget(parsed.data.maoTarget);
+  if (parsed.data.maoTarget !== undefined && !parsedMaoTarget) {
+    return { ok: false, code: "VALIDATION_ERROR", message: "Couldn't read these targets." };
+  }
+  const maoTarget = parsedMaoTarget
+    ? normalizeMaoTargetForFinancing(parsedMaoTarget, {
+        isCashPurchase: calculateAnalysis(parsed.data.values).monthlyPayment <= 0,
+      }) ?? undefined
+    : undefined;
 
   if (shareRateLimit.isOverLimit(await getRequestIp())) {
     return {
@@ -80,9 +106,16 @@ export async function createPublicShareAction(input: unknown): Promise<CreatePub
 
   const path = await mintPublicShare({
     values: parsed.data.values,
-    title: parsed.data.title || parsed.data.values.address || undefined,
+    title:
+      parsed.data.addressVisibility === "full"
+        ? parsed.data.title || parsed.data.values.address || undefined
+        : "Shared rental analysis",
     ownerId: user?.id ?? null,
     dealId: dealId ?? null,
+    maoTarget: maoTarget ?? undefined,
+    maoTargetSource: parsed.data.maoTargetSource,
+    audience: (parsed.data.audience ?? "investment-partner") as PublicShareAudience,
+    addressVisibility: (parsed.data.addressVisibility ?? "hidden") as PublicShareAddressVisibility,
   });
   if (!path) {
     // Never fall back to a URL containing the analysis payload. Existing /d
@@ -169,6 +202,7 @@ export async function revokePublicShareAction(input: unknown): Promise<RevokePub
     return { ok: false, code: "SERVER_ERROR", message: "Couldn't revoke the link." };
   }
   if (!data) return { ok: false, code: "NOT_FOUND", message: "That share no longer exists." };
+  await captureServerEvent({ distinctId: user.id, event: "share_revoked" });
   return { ok: true };
 }
 

@@ -561,6 +561,22 @@ export function summarizeBuyBoxFit(results: NamedBuyBoxResult[]): BuyBoxFitSumma
   };
 }
 
+/**
+ * Select the single Buy Box that owns this decision and its Offer Ceiling.
+ *
+ * A multi-box rollup may say that a deal meets *any* saved box. Pairing that
+ * aggregate fit with the default box's thresholds creates an impossible
+ * hybrid decision when a non-default box is the one that passed. Use the
+ * highest-priority passing box; when none pass, use the highest-priority box
+ * so the miss and the price ceiling still share one explicit basis.
+ */
+export function selectDecidingBuyBoxResult(
+  results: NamedBuyBoxResult[]
+): NamedBuyBoxResult | null {
+  const active = results.filter((entry) => entry.result.active);
+  return active.find((entry) => entry.result.passes) ?? active[0] ?? null;
+}
+
 /** "X of your N active deals pass this box" — the save-feedback count. */
 export type BuyBoxFitCount = { passing: number; evaluated: number };
 

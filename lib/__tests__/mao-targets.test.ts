@@ -44,12 +44,12 @@ describe("buildMaoTarget", () => {
     expect(target).toEqual({ monthlyCashFlow: 200 });
   });
 
-  it("falls back to the default basis for a box with only price/type/market rules", () => {
+  it("preserves a hard Buy Box purchase-price ceiling as an exact target", () => {
     const target = buildMaoTarget(
       box({ maxPurchasePrice: 300_000, propertyTypes: ["single-family"], targetStates: ["PA"] }),
       { isCashPurchase: false }
     );
-    expect(target).toEqual(DEFAULT_MAO_TARGET);
+    expect(target).toEqual({ maxPurchasePrice: 300_000 });
   });
 
   it("falls back to break-even cash flow for a DSCR-only box on a cash deal", () => {
@@ -88,8 +88,16 @@ describe("describeMaoTarget", () => {
 
   it("labels buy-box thresholds with signed money and units", () => {
     expect(
-      describeMaoTarget({ monthlyCashFlow: 150, dscr: 1.2, capRate: 6, cocReturn: 7.5 })
-    ).toBe("cash flow ≥ $150/mo · DSCR ≥ 1.2 · cap rate ≥ 6% · cash-on-cash ≥ 7.5%");
+      describeMaoTarget({
+        monthlyCashFlow: 150,
+        dscr: 1.2,
+        capRate: 6,
+        cocReturn: 7.5,
+        maxPurchasePrice: 300_000,
+      })
+    ).toBe(
+      "cash flow ≥ $150/mo · DSCR ≥ 1.2 · cap rate ≥ 6% · cash-on-cash ≥ 7.5% · purchase price ≤ $300,000"
+    );
   });
 
   it("handles a negative cash-flow floor", () => {
@@ -122,5 +130,14 @@ describe("buyBoxContributesToMaoTarget (basis attribution)", () => {
   it("never credits a null/threshold-less box", () => {
     expect(buyBoxContributesToMaoTarget(null, { isCashPurchase: false })).toBe(false);
     expect(buyBoxContributesToMaoTarget({} as never, { isCashPurchase: false })).toBe(false);
+  });
+
+  it("credits a hard purchase-price cap because it changes the displayed ceiling", () => {
+    expect(
+      buyBoxContributesToMaoTarget(
+        { maxPurchasePrice: 250_000 } as never,
+        { isCashPurchase: false }
+      )
+    ).toBe(true);
   });
 });

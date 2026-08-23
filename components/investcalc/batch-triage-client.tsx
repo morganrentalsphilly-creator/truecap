@@ -621,6 +621,7 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
                             prefetch={false}
                             target="_blank"
                             rel="noopener"
+                            onClick={() => trackEvent("shortlist_item_promoted", { source: "triage" })}
                             className="-my-2 inline-flex min-h-11 items-center gap-1 rounded-md py-2 text-xs font-semibold text-primary outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
                           >
                             Open <ArrowUpRight className="size-3.5" />
@@ -678,7 +679,7 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
                       <BuyBoxFitBadge fit={row.buyBoxFit ?? undefined} />
                       {/* 44px touch band (min-h-11 + canceling -my/py) — this is
                           the card's only action; visual height unchanged. */}
-                      <Link href={openUrl(row)} prefetch={false} target="_blank" rel="noopener" className="-my-2 ml-auto inline-flex min-h-11 items-center gap-1 rounded-md py-2 text-xs font-semibold text-primary outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring">
+                      <Link href={openUrl(row)} prefetch={false} target="_blank" rel="noopener" onClick={() => trackEvent("shortlist_item_promoted", { source: "triage" })} className="-my-2 ml-auto inline-flex min-h-11 items-center gap-1 rounded-md py-2 text-xs font-semibold text-primary outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring">
                         Open in analyzer <ArrowUpRight className="size-3.5" />
                       </Link>
                     </div>

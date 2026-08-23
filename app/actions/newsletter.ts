@@ -112,7 +112,10 @@ export async function subscribeToNewsletterAction(
     // in some cases (treats POST as upsert).
     if (response.ok) {
       await captureServerEvent({
-        distinctId: parsed.data.email,
+        // Product analytics does not need subscriber identity. The email is
+        // sent only to Resend for the requested newsletter operation and is
+        // never reused as a PostHog identifier.
+        distinctId: "$newsletter",
         event: "newsletter_subscribed",
         properties: { source: parsed.data.source ?? "other" },
       });

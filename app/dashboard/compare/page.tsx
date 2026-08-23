@@ -41,8 +41,9 @@ import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { computeDealOfferLine } from "@/lib/deal-offer-line";
 import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
+import { normalizeMaoTarget } from "@/lib/mao-target-editor";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
-import type { NamedBuyBox } from "@/lib/buy-box";
+import { buyBoxHasCriteria, type NamedBuyBox } from "@/lib/buy-box";
 import { normalizeDataConfidence, type DataConfidence } from "@/lib/data-confidence";
 import { DEFAULT_PIPELINE_STAGE, type PipelineStage } from "@/lib/pipeline";
 
@@ -76,6 +77,7 @@ type ResultSnapshot = {
   riskLevel?: StoredRiskLevel | null;
   snapshotVersion?: number | string | null;
   compareSnapshot?: unknown;
+  maxOfferTarget?: unknown;
 };
 
 type SavedAnalysisRow = {
@@ -108,10 +110,22 @@ type SavedAnalysisRow = {
   scenario_name?: string | null;
   pipeline_stage?: PipelineStage | null;
   data_confidence?: unknown;
+  client_id?: string | null;
 };
 
 function isMissingColumnError(error: { code?: string; message?: string } | null): boolean {
   return !!error && (error.code === "42703" || /column .* does not exist/i.test(error.message ?? ""));
+}
+
+function isMissingNamedColumnError(
+  error: { code?: string; message?: string } | null,
+  column: string
+): boolean {
+  return Boolean(
+    error &&
+      isMissingColumnError(error) &&
+      new RegExp(`(?:column\\s+)?[^\\n]*${column}`, "i").test(error.message ?? "")
+  );
 }
 
 function toNumber(value: number | string | null | undefined): number | null {
@@ -147,7 +161,9 @@ function methodologyLabel(resolution: ReturnType<typeof resolveSavedAnalysisSnap
 
 function mapDeal(
   row: SavedAnalysisRow,
-  activeBuyBoxes: NamedBuyBox[] = []
+  activeBuyBoxes: NamedBuyBox[] = [],
+  canShowMao = false,
+  buyBoxesResolved = true
 ): CompareDealViewModel {
   const recomputed = recomputeSavedDealVerdict(row.form_snapshot);
   const resolution = resolveSavedAnalysisSnapshot({
@@ -185,6 +201,37 @@ function mapDeal(
     : (snapshot.riskLevel ?? null);
   const scoringComplete = score != null && !!recommendation && !!riskLevel;
   const signal = scoringComplete && recommendation ? recommendationToSignal(recommendation) : null;
+  let maxOffer: number | null = null;
+  let offerGap: number | null = null;
+  let maxOfferBasisLabel: string | null = null;
+  const persistedMaoTarget = normalizeMaoTarget(
+    row.result_snapshot?.maxOfferTarget
+  );
+  // Frozen rows deliberately retain metrics from an incompatible historical
+  // methodology. Never put a current-engine inverse solve beside them; the
+  // user must explicitly re-underwrite first (same rule as My Deals/PDF).
+  if (
+    canShowMao &&
+    !resolution.shouldFreeze &&
+    (persistedMaoTarget != null || buyBoxesResolved)
+  ) {
+    const values = normalizeInvestmentFormSnapshot(row.form_snapshot);
+    if (values) {
+      try {
+        const { offer, basisLabel } = computeDealOfferLine(values, activeBuyBoxes, {
+          isShoppingStage: true,
+          dealClientId: row.client_id ?? null,
+          persistedMaoTarget,
+        });
+        maxOffer = offer && offer.kind !== "blocked" ? offer.maxPrice ?? null : null;
+        offerGap =
+          maxOffer != null && purchasePrice != null ? purchasePrice - maxOffer : null;
+        maxOfferBasisLabel = maxOffer != null && basisLabel ? basisLabel : null;
+      } catch {
+        // A legacy/unsolvable deal keeps these cells empty; Compare still opens.
+      }
+    }
+  }
 
   const metrics = {
     netCashFlow,
@@ -203,28 +250,11 @@ function mapDeal(
     monthlyRentalIncome: resolvedCurrent ? resolvedCurrent.monthlyRentalIncome : toNumber(snapshot.monthlyRentalIncome),
     totalOperatingExpenses: resolvedCurrent ? resolvedCurrent.totalOperatingExpenses : toNumber(snapshot.totalOperatingExpenses),
     purchasePrice,
-    // Max Offer + gap. Solved through the SAME lib/deal-offer-line path the
-    // dashboard and My Deals use — Max Offer is not persisted anywhere, so
-    // every surface recomputes it from form_snapshot. "blocked" carries no
-    // price by design (no dollar figure fixes a wrong-market miss).
-    ...(() => {
-      const values = normalizeInvestmentFormSnapshot(row.form_snapshot);
-      if (!values) return { maxOffer: null, offerGap: null };
-      try {
-        const { offer } = computeDealOfferLine(values, activeBuyBoxes, {
-          isShoppingStage: true,
-        });
-        const maxOffer =
-          offer && offer.kind !== "blocked" ? offer.maxPrice ?? null : null;
-        return {
-          maxOffer,
-          offerGap:
-            maxOffer != null && purchasePrice != null ? purchasePrice - maxOffer : null,
-        };
-      } catch {
-        return { maxOffer: null, offerGap: null };
-      }
-    })(),
+    // Max Offer + gap use the exact persisted target resolved just above.
+    // "blocked" carries no price by design (no dollar figure fixes a
+    // wrong-market miss).
+    maxOffer,
+    offerGap,
     totalCashRequired: resolvedCurrent ? resolvedCurrent.cashToClose : toNumber(snapshot.totalCashRequired),
     monthlyPayment: resolvedCurrent ? resolvedCurrent.monthlyPayment : toNumber(snapshot.monthlyPayment),
     pmiMonthly: resolvedCurrent
@@ -268,6 +298,7 @@ function mapDeal(
     scoringComplete,
     breakdown: resolvedCurrent?.breakdown ?? frozenScore?.breakdown ?? null,
     metrics,
+    maxOfferBasisLabel,
     signal,
     assumptions,
     compareSnapshotVersion,
@@ -301,6 +332,9 @@ export default async function DashboardComparePage() {
   ]);
   const displayName = getDisplayName((profile as ProfileRow | null) ?? null, user.email);
   const initials = getInitials(displayName, user.email ?? "");
+  // MAO uses the catalog's paid-status gate. Requiring a nonexistent `mao`
+  // plan-feature string would incorrectly hide it from valid Pro customers.
+  const canShowMao = isPremium;
 
   if (ids.length < 1) {
     // Inline picker: load the user's saved deals so they can choose 2-4 to
@@ -414,20 +448,26 @@ export default async function DashboardComparePage() {
       .eq("is_completed", false)
       .eq("is_archived", false)
       .in("id", ids);
+  const runCompareQueryWithClient = async (select: string) => {
+    const withClient = await runCompareQuery(`${select}, client_id`);
+    return isMissingNamedColumnError(withClient.error, "client_id")
+      ? runCompareQuery(select)
+      : withClient;
+  };
   // Confidence + prior stage power trust badges and a genuine Undo. Both
   // columns are additive migrations, so an older environment falls back to
   // the stable core select instead of breaking comparison entirely.
-  let { data: rows, error } = await runCompareQuery(
+  let { data: rows, error } = await runCompareQueryWithClient(
     `${COMPARE_SELECT}, scenario_name, pipeline_stage, data_confidence`
   );
   if (isMissingColumnError(error)) {
-    ({ data: rows, error } = await runCompareQuery(`${COMPARE_SELECT}, scenario_name, pipeline_stage`));
+    ({ data: rows, error } = await runCompareQueryWithClient(`${COMPARE_SELECT}, scenario_name, pipeline_stage`));
   }
   if (isMissingColumnError(error)) {
-    ({ data: rows, error } = await runCompareQuery(`${COMPARE_SELECT}, scenario_name`));
+    ({ data: rows, error } = await runCompareQueryWithClient(`${COMPARE_SELECT}, scenario_name`));
   }
   if (isMissingColumnError(error)) {
-    ({ data: rows, error } = await runCompareQuery(COMPARE_SELECT));
+    ({ data: rows, error } = await runCompareQueryWithClient(COMPARE_SELECT));
   }
 
   if (error) {
@@ -463,11 +503,16 @@ export default async function DashboardComparePage() {
   );
   const buyBoxesResult = await listBuyBoxesAction().catch(() => null);
   const activeCompareBuyBoxes =
-    buyBoxesResult && buyBoxesResult.ok && buyBoxesResult.canUse ? buyBoxesResult.boxes : [];
+    buyBoxesResult && buyBoxesResult.ok && buyBoxesResult.canUse
+      ? buyBoxesResult.boxes.filter((box) => box.isActive && buyBoxHasCriteria(box))
+      : [];
+  const compareBuyBoxesResolved = Boolean(buyBoxesResult?.ok);
   const deals = ids.map((id) => rowById.get(id)).filter((row): row is SavedAnalysisRow => Boolean(row))
     // Buy boxes resolve on the same canUse gate the dashboard and My Deals
     // use, so a Compare row's Max Offer matches those screens exactly.
-    .map((row) => mapDeal(row, activeCompareBuyBoxes));
+    .map((row) =>
+      mapDeal(row, activeCompareBuyBoxes, canShowMao, compareBuyBoxesResolved)
+    );
 
   // Stale-cookie recovery: cookie has IDs but none match a current
   // active deal (deleted, archived, or marked completed since the

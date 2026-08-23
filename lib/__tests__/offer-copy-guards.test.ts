@@ -107,8 +107,9 @@ describe("offer trust language", () => {
   it("describes new read-only deal links as opaque, expiring, and revocable", () => {
     const share = read("components/investcalc/share-link-button.tsx");
     const privacy = read("app/privacy/page.tsx");
-    expect(share).toContain("Anyone with the link can view a read-only snapshot");
-    expect(share).toContain("opaque, revocable URL");
+    expect(share).toContain("Anyone who receives");
+    expect(share).toContain("opaque, expiring link");
+    expect(share).toContain("The exact address stays hidden by default");
     expect(privacy).toMatch(/Anyone with\s+the link can view it without an\s+account/);
     expect(privacy).toMatch(/opaque, owner-revocable link/);
     expect(privacy).toMatch(/expires after 180 days by default/);

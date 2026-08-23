@@ -12,7 +12,11 @@
  */
 
 import { calculateAnalysis, AnalysisResult } from "@/lib/calc-analysis";
-import { InvestmentFormValues } from "@/lib/investcalc-schema";
+import {
+  MAX_PURCHASE_PRICE,
+  type InvestmentFormValues,
+} from "@/lib/investcalc-schema";
+import { meetsMaoTarget } from "@/lib/mao-target-evaluation";
 
 export type MaoTarget = {
   /** Target cap rate as a percent (e.g. 8 for 8%). */
@@ -23,6 +27,8 @@ export type MaoTarget = {
   monthlyCashFlow?: number;
   /** Target DSCR (e.g. 1.25). Ignored for cash purchases (no debt service). */
   dscr?: number;
+  /** Absolute purchase-price ceiling in dollars (for example, a Buy Box budget). */
+  maxPurchasePrice?: number;
 };
 
 export type MaoResult = {
@@ -38,15 +44,7 @@ export type MaoResult = {
 /** True when an analysis result satisfies every provided target. Shared by the
  *  price solver and the inverse (required-input) solvers below. */
 export function meetsTarget(r: AnalysisResult, target: MaoTarget): boolean {
-  if (target.capRate !== undefined && r.capRate < target.capRate) return false;
-  if (target.cocReturn !== undefined && r.cocReturn < target.cocReturn) return false;
-  if (target.monthlyCashFlow !== undefined && r.netCashFlow < target.monthlyCashFlow) return false;
-  // DSCR has no economic meaning when there is no debt service. The public
-  // MaoTarget contract says the target is ignored for cash purchases, so do
-  // that here as well as at the UI target-building layer. Otherwise a cash
-  // deal's sentinel dscr=0 makes an otherwise-solvable target unreachable.
-  if (target.dscr !== undefined && r.monthlyPayment > 0 && r.dscr < target.dscr) return false;
-  return true;
+  return meetsMaoTarget(r, target);
 }
 
 function hasAnyTarget(t: MaoTarget): boolean {
@@ -54,7 +52,8 @@ function hasAnyTarget(t: MaoTarget): boolean {
     t.capRate !== undefined ||
     t.cocReturn !== undefined ||
     t.monthlyCashFlow !== undefined ||
-    t.dscr !== undefined
+    t.dscr !== undefined ||
+    t.maxPurchasePrice !== undefined
   );
 }
 
@@ -73,12 +72,35 @@ export function calculateMaxAllowableOffer(
   opts?: { minPrice?: number; maxPrice?: number; iterations?: number }
 ): MaoResult | null {
   if (!hasAnyTarget(target)) return null;
+  // Negative CoC thresholds do not produce a monotone price ceiling. All
+  // product inputs now reject them; keep this final trust-boundary guard for
+  // hand-built or legacy callers.
+  if (target.cocReturn !== undefined && target.cocReturn < 0) return null;
+  // A hard target above the supported form/calculation domain is not an
+  // exact $100M ceiling. Reject it instead of clamping and presenting the
+  // search boundary as a financial result.
+  if (
+    target.maxPurchasePrice !== undefined &&
+    target.maxPurchasePrice > MAX_PURCHASE_PRICE
+  ) {
+    return null;
+  }
 
-  // Sanity bounds. Investors searching this tool will be looking at prices
-  // between $10k (a vacant lot) and $10M (small commercial).
+  // Use the same upper bound as the accepted purchase-price form. A lower
+  // private search limit would make a viable $20M acquisition look as though
+  // its ceiling were exactly $10M. An explicit Buy Box budget remains the
+  // tighter upper bound when present.
   const minPrice = opts?.minPrice ?? 10_000;
-  const maxPrice = opts?.maxPrice ?? 10_000_000;
+  const requestedMaxPrice =
+    opts?.maxPrice ?? target.maxPurchasePrice ?? MAX_PURCHASE_PRICE;
+  const maxPrice = Math.min(
+    requestedMaxPrice,
+    target.maxPurchasePrice ?? Number.POSITIVE_INFINITY,
+    MAX_PURCHASE_PRICE
+  );
   const iterations = opts?.iterations ?? 28;
+
+  if (!Number.isFinite(maxPrice) || maxPrice < minPrice) return null;
 
   const meetsTargets = (r: AnalysisResult): boolean => meetsTarget(r, target);
 
@@ -93,6 +115,22 @@ export function calculateMaxAllowableOffer(
     if (!meetsTargets(minResult)) return null;
   } catch {
     return null;
+  }
+
+  // The upper bound is a valid candidate, especially when it came from an
+  // explicit purchase-price cap. A midpoint-only bisection approaches `hi`
+  // without ever testing it, which used to shave an extra $500 from an exact
+  // $200,000 budget. If the bound clears every target, return its displayed
+  // floor immediately; no higher price is permitted by this solve.
+  const maxResult = safeCalc({ ...values, purchasePrice: maxPrice });
+  if (maxResult && meetsTargets(maxResult)) {
+    const roundedPrice = Math.max(minPrice, Math.floor(maxPrice / 500) * 500);
+    const achievedAtRounded = safeCalc({ ...values, purchasePrice: roundedPrice });
+    return {
+      target,
+      maxPrice: roundedPrice,
+      achieved: achievedAtRounded ?? maxResult,
+    };
   }
 
   let best: { price: number; result: AnalysisResult } | null = null;

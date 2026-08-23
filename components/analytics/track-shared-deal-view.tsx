@@ -26,6 +26,10 @@ export function TrackSharedDealView({ hasAddress }: { hasAddress: boolean }) {
     if (fired.current) return;
     fired.current = true;
     trackEvent("shared_deal_viewed", { has_address: hasAddress });
+    trackEvent("share_viewed", {
+      address_included: hasAddress,
+      share_format: "opaque_or_legacy",
+    });
   }, [hasAddress]);
   return null;
 }

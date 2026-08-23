@@ -67,7 +67,7 @@ export function buildProPreviewValues(
   }
 
   if (kind === "exit-scenarios") {
-    // Tiles: Best Year to Sell / Year 5 Profit / Total ROI. Recomputed from
+    // Tiles: Modeled Exit Comparison / Year 5 Profit / Total ROI. Recomputed from
     // the SAME input construction the Pro exit panel + PDF use, so the
     // teaser matches what the upgrade reveals.
     if (

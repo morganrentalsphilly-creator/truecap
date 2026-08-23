@@ -13,11 +13,21 @@ describe("rental price-ceiling surface copy", () => {
   it("prints exact criteria beside every numerical PDF price ceiling", () => {
     const pdf = read("../pdf-generator.ts");
     expect(pdf).not.toContain('"canonical target"');
-    expect(pdf).toContain('["PRICE CEILING", d.maxOffer ? fmtCurrency(d.maxOffer.maxPrice)');
-    expect(pdf).toContain('`Criteria: ${d.maxOffer.basis}`');
-    expect(pdf).toContain('`Price ceiling criteria: ${d.maxOffer.basis}`');
+    expect(pdf).toContain("if (d.maxOffer !== undefined) {");
+    expect(pdf).toContain('"PRICE CEILING",');
+    expect(pdf).toContain(
+      'd.maxOffer ? fmtCurrency(d.maxOffer.maxPrice) : "Not solvable"'
+    );
+    expect(pdf).toContain(
+      '`${d.maxOffer.sourceLabel ?? "Captured targets"}: ${d.maxOffer.basis}`'
+    );
+    expect(pdf).toContain(
+      '`Price ceiling — ${d.maxOffer.sourceLabel ?? "captured targets"}: ${d.maxOffer.basis}`'
+    );
     expect(pdf).toContain('`Price ceiling ${fmtCurrency(d.maxOffer.maxPrice)}`');
     expect(pdf.match(new RegExp(CLARIFICATION.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g"))?.length)
+      .toBeGreaterThanOrEqual(1);
+    expect(pdf.match(/This is not a recommended offer\./g)?.length)
       .toBeGreaterThanOrEqual(3);
   });
 
@@ -42,7 +52,9 @@ describe("rental price-ceiling surface copy", () => {
     expect(verdict).toContain("Price ceiling: {money(yourNumber.maxPrice)}");
     expect(verdict).toContain("Criteria: {yourNumberCriteria}");
     expect(verdict).toContain("describeMaoTarget(target)");
-    expect(verdict).toContain("primary.box.maxPurchasePrice");
+    // describeMaoTarget includes maxPurchasePrice exactly once; a prior manual
+    // append duplicated that criterion beside the ceiling.
+    expect(verdict).not.toContain('criteria.push(`purchase price');
     expect(verdict).toContain(CLARIFICATION);
   });
 

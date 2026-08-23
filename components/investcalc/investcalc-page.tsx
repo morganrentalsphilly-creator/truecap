@@ -39,9 +39,7 @@ import {
   normalizeInvestmentFormSnapshot,
 } from "@/lib/investcalc-schema";
 import { calculateAnalysis, AnalysisResult } from "@/lib/calc-analysis";
-import { buildReportOperatingStatement } from "@/lib/report-operating-statement";
 import { getDealTier } from "@/lib/verdict";
-import { applyWhatIfAdjustments, WORST_CASE_PRESET } from "./what-if-sliders";
 import { PropertyTypeSection } from "./property-type-section";
 import { PropertyDetailsSection, YearBuiltField } from "./property-details-section";
 import { SingleFamilyUnitSection } from "./single-family-unit-section";
@@ -116,13 +114,17 @@ import {
   buildDealScoreInputFromAnalysis,
   computeDealScore,
 } from "@/lib/deal-score";
+import type { MaoTarget } from "@/lib/max-allowable-offer";
 import {
-  calculateMaxAllowableOffer,
-  solveRequiredInterestRate,
-  solveRequiredMonthlyRent,
-  type MaoTarget,
-} from "@/lib/max-allowable-offer";
-import { buildMaoTarget, describeMaoTarget } from "@/lib/mao-targets";
+  clearPendingMaoTarget,
+  isMaoTargetDirty,
+  maoTargetAnalysisFingerprint,
+  maoTargetFingerprint,
+  normalizeMaoTarget,
+  readPendingMaoTarget,
+  readPendingMaoTargetBinding,
+  writePendingMaoTarget,
+} from "@/lib/mao-target-editor";
 import { isFeatureEnabled } from "@/lib/feature-flags";
 import {
   financingProfileAgeBand,
@@ -169,13 +171,6 @@ import { getPropertyCompsAction } from "@/app/actions/property-comps";
 import type { SelectedAddress } from "./address-autocomplete";
 import type { TenYearProjectionInput, ProjectionYear } from "@/lib/ten-year-projections";
 import type { TaxStrategyInput, TaxStrategyYear } from "@/lib/tax-strategy";
-// The PDF is composed on the SERVER (app/actions/generate-report-pdf.ts), so
-// jspdf, jspdf-autotable and the chart engine no longer reach the browser at
-// all — that whole ~130-150 KB gzipped payload left the client bundle when the
-// export gate moved server-side. We still need the `ReportData` shape at
-// compile time, so it is imported as `import type`, which is erased entirely
-// at runtime.
-import type { ReportData } from "@/lib/pdf-generator";
 import {
   buildExitScenarios,
   resolveExitScenarioRates,
@@ -185,6 +180,10 @@ import {
 import { trackConversion } from "@/lib/analytics/track-conversion";
 import { trackEvent } from "@/lib/analytics";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
+import {
+  normalizeOfferCeilingTargetSource,
+  type OfferCeilingTargetSource,
+} from "@/lib/offer-ceiling-contract";
 import { getAnalyzerCta } from "@/lib/analyzer-cta";
 import {
   clearPendingSaveIntent,
@@ -318,6 +317,37 @@ function writeCalcDraftRaw(json: string): void {
   }
 }
 
+/**
+ * Persist an unsaved form draft and bind its active acquisition target to the
+ * exact normalized draft that will be restored on reload. Keeping these writes
+ * together is load-bearing for Duplicate / Analyze another: address, price,
+ * and rent evolve after the fork, so a target fingerprint captured only once
+ * against the initial blank draft no longer matches the restored form.
+ */
+function writeCalcDraftWithMaoTarget(
+  values: unknown,
+  targetInput: unknown,
+  sourceInput?: unknown
+): void {
+  try {
+    writeCalcDraftRaw(JSON.stringify(values));
+  } catch {
+    // Form values should be JSON-safe, but a draft is best-effort and must
+    // never interrupt the calculator if a future field is not serializable.
+    return;
+  }
+
+  const target = normalizeMaoTarget(targetInput);
+  const normalizedDraft = normalizeInvestmentFormDraft(values);
+  const analysisFingerprint = maoTargetAnalysisFingerprint(normalizedDraft ?? values);
+  const source = normalizeOfferCeilingTargetSource(sourceInput);
+  if (target && analysisFingerprint) {
+    writePendingMaoTarget(target, { analysisFingerprint, source });
+  } else {
+    clearPendingMaoTarget();
+  }
+}
+
 /** Safely remove the draft. */
 function clearCalcDraftRaw(): void {
   try {
@@ -419,260 +449,6 @@ const INPUT_TABS: {
   { id: "deal-score", label: "Deal Score", mobileLabel: "Score", isPro: true },
 ];
 const SAVED_ANALYSIS_AUTO_EXPORT_PDF_KEY = "truecap_saved_analysis_auto_export_pdf";
-
-function toPdfReportData(args: {
-  values: InvestmentFormValues;
-  result: AnalysisResult;
-  projectionYears: ProjectionYear[];
-  taxYears: TaxStrategyYear[];
-  exitYears: ExitScenarioYear[];
-  inputConfidence?: InputConfidenceResult | null;
-}): ReportData {
-  const { values, result, projectionYears, taxYears, exitYears, inputConfidence } = args;
-
-  const units =
-    values.propertyType === "single-family"
-      ? [
-          {
-            label: "Unit 1",
-            beds: Number(values.bedrooms ?? 0),
-            baths: Number(values.bathrooms ?? 0),
-            sqft: Number(values.sqft ?? 0),
-            rent: Number(values.monthlyRent ?? result.monthlyRentalIncome),
-          },
-        ]
-      : (values.units ?? []).map((unit, idx) => ({
-          label: `Unit ${idx + 1}`,
-          beds: Number(unit.bedrooms ?? 0),
-          baths: Number(unit.bathrooms ?? 0),
-          sqft: Number(unit.sqft ?? 0),
-          rent: Number(unit.monthlyRent ?? 0),
-          // Carried so the report can exclude it from gross rent, exactly as
-          // calc-analysis excludes it from rental income.
-          isOwnerOccupied:
-            values.propertyType === "owner-occupant" && Boolean(unit.isOwnerOccupied),
-        }));
-
-  // Canonical Deal Score is always Balanced (lens-free) - the same number every
-  // surface shows (analyzer headline, dashboard, My Deals, compare, share, OG).
-  // The investor lens only reorders which metrics lead on the analyzer; it never
-  // changes the exported score, so a shared report can't disagree with the
-  // screen it came from. computeDealScore defaults to balanced when no lens is
-  // passed.
-  const balancedScore = computeDealScore(buildDealScoreInputFromAnalysis(values, result));
-  const recommendation = balancedScore.recommendation;
-  const risk = balancedScore.riskLevel;
-  const score = balancedScore.score;
-  const rationale = balancedScore.explanation;
-
-  const projectionRows = projectionYears.map((row) => ({
-    y: row.year,
-    rental: row.rentalIncomeAnnual,
-    opex: row.operatingExpensesAnnual,
-    debt: row.debtServiceAnnual,
-    net: row.netCashFlowAnnual,
-    tax: row.taxSavingsAnnual,
-    after: row.afterTaxCashFlowAnnual,
-    cum: row.cumulativeCashFlowAnnual,
-  }));
-
-  const year1Tax = taxYears.find((row) => row.year === 1);
-  const totalBenefit10y = taxYears.reduce((acc, row) => acc + row.netTaxBenefitAnnual, 0);
-  const taxRows = taxYears.map((row) => ({
-    y: row.year,
-    rental: row.rentalIncomeAnnual,
-    opex: row.operatingExpensesAnnual,
-    interest: row.mortgageInterestDeductionAnnual,
-    dep: row.depreciationDeductionAnnual,
-    total: row.totalDeductionsAnnual,
-    taxable: row.taxableRentalIncomeAnnual,
-    savings: row.taxSavingsAnnual,
-    benefit: row.netTaxBenefitAnnual,
-  }));
-
-  const bestExit = exitYears.reduce<ExitScenarioYear | null>(
-    (best, row) => (best === null || row.totalProfit > best.totalProfit ? row : best),
-    null
-  );
-
-  const year5Exit = exitYears.find((row) => row.year === 5);
-  const year10Exit = exitYears.find((row) => row.year === 10) ?? exitYears[exitYears.length - 1];
-
-  // The report's downside page must use the same coherent preset and the
-  // same calculateAnalysis path as the on-screen stress tool. Cash deals
-  // omit the rate leg because it cannot affect a zero-debt analysis.
-  const downsideRatePp = result.monthlyPayment > 0 ? WORST_CASE_PRESET.ratePp : 0;
-  let downsideResult = result;
-  try {
-    downsideResult = calculateAnalysis(
-      applyWhatIfAdjustments(
-        values,
-        WORST_CASE_PRESET.rentPct,
-        0,
-        downsideRatePp,
-        WORST_CASE_PRESET.vacancyPp
-      )
-    );
-  } catch {
-    // Fail soft for legacy/malformed drafts: the report can still export,
-    // and the explicit unchanged values make the scenario limitation visible.
-  }
-
-  // The Deal Decision Pack must answer the acquisition question, not merely
-  // export the same free metrics. Resolve the canonical deterministic Max
-  // Offer and Deal Doctor thresholds into the report payload. This does not
-  // grant a persistent Pro entitlement or expose a hidden number on screen.
-  const isCashPurchase = result.monthlyPayment <= 0;
-  const maxOfferTarget = buildMaoTarget(null, { isCashPurchase });
-  const maxOfferResult = calculateMaxAllowableOffer(values, maxOfferTarget);
-  const requiredMonthlyRent = solveRequiredMonthlyRent(values, maxOfferTarget);
-  const requiredInterestRate = solveRequiredInterestRate(values, maxOfferTarget);
-
-  return {
-    generatedAt: new Date(),
-    methodologyVersion: result.methodologyVersion,
-    property: {
-      address: values.address,
-      type: values.propertyType,
-      yearBuilt: Number(values.yearBuilt ?? new Date().getFullYear()),
-      purchasePrice: values.purchasePrice,
-      template: values.templateId ? "Template Applied" : "Custom",
-    },
-    financing: {
-      downPaymentPct: values.downPaymentPct,
-      downPayment: result.downPayment,
-      interestRate: values.interestRate,
-      loanTerm: values.loanTermYears,
-      closingCostsPct: result.closingCostsPct,
-      closingCosts: result.closingCosts,
-    },
-    expenses: {
-      // Effective % — annual-$ mode derives it from the bill (the raw
-      // propertyTaxPct field is undefined in that mode and printed "0%").
-      propertyTaxPct: Math.round(Number(result.propertyTaxPctEffective ?? 0) * 100) / 100,
-      propertyTaxAnnualBill:
-        values.propertyTaxInputMode === "annual" && values.propertyTaxAnnual != null
-          ? Number(values.propertyTaxAnnual)
-          : null,
-      insurancePct: Number(result.insurancePctEffective ?? 0),
-      maintenancePct: Number(result.maintenancePctEffective ?? 0),
-      vacancyPct: Number(values.vacancyPct),
-      managementPct: Number(values.mgmtPct),
-      capexPct: Number(result.capexPctEffective ?? 0),
-      hoaMonthly: Number(result.hoaMonthly),
-      utilitiesMonthly: Number(result.utilities),
-      rentGrowth: Number(values.rentGrowthPct),
-      expenseGrowth: Number(values.expenseGrowthPct),
-      appreciation: Number(values.appreciationRatePct ?? 3),
-      sellingCost: Number(values.sellingCostPct ?? 6),
-      taxRate: Number(values.taxRatePct ?? result.effectiveTaxRate * 100),
-    },
-    units,
-    // Lender view of year 1, from the engine's own fields (no new math).
-    operatingStatement: buildReportOperatingStatement(result),
-    performance: {
-      recommendation,
-      dealScore: score,
-      risk,
-      rationale,
-      monthlyCashFlow: result.netCashFlow,
-      cocReturn: result.cocReturn,
-      capRate: result.capRate,
-      dscr: result.dscr,
-      taxSavings: result.taxSavingsMonthly,
-      afterTaxCF: result.afterTaxCF,
-    },
-    inputConfidence: inputConfidence
-      ? {
-          score: inputConfidence.score,
-          stageLabel: inputConfidence.stageLabel,
-          sensitivityRisk: inputConfidence.sensitivityRisk,
-          methodVersion: inputConfidence.methodVersion,
-          verifiedAssumptions: inputConfidence.fields
-            .filter((field) => field.sourceClass === "verified")
-            .map((field) => field.label),
-          unverifiedAssumptions: inputConfidence.fields
-            .filter(
-              (field) =>
-                field.sourceClass !== "verified" && field.sourceClass !== "not-applicable"
-            )
-            .map((field) => ({
-              label: field.label,
-              sourceClass: inputSourceClassLabel(field.sourceClass),
-              sourceLabel: field.sourceLabel,
-              reason: field.reason,
-            })),
-        }
-      : null,
-    maxOffer: maxOfferResult
-      ? {
-          maxPrice: maxOfferResult.maxPrice,
-          basis: describeMaoTarget(maxOfferTarget),
-          currentPriceGap: maxOfferResult.maxPrice - values.purchasePrice,
-          achieved: {
-            monthlyCashFlow: maxOfferResult.achieved.netCashFlow,
-            cocReturn: maxOfferResult.achieved.cocReturn,
-            capRate: maxOfferResult.achieved.capRate,
-            dscr: maxOfferResult.achieved.dscr,
-          },
-          requiredMonthlyRent: requiredMonthlyRent
-            ? {
-                value: requiredMonthlyRent.value,
-                alreadyMet: requiredMonthlyRent.alreadyMet,
-                unreachable: requiredMonthlyRent.unreachable,
-              }
-            : null,
-          requiredInterestRate: requiredInterestRate
-            ? {
-                value: requiredInterestRate.value,
-                alreadyMet: requiredInterestRate.alreadyMet,
-                unreachable: requiredInterestRate.unreachable,
-              }
-            : null,
-        }
-      : null,
-    downsideScenario: {
-      label: `Rent ${WORST_CASE_PRESET.rentPct}% · vacancy +${WORST_CASE_PRESET.vacancyPp}pp${
-        downsideRatePp > 0 ? ` · rate +${downsideRatePp}pp` : ""
-      }`,
-      verdict: getDealTier(downsideResult),
-      monthlyCashFlow: downsideResult.netCashFlow,
-      cocReturn: downsideResult.cocReturn,
-      capRate: downsideResult.capRate,
-      dscr: downsideResult.dscr,
-    },
-    projection10y: {
-      cumulativeCF: projectionRows[projectionRows.length - 1]?.cum ?? 0,
-      bestAnnualAfterTax: projectionRows.length ? Math.max(...projectionRows.map((row) => row.after)) : 0,
-      totalAfterTax: projectionRows.reduce((acc, row) => acc + row.after, 0),
-      rows: projectionRows,
-    },
-    taxStrategy: {
-      year1Taxable: year1Tax?.taxableRentalIncomeAnnual ?? 0,
-      year1Savings: year1Tax?.taxSavingsAnnual ?? 0,
-      totalBenefit10y,
-      annualDepreciation: result.annualDepreciation,
-      rows: taxRows,
-    },
-    exitScenarios: {
-      bestYear: bestExit?.year ?? 1,
-      year5Profit: year5Exit?.totalProfit ?? 0,
-      year10Profit: year10Exit?.totalProfit ?? 0,
-      totalROI:
-        result.totalCashRequired > 0 && year10Exit
-          ? (year10Exit.totalProfit / result.totalCashRequired) * 100
-          : 0,
-      rows: exitYears.map((row) => ({
-        y: row.year,
-        value: row.propertyValue,
-        loan: row.remainingLoanBalance,
-        equity: row.equity,
-        netSale: row.netSaleProceeds,
-        profit: row.totalProfit,
-      })),
-    },
-  };
-}
 
 /** What enrich-property filled, captured so we can attribute data confidence
  *  at save time (and live on the result screen). */
@@ -968,7 +744,12 @@ export function InvestCalcPage({
   // The flag clears whenever outputs are invalidated (form drift, reset,
   // loading a saved deal) or a normal non-sample run happens.
   const [isSampleProPreview, setIsSampleProPreview] = useState(false);
-  const [sampleMaoTarget, setSampleMaoTarget] = useState<MaoTarget | null>(null);
+  // Exact price-ceiling criteria for this underwriting. Sample, tuned, and
+  // restored saved-deal targets all flow through the same state so Save and
+  // Share cannot silently revert to a different basis.
+  const [analysisMaoTarget, setAnalysisMaoTarget] = useState<MaoTarget | null>(null);
+  const [analysisMaoTargetSource, setAnalysisMaoTargetSource] =
+    useState<OfferCeilingTargetSource | null>(null);
   const pendingSamplePreviewRef = useRef(false);
   const pendingSampleRunRef = useRef(false);
   const autoSaveAfterAuthRef = useRef(false);
@@ -1033,6 +814,8 @@ export function InvestCalcPage({
    *  form (the fork's savedDealId-null guarantee would be defeated). */
   const forkGenerationRef = useRef(0);
   const lastPersistedFormJsonRef = useRef<string | null>(null);
+  const analysisMaoTargetRef = useRef<MaoTarget | null>(analysisMaoTarget);
+  const lastPersistedMaoTargetJsonRef = useRef<string | null>(null);
   /** Form snapshot that produced the currently displayed analysis outputs (last Calculate or loaded saved deal). */
   const lastComputedFormJsonRef = useRef<string | null>(null);
   /** Raw source context from a reopened deal. It retains field fingerprints so
@@ -1051,6 +834,10 @@ export function InvestCalcPage({
   const currentSaveDealLimitReached =
     saveDealLimitReached || (savedDealLimit !== null && savedDealCount >= savedDealLimit);
   const areAnalysisTabsEnabled = Boolean(analysisResult) && !isCalculating;
+
+  useEffect(() => {
+    analysisMaoTargetRef.current = analysisMaoTarget;
+  }, [analysisMaoTarget]);
 
   const mapInputTabToDashboardTab = useCallback(
     (tab: InputTab): AnalysisDashboardTab | null => {
@@ -1181,6 +968,10 @@ export function InvestCalcPage({
       return;
     }
     const json = formSnapshotForCompare(form.getValues());
+    const targetChanged = isMaoTargetDirty(
+      analysisMaoTargetRef.current,
+      lastPersistedMaoTargetJsonRef.current
+    );
     // A null snapshot means the form doesn't parse right now. Two distinct
     // cases hide in that:
     //   - No persisted baseline yet (lastPersistedFormJsonRef null): the
@@ -1195,15 +986,27 @@ export function InvestCalcPage({
     //     badge and the beforeunload guard don't keep claiming "Saved"
     //     while the on-screen form no longer matches the saved deal.
     if (!json) {
-      if (lastPersistedFormJsonRef.current) setHasUnsavedChanges(true);
+      if (lastPersistedFormJsonRef.current || targetChanged) setHasUnsavedChanges(true);
       return;
     }
     if (!lastPersistedFormJsonRef.current) {
       setHasUnsavedChanges(true);
       return;
     }
-    setHasUnsavedChanges(json !== lastPersistedFormJsonRef.current);
+    setHasUnsavedChanges(json !== lastPersistedFormJsonRef.current || targetChanged);
   }, [form]);
+
+  const handleAnalysisMaoTargetChange = useCallback(
+    (target: MaoTarget) => {
+      // Ref update is synchronous so an edit made while Save is in flight is
+      // visible to the completion's dirty reconciliation.
+      analysisMaoTargetRef.current = target;
+      setAnalysisMaoTarget(target);
+      setAnalysisMaoTargetSource("selected-targets");
+      syncFormDirtyVersusPersisted();
+    },
+    [syncFormDirtyVersusPersisted]
+  );
 
   const clearAnalysisOutputs = useCallback(() => {
     setAnalysisResult(null);
@@ -1225,7 +1028,9 @@ export function InvestCalcPage({
     // Editing away from the sample deal ends the Pro preview - the
     // unlock is for the demo numbers only, not the user's own deal.
     setIsSampleProPreview(false);
-    setSampleMaoTarget(null);
+    setAnalysisMaoTarget(null);
+    setAnalysisMaoTargetSource(null);
+    clearPendingMaoTarget();
     setIsEditingAssumptions(false);
   }, []);
 
@@ -1284,6 +1089,7 @@ export function InvestCalcPage({
       setSavedDealId(null);
       savedDealIdRef.current = null;
       lastPersistedFormJsonRef.current = null;
+      lastPersistedMaoTargetJsonRef.current = null;
       lastComputedFormJsonRef.current = null;
       // Wipe the anonymous auto-save draft - the user is explicitly
       // asking for a fresh start. Without this they'd reset, then on
@@ -2519,17 +2325,13 @@ export function InvestCalcPage({
           // Deal Score is free for everyone, so compute it for the preview too
           // - the hero 0-100 number forming live is the magic moment.
           const ds = computeDealScore(buildDealScoreInputFromAnalysis(liveParsed.data, r));
-          // A negative first number is what MOST cold visitors see (random
-          // addresses rarely cash-flow at ask) — without a path out it reads
-          // as a dead end and invites a bounce. Solve the break-even price
-          // (cash flow ≥ $0, same solver the MAO card uses) so the preview
-          // can say "try $X as your offer" instead of just "Negative".
-          // Pure client math on the debounced recompute; null when already
-          // positive or unsolvable.
-          const breakEven =
-            r.netCashFlow < 0
-              ? calculateMaxAllowableOffer(liveParsed.data, { monthlyCashFlow: 0 })
-              : null;
+          // The reverse-price solver is a paid feature. Pro customers get a
+          // break-even preview here; Free visitors get the factual metrics and
+          // nonnumeric next-step guidance rendered by LiveVerdictPanel.
+          // Offer Ceiling is resolved only after a full analysis through the
+          // entitlement-aware server action. The pre-submit live preview
+          // deliberately carries no exact reverse-solver output.
+          const breakEven = null;
           const tier = getDealTier(r);
           setLivePreview({
             tier,
@@ -2538,7 +2340,7 @@ export function InvestCalcPage({
             capRate: r.capRate,
             dscr: r.dscr,
             monthlyPayment: r.monthlyPayment,
-            breakEvenPrice: breakEven ? breakEven.maxPrice : null,
+            breakEvenPrice: breakEven,
             // Mixed/Marginal one-liner ("DSCR 1.08 — below the 1.25 lenders
             // want") so the amber pill isn't a dead end — pure string pick
             // from metrics already in hand, no extra solver work.
@@ -2691,18 +2493,18 @@ export function InvestCalcPage({
       if (savedDealIdRef.current) return;
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => {
-        try {
-          writeCalcDraftRaw(JSON.stringify(values));
-        } catch {
-          /* JSON.stringify rarely throws (only on circular refs) but we never want a localStorage write to surface as an unhandled error */
-        }
+        writeCalcDraftWithMaoTarget(
+          values,
+          analysisMaoTargetRef.current,
+          analysisMaoTargetSource
+        );
       }, CALC_FORM_DRAFT_DEBOUNCE_MS);
     });
     return () => {
       if (timer) clearTimeout(timer);
       subscription.unsubscribe();
     };
-  }, [form]);
+  }, [analysisMaoTargetSource, form]);
 
   useEffect(() => {
     // Initialize from a one-time saved-analysis handoff when present; otherwise
@@ -2758,7 +2560,11 @@ export function InvestCalcPage({
     );
     if (duplicatePayloadRaw) {
       try {
-        const parsed = JSON.parse(duplicatePayloadRaw) as { formSnapshot?: unknown };
+        const parsed = JSON.parse(duplicatePayloadRaw) as {
+          formSnapshot?: unknown;
+          maxOfferTarget?: unknown;
+          maxOfferTargetSource?: unknown;
+        };
         // Lenient fallback: the fork wipes address/price/rents anyway, so a
         // legacy snapshot the strict schema rejects (e.g. a pre-Apr-2026
         // 0-rent unit) can still donate its assumptions — this keeps
@@ -2786,6 +2592,23 @@ export function InvestCalcPage({
           };
           prevPropertyTypeRef.current = normalized.propertyType;
           form.reset(forked);
+          const duplicatedMaoTarget = normalizeMaoTarget(parsed.maxOfferTarget);
+          const duplicatedMaoTargetSource = duplicatedMaoTarget
+            ? normalizeOfferCeilingTargetSource(
+                parsed.maxOfferTargetSource
+              ) ?? "selected-targets"
+            : null;
+          analysisMaoTargetRef.current = duplicatedMaoTarget;
+          setAnalysisMaoTarget(duplicatedMaoTarget);
+          setAnalysisMaoTargetSource(duplicatedMaoTargetSource);
+          // Persist the blank-identity fork immediately; the debounced watcher
+          // is intentionally suppressed during this programmatic reset. Later
+          // user edits rebind the same target through the normal draft writer.
+          writeCalcDraftWithMaoTarget(
+            forked,
+            duplicatedMaoTarget,
+            duplicatedMaoTargetSource
+          );
           setInputVerification({});
           inputVerificationAddressRef.current = null;
           persistedInputConfidenceSourceContextRef.current = null;
@@ -2861,6 +2684,17 @@ export function InvestCalcPage({
             !Array.isArray(parsed.resultSnapshot)
               ? (parsed.resultSnapshot as Record<string, unknown>)
               : null;
+          clearPendingMaoTarget();
+          const restoredMaoTarget = normalizeMaoTarget(savedResultRecord?.maxOfferTarget);
+          const restoredMaoTargetSource = normalizeOfferCeilingTargetSource(
+            savedResultRecord?.maxOfferTargetSource
+          );
+          analysisMaoTargetRef.current = restoredMaoTarget;
+          lastPersistedMaoTargetJsonRef.current = maoTargetFingerprint(restoredMaoTarget);
+          setAnalysisMaoTarget(restoredMaoTarget);
+          setAnalysisMaoTargetSource(
+            restoredMaoTarget ? restoredMaoTargetSource ?? "selected-targets" : null
+          );
           const savedInputConfidence =
             savedResultRecord?.inputConfidence &&
             typeof savedResultRecord.inputConfidence === "object" &&
@@ -2996,6 +2830,23 @@ export function InvestCalcPage({
           setSavedDealId(parsed.id);
           savedDealIdRef.current = parsed.id;
           lastPersistedFormJsonRef.current = formSnapshotForCompare(lenient);
+          clearPendingMaoTarget();
+          const restoredMaoTarget = normalizeMaoTarget(
+            parsed.resultSnapshot && typeof parsed.resultSnapshot === "object"
+              ? (parsed.resultSnapshot as Record<string, unknown>).maxOfferTarget
+              : null
+          );
+          const restoredTargetSource = normalizeOfferCeilingTargetSource(
+            parsed.resultSnapshot && typeof parsed.resultSnapshot === "object"
+              ? (parsed.resultSnapshot as Record<string, unknown>).maxOfferTargetSource
+              : null
+          );
+          analysisMaoTargetRef.current = restoredMaoTarget;
+          lastPersistedMaoTargetJsonRef.current = maoTargetFingerprint(restoredMaoTarget);
+          setAnalysisMaoTarget(restoredMaoTarget);
+          setAnalysisMaoTargetSource(
+            restoredMaoTarget ? restoredTargetSource ?? "selected-targets" : null
+          );
           toast({
             title: "One field needs a fix",
             description: issue
@@ -3040,6 +2891,9 @@ export function InvestCalcPage({
     // expected) and returns so the draft restore doesn't clobber them.
     const handoff = readAnalyzerHandoff(window.location.search);
     if (handoff) {
+      // A tools/persona handoff is a new analysis. Never let an abandoned
+      // guest-save target from another property attach to it.
+      clearPendingMaoTarget();
       persistedInputConfidenceSourceContextRef.current = null;
       persistedInputConfidenceAddressRef.current = null;
       setInputVerification({});
@@ -3101,6 +2955,17 @@ export function InvestCalcPage({
         if (normalized) {
           prevPropertyTypeRef.current = normalized.propertyType;
           form.reset(normalized);
+          const pendingMaoBinding = readPendingMaoTargetBinding(
+            maoTargetAnalysisFingerprint(normalized)
+          );
+          const pendingMaoTarget = pendingMaoBinding?.target ?? null;
+          analysisMaoTargetRef.current = pendingMaoTarget;
+          setAnalysisMaoTarget(pendingMaoTarget);
+          setAnalysisMaoTargetSource(
+            pendingMaoTarget
+              ? pendingMaoBinding?.source ?? "selected-targets"
+              : null
+          );
           persistedInputConfidenceSourceContextRef.current = null;
           persistedInputConfidenceAddressRef.current = null;
           setInputVerification({});
@@ -3403,7 +3268,10 @@ export function InvestCalcPage({
     pendingSamplePreviewRef.current = false;
     const isSampleRun = pendingSampleRunRef.current;
     pendingSampleRunRef.current = false;
-    if (isSampleRun) setSampleMaoTarget({ ...SAMPLE_DEAL_FIXTURE.maoTarget });
+    if (isSampleRun) {
+      setAnalysisMaoTarget({ ...SAMPLE_DEAL_FIXTURE.maoTarget });
+      setAnalysisMaoTargetSource("selected-targets");
+    }
 
     // PostHog funnel event - fires the moment the user commits to
     // analyzing a deal (form passed validation, calculation started).
@@ -3414,6 +3282,17 @@ export function InvestCalcPage({
       property_type: values.propertyType,
       is_cash_purchase: !values.downPaymentPct || values.downPaymentPct >= 100,
       input_tab: activeInputTab,
+    });
+    const inputMethod = isSampleRun
+      ? "sample"
+      : listingUrl.trim()
+        ? "listing_url"
+        : "address";
+    trackEvent("property_input_method_selected", { method: inputMethod });
+    trackEvent("analysis_started", {
+      property_type: values.propertyType,
+      input_method: inputMethod,
+      is_authenticated: isAuthenticated,
     });
     const dirty = form.formState.dirtyFields as Record<string, unknown>;
     const assumptionsChanged =
@@ -3434,6 +3313,10 @@ export function InvestCalcPage({
       ].some((field) => Boolean(dirty[field]));
     if (assumptionsChanged) {
       trackEvent("assumptions_updated", { source: "analyzer_run" });
+      trackEvent("material_assumption_overridden", {
+        source: "analyzer_run",
+        field_group: "underwriting_assumptions",
+      });
     }
 
     // Increment the global "analyses run" counter behind the homepage
@@ -3742,6 +3625,11 @@ export function InvestCalcPage({
       allowAddressChange?: boolean;
       /** Completing the explicit anonymous Save click after authentication. */
       autoAfterAuth?: boolean;
+      /** Exact target currently rendered by the results dashboard. This is
+       * required for an untouched late-loaded buy-box seed, which otherwise
+       * exists only inside the child dashboard until the user edits it. */
+      maxOfferTargetOverride?: MaoTarget;
+      maxOfferTargetSourceOverride?: OfferCeilingTargetSource;
     } = {}
   ) => {
     // Snapshot the fork generation: if "Analyze another like this" fires
@@ -3777,6 +3665,25 @@ export function InvestCalcPage({
         currentValues,
         form.formState.dirtyFields as Record<string, unknown>
       );
+      const analysisFingerprint = maoTargetAnalysisFingerprint(currentValues);
+      const pendingMaoBinding = readPendingMaoTargetBinding(analysisFingerprint);
+      const maxOfferTargetSnapshot =
+        normalizeMaoTarget(options.maxOfferTargetOverride) ??
+        analysisMaoTargetRef.current ??
+        pendingMaoBinding?.target ??
+        null;
+      const maxOfferTargetSourceSnapshot =
+        options.maxOfferTargetSourceOverride ??
+        analysisMaoTargetSource ??
+        pendingMaoBinding?.source ??
+        "selected-targets";
+      if (maxOfferTargetSnapshot && !analysisMaoTargetRef.current) {
+        analysisMaoTargetRef.current = maxOfferTargetSnapshot;
+        setAnalysisMaoTarget(maxOfferTargetSnapshot);
+        setAnalysisMaoTargetSource(
+          maxOfferTargetSourceSnapshot
+        );
+      }
       const result = await saveDealAction(
         currentValues,
         targetExistingId,
@@ -3790,9 +3697,12 @@ export function InvestCalcPage({
           ...(isFeatureEnabled("financing_profiles")
             ? { financingProfileSnapshot: appliedFinancingProfile }
             : {}),
+          maxOfferTarget: maxOfferTargetSnapshot,
+          maxOfferTargetSource: maxOfferTargetSourceSnapshot,
         }
       );
       if (result.ok) {
+        clearPendingMaoTarget();
         if (options.autoAfterAuth) {
           clearPendingSaveIntent();
           autoSaveAfterAuthRef.current = false;
@@ -3868,6 +3778,7 @@ export function InvestCalcPage({
         // while the DB row held the pre-edit numbers.
         const persistedJson = formSnapshotForCompare(currentValues);
         if (persistedJson) lastPersistedFormJsonRef.current = persistedJson;
+        lastPersistedMaoTargetJsonRef.current = maoTargetFingerprint(maxOfferTargetSnapshot);
         if (parsedValues.success) {
           const values = parsedValues.data;
           const savedResult = calculateAnalysis(values);
@@ -3944,6 +3855,13 @@ export function InvestCalcPage({
             <ToastAction
               altText="Create a free account and come back to this deal"
               onClick={() => {
+                writeCalcDraftWithMaoTarget(
+                  currentValues,
+                  maxOfferTargetSnapshot,
+                  options.maxOfferTargetSourceOverride ??
+                    analysisMaoTargetSource ??
+                    "selected-targets"
+                );
                 setPendingSaveIntent();
                 // Sign-up, not login — anon savers are mostly first-timers;
                 // the sign-up page has a "Sign in" cross-link that keeps ?next.
@@ -4008,6 +3926,7 @@ export function InvestCalcPage({
         setSavedDealId(null);
         savedDealIdRef.current = null;
         lastPersistedFormJsonRef.current = null;
+        lastPersistedMaoTargetJsonRef.current = null;
         syncFormDirtyVersusPersisted();
         toast({
           title: "This deal was deleted",
@@ -4088,7 +4007,29 @@ export function InvestCalcPage({
     return false;
   };
 
-  const handleSaveDeal = async () => performSaveDeal();
+  const handleSaveDeal = async (
+    maoTarget?: MaoTarget,
+    source: OfferCeilingTargetSource = "selected-targets"
+  ) => {
+    const normalizedTarget = normalizeMaoTarget(maoTarget);
+    if (normalizedTarget) {
+      // Adopt the exact target the child rendered before starting IO. This
+      // captures an untouched buy-box seed and keeps a failed save visibly
+      // dirty instead of claiming the old persisted target is still current.
+      analysisMaoTargetRef.current = normalizedTarget;
+      setAnalysisMaoTarget(normalizedTarget);
+      setAnalysisMaoTargetSource(source);
+      syncFormDirtyVersusPersisted();
+    }
+    return performSaveDeal({
+      ...(normalizedTarget
+        ? {
+            maxOfferTargetOverride: normalizedTarget,
+            maxOfferTargetSourceOverride: source,
+          }
+        : {}),
+    });
+  };
 
   /** A choice made in the duplicate-address dialog. "update" overwrites the
    *  colliding saved deal in place; "scenario" inserts a second analysis for
@@ -4202,13 +4143,35 @@ export function InvestCalcPage({
     [form, toast]
   );
 
-  const handleExportPdf = async (mode: ReportMode = "personal") => {
+  const handleExportPdf = async (
+    mode: ReportMode = "personal",
+    maoTarget?: MaoTarget,
+    maoTargetSource?: OfferCeilingTargetSource
+  ) => {
     if (!analysisResult) return;
+    // Capture the exact target before the entitlement chooser returns early.
+    // The one-time Pack dialog opens on that early path, then Stripe performs
+    // a full-page round trip; without this synchronous ref update the Pack
+    // would silently fall back to canonical defaults on return.
+    const requestedMaoTarget = normalizeMaoTarget(maoTarget);
+    const requestedMaoTargetSource =
+      normalizeOfferCeilingTargetSource(maoTargetSource) ??
+      analysisMaoTargetSource ??
+      "selected-targets";
+    if (requestedMaoTarget) {
+      analysisMaoTargetRef.current = requestedMaoTarget;
+      setAnalysisMaoTarget(requestedMaoTarget);
+      setAnalysisMaoTargetSource(requestedMaoTargetSource);
+    }
     const oneTimeUnlocked = oneTimePdfUnlockedRef.current;
     // Without entitlement (or auth), offer the two purchase paths
     // instead of the old dead-end toast: Pro, or the $5 one-time PDF.
     // A verified one-time payment bypasses this gate exactly once.
     if (!oneTimeUnlocked && (!isAuthenticated || !canExportPdf)) {
+      trackEvent("paywall_viewed", {
+        trigger: "pdf_export",
+        placement: "analyzer_results",
+      });
       setIsPdfPurchaseDialogOpen(true);
       return;
     }
@@ -4228,65 +4191,19 @@ export function InvestCalcPage({
     setIsExportingPdf(true);
     try {
       const values = form.getValues();
-      const projectionYears = projectionSource?.initialYears ?? analysisResult.tenYearProjection;
-      const taxYears = taxStrategySource?.initialYears ?? analysisResult.taxStrategyYears;
-      const exitYears =
-        exitScenarioSource?.initialYears ??
-        buildExitScenarios({
-          purchasePrice: values.purchasePrice,
-          ...resolveExitScenarioRates({
-            appreciationRatePct: values.appreciationRatePct,
-            sellingCostPct: values.sellingCostPct,
-          }),
-          loanAmount: analysisResult.loanAmount,
-          interestRate: values.interestRate,
-          loanTermYears: values.loanTermYears,
-          monthlyPayment: analysisResult.monthlyPayment,
-          downPayment: analysisResult.downPayment,
-          closingCosts: analysisResult.closingCosts,
-          initialCashInvested: analysisResult.totalCashRequired,
-          cumulativeCashFlowByYear: projectionYears.map((year) => year.cumulativeCashFlowAnnual),
-          cumulativeTaxBenefitByYear: taxYears.map((year) => year.cumulativeTaxBenefitAnnual),
-          annualDepreciation: taxYears[0]?.depreciationDeductionAnnual ?? 0,
-        });
-
-      // The exported Deal Score is the canonical Balanced score (computed inside
-      // toPdfReportData) - the same number every surface shows - so the report
-      // never contradicts the screen it came from regardless of the active lens.
-      const confidenceContext = resolveLiveInputConfidenceContext(
-        values,
-        form.formState.dirtyFields as Record<string, unknown>
+      const pendingMaoBinding = readPendingMaoTargetBinding(
+        maoTargetAnalysisFingerprint(values)
       );
-      const reportData = toPdfReportData({
-        values,
-        result: analysisResult,
-        projectionYears,
-        taxYears,
-        exitYears,
-        inputConfidence: isFeatureEnabled("input_confidence")
-          ? buildInputConfidence({
-              values,
-              provenance: confidenceContext.provenance,
-              touchedFields: new Set(confidenceContext.touchedInputFields),
-              verified: inputVerification,
-            })
-          : null,
-      });
-
-      // Attach this deal's stored RentCast comps (saved deals only - reads the
-      // saved set, no API call) so the report includes the comp tables.
-      if (savedDealId) {
-        try {
-          const { getSavedDealCompsAction } = await import("@/app/actions/property-comps");
-          const compsRes = await getSavedDealCompsAction(savedDealId);
-          if (compsRes.ok && compsRes.enrichment) {
-            const { enrichmentToReportComps } = await import("@/lib/report-comps");
-            reportData.comps = enrichmentToReportComps(compsRes.enrichment);
-          }
-        } catch {
-          /* export proceeds without comps */
-        }
-      }
+      const reportMaoTarget =
+        normalizeMaoTarget(maoTarget) ??
+        analysisMaoTargetRef.current ??
+        pendingMaoBinding?.target ??
+        readPendingMaoTarget(maoTargetAnalysisFingerprint(values));
+      const reportMaoTargetSource =
+        normalizeOfferCeilingTargetSource(maoTargetSource) ??
+        analysisMaoTargetSource ??
+        pendingMaoBinding?.source ??
+        "selected-targets";
 
       // The report is COMPOSED ON THE SERVER. It used to be built here in the
       // browser, which meant the `canExportPdf` check a few lines up was the
@@ -4319,7 +4236,9 @@ export function InvestCalcPage({
       }
 
       const pdfResult = await generateReportPdfAction({
-        report: reportData,
+        values,
+        maxOfferTarget: reportMaoTarget,
+        maxOfferTargetSource: reportMaoTargetSource,
         mode,
         ...(claimPayload ? { claim: claimPayload } : {}),
       });
@@ -4328,6 +4247,10 @@ export function InvestCalcPage({
         // An unentitled caller is offered the two purchase paths, exactly as
         // the pre-flight check does — the server is simply the authority now.
         if (pdfResult.code === "ENTITLEMENT_REQUIRED" || pdfResult.code === "SIGN_IN_REQUIRED") {
+          trackEvent("paywall_viewed", {
+            trigger: "pdf_export_server_gate",
+            placement: "analyzer_results",
+          });
           setIsPdfPurchaseDialogOpen(true);
           return;
         }
@@ -4341,27 +4264,23 @@ export function InvestCalcPage({
 
       downloadPdfFromBase64(pdfResult.pdfBase64, pdfResult.filename);
       const brandingConfig = pdfResult.hasBranding ? {} : null;
-      // Consume the one-time unlock only after a successful generation
-      // so a transient failure doesn't burn the purchase.
+      // Keep the browser/deal-bound claim in same-tab sessionStorage after
+      // generation. A synthetic download click cannot prove that the browser
+      // actually saved the file, so deleting the secret here would break the
+      // promised 24-hour recovery path for a blocked/cancelled local download.
+      // The server remains authoritative: it accepts only the same secret,
+      // user (when present), and exact deal fingerprint, and expires recovery
+      // 24 hours after atomic consumption. Session storage disappears with the
+      // tab and never becomes a reusable URL credential.
       if (oneTimeUnlocked) {
-        const redemption = oneTimePdfRedemptionRef.current;
-        oneTimePdfUnlockedRef.current = false;
-        oneTimePdfRedemptionRef.current = null;
         try {
-          window.sessionStorage.removeItem(ONE_TIME_PDF_RETURN_KEY);
-          window.sessionStorage.removeItem(ONE_TIME_PDF_DRAFT_KEY);
           window.sessionStorage.removeItem(ONE_TIME_PDF_ACTIVE_CLAIM_KEY);
-          if (redemption) {
-            window.sessionStorage.removeItem(
-              oneTimePdfClaimSecretKey(redemption.claimId)
-            );
-          }
           // Clean up only the pre-security draft key, never the general
           // anonymous calculator auto-save draft.
           window.localStorage.removeItem(ONE_TIME_PDF_LEGACY_DRAFT_KEY);
         } catch {
-          // The server claim is already consumed. Storage cleanup is privacy
-          // hygiene only and must not turn a successful download into failure.
+          // Recovery storage is already present. Legacy cleanup must not turn
+          // a successful download into failure.
         }
       }
       // Fire the Google Ads conversion event. PDF export = high-intent
@@ -4379,6 +4298,11 @@ export function InvestCalcPage({
       // (the prompt component self-caps to once per browser, ever).
       dispatchProofMoment("pdf_export");
       trackEvent("report_generated", { report_type: mode });
+      trackEvent("decision_memo_generated", {
+        surface: "analyzer",
+        audience: mode,
+        methodology_version: analysisResult.methodologyVersion,
+      });
       trackEvent("report_viewed", { report_type: mode, surface: "pdf_export" });
       // If the user hasn't configured branding yet, the toast nudges
       // them to do so. The link routes to /settings/branding, which
@@ -4430,19 +4354,45 @@ export function InvestCalcPage({
     setIsStartingPdfCheckout(true);
     try {
       const checkoutValues = form.getValues();
+      const checkoutMaoTarget = normalizeMaoTarget(analysisMaoTargetRef.current);
+      const checkoutMaoTargetSource =
+        normalizeOfferCeilingTargetSource(analysisMaoTargetSource) ??
+        "selected-targets";
+      if (!checkoutMaoTarget) {
+        toast({
+          title: "Run the analysis first",
+          description:
+            "We need the report's exact Offer Ceiling targets before opening checkout.",
+          variant: "destructive",
+        });
+        return;
+      }
       trackEvent("one_time_pdf_checkout_started", {
         property_type: checkoutValues.propertyType,
+      });
+      trackEvent("complete_decision_checkout_started", {
+        source: "single_deal_checkout",
       });
       trackEvent("deal_decision_pack_started", {
         source: "single_deal_checkout",
         methodology_version: analysisResult?.methodologyVersion ?? "unknown",
       });
-      const result = await createOneTimePdfCheckoutAction({ values: checkoutValues });
+      const result = await createOneTimePdfCheckoutAction({
+        values: checkoutValues,
+        maxOfferTarget: checkoutMaoTarget,
+        maxOfferTargetSource: checkoutMaoTargetSource,
+      });
       if (result.ok) {
         try {
           window.sessionStorage.setItem(
             ONE_TIME_PDF_DRAFT_KEY,
-            JSON.stringify({ v: 2, values: checkoutValues, savedAt: Date.now() })
+            JSON.stringify({
+              v: 4,
+              values: checkoutValues,
+              maxOfferTarget: checkoutMaoTarget,
+              maxOfferTargetSource: checkoutMaoTargetSource,
+              savedAt: Date.now(),
+            })
           );
           window.sessionStorage.setItem(
             oneTimePdfClaimSecretKey(result.claim.id),
@@ -4582,6 +4532,9 @@ export function InvestCalcPage({
 
     let claimSecret: string | null = null;
     let restoredValues: InvestmentFormValues | null = null;
+    let restoredMaoTarget: MaoTarget | null = null;
+    let restoredMaoTargetSource: OfferCeilingTargetSource =
+      "selected-targets";
     let boundFormJson: string | null = null;
     try {
       const secretRaw = window.sessionStorage.getItem(
@@ -4599,10 +4552,19 @@ export function InvestCalcPage({
       }
       const draftRaw = window.sessionStorage.getItem(ONE_TIME_PDF_DRAFT_KEY);
       if (draftRaw) {
-        const parsedDraft = JSON.parse(draftRaw) as { values?: unknown };
+        const parsedDraft = JSON.parse(draftRaw) as {
+          values?: unknown;
+          maxOfferTarget?: unknown;
+          maxOfferTargetSource?: unknown;
+        };
         const parsedValues = investmentFormSchema.safeParse(parsedDraft.values);
         if (parsedValues.success) {
           restoredValues = parsedValues.data;
+          restoredMaoTarget = normalizeMaoTarget(parsedDraft.maxOfferTarget);
+          restoredMaoTargetSource =
+            normalizeOfferCeilingTargetSource(
+              parsedDraft.maxOfferTargetSource
+            ) ?? "selected-targets";
           boundFormJson = formSnapshotForCompare(parsedValues.data);
         }
       }
@@ -4610,7 +4572,12 @@ export function InvestCalcPage({
       // Corrupt/missing binding data is handled by the fail-closed branch.
     }
 
-    if (!claimSecret || !restoredValues || !boundFormJson) {
+    if (
+      !claimSecret ||
+      !restoredValues ||
+      !restoredMaoTarget ||
+      !boundFormJson
+    ) {
       toast({
         title: "Return to the checkout tab",
         description:
@@ -4627,6 +4594,8 @@ export function InvestCalcPage({
           claimId: returnState.claimId,
           claimSecret,
           values: restoredValues,
+          maxOfferTarget: restoredMaoTarget,
+          maxOfferTargetSource: restoredMaoTargetSource,
         });
       } catch (err) {
         console.warn("[one-time-pdf] verify call failed:", err);
@@ -4660,6 +4629,7 @@ export function InvestCalcPage({
         boundFormJson,
       };
       if (!verified.recovered) {
+        trackEvent("complete_decision_purchased", {});
         trackEvent("one_time_pdf_purchased", {});
         trackEvent("single_deal_purchased", {
           price_variant:
@@ -4699,6 +4669,9 @@ export function InvestCalcPage({
       persistedInputConfidenceAddressRef.current = null;
       setInputVerification({});
       inputVerificationAddressRef.current = null;
+      analysisMaoTargetRef.current = restoredMaoTarget;
+      setAnalysisMaoTarget(restoredMaoTarget);
+      setAnalysisMaoTargetSource(restoredMaoTargetSource);
       Object.entries(restoredValues).forEach(([key, value]) => {
         form.setValue(key as keyof InvestmentFormValues, value as never, {
           shouldDirty: true,
@@ -4763,6 +4736,10 @@ export function InvestCalcPage({
    */
   const handleAnalyzeAnotherLikeThis = () => {
     isProgrammaticResetRef.current = true;
+    const carriedMaoTarget = normalizeMaoTarget(analysisMaoTargetRef.current);
+    const carriedMaoTargetSource = carriedMaoTarget
+      ? analysisMaoTargetSource ?? "selected-targets"
+      : null;
     // Invalidate any in-flight save: performSaveDeal's completion must not
     // re-attach the SOURCE deal's id (or clear the fork draft) after this
     // fork — clicking Save then fork during the roundtrip silently turned
@@ -4807,6 +4784,7 @@ export function InvestCalcPage({
     setSavedDealId(null);
     savedDealIdRef.current = null;
     lastPersistedFormJsonRef.current = null;
+    lastPersistedMaoTargetJsonRef.current = null;
     lastComputedFormJsonRef.current = null;
     setHasUnsavedChanges(false);
     // Property-specific captures + benchmarks: the next deal must never be
@@ -4840,6 +4818,9 @@ export function InvestCalcPage({
     // Back to the input phase. clearAnalysisOutputs never touches form
     // values, so the kept assumptions are safe.
     clearAnalysisOutputs();
+    analysisMaoTargetRef.current = carriedMaoTarget;
+    setAnalysisMaoTarget(carriedMaoTarget);
+    setAnalysisMaoTargetSource(carriedMaoTargetSource);
     setIsCalculating(false);
     isCalculatingRef.current = false;
     // The forked assumptions are the point — the default-template auto-apply
@@ -4848,12 +4829,17 @@ export function InvestCalcPage({
     // restoring pre-apply values now would stomp the fork.
     autoApplyEligibleRef.current = false;
     autoApplyUndoRef.current = null;
-    // Overwrite the anon draft so a reload does NOT restore the SOURCE
-    // deal the watcher last wrote. (The forked snapshot itself won't pass
-    // the full-schema restore — no address/price — so a reload lands on a
-    // clean form: acceptable; restoring the old property would not be.)
+    // Overwrite the anon draft so a reload restores this partial fork instead
+    // of the SOURCE deal the watcher last wrote. The lenient draft normalizer
+    // accepts the blank identity; the target-aware writer binds the carried
+    // criteria now and rebinds them as address/price/rent are entered.
     try {
-      writeCalcDraftRaw(JSON.stringify(form.getValues()));
+      const forkedValues = form.getValues();
+      writeCalcDraftWithMaoTarget(
+        forkedValues,
+        carriedMaoTarget,
+        carriedMaoTargetSource
+      );
     } catch {
       /* storage unavailable — the fork still works for this session */
     }
@@ -5002,6 +4988,7 @@ export function InvestCalcPage({
         variant: "success",
       });
       trackEvent("deal_compared", { source: "analysis_result" });
+      trackEvent("comparison_completed", { count_bucket: "2" });
       router.push("/dashboard/compare");
     } finally {
       setIsComparingDeals(false);
@@ -5030,7 +5017,8 @@ export function InvestCalcPage({
     // back into the dashboard. The early seed makes the launch atomic from
     // the user's perspective. onSubmit reasserts the same fixture after
     // validation as a defense against any intervening reset.
-    setSampleMaoTarget({ ...SAMPLE_DEAL_FIXTURE.maoTarget });
+    setAnalysisMaoTarget({ ...SAMPLE_DEAL_FIXTURE.maoTarget });
+    setAnalysisMaoTargetSource("selected-targets");
     // Apply each field via setValue so RHF dirties and the form's
     // controlled inputs re-render with the new values immediately.
     Object.entries(sample).forEach(([key, value]) => {
@@ -5337,6 +5325,18 @@ export function InvestCalcPage({
         trackEvent("assumption_verified", {
           field_key: key,
           source_class: sourceClass ?? "unknown",
+          method_version: nextConfidence.methodVersion,
+        });
+        trackEvent("material_input_verified", {
+          field_key: key,
+          evidence_level: "user-confirmed",
+          method_version: nextConfidence.methodVersion,
+        });
+      }
+      if (previousConfidence.stage !== nextConfidence.stage) {
+        trackEvent("decision_readiness_changed", {
+          from_stage: previousConfidence.stage,
+          to_stage: nextConfidence.stage,
           method_version: nextConfidence.methodVersion,
         });
       }
@@ -6153,17 +6153,35 @@ export function InvestCalcPage({
               projectionSource={projectionSource}
               taxStrategySource={taxStrategySource}
               exitScenarioSource={exitScenarioSource}
-              onSaveDeal={() => {
-                void handleSaveDeal();
+              onSaveDeal={(
+                maoTarget: MaoTarget | undefined,
+                source: OfferCeilingTargetSource | undefined
+              ) => {
+                void handleSaveDeal(maoTarget, source);
               }}
               onCompareDeals={handleCompareDeals}
               onExportPdf={handleExportPdf}
               onNewAnalysis={handleNewAnalysis}
               onAnalyzeAnotherLikeThis={handleAnalyzeAnotherLikeThis}
-              onPrepareAuthSave={() => {
+              onPrepareAuthSave={(
+                maoTarget: MaoTarget | undefined,
+                source: OfferCeilingTargetSource | undefined
+              ) => {
                 const snapshot = investmentFormSchema.safeParse(form.getValues());
                 const exactValues = snapshot.success ? snapshot.data : analysisValues;
-                if (exactValues) writeCalcDraftRaw(JSON.stringify(exactValues));
+                const exactTarget = normalizeMaoTarget(maoTarget) ?? analysisMaoTargetRef.current;
+                if (exactTarget) {
+                  analysisMaoTargetRef.current = exactTarget;
+                  setAnalysisMaoTarget(exactTarget);
+                  setAnalysisMaoTargetSource(source ?? "selected-targets");
+                }
+                if (exactValues) {
+                  writeCalcDraftWithMaoTarget(
+                    exactValues,
+                    exactTarget,
+                    source ?? analysisMaoTargetSource ?? "selected-targets"
+                  );
+                }
               }}
               onEditAssumptions={() => {
                 setIsEditingAssumptions(true);
@@ -6200,7 +6218,9 @@ export function InvestCalcPage({
               canUseSensitivity={canUseSensitivity || isSampleProPreview}
               canUseStrategies={canUseStrategies || isSampleProPreview}
               isSampleProPreview={isSampleProPreview}
-              maoTargetOverride={sampleMaoTarget}
+              maoTargetOverride={analysisMaoTarget}
+              maoTargetOverrideSource={analysisMaoTargetSource}
+              onMaoTargetChange={handleAnalysisMaoTargetChange}
               activeTab={activeDashboardTab}
               activeTabNonce={activeTabNonce}
               activeStrategy={activeStrategy}
@@ -6257,6 +6277,7 @@ export function InvestCalcPage({
               autoSaveAfterAuthRef.current = false;
               setIsAutoSaveResuming(false);
               clearPendingSaveIntent();
+              clearPendingMaoTarget();
               toast({
                 title: "Automatic save canceled",
                 description: "Your analysis is still here. You can save it whenever you’re ready.",

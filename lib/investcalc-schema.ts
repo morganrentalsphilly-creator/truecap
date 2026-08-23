@@ -3,6 +3,10 @@ import { DEFAULT_APPRECIATION_RATE, DEFAULT_SELLING_COST_PCT } from "@/lib/exit-
 
 /** Bump when `investmentFormSchema` shape changes; used for persisted snapshots. */
 export const INVESTCALC_SCHEMA_VERSION = 9;
+/** Product-wide upper bound for a residential acquisition price. Inverse
+ * solvers import the same value so an accepted form can never be silently
+ * capped at a lower, undocumented search limit. */
+export const MAX_PURCHASE_PRICE = 100_000_000;
 
 const optionalMoneyMo = z.preprocess((val) => {
   if (val === undefined || val === null || val === "") return undefined;
@@ -111,7 +115,7 @@ export const investmentFormSchema = z.object({
   purchasePrice: z
     .number({ invalid_type_error: "Enter purchase price" })
     .min(10000, "Purchase price must be at least $10,000")
-    .max(100_000_000, "Price too large"),
+    .max(MAX_PURCHASE_PRICE, "Price too large"),
   yearBuilt: optionalYearBuilt,
 
   // Single-family unit details (optional at parse; required in superRefine when propertyType is single-family).

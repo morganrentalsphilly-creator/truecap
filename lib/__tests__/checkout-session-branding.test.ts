@@ -40,7 +40,7 @@ describe("TrueCap Stripe Checkout branding", () => {
     for (const relative of ["app/actions/billing.ts", "app/actions/one-time-pdf.ts"]) {
       const source = readFileSync(join(root, relative), "utf8");
       expect(source, relative).toMatch(
-        /stripe\.checkout\.sessions\.create\(withTrueCapCheckoutBranding\(\{/
+        /stripe\.checkout\.sessions\.create\(\s*withTrueCapCheckoutBranding\(\{/
       );
     }
   });

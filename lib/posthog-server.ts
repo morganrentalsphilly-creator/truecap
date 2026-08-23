@@ -29,6 +29,7 @@ import "server-only";
  */
 
 import { PostHog } from "posthog-node";
+import { sanitizeAnalyticsEventProperties } from "@/lib/analytics-event-dictionary";
 
 const HOST = process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.i.posthog.com";
 
@@ -75,7 +76,7 @@ export async function captureServerEvent(opts: {
     ph.capture({
       distinctId: opts.distinctId,
       event: opts.event,
-      properties: opts.properties,
+      properties: sanitizeAnalyticsEventProperties(opts.event, opts.properties),
     });
     // Critical for serverless: drain the buffer before the function
     // can exit. Without this, Vercel function termination can drop

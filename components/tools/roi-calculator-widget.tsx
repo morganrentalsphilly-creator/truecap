@@ -32,7 +32,7 @@ function classify(roi: number): { label: string; color: string; note: string } {
     return { label: "Invalid", color: "text-muted-foreground", note: "Enter positive cash invested above 0." };
   }
   if (roi < 0) return { label: "Negative", color: "text-[var(--metric-negative)]", note: "Losing money — review assumptions." };
-  if (roi >= 18) return { label: "Excellent", color: "text-[var(--metric-positive)]", note: "Top-decile leveraged return." };
+  if (roi >= 18) return { label: "High modeled return", color: "text-[var(--metric-positive)]", note: "Stress-test the assumptions behind this modeled result." };
   if (roi >= 12) return { label: "Strong", color: "text-[var(--metric-positive)]", note: "Solid combined return on capital." };
   if (roi >= 8) return { label: "Decent", color: "text-foreground", note: "Reasonable return; better than most index funds." };
   if (roi >= 4) return { label: "Weak", color: "text-amber-700", note: "Bond-like return — better than nothing but not why you invest in rentals." };

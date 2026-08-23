@@ -151,9 +151,10 @@ export function MomentOfValueUpsell({
           </span>
         </div>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-          Your result includes a fixed price ceiling for the displayed criteria.
-          Upgrade to change cash-flow, cash-on-cash, cap-rate, or DSCR targets
-          and re-solve the ceiling instantly.
+          Pro unlocks an interactive solver: choose your cash-flow, cash-on-cash,
+          cap-rate, or DSCR criteria, and TrueCap calculates the highest price
+          that clears all of them. The result is a criterion-based ceiling, not
+          a recommended offer.
         </p>
       </div>
 

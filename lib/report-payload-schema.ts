@@ -66,6 +66,28 @@ const compRow = z.object({
   pricePerSqft: z.number().nullable().optional(),
 });
 
+const inputConfidenceSchema = z
+  .object({
+    score: z.number().finite().min(0).max(100),
+    stageLabel: z.string().max(120),
+    sensitivityRisk: z.enum(["low", "moderate", "high"]),
+    methodVersion: z.string().max(40),
+    verifiedAssumptions: z.array(z.string().max(120)).max(60),
+    unverifiedAssumptions: z
+      .array(
+        z
+          .object({
+            label: z.string().max(120),
+            sourceClass: z.string().max(80),
+            sourceLabel: z.string().max(160),
+            reason: z.string().max(500),
+          })
+          .strict()
+      )
+      .max(60),
+  })
+  .strict();
+
 /**
  * Shape-only validation of the report payload.
  *
@@ -83,7 +105,7 @@ const reportDataSchema = z
     property: z.object({
       address: z.string().max(300),
       type: z.string().max(60),
-      yearBuilt: z.number(),
+      yearBuilt: z.number().nullable(),
       purchasePrice: money,
       template: z.string().max(120),
     }),
@@ -142,7 +164,10 @@ const reportDataSchema = z
       })
       .nullable()
       .optional(),
-    inputConfidence: z.unknown().optional(),
+    // This evidence is the only browser-supplied report block preserved by
+    // the server rebuild (along with bounded comps), so it must never remain
+    // `unknown`: an arbitrary object could otherwise reach the renderer.
+    inputConfidence: inputConfidenceSchema.nullable().optional(),
     maxOffer: z.unknown().optional(),
     downsideScenario: z.unknown().optional(),
     projection10y: z.object({

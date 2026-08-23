@@ -1,16 +1,12 @@
 /**
- * Public display floor for the all-time analysis counter.
- *
- * The live `app_counters.analysis_runs` value is shown when it exceeds this
- * floor; otherwise the counter renders the consistent 51,900 minimum.
+ * Validate the persisted cumulative analysis counter before publication.
+ * The public UI never manufactures a display floor: the owner-approved
+ * 51,900 cumulative total is persisted by the audited database migration and
+ * every later analyzer run increments that same row.
  */
-export const ANALYSIS_RUNS_DISPLAY_FLOOR = 51_900;
-
-export function withAnalysisRunsDisplayBaseline(rawCount: number): number {
+export function toPublicAnalysisRunCount(rawCount: number): number {
   if (!Number.isFinite(rawCount) || rawCount < 0) {
     throw new RangeError("Analysis run count must be a finite, non-negative number.");
   }
-
-  const runCount = Math.floor(rawCount);
-  return Math.max(runCount, ANALYSIS_RUNS_DISPLAY_FLOOR);
+  return Math.floor(rawCount);
 }

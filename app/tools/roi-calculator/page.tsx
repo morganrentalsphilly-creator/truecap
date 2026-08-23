@@ -44,7 +44,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What's a good ROI on a rental property?",
-    a: "12%+ is strong for leveraged buy-and-hold. 18%+ is excellent (top decile). 8-12% is decent — better than most index funds long-term. Below 8% is bond-like and probably not worth the operational complexity of being a landlord unless you have non-financial reasons (1031 exchange, tax planning, geographic diversification).",
+    a: "There is no universal good ROI threshold. Compare the modeled result with your own Buy Box, financing, risk tolerance, workload, evidence quality, and alternative uses of capital.",
   },
   {
     q: "How is total ROI different from cash-on-cash return?",
@@ -155,7 +155,7 @@ export default function RoiCalculatorPage() {
             <li><strong>Appreciation:</strong> the property&apos;s market value increase. The most-volatile component, market-dependent.</li>
           </ul>
           <p className="mt-3 text-base leading-relaxed text-foreground">
-            Sum the three, divide by cash invested (down payment + closing + initial rehab), and you have the actual annual return on YOUR capital.
+            Sum the three and divide by cash invested (down payment + closing + initial rehab) to get a modeled simple annual return under the assumptions entered. It is not IRR or a realized return.
           </p>
           <p className="mt-3 text-base leading-relaxed text-foreground">
             Worked example: $300k property, $75k cash invested. $5,400 annual cash flow + $3,200 principal paydown + $10,500 appreciation (3.5%/yr) = $19,100 total annual return. ROI = $19,100 ÷ $75k = 25.5%.

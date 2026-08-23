@@ -115,6 +115,8 @@ export type CompareDealViewModel = {
   /** Per-factor score breakdown for the "Why this score" popover. */
   breakdown?: DealScoreBreakdown | null;
   metrics: Record<string, number | null>;
+  /** Exact criteria used for this deal's Max Offer, when that paid metric is present. */
+  maxOfferBasisLabel?: string | null;
   signal: Signal | null;
   assumptions: DealAssumptions;
   compareSnapshotVersion: number | null;
@@ -896,9 +898,13 @@ function MetricValueWithTooltip({
   return (
     <Tooltip delayDuration={200}>
       <TooltipTrigger asChild>
-        <span className="inline-flex cursor-help items-center gap-1.5 underline decoration-dotted decoration-muted-foreground/50 underline-offset-2">
+        <button
+          type="button"
+          aria-label={`${row.label} for ${getDealLabel(deal, { short: true })}. Show calculation details.`}
+          className="inline-flex min-h-11 min-w-11 cursor-help items-center justify-center gap-1.5 rounded-md px-2 underline decoration-dotted decoration-muted-foreground/50 underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
           {children}
-        </span>
+        </button>
       </TooltipTrigger>
       <TooltipContent
         side="top"
@@ -1466,6 +1472,18 @@ export function CompareDealsClient({
                                 );
                               })}
                             </div>
+                            {row.key === "maxOffer" ? (
+                              <ul className="space-y-1 rounded-xl bg-muted/25 p-2 text-[10px] leading-snug text-muted-foreground">
+                                {deals.map((deal, index) =>
+                                  deal.metrics.maxOffer != null && deal.maxOfferBasisLabel ? (
+                                    <li key={`${deal.id}-mobile-max-offer-criteria`}>
+                                      <span className="font-bold text-foreground">Deal {index + 1} criteria:</span>{" "}
+                                      {deal.maxOfferBasisLabel}
+                                    </li>
+                                  ) : null
+                                )}
+                              </ul>
+                            ) : null}
                           </div>
                         );
                       })}
@@ -1834,12 +1852,22 @@ export function CompareDealsClient({
                               </span>
                             ) : null}
                             {deal ? (
-                              <MetricValueWithTooltip deal={deal} row={row}>
-                                <span className="inline-flex shrink-0 items-center gap-2 font-extrabold tabular-nums">
-                                  {formatCellValue(deal, row)}
-                                  {isBest ? <Trophy className="size-3.5 text-success" /> : null}
-                                </span>
-                              </MetricValueWithTooltip>
+                              <span className={cn("flex min-w-0 flex-col", index > 0 && "items-center")}>
+                                <MetricValueWithTooltip deal={deal} row={row}>
+                                  <span className="inline-flex shrink-0 items-center gap-2 font-extrabold tabular-nums">
+                                    {formatCellValue(deal, row)}
+                                    {isBest ? <Trophy className="size-3.5 text-success" /> : null}
+                                  </span>
+                                </MetricValueWithTooltip>
+                                {row.key === "maxOffer" && value != null && deal.maxOfferBasisLabel ? (
+                                  <span className={cn(
+                                    "mt-0.5 max-w-full text-[10px] font-normal leading-tight text-muted-foreground",
+                                    index > 0 && "text-center"
+                                  )}>
+                                    Criteria: {deal.maxOfferBasisLabel}
+                                  </span>
+                                ) : null}
+                              </span>
                             ) : (
                               <span className="shrink-0 font-semibold text-muted-foreground/70">—</span>
                             )}

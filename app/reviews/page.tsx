@@ -34,21 +34,26 @@ import { getRequestUser } from "@/lib/request-auth";
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
-  title: "Reviews & Proof",
-  description:
-    "How TrueCap earns trust: sourced assumptions, a public versioned methodology, a real guarantee, and customer quotes only after verification.",
-  alternates: { canonical: "/reviews" },
-  openGraph: {
-    title: "TrueCap Reviews & Proof",
+export function generateMetadata(): Metadata {
+  const { guaranteeEnabled } = getMarketingOfferConfig();
+  const description = guaranteeEnabled
+    ? "How TrueCap earns trust: sourced assumptions, a public versioned methodology, a published guarantee, and customer quotes only after verification."
+    : "How TrueCap earns trust: sourced assumptions, a public versioned methodology, and customer quotes only after verification.";
+  return {
+    title: "Reviews & Proof",
     description:
-      "Sourced assumptions, public methodology, a real guarantee — and customer quotes only after verification and approval.",
-    url: "/reviews",
-    type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap proof" }],
-  },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
-};
+      description,
+    alternates: { canonical: "/reviews" },
+    openGraph: {
+      title: "TrueCap Reviews & Proof",
+      description,
+      url: "/reviews",
+      type: "website",
+      images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap proof" }],
+    },
+    twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  };
+}
 
 export default async function ReviewsPage() {
   // Only to suppress the footer's Sign in / Create account column for a
@@ -83,28 +88,19 @@ export default async function ReviewsPage() {
               The wall of proof
             </p>
             <h1 className="mt-2 text-balance text-3xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl">
-              Only what we can prove.
+              Only what we can substantiate.
             </h1>
             <p className="mx-auto mt-4 max-w-xl text-balance text-base leading-relaxed text-muted-foreground sm:text-lg">
-              No invented praise, no stock-photo customers. Public math, a real
-              guarantee — and customer quotes only after we&apos;ve verified
-              them and the customer has approved publication.
-            </p>
-            {/* NARROW EXCEPTION to the founder call that stripped the ticker's
-                composition note everywhere. This page's entire claim is "only
-                what we can prove", and the run count is mostly an attested
-                pre-counter baseline — stating that here is what makes the
-                headline true. One clause, this page only. */}
-            <p className="mx-auto mt-2 max-w-xl text-xs text-muted-foreground">
-              That run count includes 50,000 historical analyses attested by
-              TrueCap before live counting began, plus every measured run since.
+              No invented praise, no stock-photo customers. Public math,
+              source-labeled operating figures, and customer quotes only after
+              verification and publication approval.
             </p>
             <div className="mt-6 flex justify-center">
               <DealsAnalyzedTicker
                 source="runs"
                 minimum={1}
                 plus
-                labelSuffix="analysis runs recorded on TrueCap"
+                labelSuffix="cumulative analyses represented in TrueCap"
               />
             </div>
           </div>

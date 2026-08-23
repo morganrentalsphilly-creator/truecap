@@ -111,7 +111,7 @@ const PRO_OUTCOMES: { outcome: string; detail: string }[] = [
   },
   {
     outcome: "Present the decision",
-    detail: "Send a lender-ready report or co-branded share page with the assumptions and risks intact.",
+    detail: "Send a lender-facing review report or co-branded share page with the assumptions and risks intact.",
   },
 ];
 

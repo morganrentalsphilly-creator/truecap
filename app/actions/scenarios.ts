@@ -32,7 +32,19 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { defaultScenarioName, isStrategyKind } from "@/lib/strategy-kinds";
 import { applyStrategyPreset } from "@/lib/scenario-presets";
 import { calculateAnalysis } from "@/lib/calc-analysis";
-import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
+import {
+  INVESTCALC_SCHEMA_VERSION,
+  normalizeInvestmentFormSnapshot,
+} from "@/lib/investcalc-schema";
+import { normalizeMaoTarget } from "@/lib/mao-target-editor";
+import { normalizeOfferCeilingTargetSource } from "@/lib/offer-ceiling";
+import { computeDealScore, buildDealScoreInputFromAnalysis } from "@/lib/deal-score";
+import { buildCompareSnapshotPayload } from "@/lib/compare-result-snapshot";
+import {
+  DEFAULT_APPRECIATION_RATE,
+  DEFAULT_SELLING_COST_PCT,
+} from "@/lib/exit-scenarios";
+import { shouldFreezeSavedMethodology } from "@/lib/saved-analysis-methodology";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type ScenarioSummary = {
@@ -82,6 +94,9 @@ type DealRow = Record<string, unknown> & {
   scenario_name: string | null;
   address: string | null;
   form_snapshot: Record<string, unknown> | null;
+  result_snapshot: Record<string, unknown> | null;
+  methodology_version?: string | null;
+  schema_version?: number | null;
 };
 
 function dealAddress(row: { address?: string | null; form_snapshot?: Record<string, unknown> | null }): string | null {
@@ -308,6 +323,13 @@ export async function addScenarioAction(input: unknown): Promise<AddScenarioResu
   clone.pdf_url = null;
   clone.pdf_generated_at = null;
   clone.pdf_snapshot_version = 0;
+  // Financing-profile snapshots are signed application-time provenance, not
+  // clonable defaults. The database revalidates `appliedAt` on INSERT and a
+  // strategy can change down payment anyway, so inheriting these columns is
+  // both stale and capable of rejecting an otherwise valid scenario insert.
+  clone.financing_profile_id = null;
+  clone.financing_profile_version = null;
+  clone.financing_profile_snapshot = null;
 
   // Apply the (conservative) strategy preset to the assumptions and RECOMPUTE
   // the stored metrics, so the new scenario doesn't show the source deal's
@@ -317,12 +339,106 @@ export async function addScenarioAction(input: unknown): Promise<AddScenarioResu
     const baseValues = normalizeInvestmentFormSnapshot(deal.form_snapshot);
     if (baseValues) {
       const adjusted = applyStrategyPreset(baseValues, strategyKind);
+      // A no-op strategy (buy-and-hold / flip) is a byte-for-byte clone and
+      // may safely preserve a frozen snapshot. A preset that really changes
+      // assumptions must never run today's engine while retaining an older
+      // methodology label.
+      if (
+        adjusted !== baseValues &&
+        shouldFreezeSavedMethodology(deal.methodology_version)
+      ) {
+        return {
+          ok: false,
+          code: "VALIDATION_ERROR",
+          message:
+            "This saved analysis uses a different underwriting version. Reopen and save it under the current standard before applying a strategy preset.",
+        };
+      }
+      if (adjusted === baseValues) {
+        // No financial inputs changed; retain the source's exact frozen
+        // snapshots and top-level columns.
+      } else {
       const result = calculateAnalysis(adjusted);
-      clone.form_snapshot = adjusted as unknown as Record<string, unknown>;
-      clone.result_snapshot = result as unknown as Record<string, unknown>;
+      // A scenario changes assumptions, not the investor's acquisition
+      // criteria. Rebuilding result_snapshot from the calculator result used
+      // to discard the source's tuned Max Offer target, so the scenario
+      // reopened under canonical defaults and quoted a different ceiling.
+      // Normalize at this server boundary and carry only the supported target
+      // shape into the recomputed snapshot.
+      const sourceMaoTarget = normalizeMaoTarget(deal.result_snapshot?.maxOfferTarget);
+      const sourceMaoTargetSource = normalizeOfferCeilingTargetSource(
+        deal.result_snapshot?.maxOfferTargetSource
+      );
+      const dealScore = computeDealScore(buildDealScoreInputFromAnalysis(adjusted, result));
+      const { snapshotVersion, compareSnapshot } = buildCompareSnapshotPayload(
+        result,
+        adjusted
+      );
+      const recomputedResultSnapshot: Record<string, unknown> = {
+        ...result,
+        propertyType: adjusted.propertyType,
+        purchasePrice: adjusted.purchasePrice,
+        score: dealScore.score,
+        recommendation: dealScore.recommendation,
+        riskLevel: dealScore.riskLevel,
+        breakdown: dealScore.breakdown,
+        explanation: dealScore.explanation,
+        snapshotVersion,
+        compareSnapshot,
+      };
+      if (sourceMaoTarget) recomputedResultSnapshot.maxOfferTarget = sourceMaoTarget;
+      if (sourceMaoTarget && sourceMaoTargetSource) {
+        recomputedResultSnapshot.maxOfferTargetSource = sourceMaoTargetSource;
+      }
+      const appreciationRatePct =
+        adjusted.appreciationRatePct ?? DEFAULT_APPRECIATION_RATE;
+      const sellingCostPct = adjusted.sellingCostPct ?? DEFAULT_SELLING_COST_PCT;
+      clone.schema_version = INVESTCALC_SCHEMA_VERSION;
+      clone.methodology_version = result.methodologyVersion;
+      clone.form_snapshot = {
+        ...adjusted,
+        appreciationRatePct,
+        sellingCostPct,
+      } as unknown as Record<string, unknown>;
+      clone.result_snapshot = recomputedResultSnapshot;
+      // The preset changed modeled assumptions without fresh provenance.
+      // Do not retain a top-level confidence claim whose detailed evidence
+      // was intentionally omitted from the recomputed snapshot.
+      clone.data_confidence = null;
+      clone.property_type = adjusted.propertyType;
+      clone.purchase_price = adjusted.purchasePrice;
+      clone.address = adjusted.address.trim();
+      clone.year_built = adjusted.yearBuilt;
+      clone.loan_term_years = adjusted.loanTermYears;
+      clone.interest_rate_pct = adjusted.interestRate;
       clone.down_payment_pct = adjusted.downPaymentPct;
+      clone.closing_costs_pct = adjusted.closingCostsPct ?? 3;
+      clone.bedrooms = adjusted.bedrooms ?? null;
+      clone.bathrooms = adjusted.bathrooms ?? null;
+      clone.sqft = adjusted.sqft ?? null;
+      clone.monthly_rent = adjusted.monthlyRent ?? null;
       clone.net_cash_flow_monthly = result.netCashFlow;
       clone.coc_return_pct = result.cocReturn;
+      clone.property_tax_pct = Math.round(result.propertyTaxPctEffective * 100) / 100;
+      clone.insurance_input_mode = adjusted.insuranceInputMode;
+      clone.insurance_pct = adjusted.insurancePct ?? null;
+      clone.insurance_mo = result.insurance;
+      clone.hoa_mo = result.hoa;
+      clone.utilities_mo = result.utilities;
+      clone.maintenance_pct = adjusted.maintenancePct;
+      clone.vacancy_pct = adjusted.vacancyPct;
+      clone.management_pct = adjusted.mgmtPct;
+      clone.capex_pct = adjusted.capexPct;
+      clone.building_value_pct = adjusted.buildingValuePct;
+      clone.depreciation_years = adjusted.depreciationYears;
+      clone.include_interest_deduction = adjusted.includeInterestDeduction ?? true;
+      clone.tax_rate_pct = adjusted.taxRatePct ?? 24;
+      clone.expense_growth_pct = adjusted.expenseGrowthPct;
+      clone.rent_growth_pct = adjusted.rentGrowthPct;
+      clone.template_id = adjusted.templateId ?? null;
+      clone.appreciation_rate_pct = appreciationRatePct;
+      clone.selling_cost_pct = sellingCostPct;
+      }
     }
   }
 

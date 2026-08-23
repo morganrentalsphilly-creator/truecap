@@ -93,4 +93,10 @@ describe("reportDataSchema round trip", () => {
     bad.performance.monthlyCashFlow = Number.NaN;
     expect(reportDataSchema.safeParse(bad).success).toBe(false);
   });
+
+  it("preserves an unknown construction year as null", () => {
+    const missingYear = payload();
+    (missingYear.property as { yearBuilt: number | null }).yearBuilt = null;
+    expect(reportDataSchema.parse(missingYear).property.yearBuilt).toBeNull();
+  });
 });

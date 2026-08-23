@@ -6,6 +6,7 @@ import {
   deriveStateFromAddress,
   evaluateBuyBox,
   evaluateBuyBoxes,
+  selectDecidingBuyBoxResult,
   summarizeBuyBoxFit,
   type BuyBoxCriteria,
   type BuyBoxDealMetrics,
@@ -246,6 +247,33 @@ describe("evaluateBuyBoxes (multiple boxes)", () => {
     const other = namedBox("other", { minCocPct: 8 }, { sortOrder: 1 });
     const sum = summarizeBuyBoxFit(evaluateBuyBoxes([other, def], baseMetrics));
     expect(sum.bestFit?.id).toBe("def");
+  });
+
+  it("uses the first passing box as the single decision basis", () => {
+    const defaultMiss = namedBox(
+      "strict-pa",
+      { minCapRatePct: 8, targetStates: ["PA"] },
+      { isDefault: true }
+    );
+    const passing = namedBox("working-pa", { minCapRatePct: 6, targetStates: ["PA"] });
+    const results = evaluateBuyBoxes([defaultMiss, passing], baseMetrics);
+
+    expect(summarizeBuyBoxFit(results).anyPass).toBe(true);
+    expect(selectDecidingBuyBoxResult(results)?.box.id).toBe("working-pa");
+    expect(selectDecidingBuyBoxResult(results)?.result.passes).toBe(true);
+  });
+
+  it("uses the highest-priority box when none pass", () => {
+    const defaultMiss = namedBox(
+      "strict-pa",
+      { minCapRatePct: 9 },
+      { isDefault: true }
+    );
+    const otherMiss = namedBox("strict-coc", { minCocPct: 12 });
+    const results = evaluateBuyBoxes([otherMiss, defaultMiss], baseMetrics);
+
+    expect(selectDecidingBuyBoxResult(results)?.box.id).toBe("strict-pa");
+    expect(selectDecidingBuyBoxResult(results)?.result.passes).toBe(false);
   });
 });
 

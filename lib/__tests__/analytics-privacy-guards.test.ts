@@ -21,4 +21,10 @@ describe("analytics privacy guards", () => {
     expect(source).not.toContain("email: session.user.email");
     expect(source).not.toContain("searchParams?.toString()");
   });
+
+  it("never uses a newsletter email as a product-analytics identity", () => {
+    const source = readFileSync(join(root, "app/actions/newsletter.ts"), "utf8");
+    expect(source).toContain('distinctId: "$newsletter"');
+    expect(source).not.toContain("distinctId: parsed.data.email");
+  });
 });

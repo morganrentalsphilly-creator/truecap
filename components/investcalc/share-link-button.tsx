@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
+import type { MaoTarget } from "@/lib/max-allowable-offer";
+import type { OfferCeilingTargetSource } from "@/lib/offer-ceiling-contract";
 import { createPublicShareAction } from "@/app/actions/public-shares";
 import { trackEvent } from "@/lib/analytics";
 import { useToast } from "@/hooks/use-toast";
@@ -30,27 +32,54 @@ interface ShareLinkButtonProps {
   /** Saved deal id, when sharing a saved analysis. Lets the public viewer pull
    *  this deal's stored sale/rent comps (verified against the owner). */
   savedDealId?: string | null;
+  /** Exact acquisition criteria shown with the current price ceiling. */
+  maoTarget?: MaoTarget | null;
+  /** Provenance shown beside that exact target. */
+  maoTargetSource?: OfferCeilingTargetSource | null;
   /** Agent Pro deal workspace context. This changes only the user-facing label
    *  and emits the already-declared, PII-safe client-report funnel event. */
   context?: "analysis" | "client-report";
+  /** External consistency gate (for example, while account Buy Box targets
+   *  are still resolving). */
+  disabled?: boolean;
+  disabledReason?: string;
 }
 
 export function ShareLinkButton({
   values,
   className,
   savedDealId,
+  maoTarget,
+  maoTargetSource,
   context = "analysis",
+  disabled: externallyDisabled = false,
+  disabledReason,
 }: ShareLinkButtonProps) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [shareUrl, setShareUrl] = useState<string>("");
+  const [includeAddress, setIncludeAddress] = useState(false);
+  const [audience, setAudience] = useState<
+    "investment-partner" | "client" | "lender-review"
+  >("investment-partner");
   // The signed-attribution round-trip below runs BEFORE the dialog opens, so
   // without this the click gets no answer at all — same in-flight treatment as
   // the Save / Export / Compare buttons next to it in the toolbar.
   const [isPreparing, setIsPreparing] = useState(false);
   const { toast } = useToast();
 
-  const openShare = async () => {
+  const openShare = () => {
+    if (!values) return;
+    setShareUrl("");
+    setCopied(false);
+    // Privacy choices are per-link intent. Never carry an earlier explicit
+    // disclosure into the next share dialog.
+    setIncludeAddress(false);
+    setAudience(context === "client-report" ? "client" : "investment-partner");
+    setOpen(true);
+  };
+
+  const prepareShare = async () => {
     if (!values) return;
     setIsPreparing(true);
     try {
@@ -61,13 +90,20 @@ export function ShareLinkButton({
       // proxy, and telemetry URLs.
       const opaque = await createPublicShareAction({
         values,
-        title: values.address || undefined,
+        title: includeAddress ? values.address || undefined : undefined,
         dealId: savedDealId ?? undefined,
+        maoTarget: maoTarget ?? undefined,
+        maoTargetSource: maoTargetSource ?? undefined,
+        audience,
+        addressVisibility: includeAddress ? "full" : "hidden",
       });
       if (!opaque.ok) throw new Error(opaque.code);
       setShareUrl(opaque.url);
-      setOpen(true);
       setCopied(false);
+      trackEvent("share_created", {
+        audience,
+        address_included: includeAddress,
+      });
     } catch (err) {
       // Encoding failure used to be a silent no-op - user clicked Share
       // and nothing happened. Surface a toast so they know to try again,
@@ -91,7 +127,7 @@ export function ShareLinkButton({
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-      trackEvent("share_link_copied", { has_address: Boolean(values?.address) });
+      trackEvent("share_link_copied", { has_address: includeAddress });
       if (context === "client-report") {
         trackEvent("client_report_shared", { report_type: "analysis_link" });
       }
@@ -102,7 +138,8 @@ export function ShareLinkButton({
     }
   };
 
-  const disabled = !values || !values.purchasePrice || !values.address;
+  const missingRequiredValues = !values || !values.purchasePrice || !values.address;
+  const disabled = externallyDisabled || missingRequiredValues;
 
   return (
     <>
@@ -111,9 +148,11 @@ export function ShareLinkButton({
         variant="outline"
         onClick={openShare}
         disabled={disabled || isPreparing}
-        className={cn("h-9 gap-1.5 rounded-xl text-xs sm:text-sm", className)}
+        className={cn("min-h-11 gap-1.5 rounded-xl text-xs sm:text-sm", className)}
         title={
-          disabled
+          externallyDisabled
+            ? disabledReason ?? "This action is temporarily unavailable."
+            : missingRequiredValues
             ? "Enter an address and price first"
             : context === "client-report"
               ? "Share a read-only client report"
@@ -150,20 +189,71 @@ export function ShareLinkButton({
             </DialogTitle>
             <DialogDescription>
               {context === "client-report"
-                ? "Send this read-only analysis to the assigned client. Anyone with the link can view the snapshot; saved public branding is included when configured, and no account is needed to open it."
-                : "Anyone with the link can view a read-only snapshot. Deal inputs stay behind an opaque, revocable URL; no account is needed to open it."}
+                ? "Create a read-only snapshot for the assigned client. The exact address stays hidden unless you explicitly include it."
+                : "Choose what to disclose, then create an opaque, expiring link. The exact address stays hidden by default."}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="flex gap-2">
-            <input
-              id="share-link-url"
-              readOnly
-              value={shareUrl}
-              onFocus={(e) => e.currentTarget.select()}
-              aria-label="Shareable URL"
-              className="flex-1 truncate rounded-md border border-input bg-background px-3 py-2 font-mono text-xs text-foreground"
-            />
+          {!shareUrl ? (
+            <div className="space-y-4">
+              <fieldset>
+                <legend className="text-sm font-semibold text-foreground">Intended audience</legend>
+                <div className="mt-2 grid gap-2 sm:grid-cols-3">
+                  {([
+                    ["investment-partner", "Partner"],
+                    ["client", "Client"],
+                    ["lender-review", "Lender review"],
+                  ] as const).map(([value, label]) => (
+                    <label key={value} className="flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-border px-3 text-sm focus-within:ring-2 focus-within:ring-ring">
+                      <input
+                        type="radio"
+                        name="share-audience"
+                        value={value}
+                        checked={audience === value}
+                        onChange={() => setAudience(value)}
+                      />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+
+              <label className="flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border border-border p-3 text-sm focus-within:ring-2 focus-within:ring-ring">
+                <input
+                  type="checkbox"
+                  className="mt-0.5"
+                  checked={includeAddress}
+                  onChange={(event) => setIncludeAddress(event.target.checked)}
+                />
+                <span>
+                  <span className="font-semibold text-foreground">Include the exact property address</span>
+                  <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">
+                    Off by default. The shared page still includes underwriting outputs and the
+                    financial assumptions needed to explain them.
+                  </span>
+                </span>
+              </label>
+
+              <Button
+                type="button"
+                onClick={prepareShare}
+                disabled={isPreparing}
+                className="min-h-11 w-full rounded-xl font-semibold"
+              >
+                {isPreparing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden /> : <Share2 className="mr-2 h-4 w-4" aria-hidden />}
+                {isPreparing ? "Creating secure link…" : "Create secure link"}
+              </Button>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <input
+                id="share-link-url"
+                readOnly
+                value={shareUrl}
+                onFocus={(e) => e.currentTarget.select()}
+                aria-label="Shareable URL"
+                className="min-h-11 flex-1 truncate rounded-md border border-input bg-background px-3 py-2 font-mono text-xs text-foreground"
+              />
             <Button
               type="button"
               onClick={copy}
@@ -179,10 +269,12 @@ export function ShareLinkButton({
                 </>
               )}
             </Button>
-          </div>
+            </div>
+          )}
 
           <p className="text-[11px] text-muted-foreground">
-            The link opens a snapshot of the analysis at this moment. If
+            The link opens a snapshot of the analysis at this moment. Anyone who receives
+            the link can open it. If
             you change inputs later and want viewers to see updates, generate a
             new share link. Saved links can be revoked from your account and expire
             automatically; still treat one like a document you chose to share.

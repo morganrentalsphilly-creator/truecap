@@ -16,11 +16,11 @@ import { STATE_COUNT } from "@/lib/states";
 const pct = (value: unknown) => `${Number(value)}%`;
 
 export const PRODUCT_POSITIONING =
-  "TrueCap is a rental acquisition decision engine: Analyze → Decide → Offer.";
+  "TrueCap is the Rental Acquisition Decision System: analyze the economics, know the Offer Ceiling under explicit targets, verify material assumptions, then pursue, negotiate, or pass.";
 
 export const FOUR_ACQUISITION_ANSWERS = [
   "Pursue or pass",
-  "What to offer",
+  "Offer Ceiling under your rules",
   "What could break",
   "How to present it",
 ] as const;

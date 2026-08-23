@@ -7,9 +7,11 @@ import { getSiteUrl } from "@/lib/site-url";
 import { CALCULATOR_REGISTRY } from "@/lib/calculator-registry";
 import { BLOG_TOPICS } from "@/lib/blog-topics";
 import { BLOG_POSTS } from "@/app/blog/page";
+import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const siteUrl = getSiteUrl();
+  const { guaranteeEnabled } = getMarketingOfferConfig();
 
   // lastModified policy: only emit a date we can stand behind — a blog
   // post's publishedAt or a hand-stamped content-release date. The evergreen
@@ -124,6 +126,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
+      url: `${siteUrl}/sample-decision-memo`,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
       url: `${siteUrl}/tools`,
       changeFrequency: "weekly",
       priority: 0.7,
@@ -219,13 +226,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.8,
     },
-    {
-      // Canonical Never Overpay Guarantee terms — linked from every
-      // guarantee badge/section (lib/marketing-offer-config.ts default).
-      url: `${siteUrl}/guarantee`,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
+    ...(guaranteeEnabled
+      ? [
+          {
+            // Publish the guarantee in discovery surfaces only while the
+            // matching marketing/refund approval flag is explicitly live.
+            url: `${siteUrl}/guarantee`,
+            changeFrequency: "monthly" as const,
+            priority: 0.6,
+          },
+        ]
+      : []),
     {
       // Wall of proof — live counts + methodology + verified quotes only.
       url: `${siteUrl}/reviews`,

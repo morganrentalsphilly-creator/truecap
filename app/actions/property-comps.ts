@@ -16,6 +16,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { hasPaidPlanSubscription } from "@/lib/entitlements";
 import { fetchRentCastEnrichment, type PropertyEnrichment } from "@/lib/property-enrichment/rentcast";
+import { captureServerEvent } from "@/lib/posthog-server";
 
 const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
@@ -388,7 +389,13 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
       .then(() => undefined, () => undefined);
   };
 
-  // Live fetch.
+  // Live fetch. Operational telemetry is deliberately aggregate: provider,
+  // lookup class, and outcome only — never the address or returned values.
+  await captureServerEvent({
+    distinctId: "$server",
+    event: "data_lookup_started",
+    properties: { provider: "rentcast", lookup_type: "property_comps" },
+  });
   let enrichment: PropertyEnrichment | null = null;
   try {
     enrichment = await fetchRentCastEnrichment(
@@ -402,12 +409,30 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
       { includeListing: parsed.data.includeListing }
     );
   } catch {
+    await captureServerEvent({
+      distinctId: "$server",
+      event: "data_lookup_failed",
+      properties: {
+        provider: "rentcast",
+        lookup_type: "property_comps",
+        failure_class: "provider_error",
+      },
+    });
     if (cachedPayload) return { ok: true, source: "cache", enrichment: cachedPayload };
     await refundUnbilledLookup();
     return { ok: false, code: "SERVER_ERROR", message: "Couldn't reach the data provider. Try again." };
   }
 
   if (!enrichment) {
+    await captureServerEvent({
+      distinctId: "$server",
+      event: "data_lookup_failed",
+      properties: {
+        provider: "rentcast",
+        lookup_type: "property_comps",
+        failure_class: "no_result",
+      },
+    });
     if (cachedPayload) return { ok: true, source: "cache", enrichment: cachedPayload };
     await refundUnbilledLookup();
     return { ok: false, code: "NOT_FOUND", message: "No comps found for this address." };
@@ -449,6 +474,16 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
 
   // Save the comp set onto the deal (reference-only; never feeds the math).
   await persistToDeal(enrichment);
+
+  await captureServerEvent({
+    distinctId: "$server",
+    event: "data_lookup_succeeded",
+    properties: {
+      provider: "rentcast",
+      lookup_type: "property_comps",
+      evidence_level: "estimated_from_comps",
+    },
+  });
 
   return { ok: true, source: "live", enrichment };
 }

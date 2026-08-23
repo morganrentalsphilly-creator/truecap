@@ -13,13 +13,14 @@
  */
 
 export const HOMEPAGE_HEADLINES = {
+  decision_system: "Know your number before you make the offer.",
   a: "Screen any rental in 60 seconds. Know the highest price that still works.",
   b: "Know what a rental is worth under your assumptions.",
   walkaway: "Know your walk-away price before you make the offer.",
-  // 2026-08 repositioning default: dream-outcome register ("never overpay")
-  // instead of feature register ("screen faster"). Prior variants stay
-  // selectable for rollback via NEXT_PUBLIC_TRUECAP_HOMEPAGE_HEADLINE.
-  never_overpay: "Never overpay for a rental again.",
+  // Retain the legacy key so an old environment value cannot break the build,
+  // but serve qualified decision language instead of an absolute outcome
+  // claim.
+  never_overpay: "Know the highest price that fits your targets.",
 } as const;
 
 export type HomepageHeadlineVariant = keyof typeof HOMEPAGE_HEADLINES;
@@ -77,15 +78,18 @@ function safePublicUrl(value: string | undefined): string | null {
 }
 
 export function getMarketingOfferConfig() {
-  const newHomepagePositioningEnabled = enabled(
-    process.env.NEXT_PUBLIC_TRUECAP_NEW_HOMEPAGE_POSITIONING
-  );
+  // The Rental Acquisition Decision System positioning is the approved
+  // production default. Keep an explicit false/off kill switch for rollback.
+  const positioningOverride = process.env.NEXT_PUBLIC_TRUECAP_NEW_HOMEPAGE_POSITIONING;
+  const newHomepagePositioningEnabled = positioningOverride == null
+    ? true
+    : enabled(positioningOverride);
   const homepageHeadlineVariant = newHomepagePositioningEnabled
-    ? "walkaway"
+    ? "decision_system"
     : pickVariant(
         process.env.NEXT_PUBLIC_TRUECAP_HOMEPAGE_HEADLINE,
         ["a", "b", "never_overpay"] as const,
-        "never_overpay"
+        "a"
       );
   const proOfferNameVariant = pickVariant(
     process.env.NEXT_PUBLIC_TRUECAP_PRO_NAME,
@@ -98,19 +102,17 @@ export function getMarketingOfferConfig() {
     "current"
   );
 
-  // The Never Overpay Guarantee (founder-approved 2026-08-17, replacing the
-  // never-activated 3-Deal Fit Guarantee). The published-terms requirement
-  // from the original fail-closed design still holds structurally: the terms
-  // default to the /guarantee route, which ships in the same deploy as this
-  // config, so a refund promise can never render without published terms.
-  // NEXT_PUBLIC_TRUECAP_GUARANTEE_DISABLED=1 is the kill switch;
-  // NEXT_PUBLIC_TRUECAP_GUARANTEE_TERMS_URL still overrides the terms link.
+  // A published terms route is necessary but does not substantiate the net
+  // impression of an absolute performance claim. Keep this promise dark by
+  // default; production must opt in only after the exact marketing claim and
+  // refund operations have a dated approval artifact. The old DISABLED switch
+  // remains an emergency kill switch for already-configured environments.
   const guaranteeTermsUrl =
     safePublicUrl(process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_TERMS_URL) ??
     "/guarantee";
-  const guaranteeEnabled = !enabled(
-    process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_DISABLED
-  );
+  const guaranteeEnabled =
+    enabled(process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_ENABLED) &&
+    !enabled(process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_DISABLED);
 
   return {
     homepageHeadlineVariant,

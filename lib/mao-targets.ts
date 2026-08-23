@@ -33,7 +33,11 @@ export const DEFAULT_MAO_TARGET: MaoTarget = { monthlyCashFlow: 0, dscr: 1.25 };
 
 export type BuyBoxReturnThresholds = Pick<
   BuyBoxCriteria,
-  "minCapRatePct" | "minCocPct" | "minDscr" | "minCashFlowMonthly"
+  | "minCapRatePct"
+  | "minCocPct"
+  | "minDscr"
+  | "minCashFlowMonthly"
+  | "maxPurchasePrice"
 >;
 
 /** Does this buy box set at least one numeric RETURN threshold the MAO
@@ -42,7 +46,7 @@ export type BuyBoxReturnThresholds = Pick<
 export function buyBoxHasReturnTargets(box: BuyBoxReturnThresholds): boolean {
   return (
     box.minCapRatePct != null ||
-    box.minCocPct != null ||
+    (box.minCocPct != null && box.minCocPct >= 0) ||
     box.minDscr != null ||
     box.minCashFlowMonthly != null
   );
@@ -58,10 +62,13 @@ export function buyBoxContributesToMaoTarget(
   box: BuyBoxReturnThresholds | null | undefined,
   opts: { isCashPurchase: boolean }
 ): boolean {
-  if (!box || !buyBoxHasReturnTargets(box)) return false;
+  if (!box || (!buyBoxHasReturnTargets(box) && box.maxPurchasePrice == null)) return false;
   if (!opts.isCashPurchase) return true;
   return (
-    box.minCapRatePct != null || box.minCocPct != null || box.minCashFlowMonthly != null
+    box.minCapRatePct != null ||
+    (box.minCocPct != null && box.minCocPct >= 0) ||
+    box.minCashFlowMonthly != null ||
+    box.maxPurchasePrice != null
   );
 }
 
@@ -74,15 +81,22 @@ export function buildMaoTarget(
   box: BuyBoxReturnThresholds | null | undefined,
   opts: { isCashPurchase: boolean }
 ): MaoTarget {
+  const boxShapesCeiling =
+    box && (buyBoxHasReturnTargets(box) || box.maxPurchasePrice != null);
   const target: MaoTarget =
-    box && buyBoxHasReturnTargets(box)
+    boxShapesCeiling
       ? {
           ...(box.minCapRatePct != null ? { capRate: box.minCapRatePct } : {}),
-          ...(box.minCocPct != null ? { cocReturn: box.minCocPct } : {}),
+          ...(box.minCocPct != null && box.minCocPct >= 0
+            ? { cocReturn: box.minCocPct }
+            : {}),
           ...(box.minCashFlowMonthly != null
             ? { monthlyCashFlow: box.minCashFlowMonthly }
             : {}),
           ...(box.minDscr != null ? { dscr: box.minDscr } : {}),
+          ...(box.maxPurchasePrice != null
+            ? { maxPurchasePrice: box.maxPurchasePrice }
+            : {}),
         }
       : { ...DEFAULT_MAO_TARGET };
 
@@ -93,7 +107,8 @@ export function buildMaoTarget(
     if (
       target.capRate === undefined &&
       target.cocReturn === undefined &&
-      target.monthlyCashFlow === undefined
+      target.monthlyCashFlow === undefined &&
+      target.maxPurchasePrice === undefined
     ) {
       target.monthlyCashFlow = DEFAULT_MAO_TARGET.monthlyCashFlow;
     }
@@ -117,8 +132,7 @@ export function chooseMaoTargetFromBuyBox(
   return buildMaoTarget(box, opts);
 }
 
-type BuyBoxPriceCriteria = BuyBoxReturnThresholds &
-  Pick<BuyBoxCriteria, "maxPurchasePrice">;
+type BuyBoxPriceCriteria = BuyBoxReturnThresholds;
 
 /**
  * "Your number" — the highest purchase price that clears the box's
@@ -136,9 +150,7 @@ export function solveBuyBoxClearingPrice(
 ): number | null {
   if (!box) return null;
   const target = chooseMaoTargetFromBuyBox(box, opts);
-  const budget = box.maxPurchasePrice;
-  // No return thresholds in play → the box's price cap is the only bar.
-  if (!target) return budget ?? null;
+  if (!target) return null;
   let solved: number | null;
   try {
     solved = calculateMaxAllowableOffer(values, target)?.maxPrice ?? null;
@@ -146,7 +158,7 @@ export function solveBuyBoxClearingPrice(
     return null;
   }
   if (solved == null) return null;
-  return budget != null ? Math.min(solved, budget) : solved;
+  return solved;
 }
 
 function money(n: number): string {
@@ -175,5 +187,8 @@ export function describeMaoTarget(target: MaoTarget): string {
   if (target.dscr !== undefined) parts.push(`DSCR ≥ ${num(target.dscr)}`);
   if (target.capRate !== undefined) parts.push(`cap rate ≥ ${num(target.capRate)}%`);
   if (target.cocReturn !== undefined) parts.push(`cash-on-cash ≥ ${num(target.cocReturn)}%`);
+  if (target.maxPurchasePrice !== undefined) {
+    parts.push(`purchase price ≤ ${money(target.maxPurchasePrice)}`);
+  }
   return parts.join(" · ");
 }

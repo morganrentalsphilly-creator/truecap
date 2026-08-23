@@ -61,6 +61,17 @@ import {
   snapshotFinancingProfile,
   type FinancingProfileSnapshot,
 } from "@/lib/financing-profiles";
+import { normalizeMaoTarget } from "@/lib/mao-target-editor";
+import { enrichmentToReportComps, type ReportComps } from "@/lib/report-comps";
+import { normalizeOfferCeilingTargetSource } from "@/lib/offer-ceiling";
+import { captureServerEvent } from "@/lib/posthog-server";
+import type { PropertyEnrichment } from "@/lib/property-enrichment/rentcast";
+import {
+  fingerprintSavedAnalysisPdfRender,
+  isSavedAnalysisPdfRenderFingerprint,
+  savedAnalysisPdfRenderMatches,
+  type SavedAnalysisPdfRenderSource,
+} from "@/lib/saved-analysis-pdf-render-binding";
 
 export type SaveDealResult =
   | { ok: true; id: string; mode: "inserted" | "updated" }
@@ -133,6 +144,13 @@ export type GetSavedAnalysisPdfExportResult =
       formSnapshot: Record<string, unknown>;
       templateFallback: SavedTemplateFallback | null;
       resultSnapshot: Record<string, unknown>;
+      /** Exact stored comp set bound into renderFingerprint. The client must
+       * render this value rather than issuing a second, racy comps read. */
+      reportComps: ReportComps | null;
+      /** Server-issued binding for the exact snapshots above. The upload path
+       * and completion action both require it, so a stale background render
+       * can never become the current cached report. */
+      renderFingerprint: string;
     }
   | {
       ok: false;
@@ -147,7 +165,13 @@ export type CompleteSavedAnalysisPdfExportResult =
   | { ok: true; pdfPath: string }
   | {
       ok: false;
-      code: "SIGN_IN_REQUIRED" | "ENTITLEMENT_REQUIRED" | "NOT_FOUND" | "VALIDATION_ERROR" | "SERVER_ERROR";
+      code:
+        | "SIGN_IN_REQUIRED"
+        | "ENTITLEMENT_REQUIRED"
+        | "NOT_FOUND"
+        | "VALIDATION_ERROR"
+        | "STALE_EXPORT"
+        | "SERVER_ERROR";
       message: string;
     };
 
@@ -156,6 +180,24 @@ type SavedTemplateFallback = {
   templateName: string;
   templateDescription: string | null;
 };
+
+const SAVED_ANALYSIS_PDF_EXPORT_SELECT =
+  "id, schema_version, methodology_version, form_snapshot, result_snapshot, financing_profile_id, financing_profile_version, financing_profile_snapshot, property_type, address, purchase_price, year_built, loan_term_years, interest_rate_pct, down_payment_pct, closing_costs_pct, bedrooms, bathrooms, sqft, monthly_rent, property_tax_pct, insurance_input_mode, insurance_pct, insurance_mo, hoa_mo, utilities_mo, maintenance_pct, vacancy_pct, management_pct, capex_pct, building_value_pct, depreciation_years, include_interest_deduction, tax_rate_pct, expense_growth_pct, rent_growth_pct, template_id, appreciation_rate_pct, selling_cost_pct, pdf_url, pdf_snapshot_version, updated_at" as const;
+
+function savedAnalysisPdfRenderSource(
+  row: Record<string, unknown>,
+  templateFallback: SavedTemplateFallback | null,
+  reportComps: ReportComps | null
+): SavedAnalysisPdfRenderSource {
+  return {
+    schemaVersion: Number(row.schema_version ?? 1),
+    methodologyVersion: dbString(row.methodology_version) ?? null,
+    formSnapshot: buildEditFormSnapshotFromRow(row),
+    resultSnapshot: buildTrustedResultSnapshot(row),
+    templateFallback,
+    reportComps,
+  };
+}
 
 function asRecord(value: unknown): Record<string, unknown> | null {
   if (value && typeof value === "object" && !Array.isArray(value)) return value as Record<string, unknown>;
@@ -383,6 +425,10 @@ export async function saveDealAction(
      * rechecks ownership, version bounds, and every modeled term before it
      * writes the origin link plus frozen snapshot. */
     financingProfileSnapshot?: unknown;
+    /** Exact user-selected price-ceiling criteria to preserve with this
+     * underwriting snapshot. Null explicitly clears a prior custom target. */
+    maxOfferTarget?: unknown;
+    maxOfferTargetSource?: unknown;
   }
 ): Promise<SaveDealResult> {
   const supabase = await createServerSupabaseClient();
@@ -418,6 +464,35 @@ export async function saveDealAction(
     ...values,
     units: sanitizedUnits,
   };
+  const maxOfferTargetOptionProvided = Boolean(
+    options && Object.prototype.hasOwnProperty.call(options, "maxOfferTarget")
+  );
+  const maxOfferTarget =
+    options?.maxOfferTarget == null ? null : normalizeMaoTarget(options.maxOfferTarget);
+  if (maxOfferTargetOptionProvided && options?.maxOfferTarget != null && !maxOfferTarget) {
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "Invalid price-ceiling targets",
+    };
+  }
+  const maxOfferTargetSourceOptionProvided = Boolean(
+    options && Object.prototype.hasOwnProperty.call(options, "maxOfferTargetSource")
+  );
+  const maxOfferTargetSource = normalizeOfferCeilingTargetSource(
+    options?.maxOfferTargetSource
+  );
+  if (
+    maxOfferTargetSourceOptionProvided &&
+    options?.maxOfferTargetSource != null &&
+    !maxOfferTargetSource
+  ) {
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "Invalid price-ceiling target source",
+    };
+  }
   const financingProfileOptionProvided = Boolean(
     isFeatureEnabled("financing_profiles") &&
       options &&
@@ -455,6 +530,11 @@ export async function saveDealAction(
     snapshotVersion,
     compareSnapshot,
   } as Record<string, unknown>;
+  if (maxOfferTarget) {
+    resultSnapshotWithScore.maxOfferTarget = maxOfferTarget;
+    resultSnapshotWithScore.maxOfferTargetSource =
+      maxOfferTargetSource ?? "selected-targets";
+  }
   const title =
     values.address.trim().length > 0
       ? values.address.slice(0, 200)
@@ -555,6 +635,9 @@ export async function saveDealAction(
     template_id: sanitizedValues.templateId ?? null,
     appreciation_rate_pct: appreciationRatePctStored,
     selling_cost_pct: sellingCostPctStored,
+    // Updating the underwriting can also update/clear maxOfferTarget inside
+    // result_snapshot. Invalidate the cached artifact in the SAME write so a
+    // report generated for the prior criteria can never survive the change.
     pdf_url: null,
     pdf_generated_at: null,
     pdf_snapshot_version: 0,
@@ -578,7 +661,7 @@ export async function saveDealAction(
     const { data: existing, error: existingErr } = await supabase
       .from("saved_analyses")
       .select(
-        "id, address, title, data_confidence, financing_profile_id, financing_profile_version, financing_profile_snapshot"
+        "id, address, title, data_confidence, result_snapshot, financing_profile_id, financing_profile_version, financing_profile_snapshot"
       )
       .eq("id", candidateExistingId)
       .eq("user_id", user.id)
@@ -600,6 +683,23 @@ export async function saveDealAction(
         code: "DEAL_DELETED",
         message: "This saved deal was deleted or archived, so it can't be updated.",
       };
+    }
+
+    // Older/internal callers that do not know about custom targets must not
+    // erase one on an unrelated update. Current analyzer callers send the
+    // option explicitly (including null when the user intentionally has no
+    // custom target), so their snapshot remains authoritative.
+    if (!maxOfferTargetOptionProvided) {
+      const existingSnapshot = asRecord(
+        (existing as Record<string, unknown>).result_snapshot
+      );
+      const storedTarget = normalizeMaoTarget(existingSnapshot?.maxOfferTarget);
+      if (storedTarget) {
+        resultSnapshotWithScore.maxOfferTarget = storedTarget;
+        resultSnapshotWithScore.maxOfferTargetSource =
+          normalizeOfferCeilingTargetSource(existingSnapshot?.maxOfferTargetSource) ??
+          "selected-targets";
+      }
     }
 
     const canUpdateSavedDeal = await hasPaidPlanSubscription(supabase, user.id);
@@ -944,6 +1044,35 @@ async function getTemplateFallback(
 }
 
 /**
+ * Read the exact optional comp table that will be rendered into a saved-deal
+ * PDF. Keeping this read on the same server action as the form/result snapshot
+ * lets the render fingerprint bind every displayed reference value; the
+ * browser must not perform a second comps read after the fingerprint is issued.
+ */
+async function getSavedAnalysisReportComps(
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  savedDealId: string,
+  userId: string
+): Promise<ReportComps | null> {
+  try {
+    const { data, error } = await supabase
+      .from("deal_comps")
+      .select("payload")
+      .eq("analysis_id", savedDealId)
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (error || !data) return null;
+    return enrichmentToReportComps(
+      (data as { payload?: PropertyEnrichment | null }).payload ?? null
+    );
+  } catch {
+    // Optional reference data must not block a financial report. A missing
+    // migration or malformed legacy payload simply produces no comps page.
+    return null;
+  }
+}
+
+/**
  * Does this user currently have ≥1 active buy box with at least one
  * criterion (and the plan feature to use it)? This is exactly the condition
  * under which an exported PDF carries the "Your buy box" block (see
@@ -953,15 +1082,15 @@ async function getTemplateFallback(
  *   - write: store block-carrying PDFs with PDF_CACHE_VERSION_UNCACHEABLE,
  *            so deleting the last box (or downgrading) can never re-serve a
  *            stale block from cache.
- * Fails open to `false` (worst case: a cached, block-free PDF is served) —
- * degrade, don't block the export. A missing user_buy_boxes table (the
- * migration ships dormant) is an expected `false`.
+ * Returns `null` when the lookup itself fails. Cache reads and writes treat
+ * that unknown state conservatively, so a transient database error can never
+ * bless a box-bearing artifact as reusable.
  */
 async function userHasUsableBuyBox(
   supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
   userId: string,
   entitlements: Awaited<ReturnType<typeof getEntitlementsForUser>>
-): Promise<boolean> {
+): Promise<boolean | null> {
   if (!hasPlanFeature(entitlements, "buy_box")) return false;
   try {
     const { data, error } = await supabase
@@ -971,7 +1100,7 @@ async function userHasUsableBuyBox(
       )
       .eq("user_id", userId)
       .eq("is_active", true);
-    if (error || !data) return false;
+    if (error || !data) return null;
     return data.some((row) => {
       const r = row as Record<string, unknown>;
       return buyBoxHasCriteria({
@@ -988,7 +1117,7 @@ async function userHasUsableBuyBox(
       });
     });
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -1013,7 +1142,7 @@ const buyBoxPdfMetricsSchema = z
   .strict();
 
 export type BuyBoxPdfVerdictActionResult =
-  | { ok: true; verdict: BuyBoxPdfVerdict | null }
+  | { ok: true; verdict: BuyBoxPdfVerdict | null; stateResolved: boolean }
   | { ok: false; code: "VALIDATION_ERROR"; message: string };
 
 /**
@@ -1036,8 +1165,11 @@ export async function getBuyBoxPdfVerdictAction(
   }
 
   const listed = await listBuyBoxesAction();
-  if (!listed.ok || !listed.canUse || listed.boxes.length === 0) {
-    return { ok: true, verdict: null };
+  if (!listed.ok) {
+    return { ok: true, verdict: null, stateResolved: false };
+  }
+  if (!listed.canUse || listed.boxes.length === 0) {
+    return { ok: true, verdict: null, stateResolved: true };
   }
   // Scope to the agent's OWN boxes. This verdict is printed into a PDF the
   // agent hands to a buyer or lender, and the payload carries no client id —
@@ -1045,7 +1177,7 @@ export async function getBuyBoxPdfVerdictAction(
   // document sent to a different person.
   const ownBoxes = boxesForDealClient(listed.boxes, null);
   if (ownBoxes.length === 0) {
-    return { ok: true, verdict: null };
+    return { ok: true, verdict: null, stateResolved: true };
   }
 
   const metrics: BuyBoxDealMetrics = {
@@ -1059,7 +1191,11 @@ export async function getBuyBoxPdfVerdictAction(
     isCashPurchase: parsed.data.isCashPurchase,
   };
 
-  return { ok: true, verdict: buildBuyBoxPdfVerdict(ownBoxes, metrics) };
+  return {
+    ok: true,
+    verdict: buildBuyBoxPdfVerdict(ownBoxes, metrics),
+    stateResolved: true,
+  };
 }
 
 export async function getSavedAnalysisPdfExportAction(
@@ -1082,11 +1218,19 @@ export async function getSavedAnalysisPdfExportAction(
   const canGeneratePdf = hasPlanFeature(entitlements, "pdf_export");
 
   const savedDealId = id.trim();
+  // Record access BEFORE reading the optimistic-concurrency token. The shared
+  // set_updated_at trigger advances updated_at for this activity write; doing
+  // it after the SELECT would make every render stale itself before it began.
+  await supabase
+    .from("saved_analyses")
+    .update({ last_activity_at: new Date().toISOString() })
+    .eq("id", savedDealId)
+    .eq("user_id", user.id)
+    .is("deleted_at", null);
+
   const { data, error } = await supabase
     .from("saved_analyses")
-    .select(
-      "id, schema_version, methodology_version, form_snapshot, result_snapshot, financing_profile_id, financing_profile_version, financing_profile_snapshot, property_type, address, purchase_price, year_built, loan_term_years, interest_rate_pct, down_payment_pct, closing_costs_pct, bedrooms, bathrooms, sqft, monthly_rent, property_tax_pct, insurance_input_mode, insurance_pct, insurance_mo, hoa_mo, utilities_mo, maintenance_pct, vacancy_pct, management_pct, capex_pct, building_value_pct, depreciation_years, include_interest_deduction, tax_rate_pct, expense_growth_pct, rent_growth_pct, template_id, appreciation_rate_pct, selling_cost_pct, pdf_url, pdf_snapshot_version"
-    )
+    .select(SAVED_ANALYSIS_PDF_EXPORT_SELECT)
     .eq("id", savedDealId)
     .eq("user_id", user.id)
     .is("deleted_at", null)
@@ -1107,13 +1251,6 @@ export async function getSavedAnalysisPdfExportAction(
   const row = data as Record<string, unknown>;
   const cachedPdfUrl = dbString(row.pdf_url);
   const cachedVersion = dbNumber(row.pdf_snapshot_version) ?? 0;
-
-  await supabase
-    .from("saved_analyses")
-    .update({ last_activity_at: new Date().toISOString() })
-    .eq("id", savedDealId)
-    .eq("user_id", user.id)
-    .is("deleted_at", null);
 
   // Cancellation/downgrade does not erase a report the owner already
   // generated. That is the read-only access promised in the Terms: Free can
@@ -1160,10 +1297,33 @@ export async function getSavedAnalysisPdfExportAction(
     };
   }
 
+  // Resolve the complete render source before considering a cache hit. The
+  // version number invalidates engine/template releases, while this
+  // content-addressed path invalidates edits to this deal's exact snapshots
+  // and its referenced template fallback. Checking only the version would
+  // still re-serve an old PDF after an analysis-template rename/edit because
+  // that mutation does not update the saved_analyses row.
+  const [templateFallback, reportComps] = await Promise.all([
+    getTemplateFallback(supabase, dbString(row.template_id)),
+    getSavedAnalysisReportComps(supabase, savedDealId, user.id),
+  ]);
+  const renderSource = savedAnalysisPdfRenderSource(row, templateFallback, reportComps);
+  const renderFingerprint = fingerprintSavedAnalysisPdfRender(renderSource);
+  const expectedPdfPath = buildAnalysisPdfObjectPath(
+    user.id,
+    savedDealId,
+    PDF_CACHE_VERSION,
+    renderFingerprint
+  );
+  const cachedObjectPath = cachedPdfUrl
+    ? resolveAnalysisPdfObjectPath(cachedPdfUrl, user.id)
+    : null;
+
   // Cache check — only serve cached PDF if:
   //   1) it exists,
   //   2) its snapshot version matches the current template version, AND
-  //   3) the user has NO branding configured.
+  //   3) its object path fingerprint matches the current render source, AND
+  //   4) the user has NO branding configured.
   //
   // The third condition exists because cached PDFs don't track the
   // branding state they were generated with. If a user updates their
@@ -1208,6 +1368,7 @@ export async function getSavedAnalysisPdfExportAction(
   if (
     cachedPdfUrl &&
     cachedVersion === PDF_CACHE_VERSION &&
+    cachedObjectPath === expectedPdfPath &&
     !hasUserBranding &&
     // Input confirmations can change without any financial-engine version
     // changing. A cached Decision Readiness page would then retain stale
@@ -1221,18 +1382,17 @@ export async function getSavedAnalysisPdfExportAction(
     // new boxes, default changes). Checked only on the would-serve-cache
     // path so the regenerate path pays no extra query.
     const hasUsableBuyBox = await userHasUsableBuyBox(supabase, user.id, entitlements);
-    if (!hasUsableBuyBox) {
+    if (hasUsableBuyBox === false) {
       // The bucket is PRIVATE (migration 20260802120000) — it used to be
       // public, which made every user's underwrite anonymously listable and
       // downloadable. Never hand back a durable URL: mint a short-lived
       // signed one, scoped by RLS to the caller's own folder. `supabase` here
       // is the cookie-bound user client, so signing an object outside
       // `<user.id>/` fails at the policy — a non-owner cannot mint a URL.
-      const objectPath = resolveAnalysisPdfObjectPath(cachedPdfUrl, user.id);
-      if (objectPath) {
+      if (cachedObjectPath) {
         const { data: signed, error: signError } = await supabase.storage
           .from(ANALYSIS_PDF_BUCKET)
-          .createSignedUrl(objectPath, ANALYSIS_PDF_SIGNED_URL_TTL_SECONDS);
+          .createSignedUrl(cachedObjectPath, ANALYSIS_PDF_SIGNED_URL_TTL_SECONDS);
         if (signed?.signedUrl) {
           return { ok: true, source: "cache", pdfUrl: signed.signedUrl };
         }
@@ -1248,8 +1408,6 @@ export async function getSavedAnalysisPdfExportAction(
     }
   }
 
-  const templateFallback = await getTemplateFallback(supabase, dbString(row.template_id));
-
   return {
     ok: true,
     source: "regenerate",
@@ -1259,6 +1417,8 @@ export async function getSavedAnalysisPdfExportAction(
     formSnapshot: buildEditFormSnapshotFromRow(row),
     templateFallback,
     resultSnapshot: buildTrustedResultSnapshot(row),
+    reportComps,
+    renderFingerprint,
   };
 }
 
@@ -1266,15 +1426,21 @@ export async function getSavedAnalysisPdfExportAction(
  * Record that a cached PDF was written for this deal.
  *
  * Takes no URL and no path: the object path is DERIVED server-side from the
- * authenticated user id + deal id + cache version, the same way the client
- * derives the upload path. Nothing about the storage location is
- * client-controlled, and what lands in `saved_analyses.pdf_url` is an
- * owner-scoped object path — never a durable public URL (the bucket is
- * private as of migration 20260802120000; reads mint a short-lived signed URL
- * in getSavedAnalysisPdfExportAction).
+ * authenticated user id + deal id + cache version + server-issued render
+ * fingerprint, the same way the client derives the upload path. Completion
+ * re-reads the row and atomically checks its updated_at token, so an artifact
+ * rendered before a target/snapshot edit can never be attached afterward.
+ * Nothing about the storage location is client-controlled, and what lands in
+ * `saved_analyses.pdf_url` is an owner-scoped object path — never a durable
+ * public URL (the bucket is private as of migration 20260802120000; reads mint
+ * a short-lived signed URL in getSavedAnalysisPdfExportAction).
  */
 export async function completeSavedAnalysisPdfExportAction(
-  id: string
+  id: string,
+  renderFingerprint: string,
+  renderedWithBranding: boolean,
+  renderedWithBuyBoxVerdict: boolean,
+  buyBoxStateResolved: boolean
 ): Promise<CompleteSavedAnalysisPdfExportResult> {
   const supabase = await createServerSupabaseClient();
   const {
@@ -1291,11 +1457,63 @@ export async function completeSavedAnalysisPdfExportAction(
   }
 
   const savedDealId = id.trim();
-  if (!savedDealId) {
+  if (
+    !savedDealId ||
+    !isSavedAnalysisPdfRenderFingerprint(renderFingerprint) ||
+    typeof renderedWithBranding !== "boolean" ||
+    typeof renderedWithBuyBoxVerdict !== "boolean" ||
+    typeof buyBoxStateResolved !== "boolean"
+  ) {
     return { ok: false, code: "VALIDATION_ERROR", message: "Invalid PDF export payload." };
   }
 
-  const pdfPath = buildAnalysisPdfObjectPath(user.id, savedDealId, PDF_CACHE_VERSION);
+  const { data: currentData, error: currentError } = await supabase
+    .from("saved_analyses")
+    .select(SAVED_ANALYSIS_PDF_EXPORT_SELECT)
+    .eq("id", savedDealId)
+    .eq("user_id", user.id)
+    .is("deleted_at", null)
+    .maybeSingle();
+
+  if (currentError) {
+    return toServerErrorResult(currentError, "saved-analyses");
+  }
+  if (!currentData) {
+    return { ok: false, code: "NOT_FOUND", message: "Deal was not found." };
+  }
+
+  const currentRow = currentData as Record<string, unknown>;
+  const currentUpdatedAt = dbString(currentRow.updated_at);
+  if (!currentUpdatedAt) {
+    return {
+      ok: false,
+      code: "SERVER_ERROR",
+      message: "The saved analysis could not be version-checked.",
+    };
+  }
+  const [currentTemplateFallback, currentReportComps] = await Promise.all([
+    getTemplateFallback(supabase, dbString(currentRow.template_id)),
+    getSavedAnalysisReportComps(supabase, savedDealId, user.id),
+  ]);
+  if (
+    !savedAnalysisPdfRenderMatches(
+      savedAnalysisPdfRenderSource(currentRow, currentTemplateFallback, currentReportComps),
+      renderFingerprint
+    )
+  ) {
+    return {
+      ok: false,
+      code: "STALE_EXPORT",
+      message: "The analysis changed while this PDF was being generated.",
+    };
+  }
+
+  const pdfPath = buildAnalysisPdfObjectPath(
+    user.id,
+    savedDealId,
+    PDF_CACHE_VERSION,
+    renderFingerprint
+  );
 
   // A PDF generated while the user has a usable buy box or Decision
   // Readiness evidence carries mutable state the version composite cannot
@@ -1303,6 +1521,24 @@ export async function completeSavedAnalysisPdfExportAction(
   // or confirmations.
   const hasUsableBuyBox = await userHasUsableBuyBox(supabase, user.id, entitlements);
   const hasMutableDecisionReadiness = isFeatureEnabled("input_confidence");
+  // `renderedWithBranding` relays the server renderer's actual outcome from
+  // generateReportPdfAction. It is not an authorization input; it protects
+  // the normal delete-branding race: even if
+  // the branding row disappears before completion, those branded bytes remain
+  // uncacheable for paid reads (while the retained artifact still exists for
+  // a later downgrade). Recheck the row too so creating branding between
+  // render and completion is also conservative.
+  let hasCurrentBranding = false;
+  try {
+    const { data: brandingRow } = await supabase
+      .from("branding")
+      .select("id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    hasCurrentBranding = Boolean(brandingRow);
+  } catch {
+    // The relayed renderer outcome still protects the artifact just made.
+  }
 
   const { data, error } = await supabase
     .from("saved_analyses")
@@ -1310,13 +1546,21 @@ export async function completeSavedAnalysisPdfExportAction(
       pdf_url: pdfPath,
       pdf_generated_at: new Date().toISOString(),
       pdf_snapshot_version:
-        hasUsableBuyBox || hasMutableDecisionReadiness
+        renderedWithBranding ||
+        hasCurrentBranding ||
+        renderedWithBuyBoxVerdict ||
+        !buyBoxStateResolved ||
+        hasUsableBuyBox !== false ||
+        hasMutableDecisionReadiness
           ? PDF_CACHE_VERSION_UNCACHEABLE
           : PDF_CACHE_VERSION,
       last_activity_at: new Date().toISOString(),
     })
     .eq("id", savedDealId)
     .eq("user_id", user.id)
+    // Optimistic-concurrency guard closes the final select→update window. Any
+    // save (including a target edit) advances updated_at via the DB trigger.
+    .eq("updated_at", currentUpdatedAt)
     .is("deleted_at", null)
     .select("id")
     .maybeSingle();
@@ -1326,7 +1570,11 @@ export async function completeSavedAnalysisPdfExportAction(
   }
 
   if (!data) {
-    return { ok: false, code: "NOT_FOUND", message: "Deal was not found." };
+    return {
+      ok: false,
+      code: "STALE_EXPORT",
+      message: "The analysis changed while this PDF was being generated.",
+    };
   }
 
   return { ok: true, pdfPath };
@@ -1505,6 +1753,21 @@ export async function updateSavedDealStageAction(
   }
   if (!data) {
     return { ok: false, code: "NOT_FOUND", message: "Deal was not found." };
+  }
+  const recordedDecision =
+    stage === "passed"
+      ? "pass"
+      : stage === "negotiating"
+        ? "negotiate"
+        : stage === "offer" || stage === "under_contract" || stage === "closed"
+          ? "pursue"
+          : null;
+  if (recordedDecision) {
+    await captureServerEvent({
+      distinctId: user.id,
+      event: "decision_recorded",
+      properties: { decision: recordedDecision },
+    });
   }
   return { ok: true };
 }
@@ -1703,6 +1966,13 @@ export async function setSavedDealClientAction(
   }
   if (!data) {
     return { ok: false, code: "NOT_FOUND", message: "Deal was not found." };
+  }
+  if (clientId !== null) {
+    await captureServerEvent({
+      distinctId: user.id,
+      event: "client_decision_assigned",
+      properties: { role: "client" },
+    });
   }
   return { ok: true, clientId };
 }

@@ -65,8 +65,8 @@ const USE_CASES: { icon: typeof Calculator; title: string; body: string }[] = [
   },
   {
     icon: LineChart,
-    title: "Year-2 plan: move out, rent your unit",
-    body: "House hacks become full rentals when you move out. The 10-year projection (Pro) helps you compare: 'what if I move out year 2 and rent that unit at market?'",
+    title: "Plan the later rental as a separate scenario",
+    body: "The live-in model does not switch automatically in year two. Save a separate full-rental scenario with your unit rented, then compare the assumptions explicitly.",
   },
 ];
 
@@ -95,7 +95,7 @@ export default function ForHouseHackersPage() {
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             TrueCap handles the math that makes house hacks unique:
             owner-occupant break-even bands, FHA 3.5% down, MIP, your-unit
-            subsidy, and the year-2 transition when you move out.
+            subsidy, with a separate-scenario workflow for a later move-out.
           </p>
 
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
@@ -162,8 +162,8 @@ export default function ForHouseHackersPage() {
               "Paste the listing address (the engine handles 2-4 unit multi-family automatically).",
               "Set per-unit rent for the units you'll rent out. Leave your-unit rent at $0.",
               "Hit Calculate — see your monthly out-of-pocket (the gap between rent collected and total carrying cost). Owner-occupant scoring uses the right break-even bands.",
-              "Pro: open the 10-year projection. Model the year-2 transition: move out, rent your unit, watch cash flow swing positive.",
-              "Save the deal. When you move out in 12-18 months, re-open and toggle propertyType to multi-family to see the post-transition numbers.",
+              "Save the live-in underwrite as its own base decision.",
+              "Create a separate full-rental scenario with your unit rented. TrueCap does not automatically switch occupancy in a future year; compare the two explicit scenarios and verify the later market rent.",
             ].map((step, i) => (
               <li key={i} className="flex items-start gap-3">
                 <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-extrabold tabular-nums">
@@ -188,7 +188,7 @@ export default function ForHouseHackersPage() {
             <li><strong>Right math.</strong> Owner-occupant scoring uses ±$300/mo break-even bands, not investor $1,000/mo bands. A deal scoring 60+ as an investment might score 80+ as a house hack.</li>
             <li><strong>FHA 3.5% template ready to clone.</strong> One click pre-fills the down %, MIP, term, vacancy assumption.</li>
             <li><strong>Per-unit rent.</strong> Multi-family mode lets you model each unit independently — the only way to get house-hack math right.</li>
-            <li><strong>Transition modeling.</strong> See what happens when you move out and rent your unit at market.</li>
+            <li><strong>Separate transition scenario.</strong> Preserve the live-in assumptions, then model the later full-rental state as a distinct saved scenario.</li>
             <li><strong>Mixed-use tax caveat.</strong> The Pro view is a general rental illustration; it does not allocate basis, depreciation, or interest between personal and rental use. Replace it with a CPA&apos;s mixed-use calculation.</li>
           </ul>
         </section>
@@ -231,10 +231,10 @@ export default function ForHouseHackersPage() {
 
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">
-            Free screens the live-in year. Pro models the year-2 transition.
+            Screen the live-in year, then preserve a separate move-out scenario.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            Free covers monthly out-of-pocket, cap rate, and CoC for a first-pass live-in-year screen. Pro adds the 10-year projection for exploring the year-2 rental transition, Illustrative Tax Impact, and the saved-deal portfolio view.
+            Free covers monthly out-of-pocket, cap rate, and CoC for a first-pass live-in-year screen. Pro adds saved scenarios and comparison so the later full-rental state can be modeled separately; there is no automatic year-two occupancy switch.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link

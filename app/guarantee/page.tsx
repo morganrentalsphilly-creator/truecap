@@ -15,6 +15,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { Mail, ShieldCheck, Sparkles } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -24,22 +25,36 @@ import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 import { getSiteUrl } from "@/lib/site-url";
 import { TRIAL_DAYS } from "@/lib/trial";
 import { getRequestUser } from "@/lib/request-auth";
+import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 
-export const metadata: Metadata = {
-  title: "The Never Overpay Guarantee",
-  description:
-    "Analyze 10 deals in your first 30 days as a paying Pro subscriber. If you don't feel more confident about exactly what to offer, email us for a full refund.",
-  alternates: { canonical: "/guarantee" },
-  openGraph: {
-    title: "The Never Overpay Guarantee — TrueCap",
+export function generateMetadata(): Metadata {
+  const { guaranteeEnabled } = getMarketingOfferConfig();
+  if (!guaranteeEnabled) {
+    return {
+      title: "Guarantee terms unavailable",
+      description: "No public TrueCap refund guarantee is currently offered.",
+      robots: { index: false, follow: false },
+    };
+  }
+  return {
+    title: "The Never Overpay Guarantee",
     description:
-      "Analyze 10 deals in your first 30 days as a paying Pro subscriber. Not more confident about exactly what to offer? Email us for a full refund.",
-    url: "/guarantee",
-    type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap Never Overpay Guarantee" }],
-  },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
-};
+      "Analyze 10 deals in your first 30 days as a paying Pro subscriber. If you don't feel more confident about exactly what to offer, email us for a full refund.",
+    alternates: { canonical: "/guarantee" },
+    robots: guaranteeEnabled
+      ? { index: true, follow: true }
+      : { index: false, follow: true },
+    openGraph: {
+      title: "The Never Overpay Guarantee — TrueCap",
+      description:
+        "Analyze 10 deals in your first 30 days as a paying Pro subscriber. Not more confident about exactly what to offer? Email us for a full refund.",
+      url: "/guarantee",
+      type: "website",
+      images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap Never Overpay Guarantee" }],
+    },
+    twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  };
+}
 
 const GUARANTEE_FAQS: { q: string; a: string }[] = [
   {
@@ -69,6 +84,8 @@ const GUARANTEE_FAQS: { q: string; a: string }[] = [
 ];
 
 export default async function GuaranteePage() {
+  if (!getMarketingOfferConfig().guaranteeEnabled) notFound();
+
   // Only to suppress the footer's Sign in / Create account column for a
   // signed-in visitor — no gating, no personalization.
   const user = await getRequestUser();

@@ -23,6 +23,11 @@ import { useState } from "react";
 import { ExternalLink, Loader2 } from "lucide-react";
 import { getSavedDealForEditingAction } from "@/app/actions/saved-analyses";
 import { useToast } from "@/hooks/use-toast";
+import { normalizeMaoTarget } from "@/lib/mao-target-editor";
+import {
+  normalizeOfferCeilingTargetSource,
+  type OfferCeilingTargetSource,
+} from "@/lib/offer-ceiling-contract";
 
 /** Base of the nonce-keyed edit handoff (`<base>::<nonce>`), and the legacy
  *  shared key a previous deploy's tabs may still hold. Must match
@@ -102,6 +107,38 @@ function writeNonceKeyedHandoffPayload(baseKey: string, payload: Record<string, 
 }
 
 /**
+ * Normalize the acquisition target once at the handoff boundary. Saved rows
+ * can predate the current target schema, so neither an edit nor a duplicate
+ * should transport an arbitrary legacy object into a fresh calculator tab.
+ * Invalid/empty targets are omitted and the analyzer falls back to its normal
+ * buy-box/default seed.
+ */
+function normalizeSavedDealHandoffTarget(resultSnapshot: Record<string, unknown>): {
+  maxOfferTarget: ReturnType<typeof normalizeMaoTarget>;
+  maxOfferTargetSource: OfferCeilingTargetSource;
+  resultSnapshot: Record<string, unknown>;
+} {
+  const maxOfferTarget = normalizeMaoTarget(resultSnapshot.maxOfferTarget);
+  const maxOfferTargetSource =
+    normalizeOfferCeilingTargetSource(
+      resultSnapshot.maxOfferTargetSource
+    ) ?? "selected-targets";
+  const normalizedResultSnapshot = { ...resultSnapshot };
+  if (maxOfferTarget) {
+    normalizedResultSnapshot.maxOfferTarget = maxOfferTarget;
+    normalizedResultSnapshot.maxOfferTargetSource = maxOfferTargetSource;
+  } else {
+    delete normalizedResultSnapshot.maxOfferTarget;
+    delete normalizedResultSnapshot.maxOfferTargetSource;
+  }
+  return {
+    maxOfferTarget,
+    maxOfferTargetSource,
+    resultSnapshot: normalizedResultSnapshot,
+  };
+}
+
+/**
  * "Duplicate" / "New deal from this" — open the analyzer carrying the deal's
  * form snapshot as a NEW deal: the calculator restores the financing/expense
  * assumptions but clears the address/price/rent so the user just enters the
@@ -128,9 +165,14 @@ export async function duplicateSavedDealInAnalyzer(
     targetWindow?.close();
     return { ok: false, message: result.message };
   }
+  const { maxOfferTarget, maxOfferTargetSource } =
+    normalizeSavedDealHandoffTarget(result.resultSnapshot);
   const nonce = writeNonceKeyedHandoffPayload(SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY, {
     formSnapshot: result.formSnapshot,
     templateFallback: result.templateFallback,
+    ...(maxOfferTarget
+      ? { maxOfferTarget, maxOfferTargetSource }
+      : {}),
   });
   const href = `/?${DEAL_DUPLICATE_HANDOFF_PARAM}=${nonce}`;
   if (targetWindow) {
@@ -168,13 +210,14 @@ export async function openSavedDealInAnalysisTab(
     return { ok: false, message: result.message };
   }
 
+  const { resultSnapshot } = normalizeSavedDealHandoffTarget(result.resultSnapshot);
   const nonce = writeNonceKeyedHandoffPayload(SAVED_ANALYSIS_EDIT_DRAFT_KEY, {
     id: result.id,
     schemaVersion: result.schemaVersion,
     methodologyVersion: result.methodologyVersion,
     formSnapshot: result.formSnapshot,
     templateFallback: result.templateFallback,
-    resultSnapshot: result.resultSnapshot,
+    resultSnapshot,
   });
   const href = `/?${DEAL_EDIT_HANDOFF_PARAM}=${nonce}`;
   if (targetWindow) {

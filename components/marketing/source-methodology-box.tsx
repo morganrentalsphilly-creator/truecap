@@ -84,7 +84,7 @@ export function SourceMethodologyBox({
       </p>
       <p className="mt-1">
         {confidence ??
-          "Metro-level estimates — precision is lower at the neighborhood and parcel level; pull a specific address for exact, auto-filled figures."}{" "}
+          "Metro-level estimates — precision is lower at the neighborhood and parcel level; pull a specific address for editable property-screening estimates."}{" "}
         Reviewed by {reviewer}.{" "}
         <Link
           href="/methodology"

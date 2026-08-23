@@ -9,7 +9,13 @@
  */
 
 import { cn } from "@/lib/utils";
-import { INVESTOR_STRATEGIES, getStrategyByKey } from "@/lib/investor-strategies";
+import {
+  ADVANCED_INVESTOR_STRATEGIES,
+  CORE_INVESTOR_STRATEGIES,
+  SECONDARY_INVESTOR_STRATEGIES,
+  getStrategyByKey,
+  type InvestorStrategy,
+} from "@/lib/investor-strategies";
 
 export function StrategyChips({
   activeKey,
@@ -19,6 +25,28 @@ export function StrategyChips({
   onSelect: (key: string | null) => void;
 }) {
   const active = getStrategyByKey(activeKey);
+  const renderStrategy = (strategy: InvestorStrategy) => {
+    const isActive = strategy.key === activeKey;
+    const Icon = strategy.Icon;
+    return (
+      <button
+        key={strategy.key}
+        type="button"
+        aria-pressed={isActive}
+        title={strategy.tagline}
+        onClick={() => onSelect(isActive ? null : strategy.key)}
+        className={cn(
+          "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-semibold transition-colors sm:shrink",
+          isActive
+            ? "border-primary bg-primary text-primary-foreground"
+            : "border-border bg-background text-foreground hover:bg-muted"
+        )}
+      >
+        <Icon aria-hidden className="size-3.5 shrink-0" />
+        {strategy.label}
+      </button>
+    );
+  };
 
   return (
     <div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5">
@@ -26,7 +54,7 @@ export function StrategyChips({
         <div className="min-w-0">
           <p className="text-sm font-semibold text-foreground">Strategy</p>
           <p className="text-[11px] leading-snug text-muted-foreground">
-            Optional - tailor the form and lead with the number that matters for your strategy.
+            Long-term rental acquisition is the core workflow. Other models stay available with their limitations attached.
           </p>
         </div>
         {active ? (
@@ -42,38 +70,42 @@ export function StrategyChips({
         ) : null}
       </div>
 
-      {/* One swipeable row on phones (the 6 chips wrapped to 3 rows at
-          375px, ~140px of card height for a set-and-forget control);
-          wraps as before from sm:. Negative margin bleeds the scroll
-          gutter to the card edge so the row hints its overflow. */}
+      <p className="mt-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        Core
+      </p>
       <div className="mt-3 -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
-        {INVESTOR_STRATEGIES.map((s) => {
-          const isActive = s.key === activeKey;
-          const Icon = s.Icon;
-          return (
-            <button
-              key={s.key}
-              type="button"
-              aria-pressed={isActive}
-              title={s.tagline}
-              onClick={() => onSelect(isActive ? null : s.key)}
-              className={cn(
-                "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-semibold transition-colors sm:shrink",
-                isActive
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border bg-background text-foreground hover:bg-muted"
-              )}
-            >
-              <Icon className="size-3.5 shrink-0" />
-              {s.label}
-            </button>
-          );
-        })}
+        {CORE_INVESTOR_STRATEGIES.map(renderStrategy)}
       </div>
+
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          Secondary
+        </span>
+        {SECONDARY_INVESTOR_STRATEGIES.map(renderStrategy)}
+      </div>
+
+      <details
+        className="group mt-3 rounded-xl border border-border bg-muted/20 px-3"
+        open={active?.productStage === "advanced-beta" ? true : undefined}
+      >
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-xs font-bold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          Advanced / Beta strategies
+          <span aria-hidden className="text-muted-foreground transition-transform group-open:rotate-45">+</span>
+        </summary>
+        <p className="pb-2 text-[11px] leading-relaxed text-muted-foreground">
+          BRRRR, flip, wholesale, and STR are screening aids. Their rehab, ARV, lender, operating, regulatory, and exit assumptions require separate evidence.
+        </p>
+        <div className="flex flex-wrap gap-2 border-t border-border py-3">
+          {ADVANCED_INVESTOR_STRATEGIES.map(renderStrategy)}
+        </div>
+      </details>
 
       {active ? (
         <p className="mt-3 rounded-xl bg-primary/5 px-3 py-2 text-xs leading-snug text-foreground">
           <span className="font-semibold">{active.label}:</span> {active.focusHint}
+          {active.limitation ? (
+            <span className="mt-1 block text-muted-foreground">Limit: {active.limitation}</span>
+          ) : null}
         </p>
       ) : null}
     </div>

@@ -10,6 +10,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { TRIAL_DAYS } from "@/lib/trial";
+import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
@@ -33,6 +34,7 @@ export const metadata: Metadata = {
 const LAST_UPDATED = "August 23, 2026";
 
 export default function TermsPage() {
+  const { guaranteeEnabled } = getMarketingOfferConfig();
   return (
     <div className="min-h-screen bg-background">
       <main id="main" className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
@@ -136,10 +138,15 @@ export default function TermsPage() {
           <h3>Refunds</h3>
           <p>
             Subscription charges are non-refundable except where required by law, for billing
-            errors we confirm, or when a customer satisfies the published terms of the{" "}
-            <Link href="/guarantee" className="font-medium text-primary hover:underline">
-              Never Overpay Guarantee
-            </Link>
+            errors we confirm
+            {guaranteeEnabled ? (
+              <>
+                , or when a customer satisfies the published terms of the{" "}
+                <Link href="/guarantee" className="font-medium text-primary hover:underline">
+                  Never Overpay Guarantee
+                </Link>
+              </>
+            ) : null}
             . If you believe you were charged in error, email{" "}
             <a href="mailto:hello@usetruecap.com" className="font-medium text-primary hover:underline">
               hello@usetruecap.com

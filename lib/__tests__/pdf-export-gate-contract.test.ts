@@ -51,7 +51,8 @@ const CLIENT_SURFACES: Array<[string, string]> = [
  * passed for the entire time the one-time claim was fingerprinting a field the
  * renderer never read, so one $5 purchase could render unlimited arbitrary
  * reports. Behaviour lives in the sibling suites:
- *   lib/__tests__/report-claim-binding.test.ts   — claim <-> document binding
+ *   lib/__tests__/report-data-builder.test.ts    — server-owned report numbers
+ *   lib/__tests__/report-claim-binding.test.ts   — legacy identity comparison
  *   lib/__tests__/report-payload-schema.test.ts  — no field silently stripped
  *
  * When you add a rule to the gate, add it in BOTH places.
@@ -66,7 +67,7 @@ describe("PDF export gate lives on the server", () => {
     expect(serverAction).toContain("getEntitlementsForUser");
     // The gate must run BEFORE the generator is even imported.
     expect(serverAction.indexOf("checkGate")).toBeLessThan(
-      serverAction.indexOf("generateInvestmentPDFBlob")
+      serverAction.indexOf("generateInvestmentPDFArtifact")
     );
   });
 
@@ -88,21 +89,46 @@ describe("PDF export gate lives on the server", () => {
   it("binds a one-time claim to a paid, unexpired, deal-matched purchase", () => {
     expect(serverAction).toContain("claimSecretMatches");
     expect(serverAction).toContain("fingerprintOneTimePdfDeal");
+    expect(serverAction).toContain("fingerprintOneTimePdfReportBinding");
     expect(serverAction).toContain("data.consumed_at");
+    expect(serverAction).toContain("isOneTimePdfRecoveryAllowed({");
+    expect(serverAction).toContain("report_fingerprint");
+    expect(serverAction).toContain("user?.id !== data.user_id");
   });
 
-  it("binds the claim to the DOCUMENT it renders, not just to claim.values", () => {
-    // This is the assertion that was missing while the bypass shipped. The
-    // fingerprint above is computed over `claim.values`, but the PDF is built
-    // from `parsed.data.report` — so a claim could be paired with any other
-    // report. Grepping for fingerprintOneTimePdfDeal passed the whole time.
-    //
-    // The BEHAVIOUR is covered by lib/__tests__/report-claim-binding.test.ts,
-    // which exercises the real comparison. This only proves it is still wired
-    // into the gate, which a behavioural test of a pure function cannot.
-    expect(serverAction).toContain("reportMatchesClaimedDeal(input.report");
-    expect(serverAction.indexOf("reportMatchesClaimedDeal")).toBeLessThan(
-      serverAction.indexOf("generateInvestmentPDFBlob")
+  it("binds the claim to the normalized values the server renders", () => {
+    expect(serverAction).toContain("fingerprintOneTimePdfDeal(valuesToRender");
+    expect(serverAction).toContain("claimGrantsExport(");
+    expect(serverAction).toContain("input.maxOfferTargetSource");
+    expect(serverAction.indexOf("await claimGrantsExport(")).toBeLessThan(
+      serverAction.indexOf("generateInvestmentPDFArtifact")
+    );
+  });
+
+  it("rebuilds the renderer payload server-side after the gate", () => {
+    const rebuildCall = serverAction.indexOf("const canonicalReport = buildCanonicalReportData");
+    expect(rebuildCall).toBeGreaterThan(serverAction.indexOf("checkGate(parsed.data)"));
+    expect(serverAction).toContain("generateInvestmentPDFArtifact(\n      canonicalReport");
+    expect(rebuildCall).toBeLessThan(
+      serverAction.indexOf("generateInvestmentPDFArtifact")
+    );
+    const rebuildBlock = serverAction.slice(
+      rebuildCall,
+      serverAction.indexOf("const { getBranding }")
+    );
+    expect(rebuildBlock).not.toContain("parsed.data.report");
+  });
+
+  it("fails closed before rebuilding a saved deal from another methodology", () => {
+    const freezeCheck = serverAction.indexOf(
+      "shouldFreezeSavedMethodology(authority.methodologyVersion)"
+    );
+    const rebuildCall = serverAction.indexOf("const canonicalReport = buildCanonicalReportData");
+    expect(serverAction).toContain('code: "FROZEN_METHODOLOGY"');
+    expect(freezeCheck).toBeGreaterThan(-1);
+    expect(freezeCheck).toBeLessThan(rebuildCall);
+    expect(serverAction).toContain(
+      "authority.renderFingerprint !== input.savedExport.renderFingerprint"
     );
   });
 
@@ -141,6 +167,11 @@ describe("no client surface can compose a PDF by itself", () => {
 });
 
 describe("the generator stays free of the DOM", () => {
+  it("renders a missing construction year as Unknown", () => {
+    expect(generator).toContain('yearBuilt == null ? "Unknown"');
+    expect(generator).toContain("formatYearBuilt(d.property.yearBuilt)");
+  });
+
   it("does not reach for document, window, Image, FileReader or a canvas", () => {
     for (const forbidden of [
       "document.createElement",

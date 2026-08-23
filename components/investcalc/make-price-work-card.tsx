@@ -13,63 +13,32 @@
  * the DOM entirely — a real regression, restored here as its own component so
  * it can live under "Why this number" independent of the card's fate.
  *
- * COMPUTE: calls solveRequiredMonthlyRent / solveRequiredInterestRate exactly
- * as the original did, on the same target. No math changed — the solvers are
- * untouched and this component owns no thresholds.
+ * COMPUTE: the exact inverse results arrive from the same entitlement-aware
+ * server boundary as Offer Ceiling. This component is presentation-only, so
+ * Free browsers never receive or calculate the paid thresholds.
  */
 
-import { useMemo } from "react";
-import type { InvestmentFormValues } from "@/lib/investcalc-schema";
-import { calculateAnalysis } from "@/lib/calc-analysis";
-import {
-  meetsTarget,
-  solveRequiredMonthlyRent,
-  solveRequiredInterestRate,
-  type MaoTarget,
-} from "@/lib/max-allowable-offer";
+import type { OfferCeilingExactResult } from "@/lib/offer-ceiling-access-contract";
 
 const money = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
 
 export function MakePriceWorkCard({
-  values,
-  target,
+  currentPrice,
+  result,
 }: {
-  values: InvestmentFormValues | null;
-  /** The SAME effective target the Decision tier solved Max Offer with. */
-  target: MaoTarget;
+  currentPrice: number;
+  result: OfferCeilingExactResult["makePriceWork"];
 }) {
-  const currentPrice = values?.purchasePrice ?? null;
-
-  const { currentMeets, reqRent, reqRate } = useMemo(() => {
-    if (!values || !currentPrice) {
-      return { currentMeets: false, reqRent: null, reqRate: null };
-    }
-    try {
-      const current = calculateAnalysis(values);
-      return {
-        currentMeets: meetsTarget(current, target),
-        reqRent: solveRequiredMonthlyRent(values, target),
-        reqRate: solveRequiredInterestRate(values, target),
-      };
-    } catch {
-      return { currentMeets: false, reqRent: null, reqRate: null };
-    }
-  }, [values, currentPrice, target]);
-
-  const hasTarget =
-    target.capRate !== undefined ||
-    target.cocReturn !== undefined ||
-    target.monthlyCashFlow !== undefined ||
-    target.dscr !== undefined;
-
-  if (!values || !currentPrice || !hasTarget) return null;
+  if (!Number.isFinite(currentPrice) || currentPrice <= 0) return null;
+  const reqRent = result.requiredMonthlyRent;
+  const reqRate = result.requiredInterestRate;
 
   return (
     <div className="rounded-xl border border-dashed border-border p-4 sm:p-5">
       <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
         Or — make your current price work
       </div>
-      {currentMeets ? (
+      {result.currentMeets ? (
         <p className="mt-1.5 text-sm text-foreground">
           Your current price ({money(currentPrice)}) already clears these targets. ✓
         </p>

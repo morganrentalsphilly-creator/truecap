@@ -21,9 +21,8 @@ export type LivePreviewSnapshot = {
   capRate: number;
   dscr: number;
   monthlyPayment: number;
-  /** Break-even purchase price (cash flow ≥ $0), solved only when the
-   *  preview is NEGATIVE — the "try this as your offer" path out of a bad
-   *  first number. Null when positive or unsolvable. */
+  /** Paid-only break-even purchase price (cash flow ≥ $0), solved only
+   *  when the preview is negative. Null for Free, positive, or unsolvable. */
   breakEvenPrice: number | null;
   /** One-line "what's dragging this" for MIXED/MARGINAL tiers (computed
    *  by lib/limiting-factor.ts alongside the tier). Null for every other
@@ -160,6 +159,10 @@ export function LiveVerdictPanel({ active, livePreview, livePreviewMsg }: Props)
                 ${Math.round(livePreview.breakEvenPrice).toLocaleString()}
               </span>{" "}
               — try that as your offer price.
+            </p>
+          ) : Math.round(livePreview.netCashFlow) < 0 ? (
+            <p className="mt-2.5 rounded-lg bg-background/60 px-2.5 py-2 text-[11px] font-semibold leading-snug text-foreground">
+              Negative at these assumptions. Run the full analysis to review the price, rent, financing, and expense levers.
             </p>
           ) : livePreview.limitingFactor ? (
             // Mixed/Marginal get the same next-move treatment Negative

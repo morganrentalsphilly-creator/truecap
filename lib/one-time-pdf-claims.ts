@@ -2,9 +2,33 @@ import "server-only";
 
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
+import type { MaoTarget } from "@/lib/max-allowable-offer";
+import type { OfferCeilingTargetSource } from "@/lib/offer-ceiling-contract";
 
 export const ONE_TIME_PDF_CLAIM_LIFETIME_MS = 30 * 24 * 60 * 60 * 1000;
 export const ONE_TIME_PDF_RECOVERY_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+/** Recovery ends at the earlier of claim expiry and 24h after consumption. */
+export function isOneTimePdfRecoveryAllowed(input: {
+  consumedAt: string;
+  expiresAt: string;
+  nowMs?: number;
+}): boolean {
+  const consumedAtMs = Date.parse(input.consumedAt);
+  const expiresAtMs = Date.parse(input.expiresAt);
+  const nowMs = input.nowMs ?? Date.now();
+  if (!Number.isFinite(consumedAtMs) || !Number.isFinite(expiresAtMs)) {
+    return false;
+  }
+  return (
+    nowMs >= consumedAtMs &&
+    nowMs <=
+      Math.min(
+        expiresAtMs,
+        consumedAtMs + ONE_TIME_PDF_RECOVERY_WINDOW_MS
+      )
+  );
+}
 
 function stableStringify(value: unknown): string {
   if (value === null || typeof value !== "object") {
@@ -29,6 +53,29 @@ export function fingerprintOneTimePdfDeal(
 ): string {
   return createHmac("sha256", claimSecret)
     .update(stableStringify(values))
+    .digest("hex");
+}
+
+/**
+ * Bind a Pack purchase to the exact report decision the buyer saw at
+ * checkout, not just the property's form inputs. Without the target and its
+ * provenance in this digest, the same consumed claim could be replayed with
+ * different Offer Ceiling criteria during the recovery window.
+ */
+export function fingerprintOneTimePdfReportBinding(
+  values: InvestmentFormValues,
+  maxOfferTarget: MaoTarget,
+  maxOfferTargetSource: OfferCeilingTargetSource,
+  claimSecret: string
+): string {
+  return createHmac("sha256", claimSecret)
+    .update(
+      stableStringify({
+        values,
+        maxOfferTarget,
+        maxOfferTargetSource,
+      })
+    )
     .digest("hex");
 }
 
@@ -89,12 +136,11 @@ export function decideOneTimePdfClaimBinding(input: {
   }
 
   if (input.record.consumedAt) {
-    const consumedAtMs = Date.parse(input.record.consumedAt);
-    if (
-      Number.isFinite(consumedAtMs) &&
-      nowMs >= consumedAtMs &&
-      nowMs - consumedAtMs <= ONE_TIME_PDF_RECOVERY_WINDOW_MS
-    ) {
+    if (isOneTimePdfRecoveryAllowed({
+      consumedAt: input.record.consumedAt,
+      expiresAt: input.record.expiresAt,
+      nowMs,
+    })) {
       return { ok: true, mode: "bound-recovery" };
     }
     return { ok: false, code: "ALREADY_REDEEMED" };

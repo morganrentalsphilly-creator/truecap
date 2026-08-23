@@ -336,7 +336,7 @@ export default async function PricingPage() {
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                     Unlock one complete property decision: price ceiling, risk thresholds,
                     assumptions, downside case, long-term projections, illustrative tax view,
-                    modeled exit scenarios, and a lender-ready report. No subscription required.
+                    modeled exit scenarios, and one PDF Decision Memo. No subscription required.
                     {packCreditConfigured ? (
                       <>
                         {" "}
@@ -348,12 +348,20 @@ export default async function PricingPage() {
                     ) : null}
                   </p>
                 </div>
-                <Link
-                  href="/#main"
-                  className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-bold text-foreground transition-transform hover:-translate-y-0.5 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]"
-                >
-                  Analyze a property
-                </Link>
+                <div className="flex shrink-0 flex-col gap-2">
+                  <Link
+                    href="/#main"
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-bold text-foreground transition-transform hover:-translate-y-0.5 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]"
+                  >
+                    Analyze a property
+                  </Link>
+                  <Link
+                    href="/sample-decision-memo"
+                    className="inline-flex min-h-11 items-center justify-center px-4 text-sm font-bold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    View a sample memo
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
