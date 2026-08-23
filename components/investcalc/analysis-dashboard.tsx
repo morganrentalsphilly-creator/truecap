@@ -1076,7 +1076,7 @@ export function AnalysisDashboard({
         />
       ) : null}
 
-      {showInputConfidence && result && !isLoading && inputConfidence && onEditAssumptions && onToggleInputVerified ? (
+      {showInputConfidence && result && !isLoading && inputConfidence && onToggleInputVerified ? (
         <InputConfidenceCard
           confidence={inputConfidence}
           showOfferReadyStatus={showOfferReadyStatus}

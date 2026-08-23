@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
-const LAST_UPDATED = "August 16, 2026";
+const LAST_UPDATED = "August 23, 2026";
 
 export default function PrivacyPage() {
   return (
@@ -151,9 +151,12 @@ export default function PrivacyPage() {
           </p>
           <p>
             If you choose to create a deal share link, the analysis snapshot — including the
-            property address and financial assumptions — is encoded in that URL. Anyone with
-            the link can view it without an account, and the current share-link format does not
-            expire or revoke. Share it only with people you intend to receive the analysis.
+            property address and financial assumptions — is stored by TrueCap and made available
+            through an opaque, owner-revocable link. Anyone with the link can view it without an
+            account. A new share expires after 180 days by default. You can revoke it sooner from
+            your account, and you should still share it only with people you intend to receive the
+            analysis. Previously issued legacy links may contain an encoded snapshot in the URL and
+            cannot be remotely revoked; replace those links with a new share when practical.
           </p>
 
           <h2 className="text-2xl">3. Third-party services</h2>

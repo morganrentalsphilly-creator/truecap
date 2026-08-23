@@ -43,12 +43,14 @@ export default async function PortalDealPage({ params }: Props) {
   if (!UUID_RE.test(agentUserId) || !UUID_RE.test(clientId)) notFound();
 
   let values, result;
+  let showProAnalysis = false;
   try {
     const admin = createAdminSupabaseClient();
 
     // Same live entitlement re-check as the parent portal page.
     const entitlements = await getEntitlementsForUser(admin, agentUserId);
     if (!hasPlanFeature(entitlements, "agent_portal")) notFound();
+    showProAnalysis = hasPlanFeature(entitlements, "max_offer");
 
     const { data: deal } = await admin
       .from("saved_analyses")
@@ -83,6 +85,7 @@ export default async function PortalDealPage({ params }: Props) {
       result={result}
       comps={comps}
       agent={agent}
+      showProAnalysis={showProAnalysis}
       leadCapture={
         agent ? { ownerId: agentUserId, dealId, valuesHash, sig: sig ?? undefined } : undefined
       }

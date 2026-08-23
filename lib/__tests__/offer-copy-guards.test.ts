@@ -104,13 +104,14 @@ describe("offer trust language", () => {
     expect(privacy).not.toContain("we send only the property address / county");
   });
 
-  it("warns that read-only deal links are bearer snapshots without expiry", () => {
+  it("describes new read-only deal links as opaque, expiring, and revocable", () => {
     const share = read("components/investcalc/share-link-button.tsx");
     const privacy = read("app/privacy/page.tsx");
-    expect(share).toContain("Anyone with the link can view the snapshot");
-    expect(share).toContain("Links do not currently expire or revoke");
-    expect(privacy).toMatch(/Anyone with\s+the link can view it without an account/);
-    expect(privacy).toMatch(/does not\s+expire or revoke/);
+    expect(share).toContain("Anyone with the link can view a read-only snapshot");
+    expect(share).toContain("opaque, revocable URL");
+    expect(privacy).toMatch(/Anyone with\s+the link can view it without an\s+account/);
+    expect(privacy).toMatch(/opaque, owner-revocable link/);
+    expect(privacy).toMatch(/expires after 180 days by default/);
   });
 
   it("keeps auth and homepage promises benchmark-based and non-absolute", () => {

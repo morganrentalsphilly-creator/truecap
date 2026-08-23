@@ -88,7 +88,7 @@ export async function mintPublicShare(input: {
       // quiet; anything else (FK failure, RLS change, column drift) is an
       // operational error. The UI fails closed and never mints a /d payload.
       if (!isMissingTable(error)) {
-        Sentry.captureMessage("public_shares insert failed — falling back to legacy /d link", {
+        Sentry.captureMessage("public_shares insert failed — share creation failed closed", {
           level: "error",
           tags: { feature: "public-share", stage: "mint-insert" },
           extra: { database_code: error.code ?? "unknown" },
