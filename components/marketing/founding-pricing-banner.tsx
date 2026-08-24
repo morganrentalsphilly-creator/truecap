@@ -143,7 +143,7 @@ export function FoundingPricingBanner() {
       aria-label="Founding pricing"
       className="relative w-full border-b border-primary/20 bg-gradient-to-r from-[var(--brand-blue-light)] via-card to-[var(--brand-blue-light)]"
     >
-      <div className="mx-auto flex max-w-6xl items-center justify-center gap-3 px-4 py-2 text-center text-xs font-semibold text-foreground sm:gap-4 sm:text-sm">
+      <div className="mx-auto flex min-h-11 max-w-6xl items-center justify-center gap-3 px-4 text-center text-xs font-semibold text-foreground sm:gap-4 sm:text-sm">
         <span className="hidden sm:inline text-[10px] font-bold uppercase tracking-widest text-primary">
           Founding pricing
         </span>
@@ -151,7 +151,7 @@ export function FoundingPricingBanner() {
           TrueCap is at{" "}
           <Link
             href="/methodology#version-history"
-            className="font-bold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
+            className="inline-flex min-h-11 items-center align-middle font-bold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
             onClick={() => trackEvent("founding_banner_clicked", { target: "methodology" })}
           >
             Methodology v1.0
@@ -161,7 +161,7 @@ export function FoundingPricingBanner() {
           {pathname.startsWith("/pricing") ? null : (
             <Link
               href="/pricing"
-              className="font-bold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
+              className="inline-flex min-h-11 items-center align-middle font-bold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
               onClick={() => trackEvent("founding_banner_clicked", { target: "pricing" })}
             >
               See pricing →
