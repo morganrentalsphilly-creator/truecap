@@ -162,7 +162,7 @@ export function HeroAddressForm() {
       <div className="mt-3 flex flex-wrap items-center justify-start gap-x-4 gap-y-2 text-sm">
         <a
           href="#how-it-works"
-          className="group inline-flex items-center gap-1.5 rounded-xl border border-primary/30 bg-card px-4 py-2 font-semibold text-primary shadow-sm transition-colors hover:border-primary/60 hover:bg-[var(--brand-blue-light)]"
+          className="group inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-primary/30 bg-card px-4 py-2 font-semibold text-primary shadow-sm transition-colors hover:border-primary/60 hover:bg-[var(--brand-blue-light)]"
         >
           See How It Works
           <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
@@ -181,7 +181,7 @@ export function HeroAddressForm() {
             P2-10). Still visually tertiary — outline only, muted text. */}
         <Link
           href="/pricing"
-          className="inline-flex items-center rounded-xl border border-border bg-card px-4 py-2 font-medium text-muted-foreground shadow-sm transition-colors hover:border-primary/40 hover:text-foreground"
+          className="inline-flex min-h-11 items-center rounded-xl border border-border bg-card px-4 py-2 font-medium text-muted-foreground shadow-sm transition-colors hover:border-primary/40 hover:text-foreground"
         >
           See Pro features
         </Link>

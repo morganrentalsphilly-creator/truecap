@@ -129,7 +129,7 @@ export function PricingPlanButtons({
       return (
         <Link
           href="/"
-          className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-bold text-foreground hover:bg-muted"
+          className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-bold text-foreground hover:bg-muted"
         >
           Open the calculator
         </Link>
@@ -138,7 +138,7 @@ export function PricingPlanButtons({
     return (
       <Link
         href="/#main"
-        className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-bold text-foreground hover:bg-muted"
+        className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-bold text-foreground hover:bg-muted"
       >
         Analyze a property free <ArrowRight className="size-4" />
       </Link>
@@ -154,7 +154,7 @@ export function PricingPlanButtons({
     return (
       <Link
         href="/profile#billing"
-        className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-bold text-foreground hover:bg-muted"
+        className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-bold text-foreground hover:bg-muted"
       >
         {paidCardDecision.label}
       </Link>
@@ -173,7 +173,7 @@ export function PricingPlanButtons({
     return (
       <Link
         href={`/auth/sign-up?next=${encodeURIComponent(nextPath)}`}
-        className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-[0_8px_22px_rgba(0,112,196,0.30)] hover:bg-primary/95"
+        className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-[0_8px_22px_rgba(0,112,196,0.30)] hover:bg-primary/95"
       >
         <Sparkles className="size-4" /> Continue to {tierName}
       </Link>

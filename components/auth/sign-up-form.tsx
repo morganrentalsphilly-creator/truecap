@@ -260,7 +260,7 @@ export function SignUpForm() {
                 ? `/auth/login?next=${encodeURIComponent(safeNextPath)}`
                 : "/auth/login"
             }
-            className="font-medium text-primary hover:underline"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center px-2 font-medium text-primary hover:underline"
           >
             Sign in
           </Link>

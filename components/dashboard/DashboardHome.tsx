@@ -854,7 +854,7 @@ export function DashboardHome({
               <Link
                 href={decisionCenter.nextAction.href}
                 prefetch={false}
-                className="text-xs font-semibold text-primary underline-offset-2 hover:underline"
+                className="inline-flex min-h-11 items-center text-xs font-semibold text-primary underline-offset-2 hover:underline"
               >
                 Next: {decisionCenter.nextAction.label} →
               </Link>

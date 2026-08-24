@@ -48,7 +48,7 @@ export function RateWatchStrip({
           <Link
             href="/settings"
             prefetch={false}
-            className="shrink-0 text-xs font-semibold text-primary hover:underline"
+            className="inline-flex min-h-11 shrink-0 items-center text-xs font-semibold text-primary hover:underline"
           >
             Manage alerts
           </Link>
@@ -92,7 +92,7 @@ export function RateWatchStrip({
         <Link
           href="/dashboard/saved-analyses"
           prefetch={false}
-          className="shrink-0 text-xs font-semibold text-primary hover:underline"
+          className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center text-xs font-semibold text-primary hover:underline"
         >
           Review
         </Link>
