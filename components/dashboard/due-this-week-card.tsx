@@ -182,7 +182,7 @@ export function DueThisWeekCard({
         <Link
           href="/dashboard/saved-analyses"
           prefetch={false}
-          className="inline-flex min-h-11 shrink-0 items-center text-xs font-semibold text-primary hover:underline"
+          className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center text-xs font-semibold text-primary hover:underline"
         >
           Review
         </Link>

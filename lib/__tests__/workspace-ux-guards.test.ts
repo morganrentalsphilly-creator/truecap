@@ -67,6 +67,7 @@ describe("decision workspace UX guards", () => {
     expect(home).toContain('className="inline-flex min-h-11 items-center text-xs font-semibold text-primary');
     expect(leads).toContain('className="inline-flex min-h-11 items-center');
     expect(topDeals.match(/inline-flex min-h-11 items-center/g)?.length).toBeGreaterThanOrEqual(2);
+    expect(due).toContain("inline-flex min-h-11 min-w-11");
     expect(due.match(/inline-flex min-h-11/g)?.length).toBeGreaterThanOrEqual(3);
   });
 });
