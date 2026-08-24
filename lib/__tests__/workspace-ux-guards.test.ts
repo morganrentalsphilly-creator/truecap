@@ -20,6 +20,17 @@ describe("decision workspace UX guards", () => {
     expect(source).toContain("closed at current assumptions");
   });
 
+  it("keeps Decision Center comparisons factual instead of issuing investment directives", () => {
+    const source = read("components/dashboard/DashboardHome.tsx");
+
+    expect(source).toContain("Highest screening index");
+    expect(source).toContain("Highest modeled upside");
+    expect(source).toContain("The Screening Index is a secondary heuristic, not an");
+    expect(source).toContain("verify every material assumption before relying on a comparison");
+    expect(source).not.toMatch(/>\s*Best deal\s*</i);
+    expect(source).not.toMatch(/>\s*Best upside\s*</i);
+  });
+
   it("confirms a user-recorded Pass and restores the exact prior stage on Undo", () => {
     const workspace = read("components/investcalc/deal-stage-select.tsx");
     const list = read("components/investcalc/saved-analyses-page-v2.tsx");
@@ -42,5 +53,20 @@ describe("decision workspace UX guards", () => {
     expect(source).toContain("Saved just now");
     expect(source).toContain("Couldn’t save");
     expect(source).not.toContain(">Saves on blur<");
+  });
+
+  it("keeps primary dashboard links at the 44px touch-target baseline", () => {
+    const topbar = read("components/dashboard/Topbar.tsx");
+    const home = read("components/dashboard/DashboardHome.tsx");
+    const leads = read("components/dashboard/DealLeadsCard.tsx");
+    const topDeals = read("components/dashboard/TopDeals.tsx");
+    const due = read("components/dashboard/due-this-week-card.tsx");
+
+    expect(topbar).toContain('className="hidden min-h-11 items-center');
+    expect(home).not.toMatch(/className="h-(?:9|10) [^"]*rounded-xl/);
+    expect(home).toContain('className="inline-flex min-h-11 items-center text-xs font-semibold text-primary');
+    expect(leads).toContain('className="inline-flex min-h-11 items-center');
+    expect(topDeals.match(/inline-flex min-h-11 items-center/g)?.length).toBeGreaterThanOrEqual(2);
+    expect(due.match(/inline-flex min-h-11/g)?.length).toBeGreaterThanOrEqual(3);
   });
 });

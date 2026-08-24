@@ -143,8 +143,11 @@ import {
   parseFrozenDealScore,
   resolveSavedAnalysisResult,
 } from "@/lib/saved-analysis-methodology";
-import { readRecordedOfferCeiling } from "@/lib/recorded-offer-ceiling";
-import type { OfferCeilingExactResult } from "@/lib/offer-ceiling-access-contract";
+import {
+  invalidateRecordedOfferCeilingForTargetEdit,
+  readRecordedOfferCeiling,
+  type RecordedOfferCeilingViewState,
+} from "@/lib/recorded-offer-ceiling";
 import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
 import { getLimitingFactor } from "@/lib/limiting-factor";
 import {
@@ -615,10 +618,8 @@ export function InvestCalcPage({
   // live form state. Updated everywhere `analysisResult` is set.
   const [analysisValues, setAnalysisValues] = useState<InvestmentFormValues | null>(null);
   const [savedMethodologyLabel, setSavedMethodologyLabel] = useState<string | null>(null);
-  const [recordedOfferCeiling, setRecordedOfferCeiling] = useState<{
-    captured: boolean;
-    exact: OfferCeilingExactResult | null;
-  } | null>(null);
+  const [recordedOfferCeiling, setRecordedOfferCeiling] =
+    useState<RecordedOfferCeilingViewState>(null);
   const [inputVerification, setInputVerification] = useState<InputVerificationEvidence>({});
   const [appliedFinancingProfile, setAppliedFinancingProfile] =
     useState<FinancingProfileSnapshot | null>(null);
@@ -1029,7 +1030,7 @@ export function InvestCalcPage({
       // Keep recorded mode fail-closed until an explicit Run or Save replaces
       // the whole base result too; otherwise today's inverse solver would sit
       // beside historical base metrics for one mixed-methodology view.
-      setRecordedOfferCeiling({ captured: false, exact: null });
+      setRecordedOfferCeiling(invalidateRecordedOfferCeilingForTargetEdit);
       syncFormDirtyVersusPersisted();
     },
     [syncFormDirtyVersusPersisted]

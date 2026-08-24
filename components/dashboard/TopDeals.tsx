@@ -208,7 +208,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                 <div className="min-w-0 flex-1">
                   <h4 className="text-base font-bold leading-tight text-foreground">
                     {d.id ? (
-                      <Link href={`/dashboard/saved-analyses/${d.id}`} className="hover:text-primary hover:underline">
+                      <Link href={`/dashboard/saved-analyses/${d.id}`} className="inline-flex min-h-11 items-center rounded-md hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                         {d.name}
                       </Link>
                     ) : (
@@ -343,7 +343,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                       <div>
                         <div className="font-semibold">
                           {d.id ? (
-                            <Link href={`/dashboard/saved-analyses/${d.id}`} className="hover:text-primary hover:underline">
+                            <Link href={`/dashboard/saved-analyses/${d.id}`} className="inline-flex min-h-11 items-center rounded-md hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                               {d.name}
                             </Link>
                           ) : (

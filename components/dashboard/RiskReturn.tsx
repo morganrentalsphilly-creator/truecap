@@ -16,7 +16,8 @@ import {
 /**
  * One point per saved deal, with BOTH candidate return metrics carried so
  * the user can toggle the X axis without a server round-trip. The Y axis is
- * always DSCR — a single, consistent risk scale. Cash purchases have no
+ * always model DSCR — one comparable debt-coverage measure, not a complete
+ * measure of investment risk. Cash purchases have no
  * debt service (DSCR is N/A, not 0/"underwater"), so `dscr` is null for them
  * and they're surfaced in the footnote instead of being plotted on a DSCR
  * axis they don't belong on.
@@ -46,8 +47,9 @@ const RETURN_METRICS: { id: ReturnMetricId; label: string; axis: string }[] = [
   { id: "roi", label: "10-yr ROI %", axis: "10-yr ROI %" },
 ];
 
-/** "Good return" threshold per metric — draws the vertical quadrant divider.
- *  CoC ≥ 8% is a solid 2026 deal; 100% cumulative 10-yr ROI ≈ a ~7% CAGR. */
+/** Display reference per metric — draws the vertical comparison divider.
+ *  These are fixed chart references, not user-adopted targets or advice.
+ *  100% cumulative 10-yr ROI is approximately a 7% compound annual return. */
 const RETURN_THRESHOLD: Record<ReturnMetricId, number> = { coc: 8, roi: 100 };
 /** Lender DSCR bar — the horizontal quadrant divider (matches the verdict copy). */
 const DSCR_LENDER_BAR = 1.25;
@@ -149,7 +151,7 @@ export function RiskReturn({ deals = [] }: { deals?: RiskReturnDeal[] }) {
   // sr-only summary so the scatter isn't an opaque image to screen readers.
   const summary =
     points.length > 0
-      ? `Risk versus return: ${points.length} deals plotted by ${active.axis} against DSCR. ` +
+      ? `Modeled return versus model DSCR: ${points.length} deals plotted by ${active.axis} against model DSCR. ` +
         points
           .slice(0, 8)
           .map((p) => `${p.name}, ${p.ret.toFixed(1)} percent at DSCR ${p.dscr.toFixed(2)}`)
@@ -161,9 +163,9 @@ export function RiskReturn({ deals = [] }: { deals?: RiskReturnDeal[] }) {
     <div className="rounded-2xl bg-card border border-border p-4 sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
         <div>
-          <h3 className="font-display text-lg font-semibold">Risk vs Return</h3>
+          <h3 className="font-display text-lg font-semibold">Return vs model DSCR</h3>
           <p className="text-sm text-muted-foreground mt-0.5">
-            One point per saved deal — top-right (safe + strong return) is the target. Bigger dots need more cash to close; dashed lines mark the lender DSCR bar and a solid return.
+            Each point uses saved assumptions. Right means a higher selected modeled return; up means a higher model DSCR. Neither direction establishes safety or recommends a deal. Dashed lines are fixed comparison references, not your adopted targets.
           </p>
         </div>
         <div className="flex items-center gap-1 p-1 rounded-lg bg-muted" role="group" aria-label="Return metric">
@@ -189,14 +191,14 @@ export function RiskReturn({ deals = [] }: { deals?: RiskReturnDeal[] }) {
               summary (the role=img aria-label alone doesn't re-announce). */}
           <span className="sr-only" aria-live="polite">{summary}</span>
           <div className="relative h-[260px] sm:-ml-2" role="img" aria-label={summary}>
-            {/* Quadrant orientation — best (top-right) and worst (bottom-left).
+            {/* Factual quadrant orientation only — no safety or investment verdict.
                 pointer-events-none so they never block the chart tooltip. */}
             <div aria-hidden className="pointer-events-none absolute inset-0 z-10">
-              <span className="absolute right-3 top-1 rounded bg-success/10 px-1.5 py-0.5 text-[10px] font-semibold text-success">
-                Target ✓
+              <span className="absolute right-3 top-1 rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
+                Above both references
               </span>
-              <span className="absolute bottom-9 left-10 rounded bg-destructive/10 px-1.5 py-0.5 text-[10px] font-semibold text-destructive">
-                Higher risk
+              <span className="absolute bottom-9 left-10 rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                Below both references
               </span>
             </div>
             <ResponsiveContainer width="100%" height="100%">
@@ -221,12 +223,12 @@ export function RiskReturn({ deals = [] }: { deals?: RiskReturnDeal[] }) {
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
-                  label={{ value: "DSCR (safer ↑)", angle: -90, position: "insideLeft", fontSize: 11, fill: AXIS }}
+                  label={{ value: "Model DSCR ↑", angle: -90, position: "insideLeft", fontSize: 11, fill: AXIS }}
                 />
                 <ZAxis type="number" dataKey="size" range={[80, 400]} />
-                {/* Break-even DSCR (faint), lender bar (labeled, horizontal
-                    divider), and the return threshold (vertical divider) — the
-                    two labeled lines split the plot into risk/return quadrants. */}
+                {/* Break-even model DSCR (faint), a common lender reference
+                    (labeled, horizontal divider), and the fixed return display
+                    reference (vertical divider). Neither is a user target. */}
                 <ReferenceLine y={1} stroke={GRID} strokeDasharray="3 3" />
                 <ReferenceLine
                   y={DSCR_LENDER_BAR}

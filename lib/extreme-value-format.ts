@@ -1,11 +1,12 @@
 /**
  * Honest extreme-ROI display framing (Choose-TrueCap Phase C, finding 5).
  *
- * A cumulative 10-yr ROI like "673.0%" headlining the Decision Center reads
- * as a celebration of a number that almost always means an input is off
- * (rent, price, or appreciation). This module frames such values — it never
- * hides them: the framed headline leads with the caution and the raw number
- * stays reachable via `raw` / `title` (title attr, secondary text, tooltip).
+ * A cumulative 10-yr ROI like "673.0%" headlining the Decision Center can
+ * read as an endorsement even though the projection is highly sensitive to
+ * saved inputs (including rent, price, appreciation, and exit assumptions).
+ * This module frames such values — it never hides them: the framed headline
+ * leads with the caution and the raw number stays reachable via `raw` /
+ * `title` (title attr, secondary text, tooltip).
  *
  * DISPLAY ONLY. No math, sorting, scoring, or stored value changes anywhere.
  *
@@ -16,9 +17,9 @@
  *    the score's own measuring scale ends. Beyond it the engine literally
  *    cannot rate a deal any higher, and lib/returns.ts already calls such
  *    totals "easy to misread".
- *  - For reference, the Risk/Return chart (components/dashboard/RiskReturn)
- *    marks 100% cumulative (~7%/yr) as its "strong" threshold line — 300%
- *    is 3× that reference.
+ *  - For reference, the return/model-DSCR chart
+ *    (components/dashboard/RiskReturn) marks 100% cumulative (~7%/yr) as a
+ *    fixed display reference — 300% is 3× that reference.
  */
 
 /** Cumulative 10-yr ROI (%) above which the headline is framed, not shown. */
@@ -107,9 +108,10 @@ export function formatRoiHeadline(
     text: compact ? framed : `${framed} — verify assumptions`,
     raw,
     title:
-      `Projected ${numeric}% cumulative 10-yr ROI — above the ` +
+      `Modeled ${numeric}% cumulative 10-yr ROI — above the ` +
       `${EXTREME_ROI_CUMULATIVE_PCT}% band (≈${EXTREME_ROI_ANNUALIZED_PCT}%/yr for 10 years, ` +
-      `the top of TrueCap's own scoring scale). Totals this high usually mean a rent, ` +
-      `price, or appreciation input is off — verify before trusting it.`,
+      `the top of TrueCap's own scoring scale). This output is highly sensitive to rent, ` +
+      `price, appreciation, selling costs, financing, and exit assumptions. Review those ` +
+      `inputs before relying on it; this is not an investment recommendation.`,
   };
 }

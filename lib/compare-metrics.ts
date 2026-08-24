@@ -23,7 +23,7 @@ export const METRIC_ROWS: MetricRow[] = [
   { key: "capRate", label: "Cap Rate", group: "RETURNS", kind: "percent", direction: "higher", decimals: 1 },
   { key: "afterTaxCF", label: "After-Tax Cash Flow", group: "RETURNS", kind: "currency", direction: "higher" },
   { key: "annualCashFlow", label: "Annual Cash Flow", group: "RETURNS", kind: "currency", direction: "higher" },
-  { key: "dscr", label: "DSCR", group: "RISK", kind: "number", direction: "higher", decimals: 2 },
+  { key: "dscr", label: "Model DSCR", group: "RISK", kind: "number", direction: "higher", decimals: 2 },
   { key: "monthlyRentalIncome", label: "Monthly Rent Income", group: "RISK", kind: "currency", direction: "higher" },
   { key: "totalOperatingExpenses", label: "Operating Expenses / mo", group: "RISK", kind: "currency", direction: "lower" },
   { key: "purchasePrice", label: "Purchase Price", group: "DEAL", kind: "currency", direction: "lower" },

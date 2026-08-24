@@ -4,10 +4,15 @@ import { describe, expect, it } from "vitest";
 
 import { resolveOfferCeilingForAccess } from "@/lib/offer-ceiling-server";
 import {
+  invalidateRecordedOfferCeilingForTargetEdit,
   readRecordedOfferCeiling,
   recordedDealOfferLine,
 } from "@/lib/recorded-offer-ceiling";
-import { SAMPLE_DEAL_MAO_TARGET, SAMPLE_DEAL_VALUES } from "@/lib/sample-deal";
+import {
+  SAMPLE_DEAL_FIXTURE,
+  SAMPLE_DEAL_MAO_TARGET,
+  SAMPLE_DEAL_VALUES,
+} from "@/lib/sample-deal";
 
 function capturedSnapshot() {
   const access = resolveOfferCeilingForAccess({
@@ -85,6 +90,42 @@ describe("recorded Offer Ceiling", () => {
         offerCeilingExact: { presentation: { ceiling: Number.NaN } },
       }),
     ).toEqual({ captured: false });
+  });
+
+  it("restores the exact shared-sample ceiling after a target is edited away and back", () => {
+    // Target editing must not turn a live result into recorded historical
+    // mode. The dashboard only calls the entitlement-checked server resolver
+    // when this state remains null.
+    const afterLiveTargetEdit =
+      invalidateRecordedOfferCeilingForTargetEdit(null);
+    expect(afterLiveTargetEdit).toBeNull();
+
+    const changed = resolveOfferCeilingForAccess({
+      values: SAMPLE_DEAL_FIXTURE.values,
+      target: { ...SAMPLE_DEAL_FIXTURE.maoTarget, monthlyCashFlow: 800 },
+      source: "selected-targets",
+      paidAccess: false,
+    });
+    expect(changed.access).toBe("preview");
+
+    const restored = resolveOfferCeilingForAccess({
+      values: SAMPLE_DEAL_FIXTURE.values,
+      target: { ...SAMPLE_DEAL_FIXTURE.maoTarget, monthlyCashFlow: 750 },
+      source: "selected-targets",
+      paidAccess: false,
+    });
+    expect(restored.access).toBe("exact");
+    if (restored.access !== "exact") return;
+    expect(restored.exact?.presentation.ceiling).toBe(236_000);
+
+    // A genuinely historical result still fails closed after the same edit;
+    // it must not mix recorded base metrics with today's inverse solver.
+    expect(
+      invalidateRecordedOfferCeilingForTargetEdit({
+        captured: true,
+        exact: restored.exact,
+      }),
+    ).toEqual({ captured: false, exact: null });
   });
 
   it("captures paid inserts and updates atomically and never copies a prior solve", () => {

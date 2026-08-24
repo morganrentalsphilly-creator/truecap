@@ -48,7 +48,7 @@ describe("historical result reproducibility wiring", () => {
     expect(page).toContain("readRecordedOfferCeiling(savedResultRecord)");
     expect(page).toContain("recordedOfferCeiling={recordedOfferCeiling}");
     expect(page).toContain(
-      "setRecordedOfferCeiling({ captured: false, exact: null })"
+      "setRecordedOfferCeiling(invalidateRecordedOfferCeilingForTargetEdit)"
     );
     expect(page).toContain("getSavedAnalysisPdfExportAction(");
     expect(page).toContain('bypassCache: mode !== "personal"');

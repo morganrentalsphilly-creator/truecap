@@ -267,7 +267,7 @@ export function Topbar({
           <Link
             href="/dashboard/new"
             prefetch={false}
-            className="hidden md:inline-flex items-center gap-2 h-10 px-4 rounded-lg text-sm font-semibold text-white transition hover:opacity-90"
+            className="hidden min-h-11 items-center gap-2 rounded-lg px-4 text-sm font-semibold text-white transition hover:opacity-90 md:inline-flex"
             style={{ background: "var(--gradient-premium)", boxShadow: "var(--shadow-glow)" }}
           >
             <Sparkles className="h-4 w-4" />

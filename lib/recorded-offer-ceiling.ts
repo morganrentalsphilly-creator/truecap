@@ -64,6 +64,33 @@ type RecordedOfferCeilingCapture =
       exact: OfferCeilingExactResult | null;
     };
 
+/**
+ * Minimal analyzer state for a recorded Offer Ceiling. `null` is meaningful:
+ * it says the current result was calculated live, so target edits may ask the
+ * server for a fresh entitlement-checked solve. A non-null value says the
+ * base metrics came from a saved historical snapshot and must not be mixed
+ * with today's solver.
+ */
+export type RecordedOfferCeilingViewState = {
+  captured: boolean;
+  exact: OfferCeilingExactResult | null;
+} | null;
+
+/**
+ * Invalidate a recorded solve after its target changes without accidentally
+ * converting a live analysis into historical mode.
+ *
+ * Historical results stay fail-closed until the whole underwrite is run or
+ * saved again. Live results (including the shared sample) remain live, so the
+ * server can re-check entitlement and resolve the edited target. Treating a
+ * live `null` as `{ captured: false }` blocks that request entirely.
+ */
+export function invalidateRecordedOfferCeilingForTargetEdit(
+  current: RecordedOfferCeilingViewState,
+): RecordedOfferCeilingViewState {
+  return current === null ? null : { captured: false, exact: null };
+}
+
 function asRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
