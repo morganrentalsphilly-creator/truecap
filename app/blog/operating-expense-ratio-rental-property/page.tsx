@@ -543,8 +543,8 @@ export default function OperatingExpenseRatioPost() {
                 TrueCap analyzer
               </Link>{" "}
               carry the operating expenses straight through to NOI, cap rate,
-              cash flow, and DSCR — so the ratio you assume and the verdict you
-              get always come from the same set of numbers. None of this is
+              cash flow, and DSCR — so the ratio you assume and the modeled result
+              always come from the same set of numbers. None of this is
               investment advice; confirm the actual expenses, taxes, and rents on
               any specific property before you rely on the ratio.
             </p>

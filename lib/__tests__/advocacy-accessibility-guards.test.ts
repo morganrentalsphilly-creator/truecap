@@ -47,6 +47,7 @@ describe("advocacy decision accessibility and reflow guards", () => {
     expect(ledger).toContain('label="Readiness state"');
     expect(ledger).toContain('help="Not investment advice"');
     expect(summary).toContain('result.monthlyPayment <= 0 ? "N/A"');
-    expect(summary).toContain("Screening Index is withheld in this decision view");
+    expect(summary).not.toContain("Screening Index");
+    expect(summary).not.toContain("dealScoreResult");
   });
 });

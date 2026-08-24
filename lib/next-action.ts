@@ -68,8 +68,8 @@ function terminalStageAction(
   }
   if (stage === "passed") {
     return {
-      label: "Revisit if the price drops",
-      reason: "you passed on this deal — the numbers may work at a lower price",
+      label: "Review only if inputs change",
+      reason: "this deal is recorded as Passed; a future review should use updated price and assumptions",
       tone: "review",
     };
   }
@@ -87,27 +87,27 @@ function terminalStageAction(
 function applyInFlightStage(action: NextAction, stage: PipelineStage | undefined): NextAction {
   if (stage === "negotiating") {
     if (action.tone === "blocked") {
-      return { label: "Verify the Offer Ceiling before renegotiating", reason: action.reason, tone: "blocked" };
+      return { label: "Review current terms and target gaps", reason: action.reason, tone: "blocked" };
     }
     if (action.tone === "ready") {
       return {
-        label: "Finalize the negotiated terms",
-        reason: "the numbers still hold up at the current terms",
+        label: "Recheck the negotiated terms",
+        reason: "the current modeled terms clear the screening checks; the user retains the decision",
         tone: "ready",
       };
     }
   }
   if (stage === "offer") {
     if (action.tone === "blocked") {
-      return { label: "Renegotiate or withdraw your offer", reason: action.reason, tone: "blocked" };
+      return { label: "Review the offer against current inputs", reason: action.reason, tone: "blocked" };
     }
     if (action.tone === "ready") {
-      return { label: "Follow up on your offer", reason: "your offer is out and the numbers still hold up", tone: "ready" };
+      return { label: "Monitor offer status and verify inputs", reason: "the offer is recorded and the current screening checks clear", tone: "ready" };
     }
   }
   if (stage === "under_contract") {
     if (action.tone === "blocked") {
-      return { label: "Renegotiate before your contingencies expire", reason: action.reason, tone: "blocked" };
+      return { label: "Review target gaps before contingency dates", reason: action.reason, tone: "blocked" };
     }
     if (action.tone === "ready") {
       return { label: "Work your due-diligence checklist", reason: "under contract — verify your assumptions before closing", tone: "ready" };
@@ -138,7 +138,7 @@ function baseActionForDeal(input: NextActionInput): NextAction {
   }
   if (dscr != null && dscr < 1) {
     return {
-      label: "Restructure the financing",
+      label: "Review financing assumptions",
       reason: "DSCR is under 1.0 — rent doesn't cover the debt",
       tone: "blocked",
     };

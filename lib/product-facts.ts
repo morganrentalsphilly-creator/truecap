@@ -16,13 +16,13 @@ import { STATE_COUNT } from "@/lib/states";
 const pct = (value: unknown) => `${Number(value)}%`;
 
 export const PRODUCT_POSITIONING =
-  "TrueCap is the Rental Acquisition Decision System: analyze the economics, know the Offer Ceiling under explicit targets, verify material assumptions, then pursue, negotiate, or pass.";
+  "TrueCap turns an address or supported listing into a preliminary rental screen with editable assumptions and a modeled price threshold under explicit user targets.";
 
 export const FOUR_ACQUISITION_ANSWERS = [
   "Selected-rule fit at asking",
   "Offer Ceiling under your rules",
   "What could break",
-  "How to present it",
+  "What to verify",
 ] as const;
 
 export const CURRENT_DEFAULT_FACTS = {
@@ -36,13 +36,13 @@ export const CURRENT_DEFAULT_FACTS = {
 } as const;
 
 export const PLAN_FACTS = {
-  free: "No-signup first-pass screen with editable assumptions, core metrics, Screening Index, and rule-fit context.",
-  singleDeal: "One paid report with an Offer Ceiling, Deal Doctor thresholds, downside, projections, tax, and exit views; no subscription.",
-  pro: "Repeat decision workflow with Buy Box, interactive Offer Ceiling, downside, saved opportunities, comparisons, and reports.",
+  free: "No-signup preliminary screen with editable assumptions, core modeled metrics, and selected-rule context.",
+  singleDeal: "New one-property purchases are temporarily unavailable; existing paid report claims remain recoverable.",
+  pro: "Repeat underwriting workflow with reusable target profiles, interactive Offer Ceiling, saved opportunities, comparisons, and reports.",
   // No "portals" here: agent_portal is shipped:false (bearer links lack
   // expiry/revocation) and must not be marketed anywhere — including the
   // llms.txt routes that render this string publicly.
-  agentPro: "Investor Client Operating System with client rosters, per-client Buy Boxes, deal assignment, co-branding, and Pro tools.",
+  agentPro: "A separate professional tier for client workflows; it is not part of the primary Buy & Hold analyzer path.",
   trialDays: TRIAL_DAYS,
   pricingSource: "/pricing",
 } as const;

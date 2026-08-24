@@ -265,7 +265,7 @@ export default function MethodologyPage() {
           <p>
             Required rent is rounded up to the next whole dollar; a maximum
             affordable interest rate is rounded down to 0.01 percentage
-            point. Seller-credit language appears only when the modeled cash
+            point. Closing-cost-reduction language appears only when the modeled cash
             constraint supports it and still requires lender/program
             confirmation. Each solver changes one input at a time and holds
             the rest fixed.

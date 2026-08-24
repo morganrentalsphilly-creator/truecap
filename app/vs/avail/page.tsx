@@ -61,7 +61,7 @@ const MATRIX: Row[] = [
   { feature: "Cash flow projection",                truecap: "Pro — 10-year with rent + expense + appreciation",                       avail: "Not modeled",                                                            winner: "truecap" },
   { feature: "Sensitivity grid",                    truecap: "Pro — rent ±10%, vacancy ±5pp, rate ±1pp",                                avail: "Not modeled",                                                            winner: "truecap" },
   { feature: "Illustrative tax impact",             truecap: "Pro — depreciation + interest + modeled after-tax CF",                    avail: "Not modeled",                                                            winner: "truecap" },
-  { feature: "Screening Index + plain-English verdict",  truecap: "Free — 0-100 score + Strong / Solid / Mixed / Marginal / Negative",         avail: "Not applicable",                                                          winner: "truecap" },
+  { feature: "Secondary Screening Index",               truecap: "Free — 0-100 triage score + factor breakdown",                              avail: "Not applicable",                                                          winner: "truecap" },
   { feature: "Rental listing distribution",         truecap: "No",                                                                      avail: "Yes — syndicated to Realtor.com, Apartments.com, Zillow, etc.",           winner: "avail" },
   { feature: "Online rental application",           truecap: "No",                                                                      avail: "Yes — customizable forms",                                               winner: "avail" },
   { feature: "Tenant screening (credit/criminal)",  truecap: "No",                                                                      avail: "Yes — TransUnion-powered",                                                winner: "avail" },
@@ -118,10 +118,9 @@ export default function VsAvailPage() {
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             Avail is the DIY-landlord stack: list the unit, screen
             tenants, sign a state-compliant lease, collect rent online,
-            handle maintenance. TrueCap is the calculator that decides
-            whether the property you&apos;re considering will cash flow
-            in the first place. Most independent landlords end up using
-            both — TrueCap during due diligence, Avail after closing.
+            handle maintenance. TrueCap models whether the reviewed
+            assumptions produce cash flow. Many independent landlords use
+            TrueCap during due diligence and Avail after closing.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ScrollToFormButton
@@ -312,7 +311,7 @@ export default function VsAvailPage() {
             cash flow and plain read-only share links. Pro adds projections,
             sensitivity, illustrative tax impact, exit scenarios, Offer Ceiling,
             co-branding, and included PDFs. New one-time PDF checkout is
-            available. No card to start.
+            temporarily unavailable. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -376,11 +375,11 @@ const AVAIL_FAQ: FaqItem[] = [
         reports, or store rental applications. Those are
         FCRA-regulated workflows we don&apos;t build. Avail (and
         similar tools) are the right place for that. TrueCap is
-        explicitly the &quot;decide if the deal works&quot; layer.
+        explicitly the pre-purchase underwriting layer.
       </>
     ),
     plainTextAnswer:
-      "No. TrueCap doesn't distribute listings, pull credit reports, or store applications. Those are FCRA-regulated workflows. Avail is the right tool for that. TrueCap is the 'decide if the deal works' layer.",
+      "No. TrueCap doesn't distribute listings, pull credit reports, or store applications. Those are FCRA-regulated workflows. Avail is the right tool for that. TrueCap is the pre-purchase underwriting layer.",
   },
   {
     question: "Is Avail free? Is TrueCap?",
@@ -392,7 +391,7 @@ const AVAIL_FAQ: FaqItem[] = [
         advanced features. TrueCap is free for core underwriting math;
         Pro adds projections, sensitivity, illustrative tax impact,
         co-branded share links, and included PDFs. New one-time PDF checkout
-        is also available; see TrueCap&apos;s live pricing page for current terms.
+        is temporarily unavailable; see TrueCap&apos;s live pricing page for current terms.
       </>
     ),
     plainTextAnswer:

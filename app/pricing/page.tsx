@@ -37,13 +37,13 @@ import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { rateAlertEmailsLive } from "@/lib/rate-alerts-mode";
 import { getSiteUrl } from "@/lib/site-url";
 export const metadata: Metadata = {
-  title: "Pricing — Screen Free, Decide & Act with Pro",
+  title: "Pricing — Screen Free, Repeat with Pro",
   description:
     `Screen rental deals free. New subscribers get a ${TRIAL_DAYS}-day free trial of Pro to calculate an Offer Ceiling, apply a Buy Box, stress-test downside, compare opportunities, and generate reports.`,
   alternates: { canonical: "/pricing" },
   openGraph: {
-    title: "TrueCap pricing — Free to screen, Pro to decide",
-    description: "Screen deals free. Use Pro to calculate an Offer Ceiling, stress-test downside, compare opportunities, and document a decision.",
+    title: "TrueCap pricing — Free screening, repeatable Pro underwriting",
+    description: "Screen deals free. Use Pro to apply your targets, calculate an Offer Ceiling, stress-test downside, compare opportunities, and share the underwrite.",
     url: "/pricing",
     type: "website",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap pricing" }],
@@ -211,7 +211,7 @@ export default async function PricingPage() {
               Analyze free · No card required
             </div>
             <h1 className="text-balance text-3xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl">
-              From first screen to documented decision. <span className="text-primary">One review workflow.</span>
+              From first screen to shareable underwrite. <span className="text-primary">One review workflow.</span>
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-balance text-[15px] leading-relaxed text-muted-foreground sm:text-lg">
               {/* Trial-promising hero variant must mirror the checkout guard
@@ -221,8 +221,8 @@ export default async function PricingPage() {
               {!user
                 ? `Screen any deal free. New subscribers get a ${TRIAL_DAYS}-day free trial of ${proOfferName}; returning subscribers start paid access immediately.`
                 : hadPriorSubscription
-                  ? `Screen any deal free. Use ${proOfferName} to review rule fit, the Offer Ceiling, what could break, and how to document the decision.`
-                  : `Screen any deal free, then use a ${TRIAL_LABEL} of ${proOfferName} to review rule fit, the Offer Ceiling, what could break, and how to document the decision.`}
+                  ? `Screen any deal free. Use ${proOfferName} to review rule fit, the Offer Ceiling, what could break, and how to share the underwrite.`
+                  : `Screen any deal free, then use a ${TRIAL_LABEL} of ${proOfferName} to review rule fit, the Offer Ceiling, what could break, and how to share the underwrite.`}
             </p>
             <div className="mt-6 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
               <Link
@@ -257,7 +257,7 @@ export default async function PricingPage() {
           <div className={`mt-7 grid gap-3 ${agentProConfigured ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
             {[
               { job: "Screen", product: "Free", answer: "Is this worth investigating?" },
-              { job: "Acquire", product: proOfferName, answer: "Repeat the decision workflow across every deal." },
+              { job: "Repeat", product: proOfferName, answer: "Reuse the underwriting workflow across every deal." },
               ...(agentProConfigured
                 ? [{ job: "Win investor clients", product: "Agent Pro", answer: "Match, present, and follow up professionally." }]
                 : []),

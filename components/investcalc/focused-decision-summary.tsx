@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label";
 import { ShareLinkButton } from "@/components/investcalc/share-link-button";
 import type { AnalysisResult } from "@/lib/calc-analysis";
 import { computeAssumptionImpact } from "@/lib/assumption-impact";
-import type { DealScoreActionResult } from "@/app/actions/deal-score";
 import type { MaoTarget } from "@/lib/max-allowable-offer";
 import { meetsMaoTarget } from "@/lib/mao-target-evaluation";
 import {
@@ -19,19 +18,16 @@ import {
   type MaoTargetField,
 } from "@/lib/mao-target-editor";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
-import { getDealTier } from "@/lib/verdict";
 import type {
   OfferCeilingPresentation,
   OfferCeilingRangePreview,
   OfferCeilingTargetSource,
 } from "@/lib/offer-ceiling-contract";
 import type { InputConfidenceResult } from "@/lib/input-confidence";
-import type { NextAction } from "@/lib/next-action";
 import { trackEvent } from "@/lib/analytics";
 import {
   buildAssumptionLedger,
   buildDecisionTargetContext,
-  buildSafeNextAction,
   deriveRuleFit,
   offerCeilingHelperCopy,
   offerCeilingSemanticStatus,
@@ -44,13 +40,13 @@ import {
 type Props = {
   values: InvestmentFormValues;
   result: AnalysisResult;
-  dealScoreResult: DealScoreActionResult | null;
   offerCeiling: OfferCeilingPresentation | null;
   exactBreakpointLabels?: string[];
   rangePreview?: OfferCeilingRangePreview | null;
   target: MaoTarget;
   targetLabel: string;
   targetSource: OfferCeilingTargetSource;
+  targetAdopted: boolean;
   targetProfileId?: string | null;
   targetProfileVersion?: string | null;
   buyBoxName?: string | null;
@@ -58,7 +54,6 @@ type Props = {
   buyBoxHasUnknownRules?: boolean;
   userDecision?: UserDecision;
   inputConfidence?: InputConfidenceResult | null;
-  nextAction?: NextAction | null;
   canShowPriceCeiling: boolean;
   canTunePriceCeiling: boolean;
   isOfferCeilingLoading?: boolean;
@@ -66,6 +61,7 @@ type Props = {
   onRetryOfferCeiling?: () => void;
   isScenarioActive?: boolean;
   onTargetChange: (target: MaoTarget) => void;
+  onAdoptTarget: () => void;
   onTuneTargetsOpened: () => void;
   onEditAssumptions: () => void;
   onSave: () => void;
@@ -91,10 +87,6 @@ function money(value: number): string {
   return `${rounded < 0 ? "-" : ""}$${Math.abs(rounded).toLocaleString("en-US")}`;
 }
 
-function scoreFrom(result: DealScoreActionResult | null): number | null {
-  return result?.ok && result.tier === "pro" ? Math.round(result.data.score) : null;
-}
-
 function targetInput(value: number | undefined): string {
   return value == null ? "" : String(value);
 }
@@ -118,13 +110,13 @@ const IMPACT_TO_CONFIDENCE_KEY = {
 export function FocusedDecisionSummary({
   values,
   result,
-  dealScoreResult,
   offerCeiling,
   exactBreakpointLabels = [],
   rangePreview = null,
   target,
   targetLabel,
   targetSource,
+  targetAdopted,
   targetProfileId = null,
   targetProfileVersion = null,
   buyBoxName = null,
@@ -132,7 +124,6 @@ export function FocusedDecisionSummary({
   buyBoxHasUnknownRules = false,
   userDecision = "undecided",
   inputConfidence = null,
-  nextAction = null,
   canShowPriceCeiling,
   canTunePriceCeiling,
   isOfferCeilingLoading = false,
@@ -140,6 +131,7 @@ export function FocusedDecisionSummary({
   onRetryOfferCeiling,
   isScenarioActive = false,
   onTargetChange,
+  onAdoptTarget,
   onTuneTargetsOpened,
   onEditAssumptions,
   onSave,
@@ -179,8 +171,6 @@ export function FocusedDecisionSummary({
       ),
     [allDrivers]
   );
-  const score = scoreFrom(dealScoreResult);
-  const tier = getDealTier(result);
   const targetEditorId = useId();
   const [tuneOpen, setTuneOpen] = useState(false);
   const [targetInputs, setTargetInputs] = useState<Record<MaoTargetField, string>>(() => ({
@@ -265,7 +255,9 @@ export function FocusedDecisionSummary({
         ? "Verify first"
         : "Screening only";
   const legacyDecisionLabel =
-    !clearsTargets || buyBoxFit === false
+    !targetAdopted
+      ? "Preliminary underwriting"
+      : !clearsTargets || buyBoxFit === false
       ? "Does not meet selected rules at asking"
       : "Meets selected rules at asking";
   const targetContext = useMemo(
@@ -305,9 +297,11 @@ export function FocusedDecisionSummary({
   const readinessLabel = advocacyContractEnabled
     ? evidenceLedger?.readinessLabel ?? "Screening"
     : legacyReadinessLabel;
-  const decisionLabel = advocacyContractEnabled
-    ? ruleFitLabel(ruleFit)
-    : legacyDecisionLabel;
+  const decisionLabel = !targetAdopted
+    ? "Preliminary underwriting"
+    : advocacyContractEnabled
+      ? ruleFitLabel(ruleFit)
+      : legacyDecisionLabel;
   const breakpointLabels = [
     ...exactBreakpointLabels,
     ...drivers.map(
@@ -317,7 +311,12 @@ export function FocusedDecisionSummary({
   ].filter((label, index, all) => all.indexOf(label) === index).slice(0, 3);
   const nextVerification = inputConfidence?.verificationQueue[0];
   const legacyResolvedNextAction =
-    !clearsTargets
+    !targetAdopted
+      ? {
+          label: "Review and adopt return targets",
+          reason: "A modeled price threshold is not calculated from product example defaults.",
+        }
+      : !clearsTargets
       ? offerCeiling
         ? {
             label: "Review the binding target rule",
@@ -335,10 +334,12 @@ export function FocusedDecisionSummary({
           label: nextVerification.verifyAction ?? `Verify ${nextVerification.label}`,
           reason: `${nextVerification.label} is a material ${nextVerification.sourceLabel.toLowerCase()} input`,
         }
-      : nextAction;
-  const resolvedNextAction = advocacyContractEnabled
-    ? buildSafeNextAction({ ruleFit, evidence: evidenceLedger, userDecision })
-    : legacyResolvedNextAction;
+      : {
+          label: "Review downside and verification",
+          reason:
+            "The current assumptions clear the adopted rules; TrueCap does not infer the investment decision.",
+        };
+  const resolvedNextAction = legacyResolvedNextAction;
   const ceilingSemanticStatus = offerCeilingSemanticStatus({
     presentation: offerCeiling,
     target,
@@ -358,6 +359,7 @@ export function FocusedDecisionSummary({
   useEffect(() => {
     if (
       !advocacyContractEnabled ||
+      !targetAdopted ||
       targetBlocked ||
       isOfferCeilingLoading ||
       offerCeilingError
@@ -398,12 +400,14 @@ export function FocusedDecisionSummary({
     offerCeiling?.ceiling,
     offerCeilingError,
     targetBlocked,
+    targetAdopted,
     targetContext.rulesSnapshotVersion,
   ]);
   const lastTargetContextTelemetryRef = useRef<string | null>(null);
   useEffect(() => {
     if (
       !advocacyContractEnabled ||
+      !targetAdopted ||
       targetBlocked ||
       lastTargetContextTelemetryRef.current === targetContext.rulesSnapshotVersion
     ) {
@@ -420,6 +424,7 @@ export function FocusedDecisionSummary({
   }, [
     advocacyContractEnabled,
     result.methodologyVersion,
+    targetAdopted,
     targetBlocked,
     targetContext.identityStatus,
     targetContext.profileVersion,
@@ -433,7 +438,7 @@ export function FocusedDecisionSummary({
       : `${targetSource}:none`;
   const lastOfferTelemetryKeyRef = useRef<string | null>(null);
   useEffect(() => {
-    if (targetBlocked || isOfferCeilingLoading || lastOfferTelemetryKeyRef.current === telemetryKey) return;
+    if (!targetAdopted || targetBlocked || isOfferCeilingLoading || lastOfferTelemetryKeyRef.current === telemetryKey) return;
     lastOfferTelemetryKeyRef.current = telemetryKey;
     trackEvent("offer_ceiling_viewed", {
       target_source: targetSource,
@@ -455,6 +460,7 @@ export function FocusedDecisionSummary({
     rangePreview,
     readinessLabel,
     targetBlocked,
+    targetAdopted,
     targetSource,
     telemetryKey,
   ]);
@@ -464,7 +470,7 @@ export function FocusedDecisionSummary({
       aria-labelledby="decision-summary-title"
       className="rounded-2xl border-2 border-primary/30 bg-card p-5 shadow-[0_18px_50px_rgba(15,23,42,0.10)] sm:p-6"
     >
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+      <div className="space-y-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <p className="truncate text-sm font-semibold text-muted-foreground">{values.address}</p>
@@ -478,38 +484,71 @@ export function FocusedDecisionSummary({
             {decisionLabel}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Asking {money(Number(values.purchasePrice))}
-            {advocacyContractEnabled
-              ? ` · Underwriting model v${result.methodologyVersion ?? "current"}`
-              : ` · ${tier} fundamentals`}
-            {score != null && !(advocacyContractEnabled && result.monthlyPayment <= 0)
-              ? advocacyContractEnabled
-                ? ` · Screening Index ${score}/100 — secondary heuristic (v${result.methodologyVersion ?? "current"})`
-                : ` · Screening Index ${score}/100 (v${result.methodologyVersion ?? "current"})`
-              : ""}
+            Asking {money(Number(values.purchasePrice))} · Underwriting model v
+            {result.methodologyVersion ?? "current"}
           </p>
-          {advocacyContractEnabled && result.monthlyPayment <= 0 && score != null ? (
-            <p className="mt-1 text-xs text-muted-foreground">
-              Screening Index is withheld in this decision view because Methodology v1 assigns synthetic DSCR credit to cash acquisitions. DSCR is N/A.
-            </p>
-          ) : null}
-          {advocacyContractEnabled ? (
+          {advocacyContractEnabled && targetAdopted ? (
             <p className="mt-2 text-xs font-semibold text-muted-foreground">
               User decision: {userDecisionLabel(userDecision)}. TrueCap reports rule fit; it does not record Pursue or Pass from the metrics.
             </p>
           ) : null}
         </div>
 
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+          <div className="rounded-xl border border-border bg-muted/30 p-3">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Total initial cash
+            </p>
+            <p className="mt-1 font-mono text-xl font-extrabold tabular-nums text-foreground">
+              {money(result.totalCashRequired)}
+            </p>
+          </div>
+          <div className="rounded-xl border border-border bg-muted/30 p-3">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              {isScenarioActive ? "Base cash flow after reserve" : "Cash flow after reserve"}
+            </p>
+            <p className="mt-1 font-mono text-xl font-extrabold tabular-nums text-foreground">
+              {money(result.netCashFlow)}/mo
+            </p>
+          </div>
+          <div className="rounded-xl border border-border bg-muted/30 p-3">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">NOI</p>
+            <p className="mt-1 font-mono text-xl font-extrabold tabular-nums text-foreground">
+              {money(result.noiAnnual)}/yr
+            </p>
+          </div>
+          <div className="rounded-xl border border-border bg-muted/30 p-3">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Cap rate</p>
+            <p className="mt-1 font-mono text-xl font-extrabold tabular-nums text-foreground">
+              {result.capRate.toFixed(2)}%
+            </p>
+          </div>
+          <div className="rounded-xl border border-border bg-muted/30 p-3">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Cash-on-cash</p>
+            <p className="mt-1 font-mono text-xl font-extrabold tabular-nums text-foreground">
+              {result.cocReturn.toFixed(2)}%
+            </p>
+          </div>
+          <div className="rounded-xl border border-border bg-muted/30 p-3">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Model DSCR</p>
+            <p className="mt-1 font-mono text-xl font-extrabold tabular-nums text-foreground">
+              {result.monthlyPayment <= 0 ? "N/A" : result.dscr.toFixed(2)}
+            </p>
+          </div>
+        </div>
+
         <div
           aria-live="polite"
           aria-atomic="true"
-          className="rounded-xl border border-primary/25 bg-[var(--brand-blue-light)] p-4 lg:min-w-80"
+          className="rounded-xl border border-primary/25 bg-[var(--brand-blue-light)] p-4"
         >
           <p className="text-[11px] font-extrabold uppercase tracking-widest text-primary">
             {isScenarioActive ? "Base Offer Ceiling" : "Offer Ceiling"}
           </p>
           <p className="mt-1 font-mono text-3xl font-extrabold tabular-nums text-primary">
-            {targetResolutionState === "loading"
+            {!targetAdopted
+              ? "Set targets first"
+              : targetResolutionState === "loading"
               ? advocacyContractEnabled
                 ? "Loading target rules…"
                 : "Loading your Buy Box…"
@@ -533,7 +572,9 @@ export function FocusedDecisionSummary({
                     : "No feasible range"}
           </p>
           <p className="mt-1 text-xs font-semibold text-foreground">
-            {targetBlocked
+            {!targetAdopted
+              ? "Example targets are not adopted"
+              : targetBlocked
               ? targetResolutionMessage
               : advocacyContractEnabled
                 ? `${targetContext.profileName} · ${targetContext.origin.replaceAll("-", " ")} · ${targetVersionLabel}`
@@ -541,7 +582,7 @@ export function FocusedDecisionSummary({
           </p>
           {!targetBlocked ? (
             <p className="mt-1 text-[11px] leading-relaxed text-foreground">
-              Targets: {targetLabel}
+              {targetAdopted ? "Targets" : "Examples"}: {targetLabel}
             </p>
           ) : null}
           {advocacyContractEnabled && targetDeltaNotice ? (
@@ -575,10 +616,19 @@ export function FocusedDecisionSummary({
             </div>
           ) : null}
           <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-            {advocacyContractEnabled
+            {!targetAdopted
+              ? "Review or edit the example targets, then apply at least one before TrueCap calculates a modeled price threshold."
+              : advocacyContractEnabled
               ? offerCeilingHelperCopy(targetContext)
               : "Calculated from the targets shown above. This is not a recommended offer."}
           </p>
+          {targetAdopted ? (
+            <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+              When price changes, percentage-based down payment, closing costs,
+              tax, insurance, and debt scale with it. Rent and dollar-based
+              tax, insurance, HOA, utilities, and repairs stay fixed.
+            </p>
+          ) : null}
           {advocacyContractEnabled ? (
             <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
               Model output—not an appraisal, market value, acceptance prediction, or recommended offer.
@@ -588,17 +638,19 @@ export function FocusedDecisionSummary({
       </div>
 
       <div
-        className={`mt-4 grid grid-cols-2 gap-3 ${advocacyContractEnabled ? "lg:grid-cols-6" : "lg:grid-cols-5"}`}
+        className={`mt-4 grid grid-cols-2 gap-3 ${advocacyContractEnabled ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}
       >
         <div className="rounded-xl border border-border bg-muted/30 p-3">
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-            {advocacyContractEnabled ? "Target profile" : "Buy Box Fit"}
+            {advocacyContractEnabled ? "Target profile" : "Target rules"}
           </p>
           <p className="mt-1 text-sm font-extrabold text-foreground">
-            {advocacyContractEnabled
+            {!targetAdopted
+              ? "Not adopted"
+              : advocacyContractEnabled
               ? targetContext.profileName
               : targetSource !== "buy-box"
-                ? "No Buy Box selected"
+                ? "Selected targets"
                 : buyBoxFit == null
                   ? "Checking…"
                   : buyBoxFit
@@ -618,7 +670,7 @@ export function FocusedDecisionSummary({
         </div>
         <div className="rounded-xl border border-border bg-muted/30 p-3">
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-            {advocacyContractEnabled ? "Evidence readiness" : "Decision Readiness"}
+            {advocacyContractEnabled ? "Evidence readiness" : "Assumption status"}
           </p>
           <p className="mt-1 text-sm font-extrabold text-foreground">{readinessLabel}</p>
           {advocacyContractEnabled && evidenceLedger ? (
@@ -649,7 +701,9 @@ export function FocusedDecisionSummary({
         <div className="rounded-xl border border-border bg-muted/30 p-3">
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Margin of Safety</p>
           <p className="mt-1 text-sm font-extrabold text-foreground">
-            {offerCeiling
+            {!targetAdopted
+              ? "Set targets first"
+              : offerCeiling
               ? offerCeiling.listPriceGap > 0
                 ? `${money(offerCeiling.listPriceGap)} above ceiling`
                 : offerCeiling.listPriceGap < 0
@@ -664,21 +718,13 @@ export function FocusedDecisionSummary({
                 : "Not available"}
           </p>
         </div>
-        <div className="rounded-xl border border-border bg-muted/30 p-3">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{isScenarioActive ? "Base monthly cash flow" : "Monthly cash flow"}</p>
-          <p className="mt-1 font-mono text-xl font-extrabold tabular-nums text-foreground">{money(result.netCashFlow)}</p>
-        </div>
-        <div className="rounded-xl border border-border bg-muted/30 p-3">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{isScenarioActive ? "Base DSCR" : "DSCR"}</p>
-          <p className="mt-1 font-mono text-xl font-extrabold tabular-nums text-foreground">
-            {result.monthlyPayment <= 0 ? "N/A" : result.dscr.toFixed(2)}
-          </p>
-        </div>
       </div>
 
       <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <div className="rounded-xl border border-amber-500/25 bg-amber-500/5 p-3">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Top breakpoints</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            {targetAdopted ? "Top breakpoints" : "What can move the result"}
+          </p>
           <ol className="mt-2 grid gap-1 text-sm font-semibold text-foreground sm:grid-cols-3">
             {breakpointLabels.map((label, index) => (
               <li key={label}><span className="text-muted-foreground">{index + 1}.</span> {label}</li>
@@ -718,7 +764,7 @@ export function FocusedDecisionSummary({
             className="h-11 gap-2 rounded-xl"
           >
             <SlidersHorizontal className="size-4" aria-hidden />
-            Tune targets
+            {targetAdopted ? "Tune targets" : "Set targets"}
             <ChevronDown className={`size-4 transition-transform ${tuneOpen ? "rotate-180" : ""}`} aria-hidden />
           </Button>
         ) : null}
@@ -737,8 +783,8 @@ export function FocusedDecisionSummary({
           values={values}
           isAuthenticated={isAuthenticated}
           savedDealId={savedDealId}
-          maoTarget={target}
-          maoTargetSource={targetSource}
+          maoTarget={targetAdopted ? target : undefined}
+          maoTargetSource={targetAdopted ? targetSource : undefined}
           disabled={targetBlocked}
           disabledReason={targetResolutionMessage}
           onPrepareAuth={onPrepareAuthShare}
@@ -757,7 +803,9 @@ export function FocusedDecisionSummary({
               Offer Ceiling rules
             </legend>
             <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-              Change any target and the Offer Ceiling above updates immediately. Leave a field blank to ignore it.
+              {targetAdopted
+                ? "Change any target and the Offer Ceiling above updates immediately. Leave a field blank to ignore it."
+                : "These are product examples, not your targets. Review or change them, then apply the rule set to calculate a modeled threshold."}
             </p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
               {([
@@ -804,6 +852,16 @@ export function FocusedDecisionSummary({
                 );
               })}
             </div>
+            {!targetAdopted ? (
+              <Button
+                type="button"
+                onClick={onAdoptTarget}
+                disabled={Object.values(targetErrors).some(Boolean)}
+                className="mt-4 min-h-11 rounded-xl"
+              >
+                Apply these targets
+              </Button>
+            ) : null}
           </fieldset>
         </div>
       ) : null}

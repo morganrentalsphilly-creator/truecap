@@ -7,9 +7,14 @@ import {
   solveRequiredMonthlyRent,
 } from "../max-allowable-offer";
 import { describeMaoTarget } from "../mao-targets";
-import { buildReportMaxOffer, resolveReportMaoTarget } from "../report-max-offer";
+import {
+  buildRecordedReportMaxOffer,
+  buildReportMaxOffer,
+  resolveReportMaoTarget,
+} from "../report-max-offer";
 import { SAMPLE_DEAL_FIXTURE } from "../sample-deal";
 import { buildOfferCeilingPresentation } from "../offer-ceiling";
+import { resolveOfferCeilingForAccess } from "../offer-ceiling-server";
 
 describe("report Max Offer and Deal Doctor", () => {
   it("uses the supplied saved target for every acquisition number and its basis", () => {
@@ -65,8 +70,16 @@ describe("report Max Offer and Deal Doctor", () => {
         : null,
     });
 
-    const canonical = buildReportMaxOffer({ values, result, targetInput: undefined });
-    expect(canonical?.maxPrice).not.toBe(report?.maxPrice);
+    const preliminary = buildReportMaxOffer({ values, result, targetInput: undefined });
+    expect(preliminary).toBeNull();
+
+    const screeningExamples = buildReportMaxOffer({
+      values,
+      result,
+      targetInput: target,
+      targetSourceInput: "screening-defaults",
+    });
+    expect(screeningExamples).toBeNull();
   });
 
   it("fails closed to the canonical basis for an invalid persisted target", () => {
@@ -90,5 +103,55 @@ describe("report Max Offer and Deal Doctor", () => {
     expect(resolveReportMaoTarget({ dscr: 1.25 }, { isCashPurchase: true })).toEqual({
       monthlyCashFlow: 0,
     });
+  });
+
+  it("maps an exact saved capture without invoking a newer solver", () => {
+    const values = SAMPLE_DEAL_FIXTURE.values;
+    const target = SAMPLE_DEAL_FIXTURE.maoTarget;
+    const result = calculateAnalysis(values);
+    const access = resolveOfferCeilingForAccess({
+      values,
+      target,
+      source: "buy-box",
+      paidAccess: true,
+    });
+    expect(access.access).toBe("exact");
+    if (access.access !== "exact") throw new Error("expected exact access");
+
+    const live = buildReportMaxOffer({
+      values,
+      result,
+      targetInput: target,
+      targetSourceInput: "buy-box",
+    });
+    const recorded = buildRecordedReportMaxOffer({
+      maxOfferTarget: target,
+      maxOfferTargetSource: "buy-box",
+      offerCeilingExact: access.exact,
+    });
+    expect(recorded).toEqual(live);
+
+    expect(
+      buildRecordedReportMaxOffer({
+        maxOfferTarget: target,
+        maxOfferTargetSource: "buy-box",
+        offerCeilingExact: null,
+      })
+    ).toBeNull();
+    expect(buildRecordedReportMaxOffer({})).toBeUndefined();
+
+    const olderIncomplete = access.exact
+      ? {
+          ...access.exact,
+          achieved: { ...access.exact.achieved, cocReturn: undefined },
+        }
+      : null;
+    expect(
+      buildRecordedReportMaxOffer({
+        maxOfferTarget: target,
+        maxOfferTargetSource: "buy-box",
+        offerCeilingExact: olderIncomplete,
+      })
+    ).toBeUndefined();
   });
 });

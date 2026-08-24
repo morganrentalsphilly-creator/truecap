@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * "Your assumptions — already filled in" — the input-side assumptions strip
+ * "Starting assumptions" — the input-side assumptions strip
  * (calculator redesign Phase 3, blueprint §1 item 4).
  *
  * Replaces the "Improve accuracy (optional)" toggle button as the visual
@@ -203,7 +203,7 @@ export function AssumptionsStrip({
         aria-controls={opensAdvanced ? "advanced-options" : undefined}
         aria-expanded={opensAdvanced ? advancedOpen : undefined}
         className={cn(
-          "inline-flex min-h-8 items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted",
+          "inline-flex min-h-11 items-center gap-1.5 rounded-full border border-border bg-background px-3 py-2 text-xs font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           pulsing[chip.id] && "animate-pulse border-primary bg-primary/10"
         )}
       >
@@ -215,7 +215,7 @@ export function AssumptionsStrip({
           <span
             className={cn(
               "rounded-full px-1.5 py-0.5 text-[10px] font-bold leading-none",
-              chip.badge.kind === "yours"
+              chip.badge.kind === "yours" || chip.badge.kind === "default"
                 ? "bg-muted text-muted-foreground"
                 : "bg-primary/10 text-primary"
             )}
@@ -241,10 +241,10 @@ export function AssumptionsStrip({
             tabIndex={-1}
             className="text-sm font-semibold text-foreground focus:outline-none"
           >
-            Your assumptions — already filled in
+            Starting assumptions
           </p>
           <p className="text-[11px] leading-snug text-muted-foreground">
-            Tap any chip to review or change it — every value stays editable.
+            Product defaults and imported benchmarks stay labeled and editable.
           </p>
         </div>
         {advancedOpen ? (
@@ -262,9 +262,7 @@ export function AssumptionsStrip({
             }}
             aria-expanded={advancedOpen}
             aria-controls="advanced-options"
-            // min-h-8 + canceling negative margin: match the chips' min-h-8
-            // touch band below without growing the header row visually.
-            className="-my-1.5 inline-flex min-h-8 shrink-0 items-center gap-1 text-xs font-semibold text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+            className="inline-flex min-h-11 shrink-0 items-center gap-1 px-2 text-xs font-semibold text-muted-foreground underline-offset-2 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             Hide details
             <ChevronUp className="size-3.5" aria-hidden />

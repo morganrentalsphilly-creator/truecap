@@ -11,15 +11,15 @@
  * devtools, or import the generator module out of the page bundle and call it,
  * and receive the full paid report without an entitlement or a purchase.
  *
- * Composing the document here moves the decision to the server, where the
- * caller cannot reach it. That became possible once lib/pdf-generator stopped
- * depending on a DOM (chart.js on a <canvas> → lib/pdf/vector-charts, and the
- * canvas logo round-trip → lib/pdf/load-image).
+ * Composing the document here moves the entitlement check to the server,
+ * where the caller cannot reach it. That became possible once
+ * lib/pdf-generator stopped depending on a DOM (chart.js on a <canvas> →
+ * lib/pdf/vector-charts, and the canvas logo round-trip → lib/pdf/load-image).
  *
  * ─── WHO IS ALLOWED ─────────────────────────────────────────────────────────
  *   1. A signed-in user whose plan carries the `pdf_export` feature, or
- *   2. Anyone holding a valid, unexpired one-time claim (the $5 Deal Decision
- *      Pack) whose secret and deal fingerprint both match the ledger.
+ *   2. Anyone recovering a valid, unexpired historical one-time paid claim
+ *      whose secret and deal fingerprint both match the ledger.
  *
  * Everyone else gets ENTITLEMENT_REQUIRED and no bytes.
  *
@@ -35,12 +35,14 @@ import { reportDataSchema } from "@/lib/report-payload-schema";
 import * as Sentry from "@sentry/nextjs";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
+import { getStripe } from "@/lib/stripe/client";
+import { retrieveDecisionPackStripeAccess } from "@/lib/stripe/decision-pack-access";
 import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
+import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import {
-  investmentFormSchema,
-  normalizeInvestmentFormSnapshot,
-  type InvestmentFormValues,
-} from "@/lib/investcalc-schema";
+  normalizeReleasedInvestmentFormSnapshot,
+  releasedInvestmentFormSchema,
+} from "@/lib/underwriting-model-release";
 import {
   claimSecretMatches,
   fingerprintOneTimePdfDeal,
@@ -50,7 +52,15 @@ import {
 import { createIpRateLimit, getRequestIp } from "@/lib/ip-rate-limit";
 import type { ReportMode } from "@/lib/pdf-export-constants";
 import { buildCanonicalReportData } from "@/lib/report-data-builder";
-import { shouldFreezeSavedMethodology } from "@/lib/saved-analysis-methodology";
+import {
+  isLegacySavedMethodologyVersion,
+  resolveSavedAnalysisResult,
+} from "@/lib/saved-analysis-methodology";
+import { calculateAnalysis } from "@/lib/calc-analysis";
+import {
+  buildDealScoreInputFromAnalysis,
+  computeDealScore,
+} from "@/lib/deal-score";
 import {
   normalizeOfferCeilingTargetSource,
 } from "@/lib/offer-ceiling-contract";
@@ -85,7 +95,7 @@ export type GenerateReportPdfResult =
 
 const inputSchema = z
   .object({
-    values: investmentFormSchema,
+    values: releasedInvestmentFormSchema,
     // Legacy callers may still send this display payload, but the server
     // discards it and rebuilds every financial output. New callers omit it so
     // paid Offer Ceiling math never has to run in the browser.
@@ -104,12 +114,12 @@ const inputSchema = z
     mode: z
       .enum(["personal", "lender", "partner", "agent"])
       .default("personal"),
-    /** The $5 pack path: proves purchase without an entitlement. */
+    /** Historical paid-claim recovery; new one-time checkout is disabled. */
     claim: z
       .object({
         id: z.string().uuid(),
         secret: z.string().regex(/^[A-Za-z0-9_-]{43}$/),
-        values: investmentFormSchema,
+        values: releasedInvestmentFormSchema,
       })
       .optional(),
   })
@@ -134,7 +144,7 @@ type GateOutcome =
   | { allowed: false; result: GenerateReportPdfResult };
 
 /**
- * Verify a one-time pack claim WITHOUT consuming it.
+ * Verify a historical one-time paid claim WITHOUT consuming it.
  *
  * Consumption is verifyOneTimePdfPaymentAction's job and already happened
  * before the client ever got here; re-consuming would break the documented
@@ -145,9 +155,9 @@ async function claimGrantsExport(
   claim: {
     id: string;
     secret: string;
-    values: z.infer<typeof investmentFormSchema>;
+    values: z.infer<typeof releasedInvestmentFormSchema>;
   },
-  valuesToRender: z.infer<typeof investmentFormSchema>,
+  valuesToRender: z.infer<typeof releasedInvestmentFormSchema>,
   rawMaxOfferTarget: unknown,
   rawMaxOfferTargetSource: unknown,
 ): Promise<boolean> {
@@ -166,7 +176,7 @@ async function claimGrantsExport(
     const { data, error } = await admin
       .from("one_time_pdf_purchase_claims")
       .select(
-        "claim_secret_hash, deal_fingerprint, report_fingerprint, user_id, consumed_at, expires_at"
+        "checkout_session_id, claim_secret_hash, deal_fingerprint, report_fingerprint, user_id, consumed_at, expires_at"
       )
       .eq("id", claim.id)
       .maybeSingle();
@@ -226,6 +236,17 @@ async function claimGrantsExport(
     ) {
       return false;
     }
+
+    // A Checkout Session remains `paid` after refunds. Historical recovery
+    // therefore re-reads current Charge refund totals and Dispute status on
+    // every export. Any Stripe/API ambiguity fails closed in this function's
+    // catch instead of handing out report bytes.
+    const stripeAccess = await retrieveDecisionPackStripeAccess(
+      getStripe(),
+      data.checkout_session_id as string,
+      claim.id
+    );
+    if (stripeAccess.state !== "allowed") return false;
 
     const reportFingerprint = fingerprintOneTimePdfReportBinding(
       valuesToRender,
@@ -343,13 +364,16 @@ type PreparedReportInput =
       trustedPresentation?: Parameters<
         typeof buildCanonicalReportData
       >[0]["trustedPresentation"];
+      trustedRecordedResult?: Parameters<
+        typeof buildCanonicalReportData
+      >[0]["trustedRecordedResult"];
     }
   | { ok: false; result: GenerateReportPdfResult };
 
 function normalizedValuesJson(raw: unknown): string | null {
-  const normalized = normalizeInvestmentFormSnapshot(raw);
+  const normalized = normalizeReleasedInvestmentFormSnapshot(raw);
   if (!normalized) return null;
-  const parsed = investmentFormSchema.safeParse(normalized);
+  const parsed = releasedInvestmentFormSchema.safeParse(normalized);
   return parsed.success ? JSON.stringify(parsed.data) : null;
 }
 
@@ -402,19 +426,7 @@ async function prepareReportInput(
       },
     };
   }
-  if (shouldFreezeSavedMethodology(authority.methodologyVersion)) {
-    return {
-      ok: false,
-      result: {
-        ok: false,
-        code: "FROZEN_METHODOLOGY",
-        message:
-          "This deal uses a different saved underwriting standard. Re-underwrite it with the current standard before creating a new PDF.",
-      },
-    };
-  }
-
-  const trustedValues = normalizeInvestmentFormSnapshot(authority.formSnapshot);
+  const trustedValues = normalizeReleasedInvestmentFormSnapshot(authority.formSnapshot);
   if (
     !trustedValues ||
     normalizedValuesJson(input.values) !== normalizedValuesJson(trustedValues)
@@ -433,6 +445,42 @@ async function prepareReportInput(
     authority.resultSnapshot && typeof authority.resultSnapshot === "object"
       ? authority.resultSnapshot
       : {};
+  let trustedRecordedResult: Parameters<
+    typeof buildCanonicalReportData
+  >[0]["trustedRecordedResult"];
+  if (!isLegacySavedMethodologyVersion(authority.methodologyVersion)) {
+    const currentResult = calculateAnalysis(trustedValues);
+    const currentScore = computeDealScore(
+      buildDealScoreInputFromAnalysis(trustedValues, currentResult)
+    );
+    const recorded = resolveSavedAnalysisResult({
+      methodologyVersion: authority.methodologyVersion,
+      resultSnapshot,
+      recomputedResult: currentResult,
+      recomputedExtras: {
+        score: currentScore.score,
+        recommendation: currentScore.recommendation,
+        riskLevel: currentScore.riskLevel,
+        breakdown: currentScore.breakdown,
+        explanation: currentScore.explanation,
+      },
+    });
+    if (!recorded.result || !recorded.usesRecordedSnapshot) {
+      return {
+        ok: false,
+        result: {
+          ok: false,
+          code: "FROZEN_METHODOLOGY",
+          message:
+            "This saved result is incomplete for a reproducible PDF. Create a new scenario and explicitly re-underwrite it with the current standard.",
+        },
+      };
+    }
+    trustedRecordedResult = {
+      methodologyVersion: authority.methodologyVersion,
+      resultSnapshot,
+    };
+  }
 
   return {
     ok: true,
@@ -445,6 +493,7 @@ async function prepareReportInput(
       templateLabel: authority.templateFallback?.templateName ?? null,
       comps: authority.reportComps,
     },
+    trustedRecordedResult,
   };
 }
 
@@ -483,6 +532,7 @@ export async function generateReportPdfAction(
       maxOfferTarget: prepared.maxOfferTarget,
       maxOfferTargetSource: prepared.maxOfferTargetSource,
       trustedPresentation: prepared.trustedPresentation,
+      trustedRecordedResult: prepared.trustedRecordedResult,
     });
 
     // Branding is resolved HERE, never accepted from the caller, so co-branding

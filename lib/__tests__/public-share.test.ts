@@ -128,8 +128,16 @@ describe("the share-route privacy contract", () => {
     expect(view).not.toContain("calculateMaxAllowableOffer(values, maoTarget)");
     expect(btn).toContain('addressVisibility: includeAddress ? "full" : "hidden"');
     expect(btn).toContain("Off by default");
-    expect(store).toContain("methodologyVersion: TRUECAP_UNDERWRITING_STANDARD_VERSION");
-    expect(route).toContain("resolved.methodologyVersion !== TRUECAP_UNDERWRITING_STANDARD_VERSION");
+    expect(store).toContain("resultSnapshot: capturedResult");
+    expect(store).toContain("methodologyVersion: capturedMethodologyVersion");
+    expect(store).toContain("offerCeilingExact");
+    expect(store).toContain("const hasRecordedInput = input.resultSnapshot !== undefined");
+    expect(store).toContain("adoptedTarget && !usesRecordedSnapshot");
+    expect(store).toContain("snapshotTarget = recordedCeiling.captured");
+    expect(route).toContain("resolveSavedAnalysisResult");
+    expect(route).toContain("resolved.snapshot.resultSnapshot");
+    expect(route).toContain("resolved.snapshot.offerCeilingExact");
+    expect(route).toContain("canRecomputeInputOnlyShare");
   });
 
   it("authenticates before the service-role mint and requires an owner", () => {
@@ -162,7 +170,8 @@ describe("the share-route privacy contract", () => {
     expect(btn).toContain("onClick={prepareAuthNavigation}");
     expect(btn).toContain("Draft continuity is best-effort and must never block authentication");
     expect(btn).toContain("Existing links still open without an account");
-    expect(dashboard).toContain("onPrepareAuthSave(activeMaoTarget, offerCeilingTargetSource)");
+    expect(dashboard).toContain("onPrepareAuthSave(adoptedMaoTarget, adoptedMaoTargetSource)");
+    expect(dashboard).toContain("Screening defaults are examples, not investor instructions");
   });
 
   it("keeps historical opaque and legacy viewers plus owner-scoped revoke", () => {
@@ -206,7 +215,8 @@ describe("the share-route privacy contract", () => {
       "components/investcalc/read-only-analysis-view.tsx"
     );
 
-    expect(focused).toContain("maoTargetSource={targetSource}");
+    expect(focused).toContain("maoTargetSource={targetAdopted ? targetSource : undefined}");
+    expect(focused).toContain("maoTarget={targetAdopted ? target : undefined}");
     expect(workspace).toContain("maxOfferTargetSource");
     expect(workspace).toContain("maoTargetSource={shareMaoTargetSource}");
     expect(shell).toContain("maoTargetSource={maoTargetSource}");

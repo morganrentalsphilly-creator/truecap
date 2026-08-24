@@ -33,7 +33,7 @@ const TITLE = "DealCheck vs Stessa vs TrueCap: which one do you actually need?";
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "DealCheck vs Stessa vs TrueCap (2026)";
 const DESCRIPTION =
-  "An honest 3-way comparison of DealCheck, Stessa, and TrueCap. Different tools for different stages — pre-purchase underwriting vs post-purchase ops — with concrete recommendations.";
+  "An honest comparison of DealCheck, Stessa, and TrueCap. Different tools for different stages — pre-purchase underwriting vs post-purchase operations — with concrete tradeoffs.";
 const PUBLISHED_AT = "2026-06-07";
 const MODIFIED_AT: string = "2026-08-16";
 const READING_TIME_MIN = 11;
@@ -71,7 +71,7 @@ export const metadata: Metadata = {
 const FAQ_ITEMS = [
   {
     q: "What's the difference between DealCheck, Stessa, and TrueCap?",
-    a: "DealCheck and TrueCap are pre-purchase underwriting calculators — you use them to decide if a deal is worth buying. Stessa is a post-purchase accounting and operations platform — you use it after closing to track income, expenses, and Schedule E for tax time. DealCheck and TrueCap are alternatives to each other; Stessa is complementary to both.",
+    a: "DealCheck and TrueCap are pre-purchase underwriting calculators that model a property's economics from entered assumptions. Stessa is a post-purchase accounting and operations platform used after closing to track income, expenses, and Schedule E for tax time. DealCheck and TrueCap are alternatives to each other; Stessa is complementary to both.",
   },
   {
     q: "Do I need both DealCheck (or TrueCap) and Stessa?",
@@ -169,8 +169,8 @@ export default function DealCheckVsStessaVsTrueCapPost() {
             <p className="text-sm sm:text-base leading-relaxed text-foreground">
               They&apos;re not really competitors of each other.{" "}
               <strong>DealCheck</strong> and <strong>TrueCap</strong> are
-              both pre-purchase underwriting calculators — you use them to
-              decide if a deal is worth buying. <strong>Stessa</strong> is
+              both pre-purchase underwriting calculators that model a
+              property&apos;s economics. <strong>Stessa</strong> is
               post-purchase accounting + operations — you use it after
               closing to track income, expenses, and produce a
               Schedule E. So the real question isn&apos;t three-way; it&apos;s{" "}
@@ -255,8 +255,8 @@ export default function DealCheckVsStessaVsTrueCapPost() {
             <h3>Pricing</h3>
             <p>
               <strong>TrueCap</strong> offers a free core analyzer and paid
-              Pro plans. Free includes read-only share links and one sale
-              and rent comps lookup; Pro includes 50 comps lookups per
+              Pro plans. A free signed-in account can create read-only share
+              links and includes one sale and rent comps lookup; Pro includes 50 comps lookups per
               month plus 10-year projections, illustrative tax impact,
               sensitivity, an Offer Ceiling, and dedicated BRRRR and fix-and-flip
               analyzers. PDF export is included with Pro. See the live pricing
@@ -288,8 +288,8 @@ export default function DealCheckVsStessaVsTrueCapPost() {
             <h3>What each does better</h3>
             <ul>
               <li>
-                <strong>TrueCap</strong>: unlimited no-signup core analyses, plain-English
-                verdict (Strong / Solid / Mixed / Marginal / Negative),
+                <strong>TrueCap</strong>: unlimited no-signup core analyses,
+                selected-rule fit and a secondary Screening Index,
                 portfolio rollup across saved deals, illustrative tax-impact
                 modeling with depreciation and estimated after-tax
                 cash flow, sensitivity grid (rent ±10%, vacancy ±5pp,
@@ -389,7 +389,9 @@ export default function DealCheckVsStessaVsTrueCapPost() {
               </li>
             </ul>
             <p>
-              TrueCap&apos;s read-only share links remain free. If you need
+              Creating a new TrueCap read-only share link remains free but
+              requires sign-in; anyone who receives the link can view it
+              without an account. If you need
               10-year projections, sensitivity, illustrative tax impact,
               more comps, or the dedicated BRRRR and flip workflows,
               compare the current Pro plans. PDF reports are included with
@@ -425,9 +427,8 @@ export default function DealCheckVsStessaVsTrueCapPost() {
               </li>
               <li>
                 <strong>&quot;I want selected-rule context, not just
-                metrics.&quot;</strong> TrueCap — Strong / Solid /
-                selected-rule fit with a secondary Screening Index
-                breakdown.
+                metrics.&quot;</strong> TrueCap shows selected-rule fit
+                with a secondary Screening Index breakdown.
               </li>
               <li>
                 <strong>&quot;I own 5+ rentals and want clean
@@ -470,10 +471,9 @@ export default function DealCheckVsStessaVsTrueCapPost() {
             <p>
               The easiest way to figure out which calculator you like
               is to run one of your real deals through it. TrueCap
-              takes about 60 seconds — paste the address, accept the
-              auto-filled rent / rate / tax, type purchase price, and
-              you&apos;ll see a full underwrite with a plain-English
-              verdict.
+              starts from an address. Review the imported facts and starting
+              assumptions, enter the property values that are still missing,
+              and you&apos;ll see the modeled underwrite.
             </p>
             <p className="not-prose">
               <Link

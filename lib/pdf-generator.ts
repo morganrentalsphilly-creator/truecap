@@ -92,6 +92,7 @@ export interface ReportData {
     label:
       | "Meets selected rules at asking"
       | "Does not meet selected rules at asking"
+      | "Preliminary underwriting"
       | "Cannot determine"
       | "Pursue"
       | "Conditional — verify first"
@@ -311,27 +312,16 @@ const setFill = (doc: jsPDF, hex: string) => doc.setFillColor(...hexToRgb(hex));
 const setStroke = (doc: jsPDF, hex: string) => doc.setDrawColor(...hexToRgb(hex));
 const setText = (doc: jsPDF, hex: string) => doc.setTextColor(...hexToRgb(hex));
 
-// getRecommendationPillColor + getRiskPillColor were removed when the
-// 3 verdict pills inside the hero panel were cut. getScorePillColor
-// is kept because the AI Recommendation card's Deal Score readout
-// still uses it for tier-coloring the score number.
-function getScorePillColor(score: number): { bg: string; fg: string } {
-  if (score >= 70) return { bg: COLOR.success, fg: "#FFFFFF" };
-  if (score >= 40) return { bg: COLOR.warn, fg: "#FFFFFF" };
-  return { bg: COLOR.danger, fg: "#FFFFFF" };
-}
-
 /**
  * Pro-tier branding config applied to PDF exports.
  *
  * All fields optional — missing fields fall back to TrueCap defaults.
  * The PDF generator threads this through to:
  *   - drawHeader (logo + accent bar color + tagline)
- *   - pageInputs (contact block under the recommendation card on page 1)
+ *   - pageInputs (contact block under the rule-fit card on page 1)
  *
- * Verdict color semantics (Strong Buy = green, Avoid = red, etc.) are
- * NOT replaced — those carry meaning and shouldn't shift with the user's
- * brand color. Only structural/chrome colors swap.
+ * Rule-fit color semantics are not replaced by the user's brand color.
+ * Only structural/chrome colors swap.
  */
 export type BrandingConfig = {
   logoUrl?: string | null;
@@ -712,76 +702,6 @@ function statCard(
   }
 }
 
-// pill() helper was removed when the verdict pills were cut from the
-// hero panel and the Deal Score was refactored to refined typography
-// rather than a colored pill.
-
-/**
- * Visual deal-score readout: a "DEAL SCORE" kicker, the big tier-colored
- * number with a "/100" denominator, a 0–100 progress track filled to the
- * score in the tier color, and a one-word band (Strong / Moderate / Weak).
- * Replaces the old plain-text "72 / 100" — the number that answers "is this
- * a good deal?" now reads at a glance. Right-aligned to `rightX`; returns
- * the y of its bottom edge so callers can flow content beneath it.
- */
-function drawScoreGauge(
-  doc: jsPDF,
-  opts: { rightX: number; topY: number; width: number; score: number; size?: "sm" | "lg" }
-): number {
-  const { rightX, topY, width, score } = opts;
-  const leftX = rightX - width;
-  const big = opts.size === "lg";
-  const clamped = Math.max(0, Math.min(100, Math.round(score)));
-  const tier =
-    clamped >= 70
-      ? { c: COLOR.success, label: "Strong" }
-      : clamped >= 40
-        ? { c: COLOR.warn, label: "Moderate" }
-        : { c: COLOR.danger, label: "Weak" };
-
-  // Kicker
-  setText(doc, COLOR.sub);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(big ? 8 : 7);
-  doc.setCharSpace(0.8);
-  doc.text("SCREENING INDEX", rightX, topY, { align: "right" });
-  doc.setCharSpace(0);
-
-  // Score number (numerator big, "/100" small) — visual reading order "72 /100"
-  const numY = topY + (big ? 30 : 22);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(big ? 12 : 9);
-  setText(doc, COLOR.sub);
-  const denom = " /100";
-  const denomW = doc.getTextWidth(denom);
-  doc.text(denom, rightX, numY, { align: "right" });
-  setText(doc, tier.c);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(big ? 34 : 22);
-  doc.text(String(clamped), rightX - denomW, numY, { align: "right" });
-
-  // Tier track — light rail with a tier-colored fill to the score.
-  const trackY = numY + (big ? 12 : 9);
-  const trackH = big ? 8 : 5;
-  setFill(doc, "#E9EEF5");
-  doc.roundedRect(leftX, trackY, width, trackH, trackH / 2, trackH / 2, "F");
-  const fillW = Math.max(trackH, (width * clamped) / 100);
-  setFill(doc, tier.c);
-  doc.roundedRect(leftX, trackY, fillW, trackH, trackH / 2, trackH / 2, "F");
-
-  // Band label
-  const labelY = trackY + trackH + (big ? 14 : 11);
-  setText(doc, tier.c);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(big ? 9 : 7.5);
-  doc.text(tier.label, rightX, labelY, { align: "right" });
-
-  // Restore neutral stroke defaults for downstream draws.
-  setStroke(doc, COLOR.line);
-  doc.setLineWidth(0.5);
-  return labelY + 2;
-}
-
 // ===================== Pages =====================
 
 /**
@@ -835,9 +755,9 @@ function decisionColor(decision: NonNullable<ReportData["decision"]>): string {
 /**
  * Cover page — the "arrival" beat a premium report earns before the data.
  * Big address headline, an "Investment Analysis" kicker, then a full-width
- * "UNDERWRITING VERDICT" panel that states the verdict, a one-sentence thesis,
- * the deal-score gauge, and the three numbers that matter — so a reader
- * knows the answer in five seconds. Brand-aware; self-contained (the running
+ * "UNDERWRITING RESULT" panel that states rule fit, a one-sentence thesis,
+ * and the three numbers that matter. The secondary Screening Index is not a
+ * headline result. Brand-aware; self-contained (the running
  * header/footer is skipped on this page). Anchored attribution + confidential
  * line sit at the page foot.
  */
@@ -951,20 +871,14 @@ function pageCover(
   );
   y += 36;
 
-  // ---- "UNDERWRITING VERDICT" panel ----
-  // One name for the verdict across the whole pack: the cover panel, the
-  // page-2 card and the disclosures all used to call it something different
-  // ("THE BOTTOM LINE" / "AI RECOMMENDATION" / the underwriting standard).
-  // "AI" was also simply untrue — lib/deal-score.ts's buildExplanation is a
-  // deterministic rule tree, and calling a rule tree "AI" invites a reader to
-  // discount a number that is actually reproducible.
+  // ---- "UNDERWRITING RESULT" panel ----
+  // The report presents deterministic rule fit, not an acquisition directive.
   const decision = reportDecision(d);
   const tierColor = decisionColor(decision);
   const thesis = buildThesis(d);
   const panelX = M.left;
   const panelW = SAFE.w;
-  const gaugeW = 150;
-  const textW = panelW - 40 - gaugeW - 12; // left pad + gauge column
+  const textW = panelW - 40;
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(11);
@@ -980,20 +894,13 @@ function pageCover(
   doc.roundedRect(panelX, y, 3, panelH, 1.5, 1.5, "F");
 
   let py = y + 30;
-  // Kicker (left) + deal-score gauge (right).
+  // Kicker.
   setText(doc, COLOR.sub);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
   doc.setCharSpace(0.8);
-  doc.text("ACQUISITION DECISION", panelX + 20, py);
+  doc.text("UNDERWRITING RESULT", panelX + 20, py);
   doc.setCharSpace(0);
-  drawScoreGauge(doc, {
-    rightX: panelX + panelW - 20,
-    topY: py - 8,
-    width: gaugeW,
-    score: d.performance.dealScore,
-    size: "sm",
-  });
 
   py += 22;
   setText(doc, tierColor);
@@ -1179,7 +1086,7 @@ function drawBuyBoxCheckGlyph(doc: jsPDF, x: number, textBaselineY: number, pass
 /**
  * Shared layout math for the buy-box card so pagination can measure the
  * block BEFORE drawing it (the card auto-sizes to the personal line +
- * criterion count, like the AI Recommendation card above it).
+ * criterion count, like the rule-fit card above it).
  */
 function buyBoxCardLayout(doc: jsPDF, v: BuyBoxPdfVerdict, w: number) {
   doc.setFont("helvetica", "normal");
@@ -1196,10 +1103,10 @@ function buyBoxCardLayout(doc: jsPDF, v: BuyBoxPdfVerdict, w: number) {
 }
 
 /**
- * The owner's personal verdict — the exact data the in-app BuyBoxVerdictCard
+ * The owner's saved-rule fit — the exact data the in-app BuyBoxVerdictCard
  * shows (Meets/Misses headline, N/M criteria met, the biggest-gap /
  * tightest-margin sentence, per-criterion actual vs target with pass/fail
- * marks). Follows the AI Recommendation card's visual language: white card,
+ * marks). Follows the rule-fit card's visual language: white card,
  * tier-colored left stripe + kicker + headline. Tier colors are semantic
  * (green = fits, amber = misses) and never swap with branding.
  */
@@ -1631,16 +1538,15 @@ function pageInputs(
     y += stripH + 22;
   }
 
-  // Recommendation / verdict card (full width). Auto-sizes to its
+  // Rule-fit card (full width). Auto-sizes to its
   // content so short Neutral/Risky rationales don't leave a giant
   // empty white box, and long Strong Buy explanations don't get
   // truncated. Previously hardcoded at 130pt — which was right for
   // 5-6 sentences but left ~70pt of empty space inside the card on
   // 1-sentence rationales.
   //
-  // The left stripe + the "UNDERWRITING VERDICT" kicker text both pick up
-  // the verdict tier color (green for Strong Buy / Buy, orange for
-  // Neutral / Risky, red for Avoid) so they match the headline text.
+  // The left stripe + the "RULE FIT" kicker use the same semantic color as
+  // the result label.
   const decision = reportDecision(d);
   const tierColor = decisionColor(decision);
   // Compute the rationale lines first so we can size the card to fit.
@@ -1653,7 +1559,7 @@ function pageInputs(
     SAFE.w - 32
   ).slice(0, 7); // hard cap at 7 lines to prevent absurdly long rationales
   // Vertical accounting inside the card:
-  //   y + 16  → "UNDERWRITING VERDICT" kicker (8pt)
+  //   y + 16  → "RULE FIT" kicker (8pt)
   //   y + 34  → headline (13pt)
   //   y + 50  → first rationale line
   //   each line ≈ 9pt × 1.35 leading ≈ 12.15pt
@@ -1684,47 +1590,13 @@ function pageInputs(
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7);
   doc.setCharSpace(0.8);
-  doc.text("ACQUISITION DECISION", M.left + 16, y + 16);
+  doc.text("RULE FIT", M.left + 16, y + 16);
   doc.setCharSpace(0);
   // Headline — slightly tighter (14pt vs 13pt) for confident statement.
   setText(doc, tierColor);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
   doc.text(decision.label, M.left + 16, y + 34);
-
-  // Deal Score badge — refined right-aligned typography.
-  // Reads as "52 / 100" with the score number prominent on the LEFT
-  // and the "/100" denominator smaller on the RIGHT (standard
-  // numerator-then-denominator reading order). Cleaner than a colored
-  // pill — editorial rather than promotional.
-  const scoreColor = getScorePillColor(d.performance.dealScore);
-  setText(doc, COLOR.sub);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(7);
-  doc.setCharSpace(0.8);
-  doc.text("SCREENING INDEX", PAGE.w - M.right - 16, y + 16, { align: "right" });
-  doc.setCharSpace(0);
-
-  // Render "/ 100" first (rightmost), measure its width, then render
-  // the big score number left of it. This way the visual order is
-  // "52 / 100", not "/ 100 52" (which was the previous bug).
-  setText(doc, COLOR.sub);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  const denominatorText = " / 100";
-  const denominatorWidth = doc.getTextWidth(denominatorText);
-  doc.text(denominatorText, PAGE.w - M.right - 16, y + 36, { align: "right" });
-
-  setText(doc, scoreColor.bg);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(20);
-  const scoreStr = String(d.performance.dealScore);
-  doc.text(
-    scoreStr,
-    PAGE.w - M.right - 16 - denominatorWidth,
-    y + 36,
-    { align: "right" }
-  );
 
   // Rationale body — explicitly reset character spacing AND re-set
   // the font right before rendering. jsPDF's text state is sticky;
@@ -1737,9 +1609,8 @@ function pageInputs(
   doc.setFontSize(9);
   doc.text(rationaleLines, M.left + 16, y + 50, { lineHeightFactor: 1.35 });
 
-  // "Your buy box" — the owner's personal verdict, directly under the AI
-  // recommendation (the same pairing as the app dashboard: Deal Score
-  // verdict first, buy-box fit right after). Renders ONLY when the
+  // "Your buy box" — the owner's captured criteria, directly under rule fit.
+  // Renders ONLY when the
   // exporting user has ≥1 usable buy box; without one this page stays
   // byte-identical to the pre-buy-box template. If a long rationale +
   // many criteria won't fit above the page footer, the card moves to its
@@ -1756,10 +1627,10 @@ function pageInputs(
   }
 
   // ── PAGE BREAK ──────────────────────────────────────────────────────────
-  // The verdict ends this page; the assumptions behind it start the next one.
+  // Rule fit ends this page; the assumptions behind it start the next one.
   //
   // This page used to carry everything — hero, six metrics, four input blocks,
-  // units AND the verdict card — and the arithmetic did not work. Every block
+  // units AND the rule-fit card — and the arithmetic did not work. Every block
   // above the card is fixed-height, so the card always began at y≈700 with
   // ~89pt of room, which fits barely two wrapped lines of rationale. Any real
   // rationale (deal-score's appreciation branch, verdict.ts's fallback) drew
@@ -1772,7 +1643,7 @@ function pageInputs(
   y = M.top + 12;
 
 
-  // Property & Inputs. The reader has seen the verdict and the numbers behind
+  // Property & Inputs. The reader has seen rule fit and the numbers behind
   // it; this page is the assumptions that produced them.
   y = sectionTitle(doc, "Property & Inputs", y, undefined, themeColor);
   const colW = (SAFE.w - 12) / 2;
@@ -1830,7 +1701,7 @@ function pageInputs(
   // "Prepared by [Name]" bold under the logo, and the footer of every
   // page shows the full "Prepared by [Name] · [Company]" attribution.
   // A third card on page 1 was redundant chrome. Page 1 now ends with
-  // the AI Recommendation card; the attribution lives in the header
+  // the rule-fit card; the attribution lives in the header
   // and footer where it belongs.
 
 }
@@ -1853,7 +1724,7 @@ function pageDecisionReadiness(
 
   let y = M.top + 12;
   const themeColor = resolveThemeColor(branding);
-  y = sectionTitle(doc, "Decision Readiness", y, undefined, themeColor);
+  y = sectionTitle(doc, "Assumption Readiness", y, undefined, themeColor);
   setText(doc, COLOR.sub);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9.5);
@@ -2218,7 +2089,7 @@ function pageDownside(
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   const verdictText = doc.splitTextToSize(
-    `Stressed verdict: ${stressed.verdict}. Verify achievable rent, vacancy history, current financing quotes, taxes, insurance, and major repairs before relying on either case.`,
+    `Stressed rule fit: ${stressed.verdict}. Verify achievable rent, vacancy history, current financing quotes, taxes, insurance, and major repairs before relying on either case.`,
     SAFE.w - 32
   );
   doc.text(verdictText, M.left + 16, y + 47);
@@ -2872,7 +2743,7 @@ async function buildInvestmentPDFDocument(
   const buyBoxVerdict: BuyBoxPdfVerdict | null = null;
   const buyBoxStateResolved = true;
 
-  // Cover page first — the "arrival" beat (address + verdict + bottom line).
+  // Cover page first — the "arrival" beat (address + rule fit + key numbers).
   // Self-contained: the running header/footer loop skips page 1.
   pageCover(doc, d, branding ?? null, logoData);
   doc.addPage();

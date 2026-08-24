@@ -18,6 +18,9 @@ const CORPUS_CLOCK = new Date("2026-08-24T12:00:00.000Z");
 function captureGoldenOutput(valuesInput: unknown): UnderwritingV1GoldenExpected {
   const values = investmentFormSchema.parse(valuesInput);
   const result = calculateAnalysis(values);
+  if (result.methodologyVersion !== "1.0") {
+    throw new Error("The reviewed v1 corpus must never dispatch through another methodology");
+  }
   const score = computeDealScore(
     buildDealScoreInputFromAnalysis(values, result),
   );

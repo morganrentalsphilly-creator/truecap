@@ -14,7 +14,7 @@ type AppLogoProps = {
 
 export function AppLogo({
   href = "/",
-  subtitle = "Rental acquisition decision system",
+  subtitle = "Rental property underwriting",
   className,
   imageClassName,
   subtitleClassName,

@@ -129,7 +129,7 @@ describe("offer trust language", () => {
     expect(auth).not.toMatch(/always protected/i);
     expect(auth).toContain("HUD rent benchmarks");
     expect(`${auth}\n${logo}`).not.toMatch(/Professional real estate investment (?:calculator|analysis platform)/i);
-    expect(logo).toContain("Rental acquisition decision system");
+    expect(logo).toContain("Rental property underwriting");
     expect(landing).not.toMatch(/know exactly what to offer/i);
     expect(config).not.toMatch(/Know exactly what a rental is worth/i);
     expect(hero).not.toMatch(/highest price you can pay/i);

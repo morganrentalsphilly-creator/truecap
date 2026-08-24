@@ -45,10 +45,10 @@ export function hasAnyMaoTarget(target: MaoTarget): boolean {
 
 /**
  * Keep an explicit target meaningful when financing changes. DSCR has no
- * meaning on an all-cash purchase; if it was the only selected criterion,
- * fall back to the canonical break-even cash-flow floor instead of handing
- * the inverse solver an empty target (which otherwise resolves to its upper
- * search bound).
+ * meaning on an all-cash purchase. If it was the only selected criterion,
+ * return null so the product can ask the user to adopt a relevant target;
+ * silently substituting break-even cash flow would invent a rule they did
+ * not choose.
  */
 export function normalizeMaoTargetForFinancing(
   target: MaoTarget | null,
@@ -57,7 +57,7 @@ export function normalizeMaoTargetForFinancing(
   if (!target) return null;
   const next = { ...target };
   if (options.isCashPurchase) delete next.dscr;
-  if (!hasAnyMaoTarget(next)) return { monthlyCashFlow: 0 };
+  if (!hasAnyMaoTarget(next)) return null;
   return next;
 }
 

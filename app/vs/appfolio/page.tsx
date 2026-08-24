@@ -56,7 +56,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", appfolio: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", appfolio: "Not modeled", winner: "truecap" },
   { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", appfolio: "Not modeled", winner: "truecap" },
-  { feature: "Screening Index + verdict", truecap: "Free — 0-100 score + plain-English verdict", appfolio: "Not applicable", winner: "truecap" },
+  { feature: "Secondary Screening Index", truecap: "Free — 0-100 triage score + factor breakdown", appfolio: "Not applicable", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", appfolio: "Not applicable", winner: "truecap" },
   { feature: "Property-management workflow", truecap: "No", appfolio: "Yes — multi-property operations", winner: "appfolio" },
   { feature: "Accounting + reporting at scale", truecap: "No", appfolio: "Yes — full GL, P&L, owner statements", winner: "appfolio" },

@@ -16,6 +16,7 @@ const reportBindingMigration = read(
 );
 const action = read("app/actions/one-time-pdf.ts");
 const generatorAction = read("app/actions/generate-report-pdf.ts");
+const currentAccessGuard = read("lib/stripe/decision-pack-access.ts");
 const client = read("components/investcalc/investcalc-page.tsx");
 const layout = read("app/layout.tsx");
 const sentryClient = read("instrumentation-client.ts");
@@ -40,8 +41,13 @@ describe("one-time PDF security contract", () => {
     expect(action).toContain("user_id: userId");
     expect(action).toContain('.gt("expires_at", consumedAt)');
     expect(action).toContain('.is("consumed_at", null)');
-    expect(action).toContain("session.metadata?.claim_id !== initial.row.id");
-    expect(action).toContain('session.payment_status !== "paid"');
+    expect(action).toContain("retrieveDecisionPackStripeAccess(");
+    expect(currentAccessGuard).toContain(
+      "session.metadata?.claim_id !== expectedClaimId"
+    );
+    expect(currentAccessGuard).toContain('session.payment_status !== "paid"');
+    expect(currentAccessGuard).toContain("charge.amount_refunded > 0");
+    expect(currentAccessGuard).toContain('dispute.status === "lost"');
   });
 
   it("binds the purchased report target/source and keeps recovery to 24 hours", () => {

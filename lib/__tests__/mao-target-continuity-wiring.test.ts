@@ -19,18 +19,18 @@ describe("active Max Offer target continuity", () => {
 
   it("passes the exact target rendered by the dashboard into every primary callback", () => {
     expect(dashboard).toContain(
-      "onPrepareAuthSave(activeMaoTarget ?? undefined, offerCeilingTargetSource)"
+      "onPrepareAuthSave(adoptedMaoTarget, adoptedMaoTargetSource)"
     );
     expect(dashboard).toContain(
-      "void onSaveDeal(activeMaoTarget ?? undefined, offerCeilingTargetSource)"
+      "void onSaveDeal(adoptedMaoTarget, adoptedMaoTargetSource)"
     );
-    expect(dashboard).toContain("activeMaoTarget ?? undefined,");
-    expect(dashboard).toContain("offerCeilingTargetSource\n    );");
+    expect(dashboard).toContain("adoptedMaoTarget,");
+    expect(dashboard).toContain("adoptedMaoTargetSource\n    );");
     expect(dashboard).toContain('handleExportPdf("personal")');
     expect(dashboard).toContain("onClick={() => handleExportPdf()}");
     expect(dashboard).toContain("onClick={() => handleExportPdf(m.id)}");
     expect(dashboard).toContain("handleExportPdf(m.id);");
-    expect(dashboard).toContain("maoTarget={activeMaoTarget}");
+    expect(dashboard).toContain("maoTarget={adoptedMaoTarget}");
   });
 
   it("gives an explicit Save target precedence and persists that same snapshot", () => {
@@ -55,7 +55,8 @@ describe("active Max Offer target continuity", () => {
       "/** A choice made in the duplicate-address dialog."
     );
     expect(handler).toContain("const normalizedTarget = normalizeMaoTarget(maoTarget)");
-    expect(handler).toContain("maxOfferTargetOverride: normalizedTarget");
+    expect(handler).toContain("isAdoptedOfferCeilingTargetSource(normalizedSource)");
+    expect(handler).toContain("maxOfferTargetOverride: adoptedTarget");
   });
 
   it("binds the pre-auth target to the exact analysis draft and restores only that scope", () => {
@@ -64,14 +65,12 @@ describe("active Max Offer target continuity", () => {
       "onPrepareAuthSave={(\n                maoTarget: MaoTarget | undefined,",
       "onEditAssumptions={() => {"
     );
-    expect(auth).toContain(
-      "const exactTarget = normalizeMaoTarget(maoTarget) ?? analysisMaoTargetRef.current"
-    );
+    expect(auth).toContain("const normalizedSource = normalizeOfferCeilingTargetSource(source)");
+    expect(auth).toContain("isAdoptedOfferCeilingTargetSource(normalizedSource)");
+    expect(auth).toContain("? normalizeMaoTarget(maoTarget)");
     expect(auth).toContain("writeCalcDraftWithMaoTarget(");
-    expect(auth).toContain(
-      'source ?? analysisMaoTargetSource ?? "selected-targets"'
-    );
-    expect(auth).toContain('setAnalysisMaoTargetSource(source ?? "selected-targets")');
+    expect(auth).toContain('exactTarget ? normalizedSource : "screening-defaults"');
+    expect(auth).toContain('setAnalysisMaoTargetSource("screening-defaults")');
 
     const draftWriter = sourceSection(
       calculator,

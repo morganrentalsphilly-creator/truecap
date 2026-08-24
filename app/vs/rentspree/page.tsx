@@ -54,7 +54,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", rentspree: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", rentspree: "Not modeled", winner: "truecap" },
   { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", rentspree: "Not modeled", winner: "truecap" },
-  { feature: "Screening Index + verdict", truecap: "Free — 0-100 score + plain-English verdict", rentspree: "Not applicable", winner: "truecap" },
+  { feature: "Secondary Screening Index", truecap: "Free — 0-100 triage score + factor breakdown", rentspree: "Not applicable", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", rentspree: "Not applicable", winner: "truecap" },
   { feature: "Tenant credit / criminal reports", truecap: "No", rentspree: "Yes — TransUnion-backed", winner: "rentspree" },
   { feature: "Online rental applications", truecap: "No", rentspree: "Yes — customizable", winner: "rentspree" },
@@ -106,7 +106,7 @@ export default function VsRentspreePage() {
             <span className="text-primary">underwrite the deal vs screen the tenant</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            RentSpree is the go-to tenant screening service for real-estate agents and small landlords — TransUnion credit + criminal + eviction reports, online rental applications, agent-friendly workflow. TrueCap is the pre-purchase underwriting calculator that decides whether the property is a good deal in the first place. Different jobs. Many agents and investors use both.
+            RentSpree is the go-to tenant screening service for real-estate agents and small landlords — TransUnion credit + criminal + eviction reports, online rental applications, agent-friendly workflow. TrueCap models the property&apos;s pre-purchase economics from user-reviewed assumptions. Different jobs. Many agents and investors use both.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ScrollToFormButton

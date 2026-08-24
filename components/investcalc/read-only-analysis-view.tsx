@@ -31,7 +31,10 @@ import {
 } from "@/lib/mao-target-editor";
 import { describeMaoTarget } from "@/lib/mao-targets";
 import type { OfferCeilingAccessPayload } from "@/lib/offer-ceiling-access-contract";
-import type { OfferCeilingTargetSource } from "@/lib/offer-ceiling-contract";
+import {
+  isAdoptedOfferCeilingTargetSource,
+  type OfferCeilingTargetSource,
+} from "@/lib/offer-ceiling-contract";
 import { computeAssumptionImpact } from "@/lib/assumption-impact";
 import { trackEvent } from "@/lib/analytics";
 
@@ -49,6 +52,9 @@ interface ReadOnlyAnalysisViewProps {
   maoTargetSource?: OfferCeilingTargetSource;
   /** Exact-or-preview result already authorized and calculated by the server. */
   offerCeilingAccess?: OfferCeilingAccessPayload | null;
+  /** Prevents current scenario engines from being mixed into a recorded base
+   * result captured by an opaque share. */
+  recordedResult?: boolean;
   /** False when the sharer kept the exact property identity private. */
   addressIncluded?: boolean;
 }
@@ -172,25 +178,32 @@ export function ReadOnlyAnalysisView({
   maoTarget,
   maoTargetSource = "selected-targets",
   offerCeilingAccess = null,
+  recordedResult = false,
   addressIncluded = true,
 }: ReadOnlyAnalysisViewProps) {
   const router = useRouter();
+  const adoptedMaoTarget =
+    maoTarget && isAdoptedOfferCeilingTargetSource(maoTargetSource)
+      ? maoTarget
+      : undefined;
   const offerCeiling =
-    offerCeilingAccess?.access === "exact"
+    adoptedMaoTarget && offerCeilingAccess?.access === "exact"
       ? offerCeilingAccess.exact?.presentation ?? null
       : null;
   const rangePreview =
-    offerCeilingAccess?.access === "preview"
+    adoptedMaoTarget && offerCeilingAccess?.access === "preview"
       ? offerCeilingAccess.range
       : null;
   const assumptionBreakpoints = useMemo(
-    () => computeAssumptionImpact(values).slice(0, 3),
-    [values]
+    () => (recordedResult ? [] : computeAssumptionImpact(values).slice(0, 3)),
+    [recordedResult, values]
   );
-  const criteriaMet = maoTarget ? meetsMaoTarget(result, maoTarget) : null;
+  const criteriaMet = adoptedMaoTarget
+    ? meetsMaoTarget(result, adoptedMaoTarget)
+    : null;
   const decisionLabel =
     criteriaMet == null
-      ? "Cannot determine rule fit"
+      ? "Preliminary underwriting"
       : criteriaMet
         ? "Meets selected rules at asking"
         : "Does not meet selected rules at asking";
@@ -226,8 +239,8 @@ export function ReadOnlyAnalysisView({
       /* storage unavailable — fall through to a clean calculator */
     }
     const analysisFingerprint = maoTargetAnalysisFingerprint(cloneValues);
-    if (addressIncluded && maoTarget && analysisFingerprint) {
-      writePendingMaoTarget(maoTarget, {
+    if (addressIncluded && adoptedMaoTarget && analysisFingerprint) {
+      writePendingMaoTarget(adoptedMaoTarget, {
         analysisFingerprint,
         source: maoTargetSource,
       });
@@ -268,14 +281,14 @@ export function ReadOnlyAnalysisView({
             <p className="mt-1 font-mono text-3xl font-extrabold tabular-nums text-primary">
               {ceilingDisplay}
             </p>
-            {maoTarget ? (
+            {adoptedMaoTarget ? (
               <>
                 <p className="mt-1 text-xs font-semibold text-foreground">
                   Under the targets captured with this share
                   {offerCeiling ? " · exact ceiling" : rangePreview ? " · coarse range preview" : ""}
                 </p>
                 <p className="mt-1 text-[11px] leading-relaxed text-foreground">
-                  Targets: {describeMaoTarget(maoTarget)}
+                  Targets: {describeMaoTarget(adoptedMaoTarget)}
                 </p>
                 {offerCeiling ? (
                   <div className="mt-2 space-y-1 text-[11px] leading-relaxed text-muted-foreground">
@@ -293,13 +306,13 @@ export function ReadOnlyAnalysisView({
               </>
             ) : (
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                Offer Ceiling unavailable — this older share did not capture its target
-                criteria. Open a new analysis to select targets without rewriting this
-                historical result.
+                No Offer Ceiling was calculated because this share did not capture an
+                adopted target. Open a new analysis to review and adopt your own rules
+                without rewriting this historical result.
               </p>
             )}
             <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
-              {maoTarget
+              {adoptedMaoTarget
                 ? "Highest modeled price that still meets the targets captured with this share under the assumptions shown."
                 : "A supported Offer Ceiling requires captured target criteria."} This is not a
               recommended offer or an appraisal.
@@ -311,7 +324,7 @@ export function ReadOnlyAnalysisView({
           <div className="rounded-xl border border-border bg-muted/30 p-3">
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Criteria fit</p>
             <p className="mt-1 text-sm font-extrabold text-foreground">
-              {criteriaMet == null ? "No captured target" : criteriaMet ? "Meets" : "Misses"}
+              {criteriaMet == null ? "No adopted target" : criteriaMet ? "Meets" : "Misses"}
             </p>
           </div>
           <div className="rounded-xl border border-border bg-muted/30 p-3">
@@ -336,14 +349,22 @@ export function ReadOnlyAnalysisView({
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             What could break the deal
           </p>
-          <ol className="mt-2 grid gap-1 text-sm font-semibold text-foreground sm:grid-cols-3">
-            {assumptionBreakpoints.map((driver, index) => (
-              <li key={`${driver.label}-${index}`}>
-                <span className="text-muted-foreground">{index + 1}.</span>{" "}
-                {driver.label} {driver.deltaLabel} moves cash flow about ±{fmtCash(driver.cashFlowSwing / 2)}/mo
-              </li>
-            ))}
-          </ol>
+          {assumptionBreakpoints.length > 0 ? (
+            <ol className="mt-2 grid gap-1 text-sm font-semibold text-foreground sm:grid-cols-3">
+              {assumptionBreakpoints.map((driver, index) => (
+                <li key={`${driver.label}-${index}`}>
+                  <span className="text-muted-foreground">{index + 1}.</span>{" "}
+                  {driver.label} {driver.deltaLabel} moves cash flow about ±{fmtCash(driver.cashFlowSwing / 2)}/mo
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="mt-2 text-sm font-semibold text-foreground">
+              Verify rent, property taxes, insurance, vacancy, and repair reserves against
+              current source documents. Sensitivity figures are intentionally not regenerated
+              inside this recorded share.
+            </p>
+          )}
         </div>
       </section>
 
@@ -418,7 +439,7 @@ export function ReadOnlyAnalysisView({
 
       {comps ? <SharedDealComps comps={comps} /> : null}
 
-      {showProAnalysis ? (
+      {showProAnalysis && !recordedResult ? (
         <>
           <SensitivityGrid values={values} />
 
@@ -434,6 +455,17 @@ export function ReadOnlyAnalysisView({
             <StrategiesPanel values={values} result={result} />
           </details>
         </>
+      ) : recordedResult ? (
+        <section className="rounded-2xl border border-border bg-card p-5 sm:p-6" aria-labelledby="recorded-share-scenarios-title">
+          <h2 id="recorded-share-scenarios-title" className="text-base font-bold text-foreground">
+            Scenario tools are separate from this recorded result
+          </h2>
+          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+            This link preserves the numbers captured when it was created. Clone the assumptions
+            into a new analysis to run today&rsquo;s sensitivity and strategy scenarios without
+            rewriting this historical record.
+          </p>
+        </section>
       ) : (
         <section className="rounded-2xl border border-primary/25 bg-[var(--brand-blue-light)] p-5 sm:p-6" aria-labelledby="shared-pro-analysis-title">
           <h2 id="shared-pro-analysis-title" className="text-base font-bold text-foreground">

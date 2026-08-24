@@ -13,9 +13,9 @@ import "server-only";
  *     dark rather than serving a paid surface for free);
  *   - the client must still belong to that agent;
  *   - every deal ASSIGNED to that client (and not deleted) is listed — see the
- *     query below for why archived deals are deliberately included — each
- *     recomputed on read (never a stale stored snapshot) and given a signed
- *     /d/ share link so the buyer can open the full analysis.
+ *     query below for why archived deals are deliberately included — using
+ *     the exact result captured when it was saved. Explicitly legacy rows keep
+ *     their labeled compatibility recompute.
  *
  * Returns null for any failure — bad token, missing entitlement, unknown
  * client, DB error — so the route renders a single generic 404. Never throws.
@@ -45,7 +45,10 @@ import {
   resolveSavedAnalysisSnapshot,
 } from "@/lib/saved-analysis-methodology";
 import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
-import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
+import {
+  isReleasedUnderwritingSnapshot,
+  normalizeReleasedInvestmentFormSnapshot,
+} from "@/lib/underwriting-model-release";
 import type { DealRecommendation, DealRiskLevel } from "@/lib/deal-score";
 import { isFeatureReleased } from "@/lib/entitlements-catalog";
 
@@ -182,6 +185,10 @@ export async function loadClientPortal(input: {
 
     const deals: PortalDeal[] = [];
     for (const row of (rows ?? []) as DealRow[]) {
+      // Internal/crafted v2 rows are never a public-portal surface. Check the
+      // raw marker before either a recorded-result fallback or a tolerant
+      // legacy normalizer can make the row look renderable.
+      if (!isReleasedUnderwritingSnapshot(row.form_snapshot)) continue;
       const recomputed = recomputeSavedDealVerdict(row.form_snapshot);
       const resolution = resolveSavedAnalysisSnapshot({
         methodologyVersion: row.methodology_version,
@@ -192,7 +199,7 @@ export async function loadClientPortal(input: {
       });
       const snapshot = resolution.snapshot;
       const currentVerdict = resolution.didRecompute ? recomputed : null;
-      const frozenScore = resolution.shouldFreeze
+      const frozenScore = resolution.usesRecordedSnapshot
         ? parseFrozenDealScore(snapshot)
         : null;
       const score = currentVerdict?.score ?? frozenScore?.score ?? finiteNumber(snapshot.score);
@@ -216,13 +223,12 @@ export async function loadClientPortal(input: {
       ) {
         continue; // incomplete stored output — skip, never mix in current math
       }
-      const values = normalizeInvestmentFormSnapshot(row.form_snapshot);
+      const values = normalizeReleasedInvestmentFormSnapshot(row.form_snapshot);
       // Nested portal route — NO deal data in the URL (no public URL may carry
       // encoded analysis payloads). The nested page re-verifies the portal
-      // token and the deal's ownership server-side, then recomputes with
-      // TODAY'S engine — so a FROZEN card (methodology-pinned) must not link
-      // to it: the buyer would open a page contradicting the card they were
-      // sent. Same suppression origin applied to the legacy encoded link.
+      // token and the deal's ownership server-side, then uses this same exact
+      // recorded result. Future-version rows remain intentionally unlinked:
+      // this deployment may not know how to render their complete contract.
       const sharePath: string | null =
         values && !resolution.shouldFreeze ? `/portal/${portalToken}/d/${row.id}` : null;
       // Evaluate against the buyer's own criteria (never the agent's other
@@ -274,7 +280,9 @@ export async function loadClientPortal(input: {
             ? resolution.didRecompute
               ? `Legacy analysis · recomputed with current v${TRUECAP_UNDERWRITING_STANDARD_VERSION}`
               : `Legacy analysis · stored snapshot (current v${TRUECAP_UNDERWRITING_STANDARD_VERSION} recompute unavailable)`
-            : `Standard v${resolution.storedMethodologyVersion}`,
+            : resolution.usesRecordedSnapshot
+              ? `Recorded Standard v${resolution.storedMethodologyVersion}`
+              : `Standard v${resolution.storedMethodologyVersion}`,
       });
     }
 

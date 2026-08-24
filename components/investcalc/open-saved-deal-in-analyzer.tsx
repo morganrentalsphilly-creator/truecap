@@ -20,14 +20,16 @@
  * ok-union instead of toasting so each surface keeps its own error UI.
  */
 import { useState } from "react";
-import { ExternalLink, Loader2 } from "lucide-react";
+import { ExternalLink, Loader2, RefreshCw } from "lucide-react";
 import { getSavedDealForEditingAction } from "@/app/actions/saved-analyses";
+import { addScenarioAction } from "@/app/actions/scenarios";
 import { useToast } from "@/hooks/use-toast";
 import { normalizeMaoTarget } from "@/lib/mao-target-editor";
 import {
   normalizeOfferCeilingTargetSource,
   type OfferCeilingTargetSource,
 } from "@/lib/offer-ceiling-contract";
+import { isReleasedUnderwritingSnapshot } from "@/lib/underwriting-model-release";
 
 /** Base of the nonce-keyed edit handoff (`<base>::<nonce>`), and the legacy
  *  shared key a previous deploy's tabs may still hold. Must match
@@ -165,6 +167,10 @@ export async function duplicateSavedDealInAnalyzer(
     targetWindow?.close();
     return { ok: false, message: result.message };
   }
+  if (!isReleasedUnderwritingSnapshot(result.formSnapshot)) {
+    targetWindow?.close();
+    return { ok: false, message: "This underwriting model is not available yet." };
+  }
   const { maxOfferTarget, maxOfferTargetSource } =
     normalizeSavedDealHandoffTarget(result.resultSnapshot);
   const nonce = writeNonceKeyedHandoffPayload(SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY, {
@@ -208,6 +214,10 @@ export async function openSavedDealInAnalysisTab(
   if (!result.ok) {
     targetWindow?.close();
     return { ok: false, message: result.message };
+  }
+  if (!isReleasedUnderwritingSnapshot(result.formSnapshot)) {
+    targetWindow?.close();
+    return { ok: false, message: "This underwriting model is not available yet." };
   }
 
   const { resultSnapshot } = normalizeSavedDealHandoffTarget(result.resultSnapshot);
@@ -267,14 +277,95 @@ export function OpenFullAnalysisButton({ savedDealId }: { savedDealId: string })
       type="button"
       onClick={handleClick}
       disabled={isOpening}
-      className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-border bg-background px-3 text-xs font-semibold text-foreground transition-colors hover:bg-muted disabled:opacity-60"
+      className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg border border-border bg-background px-3 text-xs font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-60"
     >
       {isOpening ? (
         <Loader2 aria-hidden className="size-3.5 animate-spin" />
       ) : (
         <ExternalLink aria-hidden className="size-3.5" />
       )}
-      Open full analysis
+      View recorded analysis
+    </button>
+  );
+}
+
+/**
+ * Clone first, then open the clone in the analyzer. An explicit re-underwrite
+ * can therefore update only the new scenario; the recorded parent row and any
+ * share/PDF bound to it remain immutable history.
+ */
+export function ReunderwriteAsScenarioButton({ savedDealId }: { savedDealId: string }) {
+  const { toast } = useToast();
+  const [isOpening, setIsOpening] = useState(false);
+
+  const handleClick = () => {
+    if (isOpening) return;
+    const targetWindow = window.open("about:blank", "_blank");
+    if (targetWindow) targetWindow.opener = null;
+    setIsOpening(true);
+    void (async () => {
+      try {
+        const now = new Date();
+        const scenarioName = `Re-underwrite ${now.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        })} ${now.toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+          second: "2-digit",
+        })}`;
+        const cloned = await addScenarioAction({
+          sourceDealId: savedDealId,
+          scenarioName,
+          strategyKind: null,
+        });
+        if (!cloned.ok) {
+          targetWindow?.close();
+          toast({
+            title: "Could not create re-underwrite scenario",
+            description: cloned.message,
+            variant: "destructive",
+          });
+          return;
+        }
+        const opened = await openSavedDealInAnalysisTab(
+          cloned.scenarioId,
+          targetWindow
+        );
+        if (!opened.ok) {
+          toast({
+            title: "Scenario created, but could not open it",
+            description: opened.message,
+            variant: "destructive",
+          });
+        }
+      } catch {
+        targetWindow?.close();
+        toast({
+          title: "Could not create re-underwrite scenario",
+          description: "Something interrupted the request. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsOpening(false);
+      }
+    })();
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      disabled={isOpening}
+      className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg bg-primary px-3 text-xs font-bold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-60"
+    >
+      {isOpening ? (
+        <Loader2 aria-hidden className="size-3.5 animate-spin" />
+      ) : (
+        <RefreshCw aria-hidden className="size-3.5" />
+      )}
+      Re-underwrite as new scenario
     </button>
   );
 }

@@ -18,6 +18,7 @@ import {
   completeSubscriptionCheckoutIntentFromWebhook,
   expireSubscriptionCheckoutIntentFromWebhook,
 } from "@/lib/stripe/subscription-checkout-intent";
+import { reconcileDecisionPackRiskEvent } from "@/lib/stripe/decision-pack-risk-webhook";
 
 export const runtime = "nodejs";
 
@@ -321,6 +322,36 @@ export async function POST(req: Request) {
             });
           }
         }
+        break;
+      }
+      case "charge.refunded": {
+        await reconcileDecisionPackRiskEvent(
+          admin,
+          stripe,
+          event.data.object as Stripe.Charge
+        );
+        break;
+      }
+      case "charge.refund.updated":
+      case "refund.created":
+      case "refund.updated": {
+        await reconcileDecisionPackRiskEvent(
+          admin,
+          stripe,
+          event.data.object as Stripe.Refund
+        );
+        break;
+      }
+      case "charge.dispute.created":
+      case "charge.dispute.updated":
+      case "charge.dispute.closed":
+      case "charge.dispute.funds_withdrawn":
+      case "charge.dispute.funds_reinstated": {
+        await reconcileDecisionPackRiskEvent(
+          admin,
+          stripe,
+          event.data.object as Stripe.Dispute
+        );
         break;
       }
       case "customer.subscription.created":

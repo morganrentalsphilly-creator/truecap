@@ -43,5 +43,9 @@ describe("strategy scenario persistence", () => {
     expect(source).toContain(
       "recomputedResultSnapshot.maxOfferTargetSource = sourceMaoTargetSource"
     );
+    expect(source).toContain("await hasPaidPlanSubscription(supabase, user.id)");
+    expect(source).toContain(
+      "recomputedResultSnapshot.offerCeilingExact = capturedAccess.exact"
+    );
   });
 });

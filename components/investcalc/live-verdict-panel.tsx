@@ -9,14 +9,11 @@
  * is exported so the sticky verdict dock can share it.
  */
 
-import type { DealTier } from "@/lib/verdict";
 import { cn } from "@/lib/utils";
 import { GlossaryTip } from "./glossary-tip";
 
 /** The lightweight pre-run verdict snapshot computed by the form watcher. */
 export type LivePreviewSnapshot = {
-  tier: DealTier;
-  score: number;
   netCashFlow: number;
   capRate: number;
   dscr: number;
@@ -83,30 +80,10 @@ export function LiveVerdictPanel({ active, livePreview, livePreviewMsg }: Props)
               </span>
               Live screening preview
             </span>
-            <span
-              className={cn(
-                "rounded-full px-2.5 py-0.5 text-xs font-extrabold uppercase tracking-wide",
-                livePreview.tier === "Strong" && "bg-[var(--brand-green)] text-white",
-                livePreview.tier === "Solid" && "bg-primary text-primary-foreground",
-                livePreview.tier === "Mixed" && "bg-amber-500 text-white",
-                livePreview.tier === "Marginal" && "bg-orange-500 text-white",
-                livePreview.tier === "Negative" && "bg-red-600 text-white"
-              )}
-            >
-              {livePreview.tier}
+            <span className="rounded-full border border-primary/25 bg-card px-2.5 py-0.5 text-xs font-extrabold uppercase tracking-wide text-primary">
+              Preliminary
             </span>
           </div>
-          <div className="mb-3 flex items-baseline gap-1.5">
-            <span className="font-mono text-3xl font-extrabold tabular-nums text-foreground">
-              {livePreview.score}
-            </span>
-            <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
-              / 100 Screening Index
-            </span>
-          </div>
-          <p className="-mt-2 mb-3 text-[10px] leading-snug text-muted-foreground">
-            Secondary screening heuristic · not an investment recommendation.
-          </p>
           <div className="grid grid-cols-3 gap-2 sm:gap-3">
             <div>
               <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">

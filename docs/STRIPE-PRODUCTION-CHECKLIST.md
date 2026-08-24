@@ -33,8 +33,10 @@ In Stripe Dashboard, open Business settings / Public details and confirm:
 
 ## Checkout branding
 
-Repository code supplies these supported hosted-Checkout settings for both
-subscription and Decision Pack sessions:
+Repository code supplies these supported hosted-Checkout settings for
+subscription sessions. The retained historical Decision Pack constructor uses
+the same settings, but its creation gates must remain off while new Pack sales
+are temporarily unavailable:
 
 - Display name: **TrueCap**
 - Background: **#F7FAFC**
@@ -118,7 +120,22 @@ protected-rate warning.
   do not submit a new payment. Current claims return as `pdf_claim=<uuid>` and
   cancellation uses `pdf_purchase=cancelled`; legacy Session-id returns fail
   closed.
-- Confirm the webhook endpoint receives its subscribed event set in test mode.
+- A partial refund, full refund, or lost dispute revokes future report access,
+  recovery, delivery, and Pack-to-Pro credit eligibility. Suspend those rights
+  while a dispute is open. Historical browser-bound verification and PDF export
+  now re-read the current Checkout Session, Charge refund total, and Dispute
+  status on every request and fail closed if Stripe cannot confirm safe access.
+  New Pack sales remain disabled; do not re-enable them to test this path.
+- Confirm the webhook endpoint receives `charge.refunded`,
+  `charge.refund.updated`, `refund.created`, `refund.updated`,
+  `charge.dispute.created`, `charge.dispute.updated`, and
+  `charge.dispute.closed` in test mode. Funds-withdrawn/reinstated dispute
+  events are also handled defensively. These events wake idempotent current-
+  state reconciliation; event arrival order is never used as authority.
+  A refund or lost dispute changes an already-applied Pack credit's audit state
+  to `reversed`; this does **not** remove a coupon from, reprice, or otherwise
+  mutate an existing live subscription. Any financial adjustment is a separate
+  support/accounting action and must preserve all live Price IDs.
   Do not change signature verification or rotate the webhook secret as part of
   this branding review.
 - Confirm a test checkout emits the canonical, PII-free funnel sequence:

@@ -53,7 +53,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", landlordstudio: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", landlordstudio: "Not modeled", winner: "truecap" },
   { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", landlordstudio: "Yes — actuals for Schedule E", winner: "tie" },
-  { feature: "Screening Index + verdict", truecap: "Free — 0-100 score + plain-English verdict", landlordstudio: "Not applicable", winner: "truecap" },
+  { feature: "Secondary Screening Index", truecap: "Free — 0-100 triage score + factor breakdown", landlordstudio: "Not applicable", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", landlordstudio: "Not applicable", winner: "truecap" },
   { feature: "Receipt scanning", truecap: "No", landlordstudio: "Yes — mobile camera + OCR", winner: "landlordstudio" },
   { feature: "Expense tracking + categorization", truecap: "No", landlordstudio: "Yes — per-property bookkeeping", winner: "landlordstudio" },
@@ -140,7 +140,7 @@ export default function VsLandlordStudioPage() {
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You&apos;re evaluating a property before making an offer.</li>
                 <li>You want cap rate, DSCR, cash flow, projection.</li>
-                <li>You want a Screening Index + verdict to compare 2-3 deals.</li>
+                <li>You want standardized economics and rule-fit context to compare 2-3 deals.</li>
                 <li>You&apos;re not yet generating receipts to track.</li>
               </ul>
             </div>

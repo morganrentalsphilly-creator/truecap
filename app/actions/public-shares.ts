@@ -15,7 +15,11 @@
 import { z } from "zod";
 import * as Sentry from "@sentry/nextjs";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { investmentFormSchema } from "@/lib/investcalc-schema";
+import type { InvestmentFormValues } from "@/lib/investcalc-schema";
+import {
+  normalizeReleasedInvestmentFormSnapshot,
+  releasedInvestmentFormSchema,
+} from "@/lib/underwriting-model-release";
 import {
   mintPublicShare,
   type PublicShareAddressVisibility,
@@ -29,6 +33,10 @@ import {
 } from "@/lib/mao-target-editor";
 import { calculateAnalysis } from "@/lib/calc-analysis";
 import { captureServerEvent } from "@/lib/posthog-server";
+import {
+  isAdoptedOfferCeilingTargetSource,
+  type OfferCeilingTargetSource,
+} from "@/lib/offer-ceiling-contract";
 
 export type CreatePublicShareResult =
   | { ok: true; url: string }
@@ -64,7 +72,7 @@ export async function createPublicShareAction(input: unknown): Promise<CreatePub
 
   const parsed = z
     .object({
-      values: investmentFormSchema,
+      values: releasedInvestmentFormSchema,
       title: z.string().trim().max(200).optional(),
       dealId: z.string().uuid().optional(),
       maoTarget: z.unknown().optional(),
@@ -83,11 +91,19 @@ export async function createPublicShareAction(input: unknown): Promise<CreatePub
   if (parsed.data.maoTarget !== undefined && !parsedMaoTarget) {
     return { ok: false, code: "VALIDATION_ERROR", message: "Couldn't read these targets." };
   }
-  const maoTarget = parsedMaoTarget
+  const candidateMaoTarget = parsedMaoTarget
     ? normalizeMaoTargetForFinancing(parsedMaoTarget, {
         isCashPurchase: calculateAnalysis(parsed.data.values).monthlyPayment <= 0,
       }) ?? undefined
     : undefined;
+  const candidateMaoTargetSource: OfferCeilingTargetSource =
+    parsed.data.maoTargetSource ??
+    (candidateMaoTarget ? "selected-targets" : "screening-defaults");
+  const maoTarget =
+    candidateMaoTarget &&
+    isAdoptedOfferCeilingTargetSource(candidateMaoTargetSource)
+      ? candidateMaoTarget
+      : undefined;
 
   if (shareRateLimit.isOverLimit(await getRequestIp())) {
     return {
@@ -100,27 +116,69 @@ export async function createPublicShareAction(input: unknown): Promise<CreatePub
   // dealId attribution is only honored for the deal's real owner — otherwise a
   // crafted call could attach someone else's saved comps/branding to a share.
   let dealId: string | undefined;
+  let valuesToShare: InvestmentFormValues = parsed.data.values;
+  let recordedResultSnapshot: Record<string, unknown> | undefined;
+  let recordedMethodologyVersion: string | undefined;
+  let shareMaoTarget = maoTarget;
+  let shareMaoTargetSource = candidateMaoTargetSource;
   if (parsed.data.dealId) {
     const { data: deal } = await supabase
       .from("saved_analyses")
-      .select("id")
+      .select("id, form_snapshot, result_snapshot, methodology_version")
       .eq("id", parsed.data.dealId)
       .eq("user_id", user.id)
       .is("deleted_at", null)
       .maybeSingle();
-    if (deal) dealId = parsed.data.dealId;
+    const savedValues = normalizeReleasedInvestmentFormSnapshot(deal?.form_snapshot);
+    const normalizedSaved = savedValues
+      ? releasedInvestmentFormSchema.safeParse(savedValues)
+      : null;
+    // Use the recorded saved result only when the browser is sharing those
+    // exact saved inputs. If the user has unsaved edits, mint a fresh share
+    // without attaching the old deal's comps/attribution or result snapshot.
+    if (
+      deal &&
+      normalizedSaved?.success &&
+      JSON.stringify(normalizedSaved.data) === JSON.stringify(parsed.data.values)
+    ) {
+      dealId = parsed.data.dealId;
+      valuesToShare = normalizedSaved.data;
+      recordedResultSnapshot =
+        deal.result_snapshot && typeof deal.result_snapshot === "object"
+          ? (deal.result_snapshot as Record<string, unknown>)
+          : undefined;
+      recordedMethodologyVersion =
+        typeof deal.methodology_version === "string"
+          ? deal.methodology_version
+          : undefined;
+      const recordedTarget = normalizeMaoTarget(
+        recordedResultSnapshot?.maxOfferTarget
+      );
+      const recordedSource = recordedResultSnapshot?.maxOfferTargetSource;
+      if (
+        recordedTarget &&
+        (recordedSource == null ||
+          recordedSource === "buy-box" ||
+          recordedSource === "selected-targets")
+      ) {
+        shareMaoTarget = recordedTarget;
+        shareMaoTargetSource = recordedSource ?? "selected-targets";
+      }
+    }
   }
 
   const path = await mintPublicShare({
-    values: parsed.data.values,
+    values: valuesToShare,
     title:
       parsed.data.addressVisibility === "full"
-        ? parsed.data.title || parsed.data.values.address || undefined
+        ? parsed.data.title || valuesToShare.address || undefined
         : "Shared rental analysis",
     ownerId: user.id,
     dealId: dealId ?? null,
-    maoTarget: maoTarget ?? undefined,
-    maoTargetSource: parsed.data.maoTargetSource,
+    maoTarget: shareMaoTarget ?? undefined,
+    maoTargetSource: shareMaoTarget ? shareMaoTargetSource : undefined,
+    resultSnapshot: recordedResultSnapshot,
+    methodologyVersion: recordedMethodologyVersion,
     audience: (parsed.data.audience ?? "investment-partner") as PublicShareAudience,
     addressVisibility: (parsed.data.addressVisibility ?? "hidden") as PublicShareAddressVisibility,
   });

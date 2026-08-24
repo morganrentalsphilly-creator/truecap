@@ -512,7 +512,9 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
               Screened {result.screenedCount} {result.screenedCount === 1 ? "listing" : "listings"}
               {result.truncated ? ` (first ${MAX_TRIAGE_ROWS} of your paste)` : ""}
               <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
-                Each Offer Ceiling is the highest modeled price that still meets the criteria shown on that row under its assumptions. It is not a recommended offer or appraisal.
+                {result.buyBoxActive
+                  ? "Each Offer Ceiling is the highest modeled price that still meets the adopted Buy Box criteria shown on that row. It is not a recommended offer or appraisal."
+                  : "Core underwriting is shown without an Offer Ceiling. Adopt return targets in a Buy Box before TrueCap calculates modeled price thresholds."}
               </span>
             </p>
             <div className="flex flex-wrap items-center gap-2">

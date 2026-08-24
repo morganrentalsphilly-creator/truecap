@@ -1,8 +1,6 @@
 import { calculateAnalysis } from "@/lib/calc-analysis";
-import {
-  investmentFormSchema,
-  type InvestmentFormValues,
-} from "@/lib/investcalc-schema";
+import type { InvestmentFormValues } from "@/lib/investcalc-schema";
+import { releasedInvestmentFormSchema } from "@/lib/underwriting-model-release";
 import type { MaoTarget } from "@/lib/max-allowable-offer";
 import {
   normalizeMaoTarget,
@@ -128,7 +126,7 @@ export function parseOneTimePdfDraft(
   if (!raw) return null;
   try {
     const draft = JSON.parse(raw) as Record<string, unknown>;
-    const parsedValues = investmentFormSchema.safeParse(draft.values);
+    const parsedValues = releasedInvestmentFormSchema.safeParse(draft.values);
     if (!parsedValues.success) return null;
 
     const bindingInput = {

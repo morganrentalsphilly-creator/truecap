@@ -548,22 +548,21 @@ export function AddressAutocomplete({
                   id={`${fieldId}-option-${i}`}
                   role="option"
                   aria-selected={isActive}
+                  onMouseDown={(e) => {
+                    // Keep DOM focus on the combobox input. The active option
+                    // is exposed through aria-activedescendant; nesting a
+                    // focusable button inside role="option" creates two
+                    // conflicting interactive roles for screen readers.
+                    e.preventDefault();
+                  }}
+                  onClick={() => handleSelect(p)}
+                  onMouseEnter={() => setHighlight(i)}
+                  className={cn(
+                    "flex min-h-11 cursor-pointer items-center px-3 py-2 text-left text-sm transition-colors",
+                    isActive ? "bg-accent text-accent-foreground" : "hover:bg-accent/60"
+                  )}
                 >
-                  <button
-                    type="button"
-                    onMouseDown={(e) => {
-                      // mousedown fires before input blur - keeps focus and avoids race
-                      e.preventDefault();
-                    }}
-                    onClick={() => handleSelect(p)}
-                    onMouseEnter={() => setHighlight(i)}
-                    className={cn(
-                      "block w-full px-3 py-2 text-left text-sm transition-colors",
-                      isActive ? "bg-accent text-accent-foreground" : "hover:bg-accent/60"
-                    )}
-                  >
-                    {text}
-                  </button>
+                  {text}
                 </li>
               );
             })}

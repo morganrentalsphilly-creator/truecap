@@ -1,9 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
-import * as Sentry from "@sentry/nextjs";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   ArrowUpRight,
@@ -21,7 +19,6 @@ import {
   X,
 } from "lucide-react";
 import { removeCompareDealAction } from "@/app/actions/compare";
-import { updateSavedDealStageAction } from "@/app/actions/saved-analyses";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 import {
   buyBoxHasCriteria,
@@ -35,8 +32,6 @@ import {
 import { BuyBoxFitBadge } from "@/components/investcalc/buy-box-fit-badge";
 import { RiskReturn, type RiskReturnDeal } from "@/components/dashboard/RiskReturn";
 import { DataConfidenceBadge } from "@/components/investcalc/data-confidence-badge";
-import { useToast } from "@/hooks/use-toast";
-import { ToastAction } from "@/components/ui/toast";
 import type { DealAssumptions } from "@/lib/compare-assumptions";
 import type { DataConfidence } from "@/lib/data-confidence";
 import type { PipelineStage } from "@/lib/pipeline";
@@ -630,125 +625,15 @@ function doesBestDealClearBar(deal: CompareDealViewModel | null): boolean {
 }
 
 /**
- * DEC-3: Compare ends in an action. Rendered on the winner card — open its
- * workspace, and one tap to mark the losers Passed. The bulk stage write is
- * confirm-first (never silent), reuses updateSavedDealStageAction (which
- * enforces the "pipeline" entitlement server-side), and only mounts when the
- * page says the user holds that entitlement — the same gate every other
- * stage write respects. Per-deal failures surface as toasts, never throws.
+ * Open the relative metric leader without turning an internal comparison
+ * tally into a transaction or pipeline decision. Stage changes remain an
+ * explicit per-deal action in the workspace.
  */
 function WinnerActions({
   winner,
-  others,
-  canUsePipeline,
 }: {
   winner: CompareDealViewModel;
-  others: CompareDealViewModel[];
-  canUsePipeline: boolean;
 }) {
-  const router = useRouter();
-  const { toast } = useToast();
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [isPassing, startPassing] = useTransition();
-
-  const undoPassedDeals = async (
-    passed: Array<{ deal: CompareDealViewModel; previousStage: PipelineStage }>
-  ) => {
-    try {
-      const results = await Promise.all(
-        passed.map(async (entry) => ({
-          entry,
-          result: await updateSavedDealStageAction(entry.deal.id, entry.previousStage),
-        }))
-      );
-      const failures = results.filter(({ result }) => !result.ok);
-      const restoredCount = results.length - failures.length;
-      toast({
-        title:
-          failures.length === 0
-            ? `Restored ${restoredCount} deal${restoredCount === 1 ? "" : "s"}`
-            : `Restored ${restoredCount} of ${results.length} deals`,
-        description:
-          failures.length === 0
-            ? "Each deal is back in its previous pipeline stage."
-            : "One or more deals could not be restored. Open My Deals to review their stages.",
-        variant: failures.length === 0 ? "success" : "destructive",
-      });
-      router.refresh();
-    } catch (err) {
-      Sentry.captureException(err, { tags: { feature: "compare-undo-pass" } });
-      toast({
-        title: "Could not undo Passed deals",
-        description: "Check your connection and try again from My Deals.",
-        variant: "destructive",
-      });
-      router.refresh();
-    }
-  };
-
-  const markOthersPassed = () => {
-    setConfirmOpen(false);
-    startPassing(async () => {
-      try {
-        const results = await Promise.all(
-          others.map(async (deal) => ({
-            deal,
-            result: await updateSavedDealStageAction(deal.id, "passed"),
-          }))
-        );
-        const failures = results.filter(({ result }) => !result.ok);
-        const passed = results
-          .filter(({ result }) => result.ok)
-          .map(({ deal }) => ({
-            deal,
-            previousStage: deal.pipelineStage ?? ("analyzing" as const),
-          }));
-        const passedCount = results.length - failures.length;
-        if (passedCount > 0) {
-          toast({
-            title: `Marked ${passedCount} deal${passedCount === 1 ? "" : "s"} as Passed`,
-            description:
-              failures.length === 0
-                ? "They moved to Passed. Undo restores each deal’s previous stage."
-                : `${failures.length} deal${failures.length === 1 ? "" : "s"} could not be moved.`,
-            variant: failures.length === 0 ? "success" : "destructive",
-            action: (
-              <ToastAction
-                altText="Undo marking deals as Passed"
-                onClick={() => void undoPassedDeals(passed)}
-              >
-                Undo
-              </ToastAction>
-            ),
-          });
-        }
-        if (passedCount === 0) {
-          toast({
-            title: "Could not mark deals as Passed",
-            description: failures[0]?.result.ok === false ? failures[0].result.message : "Try again in a moment.",
-            variant: "destructive",
-          });
-        }
-        // Passed deals drop out of the active compare set on refresh; the
-        // winner stays, ready to open.
-        router.refresh();
-      } catch (err) {
-        // One of the stage updates REJECTED rather than returning {ok:false}
-        // (network blip, cold-start 500, stale-deploy Server Action), so
-        // Promise.all rejected and the whole batch fell through with no signal.
-        // Tell the user it's retryable; a refresh reconciles which deals (if
-        // any) actually moved before the failure.
-        Sentry.captureException(err, { tags: { feature: "compare" } });
-        toast({
-          title: "Could not mark deals as Passed",
-          description: "Something interrupted the request. Check your connection and try again.",
-          variant: "destructive",
-        });
-        router.refresh();
-      }
-    });
-  };
-
   return (
     <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border/70 pt-3">
       <Button asChild size="sm" className="rounded-full">
@@ -757,41 +642,6 @@ function WinnerActions({
           <ArrowUpRight className="ml-1 size-3.5" />
         </Link>
       </Button>
-      {canUsePipeline && others.length > 0 ? (
-        <Popover open={confirmOpen} onOpenChange={setConfirmOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="rounded-full"
-              disabled={isPassing}
-            >
-              {isPassing
-                ? "Marking…"
-                : `Mark the other${others.length === 1 ? "" : "s"} as Passed`}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent align="start" className="w-72">
-            <p className="text-sm font-semibold text-foreground">
-              Mark {others.length === 1 ? "1 deal" : `${others.length} deals`} as Passed?
-            </p>
-            <p className="mt-1 text-xs leading-snug text-muted-foreground">
-              {others.map((deal) => getShortAddress(deal.address)).join(", ")} will move to the
-              Passed stage and drop out of this comparison. You can restage them from My Deals
-              anytime.
-            </p>
-            <div className="mt-3 flex justify-end gap-2">
-              <Button type="button" variant="ghost" size="sm" onClick={() => setConfirmOpen(false)}>
-                Cancel
-              </Button>
-              <Button type="button" size="sm" onClick={markOthersPassed}>
-                Mark as Passed
-              </Button>
-            </div>
-          </PopoverContent>
-        </Popover>
-      ) : null}
     </div>
   );
 }
@@ -1089,8 +939,6 @@ function CompareMobileDealStrip({ deals }: { deals: CompareDealViewModel[] }) {
 function CompareMobileHighlights({
   bestDeal,
   bestDealClears,
-  otherDeals,
-  canUsePipeline,
   highestRoiDeal,
   strongestDscrDeal,
   shortTermHighlightedWinCounts,
@@ -1098,8 +946,6 @@ function CompareMobileHighlights({
 }: {
   bestDeal: CompareDealViewModel | null;
   bestDealClears: boolean;
-  otherDeals: CompareDealViewModel[];
-  canUsePipeline: boolean;
   highestRoiDeal: CompareDealViewModel | null;
   strongestDscrDeal: CompareDealViewModel | null;
   shortTermHighlightedWinCounts: Map<string, number>;
@@ -1111,7 +957,7 @@ function CompareMobileHighlights({
           show "—", and collapse the row to 2-up so it doesn't leave a gap. */}
       <div className={`grid gap-2 ${strongestDscrDeal?.metrics.dscr != null ? "grid-cols-3" : "grid-cols-2"}`}>
         <div className="rounded-2xl bg-card p-3 shadow-sm">
-          <p className="text-[10px] font-extrabold text-success">Best Deal</p>
+          <p className="text-[10px] font-extrabold text-success">Most metric wins</p>
           <p className="mt-1 line-clamp-2 text-xs font-extrabold leading-tight text-foreground">
             {bestDeal ? getDealLabel(bestDeal, { short: true }) : "-"}
           </p>
@@ -1148,7 +994,7 @@ function CompareMobileHighlights({
         <div className="rounded-3xl border border-border bg-card p-4 shadow-sm">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-muted-foreground">Selected Winner</p>
+              <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-muted-foreground">Comparison reference</p>
               <h2 className="mt-1 text-base font-extrabold leading-tight text-foreground">{getDealLabel(bestDeal, { short: true })}</h2>
             </div>
             <Badge
@@ -1159,13 +1005,13 @@ function CompareMobileHighlights({
                   : "border-warning/30 bg-warning/15 text-warning-foreground"
               )}
             >
-              {bestDealClears ? "Best" : "Best of set"}
+              Relative leader
             </Badge>
           </div>
           {!bestDealClears ? (
             // DEC-3: no unconditional crown for the best of a bad bunch.
             <p className="mt-2 rounded-lg bg-warning/15 px-2.5 py-1.5 text-[11px] font-medium leading-snug text-warning-foreground">
-              Best of this set — but it doesn&apos;t clear your targets.
+              This relative rank does not evaluate adopted acquisition targets and is not a recommendation.
             </p>
           ) : null}
           <div className="mt-4 grid grid-cols-2 gap-2">
@@ -1180,22 +1026,15 @@ function CompareMobileHighlights({
               <p className="mt-1 text-[10px] leading-snug text-muted-foreground">Wins across 10-year cash flow, equity, profit, and return.</p>
             </div>
           </div>
-          <WinnerActions winner={bestDeal} others={otherDeals} canUsePipeline={canUsePipeline} />
+          <WinnerActions winner={bestDeal} />
         </div>
       ) : null}
     </>
   );
 }
 
-export function CompareDealsClient({
-  deals,
-  canUsePipeline = false,
-}: {
+export function CompareDealsClient({ deals }: {
   deals: CompareDealViewModel[];
-  /** Whether the user holds the "pipeline" entitlement (server-derived) —
-   *  gates the bulk "Mark the others as Passed" action the same way My
-   *  Deals gates its stage writes. The server action re-enforces it. */
-  canUsePipeline?: boolean;
 }) {
   // Buy-box fit (PV-4) — same listBuyBoxesAction useEffect pattern as My
   // Deals. Failures / no-boxes / free users leave buyBoxes null, so the
@@ -1267,7 +1106,6 @@ export function CompareDealsClient({
   const bestDealId = getBestDealIdByWins(deals, shortTermHighlightedWinCounts, longTermHighlightedWinCounts);
   const bestDeal = deals.find((deal) => deal.id === bestDealId) ?? deals[0] ?? null;
   const bestDealClears = doesBestDealClearBar(bestDeal);
-  const nonWinnerDeals = bestDeal ? deals.filter((deal) => deal.id !== bestDeal.id) : [];
   const highestRoiDeal = deals.reduce<CompareDealViewModel | null>((best, deal) => {
     const value = deal.compareSnapshot?.longTermSummary.totalROI ?? deal.metrics.cocReturn ?? Number.NEGATIVE_INFINITY;
     const bestValue = best?.compareSnapshot?.longTermSummary.totalROI ?? best?.metrics.cocReturn ?? Number.NEGATIVE_INFINITY;
@@ -1379,8 +1217,6 @@ export function CompareDealsClient({
             <CompareMobileHighlights
               bestDeal={bestDeal}
               bestDealClears={bestDealClears}
-              otherDeals={nonWinnerDeals}
-              canUsePipeline={canUsePipeline}
               highestRoiDeal={highestRoiDeal}
               strongestDscrDeal={strongestDscrDeal}
               shortTermHighlightedWinCounts={shortTermHighlightedWinCounts}
@@ -1575,7 +1411,7 @@ export function CompareDealsClient({
                         bestDealClears ? "bg-emerald-700" : "bg-amber-600"
                       )}
                     >
-                      {bestDealClears ? "Best Deal" : "Best of this set"}
+                      Most metric wins
                     </div>
                   )}
                   <form action={removeAction} className="absolute right-4 top-4">
@@ -1708,7 +1544,7 @@ export function CompareDealsClient({
                       </p>
                       {isShortTermWinner && (
                         <p className="mt-0.5 text-[10px] font-semibold text-success">
-                          Winner
+                          Metric leader
                         </p>
                       )}
                     </div>
@@ -1731,7 +1567,7 @@ export function CompareDealsClient({
                       </p>
                       {isLongTermWinner && (
                         <p className="mt-0.5 text-[10px] font-semibold text-success">
-                          Winner
+                          Metric leader
                         </p>
                       )}
                     </div>
@@ -1745,21 +1581,16 @@ export function CompareDealsClient({
                   {isBestDeal &&
                     (bestDealClears ? (
                       <p className="mt-3 rounded-lg bg-success/10 px-2.5 py-1.5 text-[11px] font-medium leading-snug text-success">
-                        Top performer across most metrics with {totalWins} total win{totalWins === 1 ? "" : "s"}.
+                        Leads this set across {totalWins} compared metric{totalWins === 1 ? "" : "s"}; review the underlying assumptions and your own targets.
                       </p>
                     ) : (
                       // DEC-3: winning a weak set is not a buy signal.
                       <p className="mt-3 rounded-lg bg-warning/15 px-2.5 py-1.5 text-[11px] font-medium leading-snug text-warning-foreground">
-                        Best of this set — but it doesn&apos;t clear your targets. It wins the most
-                        metrics here; that&apos;s not a recommendation to buy.
+                        Leads this relative metric tally, which does not evaluate adopted acquisition targets and is not a recommendation.
                       </p>
                     ))}
                   {isBestDeal && (
-                    <WinnerActions
-                      winner={deal}
-                      others={nonWinnerDeals}
-                      canUsePipeline={canUsePipeline}
-                    />
+                    <WinnerActions winner={deal} />
                   )}
                 </div>
               );

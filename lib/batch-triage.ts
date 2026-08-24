@@ -440,32 +440,34 @@ export function triageListing(
   let viabilityDistance: number | null = null;
   if (values) {
     const targetBox = boxes?.find(buyBoxHasReturnTargets) ?? null;
-    target = buildMaoTarget(targetBox, { isCashPurchase: verdict.isCashPurchase });
-    targetLabel = describeMaoTarget(target);
-    const mao = calculateMaxAllowableOffer(values, target);
-    maxOffer = mao?.maxPrice ?? null;
-    askingGap = maxOffer == null ? null : input.purchasePrice - maxOffer;
+    if (targetBox) {
+      target = buildMaoTarget(targetBox, { isCashPurchase: verdict.isCashPurchase });
+      targetLabel = describeMaoTarget(target);
+      const mao = calculateMaxAllowableOffer(values, target);
+      maxOffer = mao?.maxPrice ?? null;
+      askingGap = maxOffer == null ? null : input.purchasePrice - maxOffer;
 
-    const rentPath = solveRequiredMonthlyRent(values, target);
-    if (rentPath) {
-      requiredRentUnreachable = rentPath.unreachable;
-      if (!rentPath.unreachable) {
-        requiredMonthlyRent = rentPath.value;
-        const currentRent = input.monthlyRent ?? 0;
-        requiredRentDelta = Math.max(0, Math.round(rentPath.value - currentRent));
-        viabilityDistance = rentPath.alreadyMet
-          ? 0
-          : currentRent > 0
-            ? requiredRentDelta / currentRent
-            : requiredRentDelta;
+      const rentPath = solveRequiredMonthlyRent(values, target);
+      if (rentPath) {
+        requiredRentUnreachable = rentPath.unreachable;
+        if (!rentPath.unreachable) {
+          requiredMonthlyRent = rentPath.value;
+          const currentRent = input.monthlyRent ?? 0;
+          requiredRentDelta = Math.max(0, Math.round(rentPath.value - currentRent));
+          viabilityDistance = rentPath.alreadyMet
+            ? 0
+            : currentRent > 0
+              ? requiredRentDelta / currentRent
+              : requiredRentDelta;
+        }
       }
-    }
-    if (viabilityDistance == null) {
-      // Fallback for an unreachable/missing inverse solve: price gap is still
-      // a canonical, comparable distance to the same target.
-      viabilityDistance = askingGap == null
-        ? null
-        : Math.max(0, askingGap) / Math.max(1, input.purchasePrice);
+      if (viabilityDistance == null) {
+        // Fallback for an unreachable/missing inverse solve: price gap is still
+        // a canonical, comparable distance to the same adopted Buy Box target.
+        viabilityDistance = askingGap == null
+          ? null
+          : Math.max(0, askingGap) / Math.max(1, input.purchasePrice);
+      }
     }
   }
 

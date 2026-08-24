@@ -21,7 +21,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { calculateAnalysis } from "@/lib/calc-analysis";
-import { investmentFormSchema } from "@/lib/investcalc-schema";
+import { releasedInvestmentFormSchema } from "@/lib/underwriting-model-release";
 import { resolvePublicShare } from "@/lib/public-share";
 import { getPublicAgentBranding } from "@/lib/agent-share";
 import { getPublicDealComps } from "@/lib/public-deal-comps";
@@ -33,6 +33,17 @@ import { resolveOfferCeilingForAccess } from "@/lib/offer-ceiling-server";
 import { normalizeMaoTargetForFinancing } from "@/lib/mao-target-editor";
 import Link from "next/link";
 import { createIpRateLimit, getRequestIp } from "@/lib/ip-rate-limit";
+import {
+  isAdoptedOfferCeilingTargetSource,
+  type OfferCeilingTargetSource,
+} from "@/lib/offer-ceiling-contract";
+import {
+  buildDealScoreInputFromAnalysis,
+  computeDealScore,
+} from "@/lib/deal-score";
+import { resolveSavedAnalysisResult } from "@/lib/saved-analysis-methodology";
+import type { OfferCeilingAccessPayload } from "@/lib/offer-ceiling-access-contract";
+import { readRecordedOfferCeiling } from "@/lib/recorded-offer-ceiling";
 
 type Props = { params: Promise<{ token: string }> };
 
@@ -78,22 +89,47 @@ export default async function OpaqueSharePage({ params }: Props) {
   const resolved = await resolvePublicShare(token);
   if (!resolved) notFound();
 
-  // Never silently recompute a pinned historical share under a different
-  // formula contract. Version adapters can be added here when Standard v2
-  // ships; until then the preserved snapshot fails closed and asks for a new
-  // share rather than changing its financial answer.
-  if (
-    resolved.methodologyVersion &&
-    resolved.methodologyVersion !== TRUECAP_UNDERWRITING_STANDARD_VERSION
-  ) {
+  const parsed = releasedInvestmentFormSchema.safeParse(resolved.snapshot.values);
+  if (!parsed.success) notFound();
+
+  let currentResult;
+  try {
+    currentResult = calculateAnalysis(parsed.data);
+  } catch {
+    notFound();
+  }
+  const currentScore = computeDealScore(
+    buildDealScoreInputFromAnalysis(parsed.data, currentResult)
+  );
+  const recordedResolution = resolved.snapshot.resultSnapshot
+    ? resolveSavedAnalysisResult({
+        methodologyVersion: resolved.methodologyVersion,
+        resultSnapshot: resolved.snapshot.resultSnapshot,
+        recomputedResult: currentResult,
+        recomputedExtras: {
+          score: currentScore.score,
+          recommendation: currentScore.recommendation,
+          riskLevel: currentScore.riskLevel,
+          breakdown: currentScore.breakdown,
+          explanation: currentScore.explanation,
+        },
+      })
+    : null;
+  const canRecomputeInputOnlyShare =
+    resolved.legacyInputOnly &&
+    (!resolved.methodologyVersion ||
+      resolved.methodologyVersion === TRUECAP_UNDERWRITING_STANDARD_VERSION);
+  const result = recordedResolution?.result ??
+    (canRecomputeInputOnlyShare ? currentResult : null);
+  if (!result) {
     return (
       <main id="main" className="mx-auto flex min-h-screen max-w-xl items-center px-5 py-16">
         <section className="w-full rounded-2xl border border-border bg-card p-6 shadow-sm">
           <h1 className="text-2xl font-extrabold text-foreground">This analysis is preserved</h1>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-            It was created with TrueCap Underwriting Standard v{resolved.methodologyVersion}.
-            This viewer runs v{TRUECAP_UNDERWRITING_STANDARD_VERSION}, so it will not silently
-            recalculate the historical decision. Ask the owner to create a refreshed share.
+            Its recorded TrueCap result is not complete enough for this viewer. It has not been
+            silently recalculated. Ask the owner to create a refreshed share from a new
+            re-underwritten scenario.
           </p>
           <Link href="/" className="mt-4 inline-flex min-h-11 items-center font-bold text-primary hover:underline">
             Open TrueCap
@@ -101,16 +137,6 @@ export default async function OpaqueSharePage({ params }: Props) {
         </section>
       </main>
     );
-  }
-
-  const parsed = investmentFormSchema.safeParse(resolved.snapshot.values);
-  if (!parsed.success) notFound();
-
-  let result;
-  try {
-    result = calculateAnalysis(parsed.data);
-  } catch {
-    notFound();
   }
 
   // Access, branding, comps, and lead attribution are bound to immutable,
@@ -135,20 +161,41 @@ export default async function OpaqueSharePage({ params }: Props) {
   // oracle for anyone testing candidate listings.
   const valuesHash = hashShareValues(displayValues);
   const sig = ownerId ? signShareAttribution({ ownerId, dealId, valuesHash }) : null;
-  const displayMaoTarget = resolved.snapshot.maoTarget
+  const displayMaoTargetSource: OfferCeilingTargetSource =
+    resolved.snapshot.maoTargetSource ?? "selected-targets";
+  const displayMaoTarget =
+    resolved.snapshot.maoTarget &&
+    isAdoptedOfferCeilingTargetSource(displayMaoTargetSource)
     ? normalizeMaoTargetForFinancing(resolved.snapshot.maoTarget, {
         isCashPurchase: result.monthlyPayment <= 0,
       }) ?? undefined
     : undefined;
-  const offerCeilingAccess = displayMaoTarget
-    ? resolveOfferCeilingForAccess({
+  let offerCeilingAccess: OfferCeilingAccessPayload | null = null;
+  if (displayMaoTarget) {
+    const hasRecordedSolve = Object.prototype.hasOwnProperty.call(
+      resolved.snapshot,
+      "offerCeilingExact"
+    );
+    const recordedCeiling = hasRecordedSolve
+      ? readRecordedOfferCeiling({
+          maxOfferTarget: resolved.snapshot.maoTarget,
+          maxOfferTargetSource: resolved.snapshot.maoTargetSource,
+          offerCeilingExact: resolved.snapshot.offerCeilingExact,
+        })
+      : { captured: false as const };
+    if (recordedCeiling.captured) {
+      offerCeilingAccess = showProAnalysis
+        ? { access: "exact", exact: recordedCeiling.exact }
+        : { access: "preview", range: null };
+    } else if (resolved.legacyInputOnly) {
+      offerCeilingAccess = resolveOfferCeilingForAccess({
         values: parsed.data,
         target: displayMaoTarget,
-        source:
-          resolved.snapshot.maoTargetSource ?? "selected-targets",
+        source: displayMaoTargetSource,
         paidAccess: showProAnalysis,
-      })
-    : null;
+      });
+    }
+  }
 
   return (
     <SharedDealShell
@@ -159,11 +206,12 @@ export default async function OpaqueSharePage({ params }: Props) {
       showProAnalysis={showProAnalysis}
       maoTarget={displayMaoTarget}
       maoTargetSource={
-        resolved.snapshot.maoTargetSource ?? "selected-targets"
+        displayMaoTarget ? displayMaoTargetSource : undefined
       }
       offerCeilingAccess={offerCeilingAccess}
       methodologyVersion={resolved.methodologyVersion ?? TRUECAP_UNDERWRITING_STANDARD_VERSION}
-      legacyMethodologyWarning={resolved.legacyUnpinned}
+      legacyMethodologyWarning={resolved.legacyUnpinned || resolved.legacyInputOnly}
+      recordedResult={Boolean(recordedResolution?.usesRecordedSnapshot)}
       addressIncluded={addressVisible}
       leadCapture={
         agent && ownerId

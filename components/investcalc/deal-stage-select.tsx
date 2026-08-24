@@ -17,6 +17,7 @@ import * as Sentry from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
 import { updateSavedDealStageAction } from "@/app/actions/saved-analyses";
 import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 import {
   Select,
   SelectContent,
@@ -61,9 +62,53 @@ export function DealStageSelect({
           return;
         }
         toast({
-          title: "Stage updated",
-          description: `Moved to ${pipelineStageLabel(next)}.`,
+          title: next === "passed" ? "Marked as Passed" : "Stage updated",
+          description:
+            next === "passed"
+              ? `Recorded as your decision. Undo restores ${pipelineStageLabel(stage)}.`
+              : `Moved to ${pipelineStageLabel(next)}.`,
           variant: "success",
+          action:
+            next === "passed" ? (
+              <ToastAction
+                altText="Undo marking deal as Passed"
+                onClick={() => {
+                  setDisplayStage(stage);
+                  startSaving(async () => {
+                    try {
+                      const undo = await updateSavedDealStageAction(savedDealId, stage);
+                      if (!undo.ok) {
+                        setDisplayStage("passed");
+                        toast({
+                          title: "Could not undo",
+                          description: undo.message,
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                      trackEvent("pipeline_stage_changed", {
+                        from_stage: "passed",
+                        to_stage: stage,
+                        moved_to_offer_ready: stage === "offer_ready",
+                      });
+                      router.refresh();
+                    } catch (error) {
+                      Sentry.captureException(error, {
+                        tags: { feature: "deal-stage-pass-undo" },
+                      });
+                      setDisplayStage("passed");
+                      toast({
+                        title: "Could not undo",
+                        description: "Check your connection and try again.",
+                        variant: "destructive",
+                      });
+                    }
+                  });
+                }}
+              >
+                Undo
+              </ToastAction>
+            ) : undefined,
         });
         trackEvent("pipeline_stage_changed", {
           from_stage: stage,

@@ -337,11 +337,11 @@ const PRIVY_FAQ: FaqItem[] = [
     question: "Does Privy underwrite deals?",
     answer: (
       <>
-        Sort of — it shows listing-level cap rate estimates and rehab condition flags, but it doesn&apos;t do per-deal underwriting at TrueCap&apos;s depth (DSCR, sensitivity, projection, and illustrative tax impact). Privy gets you to a shortlist; TrueCap turns the shortlist into decisions.
+        Sort of — it shows listing-level cap rate estimates and rehab condition flags, but it doesn&apos;t do per-deal underwriting at TrueCap&apos;s depth (DSCR, sensitivity, projection, and illustrative tax impact). Privy gets you to a shortlist; TrueCap models a shortlisted property from editable assumptions.
       </>
     ),
     plainTextAnswer:
-      "Sort of — listing-level cap rate estimates + rehab flags but not deep per-deal underwriting (no DSCR, sensitivity, projection, or illustrative tax impact). Privy: shortlist. TrueCap: decisions.",
+      "Sort of — listing-level cap rate estimates + rehab flags but not deep per-deal underwriting (no DSCR, sensitivity, projection, or illustrative tax impact). Privy: shortlist. TrueCap: editable underwriting.",
   },
   {
     question: "Is Privy worth $99/month?",

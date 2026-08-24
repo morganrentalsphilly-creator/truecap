@@ -32,7 +32,7 @@ import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema"
 export const metadata: Metadata = {
   title: "RentRedi vs TrueCap (2026): Manage vs Underwrite",
   description:
-    "RentRedi collects rent. TrueCap decides if the deal cash-flows. Honest comparison of when each tool fits — and why most landlords end up using both.",
+    "RentRedi collects rent. TrueCap models pre-purchase cash flow from reviewed assumptions. An honest comparison of where each tool fits.",
   keywords: [
     "rentredi alternative",
     "rentredi vs truecap",
@@ -62,7 +62,7 @@ const MATRIX: Row[] = [
   { feature: "Sensitivity grid",                   truecap: "Pro — rent ±10%, vacancy ±5pp, rate ±1pp",                                rentredi: "Not modeled",                                                       winner: "truecap" },
   { feature: "Illustrative tax impact",            truecap: "Pro — depreciation + interest + modeled after-tax CF",                   rentredi: "Not modeled",                                                       winner: "truecap" },
   { feature: "Screening Index (0-100)",                 truecap: "Free — with subscore breakdown",                                          rentredi: "Not modeled",                                                       winner: "truecap" },
-  { feature: "Plain-English verdict",              truecap: "Yes — Strong / Solid / Mixed / Marginal / Negative",                     rentredi: "Not applicable",                                                    winner: "truecap" },
+  { feature: "Selected-rule fit",                  truecap: "Yes — named targets with supporting economics",                         rentredi: "Not applicable",                                                    winner: "truecap" },
   { feature: "Online rent collection",             truecap: "No",                                                                     rentredi: "Yes — ACH + card, late fees, auto-pay",                              winner: "rentredi" },
   { feature: "Tenant screening",                   truecap: "No",                                                                     rentredi: "Yes — credit, criminal, eviction reports",                           winner: "rentredi" },
   { feature: "Online rental application",          truecap: "No",                                                                     rentredi: "Yes — customizable forms",                                          winner: "rentredi" },
@@ -302,7 +302,7 @@ export default function VsRentRediPage() {
             cash flow and plain read-only share links. Pro adds co-branding,
             10-year projections, illustrative tax impact, sensitivity, Offer Ceiling,
             strategy analyzers, and included PDFs. New one-time PDF checkout is
-            also available. No card to start.
+            temporarily unavailable. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -350,9 +350,8 @@ const RENTREDI_FAQ: FaqItem[] = [
       <>
         No — different tools for different stages. RentRedi is for
         managing a property you already own (rent collection, tenant
-        screening, maintenance). TrueCap is for deciding whether to buy
-        the property in the first place (underwriting, cap rate, cash
-        flow, projection). Most landlords end up using both at different
+        screening, maintenance). TrueCap is for modeling pre-purchase
+        economics (cap rate, cash flow, and projections). Many landlords use both at different
         points.
       </>
     ),
@@ -394,8 +393,8 @@ const RENTREDI_FAQ: FaqItem[] = [
         You need to actually own (or be about to close on) the
         property. RentRedi&apos;s value kicks in once you have a unit
         to fill or a tenant to bill. That&apos;s exactly the moment
-        TrueCap&apos;s job ends — TrueCap helps you decide whether to
-        get to that moment in the first place.
+        TrueCap&apos;s job ends — after the investor has reviewed the
+        underwriting and recorded their own decision.
       </>
     ),
     plainTextAnswer:

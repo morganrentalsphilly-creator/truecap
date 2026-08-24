@@ -24,13 +24,17 @@ import { z } from "zod";
 import * as Sentry from "@sentry/nextjs";
 import { getStripe } from "@/lib/stripe/client";
 import { withTrueCapCheckoutBranding } from "@/lib/stripe/checkout-branding";
+import {
+  retrieveDecisionPackStripeAccess,
+  type DecisionPackAccessDecision,
+} from "@/lib/stripe/decision-pack-access";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import {
   INVESTCALC_SCHEMA_VERSION,
-  investmentFormSchema,
   type InvestmentFormValues,
 } from "@/lib/investcalc-schema";
+import { releasedInvestmentFormSchema } from "@/lib/underwriting-model-release";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import {
   ONE_TIME_PDF_CLAIM_LIFETIME_MS,
@@ -83,7 +87,7 @@ async function getCurrentUserId(): Promise<string | null> {
 
 const createCheckoutSchema = z
   .object({
-    values: investmentFormSchema,
+    values: releasedInvestmentFormSchema,
     maxOfferTarget: z.unknown(),
     maxOfferTargetSource: z.enum([
       "buy-box",
@@ -291,7 +295,7 @@ const verifySchema = z
   .object({
     claimId: z.string().uuid(),
     claimSecret: z.string().regex(/^[A-Za-z0-9_-]{43}$/),
-    values: investmentFormSchema,
+    values: releasedInvestmentFormSchema,
     // Both fields are absent only for claims created by the pre-binding client.
     // The shared resolver maps that exact legacy shape to historical defaults.
     maxOfferTarget: z.unknown().optional(),
@@ -382,6 +386,8 @@ export type OneTimePdfVerifyResult =
       code:
         | "VALIDATION_ERROR"
         | "NOT_PAID"
+        | "ACCESS_SUSPENDED"
+        | "ACCESS_REVOKED"
         | "BINDING_MISMATCH"
         | "IDENTITY_MISMATCH"
         | "EXPIRED"
@@ -408,6 +414,43 @@ function bindingFailureResult(code: BindingFailureCode): OneTimePdfVerifyResult 
       "This one-time report was already redeemed. Contact hello@usetruecap.com if the download failed.",
   } as const;
   return { ok: false, code, message: messages[code] };
+}
+
+function stripeAccessFailureResult(
+  decision: Exclude<DecisionPackAccessDecision, { state: "allowed" }>
+): OneTimePdfVerifyResult {
+  switch (decision.state) {
+    case "invalid":
+      return { ok: false, code: "VALIDATION_ERROR", message: "Invalid secure report claim." };
+    case "not_paid":
+      return {
+        ok: false,
+        code: "NOT_PAID",
+        message:
+          "Payment is not confirmed yet. Retry shortly, or contact hello@usetruecap.com if you were charged.",
+      };
+    case "suspended":
+      return {
+        ok: false,
+        code: "ACCESS_SUSPENDED",
+        message:
+          "Report access is paused while a payment dispute is unresolved. Contact hello@usetruecap.com for help.",
+      };
+    case "revoked":
+      return {
+        ok: false,
+        code: "ACCESS_REVOKED",
+        message:
+          "Report access is no longer available because this payment was refunded or a dispute was lost. Contact hello@usetruecap.com if this looks incorrect.",
+      };
+    case "unavailable":
+      return {
+        ok: false,
+        code: "SERVER_ERROR",
+        message:
+          "Could not confirm the payment's current status. Please retry or contact hello@usetruecap.com.",
+      };
+  }
 }
 
 async function loadClaim(
@@ -635,6 +678,21 @@ export async function verifyOneTimePdfPaymentAction(
     ) {
       return bindingFailureResult("BINDING_MISMATCH");
     }
+
+    // Checkout's `payment_status` remains paid after a refund. Re-read the
+    // current Session, Charge refund totals, and Dispute states for EVERY
+    // first redemption and bounded recovery before releasing access.
+    const stripe = getStripe();
+    const stripeAccess = await retrieveDecisionPackStripeAccess(
+      stripe,
+      initial.row.checkout_session_id,
+      initial.row.id
+    );
+    if (stripeAccess.state !== "allowed") {
+      return stripeAccessFailureResult(stripeAccess);
+    }
+    const session = stripeAccess.session;
+
     if (firstDecision.mode === "bound-recovery") {
       if (!(await ensureClaimReportBinding(admin, initial.row, reportFingerprint))) {
         return bindingFailureResult("BINDING_MISMATCH");
@@ -642,23 +700,6 @@ export async function verifyOneTimePdfPaymentAction(
       // Credit (if any) was granted when the claim was first consumed;
       // re-surface it so a retried download still shows the offer.
       return successfulVerification(initial.row, true, liveProCredit(initial.row));
-    }
-
-    const stripe = getStripe();
-    const session = await stripe.checkout.sessions.retrieve(initial.row.checkout_session_id);
-    if (
-      session.metadata?.purpose !== "one_time_pdf" ||
-      session.metadata?.claim_id !== initial.row.id ||
-      session.client_reference_id !== initial.row.id
-    ) {
-      return { ok: false, code: "VALIDATION_ERROR", message: "Invalid secure report claim." };
-    }
-    if (session.payment_status !== "paid" || session.status !== "complete") {
-      return {
-        ok: false,
-        code: "NOT_PAID",
-        message: "Payment is not confirmed yet. Retry shortly, or contact hello@usetruecap.com if you were charged.",
-      };
     }
     if (
       !Number.isInteger(session.amount_total) ||

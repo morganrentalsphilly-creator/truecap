@@ -27,11 +27,14 @@ describe("buildAssumptionChips (input-side assumptions strip)", () => {
     // enrichment, NO template, NO user edits still yields settled facts.
     const chips = buildAssumptionChips(defaultValues as AssumptionChipValues, {}, NO_OPTS);
     expect(byId(chips, "financing").label).toBe("20% down @ 6.75%");
-    expect(byId(chips, "financing").badge).toBeNull();
+    expect(byId(chips, "financing").badge).toEqual({ kind: "default", text: "default" });
     // Fallbacks mirror calc-analysis: propertyTaxPct ?? 1.1, insurancePct ?? 0.5.
     expect(byId(chips, "taxes").label).toBe("Taxes 1.1%");
+    expect(byId(chips, "taxes").badge).toEqual({ kind: "default", text: "default" });
     expect(byId(chips, "insurance").label).toBe("Insurance 0.5%");
+    expect(byId(chips, "insurance").badge).toEqual({ kind: "default", text: "default" });
     expect(byId(chips, "vacancy").label).toBe("Vacancy 5%");
+    expect(byId(chips, "vacancy").badge).toEqual({ kind: "default", text: "default" });
     expect(byId(chips, "extras").label).toBe("Property extras: —");
     expect(byId(chips, "extras").target).toBe("extras");
     // No template linked → no template chip.

@@ -29,7 +29,7 @@ import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema"
 export const metadata: Metadata = {
   title: "DealCheck vs TrueCap for BRRRR Deals (2026)",
   description:
-    "Both calculators handle BRRRR. Which one does the cash-out refi math better, models the ARV-driven hold value, and helps you decide whether to refi or sell? Honest BRRRR-specific comparison.",
+    "Both calculators handle BRRRR. Compare cash-out refinance math, ARV-driven hold value, and modeled refinance-versus-sale scenarios in this BRRRR-specific review.",
   keywords: [
     "dealcheck brrrr",
     "dealcheck alternative for brrrr",

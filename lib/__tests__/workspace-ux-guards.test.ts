@@ -20,13 +20,19 @@ describe("decision workspace UX guards", () => {
     expect(source).toContain("closed at current assumptions");
   });
 
-  it("restores each deal's exact prior stage when a bulk Pass is undone", () => {
-    const source = read("components/investcalc/compare-deals-client.tsx");
-    expect(source).toContain("previousStage: deal.pipelineStage");
-    expect(source).toContain('altText="Undo marking deals as Passed"');
-    expect(source).toContain("entry.previousStage");
-    expect(source).toContain("Near-term score");
-    expect(source).toContain("Long-term score");
+  it("confirms a user-recorded Pass and restores the exact prior stage on Undo", () => {
+    const workspace = read("components/investcalc/deal-stage-select.tsx");
+    const list = read("components/investcalc/saved-analyses-page-v2.tsx");
+    const compare = read("components/investcalc/compare-deals-client.tsx");
+
+    expect(workspace).toContain('altText="Undo marking deal as Passed"');
+    expect(workspace).toContain("updateSavedDealStageAction(savedDealId, stage)");
+    expect(list).toContain("previousStage: PipelineStage");
+    expect(list).toContain("updateSavedDealStageAction(id, previousStage)");
+    expect(list).toContain('altText="Undo marking deal as Passed"');
+    expect(compare).not.toMatch(/Mark all.*Passed/i);
+    expect(compare).toContain("Near-term score");
+    expect(compare).toContain("Long-term score");
   });
 
   it("announces explicit persistence states instead of promising save-on-blur", () => {

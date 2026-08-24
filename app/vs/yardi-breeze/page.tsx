@@ -53,7 +53,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", yardibreeze: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", yardibreeze: "Not modeled", winner: "truecap" },
   { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", yardibreeze: "Yes — actuals + Schedule E reports", winner: "tie" },
-  { feature: "Screening Index + verdict", truecap: "Free — 0-100 score + plain-English verdict", yardibreeze: "Not applicable", winner: "truecap" },
+  { feature: "Secondary Screening Index", truecap: "Free — 0-100 triage score + factor breakdown", yardibreeze: "Not applicable", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", yardibreeze: "Not applicable", winner: "truecap" },
   { feature: "Tenant + lease management", truecap: "No", yardibreeze: "Yes — designed for 1-100 units", winner: "yardibreeze" },
   { feature: "Online rent collection", truecap: "No", yardibreeze: "Yes — ACH + card", winner: "yardibreeze" },
@@ -106,7 +106,7 @@ export default function VsYardiBreezePage() {
             <span className="text-primary">pre-purchase calculator vs full PM platform</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Yardi Breeze is the small-business version of Yardi&apos;s enterprise PM platform — built for residential landlords managing 1-100 units. Tenant management, rent collection, accounting, owner reports. TrueCap is the pre-purchase underwriting calculator that decides which properties to add to that portfolio. Different stages, complementary tools.
+            Yardi Breeze is the small-business version of Yardi&apos;s enterprise PM platform — built for residential landlords managing 1-100 units. Tenant management, rent collection, accounting, owner reports. TrueCap models the first-year economics of properties you are considering. Different stages, complementary tools.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ScrollToFormButton

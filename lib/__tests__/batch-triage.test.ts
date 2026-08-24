@@ -172,15 +172,11 @@ describe("triageListing", () => {
     expect(typeof r.score).toBe("number");
     expect(r.recommendation).toBeTruthy();
     expect(typeof r.netCashFlowMonthly).toBe("number");
-    expect(typeof r.maxOffer).toBe("number");
-    expect(r.targetLabel).toMatch(/break-even cash flow/i);
-    expect(r.askingGap).toBe(r.input.purchasePrice - r.maxOffer!);
-    expect(r.requiredMonthlyRent).not.toBeNull();
-    const values = normalizeInvestmentFormSnapshot(buildTriageSnapshot(r.input));
-    expect(values).not.toBeNull();
-    expect(
-      meetsTarget(calculateAnalysis({ ...values!, purchasePrice: r.maxOffer! }), r.target!)
-    ).toBe(true);
+    expect(r.maxOffer).toBeNull();
+    expect(r.target).toBeNull();
+    expect(r.targetLabel).toBeNull();
+    expect(r.askingGap).toBeNull();
+    expect(r.requiredMonthlyRent).toBeNull();
     expect(r.buyBoxFit).toBeNull(); // no boxes passed
   });
 
@@ -211,6 +207,11 @@ describe("triageListing", () => {
     expect(r.targetLabel).toMatch(/cash flow.*500.*DSCR.*1.35/i);
     expect(r.maxOffer).toBeGreaterThan(0);
     expect(r.requiredMonthlyRent).toBeGreaterThanOrEqual(2100);
+    const values = normalizeInvestmentFormSnapshot(buildTriageSnapshot(r.input));
+    expect(values).not.toBeNull();
+    expect(
+      meetsTarget(calculateAnalysis({ ...values!, purchasePrice: r.maxOffer! }), r.target!)
+    ).toBe(true);
   });
 
   it("matches recomputeSavedDealVerdict for the same snapshot (one engine)", async () => {

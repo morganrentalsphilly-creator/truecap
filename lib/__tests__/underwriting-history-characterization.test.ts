@@ -47,12 +47,13 @@ describe("saved underwriting history characterization", () => {
     vi.useRealTimers();
   });
 
-  it("recomputes same-v1 fields and keeps snapshot-only acquisition metadata", () => {
+  it("preserves same-v1 recorded fields and snapshot-only acquisition metadata", () => {
     const { result, scoreExtras } = baseline();
     const resolved = resolveSavedAnalysisResult({
       methodologyVersion: result.methodologyVersion,
       resultSnapshot: {
         ...result,
+        ...scoreExtras,
         netCashFlow: -999_999,
         score: 1,
         maxOfferTarget: { monthlyCashFlow: 450, dscr: 1.25 },
@@ -63,10 +64,11 @@ describe("saved underwriting history characterization", () => {
     });
     const snapshot = resolved.result as unknown as Record<string, unknown>;
 
-    expect(resolved.mode).toBe("same-version-recomputed");
-    expect(resolved.didRecompute).toBe(true);
-    expect(snapshot.netCashFlow).toBe(result.netCashFlow);
-    expect(snapshot.score).toBe(scoreExtras.score);
+    expect(resolved.mode).toBe("same-version-recorded-snapshot");
+    expect(resolved.didRecompute).toBe(false);
+    expect(resolved.usesRecordedSnapshot).toBe(true);
+    expect(snapshot.netCashFlow).toBe(-999_999);
+    expect(snapshot.score).toBe(1);
     expect(snapshot.maxOfferTarget).toEqual({
       monthlyCashFlow: 450,
       dscr: 1.25,
@@ -90,6 +92,7 @@ describe("saved underwriting history characterization", () => {
 
     expect(resolved.mode).toBe("legacy-recomputed");
     expect(resolved.shouldFreeze).toBe(false);
+    expect(resolved.usesRecordedSnapshot).toBe(false);
     expect(snapshot.netCashFlow).toBe(result.netCashFlow);
     expect(snapshot.score).toBe(scoreExtras.score);
   });
@@ -144,7 +147,7 @@ describe("saved underwriting history characterization", () => {
     expect(resolved.result).toBeNull();
   });
 
-  it("keeps snapshot-only fields but replaces every overlapping current field in one merge", () => {
+  it("keeps every same-version recorded field without merging current output", () => {
     const resolved = resolveSavedAnalysisSnapshot({
       methodologyVersion: "1.0",
       resultSnapshot: {
@@ -160,10 +163,32 @@ describe("saved underwriting history characterization", () => {
     });
 
     expect(resolved.snapshot).toEqual({
-      netCashFlow: 400,
-      dscr: 1.3,
+      netCashFlow: -1,
+      dscr: -1,
       targetLabel: "Captured rules",
     });
+    expect(resolved.mode).toBe("same-version-recorded-snapshot");
+    expect(resolved.didRecompute).toBe(false);
+  });
+
+  it("does not drift a saved property age across a calendar-year boundary", () => {
+    vi.setSystemTime(new Date("2026-12-31T23:59:59.000Z"));
+    const { values, scoreExtras } = baseline();
+    const recordedResult = calculateAnalysis(values);
+    vi.setSystemTime(new Date("2027-01-01T12:00:01.000Z"));
+    const newlyComputed = calculateAnalysis(values);
+    expect(newlyComputed.propertyAge).toBe(recordedResult.propertyAge + 1);
+
+    const resolved = resolveSavedAnalysisResult({
+      methodologyVersion: recordedResult.methodologyVersion,
+      resultSnapshot: { ...recordedResult, ...scoreExtras },
+      recomputedResult: newlyComputed,
+      recomputedExtras: scoreExtras,
+    });
+
+    expect(resolved.result?.propertyAge).toBe(recordedResult.propertyAge);
+    expect(resolved.didRecompute).toBe(false);
+    vi.setSystemTime(FIXED_NOW);
   });
 
   it("characterizes Compare as a current-engine recomputation from form inputs", () => {

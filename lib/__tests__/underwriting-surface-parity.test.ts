@@ -76,7 +76,11 @@ describe("canonical decision output parity across safe adapters", () => {
       methodologyVersion: direct.methodologyVersion,
       resultSnapshot: {
         ...direct,
-        netCashFlow: -999_999,
+        score: directScore.score,
+        recommendation: directScore.recommendation,
+        riskLevel: directScore.riskLevel,
+        breakdown: directScore.breakdown,
+        explanation: directScore.explanation,
         maxOfferTarget: target,
         maxOfferTargetSource: targetSource,
       },
@@ -157,6 +161,7 @@ describe("canonical decision output parity across safe adapters", () => {
     expect((server.exact?.presentation.ceiling ?? -1) % 500).toBe(0);
     expect(server.exact?.achieved).toEqual({
       netCashFlow: directCeiling?.achieved.netCashFlow,
+      cocReturn: directCeiling?.achieved.cocReturn,
       capRate: directCeiling?.achieved.capRate,
       dscr: directCeiling?.achieved.dscr,
     });

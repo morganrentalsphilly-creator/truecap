@@ -105,7 +105,7 @@ export default function VsHostfullyPage() {
             <span className="text-primary">underwrite the STR, then host it</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Hostfully is short-term rental management software — channel manager (Airbnb, Vrbo, Booking.com), guest messaging, dynamic pricing, automation. TrueCap is the pre-purchase underwriting calculator that decides whether the property pencils as an STR in the first place. Different stages, complementary tools.
+            Hostfully is short-term rental management software — channel manager (Airbnb, Vrbo, Booking.com), guest messaging, dynamic pricing, automation. TrueCap models the property&apos;s pre-purchase economics from user-reviewed assumptions. Different stages, complementary tools.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ScrollToFormButton
@@ -307,7 +307,7 @@ const HOSTFULLY_FAQ: FaqItem[] = [
     question: "Is TrueCap a Hostfully alternative?",
     answer: (
       <>
-        No — different stages of the STR lifecycle. Hostfully manages an STR you already own (channel sync, pricing, guest messages, cleaning). TrueCap underwrites whether the property is worth buying in the first place. STR investors typically use both.
+        No — different stages of the STR lifecycle. Hostfully manages an STR you already own (channel sync, pricing, guest messages, cleaning). TrueCap underwrites the entered assumptions before purchase; the investor makes the decision. STR investors may use both.
       </>
     ),
     plainTextAnswer:

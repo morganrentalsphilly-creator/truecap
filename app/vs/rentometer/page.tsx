@@ -53,7 +53,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR",            truecap: "All three computed live",                                                rentometer: "Not in scope",                                                    winner: "truecap" },
   { feature: "10-year projection",               truecap: "Pro — rent + expense + appreciation compounding",                        rentometer: "Not in scope",                                                    winner: "truecap" },
   { feature: "Free use limit",                   truecap: "Unlimited core analyses; comp-lookup limits apply",                       rentometer: "Limited free; Pro $29-49/mo",                                     winner: "truecap" },
-  { feature: "Verdict / decision support",       truecap: "Free — Screening Index + verdict (Strong / Decent / Marginal / Skip)",         rentometer: "Rent comp only — you make the decision",                          winner: "truecap" },
+  { feature: "Underwriting context",             truecap: "Free — core economics + selected-rule fit",                                 rentometer: "Rent comp only",                                                   winner: "truecap" },
   { feature: "PDF report",                       truecap: "Included with Pro",                                                     rentometer: "PDF of rent comp data",                                           winner: "tie" },
   { feature: "Use case",                          truecap: "Full investor underwriting workflow",                                    rentometer: "Quick rent comp lookup",                                          winner: "tie" },
   { feature: "Pricing — paid tier",               truecap: "See TrueCap's live pricing page",                                        rentometer: "$29-49/mo depending on plan",                                     winner: "truecap" },
@@ -89,7 +89,7 @@ export default function VsRentometerPage() {
             TrueCap vs Rentometer: <span className="text-primary">different tools, different jobs</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Rentometer is a rent estimator — it tells you what a property should rent for based on local comps. TrueCap is a full rental underwriter that also estimates rent, plus everything else you need to decide whether to buy. They&apos;re not the same product; here&apos;s when each one wins.
+            Rentometer is a rent estimator — it tells you what a property should rent for based on local comps. TrueCap models the broader first-year rental economics from editable assumptions. They&apos;re not the same product; here&apos;s where each one fits.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ScrollToFormButton className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">
@@ -113,7 +113,7 @@ export default function VsRentometerPage() {
                 <li>You want a FULL deal underwrite — cap rate, CoC, DSCR, NCF, 10-yr projection.</li>
                 <li>You want to decide whether to buy, not just what rent to charge.</li>
                 <li>You want operating expense + mortgage + tax modeling included.</li>
-                <li>You want a verdict (Strong / Decent / Skip) on each property.</li>
+                <li>You want cash flow, returns, and selected-rule fit for each property.</li>
                 <li>You want unlimited free analyses.</li>
               </ul>
             </div>

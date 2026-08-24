@@ -78,7 +78,7 @@ describe("MAO release-path safety", () => {
 
     expect(calculator).toContain("function writeCalcDraftWithMaoTarget(");
     expect(calculator).toContain(
-      "const normalizedDraft = normalizeInvestmentFormDraft(values)"
+      "const normalizedDraft = normalizeReleasedInvestmentFormDraft(values)"
     );
     expect(calculator).toContain(
       "maoTargetAnalysisFingerprint(normalizedDraft ?? values)"

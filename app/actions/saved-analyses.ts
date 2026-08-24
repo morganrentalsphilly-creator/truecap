@@ -14,10 +14,13 @@ import {
 } from "@/lib/entitlements";
 import {
   INVESTCALC_SCHEMA_VERSION,
-  investmentFormSchema,
   isValidRentalUnit,
   type InvestmentFormValues,
 } from "@/lib/investcalc-schema";
+import {
+  isReleasedUnderwritingSnapshot,
+  releasedInvestmentFormSchema,
+} from "@/lib/underwriting-model-release";
 import { flagsForStage, isPipelineStage, normalizeTags, type PipelineStage } from "@/lib/pipeline";
 import {
   buildDataConfidence,
@@ -63,7 +66,11 @@ import {
 } from "@/lib/financing-profiles";
 import { normalizeMaoTarget } from "@/lib/mao-target-editor";
 import { enrichmentToReportComps, type ReportComps } from "@/lib/report-comps";
-import { normalizeOfferCeilingTargetSource } from "@/lib/offer-ceiling";
+import {
+  isAdoptedOfferCeilingTargetSource,
+  normalizeOfferCeilingTargetSource,
+} from "@/lib/offer-ceiling-contract";
+import { resolveOfferCeilingForAccess } from "@/lib/offer-ceiling-server";
 import { captureServerEvent } from "@/lib/posthog-server";
 import type { PropertyEnrichment } from "@/lib/property-enrichment/rentcast";
 import {
@@ -119,7 +126,12 @@ export type GetSavedDealForEditingResult =
     }
   | {
       ok: false;
-      code: "SIGN_IN_REQUIRED" | "ENTITLEMENT_REQUIRED" | "NOT_FOUND" | "SERVER_ERROR";
+      code:
+        | "SIGN_IN_REQUIRED"
+        | "ENTITLEMENT_REQUIRED"
+        | "NOT_FOUND"
+        | "VALIDATION_ERROR"
+        | "SERVER_ERROR";
       message: string;
     };
 
@@ -155,7 +167,12 @@ export type GetSavedAnalysisPdfExportResult =
     }
   | {
       ok: false;
-      code: "SIGN_IN_REQUIRED" | "ENTITLEMENT_REQUIRED" | "NOT_FOUND" | "SERVER_ERROR";
+      code:
+        | "SIGN_IN_REQUIRED"
+        | "ENTITLEMENT_REQUIRED"
+        | "NOT_FOUND"
+        | "VALIDATION_ERROR"
+        | "SERVER_ERROR";
       message: string;
     };
 
@@ -306,7 +323,7 @@ async function findSavedAnalysesByAddress(
 }
 
 const provenanceFieldSchema = z.object({
-  source: z.enum(["hud-fmr", "hud-safmr", "fred", "state-static", "manual"]),
+  source: z.enum(["hud-fmr", "hud-safmr", "rentcast-estimate", "fred", "state-static", "manual"]),
   fetchedAt: z.string().max(40).nullish(),
   detail: z.string().max(160).optional(),
   overridden: z.boolean().optional(),
@@ -441,7 +458,7 @@ export async function saveDealAction(
     return { ok: false, code: "SIGN_IN_REQUIRED" };
   }
 
-  const parsed = investmentFormSchema.safeParse(input);
+  const parsed = releasedInvestmentFormSchema.safeParse(input);
   if (!parsed.success) {
     return { ok: false, code: "VALIDATION_ERROR", message: "Invalid form payload" };
   }
@@ -492,6 +509,16 @@ export async function saveDealAction(
       ok: false,
       code: "VALIDATION_ERROR",
       message: "Invalid price-ceiling target source",
+    };
+  }
+  if (
+    maxOfferTarget &&
+    !isAdoptedOfferCeilingTargetSource(maxOfferTargetSource ?? "selected-targets")
+  ) {
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "Review and adopt the Offer Ceiling targets before saving them",
     };
   }
   const financingProfileOptionProvided = Boolean(
@@ -712,6 +739,36 @@ export async function saveDealAction(
       };
     }
 
+    const capturedTarget = normalizeMaoTarget(
+      resultSnapshotWithScore.maxOfferTarget
+    );
+    const capturedTargetSource = normalizeOfferCeilingTargetSource(
+      resultSnapshotWithScore.maxOfferTargetSource
+    );
+    if (
+      capturedTarget &&
+      capturedTargetSource &&
+      isAdoptedOfferCeilingTargetSource(capturedTargetSource)
+    ) {
+      const capturedAccess = resolveOfferCeilingForAccess({
+        values: sanitizedValues,
+        target: capturedTarget,
+        source: capturedTargetSource,
+        paidAccess: true,
+      });
+      if (capturedAccess.access !== "exact") {
+        return {
+          ok: false,
+          code: "SERVER_ERROR",
+          message: "The recorded Offer Ceiling could not be captured.",
+        };
+      }
+      // Persist the solve in the same JSON write as its target, result, and
+      // methodology. Updates always recapture from the newly saved inputs;
+      // they never copy an older solve onto changed assumptions.
+      resultSnapshotWithScore.offerCeilingExact = capturedAccess.exact;
+    }
+
     const addressChanged =
       (existing.address ?? "").trim().toLowerCase() !== addressTrimmed.toLowerCase();
     if (addressChanged && options?.allowAddressChange !== true) {
@@ -929,6 +986,33 @@ export async function saveDealAction(
     };
   }
 
+  if (maxOfferTarget) {
+    const canCaptureOfferCeiling = await hasPaidPlanSubscription(
+      supabase,
+      user.id
+    );
+    if (canCaptureOfferCeiling) {
+      const capturedTargetSource =
+        normalizeOfferCeilingTargetSource(
+          resultSnapshotWithScore.maxOfferTargetSource
+        ) ?? "selected-targets";
+      const capturedAccess = resolveOfferCeilingForAccess({
+        values: sanitizedValues,
+        target: maxOfferTarget,
+        source: capturedTargetSource,
+        paidAccess: true,
+      });
+      if (capturedAccess.access !== "exact") {
+        return {
+          ok: false,
+          code: "SERVER_ERROR",
+          message: "The recorded Offer Ceiling could not be captured.",
+        };
+      }
+      resultSnapshotWithScore.offerCeilingExact = capturedAccess.exact;
+    }
+  }
+
   const { data, error } = await supabase
     .from("saved_analyses")
     .insert({
@@ -979,6 +1063,14 @@ export async function getSavedDealForEditingAction(id: string): Promise<GetSaved
       ok: false,
       code: "NOT_FOUND",
       message: "This saved analysis is no longer available.",
+    };
+  }
+
+  if (!isReleasedUnderwritingSnapshot(data.form_snapshot)) {
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "This underwriting model is not available yet.",
     };
   }
 
@@ -1201,7 +1293,8 @@ export async function getBuyBoxPdfVerdictAction(
 }
 
 export async function getSavedAnalysisPdfExportAction(
-  id: string
+  id: string,
+  options?: { bypassCache?: boolean }
 ): Promise<GetSavedAnalysisPdfExportResult> {
   const supabase = await createServerSupabaseClient();
   const {
@@ -1251,6 +1344,13 @@ export async function getSavedAnalysisPdfExportAction(
   }
 
   const row = data as Record<string, unknown>;
+  if (!isReleasedUnderwritingSnapshot(row.form_snapshot)) {
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "This underwriting model is not available yet.",
+    };
+  }
   const cachedPdfUrl = dbString(row.pdf_url);
   const cachedVersion = dbNumber(row.pdf_snapshot_version) ?? 0;
 
@@ -1368,6 +1468,7 @@ export async function getSavedAnalysisPdfExportAction(
   // (0-4) simply never match and regenerate. Never throws on odd legacy
   // values: dbNumber already coerced non-numeric to 0 above.
   if (
+    options?.bypassCache !== true &&
     cachedPdfUrl &&
     cachedVersion === PDF_CACHE_VERSION &&
     cachedObjectPath === expectedPdfPath &&

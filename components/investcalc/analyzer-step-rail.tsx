@@ -92,7 +92,7 @@ export function AnalyzerStepRail({
         className
       )}
     >
-      <ol className="flex items-center gap-0.5 overflow-x-auto scrollbar-none sm:gap-1">
+      <ol className="flex flex-wrap items-center gap-1">
         {steps.map((step, i) => {
           const active = step.id === activeStepId;
           return (
@@ -103,7 +103,7 @@ export function AnalyzerStepRail({
                 aria-current={active ? "step" : undefined}
                 aria-label={`${step.label} - ${STATUS_A11Y[step.status]}`}
                 className={cn(
-                  "flex items-center gap-1.5 rounded-xl px-2 py-1.5 text-xs font-semibold transition-colors sm:px-2.5",
+                  "flex min-h-11 items-center gap-1.5 rounded-xl px-2 py-1.5 text-xs font-semibold transition-colors sm:px-2.5",
                   active
                     ? "bg-[var(--brand-green-light)] text-[var(--brand-green)]"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"

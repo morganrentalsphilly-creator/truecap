@@ -325,14 +325,14 @@ const BRICKED_FAQ: FaqItem[] = [
         For rental investors, yes — for wholesalers, not really. Bricked is an AI
         valuation tool: comps, ARV, and repair estimates for people making cash
         offers at volume. TrueCap is a returns calculator: cash flow, DSCR, cap
-        rate, 10-year projections, and illustrative tax impact for people deciding whether to
-        own a rental. If you searched &quot;Bricked alternative&quot; because you
-        wanted to know whether a property is a good <em>investment</em>, TrueCap is
-        the tool for that question — and it&apos;s free to start.
+        rate, 10-year projections, and illustrative tax impact for people underwriting
+        a rental. If you searched &quot;Bricked alternative&quot; because you
+        wanted to review a property&apos;s modeled returns, TrueCap supports that
+        workflow — and it&apos;s free to start.
       </>
     ),
     plainTextAnswer:
-      "For rental investors yes; for wholesalers not really. Bricked is AI valuation (comps, ARV, repairs) for volume cash offers. TrueCap is a returns calculator (cash flow, DSCR, projections, tax) for deciding whether to own a rental. Free to start.",
+      "For rental investors yes; for wholesalers not really. Bricked is AI valuation (comps, ARV, repairs) for volume cash offers. TrueCap is a returns calculator for rental underwriting (cash flow, DSCR, projections, tax). Free to start.",
   },
   {
     question: "Does Bricked calculate cash flow or DSCR?",

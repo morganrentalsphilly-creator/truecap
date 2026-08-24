@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "DealCheck Alternative for Rental Analysis (2026)",
     description:
-      "Address-to-decision workflow vs a mature rental-analysis and native mobile ecosystem.",
+      "Address-to-underwrite workflow vs a mature rental-analysis and native mobile ecosystem.",
     url: "/vs/dealcheck",
     type: "website",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs DealCheck" }],
@@ -48,13 +48,13 @@ export const metadata: Metadata = {
 type Row = { workflow: string; truecap: string; dealcheck: string };
 
 const MATRIX: Row[] = [
-  { workflow: "First screen", truecap: "Address-first, no-signup screen with an opinionated verdict.", dealcheck: "Account-based analysis with listing and property-data import workflows." },
+  { workflow: "First screen", truecap: "Address-first, no-signup screen with editable assumptions and core economics.", dealcheck: "Account-based analysis with listing and property-data import workflows." },
   { workflow: "Starting assumptions", truecap: "Labels HUD rent, FRED rate, state tax benchmark, smart defaults, and user edits.", dealcheck: "Imports available property data and supports user-entered assumptions." },
   { workflow: "Purchase criteria", truecap: "Buy Box checks the analysis inside the decision flow.", dealcheck: "Custom purchase criteria screen properties against saved thresholds." },
   { workflow: "Modeled boundary", truecap: "Offer Ceiling is connected to Buy Box targets and Deal Doctor thresholds; it is not a recommended offer.", dealcheck: "Its Offer Calculator calculates offers from configurable buying criteria." },
   { workflow: "Downside", truecap: "Sensitivity and downside scenarios sit directly after selected-rule fit and the Offer Ceiling.", dealcheck: "Long-range analysis and editable assumptions support scenario evaluation." },
   { workflow: "Mobile", truecap: "Responsive web app that can be installed as a PWA.", dealcheck: "Native iOS and Android apps plus web access." },
-  { workflow: "Best fit", truecap: "Investors who want a guided address-to-decision sequence.", dealcheck: "Investors who want a mature analysis ecosystem and native mobile workflow." },
+  { workflow: "Best fit", truecap: "Investors who want a guided address-to-underwrite sequence.", dealcheck: "Investors who want a mature analysis ecosystem and native mobile workflow." },
 ];
 
 export default function VsDealCheckPage() {
@@ -134,9 +134,9 @@ export default function VsDealCheckPage() {
                 Pick TrueCap if
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
-                <li>You want a fast address-to-decision sequence.</li>
+                <li>You want a fast address-to-underwrite sequence.</li>
                 <li>You want labeled HUD, FRED, and state-tax starting assumptions.</li>
-                <li>You want an opinionated verdict with the supporting math visible.</li>
+                <li>You want core economics and selected-rule fit with the supporting math visible.</li>
                 <li>You want Buy Box evaluation inside the analysis flow.</li>
                 <li>You want a target-dependent Offer Ceiling, downside, and decision packaging connected.</li>
               </ul>
@@ -241,7 +241,7 @@ export default function VsDealCheckPage() {
             <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">
               60-second underwriting
             </Link>{" "}
-            shows exactly how a TrueCap user moves from listing to verdict.
+            shows exactly how a TrueCap user moves from listing to a reviewed underwrite.
           </p>
         </section>
 
@@ -253,7 +253,7 @@ export default function VsDealCheckPage() {
             Try TrueCap free — see if it fits your workflow.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            Screen a property without a card, inspect the assumptions and verdict,
+            Screen a property without a card, inspect the assumptions and core economics,
             then decide whether TrueCap&apos;s connected Buy Box, Offer Ceiling, downside,
             and reporting workflow fits how you acquire rentals.
           </p>
@@ -298,11 +298,11 @@ const DEALCHECK_FAQ: FaqItem[] = [
     answer: (
       <>
         TrueCap offers a no-signup first-pass screen with cap rate,
-        cash-on-cash return, DSCR, monthly cash flow, and a verdict. DealCheck
+        cash-on-cash return, DSCR, monthly cash flow, and selected-rule fit. DealCheck
         also publishes a free plan; check its official{" "}
         <a href="https://dealcheck.io/pricing/" target="_blank" rel="noopener noreferrer" className="underline">pricing page</a>{" "}
         for current limits. The better fit depends on whether you prefer
-        TrueCap&apos;s address-to-decision sequence or DealCheck&apos;s established
+        TrueCap&apos;s address-to-underwrite sequence or DealCheck&apos;s established
         analysis and import workflow.
       </>
     ),
@@ -328,13 +328,13 @@ const DEALCHECK_FAQ: FaqItem[] = [
     answer: (
       <>
         TrueCap can fit a newer investor who values an address-first screen,
-        labeled starting assumptions, and a plain-English verdict. DealCheck
+        labeled starting assumptions, and selected-rule fit. DealCheck
         can fit someone who wants its established property-import and native
         mobile workflow. Neither tool replaces verification or due diligence.
       </>
     ),
     plainTextAnswer:
-      "TrueCap can fit newer investors who value an address-first screen, transparent starting assumptions, and a plain-English verdict; DealCheck can fit users who prefer its established guided tools and ecosystem.",
+      "TrueCap can fit newer investors who value an address-first screen, transparent starting assumptions, and selected-rule fit; DealCheck can fit users who prefer its established guided tools and ecosystem.",
   },
   {
     question: "Does TrueCap have a mobile app like DealCheck?",

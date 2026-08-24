@@ -12,7 +12,7 @@ describe("nextActionForDeal", () => {
   it("flags DSCR under 1.0 as a blocker when cash flow is positive", () => {
     const a = nextActionForDeal({ netCashFlow: 50, dscr: 0.95, monthlyPayment: 1400 });
     expect(a.tone).toBe("blocked");
-    expect(a.label).toMatch(/financing/i);
+    expect(a.label).toBe("Review financing assumptions");
   });
 
   it("flags a buy-box miss for review", () => {
@@ -96,33 +96,33 @@ describe("nextActionForDeal", () => {
       expect(withDate.reason).toMatch(/equity/i);
     });
 
-    it("passed → revisit if the price drops, regardless of the underwrite", () => {
+    it("passed → review only after inputs change, regardless of the underwrite", () => {
       const good = nextActionForDeal({ netCashFlow: 400, dscr: 1.5, monthlyPayment: 1400, stage: "passed" });
       const bad = nextActionForDeal({ netCashFlow: -200, dscr: 0.8, monthlyPayment: 1400, stage: "passed" });
       for (const a of [good, bad]) {
         expect(a.tone).toBe("review");
-        expect(a.label).toBe("Revisit if the price drops");
+        expect(a.label).toBe("Review only if inputs change");
         expect(a.reason).toMatch(/passed/i);
       }
     });
 
-    it("offer stage rephrases a blocker as renegotiate/withdraw, keeping the numeric reason", () => {
+    it("offer stage reports the blocker without making the transaction decision", () => {
       const a = nextActionForDeal({ netCashFlow: -120, dscr: 0.9, monthlyPayment: 1400, stage: "offer" });
       expect(a.tone).toBe("blocked");
-      expect(a.label).toBe("Renegotiate or withdraw your offer");
+      expect(a.label).toBe("Review the offer against current inputs");
       expect(a.reason).toBe("cash flow is negative at these assumptions");
     });
 
     it("offer stage tells a ready deal to follow up, not to make the offer again", () => {
       const a = nextActionForDeal({ netCashFlow: 400, dscr: 1.5, monthlyPayment: 1400, meetsBuyBox: true, stage: "offer" });
       expect(a.tone).toBe("ready");
-      expect(a.label).toBe("Follow up on your offer");
+      expect(a.label).toBe("Monitor offer status and verify inputs");
     });
 
     it("negotiating stage keeps the advice aligned with the live terms", () => {
       const blocked = nextActionForDeal({ netCashFlow: -120, stage: "negotiating" });
       expect(blocked).toEqual({
-        label: "Verify the Offer Ceiling before renegotiating",
+        label: "Review current terms and target gaps",
         reason: "cash flow is negative at these assumptions",
         tone: "blocked",
       });
@@ -133,14 +133,14 @@ describe("nextActionForDeal", () => {
         meetsBuyBox: true,
         stage: "negotiating",
       });
-      expect(ready.label).toBe("Finalize the negotiated terms");
+      expect(ready.label).toBe("Recheck the negotiated terms");
       expect(ready.tone).toBe("ready");
     });
 
-    it("under contract rephrases a blocker around the contingency window", () => {
+    it("under contract reports a blocker around the contingency window", () => {
       const a = nextActionForDeal({ netCashFlow: 50, dscr: 0.95, monthlyPayment: 1400, stage: "under_contract" });
       expect(a.tone).toBe("blocked");
-      expect(a.label).toBe("Renegotiate before your contingencies expire");
+      expect(a.label).toBe("Review target gaps before contingency dates");
       expect(a.reason).toBe("DSCR is under 1.0 — rent doesn't cover the debt");
     });
 
@@ -219,34 +219,34 @@ describe("nextActionFromVerdict", () => {
       expect(a.tone).toBe("ready");
     });
 
-    it("passed → revisit if the price drops, matching nextActionForDeal's copy", () => {
+    it("passed → review only after inputs change, matching nextActionForDeal's copy", () => {
       const a = nextActionFromVerdict({ recommendation: "Strong Buy", netCashFlow: 400, stage: "passed" });
       expect(a).toEqual(nextActionForDeal({ netCashFlow: 400, stage: "passed" }));
-      expect(a.label).toBe("Revisit if the price drops");
+      expect(a.label).toBe("Review only if inputs change");
       expect(a.tone).toBe("review");
     });
 
     it("offer stage rephrases blockers and the ready path", () => {
       const blocked = nextActionFromVerdict({ recommendation: "Avoid", netCashFlow: 100, stage: "offer" });
       expect(blocked.tone).toBe("blocked");
-      expect(blocked.label).toBe("Renegotiate or withdraw your offer");
+      expect(blocked.label).toBe("Review the offer against current inputs");
       expect(blocked.reason).toBe("the numbers don't support it as entered");
       const ready = nextActionFromVerdict({ recommendation: "Strong Buy", netCashFlow: 400, stage: "offer" });
       expect(ready.tone).toBe("ready");
-      expect(ready.label).toBe("Follow up on your offer");
+      expect(ready.label).toBe("Monitor offer status and verify inputs");
     });
 
     it("negotiating stage rephrases blockers and the ready path", () => {
       const blocked = nextActionFromVerdict({ recommendation: "Avoid", netCashFlow: 100, stage: "negotiating" });
-      expect(blocked.label).toBe("Verify the Offer Ceiling before renegotiating");
+      expect(blocked.label).toBe("Review current terms and target gaps");
       const ready = nextActionFromVerdict({ recommendation: "Strong Buy", netCashFlow: 400, stage: "negotiating" });
-      expect(ready.label).toBe("Finalize the negotiated terms");
+      expect(ready.label).toBe("Recheck the negotiated terms");
     });
 
     it("under contract rephrases blockers and routes ready deals to due diligence", () => {
       const blocked = nextActionFromVerdict({ recommendation: "Buy", netCashFlow: -50, stage: "under_contract" });
       expect(blocked.tone).toBe("blocked");
-      expect(blocked.label).toBe("Renegotiate before your contingencies expire");
+      expect(blocked.label).toBe("Review target gaps before contingency dates");
       expect(blocked.reason).toBe("cash flow is negative");
       const ready = nextActionFromVerdict({ recommendation: "Strong Buy", netCashFlow: 400, stage: "under_contract" });
       expect(ready.tone).toBe("ready");

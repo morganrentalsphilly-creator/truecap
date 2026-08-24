@@ -50,12 +50,12 @@ export const metadata: Metadata = {
 type Row = { workflow: string; truecap: string; bp: string };
 
 const MATRIX: Row[] = [
-  { workflow: "First screen", truecap: "Address-first screen with editable starting assumptions and a verdict.", bp: "Detailed rental-property input workflow with report-style results." },
-  { workflow: "Decision sequence", truecap: "Connects selected-rule fit, Buy Box, Offer Ceiling, downside, and presentation.", bp: "Centers on a detailed calculator and the investor's interpretation of its report." },
-  { workflow: "Scenario depth", truecap: "Includes long-term projection, exit, tax, and downside modules in paid decisions.", bp: "Its rental calculator captures purchase, loan, income, expense, and projection inputs." },
+  { workflow: "First screen", truecap: "Address-first screen with editable starting assumptions and core economics.", bp: "Detailed rental-property input workflow with report-style results." },
+  { workflow: "Underwriting sequence", truecap: "Connects selected-rule fit, Buy Box, Offer Ceiling, downside, and presentation.", bp: "Centers on a detailed calculator and the investor's interpretation of its report." },
+  { workflow: "Scenario depth", truecap: "Includes long-term projection, exit, tax, and downside modules in paid workflows.", bp: "Its rental calculator captures purchase, loan, income, expense, and projection inputs." },
   { workflow: "Modeled boundary", truecap: "Offer Ceiling works backward from the selected target and shows threshold alternatives; it is not a recommended offer.", bp: "The calculator supports an offer-price input inside a broader rental analysis." },
   { workflow: "Ecosystem", truecap: "Focused product, methodology, blog, and glossary.", bp: "Calculator inside a large community, education, media, and marketplace ecosystem." },
-  { workflow: "Best fit", truecap: "Investors who want a guided address-to-decision sequence.", bp: "Investors who value a detailed calculator inside the BiggerPockets ecosystem." },
+  { workflow: "Best fit", truecap: "Investors who want a guided address-to-underwrite sequence.", bp: "Investors who value a detailed calculator inside the BiggerPockets ecosystem." },
 ];
 
 export default function VsBiggerPocketsCalculatorPage() {
@@ -270,10 +270,10 @@ export default function VsBiggerPocketsCalculatorPage() {
         {/* Pricing CTA */}
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">
-            Try TrueCap free — see if the address-to-decision workflow fits.
+            Try TrueCap free — see if the address-to-underwrite workflow fits.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            Screen a property without a card, inspect the assumptions and verdict,
+            Screen a property without a card, inspect the assumptions and core economics,
             then decide whether TrueCap&apos;s connected Buy Box, Offer Ceiling, downside,
             and reporting workflow fits how you acquire rentals.
           </p>
@@ -334,15 +334,14 @@ const BP_FAQ: FaqItem[] = [
     answer: (
       <>
         TrueCap is an address-first alternative: it pre-fills HUD rent + FRED mortgage rate + state
-        property tax from the property address, and outputs a
-        plain-English verdict (Strong / Solid / Mixed / Marginal /
-        Negative) on top of the standard metrics. BiggerPockets&apos;
+        property tax from the property address, and shows selected-rule
+        fit plus a secondary Screening Index alongside the standard metrics. BiggerPockets&apos;
         calculator is a detailed analysis workflow inside a much larger
         community and education ecosystem.
       </>
     ),
     plainTextAnswer:
-      "TrueCap is an address-first alternative that labels HUD rent, the FRED mortgage rate, and a state property-tax benchmark, then adds a plain-English verdict alongside standard metrics.",
+      "TrueCap is an address-first alternative that labels HUD rent, the FRED mortgage rate, and a state property-tax benchmark, then shows standard metrics and selected-rule fit.",
   },
   {
     question: "How much is TrueCap vs BiggerPockets Pro?",
@@ -381,7 +380,7 @@ const BP_FAQ: FaqItem[] = [
       </>
     ),
     plainTextAnswer:
-      "Yes — read-only share links are free for everyone (no Pro needed): a public link for any deal, no login required for the recipient. Pro adds co-branding with your logo/color/company name.",
+      "Yes — a free signed-in account can create a read-only share link (no Pro needed), and the recipient does not need an account. Pro adds co-branding with your logo/color/company name.",
   },
   {
     question: "When should I stick with BiggerPockets?",
@@ -389,12 +388,12 @@ const BP_FAQ: FaqItem[] = [
       <>
         Stick with BiggerPockets if its community, education, and existing
         calculator workflow are central to how you invest. Choose TrueCap if
-        you want a focused address-to-decision experience with labeled
+        you want a focused address-to-underwrite experience with labeled
         starting assumptions, selected-rule fit, an Offer Ceiling, downside, and presentation
         in one sequence.
       </>
     ),
     plainTextAnswer:
-      "Stick with BiggerPockets if its community and education ecosystem are central to your workflow. Choose TrueCap for a focused address-to-decision sequence with labeled assumptions, selected-rule fit, a target-dependent Offer Ceiling, downside, and presentation.",
+      "Stick with BiggerPockets if its community and education ecosystem are central to your workflow. Choose TrueCap for a focused address-to-underwrite sequence with labeled assumptions, selected-rule fit, a target-dependent Offer Ceiling, downside, and presentation.",
   },
 ];

@@ -2,7 +2,7 @@
  * Pricing value stack — the paid tiers presented as outcomes, not features.
  *
  * Sits ABOVE the feature-comparison table on /pricing (2026-08 offer
- * rollout): the stack sells the decision system, the table below stays as
+ * rollout): the stack sells repeatable underwriting, the table below stays as
  * the exhaustive reference. Every line here must stay truthful against
  * lib/entitlements-catalog.ts — outcome phrasing is fine, invented dollar
  * anchors and unverifiable claims are not (trust-language-guards.test.ts).
@@ -40,7 +40,7 @@ export function PricingValueStack({
           What {proOfferName} actually buys
         </p>
         <h3 className="mt-1 text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
-          A decision system, not a feature list.
+          Repeatable underwriting, not another spreadsheet.
         </h3>
         <ul className="mt-5 space-y-4">
           {PRO_STACK.map(([Icon, name, outcome]) => (

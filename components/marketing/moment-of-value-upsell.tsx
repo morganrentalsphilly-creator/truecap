@@ -98,14 +98,11 @@ export function MomentOfValueUpsell({
       </div>
 
       <h3 className="mt-3 text-lg font-extrabold leading-tight tracking-tight text-foreground sm:text-2xl">
-        {decisionTone === "blocked"
-          ? "This deal misses at the current price. Find the price where it starts working."
-          : decisionTone === "review"
-            ? "This deal is close. Find the exact price that clears your targets."
-            : "This deal clears the first screen. Review the upside against a target-backed Offer Ceiling."}
+        Set your own return targets, then calculate a modeled Offer Ceiling.
       </h3>
       <p className="mt-2 text-sm text-muted-foreground">
-        Decide before you negotiate—not after the list price anchors you.
+        The free screen shows the operating math. Pro lets you adopt explicit
+        criteria and test the highest modeled price that still meets them.
       </p>
 
       {/* Everything here is a value already visible in the free analysis.
@@ -125,7 +122,7 @@ export function MomentOfValueUpsell({
         />
         <FeatureChip
           icon={FileDown}
-          label="Decision package"
+          label="Underwriting tools"
           value="Ready to unlock"
           sub="offer · downside · report"
         />
@@ -142,7 +139,7 @@ export function MomentOfValueUpsell({
             </div>
           </div>
           <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
-            Pro decision
+            Pro underwriting
           </span>
         </div>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
@@ -183,7 +180,7 @@ export function MomentOfValueUpsell({
           <Lock className="mt-0.5 size-4 shrink-0 text-primary" />
           <span className="flex-1 text-foreground">
             <strong>Tune the Offer Ceiling with {proOfferName}</strong> — set your Buy Box,
-            stress-test downside, compare opportunities, and act on the best ones.
+            stress-test downside, and compare the same operating metrics side by side.
           </span>
           <ArrowRight className="mt-0.5 size-4 shrink-0 text-primary transition-transform group-hover:translate-x-0.5" />
         </Link>

@@ -127,7 +127,7 @@ describe("Offer Ceiling server entitlement boundary", () => {
     }
   });
 
-  it("normalizes DSCR-only cash targets before solving instead of returning the product cap", () => {
+  it("requires a relevant adopted target when cash financing makes DSCR inapplicable", () => {
     const cashValues = {
       ...SAMPLE_DEAL_FIXTURE.values,
       address: "100 Cash Deal Ave, Philadelphia, PA 19100",
@@ -140,9 +140,7 @@ describe("Offer Ceiling server entitlement boundary", () => {
       paidAccess: true,
     });
 
-    expect(payload.access).toBe("exact");
-    if (payload.access !== "exact") return;
-    expect(payload.exact?.presentation.ceiling).toBeLessThan(100_000_000);
+    expect(payload).toEqual({ access: "preview", range: null });
   });
 
   it("keeps all active browser paths free of exact and inverse solver imports", () => {

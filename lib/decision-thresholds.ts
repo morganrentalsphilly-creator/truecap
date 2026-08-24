@@ -64,7 +64,7 @@ export interface CashNeededReductionThreshold extends DecisionThreshold {
   maximumTotalCashRequired: number | null;
   /**
    * Model-level support only: the required reduction fits inside modeled
-   * closing costs. Actual lender/program seller-credit limits still apply.
+   * closing costs. This is not an explicit seller-credit model.
    */
   sellerCreditFramingSupportedByModel: boolean;
   sellerCreditAmount: number | null;
@@ -467,7 +467,7 @@ function applyModeledCashReduction(
 
   let remaining = reduction;
   // Closing-cost reductions are the only portion that may be described as a
-  // seller credit by this model. Reductions beyond that come from explicit
+  // closing-cost reduction by this model. Reductions beyond that come from explicit
   // one-time rehab/furnishing inputs and therefore remain generic.
   const closingReduction = Math.min(remaining, current.closingCosts);
   remaining -= closingReduction;
@@ -644,7 +644,7 @@ function solveCashNeededReduction(
     target,
     reason: sellerCreditSupported
       ? "The reduction fits within modeled closing costs; lender and loan-program credit limits still require verification."
-      : "The reduction is rechecked only as a mix of modeled one-time cost reductions, not as a seller credit.",
+      : "The reduction is rechecked only as a mix of modeled one-time cost reductions, not as an explicit settlement credit.",
   });
   return {
     ...common,

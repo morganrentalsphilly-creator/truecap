@@ -35,9 +35,7 @@ import {
   rateAlertSubject,
   type RateAlertDeal,
 } from "@/lib/rate-alerts";
-import { investmentFormSchema,
-  normalizeInvestmentFormSnapshot,
-} from "@/lib/investcalc-schema";
+import { normalizeReleasedInvestmentFormSnapshot } from "@/lib/underwriting-model-release";
 import { resolveRateAlertsMode } from "@/lib/rate-alerts-mode";
 import { getPaidUserIds } from "@/lib/paid-user-ids";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
@@ -158,7 +156,7 @@ export async function GET(request: Request) {
       // never received an alert, with nothing logged. Every other read path
       // (dashboard, My Deals, the portal, the deal workspace) already goes
       // through normalizeInvestmentFormSnapshot; the crons were the outlier.
-      const values = normalizeInvestmentFormSnapshot(row.form_snapshot);
+      const values = normalizeReleasedInvestmentFormSnapshot(row.form_snapshot);
       if (!values) continue; // genuinely unreadable, not merely old
       const alert = buildRateAlertForDeal({
         id: row.id as string,

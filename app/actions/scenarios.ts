@@ -25,6 +25,7 @@ import { z } from "zod";
 import {
   getEntitlementsForUser,
   getSavedDealLimitLabel,
+  hasPaidPlanSubscription,
   hasPlanFeature,
   hasSavedDealCapacity,
 } from "@/lib/entitlements";
@@ -32,12 +33,15 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { defaultScenarioName, isStrategyKind } from "@/lib/strategy-kinds";
 import { applyStrategyPreset } from "@/lib/scenario-presets";
 import { calculateAnalysis } from "@/lib/calc-analysis";
+import { INVESTCALC_SCHEMA_VERSION } from "@/lib/investcalc-schema";
 import {
-  INVESTCALC_SCHEMA_VERSION,
-  normalizeInvestmentFormSnapshot,
-} from "@/lib/investcalc-schema";
+  isReleasedUnderwritingSnapshot,
+  normalizeReleasedInvestmentFormSnapshot,
+} from "@/lib/underwriting-model-release";
 import { normalizeMaoTarget } from "@/lib/mao-target-editor";
 import { normalizeOfferCeilingTargetSource } from "@/lib/offer-ceiling";
+import { isAdoptedOfferCeilingTargetSource } from "@/lib/offer-ceiling-contract";
+import { resolveOfferCeilingForAccess } from "@/lib/offer-ceiling-server";
 import { computeDealScore, buildDealScoreInputFromAnalysis } from "@/lib/deal-score";
 import { buildCompareSnapshotPayload } from "@/lib/compare-result-snapshot";
 import {
@@ -263,6 +267,16 @@ export async function addScenarioAction(input: unknown): Promise<AddScenarioResu
   if (!source) return { ok: false, code: "NOT_FOUND", message: "Source deal not found." };
 
   const deal = source as DealRow;
+  // This action can byte-for-byte clone a row without invoking the calculator,
+  // so the release check must happen before every clone path (including a
+  // malformed/preexisting v2 snapshot and a no-op strategy).
+  if (!isReleasedUnderwritingSnapshot(deal.form_snapshot)) {
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "This underwriting model is not available yet.",
+    };
+  }
   const resolved = await resolvePropertyId(supabase, user.id, deal);
   if (!resolved.ok) return resolved.result;
   const propertyId = resolved.propertyId;
@@ -336,7 +350,7 @@ export async function addScenarioAction(input: unknown): Promise<AddScenarioResu
   // numbers. Only touches the fields the preset changes; the user edits the
   // rest (notably rent) in the deal view. Skipped if the snapshot can't parse.
   if (strategyKind) {
-    const baseValues = normalizeInvestmentFormSnapshot(deal.form_snapshot);
+    const baseValues = normalizeReleasedInvestmentFormSnapshot(deal.form_snapshot);
     if (baseValues) {
       const adjusted = applyStrategyPreset(baseValues, strategyKind);
       // A no-op strategy (buy-and-hold / flip) is a byte-for-byte clone and
@@ -368,7 +382,7 @@ export async function addScenarioAction(input: unknown): Promise<AddScenarioResu
       const sourceMaoTarget = normalizeMaoTarget(deal.result_snapshot?.maxOfferTarget);
       const sourceMaoTargetSource = normalizeOfferCeilingTargetSource(
         deal.result_snapshot?.maxOfferTargetSource
-      );
+      ) ?? (sourceMaoTarget ? "selected-targets" : null);
       const dealScore = computeDealScore(buildDealScoreInputFromAnalysis(adjusted, result));
       const { snapshotVersion, compareSnapshot } = buildCompareSnapshotPayload(
         result,
@@ -389,6 +403,27 @@ export async function addScenarioAction(input: unknown): Promise<AddScenarioResu
       if (sourceMaoTarget) recomputedResultSnapshot.maxOfferTarget = sourceMaoTarget;
       if (sourceMaoTarget && sourceMaoTargetSource) {
         recomputedResultSnapshot.maxOfferTargetSource = sourceMaoTargetSource;
+      }
+      if (
+        sourceMaoTarget &&
+        sourceMaoTargetSource &&
+        isAdoptedOfferCeilingTargetSource(sourceMaoTargetSource) &&
+        (await hasPaidPlanSubscription(supabase, user.id))
+      ) {
+        const capturedAccess = resolveOfferCeilingForAccess({
+          values: adjusted,
+          target: sourceMaoTarget,
+          source: sourceMaoTargetSource,
+          paidAccess: true,
+        });
+        if (capturedAccess.access !== "exact") {
+          return {
+            ok: false,
+            code: "SERVER_ERROR",
+            message: "The scenario Offer Ceiling could not be captured.",
+          };
+        }
+        recomputedResultSnapshot.offerCeilingExact = capturedAccess.exact;
       }
       const appreciationRatePct =
         adjusted.appreciationRatePct ?? DEFAULT_APPRECIATION_RATE;

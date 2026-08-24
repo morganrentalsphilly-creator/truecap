@@ -341,11 +341,11 @@ const COZY_FAQ: FaqItem[] = [
     question: "Can I use TrueCap + a Cozy replacement together?",
     answer: (
       <>
-        Yes — that&apos;s the recommended stack. TrueCap (free) for pre-purchase underwriting, plus TurboTenant or Avail (free) for post-purchase ops. Together they replicate Cozy&apos;s old free-tier coverage and add the underwriting layer Cozy never had.
+        Yes — that&apos;s one possible stack. TrueCap (free) covers pre-purchase underwriting, while TurboTenant or Avail (free) covers post-purchase operations. Together they span much of Cozy&apos;s old free-tier coverage and add an underwriting layer.
       </>
     ),
     plainTextAnswer:
-      "Yes — recommended stack. TrueCap (free) for pre-purchase underwriting + TurboTenant or Avail (free) for post-purchase ops. Together they replicate Cozy&apos;s old free coverage plus add underwriting.",
+      "Yes — one possible stack is TrueCap (free) for pre-purchase underwriting plus TurboTenant or Avail (free) for post-purchase operations. Together they cover much of Cozy's old free scope and add underwriting.",
   },
 ];
 

@@ -282,8 +282,8 @@ export default function ScheduleEPost() {
             commissions (line 8), legal and professional fees (line 10),
             supplies (line 15), utilities (line 17), and the
             &quot;other&quot; catch-all on line 19 (HOA dues, software,
-            bank fees, education) — are real money but rarely move the
-            verdict. The complete list of what&apos;s deductible, with the
+            bank fees, education) — are real money but may have less effect on
+            the modeled operating result. The complete list of what&apos;s deductible, with the
             edge cases, is in{" "}
             <Link
               href="/blog/rental-property-tax-deductions"

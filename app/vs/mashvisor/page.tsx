@@ -214,7 +214,7 @@ export default function VsMashvisorPage() {
             <Link href="/tools/cash-on-cash-calculator" className="font-semibold text-primary hover:underline">cash-on-cash return calculator</Link>
             {" "}— same engine as the full analyzer. Our walkthrough on{" "}
             <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">underwriting a rental in 60 seconds</Link>
-            {" "}shows the full move from listing to verdict.
+            {" "}shows the full move from listing to a reviewed underwrite.
           </p>
         </section>
 

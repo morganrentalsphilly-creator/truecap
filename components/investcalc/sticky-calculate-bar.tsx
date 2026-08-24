@@ -232,29 +232,16 @@ export function StickyCalculateBar({
             onClick={() => setDockExpanded((v) => !v)}
             aria-expanded={dockExpanded}
             aria-controls="verdict-dock-sheet"
-            aria-label={`Live screening preview: ${livePreview.tier}, Screening Index ${livePreview.score}, a secondary heuristic and not investment advice. ${dockExpanded ? "Hide" : "Show"} cap rate and DSCR`}
+            aria-label={`Live underwriting preview: cash flow ${Math.round(livePreview.netCashFlow)} dollars per month. ${dockExpanded ? "Hide" : "Show"} cap rate and DSCR`}
             className="flex h-12 min-w-0 flex-1 items-center gap-2 rounded-xl border border-border bg-muted/40 px-2.5 text-left"
           >
-            <span
-              className={cn(
-                "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide",
-                livePreview.tier === "Strong" && "bg-[var(--brand-green)] text-white",
-                livePreview.tier === "Solid" && "bg-primary text-primary-foreground",
-                livePreview.tier === "Mixed" && "bg-amber-500 text-white",
-                livePreview.tier === "Marginal" && "bg-orange-500 text-white",
-                livePreview.tier === "Negative" && "bg-red-600 text-white"
-              )}
-            >
-              {livePreview.tier}
+            <span className="shrink-0 rounded-full border border-primary/25 bg-background px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-primary">
+              Preview
             </span>
             <span className="min-w-0">
-              <span className="block truncate font-mono text-sm font-bold leading-tight tabular-nums text-foreground">
-                {livePreview.score}
-                <span className="text-[10px] font-semibold text-muted-foreground">/100 index</span>
-              </span>
               <span
                 className={cn(
-                  "block truncate font-mono text-[11px] font-bold leading-tight tabular-nums",
+                  "block truncate font-mono text-sm font-bold leading-tight tabular-nums",
                   // Sign + color keyed off the SAME rounded value so a
                   // sub-dollar negative never renders "-$0" (mirrors the
                   // in-form live preview card).

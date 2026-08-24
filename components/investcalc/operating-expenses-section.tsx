@@ -71,7 +71,7 @@ function FieldLabelWithTooltip({ label, term, tooltip }: FieldLabelWithTooltipPr
           <TooltipTrigger asChild>
             <button
               type="button"
-              className="inline-flex size-3.5 items-center justify-center rounded-full text-[var(--brand-orange)]/70 hover:text-[var(--brand-orange)]"
+              className="-m-3.5 inline-flex size-11 items-center justify-center rounded-full text-[var(--brand-orange)]/70 hover:text-[var(--brand-orange)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-orange)]/30"
               aria-label={`${label} guidance`}
             >
               <Info className="size-3.5" />
@@ -159,18 +159,21 @@ export function OperatingExpensesSection({
   // The four % assumptions the collapsed summary shows. These are LIVE
   // watched values, not hardcoded schema defaults: saved user defaults, an
   // auto-applied template, or a reopened deal all override them, and the
-  // summary must show the numbers actually driving the verdict. A cleared
-  // field mirrors the schema's coerceExpensePct semantics (blank/NaN → 0%,
-  // "not reserving for this") so the summary never contradicts the math.
+  // summary must show the numbers actually driving the result. A cleared
+  // field remains unknown (—) until the user types a reviewed value or an
+  // explicit 0, matching the schema's no-silent-zero contract.
   const vacancyPct = watch("vacancyPct");
   const mgmtPct = watch("mgmtPct");
   const maintenancePct = watch("maintenancePct");
   const capexPct = watch("capexPct");
-  const asExpensePct = (v: number | undefined) => (Number.isFinite(v) ? (v as number) : 0);
+  const asExpensePct = (v: number | undefined) =>
+    Number.isFinite(v) ? (v as number) : null;
   const vacancyPctEffective = asExpensePct(vacancyPct);
   const mgmtPctEffective = asExpensePct(mgmtPct);
   const maintenancePctEffective = asExpensePct(maintenancePct);
   const capexPctEffective = asExpensePct(capexPct);
+  const expensePctLabel = (value: number | null) =>
+    value == null ? "—" : `${value}%`;
   // Stock schema defaults (lib/investcalc-schema.ts: 5/8/10/5) — drives
   // the "sensible defaults" vs "your assumptions" heading below.
   const usingStockPctDefaults =
@@ -277,25 +280,25 @@ export function OperatingExpensesSection({
               at the moment the jargon appears. */}
           <div className="mb-2.5 flex flex-wrap gap-x-4 gap-y-1 text-sm">
             <span className="text-muted-foreground">
-              Vacancy <span className="font-semibold text-foreground">{vacancyPctEffective}%</span>
+              Vacancy <span className="font-semibold text-foreground">{expensePctLabel(vacancyPctEffective)}</span>
             </span>
             <span aria-hidden className="text-muted-foreground/40">·</span>
             <span className="text-muted-foreground">
-              Management <span className="font-semibold text-foreground">{mgmtPctEffective}%</span>
+              Management <span className="font-semibold text-foreground">{expensePctLabel(mgmtPctEffective)}</span>
             </span>
             <span aria-hidden className="text-muted-foreground/40">·</span>
             <span className="text-muted-foreground">
-              Maintenance <span className="font-semibold text-foreground">{maintenancePctEffective}%</span>
+              Maintenance <span className="font-semibold text-foreground">{expensePctLabel(maintenancePctEffective)}</span>
             </span>
             <span aria-hidden className="text-muted-foreground/40">·</span>
             <span className="text-muted-foreground">
-              CapEx <span className="font-semibold text-foreground">{capexPctEffective}%</span>
+              CapEx <span className="font-semibold text-foreground">{expensePctLabel(capexPctEffective)}</span>
             </span>
             <span className="text-xs text-muted-foreground/80 self-center">(all % of rent)</span>
           </div>
           <p className="text-xs text-muted-foreground">
-            Click &quot;Show Advanced Options&quot; to override any of these or
-            customize tax, insurance, HOA, utilities, and the illustrative tax-impact assumptions.
+            Click &quot;Show Advanced Options&quot; to review any value. Type 0
+            explicitly when you intend to exclude a material expense.
           </p>
         </div>
       )}

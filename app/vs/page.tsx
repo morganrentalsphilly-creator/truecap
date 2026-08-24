@@ -70,7 +70,7 @@ type ComparisonCard = {
 const COMPARISONS: ComparisonCard[] = [
   // Direct alternatives — head-to-head calculators
   { slug: "dealcheck", competitor: "DealCheck",
-    tagline: "The other modern rental calculator. Deeper free tier, simpler pricing, plain-English verdict.",
+    tagline: "The other modern rental calculator. Deeper free tier, simpler pricing, and selected-rule fit.",
     group: "Direct alternative" },
   { slug: "biggerpockets-calculator", competitor: "BiggerPockets Calculator",
     tagline: "The household name. We're newer, faster, with a deeper free tier and everything bundled in one Pro tier.",
@@ -90,7 +90,7 @@ const COMPARISONS: ComparisonCard[] = [
     tagline: "Baselane is rental banking + bookkeeping + rent collection. TrueCap is the pre-purchase underwrite.",
     group: "Complementary tool" },
   { slug: "rentredi", competitor: "RentRedi",
-    tagline: "RentRedi collects rent. TrueCap decides if the deal cash-flows in the first place.",
+    tagline: "RentRedi collects rent. TrueCap models pre-purchase cash flow from reviewed assumptions.",
     group: "Complementary tool" },
   { slug: "avail", competitor: "Avail",
     tagline: "Avail manages your rentals after closing. TrueCap underwrites them before.",

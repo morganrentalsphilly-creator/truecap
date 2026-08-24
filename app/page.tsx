@@ -54,16 +54,16 @@ import { VERIFIED_CASE_STUDIES } from "@/lib/verified-case-studies";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  // Outcome-led title per the approved Rental Acquisition Decision System
-  // positioning; keyword-led /tools pages remain the SEO acquisition layer.
+  // Underwriting-led title; keyword-led /tools pages remain the SEO
+  // acquisition layer.
   // /tools/* pages keep their keyword-led "Free ... Calculator" titles as
   // the SEO traffic source. `absolute` opts out of the layout's
   // "%s | TrueCap" template.
   title: {
-    absolute: "TrueCap — Know Your Number Before You Make the Offer",
+    absolute: "TrueCap — Rental Property Underwriting in Minutes",
   },
   description:
-    "Paste a rental listing. See whether it meets your selected rules, its modeled Offer Ceiling, and which assumptions you must verify.",
+    "Paste an address or supported listing, review editable assumptions, and see first-year cash flow, returns, cash required, and the price that fits your targets.",
   keywords: [
     "rental property analysis",
     "investment property calculator",
@@ -80,9 +80,9 @@ export const metadata: Metadata = {
     // Keep og:title aligned with the <title> — Google falls back to
     // og:title when rewriting SERP titles, so a mismatched og:title
     // resurfaces stale phrasing on brand queries.
-    title: "TrueCap — Know Your Number Before You Make the Offer",
+    title: "TrueCap — Rental Property Underwriting in Minutes",
     description:
-      "A rental acquisition decision system for Buy Box fit, an Offer Ceiling under explicit targets, downside risk, and verification.",
+      "A preliminary rental screen with editable assumptions and a modeled price threshold under explicit user targets.",
     url: "/",
     type: "website",
     // Re-declare images because page-level openGraph fully replaces the
@@ -99,9 +99,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "TrueCap — Know Your Number Before You Make the Offer",
+    title: "TrueCap — Rental Property Underwriting in Minutes",
     description:
-      "A rental acquisition decision system for Buy Box fit, an Offer Ceiling under explicit targets, downside risk, and verification.",
+      "A preliminary rental screen with editable assumptions and a modeled price threshold under explicit user targets.",
     images: ["/home.jpg"],
   },
 };
@@ -125,7 +125,7 @@ export default function Home() {
         operatingSystem: "Web",
         url: siteUrl,
         description:
-          "A Rental Acquisition Decision System for property screening, editable underwriting, Buy Box evaluation, Offer Ceiling calculations, downside analysis, and verification.",
+          "Rental property screening software for modeled cash flow, returns, cash required, editable assumptions, comparison, and target-based price thresholds.",
         offers: {
           "@type": "Offer",
           price: "0",

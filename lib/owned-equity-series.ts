@@ -18,7 +18,7 @@
  */
 
 import { calculateAnalysis } from "@/lib/calc-analysis";
-import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
+import { normalizeReleasedInvestmentFormSnapshot } from "@/lib/underwriting-model-release";
 import {
   computeOwnedEquity,
   monthsOwnedBetween,
@@ -47,7 +47,7 @@ export type OwnedDealEquityBasis = {
  */
 export function resolveOwnedEquityBasis(row: OwnedEquityRowLike): OwnedDealEquityBasis | null {
   if (!row.is_completed || !row.close_date) return null;
-  const values = normalizeInvestmentFormSnapshot(row.form_snapshot);
+  const values = normalizeReleasedInvestmentFormSnapshot(row.form_snapshot);
   if (!values) return null;
   const closed = new Date(row.close_date);
   if (Number.isNaN(closed.getTime())) return null;

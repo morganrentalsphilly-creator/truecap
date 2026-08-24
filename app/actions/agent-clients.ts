@@ -23,7 +23,10 @@ import { PORTAL_SCOPE } from "@/lib/client-portal";
 import { getSiteUrl } from "@/lib/site-url";
 import { PORTAL_DEAL_LIMIT } from "@/lib/client-portal";
 import { buyBoxHasCriteria, type NamedBuyBox } from "@/lib/buy-box";
-import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
+import {
+  isReleasedUnderwritingSnapshot,
+  normalizeReleasedInvestmentFormSnapshot,
+} from "@/lib/underwriting-model-release";
 import { computeDealOfferLine } from "@/lib/deal-offer-line";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 import { isFeatureReleased } from "@/lib/entitlements-catalog";
@@ -347,6 +350,9 @@ export async function listClientDealCountsAction(): Promise<
   const byClient = new Map<string, ClientDealSummary>();
   for (const row of (data ?? []) as { client_id: string | null; address: string | null; form_snapshot: unknown }[]) {
     if (!row.client_id) continue;
+    // Counts must describe the same released rows the public portal can show.
+    // Reject the raw marker before a tolerant legacy normalizer can touch it.
+    if (!isReleasedUnderwritingSnapshot(row.form_snapshot)) continue;
     const entry =
       byClient.get(row.client_id) ??
       { clientId: row.client_id, dealCount: 0, meetingCount: null, recentAddresses: [] };
@@ -363,7 +369,7 @@ export async function listClientDealCountsAction(): Promise<
 
     const clientBoxes = boxesByClient.get(row.client_id);
     if (clientBoxes && clientBoxes.length > 0) {
-      const values = normalizeInvestmentFormSnapshot(row.form_snapshot);
+      const values = normalizeReleasedInvestmentFormSnapshot(row.form_snapshot);
       if (values) {
         try {
           const fit = computeDealOfferLine(values, clientBoxes, {

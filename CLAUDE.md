@@ -24,7 +24,9 @@ shareable read-only link.
   co-branded variant is Pro. The canonical
   tier/gate map for every feature is `lib/entitlements-catalog.ts`;
   pricing logic lives in the `plans.entitlements` JSON column — see
-  `lib/entitlements.ts`.
+  `lib/entitlements.ts`. New Deal Decision Pack sales are temporarily
+  unavailable. Keep both Pack checkout gates off and retain the historical
+  Price/claim paths only for existing paid-claim recovery.
 - **Stack**: Next.js 16 (App Router, `--webpack` for prod), React 19,
   TypeScript 5.7 (strict), Supabase (Auth + Postgres + Storage), Stripe
   (subscriptions), Resend (Broadcasts API), Sentry, Tailwind v4,

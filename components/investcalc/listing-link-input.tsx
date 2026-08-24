@@ -99,6 +99,8 @@ export function ListingLinkInput({
             }
           }}
           placeholder="https://www.zillow.com/homedetails/…"
+          aria-invalid={hasError || undefined}
+          aria-describedby={hasError ? "listing-url-error" : undefined}
           className="min-w-0 flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm"
         />
         <button
@@ -111,7 +113,12 @@ export function ListingLinkInput({
         </button>
       </div>
       {hasError ? (
-        <p className="mt-1.5 text-[11px] text-[var(--metric-negative,#dc2626)]">
+        <p
+          id="listing-url-error"
+          role="alert"
+          aria-live="assertive"
+          className="mt-1.5 text-[11px] text-[var(--metric-negative,#dc2626)]"
+        >
           Couldn&apos;t read that link — type the full property address instead.
         </p>
       ) : null}

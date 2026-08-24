@@ -17,7 +17,7 @@
  * <DealsAnalyzedTicker />, so the rest of this tree ships zero JS.
  */
 
-import { Check, Database, Sparkles, Target, TrendingUp } from "lucide-react";
+import { Check, Database, Target, TrendingUp } from "lucide-react";
 import { HeroAddressForm } from "@/components/marketing/hero-address-form";
 import { DealsAnalyzedTicker } from "@/components/marketing/deals-analyzed-ticker";
 import { SAMPLE_DEAL_FIXTURE } from "@/lib/sample-deal";
@@ -49,7 +49,7 @@ export function MarketingHero() {
                 objections before the visitor reaches the address field. */}
             <div className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-card/70 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-primary shadow-sm backdrop-blur">
               <Target className="size-3 shrink-0" />
-              <span>Rental Acquisition Decision System</span>
+              <span>Rental property underwriting</span>
             </div>
 
             {/* Headline: 2 lines max, hierarchy by weight + accent color,
@@ -59,7 +59,7 @@ export function MarketingHero() {
             </h1>
             <p className="mt-4 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
               {newHomepagePositioningEnabled
-                ? "Paste a rental listing. See how the entered assumptions fit your Buy Box, the target-dependent Offer Ceiling, and what you must verify."
+                ? "Get a preliminary rental screen in minutes, adjust every modeled assumption, and calculate the price that fits your targets."
                 : "Enter an address for a first-pass screen with labeled, editable assumptions. Pro adds a target-dependent Offer Ceiling. Starting benchmarks are not property-specific facts or quotes."}
             </p>
 

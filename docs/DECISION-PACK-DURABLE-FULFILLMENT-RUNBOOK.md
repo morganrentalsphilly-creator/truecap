@@ -10,6 +10,10 @@ applied to production. The permission-only
 `deal_comps` hardening migration may be reviewed and promoted independently;
 it does not activate the Pack or alter Stripe.
 
+New Pack sales are temporarily unavailable. Keep both checkout creation gates
+off; this runbook preserves historical recovery and describes prerequisites for
+a separately approved future reactivation.
+
 Files covered:
 
 - `supabase/review-drafts/decision-pack-durable-fulfillment.sql`
@@ -161,9 +165,9 @@ are deployed and tested:
 | `checkout.session.async_payment_succeeded` | Perform the same convergence logic; duplicate completion must not render or email twice. |
 | `checkout.session.async_payment_failed` | Mark payment failed without creating an artifact; retain the audit row for reconciliation. |
 | `checkout.session.expired` | Mark an unpaid intent failed/expired; do not send paid-delivery email. |
-| `charge.refunded` | Re-fetch the Charge/PaymentIntent and record cumulative refund amount. Apply artifact access and Pack-credit behavior only under the approved policy. |
-| `charge.dispute.created` | Record the dispute state and alert the operations owner; do not invent access revocation behavior. |
-| `charge.dispute.closed` | Re-fetch current dispute/payment state, record won/lost, then apply the approved access/credit policy idempotently. |
+| `charge.refunded` | Re-fetch the Charge/PaymentIntent and record cumulative refund amount. Any partial or full refund revokes future report access, recovery, delivery, and Pack-to-Pro credit eligibility. |
+| `charge.dispute.created` | Record the dispute state, suspend report access/recovery/delivery and Pack-to-Pro credit eligibility, and alert the operations owner. |
+| `charge.dispute.closed` | Re-fetch current dispute/payment state. A lost dispute revokes report access/recovery/delivery and Pack-to-Pro credit eligibility; a won dispute restores them only after a fresh paid/no-refund check. Apply the transition idempotently. |
 
 Stripe can deliver events late or out of order. An event's embedded status is
 not final authority. After signature verification and exact metadata binding,
@@ -302,10 +306,13 @@ never ask for or accept a Checkout Session id as the sole authorization factor.
 ## Refund, dispute, chargeback, and Pack-credit blocker — business policy decided
 
 **Business policy approved by Morgan on 2026-08-24.** This approval decides the
-state policy below; it does not claim that webhook, reconciliation, retrieval,
-or Pack-credit enforcement exists. Durable Pack activation remains blocked
-until those paths implement and test the policy idempotently against current
-Stripe state.
+state policy below. The retained historical browser-bound claim path now
+enforces current Stripe refund/dispute state at verification and export, and
+the signed webhook durably revokes existing credit-ledger states after refunds
+or lost disputes. That narrow safety slice does not activate the durable Pack
+design in this document: new Pack sales remain disabled, and durable artifact,
+delivery, recovery-grant, reconciliation, and credit-suspension/restoration
+work remains blocked until implemented and tested against current Stripe state.
 
 | Current payment state | Report access and delivery | Pack-to-Pro credit |
 | --- | --- | --- |
@@ -322,11 +329,15 @@ be technically recalled; the system must still record the revocation and must
 not re-deliver it. Enforcement must be driven by a current Stripe object plus
 the idempotent event ledger, never by event arrival order alone. Any credit
 reversal must preserve existing Stripe Price ids and subscriptions.
+For the retained historical path, an already-applied Pack credit is marked
+`reversed` in the audit ledger only. The webhook does not remove a live coupon,
+reprice a subscription, or mutate any Stripe Price/Subscription object.
 
-Until runtime enforcement and the required duplicate/reorder/reconciliation
-tests exist, refund and dispute handlers may record and alert only. They must
-not silently revoke, restore, re-credit, or promise a refund, and the durable
-Pack runtime gate must remain off.
+Until durable-fulfillment runtime enforcement and the required duplicate/
+reorder/reconciliation tests exist, future durable-artifact handlers may record
+and alert only. They must not silently restore, re-credit, or promise a refund,
+and the durable Pack runtime gate must remain off. This restriction does not
+weaken the current fail-closed historical verification/export gate above.
 
 ## Share and provider boundaries preserved by this slice
 
@@ -438,7 +449,7 @@ Accountability labels below do not imply the action is complete.
 | Stripe event subscription/handler | Stripe production owner (Morgan) | Test-mode duplicate/reorder/replay suite; exact subscribed event list | Not configured |
 | Artifact storage/retrieval | Supabase production owner (Morgan) | Cross-role access tests and 300-second signed URL test | Not configured |
 | Email recovery | Morgan must name a delivery owner/provider | Authenticated sender, approved copy, bounce/retry evidence | Owner/provider not selected — blocking |
-| Refund/dispute/credit policy | Morgan (business policy); engineering owner for enforcement | Approved state table above, customer/support copy, and webhook/reconciliation/access/credit tests | Business policy decided 2026-08-24; runtime enforcement and tests not implemented — blocking |
+| Refund/dispute/credit policy | Morgan (business policy); engineering owner for enforcement | Approved state table above, customer/support copy, and webhook/reconciliation/access/credit tests | Historical verification/export enforcement implemented 2026-08-24; durable fulfillment and full credit suspension/restoration remain blocking |
 | Provider retention/redisplay rights | Morgan + counsel/provider-contract owner | Contract-backed field/retention matrix | Not supplied — blocking |
 | Expired/revoked share purge | Morgan/privacy owner | Approved explicit grace, backup restore test, aggregate dry run, scheduler audit/stop limits | Not scheduled — blocking |
 | Reconciliation/on-call | Morgan until delegated | Dry run, bounded repair rehearsal, alert destination | Not configured |

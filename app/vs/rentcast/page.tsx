@@ -54,7 +54,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", rentcast: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", rentcast: "Not modeled", winner: "truecap" },
   { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", rentcast: "Not modeled", winner: "truecap" },
-  { feature: "Screening Index + verdict", truecap: "Free — 0-100 score with subscore breakdown", rentcast: "Not applicable", winner: "truecap" },
+  { feature: "Secondary Screening Index", truecap: "Free — 0-100 triage score + factor breakdown", rentcast: "Not applicable", winner: "truecap" },
   { feature: "Rent comp data", truecap: "HUD Fair Market Rent (county-level, gov-published)", rentcast: "Yes — listings-based comps with addresses", winner: "rentcast" },
   { feature: "Property value estimate", truecap: "Purchase price as user input", rentcast: "Yes — automated valuation model", winner: "rentcast" },
   { feature: "API access for developers", truecap: "No", rentcast: "Yes — REST API for rent + value", winner: "rentcast" },
@@ -108,7 +108,7 @@ export default function VsRentcastPage() {
             <span className="text-primary">rent estimates vs full underwriting</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            RentCast is a property-data + rent-estimation platform — get rent comps, property value estimates, and API access. TrueCap is the underwriting calculator that turns those numbers (and more) into a cash-flow decision. RentCast feeds inputs; TrueCap runs the analysis.
+            RentCast is a property-data + rent-estimation platform — get rent comps, property value estimates, and API access. TrueCap uses reviewed inputs to model cash flow and returns. RentCast can supply inputs; TrueCap runs the analysis.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ScrollToFormButton

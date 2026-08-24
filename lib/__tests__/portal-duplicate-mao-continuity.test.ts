@@ -31,13 +31,15 @@ describe("portal and saved-deal Max Offer continuity", () => {
     expect(source).not.toContain('hasPlanFeature(entitlements, "max_offer")');
     expect(source).toContain('.from("agent_clients")');
     expect(source).toContain("if (!client || client.is_archived) notFound()");
-    expect(source).toContain("methodologyResolution.shouldFreeze");
-    expect(source).toContain("if (methodologyResolution.shouldFreeze) notFound()");
+    expect(source).toContain("resolveSavedAnalysisResult({");
+    expect(source).toContain("if (!methodologyResolution.result) notFound()");
+    expect(source).toContain("recordedResult={recordedResult}");
+    expect(source).not.toContain("calculateAnalysis(values)");
     expect(source).toContain("normalizeMaoTarget(");
     expect(source).toContain("maoTarget={maoTarget}");
   });
 
-  it("resolves an exact saved Offer Ceiling only inside the authorized, current-methodology path", () => {
+  it("does not recompute a historical Offer Ceiling inside an authorized recorded view", () => {
     const source = read("app/portal/[token]/d/[dealId]/page.tsx");
     const releaseGate = source.indexOf(
       'if (!isFeatureReleased("agent_portal")) notFound();'
@@ -53,7 +55,7 @@ describe("portal and saved-deal Max Offer continuity", () => {
     );
     const dealGate = source.indexOf("if (!deal) notFound();", clientGate);
     const methodologyGate = source.indexOf(
-      "if (methodologyResolution.shouldFreeze) notFound();",
+      "if (!methodologyResolution.result) notFound();",
       dealGate
     );
     const financingNormalization = source.indexOf(
@@ -64,9 +66,13 @@ describe("portal and saved-deal Max Offer continuity", () => {
       "normalizeOfferCeilingTargetSource(savedResultSnapshot?.maxOfferTargetSource)",
       financingNormalization
     );
+    const recordedResolution = source.indexOf(
+      "readRecordedOfferCeiling(savedResultSnapshot)",
+      sourceNormalization
+    );
     const exactResolution = source.indexOf(
       "resolveOfferCeilingForAccess({",
-      sourceNormalization
+      recordedResolution
     );
     const shellPayload = source.indexOf(
       "offerCeilingAccess={offerCeilingAccess}",
@@ -81,9 +87,16 @@ describe("portal and saved-deal Max Offer continuity", () => {
     expect(methodologyGate).toBeGreaterThan(dealGate);
     expect(financingNormalization).toBeGreaterThan(methodologyGate);
     expect(sourceNormalization).toBeGreaterThan(financingNormalization);
-    expect(exactResolution).toBeGreaterThan(sourceNormalization);
+    expect(recordedResolution).toBeGreaterThan(sourceNormalization);
+    expect(exactResolution).toBeGreaterThan(recordedResolution);
     expect(shellPayload).toBeGreaterThan(exactResolution);
     expect(source.slice(exactResolution, shellPayload)).toContain("paidAccess: true");
+    expect(source.slice(sourceNormalization, recordedResolution)).toContain(
+      "if (maoTarget && recordedResult)"
+    );
+    expect(source.slice(recordedResolution, exactResolution)).not.toContain(
+      "resolveOfferCeilingForAccess({"
+    );
     expect(source).toContain("isCashPurchase: result.monthlyPayment <= 0");
     expect(source).toContain('??\n      "selected-targets"');
     expect(source).toContain("maoTargetSource={maoTargetSource}");

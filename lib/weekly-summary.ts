@@ -51,6 +51,7 @@ import {
   isPipelineStage,
   type PipelineStage,
 } from "@/lib/pipeline";
+import { isReleasedUnderwritingSnapshot } from "@/lib/underwriting-model-release";
 
 /** Cap the due-deadline list — a summary, not a report. */
 export const WEEKLY_SUMMARY_MAX_DUE_ITEMS = 6;
@@ -209,13 +210,18 @@ export function buildWeeklySummary(
   userDeals: WeeklySummaryDealRow[],
   context: WeeklySummaryContext,
 ): WeeklySummaryPayload | null {
-  if (userDeals.length === 0) return null;
+  // A recorded internal v2 result is not a released email surface. Filter on
+  // the raw marker before the normal recorded-result fallback can include it.
+  const releasedDeals = userDeals.filter((row) =>
+    isReleasedUnderwritingSnapshot(row.form_snapshot)
+  );
+  if (releasedDeals.length === 0) return null;
 
   // One recompute per row, shared by every section (pipeline totals, buy-box
   // metrics, owned cash flow) so the sections can't disagree with each other.
   const freshById = new Map<string, ReturnType<typeof recomputeSavedDealVerdict>>();
   const resolutionById = new Map<string, SavedAnalysisSnapshotResolution>();
-  for (const row of userDeals) {
+  for (const row of releasedDeals) {
     const recomputed = recomputeSavedDealVerdict(row.form_snapshot);
     const resolution = resolveSavedAnalysisSnapshot({
       methodologyVersion: row.methodology_version,
@@ -228,8 +234,8 @@ export function buildWeeklySummary(
     freshById.set(row.id, resolution.didRecompute ? recomputed : null);
   }
 
-  const activeRows = userDeals.filter((r) => isActiveStage(stageForRow(r)));
-  const ownedRows = userDeals.filter((r) => stageForRow(r) === "closed");
+  const activeRows = releasedDeals.filter((r) => isActiveStage(stageForRow(r)));
+  const ownedRows = releasedDeals.filter((r) => stageForRow(r) === "closed");
 
   // ── Active pipeline ────────────────────────────────────────────────
   let pipeline: WeeklySummaryPipeline | null = null;

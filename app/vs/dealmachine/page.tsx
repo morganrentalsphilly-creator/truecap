@@ -54,7 +54,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", dealmachine: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", dealmachine: "Not modeled", winner: "truecap" },
   { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", dealmachine: "Not modeled", winner: "truecap" },
-  { feature: "Screening Index + verdict", truecap: "Free — 0-100 score + plain-English verdict", dealmachine: "Not applicable", winner: "truecap" },
+  { feature: "Secondary Screening Index", truecap: "Free — 0-100 triage score + factor breakdown", dealmachine: "Not applicable", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", dealmachine: "Property data only", winner: "truecap" },
   { feature: "Driving for dollars / mobile lead capture", truecap: "No", dealmachine: "Yes — photo + instant owner lookup", winner: "dealmachine" },
   { feature: "Skip tracing (owner phone/email)", truecap: "No", dealmachine: "Yes — built-in", winner: "dealmachine" },
@@ -108,7 +108,7 @@ export default function VsDealmachinePage() {
             <span className="text-primary">find leads on the street vs underwrite them at the desk</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            DealMachine is the heavyweight in mobile-first driving for dollars — snap a photo of a distressed property, get owner contact info instantly, send a postcard or skip-trace from your phone. TrueCap is the underwriting calculator that decides whether the addresses DealMachine surfaces actually pencil out. Different jobs; most active off-market buyers use both.
+            DealMachine is the heavyweight in mobile-first driving for dollars — snap a photo of a distressed property, get owner contact info instantly, send a postcard or skip-trace from your phone. TrueCap models the economics of an address from user-reviewed assumptions. Different jobs; many active off-market buyers use both.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ScrollToFormButton

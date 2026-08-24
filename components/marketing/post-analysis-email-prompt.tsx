@@ -252,7 +252,12 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
                 onChange={(e) => setWebsite(e.target.value)}
                 className="hidden"
               />
+              <label htmlFor="post-analysis-email" className="sr-only">
+                Email address
+              </label>
               <input
+                id="post-analysis-email"
+                name="email"
                 type="email"
                 autoComplete="email"
                 required
@@ -260,6 +265,10 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={status === "submitting"}
+                aria-invalid={status === "error" || undefined}
+                aria-describedby={
+                  errorMsg ? "post-analysis-email-error" : "post-analysis-email-hint"
+                }
                 className="min-h-11 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-ring"
               />
               <button
@@ -270,9 +279,18 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
                 {status === "submitting" ? "Sending…" : "Send me the checklist"}
               </button>
               {errorMsg ? (
-                <p className="text-xs text-destructive">{errorMsg}</p>
+                <p
+                  id="post-analysis-email-error"
+                  role="alert"
+                  className="text-xs text-destructive"
+                >
+                  {errorMsg}
+                </p>
               ) : null}
-              <p className="mt-1 text-[10px] text-muted-foreground">
+              <p
+                id="post-analysis-email-hint"
+                className="mt-1 text-[10px] text-muted-foreground"
+              >
                 No spam. Unsubscribe anytime.
               </p>
             </form>

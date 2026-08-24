@@ -34,7 +34,7 @@
 
 import { z } from "zod";
 import { calculateAnalysis } from "@/lib/calc-analysis";
-import { investmentFormSchema } from "@/lib/investcalc-schema";
+import { releasedInvestmentFormSchema } from "@/lib/underwriting-model-release";
 import { DEAL_QA_LIMITS, DEAL_QA_SYSTEM_PROMPT } from "@/lib/deal-qa";
 import {
   buildGroundedDealContext,
@@ -47,7 +47,7 @@ import { headers } from "next/headers";
 
 const inputSchema = z.object({
   question: z.string().trim().min(2).max(DEAL_QA_LIMITS.questionChars),
-  values: investmentFormSchema,
+  values: releasedInvestmentFormSchema,
   /** Optional client-side grounding depth (buy box / Offer Ceiling / projection /
    *  comps). Size-bounded by the schema; omitted pieces are fine. */
   context: dealQaExtraContextSchema.optional(),

@@ -57,7 +57,7 @@ const MATRIX: Row[] = [
   { feature: "Photo / virtual tour",             truecap: "Not in scope — TrueCap is analysis, not browsing",                              zillow: "Yes — extensive photos + tours",                                         winner: "zillow" },
   { feature: "Save deals + portfolio rollup",    truecap: "Free saves up to 5 deals; Pro adds unlimited saves, portfolio rollup + comparison",                               zillow: "Save listings but no portfolio analysis",                                winner: "truecap" },
   { feature: "Shareable analysis URL",           truecap: "Free — read-only public URL for the available analysis",                                   zillow: "Share listing URL only",                                                 winner: "truecap" },
-  { feature: "Verdict / decision support",       truecap: "Free — Screening Index + verdict (Strong / Decent / Marginal / Skip)",                zillow: "No analytical verdict",                                                  winner: "truecap" },
+  { feature: "Underwriting context",             truecap: "Free — core economics + selected-rule fit",                                        zillow: "Rent estimate only",                                                      winner: "truecap" },
 ];
 
 export default function VsZillowRentPage() {
@@ -129,7 +129,7 @@ export default function VsZillowRentPage() {
                 <li>You&apos;re an investor underwriting a deal — the rent estimate is going into a real money decision.</li>
                 <li>You want an editable HUD area benchmark inside a full underwriting workflow.</li>
                 <li>You need the rent number + everything else (cap rate, DSCR, cash flow, projection).</li>
-                <li>You want a verdict on whether to buy, not just &quot;here&apos;s the rent.&quot;</li>
+                <li>You want complete modeled economics, not just &quot;here&apos;s the rent.&quot;</li>
               </ul>
             </div>
             <div>
@@ -189,7 +189,7 @@ export default function VsZillowRentPage() {
             <Link href="/tools/cash-on-cash-calculator" className="font-semibold text-primary hover:underline">cash-on-cash return calculator</Link>
             {" "}to turn it into a return. Our guide on{" "}
             <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">underwriting a rental in 60 seconds</Link>
-            {" "}shows the whole path from address to verdict.
+            {" "}shows the whole path from address to a reviewed underwrite.
           </p>
         </section>
 
@@ -282,13 +282,12 @@ const ZILLOW_FAQ: FaqItem[] = [
       "Neither source is guaranteed to be more accurate for every property. Zillow offers a property-specific starting estimate; TrueCap places an editable HUD area benchmark inside a full underwrite. Compare both with current local evidence and test a range.",
   },
   {
-    question: "How does TrueCap turn a rent estimate into a deal verdict?",
+    question: "How does TrueCap turn a rent estimate into an underwrite?",
     answer: (
       <>
         TrueCap takes rent, expenses, financing, and tax assumptions
         and runs cap rate, cash-on-cash, DSCR, and monthly cash flow,
-        then classifies the deal as Strong / Solid / Mixed / Marginal
-        / Negative based on transparent thresholds. The free analyzer
+        then shows selected-rule fit based on transparent targets. The free analyzer
         also includes a secondary Screening Index (0–100) with factor breakdown. Zillow stops at the
         rent number — you have to do everything downstream by hand.
       </>

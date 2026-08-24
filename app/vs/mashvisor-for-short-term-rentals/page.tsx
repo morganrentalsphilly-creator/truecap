@@ -47,7 +47,7 @@ const MATRIX: Row[] = [
   { feature: "Mortgage + financing math (PITI + amortization)", truecap: "Yes — full", mashvisor: "Limited", winner: "truecap" },
   { feature: "Illustrative tax impact", truecap: "Pro — straight-line depreciation + interest + modeled after-tax CF; no STR-eligibility determination", mashvisor: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", mashvisor: "Forward STR revenue forecast", winner: "tie" },
-  { feature: "Screening Index + verdict", truecap: "Free — 0-100 score + plain-English verdict", mashvisor: "Investibility score per property", winner: "tie" },
+  { feature: "Secondary Screening Index", truecap: "Free — 0-100 triage score + factor breakdown", mashvisor: "Investibility score per property", winner: "tie" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", mashvisor: "STR-focused; LTR rent estimates included", winner: "tie" },
   { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", mashvisor: "Limited free dashboard; full data paid", winner: "truecap" },
   { feature: "Pricing (paid tier)", truecap: "Paid Pro; see live pricing for current rates", mashvisor: "$70-300/mo depending on plan (as of 2026)", winner: "truecap" },
@@ -78,11 +78,11 @@ const NICHE_FAQ: FaqItem[] = [
     question: "Does Mashvisor do underwriting?",
     answer: (
       <>
-        Sort of — Mashvisor shows listing-level cap rate estimates based on its assumed inputs (rent, vacancy, expenses). It doesn&apos;t do per-deal underwriting at TrueCap&apos;s depth (DSCR, sensitivity, projection, and illustrative tax impact). Mashvisor narrows the field; TrueCap turns the shortlist into decisions.
+        Sort of — Mashvisor shows listing-level cap rate estimates based on its assumed inputs (rent, vacancy, expenses). It doesn&apos;t do per-deal underwriting at TrueCap&apos;s depth (DSCR, sensitivity, projection, and illustrative tax impact). Mashvisor narrows the field; TrueCap models the shortlisted property from editable assumptions.
       </>
     ),
     plainTextAnswer:
-      "Sort of — listing-level cap rate from assumed inputs. Not deep per-deal underwriting (no DSCR, sensitivity, projection, or tax-impact view). Mashvisor narrows; TrueCap decides.",
+      "Sort of — listing-level cap rate from assumed inputs. Not deep per-deal underwriting (no DSCR, sensitivity, projection, or tax-impact view). Mashvisor narrows; TrueCap underwrites the user-reviewed assumptions.",
   },
   {
     question: "Can I use TrueCap free with Mashvisor data?",
@@ -145,7 +145,7 @@ export default function VsMashvisorForShortTermRentalsPage() {
             <span className="text-primary">market scoring vs per-deal STR underwriting</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Both serve STR investors. Mashvisor is the market-discovery + revenue-projection tool (Airbnb occupancy rates, ADR by neighborhood). TrueCap is the underwriting calculator that turns Mashvisor&apos;s revenue numbers into a full deal analysis (cap rate, DSCR, cash flow, projection). STR investors typically use both — Mashvisor to pick the property, TrueCap to decide whether to buy it.
+            Both serve STR investors. Mashvisor is the market-discovery + revenue-projection tool (Airbnb occupancy rates, ADR by neighborhood). TrueCap turns user-reviewed revenue assumptions into a full modeled analysis (cap rate, DSCR, cash flow, projection). The user verifies the inputs and makes the investment decision.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ScrollToFormButton className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">
@@ -244,7 +244,7 @@ export default function VsMashvisorForShortTermRentalsPage() {
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Once Mashvisor hands you an ADR and occupancy figure, the underwrite is on you. Our{" "}
             <Link href="/blog/short-term-rental-underwriting-playbook" className="font-semibold text-primary hover:underline">short-term rental underwriting playbook</Link>
-            {" "}walks through turning revenue projections into a real deal verdict, and the{" "}
+            {" "}walks through turning revenue projections into a complete modeled underwrite, and the{" "}
             <Link href="/blog/best-short-term-rental-analysis-tool-2026" className="font-semibold text-primary hover:underline">best STR analysis tools of 2026</Link>
             {" "}rounds up where the data comes from. To check the math on one metric first, try the standalone{" "}
             <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">cap rate calculator</Link>.

@@ -196,10 +196,10 @@ export function ProblemBlock() {
 // ───────────────────────────────────────── The decision-system offer
 const OFFER_MODULES = [
   [Clock, "60-Second Underwriter", "Turn an address into a reviewable first-pass underwrite without rebuilding a spreadsheet."],
-  [ShieldCheck, "Buy Box Autopilot", "Define what a good deal means to you and screen each opportunity against those criteria."],
+  [ShieldCheck, "Target Profiles", "Save reviewed criteria and evaluate each opportunity against the same user-defined rules."],
   [Target, "Offer Ceiling", "Calculate the highest modeled price that still meets your return targets under the assumptions shown."],
   [Activity, "Downside Stress Test", "See how lower rent, higher vacancy, price, and rate changes affect the decision."],
-  [GitCompareArrows, "Deal Comparison", "Put saved opportunities side by side so the best use of capital is easier to see."],
+  [GitCompareArrows, "Deal Comparison", "Put saved opportunities side by side to review their modeled tradeoffs consistently."],
   [BarChart3, "Long-Term Wealth View", "Model cash flow, debt paydown, equity, tax effects, and exit scenarios over time."],
   [ListChecks, "Acquisition Pipeline", "Move saved deals from research to offer, under contract, closed, or passed."],
   [FileText, "Lender & Partner Reports", "Package the underwrite for lenders, partners, clients, or internal review."],
@@ -213,11 +213,11 @@ export function OfferEngineSection() {
         <div className="max-w-3xl">
           <p className="text-[11px] font-bold uppercase tracking-widest text-primary">{proOfferName}</p>
           <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            The complete rental acquisition <span className="text-primary">decision system.</span>
+            Focused first-pass rental <span className="text-primary">underwriting.</span>
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Free screens the opportunity. Pro connects the screening math to
-            selected-rule fit, scenario comparison, verification, and a documented user decision.
+            Free shows the core economics. Pro adds reusable assumptions,
+            explicit target pricing, comparison, deeper scenarios, and durable reports.
           </p>
         </div>
 
@@ -238,7 +238,7 @@ export function OfferEngineSection() {
                 <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{outcome}</p>
                 {featured ? (
                   <p className="mt-4 border-t border-primary/20 pt-3 text-xs font-semibold text-[var(--brand-blue-text)]">
-                    The central Pro review: compare a target-dependent ceiling with asking before recording your decision.
+                    Review the highest modeled price that still clears the targets you explicitly adopted.
                   </p>
                 ) : null}
               </article>
@@ -743,22 +743,23 @@ export function PdfProUpsell() {
 
         {/* Value ladder - answers "what exactly do I get free?" at a glance,
             so the visitor isn't guessing where the line is. */}
-        <p className="mb-2 text-center text-xs font-medium text-muted-foreground sm:hidden">
-          Swipe to compare all three →
-        </p>
         <div
           role="region"
           aria-label="Free and Pro comparison"
-          tabIndex={0}
-          className="mb-8 overflow-x-auto rounded-2xl border border-border bg-card shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:mb-10"
+          className="mb-8 overflow-hidden rounded-2xl border border-border bg-card shadow-sm sm:mb-10"
         >
-          <table className="w-full min-w-[560px] text-sm">
+          <table className="w-full table-fixed text-xs sm:text-sm">
+            <colgroup>
+              <col className="w-1/2" />
+              <col className="w-1/4" />
+              <col className="w-1/4" />
+            </colgroup>
             <caption className="sr-only">
               Features included with Free and Pro
             </caption>
             <thead>
               <tr className="border-b border-border bg-muted/30">
-                <th className="px-4 py-3 text-left font-bold text-muted-foreground sm:px-6">
+                <th className="px-2 py-3 text-left font-bold text-muted-foreground sm:px-6">
                   <span className="sr-only">Feature</span>
                 </th>
                 {ladderHeaders.map((h, i) => (
@@ -766,8 +767,8 @@ export function PdfProUpsell() {
                     key={h}
                     className={
                       i === 1
-                        ? "px-4 py-3 text-center font-extrabold text-primary sm:px-6"
-                        : "px-4 py-3 text-center font-bold text-foreground sm:px-6"
+                        ? "px-1 py-3 text-center font-extrabold text-primary sm:px-6"
+                        : "px-1 py-3 text-center font-bold text-foreground sm:px-6"
                     }
                   >
                     {h}
@@ -781,9 +782,9 @@ export function PdfProUpsell() {
             <tbody>
               {LADDER_ROWS.map((row, ri) => (
                 <tr key={row.label} className={ri % 2 === 0 ? "bg-card" : "bg-muted/20"}>
-                  <td className="px-4 py-3 font-medium text-foreground sm:px-6">{row.label}</td>
+                  <td className="px-2 py-3 font-medium text-foreground sm:px-6">{row.label}</td>
                   {row.cells.map((cell, ci) => (
-                    <td key={`${row.label}-${ci}`} className="px-4 py-3 text-center sm:px-6">
+                    <td key={`${row.label}-${ci}`} className="px-1 py-3 text-center sm:px-6">
                       {/* sr-only labels so the matrix is legible to screen
                           readers / crawlers, not a wall of blank cells. */}
                       {cell === true ? (

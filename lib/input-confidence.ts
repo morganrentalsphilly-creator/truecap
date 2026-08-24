@@ -228,6 +228,7 @@ function normalizedProvenance(
     if (
       item.source !== "hud-fmr" &&
       item.source !== "hud-safmr" &&
+      item.source !== "rentcast-estimate" &&
       item.source !== "fred" &&
       item.source !== "state-static" &&
       item.source !== "manual"
@@ -401,8 +402,16 @@ export function buildInputConfidence(context: InputConfidenceContext): InputConf
           : rentProvenance && !rentProvenance.overridden
             ? {
                 sourceClass: "market-benchmark",
-                sourceLabel: rentProvenance.source === "hud-safmr" ? "HUD Rent Benchmark (ZIP)" : "HUD Rent Benchmark (county)",
-                reason: "Geographic benchmark, not a property-specific rent comp.",
+                sourceLabel:
+                  rentProvenance.source === "rentcast-estimate"
+                    ? "RentCast market-rent estimate"
+                    : rentProvenance.source === "hud-safmr"
+                      ? "HUD Rent Benchmark (ZIP)"
+                      : "HUD Rent Benchmark (county)",
+                reason:
+                  rentProvenance.source === "rentcast-estimate"
+                    ? "Automated market estimate, not verified in-place rent or a signed lease."
+                    : "Geographic benchmark, not a property-specific rent comp.",
                 verifyAction: "Verify with local rent comps",
                 offerReadyRequired: true,
               }

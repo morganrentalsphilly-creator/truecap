@@ -249,7 +249,7 @@ export function OnboardingTour({ isAuthenticated, savedDealCount, canUseBuyBox =
             <Link
               href={step.ctaHref}
               prefetch={false}
-              className="inline-flex h-9 items-center gap-1 rounded-lg border border-border bg-card px-3 text-xs font-semibold text-foreground transition-colors hover:bg-muted"
+              className="inline-flex min-h-11 min-w-11 items-center gap-1 rounded-lg border border-border bg-card px-3 text-xs font-semibold text-foreground transition-colors hover:bg-muted"
             >
               {step.ctaLabel}
             </Link>

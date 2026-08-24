@@ -105,10 +105,9 @@ export default function VsStessaPage() {
             <span className="text-primary">underwriting vs bookkeeping.</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Most serious rental investors end up using both — they solve
-            different problems. TrueCap helps you decide which deal to buy
-            (underwriting). Stessa helps you run the deals you already own
-            (bookkeeping + Schedule E). Here&apos;s when to pick which.
+            Many rental investors use both because they solve different
+            problems. TrueCap models pre-purchase economics. Stessa helps you
+            run properties you already own (bookkeeping + Schedule E).
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ScrollToFormButton className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">

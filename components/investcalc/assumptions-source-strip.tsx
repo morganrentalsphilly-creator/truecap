@@ -53,7 +53,12 @@ export function buildAssumptionEntries(
       label: "Rent",
       ...(rent && !rent.overridden
         ? {
-            source: rent.source === "hud-safmr" ? "HUD rent benchmark (ZIP)" : "HUD rent benchmark (county)",
+            source:
+              rent.source === "rentcast-estimate"
+                ? "RentCast market-rent estimate"
+                : rent.source === "hud-safmr"
+                  ? "HUD rent benchmark (ZIP)"
+                  : "HUD rent benchmark (county)",
             short: "HUD",
             manual: false,
             ...(rent.fetchedAt ? { freshness: /^\d{4}$/.test(rent.fetchedAt) ? `HUD ${rent.fetchedAt}` : `As of ${rent.fetchedAt}` } : {}),

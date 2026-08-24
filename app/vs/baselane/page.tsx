@@ -54,7 +54,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", baselane: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", baselane: "Not modeled", winner: "truecap" },
   { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", baselane: "Yes — actuals tracking for Schedule E", winner: "tie" },
-  { feature: "Screening Index + verdict", truecap: "Free — 0-100 score + plain-English verdict", baselane: "Not applicable", winner: "truecap" },
+  { feature: "Secondary Screening Index", truecap: "Free — 0-100 triage score + factor breakdown", baselane: "Not applicable", winner: "truecap" },
   { feature: "Sensitivity grid", truecap: "Pro — rent ±10%, vacancy ±5pp, rate ±1pp", baselane: "Not modeled", winner: "truecap" },
   { feature: "Rental business banking", truecap: "No", baselane: "Yes — FDIC-insured business checking", winner: "baselane" },
   { feature: "Auto-categorized expenses", truecap: "No", baselane: "Yes — synced with bank feed", winner: "baselane" },
@@ -143,7 +143,7 @@ export default function VsBaselanePage() {
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You&apos;re evaluating a property before making an offer.</li>
                 <li>You want forward-looking projections (10-yr cash flow, exit scenarios).</li>
-                <li>You want a Screening Index + verdict to compare 2-3 deals side-by-side.</li>
+                <li>You want standardized economics and rule-fit context to compare 2-3 deals side-by-side.</li>
                 <li>You want defensible numbers for a lender or partner.</li>
               </ul>
             </div>

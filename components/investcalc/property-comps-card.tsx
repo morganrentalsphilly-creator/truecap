@@ -283,11 +283,11 @@ export function PropertyCompsCard({
                 onApply(data);
                 toast({
                   title: "Applied to your analysis",
-                  description: "Filled facts + estimates from comps - tweak anything that's off.",
+                  description: "Filled property facts, active-listing price when available, and estimated market rent. The AVM remains reference-only.",
                 });
               }}
             >
-              Use these numbers in my analysis
+              Use eligible facts in my analysis
             </Button>
           ) : null}
 

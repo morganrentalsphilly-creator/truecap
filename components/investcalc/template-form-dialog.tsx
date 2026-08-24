@@ -378,7 +378,9 @@ export function TemplateFormDialog({
                 <button
                   type="button"
                   onClick={() => setShowAdvanced((v) => !v)}
-                  className="w-full flex items-center justify-between gap-2 text-left"
+                  aria-expanded={showAdvanced}
+                  aria-controls={`${formId}-advanced-assumptions`}
+                  className="flex min-h-11 w-full items-center justify-between gap-2 text-left"
                 >
                   <div className="flex items-center gap-2">
                     <span className="inline-flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -396,8 +398,9 @@ export function TemplateFormDialog({
                   )}
                 </button>
 
-                {showAdvanced && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                <div id={`${formId}-advanced-assumptions`}>
+                  {showAdvanced ? (
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                     <NumberInputField form={templateForm} name="interestRatePct" label="Interest Rate %" />
                     <NumberInputField form={templateForm} name="downPaymentPct" label="Down Payment %" />
                     <NumberInputField form={templateForm} name="expenseGrowthPct" label="Expense Growth %" />
@@ -449,8 +452,9 @@ export function TemplateFormDialog({
                         </FormItem>
                       )}
                     />
-                  </div>
-                )}
+                    </div>
+                  ) : null}
+                </div>
 
                 <FormField
                   control={templateForm.control}

@@ -15,6 +15,11 @@ export type OfferCeilingExactResult = {
   presentation: OfferCeilingPresentation;
   achieved: {
     netCashFlow: number;
+    /** Added to persisted captures so a recorded PDF can reproduce the exact
+     * achieved-at-ceiling block without invoking a newer solver. Older public
+     * shares may not carry it, so readers must fail closed when they require
+     * the field. */
+    cocReturn?: number;
     capRate: number;
     dscr: number;
   };
@@ -22,10 +27,14 @@ export type OfferCeilingExactResult = {
     currentMeets: boolean;
     requiredMonthlyRent: {
       value: number;
+      /** Additive for recorded report fidelity; absent on older shares. */
+      alreadyMet?: boolean;
       unreachable: boolean;
     } | null;
     requiredInterestRate: {
       value: number;
+      /** Additive for recorded report fidelity; absent on older shares. */
+      alreadyMet?: boolean;
       unreachable: boolean;
     } | null;
   };

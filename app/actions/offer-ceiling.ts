@@ -3,13 +3,14 @@
 import { z } from "zod";
 import * as Sentry from "@sentry/nextjs";
 
-import { investmentFormSchema } from "@/lib/investcalc-schema";
+import { releasedInvestmentFormSchema } from "@/lib/underwriting-model-release";
 import { normalizeMaoTarget } from "@/lib/mao-target-editor";
 import {
   normalizeOfferCeilingTargetSource,
   type OfferCeilingTargetSource,
 } from "@/lib/offer-ceiling";
 import type { OfferCeilingAccessPayload } from "@/lib/offer-ceiling-access-contract";
+import { isAdoptedOfferCeilingTargetSource } from "@/lib/offer-ceiling-contract";
 import { resolveOfferCeilingForAccess } from "@/lib/offer-ceiling-server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { hasPaidPlanSubscription } from "@/lib/entitlements";
@@ -23,7 +24,7 @@ export type ResolveOfferCeilingActionResult =
     };
 
 const requestSchema = z.object({
-  values: investmentFormSchema,
+  values: releasedInvestmentFormSchema,
   target: z.unknown(),
   source: z.unknown().optional(),
 });
@@ -58,6 +59,13 @@ export async function resolveOfferCeilingAction(
   const source: OfferCeilingTargetSource =
     normalizeOfferCeilingTargetSource(parsed.data.source) ??
     "selected-targets";
+  if (!isAdoptedOfferCeilingTargetSource(source)) {
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "Review and adopt at least one target before calculating a modeled price threshold.",
+    };
+  }
 
   let paidAccess = false;
   try {

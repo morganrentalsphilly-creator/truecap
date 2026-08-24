@@ -45,6 +45,7 @@ import { resolveSavedAnalysisSnapshot } from "@/lib/saved-analysis-methodology";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { MAX_PURCHASE_PRICE } from "@/lib/investcalc-schema";
+import { isReleasedUnderwritingSnapshot } from "@/lib/underwriting-model-release";
 
 const KNOWN_STATE_ABBRS = new Set(US_STATE_OPTIONS.map((s) => s.abbr));
 const MAX_BUY_BOXES = 12;
@@ -255,41 +256,43 @@ async function computeSavedBoxFit(
       .limit(FIT_FEEDBACK_DEALS_LIMIT);
     if (error || !data || data.length === 0) return null;
 
-    const metricsList = (data as unknown as FitDealRow[]).map((row): BuyBoxDealMetrics => {
-      const recomputed = recomputeSavedDealVerdict(row.form_snapshot);
-      const resolution = resolveSavedAnalysisSnapshot({
-        methodologyVersion: row.methodology_version,
-        resultSnapshot: row.result_snapshot,
-        recomputedSnapshot: recomputed
-          ? toRecomputedSavedAnalysisSnapshot(recomputed)
-          : undefined,
+    const metricsList = (data as unknown as FitDealRow[])
+      .filter((row) => isReleasedUnderwritingSnapshot(row.form_snapshot))
+      .map((row): BuyBoxDealMetrics => {
+        const recomputed = recomputeSavedDealVerdict(row.form_snapshot);
+        const resolution = resolveSavedAnalysisSnapshot({
+          methodologyVersion: row.methodology_version,
+          resultSnapshot: row.result_snapshot,
+          recomputedSnapshot: recomputed
+            ? toRecomputedSavedAnalysisSnapshot(recomputed)
+            : undefined,
+        });
+        const fresh = resolution.didRecompute ? recomputed : null;
+        const snapshot = resolution.snapshot;
+        const capSnap = row.cap_rate_raw != null ? Number(row.cap_rate_raw) : NaN;
+        const dscrSnap = Number(snapshot.dscr);
+        const monthlyPaymentSnap = Number(snapshot.monthlyPayment);
+        return {
+          capRatePct: fresh ? fresh.capRatePct : Number.isFinite(capSnap) ? capSnap : null,
+          cocPct: fresh ? fresh.cocReturnPct : row.coc_return_pct,
+          dscr: fresh ? fresh.dscr : Number.isFinite(dscrSnap) ? dscrSnap : null,
+          cashFlowMonthly: fresh ? fresh.netCashFlowMonthly : row.net_cash_flow_monthly,
+          purchasePrice: row.purchase_price,
+          propertyType:
+            row.property_type === "single-family" ||
+            row.property_type === "multi-family" ||
+            row.property_type === "owner-occupant"
+              ? row.property_type
+              : null,
+          state: deriveStateFromAddress(row.address),
+          // Explicit cash flag from the recompute (canonical monthlyPayment<=0);
+          // fall back to not-cash so a legacy deal still gets its DSCR criterion
+          // applied rather than silently skipped — mirrors toBuyBoxMetrics.
+          isCashPurchase: fresh
+            ? fresh.isCashPurchase
+            : Number.isFinite(monthlyPaymentSnap) && monthlyPaymentSnap <= 0,
+        };
       });
-      const fresh = resolution.didRecompute ? recomputed : null;
-      const snapshot = resolution.snapshot;
-      const capSnap = row.cap_rate_raw != null ? Number(row.cap_rate_raw) : NaN;
-      const dscrSnap = Number(snapshot.dscr);
-      const monthlyPaymentSnap = Number(snapshot.monthlyPayment);
-      return {
-        capRatePct: fresh ? fresh.capRatePct : Number.isFinite(capSnap) ? capSnap : null,
-        cocPct: fresh ? fresh.cocReturnPct : row.coc_return_pct,
-        dscr: fresh ? fresh.dscr : Number.isFinite(dscrSnap) ? dscrSnap : null,
-        cashFlowMonthly: fresh ? fresh.netCashFlowMonthly : row.net_cash_flow_monthly,
-        purchasePrice: row.purchase_price,
-        propertyType:
-          row.property_type === "single-family" ||
-          row.property_type === "multi-family" ||
-          row.property_type === "owner-occupant"
-            ? row.property_type
-            : null,
-        state: deriveStateFromAddress(row.address),
-        // Explicit cash flag from the recompute (canonical monthlyPayment<=0);
-        // fall back to not-cash so a legacy deal still gets its DSCR criterion
-        // applied rather than silently skipped — mirrors toBuyBoxMetrics.
-        isCashPurchase: fresh
-          ? fresh.isCashPurchase
-          : Number.isFinite(monthlyPaymentSnap) && monthlyPaymentSnap <= 0,
-      };
-    });
     return countBuyBoxFit(criteria, metricsList);
   } catch {
     return null;

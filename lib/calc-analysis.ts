@@ -1,7 +1,11 @@
 import { InvestmentFormValues, isValidRentalUnit } from "./investcalc-schema";
 import { buildTaxStrategyProjection, type TaxStrategyYear } from "./tax-strategy";
 import { buildTenYearProjection, ProjectionYear } from "./ten-year-projections";
-import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "./underwriting-methodology";
+import {
+  TRUECAP_UNDERWRITING_STANDARD_VERSION,
+  TRUECAP_UNDERWRITING_STANDARD_V2_VERSION,
+  type TrueCapUnderwritingStandardVersion,
+} from "./underwriting-methodology";
 
 /** Annual private mortgage insurance as a % of the loan balance, applied to
  *  financed conventional loans with < 20% down and dropped once the loan
@@ -10,9 +14,30 @@ export const DEFAULT_PMI_ANNUAL_RATE_PCT = 0.8;
 /** Down-payment threshold (%) below which PMI applies. */
 export const PMI_DOWN_PAYMENT_THRESHOLD_PCT = 20;
 
-export interface AnalysisResult {
+export interface AnalysisResult<
+  TVersion extends TrueCapUnderwritingStandardVersion = TrueCapUnderwritingStandardVersion,
+> {
   /** Version of the public formula contract used for this result. */
-  methodologyVersion: typeof TRUECAP_UNDERWRITING_STANDARD_VERSION;
+  methodologyVersion: TVersion;
+  /** v2-only audit fields. Omitted from v1 results to preserve their exact
+   * runtime shape and historical snapshot hashes. */
+  analysisDate?: string;
+  operatingScenario?: "current" | "stabilized";
+  rentBasis?: "in-place" | "market" | "pro-forma";
+  scenarioRentMonthly?: number;
+  recurringOtherIncomeMonthly?: number;
+  recurringOtherIncomeAnnual?: number;
+  recurringOtherExpenseMonthly?: number;
+  recurringOtherExpenseAnnual?: number;
+  financingMode?: "cash" | "percent-down" | "fixed-down" | "fixed-loan";
+  closingCostsInputMode?: "percent" | "fixed";
+  acquisitionCredits?: number;
+  loanFees?: number;
+  initialReserve?: number;
+  cashRepairs?: number;
+  /** v2 distinguishes an unknown construction year from an actual age of 0. */
+  propertyAgeKnown?: boolean;
+  unitCount?: number;
   // income
   monthlyRentalIncome: number;
   grossScheduledIncomeAnnual: number;
@@ -85,6 +110,10 @@ export interface AnalysisResult {
   taxStrategyYears: TaxStrategyYear[];
 }
 
+export type AnyAnalysisResult = AnalysisResult;
+export type V1AnalysisResult = AnalysisResult<typeof TRUECAP_UNDERWRITING_STANDARD_VERSION>;
+export type V2AnalysisResult = AnalysisResult<typeof TRUECAP_UNDERWRITING_STANDARD_V2_VERSION>;
+
 export function calcMonthlyPayment(principal: number, annualRate: number, years: number): number {
   // Defensive guards — schema enforces years >= 1 and principal >= 0, but
   // legacy saved-deal payloads or share-link decodes could deliver garbage.
@@ -132,7 +161,357 @@ function calculateYearlyInterestSchedule(
   return yearlyInterest;
 }
 
-export function calculateAnalysis(values: InvestmentFormValues): AnalysisResult {
+function calculateYearlyInterestScheduleExact(
+  loanAmount: number,
+  interestRate: number,
+  loanTermYears: number,
+  monthlyPayment: number
+): number[] {
+  if (loanAmount <= 0 || loanTermYears <= 0) return [];
+
+  const monthlyRate = interestRate / 100 / 12;
+  const totalMonths = Math.round(loanTermYears * 12);
+  let balance = loanAmount;
+  let yearInterest = 0;
+  const yearlyInterest: number[] = [];
+
+  for (let month = 1; month <= totalMonths && balance > 0; month += 1) {
+    const interestPortion = monthlyRate > 0 ? balance * monthlyRate : 0;
+    const principalPortion = Math.min(Math.max(monthlyPayment - interestPortion, 0), balance);
+    balance = Math.max(0, balance - principalPortion);
+    yearInterest += interestPortion;
+
+    if (month % 12 === 0) {
+      yearlyInterest.push(yearInterest);
+      yearInterest = 0;
+    }
+  }
+
+  if (yearInterest > 0) yearlyInterest.push(yearInterest);
+  return yearlyInterest;
+}
+
+function requireV2Number(values: InvestmentFormValues, key: keyof InvestmentFormValues): number {
+  const value = values[key];
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw new Error(`TrueCap Underwriting Standard v2 requires an explicit ${String(key)}`);
+  }
+  return value;
+}
+
+/**
+ * Exact-annual first-year core. This function is reachable only through an
+ * explicit v2 discriminator; calculateAnalysis's historical v1 body remains
+ * below, unchanged apart from the one-line dispatch.
+ */
+function calculateAnalysisV2(
+  values: InvestmentFormValues
+): V2AnalysisResult {
+  const {
+    purchasePrice,
+    yearBuilt,
+    downPaymentPct,
+    interestRate,
+    loanTermYears,
+    pmiAnnualRatePct,
+    pmiNoCancel,
+    maintenancePct,
+    vacancyPct,
+    mgmtPct,
+    capexPct,
+    buildingValuePct,
+    depreciationYears,
+    includeInterestDeduction,
+    taxRatePct,
+    expenseGrowthPct,
+    rentGrowthPct,
+    propertyTaxPct,
+    propertyTaxInputMode,
+    propertyTaxAnnual,
+    insuranceInputMode,
+    insurancePct,
+  } = values;
+
+  const analysisDate = values.analysisDate;
+  if (!analysisDate || !/^\d{4}-\d{2}-\d{2}$/.test(analysisDate)) {
+    throw new Error("TrueCap Underwriting Standard v2 requires an explicit analysisDate");
+  }
+  const analysisDateValue = new Date(`${analysisDate}T00:00:00.000Z`);
+  if (
+    !Number.isFinite(analysisDateValue.getTime()) ||
+    analysisDateValue.toISOString().slice(0, 10) !== analysisDate
+  ) {
+    throw new Error("TrueCap Underwriting Standard v2 requires a valid analysisDate");
+  }
+
+  const operatingScenario = values.operatingScenario;
+  if (operatingScenario !== "current" && operatingScenario !== "stabilized") {
+    throw new Error("TrueCap Underwriting Standard v2 requires an operatingScenario");
+  }
+  const rentBasis = values.rentBasis;
+  if (rentBasis !== "in-place" && rentBasis !== "market" && rentBasis !== "pro-forma") {
+    throw new Error("TrueCap Underwriting Standard v2 requires a rentBasis");
+  }
+  const unitCount = requireV2Number(values, "unitCount");
+  if (!Number.isInteger(unitCount) || unitCount < 1 || unitCount > 50) {
+    throw new Error("TrueCap Underwriting Standard v2 requires a valid unitCount");
+  }
+  const scenarioRentMonthly = requireV2Number(
+    values,
+    operatingScenario === "current" ? "currentMonthlyRent" : "stabilizedMonthlyRent"
+  );
+  if (scenarioRentMonthly <= 0) {
+    throw new Error("TrueCap Underwriting Standard v2 requires scheduled rent above 0");
+  }
+
+  // These may be starting defaults in a new v2 editor, but the engine never
+  // turns a missing value into zero. It receives an explicit reviewed/default
+  // amount or fails closed.
+  const recurringOtherIncomeMonthly = requireV2Number(values, "recurringOtherIncomeMonthly");
+  const recurringOtherExpenseMonthly = requireV2Number(values, "recurringOtherExpenseMonthly");
+  const acquisitionCredits = requireV2Number(values, "acquisitionCredits");
+  const loanFees = requireV2Number(values, "loanFees");
+  const initialReserve = requireV2Number(values, "initialReserve");
+  const hoa = requireV2Number(values, "hoaMonthly");
+  const utilities = requireV2Number(values, "utilitiesMonthly");
+  const cashRepairs = requireV2Number(values, "rehabBudget");
+
+  const grossScheduledIncomeAnnual =
+    (scenarioRentMonthly + recurringOtherIncomeMonthly) * 12;
+  const recurringOtherIncomeAnnual = recurringOtherIncomeMonthly * 12;
+  const recurringOtherExpenseAnnual = recurringOtherExpenseMonthly * 12;
+  const vacancyAllowanceAnnual = grossScheduledIncomeAnnual * (vacancyPct / 100);
+  const effectiveGrossIncomeAnnual = grossScheduledIncomeAnnual - vacancyAllowanceAnnual;
+
+  const propertyTaxPctEffective =
+    propertyTaxInputMode === "annual" && propertyTaxAnnual != null && purchasePrice > 0
+      ? (propertyTaxAnnual / purchasePrice) * 100
+      : propertyTaxPct ?? 1.1;
+  const propertyTaxAnnualExact =
+    propertyTaxInputMode === "annual"
+      ? requireV2Number(values, "propertyTaxAnnual")
+      : purchasePrice * (propertyTaxPctEffective / 100);
+  const propertyTax = propertyTaxAnnualExact / 12;
+
+  const insurancePctInput = insurancePct ?? null;
+  const insuranceAnnualExact =
+    insuranceInputMode === "monthly"
+      ? requireV2Number(values, "insuranceMonthly") * 12
+      : purchasePrice * ((insurancePct ?? 0.5) / 100);
+  const insurance = insuranceAnnualExact / 12;
+  const insurancePctEffective =
+    purchasePrice > 0 ? (insuranceAnnualExact / purchasePrice) * 100 : 0;
+
+  const maintenanceAnnual = grossScheduledIncomeAnnual * (maintenancePct / 100);
+  const managementAnnual = grossScheduledIncomeAnnual * (mgmtPct / 100);
+  const capexAnnual = grossScheduledIncomeAnnual * (capexPct / 100);
+  const operatingExpensesAnnual =
+    propertyTaxAnnualExact +
+    insuranceAnnualExact +
+    hoa * 12 +
+    utilities * 12 +
+    maintenanceAnnual +
+    managementAnnual +
+    recurringOtherExpenseAnnual;
+  const noiAnnual = effectiveGrossIncomeAnnual - operatingExpensesAnnual;
+
+  const financingMode = values.financingMode;
+  let downPayment: number;
+  let loanAmount: number;
+  if (financingMode === "cash") {
+    if (loanFees !== 0) {
+      throw new Error("Cash acquisitions must use zero loanFees");
+    }
+    downPayment = purchasePrice;
+    loanAmount = 0;
+  } else if (financingMode === "percent-down") {
+    downPayment = purchasePrice * (downPaymentPct / 100);
+    loanAmount = purchasePrice - downPayment;
+  } else if (financingMode === "fixed-down") {
+    downPayment = requireV2Number(values, "fixedDownPaymentAmount");
+    if (downPayment > purchasePrice) {
+      throw new Error("Fixed down payment cannot exceed purchase price");
+    }
+    loanAmount = purchasePrice - downPayment;
+  } else if (financingMode === "fixed-loan") {
+    loanAmount = requireV2Number(values, "fixedLoanAmount");
+    if (loanAmount > purchasePrice) {
+      throw new Error("Fixed loan amount cannot exceed purchase price");
+    }
+    downPayment = purchasePrice - loanAmount;
+  } else {
+    throw new Error("TrueCap Underwriting Standard v2 requires a financingMode");
+  }
+
+  const downPaymentPctEffective = purchasePrice > 0 ? (downPayment / purchasePrice) * 100 : 0;
+  const monthlyPayment = calcMonthlyPayment(loanAmount, interestRate, loanTermYears);
+  const annualDebtService = monthlyPayment * 12;
+  const pmiAnnualRate =
+    pmiAnnualRatePct != null && Number.isFinite(pmiAnnualRatePct)
+      ? pmiAnnualRatePct
+      : DEFAULT_PMI_ANNUAL_RATE_PCT;
+  const pmiMonthly =
+    loanAmount > 0 &&
+    downPaymentPctEffective < PMI_DOWN_PAYMENT_THRESHOLD_PCT &&
+    pmiAnnualRate > 0
+      ? (loanAmount * (pmiAnnualRate / 100)) / 12
+      : 0;
+
+  const closingCostsInputMode = values.closingCostsInputMode;
+  let closingCosts: number;
+  let closingCostsPctEffective: number;
+  if (closingCostsInputMode === "percent") {
+    closingCostsPctEffective = requireV2Number(values, "closingCostsPct");
+    closingCosts = purchasePrice * (closingCostsPctEffective / 100);
+  } else if (closingCostsInputMode === "fixed") {
+    closingCosts = requireV2Number(values, "closingCostsFixed");
+    closingCostsPctEffective = purchasePrice > 0 ? (closingCosts / purchasePrice) * 100 : 0;
+  } else {
+    throw new Error("TrueCap Underwriting Standard v2 requires a closingCostsInputMode");
+  }
+
+  const totalCashRequired =
+    downPayment + closingCosts + loanFees + cashRepairs + initialReserve - acquisitionCredits;
+  if (totalCashRequired < 0) {
+    throw new Error("Acquisition credits cannot exceed modeled acquisition cash uses");
+  }
+
+  const annualCashFlow =
+    noiAnnual - annualDebtService - capexAnnual - pmiMonthly * 12;
+  const netCashFlow = annualCashFlow / 12;
+  const cocReturn = totalCashRequired > 0 ? (annualCashFlow / totalCashRequired) * 100 : 0;
+  const capRate = purchasePrice > 0 ? (noiAnnual / purchasePrice) * 100 : 0;
+  const dscr = annualDebtService > 0 ? noiAnnual / annualDebtService : 0;
+
+  const yearlyInterestSchedule = calculateYearlyInterestScheduleExact(
+    loanAmount,
+    interestRate,
+    loanTermYears,
+    monthlyPayment
+  );
+  const annualDepreciation = (purchasePrice * (buildingValuePct / 100)) / depreciationYears;
+  const effectiveTaxRate = (taxRatePct ?? 24) / 100;
+  const totalOperatingExpenses =
+    (vacancyAllowanceAnnual + operatingExpensesAnnual + capexAnnual) / 12;
+  const capex = capexAnnual / 12;
+
+  const taxStrategyYears = buildTaxStrategyProjection({
+    monthlyRentalIncome: grossScheduledIncomeAnnual / 12,
+    totalOperatingExpenses,
+    capexReserveMonthly: capex,
+    annualDepreciation,
+    yearlyInterestSchedule,
+    rentGrowthPct,
+    expenseGrowthPct,
+    taxRate: effectiveTaxRate,
+    includeInterestDeduction: includeInterestDeduction !== false,
+  });
+  const taxSavingsMonthly = (taxStrategyYears[0]?.netTaxBenefitAnnual ?? 0) / 12;
+  const afterTaxCF = netCashFlow + taxSavingsMonthly;
+  const tenYearProjection = buildTenYearProjection({
+    monthlyRentalIncome: grossScheduledIncomeAnnual / 12,
+    totalOperatingExpenses,
+    capexReserveMonthly: capex,
+    monthlyPayment,
+    pmiMonthly,
+    pmiNoCancel: pmiNoCancel === true,
+    loanAmount,
+    purchasePrice,
+    taxSavingsMonthly,
+    annualDepreciation,
+    yearlyInterestSchedule,
+    rentGrowthPct,
+    expenseGrowthPct,
+    taxRate: effectiveTaxRate,
+    includeInterestDeduction: includeInterestDeduction !== false,
+  });
+
+  const currentYear = analysisDateValue.getUTCFullYear();
+  const propertyAgeKnown = Number.isFinite(yearBuilt);
+  const propertyAge = propertyAgeKnown
+    ? Math.max(currentYear - (yearBuilt ?? currentYear), 0)
+    : 0;
+
+  return {
+    methodologyVersion: TRUECAP_UNDERWRITING_STANDARD_V2_VERSION,
+    analysisDate,
+    operatingScenario,
+    rentBasis,
+    scenarioRentMonthly,
+    recurringOtherIncomeMonthly,
+    recurringOtherIncomeAnnual,
+    recurringOtherExpenseMonthly,
+    recurringOtherExpenseAnnual,
+    financingMode,
+    closingCostsInputMode,
+    acquisitionCredits,
+    loanFees,
+    initialReserve,
+    cashRepairs,
+    propertyAgeKnown,
+    unitCount,
+    monthlyRentalIncome: scenarioRentMonthly,
+    grossScheduledIncomeAnnual,
+    vacancyAllowanceAnnual,
+    effectiveGrossIncomeAnnual,
+    propertyTax,
+    propertyTaxPctEffective,
+    insurance,
+    insuranceInputMode,
+    insurancePctInput,
+    insurancePctEffective,
+    hoa,
+    utilities,
+    maintenance: maintenanceAnnual / 12,
+    vacancy: vacancyAllowanceAnnual / 12,
+    management: managementAnnual / 12,
+    capex,
+    maintenancePctInput: maintenancePct,
+    capexPctInput: capexPct,
+    maintenancePctEffective: maintenancePct,
+    capexPctEffective: capexPct,
+    maintenanceAgeAdjusted: false,
+    capexAgeAdjusted: false,
+    totalOperatingExpenses,
+    operatingExpensesAnnual,
+    noiAnnual,
+    loanAmount,
+    monthlyPayment,
+    annualDebtService,
+    loanPrincipalAndInterest: monthlyPayment,
+    pmiMonthly,
+    propertyTaxMonthly: propertyTax,
+    insuranceMonthly: insurance,
+    hoaMonthly: hoa,
+    totalMonthlyPaymentDebug: monthlyPayment + propertyTax + insurance + hoa,
+    netCashFlow,
+    annualCashFlow,
+    cocReturn,
+    capRate,
+    dscr,
+    taxSavingsMonthly,
+    afterTaxCF,
+    annualDepreciation,
+    yearlyInterestSchedule,
+    effectiveTaxRate,
+    downPaymentPct: downPaymentPctEffective,
+    closingCostsPct: closingCostsPctEffective,
+    downPayment,
+    closingCosts,
+    totalCashRequired,
+    propertyAge,
+    tenYearProjection,
+    taxStrategyYears,
+  };
+}
+
+export function calculateAnalysis(
+  values: InvestmentFormValues & { underwritingModelVersion: "2.0" }
+): V2AnalysisResult;
+export function calculateAnalysis(values: InvestmentFormValues): AnyAnalysisResult;
+export function calculateAnalysis(values: InvestmentFormValues): AnyAnalysisResult {
+  if (values.underwritingModelVersion === "2.0") return calculateAnalysisV2(values);
+
   const {
     purchasePrice,
     yearBuilt,

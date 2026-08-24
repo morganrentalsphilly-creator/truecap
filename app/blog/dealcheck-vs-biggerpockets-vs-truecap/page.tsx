@@ -158,7 +158,7 @@ export default function ThreeWayComparisonPost() {
             </h2>
             <p
               className="text-sm sm:text-base leading-relaxed text-foreground"
-              dangerouslySetInnerHTML={{ __html: `<strong>DealCheck</strong> combines core rental, BRRRR, Airbnb, and flip calculators with native mobile apps and listing imports; Starter includes professional interactive and PDF reports with published usage limits. <strong>BiggerPockets Calculator</strong> currently presents its results as a BiggerPockets Pro feature. <strong>TrueCap</strong> offers unlimited no-signup core analyses, editable screening assumptions, one free comps lookup, and free read-only share links. Pro adds 50 comps lookups per month and the dedicated projection, BRRRR, and flip workflows. Choose based on the workflow you need, then verify current plan terms before subscribing.` }}
+              dangerouslySetInnerHTML={{ __html: `<strong>DealCheck</strong> combines core rental, BRRRR, Airbnb, and flip calculators with native mobile apps and listing imports; Starter includes professional interactive and PDF reports with published usage limits. <strong>BiggerPockets Calculator</strong> currently presents its results as a BiggerPockets Pro feature. <strong>TrueCap</strong> offers unlimited no-signup core analyses and editable screening assumptions. A free account adds one comps lookup and creation of read-only share links; recipients can view without an account. Pro adds 50 comps lookups per month and the dedicated projection, BRRRR, and flip workflows. Choose based on the workflow you need, then verify current plan terms before subscribing.` }}
             />
           </section>
 
@@ -193,7 +193,7 @@ export default function ThreeWayComparisonPost() {
             <h2>Free tier comparison</h2>
             <div dangerouslySetInnerHTML={{ __html: `<p>This is where they diverge most. The free tier sets expectations for the paid one — if free feels gated, you&apos;re skeptical of Pro.</p>
             <ul>
-              <li><strong>TrueCap free</strong> — unlimited analyses, cap rate, CoC, DSCR, NCF, monthly cash flow, selected-rule fit, address auto-fill, save up to 5 deals, dashboard access, and read-only share links. No signup required to use the calculator.</li>
+              <li><strong>TrueCap free</strong> — unlimited analyses, cap rate, CoC, DSCR, NCF, monthly cash flow, selected-rule fit, and address auto-fill without signup. A free signed-in account adds up to 5 saved deals, dashboard access, and creation of read-only share links; recipients do not need an account.</li>
               <li><strong>DealCheck Starter</strong> — account required; core rental, BRRRR, Airbnb, and flip calculators plus professional interactive and PDF reports are included. Starter supports up to 15 saved properties and has published limits on photos, comps, and templates.</li>
               <li><strong>BiggerPockets calculator</strong> — the current official page presents calculator results as a BiggerPockets Pro feature. Check the official calculator and Pro pages because access terms can change.</li>
             </ul>
@@ -201,7 +201,7 @@ export default function ThreeWayComparisonPost() {
 
             <h2>Pricing (paid tier comparison)</h2>
             <div dangerouslySetInnerHTML={{ __html: `<ul>
-              <li><strong>TrueCap</strong> — free core analyzer with paid Pro plans. Read-only share links remain free. Pro adds PDF reports, 50 comps lookups per month, 10-year projections, illustrative tax impact, sensitivity, modeled exits, an Offer Ceiling, dedicated BRRRR and fix-and-flip analyzers, editing, unlimited saves, and comparison tools.</li>
+              <li><strong>TrueCap</strong> — free core analyzer with paid Pro plans. Creating read-only share links is included with a free signed-in account; recipients can view without an account. Pro adds PDF reports, 50 comps lookups per month, 10-year projections, illustrative tax impact, sensitivity, modeled exits, an Offer Ceiling, dedicated BRRRR and fix-and-flip analyzers, editing, unlimited saves, and comparison tools.</li>
               <li><strong>DealCheck</strong> — free Starter plus paid Plus and Pro plans. The core calculators and professional reports are on Starter; paid plans raise saved-property, photo, comp, and template limits.</li>
               <li><strong>BiggerPockets Pro</strong> — bundles rental-calculator access with its broader membership benefits. Check the official Pro page for current price, trial, and renewal terms.</li>
             </ul>

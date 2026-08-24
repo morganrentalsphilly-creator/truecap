@@ -13,7 +13,7 @@ export type SavedAnalysisResolutionMode =
   | "current-computation"
   | "legacy-recomputed"
   | "legacy-stored-fallback"
-  | "same-version-recomputed"
+  | "same-version-recorded-snapshot"
   | "same-version-stored-fallback"
   | "frozen-version-snapshot";
 
@@ -26,6 +26,10 @@ export type SavedAnalysisSnapshotResolution = {
   currentMethodologyVersion: string;
   /** True only for a non-legacy version different from the running standard. */
   shouldFreeze: boolean;
+  /** True when the displayed financial result comes from the immutable
+   * result_snapshot captured when the analysis was saved. This is broader
+   * than shouldFreeze: same-version history must remain reproducible too. */
+  usesRecordedSnapshot: boolean;
   /** True when current math (including Deal Score) won the merge. */
   didRecompute: boolean;
 };
@@ -34,8 +38,8 @@ export type SavedAnalysisResultResolution = Omit<
   SavedAnalysisSnapshotResolution,
   "snapshot"
 > & {
-  /** Null means a version-mismatched frozen snapshot was incomplete. The
-   * caller must fail closed instead of filling missing outputs with new math. */
+  /** Null means a recorded snapshot was incomplete. The caller must fail
+   * closed instead of filling missing historical outputs with new math. */
   result: AnalysisResult | null;
 };
 
@@ -74,8 +78,11 @@ export function shouldFreezeSavedMethodology(
  * JSON is a payload, while the top-level column is the database contract that
  * migrations and release audits can query reliably.
  *
- * - Current and explicitly legacy rows may be recomputed. The recomputed
- *   object wins every overlapping field, including Deal Score.
+ * - A same-version saved snapshot is historical evidence. It is returned
+ *   field-for-field rather than being silently recalculated by a newer
+ *   deployment that happens to carry the same public version string.
+ * - Explicitly legacy rows retain their compatibility recompute. They were
+ *   never pinned to a formula contract, so the UI labels that recomputation.
  * - Any other version is frozen. The stored snapshot is returned field-for-
  *   field; current math is never used as a fill-in.
  * - When current math cannot be produced, the stored snapshot remains a
@@ -106,11 +113,24 @@ export function resolveSavedAnalysisSnapshot(input: {
       storedMethodologyVersion,
       currentMethodologyVersion,
       shouldFreeze: true,
+      usesRecordedSnapshot: true,
       didRecompute: false,
     };
   }
 
   const isLegacy = isLegacySavedMethodologyVersion(storedMethodologyVersion);
+  if (!isLegacy && Object.keys(frozenSnapshot).length > 0) {
+    return {
+      snapshot: frozenSnapshot,
+      mode: "same-version-recorded-snapshot",
+      storedMethodologyVersion,
+      currentMethodologyVersion,
+      shouldFreeze: false,
+      usesRecordedSnapshot: true,
+      didRecompute: false,
+    };
+  }
+
   if (!recomputedSnapshot) {
     return {
       snapshot: frozenSnapshot,
@@ -118,6 +138,7 @@ export function resolveSavedAnalysisSnapshot(input: {
       storedMethodologyVersion,
       currentMethodologyVersion,
       shouldFreeze: false,
+      usesRecordedSnapshot: Object.keys(frozenSnapshot).length > 0,
       didRecompute: false,
     };
   }
@@ -126,24 +147,19 @@ export function resolveSavedAnalysisSnapshot(input: {
     // Snapshot-only metadata survives. Every result/score field emitted by the
     // current contract wins, preventing a mixed old-score/new-financial view.
     snapshot: { ...frozenSnapshot, ...recomputedSnapshot },
-    mode:
-      Object.keys(frozenSnapshot).length === 0
-        ? "current-computation"
-        : isLegacy
-          ? "legacy-recomputed"
-          : "same-version-recomputed",
+    mode: isLegacy ? "legacy-recomputed" : "current-computation",
     storedMethodologyVersion,
     currentMethodologyVersion,
     shouldFreeze: false,
+    usesRecordedSnapshot: false,
     didRecompute: true,
   };
 }
 
 /**
- * AnalysisResult-shaped adapter for the analyzer and PDF surfaces. A frozen
- * version must contain every field the current UI expects; otherwise return
- * null rather than quietly backfilling missing financial outputs with current
- * arithmetic.
+ * AnalysisResult-shaped adapter for analyzer and PDF surfaces. Any recorded
+ * result must contain every field the current UI expects; otherwise return
+ * null rather than quietly backfilling historical outputs with current math.
  */
 export function resolveSavedAnalysisResult(input: {
   methodologyVersion: unknown;
@@ -163,11 +179,11 @@ export function resolveSavedAnalysisResult(input: {
     currentMethodologyVersion: input.recomputedResult.methodologyVersion,
   });
 
-  if (resolved.shouldFreeze) {
+  if (resolved.usesRecordedSnapshot) {
     // Compare against the current result's complete enumerable shape. This is
     // a compatibility check only; none of its VALUES flow into the output.
     // Score metadata is part of the same atomic methodology contract, so a
-    // future snapshot missing any requested score field also fails closed.
+    // recorded snapshot missing any requested score field also fails closed.
     const requiredKeys = new Set([
       ...Object.keys(input.recomputedResult),
       ...Object.keys(input.recomputedExtras),

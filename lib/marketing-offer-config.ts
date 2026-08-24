@@ -13,7 +13,7 @@
  */
 
 export const HOMEPAGE_HEADLINES = {
-  decision_system: "Review the model before you record a decision.",
+  decision_system: "Paste an address. Review what matters. Underwrite the rental.",
   a: "Screen a rental and compare asking with its target-dependent Offer Ceiling.",
   b: "See how a rental models under the assumptions shown.",
   walkaway: "Review the Offer Ceiling and the targets that produced it.",
@@ -78,8 +78,8 @@ function safePublicUrl(value: string | undefined): string | null {
 }
 
 export function getMarketingOfferConfig() {
-  // The Rental Acquisition Decision System positioning is the approved
-  // production default. Keep an explicit false/off kill switch for rollback.
+  // Underwriting-first positioning is the production default. Keep an
+  // explicit false/off kill switch for rollback.
   const positioningOverride = process.env.NEXT_PUBLIC_TRUECAP_NEW_HOMEPAGE_POSITIONING;
   const newHomepagePositioningEnabled = positioningOverride == null
     ? true

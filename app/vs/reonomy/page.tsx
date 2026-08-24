@@ -51,7 +51,7 @@ type Row = { feature: string; truecap: string; reonomy: string; winner: Verdict 
 
 const MATRIX: Row[] = [
   { feature: "Primary asset class", truecap: "Residential (SFR, small multifamily, owner-occupant)", reonomy: "Commercial (office, retail, industrial, multifamily 5+)", winner: "tie" },
-  { feature: "Primary use", truecap: "Per-deal underwriting (decide if it cash-flows)", reonomy: "CRE property + owner intelligence (find + research)", winner: "tie" },
+  { feature: "Primary use", truecap: "Per-deal underwriting (model cash flow and returns)", reonomy: "CRE property + owner intelligence (find + research)", winner: "tie" },
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine for residential", reonomy: "Not modeled (intelligence only)", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", reonomy: "Not modeled", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", reonomy: "CRE property data only", winner: "truecap" },

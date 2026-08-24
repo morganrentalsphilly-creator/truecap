@@ -12,7 +12,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { decodeShareLink } from "@/lib/share-link";
 import { calculateAnalysis } from "@/lib/calc-analysis";
-import { investmentFormSchema } from "@/lib/investcalc-schema";
+import { releasedInvestmentFormSchema } from "@/lib/underwriting-model-release";
 import { SharedDealShell } from "@/components/investcalc/shared-deal-shell";
 import { getPublicAgentBranding } from "@/lib/agent-share";
 import { verifyShareAttribution, hashShareValues } from "@/lib/share-attribution";
@@ -63,7 +63,7 @@ export default async function PublicDealPage({ params }: Props) {
   // The snapshot may have come from any time — re-validate against the
   // current schema so we don't crash if a saved analysis is missing a
   // newer required field.
-  const parsed = investmentFormSchema.safeParse(payload.values);
+  const parsed = releasedInvestmentFormSchema.safeParse(payload.values);
   if (!parsed.success) {
     return <InvalidLink reason="This shared analysis was saved in an older format we can no longer render." />;
   }

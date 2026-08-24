@@ -16,7 +16,10 @@ describe("guest analysis signup continuity", () => {
     expect(prompt).toContain('href="/auth/login?next=/"');
     expect(prompt).toContain('onBeforeStart={() => beginSignup("google")}');
     expect(dashboard).toContain(
-      "onPrepareAuthSave(activeMaoTarget ?? undefined, offerCeilingTargetSource)"
+      "onPrepareAuthSave(adoptedMaoTarget, adoptedMaoTargetSource)"
+    );
+    expect(dashboard).toContain(
+      "const targetAdopted = isAdoptedOfferCeilingTargetSource("
     );
     expect(googleButton).toContain("onBeforeStart?.()");
   });
@@ -28,7 +31,16 @@ describe("guest analysis signup continuity", () => {
     expect(calculator).toContain("clearPendingSaveIntent()");
     expect(calculator).toContain("writeCalcDraftWithMaoTarget(");
     expect(calculator).toContain(
-      'source ?? analysisMaoTargetSource ?? "selected-targets"'
+      "isAdoptedOfferCeilingTargetSource(normalizedSource)"
+    );
+    expect(calculator).toContain(
+      'exactTarget ? normalizedSource : "screening-defaults"'
+    );
+    expect(calculator).toContain(
+      "const targetWasAdopted = isAdoptedOfferCeilingTargetSource("
+    );
+    expect(calculator).toContain(
+      "const maxOfferTargetSnapshot = targetWasAdopted"
     );
     expect(calculator).toContain("autoAfterAuth: duplicateCollision.autoAfterAuth");
     expect(calculator).toContain(

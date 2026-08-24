@@ -462,7 +462,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "how-truecap-verdict-engine-works",
     title: "How TrueCap classifies selected-rule fit",
     excerpt:
-      "The exact cash flow, DSCR, cap rate, and cash-on-cash thresholds TrueCap uses to classify a rental deal as Strong / Solid / Mixed / Marginal / Negative — pulled directly from the production code.",
+      "The cash flow, DSCR, cap-rate, and cash-on-cash thresholds behind TrueCap's secondary screening bands, plus how to interpret them without treating a label as advice.",
     readingTimeMinutes: 10,
     publishedAt: "2026-06-07",
     available: true,
@@ -562,7 +562,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "dealcheck-vs-stessa-vs-truecap",
     title: "DealCheck vs Stessa vs TrueCap: which one do you actually need?",
     excerpt:
-      "An honest 3-way comparison of DealCheck, Stessa, and TrueCap. Different tools for different stages — pre-purchase underwriting vs post-purchase ops — with concrete recommendations.",
+      "An honest 3-way comparison of DealCheck, Stessa, and TrueCap. Different tools for different stages — pre-purchase underwriting vs post-purchase operations — with concrete tradeoffs.",
     readingTimeMinutes: 11,
     publishedAt: "2026-06-07",
     available: true,

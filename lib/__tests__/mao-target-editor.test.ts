@@ -149,10 +149,10 @@ describe("normalizeMaoTargetForFinancing", () => {
     ).toEqual({ capRate: 8, monthlyCashFlow: 500 });
   });
 
-  it("turns a DSCR-only cash target into a real break-even criterion", () => {
+  it("requires a new relevant target when a cash purchase invalidates DSCR", () => {
     expect(
       normalizeMaoTargetForFinancing({ dscr: 1.25 }, { isCashPurchase: true })
-    ).toEqual({ monthlyCashFlow: 0 });
+    ).toBeNull();
   });
 
   it("preserves a financed target and a missing target exactly", () => {

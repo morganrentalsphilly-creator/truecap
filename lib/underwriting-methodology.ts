@@ -8,6 +8,14 @@
  */
 
 export const TRUECAP_UNDERWRITING_STANDARD_VERSION = "1.0" as const;
+/**
+ * Opt-in first-year core. v1 remains the public/default contract until every
+ * save/share/report surface can persist v2 snapshots without mutation.
+ */
+export const TRUECAP_UNDERWRITING_STANDARD_V2_VERSION = "2.0" as const;
+export type TrueCapUnderwritingStandardVersion =
+  | typeof TRUECAP_UNDERWRITING_STANDARD_VERSION
+  | typeof TRUECAP_UNDERWRITING_STANDARD_V2_VERSION;
 export const TRUECAP_UNDERWRITING_STANDARD_NAME = "TrueCap Underwriting Standard" as const;
 /** Deal Score is part of the same saved-decision contract as the financial
  * outputs. A material score-arithmetic change therefore bumps the whole
@@ -229,6 +237,137 @@ export const UNDERWRITING_FORMULAS: Record<
     convention: "Depends on the entered appreciation scenario and scheduled amortization; it is not an appraisal.",
   },
 };
+
+/**
+ * Formula registry for the opt-in v2 first-year core. Unchanged secondary
+ * formulas are inherited deliberately; the entries below are the reviewed
+ * differences from v1. Keeping a separate registry prevents documentation or
+ * a UI label from silently changing the meaning of a historical v1 result.
+ */
+export const UNDERWRITING_V2_FORMULAS: Record<
+  UnderwritingFormulaKey,
+  UnderwritingFormulaDefinition
+> = {
+  ...UNDERWRITING_FORMULAS,
+  grossScheduledIncome: {
+    label: "Gross scheduled income",
+    formula: "Selected scenario scheduled rent + recurring other income",
+    convention:
+      "Current and stabilized rents remain separate; only the explicitly selected scenario enters the result.",
+  },
+  otherIncome: {
+    label: "Recurring other income",
+    formula: "Entered recurring other monthly income × 12",
+    convention:
+      "Included in gross scheduled income and therefore in the vacancy allowance; acquisition credits are not income.",
+  },
+  vacancyAllowance: {
+    label: "Vacancy and credit-loss allowance",
+    formula: "Gross scheduled income × entered vacancy percentage",
+    convention:
+      "Applied to scheduled rent plus recurring other income and shown above NOI.",
+  },
+  effectiveGrossIncome: {
+    label: "Effective gross income",
+    formula: "Gross scheduled income − vacancy and credit-loss allowance",
+    convention: "Uses exact annual values before display rounding.",
+  },
+  propertyTaxes: {
+    label: "Property taxes",
+    formula: "Entered annual parcel amount, otherwise purchase price × entered/default annual rate",
+    convention: "Calculated annually without intermediate monthly rounding.",
+  },
+  insurance: {
+    label: "Insurance",
+    formula: "Entered monthly premium × 12, otherwise purchase price × entered/default annual rate",
+    convention: "Calculated annually without intermediate monthly rounding.",
+  },
+  repairsMaintenance: {
+    label: "Repairs and maintenance reserve",
+    formula: "Gross scheduled income × entered maintenance percentage",
+    convention:
+      "A recurring operating expense in NOI; entered immediate repairs are a separate cash acquisition use.",
+  },
+  management: {
+    label: "Property management",
+    formula: "Gross scheduled income × entered management percentage",
+    convention: "Included in NOI; an explicit 0 remains distinct from a missing value.",
+  },
+  utilitiesAndHoa: {
+    label: "Owner-paid utilities, HOA, and other recurring expense",
+    formula:
+      "(Entered monthly utilities + HOA + recurring other expense) × 12",
+    convention: "Each category requires an explicit amount in v2; zero is allowed.",
+  },
+  capexReserve: {
+    label: "Replacement/CapEx reserve",
+    formula: "Gross scheduled income × entered replacement-reserve percentage",
+    convention: "Excluded from lender-style NOI but deducted from investor cash flow.",
+  },
+  operatingExpenses: {
+    label: "Operating expenses",
+    formula:
+      "Property tax + insurance + HOA + utilities + maintenance + management + recurring other expense",
+    convention:
+      "Excludes vacancy, debt service, PMI, income tax, immediate repairs, and the replacement reserve.",
+  },
+  noi: {
+    label: "Net operating income (NOI)",
+    formula: "Effective gross income − operating expenses",
+    convention: "Uses exact annual values and excludes financing and the replacement reserve.",
+  },
+  mortgagePayment: {
+    label: "Mortgage principal and interest",
+    formula: "L × [r(1+r)^n] ÷ [(1+r)^n − 1]",
+    convention:
+      "L follows the selected cash, percent-down, fixed-down, or fixed-loan semantics; no intermediate payment rounding.",
+  },
+  annualDebtService: {
+    label: "Annual debt service",
+    formula: "Exact monthly principal and interest × 12",
+    convention: "PMI/MIP remains outside model DSCR and inside investor cash flow.",
+  },
+  beforeTaxCashFlow: {
+    label: "Pre-tax cash flow after replacement reserve",
+    formula: "NOI − annual debt service − replacement reserve − PMI/MIP",
+    convention: "Reported monthly as the exact annual result ÷ 12 before display rounding.",
+  },
+  totalCashRequired: {
+    label: "Total initial cash invested",
+    formula:
+      "Equity + closing costs + loan fees + cash repairs + initial reserve − acquisition credits",
+    convention:
+      "Immediate repairs remain cash-funded and are never silently added to the acquisition loan.",
+  },
+  capRate: {
+    label: "Capitalization rate",
+    formula: "Annual NOI ÷ purchase price",
+    convention: "Independent of financing and based on exact annual NOI.",
+  },
+  cashOnCashReturn: {
+    label: "Cash-on-cash return",
+    formula: "Annual pre-tax cash flow after replacement reserve ÷ total initial cash invested",
+    convention: "Credits reduce the denominator; all acquisition cash uses remain explicit.",
+  },
+  dscr: {
+    label: "Model DSCR",
+    formula: "Exact annual NOI ÷ exact annual principal-and-interest debt service",
+    convention: "Cash purchases use 0 as the stored not-applicable sentinel.",
+  },
+};
+
+export const UNDERWRITING_FORMULAS_BY_VERSION = {
+  [TRUECAP_UNDERWRITING_STANDARD_VERSION]: UNDERWRITING_FORMULAS,
+  [TRUECAP_UNDERWRITING_STANDARD_V2_VERSION]: UNDERWRITING_V2_FORMULAS,
+} as const;
+
+export const UNDERWRITING_V2_CORE_RELEASE = {
+  version: TRUECAP_UNDERWRITING_STANDARD_V2_VERSION,
+  effectiveDate: "2026-08-24",
+  status: "opt-in",
+  summary:
+    "Exact annual first-year core with explicit scenarios, financing semantics, acquisition cash uses, other income/expense, and unknown-value gates.",
+} as const;
 
 export const UNDERWRITING_STANDARD_RELEASE_NOTES = [
   {

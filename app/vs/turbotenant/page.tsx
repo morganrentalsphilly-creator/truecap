@@ -54,7 +54,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", turbotenant: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", turbotenant: "Not modeled", winner: "truecap" },
   { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", turbotenant: "Not modeled", winner: "truecap" },
-  { feature: "Screening Index + verdict", truecap: "Free — 0-100 score + plain-English verdict", turbotenant: "Not applicable", winner: "truecap" },
+  { feature: "Secondary Screening Index", truecap: "Free — 0-100 triage score + factor breakdown", turbotenant: "Not applicable", winner: "truecap" },
   { feature: "Sensitivity grid", truecap: "Pro — rent ±10%, vacancy ±5pp, rate ±1pp", turbotenant: "Not modeled", winner: "truecap" },
   { feature: "Rental listing distribution", truecap: "No", turbotenant: "Yes — syndicated to Zillow, Realtor, etc.", winner: "turbotenant" },
   { feature: "Online rental application", truecap: "No", turbotenant: "Yes — customizable forms", winner: "turbotenant" },
@@ -109,7 +109,7 @@ export default function VsTurbotenantPage() {
             <span className="text-primary">underwrite the deal, then manage the tenant</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            TurboTenant handles the landlord operations stack after you own the property — listing, screening, leases, rent collection, maintenance requests. TrueCap is the pre-purchase underwriting calculator that decides whether the property is worth buying in the first place. They don&apos;t compete; they cover different halves of the rental lifecycle.
+            TurboTenant handles the landlord operations stack after you own the property — listing, screening, leases, rent collection, maintenance requests. TrueCap models a property&apos;s pre-purchase economics from the assumptions you review. They don&apos;t compete; they cover different halves of the rental lifecycle.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ScrollToFormButton
@@ -144,7 +144,7 @@ export default function VsTurbotenantPage() {
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You&apos;re evaluating a property before making an offer.</li>
                 <li>You want cap rate, DSCR, cash flow, 10-year projection.</li>
-                <li>You want a Screening Index + plain-English verdict.</li>
+                <li>You want modeled economics, selected-rule fit, and a secondary Screening Index.</li>
                 <li>You&apos;re comparing 2-3 deals side-by-side before deciding.</li>
               </ul>
             </div>

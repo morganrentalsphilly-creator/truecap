@@ -1,6 +1,10 @@
-# One-time Deal Decision Pack security and rollout
+# Historical one-time paid-claim recovery security
 
-## What changed
+New one-time Decision Pack checkout is disabled. This document records the
+security contract needed to recover reports for customers who paid while the
+product was offered; it is not an activation or marketing runbook.
+
+## Recovery design
 
 The one-time PDF flow no longer treats a Stripe Checkout Session id as a
 reusable bearer token.
@@ -30,13 +34,14 @@ original deal retroactively, so a "first claimant wins" compatibility path
 would preserve the takeover vulnerability. Support can verify Stripe payment
 records and fulfill/refund the small number of in-flight legacy purchases.
 
-## Required rollout order
+## Current verification
 
-1. Review and apply
-   `supabase/migrations/20260815150000_one_time_pdf_purchase_claims.sql`.
-2. Deploy the matching application code. Do not deploy the action first: it
-   intentionally fails closed when the ledger is unavailable.
-3. Run one Stripe test-mode purchase in the same tab and verify:
+1. Confirm the historical claim-ledger migration
+   `supabase/migrations/20260815150000_one_time_pdf_purchase_claims.sql` is
+   present in the target environment. Recovery intentionally fails closed when
+   the ledger is unavailable.
+2. Keep both Decision Pack checkout gates disabled while validating recovery.
+3. Use automated fixtures or an existing Stripe test-mode claim to verify:
    - the success URL contains `pdf_claim`, never `cs_...`;
    - the address bar is clean before analytics initialize;
    - the exact checked-out deal exports automatically;
@@ -45,6 +50,10 @@ records and fulfill/refund the small number of in-flight legacy purchases.
    - after the 24-hour recovery window, the ledger rejects replay.
 4. Review PostHog/Sentry/Vercel telemetry for historical sensitive query
    values and delete them under the providers' retention tooling if required.
+
+If new sales are ever reconsidered, use the durable-fulfillment runbook and a
+separately approved test-mode activation. Do not reactivate either checkout
+gate from this historical recovery document.
 
 No Stripe price, coupon, checkout amount, subscription entitlement, or webhook
 signature/dispatch logic changed.
