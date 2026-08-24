@@ -188,7 +188,7 @@ export function VacancyRateCalculatorWidget() {
       <p className="mt-4 text-xs text-muted-foreground leading-relaxed">
         National average vacancy on long-term residential rentals runs
         7-9%. Sellers and listing brochures typically quote 5%. Anything
-        under 5% is aggressive — adjust your offer accordingly.
+        under 5% is aggressive — update the price assumption and rerun the screen.
       </p>
 
       <Link

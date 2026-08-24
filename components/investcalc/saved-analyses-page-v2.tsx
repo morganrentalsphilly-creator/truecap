@@ -180,7 +180,7 @@ export type SavedAnalysisListItem = {
    * then renders exactly as before.
    */
   offerLine?: DealOfferLine | null;
-  /** Exact return criteria used to solve offerLine's price ceiling. */
+  /** Exact return criteria used to solve offerLine's Offer Ceiling. */
   offerBasisLabel?: string | null;
   /** Agent Pro: which client this deal is assigned to (drives their portal). */
   clientId?: string | null;
@@ -280,7 +280,7 @@ function OfferLineRow({
           </span>
           {offer.maxPrice != null ? (
             <>
-              {" · "}Price ceiling: <span className="tabular-nums">{fmtMoney0(offer.maxPrice)}</span>
+              {" · "}Offer Ceiling: <span className="tabular-nums">{fmtMoney0(offer.maxPrice)}</span>
             </>
           ) : null}
         </div>
@@ -288,7 +288,7 @@ function OfferLineRow({
           <>
             <div className="mt-0.5">Criteria: {basisLabel}</div>
             <div className="mt-0.5 text-[11px]">
-              Calculated from your selected targets. This is not a recommended offer.
+              Highest modeled price that still meets {basisLabel} under the assumptions shown. This is not a recommended offer or appraisal.
             </div>
           </>
         ) : null}
@@ -308,7 +308,7 @@ function OfferLineRow({
     <div className="mt-1.5 text-xs text-muted-foreground">
       <div>
         <span className="font-semibold text-foreground">
-          Price ceiling: <span className="tabular-nums">{fmtMoney0(offer.maxPrice)}</span>
+          Offer Ceiling: <span className="tabular-nums">{fmtMoney0(offer.maxPrice)}</span>
         </span>
         {gap != null ? (
           <>
@@ -323,7 +323,7 @@ function OfferLineRow({
       </div>
       {basisLabel ? <div className="mt-0.5">Criteria: {basisLabel}</div> : null}
       <div className="mt-0.5 text-[11px]">
-        Calculated from your selected targets. This is not a recommended offer.
+        Highest modeled price that still meets {basisLabel ?? "the captured targets"} under the assumptions shown. This is not a recommended offer or appraisal.
       </div>
     </div>
   );
@@ -726,7 +726,7 @@ function buildReportDataFromSavedSnapshot(args: {
   templateFallback: { templateName: string } | null;
   exitYears: ExitScenarioYear[];
   includeDerivedScenarios?: boolean;
-  /** Max Offer + Deal Doctor are inverse solves. Omit them when the report is
+  /** Offer Ceiling + Deal Doctor are inverse solves. Omit them when the report is
    * frozen to a different methodology unless a solved acquisition block was
    * itself frozen (historical snapshots currently persist only the target). */
   includeDerivedMaxOffer?: boolean;
@@ -2163,7 +2163,7 @@ export function SavedAnalysesPage({
         }
 
         const computedResult = calculateAnalysis(parsed.data);
-        // Resolve base financial outputs and Deal Score under one methodology
+        // Resolve base financial outputs and Screening Index under one methodology
         // decision. The top-level database version is authoritative; a future
         // mismatch stays frozen instead of being overwritten by this client.
         const freshVerdict = recomputeSavedDealVerdict(exportResult.formSnapshot);

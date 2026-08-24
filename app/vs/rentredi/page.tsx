@@ -61,7 +61,7 @@ const MATRIX: Row[] = [
   { feature: "10-year projection",                 truecap: "Pro — rent growth + expense growth + appreciation",                     rentredi: "Not modeled",                                                       winner: "truecap" },
   { feature: "Sensitivity grid",                   truecap: "Pro — rent ±10%, vacancy ±5pp, rate ±1pp",                                rentredi: "Not modeled",                                                       winner: "truecap" },
   { feature: "Illustrative tax impact",            truecap: "Pro — depreciation + interest + modeled after-tax CF",                   rentredi: "Not modeled",                                                       winner: "truecap" },
-  { feature: "Deal score (0-100)",                 truecap: "Free — with subscore breakdown",                                          rentredi: "Not modeled",                                                       winner: "truecap" },
+  { feature: "Screening Index (0-100)",                 truecap: "Free — with subscore breakdown",                                          rentredi: "Not modeled",                                                       winner: "truecap" },
   { feature: "Plain-English verdict",              truecap: "Yes — Strong / Solid / Mixed / Marginal / Negative",                     rentredi: "Not applicable",                                                    winner: "truecap" },
   { feature: "Online rent collection",             truecap: "No",                                                                     rentredi: "Yes — ACH + card, late fees, auto-pay",                              winner: "rentredi" },
   { feature: "Tenant screening",                   truecap: "No",                                                                     rentredi: "Yes — credit, criminal, eviction reports",                           winner: "rentredi" },
@@ -300,8 +300,8 @@ export default function VsRentRediPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly
             cash flow and plain read-only share links. Pro adds co-branding,
-            10-year projections, illustrative tax impact, sensitivity, MAO,
-            strategy analyzers, and included PDFs. A one-time PDF option is
+            10-year projections, illustrative tax impact, sensitivity, Offer Ceiling,
+            strategy analyzers, and included PDFs. New one-time PDF checkout is
             also available. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">

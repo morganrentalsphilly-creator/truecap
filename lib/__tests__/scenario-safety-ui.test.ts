@@ -21,7 +21,7 @@ describe("what-if scenario safety", () => {
       "These numbers are temporary. Your saved base assumptions have not changed."
     );
     expect(dashboard).toContain(
-      "Scenario values below are labeled Scenario; the Decision card and price ceiling remain labeled Base."
+      "Scenario values below are labeled Scenario; the Decision card and Offer Ceiling remain labeled Base."
     );
     expect(dashboard).toContain("previousBaseAssumptionsRef");
     expect(dashboard).toContain("setWhatIfState(null)");

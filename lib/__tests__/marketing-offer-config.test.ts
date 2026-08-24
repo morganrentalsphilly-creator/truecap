@@ -93,10 +93,10 @@ describe("marketing offer configuration", () => {
     });
   });
 
-  it("honors the guarantee kill switch and keeps the terms link safe", () => {
-    // An explicit, reviewed opt-in is required; the kill switch still wins.
+  it("keeps the retired guarantee fail-closed and the legacy terms link safe", () => {
+    // A stale deployment opt-in cannot resurrect an unsupported promise.
     process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_ENABLED = "1";
-    expect(getMarketingOfferConfig().guaranteeEnabled).toBe(true);
+    expect(getMarketingOfferConfig().guaranteeEnabled).toBe(false);
     process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_DISABLED = "1";
     expect(getMarketingOfferConfig().guaranteeEnabled).toBe(false);
     delete process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_DISABLED;
@@ -108,7 +108,7 @@ describe("marketing offer configuration", () => {
     // A valid override is respected.
     process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_TERMS_URL = "/legal/never-overpay-guarantee";
     expect(getMarketingOfferConfig()).toMatchObject({
-      guaranteeEnabled: true,
+      guaranteeEnabled: false,
       guaranteeTermsUrl: "/legal/never-overpay-guarantee",
     });
   });

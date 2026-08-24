@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * "What price makes this deal work?" - the Max Allowable Offer surface.
+ * "What price makes this deal work?" - the Offer Ceiling surface.
  *
  * Answers two questions from the same targets:
  *   1. Forward - the HIGHEST price you should pay to still hit every target
@@ -104,7 +104,7 @@ export function MaxOfferCard({
     return chooseMaoTargetFromBuyBox(buyBoxThresholds, { isCashPurchase: isCashDeal });
   }, [initialTarget, buyBoxThresholds, isCashDeal]);
 
-  // Initial targets = the buy-box seed when present, else the canonical MAO
+  // Initial targets = the buy-box seed when present, else the canonical Offer Ceiling
   // basis. Keep a validated committed target separate from raw inputs: an
   // out-of-range draft or an attempt to remove the final criterion is shown
   // with an inline error but never reaches the solver, Save, Share, or PDF.
@@ -141,6 +141,13 @@ export function MaxOfferCard({
   // edit and the targets are the user's, not the box's.
   const showBuyBoxSeedLabel =
     !initialTarget && seedTarget != null && !touched && seedKey === appliedSeedKey;
+  const targetProfileLabel = showBuyBoxSeedLabel
+    ? "your Buy Box"
+    : initialTarget
+      ? "the captured selected targets"
+      : touched
+        ? "your selected targets"
+        : "TrueCap screening defaults";
 
   const edit =
     (field: MaoTargetField) => (event: ChangeEvent<HTMLInputElement>) => {
@@ -206,7 +213,7 @@ export function MaxOfferCard({
       <div className="flex items-center gap-2 mb-1.5">
         <Target aria-hidden className="w-4 h-4 text-primary" />
         <span className="font-semibold text-sm text-foreground">
-          {showDecisionThresholds ? "Your walk-away price" : "What price makes this deal work?"}
+          Offer Ceiling
         </span>
         {showBuyBoxSeedLabel ? (
           <span className="rounded-full border border-primary/30 bg-[var(--brand-blue-light)] px-2 py-0.5 text-[10px] font-semibold text-primary">
@@ -215,7 +222,7 @@ export function MaxOfferCard({
         ) : null}
       </div>
       <p className="text-xs text-muted-foreground mb-4">
-        Set your return targets - we solve the price ceiling that still clears them, and what it&apos;d take to
+        Set your return targets - we solve the Offer Ceiling that still clears them, and what it&apos;d take to
         make your current price work. Uses your current rent, financing, and operating assumptions.
       </p>
 
@@ -360,11 +367,11 @@ export function MaxOfferCard({
         </div>
       </div>
 
-      {/* Forward: max offer */}
+      {/* Forward: modeled Offer Ceiling */}
       <div className="mt-5 rounded-xl border border-border bg-[var(--background)] p-4 sm:p-5">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
           <div>
-            <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Price ceiling</div>
+            <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Offer Ceiling</div>
             <div className={cn("mt-1 font-mono text-3xl font-extrabold tabular-nums tracking-tight sm:text-4xl", mao ? "text-primary" : "text-muted-foreground")}>
               {!values ? "—" : noneSet ? "Set a target" : mao ? money(mao.maxPrice) : "No price hits these targets"}
             </div>
@@ -390,7 +397,8 @@ export function MaxOfferCard({
           <div className="mt-3 border-t border-border pt-3">
             <p className="text-xs font-semibold text-foreground">Criteria: {describeMaoTarget(target)}</p>
             <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-              Calculated from your selected targets. This is not a recommended offer.
+              Highest modeled price that still meets {targetProfileLabel} under the assumptions shown.
+              This is not a recommended offer or an appraisal.
             </p>
           </div>
         ) : null}

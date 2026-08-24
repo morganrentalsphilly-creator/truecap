@@ -78,7 +78,7 @@ const FAQ_ITEMS = [
   },
   {
     q: `How does TrueCap relate to these three?`,
-    a: `TrueCap is downstream of all of them. They help you find deals; TrueCap helps you evaluate them. The recommended workflow: find a property (Roofstock listing / Mashvisor heatmap-driven MLS search / PropStream off-market lead) → underwrite in TrueCap → decide whether to make an offer.`,
+    a: `TrueCap is downstream of all of them. They help you find properties; TrueCap helps you screen modeled economics. A possible workflow is: find a property → underwrite in TrueCap → verify the material assumptions → record your own decision.`,
   },
 ];
 

@@ -105,6 +105,11 @@ import {
   type InputConfidenceResult,
   type InputVerificationEvidence,
 } from "@/lib/input-confidence";
+import {
+  buildAssumptionLedger,
+  buildDecisionTargetContext,
+  userDecisionFromPipelineStage,
+} from "@/lib/decision-contract";
 import type { ReportMode } from "@/lib/pdf-export-constants";
 import type { PropertyEnrichment } from "@/lib/property-enrichment/rentcast";
 import { addDealToCompareAction } from "@/app/actions/compare";
@@ -140,7 +145,6 @@ import {
 import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
 import { getLimitingFactor } from "@/lib/limiting-factor";
 import {
-  createOneTimePdfCheckoutAction,
   verifyOneTimePdfPaymentAction,
 } from "@/app/actions/one-time-pdf";
 import {
@@ -448,7 +452,7 @@ const INPUT_TABS: {
   { id: "cash-flow", label: "Cash Flow Analysis", mobileLabel: "Cash Flow", isPro: false, isFree: true },
   { id: "projections", label: "10-Year Projections", mobileLabel: "10-Year", isPro: true },
   { id: "tax-strategy", label: "Illustrative Tax Impact", mobileLabel: "Tax", isPro: true },
-  { id: "deal-score", label: "Deal Score", mobileLabel: "Score", isPro: true },
+  { id: "deal-score", label: "Screening Index", mobileLabel: "Index", isPro: true },
 ];
 const SAVED_ANALYSIS_AUTO_EXPORT_PDF_KEY = "truecap_saved_analysis_auto_export_pdf";
 
@@ -527,6 +531,7 @@ export function InvestCalcPage({
   savedDealLimit = null,
   isAuthenticated = false,
   userAnalysisDefaults = null,
+  advocacyContractEligible = false,
 }: {
   canSaveDeals?: boolean;
   canCompareDeals?: boolean;
@@ -552,8 +557,13 @@ export function InvestCalcPage({
    *  engine's built-in defaults at form initialization + on every
    *  resetToNewAnalysis. */
   userAnalysisDefaults?: Record<string, number> | null;
+  /** Server-derived internal rollout eligibility. This is not an entitlement
+   * and must remain false for anonymous/public renders. */
+  advocacyContractEligible?: boolean;
   }) {
   const router = useRouter();
+  const advocacyDecisionContract =
+    advocacyContractEligible && isFeatureEnabled("advocacy_decision_contract");
   const [activeInputTab, setActiveInputTab] = useState<InputTab>("cash-flow");
   const [activeDashboardTab, setActiveDashboardTab] = useState<AnalysisDashboardTab>("cash-flow");
   // Bumped on every point-at-tab intent so the ledger reopens a row the
@@ -587,7 +597,7 @@ export function InvestCalcPage({
   // Pre-run live verdict gating (LIVE-VERDICT-VS-STRATEGY-FRAMING): while a
   // solve-oriented play is active (Wholesale/BRRRR/Flip — primaryTab !==
   // "cash-flow"), the generic asking-price verdict directly contradicts the
-  // play's framing ("we'll reverse-solve your max offer" next to a NEGATIVE
+  // play's framing ("we'll reverse-solve your Offer Ceiling" next to a NEGATIVE
   // buy-box readout). The post-run hero already suppresses that verdict via
   // strategyLeadsOutput (analysis-dashboard) — apply the same rule to the
   // in-form LiveVerdictPanel and the sticky dock readout pre-run.
@@ -595,7 +605,7 @@ export function InvestCalcPage({
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   // The exact form values that produced `analysisResult`. The results
   // dashboard reads from this (not a live form.getValues() snapshot) so the
-  // headline metrics and the derived cards (Max Offer, Sensitivity, etc.) are
+  // headline metrics and the derived cards (Offer Ceiling, Sensitivity, etc.) are
   // always computed from the SAME inputs — never a mix of frozen result +
   // live form state. Updated everywhere `analysisResult` is set.
   const [analysisValues, setAnalysisValues] = useState<InvestmentFormValues | null>(null);
@@ -648,7 +658,7 @@ export function InvestCalcPage({
       const cf = `${ncf >= 0 ? "+" : "-"}$${Math.abs(ncf).toLocaleString()}/mo`;
       const dscr = lp.monthlyPayment > 0 ? `, DSCR ${lp.dscr.toFixed(2)}` : "";
       setLivePreviewMsg(
-        `Live preview: ${lp.tier}, Deal Score ${lp.score} out of 100, cash flow ${cf}, cap rate ${lp.capRate.toFixed(1)}%${dscr}.`
+        `Live screening preview: ${lp.tier}, Screening Index ${lp.score} out of 100, a secondary heuristic and not investment advice; cash flow ${cf}, cap rate ${lp.capRate.toFixed(1)}%${dscr}.`
       );
     }, 400);
     return () => window.clearTimeout(id);
@@ -702,8 +712,8 @@ export function InvestCalcPage({
   const [restoredFromDraft, setRestoredFromDraft] = useState(false);
   /**
    * Snapshot of the address from the restored draft so the welcome
-   * banner can show it ("Welcome back - your draft for 1700 W Erie
-   * Ave is ready"). Captured at restore time so it doesn't update if
+   * banner can identify which saved draft is ready. Captured at restore
+   * time so it doesn't update if
    * the user edits the field afterwards.
    */
   const [restoredAddress, setRestoredAddress] = useState<string | null>(null);
@@ -729,6 +739,7 @@ export function InvestCalcPage({
   const [addressChangedChoiceBusy, setAddressChangedChoiceBusy] =
     useState<AddressChangedChoice | null>(null);
   const [savedDealId, setSavedDealId] = useState<string | null>(null);
+  const [loadedPipelineStage, setLoadedPipelineStage] = useState<string | null>(null);
   const [savedDealCount, setSavedDealCount] = useState(initialSavedDealCount);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isComparingDeals, setIsComparingDeals] = useState(false);
@@ -737,7 +748,7 @@ export function InvestCalcPage({
   // ── Sample-deal Pro preview ────────────────────────────────────────
   // When the analysis was triggered from the "Try a sample deal" button
   // AND the user lacks the Pro entitlements, we unlock the full Pro
-  // report (projections, tax, exit, deal score, stress-test, strategies)
+  // report (projections, tax, exit, Screening Index, stress-test, strategies)
   // for that one demo run. This shows prospects what Pro actually looks
   // like instead of a locked teaser. It's a pure UI unlock: the sample
   // is never saved (no analysisId), so the snapshot server actions are
@@ -758,12 +769,12 @@ export function InvestCalcPage({
   // State updates do not synchronously disable a button. This ref closes the
   // same-tick window where a double click could otherwise submit two saves.
   const saveInFlightRef = useRef(false);
-  // ── One-time PDF purchase ($5, Stripe Checkout) ────────────────────
-  // A verified, server-consumed purchase unlocks exactly the deal that was
-  // fingerprinted at checkout. The high-entropy binding secret and draft
-  // survive Stripe only in same-tab sessionStorage; neither reaches the URL.
+  // ── Historical one-time PDF claim recovery ─────────────────────────
+  // New checkout is disabled. A previously verified, server-consumed purchase
+  // unlocks exactly the deal fingerprinted at checkout. The high-entropy
+  // binding secret and draft survive Stripe only in same-tab sessionStorage;
+  // neither reaches the URL.
   const [isPdfPurchaseDialogOpen, setIsPdfPurchaseDialogOpen] = useState(false);
-  const [isStartingPdfCheckout, setIsStartingPdfCheckout] = useState(false);
   const oneTimePdfUnlockedRef = useRef(false);
   const oneTimePdfRedemptionRef = useRef<{
     claimId: string;
@@ -879,7 +890,7 @@ export function InvestCalcPage({
         }, 50);
         return;
       }
-      // Deal Score has no ledger row — it lives in the answer hero at the
+      // Screening Index has no ledger row — it lives in the answer hero at the
       // top of the results, so results-top is the right landing for it.
       setTimeout(() => {
         scrollToAnalysisResults();
@@ -1090,6 +1101,7 @@ export function InvestCalcPage({
       form.clearErrors();
       setSavedDealId(null);
       savedDealIdRef.current = null;
+      setLoadedPipelineStage(null);
       lastPersistedFormJsonRef.current = null;
       lastPersistedMaoTargetJsonRef.current = null;
       lastComputedFormJsonRef.current = null;
@@ -2146,7 +2158,13 @@ export function InvestCalcPage({
       // edit); the whole set drops on Clear, which now restores the values
       // the badges were describing.
       strategyAppliedRef.current = applied
-        ? { label: strategy.label, fields: applied }
+        ? {
+            label:
+              strategy.key === "wholesale-mao"
+                ? "Wholesale / Offer Ceiling"
+                : strategy.label,
+            fields: applied,
+          }
         : null;
       // The starter set just overwrote any applied template's values —
       // leaving templateId linked would resurface "Template: <name> ✓"
@@ -2324,7 +2342,7 @@ export function InvestCalcPage({
       if (liveParsed.success) {
         try {
           const r = calculateAnalysis(liveParsed.data);
-          // Deal Score is free for everyone, so compute it for the preview too
+          // Screening Index is free for everyone, so compute it for the preview too
           // - the hero 0-100 number forming live is the magic moment.
           const ds = computeDealScore(buildDealScoreInputFromAnalysis(liveParsed.data, r));
           // The reverse-price solver is a paid feature. Pro customers get a
@@ -2417,7 +2435,7 @@ export function InvestCalcPage({
           )
         : null
     );
-    // Deal Score recomputed client-side with the same pure fn the server
+    // Screening Index recomputed client-side with the same pure fn the server
     // action wraps — only when the user is actually entitled, so we neither
     // bypass the free-tier gate nor hammer the server on every keystroke.
     if (canUseDealScore) {
@@ -2640,6 +2658,7 @@ export function InvestCalcPage({
           templateFallback?: unknown;
           resultSnapshot?: unknown;
           methodologyVersion?: unknown;
+          pipelineStage?: unknown;
         };
         const normalized = normalizeInvestmentFormSnapshot(parsed.formSnapshot);
         if (normalized && typeof parsed.id === "string") {
@@ -2677,6 +2696,9 @@ export function InvestCalcPage({
           }
           setSavedDealId(parsed.id);
           savedDealIdRef.current = parsed.id;
+          setLoadedPipelineStage(
+            typeof parsed.pipelineStage === "string" ? parsed.pipelineStage : null
+          );
           lastPersistedFormJsonRef.current = formSnapshotForCompare(hydratedValues);
           lastComputedFormJsonRef.current = formSnapshotForCompare(hydratedValues);
           setSavedTemplateFallback(parsedTemplateFallback);
@@ -2799,7 +2821,7 @@ export function InvestCalcPage({
           setHasUnsavedChanges(false);
           pendingResultsScrollRef.current = true;
           // A frozen result and score move together. Invoking the current score
-          // engine here would silently pair new Deal Score arithmetic with old
+          // engine here would silently pair new Screening Index arithmetic with old
           // financial outputs.
           // The resolver already switched financials + score atomically.
           queueMicrotask(() => {
@@ -2831,6 +2853,9 @@ export function InvestCalcPage({
           }
           setSavedDealId(parsed.id);
           savedDealIdRef.current = parsed.id;
+          setLoadedPipelineStage(
+            typeof parsed.pipelineStage === "string" ? parsed.pipelineStage : null
+          );
           lastPersistedFormJsonRef.current = formSnapshotForCompare(lenient);
           clearPendingMaoTarget();
           const restoredMaoTarget = normalizeMaoTarget(
@@ -2983,9 +3008,8 @@ export function InvestCalcPage({
           // Surface the restore visibly. Without this the user just
           // sees a pre-filled form and wonders what happened.
           setRestoredFromDraft(true);
-          // Capture the address so the banner can name the deal
-          // specifically ("Welcome back - your draft for 1700 W Erie
-          // Ave is ready"). Trim + cap to a sane length so a
+          // Capture the address so the banner can name the saved draft.
+          // Trim + cap to a sane length so a
           // pathologically long address can't blow out the layout.
           const addr = (normalized.address ?? "").trim();
           setRestoredAddress(addr ? addr.slice(0, 60) : null);
@@ -3433,7 +3457,7 @@ export function InvestCalcPage({
       // pass through onSubmit, so mid-edit repaints don't yank the page.
       pendingResultsScrollRef.current = true;
       if (sampleProPreview && !canUseDealScore) {
-        // Compute the full Deal Score client-side for the demo using
+        // Compute the full Screening Index client-side for the demo using
         // the same pure function the server action wraps. No server
         // call, no entitlement bypass - the sample can't be saved.
         setDealScoreResult({
@@ -3745,6 +3769,7 @@ export function InvestCalcPage({
         }
         setSavedDealId(result.id);
         savedDealIdRef.current = result.id;
+        if (result.mode === "inserted") setLoadedPipelineStage(null);
         // Deal is now persisted server-side - the local anonymous
         // auto-save draft is no longer needed. If we leave it, the
         // next anonymous visitor on this device would see this deal's
@@ -4167,7 +4192,7 @@ export function InvestCalcPage({
     }
     const oneTimeUnlocked = oneTimePdfUnlockedRef.current;
     // Without entitlement (or auth), offer the two purchase paths
-    // instead of the old dead-end toast: Pro, or the $5 one-time PDF.
+    // instead of the old dead-end toast. New one-time checkout is disabled.
     // A verified one-time payment bypasses this gate exactly once.
     if (!oneTimeUnlocked && (!isAuthenticated || !canExportPdf)) {
       trackEvent("paywall_viewed", {
@@ -4307,6 +4332,27 @@ export function InvestCalcPage({
         audience: mode,
         methodology_version: analysisResult.methodologyVersion,
       });
+      if (advocacyDecisionContract && reportMaoTarget) {
+        const reportTargetContext = buildDecisionTargetContext({
+          target: reportMaoTarget,
+          source: reportMaoTargetSource,
+          profileId: isSampleProPreview
+            ? SAMPLE_DEAL_FIXTURE.targetProfile.id
+            : null,
+          profileName: isSampleProPreview
+            ? SAMPLE_DEAL_FIXTURE.targetProfile.name
+            : null,
+          profileVersion: isSampleProPreview
+            ? SAMPLE_DEAL_FIXTURE.targetProfile.version
+            : null,
+        });
+        trackEvent("memo_generated", {
+          surface: "analyzer",
+          model_version: analysisResult.methodologyVersion,
+          rule_set_version:
+            reportTargetContext.profileVersion ?? reportTargetContext.identityStatus,
+        });
+      }
       trackEvent("report_viewed", { report_type: mode, surface: "pdf_export" });
       // If the user hasn't configured branding yet, the toast nudges
       // them to do so. The link routes to /settings/branding, which
@@ -4346,104 +4392,6 @@ export function InvestCalcPage({
       });
     } finally {
       setIsExportingPdf(false);
-    }
-  };
-
-  /**
-   * Start the one-time Deal Decision Pack checkout. The server binds the paid
-   * claim to these exact validated values; this tab keeps the separate claim
-   * secret + draft in sessionStorage so neither can leak through the URL.
-   */
-  const handleBuyOneTimePdf = async () => {
-    setIsStartingPdfCheckout(true);
-    try {
-      const checkoutValues = form.getValues();
-      const checkoutMaoTarget = normalizeMaoTarget(analysisMaoTargetRef.current);
-      const checkoutMaoTargetSource =
-        normalizeOfferCeilingTargetSource(analysisMaoTargetSource) ??
-        "selected-targets";
-      if (!checkoutMaoTarget) {
-        toast({
-          title: "Run the analysis first",
-          description:
-            "We need the report's exact Offer Ceiling targets before opening checkout.",
-          variant: "destructive",
-        });
-        return;
-      }
-      trackEvent("one_time_pdf_checkout_started", {
-        property_type: checkoutValues.propertyType,
-      });
-      trackEvent("complete_decision_checkout_started", {
-        source: "single_deal_checkout",
-      });
-      trackEvent("deal_decision_pack_started", {
-        source: "single_deal_checkout",
-        methodology_version: analysisResult?.methodologyVersion ?? "unknown",
-      });
-      const result = await createOneTimePdfCheckoutAction({
-        values: checkoutValues,
-        maxOfferTarget: checkoutMaoTarget,
-        maxOfferTargetSource: checkoutMaoTargetSource,
-      });
-      if (result.ok) {
-        try {
-          window.sessionStorage.setItem(
-            ONE_TIME_PDF_DRAFT_KEY,
-            JSON.stringify({
-              v: 4,
-              values: checkoutValues,
-              maxOfferTarget: checkoutMaoTarget,
-              maxOfferTargetSource: checkoutMaoTargetSource,
-              savedAt: Date.now(),
-            })
-          );
-          window.sessionStorage.setItem(
-            oneTimePdfClaimSecretKey(result.claim.id),
-            JSON.stringify({ v: 1, secret: result.claim.secret, savedAt: Date.now() })
-          );
-          window.sessionStorage.setItem(ONE_TIME_PDF_ACTIVE_CLAIM_KEY, result.claim.id);
-        } catch {
-          // The secret must never be placed in the URL as a storage fallback.
-          // The hosted session has not been visited, so no payment was made.
-          try {
-            window.sessionStorage.removeItem(ONE_TIME_PDF_DRAFT_KEY);
-            window.sessionStorage.removeItem(
-              oneTimePdfClaimSecretKey(result.claim.id)
-            );
-            window.sessionStorage.removeItem(ONE_TIME_PDF_ACTIVE_CLAIM_KEY);
-          } catch {
-            // Storage is already unavailable; cleanup cannot improve it.
-          }
-          toast({
-            title: "Secure checkout needs same-tab storage",
-            description:
-              "Allow session storage for this site, then retry. No charge was made.",
-            variant: "destructive",
-          });
-          return;
-        }
-        trackEvent("single_deal_checkout_started", {
-          property_type: checkoutValues.propertyType,
-          price_variant: getMarketingOfferConfig().singleDealPriceVariant,
-        });
-        window.location.assign(result.url);
-        return; // navigating away; leave the spinner on
-      }
-      toast({
-        title: "Checkout unavailable",
-        description: result.message,
-        variant: "destructive",
-      });
-    } catch (err) {
-      console.warn("[one-time-pdf] checkout start failed:", err);
-      toast({
-        title: "Checkout unavailable",
-        description: "Something went wrong starting checkout. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsStartingPdfCheckout(false);
     }
   };
 
@@ -4768,6 +4716,7 @@ export function InvestCalcPage({
     // A save from here is a NEW deal — never an overwrite of the source.
     setSavedDealId(null);
     savedDealIdRef.current = null;
+    setLoadedPipelineStage(null);
     lastPersistedFormJsonRef.current = null;
     lastPersistedMaoTargetJsonRef.current = null;
     lastComputedFormJsonRef.current = null;
@@ -4981,8 +4930,8 @@ export function InvestCalcPage({
   };
 
   /**
-   * "Try a sample deal" - pre-fills the form with a realistic
-   * Philadelphia rental and triggers calculate. The single biggest
+   * "Try a sample deal" - pre-fills the form with a synthetic
+   * demonstration rental and triggers calculate. The single biggest
    * friction-killer for cold paid traffic: visitor lands on the
    * calculator, sees a wall of empty fields, bounces. This button
    * gives them a fully-populated working demo in one click.
@@ -5027,7 +4976,7 @@ export function InvestCalcPage({
     toast({
       title: "Sample rental loaded",
       description:
-        "Running the analysis on a real Philadelphia rental - with a full Pro report preview unlocked for this demo.",
+        "Running illustrative sample assumptions with a full Pro report preview unlocked for this demo.",
     });
 
     // Defer the submit to the next paint frame. RHF's setValue calls
@@ -5307,25 +5256,44 @@ export function InvestCalcPage({
 
       if (verified) {
         const sourceClass = previousConfidence.fields.find((item) => item.key === key)?.sourceClass;
-        trackEvent("assumption_verified", {
-          field_key: key,
-          source_class: sourceClass ?? "unknown",
-          method_version: nextConfidence.methodVersion,
-        });
-        trackEvent("material_input_verified", {
-          field_key: key,
-          evidence_level: "user-confirmed",
-          method_version: nextConfidence.methodVersion,
-        });
+        if (advocacyDecisionContract) {
+          trackEvent("material_input_reviewed", {
+            field_key: key,
+            source_class: sourceClass ?? "unknown",
+            confirmation_type: "user-confirmed",
+            method_version: nextConfidence.methodVersion,
+          });
+        } else {
+          trackEvent("assumption_verified", {
+            field_key: key,
+            source_class: sourceClass ?? "unknown",
+            method_version: nextConfidence.methodVersion,
+          });
+          trackEvent("material_input_verified", {
+            field_key: key,
+            evidence_level: "user-confirmed",
+            method_version: nextConfidence.methodVersion,
+          });
+        }
       }
-      if (previousConfidence.stage !== nextConfidence.stage) {
+      if (advocacyDecisionContract) {
+        const previousEvidence = buildAssumptionLedger(previousConfidence);
+        const nextEvidence = buildAssumptionLedger(nextConfidence);
+        if (previousEvidence.readiness !== nextEvidence.readiness) {
+          trackEvent("evidence_readiness_changed", {
+            from_state: previousEvidence.readiness,
+            to_state: nextEvidence.readiness,
+            contract_version: nextEvidence.contractVersion,
+          });
+        }
+      } else if (previousConfidence.stage !== nextConfidence.stage) {
         trackEvent("decision_readiness_changed", {
           from_stage: previousConfidence.stage,
           to_stage: nextConfidence.stage,
           method_version: nextConfidence.methodVersion,
         });
       }
-      if (nextConfidence.score > previousConfidence.score) {
+      if (!advocacyDecisionContract && nextConfidence.score > previousConfidence.score) {
         const band = (score: number) =>
           score >= 80 ? "80-100" : score >= 55 ? "55-79" : score >= 30 ? "30-54" : "0-29";
         trackEvent("confidence_increased", {
@@ -5335,6 +5303,7 @@ export function InvestCalcPage({
         });
       }
       if (
+        !advocacyDecisionContract &&
         previousConfidence.stage !== "offer-ready" &&
         nextConfidence.stage === "offer-ready"
       ) {
@@ -5344,7 +5313,13 @@ export function InvestCalcPage({
         });
       }
     },
-    [analysisValues, form, inputVerification, resolveLiveInputConfidenceContext]
+    [
+      advocacyDecisionContract,
+      analysisValues,
+      form,
+      inputVerification,
+      resolveLiveInputConfidenceContext,
+    ]
   );
 
   const toggleAdvanced = () => {
@@ -5497,7 +5472,7 @@ export function InvestCalcPage({
               type="button"
               onClick={handleTrySampleDeal}
               className="group inline-flex min-h-11 shrink-0 flex-col items-start gap-0.5 self-start rounded-xl bg-primary px-5 py-3 text-left shadow-[0_10px_24px_rgba(0,_112,_196,0.28)] transition-transform hover:-translate-y-0.5 sm:self-end"
-              aria-label="Try a sample rental - preview a sample Pro report on a real Philadelphia rental"
+              aria-label="Try a synthetic sample rental and preview a sample Pro report"
             >
               <span className="inline-flex items-center gap-1.5 text-sm font-bold text-primary-foreground">
                 <Sparkles className="size-4" />
@@ -6102,7 +6077,7 @@ export function InvestCalcPage({
                   <p className="mt-0.5 text-muted-foreground">
                     We estimated the price from local rent
                     {priceEstimateBasis ? ` — ${priceEstimateBasis}` : ""} so you could see a
-                    verdict instantly. Enter the actual asking price to make this accurate.
+                    provisional screening result. Enter the actual asking price to update the screen.
                   </p>
                 </div>
                 <button
@@ -6187,6 +6162,9 @@ export function InvestCalcPage({
               isSaved={Boolean(savedDealId) && !hasUnsavedChanges}
               isExistingSavedDeal={Boolean(savedDealId)}
               savedDealId={savedDealId}
+              userDecision={userDecisionFromPipelineStage(
+                savedDealId ? loadedPipelineStage : null
+              )}
               isAuthenticated={isAuthenticated}
               canSaveDeals={canSaveDeals}
               canUpdateSavedDeals={canUpdateSavedDeals}
@@ -6203,6 +6181,7 @@ export function InvestCalcPage({
               canUseSensitivity={canUseSensitivity || isSampleProPreview}
               canUseStrategies={canUseStrategies || isSampleProPreview}
               isSampleProPreview={isSampleProPreview}
+              advocacyContractEligible={advocacyContractEligible}
               maoTargetOverride={analysisMaoTarget}
               maoTargetOverrideSource={analysisMaoTargetSource}
               onMaoTargetChange={handleAnalysisMaoTargetChange}
@@ -6239,13 +6218,11 @@ export function InvestCalcPage({
           submissions go to founder review — nothing renders publicly from
           here (lib/proof-records.ts is the publication gate). */}
       <TestimonialPrompt />
-      {/* Pro vs $5 one-time chooser - opens when a user without PDF
-          entitlement clicks Export PDF. */}
+      {/* Pro report upgrade - new one-time purchases are temporarily disabled.
+          Existing paid-claim recovery remains handled above. */}
       <PdfPurchaseDialog
         open={isPdfPurchaseDialogOpen}
         onOpenChange={setIsPdfPurchaseDialogOpen}
-        onBuyOneTime={handleBuyOneTimePdf}
-        isStartingCheckout={isStartingPdfCheckout}
       />
       {/* Duplicate-address chooser - opens when saving an address that's
           already in saved deals: overwrite it, keep both, or cancel. */}

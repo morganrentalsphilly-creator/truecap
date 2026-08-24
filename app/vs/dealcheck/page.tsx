@@ -51,8 +51,8 @@ const MATRIX: Row[] = [
   { workflow: "First screen", truecap: "Address-first, no-signup screen with an opinionated verdict.", dealcheck: "Account-based analysis with listing and property-data import workflows." },
   { workflow: "Starting assumptions", truecap: "Labels HUD rent, FRED rate, state tax benchmark, smart defaults, and user edits.", dealcheck: "Imports available property data and supports user-entered assumptions." },
   { workflow: "Purchase criteria", truecap: "Buy Box checks the analysis inside the decision flow.", dealcheck: "Custom purchase criteria screen properties against saved thresholds." },
-  { workflow: "Offer price", truecap: "Max Offer is connected to Buy Box targets and Deal Doctor thresholds.", dealcheck: "Its Offer Calculator calculates offers from configurable buying criteria." },
-  { workflow: "Downside", truecap: "Sensitivity and downside scenarios sit directly after the verdict and Max Offer.", dealcheck: "Long-range analysis and editable assumptions support scenario evaluation." },
+  { workflow: "Modeled boundary", truecap: "Offer Ceiling is connected to Buy Box targets and Deal Doctor thresholds; it is not a recommended offer.", dealcheck: "Its Offer Calculator calculates offers from configurable buying criteria." },
+  { workflow: "Downside", truecap: "Sensitivity and downside scenarios sit directly after selected-rule fit and the Offer Ceiling.", dealcheck: "Long-range analysis and editable assumptions support scenario evaluation." },
   { workflow: "Mobile", truecap: "Responsive web app that can be installed as a PWA.", dealcheck: "Native iOS and Android apps plus web access." },
   { workflow: "Best fit", truecap: "Investors who want a guided address-to-decision sequence.", dealcheck: "Investors who want a mature analysis ecosystem and native mobile workflow." },
 ];
@@ -100,7 +100,7 @@ export default function VsDealCheckPage() {
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             DealCheck has served investors for years. TrueCap uses a different
             sequence: start with an address, inspect the assumptions, see a
-            verdict, then connect Buy Box, Max Offer, downside, and presentation.
+            selected-rule fit, then connect Buy Box, Offer Ceiling, downside, and presentation.
             Here is the comparison so you can pick the workflow that fits.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
@@ -138,7 +138,7 @@ export default function VsDealCheckPage() {
                 <li>You want labeled HUD, FRED, and state-tax starting assumptions.</li>
                 <li>You want an opinionated verdict with the supporting math visible.</li>
                 <li>You want Buy Box evaluation inside the analysis flow.</li>
-                <li>You want Max Offer, downside, and decision packaging connected.</li>
+                <li>You want a target-dependent Offer Ceiling, downside, and decision packaging connected.</li>
               </ul>
             </div>
             <div>
@@ -219,7 +219,7 @@ export default function VsDealCheckPage() {
           <ul className="space-y-2 text-sm sm:text-base leading-relaxed text-foreground">
             <li><strong>Start with less setup.</strong> Enter an address for a first-pass screen, then refine the assumptions that matter.</li>
             <li><strong>See where the inputs came from.</strong> TrueCap labels sourced starting points and keeps them editable.</li>
-            <li><strong>Move from result to action.</strong> The verdict leads to Max Offer, downside, and next-step tools instead of stopping at a metric summary.</li>
+            <li><strong>Move from result to review.</strong> Selected-rule fit leads to the Offer Ceiling, downside, and verification tools instead of stopping at a metric summary.</li>
             <li><strong>Reuse your own criteria.</strong> Buy Box targets stay connected to the verdict and offer calculation.</li>
           </ul>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
@@ -254,7 +254,7 @@ export default function VsDealCheckPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             Screen a property without a card, inspect the assumptions and verdict,
-            then decide whether TrueCap&apos;s connected Buy Box, Max Offer, downside,
+            then decide whether TrueCap&apos;s connected Buy Box, Offer Ceiling, downside,
             and reporting workflow fits how you acquire rentals.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -376,11 +376,11 @@ const DEALCHECK_FAQ: FaqItem[] = [
         Pick DealCheck if you&apos;re primarily mobile-first walking
         many properties a day, you want a native app, and listing-site
         property import is your top workflow. Pick TrueCap if you want an
-        address-first screen connected to a verdict, Buy Box, Max Offer,
+        address-first screen connected to selected-rule fit, Buy Box, Offer Ceiling,
         downside analysis, and presentation tools.
       </>
     ),
     plainTextAnswer:
-      "Pick DealCheck if you want a native mobile app and listing-import workflow. Pick TrueCap if you want an address-first screen connected to verdicts, Buy Box, Max Offer, downside, and presentation.",
+      "Pick DealCheck if you want a native mobile app and listing-import workflow. Pick TrueCap if you want an address-first screen connected to selected-rule fit, Buy Box, a target-dependent Offer Ceiling, downside, and presentation.",
   },
 ];

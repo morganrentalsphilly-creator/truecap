@@ -51,6 +51,7 @@ import {
 } from "@/lib/pack-credit";
 import { schedulePackCreditEmails } from "@/lib/email/pack-credit-emails";
 import { createIpRateLimit, getRequestIp } from "@/lib/ip-rate-limit";
+import { decisionPackCheckoutEnabled } from "@/lib/decision-pack-checkout-gate";
 
 /** Existing production $5 price; experiments require their own configured id. */
 const ONE_TIME_PDF_PRICE_FALLBACK = "price_1TgYY33yTn6y2v95pIAe2ABs";
@@ -107,7 +108,7 @@ export type OneTimePdfCheckoutResult =
   | { ok: true; url: string; claim: { id: string; secret: string } }
   | {
       ok: false;
-      code: "VALIDATION_ERROR" | "MISSING_PRICE" | "SERVER_ERROR";
+      code: "FEATURE_DISABLED" | "VALIDATION_ERROR" | "MISSING_PRICE" | "SERVER_ERROR";
       message: string;
     };
 
@@ -127,6 +128,18 @@ const checkoutRateLimit = createIpRateLimit({
 export async function createOneTimePdfCheckoutAction(
   input: unknown
 ): Promise<OneTimePdfCheckoutResult> {
+  // This is the authoritative shutdown boundary. It intentionally executes
+  // before validation, rate limiting, Stripe initialization, or database
+  // access, so a direct Server Action call cannot create a Session or ledger
+  // row while the Pack is disabled. Existing paid-claim recovery remains live.
+  if (!decisionPackCheckoutEnabled()) {
+    return {
+      ok: false,
+      code: "FEATURE_DISABLED",
+      message: "One-time reports are temporarily unavailable. TrueCap Pro still includes PDF reports.",
+    };
+  }
+
   const parsed = createCheckoutSchema.safeParse(input);
   if (!parsed.success) {
     return {

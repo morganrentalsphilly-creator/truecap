@@ -3,13 +3,13 @@
 /**
  * Read-only analysis view rendered on the public /d/[encoded] share page.
  *
- * Shows the headline metric tiles, MAO card, sensitivity grid, and
+ * Shows the headline metric tiles, Offer Ceiling card, sensitivity grid, and
  * Strategies tab content (rehab estimator, BRRRR, fix-and-flip). All
  * computed client-side from the encoded form snapshot - no auth, no
  * server actions needed.
  *
  * Hides the four Pro-gated tabs (10-year, tax strategy, exit scenarios,
- * deal score) - those become upgrade prompts on the parent page.
+ * Screening Index) - those become upgrade prompts on the parent page.
  */
 
 import Link from "next/link";
@@ -189,9 +189,11 @@ export function ReadOnlyAnalysisView({
   );
   const criteriaMet = maoTarget ? meetsMaoTarget(result, maoTarget) : null;
   const decisionLabel =
-    criteriaMet === false
-      ? "Pass at this price"
-      : "Conditional — verify assumptions";
+    criteriaMet == null
+      ? "Cannot determine rule fit"
+      : criteriaMet
+        ? "Meets selected rules at asking"
+        : "Does not meet selected rules at asking";
   const ceilingDisplay = offerCeiling
     ? fmtCash(offerCeiling.ceiling)
     : offerCeilingAccess?.access === "exact" && maoTarget
@@ -254,8 +256,8 @@ export function ReadOnlyAnalysisView({
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
               Asking {fmtCash(Number(values.purchasePrice))}. This read-only share is a
-              screening decision; independently verify every material assumption before
-              offering.
+              screening record, not a decision; independently verify every material assumption
+              before recording a decision.
             </p>
           </div>
 
@@ -297,8 +299,10 @@ export function ReadOnlyAnalysisView({
               </p>
             )}
             <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
-              Calculated from the targets shown above when available. This is not a
-              recommended offer.
+              {maoTarget
+                ? "Highest modeled price that still meets the targets captured with this share under the assumptions shown."
+                : "A supported Offer Ceiling requires captured target criteria."} This is not a
+              recommended offer or an appraisal.
             </p>
           </div>
         </div>

@@ -23,8 +23,6 @@ import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 import { TRIAL_DAYS } from "@/lib/trial";
 import { AgentProPageTracker } from "@/components/analytics/agent-pro-page-tracker";
 import { AgentProofSection } from "@/components/marketing/testimonial-card";
-import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
-import { GuaranteeBadge } from "@/components/marketing/guarantee-badge";
 
 export const metadata: Metadata = {
   title: "Agent Pro — Become the Agent Investors Call First",
@@ -73,7 +71,6 @@ const USE_CASES: { icon: typeof Calculator; title: string; body: string }[] = [
 
 export default async function ForAgentsPage() {
   const agentProConfigured = isAgentProConfigured();
-  const { guaranteeEnabled } = getMarketingOfferConfig();
   const [agentMonthly, agentAnnual] = agentProConfigured
     ? await Promise.all([
         loadStripeDisplayPrice("agent_pro_monthly"),
@@ -154,7 +151,6 @@ export default async function ForAgentsPage() {
           </p>
           {/* Risk reversal at the hero CTA. The only refund mention used to
               sit in the pricing band far below the fold. */}
-          <GuaranteeBadge align="start" className="mt-3" />
         </section>
 
         {/* Commission math — the buying logic stated plainly, first
@@ -225,7 +221,7 @@ export default async function ForAgentsPage() {
               "Open TrueCap on your phone or laptop at the showing.",
               "Paste the listing address. Rent, mortgage rate, and property tax auto-fill from HUD, FRED, and state data.",
               "Adjust the financing for your specific client (different down payment, DSCR-loan rate, etc).",
-              "Run the analysis, then review the verdict, Max Offer, and downside before presenting the result.",
+              "Run the analysis, then review selected-rule fit, the Offer Ceiling, and downside before presenting the result.",
               "Assign the opportunity to the right client, then send a co-branded link or report.",
             ].map((step, i) => (
               <li key={i} className="flex items-start gap-3">
@@ -326,7 +322,7 @@ export default async function ForAgentsPage() {
               &ldquo;Before you get ten opinions from the internet: here&apos;s
               the analysis for [address] — every assumption is labeled and you
               can change any of them. At asking it&apos;s [verdict]; below
-              [max offer] it starts to work. Tell me which assumption you&apos;d
+              [Offer Ceiling] it starts to meet the selected rules. Tell me which assumption you&apos;d
               challenge.&rdquo;
             </li>
             <li>
@@ -364,30 +360,19 @@ export default async function ForAgentsPage() {
               href={agentCheckoutHref}
               event="agent_pro_cta_clicked"
               properties={{ placement: "agent_final" }}
-              className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
+              className="inline-flex min-h-11 items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
               Start Agent Pro
               <ArrowUpRight className="w-4 h-4" />
             </TrackedMarketingLink>
             <Link
               href="/"
-              className="inline-flex items-center gap-2 border border-primary-foreground/40 bg-primary-foreground/10 text-primary-foreground px-4 py-2.5 rounded-xl font-bold hover:bg-primary-foreground/20 transition-colors"
+              className="inline-flex min-h-11 items-center gap-2 border border-primary-foreground/40 bg-primary-foreground/10 text-primary-foreground px-4 py-2.5 rounded-xl font-bold hover:bg-primary-foreground/20 transition-colors"
             >
               <Calculator className="w-4 h-4" />
               Try the free analyzer
             </Link>
           </div>
-          {agentProConfigured && guaranteeEnabled ? (
-            <p className="mt-4 text-xs text-primary-foreground/90">
-              The agent guarantee: send 5 branded analyses in your first 30
-              days as a paying Agent Pro subscriber — if they don&apos;t change
-              your investor-client conversations, email us within those 30 days
-              for a full refund.{" "}
-              <Link href="/guarantee" className="font-bold underline underline-offset-4">
-                Full terms
-              </Link>
-            </p>
-          ) : null}
         </section>
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">

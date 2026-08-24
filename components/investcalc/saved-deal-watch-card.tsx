@@ -152,12 +152,12 @@ export function SavedDealWatchCard({ savedDealId }: { savedDealId: string }) {
           <div className="flex items-center gap-2">
             <Eye aria-hidden className="size-4 shrink-0 text-primary" />
             <h2 id={titleId} className="text-base font-bold text-foreground">
-              Saved Deal Watch
+              Saved Deal Watch preview
             </h2>
           </div>
           <p className="mt-1 max-w-prose text-sm leading-relaxed text-muted-foreground">
-            Save your intent to watch this deal for meaningful changes such as moving within
-            your Max Offer or Buy Box.
+            Join the waitlist for meaningful-change alerts, such as a deal moving within its
+            Offer Ceiling or Buy Box rules.
           </p>
         </div>
         <Switch
@@ -165,7 +165,7 @@ export function SavedDealWatchCard({ savedDealId }: { savedDealId: string }) {
           checked={settings.subscriptionEnabled}
           onCheckedChange={toggleWatch}
           disabled={pending}
-          aria-label="Save this deal to Saved Deal Watch"
+          aria-label={settings.subscriptionEnabled ? "Leave Saved Deal Watch waitlist" : "Join Saved Deal Watch waitlist"}
         />
       </div>
 
@@ -175,9 +175,9 @@ export function SavedDealWatchCard({ savedDealId }: { savedDealId: string }) {
         aria-live="polite"
       >
         <p className="text-xs font-bold text-foreground">
-          {settings.subscriptionEnabled
-            ? "Preference saved — monitoring is inactive"
-            : "Automatic monitoring is not active"}
+           {settings.subscriptionEnabled
+             ? "Waitlist preference saved — Automatic monitoring is inactive"
+             : "Preview only — Automatic monitoring is not active"}
         </p>
         <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
           TrueCap is not checking listing sites or sending Saved Deal Watch alerts. Automatic
@@ -190,7 +190,7 @@ export function SavedDealWatchCard({ savedDealId }: { savedDealId: string }) {
         htmlFor={watchSwitchId}
         className="mt-3 block cursor-pointer text-xs font-semibold text-foreground"
       >
-        {settings.subscriptionEnabled ? "Remove saved Watch preference" : "Save Watch preference"}
+        {settings.subscriptionEnabled ? "Leave waitlist" : "Join waitlist"}
       </label>
 
       {settings.subscriptionEnabled ? (

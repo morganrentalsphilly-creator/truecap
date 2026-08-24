@@ -161,7 +161,9 @@ describe("server-owned PDF report data", () => {
       maxOfferTargetSource: "selected-targets",
       generatedAt: NOW,
     });
-    expect(passAtThisPrice.decision?.label).toBe("Pass at this price");
+    expect(passAtThisPrice.decision?.label).toBe(
+      "Does not meet selected rules at asking"
+    );
     expect(passAtThisPrice.decision?.clearsSelectedTargets).toBe(false);
     expect(passAtThisPrice.decision?.targetSource).toBe("selected-targets");
     expect(passAtThisPrice.decision?.rationale).toContain("does not clear");
@@ -172,7 +174,7 @@ describe("server-owned PDF report data", () => {
       maxOfferTargetSource: "selected-targets",
       generatedAt: NOW,
     });
-    expect(screeningOnly.decision?.label).toBe("Conditional — verify first");
+    expect(screeningOnly.decision?.label).toBe("Meets selected rules at asking");
     expect(screeningOnly.decision?.readiness).toBe("Screening only");
     expect(screeningOnly.maxOffer?.source).toBe("selected-targets");
   });

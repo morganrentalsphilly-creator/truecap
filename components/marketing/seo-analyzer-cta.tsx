@@ -44,7 +44,7 @@ export function SeoAnalyzerCta({
         </p>
         <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
           Free 60-second analysis, sourced assumptions, no signup — and Pro
-          solves the exact maximum offer that still hits your targets.
+          calculates the highest modeled Offer Ceiling that still meets your selected targets under the assumptions shown.
         </p>
       </div>
       <Link

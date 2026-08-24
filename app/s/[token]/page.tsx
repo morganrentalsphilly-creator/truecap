@@ -4,8 +4,9 @@
  * The successor to /d/[encoded]: the URL carries a random 256-bit token and
  * NOTHING else — no address, no rent, no assumptions in the path, so nothing
  * sensitive lands in referrer logs or link previews. The snapshot lives in
- * public_shares (hashed token at rest), is owner-revocable, and expires by
- * default.
+ * public_shares (hashed token at rest) and expires by default. Newly minted
+ * links have a signed-in owner who can revoke them; historical ownerless rows
+ * remain readable until expiry for compatibility.
  *
  * Owner attribution here is server-trusted (we minted the row from the owner's
  * session), so co-branding needs no HMAC verification — but the lead-capture
@@ -31,8 +32,17 @@ import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-method
 import { resolveOfferCeilingForAccess } from "@/lib/offer-ceiling-server";
 import { normalizeMaoTargetForFinancing } from "@/lib/mao-target-editor";
 import Link from "next/link";
+import { createIpRateLimit, getRequestIp } from "@/lib/ip-rate-limit";
 
 type Props = { params: Promise<{ token: string }> };
+
+// Best-effort server-instance abuse brake. The random token remains the access
+// capability and every invalid/lapsed outcome stays the same 404; this simply
+// limits high-rate token enumeration without creating a validity oracle.
+const opaqueShareReadRateLimit = createIpRateLimit({
+  windowMs: 60 * 60 * 1000,
+  maxPerWindow: 300,
+});
 
 export async function generateMetadata(): Promise<Metadata> {
   // Never resolve the private snapshot for metadata. Link unfurlers cache OG
@@ -64,6 +74,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function OpaqueSharePage({ params }: Props) {
   const { token } = await params;
+  if (opaqueShareReadRateLimit.isOverLimit(await getRequestIp())) notFound();
   const resolved = await resolvePublicShare(token);
   if (!resolved) notFound();
 

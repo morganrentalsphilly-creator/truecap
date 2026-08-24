@@ -318,7 +318,7 @@ export default function FiftyPercentRuleCalculatorPage() {
               The 50% rule compresses eight expense lines into one guess.
               TrueCap expands them back out — actual state property tax,
               HUD rent benchmark, current rate — and gives the deal a
-              plain-English verdict.
+              selected-rule fit and a secondary Screening Index.
             </p>
             <ul className="text-sm space-y-1.5 mb-5 opacity-90">
               {[
@@ -326,7 +326,7 @@ export default function FiftyPercentRuleCalculatorPage() {
                 "Cash flow, cap rate, CoC, DSCR — auto-calculated",
                 "State property tax + HUD rent auto-filled from the address",
                 "10-year projection with rent + expense growth (Pro)",
-                "Plain-English verdict on every deal",
+                "Selected-rule fit with a secondary Screening Index",
                 "Free to start — no credit card",
               ].map((line) => (
                 <li key={line} className="flex items-start gap-2">

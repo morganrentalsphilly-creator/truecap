@@ -91,13 +91,15 @@ export function WeeklySummaryToggle() {
         <div className="flex items-start gap-2">
           <CalendarClock className="mt-0.5 size-4 text-primary" />
           <div>
-            <h2 className="text-base font-bold text-foreground">Weekly portfolio summary</h2>
+            <h2 className="text-base font-bold text-foreground">
+              {summaryLive ? "Weekly portfolio summary" : "Weekly portfolio summary preview"}
+            </h2>
             <p className="mt-1 max-w-prose text-sm leading-relaxed text-muted-foreground">
               {summaryLive
-                ? "Email me a short weekly recap of my deals — pipeline cash flow, owned-portfolio equity, rate moves that changed a verdict, and due-diligence deadlines. Once a week, and only when there's something to say."
+                ? "Email me a short weekly recap of my deals — pipeline cash flow, owned-portfolio equity, rate moves that changed a screening result, and due-diligence deadlines. Once a week, and only when there's something to say."
                 : enabled
-                  ? "You're on the list — weekly summaries are launching soon. Once live, you'll get a short weekly recap of your deals: pipeline cash flow, owned-portfolio equity, rate moves, and deadlines. Once a week, only when there's something to say."
-                  : "Weekly summaries are launching soon. Flip this on to join the list — once live, you'll get a short weekly recap of your deals: pipeline cash flow, owned-portfolio equity, rate moves, and deadlines. Once a week, only when there's something to say."}
+                  ? "You're on the waitlist. No summary email is active yet. If launched, it would recap pipeline cash flow, owned-portfolio equity, rate moves, and deadlines."
+                  : "Join the waitlist for a future weekly recap of pipeline cash flow, owned-portfolio equity, rate moves, and deadlines. No summary email is active yet."}
             </p>
           </div>
         </div>
@@ -105,7 +107,7 @@ export function WeeklySummaryToggle() {
           checked={enabled}
           onCheckedChange={toggle}
           disabled={pending}
-          aria-label="Toggle weekly portfolio summary emails"
+          aria-label={summaryLive ? "Toggle weekly portfolio summary emails" : enabled ? "Leave weekly summary waitlist" : "Join weekly summary waitlist"}
         />
       </div>
     </section>

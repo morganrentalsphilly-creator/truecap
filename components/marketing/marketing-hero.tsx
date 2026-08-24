@@ -24,7 +24,6 @@ import { SAMPLE_DEAL_FIXTURE } from "@/lib/sample-deal";
 import { calculateSampleDealOutcome } from "@/lib/sample-deal-analysis";
 import { describeMaoTarget } from "@/lib/mao-targets";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
-import { buildInputConfidence } from "@/lib/input-confidence";
 import { buildWhatNeedsToBeTrue } from "@/lib/decision-thresholds";
 
 export function MarketingHero() {
@@ -60,8 +59,8 @@ export function MarketingHero() {
             </h1>
             <p className="mt-4 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
               {newHomepagePositioningEnabled
-                ? "Paste a rental listing. See whether it fits your Buy Box, the highest price that works, and which assumptions you must verify."
-                : "Enter any address. In 60 seconds, TrueCap shows whether the deal cash flows — and Pro solves the exact maximum offer that still hits your targets. Every assumption sourced, every assumption editable."}
+                ? "Paste a rental listing. See how the entered assumptions fit your Buy Box, the target-dependent Offer Ceiling, and what you must verify."
+                : "Enter an address for a first-pass screen with labeled, editable assumptions. Pro adds a target-dependent Offer Ceiling. Starting benchmarks are not property-specific facts or quotes."}
             </p>
 
             {/* Primary action — the address input. Hands off to the
@@ -207,7 +206,7 @@ function HeroProductMock({ decisionPositioning }: { decisionPositioning: boolean
   const cf = Math.round(result.netCashFlow);
   const cfLabel = `${cf >= 0 ? "+" : "-"}$${Math.abs(cf).toLocaleString("en-US")}`;
   const capLabel = `${result.capRate.toFixed(1)}%`;
-  // Clearly labeled example targets, solved by the same deterministic MAO
+  // Clearly labeled example targets, solved by the same deterministic Offer Ceiling
   // engine used in the product. The target is intentionally above the
   // sample's list-price cash flow so the card demonstrates the decision.
   const targetCashFlow = SAMPLE_DEAL_FIXTURE.maoTarget.monthlyCashFlow ?? 0;
@@ -217,10 +216,6 @@ function HeroProductMock({ decisionPositioning }: { decisionPositioning: boolean
     : "Not reachable";
   const listPrice = Number(SAMPLE_DEAL_FIXTURE.values.purchasePrice);
   const gap = maxOffer ? listPrice - maxOffer.maxPrice : null;
-  const sampleConfidence = buildInputConfidence({
-    values: SAMPLE_DEAL_FIXTURE.values,
-    touchedFields: new Set(Object.keys(SAMPLE_DEAL_FIXTURE.values)),
-  });
   const target = { monthlyCashFlow: targetCashFlow, dscr: 1.25 };
   const decisionThresholds = buildWhatNeedsToBeTrue(SAMPLE_DEAL_FIXTURE.values, target);
   const askingClears = decisionThresholds?.targetAlreadyMet ?? false;
@@ -265,13 +260,12 @@ function HeroProductMock({ decisionPositioning }: { decisionPositioning: boolean
                 askingClears ? "bg-[var(--brand-green)]" : "bg-[var(--brand-orange)]"
               }`}
             >
-              {askingClears ? "Pursue at this price" : "Pass at this price"}
+              {askingClears
+                ? "Meets selected rules at asking"
+                : "Does not meet selected rules at asking"}
             </span>
             <span className="rounded-full bg-primary px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white sm:px-2.5 sm:py-1 sm:text-[10px]">
-              Strong fundamentals · Score {Math.round(score.score)}/100
-            </span>
-            <span className="rounded-full bg-[var(--brand-green)] px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white sm:px-2.5 sm:py-1 sm:text-[10px]">
-              {score.riskLevel}
+              Screening Index {Math.round(score.score)}/100
             </span>
           </div>
         </div>
@@ -281,7 +275,7 @@ function HeroProductMock({ decisionPositioning }: { decisionPositioning: boolean
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest text-primary">
-                <Target aria-hidden className="size-3.5" /> TrueCap Max Offer
+                <Target aria-hidden className="size-3.5" /> Offer Ceiling
               </div>
               <div className="mt-1 font-mono text-3xl font-extrabold tabular-nums tracking-tight text-primary">
                 {maxOfferLabel}
@@ -291,9 +285,11 @@ function HeroProductMock({ decisionPositioning }: { decisionPositioning: boolean
                   ${gap.toLocaleString("en-US")} below the ${listPrice.toLocaleString("en-US")} list price
                 </div>
               ) : null}
-              <p className="mt-1 text-xs text-muted-foreground">Price ceiling for {targetLabel}.</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {SAMPLE_DEAL_FIXTURE.targetProfile.name} v{SAMPLE_DEAL_FIXTURE.targetProfile.version} · {targetLabel}.
+              </p>
               <p className="mt-1 text-[10px] leading-relaxed text-muted-foreground">
-                Calculated from your selected targets. This is not a recommended offer.
+                Highest modeled price that still meets the sample target profile under the assumptions shown. This is not a recommended offer.
               </p>
             </div>
             <span className="rounded-full bg-[var(--brand-green)] px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white">
@@ -305,15 +301,13 @@ function HeroProductMock({ decisionPositioning }: { decisionPositioning: boolean
         {decisionPositioning ? (
           <>
             <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-3 sm:gap-3">
-              {/* Was "Pass"/"Miss" — "Pass" here meant it CLEARS, while the
-                  verdict pill above uses the deal-score vocabulary. */}
-              <MockTile label="At asking" value={askingClears ? "Clears" : "Miss"} tone={askingClears ? "success" : "primary"} sub={`${cfLabel}/mo`} stepClass="tc-hero-step-3" />
-              <MockTile label="Input confidence" value={`${sampleConfidence.score}%`} tone="primary" sub="readiness, not probability" stepClass="tc-hero-step-4" />
-              <MockTile label="Before offering" value={`${sampleConfidence.offerReadyRemaining.length}`} tone="primary" sub="inputs to verify" stepClass="tc-hero-step-5" />
+              <MockTile label="At asking" value={askingClears ? "Meets" : "Misses"} tone={askingClears ? "success" : "primary"} sub="selected sample rules" stepClass="tc-hero-step-3" />
+              <MockTile label="Evidence status" value="Illustrative" tone="primary" sub="not property facts" stepClass="tc-hero-step-4" />
+              <MockTile label="Target profile" value="Synthetic" tone="primary" sub={`v${SAMPLE_DEAL_FIXTURE.targetProfile.version}`} stepClass="tc-hero-step-5" />
             </div>
             {!askingClears ? (
               <div className="tc-hero-step-6 mt-3 rounded-xl border border-primary/20 bg-primary/5 p-3 text-xs text-foreground">
-                <strong>What needs to be true:</strong>{" "}
+                <strong>Modeled paths to meet the sample targets:</strong>{" "}
                 {decisionThresholds?.maxPrice.thresholdValue != null
                   ? `price ≤ $${Math.round(decisionThresholds.maxPrice.thresholdValue).toLocaleString("en-US")}`
                   : "review the asking price"}
@@ -339,10 +333,10 @@ function HeroProductMock({ decisionPositioning }: { decisionPositioning: boolean
         <div className={`${decisionPositioning ? "" : "tc-hero-step-6"} mt-4 flex items-start gap-2 rounded-xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-3 text-xs text-foreground`}>
           <TrendingUp aria-hidden className="mt-0.5 size-4 shrink-0 text-[var(--brand-green)]" />
           <span>
-            <strong>Decision:</strong>{" "}
+            <strong>Selected-rule fit:</strong>{" "}
             {maxOffer && gap != null && gap > 0
-              ? `Works at ${maxOfferLabel}. At list, it misses the example $${targetCashFlow}/mo cash-flow target.`
-              : "The list price clears the example targets. Stress-test the assumptions before offering."}
+              ? `Asking is $${gap.toLocaleString("en-US")} above the ${maxOfferLabel} Offer Ceiling and misses the example $${targetCashFlow}/mo cash-flow target.`
+              : "The asking price meets the example targets under the illustrative assumptions. Verify the material inputs before recording a decision."}
           </span>
         </div>
         <p className="mt-3 text-[10px] leading-relaxed text-muted-foreground">

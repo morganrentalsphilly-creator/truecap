@@ -3,6 +3,6 @@ export function getAnalyzerCta(input: {
   canCalculateMaxOffer: boolean;
 }): string {
   if (!input.hasProperty) return "Try a sample deal";
-  if (input.canCalculateMaxOffer) return "Calculate my Max Offer";
+  if (input.canCalculateMaxOffer) return "Calculate my Offer Ceiling";
   return "Analyze this property free";
 }

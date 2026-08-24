@@ -286,7 +286,7 @@ export default function CoCCalculatorPage() {
             <h2 className="text-xl sm:text-2xl font-extrabold mb-2">Run the full analysis — free</h2>
             <p className="text-sm sm:text-base opacity-90 mb-4">
               Cap rate, DSCR, 10-year projections, tax savings, exit
-              scenarios, and a Deal Score — all from the same property
+              scenarios, and a secondary Screening Index—all from the same property
               inputs you used here.
             </p>
             <ul className="text-sm space-y-1.5 mb-5 opacity-90">

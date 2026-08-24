@@ -2,9 +2,6 @@ import type { Metadata } from 'next'
 import { Plus_Jakarta_Sans, DM_Mono } from 'next/font/google'
 import { Toaster } from '@/components/ui/toaster'
 import { CookieConsentBanner } from '@/components/marketing/cookie-consent-banner'
-// AnnualPromoBanner is parked while the founding-pricing window runs — one
-// top banner at a time. Swap the mount below back to end the window.
-import { FoundingPricingBanner } from '@/components/marketing/founding-pricing-banner'
 import { PostHogProvider } from '@/components/analytics/posthog-provider'
 import { GoogleMeasurement } from '@/components/analytics/google-measurement'
 import { TrueCapVercelAnalytics } from '@/components/analytics/vercel-analytics'
@@ -69,7 +66,7 @@ export const metadata: Metadata = {
     template: "%s | TrueCap",
   },
   description:
-    "Screen rental properties, test them against your investment criteria, stress the downside, and calculate the price that makes the deal work.",
+    "Screen rental properties, test them against selected rules, stress the downside, and calculate a target-dependent Offer Ceiling.",
   keywords: [
     "real estate investment calculator",
     "rental property calculator",
@@ -97,7 +94,7 @@ export const metadata: Metadata = {
     type: "website",
     title: "TrueCap | Rental Deal Decision Engine",
     description:
-      "Know whether a rental fits your strategy and the highest price you can offer before the numbers stop working.",
+      "Review whether a rental fits selected rules and the modeled Offer Ceiling under the assumptions shown.",
     siteName: "TrueCap",
     locale: "en_US",
     url: siteUrl,
@@ -114,7 +111,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "TrueCap | Rental Deal Decision Engine",
     description:
-      "Know whether a rental fits your strategy and the highest price you can offer before the numbers stop working.",
+      "Review whether a rental fits selected rules and the modeled Offer Ceiling under the assumptions shown.",
     images: ["/home.jpg"],
   },
   robots: {
@@ -250,10 +247,6 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
-        {/* Annual plan promo banner — thin, dismissible, hidden on
-            /pricing and /auth/*. Sits ABOVE all page content so it
-            doesn't reshuffle individual pages' layouts. */}
-        <FoundingPricingBanner />
         {/* PostHog provider — initializes posthog-js with cookie-consent
             respect, identifies authenticated Supabase users, and fires
             $pageview on App Router transitions. The wizard set up env

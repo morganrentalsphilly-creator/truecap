@@ -479,9 +479,10 @@ export function WeeklyDigestEmail({
                 fontSize: "13px",
               }}
             >
-              Deal Score and the verdict are free. TrueCap Pro adds your buy box
-              (every deal pass/failed against YOUR criteria), sensitivity grids,
-              10-year projections, MAO calculator, and PDF reports. Underwrite a
+              The secondary Screening Index and selected-rule fit are free. TrueCap Pro adds your buy box
+              (each deal shown against YOUR criteria), sensitivity grids,
+              10-year projections, an Offer Ceiling calculator, and PDF reports. The Offer Ceiling is
+              target-dependent and is not a recommended offer. Underwrite a
               property in less time than it takes to open Excel.
             </Text>
             <Link href={`${SITE_URL}/pricing`} style={styles.ctaButton}>

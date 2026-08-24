@@ -22,7 +22,7 @@ import { computeAssumptionImpact } from "@/lib/assumption-impact";
 const DRIVER_ADVICE: Record<string, { noun: string; risk: string }> = {
   rent: {
     noun: "rent",
-    risk: "If rent comes in below your estimate, cash flow erodes fast — confirm it against real comps before you offer.",
+    risk: "If rent comes in below your estimate, cash flow erodes fast — confirm it against real comps before recording a decision.",
   },
   interestRate: {
     noun: "your interest rate",
@@ -30,7 +30,7 @@ const DRIVER_ADVICE: Record<string, { noun: string; risk: string }> = {
   },
   purchasePrice: {
     noun: "your purchase price",
-    risk: "Overpaying hurts here more than anything — your offer price is the lever you control most.",
+    risk: "Overpaying hurts here more than anything — the modeled purchase-price assumption is the lever you control most.",
   },
   vacancyPct: {
     noun: "vacancy",
@@ -122,7 +122,7 @@ export function DealDriverInsight({
               <>
                 Your <strong className="text-foreground">${enteredRent.toLocaleString()}</strong> rent is{" "}
                 <strong className="text-foreground">{rentDiffPct}% above</strong> the ${market.toLocaleString()}{" "}
-                HUD area estimate — make sure you can actually get it, or the verdict softens fast.
+                HUD area estimate — verify it against local evidence, or the screening result weakens fast.
               </>
             ) : (
               <>

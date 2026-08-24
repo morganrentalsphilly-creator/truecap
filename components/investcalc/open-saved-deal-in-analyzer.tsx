@@ -215,6 +215,7 @@ export async function openSavedDealInAnalysisTab(
     id: result.id,
     schemaVersion: result.schemaVersion,
     methodologyVersion: result.methodologyVersion,
+    pipelineStage: result.pipelineStage,
     formSnapshot: result.formSnapshot,
     templateFallback: result.templateFallback,
     resultSnapshot,

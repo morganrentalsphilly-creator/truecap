@@ -78,7 +78,7 @@ export function OnePercentRuleWidget() {
           </div>
 
           <p className="text-xs text-muted-foreground">
-            The 1% rule is a screening filter, not a verdict. A property
+            The 1% rule is a screening filter, not an investment decision. A property
             that passes is worth a deeper underwrite. A property that fails
             isn&apos;t necessarily a bad deal — appreciation markets often
             fail the 1% rule for good reason.

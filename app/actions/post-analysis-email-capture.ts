@@ -11,7 +11,7 @@
  *   Day 0:  Underwriting checklist (the 7 numbers) — instant, delivers value
  *   Day 2:  "5 metrics most investors forget"
  *   Day 5:  "What does year 10 look like?" (Pro 10-year projection)
- *   Day 8:  Deal Decision Pack — lowest-friction paid step
+ *   Day 8:  Pro workflow education — one-time Pack checkout is disabled
  *   Day 12: configured promotional offer (only when code + Stripe coupon exist)
  *
  * Result shape follows the codebase convention from CLAUDE.md (§3.2):
@@ -37,10 +37,7 @@ import {
   claimEmailCaptureSlot,
   releaseEmailCaptureSlot,
 } from "@/lib/email-capture-guard";
-import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { getPostAnalysisOfferConfig } from "@/lib/post-analysis-offer";
-
-const SINGLE_DEAL_PRICE_LABEL = getMarketingOfferConfig().singleDeal.priceLabel;
 
 export type CaptureResult =
   | { ok: true; scheduledCount: number }
@@ -112,7 +109,7 @@ const SEQUENCE: SequenceEmail[] = [
     <li><strong>The exit</strong> — modeled profit across hold years, after assumed selling costs and taxes.</li>
   </ol>
   <p style="margin:0 0 20px 0;color:#374151;line-height:1.6;font-size:15px;">
-    The free screen covers cap rate, cash-on-cash, DSCR, cash flow, Deal Score, and a plain-English verdict. Pro adds sensitivity, 10-year projections, and modeled exits. Review every starting assumption before relying on the result.
+    The free screen covers cap rate, cash-on-cash, DSCR, cash flow, a secondary Screening Index, and selected-rule fit. The index is for triage—not evidence readiness, an appraisal, lender approval, or investment advice. Pro adds sensitivity, 10-year projections, and modeled exits. Review every starting assumption before relying on the result.
   </p>
   <div style="text-align:center;margin:24px 0;">
     <a href="${siteUrlHtml}" style="display:inline-block;background:#0070c4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">Run a deal in 60 seconds</a>
@@ -170,21 +167,21 @@ const SEQUENCE: SequenceEmail[] = [
   },
   {
     delayDays: 8,
-    subject: `One complete deal underwrite for ${SINGLE_DEAL_PRICE_LABEL}, no subscription`,
+    subject: "Turn your screening analysis into a repeatable Pro workflow",
     build: ({ addressHtml, siteUrlHtml }) => `<!DOCTYPE html>
 <html><body style="margin:0;padding:0;background:#f6f7fb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#111827;">
 <div style="max-width:560px;margin:32px auto;padding:32px 24px;background:#fff;border-radius:16px;border:1px solid #e5e7eb;">
-  <h1 style="margin:0 0 12px 0;font-size:22px;font-weight:800;line-height:1.2;">Need one complete underwrite? ${SINGLE_DEAL_PRICE_LABEL}.</h1>
+  <h1 style="margin:0 0 12px 0;font-size:22px;font-weight:800;line-height:1.2;">Ready for a repeatable review workflow?</h1>
   <p style="margin:0 0 16px 0;color:#374151;line-height:1.6;font-size:15px;">
-    Taking ${addressHtml ? `<strong>${addressHtml}</strong>` : "a deal"} to a lender, partner, or seller? The Deal Decision Pack packages the verdict, walk-away price, downside scenario, 10-year projection, illustrative tax impact, modeled exit comparisons, and Deal Score into a polished report for a one-time <strong>${SINGLE_DEAL_PRICE_LABEL}</strong>. No account, no subscription.
+    Reviewing ${addressHtml ? `<strong>${addressHtml}</strong>` : "a deal"} with a lender, partner, or adviser? Pro adds selected-rule fit, a target-dependent Offer Ceiling, downside testing, 10-year projections, illustrative tax impact, modeled exit comparisons, and PDF reports. The Offer Ceiling is not a recommended offer.
   </p>
   <p style="margin:0 0 20px 0;color:#374151;line-height:1.6;font-size:15px;">
-    Re-run your deal, click <strong>Export PDF</strong>, and choose the Deal Decision Pack option.
+    Compare Pro plans and current terms before starting checkout. New one-time report purchases are temporarily unavailable.
   </p>
   <div style="text-align:center;margin:24px 0;">
-    <a href="${siteUrlHtml}" style="display:inline-block;background:#0070c4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">Get your PDF</a>
+    <a href="${siteUrlHtml}/pricing" style="display:inline-block;background:#0070c4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">See Pro plans</a>
   </div>
-  <p style="margin:0 0 0 0;color:#6b7280;line-height:1.6;font-size:13px;text-align:center;">Want the full decision workflow instead? Pro adds Max Offer, Buy Box screening, stress testing, unlimited reports, saved deals, and comparison.</p>
+  <p style="margin:0 0 0 0;color:#6b7280;line-height:1.6;font-size:13px;text-align:center;">Keep using Free for unlimited screening analyses; upgrade only when the repeat workflow is useful.</p>
   <p style="margin:12px 0 0 0;color:#9ca3af;font-size:12px;line-height:1.5;text-align:center;">— Morgan · usetruecap.com</p>
 </div></body></html>`,
   },

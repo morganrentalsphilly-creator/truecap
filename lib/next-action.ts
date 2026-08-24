@@ -87,7 +87,7 @@ function terminalStageAction(
 function applyInFlightStage(action: NextAction, stage: PipelineStage | undefined): NextAction {
   if (stage === "negotiating") {
     if (action.tone === "blocked") {
-      return { label: "Renegotiate or walk away", reason: action.reason, tone: "blocked" };
+      return { label: "Verify the Offer Ceiling before renegotiating", reason: action.reason, tone: "blocked" };
     }
     if (action.tone === "ready") {
       return {
@@ -131,7 +131,7 @@ function baseActionForDeal(input: NextActionInput): NextAction {
   // 1) Hard blockers — the deal doesn't work as entered.
   if (cf < 0) {
     return {
-      label: "Lower your offer or raise rent",
+      label: "Review price and rent assumptions",
       reason: "cash flow is negative at these assumptions",
       tone: "blocked",
     };
@@ -147,7 +147,7 @@ function baseActionForDeal(input: NextActionInput): NextAction {
   // 2) Misses the user's buy box.
   if (input.meetsBuyBox === false) {
     return {
-      label: "Adjust to hit your buy box",
+      label: "Review the missed Buy Box rules",
       reason: "this deal misses your buy-box criteria",
       tone: "review",
     };
@@ -156,23 +156,23 @@ function baseActionForDeal(input: NextActionInput): NextAction {
   // 3) Bankable, but below the lender DSCR bar.
   if (dscr != null && dscr < LENDER_DSCR_BAR) {
     return {
-      label: "Line up DSCR financing",
-      reason: `DSCR is below the ${LENDER_DSCR_BAR} lender bar`,
+      label: "Confirm written lender terms",
+      reason: `DSCR is below the ${LENDER_DSCR_BAR} screening benchmark; lender criteria vary`,
       tone: "review",
     };
   }
 
-  // 4) Clears the bar — move toward an offer.
+  // 4) Positive screen — verification still comes before a user decision.
   if (input.meetsBuyBox === true) {
     return {
-      label: "Make your offer",
-      reason: "meets your buy box and clears the lender bar",
+      label: "Verify material assumptions",
+      reason: "the modeled economics meet your Buy Box; evidence is still separate",
       tone: "ready",
     };
   }
   return {
-    label: "Line up financing and make your offer",
-    reason: "positive cash flow and clears the lender bar",
+    label: "Verify material assumptions",
+    reason: "the modeled cash flow and DSCR clear the screening thresholds",
     tone: "ready",
   };
 }
@@ -207,13 +207,13 @@ function baseActionFromVerdict(input: {
 }): NextAction {
   const cf = Number(input.netCashFlow) || 0;
   if (cf < 0) {
-    return { label: "Lower your offer or raise rent", reason: "cash flow is negative", tone: "blocked" };
+    return { label: "Review price and rent assumptions", reason: "cash flow is negative", tone: "blocked" };
   }
   if (input.recommendation === "Avoid") {
-    return { label: "Pass or restructure the deal", reason: "the numbers don't support it as entered", tone: "blocked" };
+    return { label: "Review the failed economics", reason: "the numbers don't support it as entered", tone: "blocked" };
   }
   if (input.meetsBuyBox === false) {
-    return { label: "Adjust to hit your buy box", reason: "this deal misses your buy-box criteria", tone: "review" };
+    return { label: "Review the missed Buy Box rules", reason: "this deal misses your buy-box criteria", tone: "review" };
   }
   if (input.recommendation === "Risky") {
     return { label: "Verify the weak assumptions", reason: "thin margins — confirm rent, rate, and expenses", tone: "review" };
@@ -221,5 +221,9 @@ function baseActionFromVerdict(input: {
   if (input.recommendation === "Neutral") {
     return { label: "Compare, then decide", reason: "a middling deal — weigh it against your others", tone: "review" };
   }
-  return { label: "Line up financing and make your offer", reason: "clears your targets", tone: "ready" };
+  return {
+    label: "Verify material assumptions",
+    reason: "the Screening Index is positive, but it does not record a decision",
+    tone: "ready",
+  };
 }

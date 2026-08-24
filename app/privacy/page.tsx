@@ -150,13 +150,15 @@ export default function PrivacyPage() {
             share with third-party advertisers.
           </p>
           <p>
-            If you choose to create a deal share link, the analysis snapshot — including the
-            property address and financial assumptions — is stored by TrueCap and made available
-            through an opaque, owner-revocable link. Anyone with the link can view it without an
-            account. A new share expires after 180 days by default. You can revoke it sooner from
-            your account, and you should still share it only with people you intend to receive the
-            analysis. Previously issued legacy links may contain an encoded snapshot in the URL and
-            cannot be remotely revoked; replace those links with a new share when practical.
+            You must be signed in to create a new deal share link. The analysis snapshot and its
+            financial assumptions are stored by TrueCap; the exact property address is included
+            only if you choose to disclose it. A new opaque share is associated with your account,
+            expires after 180 days by default, and can be revoked from your account. Anyone with
+            the link can view it without an account, so share it only with people you intend to
+            receive the analysis. Historical opaque links created without account ownership remain
+            viewable until they expire but cannot be managed or revoked. Previously issued legacy
+            links may contain an encoded snapshot in the URL and cannot be remotely revoked;
+            replace those links with a new signed-in share when practical.
           </p>
 
           <h2 className="text-2xl">3. Third-party services</h2>

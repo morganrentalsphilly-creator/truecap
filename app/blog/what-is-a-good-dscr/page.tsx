@@ -34,7 +34,7 @@ const TITLE = "What is a good DSCR for a rental property? (And what 1.25 means f
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "What is a good DSCR for a rental property? (2026)";
 const DESCRIPTION =
-  "1.25 is the lender bar, not the investor bar. DSCR bands explained, plus worked examples: max loan and max offer price at a 1.25 DSCR.";
+  "1.25 is a common lender screen, not an investor guarantee. DSCR bands explained, plus worked examples for loan size and a target-dependent Offer Ceiling.";
 const PUBLISHED_AT = "2026-07-18";
 const MODIFIED_AT = "2026-08-15";
 const READING_TIME_MIN = 10;
@@ -302,7 +302,7 @@ export default function BlogPost() {
             </div>
           </div>
           <p>
-            To hit a 1.25 DSCR with 25% down, your maximum offer on this
+            To hit a modeled 1.25 DSCR with 25% down, the Offer Ceiling on this
             duplex is about <strong>$224,500 — roughly $25,500 (10%) below
             asking</strong>. (A lower price also trims property taxes
             slightly, which nudges NOI up — so $224,500 is mildly
@@ -472,7 +472,7 @@ export default function BlogPost() {
             Type in a price, rent, rate, and down payment, and TrueCap
             computes the DSCR alongside cash flow, cap rate, and
             cash-on-cash — then stress-tests the whole underwrite and gives
-            you a plain-English verdict. Takes about 60 seconds.
+            you a selected-rule fit and secondary Screening Index. Takes about 60 seconds.
           </p>
 
           <div className="not-prose">

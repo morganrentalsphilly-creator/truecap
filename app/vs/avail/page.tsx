@@ -61,7 +61,7 @@ const MATRIX: Row[] = [
   { feature: "Cash flow projection",                truecap: "Pro — 10-year with rent + expense + appreciation",                       avail: "Not modeled",                                                            winner: "truecap" },
   { feature: "Sensitivity grid",                    truecap: "Pro — rent ±10%, vacancy ±5pp, rate ±1pp",                                avail: "Not modeled",                                                            winner: "truecap" },
   { feature: "Illustrative tax impact",             truecap: "Pro — depreciation + interest + modeled after-tax CF",                    avail: "Not modeled",                                                            winner: "truecap" },
-  { feature: "Deal score + plain-English verdict",  truecap: "Free — 0-100 score + Strong / Solid / Mixed / Marginal / Negative",         avail: "Not applicable",                                                          winner: "truecap" },
+  { feature: "Screening Index + plain-English verdict",  truecap: "Free — 0-100 score + Strong / Solid / Mixed / Marginal / Negative",         avail: "Not applicable",                                                          winner: "truecap" },
   { feature: "Rental listing distribution",         truecap: "No",                                                                      avail: "Yes — syndicated to Realtor.com, Apartments.com, Zillow, etc.",           winner: "avail" },
   { feature: "Online rental application",           truecap: "No",                                                                      avail: "Yes — customizable forms",                                               winner: "avail" },
   { feature: "Tenant screening (credit/criminal)",  truecap: "No",                                                                      avail: "Yes — TransUnion-powered",                                                winner: "avail" },
@@ -260,7 +260,7 @@ export default function VsAvailPage() {
               benchmarks. Sensitize the inputs. Save the deal.
             </li>
             <li>
-              <strong>Make the offer</strong> and close.
+              <strong>Verify the material inputs and record your decision.</strong> If you proceed, the transaction and closing workflow happens outside TrueCap.
             </li>
             <li>
               <strong>Set up the property in Avail.</strong> List vacant
@@ -310,8 +310,8 @@ export default function VsAvailPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly
             cash flow and plain read-only share links. Pro adds projections,
-            sensitivity, illustrative tax impact, exit scenarios, MAO,
-            co-branding, and included PDFs. A one-time PDF option is also
+            sensitivity, illustrative tax impact, exit scenarios, Offer Ceiling,
+            co-branding, and included PDFs. New one-time PDF checkout is
             available. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -361,12 +361,12 @@ const AVAIL_FAQ: FaqItem[] = [
         No — they cover different stages. Avail is post-purchase
         landlord operations: listing, screening, leases, rent
         collection, maintenance. TrueCap is pre-purchase underwriting:
-        cap rate, CoC, DSCR, projection, deal score. Most independent
+        cap rate, CoC, DSCR, projection, Screening Index. Most independent
         landlords end up using both.
       </>
     ),
     plainTextAnswer:
-      "No — different stages. Avail is post-purchase landlord ops (listing, screening, leases, rent collection, maintenance). TrueCap is pre-purchase underwriting (cap rate, CoC, DSCR, projection, deal score). Most independent landlords use both.",
+      "No — different stages. Avail is post-purchase landlord ops (listing, screening, leases, rent collection, maintenance). TrueCap is pre-purchase underwriting (cap rate, CoC, DSCR, projection, Screening Index). Most independent landlords use both.",
   },
   {
     question: "Can TrueCap do what Avail's listing or screening does?",
@@ -391,12 +391,12 @@ const AVAIL_FAQ: FaqItem[] = [
         &quot;Unlimited Plus&quot; is ~$7/unit/month (as of 2026) for
         advanced features. TrueCap is free for core underwriting math;
         Pro adds projections, sensitivity, illustrative tax impact,
-        co-branded share links, and included PDFs. A one-time PDF option
+        co-branded share links, and included PDFs. New one-time PDF checkout
         is also available; see TrueCap&apos;s live pricing page for current terms.
       </>
     ),
     plainTextAnswer:
-      "Avail publishes free and paid operations plans. TrueCap free covers core underwriting, while Pro adds advanced analysis and included PDFs; a one-time PDF option is also available. Check both live pricing pages for current rates and terms.",
+      "Avail publishes free and paid operations plans. TrueCap free covers core underwriting, while Pro adds advanced analysis and included PDFs. Check both live pricing pages for current rates and terms.",
   },
   {
     question: "Does Avail's calculator replace TrueCap?",
@@ -405,13 +405,13 @@ const AVAIL_FAQ: FaqItem[] = [
         Avail has some basic financial views in their landlord
         dashboard (rent collected, payment history) but they don&apos;t
         do underwriting — no cap rate, no DSCR, no 10-year projection,
-        no sensitivity, no deal score. Their financial views are for
+        no sensitivity, no Screening Index. Their financial views are for
         what&apos;s happening on properties you own. TrueCap models
         what will happen on properties you&apos;re considering.
       </>
     ),
     plainTextAnswer:
-      "Avail has basic financial views (rent collected, payment history) but doesn't do underwriting — no cap rate, DSCR, projection, sensitivity, or deal score. Their views are for properties you own; TrueCap models what will happen on properties you're considering.",
+      "Avail has basic financial views (rent collected, payment history) but doesn't do underwriting — no cap rate, DSCR, projection, sensitivity, or Screening Index. Their views are for properties you own; TrueCap models what will happen on properties you're considering.",
   },
   {
     question: "Avail is owned by Realtor.com — does that matter?",

@@ -28,6 +28,7 @@ import { getAnalyzerCapabilities } from "@/lib/analyzer-capabilities";
 import { getDashboardNavAccess, hasPaidPlanSubscription } from "@/lib/entitlements";
 import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { isAdvocacyInternalUser } from "@/lib/advocacy-rollout";
 
 export const metadata: Metadata = {
   title: "New analysis",
@@ -102,6 +103,7 @@ export default async function NewAnalysisPage() {
           savedDealLimit={entitlements?.max_saved_deals ?? null}
           isAuthenticated
           userAnalysisDefaults={capabilities.userAnalysisDefaults}
+          advocacyContractEligible={isAdvocacyInternalUser(user.email)}
         />
       </div>
     </div>

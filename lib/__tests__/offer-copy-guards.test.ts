@@ -104,14 +104,16 @@ describe("offer trust language", () => {
     expect(privacy).not.toContain("we send only the property address / county");
   });
 
-  it("describes new read-only deal links as opaque, expiring, and revocable", () => {
+  it("describes only new signed-in deal links as revocable", () => {
     const share = read("components/investcalc/share-link-button.tsx");
     const privacy = read("app/privacy/page.tsx");
     expect(share).toContain("Anyone who receives");
     expect(share).toContain("opaque, expiring link");
     expect(share).toContain("The exact address stays hidden by default");
     expect(privacy).toMatch(/Anyone with\s+the link can view it without an\s+account/);
-    expect(privacy).toMatch(/opaque, owner-revocable link/);
+    expect(privacy).toMatch(/must be signed in to create a new deal share link/);
+    expect(privacy).toMatch(/associated with your account/);
+    expect(privacy).toMatch(/Historical opaque links created without account ownership remain\s+viewable until they expire but cannot be managed or revoked/);
     expect(privacy).toMatch(/expires after 180 days by default/);
   });
 

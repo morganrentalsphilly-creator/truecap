@@ -6,7 +6,7 @@ describe("nextActionForDeal", () => {
   it("flags negative cash flow as a blocker first (even if the buy box also misses)", () => {
     const a = nextActionForDeal({ netCashFlow: -120, dscr: 0.9, monthlyPayment: 1400, meetsBuyBox: false });
     expect(a.tone).toBe("blocked");
-    expect(a.label).toMatch(/lower your offer|raise rent/i);
+    expect(a.label).toBe("Review price and rent assumptions");
   });
 
   it("flags DSCR under 1.0 as a blocker when cash flow is positive", () => {
@@ -24,19 +24,19 @@ describe("nextActionForDeal", () => {
   it("flags DSCR below the 1.25 lender bar for review", () => {
     const a = nextActionForDeal({ netCashFlow: 100, dscr: 1.1, monthlyPayment: 1400, meetsBuyBox: true });
     expect(a.tone).toBe("review");
-    expect(a.label).toMatch(/DSCR financing/i);
+    expect(a.label).toBe("Confirm written lender terms");
   });
 
-  it("tells a strong deal that meets the buy box to make the offer", () => {
+  it("routes a strong deal that meets the buy box to verification", () => {
     const a = nextActionForDeal({ netCashFlow: 400, dscr: 1.5, monthlyPayment: 1400, meetsBuyBox: true });
     expect(a.tone).toBe("ready");
-    expect(a.label).toMatch(/make your offer/i);
+    expect(a.label).toBe("Verify material assumptions");
   });
 
-  it("a strong deal with no buy box set still says make the offer", () => {
+  it("routes a strong deal with no buy box to verification", () => {
     const a = nextActionForDeal({ netCashFlow: 400, dscr: 1.5, monthlyPayment: 1400, meetsBuyBox: null });
     expect(a.tone).toBe("ready");
-    expect(a.label).toMatch(/make your offer/i);
+    expect(a.label).toBe("Verify material assumptions");
   });
 
   it("handles a cash purchase — ignores DSCR, judges on cash flow", () => {
@@ -49,12 +49,12 @@ describe("nextActionForDeal", () => {
   describe("pipeline-stage awareness", () => {
     it("no stage → byte-identical to today's output (backward compat snapshot)", () => {
       expect(nextActionForDeal({ netCashFlow: 400, dscr: 1.5, monthlyPayment: 1400, meetsBuyBox: true })).toEqual({
-        label: "Make your offer",
-        reason: "meets your buy box and clears the lender bar",
+        label: "Verify material assumptions",
+        reason: "the modeled economics meet your Buy Box; evidence is still separate",
         tone: "ready",
       });
       expect(nextActionForDeal({ netCashFlow: -120, dscr: 0.9, monthlyPayment: 1400, meetsBuyBox: false })).toEqual({
-        label: "Lower your offer or raise rent",
+        label: "Review price and rent assumptions",
         reason: "cash flow is negative at these assumptions",
         tone: "blocked",
       });
@@ -122,7 +122,7 @@ describe("nextActionForDeal", () => {
     it("negotiating stage keeps the advice aligned with the live terms", () => {
       const blocked = nextActionForDeal({ netCashFlow: -120, stage: "negotiating" });
       expect(blocked).toEqual({
-        label: "Renegotiate or walk away",
+        label: "Verify the Offer Ceiling before renegotiating",
         reason: "cash flow is negative at these assumptions",
         tone: "blocked",
       });
@@ -163,10 +163,10 @@ describe("nextActionFromVerdict", () => {
   it("flags negative cash flow as a blocker", () => {
     expect(nextActionFromVerdict({ recommendation: "Buy", netCashFlow: -50 }).tone).toBe("blocked");
   });
-  it("tells an Avoid deal to pass or restructure", () => {
+  it("routes an Avoid result to review of the failed economics", () => {
     const a = nextActionFromVerdict({ recommendation: "Avoid", netCashFlow: 100 });
     expect(a.tone).toBe("blocked");
-    expect(a.label).toMatch(/pass|restructure/i);
+    expect(a.label).toBe("Review the failed economics");
   });
   it("flags a buy-box miss for review", () => {
     const a = nextActionFromVerdict({ recommendation: "Buy", netCashFlow: 200, meetsBuyBox: false });
@@ -177,21 +177,21 @@ describe("nextActionFromVerdict", () => {
     expect(nextActionFromVerdict({ recommendation: "Risky", netCashFlow: 50 }).tone).toBe("review");
     expect(nextActionFromVerdict({ recommendation: "Neutral", netCashFlow: 50 }).tone).toBe("review");
   });
-  it("tells a Strong Buy with positive cash flow to make the offer", () => {
+  it("routes a Strong Buy with positive cash flow to verification", () => {
     const a = nextActionFromVerdict({ recommendation: "Strong Buy", netCashFlow: 400 });
     expect(a.tone).toBe("ready");
-    expect(a.label).toMatch(/make your offer/i);
+    expect(a.label).toBe("Verify material assumptions");
   });
 
   describe("pipeline-stage awareness", () => {
     it("no stage → byte-identical to today's output (backward compat snapshot)", () => {
       expect(nextActionFromVerdict({ recommendation: "Strong Buy", netCashFlow: 400 })).toEqual({
-        label: "Line up financing and make your offer",
-        reason: "clears your targets",
+        label: "Verify material assumptions",
+        reason: "the Screening Index is positive, but it does not record a decision",
         tone: "ready",
       });
       expect(nextActionFromVerdict({ recommendation: "Avoid", netCashFlow: 100 })).toEqual({
-        label: "Pass or restructure the deal",
+        label: "Review the failed economics",
         reason: "the numbers don't support it as entered",
         tone: "blocked",
       });
@@ -238,7 +238,7 @@ describe("nextActionFromVerdict", () => {
 
     it("negotiating stage rephrases blockers and the ready path", () => {
       const blocked = nextActionFromVerdict({ recommendation: "Avoid", netCashFlow: 100, stage: "negotiating" });
-      expect(blocked.label).toBe("Renegotiate or walk away");
+      expect(blocked.label).toBe("Verify the Offer Ceiling before renegotiating");
       const ready = nextActionFromVerdict({ recommendation: "Strong Buy", netCashFlow: 400, stage: "negotiating" });
       expect(ready.label).toBe("Finalize the negotiated terms");
     });

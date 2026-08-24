@@ -55,7 +55,10 @@ describe("one-time PDF security contract", () => {
       "one-time PDF report binding is immutable"
     );
     expect(reportBindingMigration).toContain("interval '24 hours'");
-    expect(client).toContain("maxOfferTargetSource: checkoutMaoTargetSource");
+    expect(client).not.toContain("checkoutMaoTarget");
+    expect(client).not.toContain("createOneTimePdfCheckoutAction");
+    expect(client).toContain("const restoredDraft = parseOneTimePdfDraft(draftRaw)");
+    expect(client).toContain("maxOfferTarget: restoredMaoTarget");
     expect(client).toContain("maxOfferTargetSource: restoredMaoTargetSource");
   });
 
@@ -127,14 +130,22 @@ describe("one-time PDF security contract", () => {
     }
   });
 
-  it("stores the new claim secret and deal draft in sessionStorage, never localStorage", () => {
-    const checkoutStart = client.slice(client.indexOf("const handleBuyOneTimePdf"));
-    const returnHandler = checkoutStart.slice(0, checkoutStart.indexOf("const handleNewAnalysis"));
-    expect(returnHandler).toContain("window.sessionStorage.setItem");
-    expect(returnHandler).not.toContain("window.localStorage.setItem");
-    expect(returnHandler).toContain("oneTimePdfClaimSecretKey(result.claim.id)");
+  it("reads existing paid-claim secrets and drafts only from same-tab sessionStorage", () => {
+    const returnStart = client.indexOf("Return-from-Stripe handler");
+    const returnEnd = client.indexOf("const handleNewAnalysis", returnStart);
+    expect(returnStart).toBeGreaterThanOrEqual(0);
+    expect(returnEnd).toBeGreaterThan(returnStart);
+    const returnHandler = client.slice(returnStart, returnEnd);
+
+    expect(client).not.toContain("createOneTimePdfCheckoutAction");
+    expect(client).not.toContain("handleBuyOneTimePdf");
+    expect(returnHandler).toContain("window.sessionStorage.getItem(");
+    expect(returnHandler).toContain("oneTimePdfClaimSecretKey(returnState.claimId)");
+    expect(returnHandler).toContain("window.sessionStorage.getItem(ONE_TIME_PDF_DRAFT_KEY)");
+    expect(returnHandler).not.toContain("window.localStorage.getItem");
     expect(returnHandler).toContain("parseOneTimePdfClaimSecret(secretRaw)");
-    expect(client.match(/parseOneTimePdfClaimSecret\(/g)?.length).toBeGreaterThanOrEqual(2);
+    expect(returnHandler).toContain("parseOneTimePdfDraft(draftRaw)");
+    expect(returnHandler).toContain("verifyOneTimePdfPaymentAction({");
   });
 
   it("leaves Pro credit dormant but preserves an auditable future ledger", () => {
@@ -146,12 +157,13 @@ describe("one-time PDF security contract", () => {
     expect(action).toContain('pro_credit_status: "not_configured"');
   });
 
-  it("discloses the browser-bound one-deal delivery limits before checkout", () => {
-    expect(purchaseDialog).toContain("one PDF");
-    expect(purchaseDialog).toContain("exact analysis inputs");
-    expect(purchaseDialog).toContain("same browser tab within 30 days");
-    expect(purchaseDialog).toContain("retry for 24 hours");
-    expect(purchaseDialog).toContain("does not create an account or cloud copy");
+  it("discloses the shutdown while preserving existing paid-claim support", () => {
+    expect(purchaseDialog).toContain("One-time report purchases are");
+    expect(purchaseDialog).toContain("temporarily unavailable");
+    expect(purchaseDialog).toContain("Existing paid claims and recovery remain supported");
+    expect(purchaseDialog).toContain("new purchases only");
+    expect(purchaseDialog).not.toContain("onBuyOneTime");
+    expect(purchaseDialog).not.toContain("Buy the Deal Decision Pack");
     expect(purchaseDialog).toContain('href="/terms"');
     expect(purchaseDialog).toContain("Terms");
     expect(purchaseDialog).toContain("hello@usetruecap.com");

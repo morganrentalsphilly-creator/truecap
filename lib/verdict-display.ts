@@ -52,35 +52,34 @@ export type VerdictDisplay = {
  */
 export const VERDICT_DISPLAY: Record<DealRecommendation, VerdictDisplay> = {
   "Strong Buy": {
-    label: "Strong fit",
-    shortLabel: "Strong fit",
+    label: "Strong screening result",
+    shortLabel: "Strong screen",
     tone: "positive",
-    srLabel: "Verdict: strong fit",
+    srLabel: "Screening result: strong",
   },
   Buy: {
-    label: "Worth pursuing",
-    shortLabel: "Worth pursuing",
+    label: "Positive screening result",
+    shortLabel: "Positive screen",
     tone: "positive",
-    srLabel: "Verdict: worth pursuing",
+    srLabel: "Screening result: positive",
   },
   Neutral: {
-    label: "Needs a closer look",
-    shortLabel: "Closer look",
+    label: "Mixed screening result",
+    shortLabel: "Mixed screen",
     tone: "neutral",
-    srLabel: "Verdict: needs a closer look",
+    srLabel: "Screening result: mixed",
   },
   Risky: {
-    label: "Needs work",
-    shortLabel: "Needs work",
+    label: "Weak screening result",
+    shortLabel: "Weak screen",
     tone: "caution",
-    srLabel: "Verdict: needs work",
+    srLabel: "Screening result: weak",
   },
   Avoid: {
-    // Replaces "Pass" — the single most ambiguous word in the product.
-    label: "Don't buy at this price",
-    shortLabel: "Too expensive",
+    label: "Very weak screening result",
+    shortLabel: "Very weak screen",
     tone: "negative",
-    srLabel: "Verdict: do not buy at this price",
+    srLabel: "Screening result: very weak",
   },
 };
 
@@ -126,7 +125,7 @@ export function verdictLabel(recommendation: string | null | undefined): string 
  */
 export function verdictScreeningLabel(recommendation: string | null | undefined): string {
   const display = verdictDisplay(recommendation);
-  return display.tone === "negative" ? "Skip" : display.shortLabel;
+  return display.shortLabel;
 }
 
 /**

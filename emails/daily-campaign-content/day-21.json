@@ -6,12 +6,12 @@
   "headline": "How TrueCap caught a $40,000 mistake on a Nashville duplex.",
   "body": [
     "An investor I know was about to close on a duplex in East Nashville. $385,000, $1,650 per unit, $3,300/mo gross. He'd run the cap rate (looked like 6.2%), liked the location, and was three days from inspection contingency.",
-    "He ran the address through TrueCap on a Saturday morning, mostly to grab a PDF for his lender. The verdict came back Mixed with a DSCR of 1.08. Below his lender's 1.20 floor. He didn't believe it — ran the numbers in his own spreadsheet. Same answer.",
+    "He ran the address through TrueCap on a Saturday morning, mostly to grab a PDF for his lender. The secondary Screening Index band was Mixed, and the modeled DSCR was 1.08—below the 1.20 program floor he had entered. He checked the inputs and ran the numbers in his own spreadsheet. Same modeled answer.",
     "What had he missed? Property tax. Davidson County had reassessed the area last year and the new assessment was 22% higher than what the seller's prior bill reflected. He'd modeled the seller's old tax bill (about $3,800) instead of the new one (about $4,900). $1,100 of NOI he didn't have. DSCR collapsed.",
     "He killed the deal. Two weeks later he closed on a smaller duplex three blocks over at $310,000 with $1,500 per unit and a clean DSCR of 1.31. Roughly $40,000 less price, better cash flow, loan got approved without a rate bump.",
     "The point isn't 'TrueCap is magic.' The point is that one bad assumption (old tax bill instead of reassessed value) was about to cost him $40,000. Sixty seconds caught it."
   ],
   "cta_text": "Run your own deal",
   "cta_url": "https://usetruecap.com/",
-  "signature_note": "PS — if you've got a deal in progress and want a second pair of eyes on the numbers, paste it and hit reply with the verdict. Happy to talk through anything that looks off."
+  "signature_note": "PS — if you've got a deal in progress and want a second pair of eyes on the numbers, paste it and hit reply with the selected-rule fit and assumptions you still need to verify. Happy to talk through anything that looks off."
 }

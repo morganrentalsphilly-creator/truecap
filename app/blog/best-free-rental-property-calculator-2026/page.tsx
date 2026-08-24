@@ -58,7 +58,7 @@ const TOOLS = [
     freeCovers: [
       "Cap rate, CoC, DSCR, NCF, monthly cash flow",
       "Address auto-fill (HUD rent benchmark + FRED owner-occupied rate benchmark + state property-tax estimate)",
-      "Plain-English verdict (Strong / Solid / Mixed / Marginal / Negative)",
+      "Selected-rule fit, with a secondary Screening Index",
       "Unlimited analyses, no signup, no cap",
       "Save up to 5 deals + dashboard access",
       "One sale and rent comps lookup",
@@ -67,10 +67,10 @@ const TOOLS = [
     freeGates: [
       "10-year projection (Pro)",
       "Illustrative tax impact + sensitivity (Pro)",
-      "MAO solver, BRRRR & fix-flip analyzer (Pro)",
+      "Offer Ceiling, BRRRR & fix-flip analyzer (Pro)",
       "Editing, unlimited saves, and comparison of up to 4 deals (Pro)",
       "Additional comps lookups: Pro includes 50 per month",
-      "PDF export: one-time purchase or Pro"
+      "PDF export (Pro)"
     ],
     pickIf: "You want unlimited core rental metrics without paying or creating an account.",
   },
@@ -145,9 +145,9 @@ const TOOLS = [
 ];
 
 const FAQ_ITEMS = [
-  { q: "Is TrueCap really free for core rental analysis?", a: "Yes. TrueCap's free tier covers cap rate, cash-on-cash, DSCR, NCF, and monthly cash flow on unlimited analyses without signup. It also includes editable HUD, FRED, and state-tax screening assumptions, up to 5 saved deals, one comps lookup, and read-only share links. Pro adds advanced workflows and 50 comps lookups per month; PDF export is available as a one-time purchase or with Pro. Check live pricing for current terms." },
+  { q: "Is TrueCap really free for core rental analysis?", a: "Yes. TrueCap's free tier covers cap rate, cash-on-cash, DSCR, NCF, and monthly cash flow on unlimited analyses without signup. It also includes editable HUD, FRED, and state-tax screening assumptions, up to 5 saved deals, one comps lookup, and read-only share links. Pro adds advanced workflows, 50 comps lookups per month, and PDF reports. Check live pricing for current terms." },
   { q: "Is BiggerPockets' rental property calculator free?", a: "The current official BiggerPockets rental-property-calculator page presents calculator results as a Pro feature. Access, trial, and membership terms can change, so verify both the official calculator page and Pro page before choosing it as a free option." },
-  { q: "What's the catch with TrueCap's free tier?", a: "The core underwriting metrics, unlimited analyses, one comps lookup, and read-only share links are free. Pro adds 10-year projections, illustrative tax impact, sensitivity, editing, unlimited saves, comparison tools, 50 comps lookups per month, and dedicated BRRRR and flip analyzers. PDF export is available through a one-time purchase or Pro." },
+  { q: "What's the catch with TrueCap's free tier?", a: "The core underwriting metrics, unlimited analyses, one comps lookup, and read-only share links are free. Pro adds 10-year projections, illustrative tax impact, sensitivity, editing, unlimited saves, comparison tools, 50 comps lookups per month, dedicated BRRRR and flip analyzers, and PDF reports." },
   { q: "Can I underwrite a BRRRR or flip on a free calculator?", a: "DealCheck Starter currently includes its BRRRR and flip calculators plus professional reports, subject to published usage limits. TrueCap's free core analyzer can screen a property's standard rental metrics, while its dedicated BRRRR and Fix-and-Flip analyzers are Pro workflows." },
   { q: "How should I compare free calculator plans?", a: "Check which metrics, strategy calculators, reports, saved-property limits, comps, and sharing tools are included before entering a deal. Product access and pricing change, so verify current terms on each provider's official page and confirm every starting assumption with property-specific evidence." },
 ];

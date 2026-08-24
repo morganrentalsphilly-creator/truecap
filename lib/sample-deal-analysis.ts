@@ -7,7 +7,7 @@ import { calculateMaxAllowableOffer } from "@/lib/max-allowable-offer";
 import { SAMPLE_DEAL_FIXTURE } from "@/lib/sample-deal";
 
 /**
- * Deterministic output used by every 1700 W Erie preview. This is deliberately
+ * Deterministic output used by every synthetic sample preview. This is deliberately
  * a thin composition of the production engines—not a second formula layer.
  */
 export function calculateSampleDealOutcome() {

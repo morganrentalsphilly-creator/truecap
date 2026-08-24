@@ -499,7 +499,7 @@ export default async function DashboardPage() {
     isPremium,
     navAccess.dashboard
   );
-  // Max Offer per deal — the number the product is sold on, absent from this
+  // Offer Ceiling per deal — the number the product is sold on, absent from this
   // screen until now. Recomputed from form_snapshot via the same
   // computeDealOfferLine path My Deals uses (no new math, no new query).
   // Deliberately over the DETAILED rows only: this is a bounded set, whereas
@@ -560,15 +560,15 @@ export default async function DashboardPage() {
       ? buyBoxesResult.boxes.filter((b) => b.isActive && buyBoxHasCriteria(b))
       : [];
   const buyBoxesResolved = Boolean(buyBoxesResult?.ok);
-  // FEATURE_CATALOG marks MAO as `gate: "paid"`; production Pro plan JSON has
+  // FEATURE_CATALOG marks Offer Ceiling as `gate: "paid"`; production Pro plan JSON has
   // no `mao` feature flag. Paid subscription status is therefore the complete
   // and fail-closed gate here.
   const canShowMao = isPremium;
 
-  // Max Offer per DETAILED row (bounded set). Same lib/deal-offer-line path
+  // Offer Ceiling per DETAILED row (bounded set). Same lib/deal-offer-line path
   // My Deals uses, so the two screens can never quote different numbers. The
   // paid gate wraps the entire solve, not only its rendering, so a free user
-  // cannot receive a hidden MAO value in the dashboard payload.
+  // cannot receive a hidden Offer Ceiling value in the dashboard payload.
   if (canShowMao) {
     const offerById = new Map<string, number | null>();
     const basisById = new Map<string, DashboardDeal["maxOfferBasis"]>();

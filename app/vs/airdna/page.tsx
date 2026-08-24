@@ -54,7 +54,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", airdna: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", airdna: "Forward STR revenue forecast", winner: "tie" },
   { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", airdna: "Not modeled", winner: "truecap" },
-  { feature: "Deal score + verdict", truecap: "Free — 0-100 score + plain-English verdict", airdna: "Property-level investibility score", winner: "tie" },
+  { feature: "Screening Index + verdict", truecap: "Free — 0-100 score + plain-English verdict", airdna: "Property-level investibility score", winner: "tie" },
   { feature: "STR revenue projection (ADR + occupancy)", truecap: "Editable input only", airdna: "Yes — best-in-class market data", winner: "airdna" },
   { feature: "Comparable STR listings nearby", truecap: "No", airdna: "Yes — Airbnb + Vrbo comp set", winner: "airdna" },
   { feature: "Long-term rent baseline", truecap: "HUD Fair Market Rent", airdna: "Not the focus", winner: "truecap" },
@@ -267,8 +267,7 @@ export default function VsAirdnaPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, and co-branded share links. Pro includes PDFs, and a one-time
-            PDF option is available; see live pricing for current terms.
+            Offer Ceiling, co-branded share links, and PDF reports with Pro; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">

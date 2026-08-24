@@ -27,7 +27,6 @@ import {
   releaseEmailCaptureSlot,
 } from "@/lib/email-capture-guard";
 import { escapeHtml } from "@/lib/html-escape";
-import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 
 const PACK_PATH = "/downloads/truecap-market-intelligence-pack.pdf";
 
@@ -47,7 +46,7 @@ export type LeadMagnetCaptureResult =
       message: string;
     };
 
-type SequenceCtx = { siteUrlHtml: string; guaranteeEnabled: boolean };
+type SequenceCtx = { siteUrlHtml: string };
 
 const SEQUENCE: Array<{
   delayDays: number;
@@ -61,22 +60,22 @@ const SEQUENCE: Array<{
       <p>Here it is — every state's investing benchmarks on one table, the
       rent-to-price screen, and HUD rent benchmarks for 150 tracked markets:</p>
       <p><a href="${siteUrlHtml}${PACK_PATH}"><strong>Download the Market Intelligence Pack (PDF)</strong></a></p>
-      <p>It's built from the same sourced data that pre-fills every TrueCap
-      analysis — HUD Fair Market Rents, state tax rates, landlord-law
-      timelines. Benchmarks, not quotes: when a market looks interesting,
-      run a real address and let the underwrite decide.</p>
-      <p><a href="${siteUrlHtml}/?utm_source=email&utm_campaign=mip-day0">Analyze any address free — Pro solves your exact Max Offer →</a></p>
+      <p>It compiles labeled HUD Fair Market Rent, state tax-rate, and
+      landlord-law reference material. Coverage and dates vary. These are
+      screening references, not property facts, legal advice, or quotes.</p>
+      <p><a href="${siteUrlHtml}/?utm_source=email&utm_campaign=mip-day0">Analyze any address free — Pro adds a target-dependent Offer Ceiling →</a></p>
     `,
   },
   {
     delayDays: 3,
     subject: "From screening to a submitted offer (the playbook)",
     build: ({ siteUrlHtml }) => `
-      <p>The pack tells you where the numbers might work. The next blocker is
-      never math — it's making the actual offer.</p>
-      <p>We wrote the whole path down: define your Buy Box, source candidates,
-      read the analysis, set your Max Offer, submit the offer (scripts
-      included).</p>
+      <p>The pack helps compare market-level screening references. Property-level
+      inputs, financing terms, condition, title, and contract protections still
+      require verification.</p>
+      <p>We wrote an educational review path: define your Buy Box, source
+      candidates, inspect the analysis, review the Offer Ceiling and its target
+      profile, then make your own documented decision with relevant advisers.</p>
       <p><a href="${siteUrlHtml}/playbook"><strong>Read the First Offer Playbook</strong></a></p>
       <p>It's free and public — the same reason our methodology is public.
       Confident offers come from a process you can audit.</p>
@@ -85,21 +84,12 @@ const SEQUENCE: Array<{
   {
     delayDays: 5,
     subject: "The number that protects you from a bad buy",
-    build: ({ siteUrlHtml, guaranteeEnabled }) => `
-      <p>Every rental has one number that matters more than the rest: the
-      most you can pay before the deal stops working. Overpaying by even 3%
-      on a $250,000 rental is $7,500 gone before you collect a dollar of rent.</p>
-      <p>TrueCap Pro computes that walk-away price on every deal — plus the
-      downside stress test, your Buy Box verdict, and a lender-facing review report.</p>
-      ${
-        guaranteeEnabled
-          ? `<p>And the risk is ours: analyze 10 deals in your first 30 days as a
-      paying subscriber, and if you don't feel more confident about exactly what to
-      offer, email us for a full refund.
-      <a href="${siteUrlHtml}/guarantee">The Never Overpay Guarantee</a> is
-      published in full.</p>`
-          : ""
-      }
+    build: ({ siteUrlHtml }) => `
+      <p>The Offer Ceiling is the highest modeled purchase price that still
+      meets a named target profile under the assumptions shown.</p>
+      <p>TrueCap Pro computes this target-dependent boundary on compatible
+      analyses, alongside the downside stress test, Buy Box rule fit, and a
+      report designed for review with advisers or a lender. It is not a recommended offer.</p>
       <p><a href="${siteUrlHtml}/pricing?utm_source=email&utm_campaign=mip-day5"><strong>See Pro plans</strong></a></p>
     `,
   },
@@ -109,7 +99,7 @@ function wrapHtml(inner: string, unsubscribeMailbox: string): string {
   return `<!doctype html><html><body style="font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color: #1f2937; line-height: 1.6; max-width: 560px; margin: 0 auto; padding: 24px 16px;">
     ${inner}
     <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 28px 0 12px" />
-    <p style="font-size: 12px; color: #6b7280;">TrueCap · sourced, editable rental underwriting ·
+    <p style="font-size: 12px; color: #6b7280;">TrueCap · labeled, editable rental screening assumptions ·
     <a href="mailto:${unsubscribeMailbox}?subject=unsubscribe" style="color:#6b7280">unsubscribe</a></p>
   </body></html>`;
 }
@@ -194,7 +184,6 @@ export async function captureLeadMagnetEmail(input: {
   const unsubscribeMailbox = (replyTo.match(/<([^>]+)>/)?.[1] ?? replyTo).trim();
   const ctx: SequenceCtx = {
     siteUrlHtml: escapeHtml(siteUrl),
-    guaranteeEnabled: getMarketingOfferConfig().guaranteeEnabled,
   };
 
   let scheduledCount = 0;

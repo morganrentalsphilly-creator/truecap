@@ -6,7 +6,7 @@
  * Two calculations, same conventions as the rest of TrueCap:
  *
  *   ARV       = average renovated-comp $/sq ft × subject finished sq ft
- *   Max offer = (ARV × multiplier%) − repair costs   (the 70% rule)
+ *   Offer Ceiling = (ARV × multiplier%) − repair costs   (the 70% rule)
  *
  * The comps method + the worked numbers mirror the how-to-calculate-arv
  * blog post; the max-offer arithmetic mirrors the 70-percent-rule post
@@ -79,7 +79,7 @@ export function ArvCalculatorWidget() {
     };
   }, [subjectSqft, repairs, multiplier, comp1Price, comp1Sqft, comp2Price, comp2Sqft, comp3Price, comp3Sqft]);
 
-  // Moment-of-result handoff (P2-2 pattern): carry the max offer into the
+  // Moment-of-result handoff (P2-2 pattern): carry the Offer Ceiling into the
   // full analyzer as the purchase price — the number the rule says to pay.
   const handoffHref = buildAnalyzerHandoffUrl(
     result && result.mao >= 10000 ? { purchasePrice: result.mao } : {},
@@ -125,7 +125,7 @@ export function ArvCalculatorWidget() {
               <Metric label="Estimated ARV" value={fmt(result.arv)} />
               <Metric label="Avg comp $/sq ft" value={`$${result.avgPpsf.toFixed(2)}`} />
               <Metric
-                label={`Max offer (${num(multiplier)}% rule)`}
+                label={`Offer Ceiling (${num(multiplier)}% rule)`}
                 value={fmt(result.mao)}
                 positive={result.mao > 0}
                 negative={result.mao <= 0}
@@ -159,7 +159,7 @@ export function ArvCalculatorWidget() {
             {result.mao <= 0 && (
               <p className="text-xs font-semibold text-[var(--metric-negative)]">
                 At this multiplier the repairs consume the entire allowable price —
-                the rule says there is no workable offer on this deal as entered.
+                the rule produces no feasible Offer Ceiling for this deal as entered.
               </p>
             )}
             {result.mao > 0 && result.arv < 150_000 && (
@@ -193,7 +193,7 @@ export function ArvCalculatorWidget() {
                 bold
               />
               <Row
-                label={`Max offer — ${num(multiplier)}% of ARV − ${fmt(num(repairs))} repairs, rounded down to $500`}
+                label={`Offer Ceiling — ${num(multiplier)}% of ARV − ${fmt(num(repairs))} repairs, rounded down to $500`}
                 value={fmt(result.mao)}
                 bold
               />
@@ -204,7 +204,7 @@ export function ArvCalculatorWidget() {
 
       <Link href={handoffHref} target="_top" className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline">
         <Sparkles className="w-4 h-4" />
-        Run the full deal at this price — rehab, refi, cash flow, verdict — free in TrueCap
+        Screen the full deal at this price — rehab, refi, cash flow, and Screening Index — free in TrueCap
         <ArrowUpRight className="w-4 h-4" />
       </Link>
     </div>

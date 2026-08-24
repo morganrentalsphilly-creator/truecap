@@ -236,7 +236,7 @@ export default function VsPrivyPage() {
               <strong>Compare TrueCap&apos;s cap rate to Privy&apos;s estimate.</strong> If they diverge, dig into the assumptions — usually the difference is rent (Privy uses optimistic rent) or expense ratios.
             </li>
             <li>
-              <strong>Make the offer with TrueCap&apos;s MAO solver (Pro).</strong> Back into your max-bid from a target return.
+              <strong>Review the Offer Ceiling in TrueCap Pro.</strong> It works backward from your selected target return; verify the material assumptions before recording a decision.
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
@@ -266,8 +266,7 @@ export default function VsPrivyPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, and co-branded share links. Pro includes PDFs, and a one-time
-            PDF option is available; see live pricing for current terms.
+            Offer Ceiling, co-branded share links, and PDF reports with Pro; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">

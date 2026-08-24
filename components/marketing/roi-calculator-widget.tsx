@@ -64,11 +64,9 @@ type Props = {
    * or Stripe API hiccup). Always passed in dollars, never cents.
    */
   proMonthlyPrice?: number;
-  /** Current configured one-time underwrite label for the low-volume verdict. */
-  singleDealPriceLabel?: string;
 };
 
-export function RoiCalculatorWidget({ proMonthlyPrice, singleDealPriceLabel = "$5" }: Props) {
+export function RoiCalculatorWidget({ proMonthlyPrice }: Props) {
   // Coalesce: prefer the real Stripe price, fall back to the hardcoded
   // placeholder so the widget never displays "$0" or NaN math when the
   // Stripe load returned null for any reason.
@@ -219,8 +217,8 @@ export function RoiCalculatorWidget({ proMonthlyPrice, singleDealPriceLabel = "$
             </p>
           ) : (
             <p className="leading-relaxed">
-              At your inputs, Free or a {singleDealPriceLabel} Deal Decision Pack may be the better fit today.
-              Move to Pro when Max Offer, repeat underwriting, comparison, and saved workflows become valuable.
+              At your inputs, Free may be the better fit today. Move to Pro when Offer Ceiling,
+              repeat underwriting, comparison, PDF reports, and saved workflows become valuable.
             </p>
           )}
         </div>

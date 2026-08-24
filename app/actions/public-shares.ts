@@ -1,15 +1,12 @@
 "use server";
 
 /**
- * Public-share server actions: create (any analyzer user, signed in or not),
- * list/revoke (owners only).
+ * Public-share server actions: create/list/revoke (signed-in owners only).
  *
- * Creation is deliberately open to anonymous users — the analyzer itself is
- * free and anonymous, and their legacy share (everything in the URL) needed no
- * account either. Anonymous shares carry owner_id null: nothing to list, no
- * revocation surface, they simply expire on schedule. Abuse is bounded by the
- * validated payload (the resulting row is exactly one analysis snapshot) and
- * the share only renders what the creator could already see.
+ * Existing opaque shares remain publicly readable by capability token,
+ * including historical rows whose owner_id is null. New rows, however, must
+ * be attached to an authenticated owner so the product can accurately promise
+ * revocation. Authentication therefore happens before the service-role mint.
  *
  * Revocation goes through the caller's OWN session client, so RLS — not this
  * code — is the boundary that stops cross-account revocation.
@@ -35,14 +32,17 @@ import { captureServerEvent } from "@/lib/posthog-server";
 
 export type CreatePublicShareResult =
   | { ok: true; url: string }
-  | { ok: false; code: "VALIDATION_ERROR" | "NOT_CONFIGURED"; message: string };
+  | {
+      ok: false;
+      code: "SIGN_IN_REQUIRED" | "VALIDATION_ERROR" | "NOT_CONFIGURED";
+      message: string;
+    };
 
 /**
- * Sharing is deliberately FREE and works for anonymous analyzers, so this
- * action's id ships in the public bundle and is callable with no cookie. It
- * writes through the SERVICE-ROLE client, which bypasses the table's
- * owner-only RLS by design (an anonymous share has no owner) — so RLS is not
- * the brake here and something else has to be. Well above any human pace.
+ * Creating a link remains a free capability, but requires a signed-in owner.
+ * The service-role insert bypasses RLS, so the session check in the action and
+ * the required owner id in mintPublicShare are both load-bearing boundaries.
+ * The IP brake remains defense in depth above normal human pace.
  */
 const shareRateLimit = createIpRateLimit({
   windowMs: 60 * 60 * 1000,
@@ -50,6 +50,18 @@ const shareRateLimit = createIpRateLimit({
 });
 
 export async function createPublicShareAction(input: unknown): Promise<CreatePublicShareResult> {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return {
+      ok: false,
+      code: "SIGN_IN_REQUIRED",
+      message: "Sign in to create a revocable share link.",
+    };
+  }
+
   const parsed = z
     .object({
       values: investmentFormSchema,
@@ -85,15 +97,10 @@ export async function createPublicShareAction(input: unknown): Promise<CreatePub
     };
   }
 
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
   // dealId attribution is only honored for the deal's real owner — otherwise a
   // crafted call could attach someone else's saved comps/branding to a share.
   let dealId: string | undefined;
-  if (parsed.data.dealId && user) {
+  if (parsed.data.dealId) {
     const { data: deal } = await supabase
       .from("saved_analyses")
       .select("id")
@@ -110,7 +117,7 @@ export async function createPublicShareAction(input: unknown): Promise<CreatePub
       parsed.data.addressVisibility === "full"
         ? parsed.data.title || parsed.data.values.address || undefined
         : "Shared rental analysis",
-    ownerId: user?.id ?? null,
+    ownerId: user.id,
     dealId: dealId ?? null,
     maoTarget: maoTarget ?? undefined,
     maoTargetSource: parsed.data.maoTargetSource,

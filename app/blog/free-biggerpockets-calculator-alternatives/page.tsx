@@ -85,7 +85,7 @@ const TOOLS: Tool[] = [
     freeCovers: [
       "Cap rate, cash-on-cash, DSCR, NCF, monthly cash flow — unlimited, no signup",
       "Address auto-fill: HUD rent + FRED mortgage rate + state property tax",
-      "Plain-English verdict (Strong / Solid / Mixed / Marginal / Negative)",
+      "Selected-rule fit, with a secondary Screening Index",
       "Every operating expense line the BP form collects",
       "Save up to 5 deals + dashboard access",
     ],

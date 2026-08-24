@@ -54,7 +54,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, editable rent input for STR scenarios", hostaway: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", hostaway: "Not modeled", winner: "truecap" },
   { feature: "Illustrative tax impact", truecap: "Pro — straight-line depreciation + interest + modeled after-tax CF", hostaway: "Not modeled", winner: "truecap" },
-  { feature: "Deal score + verdict", truecap: "Free — 0-100 score + plain-English verdict", hostaway: "Not applicable", winner: "truecap" },
+  { feature: "Screening Index + verdict", truecap: "Free — 0-100 score + plain-English verdict", hostaway: "Not applicable", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", hostaway: "Not applicable", winner: "truecap" },
   { feature: "Channel manager (Airbnb, Vrbo, Booking)", truecap: "No", hostaway: "Yes — unified inbox + calendar", winner: "hostaway" },
   { feature: "Guest messaging automation", truecap: "No", hostaway: "Yes — full automation suite", winner: "hostaway" },
@@ -267,8 +267,7 @@ export default function VsHostawayPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, and co-branded share links. Pro includes PDFs, and a one-time
-            PDF option is available; see live pricing for current terms.
+            Offer Ceiling, co-branded share links, and PDF reports with Pro; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">

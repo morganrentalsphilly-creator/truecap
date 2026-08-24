@@ -115,7 +115,7 @@ function getInitials(displayName: string, email: string): string {
  * user's buy boxes. Shipping every row's full snapshot to the client just to
  * render one line would bloat the payload; only the small result crosses.
  *
- * Returns null (line hidden) without the paid MAO entitlement, when the
+ * Returns null (line hidden) without the paid Offer Ceiling entitlement, when the
  * snapshot doesn't validate, or when the deal is no longer shopping — never
  * throws.
  */
@@ -131,7 +131,7 @@ function offerLineForRow(
   // deal's number.
   // A saved Tune-target is authoritative even when the user has no buy box.
   // Normalize the untrusted JSON snapshot and, critically, only read it for a
-  // paid MAO entitlement so free My Deals rows never reveal the solver.
+  // paid Offer Ceiling entitlement so free My Deals rows never reveal the solver.
   const persistedMaoTarget = canShowMao
     ? normalizeMaoTarget(row.result_snapshot?.maxOfferTarget)
     : null;
@@ -185,7 +185,7 @@ function mapSavedRow(
       : typeof snapshot.score === "string"
         ? Number(snapshot.score)
         : null;
-  // Deals saved before the Deal Score feature (or whose snapshot is
+  // Deals saved before the Screening Index feature (or whose snapshot is
   // partial) previously made this function return null — and the
   // caller filters nulls, so those deals SILENTLY VANISHED from the
   // list. A paying user's old deals looked deleted. Default the
@@ -327,7 +327,7 @@ export default async function DashboardSavedAnalysesPage({
       : [];
   const buyBoxesResolved =
     !hasPlanFeature(entitlements, "buy_box") || Boolean(buyBoxesResult?.ok);
-  // MAO is catalogued as a paid-status gate, not a plan-feature flag. The
+  // Offer Ceiling is catalogued as a paid-status gate, not a plan-feature flag. The
   // production Pro plan JSON intentionally has no `mao` string, so combining
   // these checks would hide the feature from every legitimate Pro customer.
   const canShowMao = isPremium;

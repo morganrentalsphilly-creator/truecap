@@ -28,12 +28,12 @@ export function PrepareOfferCard({
           <div className="flex items-center gap-2 text-primary">
             <ShieldCheck aria-hidden className="size-4" />
             <h2 id="prepare-offer-title" className="text-xs font-extrabold uppercase tracking-widest">
-              Prepare My Offer
+              Decision review package
             </h2>
           </div>
-          <p className="mt-2 text-lg font-extrabold text-foreground">Turn the underwrite into a Deal Decision Pack.</p>
+          <p className="mt-2 text-lg font-extrabold text-foreground">Turn the underwrite into a Pro review report.</p>
           <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            Package the asking price, walk-away price, target basis, assumptions, downside case, key risks, and underwriting-method version for your partner, agent, or lender.
+            Package the asking price, Offer Ceiling, target basis, assumptions, downside case, key risks, and underwriting-method version for partner, agent, or lender review.
           </p>
           {stage && stage !== "offer-ready" && remainingVerificationCount != null ? (
             <p className="mt-2 text-xs font-semibold text-amber-700">
@@ -51,7 +51,7 @@ export function PrepareOfferCard({
             className="min-h-11 w-full gap-2 rounded-xl sm:w-auto"
           >
             <FileDown aria-hidden className="size-4" />
-            {isPreparing ? "Preparing…" : "Prepare My Offer"}
+            {isPreparing ? "Preparing…" : "Create review package"}
           </Button>
           <p className="mt-2 max-w-56 text-[10px] leading-relaxed text-muted-foreground sm:text-right">
             Creates an analysis package. It does not submit or sign a purchase agreement.

@@ -18,6 +18,6 @@ export const contentType = "image/png";
 export default function Image() {
   return renderToolOgImage({
     name: "ARV calculator",
-    tagline: "After-repair value from renovated comps, plus the 70%-rule max offer — the two numbers every flip and BRRRR starts with.",
+    tagline: "After-repair value from renovated comps, plus a 70%-rule Offer Ceiling for flip and BRRRR screening.",
   });
 }

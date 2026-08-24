@@ -232,7 +232,7 @@ export function StickyCalculateBar({
             onClick={() => setDockExpanded((v) => !v)}
             aria-expanded={dockExpanded}
             aria-controls="verdict-dock-sheet"
-            aria-label={`Live preview: ${livePreview.tier}, Deal Score ${livePreview.score}. ${dockExpanded ? "Hide" : "Show"} cap rate and DSCR`}
+            aria-label={`Live screening preview: ${livePreview.tier}, Screening Index ${livePreview.score}, a secondary heuristic and not investment advice. ${dockExpanded ? "Hide" : "Show"} cap rate and DSCR`}
             className="flex h-12 min-w-0 flex-1 items-center gap-2 rounded-xl border border-border bg-muted/40 px-2.5 text-left"
           >
             <span
@@ -250,7 +250,7 @@ export function StickyCalculateBar({
             <span className="min-w-0">
               <span className="block truncate font-mono text-sm font-bold leading-tight tabular-nums text-foreground">
                 {livePreview.score}
-                <span className="text-[10px] font-semibold text-muted-foreground">/100</span>
+                <span className="text-[10px] font-semibold text-muted-foreground">/100 index</span>
               </span>
               <span
                 className={cn(

@@ -16,7 +16,7 @@ const trustItems = [
   {
     icon: Calculator,
     title: "Screen the deal",
-    description: "See cash flow, cap rate, CoC, DSCR, Deal Score and a plain-English verdict.",
+    description: "See cash flow, cap rate, CoC, DSCR, selected-rule fit, and a secondary Screening Index.",
   },
   {
     icon: Database,
@@ -35,8 +35,8 @@ export function AuthShell({
   description,
   children,
   footer,
-  panelTitle = "Know what the deal needs before you make an offer.",
-  panelDescription = "Transparent assumptions. Clear acquisition decisions. Your work saved securely.",
+  panelTitle = "Know what the model needs before you record a decision.",
+  panelDescription = "Labeled assumptions. Selected-rule fit. Your work saved securely.",
   className,
 }: AuthShellProps) {
   return (

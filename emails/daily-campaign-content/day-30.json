@@ -10,7 +10,7 @@
     "Two: insurance set at last year's rate. Premiums are rising 10-15% per year nationally, 25-50% in coastal Florida and parts of Texas. Underwriting with a stale quote means year-two NOI evaporates. Get a fresh quote before you close.",
     "Three: rent comps using listed rents instead of leased rents. Listed rents on Zillow and Apartments.com run 8-12% above what units actually rent for after concessions. Use the lower end of the range, not the median asking price.",
     "Four: PM fees modeled at 8% with no leasing fee. The real all-in PM cost is closer to 11-13% once you add lease-up, renewals, maintenance markups, and admin. Underestimating PM is a $1,000+/yr NOI mistake on a typical property.",
-    "Five: DSCR that only works at base-case rent. The lender's floor is 1.20-1.25. If your deal is at 1.22 and rents drop 5% in a soft market, you've blown the covenant. Build a buffer or pass.",
+    "Five: DSCR that only meets the selected screening threshold at base-case rent. Lender definitions and minimums vary. Stress lower rent, then confirm the lender's written rent basis, DSCR calculation, leverage, reserves, and other program rules.",
     "Run any property through TrueCap and these five get checked automatically. Free tier. Sixty seconds. The pricing page is there if you want the full sensitivity grid and PDF reports."
   ],
   "cta_text": "Catch the deal-killers",

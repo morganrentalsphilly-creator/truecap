@@ -19,7 +19,7 @@ export const PRODUCT_POSITIONING =
   "TrueCap is the Rental Acquisition Decision System: analyze the economics, know the Offer Ceiling under explicit targets, verify material assumptions, then pursue, negotiate, or pass.";
 
 export const FOUR_ACQUISITION_ANSWERS = [
-  "Pursue or pass",
+  "Selected-rule fit at asking",
   "Offer Ceiling under your rules",
   "What could break",
   "How to present it",
@@ -36,9 +36,9 @@ export const CURRENT_DEFAULT_FACTS = {
 } as const;
 
 export const PLAN_FACTS = {
-  free: "No-signup first-pass screen with editable assumptions, core metrics, Deal Score, and verdict.",
-  singleDeal: "One paid report with Max Offer, Deal Doctor thresholds, downside, projections, tax, and exit views; no subscription.",
-  pro: "Repeat decision workflow with Buy Box, interactive Max Offer, downside, saved opportunities, comparisons, and reports.",
+  free: "No-signup first-pass screen with editable assumptions, core metrics, Screening Index, and rule-fit context.",
+  singleDeal: "One paid report with an Offer Ceiling, Deal Doctor thresholds, downside, projections, tax, and exit views; no subscription.",
+  pro: "Repeat decision workflow with Buy Box, interactive Offer Ceiling, downside, saved opportunities, comparisons, and reports.",
   // No "portals" here: agent_portal is shipped:false (bearer links lack
   // expiry/revocation) and must not be marketed anywhere — including the
   // llms.txt routes that render this string publicly.

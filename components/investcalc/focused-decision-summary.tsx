@@ -28,6 +28,18 @@ import type {
 import type { InputConfidenceResult } from "@/lib/input-confidence";
 import type { NextAction } from "@/lib/next-action";
 import { trackEvent } from "@/lib/analytics";
+import {
+  buildAssumptionLedger,
+  buildDecisionTargetContext,
+  buildSafeNextAction,
+  deriveRuleFit,
+  offerCeilingHelperCopy,
+  offerCeilingSemanticStatus,
+  ruleFitLabel,
+  userDecisionLabel,
+  type AssumptionSensitivity,
+  type UserDecision,
+} from "@/lib/decision-contract";
 
 type Props = {
   values: InvestmentFormValues;
@@ -39,8 +51,12 @@ type Props = {
   target: MaoTarget;
   targetLabel: string;
   targetSource: OfferCeilingTargetSource;
+  targetProfileId?: string | null;
+  targetProfileVersion?: string | null;
   buyBoxName?: string | null;
   buyBoxFit?: boolean | null;
+  buyBoxHasUnknownRules?: boolean;
+  userDecision?: UserDecision;
   inputConfidence?: InputConfidenceResult | null;
   nextAction?: NextAction | null;
   canShowPriceCeiling: boolean;
@@ -57,8 +73,17 @@ type Props = {
   isSaveLocked?: boolean;
   saveLockedHint?: string;
   savedDealId?: string | null;
+  isAuthenticated: boolean;
+  onPrepareAuthShare?: () => void;
   targetResolutionState?: "loading" | "ready" | "error";
   targetResolutionMessage?: string;
+  advocacyContractEnabled?: boolean;
+};
+
+type TargetDeltaNotice = {
+  previousRulesSnapshotVersion: string;
+  delta: number | null;
+  message: string;
 };
 
 function money(value: number): string {
@@ -73,6 +98,17 @@ function scoreFrom(result: DealScoreActionResult | null): number | null {
 function targetInput(value: number | undefined): string {
   return value == null ? "" : String(value);
 }
+
+const IMPACT_TO_CONFIDENCE_KEY = {
+  rent: "rent",
+  interestRate: "interestRate",
+  purchasePrice: "purchasePrice",
+  vacancyPct: "vacancy",
+  mgmtPct: "management",
+  maintenancePct: "maintenance",
+  capexPct: "capex",
+  propertyTaxPct: "propertyTax",
+} as const;
 
 /**
  * The decision viewport: one compact, factual answer before the deeper report.
@@ -89,8 +125,12 @@ export function FocusedDecisionSummary({
   target,
   targetLabel,
   targetSource,
+  targetProfileId = null,
+  targetProfileVersion = null,
   buyBoxName = null,
   buyBoxFit = null,
+  buyBoxHasUnknownRules = false,
+  userDecision = "undecided",
   inputConfidence = null,
   nextAction = null,
   canShowPriceCeiling,
@@ -107,10 +147,38 @@ export function FocusedDecisionSummary({
   isSaveLocked = false,
   saveLockedHint,
   savedDealId,
+  isAuthenticated,
+  onPrepareAuthShare,
   targetResolutionState = "ready",
   targetResolutionMessage,
+  advocacyContractEnabled = false,
 }: Props) {
-  const drivers = useMemo(() => computeAssumptionImpact(values).slice(0, 3), [values]);
+  const allDrivers = useMemo(() => computeAssumptionImpact(values), [values]);
+  const drivers = allDrivers.slice(0, 3);
+  const assumptionSensitivity = useMemo(
+    () =>
+      Object.fromEntries(
+        allDrivers.flatMap((driver) => {
+          const key =
+            IMPACT_TO_CONFIDENCE_KEY[
+              driver.key as keyof typeof IMPACT_TO_CONFIDENCE_KEY
+            ];
+          return key
+            ? [
+                [
+                  key,
+                  {
+                    cashFlowSwing: driver.cashFlowSwing,
+                    dscrSwing: driver.dscrSwing,
+                    deltaLabel: driver.deltaLabel,
+                  } satisfies AssumptionSensitivity,
+                ],
+              ]
+            : [];
+        })
+      ),
+    [allDrivers]
+  );
   const score = scoreFrom(dealScoreResult);
   const tier = getDealTier(result);
   const targetEditorId = useId();
@@ -190,19 +258,56 @@ export function FocusedDecisionSummary({
   // The verdict must reconcile with the exact ceiling shown beside it. A deal
   // can have positive cash flow and still miss the selected $/mo or DSCR bar.
   const clearsTargets = meetsMaoTarget(result, target);
-  const readinessLabel =
+  const legacyReadinessLabel =
     inputConfidence?.stage === "offer-ready"
       ? "Ready"
       : inputConfidence?.stage === "verified"
         ? "Verify first"
         : "Screening only";
-  const decisionLabel =
+  const legacyDecisionLabel =
     !clearsTargets || buyBoxFit === false
-      ? "Pass at this price"
-      : readinessLabel === "Ready" &&
-          (targetSource !== "buy-box" || buyBoxFit === true)
-        ? "Pursue"
-        : "Conditional — verify first";
+      ? "Does not meet selected rules at asking"
+      : "Meets selected rules at asking";
+  const targetContext = useMemo(
+    () =>
+      buildDecisionTargetContext({
+        target,
+        source: targetSource,
+        profileId: targetProfileId,
+        profileName: buyBoxName,
+        profileVersion: targetProfileVersion,
+        inherited: targetSource === "buy-box" && !targetProfileId,
+      }),
+    [buyBoxName, target, targetProfileId, targetProfileVersion, targetSource]
+  );
+  const evidenceLedger = useMemo(
+    () =>
+      inputConfidence
+        ? buildAssumptionLedger(inputConfidence, {
+            sensitivity: assumptionSensitivity,
+          })
+        : null,
+    [assumptionSensitivity, inputConfidence]
+  );
+  const targetVersionLabel = targetContext.profileVersion
+    ? `profile v${targetContext.profileVersion}`
+    : targetContext.identityStatus === "captured-rules-only"
+      ? "captured rules · schema v1"
+      : "profile version unavailable · schema v1";
+  const ruleFit = deriveRuleFit({
+    result,
+    target,
+    targetResolutionState,
+    targetSource,
+    buyBoxFit,
+    hasUnevaluableSelectedRules: buyBoxHasUnknownRules,
+  });
+  const readinessLabel = advocacyContractEnabled
+    ? evidenceLedger?.readinessLabel ?? "Screening"
+    : legacyReadinessLabel;
+  const decisionLabel = advocacyContractEnabled
+    ? ruleFitLabel(ruleFit)
+    : legacyDecisionLabel;
   const breakpointLabels = [
     ...exactBreakpointLabels,
     ...drivers.map(
@@ -211,27 +316,116 @@ export function FocusedDecisionSummary({
     ),
   ].filter((label, index, all) => all.indexOf(label) === index).slice(0, 3);
   const nextVerification = inputConfidence?.verificationQueue[0];
-  const resolvedNextAction =
+  const legacyResolvedNextAction =
     !clearsTargets
       ? offerCeiling
         ? {
-            label: `Negotiate to ${money(offerCeiling.ceiling)} or less — or pass`,
+            label: "Review the binding target rule",
             reason:
               offerCeiling.listPriceGap > 0
-                ? `${money(offerCeiling.listPriceGap)} above the ceiling for your selected targets`
-                : "the current price misses at least one selected target",
+                ? `The asking price is ${money(offerCeiling.listPriceGap)} above the Offer Ceiling under the selected rules. Record the investment decision yourself.`
+                : "The current price misses at least one selected rule. Record the investment decision yourself.",
           }
         : {
-            label: "Change the price or assumptions before proceeding",
-            reason: "the current assumptions miss your selected targets",
+            label: "Review the active target rules",
+            reason: "No qualifying Offer Ceiling was found under the current assumptions. Record the investment decision yourself.",
           }
-      : readinessLabel !== "Ready" && nextVerification
+      : legacyReadinessLabel !== "Ready" && nextVerification
       ? {
           label: nextVerification.verifyAction ?? `Verify ${nextVerification.label}`,
           reason: `${nextVerification.label} is a material ${nextVerification.sourceLabel.toLowerCase()} input`,
         }
       : nextAction;
+  const resolvedNextAction = advocacyContractEnabled
+    ? buildSafeNextAction({ ruleFit, evidence: evidenceLedger, userDecision })
+    : legacyResolvedNextAction;
+  const ceilingSemanticStatus = offerCeilingSemanticStatus({
+    presentation: offerCeiling,
+    target,
+  });
   const targetBlocked = targetResolutionState !== "ready";
+  const lastResolvedTargetRef = useRef<{
+    rulesSnapshotVersion: string;
+    ceiling: number | null;
+  } | null>(null);
+  const [targetDeltaNotice, setTargetDeltaNotice] =
+    useState<TargetDeltaNotice | null>(null);
+  const decisionAnalysisKey = `${values.address.trim().toLowerCase()}|${values.purchasePrice}`;
+  useEffect(() => {
+    lastResolvedTargetRef.current = null;
+    setTargetDeltaNotice(null);
+  }, [decisionAnalysisKey]);
+  useEffect(() => {
+    if (
+      !advocacyContractEnabled ||
+      targetBlocked ||
+      isOfferCeilingLoading ||
+      offerCeilingError
+    ) {
+      return;
+    }
+    const currentCeiling = offerCeiling?.ceiling ?? null;
+    const previous = lastResolvedTargetRef.current;
+    if (
+      previous &&
+      previous.rulesSnapshotVersion !== targetContext.rulesSnapshotVersion
+    ) {
+      const delta =
+        previous.ceiling != null && currentCeiling != null
+          ? currentCeiling - previous.ceiling
+          : null;
+      setTargetDeltaNotice({
+        previousRulesSnapshotVersion: previous.rulesSnapshotVersion,
+        delta,
+        message:
+          delta != null
+            ? `Offer Ceiling ${delta >= 0 ? "increased" : "decreased"} by ${money(
+                Math.abs(delta)
+              )} versus the prior resolved rules.`
+            : canShowPriceCeiling
+              ? "The target rules changed, and one of the two rule sets has no feasible finite Offer Ceiling for comparison."
+              : "The target rules changed. An exact delta is unavailable in range-preview access.",
+      });
+    }
+    lastResolvedTargetRef.current = {
+      rulesSnapshotVersion: targetContext.rulesSnapshotVersion,
+      ceiling: currentCeiling,
+    };
+  }, [
+    advocacyContractEnabled,
+    canShowPriceCeiling,
+    isOfferCeilingLoading,
+    offerCeiling?.ceiling,
+    offerCeilingError,
+    targetBlocked,
+    targetContext.rulesSnapshotVersion,
+  ]);
+  const lastTargetContextTelemetryRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (
+      !advocacyContractEnabled ||
+      targetBlocked ||
+      lastTargetContextTelemetryRef.current === targetContext.rulesSnapshotVersion
+    ) {
+      return;
+    }
+    lastTargetContextTelemetryRef.current = targetContext.rulesSnapshotVersion;
+    trackEvent("target_context_set", {
+      model_version: result.methodologyVersion ?? "current",
+      rule_set_version:
+        targetContext.profileVersion ?? targetContext.identityStatus,
+      target_source: targetContext.source,
+      surface: "focused_decision_summary",
+    });
+  }, [
+    advocacyContractEnabled,
+    result.methodologyVersion,
+    targetBlocked,
+    targetContext.identityStatus,
+    targetContext.profileVersion,
+    targetContext.rulesSnapshotVersion,
+    targetContext.source,
+  ]);
   const telemetryKey = offerCeiling
     ? `${targetSource}:${offerCeiling.ceiling}`
     : rangePreview
@@ -284,9 +478,26 @@ export function FocusedDecisionSummary({
             {decisionLabel}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Asking {money(Number(values.purchasePrice))} · {tier} fundamentals
-            {score != null ? ` · Screening Index ${score}/100 (v${result.methodologyVersion ?? "current"})` : ""}
+            Asking {money(Number(values.purchasePrice))}
+            {advocacyContractEnabled
+              ? ` · Underwriting model v${result.methodologyVersion ?? "current"}`
+              : ` · ${tier} fundamentals`}
+            {score != null && !(advocacyContractEnabled && result.monthlyPayment <= 0)
+              ? advocacyContractEnabled
+                ? ` · Screening Index ${score}/100 — secondary heuristic (v${result.methodologyVersion ?? "current"})`
+                : ` · Screening Index ${score}/100 (v${result.methodologyVersion ?? "current"})`
+              : ""}
           </p>
+          {advocacyContractEnabled && result.monthlyPayment <= 0 && score != null ? (
+            <p className="mt-1 text-xs text-muted-foreground">
+              Screening Index is withheld in this decision view because Methodology v1 assigns synthetic DSCR credit to cash acquisitions. DSCR is N/A.
+            </p>
+          ) : null}
+          {advocacyContractEnabled ? (
+            <p className="mt-2 text-xs font-semibold text-muted-foreground">
+              User decision: {userDecisionLabel(userDecision)}. TrueCap reports rule fit; it does not record Pursue or Pass from the metrics.
+            </p>
+          ) : null}
         </div>
 
         <div
@@ -299,17 +510,24 @@ export function FocusedDecisionSummary({
           </p>
           <p className="mt-1 font-mono text-3xl font-extrabold tabular-nums text-primary">
             {targetResolutionState === "loading"
-              ? "Loading your Buy Box…"
+              ? advocacyContractEnabled
+                ? "Loading target rules…"
+                : "Loading your Buy Box…"
               : targetResolutionState === "error"
-                ? "Buy Box unavailable"
+                ? advocacyContractEnabled
+                  ? "Target rules unavailable"
+                  : "Buy Box unavailable"
                 : isOfferCeilingLoading
                   ? "Calculating…"
                 : offerCeilingError
                   ? "Temporarily unavailable"
                 : canShowPriceCeiling
-                  ? offerCeiling
-                    ? money(offerCeiling.ceiling)
-                    : "Not reachable"
+                  ? advocacyContractEnabled &&
+                    ceilingSemanticStatus === "no-finite-ceiling-in-supported-range"
+                    ? "No finite ceiling found"
+                    : offerCeiling
+                      ? money(offerCeiling.ceiling)
+                      : "Not reachable"
                   : rangePreview
                     ? `${money(rangePreview.lower)}–${money(rangePreview.upper)}`
                     : "No feasible range"}
@@ -317,11 +535,18 @@ export function FocusedDecisionSummary({
           <p className="mt-1 text-xs font-semibold text-foreground">
             {targetBlocked
               ? targetResolutionMessage
-              : `${targetSource === "buy-box" && buyBoxName ? `Under Buy Box: ${buyBoxName}` : offerCeiling?.sourceLabel ?? (targetSource === "screening-defaults" ? "Under screening defaults" : targetSource === "buy-box" ? "Under your Buy Box" : "Under your selected targets")} · ${canShowPriceCeiling ? "Exact ceiling" : "Coarse range preview"}`}
+              : advocacyContractEnabled
+                ? `${targetContext.profileName} · ${targetContext.origin.replaceAll("-", " ")} · ${targetVersionLabel}`
+                : `${targetSource === "buy-box" && buyBoxName ? `Under Buy Box: ${buyBoxName}` : offerCeiling?.sourceLabel ?? (targetSource === "screening-defaults" ? "Under screening defaults" : targetSource === "buy-box" ? "Under your Buy Box" : "Under your selected targets")} · ${canShowPriceCeiling ? "Exact ceiling" : "Coarse range preview"}`}
           </p>
           {!targetBlocked ? (
             <p className="mt-1 text-[11px] leading-relaxed text-foreground">
               Targets: {targetLabel}
+            </p>
+          ) : null}
+          {advocacyContractEnabled && targetDeltaNotice ? (
+            <p className="mt-2 rounded-md border border-primary/20 bg-background/70 px-2 py-1.5 text-[11px] leading-relaxed text-foreground">
+              {targetDeltaNotice.message} The prior target criteria remain preserved in the previous snapshot.
             </p>
           ) : null}
           {offerCeilingError && onRetryOfferCeiling ? (
@@ -350,31 +575,77 @@ export function FocusedDecisionSummary({
             </div>
           ) : null}
           <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-            Calculated from the targets shown above. This is not a recommended offer.
+            {advocacyContractEnabled
+              ? offerCeilingHelperCopy(targetContext)
+              : "Calculated from the targets shown above. This is not a recommended offer."}
           </p>
+          {advocacyContractEnabled ? (
+            <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+              Model output—not an appraisal, market value, acceptance prediction, or recommended offer.
+            </p>
+          ) : null}
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-5">
+      <div
+        className={`mt-4 grid grid-cols-2 gap-3 ${advocacyContractEnabled ? "lg:grid-cols-6" : "lg:grid-cols-5"}`}
+      >
         <div className="rounded-xl border border-border bg-muted/30 p-3">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Buy Box Fit</p>
-          <p className="mt-1 text-sm font-extrabold text-foreground">
-            {targetSource !== "buy-box"
-              ? "No Buy Box selected"
-              : buyBoxFit == null
-                ? "Checking…"
-                : buyBoxFit
-                  ? "Meets"
-                  : "Misses"}
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            {advocacyContractEnabled ? "Target profile" : "Buy Box Fit"}
           </p>
-        </div>
-        <div className="rounded-xl border border-border bg-muted/30 p-3">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Decision Readiness</p>
-          <p className="mt-1 text-sm font-extrabold text-foreground">{readinessLabel}</p>
-          {nextVerification ? (
-            <p className="mt-1 text-[10px] text-muted-foreground">Weakest material input: {nextVerification.label}</p>
+          <p className="mt-1 text-sm font-extrabold text-foreground">
+            {advocacyContractEnabled
+              ? targetContext.profileName
+              : targetSource !== "buy-box"
+                ? "No Buy Box selected"
+                : buyBoxFit == null
+                  ? "Checking…"
+                  : buyBoxFit
+                    ? "Meets"
+                    : "Misses"}
+          </p>
+          {advocacyContractEnabled ? (
+            <>
+              <p className="mt-1 break-all text-[10px] text-muted-foreground">
+                {targetVersionLabel}
+              </p>
+              <p className="mt-1 break-all text-[10px] text-muted-foreground">
+                Exact criteria are shown with the Offer Ceiling.
+              </p>
+            </>
           ) : null}
         </div>
+        <div className="rounded-xl border border-border bg-muted/30 p-3">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            {advocacyContractEnabled ? "Evidence readiness" : "Decision Readiness"}
+          </p>
+          <p className="mt-1 text-sm font-extrabold text-foreground">{readinessLabel}</p>
+          {advocacyContractEnabled && evidenceLedger ? (
+            <p className="mt-1 text-[10px] text-muted-foreground">
+              {evidenceLedger.evidenceVerifiedCount} of {evidenceLedger.materialInputCount} material inputs evidence-verified
+            </p>
+          ) : nextVerification ? (
+            <p className="mt-1 text-[10px] text-muted-foreground">Weakest material input: {nextVerification.label}</p>
+          ) : null}
+          {advocacyContractEnabled && evidenceLedger?.highestImpactUnresolved ? (
+            <p className="mt-1 text-[10px] text-muted-foreground">
+              {evidenceLedger.highestImpactUnresolved.materialityScore != null
+                ? "Highest-impact unresolved"
+                : "Next unresolved input"}
+              : {evidenceLedger.highestImpactUnresolved.label}
+            </p>
+          ) : null}
+        </div>
+        {advocacyContractEnabled ? (
+          <div className="rounded-xl border border-border bg-muted/30 p-3">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">User decision</p>
+            <p className="mt-1 text-sm font-extrabold text-foreground">
+              {userDecisionLabel(userDecision)}
+            </p>
+            <p className="mt-1 text-[10px] text-muted-foreground">Never inferred from model outputs</p>
+          </div>
+        ) : null}
         <div className="rounded-xl border border-border bg-muted/30 p-3">
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Margin of Safety</p>
           <p className="mt-1 text-sm font-extrabold text-foreground">
@@ -464,11 +735,13 @@ export function FocusedDecisionSummary({
         </Button>
         <ShareLinkButton
           values={values}
+          isAuthenticated={isAuthenticated}
           savedDealId={savedDealId}
           maoTarget={target}
           maoTargetSource={targetSource}
           disabled={targetBlocked}
           disabledReason={targetResolutionMessage}
+          onPrepareAuth={onPrepareAuthShare}
           className="h-11 rounded-xl px-4"
         />
         <Button type="button" variant="ghost" onClick={onEditAssumptions} className="h-11 gap-2 rounded-xl">
@@ -480,9 +753,11 @@ export function FocusedDecisionSummary({
       {canTunePriceCeiling ? (
         <div id={targetEditorId} hidden={!tuneOpen} className="mt-4 rounded-xl border border-border bg-muted/20 p-4">
           <fieldset>
-            <legend className="text-sm font-bold text-foreground">Price ceiling targets</legend>
+            <legend className="text-sm font-bold text-foreground">
+              Offer Ceiling rules
+            </legend>
             <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-              Change any target and the price ceiling above updates immediately. Leave a field blank to ignore it.
+              Change any target and the Offer Ceiling above updates immediately. Leave a field blank to ignore it.
             </p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
               {([

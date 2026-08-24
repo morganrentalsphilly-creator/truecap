@@ -333,7 +333,7 @@ export default function TwoPercentRuleCalculatorPage() {
                 "State property tax + HUD rent benchmark auto-filled",
                 "Stress-test rent and vacancy assumptions",
                 "10-year projection with rent + expense growth (Pro)",
-                "Plain-English verdict on every deal",
+                "Selected-rule fit with a secondary Screening Index",
                 "Free to start — no credit card",
               ].map((line) => (
                 <li key={line} className="flex items-start gap-2">
@@ -356,7 +356,7 @@ export default function TwoPercentRuleCalculatorPage() {
               tool has no embeddable widget. See the component header. */}
           <ToolEmbedInvite slug="2-percent-rule-calculator" />
 
-          <ToolsConversionCta calculatorName="2% rule calculator" hook="A 2% ratio is a reason to look harder, not a verdict. TrueCap's full analyzer replaces the screen with a real underwrite — expenses, financing, and a plain-English verdict. It's free." />
+          <ToolsConversionCta calculatorName="2% rule calculator" hook="A 2% ratio is a reason to look harder, not a decision. TrueCap's full analyzer adds expenses, financing, selected-rule fit, and a secondary Screening Index. You still verify the assumptions and make the decision." />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}

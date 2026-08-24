@@ -163,7 +163,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title:
       "How to calculate ARV (after-repair value): the comps method, step by step (2026)",
     excerpt:
-      "The number every flip and BRRRR is built on — and the one you can't look up. Why ARV is a forecast of an appraisal, not purchase + rehab: the renovated-comps method step by step, a worked 1,400 sq ft example that reconciles four comps to a $255,000 ARV, the 70% rule max offer and 75% LTV refi math that key off it, and a sensitivity table where a 10% ARV miss cuts flip profit 74% and more than doubles the cash trapped in a BRRRR.",
+      "The number every flip and BRRRR model is built on—and one you cannot simply look up. Learn why ARV is a forecast, how renovated comps support it, how a 70%-rule Offer Ceiling and 75% LTV refinance line key off it, and how sensitive modeled outcomes are to an ARV miss.",
     readingTimeMinutes: 11,
     publishedAt: "2026-07-10",
     available: true,
@@ -191,9 +191,9 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "70-percent-rule-house-flipping",
     title:
-      "The 70% rule for house flipping (and BRRRR): how to calculate your max offer (2026)",
+      "The 70% rule for house flipping (and BRRRR): calculate an Offer Ceiling (2026)",
     excerpt:
-      "The fastest offer screen in real estate — pay 70% of after-repair value, minus repairs — and what it&apos;s really doing under the hood. The Maximum Allowable Offer formula worked on a $300K flip, a full P&amp;L that shows where the 30% spread actually goes ($37,800 of costs, $52,200 of profit), the price-per-sqft comp method for pinning down ARV against the neighborhood ceiling, the BRRRR twist where the same 70% cap dovetails with a 75% cash-out refinance, and the backward solve that lands within $2,000 of the rule — plus the cheap-house and long-rehab cases where 70% quietly lies.",
+      "The fastest offer screen in real estate — pay 70% of after-repair value, minus repairs — and what it&apos;s really doing under the hood. The Offer Ceiling formula worked on a $300K flip, a full P&amp;L that shows where the 30% spread actually goes ($37,800 of costs, $52,200 of profit), the price-per-sqft comp method for pinning down ARV against the neighborhood ceiling, the BRRRR twist where the same 70% cap dovetails with a 75% cash-out refinance, and the backward solve that lands within $2,000 of the rule — plus the cheap-house and long-rehab cases where 70% quietly lies.",
     readingTimeMinutes: 11,
     publishedAt: "2026-07-05",
     available: true,
@@ -460,7 +460,7 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "how-truecap-verdict-engine-works",
-    title: "How TrueCap's verdict engine decides Strong Buy vs Avoid",
+    title: "How TrueCap classifies selected-rule fit",
     excerpt:
       "The exact cash flow, DSCR, cap rate, and cash-on-cash thresholds TrueCap uses to classify a rental deal as Strong / Solid / Mixed / Marginal / Negative — pulled directly from the production code.",
     readingTimeMinutes: 10,

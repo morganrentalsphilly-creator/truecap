@@ -66,7 +66,7 @@ const MATRIX: Row[] = [
   { feature: "Document storage",                  truecap: "Pro — acquisition due-diligence vault",                                             stessa: "Yes — operational leases, receipts, and statements",                      winner: "tie" },
   { feature: "Rent collection",                   truecap: "No",                                                                               stessa: "Yes — built-in rent collection in some plans",                            winner: "stessa" },
   { feature: "Shareable deal links",              truecap: "Free — read-only public link; Pro adds co-branding",                               stessa: "Not the primary use case",                                                winner: "truecap" },
-  { feature: "PDF deal report",                   truecap: "One-time Deal Decision Pack or included with Pro",                                  stessa: "Year-end accounting reports (different purpose)",                         winner: "tie" },
+  { feature: "PDF deal report",                   truecap: "Included with Pro",                                                               stessa: "Year-end accounting reports (different purpose)",                         winner: "tie" },
 ];
 
 export default function VsStessaPage() {
@@ -134,7 +134,7 @@ export default function VsStessaPage() {
                 <li>You&apos;re evaluating new deals to potentially buy.</li>
                 <li>You need cap rate, CoC, DSCR, 10-year projections, tax modeling, exit scenarios.</li>
                 <li>You want stress-test sensitivity (rent / vacancy / rate moves).</li>
-                <li>You want a one-time or Pro PDF report for review.</li>
+                <li>You want PDF decision reports included with Pro.</li>
                 <li>You want BRRRR or fix-and-flip strategy modeling.</li>
               </ul>
             </div>
@@ -245,7 +245,7 @@ export default function VsStessaPage() {
             Underwriting the next deal? Start free.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            TrueCap free covers cap rate, CoC, DSCR, NCF, monthly cash flow, and plain read-only share links. Pro adds co-branding, 10-year projections, illustrative tax impact, sensitivity, MAO, strategy analyzers, and a due-diligence document vault. A one-time PDF option is also available; see live pricing for current terms.
+            TrueCap free covers cap rate, CoC, DSCR, NCF, monthly cash flow, and plain read-only share links. Pro adds co-branding, 10-year projections, illustrative tax impact, sensitivity, Offer Ceiling, strategy analyzers, PDF reports, and a due-diligence document vault. See live pricing for current terms.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link href="/pricing" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
@@ -309,12 +309,12 @@ const STESSA_FAQ: FaqItem[] = [
         Stessa currently publishes a free Essentials tier plus paid
         Manage and Pro tiers with different feature sets. TrueCap free
         covers core underwriting math, while paid Pro adds projections,
-        illustrative tax impact, sensitivity, and MAO. Check both live
+        illustrative tax impact, sensitivity, and Offer Ceiling. Check both live
         pricing pages for current rates and terms.
       </>
     ),
     plainTextAnswer:
-      "Stessa publishes a free Essentials tier plus paid Manage and Pro tiers. TrueCap free covers core underwriting; paid Pro adds projections, illustrative tax impact, sensitivity, and MAO. Check both live pricing pages for current rates and terms.",
+      "Stessa publishes a free Essentials tier plus paid Manage and Pro tiers. TrueCap free covers core underwriting; paid Pro adds projections, illustrative tax impact, sensitivity, and Offer Ceiling. Check both live pricing pages for current rates and terms.",
   },
   {
     question: "Does TrueCap track expenses like Stessa?",
@@ -337,13 +337,13 @@ const STESSA_FAQ: FaqItem[] = [
       <>
         Yes — every TrueCap user can generate a public read-only share
         link for free; Pro adds co-branding and includes the multi-page
-        PDF, while a one-time PDF option is also available. Reports
+        PDF. Reports
         reflect the analysis fields available for that deal and can
         support an accountant&apos;s independent review; they are not tax advice.
       </>
     ),
     plainTextAnswer:
-      "Yes — read-only share links are free. Pro adds co-branding and includes the multi-page PDF; a one-time PDF option is also available. Reports can support independent review but are not tax advice.",
+      "Yes — read-only share links are free. Pro adds co-branding and includes the multi-page PDF. Reports can support independent review but are not tax advice.",
   },
 ];
 

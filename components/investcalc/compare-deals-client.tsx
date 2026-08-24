@@ -115,7 +115,7 @@ export type CompareDealViewModel = {
   /** Per-factor score breakdown for the "Why this score" popover. */
   breakdown?: DealScoreBreakdown | null;
   metrics: Record<string, number | null>;
-  /** Exact criteria used for this deal's Max Offer, when that paid metric is present. */
+  /** Exact criteria used for this deal's Offer Ceiling, when that paid metric is present. */
   maxOfferBasisLabel?: string | null;
   signal: Signal | null;
   assumptions: DealAssumptions;
@@ -527,7 +527,7 @@ function getLongTermHighlightedWinCounts(deals: CompareDealViewModel[]): Map<str
 function getShortTermHighlightedWinCounts(deals: CompareDealViewModel[]): Map<string, number> {
   const counts = new Map<string, number>(deals.map((deal) => [deal.id, 0]));
   for (const row of METRIC_ROWS) {
-    // Max Offer scales with price/NOI, not deal quality — leaving it in the
+    // Offer Ceiling scales with price/NOI, not deal quality — leaving it in the
     // tally handed the most expensive property a free win on every compare.
     if (WINNER_TALLY_EXCLUDED_KEYS.has(row.key)) continue;
     // For DSCR, only rank financed deals against each other - a cash

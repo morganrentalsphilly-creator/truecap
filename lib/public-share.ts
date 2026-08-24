@@ -6,8 +6,9 @@ import "server-only";
  * Replaces the legacy /d/[encoded] model where the URL itself carried the whole
  * analysis (address, rent, price, assumptions — deal data in referrer logs and
  * link previews). Here the URL carries a random 256-bit token; the snapshot
- * lives in public_shares, hashed-token at rest, owner-revocable, default
- * 180-day expiry.
+ * lives in public_shares, hashed-token at rest, and has a default 180-day
+ * expiry. New rows are owned and revocable because minting requires a signed-in
+ * owner; historical ownerless rows remain readable until they expire.
  *
  * Resolution runs on the service-role client because the viewer is anonymous
  * and RLS is owner-only by design (there is deliberately NO public read
@@ -31,6 +32,7 @@ import {
   type OfferCeilingTargetSource,
 } from "@/lib/offer-ceiling-contract";
 import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
+import { isPublicShareExpired } from "@/lib/public-share-lifecycle";
 
 export type PublicShareAudience = "investment-partner" | "client" | "lender-review";
 export type PublicShareAddressVisibility = "hidden" | "full";
@@ -89,13 +91,18 @@ function isMissingTable(error: { code?: string; message?: string } | null): bool
 export async function mintPublicShare(input: {
   values: InvestmentFormValues;
   title?: string;
-  ownerId?: string | null;
+  ownerId: string;
   dealId?: string | null;
   maoTarget?: MaoTarget;
   maoTargetSource?: OfferCeilingTargetSource;
   audience?: PublicShareAudience;
   addressVisibility?: PublicShareAddressVisibility;
 }): Promise<string | null> {
+  // This helper writes through the service-role client. Keep the invariant
+  // local as well as at the server-action boundary so no future caller can
+  // accidentally mint a new ownerless row.
+  if (!input.ownerId) return null;
+
   try {
     const admin = createAdminSupabaseClient();
     const token = generateShareToken();
@@ -110,7 +117,7 @@ export async function mintPublicShare(input: {
         : {}),
       meta: {
         ...(input.title ? { title: input.title } : {}),
-        ...(input.ownerId ? { ownerId: input.ownerId } : {}),
+        ownerId: input.ownerId,
         ...(input.dealId ? { dealId: input.dealId } : {}),
         sharedAt: new Date().toISOString(),
         methodologyVersion: TRUECAP_UNDERWRITING_STANDARD_VERSION,
@@ -121,7 +128,7 @@ export async function mintPublicShare(input: {
     };
     const { error } = await admin.from("public_shares").insert({
       token_hash: hashShareToken(token),
-      owner_id: input.ownerId ?? null,
+      owner_id: input.ownerId,
       deal_id: input.dealId ?? null,
       snapshot,
       // Kept for backward-compatible storage while the real underwriting
@@ -164,7 +171,7 @@ export async function resolvePublicShare(token: string): Promise<ResolvedPublicS
     if (error || !data) return null;
     const row = data as ShareRow;
     if (row.revoked_at) return null;
-    if (row.expires_at && new Date(row.expires_at).getTime() < Date.now()) return null;
+    if (isPublicShareExpired(row.expires_at)) return null;
 
     const snapshot = row.snapshot as PublicShareSnapshot | null;
     if (!snapshot || typeof snapshot !== "object" || !snapshot.values) return null;

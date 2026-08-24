@@ -26,7 +26,7 @@ import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema"
 export const metadata: Metadata = {
   title: "TurboTenant vs TrueCap (2026): Manage vs Analyze",
   description:
-    "TurboTenant runs your rentals after you buy them. TrueCap decides if you should buy. Honest comparison and how DIY landlords use both.",
+    "TurboTenant runs rentals after closing. TrueCap shows selected-rule fit, an Offer Ceiling, and verification work before you record your own decision.",
   keywords: [
     "turbotenant alternative",
     "turbotenant vs",
@@ -54,7 +54,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", turbotenant: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", turbotenant: "Not modeled", winner: "truecap" },
   { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", turbotenant: "Not modeled", winner: "truecap" },
-  { feature: "Deal score + verdict", truecap: "Free — 0-100 score + plain-English verdict", turbotenant: "Not applicable", winner: "truecap" },
+  { feature: "Screening Index + verdict", truecap: "Free — 0-100 score + plain-English verdict", turbotenant: "Not applicable", winner: "truecap" },
   { feature: "Sensitivity grid", truecap: "Pro — rent ±10%, vacancy ±5pp, rate ±1pp", turbotenant: "Not modeled", winner: "truecap" },
   { feature: "Rental listing distribution", truecap: "No", turbotenant: "Yes — syndicated to Zillow, Realtor, etc.", winner: "turbotenant" },
   { feature: "Online rental application", truecap: "No", turbotenant: "Yes — customizable forms", winner: "turbotenant" },
@@ -76,7 +76,7 @@ export default function VsTurbotenantPage() {
     name: "TurboTenant vs TrueCap (2026): Manage vs Analyze",
     url: `${siteUrl}/vs/turbotenant`,
     description:
-      "TurboTenant runs your rentals after you buy them. TrueCap decides if you should buy. Honest comparison and how DIY landlords use both.",
+      "TurboTenant runs rentals after closing. TrueCap shows selected-rule fit, an Offer Ceiling, and verification work before you record your own decision.",
     dateModified: "2026-06-07",
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -144,7 +144,7 @@ export default function VsTurbotenantPage() {
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You&apos;re evaluating a property before making an offer.</li>
                 <li>You want cap rate, DSCR, cash flow, 10-year projection.</li>
-                <li>You want a deal score + plain-English verdict.</li>
+                <li>You want a Screening Index + plain-English verdict.</li>
                 <li>You&apos;re comparing 2-3 deals side-by-side before deciding.</li>
               </ul>
             </div>
@@ -234,7 +234,7 @@ export default function VsTurbotenantPage() {
               <strong>Underwrite in TrueCap.</strong> Address auto-fills HUD rent, FRED rate, state tax. Check cap rate, CoC, DSCR. Sensitize the inputs. Save the deal.
             </li>
             <li>
-              <strong>Make the offer and close.</strong> TrueCap is done; your transaction takes over.
+              <strong>Verify the material inputs and record your decision.</strong> If you proceed, the transaction and closing workflow happens outside TrueCap.
             </li>
             <li>
               <strong>Set up the property in TurboTenant.</strong> List the unit, accept applications, screen tenants with TransUnion, sign a state-specific lease online.
@@ -273,8 +273,7 @@ export default function VsTurbotenantPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, and co-branded share links. Pro includes PDFs, and a one-time
-            PDF option is available; see live pricing for current terms.
+            Offer Ceiling, co-branded share links, and PDF reports with Pro; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">

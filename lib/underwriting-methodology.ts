@@ -164,17 +164,17 @@ export const UNDERWRITING_FORMULAS: Record<
     convention: "Cash purchases are displayed as not applicable and use 0 as the stored sentinel.",
   },
   dealScore: {
-    label: "Deal Score (Balanced)",
+    label: "Screening Index (Balanced)",
     formula:
       "Round and clamp to 0–100: cash-flow points + CoC points + cap-rate points + DSCR points + projected-return points + risk penalty",
     convention:
-      "Balanced investment-property maxima are 22, 20, 16, 17, and 25 points. The projected return excludes annual personal-tax benefits but nets modeled selling costs and federal exit-tax defaults. Owner-occupant cash flow instead uses a 30-point maximum before the final 0–100 clamp. Risk penalties are capped at −30; recommendation bands are 75 / 55 / 35 / 18. Qualifying appreciation-play rules are disclosed on the methodology page.",
+      "Balanced investment-property maxima are 22, 20, 16, 17, and 25 points. The projected return excludes annual personal-tax benefits but nets modeled selling costs and federal exit-tax defaults. Owner-occupant cash flow instead uses a 30-point maximum before the final 0–100 clamp. Risk penalties are capped at −30; recommendation bands are 75 / 55 / 35 / 18. Qualifying appreciation-play rules are disclosed on the methodology page. The index is secondary triage context, not selected-rule fit, evidence readiness, a probability, an appraisal, or investment advice.",
   },
   maxOffer: {
-    label: "Maximum allowable offer",
+    label: "Offer Ceiling",
     formula: "Highest tested purchase price at which every selected target still passes",
     convention:
-      "Solved through the canonical engine and rounded down to a $500 step; returns null when the targets cannot be met inside the tested range.",
+      "Solved through the canonical engine and rounded down to a $500 step; returns null when the targets cannot be met inside the tested range. It is a target-dependent modeled boundary, not a recommended offer.",
   },
   brrrrRefinance: {
     label: "BRRRR refinance",

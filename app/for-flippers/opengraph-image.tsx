@@ -81,7 +81,7 @@ export default function Image() {
             }}
           >
             ARV, rehab, holding cost, net profit, break-even, annualized
-            ROI, and Max Allowable Offer — all live as you type. Free to
+            ROI, and Offer Ceiling — all live as you type. Free to
             start.
           </div>
         </div>

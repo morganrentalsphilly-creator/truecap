@@ -232,7 +232,11 @@ const nextConfig = {
       // after the general/embed policies so their stricter value wins.
       {
         source: "/d/:path+",
-        headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
+        headers: [
+          { key: "Referrer-Policy", value: "no-referrer" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive, nosnippet" },
+          { key: "Cache-Control", value: "private, no-store" },
+        ],
       },
       {
         // Opaque share viewer: token-only URLs, but the page RESOLVES to deal

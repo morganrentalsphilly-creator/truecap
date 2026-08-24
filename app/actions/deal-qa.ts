@@ -11,7 +11,7 @@
  *    so a tampered request can't make the AI bless fake numbers beyond
  *    what the user could type into the public form anyway.
  *  - The client MAY also forward an optional grounding-context block
- *    (buy-box evaluation, MAO, projection headline, pulled comps) that
+ *    (buy-box evaluation, Offer Ceiling, projection headline, pulled comps) that
  *    already exists client-side on the dashboard. It's zod-validated and
  *    size-bounded (lib/deal-qa-context) and adds DEPTH only — a tampered
  *    block is the same self-deception class as typing a fake rent. It
@@ -48,7 +48,7 @@ import { headers } from "next/headers";
 const inputSchema = z.object({
   question: z.string().trim().min(2).max(DEAL_QA_LIMITS.questionChars),
   values: investmentFormSchema,
-  /** Optional client-side grounding depth (buy box / MAO / projection /
+  /** Optional client-side grounding depth (buy box / Offer Ceiling / projection /
    *  comps). Size-bounded by the schema; omitted pieces are fine. */
   context: dealQaExtraContextSchema.optional(),
 });

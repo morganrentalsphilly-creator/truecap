@@ -308,8 +308,7 @@ async function checkGate(
       result: {
         ok: false,
         code: "ENTITLEMENT_REQUIRED",
-        message:
-          "PDF export is a Pro feature. Upgrade, or buy this single report.",
+        message: "PDF export is a Pro feature. Upgrade to Pro to export this report.",
       },
     };
   }

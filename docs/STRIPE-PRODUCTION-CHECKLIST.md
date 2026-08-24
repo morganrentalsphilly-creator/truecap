@@ -53,10 +53,10 @@ semantic colors. Keep the account-level branding compatible with:
 - Warning: **#B45309**
 - Error: **#B42318**
 
-Preview one subscription Checkout and one one-time Decision Pack Checkout in
-test mode. Confirm the name, wordmark, icon, contrast, mobile layout, Terms and
-Privacy links, amount, cadence, trial terms, and return links. Cancel both
-sessions before payment.
+Preview one subscription Checkout in test mode. Confirm the name, wordmark,
+icon, contrast, mobile layout, Terms and Privacy links, amount, cadence, trial
+terms, and return links. Cancel the session before payment. New Decision Pack
+checkout is intentionally disabled; do not re-enable it for this review.
 
 ## Product and Price inventory
 
@@ -69,9 +69,9 @@ uses Price IDs, while Product names remain Dashboard presentation:
 | TrueCap Pro | `STRIPE_PRICE_PRO_ANNUAL` | Current annual Price |
 | Agent Pro | `STRIPE_PRICE_AGENT_PRO_MONTHLY` | Current monthly Price; tier hidden when unset |
 | Agent Pro | `STRIPE_PRICE_AGENT_PRO_ANNUAL` | Current annual Price |
-| Decision Pack | `STRIPE_PRICE_PDF_ONE_TIME` | Existing $5 one-time Price |
-| Decision Pack experiment | `STRIPE_PRICE_SINGLE_DEAL_9` | Optional $9 one-time Price |
-| Decision Pack experiment | `STRIPE_PRICE_SINGLE_DEAL_19` | Optional $19 one-time Price |
+| Decision Pack | `STRIPE_PRICE_PDF_ONE_TIME` | Historical $5 mapping; not offered for new checkout |
+| Decision Pack experiment | `STRIPE_PRICE_SINGLE_DEAL_9` | Dormant; do not activate |
+| Decision Pack experiment | `STRIPE_PRICE_SINGLE_DEAL_19` | Dormant; do not activate |
 
 Renaming a Stripe Product’s display text is safe only when the existing Product
 and Price relationship remains intact. Never replace a Product or Price merely
@@ -113,8 +113,11 @@ protected-rate warning.
   `/pricing?billing=checkout_cancelled#plans`.
 - Portal returns to `/profile`; cancel/switch deep links return with their
   existing billing status query parameters.
-- Decision Pack success returns with `pdf_purchase={CHECKOUT_SESSION_ID}` and
-  cancellation returns with `pdf_purchase=cancelled`.
+- New Decision Pack checkout remains disabled. Verify existing paid-claim
+  recovery through the automated tests or a previously paid test-mode claim;
+  do not submit a new payment. Current claims return as `pdf_claim=<uuid>` and
+  cancellation uses `pdf_purchase=cancelled`; legacy Session-id returns fail
+  closed.
 - Confirm the webhook endpoint receives its subscribed event set in test mode.
   Do not change signature verification or rotate the webhook secret as part of
   this branding review.

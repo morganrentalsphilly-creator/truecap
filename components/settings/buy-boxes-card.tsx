@@ -354,7 +354,7 @@ export function BuyBoxesCard() {
         <p className="mb-4 max-w-prose text-sm leading-relaxed text-muted-foreground">
           Keep one set of acquisition criteria per strategy or market — a Memphis BRRRR box, a Philly
           house-hack box. Every analysis shows which of your buy boxes the deal{" "}
-          <span className="font-semibold text-foreground">meets</span>, alongside its Deal Score.
+          <span className="font-semibold text-foreground">meets</span>, alongside its secondary Screening Index.
         </p>
         <Link
           href="/pricing"
@@ -379,8 +379,8 @@ export function BuyBoxesCard() {
       </div>
       <p className="mb-5 max-w-prose text-sm leading-relaxed text-muted-foreground">
         One set of criteria per strategy or market. Each analysis shows a{" "}
-        <span className="font-semibold text-foreground">Meets your buy box</span> verdict per box, next
-        to its Deal Score. Every criterion is optional.
+        <span className="font-semibold text-foreground">Meets your buy box</span> selected-rule fit per box, next
+        to its Screening Index. The index summarizes modeled economics; it is not evidence readiness, advice, or a substitute for these rules. Every criterion is optional.
       </p>
 
       {/* Box list */}
@@ -774,7 +774,7 @@ function BoxEditorForm({
             onChange={(e) => update({ isActive: e.target.checked })}
             className="size-4 rounded border-border accent-[var(--brand-orange)]"
           />
-          Active (show its verdict)
+          Active (show its selected-rule fit)
         </label>
         <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-sm text-foreground">
           <input

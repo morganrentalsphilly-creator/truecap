@@ -8,7 +8,7 @@
     "Debt Service Coverage Ratio = NOI / Annual Debt Service. A property generating $24,000 NOI with $20,000 in annual mortgage payments has a DSCR of 1.20.",
     "Lenders care about DSCR more than they care about your tax return. Most non-QM DSCR loans in 2026 want 1.20-1.25 minimum. Some want 1.30. A few aggressive lenders will go to 1.15 with a rate bump and a bigger down payment.",
     "Here's the trap: at today's rates (6.5-7.5% for investor loans), a lot of cap-rate-decent properties don't clear DSCR. A 7% cap rate property with 75% LTV at 7% interest often comes in at DSCR 1.08-1.15. Lender says no. You're stuck putting more cash down or walking.",
-    "The smart move is modeling DSCR before you make an offer. If you're at 1.18, you know you need to either negotiate harder, put more down, or pass. If you're at 1.32, you've got room to compete.",
+    "Model DSCR before relying on a financing scenario. A modeled 1.18 and 1.32 indicate different screening cushions, but neither determines lender eligibility or tells you whether or how to offer. Confirm the lender's written DSCR definition, rent basis, leverage, reserves, and other program rules.",
     "TrueCap models DSCR against today's investor loan rates by default. Paste an address and you'll see whether the loan you want actually exists at the price you're considering. Free tier."
   ],
   "cta_text": "Check your DSCR",

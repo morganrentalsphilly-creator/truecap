@@ -362,7 +362,7 @@ export default async function DealWorkspacePage({
   const monthlyPayment = fresh ? fresh.monthlyPayment : num(snap["monthlyPayment"]);
   // calc-analysis canon: monthlyPayment <= 0 means a cash purchase (DSCR is
   // N/A, never failed). One derivation, shared by the buy-box metrics and the
-  // MAO target below.
+  // Offer Ceiling target below.
   const isCashPurchase = fresh ? fresh.isCashPurchase : monthlyPayment <= 0;
   // Current-engine form values — reused by the max-offer solver and the
   // owned-equity estimate. Null for legacy snapshots that don't validate.
@@ -422,7 +422,7 @@ export default async function DealWorkspacePage({
       ? boxesForDealClient(
           buyBoxesResult.boxes.filter((b) => b.isActive && buyBoxHasCriteria(b)),
           // Scope to THIS deal's client — a box belonging to another buyer must
-          // not drive this deal's fit, personal line, or MAO basis.
+          // not drive this deal's fit, personal line, or Offer Ceiling basis.
           dealRow.client_id ?? null
         )
       : [];
@@ -461,7 +461,7 @@ export default async function DealWorkspacePage({
     }
   }
 
-  // Max allowable offer (DEC-2): the verdict → offer-number path. Solve the
+  // Offer Ceiling (DEC-2): the verdict → offer-number path. Solve the
   // highest price that still clears the user's targets (buy-box thresholds
   // when set, else break-even cash flow + DSCR 1.25 — see lib/mao-targets)
   // from the SAME current-engine form snapshot everything above recomputes
@@ -618,6 +618,7 @@ export default async function DealWorkspacePage({
                 {formValues ? (
                   <ShareLinkButton
                     values={formValues}
+                    isAuthenticated={true}
                     savedDealId={dealRow.id}
                     maoTarget={shareMaoTarget}
                     maoTargetSource={shareMaoTargetSource}
@@ -646,7 +647,7 @@ export default async function DealWorkspacePage({
               {cocPct != null ? <Metric label="CoC" value={`${cocPct.toFixed(1)}%`} /> : null}
               {dscrDisplay ? <Metric label="DSCR" value={dscrDisplay} /> : null}
               {dealScore != null ? (
-                <Metric label="Deal Score" value={`${Math.round(dealScore)}`} />
+                <Metric label="Screening Index" value={`${Math.round(dealScore)}/100`} />
               ) : null}
             </div>
             {/* Cross-deal compare, at the "is this one better than my
@@ -697,16 +698,16 @@ export default async function DealWorkspacePage({
                 Your buy box · {buyBoxPersonalLine}
               </p>
             ) : null}
-            {/* Max offer line (DEC-2): "lower your offer" becomes an
+            {/* Offer Ceiling line (DEC-2): "lower your offer" becomes an
                 executable number, right beside the advice. The basis is
                 labeled inline (CONFLICT #6) so this never reads as a second,
-                unexplained "your max" vs the analyzer's MAO surfaces. */}
+                unexplained "your max" vs the analyzer's Offer Ceiling surfaces. */}
             {maoLine ? (
               <div className="mt-2 flex items-start gap-3 rounded-2xl border border-border bg-card p-4">
                 <Target aria-hidden className="mt-0.5 size-5 shrink-0 text-primary" />
                 <div className="min-w-0 flex-1">
                   <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    Price ceiling
+                    Offer Ceiling
                   </div>
                   {maoLine.kind === "blocked" ? (
                     <div className="text-sm font-bold text-foreground">
@@ -720,15 +721,15 @@ export default async function DealWorkspacePage({
                   ) : maoLine.kind === "clears" ? (
                     <>
                       <div className="text-sm font-bold text-foreground">
-                        Asking price works at your targets
+                        Asking is at or below the Offer Ceiling
                       </div>
                       {maoLine.maxPrice != null ? (
                         <div className="text-xs text-muted-foreground">
-                          You could pay up to{" "}
+                          Highest modeled price that meets the captured targets:{" "}
                           <span className="font-semibold tabular-nums text-foreground">
                             {fmtMoney(maoLine.maxPrice)}
                           </span>{" "}
-                          and still hit them.
+                          under the assumptions shown.
                         </div>
                       ) : null}
                     </>
@@ -754,7 +755,7 @@ export default async function DealWorkspacePage({
                         Targets: {maoBasisLabel}
                       </div>
                       <div className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-                        Calculated from your selected targets. This is not a recommended offer.
+                        Highest modeled price that still meets {maoBasisLabel} under the assumptions shown. This is not a recommended offer or appraisal.
                       </div>
                     </>
                   ) : null}

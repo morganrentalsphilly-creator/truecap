@@ -3,7 +3,7 @@
  * Strong Buy vs Avoid". Explains the actual thresholds in
  * lib/verdict.ts in plain English. Builds trust + earns
  * organic search for "is this rental a good deal" / "rental
- * property deal score" queries.
+ * property Screening Index" queries.
  *
  * IMPORTANT: the thresholds quoted in this post are pulled
  * directly from lib/verdict.ts. If verdict.ts changes (per
@@ -23,13 +23,13 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "how-truecap-verdict-engine-works";
-const TITLE = "How TrueCap's verdict engine decides Strong Buy vs Avoid";
+const TITLE = "How TrueCap classifies selected-rule fit";
 // SERP-facing title (metadata/og only): kept ≤50 chars so the root
 // layout's "%s | TrueCap" template stays inside the ~60-char SERP
 // window. The on-page <h1> keeps the longer editorial TITLE.
-const SERP_TITLE = "How the verdict engine decides Strong Buy vs Avoid";
+const SERP_TITLE = "How TrueCap classifies selected-rule fit";
 const DESCRIPTION =
-  "The exact cash flow, DSCR, cap rate, and cash-on-cash thresholds TrueCap uses to classify a rental deal as Strong / Solid / Mixed / Marginal / Negative — pulled directly from the production code.";
+  "The explicit cash flow, DSCR, cap-rate, and cash-on-cash thresholds TrueCap uses for selected-rule fit. This screening classification is not a buy/pass decision or advice.";
 const PUBLISHED_AT = "2026-06-07";
 const MODIFIED_AT = "2026-06-07";
 const READING_TIME_MIN = 10;
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
   keywords: [
     "rental property verdict engine",
     "is this rental a good deal",
-    "rental property deal score",
+    "rental property Screening Index",
     "rental underwriting thresholds",
     "rental property classification",
     "good cap rate rental",
@@ -66,24 +66,24 @@ export const metadata: Metadata = {
 
 const FAQ_ITEMS = [
   {
-    q: "How does TrueCap decide if a rental property is a good deal?",
-    a: "TrueCap classifies each deal as Strong, Solid, Mixed, Marginal, or Negative based on four metrics: monthly cash flow, debt service coverage ratio (DSCR), cap rate, and cash-on-cash return. Strong requires cash flow ≥ $400/mo, DSCR ≥ 1.25, and CoC ≥ 10%. Solid requires cash flow ≥ $100/mo, DSCR ≥ 1.15, and CoC ≥ 6%. Marginal and Negative trigger when cash flow goes negative or DSCR drops below 1.0.",
+    q: "How does TrueCap classify selected-rule fit?",
+    a: "TrueCap compares modeled cash flow, DSCR, cap rate, and cash-on-cash return with explicit screening thresholds, producing Strong, Solid, Mixed, Marginal, or Negative rule-fit bands. These labels describe the entered assumptions against those rules; they do not decide whether a property is a good investment.",
   },
   {
     q: "What cash flow does TrueCap consider 'good'?",
     a: "$400/month or more net monthly cash flow (after all operating expenses and debt service) clears the Strong threshold. $100-400/month is Solid territory. Below $100/month but still positive is Mixed. Negative cash flow drops you into Marginal (down to -$200) or Negative (worse than -$200).",
   },
   {
-    q: "What DSCR is required for TrueCap's Strong verdict?",
+    q: "What DSCR contributes to TrueCap's Strong rule-fit band?",
     a: "TrueCap uses 1.25 or higher as its Strong score-band threshold; 1.15-1.25 is Solid, 1.0-1.15 is Mixed/Marginal, and below 1.0 means the modeled operating income does not cover modeled debt service. These are TrueCap heuristics, not lender rules. Lenders calculate DSCR differently and apply separate borrower, property, documentation, reserve, rate, and LTV requirements, so no TrueCap band establishes loan eligibility or approval.",
   },
   {
     q: "How does TrueCap handle all-cash purchases for DSCR?",
-    a: "DSCR doesn't apply to cash purchases — there's no debt service. The verdict engine detects this (monthlyPayment <= 0) and switches to a cash-only classifier that leans on cash flow, cap rate, and cash-on-cash. A cash deal with $400+/mo cash flow, ≥ 7% cap rate, and ≥ 8% CoC is Strong; ≥ $100/mo, ≥ 5% cap, ≥ 5% CoC is Solid.",
+    a: "DSCR doesn't apply to cash purchases because there is no debt service. The selected-rule classifier uses a cash-only path based on cash flow, cap rate, and cash-on-cash. These are screening thresholds, not recommendations or evidence that the assumptions are verified.",
   },
   {
-    q: "What's the difference between the verdict and the Deal Score?",
-    a: "The verdict is the free-tier rule-of-thumb classifier (Strong / Solid / Mixed / Marginal / Negative). The Deal Score is a 0-100 weighted score with a subscore breakdown — and both are free for every user. The verdict is intentionally simpler — it tells you which bucket the deal lands in. The Deal Score tells you why, with contribution from each underlying metric.",
+    q: "What's the difference between selected-rule fit and the Screening Index?",
+    a: "Selected-rule fit checks the entered assumptions against the named Buy Box or target profile. The Screening Index is a secondary 0-100 weighted triage score with a factor breakdown. It is not evidence readiness, a Buy Box result, an appraisal, lender approval, or investment advice.",
   },
 ];
 
@@ -163,8 +163,8 @@ export default function HowVerdictEngineWorksPost() {
               TL;DR
             </h2>
             <p className="text-sm sm:text-base leading-relaxed text-foreground">
-              TrueCap&apos;s verdict engine is a small set of explicit
-              thresholds that classify a deal into one of five tiers:{" "}
+              TrueCap&apos;s selected-rule classifier is a small set of explicit
+              thresholds that groups modeled results into five bands:{" "}
               <strong>Strong, Solid, Mixed, Marginal, Negative</strong>.
               Strong needs <strong>$400+/mo cash flow, DSCR ≥ 1.25, and
               CoC ≥ 10%</strong>. Solid needs <strong>$100+/mo, DSCR ≥
@@ -177,7 +177,7 @@ export default function HowVerdictEngineWorksPost() {
           </section>
 
           <div className="prose prose-neutral max-w-none prose-headings:font-extrabold prose-headings:text-foreground prose-p:text-foreground prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:text-foreground prose-li:leading-relaxed">
-            <h2>Why we built a verdict engine at all</h2>
+            <h2>Why we show selected-rule fit</h2>
             <p>
               A rental analysis spits out numbers — cap rate, cash flow,
               DSCR, cash-on-cash, IRR — and a new investor stares at
@@ -187,11 +187,10 @@ export default function HowVerdictEngineWorksPost() {
               hasn&apos;t fallen in love with the deal.
             </p>
             <p>
-              The verdict engine answers <em>&quot;is this a deal?&quot;</em>{" "}
-              with one of five tiers and a one-paragraph rationale. It
-              runs free, on every analysis, on every property. Pro
-              users get the more sophisticated Deal Score on top, but
-              the verdict is the baseline.
+              The selected-rule fit groups the modeled outputs into one of five
+              bands and explains which thresholds were met or missed. It does not
+              answer whether someone should buy, pass, or offer. The Screening
+              Index is a secondary triage aid, not evidence readiness or advice.
             </p>
             <p>
               The whole engine is open — the source code is at{" "}
@@ -312,7 +311,7 @@ export default function HowVerdictEngineWorksPost() {
               When the analysis says <code>monthlyPayment &lt;= 0</code>{" "}
               — i.e., there&apos;s no financing — DSCR doesn&apos;t
               mean anything. There&apos;s no debt service to cover.
-              The verdict engine detects this and switches to a
+              The selected-rule classifier detects this and switches to a
               simpler classifier:
             </p>
             <ul>
@@ -427,7 +426,7 @@ export default function HowVerdictEngineWorksPost() {
                 <strong>No partial credit.</strong> Strong requires
                 <em>all three</em> thresholds. Two-out-of-three knocks
                 you to Solid. We thought about a weighted score
-                (that&apos;s what the Deal Score does) but for the
+                (that&apos;s what the Screening Index does) but for the
                 free verdict tier, hard cutoffs are easier to trust.
               </li>
             </ul>
@@ -470,7 +469,7 @@ export default function HowVerdictEngineWorksPost() {
               </li>
             </ol>
 
-            <h2>If you want the math behind the verdict</h2>
+            <h2>If you want the math behind the classification</h2>
             <p>
               The underlying calculations come from{" "}
               <code>lib/calc-analysis.ts</code> — the single source of
@@ -479,7 +478,7 @@ export default function HowVerdictEngineWorksPost() {
               free analyzer, the saved-deal PDF, the share link, the
               dashboard, and the OG image. If you&apos;ve seen the
               number 6.4% as the cap rate in your TrueCap analysis,
-              that&apos;s the same 6.4% the verdict engine reads.
+              that&apos;s the same 6.4% the selected-rule classifier reads.
             </p>
             <p>
               For deeper reading on the individual metrics, our

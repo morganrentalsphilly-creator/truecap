@@ -32,7 +32,10 @@ export const ANALYTICS_EVENT_DICTIONARY = {
   second_unique_property_analyzed: define("growth", "account-aggregate", ["period"]),
   buy_box_created: define("product", "account-aggregate", ["source", "is_default", "has_strategy"]),
   material_assumption_overridden: define("product", "anonymous-aggregate", ["source", "field_group"]),
+  target_context_set: define("product", "account-aggregate", ["model_version", "rule_set_version", "target_source", "surface"]),
+  material_input_reviewed: define("product", "account-aggregate", ["field_key", "source_class", "confirmation_type", "method_version"]),
   material_input_verified: define("product", "account-aggregate", ["field_key", "evidence_level", "method_version"]),
+  evidence_readiness_changed: define("product", "account-aggregate", ["from_state", "to_state", "contract_version"]),
   activation_completed: define("product", "account-aggregate", ["definition_version"]),
 
   decision_viewed: define("product", "anonymous-aggregate", ["property_type"]),
@@ -61,6 +64,16 @@ export const ANALYTICS_EVENT_DICTIONARY = {
   share_viewed: define("growth", "anonymous-aggregate", ["address_included", "share_format"]),
   share_revoked: define("product", "account-aggregate"),
   shared_scenario_forked: define("product", "account-aggregate"),
+  memo_generated: define("product", "account-aggregate", ["surface", "model_version", "rule_set_version"]),
+  recipient_assumption_challenged: define("product", "account-aggregate", ["source_class", "confirmation_type"]),
+  recipient_evidence_requested: define("product", "account-aggregate", ["source_class", "confirmation_type"]),
+  recipient_scenario_forked: define("product", "account-aggregate", ["model_version", "rule_set_version"]),
+  recipient_response_recorded: define("product", "account-aggregate", ["response_type"]),
+  second_unique_property: define("growth", "account-aggregate", ["period"]),
+  return_within_7d: define("growth", "account-aggregate", ["activation_surface"]),
+  advocacy_prompt_shown: define("growth", "account-aggregate", ["value_event"]),
+  quote_submitted: define("growth", "account-aggregate", ["value_event"]),
+  referral_converted: define("growth", "account-aggregate", ["attribution_surface"]),
   client_decision_assigned: define("professional", "account-aggregate", ["role"]),
   client_decision_approved: define("professional", "account-aggregate", ["decision"]),
 
@@ -71,6 +84,14 @@ export const ANALYTICS_EVENT_DICTIONARY = {
   decision_readiness_changed: define("product", "account-aggregate", ["from_stage", "to_stage", "method_version"]),
   material_change_detected: define("product", "account-aggregate", ["change_type"]),
   calculation_parity_failed: define("data-quality", "operational-no-customer-data", ["surface", "methodology_version", "failure_class"]),
+  provider_fallback_used: define("data-quality", "operational-no-customer-data", ["provider", "fallback_class", "stale_band", "mismatch_reason"]),
+  model_version_mismatch: define("data-quality", "operational-no-customer-data", ["surface", "stored_version", "running_version", "failure_class"]),
+  historical_snapshot_mutation: define("data-quality", "operational-no-customer-data", ["surface", "methodology_version", "failure_class"]),
+  migration_backfill_progress: define("data-quality", "operational-no-customer-data", ["migration", "phase", "status"]),
+  webhook_reconciliation_failed: define("billing", "operational-no-customer-data", ["object_type", "error_class", "recoverable"]),
+  entitlement_divergence: define("billing", "operational-no-customer-data", ["plan_state", "entitlement_state", "error_class"]),
+  paid_memo_fulfillment_failed: define("billing", "operational-no-customer-data", ["lifecycle_state", "error_class", "recoverable"]),
+  share_authorization_failed: define("product", "operational-no-customer-data", ["route", "failure_class"]),
 } as const satisfies Record<string, AnalyticsEventDefinition>;
 
 export type DocumentedAnalyticsEvent = keyof typeof ANALYTICS_EVENT_DICTIONARY;

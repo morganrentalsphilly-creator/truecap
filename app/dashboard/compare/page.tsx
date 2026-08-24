@@ -250,7 +250,7 @@ function mapDeal(
     monthlyRentalIncome: resolvedCurrent ? resolvedCurrent.monthlyRentalIncome : toNumber(snapshot.monthlyRentalIncome),
     totalOperatingExpenses: resolvedCurrent ? resolvedCurrent.totalOperatingExpenses : toNumber(snapshot.totalOperatingExpenses),
     purchasePrice,
-    // Max Offer + gap use the exact persisted target resolved just above.
+    // Offer Ceiling + gap use the exact persisted target resolved just above.
     // "blocked" carries no price by design (no dollar figure fixes a
     // wrong-market miss).
     maxOffer,
@@ -332,7 +332,7 @@ export default async function DashboardComparePage() {
   ]);
   const displayName = getDisplayName((profile as ProfileRow | null) ?? null, user.email);
   const initials = getInitials(displayName, user.email ?? "");
-  // MAO uses the catalog's paid-status gate. Requiring a nonexistent `mao`
+  // Offer Ceiling uses the catalog's paid-status gate. Requiring a nonexistent `mao`
   // plan-feature string would incorrectly hide it from valid Pro customers.
   const canShowMao = isPremium;
 
@@ -509,7 +509,7 @@ export default async function DashboardComparePage() {
   const compareBuyBoxesResolved = Boolean(buyBoxesResult?.ok);
   const deals = ids.map((id) => rowById.get(id)).filter((row): row is SavedAnalysisRow => Boolean(row))
     // Buy boxes resolve on the same canUse gate the dashboard and My Deals
-    // use, so a Compare row's Max Offer matches those screens exactly.
+    // use, so a Compare row's Offer Ceiling matches those screens exactly.
     .map((row) =>
       mapDeal(row, activeCompareBuyBoxes, canShowMao, compareBuyBoxesResolved)
     );

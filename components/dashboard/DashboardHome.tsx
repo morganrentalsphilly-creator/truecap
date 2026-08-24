@@ -463,7 +463,7 @@ function getDecisionCenter(data: DashboardHomeData) {
 /**
  * Portfolio KPIs — the four numbers an investor underwrites a *book* on,
  * complementing the Pipeline Value / Monthly Cash Flow headline cards:
- *  - Average Deal Score (book quality)
+ *  - Average Screening Index (book quality)
  *  - Weighted DSCR (leverage safety; purchase-price-weighted, financed
  *    deals only — cash purchases have no debt service)
  *  - Cash to Close (capital at work = down payment + closing across deals)
@@ -614,7 +614,7 @@ function buildDecisionInsights(deals: DashboardDeal[]) {
 
   const evidence = (d: DashboardDeal): string =>
     [
-      d.score != null ? `Deal Score ${Math.round(d.score)}` : null,
+      d.score != null ? `Secondary Screening Index ${Math.round(d.score)}` : null,
       d.recommendation ? recommendationLabel(d.recommendation) : null,
       d.cashFlowMonthly != null ? `${formatSignedCurrency(d.cashFlowMonthly)}/mo` : null,
       d.capRatePct != null ? `${d.capRatePct.toFixed(1)}% cap` : null,
@@ -629,7 +629,7 @@ function buildDecisionInsights(deals: DashboardDeal[]) {
       ? {
           title: `Top opportunity: ${bestPick.address}`,
           body: canCompare
-            ? `${evidence(bestPick)}. Next: line it up against your other top deals before you offer.`
+            ? `${evidence(bestPick)}. Next: compare it with your other top deals, verify the material inputs, and record your decision.`
             : `${evidence(bestPick)}. Next: save a second deal to compare it side-by-side.`,
           tone: "opportunity" as const,
           action: canCompare
@@ -640,7 +640,7 @@ function buildDecisionInsights(deals: DashboardDeal[]) {
     reviewPick
       ? {
           title: `Review: ${reviewPick.address} is cash-flow negative`,
-          body: `${formatSignedCurrency(reviewPick.cashFlowMonthly)}/mo at current assumptions${reviewPick.dscr != null ? ` · DSCR ${reviewPick.dscr.toFixed(2)}` : ""}. Next: lower your offer or raise rent and rerun — or pass.`,
+          body: `${formatSignedCurrency(reviewPick.cashFlowMonthly)}/mo at current assumptions${reviewPick.dscr != null ? ` · DSCR ${reviewPick.dscr.toFixed(2)}` : ""}. Next: review the price and rent assumptions, rerun, then record your decision.`,
           tone: "risk" as const,
           // Deep-link to the named deal so "fix it" is one tap, not a hunt
           // through the list (the deal-detail screen is where re-underwriting,
@@ -876,7 +876,7 @@ export function DashboardHome({
                 </div>
                 <div className="mt-1 truncate text-sm font-bold text-foreground">{decisionCenter.best?.address ?? "—"}</div>
                 <div className="truncate text-xs text-muted-foreground">
-                  {decisionCenter.best?.score != null ? `Score ${Math.round(decisionCenter.best.score)}` : "—"}
+                  {decisionCenter.best?.score != null ? `Screening Index ${Math.round(decisionCenter.best.score)}` : "—"}
                   {decisionCenter.best?.recommendation ? ` · ${recommendationLabel(decisionCenter.best.recommendation)}` : ""}
                 </div>
               </div>
@@ -976,7 +976,7 @@ export function DashboardHome({
             ONE table replacing Portfolio Overview, Pipeline, Top
             Performers, the Deal Comparison chart, Portfolio Signals and
             Risk vs Return — and the first dashboard surface ever to carry
-            a MAX OFFER per deal, plus the gap to asking. */}
+            an Offer Ceiling per deal, plus the gap to asking. */}
         {focusedDashboard ? (
           <>
             <YourDealsTable deals={data.allDeals} />
@@ -1182,7 +1182,7 @@ export function DashboardHome({
               <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
                 <div className="rounded-xl border border-border bg-card p-3">
                   <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    <Award className="h-3.5 w-3.5" /> Avg Deal Score
+                    <Award className="h-3.5 w-3.5" /> Avg Screening Index · secondary
                   </div>
                   <div className="mt-1 text-lg font-bold text-foreground">
                     {kpis.avgScore == null ? "—" : Math.round(kpis.avgScore)}
@@ -1298,7 +1298,7 @@ export function DashboardHome({
                 [
                   {
                     icon: Award,
-                    label: "Best Score",
+                    label: "Highest Screening Index",
                     value:
                       highlights.byScore?.score == null
                         ? "—"
@@ -1430,7 +1430,7 @@ export function DashboardHome({
               >
                 your buy box
               </Link>{" "}
-              and every deal gets a pass/fail against your numbers.
+              and every deal shows which selected rules it meets or misses.
             </p>
             <Button
               asChild
@@ -1448,7 +1448,7 @@ export function DashboardHome({
         {/* ── DELETED by the focused dashboard ──────────────────────
             PortfolioChart (Deal Comparison bar chart) and AIInsights
             (Portfolio Signals) are superseded by "Your deals": the same
-            saved deals, with the Max Offer and gap those two never showed.
+            saved deals, with the Offer Ceiling and gap those two never showed.
             RiskReturn moves to Compare Deals, where comparison is the job.
             Kept behind the kill switch only. */}
         {!focusedDashboard && hasAnyDeals && data.topDeals.length > 0 ? (

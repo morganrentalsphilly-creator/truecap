@@ -40,7 +40,7 @@ import { headers } from "next/headers";
 
 const inputSchema = z.object({
   values: investmentFormSchema,
-  /** Optional client-side grounding depth (buy box / MAO / projection /
+  /** Optional client-side grounding depth (buy box / Offer Ceiling / projection /
    *  comps) — shared shape with Deal Q&A so the pair can't drift. */
   context: dealQaExtraContextSchema.optional(),
 });

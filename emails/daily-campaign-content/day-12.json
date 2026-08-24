@@ -3,14 +3,14 @@
   "send_date": "2026-06-12",
   "subject": "use the 70% rule as a screen, not a verdict",
   "preheader": "a quick flip check that still needs deal-specific costs and targets.",
-  "headline": "The 70% rule is a starting screen—not a universal Max Offer.",
+  "headline": "The 70% rule is a starting screen—not a universal Offer Ceiling.",
   "body": [
     "A common quick screen is purchase ceiling = ARV × 0.70 − rehab cost. The retained spread is intended to absorb selling, financing, holding, contingency, and profit—but those amounts vary materially by deal.",
     "Illustration only: at a $400,000 entered ARV and $60,000 entered rehab budget, the rule produces $220,000. That is not automatically the price you should pay; replace the factor and every cost assumption with figures for the property, financing, timeline, market, and your return target.",
     "The useful lesson is not that 70% is magic. It is that a flip offer needs room for more than construction. Selling costs, interest, taxes, insurance, utilities, permits, delays, concessions, and contingency all compete for the spread.",
-    "TrueCap Pro models Max Offer from the ARV, rehab, holding, financing, selling-cost, and target inputs you enter. It does not automatically supply property-specific ARV comps or a contractor rehab quote. Free can still screen the rental fallback."
+    "TrueCap Pro models an Offer Ceiling from the ARV, rehab, holding, financing, selling-cost, and target inputs you enter. It is not a recommended offer and does not automatically supply property-specific ARV comps or a contractor rehab quote. Verify every material input before negotiating or offering. Free can still screen the rental fallback."
   ],
-  "cta_text": "Unlock the MAO calculator",
+  "cta_text": "Unlock the Offer Ceiling calculator",
   "cta_url": "https://usetruecap.com/pricing",
   "signature_note": null
 }

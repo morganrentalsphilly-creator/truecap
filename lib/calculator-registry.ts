@@ -61,9 +61,9 @@ export const CALCULATOR_REGISTRY: CalculatorEntry[] = [
   { slug: "roi-calculator", title: "Rental Property ROI Calculator", shortTitle: "ROI", description: "Total return — cash flow + principal paydown + appreciation in one number.", category: "returns", embeddable: true },
   // Offer & strategy
   { slug: "brrrr-calculator", title: "BRRRR Calculator", shortTitle: "BRRRR", description: "Buy, Rehab, Rent, Refinance — model the full strategy in one view.", category: "offer", embeddable: true, footerFeatured: true },
-  { slug: "arv-calculator", title: "ARV Calculator (After-Repair Value + 70% Rule)", shortTitle: "ARV", description: "Comps-based after-repair value plus the 70%-rule max offer for flips and BRRRR.", category: "offer", embeddable: true },
+  { slug: "arv-calculator", title: "ARV Calculator (After-Repair Value + 70% Rule)", shortTitle: "ARV", description: "Entered after-repair value plus a 70%-rule Offer Ceiling screen for flips and BRRRR; verify comps, repairs, and all costs.", category: "offer", embeddable: true },
   { slug: "house-hacking-calculator", title: "House Hacking Calculator", shortTitle: "House Hack", description: "Live in one unit, rent the rest — your effective housing cost after tenant rent.", category: "offer", embeddable: true },
-  { slug: "70-percent-rule-calculator", title: "70% Rule Calculator", shortTitle: "70% Rule", description: "Max offer = 70% of ARV minus repairs — the flip and BRRRR screen, at every common multiplier.", category: "offer", embeddable: true },
+  { slug: "70-percent-rule-calculator", title: "70% Rule Calculator", shortTitle: "70% Rule", description: "70%-rule Offer Ceiling = entered ARV × selected multiplier minus entered repairs — a starting screen, not a recommended offer.", category: "offer", embeddable: true },
   { slug: "rehab-cost-estimator", title: "Rehab Cost Estimator", shortTitle: "Rehab", description: "Line-item rehab budget by scope of work — the rehab number that feeds BRRRR + flip.", category: "offer", embeddable: false },
 ];
 

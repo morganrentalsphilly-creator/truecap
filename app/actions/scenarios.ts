@@ -361,7 +361,7 @@ export async function addScenarioAction(input: unknown): Promise<AddScenarioResu
       const result = calculateAnalysis(adjusted);
       // A scenario changes assumptions, not the investor's acquisition
       // criteria. Rebuilding result_snapshot from the calculator result used
-      // to discard the source's tuned Max Offer target, so the scenario
+      // to discard the source's tuned Offer Ceiling target, so the scenario
       // reopened under canonical defaults and quoted a different ceiling.
       // Normalize at this server boundary and carry only the supported target
       // shape into the recomputed snapshot.

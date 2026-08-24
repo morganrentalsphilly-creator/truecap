@@ -71,8 +71,8 @@ const MATRIX: Row[] = [
   { feature: "AI deal Q&A on your numbers", truecap: "Yes — grounded in the computed analysis", bricked: "AI picks comps; no investment Q&A", winner: "truecap" },
   { feature: "Try without signup", truecap: "Yes — full analysis, no account", bricked: "No — account + 3-day trial", winner: "truecap" },
   { feature: "Free tier", truecap: "Yes — unlimited core underwriting", bricked: "No — trial only", winner: "truecap" },
-  { feature: "Entry pricing", truecap: "Free core; paid Pro with published limits; one-time PDF option — see live pricing", bricked: "$49/mo for 100 comps, metered up to $199/mo (as of June 2026)", winner: "truecap" },
-  { feature: "PDF + share links", truecap: "Read-only share links free; one-time PDF option or included with Pro", bricked: "Not the focus", winner: "truecap" },
+  { feature: "Entry pricing", truecap: "Free core; paid Pro with published limits — see live pricing", bricked: "$49/mo for 100 comps, metered up to $199/mo (as of June 2026)", winner: "truecap" },
+  { feature: "PDF + share links", truecap: "Read-only share links free; PDFs included with Pro", bricked: "Not the focus", winner: "truecap" },
   { feature: "API access", truecap: "No", bricked: "Yes — Growth tier and up", winner: "bricked" },
 ];
 
@@ -281,7 +281,7 @@ export default function VsBrickedPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow with no
             account and no analysis cap. Pro adds projections, illustrative tax impact, modeled exit
-            scenarios, BRRRR + flip analyzers, and Deal Decision Pack PDFs in
+            scenarios, BRRRR + flip analyzers, and PDF reports in
             one paid plan. See live pricing for the current rate and limits.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -357,12 +357,12 @@ const BRICKED_FAQ: FaqItem[] = [
         teams running volume. TrueCap&apos;s core analyzer is free with no analysis
         cap and no account required. Pro adds advanced analysis and reporting
         with published limits, including 50 comp lookups per month and comparison
-        of up to four saved deals. A one-time PDF option is also available. See
+        of up to four saved deals. PDF reports are included with Pro. See
         TrueCap&apos;s live pricing page for current rates and terms.
       </>
     ),
     plainTextAnswer:
-      "Bricked publishes metered comp plans and a trial. TrueCap has unlimited free core analyses, paid Pro with published limits, and a one-time PDF option. Check both live pricing pages for current rates and terms.",
+      "Bricked publishes metered comp plans and a trial. TrueCap has unlimited free core analyses and paid Pro with published limits. Check both live pricing pages for current rates and terms.",
   },
   {
     question: "Are Bricked's repair estimates better than TrueCap's rehab estimator?",

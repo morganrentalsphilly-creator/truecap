@@ -81,7 +81,7 @@ export function LiveVerdictPanel({ active, livePreview, livePreviewMsg }: Props)
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/60" />
                 <span className="relative inline-flex size-2 rounded-full bg-primary" />
               </span>
-              Live preview
+              Live screening preview
             </span>
             <span
               className={cn(
@@ -101,9 +101,12 @@ export function LiveVerdictPanel({ active, livePreview, livePreviewMsg }: Props)
               {livePreview.score}
             </span>
             <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
-              / 100 Deal Score
+              / 100 Screening Index
             </span>
           </div>
+          <p className="-mt-2 mb-3 text-[10px] leading-snug text-muted-foreground">
+            Secondary screening heuristic · not an investment recommendation.
+          </p>
           <div className="grid grid-cols-3 gap-2 sm:gap-3">
             <div>
               <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
@@ -158,7 +161,7 @@ export function LiveVerdictPanel({ active, livePreview, livePreviewMsg }: Props)
               <span className="font-mono font-bold">
                 ${Math.round(livePreview.breakEvenPrice).toLocaleString()}
               </span>{" "}
-              — try that as your offer price.
+              — review that modeled break-even point against the price assumption.
             </p>
           ) : Math.round(livePreview.netCashFlow) < 0 ? (
             <p className="mt-2.5 rounded-lg bg-background/60 px-2.5 py-2 text-[11px] font-semibold leading-snug text-foreground">

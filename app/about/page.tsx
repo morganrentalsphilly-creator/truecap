@@ -135,7 +135,7 @@ export default function AboutPage() {
           <p>
             Type an address and get a full underwrite in about 60 seconds:
             monthly cash flow, cap rate, cash-on-cash return, DSCR, 10-year
-            projections, and a plain-English verdict. The{" "}
+            projections, a selected-rule fit, and a secondary Screening Index. The{" "}
             <Link href="/" className="font-bold text-foreground hover:underline">
               core analyzer
             </Link>{" "}
@@ -144,7 +144,7 @@ export default function AboutPage() {
               paid plan
             </Link>{" "}
             adds saved deals, a portfolio dashboard, deal comparison, and
-            lender-facing Deal Decision Pack exports.
+            lender-facing Pro report exports.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">Get in touch</h2>

@@ -13,14 +13,14 @@
  */
 
 export const HOMEPAGE_HEADLINES = {
-  decision_system: "Know your number before you make the offer.",
-  a: "Screen any rental in 60 seconds. Know the highest price that still works.",
-  b: "Know what a rental is worth under your assumptions.",
-  walkaway: "Know your walk-away price before you make the offer.",
+  decision_system: "Review the model before you record a decision.",
+  a: "Screen a rental and compare asking with its target-dependent Offer Ceiling.",
+  b: "See how a rental models under the assumptions shown.",
+  walkaway: "Review the Offer Ceiling and the targets that produced it.",
   // Retain the legacy key so an old environment value cannot break the build,
   // but serve qualified decision language instead of an absolute outcome
   // claim.
-  never_overpay: "Know the highest price that fits your targets.",
+  never_overpay: "Review the highest modeled price that meets your selected targets.",
 } as const;
 
 export type HomepageHeadlineVariant = keyof typeof HOMEPAGE_HEADLINES;
@@ -110,9 +110,9 @@ export function getMarketingOfferConfig() {
   const guaranteeTermsUrl =
     safePublicUrl(process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_TERMS_URL) ??
     "/guarantee";
-  const guaranteeEnabled =
-    enabled(process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_ENABLED) &&
-    !enabled(process.env.NEXT_PUBLIC_TRUECAP_GUARANTEE_DISABLED);
+  // Fail closed regardless of stale deployment environment values. Re-enable
+  // only with a separately reviewed policy + operations contract in code.
+  const guaranteeEnabled = false;
 
   return {
     homepageHeadlineVariant,

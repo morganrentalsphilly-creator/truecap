@@ -45,7 +45,7 @@ describe("verdict display — single source of wording", () => {
       const d = verdictDisplay(rec);
       expect(d.label.length, rec).toBeGreaterThan(0);
       expect(d.shortLabel.length, rec).toBeGreaterThan(0);
-      expect(d.srLabel.toLowerCase(), rec).toContain("verdict");
+      expect(d.srLabel.toLowerCase(), rec).toContain("screening result");
     }
     expect(Object.keys(VERDICT_DISPLAY).sort()).toEqual([...ALL_RECOMMENDATIONS].sort());
   });
@@ -61,14 +61,12 @@ describe("verdict display — single source of wording", () => {
     }
   });
 
-  it("the negative tier states a decision, not a category", () => {
-    expect(verdictLabel("Avoid")).toBe("Don't buy at this price");
+  it("the negative tier remains a screening result, not an automatic decision", () => {
+    expect(verdictLabel("Avoid")).toBe("Very weak screening result");
   });
 
-  it("screening context swaps the negative tier for a row action", () => {
-    // In a shortlist table "Don't buy at this price" is about the PRICE;
-    // the row-level instruction is to drop it from the list.
-    expect(verdictScreeningLabel("Avoid")).toBe("Skip");
+  it("screening context keeps factual tier language", () => {
+    expect(verdictScreeningLabel("Avoid")).toBe("Very weak screen");
     expect(verdictScreeningLabel("Strong Buy")).toBe(VERDICT_DISPLAY["Strong Buy"].shortLabel);
   });
 
@@ -154,24 +152,24 @@ describe("verdict display — single source of wording", () => {
   });
 });
 
-describe("verdict sentence — the results headline is an instruction", () => {
-  it("negative verdicts name the walk-away price", () => {
+describe("verdict sentence — the results headline states the modeled relationship", () => {
+  it("states when asking is above the Offer Ceiling", () => {
     const s = buildVerdictSentence({
       recommendation: "Avoid",
       purchasePrice: 310_000,
       maxOffer: 214_000,
     });
-    expect(s.text).toBe("Don't buy at $310,000. Offer $214,000 or walk.");
+    expect(s.text).toBe("Asking is $96,000 above the modeled Offer Ceiling of $214,000.");
     expect(s.hasOffer).toBe(true);
   });
 
-  it("positive verdicts name the max offer and the gap", () => {
+  it("does not infer an offer directive from a positive Screening Index", () => {
     const s = buildVerdictSentence({
       recommendation: "Buy",
       purchasePrice: 310_000,
       maxOffer: 214_000,
     });
-    expect(s.text).toBe("Worth pursuing. Your max offer is $214,000 — $96,000 below asking.");
+    expect(s.text).toBe("Asking is $96,000 above the modeled Offer Ceiling of $214,000.");
   });
 
   it("says so plainly when the deal clears at asking", () => {
@@ -180,22 +178,21 @@ describe("verdict sentence — the results headline is an instruction", () => {
       purchasePrice: 200_000,
       maxOffer: 240_000,
     });
-    expect(s.text).toContain("clears your targets");
-    expect(s.text).toContain("$200,000");
+    expect(s.text).toBe("Asking is $40,000 below the modeled Offer Ceiling of $240,000.");
   });
 
-  it("degrades without a Max Offer (Free tier) but stays imperative", () => {
+  it("degrades without an Offer Ceiling without inventing a decision", () => {
     expect(
       buildVerdictSentence({ recommendation: "Avoid", purchasePrice: 310_000, maxOffer: null }).text
-    ).toBe("Don't buy at $310,000 on these numbers.");
+    ).toBe("Review the selected rules and assumptions at the $310,000 asking price.");
     expect(
       buildVerdictSentence({ recommendation: "Buy", purchasePrice: 310_000, maxOffer: null }).text
-    ).toBe("Worth pursuing at $310,000.");
+    ).toBe("Review the selected rules and assumptions at the $310,000 asking price.");
   });
 
   it("degrades to the label alone when nothing else is known", () => {
     expect(
       buildVerdictSentence({ recommendation: "Neutral", purchasePrice: null, maxOffer: null }).text
-    ).toBe("Needs a closer look.");
+    ).toBe("Review the selected rules and assumptions.");
   });
 });

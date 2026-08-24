@@ -204,13 +204,15 @@ export function buildCanonicalReportData(
       afterTaxCF: result.afterTaxCF,
     },
     decision: {
-      label: clearsSelectedTargets ? "Conditional — verify first" : "Pass at this price",
+      label: clearsSelectedTargets
+        ? "Meets selected rules at asking"
+        : "Does not meet selected rules at asking",
       readiness: "Screening only",
       clearsSelectedTargets,
       targetSource,
       targetBasis,
       rationale: clearsSelectedTargets
-        ? `The asking price clears ${decisionSourceLabel}, but material inputs remain screening assumptions and must be verified before pursuing.`
+        ? `The asking price clears ${decisionSourceLabel}, but material inputs remain screening assumptions and must be verified before a user-recorded decision.`
         : `The asking price does not clear ${decisionSourceLabel}: ${targetBasis}.`,
     },
     // Input-verification evidence submitted by the browser is not authoritative

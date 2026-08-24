@@ -506,7 +506,7 @@ export default function HowToEstimateRentPost() {
               </Link>{" "}
               does the first pass for you: enter the address and it pulls a market
               rent estimate, layers in vacancy and reserves, and returns cap rate,
-              cash flow, DSCR, and a plain-English verdict in one pass — so the comp
+              cash flow, DSCR, and a selected-rule fit in one pass — so the comp
               work becomes a confirmation step instead of a blank box you have to
               guess at.
             </p>

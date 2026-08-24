@@ -239,7 +239,7 @@ function solveMaxPrice(
       requiredChange: 0,
       recheckedAnalysis: atSearchLimit,
       target,
-      reason: "The complete target still passes at the supported price ceiling.",
+      reason: "The complete target still passes at the supported Offer Ceiling.",
     });
   }
 

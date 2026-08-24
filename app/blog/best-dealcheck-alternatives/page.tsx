@@ -87,8 +87,8 @@ const TOOLS: Tool[] = [
     strengths: [
       "Cap rate, cash-on-cash, DSCR, NCF, and monthly cash flow — free, unlimited, no signup",
       "Address auto-fill: HUD rent + FRED mortgage rate + state property tax populate live",
-      "Plain-English verdict (Strong / Solid / Mixed / Marginal / Negative) with each metric benchmarked inline",
-      "Sensitivity grid, BRRRR + fix-and-flip analyzers, MAO solver, illustrative tax impact on Pro",
+      "Selected-rule fit with each metric benchmarked inline and a secondary Screening Index",
+      "Sensitivity grid, BRRRR + fix-and-flip analyzers, Offer Ceiling, and illustrative tax impact on Pro",
     ],
     tradeoffs: [
       "No full property import from listing sites — a pasted Zillow/Redfin link yields the address, then auto-fill uses public data sources",

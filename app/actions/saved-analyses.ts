@@ -108,6 +108,7 @@ export type GetSavedDealForEditingResult =
       id: string;
       schemaVersion: number;
       methodologyVersion: string | null;
+      pipelineStage: string | null;
       formSnapshot: Record<string, unknown>;
       templateFallback: {
         id: string;
@@ -962,7 +963,7 @@ export async function getSavedDealForEditingAction(id: string): Promise<GetSaved
   const { data, error } = await supabase
     .from("saved_analyses")
     .select(
-      "id, schema_version, methodology_version, form_snapshot, result_snapshot, financing_profile_id, financing_profile_version, financing_profile_snapshot, property_type, address, purchase_price, year_built, loan_term_years, interest_rate_pct, down_payment_pct, closing_costs_pct, bedrooms, bathrooms, sqft, monthly_rent, property_tax_pct, insurance_input_mode, insurance_pct, insurance_mo, hoa_mo, utilities_mo, maintenance_pct, vacancy_pct, management_pct, capex_pct, building_value_pct, depreciation_years, include_interest_deduction, tax_rate_pct, expense_growth_pct, rent_growth_pct, template_id, appreciation_rate_pct, selling_cost_pct"
+      "id, schema_version, methodology_version, pipeline_stage, form_snapshot, result_snapshot, financing_profile_id, financing_profile_version, financing_profile_snapshot, property_type, address, purchase_price, year_built, loan_term_years, interest_rate_pct, down_payment_pct, closing_costs_pct, bedrooms, bathrooms, sqft, monthly_rent, property_tax_pct, insurance_input_mode, insurance_pct, insurance_mo, hoa_mo, utilities_mo, maintenance_pct, vacancy_pct, management_pct, capex_pct, building_value_pct, depreciation_years, include_interest_deduction, tax_rate_pct, expense_growth_pct, rent_growth_pct, template_id, appreciation_rate_pct, selling_cost_pct"
     )
     .eq("id", id.trim())
     .eq("user_id", user.id)
@@ -1015,6 +1016,7 @@ export async function getSavedDealForEditingAction(id: string): Promise<GetSaved
     id: String(data.id),
     schemaVersion: Number(data.schema_version ?? 1),
     methodologyVersion: dbString((data as Record<string, unknown>).methodology_version) ?? null,
+    pipelineStage: dbString((data as Record<string, unknown>).pipeline_stage) ?? null,
     formSnapshot: buildEditFormSnapshotFromRow(data as Record<string, unknown>),
     templateFallback,
     resultSnapshot: buildTrustedResultSnapshot(data as Record<string, unknown>),

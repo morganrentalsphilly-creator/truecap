@@ -47,8 +47,8 @@ const USE_CASES: { icon: typeof Calculator; title: string; body: string }[] = [
   },
   {
     icon: TrendingUp,
-    title: "Solve for Max Allowable Offer at your target margin",
-    body: "MAO = (ARV × target margin) − rehab − closing − holding − selling. The number above which the deal stops making sense. Computed live as you change ARV or rehab.",
+    title: "Solve an Offer Ceiling at your target margin",
+    body: "Offer Ceiling = (ARV × target margin) − rehab − closing − holding − selling. It is the highest modeled acquisition price that meets the target margin under the assumptions shown, and updates as ARV or rehab changes.",
   },
   {
     icon: ShieldCheck,
@@ -86,7 +86,7 @@ export default function ForFlippersPage() {
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             Run the rental fallback screen free. Pro adds ARV, rehab, holding
-            costs, profit, break-even ARV, sensitivity, and Max Offer.
+            costs, profit, break-even ARV, sensitivity, and Offer Ceiling.
           </p>
 
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
@@ -165,7 +165,7 @@ export default function ForFlippersPage() {
                 <tr><td className="font-semibold text-foreground">Cash-on-cash ROI</td><td className="text-muted-foreground">Net profit ÷ total cash deployed</td></tr>
                 <tr><td className="font-semibold text-foreground">Annualized ROI</td><td className="text-muted-foreground">Adjusts ROI for the hold length — makes 3-month vs 12-month flips comparable</td></tr>
                 <tr><td className="font-semibold text-foreground">Break-even ARV</td><td className="text-muted-foreground">The ARV at which net profit hits zero. Your worst-case appraisal target.</td></tr>
-                <tr><td className="font-semibold text-foreground">Max Allowable Offer</td><td className="text-muted-foreground">Highest price you can pay and still hit your target margin</td></tr>
+                <tr><td className="font-semibold text-foreground">Offer Ceiling</td><td className="text-muted-foreground">Highest modeled acquisition price that meets the target margin under the assumptions shown</td></tr>
               </tbody>
             </table>
           </div>
@@ -177,7 +177,7 @@ export default function ForFlippersPage() {
             Why flippers pick TrueCap
           </h2>
           <ul className="space-y-2 text-sm sm:text-base text-foreground">
-            <li><strong>The MAO + sensitivity grid combination</strong> tells you the highest price you can offer AND how much your assumptions can be wrong before the deal stops penciling. Most flip calculators only do one of those.</li>
+            <li><strong>The Offer Ceiling + sensitivity grid combination</strong> shows the highest modeled acquisition price that meets the target margin and how changes to the entered assumptions affect the result.</li>
             <li><strong>Rehab estimator with sq-ft-based defaults</strong> for cosmetic, kitchen, bath, systems. Mid-market 2024-26 pricing so you can ballpark before getting a contractor on-site.</li>
             <li><strong>Flip vs BRRRR side-by-side</strong> on the same property. Sometimes the right answer is to hold what you would have flipped.</li>
             <li><strong>Shareable links</strong> to send the underwrite to your hard-money lender or capital partner.</li>
@@ -217,7 +217,7 @@ export default function ForFlippersPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             Free shows the rental fallback metrics for the property. Pro unlocks
-            the Fix &amp; Flip analyzer, Max Offer, sensitivity, BRRRR modeling,
+            the Fix &amp; Flip analyzer, Offer Ceiling, sensitivity, BRRRR modeling,
             and the full rehab estimator.
           </p>
           <div className="flex flex-wrap gap-3">

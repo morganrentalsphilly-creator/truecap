@@ -19,7 +19,7 @@ forever live.
 | URL contents | one random 256-bit token (43-char base64url), nothing else |
 | At rest | `public_shares.token_hash` = sha256(token); a DB read alone can't reconstruct links |
 | Snapshot | immutable jsonb captured at mint, pinned to `calc_version` |
-| Ownership | `owner_id` (nullable — anonymous analyzer users can share; their links just expire) |
+| Ownership | `owner_id` is required for new shares; historical ownerless rows remain readable until expiry |
 | Expiry | default `now() + 180 days`; NULL = explicit never |
 | Revocation | `revoked_at` — owner action via `revokePublicShareAction` (RLS-scoped) |
 | Resolution | service-role server route; RLS has deliberately NO public read policy |
@@ -41,9 +41,11 @@ the agent's live entitlement, and the deal↔client assignment server-side.
 
 - `/d/[encoded]` KEEPS decoding (CLAUDE.md §8.8 — links in the wild must not
   break) and now renders through the same `SharedDealShell` as `/s/`.
-- The share button tries the opaque path FIRST and falls back to a legacy
-  encoded link only when `public_shares` doesn't exist yet — so sharing keeps
-  working before the migration is applied, and switches over by itself after.
+- The share button creates only opaque links and fails closed when storage is
+  unavailable; it never puts a new analysis snapshot back into a URL.
+- New share creation requires a signed-in account. Historical opaque rows with
+  `owner_id = null` and legacy `/d/` links remain readable for compatibility,
+  but only newly created owned links can be listed and revoked from an account.
 - **Deprecation date: 2027-02-01.** After that date, revisit `/d/` and decide
   whether to redirect remaining traffic to an upgrade prompt. Until then the
   legacy payload is never logged or sent to analytics (no-referrer + Sentry
@@ -53,15 +55,15 @@ the agent's live entitlement, and the deal↔client assignment server-side.
 
 1. Apply `supabase/migrations/20260817150658_public_shares.sql` in the Supabase
    SQL editor (idempotent; ends with a verification select that must return one
-   row with `policies = 4`, `rls_enabled = true`). Until applied, new shares
-   transparently fall back to legacy links — nothing breaks either way.
+   row with `policies = 4`, `rls_enabled = true`). Until applied, new share
+   creation fails closed; existing `/s/` and `/d/` viewers are unaffected.
 
 ## Test coverage
 
-`lib/__tests__/public-share.test.ts` (9 tests): token entropy/uniqueness/shape,
+`lib/__tests__/public-share.test.ts`: token entropy/uniqueness/shape,
 hash stability, malformed rejection, header-contract presence AND ordering (the
 override block must sit after the catch-all or Next's merge silently reverts
-no-referrer), opaque-first button with legacy fallback, portal URLs carrying
-ids only, `/d/` still decoding. Verified on a production build: malformed and
+no-referrer), authenticated owner creation, opaque-only failure, portal URLs
+carrying ids only, `/d/` still decoding. Verified on a production build: malformed and
 unknown tokens 404; headers present on `/s/` and `/d/`; a valid legacy link
 still renders.

@@ -79,7 +79,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Is TrueCap a DealCheck alternative?",
-    a: "Yes. Both are per-deal underwriting calculators with cap rate, cash-on-cash, DSCR, and cash flow analysis. TrueCap's free core analyzer supports unlimited analyses without signup, with plain-English verdicts and editable starting assumptions from HUD, FRED, and a state effective property-tax estimate. DealCheck Starter includes its core calculators and professional reports, subject to published usage limits. DealCheck has native iOS/Android apps; TrueCap is an installable PWA.",
+    a: "Yes. Both are per-deal underwriting calculators with cap rate, cash-on-cash, DSCR, and cash flow analysis. TrueCap's free core analyzer supports unlimited analyses without signup, with selected-rule fit, a secondary Screening Index, and editable labeled starting assumptions. DealCheck Starter includes its core calculators and reports subject to its published limits. DealCheck has native iOS/Android apps; TrueCap is an installable PWA.",
   },
   {
     q: "Is Stessa free?",
@@ -200,7 +200,7 @@ export default function DealCheckVsStessaVsTrueCapPost() {
                 <strong>TrueCap</strong> is the same kind of tool — a
                 per-deal rental underwriting calculator — built newer
                 with unlimited free core analyses, editable screening
-                assumptions, and a plain-English verdict engine.
+                assumptions, selected-rule fit, and a secondary Screening Index.
               </li>
               <li>
                 <strong>Stessa</strong> is a property accounting and
@@ -258,9 +258,9 @@ export default function DealCheckVsStessaVsTrueCapPost() {
               Pro plans. Free includes read-only share links and one sale
               and rent comps lookup; Pro includes 50 comps lookups per
               month plus 10-year projections, illustrative tax impact,
-              sensitivity, MAO, and dedicated BRRRR and fix-and-flip
-              analyzers. A PDF is available as a one-time purchase or with
-              Pro. See the live pricing page for current rates and limits.
+              sensitivity, an Offer Ceiling, and dedicated BRRRR and fix-and-flip
+              analyzers. PDF export is included with Pro. See the live pricing
+              page for current rates and limits.
             </p>
             <p>
               <strong>DealCheck</strong> currently offers Starter, Plus,
@@ -293,7 +293,7 @@ export default function DealCheckVsStessaVsTrueCapPost() {
                 portfolio rollup across saved deals, illustrative tax-impact
                 modeling with depreciation and estimated after-tax
                 cash flow, sensitivity grid (rent ±10%, vacancy ±5pp,
-                rate ±1pp), max allowable offer solver, Deal Score
+                rate ±1pp), target-dependent Offer Ceiling, Screening Index
                 (0-100) with subscore breakdown, address auto-fill via
                 authoritative open data sources you can audit.
               </li>
@@ -308,7 +308,7 @@ export default function DealCheckVsStessaVsTrueCapPost() {
             <p>
               For investors who prioritize unlimited no-signup core
               analyses, editable screening assumptions, and a
-              plain-English verdict, TrueCap may be the better fit.{" "}
+              selected-rule fit and secondary Screening Index, TrueCap may be the better fit.{" "}
               <Link href="/vs/dealcheck">
                 The full TrueCap vs DealCheck comparison page
               </Link>{" "}
@@ -392,8 +392,8 @@ export default function DealCheckVsStessaVsTrueCapPost() {
               TrueCap&apos;s read-only share links remain free. If you need
               10-year projections, sensitivity, illustrative tax impact,
               more comps, or the dedicated BRRRR and flip workflows,
-              compare the current Pro plans. PDF reports are available as
-              a one-time purchase or with Pro. If you need more from
+              compare the current Pro plans. PDF reports are included with
+              Pro. If you need more from
               Stessa, compare its current Manage and Pro plans as well.
             </p>
             <p>
@@ -424,9 +424,9 @@ export default function DealCheckVsStessaVsTrueCapPost() {
                 signup.&quot;</strong> TrueCap is designed for that workflow.
               </li>
               <li>
-                <strong>&quot;I want a plain-English verdict, not just
+                <strong>&quot;I want selected-rule context, not just
                 metrics.&quot;</strong> TrueCap — Strong / Solid /
-                Mixed / Marginal / Negative tier with a Deal Score
+                selected-rule fit with a secondary Screening Index
                 breakdown.
               </li>
               <li>

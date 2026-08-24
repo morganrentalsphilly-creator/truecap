@@ -18,7 +18,6 @@ import { useEffect, useRef, useState } from "react";
 import { Check, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { PricingPlanButtons } from "@/components/marketing/pricing-plan-buttons";
-import { GuaranteeBadge } from "@/components/marketing/guarantee-badge";
 import { trackEvent } from "@/lib/analytics";
 import { decidePricingCardCta } from "@/lib/billing-plan-cta";
 import { TRIAL_DAYS, willCheckoutGrantTrial } from "@/lib/trial";
@@ -61,7 +60,7 @@ interface PricingTogglePlansProps {
 // from reconciling the same twenty claims in three different places.
 const FREE_FEATURES = [
   "Unlimited cash-flow analyses",
-  "Cap rate, CoC, DSCR, cash flow, Deal Score, and verdict",
+  "Cap rate, CoC, DSCR, cash flow, Screening Index, and screening context",
   "Auto-fill starting assumptions from the address",
   "Shareable read-only deal links",
   // Honest caveat: Free can create five saves, while editing a saved deal is
@@ -99,7 +98,7 @@ const AGENT_PRO_FEATURES: string[] = [
 const PRO_OUTCOMES: { outcome: string; detail: string }[] = [
   {
     outcome: "Find the right price",
-    detail: "Reverse-solve a target-backed price ceiling, then check it against your Buy Box and market comps.",
+    detail: "Calculate a target-backed Offer Ceiling, then check the deal against your Buy Box and market comps.",
   },
   {
     outcome: "See what could break",
@@ -116,10 +115,10 @@ const PRO_OUTCOMES: { outcome: string; detail: string }[] = [
 ];
 
 const PRO_DECISION_ANSWERS = [
-  { answer: "Pursue or pass", proof: "Buy Box verdict" },
-  { answer: "What to offer", proof: "Max Offer solver" },
+  { answer: "Selected-rule fit", proof: "At asking price" },
+  { answer: "Offer Ceiling", proof: "Target-backed solver" },
   { answer: "What could break", proof: "Downside stress test" },
-  { answer: "How to present it", proof: "Offer-ready report" },
+  { answer: "How to document it", proof: "Review report" },
 ] as const;
 
 
@@ -253,7 +252,7 @@ export function PricingTogglePlans({
         </p>
         <p className="text-sm">
           <span className="font-bold text-foreground">{proOfferName}</span>{" "}
-          <span className="text-muted-foreground">— underwrite and make offers</span>
+          <span className="text-muted-foreground">— underwrite and document decisions</span>
         </p>
         {showAgentPro ? (
           <p className="text-sm">
@@ -555,7 +554,6 @@ function PricingTrialTerms({
           Card required at checkout. Returning subscribers start paid access immediately.
           Cancel online anytime; no contract.
         </p>
-        <GuaranteeBadge className="mt-2.5" />
       </>
     );
   }
@@ -568,7 +566,6 @@ function PricingTrialTerms({
           Subscription billing starts after {TRIAL_DAYS} days unless you cancel first. Your saved
           work stays in your account if you downgrade.
         </p>
-        <GuaranteeBadge className="mt-2.5" />
       </>
     );
   }
@@ -580,7 +577,6 @@ function PricingTrialTerms({
         <span>The free trial is a first-time offer.</span> Cancel online anytime; no contract. Your saved work stays in your
         account if you downgrade.
       </p>
-      <GuaranteeBadge className="mt-2.5" />
     </>
   );
 }

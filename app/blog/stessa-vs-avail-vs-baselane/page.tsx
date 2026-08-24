@@ -74,7 +74,7 @@ const FAQ_ITEMS = [
   },
   {
     q: `Does TrueCap replace any of these?`,
-    a: `No. TrueCap is pre-purchase underwriting — cap rate, DSCR, cash flow, projection, deal score. Stessa / Avail / Baselane are post-purchase ops. They cover entirely different stages of the rental lifecycle. Most landlords use TrueCap to underwrite + one or two of the others to operate.`,
+    a: `No. TrueCap is pre-purchase underwriting—cap rate, DSCR, cash flow, projection, selected-rule fit, and a secondary Screening Index. Stessa, Avail, and Baselane focus on post-purchase operations. They cover different stages of the rental lifecycle.`,
   },
   {
     q: `Avail vs Stessa — which one if I can only pick one?`,
@@ -204,7 +204,7 @@ export default function ThreeWayComparisonPost() {
             </ul>` }} />
 
             <h2>Where TrueCap fits</h2>
-            <div dangerouslySetInnerHTML={{ __html: `<p>Upstream of all three. TrueCap is the pre-purchase underwriting calculator — cap rate, DSCR, cash flow, 10-year projection, deal score. You use TrueCap to decide whether to buy a property; then you use Stessa / Avail / Baselane to operate it.</p>
+            <div dangerouslySetInnerHTML={{ __html: `<p>Upstream of all three. TrueCap is the pre-purchase underwriting calculator—cap rate, DSCR, cash flow, 10-year projection, selected-rule fit, and a secondary Screening Index. Use it to screen modeled economics and document what to verify; you make the purchase decision. Stessa, Avail, or Baselane can then support operations.</p>
             <p>The full investor stack (cheapest version): TrueCap free (underwriting) + Stessa free OR Baselane free (accounting/banking) + Avail free (leasing). \$0/month for the basics.</p>` }} />
 
             <h2>FAQ</h2>

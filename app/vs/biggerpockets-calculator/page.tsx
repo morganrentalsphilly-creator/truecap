@@ -51,9 +51,9 @@ type Row = { workflow: string; truecap: string; bp: string };
 
 const MATRIX: Row[] = [
   { workflow: "First screen", truecap: "Address-first screen with editable starting assumptions and a verdict.", bp: "Detailed rental-property input workflow with report-style results." },
-  { workflow: "Decision sequence", truecap: "Connects verdict, Buy Box, Max Offer, downside, and presentation.", bp: "Centers on a detailed calculator and the investor's interpretation of its report." },
+  { workflow: "Decision sequence", truecap: "Connects selected-rule fit, Buy Box, Offer Ceiling, downside, and presentation.", bp: "Centers on a detailed calculator and the investor's interpretation of its report." },
   { workflow: "Scenario depth", truecap: "Includes long-term projection, exit, tax, and downside modules in paid decisions.", bp: "Its rental calculator captures purchase, loan, income, expense, and projection inputs." },
-  { workflow: "Offer price", truecap: "Max Offer works backward from the selected target and shows threshold alternatives.", bp: "The calculator supports an offer-price input inside a broader rental analysis." },
+  { workflow: "Modeled boundary", truecap: "Offer Ceiling works backward from the selected target and shows threshold alternatives; it is not a recommended offer.", bp: "The calculator supports an offer-price input inside a broader rental analysis." },
   { workflow: "Ecosystem", truecap: "Focused product, methodology, blog, and glossary.", bp: "Calculator inside a large community, education, media, and marketplace ecosystem." },
   { workflow: "Best fit", truecap: "Investors who want a guided address-to-decision sequence.", bp: "Investors who value a detailed calculator inside the BiggerPockets ecosystem." },
 ];
@@ -102,7 +102,7 @@ export default function VsBiggerPocketsCalculatorPage() {
             BiggerPockets has been the default real estate analysis tool for two
             decades. Their calculator is solid. We built TrueCap because we
             wanted an address-first workflow that connects the initial screen to
-            a verdict, Max Offer, downside, and presentation. BiggerPockets may
+            selected-rule fit, an Offer Ceiling, downside, and presentation. BiggerPockets may
             be the better choice when its community and education ecosystem are
             part of what you value. Here is the workflow comparison.
           </p>
@@ -139,7 +139,7 @@ export default function VsBiggerPocketsCalculatorPage() {
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You want a fully usable free tier with no per-analysis limits.</li>
                 <li>You want an address-first screen with labeled starting assumptions.</li>
-                <li>You want a deal score with plain-English breakdown.</li>
+                <li>You want a Screening Index with plain-English breakdown.</li>
                 <li>You want a portfolio rollup across saved deals.</li>
               </ul>
             </div>
@@ -224,7 +224,7 @@ export default function VsBiggerPocketsCalculatorPage() {
             <li><strong>Screen before creating an account.</strong> TrueCap&apos;s core analyzer is available before signup.</li>
             <li><strong>Start from labeled assumptions.</strong> TrueCap can pre-fill HUD rent, the FRED mortgage rate, and a state property-tax benchmark, then lets you replace each value.</li>
             <li><strong>Keep the product focused.</strong> TrueCap centers on screening, offer price, downside, and presenting the decision; BiggerPockets pairs its calculator with a much broader investor ecosystem.</li>
-            <li><strong>Connect the outputs.</strong> TrueCap&apos;s verdict leads into Buy Box, Max Offer, downside, and reporting instead of treating each as a separate destination.</li>
+            <li><strong>Connect the outputs.</strong> TrueCap&apos;s selected-rule fit leads into Buy Box, Offer Ceiling, downside, and reporting instead of treating each as a separate destination.</li>
           </ul>
         </section>
 
@@ -274,7 +274,7 @@ export default function VsBiggerPocketsCalculatorPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             Screen a property without a card, inspect the assumptions and verdict,
-            then decide whether TrueCap&apos;s connected Buy Box, Max Offer, downside,
+            then decide whether TrueCap&apos;s connected Buy Box, Offer Ceiling, downside,
             and reporting workflow fits how you acquire rentals.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -390,11 +390,11 @@ const BP_FAQ: FaqItem[] = [
         Stick with BiggerPockets if its community, education, and existing
         calculator workflow are central to how you invest. Choose TrueCap if
         you want a focused address-to-decision experience with labeled
-        starting assumptions, a verdict, Max Offer, downside, and presentation
+        starting assumptions, selected-rule fit, an Offer Ceiling, downside, and presentation
         in one sequence.
       </>
     ),
     plainTextAnswer:
-      "Stick with BiggerPockets if its community and education ecosystem are central to your workflow. Choose TrueCap for a focused address-to-decision sequence with labeled assumptions, verdict, Max Offer, downside, and presentation.",
+      "Stick with BiggerPockets if its community and education ecosystem are central to your workflow. Choose TrueCap for a focused address-to-decision sequence with labeled assumptions, selected-rule fit, a target-dependent Offer Ceiling, downside, and presentation.",
   },
 ];

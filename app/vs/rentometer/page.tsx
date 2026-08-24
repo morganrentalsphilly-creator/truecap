@@ -53,8 +53,8 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR",            truecap: "All three computed live",                                                rentometer: "Not in scope",                                                    winner: "truecap" },
   { feature: "10-year projection",               truecap: "Pro — rent + expense + appreciation compounding",                        rentometer: "Not in scope",                                                    winner: "truecap" },
   { feature: "Free use limit",                   truecap: "Unlimited core analyses; comp-lookup limits apply",                       rentometer: "Limited free; Pro $29-49/mo",                                     winner: "truecap" },
-  { feature: "Verdict / decision support",       truecap: "Free — deal score + verdict (Strong / Decent / Marginal / Skip)",         rentometer: "Rent comp only — you make the decision",                          winner: "truecap" },
-  { feature: "PDF report",                       truecap: "One-time Deal Decision Pack or included with Pro",                        rentometer: "PDF of rent comp data",                                           winner: "tie" },
+  { feature: "Verdict / decision support",       truecap: "Free — Screening Index + verdict (Strong / Decent / Marginal / Skip)",         rentometer: "Rent comp only — you make the decision",                          winner: "truecap" },
+  { feature: "PDF report",                       truecap: "Included with Pro",                                                     rentometer: "PDF of rent comp data",                                           winner: "tie" },
   { feature: "Use case",                          truecap: "Full investor underwriting workflow",                                    rentometer: "Quick rent comp lookup",                                          winner: "tie" },
   { feature: "Pricing — paid tier",               truecap: "See TrueCap's live pricing page",                                        rentometer: "$29-49/mo depending on plan",                                     winner: "truecap" },
 ];

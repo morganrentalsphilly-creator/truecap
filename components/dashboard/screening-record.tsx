@@ -5,13 +5,13 @@
  * success/green treatment.
  *
  * HONESTY NOTE — why only two stats. The brief specified three, the third
- * being "total gap between asking prices and computed max offers on deals
+ * being "total gap between asking prices and computed Offer Ceilings on deals
  * you passed on", and instructed: ship the first two and omit the third
  * rather than estimating. That is what this does.
  *   • "Deals saved" is labelled SAVED, not screened. Anonymous analyzer runs
  *     are counted only in a global counter row with no per-user attribution,
  *     so a per-user "screened" figure does not exist in the data.
- *   • "Clear your targets" counts deals whose solved max offer is at or above
+ *   • "Clear your targets" counts deals whose solved Offer Ceiling is at or above
  *     the asking price — i.e. the price works — over the rows on this screen.
  *   • The passed-on gap total would need an unbounded extra query plus a
  *     solve per archived row. Omitted rather than approximated.
@@ -28,7 +28,7 @@ export function ScreeningRecord({
   deals: DashboardDeal[];
   totalSavedDeals: number;
 }) {
-  // "Works at asking" = the solved max offer meets or beats what they're
+  // "Works at asking" = the solved Offer Ceiling meets or beats what they're
   // asking. Only deals with BOTH numbers can be judged.
   const judged = deals.filter((d) => d.maxOffer != null && d.purchasePrice != null);
   const clearing = judged.filter((d) => (d.maxOffer as number) >= (d.purchasePrice as number));
@@ -61,8 +61,8 @@ export function ScreeningRecord({
       </dl>
       <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
         {judged.length === 0
-          ? "Once your deals have a max offer, this shows how many work at the asking price."
-          : `${clearing.length} of ${judged.length} deals shown here have a max offer at or above their asking price. Passing on the rest is the product working.`}
+          ? "Once your deals have an Offer Ceiling, this shows how many meet the modeled targets at the asking price."
+          : `${clearing.length} of ${judged.length} deals shown here have an Offer Ceiling at or above their asking price. Verify the material inputs, then record your own decision.`}
       </p>
     </section>
   );

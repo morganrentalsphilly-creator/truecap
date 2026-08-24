@@ -174,7 +174,7 @@ export default function WeeklySummaryEmail({ payload, siteUrl }: WeeklySummaryEm
                     </>
                   ) : (
                     <Text style={rowSubStyle}>
-                      No saved-deal verdicts flipped at this week&apos;s rate
+                      No saved-deal screening bands changed at this week&apos;s rate
                       ({rateMover.monitoredCount === 1
                         ? "1 deal monitored"
                         : `${rateMover.monitoredCount} deals monitored`}).

@@ -83,7 +83,7 @@ export default async function PortalDealPage({ params }: Props) {
     // portal. Assignment alone is not sufficient authorization.
     if (!client || client.is_archived) notFound();
     // Reaching this point already proves the owner has the Agent Pro portal
-    // entitlement. MAO is a paid-status feature, not a separately named
+    // entitlement. Offer Ceiling is a paid-status feature, not a separately named
     // `max_offer` plan flag (that key does not exist in the catalog), so a
     // second flag check incorrectly hid the saved target from every portal.
     showProAnalysis = true;

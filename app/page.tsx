@@ -63,7 +63,7 @@ export const metadata: Metadata = {
     absolute: "TrueCap — Know Your Number Before You Make the Offer",
   },
   description:
-    "Paste a rental listing. See whether it fits your Buy Box, the highest price that works, and which assumptions you must verify.",
+    "Paste a rental listing. See whether it meets your selected rules, its modeled Offer Ceiling, and which assumptions you must verify.",
   keywords: [
     "rental property analysis",
     "investment property calculator",
@@ -190,7 +190,7 @@ export default function Home() {
       {/* Anonymous-visitor entitlement props — keep in lockstep with
           the user == null branch in app/home-authed/page.tsx.
           NOTE: canUseDealScore is intentionally TRUE for everyone — the
-          headline 0-100 Deal Score is given away free (it converts better
+          headline 0-100 Screening Index is given away free (it converts better
           unlocked than as a blurred teaser). Only the DEPTH (projections /
           tax / exit / save / PDF / compare) stays Pro. */}
       <InvestCalcPage
@@ -210,6 +210,7 @@ export default function Home() {
         savedDealLimit={null}
         isAuthenticated={false}
         userAnalysisDefaults={null}
+        advocacyContractEligible={false}
         // Presence-only env check — safe on a static page (baked at
         // build; the key VALUE never reaches the client).
       />
@@ -224,7 +225,7 @@ export default function Home() {
           MUST stay in lockstep with app/home-authed/page.tsx. */}
       <div className="truecap-marketing-tail contents">
         {/* 2026-08 conversion order: problem (dollar-denominated stake) →
-            how it works → proof → trust → offer stack → guarantee →
+            how it works → proof → trust → offer stack →
             segmented paths → FAQ (objection-ordered) → closing ask. */}
         <ProblemBlock />
         <HowTrueCapWorks />
@@ -233,7 +234,7 @@ export default function Home() {
         {/* Trust: transparent methodology, editable assumptions, sources shown. */}
         <DataSourcesSection />
         <OfferEngineSection />
-        {/* Pricing: Free → $5 report → Pro → Agent Pro. */}
+        {/* Upgrade path: Free → Pro; new one-time report checkout is disabled. */}
         <PdfProUpsell />
         <NeverOverpayGuarantee />
         {/* Segmented paths — investor / agent / house-hacker self-ID. */}

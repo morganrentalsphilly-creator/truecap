@@ -275,7 +275,7 @@ export default function RehabEstimatorPage() {
                 "Fix-and-Flip: net profit, ROI, annualized ROI, profit/day, break-even ARV",
                 "Save up to 5 deals free — unlimited with Pro",
                 "Compare side-by-side (Pro)",
-                "Export a Deal Decision Pack PDF — one-time purchase, or unlimited with Pro",
+                "Export PDF reports with Pro",
                 "Free to start",
               ].map((line) => (
                 <li key={line} className="flex items-start gap-2">

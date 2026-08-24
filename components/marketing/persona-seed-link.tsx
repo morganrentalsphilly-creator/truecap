@@ -42,7 +42,7 @@ export function PersonaSeedLink({
           })
         );
       }}
-      className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary underline-offset-2 hover:underline"
+      className="mt-3 inline-flex min-h-11 items-center gap-1 rounded text-sm font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       {label}
       <ArrowRight className="size-3.5" />

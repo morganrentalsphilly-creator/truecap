@@ -4,7 +4,7 @@
  * Anyone with the link can view a snapshot of an analysis. No auth,
  * no DB lookup — the entire form snapshot is encoded in the URL.
  * Hidden Pro-only sections (10-year projections, tax strategy,
- * exit scenarios, deal score) act as upgrade prompts.
+ * exit scenarios, Screening Index) act as upgrade prompts.
  */
 
 import type { Metadata } from "next";

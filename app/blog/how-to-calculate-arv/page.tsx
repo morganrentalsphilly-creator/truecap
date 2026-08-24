@@ -6,7 +6,7 @@
  * real estate", "what is ARV", "ARV comps".
  *
  * Angle: ARV is the number the whole flip / BRRRR stack is built on —
- * the 70% rule max offer, the refinance loan amount, and the flip
+ * the 70%-rule Offer Ceiling, the refinance loan amount, and the flip
  * profit all key off it — yet it's a forecast of an appraisal, not a
  * formula. Give the comps method step by step with a worked 1,400 sq ft
  * example, the adjustment discipline, where ARV feeds the deal math,
@@ -33,7 +33,7 @@ const TITLE_PLAIN =
 // window. The on-page <h1> keeps the longer editorial TITLE_PLAIN.
 const SERP_TITLE = "How to calculate ARV (2026): the comps method";
 const DESCRIPTION =
-  "How to calculate ARV: pull renovated comps, adjust, and apply price per square foot. A worked example, the 70% rule max offer, and the BRRRR refi math.";
+  "How to calculate ARV: pull renovated comps, adjust, and apply price per square foot. A worked example, a 70%-rule Offer Ceiling, and BRRRR refinance math.";
 const PUBLISHED_AT = "2026-07-10";
 const MODIFIED_AT = "2026-07-10";
 const READING_TIME = 11;
@@ -67,7 +67,7 @@ export const metadata: Metadata = {
 const FAQS = [
   {
     q: "What does ARV mean in real estate?",
-    a: "ARV stands for after-repair value: the price a property will sell for — or appraise at — once the planned renovation is complete. It is not the purchase price plus the rehab budget. It's a forecast of what fully renovated, comparable homes in the same area are actually selling for, applied to your property's size and features. Flippers use ARV to set a maximum offer, and BRRRR investors use it to project the refinance appraisal that determines how much of their cash comes back out.",
+    a: "ARV stands for after-repair value: the projected price a property could sell for—or appraise at—after the planned renovation. It is not purchase price plus rehab. It is a forecast based on renovated comparable sales, adjusted for the subject property. Flippers use ARV to calculate an Offer Ceiling, and BRRRR investors use it to model a refinance appraisal. Neither is guaranteed.",
   },
   {
     q: "What is the formula for ARV?",
@@ -160,7 +160,7 @@ export default function HowToCalculateArvPost() {
             <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
               Every flip and every BRRRR deal is built on one number: the
               after-repair value, or ARV — what the property will sell for, or
-              appraise at, once the renovation is done. Your maximum offer keys
+              appraise at, once the renovation is done. Your Offer Ceiling keys
               off it. Your refinance loan is sized as a percentage of it. Your
               flip profit is whatever&apos;s left of it after costs. And unlike
               rent or taxes, you can&apos;t look it up anywhere — you have to
@@ -216,8 +216,8 @@ export default function HowToCalculateArvPost() {
               >
                 70% rule
               </Link>{" "}
-              sets your maximum offer at 70% of ARV minus rehab costs — get ARV
-              wrong and every offer you write is wrong by 70 cents on the
+              calculates a 70%-rule Offer Ceiling as 70% of ARV minus rehab costs — get ARV
+              wrong and the modeled boundary moves by 70 cents on the
               dollar. On a{" "}
               <Link
                 href="/blog/brrrr-method-explained"
@@ -404,7 +404,7 @@ export default function HowToCalculateArvPost() {
             </h2>
             <p>
               With ARV pinned at $255,000, the deal numbers fall out fast.{" "}
-              <strong>Max offer:</strong> the 70% rule says 0.70 × $255,000 −
+              <strong>Offer Ceiling:</strong> the 70% rule says 0.70 × $255,000 −
               $45,000 rehab = <strong>$133,500</strong> — a long way below the
               $185,000 ask, which tells you this property needs a heavy
               negotiation, a wholesale-style acquisition, or a different
@@ -543,7 +543,7 @@ export default function HowToCalculateArvPost() {
               renovated comps inside the neighborhood, adjust them toward your
               subject, reconcile the $/sq ft, and keep the answer inside the
               range the comps actually sold in. Then let the number do its
-              three jobs: set the max offer through the 70% rule, size the
+              three jobs: calculate the Offer Ceiling through the 70% rule, size the
               BRRRR refinance, and cap the flip profit — and confirm the deal
               survives an appraisal 5–10% below your estimate before you wire
               a deposit. When the property&apos;s endgame is a rental, run the

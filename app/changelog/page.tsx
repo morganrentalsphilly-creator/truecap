@@ -67,7 +67,7 @@ const ENTRIES: Entry[] = [
     category: "Feature",
     title: "Your buy box now answers 'so what price WOULD work?'",
     description:
-      "When a deal fails your buy box, the verdict card now solves for the highest price that clears your criteria — 'Your number: $272,000' — right on the live analyzer. The Max Offer stress-test also seeds its targets from your buy box instead of generic defaults. Rate-alert emails deep-link each deal to a one-click re-underwrite at the new rate.",
+      "When a deal fails your buy box, the verdict card now solves for the highest price that clears your criteria — 'Your number: $272,000' — right on the live analyzer. The Offer Ceiling stress-test also seeds its targets from your buy box instead of generic defaults. Rate-alert emails deep-link each deal to a one-click re-underwrite at the new rate.",
   },
   {
     date: "2026-07-13",
@@ -95,7 +95,7 @@ const ENTRIES: Entry[] = [
     category: "Feature",
     title: "The Verdict Ledger — the analysis reads top-down like an answer",
     description:
-      "Full results redesign: one answer card up top (verdict, deal score, the three numbers that decide it), then an accordion ledger of everything else — cash flow waterfall, 10-year view, Illustrative Tax Impact, exit scenarios, stress tests — each row openable without losing your place. A 'Where these numbers came from' row shows the provenance of every input.",
+      "Full results redesign: one answer card up top (verdict, Screening Index, the three numbers that decide it), then an accordion ledger of everything else — cash flow waterfall, 10-year view, Illustrative Tax Impact, exit scenarios, stress tests — each row openable without losing your place. A 'Where these numbers came from' row shows the provenance of every input.",
   },
   {
     date: "2026-07-05",
@@ -109,14 +109,14 @@ const ENTRIES: Entry[] = [
     category: "Feature",
     title: "Screen Listings — paste a week of listings, get a shortlist",
     description:
-      "New Pro power tool at Dashboard → Screen Listings: paste up to 10 listings (free text works — AI extracts the numbers), and every row gets a verdict, deal score, and buy-box fit so you drill into winners instead of underwriting everything.",
+      "New Pro power tool at Dashboard → Screen Listings: paste up to 10 listings (free text works — AI extracts the numbers), and every row gets a verdict, Screening Index, and buy-box fit so you drill into winners instead of underwriting everything.",
   },
   {
     date: "2026-07-02",
     category: "Feature",
     title: "Your buy box everywhere + Deal Q&A that cites its sources",
     description:
-      "Buy-box fit badges now appear on My Deals, the dashboard, compare, and shared links; the Pro PDF carries your box so lenders see your criteria. Deal Q&A answers only from this deal's own numbers, comps, max offer, and projections — it will say 'run comps to answer that' rather than guess. Plus: CSV export of My Deals, a lender-reserves note on cash-to-close, and an HUD rent reality-check for multi-family units.",
+      "Buy-box fit badges now appear on My Deals, the dashboard, compare, and shared links; the Pro PDF carries your box so lenders see your criteria. Deal Q&A answers only from this deal's own numbers, comps, Offer Ceiling, and projections — it will say 'run comps to answer that' rather than guess. Plus: CSV export of My Deals, a lender-reserves note on cash-to-close, and an HUD rent reality-check for multi-family units.",
   },
   {
     date: "2026-07-02",
@@ -592,7 +592,7 @@ const ENTRIES: Entry[] = [
     category: "Feature",
     title: "Pro feature gating overhaul",
     description:
-      "MAO solver, sensitivity grid, BRRRR + fix-and-flip strategies, and shareable read-only deal links moved to Pro. Free users still see locked previews so they know what's available.",
+      "Offer Ceiling solver, sensitivity grid, BRRRR + fix-and-flip strategies, and shareable read-only deal links moved to Pro. Free users still see locked previews so they know what's available.",
   },
   {
     date: "2026-05-23",
@@ -639,9 +639,9 @@ const ENTRIES: Entry[] = [
   {
     date: "2026-05-18",
     category: "Feature",
-    title: "Deal Score + AI verdict (free)",
+    title: "Screening Index + AI verdict (free)",
     description:
-      "Every analyzed property gets a 0-100 score with risk level (Conservative / Balanced / Aggressive / High Risk) and a plain-English explanation of why the deal scored where it did.",
+      "Every analyzed property gets a 0-100 score with risk level (Conservative / Balanced / Aggressive / High Risk) and a plain-English explanation of why the Screening Indexd where it did.",
   },
   {
     date: "2026-05-17",

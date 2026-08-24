@@ -126,7 +126,7 @@ describe("PDF Max Offer target contract", () => {
     );
   });
 
-  it("prefers the callback target and sends the resolved target to the report builder", () => {
+  it("prefers the callback target and preserves it for paid-claim recovery", () => {
     const exportHandler = sourceSection(
       calculator,
       "const handleExportPdf = async (",
@@ -143,11 +143,14 @@ describe("PDF Max Offer target contract", () => {
     expect(exportHandler).toContain(
       "maxOfferTargetSource: reportMaoTargetSource"
     );
-    expect(exportHandler).toContain(
-      "maxOfferTargetSource: checkoutMaoTargetSource"
-    );
+    expect(calculator).not.toContain("createOneTimePdfCheckoutAction");
+    expect(calculator).not.toContain("handleBuyOneTimePdf");
+    expect(calculator).not.toContain("checkoutMaoTarget");
+    expect(exportHandler).toContain("const restoredDraft = parseOneTimePdfDraft(draftRaw)");
+    expect(exportHandler).toContain("maxOfferTarget: restoredMaoTarget");
     expect(exportHandler).toContain(
       "maxOfferTargetSource: restoredMaoTargetSource"
     );
+    expect(exportHandler).toContain("analysisMaoTargetRef.current = restoredMaoTarget");
   });
 });

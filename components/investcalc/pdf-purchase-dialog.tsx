@@ -2,17 +2,11 @@
 
 /**
  * Shown when a user without PDF entitlement clicks Export PDF.
- * Two paths, clearly priced:
- *
- *   - Pro subscription → /pricing (current price, terms, and plan details)
- *   - Single Deal   → Stripe Checkout for one complete report
- *
- * The one-time path is the conversion-rescue: visitors who will never
- * subscribe but want this one lender package. Anonymous purchase is
- * fine - no account required.
+ * The temporary Decision Pack shutdown leaves one supported path:
+ * Pro subscription → /pricing (current price, terms, and plan details).
  */
 
-import { ArrowRight, FileDown, Loader2, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 import {
   Dialog,
@@ -26,17 +20,13 @@ import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 interface PdfPurchaseDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onBuyOneTime: () => void | Promise<void>;
-  isStartingCheckout: boolean;
 }
 
 export function PdfPurchaseDialog({
   open,
   onOpenChange,
-  onBuyOneTime,
-  isStartingCheckout,
 }: PdfPurchaseDialogProps) {
-  const { singleDeal, proOfferName } = getMarketingOfferConfig();
+  const { proOfferName } = getMarketingOfferConfig();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {/* Short-viewport max-h + scroll comes from the DialogContent base
@@ -46,8 +36,8 @@ export function PdfPurchaseDialog({
         <DialogHeader>
           <DialogTitle>Choose how to unlock this report</DialogTitle>
           <DialogDescription>
-            Buy the Deal Decision Pack for this property once, or compare Pro
-            plans for repeat analysis and reports.
+            PDF reports are included with Pro. One-time report purchases are
+            temporarily unavailable.
           </DialogDescription>
         </DialogHeader>
 
@@ -67,7 +57,7 @@ export function PdfPurchaseDialog({
                 {proOfferName}
               </p>
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                Decide and act across every opportunity: Max Offer, Buy Box,
+                Review every opportunity with an Offer Ceiling, Buy Box,
                 downside testing, saved deals, comparisons, projections, and
                 unlimited branded reports. Pricing, trial eligibility, and
                 billing terms are shown before checkout.
@@ -79,43 +69,11 @@ export function PdfPurchaseDialog({
             </span>
           </Link>
 
-          {/* One-time purchase */}
-          <button
-            type="button"
-            onClick={() => void onBuyOneTime()}
-            disabled={isStartingCheckout}
-            className="flex w-full items-start justify-between gap-3 rounded-2xl border border-border bg-card p-4 text-left transition hover:border-primary/40 hover:bg-muted/40 disabled:opacity-60"
-          >
-            <div>
-              <p className="flex items-center gap-1.5 text-sm font-bold text-foreground">
-                <FileDown className="size-4 text-muted-foreground" />
-                Deal Decision Pack
-              </p>
-              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                The complete TrueCap decision package for this property. One
-                payment, no account, no subscription. Includes assumptions,
-                Offer Ceiling, What Needs to Be True rent/rate thresholds, Screening Index,
-                downside scenario, 10-year, tax, and exit views.
-              </p>
-            </div>
-            <span className="mt-0.5 inline-flex shrink-0 items-center gap-1.5 text-sm font-bold text-foreground">
-              {isStartingCheckout ? (
-                <>
-                  <Loader2 className="size-4 animate-spin" />
-                  Starting…
-                </>
-              ) : (
-                singleDeal.priceLabel
-              )}
-            </span>
-          </button>
-
           <div className="rounded-xl border border-border/70 bg-muted/35 px-3 py-2.5 text-[11px] leading-relaxed text-muted-foreground">
             <p>
-              <strong className="text-foreground">One-deal access:</strong> unlocks one PDF
-              decision memo for these exact analysis inputs. Complete checkout and return to this
-              same browser tab within 30 days. If delivery fails after redemption, this bound
-              tab can retry for 24 hours. The purchase does not create an account or cloud copy.
+              <strong className="text-foreground">Already purchased a one-time report?</strong>{" "}
+              Existing paid claims and recovery remain supported. This temporary shutdown affects
+              new purchases only.
             </p>
             <p className="mt-1.5">
               Need help? Email{" "}

@@ -36,7 +36,7 @@ export function DealQaPanel({
   context,
 }: {
   values: InvestmentFormValues;
-  /** Optional grounding depth (buy box / MAO / projection / comps) already
+  /** Optional grounding depth (buy box / Offer Ceiling / projection / comps) already
    *  computed on the dashboard — forwarded with each question so answers
    *  can reference the user's own criteria. Absent pieces are omitted. */
   context?: DealQaExtraContext;
@@ -60,7 +60,7 @@ export function DealQaPanel({
           : "Why does this deal miss my buy box?"
       );
     }
-    if (context?.mao) personal.push("Is the asking price above my max offer?");
+    if (context?.mao) personal.push("Is asking above the modeled Offer Ceiling?");
     return [...personal, ...SUGGESTED_QUESTIONS].slice(0, 3);
   }, [context]);
 

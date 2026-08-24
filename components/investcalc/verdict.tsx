@@ -51,7 +51,7 @@ export function Verdict({ recommendation, variant = "badge", className }: Verdic
     return (
       <span className={cn("inline-flex items-center gap-2", className)}>
         <Icon aria-hidden className="size-6 shrink-0" />
-        <span className="sr-only">Verdict: </span>
+        <span className="sr-only">Screening result: </span>
         <span>{display.label}</span>
       </span>
     );
@@ -68,7 +68,7 @@ export function Verdict({ recommendation, variant = "badge", className }: Verdic
       )}
     >
       <Icon aria-hidden className={isCompact ? "size-3 shrink-0" : "size-3.5 shrink-0"} />
-      <span className="sr-only">Verdict: </span>
+      <span className="sr-only">Screening result: </span>
       <span>{isCompact ? display.shortLabel : display.label}</span>
     </span>
   );

@@ -47,7 +47,7 @@ const MATRIX: Row[] = [
   { feature: "Mortgage + financing math (PITI + amortization)", truecap: "Yes — full", mashvisor: "Limited", winner: "truecap" },
   { feature: "Illustrative tax impact", truecap: "Pro — straight-line depreciation + interest + modeled after-tax CF; no STR-eligibility determination", mashvisor: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", mashvisor: "Forward STR revenue forecast", winner: "tie" },
-  { feature: "Deal score + verdict", truecap: "Free — 0-100 score + plain-English verdict", mashvisor: "Investibility score per property", winner: "tie" },
+  { feature: "Screening Index + verdict", truecap: "Free — 0-100 score + plain-English verdict", mashvisor: "Investibility score per property", winner: "tie" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", mashvisor: "STR-focused; LTR rent estimates included", winner: "tie" },
   { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", mashvisor: "Limited free dashboard; full data paid", winner: "truecap" },
   { feature: "Pricing (paid tier)", truecap: "Paid Pro; see live pricing for current rates", mashvisor: "$70-300/mo depending on plan (as of 2026)", winner: "truecap" },
@@ -260,8 +260,8 @@ export default function VsMashvisorForShortTermRentalsPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             Free covers the standard cap rate, CoC, DSCR, cash flow, and plain
             read-only share links. Pro adds projections, sensitivity, illustrative
-            tax impact, modeled exit comparisons, MAO, co-branding, and included
-            PDFs. A one-time PDF option is also available.
+            tax impact, modeled exit comparisons, Offer Ceiling, co-branding, and included
+            PDFs. New one-time PDF checkout is temporarily unavailable.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link

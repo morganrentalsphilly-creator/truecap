@@ -82,7 +82,7 @@ export function ListingLinkInput({
         Paste a listing link
       </label>
       <p className="mt-0.5 text-[11px] text-muted-foreground">
-        Zillow, Redfin, or Realtor.com — we&apos;ll pull the address and pre-fill the deal.
+        Zillow, Redfin, or Realtor.com — TrueCap extracts the address from the URL, then starts rent, rate, and tax from labeled area or national screening benchmarks. It does not import the listing price, taxes, photos, or seller claims.
       </p>
       <div className="mt-2 flex gap-2">
         <input

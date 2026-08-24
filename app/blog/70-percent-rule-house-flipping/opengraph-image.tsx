@@ -84,7 +84,7 @@ export default function Image() {
               display: "flex",
             }}
           >
-            How to calculate your max offer on a flip
+            How to calculate a 70%-rule Offer Ceiling
           </div>
         </div>
 

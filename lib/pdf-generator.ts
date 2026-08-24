@@ -89,7 +89,13 @@ export interface ReportData {
   /** Primary acquisition decision. Canonical server-built reports always
    * include it; optional only so frozen legacy payloads remain renderable. */
   decision?: {
-    label: "Pursue" | "Conditional — verify first" | "Pass at this price";
+    label:
+      | "Meets selected rules at asking"
+      | "Does not meet selected rules at asking"
+      | "Cannot determine"
+      | "Pursue"
+      | "Conditional — verify first"
+      | "Pass at this price";
     readiness: "Ready" | "Verify first" | "Screening only";
     clearsSelectedTargets: boolean;
     targetSource: "buy-box" | "screening-defaults" | "selected-targets";
@@ -738,7 +744,7 @@ function drawScoreGauge(
   doc.setFont("helvetica", "bold");
   doc.setFontSize(big ? 8 : 7);
   doc.setCharSpace(0.8);
-  doc.text("DEAL SCORE", rightX, topY, { align: "right" });
+  doc.text("SCREENING INDEX", rightX, topY, { align: "right" });
   doc.setCharSpace(0);
 
   // Score number (numerator big, "/100" small) — visual reading order "72 /100"
@@ -815,8 +821,14 @@ function reportDecision(d: ReportData): NonNullable<ReportData["decision"]> {
 }
 
 function decisionColor(decision: NonNullable<ReportData["decision"]>): string {
-  if (decision.label === "Pursue") return COLOR.successText;
-  if (decision.label === "Pass at this price") return COLOR.danger;
+  if (
+    decision.label === "Meets selected rules at asking" ||
+    decision.label === "Pursue"
+  ) return COLOR.successText;
+  if (
+    decision.label === "Does not meet selected rules at asking" ||
+    decision.label === "Pass at this price"
+  ) return COLOR.danger;
   return COLOR.warnText;
 }
 
@@ -1010,7 +1022,7 @@ function pageCover(
   ];
   if (d.maxOffer !== undefined) {
     metrics.push([
-      "PRICE CEILING",
+      "OFFER CEILING",
       d.maxOffer ? fmtCurrency(d.maxOffer.maxPrice) : "Not solvable",
     ]);
   }
@@ -1026,7 +1038,7 @@ function pageCover(
     // MAX OFFER picks up the BRAND colour, not a hardcoded TrueCap blue — on
     // a white-label pack this cell was another company's blue sitting between
     // three neutral ones, for no reason a reader could infer.
-    setText(doc, i === 0 ? (d.performance.monthlyCashFlow >= 0 ? COLOR.successText : COLOR.danger) : m[0] === "PRICE CEILING" ? themeColor : COLOR.ink);
+    setText(doc, i === 0 ? (d.performance.monthlyCashFlow >= 0 ? COLOR.successText : COLOR.danger) : m[0] === "OFFER CEILING" ? themeColor : COLOR.ink);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
     doc.text(m[1], mx, py + 18);
@@ -1046,7 +1058,7 @@ function pageCover(
       py + 42,
     );
     doc.text(
-      "Calculated from the targets shown. This is not a recommended offer.",
+      `Highest modeled price that still meets ${d.maxOffer.sourceLabel ?? "the captured targets"} under the assumptions shown. This is not a recommended offer.`,
       panelX + 20,
       py + 52,
     );
@@ -1483,7 +1495,7 @@ function pageInputs(
   ];
   if (d.maxOffer !== undefined) {
     cards.unshift([
-      "Price Ceiling",
+      "Offer Ceiling",
       d.maxOffer ? fmtCurrency(d.maxOffer.maxPrice) : "Not solvable",
       "primary",
       d.maxOffer ? d.maxOffer.sourceLabel ?? "captured targets" : "review inputs",
@@ -1500,7 +1512,7 @@ function pageInputs(
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7.5);
     doc.text(
-      `Price ceiling — ${d.maxOffer.sourceLabel ?? "captured targets"}: ${d.maxOffer.basis}`,
+      `Offer Ceiling — ${d.maxOffer.sourceLabel ?? "captured targets"}: ${d.maxOffer.basis}`,
       M.left,
       criteriaY,
     );
@@ -1510,7 +1522,7 @@ function pageInputs(
       criteriaY + 11,
     );
     doc.text(
-      "Calculated from the targets shown. This is not a recommended offer.",
+      `Highest modeled price that still meets ${d.maxOffer.sourceLabel ?? "the captured targets"} under the assumptions shown. This is not a recommended offer.`,
       M.left,
       criteriaY + 22,
     );
@@ -1830,6 +1842,14 @@ function pageDecisionReadiness(
 ) {
   const confidence = d.inputConfidence;
   if (!confidence) return;
+  const evidenceReadiness =
+    confidence.stageLabel === "Offer Ready"
+      ? "Evidence complete"
+      : confidence.stageLabel === "Verified"
+        ? "Verify"
+        : "Screening";
+  const verificationStatus =
+    confidence.unverifiedAssumptions.length === 0 ? "No open items" : "Review required";
 
   let y = M.top + 12;
   const themeColor = resolveThemeColor(branding);
@@ -1839,7 +1859,7 @@ function pageDecisionReadiness(
   doc.setFontSize(9.5);
   y = drawParagraph(
     doc,
-    "Deal Score describes the modeled economics. Input Confidence separately describes how decision-ready the assumptions are; it is a deterministic readiness score, not a probability of success.",
+    "The Screening Index summarizes modeled economics for triage. It is secondary to selected rules and is not evidence readiness, a probability of success, an appraisal, or investment advice. Evidence Readiness categorizes how thoroughly the material assumptions have been verified.",
     M.left,
     y,
     SAFE.w
@@ -1847,14 +1867,14 @@ function pageDecisionReadiness(
   y += 18;
 
   const cw = (SAFE.w - 24) / 3;
-  statCard(doc, M.left, y, cw, 60, "Input Confidence", `${confidence.score}%`, {
-    tone: confidence.score >= 80 ? "success" : confidence.score >= 55 ? "warn" : "danger",
-    sub: "readiness, not probability",
+  statCard(doc, M.left, y, cw, 60, "Evidence Readiness", evidenceReadiness, {
+    tone: evidenceReadiness === "Evidence complete" ? "success" : evidenceReadiness === "Verify" ? "warn" : "primary",
+    sub: "categorical, not probability",
     themeColor,
   });
-  statCard(doc, M.left + cw + 12, y, cw, 60, "Underwriting Stage", confidence.stageLabel, {
-    tone: confidence.stageLabel === "Offer Ready" ? "success" : "primary",
-    sub: "data-readiness status",
+  statCard(doc, M.left + cw + 12, y, cw, 60, "Verification Status", verificationStatus, {
+    tone: verificationStatus === "No open items" ? "success" : "warn",
+    sub: "review material assumptions",
     themeColor,
   });
   statCard(doc, M.left + 2 * (cw + 12), y, cw, 60, "Sensitivity Risk", confidence.sensitivityRisk, {
@@ -1906,7 +1926,7 @@ function pageDecisionReadiness(
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
   doc.text(
-    `Input Confidence methodology v${confidence.methodVersion}. Confirmations are tied to the input value and must be re-checked after that value changes.`,
+    `Evidence-readiness method v${confidence.methodVersion}. Confirmations are tied to the input value and must be re-checked after that value changes.`,
     M.left,
     PAGE.h - M.bottom - 4
   );
@@ -2164,7 +2184,7 @@ function pageDownside(
     doc.setCharSpace(0);
     setText(doc, COLOR.ink);
     doc.setFontSize(14);
-    doc.text(`Price ceiling ${fmtCurrency(d.maxOffer.maxPrice)}`, M.left + 16, y + 42);
+    doc.text(`Offer Ceiling ${fmtCurrency(d.maxOffer.maxPrice)}`, M.left + 16, y + 42);
     setText(doc, COLOR.sub);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.5);
@@ -2180,7 +2200,7 @@ function pageDownside(
     ].filter((value): value is string => Boolean(value));
     const doctorText = `Criteria: ${d.maxOffer.basis}. At the current asking price${
       alternatives.length ? `, the same target could also be reached with ${alternatives.join(" or ")}.` : ", review the verified inputs before negotiating."
-    } Calculated from your selected targets. This is not a recommended offer.`;
+    } Highest modeled price that still meets the targets shown under the assumptions shown. This is not a recommended offer.`;
     doc.text(doc.splitTextToSize(doctorText, SAFE.w - 32), M.left + 16, y + 61);
     y += 132;
   }

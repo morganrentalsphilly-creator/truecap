@@ -271,7 +271,7 @@ export default function VsDealcheckForFixAndFlipPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             Free covers the standard cap rate, CoC, DSCR, and cash flow. Pro adds
             the dedicated flip workflow, sensitivity, projections, illustrative tax impact,
-            modeled exit comparisons, and included PDFs. A one-time PDF option is also
+            modeled exit comparisons, and included PDFs. New one-time PDF checkout is
             available for a single core deal; see live pricing for current terms.
           </p>
           <div className="flex flex-wrap gap-3">

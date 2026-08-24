@@ -85,7 +85,7 @@ export function PropertyDetailsSection({
       {!bare ? (
         <p className="mb-1.5 text-[11px] leading-snug text-muted-foreground">
           <span className="font-semibold text-foreground">Fastest start</span>
-          {" - type an address and we auto-fill rates, taxes & (where public data covers it) area rent. Or just enter price & rent to see your verdict. Everything stays editable."}
+          {" - type an address and we auto-fill rates, taxes & (where public data covers it) area rent. Or just enter price & rent to see a provisional screening result. Everything stays editable."}
         </p>
       ) : null}
       <AddressAutocomplete

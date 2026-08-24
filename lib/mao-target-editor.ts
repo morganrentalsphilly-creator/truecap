@@ -37,7 +37,7 @@ export type MaoTargetInputResult =
   | { ok: false; error: string };
 
 export const EMPTY_MAO_TARGET_ERROR =
-  "Keep at least one target. The current price ceiling has not changed.";
+  "Keep at least one target. The current Offer Ceiling has not changed.";
 
 export function hasAnyMaoTarget(target: MaoTarget): boolean {
   return Object.values(target).some((value) => value !== undefined);

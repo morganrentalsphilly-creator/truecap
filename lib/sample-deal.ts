@@ -16,13 +16,15 @@
  * hero computing from this shared constant, the two can never diverge
  * again.
  *
- * The inputs below run through the REAL engine at ≈$554/mo cash flow,
+ * The inputs below are synthetic and run through the REAL engine at ≈$554/mo cash flow,
  * ≈9.33% cap rate, and ≈1.52 DSCR: $265k purchase, $3,050 rent, 20% down
  * at 6.6%. The $265k asking price intentionally sits above the $236k price
  * ceiling produced by the visible $750/mo cash-flow + 1.25 DSCR targets, so
- * the first experience demonstrates both "worth pursuing" fundamentals and
- * the discipline to pass at the current price. If any input changes, update
- * the pinned regression snapshot and verify every sample surface together.
+ * the first experience demonstrates both positive base economics and a miss
+ * against stricter selected rules. The address is intentionally a non-property
+ * label; never replace it with a customer or private-property address. If any
+ * input changes, update the pinned regression snapshot and verify every sample
+ * surface together.
  */
 
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
@@ -30,14 +32,21 @@ import type { MaoTarget } from "@/lib/max-allowable-offer";
 
 /** The product lens and exact acquisition criteria demonstrated by the sample. */
 export const SAMPLE_DEAL_STRATEGY_KEY = "buy-hold" as const;
+export const SAMPLE_DEAL_FIXTURE_VERSION = "synthetic-rental-v1" as const;
 export const SAMPLE_DEAL_MAO_TARGET: MaoTarget = {
   monthlyCashFlow: 750,
   dscr: 1.25,
 };
+export const SAMPLE_DEAL_TARGET_PROFILE = {
+  id: "truecap-synthetic-sample-target",
+  name: "Synthetic sample targets",
+  version: "1.0",
+  source: "selected-targets",
+} as const;
 
 export const SAMPLE_DEAL_VALUES = {
   propertyType: "single-family",
-  address: "1700 W Erie Ave, Philadelphia, PA 19140, USA",
+  address: "TrueCap Synthetic Sample, Philadelphia, PA 19140, USA",
   purchasePrice: 265_000,
   yearBuilt: 1942,
   bedrooms: 3,
@@ -71,7 +80,7 @@ export const SAMPLE_DEAL_VALUES = {
 
 /** Short display strings shared by the hero card. */
 export const SAMPLE_DEAL_DISPLAY = {
-  shortAddress: "1700 W Erie · Philadelphia",
+  shortAddress: "Synthetic sample · Philadelphia",
   subtitle: `Single Family · $${SAMPLE_DEAL_VALUES.purchasePrice.toLocaleString("en-US")} · Built ${SAMPLE_DEAL_VALUES.yearBuilt}`,
 } as const;
 
@@ -81,8 +90,11 @@ export const SAMPLE_DEAL_DISPLAY = {
  * strategy, and target criteria cannot drift independently.
  */
 export const SAMPLE_DEAL_FIXTURE = {
+  fixtureVersion: SAMPLE_DEAL_FIXTURE_VERSION,
+  synthetic: true,
   values: SAMPLE_DEAL_VALUES,
   strategyKey: SAMPLE_DEAL_STRATEGY_KEY,
   maoTarget: SAMPLE_DEAL_MAO_TARGET,
+  targetProfile: SAMPLE_DEAL_TARGET_PROFILE,
   display: SAMPLE_DEAL_DISPLAY,
 } as const;

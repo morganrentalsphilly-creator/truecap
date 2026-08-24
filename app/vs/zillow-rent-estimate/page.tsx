@@ -57,7 +57,7 @@ const MATRIX: Row[] = [
   { feature: "Photo / virtual tour",             truecap: "Not in scope — TrueCap is analysis, not browsing",                              zillow: "Yes — extensive photos + tours",                                         winner: "zillow" },
   { feature: "Save deals + portfolio rollup",    truecap: "Free saves up to 5 deals; Pro adds unlimited saves, portfolio rollup + comparison",                               zillow: "Save listings but no portfolio analysis",                                winner: "truecap" },
   { feature: "Shareable analysis URL",           truecap: "Free — read-only public URL for the available analysis",                                   zillow: "Share listing URL only",                                                 winner: "truecap" },
-  { feature: "Verdict / decision support",       truecap: "Free — deal score + verdict (Strong / Decent / Marginal / Skip)",                zillow: "No analytical verdict",                                                  winner: "truecap" },
+  { feature: "Verdict / decision support",       truecap: "Free — Screening Index + verdict (Strong / Decent / Marginal / Skip)",                zillow: "No analytical verdict",                                                  winner: "truecap" },
 ];
 
 export default function VsZillowRentPage() {
@@ -289,12 +289,12 @@ const ZILLOW_FAQ: FaqItem[] = [
         and runs cap rate, cash-on-cash, DSCR, and monthly cash flow,
         then classifies the deal as Strong / Solid / Mixed / Marginal
         / Negative based on transparent thresholds. The free analyzer
-        also includes a Deal Score (0–100) with subscore breakdown. Zillow stops at the
+        also includes a secondary Screening Index (0–100) with factor breakdown. Zillow stops at the
         rent number — you have to do everything downstream by hand.
       </>
     ),
     plainTextAnswer:
-      "TrueCap takes rent + expenses + financing + tax assumptions and runs cap rate, CoC, DSCR, and monthly cash flow, then classifies the deal Strong/Solid/Mixed/Marginal/Negative, plus a free 0–100 Deal Score. Zillow stops at the rent number.",
+      "TrueCap takes rent + expenses + financing + tax assumptions and runs cap rate, CoC, DSCR, and monthly cash flow, then shows selected-rule fit plus a free secondary 0–100 Screening Index. Zillow stops at the rent number. The index is for triage, not evidence readiness, an appraisal, or investment advice.",
   },
 ];
 

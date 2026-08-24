@@ -49,10 +49,11 @@ describe("global interaction accessibility baseline", () => {
     expect(primaryLinkSurfaces[4]).toContain("min-w-11");
   });
 
-  it("keeps shared footer and pricing-banner links at least 44px", () => {
+  it("keeps shared footer links at least 44px and the retired pricing banner inert", () => {
     expect(siteFooter.match(/min-h-11/g)).toHaveLength(6);
     expect(siteFooter.match(/min-w-11/g)).toHaveLength(6);
-    expect(foundingPricingBanner.match(/min-h-11/g)).toHaveLength(3);
-    expect(foundingPricingBanner).toContain("size-11");
+    expect(foundingPricingBanner).toContain("return null");
+    expect(foundingPricingBanner).not.toContain("<button");
+    expect(foundingPricingBanner).not.toContain("<a");
   });
 });

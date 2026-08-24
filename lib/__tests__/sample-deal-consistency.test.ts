@@ -12,12 +12,20 @@ import { describeMaoTarget } from "../mao-targets";
 import { calculateSampleDealOutcome } from "../sample-deal-analysis";
 import { SAMPLE_DEAL_FIXTURE } from "../sample-deal";
 
-describe("1700 W Erie shared sample", () => {
+describe("versioned synthetic shared sample", () => {
   it("uses one complete fixture for the property, strategy, and visible targets", () => {
+    expect(SAMPLE_DEAL_FIXTURE.fixtureVersion).toBe("synthetic-rental-v1");
+    expect(SAMPLE_DEAL_FIXTURE.synthetic).toBe(true);
     expect(SAMPLE_DEAL_FIXTURE.strategyKey).toBe("buy-hold");
     expect(SAMPLE_DEAL_FIXTURE.values.address).toBe(
-      "1700 W Erie Ave, Philadelphia, PA 19140, USA"
+      "TrueCap Synthetic Sample, Philadelphia, PA 19140, USA"
     );
+    expect(SAMPLE_DEAL_FIXTURE.targetProfile).toEqual({
+      id: "truecap-synthetic-sample-target",
+      name: "Synthetic sample targets",
+      version: "1.0",
+      source: "selected-targets",
+    });
     expect(describeMaoTarget(SAMPLE_DEAL_FIXTURE.maoTarget)).toBe(
       "cash flow ≥ $750/mo · DSCR ≥ 1.25"
     );
@@ -75,9 +83,9 @@ describe("1700 W Erie shared sample", () => {
       "utf8"
     );
 
-    expect(hero).toContain('"Pass at this price"');
+    expect(hero).toContain('"Does not meet selected rules at asking"');
     expect(hero).toContain(
-      "Strong fundamentals · Score {Math.round(score.score)}/100"
+      "Screening Index {Math.round(score.score)}/100"
     );
     expect(hero).not.toContain("recommendationLabel(score.recommendation)");
   });

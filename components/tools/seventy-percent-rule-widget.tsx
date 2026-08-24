@@ -4,7 +4,7 @@
  * 70% rule calculator widget — the max-offer rule on its own URL.
  *
  * Differs from the ARV calculator widget in scope, not math: this page
- * takes ARV directly (the rule's question — "what's my max offer?"),
+ * takes ARV directly (the rule's question — "what's my Offer Ceiling?"),
  * while /tools/arv-calculator builds ARV from sold comps first. The
  * max-offer arithmetic is SHARED via components/tools/max-offer-math.ts
  * (never duplicated), which carries the lib/max-allowable-offer.ts
@@ -62,7 +62,7 @@ export function SeventyPercentRuleWidget() {
     return { arv: a, mult, mao, spread, ladder };
   }, [arv, repairs, multiplier]);
 
-  // Moment-of-result handoff: carry the max offer into the full analyzer
+  // Moment-of-result handoff: carry the Offer Ceiling into the full analyzer
   // as the purchase price — the number the rule says to pay.
   const handoffHref = buildAnalyzerHandoffUrl(
     result && result.mao >= 10000 ? { purchasePrice: result.mao } : {},
@@ -126,13 +126,13 @@ export function SeventyPercentRuleWidget() {
         <div className="bg-[var(--background)] rounded-xl border border-border p-5 sm:p-6 flex flex-col justify-between">
           {result === null ? (
             <p className="text-sm text-muted-foreground">
-              Enter the after-repair value to see the rule&apos;s max offer.
+              Enter the after-repair value to see the rule&apos;s Offer Ceiling.
             </p>
           ) : (
             <>
               <div>
                 <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                  Max offer ({result.mult}% rule)
+                  Offer Ceiling ({result.mult}% rule)
                 </div>
                 <div
                   className={cn(
@@ -152,7 +152,7 @@ export function SeventyPercentRuleWidget() {
               {result.mao <= 0 ? (
                 <p className="text-xs font-semibold text-[var(--metric-negative)] mt-4">
                   At this multiplier the repairs consume the entire allowable
-                  price — the rule says there is no workable offer on this deal
+                  price — the rule produces no feasible Offer Ceiling for this deal
                   as entered.
                 </p>
               ) : (
@@ -179,7 +179,7 @@ export function SeventyPercentRuleWidget() {
 
               <div className="text-xs mt-5 pt-4 border-t border-border">
                 <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-1.5">
-                  Max offer at other multipliers
+                  Offer Ceiling at other multipliers
                 </div>
                 {result.ladder.map((step) => (
                   <div key={step.pct} className="flex justify-between py-0.5 gap-3">
@@ -187,7 +187,7 @@ export function SeventyPercentRuleWidget() {
                       {step.pct}% of ARV
                     </span>
                     <span className={cn("tabular-nums shrink-0", step.pct === result.mult ? "font-bold text-foreground" : "text-foreground")}>
-                      {step.mao > 0 ? fmt(step.mao) : "no workable offer"}
+                      {step.mao > 0 ? fmt(step.mao) : "no feasible ceiling"}
                     </span>
                   </div>
                 ))}
@@ -199,7 +199,7 @@ export function SeventyPercentRuleWidget() {
 
       <Link href={handoffHref} target="_top" className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline">
         <Sparkles className="w-4 h-4" />
-        Run the full deal at this price — rehab, refi, cash flow, verdict — free in TrueCap
+        Screen the full deal at this price — rehab, refi, cash flow, and Screening Index — free in TrueCap
         <ArrowUpRight className="w-4 h-4" />
       </Link>
     </div>

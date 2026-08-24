@@ -104,12 +104,12 @@ export function RateAlertsToggle({
                 ? {
                     title: "Rate alerts on",
                     description:
-                      "We'll email you only when a rate move flips a saved deal's verdict.",
+                      "We'll email you only when a rate move changes a saved deal's screening result.",
                   }
                 : {
-                    title: "You're on the list",
+                    title: "You're on the waitlist",
                     description:
-                      "Email alerts are launching soon — you'll hear about rate moves that flip a saved deal's verdict.",
+                      "No monitoring or email is active yet. We'll keep your preference for the preview.",
                   }
             );
           }
@@ -137,8 +137,8 @@ export function RateAlertsToggle({
           <BellRing className="size-4 shrink-0 text-primary" />
           <p className="min-w-0 flex-1 text-xs leading-snug text-muted-foreground">
             {alertsLive
-              ? "Get an email if a rate move flips this deal's verdict."
-              : "Email alerts for rate moves that flip a verdict are launching soon."}
+              ? "Get an email if a rate move changes this deal's screening result."
+              : "Preview a future rate-change alert. No monitoring is active yet."}
           </p>
           <button
             type="button"
@@ -146,7 +146,7 @@ export function RateAlertsToggle({
             disabled={pending}
             className="shrink-0 rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground disabled:opacity-70"
           >
-            {pending ? (alertsLive ? "Enabling…" : "Joining…") : alertsLive ? "Notify me" : "Join the list"}
+            {pending ? (alertsLive ? "Enabling…" : "Joining…") : alertsLive ? "Notify me" : "Join waitlist"}
           </button>
         </div>
         <div className="hidden rounded-2xl border border-primary/25 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-5 shadow-sm sm:block sm:p-6">
@@ -158,8 +158,8 @@ export function RateAlertsToggle({
               </h3>
               <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                 {alertsLive
-                  ? "Mortgage rates move every week. We'll quietly re-underwrite your saved deals and email you only when a move actually flips a verdict — its tier, DSCR band, or cash-flow sign. At most once a week, never spam."
-                  : "Mortgage rates move every week. Email alerts are launching soon — join the list now and, once they're live, you'll only hear when a move actually flips a verdict: its tier, DSCR band, or cash-flow sign. At most once a week, never spam."}
+                  ? "Mortgage rates move every week. We'll quietly re-underwrite your saved deals and email you only when a move changes a screening result — its tier, DSCR band, or cash-flow sign. At most once a week, never spam."
+                  : "Preview · Join the waitlist for a future rate-change alert. No listing monitoring, re-underwriting, or email is active yet."}
               </p>
               <button
                 type="button"
@@ -174,7 +174,7 @@ export function RateAlertsToggle({
                     : "Joining…"
                   : alertsLive
                     ? "Email me if rates move this deal"
-                    : "Join the alert list"}
+                    : "Join waitlist"}
               </button>
             </div>
           </div>
@@ -189,13 +189,15 @@ export function RateAlertsToggle({
         <div className="flex items-start gap-2">
           <BellRing className="mt-0.5 size-4 text-primary" />
           <div>
-            <h2 className="text-base font-bold text-foreground">Deal rate alerts</h2>
+            <h2 className="text-base font-bold text-foreground">
+              {alertsLive ? "Deal rate alerts" : "Deal rate alerts preview"}
+            </h2>
             <p className="mt-1 max-w-prose text-sm leading-relaxed text-muted-foreground">
               {alertsLive
-                ? "Email me when the 30-year mortgage rate moves enough to change one of my saved deals' verdict — its tier, DSCR band, or cash-flow sign. At most once a week, and only when something actually changed."
+                ? "Email me when the 30-year mortgage rate moves enough to change one of my saved deals' screening results — its tier, DSCR band, or cash-flow sign. At most once a week, and only when something actually changed."
                 : enabled
-                  ? "You're on the list — email alerts are launching soon. Once live, we'll email you when the 30-year mortgage rate moves enough to change one of your saved deals' verdicts. At most once a week."
-                  : "Email alerts are launching soon. Flip this on to join the list — once live, we'll email you when the 30-year mortgage rate moves enough to change one of your saved deals' verdicts. At most once a week."}
+                  ? "Preview · You're on the waitlist. No monitoring or email is active yet. If launched, alerts would cover rate moves that change a saved deal's modeled tier, DSCR band, or cash-flow sign, at most once a week."
+                  : "Preview · Join the waitlist for a future alert that would cover rate moves changing a saved deal's modeled tier, DSCR band, or cash-flow sign. No monitoring or email is active yet."}
             </p>
           </div>
         </div>
@@ -203,7 +205,7 @@ export function RateAlertsToggle({
           checked={enabled}
           onCheckedChange={toggle}
           disabled={pending}
-          aria-label="Toggle deal rate alert emails"
+          aria-label={alertsLive ? "Toggle deal rate alert emails" : enabled ? "Leave deal rate alerts waitlist" : "Join deal rate alerts waitlist"}
         />
       </div>
     </section>

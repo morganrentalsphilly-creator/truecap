@@ -2,7 +2,7 @@
 
 /**
  * Buy Box verdict - inline card that shows whether the current deal meets the
- * user's saved acquisition criteria. COMPLEMENTS the Deal Score (never
+ * user's saved acquisition criteria. COMPLEMENTS the Screening Index (never
  * replaces it). With multiple buy boxes (DM-2) it screens the deal against
  * every active box, shows a "meets N of M" summary, and details the default
  * box's per-criterion checks. Renders nothing unless:
@@ -50,7 +50,7 @@ export function BuyBoxVerdictCard({
   enabled: boolean;
   metrics: BuyBoxDealMetrics | null;
   /** Current form values — lets the FAIL state answer "so what price
-   *  WOULD work?" via the MAO solver (same basis as the saved-deal
+   *  WOULD work?" via the Offer Ceiling solver (same basis as the saved-deal
    *  workspace's max-offer line). Optional: surfaces without form values
    *  (shared-deal viewer) simply don't render the line. */
   values?: InvestmentFormValues | null;
@@ -61,7 +61,7 @@ export function BuyBoxVerdictCard({
    *  "make your offer". */
   onFitChange?: (anyPass: boolean | null) => void;
   /** Reports the SAME evaluation as a compact Deal Q&A grounding block
-   *  (plus the primary box's numeric thresholds, the canonical MAO basis),
+   *  (plus the primary box's numeric thresholds, the canonical Offer Ceiling basis),
    *  so AI answers are grounded in exactly what this card shows on screen.
    *  null = no active box / not evaluated. */
   onQaContextChange?: (report: DealQaBuyBoxReport | null) => void;
@@ -217,15 +217,15 @@ export function BuyBoxVerdictCard({
   })();
 
   const headline = r.passes
-    ? "Meets your buy box"
+    ? "Meets selected rules at asking"
     : r.failedLabels.length > 0
-      ? `Misses on ${r.failedLabels.join(", ")}`
-      : "Can't evaluate on this deal yet";
+      ? "Does not meet selected rules at asking"
+      : "Cannot determine rule fit yet";
   const applicableCount = r.checks.filter((c) => c.pass !== null).length;
 
   return (
     <section
-      aria-label="Buy box verdict"
+      aria-label="Selected-rule fit"
       className={cn(
         "rounded-2xl border p-4 sm:p-5",
         r.passes
@@ -283,8 +283,13 @@ export function BuyBoxVerdictCard({
         </span>
       </div>
 
-      {r.personalLine ? (
+        {r.personalLine ? (
         <p className="mt-2 text-xs font-medium text-foreground/80">{r.personalLine}</p>
+      ) : null}
+      {!r.passes && r.failedLabels.length > 0 ? (
+        <p className="mt-1 text-xs text-muted-foreground">
+          Misses on {r.failedLabels.join(", ")}.
+        </p>
       ) : null}
 
       {/* The gaps above say what misses; this says what to DO about it —
@@ -294,15 +299,14 @@ export function BuyBoxVerdictCard({
         yourNumber.kind === "price" ? (
           <p className="mt-1.5 text-xs text-foreground/80">
             <span className="font-bold text-foreground">
-              Price ceiling: {money(yourNumber.maxPrice)}
+              Offer Ceiling: {money(yourNumber.maxPrice)}
             </span>{" "}
-            — the highest price that clears this box, holding your current rent and financing
-            assumptions.
+            — highest modeled price that still meets {primary.box.name} under the assumptions shown.
             {yourNumberCriteria ? (
               <>
                 <span className="mt-0.5 block">Criteria: {yourNumberCriteria}</span>
                 <span className="mt-0.5 block text-[11px] text-muted-foreground">
-                  Calculated from your selected targets. This is not a recommended offer.
+                  This is not a recommended offer or an appraisal.
                 </span>
               </>
             ) : null}

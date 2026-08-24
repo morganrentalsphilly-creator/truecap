@@ -117,7 +117,7 @@ function ChartTooltip({
       ) : null}
       {p.score != null ? (
         <div className="mt-1">
-          <span className="font-semibold text-muted-foreground">Deal Score:</span>{" "}
+          <span className="font-semibold text-muted-foreground">Screening Index:</span>{" "}
           <span className="text-foreground">{Math.round(p.score)}/100</span>
         </div>
       ) : null}
