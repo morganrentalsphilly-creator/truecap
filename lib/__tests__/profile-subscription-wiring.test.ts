@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const profilePage = readFileSync(join(process.cwd(), "app/profile/page.tsx"), "utf8");
+const profileForm = readFileSync(join(process.cwd(), "components/profile/profile-form.tsx"), "utf8");
 
 describe("profile subscription display wiring", () => {
   it("uses the Price-ID-derived slug when the plan relation is missing", () => {
@@ -13,5 +14,14 @@ describe("profile subscription display wiring", () => {
 
   it("uses the resolved subscribed slug for conversion price lookup", () => {
     expect(profilePage).toContain("? (subscribedPlanSlug ?? undefined)");
+  });
+});
+
+describe("profile hydration determinism", () => {
+  it("does not generate a new avatar URL during the initial render", () => {
+    expect(profileForm).toContain("initialAvatarUrl ?? undefined");
+    expect(profileForm).not.toContain(
+      "initialAvatarUrl ? `${initialAvatarUrl}?v=${Date.now()}` : undefined"
+    );
   });
 });

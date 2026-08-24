@@ -149,7 +149,12 @@ export function ProfileForm({
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>(
-    initialAvatarUrl ? `${initialAvatarUrl}?v=${Date.now()}` : undefined
+    // The initial client render must be byte-for-byte identical to the server
+    // render. Date.now() here generated different image src attributes during
+    // SSR and hydration for accounts with an avatar. Uploaded avatars already
+    // use timestamped object names, so the persisted URL is cache-safe; only
+    // append a cache buster after a user-triggered upload/save below.
+    initialAvatarUrl ?? undefined
   );
   const initialAvatarUrlRef = useRef<string | undefined>(initialAvatarUrl ?? undefined);
   const pendingDeletePathRef = useRef<string | null>(null);

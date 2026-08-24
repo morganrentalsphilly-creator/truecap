@@ -3039,7 +3039,14 @@ export function SavedAnalysesPage({
 
                   <p className="mt-3 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
                     <CalendarClock className="h-3.5 w-3.5" />
-                    <span>Saved {new Date(item.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+                    <span>
+                      Saved {new Date(item.createdAt).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                        timeZone: "UTC",
+                      })}
+                    </span>
                   </p>
                 </article>
               );
@@ -3377,7 +3384,14 @@ export function SavedAnalysesPage({
                       <td className="whitespace-nowrap pr-4 text-muted-foreground">
                         <span className="inline-flex items-center gap-1.5">
                           <CalendarClock className="h-3.5 w-3.5" />
-                          <span>{new Date(item.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+                          <span>
+                            {new Date(item.createdAt).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                              timeZone: "UTC",
+                            })}
+                          </span>
                         </span>
                       </td>
                     </tr>
