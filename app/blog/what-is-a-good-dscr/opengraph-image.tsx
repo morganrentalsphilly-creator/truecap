@@ -100,7 +100,7 @@ export default function Image() {
           }}
         >
           <div style={{ display: "flex" }}>
-            Max loan · Max offer price · Lender vs investor DSCR · 2026
+            Max loan · Offer Ceiling · Lender vs investor DSCR · 2026
           </div>
           <div style={{ fontWeight: 700, color: BRAND_BLUE, display: "flex" }}>
             usetruecap.com/blog

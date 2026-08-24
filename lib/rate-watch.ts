@@ -1,4 +1,4 @@
-import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
+import { normalizeReleasedInvestmentFormSnapshot } from "@/lib/underwriting-model-release";
 import { buildRateAlertForDeal, type RateAlertDeal } from "@/lib/rate-alerts";
 
 /**
@@ -47,7 +47,7 @@ export function buildRateWatch(
   const changedDeals: RateAlertDeal[] = [];
   let monitoredCount = 0;
   for (const row of rows) {
-    const values = normalizeInvestmentFormSnapshot(row.form_snapshot);
+    const values = normalizeReleasedInvestmentFormSnapshot(row.form_snapshot);
     if (!values) continue; // pre-snapshot or partial save — skip quietly
     monitoredCount += 1;
     const alert = buildRateAlertForDeal({

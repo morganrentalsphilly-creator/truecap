@@ -26,7 +26,7 @@ export function DealSummaryCard({
   context,
 }: {
   values: InvestmentFormValues;
-  /** Optional grounding depth (buy box / MAO / projection / comps) already
+  /** Optional grounding depth (buy box / Offer Ceiling / projection / comps) already
    *  computed on the dashboard — the summary can then speak to the user's
    *  own criteria. Absent pieces are omitted. */
   context?: DealQaExtraContext;

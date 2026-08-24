@@ -78,7 +78,7 @@ const FAQ_ITEMS = [
   },
   {
     q: `How does TrueCap relate to these three?`,
-    a: `TrueCap is downstream of all of them. They help you find deals; TrueCap helps you evaluate them. The recommended workflow: find a property (Roofstock listing / Mashvisor heatmap-driven MLS search / PropStream off-market lead) → underwrite in TrueCap → decide whether to make an offer.`,
+    a: `TrueCap is downstream of all of them. They help you find properties; TrueCap helps you screen modeled economics. A possible workflow is: find a property → underwrite in TrueCap → verify the material assumptions → record your own decision.`,
   },
 ];
 
@@ -158,7 +158,7 @@ export default function ThreeWayComparisonPost() {
             </h2>
             <p
               className="text-sm sm:text-base leading-relaxed text-foreground"
-              dangerouslySetInnerHTML={{ __html: `All three help you <em>find</em> rental property deals; none of them <em>underwrite</em> them. <strong>Roofstock</strong> is a marketplace selling curated turnkey single-family rentals (you bring the buyer, they bring the property). <strong>Mashvisor</strong> is market discovery — heatmaps, neighborhood Airbnb / LTR scores, comparable sales. <strong>PropStream</strong> is lead generation — skip-tracing, motivated-seller lists, pre-foreclosure data. Different ways to source. <strong>TrueCap</strong> isn&apos;t in this category — it&apos;s the underwriting calculator you&apos;d use AFTER any of these finds you a property to decide if it actually cash flows.` }}
+              dangerouslySetInnerHTML={{ __html: `All three help you <em>find</em> rental property deals; none of them <em>underwrite</em> them. <strong>Roofstock</strong> is a marketplace selling curated turnkey single-family rentals (you bring the buyer, they bring the property). <strong>Mashvisor</strong> is market discovery — heatmaps, neighborhood Airbnb / LTR scores, comparable sales. <strong>PropStream</strong> is lead generation — skip-tracing, motivated-seller lists, pre-foreclosure data. Different ways to source. <strong>TrueCap</strong> isn&apos;t in this category — it&apos;s an underwriting calculator that models cash flow from user-reviewed assumptions after a property is found.` }}
             />
           </section>
 
@@ -196,7 +196,7 @@ export default function ThreeWayComparisonPost() {
             <h2>Where TrueCap fits — after the deal is found</h2>
             <div dangerouslySetInnerHTML={{ __html: `<p>None of the three calculates whether a specific property actually cash flows under your assumptions. They surface deals; you still have to underwrite them.</p>
             <p>That&apos;s the TrueCap job: paste the address, get HUD rent / FRED rate / state property tax pre-filled, override anything you have better data on, run cap rate / CoC / DSCR / cash flow, sensitize the inputs, decide.</p>
-            <p>Roofstock&apos;s listing pro-formas are marketing material — they assume optimistic vacancy + light capex. Mashvisor&apos;s neighborhood scores are directional, not deal-specific. PropStream gives you a lead, not an analysis. TrueCap turns any of those inputs into a decision.</p>` }} />
+            <p>Roofstock&apos;s listing pro-formas are marketing material — they assume optimistic vacancy + light capex. Mashvisor&apos;s neighborhood scores are directional, not deal-specific. PropStream gives you a lead, not an analysis. TrueCap turns reviewed inputs into a modeled underwrite; the user makes the decision.</p>` }} />
 
             <h2>Honest quick decision</h2>
             <div dangerouslySetInnerHTML={{ __html: `<ul>

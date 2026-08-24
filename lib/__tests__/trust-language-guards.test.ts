@@ -222,7 +222,7 @@ describe("trust-language guards", () => {
     expect(authShell).toContain("Owner-scoped saved data");
   });
 
-  it("never renders a refund guarantee without published terms", () => {
+  it("keeps the retired refund guarantee fail-closed", () => {
     const landing = read("../../components/marketing/landing-sections.tsx");
     const config = read("../../lib/marketing-offer-config.ts");
     const guaranteePage = read("../../app/guarantee/page.tsx");
@@ -231,18 +231,14 @@ describe("trust-language guards", () => {
 
     expect(landing).not.toContain('"The 5-Deal Guarantee"');
     expect(landing).not.toContain("fiveDealGuaranteeEnabled,");
-    // The Never Overpay Guarantee gates on the config switch, and the config
-    // guarantees a terms link structurally: the default terms URL is the
-    // in-repo /guarantee route, and an env override that fails URL
-    // validation falls back to it rather than dangling.
-    expect(landing).toContain("if (!guaranteeEnabled) return null");
-    expect(landing).toContain("Read the full guarantee");
+    expect(landing).toContain("export function NeverOverpayGuarantee()");
+    expect(landing).not.toContain("Read the full guarantee");
+    expect(landing).not.toContain("Never Overpay Guarantee");
+    expect(config).toContain("const guaranteeEnabled = false");
     expect(config).toMatch(/safePublicUrl\([\s\S]*\?\?\s*\n?\s*"\/guarantee"/);
-    expect(guaranteePage).toContain("if (!getMarketingOfferConfig().guaranteeEnabled) notFound()");
+    expect(guaranteePage).toContain("notFound()");
     expect(guaranteePage).toContain("No public TrueCap refund guarantee is currently offered.");
-    expect(reviewsPage).toContain("const { guaranteeEnabled } = getMarketingOfferConfig()");
-    expect(termsPage).toContain("{guaranteeEnabled ? (");
-    // The refund promise stays a software-satisfaction claim.
-    expect(landing).toContain("not a guarantee of");
+    expect(reviewsPage).not.toContain("Never Overpay Guarantee");
+    expect(termsPage).not.toContain("Never Overpay Guarantee");
   });
 });

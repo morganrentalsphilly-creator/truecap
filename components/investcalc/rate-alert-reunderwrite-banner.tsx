@@ -113,7 +113,7 @@ export function RateAlertReUnderwriteBanner({
           />
           <Delta label="DSCR" before={before.dscr.toFixed(2)} after={after.dscr.toFixed(2)} />
           {before.tier !== after.tier ? (
-            <Delta label="Verdict" before={before.tier} after={after.tier} />
+            <Delta label="Screening result" before={before.tier} after={after.tier} />
           ) : null}
         </div>
         <div className="mt-1 text-xs text-muted-foreground">

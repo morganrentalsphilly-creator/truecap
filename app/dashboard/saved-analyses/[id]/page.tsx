@@ -27,7 +27,10 @@ import { DealStageSelect } from "@/components/investcalc/deal-stage-select";
 import { DealClientSelect } from "@/components/investcalc/deal-client-select";
 import { ShareLinkButton } from "@/components/investcalc/share-link-button";
 import { listAgentClientsAction } from "@/app/actions/agent-clients";
-import { OpenFullAnalysisButton } from "@/components/investcalc/open-saved-deal-in-analyzer";
+import {
+  OpenFullAnalysisButton,
+  ReunderwriteAsScenarioButton,
+} from "@/components/investcalc/open-saved-deal-in-analyzer";
 import { RefreshOnReturn } from "@/components/investcalc/refresh-on-return";
 import { DealWorkspaceAnchorChips } from "@/components/investcalc/deal-workspace-anchor-chips";
 import { OwnedEquityCard } from "@/components/investcalc/owned-equity-card";
@@ -42,11 +45,16 @@ import {
 } from "@/lib/recompute-saved-deal-verdict";
 import { normalizeMaoTarget } from "@/lib/mao-target-editor";
 import {
+  isAdoptedOfferCeilingTargetSource,
   normalizeOfferCeilingTargetSource,
   type OfferCeilingTargetSource,
 } from "@/lib/offer-ceiling-contract";
 import { computeDealOfferLine, type DealOfferLine } from "@/lib/deal-offer-line";
-import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
+import { recordedDealOfferLine } from "@/lib/recorded-offer-ceiling";
+import {
+  isReleasedUnderwritingSnapshot,
+  normalizeReleasedInvestmentFormSnapshot,
+} from "@/lib/underwriting-model-release";
 import type { OwnedEquitySummary } from "@/lib/owned-equity";
 import { computeRowEquity } from "@/lib/owned-equity-series";
 import type { DealRecommendation } from "@/lib/deal-score";
@@ -291,6 +299,11 @@ export default async function DealWorkspacePage({
     /** Owned-deal close date — absent until its migration is applied. */
     close_date?: string | null;
   };
+  // A crafted/preexisting internal model snapshot is not a released deal
+  // workspace. Block before any recorded-result fallback or action controls.
+  if (!isReleasedUnderwritingSnapshot(dealRow.form_snapshot)) {
+    redirect("/dashboard/saved-analyses");
+  }
   // Nickname leads (same convention as My Deals rows); the address drops to a
   // secondary line under the h1 so the property is still identifiable.
   const nickname = typeof dealRow.nickname === "string" && dealRow.nickname.trim() ? dealRow.nickname.trim() : null;
@@ -350,10 +363,9 @@ export default async function DealWorkspacePage({
   // null (criterion skipped) — NOT 0 (criterion failed) — for metrics the
   // legacy snapshot may simply not carry.
   const numOrNull = (v: unknown): number | null => (v == null ? null : num(v));
-  // A future material standard must not silently rewrite an old acquisition
-  // decision. Version-mismatched rows use their frozen output until the user
-  // explicitly re-underwrites; same-version and legacy rows preserve the
-  // existing, clearly labeled recompute-on-read behavior.
+  // A saved analysis is recorded history even when its public methodology
+  // version matches the running app. Only explicitly unpinned legacy rows use
+  // the clearly labeled compatibility recompute.
   const fresh = methodologyResolution.didRecompute ? recomputed : null;
   const netCashFlow = fresh
     ? fresh.netCashFlowMonthly
@@ -362,13 +374,13 @@ export default async function DealWorkspacePage({
   const monthlyPayment = fresh ? fresh.monthlyPayment : num(snap["monthlyPayment"]);
   // calc-analysis canon: monthlyPayment <= 0 means a cash purchase (DSCR is
   // N/A, never failed). One derivation, shared by the buy-box metrics and the
-  // MAO target below.
+  // Offer Ceiling target below.
   const isCashPurchase = fresh ? fresh.isCashPurchase : monthlyPayment <= 0;
   // Current-engine form values — reused by the max-offer solver and the
   // owned-equity estimate. Null for legacy snapshots that don't validate.
   const formValues = isFrozenMethodologySnapshot
     ? null
-    : normalizeInvestmentFormSnapshot(dealRow.form_snapshot);
+    : normalizeReleasedInvestmentFormSnapshot(dealRow.form_snapshot);
 
   // Rate-alert deep link: re-underwrite at the alert's rate (pure preview —
   // the saved deal is NOT mutated by opening the link; the banner's one
@@ -422,7 +434,7 @@ export default async function DealWorkspacePage({
       ? boxesForDealClient(
           buyBoxesResult.boxes.filter((b) => b.isActive && buyBoxHasCriteria(b)),
           // Scope to THIS deal's client — a box belonging to another buyer must
-          // not drive this deal's fit, personal line, or MAO basis.
+          // not drive this deal's fit, personal line, or Offer Ceiling basis.
           dealRow.client_id ?? null
         )
       : [];
@@ -461,7 +473,7 @@ export default async function DealWorkspacePage({
     }
   }
 
-  // Max allowable offer (DEC-2): the verdict → offer-number path. Solve the
+  // Offer Ceiling (DEC-2): the verdict → offer-number path. Solve the
   // highest price that still clears the user's targets (buy-box thresholds
   // when set, else break-even cash flow + DSCR 1.25 — see lib/mao-targets)
   // from the SAME current-engine form snapshot everything above recomputes
@@ -476,20 +488,34 @@ export default async function DealWorkspacePage({
     normalizeOfferCeilingTargetSource(
       dealRow.result_snapshot?.maxOfferTargetSource
     ) ?? "selected-targets";
-  const storedMaoTarget =
+  const financingSafeStoredMaoTarget =
     rawStoredMaoTarget && isCashPurchase
       ? normalizeMaoTarget({ ...rawStoredMaoTarget, dscr: undefined })
       : rawStoredMaoTarget;
+  const storedMaoTarget = isAdoptedOfferCeilingTargetSource(
+    storedMaoTargetSource
+  )
+    ? financingSafeStoredMaoTarget
+    : null;
   let shareMaoTarget = storedMaoTarget;
   let shareMaoTargetSource: OfferCeilingTargetSource | undefined =
     storedMaoTarget ? storedMaoTargetSource : undefined;
-  if (
+  const isShoppingStage =
+    !isClosedDeal && (stage == null || isActiveStage(stage));
+  if (isPremium && methodologyResolution.usesRecordedSnapshot) {
+    const recorded = recordedDealOfferLine({
+      snapshot: dealRow.result_snapshot,
+      isShoppingStage,
+    });
+    if (recorded) {
+      maoLine = recorded.offer;
+      maoBasisLabel = recorded.basisLabel;
+    }
+  } else if (
     isPremium &&
-    !isFrozenMethodologySnapshot &&
     formValues &&
-    !isClosedDeal &&
-    (storedMaoTarget != null || buyBoxesResolved) &&
-    (stage == null || isActiveStage(stage))
+    isShoppingStage &&
+    (storedMaoTarget != null || buyBoxesResolved)
   ) {
     const offerResolution = computeDealOfferLine(formValues, activeBuyBoxes, {
       isShoppingStage: true,
@@ -573,7 +599,9 @@ export default async function DealWorkspacePage({
                       TrueCap Underwriting Standard v{storedMethodologyVersion}
                       {storedMethodologyVersion !== TRUECAP_UNDERWRITING_STANDARD_VERSION
                         ? ` · frozen snapshot; current standard is v${TRUECAP_UNDERWRITING_STANDARD_VERSION}`
-                        : ""}
+                        : methodologyResolution.usesRecordedSnapshot
+                          ? " · recorded result"
+                          : ""}
                     </>
                   ) : (
                     <>
@@ -618,6 +646,7 @@ export default async function DealWorkspacePage({
                 {formValues ? (
                   <ShareLinkButton
                     values={formValues}
+                    isAuthenticated={true}
                     savedDealId={dealRow.id}
                     maoTarget={shareMaoTarget}
                     maoTargetSource={shareMaoTargetSource}
@@ -629,6 +658,9 @@ export default async function DealWorkspacePage({
                   />
                 ) : null}
                 <OpenFullAnalysisButton savedDealId={dealRow.id} />
+                {methodologyResolution.usesRecordedSnapshot ? (
+                  <ReunderwriteAsScenarioButton savedDealId={dealRow.id} />
+                ) : null}
               </div>
             </div>
             {/* Compact underwrite strip (DEC-1/WS-1): the numbers the dashboard
@@ -646,7 +678,7 @@ export default async function DealWorkspacePage({
               {cocPct != null ? <Metric label="CoC" value={`${cocPct.toFixed(1)}%`} /> : null}
               {dscrDisplay ? <Metric label="DSCR" value={dscrDisplay} /> : null}
               {dealScore != null ? (
-                <Metric label="Deal Score" value={`${Math.round(dealScore)}`} />
+                <Metric label="Screening Index" value={`${Math.round(dealScore)}/100`} />
               ) : null}
             </div>
             {/* Cross-deal compare, at the "is this one better than my
@@ -697,16 +729,16 @@ export default async function DealWorkspacePage({
                 Your buy box · {buyBoxPersonalLine}
               </p>
             ) : null}
-            {/* Max offer line (DEC-2): "lower your offer" becomes an
+            {/* Offer Ceiling line (DEC-2): "lower your offer" becomes an
                 executable number, right beside the advice. The basis is
                 labeled inline (CONFLICT #6) so this never reads as a second,
-                unexplained "your max" vs the analyzer's MAO surfaces. */}
+                unexplained "your max" vs the analyzer's Offer Ceiling surfaces. */}
             {maoLine ? (
               <div className="mt-2 flex items-start gap-3 rounded-2xl border border-border bg-card p-4">
                 <Target aria-hidden className="mt-0.5 size-5 shrink-0 text-primary" />
                 <div className="min-w-0 flex-1">
                   <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    Price ceiling
+                    Offer Ceiling
                   </div>
                   {maoLine.kind === "blocked" ? (
                     <div className="text-sm font-bold text-foreground">
@@ -720,15 +752,15 @@ export default async function DealWorkspacePage({
                   ) : maoLine.kind === "clears" ? (
                     <>
                       <div className="text-sm font-bold text-foreground">
-                        Asking price works at your targets
+                        Asking is at or below the Offer Ceiling
                       </div>
                       {maoLine.maxPrice != null ? (
                         <div className="text-xs text-muted-foreground">
-                          You could pay up to{" "}
+                          Highest modeled price that meets the captured targets:{" "}
                           <span className="font-semibold tabular-nums text-foreground">
                             {fmtMoney(maoLine.maxPrice)}
                           </span>{" "}
-                          and still hit them.
+                          under the assumptions shown.
                         </div>
                       ) : null}
                     </>
@@ -754,7 +786,7 @@ export default async function DealWorkspacePage({
                         Targets: {maoBasisLabel}
                       </div>
                       <div className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-                        Calculated from your selected targets. This is not a recommended offer.
+                        Highest modeled price that still meets {maoBasisLabel} under the assumptions shown. This is not a recommended offer or appraisal.
                       </div>
                     </>
                   ) : null}

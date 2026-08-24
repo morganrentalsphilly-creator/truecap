@@ -13,7 +13,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Lock, X, FileDown, Calculator, Target, TrendingUp } from "lucide-react";
+import { ArrowRight, Lock, X, Calculator, Target, TrendingUp, FileDown } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { scrollBehavior } from "@/lib/utils";
@@ -28,10 +28,6 @@ interface MomentOfValueUpsellProps {
   decisionTone: "blocked" | "review" | "ready";
   /** True when the viewer is already on a paid plan; if so we render nothing. */
   isPaid: boolean;
-  /** Triggers the one-time Deal Decision Pack chooser for free users.
-   *  When provided, the one-time next-step is shown so the
-   *  visitor isn't funneled only toward Pro. */
-  onExportPdf?: () => void;
 }
 
 const fmtMoney = (n: number) => {
@@ -46,10 +42,9 @@ export function MomentOfValueUpsell({
   cocReturn,
   decisionTone,
   isPaid,
-  onExportPdf,
 }: MomentOfValueUpsellProps) {
   const [dismissed, setDismissed] = useState(false);
-  const { proOfferName, singleDeal } = getMarketingOfferConfig();
+  const { proOfferName } = getMarketingOfferConfig();
 
   // Post-checkout suppression: while BillingSuccessBanner is confirming a
   // fresh purchase (billing=success poll pending), render nothing — a buyer
@@ -103,14 +98,11 @@ export function MomentOfValueUpsell({
       </div>
 
       <h3 className="mt-3 text-lg font-extrabold leading-tight tracking-tight text-foreground sm:text-2xl">
-        {decisionTone === "blocked"
-          ? "This deal misses at the current price. Find the price where it starts working."
-          : decisionTone === "review"
-            ? "This deal is close. Find the exact price that clears your targets."
-            : "This deal clears the first screen. Protect the upside with a hard offer ceiling."}
+        Set your own return targets, then calculate a modeled Offer Ceiling.
       </h3>
       <p className="mt-2 text-sm text-muted-foreground">
-        Decide before you negotiate—not after the list price anchors you.
+        The free screen shows the operating math. Pro lets you adopt explicit
+        criteria and test the highest modeled price that still meets them.
       </p>
 
       {/* Everything here is a value already visible in the free analysis.
@@ -130,7 +122,7 @@ export function MomentOfValueUpsell({
         />
         <FeatureChip
           icon={FileDown}
-          label="Decision package"
+          label="Underwriting tools"
           value="Ready to unlock"
           sub="offer · downside · report"
         />
@@ -147,7 +139,7 @@ export function MomentOfValueUpsell({
             </div>
           </div>
           <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
-            Pro decision
+            Pro underwriting
           </span>
         </div>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
@@ -158,9 +150,8 @@ export function MomentOfValueUpsell({
         </p>
       </div>
 
-      {/* Next steps — three clear paths so the visitor isn't funneled only
-          toward Pro: keep refining (free), buy one decision package, or upgrade
-          for the repeat workflow. */}
+      {/* Next steps: keep refining for free or upgrade to the supported Pro
+          report workflow. New one-time purchases are temporarily disabled. */}
       <div className="mt-5 space-y-2.5">
         <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
           Next steps
@@ -177,24 +168,6 @@ export function MomentOfValueUpsell({
           </span>
         </button>
 
-        {onExportPdf ? (
-          <button
-            type="button"
-            onClick={() => {
-              trackEvent("max_offer_unlock_clicked", { placement: "post_analysis", offer: "single_deal" });
-              onExportPdf();
-            }}
-            className="flex w-full items-start gap-2.5 rounded-xl border border-border bg-card p-3 text-left text-sm transition-colors hover:bg-muted"
-          >
-            <FileDown className="mt-0.5 size-4 shrink-0 text-[var(--brand-green)]" />
-            <span className="text-foreground">
-              <strong>Deal Decision Pack — {singleDeal.priceLabel}</strong> — get this
-              property&apos;s Max Offer, Deal Doctor thresholds, downside, projections,
-              and complete report. No subscription.
-            </span>
-          </button>
-        ) : null}
-
         <Link
           href="/pricing"
           onClick={() => {
@@ -206,8 +179,8 @@ export function MomentOfValueUpsell({
         >
           <Lock className="mt-0.5 size-4 shrink-0 text-primary" />
           <span className="flex-1 text-foreground">
-            <strong>Tune your price ceiling with {proOfferName}</strong> — set your Buy Box,
-            stress-test downside, compare opportunities, and act on the best ones.
+            <strong>Tune the Offer Ceiling with {proOfferName}</strong> — set your Buy Box,
+            stress-test downside, and compare the same operating metrics side by side.
           </span>
           <ArrowRight className="mt-0.5 size-4 shrink-0 text-primary transition-transform group-hover:translate-x-0.5" />
         </Link>
@@ -217,7 +190,7 @@ export function MomentOfValueUpsell({
       {/* Inline note — softens the upsell */}
       <p className="mt-4 border-t border-border/60 pt-3 text-[11px] text-muted-foreground">
         Cash flow {fmtMoney(netCashFlow)}/mo · cap {capRate.toFixed(1)}% · CoC {cocReturn.toFixed(1)}%.
-        Calculations are estimates based on your inputs. Verify assumptions independently before making an offer.
+        Calculations are estimates based on your inputs. Verify assumptions independently before recording or acting on an investment decision.
       </p>
     </div>
   );

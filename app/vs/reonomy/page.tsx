@@ -51,7 +51,7 @@ type Row = { feature: string; truecap: string; reonomy: string; winner: Verdict 
 
 const MATRIX: Row[] = [
   { feature: "Primary asset class", truecap: "Residential (SFR, small multifamily, owner-occupant)", reonomy: "Commercial (office, retail, industrial, multifamily 5+)", winner: "tie" },
-  { feature: "Primary use", truecap: "Per-deal underwriting (decide if it cash-flows)", reonomy: "CRE property + owner intelligence (find + research)", winner: "tie" },
+  { feature: "Primary use", truecap: "Per-deal underwriting (model cash flow and returns)", reonomy: "CRE property + owner intelligence (find + research)", winner: "tie" },
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine for residential", reonomy: "Not modeled (intelligence only)", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", reonomy: "Not modeled", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", reonomy: "CRE property data only", winner: "truecap" },
@@ -259,8 +259,7 @@ export default function VsReonomyPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, and co-branded share links. Pro includes PDFs, and a one-time
-            PDF option is available; see live pricing for current terms.
+            Offer Ceiling, co-branded share links, and PDF reports with Pro; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">

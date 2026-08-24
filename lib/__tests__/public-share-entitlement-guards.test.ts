@@ -40,7 +40,8 @@ describe("public share entitlement guards", () => {
     const opaque = source("../../app/s/[token]/page.tsx");
     expect(access).toContain("if (!ownerId) return false");
     expect(access).toContain("return false");
-    expect(view).toContain("showProAnalysis ?");
+    expect(view).toContain("showProAnalysis && !recordedResult");
+    expect(view).toContain("Scenario tools are separate from this recorded result");
     expect(view).toContain('offerCeilingAccess?.access === "exact"');
     expect(view).not.toContain("calculateMaxAllowableOffer");
     expect(opaque).toContain("resolveOfferCeilingForAccess");

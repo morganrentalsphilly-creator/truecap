@@ -38,7 +38,7 @@ import {
   type RentAlertDeal,
 } from "@/lib/rent-alerts";
 import { fetchRentCastRentEstimate } from "@/lib/property-enrichment/rentcast";
-import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
+import { normalizeReleasedInvestmentFormSnapshot } from "@/lib/underwriting-model-release";
 import { getPaidUserIds } from "@/lib/paid-user-ids";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { getSiteUrl } from "@/lib/site-url";
@@ -138,7 +138,7 @@ export async function GET(request: Request) {
       // filter dropped those deals in silence — a paying customer simply never
       // received a rent alert, with nothing logged. Every other read path
       // already goes through normalizeInvestmentFormSnapshot.
-      const values = normalizeInvestmentFormSnapshot(row.form_snapshot);
+      const values = normalizeReleasedInvestmentFormSnapshot(row.form_snapshot);
       if (!values) return []; // genuinely unreadable, not merely old
       if (values.propertyType !== "single-family") return [];
       const address = (row.address as string | null)?.trim();

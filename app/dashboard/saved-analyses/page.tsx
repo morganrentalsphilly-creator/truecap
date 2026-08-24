@@ -34,8 +34,16 @@ import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-method
 import { computeRowEquity } from "@/lib/owned-equity-series";
 import { DEFAULT_PIPELINE_STAGE, isActiveStage, isPipelineStage } from "@/lib/pipeline";
 import { computeDealOfferLine, type DealOfferResult } from "@/lib/deal-offer-line";
-import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
+import { recordedDealOfferLine } from "@/lib/recorded-offer-ceiling";
+import {
+  isReleasedUnderwritingSnapshot,
+  normalizeReleasedInvestmentFormSnapshot,
+} from "@/lib/underwriting-model-release";
 import { normalizeMaoTarget } from "@/lib/mao-target-editor";
+import {
+  isAdoptedOfferCeilingTargetSource,
+  normalizeOfferCeilingTargetSource,
+} from "@/lib/offer-ceiling-contract";
 import { buyBoxHasCriteria, type NamedBuyBox } from "@/lib/buy-box";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 import { listAgentClientsAction } from "@/app/actions/agent-clients";
@@ -68,10 +76,17 @@ type SavedAnalysisRow = {
   is_archived: boolean | null;
   result_snapshot: {
     capRate?: number | string | null;
+    netCashFlow?: number | string | null;
+    cocReturn?: number | string | null;
+    dscr?: number | string | null;
+    monthlyPayment?: number | string | null;
+    totalCashRequired?: number | string | null;
     score?: number | string | null;
     recommendation?: StoredRecommendation | null;
     riskLevel?: StoredRiskLevel | null;
     maxOfferTarget?: unknown;
+    maxOfferTargetSource?: unknown;
+    offerCeilingExact?: unknown;
   } | null;
   methodology_version?: string | null;
   form_snapshot?: unknown;
@@ -89,6 +104,15 @@ type SavedAnalysisRow = {
   scenario_name?: string | null;
   pdf_url?: string | null;
 };
+
+function numberFromSnapshot(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string" && value.trim()) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
 
 // computeRowEquity (owned-deal equity from close_date + saved assumptions)
 // moved to lib/owned-equity-series so the dashboard home's owned-portfolio
@@ -115,7 +139,7 @@ function getInitials(displayName: string, email: string): string {
  * user's buy boxes. Shipping every row's full snapshot to the client just to
  * render one line would bloat the payload; only the small result crosses.
  *
- * Returns null (line hidden) without the paid MAO entitlement, when the
+ * Returns null (line hidden) without the paid Offer Ceiling entitlement, when the
  * snapshot doesn't validate, or when the deal is no longer shopping — never
  * throws.
  */
@@ -131,10 +155,16 @@ function offerLineForRow(
   // deal's number.
   // A saved Tune-target is authoritative even when the user has no buy box.
   // Normalize the untrusted JSON snapshot and, critically, only read it for a
-  // paid MAO entitlement so free My Deals rows never reveal the solver.
-  const persistedMaoTarget = canShowMao
-    ? normalizeMaoTarget(row.result_snapshot?.maxOfferTarget)
-    : null;
+  // paid Offer Ceiling entitlement so free My Deals rows never reveal the solver.
+  const persistedTargetSource = normalizeOfferCeilingTargetSource(
+    row.result_snapshot?.maxOfferTargetSource
+  );
+  const persistedMaoTarget =
+    canShowMao &&
+    (persistedTargetSource == null ||
+      isAdoptedOfferCeilingTargetSource(persistedTargetSource))
+      ? normalizeMaoTarget(row.result_snapshot?.maxOfferTarget)
+      : null;
   if (!canShowMao) return null;
   if (!persistedMaoTarget && !buyBoxesResolved) return null;
   // The RESILIENT normalizer, not a raw safeParse — the same one
@@ -143,7 +173,7 @@ function offerLineForRow(
   // default, so a strict parse rejects every pre-v9 snapshot: the row's metrics
   // would recompute fine while "your number" silently never appeared on
   // exactly the older deals a long-time user has most of.
-  const values = normalizeInvestmentFormSnapshot(row.form_snapshot);
+  const values = normalizeReleasedInvestmentFormSnapshot(row.form_snapshot);
   if (!values) return null;
   const result = computeDealOfferLine(values, activeBuyBoxes, {
     isShoppingStage,
@@ -159,6 +189,9 @@ function mapSavedRow(
   canShowMao = false,
   buyBoxesResolved = true
 ): SavedAnalysisListItem | null {
+  // Do not let an internal/crafted v2 row surface through its recorded result
+  // when recomputation correctly declines it.
+  if (!isReleasedUnderwritingSnapshot(row.form_snapshot)) return null;
   const recomputed = recomputeSavedDealVerdict(row.form_snapshot);
   const resolution = resolveSavedAnalysisSnapshot({
     methodologyVersion: row.methodology_version,
@@ -169,7 +202,7 @@ function mapSavedRow(
   });
   const snapshot = resolution.snapshot as NonNullable<SavedAnalysisRow["result_snapshot"]>;
   const fresh = resolution.didRecompute ? recomputed : null;
-  const frozenScore = resolution.shouldFreeze
+  const frozenScore = resolution.usesRecordedSnapshot
     ? parseFrozenDealScore(snapshot)
     : null;
   const capRateRaw = snapshot.capRate;
@@ -185,7 +218,7 @@ function mapSavedRow(
       : typeof snapshot.score === "string"
         ? Number(snapshot.score)
         : null;
-  // Deals saved before the Deal Score feature (or whose snapshot is
+  // Deals saved before the Screening Index feature (or whose snapshot is
   // partial) previously made this function return null — and the
   // caller filters nulls, so those deals SILENTLY VANISHED from the
   // list. A paying user's old deals looked deleted. Default the
@@ -194,15 +227,28 @@ function mapSavedRow(
   // null score → renders as a neutral row, data intact and clickable).
   const storedRecommendation = snapshot.recommendation ?? "Neutral";
   const storedRiskLevel = snapshot.riskLevel ?? "Medium Risk";
-  const offerResult = offerLineForRow(
-    row,
-    activeBuyBoxes,
-    !resolution.shouldFreeze && !row.is_completed && !row.is_archived && isActiveStage(
-      isPipelineStage(row.pipeline_stage) ? row.pipeline_stage : DEFAULT_PIPELINE_STAGE
-    ),
-    canShowMao,
-    buyBoxesResolved
-  );
+  const isShoppingStage =
+    !row.is_completed &&
+    !row.is_archived &&
+    isActiveStage(
+      isPipelineStage(row.pipeline_stage)
+        ? row.pipeline_stage
+        : DEFAULT_PIPELINE_STAGE
+    );
+  const offerResult = resolution.usesRecordedSnapshot
+    ? canShowMao
+      ? recordedDealOfferLine({
+          snapshot: row.result_snapshot,
+          isShoppingStage,
+        })
+      : null
+    : offerLineForRow(
+        row,
+        activeBuyBoxes,
+        isShoppingStage,
+        canShowMao,
+        buyBoxesResolved
+      );
 
   return {
     id: row.id,
@@ -210,16 +256,22 @@ function mapSavedRow(
     title: row.title,
     propertyType: row.property_type,
     purchasePrice: row.purchase_price,
-    // Recompute-on-read (Balanced), same as the verdict — so cash flow / CoC /
-    // cap / DSCR / cash-to-close all stay in lockstep with the live engine
-    // rather than drifting from the stored snapshot. Fall back to the stored
-    // values for legacy snapshots that don't validate.
-    netCashFlowMonthly: fresh ? fresh.netCashFlowMonthly : row.net_cash_flow_monthly,
-    cocReturnPct: fresh ? fresh.cocReturnPct : row.coc_return_pct,
+    // Recorded rows use the exact result snapshot captured at save time. Only
+    // unpinned legacy rows retain their clearly labeled compatibility recompute.
+    netCashFlowMonthly: fresh
+      ? fresh.netCashFlowMonthly
+      : (numberFromSnapshot(snapshot.netCashFlow) ?? row.net_cash_flow_monthly),
+    cocReturnPct: fresh
+      ? fresh.cocReturnPct
+      : (numberFromSnapshot(snapshot.cocReturn) ?? row.coc_return_pct),
     capRatePct: fresh ? fresh.capRatePct : Number.isFinite(parsedCapRate) ? parsedCapRate : null,
-    dscr: fresh ? fresh.dscr : null,
-    isCashPurchase: fresh ? fresh.isCashPurchase : undefined,
-    cashToClose: fresh ? fresh.cashToClose : null,
+    dscr: fresh ? fresh.dscr : numberFromSnapshot(snapshot.dscr),
+    isCashPurchase: fresh
+      ? fresh.isCashPurchase
+      : numberFromSnapshot(snapshot.monthlyPayment) != null
+        ? numberFromSnapshot(snapshot.monthlyPayment)! <= 0
+        : undefined,
+    cashToClose: fresh ? fresh.cashToClose : numberFromSnapshot(snapshot.totalCashRequired),
     score: fresh ? fresh.score : Number.isFinite(parsedScore) ? parsedScore : null,
     recommendation: fresh ? fresh.recommendation : storedRecommendation,
     riskLevel: fresh ? fresh.riskLevel : storedRiskLevel,
@@ -237,7 +289,9 @@ function mapSavedRow(
         ? resolution.didRecompute
           ? `Legacy analysis · recomputed with current v${TRUECAP_UNDERWRITING_STANDARD_VERSION}`
           : `Legacy analysis · stored snapshot (current v${TRUECAP_UNDERWRITING_STANDARD_VERSION} recompute unavailable)`
-        : undefined,
+        : resolution.usesRecordedSnapshot
+          ? `Recorded Standard v${resolution.storedMethodologyVersion}`
+          : undefined,
     pipelineStage: isPipelineStage(row.pipeline_stage) ? row.pipeline_stage : DEFAULT_PIPELINE_STAGE,
     tags: Array.isArray(row.tags) ? row.tags.filter((t): t is string => typeof t === "string") : [],
     clientId: row.client_id ?? null,
@@ -327,7 +381,7 @@ export default async function DashboardSavedAnalysesPage({
       : [];
   const buyBoxesResolved =
     !hasPlanFeature(entitlements, "buy_box") || Boolean(buyBoxesResult?.ok);
-  // MAO is catalogued as a paid-status gate, not a plan-feature flag. The
+  // Offer Ceiling is catalogued as a paid-status gate, not a plan-feature flag. The
   // production Pro plan JSON intentionally has no `mao` string, so combining
   // these checks would hide the feature from every legitimate Pro customer.
   const canShowMao = isPremium;

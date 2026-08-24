@@ -54,7 +54,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", baselane: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", baselane: "Not modeled", winner: "truecap" },
   { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", baselane: "Yes — actuals tracking for Schedule E", winner: "tie" },
-  { feature: "Deal score + verdict", truecap: "Free — 0-100 score + plain-English verdict", baselane: "Not applicable", winner: "truecap" },
+  { feature: "Secondary Screening Index", truecap: "Free — 0-100 triage score + factor breakdown", baselane: "Not applicable", winner: "truecap" },
   { feature: "Sensitivity grid", truecap: "Pro — rent ±10%, vacancy ±5pp, rate ±1pp", baselane: "Not modeled", winner: "truecap" },
   { feature: "Rental business banking", truecap: "No", baselane: "Yes — FDIC-insured business checking", winner: "baselane" },
   { feature: "Auto-categorized expenses", truecap: "No", baselane: "Yes — synced with bank feed", winner: "baselane" },
@@ -64,7 +64,7 @@ const MATRIX: Row[] = [
   { feature: "Pricing (entry tier)", truecap: "Free core; paid Pro — see live pricing", baselane: "Banking + bookkeeping free; advanced ~$22/mo (as of 2026)", winner: "tie" },
   { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", baselane: "Yes — banking + basic bookkeeping", winner: "tie" },
   { feature: "Shareable read-only deal link", truecap: "Free — read-only public link; Pro adds co-branding", baselane: "Not the use case", winner: "truecap" },
-  { feature: "PDF deal report", truecap: "One-time Deal Decision Pack or included with Pro", baselane: "Schedule E reports for tax filing", winner: "tie" },
+  { feature: "PDF deal report", truecap: "Included with Pro", baselane: "Schedule E reports for tax filing", winner: "tie" },
 ];
 
 export default function VsBaselanePage() {
@@ -143,7 +143,7 @@ export default function VsBaselanePage() {
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You&apos;re evaluating a property before making an offer.</li>
                 <li>You want forward-looking projections (10-yr cash flow, exit scenarios).</li>
-                <li>You want a deal score + verdict to compare 2-3 deals side-by-side.</li>
+                <li>You want standardized economics and rule-fit context to compare 2-3 deals side-by-side.</li>
                 <li>You want defensible numbers for a lender or partner.</li>
               </ul>
             </div>
@@ -269,8 +269,7 @@ export default function VsBaselanePage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, and co-branded share links. Pro includes PDFs, and a one-time
-            PDF option is available; see live pricing for current terms.
+            Offer Ceiling, co-branded share links, and PDF reports with Pro; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -351,11 +350,11 @@ const BASELANE_FAQ: FaqItem[] = [
     question: "Can I share a TrueCap analysis with my CPA via Baselane?",
     answer: (
       <>
-        Not directly — they&apos;re separate tools. TrueCap generates a free read-only share link and offers a one-time Deal Decision Pack or PDFs included with Pro. You can provide the review snapshot alongside Baselane&apos;s historical reports, subject to your CPA&apos;s requested documentation.
+        Not directly — they&apos;re separate tools. TrueCap generates a free read-only share link and includes PDFs with Pro. You can provide the review snapshot alongside Baselane&apos;s historical reports, subject to your CPA&apos;s requested documentation.
       </>
     ),
     plainTextAnswer:
-      "Not directly. TrueCap generates a free read-only share link and offers a one-time Deal Decision Pack or PDFs included with Pro. Provide it alongside Baselane's historical reports when your CPA requests that documentation.",
+      "Not directly. TrueCap generates a free read-only share link and includes PDFs with Pro. Provide it alongside Baselane's historical reports when your CPA requests that documentation.",
   },
 ];
 

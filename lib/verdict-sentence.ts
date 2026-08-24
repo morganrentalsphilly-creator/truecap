@@ -32,47 +32,42 @@ const money = (n: number) =>
   `$${Math.round(n).toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
 
 export function buildVerdictSentence(input: VerdictSentenceInput): VerdictSentence {
-  const display = verdictDisplay(input.recommendation);
+  // Keep the stored recommendation mapped so stale/unknown values still fail
+  // through the canonical display boundary. It is deliberately not used to
+  // infer a user decision or an offer instruction.
+  verdictDisplay(input.recommendation);
   const price =
     typeof input.purchasePrice === "number" && input.purchasePrice > 0
       ? input.purchasePrice
       : null;
   const offer =
     typeof input.maxOffer === "number" && input.maxOffer > 0 ? input.maxOffer : null;
-  const negative = display.tone === "negative" || display.tone === "caution";
-
-  // Both numbers known — the full instruction, including the gap.
+  // Both numbers known — state the modeled relationship, never an instruction
+  // to buy, offer, pursue, or pass.
   if (price && offer) {
     const gap = Math.round(price - offer);
-    if (negative) {
-      return {
-        text: `Don't buy at ${money(price)}. Offer ${money(offer)} or walk.`,
-        hasOffer: true,
-      };
-    }
     if (gap > 0) {
       return {
-        text: `${display.label}. Your max offer is ${money(offer)} — ${money(gap)} below asking.`,
+        text: `Asking is ${money(gap)} above the modeled Offer Ceiling of ${money(offer)}.`,
         hasOffer: true,
       };
     }
-    // Solver clears at or above asking: the deal works at the asking price.
     return {
-      text: `${display.label}. It clears your targets at the ${money(price)} asking price.`,
+      text:
+        gap < 0
+          ? `Asking is ${money(Math.abs(gap))} below the modeled Offer Ceiling of ${money(offer)}.`
+          : `Asking equals the modeled Offer Ceiling of ${money(offer)}.`,
       hasOffer: true,
     };
   }
 
-  // Price only (Free tier, or the solver found no price that clears).
+  // Price only (Free tier, or the solver found no supported ceiling).
   if (price) {
     return {
-      text: negative
-        ? `Don't buy at ${money(price)} on these numbers.`
-        : `${display.label} at ${money(price)}.`,
+      text: `Review the selected rules and assumptions at the ${money(price)} asking price.`,
       hasOffer: false,
     };
   }
 
-  // Nothing but the verdict — still phrased as a decision, never a category.
-  return { text: `${display.label}.`, hasOffer: false };
+  return { text: "Review the selected rules and assumptions.", hasOffer: false };
 }

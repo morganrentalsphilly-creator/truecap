@@ -4,16 +4,16 @@
  * STRATEGY OUTCOME CARD - the strategy-aware headline for the results.
  *
  * When a non-cash-flow strategy is active (Wholesale, BRRRR, Fix & Flip), the
- * generic "Does not meet buy box / Deal Score" verdict is misleading - a
+ * generic "Does not meet buy box / Screening Index" verdict is misleading - a
  * wholesaler offering below ask EXPECTS the asking-price underwrite to be
  * negative. This card replaces that verdict and leads with the number that
  * play actually came for:
- *   - Wholesale → Max Allowable Offer (solved from the dashboard's exact
+ *   - Wholesale → Offer Ceiling (solved from the dashboard's exact
  *     active targets, with an inline editor that updates every other surface).
  *   - BRRRR / Fix & Flip → a jump into their model (the profit/cash-left-in
  *     math needs ARV + rehab, which live in the Strategies tab).
  *
- * Pro stays Pro: MAO + BRRRR/Flip are paid, so free users see a clean upsell
+ * Pro stays Pro: Offer Ceiling + BRRRR/Flip are paid, so free users see a clean upsell
  * here instead of being dumped on a paywall tab.
  */
 
@@ -44,7 +44,7 @@ const usd = (n: number) =>
     maximumFractionDigits: 0,
   }).format(Math.round(n));
 
-// The dashboard owns the active MAO target. Wholesale consumes and edits that
+// The dashboard owns the active Offer Ceiling target. Wholesale consumes and edits that
 // same object so its headline, Save/Share/PDF, and every other price-ceiling
 // surface cannot drift onto a second set of criteria.
 
@@ -77,11 +77,11 @@ export function StrategyOutcomeCard({
   onTuneTargetsOpened?: () => void;
   onUpgrade?: () => void;
 }) {
-  // ---- Wholesale → Max Allowable Offer ----
+  // ---- Wholesale → Offer Ceiling ----
   if (strategy.key === "wholesale-mao") {
     if (offerCeilingError && canUseMaxOffer) {
       return (
-        <OutcomeShell icon={Target} eyebrow="Wholesale / MAO" title="Price ceiling temporarily unavailable">
+        <OutcomeShell icon={Target} eyebrow="Wholesale / Offer Ceiling" title="Offer Ceiling temporarily unavailable">
           <p role="alert" className="text-sm text-muted-foreground">
             The secure calculation could not be reached. Retry it from the decision summary above.
           </p>
@@ -90,11 +90,11 @@ export function StrategyOutcomeCard({
     }
     if (!canUseMaxOffer || (!isOfferCeilingLoading && !hasExactOfferCeilingAccess)) {
       return (
-        <OutcomeShell icon={Target} eyebrow="Wholesale / MAO" title="Unlock your max allowable offer">
+        <OutcomeShell icon={Target} eyebrow="Wholesale / Offer Ceiling" title="Unlock the Offer Ceiling">
           <p className="text-sm text-muted-foreground">
             Set the return criteria that matter to you, then reverse-solve the highest price that
             clears all of them. The deal-specific ceiling stays locked until you choose Pro or a
-            single Deal Decision Pack.
+            Pro PDF report.
           </p>
           {onUpgrade ? (
             <Button onClick={onUpgrade} className="mt-3 rounded-xl">
@@ -106,7 +106,7 @@ export function StrategyOutcomeCard({
     }
     if (!activeMaoTarget) {
       return (
-        <OutcomeShell icon={Target} eyebrow="Wholesale / MAO" title="Calculating your price ceiling">
+        <OutcomeShell icon={Target} eyebrow="Wholesale / Offer Ceiling" title="Calculating the Offer Ceiling">
           <p role="status" className="text-sm text-muted-foreground">
             Resolving the criteria attached to this analysis…
           </p>
@@ -115,7 +115,7 @@ export function StrategyOutcomeCard({
     }
     if (isOfferCeilingLoading) {
       return (
-        <OutcomeShell icon={Target} eyebrow="Wholesale / MAO" title="Calculating your price ceiling">
+        <OutcomeShell icon={Target} eyebrow="Wholesale / Offer Ceiling" title="Calculating the Offer Ceiling">
           <p role="status" className="text-sm text-muted-foreground">
             Checking access and solving the criteria attached to this analysis…
           </p>
@@ -156,7 +156,7 @@ export function StrategyOutcomeCard({
   }
 
   // Pro: lead with the real interactive model so the play shows its actual
-  // numbers (rehab/ARV → profit / cash-left-in), just like Wholesale's MAO.
+  // numbers (rehab/ARV → profit / cash-left-in), just like Wholesale's Offer Ceiling.
   return isFlip ? (
     <FixFlipCard values={values} result={result} />
   ) : (
@@ -201,7 +201,7 @@ function WholesaleOutcome({
 
   if (!hasTarget) {
     return (
-      <OutcomeShell icon={Target} eyebrow="Wholesale / MAO" title="Set a price-ceiling target">
+      <OutcomeShell icon={Target} eyebrow="Wholesale / Offer Ceiling" title="Set Offer Ceiling rules">
         <p className="text-sm text-muted-foreground">
           Add at least one return criterion below. TrueCap will then calculate the highest price
           that clears it using this deal&apos;s assumptions.
@@ -219,7 +219,7 @@ function WholesaleOutcome({
 
   if (!offerCeiling) {
     return (
-      <OutcomeShell icon={Target} eyebrow="Wholesale / MAO" title="No price clears these targets">
+      <OutcomeShell icon={Target} eyebrow="Wholesale / Offer Ceiling" title="No price meets these rules">
         <p className="text-sm text-muted-foreground">
           Even at the solver&apos;s lowest supported price, {usd(values.monthlyRent ?? 0)}/mo rent
           does not clear every selected criterion: {targetsLabel}. Verify the rent assumption or
@@ -242,7 +242,7 @@ function WholesaleOutcome({
     asking && asking > 0 && spread != null ? Math.round((spread / asking) * 100) : null;
 
   return (
-    <OutcomeShell icon={Target} eyebrow="Wholesale / MAO" title="Price ceiling">
+    <OutcomeShell icon={Target} eyebrow="Wholesale / Offer Ceiling" title="Offer Ceiling">
       <p
         aria-live="polite"
         aria-atomic="true"
@@ -252,7 +252,8 @@ function WholesaleOutcome({
       </p>
       <p className="mt-2 text-sm text-muted-foreground">Criteria: {targetsLabel}.</p>
       <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-        Calculated from your selected targets. This is not a recommended offer.
+        Highest modeled price that still meets the selected wholesale rules under the assumptions shown.
+        This is not a recommended offer or an appraisal.
       </p>
       {asking != null ? (
         <div className="mt-4 rounded-xl border border-border bg-card/70 p-3">
@@ -270,7 +271,7 @@ function WholesaleOutcome({
           </div>
           <div className="flex items-center justify-between gap-3 text-xs">
             <span className="font-bold tabular-nums text-primary">
-              Price ceiling {usd(maxPrice)}
+              Offer Ceiling {usd(maxPrice)}
             </span>
             {spread != null && spread > 0 ? (
               <span className="text-right font-medium text-muted-foreground">
@@ -285,8 +286,8 @@ function WholesaleOutcome({
           </div>
           <p className="mt-2 text-xs leading-snug text-muted-foreground">
             {spread != null && spread > 0
-              ? "The asking price exceeds the ceiling—negotiate down or pass."
-              : "At the asking price this already hits your return targets."}
+              ? "The asking price exceeds the modeled ceiling. Review the gap and unresolved assumptions."
+              : "At asking, the modeled economics meet the selected return rules."}
           </p>
         </div>
       ) : null}
@@ -401,7 +402,7 @@ function WholesaleTargetEditor({
         className="h-11 gap-2 rounded-xl"
       >
         <SlidersHorizontal className="size-4" aria-hidden />
-        Tune price-ceiling targets
+        Tune Offer Ceiling rules
         <ChevronDown
           className={`size-4 transition-transform ${open ? "rotate-180" : ""}`}
           aria-hidden
@@ -409,7 +410,7 @@ function WholesaleTargetEditor({
       </Button>
       <div id={editorId} hidden={!open} className="mt-4 rounded-xl border border-border bg-card/70 p-4">
         <fieldset>
-          <legend className="text-sm font-bold text-foreground">Wholesale price-ceiling targets</legend>
+          <legend className="text-sm font-bold text-foreground">Wholesale Offer Ceiling rules</legend>
           <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
             Change a criterion and the ceiling updates immediately everywhere this analysis is used.
             Leave a field blank to ignore it.

@@ -42,6 +42,7 @@ export function SharedDealShell({
   leadCapture,
   methodologyVersion,
   legacyMethodologyWarning = false,
+  recordedResult = false,
   addressIncluded = true,
 }: {
   values: InvestmentFormValues;
@@ -61,6 +62,8 @@ export function SharedDealShell({
   leadCapture?: SharedDealLeadCapture;
   methodologyVersion?: string;
   legacyMethodologyWarning?: boolean;
+  /** True when result is the immutable output captured with an opaque share. */
+  recordedResult?: boolean;
   addressIncluded?: boolean;
 }) {
   return (
@@ -112,9 +115,9 @@ export function SharedDealShell({
           </p>
           {legacyMethodologyWarning ? (
             <p role="status" className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs leading-relaxed text-foreground">
-              Legacy share: this link did not capture a formula-version pin. It has been
-              recalculated with the current standard and should be refreshed before it is
-              used for a decision.
+              Legacy input-only share: this link predates recorded result snapshots. It has
+              been recalculated with the labeled current standard and should be refreshed
+              before it is used for a decision.
             </p>
           ) : null}
         </header>
@@ -127,6 +130,7 @@ export function SharedDealShell({
           maoTarget={maoTarget}
           maoTargetSource={maoTargetSource}
           offerCeilingAccess={offerCeilingAccess}
+          recordedResult={recordedResult}
           addressIncluded={addressIncluded}
         />
 

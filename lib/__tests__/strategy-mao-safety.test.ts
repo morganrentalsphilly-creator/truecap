@@ -77,10 +77,14 @@ describe("Max Offer entitlement and Wholesale target safety", () => {
     expect(strategyCard).not.toContain("onJumpToTab");
   });
 
-  it("keeps the one-time Pack export on the same active target", () => {
-    expect(dashboard).toContain("activeMaoTarget ?? undefined,");
-    expect(dashboard).toContain("offerCeilingTargetSource\n    );");
-    expect(dashboard).toContain("onExportPdf={() => handleExportPdf()}");
+  it("keeps every supported PDF export on the same explicitly adopted target", () => {
+    expect(dashboard).toContain("const adoptedMaoTarget = targetAdopted");
+    expect(dashboard).toContain("const adoptedMaoTargetSource = targetAdopted");
+    expect(dashboard).toContain("adoptedMaoTarget,\n      adoptedMaoTargetSource");
+    expect(dashboard).not.toContain("activeMaoTarget ?? undefined,");
+    expect(dashboard).toContain("onClick={() => handleExportPdf()}");
+    expect(dashboard).toContain("handleExportPdf(\"personal\")");
+    expect(dashboard).not.toContain("createOneTimePdfCheckoutAction");
   });
 
   it("keeps the legacy target action on the actual Max Offer editor", () => {

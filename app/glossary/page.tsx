@@ -224,16 +224,16 @@ const CURATED: Term[] = [
   },
   {
     slug: "max-allowable-offer",
-    term: "Max Allowable Offer",
-    also: ["MAO"],
+    term: "Offer Ceiling",
+    also: ["Target-dependent purchase-price boundary"],
     definition:
-      "The maximum price you can pay for a property and still hit your target return / cash-back-at-refi. For BRRRR: MAO = (ARV × refi LTV) − rehab cost − closing − holding. For buy-and-hold: MAO solves for a target DSCR or cap rate. Computed automatically in TrueCap Pro.",
+      "The highest modeled purchase price that still meets the selected target profile under the assumptions shown. For BRRRR, the boundary can use ARV, refinance LTV, rehab, closing, and holding costs; for buy-and-hold, it can solve against selected DSCR, cap-rate, cash-flow, or return rules. It is not a recommended offer, appraisal, or substitute for verification.",
   },
   {
     slug: "pro-forma",
     term: "Pro forma",
     definition:
-      "Your projection of the property's future operating performance, as opposed to the seller's trailing actuals. Brokers always pitch pro-forma cap rates that include optimistic rent bumps and aggressive expense assumptions. For triage use pro-forma; for the actual offer, recompute using trailing actuals plus YOUR conservative growth assumptions.",
+      "Your projection of the property's future operating performance, as opposed to the seller's trailing actuals. Marketing materials may use pro-forma cap rates with optimistic rent growth or expense assumptions. For screening, compare the pro forma with trailing actuals and your own verified assumptions before recording a decision.",
   },
   {
     slug: "1031-exchange",

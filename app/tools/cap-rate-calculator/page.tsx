@@ -350,7 +350,7 @@ export default function CapRateCalculatorPage() {
             <p>
               When you&apos;re ready to go deeper — cash-on-cash, DSCR,
               monthly cash flow, 10-year projections, illustrative tax impact, modeled exit
-              scenarios, and a deal score — you can run the full analysis
+              scenarios, and a secondary Screening Index — you can run the full analysis
               free at TrueCap.
             </p>
 
@@ -383,7 +383,7 @@ export default function CapRateCalculatorPage() {
             <p className="text-sm sm:text-base opacity-90 mb-4">
               Cap rate is a great filter, but real underwriting needs cash
               flow, cash-on-cash, DSCR, 10-year projections, tax savings,
-              exit scenarios, and a Deal Score. TrueCap does all of it from
+              exit scenarios, and a secondary Screening Index. TrueCap does all of it from
               the same property inputs you used here.
             </p>
             <ul className="text-sm space-y-1.5 mb-5 opacity-90">
@@ -392,7 +392,7 @@ export default function CapRateCalculatorPage() {
                 "10-year projection with rent + expense growth (Pro)",
                 "Depreciation modeling and tax savings (Pro)",
                 "Sell / refi / hold exit comparison (Pro)",
-                "Deal Score with thresholds across 4 dimensions",
+                "Screening Index with a factor breakdown for triage",
                 "Free to start — no credit card",
               ].map((line) => (
                 <li key={line} className="flex items-start gap-2">

@@ -207,13 +207,17 @@ async function fetchWithTimeout(
     return await fetch(input, { ...init, signal: controller.signal });
   } catch (err) {
     const name = (err as Error | undefined)?.name;
-    const message = (err as Error | undefined)?.message;
     if (name === "AbortError") {
-      console.warn(`[enrichProperty] Remote fetch timed out after ${timeoutMs}ms: ${input}`);
+      console.warn("[enrichProperty] remote provider request timed out", {
+        errorClass: "timeout",
+        timeoutMs,
+      });
     } else {
       // Network/DNS/TLS failure. Log so we can spot persistent outages,
       // but don't rethrow — the caller has a null path.
-      console.warn(`[enrichProperty] Remote fetch failed (${name ?? "Error"}): ${message ?? "unknown"} — ${input}`);
+      console.warn("[enrichProperty] remote provider request failed", {
+        errorClass: name ?? "network-error",
+      });
     }
     return null;
   } finally {
@@ -249,9 +253,9 @@ async function fetchCurrentMortgageRate(): Promise<{ rate: number; asOf: string 
     const res = await fetchWithTimeout(url.toString(), { cache: "no-store" });
     if (!res) return null; // timed out
     if (!res.ok) {
-      const body = await res.text().catch(() => "");
       console.warn(
-        `[enrichProperty] FRED request failed: HTTP ${res.status} ${res.statusText}. Body: ${body.slice(0, 200)}`
+        "[enrichProperty] FRED request failed",
+        { provider: "fred", endpoint: "series-observations", status: res.status }
       );
       return null;
     }
@@ -260,15 +264,25 @@ async function fetchCurrentMortgageRate(): Promise<{ rate: number; asOf: string 
     };
     const latest = json.observations?.[0];
     if (!latest || latest.value === "." || isNaN(Number(latest.value))) {
-      console.warn("[enrichProperty] FRED returned no valid observation", json);
+      console.warn("[enrichProperty] FRED returned no valid observation", {
+        provider: "fred",
+        endpoint: "series-observations",
+        errorClass: "invalid-observation",
+      });
       return null;
     }
     const rate = Number(latest.value);
-    console.log(`[enrichProperty] FRED rate: ${rate}% as of ${latest.date}`);
+    console.log("[enrichProperty] FRED mortgage-rate observation refreshed", {
+      provider: "fred",
+      asOf: latest.date,
+    });
     mortgageRateCache = { rate, asOf: latest.date, fetchedAt: Date.now() };
     return { rate, asOf: latest.date };
   } catch (err) {
-    console.warn("[enrichProperty] FRED fetch threw:", err);
+    console.warn("[enrichProperty] FRED processing failed", {
+      provider: "fred",
+      errorClass: (err as Error | undefined)?.name ?? "processing-error",
+    });
     return null;
   }
 }
@@ -346,9 +360,9 @@ async function fetchSafmrRows(
   });
   if (!res) return null;
   if (!res.ok) {
-    const body = await res.text().catch(() => "");
     console.warn(
-      `[enrichProperty] HUD SAFMR request failed: HTTP ${res.status}. URL=${url}. Body=${body.slice(0, 200)}`
+      "[enrichProperty] HUD SAFMR request failed",
+      { provider: "hud", endpoint: "fmr-data", status: res.status }
     );
     return null;
   }
@@ -365,9 +379,10 @@ async function fetchSafmrRows(
     year: Number(json.data.year ?? new Date().getFullYear()),
     fetchedAt: Date.now(),
   };
-  console.log(
-    `[enrichProperty] HUD SAFMR fetched entity ${entityId}: ${(json.data.basicdata as unknown[]).length} ZIP rows`
-  );
+  console.log("[enrichProperty] HUD SAFMR rows refreshed", {
+    provider: "hud",
+    rowCount: (json.data.basicdata as unknown[]).length,
+  });
   safmrCache.set(entityId, value);
   return value;
 }
@@ -392,9 +407,9 @@ async function fetchHudStateData(
   });
   if (!res) return null; // timed out
   if (!res.ok) {
-    const body = await res.text().catch(() => "");
     console.warn(
-      `[enrichProperty] HUD request failed: HTTP ${res.status} ${res.statusText}. URL=${url}. Body=${body.slice(0, 200)}`
+      "[enrichProperty] HUD request failed",
+      { provider: "hud", endpoint: "fmr-state-data", status: res.status }
     );
     return null;
   }
@@ -411,9 +426,12 @@ async function fetchHudStateData(
     year: Number(json.data?.year ?? new Date().getFullYear()),
     fetchedAt: Date.now(),
   };
-  console.log(
-    `[enrichProperty] HUD fetched ${key}: ${value.counties.length} counties, ${value.metroareas.length} metros, year=${value.year} (cached for ${HUD_CACHE_TTL_MS / 60000}m)`
-  );
+  console.log("[enrichProperty] HUD state dataset refreshed", {
+    provider: "hud",
+    endpoint: "fmr-state-data",
+    countyCount: value.counties.length,
+    metroCount: value.metroareas.length,
+  });
   hudCache.set(key, value);
   return value;
 }
@@ -505,9 +523,10 @@ async function maybeFetchHudRent(
             ? pickZipSafmrRent(safmr.rows, input.zip, fmrField)
             : null;
           if (zipRent !== null) {
-            console.log(
-              `[enrichProperty] HUD SAFMR matched ZIP ${input.zip} in "${label}" — ${fmrField}=$${zipRent} (county-wide was $${v})`
-            );
+            console.log("[enrichProperty] HUD rent benchmark resolved", {
+              provider: "hud",
+              resolution: "zip-safmr",
+            });
             return {
               amount: zipRent,
               county: label,
@@ -521,14 +540,16 @@ async function maybeFetchHudRent(
       }
 
       if (v > 0) {
-        console.log(
-          `[enrichProperty] HUD matched "${label}" — ${fmrField}=$${v}`
-        );
+        console.log("[enrichProperty] HUD rent benchmark resolved", {
+          provider: "hud",
+          resolution: "county-or-metro",
+        });
         return { amount: v, county: label, year: respYear };
       }
-      console.log(
-        `[enrichProperty] HUD matched "${label}" but ${fmrField}=${v} (falling through to state-avg)`
-      );
+      console.log("[enrichProperty] HUD benchmark fallback used", {
+        provider: "hud",
+        fallback: "state-average-after-empty-local-match",
+      });
     }
 
     // 3. Always fall back to a state-average across counties + metros.
@@ -541,19 +562,25 @@ async function maybeFetchHudRent(
         const avg = Math.round(
           values.reduce((a, b) => a + b, 0) / values.length
         );
-        console.log(
-          `[enrichProperty] HUD: no precise match for "${input.county}", returning state-avg ${fmrField}=$${avg} across ${values.length} areas`
-        );
+        console.log("[enrichProperty] HUD benchmark fallback used", {
+          provider: "hud",
+          fallback: "state-average",
+          areaCount: values.length,
+        });
         return { amount: avg, county: `${input.state} avg`, year: respYear };
       }
     }
 
-    console.log(
-      `[enrichProperty] HUD: no usable data — haystack=${haystack.length}, county="${input.county}", state="${input.state}", field=${fmrField}`
-    );
+    console.log("[enrichProperty] HUD returned no usable benchmark", {
+      provider: "hud",
+      errorClass: "no-data",
+    });
     return null;
   } catch (err) {
-    console.warn("[enrichProperty] HUD fetch threw:", err);
+    console.warn("[enrichProperty] HUD processing failed", {
+      provider: "hud",
+      errorClass: (err as Error | undefined)?.name ?? "processing-error",
+    });
     return null;
   }
 }

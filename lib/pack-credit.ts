@@ -30,6 +30,11 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { OneTimePdfProCreditPolicy } from "@/lib/one-time-pdf-credit";
+import { getStripe } from "@/lib/stripe/client";
+import {
+  retrieveDecisionPackStripeAccess,
+  type DecisionPackStripeReader,
+} from "@/lib/stripe/decision-pack-access";
 
 export const PACK_CREDIT_WINDOW_DAYS = 7;
 
@@ -71,7 +76,8 @@ export type EligiblePackCredit = {
 export async function findEligiblePackCredit(
   admin: SupabaseClient,
   userId: string,
-  now: Date = new Date()
+  now: Date = new Date(),
+  stripe: DecisionPackStripeReader = getStripe()
 ): Promise<EligiblePackCredit | null> {
   // DEFENCE IN DEPTH: the only caller passes a server-verified auth.getUser()
   // id, but the .or() filter below interpolates this value directly into
@@ -84,7 +90,9 @@ export async function findEligiblePackCredit(
 
   const { data, error } = await admin
     .from("one_time_pdf_purchase_claims")
-    .select("id, pro_credit_amount_cents, pro_credit_eligible_until")
+    .select(
+      "id, checkout_session_id, pro_credit_amount_cents, pro_credit_eligible_until"
+    )
     .eq("pro_credit_status", "eligible")
     .eq("pro_credit_amount_cents", PACK_CREDIT_REDEEMABLE_AMOUNT_CENTS)
     .gt("pro_credit_eligible_until", now.toISOString())
@@ -94,7 +102,28 @@ export async function findEligiblePackCredit(
     .maybeSingle();
 
   if (error) throw new Error(`pack-credit lookup failed: ${error.code ?? "unknown"}`);
-  if (!data?.pro_credit_amount_cents || !data.pro_credit_eligible_until) return null;
+  if (
+    !data?.id ||
+    !data.checkout_session_id ||
+    !data.pro_credit_amount_cents ||
+    !data.pro_credit_eligible_until
+  ) {
+    return null;
+  }
+
+  // The database row is only a candidate. Re-read Stripe at the exact moment
+  // checkout is constructed so an open dispute or refund that arrived before
+  // its webhook cannot spend stale eligibility. Only the explicit safe state
+  // may attach a credit; every other result silently falls back to the normal
+  // Pro checkout path. Transport failures throw and are caught by billing's
+  // existing fail-safe for the same full-price fallback.
+  const access = await retrieveDecisionPackStripeAccess(
+    stripe,
+    data.checkout_session_id as string,
+    data.id as string
+  );
+  if (access.state !== "allowed") return null;
+
   return {
     claimId: data.id as string,
     amountCents: data.pro_credit_amount_cents as number,

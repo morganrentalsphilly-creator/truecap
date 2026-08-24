@@ -53,7 +53,7 @@ import { BuyBoxFitBadge } from "@/components/investcalc/buy-box-fit-badge";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
-const PLACEHOLDER = `1700 W Erie Ave, Philadelphia, PA 19140\t265000\t2100\t3
+const PLACEHOLDER = `100 Example Ave, Philadelphia, PA 19140\t265000\t2100\t3
 1205 N 5th St, Philadelphia, PA\t245000\t2000\t3
 456 Oak Ave, Denver, CO\t420000\t2600\t4`;
 
@@ -81,7 +81,7 @@ function fastestPath(row: TriageRowResult): string {
   if (!row.ok) return "Add monthly rent";
   if (row.requiredRentUnreachable) return "Rent alone won’t clear targets";
   if (row.requiredMonthlyRent == null) return "Verify assumptions";
-  if ((row.requiredRentDelta ?? 0) <= 0) return "Works at current rent";
+  if ((row.requiredRentDelta ?? 0) <= 0) return "Current rent meets targets";
   return `${money(row.requiredMonthlyRent)}/mo rent (+${money(row.requiredRentDelta)})`;
 }
 
@@ -360,7 +360,7 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
   );
 
   const sortOptions: { id: TriageSort; label: string }[] = [
-    { id: "score", label: "Score" },
+    { id: "score", label: "Screening Index" },
     { id: "cashFlow", label: "Cash flow" },
     ...(result?.buyBoxActive ? ([{ id: "fit" as const, label: "Buy-box fit" }]) : []),
   ];
@@ -512,7 +512,9 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
               Screened {result.screenedCount} {result.screenedCount === 1 ? "listing" : "listings"}
               {result.truncated ? ` (first ${MAX_TRIAGE_ROWS} of your paste)` : ""}
               <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
-                Calculated from your selected targets. This is not a recommended offer.
+                {result.buyBoxActive
+                  ? "Each Offer Ceiling is the highest modeled price that still meets the adopted Buy Box criteria shown on that row. It is not a recommended offer or appraisal."
+                  : "Core underwriting is shown without an Offer Ceiling. Adopt return targets in a Buy Box before TrueCap calculates modeled price thresholds."}
               </span>
             </p>
             <div className="flex flex-wrap items-center gap-2">
@@ -563,11 +565,11 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
                   <thead className="bg-muted/50 text-left text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
                     <tr>
                       <th scope="col" className="px-4 py-2.5">Listing</th>
-                      <th scope="col" className="px-3 py-2.5">Verdict</th>
-                      <th scope="col" className="px-3 py-2.5 text-right">Score</th>
+                      <th scope="col" className="px-3 py-2.5">Screening result</th>
+                      <th scope="col" className="px-3 py-2.5 text-right">Screening Index</th>
                       <th scope="col" className="px-3 py-2.5 text-right">Cash flow</th>
                       <th scope="col" className="px-3 py-2.5 text-right">DSCR</th>
-                      <th scope="col" className="px-3 py-2.5 text-right">Price ceiling</th>
+                      <th scope="col" className="px-3 py-2.5 text-right">Offer Ceiling</th>
                       <th scope="col" className="px-3 py-2.5 text-right">Gap</th>
                       <th scope="col" className="px-3 py-2.5">Fastest path</th>
                       <th scope="col" className="px-3 py-2.5"><span className="sr-only">Action</span></th>
@@ -648,7 +650,7 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
                             {row.recommendation ? triageVerdictLabel(row.recommendation) : "—"}
                           </span>
                           <span className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                            Score {row.score ?? "—"}
+                            Screening Index {row.score ?? "—"}
                           </span>
                         </div>
                       ) : (
@@ -662,7 +664,7 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
                     </div>
                     <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
                       <div className="rounded-xl bg-muted/40 p-3">
-                        <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Price ceiling</div>
+                        <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Offer Ceiling</div>
                         <div className="mt-0.5 font-mono font-semibold text-foreground" title={row.targetLabel ?? undefined}>{money(row.maxOffer)}</div>
                         {row.targetLabel ? <div className="mt-1 text-[10px] leading-snug text-muted-foreground">{row.targetLabel}</div> : null}
                       </div>

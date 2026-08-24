@@ -12,7 +12,7 @@
  *   - The standalone "10-year returns" mini-strip IIFE was deleted from
  *     the dashboard; its three readouts render here as band members.
  *   - DealStrategyToggle (and its mobile "Change lens" disclosure from
- *     the density pass) moved here from the Deal Score card, so the lens
+ *     the density pass) moved here from the Screening Index card, so the lens
  *     sits beside the numbers it re-curates.
  *   - NEW: tapping a metric jumps to the analysis section that explains
  *     it, wired through the dashboard's existing setActiveTab machinery
@@ -89,7 +89,7 @@ function capRateBenchmarkColor(capRatePct: number, address?: string | null): str
 }
 
 function cocBenchmarkLabel(cocPct: number): string {
-  // Bands mirror the Deal Score's displayed CoC tiers (>7 strong, 5–7 healthy,
+  // Bands mirror the Screening Index's displayed CoC tiers (>7 strong, 5–7 healthy,
   // 3–5 modest, <3 weak) so the tile sub-label never contradicts the score's
   // "Why this score" breakdown for the same deal.
   if (cocPct > 7) return "Above 7% - strong";
@@ -100,7 +100,7 @@ function cocBenchmarkLabel(cocPct: number): string {
 }
 
 function cashFlowBenchmarkLabel(monthlyCashFlow: number): string {
-  // Bands aligned with the Deal Score's own cash-flow tiers so the sub-label
+  // Bands aligned with the Screening Index's own cash-flow tiers so the sub-label
   // never contradicts the score (the old flat "$1,000/mo target" deflated
   // perfectly good $300-500/mo deals).
   if (monthlyCashFlow >= 500) return "Strong (≥$500/mo)";
@@ -119,7 +119,7 @@ function cashFlowBenchmarkLabel(monthlyCashFlow: number): string {
  * benchmark band.
  *
  * Exported: the answer hero card reuses this exact label as the
- * benchmark sublabel under the Deal Score, so the two can never disagree.
+ * benchmark sublabel under the Screening Index, so the two can never disagree.
  */
 export function cashFlowSubLabel(r: AnalysisResult): string {
   if (r.netCashFlow < 0 && r.afterTaxCF >= 0) {
@@ -460,7 +460,7 @@ const DEAL_STRATEGIES: { value: DealStrategy; label: string; hint: string }[] = 
 ];
 
 /** Compact segmented control that reorders which metrics lead with the
- *  investor's focus. The Deal Score itself is lens-free (canonical Balanced) on
+ *  investor's focus. The Screening Index itself is lens-free (canonical Balanced) on
  *  every surface, so picking a lens never changes the score, verdict, or risk —
  *  only which 3 metric tiles surface first. */
 function DealStrategyToggle({
@@ -551,7 +551,7 @@ function DealStrategyToggle({
 }
 
 /** 10-Year Returns — IRR, equity multiple, and total return, computed by
- *  the same exit engine that already feeds the Deal Score. Previously a
+ *  the same exit engine that already feeds the Screening Index. Previously a
  *  standalone mini-strip below the metric row; now folded into the band
  *  as regular members (the strip's values/formatting are unchanged). */
 function buildReturnMemberTiles(
@@ -651,7 +651,7 @@ export function MetricsBand({
         {dataConfidence ? <DataConfidenceBadge confidence={dataConfidence} propertyType={dealPropertyType} /> : null}
       </div>
 
-      {/* Investor lens — moved from the Deal Score card into the band header
+      {/* Investor lens — moved from the Screening Index card into the band header
           so the lens sits beside the numbers it re-curates. Presentation is
           unchanged from the density pass: always visible on md+, collapsed
           behind the "Change lens" disclosure below md so a first-timer isn't

@@ -53,7 +53,7 @@
   "shipNote": {
     "title": "Price the inspection findings before re-negotiating",
     "items": [
-      "Free: drop the renegotiated price into the analyzer and re-run the verdict in 60 seconds",
+      "Free: enter the renegotiated price and re-run the selected-rule screen and secondary Screening Index",
       "Pro: rehab estimator with line-item costs — model how a $15k roof or $8k electrical changes the deal before you counter",
       "Re-underwrite after inspection in 60 seconds →"
     ]

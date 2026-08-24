@@ -529,7 +529,7 @@ function buildMeaningfulEvent(
         input,
         kind: "newly_within_max_offer",
         priority: "high",
-        summary: `${labelFor(input)} is now within your Max Offer.`,
+        summary: `${labelFor(input)} is now at or below your Offer Ceiling. This is not a recommended offer.`,
         before,
         after,
       }),

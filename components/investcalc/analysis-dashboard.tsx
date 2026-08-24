@@ -87,15 +87,20 @@ import type { InvestorStrategy } from "@/lib/investor-strategies";
 import { deriveStateFromAddress } from "@/lib/buy-box";
 import type { DealQaBuyBoxReport } from "@/lib/deal-qa-context";
 import {
-  DEFAULT_MAO_TARGET,
   buildMaoTarget,
   buyBoxContributesToMaoTarget,
   describeMaoTarget,
 } from "@/lib/mao-targets";
 import type { MaoTarget } from "@/lib/max-allowable-offer";
-import type { OfferCeilingTargetSource } from "@/lib/offer-ceiling-contract";
+import {
+  isAdoptedOfferCeilingTargetSource,
+  type OfferCeilingTargetSource,
+} from "@/lib/offer-ceiling-contract";
 import { resolveOfferCeilingAction } from "@/app/actions/offer-ceiling";
-import type { OfferCeilingAccessPayload } from "@/lib/offer-ceiling-access-contract";
+import type {
+  OfferCeilingAccessPayload,
+  OfferCeilingExactResult,
+} from "@/lib/offer-ceiling-access-contract";
 import {
   normalizeMaoTargetForFinancing,
   reduceMaoTargetState,
@@ -108,7 +113,6 @@ import { REPORT_MODES, type ReportMode } from "@/lib/pdf-export-constants";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Activity, Target } from "lucide-react";
 import { MomentOfValueUpsell } from "@/components/marketing/moment-of-value-upsell";
-import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { trackEvent } from "@/lib/analytics";
 import { SignupPromptCard } from "@/components/marketing/signup-prompt-card";
 import { RateAlertsToggle } from "@/components/settings/rate-alerts-toggle";
@@ -119,7 +123,6 @@ import { DealNotesPanel } from "@/components/investcalc/deal-notes-panel";
 import { ShareLinkButton } from "@/components/investcalc/share-link-button";
 import { AnswerHeroCard } from "@/components/investcalc/answer-hero-card";
 import { InputConfidenceCard } from "@/components/investcalc/input-confidence-card";
-import type { ApplicableDecisionThreshold } from "@/components/investcalc/what-needs-to-be-true-card";
 import { PrepareOfferCard } from "@/components/investcalc/prepare-offer-card";
 import type {
   InputConfidenceFieldKey,
@@ -141,6 +144,8 @@ import type { ExitScenarioInput, ExitScenarioYear } from "@/lib/exit-scenarios";
 import { computeReturnSummaryFromExitYears } from "@/lib/returns";
 import { isExtremeAnnualizedRoi } from "@/lib/extreme-value-format";
 import { isFeatureEnabled } from "@/lib/feature-flags";
+import { SAMPLE_DEAL_FIXTURE } from "@/lib/sample-deal";
+import type { UserDecision } from "@/lib/decision-contract";
 import { cn, scrollBehavior } from "@/lib/utils";
 import type { DealScoreActionResult } from "@/app/actions/deal-score";
 import {
@@ -212,6 +217,9 @@ interface AnalysisDashboardProps {
   /** The persisted deal id, when this is a saved-and-loaded deal.
    *  Used by the Deal Notes panel to fetch + persist notes. */
   savedDealId?: string | null;
+  /** Explicit workflow decision restored with a saved deal. Financial output
+   * never infers this value. */
+  userDecision?: UserDecision;
   isAuthenticated?: boolean;
   canSaveDeals?: boolean;
   canUpdateSavedDeals?: boolean;
@@ -248,7 +256,6 @@ interface AnalysisDashboardProps {
   /** Deterministic 15-field data-readiness assessment. Separate from Deal Fit. */
   inputConfidence?: InputConfidenceResult | null;
   onToggleInputVerified?: (key: InputConfidenceFieldKey, verified: boolean) => void;
-  onApplyDecisionThreshold?: (change: ApplicableDecisionThreshold) => void;
   activeTab?: AnalysisDashboardTab;
   /** Bumped by the caller on every point-at-tab intent, so a SAME-VALUE
    *  re-point (user closed the row, then re-clicked the input tab or
@@ -266,6 +273,16 @@ interface AnalysisDashboardProps {
   maoTargetOverrideSource?: OfferCeilingTargetSource | null;
   /** Lifts explicit target edits so Save and Share preserve the same basis. */
   onMaoTargetChange?: (target: MaoTarget) => void;
+  /** Recorded solve captured atomically with a saved result. Null means this
+   * is a live/current underwrite. A recorded uncaptured row suppresses the
+   * current solver rather than mixing methodologies. */
+  recordedOfferCeiling?: {
+    captured: boolean;
+    exact: OfferCeilingExactResult | null;
+  } | null;
+  /** Private server-derived cohort gate. The public rollout flag alone must
+   * never expose the advocacy contract to all users. */
+  advocacyContractEligible?: boolean;
 }
 
 export type AnalysisDashboardTab =
@@ -299,7 +316,7 @@ const TABS: { id: AnalysisDashboardTab; label: string; icon: LucideIcon; isPro: 
   // not-Excel-power-user audience; the row IS the BRRRR + fix-and-flip
   // + rehab analyzers, so say that.
   { id: "strategies", label: "BRRRR & Flip", icon: Target, isPro: true },
-  // Stress Test consolidates Max Allowable Offer + Sensitivity Grid —
+  // Stress Test consolidates Offer Ceiling + Sensitivity Grid —
   // both Pro features that previously rendered as always-visible cards
   // between the metrics row and the tab bar. Keeping them in one row
   // keeps the headline scroll calmer without losing the features.
@@ -373,6 +390,7 @@ export function AnalysisDashboard({
   isSaved = false,
   isExistingSavedDeal = false,
   savedDealId = null,
+  userDecision = "undecided",
   isAuthenticated = false,
   canSaveDeals = false,
   canUpdateSavedDeals = false,
@@ -391,7 +409,6 @@ export function AnalysisDashboard({
   dataConfidence = null,
   inputConfidence = null,
   onToggleInputVerified,
-  onApplyDecisionThreshold,
   activeTab: activeTabProp,
   activeTabNonce = 0,
   activeStrategy = null,
@@ -399,12 +416,15 @@ export function AnalysisDashboard({
   maoTargetOverride = null,
   maoTargetOverrideSource = null,
   onMaoTargetChange,
+  recordedOfferCeiling = null,
+  advocacyContractEligible = false,
 }: AnalysisDashboardProps) {
   const showInputConfidence = isFeatureEnabled("input_confidence");
   const showOfferReadyStatus = isFeatureEnabled("offer_ready_status");
   const showDecisionThresholds = isFeatureEnabled("what_needs_to_be_true_v2");
   const showDealDecisionPack = isFeatureEnabled("deal_decision_pack");
-  const singleDealPriceLabel = getMarketingOfferConfig().singleDeal.priceLabel;
+  const advocacyDecisionContract =
+    advocacyContractEligible && isFeatureEnabled("advocacy_decision_contract");
   // Ledger open state (Phase 5) - replaces the single activeTab. Rows are
   // INDEPENDENT multi-open accordions: opening one never closes a sibling
   // (single-open enforcement was explicitly rejected). The lead row (the
@@ -491,7 +511,7 @@ export function AnalysisDashboard({
   // Deal Q&A grounding depth — assembled ONLY from what this surface already
   // computes/holds (no new fetches): the buy-box evaluation reported up by
   // BuyBoxVerdictCard, the comp set reported up by PropertyCompsCard, the
-  // MAO solved from the current form values, and the exit-scenario return
+  // Offer Ceiling solved from the current form values, and the exit-scenario return
   // summary. Absent pieces are simply omitted from the AI context.
   const [buyBoxQaReport, setBuyBoxQaReport] = useState<DealQaBuyBoxReport | null>(null);
   const requiresBuyBoxTargetResolution = Boolean(
@@ -551,7 +571,7 @@ export function AnalysisDashboard({
   // What-if slider state. When the user drags rent / rate, this holds
   // the adjusted result; otherwise null and we render the base `result`
   // unchanged. SCOPED: only the 4 Overview tier metric cards consume
-  // this - projections, illustrative tax impact, exit scenarios, deal score, and
+  // this - projections, illustrative tax impact, exit scenarios, Screening Index, and
   // every Pro panel stay anchored to the saved/base analysis. Sliders
   // are a "what-if peek" on headline numbers, not a full reanalysis.
   const [whatIfState, setWhatIfState] = useState<WhatIfState | null>(null);
@@ -587,7 +607,7 @@ export function AnalysisDashboard({
   }, [scenarioResetNotice]);
   // Holistic context for the Overview. Computed from the BASE result (not
   // the what-if state) so dragging sliders doesn't flicker the banner.
-  // Reuses the same exit-scenario engine as the Deal Score + PDF.
+  // Reuses the same exit-scenario engine as the Screening Index + PDF.
   const annualizedReturnPct = useMemo(
     () => (result && values ? computeTenYearAnnualizedReturnPct(values, result) : null),
     [result, values]
@@ -596,20 +616,27 @@ export function AnalysisDashboard({
     !!result && isAppreciationPlayDeal(result, propertyType, annualizedReturnPct);
 
   // ── Deal Q&A grounding context (see the state block above) ──────────
-  // MAO: only when the user can see the Stress Test solver (Pro / sample
+  // Offer Ceiling: only when the user can see the Stress Test solver (Pro / sample
   // preview) so free-tier answers can't leak a gated number. Basis follows
   // lib/mao-targets: the user's buy-box thresholds when set, else the
   // canonical default floor — always labeled. Memoized on the BASE
-  // result/values (never the what-if sliders), matching the Deal Score.
+  // result/values (never the what-if sliders), matching the Screening Index.
   const isCashPurchase = Boolean(result && result.monthlyPayment <= 0);
+  const financingSafeOverride = useMemo(
+    () =>
+      maoTargetOverride
+        ? normalizeMaoTargetForFinancing(maoTargetOverride, { isCashPurchase })
+        : null,
+    [isCashPurchase, maoTargetOverride]
+  );
   const resolvedMaoSeed = useMemo(() => {
     if (!values || !result) return null;
     if (maoTargetOverride) {
-      return normalizeMaoTargetForFinancing(maoTargetOverride, { isCashPurchase });
+      return financingSafeOverride ?? buildMaoTarget(null, { isCashPurchase });
     }
     const thresholds = buyBoxQaReport?.maoThresholds ?? null;
     return buildMaoTarget(thresholds, { isCashPurchase });
-  }, [values, result, isCashPurchase, maoTargetOverride, buyBoxQaReport]);
+  }, [values, result, isCashPurchase, maoTargetOverride, financingSafeOverride, buyBoxQaReport]);
   const maoTargetAnalysisKey = `${values?.address?.trim().toLowerCase() ?? ""}|${
     maoTargetOverride ? "override" : "standard"
   }|${isCashPurchase ? "cash" : "debt"}`;
@@ -643,7 +670,7 @@ export function AnalysisDashboard({
     onMaoTargetChange?.(target);
   }, [onMaoTargetChange]);
   const buyBoxIsTargetSource =
-    maoTargetOverrideSource === "buy-box" ||
+    (maoTargetOverrideSource === "buy-box" && Boolean(financingSafeOverride)) ||
     (!maoTargetOverride &&
       !maoTargetState.touched &&
       buyBoxContributesToMaoTarget(buyBoxQaReport?.maoThresholds ?? null, {
@@ -651,10 +678,23 @@ export function AnalysisDashboard({
       }));
   const offerCeilingTargetSource: OfferCeilingTargetSource = buyBoxIsTargetSource
     ? "buy-box"
-    : maoTargetOverrideSource ??
-      (maoTargetOverride || maoTargetState.touched
+    : (financingSafeOverride ? maoTargetOverrideSource : null) ??
+      (financingSafeOverride || maoTargetState.touched
         ? "selected-targets"
         : "screening-defaults");
+  const targetAdopted = isAdoptedOfferCeilingTargetSource(
+    offerCeilingTargetSource
+  );
+  // Screening defaults are examples, not investor instructions. Keep one
+  // canonical pair for every persistence/export boundary so Save, Share, PDF,
+  // and post-auth continuity cannot silently turn those examples into the
+  // user's acquisition criteria.
+  const adoptedMaoTarget = targetAdopted
+    ? activeMaoTarget ?? undefined
+    : undefined;
+  const adoptedMaoTargetSource = targetAdopted
+    ? offerCeilingTargetSource
+    : undefined;
 
   // The inverse solver is a paid decision tool, so neither the exact result
   // nor its uncertainty endpoints are calculated in this client component.
@@ -663,7 +703,12 @@ export function AnalysisDashboard({
   // response is kept out of the render by binding it to the complete request
   // key; rapid target/assumption edits cannot flash the prior deal's ceiling.
   const offerCeilingRequestKey =
-    !targetActionsBlocked && values && result && activeMaoTarget
+    !recordedOfferCeiling &&
+    !targetActionsBlocked &&
+    targetAdopted &&
+    values &&
+    result &&
+    activeMaoTarget
       ? JSON.stringify({
           values,
           target: activeMaoTarget,
@@ -718,15 +763,23 @@ export function AnalysisDashboard({
     offerCeilingTargetSource,
     values,
   ]);
-  const currentOfferCeilingPayload =
-    offerCeilingResolution.key === offerCeilingRequestKey &&
-    offerCeilingResolution.status === "ready"
-      ? offerCeilingResolution.payload
-      : null;
+  const currentOfferCeilingPayload: OfferCeilingAccessPayload | null =
+    recordedOfferCeiling
+      ? canUseMaxOffer && recordedOfferCeiling.captured
+        ? { access: "exact", exact: recordedOfferCeiling.exact }
+        : null
+      : offerCeilingResolution.key === offerCeilingRequestKey &&
+          offerCeilingResolution.status === "ready"
+        ? offerCeilingResolution.payload
+        : null;
   const offerCeilingIsLoading = Boolean(
-    offerCeilingRequestKey &&
+    !recordedOfferCeiling &&
+      offerCeilingRequestKey &&
       (offerCeilingResolution.key !== offerCeilingRequestKey ||
         offerCeilingResolution.status === "loading")
+  );
+  const offerCeilingHasError = Boolean(
+    !recordedOfferCeiling && offerCeilingResolution.status === "error"
   );
   const exactOfferCeiling =
     currentOfferCeilingPayload?.access === "exact"
@@ -763,7 +816,7 @@ export function AnalysisDashboard({
         : null,
     [exitScenarioSource]
   );
-  // Investor lens - owned HERE (the common parent of the Deal Score + the
+  // Investor lens - owned HERE (the common parent of the Screening Index + the
   // metric cards) so the metric ordering reacts when it changes. Persisted
   // across deals so a cash-flow investor isn't reset to Balanced each analysis.
   // The lens only reorders which metrics LEAD (see PRIMARY_METRICS); the Deal
@@ -803,7 +856,7 @@ export function AnalysisDashboard({
   // Google OAuth and keeps a "Sign in" cross-link (which threads ?next)
   // for the rare returning user.
   const goToLogin = () => {
-    onPrepareAuthSave(activeMaoTarget ?? undefined, offerCeilingTargetSource);
+    onPrepareAuthSave(adoptedMaoTarget, adoptedMaoTargetSource);
     setPendingSaveIntent();
     router.push("/auth/sign-up?next=/");
   };
@@ -830,7 +883,7 @@ export function AnalysisDashboard({
     // Pro feature - gated by canUseStrategies. Free users see the tab
     // with a lock icon and the ProFeaturePreview placeholder on click.
     strategies: canUseStrategies,
-    // Stress Test tab houses Max Allowable Offer + Sensitivity Grid.
+    // Stress Test tab houses Offer Ceiling + Sensitivity Grid.
     // It unlocks if EITHER underlying entitlement is granted, since the
     // tab itself shows both cards (with a per-card Pro gate if only one
     // is unlocked).
@@ -866,14 +919,14 @@ export function AnalysisDashboard({
     // NOTE: deal_saved is emitted on the SUCCESS path in investcalc-page —
     // firing it here too double-counted every real save and counted every
     // rejected one.
-    void onSaveDeal(activeMaoTarget ?? undefined, offerCeilingTargetSource);
+    void onSaveDeal(adoptedMaoTarget, adoptedMaoTargetSource);
   };
   const handleExportPdf = (mode?: ReportMode) => {
     if (targetActionsBlocked) return;
     void onExportPdf(
       mode,
-      activeMaoTarget ?? undefined,
-      offerCeilingTargetSource
+      adoptedMaoTarget,
+      adoptedMaoTargetSource
     );
   };
   const handlePrepareOffer = () => {
@@ -910,7 +963,7 @@ export function AnalysisDashboard({
   // One-glance "what do I do next" - the single imperative step that turns a
   // verdict into action ("Lower your offer or raise rent", "Make your offer").
   // Derived from the BASE result (not the what-if sliders) so it stays
-  // consistent with the Deal Score + verdict above it. Same lib that drives
+  // consistent with the Screening Index + verdict above it. Same lib that drives
   // the saved-deal pages, so the wording never diverges between surfaces.
   const nextAction =
     result && !isLoading
@@ -1075,14 +1128,9 @@ export function AnalysisDashboard({
   };
 
   // ── Tier-1 derivations (Aug-2026 hierarchy rebuild) ──────────────────
-  // Presentation only: reads the ALREADY-COMPUTED deal score. The
+  // Presentation only: reads the ALREADY-COMPUTED Screening Index. The
   // recommendation string is the INTERNAL enum; <Verdict> maps it.
   const decisionFirst = isFeatureEnabled("decision_first_results");
-  // The focused summary and its inverse solver always share the same active
-  // target. For a sample this is the fixture override; otherwise it is the
-  // buy-box/default seed and follows edits made in the Stress Test solver.
-  const decisionTarget = activeMaoTarget ?? DEFAULT_MAO_TARGET;
-
   return (
     <div className="space-y-6">
       {/* Sample-deal Pro preview banner - slimmed to a one-line dismissible
@@ -1118,7 +1166,7 @@ export function AnalysisDashboard({
           role="status"
           className="sticky top-16 z-20 rounded-xl border border-amber-500/40 bg-amber-50 px-4 py-3 text-sm text-amber-950 shadow-sm"
         >
-          <strong>Scenario only.</strong> These numbers are temporary. Your saved base assumptions have not changed. Scenario values below are labeled Scenario; the Decision card and price ceiling remain labeled Base.
+          <strong>Scenario only.</strong> These numbers are temporary. Your saved base assumptions have not changed. Scenario values below are labeled Scenario; the Decision card and Offer Ceiling remain labeled Base.
         </div>
       ) : null}
       {scenarioResetNotice ? (
@@ -1148,7 +1196,7 @@ export function AnalysisDashboard({
         id="analysis-decision-title"
         className="text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl"
       >
-        Investment decision
+        First-pass underwriting
       </h1>
 
       {decisionFirst && result && values && activeMaoTarget ? (
@@ -1156,18 +1204,32 @@ export function AnalysisDashboard({
           <FocusedDecisionSummary
             values={values}
             result={result}
-            dealScoreResult={dealScoreResult}
             offerCeiling={exactOfferCeiling?.presentation ?? null}
             exactBreakpointLabels={exactOfferCeiling?.decisionBreakpoints ?? []}
             rangePreview={freeOfferCeilingPreview}
             target={activeMaoTarget}
             targetLabel={describeMaoTarget(activeMaoTarget)}
             targetSource={offerCeilingTargetSource}
+            targetAdopted={targetAdopted}
+            targetProfileId={
+              isSampleProPreview
+                ? SAMPLE_DEAL_FIXTURE.targetProfile.id
+                : buyBoxIsTargetSource && !maoTargetOverride
+                ? buyBoxQaReport?.selectedBox.id ?? null
+                : null
+            }
+            targetProfileVersion={
+              isSampleProPreview
+                ? SAMPLE_DEAL_FIXTURE.targetProfile.version
+                : null
+            }
             // A persisted Buy Box target is a frozen numeric snapshot. Until
             // its box id/name/fingerprint is stored too, never relabel it with
             // whichever live box happens to be selected today.
             buyBoxName={
-              buyBoxIsTargetSource && !maoTargetOverride
+              isSampleProPreview
+                ? SAMPLE_DEAL_FIXTURE.targetProfile.name
+                : buyBoxIsTargetSource && !maoTargetOverride
                 ? buyBoxQaReport?.selectedBox.name ?? null
                 : null
             }
@@ -1176,17 +1238,21 @@ export function AnalysisDashboard({
                 ? null
                 : buyBoxAnyPass
             }
+            buyBoxHasUnknownRules={Boolean(
+              buyBoxQaReport?.context.checks.some((check) => check.pass == null)
+            )}
+            userDecision={userDecision}
             inputConfidence={inputConfidence}
-            nextAction={nextAction}
             canShowPriceCeiling={currentOfferCeilingPayload?.access === "exact"}
             canTunePriceCeiling={canUseMaxOffer}
             isOfferCeilingLoading={offerCeilingIsLoading}
-            offerCeilingError={offerCeilingResolution.status === "error"}
+            offerCeilingError={offerCeilingHasError}
             onRetryOfferCeiling={() => {
               setOfferCeilingRetryNonce((current) => current + 1);
             }}
             isScenarioActive={Boolean(deferredWhatIfState?.isAdjusted)}
             onTargetChange={handleMaoTargetChange}
+            onAdoptTarget={() => handleMaoTargetChange(activeMaoTarget)}
             onTuneTargetsOpened={() => {
               trackEvent("targets_opened", { placement: "decision_summary" });
             }}
@@ -1196,8 +1262,13 @@ export function AnalysisDashboard({
             isSaveLocked={isSaveLockedByPlan}
             saveLockedHint={saveLockedHint}
             savedDealId={savedDealId}
+            isAuthenticated={isAuthenticated}
+            onPrepareAuthShare={() => {
+              onPrepareAuthSave(adoptedMaoTarget, adoptedMaoTargetSource);
+            }}
             targetResolutionState={effectiveBuyBoxTargetResolutionState}
             targetResolutionMessage={targetActionsBlockedReason}
+            advocacyContractEnabled={advocacyDecisionContract}
           />
         </section>
       ) : null}
@@ -1220,7 +1291,7 @@ export function AnalysisDashboard({
             offerCeiling={exactOfferCeiling}
             isOfferCeilingLoading={offerCeilingIsLoading}
             hasExactOfferCeilingAccess={currentOfferCeilingPayload?.access === "exact"}
-            offerCeilingError={offerCeilingResolution.status === "error"}
+            offerCeilingError={offerCeilingHasError}
             onMaoTargetChange={handleMaoTargetChange}
             onTuneTargetsOpened={() => {
               trackEvent("targets_opened", { placement: "wholesale_outcome" });
@@ -1255,7 +1326,7 @@ export function AnalysisDashboard({
           at the verdict: names the metrics that carry the deal for that
           investor type and how this deal does on them. Balanced (the default)
           renders nothing - invisible until a lens is actively chosen. BASE-
-          result driven (matches the Deal Score + verdict); hidden while a
+          result driven (matches the Screening Index + verdict); hidden while a
           strategy play leads the output (the lens tiles are hidden there too).
           Bands are display-only, in lib/strategy-lens-outcome. */}
       {result && !isLoading && !strategyLeadsOutput ? (
@@ -1269,7 +1340,7 @@ export function AnalysisDashboard({
 
       {/* The upgrade moment belongs immediately after the answer, while the
           acquisition decision is still top-of-mind. It exposes the exact
-          missing outcome (Max Offer) without inventing a number for Free. */}
+          missing outcome (Offer Ceiling) without inventing a number for Free. */}
       {/* The retired legacy MaxOfferCard calculated paid solver output in the
           browser. The legacy layout consumes the server-authorized summary
           below instead, so a feature-flag rollback cannot reopen that path. */}
@@ -1282,14 +1353,14 @@ export function AnalysisDashboard({
           cocReturn={result.cocReturn}
           decisionTone={nextAction?.tone ?? "review"}
           isPaid={canUseMaxOffer}
-          onExportPdf={() => handleExportPdf()}
         />
       ) : null}
 
-      {showInputConfidence && result && !isLoading && inputConfidence && onToggleInputVerified ? (
+      {(showInputConfidence || advocacyDecisionContract) && result && !isLoading && inputConfidence && onToggleInputVerified ? (
         <InputConfidenceCard
           confidence={inputConfidence}
           showOfferReadyStatus={showOfferReadyStatus}
+          advocacyContractEnabled={advocacyDecisionContract}
           dealFitScore={
             dealScoreResult?.ok && dealScoreResult.tier === "pro"
               ? dealScoreResult.data.score
@@ -1422,10 +1493,9 @@ export function AnalysisDashboard({
                 className="h-11 gap-1 rounded-xl bg-primary px-2 text-[11px] font-semibold text-primary-foreground sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-[10px]"
                 onClick={() => handleExportPdf()}
                 // Clickable for users WITHOUT the entitlement on purpose:
-                // the click opens the Pro-vs-$5-one-time purchase dialog
-                // (see PdfPurchaseDialog in investcalc-page). The isSaved
-                // requirement only applies to entitled users - one-time
-                // buyers are often anonymous and can't save at all.
+                // the click opens the Pro report upgrade dialog. Existing
+                // paid one-time claims can still recover, but new Pack
+                // checkout is temporarily disabled.
                 disabled={targetActionsBlocked || isExporting || (canExportPdf && !isSaved)}
                 title={
                   targetActionsBlocked
@@ -1433,7 +1503,7 @@ export function AnalysisDashboard({
                     : canExportPdf && !isSaved
                     ? persistedActionsBlockHint ?? "Save this analysis before exporting PDF."
                     : !canExportPdf
-                      ? `Get the Deal Decision Pack - included with Pro, or ${singleDealPriceLabel} one-time.`
+                      ? "PDF reports are included with TrueCap Pro."
                       : undefined
                 }
               >
@@ -1522,11 +1592,15 @@ export function AnalysisDashboard({
                   width for exactly that reason. */}
               <ShareLinkButton
                 values={values}
+                isAuthenticated={isAuthenticated}
                 savedDealId={savedDealId}
-                maoTarget={activeMaoTarget}
-                maoTargetSource={offerCeilingTargetSource}
+                maoTarget={adoptedMaoTarget}
+                maoTargetSource={adoptedMaoTargetSource}
                 disabled={targetActionsBlocked}
                 disabledReason={targetActionsBlockedReason}
+                onPrepareAuth={() => {
+                  onPrepareAuthSave(adoptedMaoTarget, adoptedMaoTargetSource);
+                }}
               />
               {/* Mobile-only "More" overflow - Compare, New Analysis and
                   the report-style modes fold in here below sm (see the
@@ -1683,15 +1757,15 @@ export function AnalysisDashboard({
       {/* Existing deterministic breakpoint solver, promoted out of the
           collapsed what-if drawer. On a weak or marginal deal this answers
           the next acquisition question: what has to change for it to work? */}
-      {result && values && !isLoading && !strategyLeadsOutput && !showDecisionThresholds ? (
+      {!decisionFirst && result && values && !isLoading && !strategyLeadsOutput && !showDecisionThresholds ? (
         <BreakpointSuggestionCard values={values} result={result} />
       ) : null}
 
       {/* Buy Box verdict - personalized "meets your buy box" line that
-          complements the Deal Score above. Self-gates: only authenticated
+          complements the Screening Index above. Self-gates: only authenticated
           Pro users with an active Buy Box (≥1 criterion) ever see it.
           Evaluates the BASE result (not the what-if sliders), matching the
-          Deal Score. */}
+          Screening Index. */}
       {result && values ? (
         <BuyBoxVerdictCard
           enabled={Boolean(isAuthenticated)}
@@ -1712,7 +1786,7 @@ export function AnalysisDashboard({
         />
       ) : null}
 
-      {/* Max Offer is a first-class acquisition answer, not just another
+      {/* Offer Ceiling is a first-class acquisition answer, not just another
           metric. This compact summary uses the exact same deterministic
           engine and Buy Box target basis as the editable solver below. */}
       {maoQaContext && values && !strategyLeadsOutput && !showDecisionThresholds && !decisionFirst ? (
@@ -1725,7 +1799,7 @@ export function AnalysisDashboard({
               <div className="flex items-center gap-2 text-primary">
                 <Target className="size-4" aria-hidden />
                 <h2 id="max-offer-summary-title" className="text-xs font-extrabold uppercase tracking-widest">
-                  Your TrueCap Max Offer
+                  Offer Ceiling
                 </h2>
                 {maoQaContext.fromBuyBox ? (
                   <span className="rounded-full border border-primary/25 bg-card px-2 py-0.5 text-[10px] font-semibold">
@@ -1737,7 +1811,7 @@ export function AnalysisDashboard({
                 ${Math.round(maoQaContext.maxOffer).toLocaleString("en-US")}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Highest price that clears {maoQaContext.basis}.
+                Highest modeled price that still meets {maoQaContext.basis} under the assumptions shown. This is not a recommended offer.
               </p>
             </div>
             <div className="text-sm sm:text-right">
@@ -1746,10 +1820,10 @@ export function AnalysisDashboard({
                   ${Math.round(Number(values.purchasePrice) - maoQaContext.maxOffer).toLocaleString("en-US")} below the current price
                 </p>
               ) : (
-                <p className="font-bold text-[var(--brand-green)]">Current price clears these targets</p>
+                <p className="font-bold text-[var(--brand-green)]">Current price meets these modeled targets</p>
               )}
               <p className="mt-1 text-xs text-muted-foreground">
-                At max: ${Math.round(maoQaContext.achieved.netCashFlow).toLocaleString("en-US")}/mo · {maoQaContext.achieved.capRate.toFixed(1)}% cap · {maoQaContext.achieved.dscr > 0 ? maoQaContext.achieved.dscr.toFixed(2) : "—"} DSCR
+                At the ceiling: ${Math.round(maoQaContext.achieved.netCashFlow).toLocaleString("en-US")}/mo · {maoQaContext.achieved.capRate.toFixed(1)}% cap · {maoQaContext.achieved.dscr > 0 ? maoQaContext.achieved.dscr.toFixed(2) : "—"} DSCR
               </p>
               <button
                 type="button"
@@ -1853,7 +1927,7 @@ export function AnalysisDashboard({
             year-1 cards read uniformly red (negative cash flow, sub-1
             DSCR) but which pays off after-tax and projects a strong
             10-year total return. Sourced from the BASE result + the same
-            exit-scenario engine as the Deal Score, so it never contradicts
+            exit-scenario engine as the Screening Index, so it never contradicts
             them. Does NOT alter the year-1 facts above - it explains them. */}
         {appreciationPlay && result && !deferredWhatIfState?.isAdjusted ? (
           <div className="flex items-start gap-3 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-4">
@@ -1862,7 +1936,7 @@ export function AnalysisDashboard({
             </span>
             <div className="space-y-1">
               <p className="text-sm font-bold text-[var(--brand-green)]">
-                Stronger than it looks - this is an appreciation play, not a losing deal.
+                Long-term projection differs from the year-1 operating result
               </p>
               <p className="text-xs leading-relaxed text-foreground/70">
                 Year-1 cash flow is negative because of the high leverage, but after the
@@ -1875,9 +1949,9 @@ export function AnalysisDashboard({
                 <strong className="text-foreground">
                   ~{Math.round(annualizedReturnPct ?? 0)}%/yr
                 </strong>{" "}
-                (appreciation + loan paydown). The monthly shortfall is the cost of low money
-                down - confirm you can carry it and that your rent and appreciation assumptions
-                hold.
+                (modeled appreciation + loan paydown). This projection depends on the stated
+                growth and exit assumptions; it does not offset the year-1 shortfall or establish
+                that the property is a suitable investment.
               </p>
             </div>
           </div>
@@ -1906,7 +1980,6 @@ export function AnalysisDashboard({
             <>
               <DealDriverInsight values={values} result={result} marketRentEstimate={marketRentEstimate} />
               <AssumptionImpactCard values={values} />
-              <BreakpointSuggestionCard values={values} result={result} />
             </>
           ) : null}
         </section>
@@ -1938,7 +2011,7 @@ export function AnalysisDashboard({
                   Play with the numbers
                 </span>
                 <span className="block text-xs text-muted-foreground">
-                  Drag the levers - or tap Worst case - and watch the verdict move, live.
+                  Drag the levers - or tap Worst case - and watch the screening result move, live.
                 </span>
               </span>
               <ChevronRight
@@ -1993,27 +2066,6 @@ export function AnalysisDashboard({
           openEvent="why_this_number_opened"
         >
           <div className="space-y-4">
-            <AnswerHeroCard
-          isLoading={isLoading}
-          isLoadingDealScore={isLoadingDealScore}
-          dealScoreResult={dealScoreResult}
-          result={result}
-          propertyType={propertyType}
-          isAppreciationPlay={appreciationPlay}
-          verdictNarrative={verdictNarrative}
-          nextAction={nextAction}
-          buyBoxFit={buyBoxAnyPass}
-          showAllTips={showAllTips}
-          onToggleShowAllTips={() => setShowAllTips((prev) => !prev)}
-          onSave={handleSaveClick}
-          isSaving={isSaving}
-          isSaveLocked={isSaveLockedByPlan}
-          saveLockedHint={saveLockedHint}
-          hasUnsavedChanges={isExistingSavedDeal && !isSaved}
-            purchasePrice={values?.purchasePrice ?? null}
-            maxOffer={maoQaContext?.maxOffer ?? null}
-            decisionOwnedUpstream
-            />
             {/* RESTORED: this panel lived inside MaxOfferCard and vanished
                 from the DOM when the Decision-tier merge suppressed that
                 card. It is the answer to "but what if I still want this
@@ -2045,7 +2097,7 @@ export function AnalysisDashboard({
             - Anonymous user → SignupPromptCard (cheap "save this" ask).
               Signing up is the lower-friction win; we don't double-up
               with a Pro pitch on top of it.
-            - Signed-in free users already saw the deal-specific Max Offer
+            - Signed-in free users already saw the deal-specific Offer Ceiling
               upgrade moment directly after the answer above.
             - Pro user → nothing renders here.
           Previously both rendered for anonymous users, which buried
@@ -2055,7 +2107,7 @@ export function AnalysisDashboard({
           address={values?.address}
           isAuthenticated={isAuthenticated}
           onPrepareSaveIntent={() =>
-            onPrepareAuthSave(activeMaoTarget ?? undefined, offerCeilingTargetSource)
+            onPrepareAuthSave(adoptedMaoTarget, adoptedMaoTargetSource)
           }
         />
       )}
@@ -2156,7 +2208,7 @@ export function AnalysisDashboard({
               {tab.id === "strategies" && canUseStrategies && (
                 <StrategiesPanel values={values} result={result} onApplyRehab={onApplyRehab} currentRehabBudget={currentRehabBudget} />
               )}
-              {/* Stress Test row — the paid Max Offer is promoted directly
+              {/* Stress Test row — the paid Offer Ceiling is promoted directly
                   beneath the verdict above. This row now focuses on downside
                   sensitivity so the same answer never renders twice. */}
               {tab.id === "stress-test" && (

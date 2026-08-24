@@ -19,7 +19,7 @@ export default function Image() {
   return renderVsOgImage({
     competitor: "RentRedi",
     tagline:
-      "RentRedi collects rent. TrueCap decides if the deal cash-flows. Pre-purchase underwrite vs post-purchase ops.",
+      "RentRedi collects rent. TrueCap models pre-purchase cash flow. Underwriting vs post-purchase operations.",
     slug: "rentredi",
   });
 }

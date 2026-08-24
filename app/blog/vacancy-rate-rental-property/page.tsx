@@ -486,8 +486,7 @@ export default function VacancyRatePost() {
           </h2>
           <p>
             Vacancy is one line, but it touches everything downstream — NOI,
-            cap rate, cash flow, DSCR, and ultimately the verdict on the
-            deal. The full{" "}
+            cap rate, cash flow, DSCR, and selected-rule fit. The full{" "}
             <Link href="/" className="text-primary font-semibold hover:underline">
               TrueCap analyzer
             </Link>{" "}

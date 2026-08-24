@@ -26,7 +26,7 @@ import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema"
 export const metadata: Metadata = {
   title: "PropStream vs TrueCap (2026): Find vs Underwrite",
   description:
-    "PropStream finds the deals. TrueCap decides if they actually cash flow. Honest side-by-side of when each fits, plus the workflow most investors run.",
+    "PropStream finds properties. TrueCap models their cash flow from the assumptions you review. An honest side-by-side of where each fits.",
   keywords: [
     "propstream alternative",
     "propstream vs",
@@ -54,7 +54,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", propstream: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", propstream: "Not modeled", winner: "truecap" },
   { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", propstream: "Not modeled", winner: "truecap" },
-  { feature: "Deal score + verdict", truecap: "Free — 0-100 score + Strong / Solid / Mixed / Negative", propstream: "Not applicable", winner: "truecap" },
+  { feature: "Secondary Screening Index", truecap: "Free — 0-100 triage score + factor breakdown", propstream: "Not applicable", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", propstream: "Property data only — no underwriting", winner: "truecap" },
   { feature: "Skip tracing", truecap: "No", propstream: "Yes — owner phone + email lookup", winner: "propstream" },
   { feature: "Motivated-seller lists", truecap: "No", propstream: "Yes — pre-foreclosure, probate, vacant, tax delinquent", winner: "propstream" },
@@ -64,7 +64,7 @@ const MATRIX: Row[] = [
   { feature: "Pricing (entry tier)", truecap: "Free core; paid Pro — see live pricing", propstream: "~$99/mo (as of 2026), no real free tier", winner: "truecap" },
   { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", propstream: "No — paid only", winner: "truecap" },
   { feature: "Shareable read-only deal link", truecap: "Free — read-only public link; Pro adds co-branding", propstream: "Internal-only data", winner: "truecap" },
-  { feature: "PDF deal report", truecap: "One-time Deal Decision Pack or included with Pro", propstream: "Not the use case", winner: "truecap" },
+  { feature: "PDF deal report", truecap: "Included with Pro", propstream: "Not the use case", winner: "truecap" },
 ];
 
 export default function VsPropstreamPage() {
@@ -75,7 +75,7 @@ export default function VsPropstreamPage() {
     name: "PropStream vs TrueCap (2026): Find vs Underwrite",
     url: `${siteUrl}/vs/propstream`,
     description:
-      "PropStream finds the deals. TrueCap decides if they actually cash flow. Honest side-by-side of when each fits, plus the workflow most investors run.",
+      "PropStream finds properties. TrueCap models their cash flow from the assumptions you review. An honest side-by-side of where each fits.",
     dateModified: "2026-06-07",
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -108,7 +108,7 @@ export default function VsPropstreamPage() {
             <span className="text-primary">find the leads vs underwrite the deals</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            PropStream is the heavyweight in real-estate lead generation — skip tracing, list-pulling, motivated-seller filters across 150M+ properties. TrueCap is the calculator that decides which of those leads actually pencil out. Different jobs. Most serious investors run both: PropStream to source, TrueCap to underwrite.
+            PropStream is the heavyweight in real-estate lead generation — skip tracing, list-pulling, motivated-seller filters across 150M+ properties. TrueCap underwrites the user-reviewed assumptions for an individual lead. Different jobs: PropStream sources; TrueCap models the economics.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ScrollToFormButton
@@ -233,10 +233,10 @@ export default function VsPropstreamPage() {
               <strong>Get a callback / motivated seller responds.</strong> Now you have an address.
             </li>
             <li>
-              <strong>Underwrite in TrueCap.</strong> Paste the address. HUD rent, FRED rate, state property tax pre-fill. Run the analysis. Decide your max offer.
+              <strong>Underwrite in TrueCap.</strong> Paste the address. HUD rent, FRED rate, and a state property-tax benchmark pre-fill as editable starting points. Run the analysis and review the Offer Ceiling under your selected targets.
             </li>
             <li>
-              <strong>Negotiate / make the offer.</strong> TrueCap&apos;s MAO solver (Pro) backs into your max-bid from a target return — useful when the seller counters.
+              <strong>Verify, then record your decision.</strong> TrueCap&apos;s Offer Ceiling solver (Pro) works backward from your selected targets. It is a modeled boundary, not a recommended offer.
             </li>
             <li>
               <strong>Close, save the deal, track actuals in your accounting tool.</strong> TrueCap doesn&apos;t do operations — pair with Stessa or your bookkeeping system.
@@ -269,8 +269,7 @@ export default function VsPropstreamPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, and co-branded share links. Pro includes PDFs, and a one-time
-            PDF option is available; see live pricing for current terms.
+            Offer Ceiling, co-branded share links, and PDF reports with Pro; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -341,7 +340,7 @@ const PROPSTREAM_FAQ: FaqItem[] = [
     question: "Does TrueCap have a free tier? PropStream doesn&apos;t.",
     answer: (
       <>
-        Yes — TrueCap&apos;s free tier covers cap rate, cash-on-cash, DSCR, cash flow, and address auto-fill on unlimited analyses. No card required. Pro adds projections, illustrative tax impact, sensitivity, and included PDFs; a one-time PDF option is also available. See TrueCap&apos;s live pricing page for current rates. PropStream is paid-only — no real free tier beyond a trial.
+        Yes — TrueCap&apos;s free tier covers cap rate, cash-on-cash, DSCR, cash flow, and address auto-fill on unlimited analyses. No card required. Pro adds projections, illustrative tax impact, sensitivity, and included PDFs. See TrueCap&apos;s live pricing page for current rates. PropStream is paid-only — no real free tier beyond a trial.
       </>
     ),
     plainTextAnswer:

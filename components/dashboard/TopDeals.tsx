@@ -76,7 +76,7 @@ const scoreRingStrokeByRisk: Record<string, string> = {
 };
 
 const sortOptions = [
-  { id: "score", label: "Score" },
+  { id: "score", label: "Screening Index" },
   { id: "roi", label: "ROI" },
   { id: "cashFlow", label: "CF" },
   // Buy-box fit (PV-6) — the option only renders when ≥1 deal actually
@@ -162,8 +162,10 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
     <div className="rounded-2xl bg-card border border-border overflow-hidden">
       <div className="flex flex-col gap-4 p-4 pb-3 sm:flex-row sm:items-start sm:justify-between sm:p-6 sm:pb-4">
         <div>
-          <h3 className="font-display text-lg font-semibold">Deal Decision List</h3>
-          <p className="text-sm text-muted-foreground mt-0.5">Sort saved deals by the metric that matters for the next purchase.</p>
+          <h3 className="font-display text-lg font-semibold">Deal Screening List</h3>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Sort saved deals by secondary screening metrics; these are not investment advice.
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <div role="group" aria-label="Sort deals by" className="flex items-center gap-1 p-1 rounded-lg bg-muted">
@@ -206,7 +208,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                 <div className="min-w-0 flex-1">
                   <h4 className="text-base font-bold leading-tight text-foreground">
                     {d.id ? (
-                      <Link href={`/dashboard/saved-analyses/${d.id}`} className="hover:text-primary hover:underline">
+                      <Link href={`/dashboard/saved-analyses/${d.id}`} className="inline-flex min-h-11 items-center rounded-md hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                         {d.name}
                       </Link>
                     ) : (
@@ -240,7 +242,9 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                   {/* Risk is encoded in the ring COLOR only — give SR/colorblind
                       users the score + risk as text. */}
                   <span className="sr-only">
-                    {d.score != null ? `Deal score ${d.score} out of 100` : "Not scored"}
+                    {d.score != null
+                      ? `Secondary Screening Index ${d.score} out of 100; not investment advice`
+                      : "Not screened"}
                     {d.riskLevel ? `, ${d.riskLevel} risk` : ""}
                   </span>
                 </div>
@@ -317,12 +321,12 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
           <thead>
             <tr className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground border-y border-border bg-muted/40">
               <th scope="col" className="text-left px-6 py-3">Property</th>
-              <th scope="col" className="text-left px-3 py-3">Score</th>
+              <th scope="col" className="text-left px-3 py-3">Screening Index</th>
               <th scope="col" className="text-right px-3 py-3 hidden md:table-cell">10-Yr ROI</th>
               <th scope="col" className="text-right px-3 py-3 hidden md:table-cell">Cap Rate</th>
               <th scope="col" className="text-right px-3 py-3">Cash Flow</th>
               <th scope="col" className="text-right px-3 py-3 hidden xl:table-cell">Risk</th>
-              <th scope="col" className="text-right px-6 py-3">Recommendation</th>
+              <th scope="col" className="text-right px-6 py-3">Screening result</th>
             </tr>
           </thead>
           <tbody>
@@ -339,7 +343,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                       <div>
                         <div className="font-semibold">
                           {d.id ? (
-                            <Link href={`/dashboard/saved-analyses/${d.id}`} className="hover:text-primary hover:underline">
+                            <Link href={`/dashboard/saved-analyses/${d.id}`} className="inline-flex min-h-11 items-center rounded-md hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                               {d.name}
                             </Link>
                           ) : (
@@ -376,7 +380,9 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                         </svg>
                         <div aria-hidden className="absolute inset-0 grid place-items-center text-[11px] font-bold">{d.score ?? "-"}</div>
                         <span className="sr-only">
-                          {d.score != null ? `Deal score ${d.score} out of 100` : "Not scored"}
+                          {d.score != null
+                            ? `Secondary Screening Index ${d.score} out of 100; not investment advice`
+                            : "Not screened"}
                           {d.riskLevel ? `, ${d.riskLevel} risk` : ""}
                         </span>
                       </div>

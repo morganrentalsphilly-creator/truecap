@@ -90,42 +90,42 @@ function classifyDeal(result: AnalysisResult): {
 
   const capRateSentence =
     cap >= 7
-      ? `Cap rate of ${cap.toFixed(1)}% is healthy for most markets, indicating the property earns its own way independent of how it's financed.`
+      ? `Cap rate is ${cap.toFixed(1)}%; compare it with verified local properties and your selected target.`
       : cap >= 5
-      ? `Cap rate of ${cap.toFixed(1)}% sits in the typical range for stable / appreciation-focused markets.`
+      ? `Cap rate is ${cap.toFixed(1)}%; local market, condition, and expense conventions determine whether that fits your rules.`
       : cap >= 3
-      ? `Cap rate of ${cap.toFixed(1)}% is on the low end — common in coastal / Tier-1 markets where appreciation is the dominant return.`
-      : `Cap rate of ${cap.toFixed(1)}% is well below market norms; verify the rent assumption and operating expense estimates.`;
+      ? `Cap rate is ${cap.toFixed(1)}%; this screen depends more heavily on assumptions outside current operating income.`
+      : `Cap rate is ${cap.toFixed(1)}%; verify rent and operating expenses before comparing it with local alternatives.`;
 
   const dscrSentence = isCashPurchase
     ? `DSCR isn't applicable for an all-cash purchase — no lender debt service to cover.`
     : dscr >= 1.25
-    ? `DSCR of ${dscr.toFixed(2)} clears the typical ≥1.25 lender threshold — the property comfortably covers debt service.`
+    ? `DSCR is ${dscr.toFixed(2)}, above the 1.25 screening benchmark; actual lender definitions and requirements vary.`
     : dscr >= 1.0
-    ? `DSCR of ${dscr.toFixed(2)} is in tight territory (above breakeven but below the ≥1.25 most lenders require for investment loans).`
+    ? `DSCR is ${dscr.toFixed(2)}, above modeled debt-service breakeven but below the 1.25 screening benchmark; confirm the lender's definition and requirements.`
     : `DSCR of ${dscr.toFixed(2)} is below 1.0 — operating income doesn't cover debt service, so the owner subsidizes the property each month.`;
 
   const cocSentence =
     coc >= 12
-      ? `Cash-on-cash of ${coc.toFixed(1)}% is strong — your invested capital is working harder than most alternatives.`
+      ? `Cash-on-cash is ${coc.toFixed(1)}% under the assumptions shown.`
       : coc >= 8
-      ? `Cash-on-cash of ${coc.toFixed(1)}% is a healthy target for buy-and-hold investors.`
+      ? `Cash-on-cash is ${coc.toFixed(1)}% under the assumptions shown.`
       : coc >= 4
-      ? `Cash-on-cash of ${coc.toFixed(1)}% is modest — likely an appreciation play rather than a cash-flow play.`
+      ? `Cash-on-cash is ${coc.toFixed(1)}%; compare it with your selected target and alternatives.`
       : coc >= 0
-      ? `Cash-on-cash of ${coc.toFixed(1)}% is below typical alternatives — needs strong appreciation and tax benefits to justify.`
-      : `Cash-on-cash of ${coc.toFixed(1)}% is negative — investor capital loses value year over year on cash terms alone.`;
+      ? `Cash-on-cash is ${coc.toFixed(1)}%; the modeled case relies more heavily on other return sources.`
+      : `Cash-on-cash is ${coc.toFixed(1)}% under the assumptions shown.`;
 
   const closer =
     headline === "Strong"
-      ? "Strong overall fundamentals; if rents and reserves are realistic, this is a deal to move on."
+      ? "The screening metrics are strong; verify every material assumption before recording a decision."
       : headline === "Solid"
-      ? "Solid fundamentals across the board. Worth a deeper underwrite and verification of rent / expense assumptions."
+      ? "The screening metrics are positive; continue with a deeper underwrite and verify rent and expenses."
       : headline === "Mixed"
-      ? "Mixed signals — one or two metrics are below target. Stress-test the rent and vacancy assumptions before offering."
+      ? "The screening metrics are mixed. Stress-test and verify rent and vacancy before recording a decision."
       : headline === "Marginal"
-      ? "Margins are thin. The deal could work if rents come in above projection or you can lock in below-market financing, but it leaves no cushion."
-      : "These numbers don't support a buy-and-hold thesis as entered. Either the price needs to come down, the rent needs to be higher, or the strategy is appreciation-driven only.";
+      ? "Modeled margins are thin. Verify rent and written financing terms, then compare them with the selected rules."
+      : "The modeled economics are weak as entered. Review price, rent, financing, and strategy assumptions before recording a decision.";
 
   return { headline, cashFlowSentence, capRateSentence, dscrSentence, cocSentence, closer };
 }

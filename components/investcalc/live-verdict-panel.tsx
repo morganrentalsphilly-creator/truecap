@@ -9,14 +9,11 @@
  * is exported so the sticky verdict dock can share it.
  */
 
-import type { DealTier } from "@/lib/verdict";
 import { cn } from "@/lib/utils";
 import { GlossaryTip } from "./glossary-tip";
 
 /** The lightweight pre-run verdict snapshot computed by the form watcher. */
 export type LivePreviewSnapshot = {
-  tier: DealTier;
-  score: number;
   netCashFlow: number;
   capRate: number;
   dscr: number;
@@ -81,27 +78,10 @@ export function LiveVerdictPanel({ active, livePreview, livePreviewMsg }: Props)
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/60" />
                 <span className="relative inline-flex size-2 rounded-full bg-primary" />
               </span>
-              Live preview
+              Live screening preview
             </span>
-            <span
-              className={cn(
-                "rounded-full px-2.5 py-0.5 text-xs font-extrabold uppercase tracking-wide",
-                livePreview.tier === "Strong" && "bg-[var(--brand-green)] text-white",
-                livePreview.tier === "Solid" && "bg-primary text-primary-foreground",
-                livePreview.tier === "Mixed" && "bg-amber-500 text-white",
-                livePreview.tier === "Marginal" && "bg-orange-500 text-white",
-                livePreview.tier === "Negative" && "bg-red-600 text-white"
-              )}
-            >
-              {livePreview.tier}
-            </span>
-          </div>
-          <div className="mb-3 flex items-baseline gap-1.5">
-            <span className="font-mono text-3xl font-extrabold tabular-nums text-foreground">
-              {livePreview.score}
-            </span>
-            <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
-              / 100 Deal Score
+            <span className="rounded-full border border-primary/25 bg-card px-2.5 py-0.5 text-xs font-extrabold uppercase tracking-wide text-primary">
+              Preliminary
             </span>
           </div>
           <div className="grid grid-cols-3 gap-2 sm:gap-3">
@@ -158,7 +138,7 @@ export function LiveVerdictPanel({ active, livePreview, livePreviewMsg }: Props)
               <span className="font-mono font-bold">
                 ${Math.round(livePreview.breakEvenPrice).toLocaleString()}
               </span>{" "}
-              — try that as your offer price.
+              — review that modeled break-even point against the price assumption.
             </p>
           ) : Math.round(livePreview.netCashFlow) < 0 ? (
             <p className="mt-2.5 rounded-lg bg-background/60 px-2.5 py-2 text-[11px] font-semibold leading-snug text-foreground">

@@ -502,7 +502,7 @@ export default function ExitCapRatePost() {
               </Link>{" "}
               carry your NOI, financing, and cap-rate assumptions straight through
               to cash flow, DSCR, and the projected sale — so the exit you assume
-              and the verdict you get always come from the same set of numbers.
+              and the modeled result always come from the same set of numbers.
               None of this is investment advice; confirm the actual rents,
               expenses, and comparable sales on any specific property before you
               rely on a projected exit.

@@ -55,7 +55,7 @@ export default function SampleDecisionMemoPage() {
       <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-16">
         <div className="rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950">
           <strong>Illustrative sample — not a customer result.</strong> The address and all
-          financial inputs below are editable demonstration assumptions. They are not verified
+          financial inputs below are illustrative demonstration assumptions. They are not verified
           property facts, an appraisal, a lender decision, or investment advice.
         </div>
 
@@ -64,7 +64,7 @@ export default function SampleDecisionMemoPage() {
             Sample Decision Memo
           </p>
           <h1 className="mt-3 text-balance text-3xl font-extrabold tracking-tight sm:text-5xl">
-            Pass at this price. Keep the deal alive below the ceiling.
+            Does not meet selected rules at asking.
           </h1>
           <p className="mt-3 text-lg text-muted-foreground">
             {SAMPLE_DEAL_FIXTURE.display.shortAddress} · asking {money(values.purchasePrice)}
@@ -74,13 +74,13 @@ export default function SampleDecisionMemoPage() {
         <section aria-labelledby="sample-decision" className="mt-8 grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
           <article className="rounded-2xl border-2 border-primary/30 bg-card p-5 shadow-sm sm:p-6">
             <h2 id="sample-decision" className="text-xs font-extrabold uppercase tracking-widest text-primary">
-              What should I offer?
+              Offer Ceiling
             </h2>
             <p className="mt-2 font-mono text-4xl font-extrabold tabular-nums text-primary sm:text-5xl">
               {money(maxOffer.maxPrice)}
             </p>
             <p className="mt-2 text-sm font-semibold">
-              Under the selected sample targets · {describeMaoTarget(SAMPLE_DEAL_FIXTURE.maoTarget)}
+              {SAMPLE_DEAL_FIXTURE.targetProfile.name} v{SAMPLE_DEAL_FIXTURE.targetProfile.version} · {describeMaoTarget(SAMPLE_DEAL_FIXTURE.maoTarget)}
             </p>
             <p className="mt-3 text-sm text-muted-foreground">
               The asking price is {money(values.purchasePrice - maxOffer.maxPrice)} above this
@@ -107,7 +107,8 @@ export default function SampleDecisionMemoPage() {
               </div>
             </dl>
             <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-              Calculated from the targets shown. This is not a recommended offer.
+              Highest modeled price that still meets {SAMPLE_DEAL_FIXTURE.targetProfile.name}{" "}
+              under the assumptions shown. This is not a recommended offer.
             </p>
           </article>
 
@@ -164,8 +165,9 @@ export default function SampleDecisionMemoPage() {
         <section className="mt-8 rounded-2xl border border-border bg-muted/30 p-5 text-sm sm:p-6">
           <h2 className="font-extrabold">Methodology and scope</h2>
           <p className="mt-2 leading-relaxed text-muted-foreground">
-            Generated from the shared 1700 W Erie fixture using {TRUECAP_UNDERWRITING_STANDARD_NAME} v{analysis.methodologyVersion}.
-            The same deterministic fixture powers the homepage preview and opened sample analysis.
+            Generated from synthetic fixture {SAMPLE_DEAL_FIXTURE.fixtureVersion} using {TRUECAP_UNDERWRITING_STANDARD_NAME} v{analysis.methodologyVersion}.
+            Target profile: {SAMPLE_DEAL_FIXTURE.targetProfile.name} v{SAMPLE_DEAL_FIXTURE.targetProfile.version}.
+            The same explicitly synthetic, deterministic fixture powers the homepage preview and opened sample analysis.
           </p>
           <Link href="/methodology" className="mt-3 inline-flex min-h-11 items-center font-bold text-primary hover:underline">
             Review the methodology <ArrowRight className="ml-1 size-4" aria-hidden />

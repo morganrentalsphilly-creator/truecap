@@ -1,5 +1,5 @@
 /**
- * Pure chip-builder for the input-side "Your assumptions — already filled in"
+ * Pure chip-builder for the input-side "Starting assumptions" strip.
  * strip (calculator redesign Phase 3, blueprint §1 item 4).
  *
  * DATA-DERIVED-STATE INVARIANT (blueprint, non-negotiable): every chip is
@@ -31,8 +31,9 @@ export type AssumptionChipTarget = "property" | "financing" | "expenses" | "extr
 
 export type AssumptionChipBadge = {
   /** Provenance vocabulary shared with the result-state strip, plus "play"
-   *  for values written by an active "What's your play?" starter set. */
-  kind: "live" | "hud" | "state" | "yours" | "play";
+   *  for values written by an active strategy and "default" for untouched
+   *  product starting values. */
+  kind: "live" | "hud" | "state" | "yours" | "play" | "default";
   /** Display text, e.g. "live rate", "PA", "yours", "BRRRR". */
   text: string;
 };
@@ -217,7 +218,7 @@ export function buildAssumptionChips(
         ? playBadge
         : provenance.interestRate
           ? { kind: "yours", text: "yours" }
-          : null,
+          : { kind: "default", text: "default" },
     target: "financing",
     pulseKey: rateIsLive ? "rate:fred" : null,
   });
@@ -237,7 +238,7 @@ export function buildAssumptionChips(
         ? playBadge
         : provenance.propertyTaxPct
           ? { kind: "yours", text: "yours" }
-          : null,
+          : { kind: "default", text: "default" },
     target: "expenses",
     pulseKey: taxIsState ? "tax:state" : null,
   });
@@ -255,7 +256,7 @@ export function buildAssumptionChips(
       ? playBadge
       : expensesYours
         ? { kind: "yours", text: "yours" }
-        : null,
+        : { kind: "default", text: "default" },
     target: "expenses",
     pulseKey: null,
   });
@@ -266,7 +267,7 @@ export function buildAssumptionChips(
       ? playBadge
       : expensesYours
         ? { kind: "yours", text: "yours" }
-        : null,
+        : { kind: "default", text: "default" },
     target: "expenses",
     pulseKey: null,
   });

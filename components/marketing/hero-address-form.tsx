@@ -26,7 +26,7 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { useForm, type DefaultValues } from "react-hook-form";
-import { ArrowRight, Calculator, Sparkles } from "lucide-react";
+import { ArrowRight, Calculator, Link2, MapPin, Sparkles } from "lucide-react";
 import { AddressAutocomplete, type SelectedAddress } from "@/components/investcalc/address-autocomplete";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import {
@@ -35,6 +35,7 @@ import {
   type HeroAnalyzeDetail,
 } from "@/lib/hero-handoff";
 import { trackEvent } from "@/lib/analytics";
+import { parseListingUrl } from "@/lib/listing-url";
 import { scrollBehavior } from "@/lib/utils";
 
 function scrollToCalculator() {
@@ -75,9 +76,46 @@ export function HeroAddressForm() {
   const selectedRef = useRef<SelectedAddress | null>(null);
   const addressStartedRef = useRef(false);
   const [submitting, setSubmitting] = useState(false);
+  const [entryMode, setEntryMode] = useState<"address" | "listing">("address");
+  const [listingUrl, setListingUrl] = useState("");
+  const [listingError, setListingError] = useState<string | null>(null);
 
   const handleAnalyze = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (entryMode === "listing") {
+      const parsed = parseListingUrl(listingUrl);
+      if (!parsed) {
+        setListingError(
+          "Paste a supported Zillow, Redfin, Realtor.com, Homes.com, or Trulia property link."
+        );
+        return;
+      }
+
+      setListingError(null);
+      setSubmitting(true);
+      // Privacy: only coarse entry/source signals are captured. The listing
+      // URL and parsed address never leave the underwriting handoff.
+      trackEvent("hero_address_submit", {
+        has_components: Boolean(parsed.state),
+        entry_kind: "listing_url",
+        listing_source: parsed.source,
+      });
+      trackEvent("address_submitted", {
+        has_components: Boolean(parsed.state),
+        entry_kind: "listing_url",
+      });
+      trackEvent("homepage_primary_cta", { source: "hero_listing" });
+      dispatchHeroAnalyze({
+        token: `listing:${newToken()}`,
+        address: parsed.address,
+        state: parsed.state,
+      });
+      scrollToCalculator();
+      window.setTimeout(() => setSubmitting(false), 1200);
+      return;
+    }
+
     const address = (form.getValues("address") ?? "").trim();
     if (!address) {
       // Nothing typed — send them to the full calculator to start there.
@@ -89,8 +127,14 @@ export function HeroAddressForm() {
     const picked = selectedRef.current;
     const sameAsPicked = picked && picked.formattedAddress.trim() === address;
     // Funnel: top of the hero-start path. No address string sent (PII).
-    trackEvent("hero_address_submit", { has_components: Boolean(sameAsPicked) });
-    trackEvent("address_submitted", { has_components: Boolean(sameAsPicked) });
+    trackEvent("hero_address_submit", {
+      has_components: Boolean(sameAsPicked),
+      entry_kind: "address",
+    });
+    trackEvent("address_submitted", {
+      has_components: Boolean(sameAsPicked),
+      entry_kind: "address",
+    });
     trackEvent("homepage_primary_cta", { source: "hero_address" });
     dispatchHeroAnalyze({
       token: newToken(),
@@ -114,6 +158,36 @@ export function HeroAddressForm() {
 
   return (
     <div className="mt-7 w-full max-w-xl">
+      <div
+        className="mb-2.5 inline-flex rounded-xl border border-border bg-muted/60 p-1"
+        role="group"
+        aria-label="Property entry method"
+      >
+        <button
+          type="button"
+          aria-pressed={entryMode === "address"}
+          onClick={() => {
+            setEntryMode("address");
+            setListingError(null);
+          }}
+          className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3.5 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 aria-pressed:bg-card aria-pressed:text-foreground aria-pressed:shadow-sm"
+        >
+          <MapPin className="size-4" aria-hidden="true" />
+          Street address
+        </button>
+        <button
+          type="button"
+          aria-pressed={entryMode === "listing"}
+          onClick={() => {
+            setEntryMode("listing");
+            selectedRef.current = null;
+          }}
+          className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3.5 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 aria-pressed:bg-card aria-pressed:text-foreground aria-pressed:shadow-sm"
+        >
+          <Link2 className="size-4" aria-hidden="true" />
+          Listing link
+        </button>
+      </div>
       <form
         onSubmit={handleAnalyze}
         onFocusCapture={() => {
@@ -124,18 +198,51 @@ export function HeroAddressForm() {
         className="flex flex-col items-stretch gap-2.5 sm:flex-row"
       >
         <div className="min-w-0 flex-1">
-          <AddressAutocomplete
-            form={form}
-            placeholder="Enter a property address"
-            ariaLabel="Property address"
-            inputClassName="h-12 rounded-xl px-4 text-base shadow-sm sm:h-14"
-            onPlaceSelected={(place) => {
-              // Capture the picked suggestion's parsed components so
-              // "Analyze free" can hand them to the calculator for the
-              // same HUD/FRED/state auto-fill an in-form selection gets.
-              selectedRef.current = place;
-            }}
-          />
+          {entryMode === "address" ? (
+            <AddressAutocomplete
+              form={form}
+              placeholder="Enter a property address"
+              ariaLabel="Property address"
+              inputClassName="h-12 rounded-xl px-4 text-base shadow-sm sm:h-14"
+              onPlaceSelected={(place) => {
+                // Capture the picked suggestion's parsed components so
+                // "Analyze free" can hand them to the calculator for the
+                // same HUD/FRED/state auto-fill an in-form selection gets.
+                selectedRef.current = place;
+              }}
+            />
+          ) : (
+            <div>
+              <label htmlFor="hero-listing-url" className="sr-only">
+                Property listing link
+              </label>
+              <input
+                id="hero-listing-url"
+                name="listingUrl"
+                type="url"
+                inputMode="url"
+                autoComplete="url"
+                value={listingUrl}
+                onChange={(event) => {
+                  setListingUrl(event.target.value);
+                  if (listingError) setListingError(null);
+                }}
+                placeholder="Paste a Zillow, Redfin, or Realtor.com link"
+                aria-invalid={Boolean(listingError)}
+                aria-describedby={listingError ? "hero-listing-url-error" : "hero-listing-url-help"}
+                className="h-12 w-full rounded-xl border border-input bg-background px-4 text-base shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 sm:h-14"
+              />
+              <p
+                id={listingError ? "hero-listing-url-error" : "hero-listing-url-help"}
+                role={listingError ? "alert" : undefined}
+                className={`mt-1.5 px-1 text-xs ${
+                  listingError ? "font-medium text-destructive" : "text-muted-foreground"
+                }`}
+              >
+                {listingError ?? "We parse the address, then ask you to verify imported values."}
+              </p>
+            </div>
+          )}
         </div>
         <button
           type="submit"
@@ -143,7 +250,7 @@ export function HeroAddressForm() {
           className="group inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] disabled:opacity-70 sm:h-14"
         >
           <Calculator className="size-4" />
-          Analyze a Deal
+          Underwrite rental
           <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
         </button>
       </form>

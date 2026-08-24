@@ -14,9 +14,9 @@ describe("role-aware analyzer CTA", () => {
     );
   });
 
-  it("names the Max Offer outcome for Pro", () => {
+  it("names the Offer Ceiling outcome for Pro", () => {
     expect(getAnalyzerCta({ hasProperty: true, canCalculateMaxOffer: true })).toBe(
-      "Calculate my Max Offer"
+      "Calculate my Offer Ceiling"
     );
   });
 });

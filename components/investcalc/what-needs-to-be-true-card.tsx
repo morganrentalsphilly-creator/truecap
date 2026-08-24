@@ -42,7 +42,7 @@ function compactValue(threshold: AnyDecisionThreshold): string | null {
       const cash = threshold as Extract<AnyDecisionThreshold, { id: "cash_needed_reduction" }>;
       if (cash.requiredCashReduction == null) return null;
       return cash.sellerCreditFramingSupportedByModel
-        ? `Modeled seller credit ≥ ${money(cash.requiredCashReduction)}`
+        ? `Modeled closing-cost reduction ≥ ${money(cash.requiredCashReduction)}`
         : `Cash needed reduction ≥ ${money(cash.requiredCashReduction)}`;
     }
     case "max_rehab_budget":
@@ -139,7 +139,7 @@ export function WhatNeedsToBeTrueCard({ values, target, targetSource, onApply }:
         <div className="mt-4 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
           <CheckCircle2 aria-hidden className="mt-0.5 size-4 shrink-0" />
           <p>
-            At {money(values.purchasePrice)}, the deal clears the selected criteria. The Max Offer above remains the walk-away boundary under these assumptions.
+            At {money(values.purchasePrice)}, the modeled economics clear the selected criteria. The Offer Ceiling above remains the target-dependent boundary under these assumptions.
           </p>
         </div>
       ) : actionable.length > 0 ? (
@@ -198,7 +198,7 @@ export function WhatNeedsToBeTrueCard({ values, target, targetSource, onApply }:
             </li>
           ))}
           <li>
-            A modeled seller credit appears only when the required cash reduction fits inside modeled closing costs. Actual lender and loan-program limits still require written verification.
+            A modeled closing-cost reduction appears only when the required cash reduction fits inside modeled closing costs. It is not an explicit seller credit; actual settlement terms and lender limits require written verification.
           </li>
         </ul>
       </details>

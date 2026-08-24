@@ -53,7 +53,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", batchleads: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", batchleads: "Not modeled", winner: "truecap" },
   { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", batchleads: "Not modeled", winner: "truecap" },
-  { feature: "Deal score + verdict", truecap: "Free — 0-100 score + plain-English verdict", batchleads: "Not applicable", winner: "truecap" },
+  { feature: "Secondary Screening Index", truecap: "Free — 0-100 triage score + factor breakdown", batchleads: "Not applicable", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", batchleads: "Property data only", winner: "truecap" },
   { feature: "Motivated-seller lists", truecap: "No", batchleads: "Yes — pre-foreclosure, probate, vacant, etc.", winner: "batchleads" },
   { feature: "Skip tracing", truecap: "No", batchleads: "Yes — owner phone + email", winner: "batchleads" },
@@ -236,7 +236,7 @@ export default function VsBatchleadsPage() {
               <strong>Underwrite in TrueCap.</strong> Paste address; HUD rent, FRED rate, state tax pre-fill; run cap rate / DSCR / cash flow.
             </li>
             <li>
-              <strong>Make the offer.</strong> Use TrueCap&apos;s MAO solver (Pro) to back into your max-bid.
+              <strong>Verify, then record your decision.</strong> Use TrueCap&apos;s Offer Ceiling solver (Pro) to calculate the modeled boundary under your selected targets; it is not a recommended offer.
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
@@ -266,8 +266,7 @@ export default function VsBatchleadsPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, and co-branded share links. Pro includes PDFs, and a one-time
-            PDF option is available; see live pricing for current terms.
+            Offer Ceiling, co-branded share links, and PDF reports with Pro; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -348,11 +347,11 @@ const BATCHLEADS_FAQ: FaqItem[] = [
     question: "Can I use BatchLeads + TrueCap together?",
     answer: (
       <>
-        Yes — the standard workflow for active off-market buyers. BatchLeads surfaces motivated-seller leads, you reach out and get a verbal price, paste the address into TrueCap and run the underwrite. Deal Score + MAO solver helps you make a defensible offer.
+        Yes — BatchLeads can surface off-market leads, and TrueCap can screen user-entered assumptions. The secondary Screening Index supports triage, while the target-dependent Offer Ceiling shows a modeled boundary for review. Neither is a recommended offer.
       </>
     ),
     plainTextAnswer:
-      "Yes — standard active-off-market workflow. BatchLeads surfaces leads; you reach out; paste address into TrueCap; underwrite. Deal Score + MAO solver helps you offer defensibly.",
+      "BatchLeads can surface off-market leads; TrueCap can screen user-entered assumptions. Its secondary Screening Index supports triage, and its target-dependent Offer Ceiling is a modeled boundary—not a recommended offer.",
   },
 ];
 

@@ -32,22 +32,25 @@ describe("saved-analysis methodology resolution", () => {
     expect(resolved.result).toEqual(current);
   });
 
-  it("recomputes same-version snapshots while retaining snapshot-only metadata", () => {
+  it("preserves a complete same-version recorded result without recomputing", () => {
     const current = currentResult();
+    const recorded = {
+      ...current,
+      netCashFlow: -999_999,
+      score: 77,
+    };
     const resolved = resolveSavedAnalysisResult({
       methodologyVersion: current.methodologyVersion,
-      resultSnapshot: {
-        methodologyVersion: "future-value-is-not-authoritative",
-        netCashFlow: -999_999,
-        score: 77,
-      },
+      resultSnapshot: recorded,
       recomputedResult: current,
       recomputedExtras: { score: 55 },
     });
 
-    expect(resolved.mode).toBe("same-version-recomputed");
-    expect(resolved.result?.netCashFlow).toBe(current.netCashFlow);
-    expect((resolved.result as unknown as { score: number }).score).toBe(55);
+    expect(resolved.mode).toBe("same-version-recorded-snapshot");
+    expect(resolved.usesRecordedSnapshot).toBe(true);
+    expect(resolved.didRecompute).toBe(false);
+    expect(resolved.result?.netCashFlow).toBe(-999_999);
+    expect((resolved.result as unknown as { score: number }).score).toBe(77);
   });
 
   it("labels unversioned snapshots as legacy recomputations", () => {
@@ -59,6 +62,7 @@ describe("saved-analysis methodology resolution", () => {
       recomputedExtras: {},
     });
     expect(resolved.mode).toBe("legacy-recomputed");
+    expect(resolved.usesRecordedSnapshot).toBe(false);
     expect(resolved.result?.netCashFlow).toBe(current.netCashFlow);
   });
 
@@ -123,6 +127,7 @@ describe("saved-analysis methodology resolution", () => {
     });
 
     expect(resolved.shouldFreeze).toBe(true);
+    expect(resolved.usesRecordedSnapshot).toBe(true);
     expect(resolved.didRecompute).toBe(false);
     expect(resolved.snapshot).toMatchObject({
       netCashFlow: 111,
@@ -144,5 +149,22 @@ describe("saved-analysis methodology resolution", () => {
     });
     expect(resolved.result).toBeNull();
     expect(resolved.shouldFreeze).toBe(true);
+  });
+
+  it("fails closed when a same-version recorded snapshot is incomplete", () => {
+    const current = currentResult();
+    const resolved = resolveSavedAnalysisResult({
+      methodologyVersion: current.methodologyVersion,
+      resultSnapshot: {
+        methodologyVersion: current.methodologyVersion,
+        netCashFlow: 321,
+      },
+      recomputedResult: current,
+      recomputedExtras: {},
+    });
+
+    expect(resolved.mode).toBe("same-version-recorded-snapshot");
+    expect(resolved.usesRecordedSnapshot).toBe(true);
+    expect(resolved.result).toBeNull();
   });
 });

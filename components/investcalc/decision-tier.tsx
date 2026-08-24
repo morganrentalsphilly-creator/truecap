@@ -3,19 +3,19 @@
 /**
  * TIER 1 — THE DECISION. The only thing above the fold on a results page.
  *
- * WHAT THIS REPLACES (Aug-2026 hierarchy rebuild): the Max Offer — the thing
+ * WHAT THIS REPLACES (Aug-2026 hierarchy rebuild): the Offer Ceiling — the thing
  * the product is sold on — used to render 9th, gated behind a four-input
  * targets form, and then AGAIN ~10 blocks lower as a hero. The two agreed on
  * first paint and silently diverged the moment a user edited a target: the
  * card re-solved on the edited targets while the hero stayed on the canonical
  * basis. Six action buttons competed beneath them, two of them filled-primary.
  *
- * THE MERGE (not a deletion): there is now ONE Max Offer. The four targets
+ * THE MERGE (not a deletion): there is now ONE Offer Ceiling. The four targets
  * moved into the collapsed "Tune targets" disclosure below it, and editing
  * them recomputes THIS number in place. That removes the divergence rather
  * than picking a winner between the two old numbers.
  *
- * Max Offer resolves with ZERO user input: targets seed from the user's buy
+ * Offer Ceiling resolves with ZERO user input: targets seed from the user's buy
  * box when they have one, else the canonical basis (break-even cash flow +
  * DSCR 1.25 — lib/mao-targets).
  *
@@ -56,17 +56,17 @@ const numberOrUndefined = (s: string): number | undefined => {
 export type DecisionTierProps = {
   values: InvestmentFormValues | null;
   result: AnalysisResult | null;
-  /** INTERNAL recommendation value; null while the Deal Score is loading. */
+  /** INTERNAL recommendation value; null while the Screening Index is loading. */
   recommendation: string | null;
   /** 0-100. Rendered as a small chip beside the verdict, never as the hero. */
   score: number | null;
-  /** Analysis-level load. Gates the Max Offer figure only. */
+  /** Analysis-level load. Gates the Offer Ceiling figure only. */
   isLoading: boolean;
-  /** Deal Score load — gates ONLY the verdict sentence + score chip. The
-   *  Max Offer solve does not depend on it, so blocking the number behind
+  /** Screening Index load — gates ONLY the verdict sentence + score chip. The
+   *  Offer Ceiling solve does not depend on it, so blocking the number behind
    *  it hid the product for the length of an unrelated fetch. */
   isScoreLoading?: boolean;
-  /** Pro gate. When false the Max Offer figure is not solved or shown. */
+  /** Pro gate. When false the Offer Ceiling figure is not solved or shown. */
   canUseMaxOffer: boolean;
   buyBoxThresholds?: BuyBoxReturnThresholds | null;
   /** Sourcing/confidence disclosure — the single trust line's target. */
@@ -82,7 +82,7 @@ export type DecisionTierProps = {
   /**
    * Reports the EFFECTIVE target (seeded, then tuned) up to the dashboard so
    * "Or — make your current price work" solves the same targets this tier
-   * solved Max Offer with. Without this it would silently answer a different
+   * solved Offer Ceiling with. Without this it would silently answer a different
    * question after any edit.
    */
   onTargetResolved?: (target: MaoTarget) => void;
@@ -206,7 +206,7 @@ export function DecisionTier({
               text and --primary measures 4.34:1 here, under the 4.5:1 AA bar.
               The codebase already ships this AA-safe sibling token. */}
           <p className="text-[11px] font-bold uppercase tracking-widest text-[var(--brand-blue-text)]">
-            Your max offer
+            Offer Ceiling
           </p>
           {isLoading ? (
             <div className="mt-1 h-14 w-56 animate-pulse rounded-xl bg-muted sm:h-16" />
@@ -225,19 +225,20 @@ export function DecisionTier({
                 </p>
               ) : null}
               <p className="mt-1 text-xs text-muted-foreground">
-                Highest price that clears {describeMaoTarget(target)}.
+                Highest modeled price that still meets the selected targets under the assumptions shown.
+                Criteria: {describeMaoTarget(target)}. Not a recommended offer or appraisal.
               </p>
               {/* Tuning a target silently rewrote the page's headline number.
                   Announce it — this is the one value the product exists for. */}
               <span aria-live="polite" className="sr-only">
-                Max offer {money(maxOffer)}, the highest price that clears{" "}
+                Offer Ceiling {money(maxOffer)}, the highest modeled price that meets{" "}
                 {describeMaoTarget(target)}.
               </span>
             </>
           ) : (
             <p className="mt-1 text-sm text-muted-foreground">
               {noTargetSet
-                ? "Set at least one target below to solve your max offer."
+                ? "Set at least one target below to calculate an Offer Ceiling."
                 : "No price clears these targets. Loosen one in Tune targets."}
             </p>
           )}
@@ -253,7 +254,11 @@ export function DecisionTier({
           <span className="inline-flex shrink-0 items-center gap-2">
             <Verdict recommendation={recommendation} variant="compact" />
             {score != null ? (
-              <span className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
+              <span
+                title="Secondary screening heuristic; not investment advice"
+                className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2 py-0.5 text-[11px] font-semibold text-muted-foreground"
+              >
+                <span>Screening Index · secondary</span>
                 <span className="tabular-nums text-foreground">{score}</span>
                 <span>/100</span>
               </span>
@@ -327,7 +332,7 @@ export function DecisionTier({
           </button>
           <div id={`${fieldId}-tune`} hidden={!tuneOpen} className="mt-3">
             <p className="mb-2 text-xs text-muted-foreground">
-              Your max offer is the highest price that still clears every target you set.
+              The Offer Ceiling is the highest modeled price that still meets every target you set under the assumptions shown.
             </p>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <div>

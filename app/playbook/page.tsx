@@ -31,12 +31,12 @@ import { getSiteUrl } from "@/lib/site-url";
 export const metadata: Metadata = {
   title: "The First Offer Playbook",
   description:
-    "The written path from screening rentals to a submitted offer: define your Buy Box, read the analysis, set your Max Offer, and make the offer — scripts included.",
+    "An educational path from rental screening to a documented decision: define your Buy Box, verify assumptions, and review your Offer Ceiling with advisers.",
   alternates: { canonical: "/playbook" },
   openGraph: {
     title: "The First Offer Playbook — TrueCap",
     description:
-      "Define your Buy Box, source candidates, read the analysis, set your Max Offer, submit the offer. The whole path, written down, with scripts.",
+      "Define your Buy Box, source candidates, verify the analysis, review the Offer Ceiling, and make your own documented decision.",
     url: "/playbook",
     type: "article",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "The First Offer Playbook" }],
@@ -53,7 +53,7 @@ const STEPS = [
     paragraphs: [
       "Analysis paralysis is almost never a math problem — it's a criteria problem. If you don't know what a good deal means to you, every deal is a maybe, and maybes don't get offers. Your Buy Box is the fix: the small set of numbers a property must clear before it deserves another minute of your attention.",
       "Write down five numbers: the most cash you can deploy (down payment + closing + reserves), your minimum monthly cash flow after ALL expenses (including the vacancy, maintenance, and CapEx reserves most spreadsheets skip), your minimum cash-on-cash return, the property types you'll actually manage, and the markets you're hunting in. That's it. Three of them will feel arbitrary — write them down anyway; you can revise them after ten analyses, but you can't revise a blank page.",
-      "In TrueCap, save these as your Buy Box (a Pro feature) and every analysis gets an automatic pass/fail with reasons — or keep them on a sticky note and check each analysis by hand. The tool matters less than the commitment: from now on, deals are measured against YOUR criteria, not against your mood.",
+      "In TrueCap, save these as your Buy Box (a Pro feature) and each analysis shows which selected rules the inputs meet or miss — or keep them on a sticky note and check each analysis by hand. The tool matters less than the commitment: deals are measured against your stated criteria, not against your mood.",
     ],
     action: "Write the five numbers down. Today, before the next listing.",
   },
@@ -63,7 +63,7 @@ const STEPS = [
     short: "Source deals",
     title: "Source candidates in volume — screening is a numbers game",
     paragraphs: [
-      "The investors who close aren't better pickers; they screen more property. A workable rhythm for a W-2 schedule: fifteen minutes a day, every listing that's new in your target market, each one through a 60-second screen. Most fail instantly — that's the system working, not failing. A pass in 60 seconds costs you nothing; a maybe you carry around for two weeks costs you the next deal.",
+      "A consistent screening process helps investors compare more properties against the same rules. A workable rhythm for a W-2 schedule might be fifteen minutes a day, with each new listing in your target market receiving the same first-pass screen. Most may miss one or more rules; that is useful triage, not a final investment decision.",
       "Where to source: the listing portals for what's public, an investor-friendly agent for what's coming (tell them your Buy Box numbers — a specific ask gets specific answers), and your market's property-tax and pre-foreclosure lists when you're ready to go deeper. Start with the portals; volume beats cleverness at this stage.",
       "Track everything you screen, even the fails. Ten screened deals teach you what your market actually offers at your price point — which is exactly the calibration your Buy Box needs. Repetition turns a vague preference into a usable acquisition rule.",
     ],
@@ -75,36 +75,36 @@ const STEPS = [
     short: "Read the analysis",
     title: "Read the analysis like an underwriter, not a fan",
     paragraphs: [
-      "When a deal passes the first screen, slow down exactly once: verify the assumptions before you trust the outputs. TrueCap pre-fills rent from HUD area benchmarks, the rate from FRED's national series, and taxes from state effective rates — sourced starting points, deliberately labeled, all editable. A screening benchmark is not a quote for YOUR property.",
+      "When a property meets the first screen, slow down and verify the assumptions before relying on the outputs. TrueCap can start rent from a labeled HUD area benchmark, rate from a labeled FRED national series, and taxes from a labeled state effective-rate benchmark when available. These are editable screening starting points, not verified facts or quotes for the property.",
       "Replace four numbers with local evidence before you believe any verdict: the rent (pull 3 comparable actual rentals, not asking rents), the tax bill (the county has the real number), insurance (one phone call), and the rate (a written quote for an investor loan, which is not the owner-occupant headline rate). Everything else — vacancy, maintenance, CapEx, management — keep conservative defaults until the property tells you otherwise.",
-      "Then read three outputs in order: cash flow (does it hold with reserves in?), DSCR (will a lender agree?), and the downside case (raise vacancy, drop rent, bump the rate — does it survive?). A deal that only works in the sunny scenario is not a deal; it's a hope with a mortgage.",
+      "Then read three outputs in order: modeled cash flow with reserves, DSCR against your selected screening threshold, and the downside scenario. A lender may calculate DSCR differently and will apply its own eligibility, valuation, and reserve rules.",
     ],
     action: "For your best candidate: verify rent, tax, insurance, and rate with real evidence.",
   },
   {
-    id: "max-offer",
+    id: "offer-ceiling",
     kicker: "Step 4",
-    short: "Max Offer",
-    title: "Set your Max Offer — the walk-away number decides, not the asking price",
+    short: "Offer Ceiling",
+    title: "Review the Offer Ceiling before negotiation",
     paragraphs: [
-      "Here is the single most protective habit in real estate investing: decide the most you can pay BEFORE you negotiate, and never cross it. Asking price is the seller's opening position; your Max Offer is arithmetic — the highest price at which the deal still clears every number in your Buy Box, with honest expenses and your verified inputs.",
-      "Work the math backwards: hold your required cash flow and cash-on-cash fixed, and solve for the purchase price that still delivers them. TrueCap Pro's Max Offer Engine computes this deterministically on every analysis (and the $5 Deal Decision Pack includes it for a single property) — but even by hand in a spreadsheet, the discipline is the same: the number exists before the negotiation starts.",
-      "If the Max Offer comes out under asking, that's not a dead deal — that's your opening bid and your ceiling, both known. If it comes out way under asking, you just avoided the expensive mistake before making an offer. TrueCap Pro or the one-time Deal Decision Pack puts that ceiling in front of you in about sixty seconds. Overpaying by even 3% on a $250,000 property is $7,500 gone before the first rent check; the walk-away number is what stands between you and that.",
+      "The Offer Ceiling is the highest modeled purchase price that still meets the named target profile under the assumptions shown. It is a target-dependent screening boundary—not a recommended offer, appraisal, or substitute for diligence.",
+      "The solver works backward from the selected cash-flow, cash-on-cash, cap-rate, DSCR, and price constraints that apply. TrueCap Pro computes this boundary on each compatible analysis and includes it in Pro reports.",
+      "If the Offer Ceiling is below asking, the page reports the gap. That comparison does not tell you to make, submit, or avoid an offer. Verify rent, property costs, condition, financing, title, and local requirements, then decide with the advisers relevant to your situation.",
     ],
-    action: "Compute the Max Offer on your best candidate. Write it where you'll see it during negotiation.",
+    action: "Calculate the Offer Ceiling, record its target profile, and verify the assumptions that could move it.",
   },
   {
     id: "offer",
     kicker: "Step 5",
-    short: "Submit the offer",
-    title: "Submit the offer — scripts included",
+    short: "Record your decision",
+    title: "Record your decision — review prompts included",
     paragraphs: [
-      "The last blocker is the send button. Two facts make it easier: a written offer with financing and inspection contingencies is the START of a conversation, not a final commitment — you will have an inspection period and a financing condition protecting you. And a rejected offer costs nothing except the fantasy that this was the only property.",
-      "To your agent: \"I'd like to submit an offer on [address] at $X — that's my number based on my underwriting, with [financing/inspection] contingencies. If they counter above $Y (your Max Offer), we pass and move to the next one. Can you have it out today?\" Notice what the script does: it commits to the number, pre-declares the ceiling, and books your exit before emotions arrive.",
-      "Direct to a seller (off-market): \"I'm a local buyer purchasing rental property in [area]. Based on rents and condition, I can offer $X with a straightforward close. If that's in range, I can send a written offer this week.\" Attach your analysis — a one-page underwrite with sourced assumptions reads as serious money, because it is.",
+      "Offer terms, contingencies, deposits, deadlines, and legal effect vary by transaction and jurisdiction. Review the actual agreement with your agent and attorney where appropriate; do not assume a contingency or cancellation right exists unless it is written and enforceable.",
+      "A neutral prompt for your agent: \"I have completed an initial underwrite for [address]. Please help me verify the assumptions, comparable evidence, property disclosures, and financing terms, then review the risks and appropriate contract protections with me before I decide whether and how to offer.\"",
+      "For an off-market conversation, keep screening estimates separate from verified facts. A report can document the assumptions, selected rules, gaps, and verification plan, but it does not establish property value, proof of funds, lender approval, or an appropriate offer price.",
       "Then — win or lose — go back to Step 2. The pipeline is the strategy; any single deal is just a rep.",
     ],
-    action: "Send the offer at or below your Max Offer. Then screen the next deal.",
+    action: "Record your own decision and rationale after the material assumptions and contract terms are reviewed.",
   },
 ];
 
@@ -116,7 +116,7 @@ export default function PlaybookPage() {
     "@id": `${siteUrl}/playbook#howto`,
     name: "The First Offer Playbook",
     description:
-      "The path from screening rental listings to a submitted offer: Buy Box, sourcing, underwriting, Max Offer, offer scripts.",
+      "An educational path from rental screening to a documented decision: Buy Box, sourcing, verification, Offer Ceiling, and adviser review.",
     step: STEPS.map((s, i) => ({
       "@type": "HowToStep",
       position: i + 1,

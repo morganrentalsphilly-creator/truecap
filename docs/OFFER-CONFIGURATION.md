@@ -12,10 +12,9 @@ copy test cannot silently reprice a customer.
   - `pro` (default): “TrueCap Pro”
   - `offer_engine`: “TrueCap Offer Engine”
 - `NEXT_PUBLIC_SINGLE_DEAL_PRICE_VARIANT=current|p9|p15|p19`
-  - `current` (default) keeps the production $5 Stripe Price.
-  - `p9` requires `STRIPE_PRICE_SINGLE_DEAL_9`.
-  - `p15` requires `STRIPE_PRICE_SINGLE_DEAL_15`.
-  - `p19` requires `STRIPE_PRICE_SINGLE_DEAL_19`.
+  - Historical compatibility only while new Decision Pack sales are
+    temporarily unavailable. `current` preserves recognition of the existing
+    $5 Price; the experimental slots remain dormant and must not be activated.
 - `NEXT_PUBLIC_TRUECAP_THREE_DEAL_GUARANTEE=true|false`
   - Off by default and still renders nothing unless
     `NEXT_PUBLIC_TRUECAP_GUARANTEE_TERMS_URL` is a valid HTTPS or local URL.
@@ -39,12 +38,14 @@ be enabled:
 Until all five are in place, the component renders nothing and the existing
 non-refundable Terms remain controlling.
 
-## Safe pricing activation
+## Disabled Decision Pack checkout
 
-Create the matching one-time Stripe Price first, add its server-only Price id,
-then set the public variant in the same deployment. The checkout action returns
-a configuration error instead of falling back to a differently priced product
-when an experimental Price id is missing.
+Keep `NEXT_PUBLIC_TRUECAP_DEAL_DECISION_PACK=false` and
+`TRUECAP_DECISION_PACK_CHECKOUT_ENABLED=false`. Preserve existing Price IDs and
+claim recovery, but do not create a new Price, enable an experiment, or market a
+new one-time purchase. Any future reactivation requires the durable-fulfillment
+and refund/dispute gates in
+`docs/DECISION-PACK-DURABLE-FULFILLMENT-RUNBOOK.md` to pass first.
 
 Subscription prices and product ids are unchanged. They continue to come from
 `STRIPE_PRICE_PRO_MONTHLY` and `STRIPE_PRICE_PRO_ANNUAL`; changing the Pro name

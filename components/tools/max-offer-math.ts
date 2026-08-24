@@ -2,11 +2,11 @@
  * Shared 70%-rule max-offer math for the free tool widgets.
  *
  * One implementation, two consumers: the ARV calculator widget
- * (computes ARV from comps, then the max offer) and the 70% rule
+ * (computes ARV from comps, then the Offer Ceiling) and the 70% rule
  * calculator widget (takes ARV directly). Extracted so the rule
  * page can't drift from the ARV page's arithmetic.
  *
- *   Max offer = (ARV × multiplier%) − repair costs
+ *   Offer Ceiling = (ARV × multiplier%) − repair costs
  *
  * Like lib/max-allowable-offer.ts, a positive offer is rounded DOWN
  * to a $500 step — never up, so the widgets never quote a price above

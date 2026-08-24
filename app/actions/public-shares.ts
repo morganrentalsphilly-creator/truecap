@@ -1,15 +1,12 @@
 "use server";
 
 /**
- * Public-share server actions: create (any analyzer user, signed in or not),
- * list/revoke (owners only).
+ * Public-share server actions: create/list/revoke (signed-in owners only).
  *
- * Creation is deliberately open to anonymous users — the analyzer itself is
- * free and anonymous, and their legacy share (everything in the URL) needed no
- * account either. Anonymous shares carry owner_id null: nothing to list, no
- * revocation surface, they simply expire on schedule. Abuse is bounded by the
- * validated payload (the resulting row is exactly one analysis snapshot) and
- * the share only renders what the creator could already see.
+ * Existing opaque shares remain publicly readable by capability token,
+ * including historical rows whose owner_id is null. New rows, however, must
+ * be attached to an authenticated owner so the product can accurately promise
+ * revocation. Authentication therefore happens before the service-role mint.
  *
  * Revocation goes through the caller's OWN session client, so RLS — not this
  * code — is the boundary that stops cross-account revocation.
@@ -18,7 +15,11 @@
 import { z } from "zod";
 import * as Sentry from "@sentry/nextjs";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { investmentFormSchema } from "@/lib/investcalc-schema";
+import type { InvestmentFormValues } from "@/lib/investcalc-schema";
+import {
+  normalizeReleasedInvestmentFormSnapshot,
+  releasedInvestmentFormSchema,
+} from "@/lib/underwriting-model-release";
 import {
   mintPublicShare,
   type PublicShareAddressVisibility,
@@ -32,17 +33,24 @@ import {
 } from "@/lib/mao-target-editor";
 import { calculateAnalysis } from "@/lib/calc-analysis";
 import { captureServerEvent } from "@/lib/posthog-server";
+import {
+  isAdoptedOfferCeilingTargetSource,
+  type OfferCeilingTargetSource,
+} from "@/lib/offer-ceiling-contract";
 
 export type CreatePublicShareResult =
   | { ok: true; url: string }
-  | { ok: false; code: "VALIDATION_ERROR" | "NOT_CONFIGURED"; message: string };
+  | {
+      ok: false;
+      code: "SIGN_IN_REQUIRED" | "VALIDATION_ERROR" | "NOT_CONFIGURED";
+      message: string;
+    };
 
 /**
- * Sharing is deliberately FREE and works for anonymous analyzers, so this
- * action's id ships in the public bundle and is callable with no cookie. It
- * writes through the SERVICE-ROLE client, which bypasses the table's
- * owner-only RLS by design (an anonymous share has no owner) — so RLS is not
- * the brake here and something else has to be. Well above any human pace.
+ * Creating a link remains a free capability, but requires a signed-in owner.
+ * The service-role insert bypasses RLS, so the session check in the action and
+ * the required owner id in mintPublicShare are both load-bearing boundaries.
+ * The IP brake remains defense in depth above normal human pace.
  */
 const shareRateLimit = createIpRateLimit({
   windowMs: 60 * 60 * 1000,
@@ -50,9 +58,21 @@ const shareRateLimit = createIpRateLimit({
 });
 
 export async function createPublicShareAction(input: unknown): Promise<CreatePublicShareResult> {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return {
+      ok: false,
+      code: "SIGN_IN_REQUIRED",
+      message: "Sign in to create a revocable share link.",
+    };
+  }
+
   const parsed = z
     .object({
-      values: investmentFormSchema,
+      values: releasedInvestmentFormSchema,
       title: z.string().trim().max(200).optional(),
       dealId: z.string().uuid().optional(),
       maoTarget: z.unknown().optional(),
@@ -71,11 +91,19 @@ export async function createPublicShareAction(input: unknown): Promise<CreatePub
   if (parsed.data.maoTarget !== undefined && !parsedMaoTarget) {
     return { ok: false, code: "VALIDATION_ERROR", message: "Couldn't read these targets." };
   }
-  const maoTarget = parsedMaoTarget
+  const candidateMaoTarget = parsedMaoTarget
     ? normalizeMaoTargetForFinancing(parsedMaoTarget, {
         isCashPurchase: calculateAnalysis(parsed.data.values).monthlyPayment <= 0,
       }) ?? undefined
     : undefined;
+  const candidateMaoTargetSource: OfferCeilingTargetSource =
+    parsed.data.maoTargetSource ??
+    (candidateMaoTarget ? "selected-targets" : "screening-defaults");
+  const maoTarget =
+    candidateMaoTarget &&
+    isAdoptedOfferCeilingTargetSource(candidateMaoTargetSource)
+      ? candidateMaoTarget
+      : undefined;
 
   if (shareRateLimit.isOverLimit(await getRequestIp())) {
     return {
@@ -85,35 +113,72 @@ export async function createPublicShareAction(input: unknown): Promise<CreatePub
     };
   }
 
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
   // dealId attribution is only honored for the deal's real owner — otherwise a
   // crafted call could attach someone else's saved comps/branding to a share.
   let dealId: string | undefined;
-  if (parsed.data.dealId && user) {
+  let valuesToShare: InvestmentFormValues = parsed.data.values;
+  let recordedResultSnapshot: Record<string, unknown> | undefined;
+  let recordedMethodologyVersion: string | undefined;
+  let shareMaoTarget = maoTarget;
+  let shareMaoTargetSource = candidateMaoTargetSource;
+  if (parsed.data.dealId) {
     const { data: deal } = await supabase
       .from("saved_analyses")
-      .select("id")
+      .select("id, form_snapshot, result_snapshot, methodology_version")
       .eq("id", parsed.data.dealId)
       .eq("user_id", user.id)
       .is("deleted_at", null)
       .maybeSingle();
-    if (deal) dealId = parsed.data.dealId;
+    const savedValues = normalizeReleasedInvestmentFormSnapshot(deal?.form_snapshot);
+    const normalizedSaved = savedValues
+      ? releasedInvestmentFormSchema.safeParse(savedValues)
+      : null;
+    // Use the recorded saved result only when the browser is sharing those
+    // exact saved inputs. If the user has unsaved edits, mint a fresh share
+    // without attaching the old deal's comps/attribution or result snapshot.
+    if (
+      deal &&
+      normalizedSaved?.success &&
+      JSON.stringify(normalizedSaved.data) === JSON.stringify(parsed.data.values)
+    ) {
+      dealId = parsed.data.dealId;
+      valuesToShare = normalizedSaved.data;
+      recordedResultSnapshot =
+        deal.result_snapshot && typeof deal.result_snapshot === "object"
+          ? (deal.result_snapshot as Record<string, unknown>)
+          : undefined;
+      recordedMethodologyVersion =
+        typeof deal.methodology_version === "string"
+          ? deal.methodology_version
+          : undefined;
+      const recordedTarget = normalizeMaoTarget(
+        recordedResultSnapshot?.maxOfferTarget
+      );
+      const recordedSource = recordedResultSnapshot?.maxOfferTargetSource;
+      if (
+        recordedTarget &&
+        (recordedSource == null ||
+          recordedSource === "buy-box" ||
+          recordedSource === "selected-targets")
+      ) {
+        shareMaoTarget = recordedTarget;
+        shareMaoTargetSource = recordedSource ?? "selected-targets";
+      }
+    }
   }
 
   const path = await mintPublicShare({
-    values: parsed.data.values,
+    values: valuesToShare,
     title:
       parsed.data.addressVisibility === "full"
-        ? parsed.data.title || parsed.data.values.address || undefined
+        ? parsed.data.title || valuesToShare.address || undefined
         : "Shared rental analysis",
-    ownerId: user?.id ?? null,
+    ownerId: user.id,
     dealId: dealId ?? null,
-    maoTarget: maoTarget ?? undefined,
-    maoTargetSource: parsed.data.maoTargetSource,
+    maoTarget: shareMaoTarget ?? undefined,
+    maoTargetSource: shareMaoTarget ? shareMaoTargetSource : undefined,
+    resultSnapshot: recordedResultSnapshot,
+    methodologyVersion: recordedMethodologyVersion,
     audience: (parsed.data.audience ?? "investment-partner") as PublicShareAudience,
     addressVisibility: (parsed.data.addressVisibility ?? "hidden") as PublicShareAddressVisibility,
   });

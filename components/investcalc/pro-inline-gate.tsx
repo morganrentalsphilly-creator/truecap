@@ -21,7 +21,7 @@ import { GuaranteeBadge } from "@/components/marketing/guarantee-badge";
 interface ProInlineGateProps {
   /** Brand-color icon at the top - same icon as the gated feature uses. */
   icon: React.ComponentType<{ className?: string }>;
-  /** Headline of the gated feature, e.g. "Max Allowable Offer". */
+  /** Headline of the gated feature, e.g. "Offer Ceiling". */
   title: string;
   /** One-line description of what the user would see if unlocked. */
   description: string;
@@ -39,7 +39,7 @@ export function ProInlineGate({ icon: Icon, title, description, previewBullets }
   // Upsell attribution: fire once when this gate renders (the user reached a
   // Pro feature), and again if they click through - closes the
   // analysis_completed → saw-upsell → pro_checkout_started gap. `feature` is
-  // the gate title (e.g. "Max Allowable Offer"); no PII.
+  // the gate title (e.g. "Offer Ceiling"); no PII.
   const fired = useRef(false);
   useEffect(() => {
     if (suppressed || fired.current) return;

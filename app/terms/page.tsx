@@ -10,7 +10,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { TRIAL_DAYS } from "@/lib/trial";
-import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
@@ -34,7 +33,6 @@ export const metadata: Metadata = {
 const LAST_UPDATED = "August 23, 2026";
 
 export default function TermsPage() {
-  const { guaranteeEnabled } = getMarketingOfferConfig();
   return (
     <div className="min-h-screen bg-background">
       <main id="main" className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
@@ -65,8 +63,9 @@ export default function TermsPage() {
           <p>
             TrueCap provides software for analyzing rental real estate investments — cap rate,
             cash-on-cash return, debt service coverage, multi-year projections, exit modeling,
-            and related calculators. The Service includes a free tier, paid TrueCap Pro
-            and Agent Pro subscriptions, and an optional one-time Deal Decision Pack.
+            and related calculators. The Service includes a free tier and paid TrueCap Pro
+            and Agent Pro subscriptions. New one-time Deal Decision Pack purchases are
+            currently unavailable; the Pack terms below continue to govern prior purchases.
           </p>
           <p>
             The Service uses public market data (HUD Fair Market Rent, FRED interest rates)
@@ -138,16 +137,7 @@ export default function TermsPage() {
           <h3>Refunds</h3>
           <p>
             Subscription charges are non-refundable except where required by law, for billing
-            errors we confirm
-            {guaranteeEnabled ? (
-              <>
-                , or when a customer satisfies the published terms of the{" "}
-                <Link href="/guarantee" className="font-medium text-primary hover:underline">
-                  Never Overpay Guarantee
-                </Link>
-              </>
-            ) : null}
-            . If you believe you were charged in error, email{" "}
+            errors we confirm. If you believe you were charged in error, email{" "}
             <a href="mailto:hello@usetruecap.com" className="font-medium text-primary hover:underline">
               hello@usetruecap.com
             </a>{" "}
@@ -155,7 +145,7 @@ export default function TermsPage() {
           </p>
           <h3>One-time Deal Decision Pack</h3>
           <p>
-            A Deal Decision Pack is a one-time purchase for the analysis identified at
+            When offered, a Deal Decision Pack is a one-time purchase for the analysis identified at
             checkout. It does not create a recurring subscription and does not include future
             analyses or ongoing Pro access. Because the digital report is generated and made
             available immediately after payment, Pack purchases are final once delivered,
@@ -203,8 +193,8 @@ export default function TermsPage() {
           <p>
             TrueCap is a calculator. We are not a registered investment advisor, real estate
             broker, accountant, lender, attorney, or tax professional. The outputs of the
-            Service — including projected cash flow, cap rate, deal score, recommendations,
-            and exit modeling — are estimates based on the inputs you provide and standard
+            Service — including projected cash flow, cap rate, Screening Index, selected-rule
+            fit, and exit modeling — are estimates based on the inputs you provide and standard
             real estate math. They are not advice, guarantees, appraisals, or substitutes for
             professional counsel.
           </p>

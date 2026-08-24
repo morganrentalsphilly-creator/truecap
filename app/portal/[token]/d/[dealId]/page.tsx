@@ -17,8 +17,7 @@ import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
 import { readSignedToken } from "@/lib/signed-token";
 import { PORTAL_SCOPE } from "@/lib/client-portal";
-import { calculateAnalysis } from "@/lib/calc-analysis";
-import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
+import { normalizeReleasedInvestmentFormSnapshot } from "@/lib/underwriting-model-release";
 import { getPublicAgentBranding } from "@/lib/agent-share";
 import { getPublicDealComps } from "@/lib/public-deal-comps";
 import { hashShareValues, signShareAttribution } from "@/lib/share-attribution";
@@ -29,15 +28,17 @@ import {
 } from "@/lib/mao-target-editor";
 import { isFeatureReleased } from "@/lib/entitlements-catalog";
 import {
+  isAdoptedOfferCeilingTargetSource,
   normalizeOfferCeilingTargetSource,
   type OfferCeilingTargetSource,
 } from "@/lib/offer-ceiling-contract";
 import { resolveOfferCeilingForAccess } from "@/lib/offer-ceiling-server";
+import { readRecordedOfferCeiling } from "@/lib/recorded-offer-ceiling";
+import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
 import {
-  recomputeSavedDealVerdict,
-  toRecomputedSavedAnalysisSnapshot,
-} from "@/lib/recompute-saved-deal-verdict";
-import { resolveSavedAnalysisSnapshot } from "@/lib/saved-analysis-methodology";
+  isLegacySavedMethodologyVersion,
+  resolveSavedAnalysisResult,
+} from "@/lib/saved-analysis-methodology";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -64,6 +65,9 @@ export default async function PortalDealPage({ params }: Props) {
   let values, result, maoTarget, offerCeilingAccess;
   let maoTargetSource: OfferCeilingTargetSource = "selected-targets";
   let showProAnalysis = false;
+  let recordedResult = false;
+  let legacyMethodologyWarning = false;
+  let displayedMethodologyVersion: string | undefined;
   try {
     const admin = createAdminSupabaseClient();
 
@@ -83,7 +87,7 @@ export default async function PortalDealPage({ params }: Props) {
     // portal. Assignment alone is not sufficient authorization.
     if (!client || client.is_archived) notFound();
     // Reaching this point already proves the owner has the Agent Pro portal
-    // entitlement. MAO is a paid-status feature, not a separately named
+    // entitlement. Offer Ceiling is a paid-status feature, not a separately named
     // `max_offer` plan flag (that key does not exist in the catalog), so a
     // second flag check incorrectly hid the saved target from every portal.
     showProAnalysis = true;
@@ -98,21 +102,32 @@ export default async function PortalDealPage({ params }: Props) {
       .maybeSingle();
     if (!deal) notFound();
 
-    values = normalizeInvestmentFormSnapshot(deal.form_snapshot);
+    values = normalizeReleasedInvestmentFormSnapshot(deal.form_snapshot);
     if (!values) notFound();
     const recomputedVerdict = recomputeSavedDealVerdict(deal.form_snapshot);
-    const methodologyResolution = resolveSavedAnalysisSnapshot({
+    if (!recomputedVerdict) notFound();
+    const methodologyResolution = resolveSavedAnalysisResult({
       methodologyVersion: deal.methodology_version,
       resultSnapshot: deal.result_snapshot as Record<string, unknown> | null,
-      recomputedSnapshot: recomputedVerdict
-        ? toRecomputedSavedAnalysisSnapshot(recomputedVerdict)
-        : undefined,
+      recomputedResult: recomputedVerdict.analysisResult,
+      recomputedExtras: {
+        score: recomputedVerdict.score,
+        recommendation: recomputedVerdict.recommendation,
+        riskLevel: recomputedVerdict.riskLevel,
+        breakdown: recomputedVerdict.breakdown,
+        explanation: recomputedVerdict.explanation,
+      },
     });
-    // Parent portal cards deliberately do not link frozen analyses. Enforce
-    // the same rule here so an old bookmark cannot pair historical metrics
-    // with today's calculation engine.
-    if (methodologyResolution.shouldFreeze) notFound();
-    result = calculateAnalysis(values);
+    // A recorded result is atomic: never fill a missing historical field with
+    // today's engine. Incomplete rows fail closed instead of showing a hybrid.
+    if (!methodologyResolution.result) notFound();
+    result = methodologyResolution.result;
+    recordedResult = methodologyResolution.usesRecordedSnapshot;
+    legacyMethodologyWarning = isLegacySavedMethodologyVersion(
+      methodologyResolution.storedMethodologyVersion
+    );
+    displayedMethodologyVersion =
+      methodologyResolution.storedMethodologyVersion ?? result.methodologyVersion;
     const savedResultSnapshot = deal.result_snapshot as Record<string, unknown> | null;
     const savedMaoTarget = normalizeMaoTarget(savedResultSnapshot?.maxOfferTarget);
     maoTarget = normalizeMaoTargetForFinancing(savedMaoTarget, {
@@ -121,14 +136,24 @@ export default async function PortalDealPage({ params }: Props) {
     maoTargetSource =
       normalizeOfferCeilingTargetSource(savedResultSnapshot?.maxOfferTargetSource) ??
       "selected-targets";
-    offerCeilingAccess = maoTarget
-      ? resolveOfferCeilingForAccess({
-          values,
-          target: maoTarget,
-          source: maoTargetSource,
-          paidAccess: true,
-        })
-      : null;
+    if (!isAdoptedOfferCeilingTargetSource(maoTargetSource)) {
+      maoTarget = undefined;
+    }
+    if (maoTarget && recordedResult) {
+      const recordedCeiling = readRecordedOfferCeiling(savedResultSnapshot);
+      offerCeilingAccess = recordedCeiling.captured
+        ? ({ access: "exact", exact: recordedCeiling.exact } as const)
+        : null;
+    } else {
+      offerCeilingAccess = maoTarget
+        ? resolveOfferCeilingForAccess({
+            values,
+            target: maoTarget,
+            source: maoTargetSource,
+            paidAccess: true,
+          })
+        : null;
+    }
   } catch (err) {
     // notFound() throws a Next control-flow error — let it through.
     if (err && typeof err === "object" && "digest" in err) throw err;
@@ -153,6 +178,9 @@ export default async function PortalDealPage({ params }: Props) {
       maoTarget={maoTarget}
       maoTargetSource={maoTargetSource}
       offerCeilingAccess={offerCeilingAccess}
+      methodologyVersion={displayedMethodologyVersion}
+      legacyMethodologyWarning={legacyMethodologyWarning}
+      recordedResult={recordedResult}
       leadCapture={
         agent ? { ownerId: agentUserId, dealId, valuesHash, sig: sig ?? undefined } : undefined
       }

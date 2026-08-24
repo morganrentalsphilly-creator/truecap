@@ -2,7 +2,7 @@
  * Blog post: the 70% rule for house flipping (and BRRRR).
  *
  * Targets queries: "70 percent rule house flipping", "70% rule real
- * estate", "how to calculate max offer flip", "maximum allowable offer",
+ * estate", "how to calculate offer ceiling flip", "70%-rule offer ceiling",
  * "ARV minus repairs formula", "how to calculate ARV", "70 rule BRRRR",
  * "what should I offer on a flip", "70 percent rule calculator".
  *
@@ -26,11 +26,11 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "70-percent-rule-house-flipping";
 const TITLE =
-  "The 70% rule for house flipping (and BRRRR): how to calculate your max offer (2026)";
+  "The 70% rule for house flipping (and BRRRR): calculate an Offer Ceiling (2026)";
 // SERP-facing title (metadata/og only): kept ≤50 chars so the root
 // layout's "%s | TrueCap" template stays inside the ~60-char SERP
 // window. The on-page <h1> keeps the longer editorial TITLE.
-const SERP_TITLE = "The 70% rule for house flipping: max offer (2026)";
+const SERP_TITLE = "70% rule for flipping: Offer Ceiling (2026)";
 const DESCRIPTION =
   "The 70% rule caps your offer at 70% of ARV minus repairs. Here's the formula, a worked flip and BRRRR example, and when 70% is the wrong number.";
 const PUBLISHED_AT = "2026-07-05";
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
   keywords: [
     "70 percent rule house flipping",
     "70% rule real estate",
-    "maximum allowable offer",
+    "Offer Ceiling",
     "how to calculate ARV",
     "ARV minus repairs formula",
     "how much to offer on a flip",
@@ -66,7 +66,7 @@ export const metadata: Metadata = {
 const FAQS = [
   {
     q: "What is the 70% rule in house flipping?",
-    a: "It's a rule of thumb that caps your purchase offer at 70% of a property's after-repair value (ARV) minus the cost of repairs. On a house that will be worth $300,000 renovated and needs $45,000 of work, the maximum offer is (0.70 × $300,000) − $45,000 = $165,000. The 30% you hold back is not all profit — it covers buying costs, holding costs, and selling costs first, and whatever is left is your margin.",
+    a: "It's a rule of thumb that calculates a screening boundary at 70% of a property's projected ARV minus repairs. On a property modeled at $300,000 renovated with $45,000 of work, the 70%-rule Offer Ceiling is (0.70 × $300,000) − $45,000 = $165,000. The 30% held back is not all profit; it covers buying, holding, and selling costs first. This is not a recommended offer or appraisal.",
   },
   {
     q: "How do you calculate ARV (after-repair value)?",
@@ -82,7 +82,7 @@ const FAQS = [
   },
   {
     q: "What if there aren't good comparable sales?",
-    a: "Thin comps are a real risk, because ARV is the input the whole rule leans on. Widen the search carefully — a little further out or a little older — and adjust for the differences the way an appraiser does. If you still can't triangulate a credible ARV, that uncertainty is itself information: either build in a wider margin (a lower multiplier) or pass. A max offer built on a guessed ARV is just a guess with a decimal point.",
+    a: "Thin comps are a real risk because ARV drives the rule. Widen the search carefully and adjust for relevant differences. If you still cannot support a credible ARV, label the uncertainty, test a wider margin, and verify before recording a decision. An Offer Ceiling built on a guessed ARV is still a guess.",
   },
 ];
 
@@ -179,12 +179,12 @@ export default function SeventyPercentRulePost() {
               What the 70% rule actually says
             </h2>
             <p>
-              The rule sets your <strong>Maximum Allowable Offer</strong> — the
-              MAO, the most you can pay and still leave room to profit:
+              The rule calculates a <strong>70%-rule Offer Ceiling</strong>—a
+              screening boundary intended to leave room for modeled costs and profit:
             </p>
             <div className="rounded-xl border border-border bg-muted/30 p-5">
               <code className="text-sm sm:text-base text-foreground font-mono">
-                Maximum offer = (ARV × 0.70) − Repair costs
+                Offer Ceiling = (ARV × 0.70) − Repair costs
               </code>
             </div>
             <p>
@@ -198,7 +198,7 @@ export default function SeventyPercentRulePost() {
             </p>
             <div className="rounded-xl border border-border bg-muted/30 p-5">
               <code className="text-sm sm:text-base text-foreground font-mono">
-                Maximum offer = (0.70 × $300,000) − $45,000 = $165,000
+                Offer Ceiling = (0.70 × $300,000) − $45,000 = $165,000
               </code>
             </div>
             <p>
@@ -214,7 +214,7 @@ export default function SeventyPercentRulePost() {
                 ARV calculator
               </Link>{" "}
               runs this exact formula against your own comps — the comps-based
-              ARV, the max offer at any multiplier, and the 75% refi line in one
+              ARV, the Offer Ceiling at any multiplier, and the 75% refi line in one
               screen. Already have the ARV? The free{" "}
               <Link
                 href="/tools/70-percent-rule-calculator"
@@ -222,7 +222,7 @@ export default function SeventyPercentRulePost() {
               >
                 70% rule calculator
               </Link>{" "}
-              skips straight to the max offer, at 60/65/70/75% side by side.)
+              shows the Offer Ceiling at 60/65/70/75% side by side.)
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -281,7 +281,7 @@ export default function SeventyPercentRulePost() {
                 </thead>
                 <tbody>
                   <tr>
-                    <td>Buy at MAO</td>
+                    <td>At Offer Ceiling</td>
                     <td className="text-right">$165,000</td>
                   </tr>
                   <tr>
@@ -415,7 +415,7 @@ export default function SeventyPercentRulePost() {
             <p>
               ARV sets the top of the deal; the repair estimate sets how much of
               it you keep. Get the rehab wrong and the 70% rule faithfully hands
-              you a max offer that&apos;s also wrong. A rough 2026 scope-to-cost
+              you an Offer Ceiling that&apos;s also wrong. A rough 2026 scope-to-cost
               ladder, per finished square foot:
             </p>
             <ul className="list-disc pl-6 space-y-1">
@@ -580,13 +580,13 @@ export default function SeventyPercentRulePost() {
               The honest version: solve the offer backward
             </h2>
             <p>
-              The 70% rule is triage, not underwriting. The rigorous way to set a
-              max offer is to start from the ARV and subtract every real cost plus
+              The 70% rule is triage, not underwriting. A more complete Offer Ceiling starts
+              from ARV and subtracts modeled costs plus
               the profit you require, leaving the price as the remainder:
             </p>
             <div className="rounded-xl border border-border bg-muted/30 p-5">
               <code className="text-sm sm:text-base text-foreground font-mono">
-                Max offer = ARV − selling − holding − buying − rehab − required
+                Offer Ceiling = ARV − selling − holding − buying − rehab − required
                 profit
               </code>
             </div>
@@ -596,7 +596,7 @@ export default function SeventyPercentRulePost() {
             </p>
             <div className="rounded-xl border border-border bg-muted/30 p-5">
               <code className="text-sm sm:text-base text-foreground font-mono">
-                Max offer = $300,000 − $19,500 − $15,000 − $3,300 − $45,000 −
+                Offer Ceiling = $300,000 − $19,500 − $15,000 − $3,300 − $45,000 −
                 $50,000 = $167,200
               </code>
             </div>
@@ -640,11 +640,11 @@ export default function SeventyPercentRulePost() {
               <Link href="/" className="text-primary font-semibold hover:underline">
                 TrueCap analyzer
               </Link>{" "}
-              runs a property&apos;s max offer, cash flow, cap rate, and DSCR off
+              runs a property&apos;s Offer Ceiling, cash flow, cap rate, and DSCR from
               the same inputs — so whether you&apos;re flipping it or holding it,
               you can see the number that protects your spread before you write the
               offer. None of this is investment or lending advice; confirm your own
-              costs, comps, and financing terms before you make an offer.
+              costs, comps, and financing terms before recording a decision. The Offer Ceiling is not a recommended offer.
             </p>
           </div>
         </article>

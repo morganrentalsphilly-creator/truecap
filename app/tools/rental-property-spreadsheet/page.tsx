@@ -76,7 +76,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What's actually in the spreadsheet?",
-    a: "Three tabs. Deal Analyzer: type price, rent, financing, and expense assumptions and get monthly cash flow, NOI, cap rate, cash-on-cash return, and DSCR, all live formulas. 10-Year Projection: rent and expenses compound at editable growth rates against a fixed mortgage payment. Quick Reference: plain-English definitions and 'what's a good number' benchmarks for every metric, plus the exact bands TrueCap's verdict engine uses.",
+    a: "Three tabs. Deal Analyzer: type price, rent, financing, and expense assumptions and get monthly cash flow, NOI, cap rate, cash-on-cash return, and DSCR from live formulas. 10-Year Projection: rent and expenses compound at editable growth rates against a fixed mortgage payment. Quick Reference: definitions and screening benchmarks for every metric, plus the bands TrueCap uses for selected-rule fit.",
   },
   {
     q: "Why do NOI and DSCR exclude the CapEx reserve?",
@@ -88,7 +88,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Spreadsheet or the TrueCap analyzer — which should I use?",
-    a: "Use the spreadsheet when you want full control of every cell, need to work offline, or want to hand a lender or partner a file. Use the analyzer when you want speed: type an address and it pre-fills editable area-level screening benchmarks, then layers on PMI modeling, 10-year projections with paydown and appreciation, illustrative tax impact, modeled exit comparisons, and a plain-English verdict. The core NOI, cap-rate, cash-flow, and DSCR conventions match; the analyzer adds modules the spreadsheet intentionally omits.",
+    a: "Use the spreadsheet when you want full control of every cell or need to work offline. Use the analyzer when you want speed: type an address and it pre-fills editable, labeled screening benchmarks, then layers on PMI modeling, 10-year projections, illustrative tax impact, modeled exit comparisons, selected-rule fit, and a secondary Screening Index. Neither output is lender approval or investment advice.",
   },
   {
     q: "Can I share or modify the file?",
@@ -268,7 +268,7 @@ export default function RentalPropertySpreadsheetPage() {
               number&rdquo; benchmarks for every metric in the workbook —
               cap rate, cash-on-cash, DSCR, NOI, the 1% rule, and each
               expense reserve — plus the exact bands TrueCap&apos;s
-              verdict engine uses to call a deal Strong, Solid, Mixed,
+              selected-rule classifier uses to group modeled results as Strong, Solid, Mixed,
               Marginal, or Negative. It&apos;s the tab to hand someone
               who asks &ldquo;wait, what&apos;s DSCR?&rdquo;
             </p>
@@ -347,7 +347,7 @@ export default function RentalPropertySpreadsheetPage() {
               spreadsheet makes painful — PMI drop-off modeling, 10-year
               projections with principal paydown and appreciation, tax
               strategy, exit scenarios, side-by-side deal comparison, and
-              a plain-English verdict. It&apos;s free to start, and
+              selected-rule fit and a secondary Screening Index. It&apos;s free to start, and
               because the conventions match, your spreadsheet numbers
               carry over exactly. For the longer version of this
               comparison, see{" "}
@@ -403,7 +403,7 @@ export default function RentalPropertySpreadsheetPage() {
               The spreadsheet is the manual version. TrueCap takes an
               address, pre-fills market rent and property tax, runs the
               same math, and adds PMI modeling, 10-year projections, tax
-              savings, exit scenarios, and a Deal Score.
+              savings, exit scenarios, and a secondary Screening Index.
             </p>
             <ul className="text-sm space-y-1.5 mb-5 opacity-90">
               {[
@@ -411,7 +411,7 @@ export default function RentalPropertySpreadsheetPage() {
                 "State property tax + market rent auto-filled from the address",
                 "10-year projection with rent + expense growth (Pro)",
                 "Depreciation modeling and after-tax cash flow (Pro)",
-                "Deal Score with thresholds across 4 dimensions",
+                "Screening Index with a factor breakdown for triage",
                 "Free to start — no credit card",
               ].map((line) => (
                 <li key={line} className="flex items-start gap-2">

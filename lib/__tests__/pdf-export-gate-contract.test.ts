@@ -119,14 +119,16 @@ describe("PDF export gate lives on the server", () => {
     expect(rebuildBlock).not.toContain("parsed.data.report");
   });
 
-  it("fails closed before rebuilding a saved deal from another methodology", () => {
+  it("uses the owner-scoped recorded result and fails closed when it is incomplete", () => {
     const freezeCheck = serverAction.indexOf(
-      "shouldFreezeSavedMethodology(authority.methodologyVersion)"
+      "if (!recorded.result || !recorded.usesRecordedSnapshot)"
     );
     const rebuildCall = serverAction.indexOf("const canonicalReport = buildCanonicalReportData");
     expect(serverAction).toContain('code: "FROZEN_METHODOLOGY"');
     expect(freezeCheck).toBeGreaterThan(-1);
     expect(freezeCheck).toBeLessThan(rebuildCall);
+    expect(serverAction).toContain("trustedRecordedResult");
+    expect(serverAction).toContain("resultSnapshot,");
     expect(serverAction).toContain(
       "authority.renderFingerprint !== input.savedExport.renderFingerprint"
     );

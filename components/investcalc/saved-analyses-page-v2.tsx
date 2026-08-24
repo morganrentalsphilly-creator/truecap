@@ -61,6 +61,7 @@ import {
   updateSavedDealTagsAction,
 } from "@/app/actions/saved-analyses";
 import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import { useCookieBannerOpen } from "@/lib/use-cookie-banner";
 import type { StoredRiskLevel } from "@/lib/compare-metrics";
@@ -72,10 +73,12 @@ import { consumePendingSavedListSearch } from "@/lib/dashboard-saved-search-brid
 import { Switch } from "../ui/switch";
 import {
   describeInvestmentFormSnapshotIssue,
-  investmentFormSchema,
-  normalizeInvestmentFormSnapshot,
   type InvestmentFormValues,
 } from "@/lib/investcalc-schema";
+import {
+  normalizeReleasedInvestmentFormSnapshot,
+  releasedInvestmentFormSchema,
+} from "@/lib/underwriting-model-release";
 import { calculateAnalysis, type AnalysisResult } from "@/lib/calc-analysis";
 import { buildReportOperatingStatement } from "@/lib/report-operating-statement";
 import { buildReportMaxOffer } from "@/lib/report-max-offer";
@@ -180,7 +183,7 @@ export type SavedAnalysisListItem = {
    * then renders exactly as before.
    */
   offerLine?: DealOfferLine | null;
-  /** Exact return criteria used to solve offerLine's price ceiling. */
+  /** Exact return criteria used to solve offerLine's Offer Ceiling. */
   offerBasisLabel?: string | null;
   /** Agent Pro: which client this deal is assigned to (drives their portal). */
   clientId?: string | null;
@@ -280,7 +283,7 @@ function OfferLineRow({
           </span>
           {offer.maxPrice != null ? (
             <>
-              {" · "}Price ceiling: <span className="tabular-nums">{fmtMoney0(offer.maxPrice)}</span>
+              {" · "}Offer Ceiling: <span className="tabular-nums">{fmtMoney0(offer.maxPrice)}</span>
             </>
           ) : null}
         </div>
@@ -288,7 +291,7 @@ function OfferLineRow({
           <>
             <div className="mt-0.5">Criteria: {basisLabel}</div>
             <div className="mt-0.5 text-[11px]">
-              Calculated from your selected targets. This is not a recommended offer.
+              Highest modeled price that still meets {basisLabel} under the assumptions shown. This is not a recommended offer or appraisal.
             </div>
           </>
         ) : null}
@@ -308,7 +311,7 @@ function OfferLineRow({
     <div className="mt-1.5 text-xs text-muted-foreground">
       <div>
         <span className="font-semibold text-foreground">
-          Price ceiling: <span className="tabular-nums">{fmtMoney0(offer.maxPrice)}</span>
+          Offer Ceiling: <span className="tabular-nums">{fmtMoney0(offer.maxPrice)}</span>
         </span>
         {gap != null ? (
           <>
@@ -323,7 +326,7 @@ function OfferLineRow({
       </div>
       {basisLabel ? <div className="mt-0.5">Criteria: {basisLabel}</div> : null}
       <div className="mt-0.5 text-[11px]">
-        Calculated from your selected targets. This is not a recommended offer.
+        Highest modeled price that still meets {basisLabel ?? "the captured targets"} under the assumptions shown. This is not a recommended offer or appraisal.
       </div>
     </div>
   );
@@ -726,7 +729,7 @@ function buildReportDataFromSavedSnapshot(args: {
   templateFallback: { templateName: string } | null;
   exitYears: ExitScenarioYear[];
   includeDerivedScenarios?: boolean;
-  /** Max Offer + Deal Doctor are inverse solves. Omit them when the report is
+  /** Offer Ceiling + Deal Doctor are inverse solves. Omit them when the report is
    * frozen to a different methodology unless a solved acquisition block was
    * itself frozen (historical snapshots currently persist only the target). */
   includeDerivedMaxOffer?: boolean;
@@ -860,7 +863,7 @@ function buildReportDataFromSavedSnapshot(args: {
     property: {
       address: values.address,
       type: values.propertyType,
-      yearBuilt: Number(values.yearBuilt ?? new Date().getFullYear()),
+      yearBuilt: values.yearBuilt ?? null,
       purchasePrice: values.purchasePrice,
       template: templateFallback?.templateName ?? (values.templateId ? "Template Applied" : "Custom"),
     },
@@ -1639,7 +1642,11 @@ export function SavedAnalysesPage({
     });
   };
 
-  const handleDealStageChange = (id: string, stage: PipelineStage) => {
+  const handleDealStageChange = (
+    id: string,
+    stage: PipelineStage,
+    previousStage: PipelineStage
+  ) => {
     setUpdatingDealStatusId(id);
     startUpdateStatusTransition(async () => {
       try {
@@ -1650,7 +1657,55 @@ export function SavedAnalysesPage({
           if (result.code === "NOT_FOUND") router.refresh();
           return;
         }
-        toast({ title: "Stage updated", description: `Moved to ${pipelineStageLabel(stage)}.`, variant: "success" });
+        toast({
+          title: stage === "passed" ? "Marked as Passed" : "Stage updated",
+          description:
+            stage === "passed"
+              ? `Recorded as your decision. Undo restores ${pipelineStageLabel(previousStage)}.`
+              : `Moved to ${pipelineStageLabel(stage)}.`,
+          variant: "success",
+          action:
+            stage === "passed" ? (
+              <ToastAction
+                altText="Undo marking deal as Passed"
+                onClick={() => {
+                  setUpdatingDealStatusId(id);
+                  startUpdateStatusTransition(async () => {
+                    try {
+                      const undo = await updateSavedDealStageAction(id, previousStage);
+                      if (!undo.ok) {
+                        toast({
+                          title: "Could not undo",
+                          description: undo.message,
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                      toast({
+                        title: "Pass undone",
+                        description: `Restored ${pipelineStageLabel(previousStage)}.`,
+                        variant: "success",
+                      });
+                      router.refresh();
+                    } catch (error) {
+                      Sentry.captureException(error, {
+                        tags: { feature: "saved-analyses-pass-undo" },
+                      });
+                      toast({
+                        title: "Could not undo",
+                        description: "Check your connection and try again.",
+                        variant: "destructive",
+                      });
+                    } finally {
+                      setUpdatingDealStatusId(null);
+                    }
+                  });
+                }}
+              >
+                Undo
+              </ToastAction>
+            ) : undefined,
+        });
         router.refresh();
       } catch (err) {
         // A thrown action would otherwise strand the row's "updating" spinner
@@ -2137,7 +2192,7 @@ export function SavedAnalysesPage({
           return;
         }
 
-        const normalized = normalizeInvestmentFormSnapshot(exportResult.formSnapshot);
+        const normalized = normalizeReleasedInvestmentFormSnapshot(exportResult.formSnapshot);
         if (!normalized) {
           // Name the failing field so the customer can actually fix it —
           // "not valid enough" with no pointer was a dead end.
@@ -2152,7 +2207,7 @@ export function SavedAnalysesPage({
           return;
         }
 
-        const parsed = investmentFormSchema.safeParse(normalized);
+        const parsed = releasedInvestmentFormSchema.safeParse(normalized);
         if (!parsed.success) {
           toast({
             title: "Could not export PDF",
@@ -2163,7 +2218,7 @@ export function SavedAnalysesPage({
         }
 
         const computedResult = calculateAnalysis(parsed.data);
-        // Resolve base financial outputs and Deal Score under one methodology
+        // Resolve base financial outputs and Screening Index under one methodology
         // decision. The top-level database version is authoritative; a future
         // mismatch stays frozen instead of being overwritten by this client.
         const freshVerdict = recomputeSavedDealVerdict(exportResult.formSnapshot);
@@ -2197,6 +2252,19 @@ export function SavedAnalysesPage({
           return;
         }
         const resultSnapshot = resolved.result as AnalysisResult & Record<string, unknown>;
+        if (
+          resolved.usesRecordedSnapshot &&
+          (!Array.isArray(resultSnapshot.tenYearProjection) ||
+            !Array.isArray(resultSnapshot.taxStrategyYears))
+        ) {
+          toast({
+            title: "Could not export recorded PDF",
+            description:
+              "This recorded result is missing its saved projection tables. Create a new scenario and explicitly re-underwrite it before exporting.",
+            variant: "destructive",
+          });
+          return;
+        }
         const projectionYears = Array.isArray(resultSnapshot.tenYearProjection)
           ? resultSnapshot.tenYearProjection
           : computedResult.tenYearProjection;
@@ -2204,7 +2272,7 @@ export function SavedAnalysesPage({
           ? resultSnapshot.taxStrategyYears
           : computedResult.taxStrategyYears;
         let exitYears: ExitScenarioYear[];
-        if (resolved.shouldFreeze) {
+        if (resolved.usesRecordedSnapshot) {
           const compareSnapshot = parseCompareSnapshotV1(resultSnapshot.compareSnapshot);
           if (!compareSnapshot || compareSnapshot.exitScenarios.years.length === 0) {
             toast({
@@ -2250,16 +2318,18 @@ export function SavedAnalysesPage({
           exitYears,
           // A stress case was not frozen in historical snapshots. Omitting it
           // is honest; recomputing it would mix methodology versions.
-          includeDerivedScenarios: !resolved.shouldFreeze,
+          includeDerivedScenarios: !resolved.usesRecordedSnapshot,
           // A frozen historical result does not carry a frozen inverse-solver
           // output. Re-solving its target with today's engine would mix
           // methodologies inside a PDF explicitly labeled "Frozen".
-          includeDerivedMaxOffer: !resolved.shouldFreeze,
+          includeDerivedMaxOffer: !resolved.usesRecordedSnapshot,
           methodologyLabel: resolved.shouldFreeze
             ? `Frozen TrueCap Underwriting Standard v${resolved.storedMethodologyVersion}`
             : isLegacySavedMethodologyVersion(resolved.storedMethodologyVersion)
               ? `Legacy analysis · recomputed with current v${TRUECAP_UNDERWRITING_STANDARD_VERSION}`
-              : `TrueCap Underwriting Standard v${resolved.storedMethodologyVersion}`,
+              : resolved.usesRecordedSnapshot
+                ? `Recorded TrueCap Underwriting Standard v${resolved.storedMethodologyVersion}`
+                : `TrueCap Underwriting Standard v${resolved.storedMethodologyVersion}`,
         });
         // Use the exact comp table returned with—and bound into—the server's
         // render fingerprint. A second browser-triggered read here would allow
@@ -2932,7 +3002,13 @@ export function SavedAnalysesPage({
                                   checked={(item.pipelineStage ?? "analyzing") === s.id}
                                   disabled={isUpdatingStatus && updatingDealStatusId === item.id}
                                   onCheckedChange={(checked) => {
-                                    if (checked) handleDealStageChange(item.id, s.id);
+                                    if (checked) {
+                                      handleDealStageChange(
+                                        item.id,
+                                        s.id,
+                                        item.pipelineStage ?? "analyzing"
+                                      );
+                                    }
                                   }}
                                 >
                                   {s.label}
@@ -3164,7 +3240,13 @@ export function SavedAnalysesPage({
                           {canUsePipeline ? (
                             <Select
                               value={item.pipelineStage ?? "analyzing"}
-                              onValueChange={(value) => handleDealStageChange(item.id, value as PipelineStage)}
+                              onValueChange={(value) =>
+                                handleDealStageChange(
+                                  item.id,
+                                  value as PipelineStage,
+                                  item.pipelineStage ?? "analyzing"
+                                )
+                              }
                               disabled={isUpdatingStatus && updatingDealStatusId === item.id}
                             >
                               <SelectTrigger className="h-8 w-[150px] rounded-md text-xs">

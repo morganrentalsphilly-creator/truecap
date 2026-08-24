@@ -109,7 +109,9 @@ export function WhitelabelEmbedCard() {
     <section aria-label="White-label embed" className="rounded-2xl border border-border bg-card p-4 sm:p-5">
       <div className="flex items-center gap-2">
         <Code2 className="size-4 text-primary" />
-        <h2 className="text-xs font-bold uppercase tracking-widest text-foreground">White-label embed</h2>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-foreground">
+          {notConfigured ? "White-label embed preview" : "White-label embed"}
+        </h2>
       </div>
       <p className="mt-1 text-xs text-muted-foreground">
         Put a TrueCap calculator on your own site under your brand — no &ldquo;Powered by TrueCap&rdquo;.
@@ -149,8 +151,7 @@ export function WhitelabelEmbedCard() {
         ) : (
           notConfigured ? (
           <p className="rounded-lg border border-dashed border-border bg-muted/20 p-3 text-xs text-muted-foreground">
-            White-label embeds aren&rsquo;t configured on this deployment yet
-            (SHARE_LINK_SECRET is missing). Your branding is fine — nothing to do here.
+            Preview only. White-label embeds are not active on this deployment yet. Your branding is fine; there is nothing to configure until activation.
           </p>
         ) : (
           <p className="rounded-lg border border-dashed border-border bg-muted/20 p-3 text-xs text-muted-foreground">

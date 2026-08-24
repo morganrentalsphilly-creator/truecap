@@ -223,7 +223,7 @@ describe("buildGroundedDealContext", () => {
     expect(text).toContain("Cap rate:");
     expect(text).toContain("NOT PROVIDED");
     expect(text).toContain("buy box");
-    expect(text).toContain("max allowable offer");
+    expect(text).toContain("Offer Ceiling");
     expect(text).toContain("Run comps");
     expect(text).not.toContain("YOUR BUY BOX");
     expect(text).not.toContain("YOUR MAX ALLOWABLE OFFER");
@@ -236,7 +236,7 @@ describe("buildGroundedDealContext", () => {
     expect(text).toContain("YOUR BUY BOX");
     expect(text).toContain("Misses the user's buy box on");
     expect(text).toContain("Biggest gap");
-    expect(text).toContain("YOUR MAX ALLOWABLE OFFER");
+    expect(text).toContain("OFFER CEILING");
     expect(text).toContain("$218,500");
     expect(text).toContain("cap rate ≥ 8%");
     expect(text).toContain("10-YEAR PROJECTION");
@@ -251,7 +251,7 @@ describe("buildGroundedDealContext", () => {
     const text = buildGroundedDealContext(values, result, {
       mao: { maxOffer: 218_500, basis: "break-even cash flow · DSCR ≥ 1.25", fromBuyBox: false },
     });
-    expect(text).toContain("YOUR MAX ALLOWABLE OFFER");
+    expect(text).toContain("OFFER CEILING");
     expect(text).not.toContain("YOUR BUY BOX");
     expect(text).not.toContain("PULLED COMPS");
     const note = text.slice(text.indexOf("NOT PROVIDED"));
@@ -282,7 +282,7 @@ describe("buildGroundedDealContext", () => {
     expect(capped.length).toBeLessThanOrEqual(maxChars);
     // Personal context survives the trim.
     expect(capped).toContain("YOUR BUY BOX");
-    expect(capped).toContain("YOUR MAX ALLOWABLE OFFER");
+    expect(capped).toContain("OFFER CEILING");
     expect(capped).toContain("$218,500");
     // Comps got shorter, not the rest.
     expect((capped.match(/Very Long Street/g) ?? []).length).toBeLessThan(
@@ -306,8 +306,8 @@ describe("buildGroundedDealContext", () => {
     expect(text).not.toContain("undefined");
     expect(text).not.toContain("Infinity");
     // The unusable MAO piece is treated as absent.
-    expect(text).not.toContain("YOUR MAX ALLOWABLE OFFER");
-    expect(text.slice(text.indexOf("NOT PROVIDED"))).toContain("max allowable offer");
+    expect(text).not.toContain("OFFER CEILING (a target-dependent modeled boundary):");
+    expect(text.slice(text.indexOf("NOT PROVIDED"))).toContain("Offer Ceiling");
     // The projection anchors (years/profit) are fine → section renders, bad fields skipped.
     expect(text).toContain("10-YEAR PROJECTION");
     expect(text).toContain("$120,000");

@@ -54,7 +54,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", dealmachine: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", dealmachine: "Not modeled", winner: "truecap" },
   { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", dealmachine: "Not modeled", winner: "truecap" },
-  { feature: "Deal score + verdict", truecap: "Free — 0-100 score + plain-English verdict", dealmachine: "Not applicable", winner: "truecap" },
+  { feature: "Secondary Screening Index", truecap: "Free — 0-100 triage score + factor breakdown", dealmachine: "Not applicable", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", dealmachine: "Property data only", winner: "truecap" },
   { feature: "Driving for dollars / mobile lead capture", truecap: "No", dealmachine: "Yes — photo + instant owner lookup", winner: "dealmachine" },
   { feature: "Skip tracing (owner phone/email)", truecap: "No", dealmachine: "Yes — built-in", winner: "dealmachine" },
@@ -64,7 +64,7 @@ const MATRIX: Row[] = [
   { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", dealmachine: "Trial only ($59-99/mo paid)", winner: "truecap" },
   { feature: "Pricing (entry tier)", truecap: "Free core; paid Pro — see live pricing", dealmachine: "Starter ~$59/mo, Pro ~$99/mo (as of 2026)", winner: "truecap" },
   { feature: "Shareable read-only deal link", truecap: "Free — read-only public link; Pro adds co-branding", dealmachine: "Internal-only data", winner: "truecap" },
-  { feature: "PDF deal report", truecap: "One-time Deal Decision Pack or included with Pro", dealmachine: "Not the use case", winner: "truecap" },
+  { feature: "PDF deal report", truecap: "Included with Pro", dealmachine: "Not the use case", winner: "truecap" },
 ];
 
 export default function VsDealmachinePage() {
@@ -108,7 +108,7 @@ export default function VsDealmachinePage() {
             <span className="text-primary">find leads on the street vs underwrite them at the desk</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            DealMachine is the heavyweight in mobile-first driving for dollars — snap a photo of a distressed property, get owner contact info instantly, send a postcard or skip-trace from your phone. TrueCap is the underwriting calculator that decides whether the addresses DealMachine surfaces actually pencil out. Different jobs; most active off-market buyers use both.
+            DealMachine is the heavyweight in mobile-first driving for dollars — snap a photo of a distressed property, get owner contact info instantly, send a postcard or skip-trace from your phone. TrueCap models the economics of an address from user-reviewed assumptions. Different jobs; many active off-market buyers use both.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ScrollToFormButton
@@ -236,10 +236,10 @@ export default function VsDealmachinePage() {
               <strong>Seller calls back.</strong> Now you have an address you might buy.
             </li>
             <li>
-              <strong>Underwrite in TrueCap.</strong> Paste the address. HUD rent, FRED rate, state tax pre-fill. Run the analysis. Decide max offer.
+              <strong>Underwrite in TrueCap.</strong> Paste the address. HUD rent, FRED rate, and a state property-tax benchmark pre-fill as editable starting points. Review the Offer Ceiling under your selected targets.
             </li>
             <li>
-              <strong>Make the offer.</strong> TrueCap&apos;s MAO solver (Pro) gives you a max-bid backed into from your target return.
+              <strong>Verify, then record your decision.</strong> TrueCap&apos;s Offer Ceiling solver (Pro) works backward from your target return. It is not a recommended offer.
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
@@ -269,8 +269,7 @@ export default function VsDealmachinePage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, and co-branded share links. Pro includes PDFs, and a one-time
-            PDF option is available; see live pricing for current terms.
+            Offer Ceiling, co-branded share links, and PDF reports with Pro; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -351,11 +350,11 @@ const DEALMACHINE_FAQ: FaqItem[] = [
     question: "Can I use DealMachine + TrueCap on the same property?",
     answer: (
       <>
-        Yes — that&apos;s the recommended workflow for off-market buyers. DealMachine surfaces a distressed property and the owner&apos;s contact info, you reach out, get a verbal price, paste the address into TrueCap and run the full underwrite. The MAO solver (TrueCap Pro) gives you a max-bid backed into from your target return.
+        One possible workflow is to source a property in DealMachine, then underwrite the entered assumptions in TrueCap. Pro calculates an Offer Ceiling under the selected targets. Verify the material inputs and record your own decision before any transaction step.
       </>
     ),
     plainTextAnswer:
-      "Yes — recommended off-market workflow. DealMachine surfaces the property + owner; reach out; paste into TrueCap; run the underwrite. Pro MAO solver backs into max-bid from target return.",
+      "One possible workflow is to source a property in DealMachine, then underwrite it in TrueCap. Pro calculates an Offer Ceiling under selected targets; verify the material inputs and record your own decision.",
   },
 ];
 

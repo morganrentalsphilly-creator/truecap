@@ -54,6 +54,7 @@ export type ResultSnapshot = {
   /** Exact Tune-target persisted with this analysis; untrusted JSON until the
    *  server page validates it with normalizeMaoTarget. */
   maxOfferTarget?: unknown;
+  maxOfferTargetSource?: unknown;
 } | null;
 
 export type SavedAnalysisDashboardRow = {

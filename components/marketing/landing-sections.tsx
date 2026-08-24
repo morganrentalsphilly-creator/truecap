@@ -51,8 +51,6 @@ import { PersonaSeedLink } from "@/components/marketing/persona-seed-link";
 import type { HandoffStrategyKey } from "@/lib/analyzer-handoff";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { VERIFIED_TESTIMONIALS, isPublicationReady } from "@/lib/proof-records";
-import { GuaranteeViewTracker } from "@/components/analytics/guarantee-view-tracker";
-import { GuaranteeBadge } from "@/components/marketing/guarantee-badge";
 
 // ─────────────────────────────────────────────────────── How It Works
 // ───────────────────────────────────────── Why not a spreadsheet
@@ -97,18 +95,18 @@ const SPINE_STEPS = [
     icon: Gauge,
     title: "See the real economics",
     body:
-      "Cash flow, cap rate, cash-on-cash and DSCR, plus a 0-100 Deal Score and a plain-English verdict that says what the numbers mean, not just what they are.",
+      "Cash flow, cap rate, cash-on-cash and DSCR, plus a 0-100 Screening Index and plain-English context for the modeled economics.",
   },
   {
     key: "offer",
-    label: "Offer",
+    label: "Ceiling",
     icon: Target,
-    title: "Know your number",
+    title: "Review the Offer Ceiling",
     body:
-      "TrueCap reverse-solves the highest price that still hits your targets. Don't buy at $325,000 because it's listed there. Offer $283,000 because that's where the deal works.",
+      "TrueCap calculates the highest modeled price that still meets the selected targets under the assumptions shown. Compare that Offer Ceiling with asking, then verify the inputs before recording your decision.",
     // The section this replaced disclosed that the max-offer solver is Pro.
     // Dropping that made the homepage sell a paid feature as the free product.
-    proNote: "The max-offer solver is part of Pro",
+    proNote: "The Offer Ceiling solver is part of Pro",
   },
 ] as const;
 
@@ -187,8 +185,8 @@ export function ProblemBlock() {
           Overpaying by even 3% on a $250,000 rental is $7,500 gone before you
           collect a dollar of rent — and negative cash flow compounds it every
           month after. The protection isn&apos;t more metrics; it&apos;s knowing
-          your walk-away price before you negotiate. That&apos;s the number
-          TrueCap computes.
+          the target-dependent Offer Ceiling before you negotiate. That&apos;s the number
+          TrueCap computes from the assumptions shown.
         </p>
       </div>
     </section>
@@ -198,10 +196,10 @@ export function ProblemBlock() {
 // ───────────────────────────────────────── The decision-system offer
 const OFFER_MODULES = [
   [Clock, "60-Second Underwriter", "Turn an address into a reviewable first-pass underwrite without rebuilding a spreadsheet."],
-  [ShieldCheck, "Buy Box Autopilot", "Define what a good deal means to you and screen each opportunity against those criteria."],
-  [Target, "Max Offer Engine", "Reverse-solve the highest price that still clears your return targets."],
+  [ShieldCheck, "Target Profiles", "Save reviewed criteria and evaluate each opportunity against the same user-defined rules."],
+  [Target, "Offer Ceiling", "Calculate the highest modeled price that still meets your return targets under the assumptions shown."],
   [Activity, "Downside Stress Test", "See how lower rent, higher vacancy, price, and rate changes affect the decision."],
-  [GitCompareArrows, "Deal Comparison", "Put saved opportunities side by side so the best use of capital is easier to see."],
+  [GitCompareArrows, "Deal Comparison", "Put saved opportunities side by side to review their modeled tradeoffs consistently."],
   [BarChart3, "Long-Term Wealth View", "Model cash flow, debt paydown, equity, tax effects, and exit scenarios over time."],
   [ListChecks, "Acquisition Pipeline", "Move saved deals from research to offer, under contract, closed, or passed."],
   [FileText, "Lender & Partner Reports", "Package the underwrite for lenders, partners, clients, or internal review."],
@@ -215,17 +213,17 @@ export function OfferEngineSection() {
         <div className="max-w-3xl">
           <p className="text-[11px] font-bold uppercase tracking-widest text-primary">{proOfferName}</p>
           <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            The complete rental acquisition <span className="text-primary">decision system.</span>
+            Focused first-pass rental <span className="text-primary">underwriting.</span>
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Free screens the opportunity. Pro connects the screening math to
-            the decisions that follow: pursue, renegotiate, compare, report, or pass.
+            Free shows the core economics. Pro adds reusable assumptions,
+            explicit target pricing, comparison, deeper scenarios, and durable reports.
           </p>
         </div>
 
         <div className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {OFFER_MODULES.map(([Icon, name, outcome]) => {
-            const featured = name === "Max Offer Engine";
+            const featured = name === "Offer Ceiling";
             return (
               <article
                 key={name}
@@ -240,7 +238,7 @@ export function OfferEngineSection() {
                 <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{outcome}</p>
                 {featured ? (
                   <p className="mt-4 border-t border-primary/20 pt-3 text-xs font-semibold text-[var(--brand-blue-text)]">
-                    The central Pro decision: know your number before you make the offer.
+                    Review the highest modeled price that still clears the targets you explicitly adopted.
                   </p>
                 ) : null}
               </article>
@@ -279,11 +277,11 @@ export function FinalCta() {
       <div className="mx-auto max-w-3xl px-4 py-14 text-center sm:px-6 sm:py-20">
         <h2 className="text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
           Put in an address. Understand the deal.{" "}
-          <span className="text-primary">Know what to offer.</span>
+          <span className="text-primary">Review the Offer Ceiling.</span>
         </h2>
         <p className="mx-auto mt-3 max-w-[52ch] text-balance text-sm leading-relaxed text-muted-foreground">
-          Cash flow, cap rate, CoC, DSCR and your Deal Score are free, with no account
-          needed. Projections, tax, exit scenarios and the max-offer solver are Pro.
+          Cash flow, cap rate, CoC, DSCR and your Screening Index are free, with no account
+          needed. Projections, tax, exit scenarios and the Offer Ceiling solver are Pro.
         </p>
         <ScrollToFormButton analyticsSource="final_cta" className="group mt-6 inline-flex h-12 items-center gap-1.5 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform">
           Analyze a property free
@@ -394,7 +392,7 @@ const WORKFLOW_COMPARISONS = [
   {
     name: "TrueCap",
     thesis: "It turns the deal into a decision.",
-    bestFor: "An address-first screen connected to Buy Box, Max Offer, downside, and presentation.",
+    bestFor: "An address-first screen connected to Buy Box, Offer Ceiling, downside, and presentation.",
     tradeoff: "It is intentionally opinionated and is a first-pass decision tool, not a replacement for due diligence.",
   },
 ] as const;
@@ -466,8 +464,8 @@ export function VsCompetitors() {
               <p className="font-bold text-foreground">TrueCap may fit better if you want</p>
               <ul className="mt-2 space-y-1.5 text-muted-foreground">
                 <li>A no-signup, address-first screen with editable sourced assumptions.</li>
-                <li>An opinionated verdict tied to your Buy Box.</li>
-                <li>Max Offer, downside, and an offer-ready decision package in one sequence.</li>
+                <li>Rule-fit context tied to your Buy Box.</li>
+                <li>Offer Ceiling, downside, and a decision-review package in one sequence.</li>
               </ul>
               <p className="mt-3 text-xs text-muted-foreground">
                 BiggerPockets may fit better for its community and education ecosystem;
@@ -495,17 +493,17 @@ export function VsCompetitors() {
 const HOMEPAGE_FAQS: { q: string; a: string }[] = [
   {
     q: "Why not just use a free calculator?",
-    a: "Free calculators — including TrueCap's own free analyzer — give you metrics: cap rate, cash flow, DSCR. What they don't give you is a decision. The Deal Decision Pack and Pro add the decision layer: the exact maximum offer that still hits your targets, a pass/fail against your own Buy Box with reasons, the downside stress test, and a report you can hand a lender. Metrics tell you about the deal; the decision layer tells you what to do.",
+    a: "Free calculators — including TrueCap's own free analyzer — give you metrics such as cap rate, cash flow, and DSCR. Pro adds a target-backed Offer Ceiling, Buy Box rule-fit results with reasons, downside testing, and reports for lender or partner review. The Offer Ceiling is the highest modeled price that still meets the selected targets under the assumptions shown; it is not advice or an appraisal.",
   },
   {
-    q: "How accurate is the auto-fill?",
-    a: "Rent starts from a HUD area benchmark (ZIP-level when available, otherwise county-level), not a property-specific rent comp. The rate starts from FRED's national owner-occupied 30-year benchmark, not an investor lender quote. Property tax uses a state effective-rate estimate. Every field is editable - replace screening defaults with local comps, the actual tax bill, insurance, and written loan terms before making an offer.",
+    q: "What does the auto-fill provide?",
+    a: "Rent starts from a HUD area benchmark (ZIP-level when available, otherwise county-level), not a property-specific rent comp. The rate starts from FRED's national owner-occupied 30-year benchmark, not an investor lender quote. Property tax uses a state effective-rate estimate. Every field is editable - replace screening defaults with local comps, the actual tax bill, insurance, and written loan terms before recording or acting on an investment decision.",
   },
   {
     // The guarantee sentence is appended dynamically in HomepageFaq so the
     // kill switch silences it together with every other refund promise.
     q: "Why does Pro cost more than other rental calculators?",
-    a: "Because you're not buying analysis — you're buying the decision layer. Cheaper tools calculate the deal you describe; Pro computes your walk-away price on every deal, checks it against your Buy Box, and stress-tests the downside before the bank does. Overpaying by even 3% on a $250,000 rental costs $7,500 — one avoided mistake covers years of Pro.",
+    a: "Pro adds a repeatable decision-review layer: a target-backed Offer Ceiling, Buy Box rule-fit checks, downside stress tests, comparisons, and reports. The outputs remain estimates based on the assumptions shown and require independent verification.",
   },
   {
     q: "Is TrueCap really free?",
@@ -514,7 +512,7 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
     // version claimed saving itself was a Pro add-on, contradicting the
     // pricing card's Free save-up-to-5 bullet and the runtime gate
     // (pricing-copy-guards.test.ts locks this).
-    a: "Yes. The cash-flow analyzer - cap rate, CoC, DSCR, monthly cash flow, address auto-fill, the 0-100 Deal Score, and a plain-English verdict - is free forever and unlimited. No card required. Free even saves up to 5 deals. Pro adds editing + unlimited saved deals, compare deals, Deal Decision Pack PDFs, a personal buy box (your criteria, checked on every deal), and the advanced modules (BRRRR + Fix-and-Flip, Sensitivity, 10-year projections, illustrative tax impact, and modeled exit comparisons).",
+    a: "Yes. The cash-flow analyzer - cap rate, CoC, DSCR, monthly cash flow, address auto-fill, the 0-100 Screening Index, and plain-English screening context - is free forever and unlimited. No card required. Free even saves up to 5 deals. Pro adds editing, unlimited saved deals, comparisons, PDF reports, a personal Buy Box, and advanced modules including BRRRR, Fix-and-Flip, Sensitivity, 10-year projections, illustrative tax impact, and modeled exit comparisons.",
   },
   {
     q: "Do I need a credit card?",
@@ -525,12 +523,8 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
     a: "Yes - every number is editable. TrueCap pre-fills rent, rate, tax, and expense defaults so you get an instant first pass, then you can change financing, expenses, and growth assumptions under “Improve accuracy” and rerun in a click.",
   },
   {
-    q: "What do I get with a Deal Decision Pack?",
-    a: "A complete one-property decision report: deterministic Max Offer, Deal Doctor rent/rate thresholds, assumptions, verdict, cash flow, cap rate, DSCR, downside scenario, 10-year projection, illustrative tax impact, modeled exit comparisons, and Deal Score. No account or subscription.",
-  },
-  {
     q: "When should I upgrade to Pro?",
-    a: "Use Free to screen unlimited deals. Use a Deal Decision Pack when you need Max Offer and the complete decision report for one property without a subscription. Upgrade to Pro for an interactive Max Offer workflow, Buy Box screening, downside testing, unlimited saves, comparisons, reusable assumptions, branded reports, and unlimited exports. Pro is month-to-month - cancel anytime.",
+    a: "Use Free to screen unlimited deals. Upgrade to Pro for an interactive Offer Ceiling workflow, Buy Box screening, downside testing, unlimited saves, comparisons, reusable assumptions, branded reports, and unlimited exports. Pro is month-to-month - cancel anytime.",
   },
   {
     q: "How does the Pro trial work?",
@@ -542,32 +536,12 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Is this financial advice?",
-    a: "No. TrueCap surfaces the math you'd compute yourself - accurate formulas and market-data defaults - but every assumption is editable and the decision is yours. It's a calculator, not a financial advisor.",
+    a: "No. TrueCap applies documented, deterministic formulas to your inputs and labeled screening benchmarks. Every assumption is editable, every output is an estimate, and the decision is yours. It is a calculator, not a financial advisor.",
   },
 ];
 
 export function HomepageFaq({ structuredData = true }: { structuredData?: boolean } = {}) {
-  const { guaranteeEnabled } = getMarketingOfferConfig();
-  // The guarantee question renders (in prose AND schema) only while the
-  // guarantee itself is live, so the FAQ can never promise a dead policy.
-  const faqs = guaranteeEnabled
-    ? (() => {
-        const withGuarantee = HOMEPAGE_FAQS.map((f) =>
-          f.q === "Why does Pro cost more than other rental calculators?"
-            ? {
-                ...f,
-                a: `${f.a} And the Never Overpay Guarantee puts the risk on us, not you.`,
-              }
-            : f
-        );
-        const trialIndex = withGuarantee.findIndex((f) => f.q === "How does the Pro trial work?");
-        withGuarantee.splice(trialIndex + 1, 0, {
-          q: "Is there a money-back guarantee?",
-          a: "Yes — the Never Overpay Guarantee. Analyze at least 10 deals in your first 30 days as a paying Pro subscriber, and if you don't feel more confident about exactly what to offer, email us within those 30 days for a full refund of what you've paid. Full terms at usetruecap.com/guarantee.",
-        });
-        return withGuarantee;
-      })()
-    : HOMEPAGE_FAQS;
+  const faqs = HOMEPAGE_FAQS;
   return (
     <>
       <section className="border-t border-border bg-background">
@@ -601,7 +575,7 @@ export function HomepageFaq({ structuredData = true }: { structuredData?: boolea
             Still have a question?{" "}
             <a
               href="mailto:hello@usetruecap.com"
-              className="font-semibold text-primary hover:underline"
+              className="inline-flex min-h-11 items-center rounded px-1 font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               Email us
             </a>
@@ -706,25 +680,24 @@ export function DataSourcesSection() {
 // ───────────────────────────────────────── PDF / Pro upsell
 /**
  * #7 - a low-friction paid path for non-subscribers, surfaced AFTER the
- * calculator (i.e. after the visitor has felt the value). The $5 one-time
- * PDF is a real, fully-automated product (see app/actions/one-time-pdf.ts);
+ * calculator (i.e. after the visitor has felt the value). New one-time
+ * report checkout is temporarily disabled;
  * we deliberately do NOT hardcode the Pro monthly price here - it's loaded
  * live from Stripe on /pricing, and duplicating it risks drift.
  */
 // Honest value ladder - what each path actually unlocks. Mirrors the
-// entitlements bag (lib/entitlements.ts) + the $5 one-time PDF product.
+// entitlements bag (lib/entitlements.ts).
 // Pro's monthly price is deliberately NOT printed here (it's loaded live
 // from Stripe on /pricing); the Pro card below links out so the two can
 // never drift. "true" → included, "false" → not, string → a qualifier.
-const LADDER_SUBHEADERS = ["Free forever", "One-time", "Pro plans"] as const;
+const LADDER_SUBHEADERS = ["Free forever", "Pro plans"] as const;
 /**
- * The Free / $5 / Pro ladder.
+ * The Free / Pro ladder. Historical one-time Pack checkout is disabled.
  *
  * The LABEL is marketing copy and lives here. The three TIER CELLS are derived
  * from lib/entitlements-catalog — never hand-typed — because hand-typing them
  * is exactly how this table came to claim Free couldn't save deals (it can:
- * five) and that the $5 PDF omitted projections (it doesn't), each
- * contradicting /pricing at the moment someone decides to pay. Change what a
+ * five), contradicting /pricing at the moment someone decides to pay. Change what a
  * tier includes in the catalog and every surface follows.
  *
  * `key: null` marks a row that is a policy statement rather than an
@@ -734,68 +707,68 @@ const LADDER_ROWS: { label: string; cells: (boolean | string)[] }[] = (
   [
     { label: "Analyze unlimited deals", key: null, cells: [true, true, true] },
     { label: "Cap rate · CoC · DSCR · cash flow", key: "cash_flow" },
-    { label: "0-100 Deal Score + plain-English verdict", key: "deal_score" },
+    { label: "0-100 Screening Index + modeled context", key: "deal_score" },
     { label: "Lender-facing PDF export", key: "pdf_export" },
-    { label: "Max Offer + Deal Doctor thresholds", key: "mao" },
+    { label: "Offer Ceiling + Deal Doctor thresholds", key: "mao" },
     { label: "Save & revisit deals", key: "save_deal" },
     { label: "Compare deals side-by-side", key: "compare_deals" },
-    { label: "Buy box: personal pass/fail on every deal", key: "buy_box" },
+    { label: "Buy Box: selected-rule fit on every deal", key: "buy_box" },
     { label: "10-year projections · tax · exit", key: "projections" },
     { label: "BRRRR · fix & flip · sensitivity", key: "strategies" },
   ] as { label: string; key: FeatureKey | null; cells?: (boolean | string)[] }[]
-).map(({ label, key, cells }) => ({
-  label,
-  cells: cells ?? ladderCellsForFeature(key!),
-}));
+).map(({ label, key, cells }) => {
+  const fullCells = cells ?? ladderCellsForFeature(key!);
+  return { label, cells: [fullCells[0], fullCells[2]] };
+});
 
 
 export function PdfProUpsell() {
-  const { proOfferName, singleDeal } = getMarketingOfferConfig();
-  const ladderHeaders = ["Free", `${singleDeal.priceLabel} Single Deal`, proOfferName] as const;
+  const { proOfferName } = getMarketingOfferConfig();
+  const ladderHeaders = ["Free", proOfferName] as const;
   return (
     <section className="border-t border-border bg-card/40">
       <div className="mx-auto max-w-4xl px-4 py-14 sm:px-6 sm:py-20">
         <div className="mb-8 text-center sm:mb-10">
           <p className="text-[11px] font-bold uppercase tracking-widest text-primary">What you get</p>
           <h2 className="mt-2 text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            Analyze free. Unlock one complete deal for{" "}
-            <span className="text-primary">{singleDeal.priceLabel}</span>. Use{" "}
-            <span className="text-primary">{proOfferName}</span> to solve the offer ceiling that fits your targets—deal after deal.
+            Analyze free. Use <span className="text-primary">{proOfferName}</span>{" "}
+            to solve the Offer Ceiling that fits your targets—deal after deal.
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-balance text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Start with a 60-second screen. Unlock a complete Deal Decision Pack
-            once, or use Pro to turn every address into four answers: pursue or pass,
-            what to offer, what could break, and how to present the decision.
+            Start with a 60-second screen, then use Pro to review four things:
+            selected-rule fit, Offer Ceiling,
+            what could break, and how to document the decision.
           </p>
         </div>
 
         {/* Value ladder - answers "what exactly do I get free?" at a glance,
             so the visitor isn't guessing where the line is. */}
-        <p className="mb-2 text-center text-xs font-medium text-muted-foreground sm:hidden">
-          Swipe to compare all three →
-        </p>
         <div
           role="region"
-          aria-label="Free, Deal Decision Pack, and Pro comparison"
-          tabIndex={0}
-          className="mb-8 overflow-x-auto rounded-2xl border border-border bg-card shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:mb-10"
+          aria-label="Free and Pro comparison"
+          className="mb-8 overflow-hidden rounded-2xl border border-border bg-card shadow-sm sm:mb-10"
         >
-          <table className="w-full min-w-[560px] text-sm">
+          <table className="w-full table-fixed text-xs sm:text-sm">
+            <colgroup>
+              <col className="w-1/2" />
+              <col className="w-1/4" />
+              <col className="w-1/4" />
+            </colgroup>
             <caption className="sr-only">
-              Features included with Free, the one-time Deal Decision Pack, and Pro
+              Features included with Free and Pro
             </caption>
             <thead>
               <tr className="border-b border-border bg-muted/30">
-                <th className="px-4 py-3 text-left font-bold text-muted-foreground sm:px-6">
+                <th className="px-2 py-3 text-left font-bold text-muted-foreground sm:px-6">
                   <span className="sr-only">Feature</span>
                 </th>
                 {ladderHeaders.map((h, i) => (
                   <th
                     key={h}
                     className={
-                      i === 2
-                        ? "px-4 py-3 text-center font-extrabold text-primary sm:px-6"
-                        : "px-4 py-3 text-center font-bold text-foreground sm:px-6"
+                      i === 1
+                        ? "px-1 py-3 text-center font-extrabold text-primary sm:px-6"
+                        : "px-1 py-3 text-center font-bold text-foreground sm:px-6"
                     }
                   >
                     {h}
@@ -809,9 +782,9 @@ export function PdfProUpsell() {
             <tbody>
               {LADDER_ROWS.map((row, ri) => (
                 <tr key={row.label} className={ri % 2 === 0 ? "bg-card" : "bg-muted/20"}>
-                  <td className="px-4 py-3 font-medium text-foreground sm:px-6">{row.label}</td>
+                  <td className="px-2 py-3 font-medium text-foreground sm:px-6">{row.label}</td>
                   {row.cells.map((cell, ci) => (
-                    <td key={`${row.label}-${ci}`} className="px-4 py-3 text-center sm:px-6">
+                    <td key={`${row.label}-${ci}`} className="px-1 py-3 text-center sm:px-6">
                       {/* sr-only labels so the matrix is legible to screen
                           readers / crawlers, not a wall of blank cells. */}
                       {cell === true ? (
@@ -819,7 +792,7 @@ export function PdfProUpsell() {
                           <Check
                             aria-hidden
                             className={
-                              ci === 2
+                              ci === 1
                                 ? "mx-auto size-4 text-[var(--metric-positive)]"
                                 : "mx-auto size-4 text-[var(--metric-positive)]/80"
                             }
@@ -834,7 +807,7 @@ export function PdfProUpsell() {
                       ) : (
                         <span
                           className={
-                            ci === 2
+                            ci === 1
                               ? "text-xs font-semibold text-primary"
                               : "text-xs font-medium text-foreground"
                           }
@@ -850,31 +823,7 @@ export function PdfProUpsell() {
           </table>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 sm:gap-5">
-          {/* One complete deal without a subscription. */}
-          <div className="flex flex-col rounded-2xl border border-border bg-card p-6 shadow-sm">
-            <div className="mb-4 flex size-11 items-center justify-center rounded-xl bg-[var(--brand-green)]/10 text-[var(--brand-green)]">
-              <FileText aria-hidden className="size-5" />
-            </div>
-            <span className="w-fit rounded-full bg-[var(--brand-green)]/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[var(--brand-green)]">
-              One-time · {singleDeal.priceLabel}
-            </span>
-            <h3 className="mt-2 text-lg font-bold text-foreground">TrueCap Deal Decision Pack</h3>
-            <p className="mt-1.5 flex-1 text-sm leading-relaxed text-muted-foreground">
-              Get the complete decision package for one property: Max Offer,
-              Deal Doctor thresholds, assumptions, verdict, downside scenario,
-              long-term projection, illustrative tax-impact view, modeled exit comparisons, and a polished
-              report. No subscription.
-            </p>
-            <div className="mt-5">
-              <ScrollToFormButton className="group inline-flex h-11 items-center gap-1.5 rounded-xl border border-border bg-background px-5 text-sm font-bold text-foreground hover:bg-muted">
-                Analyze a property
-                <ArrowRight aria-hidden className="size-4 transition-transform group-hover:translate-x-0.5" />
-              </ScrollToFormButton>
-            </div>
-          </div>
-
-          {/* Pro */}
+        <div className="mx-auto max-w-xl">
           <div className="flex flex-col rounded-2xl border-2 border-primary/30 bg-card p-6 shadow-[0_16px_40px_rgba(0,112,196,0.10)]">
             <div className="mb-4 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <Sparkles aria-hidden className="size-5" />
@@ -884,8 +833,8 @@ export function PdfProUpsell() {
             </span>
             <h3 className="mt-2 text-lg font-bold text-foreground">One address. Four acquisition answers.</h3>
             <p className="mt-1.5 flex-1 text-sm leading-relaxed text-muted-foreground">
-              Get your Buy Box verdict, Max Offer, downside stress test, and an
-              offer-ready report—then compare, save, and move the strongest deals
+              Get your Buy Box rule-fit result, Offer Ceiling, downside stress test, and a
+              decision-review report—then compare, save, and move selected deals
               through your acquisition workflow.
             </p>
             <div className="mt-5">
@@ -900,7 +849,6 @@ export function PdfProUpsell() {
                 New subscribers get full Pro access free for {TRIAL_DAYS} days. Card required
                 at checkout; cancel before the trial ends to avoid a subscription charge.
               </p>
-              <GuaranteeBadge align="start" className="mt-3" />
             </div>
           </div>
         </div>
@@ -909,58 +857,9 @@ export function PdfProUpsell() {
   );
 }
 
-/**
- * Risk reversal — the Never Overpay Guarantee (founder-approved 2026-08-17,
- * replacing the never-activated 3-Deal Fit Guarantee). This section is the
- * summary; /guarantee is the canonical statement and ships in the same
- * deploy, so the terms link can never dangle. The activation condition (10
- * analyzed deals in the first 30 days) is deliberate: it drives the behavior
- * most correlated with retention while the refund removes all buyer risk.
- * It guarantees decision confidence with the software, never an investment
- * result. Kill switch: NEXT_PUBLIC_TRUECAP_GUARANTEE_DISABLED=1.
- */
+/** Retired placement retained as a no-op for import compatibility. */
 export function NeverOverpayGuarantee() {
-  const { guaranteeEnabled, guaranteeTermsUrl } = getMarketingOfferConfig();
-  if (!guaranteeEnabled) return null;
-
-  return (
-    <section className="border-t border-border bg-background">
-      <GuaranteeViewTracker guarantee="never_overpay" />
-      <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
-        <div className="rounded-3xl border-2 border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] p-6 sm:p-8">
-          <div className="flex items-start gap-4">
-            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-card text-[var(--brand-green)]">
-              <ShieldCheck aria-hidden className="size-5" />
-            </span>
-            <div className="min-w-0">
-              <p className="text-[11px] font-bold uppercase tracking-widest text-[var(--brand-green)]">Risk reversal</p>
-              <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-foreground">
-                The Never Overpay Guarantee
-              </h2>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
-                New subscribers try TrueCap Pro free for {TRIAL_DAYS} days. After
-                that, analyze at least 10 deals in your first 30 days as a
-                paying subscriber — and if you don&apos;t feel more confident about
-                exactly what to offer, email us within those 30 days and
-                we&apos;ll refund every dollar you&apos;ve paid. No forms, no
-                hoops. Keep anything you&apos;ve downloaded.
-              </p>
-              <p className="mt-3 text-xs text-muted-foreground">
-                This is a software-satisfaction guarantee, not a guarantee of
-                returns, cash flow, appreciation, financing, or deal success.
-              </p>
-              <Link
-                href={guaranteeTermsUrl}
-                className="mt-1 inline-flex min-h-11 items-center rounded text-xs font-bold text-[var(--brand-green)] underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                Read the full guarantee
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
+  return null;
 }
 
 // ───────────────────────────────────────── Personas
@@ -980,7 +879,7 @@ const PERSONAS: {
   {
     icon: TrendingUp,
     title: "For investors",
-    body: "Underwrite buy-and-hold deals in seconds - cash flow, cap rate, CoC, DSCR, a 10-year view, and a pass/fail against your own buy box.",
+    body: "Screen buy-and-hold assumptions with cash flow, cap rate, CoC, DSCR, a 10-year view, and selected-rule fit against your Buy Box.",
     // Deep-link with the Buy & Hold play pre-selected (analyzer handoff
     // ?strategy=) so long-term-rental defaults are already applied.
     seed: { href: "/?strategy=buy-hold#main", label: "Start a buy-and-hold analysis", strategy: "buy-hold" },
@@ -989,7 +888,7 @@ const PERSONAS: {
   {
     icon: Users,
     title: "For agents",
-    body: "Hand clients a clearly sourced analysis at the showing, with a shareable link or lender-facing Deal Decision Pack PDF.",
+    body: "Share a labeled screening analysis or Pro report for review with investor clients and lenders; it is not an appraisal or approval.",
     // No seed: agents run whatever their client is buying — no single play
     // (or property type) fits, so the plain analyzer is the right landing.
     // The page link is the first homepage-body path to /for-agents.
@@ -1049,7 +948,7 @@ export function Personas() {
               {p.pagePath ? (
                 <Link
                   href={p.pagePath.href}
-                  className={`mt-2 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline ${i === 0 ? "lg:justify-center" : ""}`}
+                  className={`mt-2 inline-flex min-h-11 items-center gap-1 rounded text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${i === 0 ? "lg:justify-center" : ""}`}
                 >
                   {p.pagePath.label} <ArrowRight className="size-3.5" />
                 </Link>

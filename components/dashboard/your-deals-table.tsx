@@ -6,7 +6,7 @@
  * chart, Portfolio Signals, and Risk vs Return).
  *
  * The point of the screen: this is the first surface in the dashboard's
- * history to show a MAX OFFER per deal, and the gap between it and the
+ * history to show an Offer Ceiling per deal, and the gap between it and the
  * asking price. A portfolio dashboard for an acquisition decision system
  * had no column for the number that answers it.
  *
@@ -29,7 +29,7 @@ type SortKey = "gap" | "maxOffer" | "score" | "address";
 const money = (n: number | null | undefined) =>
   n == null ? "—" : `$${Math.round(n).toLocaleString("en-US")}`;
 
-/** Gap = asking − max offer. Positive means asking is ABOVE what works. */
+/** Gap = asking − Offer Ceiling. Positive means asking is ABOVE what works. */
 function gapOf(deal: DashboardDeal): number | null {
   const asking = deal.purchasePrice ?? null;
   if (asking == null || deal.maxOffer == null) return null;
@@ -156,8 +156,8 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
               className="mt-1 min-h-11 w-full rounded-lg border border-input bg-background px-3 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <option value="gap">Gap to ceiling</option>
-              <option value="maxOffer">Max offer</option>
-              <option value="score">Deal score</option>
+              <option value="maxOffer">Offer Ceiling</option>
+              <option value="score">Screening Index</option>
               <option value="address">Property</option>
             </select>
           </label>
@@ -195,7 +195,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                 <dl className="mt-3 grid grid-cols-2 gap-3">
                   <div className="rounded-lg bg-muted/30 p-3">
                     <dt className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                      Max offer
+                      Offer Ceiling
                     </dt>
                     <dd className="mt-1 font-mono text-lg font-extrabold tabular-nums text-foreground">
                       {money(deal.maxOffer)}
@@ -212,7 +212,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                   {deal.maxOffer != null && deal.maxOfferBasisLabel ? (
                     <div className="col-span-2 rounded-lg border border-primary/15 bg-[var(--brand-blue-light)] p-3">
                       <dt className="text-[10px] font-bold uppercase tracking-wider text-primary">
-                        Price-ceiling criteria
+                        Offer Ceiling criteria
                       </dt>
                       <dd className="mt-1 break-words text-xs leading-relaxed text-foreground">
                         {deal.maxOfferBasisLabel}
@@ -244,7 +244,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                   </div>
                   <div className="rounded-lg border border-border p-3">
                     <dt className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                      Deal score
+                      Screening Index
                     </dt>
                     <dd className="mt-1 font-mono text-sm font-bold tabular-nums text-foreground">
                       {deal.score ?? "—"}
@@ -256,7 +256,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                   {deal.recommendation ? (
                     <Verdict recommendation={deal.recommendation} variant="compact" />
                   ) : (
-                    <span className="text-xs text-muted-foreground">Not scored</span>
+                    <span className="text-xs text-muted-foreground">Not screened</span>
                   )}
                 </div>
               </article>
@@ -270,20 +270,20 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
       <div data-deal-layout="table" className="hidden overflow-x-auto border-t border-border lg:block" tabIndex={0}>
         <table className="w-full min-w-[720px] text-sm">
           <caption className="sr-only">
-            Your saved deals with max offer, asking price, and the gap between them
+            Your saved deals with Offer Ceiling, asking price, the gap between them, and a secondary Screening Index that is not investment advice
           </caption>
           <thead className="bg-muted/30">
             <tr>
               <SortableTh label="Property" sortKey="address" activeKey={sortKey} desc={desc} onToggle={toggle} />
-              <SortableTh label="Max offer" sortKey="maxOffer" activeKey={sortKey} desc={desc} onToggle={toggle} className="text-right" />
+              <SortableTh label="Offer Ceiling" sortKey="maxOffer" activeKey={sortKey} desc={desc} onToggle={toggle} className="text-right" />
               <th scope="col" className="px-3 py-2 text-right text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                 Asking
               </th>
               <SortableTh label="Gap" sortKey="gap" activeKey={sortKey} desc={desc} onToggle={toggle} className="text-right" />
               <th scope="col" className="px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                Verdict
+                Screening result
               </th>
-              <SortableTh label="Score" sortKey="score" activeKey={sortKey} desc={desc} onToggle={toggle} className="text-right" />
+              <SortableTh label="Screening Index" sortKey="score" activeKey={sortKey} desc={desc} onToggle={toggle} className="text-right" />
             </tr>
           </thead>
           <tbody>
@@ -335,10 +335,10 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                         </span>
                         <span className="sr-only">
                           {gap > 0
-                            ? " above your max offer"
+                            ? " above the Offer Ceiling"
                             : gap < 0
-                              ? " below your max offer"
-                              : " equal to your max offer"}
+                              ? " below the Offer Ceiling"
+                              : " equal to the Offer Ceiling"}
                         </span>
                       </>
                     )}
@@ -347,7 +347,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                     {deal.recommendation ? (
                       <Verdict recommendation={deal.recommendation} variant="compact" />
                     ) : (
-                      <span className="text-xs text-muted-foreground">Not scored</span>
+                      <span className="text-xs text-muted-foreground">Not screened</span>
                     )}
                   </td>
                   <td className="whitespace-nowrap px-3 py-2.5 text-right font-mono tabular-nums text-foreground">
@@ -363,9 +363,10 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
           therefore explain the gap without pretending a mixed table shares
           one target basis. */}
       <p className="border-t border-border px-4 py-2 text-[11px] text-muted-foreground sm:px-5">
-        Gap is the asking price minus your max offer. A positive gap means the
-        asking price is above the price ceiling calculated from the criteria
-        shown for that deal. This is not a recommended offer.
+        Gap is the asking price minus the Offer Ceiling. A positive gap means the
+        asking price is above the highest modeled price that still meets the criteria
+        shown for that deal under its assumptions. The Screening Index is a secondary heuristic.
+        Neither output is a recommended offer, appraisal, or investment advice.
       </p>
     </section>
   );

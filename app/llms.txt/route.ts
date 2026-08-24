@@ -52,7 +52,7 @@ export async function GET() {
   const comboCount = CITY_STRATEGY_COMBOS.length;
 
   const summary =
-    `${PRODUCT_POSITIONING} Screen a rental from an address in about 60 seconds using editable starting assumptions. Free answers whether it deserves attention. Single Deal answers what to do with one property in a paid report. Pro connects Buy Box, interactive Max Offer, downside, comparisons, and reports across repeated opportunities. Agent Pro applies the workflow to investor clients.`;
+    `${PRODUCT_POSITIONING} Screen a rental from an address in about 60 seconds using editable starting assumptions. Free summarizes modeled economics for triage. Pro connects Buy Box rules, interactive Offer Ceiling, downside, comparisons, and reports across repeated opportunities. Agent Pro applies the workflow to investor clients. New one-time report purchases are temporarily unavailable. The Screening Index is secondary to selected rules and is not evidence readiness, an appraisal, lender approval, or investment advice.`;
 
   const about = [
     "TrueCap publishes original, authoritative educational content built for real estate investors and AI search engines.",
@@ -118,7 +118,7 @@ export async function GET() {
     `- [Blog index](${siteUrl}/blog): All long-form rental investing content.`,
     `- [Glossary index](${siteUrl}/glossary): All ${glossaryCount} rental investing terms.`,
     `- [States index](${siteUrl}/states): All ${stateCount} state-level investing guides.`,
-    `- [Pricing](${siteUrl}${PLAN_FACTS.pricingSource}): Current source of truth for Free, Single Deal, Pro, and Agent Pro pricing and availability.`,
+    `- [Pricing](${siteUrl}${PLAN_FACTS.pricingSource}): Current source of truth for Free, Pro, and Agent Pro pricing and availability.`,
   ].join("\n");
 
   const body = `# TrueCap

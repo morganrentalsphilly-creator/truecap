@@ -21,6 +21,6 @@ export default function Image() {
     section: "Comparisons",
     tag: "3-way comparison",
     title: "DealCheck vs Stessa vs TrueCap: which one do you actually need?",
-    subline: "Analysis vs bookkeeping vs verdicts",
+    subline: "Underwriting vs bookkeeping vs operations",
   });
 }

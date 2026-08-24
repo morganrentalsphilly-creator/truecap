@@ -1,9 +1,9 @@
 "use client";
 
 /**
- * "Or — make your current price work": the inverse of the Max Offer.
+ * "Or — make your current price work": the inverse of the Offer Ceiling.
  *
- * Max Offer answers "what should I pay?". This answers the question every
+ * Offer Ceiling answers "what should I pay?". This answers the question every
  * buyer asks next — "but what if I still want THIS house at THIS price?" —
  * by solving the rent or the rate that would make the asking price clear the
  * same targets. It is the most negotiation-useful output on the page.

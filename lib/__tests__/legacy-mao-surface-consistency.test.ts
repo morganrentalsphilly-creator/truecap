@@ -17,7 +17,7 @@ describe("legacy Max Offer surface consistency", () => {
     );
     expect(viewer).toContain(': "Unavailable"');
     expect(viewer).toContain(
-      "Offer Ceiling unavailable — this older share did not capture its target"
+      "No Offer Ceiling was calculated because this share did not capture"
     );
     // Other entitled analysis remains available; only the unsupported number
     // is suppressed.
@@ -33,16 +33,19 @@ describe("legacy Max Offer surface consistency", () => {
 
     for (const source of [workspace, dashboard, compare, myDeals]) {
       expect(source).toContain("computeDealOfferLine(");
+      expect(source).toContain("recordedDealOfferLine(");
       expect(source).toContain("dealClientId:");
       // Accept both explicit object properties and the equivalent shorthand
       // used by My Deals.
       expect(source).toMatch(/persistedMaoTarget(?:\s*:|\s*,)/);
     }
     expect(dashboard).toContain("DASHBOARD_DEALS_SELECT_WITH_CLIENT");
-    expect(dashboard).toContain("if (methodologyResolution.shouldFreeze) continue");
+    expect(dashboard).toContain("if (methodologyResolution.usesRecordedSnapshot) {");
     expect(compare).toContain("runCompareQueryWithClient");
-    expect(compare).toMatch(/canShowMao\s*&&\s*!resolution\.shouldFreeze/);
+    expect(compare).toContain("if (canShowMao && resolution.usesRecordedSnapshot) {");
     expect(compare).toContain("box.isActive && buyBoxHasCriteria(box)");
-    expect(workspace).toContain("!isFrozenMethodologySnapshot");
+    expect(workspace).toContain(
+      "if (isPremium && methodologyResolution.usesRecordedSnapshot) {"
+    );
   });
 });

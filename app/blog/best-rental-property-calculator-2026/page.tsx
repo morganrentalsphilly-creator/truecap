@@ -69,8 +69,8 @@ const RANKED_CALCULATORS = [
     pros: [
       "Deepest free tier — full cap rate, CoC, DSCR, NCF, monthly cash flow with no signup or analysis cap",
       "Address auto-fill from HUD Fair Market Rent + FRED 30-year rate + state property tax (no other tool does all three)",
-      "Plain-English verdict (Strong / Solid / Mixed / Marginal / Negative) on every deal",
-      "Single $29.99/mo Pro tier bundles 10-year projections, illustrative tax impact, sensitivity, modeled exit comparisons, MAO solver, BRRRR, fix-and-flip — no per-feature upcharges",
+      "Selected-rule fit, with a secondary Screening Index",
+      "Single $29.99/mo Pro tier bundles 10-year projections, illustrative tax impact, sensitivity, modeled exit comparisons, Offer Ceiling, BRRRR, and fix-and-flip workflows",
       "Lender-facing PDF + shareable read-only deal link with optional custom branding",
     ],
     cons: [
@@ -197,7 +197,7 @@ const RANKED_CALCULATORS = [
 const FAQ_ITEMS = [
   {
     q: "What's the best rental property calculator in 2026?",
-    a: "TrueCap edges out for most investors — deepest free tier, simplest pricing (one $29.99/mo Pro tier with everything bundled, vs DealCheck's cap-based tier ladder or $390/year on BiggerPockets), address auto-fill from HUD/FRED/state tax, and a plain-English verdict on every deal. DealCheck wins if you need native iOS/Android apps. BiggerPockets is the right answer if you already pay for the community.",
+    a: "TrueCap may fit investors who want a deep free tier, one published Pro tier, labeled HUD/FRED/state-tax starting assumptions, selected-rule fit, and a secondary Screening Index. DealCheck may fit users who need native iOS/Android apps. BiggerPockets may fit investors already paying for its community. Verify current pricing and features on each provider's site.",
   },
   {
     q: "What's the best free rental property calculator?",

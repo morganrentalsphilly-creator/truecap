@@ -11,6 +11,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { generateShareToken, hashShareToken, isWellFormedShareToken } from "@/lib/share-token";
+import { isPublicShareExpired } from "@/lib/public-share-lifecycle";
 
 const ROOT = join(__dirname, "..", "..");
 const read = (p: string) => readFileSync(join(ROOT, p), "utf8");
@@ -42,6 +43,26 @@ describe("share tokens", () => {
   });
 });
 
+describe("opaque share lifecycle", () => {
+  it("expires at the exact boundary and fails closed on malformed timestamps", () => {
+    const now = Date.parse("2026-08-24T12:00:00.000Z");
+    expect(isPublicShareExpired(null, now)).toBe(false);
+    expect(isPublicShareExpired("2026-08-24T12:00:00.001Z", now)).toBe(false);
+    expect(isPublicShareExpired("2026-08-24T12:00:00.000Z", now)).toBe(true);
+    expect(isPublicShareExpired("2026-08-24T11:59:59.999Z", now)).toBe(true);
+    expect(isPublicShareExpired("not-a-date", now)).toBe(true);
+  });
+
+  it("applies a generic read-side rate limit before token resolution", () => {
+    const page = read("app/s/[token]/page.tsx");
+    const rateGate = page.indexOf("opaqueShareReadRateLimit.isOverLimit");
+    const resolver = page.indexOf("resolvePublicShare(token)");
+    expect(rateGate).toBeGreaterThan(-1);
+    expect(resolver).toBeGreaterThan(rateGate);
+    expect(page).not.toContain("token_valid");
+  });
+});
+
 describe("the share-route privacy contract", () => {
   const config = read("next.config.mjs");
 
@@ -49,6 +70,15 @@ describe("the share-route privacy contract", () => {
     const i = config.indexOf('source: "/s/:path+"');
     expect(i, "/s/ header block missing from next.config.mjs").toBeGreaterThan(-1);
     const block = config.slice(i, i + 700);
+    expect(block).toContain('"no-referrer"');
+    expect(block).toContain("noindex, nofollow, noarchive, nosnippet");
+    expect(block).toContain("private, no-store");
+  });
+
+  it("the legacy /d/ route sends the same no-referrer + noindex + no-store policy", () => {
+    const i = config.indexOf('source: "/d/:path+"');
+    expect(i, "/d/ header block missing from next.config.mjs").toBeGreaterThan(-1);
+    const block = config.slice(i, config.indexOf('source: "/s/:path+"', i));
     expect(block).toContain('"no-referrer"');
     expect(block).toContain("noindex, nofollow, noarchive, nosnippet");
     expect(block).toContain("private, no-store");
@@ -86,7 +116,8 @@ describe("the share-route privacy contract", () => {
     expect(btn).toContain("createPublicShareAction");
     expect(btn).not.toContain("encodeShareLink");
     expect(btn).not.toContain("getSignedShareAttribution");
-    expect(btn).toContain("if (!opaque.ok) throw new Error(opaque.code)");
+    expect(btn).toContain('opaque.code === "SIGN_IN_REQUIRED"');
+    expect(btn).toContain("throw new Error(opaque.code)");
     expect(btn).toContain("maoTarget: maoTarget ?? undefined");
     expect(btn).toContain("maoTargetSource: maoTargetSource ?? undefined");
     expect(action).toContain("normalizeMaoTarget(parsed.data.maoTarget)");
@@ -97,8 +128,62 @@ describe("the share-route privacy contract", () => {
     expect(view).not.toContain("calculateMaxAllowableOffer(values, maoTarget)");
     expect(btn).toContain('addressVisibility: includeAddress ? "full" : "hidden"');
     expect(btn).toContain("Off by default");
-    expect(store).toContain("methodologyVersion: TRUECAP_UNDERWRITING_STANDARD_VERSION");
-    expect(route).toContain("resolved.methodologyVersion !== TRUECAP_UNDERWRITING_STANDARD_VERSION");
+    expect(store).toContain("resultSnapshot: capturedResult");
+    expect(store).toContain("methodologyVersion: capturedMethodologyVersion");
+    expect(store).toContain("offerCeilingExact");
+    expect(store).toContain("const hasRecordedInput = input.resultSnapshot !== undefined");
+    expect(store).toContain("adoptedTarget && !usesRecordedSnapshot");
+    expect(store).toContain("snapshotTarget = recordedCeiling.captured");
+    expect(route).toContain("resolveSavedAnalysisResult");
+    expect(route).toContain("resolved.snapshot.resultSnapshot");
+    expect(route).toContain("resolved.snapshot.offerCeilingExact");
+    expect(route).toContain("canRecomputeInputOnlyShare");
+  });
+
+  it("authenticates before the service-role mint and requires an owner", () => {
+    const action = read("app/actions/public-shares.ts");
+    const store = read("lib/public-share.ts");
+    const createStart = action.indexOf("export async function createPublicShareAction");
+    const authRead = action.indexOf("await supabase.auth.getUser()", createStart);
+    const authGate = action.indexOf('code: "SIGN_IN_REQUIRED"', authRead);
+    const mint = action.indexOf("mintPublicShare({", createStart);
+
+    expect(createStart).toBeGreaterThan(-1);
+    expect(authRead).toBeGreaterThan(createStart);
+    expect(authGate).toBeGreaterThan(authRead);
+    expect(mint).toBeGreaterThan(authGate);
+    expect(action.slice(authRead, mint)).toContain("if (!user)");
+    expect(action).toContain("ownerId: user.id");
+    expect(action).not.toContain("ownerId: user?.id ?? null");
+    expect(store).toContain("ownerId: string;");
+    expect(store).toContain("if (!input.ownerId) return null");
+    expect(store).toContain("owner_id: input.ownerId");
+  });
+
+  it("prompts for auth with a safe return path and preserves draft continuity", () => {
+    const btn = read("components/investcalc/share-link-button.tsx");
+    const dashboard = read("components/investcalc/analysis-dashboard.tsx");
+
+    expect(btn).toContain('href={`/auth/sign-up?next=${encodedReturnPath}`}');
+    expect(btn).toContain('href={`/auth/login?next=${encodedReturnPath}`}');
+    expect(btn).toContain('pathname.startsWith("/") && !pathname.startsWith("//")');
+    expect(btn).toContain("onClick={prepareAuthNavigation}");
+    expect(btn).toContain("Draft continuity is best-effort and must never block authentication");
+    expect(btn).toContain("Existing links still open without an account");
+    expect(dashboard).toContain("onPrepareAuthSave(adoptedMaoTarget, adoptedMaoTargetSource)");
+    expect(dashboard).toContain("Screening defaults are examples, not investor instructions");
+  });
+
+  it("keeps historical opaque and legacy viewers plus owner-scoped revoke", () => {
+    const action = read("app/actions/public-shares.ts");
+    const store = read("lib/public-share.ts");
+    const opaqueViewer = read("app/s/[token]/page.tsx");
+    const legacyViewer = read("app/d/[encoded]/page.tsx");
+
+    expect(store).toContain("ownerId: string | null;");
+    expect(opaqueViewer).toContain("resolvePublicShare(token)");
+    expect(legacyViewer).toContain("decodeShareLink");
+    expect(action).toContain('.eq("owner_id", user.id)');
   });
 
   it("rejects an explicitly supplied invalid target before minting a share", () => {
@@ -130,7 +215,8 @@ describe("the share-route privacy contract", () => {
       "components/investcalc/read-only-analysis-view.tsx"
     );
 
-    expect(focused).toContain("maoTargetSource={targetSource}");
+    expect(focused).toContain("maoTargetSource={targetAdopted ? targetSource : undefined}");
+    expect(focused).toContain("maoTarget={targetAdopted ? target : undefined}");
     expect(workspace).toContain("maxOfferTargetSource");
     expect(workspace).toContain("maoTargetSource={shareMaoTargetSource}");
     expect(shell).toContain("maoTargetSource={maoTargetSource}");

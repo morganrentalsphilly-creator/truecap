@@ -51,8 +51,8 @@ type Verdict = "truecap" | "mashvisor" | "tie";
 type Row = { feature: string; truecap: string; mashvisor: string; winner: Verdict };
 
 const MATRIX: Row[] = [
-  { feature: "Primary job",                       truecap: "Per-deal underwriting — should I buy THIS property?",                              mashvisor: "Market research — WHERE should I invest?",                              winner: "tie" },
-  { feature: "Free tier depth",                   truecap: "Core cap rate, CoC, DSCR, cash flow, score, and verdict",                        mashvisor: "Limited free preview; most data requires paid plan",                    winner: "truecap" },
+  { feature: "Primary job",                       truecap: "Per-deal underwriting — how does this property fit my selected rules?",          mashvisor: "Market research — WHERE should I invest?",                              winner: "tie" },
+  { feature: "Free tier depth",                   truecap: "Core cap rate, CoC, DSCR, cash flow, Screening Index, and selected-rule fit",     mashvisor: "Limited free preview; most data requires paid plan",                    winner: "truecap" },
   { feature: "Per-deal cap rate / CoC / DSCR",    truecap: "Yes — live as you type, with inline benchmarks",                                  mashvisor: "Yes — alongside market data",                                            winner: "tie" },
   { feature: "10-year projection",                truecap: "Pro — full compounding with depreciation",                                        mashvisor: "Available",                                                              winner: "tie" },
   { feature: "Market-level heatmaps",             truecap: "No — focused on the property in front of you",                                    mashvisor: "Yes — neighborhood-level cap rate + rent heatmaps",                      winner: "mashvisor" },
@@ -61,11 +61,11 @@ const MATRIX: Row[] = [
   { feature: "Property listings discovery",       truecap: "Not the focus — start with an address you found elsewhere",                       mashvisor: "Yes — investment-property marketplace",                                  winner: "mashvisor" },
   { feature: "Illustrative tax impact",           truecap: "Pro — depreciation + interest + modeled after-tax CF",                            mashvisor: "Basic tax view",                                                         winner: "truecap" },
   { feature: "Sensitivity / stress test",         truecap: "Pro — rent ±10%, vacancy ±5pp, rates ±1pp",                                       mashvisor: "Not the primary use case",                                               winner: "truecap" },
-  { feature: "Max allowable offer (MAO) solver",  truecap: "Pro — works backward from target return",                                         mashvisor: "Not a primary feature",                                                  winner: "truecap" },
-  { feature: "Deal score + breakdown",            truecap: "Free — 0–100 score with per-subscore explanation",                                 mashvisor: "Their own metric",                                                       winner: "tie" },
+  { feature: "Offer Ceiling solver",              truecap: "Pro — works backward from selected targets",                                  mashvisor: "Not a primary feature",                                                  winner: "truecap" },
+  { feature: "Screening Index + breakdown",            truecap: "Free — 0–100 score with per-subscore explanation",                                 mashvisor: "Their own metric",                                                       winner: "tie" },
   { feature: "Free address auto-fill",            truecap: "HUD FMR + FRED + state tax — free, no signup",                                    mashvisor: "Behind paywall",                                                         winner: "truecap" },
   { feature: "Sharable read-only deal links",     truecap: "Free — read-only public link; Pro adds co-branding",                              mashvisor: "Account-gated views",                                                    winner: "truecap" },
-  { feature: "PDF deal report",                   truecap: "One-time Deal Decision Pack or included with Pro",                              mashvisor: "Available",                                                              winner: "tie" },
+  { feature: "PDF deal report",                   truecap: "Included with Pro",                                                           mashvisor: "Available",                                                              winner: "tie" },
   { feature: "Pricing",                           truecap: "Free + monthly Pro on /pricing, no card to start",                                mashvisor: "Tiered paid plans, generally $$$ at scale",                              winner: "truecap" },
 ];
 
@@ -214,7 +214,7 @@ export default function VsMashvisorPage() {
             <Link href="/tools/cash-on-cash-calculator" className="font-semibold text-primary hover:underline">cash-on-cash return calculator</Link>
             {" "}— same engine as the full analyzer. Our walkthrough on{" "}
             <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">underwriting a rental in 60 seconds</Link>
-            {" "}shows the full move from listing to verdict.
+            {" "}shows the full move from listing to a reviewed underwrite.
           </p>
         </section>
 
@@ -225,7 +225,7 @@ export default function VsMashvisorPage() {
             Underwriting the next deal? Start free.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            TrueCap free covers cap rate, CoC, DSCR, NCF, monthly cash flow, and plain read-only share links. Pro adds co-branding, 10-year projections, illustrative tax impact, sensitivity, MAO, strategy analyzers, and included PDFs. A one-time PDF option is also available. No card to start.
+            TrueCap free covers cap rate, CoC, DSCR, NCF, monthly cash flow, and plain read-only share links. Pro adds co-branding, 10-year projections, illustrative tax impact, sensitivity, Offer Ceiling, strategy analyzers, and included PDFs. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link href="/pricing" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
@@ -287,14 +287,14 @@ const MASHVISOR_FAQ: FaqItem[] = [
     answer: (
       <>
         The products have different scopes and changing plan terms.
-        TrueCap has a free core analyzer plus paid Pro and one-time PDF
-        options. Mashvisor publishes tiered market-data plans. Compare
+        TrueCap has a free core analyzer plus paid Pro; new one-time PDF
+        purchases are temporarily unavailable. Mashvisor publishes tiered market-data plans. Compare
         both official pricing pages for the features and current rates
         you need.
       </>
     ),
     plainTextAnswer:
-      "The products have different scopes and changing terms. TrueCap has free core, paid Pro, and one-time PDF options; Mashvisor publishes tiered market-data plans. Compare both official pricing pages for current rates and features.",
+      "The products have different scopes and changing terms. TrueCap has a free core and paid Pro plans; Mashvisor publishes tiered market-data plans. Compare both official pricing pages for current rates and features.",
   },
   {
     question: "Does TrueCap have neighborhood heatmaps like Mashvisor?",

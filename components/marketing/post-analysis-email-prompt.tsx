@@ -27,7 +27,7 @@
  * accessibility tree the moment this card appeared.
  *
  * Why not a flat timer (BROWSER-6): the redesign's answer-first mobile
- * ordering put the Deal Score exactly where the old 5s overlay landed —
+ * ordering put the Screening Index exactly where the old 5s overlay landed —
  * it slid over ~40% of a 375px viewport while the first-timer was still
  * reading the verdict. Scroll-past / exit-intent fires at the natural
  * "about to leave" moment instead of mid-read.
@@ -44,6 +44,10 @@ const CAPTURED_KEY = "truecap_post_analysis_email_captured_v1";
  *  many px of entering the viewport — i.e. the user scrolled through the
  *  ledger and is running out of page. */
 const LEDGER_END_MARGIN_PX = 120;
+/** Ignore the analyzer's automatic jump into focused results. The prompt may
+ * react only after the settled viewport moves materially farther down. */
+const SCROLL_INTENT_DISTANCE_PX = 240;
+const SCROLL_ARM_DELAY_MS = 1000;
 
 type Props = {
   /** True when an analysis has been completed in the current session. */
@@ -88,8 +92,19 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
       });
     };
     // Scroll-past-the-ledger: the user has scrolled through the results —
-    // they've read the answer and are running out of page.
+    // they've read the answer and are running out of page. Arm only after
+    // focused-results auto-scroll and lazy dashboard layout have settled;
+    // otherwise that programmatic jump opens this card over the first answer.
+    let scrollArmed = false;
+    let settledScrollY = window.scrollY;
+    const armTimer = window.setTimeout(() => {
+      settledScrollY = window.scrollY;
+      scrollArmed = true;
+    }, SCROLL_ARM_DELAY_MS);
     const onScroll = () => {
+      if (!scrollArmed || window.scrollY < settledScrollY + SCROLL_INTENT_DISTANCE_PX) {
+        return;
+      }
       const results = document.querySelector('[data-analysis-results="true"]');
       if (!results) return;
       const bottom = results.getBoundingClientRect().bottom;
@@ -101,6 +116,7 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
       if (e.clientY <= 0) openPrompt();
     };
     const removeListeners = () => {
+      window.clearTimeout(armTimer);
       window.removeEventListener("scroll", onScroll);
       document.documentElement.removeEventListener("mouseleave", onMouseLeave);
     };
@@ -192,7 +208,7 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
           type="button"
           aria-label="Close"
           onClick={dismiss}
-          className="absolute right-2 top-2 inline-flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+          className="absolute right-1 top-1 inline-flex min-h-11 min-w-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <X className="h-4 w-4" />
         </button>
@@ -220,7 +236,7 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
                 on top of the analysis the user was reading. Headline +
                 input carries the pitch on mobile. */}
             <p className="mt-2 hidden text-[13px] leading-relaxed text-muted-foreground sm:block">
-              Drop your email — I&apos;ll send the underwriting checklist I run before every offer, plus a few short notes on the numbers most investors miss.
+              Drop your email — I&apos;ll send the underwriting checklist I use before recording a decision, plus a few short notes on the numbers most investors miss.
             </p>
             <form onSubmit={onSubmit} className="mt-4 flex flex-col gap-2">
               {/* Honeypot: display:none, out of the tab order and hidden from
@@ -236,7 +252,12 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
                 onChange={(e) => setWebsite(e.target.value)}
                 className="hidden"
               />
+              <label htmlFor="post-analysis-email" className="sr-only">
+                Email address
+              </label>
               <input
+                id="post-analysis-email"
+                name="email"
                 type="email"
                 autoComplete="email"
                 required
@@ -244,19 +265,32 @@ export function PostAnalysisEmailPrompt({ hasCompletedAnalysis, propertyAddress 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={status === "submitting"}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+                aria-invalid={status === "error" || undefined}
+                aria-describedby={
+                  errorMsg ? "post-analysis-email-error" : "post-analysis-email-hint"
+                }
+                className="min-h-11 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-ring"
               />
               <button
                 type="submit"
                 disabled={status === "submitting" || email.trim().length === 0}
-                className="inline-flex items-center justify-center rounded-lg bg-primary px-3 py-2 text-sm font-bold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-60"
+                className="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-3 py-2 text-sm font-bold text-primary-foreground transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
               >
                 {status === "submitting" ? "Sending…" : "Send me the checklist"}
               </button>
               {errorMsg ? (
-                <p className="text-xs text-destructive">{errorMsg}</p>
+                <p
+                  id="post-analysis-email-error"
+                  role="alert"
+                  className="text-xs text-destructive"
+                >
+                  {errorMsg}
+                </p>
               ) : null}
-              <p className="mt-1 text-[10px] text-muted-foreground">
+              <p
+                id="post-analysis-email-hint"
+                className="mt-1 text-[10px] text-muted-foreground"
+              >
                 No spam. Unsubscribe anytime.
               </p>
             </form>

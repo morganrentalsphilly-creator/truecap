@@ -18,7 +18,6 @@ import "server-only";
 
 import * as Sentry from "@sentry/nextjs";
 import { escapeHtml } from "@/lib/html-escape";
-import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { TRIAL_DAYS } from "@/lib/trial";
 
 function wrapHtml(inner: string, unsubscribeMailbox: string): string {
@@ -64,14 +63,10 @@ export async function schedulePackCreditEmails(input: {
         <p><strong>Upgrade to TrueCap Pro by ${deadlineHtml}</strong> and this
         purchase is credited to your first Pro invoice automatically at
         checkout. No code to remember.</p>
-        <p>Pro is the repeat version of the report you just bought: Max Offer,
-        Buy Box verdict, downside stress test, and lender-facing review exports on
-        every deal — with a ${escapeHtml(String(TRIAL_DAYS))}-day free trial for new
-        subscribers${
-          getMarketingOfferConfig().guaranteeEnabled
-            ? ` and the <a href="${siteUrlHtml}/guarantee">Never Overpay Guarantee</a> after that`
-            : ""
-        }.</p>
+        <p>Pro is the repeat version of the report you just bought: a target-dependent Offer Ceiling,
+        Buy Box rule fit, downside stress test, and adviser/lender review exports on
+        every deal—with a ${escapeHtml(String(TRIAL_DAYS))}-day free trial for eligible new
+        subscribers. Review current billing and cancellation terms before checkout.</p>
         <p><a href="${siteUrlHtml}/pricing?utm_source=email&utm_campaign=pack-credit-day0"><strong>See Pro plans</strong></a></p>
       `,
     },

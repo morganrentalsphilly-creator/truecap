@@ -8,7 +8,8 @@
 - Gates baseline: tsc 0 · vitest 2601 · lint 0 errors · build 0 · integrity 0 (re-verify at start).
 - Prices: Pro $29.99/mo `price_1TlJs3…`, Pro annual $300 `price_1TlJtA…`, Agent Pro $59.99/mo
   `price_1U3MUX…`, $590/yr `price_1U3MUv…`; legacy $20 `price_1TVvTz…` grandfathers 2 subs
-  (NEVER remap). $5 one-time PDF via `POST_ANALYSIS_*`. Trial = 14 days (lib/trial.ts).
+  (NEVER remap). Historical one-time PDF Price mappings remain only for paid-claim
+  recovery; new one-time checkout is disabled. Trial = 14 days (lib/trial.ts).
 - Captcha (Turnstile) LIVE + enforcing; coverage guard `lib/__tests__/captcha-coverage.test.ts`.
 - SHARE_LINK_SECRET set in prod (portal links + white-label embeds + /d/ attribution live).
 - Supabase project `cpfbtvblaufrnxsrvmnm` (truecap-db). MCP: read SQL fine; DDL apply BLOCKED by
@@ -17,8 +18,9 @@
 - Deploy convention: push to main → Vercel. No PR gate for this repo (standing rule: ship to main).
 
 ## Decisions locked by the brief (do not re-litigate)
-- Marketing names: "TrueCap Acquisition Pro" (billing IDs unchanged), "$5 → TrueCap Deal Decision
-  Pack", "Agent Pro" stays. Category: "The Rental Acquisition Decision System".
+- Superseded public positioning (2026-08-24): TrueCap performs rental-property
+  underwriting; the user makes the investment decision. Do not market a new
+  one-time Decision Pack while checkout remains disabled. Billing IDs stay unchanged.
 - Homepage ticker with +50k baseline: REMOVE from customer-facing pages (brief §Phase 1.5
   supersedes the earlier founder call; flag-gated honest counter may return later).
 - New public shares: opaque server-backed tokens at `/s/[token]` (hash-at-rest, revocable,

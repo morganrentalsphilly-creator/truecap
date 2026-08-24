@@ -61,7 +61,7 @@ export function DealAgingNudge({
         : "Under contract";
   const action =
     stage === "negotiating"
-      ? "Recheck every seller change against your walk-away number and set the next follow-up."
+      ? "Recheck every seller change against your Offer Ceiling and set the next follow-up."
       : stage === "offer"
         ? "A quick follow-up with the seller or their agent keeps it from going cold."
         : "Stay on top of inspection, financing, and your due-diligence deadlines.";

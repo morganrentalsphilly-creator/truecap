@@ -49,7 +49,7 @@ export async function DealLeadsCard({ limit = 8 }: { limit?: number }) {
               <div className="min-w-0">
                 <a
                   href={`mailto:${lead.lead_email}`}
-                  className="font-semibold text-foreground hover:underline"
+                  className="inline-flex min-h-11 items-center rounded-md font-semibold text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   {lead.lead_name || lead.lead_email}
                 </a>

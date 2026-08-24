@@ -3,6 +3,16 @@ export type OfferCeilingTargetSource =
   | "screening-defaults"
   | "selected-targets";
 
+/**
+ * A modeled price threshold is eligible only after the investor adopts a
+ * rule set. Product screening defaults are examples, not the user's targets.
+ */
+export function isAdoptedOfferCeilingTargetSource(
+  source: OfferCeilingTargetSource
+): boolean {
+  return source === "buy-box" || source === "selected-targets";
+}
+
 export function normalizeOfferCeilingTargetSource(
   value: unknown
 ): OfferCeilingTargetSource | null {

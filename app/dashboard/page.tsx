@@ -43,8 +43,16 @@ import {
   type OwnedDealEquityBasis,
 } from "@/lib/owned-equity-series";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
+import {
+  isAdoptedOfferCeilingTargetSource,
+  normalizeOfferCeilingTargetSource,
+} from "@/lib/offer-ceiling-contract";
 import { computeDealOfferLine } from "@/lib/deal-offer-line";
-import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
+import { recordedDealOfferLine } from "@/lib/recorded-offer-ceiling";
+import {
+  isReleasedUnderwritingSnapshot,
+  normalizeReleasedInvestmentFormSnapshot,
+} from "@/lib/underwriting-model-release";
 import { normalizeMaoTarget } from "@/lib/mao-target-editor";
 import type { DashboardDeal } from "@/lib/dashboard-deal-mapping";
 import {
@@ -326,6 +334,13 @@ export default async function DashboardPage() {
     rows = fallbackDealsResult.data as unknown[] | null;
     error = fallbackDealsResult.error;
   }
+  // A stored internal v2 result must not become visible merely because the
+  // dashboard can fall back to recorded metrics when recomputation declines.
+  rows = (rows ?? []).filter((row) =>
+    isReleasedUnderwritingSnapshot(
+      (row as { form_snapshot?: unknown }).form_snapshot
+    )
+  );
 
   // Full-portfolio aggregates (see query note above). Null on error —
   // getPortfolioTotals falls back to the 20-deal sample, same as before.
@@ -366,7 +381,9 @@ export default async function DashboardPage() {
     });
   }
   if (!aggregateResult.error) {
-    const aggRows = (aggregateResult.data ?? []) as unknown as AggregateRow[];
+    const aggRows = ((aggregateResult.data ?? []) as unknown as AggregateRow[]).filter(
+      (row) => isReleasedUnderwritingSnapshot(row.form_snapshot)
+    );
     fullActiveRows = aggRows;
     let totalValue = 0;
     let totalCashFlow = 0;
@@ -499,7 +516,7 @@ export default async function DashboardPage() {
     isPremium,
     navAccess.dashboard
   );
-  // Max Offer per deal — the number the product is sold on, absent from this
+  // Offer Ceiling per deal — the number the product is sold on, absent from this
   // screen until now. Recomputed from form_snapshot via the same
   // computeDealOfferLine path My Deals uses (no new math, no new query).
   // Deliberately over the DETAILED rows only: this is a bounded set, whereas
@@ -560,15 +577,15 @@ export default async function DashboardPage() {
       ? buyBoxesResult.boxes.filter((b) => b.isActive && buyBoxHasCriteria(b))
       : [];
   const buyBoxesResolved = Boolean(buyBoxesResult?.ok);
-  // FEATURE_CATALOG marks MAO as `gate: "paid"`; production Pro plan JSON has
+  // FEATURE_CATALOG marks Offer Ceiling as `gate: "paid"`; production Pro plan JSON has
   // no `mao` feature flag. Paid subscription status is therefore the complete
   // and fail-closed gate here.
   const canShowMao = isPremium;
 
-  // Max Offer per DETAILED row (bounded set). Same lib/deal-offer-line path
+  // Offer Ceiling per DETAILED row (bounded set). Same lib/deal-offer-line path
   // My Deals uses, so the two screens can never quote different numbers. The
   // paid gate wraps the entire solve, not only its rendering, so a free user
-  // cannot receive a hidden MAO value in the dashboard payload.
+  // cannot receive a hidden Offer Ceiling value in the dashboard payload.
   if (canShowMao) {
     const offerById = new Map<string, number | null>();
     const basisById = new Map<string, DashboardDeal["maxOfferBasis"]>();
@@ -582,15 +599,42 @@ export default async function DashboardPage() {
           ? toRecomputedSavedAnalysisSnapshot(recomputed)
           : undefined,
       });
-      // Do not mix today's inverse solver with metrics intentionally frozen
-      // under an incompatible historical methodology. Re-underwriting is the
-      // explicit transition that makes a new ceiling trustworthy.
-      if (methodologyResolution.shouldFreeze) continue;
-      const values = normalizeInvestmentFormSnapshot(row.form_snapshot);
+      if (methodologyResolution.usesRecordedSnapshot) {
+        const recorded = recordedDealOfferLine({
+          snapshot: row.result_snapshot,
+          isShoppingStage: true,
+        });
+        if (recorded) {
+          const offer = recorded.offer;
+          offerById.set(
+            row.id,
+            offer && offer.kind !== "blocked" ? offer.maxPrice ?? null : null
+          );
+          basisById.set(
+            row.id,
+            offer && offer.kind !== "blocked" ? offer.basis : null
+          );
+          basisLabelById.set(
+            row.id,
+            offer && offer.kind !== "blocked"
+              ? recorded.basisLabel || null
+              : null
+          );
+        }
+        // Older rows without an atomic capture remain blank. Never fill a
+        // recorded result with a solve from today's formula.
+        continue;
+      }
+      const values = normalizeReleasedInvestmentFormSnapshot(row.form_snapshot);
       if (!values) continue;
-      const persistedMaoTarget = normalizeMaoTarget(
-        row.result_snapshot?.maxOfferTarget
+      const persistedTargetSource = normalizeOfferCeilingTargetSource(
+        row.result_snapshot?.maxOfferTargetSource
       );
+      const persistedMaoTarget =
+        persistedTargetSource == null ||
+        isAdoptedOfferCeilingTargetSource(persistedTargetSource)
+          ? normalizeMaoTarget(row.result_snapshot?.maxOfferTarget)
+          : null;
       // A stored target is self-contained. A legacy row is not: if the
       // account Buy Box lookup failed, hide its ceiling instead of silently
       // substituting TrueCap's canonical default.

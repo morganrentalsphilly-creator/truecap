@@ -98,15 +98,15 @@ const TOOL_FORMULAS: Record<string, { formula: string; description: string }> = 
       "Three-second expense triage. Assumes operating expenses (excluding mortgage) run about half of gross rent, then derives NOI and cash flow. Useful when a seller pro forma shows a 25% expense ratio and you want a sanity check before spending time on a full underwrite.",
   },
   "70-percent-rule-calculator": {
-    formula: "Max offer = (0.70 × ARV) - Repair costs",
+    formula: "Offer Ceiling = (0.70 × ARV) - Repair costs",
     description:
       "The flip and BRRRR screen. Caps the offer at 70% of after-repair value minus the rehab budget, leaving room for holding costs, selling costs, and profit. Supports the other common multipliers (65%, 75%, 80%) since the right number varies by market heat and deal size.",
   },
   "arv-calculator": {
     formula:
-      "ARV = Median comp price per sq ft × Subject sq ft; Max offer = (0.70 × ARV) - Repairs",
+      "ARV = Median comp price per sq ft × Subject sq ft; Offer Ceiling = (0.70 × ARV) - Repairs",
     description:
-      "Comps-based after-repair value plus the 70%-rule max offer. ARV is the number every flip and BRRRR decision hangs on — get it wrong by 10% and the whole deal inverts.",
+      "Comps-based after-repair value plus the 70%-rule Offer Ceiling. ARV is the number every flip and BRRRR decision hangs on — get it wrong by 10% and the whole deal inverts.",
   },
   "house-hacking-calculator": {
     formula:
@@ -195,7 +195,7 @@ export async function GET() {
     PRODUCT_POSITIONING,
     `One address. Four answers: ${FOUR_ACQUISITION_ANSWERS.join("; ")}.`,
     `Free: ${PLAN_FACTS.free}`,
-    `Single Deal: ${PLAN_FACTS.singleDeal}`,
+    "Single Deal: new one-time report purchases are temporarily unavailable.",
     `Pro: ${PLAN_FACTS.pro}`,
     `Agent Pro: ${PLAN_FACTS.agentPro}`,
     `Eligible first-time subscribers receive a ${PLAN_FACTS.trialDays}-day trial. Current recurring prices and plan availability are published at ${siteUrl}${PLAN_FACTS.pricingSource}; Stripe is the source of truth, so this reference does not copy price amounts.`,

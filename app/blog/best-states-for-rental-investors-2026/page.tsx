@@ -248,7 +248,7 @@ export default function BestStatesPost() {
           </ol>
           <p>
             Once you&apos;ve picked a state, pick the specific submarket using the city-level guides linked above, then run the actual property through{" "}
-            <Link href="/" className="text-primary font-semibold hover:underline">TrueCap</Link> with the address — the analyzer auto-fills state property tax, HUD rent for the county, and current mortgage rates. Three minutes from address to verdict.
+            <Link href="/" className="text-primary font-semibold hover:underline">TrueCap</Link> with the address — the analyzer starts with a state property-tax estimate, HUD area rent benchmark, and mortgage-rate benchmark. Review those assumptions before using the underwrite.
           </p>
         </div>
         </article>

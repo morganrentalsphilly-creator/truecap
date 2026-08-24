@@ -182,7 +182,7 @@ export function DueThisWeekCard({
         <Link
           href="/dashboard/saved-analyses"
           prefetch={false}
-          className="shrink-0 text-xs font-semibold text-primary hover:underline"
+          className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center text-xs font-semibold text-primary hover:underline"
         >
           Review
         </Link>
@@ -230,7 +230,7 @@ export function DueThisWeekCard({
           <Link
             href="/dashboard/saved-analyses"
             prefetch={false}
-            className="font-semibold text-primary hover:underline"
+            className="inline-flex min-h-11 items-center font-semibold text-primary hover:underline"
           >
             My Deals
           </Link>
@@ -255,7 +255,7 @@ export function DueThisWeekCard({
               <Link
                 href={`/dashboard/saved-analyses/${deal.id}`}
                 prefetch={false}
-                className="font-semibold text-primary hover:underline"
+                className="inline-flex min-h-11 items-center font-semibold text-primary hover:underline"
               >
                 {deal.address}
               </Link>{" "}

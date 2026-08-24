@@ -102,20 +102,23 @@ function exactResult(
     presentation: buildOfferCeilingPresentation({ values, result, source }),
     achieved: {
       netCashFlow: result.achieved.netCashFlow,
+      cocReturn: result.achieved.cocReturn,
       capRate: result.achieved.capRate,
       dscr: result.achieved.dscr,
     },
     makePriceWork: {
       currentMeets,
       requiredMonthlyRent: requiredMonthlyRent
-        ? {
+          ? {
             value: requiredMonthlyRent.value,
+            alreadyMet: requiredMonthlyRent.alreadyMet,
             unreachable: requiredMonthlyRent.unreachable,
           }
         : null,
       requiredInterestRate: requiredInterestRate
-        ? {
+          ? {
             value: requiredInterestRate.value,
+            alreadyMet: requiredInterestRate.alreadyMet,
             unreachable: requiredInterestRate.unreachable,
           }
         : null,

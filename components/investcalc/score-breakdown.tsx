@@ -1,10 +1,10 @@
 "use client";
 
 /**
- * Reusable "Why this score" breakdown - renders the six Deal Score factors
+ * Reusable "Why this score" breakdown - renders the six Screening Index factors
  * (the engine's DealScoreBreakdown) as labeled bars with points/max, plus
  * the risk adjustment and the resulting score. Pure presentation; drop it
- * anywhere a Deal Score is shown (popover on Top Deals / Compare, inline in
+ * anywhere a Screening Index is shown (popover on Top Deals / Compare, inline in
  * the analyzer). Uses the engine's COMPONENT_MAXES so the maxes never drift.
  * Pass the deal's propertyType: owner-occupant (house-hack) deals score cash
  * flow on a 30-pt max (OWNER_OCCUPANT_CASH_FLOW_MAX) vs the investor 22.
@@ -64,7 +64,7 @@ export function ScoreBreakdown({
   return (
     <div className="w-[min(20rem,78vw)] text-sm">
       <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-        Why this score
+        Screening Index factors
       </p>
       <ul className="space-y-2">
         {rows.map((r) => {
@@ -102,7 +102,7 @@ export function ScoreBreakdown({
         ) : null}
       </ul>
       <div className="mt-3 flex items-center justify-between border-t border-border pt-2 font-bold">
-        <span>Deal Score</span>
+        <span>Screening Index</span>
         <span className="tabular-nums">{Math.round(score)} / 100</span>
       </div>
       <p className="mt-2 text-[11px] leading-snug text-muted-foreground">
@@ -119,6 +119,9 @@ export function ScoreBreakdown({
             up to 30.
           </>
         )}
+      </p>
+      <p className="mt-2 text-[11px] leading-snug text-muted-foreground">
+        Secondary model summary only—not evidence readiness, Buy Box fit, advice, or a recorded decision.
       </p>
     </div>
   );

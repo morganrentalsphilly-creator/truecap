@@ -9,6 +9,8 @@ describe("My Deals PDF target continuity", () => {
   it("builds the report acquisition block from resultSnapshot.maxOfferTarget", () => {
     const page = read("components/investcalc/saved-analyses-page-v2.tsx");
     const generator = read("lib/pdf-generator.ts");
+    const serverBuilder = read("lib/report-data-builder.ts");
+    const reportMaxOffer = read("lib/report-max-offer.ts");
     const builderStart = page.indexOf("function buildReportDataFromSavedSnapshot");
     const builderEnd = page.indexOf("function DealTags", builderStart);
     const builder = page.slice(builderStart, builderEnd);
@@ -20,7 +22,12 @@ describe("My Deals PDF target continuity", () => {
     expect(builder).toContain("includeDerivedMaxOffer");
     expect(builder).toContain("const maxOffer = includeDerivedMaxOffer");
     expect(builder).toContain("maxOffer,");
-    expect(page).toContain("includeDerivedMaxOffer: !resolved.shouldFreeze");
+    expect(page).toContain("includeDerivedMaxOffer: !resolved.usesRecordedSnapshot");
+    expect(serverBuilder).toContain("buildRecordedReportMaxOffer(");
+    expect(reportMaxOffer).toContain("readRecordedOfferCeiling(snapshotInput)");
+    expect(reportMaxOffer).not.toContain(
+      "calculateMaxAllowableOffer(snapshotInput"
+    );
     expect(generator).toContain("if (d.maxOffer !== undefined) {");
     expect(generator).toContain("metrics.push([");
     expect(generator).toContain("cards.unshift([");

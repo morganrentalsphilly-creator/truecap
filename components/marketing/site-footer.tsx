@@ -180,7 +180,7 @@ export function SiteFooter({ hideAccountLinks = false }: { hideAccountLinks?: bo
         <p className="mt-10 text-center text-[11px] leading-relaxed text-muted-foreground sm:text-xs">
           <strong className="text-foreground/90">TrueCap is not a financial advisor.</strong>{" "}
           The analyzer surfaces the math you&apos;d compute yourself in a spreadsheet, with
-          accurate formulas and market-data defaults, but every assumption is editable and
+          documented formulas and labeled market-data benchmarks, but every assumption is editable and
           the underwriting decision is yours.
         </p>
 

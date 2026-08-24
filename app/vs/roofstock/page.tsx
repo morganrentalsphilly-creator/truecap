@@ -55,7 +55,7 @@ type Row = { feature: string; truecap: string; roofstock: string; winner: Verdic
 
 const MATRIX: Row[] = [
   { feature: "Primary purpose",                   truecap: "Per-deal underwriting calculator",                                       roofstock: "Individual-investor real-estate services; confirm current offering", winner: "tie" },
-  { feature: "Cost to use",                       truecap: "Free core; paid Pro and one-time PDF options — see live pricing",           roofstock: "Service and transaction dependent — confirm current terms",        winner: "tie" },
+  { feature: "Cost to use",                       truecap: "Free core and paid Pro — see live pricing",                              roofstock: "Service and transaction dependent — confirm current terms",        winner: "tie" },
   { feature: "Underwriting perspective",           truecap: "Separate model using editable assumptions",                              roofstock: "Materials and analysis vary by current service",                    winner: "tie" },
   { feature: "Cap rate / CoC / DSCR",              truecap: "Calculated from the assumptions entered",                                roofstock: "Confirm the metrics included in the current offering",              winner: "truecap" },
   { feature: "Editable assumptions",               truecap: "Rent, vacancy, management, reserves, taxes, financing, and more",         roofstock: "Depends on the current product or transaction workflow",            winner: "truecap" },
@@ -63,14 +63,14 @@ const MATRIX: Row[] = [
   { feature: "Illustrative tax impact",             truecap: "Pro — depreciation, interest deduction, modeled after-tax CF",           roofstock: "Not modeled",                                                       winner: "truecap" },
   { feature: "Exit scenarios",                      truecap: "Pro — sell-at-year-N with equity + IRR",                                  roofstock: "Not modeled",                                                       winner: "truecap" },
   { feature: "Sensitivity grid (stress test)",      truecap: "Pro — rent ±10%, vacancy ±5pp, rate ±1pp",                                roofstock: "Not modeled",                                                       winner: "truecap" },
-  { feature: "Deal score with breakdown",           truecap: "Free — 0-100 screening score with subscore drill-down",                    roofstock: "Confirm any rating methodology in the current offering",            winner: "truecap" },
+  { feature: "Screening Index with breakdown",           truecap: "Free — 0-100 screening score with subscore drill-down",                    roofstock: "Confirm any rating methodology in the current offering",            winner: "truecap" },
   { feature: "Starting data sources",                truecap: "Editable HUD, FRED, and state-tax screening estimates",                    roofstock: "Review the sources and dates in the relevant materials",             winner: "tie" },
   { feature: "Transaction services",                 truecap: "No — analysis only",                                                       roofstock: "Depends on the current individual-investor service",                winner: "roofstock" },
   { feature: "Property discovery",                   truecap: "No inventory; analyze a supported address or enter inputs manually",       roofstock: "Depends on the current individual-investor service",                winner: "roofstock" },
   { feature: "Property management connection",      truecap: "Not included",                                                            roofstock: "Confirm availability and terms for the property",                   winner: "roofstock" },
   { feature: "Property coverage",                    truecap: "Supported U.S. addresses with manual input fallback",                       roofstock: "Service and property dependent",                                    winner: "truecap" },
   { feature: "Shareable read-only deal link",       truecap: "Free read-only public link; Pro adds co-branding",                          roofstock: "Confirm what can be shared from the current service",               winner: "truecap" },
-  { feature: "PDF report export",                    truecap: "One-time Deal Decision Pack or included with Pro",                        roofstock: "Confirm available documents for the current service",               winner: "truecap" },
+  { feature: "PDF report export",                    truecap: "Included with Pro",                                                     roofstock: "Confirm available documents for the current service",               winner: "truecap" },
   { feature: "Mobile-first UX",                      truecap: "PWA — install to home screen",                                            roofstock: "Mobile-friendly web app",                                           winner: "tie" },
 ];
 
@@ -156,7 +156,7 @@ export default function VsRoofstockPage() {
                 <li>You want to compare a Roofstock deal to a non-Roofstock deal head-to-head.</li>
                 <li>You want to replace third-party assumptions with property-specific evidence and test a range.</li>
                 <li>You want a 10-year projection with exit scenarios, not a year-one snapshot.</li>
-                <li>You want a deal score with a transparent breakdown.</li>
+                <li>You want a Screening Index with a transparent breakdown.</li>
               </ul>
             </div>
             <div>
@@ -268,7 +268,7 @@ export default function VsRoofstockPage() {
               scenarios. The grid is decision support, not a forecast.
             </li>
             <li>
-              <strong>Review the Deal Score and its inputs.</strong> The score
+              <strong>Review the Screening Index and its inputs.</strong> The secondary index
               is a screening aid, not a buy, decline, appraisal, or investment
               recommendation. Apply your own criteria and complete diligence.
             </li>
@@ -300,8 +300,8 @@ export default function VsRoofstockPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             Free covers the core underwrite and plain read-only share links. Pro adds
             10-year projections, sensitivity, illustrative tax impact, modeled exit
-            comparisons, co-branding, and included PDFs. A one-time PDF option is
-            also available. No card to start.
+            comparisons, co-branding, and included PDFs. New one-time PDF purchases
+            are temporarily unavailable. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -377,12 +377,12 @@ const ROOFSTOCK_FAQ: FaqItem[] = [
       <>
         Roofstock&apos;s offering and transaction terms can change, so use
         the relevant agreement and official site for the current fees.
-        TrueCap has a free core analyzer plus paid Pro and one-time PDF
-        options; its live pricing page is the source of truth.
+        TrueCap has a free core analyzer plus paid Pro; new one-time PDF
+        purchases are temporarily unavailable. Its live pricing page is the source of truth.
       </>
     ),
     plainTextAnswer:
-      "Roofstock's offering and transaction terms can change; confirm current fees in the relevant agreement and official site. TrueCap has free core, paid Pro, and one-time PDF options; see live pricing.",
+      "Roofstock's offering and transaction terms can change; confirm current fees in the relevant agreement and official site. TrueCap has a free core and paid Pro plans; see live pricing.",
   },
   {
     question: "Can TrueCap analyze any Roofstock listing?",

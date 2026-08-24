@@ -8,6 +8,7 @@ import {
   buildOfferCeilingPresentation,
   rankOfferCeilingConstraints,
 } from "@/lib/offer-ceiling";
+import { isAdoptedOfferCeilingTargetSource } from "@/lib/offer-ceiling-contract";
 
 const values: InvestmentFormValues = {
   propertyType: "single-family",
@@ -43,6 +44,12 @@ const values: InvestmentFormValues = {
 } as InvestmentFormValues;
 
 describe("Offer Ceiling presentation model", () => {
+  it("does not treat product screening defaults as the investor's adopted targets", () => {
+    expect(isAdoptedOfferCeilingTargetSource("screening-defaults")).toBe(false);
+    expect(isAdoptedOfferCeilingTargetSource("selected-targets")).toBe(true);
+    expect(isAdoptedOfferCeilingTargetSource("buy-box")).toBe(true);
+  });
+
   it("adds source, list gap, binding constraint, and re-solved uncertainty range", () => {
     const target = { monthlyCashFlow: 0, dscr: 1.25 };
     const solved = calculateMaxAllowableOffer(values, target);

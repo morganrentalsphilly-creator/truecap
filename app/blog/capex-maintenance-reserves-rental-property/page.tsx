@@ -483,7 +483,7 @@ export default function CapexReservesPost() {
           <p>
             CapEx is one line, but it compounds through everything
             downstream — NOI, cap rate, cash flow, DSCR, and whether the
-            deal verdict is real or borrowed from a future roof. The full{" "}
+            modeled return still holds after a future roof. The full{" "}
             <Link href="/" className="text-primary font-semibold hover:underline">
               TrueCap analyzer
             </Link>{" "}

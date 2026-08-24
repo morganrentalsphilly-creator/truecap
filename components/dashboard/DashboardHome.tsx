@@ -410,9 +410,9 @@ function getDecisionHighlights(data: DashboardHomeData) {
 }
 
 /**
- * Decision Center — the "what do I do next" band: the best-scoring deal, the
- * worst cash-flow-negative deal to review, the best 10-yr upside, a count of
- * negatives, and a context-aware next action.
+ * Decision Center — a fact-based comparison band: the highest Screening Index,
+ * the worst cash-flow-negative deal to review, the highest modeled 10-yr
+ * upside, a count of negatives, and a context-aware next action.
  *
  * NT-4: prefers the FULL-active-set winners computed server-side
  * (portfolioAggregates.winners) so a 21+-deal user's deal #23 can win a tile
@@ -463,7 +463,7 @@ function getDecisionCenter(data: DashboardHomeData) {
 /**
  * Portfolio KPIs — the four numbers an investor underwrites a *book* on,
  * complementing the Pipeline Value / Monthly Cash Flow headline cards:
- *  - Average Deal Score (book quality)
+ *  - Average Screening Index (book quality)
  *  - Weighted DSCR (leverage safety; purchase-price-weighted, financed
  *    deals only — cash purchases have no debt service)
  *  - Cash to Close (capital at work = down payment + closing across deals)
@@ -614,7 +614,7 @@ function buildDecisionInsights(deals: DashboardDeal[]) {
 
   const evidence = (d: DashboardDeal): string =>
     [
-      d.score != null ? `Deal Score ${Math.round(d.score)}` : null,
+      d.score != null ? `Secondary Screening Index ${Math.round(d.score)}` : null,
       d.recommendation ? recommendationLabel(d.recommendation) : null,
       d.cashFlowMonthly != null ? `${formatSignedCurrency(d.cashFlowMonthly)}/mo` : null,
       d.capRatePct != null ? `${d.capRatePct.toFixed(1)}% cap` : null,
@@ -629,7 +629,7 @@ function buildDecisionInsights(deals: DashboardDeal[]) {
       ? {
           title: `Top opportunity: ${bestPick.address}`,
           body: canCompare
-            ? `${evidence(bestPick)}. Next: line it up against your other top deals before you offer.`
+            ? `${evidence(bestPick)}. Next: compare it with your other top deals, verify the material inputs, and record your decision.`
             : `${evidence(bestPick)}. Next: save a second deal to compare it side-by-side.`,
           tone: "opportunity" as const,
           action: canCompare
@@ -640,7 +640,7 @@ function buildDecisionInsights(deals: DashboardDeal[]) {
     reviewPick
       ? {
           title: `Review: ${reviewPick.address} is cash-flow negative`,
-          body: `${formatSignedCurrency(reviewPick.cashFlowMonthly)}/mo at current assumptions${reviewPick.dscr != null ? ` · DSCR ${reviewPick.dscr.toFixed(2)}` : ""}. Next: lower your offer or raise rent and rerun — or pass.`,
+          body: `${formatSignedCurrency(reviewPick.cashFlowMonthly)}/mo at current assumptions${reviewPick.dscr != null ? ` · DSCR ${reviewPick.dscr.toFixed(2)}` : ""}. Next: review the price and rent assumptions, rerun, then record your decision.`,
           tone: "risk" as const,
           // Deep-link to the named deal so "fix it" is one tap, not a hunt
           // through the list (the deal-detail screen is where re-underwriting,
@@ -808,7 +808,7 @@ export function DashboardHome({
                 already carries the gradient analyze CTA — two identical
                 primary buttons in the first viewport wrapped this row to
                 two lines at 375px (mobile density audit DH-4). */}
-            <Button asChild variant="outline" className="h-10 rounded-xl px-4 text-sm">
+            <Button asChild variant="outline" className="min-h-11 rounded-xl px-4 text-sm">
               <Link href="/dashboard/saved-analyses" prefetch={false}>
                 <Briefcase className="h-4 w-4" />
                 My Deals
@@ -818,7 +818,7 @@ export function DashboardHome({
               <Button
                 asChild
                 variant="outline"
-                className="h-10 rounded-xl px-4 text-sm"
+                className="min-h-11 rounded-xl px-4 text-sm"
               >
                 <Link href="/dashboard/compare" prefetch={false}>
                   <ArrowUpDown className="h-4 w-4" />
@@ -829,7 +829,7 @@ export function DashboardHome({
               <Button
                 asChild
                 variant="outline"
-                className="h-10 rounded-xl px-4 text-sm"
+                className="min-h-11 rounded-xl px-4 text-sm"
                 title="Compare 2-4 deals side-by-side — Pro feature"
               >
                 <Link href="/pricing" prefetch={false}>
@@ -844,13 +844,21 @@ export function DashboardHome({
           </div>
         </div>
 
-        {/* ── Decision Center — the "what to do next" band, derived from your
-            active deals: best score, first cash-flow-negative deal to review,
-            best 10-yr upside, and a context-aware next action. */}
+        {/* ── Decision Center — fact-based comparisons derived from active
+            deals: highest Screening Index, first cash-flow-negative deal to
+            review, highest modeled 10-yr upside, and a next workflow action. */}
         {decisionCenter ? (
           <section aria-label="Decision center" className="rounded-2xl border border-border bg-card p-4 sm:p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Decision center</h2>
+              <div className="min-w-0">
+                <h2 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                  Decision center
+                </h2>
+                <p className="mt-1 max-w-3xl text-xs leading-relaxed text-muted-foreground">
+                  These highlights compare modeled outputs only. The Screening Index is a secondary heuristic, not an
+                  investment directive; verify every material assumption before relying on a comparison.
+                </p>
+              </div>
               <Link
                 href={decisionCenter.nextAction.href}
                 prefetch={false}
@@ -872,11 +880,11 @@ export function DashboardHome({
             >
               <div className="rounded-xl border border-success/30 bg-success/5 p-3">
                 <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-success">
-                  <Award className="h-3.5 w-3.5" /> Best deal
+                  <Award className="h-3.5 w-3.5" /> Highest screening index
                 </div>
                 <div className="mt-1 truncate text-sm font-bold text-foreground">{decisionCenter.best?.address ?? "—"}</div>
                 <div className="truncate text-xs text-muted-foreground">
-                  {decisionCenter.best?.score != null ? `Score ${Math.round(decisionCenter.best.score)}` : "—"}
+                  {decisionCenter.best?.score != null ? `Screening Index ${Math.round(decisionCenter.best.score)}` : "—"}
                   {decisionCenter.best?.recommendation ? ` · ${recommendationLabel(decisionCenter.best.recommendation)}` : ""}
                 </div>
               </div>
@@ -907,7 +915,7 @@ export function DashboardHome({
               </div>
               <div className="rounded-xl border border-primary/30 bg-primary/5 p-3">
                 <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-primary">
-                  <TrendingUp className="h-3.5 w-3.5" /> Best upside
+                  <TrendingUp className="h-3.5 w-3.5" /> Highest modeled upside
                 </div>
                 <div className="mt-1 truncate text-sm font-bold text-foreground">{decisionCenter.bestUpside?.address ?? "—"}</div>
                 <div
@@ -976,7 +984,7 @@ export function DashboardHome({
             ONE table replacing Portfolio Overview, Pipeline, Top
             Performers, the Deal Comparison chart, Portfolio Signals and
             Risk vs Return — and the first dashboard surface ever to carry
-            a MAX OFFER per deal, plus the gap to asking. */}
+            an Offer Ceiling per deal, plus the gap to asking. */}
         {focusedDashboard ? (
           <>
             <YourDealsTable deals={data.allDeals} />
@@ -1013,7 +1021,7 @@ export function DashboardHome({
                 <Link
                   href="/dashboard/saved-analyses?state=completed"
                   prefetch={false}
-                  className="text-xs font-semibold text-primary underline-offset-2 hover:underline"
+                  className="inline-flex min-h-11 items-center text-xs font-semibold text-primary underline-offset-2 hover:underline"
                 >
                   View owned deals →
                 </Link>
@@ -1032,7 +1040,7 @@ export function DashboardHome({
                         <Link
                           href="/dashboard/saved-analyses?state=completed"
                           prefetch={false}
-                          className="underline-offset-2 hover:underline"
+                          className="inline-flex min-h-11 items-center underline-offset-2 hover:underline"
                         >
                           add close dates to track equity
                         </Link>
@@ -1182,7 +1190,7 @@ export function DashboardHome({
               <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
                 <div className="rounded-xl border border-border bg-card p-3">
                   <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    <Award className="h-3.5 w-3.5" /> Avg Deal Score
+                    <Award className="h-3.5 w-3.5" /> Avg Screening Index · secondary
                   </div>
                   <div className="mt-1 text-lg font-bold text-foreground">
                     {kpis.avgScore == null ? "—" : Math.round(kpis.avgScore)}
@@ -1251,7 +1259,7 @@ export function DashboardHome({
               <Link
                 href="/dashboard/saved-analyses"
                 prefetch={false}
-                className="text-xs font-semibold text-primary underline-offset-2 hover:underline"
+                className="inline-flex min-h-11 items-center text-xs font-semibold text-primary underline-offset-2 hover:underline"
               >
                 Manage →
               </Link>
@@ -1298,7 +1306,7 @@ export function DashboardHome({
                 [
                   {
                     icon: Award,
-                    label: "Best Score",
+                    label: "Highest Screening Index",
                     value:
                       highlights.byScore?.score == null
                         ? "—"
@@ -1389,7 +1397,7 @@ export function DashboardHome({
                   Save a second deal to unlock rankings, risk/return, and side-by-side compare.
                 </p>
               </div>
-              <Button asChild variant="outline" className="h-9 shrink-0 rounded-xl px-4 text-sm">
+              <Button asChild variant="outline" className="min-h-11 shrink-0 rounded-xl px-4 text-sm">
                 <Link href="/dashboard/new" prefetch={false}>
                   <Plus className="h-4 w-4" />
                   Analyze another property
@@ -1426,15 +1434,15 @@ export function DashboardHome({
               <Link
                 href="/settings#buy-boxes-heading"
                 prefetch={false}
-                className="font-semibold text-primary underline-offset-2 hover:underline"
+                className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-2 hover:underline"
               >
                 your buy box
               </Link>{" "}
-              and every deal gets a pass/fail against your numbers.
+              and every deal shows which selected rules it meets or misses.
             </p>
             <Button
               asChild
-              className="mt-5 rounded-xl px-5"
+              className="mt-5 min-h-11 rounded-xl px-5"
               style={{ background: "var(--gradient-premium)", boxShadow: "var(--shadow-glow)" }}
             >
               <Link href="/dashboard/new">
@@ -1448,7 +1456,7 @@ export function DashboardHome({
         {/* ── DELETED by the focused dashboard ──────────────────────
             PortfolioChart (Deal Comparison bar chart) and AIInsights
             (Portfolio Signals) are superseded by "Your deals": the same
-            saved deals, with the Max Offer and gap those two never showed.
+            saved deals, with the Offer Ceiling and gap those two never showed.
             RiskReturn moves to Compare Deals, where comparison is the job.
             Kept behind the kill switch only. */}
         {!focusedDashboard && hasAnyDeals && data.topDeals.length > 0 ? (

@@ -53,7 +53,12 @@ export function buildAssumptionEntries(
       label: "Rent",
       ...(rent && !rent.overridden
         ? {
-            source: rent.source === "hud-safmr" ? "HUD rent benchmark (ZIP)" : "HUD rent benchmark (county)",
+            source:
+              rent.source === "rentcast-estimate"
+                ? "RentCast market-rent estimate"
+                : rent.source === "hud-safmr"
+                  ? "HUD rent benchmark (ZIP)"
+                  : "HUD rent benchmark (county)",
             short: "HUD",
             manual: false,
             ...(rent.fetchedAt ? { freshness: /^\d{4}$/.test(rent.fetchedAt) ? `HUD ${rent.fetchedAt}` : `As of ${rent.fetchedAt}` } : {}),
@@ -176,7 +181,7 @@ export function AssumptionsSourceStrip({
           expanded ? "block" : "hidden sm:block"
         )}
       >
-        Planning benchmarks, not property facts or financial advice — verify rent, financing, taxes, insurance, and condition before you offer.{" "}
+        Planning benchmarks, not property facts or financial advice — verify rent, financing, taxes, insurance, and condition before recording an investment decision.{" "}
         {/* Quiet provenance link (trust-polish audit): the skeptical-investor
             "is this math real?" path used to dead-end here — /methodology
             documents every formula + data source but had no inbound link

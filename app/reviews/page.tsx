@@ -17,28 +17,23 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Database, FileCheck2, ShieldCheck } from "lucide-react";
+import { Database, FileCheck2 } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { DealsAnalyzedTicker } from "@/components/marketing/deals-analyzed-ticker";
-import { GuaranteeBadge } from "@/components/marketing/guarantee-badge";
 import { TestimonialStrip } from "@/components/marketing/testimonial-card";
 import {
   VERIFIED_TESTIMONIALS,
   VERIFIED_AGENT_PROOF,
   isPublicationReady,
 } from "@/lib/proof-records";
-import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { getSiteUrl } from "@/lib/site-url";
 import { getRequestUser } from "@/lib/request-auth";
 
 export const revalidate = 3600;
 
 export function generateMetadata(): Metadata {
-  const { guaranteeEnabled } = getMarketingOfferConfig();
-  const description = guaranteeEnabled
-    ? "How TrueCap earns trust: sourced assumptions, a public versioned methodology, a published guarantee, and customer quotes only after verification."
-    : "How TrueCap earns trust: sourced assumptions, a public versioned methodology, and customer quotes only after verification.";
+  const description = "How TrueCap earns trust: labeled starting references, a public versioned methodology, and customer quotes only after verification.";
   return {
     title: "Reviews & Proof",
     description:
@@ -61,7 +56,6 @@ export default async function ReviewsPage() {
   const user = await getRequestUser();
 
   const siteUrl = getSiteUrl();
-  const { guaranteeEnabled } = getMarketingOfferConfig();
   const publishedCount =
     VERIFIED_TESTIMONIALS.filter((r) => isPublicationReady(r, "homepage")).length +
     VERIFIED_AGENT_PROOF.filter((r) => isPublicationReady(r, "homepage")).length;
@@ -152,19 +146,6 @@ export default async function ReviewsPage() {
                 , including its limitations.
               </p>
             </div>
-            {guaranteeEnabled ? (
-              <div className="rounded-2xl border border-border bg-card p-5">
-                <span className="flex size-10 items-center justify-center rounded-xl bg-[var(--brand-green)]/10 text-[var(--brand-green)]">
-                  <ShieldCheck aria-hidden className="size-5" />
-                </span>
-                <h3 className="mt-4 font-extrabold text-foreground">A real guarantee</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                  Analyze 10 deals in your first 30 days as a paying Pro subscriber —
-                  not more confident about what to offer? Full refund.
-                </p>
-                <GuaranteeBadge align="start" className="mt-3" />
-              </div>
-            ) : null}
           </div>
           <p className="mx-auto mt-8 max-w-2xl text-center text-xs leading-relaxed text-muted-foreground">
             How quotes get here: after a real workflow moment (an exported

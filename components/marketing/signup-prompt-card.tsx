@@ -142,7 +142,7 @@ export function SignupPromptCard({ address, isAuthenticated, onPrepareSaveIntent
         <Link
           href="/auth/login?next=/"
           onClick={() => beginSignup("sign_in")}
-          className="inline-flex min-h-11 items-center px-1 font-semibold text-foreground hover:underline"
+          className="inline-flex min-h-11 min-w-11 items-center justify-center px-1 font-semibold text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           Sign in
         </Link>

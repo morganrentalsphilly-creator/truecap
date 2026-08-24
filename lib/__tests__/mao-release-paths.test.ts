@@ -16,20 +16,30 @@ describe("MAO release-path safety", () => {
     expect(preview).toContain("livePreview.breakEvenPrice != null");
   });
 
-  it("preserves the exact target through one-time Pack checkout and return", () => {
+  it("disables new Pack checkout while preserving exact-target paid recovery", () => {
     const calculator = read("components/investcalc/investcalc-page.tsx");
+    const action = read("app/actions/one-time-pdf.ts");
     const capture = calculator.indexOf("const requestedMaoTarget = normalizeMaoTarget(maoTarget)");
     const purchaseGate = calculator.indexOf("setIsPdfPurchaseDialogOpen(true)", capture);
+    const actionStart = action.indexOf("export async function createOneTimePdfCheckoutAction");
+    const shutdownGate = action.indexOf("if (!decisionPackCheckoutEnabled())", actionStart);
+    const validation = action.indexOf("createCheckoutSchema.safeParse", actionStart);
+    const stripe = action.indexOf("const stripe = getStripe()", actionStart);
 
     expect(capture).toBeGreaterThan(-1);
     expect(purchaseGate).toBeGreaterThan(capture);
-    expect(calculator).toContain("maxOfferTarget: checkoutMaoTarget");
-    expect(calculator).toContain(
-      "maxOfferTargetSource: checkoutMaoTargetSource"
-    );
+    expect(calculator).not.toContain("createOneTimePdfCheckoutAction");
+    expect(calculator).not.toContain("handleBuyOneTimePdf");
+    expect(calculator).not.toContain("checkoutMaoTarget");
+    expect(shutdownGate).toBeGreaterThan(actionStart);
+    expect(shutdownGate).toBeLessThan(validation);
+    expect(shutdownGate).toBeLessThan(stripe);
+    expect(action.slice(shutdownGate, validation)).toContain('code: "FEATURE_DISABLED"');
     expect(calculator).toContain("const restoredDraft = parseOneTimePdfDraft(draftRaw)");
     expect(calculator).toContain("restoredMaoTarget = restoredDraft.target");
     expect(calculator).toContain("restoredMaoTargetSource = restoredDraft.source");
+    expect(calculator).toContain("maxOfferTarget: restoredMaoTarget");
+    expect(calculator).toContain("maxOfferTargetSource: restoredMaoTargetSource");
     expect(calculator).toContain("analysisMaoTargetRef.current = restoredMaoTarget");
     expect(calculator).toContain("setAnalysisMaoTarget(restoredMaoTarget)");
     expect(calculator).toContain(
@@ -68,7 +78,7 @@ describe("MAO release-path safety", () => {
 
     expect(calculator).toContain("function writeCalcDraftWithMaoTarget(");
     expect(calculator).toContain(
-      "const normalizedDraft = normalizeInvestmentFormDraft(values)"
+      "const normalizedDraft = normalizeReleasedInvestmentFormDraft(values)"
     );
     expect(calculator).toContain(
       "maoTargetAnalysisFingerprint(normalizedDraft ?? values)"

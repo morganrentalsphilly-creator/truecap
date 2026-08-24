@@ -53,7 +53,7 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", rentecdirect: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", rentecdirect: "Not modeled", winner: "truecap" },
   { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", rentecdirect: "Yes — actuals tracking for Schedule E", winner: "tie" },
-  { feature: "Deal score + verdict", truecap: "Free — 0-100 score + plain-English verdict", rentecdirect: "Not applicable", winner: "truecap" },
+  { feature: "Secondary Screening Index", truecap: "Free — 0-100 triage score + factor breakdown", rentecdirect: "Not applicable", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", rentecdirect: "Not applicable", winner: "truecap" },
   { feature: "Tenant + lease management", truecap: "No", rentecdirect: "Yes — designed for 5-100 units", winner: "rentecdirect" },
   { feature: "Online rent collection", truecap: "No", rentecdirect: "Yes — ACH + card", winner: "rentecdirect" },
@@ -106,7 +106,7 @@ export default function VsRentecDirectPage() {
             <span className="text-primary">pre-purchase calculator vs landlord ops platform</span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Rentec Direct is property management software targeted at small landlords running 5-100 units — tenant management, rent collection, accounting, owner portals. TrueCap is the pre-purchase underwriting calculator that decides which properties to add to that portfolio. We don&apos;t compete; different halves of the rental lifecycle.
+            Rentec Direct is property management software targeted at small landlords running 5-100 units — tenant management, rent collection, accounting, owner portals. TrueCap models the pre-purchase economics of properties you are considering. We don&apos;t compete; different halves of the rental lifecycle.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ScrollToFormButton
@@ -264,8 +264,7 @@ export default function VsRentecDirectPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, and co-branded share links. Pro includes PDFs, and a one-time
-            PDF option is available; see live pricing for current terms.
+            Offer Ceiling, co-branded share links, and PDF reports with Pro; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">

@@ -8,7 +8,9 @@
  */
 
 import { useState } from "react";
-import { Share2, Copy, Check, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Share2, Copy, Check, Loader2, LogIn, UserPlus } from "lucide-react";
 import * as Sentry from "@sentry/nextjs";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,11 +30,14 @@ import { useToast } from "@/hooks/use-toast";
 
 interface ShareLinkButtonProps {
   values: InvestmentFormValues | null;
+  /** Presentation hint only. The server action independently authenticates
+   *  immediately before any service-role mint. */
+  isAuthenticated: boolean;
   className?: string;
   /** Saved deal id, when sharing a saved analysis. Lets the public viewer pull
    *  this deal's stored sale/rent comps (verified against the owner). */
   savedDealId?: string | null;
-  /** Exact acquisition criteria shown with the current price ceiling. */
+  /** Exact acquisition criteria shown with the current Offer Ceiling. */
   maoTarget?: MaoTarget | null;
   /** Provenance shown beside that exact target. */
   maoTargetSource?: OfferCeilingTargetSource | null;
@@ -43,10 +48,13 @@ interface ShareLinkButtonProps {
    *  are still resolving). */
   disabled?: boolean;
   disabledReason?: string;
+  /** Best-effort draft persistence before leaving for authentication. */
+  onPrepareAuth?: () => void;
 }
 
 export function ShareLinkButton({
   values,
+  isAuthenticated,
   className,
   savedDealId,
   maoTarget,
@@ -54,7 +62,9 @@ export function ShareLinkButton({
   context = "analysis",
   disabled: externallyDisabled = false,
   disabledReason,
+  onPrepareAuth,
 }: ShareLinkButtonProps) {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [shareUrl, setShareUrl] = useState<string>("");
@@ -62,16 +72,28 @@ export function ShareLinkButton({
   const [audience, setAudience] = useState<
     "investment-partner" | "client" | "lender-review"
   >("investment-partner");
-  // The signed-attribution round-trip below runs BEFORE the dialog opens, so
-  // without this the click gets no answer at all — same in-flight treatment as
-  // the Save / Export / Compare buttons next to it in the toolbar.
+  // Creating the opaque row happens after the user confirms disclosure
+  // choices. Keep its in-flight state visible like the neighboring actions.
   const [isPreparing, setIsPreparing] = useState(false);
+  const [sessionAuthRequired, setSessionAuthRequired] = useState(false);
   const { toast } = useToast();
+  const needsSignIn = !isAuthenticated || sessionAuthRequired;
+  const returnPath =
+    pathname.startsWith("/") && !pathname.startsWith("//") ? pathname : "/";
+  const encodedReturnPath = encodeURIComponent(returnPath);
+  const prepareAuthNavigation = () => {
+    try {
+      onPrepareAuth?.();
+    } catch {
+      // Draft continuity is best-effort and must never block authentication.
+    }
+  };
 
   const openShare = () => {
     if (!values) return;
     setShareUrl("");
     setCopied(false);
+    setSessionAuthRequired(false);
     // Privacy choices are per-link intent. Never carry an earlier explicit
     // disclosure into the next share dialog.
     setIncludeAddress(false);
@@ -97,7 +119,14 @@ export function ShareLinkButton({
         audience,
         addressVisibility: includeAddress ? "full" : "hidden",
       });
-      if (!opaque.ok) throw new Error(opaque.code);
+      if (!opaque.ok) {
+        if (opaque.code === "SIGN_IN_REQUIRED") {
+          prepareAuthNavigation();
+          setSessionAuthRequired(true);
+          return;
+        }
+        throw new Error(opaque.code);
+      }
       setShareUrl(opaque.url);
       setCopied(false);
       trackEvent("share_created", {
@@ -154,9 +183,11 @@ export function ShareLinkButton({
             ? disabledReason ?? "This action is temporarily unavailable."
             : missingRequiredValues
             ? "Enter an address and price first"
-            : context === "client-report"
-              ? "Share a read-only client report"
-              : "Share a read-only view of this deal"
+            : !isAuthenticated
+              ? "Sign in to create a share link"
+              : context === "client-report"
+                ? "Share a read-only client report"
+                : "Share a read-only view of this deal"
         }
       >
         {isPreparing ? (
@@ -177,7 +208,7 @@ export function ShareLinkButton({
       {/* Dialog primitive (was a hand-rolled fixed overlay): inherits the
           standard fade+zoom, Escape-to-close, focus trap, scroll lock,
           overlay-click dismiss, and a built-in close button. Controlled open
-          because openShare mints the signed link before showing. */}
+          so disclosure and authentication choices stay inside the modal. */}
       <Dialog open={open} onOpenChange={setOpen}>
         {/* sm:-prefixed, so the primitive's `max-w-[calc(100%-2rem)]` phone
             gutter survives tailwind-merge (an unprefixed max-w-* deletes it
@@ -188,13 +219,45 @@ export function ShareLinkButton({
               {context === "client-report" ? "Share client report" : "Share this analysis"}
             </DialogTitle>
             <DialogDescription>
-              {context === "client-report"
-                ? "Create a read-only snapshot for the assigned client. The exact address stays hidden unless you explicitly include it."
-                : "Choose what to disclose, then create an opaque, expiring link. The exact address stays hidden by default."}
+              {needsSignIn
+                ? "Sign in or create a free account to make a new share link. Anyone who receives the link can view it without signing in."
+                : context === "client-report"
+                  ? "Create a read-only snapshot for the assigned client. The exact address stays hidden unless you explicitly include it."
+                  : "Choose what to disclose, then create an opaque, expiring link. The exact address stays hidden by default."}
             </DialogDescription>
           </DialogHeader>
 
-          {!shareUrl ? (
+          {needsSignIn ? (
+            <div className="space-y-4 rounded-xl border border-border bg-muted/30 p-4">
+              <div>
+                <p className="font-semibold text-foreground">Sign in to create this link</p>
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                  New links belong to your account, so you can revoke them later. After
+                  authentication, you’ll return to this page and can finish sharing.
+                </p>
+              </div>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <Button asChild className="min-h-11 rounded-xl font-semibold">
+                  <Link
+                    href={`/auth/sign-up?next=${encodedReturnPath}`}
+                    onClick={prepareAuthNavigation}
+                  >
+                    <UserPlus className="mr-2 h-4 w-4" aria-hidden />
+                    Create free account
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="min-h-11 rounded-xl font-semibold">
+                  <Link
+                    href={`/auth/login?next=${encodedReturnPath}`}
+                    onClick={prepareAuthNavigation}
+                  >
+                    <LogIn className="mr-2 h-4 w-4" aria-hidden />
+                    Sign in
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          ) : !shareUrl ? (
             <div className="space-y-4">
               <fieldset>
                 <legend className="text-sm font-semibold text-foreground">Intended audience</legend>
@@ -273,11 +336,20 @@ export function ShareLinkButton({
           )}
 
           <p className="text-[11px] text-muted-foreground">
-            The link opens a snapshot of the analysis at this moment. Anyone who receives
-            the link can open it. If
-            you change inputs later and want viewers to see updates, generate a
-            new share link. Saved links can be revoked from your account and expire
-            automatically; still treat one like a document you chose to share.
+            {needsSignIn ? (
+              <>
+                Existing links still open without an account. Creating a new link requires
+                sign-in so it has an owner who can revoke it.
+              </>
+            ) : (
+              <>
+                The link opens a snapshot of the analysis at this moment. Anyone who receives
+                the link can open it. If you change inputs later and want viewers to see updates,
+                generate a new share link. New links attached to your signed-in account can be
+                revoked there and expire automatically; still treat one like a document you chose
+                to share.
+              </>
+            )}
           </p>
         </DialogContent>
       </Dialog>

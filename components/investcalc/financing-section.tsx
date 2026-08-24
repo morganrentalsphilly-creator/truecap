@@ -246,12 +246,15 @@ export function FinancingSection({
               <FieldError id="pmiAnnualRatePct-error" message={errors.pmiAnnualRatePct?.message} />
             </div>
 
-            <label htmlFor="pmiNoCancel" className="flex items-start gap-2.5 sm:pt-7 cursor-pointer select-none">
+            <label
+              htmlFor="pmiNoCancel"
+              className="flex min-h-11 cursor-pointer select-none items-center gap-2.5 sm:mt-7"
+            >
               <input
                 {...register("pmiNoCancel")}
                 id="pmiNoCancel"
                 type="checkbox"
-                className="mt-0.5 size-4 rounded border-input accent-[var(--brand-green)]"
+                className="size-5 shrink-0 rounded border-input accent-[var(--brand-green)]"
               />
               <span className="text-xs leading-snug text-foreground">
                 Runs for the life of the loan

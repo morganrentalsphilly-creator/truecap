@@ -43,15 +43,19 @@ describe("Product Overhaul analytics wiring", () => {
     expect(comps).not.toContain("properties: { address:");
   });
 
-  it("wires the real Pack paywall/purchase and input-readiness workflows", () => {
+  it("wires the Pro paywall, paid-claim recovery, and input-readiness workflows", () => {
     const calculator = read("components/investcalc/investcalc-page.tsx");
     expect(calculator).toContain('trackEvent("paywall_viewed", {');
-    expect(calculator).toContain(
+    expect(calculator).not.toContain("createOneTimePdfCheckoutAction");
+    expect(calculator).not.toContain("handleBuyOneTimePdf");
+    expect(calculator).not.toContain(
       'trackEvent("complete_decision_checkout_started", {'
     );
     expect(calculator).toContain(
       'trackEvent("complete_decision_purchased", {})'
     );
+    expect(calculator).toContain("if (!verified.recovered) {");
+    expect(calculator).toContain("verifyOneTimePdfPaymentAction({");
     expect(calculator).toContain('trackEvent("material_input_verified", {');
     expect(calculator).toContain(
       'trackEvent("decision_readiness_changed", {'

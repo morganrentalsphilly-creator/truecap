@@ -177,28 +177,28 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     related: ["irr", "coc", "appreciation"],
   },
   mao: {
-    term: "Maximum Allowable Offer (MAO)",
+    term: "Offer Ceiling",
     slug: "max-allowable-offer",
-    also: ["MAO"],
+    also: ["Target-dependent modeled price boundary"],
     category: "metric",
     definition:
-      "The highest price you should pay to still hit your target cap rate, cash-on-cash, and cash flow thresholds.",
+      "The highest modeled purchase price that still meets your selected targets under the assumptions shown. It is not a recommended offer.",
     formula:
-      "MAO = work backward from your target metrics (target cap rate, target CoC) given the property's NOI and your financing assumptions.",
+      "Offer Ceiling = work backward from your selected target metrics using the property's modeled NOI and your financing assumptions.",
     example:
-      "A property with $32,000 NOI at your target 7.5% cap rate has MAO = $32,000 ÷ 0.075 = $426,666.",
+      "With $32,000 of modeled NOI and a selected 7.5% cap-rate floor, the cap-rate-only Offer Ceiling is $32,000 ÷ 0.075 = $426,666; other selected targets may produce a lower boundary.",
     whyItMatters:
-      "MAO gives you a hard ceiling for negotiation. You go into the offer conversation knowing 'anything above $X breaks my model' — way more powerful than haggling without a number.",
+      "The Offer Ceiling shows where the model stops meeting the selected targets. Verify rent, financing, taxes, insurance, property condition, and material costs before using it in a negotiation or purchase decision.",
     related: ["capRate", "coc", "dealScore"],
   },
   dealScore: {
-    term: "Deal Score",
+    term: "Screening Index",
     slug: "deal-score",
     category: "metric",
     definition:
-      "A 0–100 composite of cap rate, cash-on-cash, monthly cash flow, and DSCR. Use it to triage deals in seconds.",
+      "A secondary 0–100 composite of modeled cap rate, cash-on-cash, monthly cash flow, DSCR, and projected return for consistent triage.",
     whyItMatters:
-      "Deal Score gives you a single number to compare deals across markets quickly. It's a triage tool — not a substitute for the full underwrite. But it's powerful for sorting 20 deals into 'open the analyzer' vs 'walk.'",
+      "The Screening Index can help sort analyses for deeper review, but it is not selected-rule fit, evidence readiness, a probability of success, an appraisal, or investment advice. Read it after the selected rules and underlying metrics.",
     related: ["capRate", "coc", "dscr", "cashFlow"],
   },
   taxSavings: {

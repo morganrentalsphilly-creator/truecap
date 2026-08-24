@@ -4,7 +4,7 @@
  * Anyone with the link can view a snapshot of an analysis. No auth,
  * no DB lookup — the entire form snapshot is encoded in the URL.
  * Hidden Pro-only sections (10-year projections, tax strategy,
- * exit scenarios, deal score) act as upgrade prompts.
+ * exit scenarios, Screening Index) act as upgrade prompts.
  */
 
 import type { Metadata } from "next";
@@ -12,7 +12,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { decodeShareLink } from "@/lib/share-link";
 import { calculateAnalysis } from "@/lib/calc-analysis";
-import { investmentFormSchema } from "@/lib/investcalc-schema";
+import { releasedInvestmentFormSchema } from "@/lib/underwriting-model-release";
 import { SharedDealShell } from "@/components/investcalc/shared-deal-shell";
 import { getPublicAgentBranding } from "@/lib/agent-share";
 import { verifyShareAttribution, hashShareValues } from "@/lib/share-attribution";
@@ -63,7 +63,7 @@ export default async function PublicDealPage({ params }: Props) {
   // The snapshot may have come from any time — re-validate against the
   // current schema so we don't crash if a saved analysis is missing a
   // newer required field.
-  const parsed = investmentFormSchema.safeParse(payload.values);
+  const parsed = releasedInvestmentFormSchema.safeParse(payload.values);
   if (!parsed.success) {
     return <InvalidLink reason="This shared analysis was saved in an older format we can no longer render." />;
   }

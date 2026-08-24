@@ -140,7 +140,7 @@ gh api repos/morganrentalsphilly-creator/truecap/rules/branches/main
 If the first command prints `["build-chain-guard","check"]`, the guard can
 finally *block*: a PR that changes `postcss.config.mjs`, `next.config.mjs`,
 `package.json`, `.github/**`, `.claude/**`, `scripts/**`,
-`supabase/migrations/**`, `app/api/**` or the other guarded paths, and was not
+`supabase/**`, `app/api/**` or the other guarded paths, and was not
 authored by you, cannot be merged — short of your own admin bypass, which the
 ruleset in step 1 keeps deliberately. If it 404s, nothing has changed and you
 should not move on.
@@ -508,8 +508,8 @@ Create **`.claude/settings.json`**:
       "Edit(./.github/**)",
       "Write(./scripts/**)",
       "Edit(./scripts/**)",
-      "Write(./supabase/migrations/**)",
-      "Edit(./supabase/migrations/**)",
+      "Write(./supabase/**)",
+      "Edit(./supabase/**)",
       "Write(./lib/supabase/**)",
       "Edit(./lib/supabase/**)",
       "Write(./app/api/**)",
@@ -674,7 +674,7 @@ Shipped in this change, no settings required:
   `package-lock.json`, `pnpm-lock.yaml`, `.npmrc`, `instrumentation*`,
   `sentry.*.config.ts`, `proxy.*`, `middleware.*`, `vitest.config.*`,
   `eslint.config.*`, `tsconfig*.json`, `.github/**`, `.claude/**`,
-  `.gitmodules`, `.gitattributes`, `supabase/migrations/**`, `lib/supabase/**`,
+  `.gitmodules`, `.gitattributes`, `supabase/**`, `lib/supabase/**`,
   `app/api/**`, and all of `scripts/**` (which contains the three files of this
   control itself) — unless the actor is `morganrentalsphilly-creator`. On
   a PR, *both* the pusher and the PR author must be you, so an agent-opened PR

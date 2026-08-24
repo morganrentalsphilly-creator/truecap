@@ -6,8 +6,9 @@ import "server-only";
  * Replaces the legacy /d/[encoded] model where the URL itself carried the whole
  * analysis (address, rent, price, assumptions — deal data in referrer logs and
  * link previews). Here the URL carries a random 256-bit token; the snapshot
- * lives in public_shares, hashed-token at rest, owner-revocable, default
- * 180-day expiry.
+ * lives in public_shares, hashed-token at rest, and has a default 180-day
+ * expiry. New rows are owned and revocable because minting requires a signed-in
+ * owner; historical ownerless rows remain readable until they expire.
  *
  * Resolution runs on the service-role client because the viewer is anonymous
  * and RLS is owner-only by design (there is deliberately NO public read
@@ -27,20 +28,39 @@ import * as Sentry from "@sentry/nextjs";
 import type { MaoTarget } from "@/lib/max-allowable-offer";
 import { normalizeMaoTarget } from "@/lib/mao-target-editor";
 import {
+  isAdoptedOfferCeilingTargetSource,
   normalizeOfferCeilingTargetSource,
   type OfferCeilingTargetSource,
 } from "@/lib/offer-ceiling-contract";
-import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
+import { isPublicShareExpired } from "@/lib/public-share-lifecycle";
+import { calculateAnalysis } from "@/lib/calc-analysis";
+import {
+  buildDealScoreInputFromAnalysis,
+  computeDealScore,
+} from "@/lib/deal-score";
+import { resolveSavedAnalysisResult } from "@/lib/saved-analysis-methodology";
+import {
+  resolveOfferCeilingForAccess,
+} from "@/lib/offer-ceiling-server";
+import { readRecordedOfferCeiling } from "@/lib/recorded-offer-ceiling";
+import type { OfferCeilingExactResult } from "@/lib/offer-ceiling-access-contract";
+import { isReleasedUnderwritingModel } from "@/lib/underwriting-model-release";
 
 export type PublicShareAudience = "investment-partner" | "client" | "lender-review";
 export type PublicShareAddressVisibility = "hidden" | "full";
 
 export type PublicShareSnapshot = {
   values: InvestmentFormValues;
+  /** Exact result captured when the link was minted. Older input-only shares
+   * omit it and remain readable through the visibly labeled legacy path. */
+  resultSnapshot?: Record<string, unknown>;
   /** Exact price-ceiling criteria visible when the share was minted. */
   maoTarget?: MaoTarget;
   /** Frozen provenance for those criteria. */
   maoTargetSource?: OfferCeilingTargetSource;
+  /** Exact solved output captured with the link. Undefined means no adopted
+   * target; null means the adopted target had no supported solution. */
+  offerCeilingExact?: OfferCeilingExactResult | null;
   meta: {
     title?: string;
     /** Set server-side at mint from the authenticated session — the public
@@ -66,6 +86,8 @@ export type ResolvedPublicShare = {
   schemaVersion: number;
   methodologyVersion: string | null;
   legacyUnpinned: boolean;
+  /** True for historical input-only rows that must be recomputed to render. */
+  legacyInputOnly: boolean;
 };
 
 type ShareRow = {
@@ -78,6 +100,12 @@ type ShareRow = {
   revoked_at: string | null;
 };
 
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+}
+
 function isMissingTable(error: { code?: string; message?: string } | null): boolean {
   return !!error && (error.code === "42P01" || /relation .* does not exist/i.test(error.message ?? ""));
 }
@@ -89,31 +117,115 @@ function isMissingTable(error: { code?: string; message?: string } | null): bool
 export async function mintPublicShare(input: {
   values: InvestmentFormValues;
   title?: string;
-  ownerId?: string | null;
+  ownerId: string;
   dealId?: string | null;
   maoTarget?: MaoTarget;
   maoTargetSource?: OfferCeilingTargetSource;
+  /** Owner-scoped saved result. Omit for a new unsaved analysis; the server
+   * captures the current result itself. */
+  resultSnapshot?: unknown;
+  methodologyVersion?: unknown;
   audience?: PublicShareAudience;
   addressVisibility?: PublicShareAddressVisibility;
 }): Promise<string | null> {
+  // This helper writes through the service-role client. Keep the invariant
+  // local as well as at the server-action boundary so no future caller can
+  // accidentally mint a new ownerless row.
+  if (!input.ownerId) return null;
+  if (!isReleasedUnderwritingModel(input.values)) return null;
+
   try {
     const admin = createAdminSupabaseClient();
     const token = generateShareToken();
+    const candidateSource = input.maoTargetSource ?? "selected-targets";
+    const adoptedTarget =
+      input.maoTarget && isAdoptedOfferCeilingTargetSource(candidateSource)
+        ? input.maoTarget
+        : undefined;
+    const currentResult = calculateAnalysis(input.values);
+    const currentScore = computeDealScore(
+      buildDealScoreInputFromAnalysis(input.values, currentResult)
+    );
+    const hasRecordedInput = input.resultSnapshot !== undefined;
+    const capturedResolution = resolveSavedAnalysisResult({
+      methodologyVersion:
+        hasRecordedInput
+          ? input.methodologyVersion
+          : currentResult.methodologyVersion,
+      resultSnapshot:
+        input.resultSnapshot ?? {
+          ...currentResult,
+          score: currentScore.score,
+          recommendation: currentScore.recommendation,
+          riskLevel: currentScore.riskLevel,
+          breakdown: currentScore.breakdown,
+          explanation: currentScore.explanation,
+        },
+      recomputedResult: currentResult,
+      recomputedExtras: {
+        score: currentScore.score,
+        recommendation: currentScore.recommendation,
+        riskLevel: currentScore.riskLevel,
+        breakdown: currentScore.breakdown,
+        explanation: currentScore.explanation,
+      },
+    });
+    if (!capturedResolution.result) return null;
+    const capturedResult = capturedResolution.result as unknown as Record<string, unknown>;
+    const usesRecordedSnapshot = Boolean(
+      hasRecordedInput && capturedResolution.usesRecordedSnapshot
+    );
+    const capturedMethodologyVersion =
+      usesRecordedSnapshot
+        ? capturedResolution.storedMethodologyVersion
+        : currentResult.methodologyVersion;
+    if (!capturedMethodologyVersion) return null;
+    const recordedCeiling = usesRecordedSnapshot
+      ? readRecordedOfferCeiling(capturedResult)
+      : { captured: false as const };
+    // For a saved result, the captured target/source are the authority for
+    // the captured exact solve. Never let a future caller pair that number
+    // with different criteria merely by passing mismatched arguments.
+    const snapshotTarget = recordedCeiling.captured
+      ? recordedCeiling.target
+      : adoptedTarget;
+    const snapshotTargetSource = recordedCeiling.captured
+      ? recordedCeiling.source
+      : candidateSource;
+    const offerCeilingAccess =
+      adoptedTarget && !usesRecordedSnapshot
+        ? resolveOfferCeilingForAccess({
+            values: input.values,
+            target: adoptedTarget,
+            source: candidateSource,
+            paidAccess: true,
+          })
+        : null;
+    const shouldCaptureOfferCeiling = Boolean(
+      snapshotTarget &&
+        (recordedCeiling.captured || offerCeilingAccess?.access === "exact")
+    );
+    const offerCeilingExact = recordedCeiling.captured
+      ? recordedCeiling.exact
+      : offerCeilingAccess?.access === "exact"
+        ? offerCeilingAccess.exact
+        : undefined;
     const snapshot: PublicShareSnapshot = {
       values: input.values,
-      ...(input.maoTarget ? { maoTarget: input.maoTarget } : {}),
-      ...(input.maoTarget
+      resultSnapshot: capturedResult,
+      ...(snapshotTarget ? { maoTarget: snapshotTarget } : {}),
+      ...(snapshotTarget
         ? {
-            maoTargetSource:
-              input.maoTargetSource ?? "selected-targets",
+            maoTargetSource: snapshotTargetSource,
           }
         : {}),
+      ...(shouldCaptureOfferCeiling ? { offerCeilingExact } : {}),
       meta: {
         ...(input.title ? { title: input.title } : {}),
-        ...(input.ownerId ? { ownerId: input.ownerId } : {}),
+        ownerId: input.ownerId,
         ...(input.dealId ? { dealId: input.dealId } : {}),
         sharedAt: new Date().toISOString(),
-        methodologyVersion: TRUECAP_UNDERWRITING_STANDARD_VERSION,
+        methodologyVersion: capturedMethodologyVersion,
         schemaVersion: INVESTCALC_SCHEMA_VERSION,
         audience: input.audience ?? "investment-partner",
         addressVisibility: input.addressVisibility ?? "hidden",
@@ -121,7 +233,7 @@ export async function mintPublicShare(input: {
     };
     const { error } = await admin.from("public_shares").insert({
       token_hash: hashShareToken(token),
-      owner_id: input.ownerId ?? null,
+      owner_id: input.ownerId,
       deal_id: input.dealId ?? null,
       snapshot,
       // Kept for backward-compatible storage while the real underwriting
@@ -164,10 +276,11 @@ export async function resolvePublicShare(token: string): Promise<ResolvedPublicS
     if (error || !data) return null;
     const row = data as ShareRow;
     if (row.revoked_at) return null;
-    if (row.expires_at && new Date(row.expires_at).getTime() < Date.now()) return null;
+    if (isPublicShareExpired(row.expires_at)) return null;
 
     const snapshot = row.snapshot as PublicShareSnapshot | null;
     if (!snapshot || typeof snapshot !== "object" || !snapshot.values) return null;
+    if (!isReleasedUnderwritingModel(snapshot.values)) return null;
     const normalizedMaoTarget = normalizeMaoTarget(snapshot.maoTarget);
     const normalizedMaoTargetSource = normalizeOfferCeilingTargetSource(
       snapshot.maoTargetSource
@@ -184,12 +297,18 @@ export async function resolvePublicShare(token: string): Promise<ResolvedPublicS
     }
     const safeSnapshot: PublicShareSnapshot = {
       values: snapshot.values,
+      ...(asRecord(snapshot.resultSnapshot)
+        ? { resultSnapshot: asRecord(snapshot.resultSnapshot)! }
+        : {}),
       ...(normalizedMaoTarget ? { maoTarget: normalizedMaoTarget } : {}),
       ...(normalizedMaoTarget
         ? {
             maoTargetSource:
               normalizedMaoTargetSource ?? "selected-targets",
           }
+        : {}),
+      ...(snapshot.offerCeilingExact !== undefined
+        ? { offerCeilingExact: snapshot.offerCeilingExact }
         : {}),
       meta: snapshot.meta,
     };
@@ -205,6 +324,7 @@ export async function resolvePublicShare(token: string): Promise<ResolvedPublicS
       typeof snapshot.meta?.methodologyVersion === "string"
         ? snapshot.meta.methodologyVersion
         : null;
+    const legacyInputOnly = !asRecord(snapshot.resultSnapshot);
     return {
       snapshot: safeSnapshot,
       ownerId: row.owner_id,
@@ -215,6 +335,7 @@ export async function resolvePublicShare(token: string): Promise<ResolvedPublicS
           : row.calc_version,
       methodologyVersion,
       legacyUnpinned: methodologyVersion == null,
+      legacyInputOnly,
     };
   } catch {
     return null;

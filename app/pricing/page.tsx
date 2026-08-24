@@ -29,24 +29,21 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 import { loadStripeDisplayPrice } from "@/lib/stripe/display-prices";
 
-import { isPackCreditConfigured, PACK_CREDIT_WINDOW_DAYS } from "@/lib/pack-credit";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { DealsAnalyzedTicker } from "@/components/marketing/deals-analyzed-ticker";
-import { NeverOverpayGuarantee } from "@/components/marketing/landing-sections";
-import { GuaranteeBadge } from "@/components/marketing/guarantee-badge";
 import { TestimonialStrip } from "@/components/marketing/testimonial-card";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { rateAlertEmailsLive } from "@/lib/rate-alerts-mode";
 import { getSiteUrl } from "@/lib/site-url";
 export const metadata: Metadata = {
-  title: "Pricing — Screen Free, Decide & Act with Pro",
+  title: "Pricing — Screen Free, Repeat with Pro",
   description:
-    `Screen rental deals free. New subscribers get a ${TRIAL_DAYS}-day free trial of Pro to solve Max Offer, apply a Buy Box, stress-test downside, compare opportunities, and generate reports.`,
+    `Screen rental deals free. New subscribers get a ${TRIAL_DAYS}-day free trial of Pro to calculate an Offer Ceiling, apply a Buy Box, stress-test downside, compare opportunities, and generate reports.`,
   alternates: { canonical: "/pricing" },
   openGraph: {
-    title: "TrueCap pricing — Free to screen, Pro to decide",
-    description: "Screen deals free. Use Pro to know your Max Offer, stress-test downside, compare opportunities, and act.",
+    title: "TrueCap pricing — Free screening, repeatable Pro underwriting",
+    description: "Screen deals free. Use Pro to apply your targets, calculate an Offer Ceiling, stress-test downside, compare opportunities, and share the underwrite.",
     url: "/pricing",
     type: "website",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap pricing" }],
@@ -64,10 +61,10 @@ const FAQS: { q: string; a: string }[] = [
     // Keep this answer in lockstep with the homepage FAQ
     // (components/marketing/landing-sections.tsx), the plan cards
     // (pricing-toggle-plans.tsx), and the actual gating in
-    // app/page.tsx. MAO, sensitivity, BRRRR/fix-and-flip, and share
+    // app/page.tsx. Offer Ceiling, sensitivity, BRRRR/fix-and-flip, and share
     // links are PRO features — a previous version of this answer
     // claimed they were free, contradicting every other surface.
-    a: "Yes. The cash-flow analyzer — cap rate, CoC, DSCR, monthly cash flow, address auto-fill, the 0–100 Deal Score, and a plain-English verdict — is free forever and unlimited. No card required to start. Pro adds a personal buy box (your criteria, checked on every deal), MAO solver, sensitivity grid, BRRRR + fix-and-flip, 10-year projections, illustrative tax impact, modeled exit comparisons, co-branded shareable links, and Deal Decision Pack PDFs.",
+    a: "Yes. The cash-flow analyzer — cap rate, CoC, DSCR, monthly cash flow, address auto-fill, the 0–100 Screening Index, and plain-English screening context — is free forever and unlimited. No card required to start. Pro adds a personal Buy Box, Offer Ceiling, sensitivity grid, BRRRR + fix-and-flip, 10-year projections, illustrative tax impact, modeled exit comparisons, co-branded shareable links, and PDF reports.",
   },
   {
     q: "Can I cancel anytime?",
@@ -76,10 +73,6 @@ const FAQS: { q: string; a: string }[] = [
   {
     q: "How does the Pro trial work?",
     a: `Stripe collects a card at checkout. New subscribers get full Pro access for ${TRIAL_DAYS} days, and you can cancel online anytime. Subscription billing starts after the trial unless you cancel first. Returning subscribers start paid access immediately and are not eligible for another free trial.`,
-  },
-  {
-    q: "What is the Never Overpay Guarantee?",
-    a: "Analyze at least 10 deals in your first 30 days as a paying Pro subscriber. If you don't feel more confident about exactly what to offer, email us within those 30 days and we'll refund every dollar you've paid — back to your original payment method via Stripe. Full terms at usetruecap.com/guarantee.",
   },
   {
     q: "Do I keep my saved deals if I downgrade?",
@@ -92,7 +85,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "How accurate is the auto-fill?",
-    a: "Rent uses a HUD area benchmark (ZIP-level when available, otherwise county-level), not a property-specific rent comp. The rate uses FRED's national owner-occupied 30-year benchmark, not an investor lender quote. Property tax starts from a state effective-rate estimate. Every field is editable — replace these screening defaults with local comps, the actual tax bill, insurance, and written loan terms before making an offer.",
+    a: "Rent uses a HUD area benchmark (ZIP-level when available, otherwise county-level), not a property-specific rent comp. The rate uses FRED's national owner-occupied 30-year benchmark, not an investor lender quote. Property tax starts from a state effective-rate estimate. Every field is editable—replace these screening defaults with local comps, the actual tax bill, insurance, and written loan terms before relying on the result.",
   },
   {
     q: "Is this for agents, investors, or both?",
@@ -108,9 +101,9 @@ const FEATURE_COMPARISON: Array<[
   ["Unlimited analyses", true, true],
   ["Cap rate · CoC · DSCR · cash flow", true, true],
   ["Auto-fill (HUD rent · FRED rate · state tax)", true, true],
-  ["Deal Score (0–100) with breakdown", true, true],
+  ["Screening Index (0–100) with factor breakdown", true, true],
   ["Sale + rent comps from the address", "1 free", "50 / mo"],
-  ["MAO solver · Sensitivity grid", false, true],
+  ["Offer Ceiling · Sensitivity grid", false, true],
   ["BRRRR + fix-and-flip + rehab estimator", false, true],
   ["Shareable read-only deal links", true, true],
   ["10-year cash flow projection", false, true],
@@ -128,8 +121,7 @@ const FEATURE_COMPARISON: Array<[
 ];
 
 export default async function PricingPage() {
-  const { proOfferName, singleDeal, singleDealPriceVariant, guaranteeEnabled } =
-    getMarketingOfferConfig();
+  const { proOfferName } = getMarketingOfferConfig();
   const alertsLive = rateAlertEmailsLive();
   const supabase = await createServerSupabaseClient();
   const {
@@ -149,16 +141,7 @@ export default async function PricingPage() {
   // the fetched price meant one transient Stripe error deleted a live tier from
   // the pricing page for that visitor.
   const agentProConfigured = isAgentProConfigured();
-  // The credit promise renders only when it is fully redeemable as
-  // promised: coupon env set AND the $5 'current' variant is selling
-  // (redemption hard-filters to the $5 amount; see lib/pack-credit.ts).
-  const packCreditConfigured =
-    isPackCreditConfigured() && singleDealPriceVariant === "current";
-  // The guarantee kill switch must silence EVERY refund promise, including
-  // this page's FAQ prose and its FAQPage JSON-LD (review finding 2026-08-17).
-  const faqs = guaranteeEnabled
-    ? FAQS
-    : FAQS.filter((f) => f.q !== "What is the Never Overpay Guarantee?");
+  const faqs = FAQS;
   const [
     monthly,
     annual,
@@ -193,7 +176,6 @@ export default async function PricingPage() {
     url: `${siteUrl}/pricing`,
     offers: [
       { "@type": "Offer", name: "TrueCap Free", price: 0, priceCurrency: "USD", url: `${siteUrl}/` },
-      { "@type": "Offer", name: "TrueCap Deal Decision Pack", price: singleDeal.amount, priceCurrency: "USD", url: `${siteUrl}/pricing` },
       ...recurringOffers.flatMap(([name, price]) =>
         price
           ? [{ "@type": "Offer", name, price: price.unitAmount, priceCurrency: price.currency, url: `${siteUrl}/pricing` }]
@@ -229,7 +211,7 @@ export default async function PricingPage() {
               Analyze free · No card required
             </div>
             <h1 className="text-balance text-3xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl">
-              From listing to confident offer. <span className="text-primary">One decision workflow.</span>
+              From first screen to shareable underwrite. <span className="text-primary">One review workflow.</span>
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-balance text-[15px] leading-relaxed text-muted-foreground sm:text-lg">
               {/* Trial-promising hero variant must mirror the checkout guard
@@ -239,8 +221,8 @@ export default async function PricingPage() {
               {!user
                 ? `Screen any deal free. New subscribers get a ${TRIAL_DAYS}-day free trial of ${proOfferName}; returning subscribers start paid access immediately.`
                 : hadPriorSubscription
-                  ? `Screen any deal free. Use ${proOfferName} to get four acquisition answers: pursue or pass, what to offer, what could break, and how to present the decision.`
-                  : `Screen any deal free, then use a ${TRIAL_LABEL} of ${proOfferName} to get four acquisition answers: pursue or pass, what to offer, what could break, and how to present the decision.`}
+                  ? `Screen any deal free. Use ${proOfferName} to review rule fit, the Offer Ceiling, what could break, and how to share the underwrite.`
+                  : `Screen any deal free, then use a ${TRIAL_LABEL} of ${proOfferName} to review rule fit, the Offer Ceiling, what could break, and how to share the underwrite.`}
             </p>
             <div className="mt-6 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
               <Link
@@ -256,9 +238,6 @@ export default async function PricingPage() {
                 See Pro plans
               </Link>
             </div>
-            {/* Guarantee-first: the risk reversal is visible before any
-                price is (Never Overpay Guarantee, canonical at /guarantee). */}
-            <GuaranteeBadge className="mt-4" />
             {/* Real-data social proof — investors arriving at /pricing
                 are evaluating credibility. A live count of recent
                 analyses converts skepticism faster than testimonials. */}
@@ -278,7 +257,7 @@ export default async function PricingPage() {
           <div className={`mt-7 grid gap-3 ${agentProConfigured ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
             {[
               { job: "Screen", product: "Free", answer: "Is this worth investigating?" },
-              { job: "Acquire", product: proOfferName, answer: "Repeat the decision workflow across every deal." },
+              { job: "Repeat", product: proOfferName, answer: "Reuse the underwriting workflow across every deal." },
               ...(agentProConfigured
                 ? [{ job: "Win investor clients", product: "Agent Pro", answer: "Match, present, and follow up professionally." }]
                 : []),
@@ -318,54 +297,6 @@ export default async function PricingPage() {
             proOfferName={proOfferName}
           />
 
-          {/* Secondary one-time path. It sits below the subscription choices,
-              outside the tier cards, so it cannot be mistaken for Free. */}
-          <div className="mx-auto mt-8 max-w-3xl">
-            <p className="text-center text-xs font-extrabold uppercase tracking-[0.18em] text-muted-foreground">
-              Not ready for a subscription?
-            </p>
-            <div className="mt-3 rounded-2xl border border-border bg-card p-6 sm:p-7">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
-                <div className="flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="text-xl font-extrabold text-foreground">Decision Pack</h2>
-                    <span className="rounded-full bg-[var(--brand-green)]/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[var(--brand-green)]">
-                      {singleDeal.priceLabel} once
-                    </span>
-                  </div>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    Unlock one complete property decision: price ceiling, risk thresholds,
-                    assumptions, downside case, long-term projections, illustrative tax view,
-                    modeled exit scenarios, and one PDF Decision Memo. No subscription required.
-                    {packCreditConfigured ? (
-                      <>
-                        {" "}
-                        <strong className="text-foreground">
-                          Buy while signed in and your {singleDeal.priceLabel} is credited toward Pro
-                        </strong>{" "}
-                        if you upgrade within {PACK_CREDIT_WINDOW_DAYS} days.
-                      </>
-                    ) : null}
-                  </p>
-                </div>
-                <div className="flex shrink-0 flex-col gap-2">
-                  <Link
-                    href="/#main"
-                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-bold text-foreground transition-transform hover:-translate-y-0.5 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]"
-                  >
-                    Analyze a property
-                  </Link>
-                  <Link
-                    href="/sample-decision-memo"
-                    className="inline-flex min-h-11 items-center justify-center px-4 text-sm font-bold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  >
-                    View a sample memo
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Avoided-mistake frame (2026-08 offer rollout): the price
               objection is answered against the cost of overpaying on the
               asset — not against hourly time savings (the previous $/hr
@@ -379,7 +310,7 @@ export default async function PricingPage() {
               </strong>{" "}
               — before you collect a dollar of rent. Pro
               {monthly?.amountLabel ? ` is ${monthly.amountLabel}/mo and` : ""} computes
-              your walk-away price on every deal you look at.
+              an Offer Ceiling under the selected targets on every deal you review.
             </p>
           </div>
 
@@ -424,8 +355,8 @@ export default async function PricingPage() {
             What you get
           </h2>
           <p className="mx-auto mt-2 max-w-xl text-center text-sm text-muted-foreground sm:text-base">
-            Free answers whether the deal deserves attention. Pro answers what
-            to offer, what could break, and what to do next.
+            Free answers whether the deal deserves attention. Pro shows the
+            target-dependent ceiling, what could break, and what to verify next.
           </p>
           {/* Phones use stacked comparison cards; tablet and desktop keep the
               denser semantic table. No narrow viewport has to pan sideways. */}
@@ -471,7 +402,6 @@ export default async function PricingPage() {
           </div>
         </section>
 
-        <NeverOverpayGuarantee />
 
         {/* FAQ */}
         <section className="mx-auto max-w-3xl px-4 pb-16 sm:px-6 sm:pb-24">

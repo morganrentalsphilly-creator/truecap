@@ -80,6 +80,17 @@ describe("buildSubscriptionDisplay", () => {
     });
   });
 
+  it.each(["incomplete", "unpaid", "paused"])(
+    "keeps the existing %s subscription state inactive and preserves its historical rate",
+    (status) => {
+      expect(buildSubscriptionDisplay(input({ status }))).toMatchObject({
+        state: "inactive",
+        rateHeadline: "$29.99/month",
+        detailLines: ["This was the rate on your previous subscription."],
+      });
+    }
+  );
+
   it("degrades safely when Stripe price display is unavailable", () => {
     expect(buildSubscriptionDisplay(input({ subscribedPrice: null }))).toMatchObject({
       state: "active",

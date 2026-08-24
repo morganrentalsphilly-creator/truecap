@@ -65,6 +65,59 @@ function safeCalc(values: InvestmentFormValues): AnalysisResult | null {
   }
 }
 
+/**
+ * v2 fixed-amount financing has a real purchase-price floor: a fixed down
+ * payment or fixed loan cannot exceed the candidate price. v1 has no such
+ * modes, so its historical $10,000/default caller floor is returned exactly.
+ */
+function resolveMinimumCandidatePrice(
+  values: InvestmentFormValues,
+  requestedMinimum: number
+): number | null {
+  if (values.underwritingModelVersion !== "2.0") return requestedMinimum;
+
+  const fixedAmount =
+    values.financingMode === "fixed-down"
+      ? values.fixedDownPaymentAmount
+      : values.financingMode === "fixed-loan"
+        ? values.fixedLoanAmount
+        : undefined;
+
+  if (
+    (values.financingMode === "fixed-down" || values.financingMode === "fixed-loan") &&
+    (typeof fixedAmount !== "number" || !Number.isFinite(fixedAmount) || fixedAmount < 0)
+  ) {
+    return null;
+  }
+
+  return fixedAmount === undefined
+    ? requestedMinimum
+    : Math.max(requestedMinimum, fixedAmount);
+}
+
+type SolvableRentField =
+  | "monthlyRent"
+  | "currentMonthlyRent"
+  | "stabilizedMonthlyRent";
+
+/** Resolve the rent field the selected underwriting model actually consumes. */
+function resolveSolvableRentField(
+  values: InvestmentFormValues
+): SolvableRentField | null {
+  if (values.underwritingModelVersion !== "2.0") return "monthlyRent";
+  if (values.operatingScenario === "current") return "currentMonthlyRent";
+  if (values.operatingScenario === "stabilized") return "stabilizedMonthlyRent";
+  return null;
+}
+
+function withSolvedRent(
+  values: InvestmentFormValues,
+  field: SolvableRentField,
+  rent: number
+): InvestmentFormValues {
+  return { ...values, [field]: rent };
+}
+
 /** Solver — returns null if no targets given or if even the lowest tested price fails. */
 export function calculateMaxAllowableOffer(
   values: InvestmentFormValues,
@@ -90,7 +143,9 @@ export function calculateMaxAllowableOffer(
   // private search limit would make a viable $20M acquisition look as though
   // its ceiling were exactly $10M. An explicit Buy Box budget remains the
   // tighter upper bound when present.
-  const minPrice = opts?.minPrice ?? 10_000;
+  const requestedMinPrice = opts?.minPrice ?? 10_000;
+  const minPrice = resolveMinimumCandidatePrice(values, requestedMinPrice);
+  if (minPrice === null) return null;
   const requestedMaxPrice =
     opts?.maxPrice ?? target.maxPurchasePrice ?? MAX_PURCHASE_PRICE;
   const maxPrice = Math.min(
@@ -187,9 +242,10 @@ export type RequiredInputResult = {
 };
 
 /**
- * Lowest single-family monthly rent that hits ALL targets at the CURRENT price.
- * Returns null if no targets or monthlyRent isn't a number (multi-family rents
- * are per-unit; solve those on the per-unit fields).
+ * Lowest modeled monthly rent that hits ALL targets at the CURRENT price.
+ * v1 solves its single-family monthlyRent field; v2 solves the property-total
+ * rent for the selected current or stabilized scenario. Returns null when the
+ * active model has no numeric rent input that can be solved safely.
  */
 export function solveRequiredMonthlyRent(
   values: InvestmentFormValues,
@@ -197,7 +253,9 @@ export function solveRequiredMonthlyRent(
   opts?: { iterations?: number; maxRent?: number }
 ): RequiredInputResult | null {
   if (!hasAnyTarget(target)) return null;
-  const current = Number(values.monthlyRent);
+  const rentField = resolveSolvableRentField(values);
+  if (rentField === null) return null;
+  const current = Number(values[rentField]);
   if (!Number.isFinite(current)) return null;
 
   const base = safeCalc(values);
@@ -212,7 +270,7 @@ export function solveRequiredMonthlyRent(
   // ceiling so an unreachable result's `achieved` value is not from a
   // different, hidden decimal input.
   const rentCeiling = Math.ceil(rawCeiling);
-  const hiResult = safeCalc({ ...values, monthlyRent: rentCeiling });
+  const hiResult = safeCalc(withSolvedRent(values, rentField, rentCeiling));
   if (!hiResult) return null;
   if (!meetsTarget(hiResult, target)) {
     return {
@@ -229,7 +287,7 @@ export function solveRequiredMonthlyRent(
   let bestV = rentCeiling;
   for (let i = 0; i < iterations; i++) {
     const mid = (lo + hiB) / 2;
-    const r = safeCalc({ ...values, monthlyRent: mid });
+    const r = safeCalc(withSolvedRent(values, rentField, mid));
     if (r && meetsTarget(r, target)) {
       bestV = mid;
       hiB = mid;
@@ -240,7 +298,9 @@ export function solveRequiredMonthlyRent(
   // Required rent is a minimum: round UP, never to nearest. Rounding down can
   // put the displayed threshold back on the failing side of the boundary.
   const displayedRent = Math.ceil(bestV);
-  const achievedAtDisplayed = safeCalc({ ...values, monthlyRent: displayedRent });
+  const achievedAtDisplayed = safeCalc(
+    withSolvedRent(values, rentField, displayedRent)
+  );
   if (!achievedAtDisplayed || !meetsTarget(achievedAtDisplayed, target)) return null;
   return {
     value: displayedRent,

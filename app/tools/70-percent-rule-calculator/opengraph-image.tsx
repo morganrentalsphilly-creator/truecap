@@ -18,6 +18,6 @@ export const contentType = "image/png";
 export default function Image() {
   return renderToolOgImage({
     name: "70% rule calculator",
-    tagline: "Max offer = 70% of ARV minus repairs. The flip and BRRRR screen — with the offer at 60 / 65 / 70 / 75% side by side.",
+    tagline: "Offer Ceiling = 70% of ARV minus repairs, shown at 60 / 65 / 70 / 75% for screening.",
   });
 }

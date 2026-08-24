@@ -464,7 +464,7 @@ export default function BrrrrMethodPost() {
             liquid for cycle four. The same $60,000 deployed as a single 25%
             down payment buys exactly one turnkey property and then stops.
             That is the entire argument for BRRRR — and it only holds if every
-            deal in the chain clears the purchase-price ceiling. One
+            deal in the chain clears its target-dependent Offer Ceiling. One
             overpriced deal doesn&apos;t just underperform; it traps the
             capital that was supposed to fund the next cycle. Actual timing,
             appraisal, approval, proceeds, and portfolio outcome may differ.

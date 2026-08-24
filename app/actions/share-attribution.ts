@@ -13,7 +13,7 @@
 
 import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { investmentFormSchema } from "@/lib/investcalc-schema";
+import { releasedInvestmentFormSchema } from "@/lib/underwriting-model-release";
 import { hashShareValues, signShareAttribution } from "@/lib/share-attribution";
 
 export type SignedShareAttribution = {
@@ -33,7 +33,7 @@ export async function getSignedShareAttribution(input: unknown): Promise<SignedS
 
   // Hash the SAME canonical values the viewer will re-derive (Zod-parsed), so
   // the signature matches at verify time.
-  const parsedValues = investmentFormSchema.safeParse(parsedInput.data.values);
+  const parsedValues = releasedInvestmentFormSchema.safeParse(parsedInput.data.values);
   if (!parsedValues.success) return null;
 
   const supabase = await createServerSupabaseClient();

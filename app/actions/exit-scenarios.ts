@@ -14,6 +14,7 @@ import {
   type ExitScenarioSnapshotPayload,
   type ExitScenarioYear,
 } from "@/lib/exit-scenarios";
+import { isReleasedUnderwritingSnapshot } from "@/lib/underwriting-model-release";
 
 function asRecord(value: unknown): Record<string, unknown> | null {
   if (value && typeof value === "object" && !Array.isArray(value)) return value as Record<string, unknown>;
@@ -113,6 +114,14 @@ export async function getExitScenarioSnapshotAction(
       ok: false,
       code: "NOT_FOUND",
       message: "This analysis is no longer available.",
+    };
+  }
+
+  if (!isReleasedUnderwritingSnapshot(savedAnalysis.form_snapshot)) {
+    return {
+      ok: false,
+      code: "NOT_FOUND",
+      message: "This analysis is not available.",
     };
   }
 

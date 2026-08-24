@@ -96,7 +96,7 @@ export default function ForBuyAndHoldPage() {
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             Screen cap rate, cash-on-cash, DSCR, and cash flow free. Pro adds
-            Max Offer, sensitivity, 10-year projections, Illustrative Tax
+            Offer Ceiling, sensitivity, 10-year projections, Illustrative Tax
             Impact, and modeled exits using labeled, editable starting data.
           </p>
 
@@ -133,7 +133,7 @@ export default function ForBuyAndHoldPage() {
           </h2>
           <p className="text-base text-muted-foreground mb-6 leading-relaxed">
             Four jobs serious rental investors do over and over —
-            faster, more accurate, more defensible.
+            faster, easier to audit, and more consistent.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
             {USE_CASES.map(({ icon: Icon, title, body }) => (
@@ -235,7 +235,7 @@ export default function ForBuyAndHoldPage() {
             Free screens the purchase. Pro solves and stress-tests the offer and hold.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            Free gives you cap rate, CoC, DSCR, monthly cash flow, the 0–100 Deal Score, and read-only share links for a first-pass screen. Pro adds 10-year projections, Illustrative Tax Impact, modeled exits, sensitivity, Max Offer, PDF exports, and co-branded share links.
+            Free gives you cap rate, CoC, DSCR, monthly cash flow, the 0–100 Screening Index, and read-only share links for a first-pass screen. Pro adds 10-year projections, Illustrative Tax Impact, modeled exits, sensitivity, Offer Ceiling, PDF exports, and co-branded share links.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link

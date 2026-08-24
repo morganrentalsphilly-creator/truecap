@@ -7,7 +7,7 @@ import {
   type DealRiskLevel,
   type DealScoreBreakdown,
 } from "@/lib/deal-score";
-import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
+import { normalizeReleasedInvestmentFormSnapshot } from "@/lib/underwriting-model-release";
 
 /**
  * Re-score a saved deal with the CURRENT scoring engine from its stored form
@@ -85,7 +85,7 @@ export function recomputeSavedDealVerdict(
   // Use the resilient normalizer (same as the editor) rather than a raw
   // safeParse, so legacy snapshots that open fine in the editor recompute
   // here too instead of silently falling back to a stale stored score.
-  const values = normalizeInvestmentFormSnapshot(formSnapshot);
+  const values = normalizeReleasedInvestmentFormSnapshot(formSnapshot);
   if (!values) return null;
   try {
     const result = calculateAnalysis(values);

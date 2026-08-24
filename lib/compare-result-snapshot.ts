@@ -1,5 +1,6 @@
 import { calculateAnalysis, type AnalysisResult } from "@/lib/calc-analysis";
-import { normalizeInvestmentFormSnapshot, type InvestmentFormValues } from "@/lib/investcalc-schema";
+import type { InvestmentFormValues } from "@/lib/investcalc-schema";
+import { normalizeReleasedInvestmentFormSnapshot } from "@/lib/underwriting-model-release";
 import { buildExitScenarios, resolveExitScenarioRates, type ExitScenarioYear } from "@/lib/exit-scenarios";
 import type { TaxStrategyYear } from "@/lib/tax-strategy";
 
@@ -230,7 +231,7 @@ function isRecord(v: unknown): v is Record<string, unknown> {
  * parseCompareSnapshotV1(persisted).
  */
 export function recomputeCompareSnapshotFromForm(formSnapshot: unknown): CompareSnapshotV1 | null {
-  const values = normalizeInvestmentFormSnapshot(formSnapshot);
+  const values = normalizeReleasedInvestmentFormSnapshot(formSnapshot);
   if (!values) return null;
   try {
     return buildCompareSnapshotPayload(calculateAnalysis(values), values).compareSnapshot;

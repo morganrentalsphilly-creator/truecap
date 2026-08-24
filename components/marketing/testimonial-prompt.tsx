@@ -163,7 +163,12 @@ export function TestimonialPrompt() {
               </span>
             </p>
           </div>
+          <label htmlFor="testimonial-quote" className="sr-only">
+            How TrueCap changed your investment decision
+          </label>
           <textarea
+            id="testimonial-quote"
+            name="quote"
             value={quote}
             onChange={(e) => setQuote(e.target.value)}
             required
@@ -174,7 +179,12 @@ export function TestimonialPrompt() {
             className="mt-3 w-full rounded-lg border border-border bg-background p-2.5 text-sm text-foreground placeholder:text-muted-foreground/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
           <div className="mt-2 grid grid-cols-2 gap-2">
+            <label htmlFor="testimonial-display-name" className="sr-only">
+              Name (optional)
+            </label>
             <input
+              id="testimonial-display-name"
+              name="displayName"
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
@@ -182,10 +192,14 @@ export function TestimonialPrompt() {
               placeholder="Name (optional)"
               className="w-full rounded-lg border border-border bg-background px-2.5 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
+            <label htmlFor="testimonial-role" className="sr-only">
+              Your role (optional)
+            </label>
             <select
+              id="testimonial-role"
+              name="roleSegment"
               value={roleSegment}
               onChange={(e) => setRoleSegment(e.target.value)}
-              aria-label="Your role (optional)"
               className="w-full rounded-lg border border-border bg-background px-2 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <option value="">Role (optional)</option>
@@ -208,6 +222,7 @@ export function TestimonialPrompt() {
           />
           <label className="mt-2.5 flex min-h-11 cursor-pointer items-start gap-2 text-xs text-muted-foreground">
             <input
+              name="consentToPublish"
               type="checkbox"
               checked={consent}
               onChange={(e) => setConsent(e.target.checked)}

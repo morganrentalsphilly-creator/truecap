@@ -488,7 +488,7 @@ export default function PitiExplainedPost() {
               </Link>{" "}
               does this automatically — it pulls a current rate, estimates taxes
               and insurance from the address, layers in vacancy and reserves, and
-              returns the cash flow, DSCR, and a plain-English verdict in one
+              returns cash flow, DSCR, and a selected-rule fit in one
               pass.
             </p>
 

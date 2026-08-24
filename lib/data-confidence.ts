@@ -18,7 +18,7 @@
  *              object remains as a backward-compatible three-field summary.
  */
 
-export type DataConfidenceSource = "hud-fmr" | "hud-safmr" | "fred" | "state-static" | "manual";
+export type DataConfidenceSource = "hud-fmr" | "hud-safmr" | "rentcast-estimate" | "fred" | "state-static" | "manual";
 export type ConfidenceLevel = "high" | "medium" | "low";
 export type DataConfidenceField = "monthlyRent" | "interestRate" | "propertyTaxPct";
 
@@ -67,6 +67,7 @@ const FIELD_LABELS: Record<DataConfidenceField, string> = {
 const SOURCE_LABELS: Record<DataConfidenceSource, string> = {
   "hud-fmr": "HUD rent benchmark (county)",
   "hud-safmr": "HUD rent benchmark (ZIP)",
+  "rentcast-estimate": "RentCast market-rent estimate",
   fred: "FRED owner-occupied rate benchmark",
   "state-static": "State tax benchmark",
   manual: "You entered it",
@@ -213,6 +214,7 @@ export function normalizeDataConfidence(raw: unknown): DataConfidence | null {
       if (
         source === "hud-fmr" ||
         source === "hud-safmr" ||
+        source === "rentcast-estimate" ||
         source === "fred" ||
         source === "state-static" ||
         source === "manual"

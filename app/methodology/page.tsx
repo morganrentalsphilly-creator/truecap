@@ -29,7 +29,7 @@ import {
 export const metadata: Metadata = {
   title: "Methodology",
   description:
-    "How TrueCap computes cap rate, CoC, DSCR, Max Offer, 10-year projections, illustrative tax impact, and exit scenarios, plus its benchmark data sources.",
+    "How TrueCap computes cap rate, CoC, DSCR, the target-dependent Offer Ceiling, Screening Index, projections, illustrative tax impact, and exit scenarios.",
   keywords: [
     "truecap methodology",
     "how is cap rate calculated",
@@ -61,7 +61,7 @@ export default function MethodologyPage() {
     "@id": `${siteUrl}/methodology#article`,
     headline: "TrueCap Methodology",
     description:
-      "How TrueCap computes cap rate, cash-on-cash, DSCR, Max Offer, 10-year projections, illustrative tax impact, and modeled exit scenarios.",
+      "How TrueCap computes cap rate, cash-on-cash, DSCR, the target-dependent Offer Ceiling, Screening Index, projections, illustrative tax impact, and modeled exit scenarios.",
     url: `${siteUrl}/methodology`,
     datePublished: "2026-05-24",
     dateModified: "2026-08-15",
@@ -205,8 +205,8 @@ export default function MethodologyPage() {
             .
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">Decision thresholds and Max Offer</h2>
-          <h3>Deal Score (Balanced)</h3>
+          <h2 className="text-2xl sm:text-3xl">Decision thresholds and Offer Ceiling</h2>
+          <h3>Screening Index (Balanced)</h3>
           <div className="not-prose bg-card border border-border rounded-xl p-4 sm:p-5 my-3 text-center font-mono text-xs sm:text-sm">
             Score = round(clamp(component points + risk penalty, 0, 100))
           </div>
@@ -226,7 +226,7 @@ export default function MethodologyPage() {
             appreciation, and loan paydown through a modeled year-10 sale, net
             selling costs and the exit engine&apos;s federal capital-gain and
             depreciation-recapture defaults. It excludes the separate
-            illustrative annual personal-tax benefit from Deal Score.
+            illustrative annual personal-tax benefit from the Screening Index.
           </p>
           <p>
             {/* Derived from lib/verdict-display so the published methodology
@@ -243,10 +243,10 @@ export default function MethodologyPage() {
             return and non-negative before-tax cash flow; that floor is
             never used by the Cash Flow lens. The score is a deterministic
             screening model, not a probability of profit, appraisal, or lending
-            decision.
+            decision, evidence-readiness measure, Buy Box result, or investment advice.
           </p>
           <p>
-            Saved Deal Score and financial outputs share the same top-level
+            The saved Screening Index and financial outputs share the same top-level
             Underwriting Standard version. A future-version saved decision is
             displayed from its frozen result snapshot until the owner
             explicitly re-underwrites it; legacy unversioned rows retain the
@@ -254,10 +254,10 @@ export default function MethodologyPage() {
           </p>
 
           <p>
-            Max Offer is not a price prediction or appraisal. TrueCap runs
+            Offer Ceiling is not a recommended offer, price prediction, or appraisal. TrueCap runs
             the complete underwriting engine repeatedly and finds the highest
             tested purchase price that still clears every selected return or
-            Buy Box threshold. The displayed walk-away price is rounded
+            Buy Box threshold. The displayed Offer Ceiling is rounded
             <strong> down</strong> to a $500 step and rechecked at that exact
             displayed value, so rounding cannot move the answer onto the
             failing side of the threshold.
@@ -265,7 +265,7 @@ export default function MethodologyPage() {
           <p>
             Required rent is rounded up to the next whole dollar; a maximum
             affordable interest rate is rounded down to 0.01 percentage
-            point. Seller-credit language appears only when the modeled cash
+            point. Closing-cost-reduction language appears only when the modeled cash
             constraint supports it and still requires lender/program
             confirmation. Each solver changes one input at a time and holds
             the rest fixed.

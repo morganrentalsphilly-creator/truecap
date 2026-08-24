@@ -45,6 +45,7 @@ import { getAnalyzerCapabilities } from "@/lib/analyzer-capabilities";
 import { getStripe } from "@/lib/stripe/client";
 import { planSlugFromPriceId, type PaidPlanSlug } from "@/lib/stripe/plan-prices";
 import { VERIFIED_CASE_STUDIES } from "@/lib/verified-case-studies";
+import { isAdvocacyInternalUser } from "@/lib/advocacy-rollout";
 
 export const metadata: Metadata = {
   // Same title/description as the static homepage (this IS the homepage
@@ -193,6 +194,7 @@ export default async function AuthedHome({
         savedDealLimit={entitlements?.max_saved_deals ?? null}
         isAuthenticated={Boolean(user)}
         userAnalysisDefaults={userAnalysisDefaults}
+        advocacyContractEligible={isAdvocacyInternalUser(user?.email)}
       />
       {/* Anon fallback only — the SAME seven-block story as app/page.tsx:
           how it works → trust → who it's for → pricing → closing ask → FAQ

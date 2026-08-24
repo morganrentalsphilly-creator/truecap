@@ -5,7 +5,7 @@
  * Picking a chip tailors the form (property type + assumption defaults) and
  * tells the results view which tab to lead with. Fully optional: with nothing
  * selected the calculator is unchanged. Free to all users; plays whose headline
- * output is Pro (MAO, BRRRR/Flip) surface the existing Pro gate at the result.
+ * output is Pro (Offer Ceiling, BRRRR/Flip) surface the existing Pro gate at the result.
  */
 
 import { cn } from "@/lib/utils";
@@ -28,12 +28,19 @@ export function StrategyChips({
   const renderStrategy = (strategy: InvestorStrategy) => {
     const isActive = strategy.key === activeKey;
     const Icon = strategy.Icon;
+    const isWholesaleOfferCeiling = strategy.key === "wholesale-mao";
+    const displayLabel = isWholesaleOfferCeiling
+      ? "Wholesale / Offer Ceiling"
+      : strategy.label;
+    const displayTagline = isWholesaleOfferCeiling
+      ? "Offer Ceiling for the selected rules"
+      : strategy.tagline;
     return (
       <button
         key={strategy.key}
         type="button"
         aria-pressed={isActive}
-        title={strategy.tagline}
+        title={displayTagline}
         onClick={() => onSelect(isActive ? null : strategy.key)}
         className={cn(
           "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-semibold transition-colors sm:shrink",
@@ -43,7 +50,7 @@ export function StrategyChips({
         )}
       >
         <Icon aria-hidden className="size-3.5 shrink-0" />
-        {strategy.label}
+        {displayLabel}
       </button>
     );
   };
@@ -102,7 +109,12 @@ export function StrategyChips({
 
       {active ? (
         <p className="mt-3 rounded-xl bg-primary/5 px-3 py-2 text-xs leading-snug text-foreground">
-          <span className="font-semibold">{active.label}:</span> {active.focusHint}
+          <span className="font-semibold">
+            {active.key === "wholesale-mao" ? "Wholesale / Offer Ceiling" : active.label}:
+          </span>{" "}
+          {active.key === "wholesale-mao"
+            ? "Enter the address and rent — we’ll reverse-solve the Offer Ceiling for the selected return rules."
+            : active.focusHint}
           {active.limitation ? (
             <span className="mt-1 block text-muted-foreground">Limit: {active.limitation}</span>
           ) : null}

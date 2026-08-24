@@ -23,7 +23,7 @@
 
 import { z } from "zod";
 import { calculateAnalysis } from "@/lib/calc-analysis";
-import { investmentFormSchema } from "@/lib/investcalc-schema";
+import { releasedInvestmentFormSchema } from "@/lib/underwriting-model-release";
 import {
   DEAL_SUMMARY_LIMITS,
   DEAL_SUMMARY_SYSTEM_PROMPT,
@@ -39,8 +39,8 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
 
 const inputSchema = z.object({
-  values: investmentFormSchema,
-  /** Optional client-side grounding depth (buy box / MAO / projection /
+  values: releasedInvestmentFormSchema,
+  /** Optional client-side grounding depth (buy box / Offer Ceiling / projection /
    *  comps) — shared shape with Deal Q&A so the pair can't drift. */
   context: dealQaExtraContextSchema.optional(),
 });

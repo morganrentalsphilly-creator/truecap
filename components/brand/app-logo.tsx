@@ -14,7 +14,7 @@ type AppLogoProps = {
 
 export function AppLogo({
   href = "/",
-  subtitle = "Rental acquisition decision system",
+  subtitle = "Rental property underwriting",
   className,
   imageClassName,
   subtitleClassName,
@@ -56,7 +56,7 @@ export function AppLogo({
     <Link
       href={href}
       className={cn(
-        "flex min-w-0 flex-col items-start rounded-lg transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        "flex min-h-11 min-w-0 flex-col items-start justify-center rounded-lg transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         className
       )}
     >

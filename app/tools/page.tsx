@@ -153,7 +153,7 @@ export default function ToolsLandingPage() {
           <p className="text-sm sm:text-base opacity-90 mb-4">
             Single-purpose calculators are great for triaging deals. When
             you&apos;re ready to underwrite — cash flow, projections, tax
-            savings, Deal Score, exit scenarios, BRRRR, fix-and-flip — open
+            savings, a secondary Screening Index, exit scenarios, BRRRR, fix-and-flip — open
             the full TrueCap analyzer. Free to start.
           </p>
           <Link

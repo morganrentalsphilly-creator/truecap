@@ -381,7 +381,7 @@ export default function HouseHackingCalculatorPage() {
               This page answers &ldquo;what would I pay to live
               there?&rdquo; TrueCap&apos;s House Hack mode answers the rest:
               per-unit rents, real cash flow, DSCR, the year-2 move-out
-              scenario, and a plain-English verdict.
+              scenario, selected-rule fit, and a secondary Screening Index.
             </p>
             <ul className="text-sm space-y-1.5 mb-5 opacity-90">
               {[

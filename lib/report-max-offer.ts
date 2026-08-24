@@ -6,14 +6,19 @@ import {
   solveRequiredInterestRate,
   solveRequiredMonthlyRent,
 } from "@/lib/max-allowable-offer";
-import { normalizeMaoTarget } from "@/lib/mao-target-editor";
+import {
+  normalizeMaoTarget,
+  normalizeMaoTargetForFinancing,
+} from "@/lib/mao-target-editor";
 import { buildMaoTarget, describeMaoTarget } from "@/lib/mao-targets";
 import {
-  buildOfferCeilingPresentation,
+  isAdoptedOfferCeilingTargetSource,
   normalizeOfferCeilingTargetSource,
   type OfferCeilingTargetSource,
-} from "@/lib/offer-ceiling";
+} from "@/lib/offer-ceiling-contract";
+import { buildOfferCeilingPresentation } from "@/lib/offer-ceiling";
 import type { ReportData } from "@/lib/pdf-generator";
+import { readRecordedOfferCeiling } from "@/lib/recorded-offer-ceiling";
 
 /**
  * Resolve the exact acquisition target a report must use. Persisted targets
@@ -48,14 +53,23 @@ export function buildReportMaxOffer(args: {
   targetSourceInput?: unknown;
 }): NonNullable<ReportData["maxOffer"]> | null {
   const { values, result, targetInput, targetSourceInput } = args;
-  const target = resolveReportMaoTarget(targetInput, {
-    isCashPurchase: result.monthlyPayment <= 0,
-  });
-  const maxOffer = calculateMaxAllowableOffer(values, target);
-  if (!maxOffer) return null;
+  const normalizedInput = normalizeMaoTarget(targetInput);
   const source: OfferCeilingTargetSource =
     normalizeOfferCeilingTargetSource(targetSourceInput) ??
-    (normalizeMaoTarget(targetInput) ? "selected-targets" : "screening-defaults");
+    (normalizedInput ? "selected-targets" : "screening-defaults");
+  // A report must never manufacture a price ceiling from product examples.
+  // Missing targets and screening defaults remain a preliminary underwrite;
+  // older snapshots with an explicit target but no source retain their
+  // historical selected-target compatibility.
+  if (!normalizedInput || !isAdoptedOfferCeilingTargetSource(source)) {
+    return null;
+  }
+  const target = normalizeMaoTargetForFinancing(normalizedInput, {
+    isCashPurchase: result.monthlyPayment <= 0,
+  });
+  if (!target) return null;
+  const maxOffer = calculateMaxAllowableOffer(values, target);
+  if (!maxOffer) return null;
   const presentation = buildOfferCeilingPresentation({ values, result: maxOffer, source });
 
   const requiredMonthlyRent = solveRequiredMonthlyRent(values, target);
@@ -88,6 +102,71 @@ export function buildReportMaxOffer(args: {
           value: requiredInterestRate.value,
           alreadyMet: requiredInterestRate.alreadyMet,
           unreachable: requiredInterestRate.unreachable,
+        }
+      : null,
+  };
+}
+
+/**
+ * Map an atomically captured Offer Ceiling into the PDF acquisition block.
+ *
+ * A recorded report must never invoke today's solver for a saved result. An
+ * absent or older incomplete capture therefore omits the block; a captured
+ * null remains an explicit "not solvable" result. The extra CoC/alreadyMet
+ * checks are required because older public-share captures predate those fields
+ * and cannot reproduce the full report block exactly.
+ */
+export function buildRecordedReportMaxOffer(
+  snapshotInput: unknown,
+): ReportData["maxOffer"] {
+  const captured = readRecordedOfferCeiling(snapshotInput);
+  if (!captured.captured) return undefined;
+  if (!captured.exact) return null;
+
+  const { presentation, achieved, makePriceWork } = captured.exact;
+  if (typeof achieved.cocReturn !== "number") return undefined;
+  if (
+    makePriceWork.requiredMonthlyRent &&
+    typeof makePriceWork.requiredMonthlyRent.alreadyMet !== "boolean"
+  ) {
+    return undefined;
+  }
+  if (
+    makePriceWork.requiredInterestRate &&
+    typeof makePriceWork.requiredInterestRate.alreadyMet !== "boolean"
+  ) {
+    return undefined;
+  }
+
+  return {
+    maxPrice: presentation.ceiling,
+    basis: describeMaoTarget(captured.target),
+    source: captured.source,
+    sourceLabel: presentation.sourceLabel,
+    currentPriceGap: presentation.ceiling - presentation.askingPrice,
+    bindingConstraints: presentation.bindingConstraints.map(
+      (constraint) => constraint.criterion,
+    ),
+    nextConstraint: presentation.nextConstraint?.criterion ?? null,
+    range: presentation.range,
+    achieved: {
+      monthlyCashFlow: achieved.netCashFlow,
+      cocReturn: achieved.cocReturn,
+      capRate: achieved.capRate,
+      dscr: achieved.dscr,
+    },
+    requiredMonthlyRent: makePriceWork.requiredMonthlyRent
+      ? {
+          value: makePriceWork.requiredMonthlyRent.value,
+          alreadyMet: makePriceWork.requiredMonthlyRent.alreadyMet!,
+          unreachable: makePriceWork.requiredMonthlyRent.unreachable,
+        }
+      : null,
+    requiredInterestRate: makePriceWork.requiredInterestRate
+      ? {
+          value: makePriceWork.requiredInterestRate.value,
+          alreadyMet: makePriceWork.requiredInterestRate.alreadyMet!,
+          unreachable: makePriceWork.requiredInterestRate.unreachable,
         }
       : null,
   };

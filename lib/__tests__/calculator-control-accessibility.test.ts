@@ -92,4 +92,16 @@ describe("calculator control accessibility guards", () => {
     expect(hero).toContain('ariaLabel="Property address"');
     expect(autocomplete).toContain("aria-label={ariaLabel}");
   });
+
+  it("gives listing-link entry a labeled, error-connected, keyboard-sized control", () => {
+    const hero = read("../../components/marketing/hero-address-form.tsx");
+
+    expect(hero).toContain('aria-label="Property entry method"');
+    expect(hero).toContain('aria-pressed={entryMode === "listing"}');
+    expect(hero).toContain('htmlFor="hero-listing-url"');
+    expect(hero).toContain('id="hero-listing-url"');
+    expect(hero).toContain('aria-invalid={Boolean(listingError)}');
+    expect(hero).toContain('aria-describedby={listingError ? "hero-listing-url-error" : "hero-listing-url-help"}');
+    expect(hero).toContain("min-h-11");
+  });
 });

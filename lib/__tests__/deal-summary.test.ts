@@ -68,7 +68,7 @@ describe("buildDealSummaryContext", () => {
     const context = buildDealSummaryContext(values, calculateAnalysis(values));
     expect(context).toContain("Cap rate:");
     expect(context).toContain("Net monthly cash flow:");
-    expect(context).toContain("TrueCap verdict tier:");
+    expect(context).toContain("Secondary Screening Index band:");
   });
 });
 

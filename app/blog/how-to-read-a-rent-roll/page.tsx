@@ -571,7 +571,7 @@ export default function HowToReadARentRollPost() {
               GRM calculator
             </Link>
             , and run the whole deal — cash flow, cap rate, DSCR, projections, and a
-            plain-English verdict — through the{" "}
+            selected-rule fit — through the{" "}
             <Link href="/" className="text-primary font-semibold hover:underline">
               TrueCap analyzer
             </Link>

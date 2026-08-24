@@ -20,10 +20,13 @@ shareable read-only link.
   + Pro at **$29.99/mo** or **$300/yr** (editing + unlimited saved
   deals, dashboard, compare, templates, tax strategy, exit scenarios,
   PDF export, buy box, etc.). Note: plain read-only share links are
-  free for everyone; only the co-branded variant is Pro. The canonical
+  free, but creating a new revocable link requires sign-in; only the
+  co-branded variant is Pro. The canonical
   tier/gate map for every feature is `lib/entitlements-catalog.ts`;
   pricing logic lives in the `plans.entitlements` JSON column — see
-  `lib/entitlements.ts`.
+  `lib/entitlements.ts`. New Deal Decision Pack sales are temporarily
+  unavailable. Keep both Pack checkout gates off and retain the historical
+  Price/claim paths only for existing paid-claim recovery.
 - **Stack**: Next.js 16 (App Router, `--webpack` for prod), React 19,
   TypeScript 5.7 (strict), Supabase (Auth + Postgres + Storage), Stripe
   (subscriptions), Resend (Broadcasts API), Sentry, Tailwind v4,
@@ -90,7 +93,8 @@ final_source_code/
 │   │   └── email/send-test/route.ts
 │   ├── auth/                     # /login, /sign-up, /forgot-password,
 │   │                             # /update-password, /callback, /sign-out
-│   ├── d/[encoded]/              # Public read-only shared deal viewer
+│   ├── s/[token]/                # Current opaque, revocable shared-deal viewer
+│   ├── d/[encoded]/              # Legacy stateless viewer; decode compatibility only
 │   │   ├── page.tsx
 │   │   └── opengraph-image.tsx   # edge runtime, dynamic OG card
 │   ├── dashboard/                # Pro dashboard (entitlement-gated)
@@ -390,10 +394,18 @@ Constraints (see `app/d/[encoded]/opengraph-image.tsx`):
 Same pattern applies to the per-tool OG images under
 `app/tools/<tool>/opengraph-image.tsx` and blog OG images.
 
-### 3.7 Share links — `lib/share-link.ts`, payload format is frozen
+### 3.7 Share links — current `/s` links are owned; legacy `/d` is frozen
 
-Saved-deal share links are **stateless** — the entire analysis is
-encoded in the URL (URL-safe base64 of a JSON payload). No DB, no auth.
+New share links are opaque `/s/[token]` records minted through
+`app/actions/public-shares.ts`. Creation requires an authenticated user before
+the service-role insert, and `lib/public-share.ts` requires a non-null owner.
+That ownership makes current links listable and revocable. Viewing remains
+public for anyone who possesses the capability token, including historical
+ownerless `/s` rows.
+
+The old `/d/[encoded]` format is stateless and remains decoder-only legacy
+compatibility. Its entire analysis is URL-safe base64 JSON; never use it to
+mint a new link.
 
 ```ts
 // lib/share-link.ts
@@ -404,11 +416,12 @@ export type SharePayload = {
 };
 ```
 
-- `encodeShareLink(payload)` and `decodeShareLink(encoded)` — the only
-  two entry points. The base64 helpers handle browser + Node.
+- `decodeShareLink(encoded)` remains the legacy read entry point. Do not add a
+  new caller to `encodeShareLink`; current creation must use the authenticated
+  opaque mint action.
 - The `/d/[encoded]` route + its OG image both call `decodeShareLink`
   then re-validate via `investmentFormSchema.safeParse`.
-- **Never modify the payload format** without keeping backwards-compatible
+- **Never modify the legacy payload format** without keeping backwards-compatible
   decoding. Existing links in the wild rely on `v: 1`. New fields go on
   `meta` (optional) or behind a new `v: 2` decoder that runs alongside
   `v: 1`.
@@ -583,6 +596,10 @@ When adding a fourth such feature, replicate this layout. Shared shells
 - `emails/content/YYYY-MM-DD.json` — one per Tuesday's send.
 - `emails/daily-campaign-content/day-NN.json` — 30-day drip days.
 - `supabase/migrations/*.sql` — timestamped, run in order. Don't edit existing migrations; add a new one.
+- `supabase/review-drafts/*.sql` — non-executable design artifacts. Every file
+  must carry `TRUECAP_DRAFT_SQL: DO_NOT_APPLY`. Never move a draft into the
+  migration queue under its old timestamp; promote approved work as a newly
+  reviewed, fresh timestamp after production backup and dry-run evidence.
 - `lib/glossary.ts`, `lib/states.ts`, `lib/city-strategy-combos.ts`, `lib/starter-templates.ts` — static reference data.
 
 ---

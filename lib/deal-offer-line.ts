@@ -36,7 +36,6 @@ import {
   summarizeBuyBoxFit,
 } from "@/lib/buy-box";
 import {
-  buildMaoTarget,
   chooseMaoTargetFromBuyBox,
   describeMaoTarget,
   solveBuyBoxClearingPrice,
@@ -62,8 +61,8 @@ import {
  *   - "saved-target" — solved against the exact target persisted with this
  *     analysis after the user tuned it.
  *   - "buy-box" — solved against the user's own criteria.
- *   - "default" — solved against TrueCap's canonical bar (break-even cash flow
- *     + DSCR 1.25) because the user's boxes set no price-solvable target.
+ *   - "default" — retained only for historical serialized view models; new
+ *     calculations never solve from product defaults without adoption.
  */
 export type DealOfferBasis = "saved-target" | "buy-box" | "default";
 
@@ -259,28 +258,6 @@ export function computeDealOfferLine(
             offer = { kind: "cut", maxPrice: clearing, asking, discountPct, basis: "buy-box" };
           }
         }
-      }
-    } else {
-      // No usable box shaped a target — fall back to TrueCap's canonical bar,
-      // and mark the basis so the UI never calls this "your buy box".
-      const maoTarget = buildMaoTarget(null, { isCashPurchase });
-      resolvedMaoTarget = maoTarget;
-      basisLabel = describeMaoTarget(maoTarget);
-      let clearsAtAsking = false;
-      try {
-        clearsAtAsking = meetsTarget(analysis, maoTarget);
-      } catch {
-        // fall through to the solver alone
-      }
-      const mao = calculateMaxAllowableOffer(formValues, maoTarget);
-      if (clearsAtAsking) {
-        offer = { kind: "clears", maxPrice: mao?.maxPrice ?? null, basis: "default" };
-      } else if (mao) {
-        const discountPct =
-          asking != null && asking > mao.maxPrice
-            ? Math.round(((asking - mao.maxPrice) / asking) * 100)
-            : null;
-        offer = { kind: "cut", maxPrice: mao.maxPrice, asking, discountPct, basis: "default" };
       }
     }
   }

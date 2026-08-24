@@ -1,9 +1,9 @@
 /**
- * Methodology blog post — "How TrueCap's Verdict Engine decides
- * Strong Buy vs Avoid". Explains the actual thresholds in
+ * Methodology blog post for the legacy URL. Explains the secondary
+ * screening-band thresholds in
  * lib/verdict.ts in plain English. Builds trust + earns
  * organic search for "is this rental a good deal" / "rental
- * property deal score" queries.
+ * property Screening Index" queries.
  *
  * IMPORTANT: the thresholds quoted in this post are pulled
  * directly from lib/verdict.ts. If verdict.ts changes (per
@@ -23,13 +23,13 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "how-truecap-verdict-engine-works";
-const TITLE = "How TrueCap's verdict engine decides Strong Buy vs Avoid";
+const TITLE = "How TrueCap classifies selected-rule fit";
 // SERP-facing title (metadata/og only): kept ≤50 chars so the root
 // layout's "%s | TrueCap" template stays inside the ~60-char SERP
 // window. The on-page <h1> keeps the longer editorial TITLE.
-const SERP_TITLE = "How the verdict engine decides Strong Buy vs Avoid";
+const SERP_TITLE = "How TrueCap classifies selected-rule fit";
 const DESCRIPTION =
-  "The exact cash flow, DSCR, cap rate, and cash-on-cash thresholds TrueCap uses to classify a rental deal as Strong / Solid / Mixed / Marginal / Negative — pulled directly from the production code.";
+  "The explicit cash flow, DSCR, cap-rate, and cash-on-cash thresholds TrueCap uses for selected-rule fit. This screening classification is not a buy/pass decision or advice.";
 const PUBLISHED_AT = "2026-06-07";
 const MODIFIED_AT = "2026-06-07";
 const READING_TIME_MIN = 10;
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
   keywords: [
     "rental property verdict engine",
     "is this rental a good deal",
-    "rental property deal score",
+    "rental property Screening Index",
     "rental underwriting thresholds",
     "rental property classification",
     "good cap rate rental",
@@ -66,24 +66,24 @@ export const metadata: Metadata = {
 
 const FAQ_ITEMS = [
   {
-    q: "How does TrueCap decide if a rental property is a good deal?",
-    a: "TrueCap classifies each deal as Strong, Solid, Mixed, Marginal, or Negative based on four metrics: monthly cash flow, debt service coverage ratio (DSCR), cap rate, and cash-on-cash return. Strong requires cash flow ≥ $400/mo, DSCR ≥ 1.25, and CoC ≥ 10%. Solid requires cash flow ≥ $100/mo, DSCR ≥ 1.15, and CoC ≥ 6%. Marginal and Negative trigger when cash flow goes negative or DSCR drops below 1.0.",
+    q: "How does TrueCap classify selected-rule fit?",
+    a: "TrueCap compares modeled cash flow, DSCR, cap rate, and cash-on-cash return with explicit screening thresholds, producing Strong, Solid, Mixed, Marginal, or Negative rule-fit bands. These labels describe the entered assumptions against those rules; they do not decide whether a property is a good investment.",
   },
   {
     q: "What cash flow does TrueCap consider 'good'?",
     a: "$400/month or more net monthly cash flow (after all operating expenses and debt service) clears the Strong threshold. $100-400/month is Solid territory. Below $100/month but still positive is Mixed. Negative cash flow drops you into Marginal (down to -$200) or Negative (worse than -$200).",
   },
   {
-    q: "What DSCR is required for TrueCap's Strong verdict?",
+    q: "What DSCR contributes to TrueCap's Strong rule-fit band?",
     a: "TrueCap uses 1.25 or higher as its Strong score-band threshold; 1.15-1.25 is Solid, 1.0-1.15 is Mixed/Marginal, and below 1.0 means the modeled operating income does not cover modeled debt service. These are TrueCap heuristics, not lender rules. Lenders calculate DSCR differently and apply separate borrower, property, documentation, reserve, rate, and LTV requirements, so no TrueCap band establishes loan eligibility or approval.",
   },
   {
     q: "How does TrueCap handle all-cash purchases for DSCR?",
-    a: "DSCR doesn't apply to cash purchases — there's no debt service. The verdict engine detects this (monthlyPayment <= 0) and switches to a cash-only classifier that leans on cash flow, cap rate, and cash-on-cash. A cash deal with $400+/mo cash flow, ≥ 7% cap rate, and ≥ 8% CoC is Strong; ≥ $100/mo, ≥ 5% cap, ≥ 5% CoC is Solid.",
+    a: "DSCR doesn't apply to cash purchases because there is no debt service. The selected-rule classifier uses a cash-only path based on cash flow, cap rate, and cash-on-cash. These are screening thresholds, not recommendations or evidence that the assumptions are verified.",
   },
   {
-    q: "What's the difference between the verdict and the Deal Score?",
-    a: "The verdict is the free-tier rule-of-thumb classifier (Strong / Solid / Mixed / Marginal / Negative). The Deal Score is a 0-100 weighted score with a subscore breakdown — and both are free for every user. The verdict is intentionally simpler — it tells you which bucket the deal lands in. The Deal Score tells you why, with contribution from each underlying metric.",
+    q: "What's the difference between selected-rule fit and the Screening Index?",
+    a: "Selected-rule fit checks the entered assumptions against the named Buy Box or target profile. The Screening Index is a secondary 0-100 weighted triage score with a factor breakdown. It is not evidence readiness, a Buy Box result, an appraisal, lender approval, or investment advice.",
   },
 ];
 
@@ -163,8 +163,8 @@ export default function HowVerdictEngineWorksPost() {
               TL;DR
             </h2>
             <p className="text-sm sm:text-base leading-relaxed text-foreground">
-              TrueCap&apos;s verdict engine is a small set of explicit
-              thresholds that classify a deal into one of five tiers:{" "}
+              TrueCap&apos;s selected-rule classifier is a small set of explicit
+              thresholds that groups modeled results into five bands:{" "}
               <strong>Strong, Solid, Mixed, Marginal, Negative</strong>.
               Strong needs <strong>$400+/mo cash flow, DSCR ≥ 1.25, and
               CoC ≥ 10%</strong>. Solid needs <strong>$100+/mo, DSCR ≥
@@ -177,21 +177,20 @@ export default function HowVerdictEngineWorksPost() {
           </section>
 
           <div className="prose prose-neutral max-w-none prose-headings:font-extrabold prose-headings:text-foreground prose-p:text-foreground prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:text-foreground prose-li:leading-relaxed">
-            <h2>Why we built a verdict engine at all</h2>
+            <h2>Why we show selected-rule fit</h2>
             <p>
               A rental analysis spits out numbers — cap rate, cash flow,
               DSCR, cash-on-cash, IRR — and a new investor stares at
               them wondering if 6.5% is good. An experienced investor
-              knows the rules of thumb (DSCR ≥ 1.25, cap rate ≥ 7% in
-              most markets, etc.) but still wants a second eye that
-              hasn&apos;t fallen in love with the deal.
+              may recognize common rules of thumb (DSCR ≥ 1.25, cap rate
+              ≥ 7% in some contexts) but still needs the assumptions and
+              target basis stated explicitly.
             </p>
             <p>
-              The verdict engine answers <em>&quot;is this a deal?&quot;</em>{" "}
-              with one of five tiers and a one-paragraph rationale. It
-              runs free, on every analysis, on every property. Pro
-              users get the more sophisticated Deal Score on top, but
-              the verdict is the baseline.
+              The selected-rule fit groups the modeled outputs into one of five
+              bands and explains which thresholds were met or missed. It does not
+              answer whether someone should buy, pass, or offer. The Screening
+              Index is a secondary triage aid, not evidence readiness or advice.
             </p>
             <p>
               The whole engine is open — the source code is at{" "}
@@ -203,34 +202,33 @@ export default function HowVerdictEngineWorksPost() {
             <h2>The five tiers, in one sentence each</h2>
             <ul>
               <li>
-                <strong>Strong</strong> — clears every metric with
-                margin. Move on it if the assumptions check out.
+                <strong>Strong</strong> — clears every legacy band threshold.
+                This label does not direct the user to buy or offer.
               </li>
               <li>
-                <strong>Solid</strong> — clears every threshold but
-                without a huge buffer. Worth a deeper underwrite.
+                <strong>Solid</strong> — clears the lower legacy band
+                thresholds with less modeled margin.
               </li>
               <li>
-                <strong>Mixed</strong> — one or two metrics are below
-                target. Stress-test before offering.
+                <strong>Mixed</strong> — one or more metrics do not clear
+                the higher bands; review the actual targets and assumptions.
               </li>
               <li>
                 <strong>Marginal</strong> — cash flow is negative or
-                DSCR is below 1.0. The deal works only if your
-                assumptions are too conservative.
+                model DSCR is below 1.0 within the stated range.
               </li>
               <li>
                 <strong>Negative</strong> — cash flow is meaningfully
-                negative or DSCR is well below 1.0. The numbers
-                don&apos;t support a buy-and-hold thesis.
+                negative or model DSCR is well below 1.0 under the
+                entered assumptions.
               </li>
             </ul>
 
             <h2>The exact thresholds (financed purchase)</h2>
             <p>
               Most rental purchases use financing, so this is the
-              primary path. The verdict checks four metrics and picks
-              the tier where the deal first matches.
+              primary legacy path. The classifier checks four metrics and
+              assigns the first matching screening band.
             </p>
 
             <h3>Strong</h3>
@@ -258,7 +256,7 @@ export default function HowVerdictEngineWorksPost() {
               <li>Cash-on-cash ≥ <strong>6%</strong></li>
             </ul>
             <p>
-              Solid is &quot;works on paper, no cushion.&quot; A $100/month
+              The Solid band has limited modeled margin. A $100/month
               cash flow buffer disappears the moment vacancy ticks up
               or a major appliance breaks. 1.15 DSCR is above breakeven
               but leaves limited modeled coverage. It does not show whether a
@@ -272,9 +270,8 @@ export default function HowVerdictEngineWorksPost() {
               Anything that doesn&apos;t hit Strong or Solid but still
               has positive cash flow and DSCR ≥ 1.0 lands here. Cash
               flow is positive but maybe only by a few dollars. DSCR
-              clears breakeven but tightly. CoC may be modest. The deal
-              probably works under one set of assumptions but breaks
-              under realistic ones.
+              clears breakeven but tightly. CoC may be modest. The output is
+              sensitive to the assumptions and should not be read as a directive.
             </p>
 
             <h3>Marginal</h3>
@@ -284,12 +281,10 @@ export default function HowVerdictEngineWorksPost() {
               <li>DSCR drops between <strong>0.9 and 1.0</strong></li>
             </ul>
             <p>
-              Marginal is &quot;the math doesn&apos;t work today, but
-              the deal could become real if rents come in above your
-              projection or you lock in below-market financing.&quot;
-              It&apos;s a deal worth a second look, but only if you
-              have a specific reason to think your assumptions are
-              conservative.
+              Marginal means the entered case misses a cash-flow or coverage
+              threshold. A different result requires evidence for a changed
+              assumption—for example, a documented rent or financing term—not
+              optimism about a future value.
             </p>
 
             <h3>Negative</h3>
@@ -298,13 +293,10 @@ export default function HowVerdictEngineWorksPost() {
               <li>DSCR below <strong>0.9</strong></li>
             </ul>
             <p>
-              Negative is &quot;the numbers don&apos;t support a
-              buy-and-hold thesis as entered.&quot; Either the
-              purchase price needs to come down, the rent needs to
-              come up, or you&apos;re betting on appreciation rather
-              than operational returns. There&apos;s nothing wrong
-              with that as a strategy — just don&apos;t lie to
-              yourself about it being a cash-flowing rental.
+              Negative means the entered assumptions do not produce a
+              positive operating case. Price, rent, expenses, or financing
+              would have to change for the modeled cash-flow result to change;
+              any replacement value should be supported by evidence.
             </p>
 
             <h2>The cash-purchase path</h2>
@@ -312,7 +304,7 @@ export default function HowVerdictEngineWorksPost() {
               When the analysis says <code>monthlyPayment &lt;= 0</code>{" "}
               — i.e., there&apos;s no financing — DSCR doesn&apos;t
               mean anything. There&apos;s no debt service to cover.
-              The verdict engine detects this and switches to a
+              The selected-rule classifier detects this and switches to a
               simpler classifier:
             </p>
             <ul>
@@ -341,33 +333,27 @@ export default function HowVerdictEngineWorksPost() {
               because there&apos;s no debt-service risk.
             </p>
 
-            <h2>How the engine talks about each metric</h2>
+            <h2>How the screening bands group each metric</h2>
             <p>
-              The verdict isn&apos;t just a tier — it&apos;s a paragraph.
-              Each metric gets one sentence with a band-appropriate
-              read.
+              The legacy classifier groups each metric into a band. The
+              current underwriting result keeps these labels secondary to
+              the actual numbers and the user&apos;s selected targets.
             </p>
 
             <h3>Cap rate sentences</h3>
             <ul>
               <li>
-                <strong>≥ 7%</strong> — &quot;healthy for most markets,
-                indicating the property earns its own way independent
-                of how it&apos;s financed.&quot;
+                <strong>≥ 7%</strong> — legacy upper cap-rate band.
               </li>
               <li>
-                <strong>5-7%</strong> — &quot;typical range for stable
-                / appreciation-focused markets.&quot;
+                <strong>5-7%</strong> — legacy middle cap-rate band.
               </li>
               <li>
-                <strong>3-5%</strong> — &quot;on the low end — common
-                in coastal / Tier-1 markets where appreciation is the
-                dominant return.&quot;
+                <strong>3-5%</strong> — legacy lower cap-rate band.
               </li>
               <li>
-                <strong>&lt; 3%</strong> — &quot;well below market
-                norms; verify the rent assumption and operating
-                expense estimates.&quot;
+                <strong>&lt; 3%</strong> — below the legacy cap-rate bands;
+                verify rent and operating expenses.
               </li>
             </ul>
 
@@ -396,29 +382,27 @@ export default function HowVerdictEngineWorksPost() {
 
             <h3>Cash-on-cash sentences</h3>
             <ul>
-              <li><strong>≥ 12%</strong> — &quot;strong.&quot;</li>
-              <li><strong>8 - 12%</strong> — &quot;healthy target for buy-and-hold.&quot;</li>
-              <li><strong>4 - 8%</strong> — &quot;modest, likely an appreciation play.&quot;</li>
-              <li><strong>0 - 4%</strong> — &quot;below typical alternatives.&quot;</li>
-              <li><strong>&lt; 0%</strong> — &quot;negative — investor capital loses value year over year on cash terms alone.&quot;</li>
+              <li><strong>≥ 12%</strong> — legacy upper CoC band.</li>
+              <li><strong>8 - 12%</strong> — legacy high CoC band.</li>
+              <li><strong>4 - 8%</strong> — legacy middle CoC band.</li>
+              <li><strong>0 - 4%</strong> — legacy lower positive CoC band.</li>
+              <li><strong>&lt; 0%</strong> — negative modeled cash return.</li>
             </ul>
 
-            <h2>What the verdict <em>doesn&apos;t</em> do</h2>
+            <h2>What the screening classification <em>doesn&apos;t</em> do</h2>
             <p>
               These are deliberate scope decisions:
             </p>
             <ul>
               <li>
-                <strong>No appreciation modeling.</strong> The verdict
-                is operations-only — it asks &quot;does this property
-                earn its keep today?&quot; not &quot;will it be worth
-                more in 5 years?&quot; That&apos;s by design. The Pro
+                <strong>No appreciation modeling.</strong> The classification
+                is operations-only and does not predict future value. The Pro
                 tier&apos;s 10-year projection and exit-scenarios
                 modeling cover the appreciation side.
               </li>
               <li>
                 <strong>No subjective &quot;location quality&quot; score.</strong>{" "}
-                Plenty of tools muddy the financial verdict with a
+                Some tools combine financial output with a
                 neighborhood-vibes rating. We don&apos;t — location
                 quality is what you know about the market, not what an
                 algorithm tells you.
@@ -427,50 +411,42 @@ export default function HowVerdictEngineWorksPost() {
                 <strong>No partial credit.</strong> Strong requires
                 <em>all three</em> thresholds. Two-out-of-three knocks
                 you to Solid. We thought about a weighted score
-                (that&apos;s what the Deal Score does) but for the
-                free verdict tier, hard cutoffs are easier to trust.
+                (that&apos;s what the Screening Index does), while this
+                classifier uses explicit cutoffs.
               </li>
             </ul>
 
-            <h2>How to read your own verdict</h2>
+            <h2>How to use the screening bands</h2>
             <p>
               When you run a property through{" "}
-              <Link href="/">the TrueCap analyzer</Link>, the verdict
-              shows up on the cover of the analysis. Use it like this:
+              <Link href="/">the TrueCap analyzer</Link>, start with the
+              core economics and any selected-rule fit. Treat a legacy band as
+              secondary context:
             </p>
             <ol>
               <li>
-                <strong>Strong</strong>: do a deeper diligence pass —
-                verify the rent assumption against actual market
-                comps, validate the property tax and insurance lines,
-                walk the property. If the numbers hold, write the
-                offer.
+                <strong>Strong</strong>: the entered case clears every band
+                threshold. Verify rent, tax, insurance, condition, financing,
+                and the targets that matter to you before recording a decision.
               </li>
               <li>
-                <strong>Solid</strong>: this is the most common
-                acceptable verdict for a real-world deal. Stress-test
-                rent (drop it 5-10%) and vacancy (bump it from 5% to
-                8%) and see if the deal stays in Solid. If it drops
-                to Mixed under stress, factor that into your offer
-                price.
+                <strong>Solid</strong>: the entered case clears the lower band
+                thresholds with less margin. Stress-test rent and vacancy, then
+                compare the result with your own explicit targets.
               </li>
               <li>
-                <strong>Mixed</strong>: you need a specific reason to
-                like this deal beyond the numbers — maybe the location
-                is improving, the cosmetic value-add is obvious,
-                you&apos;re house-hacking and the &quot;rent&quot; you
-                save changes the math. Don&apos;t buy on the numbers
-                alone.
+                <strong>Mixed</strong>: one or more metrics miss the higher
+                bands. Review the modeled result directly instead of treating
+                the label as a conclusion.
               </li>
               <li>
-                <strong>Marginal / Negative</strong>: either bring the
-                purchase price down materially, find better
-                financing, or pass. Don&apos;t talk yourself into a
-                Marginal deal because the property is interesting.
+                <strong>Marginal / Negative</strong>: the entered case misses
+                a cash-flow or coverage threshold. Change assumptions only
+                when you have evidence for the replacement value.
               </li>
             </ol>
 
-            <h2>If you want the math behind the verdict</h2>
+            <h2>If you want the math behind the classification</h2>
             <p>
               The underlying calculations come from{" "}
               <code>lib/calc-analysis.ts</code> — the single source of
@@ -479,7 +455,7 @@ export default function HowVerdictEngineWorksPost() {
               free analyzer, the saved-deal PDF, the share link, the
               dashboard, and the OG image. If you&apos;ve seen the
               number 6.4% as the cap rate in your TrueCap analysis,
-              that&apos;s the same 6.4% the verdict engine reads.
+              that&apos;s the same 6.4% the selected-rule classifier reads.
             </p>
             <p>
               For deeper reading on the individual metrics, our
@@ -518,14 +494,12 @@ export default function HowVerdictEngineWorksPost() {
               ))}
             </div>
 
-            <h2>See your verdict on a real deal</h2>
+            <h2>Review a real underwrite</h2>
             <p>
-              The fastest way to understand the verdict is to run
-              one. TrueCap is free — paste an address, accept the
-              auto-filled rent / rate / tax, type purchase price.
-              You&apos;ll see the tier within seconds, with a
-              one-paragraph rationale built from the exact thresholds
-              described above.
+              TrueCap is free to try: paste an address, review every imported
+              fact and starting assumption, then enter or confirm the property
+              values. You&apos;ll see the core economics first, with selected-rule
+              fit only after targets are explicit.
             </p>
             <p className="not-prose">
               <Link
@@ -533,7 +507,7 @@ export default function HowVerdictEngineWorksPost() {
                 className="inline-flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-5 py-3 font-bold hover:opacity-90"
               >
                 <Calculator className="w-4 h-4" />
-                Get your verdict free
+                Underwrite a rental free
                 <ArrowUpRight className="w-4 h-4" />
               </Link>
             </p>

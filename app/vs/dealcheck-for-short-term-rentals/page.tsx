@@ -267,8 +267,8 @@ export default function VsDealcheckForShortTermRentalsPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             Free covers the standard cap rate, CoC, DSCR, and cash flow. Pro adds
-            projections, sensitivity, illustrative tax impact, modeled exit comparisons, MAO,
-            and included PDFs. A one-time PDF option is also available for one deal; see live
+            projections, sensitivity, illustrative tax impact, modeled exit comparisons, Offer Ceiling,
+            and included PDFs. New one-time PDF checkout is temporarily unavailable; see live
             pricing for current terms.
           </p>
           <div className="flex flex-wrap gap-3">

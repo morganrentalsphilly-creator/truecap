@@ -260,8 +260,7 @@ export default function VsCozyPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
-            MAO, and co-branded share links. Pro includes PDFs, and a one-time
-            PDF option is available; see live pricing for current terms.
+            Offer Ceiling, co-branded share links, and PDF reports with Pro; see live pricing for current terms.
             No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -342,11 +341,11 @@ const COZY_FAQ: FaqItem[] = [
     question: "Can I use TrueCap + a Cozy replacement together?",
     answer: (
       <>
-        Yes — that&apos;s the recommended stack. TrueCap (free) for pre-purchase underwriting, plus TurboTenant or Avail (free) for post-purchase ops. Together they replicate Cozy&apos;s old free-tier coverage and add the underwriting layer Cozy never had.
+        Yes — that&apos;s one possible stack. TrueCap (free) covers pre-purchase underwriting, while TurboTenant or Avail (free) covers post-purchase operations. Together they span much of Cozy&apos;s old free-tier coverage and add an underwriting layer.
       </>
     ),
     plainTextAnswer:
-      "Yes — recommended stack. TrueCap (free) for pre-purchase underwriting + TurboTenant or Avail (free) for post-purchase ops. Together they replicate Cozy&apos;s old free coverage plus add underwriting.",
+      "Yes — one possible stack is TrueCap (free) for pre-purchase underwriting plus TurboTenant or Avail (free) for post-purchase operations. Together they cover much of Cozy's old free scope and add underwriting.",
   },
 ];
 

@@ -1,13 +1,13 @@
 {
   "_readme": "Pinned sha256 of every file that executes during a build (or decides what does). Verified by scripts/verify-build-integrity.mjs in the build-chain-guard CI job. Any drift fails CI until someone regenerates this file on purpose: `node scripts/verify-build-integrity.mjs --update`. Exists because of the 2026-06-01 incident — see the header of that script.",
   "algorithm": "sha256",
-  "generatedAt": "2026-08-23T17:58:37.861Z",
+  "generatedAt": "2026-08-24T15:51:45.216Z",
   "files": {
-    ".github/workflows/ci.yml": "779a0f407a896e0e677c164383b74b4eb22dd27c6711c488173b988656195e30",
+    ".github/workflows/ci.yml": "c54fe4d12c25433eafa20f6c657bf816f2fd3616f3b4eb8e8076d848f7131cfb",
     "eslint.config.mjs": "50ef27101a8f02892b83d543ae9be26afa81e2fe4f0a87f1bfeebda77b8e22fc",
     "instrumentation-client.ts": "6f89d202075bbc6fd3537ddcf665180885dc6824cf2e0cbc19ecae9f0610f24d",
     "instrumentation.ts": "158fe4c748f1599b56a1681e417ceddcda7ce40b988f95fca298c5ab548ca38c",
-    "next.config.mjs": "27be488ce251351883154d3cf5c175e77ee0081db8c6d7839ee8361bf5880b68",
+    "next.config.mjs": "b81fb4437bbed6ddcecfce3ea3bf851a0c7b36575cc1ec087d686662ecfaf7bc",
     "package-lock.json": "e8d149f4990d9400a224fc806f21a687d1a36177b48a692589fc51ed9ebfbcce",
     "package.json": "4743c782c3d6744286d28a709f7266756d1d6214fac719dcf3223829e4bc27ab",
     "postcss.config.mjs": "54b5708e687b8c9ecc8dbeebf29801dbec1213f890c5e018d7ca9c1541a6f7e3",

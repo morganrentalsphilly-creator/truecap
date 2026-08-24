@@ -1,6 +1,6 @@
 /**
  * Public SEO landing page for the ARV calculator (after-repair value +
- * the 70% rule max offer) — the head-term tool for the flip/BRRRR
+ * the 70%-rule Offer Ceiling) — the head-term tool for the flip/BRRRR
  * acquisition cluster.
  *
  * Strategy mirrors /tools/cap-rate-calculator: the working calculator is
@@ -12,7 +12,7 @@
  *
  * Numbers in the copy are the SAME worked example as the
  * how-to-calculate-arv and 70-percent-rule-house-flipping blog posts
- * ($255k ARV / $45k rehab / $133,500 max offer / $191,250 refi loan) —
+ * ($255k ARV / $45k rehab / $133,500 Offer Ceiling / $191,250 refi loan) —
  * internal consistency beats novelty, and the widget's default comps are
  * the first three comps from that example.
  */
@@ -28,15 +28,15 @@ import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 export const metadata: Metadata = {
-  title: "ARV Calculator | After-Repair Value + 70% Rule Max Offer",
+  title: "ARV Calculator | ARV + 70% Rule Offer Ceiling",
   description:
-    "Free ARV calculator. Estimate after-repair value from renovated comps ($/sq ft method) and get the 70%-rule max offer for a flip or BRRRR — plus when the rule lies.",
+    "Free ARV calculator. Estimate after-repair value from renovated comps and calculate a 70%-rule Offer Ceiling for flips or BRRRR, with clear limitations.",
   keywords: [
     "ARV calculator",
     "after repair value calculator",
     "ARV real estate",
     "70 percent rule calculator",
-    "maximum allowable offer calculator",
+    "Offer Ceiling calculator",
     "how to calculate ARV",
     "ARV formula",
     "house flipping calculator",
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "ARV Calculator — After-Repair Value + 70% Rule",
     description:
-      "Estimate ARV from renovated comps and get the 70%-rule max offer in seconds — with the comps-method sanity checks appraisers use and honest guidance on when 70% is the wrong number.",
+      "Estimate ARV from renovated comps and calculate a 70%-rule Offer Ceiling — with comps-method checks and guidance on when 70% is the wrong screen.",
     url: "/tools/arv-calculator",
     type: "website",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap ARV calculator" }],
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
 const FAQS: { q: string; a: string }[] = [
   {
     q: "What is ARV in real estate?",
-    a: "ARV (after-repair value) is what the property would sell for — or appraise at — once the rehab is complete. It's the most important, and most mis-estimated, input in any BRRRR or flip: the max offer keys off it, the refinance loan is sized as a percentage of it, and the flip profit is whatever's left of it after costs. It is a forecast of an appraisal, not a formula, which is why it comes from renovated comparable sales rather than from your rehab budget.",
+    a: "ARV (after-repair value) is what the property might sell for — or appraise at — once the rehab is complete. It is a critical, frequently mis-estimated input in a BRRRR or flip: the Offer Ceiling keys off it, the refinance loan may be sized as a percentage of it, and modeled flip profit is whatever remains after costs. ARV is a forecast, not an appraisal or guarantee, so it should be supported by renovated comparable sales rather than inferred from the rehab budget.",
   },
   {
     q: "How do you calculate ARV?",
@@ -67,7 +67,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What is the 70% rule?",
-    a: "A rule of thumb that caps your purchase offer at 70% of ARV minus the cost of repairs. On a house that will be worth $300,000 renovated and needs $45,000 of work, the maximum offer is (0.70 × $300,000) − $45,000 = $165,000. The 30% you hold back isn't all profit — it covers buying, holding, and selling costs first, and whatever is left is your margin.",
+    a: "A rule of thumb that calculates a screening boundary at 70% of ARV minus repairs. On a property modeled at a $300,000 renovated value with $45,000 of work, the 70%-rule Offer Ceiling is (0.70 × $300,000) − $45,000 = $165,000. The 30% held back is not all profit; it covers buying, holding, and selling costs first. This boundary is not a recommended offer or appraisal.",
   },
   {
     q: "Is ARV just the purchase price plus the rehab budget?",
@@ -100,7 +100,7 @@ export default function ArvCalculatorPage() {
     url: `${siteUrl}/tools/arv-calculator`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
     description:
-      "Free online calculator for after-repair value (ARV) from renovated comps, with the 70%-rule maximum offer and the 75%-LTV BRRRR refinance line.",
+      "Free online calculator for after-repair value (ARV) from renovated comps, with a 70%-rule Offer Ceiling and 75%-LTV BRRRR refinance line.",
   };
 
   const faqLd = {
@@ -121,7 +121,7 @@ export default function ArvCalculatorPage() {
     applicationSubCategory: "Real Estate Calculator",
     operatingSystem: "Web",
     description:
-      "Free ARV calculator. Estimate after-repair value from renovated comps ($/sq ft method) and get the 70%-rule max offer for a flip or BRRRR — plus when the rule lies.",
+      "Free ARV calculator. Estimate after-repair value from renovated comps and calculate a 70%-rule Offer Ceiling for a flip or BRRRR.",
     url: `${siteUrl}/tools/arv-calculator`,
     offers: {
       "@type": "Offer",
@@ -136,7 +136,7 @@ export default function ArvCalculatorPage() {
     },
     featureList: [
       "ARV from up to 3 renovated comps ($/sq ft method)",
-      "70%-rule max offer with an adjustable multiplier",
+      "70%-rule Offer Ceiling with an adjustable multiplier",
       "Comps-range sanity check on the estimate",
       "75% LTV BRRRR refinance loan line",
       "Free, no signup",
@@ -176,7 +176,7 @@ export default function ArvCalculatorPage() {
               The number every flip and BRRRR is built on — what the property
               will sell for, or appraise at, once the renovation is done.
               Enter up to three renovated sold comps and your square footage;
-              the ARV, the 70%-rule max offer, and the 75%-LTV refinance line
+              the ARV, the 70%-rule Offer Ceiling, and the 75%-LTV refinance line
               compute live.
             </p>
           </header>
@@ -323,15 +323,15 @@ export default function ArvCalculatorPage() {
             </p>
 
             <h2 className="text-2xl sm:text-3xl">
-              The 70% rule: turning ARV into a max offer
+              The 70% rule: turning ARV into an Offer Ceiling
             </h2>
             <p>
               ARV&apos;s first job is setting the most you can pay and still
-              leave room to profit — the maximum allowable offer:
+              leave room to profit — the Offer Ceiling:
             </p>
             <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
               <div className="text-base sm:text-lg font-mono">
-                <span className="font-bold">Max offer</span> = (ARV × 0.70) −
+                <span className="font-bold">Offer Ceiling</span> = (ARV × 0.70) −
                 Repair costs
               </div>
               <div className="text-sm text-muted-foreground mt-2">
@@ -469,10 +469,10 @@ export default function ArvCalculatorPage() {
               whether the deal deserves another hour — the ARV and the max
               offer. When a property clears the screen and the endgame is a
               rental, run the stabilized numbers through the full TrueCap
-              analyzer — its Max Offer card solves the rental version of this
+              analyzer — its Offer Ceiling card solves the rental version of this
               question (the highest price that still hits your target cap
               rate, cash-on-cash, and DSCR), alongside cash flow, 10-year
-              projections, and a plain-English verdict. None of this is
+              projections, selected-rule fit, and a secondary Screening Index. None of this is
               investment advice; verify comps, rehab scope, and lender terms
               on any specific deal.
             </p>
@@ -507,11 +507,11 @@ export default function ArvCalculatorPage() {
               ARV and the 70% rule get you to a defensible offer. TrueCap
               takes it from there: the rehab, the refinance, the stabilized
               cash flow, cap rate, cash-on-cash, DSCR, 10-year projections,
-              and a Deal Score — all from the same inputs.
+              and a secondary Screening Index — all from the same inputs.
             </p>
             <ul className="text-sm space-y-1.5 mb-5 opacity-90">
               {[
-                "Max Offer solver — highest price that hits your target metrics",
+                "Offer Ceiling — highest modeled price that meets your selected targets; not a recommended offer",
                 "BRRRR + fix-and-flip strategy cards on every deal",
                 "Cash flow, cap rate, CoC, DSCR — auto-calculated",
                 "10-year projection with rent + expense growth (Pro)",
@@ -538,7 +538,7 @@ export default function ArvCalculatorPage() {
               tool has no embeddable widget. See the component header. */}
           <ToolEmbedInvite slug="arv-calculator" />
 
-          <ToolsConversionCta calculatorName="ARV calculator" hook="TrueCap's full analyzer takes the max offer further — rehab budget, BRRRR refinance, fix-and-flip profit, cash flow, and a Max Offer solver for rentals — all on the same deal. Save your work, compare deals, share a link." />
+          <ToolsConversionCta calculatorName="ARV calculator" hook="TrueCap's full analyzer connects rehab, BRRRR refinance, modeled flip profit, cash flow, and a target-dependent rental Offer Ceiling on the same deal. The boundary is not a recommended offer. Save your work, compare deals, and share a link." />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}

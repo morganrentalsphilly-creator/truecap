@@ -33,8 +33,10 @@ In Stripe Dashboard, open Business settings / Public details and confirm:
 
 ## Checkout branding
 
-Repository code supplies these supported hosted-Checkout settings for both
-subscription and Decision Pack sessions:
+Repository code supplies these supported hosted-Checkout settings for
+subscription sessions. The retained historical Decision Pack constructor uses
+the same settings, but its creation gates must remain off while new Pack sales
+are temporarily unavailable:
 
 - Display name: **TrueCap**
 - Background: **#F7FAFC**
@@ -53,10 +55,10 @@ semantic colors. Keep the account-level branding compatible with:
 - Warning: **#B45309**
 - Error: **#B42318**
 
-Preview one subscription Checkout and one one-time Decision Pack Checkout in
-test mode. Confirm the name, wordmark, icon, contrast, mobile layout, Terms and
-Privacy links, amount, cadence, trial terms, and return links. Cancel both
-sessions before payment.
+Preview one subscription Checkout in test mode. Confirm the name, wordmark,
+icon, contrast, mobile layout, Terms and Privacy links, amount, cadence, trial
+terms, and return links. Cancel the session before payment. New Decision Pack
+checkout is intentionally disabled; do not re-enable it for this review.
 
 ## Product and Price inventory
 
@@ -69,9 +71,9 @@ uses Price IDs, while Product names remain Dashboard presentation:
 | TrueCap Pro | `STRIPE_PRICE_PRO_ANNUAL` | Current annual Price |
 | Agent Pro | `STRIPE_PRICE_AGENT_PRO_MONTHLY` | Current monthly Price; tier hidden when unset |
 | Agent Pro | `STRIPE_PRICE_AGENT_PRO_ANNUAL` | Current annual Price |
-| Decision Pack | `STRIPE_PRICE_PDF_ONE_TIME` | Existing $5 one-time Price |
-| Decision Pack experiment | `STRIPE_PRICE_SINGLE_DEAL_9` | Optional $9 one-time Price |
-| Decision Pack experiment | `STRIPE_PRICE_SINGLE_DEAL_19` | Optional $19 one-time Price |
+| Decision Pack | `STRIPE_PRICE_PDF_ONE_TIME` | Historical $5 mapping; not offered for new checkout |
+| Decision Pack experiment | `STRIPE_PRICE_SINGLE_DEAL_9` | Dormant; do not activate |
+| Decision Pack experiment | `STRIPE_PRICE_SINGLE_DEAL_19` | Dormant; do not activate |
 
 Renaming a Stripe Product’s display text is safe only when the existing Product
 and Price relationship remains intact. Never replace a Product or Price merely
@@ -113,9 +115,27 @@ protected-rate warning.
   `/pricing?billing=checkout_cancelled#plans`.
 - Portal returns to `/profile`; cancel/switch deep links return with their
   existing billing status query parameters.
-- Decision Pack success returns with `pdf_purchase={CHECKOUT_SESSION_ID}` and
-  cancellation returns with `pdf_purchase=cancelled`.
-- Confirm the webhook endpoint receives its subscribed event set in test mode.
+- New Decision Pack checkout remains disabled. Verify existing paid-claim
+  recovery through the automated tests or a previously paid test-mode claim;
+  do not submit a new payment. Current claims return as `pdf_claim=<uuid>` and
+  cancellation uses `pdf_purchase=cancelled`; legacy Session-id returns fail
+  closed.
+- A partial refund, full refund, or lost dispute revokes future report access,
+  recovery, delivery, and Pack-to-Pro credit eligibility. Suspend those rights
+  while a dispute is open. Historical browser-bound verification and PDF export
+  now re-read the current Checkout Session, Charge refund total, and Dispute
+  status on every request and fail closed if Stripe cannot confirm safe access.
+  New Pack sales remain disabled; do not re-enable them to test this path.
+- Confirm the webhook endpoint receives `charge.refunded`,
+  `charge.refund.updated`, `refund.created`, `refund.updated`,
+  `charge.dispute.created`, `charge.dispute.updated`, and
+  `charge.dispute.closed` in test mode. Funds-withdrawn/reinstated dispute
+  events are also handled defensively. These events wake idempotent current-
+  state reconciliation; event arrival order is never used as authority.
+  A refund or lost dispute changes an already-applied Pack credit's audit state
+  to `reversed`; this does **not** remove a coupon from, reprice, or otherwise
+  mutate an existing live subscription. Any financial adjustment is a separate
+  support/accounting action and must preserve all live Price IDs.
   Do not change signature verification or rotate the webhook secret as part of
   this branding review.
 - Confirm a test checkout emits the canonical, PII-free funnel sequence:

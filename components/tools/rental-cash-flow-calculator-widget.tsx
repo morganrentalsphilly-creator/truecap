@@ -62,7 +62,7 @@ function classify(cf: number): { label: string; color: string; note: string } {
   return {
     label: "Strong",
     color: "text-[var(--metric-positive)]",
-    note: "Clears the $400/mo bar TrueCap's verdict engine weighs most heavily (alongside DSCR and CoC).",
+    note: "Clears the $400/mo bar TrueCap's secondary Screening Index model weighs most heavily (alongside DSCR and CoC); this is not investment advice.",
   };
 }
 

@@ -40,8 +40,16 @@ import {
 import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { computeDealOfferLine } from "@/lib/deal-offer-line";
-import { normalizeInvestmentFormSnapshot } from "@/lib/investcalc-schema";
+import { recordedDealOfferLine } from "@/lib/recorded-offer-ceiling";
+import {
+  isReleasedUnderwritingSnapshot,
+  normalizeReleasedInvestmentFormSnapshot,
+} from "@/lib/underwriting-model-release";
 import { normalizeMaoTarget } from "@/lib/mao-target-editor";
+import {
+  isAdoptedOfferCeilingTargetSource,
+  normalizeOfferCeilingTargetSource,
+} from "@/lib/offer-ceiling-contract";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 import { buyBoxHasCriteria, type NamedBuyBox } from "@/lib/buy-box";
 import { normalizeDataConfidence, type DataConfidence } from "@/lib/data-confidence";
@@ -78,6 +86,8 @@ type ResultSnapshot = {
   snapshotVersion?: number | string | null;
   compareSnapshot?: unknown;
   maxOfferTarget?: unknown;
+  maxOfferTargetSource?: unknown;
+  offerCeilingExact?: unknown;
 };
 
 type SavedAnalysisRow = {
@@ -156,6 +166,9 @@ function methodologyLabel(resolution: ReturnType<typeof resolveSavedAnalysisSnap
       ? `Legacy analysis · recomputed with current v${TRUECAP_UNDERWRITING_STANDARD_VERSION}`
       : `Legacy analysis · stored snapshot (current v${TRUECAP_UNDERWRITING_STANDARD_VERSION} recompute unavailable)`;
   }
+  if (resolution.usesRecordedSnapshot) {
+    return `Recorded Standard v${resolution.storedMethodologyVersion}`;
+  }
   return `Standard v${resolution.storedMethodologyVersion}`;
 }
 
@@ -175,14 +188,11 @@ function mapDeal(
   });
   const snapshot = resolution.snapshot as ResultSnapshot;
   const purchasePrice = toNumber(row.purchase_price);
-  // Recompute the verdict AND the decision metrics from the form snapshot with
-  // the CURRENT engine (Balanced lens) so Compare matches the Dashboard and My
-  // Deals lists — all recompute on read (see recomputeSavedDealVerdict). Reading
-  // the stored snapshot verbatim showed STALE numbers here while those surfaces
-  // showed the fresh ones: the same deal reading two different values (the
-  // 52-vs-78 P0). Falls back to stored values if the snapshot can't be reparsed.
+  // A saved result is recorded history. The resolver uses its exact financial
+  // outputs and score; only explicitly unpinned legacy rows retain the clearly
+  // labeled compatibility recompute.
   const resolvedCurrent = resolution.didRecompute ? recomputed : null;
-  const frozenScore = resolution.shouldFreeze
+  const frozenScore = resolution.usesRecordedSnapshot
     ? parseFrozenDealScore(snapshot)
     : null;
   const netCashFlow = resolvedCurrent
@@ -204,18 +214,32 @@ function mapDeal(
   let maxOffer: number | null = null;
   let offerGap: number | null = null;
   let maxOfferBasisLabel: string | null = null;
-  const persistedMaoTarget = normalizeMaoTarget(
-    row.result_snapshot?.maxOfferTarget
+  const persistedTargetSource = normalizeOfferCeilingTargetSource(
+    row.result_snapshot?.maxOfferTargetSource
   );
-  // Frozen rows deliberately retain metrics from an incompatible historical
-  // methodology. Never put a current-engine inverse solve beside them; the
-  // user must explicitly re-underwrite first (same rule as My Deals/PDF).
-  if (
+  const persistedMaoTarget =
+    persistedTargetSource == null ||
+    isAdoptedOfferCeilingTargetSource(persistedTargetSource)
+      ? normalizeMaoTarget(row.result_snapshot?.maxOfferTarget)
+      : null;
+  if (canShowMao && resolution.usesRecordedSnapshot) {
+    const recorded = recordedDealOfferLine({
+      snapshot: row.result_snapshot,
+      isShoppingStage: true,
+    });
+    if (recorded?.offer && recorded.offer.kind !== "blocked") {
+      maxOffer = recorded.offer.maxPrice ?? null;
+      offerGap =
+        maxOffer != null && purchasePrice != null
+          ? purchasePrice - maxOffer
+          : null;
+      maxOfferBasisLabel = maxOffer != null ? recorded.basisLabel : null;
+    }
+  } else if (
     canShowMao &&
-    !resolution.shouldFreeze &&
     (persistedMaoTarget != null || buyBoxesResolved)
   ) {
-    const values = normalizeInvestmentFormSnapshot(row.form_snapshot);
+    const values = normalizeReleasedInvestmentFormSnapshot(row.form_snapshot);
     if (values) {
       try {
         const { offer, basisLabel } = computeDealOfferLine(values, activeBuyBoxes, {
@@ -250,7 +274,7 @@ function mapDeal(
     monthlyRentalIncome: resolvedCurrent ? resolvedCurrent.monthlyRentalIncome : toNumber(snapshot.monthlyRentalIncome),
     totalOperatingExpenses: resolvedCurrent ? resolvedCurrent.totalOperatingExpenses : toNumber(snapshot.totalOperatingExpenses),
     purchasePrice,
-    // Max Offer + gap use the exact persisted target resolved just above.
+    // Offer Ceiling + gap use the exact persisted target resolved just above.
     // "blocked" carries no price by design (no dollar figure fixes a
     // wrong-market miss).
     maxOffer,
@@ -265,12 +289,11 @@ function mapDeal(
 
   const assumptions = buildDealAssumptions(row.form_snapshot, row);
   const compareSnapshotVersion = toNumber(snapshot.snapshotVersion ?? null);
-  // Recompute the compareSnapshot from the form so exit-scenario figures (year-10
-  // profit, Total ROI) reflect the current exit-tax math — otherwise deals saved
-  // before the exit-tax change would show pre-tax ROI next to post-tax ones.
-  // Falls back to the persisted snapshot for legacy/unparseable forms.
+  // Long-term tables are part of the same recorded result. Never mix a saved
+  // base case with exit/tax rows silently regenerated by today's deployment.
+  // Legacy unpinned rows retain their labeled compatibility recompute.
   const compareSnapshot: CompareSnapshotV1 | null =
-    resolution.shouldFreeze
+    resolution.usesRecordedSnapshot
       ? parseCompareSnapshotV1(snapshot.compareSnapshot)
       : recomputeCompareSnapshotFromForm(row.form_snapshot) ??
         parseCompareSnapshotV1(snapshot.compareSnapshot);
@@ -332,7 +355,7 @@ export default async function DashboardComparePage() {
   ]);
   const displayName = getDisplayName((profile as ProfileRow | null) ?? null, user.email);
   const initials = getInitials(displayName, user.email ?? "");
-  // MAO uses the catalog's paid-status gate. Requiring a nonexistent `mao`
+  // Offer Ceiling uses the catalog's paid-status gate. Requiring a nonexistent `mao`
   // plan-feature string would incorrectly hide it from valid Pro customers.
   const canShowMao = isPremium;
 
@@ -496,10 +519,14 @@ export default async function DashboardComparePage() {
   // Dynamic string selects defeat Supabase's row-type inference, so the rows
   // come back loosely typed — cast through unknown (same as the My Deals list).
   const rowById = new Map(
-    ((rows ?? []) as unknown[]).map((row) => {
+    ((rows ?? []) as unknown[])
+      .filter((row) =>
+        isReleasedUnderwritingSnapshot((row as SavedAnalysisRow).form_snapshot)
+      )
+      .map((row) => {
       const r = row as SavedAnalysisRow;
       return [r.id, r] as const;
-    })
+      })
   );
   const buyBoxesResult = await listBuyBoxesAction().catch(() => null);
   const activeCompareBuyBoxes =
@@ -509,7 +536,7 @@ export default async function DashboardComparePage() {
   const compareBuyBoxesResolved = Boolean(buyBoxesResult?.ok);
   const deals = ids.map((id) => rowById.get(id)).filter((row): row is SavedAnalysisRow => Boolean(row))
     // Buy boxes resolve on the same canUse gate the dashboard and My Deals
-    // use, so a Compare row's Max Offer matches those screens exactly.
+    // use, so a Compare row's Offer Ceiling matches those screens exactly.
     .map((row) =>
       mapDeal(row, activeCompareBuyBoxes, canShowMao, compareBuyBoxesResolved)
     );
@@ -560,7 +587,6 @@ export default async function DashboardComparePage() {
             // Gates the winner card's "Mark the others as Passed" bulk stage
             // write the same way My Deals gates stage changes; the server
             // action re-enforces the entitlement regardless.
-            canUsePipeline={hasPlanFeature(entitlements, "pipeline")}
           />
         </div>
       </div>

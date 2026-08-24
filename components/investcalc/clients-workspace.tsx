@@ -219,7 +219,7 @@ export function ClientsWorkspace({
         <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
           Add the buyer here, define their criteria, analyze a property, assign the saved analysis,
           then share the client report. Keep follow-up in the deal notes and move the pipeline stage
-          when you submit the offer.
+          after verifying the assumptions and recording the buyer&apos;s decision.
         </p>
         <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs font-semibold">
           <Link href="/settings#buy-boxes" className="text-primary hover:underline">

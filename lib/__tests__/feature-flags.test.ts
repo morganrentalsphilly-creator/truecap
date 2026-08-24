@@ -35,6 +35,7 @@ describe("product feature flags", () => {
       "batch_underwriting",
       "agent_client_matching",
       "new_homepage_positioning",
+      "advocacy_decision_contract",
       "decision_first_results",
       "focused_dashboard",
     ]);

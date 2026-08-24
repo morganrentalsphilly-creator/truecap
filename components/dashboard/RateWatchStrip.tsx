@@ -123,7 +123,7 @@ export function RateWatchStrip({
       {extra > 0 ? (
         <p className="mt-2 text-xs text-muted-foreground">
           +{extra} more {extra === 1 ? "deal" : "deals"} changed — see all in{" "}
-          <Link href="/dashboard/saved-analyses" prefetch={false} className="font-semibold text-primary hover:underline">
+          <Link href="/dashboard/saved-analyses" prefetch={false} className="inline-flex min-h-11 items-center font-semibold text-primary hover:underline">
             My Deals
           </Link>
           .

@@ -28,16 +28,19 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  investmentFormSchema,
   previewParse,
   InvestmentFormValues,
   defaultValues,
   describeInvestmentFormSnapshotIssue,
   getDefaultUnitsForPropertyType,
   isValidRentalUnit,
-  normalizeInvestmentFormDraft,
-  normalizeInvestmentFormSnapshot,
 } from "@/lib/investcalc-schema";
+import {
+  isReleasedUnderwritingSnapshot,
+  normalizeReleasedInvestmentFormDraft,
+  normalizeReleasedInvestmentFormSnapshot,
+  releasedInvestmentFormSchema,
+} from "@/lib/underwriting-model-release";
 import { calculateAnalysis, AnalysisResult } from "@/lib/calc-analysis";
 import { getDealTier } from "@/lib/verdict";
 import { PropertyTypeSection } from "./property-type-section";
@@ -84,7 +87,6 @@ import { StickyCalculateBar } from "./sticky-calculate-bar";
 import { LiveVerdictPanel, type LivePreviewSnapshot } from "./live-verdict-panel";
 import { AutosaveIndicator } from "./autosave-indicator";
 import type { AnalysisDashboardTab } from "./analysis-dashboard";
-import type { ApplicableDecisionThreshold } from "./what-needs-to-be-true-card";
 import { AnalysisDashboardSkeleton } from "./analysis-dashboard-skeleton";
 import { AnalysisErrorBoundary } from "@/components/investcalc/analysis-error-boundary";
 import { PostAnalysisEmailPrompt } from "@/components/marketing/post-analysis-email-prompt";
@@ -96,17 +98,21 @@ import { saveDealAction } from "@/app/actions/saved-analyses";
 import { buildDataConfidence, type EnrichmentProvenanceInput } from "@/lib/data-confidence";
 import {
   buildInputConfidence,
-  inputSourceClassLabel,
   inputVerificationFingerprint,
   mergeInputConfidenceSourceContext,
   normalizeInputVerificationEvidence,
   restoreInputConfidenceSourceContext,
   type InputConfidenceFieldKey,
-  type InputConfidenceResult,
   type InputVerificationEvidence,
 } from "@/lib/input-confidence";
+import {
+  buildAssumptionLedger,
+  buildDecisionTargetContext,
+  userDecisionFromPipelineStage,
+} from "@/lib/decision-contract";
 import type { ReportMode } from "@/lib/pdf-export-constants";
 import type { PropertyEnrichment } from "@/lib/property-enrichment/rentcast";
+import { selectUnderwritingEnrichment } from "@/lib/property-enrichment/underwriting-adoption";
 import { addDealToCompareAction } from "@/app/actions/compare";
 import { getDealScoreAction, type DealScoreActionResult } from "@/app/actions/deal-score";
 import { trackAnalysisRunAction } from "@/app/actions/track-analysis-run";
@@ -137,10 +143,14 @@ import {
   parseFrozenDealScore,
   resolveSavedAnalysisResult,
 } from "@/lib/saved-analysis-methodology";
+import {
+  invalidateRecordedOfferCeilingForTargetEdit,
+  readRecordedOfferCeiling,
+  type RecordedOfferCeilingViewState,
+} from "@/lib/recorded-offer-ceiling";
 import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
 import { getLimitingFactor } from "@/lib/limiting-factor";
 import {
-  createOneTimePdfCheckoutAction,
   verifyOneTimePdfPaymentAction,
 } from "@/app/actions/one-time-pdf";
 import {
@@ -183,6 +193,7 @@ import { trackConversion } from "@/lib/analytics/track-conversion";
 import { trackEvent } from "@/lib/analytics";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import {
+  isAdoptedOfferCeilingTargetSource,
   normalizeOfferCeilingTargetSource,
   type OfferCeilingTargetSource,
 } from "@/lib/offer-ceiling-contract";
@@ -331,6 +342,7 @@ function writeCalcDraftWithMaoTarget(
   targetInput: unknown,
   sourceInput?: unknown
 ): void {
+  if (!isReleasedUnderwritingSnapshot(values)) return;
   try {
     writeCalcDraftRaw(JSON.stringify(values));
   } catch {
@@ -340,7 +352,7 @@ function writeCalcDraftWithMaoTarget(
   }
 
   const target = normalizeMaoTarget(targetInput);
-  const normalizedDraft = normalizeInvestmentFormDraft(values);
+  const normalizedDraft = normalizeReleasedInvestmentFormDraft(values);
   const analysisFingerprint = maoTargetAnalysisFingerprint(normalizedDraft ?? values);
   const source = normalizeOfferCeilingTargetSource(sourceInput);
   if (target && analysisFingerprint) {
@@ -434,7 +446,7 @@ function formSnapshotForCompare(values: InvestmentFormValues): string | null {
     })
   );
   const candidate: InvestmentFormValues = { ...values, units: sanitizedUnits };
-  const parsed = investmentFormSchema.safeParse(candidate);
+  const parsed = releasedInvestmentFormSchema.safeParse(candidate);
   return parsed.success ? JSON.stringify(parsed.data) : null;
 }
 
@@ -448,14 +460,14 @@ const INPUT_TABS: {
   { id: "cash-flow", label: "Cash Flow Analysis", mobileLabel: "Cash Flow", isPro: false, isFree: true },
   { id: "projections", label: "10-Year Projections", mobileLabel: "10-Year", isPro: true },
   { id: "tax-strategy", label: "Illustrative Tax Impact", mobileLabel: "Tax", isPro: true },
-  { id: "deal-score", label: "Deal Score", mobileLabel: "Score", isPro: true },
+  { id: "deal-score", label: "Screening Index", mobileLabel: "Index", isPro: true },
 ];
 const SAVED_ANALYSIS_AUTO_EXPORT_PDF_KEY = "truecap_saved_analysis_auto_export_pdf";
 
 /** What enrich-property filled, captured so we can attribute data confidence
  *  at save time (and live on the result screen). */
 type EnrichmentCapture = {
-  monthlyRent?: { source: "hud-fmr" | "hud-safmr"; detail?: string; fetchedAt?: string; value: number };
+  monthlyRent?: { source: "hud-fmr" | "hud-safmr" | "rentcast-estimate"; detail?: string; fetchedAt?: string; value: number };
   interestRate?: { source: "fred"; fetchedAt?: string; value: number };
   propertyTaxPct?: { source: "state-static"; detail?: string; value: number };
 };
@@ -527,6 +539,7 @@ export function InvestCalcPage({
   savedDealLimit = null,
   isAuthenticated = false,
   userAnalysisDefaults = null,
+  advocacyContractEligible = false,
 }: {
   canSaveDeals?: boolean;
   canCompareDeals?: boolean;
@@ -552,8 +565,13 @@ export function InvestCalcPage({
    *  engine's built-in defaults at form initialization + on every
    *  resetToNewAnalysis. */
   userAnalysisDefaults?: Record<string, number> | null;
+  /** Server-derived internal rollout eligibility. This is not an entitlement
+   * and must remain false for anonymous/public renders. */
+  advocacyContractEligible?: boolean;
   }) {
   const router = useRouter();
+  const advocacyDecisionContract =
+    advocacyContractEligible && isFeatureEnabled("advocacy_decision_contract");
   const [activeInputTab, setActiveInputTab] = useState<InputTab>("cash-flow");
   const [activeDashboardTab, setActiveDashboardTab] = useState<AnalysisDashboardTab>("cash-flow");
   // Bumped on every point-at-tab intent so the ledger reopens a row the
@@ -587,7 +605,7 @@ export function InvestCalcPage({
   // Pre-run live verdict gating (LIVE-VERDICT-VS-STRATEGY-FRAMING): while a
   // solve-oriented play is active (Wholesale/BRRRR/Flip — primaryTab !==
   // "cash-flow"), the generic asking-price verdict directly contradicts the
-  // play's framing ("we'll reverse-solve your max offer" next to a NEGATIVE
+  // play's framing ("we'll reverse-solve your Offer Ceiling" next to a NEGATIVE
   // buy-box readout). The post-run hero already suppresses that verdict via
   // strategyLeadsOutput (analysis-dashboard) — apply the same rule to the
   // in-form LiveVerdictPanel and the sticky dock readout pre-run.
@@ -595,11 +613,13 @@ export function InvestCalcPage({
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   // The exact form values that produced `analysisResult`. The results
   // dashboard reads from this (not a live form.getValues() snapshot) so the
-  // headline metrics and the derived cards (Max Offer, Sensitivity, etc.) are
+  // headline metrics and the derived cards (Offer Ceiling, Sensitivity, etc.) are
   // always computed from the SAME inputs — never a mix of frozen result +
   // live form state. Updated everywhere `analysisResult` is set.
   const [analysisValues, setAnalysisValues] = useState<InvestmentFormValues | null>(null);
   const [savedMethodologyLabel, setSavedMethodologyLabel] = useState<string | null>(null);
+  const [recordedOfferCeiling, setRecordedOfferCeiling] =
+    useState<RecordedOfferCeilingViewState>(null);
   const [inputVerification, setInputVerification] = useState<InputVerificationEvidence>({});
   const [appliedFinancingProfile, setAppliedFinancingProfile] =
     useState<FinancingProfileSnapshot | null>(null);
@@ -648,7 +668,7 @@ export function InvestCalcPage({
       const cf = `${ncf >= 0 ? "+" : "-"}$${Math.abs(ncf).toLocaleString()}/mo`;
       const dscr = lp.monthlyPayment > 0 ? `, DSCR ${lp.dscr.toFixed(2)}` : "";
       setLivePreviewMsg(
-        `Live preview: ${lp.tier}, Deal Score ${lp.score} out of 100, cash flow ${cf}, cap rate ${lp.capRate.toFixed(1)}%${dscr}.`
+        `Live underwriting preview: cash flow ${cf}, cap rate ${lp.capRate.toFixed(1)}%${dscr}. Review all assumptions before relying on this preliminary result.`
       );
     }, 400);
     return () => window.clearTimeout(id);
@@ -702,8 +722,8 @@ export function InvestCalcPage({
   const [restoredFromDraft, setRestoredFromDraft] = useState(false);
   /**
    * Snapshot of the address from the restored draft so the welcome
-   * banner can show it ("Welcome back - your draft for 1700 W Erie
-   * Ave is ready"). Captured at restore time so it doesn't update if
+   * banner can identify which saved draft is ready. Captured at restore
+   * time so it doesn't update if
    * the user edits the field afterwards.
    */
   const [restoredAddress, setRestoredAddress] = useState<string | null>(null);
@@ -729,6 +749,7 @@ export function InvestCalcPage({
   const [addressChangedChoiceBusy, setAddressChangedChoiceBusy] =
     useState<AddressChangedChoice | null>(null);
   const [savedDealId, setSavedDealId] = useState<string | null>(null);
+  const [loadedPipelineStage, setLoadedPipelineStage] = useState<string | null>(null);
   const [savedDealCount, setSavedDealCount] = useState(initialSavedDealCount);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isComparingDeals, setIsComparingDeals] = useState(false);
@@ -737,7 +758,7 @@ export function InvestCalcPage({
   // ── Sample-deal Pro preview ────────────────────────────────────────
   // When the analysis was triggered from the "Try a sample deal" button
   // AND the user lacks the Pro entitlements, we unlock the full Pro
-  // report (projections, tax, exit, deal score, stress-test, strategies)
+  // report (projections, tax, exit, Screening Index, stress-test, strategies)
   // for that one demo run. This shows prospects what Pro actually looks
   // like instead of a locked teaser. It's a pure UI unlock: the sample
   // is never saved (no analysisId), so the snapshot server actions are
@@ -758,12 +779,12 @@ export function InvestCalcPage({
   // State updates do not synchronously disable a button. This ref closes the
   // same-tick window where a double click could otherwise submit two saves.
   const saveInFlightRef = useRef(false);
-  // ── One-time PDF purchase ($5, Stripe Checkout) ────────────────────
-  // A verified, server-consumed purchase unlocks exactly the deal that was
-  // fingerprinted at checkout. The high-entropy binding secret and draft
-  // survive Stripe only in same-tab sessionStorage; neither reaches the URL.
+  // ── Historical one-time PDF claim recovery ─────────────────────────
+  // New checkout is disabled. A previously verified, server-consumed purchase
+  // unlocks exactly the deal fingerprinted at checkout. The high-entropy
+  // binding secret and draft survive Stripe only in same-tab sessionStorage;
+  // neither reaches the URL.
   const [isPdfPurchaseDialogOpen, setIsPdfPurchaseDialogOpen] = useState(false);
-  const [isStartingPdfCheckout, setIsStartingPdfCheckout] = useState(false);
   const oneTimePdfUnlockedRef = useRef(false);
   const oneTimePdfRedemptionRef = useRef<{
     claimId: string;
@@ -879,7 +900,7 @@ export function InvestCalcPage({
         }, 50);
         return;
       }
-      // Deal Score has no ledger row — it lives in the answer hero at the
+      // Screening Index has no ledger row — it lives in the answer hero at the
       // top of the results, so results-top is the right landing for it.
       setTimeout(() => {
         scrollToAnalysisResults();
@@ -918,7 +939,7 @@ export function InvestCalcPage({
   };
 
   const form = useForm<InvestmentFormValues>({
-    resolver: zodResolver(investmentFormSchema),
+    resolver: zodResolver(releasedInvestmentFormSchema),
     defaultValues: buildNewAnalysisDefaults("single-family", userAnalysisDefaults),
     mode: "onChange",
   });
@@ -1005,6 +1026,11 @@ export function InvestCalcPage({
       analysisMaoTargetRef.current = target;
       setAnalysisMaoTarget(target);
       setAnalysisMaoTargetSource("selected-targets");
+      // The edited criteria no longer match the atomically recorded solve.
+      // Keep recorded mode fail-closed until an explicit Run or Save replaces
+      // the whole base result too; otherwise today's inverse solver would sit
+      // beside historical base metrics for one mixed-methodology view.
+      setRecordedOfferCeiling(invalidateRecordedOfferCeilingForTargetEdit);
       syncFormDirtyVersusPersisted();
     },
     [syncFormDirtyVersusPersisted]
@@ -1019,6 +1045,7 @@ export function InvestCalcPage({
     setDealScoreResult(null);
     setShowResults(false);
     setSavedMethodologyLabel(null);
+    setRecordedOfferCeiling(null);
     setIsLoadingDealScore(false);
     // No results on screen → nothing to be stale.
     setStaleResultsWarning(false);
@@ -1090,6 +1117,7 @@ export function InvestCalcPage({
       form.clearErrors();
       setSavedDealId(null);
       savedDealIdRef.current = null;
+      setLoadedPipelineStage(null);
       lastPersistedFormJsonRef.current = null;
       lastPersistedMaoTargetJsonRef.current = null;
       lastComputedFormJsonRef.current = null;
@@ -1798,6 +1826,7 @@ export function InvestCalcPage({
   const applyComps = useCallback(
     (e: PropertyEnrichment) => {
       const f = e.facts;
+      const adopted = selectUnderwritingEnrichment(e);
       const filled: string[] = [];
       // Explicit click = the user is asking for RentCast's numbers, so
       // OVERWRITE the autofill-owned fields rather than only filling blanks.
@@ -1814,25 +1843,31 @@ export function InvestCalcPage({
         form.setValue("sqft", f.squareFootage, opts);
         filled.push("size");
       }
-      // Prefer the REAL for-sale list price (asking price) when we have it;
-      // fall back to the AVM value estimate otherwise.
-      const price = e.listPrice ?? e.valueEstimate;
-      const priceIsAsking = e.listPrice != null;
-      if (price != null) {
-        form.setValue("purchasePrice", Math.round(price), opts);
-        filled.push(priceIsAsking ? "asking price" : "price");
+      // Only an active listing may become the asking price. The AVM remains
+      // visible as comp evidence and never enters the acquisition math.
+      const priceIsAsking = adopted.purchasePriceSource === "active-listing";
+      if (adopted.purchasePrice != null) {
+        form.setValue("purchasePrice", adopted.purchasePrice, opts);
+        filled.push("asking price");
       }
       const pt = form.getValues("propertyType");
-      if (e.rentEstimate != null && (pt === "single-family" || pt === "owner-occupant")) {
-        form.setValue("monthlyRent", Math.round(e.rentEstimate), opts);
-        filled.push("rent");
+      if (adopted.monthlyRent != null && (pt === "single-family" || pt === "owner-occupant")) {
+        form.setValue("monthlyRent", adopted.monthlyRent, opts);
+        setMarketRentEstimate(adopted.monthlyRent);
+        enrichmentCaptureRef.current.monthlyRent = {
+          source: "rentcast-estimate",
+          detail: "RentCast market-rent estimate",
+          fetchedAt: e.fetchedAt,
+          value: adopted.monthlyRent,
+        };
+        filled.push("estimated market rent");
       }
       if (filled.length > 0) {
         toast({
           title: "Auto-filled from address",
           description: `Filled ${filled.join(", ")} from RentCast${
             priceIsAsking ? " (asking price from the active listing)" : ""
-          } - adjust anything that's off.`,
+          }. AVM value stayed in comps and was not used as an asking price. Review every estimate before relying on it.`,
         });
       }
     },
@@ -2146,7 +2181,13 @@ export function InvestCalcPage({
       // edit); the whole set drops on Clear, which now restores the values
       // the badges were describing.
       strategyAppliedRef.current = applied
-        ? { label: strategy.label, fields: applied }
+        ? {
+            label:
+              strategy.key === "wholesale-mao"
+                ? "Wholesale / Offer Ceiling"
+                : strategy.label,
+            fields: applied,
+          }
         : null;
       // The starter set just overwrote any applied template's values —
       // leaving templateId linked would resurface "Template: <name> ✓"
@@ -2284,10 +2325,9 @@ export function InvestCalcPage({
     computedResult: AnalysisResult,
     values: InvestmentFormValues
   ) => {
-    // Same-standard and honest legacy rows retain the established
-    // recompute-on-read behavior. Once a future material methodology version
-    // differs, however, the frozen snapshot wins until the user explicitly
-    // chooses to re-underwrite under the current standard.
+    // Saved results are recorded history, including same-standard rows. Only
+    // explicitly unpinned legacy rows retain the labeled compatibility
+    // recompute; re-running is always a separate user action.
     const score = computeDealScore(buildDealScoreInputFromAnalysis(values, computedResult));
     return resolveSavedAnalysisResult({
       methodologyVersion,
@@ -2320,13 +2360,15 @@ export function InvestCalcPage({
       // previewParse (not the full schema): the live verdict forms on
       // price + rent alone — address is required for save/share but the
       // math never reads it, so it must not gate the magic moment.
-      const liveParsed = previewParse(form.getValues());
+      const liveValues = form.getValues();
+      if (!isReleasedUnderwritingSnapshot(liveValues)) {
+        setLivePreview(null);
+        return;
+      }
+      const liveParsed = previewParse(liveValues);
       if (liveParsed.success) {
         try {
           const r = calculateAnalysis(liveParsed.data);
-          // Deal Score is free for everyone, so compute it for the preview too
-          // - the hero 0-100 number forming live is the magic moment.
-          const ds = computeDealScore(buildDealScoreInputFromAnalysis(liveParsed.data, r));
           // The reverse-price solver is a paid feature. Pro customers get a
           // break-even preview here; Free visitors get the factual metrics and
           // nonnumeric next-step guidance rendered by LiveVerdictPanel.
@@ -2336,8 +2378,6 @@ export function InvestCalcPage({
           const breakEven = null;
           const tier = getDealTier(r);
           setLivePreview({
-            tier,
-            score: ds.score,
             netCashFlow: r.netCashFlow,
             capRate: r.capRate,
             dscr: r.dscr,
@@ -2374,7 +2414,7 @@ export function InvestCalcPage({
       setStaleResultsWarning(true);
       return;
     }
-    const parsed = investmentFormSchema.safeParse(form.getValues());
+    const parsed = releasedInvestmentFormSchema.safeParse(form.getValues());
     if (!parsed.success) {
       setStaleResultsWarning(true);
       return;
@@ -2398,6 +2438,7 @@ export function InvestCalcPage({
     // longer a historical saved-analysis view, so a frozen/legacy provenance
     // label would be stale and misleading.
     setSavedMethodologyLabel(null);
+    setRecordedOfferCeiling(null);
     setAnalysisResult(result);
     setAnalysisValues(values);
     setProjectionSource(
@@ -2417,7 +2458,7 @@ export function InvestCalcPage({
           )
         : null
     );
-    // Deal Score recomputed client-side with the same pure fn the server
+    // Screening Index recomputed client-side with the same pure fn the server
     // action wraps — only when the user is actually entitled, so we neither
     // bypass the free-tier gate nor hammer the server on every keystroke.
     if (canUseDealScore) {
@@ -2573,8 +2614,8 @@ export function InvestCalcPage({
         // "Duplicate assumptions" working as the recovery path for frozen
         // legacy deals.
         const normalized =
-          normalizeInvestmentFormSnapshot(parsed.formSnapshot) ??
-          normalizeInvestmentFormDraft(parsed.formSnapshot);
+          normalizeReleasedInvestmentFormSnapshot(parsed.formSnapshot) ??
+          normalizeReleasedInvestmentFormDraft(parsed.formSnapshot);
         if (normalized) {
           const forked: Partial<InvestmentFormValues> = {
             ...normalized,
@@ -2640,8 +2681,9 @@ export function InvestCalcPage({
           templateFallback?: unknown;
           resultSnapshot?: unknown;
           methodologyVersion?: unknown;
+          pipelineStage?: unknown;
         };
-        const normalized = normalizeInvestmentFormSnapshot(parsed.formSnapshot);
+        const normalized = normalizeReleasedInvestmentFormSnapshot(parsed.formSnapshot);
         if (normalized && typeof parsed.id === "string") {
           const parsedTemplateFallback =
             parsed.templateFallback &&
@@ -2677,6 +2719,9 @@ export function InvestCalcPage({
           }
           setSavedDealId(parsed.id);
           savedDealIdRef.current = parsed.id;
+          setLoadedPipelineStage(
+            typeof parsed.pipelineStage === "string" ? parsed.pipelineStage : null
+          );
           lastPersistedFormJsonRef.current = formSnapshotForCompare(hydratedValues);
           lastComputedFormJsonRef.current = formSnapshotForCompare(hydratedValues);
           setSavedTemplateFallback(parsedTemplateFallback);
@@ -2739,6 +2784,16 @@ export function InvestCalcPage({
             hydratedValues
           );
           const result = resolution.result;
+          if (resolution.usesRecordedSnapshot) {
+            const recorded = readRecordedOfferCeiling(savedResultRecord);
+            setRecordedOfferCeiling(
+              recorded.captured
+                ? { captured: true, exact: recorded.exact }
+                : { captured: false, exact: null }
+            );
+          } else {
+            setRecordedOfferCeiling(null);
+          }
           if (!result) {
             // A newer methodology's incomplete snapshot cannot be made whole
             // with today's math without fabricating a mixed-version decision.
@@ -2794,12 +2849,14 @@ export function InvestCalcPage({
               ? `Frozen TrueCap Underwriting Standard v${resolution.storedMethodologyVersion}`
               : isLegacySavedMethodologyVersion(resolution.storedMethodologyVersion)
                 ? `Legacy analysis · recomputed with current v${TRUECAP_UNDERWRITING_STANDARD_VERSION}`
-                : `TrueCap Underwriting Standard v${resolution.storedMethodologyVersion}`
+                : resolution.usesRecordedSnapshot
+                  ? `Recorded TrueCap Underwriting Standard v${resolution.storedMethodologyVersion}`
+                  : `TrueCap Underwriting Standard v${resolution.storedMethodologyVersion}`
           );
           setHasUnsavedChanges(false);
           pendingResultsScrollRef.current = true;
           // A frozen result and score move together. Invoking the current score
-          // engine here would silently pair new Deal Score arithmetic with old
+          // engine here would silently pair new Screening Index arithmetic with old
           // financial outputs.
           // The resolver already switched financials + score atomically.
           queueMicrotask(() => {
@@ -2817,7 +2874,9 @@ export function InvestCalcPage({
         // No results render — the schema rejected these values, so nothing
         // computed from them should either.
         const lenient =
-          typeof parsed.id === "string" ? normalizeInvestmentFormDraft(parsed.formSnapshot) : null;
+          typeof parsed.id === "string"
+            ? normalizeReleasedInvestmentFormDraft(parsed.formSnapshot)
+            : null;
         if (lenient && typeof parsed.id === "string") {
           const issue = describeInvestmentFormSnapshotIssue(parsed.formSnapshot);
           prevPropertyTypeRef.current = lenient.propertyType;
@@ -2831,6 +2890,9 @@ export function InvestCalcPage({
           }
           setSavedDealId(parsed.id);
           savedDealIdRef.current = parsed.id;
+          setLoadedPipelineStage(
+            typeof parsed.pipelineStage === "string" ? parsed.pipelineStage : null
+          );
           lastPersistedFormJsonRef.current = formSnapshotForCompare(lenient);
           clearPendingMaoTarget();
           const restoredMaoTarget = normalizeMaoTarget(
@@ -2953,7 +3015,7 @@ export function InvestCalcPage({
         // schema-INCOMPLETE (address + price, no rent yet) — the strict
         // snapshot gate rejected exactly the drafts this feature exists
         // for and the catch below then wiped them.
-        const normalized = normalizeInvestmentFormDraft(parsedDraft);
+        const normalized = normalizeReleasedInvestmentFormDraft(parsedDraft);
         if (normalized) {
           prevPropertyTypeRef.current = normalized.propertyType;
           form.reset(normalized);
@@ -2983,9 +3045,8 @@ export function InvestCalcPage({
           // Surface the restore visibly. Without this the user just
           // sees a pre-filled form and wonders what happened.
           setRestoredFromDraft(true);
-          // Capture the address so the banner can name the deal
-          // specifically ("Welcome back - your draft for 1700 W Erie
-          // Ave is ready"). Trim + cap to a sane length so a
+          // Capture the address so the banner can name the saved draft.
+          // Trim + cap to a sane length so a
           // pathologically long address can't blow out the layout.
           const addr = (normalized.address ?? "").trim();
           setRestoredAddress(addr ? addr.slice(0, 60) : null);
@@ -3219,7 +3280,7 @@ export function InvestCalcPage({
    * validation — mid-edit invalidity exists only at the schema level.
    */
   const handleJumpToFirstInvalidField = () => {
-    const parsed = investmentFormSchema.safeParse(form.getValues());
+    const parsed = releasedInvestmentFormSchema.safeParse(form.getValues());
     if (parsed.success) return; // already healed — the strip clears on the next recompute
     const issue = parsed.error.issues[0];
     if (!issue || issue.path.length === 0) return;
@@ -3238,7 +3299,7 @@ export function InvestCalcPage({
     // Use a synchronous snapshot of the live form right after validation. This
     // matches what the user sees (including fields that only exist while mounted)
     // and avoids any mismatch between RHF state and resolver output.
-    const liveParse = investmentFormSchema.safeParse(form.getValues());
+    const liveParse = releasedInvestmentFormSchema.safeParse(form.getValues());
     const values: InvestmentFormValues = liveParse.success ? liveParse.data : validated;
 
     // If the user changed the purchase price away from the hero auto-
@@ -3373,6 +3434,7 @@ export function InvestCalcPage({
       // currently deployed standard. Retire any saved-version provenance at
       // the same moment the replacement outputs become visible.
       setSavedMethodologyLabel(null);
+      setRecordedOfferCeiling(null);
       setAnalysisResult(result);
       // A full Run just validated + computed from the live form — the
       // results are current by definition.
@@ -3433,7 +3495,7 @@ export function InvestCalcPage({
       // pass through onSubmit, so mid-edit repaints don't yank the page.
       pendingResultsScrollRef.current = true;
       if (sampleProPreview && !canUseDealScore) {
-        // Compute the full Deal Score client-side for the demo using
+        // Compute the full Screening Index client-side for the demo using
         // the same pure function the server action wraps. No server
         // call, no entitlement bypass - the sample can't be saved.
         setDealScoreResult({
@@ -3669,16 +3731,26 @@ export function InvestCalcPage({
       );
       const analysisFingerprint = maoTargetAnalysisFingerprint(currentValues);
       const pendingMaoBinding = readPendingMaoTargetBinding(analysisFingerprint);
-      const maxOfferTargetSnapshot =
+      const candidateMaxOfferTarget =
         normalizeMaoTarget(options.maxOfferTargetOverride) ??
         analysisMaoTargetRef.current ??
         pendingMaoBinding?.target ??
         null;
-      const maxOfferTargetSourceSnapshot =
+      const candidateMaxOfferTargetSource =
         options.maxOfferTargetSourceOverride ??
         analysisMaoTargetSource ??
         pendingMaoBinding?.source ??
-        "selected-targets";
+        (candidateMaxOfferTarget ? "selected-targets" : "screening-defaults");
+      const targetWasAdopted = isAdoptedOfferCeilingTargetSource(
+        candidateMaxOfferTargetSource
+      );
+      const maxOfferTargetSnapshot = targetWasAdopted
+        ? candidateMaxOfferTarget
+        : null;
+      const maxOfferTargetSourceSnapshot: OfferCeilingTargetSource =
+        maxOfferTargetSnapshot
+          ? candidateMaxOfferTargetSource
+          : "screening-defaults";
       if (maxOfferTargetSnapshot && !analysisMaoTargetRef.current) {
         analysisMaoTargetRef.current = maxOfferTargetSnapshot;
         setAnalysisMaoTarget(maxOfferTargetSnapshot);
@@ -3731,7 +3803,7 @@ export function InvestCalcPage({
         // parsedValues derives from the payload actually sent (NOT a fresh
         // form.getValues()): edits made while the save was in flight must
         // not be stamped as the persisted/displayed "saved" state.
-        const parsedValues = investmentFormSchema.safeParse(currentValues);
+        const parsedValues = releasedInvestmentFormSchema.safeParse(currentValues);
         // Fork raced this save (see saveGeneration above): the form now
         // holds the NEXT deal — do not attach the saved id or clear the
         // fork's draft.
@@ -3745,6 +3817,7 @@ export function InvestCalcPage({
         }
         setSavedDealId(result.id);
         savedDealIdRef.current = result.id;
+        if (result.mode === "inserted") setLoadedPipelineStage(null);
         // Deal is now persisted server-side - the local anonymous
         // auto-save draft is no longer needed. If we leave it, the
         // next anonymous visitor on this device would see this deal's
@@ -3784,6 +3857,11 @@ export function InvestCalcPage({
         if (parsedValues.success) {
           const values = parsedValues.data;
           const savedResult = calculateAnalysis(values);
+          // The server captured the persisted solve atomically. This client
+          // response intentionally carries no paid result, so return to the
+          // live server boundary until the row is reopened.
+          setRecordedOfferCeiling(null);
+          setSavedMethodologyLabel(null);
           const builtProjectionSource = canUseProjections
             ? buildProjectionSource(result.id, values, savedResult)
             : null;
@@ -4011,23 +4089,30 @@ export function InvestCalcPage({
 
   const handleSaveDeal = async (
     maoTarget?: MaoTarget,
-    source: OfferCeilingTargetSource = "selected-targets"
+    source?: OfferCeilingTargetSource
   ) => {
     const normalizedTarget = normalizeMaoTarget(maoTarget);
-    if (normalizedTarget) {
+    const normalizedSource =
+      normalizeOfferCeilingTargetSource(source) ??
+      (normalizedTarget ? "selected-targets" : "screening-defaults");
+    const adoptedTarget =
+      normalizedTarget && isAdoptedOfferCeilingTargetSource(normalizedSource)
+        ? normalizedTarget
+        : null;
+    if (adoptedTarget) {
       // Adopt the exact target the child rendered before starting IO. This
       // captures an untouched buy-box seed and keeps a failed save visibly
       // dirty instead of claiming the old persisted target is still current.
-      analysisMaoTargetRef.current = normalizedTarget;
-      setAnalysisMaoTarget(normalizedTarget);
-      setAnalysisMaoTargetSource(source);
+      analysisMaoTargetRef.current = adoptedTarget;
+      setAnalysisMaoTarget(adoptedTarget);
+      setAnalysisMaoTargetSource(normalizedSource);
       syncFormDirtyVersusPersisted();
     }
     return performSaveDeal({
-      ...(normalizedTarget
+      ...(adoptedTarget
         ? {
-            maxOfferTargetOverride: normalizedTarget,
-            maxOfferTargetSourceOverride: source,
+            maxOfferTargetOverride: adoptedTarget,
+            maxOfferTargetSourceOverride: normalizedSource,
           }
         : {}),
     });
@@ -4095,15 +4180,23 @@ export function InvestCalcPage({
    *  these numbers" - and recompute fires via the form watch. */
   const handleApplyComps = (enrichment: PropertyEnrichment) => {
     const f = enrichment.facts;
+    const adopted = selectUnderwritingEnrichment(enrichment);
     if (f?.bedrooms != null) form.setValue("bedrooms", f.bedrooms, { shouldDirty: true, shouldValidate: true });
     if (f?.bathrooms != null) form.setValue("bathrooms", f.bathrooms, { shouldDirty: true, shouldValidate: true });
     if (f?.squareFootage != null) form.setValue("sqft", f.squareFootage, { shouldDirty: true, shouldValidate: true });
-    if (enrichment.valueEstimate != null) {
-      form.setValue("purchasePrice", Math.round(enrichment.valueEstimate), { shouldDirty: true, shouldValidate: true });
+    if (adopted.purchasePrice != null) {
+      form.setValue("purchasePrice", adopted.purchasePrice, { shouldDirty: true, shouldValidate: true });
     }
     const pt = form.getValues("propertyType");
-    if (enrichment.rentEstimate != null && (pt === "single-family" || pt === "owner-occupant")) {
-      form.setValue("monthlyRent", Math.round(enrichment.rentEstimate), { shouldDirty: true, shouldValidate: true });
+    if (adopted.monthlyRent != null && (pt === "single-family" || pt === "owner-occupant")) {
+      form.setValue("monthlyRent", adopted.monthlyRent, { shouldDirty: true, shouldValidate: true });
+      setMarketRentEstimate(adopted.monthlyRent);
+      enrichmentCaptureRef.current.monthlyRent = {
+        source: "rentcast-estimate",
+        detail: "RentCast market-rent estimate",
+        fetchedAt: enrichment.fetchedAt,
+        value: adopted.monthlyRent,
+      };
     }
   };
 
@@ -4118,32 +4211,6 @@ export function InvestCalcPage({
       description: `$${amount.toLocaleString()} added to cash invested — re-run to see the impact on cash-on-cash.`,
     });
   };
-
-  const handleApplyDecisionThreshold = useCallback(
-    (change: ApplicableDecisionThreshold) => {
-      form.setValue(change.field, change.value, {
-        shouldDirty: true,
-        shouldTouch: true,
-        shouldValidate: true,
-      });
-      trackEvent("decision_threshold_applied", { lever: change.lever });
-      const labels = {
-        price: "Purchase price",
-        rent: "Monthly rent",
-        rate: "Interest rate",
-        rehab: "Rehab budget",
-      } as const;
-      const formatted =
-        change.lever === "rate"
-          ? `${change.value.toFixed(2)}%`
-          : `$${Math.round(change.value).toLocaleString("en-US")}${change.lever === "rent" ? "/mo" : ""}`;
-      toast({
-        title: `${labels[change.lever]} applied`,
-        description: `${formatted} is now in the live underwrite. Re-check the confidence and target before relying on it.`,
-      });
-    },
-    [form, toast]
-  );
 
   const handleExportPdf = async (
     mode: ReportMode = "personal",
@@ -4167,7 +4234,7 @@ export function InvestCalcPage({
     }
     const oneTimeUnlocked = oneTimePdfUnlockedRef.current;
     // Without entitlement (or auth), offer the two purchase paths
-    // instead of the old dead-end toast: Pro, or the $5 one-time PDF.
+    // instead of the old dead-end toast. New one-time checkout is disabled.
     // A verified one-time payment bypasses this gate exactly once.
     if (!oneTimeUnlocked && (!isAuthenticated || !canExportPdf)) {
       trackEvent("paywall_viewed", {
@@ -4193,6 +4260,67 @@ export function InvestCalcPage({
     setIsExportingPdf(true);
     try {
       const values = form.getValues();
+      let savedExport:
+        | { id: string; renderFingerprint: string }
+        | undefined;
+      // A reopened saved result is historical evidence. Bind its analyzer
+      // export to the same owner-scoped snapshot/fingerprint path as My Deals
+      // instead of rebuilding its PDF from today's engine.
+      if (
+        !oneTimeUnlocked &&
+        savedDealId &&
+        !hasUnsavedChanges &&
+        recordedOfferCeiling !== null
+      ) {
+        const { getSavedAnalysisPdfExportAction } = await import(
+          "@/app/actions/saved-analyses"
+        );
+        const savedAuthority = await getSavedAnalysisPdfExportAction(
+          savedDealId,
+          { bypassCache: mode !== "personal" }
+        );
+        if (!savedAuthority.ok) {
+          toast({
+            title: "Could not export PDF",
+            description: savedAuthority.message,
+            variant: "destructive",
+          });
+          return;
+        }
+        if (savedAuthority.source === "cache") {
+          try {
+            const response = await fetch(savedAuthority.pdfUrl);
+            if (!response.ok) throw new Error("Cached report unavailable");
+            const blobUrl = URL.createObjectURL(await response.blob());
+            const link = document.createElement("a");
+            link.href = blobUrl;
+            link.download = "Investment-Analysis-Report.pdf";
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(blobUrl);
+          } catch {
+            const link = document.createElement("a");
+            link.href = savedAuthority.pdfUrl;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+          }
+          toast({
+            title: "PDF downloaded",
+            description: "Your recorded report was downloaded.",
+            variant: "success",
+          });
+          dispatchProofMoment("pdf_export");
+          return;
+        }
+        savedExport = {
+          id: savedAuthority.id,
+          renderFingerprint: savedAuthority.renderFingerprint,
+        };
+      }
       const pendingMaoBinding = readPendingMaoTargetBinding(
         maoTargetAnalysisFingerprint(values)
       );
@@ -4244,6 +4372,7 @@ export function InvestCalcPage({
         maxOfferTarget: reportMaoTarget,
         maxOfferTargetSource: reportMaoTargetSource,
         mode,
+        ...(savedExport ? { savedExport } : {}),
         ...(claimPayload ? { claim: claimPayload } : {}),
       });
 
@@ -4307,6 +4436,27 @@ export function InvestCalcPage({
         audience: mode,
         methodology_version: analysisResult.methodologyVersion,
       });
+      if (advocacyDecisionContract && reportMaoTarget) {
+        const reportTargetContext = buildDecisionTargetContext({
+          target: reportMaoTarget,
+          source: reportMaoTargetSource,
+          profileId: isSampleProPreview
+            ? SAMPLE_DEAL_FIXTURE.targetProfile.id
+            : null,
+          profileName: isSampleProPreview
+            ? SAMPLE_DEAL_FIXTURE.targetProfile.name
+            : null,
+          profileVersion: isSampleProPreview
+            ? SAMPLE_DEAL_FIXTURE.targetProfile.version
+            : null,
+        });
+        trackEvent("memo_generated", {
+          surface: "analyzer",
+          model_version: analysisResult.methodologyVersion,
+          rule_set_version:
+            reportTargetContext.profileVersion ?? reportTargetContext.identityStatus,
+        });
+      }
       trackEvent("report_viewed", { report_type: mode, surface: "pdf_export" });
       // If the user hasn't configured branding yet, the toast nudges
       // them to do so. The link routes to /settings/branding, which
@@ -4325,7 +4475,9 @@ export function InvestCalcPage({
         title: "PDF generated",
         description: (
           <span>
-            Your report was exported from the latest live analysis data.
+            {savedExport
+              ? "Your report was exported from the recorded saved analysis."
+              : "Your report was exported from the latest live analysis data."}
             {brandingHint}
           </span>
         ),
@@ -4346,104 +4498,6 @@ export function InvestCalcPage({
       });
     } finally {
       setIsExportingPdf(false);
-    }
-  };
-
-  /**
-   * Start the one-time Deal Decision Pack checkout. The server binds the paid
-   * claim to these exact validated values; this tab keeps the separate claim
-   * secret + draft in sessionStorage so neither can leak through the URL.
-   */
-  const handleBuyOneTimePdf = async () => {
-    setIsStartingPdfCheckout(true);
-    try {
-      const checkoutValues = form.getValues();
-      const checkoutMaoTarget = normalizeMaoTarget(analysisMaoTargetRef.current);
-      const checkoutMaoTargetSource =
-        normalizeOfferCeilingTargetSource(analysisMaoTargetSource) ??
-        "selected-targets";
-      if (!checkoutMaoTarget) {
-        toast({
-          title: "Run the analysis first",
-          description:
-            "We need the report's exact Offer Ceiling targets before opening checkout.",
-          variant: "destructive",
-        });
-        return;
-      }
-      trackEvent("one_time_pdf_checkout_started", {
-        property_type: checkoutValues.propertyType,
-      });
-      trackEvent("complete_decision_checkout_started", {
-        source: "single_deal_checkout",
-      });
-      trackEvent("deal_decision_pack_started", {
-        source: "single_deal_checkout",
-        methodology_version: analysisResult?.methodologyVersion ?? "unknown",
-      });
-      const result = await createOneTimePdfCheckoutAction({
-        values: checkoutValues,
-        maxOfferTarget: checkoutMaoTarget,
-        maxOfferTargetSource: checkoutMaoTargetSource,
-      });
-      if (result.ok) {
-        try {
-          window.sessionStorage.setItem(
-            ONE_TIME_PDF_DRAFT_KEY,
-            JSON.stringify({
-              v: 4,
-              values: checkoutValues,
-              maxOfferTarget: checkoutMaoTarget,
-              maxOfferTargetSource: checkoutMaoTargetSource,
-              savedAt: Date.now(),
-            })
-          );
-          window.sessionStorage.setItem(
-            oneTimePdfClaimSecretKey(result.claim.id),
-            JSON.stringify({ v: 1, secret: result.claim.secret, savedAt: Date.now() })
-          );
-          window.sessionStorage.setItem(ONE_TIME_PDF_ACTIVE_CLAIM_KEY, result.claim.id);
-        } catch {
-          // The secret must never be placed in the URL as a storage fallback.
-          // The hosted session has not been visited, so no payment was made.
-          try {
-            window.sessionStorage.removeItem(ONE_TIME_PDF_DRAFT_KEY);
-            window.sessionStorage.removeItem(
-              oneTimePdfClaimSecretKey(result.claim.id)
-            );
-            window.sessionStorage.removeItem(ONE_TIME_PDF_ACTIVE_CLAIM_KEY);
-          } catch {
-            // Storage is already unavailable; cleanup cannot improve it.
-          }
-          toast({
-            title: "Secure checkout needs same-tab storage",
-            description:
-              "Allow session storage for this site, then retry. No charge was made.",
-            variant: "destructive",
-          });
-          return;
-        }
-        trackEvent("single_deal_checkout_started", {
-          property_type: checkoutValues.propertyType,
-          price_variant: getMarketingOfferConfig().singleDealPriceVariant,
-        });
-        window.location.assign(result.url);
-        return; // navigating away; leave the spinner on
-      }
-      toast({
-        title: "Checkout unavailable",
-        description: result.message,
-        variant: "destructive",
-      });
-    } catch (err) {
-      console.warn("[one-time-pdf] checkout start failed:", err);
-      toast({
-        title: "Checkout unavailable",
-        description: "Something went wrong starting checkout. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsStartingPdfCheckout(false);
     }
   };
 
@@ -4595,8 +4649,14 @@ export function InvestCalcPage({
           verified.code === "SERVER_ERROR" ||
           verified.code === "NOT_PAID" ||
           verified.code === "IDENTITY_MISMATCH";
+        const title =
+          verified.code === "ACCESS_SUSPENDED"
+            ? "Report access paused"
+            : verified.code === "ACCESS_REVOKED"
+              ? "Report access revoked"
+              : "Payment not confirmed";
         toast({
-          title: "Payment not confirmed",
+          title,
           description: verified.message,
           variant: "destructive",
           action: canRetry ? (
@@ -4768,6 +4828,7 @@ export function InvestCalcPage({
     // A save from here is a NEW deal — never an overwrite of the source.
     setSavedDealId(null);
     savedDealIdRef.current = null;
+    setLoadedPipelineStage(null);
     lastPersistedFormJsonRef.current = null;
     lastPersistedMaoTargetJsonRef.current = null;
     lastComputedFormJsonRef.current = null;
@@ -4981,8 +5042,8 @@ export function InvestCalcPage({
   };
 
   /**
-   * "Try a sample deal" - pre-fills the form with a realistic
-   * Philadelphia rental and triggers calculate. The single biggest
+   * "Try a sample deal" - pre-fills the form with a synthetic
+   * demonstration rental and triggers calculate. The single biggest
    * friction-killer for cold paid traffic: visitor lands on the
    * calculator, sees a wall of empty fields, bounces. This button
    * gives them a fully-populated working demo in one click.
@@ -5027,7 +5088,7 @@ export function InvestCalcPage({
     toast({
       title: "Sample rental loaded",
       description:
-        "Running the analysis on a real Philadelphia rental - with a full Pro report preview unlocked for this demo.",
+        "Running illustrative sample assumptions with a full Pro report preview unlocked for this demo.",
     });
 
     // Defer the submit to the next paint frame. RHF's setValue calls
@@ -5307,25 +5368,44 @@ export function InvestCalcPage({
 
       if (verified) {
         const sourceClass = previousConfidence.fields.find((item) => item.key === key)?.sourceClass;
-        trackEvent("assumption_verified", {
-          field_key: key,
-          source_class: sourceClass ?? "unknown",
-          method_version: nextConfidence.methodVersion,
-        });
-        trackEvent("material_input_verified", {
-          field_key: key,
-          evidence_level: "user-confirmed",
-          method_version: nextConfidence.methodVersion,
-        });
+        if (advocacyDecisionContract) {
+          trackEvent("material_input_reviewed", {
+            field_key: key,
+            source_class: sourceClass ?? "unknown",
+            confirmation_type: "user-confirmed",
+            method_version: nextConfidence.methodVersion,
+          });
+        } else {
+          trackEvent("assumption_verified", {
+            field_key: key,
+            source_class: sourceClass ?? "unknown",
+            method_version: nextConfidence.methodVersion,
+          });
+          trackEvent("material_input_verified", {
+            field_key: key,
+            evidence_level: "user-confirmed",
+            method_version: nextConfidence.methodVersion,
+          });
+        }
       }
-      if (previousConfidence.stage !== nextConfidence.stage) {
+      if (advocacyDecisionContract) {
+        const previousEvidence = buildAssumptionLedger(previousConfidence);
+        const nextEvidence = buildAssumptionLedger(nextConfidence);
+        if (previousEvidence.readiness !== nextEvidence.readiness) {
+          trackEvent("evidence_readiness_changed", {
+            from_state: previousEvidence.readiness,
+            to_state: nextEvidence.readiness,
+            contract_version: nextEvidence.contractVersion,
+          });
+        }
+      } else if (previousConfidence.stage !== nextConfidence.stage) {
         trackEvent("decision_readiness_changed", {
           from_stage: previousConfidence.stage,
           to_stage: nextConfidence.stage,
           method_version: nextConfidence.methodVersion,
         });
       }
-      if (nextConfidence.score > previousConfidence.score) {
+      if (!advocacyDecisionContract && nextConfidence.score > previousConfidence.score) {
         const band = (score: number) =>
           score >= 80 ? "80-100" : score >= 55 ? "55-79" : score >= 30 ? "30-54" : "0-29";
         trackEvent("confidence_increased", {
@@ -5335,6 +5415,7 @@ export function InvestCalcPage({
         });
       }
       if (
+        !advocacyDecisionContract &&
         previousConfidence.stage !== "offer-ready" &&
         nextConfidence.stage === "offer-ready"
       ) {
@@ -5344,7 +5425,13 @@ export function InvestCalcPage({
         });
       }
     },
-    [analysisValues, form, inputVerification, resolveLiveInputConfidenceContext]
+    [
+      advocacyDecisionContract,
+      analysisValues,
+      form,
+      inputVerification,
+      resolveLiveInputConfidenceContext,
+    ]
   );
 
   const toggleAdvanced = () => {
@@ -5462,11 +5549,11 @@ export function InvestCalcPage({
                 is skipped entirely, so this becomes the page's H1. */}
             {isAuthenticated ? (
               <h1 className="text-2xl sm:text-3xl xl:text-4xl font-extrabold text-foreground mb-2 text-balance">
-                Analyze Your Investment Property
+                Underwrite a Buy &amp; Hold Rental
               </h1>
             ) : (
               <h2 className="text-2xl sm:text-3xl xl:text-4xl font-extrabold text-foreground mb-2 text-balance">
-                Analyze Your Investment Property
+                Underwrite a Buy &amp; Hold Rental
               </h2>
             )}
             {/* ONE headline (Choose-TrueCap Phase B, finding 3): this page
@@ -5482,7 +5569,7 @@ export function InvestCalcPage({
                 defaulting bedrooms would silently change a user's computed
                 rent, so the COPY moves to match the behavior. */}
             <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
-              Type an address — we fill your assumptions. Add price and beds.
+              Start with an address, then review the asking price, rent, beds, and financing assumptions.
             </p>
           </div>
           {/* Sample-deal button - anonymous visitors only, before any
@@ -5497,7 +5584,7 @@ export function InvestCalcPage({
               type="button"
               onClick={handleTrySampleDeal}
               className="group inline-flex min-h-11 shrink-0 flex-col items-start gap-0.5 self-start rounded-xl bg-primary px-5 py-3 text-left shadow-[0_10px_24px_rgba(0,_112,_196,0.28)] transition-transform hover:-translate-y-0.5 sm:self-end"
-              aria-label="Try a sample rental - preview a sample Pro report on a real Philadelphia rental"
+              aria-label="Try a synthetic sample rental and preview a sample Pro report"
             >
               <span className="inline-flex items-center gap-1.5 text-sm font-bold text-primary-foreground">
                 <Sparkles className="size-4" />
@@ -5510,7 +5597,7 @@ export function InvestCalcPage({
           )}
         </div>
 
-        {!focusedResultsMode ? (
+        {!focusedResultsMode && activeStrategyKey ? (
           <div className="mt-4">
             <StrategyChips activeKey={activeStrategyKey} onSelect={handleSelectStrategy} />
           </div>
@@ -5523,9 +5610,9 @@ export function InvestCalcPage({
             also matters for shared-device cases (cafe laptop, etc). */}
         {restoredFromDraft && analysisResult === null && (
           <div className="mt-4 flex flex-col gap-2 rounded-xl border border-primary/30 bg-[var(--brand-blue-light)] px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-start gap-2.5 sm:items-center">
+            <div className="flex min-w-0 items-start gap-2.5 sm:items-center">
               <Sparkles className="mt-0.5 size-4 shrink-0 text-primary sm:mt-0" />
-              <p className="leading-relaxed text-foreground">
+              <p className="min-w-0 leading-relaxed text-foreground [overflow-wrap:anywhere]">
                 <strong className="font-bold">Welcome back —</strong>{" "}
                 {restoredAddress ? (
                   <span className="text-muted-foreground">
@@ -6102,7 +6189,7 @@ export function InvestCalcPage({
                   <p className="mt-0.5 text-muted-foreground">
                     We estimated the price from local rent
                     {priceEstimateBasis ? ` — ${priceEstimateBasis}` : ""} so you could see a
-                    verdict instantly. Enter the actual asking price to make this accurate.
+                    provisional screening result. Enter the actual asking price to update the screen.
                   </p>
                 </div>
                 <button
@@ -6129,7 +6216,6 @@ export function InvestCalcPage({
               }
               inputConfidence={currentInputConfidence}
               onToggleInputVerified={handleToggleInputVerified}
-              onApplyDecisionThreshold={handleApplyDecisionThreshold}
               isLoading={isCalculating}
               dealScoreResult={dealScoreResult}
               isLoadingDealScore={isLoadingDealScore}
@@ -6152,19 +6238,28 @@ export function InvestCalcPage({
                 maoTarget: MaoTarget | undefined,
                 source: OfferCeilingTargetSource | undefined
               ) => {
-                const snapshot = investmentFormSchema.safeParse(form.getValues());
+                const snapshot = releasedInvestmentFormSchema.safeParse(form.getValues());
                 const exactValues = snapshot.success ? snapshot.data : analysisValues;
-                const exactTarget = normalizeMaoTarget(maoTarget) ?? analysisMaoTargetRef.current;
+                const normalizedSource = normalizeOfferCeilingTargetSource(source);
+                const exactTarget =
+                  normalizedSource &&
+                  isAdoptedOfferCeilingTargetSource(normalizedSource)
+                    ? normalizeMaoTarget(maoTarget)
+                    : null;
                 if (exactTarget) {
                   analysisMaoTargetRef.current = exactTarget;
                   setAnalysisMaoTarget(exactTarget);
-                  setAnalysisMaoTargetSource(source ?? "selected-targets");
+                  setAnalysisMaoTargetSource(normalizedSource);
+                } else {
+                  analysisMaoTargetRef.current = null;
+                  setAnalysisMaoTarget(null);
+                  setAnalysisMaoTargetSource("screening-defaults");
                 }
                 if (exactValues) {
                   writeCalcDraftWithMaoTarget(
                     exactValues,
                     exactTarget,
-                    source ?? analysisMaoTargetSource ?? "selected-targets"
+                    exactTarget ? normalizedSource : "screening-defaults"
                   );
                 }
               }}
@@ -6187,6 +6282,9 @@ export function InvestCalcPage({
               isSaved={Boolean(savedDealId) && !hasUnsavedChanges}
               isExistingSavedDeal={Boolean(savedDealId)}
               savedDealId={savedDealId}
+              userDecision={userDecisionFromPipelineStage(
+                savedDealId ? loadedPipelineStage : null
+              )}
               isAuthenticated={isAuthenticated}
               canSaveDeals={canSaveDeals}
               canUpdateSavedDeals={canUpdateSavedDeals}
@@ -6203,9 +6301,11 @@ export function InvestCalcPage({
               canUseSensitivity={canUseSensitivity || isSampleProPreview}
               canUseStrategies={canUseStrategies || isSampleProPreview}
               isSampleProPreview={isSampleProPreview}
+              advocacyContractEligible={advocacyContractEligible}
               maoTargetOverride={analysisMaoTarget}
               maoTargetOverrideSource={analysisMaoTargetSource}
               onMaoTargetChange={handleAnalysisMaoTargetChange}
+              recordedOfferCeiling={recordedOfferCeiling}
               activeTab={activeDashboardTab}
               activeTabNonce={activeTabNonce}
               activeStrategy={activeStrategy}
@@ -6239,13 +6339,11 @@ export function InvestCalcPage({
           submissions go to founder review — nothing renders publicly from
           here (lib/proof-records.ts is the publication gate). */}
       <TestimonialPrompt />
-      {/* Pro vs $5 one-time chooser - opens when a user without PDF
-          entitlement clicks Export PDF. */}
+      {/* Pro report upgrade - new one-time purchases are temporarily disabled.
+          Existing paid-claim recovery remains handled above. */}
       <PdfPurchaseDialog
         open={isPdfPurchaseDialogOpen}
         onOpenChange={setIsPdfPurchaseDialogOpen}
-        onBuyOneTime={handleBuyOneTimePdf}
-        isStartingCheckout={isStartingPdfCheckout}
       />
       {/* Duplicate-address chooser - opens when saving an address that's
           already in saved deals: overwrite it, keep both, or cancel. */}

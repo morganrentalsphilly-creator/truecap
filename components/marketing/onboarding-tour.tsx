@@ -47,7 +47,7 @@ const STEPS: Step[] = [
     id: "run-deal",
     icon: Calculator,
     title: "1. Run your first deal",
-    body: "Type a property address in the calculator below, review the editable rent, rate, and tax starting points, then run the free screen for cash flow, cap rate, CoC, DSCR, Deal Score, and a plain-English verdict.",
+    body: "Type a property address in the calculator below, review the editable rent, rate, and tax starting points, then run the free screen for cash flow, cap rate, CoC, DSCR, Screening Index, and plain-English screening context.",
     ctaLabel: "Take me there",
     ctaHref: "/",
   },
@@ -55,7 +55,7 @@ const STEPS: Step[] = [
     id: "save-deal",
     icon: Save,
     title: "2. Save your first deal",
-    body: "Once an analysis is showing, select Save. You can save up to 5 deals free and reopen them on any device. Pro adds editing and comparison; the Deal Decision Pack is available one-time or with Pro.",
+    body: "Once an analysis is showing, select Save. You can save up to 5 deals free and reopen them on any device. Pro adds editing, comparison, and PDF reports.",
     ctaLabel: "Open the analyzer",
     ctaHref: "/",
   },
@@ -66,7 +66,7 @@ const STEPS: Step[] = [
     id: "explore-pro",
     icon: CheckCircle2,
     title: "3. Make it yours",
-    body: "Set your buy box — target cash flow, cash-on-cash, price range — and every deal you run gets a personal pass/fail against YOUR criteria. Plus 10-year projections, illustrative tax impact, and the BRRRR + flip analyzers with Pro.",
+    body: "Set your Buy Box—target cash flow, cash-on-cash, price range—and each deal shows which of YOUR selected rules the entered assumptions meet or miss. Pro also includes projections, illustrative tax impact, and BRRRR + flip analyzers.",
     ctaLabel: "See pricing",
     ctaHref: "/pricing",
   },
@@ -92,8 +92,8 @@ const PRO_STEPS: Step[] = [
   {
     id: "review-max-offer",
     icon: Target,
-    title: "3. Know your offer ceiling",
-    body: "Open Max Offer to see the highest purchase price that still clears the selected targets—and the rent or rate that could fix a miss.",
+    title: "3. Know your Offer Ceiling",
+    body: "Open Offer Ceiling to see the highest modeled price that still meets the selected targets under the assumptions shown—and the rent or rate boundary for a miss.",
     ctaLabel: "Analyze a property",
     ctaHref: "/",
   },
@@ -101,15 +101,15 @@ const PRO_STEPS: Step[] = [
     id: "stress-downside",
     icon: ShieldAlert,
     title: "4. Stress-test the downside",
-    body: "Lower rent, raise vacancy, or worsen financing. See whether the decision still holds before you rely on the base case.",
+    body: "Lower rent, raise vacancy, or worsen financing. Compare the scenario with the labeled base case before relying on either set of modeled numbers.",
     ctaLabel: "Open the analyzer",
     ctaHref: "/",
   },
   {
     id: "package-decision",
     icon: FileDown,
-    title: "5. Save and present the decision",
-    body: "Save the property, compare it with the next opportunity, and generate a report when a partner, lender, or client needs the rationale.",
+    title: "5. Save and document your review",
+    body: "Save the property, compare it with the next opportunity, and generate a report of the assumptions, selected-rule fit, risks, and verification plan for review with a partner, lender, or client.",
     ctaLabel: "Open my deals",
     ctaHref: "/dashboard/saved-analyses",
   },
@@ -249,7 +249,7 @@ export function OnboardingTour({ isAuthenticated, savedDealCount, canUseBuyBox =
             <Link
               href={step.ctaHref}
               prefetch={false}
-              className="inline-flex h-9 items-center gap-1 rounded-lg border border-border bg-card px-3 text-xs font-semibold text-foreground transition-colors hover:bg-muted"
+              className="inline-flex min-h-11 min-w-11 items-center gap-1 rounded-lg border border-border bg-card px-3 text-xs font-semibold text-foreground transition-colors hover:bg-muted"
             >
               {step.ctaLabel}
             </Link>

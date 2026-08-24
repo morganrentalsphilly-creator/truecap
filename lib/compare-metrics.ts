@@ -23,7 +23,7 @@ export const METRIC_ROWS: MetricRow[] = [
   { key: "capRate", label: "Cap Rate", group: "RETURNS", kind: "percent", direction: "higher", decimals: 1 },
   { key: "afterTaxCF", label: "After-Tax Cash Flow", group: "RETURNS", kind: "currency", direction: "higher" },
   { key: "annualCashFlow", label: "Annual Cash Flow", group: "RETURNS", kind: "currency", direction: "higher" },
-  { key: "dscr", label: "DSCR", group: "RISK", kind: "number", direction: "higher", decimals: 2 },
+  { key: "dscr", label: "Model DSCR", group: "RISK", kind: "number", direction: "higher", decimals: 2 },
   { key: "monthlyRentalIncome", label: "Monthly Rent Income", group: "RISK", kind: "currency", direction: "higher" },
   { key: "totalOperatingExpenses", label: "Operating Expenses / mo", group: "RISK", kind: "currency", direction: "lower" },
   { key: "purchasePrice", label: "Purchase Price", group: "DEAL", kind: "currency", direction: "lower" },
@@ -31,7 +31,7 @@ export const METRIC_ROWS: MetricRow[] = [
   // absent from Compare until Aug-2026. "higher is better" for the offer;
   // for the gap, LOWER is better (a smaller gap means the asking price is
   // closer to — or below — what the deal actually supports).
-  { key: "maxOffer", label: "Max Offer", group: "DEAL", kind: "currency", direction: "higher" },
+  { key: "maxOffer", label: "Offer Ceiling", group: "DEAL", kind: "currency", direction: "higher" },
   { key: "offerGap", label: "Gap to Asking", group: "DEAL", kind: "currency", direction: "lower" },
   { key: "totalCashRequired", label: "Total Cash Required", group: "DEAL", kind: "currency", direction: "lower" },
   { key: "monthlyPayment", label: "Loan Payment (P&I)", group: "DEAL", kind: "currency", direction: "lower" },
@@ -116,4 +116,3 @@ export function getBestValue(row: MetricRow, deals: { metrics: Record<string, nu
   if (values.length === 0) return null;
   return row.direction === "higher" ? Math.max(...values) : Math.min(...values);
 }
-

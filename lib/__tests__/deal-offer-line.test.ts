@@ -27,13 +27,13 @@ function box(partial: Partial<NamedBuyBox>): NamedBuyBox {
 const deal = SAMPLE_DEAL_VALUES as InvestmentFormValues;
 
 describe("computeDealOfferLine", () => {
-  it("with no buy boxes: falls back to the default target and returns a clears/cut line, no fit", () => {
+  it("with no adopted target or buy box: never invents an offer line", () => {
     const r = computeDealOfferLine(deal, []);
     expect(r.fit).toBeNull();
     expect(r.personalLine).toBeNull();
-    // Default target (break-even CF + DSCR 1.25) still yields an offer line.
-    expect(r.offer).not.toBeNull();
-    expect(["cut", "clears"]).toContain(r.offer!.kind);
+    expect(r.offer).toBeNull();
+    expect(r.resolvedMaoTarget).toBeNull();
+    expect(r.basisLabel).toBe("");
   });
 
   it("a deal that MISSES an aggressive cap-rate box returns a 'cut' line below asking", () => {
@@ -113,18 +113,16 @@ describe("computeDealOfferLine", () => {
     }
   });
 
-  it("drops a saved DSCR-only target for a cash purchase instead of labeling an ignored criterion", () => {
+  it("does not replace a saved DSCR-only target with a product rule for cash", () => {
     const cashDeal = { ...deal, downPaymentPct: 100 };
     const r = computeDealOfferLine(cashDeal, [], {
       isShoppingStage: true,
       persistedMaoTarget: { dscr: 2 },
     });
 
-    expect(r.offer?.kind).not.toBe("blocked");
-    if (r.offer && r.offer.kind !== "blocked") {
-      expect(r.offer.basis).toBe("default");
-    }
-    expect(r.basisLabel).toBe("break-even cash flow");
+    expect(r.offer).toBeNull();
+    expect(r.resolvedMaoTarget).toBeNull();
+    expect(r.basisLabel).toBe("");
   });
 
   it("uses only the assigned client's buy box for a target-less legacy deal", () => {

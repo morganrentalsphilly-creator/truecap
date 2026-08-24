@@ -137,7 +137,7 @@ describe("trial copy — mirrors the checkout repeat-trial guard", () => {
 });
 
 describe("pricing offer hierarchy", () => {
-  it("does not imply that every Decision Pack PDF includes comps", () => {
+  it("does not imply that every Pro PDF includes comps", () => {
     const plans = read("../../components/marketing/pricing-toggle-plans.tsx");
     expect(plans).not.toMatch(/report[^\n]*with[^\n]*comps/i);
   });
@@ -153,12 +153,11 @@ describe("pricing offer hierarchy", () => {
     expect(plans).not.toMatch(/\blg:order-[123]\b/);
   });
 
-  it("keeps the Decision Pack in the secondary non-subscription section", () => {
+  it("does not advertise the temporarily disabled Decision Pack", () => {
     const page = read("../../app/pricing/page.tsx");
-    expect(page).toContain("Not ready for a subscription?");
-    expect(page.indexOf("<PricingTogglePlans")).toBeLessThan(
-      page.indexOf("Not ready for a subscription?")
-    );
+    expect(page).not.toContain("Not ready for a subscription?");
+    expect(page).not.toContain("TrueCap Deal Decision Pack");
+    expect(page).not.toContain("singleDeal.priceLabel");
   });
 
   it("does not manufacture scarcity around the permanent annual plan", () => {

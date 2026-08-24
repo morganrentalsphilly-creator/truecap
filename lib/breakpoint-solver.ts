@@ -83,11 +83,9 @@ export function solveBreakpoints(
   // ── Price sweep (negative deltas) ───────────────────────────────────
   const priceResult = sweepPrice(values, targetRank);
 
+  const activeRentMonthly = getActiveRentMonthly(values);
   const currentRentMonthly =
-    values.propertyType === "single-family" &&
-    typeof values.monthlyRent === "number"
-      ? values.monthlyRent
-      : null;
+    values.propertyType === "single-family" ? activeRentMonthly : null;
 
   return {
     currentTier,
@@ -139,10 +137,19 @@ function sweepPrice(
 ): { pct: number } | null {
   if (typeof values.purchasePrice !== "number" || values.purchasePrice <= 0)
     return null;
+  const minimumPrice = getMinimumValidPrice(values);
+  if (minimumPrice === null) return null;
   for (let pct = 1; pct <= MAX_SWEEP_PCT; pct++) {
+    const candidatePrice = Math.round(
+      values.purchasePrice * (1 - pct / 100)
+    );
+    // v2 fixed-amount financing cannot model a price below its fixed down
+    // payment or fixed loan. Stop at the valid boundary instead of asking the
+    // engine to calculate an impossible candidate.
+    if (candidatePrice < minimumPrice) break;
     const adjusted: InvestmentFormValues = {
       ...values,
-      purchasePrice: Math.round(values.purchasePrice * (1 - pct / 100)),
+      purchasePrice: candidatePrice,
     };
     try {
       const r = calculateAnalysis(adjusted);
@@ -159,6 +166,18 @@ function applyRentAdjustment(
   rentPct: number
 ): InvestmentFormValues | null {
   const mul = 1 + rentPct / 100;
+  if (values.underwritingModelVersion === "2.0") {
+    const rentField =
+      values.operatingScenario === "current"
+        ? ("currentMonthlyRent" as const)
+        : values.operatingScenario === "stabilized"
+          ? ("stabilizedMonthlyRent" as const)
+          : null;
+    if (rentField === null) return null;
+    const activeRent = values[rentField];
+    if (typeof activeRent !== "number" || !Number.isFinite(activeRent)) return null;
+    return { ...values, [rentField]: Math.round(activeRent * mul) };
+  }
   if (values.propertyType === "single-family") {
     if (typeof values.monthlyRent !== "number") return null;
     return { ...values, monthlyRent: Math.round(values.monthlyRent * mul) };
@@ -176,4 +195,35 @@ function applyRentAdjustment(
     };
   }
   return null;
+}
+
+function getActiveRentMonthly(values: InvestmentFormValues): number | null {
+  if (values.underwritingModelVersion === "2.0") {
+    const activeRent =
+      values.operatingScenario === "current"
+        ? values.currentMonthlyRent
+        : values.operatingScenario === "stabilized"
+          ? values.stabilizedMonthlyRent
+          : undefined;
+    return typeof activeRent === "number" && Number.isFinite(activeRent)
+      ? activeRent
+      : null;
+  }
+  return typeof values.monthlyRent === "number" ? values.monthlyRent : null;
+}
+
+function getMinimumValidPrice(values: InvestmentFormValues): number | null {
+  if (values.underwritingModelVersion !== "2.0") return 0;
+
+  const fixedAmount =
+    values.financingMode === "fixed-down"
+      ? values.fixedDownPaymentAmount
+      : values.financingMode === "fixed-loan"
+        ? values.fixedLoanAmount
+        : 0;
+  return typeof fixedAmount === "number" &&
+    Number.isFinite(fixedAmount) &&
+    fixedAmount >= 0
+    ? fixedAmount
+    : null;
 }

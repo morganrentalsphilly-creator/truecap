@@ -3,14 +3,14 @@
 /**
  * Answer hero card — the ONE card that leads the results: the
  * plain-English Recommendation (verdict word + description + "Why this
- * verdict?" + tips) composed with the Deal Score ring + subscore
+ * verdict?" + tips) composed with the Screening Index ring + subscore
  * breakdown, with the NextActionBanner as its footer CTA.
  *
  * EXTRACTED (Phase 2 of the calculator redesign) from
  * analysis-dashboard.tsx with minimal adaptation:
  *   - The Recommendation card JSX, DealScoreCard, ScoreBreakdownTile and
  *     buildRecommendationModel moved here verbatim (the investor-lens
- *     toggle moved OUT of the Deal Score card into the metrics band).
+ *     toggle moved OUT of the Screening Index card into the metrics band).
  *   - NextActionBanner renders as the hero footer instead of a separate
  *     block below the verdict row (content verbatim).
  *   - Blueprint grafts: Save + unsaved-changes dot in the hero corner
@@ -71,7 +71,7 @@ function variantForRecommendation(recommendation: string): RecommendationVariant
           : "avoid";
 }
 
-/** Per-variant chrome shared by the Deal Score card and the score-breakdown
+/** Per-variant chrome shared by the Screening Index card and the score-breakdown
  *  receipts (which render inside the Recommendation card's single "Why this
  *  verdict?" door — Choose-TrueCap Phase B, finding 4). Module-scope so the
  *  two surfaces can never drift. */
@@ -229,7 +229,7 @@ function DealScoreCard({
    *  My Deals, compare, PDF, and share surfaces show. Lens-free, so this card and
    *  the Recommendation card beside it always agree with every other surface. */
   dealScoreResult: DealScoreActionResult | null;
-  /** True when the deal scores as an appreciation play (strong projected
+  /** True when the Screening Index values as an appreciation play (strong projected
    *  long-term return + non-negative after-tax cash flow). Surfaces a chip on
    *  the score so a Neutral verdict on a red year-1 deal is self-explanatory at
    *  a glance - the same signal that drives the Overview reframe banner. */
@@ -259,11 +259,11 @@ function DealScoreCard({
     return (
       <div className="bg-card rounded-2xl border border-border p-4 sm:p-6">
         <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
-          Deal Score
+          Screening Index
         </p>
         <div className="flex items-center justify-center min-h-40 rounded-xl border border-dashed border-border bg-muted/20 text-center px-4">
           <p className="text-sm text-muted-foreground">
-            Run the analysis to view your live Deal Score and recommendation details.
+            Run the analysis to view the Screening Index and its modeled factors.
           </p>
         </div>
       </div>
@@ -279,7 +279,7 @@ function DealScoreCard({
   return (
     <div className="bg-card rounded-2xl border border-border p-4 sm:p-6">
       <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
-        Deal Score
+        Screening Index
       </p>
       {/* The investor-lens toggle previously lived here; it moved into the
           metrics band header (Phase 2) so the lens sits beside the metric
@@ -333,7 +333,7 @@ function DealScoreCard({
 
 /**
  * Score-breakdown receipts — the per-subscore tiles + the "how the number
- * adds up" box that used to live behind the Deal Score card's own
+ * adds up" box that used to live behind the Screening Index card's own
  * "Why this score?" disclosure. Now rendered inside the Recommendation
  * card's single "Why this verdict?" door (narrative first, receipts second).
  * Content verbatim; renders null unless a pro-tier score is loaded.
@@ -566,7 +566,7 @@ export function AnswerHeroCard({
   decisionOwnedUpstream = false,
 }: {
   isLoading: boolean;
-  /** Two-stage load: the base analysis lands first, the Deal Score action
+  /** Two-stage load: the base analysis lands first, the Screening Index action
    *  resolves after — the recommendation side keeps its skeleton until
    *  BOTH are done, exactly as before the extraction. */
   isLoadingDealScore: boolean;
@@ -593,11 +593,11 @@ export function AnswerHeroCard({
   hasUnsavedChanges: boolean;
   /** Asking price, for the imperative verdict sentence. */
   purchasePrice: number | null;
-  /** Solved Max Offer from the dashboard's canonical maoQaContext memo —
-   *  the SAME value the Max Offer card renders. Null on Free/unsolvable. */
+  /** Solved Offer Ceiling from the dashboard's canonical maoQaContext memo —
+   *  the SAME value the Offer Ceiling card renders. Null on Free/unsolvable. */
   maxOffer: number | null;
   /**
-   * True when <DecisionTier> above already renders the Max Offer, the
+   * True when <DecisionTier> above already renders the Offer Ceiling, the
    * verdict sentence, the score chip and the primary Save. This card then
    * drops those four (they would be a second copy inches apart) and serves
    * as Tier-2 EVIDENCE: why this verdict, and what to do about it.
@@ -653,7 +653,7 @@ export function AnswerHeroCard({
 
       {/* Recommendation card. Visually FIRST below md (order-first) so the
           first thing a phone user reads after Run is the plain-English
-          verdict, not the abstract 0-100 score - the Deal Score card keeps
+          verdict, not the abstract 0-100 score - the Screening Index card keeps
           its default order 0 and stacks second. md+ keeps DOM order
           (score col 1, recommendation cols 2-3), so desktop is unchanged. */}
       <div
@@ -733,7 +733,7 @@ export function AnswerHeroCard({
               </div>
               {/* The verdict is an INSTRUCTION, not a category chip: it names
                   what to do, at what price, against what was asked. Falls
-                  back to the label alone when price/Max Offer aren't
+                  back to the label alone when price/Offer Ceiling aren't
                   available (Free tier). */}
               {decisionOwnedUpstream ? (
                 // Tier 1 states the decision, and the enclosing region is
@@ -779,7 +779,7 @@ export function AnswerHeroCard({
                 disclosure: the verdict + one-line description stay the calm
                 first read; ONE tap reveals BOTH the plain-English narrative
                 (per-deal, free-tier safe) AND the subscore receipts that
-                used to hide behind the Deal Score card's separate "Why this
+                used to hide behind the Screening Index card's separate "Why this
                 score?" disclosure — narrative first, breakdown stacked
                 below. Native <details>/<summary> keeps the surviving
                 disclosure's keyboard + a11y behavior (Enter/Space toggles,
@@ -796,7 +796,7 @@ export function AnswerHeroCard({
                     aria-hidden
                     className="size-3.5 shrink-0 transition-transform group-open:rotate-90"
                   />
-                  Why this verdict?
+                  Why this screening result?
                 </summary>
                 {verdictNarrative && verdictNarrative.sentences.length > 0 ? (
                   <ul className="mt-1.5 space-y-1.5 pl-1">
@@ -810,7 +810,7 @@ export function AnswerHeroCard({
                 {hasScoreBreakdown ? (
                   <div className="mt-3 space-y-2">
                     <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-                      Score breakdown
+                      Screening Index breakdown
                     </p>
                     <ScoreBreakdownReceipts
                       dealScoreResult={dealScoreResult}
@@ -879,7 +879,7 @@ export function AnswerHeroCard({
 
       {/* Next action - the one imperative step the verdict implies, now the
           hero's footer CTA (content verbatim from the standalone banner).
-          BASE-result driven (matches the Deal Score + verdict above). */}
+          BASE-result driven (matches the Screening Index + verdict above). */}
       {nextAction ? (
         <div className="md:col-span-3">
           {/* The standalone Next Action banner is GONE when the Decision

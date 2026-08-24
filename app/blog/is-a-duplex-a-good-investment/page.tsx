@@ -543,7 +543,7 @@ export default function BlogPost() {
               rental cash flow calculator
             </Link>{" "}
             takes about a minute per property, and the full analyzer will hold
-            both so you can compare verdicts rather than eyeball spreadsheets.
+            both so you can compare standardized economics rather than eyeball spreadsheets.
             For the wider property-type question, including where five-plus
             units change the rules,{" "}
             <Link href="/blog/single-family-vs-multi-family-rental" className="text-primary font-semibold hover:underline">

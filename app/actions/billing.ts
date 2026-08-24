@@ -400,6 +400,7 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
 
   try {
     const admin = createAdminSupabaseClient();
+    const stripe = getStripe();
     // A campaign coupon from the URL (e.g. the post-analysis ANALYZE20) takes
     // precedence over the standard annual coupon, and applies to monthly OR
     // annual. Both resolve to a Stripe coupon id we control.
@@ -428,7 +429,7 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
     const packCreditCouponId = getPackCreditCouponId();
     if (packCreditCouponId && !parsed.data.planSlug.startsWith("agent_pro")) {
       try {
-        packCredit = await findEligiblePackCredit(admin, user.id);
+        packCredit = await findEligiblePackCredit(admin, user.id, new Date(), stripe);
       } catch (error) {
         Sentry.captureException(error, {
           tags: { feature: "billing-checkout", flow: "pack_credit_lookup" },
@@ -444,7 +445,6 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
     // override previously allowed checkout and the offer to contradict each
     // other.
     const proTrialDays = TRIAL_DAYS;
-    const stripe = getStripe();
     let checkoutProfileCustomerId = profile?.stripe_customer_id ?? null;
     const acquireInput = {
       userId: user.id,

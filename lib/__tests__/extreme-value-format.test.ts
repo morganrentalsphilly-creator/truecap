@@ -82,7 +82,9 @@ describe("formatRoiHeadline — extreme values lead with the caution", () => {
     const h = formatRoiHeadline(673.0);
     expect(h.raw).toBe("673.0%");
     expect(h.title).toContain("673.0%");
-    expect(h.title).toContain("verify");
+    expect(h.title).toContain("highly sensitive");
+    expect(h.title).toContain("not an investment recommendation");
+    expect(h.title).not.toMatch(/usually mean|input is off/i);
   });
 
   it("compact form for tight cells is just the framed band", () => {
