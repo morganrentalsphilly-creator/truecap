@@ -355,8 +355,8 @@ export default async function PricingPage() {
             What you get
           </h2>
           <p className="mx-auto mt-2 max-w-xl text-center text-sm text-muted-foreground sm:text-base">
-            Free answers whether the deal deserves attention. Pro answers what
-            to offer, what could break, and what to do next.
+            Free answers whether the deal deserves attention. Pro shows the
+            target-dependent ceiling, what could break, and what to verify next.
           </p>
           {/* Phones use stacked comparison cards; tablet and desktop keep the
               denser semantic table. No narrow viewport has to pan sideways. */}

@@ -27,6 +27,7 @@ describe("customer-facing decision vocabulary", () => {
       /\bprice ceiling\b/i,
       /\bMAO\b/,
       /what should i offer/i,
+      /what\s+to\s+offer/i,
       /walk[- ]away price/i,
     ];
     const violations: string[] = [];
