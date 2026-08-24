@@ -155,7 +155,7 @@ jobs:
                                         # without this an agent run can edit the
                                         # rules that are supposed to bind it and
                                         # this job still exits 0
-            'supabase/migrations/*'     # schema + RLS
+            'supabase/*'                # executable migrations + non-executable security drafts
             'lib/supabase/*'            # service-role client, RLS bypass surface
             'app/api/*'                 # webhooks, cron, auth callbacks
             '.gitmodules'               # a gitlink pulls in a whole other repo
