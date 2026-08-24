@@ -144,7 +144,7 @@ export function SiteFooter({ hideAccountLinks = false }: { hideAccountLinks?: bo
           <div className="col-span-2 sm:col-span-3 lg:col-span-1">
             <Link
               href="/"
-              className="inline-flex items-center text-xl font-extrabold tracking-tight text-foreground"
+              className="inline-flex min-h-11 min-w-11 items-center text-xl font-extrabold tracking-tight text-foreground"
             >
               TrueCap<span className="text-primary">.</span>
             </Link>
@@ -159,12 +159,12 @@ export function SiteFooter({ hideAccountLinks = false }: { hideAccountLinks?: bo
               <h3 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
                 {col.title}
               </h3>
-              <ul className="mt-3 space-y-2">
+              <ul className="mt-3">
                 {col.links.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-foreground/80 transition-colors hover:text-primary"
+                      className="inline-flex min-h-11 min-w-11 items-center text-sm text-foreground/80 transition-colors hover:text-primary"
                     >
                       {link.label}
                     </Link>
@@ -209,19 +209,28 @@ export function SiteFooter({ hideAccountLinks = false }: { hideAccountLinks?: bo
             {/* /about — quiet E-E-A-T link (who builds TrueCap). Bottom
                 strip only, per the no-new-top-level-nav principle; the
                 blog bylines are the other inbound path. */}
-            <Link href="/about" className="transition-colors hover:text-foreground">
+            <Link
+              href="/about"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center transition-colors hover:text-foreground"
+            >
               About
             </Link>
             <span aria-hidden className="text-muted-foreground/30">
               ·
             </span>
-            <Link href="/privacy" className="transition-colors hover:text-foreground">
+            <Link
+              href="/privacy"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center transition-colors hover:text-foreground"
+            >
               Privacy
             </Link>
             <span aria-hidden className="text-muted-foreground/30">
               ·
             </span>
-            <Link href="/terms" className="transition-colors hover:text-foreground">
+            <Link
+              href="/terms"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center transition-colors hover:text-foreground"
+            >
               Terms
             </Link>
             <span aria-hidden className="text-muted-foreground/30">
@@ -235,7 +244,7 @@ export function SiteFooter({ hideAccountLinks = false }: { hideAccountLinks?: bo
                 will still discover it. No SEO loss; cleaner footer. */}
             <a
               href="mailto:hello@usetruecap.com"
-              className="transition-colors hover:text-foreground"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center transition-colors hover:text-foreground"
             >
               hello@usetruecap.com
             </a>

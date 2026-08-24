@@ -7,6 +7,14 @@ const glossaryTip = readFileSync(
   join(process.cwd(), "components/investcalc/glossary-tip.tsx"),
   "utf8"
 );
+const siteFooter = readFileSync(
+  join(process.cwd(), "components/marketing/site-footer.tsx"),
+  "utf8"
+);
+const foundingPricingBanner = readFileSync(
+  join(process.cwd(), "components/marketing/founding-pricing-banner.tsx"),
+  "utf8"
+);
 const primaryLinkSurfaces = [
   "components/marketing/pricing-plan-buttons.tsx",
   "components/marketing/hero-address-form.tsx",
@@ -39,5 +47,12 @@ describe("global interaction accessibility baseline", () => {
       expect(source).toContain("min-h-11");
     }
     expect(primaryLinkSurfaces[4]).toContain("min-w-11");
+  });
+
+  it("keeps shared footer and pricing-banner links at least 44px", () => {
+    expect(siteFooter.match(/min-h-11/g)).toHaveLength(6);
+    expect(siteFooter.match(/min-w-11/g)).toHaveLength(6);
+    expect(foundingPricingBanner.match(/min-h-11/g)).toHaveLength(3);
+    expect(foundingPricingBanner).toContain("size-11");
   });
 });
