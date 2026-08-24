@@ -31,7 +31,9 @@ export type ComparePickerDeal = {
 const MAX_COMPARE_ITEMS = 4;
 
 const fmtMoney = (n: number | null) =>
-  n == null ? "—" : `${n >= 0 ? "+" : "-"}$${Math.abs(Math.round(n)).toLocaleString()}/mo`;
+  n == null
+    ? "—"
+    : `${n >= 0 ? "+" : "-"}$${Math.abs(Math.round(n)).toLocaleString("en-US")}/mo`;
 const fmtPct = (n: number | null) => (n == null ? "—" : `${n.toFixed(1)}% cap`);
 
 export function CompareDealPicker({ deals }: { deals: ComparePickerDeal[] }) {

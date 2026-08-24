@@ -18,7 +18,7 @@
  * also re-check the entitlement (defense in depth).
  */
 
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import { Loader2, Upload, X } from "lucide-react";
 import {
@@ -43,11 +43,19 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
   const [contactPhone, setContactPhone] = useState(initial?.contact_phone ?? "");
   const [contactWebsite, setContactWebsite] = useState(initial?.contact_website ?? "");
   const [logoUrl, setLogoUrl] = useState<string | null>(initial?.logo_url ?? null);
+  // A viewer-local date cannot be rendered deterministically on the server.
+  // Keep SSR and the first client render identical, then populate the preview
+  // after mount in the viewer's own time zone.
+  const [preparedDate, setPreparedDate] = useState("");
 
   const [isPending, startTransition] = useTransition();
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const [logoUploading, setLogoUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setPreparedDate(todayShort());
+  }, []);
 
   // Preview accent color — uses what's typed, or falls back to TrueCap blue
   // if blank/invalid so the preview never goes colorless and disorienting.
@@ -372,7 +380,9 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
                 Investment Analysis Report
               </p>
               <p>123 Sample Street, Philadelphia PA</p>
-              <p className="mt-1 text-[10px]">Prepared {todayShort()}</p>
+              <p className="mt-1 text-[10px]">
+                Prepared{preparedDate ? ` ${preparedDate}` : ""}
+              </p>
             </div>
             <div className="border-t border-border pt-3">
               <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">

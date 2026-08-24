@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { buildSubscriptionDisplay, type SubscriptionDisplayInput } from "@/lib/subscription-display";
+import {
+  buildSubscriptionDisplay,
+  formatBillingDate,
+  type SubscriptionDisplayInput,
+} from "@/lib/subscription-display";
 
 const monthly = {
   amountLabel: "$29.99",
@@ -97,5 +101,17 @@ describe("buildSubscriptionDisplay", () => {
       rateHeadline: null,
       isGrandfatheredTwenty: false,
     });
+  });
+});
+
+describe("formatBillingDate", () => {
+  it("uses one canonical time zone across SSR and hydration", () => {
+    // This instant is Sep 11 in UTC but Sep 10 in US time zones. The billing
+    // page must render the same text in Vercel and in the customer's browser.
+    expect(formatBillingDate("2026-09-11T00:30:00.000Z")).toBe("Sep 11, 2026");
+  });
+
+  it("keeps the existing missing-date fallback", () => {
+    expect(formatBillingDate(null)).toBe("Not available");
   });
 });

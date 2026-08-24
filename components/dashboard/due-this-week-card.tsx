@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AlertTriangle, CalendarClock, Clock } from "lucide-react";
 import {
@@ -113,8 +113,18 @@ export function DueThisWeekCard({
   deals: DueThisWeekDeal[];
   agingDeals?: AgingDealRow[];
 }) {
+  // The server cannot know the viewer's local calendar day. Rendering local
+  // `new Date()` output during SSR made deadline rows differ during hydration
+  // for viewers west/east of UTC. Start from the same null state on both sides,
+  // then resolve the viewer-local day after mount.
+  const [todayISO, setTodayISO] = useState<string | null>(null);
+
+  useEffect(() => {
+    setTodayISO(localTodayISO());
+  }, []);
+
   const rows = useMemo<DueRow[]>(() => {
-    const todayISO = localTodayISO();
+    if (!todayISO) return [];
     const collected: DueRow[] = [];
     for (const deal of deals) {
       const items: DueDiligenceItem[] = normalizeDueDiligenceItems(deal.items);
@@ -138,7 +148,7 @@ export function DueThisWeekCard({
     // Overdue first (most overdue → least), then due-soon by soonest deadline.
     collected.sort((a, b) => a.days - b.days);
     return collected;
-  }, [deals]);
+  }, [deals, todayISO]);
 
   // Invisible until useful — nothing overdue, due within 7 days, or aging.
   if (rows.length === 0 && agingDeals.length === 0) return null;

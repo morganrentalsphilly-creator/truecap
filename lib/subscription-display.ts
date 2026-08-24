@@ -17,6 +17,22 @@ export type SubscriptionDisplayModel = {
 
 const LIVE_STATUSES = new Set(["active", "trialing", "past_due"]);
 
+/**
+ * Render Stripe period boundaries identically during server rendering and
+ * browser hydration. `current_period_end` is an instant, but leaving the time
+ * zone implicit lets Vercel (UTC) and a customer's browser disagree on the
+ * calendar date near midnight.
+ */
+export function formatBillingDate(value?: string | null): string {
+  if (!value) return "Not available";
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(value));
+}
+
 function amountPerPeriod(price: StripeDisplayPriceDetails): string {
   return `${price.amountLabel}/${price.period}`;
 }

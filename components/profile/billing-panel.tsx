@@ -20,7 +20,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { buildSubscriptionDisplay } from "@/lib/subscription-display";
+import {
+  buildSubscriptionDisplay,
+  formatBillingDate,
+} from "@/lib/subscription-display";
 import type { StripeDisplayPriceDetails } from "@/lib/stripe/display-prices";
 import { cn } from "@/lib/utils";
 import { GuaranteeBadge } from "@/components/marketing/guarantee-badge";
@@ -58,15 +61,6 @@ function statusLabel(status?: string | null): string {
   if (status === "past_due") return "Past due";
   if (status === "canceled") return "Canceled";
   return status.replaceAll("_", " ");
-}
-
-function formatDate(value?: string | null): string {
-  if (!value) return "Not available";
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(value));
 }
 
 function currentStatusLabel(currentSubscription: CurrentSubscription): string | null {
@@ -314,8 +308,8 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
             {currentSubscription ? (
               <div className="mt-2 space-y-1 text-sm text-muted-foreground">
                 <p>Status: {currentSubscription.cancelAtPeriodEnd ? "cancellation scheduled" : statusLabel(currentSubscription.status).toLowerCase()}</p>
-                <p>Valid until {formatDate(currentSubscription.currentPeriodEnd)}</p>
-                {/* <p>Billing period start: {formatDate(currentSubscription.currentPeriodStart)}</p> */}
+                <p>Valid until {formatBillingDate(currentSubscription.currentPeriodEnd)}</p>
+                {/* <p>Billing period start: {formatBillingDate(currentSubscription.currentPeriodStart)}</p> */}
               </div>
             ) : (
               <p className="mt-2 text-sm text-muted-foreground">Status: free</p>
@@ -354,8 +348,8 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
           {currentSubscription ? (
             <p className="text-sm text-muted-foreground">
               {currentSubscription.cancelAtPeriodEnd
-                ? `Your subscription will end on ${formatDate(currentSubscription.currentPeriodEnd)}.`
-                : `Renew date: ${formatDate(currentSubscription.currentPeriodEnd)}`}
+                ? `Your subscription will end on ${formatBillingDate(currentSubscription.currentPeriodEnd)}.`
+                : `Renew date: ${formatBillingDate(currentSubscription.currentPeriodEnd)}`}
             </p>
           ) : null}
         </CardContent>

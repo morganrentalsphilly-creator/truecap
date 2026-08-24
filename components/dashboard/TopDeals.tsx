@@ -254,7 +254,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                 <div className="rounded-xl bg-muted/40 p-3">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Cash Flow</p>
                   <p className={`mt-1 text-sm font-extrabold tabular-nums ${d.cashFlow == null ? "" : d.cashFlow >= 0 ? "text-success" : "text-destructive"}`}>
-                    {d.cashFlow == null ? "-" : `${d.cashFlow >= 0 ? "+" : ""}$${Math.round(d.cashFlow).toLocaleString()}/mo`}
+                    {d.cashFlow == null ? "-" : `${d.cashFlow >= 0 ? "+" : ""}$${Math.round(d.cashFlow).toLocaleString("en-US")}/mo`}
                   </p>
                 </div>
                 <div className="rounded-xl bg-muted/40 p-3">
@@ -397,7 +397,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                   </td>
                   <td className="px-3 py-4 text-right tabular-nums hidden md:table-cell">{d.capRate == null ? "-" : `${d.capRate}%`}</td>
                   <td className={`px-3 py-4 text-right tabular-nums font-semibold ${d.cashFlow == null ? "" : d.cashFlow >= 0 ? "text-success" : "text-destructive"}`}>
-                    {d.cashFlow == null ? "-" : `${d.cashFlow >= 0 ? "+" : ""}$${Math.round(d.cashFlow).toLocaleString()}/mo`}
+                    {d.cashFlow == null ? "-" : `${d.cashFlow >= 0 ? "+" : ""}$${Math.round(d.cashFlow).toLocaleString("en-US")}/mo`}
                   </td>
                   <td className="px-3 py-4 text-right hidden xl:table-cell">
                     {d.riskLevel ? (
