@@ -9,10 +9,32 @@ import { describeMaoTarget } from "@/lib/mao-targets";
 import { TRUECAP_UNDERWRITING_STANDARD_NAME } from "@/lib/underwriting-methodology";
 
 export const metadata: Metadata = {
-  title: "Sample Rental Decision Memo | TrueCap",
+  title: "Sample Rental Decision Memo",
   description:
     "See an illustrative TrueCap rental acquisition decision, including the Offer Ceiling, targets, downside range, risks, and verification plan.",
   alternates: { canonical: "/sample-decision-memo" },
+  openGraph: {
+    type: "website",
+    url: "/sample-decision-memo",
+    title: "Sample Rental Decision Memo | TrueCap",
+    description:
+      "See a complete sample rental decision with its target-dependent Offer Ceiling, downside range, risks, and verification plan.",
+    images: [
+      {
+        url: "/home.jpg",
+        width: 1200,
+        height: 630,
+        alt: "TrueCap sample rental decision memo",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Sample Rental Decision Memo | TrueCap",
+    description:
+      "See a complete sample rental decision with its target-dependent Offer Ceiling, downside range, risks, and verification plan.",
+    images: ["/home.jpg"],
+  },
 };
 
 const money = (value: number) =>
