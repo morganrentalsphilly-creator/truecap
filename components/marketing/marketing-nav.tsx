@@ -38,7 +38,7 @@ const LEARN_LINKS: { label: string; href: string; hint: string }[] = [
 ];
 
 const linkClass =
-  "inline-flex min-h-11 items-center text-[13px] font-semibold text-muted-foreground transition-colors hover:text-foreground";
+  "inline-flex min-h-11 min-w-11 items-center justify-center text-[13px] font-semibold text-muted-foreground transition-colors hover:text-foreground";
 
 export function MarketingNav() {
   return (

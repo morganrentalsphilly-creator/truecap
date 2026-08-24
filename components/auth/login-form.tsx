@@ -225,7 +225,7 @@ export function LoginForm() {
                 <FormLabel className="text-xs font-semibold text-foreground">Password</FormLabel>
                 <Link
                   href="/auth/forgot-password"
-                  className="text-xs font-medium text-primary hover:underline"
+                  className="inline-flex min-h-11 min-w-11 items-center justify-center px-2 text-xs font-medium text-primary hover:underline"
                 >
                   Forgot password?
                 </Link>
@@ -307,7 +307,7 @@ export function LoginForm() {
                 ? `/auth/sign-up?next=${encodeURIComponent(safeNextPath)}`
                 : "/auth/sign-up"
             }
-            className="font-medium text-primary hover:underline"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center px-2 font-medium text-primary hover:underline"
           >
             Sign up
           </Link>

@@ -140,7 +140,7 @@ export const metadata: Metadata = {
       },
       {
         url: "/favicon.ico",
-        type: 'image/svg+xml',
+        type: "image/vnd.microsoft.icon",
       },
     ],
     apple: '/apple-icon.png',
