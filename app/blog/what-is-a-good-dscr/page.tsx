@@ -36,7 +36,7 @@ const SERP_TITLE = "What is a good DSCR for a rental property? (2026)";
 const DESCRIPTION =
   "1.25 is a common lender screen, not an investor guarantee. DSCR bands explained, plus worked examples for loan size and a target-dependent Offer Ceiling.";
 const PUBLISHED_AT = "2026-07-18";
-const MODIFIED_AT = "2026-08-15";
+const MODIFIED_AT = "2026-08-25";
 const READING_TIME_MIN = 10;
 
 export const metadata: Metadata = {
@@ -206,6 +206,17 @@ export default function BlogPost() {
             underwriting because portfolios above 1.25 rarely default and
             portfolios below 1.1 default often.
           </p>
+          <p>
+            How hard 1.25 is to clear also depends on where you&apos;re
+            buying. Higher cap-rate metros like{" "}
+            <Link href="/markets/cleveland" className="text-primary font-semibold hover:underline">
+              Cleveland
+            </Link>{" "}
+            produce more NOI per dollar of purchase price, so plenty of
+            at-asking deals clear 1.25 without touching the down payment. In
+            a low cap-rate coastal metro, the same ratio usually needs the
+            leverage lever below.
+          </p>
 
           <h2 className="text-2xl sm:text-3xl">A 60-second refresher on the formula</h2>
           <p>
@@ -243,7 +254,7 @@ export default function BlogPost() {
           <p>Now build NOI with honest expense assumptions:</p>
           <ul>
             <li>Gross rent: <strong>$31,200</strong></li>
-            <li>Vacancy (8%): −$2,496</li>
+            <li><Link href="/glossary/vacancy" className="text-primary font-semibold hover:underline">Vacancy</Link> (8%): −$2,496</li>
             <li>Property taxes (1.5% of price): −$3,750</li>
             <li>Insurance: −$1,600</li>
             <li>Repairs &amp; maintenance (8%): −$2,496</li>
