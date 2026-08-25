@@ -314,7 +314,7 @@ function MortgageTooltip({ deal }: { deal: CompareDealViewModel }) {
 
 function NetCashFlowTooltip({ deal }: { deal: CompareDealViewModel }) {
   const rent = deal.metrics.monthlyRentalIncome;
-  const opex = deal.metrics.totalOperatingExpenses;
+  const fullOperatingCashOutflow = deal.metrics.totalOperatingExpenses;
   const pmt = deal.metrics.monthlyPayment;
   const pmi = deal.metrics.pmiMonthly;
   const ncf = deal.metrics.netCashFlow;
@@ -323,8 +323,8 @@ function NetCashFlowTooltip({ deal }: { deal: CompareDealViewModel }) {
     <div className="max-w-xs space-y-1.5 text-left text-xs font-normal leading-snug">
       <p className="font-semibold text-foreground">Net cash flow bridge</p>
       <p className="text-muted-foreground">
-        Rent {formatCurrency(rent)} − Operating expenses {formatCurrency(opex)} − Loan payment{" "}
-        {formatCurrency(pmt)}
+        Rent {formatCurrency(rent)} − Vacancy, operating costs &amp; CapEx reserve{" "}
+        {formatCurrency(fullOperatingCashOutflow)} − Loan payment {formatCurrency(pmt)}
         {hasPmi ? <> − PMI {formatCurrency(pmi)}</> : null} →{" "}
         <span className="font-medium text-foreground">{formatCurrency(ncf)}</span>
       </p>
@@ -352,15 +352,14 @@ function formatCellValue(deal: CompareDealViewModel, row: MetricRow): string {
 }
 
 function DscrTooltip({ deal }: { deal: CompareDealViewModel }) {
-  const rent = deal.metrics.monthlyRentalIncome;
-  const opex = deal.metrics.totalOperatingExpenses;
+  const noi = deal.metrics.noiMonthly;
+  const opex = deal.metrics.operatingExpensesMonthly;
   const pmt = deal.metrics.monthlyPayment;
   const dscr = deal.metrics.dscr;
-  const noi = rent != null && opex != null ? rent - opex : null;
   if (isCashPurchaseDeal(deal)) {
     return (
       <div className="max-w-xs space-y-1.5 text-left text-xs font-normal leading-snug">
-        <p className="font-semibold text-foreground">DSCR (debt service coverage)</p>
+        <p className="font-semibold text-foreground">Model DSCR (debt service coverage)</p>
         <p className="text-muted-foreground">
           This deal has no loan, so DSCR is not applicable. The cash flow column already reflects the all-cash purchase.
         </p>
@@ -369,10 +368,14 @@ function DscrTooltip({ deal }: { deal: CompareDealViewModel }) {
   }
   return (
     <div className="max-w-xs space-y-1.5 text-left text-xs font-normal leading-snug">
-      <p className="font-semibold text-foreground">DSCR (debt service coverage)</p>
+      <p className="font-semibold text-foreground">Model DSCR (debt service coverage)</p>
       <p className="text-muted-foreground">
-        Monthly NOI (before debt) ≈ Rent − Operating expenses ={" "}
-        {noi == null ? "—" : formatCurrency(noi)}.
+        Monthly NOI before debt and replacement reserve ={" "}
+        {formatCurrency(noi)}.
+      </p>
+      <p className="text-muted-foreground">
+        Modeled operating expenses included in NOI = {formatCurrency(opex)}.
+        Vacancy reduces effective income; the CapEx reserve stays below NOI.
       </p>
       <p className="text-muted-foreground">
         Debt service (loan payment) = {formatCurrency(pmt)}. Ratio (NOI ÷ payment) ≈{" "}

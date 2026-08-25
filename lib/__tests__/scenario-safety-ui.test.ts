@@ -37,8 +37,6 @@ describe("what-if scenario safety", () => {
     expect(metricsBand).toContain('sourcedLabel("After-Tax CF", "base")');
     expect(dashboard).toContain('"Base risks and verification"');
     expect(dashboard).toContain('"Base long-term analysis"');
-    expect(dashboard).toContain(
-      "deferredWhatIfState?.isAdjusted ? null : returnSummary"
-    );
+    expect(dashboard).not.toContain("returnSummary={");
   });
 });

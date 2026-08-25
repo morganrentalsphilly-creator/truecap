@@ -321,7 +321,7 @@ export function DecisionTier({
             }}
             aria-expanded={tuneOpen}
             aria-controls={`${fieldId}-tune`}
-            className="inline-flex min-h-9 items-center gap-1.5 rounded-lg text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-lg text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <SlidersHorizontal aria-hidden className="size-4" />
             Tune targets

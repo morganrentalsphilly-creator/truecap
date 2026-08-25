@@ -73,6 +73,31 @@ describe("underwriting model release boundary", () => {
     }
   });
 
+  it("fails closed for explicit unknown and future model versions", () => {
+    const futureVersions = ["3.0", "future-standard", 3] as const;
+
+    for (const underwritingModelVersion of futureVersions) {
+      const complete = {
+        ...SAMPLE_DEAL_FIXTURE.values,
+        underwritingModelVersion,
+      };
+      const malformed = {
+        underwritingModelVersion,
+        address: "Unknown-version draft",
+      };
+
+      expect(
+        isReleasedUnderwritingModel({ underwritingModelVersion }),
+        String(underwritingModelVersion)
+      ).toBe(false);
+      for (const raw of [complete, malformed]) {
+        expect(isReleasedUnderwritingSnapshot(raw)).toBe(false);
+        expect(normalizeReleasedInvestmentFormSnapshot(raw)).toBeNull();
+        expect(normalizeReleasedInvestmentFormDraft(raw)).toBeNull();
+      }
+    }
+  });
+
   it("keeps the legacy v1 snapshot and draft normalization paths unchanged", () => {
     const missingVersion = SAMPLE_DEAL_FIXTURE.values;
     const explicitV1 = {

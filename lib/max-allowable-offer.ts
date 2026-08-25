@@ -65,6 +65,96 @@ function safeCalc(values: InvestmentFormValues): AnalysisResult | null {
   }
 }
 
+function isUsableLowerBound(
+  result: AnalysisResult,
+  target: MaoTarget
+): boolean {
+  // At the exact v2 acquisition-credit boundary, total cash invested can be
+  // zero. The engine intentionally stores CoC as 0 there, but an arbitrarily
+  // small move into the valid domain can produce a real positive denominator.
+  // Do not use that zero-denominator sentinel to declare a CoC target
+  // unreachable before the search has entered its meaningful domain.
+  return target.cocReturn === undefined || result.totalCashRequired > 0;
+}
+
+type CandidateResult = {
+  price: number;
+  result: AnalysisResult;
+};
+
+/**
+ * Resolve the first calculable low-price candidate. v2 fixed acquisition
+ * credits can legitimately exceed cash uses at the caller's generic $10k
+ * floor even though a higher candidate is valid. Valid acquisition cash uses
+ * are non-decreasing with price for every v2 financing/closing-cost mode, so a
+ * bounded binary search can enter that valid domain without changing any
+ * financial formula or target threshold.
+ */
+function resolveFirstUsableCandidate(
+  values: InvestmentFormValues,
+  target: MaoTarget,
+  minPrice: number,
+  maxPrice: number,
+  maxResult: AnalysisResult | null
+): CandidateResult | null {
+  const minResult = safeCalc({ ...values, purchasePrice: minPrice });
+  if (minResult && isUsableLowerBound(minResult, target)) {
+    return { price: minPrice, result: minResult };
+  }
+
+  // v1 has no fixed-credit validity floor. Preserve its historical behavior:
+  // a failed minimum calculation means the input is not solvable.
+  if (values.underwritingModelVersion !== "2.0") return null;
+  if (!maxResult || !isUsableLowerBound(maxResult, target)) return null;
+
+  let invalidPrice = minPrice;
+  let validPrice = maxPrice;
+  for (let index = 0; index < 64; index += 1) {
+    const midpoint = (invalidPrice + validPrice) / 2;
+    if (midpoint === invalidPrice || midpoint === validPrice) break;
+    const midpointResult = safeCalc({ ...values, purchasePrice: midpoint });
+    if (midpointResult && isUsableLowerBound(midpointResult, target)) {
+      validPrice = midpoint;
+    } else {
+      invalidPrice = midpoint;
+    }
+  }
+
+  // The validity boundary can be a fractional dollar. Enter the domain at the
+  // first conservative display increment instead of leaking that internal
+  // binary-search value into a customer-facing price.
+  const firstDisplayPrice = Math.ceil(validPrice / 500) * 500;
+  if (firstDisplayPrice > maxPrice) return null;
+  const firstDisplayResult = safeCalc({
+    ...values,
+    purchasePrice: firstDisplayPrice,
+  });
+  return firstDisplayResult && isUsableLowerBound(firstDisplayResult, target)
+    ? { price: firstDisplayPrice, result: firstDisplayResult }
+    : null;
+}
+
+function hasOnlyDscrTarget(target: MaoTarget): boolean {
+  return (
+    target.dscr !== undefined &&
+    target.capRate === undefined &&
+    target.cocReturn === undefined &&
+    target.monthlyCashFlow === undefined &&
+    target.maxPurchasePrice === undefined
+  );
+}
+
+function verifiedDisplayedResult(
+  values: InvestmentFormValues,
+  target: MaoTarget,
+  price: number
+): MaoResult | null {
+  const achieved = safeCalc({ ...values, purchasePrice: price });
+  if (!achieved || !meetsTarget(achieved, target)) return null;
+  if (hasOnlyDscrTarget(target) && achieved.monthlyPayment <= 0) return null;
+  return { target, maxPrice: price, achieved };
+}
+
 /**
  * v2 fixed-amount financing has a real purchase-price floor: a fixed down
  * payment or fixed loan cannot exceed the candidate price. v1 has no such
@@ -144,8 +234,11 @@ export function calculateMaxAllowableOffer(
   // its ceiling were exactly $10M. An explicit Buy Box budget remains the
   // tighter upper bound when present.
   const requestedMinPrice = opts?.minPrice ?? 10_000;
-  const minPrice = resolveMinimumCandidatePrice(values, requestedMinPrice);
-  if (minPrice === null) return null;
+  const requestedCandidateFloor = resolveMinimumCandidatePrice(
+    values,
+    requestedMinPrice
+  );
+  if (requestedCandidateFloor === null) return null;
   const requestedMaxPrice =
     opts?.maxPrice ?? target.maxPurchasePrice ?? MAX_PURCHASE_PRICE;
   const maxPrice = Math.min(
@@ -155,9 +248,35 @@ export function calculateMaxAllowableOffer(
   );
   const iterations = opts?.iterations ?? 28;
 
-  if (!Number.isFinite(maxPrice) || maxPrice < minPrice) return null;
+  if (
+    !Number.isFinite(maxPrice) ||
+    maxPrice < requestedCandidateFloor
+  ) {
+    return null;
+  }
 
   const meetsTargets = (r: AnalysisResult): boolean => meetsTarget(r, target);
+
+  // The upper-bound result serves two trust checks: a DSCR-only solve must
+  // actually have debt somewhere in its allowed domain, and a v2 credit-bound
+  // solve needs one known-valid endpoint before locating its first valid price.
+  const maxResult = safeCalc({ ...values, purchasePrice: maxPrice });
+  if (
+    hasOnlyDscrTarget(target) &&
+    (!maxResult || maxResult.monthlyPayment <= 0)
+  ) {
+    return null;
+  }
+
+  const firstUsable = resolveFirstUsableCandidate(
+    values,
+    target,
+    requestedCandidateFloor,
+    maxPrice,
+    maxResult
+  );
+  if (!firstUsable || !meetsTargets(firstUsable.result)) return null;
+  const minPrice = firstUsable.price;
 
   // Quick reject: if the minimum-price scenario already fails, the targets
   // are unreachable regardless of how cheap the deal is (some
@@ -165,30 +284,18 @@ export function calculateMaxAllowableOffer(
   // lower price means stronger returns).
   let lo = minPrice;
   let hi = maxPrice;
-  try {
-    const minResult = calculateAnalysis({ ...values, purchasePrice: minPrice });
-    if (!meetsTargets(minResult)) return null;
-  } catch {
-    return null;
-  }
 
   // The upper bound is a valid candidate, especially when it came from an
   // explicit purchase-price cap. A midpoint-only bisection approaches `hi`
   // without ever testing it, which used to shave an extra $500 from an exact
   // $200,000 budget. If the bound clears every target, return its displayed
   // floor immediately; no higher price is permitted by this solve.
-  const maxResult = safeCalc({ ...values, purchasePrice: maxPrice });
   if (maxResult && meetsTargets(maxResult)) {
     const roundedPrice = Math.max(minPrice, Math.floor(maxPrice / 500) * 500);
-    const achievedAtRounded = safeCalc({ ...values, purchasePrice: roundedPrice });
-    return {
-      target,
-      maxPrice: roundedPrice,
-      achieved: achievedAtRounded ?? maxResult,
-    };
+    return verifiedDisplayedResult(values, target, roundedPrice);
   }
 
-  let best: { price: number; result: AnalysisResult } | null = null;
+  let best: CandidateResult | null = firstUsable;
 
   for (let i = 0; i < iterations; i++) {
     const mid = (lo + hi) / 2;
@@ -220,12 +327,7 @@ export function calculateMaxAllowableOffer(
   const roundedPrice = Math.max(minPrice, Math.floor(best.price / 500) * 500);
   // Recompute the readout AT the displayed price so "at this price you'd
   // get..." describes the number the user actually sees.
-  const achievedAtRounded = safeCalc({ ...values, purchasePrice: roundedPrice });
-  return {
-    target,
-    maxPrice: roundedPrice,
-    achieved: achievedAtRounded ?? best.result,
-  };
+  return verifiedDisplayedResult(values, target, roundedPrice);
 }
 
 // ---- Inverse solvers: "what would it take to make THIS price work?" ----

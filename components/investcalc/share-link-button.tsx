@@ -7,7 +7,7 @@
  * copy-to-clipboard button. Deal inputs never enter the URL.
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Share2, Copy, Check, Loader2, LogIn, UserPlus } from "lucide-react";
@@ -27,6 +27,11 @@ import type { OfferCeilingTargetSource } from "@/lib/offer-ceiling-contract";
 import { createPublicShareAction } from "@/app/actions/public-shares";
 import { trackEvent } from "@/lib/analytics";
 import { useToast } from "@/hooks/use-toast";
+import {
+  parseShareAuthIntent,
+  serializeShareAuthIntent,
+  SHARE_AUTH_INTENT_STORAGE_KEY,
+} from "@/lib/share-auth-intent";
 
 interface ShareLinkButtonProps {
   values: InvestmentFormValues | null;
@@ -83,11 +88,43 @@ export function ShareLinkButton({
   const encodedReturnPath = encodeURIComponent(returnPath);
   const prepareAuthNavigation = () => {
     try {
+      window.sessionStorage.setItem(
+        SHARE_AUTH_INTENT_STORAGE_KEY,
+        serializeShareAuthIntent({ returnPath, context })
+      );
+    } catch {
+      // The analysis draft still restores even when tab storage is unavailable.
+    }
+    try {
       onPrepareAuth?.();
     } catch {
       // Draft continuity is best-effort and must never block authentication.
     }
   };
+
+  // Authentication returns to the restored analysis. Reopen the disclosure
+  // dialog once so the user can finish the Share action they already chose;
+  // the stored intent contains no address or financial values.
+  useEffect(() => {
+    if (!isAuthenticated || !values) return;
+    try {
+      const raw = window.sessionStorage.getItem(SHARE_AUTH_INTENT_STORAGE_KEY);
+      const intent = parseShareAuthIntent(raw, { currentPath: returnPath });
+      if (!intent || intent.context !== context) {
+        if (raw) window.sessionStorage.removeItem(SHARE_AUTH_INTENT_STORAGE_KEY);
+        return;
+      }
+      window.sessionStorage.removeItem(SHARE_AUTH_INTENT_STORAGE_KEY);
+      setShareUrl("");
+      setCopied(false);
+      setSessionAuthRequired(false);
+      setIncludeAddress(false);
+      setAudience(context === "client-report" ? "client" : "investment-partner");
+      setOpen(true);
+    } catch {
+      // Storage is optional; the user can still open Share manually.
+    }
+  }, [context, isAuthenticated, returnPath, values]);
 
   const openShare = () => {
     if (!values) return;

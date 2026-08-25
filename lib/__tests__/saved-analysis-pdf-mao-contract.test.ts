@@ -84,4 +84,12 @@ describe("My Deals PDF target continuity", () => {
     expect(action).toContain("if (hasUsableBuyBox === false) {");
     expect(completion).toContain('code: "STALE_EXPORT"');
   });
+
+  it("bypasses the personal-report cache for every alternate report mode on both reads", () => {
+    const action = read("app/actions/generate-report-pdf.ts");
+    const page = read("components/investcalc/investcalc-page.tsx");
+
+    expect(page).toContain('{ bypassCache: mode !== "personal" }');
+    expect(action).toContain('{ bypassCache: input.mode !== "personal" }');
+  });
 });

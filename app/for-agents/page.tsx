@@ -49,8 +49,8 @@ export const metadata: Metadata = {
 const USE_CASES: { icon: typeof Calculator; title: string; body: string }[] = [
   {
     icon: Calculator,
-    title: "Answer the investment question at the showing",
-    body: "Paste the address, review the assumptions, and see the verdict, cash flow, cap rate, cash-on-cash return, and DSCR while the property is still in front of you.",
+    title: "Review the investment case at the showing",
+    body: "Paste the address, review the assumptions, and see selected-rule fit, cash flow, cap rate, cash-on-cash return, and DSCR while the property is still in front of you.",
   },
   {
     icon: Share2,
@@ -60,7 +60,7 @@ const USE_CASES: { icon: typeof Calculator; title: string; body: string }[] = [
   {
     icon: FileDown,
     title: "Send a co-branded analysis clients can review",
-    body: "Share a polished PDF or co-branded deal link with the assumptions, verdict, projections, and context for that buyer.",
+    body: "Share a polished PDF or co-branded deal link with the assumptions, selected-rule fit, projections, and context for that buyer.",
   },
   {
     icon: ShieldCheck,
@@ -77,9 +77,12 @@ export default async function ForAgentsPage() {
         loadStripeDisplayPrice("agent_pro_annual"),
       ])
     : [null, null];
-  const agentCheckoutHref = agentProConfigured
+  const agentPrimaryHref = agentProConfigured
     ? "/pricing?checkout=agent_pro_monthly#plans"
-    : "/pricing#plans";
+    : "mailto:hello@usetruecap.com?subject=Agent%20Pro%20waitlist";
+  const agentPrimaryLabel = agentProConfigured
+    ? "Start Agent Pro"
+    : "Email to join Agent Pro waitlist";
 
   return (
     <div className="min-h-screen bg-background">
@@ -111,32 +114,41 @@ export default async function ForAgentsPage() {
             every assumption labeled.
           </p>
           <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-2xl border border-border bg-card px-4 py-3 text-sm sm:w-fit">
-            <span className="font-bold text-foreground">
-              {agentMonthly
-                ? `${agentMonthly.amountLabel}/${agentMonthly.period}`
-                : agentProConfigured
-                  ? "Live price temporarily unavailable"
-                  : "See current availability"}
-            </span>
-            {agentAnnual ? (
-              <span className="text-muted-foreground">
-                {agentAnnual.amountLabel}/{agentAnnual.period}
-              </span>
-            ) : null}
-            <span className="text-muted-foreground">{TRIAL_DAYS}-day trial for new subscribers</span>
-            <span className="text-muted-foreground">Client roster included · up to 100 clients</span>
+            {agentProConfigured ? (
+              <>
+                <span className="font-bold text-foreground">
+                  {agentMonthly
+                    ? `${agentMonthly.amountLabel}/${agentMonthly.period}`
+                    : "Live price temporarily unavailable"}
+                </span>
+                {agentAnnual ? (
+                  <span className="text-muted-foreground">
+                    {agentAnnual.amountLabel}/{agentAnnual.period}
+                  </span>
+                ) : null}
+                <span className="text-muted-foreground">{TRIAL_DAYS}-day trial for new subscribers</span>
+                <span className="text-muted-foreground">Client roster included · up to 100 clients</span>
+              </>
+            ) : (
+              <>
+                <span className="font-bold text-foreground">Waitlist open</span>
+                <span className="text-muted-foreground">
+                  Agent Pro is not accepting new subscriptions yet.
+                </span>
+              </>
+            )}
           </div>
 
           {/* CTAs */}
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <TrackedMarketingLink
-              href={agentCheckoutHref}
+              href={agentPrimaryHref}
               event="agent_pro_cta_clicked"
               properties={{ placement: "agent_hero" }}
               className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5"
             >
               <Sparkles className="size-4" />
-              Start Agent Pro
+              {agentPrimaryLabel}
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
             </TrackedMarketingLink>
             <Link
@@ -147,7 +159,9 @@ export default async function ForAgentsPage() {
             </Link>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            Screen deals free with no card. Agent Pro is a separate plan for client workflows; cancel anytime.
+            {agentProConfigured
+              ? "Screen deals free with no card. Agent Pro is a separate plan for client workflows; cancel anytime."
+              : "Screen deals free with no card. Sending a waitlist request does not start a trial or subscription."}
           </p>
           {/* Risk reversal at the hero CTA. The only refund mention used to
               sit in the pricing band far below the fold. */}
@@ -168,7 +182,9 @@ export default async function ForAgentsPage() {
             in the thousands of dollars — and investors, unlike most buyers,
             purchase again and again. {agentMonthly
               ? `Agent Pro is ${agentMonthly.amountLabel}/${agentMonthly.period}.`
-              : "Agent Pro is a monthly plan."}{" "}
+              : agentProConfigured
+                ? "Agent Pro is a monthly plan."
+                : "Agent Pro pricing will be shown before subscriptions open."}{" "}
             If being the agent with the underwrite in hand wins you a single
             additional investor deal a year, this is not a close call.
           </p>
@@ -247,7 +263,7 @@ export default async function ForAgentsPage() {
           <ul className="space-y-2 text-sm sm:text-base text-foreground">
             <li><strong>Speed.</strong> Build the first-pass underwrite from the address while the property is still being discussed.</li>
             <li><strong>Defensibility.</strong> Show the source and assumption behind each starting number, then edit it for the client&apos;s financing.</li>
-            <li><strong>Client context.</strong> Maintain per-client Buy Boxes and show the specific reason a property passes or misses.</li>
+            <li><strong>Client context.</strong> Maintain per-client Buy Boxes and show the specific reason a property meets or misses selected criteria.</li>
             <li><strong>Brand presence.</strong> Put your logo, colors, and contact details on share links and reports.</li>
             <li><strong>Continuity.</strong> Assign opportunities to a client and keep the investment conversation organized.</li>
           </ul>
@@ -314,15 +330,15 @@ export default async function ForAgentsPage() {
               &ldquo;Hi [name] — a [3-bed in Zip/area] listed this week and it
               screens better than most of what we looked at in [month].
               I&apos;ve attached my underwrite: rent benchmark, cash flow, and
-              the price where it stops making sense. Worth 15 minutes this
-              week?&rdquo;
+              the modeled price threshold under your selected targets. Worth
+              15 minutes this week?&rdquo;
             </li>
             <li>
               <strong className="text-foreground">2 · Follow up after a showing, same day.</strong>{" "}
               &ldquo;Before you get ten opinions from the internet: here&apos;s
               the analysis for [address] — every assumption is labeled and you
-              can change any of them. At asking it&apos;s [verdict]; below
-              [Offer Ceiling] it starts to meet the selected rules. Tell me which assumption you&apos;d
+              can change any of them. At asking it [meets / misses] the selected
+              rules; the Offer Ceiling shows the modeled threshold for those targets. Tell me which assumption you&apos;d
               challenge.&rdquo;
             </li>
             <li>
@@ -350,19 +366,25 @@ export default async function ForAgentsPage() {
             per-client Buy Boxes, deal assignment, co-branded analysis,
             and the full Pro decision workflow.
           </p>
-          <p className="mb-5 text-sm font-bold">
-            {agentMonthly ? `${agentMonthly.amountLabel}/${agentMonthly.period}` : "See live pricing"}
-            {agentAnnual ? ` · ${agentAnnual.amountLabel}/${agentAnnual.period}` : ""}
-            {` · ${TRIAL_DAYS}-day trial for new subscribers · client roster included`}
-          </p>
+          {agentProConfigured ? (
+            <p className="mb-5 text-sm font-bold">
+              {agentMonthly ? `${agentMonthly.amountLabel}/${agentMonthly.period}` : "See live pricing"}
+              {agentAnnual ? ` · ${agentAnnual.amountLabel}/${agentAnnual.period}` : ""}
+              {` · ${TRIAL_DAYS}-day trial for new subscribers · client roster included`}
+            </p>
+          ) : (
+            <p className="mb-5 text-sm font-bold">
+              Agent Pro is not accepting new subscriptions yet. Email to ask about availability; no checkout or trial starts today.
+            </p>
+          )}
           <div className="flex flex-wrap gap-3">
             <TrackedMarketingLink
-              href={agentCheckoutHref}
+              href={agentPrimaryHref}
               event="agent_pro_cta_clicked"
               properties={{ placement: "agent_final" }}
               className="inline-flex min-h-11 items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
-              Start Agent Pro
+              {agentPrimaryLabel}
               <ArrowUpRight className="w-4 h-4" />
             </TrackedMarketingLink>
             <Link

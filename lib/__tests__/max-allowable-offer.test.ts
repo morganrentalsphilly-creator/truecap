@@ -4,8 +4,9 @@
  * These dollar/rate numbers go straight into negotiation guidance, so the math
  * is pinned here.
  */
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
+import * as calcAnalysisModule from "../calc-analysis";
 import { calculateAnalysis } from "../calc-analysis";
 import {
   calculateMaxAllowableOffer,
@@ -110,6 +111,31 @@ describe("MAO — explicit purchase-price ceiling", () => {
       maxPurchasePrice: 200_000_000,
     });
     expect(res).toBeNull();
+  });
+
+  it("fails closed when the displayed rounded price cannot be recomputed", () => {
+    const values = baseSingleFamily();
+    const target: MaoTarget = {
+      monthlyCashFlow: -99_999,
+      maxPurchasePrice: 180_250,
+    };
+    const baseline = calculateMaxAllowableOffer(values, target);
+    expect(baseline?.maxPrice).toBe(180_000);
+
+    const originalCalculateAnalysis = calcAnalysisModule.calculateAnalysis;
+    const calculateSpy = vi.spyOn(calcAnalysisModule, "calculateAnalysis");
+    calculateSpy.mockImplementation(((candidate: InvestmentFormValues) => {
+      if (candidate.purchasePrice === baseline?.maxPrice) {
+        throw new Error("displayed-price recompute failed");
+      }
+      return originalCalculateAnalysis(candidate);
+    }) as typeof calcAnalysisModule.calculateAnalysis);
+
+    try {
+      expect(calculateMaxAllowableOffer(values, target)).toBeNull();
+    } finally {
+      calculateSpy.mockRestore();
+    }
   });
 
   it("does not claim rent or rate can repair a current price above a hard cap", () => {
@@ -299,5 +325,10 @@ describe("MAO — cash-purchase DSCR handling", () => {
     });
     expect(res).not.toBeNull();
     if (res) expect(meetsTarget(res.achieved, res.target)).toBe(true);
+  });
+
+  it("rejects a DSCR-only target because cash has no debt service to constrain", () => {
+    const cashDeal = baseSingleFamily({ downPaymentPct: 100 });
+    expect(calculateMaxAllowableOffer(cashDeal, { dscr: 1.25 })).toBeNull();
   });
 });

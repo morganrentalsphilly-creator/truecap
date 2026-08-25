@@ -149,6 +149,48 @@ describe("v2 Offer Ceiling financing bounds", () => {
       )
     ).toBeNull();
   });
+
+  it("finds the first valid credit-constrained price before applying the target quick-reject", () => {
+    const values = v2({
+      acquisitionCredits: 20_000,
+      loanFees: 0,
+      initialReserve: 0,
+      rehabBudget: 0,
+    });
+    const target: MaoTarget = { monthlyCashFlow: 0 };
+    const bounds = { minPrice: 10_000, maxPrice: 650_000 };
+
+    expect(() =>
+      calculateAnalysis({ ...values, purchasePrice: bounds.minPrice })
+    ).toThrow("Acquisition credits cannot exceed modeled acquisition cash uses");
+
+    let oraclePrice: number | null = null;
+    for (let price = bounds.minPrice; price <= bounds.maxPrice; price += 500) {
+      try {
+        const candidate = calculateAnalysis({ ...values, purchasePrice: price });
+        if (meetsTarget(candidate, target)) oraclePrice = price;
+      } catch {
+        // A fixed credit can make low prices economically invalid. The oracle
+        // keeps enumerating rather than mistaking that domain boundary for an
+        // unreachable target.
+      }
+    }
+
+    const solved = calculateMaxAllowableOffer(values, target, bounds);
+    expect(oraclePrice).not.toBeNull();
+    expect(solved?.maxPrice ?? null).toBe(oraclePrice);
+    if (!solved) return;
+    expect(solved.achieved).toEqual(
+      calculateAnalysis({ ...values, purchasePrice: solved.maxPrice })
+    );
+    expect(meetsTarget(solved.achieved, target)).toBe(true);
+  });
+
+  it("rejects a DSCR-only target for an explicit v2 cash acquisition", () => {
+    const values = v2({ financingMode: "cash", loanFees: 0 });
+    expect(calculateAnalysis(values).monthlyPayment).toBe(0);
+    expect(calculateMaxAllowableOffer(values, { dscr: 1.25 })).toBeNull();
+  });
 });
 
 describe.each([

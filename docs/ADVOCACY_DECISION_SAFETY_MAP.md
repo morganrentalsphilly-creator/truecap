@@ -219,16 +219,26 @@ production privacy check.
 
 ### One-time $5 purchase
 
-- `app/actions/one-time-pdf.ts` creates a payment-mode Checkout Session and a
-  browser-bound claim. Existing claim rows bind secret/input/target
-  fingerprints but not a durable purchased artifact.
-- The Stripe webhook intentionally skips Pack completion. Browser return must
-  still possess the claim secret and exact draft; the generated PDF is returned
-  as base64 and not stored.
+- New checkout is disabled behind independent public and server-only gates.
+  `app/actions/one-time-pdf.ts` retains the payment-mode Checkout construction
+  only for a separately reviewed future activation; existing paid claims bind
+  secret/input/target fingerprints but not a durable purchased artifact.
+- Pack completion still is not durable webhook fulfillment. Browser return must
+  possess the claim secret and exact draft; the generated PDF is returned as
+  base64 and not stored.
+- Historical verification and export re-read the current Stripe Session,
+  Charges, and Disputes. Partial or full refunds and lost disputes revoke future
+  server-controlled report access; open disputes suspend it; a won dispute is
+  accepted only after a fresh paid/no-refund check.
+- Signed refund/dispute webhooks are wake-up signals for a fresh Stripe read and
+  durably mark an eligible credit denied or an applied credit reversed. They do
+  not recall a downloaded PDF, remove an already-applied coupon, reprice a
+  subscription, or mutate a Stripe Price.
 - Tab/session loss can therefore leave a paid buyer without retrieval. There is
   no complete Pack webhook fulfillment, private artifact, email recovery,
-  account claim, delivery retry, refund/dispute lifecycle, or Pack reconcile
-  loop.
+  account claim, delivery retry, or Pack reconciliation loop. The narrow
+  historical refund/dispute access and credit controls do not make fulfillment
+  durable or cross-device.
 - Production activation is blocked until the reviewed expand-only fulfillment
   schema, private storage, webhook/reconciliation implementation, delivery
   owner, and rollback runbook are complete and applied. The current price and

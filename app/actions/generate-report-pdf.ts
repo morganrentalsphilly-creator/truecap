@@ -396,7 +396,10 @@ async function prepareReportInput(
 
   const { getSavedAnalysisPdfExportAction } =
     await import("@/app/actions/saved-analyses");
-  const authority = await getSavedAnalysisPdfExportAction(input.savedExport.id);
+  const authority = await getSavedAnalysisPdfExportAction(
+    input.savedExport.id,
+    { bypassCache: input.mode !== "personal" }
+  );
   if (!authority.ok) {
     return {
       ok: false,
