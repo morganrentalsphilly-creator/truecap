@@ -52,8 +52,10 @@ describe("MAO release-path safety", () => {
 
     expect(calculator).toContain("maxOfferTarget?: unknown");
     expect(calculator).toContain("normalizeMaoTarget(parsed.maxOfferTarget)");
+    // Sample-seeded example targets are the one exception: the fork carries
+    // only USER-adopted targets (see sample-target-adoption-guard.test.ts).
     expect(calculator).toContain(
-      "const carriedMaoTarget = normalizeMaoTarget(analysisMaoTargetRef.current)"
+      "const carriedMaoTarget = sampleSeededMaoTargetRef.current\n      ? null\n      : normalizeMaoTarget(analysisMaoTargetRef.current)"
     );
     expect(calculator).toContain("analysisMaoTargetRef.current = carriedMaoTarget");
     expect(calculator).toContain(
@@ -83,8 +85,14 @@ describe("MAO release-path safety", () => {
     expect(calculator).toContain(
       "maoTargetAnalysisFingerprint(normalizedDraft ?? values)"
     );
+    // The rebind carries the ACTIVE target — except sample-seeded example
+    // targets, which must never persist as adoption (locked decision; see
+    // sample-target-adoption-guard.test.ts).
     expect(watcher).toContain(
-      "analysisMaoTargetRef.current,\n          analysisMaoTargetSource"
+      "sampleSeeded ? null : analysisMaoTargetRef.current"
+    );
+    expect(watcher).toContain(
+      'sampleSeeded ? "screening-defaults" : analysisMaoTargetSource'
     );
   });
 

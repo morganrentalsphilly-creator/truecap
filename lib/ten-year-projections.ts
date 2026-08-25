@@ -4,7 +4,10 @@
 // v4: the CapEx reserve is excluded from the TAXABLE-income line (a reserve
 // isn't a deductible operating expense), so v3 snapshots that over-sheltered
 // rental income regenerate.
-export const TEN_YEAR_PROJECTION_SNAPSHOT_VERSION = 4;
+// v5: debt service stops once the loan amortizes (loan terms < 10 years no
+// longer charge P&I/PMI in post-payoff years), so cached snapshots for
+// short-term loans regenerate.
+export const TEN_YEAR_PROJECTION_SNAPSHOT_VERSION = 5;
 
 export interface ProjectionYear {
   year: number;
@@ -69,6 +72,13 @@ export function buildTenYearProjection(input: TenYearProjectionInput): Projectio
   const pmiDropBalance = 0.8 * (input.purchasePrice ?? 0);
   let loanBalance = input.loanAmount ?? 0;
 
+  // The interest schedule runs exactly as long as the loan does, so a year at
+  // or past its end is a year after payoff: P&I stops, and mortgage insurance
+  // (even never-canceling FHA MIP) dies with the loan. Termless/legacy inputs
+  // (no schedule) keep the historical flat charge for all 10 years.
+  const amortizedScheduleLength =
+    (input.loanAmount ?? 0) > 0 ? (input.yearlyInterestSchedule?.length ?? 0) : 0;
+
   let cumulativeCashFlowAnnual = 0;
 
   return Array.from({ length: 10 }, (_, index) => {
@@ -82,9 +92,14 @@ export function buildTenYearProjection(input: TenYearProjectionInput): Projectio
     // PMI applies while the loan balance at the start of the year is above the
     // 80% LTV threshold (or always, for FHA MIP that never cancels); then pay
     // down the balance for next year's check.
+    const loanPaidOff = amortizedScheduleLength > 0 && index >= amortizedScheduleLength;
     const pmiThisYear =
-      pmiAnnual > 0 && (input.pmiNoCancel === true || loanBalance > pmiDropBalance) ? pmiAnnual : 0;
-    const debtServiceAnnual = principalAndInterestAnnual + pmiThisYear;
+      !loanPaidOff &&
+      pmiAnnual > 0 &&
+      (input.pmiNoCancel === true || loanBalance > pmiDropBalance)
+        ? pmiAnnual
+        : 0;
+    const debtServiceAnnual = loanPaidOff ? 0 : principalAndInterestAnnual + pmiThisYear;
     if (typeof yearlyInterestForYear === "number") {
       loanBalance = Math.max(0, loanBalance - Math.max(0, principalAndInterestAnnual - yearlyInterestForYear));
     }

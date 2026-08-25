@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Free DSCR Calculator — Debt Service Coverage Ratio",
     description:
-      "Compute DSCR in seconds. Plus what counts as bankable, what lenders require, and how DSCR loans work.",
+      "Compute DSCR in seconds. Plus what lenders typically require and how DSCR loans work.",
     url: "/tools/dscr-calculator",
     type: "website",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap DSCR calculator" }],
@@ -52,7 +52,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What's a good DSCR?",
-    a: "Most conventional and DSCR-loan lenders want at least 1.25. Below 1.0 the property loses money each month (you're subsidizing it). Between 1.0 and 1.25 is acceptable for some products but tight. Above 1.5 is comfortable; above 2.0 is very strong but rare in markets with normal cap rates.",
+    a: "Most conventional and DSCR-loan lenders want at least 1.25. Below 1.0 the property loses money each month (you're subsidizing it). Between 1.0 and 1.25 is acceptable for some products but tight. 1.25 to 1.5 is a comfortable cushion for most products; above 1.5 is strong, and above 2.0 is rare in markets with normal cap rates.",
   },
   {
     q: "How is DSCR different from cash-on-cash return?",
@@ -141,7 +141,8 @@ export default function DscrCalculatorPage() {
             <p className="text-base sm:text-lg text-muted-foreground mt-2 leading-relaxed">
               Debt Service Coverage Ratio — the single metric every lender
               wants to see for an investment loan. Compute it in seconds and
-              know whether your deal is bankable before you submit.
+              see how your DSCR compares with typical lender thresholds
+              before you submit — lenders compute their own.
             </p>
           </header>
 

@@ -99,6 +99,31 @@ export function buildSensitivityReport(
     const rentBase = safeMonthlyRent(values);
     const rentDeltaPct = (pct: number) => `${pct > 0 ? "+" : ""}${(pct * 100).toFixed(0)}%`;
 
+    // The vacancy/rate scenarios clamp at their floors (0%), so the label must
+    // state the delta that was ACTUALLY applied — a 3%-vacancy deal's Upside
+    // rerun happens at 0% (-3pp), and labeling it "-5pp" misstates the
+    // perturbation behind the numbers.
+    const ppLabel = (pp: number) => {
+      // Two decimals of precision (rates carry hundredths), trimmed to the
+      // shortest exact form. Math.round on the scaled magnitude keeps halves
+      // away from zero for negatives too (-0.25 must not display as -0.2).
+      const rounded = (Math.sign(pp) * Math.round(Math.abs(pp) * 100)) / 100;
+      const text = Number.isInteger(rounded)
+        ? rounded.toFixed(0)
+        : Math.round(rounded * 10) / 10 === rounded
+          ? rounded.toFixed(1)
+          : rounded.toFixed(2);
+      return `${rounded > 0 ? "+" : ""}${text}pp`;
+    };
+    const vacancyAppliedPp = (pointsDelta: number) => {
+      const baseVacancy = Number(values.vacancyPct) || 0;
+      return Math.max(0, Math.min(100, baseVacancy + pointsDelta * 100)) - baseVacancy;
+    };
+    const rateAppliedPp = (pointsDelta: number) => {
+      const baseRate = Number(values.interestRate) || 0;
+      return Math.max(0, baseRate + pointsDelta * 100) - baseRate;
+    };
+
     // Cash purchases have no loan, so the interest-rate axis would show
     // identical numbers across Stress/Base/Upside — confusing noise. Skip
     // the row entirely for cash deals.
@@ -118,9 +143,9 @@ export function buildSensitivityReport(
         axis: "vacancy",
         label: "Vacancy",
         scenarios: [
-          { name: "Stress", deltaLabel: `+${(deltas.vacancy.stress * 100).toFixed(0)}pp`, result: vacancyScenario(values, deltas.vacancy.stress) },
+          { name: "Stress", deltaLabel: ppLabel(vacancyAppliedPp(deltas.vacancy.stress)), result: vacancyScenario(values, deltas.vacancy.stress) },
           { name: "Base", deltaLabel: `${(Number(values.vacancyPct) || 0).toFixed(0)}%`, result: base },
-          { name: "Upside", deltaLabel: `${(deltas.vacancy.upside * 100).toFixed(0)}pp`, result: vacancyScenario(values, deltas.vacancy.upside) },
+          { name: "Upside", deltaLabel: ppLabel(vacancyAppliedPp(deltas.vacancy.upside)), result: vacancyScenario(values, deltas.vacancy.upside) },
         ],
       },
     ];
@@ -130,9 +155,9 @@ export function buildSensitivityReport(
         axis: "interestRate",
         label: "Interest Rate",
         scenarios: [
-          { name: "Stress", deltaLabel: `+${(deltas.interestRate.stress * 100).toFixed(0)}pp`, result: rateScenario(values, deltas.interestRate.stress) },
+          { name: "Stress", deltaLabel: ppLabel(rateAppliedPp(deltas.interestRate.stress)), result: rateScenario(values, deltas.interestRate.stress) },
           { name: "Base", deltaLabel: `${(Number(values.interestRate) || 0).toFixed(2)}%`, result: base },
-          { name: "Upside", deltaLabel: `${(deltas.interestRate.upside * 100).toFixed(0)}pp`, result: rateScenario(values, deltas.interestRate.upside) },
+          { name: "Upside", deltaLabel: ppLabel(rateAppliedPp(deltas.interestRate.upside)), result: rateScenario(values, deltas.interestRate.upside) },
         ],
       });
     }

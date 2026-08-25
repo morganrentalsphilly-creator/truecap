@@ -526,6 +526,66 @@ describe("ten-year projection", () => {
     }
   });
 
+  it("debt service stops after a short-term loan amortizes (5-yr term)", () => {
+    // A 5-year schedule means the loan is paid off entering year 6 — the
+    // projection must not keep charging P&I (it did, contradicting the
+    // exit-scenario balance table on the same analysis).
+    const years = buildTenYearProjection({
+      monthlyRentalIncome: 2_000,
+      totalOperatingExpenses: 500,
+      capexReserveMonthly: 0,
+      monthlyPayment: 3_937,
+      loanAmount: 200_000,
+      purchasePrice: 250_000,
+      taxSavingsMonthly: 0,
+      annualDepreciation: 0,
+      yearlyInterestSchedule: [12_856, 10_534, 8_050, 5_393, 2_551],
+      rentGrowthPct: 0,
+      expenseGrowthPct: 0,
+      taxRate: 0.24,
+      includeInterestDeduction: true,
+    });
+    for (const y of years.slice(0, 5)) {
+      expect(y.debtServiceAnnual).toBe(3_937 * 12);
+    }
+    for (const y of years.slice(5)) {
+      expect(y.debtServiceAnnual).toBe(0);
+    }
+    // Post-payoff cash flow reflects the freed-up debt service.
+    expect(years[5]!.netCashFlowAnnual).toBe(2_000 * 12 - 500 * 12);
+  });
+
+  it("never-canceling MIP (pmiNoCancel) also stops once the loan is paid off", () => {
+    const years = buildTenYearProjection({
+      monthlyRentalIncome: 2_000,
+      totalOperatingExpenses: 500,
+      capexReserveMonthly: 0,
+      monthlyPayment: 3_937,
+      pmiMonthly: 150,
+      pmiNoCancel: true,
+      loanAmount: 200_000,
+      purchasePrice: 250_000,
+      taxSavingsMonthly: 0,
+      annualDepreciation: 0,
+      yearlyInterestSchedule: [12_856, 10_534, 8_050, 5_393, 2_551],
+      rentGrowthPct: 0,
+      expenseGrowthPct: 0,
+      taxRate: 0.24,
+      includeInterestDeduction: true,
+    });
+    expect(years[4]!.debtServiceAnnual).toBe(3_937 * 12 + 150 * 12);
+    expect(years[5]!.debtServiceAnnual).toBe(0);
+  });
+
+  it("full-term financed deal end-to-end keeps flat debt service (30-yr)", () => {
+    const result = calculateAnalysis(baseSingleFamily());
+    const first = result.tenYearProjection[0]!.debtServiceAnnual;
+    expect(first).toBeGreaterThan(0);
+    for (const y of result.tenYearProjection) {
+      expect(y.debtServiceAnnual).toBe(first);
+    }
+  });
+
   it("rent compounds at the growth rate (year-10 vs year-1)", () => {
     const years = buildTenYearProjection({
       monthlyRentalIncome: 1_000,
