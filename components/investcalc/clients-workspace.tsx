@@ -395,10 +395,14 @@ export function ClientsWorkspace({
                   can always get it out by hand. */}
               {revealedId === c.id && portalUrlByClient[c.id] ? (
                 <div className="mt-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  <label
+                    htmlFor={`portal-link-${c.id}`}
+                    className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground"
+                  >
                     Portal link — select and copy
                   </label>
                   <input
+                    id={`portal-link-${c.id}`}
                     readOnly
                     value={portalUrlByClient[c.id]}
                     onFocus={(e) => e.currentTarget.select()}

@@ -50,7 +50,7 @@ function classify(dscr: number): { label: string; color: string; note: string } 
     };
   if (dscr < 1.5)
     return {
-      label: "Bankable",
+      label: "Comfortable",
       color: "text-[var(--metric-positive)]",
       note: "Clears the typical ≥1.25 conventional / DSCR-loan threshold.",
     };

@@ -36,8 +36,10 @@ describe("guest analysis signup continuity", () => {
     expect(calculator).toContain(
       'exactTarget ? normalizedSource : "screening-defaults"'
     );
+    // The adoption check now also excludes sample-seeded example targets
+    // (locked decision; see sample-target-adoption-guard.test.ts).
     expect(calculator).toContain(
-      "const targetWasAdopted = isAdoptedOfferCeilingTargetSource("
+      "const targetWasAdopted =\n        !sampleSeededTarget &&\n        isAdoptedOfferCeilingTargetSource("
     );
     expect(calculator).toContain(
       "const maxOfferTargetSnapshot = targetWasAdopted"

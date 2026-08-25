@@ -1032,6 +1032,7 @@ function DealTags({
         <PopoverContent align="start" className="w-56 p-2">
           <div className="flex gap-1.5">
             <Input
+              aria-label="New tag name"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {

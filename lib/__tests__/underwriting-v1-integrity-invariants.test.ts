@@ -344,6 +344,38 @@ describe("sensitivity scenarios equal full engine reruns", () => {
     );
   });
 
+  it("labels state the APPLIED delta when the scenario clamps at the floor", () => {
+    const values = corpusValues("financed_sfr_standard");
+
+    // Unclamped deal keeps the nominal labels.
+    const nominal = buildSensitivityReport({ ...values, vacancyPct: 8, interestRate: 6.5 });
+    const nominalVacancy = nominal?.find((row) => row.axis === "vacancy");
+    const nominalRate = nominal?.find((row) => row.axis === "interestRate");
+    expect(nominalVacancy?.scenarios[0].deltaLabel).toBe("+5pp");
+    expect(nominalVacancy?.scenarios[2].deltaLabel).toBe("-5pp");
+    expect(nominalRate?.scenarios[0].deltaLabel).toBe("+1pp");
+    expect(nominalRate?.scenarios[2].deltaLabel).toBe("-1pp");
+
+    // A 3%-vacancy deal's Upside rerun happens at 0% — the label must say so.
+    const clamped = buildSensitivityReport({ ...values, vacancyPct: 3, interestRate: 0.5 });
+    const clampedVacancy = clamped?.find((row) => row.axis === "vacancy");
+    const clampedRate = clamped?.find((row) => row.axis === "interestRate");
+    expect(clampedVacancy?.scenarios[2].deltaLabel).toBe("-3pp");
+    expect(clampedVacancy?.scenarios[2].result).toEqual(
+      calculateAnalysis({ ...values, vacancyPct: 0, interestRate: 0.5 }),
+    );
+    expect(clampedRate?.scenarios[2].deltaLabel).toBe("-0.5pp");
+    expect(clampedRate?.scenarios[2].result).toEqual(
+      calculateAnalysis({ ...values, vacancyPct: 3, interestRate: 0 }),
+    );
+
+    // Hundredths precision must survive (JS Math.round on negative halves
+    // pulls toward +∞ — a 0.25% base rate must not label as "-0.2pp").
+    const hundredths = buildSensitivityReport({ ...values, interestRate: 0.25 });
+    const hundredthsRate = hundredths?.find((row) => row.axis === "interestRate");
+    expect(hundredthsRate?.scenarios[2].deltaLabel).toBe("-0.25pp");
+  });
+
   it("matches direct per-unit reruns for multifamily rent sensitivity", () => {
     const values = corpusValues("three_unit_multifamily");
     const report = buildSensitivityReport(values);

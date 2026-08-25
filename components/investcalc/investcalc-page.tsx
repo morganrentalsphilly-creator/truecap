@@ -840,6 +840,16 @@ export function InvestCalcPage({
   const forkGenerationRef = useRef(0);
   const lastPersistedFormJsonRef = useRef<string | null>(null);
   const analysisMaoTargetRef = useRef<MaoTarget | null>(analysisMaoTarget);
+  /** True while the CURRENT adopted-target state was seeded by the synthetic
+   *  sample demo rather than an explicit user action. The sample's targets are
+   *  EXAMPLE rules — they must never survive as "your selected targets" once
+   *  the user underwrites their own deal (locked product decision). While
+   *  armed: drafts and saves record screening-defaults instead of the sample
+   *  adoption, the fork path drops the carried target, and any subsequent
+   *  non-sample submit (or live recompute over edited values) clears the
+   *  adopted state entirely — one-shot, matching the Pro-preview contract.
+   *  Any explicit adoption (target editor edit) disarms it. */
+  const sampleSeededMaoTargetRef = useRef(false);
   const lastPersistedMaoTargetJsonRef = useRef<string | null>(null);
   /** Form snapshot that produced the currently displayed analysis outputs (last Calculate or loaded saved deal). */
   const lastComputedFormJsonRef = useRef<string | null>(null);
@@ -1028,6 +1038,9 @@ export function InvestCalcPage({
       analysisMaoTargetRef.current = target;
       setAnalysisMaoTarget(target);
       setAnalysisMaoTargetSource("selected-targets");
+      // Editing the rules IS explicit adoption — even if the editor was
+      // seeded by the sample, the user has now made these targets theirs.
+      sampleSeededMaoTargetRef.current = false;
       // The edited criteria no longer match the atomically recorded solve.
       // Keep recorded mode fail-closed until an explicit Run or Save replaces
       // the whole base result too; otherwise today's inverse solver would sit
@@ -1061,6 +1074,7 @@ export function InvestCalcPage({
     setIsSampleProPreview(false);
     setAnalysisMaoTarget(null);
     setAnalysisMaoTargetSource(null);
+    sampleSeededMaoTargetRef.current = false;
     clearPendingMaoTarget();
     setIsEditingAssumptions(false);
   }, []);
@@ -2461,6 +2475,16 @@ export function InvestCalcPage({
     // Editing away from the sample deal ends the Pro preview — the unlock is
     // for the demo numbers only, so panels re-gate to the real entitlement.
     setIsSampleProPreview(false);
+    // …and the sample's example targets end with it. The live recompute is
+    // now grading the USER's edited numbers; example rules must not keep
+    // scoring them as "your selected targets" (they were never adopted).
+    if (sampleSeededMaoTargetRef.current) {
+      sampleSeededMaoTargetRef.current = false;
+      analysisMaoTargetRef.current = null;
+      setAnalysisMaoTarget(null);
+      setAnalysisMaoTargetSource("screening-defaults");
+      clearPendingMaoTarget();
+    }
     // These outputs were just recomputed from the live form. They are no
     // longer a historical saved-analysis view, so a frozen/legacy provenance
     // label would be stale and misleading.
@@ -2563,10 +2587,14 @@ export function InvestCalcPage({
       if (savedDealIdRef.current) return;
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => {
+        // Sample-seeded example targets are session theater, not user
+        // adoption — persisting them would resurrect "your selected
+        // targets" on the next reload of a deal the user never targeted.
+        const sampleSeeded = sampleSeededMaoTargetRef.current;
         writeCalcDraftWithMaoTarget(
           values,
-          analysisMaoTargetRef.current,
-          analysisMaoTargetSource
+          sampleSeeded ? null : analysisMaoTargetRef.current,
+          sampleSeeded ? "screening-defaults" : analysisMaoTargetSource
         );
       }, CALC_FORM_DRAFT_DEBOUNCE_MS);
     });
@@ -3359,6 +3387,19 @@ export function InvestCalcPage({
     if (isSampleRun) {
       setAnalysisMaoTarget({ ...SAMPLE_DEAL_FIXTURE.maoTarget });
       setAnalysisMaoTargetSource("selected-targets");
+      sampleSeededMaoTargetRef.current = true;
+    } else if (sampleSeededMaoTargetRef.current) {
+      // The sample's example targets live for exactly the sample run — the
+      // same one-shot contract as the Pro preview above. Any later submit is
+      // the user's own underwriting, and example rules must never grade it
+      // as "your selected targets" (they were never adopted). Fall back to
+      // the not-adopted state; the user can review + adopt targets
+      // explicitly from the result.
+      sampleSeededMaoTargetRef.current = false;
+      analysisMaoTargetRef.current = null;
+      setAnalysisMaoTarget(null);
+      setAnalysisMaoTargetSource("screening-defaults");
+      clearPendingMaoTarget();
     }
 
     // PostHog funnel event - fires the moment the user commits to
@@ -3766,9 +3807,23 @@ export function InvestCalcPage({
         analysisMaoTargetSource ??
         pendingMaoBinding?.source ??
         (candidateMaxOfferTarget ? "selected-targets" : "screening-defaults");
-      const targetWasAdopted = isAdoptedOfferCeilingTargetSource(
-        candidateMaxOfferTargetSource
-      );
+      // Sample-seeded example targets never persist as an adoption — a saved
+      // copy of (or fork from) the demo records screening-defaults until the
+      // user adopts rules themselves. The DISPLAYED state must converge to
+      // that persisted row too: leaving the sample target live while the row
+      // records null pins isMaoTargetDirty (→ "Unsaved changes") in a state
+      // no amount of re-saving could ever clear.
+      const sampleSeededTarget = sampleSeededMaoTargetRef.current;
+      if (sampleSeededTarget) {
+        sampleSeededMaoTargetRef.current = false;
+        analysisMaoTargetRef.current = null;
+        setAnalysisMaoTarget(null);
+        setAnalysisMaoTargetSource("screening-defaults");
+        clearPendingMaoTarget();
+      }
+      const targetWasAdopted =
+        !sampleSeededTarget &&
+        isAdoptedOfferCeilingTargetSource(candidateMaxOfferTargetSource);
       const maxOfferTargetSnapshot = targetWasAdopted
         ? candidateMaxOfferTarget
         : null;
@@ -4742,6 +4797,9 @@ export function InvestCalcPage({
       analysisMaoTargetRef.current = restoredMaoTarget;
       setAnalysisMaoTarget(restoredMaoTarget);
       setAnalysisMaoTargetSource(restoredMaoTargetSource);
+      // A verified paid claim is the opposite of sample theater — never let a
+      // stale sample flag strip the recorded target from the rebuilt report.
+      sampleSeededMaoTargetRef.current = false;
       Object.entries(restoredValues).forEach(([key, value]) => {
         form.setValue(key as keyof InvestmentFormValues, value as never, {
           shouldDirty: true,
@@ -4812,10 +4870,15 @@ export function InvestCalcPage({
     if (!ok) return;
     isProgrammaticResetRef.current = true;
     const forkedValues = buildRepeatDealDraft(form.getValues());
-    const carriedMaoTarget = normalizeMaoTarget(analysisMaoTargetRef.current);
+    // "Targets will remain" applies to targets the USER adopted. Sample-seeded
+    // example rules stop at the demo — the next deal starts not-adopted.
+    const carriedMaoTarget = sampleSeededMaoTargetRef.current
+      ? null
+      : normalizeMaoTarget(analysisMaoTargetRef.current);
     const carriedMaoTargetSource = carriedMaoTarget
       ? analysisMaoTargetSource ?? "selected-targets"
       : null;
+    sampleSeededMaoTargetRef.current = false;
     // Invalidate any in-flight save: performSaveDeal's completion must not
     // re-attach the SOURCE deal's id (or clear the fork draft) after this
     // fork — clicking Save then fork during the roundtrip silently turned
@@ -5054,6 +5117,10 @@ export function InvestCalcPage({
    * gives them a fully-populated working demo in one click.
    */
   const handleTrySampleDeal = () => {
+    // A second tap while the first sample submit is still deferred (double-rAF
+    // + 150ms backstop) would fire a second, NON-sample submit that consumes
+    // the one-shot preview/target state and strips the demo it just launched.
+    if (pendingSampleRunRef.current) return;
     // Shared single source of truth (lib/sample-deal.ts) - the homepage
     // hero mock card COMPUTES its displayed numbers from these same
     // values, so the demo can never contradict the marketing card
@@ -5070,6 +5137,7 @@ export function InvestCalcPage({
     // validation as a defense against any intervening reset.
     setAnalysisMaoTarget({ ...SAMPLE_DEAL_FIXTURE.maoTarget });
     setAnalysisMaoTargetSource("selected-targets");
+    sampleSeededMaoTargetRef.current = true;
     // Apply each field via setValue so RHF dirties and the form's
     // controlled inputs re-render with the new values immediately.
     Object.entries(sample).forEach(([key, value]) => {
@@ -5678,6 +5746,7 @@ export function InvestCalcPage({
               key={tab.id}
               disabled={!areAnalysisTabsEnabled}
               aria-disabled={!areAnalysisTabsEnabled}
+              aria-pressed={tab.id === activeInputTab}
               title={!areAnalysisTabsEnabled ? "Calculate the analysis first." : undefined}
               onClick={() => handleInputTabClick(tab.id)}
               className={cn(
@@ -6248,6 +6317,7 @@ export function InvestCalcPage({
                 const exactValues = snapshot.success ? snapshot.data : analysisValues;
                 const normalizedSource = normalizeOfferCeilingTargetSource(source);
                 const exactTarget =
+                  !sampleSeededMaoTargetRef.current &&
                   normalizedSource &&
                   isAdoptedOfferCeilingTargetSource(normalizedSource)
                     ? normalizeMaoTarget(maoTarget)

@@ -497,6 +497,7 @@ export function TemplatesManagementPage({
           <div className="relative max-w-md">
             <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
             <Input
+              aria-label="Search templates"
               placeholder="Search templates..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
