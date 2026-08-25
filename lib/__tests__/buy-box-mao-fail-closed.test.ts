@@ -15,7 +15,20 @@ describe("Buy Box target resolution fails closed", () => {
     expect(dashboard).toContain(
       'const targetActionsBlocked = effectiveBuyBoxTargetResolutionState !== "ready"'
     );
-    expect(dashboard).toContain("if (targetActionsBlocked || isSaveLockedByPlan) return;");
+    // The two guards split so the plan-lock branch can EXPLAIN itself (toast
+    // with an upgrade path) instead of a silent disabled button — but both
+    // still return before onSaveDeal, so the fail-closed contract holds.
+    expect(dashboard).toContain("if (targetActionsBlocked) return;");
+    const saveClick = dashboard.slice(
+      dashboard.indexOf("const handleSaveClick = () => {"),
+      dashboard.indexOf("const handleExportPdf = (")
+    );
+    const lockedBranch = saveClick.indexOf("if (isSaveLockedByPlan) {");
+    const lockedReturn = saveClick.indexOf("return;", lockedBranch);
+    const saveCall = saveClick.indexOf("void onSaveDeal(");
+    expect(lockedBranch).toBeGreaterThanOrEqual(0);
+    expect(lockedReturn).toBeGreaterThan(lockedBranch);
+    expect(saveCall).toBeGreaterThan(lockedReturn);
     expect(dashboard).toContain("disabled={targetActionsBlocked}");
     // Account criteria stay valid across address edits; readiness must not be
     // reset by an address without a matching refetch.

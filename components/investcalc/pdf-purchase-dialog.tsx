@@ -34,10 +34,9 @@ export function PdfPurchaseDialog({
           below the fold unreachable. */}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Choose how to unlock this report</DialogTitle>
+          <DialogTitle>PDF reports are included with Pro</DialogTitle>
           <DialogDescription>
-            PDF reports are included with Pro. One-time report purchases are
-            temporarily unavailable.
+            One-time report purchases are temporarily unavailable.
           </DialogDescription>
         </DialogHeader>
 
@@ -48,9 +47,6 @@ export function PdfPurchaseDialog({
             href="/pricing"
             className="group relative flex items-start justify-between gap-3 rounded-2xl border-2 border-primary bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-4 transition hover:border-primary/70"
           >
-            <span className="absolute -top-2.5 left-4 rounded-full bg-primary px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest text-primary-foreground shadow-sm">
-              For repeat analysis
-            </span>
             <div>
               <p className="flex items-center gap-1.5 text-sm font-bold text-foreground">
                 <Sparkles className="size-4 text-primary" />

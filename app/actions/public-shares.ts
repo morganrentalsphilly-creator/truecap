@@ -81,6 +81,10 @@ export async function createPublicShareAction(input: unknown): Promise<CreatePub
         .optional(),
       audience: z.enum(["investment-partner", "client", "lender-review"]).optional(),
       addressVisibility: z.enum(["hidden", "full"]).optional(),
+      /** The client's price field currently holds an automated estimate (AVM /
+       *  rent-multiple) the user never replaced. Ignored when the share swaps
+       *  to a saved deal's snapshot, whose provenance this flag can't describe. */
+      priceEstimated: z.boolean().optional(),
     })
     .safeParse(input);
   if (!parsed.success) {
@@ -181,6 +185,9 @@ export async function createPublicShareAction(input: unknown): Promise<CreatePub
     methodologyVersion: recordedMethodologyVersion,
     audience: (parsed.data.audience ?? "investment-partner") as PublicShareAudience,
     addressVisibility: (parsed.data.addressVisibility ?? "hidden") as PublicShareAddressVisibility,
+    // Safe under the dealId swap too: that branch only fires when the saved
+    // values byte-match the client values, so the flag describes the same price.
+    priceEstimated: parsed.data.priceEstimated === true,
   });
   if (!path) {
     // Never fall back to a URL containing the analysis payload. Existing /d

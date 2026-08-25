@@ -681,6 +681,16 @@ export function InvestCalcPage({
   // notice on the result screen; cleared once the user edits the price and
   // re-runs (see onSubmit).
   const [priceEstimated, setPriceEstimated] = useState(false);
+  // Keyboard-hint modifier. Deterministic "⌘" for SSR/first paint (hydration
+  // must match the server), swapped to "Ctrl" in an effect for the majority
+  // non-Mac audience — the handler has always accepted both metaKey and
+  // ctrlKey; only the advertised key was Mac-only.
+  const [kbdModifier, setKbdModifier] = useState("⌘");
+  useEffect(() => {
+    if (!/Mac|iP(hone|ad|od)/.test(navigator.platform ?? "")) {
+      setKbdModifier("Ctrl");
+    }
+  }, []);
   const [estimatedPriceValue, setEstimatedPriceValue] = useState<number | null>(null);
   const [priceEstimateBasis, setPriceEstimateBasis] = useState<string | null>(null);
   // Hero listing-link toggle (Phase 4): while open, the URL row renders in
@@ -1475,6 +1485,7 @@ export function InvestCalcPage({
       // true` means an empty input reads as NaN, so we must treat NaN as
       // empty too.
       let rentFilledFromHud = false;
+      let rentIsStateAverage = false;
       if (isSingleFamily && enrichment.monthlyRent !== undefined) {
         // Always record the HUD benchmark for the rent reality-check, even if
         // the user already typed their own rent (so we can compare the two).
@@ -1494,9 +1505,14 @@ export function InvestCalcPage({
             value: enrichment.monthlyRent,
           };
           filled.push(
-            `Rent ~$${enrichment.monthlyRent.toLocaleString()}/mo (HUD FMR)`
+            `Rent ~$${enrichment.monthlyRent.toLocaleString()}/mo ${
+              enrichment.meta.rent?.stateAverage
+                ? "(HUD statewide average)"
+                : "(HUD FMR)"
+            }`
           );
           rentFilledFromHud = true;
+          rentIsStateAverage = Boolean(enrichment.meta.rent?.stateAverage);
         }
       }
 
@@ -1504,7 +1520,11 @@ export function InvestCalcPage({
         toast({
           title: "Auto-filled from address",
           description: rentFilledFromHud
-            ? `${filled.join("  ·  ")} - HUD FMR is an area average; adjust to local comps.`
+            ? `${filled.join("  ·  ")} - ${
+                rentIsStateAverage
+                  ? "No local HUD match — this is a statewide average; local rents vary widely, so adjust to comps."
+                  : "HUD FMR is an area average; adjust to local comps."
+              }`
             : filled.join("  ·  "),
         });
       }
@@ -1765,9 +1785,18 @@ export function InvestCalcPage({
           }
         }
         if (filledLines.length > 0) {
+          // Same disclosure contract as the single-family fill: a statewide
+          // mean must never wear the local-FMR label.
+          const anyStateAverage = results.some(
+            (r) => r?.meta?.rent?.stateAverage === true
+          );
           toast({
             title: "Auto-filled per-unit rent",
-            description: `${filledLines.join("  ·  ")} - HUD FMR is an area average; adjust to local comps.`,
+            description: `${filledLines.join("  ·  ")} - ${
+              anyStateAverage
+                ? "No local HUD match — these are statewide averages; local rents vary widely, so adjust to comps."
+                : "HUD FMR is an area average; adjust to local comps."
+            }`,
           });
         }
       } catch (err) {
@@ -1875,12 +1904,37 @@ export function InvestCalcPage({
         form.setValue("sqft", f.squareFootage, opts);
         filled.push("size");
       }
-      // Only an active listing may become the asking price. The AVM remains
-      // visible as comp evidence and never enters the acquisition math.
+      // Only an active listing may become the ASKING price. With no listing
+      // and an empty field, the AVM fills as a labeled, editable ESTIMATE
+      // (block below) and is never presented as an asking price.
       const priceIsAsking = adopted.purchasePriceSource === "active-listing";
       if (adopted.purchasePrice != null) {
         form.setValue("purchasePrice", adopted.purchasePrice, opts);
         filled.push("asking price");
+      }
+      // No listing price and the user hasn't typed one: the AVM the lookup
+      // already paid for fills the gap as a clearly-labeled, editable
+      // ESTIMATE (same machinery as the hero rent-multiple path — amber
+      // "Estimated purchase price" strip, never persisted as a fact). It
+      // is never adopted as an asking price and never overwrites a typed
+      // value. Without this, the field the analysis can't run without
+      // stayed empty while RentCast's value estimate was silently thrown
+      // away (founder-reported).
+      let priceIsAvmEstimate = false;
+      const avmEstimate = Number(e.valueEstimate);
+      if (
+        adopted.purchasePrice == null &&
+        Number.isFinite(avmEstimate) &&
+        avmEstimate > 0 &&
+        isEmptyNumber(form.getValues("purchasePrice"))
+      ) {
+        const rounded = Math.round(avmEstimate);
+        form.setValue("purchasePrice", rounded, opts);
+        setEstimatedPriceValue(rounded);
+        setPriceEstimateBasis("RentCast's value estimate for this address");
+        setPriceEstimated(true);
+        priceIsAvmEstimate = true;
+        filled.push("estimated value");
       }
       const pt = form.getValues("propertyType");
       if (adopted.monthlyRent != null && (pt === "single-family" || pt === "owner-occupant")) {
@@ -1897,9 +1951,13 @@ export function InvestCalcPage({
       if (filled.length > 0) {
         toast({
           title: "Auto-filled from address",
-          description: `Filled ${filled.join(", ")} from RentCast${
-            priceIsAsking ? " (asking price from the active listing)" : ""
-          }. AVM value stayed in comps and was not used as an asking price. Review every estimate before relying on it.`,
+          description: `Filled ${filled.join(", ")} from RentCast.${
+            priceIsAsking
+              ? " Price is the active listing's asking price."
+              : priceIsAvmEstimate
+                ? " Price is RentCast's value estimate — replace it with the real asking price."
+                : ""
+          } Every value stays editable.`,
         });
       }
     },
@@ -1935,12 +1993,48 @@ export function InvestCalcPage({
         setAutofillUnavailable(true);
         return;
       }
+      // Signed-out users see this button as a deliberate sign-in CTA (see the
+      // showAutofill comment below) — answering their first click with a red
+      // error toast punished the exact action we invited. Offer the account
+      // path; the anon draft watcher already preserves the typed address, so
+      // they return to the same form and can autofill immediately.
+      if (r.code === "SIGN_IN_REQUIRED") {
+        toast({
+          title: "Create a free account to autofill",
+          description:
+            "Beds, size, and market rent fill from the address. Your entries are kept while you sign up.",
+          action: (
+            <ToastAction
+              altText="Create a free account and come back to this analysis"
+              onClick={() => {
+                router.push("/auth/sign-up?next=/");
+              }}
+            >
+              Create free account
+            </ToastAction>
+          ),
+        });
+        return;
+      }
+      if (r.code === "ENTITLEMENT_REQUIRED") {
+        toast({
+          title: "Free lookup used",
+          description: r.message,
+          action: (
+            <ToastAction
+              altText="See Pro plans with 50 lookups per month"
+              onClick={() => {
+                router.push("/pricing");
+              }}
+            >
+              See plans
+            </ToastAction>
+          ),
+        });
+        return;
+      }
       const title =
-        r.code === "SIGN_IN_REQUIRED"
-          ? "Sign in to autofill"
-          : r.code === "ENTITLEMENT_REQUIRED"
-          ? "Upgrade for more autofills"
-          : r.code === "CAP_REACHED"
+        r.code === "CAP_REACHED"
           ? "Monthly limit reached"
           : r.code === "NOT_FOUND"
           ? "No data for this address"
@@ -1951,7 +2045,7 @@ export function InvestCalcPage({
     } finally {
       setIsAutofilling(false);
     }
-  }, [form, applyComps, toast]);
+  }, [form, applyComps, toast, router]);
 
   // Paste a Zillow/Redfin/Realtor link → parse the address from the URL slug
   // (we never fetch the page — those sites block bots with a captcha) and run it
@@ -4035,25 +4129,36 @@ export function InvestCalcPage({
         return;
       }
       if (result.code === "ENTITLEMENT_SAVE") {
-        // Two causes share this code: a paid user AT their saved-deal cap
-        // (canSaveDeals true) needs to free space; a non-paid user needs to
-        // upgrade. Route the action to the place that actually resolves each
-        // — a plain message here was a dead end on mobile (no hover title).
-        const atCap = canSaveDeals;
+        // Three causes share this code. A PAID user at a finite cap frees
+        // space; a FREE user at the 5-deal cap is the product's most natural
+        // upgrade moment — it must actually offer the upgrade (deriving
+        // "at cap" from canSaveDeals alone sent free users to Manage deals
+        // and never mentioned Pro); a plan with no save entitlement at all
+        // upgrades. Paid is derived from the existing client paid proxy
+        // (canUpdateSavedDeals), never a plan-name string.
+        const isPaidPlan = canUpdateSavedDeals;
+        const freeAtCap = !isPaidPlan && canSaveDeals;
         toast({
-          title: atCap ? "Saved-deal limit reached" : "Upgrade required",
+          title: isPaidPlan
+            ? "Saved-deal limit reached"
+            : freeAtCap
+              ? "Free limit: 5 saved deals"
+              : "Upgrade required",
           description:
+            (freeAtCap
+              ? "Delete or archive a deal to free a slot, or go Pro for unlimited saved deals."
+              : null) ??
             result.message ??
-            (atCap
+            (isPaidPlan
               ? "You're at your plan's saved-deal limit. Archive or delete a deal to free space."
               : "Subscribe to save and unlock Pro features."),
-          variant: "destructive",
+          variant: isPaidPlan ? "destructive" : "default",
           action: (
             <ToastAction
-              altText={atCap ? "Manage your saved deals" : "See TrueCap plans"}
-              onClick={() => router.push(atCap ? "/dashboard/saved-analyses" : "/pricing")}
+              altText={isPaidPlan ? "Manage your saved deals" : "See TrueCap plans"}
+              onClick={() => router.push(isPaidPlan ? "/dashboard/saved-analyses" : "/pricing")}
             >
-              {atCap ? "Manage deals" : "See plans"}
+              {isPaidPlan ? "Manage deals" : "See Pro plans"}
             </ToastAction>
           ),
         });
@@ -5227,6 +5332,33 @@ export function InvestCalcPage({
           description:
             "Couldn't auto-detect the location from that address — type the price below, or pick a suggestion as you type for full auto-fill.",
         });
+      } else {
+        // Enrichment ran but couldn't finish the screen (usually: no bedroom
+        // count yet, so no HUD rent → no estimated price). Landing here
+        // silently read as "the button did nothing" — say exactly what's
+        // missing (founder call 2026-08-25: prompt, don't assume bedrooms).
+        // A listing paste may have already filled the price; telling that
+        // user to "add the asking price" while focusing a filled field reads
+        // as a bug — name only the fields that are actually empty.
+        const priceMissing = isEmptyNumber(form.getValues("purchasePrice"));
+        toast({
+          title: priceMissing
+            ? "Two fields to your first screen"
+            : "One field to your first screen",
+          description: priceMissing
+            ? "Add the asking price, and bedrooms to auto-estimate rent from HUD area data — then run the analysis."
+            : "Add bedrooms to auto-estimate rent from HUD area data (or type the monthly rent) — then run the analysis.",
+        });
+        if (!priceMissing) {
+          requestAnimationFrame(() => {
+            try {
+              form.setFocus("bedrooms");
+            } catch {
+              /* field may be unmounted for some property types - non-fatal */
+            }
+          });
+          return;
+        }
       }
       requestAnimationFrame(() => {
         try {
@@ -5575,8 +5707,14 @@ export function InvestCalcPage({
   const showEmptyStateSampleLine =
     isInputPhase && isAuthenticated && !hasMeaningfulInput && !listingLinkOpen;
   const hasPropertyAvailable = Boolean(watchedAddress?.trim());
+  // The primary CTA may become the sample launcher ONLY on a pristine form.
+  // With price/rent already typed (address pending), one tap on what looks
+  // like the Run button used to setValue the entire sample fixture over the
+  // user's numbers with no confirmation — a destructive swap disguised as
+  // the action the live preview told them to take.
+  const primaryCtaRunsSample = !hasPropertyAvailable && !hasMeaningfulInput;
   const analyzerCta = getAnalyzerCta({
-    hasProperty: hasPropertyAvailable,
+    hasProperty: !primaryCtaRunsSample,
     canCalculateMaxOffer: canUseMaxOffer,
   });
   const focusedResultsMode =
@@ -6136,8 +6274,8 @@ export function InvestCalcPage({
                 downstream). Copy standardized to "Run analysis" to
                 match the homepage "Run a deal - 60 seconds" register. */}
             <Button
-              type={hasPropertyAvailable ? "submit" : "button"}
-              onClick={hasPropertyAvailable ? undefined : handleTrySampleDeal}
+              type={primaryCtaRunsSample ? "button" : "submit"}
+              onClick={primaryCtaRunsSample ? handleTrySampleDeal : undefined}
               disabled={isCalculating}
               data-inform-submit="true"
               className={cn(
@@ -6166,7 +6304,7 @@ export function InvestCalcPage({
             <div className="hidden sm:flex items-center justify-between gap-3 text-[11px] text-muted-foreground lg:col-span-3 lg:col-start-1">
               <p className="flex items-center gap-1.5">
                 <kbd className="inline-flex items-center rounded border border-border bg-card px-1.5 py-0.5 font-mono text-[10px] font-semibold text-foreground">
-                  ⌘
+                  {kbdModifier}
                 </kbd>
                 <kbd className="inline-flex items-center rounded border border-border bg-card px-1.5 py-0.5 font-mono text-[10px] font-semibold text-foreground">
                   Enter
@@ -6190,7 +6328,7 @@ export function InvestCalcPage({
             isCalculating={isCalculating}
             hasResults={analysisResult !== null}
             ctaLabel={analyzerCta}
-            onTrySample={hasPropertyAvailable ? undefined : handleTrySampleDeal}
+            onTrySample={primaryCtaRunsSample ? handleTrySampleDeal : undefined}
             // Verdict dock readout: only pre-results (same gate as the
             // in-form LiveVerdictPanel), and suppressed while a solve-
             // oriented play is active (showGenericLivePreview). Once a real
@@ -6262,9 +6400,10 @@ export function InvestCalcPage({
                       : ""}
                   </p>
                   <p className="mt-0.5 text-muted-foreground">
-                    We estimated the price from local rent
-                    {priceEstimateBasis ? ` — ${priceEstimateBasis}` : ""} so you could see a
-                    provisional screening result. Enter the actual asking price to update the screen.
+                    We estimated the price
+                    {priceEstimateBasis ? ` (${priceEstimateBasis})` : " from local rent data"} so
+                    you could see a provisional screening result. Enter the actual asking price to
+                    update the screen.
                   </p>
                 </div>
                 <button
@@ -6374,6 +6513,7 @@ export function InvestCalcPage({
               canUseTaxStrategy={canUseTaxStrategy || isSampleProPreview}
               canUseExitScenarios={canUseExitScenarios || isSampleProPreview}
               canUseMaxOffer={canUseMaxOffer || isSampleProPreview}
+              priceIsEstimated={priceEstimated}
               canUseSensitivity={canUseSensitivity || isSampleProPreview}
               canUseStrategies={canUseStrategies || isSampleProPreview}
               isSampleProPreview={isSampleProPreview}

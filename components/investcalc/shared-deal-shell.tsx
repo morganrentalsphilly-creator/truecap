@@ -44,6 +44,7 @@ export function SharedDealShell({
   legacyMethodologyWarning = false,
   recordedResult = false,
   addressIncluded = true,
+  priceEstimated = false,
 }: {
   values: InvestmentFormValues;
   result: AnalysisResult;
@@ -65,6 +66,8 @@ export function SharedDealShell({
   /** True when result is the immutable output captured with an opaque share. */
   recordedResult?: boolean;
   addressIncluded?: boolean;
+  /** The shared price was an automated estimate — never headline it "Asking". */
+  priceEstimated?: boolean;
 }) {
   return (
     <div className="min-h-screen bg-background">
@@ -132,6 +135,7 @@ export function SharedDealShell({
           offerCeilingAccess={offerCeilingAccess}
           recordedResult={recordedResult}
           addressIncluded={addressIncluded}
+          priceEstimated={priceEstimated}
         />
 
         {/* Agent lead capture (co-branded shares) OR the generic Pro upsell. */}

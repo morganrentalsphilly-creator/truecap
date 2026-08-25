@@ -104,6 +104,9 @@ export type EnrichPropertyResult = {
       year: number;
       /** Present when source is hud-safmr. */
       zip?: string;
+      /** True when no county/metro matched and the value is a statewide
+       *  mean — far coarser than a local FMR; the UI must say so. */
+      stateAverage?: boolean;
     };
     /** Sourcing for `fmrByBedrooms` (coarse: from the first resolved count). */
     unitRents?: {
@@ -149,6 +152,7 @@ export async function enrichPropertyAction(
       county: rent.county,
       year: rent.year,
       ...(rent.zip ? { zip: rent.zip } : {}),
+      ...(rent.stateAverage ? { stateAverage: true } : {}),
     };
   }
   if (unitFmrs) {
@@ -438,7 +442,13 @@ async function fetchHudStateData(
 
 async function maybeFetchHudRent(
   input: EnrichPropertyInput
-): Promise<{ amount: number; county: string; year: number; zip?: string } | null> {
+): Promise<{
+  amount: number;
+  county: string;
+  year: number;
+  zip?: string;
+  stateAverage?: true;
+} | null> {
   const apiKey = process.env.HUD_API_KEY;
   if (!apiKey) {
     console.warn("[enrichProperty] HUD_API_KEY not set in environment");
@@ -567,7 +577,12 @@ async function maybeFetchHudRent(
           fallback: "state-average",
           areaCount: values.length,
         });
-        return { amount: avg, county: `${input.state} avg`, year: respYear };
+        return {
+          amount: avg,
+          county: `${input.state} avg`,
+          year: respYear,
+          stateAverage: true,
+        };
       }
     }
 

@@ -86,7 +86,7 @@ export function SignupPromptCard({ address, isAuthenticated, onPrepareSaveIntent
         <BenefitChip
           icon={History}
           label="Save up to 5"
-          sub="Reopen them later"
+          sub="Reopen later · editing is Pro"
         />
         <BenefitChip
           icon={Smartphone}

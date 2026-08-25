@@ -2069,7 +2069,7 @@ function pageDownside(
         ? `interest rate at or below ${rateFix.value.toFixed(2)}%`
         : null,
     ].filter((value): value is string => Boolean(value));
-    const doctorText = `Criteria: ${d.maxOffer.basis}. At the current asking price${
+    const doctorText = `Criteria: ${d.maxOffer.basis}. At the analyzed price${
       alternatives.length ? `, the same target could also be reached with ${alternatives.join(" or ")}.` : ", review the verified inputs before negotiating."
     } Highest modeled price that still meets the targets shown under the assumptions shown. This is not a recommended offer.`;
     doc.text(doc.splitTextToSize(doctorText, SAFE.w - 32), M.left + 16, y + 61);

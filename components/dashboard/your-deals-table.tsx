@@ -203,7 +203,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                   </div>
                   <div className="rounded-lg bg-muted/30 p-3">
                     <dt className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                      Asking
+                      Price
                     </dt>
                     <dd className="mt-1 font-mono text-lg font-bold tabular-nums text-foreground">
                       {money(deal.purchasePrice)}
@@ -277,7 +277,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
               <SortableTh label="Property" sortKey="address" activeKey={sortKey} desc={desc} onToggle={toggle} />
               <SortableTh label="Offer Ceiling" sortKey="maxOffer" activeKey={sortKey} desc={desc} onToggle={toggle} className="text-right" />
               <th scope="col" className="px-3 py-2 text-right text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                Asking
+                Price
               </th>
               <SortableTh label="Gap" sortKey="gap" activeKey={sortKey} desc={desc} onToggle={toggle} className="text-right" />
               <th scope="col" className="px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-muted-foreground">

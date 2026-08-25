@@ -213,6 +213,7 @@ export default async function OpaqueSharePage({ params }: Props) {
       legacyMethodologyWarning={resolved.legacyUnpinned || resolved.legacyInputOnly}
       recordedResult={Boolean(recordedResolution?.usesRecordedSnapshot)}
       addressIncluded={addressVisible}
+      priceEstimated={resolved.snapshot.meta.priceEstimated === true}
       leadCapture={
         agent && ownerId
           ? { ownerId, dealId, valuesHash, sig: sig ?? undefined }
