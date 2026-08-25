@@ -74,6 +74,10 @@ export type PublicShareSnapshot = {
     schemaVersion?: number;
     audience?: PublicShareAudience;
     addressVisibility?: PublicShareAddressVisibility;
+    /** True when the shared purchase price was an automated ESTIMATE (e.g.
+     *  RentCast AVM fill) the sharer never replaced — the viewer must not
+     *  headline it as an asking price. */
+    priceEstimated?: boolean;
   };
 };
 
@@ -127,6 +131,8 @@ export async function mintPublicShare(input: {
   methodologyVersion?: unknown;
   audience?: PublicShareAudience;
   addressVisibility?: PublicShareAddressVisibility;
+  /** The shared purchase price is an automated estimate, not an asking price. */
+  priceEstimated?: boolean;
 }): Promise<string | null> {
   // This helper writes through the service-role client. Keep the invariant
   // local as well as at the server-action boundary so no future caller can
@@ -229,6 +235,7 @@ export async function mintPublicShare(input: {
         schemaVersion: INVESTCALC_SCHEMA_VERSION,
         audience: input.audience ?? "investment-partner",
         addressVisibility: input.addressVisibility ?? "hidden",
+        ...(input.priceEstimated ? { priceEstimated: true } : {}),
       },
     };
     const { error } = await admin.from("public_shares").insert({

@@ -5,6 +5,7 @@ import {
   ChevronDown,
   CopyPlus,
   Edit3,
+  FileDown,
   ListTodo,
   Loader2,
   LockKeyhole,
@@ -66,6 +67,15 @@ type Props = {
   inputConfidence?: InputConfidenceResult | null;
   canShowPriceCeiling: boolean;
   canTunePriceCeiling: boolean;
+  priceIsEstimated?: boolean;
+  /** PDF export — the decision-first layout is the ONLY results surface, so
+   *  the report the pricing page sells must be reachable from here (it was
+   *  stranded in the flag-dead legacy toolbar). Click-through for non-
+   *  entitled users opens the upgrade dialog upstream. */
+  onExportPdf: () => void;
+  isExporting?: boolean;
+  isExportDisabled?: boolean;
+  exportHint?: string;
   isOfferCeilingLoading?: boolean;
   offerCeilingError?: boolean;
   onRetryOfferCeiling?: () => void;
@@ -144,6 +154,11 @@ export function FocusedDecisionSummary({
   inputConfidence = null,
   canShowPriceCeiling,
   canTunePriceCeiling,
+  priceIsEstimated = false,
+  onExportPdf,
+  isExporting = false,
+  isExportDisabled = false,
+  exportHint,
   isOfferCeilingLoading = false,
   offerCeilingError = false,
   onRetryOfferCeiling,
@@ -307,11 +322,17 @@ export function FocusedDecisionSummary({
         : null,
     [assumptionSensitivity, inputConfidence]
   );
-  const targetVersionLabel = targetContext.profileVersion
-    ? `profile v${targetContext.profileVersion}`
-    : targetContext.identityStatus === "captured-rules-only"
-      ? "captured rules · schema v1"
-      : "profile version unavailable · schema v1";
+  // Human phrasing only — the underlying contract identifiers (profileVersion,
+  // rulesSnapshotVersion) are untouched. Raw slugs and schema-version suffixes
+  // read as debug output on the main result, so they never render verbatim.
+  const targetVersionLabel =
+    targetContext.identityStatus === "screening-defaults"
+      ? "example rules"
+      : targetContext.profileVersion
+        ? `profile v${targetContext.profileVersion}`
+        : targetContext.identityStatus === "captured-rules-only"
+          ? "rules recorded with this analysis"
+          : "profile version unavailable";
   const ruleFit = deriveRuleFit({
     result,
     target,
@@ -323,11 +344,17 @@ export function FocusedDecisionSummary({
   const readinessLabel = advocacyContractEnabled
     ? evidenceLedger?.readinessLabel ?? "Screening"
     : legacyReadinessLabel;
-  const decisionLabel = !targetAdopted
+  const rawDecisionLabel = !targetAdopted
     ? "Preliminary underwriting"
     : advocacyContractEnabled
       ? ruleFitLabel(ruleFit)
       : legacyDecisionLabel;
+  // Render-time substitution only (the contract's ruleFitLabel identifiers are
+  // pinned elsewhere): an estimated price can't be judged "at asking" in the
+  // same card whose subtitle says "Est. price".
+  const decisionLabel = priceIsEstimated
+    ? rawDecisionLabel.replace(/ at asking\b/, " at the estimated price")
+    : rawDecisionLabel;
   const breakpointLabels = [
     ...exactBreakpointLabels,
     ...drivers.map(
@@ -340,7 +367,8 @@ export function FocusedDecisionSummary({
     !targetAdopted
       ? {
           label: "Review and adopt return targets",
-          reason: "A modeled price threshold is not calculated from product example defaults.",
+          reason:
+            "TrueCap only calculates a price threshold from targets you've applied — examples don't count.",
         }
       : !clearsTargets
       ? offerCeiling
@@ -510,8 +538,8 @@ export function FocusedDecisionSummary({
             {decisionLabel}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Asking {money(Number(values.purchasePrice))} · Underwriting model v
-            {result.methodologyVersion ?? "current"}
+            {priceIsEstimated ? "Est. price" : "Asking"} {money(Number(values.purchasePrice))} ·
+            Underwriting model v{result.methodologyVersion ?? "current"}
           </p>
           {advocacyContractEnabled && targetAdopted ? (
             <p className="mt-2 text-xs font-semibold text-muted-foreground">
@@ -573,7 +601,9 @@ export function FocusedDecisionSummary({
           </p>
           <p className="mt-1 font-mono text-3xl font-extrabold tabular-nums text-primary">
             {!targetAdopted
-              ? "Set targets first"
+              ? canTunePriceCeiling
+                ? "Set targets first"
+                : "Pro feature"
               : targetResolutionState === "loading"
               ? advocacyContractEnabled
                 ? "Loading target rules…"
@@ -603,7 +633,11 @@ export function FocusedDecisionSummary({
               : targetBlocked
               ? targetResolutionMessage
               : advocacyContractEnabled
-                ? `${targetContext.profileName} · ${targetContext.origin.replaceAll("-", " ")} · ${targetVersionLabel}`
+                ? `${targetContext.profileName}${
+                    targetContext.origin && targetContext.origin !== "user-selected"
+                      ? ` · ${targetContext.origin.replaceAll("-", " ")}`
+                      : ""
+                  } · ${targetVersionLabel}`
                 : `${targetSource === "buy-box" && buyBoxName ? `Under Buy Box: ${buyBoxName}` : offerCeiling?.sourceLabel ?? (targetSource === "screening-defaults" ? "Under screening defaults" : targetSource === "buy-box" ? "Under your Buy Box" : "Under your selected targets")} · ${canShowPriceCeiling ? "Exact ceiling" : "Coarse range preview"}`}
           </p>
           {!targetBlocked ? (
@@ -643,11 +677,22 @@ export function FocusedDecisionSummary({
           ) : null}
           <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
             {!targetAdopted
-              ? "Review or edit the example targets, then apply at least one before TrueCap calculates a modeled price threshold."
+              ? canTunePriceCeiling
+                ? "Review or edit the example targets, then apply at least one before TrueCap calculates a modeled price threshold."
+                : "TrueCap Pro calculates the highest modeled price that still meets rules you choose — like the examples above — plus the binding constraint and a screening range."
               : advocacyContractEnabled
               ? offerCeilingHelperCopy(targetContext)
               : "Calculated from the targets shown above. This is not a recommended offer."}
           </p>
+          {!targetAdopted && canTunePriceCeiling && !targetBlocked ? (
+            <button
+              type="button"
+              onClick={onAdoptTarget}
+              className="mt-2 inline-flex min-h-11 items-center rounded-lg border border-primary/30 bg-background px-3 text-xs font-bold text-primary transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              Apply the example targets
+            </button>
+          ) : null}
           {targetAdopted ? (
             <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
               When price changes, percentage-based down payment, closing costs,
@@ -685,9 +730,11 @@ export function FocusedDecisionSummary({
           </p>
           {advocacyContractEnabled ? (
             <>
-              <p className="mt-1 break-all text-[10px] text-muted-foreground">
-                {targetVersionLabel}
-              </p>
+              {targetAdopted ? (
+                <p className="mt-1 break-all text-[10px] text-muted-foreground">
+                  {targetVersionLabel}
+                </p>
+              ) : null}
               <p className="mt-1 break-all text-[10px] text-muted-foreground">
                 Exact criteria are shown with the Offer Ceiling.
               </p>
@@ -728,7 +775,7 @@ export function FocusedDecisionSummary({
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Margin of Safety</p>
           <p className="mt-1 text-sm font-extrabold text-foreground">
             {!targetAdopted
-              ? "Set targets first"
+              ? "—"
               : offerCeiling
               ? offerCeiling.listPriceGap > 0
                 ? `${money(offerCeiling.listPriceGap)} above ceiling`
@@ -807,17 +854,23 @@ export function FocusedDecisionSummary({
           type="button"
           variant="outline"
           onClick={onSave}
-          disabled={isSaving || targetBlocked || isSaveLocked}
+          disabled={isSaving || targetBlocked}
           title={isSaveLocked ? saveLockedHint : undefined}
           className="h-11 gap-2 rounded-xl"
         >
           {isSaving ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <Save className="size-4" aria-hidden />}
           Save
+          {isSaveLocked ? (
+            <span className="ml-0.5 rounded-full bg-[var(--brand-orange)] px-1.5 py-0.5 text-[9px] font-bold uppercase text-white">
+              PRO
+            </span>
+          ) : null}
         </Button>
         <ShareLinkButton
           values={values}
           isAuthenticated={isAuthenticated}
           savedDealId={savedDealId}
+          priceIsEstimated={priceIsEstimated}
           maoTarget={targetAdopted ? target : undefined}
           maoTargetSource={targetAdopted ? targetSource : undefined}
           disabled={targetBlocked}
@@ -825,6 +878,21 @@ export function FocusedDecisionSummary({
           onPrepareAuth={onPrepareAuthShare}
           className="h-11 rounded-xl px-4"
         />
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onExportPdf}
+          disabled={targetBlocked || isExportDisabled}
+          title={exportHint}
+          className="h-11 gap-2 rounded-xl"
+        >
+          {isExporting ? (
+            <Loader2 className="size-4 animate-spin" aria-hidden />
+          ) : (
+            <FileDown className="size-4" aria-hidden />
+          )}
+          Export PDF
+        </Button>
         <Button type="button" variant="ghost" onClick={onEditAssumptions} className="h-11 gap-2 rounded-xl">
           <Edit3 className="size-4" aria-hidden />
           Edit assumptions

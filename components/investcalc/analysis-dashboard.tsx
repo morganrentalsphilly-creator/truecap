@@ -27,6 +27,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ToastAction } from "@/components/ui/toast";
+import { useToast } from "@/hooks/use-toast";
 import { AnalysisResult } from "@/lib/calc-analysis";
 import { setPendingSaveIntent } from "@/lib/save-intent";
 import { WhatIfSliders, formatAdjustmentLabel, type WhatIfState } from "@/components/investcalc/what-if-sliders";
@@ -227,6 +229,9 @@ interface AnalysisDashboardProps {
   canUseExitScenarios?: boolean;
   /** Pro: max-allowable-offer solver. False = render upsell teaser. */
   canUseMaxOffer?: boolean;
+  /** The purchase price came from an estimate (rent multiple or RentCast AVM),
+   *  not the user or a listing — the header must not call it "Asking". */
+  priceIsEstimated?: boolean;
   /** Pro: sensitivity grid. False = render upsell teaser. */
   canUseSensitivity?: boolean;
   /** Pro: Strategies tab. False = tab shown locked with upgrade prompt. */
@@ -397,6 +402,7 @@ export function AnalysisDashboard({
   canUseTaxStrategy = false,
   canUseExitScenarios = false,
   canUseMaxOffer = false,
+  priceIsEstimated = false,
   canUseSensitivity = false,
   canUseStrategies = false,
   isSampleProPreview = false,
@@ -812,6 +818,7 @@ export function AnalysisDashboard({
     [exitScenarioSource]
   );
   const router = useRouter();
+  const { toast } = useToast();
   // Send the user back to the calculator after auth (?next=/) so the
   // auto-saved form draft restores their analysis instead of landing them on
   // a blank homepage with their work seemingly gone. The pending-save-intent
@@ -880,9 +887,47 @@ export function AnalysisDashboard({
   // The ONE save entry point - used by the toolbar button and the
   // hero-corner Save so the sign-in redirect + handler never diverge.
   const handleSaveClick = () => {
-    if (targetActionsBlocked || isSaveLockedByPlan) return;
+    if (targetActionsBlocked) return;
     if (!isAuthenticated) {
       goToLogin();
+      return;
+    }
+    if (isSaveLockedByPlan) {
+      // A silently disabled Save reads as broken — disabled buttons show no
+      // tooltip on touch, so the "editing saved deals is Pro" wall had no
+      // visible explanation. Keep the button clickable and answer the click
+      // with the reason and the action that resolves it.
+      const paidAtCap = isSaveLimitLockedByPlan && canUpdateSavedDeals;
+      toast({
+        title: isEditingLockedByPlan
+          ? "Editing saved deals is Pro"
+          : isSaveLimitLockedByPlan
+            ? canUpdateSavedDeals
+              ? "Saved-deal limit reached"
+              : "Free limit: 5 saved deals"
+            : "Saving isn't in your plan",
+        description: isEditingLockedByPlan
+          ? "This deal stays saved exactly as it was. Upgrade to update it in place."
+          : isSaveLimitLockedByPlan
+            ? canUpdateSavedDeals
+              ? "Archive or delete a deal to free a slot."
+              : "Delete or archive a deal to free a slot, or go Pro for unlimited saved deals."
+            : "Upgrade to save deals and reopen them on any device.",
+        action: (
+          <ToastAction
+            altText={paidAtCap ? "Manage your saved deals" : "See TrueCap Pro plans"}
+            onClick={() => {
+              if (paidAtCap) {
+                router.push("/dashboard/saved-analyses");
+                return;
+              }
+              goToBilling();
+            }}
+          >
+            {paidAtCap ? "Manage deals" : "See Pro plans"}
+          </ToastAction>
+        ),
+      });
       return;
     }
     // NOTE: deal_saved is emitted on the SUCCESS path in investcalc-page —
@@ -1212,6 +1257,19 @@ export function AnalysisDashboard({
             inputConfidence={inputConfidence}
             canShowPriceCeiling={currentOfferCeilingPayload?.access === "exact"}
             canTunePriceCeiling={canUseMaxOffer}
+            priceIsEstimated={priceIsEstimated}
+            onExportPdf={() => handleExportPdf()}
+            isExporting={isExporting}
+            isExportDisabled={isExporting || (canExportPdf && !isSaved)}
+            exportHint={
+              targetActionsBlocked
+                ? targetActionsBlockedReason
+                : canExportPdf && !isSaved
+                  ? persistedActionsBlockHint ?? "Save this analysis before exporting PDF."
+                  : !canExportPdf
+                    ? "PDF reports are included with TrueCap Pro."
+                    : undefined
+            }
             isOfferCeilingLoading={offerCeilingIsLoading}
             offerCeilingError={offerCeilingHasError}
             onRetryOfferCeiling={() => {
@@ -1245,6 +1303,28 @@ export function AnalysisDashboard({
             targetResolutionMessage={targetActionsBlockedReason}
             advocacyContractEnabled={advocacyDecisionContract}
           />
+          {/* Screening Index — the FREE 0-100 heuristic sold on /pricing and
+              computed on every run, which the decision-first rebuild left
+              with no rendering surface. It lives OUTSIDE the decision card
+              on purpose: the decision module carries no numerical-confidence
+              claim (advocacy-accessibility-guards pins that), and a
+              secondary heuristic belongs in a secondary strip. */}
+          {dealScoreResult?.ok && dealScoreResult.tier === "pro" ? (
+            <div
+              id="screening-index"
+              className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1 rounded-xl border border-border bg-muted/20 px-4 py-2.5"
+            >
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                Screening Index
+              </p>
+              <p className="font-mono text-sm font-extrabold tabular-nums text-foreground">
+                {Math.round(dealScoreResult.data.score)}/100
+              </p>
+              <p className="text-[11px] text-muted-foreground">
+                Secondary screening heuristic — not investment advice.
+              </p>
+            </div>
+          ) : null}
         </section>
       ) : null}
       {/* Answer hero - the ONE card that leads the results (Phase 2:
@@ -1304,7 +1384,12 @@ export function AnalysisDashboard({
           browser. The legacy layout consumes the server-authorized summary
           below instead, so a feature-flag rollback cannot reopen that path. */}
 
-      {result && values && !isLoading && !canUseMaxOffer ? (
+      {/* Decision-first already pitches the Offer Ceiling inside module 1
+          (the locked ceiling block + "Unlock target price"), so rendering
+          this card directly beneath it pitched the same feature twice
+          back-to-back. It stays for the legacy kill-switch layout, which
+          has no in-module pitch. */}
+      {result && values && !isLoading && !canUseMaxOffer && !decisionFirst ? (
         <MomentOfValueUpsell
           purchasePrice={Number(values.purchasePrice ?? 0)}
           netCashFlow={result.netCashFlow}
@@ -1408,7 +1493,7 @@ export function AnalysisDashboard({
                 variant="outline"
                 size="sm"
                 onClick={handleSaveClick}
-                disabled={isSaving || isSaveLockedByPlan || targetActionsBlocked}
+                disabled={isSaving || targetActionsBlocked}
                 title={targetActionsBlocked ? targetActionsBlockedReason : saveLockedHint}
                 className="h-11 gap-1 rounded-xl px-2 text-[11px] sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-[10px]"
               >

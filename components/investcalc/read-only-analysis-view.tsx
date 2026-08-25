@@ -57,6 +57,8 @@ interface ReadOnlyAnalysisViewProps {
   recordedResult?: boolean;
   /** False when the sharer kept the exact property identity private. */
   addressIncluded?: boolean;
+  /** True when the snapshot's price was an automated estimate (share meta). */
+  priceEstimated?: boolean;
 }
 
 const fmtCash = (n: number) =>
@@ -180,6 +182,7 @@ export function ReadOnlyAnalysisView({
   offerCeilingAccess = null,
   recordedResult = false,
   addressIncluded = true,
+  priceEstimated = false,
 }: ReadOnlyAnalysisViewProps) {
   const router = useRouter();
   const adoptedMaoTarget =
@@ -268,9 +271,11 @@ export function ReadOnlyAnalysisView({
               {decisionLabel}
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Asking {fmtCash(Number(values.purchasePrice))}. This read-only share is a
-              screening record, not a decision; independently verify every material assumption
-              before recording a decision.
+              {priceEstimated ? "Estimated price" : "Asking"}{" "}
+              {fmtCash(Number(values.purchasePrice))}
+              {priceEstimated ? " (automated estimate — not an asking price)" : ""}. This
+              read-only share is a screening record, not a decision; independently verify every
+              material assumption before recording a decision.
             </p>
           </div>
 

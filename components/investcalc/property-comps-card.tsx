@@ -17,6 +17,7 @@ import { getCompsFreshness } from "@/lib/comps-freshness";
 import type { PipelineStage } from "@/lib/pipeline";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { ToastAction } from "@/components/ui/toast";
 
 const money = (n: number | null) => (n == null ? "—" : `$${Math.round(n).toLocaleString()}`);
 
@@ -172,6 +173,29 @@ export function PropertyCompsCard({
           if (r.code === "NOT_CONFIGURED") {
             setUnavailable(true);
             onUnavailableChange?.(true);
+            return;
+          }
+          // Hitting the plan limit is not an error the user caused — a red
+          // failure toast at the moment they wanted more data buried the
+          // upgrade path. Route it constructively; real failures stay red.
+          if (r.code === "ENTITLEMENT_REQUIRED" || r.code === "CAP_REACHED") {
+            toast({
+              title:
+                r.code === "ENTITLEMENT_REQUIRED"
+                  ? "Free comps lookup used"
+                  : "Monthly comps limit reached",
+              description: r.message,
+              action: (
+                <ToastAction
+                  altText="See Pro plans with 50 comps lookups per month"
+                  onClick={() => {
+                    window.location.assign("/pricing");
+                  }}
+                >
+                  See plans
+                </ToastAction>
+              ),
+            });
             return;
           }
           toast({ title: "Couldn't pull comps", description: r.message, variant: "destructive" });

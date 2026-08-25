@@ -24,7 +24,12 @@ import { cn } from "@/lib/utils";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import type { MaoTarget } from "@/lib/max-allowable-offer";
 import type { OfferCeilingTargetSource } from "@/lib/offer-ceiling-contract";
-import { createPublicShareAction } from "@/app/actions/public-shares";
+import {
+  createPublicShareAction,
+  listPublicSharesAction,
+  revokePublicShareAction,
+  type PublicShareListItem,
+} from "@/app/actions/public-shares";
 import { trackEvent } from "@/lib/analytics";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -44,6 +49,9 @@ interface ShareLinkButtonProps {
   savedDealId?: string | null;
   /** Exact acquisition criteria shown with the current Offer Ceiling. */
   maoTarget?: MaoTarget | null;
+  /** The current price field holds an automated estimate (AVM/rent-multiple)
+   *  the user never replaced — the share viewer must not call it "Asking". */
+  priceIsEstimated?: boolean;
   /** Provenance shown beside that exact target. */
   maoTargetSource?: OfferCeilingTargetSource | null;
   /** Agent Pro deal workspace context. This changes only the user-facing label
@@ -64,6 +72,7 @@ export function ShareLinkButton({
   savedDealId,
   maoTarget,
   maoTargetSource,
+  priceIsEstimated = false,
   context = "analysis",
   disabled: externallyDisabled = false,
   disabledReason,
@@ -81,6 +90,11 @@ export function ShareLinkButton({
   // choices. Keep its in-flight state visible like the neighboring actions.
   const [isPreparing, setIsPreparing] = useState(false);
   const [sessionAuthRequired, setSessionAuthRequired] = useState(false);
+  // The dialog is also where owners manage links: the create copy promises
+  // "you can revoke them later", so the revoke control must live here too
+  // (the list/revoke actions existed server-side with no UI caller).
+  const [myShares, setMyShares] = useState<PublicShareListItem[] | null>(null);
+  const [revokingId, setRevokingId] = useState<string | null>(null);
   const { toast } = useToast();
   const needsSignIn = !isAuthenticated || sessionAuthRequired;
   const returnPath =
@@ -99,6 +113,61 @@ export function ShareLinkButton({
       onPrepareAuth?.();
     } catch {
       // Draft continuity is best-effort and must never block authentication.
+    }
+  };
+
+  // Load the owner's existing links whenever the dialog opens (and refresh
+  // after a mint — shareUrl in deps). NOT_CONFIGURED / errors keep the
+  // section hidden; managing links is additive, never blocking.
+  useEffect(() => {
+    if (!open || needsSignIn) return;
+    let cancelled = false;
+    listPublicSharesAction()
+      .then((r) => {
+        if (!cancelled && r.ok) setMyShares(r.shares);
+      })
+      .catch(() => {
+        /* list is best-effort; the create flow must never break on it */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, needsSignIn, shareUrl]);
+
+  const revokeShare = async (id: string) => {
+    setRevokingId(id);
+    try {
+      const r = await revokePublicShareAction({ id });
+      if (r.ok) {
+        // Revoking the newest row while the just-minted URL sits in the copy
+        // box would leave a dead link with a live Copy button — clear it.
+        // (The list is created-desc, so the just-minted link is row 0.)
+        if (myShares && myShares[0]?.id === id && shareUrl) {
+          setShareUrl("");
+          setCopied(false);
+        }
+        setMyShares((current) =>
+          current
+            ? current.map((s) =>
+                s.id === id ? { ...s, revokedAt: new Date().toISOString() } : s
+              )
+            : current
+        );
+        toast({
+          title: "Link revoked",
+          description: "That share link no longer opens for anyone.",
+        });
+      } else {
+        toast({ title: "Couldn't revoke", description: r.message, variant: "destructive" });
+      }
+    } catch {
+      toast({
+        title: "Couldn't revoke",
+        description: "Try again in a moment.",
+        variant: "destructive",
+      });
+    } finally {
+      setRevokingId(null);
     }
   };
 
@@ -155,6 +224,7 @@ export function ShareLinkButton({
         maoTargetSource: maoTargetSource ?? undefined,
         audience,
         addressVisibility: includeAddress ? "full" : "hidden",
+        ...(priceIsEstimated ? { priceEstimated: true } : {}),
       });
       if (!opaque.ok) {
         if (opaque.code === "SIGN_IN_REQUIRED") {
@@ -372,6 +442,64 @@ export function ShareLinkButton({
             </div>
           )}
 
+          {!needsSignIn && myShares && myShares.length > 0 ? (
+            <div className="rounded-xl border border-border bg-muted/20 p-3">
+              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                Your share links
+              </p>
+              <ul className="mt-2 space-y-2">
+                {myShares.slice(0, 5).map((s) => {
+                  const revoked = Boolean(s.revokedAt);
+                  const expired =
+                    !revoked && s.expiresAt
+                      ? new Date(s.expiresAt).getTime() < Date.now()
+                      : false;
+                  return (
+                    <li key={s.id} className="flex items-center justify-between gap-3 text-xs">
+                      <span className="min-w-0 flex-1 truncate text-foreground">
+                        {s.title || s.label || "Shared analysis"}
+                        <span className="ml-1 text-muted-foreground">
+                          · {new Date(s.createdAt).toLocaleDateString()}
+                          {revoked
+                            ? " · revoked"
+                            : expired
+                              ? " · expired"
+                              : s.lastViewedAt
+                                ? " · viewed"
+                                : ""}
+                        </span>
+                      </span>
+                      {!revoked && !expired ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="h-8 rounded-lg px-2.5 text-xs"
+                          disabled={revokingId === s.id}
+                          aria-label={`Revoke link "${s.title || s.label || "Shared analysis"}" created ${new Date(s.createdAt).toLocaleDateString()}`}
+                          onClick={() => void revokeShare(s.id)}
+                        >
+                          {revokingId === s.id ? (
+                            <>
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
+                              <span className="sr-only">Revoking…</span>
+                            </>
+                          ) : (
+                            "Revoke"
+                          )}
+                        </Button>
+                      ) : null}
+                    </li>
+                  );
+                })}
+              </ul>
+              {myShares.length > 5 ? (
+                <p className="mt-2 text-[11px] text-muted-foreground">
+                  Showing your 5 most recent links.
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+
           <p className="text-[11px] text-muted-foreground">
             {needsSignIn ? (
               <>
@@ -382,9 +510,11 @@ export function ShareLinkButton({
               <>
                 The link opens a snapshot of the analysis at this moment. Anyone who receives
                 the link can open it. If you change inputs later and want viewers to see updates,
-                generate a new share link. New links attached to your signed-in account can be
-                revoked there and expire automatically; still treat one like a document you chose
-                to share.
+                generate a new share link.{" "}
+                {myShares && myShares.length > 0
+                  ? "Revoke any link above and it stops opening immediately; links also expire automatically."
+                  : "Links you create can be revoked from this dialog and expire automatically."}{" "}
+                Still treat one like a document you chose to share.
               </>
             )}
           </p>
