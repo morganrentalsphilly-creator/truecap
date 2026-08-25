@@ -111,7 +111,7 @@ export function DealSummaryCard({
           type="button"
           onClick={() => void generate()}
           disabled={isGenerating}
-          className="mt-3 inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
+          className="mt-3 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
         >
           {isGenerating ? (
             <>

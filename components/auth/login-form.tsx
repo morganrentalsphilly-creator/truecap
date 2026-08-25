@@ -245,7 +245,7 @@ export function LoginForm() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((value) => !value)}
-                  className="absolute right-2 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  className="absolute right-0.5 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -268,7 +268,7 @@ export function LoginForm() {
               type="button"
               onClick={handleResendConfirmation}
               disabled={isResending}
-              className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-amber-200 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-amber-900 hover:bg-amber-300 disabled:opacity-50"
+              className="mt-2 inline-flex min-h-11 items-center gap-1.5 rounded-md bg-amber-200 px-3 py-2 text-[11px] font-bold uppercase tracking-wide text-amber-900 hover:bg-amber-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-700 disabled:opacity-50"
             >
               {isResending ? (
                 <>

@@ -30,7 +30,13 @@ import {
   resolveSavedAnalysisSnapshot,
 } from "@/lib/saved-analysis-methodology";
 import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
-import { recommendationToSignal, type PropertyType, type StoredRecommendation, type StoredRiskLevel } from "@/lib/compare-metrics";
+import {
+  buildCanonicalMonthlyNoiMetrics,
+  recommendationToSignal,
+  type PropertyType,
+  type StoredRecommendation,
+  type StoredRiskLevel,
+} from "@/lib/compare-metrics";
 import {
   getDashboardNavAccess,
   hasDashboardAccess,
@@ -67,6 +73,8 @@ type ProfileRow = {
 type ResultSnapshot = {
   monthlyRentalIncome?: number | string | null;
   totalOperatingExpenses?: number | string | null;
+  operatingExpensesAnnual?: number | string | null;
+  noiAnnual?: number | string | null;
   monthlyPayment?: number | string | null;
   netCashFlow?: number | string | null;
   annualCashFlow?: number | string | null;
@@ -257,6 +265,14 @@ function mapDeal(
     }
   }
 
+  const canonicalNoiMetrics = buildCanonicalMonthlyNoiMetrics({
+    noiAnnual: resolvedCurrent
+      ? resolvedCurrent.analysisResult.noiAnnual
+      : toNumber(snapshot.noiAnnual),
+    operatingExpensesAnnual: resolvedCurrent
+      ? resolvedCurrent.analysisResult.operatingExpensesAnnual
+      : toNumber(snapshot.operatingExpensesAnnual),
+  });
   const metrics = {
     netCashFlow,
     cocReturn,
@@ -269,9 +285,11 @@ function mapDeal(
     afterTaxCF: resolvedCurrent ? resolvedCurrent.afterTaxCF : toNumber(snapshot.afterTaxCF),
     annualCashFlow: resolvedCurrent ? resolvedCurrent.netCashFlowMonthly * 12 : toNumber(snapshot.annualCashFlow),
     dscr: resolvedCurrent ? resolvedCurrent.dscr : toNumber(snapshot.dscr),
-    // Bridge components from the SAME recompute as netCashFlow so the tooltip
-    // reconciles (rent − opex − P&I − PMI = NCF); fall back to the stored snapshot.
+    // Full cash-outflow bridge components from the SAME recompute as
+    // netCashFlow so the tooltip reconciles (rent − vacancy/operating
+    // costs/CapEx reserve − P&I − PMI = NCF); fall back to the stored snapshot.
     monthlyRentalIncome: resolvedCurrent ? resolvedCurrent.monthlyRentalIncome : toNumber(snapshot.monthlyRentalIncome),
+    ...canonicalNoiMetrics,
     totalOperatingExpenses: resolvedCurrent ? resolvedCurrent.totalOperatingExpenses : toNumber(snapshot.totalOperatingExpenses),
     purchasePrice,
     // Offer Ceiling + gap use the exact persisted target resolved just above.

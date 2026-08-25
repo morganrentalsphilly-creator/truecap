@@ -194,7 +194,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Is there a truly free alternative to the BiggerPockets rental calculator?",
-    a: "Yes, several. TrueCap's free tier runs unlimited full underwrites (cap rate, cash-on-cash, DSCR, cash flow) with no signup — disclosure: TrueCap is our tool. DealCheck's free Starter plan analyzes and saves up to 15 properties. Calculator.net's rental calculator is free and unlimited with no account. Each trades away something different — signup, saved-deal caps, or data auto-fill.",
+    a: "Yes, several. TrueCap's free tier runs unlimited preliminary rental screens (cap rate, cash-on-cash, DSCR, and cash flow) with no signup — disclosure: TrueCap is our tool. DealCheck's free Starter plan analyzes and saves up to 15 properties. Calculator.net's rental calculator is free and unlimited with no account. Each trades away something different — signup, saved-deal caps, or data auto-fill.",
   },
   {
     q: "Is BiggerPockets Pro worth $390 a year just for the calculators?",
@@ -299,8 +299,8 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
             <h2 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">Quick answer</h2>
             <p className="text-sm sm:text-base leading-relaxed text-foreground">
               <strong>TrueCap</strong>{" "}
-              (that&apos;s us) is the closest free replacement — unlimited full
-              underwrites, no signup, with rent, rate, and tax auto-filled.{" "}
+              (that&apos;s us) is the closest free replacement — unlimited preliminary
+              rental screens, no signup, with labeled rent, rate, and tax starting points.{" "}
               <strong>DealCheck&apos;s free Starter plan</strong>{" "}
               adds saving (up to 15 properties) and native apps.{" "}
               <strong>Calculator.net</strong>{" "}

@@ -215,7 +215,7 @@ export function OnboardingTour({ isAuthenticated, savedDealCount, canUseBuyBox =
             type="button"
             onClick={dismissTour}
             aria-label="Skip onboarding tour"
-            className="rounded-full p-1.5 text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground"
+            className="inline-flex size-11 items-center justify-center rounded-full text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <X className="size-4" />
           </button>
@@ -256,7 +256,7 @@ export function OnboardingTour({ isAuthenticated, savedDealCount, canUseBuyBox =
             <button
               type="button"
               onClick={nextStep}
-              className="group inline-flex h-9 items-center gap-1 rounded-lg bg-primary px-3 text-xs font-bold text-primary-foreground transition-transform hover:-translate-y-0.5"
+              className="group inline-flex min-h-11 items-center gap-1 rounded-lg bg-primary px-3 text-xs font-bold text-primary-foreground transition-transform hover:-translate-y-0.5"
             >
               {isLast ? "Got it" : "Next"}
               <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />

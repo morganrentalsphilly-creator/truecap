@@ -1,7 +1,17 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { ChevronDown, Edit3, Loader2, Save, SlidersHorizontal } from "lucide-react";
+import {
+  ChevronDown,
+  CopyPlus,
+  Edit3,
+  ListTodo,
+  Loader2,
+  LockKeyhole,
+  Save,
+  SlidersHorizontal,
+  Sparkles,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,7 +75,15 @@ type Props = {
   onTuneTargetsOpened: () => void;
   onEditAssumptions: () => void;
   onSave: () => void;
+  onCompareDeals: () => void | Promise<void>;
+  onAnalyzeAnotherLikeThis: () => void;
+  onNewAnalysis: () => void | Promise<void>;
+  onUpgrade: () => void;
   isSaving: boolean;
+  isComparing?: boolean;
+  isSaved?: boolean;
+  canCompareDeals?: boolean;
+  persistedActionsBlockHint?: string;
   isSaveLocked?: boolean;
   saveLockedHint?: string;
   savedDealId?: string | null;
@@ -135,7 +153,15 @@ export function FocusedDecisionSummary({
   onTuneTargetsOpened,
   onEditAssumptions,
   onSave,
+  onCompareDeals,
+  onAnalyzeAnotherLikeThis,
+  onNewAnalysis,
+  onUpgrade,
   isSaving,
+  isComparing = false,
+  isSaved = false,
+  canCompareDeals = false,
+  persistedActionsBlockHint,
   isSaveLocked = false,
   saveLockedHint,
   savedDealId,
@@ -767,6 +793,15 @@ export function FocusedDecisionSummary({
             {targetAdopted ? "Tune targets" : "Set targets"}
             <ChevronDown className={`size-4 transition-transform ${tuneOpen ? "rotate-180" : ""}`} aria-hidden />
           </Button>
+        ) : !targetAdopted ? (
+          <Button
+            type="button"
+            onClick={onUpgrade}
+            className="min-h-11 gap-2 rounded-xl"
+          >
+            <LockKeyhole className="size-4" aria-hidden />
+            Unlock target price
+          </Button>
         ) : null}
         <Button
           type="button"
@@ -794,7 +829,68 @@ export function FocusedDecisionSummary({
           <Edit3 className="size-4" aria-hidden />
           Edit assumptions
         </Button>
+        {canCompareDeals ? (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => void onCompareDeals()}
+            disabled={!isSaved || isComparing}
+            aria-label={
+              !isSaved
+                ? "Compare deals — save this analysis first"
+                : "Compare deals"
+            }
+            title={
+              !isSaved
+                ? persistedActionsBlockHint ?? "Save this analysis before comparing it."
+                : undefined
+            }
+            className="min-h-11 gap-2 rounded-xl"
+          >
+            {isComparing ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden />
+            ) : (
+              <ListTodo className="size-4" aria-hidden />
+            )}
+            Compare deals
+          </Button>
+        ) : (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onUpgrade}
+            className="min-h-11 gap-2 rounded-xl"
+          >
+            <ListTodo className="size-4" aria-hidden />
+            Compare with Pro
+          </Button>
+        )}
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onAnalyzeAnotherLikeThis}
+          className="min-h-11 gap-2 rounded-xl"
+          title="Keeps reusable assumptions and clears property-specific values"
+        >
+          <CopyPlus className="size-4" aria-hidden />
+          Analyze another like this
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => void onNewAnalysis()}
+          className="min-h-11 gap-2 rounded-xl"
+        >
+          <Sparkles className="size-4" aria-hidden />
+          New analysis
+        </Button>
       </div>
+
+      {canCompareDeals && !isSaved ? (
+        <p className="mt-2 text-xs text-muted-foreground" role="status">
+          Save this analysis to compare it with another deal.
+        </p>
+      ) : null}
 
       {canTunePriceCeiling ? (
         <div id={targetEditorId} hidden={!tuneOpen} className="mt-4 rounded-xl border border-border bg-muted/20 p-4">

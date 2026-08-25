@@ -1,29 +1,16 @@
 "use client";
 
 /**
- * Metrics band — the lens-curated primary MetricCard row with the
- * IRR / equity-multiple / total-return summary FOLDED IN as band members,
- * plus the investor-lens control in the band header.
+ * Canonical first-year metric band.
  *
- * EXTRACTED (Phase 2 of the calculator redesign) from
- * analysis-dashboard.tsx with minimal adaptation:
- *   - MetricCard + the per-metric benchmark label/color helpers moved
- *     here verbatim (the tile value/sub/color logic is unchanged).
- *   - The standalone "10-year returns" mini-strip IIFE was deleted from
- *     the dashboard; its three readouts render here as band members.
- *   - DealStrategyToggle (and its mobile "Change lens" disclosure from
- *     the density pass) moved here from the Screening Index card, so the lens
- *     sits beside the numbers it re-curates.
- *   - NEW: tapping a metric jumps to the analysis section that explains
- *     it, wired through the dashboard's existing setActiveTab machinery
- *     (tab ids unchanged).
- *
- * Purely presentational: all state (lens strategy, what-if, active tab)
- * stays in analysis-dashboard.tsx.
+ * The decision summary already leads with total cash, NOI, cash flow, cap
+ * rate, cash-on-cash, model DSCR, and the target-backed Offer Ceiling. This
+ * secondary band therefore keeps one fixed first-year reading order instead
+ * of allowing a remembered persona lens or long-term projection to displace
+ * the current operating economics.
  */
 
-import { useRef, type KeyboardEvent, type ReactNode } from "react";
-import { ChevronRight } from "lucide-react";
+import type { ReactNode } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { GlossaryTip } from "@/components/investcalc/glossary-tip";
@@ -31,9 +18,7 @@ import type { GLOSSARY } from "@/lib/glossary";
 import { DataConfidenceBadge } from "@/components/investcalc/data-confidence-badge";
 import type { DataConfidence } from "@/lib/data-confidence";
 import type { AnalysisResult } from "@/lib/calc-analysis";
-import type { ReturnSummary } from "@/lib/returns";
-import { formatRoiHeadline, isExtremeAnnualizedRoi } from "@/lib/extreme-value-format";
-import type { DealStrategy } from "@/lib/deal-score";
+import { isExtremeAnnualizedRoi } from "@/lib/extreme-value-format";
 import {
   getCapRateBenchmark,
   formatCapRateBenchmarkSubline,
@@ -59,11 +44,11 @@ function capRateBenchmarkLabel(capRatePct: number, address?: string | null): str
   if (benchmark && benchmark.scope !== "national") {
     return formatCapRateBenchmarkSubline(capRatePct, benchmark);
   }
-  // National fallback bands - keep the same thresholds the scoring
-  // engine uses so the metric subline and the score subline agree.
-  if (capRatePct > 8) return "Above 8% - top quartile (U.S.)";
-  if (capRatePct > 5) return "5–8% - fair for market (U.S.)";
-  return "Below 5% - returns rely on price growth (U.S.)";
+  // Factual national reference bands. They add context without assigning an
+  // investment-quality or suitability label.
+  if (capRatePct > 8) return "Above the 8% reference (U.S.)";
+  if (capRatePct > 5) return "Between 5% and 8% (U.S.)";
+  return "Below the 5% reference (U.S.)";
 }
 
 /**
@@ -89,25 +74,17 @@ function capRateBenchmarkColor(capRatePct: number, address?: string | null): str
 }
 
 function cocBenchmarkLabel(cocPct: number): string {
-  // Bands mirror the Screening Index's displayed CoC tiers (>7 strong, 5–7 healthy,
-  // 3–5 modest, <3 weak) so the tile sub-label never contradicts the score's
-  // "Why this score" breakdown for the same deal.
-  if (cocPct > 7) return "Above 7% - strong";
-  if (cocPct > 5) return "5–7% - healthy";
-  if (cocPct > 3) return "3–5% - modest";
-  if (cocPct >= 0) return "Below 3% - weak";
-  return "Negative - losing money";
+  if (cocPct > 7) return "Above the 7% reference";
+  if (cocPct > 5) return "Between 5% and 7%";
+  if (cocPct > 3) return "Between 3% and 5%";
+  if (cocPct >= 0) return "Between 0% and 3%";
+  return "Negative first-year cash return";
 }
 
 function cashFlowBenchmarkLabel(monthlyCashFlow: number): string {
-  // Bands aligned with the Screening Index's own cash-flow tiers so the sub-label
-  // never contradicts the score (the old flat "$1,000/mo target" deflated
-  // perfectly good $300-500/mo deals).
-  if (monthlyCashFlow >= 500) return "Strong (≥$500/mo)";
-  if (monthlyCashFlow >= 200) return "Solid ($200–500/mo)";
-  if (monthlyCashFlow > 0) return "Modest ($1–$200/mo)";
-  if (monthlyCashFlow > -100) return "~Break-even";
-  return "Losing money monthly";
+  if (monthlyCashFlow > 0) return "Positive before tax and after reserve";
+  if (monthlyCashFlow > -100) return "Near break-even before tax";
+  return "Negative before tax";
 }
 
 /**
@@ -206,11 +183,7 @@ function MetricCard({
 }
 
 const METRIC_ORDER = ["cashFlow", "coc", "capRate", "dscr", "return", "afterTax", "annualCf", "taxSavings"];
-const PRIMARY_METRICS: Record<DealStrategy, string[]> = {
-  "cash-flow": ["cashFlow", "coc", "dscr"],
-  balanced: ["cashFlow", "capRate", "dscr"],
-  appreciation: ["return", "capRate", "afterTax"],
-};
+const CORE_METRIC_KEYS = ["cashFlow", "capRate", "dscr"] as const;
 
 /** Which analysis section explains each metric — used by the tap-to-jump
  *  wiring. Ids ARE the existing AnalysisDashboardTab ids (unchanged). */
@@ -225,9 +198,10 @@ const METRIC_JUMP_TARGETS: Record<string, AnalysisDashboardTab> = {
   taxSavings: "tax-strategy",
 };
 
-export function getSecondaryMetricKeys(strategy: DealStrategy): string[] {
-  const primary = PRIMARY_METRICS[strategy];
-  return METRIC_ORDER.filter((k) => !primary.includes(k));
+export function getSecondaryMetricKeys(): string[] {
+  return METRIC_ORDER.filter(
+    (key) => !CORE_METRIC_KEYS.includes(key as (typeof CORE_METRIC_KEYS)[number])
+  );
 }
 
 /**
@@ -299,9 +273,8 @@ export function buildMetricTiles({
         glossaryTerm="coc"
         value={displayResult ? `${displayResult.cocReturn >= 0 ? "+" : ""}${displayResult.cocReturn.toFixed(1)}%` : "—"}
         sub={displayResult ? cocBenchmarkLabel(displayResult.cocReturn) : undefined}
-        // Threshold-driven: green at "healthy" (>5) per cocBenchmarkLabel and
-        // lib/strategy-lens-outcome's cocMetric. It used to go green at >= 0,
-        // so a 0.4% return rendered as a win while the caption said "weak".
+        // Threshold-driven: green only above the shared 5% reference. A bare
+        // non-negative return stays neutral.
         color={
           displayResult
             ? displayResult.cocReturn > 5
@@ -334,7 +307,7 @@ export function buildMetricTiles({
     dscr: (
       <MetricCard
         key="dscr"
-        label={sourcedLabel("DSCR", "scenario")}
+        label={sourcedLabel("Model DSCR", "scenario")}
         glossaryTerm="dscr"
         value={displayResult ? (displayResult.monthlyPayment <= 0 ? "—" : displayResult.dscr.toFixed(2)) : "—"}
         sub={
@@ -342,12 +315,12 @@ export function buildMetricTiles({
             ? displayResult.monthlyPayment <= 0
               ? "Cash purchase"
               : displayResult.dscr >= 1.25
-                ? "Bankable (≥1.25)"
+                ? "At or above the 1.25 reference"
                 : displayResult.dscr >= 1.0
-                  ? "Tight (≥1.0)"
+                  ? "Between 1.00 and 1.25"
                   : propertyType === "owner-occupant"
-                    ? "Below 1.0 — normal for a house-hack"
-                    : "Underwater"
+                    ? "Below 1.00; full debt service exceeds modeled NOI"
+                    : "Below 1.00"
             : undefined
         }
         color={
@@ -356,9 +329,8 @@ export function buildMetricTiles({
               ? undefined
               : displayResult.dscr >= 1.25
                 ? "text-[var(--metric-positive)]"
-                : // 1.00-1.25 is the caption's own "Tight" band — neutral, not
-                  // alarm-red. Previously anything under 1.25 went red, so a
-                  // financeable 1.10 looked like a failure.
+                : // Keep the 1.00-1.25 reference band neutral. Only modeled
+                  // NOI below full debt service receives the negative tone.
                   displayResult.dscr >= 1.0
                   ? undefined
                   : // A sub-1 DSCR is expected for an owner-occupied house-hack
@@ -438,8 +410,8 @@ export function buildMetricTiles({
         key="taxSavings"
         label={sourcedLabel("Tax Savings", "base")}
         glossaryTerm="taxSavings"
-        // Signed net tax effect since the after-tax formula fix — a healthy
-        // deal can OWE tax, so the sign must survive fmt()'s Math.abs and
+        // Signed net tax effect since the after-tax formula fix — a positive
+        // operating result can still owe tax, so the sign must survive fmt()'s Math.abs and
         // the color can't claim "primary-good" for a negative.
         value={result ? `${result.taxSavingsMonthly < 0 ? "-" : ""}${fmt(result.taxSavingsMonthly)}` : "—"}
         sub="/mo"
@@ -453,194 +425,19 @@ export function buildMetricTiles({
   };
 }
 
-const DEAL_STRATEGIES: { value: DealStrategy; label: string; hint: string }[] = [
-  { value: "cash-flow", label: "Cash flow", hint: "Prioritizes monthly income, cash-on-cash, and debt coverage." },
-  { value: "balanced", label: "Balanced", hint: "Weights all return sources evenly (default)." },
-  { value: "appreciation", label: "Appreciation", hint: "Prioritizes long-term total return and yield." },
-];
-
-/** Compact segmented control that reorders which metrics lead with the
- *  investor's focus. The Screening Index itself is lens-free (canonical Balanced) on
- *  every surface, so picking a lens never changes the score, verdict, or risk —
- *  only which 3 metric tiles surface first. */
-function DealStrategyToggle({
-  strategy,
-  onChange,
-}: {
-  strategy: DealStrategy;
-  onChange: (next: DealStrategy) => void;
-}) {
-  // A11Y (ARIA radiogroup keyboard pattern): the three lens buttons were each
-  // a tab stop with no arrow-key handling, so keyboard users had to Tab
-  // through all of them and Space/Enter to pick. A proper radiogroup is ONE
-  // tab stop (roving tabindex: only the checked radio is tabbable) with
-  // Arrow/Home/End moving focus AND selecting. Refs let us move focus to the
-  // newly selected radio.
-  const btnRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const selectedIndex = Math.max(
-    0,
-    DEAL_STRATEGIES.findIndex((s) => s.value === strategy)
-  );
-  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    let next = selectedIndex;
-    switch (e.key) {
-      case "ArrowRight":
-      case "ArrowDown":
-        next = (selectedIndex + 1) % DEAL_STRATEGIES.length;
-        break;
-      case "ArrowLeft":
-      case "ArrowUp":
-        next = (selectedIndex - 1 + DEAL_STRATEGIES.length) % DEAL_STRATEGIES.length;
-        break;
-      case "Home":
-        next = 0;
-        break;
-      case "End":
-        next = DEAL_STRATEGIES.length - 1;
-        break;
-      default:
-        return;
-    }
-    e.preventDefault();
-    onChange(DEAL_STRATEGIES[next]!.value);
-    btnRefs.current[next]?.focus();
-  };
-  return (
-    <div className="mb-3">
-      <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-        Show me first
-      </p>
-      <div
-        role="radiogroup"
-        aria-label="Show me first - reorders which metrics lead"
-        className="grid grid-cols-3 gap-0.5 rounded-lg bg-muted/60 p-0.5"
-        onKeyDown={handleKeyDown}
-      >
-        {DEAL_STRATEGIES.map((s, i) => {
-          const active = strategy === s.value;
-          return (
-            <button
-              key={s.value}
-              ref={(el) => {
-                btnRefs.current[i] = el;
-              }}
-              type="button"
-              role="radio"
-              aria-checked={active}
-              // Roving tabindex: only the selected radio is in the tab order.
-              tabIndex={i === selectedIndex ? 0 : -1}
-              title={s.hint}
-              onClick={() => onChange(s.value)}
-              className={cn(
-                "rounded-md px-1 py-1 text-[10px] font-semibold leading-tight transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                active
-                  ? "bg-card text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {s.label}
-            </button>
-          );
-        })}
-      </div>
-      <p className="mt-1 text-[10px] leading-tight text-muted-foreground">
-        Reorders the metrics you see first.
-      </p>
-    </div>
-  );
-}
-
-/** 10-Year Returns — IRR, equity multiple, and total return, computed by
- *  the same exit engine that already feeds the Screening Index. Previously a
- *  standalone mini-strip below the metric row; now folded into the band
- *  as regular members (the strip's values/formatting are unchanged). */
-function buildReturnMemberTiles(
-  s: ReturnSummary | null,
-  onMetricSelect?: (tab: AnalysisDashboardTab) => void
-): Array<{ key: string; node: ReactNode }> {
-  if (!s || (s.irrPct == null && s.equityMultiple == null && s.roiPct == null)) return [];
-  const jump = onMetricSelect ? () => onMetricSelect("exit-scenarios") : undefined;
-  return [
-    {
-      key: "irr",
-      node: (
-        <MetricCard
-          label={`${s.years}-yr IRR`}
-          glossaryTerm="irr"
-          value={s.irrPct == null ? "—" : `${s.irrPct.toFixed(1)}%`}
-          sub="Annualized return over the hold"
-          isLoading={false}
-          onSelect={jump}
-        />
-      ),
-    },
-    {
-      key: "equityMultiple",
-      node: (
-        <MetricCard
-          label="Equity multiple"
-          glossaryTerm="equityMultiple"
-          value={s.equityMultiple == null ? "—" : `${s.equityMultiple.toFixed(2)}×`}
-          sub="Cash returned ÷ cash invested"
-          isLoading={false}
-          onSelect={jump}
-        />
-      ),
-    },
-    {
-      key: "totalReturn",
-      node: (() => {
-        // Extreme cumulative ROI (finding 5): framed band in the tile, raw
-        // figure demoted to the sub line. Sane values byte-identical.
-        const roiHeadline = formatRoiHeadline(s.roiPct, { decimals: 0, signed: true, compact: true });
-        return (
-          <MetricCard
-            label="Total return"
-            value={
-              s.roiPct == null
-                ? "—"
-                : roiHeadline.extreme
-                  ? roiHeadline.text
-                  : `${s.roiPct >= 0 ? "+" : ""}${Math.round(s.roiPct)}%`
-            }
-            sub={
-              roiHeadline.extreme
-                ? `${roiHeadline.raw} cumulative — verify assumptions`
-                : `Cumulative over ${s.years} years`
-            }
-            isLoading={false}
-            onSelect={jump}
-          />
-        );
-      })(),
-    },
-  ];
-}
-
 export function MetricsBand({
   tiles,
-  strategy,
-  onStrategyChange,
   dataConfidence,
   dealPropertyType,
-  returnSummary,
-  onMetricSelect,
 }: {
   /** Tile record built by buildMetricTiles in the dashboard (single build,
    *  shared with the "Show all metrics" secondary fold). */
   tiles: Record<string, ReactNode>;
-  strategy: DealStrategy;
-  onStrategyChange: (next: DealStrategy) => void;
   dataConfidence: DataConfidence | null;
   /** The analyzed deal's property type, so the confidence hint can suppress
    *  advice that cannot work for multi-unit deals (no HUD rent auto-fill). */
   dealPropertyType?: string | null;
-  /** Exit-engine return summary; null hides the folded-in return members. */
-  returnSummary: ReturnSummary | null;
-  onMetricSelect?: (tab: AnalysisDashboardTab) => void;
 }) {
-  const primaryMetricKeys = PRIMARY_METRICS[strategy];
-  const returnTiles = buildReturnMemberTiles(returnSummary, onMetricSelect);
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2 px-1">
@@ -651,53 +448,12 @@ export function MetricsBand({
         {dataConfidence ? <DataConfidenceBadge confidence={dataConfidence} propertyType={dealPropertyType} /> : null}
       </div>
 
-      {/* Investor lens — moved from the Screening Index card into the band header
-          so the lens sits beside the numbers it re-curates. Presentation is
-          unchanged from the density pass: always visible on md+, collapsed
-          behind the "Change lens" disclosure below md so a first-timer isn't
-          asked to pick a lens before seeing the answer. The default
-          (Balanced) lens still applies either way, and the summary names the
-          active lens so nothing is hidden. */}
-      <div className="hidden px-1 md:block">
-        <DealStrategyToggle strategy={strategy} onChange={onStrategyChange} />
-      </div>
-      <details className="group/lens px-1 md:hidden">
-        <summary className="flex min-h-11 cursor-pointer list-none items-center gap-1 text-[11px] font-semibold text-muted-foreground hover:text-foreground">
-          <ChevronRight
-            aria-hidden
-            className="size-3 shrink-0 transition-transform group-open/lens:rotate-90"
-          />
-          Change what leads
-          <span className="font-normal">
-            · {DEAL_STRATEGIES.find((s) => s.value === strategy)?.label ?? "Balanced"}
-          </span>
-        </summary>
-        <div className="mt-1.5">
-          <DealStrategyToggle strategy={strategy} onChange={onStrategyChange} />
-        </div>
-      </details>
-
-      {/* Lens-curated primary metrics + the folded-in return members.
-          2-col below sm with the lens's #1 metric spanning the row: at
-          375px three-up tiles were ~107px wide and "MONTHLY CASH FLOW"
-          wrapped to three lines next to a cramped figure. The last return
-          member also spans the row below sm so the grid never ends on a
-          ragged half-row. */}
+      {/* Fixed first-year metrics. The leading cash-flow tile spans both
+          columns on narrow phones so its label and value remain readable. */}
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
-        {primaryMetricKeys.map((k, i) => (
+        {CORE_METRIC_KEYS.map((k, i) => (
           <div key={k} className={cn("min-w-0 [&>*]:h-full", i === 0 && "col-span-2 sm:col-span-1")}>
             {tiles[k]}
-          </div>
-        ))}
-        {returnTiles.map((t, i) => (
-          <div
-            key={t.key}
-            className={cn(
-              "min-w-0 [&>*]:h-full",
-              i === returnTiles.length - 1 && "col-span-2 sm:col-span-1"
-            )}
-          >
-            {t.node}
           </div>
         ))}
       </div>

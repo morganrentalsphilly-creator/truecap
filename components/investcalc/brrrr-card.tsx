@@ -41,7 +41,7 @@ function deriveOpEx(result: AnalysisResult | null): number {
 
 export function BrrrrCard({ values, result, defaultRehab }: BrrrrCardProps) {
   const purchasePrice = Number(values?.purchasePrice) || 0;
-  const downPaymentPct = Number(values?.downPaymentPct) || 20;
+  const downPaymentPct = Number(values?.downPaymentPct ?? 20);
   const baseRatePct = Number(values?.interestRate) || 6.5;
   const baseCloseAcqPct = Number(values?.closingCostsPct) || 3;
 

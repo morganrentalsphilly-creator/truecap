@@ -35,6 +35,8 @@ import {
   getDefaultUnitsForPropertyType,
   isValidRentalUnit,
 } from "@/lib/investcalc-schema";
+import { isAllCashDownPayment } from "@/lib/financing-classification";
+import { buildRepeatDealDraft } from "@/lib/repeat-deal-draft";
 import {
   isReleasedUnderwritingSnapshot,
   normalizeReleasedInvestmentFormDraft,
@@ -1101,6 +1103,9 @@ export function InvestCalcPage({
   const resetToNewAnalysis = useCallback(
     (nextPropertyType: InvestmentFormValues["propertyType"] = "single-family") => {
       isProgrammaticResetRef.current = true;
+      // Invalidate every async calculation/enrichment completion owned by the
+      // property being left before clearing the form.
+      forkGenerationRef.current += 1;
       // Re-apply user defaults on every reset so a "New Analysis" still
       // pre-fills the user's preferred vacancy/mgmt/financing values.
       const defaults = buildNewAnalysisDefaults(nextPropertyType, userAnalysisDefaults);
@@ -1157,6 +1162,7 @@ export function InvestCalcPage({
       // its units against the PREVIOUS deal's market benchmark.
       setUnitFmrByBedrooms(null);
       unitFmrKeyRef.current = null;
+      enrichedUnitsRef.current.clear();
       // …and the enrichment TRIGGERS, not just the captures — the same
       // guarantee the fork path gives. With the old refs armed, typing
       // bedrooms (or hand-typing the next address without picking a
@@ -1177,6 +1183,9 @@ export function InvestCalcPage({
       setListingLinkOpen(false);
       setListingUrl("");
       setListingUrlError(false);
+      setPriceEstimated(false);
+      setEstimatedPriceValue(null);
+      setPriceEstimateBasis(null);
       // The active play must not outlive the assumptions it applied: the
       // form.reset above restored factory values, so a surviving
       // "Analyzing as: <play>" pill (plus STR income inputs / Wholesale
@@ -1498,6 +1507,7 @@ export function InvestCalcPage({
   /** Address-selected entry point (passed to PropertyDetailsSection). */
   const handleAddressSelected = useCallback(
     async (place: SelectedAddress) => {
+      enrichedUnitsRef.current.clear();
       lastSelectedAddressRef.current = place;
       // New property → fresh provenance capture for this address.
       enrichmentCaptureRef.current = {};
@@ -1695,6 +1705,7 @@ export function InvestCalcPage({
       pending.push({ idx, beds });
     }
     if (pending.length === 0) return;
+    const enrichmentGeneration = forkGenerationRef.current;
 
     // Wrapped in try/catch because Promise.all rejects on the first
     // failed action - without this, a single HUD blip would surface as
@@ -1713,6 +1724,13 @@ export function InvestCalcPage({
             })
           )
         );
+
+        if (
+          forkGenerationRef.current !== enrichmentGeneration ||
+          lastSelectedAddressRef.current !== place
+        ) {
+          return;
+        }
 
         const filledLines: string[] = [];
         for (let i = 0; i < pending.length; i++) {
@@ -1880,12 +1898,21 @@ export function InvestCalcPage({
       toast({ title: "Enter an address first", description: "Add the property address, then tap Autofill." });
       return;
     }
+    const propertyTypeAtRequest = form.getValues("propertyType");
+    const autofillGeneration = forkGenerationRef.current;
     setIsAutofilling(true);
     try {
       const r = await getPropertyCompsAction({
         address: addr,
-        propertyType: form.getValues("propertyType"),
+        propertyType: propertyTypeAtRequest,
       });
+      if (
+        forkGenerationRef.current !== autofillGeneration ||
+        (form.getValues("address") ?? "").trim() !== addr ||
+        form.getValues("propertyType") !== propertyTypeAtRequest
+      ) {
+        return;
+      }
       if (r.ok) {
         applyComps(r.enrichment);
         return;
@@ -2590,12 +2617,11 @@ export function InvestCalcPage({
       window.localStorage.removeItem(SAVED_ANALYSIS_AUTO_EXPORT_PDF_KEY);
     }
 
-    // Duplicate handoff (My Deals → "Duplicate"): fork the deal's ASSUMPTIONS
-    // into a NEW deal. Restore financing/expenses/vacancy/etc. but clear the
-    // property identity (address/price/rent, incl. per-unit rents) so the
-    // user just enters the new property — the "copy a row, change 3 cells"
-    // flow. No savedDealId → a save is a fresh insert (never overwrites the
-    // original). Checked before the edit-draft path; isolated from it.
+    // Duplicate handoff (My Deals → "Duplicate"): fork reusable financing and
+    // policy percentages into a NEW deal, while clearing property identity,
+    // rents, parcel/quote costs, repairs, and property provenance. No
+    // savedDealId → a save is a fresh insert (never overwrites the original).
+    // Checked before the edit-draft path; isolated from it.
     const duplicatePayloadRaw = consumeSavedDealHandoffPayload(
       SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY,
       duplicateHandoffNonce,
@@ -2617,22 +2643,7 @@ export function InvestCalcPage({
           normalizeReleasedInvestmentFormSnapshot(parsed.formSnapshot) ??
           normalizeReleasedInvestmentFormDraft(parsed.formSnapshot);
         if (normalized) {
-          const forked: Partial<InvestmentFormValues> = {
-            ...normalized,
-            address: "",
-            purchasePrice: undefined,
-            monthlyRent: undefined,
-            // Income is property-specific: an STR deal's nightly rate ×
-            // occupancy is this property's revenue, and carrying it into the
-            // fork silently prices the NEW deal on the OLD property's income
-            // (calc-analysis derives income from ADR when set, so even a
-            // typed rent would be ignored) —
-            // STR-STRATEGY-RESTORE-INVISIBLE-INCOME.
-            avgDailyRate: undefined,
-            occupancyPct: undefined,
-            strFurnishingCost: undefined,
-            units: (normalized.units ?? []).map((u) => ({ ...u, monthlyRent: undefined })),
-          };
+          const forked = buildRepeatDealDraft(normalized);
           prevPropertyTypeRef.current = normalized.propertyType;
           form.reset(forked);
           const duplicatedMaoTarget = normalizeMaoTarget(parsed.maxOfferTarget);
@@ -2656,12 +2667,26 @@ export function InvestCalcPage({
           inputVerificationAddressRef.current = null;
           persistedInputConfidenceSourceContextRef.current = null;
           persistedInputConfidenceAddressRef.current = null;
+          enrichmentCaptureRef.current = {};
+          setSavedTemplateFallback(null);
+          setMarketRentEstimate(null);
+          setUnitFmrByBedrooms(null);
+          unitFmrKeyRef.current = null;
+          lastSelectedAddressRef.current = null;
+          lastEnrichedAddressRef.current = null;
+          lastEnrichedGeoRef.current = null;
+          setListingLinkOpen(false);
+          setListingUrl("");
+          setListingUrlError(false);
+          setPriceEstimated(false);
+          setEstimatedPriceValue(null);
+          setPriceEstimateBasis(null);
           // New deal: no savedDealId, no results yet (price/rent cleared → the
           // live preview forms once the user enters the new property).
           toast({
             title: "Assumptions duplicated",
             description:
-              "Enter the new property's address, price & rent — your financing and expense assumptions carried over.",
+              "Enter the new property's address, price, and rent. Financing and percentage policies carried over; property-specific costs need review.",
           });
           queueMicrotask(() => {
             isProgrammaticResetRef.current = false;
@@ -3343,7 +3368,7 @@ export function InvestCalcPage({
     // by property type / cash purchase / etc. - no PII (no address).
     trackEvent("analyzer_started", {
       property_type: values.propertyType,
-      is_cash_purchase: !values.downPaymentPct || values.downPaymentPct >= 100,
+      is_cash_purchase: isAllCashDownPayment(values.downPaymentPct),
       input_tab: activeInputTab,
     });
     const inputMethod = isSampleRun
@@ -4766,21 +4791,27 @@ export function InvestCalcPage({
 
   /**
    * "Analyze another like this" (Phase D) — the in-flow copy-a-row. From the
-   * CURRENT form values (no save required): keep every assumption (financing,
-   * expenses, taxes, insurance, vacancy, growth rates, active play,
-   * templateId link) and clear ONLY the property identity + results, so the
-   * screen-6-listings investor runs the next address with the same
-   * assumptions instead of resetting to factory via New Analysis.
+   * CURRENT form values (no save required): keep reusable financing and general
+   * operating assumptions while clearing the prior property's identity, income, parcel
+   * costs, quote amounts, repairs, template link, and result state.
    *
    * Deliberately NOT resetToNewAnalysis: that path rebuilds factory/template
    * defaults. This one mirrors the My Deals "Duplicate" fork
    * (SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY mount branch above) without the
    * save + navigation — same clear list, same "assumptions are the point"
-   * semantics. No confirm(): unlike New Analysis nothing irreplaceable is
-   * lost (assumptions survive; only identity fields blank).
+   * semantics. Property-specific entries are still user work, so confirm
+   * before clearing them just as New Analysis does.
    */
   const handleAnalyzeAnotherLikeThis = () => {
+    const ok =
+      typeof window === "undefined"
+        ? true
+        : window.confirm(
+            "Analyze another property? This clears the current property's address, income, tax, insurance, repairs, and results.\n\nReusable financing, general operating assumptions, and targets will remain. Save first if you want to keep this deal."
+          );
+    if (!ok) return;
     isProgrammaticResetRef.current = true;
+    const forkedValues = buildRepeatDealDraft(form.getValues());
     const carriedMaoTarget = normalizeMaoTarget(analysisMaoTargetRef.current);
     const carriedMaoTargetSource = carriedMaoTarget
       ? analysisMaoTargetSource ?? "selected-targets"
@@ -4796,34 +4827,7 @@ export function InvestCalcPage({
     // behind — keeping it would let a type toggle re-fill the NEXT deal
     // with the previous one's rents.
     propertyTypeStashRef.current = {};
-    const clearOpts = { shouldDirty: false, shouldValidate: false } as const;
-    // Property identity — the Duplicate-fork clear list PLUS yearBuilt /
-    // beds / baths / sqft (this in-flow fork deliberately clears more than
-    // the saved-deal mount branch: those are property identity too).
-    // setValue on MOUNTED registered fields (never unmount-clear — the STR
-    // QA lesson); the input form stays mounted through the results phase.
-    form.setValue("address", "", clearOpts);
-    form.setValue("purchasePrice", undefined as unknown as number, clearOpts);
-    form.setValue("yearBuilt", undefined, clearOpts);
-    form.setValue("bedrooms", undefined, clearOpts);
-    form.setValue("bathrooms", undefined, clearOpts);
-    form.setValue("sqft", undefined, clearOpts);
-    form.setValue("monthlyRent", undefined, clearOpts);
-    // STR income is property-specific: ADR × occupancy is the OLD
-    // property's revenue (calc-analysis derives income from ADR when set,
-    // silently ignoring typed rent) — STR-STRATEGY-RESTORE-INVISIBLE-INCOME.
-    // The active play itself is an assumption and survives.
-    form.setValue("avgDailyRate", undefined, clearOpts);
-    form.setValue("occupancyPct", undefined, clearOpts);
-    form.setValue("strFurnishingCost", undefined, clearOpts);
-    // MF: keep the unit STRUCTURE (count + beds/baths/sqft are close on
-    // like-kind listings and cheap to tweak), clear the rents — identical to
-    // the Duplicate fork's per-unit treatment.
-    form.setValue(
-      "units",
-      (form.getValues("units") ?? []).map((u) => ({ ...u, monthlyRent: undefined })),
-      clearOpts
-    );
+    form.reset(forkedValues);
     form.clearErrors();
     // A save from here is a NEW deal — never an overwrite of the source.
     setSavedDealId(null);
@@ -4843,6 +4847,7 @@ export function InvestCalcPage({
     setMarketRentEstimate(null);
     setUnitFmrByBedrooms(null);
     unitFmrKeyRef.current = null;
+    enrichedUnitsRef.current.clear();
     // …and the enrichment TRIGGERS, not just the captures (verifier
     // live-confirmed): with the old refs armed, the MF benchmark effect
     // refetched the OLD metro's FMRs on the very next render, and the SF
@@ -4859,6 +4864,7 @@ export function InvestCalcPage({
     setListingLinkOpen(false);
     setListingUrl("");
     setListingUrlError(false);
+    setSavedTemplateFallback(null);
     setRestoredFromDraft(false);
     setRestoredAddress(null);
     // Back to the input phase. clearAnalysisOutputs never touches form
@@ -4880,7 +4886,6 @@ export function InvestCalcPage({
     // accepts the blank identity; the target-aware writer binds the carried
     // criteria now and rebinds them as address/price/rent are entered.
     try {
-      const forkedValues = form.getValues();
       writeCalcDraftWithMaoTarget(
         forkedValues,
         carriedMaoTarget,
@@ -4893,9 +4898,9 @@ export function InvestCalcPage({
       isProgrammaticResetRef.current = false;
     });
     toast({
-      title: "Assumptions kept",
+      title: "Reusable assumptions kept",
       description:
-        "Enter the next property's address, price & rent — everything else carried over.",
+        "Enter the next property's address, price, and rent. Financing and general operating assumptions carried over; tax, insurance, and other property-specific costs need review.",
     });
     // Land the user on the (now visible again) address input. Deferred a
     // beat so the results section has unmounted and the input phase is the
@@ -5192,6 +5197,7 @@ export function InvestCalcPage({
       county: resolvedCounty,
       zip: resolvedZip,
     };
+    enrichedUnitsRef.current.clear();
     lastSelectedAddressRef.current = place;
 
     // Run the SAME enrichment an in-form selection triggers (rent/rate/
@@ -6159,7 +6165,7 @@ export function InvestCalcPage({
                 <button
                   type="button"
                   onClick={handleJumpToFirstInvalidField}
-                  className="shrink-0 rounded-lg border border-input bg-background px-3 py-1.5 text-xs font-bold text-primary transition-colors hover:bg-muted"
+                  className="inline-flex min-h-11 shrink-0 items-center rounded-lg border border-input bg-background px-3 py-2 text-xs font-bold text-primary transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   Go to field
                 </button>
@@ -6195,7 +6201,7 @@ export function InvestCalcPage({
                 <button
                   type="button"
                   onClick={handleEditPrice}
-                  className="shrink-0 rounded-lg border border-input bg-background px-3 py-1.5 text-xs font-bold text-primary transition-colors hover:bg-muted"
+                  className="inline-flex min-h-11 shrink-0 items-center rounded-lg border border-input bg-background px-3 py-2 text-xs font-bold text-primary transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   Enter price
                 </button>

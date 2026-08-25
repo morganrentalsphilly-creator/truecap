@@ -17,6 +17,21 @@ export type MetricRow = {
   decimals?: number;
 };
 
+export function buildCanonicalMonthlyNoiMetrics(input: {
+  noiAnnual: number | null;
+  operatingExpensesAnnual: number | null;
+}): {
+  noiMonthly: number | null;
+  operatingExpensesMonthly: number | null;
+} {
+  const monthly = (annual: number | null): number | null =>
+    typeof annual === "number" && Number.isFinite(annual) ? annual / 12 : null;
+  return {
+    noiMonthly: monthly(input.noiAnnual),
+    operatingExpensesMonthly: monthly(input.operatingExpensesAnnual),
+  };
+}
+
 export const METRIC_ROWS: MetricRow[] = [
   { key: "netCashFlow", label: "Net Cash Flow / mo", group: "RETURNS", kind: "currency", direction: "higher" },
   { key: "cocReturn", label: "Cash-on-Cash Return", group: "RETURNS", kind: "percent", direction: "higher", decimals: 1 },
@@ -25,7 +40,7 @@ export const METRIC_ROWS: MetricRow[] = [
   { key: "annualCashFlow", label: "Annual Cash Flow", group: "RETURNS", kind: "currency", direction: "higher" },
   { key: "dscr", label: "Model DSCR", group: "RISK", kind: "number", direction: "higher", decimals: 2 },
   { key: "monthlyRentalIncome", label: "Monthly Rent Income", group: "RISK", kind: "currency", direction: "higher" },
-  { key: "totalOperatingExpenses", label: "Operating Expenses / mo", group: "RISK", kind: "currency", direction: "lower" },
+  { key: "operatingExpensesMonthly", label: "Operating Expenses / mo (NOI)", group: "RISK", kind: "currency", direction: "lower" },
   { key: "purchasePrice", label: "Purchase Price", group: "DEAL", kind: "currency", direction: "lower" },
   // Max Offer + the gap to asking — the two numbers the product is sold on,
   // absent from Compare until Aug-2026. "higher is better" for the offer;

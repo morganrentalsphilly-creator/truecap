@@ -82,7 +82,6 @@ import { nextActionForDeal } from "@/lib/next-action";
 import { getVerdictNarrative } from "@/lib/verdict";
 import { DealDriverInsight } from "@/components/investcalc/deal-driver-insight";
 import { StrategyOutcomeCard } from "@/components/investcalc/strategy-outcome-card";
-import { StrategyLensOutcomeCard } from "@/components/investcalc/strategy-lens-outcome-card";
 import type { InvestorStrategy } from "@/lib/investor-strategies";
 import { deriveStateFromAddress } from "@/lib/buy-box";
 import type { DealQaBuyBoxReport } from "@/lib/deal-qa-context";
@@ -151,8 +150,6 @@ import type { DealScoreActionResult } from "@/app/actions/deal-score";
 import {
   APPRECIATION_PLAY_MIN_ANNUAL_RETURN_PCT,
   computeTenYearAnnualizedReturnPct,
-  DEAL_STRATEGY_STORAGE_KEY,
-  type DealStrategy,
 } from "@/lib/deal-score";
 
 interface AnalysisDashboardProps {
@@ -805,10 +802,8 @@ export function AnalysisDashboard({
     lastDecisionViewedRef.current = decisionViewedKey;
     trackEvent("decision_viewed", { property_type: values?.propertyType });
   }, [decisionViewedKey, values?.propertyType]);
-  // Exit-engine return summary - feeds BOTH the metrics band's folded-in
-  // IRR / equity-multiple / total-return members and the Deal Q&A
-  // projection context below (exitScenarioSource is already
-  // entitlement-gated by the caller).
+  // Exit-engine return summary feeds the deeper-analysis summary and Deal Q&A
+  // projection context. It does not displace the first-year core metrics.
   const returnSummary = useMemo(
     () =>
       exitScenarioSource
@@ -816,32 +811,6 @@ export function AnalysisDashboard({
         : null,
     [exitScenarioSource]
   );
-  // Investor lens - owned HERE (the common parent of the Screening Index + the
-  // metric cards) so the metric ordering reacts when it changes. Persisted
-  // across deals so a cash-flow investor isn't reset to Balanced each analysis.
-  // The lens only reorders which metrics LEAD (see PRIMARY_METRICS); the Deal
-  // Score itself is lens-free (canonical Balanced) on every surface, so the
-  // headline number never diverges between the analyzer and the dashboard/
-  // My Deals/compare/PDF.
-  const [strategy, setStrategy] = useState<DealStrategy>("balanced");
-  useEffect(() => {
-    try {
-      const saved = window.localStorage.getItem(DEAL_STRATEGY_STORAGE_KEY);
-      if (saved === "cash-flow" || saved === "balanced" || saved === "appreciation") {
-        setStrategy(saved);
-      }
-    } catch {
-      // private mode - default Balanced
-    }
-  }, []);
-  const pickStrategy = (next: DealStrategy) => {
-    setStrategy(next);
-    try {
-      window.localStorage.setItem(DEAL_STRATEGY_STORAGE_KEY, next);
-    } catch {
-      // ignore
-    }
-  };
   const router = useRouter();
   // Send the user back to the calculator after auth (?next=/) so the
   // auto-saved form draft restores their analysis instead of landing them on
@@ -1062,10 +1031,8 @@ export function AnalysisDashboard({
     "owner-occupant": "Owner Occupant",
   };
 
-  // Lens-curated metric tiles - built once (in metrics-band.tsx, where the
-  // per-metric benchmark logic now lives) and shared between the metrics
-  // band's primary row and the "Show all metrics" secondary fold below,
-  // so the two can never diverge. Tap-to-jump wiring rides along.
+  // Metric tiles are built once and shared between the fixed first-year row
+  // and the "Show all metrics" fold, so the two cannot diverge.
   const metricTiles = buildMetricTiles({
     displayResult,
     result,
@@ -1076,7 +1043,7 @@ export function AnalysisDashboard({
     annualizedReturnPct,
     onMetricSelect: handleMetricJump,
   });
-  const secondaryMetricKeys = getSecondaryMetricKeys(strategy);
+  const secondaryMetricKeys = getSecondaryMetricKeys();
 
   // ── Closed-row summary lines (Phase 5, the Ledger's unique asset) ──
   // ONE truthful line per closed ledger row, derived ONLY from numbers
@@ -1258,7 +1225,15 @@ export function AnalysisDashboard({
             }}
             onEditAssumptions={onEditAssumptions}
             onSave={handleSaveClick}
+            onCompareDeals={onCompareDeals}
+            onAnalyzeAnotherLikeThis={onAnalyzeAnotherLikeThis}
+            onNewAnalysis={onNewAnalysis}
+            onUpgrade={goToBilling}
             isSaving={isSaving}
+            isComparing={isComparing}
+            isSaved={isSaved}
+            canCompareDeals={canCompareDeals}
+            persistedActionsBlockHint={persistedActionsBlockHint}
             isSaveLocked={isSaveLockedByPlan}
             saveLockedHint={saveLockedHint}
             savedDealId={savedDealId}
@@ -1321,22 +1296,6 @@ export function AnalysisDashboard({
           maxOffer={maoQaContext?.maxOffer ?? null}
         />
       )}
-
-      {/* Strategy-lens outcome - makes the investor lens visibly DO something
-          at the verdict: names the metrics that carry the deal for that
-          investor type and how this deal does on them. Balanced (the default)
-          renders nothing - invisible until a lens is actively chosen. BASE-
-          result driven (matches the Screening Index + verdict); hidden while a
-          strategy play leads the output (the lens tiles are hidden there too).
-          Bands are display-only, in lib/strategy-lens-outcome. */}
-      {result && !isLoading && !strategyLeadsOutput ? (
-        <StrategyLensOutcomeCard
-          strategy={strategy}
-          result={result}
-          annualizedReturnPct={annualizedReturnPct}
-          isOwnerOccupant={propertyType === "owner-occupant"}
-        />
-      ) : null}
 
       {/* The upgrade moment belongs immediately after the answer, while the
           acquisition decision is still top-of-mind. It exposes the exact
@@ -1842,18 +1801,8 @@ export function AnalysisDashboard({
           </div>
         </section>
       ) : null}
-      {/* Metrics band (Phase 2: metrics-band.tsx) - the lens-curated primary
-          tiles with the 10-year-returns members folded in and the investor
-          lens control in the band header. Secondary tiles stay below in
-          "Show all metrics"; the interactive stress-test tools sit in a
-          labeled group under all the numbers, so controls never crowd the
-          answer (reading order: NUMBERS FIRST, TOOLS LAST).
-
-          The cash-flow / CoC / cap-rate / DSCR / 10-yr-return tiles read
-          from `displayResult` (= whatIfState.result when sliders are
-          non-zero, else base result) so they react live to the
-          stress-test sliders; the after-tax / annual-CF / tax-savings
-          tiles read base `result` so Pro panels don't thrash on drags. */}
+      {/* Fixed first-year metrics lead here. Long-term returns remain in the
+          dedicated Long-term analysis region and secondary disclosure. */}
       {/* REGION 3 · THE NUMBERS — metrics grid + stress tools behind one
           disclosure when decision-first is on; a loose block otherwise. */}
       <ResultsRegionOrFragment
@@ -1870,12 +1819,8 @@ export function AnalysisDashboard({
         </h2>
         <MetricsBand
           tiles={metricTiles}
-          strategy={strategy}
-          onStrategyChange={pickStrategy}
           dataConfidence={dataConfidence}
           dealPropertyType={values?.propertyType}
-          returnSummary={deferredWhatIfState?.isAdjusted ? null : returnSummary}
-          onMetricSelect={handleMetricJump}
         />
 
         {/* Quick-screen ratios investors use to triage at a glance: break-even
@@ -2054,7 +1999,7 @@ export function AnalysisDashboard({
           The reader sees the metrics first, then the reasoning that
           explains them; the justification lands better once the figures
           it refers to are already on screen. */}
-      {decisionFirst && !strategyLeadsOutput ? (
+      {decisionFirst && !strategyLeadsOutput && exactOfferCeiling ? (
         /* REGION 2 · WHY THIS NUMBER — the reasoning paragraph, the risk
            bullets, the make-your-price-work inverse, and the ranked
            drivers, behind ONE collapsed disclosure. Previously four
@@ -2078,9 +2023,6 @@ export function AnalysisDashboard({
                 currentPrice={Number(values?.purchasePrice ?? 0)}
                 result={exactOfferCeiling.makePriceWork}
               />
-            ) : null}
-            {result && values && !isLoading && canUseMaxOffer ? (
-              <AssumptionImpactCard values={values} />
             ) : null}
           </div>
         </ResultsRegion>

@@ -73,7 +73,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Does my own unit count as income?",
-    a: "No. While you live there, your unit produces no rent, so the honest calculation excludes it. When you model the year-2 move-out — renting your unit at market and turning the property into a pure rental — the picture changes, which is exactly what TrueCap's full analyzer models with per-unit rents and an owner-occupant toggle.",
+    a: "No. While you live there, your unit produces no rent, so the live-in calculation excludes it. To evaluate a later move-out, save a separate full-rental scenario with your unit's then-current verified rent and compare it with the live-in analysis. TrueCap does not switch occupancy automatically.",
   },
   {
     q: "Why does the calculator add reserves back?",
@@ -313,7 +313,8 @@ export default function HouseHackingCalculatorPage() {
             <p>
               Year-1 house hacks rarely cash flow, and that&apos;s not
               failure — the benchmark is your housing cost vs. renting.
-              The cash-flow test belongs to year 2, when you move out.
+              Model the later full-rental cash flow as a separate scenario;
+              the live-in analysis does not switch automatically when you move out.
             </p>
             <h3>3. Skipping reserves because &ldquo;I&apos;ll be right there&rdquo;</h3>
             <p>
@@ -322,13 +323,13 @@ export default function HouseHackingCalculatorPage() {
             </p>
             <h3>4. Ignoring the year-2 transition</h3>
             <p>
-              The exit plan matters as much as the entry: after the
-              one-year occupancy requirement, most house hackers rent
-              their unit at market and either stay put or repeat with the
-              next property. Whether the building works as a{" "}
+              The exit plan matters as much as the entry. After satisfying
+              the occupancy terms in their specific loan documents, some
+              house hackers rent their unit and move elsewhere. Whether the
+              building works as a{" "}
               <em>pure rental</em>{" "}at that point — cash flow, cap rate,
-              DSCR — is what separates a stepping-stone from a trap. Check
-              the rented-building math with the{" "}
+              DSCR — depends on the rent and costs at that time. Save that
+              full-rental case separately, verify it, and check the math with the{" "}
               <Link href="/tools/cap-rate-calculator" className="text-primary font-semibold hover:underline">cap rate calculator</Link>{" "}
               and the{" "}
               <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">DSCR calculator</Link>.
@@ -340,12 +341,11 @@ export default function HouseHackingCalculatorPage() {
             <p>
               This calculator answers the first question — &ldquo;what
               would I actually pay to live here?&rdquo; — in seconds. The
-              full underwrite needs per-unit rents modeled independently,
-              the year-2 move-out scenario, actual property tax and
-              insurance for the address, and the tax treatment of the
-              rented portion. TrueCap&apos;s analyzer handles all of that
-              with a House Hack mode that applies owner-occupant defaults
-              automatically; if you&apos;re weighing tools, see how it{" "}
+              deeper review needs per-unit rents, verified property tax and
+              insurance, and the tax treatment of the rented portion. Start
+              with House Hack mode for the live-in case, then save a separate
+              full-rental scenario with your unit rented to compare the later
+              move-out state explicitly. If you&apos;re weighing tools, see how it{" "}
               <Link href="/vs/biggerpockets-for-house-hacking" className="text-primary font-semibold hover:underline">compares to BiggerPockets for house hacking</Link>{" "}
               or read{" "}
               <Link href="/blog/best-rental-analysis-tool-for-house-hackers" className="text-primary font-semibold hover:underline">the best rental analysis tools for house hackers</Link>.
@@ -375,20 +375,21 @@ export default function HouseHackingCalculatorPage() {
           {/* CTA */}
           <section className="mt-10 sm:mt-12 rounded-2xl bg-primary text-primary-foreground p-6 sm:p-8">
             <h2 className="text-xl sm:text-2xl font-extrabold mb-2">
-              Run the full house-hack underwrite — free
+              Run the live-in house-hack screen — free
             </h2>
             <p className="text-sm sm:text-base opacity-90 mb-4">
               This page answers &ldquo;what would I pay to live
-              there?&rdquo; TrueCap&apos;s House Hack mode answers the rest:
-              per-unit rents, real cash flow, DSCR, the year-2 move-out
-              scenario, selected-rule fit, and a secondary Screening Index.
+              there?&rdquo; TrueCap&apos;s House Hack mode adds per-unit rents,
+              projected cash flow, DSCR, selected-rule fit, and a secondary
+              Screening Index for the live-in case. Save the later full-rental
+              state as a separate scenario instead of mixing the two.
             </p>
             <ul className="text-sm space-y-1.5 mb-5 opacity-90">
               {[
                 "Owner-occupant mode — your unit excluded from income automatically",
                 "Per-unit rents for the duplex / triplex / fourplex math",
                 "Cash flow, cap rate, CoC, DSCR — auto-calculated",
-                "10-year projection for the year-2 transition (Pro)",
+                "Separate saved full-rental scenario and comparison (Pro)",
                 "Tax treatment of the rented portion (Pro)",
                 "Free to start — no credit card",
               ].map((line) => (
@@ -412,7 +413,7 @@ export default function HouseHackingCalculatorPage() {
               tool has no embeddable widget. See the component header. */}
           <ToolEmbedInvite slug="house-hacking-calculator" />
 
-          <ToolsConversionCta calculatorName="House hacking calculator" hook="TrueCap's full analyzer has a House Hack mode: per-unit rents, owner-occupant math, year-2 move-out modeling, and a verdict — all from the same inputs you used here." />
+          <ToolsConversionCta calculatorName="House hacking calculator" hook="TrueCap's House Hack mode adds per-unit rents and owner-occupant math for the live-in screen. Save a separate full-rental scenario to compare the later move-out state." />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}

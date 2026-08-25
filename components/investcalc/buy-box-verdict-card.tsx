@@ -327,7 +327,7 @@ export function BuyBoxVerdictCard({
         type="button"
         onClick={() => setShowChecks((v) => !v)}
         aria-expanded={showChecks}
-        className="mt-2 flex min-h-9 items-center gap-1 text-xs font-semibold text-muted-foreground underline-offset-2 hover:text-foreground hover:underline sm:hidden"
+        className="mt-2 flex min-h-11 items-center gap-1 text-xs font-semibold text-muted-foreground underline-offset-2 hover:text-foreground hover:underline sm:hidden"
       >
         {showChecks ? "Hide criteria" : `Show all ${r.checks.length} criteria`}
         <ChevronDown className={cn("size-3.5 transition-transform", showChecks && "rotate-180")} />

@@ -92,7 +92,7 @@ function CaptureForm({
         <button
           type="submit"
           disabled={state === "submitting"}
-          className="inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-lg bg-primary px-4 text-sm font-bold text-primary-foreground hover:bg-primary/95 disabled:opacity-60"
+          className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 rounded-lg bg-primary px-4 text-sm font-bold text-primary-foreground hover:bg-primary/95 disabled:opacity-60"
         >
           <FileDown className="size-4" />
           {state === "submitting" ? "Sending…" : "Send me the pack"}
@@ -240,7 +240,7 @@ export function LeadMagnetExitIntent() {
         type="button"
         onClick={dismiss}
         aria-label="Dismiss"
-        className="absolute right-2 top-2 inline-flex size-8 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+        className="absolute right-1 top-1 inline-flex size-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <X className="size-4" />
       </button>

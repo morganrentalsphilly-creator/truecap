@@ -186,7 +186,7 @@ export function DealQaPanel({
             type="submit"
             disabled={isAsking || question.trim().length < 2}
             aria-label="Ask"
-            className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground transition disabled:opacity-40"
+            className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground transition disabled:opacity-40"
           >
             {isAsking ? <Loader2 className="size-4 animate-spin" /> : <ArrowUp className="size-4" />}
           </button>

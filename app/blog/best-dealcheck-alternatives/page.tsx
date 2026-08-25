@@ -79,14 +79,14 @@ const TOOLS: Tool[] = [
   {
     rank: 1,
     name: "TrueCap",
-    bestFor: "Best free tier — full underwrite, no signup, no analysis cap",
+    bestFor: "Free preliminary rental screens with no signup or analysis cap",
     url: "/vs/dealcheck",
     pricing: "Free; Pro $29.99/mo (or $300/yr annual)",
     disclosure:
-      "Full disclosure: TrueCap is our tool, so read this entry as the maker's pitch and check the side-by-side comparison for the fair version. We put it first because the free tier genuinely covers what most people pay DealCheck for.",
+      "Full disclosure: TrueCap is our tool, so read this entry as the maker's pitch and check the side-by-side comparison. We put it first for its no-signup preliminary screen and transparent starting assumptions.",
     strengths: [
       "Cap rate, cash-on-cash, DSCR, NCF, and monthly cash flow — free, unlimited, no signup",
-      "Address auto-fill: HUD rent + FRED mortgage rate + state property tax populate live",
+      "Labeled HUD rent, published-rate, and state-tax starting benchmarks when available",
       "Selected-rule fit with each metric benchmarked inline and a secondary Screening Index",
       "Sensitivity grid, BRRRR + fix-and-flip analyzers, Offer Ceiling, and illustrative tax impact on Pro",
     ],
@@ -226,7 +226,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Is TrueCap better than DealCheck?",
-    a: "It depends on your workflow, and we're biased — TrueCap is our tool. TrueCap's free tier is deeper (unlimited full underwrites, no signup) and it auto-fills rent, rate, and tax from public data. DealCheck has native mobile apps, listing-site property import, and a longer track record. The honest side-by-side is on our TrueCap vs DealCheck page.",
+    a: "It depends on your workflow, and we're biased — TrueCap is our tool. TrueCap's free tier offers unlimited preliminary rental screens with no signup and labeled rent, rate, and tax starting points from public data. DealCheck has native mobile apps, listing-site property import, and a longer track record. The honest side-by-side is on our TrueCap vs DealCheck page.",
   },
   {
     q: "When should I just stay with DealCheck?",
@@ -328,7 +328,7 @@ export default function BestDealCheckAlternativesPost() {
             <p className="text-sm sm:text-base leading-relaxed text-foreground">
               For a deeper free tier than DealCheck&apos;s Starter plan,{" "}
               <strong>TrueCap</strong>{" "}
-              (that&apos;s us) runs unlimited full underwrites with no signup.{" "}
+              (that&apos;s us) runs unlimited preliminary rental screens with no signup.{" "}
               <strong>BiggerPockets</strong>{" "}
               makes sense if you want the community bundled in.{" "}
               <strong>Stessa</strong>{" "}

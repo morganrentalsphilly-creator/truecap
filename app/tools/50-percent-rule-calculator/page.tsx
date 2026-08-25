@@ -52,7 +52,7 @@ export const metadata: Metadata = {
 const FAQS: { q: string; a: string }[] = [
   {
     q: "What is the 50% rule in real estate?",
-    a: "A rule of thumb that says a rental property's operating expenses — everything except the mortgage payment — typically run about 50% of gross rent over time. So estimated NOI ≈ rent × 50%, and estimated cash flow is what's left after your principal-and-interest payment. It's a 3-second triage tool for deciding whether a listing deserves a real underwrite.",
+    a: "A rule of thumb that assumes a rental property's broad expense bundle is about 50% of gross rent before debt service. It produces a coarse preliminary screen, not a property-specific NOI, cash-flow forecast, or decision rule.",
   },
   {
     q: "What counts as operating expenses in the 50% rule?",
@@ -60,19 +60,19 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Is the 50% rule accurate?",
-    a: "For a specific archetype, yes: stabilized single-family rentals in moderate-tax, moderate-insurance markets — classic Midwest workforce housing. Across a portfolio of that profile, expenses genuinely converge near half of gross rent over multi-year averages. Outside that profile, the rule can miss badly in either direction.",
+    a: "It can approximate some stabilized portfolios, but it is not reliable for a specific property. Taxes, insurance, utilities, management, condition, age, location, and major replacements can move the expense ratio far above or below 50%.",
   },
   {
     q: "Where does the 50% rule fail?",
-    a: "Five common failure modes: high property-tax states (Texas new-construction suburbs can run 2.5-3.2% effective tax — expenses land at 60-65% of rent), high-insurance markets (post-2022 Florida), pre-1940 housing stock (real-world CapEx runs 10-15% of rent, not 5-8%), short-term rentals (operating costs hit 60-75% of revenue), and high-HOA condos (a $400/month HOA is already 22% of a $1,800 rent). In those cases raise the expense ratio to 55-65% — or skip the guess and use real numbers.",
+    a: "It can diverge sharply with high property tax, volatile insurance, older building systems, owner-paid utilities, substantial management, high HOA dues, or short-term-rental operations. Replace the fixed ratio with category-by-category, property-specific inputs before relying on the model.",
   },
   {
     q: "Is the 50% rule's NOI the same as a formal NOI?",
-    a: "Not exactly. The rule's expense bundle includes the CapEx reserve; the formal NOI convention used by lenders (and by TrueCap's full analyzer) excludes CapEx as a below-the-line reserve. For a 3-second screen the difference doesn't matter; for a real underwrite it does — which is one more reason the rule is a filter, not a verdict.",
+    a: "No. The rule's expense bundle includes the replacement reserve; the lender-style NOI convention used by TrueCap excludes that reserve from NOI and subtracts it below the line when calculating investor cash flow. Keep the distinction explicit even in a quick screen.",
   },
   {
     q: "What's the difference between the 50% rule and the 1% rule?",
-    a: "They screen different things. The 1% rule checks whether the rent is big enough relative to the price (income screen). The 50% rule checks whether the rent survives expenses and the mortgage (expense screen). They stack well: a property that passes the 1% rule and still shows positive cash flow under the 50% rule is a strong candidate for a full underwrite.",
+    a: "They screen different things. The 1% rule compares gross rent with price; the 50% rule applies a broad expense assumption before debt service. Neither establishes property-level cash flow. Use the complete expense, reserve, and financing model to evaluate the criteria you select.",
   },
 ];
 
@@ -349,7 +349,7 @@ export default function FiftyPercentRuleCalculatorPage() {
               tool has no embeddable widget. See the component header. */}
           <ToolEmbedInvite slug="50-percent-rule-calculator" />
 
-          <ToolsConversionCta calculatorName="50% rule calculator" hook="The 50% rule is a 3-second triage. TrueCap's full analyzer replaces the guess with real expense lines — tax, insurance, vacancy, CapEx — and a verdict. It's free." />
+          <ToolsConversionCta calculatorName="50% rule calculator" hook="The 50% rule is a 3-second triage. TrueCap's preliminary analyzer replaces the bundled guess with itemized tax, insurance, vacancy, and CapEx assumptions, then shows how the property fits the rules you select. It's free to start." />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}

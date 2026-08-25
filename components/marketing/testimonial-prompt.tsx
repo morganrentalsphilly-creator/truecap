@@ -141,7 +141,7 @@ export function TestimonialPrompt() {
         type="button"
         onClick={handleDismiss}
         aria-label="Dismiss"
-        className="absolute right-2 top-2 inline-flex size-8 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+        className="absolute right-1 top-1 inline-flex size-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <X className="size-4" />
       </button>
@@ -239,7 +239,7 @@ export function TestimonialPrompt() {
           <button
             type="submit"
             disabled={state === "submitting"}
-            className="mt-3 inline-flex h-9 w-full items-center justify-center rounded-lg bg-primary px-3 text-xs font-bold text-primary-foreground hover:bg-primary/95 disabled:opacity-60"
+            className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-primary px-3 text-xs font-bold text-primary-foreground hover:bg-primary/95 disabled:opacity-60"
           >
             {state === "submitting" ? "Sending…" : "Send it"}
           </button>

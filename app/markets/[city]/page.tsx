@@ -149,25 +149,25 @@ export default async function MarketCityPage({
   // for the rest (invisible until useful).
   const safmr = SAFMR_RENTS[data.slug];
 
-  // Verdict-first answer to the H1 question, built from the same data the
-  // rest of the page shows (cap-rate benchmark, HUD rent, state tax).
+  // Market-context answer to the H1 question, built from the same broad data
+  // the rest of the page shows. It never turns a median into buy guidance.
   // The ~6.5% national-median reference mirrors lib/market-strategy-fit.ts.
   const verdictLead =
     fit?.tone === "cashflow"
-      ? "Short answer: yes — for cash-flow investors."
+      ? "Market context: the published median cap rate is above the national reference."
       : fit?.tone === "appreciation"
-        ? "Short answer: it depends on your strategy."
+        ? "Market context: the published median cap rate is below the national reference."
         : fit
-          ? "Short answer: yes — for balanced buy-and-hold."
-          : "Short answer: run the numbers.";
+          ? "Market context: the published median cap rate is near the national reference."
+          : "Market context is incomplete; address-level results vary.";
   const verdictDetail =
     fit?.tone === "cashflow"
-      ? `${data.name}'s median cap rate runs about ${capMedian} (${capScope} median), above the ~6.5% national median, with typical rent at ${rentDisplay} and ${data.stateName} property tax near ${taxPct}.`
+      ? `${data.name}'s median cap rate runs about ${capMedian} (${capScope} median), with a broad rent benchmark of ${rentDisplay} and a ${data.stateName} effective property-tax benchmark near ${taxPct}. These figures do not establish a specific property's economics.`
       : fit?.tone === "appreciation"
-        ? `${data.name} is an appreciation-first market — its ~${capMedian} median cap rate (${capScope}) sits below the ~6.5% national median, so the play is long-term price growth more than day-one cash flow. Typical rent runs ${rentDisplay}; ${data.stateName} property tax is about ${taxPct}.`
+        ? `${data.name}'s median cap rate is about ${capMedian} (${capScope}), with a broad rent benchmark of ${rentDisplay} and a ${data.stateName} effective property-tax benchmark near ${taxPct}. A lower median does not establish future appreciation.`
         : fit
-          ? `${data.name}'s median cap rate of about ${capMedian} (${capScope} median) sits near the ~6.5% national median, with typical rent at ${rentDisplay} and ${data.stateName} property tax near ${taxPct}.`
-          : `Typical rent runs ${rentDisplay} and ${data.stateName} property tax is about ${taxPct} — whether ${data.name} works depends on the specific deal.`;
+          ? `${data.name}'s median cap rate is about ${capMedian} (${capScope} median), with a broad rent benchmark of ${rentDisplay} and a ${data.stateName} effective property-tax benchmark near ${taxPct}. Address-level income, expenses, condition, and financing determine the modeled result.`
+          : `The broad rent benchmark is ${rentDisplay} and the ${data.stateName} effective property-tax benchmark is near ${taxPct}; neither is a property fact or investment conclusion.`;
 
   // Cross-link to other programmatic markets + a few bespoke flagship markets.
   const otherMarkets = MARKET_CITIES.filter((c) => c.slug !== data.slug).slice(0, 6);
@@ -220,7 +220,7 @@ export default async function MarketCityPage({
         name: `Is ${data.name} a good place to buy rental property in 2026?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `${verdictLead} ${verdictDetail} Run any specific ${data.name} address through TrueCap for a full verdict — cap rate, cash flow, DSCR, and a 10-year projection — in about 60 seconds.`,
+          text: `${verdictLead} ${verdictDetail} Run a specific ${data.name} address through TrueCap for a preliminary screen with cap rate, cash flow, DSCR, and an illustrative 10-year projection. Review the inputs and decide which facts need verification.`,
         },
       },
       {
@@ -228,7 +228,7 @@ export default async function MarketCityPage({
         name: `What's a good cap rate in ${data.name}?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `In ${data.name}, cap rates typically run around ${capMedian} (${capScope} median). A deal above that line is outperforming the local market; below it, you're paying up for appreciation or stability. TrueCap shows where any specific ${data.name} deal lands versus this benchmark.`,
+          text: `The published cap-rate benchmark for ${data.name} is about ${capMedian} (${capScope} median). A property can sit above or below that reference for many reasons; the benchmark alone does not establish quality, risk, or future appreciation.`,
         },
       },
       {
@@ -236,7 +236,7 @@ export default async function MarketCityPage({
         name: `What's the average rent for a rental in ${data.name}?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `A typical rental in ${data.name} runs about ${rentDisplay}${hud ? " (HUD Fair Market Rent, 2–3BR)" : " (estimate; varies by neighborhood, size, and condition)"}. TrueCap auto-fills HUD Fair Market Rent for the exact address you enter.`,
+          text: `A typical rental in ${data.name} runs about ${rentDisplay}${hud ? " (HUD Fair Market Rent, 2–3BR)" : " (estimate; varies by neighborhood, size, and condition)"}. TrueCap can start from a labeled HUD area benchmark; verify it against current comparable rents and any existing lease.`,
         },
       },
       {
@@ -244,7 +244,7 @@ export default async function MarketCityPage({
         name: `What is the property tax rate in ${data.stateName}?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `${data.stateName}'s effective property tax rate is about ${taxPct} of value per year — the figure TrueCap applies by default for ${data.name} deals. You can override it with the exact local rate.`,
+          text: `${data.stateName}'s broad effective property-tax benchmark is about ${taxPct} of value per year. It is a starting estimate, not a parcel fact; replace it with the expected post-acquisition tax from the assessor or a qualified local source.`,
         },
       },
     ],

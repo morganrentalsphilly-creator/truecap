@@ -11,12 +11,16 @@ import {
  * The v2 calculation core is intentionally available to deterministic tests
  * and internal development, but it is not yet wired through every saved,
  * shared, report, and historical-snapshot surface. Missing and explicit 1.0
- * both mean v1; an explicit 2.0 must fail closed at every external boundary.
+ * both mean v1; every other explicit version must fail closed at each external
+ * boundary.
  */
 export function isReleasedUnderwritingModel(
-  values: Pick<InvestmentFormValues, "underwritingModelVersion">
+  values: { underwritingModelVersion?: unknown }
 ): boolean {
-  return values.underwritingModelVersion !== "2.0";
+  return (
+    values.underwritingModelVersion === undefined ||
+    values.underwritingModelVersion === "1.0"
+  );
 }
 
 /** Customer-facing parser. Keep the broader investmentFormSchema for internal
@@ -29,20 +33,14 @@ export const releasedInvestmentFormSchema = investmentFormSchema.refine(
   }
 );
 
-function carriesInternalV2Marker(raw: unknown): boolean {
-  return Boolean(
-    raw &&
-      typeof raw === "object" &&
-      !Array.isArray(raw) &&
-      (raw as Record<string, unknown>).underwritingModelVersion === "2.0"
-  );
-}
-
 /** Raw persisted/draft boundary. Check before normalization so even an
- * incomplete or otherwise invalid crafted v2 payload cannot shed its marker
- * and fall through a legacy-tolerance path. */
+ * incomplete or otherwise invalid crafted non-v1 payload cannot shed its
+ * marker and fall through a legacy-tolerance path. Missing and explicit 1.0
+ * are the complete released whitelist; every other explicit value fails
+ * closed, including future versions unknown to today's schema. */
 export function isReleasedUnderwritingSnapshot(raw: unknown): boolean {
-  return !carriesInternalV2Marker(raw);
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return true;
+  return isReleasedUnderwritingModel(raw as Record<string, unknown>);
 }
 
 /** Released equivalent of the resilient saved-row normalizer. */

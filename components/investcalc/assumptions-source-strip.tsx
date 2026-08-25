@@ -139,7 +139,7 @@ export function AssumptionsSourceStrip({
         type="button"
         onClick={() => setExpanded((v) => !v)}
         aria-expanded={expanded}
-        className="mt-2 flex min-h-9 w-full items-center justify-between gap-2 text-left sm:hidden"
+        className="mt-2 flex min-h-11 w-full items-center justify-between gap-2 text-left sm:hidden"
       >
         <span className="min-w-0 truncate text-xs text-muted-foreground">{summary}</span>
         <ChevronDown

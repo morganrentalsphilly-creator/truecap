@@ -25,11 +25,11 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "how-to-underwrite-a-rental-property-in-60-seconds";
-const TITLE = "How to underwrite a rental property in 60 seconds";
+const TITLE = "How to screen a rental property in 60 seconds";
 const DESCRIPTION =
-  "The five numbers, four metrics, and two sanity checks every real estate investor uses to triage a rental deal in under a minute — no spreadsheet required.";
+  "A fast preliminary rental screen: organize five inputs, review four modeled metrics, and identify what still needs verification before a complete underwrite.";
 const PUBLISHED_AT = "2026-05-24";
-const MODIFIED_AT = "2026-08-15";
+const MODIFIED_AT = "2026-08-24";
 const READING_TIME_MIN = 9;
 
 export const metadata: Metadata = {
@@ -67,7 +67,7 @@ export const metadata: Metadata = {
 const FAQS: { q: string; a: string }[] = [
   {
     q: "Is 60 seconds enough to underwrite a rental property?",
-    a: "Sixty seconds is enough to triage a deal — to decide whether it's worth a full underwrite. It's NOT enough to buy. The 60-second pass tells you 'this is worth a deeper look' or 'pass.' Before making an offer you'll spend hours validating rent comps, inspecting the property, reviewing the actual operating statements, and stress-testing assumptions. The 60-second screen just keeps you from wasting those hours on deals that obviously don't pencil.",
+    a: "Sixty seconds is enough for a preliminary screen, not a complete underwrite or a decision to buy. It can organize the projected metrics, show how they compare with criteria you choose, and identify assumptions that need verification. Before making an offer, validate rent comps, inspect the property, review actual operating statements, and stress-test the assumptions yourself.",
   },
   {
     q: "What's the difference between underwriting and analyzing a rental property?",
@@ -75,19 +75,19 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What's the most important metric — cap rate, cash-on-cash, or DSCR?",
-    a: "Depends what you care about. Cap rate measures the property as if you owned it free-and-clear — useful for comparing properties regardless of how they're financed. Cash-on-cash measures the return on the cash YOU specifically put in — useful for personal investment decisions and for comparing leveraged deals. DSCR is what lenders care about — it determines whether you can actually get financed. For a full underwrite, you need all three. For a 60-second screen, start with cap rate and the 1% rule.",
+    a: "Depends what you care about. Cap rate measures the property as if you owned it free-and-clear — useful for comparing properties regardless of how they're financed. Cash-on-cash measures the return on the cash YOU specifically put in — useful for comparing leveraged deals. DSCR measures projected debt-service coverage, but each lender applies its own definition and minimum. A complete review should consider all three alongside cash flow and the underlying evidence.",
   },
   {
     q: "What's a 'good' cap rate?",
-    a: "Market-dependent. In cash-flow markets (Midwest, Sun Belt secondary cities, older multifamily), 6-10% is healthy. In appreciation markets (Tier-1 coastal cities), you'll see 3-5% — the return assumption there is price growth, not cash flow. Anything below the prevailing 10-year Treasury yield (4-5% in mid-2026) is hard to justify without strong appreciation thesis.",
+    a: "There is no universal good cap rate. Compare the property with relevant market evidence, its condition and workload, current financing, alternative uses of capital, and the return criteria you choose. A market median is context, not a suitability threshold.",
   },
   {
     q: "Why use a calculator instead of a spreadsheet?",
-    a: "Spreadsheets break the first time you change a formula. They don't auto-fill market rent from HUD or pull live interest rates. They don't model tax savings from depreciation correctly. They don't stress-test your assumptions against ±10% rent or ±1 percentage point on rate. A purpose-built tool like TrueCap handles all of this without you having to remember formulas you only use once a quarter.",
+    a: "A well-built spreadsheet can be flexible, but the owner must maintain its formulas, units, versioning, and input sources. TrueCap provides a reviewed calculation path, labeled HUD and rate benchmarks, editable assumptions, and repeatable stress scenarios; those starting estimates still require property-specific verification.",
   },
   {
     q: "Should I underwrite a property before I tour it or after?",
-    a: "Before. The 60-second screen is specifically designed to gate which properties are worth your time. Touring a property takes 1-2 hours including drive time. If you tour every listing that catches your eye, you'll burn 10+ hours a week on dead-end deals. Run the 60-second pass first; only tour the ones that pass.",
+    a: "A preliminary screen before a tour can help you identify the questions and assumptions that deserve attention on site. It does not replace the tour, inspection, document review, or your own decision about which properties merit deeper work.",
   },
 ];
 
@@ -140,9 +140,9 @@ export default function BlogPost() {
   const howToLd = {
     "@context": "https://schema.org",
     "@type": "HowTo",
-    name: "How to underwrite a rental property in 60 seconds",
+    name: "How to screen a rental property in 60 seconds",
     description:
-      "A 60-second triage that tells you whether a rental property deal is worth a full underwrite — covering rent, expenses, financing, and the four return metrics.",
+      "A 60-second preliminary screen that organizes rent, expenses, financing, and four return metrics so you can identify what needs deeper verification.",
     totalTime: "PT1M",
     estimatedCost: { "@type": "MonetaryAmount", currency: "USD", value: "0" },
     tool: [
@@ -153,35 +153,35 @@ export default function BlogPost() {
         "@type": "HowToStep",
         position: 1,
         name: "Get the gross monthly rent",
-        text: "Pull the listing's stated rent OR HUD Fair Market Rent for the zip code. If the listing's number is more than 10% above HUD's FMR, treat it as aspirational and use FMR instead.",
+        text: "Record current lease rent separately from market or pro forma rent. Use recent comparable rents and lease evidence for the property; treat HUD Fair Market Rent only as a labeled area benchmark, not a substitute for property-specific rent evidence.",
         url: `${canonicalUrl}#step-1`,
       },
       {
         "@type": "HowToStep",
         position: 2,
         name: "Estimate operating expenses",
-        text: "Add property tax (from county assessor), insurance (quote-able in 60 seconds at most carriers), and a 30-40% reserve for vacancy + maintenance + capex + management. Don't trust the seller's last-year operating expense number — quote fresh.",
+        text: "Enter expected post-acquisition property tax, an insurance quote when available, HOA and owner-paid utilities, plus separate assumptions for vacancy, management, maintenance, and replacement reserve. Leave an unknown unresolved instead of turning it into zero.",
         url: `${canonicalUrl}#step-2`,
       },
       {
         "@type": "HowToStep",
         position: 3,
         name: "Estimate the mortgage payment",
-        text: "Plug purchase price, 25% down, and current investor-loan rate (~1% above primary-residence rates) into a mortgage calculator. Add property tax and insurance for the PITI total.",
+        text: "Enter cash or financed acquisition, the expected down payment, rate, amortization term, and loan fees. A published rate is a benchmark; replace it with the lender's written quote and terms before relying on the result.",
         url: `${canonicalUrl}#step-3`,
       },
       {
         "@type": "HowToStep",
         position: 4,
         name: "Compute the four return metrics",
-        text: "Cap rate = NOI ÷ purchase price. Cash-on-cash = annual cash flow ÷ total cash invested. DSCR = NOI ÷ annual debt service. Monthly cash flow = rent minus all expenses minus mortgage. All four should clear their respective thresholds (cap rate 6%+ in cash-flow markets, CoC 8%+, DSCR 1.25+, cash flow positive).",
+        text: "Cap rate = NOI ÷ purchase price. Cash-on-cash = annual cash flow ÷ total cash invested. DSCR = NOI ÷ annual debt service. Monthly cash flow = rent minus expenses and debt service. Compare each result with the market evidence, lender rules, and investment criteria you select.",
         url: `${canonicalUrl}#step-4`,
       },
       {
         "@type": "HowToStep",
         position: 5,
         name: "Run the sanity checks",
-        text: "Two quick gut checks: (1) Does the 1% rule clear (monthly rent ≥ 1% of price)? (2) Is the property well-located in a market you've researched? If both pass and the four metrics clear, this deal is worth a full underwrite.",
+        text: "Record whether the property meets the 1% benchmark, compare the projected cap rate with relevant alternatives, and note which assumptions can change the result. Use that evidence to choose your own next verification step.",
         url: `${canonicalUrl}#step-5`,
       },
     ],
@@ -221,25 +221,24 @@ export default function BlogPost() {
 
         <article className="prose prose-slate max-w-none [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
           <p>
-            Every experienced real estate investor underwrites the same way:
-            gather a handful of numbers, compute four ratios, run two sanity
-            checks, decide. Most of them can do it in under a minute — without
-            opening a spreadsheet. This post walks through exactly how, so you
-            can do the same.
+            A fast first pass can organize a handful of inputs, compute standard
+            ratios, and expose the assumptions most likely to change the result.
+            It cannot complete the property-specific diligence or choose the
+            investment. This post separates the quick screen from that deeper work.
           </p>
 
           <p>
             The goal isn&apos;t to make a final buy decision in 60 seconds.
-            It&apos;s to <em>triage</em>: figure out which listings are worth a
-            full underwrite versus which ones should be discarded on sight.
-            Done well, the 60-second screen saves you 10+ hours a week of
-            chasing dead-end deals.
+            It&apos;s to <em>triage</em>: organize the projected metrics, compare
+            them with criteria you choose, and identify the facts that need
+            deeper verification before you decide what to do next.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">The five numbers you need</h2>
           <p>
-            Before you can underwrite anything, you need five inputs. Every one
-            of them is either on the listing or one Google search away.
+            A preliminary screen starts with five input groups. Some may appear
+            in a listing; others require a lease, assessor record, insurance or
+            lender quote, inspection, or an explicit starting assumption.
           </p>
           <ol>
             <li>
@@ -249,30 +248,30 @@ export default function BlogPost() {
             </li>
             <li>
               <strong>Monthly gross rent.</strong> If the property is occupied,
-              this is the lease amount. If vacant, it&apos;s your estimated
-              market rent — use HUD&apos;s Fair Market Rent for the county as a
-              floor, then check Zillow and Rentometer for comps. Don&apos;t trust
-              the seller&apos;s number alone.
+              record the current lease amount separately. If vacant, enter an
+              estimated market rent supported by recent comparable properties.
+              HUD Fair Market Rent can provide labeled area context, but it is
+              not a floor or a property-specific rent comp.
             </li>
             <li>
               <strong>Operating expenses (annualized).</strong> <Link href="/glossary/property-tax" className="text-primary font-semibold hover:underline">Property tax</Link>,
               <Link href="/glossary/insurance" className="text-primary font-semibold hover:underline"> insurance</Link>, <Link href="/glossary/maintenance-reserve" className="text-primary font-semibold hover:underline">maintenance</Link>, management, <Link href="/glossary/vacancy" className="text-primary font-semibold hover:underline">vacancy reserve</Link>, HOA, owner-
-              paid utilities, <Link href="/glossary/capex" className="text-primary font-semibold hover:underline">CapEx reserve</Link>. As a rule of thumb when you have no
-              other data: 40-50% of gross rent for a residential rental.
-              Underwriting against the <Link href="/blog/50-percent-rule-rentals" className="text-primary font-semibold hover:underline">&ldquo;50% rule&rdquo;</Link> is a fine starting
-              point on a 60-second screen.
+              paid utilities, <Link href="/glossary/capex" className="text-primary font-semibold hover:underline">replacement reserve</Link>. A <Link href="/blog/50-percent-rule-rentals" className="text-primary font-semibold hover:underline">broad expense-ratio rule</Link> can be a
+              labeled triage check, but it must not replace the individual
+              categories or turn missing costs into zero.
             </li>
             <li>
               <strong>Financing terms.</strong> Down payment percentage,
-              interest rate, loan term. Use the current investment-property
-              rate (typically 0.5-1.0 percentage points above owner-occupied),
-              25% down conventional, 30-year fixed. For cash purchases, skip
-              this.
+              interest rate, amortization term, and loan fees. Use a clearly
+              labeled benchmark for an early screen, then replace it with the
+              written quote and terms for the loan you may use. For a cash
+              purchase, model no debt service.
             </li>
             <li>
-              <strong>Closing costs.</strong> 2-3% of purchase price is a
-              reasonable estimate, including title, escrow, inspection, and
-              minor cosmetic move-in costs.
+              <strong>Closing costs and initial cash items.</strong> Enter title,
+              lender and transaction costs, cash-funded immediate repairs, and
+              the initial reserve separately when known. A percentage default
+              is only a starting estimate and must remain labeled as such.
             </li>
           </ol>
 
@@ -284,27 +283,23 @@ export default function BlogPost() {
           <h2 className="text-2xl sm:text-3xl">Metric 1: The 1% rule (5 seconds)</h2>
           <p>
             The <Link href="/glossary/1-percent-rule" className="text-primary font-semibold hover:underline">1% rule</Link> is the fastest possible screen. Divide monthly gross
-            rent by the purchase price; if it&apos;s 1% or higher, the deal
-            <em> probably</em> cash-flows; if it&apos;s well below 1%, the deal
-            <em> probably</em> doesn&apos;t.
+            rent by the purchase price. It compares price with gross rent only;
+            it says nothing about expenses, financing, condition, or actual cash flow.
           </p>
           <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
             <div className="text-sm sm:text-base font-mono">
-              Monthly Rent ÷ Purchase Price = should be ≥ 1%
+              Monthly Rent ÷ Purchase Price = rent-to-price percentage
             </div>
           </div>
           <p>
-            Example: $2,500/mo rent on a $250,000 property = 1.0%. Passes.
-            $1,800/mo rent on a $300,000 property = 0.6%. Fails on its face.
+            Example: $2,500/mo rent on a $250,000 property = 1.0%, which meets
+            the benchmark. $1,800/mo rent on a $300,000 property = 0.6%, which
+            does not meet it.
           </p>
           <p>
-            Two caveats. First, the 1% rule is just a screen — failing it
-            doesn&apos;t mean the deal is bad (high-appreciation markets often
-            run 0.4-0.7% and still produce solid returns), and passing it
-            doesn&apos;t mean the deal is good. Second, the rule was calibrated
-            during 4-5% interest rate eras. With 30-year fixed rates above 6.5%
-            in mid-2026, you arguably need more like the &ldquo;1.25% rule.&rdquo;
-            Adjust your threshold to the rate environment.
+            Meeting or missing the 1% reference does not establish whether the
+            property works. Continue with the complete expense and financing
+            model, then compare the result with the criteria you selected.
           </p>
           <p>
             <Link href="/tools/1-percent-rule-calculator" className="text-primary font-semibold hover:underline">
@@ -328,18 +323,16 @@ export default function BlogPost() {
             </div>
           </div>
           <p>
-            What counts as a &ldquo;good&rdquo; cap rate is entirely
-            market-dependent. In cash-flow markets like Cleveland, Indianapolis,
-            or older multifamily in Sun Belt secondary cities, 6-10% is healthy.
-            In appreciation markets like coastal California or NYC, 3-5% is the
-            norm — the return assumption there is price growth, not cash flow.
+            Cap-rate ranges vary by property type, condition, market, lease
+            quality, expense conventions, and data date. Compare like with like
+            and verify that NOI excludes financing while including the applicable
+            operating costs.
           </p>
           <p>
-            The rule: <strong>your cap rate should comfortably exceed the
-            risk-free rate.</strong> If 10-year Treasuries yield 4.5% and you&apos;re
-            buying a property at a 4% cap, you&apos;re taking real-estate-level
-            risk for less than Treasury return — that only makes sense if you
-            believe in significant appreciation.
+            Comparing cap rate with current alternatives can add context, but
+            it is not an apples-to-apples suitability rule: liquidity, leverage,
+            workload, transaction costs, taxes, condition risk, and uncertain
+            future price changes differ materially.
           </p>
           <p>
             <Link href="/tools/cap-rate-calculator" className="text-primary font-semibold hover:underline">
@@ -363,12 +356,10 @@ export default function BlogPost() {
             </div>
           </div>
           <p>
-            On a typical 25%-down conventional loan in 2026, an 8-10% CoC is
-            very strong, 5-7% is acceptable in most markets, and below 5%
-            you&apos;re probably looking at an appreciation play, not a cash-flow
-            play. Negative CoC means you&apos;re feeding the property out of pocket
-            every month — sometimes intentional (strong appreciation thesis),
-            usually not.
+            Cash-on-cash is specific to the stated financing and initial-cash
+            assumptions. There is no universal acceptable band. A negative
+            result means the modeled pre-tax cash flow after reserve is below
+            zero; it does not predict future appreciation or choose the next step.
           </p>
           <p>
             <Link href="/tools/cash-on-cash-calculator" className="text-primary font-semibold hover:underline">
@@ -412,20 +403,16 @@ export default function BlogPost() {
             What happens to your DSCR and cash flow if rent comes in 10% below
             your estimate, or vacancy spikes from 5% to 10%? If a small miss on
             either input flips the deal from positive cash flow to negative,
-            your margin of safety is too thin. Look for deals that still hold
-            up after a -10% rent shock — those are the ones you can afford to
-            be wrong about.
+            the result is highly sensitive to those assumptions. Label that
+            risk and decide how much evidence or margin your criteria require.
           </p>
 
-          <h3>Sanity check 2: Compare to the 10-year Treasury</h3>
+          <h3>Sanity check 2: Compare alternatives on the same basis</h3>
           <p>
-            The 10-year Treasury yield is the closest thing real estate has to
-            a risk-free benchmark. If your projected unleveraged return (cap
-            rate) is below the Treasury yield, you&apos;re explicitly taking real-
-            estate-level risk for sub-risk-free reward. That only makes sense if
-            you have a strong appreciation thesis OR significant tax benefits
-            you&apos;re harvesting (depreciation, 1031 exchange, opportunity zone).
-            Otherwise, walk.
+            A current lower-risk yield can be one reference, but cap rate is not
+            a total-return forecast and the risks are different. Record which
+            cash flows, fees, taxes, liquidity limits, leverage, work, and future
+            value assumptions are included before comparing alternatives.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">Putting it together</h2>
@@ -433,27 +420,26 @@ export default function BlogPost() {
             The 60-second workflow:
           </p>
           <ol>
-            <li>Glance at the 1% rule — pass or fail.</li>
-            <li>If it passes (or is borderline), compute cap rate. Compare to your market&apos;s typical range.</li>
-            <li>Compute cash-on-cash at your expected financing. Decide if the return justifies the risk.</li>
-            <li>Compute DSCR. Confirm it&apos;s above 1.2 — otherwise you can&apos;t get financed.</li>
-            <li>Stress-test rent and vacancy. If a -10% rent shock kills the deal, walk.</li>
-            <li>Compare your cap rate to the 10-year Treasury. If below, you need a thesis beyond cash flow.</li>
+            <li>Record whether the property meets the 1% benchmark.</li>
+            <li>Compute cap rate and compare it with relevant market evidence.</li>
+            <li>Compute cash-on-cash using the financing you expect.</li>
+            <li>Compute DSCR, then compare it with the written requirements of the lender and program you may use.</li>
+            <li>Stress-test rent and vacancy; label any assumption that changes the cash-flow sign or coverage band.</li>
+            <li>Compare alternatives on a clearly stated, like-for-like basis.</li>
           </ol>
 
           <p>
-            Pass all six and the deal is worth a real underwrite — comping rent
-            in person, pulling actual tax records, inspecting the property,
-            modeling out a 10-year hold with illustrative tax impact and exit scenarios.
-            Fail any of them and you&apos;ve just saved yourself a wasted weekend.
+            These checks do not choose the next step for you. They make the
+            tradeoffs visible so you can decide whether to continue with rent
+            comps, actual tax records, inspection, document review, and an
+            illustrative long-term model.
           </p>
 
           <p>
-            <strong>The shortcut:</strong> all four metrics + both sanity checks
-            run automatically in TrueCap. Paste the address, and we auto-fill
-            rent from HUD, mortgage rate from FRED, and property tax from your
-            state&apos;s effective rate. You can run the 60-second screen on a
-            real deal right now.
+            <strong>The shortcut:</strong> TrueCap computes the first-pass metrics
+            consistently and can start from labeled HUD, published-rate, and
+            state effective-tax benchmarks when available. Every estimate stays
+            editable and should be replaced with property-specific evidence.
           </p>
 
           <div className="not-prose">

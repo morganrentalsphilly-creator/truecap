@@ -1940,7 +1940,7 @@ export function SavedAnalysesPage({
         type="button"
         onClick={() => setMobileFiltersOpen((open) => !open)}
         aria-expanded={mobileFiltersOpen}
-        className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-muted/60 px-3 text-xs font-bold text-foreground transition-colors hover:bg-muted sm:hidden"
+        className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-border bg-muted/60 px-3 text-xs font-bold text-foreground transition-colors hover:bg-muted sm:hidden"
       >
         <SlidersHorizontal className="h-3.5 w-3.5" />
         Filters
@@ -2005,7 +2005,7 @@ export function SavedAnalysesPage({
         type="button"
         onClick={handleExportCsv}
         disabled={displayItems.length === 0}
-        className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-2xl border border-border bg-muted/40 text-xs font-bold text-foreground transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
+        className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-2xl border border-border bg-muted/40 text-xs font-bold text-foreground transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
       >
         <FileDown className="h-3.5 w-3.5" />
         Export CSV ({displayItems.length})
@@ -2593,7 +2593,7 @@ export function SavedAnalysesPage({
                 type="button"
                 onClick={() => handleSort(activeSortField ?? "saved")}
                 aria-label="Toggle sort direction"
-                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border bg-muted/60 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl border border-border bg-muted/60 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               >
                 {activeSortField && activeSortDirection === "asc" ? (
                   <ArrowUp className="w-3.5 h-3.5" />

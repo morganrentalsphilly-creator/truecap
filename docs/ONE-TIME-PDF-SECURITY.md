@@ -58,24 +58,39 @@ gate from this historical recovery document.
 No Stripe price, coupon, checkout amount, subscription entitlement, or webhook
 signature/dispatch logic changed.
 
-## Dormant 100% purchase-credit hook
+## Pack-to-Pro credit and approved refund/dispute policy
 
-The ledger records immutable purchase amount/currency and includes dormant
-credit audit fields (`status`, policy version, amount, eligibility expiry,
-applied timestamp, external reference, credited user). The pure
-`evaluateOneTimePdfProCredit` helper only returns eligibility when a caller
-supplies an explicit enabled policy; the current product always writes
-`not_configured` and applies nothing.
+The ledger records immutable purchase amount/currency and credit audit fields
+(`status`, policy version, amount, eligibility expiry, applied timestamp,
+external reference, credited user). The credit mechanism remains fail-closed:
+only a configured `STRIPE_PACK_CREDIT_COUPON_ID` can make an eligible paid $5
+claim available for the seven-day first-Pro-invoice credit. Without that
+server-only configuration, claims remain `not_configured` and no credit is
+promised or applied.
 
-Before activation, the founder must approve:
+Morgan approved the refund/dispute policy on 2026-08-24. The retained
+historical flow enforces it as follows:
 
-- eligibility window and whether it runs from payment or redemption;
-- whether anonymous buyers must sign in and explicitly claim the purchase;
-- monthly vs annual Pro eligibility, currency/tax treatment, and stacking;
-- Stripe mechanism (single-use promotion code, invoice/customer balance, or
-  application-managed discount) and idempotency reference;
-- refund, dispute, chargeback, expiration, and already-subscribed handling;
-- customer-facing terms and support override/audit procedure.
+- every report verification, recovery, and export re-reads the current Stripe
+  Session, Charges, and Disputes;
+- a partial or full refund or lost dispute revokes future server-controlled
+  report access and prevents a new Pack-to-Pro credit;
+- an open dispute suspends report access and blocks credit use at checkout;
+- a won dispute restores report access only after a fresh check confirms the
+  payment remains paid, captured, and unrefunded;
+- refund/dispute webhooks use current Stripe truth, not event order, and
+  idempotently move an eligible credit to `denied` or an applied credit to the
+  audit-only `reversed` state.
 
-Activation must add server-authoritative billing integration and tests. It
-must not infer eligibility from browser storage or client analytics.
+The database row is only a credit candidate. Pro checkout revalidates Stripe
+before attaching the configured coupon, so stale eligibility cannot spend
+through an unprocessed refund or dispute. A downloaded PDF cannot be recalled,
+and the webhook does not remove a coupon from, reprice, cancel, or recreate a
+live subscription. The canonical state table and remaining durable-fulfillment
+limitations are in `docs/DECISION-PACK-DURABLE-FULFILLMENT-RUNBOOK.md`.
+
+These controls protect historical buyers and billing integrity; they do not
+activate new Pack sales or provide durable artifact storage, cross-device
+recovery, or email delivery. Both checkout gates must remain disabled until the
+durable-fulfillment runbook is implemented and separately approved in test
+mode. No eligibility may be inferred from browser storage or client analytics.

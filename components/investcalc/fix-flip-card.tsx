@@ -33,7 +33,7 @@ const fmtPct = (n: number) => (Number.isFinite(n) ? `${n.toFixed(1)}%` : "—");
 
 export function FixFlipCard({ values, result, defaultRehab }: FixFlipCardProps) {
   const purchasePrice = Number(values?.purchasePrice) || 0;
-  const defaultDp = Number(values?.downPaymentPct) || 20;
+  const defaultDp = Number(values?.downPaymentPct ?? 20);
   const defaultCloseAcq = Number(values?.closingCostsPct) || 3;
 
   const [rehabInput, setRehabInput] = useState<string>("");

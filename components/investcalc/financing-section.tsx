@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
+import { isAllCashDownPayment } from "@/lib/financing-classification";
 import { FieldError, optionalNumberSetValueAs } from "@/components/investcalc/form-field-helpers";
 import { GlossaryTip } from "@/components/investcalc/glossary-tip";
 import { FinancingProfileSelector } from "@/components/investcalc/financing-profile-selector";
@@ -30,18 +31,15 @@ export function FinancingSection({
     formState: { errors },
   } = form;
 
-  // A 0% (or 100%) down payment silently switches the underwrite to all-cash:
-  // no mortgage, so DSCR drops out and cash-on-cash is computed differently.
-  // Surface that so a user who zeroes it (or fat-fingers it) understands the
-  // verdict changed on purpose, not that something broke. Invisible at the
-  // default 20%, so it never adds chrome to the normal financed path.
+  // A 100% down payment switches the v1 underwrite to all-cash: no mortgage,
+  // so DSCR drops out and cash-on-cash is computed differently. A 0% down
+  // payment is the opposite — fully financed — and must never enter this path.
   const downPaymentPct = form.watch("downPaymentPct");
-  const isAllCash =
-    downPaymentPct === 0 || (typeof downPaymentPct === "number" && downPaymentPct >= 100);
+  const isAllCash = isAllCashDownPayment(downPaymentPct);
   // PMI / MIP only applies to a financed loan with < 20% down — show the lever
   // exactly when it's relevant, so it never clutters the standard 20%-down path.
   const pmiApplies =
-    typeof downPaymentPct === "number" && downPaymentPct > 0 && downPaymentPct < 20;
+    typeof downPaymentPct === "number" && downPaymentPct >= 0 && downPaymentPct < 20;
 
   return (
     // Card chrome unified with the other input sections (PropertyType /
