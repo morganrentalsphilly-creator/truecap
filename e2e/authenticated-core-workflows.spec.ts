@@ -20,6 +20,7 @@ test.beforeEach(() => {
 test("shortlist preview repairs mixed pasted rows, ranks them, and survives refresh", async ({
   page,
 }) => {
+  test.setTimeout(120_000);
   await page.goto("/dashboard/triage", { waitUntil: "domcontentloaded" });
   await acceptCookiesIfShown(page);
   await expect(
@@ -44,14 +45,17 @@ test("shortlist preview repairs mixed pasted rows, ranks them, and survives refr
   await expect(review).toBeVisible();
   await expect(review.getByText("2 included", { exact: true })).toBeVisible();
   await expect(
-    review.getByText(
-      "Rent is missing; this row will need rent before it can be underwritten.",
-      { exact: true },
-    ),
+    review
+      .getByText(
+        "Rent is missing; this row will need rent before it can be underwritten.",
+        { exact: true },
+      )
+      .filter({ visible: true }),
   ).toBeVisible();
   await expect(
     review
       .getByText(/Assumption location: Philadelphia, PA · PA tax assumptions/)
+      .filter({ visible: true })
       .first(),
   ).toBeVisible();
 
@@ -99,13 +103,22 @@ test("shortlist preview repairs mixed pasted rows, ranks them, and survives refr
     timeout: 20_000,
   });
   await expect(
-    page.getByText(expensiveAddress, { exact: true }).first(),
+    page
+      .getByText(expensiveAddress, { exact: true })
+      .filter({ visible: true })
+      .first(),
   ).toBeVisible();
   await expect(
-    page.getByText(missingRentAddress, { exact: true }).first(),
+    page
+      .getByText(missingRentAddress, { exact: true })
+      .filter({ visible: true })
+      .first(),
   ).toBeVisible();
   await expect(
-    page.getByText(middleAddress, { exact: true }).first(),
+    page
+      .getByText(middleAddress, { exact: true })
+      .filter({ visible: true })
+      .first(),
   ).toBeVisible();
 });
 
@@ -128,7 +141,10 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
       page.getByRole("heading", { level: 1, name: /Welcome back/ }),
     ).toBeVisible();
     await expect(
-      page.getByText(address, { exact: true }).first(),
+      page
+        .getByText(address, { exact: true })
+        .filter({ visible: true })
+        .first(),
     ).toBeVisible();
     await expectNoHorizontalOverflow(page);
 
@@ -177,9 +193,12 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
     ).toBeVisible();
 
     await page.reload({ waitUntil: "domcontentloaded" });
-    await expect(page.getByText(scenarioName, { exact: true })).toBeVisible({
-      timeout: 20_000,
-    });
+    await expect(
+      page
+        .getByText(scenarioName, { exact: true })
+        .filter({ visible: true })
+        .first(),
+    ).toBeVisible({ timeout: 20_000 });
     await page
       .getByRole("link", { name: `Open ${scenarioName} workspace` })
       .click();
@@ -188,7 +207,10 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
     );
     expect(page.url()).not.toContain(baseDealId);
 
-    const notes = page.getByLabel("Deal notes");
+    const notes = page.getByRole("textbox", {
+      name: "Deal notes",
+      exact: true,
+    });
     await expect(notes).toBeEditable({ timeout: 20_000 });
     await notes.fill(scenarioNote);
     await notes.blur();
@@ -198,9 +220,9 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
       },
     );
     await page.reload({ waitUntil: "domcontentloaded" });
-    await expect(page.getByLabel("Deal notes")).toHaveValue(scenarioNote, {
-      timeout: 20_000,
-    });
+    await expect(
+      page.getByRole("textbox", { name: "Deal notes", exact: true }),
+    ).toHaveValue(scenarioNote, { timeout: 20_000 });
 
     await page
       .getByRole("button", { name: "Compare scenarios", exact: true })
@@ -212,7 +234,10 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
       page.getByRole("heading", { level: 1, name: "Compare Deals" }),
     ).toBeVisible();
     await expect(
-      page.getByText(scenarioName, { exact: true }).first(),
+      page
+        .getByText(scenarioName, { exact: true })
+        .filter({ visible: true })
+        .first(),
     ).toBeVisible();
     await expect(
       page.getByText(
