@@ -133,10 +133,10 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
           toast({ title: "Couldn't compare scenarios", description: result.message, variant: "destructive" });
           return;
         }
-        // Keep cookie preparation and navigation as distinct transitions. A
-        // Server Action redirect nested in this pending App Router transition
-        // could prepare the cookie yet leave the workspace URL uncommitted.
-        router.push("/dashboard/compare");
+        // Use a document navigation after the HttpOnly cookie is committed.
+        // Keeping another App Router navigation inside this pending transition
+        // can leave it waiting indefinitely even after the route is fetched.
+        window.location.assign("/dashboard/compare");
       } catch (err) {
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, stale-deploy Server Action). Without this the Compare

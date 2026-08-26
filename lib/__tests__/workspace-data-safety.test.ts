@@ -86,8 +86,9 @@ describe("saved workspace data safety", () => {
     expect(compareAction).toContain("return { ok: true }");
     expect(compareAction).not.toContain("redirect(");
     expect(compareHandler).toContain("if (!result.ok)");
-    expect(compareHandler).toContain('router.push("/dashboard/compare")');
-    expect(compareHandler.indexOf('router.push("/dashboard/compare")')).toBeGreaterThan(
+    expect(compareHandler).toContain('window.location.assign("/dashboard/compare")');
+    expect(compareHandler).not.toContain('router.push("/dashboard/compare")');
+    expect(compareHandler.indexOf('window.location.assign("/dashboard/compare")')).toBeGreaterThan(
       compareHandler.indexOf("if (!result.ok)")
     );
   });
