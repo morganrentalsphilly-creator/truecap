@@ -130,7 +130,10 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
   const address = `E2E Power ${runKey} Ave, Philadelphia, PA 19140`;
   const scenarioName = `E2E downside ${runKey}`;
   const scenarioNote = `Verify roof scope for ${runKey}.`;
+  const queuedScenarioNote = `Confirm sewer scope for ${runKey}.`;
   let baseDealId: string | null = null;
+  let notesRoutePattern: string | null = null;
+  const notesSaveGate = { release: null as (() => void) | null };
 
   try {
     await page.setViewportSize({ width: 390, height: 844 });
@@ -221,8 +224,49 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
       exact: true,
     });
     await expect(notes).toBeEditable({ timeout: 20_000 });
+
+    notesRoutePattern = `**${scenarioPath}`;
+    const firstNotesSaveGate = new Promise<void>((resolve) => {
+      notesSaveGate.release = resolve;
+    });
+    let firstNotesSaveDelayed = false;
+    await page.route(notesRoutePattern, async (route) => {
+      const request = route.request();
+      if (
+        !firstNotesSaveDelayed &&
+        request.method() === "POST" &&
+        request.postData()?.includes(scenarioNote)
+      ) {
+        firstNotesSaveDelayed = true;
+        await firstNotesSaveGate;
+      }
+      await route.continue();
+    });
+
+    const firstNotesSaveRequest = page.waitForRequest(
+      (request) =>
+        new URL(request.url()).pathname === scenarioPath &&
+        request.method() === "POST" &&
+        Boolean(request.postData()?.includes(scenarioNote)),
+      { timeout: 20_000 },
+    );
     await notes.fill(scenarioNote);
     await notes.blur();
+    await firstNotesSaveRequest;
+    await expect(page.getByText("Saving…", { exact: true })).toBeVisible();
+
+    const queuedNotesSaveRequest = page.waitForRequest(
+      (request) =>
+        new URL(request.url()).pathname === scenarioPath &&
+        request.method() === "POST" &&
+        Boolean(request.postData()?.includes(queuedScenarioNote)),
+      { timeout: 20_000 },
+    );
+    await notes.fill(queuedScenarioNote);
+    await notes.blur();
+    notesSaveGate.release?.();
+    notesSaveGate.release = null;
+    await queuedNotesSaveRequest;
     await expect(page.getByText("Saved just now", { exact: true })).toBeVisible(
       {
         timeout: 20_000,
@@ -231,7 +275,9 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
     await page.reload({ waitUntil: "domcontentloaded" });
     await expect(
       page.getByRole("textbox", { name: "Deal notes", exact: true }),
-    ).toHaveValue(scenarioNote, { timeout: 20_000 });
+    ).toHaveValue(queuedScenarioNote, { timeout: 20_000 });
+    await page.unroute(notesRoutePattern);
+    notesRoutePattern = null;
 
     await page
       .getByRole("button", { name: "Compare scenarios", exact: true })
@@ -249,9 +295,7 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
         .first(),
     ).toBeVisible();
     await expect(
-      page.getByText(
-        /Tied row values share the highlight; no hidden tie-breaker/,
-      ),
+      page.getByText(/Tied values share the highlight; no hidden tie-breaker/),
     ).toBeVisible();
     await expect(
       page.getByText(/Near-term lead count uses exactly four/),
@@ -278,6 +322,10 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
       timeout: 20_000,
     });
   } finally {
+    notesSaveGate.release?.();
+    if (notesRoutePattern) {
+      await page.unroute(notesRoutePattern).catch(() => undefined);
+    }
     if (baseDealId) {
       await deleteRegressionDealsByAddress(page, address);
     }

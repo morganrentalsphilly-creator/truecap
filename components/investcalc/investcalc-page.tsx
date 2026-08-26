@@ -120,6 +120,7 @@ import {
   userDecisionFromPipelineStage,
 } from "@/lib/decision-contract";
 import type { ReportMode } from "@/lib/pdf-export-constants";
+import { cacheSavedAnalysisPdfExport } from "@/lib/pdf/saved-analysis-cache";
 import type { PropertyEnrichment } from "@/lib/property-enrichment/rentcast";
 import { selectUnderwritingEnrichment } from "@/lib/property-enrichment/underwriting-adoption";
 import { addDealToCompareAction } from "@/app/actions/compare";
@@ -4796,22 +4797,22 @@ export function InvestCalcPage({
           try {
             const response = await fetch(savedAuthority.pdfUrl);
             if (!response.ok) throw new Error("Cached report unavailable");
-            const blobUrl = URL.createObjectURL(await response.blob());
-            const link = document.createElement("a");
-            link.href = blobUrl;
-            link.download = "Investment-Analysis-Report.pdf";
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            URL.revokeObjectURL(blobUrl);
+            const { downloadPdfBlob } = await import("@/lib/pdf/download");
+            downloadPdfBlob(
+              await response.blob(),
+              "Investment-Analysis-Report.pdf"
+            );
           } catch {
-            const link = document.createElement("a");
-            link.href = savedAuthority.pdfUrl;
-            link.target = "_blank";
-            link.rel = "noopener noreferrer";
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
+            // Fetch completed after the original click gesture, so a new tab
+            // is commonly popup-blocked. Same-tab navigation is the reliable
+            // recovery path and matches My Deals.
+            toast({
+              title: "Opening saved PDF",
+              description:
+                "The direct download was unavailable, so the report is opening in this tab.",
+            });
+            window.location.assign(savedAuthority.pdfUrl);
+            return;
           }
           toast({
             title: "PDF downloaded",
@@ -4901,6 +4902,20 @@ export function InvestCalcPage({
       }
 
       downloadPdfFromBase64(pdfResult.pdfBase64, pdfResult.filename);
+      // The saved-deal analyzer and My Deals must converge on the same
+      // retained-report path. Only the personal report is cacheable: the row
+      // currently stores one PDF object, while lender/partner/agent modes have
+      // deliberately different presentation and already bypass that cache.
+      if (savedExport && mode === "personal") {
+        void cacheSavedAnalysisPdfExport({
+          analysisId: savedExport.id,
+          renderFingerprint: savedExport.renderFingerprint,
+          pdfBase64: pdfResult.pdfBase64,
+          renderedWithBranding: pdfResult.hasBranding,
+          renderedWithBuyBoxVerdict: pdfResult.hasBuyBoxVerdict,
+          buyBoxStateResolved: pdfResult.buyBoxStateResolved,
+        });
+      }
       const brandingConfig = pdfResult.hasBranding ? {} : null;
       // Keep the browser/deal-bound claim in same-tab sessionStorage after
       // generation. A synthetic download click cannot prove that the browser

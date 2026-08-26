@@ -8,18 +8,21 @@
  * An <a download> click is used rather than window.open: browsers block a
  * popup opened after an await because the user-gesture context is gone by
  * then, whereas a synthesized anchor click is not treated as a popup. The
- * object URL is revoked on the next tick — revoking it immediately can cancel
- * the download in Safari before it starts.
+ * object URL is revoked after a short delay — revoking it immediately can
+ * cancel the download in Safari before it starts.
  */
 
-export function downloadPdfFromBase64(base64: string, filename: string): void {
+const OBJECT_URL_REVOCATION_DELAY_MS = 1000;
+
+/**
+ * Download an already-fetched PDF without racing Safari's async hand-off to
+ * its download manager. Cached reports use this path; generated reports call
+ * it through downloadPdfFromBase64 below.
+ */
+export function downloadPdfBlob(blob: Blob, filename: string): void {
   if (typeof document === "undefined") return;
 
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
-
-  const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
+  const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
   anchor.download = filename;
@@ -28,5 +31,15 @@ export function downloadPdfFromBase64(base64: string, filename: string): void {
   document.body.appendChild(anchor);
   anchor.click();
   anchor.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  setTimeout(() => URL.revokeObjectURL(url), OBJECT_URL_REVOCATION_DELAY_MS);
+}
+
+export function downloadPdfFromBase64(base64: string, filename: string): void {
+  if (typeof document === "undefined") return;
+
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+
+  downloadPdfBlob(new Blob([bytes], { type: "application/pdf" }), filename);
 }

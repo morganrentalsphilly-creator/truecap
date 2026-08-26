@@ -18,7 +18,7 @@
  * Defensive: gracefully handles the case where the DB migration hasn't
  * been applied yet - shows a quiet inline notice instead of crashing.
  */
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as Sentry from "@sentry/nextjs";
 import { Loader2, NotebookPen } from "lucide-react";
 import {
@@ -27,6 +27,11 @@ import {
 } from "@/app/actions/saved-analyses";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import {
+  getQueuedDealNotesSave,
+  isCurrentDealNotesSave,
+  type QueuedDealNotesSave,
+} from "@/lib/deal-notes-save-lifecycle";
 
 const NOTES_MAX = 10_000;
 
@@ -42,8 +47,7 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [migrationPending, setMigrationPending] = useState(false);
-  const [isPending, startTransition] = useTransition();
-  const [lastSavedNotes, setLastSavedNotes] = useState<string>("");
+  const [isSaving, setIsSaving] = useState(false);
   const [revision, setRevision] = useState<number | null>(null);
   const [conflict, setConflict] = useState<NotesConflict | null>(null);
   const [recoverableDraft, setRecoverableDraft] = useState<string | null>(null);
@@ -51,7 +55,10 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
     "idle" | "dirty" | "saving" | "saved" | "error" | "conflict"
   >("idle");
   const notesRef = useRef("");
+  const lastSavedNotesRef = useRef("");
   const savedDealIdRef = useRef(savedDealId);
+  const saveRequestRef = useRef<symbol | null>(null);
+  const queuedSaveRequestedRef = useRef(false);
 
   useEffect(() => {
     savedDealIdRef.current = savedDealId;
@@ -64,6 +71,11 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
     setLoadError(null);
     setMigrationPending(false);
     setSaveStatus("idle");
+    setIsSaving(false);
+    // Invalidate an older deal's request without letting its eventual
+    // completion clear a newer deal's save lifecycle.
+    saveRequestRef.current = null;
+    queuedSaveRequestedRef.current = false;
     setRevision(null);
     setConflict(null);
     setRecoverableDraft(null);
@@ -75,8 +87,8 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
         if (result.ok) {
           const stored = result.notes ?? "";
           notesRef.current = stored;
+          lastSavedNotesRef.current = stored;
           setNotes(stored);
-          setLastSavedNotes(stored);
           setRevision(result.revision);
         } else if (result.code === "MIGRATION_PENDING") {
           setMigrationPending(true);
@@ -99,18 +111,25 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
 
   const persistNotes = (
     revisionOverride?: number,
-    allowConflictResolution = false
+    allowConflictResolution = false,
+    notesOverride?: string
   ) => {
-    if (
-      migrationPending ||
-      loadError ||
-      isPending ||
-      (conflict && !allowConflictResolution)
-    ) {
+    if (migrationPending || loadError) {
       return;
     }
-    const currentNotes = notesRef.current;
-    if (currentNotes === lastSavedNotes) {
+    if (saveRequestRef.current !== null) {
+      // A blur can happen while the prior save is still in flight. Record the
+      // intent instead of issuing an overlapping write; the owner request
+      // compares its submitted snapshot with the latest ref and immediately
+      // chains the newest draft using the revision returned by the server.
+      queuedSaveRequestedRef.current = true;
+      return;
+    }
+    if (conflict && !allowConflictResolution) {
+      return;
+    }
+    const currentNotes = notesOverride ?? notesRef.current;
+    if (currentNotes === lastSavedNotesRef.current) {
       if (allowConflictResolution) setConflict(null);
       setSaveStatus("saved");
       return;
@@ -128,17 +147,30 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
     // "saved" when it actually hasn't been touched yet.
     const dealIdAtSubmit = savedDealId;
     const notesAtSubmit = currentNotes;
+    const requestToken = Symbol("deal-notes-save");
+    saveRequestRef.current = requestToken;
+    queuedSaveRequestedRef.current = false;
+    setIsSaving(true);
     setSaveStatus("saving");
-    startTransition(async () => {
+    void (async () => {
+      let queuedSave: QueuedDealNotesSave | null = null;
+      const requestStillOwnsDeal = () =>
+        isCurrentDealNotesSave({
+          submittedDealId: dealIdAtSubmit,
+          currentDealId: savedDealIdRef.current,
+          requestToken,
+          currentRequestToken: saveRequestRef.current,
+        });
       try {
         const result = await updateSavedDealNotesAction(
           dealIdAtSubmit,
           notesAtSubmit,
           revisionAtSubmit
         );
-        if (dealIdAtSubmit !== savedDealIdRef.current) {
+        if (!requestStillOwnsDeal()) {
           // User switched deals while this save was in flight - its
-          // result is no longer relevant. Discard silently.
+          // result is no longer relevant. The request token also closes the
+          // A → B → A case, where the id alone would look current again.
           return;
         }
         if (!result.ok) {
@@ -150,11 +182,11 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
             const fresh = await getSavedDealNotesAction(dealIdAtSubmit).catch(
               () => null
             );
-            if (dealIdAtSubmit !== savedDealIdRef.current) return;
+            if (!requestStillOwnsDeal()) return;
             if (fresh?.ok) {
               const latestNotes = fresh.notes ?? "";
               setRevision(fresh.revision);
-              setLastSavedNotes(latestNotes);
+              lastSavedNotesRef.current = latestNotes;
               setConflict({
                 latestNotes,
                 latestRevision: fresh.revision,
@@ -179,8 +211,19 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
         }
         setRevision(result.revision);
         setConflict(null);
-        setLastSavedNotes(notesAtSubmit);
-        setSaveStatus(notesRef.current === notesAtSubmit ? "saved" : "dirty");
+        lastSavedNotesRef.current = notesAtSubmit;
+        queuedSave = getQueuedDealNotesSave({
+          wasRequested: queuedSaveRequestedRef.current,
+          submittedNotes: notesAtSubmit,
+          currentNotes: notesRef.current,
+          returnedRevision: result.revision,
+        });
+        if (!queuedSave) {
+          queuedSaveRequestedRef.current = false;
+        }
+        setSaveStatus(
+          notesRef.current === notesAtSubmit ? "saved" : "dirty"
+        );
       } catch (err) {
         // The action REJECTED (network blip, cold-start 500, stale-deploy
         // Server Action) rather than returning {ok:false}. Without this the
@@ -188,16 +231,40 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
         // just falls back to "Auto-saves" as if nothing happened. Tell the
         // user it's retryable — the typed text is untouched, so re-blurring
         // retries. Same stale-deal guard as the success path.
+        if (!requestStillOwnsDeal()) return;
         Sentry.captureException(err, { tags: { feature: "deal-notes" } });
-        if (dealIdAtSubmit !== savedDealIdRef.current) return;
         setSaveStatus("error");
         toast({
           title: "Could not save notes",
           description: "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
+      } finally {
+        // Only the request that still owns the lifecycle may clear it. A deal
+        // change invalidates this token, and a later save installs a new one.
+        if (saveRequestRef.current === requestToken) {
+          saveRequestRef.current = null;
+          if (dealIdAtSubmit === savedDealIdRef.current) {
+            setIsSaving(false);
+          }
+        }
       }
-    });
+      if (
+        queuedSave &&
+        dealIdAtSubmit === savedDealIdRef.current &&
+        saveRequestRef.current === null
+      ) {
+        // Serialize the newest draft behind the completed write. Passing the
+        // returned revision makes this a safe compare-and-swap rather than an
+        // overlapping last-write-wins update.
+        queuedSaveRequestedRef.current = false;
+        persistNotes(
+          queuedSave.expectedRevision,
+          true,
+          queuedSave.notes
+        );
+      }
+    })();
   };
 
   const persistOnBlur = () => persistNotes();
@@ -209,8 +276,8 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
       localDraft === conflict.latestNotes ? null : localDraft
     );
     notesRef.current = conflict.latestNotes;
+    lastSavedNotesRef.current = conflict.latestNotes;
     setNotes(conflict.latestNotes);
-    setLastSavedNotes(conflict.latestNotes);
     setRevision(conflict.latestRevision);
     setConflict(null);
     setSaveStatus("saved");
@@ -221,7 +288,9 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
     notesRef.current = recoverableDraft;
     setNotes(recoverableDraft);
     setRecoverableDraft(null);
-    setSaveStatus(recoverableDraft === lastSavedNotes ? "saved" : "dirty");
+    setSaveStatus(
+      recoverableDraft === lastSavedNotesRef.current ? "saved" : "dirty"
+    );
   };
 
   // Render nothing while we wait for the first fetch - avoids a flash
@@ -281,7 +350,7 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
           </h3>
         </div>
         <div role="status" aria-live="polite" className="flex items-center gap-2 text-[11px] text-muted-foreground">
-          {isPending || saveStatus === "saving" ? (
+          {isSaving || saveStatus === "saving" ? (
             <span className="inline-flex items-center gap-1">
               <Loader2 className="size-3 animate-spin" /> Saving…
             </span>
@@ -329,7 +398,7 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
               variant="outline"
               className="min-h-11"
               onClick={loadLatestNotes}
-              disabled={isPending}
+              disabled={isSaving}
             >
               Load latest
             </Button>
@@ -340,7 +409,7 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
               onClick={() =>
                 persistNotes(conflict.latestRevision, true)
               }
-              disabled={isPending}
+              disabled={isSaving}
             >
               Save my version
             </Button>
@@ -378,7 +447,7 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
           setSaveStatus(
             conflict
               ? "conflict"
-              : clipped === lastSavedNotes
+              : clipped === lastSavedNotesRef.current
                 ? "saved"
                 : "dirty"
           );

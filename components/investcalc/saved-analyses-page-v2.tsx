@@ -54,7 +54,6 @@ import {
 import { startCompareAction } from "@/app/actions/compare";
 import {
   bulkUpdateSavedDealsAction,
-  completeSavedAnalysisPdfExportAction,
   getSavedAnalysisPdfExportAction,
   updateSavedDealLifecycleStateAction,
   updateSavedDealStageAction,
@@ -86,12 +85,7 @@ import {
   type DealScoreBreakdown,
 } from "@/lib/deal-score";
 import type { ReportData } from "@/lib/pdf-generator";
-import { createBrowserSupabaseClient } from "@/lib/supabase/client";
-import {
-  ANALYSIS_PDF_BUCKET,
-  buildAnalysisPdfObjectPath,
-  PDF_CACHE_VERSION,
-} from "@/lib/pdf-export-constants";
+import { cacheSavedAnalysisPdfExport } from "@/lib/pdf/saved-analysis-cache";
 import {
   buildExitScenarios,
   resolveExitScenarioRates,
@@ -2181,14 +2175,8 @@ export function SavedAnalysesPage({
             const cacheResp = await fetch(exportResult.pdfUrl);
             if (!cacheResp.ok) throw new Error("Fetch failed");
             const cacheBlob = await cacheResp.blob();
-            const blobUrl = URL.createObjectURL(cacheBlob);
-            const a = document.createElement("a");
-            a.href = blobUrl;
-            a.download = "Investment-Analysis-Report.pdf";
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            URL.revokeObjectURL(blobUrl);
+            const { downloadPdfBlob } = await import("@/lib/pdf/download");
+            downloadPdfBlob(cacheBlob, "Investment-Analysis-Report.pdf");
             toast({
               title: "PDF downloaded",
               description: "Your saved report was downloaded.",
@@ -2381,8 +2369,6 @@ export function SavedAnalysesPage({
         // gesture had expired and the browser silently blocked it, so Export
         // PDF appeared to do nothing. A download is never treated as a popup.
         downloadPdfFromBase64(pdfResult.pdfBase64, pdfResult.filename);
-        const pdfBytes = Uint8Array.from(atob(pdfResult.pdfBase64), (c) => c.charCodeAt(0));
-        const pdfBlob = new Blob([pdfBytes], { type: "application/pdf" });
 
         // Show a quick success toast so the user knows the export
         // worked even if their browser silently downloaded the file.
@@ -2399,61 +2385,14 @@ export function SavedAnalysesPage({
         // dedicated tag so systemic failures (RLS regression, quota,
         // bucket misconfig) are visible in the dashboard without
         // surfacing as errors to the user.
-        void (async () => {
-          try {
-            const supabase = createBrowserSupabaseClient();
-            const {
-              data: { user },
-            } = await supabase.auth.getUser();
-            if (!user) return;
-            // Path embeds both the composite cache version and the server-issued
-            // fingerprint of the exact saved snapshots used above. An engine
-            // bump OR a target/input edit therefore writes a different object;
-            // the completion action rechecks the fingerprint + row version
-            // before it records that object as current.
-            const filePath = buildAnalysisPdfObjectPath(
-              user.id,
-              exportResult.id,
-              PDF_CACHE_VERSION,
-              exportResult.renderFingerprint
-            );
-            const { error: uploadError } = await supabase.storage
-              .from(ANALYSIS_PDF_BUCKET)
-              .upload(filePath, pdfBlob, {
-                contentType: "application/pdf",
-                upsert: true,
-              });
-            if (uploadError) {
-              Sentry.captureMessage("pdf-cache-write upload failed", {
-                level: "warning",
-                tags: { feature: "pdf-cache-write" },
-                extra: { message: uploadError.message },
-              });
-              return;
-            }
-            // No getPublicUrl: the bucket is private (migration
-            // 20260802120000). The server records the object path and mints a
-            // short-lived signed URL at read time.
-            const completeResult = await completeSavedAnalysisPdfExportAction(
-              exportResult.id,
-              exportResult.renderFingerprint,
-              pdfResult.hasBranding,
-              pdfResult.hasBuyBoxVerdict,
-              pdfResult.buyBoxStateResolved
-            );
-            if (!completeResult.ok && completeResult.code !== "STALE_EXPORT") {
-              Sentry.captureMessage("pdf-cache-write complete action failed", {
-                level: "warning",
-                tags: { feature: "pdf-cache-write" },
-                extra: { code: completeResult.code, message: completeResult.message },
-              });
-            }
-          } catch (err) {
-            Sentry.captureException(err, {
-              tags: { feature: "pdf-cache-write" },
-            });
-          }
-        })();
+        void cacheSavedAnalysisPdfExport({
+          analysisId: exportResult.id,
+          renderFingerprint: exportResult.renderFingerprint,
+          pdfBase64: pdfResult.pdfBase64,
+          renderedWithBranding: pdfResult.hasBranding,
+          renderedWithBuyBoxVerdict: pdfResult.hasBuyBoxVerdict,
+          buyBoxStateResolved: pdfResult.buyBoxStateResolved,
+        });
       } catch (err) {
         // Top-level catch - any error in the regenerate path (parsing,
         // generation, etc.) surfaces a toast AND captures to Sentry so

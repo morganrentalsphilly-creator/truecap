@@ -50,6 +50,8 @@ describe("My Deals PDF target continuity", () => {
   it("binds upload and completion to the same server-issued render fingerprint", () => {
     const action = read("app/actions/saved-analyses.ts");
     const page = read("components/investcalc/saved-analyses-page-v2.tsx");
+    const analyzer = read("components/investcalc/investcalc-page.tsx");
+    const cacheWriter = read("lib/pdf/saved-analysis-cache.ts");
     const completionStart = action.indexOf(
       "export async function completeSavedAnalysisPdfExportAction("
     );
@@ -69,8 +71,20 @@ describe("My Deals PDF target continuity", () => {
     expect(page).toContain("reportData.comps = exportResult.reportComps");
     expect(page).not.toContain("getSavedDealCompsAction(id)");
     expect(page).toContain("exportResult.renderFingerprint");
+    expect(page).toContain("void cacheSavedAnalysisPdfExport({");
+    expect(analyzer).toContain("if (savedExport && mode === \"personal\")");
+    expect(analyzer).toContain("analysisId: savedExport.id");
+    expect(analyzer).toContain("renderFingerprint: savedExport.renderFingerprint");
+    expect(cacheWriter).toContain(
+      "buildAnalysisPdfObjectPath(\n      user.id,\n      analysisId,\n      PDF_CACHE_VERSION,\n      renderFingerprint"
+    );
+    expect(cacheWriter).toContain(".from(ANALYSIS_PDF_BUCKET)");
+    expect(cacheWriter).toContain(".upload(filePath, pdfBlob");
     expect(page).toContain(
-      "completeSavedAnalysisPdfExportAction(\n              exportResult.id,\n              exportResult.renderFingerprint,\n              pdfResult.hasBranding,\n              pdfResult.hasBuyBoxVerdict,\n              pdfResult.buyBoxStateResolved"
+      "renderFingerprint: exportResult.renderFingerprint"
+    );
+    expect(cacheWriter).toContain(
+      "completeSavedAnalysisPdfExportAction(\n      analysisId,\n      renderFingerprint,\n      renderedWithBranding,\n      renderedWithBuyBoxVerdict,\n      buyBoxStateResolved"
     );
     expect(completion).toContain("isSavedAnalysisPdfRenderFingerprint(renderFingerprint)");
     expect(completion).toContain("savedAnalysisPdfRenderMatches(");
@@ -91,5 +105,33 @@ describe("My Deals PDF target continuity", () => {
 
     expect(page).toContain('{ bypassCache: mode !== "personal" }');
     expect(action).toContain('{ bypassCache: input.mode !== "personal" }');
+  });
+
+  it("uses the Safari-safe PDF download helper for cached reports on both surfaces", () => {
+    const analyzer = read("components/investcalc/investcalc-page.tsx");
+    const savedDeals = read("components/investcalc/saved-analyses-page-v2.tsx");
+    const analyzerCacheStart = analyzer.indexOf(
+      'if (savedAuthority.source === "cache")'
+    );
+    const analyzerCacheEnd = analyzer.indexOf(
+      "savedExport = {",
+      analyzerCacheStart
+    );
+    const analyzerCachePath = analyzer.slice(
+      analyzerCacheStart,
+      analyzerCacheEnd
+    );
+
+    expect(analyzerCacheStart).toBeGreaterThanOrEqual(0);
+    expect(analyzerCacheEnd).toBeGreaterThan(analyzerCacheStart);
+    expect(analyzer).toContain("downloadPdfBlob(");
+    expect(savedDeals).toContain("downloadPdfBlob(cacheBlob");
+    expect(analyzer).not.toContain("URL.revokeObjectURL(blobUrl)");
+    expect(savedDeals).not.toContain("URL.revokeObjectURL(blobUrl)");
+    expect(analyzerCachePath).toContain(
+      "window.location.assign(savedAuthority.pdfUrl)"
+    );
+    expect(analyzerCachePath).toContain('title: "Opening saved PDF"');
+    expect(analyzerCachePath).not.toContain('target = "_blank"');
   });
 });

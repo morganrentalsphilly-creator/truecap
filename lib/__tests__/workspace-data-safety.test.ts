@@ -52,6 +52,26 @@ describe("saved workspace data safety", () => {
     expect(notes).not.toContain("Date.now() - savedTick");
   });
 
+  it("settles note saves with an explicit, deal-scoped request lifecycle", () => {
+    const notes = read("components/investcalc/deal-notes-panel.tsx");
+
+    expect(notes).not.toContain("useTransition");
+    expect(notes).toContain("const saveRequestRef = useRef<symbol | null>(null)");
+    expect(notes).toContain("saveRequestRef.current !== null");
+    expect(notes).toContain("queuedSaveRequestedRef.current = true");
+    expect(notes).toContain('const requestToken = Symbol("deal-notes-save")');
+    expect(notes).toContain("saveRequestRef.current === requestToken");
+    expect(notes).toContain("dealIdAtSubmit === savedDealIdRef.current");
+    expect(notes).toContain("const requestStillOwnsDeal = () =>");
+    expect(notes.match(/if \(!requestStillOwnsDeal\(\)\)/g)?.length).toBeGreaterThanOrEqual(3);
+    expect(notes).toContain("getQueuedDealNotesSave({");
+    expect(notes).toContain("wasRequested: queuedSaveRequestedRef.current");
+    expect(notes).toContain("returnedRevision: result.revision");
+    expect(notes).toContain("queuedSave.expectedRevision");
+    expect(notes).toContain("queuedSave.notes");
+    expect(notes).toContain("setIsSaving(false)");
+  });
+
   it("rejects stale underwriting and note writes with independent revisions", () => {
     const actions = read("app/actions/saved-analyses.ts");
     const notes = read("components/investcalc/deal-notes-panel.tsx");
