@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { internalNextPathOrNull, safeInternalNextPath } from "@/lib/auth-schema";
+import {
+  internalNextPathOrNull,
+  loginPathFor,
+  safeInternalNextPath,
+} from "@/lib/auth-schema";
 
 /**
  * Jul 2026: signUpAction / resendConfirmationAction thread the caller's
@@ -114,6 +118,14 @@ const LEGITIMATE: string[] = [
 ];
 
 describe("internalNextPathOrNull / safeInternalNextPath", () => {
+  it("builds a login URL that preserves an exact safe protected destination", () => {
+    expect(loginPathFor("/dashboard/compare?ids=deal-a,deal-b")).toBe(
+      "/auth/login?next=%2Fdashboard%2Fcompare%3Fids%3Ddeal-a%2Cdeal-b"
+    );
+    expect(loginPathFor("https://evil.example/phish")).toBe(
+      "/auth/login?next=%2F"
+    );
+  });
   describe("rejects every open-redirect payload", () => {
     it.each(ATTACKS)("rejects %s", (_label, payload) => {
       expect(internalNextPathOrNull(payload)).toBeNull();

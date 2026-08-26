@@ -112,9 +112,19 @@ function openUrl(row: TriageRowResult): string {
       purchasePrice: row.input.purchasePrice,
       monthlyRent: row.input.monthlyRent,
       bedrooms: row.input.bedrooms,
+      interestRate: row.assumptionContext?.interestRatePct,
+      propertyTaxPct: row.assumptionContext?.propertyTaxPct,
     },
     { utmSource: "batch-triage" }
   );
+}
+
+function rowAssumptionLabel(row: TriageRowResult): string {
+  const context = row.assumptionContext;
+  if (!context) return "Legacy screen — re-screen to verify rate and tax";
+  const rateSource = context.rateSource === "fred" ? "FRED" : "default";
+  const taxSource = context.taxSource === "state-static" ? `${context.state ?? "state"} data` : "default";
+  return `${context.interestRatePct.toFixed(2)}% rate (${rateSource}) · ${context.propertyTaxPct.toFixed(2)}% tax (${taxSource})`;
 }
 
 type EditablePreviewField = Exclude<TriagePreviewField, "row">;
@@ -364,6 +374,11 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
     { id: "cashFlow", label: "Cash flow" },
     ...(result?.buyBoxActive ? ([{ id: "fit" as const, label: "Buy-box fit" }]) : []),
   ];
+  const resultContext = result?.rows.find((row) => row.assumptionContext?.screenedAt)?.assumptionContext;
+  const screenedAtMs = resultContext?.screenedAt ? Date.parse(resultContext.screenedAt) : NaN;
+  const resultIsStale = Number.isFinite(screenedAtMs) && Date.now() - screenedAtMs > 6 * 60 * 60 * 1000;
+  const fallbackRows =
+    result?.rows.filter((row) => row.assumptionContext?.enrichmentStatus !== "live").length ?? 0;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
@@ -375,8 +390,8 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
         <p className="mt-1 text-sm text-muted-foreground">
           Paste up to {MAX_TRIAGE_ROWS} listings — one per line, columns{" "}
           <span className="font-semibold text-foreground">Address · Price · Rent · Beds</span>{" "}
-          (tab, pipe, or comma separated). We underwrite each on today&apos;s rate + your
-          state&apos;s tax and rank the survivors
+          (tab, pipe, or comma separated). We use the current FRED rate and state tax data when available,
+          clearly label defaults, and rank the survivors
           {result?.buyBoxActive ? " against your buy box" : ""}.
         </p>
       </div>
@@ -553,6 +568,40 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
             </div>
           </div>
 
+          <div
+            className={cn(
+              "mt-3 flex flex-col gap-2 rounded-xl border p-3 text-xs sm:flex-row sm:items-center sm:justify-between",
+              fallbackRows > 0 || resultIsStale
+                ? "border-warning/35 bg-warning/10"
+                : "border-border bg-muted/30"
+            )}
+          >
+            <div>
+              <p className="font-semibold text-foreground">
+                {resultContext?.screenedAt
+                  ? `Screened ${new Date(resultContext.screenedAt).toLocaleString()}`
+                  : "Screening assumptions need a refresh"}
+              </p>
+              <p className="mt-0.5 text-muted-foreground">
+                Exact rate and tax assumptions appear on each row and carry into the full analyzer.
+                {fallbackRows > 0
+                  ? ` ${fallbackRows} ${fallbackRows === 1 ? "row used" : "rows used"} one or more clearly labeled defaults.`
+                  : ""}
+                {resultIsStale ? " Rates may have changed since this saved screen." : ""}
+              </p>
+            </div>
+            {resultIsStale || !resultContext?.screenedAt ? (
+              <button
+                type="button"
+                onClick={screen}
+                disabled={pending || !previewRows}
+                className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl border border-border bg-background px-4 font-semibold text-foreground disabled:opacity-60"
+              >
+                Re-screen with current assumptions
+              </button>
+            ) : null}
+          </div>
+
           {rows.length === 0 ? (
             <p className="mt-6 rounded-xl border border-dashed border-border bg-card p-6 text-center text-sm text-muted-foreground">
               {passersOnly ? "None of these meet your buy box yet." : "Nothing to show."}
@@ -585,6 +634,9 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
                           <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
                             <span>{money(row.input.purchasePrice)}</span>
                             <BuyBoxFitBadge fit={row.buyBoxFit ?? undefined} />
+                          </div>
+                          <div className={cn("mt-1 text-[10px] leading-snug", row.assumptionContext?.enrichmentStatus === "live" ? "text-muted-foreground" : "text-warning-foreground")}>
+                            {rowAssumptionLabel(row)}
                           </div>
                         </td>
                         <td className="px-3 py-3">
@@ -643,6 +695,9 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
                       <div className="min-w-0">
                         <div className="truncate font-semibold text-foreground" title={row.input.address}>{row.input.address}</div>
                         <div className="mt-0.5 text-xs text-muted-foreground">{money(row.input.purchasePrice)}</div>
+                        <div className={cn("mt-1 text-[10px] leading-snug", row.assumptionContext?.enrichmentStatus === "live" ? "text-muted-foreground" : "text-warning-foreground")}>
+                          {rowAssumptionLabel(row)}
+                        </div>
                       </div>
                       {row.ok ? (
                         <div className="flex shrink-0 flex-col items-end gap-1">

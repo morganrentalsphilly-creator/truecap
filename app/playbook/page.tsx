@@ -131,7 +131,7 @@ export default function PlaybookPage() {
     <>
       <Header initialUser={null} initialEntitlements={null} />
       <ScrollDepthTracker />
-      <main className="bg-background">
+      <main id="main" className="bg-background">
         <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-[var(--brand-blue-light)] via-background to-background">
           <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6 sm:py-20">
             <p className="text-[11px] font-bold uppercase tracking-widest text-primary">

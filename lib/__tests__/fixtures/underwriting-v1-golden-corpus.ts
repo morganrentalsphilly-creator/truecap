@@ -45,7 +45,7 @@ const BASE_V1_INPUT: InvestmentFormValues = {
 };
 
 export type UnderwritingV1GoldenExpected = {
-  methodologyVersion: "1.0";
+  methodologyVersion: "1.1";
   monthlyRentalIncome: number;
   propertyTax: number;
   insurance: number;
@@ -82,7 +82,7 @@ export const UNDERWRITING_V1_GOLDEN_CORPUS: UnderwritingV1GoldenCase[] = [
     rationale: "Conventional 20%-down single-family baseline.",
     values: { ...BASE_V1_INPUT },
     expected: {
-      methodologyVersion: "1.0",
+      methodologyVersion: "1.1",
       monthlyRentalIncome: 2_600,
       propertyTax: 229,
       insurance: 104,
@@ -123,7 +123,7 @@ export const UNDERWRITING_V1_GOLDEN_CORPUS: UnderwritingV1GoldenCase[] = [
       insurancePct: undefined,
     },
     expected: {
-      methodologyVersion: "1.0",
+      methodologyVersion: "1.1",
       monthlyRentalIncome: 3_000,
       propertyTax: 350,
       insurance: 180,
@@ -158,7 +158,7 @@ export const UNDERWRITING_V1_GOLDEN_CORPUS: UnderwritingV1GoldenCase[] = [
       loanTermYears: 15,
     },
     expected: {
-      methodologyVersion: "1.0",
+      methodologyVersion: "1.1",
       monthlyRentalIncome: 1_800,
       propertyTax: 165,
       insurance: 75,
@@ -195,7 +195,7 @@ export const UNDERWRITING_V1_GOLDEN_CORPUS: UnderwritingV1GoldenCase[] = [
       pmiNoCancel: true,
     },
     expected: {
-      methodologyVersion: "1.0",
+      methodologyVersion: "1.1",
       monthlyRentalIncome: 3_700,
       propertyTax: 321,
       insurance: 146,
@@ -242,7 +242,7 @@ export const UNDERWRITING_V1_GOLDEN_CORPUS: UnderwritingV1GoldenCase[] = [
       insurancePct: undefined,
     },
     expected: {
-      methodologyVersion: "1.0",
+      methodologyVersion: "1.1",
       monthlyRentalIncome: 5_150,
       propertyTax: 650,
       insurance: 350,
@@ -284,7 +284,7 @@ export const UNDERWRITING_V1_GOLDEN_CORPUS: UnderwritingV1GoldenCase[] = [
       pmiNoCancel: true,
     },
     expected: {
-      methodologyVersion: "1.0",
+      methodologyVersion: "1.1",
       monthlyRentalIncome: 1_900,
       propertyTax: 298,
       insurance: 135,
@@ -330,7 +330,7 @@ export const UNDERWRITING_V1_GOLDEN_CORPUS: UnderwritingV1GoldenCase[] = [
       insurancePct: undefined,
     },
     expected: {
-      methodologyVersion: "1.0",
+      methodologyVersion: "1.1",
       monthlyRentalIncome: 4_148.833333333333,
       propertyTax: 500,
       insurance: 260,
@@ -372,7 +372,7 @@ export const UNDERWRITING_V1_GOLDEN_CORPUS: UnderwritingV1GoldenCase[] = [
       utilitiesMonthly: 250,
     },
     expected: {
-      methodologyVersion: "1.0",
+      methodologyVersion: "1.1",
       monthlyRentalIncome: 1_900,
       propertyTax: 458,
       insurance: 208,
@@ -388,7 +388,9 @@ export const UNDERWRITING_V1_GOLDEN_CORPUS: UnderwritingV1GoldenCase[] = [
       totalCashRequired: 65_000,
       taxSavingsMonthly: 1_068,
       afterTaxCF: -2_868,
-      year10CumulativeCashFlow: -474_862,
+      // Projection snapshot v6 stops cancellable PMI in the month the balance
+      // reaches 80% LTV, removing two obsolete $300 charges in year 10.
+      year10CumulativeCashFlow: -474_262,
       year10CumulativeTaxBenefit: 123_986,
       dealScore: 0,
       dscrScore: 0,
@@ -408,7 +410,7 @@ export const UNDERWRITING_V1_GOLDEN_CORPUS: UnderwritingV1GoldenCase[] = [
       rehabBudget: 65_000,
     },
     expected: {
-      methodologyVersion: "1.0",
+      methodologyVersion: "1.1",
       monthlyRentalIncome: 2_100,
       propertyTax: 147,
       insurance: 67,

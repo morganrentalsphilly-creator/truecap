@@ -3,12 +3,14 @@ import { describe, expect, it } from "vitest";
 import { calculateAnalysis } from "@/lib/calc-analysis";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { calculateMaxAllowableOffer, meetsTarget } from "@/lib/max-allowable-offer";
+import { MIN_PURCHASE_PRICE } from "@/lib/investcalc-schema";
 import {
   buildOfferCeilingRangePreview,
   buildOfferCeilingPresentation,
   rankOfferCeilingConstraints,
 } from "@/lib/offer-ceiling";
 import { isAdoptedOfferCeilingTargetSource } from "@/lib/offer-ceiling-contract";
+import { SAMPLE_DEAL_VALUES } from "@/lib/sample-deal";
 
 const values: InvestmentFormValues = {
   propertyType: "single-family",
@@ -116,9 +118,12 @@ describe("Offer Ceiling presentation model", () => {
     expect(preview).not.toBeNull();
     if (!preview) return;
     expect(preview?.increment).toBe(25_000);
+    expect(preview.lower).not.toBeNull();
+    if (preview.lower == null) return;
     expect(preview.lower % 25_000).toBe(0);
     expect(preview.upper % 25_000).toBe(0);
     expect(preview.upper).toBeGreaterThan(preview.lower);
+    expect(preview.downsideFeasible).toBe(true);
   });
 
   it("does not expose a caller-controlled purchase-price cap through the free preview", () => {
@@ -142,10 +147,12 @@ describe("Offer Ceiling presentation model", () => {
       expect(preview).toEqual(withoutCap);
       expect(preview).not.toBeNull();
       if (!preview) continue;
-      expect(preview.lower % 25_000).toBe(0);
+      if (preview.lower != null) {
+        expect(preview.lower % 25_000).toBe(0);
+      }
       expect(preview.upper % 25_000).toBe(0);
       if (maxPurchasePrice % 25_000 !== 0) {
-        expect(preview.lower).not.toBe(maxPurchasePrice);
+        if (preview.lower != null) expect(preview.lower).not.toBe(maxPurchasePrice);
         expect(preview.upper).not.toBe(maxPurchasePrice);
       }
     }
@@ -153,5 +160,17 @@ describe("Offer Ceiling presentation model", () => {
     expect(
       buildOfferCeilingRangePreview(values, { maxPurchasePrice: 200_000 })
     ).toBeNull();
+  });
+
+  it("preserves an infeasible downside and never manufactures a $0 floor", () => {
+    const preview = buildOfferCeilingRangePreview(SAMPLE_DEAL_VALUES, {
+      monthlyCashFlow: 2_191,
+    });
+
+    expect(preview).not.toBeNull();
+    expect(preview?.downsideFeasible).toBe(false);
+    expect(preview?.lower).toBeNull();
+    expect(preview?.upper).toBeGreaterThanOrEqual(MIN_PURCHASE_PRICE);
+    expect(preview?.upper).not.toBe(0);
   });
 });

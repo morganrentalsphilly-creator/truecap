@@ -18,6 +18,7 @@ import {
 } from "@/app/actions/deal-comments";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 function formatWhen(iso: string): string {
   const d = new Date(iso);
@@ -29,28 +30,38 @@ export function DealCommentsPanel({ savedDealId }: { savedDealId: string }) {
   const { toast } = useToast();
   const [comments, setComments] = useState<DealComment[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [migrationPending, setMigrationPending] = useState(false);
   const [draft, setDraft] = useState("");
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [isBusy, startBusy] = useTransition();
 
   useEffect(() => {
     let cancelled = false;
     setLoaded(false);
+    setLoadError(null);
     setMigrationPending(false);
+    setConfirmDeleteId(null);
     void listDealCommentsAction(savedDealId)
       .then((r) => {
         if (cancelled) return;
         if (r.ok) setComments(r.comments);
         else if (r.code === "MIGRATION_PENDING") setMigrationPending(true);
+        else setLoadError(r.message || "We couldn't load this comment log.");
         setLoaded(true);
       })
-      .catch(() => {
-        if (!cancelled) setLoaded(true);
+      .catch((err) => {
+        if (!cancelled) {
+          Sentry.captureException(err, { tags: { feature: "deal-comments-load" } });
+          setLoadError("We couldn't load this comment log. Check your connection and try again.");
+          setLoaded(true);
+        }
       });
     return () => {
       cancelled = true;
     };
-  }, [savedDealId]);
+  }, [loadAttempt, savedDealId]);
 
   const apply = (r: Awaited<ReturnType<typeof listDealCommentsAction>>) => {
     if (r.ok) setComments(r.comments);
@@ -93,7 +104,10 @@ export function DealCommentsPanel({ savedDealId }: { savedDealId: string }) {
     startBusy(async () => {
       try {
         const r = await deleteDealCommentAction(dealAtSubmit, commentId);
-        if (dealAtSubmit === savedDealId) apply(r);
+        if (dealAtSubmit === savedDealId) {
+          if (r.ok) setConfirmDeleteId(null);
+          apply(r);
+        }
       } catch (err) {
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, stale-deploy Server Action). Without this the delete
@@ -112,6 +126,28 @@ export function DealCommentsPanel({ savedDealId }: { savedDealId: string }) {
   };
 
   if (!loaded) return null;
+
+  if (loadError) {
+    return (
+      <section aria-label="Deal comments" className="rounded-2xl border border-destructive/25 bg-destructive/5 p-4">
+        <div role="alert">
+          <p className="text-sm font-semibold text-foreground">Couldn&apos;t load comments</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {loadError} Adding and deleting stay disabled until the saved log is available.
+          </p>
+        </div>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className="mt-3 min-h-11"
+          onClick={() => setLoadAttempt((attempt) => attempt + 1)}
+        >
+          Try again
+        </Button>
+      </section>
+    );
+  }
 
   if (migrationPending) {
     return (
@@ -176,14 +212,49 @@ export function DealCommentsPanel({ savedDealId }: { savedDealId: string }) {
                   {c.authorName ? `${c.authorName} · ` : ""}
                   {formatWhen(c.createdAt)}
                 </span>
-                <button
-                  type="button"
-                  aria-label="Delete comment"
-                  onClick={() => remove(c.id)}
-                  className="shrink-0 text-muted-foreground/40 transition-colors hover:text-destructive focus-visible:text-destructive focus-visible:outline-none"
+                <Popover
+                  open={confirmDeleteId === c.id}
+                  onOpenChange={(open) => setConfirmDeleteId(open ? c.id : null)}
                 >
-                  <X className="size-3.5" />
-                </button>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      aria-label="Delete comment"
+                      disabled={isBusy}
+                      className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-md text-muted-foreground/50 transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+                    >
+                      <X className="size-3.5" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-72">
+                    <p className="text-sm font-semibold text-foreground">Delete this comment?</p>
+                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                      This removes the dated entry permanently. There is no safe undo after it leaves the server.
+                    </p>
+                    <div className="mt-3 flex justify-end gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        className="min-h-11"
+                        disabled={isBusy}
+                        onClick={() => setConfirmDeleteId(null)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="destructive"
+                        className="min-h-11"
+                        disabled={isBusy}
+                        onClick={() => remove(c.id)}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
               <p className="whitespace-pre-wrap text-sm text-foreground">{c.body}</p>
             </li>

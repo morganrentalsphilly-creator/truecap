@@ -1,4 +1,5 @@
 import type { StripeDisplayPriceDetails } from "@/lib/stripe/display-prices";
+import { formatPublicUsd, PUBLIC_PRO_MONTHLY_USD } from "@/lib/public-pricing";
 
 export type SubscriptionDisplayInput = {
   status: string;
@@ -74,7 +75,7 @@ export function buildSubscriptionDisplay(
         `Standard price: ${
           standard && Math.round(standard.unitAmount * 100) !== 2_000
             ? amountPerPeriod(standard)
-            : "$29.99/month"
+            : `${formatPublicUsd(PUBLIC_PRO_MONTHLY_USD)}/month`
         }`,
         "Your rate remains active while this subscription remains active.",
         "Changing plans ends this protected rate.",

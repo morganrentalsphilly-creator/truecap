@@ -53,6 +53,17 @@ describe("canonical first-year results hierarchy", () => {
     expect(dashboard).toContain("onCompareDeals={onCompareDeals}");
   });
 
+  it("puts the complete first-year investment snapshot above secondary actions", () => {
+    const summary = read("components/investcalc/focused-decision-summary.tsx");
+
+    expect(summary).toContain("Cash needed");
+    expect(summary).toContain("Annual NOI");
+    expect(summary).toContain("Cap rate");
+    expect(summary).toContain("Cash-on-cash");
+    expect(summary).toContain("More actions");
+    expect(summary.indexOf("Cash needed")).toBeLessThan(summary.indexOf("More actions"));
+  });
+
   it("gives free users an actionable, honestly gated target-price path", () => {
     const summary = read("components/investcalc/focused-decision-summary.tsx");
 

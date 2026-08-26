@@ -41,6 +41,7 @@ function Delta({ label, before, after }: { label: string; before: string; after:
 export function RateAlertReUnderwriteBanner({
   savedDealId,
   values,
+  underwritingRevision,
   savedRatePct,
   alertRatePct,
   before,
@@ -50,6 +51,8 @@ export function RateAlertReUnderwriteBanner({
   /** Current-engine form values with the SAVED rate — the alert rate is
    *  substituted only when the user explicitly applies it. */
   values: InvestmentFormValues;
+  /** OCC token read with the same saved form snapshot. */
+  underwritingRevision: number;
   savedRatePct: number;
   alertRatePct: number;
   before: RateAlertMetrics;
@@ -62,7 +65,12 @@ export function RateAlertReUnderwriteBanner({
   const handleApply = () => {
     startApplying(async () => {
       try {
-        const result = await saveDealAction({ ...values, interestRate: alertRatePct }, savedDealId);
+        const result = await saveDealAction(
+          { ...values, interestRate: alertRatePct },
+          savedDealId,
+          undefined,
+          { expectedUnderwritingRevision: underwritingRevision }
+        );
         if (!result.ok) {
           toast({
             title: "Could not apply the rate",

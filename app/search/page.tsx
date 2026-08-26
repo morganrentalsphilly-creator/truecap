@@ -55,7 +55,7 @@ const TOOL_PAGES: Array<{ slug: string; title: string; blurb: string }> = [
   { slug: "brrrr-calculator", title: "BRRRR Calculator", blurb: "Buy-Rehab-Rent-Refinance-Repeat math." },
   { slug: "noi-calculator", title: "NOI Calculator", blurb: "Net Operating Income from gross rent + expenses." },
   { slug: "1-percent-rule-calculator", title: "1% Rule Calculator", blurb: "Quick rule-of-thumb screen." },
-  { slug: "mortgage-payment-calculator", title: "Mortgage Payment Calculator", blurb: "Monthly P&I + PMI + taxes." },
+  { slug: "mortgage-payment-calculator", title: "Mortgage Payment Calculator", blurb: "Monthly P&I + tax + homeowner insurance + estimated PMI." },
   { slug: "gross-rent-multiplier-calculator", title: "Gross Rent Multiplier Calculator", blurb: "Price ÷ annual gross rent." },
   { slug: "roi-calculator", title: "ROI Calculator", blurb: "Total ROI across rent + appreciation + amortization." },
   { slug: "vacancy-rate-calculator", title: "Vacancy Rate Calculator", blurb: "Effective income after vacancy." },

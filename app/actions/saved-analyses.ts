@@ -79,9 +79,18 @@ import {
   savedAnalysisPdfRenderMatches,
   type SavedAnalysisPdfRenderSource,
 } from "@/lib/saved-analysis-pdf-render-binding";
+import {
+  INITIAL_SAVED_ANALYSIS_REVISION,
+  parseSavedAnalysisRevision,
+} from "@/lib/saved-analysis-concurrency";
 
 export type SaveDealResult =
-  | { ok: true; id: string; mode: "inserted" | "updated" }
+  | {
+      ok: true;
+      id: string;
+      mode: "inserted" | "updated";
+      underwritingRevision: number;
+    }
   | {
       ok: false;
       code:
@@ -96,6 +105,11 @@ export type SaveDealResult =
         // elsewhere). The caller must detach the id and offer save-as-new —
         // never silently fall through to an insert.
         | "DEAL_DELETED"
+        // The caller's recorded underwriting revision is no longer current.
+        // Never overwrite it silently; reload or save the edits as a scenario.
+        | "STALE_DATA"
+        // Forward-only concurrency migration must be applied before writes.
+        | "MIGRATION_PENDING"
         | "SERVER_ERROR";
       message?: string;
       // DUPLICATE_ADDRESS (insert path): the user's own colliding saved
@@ -107,6 +121,10 @@ export type SaveDealResult =
       // working unchanged.
       existingId?: string;
       existingTitle?: string;
+      /** Revision captured with an identified duplicate. The chooser must
+       * send it back when the user elects to update that row so a later
+       * edit in another tab cannot be overwritten. */
+      existingUnderwritingRevision?: number;
     };
 
 export type GetSavedDealForEditingResult =
@@ -115,6 +133,7 @@ export type GetSavedDealForEditingResult =
       id: string;
       schemaVersion: number;
       methodologyVersion: string | null;
+      underwritingRevision: number;
       pipelineStage: string | null;
       formSnapshot: Record<string, unknown>;
       templateFallback: {
@@ -130,6 +149,7 @@ export type GetSavedDealForEditingResult =
         | "SIGN_IN_REQUIRED"
         | "ENTITLEMENT_REQUIRED"
         | "NOT_FOUND"
+        | "MIGRATION_PENDING"
         | "VALIDATION_ERROR"
         | "SERVER_ERROR";
       message: string;
@@ -237,6 +257,20 @@ function dbString(value: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;
 }
 
+function isMissingSavedAnalysisConcurrencyColumn(error: {
+  code?: string;
+  message?: string;
+}): boolean {
+  const namesConcurrencyColumn =
+    /underwriting_revision|notes_revision/i.test(error.message ?? "");
+  return (
+    namesConcurrencyColumn &&
+    (error.code === "42703" ||
+      error.code === "PGRST204" ||
+      /does not exist|schema cache/i.test(error.message ?? ""))
+  );
+}
+
 function buildEditFormSnapshotFromRow(row: Record<string, unknown>): Record<string, unknown> {
   const rawSnapshot = asRecord(row.form_snapshot) ?? {};
 
@@ -305,21 +339,40 @@ async function findSavedAnalysesByAddress(
   supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
   userId: string,
   address: string
-): Promise<Array<{ id: string; title: string | null }>> {
+): Promise<{
+  rows: Array<{
+    id: string;
+    title: string | null;
+    underwritingRevision: number | null;
+  }>;
+  migrationPending: boolean;
+}> {
   const { data, error } = await supabase
     .from("saved_analyses")
-    .select("id, title, form_address:form_snapshot->>address")
+    .select("id, title, underwriting_revision, form_address:form_snapshot->>address")
     .eq("user_id", userId)
     .is("deleted_at", null)
     // Oldest first so [0] is the original deal when scenarios already exist.
     .order("created_at", { ascending: true });
 
-  if (error || !data) return [];
+  if (error || !data) {
+    return {
+      rows: [],
+      migrationPending: Boolean(error && isMissingSavedAnalysisConcurrencyColumn(error)),
+    };
+  }
 
   const needle = address.trim().toLowerCase();
-  return (data as Array<Record<string, unknown>>)
-    .filter((row) => (dbString(row.form_address) ?? "").trim().toLowerCase() === needle)
-    .map((row) => ({ id: String(row.id), title: dbString(row.title) ?? null }));
+  return {
+    rows: (data as Array<Record<string, unknown>>)
+      .filter((row) => (dbString(row.form_address) ?? "").trim().toLowerCase() === needle)
+      .map((row) => ({
+        id: String(row.id),
+        title: dbString(row.title) ?? null,
+        underwritingRevision: parseSavedAnalysisRevision(row.underwriting_revision),
+      })),
+    migrationPending: false,
+  };
 }
 
 const provenanceFieldSchema = z.object({
@@ -447,6 +500,9 @@ export async function saveDealAction(
      * underwriting snapshot. Null explicitly clears a prior custom target. */
     maxOfferTarget?: unknown;
     maxOfferTargetSource?: unknown;
+    /** Revision returned when this exact saved underwriting was opened or
+     * last updated. Required on every update; inserts omit it. */
+    expectedUnderwritingRevision?: unknown;
   }
 ): Promise<SaveDealResult> {
   const supabase = await createServerSupabaseClient();
@@ -551,6 +607,7 @@ export async function saveDealAction(
     propertyType: sanitizedValues.propertyType,
     purchasePrice: sanitizedValues.purchasePrice,
     score: dealScore.score,
+    scoreMethodologyVersion: dealScore.scoreMethodologyVersion,
     recommendation: dealScore.recommendation,
     riskLevel: dealScore.riskLevel,
     breakdown: dealScore.breakdown,
@@ -686,10 +743,35 @@ export async function saveDealAction(
 
   const candidateExistingId = existingId?.trim();
   if (candidateExistingId) {
+    const expectedRevisionOptionProvided = Boolean(
+      options &&
+        Object.prototype.hasOwnProperty.call(
+          options,
+          "expectedUnderwritingRevision"
+        )
+    );
+    if (!expectedRevisionOptionProvided) {
+      return {
+        ok: false,
+        code: "STALE_DATA",
+        message:
+          "This deal must be reopened before it can be updated safely. Your edits have not overwritten the saved version.",
+      };
+    }
+    const expectedUnderwritingRevision = parseSavedAnalysisRevision(
+      options?.expectedUnderwritingRevision
+    );
+    if (expectedUnderwritingRevision === null) {
+      return {
+        ok: false,
+        code: "VALIDATION_ERROR",
+        message: "Invalid underwriting revision.",
+      };
+    }
     const { data: existing, error: existingErr } = await supabase
       .from("saved_analyses")
       .select(
-        "id, address, title, data_confidence, result_snapshot, financing_profile_id, financing_profile_version, financing_profile_snapshot"
+        "id, address, title, data_confidence, result_snapshot, financing_profile_id, financing_profile_version, financing_profile_snapshot, underwriting_revision"
       )
       .eq("id", candidateExistingId)
       .eq("user_id", user.id)
@@ -697,6 +779,14 @@ export async function saveDealAction(
       .maybeSingle();
 
     if (existingErr) {
+      if (isMissingSavedAnalysisConcurrencyColumn(existingErr)) {
+        return {
+          ok: false,
+          code: "MIGRATION_PENDING",
+          message:
+            "Saved-deal updates are paused until migration 20260825210000_saved_analysis_concurrency_revisions.sql is applied.",
+        };
+      }
       return toServerErrorResult(existingErr, "saved-analyses");
     }
 
@@ -710,6 +800,26 @@ export async function saveDealAction(
         ok: false,
         code: "DEAL_DELETED",
         message: "This saved deal was deleted or archived, so it can't be updated.",
+      };
+    }
+
+    const storedUnderwritingRevision = parseSavedAnalysisRevision(
+      (existing as Record<string, unknown>).underwriting_revision
+    );
+    if (storedUnderwritingRevision === null) {
+      return {
+        ok: false,
+        code: "MIGRATION_PENDING",
+        message:
+          "Saved-deal updates are paused until the concurrency migration is applied.",
+      };
+    }
+    if (storedUnderwritingRevision !== expectedUnderwritingRevision) {
+      return {
+        ok: false,
+        code: "STALE_DATA",
+        message:
+          "This underwriting changed in another tab or device. Reload the latest version or save these edits as a new scenario.",
       };
     }
 
@@ -735,7 +845,7 @@ export async function saveDealAction(
       return {
         ok: false,
         code: "ENTITLEMENT_SAVE",
-        message: "Upgrade required to update saved analyses.",
+        message: "Upgrade required to update deals in My Deals.",
       };
     }
 
@@ -808,13 +918,32 @@ export async function saveDealAction(
         return toServerErrorResult(dupErr, "saved-analyses");
       }
       if (addressTaken === true) {
-        const collision = (await findSavedAnalysesByAddress(supabase, user.id, addressTrimmed))[0];
+        const collisionLookup = await findSavedAnalysesByAddress(
+          supabase,
+          user.id,
+          addressTrimmed
+        );
+        if (collisionLookup.migrationPending) {
+          return {
+            ok: false,
+            code: "MIGRATION_PENDING",
+            message:
+              "Saved-deal updates are paused until the concurrency migration is applied.",
+          };
+        }
+        const collision = collisionLookup.rows[0];
         return {
           ok: false,
           code: "DUPLICATE_ADDRESS",
           message: "You already saved an analysis for this property address.",
           ...(collision
-            ? { existingId: collision.id, existingTitle: collision.title ?? undefined }
+            ? {
+                existingId: collision.id,
+                existingTitle: collision.title ?? undefined,
+                ...(collision.underwritingRevision !== null
+                  ? { existingUnderwritingRevision: collision.underwritingRevision }
+                  : {}),
+              }
             : {}),
         };
       }
@@ -923,15 +1052,67 @@ export async function saveDealAction(
       .update(preservedTitle ? { ...updatePayload, title: preservedTitle } : updatePayload)
       .eq("id", existing.id)
       .eq("user_id", user.id)
+      .eq("underwriting_revision", expectedUnderwritingRevision)
       .is("deleted_at", null)
-      .select("id")
-      .single();
+      .select("id, underwriting_revision")
+      .maybeSingle();
 
     if (error) {
+      if (isMissingSavedAnalysisConcurrencyColumn(error)) {
+        return {
+          ok: false,
+          code: "MIGRATION_PENDING",
+          message:
+            "Saved-deal updates are paused until the concurrency migration is applied.",
+        };
+      }
       return toServerErrorResult(error, "saved-analyses");
     }
 
-    return { ok: true, id: data.id, mode: "updated" };
+    if (!data) {
+      const { data: current, error: currentError } = await supabase
+        .from("saved_analyses")
+        .select("id")
+        .eq("id", existing.id)
+        .eq("user_id", user.id)
+        .is("deleted_at", null)
+        .maybeSingle();
+      if (currentError) {
+        return toServerErrorResult(currentError, "saved-analyses");
+      }
+      if (!current) {
+        return {
+          ok: false,
+          code: "DEAL_DELETED",
+          message:
+            "This saved deal was deleted or archived while you were saving.",
+        };
+      }
+      return {
+        ok: false,
+        code: "STALE_DATA",
+        message:
+          "This underwriting changed while you were saving. Reload the latest version or save these edits as a new scenario.",
+      };
+    }
+
+    const nextUnderwritingRevision = parseSavedAnalysisRevision(
+      (data as Record<string, unknown>).underwriting_revision
+    );
+    if (nextUnderwritingRevision === null) {
+      return {
+        ok: false,
+        code: "SERVER_ERROR",
+        message: "The saved underwriting revision could not be verified.",
+      };
+    }
+
+    return {
+      ok: true,
+      id: String(data.id),
+      mode: "updated",
+      underwritingRevision: nextUnderwritingRevision,
+    };
   }
 
   let insertTitle = title;
@@ -939,9 +1120,21 @@ export async function saveDealAction(
     // Explicit choice from the duplicate dialog: keep both. Number the title
     // off the current count of same-address analyses so dashboard rows stay
     // distinguishable (original = plain address, then Scenario 2, 3, …).
-    const sameAddress = await findSavedAnalysesByAddress(supabase, user.id, addressTrimmed);
-    if (sameAddress.length > 0) {
-      insertTitle = `${title.slice(0, 180)} — Scenario ${sameAddress.length + 1}`;
+    const sameAddressLookup = await findSavedAnalysesByAddress(
+      supabase,
+      user.id,
+      addressTrimmed
+    );
+    if (sameAddressLookup.migrationPending) {
+      return {
+        ok: false,
+        code: "MIGRATION_PENDING",
+        message:
+          "Saving is paused until the saved-analysis concurrency migration is applied.",
+      };
+    }
+    if (sameAddressLookup.rows.length > 0) {
+      insertTitle = `${title.slice(0, 180)} — Scenario ${sameAddressLookup.rows.length + 1}`;
     }
   } else {
     const { data: addressTaken, error: dupErr } = await supabase.rpc("saved_analyses_address_taken", {
@@ -956,13 +1149,32 @@ export async function saveDealAction(
       // (update it / save as scenario) instead of a dead end. If the lookup
       // finds nothing (shouldn't happen - same match as the RPC), degrade to
       // the plain message the old toast showed.
-      const collision = (await findSavedAnalysesByAddress(supabase, user.id, addressTrimmed))[0];
+      const collisionLookup = await findSavedAnalysesByAddress(
+        supabase,
+        user.id,
+        addressTrimmed
+      );
+      if (collisionLookup.migrationPending) {
+        return {
+          ok: false,
+          code: "MIGRATION_PENDING",
+          message:
+            "Saving is paused until the saved-analysis concurrency migration is applied.",
+        };
+      }
+      const collision = collisionLookup.rows[0];
       return {
         ok: false,
         code: "DUPLICATE_ADDRESS",
         message: "You already saved an analysis for this property address.",
         ...(collision
-          ? { existingId: collision.id, existingTitle: collision.title ?? undefined }
+          ? {
+              existingId: collision.id,
+              existingTitle: collision.title ?? undefined,
+              ...(collision.underwritingRevision !== null
+                ? { existingUnderwritingRevision: collision.underwritingRevision }
+                : {}),
+            }
           : {}),
       };
     }
@@ -1019,15 +1231,40 @@ export async function saveDealAction(
       user_id: user.id,
       ...payload,
       title: insertTitle,
+      underwriting_revision: INITIAL_SAVED_ANALYSIS_REVISION,
+      notes_revision: INITIAL_SAVED_ANALYSIS_REVISION,
     })
-    .select("id")
+    .select("id, underwriting_revision")
     .single();
 
   if (error) {
+    if (isMissingSavedAnalysisConcurrencyColumn(error)) {
+      return {
+        ok: false,
+        code: "MIGRATION_PENDING",
+        message:
+          "Saving is paused until migration 20260825210000_saved_analysis_concurrency_revisions.sql is applied.",
+      };
+    }
     return toServerErrorResult(error, "saved-analyses");
   }
 
-  return { ok: true, id: data.id, mode: "inserted" };
+  const insertedRevision = parseSavedAnalysisRevision(
+    (data as Record<string, unknown>).underwriting_revision
+  );
+  if (insertedRevision === null) {
+    return {
+      ok: false,
+      code: "SERVER_ERROR",
+      message: "The saved underwriting revision could not be verified.",
+    };
+  }
+  return {
+    ok: true,
+    id: String(data.id),
+    mode: "inserted",
+    underwritingRevision: insertedRevision,
+  };
 }
 
 export async function getSavedDealForEditingAction(id: string): Promise<GetSavedDealForEditingResult> {
@@ -1040,14 +1277,14 @@ export async function getSavedDealForEditingAction(id: string): Promise<GetSaved
     return {
       ok: false,
       code: "SIGN_IN_REQUIRED",
-      message: "Please sign in to open saved analyses.",
+      message: "Please sign in to open deals from My Deals.",
     };
   }
 
   const { data, error } = await supabase
     .from("saved_analyses")
     .select(
-      "id, schema_version, methodology_version, pipeline_stage, form_snapshot, result_snapshot, financing_profile_id, financing_profile_version, financing_profile_snapshot, property_type, address, purchase_price, year_built, loan_term_years, interest_rate_pct, down_payment_pct, closing_costs_pct, bedrooms, bathrooms, sqft, monthly_rent, property_tax_pct, insurance_input_mode, insurance_pct, insurance_mo, hoa_mo, utilities_mo, maintenance_pct, vacancy_pct, management_pct, capex_pct, building_value_pct, depreciation_years, include_interest_deduction, tax_rate_pct, expense_growth_pct, rent_growth_pct, template_id, appreciation_rate_pct, selling_cost_pct"
+      "id, schema_version, methodology_version, underwriting_revision, pipeline_stage, form_snapshot, result_snapshot, financing_profile_id, financing_profile_version, financing_profile_snapshot, property_type, address, purchase_price, year_built, loan_term_years, interest_rate_pct, down_payment_pct, closing_costs_pct, bedrooms, bathrooms, sqft, monthly_rent, property_tax_pct, insurance_input_mode, insurance_pct, insurance_mo, hoa_mo, utilities_mo, maintenance_pct, vacancy_pct, management_pct, capex_pct, building_value_pct, depreciation_years, include_interest_deduction, tax_rate_pct, expense_growth_pct, rent_growth_pct, template_id, appreciation_rate_pct, selling_cost_pct"
     )
     .eq("id", id.trim())
     .eq("user_id", user.id)
@@ -1055,6 +1292,14 @@ export async function getSavedDealForEditingAction(id: string): Promise<GetSaved
     .maybeSingle();
 
   if (error) {
+    if (isMissingSavedAnalysisConcurrencyColumn(error)) {
+      return {
+        ok: false,
+        code: "MIGRATION_PENDING",
+        message:
+          "Opening saved deals for editing is paused until migration 20260825210000_saved_analysis_concurrency_revisions.sql is applied.",
+      };
+    }
     return toServerErrorResult(error, "saved-analyses");
   }
 
@@ -1071,6 +1316,17 @@ export async function getSavedDealForEditingAction(id: string): Promise<GetSaved
       ok: false,
       code: "VALIDATION_ERROR",
       message: "This underwriting model is not available yet.",
+    };
+  }
+
+  const underwritingRevision = parseSavedAnalysisRevision(
+    (data as Record<string, unknown>).underwriting_revision
+  );
+  if (underwritingRevision === null) {
+    return {
+      ok: false,
+      code: "MIGRATION_PENDING",
+      message: "This saved deal does not have a concurrency revision yet.",
     };
   }
 
@@ -1108,6 +1364,7 @@ export async function getSavedDealForEditingAction(id: string): Promise<GetSaved
     id: String(data.id),
     schemaVersion: Number(data.schema_version ?? 1),
     methodologyVersion: dbString((data as Record<string, unknown>).methodology_version) ?? null,
+    underwritingRevision,
     pipelineStage: dbString((data as Record<string, unknown>).pipeline_stage) ?? null,
     formSnapshot: buildEditFormSnapshotFromRow(data as Record<string, unknown>),
     templateFallback,
@@ -1305,7 +1562,7 @@ export async function getSavedAnalysisPdfExportAction(
     return {
       ok: false,
       code: "SIGN_IN_REQUIRED",
-      message: "Please sign in to export saved analyses.",
+      message: "Please sign in to export deals from My Deals.",
     };
   }
 
@@ -1692,10 +1949,25 @@ export async function completeSavedAnalysisPdfExportAction(
  * yet (i.e. migration 20260524120000_saved_analyses_notes hasn't been
  * applied). Postgres error code 42703 = "undefined column".
  */
+export type UpdateSavedDealNotesResult =
+  | { ok: true; revision: number }
+  | {
+      ok: false;
+      code:
+        | "SIGN_IN_REQUIRED"
+        | "MIGRATION_PENDING"
+        | "NOT_FOUND"
+        | "STALE_DATA"
+        | "SERVER_ERROR"
+        | "VALIDATION_ERROR";
+      message: string;
+    };
+
 export async function updateSavedDealNotesAction(
   id: string,
-  notes: string
-): Promise<{ ok: true } | { ok: false; code: "SIGN_IN_REQUIRED" | "MIGRATION_PENDING" | "NOT_FOUND" | "SERVER_ERROR" | "VALIDATION_ERROR"; message: string }> {
+  notes: string,
+  expectedRevision: unknown
+): Promise<UpdateSavedDealNotesResult> {
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -1708,30 +1980,64 @@ export async function updateSavedDealNotesAction(
   if (!savedId) {
     return { ok: false, code: "VALIDATION_ERROR", message: "Invalid deal id." };
   }
+  const expectedNotesRevision = parseSavedAnalysisRevision(expectedRevision);
+  if (expectedNotesRevision === null) {
+    return { ok: false, code: "VALIDATION_ERROR", message: "Invalid notes revision." };
+  }
   const { data, error } = await supabase
     .from("saved_analyses")
     .update({ notes: trimmed })
     .eq("id", savedId)
     .eq("user_id", user.id)
+    .eq("notes_revision", expectedNotesRevision)
     .is("deleted_at", null)
-    .select("id")
+    .select("id, notes_revision")
     .maybeSingle();
   if (error) {
     // 42703 = undefined_column — migration not yet applied.
-    if (error.code === "42703" || /column .* does not exist/i.test(error.message)) {
+    if (
+      error.code === "42703" ||
+      /column .* does not exist/i.test(error.message)
+    ) {
       return {
         ok: false,
         code: "MIGRATION_PENDING",
         message:
-          "Notes are temporarily disabled — the schema migration hasn't been applied yet. Ask the site admin to apply 20260524120000_saved_analyses_notes.sql.",
+          "Notes are temporarily disabled until migrations 20260524120000_saved_analyses_notes.sql and 20260825210000_saved_analysis_concurrency_revisions.sql are applied.",
       };
     }
     return toServerErrorResult(error, "saved-analyses");
   }
   if (!data) {
-    return { ok: false, code: "NOT_FOUND", message: "Deal not found." };
+    const { data: current, error: currentError } = await supabase
+      .from("saved_analyses")
+      .select("id")
+      .eq("id", savedId)
+      .eq("user_id", user.id)
+      .is("deleted_at", null)
+      .maybeSingle();
+    if (currentError) return toServerErrorResult(currentError, "saved-analyses");
+    if (!current) {
+      return { ok: false, code: "NOT_FOUND", message: "Deal not found." };
+    }
+    return {
+      ok: false,
+      code: "STALE_DATA",
+      message:
+        "These notes changed in another tab or device. Your text is still here; review the latest version before choosing what to save.",
+    };
   }
-  return { ok: true };
+  const revision = parseSavedAnalysisRevision(
+    (data as Record<string, unknown>).notes_revision
+  );
+  if (revision === null) {
+    return {
+      ok: false,
+      code: "SERVER_ERROR",
+      message: "The saved notes revision could not be verified.",
+    };
+  }
+  return { ok: true, revision };
 }
 
 /**
@@ -1740,7 +2046,10 @@ export async function updateSavedDealNotesAction(
  */
 export async function getSavedDealNotesAction(
   id: string
-): Promise<{ ok: true; notes: string | null } | { ok: false; code: "SIGN_IN_REQUIRED" | "MIGRATION_PENDING" | "SERVER_ERROR"; message: string }> {
+): Promise<
+  | { ok: true; notes: string | null; revision: number }
+  | { ok: false; code: "SIGN_IN_REQUIRED" | "MIGRATION_PENDING" | "NOT_FOUND" | "SERVER_ERROR"; message: string }
+> {
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -1750,7 +2059,7 @@ export async function getSavedDealNotesAction(
   }
   const { data, error } = await supabase
     .from("saved_analyses")
-    .select("notes")
+    .select("notes, notes_revision")
     .eq("id", id.trim())
     .eq("user_id", user.id)
     .is("deleted_at", null)
@@ -1761,7 +2070,24 @@ export async function getSavedDealNotesAction(
     }
     return toServerErrorResult(error, "saved-analyses");
   }
-  return { ok: true, notes: (data as { notes: string | null } | null)?.notes ?? null };
+  if (!data) {
+    return { ok: false, code: "NOT_FOUND", message: "Deal was not found." };
+  }
+  const revision = parseSavedAnalysisRevision(
+    (data as Record<string, unknown>).notes_revision
+  );
+  if (revision === null) {
+    return {
+      ok: false,
+      code: "MIGRATION_PENDING",
+      message: "The notes concurrency migration has not been applied yet.",
+    };
+  }
+  return {
+    ok: true,
+    notes: (data as { notes: string | null }).notes ?? null,
+    revision,
+  };
 }
 
 export async function updateSavedDealLifecycleStateAction(
@@ -2134,10 +2460,16 @@ export async function listSavedDealsBriefAction(): Promise<ListSavedDealsBriefRe
 }
 
 export type DealDueDiligenceResult =
-  | { ok: true; items: DueDiligenceItem[] }
+  | { ok: true; items: DueDiligenceItem[]; revision: string | null }
   | {
       ok: false;
-      code: "SIGN_IN_REQUIRED" | "MIGRATION_PENDING" | "NOT_FOUND" | "VALIDATION_ERROR" | "SERVER_ERROR";
+      code:
+        | "SIGN_IN_REQUIRED"
+        | "MIGRATION_PENDING"
+        | "NOT_FOUND"
+        | "VALIDATION_ERROR"
+        | "STALE_DATA"
+        | "SERVER_ERROR";
       message: string;
     };
 
@@ -2175,7 +2507,7 @@ export async function getDealDueDiligenceAction(id: string): Promise<DealDueDili
 
   const { data, error } = await supabase
     .from("deal_due_diligence")
-    .select("items")
+    .select("items, updated_at")
     .eq("analysis_id", dealId)
     .eq("user_id", user.id)
     .maybeSingle();
@@ -2186,13 +2518,24 @@ export async function getDealDueDiligenceAction(id: string): Promise<DealDueDili
     return toServerErrorResult(error, "saved-analyses");
   }
   const stored = data ? normalizeDueDiligenceItems((data as { items?: unknown }).items) : [];
-  return { ok: true, items: stored.length > 0 ? stored : defaultDueDiligenceItems() };
+  return {
+    ok: true,
+    items: stored.length > 0 ? stored : defaultDueDiligenceItems(),
+    revision: data ? (data as { updated_at?: string | null }).updated_at ?? null : null,
+  };
 }
 
-/** Replace a saved deal's due-diligence checklist (normalized server-side). */
+/**
+ * Replace a saved deal's due-diligence checklist (normalized server-side), but
+ * only when the caller still holds the revision it read. The checklist is one
+ * JSON document, so an unconditional upsert lets an older tab erase items or
+ * notes added in a newer tab. `expectedRevision=null` means the caller observed
+ * no stored row; that path INSERTs and treats a concurrent insert as stale.
+ */
 export async function updateDealDueDiligenceAction(
   id: string,
-  items: unknown
+  items: unknown,
+  expectedRevision: unknown
 ): Promise<DealDueDiligenceResult> {
   const supabase = await createServerSupabaseClient();
   const {
@@ -2206,6 +2549,10 @@ export async function updateDealDueDiligenceAction(
     return { ok: false, code: "VALIDATION_ERROR", message: "Invalid deal id." };
   }
   const normalized = normalizeDueDiligenceItems(items);
+  if (expectedRevision !== null && (typeof expectedRevision !== "string" || Number.isNaN(Date.parse(expectedRevision)))) {
+    return { ok: false, code: "VALIDATION_ERROR", message: "Invalid checklist revision." };
+  }
+  const revision = expectedRevision as string | null;
 
   const { data: deal, error: dealErr } = await supabase
     .from("saved_analyses")
@@ -2221,22 +2568,54 @@ export async function updateDealDueDiligenceAction(
     return { ok: false, code: "NOT_FOUND", message: "Deal was not found." };
   }
 
-  const { error } = await supabase.from("deal_due_diligence").upsert(
-    {
-      analysis_id: dealId,
-      user_id: user.id,
-      items: normalized,
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: "analysis_id" }
-  );
+  const write =
+    revision === null
+      ? await supabase
+          .from("deal_due_diligence")
+          .insert({
+            analysis_id: dealId,
+            user_id: user.id,
+            items: normalized,
+          })
+          .select("items, updated_at")
+          .single()
+      : await supabase
+          .from("deal_due_diligence")
+          .update({ items: normalized })
+          .eq("analysis_id", dealId)
+          .eq("user_id", user.id)
+          .eq("updated_at", revision)
+          .select("items, updated_at")
+          .maybeSingle();
+  const { data: written, error } = write;
   if (error) {
     if (isMissingDueDiligenceTable(error)) {
       return { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." };
     }
+    // Another client created the row after this caller read "no row".
+    if (revision === null && error.code === "23505") {
+      return {
+        ok: false,
+        code: "STALE_DATA",
+        message: "This checklist changed elsewhere. Reload the latest version before saving again.",
+      };
+    }
     return toServerErrorResult(error, "saved-analyses");
   }
-  return { ok: true, items: normalized };
+  // Conditional UPDATE matched no row: it was deleted or its updated_at
+  // advanced after the caller read it. Never fall through to an upsert.
+  if (!written) {
+    return {
+      ok: false,
+      code: "STALE_DATA",
+      message: "This checklist changed elsewhere. Reload the latest version before saving again.",
+    };
+  }
+  return {
+    ok: true,
+    items: normalizeDueDiligenceItems((written as { items?: unknown }).items),
+    revision: (written as { updated_at?: string | null }).updated_at ?? null,
+  };
 }
 
 /**

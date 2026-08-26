@@ -35,6 +35,8 @@ export function FinancingSection({
   // so DSCR drops out and cash-on-cash is computed differently. A 0% down
   // payment is the opposite — fully financed — and must never enter this path.
   const downPaymentPct = form.watch("downPaymentPct");
+  const propertyType = form.watch("propertyType");
+  const usesOwnerOccupantPmiDefault = propertyType === "owner-occupant";
   const isAllCash = isAllCashDownPayment(downPaymentPct);
   // PMI / MIP only applies to a financed loan with < 20% down — show the lever
   // exactly when it's relevant, so it never clutters the standard 20%-down path.
@@ -228,7 +230,7 @@ export function FinancingSection({
                   step="0.05"
                   min={0}
                   max={5}
-                  placeholder="0.8"
+                  placeholder={usesOwnerOccupantPmiDefault ? "0.8" : "0"}
                   aria-invalid={!!errors.pmiAnnualRatePct}
                   aria-describedby={errors.pmiAnnualRatePct ? "pmiAnnualRatePct-error" : undefined}
                   className={cn(
@@ -239,7 +241,9 @@ export function FinancingSection({
                 <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               </div>
               <p className="text-[11px] text-muted-foreground mt-1">
-                Annual mortgage insurance, % of loan. Defaults to 0.8%; set 0 if none.
+                {usesOwnerOccupantPmiDefault
+                  ? "Annual mortgage insurance, % of loan. Owner-occupant screening default: 0.8%; replace it with the lender's premium or enter 0 if none."
+                  : "Annual mortgage insurance, % of loan. No premium is assumed for an investment property when this is blank; enter the lender's rate if one applies."}
               </p>
               <FieldError id="pmiAnnualRatePct-error" message={errors.pmiAnnualRatePct?.message} />
             </div>

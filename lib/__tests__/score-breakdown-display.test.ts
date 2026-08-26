@@ -97,12 +97,26 @@ describe("getScoreBreakdownSum — the arithmetic the receipts recite", () => {
       })
     ).toBe(45);
   });
+
+  it("includes the explicit zero-cash applicability normalization", () => {
+    expect(
+      getScoreBreakdownSum({
+        cashFlowScore: 22,
+        cocScore: 0,
+        capRateScore: 16,
+        dscrScore: 17,
+        totalReturnScore: 25,
+        riskPenalty: 0,
+        applicabilityAdjustment: 20,
+      })
+    ).toBe(100);
+  });
 });
 
 describe("isAppreciationFloorApplied — receipts/popover reconciliation", () => {
   // The audit's reproduced deal: components sum far below 40, floor holds at 40.
   const flooredDeal = input({
-    monthlyCashFlow: -250,
+    monthlyCashFlow: 0,
     cashOnCashReturn: -5,
     capRate: 5.6,
     dscr: 0.92,

@@ -9,7 +9,10 @@ import {
   TRUECAP_UNDERWRITING_STANDARD_NAME,
   TRUECAP_UNDERWRITING_STANDARD_VERSION,
 } from "@/lib/underwriting-methodology";
-import type { ReportData } from "@/lib/pdf-generator";
+import {
+  formatReportInsuranceAssumption,
+  type ReportData,
+} from "@/lib/pdf-generator";
 import { calculateAnalysis } from "@/lib/calc-analysis";
 import {
   buildDealScoreInputFromAnalysis,
@@ -30,6 +33,44 @@ function canonical(): ReportData {
 }
 
 describe("server-owned PDF report data", () => {
+  it("preserves and prints the active monthly insurance bill", () => {
+    const report = buildCanonicalReportData({
+      values: {
+        ...SAMPLE_DEAL_VALUES,
+        purchasePrice: 240_000,
+        insuranceInputMode: "monthly",
+        insuranceMonthly: 250,
+        // Deliberately stale: monthly mode must not print this as the input.
+        insurancePct: 0.5,
+      },
+      generatedAt: NOW,
+    });
+
+    expect(report.expenses.insuranceMonthlyBill).toBe(250);
+    expect(report.expenses.insurancePct).toBeCloseTo(1.25, 10);
+    expect(formatReportInsuranceAssumption(report.expenses)).toBe(
+      "$250/mo (monthly amount)",
+    );
+  });
+
+  it("marks zero-cash CoC as not applicable in base and downside report data", () => {
+    const report = buildCanonicalReportData({
+      values: {
+        ...SAMPLE_DEAL_VALUES,
+        downPaymentPct: 0,
+        closingCostsPct: 0,
+        rehabBudget: 0,
+        strFurnishingCost: 0,
+        monthlyRent: 8_000,
+      },
+      generatedAt: NOW,
+    });
+
+    expect(report.performance.cocReturn).toBe(0);
+    expect(report.performance.cocApplicable).toBe(false);
+    expect(report.downsideScenario?.cocApplicable).toBe(false);
+  });
+
   it("recomputes every deterministic section instead of rendering forged client results", () => {
     const expected = canonical();
     const forged: ReportData = {

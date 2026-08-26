@@ -26,13 +26,15 @@ import {
 import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { getActiveSavedAnalysesCount } from "@/lib/saved-analyses-count";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { loginPathFor } from "@/lib/auth-schema";
+import { getCurrentRequestPath } from "@/lib/request-path";
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const supabase = await createServerSupabaseClient();
   const user = await getRequestUser();
 
   if (!user) {
-    redirect("/auth/login");
+    redirect(loginPathFor(await getCurrentRequestPath("/dashboard")));
   }
 
   const entitlements = await getRequestEntitlements(user.id);

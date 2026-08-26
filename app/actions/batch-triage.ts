@@ -111,6 +111,7 @@ export async function screenBatchAction(rawInput: unknown): Promise<BatchTriageR
     // Enrich once per DISTINCT state (rate is the same everywhere; tax is
     // per-state). Failures degrade to engine defaults — never block.
     const enrichmentByState = new Map<string, TriageEnrichment>();
+    const screenedAt = new Date().toISOString();
     const distinctStates = Array.from(
       new Set(rows.map((r) => deriveStateFromAddress(r.address)).filter((s): s is string => !!s))
     );
@@ -120,17 +121,35 @@ export async function screenBatchAction(rawInput: unknown): Promise<BatchTriageR
         enrichmentByState.set(state, {
           interestRate: e.interestRate,
           propertyTaxPct: e.propertyTaxPct,
+          screenedAt,
+          state,
+          status:
+            e.meta.mortgageRate && e.meta.propertyTax ? "live" : "fallback",
+          rateSource: e.meta.mortgageRate ? "fred" : "default",
+          taxSource: e.meta.propertyTax ? "state-static" : "default",
         });
       } catch {
-        // Leave this state unenriched — the engine defaults still produce a
-        // valid underwrite; a triage screen is directional, not a wire-money
-        // number.
+        enrichmentByState.set(state, {
+          screenedAt,
+          state,
+          status: "fallback",
+          rateSource: "default",
+          taxSource: "default",
+        });
       }
     }
 
     const triaged = rows.map((row) => {
       const state = deriveStateFromAddress(row.address);
-      const enrichment = state ? enrichmentByState.get(state) : undefined;
+      const enrichment = state
+        ? enrichmentByState.get(state)
+        : {
+            screenedAt,
+            state: null,
+            status: "fallback" as const,
+            rateSource: "default" as const,
+            taxSource: "default" as const,
+          };
       return triageListing(row, { enrichment, buyBoxes: boxes });
     });
 

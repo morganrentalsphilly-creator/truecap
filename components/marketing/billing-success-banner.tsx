@@ -50,7 +50,7 @@
  * the conversion nor resurrects a dismissed banner.
  */
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Sparkles } from "lucide-react";
 import { BillingConversionTracker } from "@/components/marketing/billing-conversion-tracker";
@@ -102,7 +102,25 @@ export function BillingSuccessBanner({
     verifiedReturn?.purchasedPlanSlug.startsWith("agent_pro") ?? false;
   // Flips true the moment the poll sees the subscription row — upgrades the
   // banner copy from "activating…" to "Pro is live" with unlock deep links.
-  const [proLive, setProLive] = useState(false);
+  const [activationState, setActivationState] = useState<"checking" | "live" | "taking_longer">("checking");
+  const proLive = activationState === "live";
+
+  const refreshAccess = useCallback(async () => {
+    setActivationState("checking");
+    try {
+      const result = await isProActiveAction();
+      if (result.ok && result.active) {
+        setActivationState("live");
+        router.refresh();
+        return true;
+      }
+    } catch {
+      // The verified Checkout Session still proves the purchase return; a
+      // transient entitlement read should remain recoverable, not disappear.
+    }
+    setActivationState("taking_longer");
+    return false;
+  }, [router]);
 
   // One-time banner: dismissal is keyed on the checkout session id, so a
   // FUTURE purchase (new session) still gets its acknowledgment while a
@@ -202,7 +220,7 @@ export function BillingSuccessBanner({
       if (active) {
         cancelled = true;
         clearInterval(intervalId);
-        setProLive(true);
+        setActivationState("live");
         // Re-read the server-resolved entitlements: this is the self-heal.
         // The suppression signal stays up only until unmount — after the
         // refresh the upsells retire themselves via real entitlements.
@@ -212,9 +230,10 @@ export function BillingSuccessBanner({
       if (attempts >= PRO_ACTIVATION_POLL_MAX_ATTEMPTS) {
         cancelled = true;
         clearInterval(intervalId);
-        // Webhook still not visible — give up and FAIL OPEN so the page
-        // behaves exactly as it did before this poll existed.
-        setPostCheckoutUpsellSuppression(false);
+        // The Checkout Session is verified, so do not pitch another purchase.
+        // Move to an explicit recoverable state instead of leaving
+        // "activating for a few seconds" on screen indefinitely.
+        setActivationState("taking_longer");
       }
     };
 
@@ -230,6 +249,21 @@ export function BillingSuccessBanner({
       setPostCheckoutUpsellSuppression(false);
     };
   }, [router, verifiedReturn]);
+
+  // A delayed webhook often lands after the initial bounded poll. Recheck
+  // when the customer returns to the tab instead of requiring a blind reload.
+  useEffect(() => {
+    if (activationState !== "taking_longer" || !verifiedReturn) return;
+    const recheck = () => {
+      if (document.visibilityState === "visible") void refreshAccess();
+    };
+    window.addEventListener("focus", recheck);
+    document.addEventListener("visibilitychange", recheck);
+    return () => {
+      window.removeEventListener("focus", recheck);
+      document.removeEventListener("visibilitychange", recheck);
+    };
+  }, [activationState, refreshAccess, verifiedReturn]);
 
   // Strip the billing params from the address bar after mount. Runs in a
   // PARENT effect, i.e. after the child tracker's effect has already
@@ -318,6 +352,36 @@ export function BillingSuccessBanner({
                       <button type="button" onClick={goToPdfExport} className={unlockLinkClass}>
                         Branded PDF export
                       </button>
+                    </div>
+                  </>
+                ) : activationState === "taking_longer" ? (
+                  <>
+                    <p className="leading-relaxed text-foreground">
+                      <strong className="font-bold">Your payment is confirmed.</strong>{" "}
+                      <span className="text-muted-foreground">
+                        Account access is taking longer than expected. Your purchase is safe; refresh access below or manage billing while TrueCap catches up.
+                      </span>
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => void refreshAccess()}
+                        className="inline-flex min-h-11 items-center rounded-lg bg-primary px-3 text-xs font-semibold text-primary-foreground"
+                      >
+                        Refresh access
+                      </button>
+                      <a
+                        href="/profile#billing"
+                        className="inline-flex min-h-11 items-center rounded-lg border border-border px-3 text-xs font-semibold text-foreground"
+                      >
+                        Manage billing
+                      </a>
+                      <a
+                        href="mailto:hello@usetruecap.com?subject=Subscription%20activation"
+                        className="inline-flex min-h-11 items-center rounded-lg px-3 text-xs font-semibold text-primary hover:bg-primary/5"
+                      >
+                        Contact support
+                      </a>
                     </div>
                   </>
                 ) : (

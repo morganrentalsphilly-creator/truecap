@@ -97,7 +97,7 @@ describe("canonical decision output parity across safe adapters", () => {
 
     expect(sample.analysis).toEqual(direct);
     expect(SAMPLE_DEAL_FIXTURE).toMatchObject({
-      fixtureVersion: "synthetic-rental-v1",
+      fixtureVersion: "synthetic-rental-v2",
       synthetic: true,
       targetProfile: {
         id: "truecap-synthetic-sample-target",

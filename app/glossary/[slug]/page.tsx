@@ -186,7 +186,8 @@ export default async function GlossaryTermPage({
 
       <Header />
 
-      <article className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
+      <main id="main">
+        <article className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
         {/* Breadcrumb */}
         <nav aria-label="Breadcrumb" className="mb-6 text-xs">
           <ol className="flex flex-wrap items-center gap-2 text-muted-foreground">
@@ -311,7 +312,8 @@ export default async function GlossaryTermPage({
             ← Back to full glossary
           </Link>
         </div>
-      </article>
+        </article>
+      </main>
 
       <SiteFooter />
       <ScrollDepthTracker />

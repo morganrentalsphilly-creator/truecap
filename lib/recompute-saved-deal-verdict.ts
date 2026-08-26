@@ -6,6 +6,7 @@ import {
   type DealRecommendation,
   type DealRiskLevel,
   type DealScoreBreakdown,
+  type DealScoreResult,
 } from "@/lib/deal-score";
 import { normalizeReleasedInvestmentFormSnapshot } from "@/lib/underwriting-model-release";
 
@@ -26,6 +27,8 @@ import { normalizeReleasedInvestmentFormSnapshot } from "@/lib/underwriting-mode
  * shape), in which case the caller falls back to the stored values.
  */
 export type RecomputedSavedDealVerdict = {
+  /** Explicit provenance for the secondary screening heuristic. */
+  scoreMethodologyVersion: DealScoreResult["scoreMethodologyVersion"];
   score: number;
   recommendation: DealRecommendation;
   riskLevel: DealRiskLevel;
@@ -71,6 +74,7 @@ export function toRecomputedSavedAnalysisSnapshot(
 ): Record<string, unknown> {
   return {
     ...verdict.analysisResult,
+    scoreMethodologyVersion: verdict.scoreMethodologyVersion,
     score: verdict.score,
     recommendation: verdict.recommendation,
     riskLevel: verdict.riskLevel,
@@ -91,6 +95,7 @@ export function recomputeSavedDealVerdict(
     const result = calculateAnalysis(values);
     const scored = computeDealScore(buildDealScoreInputFromAnalysis(values, result));
     return {
+      scoreMethodologyVersion: scored.scoreMethodologyVersion,
       score: scored.score,
       recommendation: scored.recommendation,
       riskLevel: scored.riskLevel,

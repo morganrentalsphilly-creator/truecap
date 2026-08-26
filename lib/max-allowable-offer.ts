@@ -13,6 +13,7 @@
 
 import { calculateAnalysis, AnalysisResult } from "@/lib/calc-analysis";
 import {
+  MIN_PURCHASE_PRICE,
   MAX_PURCHASE_PRICE,
   type InvestmentFormValues,
 } from "@/lib/investcalc-schema";
@@ -233,7 +234,7 @@ export function calculateMaxAllowableOffer(
   // private search limit would make a viable $20M acquisition look as though
   // its ceiling were exactly $10M. An explicit Buy Box budget remains the
   // tighter upper bound when present.
-  const requestedMinPrice = opts?.minPrice ?? 10_000;
+  const requestedMinPrice = opts?.minPrice ?? MIN_PURCHASE_PRICE;
   const requestedCandidateFloor = resolveMinimumCandidatePrice(
     values,
     requestedMinPrice

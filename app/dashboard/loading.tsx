@@ -8,7 +8,11 @@
 
 export default function DashboardLoading() {
   return (
-    <div className="flex-1 min-w-0 flex flex-col">
+    <main id="main" aria-busy="true" className="flex-1 min-w-0 flex flex-col">
+      <span className="sr-only" role="status" aria-live="polite">
+        Loading dashboard content…
+      </span>
+      <div aria-hidden="true" className="contents">
       {/* Topbar placeholder — same height band as the real Topbar so
           the page doesn't jump when content arrives. */}
       <div className="flex h-16 items-center justify-between border-b border-border px-4 sm:px-6 lg:px-8">
@@ -56,6 +60,7 @@ export default function DashboardLoading() {
           <div className="h-64 w-full rounded-xl bg-muted animate-pulse" />
         </div>
       </div>
-    </div>
+      </div>
+    </main>
   );
 }

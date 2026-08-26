@@ -63,7 +63,7 @@ describe("portal and saved-deal Max Offer continuity", () => {
       methodologyGate
     );
     const sourceNormalization = source.indexOf(
-      "normalizeOfferCeilingTargetSource(savedResultSnapshot?.maxOfferTargetSource)",
+      "normalizeOfferCeilingTargetSource(",
       financingNormalization
     );
     const recordedResolution = source.indexOf(
@@ -98,21 +98,22 @@ describe("portal and saved-deal Max Offer continuity", () => {
       "resolveOfferCeilingForAccess({"
     );
     expect(source).toContain("isCashPurchase: result.monthlyPayment <= 0");
-    expect(source).toContain('??\n      "selected-targets"');
+    expect(source).toMatch(/\?\?\s*"selected-targets"/);
     expect(source).toContain("maoTargetSource={maoTargetSource}");
   });
 
-  it("normalizes and carries a saved target in both edit and duplicate handoffs", () => {
+  it("normalizes duplicate targets and keeps edit reopen owner-scoped and durable", () => {
     const source = read("components/investcalc/open-saved-deal-in-analyzer.tsx");
+    const analyzer = read("components/investcalc/investcalc-page.tsx");
     const duplicate = section(
       source,
       "export async function duplicateSavedDealInAnalyzer(",
-      "/**\n * Fetch the saved deal for editing"
+      "export async function openSavedDealInAnalysisTab("
     );
     const edit = section(
       source,
       "export async function openSavedDealInAnalysisTab(",
-      "/**\n * \"Open full analysis\" button"
+      "export function OpenFullAnalysisButton"
     );
 
     expect(source).toContain(
@@ -125,10 +126,8 @@ describe("portal and saved-deal Max Offer continuity", () => {
     expect(duplicate).toContain(
       "? { maxOfferTarget, maxOfferTargetSource }"
     );
-    expect(edit).toContain(
-      "const { resultSnapshot } = normalizeSavedDealHandoffTarget(result.resultSnapshot);"
-    );
-    expect(edit).toContain("resultSnapshot,");
-    expect(edit).not.toContain("resultSnapshot: result.resultSnapshot");
+    expect(edit).toContain("`/?savedDeal=${encodeURIComponent(id)}`");
+    expect(edit).not.toContain("writeNonceKeyedHandoffPayload");
+    expect(analyzer).toContain("normalizeMaoTarget(savedResultRecord?.maxOfferTarget)");
   });
 });

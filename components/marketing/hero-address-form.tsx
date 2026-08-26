@@ -23,15 +23,15 @@
  * captures the address and tells the calculator to take over.
  */
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useForm, type DefaultValues } from "react-hook-form";
 import { ArrowRight, Calculator, Link2, MapPin, Sparkles } from "lucide-react";
 import { AddressAutocomplete, type SelectedAddress } from "@/components/investcalc/address-autocomplete";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import {
+  dispatchHeroAnalyzeWithFallback,
   HERO_ANALYZE_EVENT,
-  HERO_ANALYZE_STORAGE_KEY,
   type HeroAnalyzeDetail,
 } from "@/lib/hero-handoff";
 import { trackEvent } from "@/lib/analytics";
@@ -53,12 +53,15 @@ function scrollToCalculator() {
 
 function dispatchHeroAnalyze(detail: HeroAnalyzeDetail) {
   if (typeof window === "undefined") return;
-  try {
-    window.sessionStorage.setItem(HERO_ANALYZE_STORAGE_KEY, JSON.stringify(detail));
-  } catch {
-    /* private mode / quota — the live event below still delivers it */
-  }
-  window.dispatchEvent(new CustomEvent<HeroAnalyzeDetail>(HERO_ANALYZE_EVENT, { detail }));
+  dispatchHeroAnalyzeWithFallback(detail, {
+    storage: window.sessionStorage,
+    dispatch: (payload) => {
+      window.dispatchEvent(
+        new CustomEvent<HeroAnalyzeDetail>(HERO_ANALYZE_EVENT, { detail: payload })
+      );
+    },
+    schedule: (callback, delayMs) => window.setTimeout(callback, delayMs),
+  });
 }
 
 function newToken() {
@@ -76,9 +79,15 @@ export function HeroAddressForm() {
   const selectedRef = useRef<SelectedAddress | null>(null);
   const addressStartedRef = useRef(false);
   const [submitting, setSubmitting] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
   const [entryMode, setEntryMode] = useState<"address" | "listing">("address");
   const [listingUrl, setListingUrl] = useState("");
   const [listingError, setListingError] = useState<string | null>(null);
+
+  // A native button can be clicked before this client boundary hydrates on a
+  // slow device, but no React handler exists yet. Keep action buttons disabled
+  // for that brief window so an early tap is never silently lost.
+  useEffect(() => setHydrated(true), []);
 
   const handleAnalyze = (e: React.FormEvent) => {
     e.preventDefault();
@@ -246,7 +255,7 @@ export function HeroAddressForm() {
         </div>
         <button
           type="submit"
-          disabled={submitting}
+          disabled={submitting || !hydrated}
           className="group inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] disabled:opacity-70 sm:h-14"
         >
           <Calculator className="size-4" />
@@ -277,7 +286,8 @@ export function HeroAddressForm() {
         <button
           type="button"
           onClick={handleTrySample}
-          className="group inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-border bg-card px-4 py-2 font-medium text-muted-foreground shadow-sm transition-colors hover:border-primary/40 hover:text-foreground"
+          disabled={!hydrated}
+          className="group inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-border bg-card px-4 py-2 font-medium text-muted-foreground shadow-sm transition-colors hover:border-primary/40 hover:text-foreground disabled:cursor-wait disabled:opacity-60"
         >
           <Sparkles className="size-4" />
           View a Sample Decision

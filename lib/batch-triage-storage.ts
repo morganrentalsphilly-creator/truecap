@@ -20,7 +20,7 @@ export type StoredTriageBatch = {
   result: Extract<BatchTriageResult, { ok: true }> | null;
 };
 
-export const TRIAGE_STORAGE_KEY = "truecap:batch-triage:v1";
+export const TRIAGE_STORAGE_KEY = "truecap:batch-triage:v2";
 
 const TRIAGE_SORTS = ["score", "cashFlow", "fit"] as const;
 
@@ -66,6 +66,21 @@ export function parseStoredTriageBatch(raw: string | null): StoredTriageBatch | 
     if (!isRecord(row)) return null;
     const input = row.input;
     if (!isRecord(input) || typeof input.address !== "string") return null;
+    const context = row.assumptionContext;
+    if (!isRecord(context)) return null;
+    if (
+      (context.screenedAt !== null && typeof context.screenedAt !== "string") ||
+      typeof context.interestRatePct !== "number" ||
+      !Number.isFinite(context.interestRatePct) ||
+      typeof context.propertyTaxPct !== "number" ||
+      !Number.isFinite(context.propertyTaxPct) ||
+      (context.state !== null && typeof context.state !== "string") ||
+      !["live", "fallback"].includes(String(context.enrichmentStatus)) ||
+      !["fred", "default"].includes(String(context.rateSource)) ||
+      !["state-static", "default"].includes(String(context.taxSource))
+    ) {
+      return null;
+    }
   }
   return { text, result: result as unknown as StoredTriageBatch["result"] };
 }

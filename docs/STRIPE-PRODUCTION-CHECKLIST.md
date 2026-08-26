@@ -65,15 +65,15 @@ checkout is intentionally disabled; do not re-enable it for this review.
 Record the live Product ID and every Price ID for these mappings. The repository
 uses Price IDs, while Product names remain Dashboard presentation:
 
-| Product display name | Runtime slot | Expected public offer |
-| --- | --- | --- |
-| TrueCap Pro | `STRIPE_PRICE_PRO_MONTHLY` | Standard $29.99/month first; grandfathered $20/month appended |
-| TrueCap Pro | `STRIPE_PRICE_PRO_ANNUAL` | Current annual Price |
-| Agent Pro | `STRIPE_PRICE_AGENT_PRO_MONTHLY` | Current monthly Price; tier hidden when unset |
-| Agent Pro | `STRIPE_PRICE_AGENT_PRO_ANNUAL` | Current annual Price |
-| Decision Pack | `STRIPE_PRICE_PDF_ONE_TIME` | Historical $5 mapping; not offered for new checkout |
-| Decision Pack experiment | `STRIPE_PRICE_SINGLE_DEAL_9` | Dormant; do not activate |
-| Decision Pack experiment | `STRIPE_PRICE_SINGLE_DEAL_19` | Dormant; do not activate |
+| Product display name     | Runtime slot                     | Expected public offer                                         |
+| ------------------------ | -------------------------------- | ------------------------------------------------------------- |
+| TrueCap Pro              | `STRIPE_PRICE_PRO_MONTHLY`       | Standard $29.99/month first; grandfathered $20/month appended |
+| TrueCap Pro              | `STRIPE_PRICE_PRO_ANNUAL`        | Current annual Price                                          |
+| Agent Pro                | `STRIPE_PRICE_AGENT_PRO_MONTHLY` | Current monthly Price; tier hidden when unset                 |
+| Agent Pro                | `STRIPE_PRICE_AGENT_PRO_ANNUAL`  | Current annual Price                                          |
+| Decision Pack            | `STRIPE_PRICE_PDF_ONE_TIME`      | Historical $5 mapping; not offered for new checkout           |
+| Decision Pack experiment | `STRIPE_PRICE_SINGLE_DEAL_9`     | Dormant; do not activate                                      |
+| Decision Pack experiment | `STRIPE_PRICE_SINGLE_DEAL_19`    | Dormant; do not activate                                      |
 
 Renaming a Stripe Product’s display text is safe only when the existing Product
 and Price relationship remains intact. Never replace a Product or Price merely
@@ -133,9 +133,24 @@ protected-rate warning.
   events are also handled defensively. These events wake idempotent current-
   state reconciliation; event arrival order is never used as authority.
   A refund or lost dispute changes an already-applied Pack credit's audit state
-  to `reversed`; this does **not** remove a coupon from, reprice, or otherwise
-  mutate an existing live subscription. Any financial adjustment is a separate
-  support/accounting action and must preserve all live Price IDs.
+  to `reversed` and creates one pending row in the server-only
+  `decision_pack_credit_adjustments` queue; this does **not** remove a coupon
+  from, charge a customer, reprice, or otherwise mutate an existing live
+  subscription. Any financial adjustment is a separate support/accounting
+  action and must preserve all live Price IDs.
+- Before deploying the matching webhook code, clone-test and apply
+  `20260825120000_decision_pack_credit_adjustments.sql`. Run it twice in the
+  clone, then verify production has zero reversed claims without an adjustment
+  row. Record the migration's pending backfill count without customer data.
+- Route the exact Sentry warning `Decision Pack reversed credit requires
+operational adjustment` to the billing-operations owner. One warning is
+  emitted only when a unique pending row is first created; webhook retries do
+  not duplicate it.
+- Review every pending adjustment. Mark it `completed` only after the approved
+  external adjustment is verified, or `waived` only with an explicit approval
+  reference. Both terminal states require a non-PII resolution reference, note,
+  and timestamp and cannot be reopened or deleted. See the durable-fulfillment
+  runbook for the verification and resolution SQL.
   Do not change signature verification or rotate the webhook secret as part of
   this branding review.
 - Confirm a test checkout emits the canonical, PII-free funnel sequence:

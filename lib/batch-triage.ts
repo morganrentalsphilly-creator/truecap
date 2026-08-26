@@ -93,10 +93,28 @@ export interface TriagePreviewRow {
 export interface TriageEnrichment {
   interestRate?: number;
   propertyTaxPct?: number;
+  /** Exact screening context supplied by the authenticated server action. */
+  screenedAt?: string;
+  state?: string | null;
+  status?: "live" | "fallback";
+  rateSource?: "fred" | "default";
+  taxSource?: "state-static" | "default";
+}
+
+export interface TriageAssumptionContext {
+  screenedAt: string | null;
+  interestRatePct: number;
+  propertyTaxPct: number;
+  state: string | null;
+  enrichmentStatus: "live" | "fallback";
+  rateSource: "fred" | "default";
+  taxSource: "state-static" | "default";
 }
 
 export interface TriageRowResult {
   input: TriageListingInput;
+  /** The exact market assumptions used, retained through restore + analyzer handoff. */
+  assumptionContext: TriageAssumptionContext;
   /** False when the inputs don't produce a valid underwrite. */
   ok: boolean;
   score: number | null;
@@ -371,8 +389,21 @@ export function buildTriageSnapshot(
   return snapshot;
 }
 
-const EMPTY_ROW = (input: TriageListingInput): TriageRowResult => ({
+function triageAssumptionContext(enrichment?: TriageEnrichment): TriageAssumptionContext {
+  return {
+    screenedAt: enrichment?.screenedAt ?? null,
+    interestRatePct: Number(enrichment?.interestRate ?? defaultValues.interestRate),
+    propertyTaxPct: Number(enrichment?.propertyTaxPct ?? defaultValues.propertyTaxPct),
+    state: enrichment?.state ?? null,
+    enrichmentStatus: enrichment?.status ?? "fallback",
+    rateSource: enrichment?.rateSource ?? "default",
+    taxSource: enrichment?.taxSource ?? "default",
+  };
+}
+
+const EMPTY_ROW = (input: TriageListingInput, enrichment?: TriageEnrichment): TriageRowResult => ({
   input,
+  assumptionContext: triageAssumptionContext(enrichment),
   ok: false,
   score: null,
   recommendation: null,
@@ -405,10 +436,10 @@ export function triageListing(
   // Never let the schema's demonstration/default rent turn a missing pasted
   // rent into a real-looking underwrite. The preview flags this row and the
   // result asks for rent; the canonical engine only runs once rent is real.
-  if (input.monthlyRent === undefined) return EMPTY_ROW(input);
+  if (input.monthlyRent === undefined) return EMPTY_ROW(input, opts?.enrichment);
   const snapshot = buildTriageSnapshot(input, opts?.enrichment);
   const verdict = recomputeSavedDealVerdict(snapshot);
-  if (!verdict) return EMPTY_ROW(input);
+  if (!verdict) return EMPTY_ROW(input, opts?.enrichment);
 
   let buyBoxFit: BuyBoxFitSummary | null = null;
   const boxes = opts?.buyBoxes;
@@ -473,6 +504,7 @@ export function triageListing(
 
   return {
     input,
+    assumptionContext: triageAssumptionContext(opts?.enrichment),
     ok: true,
     score: verdict.score,
     recommendation: verdict.recommendation,

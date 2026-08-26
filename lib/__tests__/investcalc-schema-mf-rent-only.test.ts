@@ -3,6 +3,7 @@ import {
   investmentFormSchema,
   isValidRentalUnit,
   defaultValues,
+  MAX_MONTHLY_RENT,
 } from "@/lib/investcalc-schema";
 import { calculateAnalysis } from "@/lib/calc-analysis";
 
@@ -67,5 +68,37 @@ describe("multi-family — rent-only units are valid", () => {
       units: [{ monthlyRent: 1400, bedrooms: 99 }],
     });
     expect(res.success).toBe(false);
+  });
+
+  it("requires at least one positive-rent unit instead of underwriting an empty building", () => {
+    const res = investmentFormSchema.safeParse({
+      ...mfBase,
+      units: [],
+    });
+    expect(res.success).toBe(false);
+    if (!res.success) {
+      expect(res.error.issues).toContainEqual(
+        expect.objectContaining({
+          path: ["units", 0, "monthlyRent"],
+          message: "Add at least one rental unit with rent greater than 0.",
+        }),
+      );
+    }
+  });
+
+  it("rejects unsupported rents for both single-family and per-unit inputs", () => {
+    const singleFamily = investmentFormSchema.safeParse({
+      ...defaultValues,
+      address: mfBase.address,
+      purchasePrice: mfBase.purchasePrice,
+      monthlyRent: MAX_MONTHLY_RENT + 1,
+    });
+    const multiFamily = investmentFormSchema.safeParse({
+      ...mfBase,
+      units: [{ monthlyRent: MAX_MONTHLY_RENT + 1 }],
+    });
+
+    expect(singleFamily.success).toBe(false);
+    expect(multiFamily.success).toBe(false);
   });
 });

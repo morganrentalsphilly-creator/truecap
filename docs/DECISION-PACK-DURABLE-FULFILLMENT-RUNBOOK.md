@@ -7,8 +7,13 @@ browser-bound claim recovery remains authoritative until every durable
 fulfillment activation gate below passes. The fulfillment and retention SQL
 files are review drafts outside the executable migration queue and must not be
 applied to production. The permission-only
-`deal_comps` hardening migration may be reviewed and promoted independently;
-it does not activate the Pack or alter Stripe.
+`deal_comps` write-boundary hardening migration is already recorded in
+production and must not be edited or replayed; the forward-only owner binding
+remains part of the next reviewed release batch. Neither change activates the
+Pack or alters Stripe. The historical credit-adjustment
+queue migration is also independently deployable, but it must be applied
+before the matching webhook code because the webhook intentionally fails and
+retries when it cannot durably create a required adjustment row.
 
 New Pack sales are temporarily unavailable. Keep both checkout creation gates
 off; this runbook preserves historical recovery and describes prerequisites for
@@ -18,6 +23,9 @@ Files covered:
 
 - `supabase/review-drafts/decision-pack-durable-fulfillment.sql`
 - `supabase/migrations/20260824121000_deal_comps_service_role_writes.sql`
+- `supabase/migrations/20260825120000_decision_pack_credit_adjustments.sql`
+- `supabase/migrations/20260825220000_public_shares_service_role_inserts.sql`
+- `supabase/migrations/20260825221000_deal_comps_owner_binding.sql`
 - `supabase/review-drafts/public-share-retention-service-role.sql`
 
 No email provider or message implementation is selected by this work. No live
@@ -26,7 +34,7 @@ customer record may be created while reviewing this runbook.
 
 ## Current source truth and known drift
 
-The following statements are verified against the repository as of 2026-08-24
+The following statements are verified against the repository as of 2026-08-25
 and supersede stale operational notes; they do not claim anything about live
 environment values:
 
@@ -48,6 +56,11 @@ environment values:
 - `one_time_pdf_purchase_claims` binds the browser secret, exact inputs, target
   fingerprint, optional user, payment facts, and a bounded same-tab recovery.
   It does not retain the canonical input/result/target snapshot or a PDF.
+- `decision_pack_credit_adjustments` is the server-only operations queue for an
+  applied Pack-to-Pro credit that later becomes `reversed`. One unique row per
+  claim remains `pending` until support/accounting records either a completed
+  adjustment or an explicitly approved waiver. It never authorizes an
+  automatic Stripe mutation.
 - `decision-pack-artifacts` and the three new durable tables do not exist until
   the reviewed migration is manually applied. Application code does not use
   them in this slice.
@@ -159,15 +172,15 @@ sufficient.
 Subscribe in Stripe test mode first, and only after the corresponding handlers
 are deployed and tested:
 
-| Stripe event | Required Pack behavior |
-| --- | --- |
-| `checkout.session.completed` | For a synchronously paid Pack, verify `purpose`, claim id, fulfillment id, Session id, mode, paid status, currency, amount, and Price. Re-fetch the Session/PaymentIntent, then set payment facts once and queue rendering. |
-| `checkout.session.async_payment_succeeded` | Perform the same convergence logic; duplicate completion must not render or email twice. |
-| `checkout.session.async_payment_failed` | Mark payment failed without creating an artifact; retain the audit row for reconciliation. |
-| `checkout.session.expired` | Mark an unpaid intent failed/expired; do not send paid-delivery email. |
-| `charge.refunded` | Re-fetch the Charge/PaymentIntent and record cumulative refund amount. Any partial or full refund revokes future report access, recovery, delivery, and Pack-to-Pro credit eligibility. |
-| `charge.dispute.created` | Record the dispute state, suspend report access/recovery/delivery and Pack-to-Pro credit eligibility, and alert the operations owner. |
-| `charge.dispute.closed` | Re-fetch current dispute/payment state. A lost dispute revokes report access/recovery/delivery and Pack-to-Pro credit eligibility; a won dispute restores them only after a fresh paid/no-refund check. Apply the transition idempotently. |
+| Stripe event                               | Required Pack behavior                                                                                                                                                                                                                     |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `checkout.session.completed`               | For a synchronously paid Pack, verify `purpose`, claim id, fulfillment id, Session id, mode, paid status, currency, amount, and Price. Re-fetch the Session/PaymentIntent, then set payment facts once and queue rendering.                |
+| `checkout.session.async_payment_succeeded` | Perform the same convergence logic; duplicate completion must not render or email twice.                                                                                                                                                   |
+| `checkout.session.async_payment_failed`    | Mark payment failed without creating an artifact; retain the audit row for reconciliation.                                                                                                                                                 |
+| `checkout.session.expired`                 | Mark an unpaid intent failed/expired; do not send paid-delivery email.                                                                                                                                                                     |
+| `charge.refunded`                          | Re-fetch the Charge/PaymentIntent and record cumulative refund amount. Any partial or full refund revokes future report access, recovery, delivery, and Pack-to-Pro credit eligibility.                                                    |
+| `charge.dispute.created`                   | Record the dispute state, suspend report access/recovery/delivery and Pack-to-Pro credit eligibility, and alert the operations owner.                                                                                                      |
+| `charge.dispute.closed`                    | Re-fetch current dispute/payment state. A lost dispute revokes report access/recovery/delivery and Pack-to-Pro credit eligibility; a won dispute restores them only after a fresh paid/no-refund check. Apply the transition idempotently. |
 
 Stripe can deliver events late or out of order. An event's embedded status is
 not final authority. After signature verification and exact metadata binding,
@@ -314,14 +327,14 @@ design in this document: new Pack sales remain disabled, and durable artifact,
 delivery, recovery-grant, reconciliation, and credit-suspension/restoration
 work remains blocked until implemented and tested against current Stripe state.
 
-| Current payment state | Report access and delivery | Pack-to-Pro credit |
-| --- | --- | --- |
-| Paid, with no refund or dispute | May remain available, subject to the normal fulfillment and identity checks. | May remain available under the existing eligibility rules. |
-| Partial refund | Revoke future report access, recovery, and delivery. | Revoke the credit and prevent any new application. |
-| Full refund | Revoke future report access, recovery, and delivery. | Revoke the credit and prevent any new application. |
-| Dispute open or pending | Suspend report access, recovery, and delivery while the dispute is unresolved. | Suspend the credit; do not apply or restore it while the dispute is unresolved. |
-| Dispute lost | Revoke future report access, recovery, and delivery. | Revoke the credit and prevent any new application. |
-| Dispute won | Restore only after a fresh server-side Stripe lookup confirms the purchase is currently paid and there is no unreconciled refund. Otherwise access remains suspended or revoked. | Restore only after the same current-state check confirms paid status and no unreconciled refund. |
+| Current payment state           | Report access and delivery                                                                                                                                                       | Pack-to-Pro credit                                                                               |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Paid, with no refund or dispute | May remain available, subject to the normal fulfillment and identity checks.                                                                                                     | May remain available under the existing eligibility rules.                                       |
+| Partial refund                  | Revoke future report access, recovery, and delivery.                                                                                                                             | Revoke the credit and prevent any new application.                                               |
+| Full refund                     | Revoke future report access, recovery, and delivery.                                                                                                                             | Revoke the credit and prevent any new application.                                               |
+| Dispute open or pending         | Suspend report access, recovery, and delivery while the dispute is unresolved.                                                                                                   | Suspend the credit; do not apply or restore it while the dispute is unresolved.                  |
+| Dispute lost                    | Revoke future report access, recovery, and delivery.                                                                                                                             | Revoke the credit and prevent any new application.                                               |
+| Dispute won                     | Restore only after a fresh server-side Stripe lookup confirms the purchase is currently paid and there is no unreconciled refund. Otherwise access remains suspended or revoked. | Restore only after the same current-state check confirms paid status and no unreconciled refund. |
 
 Revocation governs all future server-controlled retrieval, recovery links, and
 delivery attempts. A PDF already downloaded to a buyer-controlled device cannot
@@ -330,8 +343,74 @@ not re-deliver it. Enforcement must be driven by a current Stripe object plus
 the idempotent event ledger, never by event arrival order alone. Any credit
 reversal must preserve existing Stripe Price ids and subscriptions.
 For the retained historical path, an already-applied Pack credit is marked
-`reversed` in the audit ledger only. The webhook does not remove a live coupon,
-reprice a subscription, or mutate any Stripe Price/Subscription object.
+`reversed` in the immutable claim ledger and a unique
+`decision_pack_credit_adjustments` row is created. The webhook emits one
+PII-free Sentry warning when that row is first created. Retry and reordered
+events use a unique claim binding plus `ignoreDuplicates`, so they neither
+duplicate the obligation nor reset a completed/waived resolution to pending.
+The webhook does not remove a live coupon, charge a customer, reprice a
+subscription, or mutate any Stripe Price/Subscription object.
+
+### Applied-credit adjustment queue — required operations
+
+Apply `20260825120000_decision_pack_credit_adjustments.sql` before deploying the
+matching webhook version. First execute it twice against a production-shaped
+clone and verify the second execution does not add duplicate rows. The
+migration backfills every existing claim whose `pro_credit_status` is
+`reversed` with reason `legacy_reversed`. A database migration cannot emit a
+Sentry event, so the production operator must treat any non-zero backfill count
+as an immediate billing-operations alert and assign every pending row.
+
+Configure the alert destination for the exact Sentry message:
+`Decision Pack reversed credit requires operational adjustment`. The event
+contains only the adjustment id and reason; use the server-only table to locate
+the associated claim. Do not put an email address, customer id, Checkout
+Session id, payment amount, or deal input into Sentry or an analytics payload.
+
+Use these read-only checks after migration and in the billing-operations review:
+
+```sql
+select status, count(*) as adjustment_count
+from public.decision_pack_credit_adjustments
+group by status
+order by status;
+
+select id, reason, created_at
+from public.decision_pack_credit_adjustments
+where status = 'pending'
+order by created_at asc;
+
+select c.id
+from public.one_time_pdf_purchase_claims c
+left join public.decision_pack_credit_adjustments a on a.claim_id = c.id
+where c.pro_credit_status = 'reversed' and a.id is null;
+```
+
+The last query must return zero rows. For each pending item, support/accounting
+must inspect the existing Stripe records without changing any Price or
+subscription. Then choose exactly one terminal disposition:
+
+- `completed`: the separately approved financial adjustment is complete; or
+- `waived`: an authorized business owner explicitly waives the adjustment.
+
+Resolve with a non-PII ticket/accounting reference and a concise note. The
+database allows only `pending` → `completed|waived`, requires both resolution
+fields and `resolved_at`, and makes the terminal disposition immutable:
+
+```sql
+update public.decision_pack_credit_adjustments
+set status = 'completed',
+    resolution_reference = 'support-ticket-reference',
+    resolution_note = 'Approved adjustment completed and independently verified.',
+    resolved_at = now()
+where id = 'adjustment-uuid' and status = 'pending'
+returning id, status, resolved_at;
+```
+
+Use `status = 'waived'` only with an approval reference and a note identifying
+the approved policy basis without customer PII. Never delete a queue row, mark
+one complete before the external action is verified, or use this queue as
+authority to automatically charge, remove a coupon, or edit a subscription.
 
 Until durable-fulfillment runtime enforcement and the required duplicate/
 reorder/reconciliation tests exist, future durable-artifact handlers may record
@@ -426,33 +505,46 @@ silently replace a purchased frozen snapshot.
 ### Independent `deal_comps` security hardening
 
 `20260824121000_deal_comps_service_role_writes.sql` is a permission-only
-security repair, not a durable Pack or share-retention dependency. It may be
-reviewed, clone-tested, and applied independently while the Decision Pack
-durable-fulfillment review draft remains outside the executable migration queue,
-the durable Pack runtime gate remains off, and the public-share retention review
-draft remains outside the executable migration queue with no purge scheduler.
+security repair, not a durable Pack or share-retention dependency. Production
+already records that historical migration; do not edit or replay its contents.
+The forward-only `20260825221000_deal_comps_owner_binding.sql` separately audits
+historical owner consistency and adds the composite `(analysis_id, user_id)`
+foreign key. It may be clone-tested and applied while the durable Pack runtime
+gate remains off and the retention review drafts remain unapplied.
 
-Before that independent promotion, verify the ownership-checking service-role
-upsert and authenticated owner read against a production-shaped clone. Its safe
-rollback is an application server adapter; do not restore authenticated browser
-INSERT, UPDATE, or DELETE policies.
+Before applying the owner binding, the following count must be zero:
+
+```sql
+select count(*) as mismatched_owner_rows
+from public.deal_comps dc
+join public.saved_analyses sa on sa.id = dc.analysis_id
+where dc.user_id is distinct from sa.user_id;
+```
+
+The migration deliberately aborts rather than guessing which tenant should
+receive an inconsistent provider payload. If the count is non-zero, review and
+remove or quarantine those rows; never reassign untrusted payloads across
+tenants. Verify the ownership-checking service-role upsert and authenticated
+owner read against a production-shaped clone. The safe rollback is an
+application server adapter; do not restore authenticated browser INSERT,
+UPDATE, or DELETE policies or drop the owner FK after it is active.
 
 ## Activation gates and accountable owners
 
 Accountability labels below do not imply the action is complete.
 
-| Gate | Accountable owner | Evidence required | Current state |
-| --- | --- | --- | --- |
-| Snapshot/model/target contract | TrueCap engineering owner (Morgan until delegated) | Golden parity tests and canonical hash vectors | Blocked |
-| Transactional checkout binding and worker leases/outbox | TrueCap engineering owner (Morgan until delegated) | Atomic RPC plus process-death/duplicate-delivery tests | Not implemented — blocking |
-| Expand-only migration review/apply | Supabase production owner (Morgan) | Clone restore, migration dry run twice, backup id, schema verification | Not applied; `deal_comps` hardening may be promoted independently |
-| Stripe event subscription/handler | Stripe production owner (Morgan) | Test-mode duplicate/reorder/replay suite; exact subscribed event list | Not configured |
-| Artifact storage/retrieval | Supabase production owner (Morgan) | Cross-role access tests and 300-second signed URL test | Not configured |
-| Email recovery | Morgan must name a delivery owner/provider | Authenticated sender, approved copy, bounce/retry evidence | Owner/provider not selected — blocking |
-| Refund/dispute/credit policy | Morgan (business policy); engineering owner for enforcement | Approved state table above, customer/support copy, and webhook/reconciliation/access/credit tests | Historical verification/export enforcement implemented 2026-08-24; durable fulfillment and full credit suspension/restoration remain blocking |
-| Provider retention/redisplay rights | Morgan + counsel/provider-contract owner | Contract-backed field/retention matrix | Not supplied — blocking |
-| Expired/revoked share purge | Morgan/privacy owner | Approved explicit grace, backup restore test, aggregate dry run, scheduler audit/stop limits | Not scheduled — blocking |
-| Reconciliation/on-call | Morgan until delegated | Dry run, bounded repair rehearsal, alert destination | Not configured |
+| Gate                                                    | Accountable owner                                           | Evidence required                                                                                                                               | Current state                                                                                                                                                                                                                           |
+| ------------------------------------------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Snapshot/model/target contract                          | TrueCap engineering owner (Morgan until delegated)          | Golden parity tests and canonical hash vectors                                                                                                  | Blocked                                                                                                                                                                                                                                 |
+| Transactional checkout binding and worker leases/outbox | TrueCap engineering owner (Morgan until delegated)          | Atomic RPC plus process-death/duplicate-delivery tests                                                                                          | Not implemented — blocking                                                                                                                                                                                                              |
+| Expand-only migration review/apply                      | Supabase production owner (Morgan)                          | Clone restore, migration dry run twice, backup id, schema verification                                                                          | The historical `deal_comps` write-boundary repair is live. The four-migration release batch has replayed twice on isolated PostgreSQL 17 but is not yet applied to production; durable Pack and retention review drafts remain unapplied.                                                               |
+| Stripe event subscription/handler                       | Stripe production owner (Morgan)                            | Test-mode duplicate/reorder/replay suite; exact subscribed event list                                                                           | Not configured                                                                                                                                                                                                                          |
+| Artifact storage/retrieval                              | Supabase production owner (Morgan)                          | Cross-role access tests and 300-second signed URL test                                                                                          | Not configured                                                                                                                                                                                                                          |
+| Email recovery                                          | Morgan must name a delivery owner/provider                  | Authenticated sender, approved copy, bounce/retry evidence                                                                                      | Owner/provider not selected — blocking                                                                                                                                                                                                  |
+| Refund/dispute/credit policy                            | Morgan (business policy); engineering owner for enforcement | Approved state table above, customer/support copy, webhook/reconciliation/access/credit tests, and zero reversed claims missing adjustment rows | Historical verification/export and idempotent applied-credit adjustment tracking implemented in source; production migration/alert routing remain to verify. Durable fulfillment and full credit suspension/restoration remain blocking |
+| Provider retention/redisplay rights                     | Morgan + counsel/provider-contract owner                    | Contract-backed field/retention matrix                                                                                                          | Not supplied — blocking                                                                                                                                                                                                                 |
+| Expired/revoked share purge                             | Morgan/privacy owner                                        | Approved explicit grace, backup restore test, aggregate dry run, scheduler audit/stop limits                                                    | Not scheduled — blocking                                                                                                                                                                                                                |
+| Reconciliation/on-call                                  | Morgan until delegated                                      | Dry run, bounded repair rehearsal, alert destination                                                                                            | Not configured                                                                                                                                                                                                                          |
 
 Activation is prohibited while any row is blocked or unassigned. In this
 runbook, "activation" means durable Pack runtime activation. That prohibition
@@ -466,10 +558,10 @@ runtimes off.
    Stripe event subscription list, Pack Price id, and row counts without
    exposing customer data.
 2. In a disposable Supabase clone restored from a recent production-shaped
-   backup, execute the permission migration and both review drafts separately.
-   Execute each twice; the second run must be a no-op. Run the schema/source
-   contract tests. Clone execution does not promote either draft into the
-   production migration queue.
+   backup, replay every pending executable migration in ledger order, then
+   execute both review drafts separately. Execute the executable batch twice;
+   the second run must be a no-op. Run the schema/source contract tests. Clone
+   execution does not promote either draft into the production migration queue.
 3. Implement the tolerant runtime behind a server-only activation gate. It must
    work when the new tables are absent and must not create a new Pack Session
    unless it can persist the durable binding.
@@ -488,8 +580,8 @@ runtimes off.
    duplicate, delayed, reordered, failed-render, failed-email, refunded, and
    disputed fixtures.
 8. After the relevant owner approval, take a fresh backup and manually apply
-   only the migration approved for that release. The `deal_comps` permission
-   repair may be applied alone. Do not promote or execute either review draft
+   only the migration batch approved for that release. Do not replay the
+   already-recorded `20260824121000` permission repair. Do not promote or execute either review draft
    merely because the comps repair is approved. Re-run the read-only
    verification queries before deploying a writer.
 9. Deploy code with creation still off. Enable webhook observation/recording,

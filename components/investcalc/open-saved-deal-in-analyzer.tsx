@@ -1,12 +1,11 @@
 "use client";
 
 /**
- * Open a saved deal in the analyzer — the ONE code path for the storage
- * handoff that hands a saved deal's form + result snapshots to the
- * calculator on "/" (investcalc-page.tsx reads the matching key on mount and
- * restores the draft in edit mode).
+ * Open a saved deal in the analyzer. Edit/reopen uses a durable owner-scoped
+ * `/?savedDeal=<id>` URL resolved on the authenticated server route, so the
+ * analysis survives refresh, history, bookmarks, and another signed-in device.
  *
- * The handoff is NONCE-KEYED: each open writes its payload to a localStorage
+ * Duplicate/fork remains a NONCE-KEYED handoff: each fork writes its payload to a localStorage
  * key derived from a fresh crypto.randomUUID() and opens the tab at
  * `/?dealHandoff=<nonce>` (or `/?dealDuplicate=<nonce>`). A single shared
  * key can't work here — two quick opens overwrite each other and cross-wire
@@ -43,7 +42,7 @@ export const SAVED_ANALYSIS_EDIT_DRAFT_KEY = "truecap_saved_analysis_edit_draft"
  */
 export const SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY = "truecap_saved_analysis_duplicate_draft";
 
-/** Query params carrying the handoff nonce. Must match investcalc-page.tsx. */
+/** Legacy edit and current duplicate handoff params. Must match investcalc-page.tsx. */
 export const DEAL_EDIT_HANDOFF_PARAM = "dealHandoff";
 export const DEAL_DUPLICATE_HANDOFF_PARAM = "dealDuplicate";
 
@@ -54,6 +53,18 @@ export const DEAL_DUPLICATE_HANDOFF_PARAM = "dealDuplicate";
  * popup-blocker prompt still finds its payload.
  */
 const HANDOFF_PAYLOAD_TTL_MS = 60 * 60 * 1000;
+
+export const POPUP_BLOCKED_MESSAGE =
+  "Your browser blocked the new tab. Allow pop-ups for TrueCap, then try again.";
+const HANDOFF_STORAGE_BLOCKED_MESSAGE =
+  "Your browser blocked the site storage needed to open this deal safely. Allow site data for TrueCap, then try again.";
+
+/** Open synchronously inside the click event so browsers can authorize it. */
+export function openAnalyzerHandoffWindow(): Window | null {
+  const targetWindow = window.open("about:blank", "_blank");
+  if (targetWindow) targetWindow.opener = null;
+  return targetWindow;
+}
 
 /** Remove orphaned per-nonce payloads under `<baseKey>::` past their TTL
  *  (or unparseable). Snapshot the keys first — removing while iterating
@@ -152,6 +163,8 @@ export async function duplicateSavedDealInAnalyzer(
   id: string,
   targetWindow: Window | null
 ): Promise<{ ok: true } | { ok: false; message: string }> {
+  if (!targetWindow) return { ok: false, message: POPUP_BLOCKED_MESSAGE };
+
   let result: Awaited<ReturnType<typeof getSavedDealForEditingAction>>;
   try {
     result = await getSavedDealForEditingAction(id);
@@ -173,70 +186,61 @@ export async function duplicateSavedDealInAnalyzer(
   }
   const { maxOfferTarget, maxOfferTargetSource } =
     normalizeSavedDealHandoffTarget(result.resultSnapshot);
-  const nonce = writeNonceKeyedHandoffPayload(SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY, {
-    formSnapshot: result.formSnapshot,
-    templateFallback: result.templateFallback,
-    ...(maxOfferTarget
-      ? { maxOfferTarget, maxOfferTargetSource }
-      : {}),
-  });
+  let nonce: string;
+  try {
+    nonce = writeNonceKeyedHandoffPayload(SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY, {
+      formSnapshot: result.formSnapshot,
+      templateFallback: result.templateFallback,
+      ...(maxOfferTarget
+        ? { maxOfferTarget, maxOfferTargetSource }
+        : {}),
+    });
+  } catch {
+    targetWindow.close();
+    return { ok: false, message: HANDOFF_STORAGE_BLOCKED_MESSAGE };
+  }
   const href = `/?${DEAL_DUPLICATE_HANDOFF_PARAM}=${nonce}`;
-  if (targetWindow) {
+  try {
+    if (targetWindow.closed) throw new Error("Target tab closed");
     targetWindow.location.href = href;
     return { ok: true };
+  } catch {
+    try {
+      window.localStorage.removeItem(`${SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY}::${nonce}`);
+    } catch {
+      // Best-effort cleanup only; the normal TTL sweep removes the payload.
+    }
+    return {
+      ok: false,
+      message: "The new tab closed before the deal was ready. Try opening it again.",
+    };
   }
-  window.open(href, "_blank", "noopener,noreferrer");
-  return { ok: true };
 }
 
 /**
- * Fetch the saved deal for editing, stash the handoff payload under a fresh
- * nonce key, and point `targetWindow` (an already-opened about:blank tab —
- * popup-blocker safe) at the nonce URL. Falls back to window.open when no
- * target tab was pre-opened. On failure the pre-opened tab is closed and the
- * error is returned for the caller to surface (toast etc.).
+ * Point an already-opened, popup-safe tab at the stable saved-deal URL. Data is
+ * resolved server-side after navigation and never transported through browser
+ * storage.
  */
 export async function openSavedDealInAnalysisTab(
   id: string,
   targetWindow: Window | null
 ): Promise<{ ok: true } | { ok: false; message: string }> {
-  let result: Awaited<ReturnType<typeof getSavedDealForEditingAction>>;
+  if (!targetWindow) return { ok: false, message: POPUP_BLOCKED_MESSAGE };
+  // The saved row ID is not secret; the authenticated server route performs
+  // the ownership check before returning any data. A stable URL is durable
+  // across refresh, history, bookmarks, and another signed-in device.
+  const href = `/?savedDeal=${encodeURIComponent(id)}`;
   try {
-    result = await getSavedDealForEditingAction(id);
-  } catch {
-    // The action REJECTED rather than returning {ok:false} (network blip,
-    // cold-start 500, stale-deploy Server Action). Close the pre-opened tab and
-    // hand the caller a normal failure so its existing !ok toast fires, instead
-    // of leaking an unhandled rejection and stranding the blank tab.
-    targetWindow?.close();
-    return { ok: false, message: "Something interrupted the request. Please try again." };
-  }
-  if (!result.ok) {
-    targetWindow?.close();
-    return { ok: false, message: result.message };
-  }
-  if (!isReleasedUnderwritingSnapshot(result.formSnapshot)) {
-    targetWindow?.close();
-    return { ok: false, message: "This underwriting model is not available yet." };
-  }
-
-  const { resultSnapshot } = normalizeSavedDealHandoffTarget(result.resultSnapshot);
-  const nonce = writeNonceKeyedHandoffPayload(SAVED_ANALYSIS_EDIT_DRAFT_KEY, {
-    id: result.id,
-    schemaVersion: result.schemaVersion,
-    methodologyVersion: result.methodologyVersion,
-    pipelineStage: result.pipelineStage,
-    formSnapshot: result.formSnapshot,
-    templateFallback: result.templateFallback,
-    resultSnapshot,
-  });
-  const href = `/?${DEAL_EDIT_HANDOFF_PARAM}=${nonce}`;
-  if (targetWindow) {
+    if (targetWindow.closed) throw new Error("Target tab closed");
     targetWindow.location.href = href;
     return { ok: true };
+  } catch {
+    return {
+      ok: false,
+      message: "The new tab closed before the deal was ready. Try opening it again.",
+    };
   }
-  window.open(href, "_blank", "noopener,noreferrer");
-  return { ok: true };
 }
 
 /**
@@ -244,17 +248,21 @@ export async function openSavedDealInAnalysisTab(
  * underwrite (verdict, projections, tax strategy, exit scenarios) in a new
  * tab via the shared handoff above.
  */
-export function OpenFullAnalysisButton({ savedDealId }: { savedDealId: string }) {
+export function OpenFullAnalysisButton({
+  savedDealId,
+  recorded = false,
+}: {
+  savedDealId: string;
+  /** Recorded methodology snapshots open read-only; current analyses can update in place. */
+  recorded?: boolean;
+}) {
   const { toast } = useToast();
   const [isOpening, setIsOpening] = useState(false);
 
   const handleClick = () => {
     if (isOpening) return;
-    // Open the tab synchronously (inside the click) so popup blockers allow
-    // it, then navigate it once the server action resolves — same pattern as
-    // My Deals' Open button.
-    const targetWindow = window.open("about:blank", "_blank");
-    if (targetWindow) targetWindow.opener = null;
+    // Open synchronously inside the click so popup blockers allow it.
+    const targetWindow = openAnalyzerHandoffWindow();
     setIsOpening(true);
     void (async () => {
       try {
@@ -284,7 +292,7 @@ export function OpenFullAnalysisButton({ savedDealId }: { savedDealId: string })
       ) : (
         <ExternalLink aria-hidden className="size-3.5" />
       )}
-      View recorded analysis
+      {recorded ? "View recorded analysis" : "Edit assumptions"}
     </button>
   );
 }
@@ -300,8 +308,15 @@ export function ReunderwriteAsScenarioButton({ savedDealId }: { savedDealId: str
 
   const handleClick = () => {
     if (isOpening) return;
-    const targetWindow = window.open("about:blank", "_blank");
-    if (targetWindow) targetWindow.opener = null;
+    const targetWindow = openAnalyzerHandoffWindow();
+    if (!targetWindow) {
+      toast({
+        title: "Could not open new tab",
+        description: POPUP_BLOCKED_MESSAGE,
+        variant: "destructive",
+      });
+      return;
+    }
     setIsOpening(true);
     void (async () => {
       try {

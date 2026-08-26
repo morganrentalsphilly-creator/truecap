@@ -53,14 +53,25 @@ export function ScoreBreakdown({
    *  Omitted/null falls back to the investor scale. */
   propertyType?: DealScoreInput["propertyType"] | null;
 }) {
-  const rows: { key: keyof DealScoreBreakdown; label: string; max: number }[] = [
+  const rows: {
+    key: keyof DealScoreBreakdown;
+    label: string;
+    max: number;
+    notApplicable?: boolean;
+  }[] = [
     { key: "cashFlowScore", label: "Cash flow", max: getCashFlowComponentMax(propertyType) },
-    { key: "cocScore", label: "Cash-on-cash", max: COMPONENT_MAXES.coc },
+    {
+      key: "cocScore",
+      label: "Cash-on-cash",
+      max: COMPONENT_MAXES.coc,
+      notApplicable: breakdown.applicabilityAdjustment != null,
+    },
     { key: "capRateScore", label: "Cap rate", max: COMPONENT_MAXES.capRate },
     { key: "dscrScore", label: "DSCR", max: COMPONENT_MAXES.dscr },
     { key: "totalReturnScore", label: "10-yr total return", max: COMPONENT_MAXES.totalReturn },
   ];
   const floorApplied = isAppreciationFloorApplied(breakdown, score);
+  const applicabilityAdjustment = breakdown.applicabilityAdjustment;
   return (
     <div className="w-[min(20rem,78vw)] text-sm">
       <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
@@ -75,7 +86,7 @@ export function ScoreBreakdown({
               <div className="flex items-center justify-between gap-3">
                 <span className="text-foreground">{r.label}</span>
                 <span className="tabular-nums text-muted-foreground">
-                  {Math.round(v)} / {r.max}
+                  {r.notApplicable ? "N/A" : `${Math.round(v)} / ${r.max}`}
                 </span>
               </div>
               <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-muted">
@@ -89,6 +100,14 @@ export function ScoreBreakdown({
             <span className="text-foreground">Risk adjustments</span>
             <span className="tabular-nums font-semibold text-destructive">
               {Math.round(breakdown.riskPenalty)}
+            </span>
+          </li>
+        ) : null}
+        {applicabilityAdjustment != null ? (
+          <li className="flex items-center justify-between gap-3 pt-0.5">
+            <span className="text-foreground">Applicable-factor normalization</span>
+            <span className="tabular-nums font-semibold text-foreground">
+              {applicabilityAdjustment >= 0 ? "+" : ""}{Math.round(applicabilityAdjustment)}
             </span>
           </li>
         ) : null}
@@ -110,7 +129,7 @@ export function ScoreBreakdown({
           <>
             The factors above sum to {Math.round(getScoreBreakdownSum(breakdown))}, but this deal
             is an appreciation play - strong projected 10-yr total return with non-negative
-            after-tax cash flow - so the score is held at {Math.round(score)} instead of reading
+            pre-tax operating cash flow - so the score is held at {Math.round(score)} instead of reading
             as weak fundamentals.
           </>
         ) : (
@@ -120,6 +139,12 @@ export function ScoreBreakdown({
           </>
         )}
       </p>
+      {applicabilityAdjustment != null ? (
+        <p className="mt-2 text-[11px] leading-snug text-muted-foreground">
+          Cash-on-cash is N/A because modeled cash invested is $0. The remaining applicable
+          factors are normalized to 100; the historical 0% sentinel is not scored.
+        </p>
+      ) : null}
       <p className="mt-2 text-[11px] leading-snug text-muted-foreground">
         Secondary model summary only—not evidence readiness, Buy Box fit, advice, or a recorded decision.
       </p>

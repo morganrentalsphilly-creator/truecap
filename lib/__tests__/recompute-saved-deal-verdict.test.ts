@@ -12,7 +12,10 @@ import { describe, expect, it } from "vitest";
 
 import { calculateAnalysis } from "../calc-analysis";
 import type { InvestmentFormValues } from "../investcalc-schema";
-import { recomputeSavedDealVerdict } from "../recompute-saved-deal-verdict";
+import {
+  recomputeSavedDealVerdict,
+  toRecomputedSavedAnalysisSnapshot,
+} from "../recompute-saved-deal-verdict";
 
 /** Canonical single-family deal (mirrors the calc-analysis test baseline). */
 function baseSingleFamily(overrides: Partial<InvestmentFormValues> = {}): InvestmentFormValues {
@@ -70,6 +73,17 @@ describe("recomputeSavedDealVerdict", () => {
     expect(fresh!.capRatePct).toBe(expected.capRate);
     expect(fresh!.cocReturnPct).toBe(expected.cocReturn);
     expect(fresh!.isCashPurchase).toBe(false);
+  });
+
+  it("carries explicit score-method provenance into a current recompute snapshot", () => {
+    const fresh = recomputeSavedDealVerdict(baseSingleFamily());
+    expect(fresh).not.toBeNull();
+
+    const snapshot = toRecomputedSavedAnalysisSnapshot(fresh!);
+    expect(fresh!.scoreMethodologyVersion).toBe("1.2");
+    expect(snapshot.scoreMethodologyVersion).toBe(
+      fresh!.scoreMethodologyVersion,
+    );
   });
 
   it("carries taxSavingsMonthly + afterTaxCF from the SAME recompute (NT-1)", () => {

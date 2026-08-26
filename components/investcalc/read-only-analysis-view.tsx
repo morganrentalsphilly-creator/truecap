@@ -16,7 +16,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
-import type { AnalysisResult } from "@/lib/calc-analysis";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { SensitivityGrid } from "@/components/investcalc/sensitivity-grid";
 import { StrategiesPanel } from "@/components/investcalc/strategies-panel";
@@ -37,15 +36,15 @@ import {
 } from "@/lib/offer-ceiling-contract";
 import { computeAssumptionImpact } from "@/lib/assumption-impact";
 import { trackEvent } from "@/lib/analytics";
+import type { PublicShareAnalysisPayload } from "@/lib/public-share-analysis-result";
 
 interface ReadOnlyAnalysisViewProps {
   values: InvestmentFormValues;
-  result: AnalysisResult;
+  /** Server-authorized result. Core shares contain no paid result fields. */
+  analysis: PublicShareAnalysisPayload;
   /** Owner's stored sale/rent comps (when a saved deal was shared). Backs the
    *  rent/value with real comparables; null hides the section. */
   comps?: ReportComps | null;
-  /** True only when the verified share owner currently has a paid plan. */
-  showProAnalysis: boolean;
   /** Exact acquisition criteria captured with the share. */
   maoTarget?: MaoTarget;
   /** Frozen provenance for the shared target. */
@@ -88,7 +87,7 @@ function MetricTile({
           "font-mono text-xl font-bold tabular-nums tracking-tight sm:text-2xl",
           positive && "text-[var(--metric-positive)]",
           negative && "text-[var(--metric-negative)]",
-          !positive && !negative && "text-foreground"
+          !positive && !negative && "text-foreground",
         )}
       >
         {value}
@@ -99,22 +98,34 @@ function MetricTile({
 }
 
 const money0 = (n: number | null | undefined) =>
-  n == null || !Number.isFinite(n) ? "—" : `$${Math.round(n).toLocaleString("en-US")}`;
+  n == null || !Number.isFinite(n)
+    ? "—"
+    : `$${Math.round(n).toLocaleString("en-US")}`;
 
 function CompRow({ c }: { c: ReportComp }) {
   const facts = [
     c.bedrooms != null ? `${c.bedrooms} bd` : null,
     c.bathrooms != null ? `${c.bathrooms} ba` : null,
-    c.squareFootage != null ? `${c.squareFootage.toLocaleString("en-US")} sqft` : null,
+    c.squareFootage != null
+      ? `${c.squareFootage.toLocaleString("en-US")} sqft`
+      : null,
     c.distanceMiles != null ? `${c.distanceMiles.toFixed(1)} mi` : null,
-  ].filter(Boolean).join(" · ");
+  ]
+    .filter(Boolean)
+    .join(" · ");
   return (
     <li className="flex items-start justify-between gap-3 py-1.5">
       <div className="min-w-0">
-        <p className="truncate text-xs font-medium text-foreground">{c.address || "Nearby comp"}</p>
-        {facts ? <p className="truncate text-[11px] text-muted-foreground">{facts}</p> : null}
+        <p className="truncate text-xs font-medium text-foreground">
+          {c.address || "Nearby comp"}
+        </p>
+        {facts ? (
+          <p className="truncate text-[11px] text-muted-foreground">{facts}</p>
+        ) : null}
       </div>
-      <span className="shrink-0 text-xs font-semibold tabular-nums text-foreground">{money0(c.price)}</span>
+      <span className="shrink-0 text-xs font-semibold tabular-nums text-foreground">
+        {money0(c.price)}
+      </span>
     </li>
   );
 }
@@ -130,41 +141,74 @@ function SharedDealComps({ comps }: { comps: ReportComps }) {
   const sale = comps.saleComps.slice(0, 4);
   const rent = comps.rentComps.slice(0, 4);
   const range = (r: { low: number | null; high: number | null } | null) =>
-    r && (r.low != null || r.high != null) ? `${money0(r.low)} – ${money0(r.high)}` : null;
+    r && (r.low != null || r.high != null)
+      ? `${money0(r.low)} – ${money0(r.high)}`
+      : null;
   const valueRange = range(comps.valueRange);
   const rentRange = range(comps.rentRange);
 
   return (
-    <section aria-label="Market comps" className="bg-card rounded-2xl border border-border shadow-sm">
+    <section
+      aria-label="Market comps"
+      className="bg-card rounded-2xl border border-border shadow-sm"
+    >
       <div className="border-b border-border px-5 py-3">
-        <h2 className="text-sm font-semibold text-foreground">Backed by market comps</h2>
-        <p className="text-[11px] text-muted-foreground">Nearby sales &amp; rentals via RentCast — reference only.</p>
+        <h2 className="text-sm font-semibold text-foreground">
+          Backed by market comps
+        </h2>
+        <p className="text-[11px] text-muted-foreground">
+          Nearby sales &amp; rentals via RentCast — reference only.
+        </p>
       </div>
       <div className="p-5 space-y-4">
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-xl border border-border bg-muted/30 p-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Est. value</p>
-            <p className="mt-0.5 text-lg font-bold tabular-nums text-foreground">{money0(comps.valueEstimate)}</p>
-            {valueRange ? <p className="text-[11px] text-muted-foreground">{valueRange}</p> : null}
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Est. value
+            </p>
+            <p className="mt-0.5 text-lg font-bold tabular-nums text-foreground">
+              {money0(comps.valueEstimate)}
+            </p>
+            {valueRange ? (
+              <p className="text-[11px] text-muted-foreground">{valueRange}</p>
+            ) : null}
           </div>
           <div className="rounded-xl border border-border bg-muted/30 p-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Est. rent</p>
-            <p className="mt-0.5 text-lg font-bold tabular-nums text-foreground">
-              {comps.rentEstimate == null ? "—" : `${money0(comps.rentEstimate)}/mo`}
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Est. rent
             </p>
-            {rentRange ? <p className="text-[11px] text-muted-foreground">{rentRange}</p> : null}
+            <p className="mt-0.5 text-lg font-bold tabular-nums text-foreground">
+              {comps.rentEstimate == null
+                ? "—"
+                : `${money0(comps.rentEstimate)}/mo`}
+            </p>
+            {rentRange ? (
+              <p className="text-[11px] text-muted-foreground">{rentRange}</p>
+            ) : null}
           </div>
         </div>
         {sale.length > 0 ? (
           <div>
-            <p className="mb-1 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Comparable sales</p>
-            <ul className="divide-y divide-border/70">{sale.map((c, i) => <CompRow key={`s-${i}`} c={c} />)}</ul>
+            <p className="mb-1 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+              Comparable sales
+            </p>
+            <ul className="divide-y divide-border/70">
+              {sale.map((c, i) => (
+                <CompRow key={`s-${i}`} c={c} />
+              ))}
+            </ul>
           </div>
         ) : null}
         {rent.length > 0 ? (
           <div>
-            <p className="mb-1 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Comparable rentals</p>
-            <ul className="divide-y divide-border/70">{rent.map((c, i) => <CompRow key={`r-${i}`} c={c} />)}</ul>
+            <p className="mb-1 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+              Comparable rentals
+            </p>
+            <ul className="divide-y divide-border/70">
+              {rent.map((c, i) => (
+                <CompRow key={`r-${i}`} c={c} />
+              ))}
+            </ul>
           </div>
         ) : null}
       </div>
@@ -174,9 +218,8 @@ function SharedDealComps({ comps }: { comps: ReportComps }) {
 
 export function ReadOnlyAnalysisView({
   values,
-  result,
+  analysis,
   comps,
-  showProAnalysis,
   maoTarget,
   maoTargetSource = "selected-targets",
   offerCeilingAccess = null,
@@ -185,13 +228,15 @@ export function ReadOnlyAnalysisView({
   priceEstimated = false,
 }: ReadOnlyAnalysisViewProps) {
   const router = useRouter();
+  const result = analysis.result;
+  const proResult = analysis.access === "pro" ? analysis.result : null;
   const adoptedMaoTarget =
     maoTarget && isAdoptedOfferCeilingTargetSource(maoTargetSource)
       ? maoTarget
       : undefined;
   const offerCeiling =
     adoptedMaoTarget && offerCeilingAccess?.access === "exact"
-      ? offerCeilingAccess.exact?.presentation ?? null
+      ? (offerCeilingAccess.exact?.presentation ?? null)
       : null;
   const rangePreview =
     adoptedMaoTarget && offerCeilingAccess?.access === "preview"
@@ -199,7 +244,7 @@ export function ReadOnlyAnalysisView({
       : null;
   const assumptionBreakpoints = useMemo(
     () => (recordedResult ? [] : computeAssumptionImpact(values).slice(0, 3)),
-    [recordedResult, values]
+    [recordedResult, values],
   );
   const criteriaMet = adoptedMaoTarget
     ? meetsMaoTarget(result, adoptedMaoTarget)
@@ -215,7 +260,9 @@ export function ReadOnlyAnalysisView({
     : offerCeilingAccess?.access === "exact" && maoTarget
       ? "Not reachable"
       : rangePreview
-        ? `${fmtCash(rangePreview.lower)}–${fmtCash(rangePreview.upper)}`
+        ? !rangePreview.downsideFeasible || rangePreview.lower == null
+          ? "No feasible downside case"
+          : `${fmtCash(rangePreview.lower)}–${fmtCash(rangePreview.upper)}`
         : "Unavailable";
   const priceGap = offerCeiling
     ? offerCeiling.listPriceGap > 0
@@ -224,11 +271,13 @@ export function ReadOnlyAnalysisView({
         ? `${fmtCash(Math.abs(offerCeiling.listPriceGap))} below ceiling`
         : "At the ceiling"
     : rangePreview
-      ? Number(values.purchasePrice) > rangePreview.upper
-        ? `${fmtCash(Number(values.purchasePrice) - rangePreview.upper)} above preview`
-        : Number(values.purchasePrice) < rangePreview.lower
-          ? `${fmtCash(rangePreview.lower - Number(values.purchasePrice))} below preview`
-          : "Inside preview range"
+      ? !rangePreview.downsideFeasible || rangePreview.lower == null
+        ? "Downside misses targets at every supported price"
+        : Number(values.purchasePrice) > rangePreview.upper
+          ? `${fmtCash(Number(values.purchasePrice) - rangePreview.upper)} above preview`
+          : Number(values.purchasePrice) < rangePreview.lower
+            ? `${fmtCash(rangePreview.lower - Number(values.purchasePrice))} below preview`
+            : "Inside preview range"
       : "Not available";
   // "Make this mine": hand the FULL deal to the calculator via its autosave
   // draft (restored on mount via normalizeInvestmentFormSnapshot), so the
@@ -237,7 +286,10 @@ export function ReadOnlyAnalysisView({
   const makeThisMine = () => {
     const cloneValues = addressIncluded ? values : { ...values, address: "" };
     try {
-      window.localStorage.setItem("truecap_calc_form_draft_v1", JSON.stringify(cloneValues));
+      window.localStorage.setItem(
+        "truecap_calc_form_draft_v1",
+        JSON.stringify(cloneValues),
+      );
     } catch {
       /* storage unavailable — fall through to a clean calculator */
     }
@@ -273,9 +325,12 @@ export function ReadOnlyAnalysisView({
             <p className="mt-1 text-sm text-muted-foreground">
               {priceEstimated ? "Estimated price" : "Asking"}{" "}
               {fmtCash(Number(values.purchasePrice))}
-              {priceEstimated ? " (automated estimate — not an asking price)" : ""}. This
-              read-only share is a screening record, not a decision; independently verify every
-              material assumption before recording a decision.
+              {priceEstimated
+                ? " (automated estimate — not an asking price)"
+                : ""}
+              . This read-only share is a screening record, not a decision;
+              independently verify every material assumption before recording a
+              decision.
             </p>
           </div>
 
@@ -290,7 +345,11 @@ export function ReadOnlyAnalysisView({
               <>
                 <p className="mt-1 text-xs font-semibold text-foreground">
                   Under the targets captured with this share
-                  {offerCeiling ? " · exact ceiling" : rangePreview ? " · coarse range preview" : ""}
+                  {offerCeiling
+                    ? " · exact ceiling"
+                    : rangePreview
+                      ? " · coarse range preview"
+                      : ""}
                 </p>
                 <p className="mt-1 text-[11px] leading-relaxed text-foreground">
                   Targets: {describeMaoTarget(adoptedMaoTarget)}
@@ -298,50 +357,79 @@ export function ReadOnlyAnalysisView({
                 {offerCeiling ? (
                   <div className="mt-2 space-y-1 text-[11px] leading-relaxed text-muted-foreground">
                     <p>
-                      Binding: {offerCeiling.bindingConstraints.map((item) => item.criterion).join(" + ") || "No constraint resolved"}
+                      Binding:{" "}
+                      {offerCeiling.bindingConstraints
+                        .map((item) => item.criterion)
+                        .join(" + ") || "No constraint resolved"}
                     </p>
                     {offerCeiling.nextConstraint ? (
-                      <p>Next constraint: {offerCeiling.nextConstraint.criterion}</p>
+                      <p>
+                        Next constraint: {offerCeiling.nextConstraint.criterion}
+                      </p>
                     ) : null}
                     <p>
-                      Screening range: {offerCeiling.range.lower == null ? "no feasible downside price" : fmtCash(offerCeiling.range.lower)}–{offerCeiling.range.upper == null ? "no feasible upside price" : fmtCash(offerCeiling.range.upper)} if {offerCeiling.range.label}.
+                      Screening range:{" "}
+                      {offerCeiling.range.lower == null
+                        ? "no feasible downside price"
+                        : fmtCash(offerCeiling.range.lower)}
+                      –
+                      {offerCeiling.range.upper == null
+                        ? "no feasible upside price"
+                        : fmtCash(offerCeiling.range.upper)}{" "}
+                      if {offerCeiling.range.label}.
                     </p>
                   </div>
                 ) : null}
               </>
             ) : (
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                No Offer Ceiling was calculated because this share did not capture an
-                adopted target. Open a new analysis to review and adopt your own rules
-                without rewriting this historical result.
+                No Offer Ceiling was calculated because this share did not
+                capture an adopted target. Open a new analysis to review and
+                adopt your own rules without rewriting this historical result.
               </p>
             )}
             <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
               {adoptedMaoTarget
                 ? "Highest modeled price that still meets the targets captured with this share under the assumptions shown."
-                : "A supported Offer Ceiling requires captured target criteria."} This is not a
-              recommended offer or an appraisal.
+                : "A supported Offer Ceiling requires captured target criteria."}{" "}
+              This is not a recommended offer or an appraisal.
             </p>
           </div>
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
           <div className="rounded-xl border border-border bg-muted/30 p-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Criteria fit</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Criteria fit
+            </p>
             <p className="mt-1 text-sm font-extrabold text-foreground">
-              {criteriaMet == null ? "No adopted target" : criteriaMet ? "Meets" : "Misses"}
+              {criteriaMet == null
+                ? "No adopted target"
+                : criteriaMet
+                  ? "Meets"
+                  : "Misses"}
             </p>
           </div>
           <div className="rounded-xl border border-border bg-muted/30 p-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Decision readiness</p>
-            <p className="mt-1 text-sm font-extrabold text-foreground">Screening only</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Decision readiness
+            </p>
+            <p className="mt-1 text-sm font-extrabold text-foreground">
+              Screening only
+            </p>
           </div>
           <div className="rounded-xl border border-border bg-muted/30 p-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Margin of safety</p>
-            <p className="mt-1 text-sm font-extrabold text-foreground">{priceGap}</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Margin of safety
+            </p>
+            <p className="mt-1 text-sm font-extrabold text-foreground">
+              {priceGap}
+            </p>
           </div>
           <div className="rounded-xl border border-primary/20 bg-[var(--brand-blue-light)] p-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Next action</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Next action
+            </p>
             <p className="mt-1 text-sm font-extrabold text-foreground">
               {assumptionBreakpoints[0]
                 ? `Verify ${assumptionBreakpoints[0].label.toLowerCase()}`
@@ -359,22 +447,28 @@ export function ReadOnlyAnalysisView({
               {assumptionBreakpoints.map((driver, index) => (
                 <li key={`${driver.label}-${index}`}>
                   <span className="text-muted-foreground">{index + 1}.</span>{" "}
-                  {driver.label} {driver.deltaLabel} moves cash flow about ±{fmtCash(driver.cashFlowSwing / 2)}/mo
+                  {driver.label} {driver.deltaLabel} moves cash flow about ±
+                  {fmtCash(driver.cashFlowSwing / 2)}/mo
                 </li>
               ))}
             </ol>
           ) : (
             <p className="mt-2 text-sm font-semibold text-foreground">
-              Verify rent, property taxes, insurance, vacancy, and repair reserves against
-              current source documents. Sensitivity figures are intentionally not regenerated
-              inside this recorded share.
+              Verify rent, property taxes, insurance, vacancy, and repair
+              reserves against current source documents. Sensitivity figures are
+              intentionally not regenerated inside this recorded share.
             </p>
           )}
         </div>
       </section>
 
       {/* Headline metric tiles */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2 sm:gap-3">
+      <div
+        className={cn(
+          "grid grid-cols-2 gap-2 sm:gap-3",
+          proResult ? "sm:grid-cols-3 xl:grid-cols-6" : "sm:grid-cols-4",
+        )}
+      >
         <MetricTile
           label="Monthly Cash Flow"
           value={fmtCash(result.netCashFlow)}
@@ -383,9 +477,16 @@ export function ReadOnlyAnalysisView({
         />
         <MetricTile
           label="CoC Return"
-          value={fmtPct(result.cocReturn)}
-          positive={result.cocReturn >= 0}
-          negative={result.cocReturn < 0}
+          value={
+            result.totalCashRequired <= 0 ? "N/A" : fmtPct(result.cocReturn)
+          }
+          sub={
+            result.totalCashRequired <= 0
+              ? "No modeled cash invested"
+              : undefined
+          }
+          positive={result.totalCashRequired > 0 && result.cocReturn >= 0}
+          negative={result.totalCashRequired > 0 && result.cocReturn < 0}
         />
         <MetricTile
           label="Cap Rate"
@@ -403,31 +504,43 @@ export function ReadOnlyAnalysisView({
             result.monthlyPayment <= 0
               ? "Cash purchase"
               : result.dscr >= 1.25
-              ? "Common screening threshold (≥1.25)"
-              : result.dscr >= 1.0
-              ? "Tight (≥1.0)"
-              : "Underwater"
+                ? "Common screening threshold (≥1.25)"
+                : result.dscr >= 1.0
+                  ? "Tight (≥1.0)"
+                  : "Underwater"
           }
           positive={result.monthlyPayment > 0 && result.dscr >= 1.25}
           negative={result.monthlyPayment > 0 && result.dscr < 1.25}
         />
-        <MetricTile
-          label="Est. Tax Savings"
-          value={fmtCash(result.taxSavingsMonthly)}
-          sub="/month"
-        />
-        <MetricTile
-          label="After-Tax CF"
-          value={fmtCash(result.afterTaxCF)}
-          sub="/month"
-        />
+        {proResult ? (
+          <>
+            <MetricTile
+              label="Illustrative Tax Effect"
+              value={fmtCash(proResult.taxSavingsMonthly)}
+              sub={
+                proResult.taxSavingsMonthly > 0
+                  ? "Estimated benefit / month"
+                  : proResult.taxSavingsMonthly < 0
+                    ? "Estimated liability / month"
+                    : "No modeled effect"
+              }
+            />
+            <MetricTile
+              label="Illustrative After-Tax CF"
+              value={fmtCash(proResult.afterTaxCF)}
+              sub="/month estimate"
+            />
+          </>
+        ) : null}
       </div>
 
       {/* The VIEWER's own buy box verdict on this shared deal — renders only
           for a signed-in viewer with an active buy box; anonymous viewers see
           nothing here. Sits right above "Make this mine" so a personal miss
           ("0.8pp short") flows into "import it and adjust". */}
-      {addressIncluded ? <SharedDealViewerBuyBox values={values} result={result} /> : null}
+      {addressIncluded ? (
+        <SharedDealViewerBuyBox values={values} result={result} />
+      ) : null}
 
       {/* Primary conversion action for a high-intent viewer: clone the deal
           into the calculator (full inputs preloaded) instead of sending them
@@ -444,7 +557,7 @@ export function ReadOnlyAnalysisView({
 
       {comps ? <SharedDealComps comps={comps} /> : null}
 
-      {showProAnalysis && !recordedResult ? (
+      {proResult && !recordedResult ? (
         <>
           <SensitivityGrid values={values} />
 
@@ -453,34 +566,51 @@ export function ReadOnlyAnalysisView({
               Advanced/Beta strategy modeling
             </summary>
             <p className="border-t border-border px-5 pt-4 text-xs leading-relaxed text-muted-foreground">
-              Rehab, refinance, flip, and short-term-rental outputs are secondary
-              scenarios with incomplete market, lender, regulatory, or contractor
-              evidence. Verify them independently.
+              Rehab, refinance, flip, and short-term-rental outputs are
+              secondary scenarios with incomplete market, lender, regulatory, or
+              contractor evidence. Verify them independently.
             </p>
-            <StrategiesPanel values={values} result={result} />
+            <StrategiesPanel values={values} result={proResult} />
           </details>
         </>
       ) : recordedResult ? (
-        <section className="rounded-2xl border border-border bg-card p-5 sm:p-6" aria-labelledby="recorded-share-scenarios-title">
-          <h2 id="recorded-share-scenarios-title" className="text-base font-bold text-foreground">
+        <section
+          className="rounded-2xl border border-border bg-card p-5 sm:p-6"
+          aria-labelledby="recorded-share-scenarios-title"
+        >
+          <h2
+            id="recorded-share-scenarios-title"
+            className="text-base font-bold text-foreground"
+          >
             Scenario tools are separate from this recorded result
           </h2>
           <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-            This link preserves the numbers captured when it was created. Clone the assumptions
-            into a new analysis to run today&rsquo;s sensitivity and strategy scenarios without
-            rewriting this historical record.
+            This link preserves the numbers captured when it was created. Clone
+            the assumptions into a new analysis to run today&rsquo;s sensitivity
+            and strategy scenarios without rewriting this historical record.
           </p>
         </section>
       ) : (
-        <section className="rounded-2xl border border-primary/25 bg-[var(--brand-blue-light)] p-5 sm:p-6" aria-labelledby="shared-pro-analysis-title">
-          <h2 id="shared-pro-analysis-title" className="text-base font-bold text-foreground">
-            Exact Offer Ceiling, sensitivity, and advanced strategy modeling are paid tools
+        <section
+          className="rounded-2xl border border-primary/25 bg-[var(--brand-blue-light)] p-5 sm:p-6"
+          aria-labelledby="shared-pro-analysis-title"
+        >
+          <h2
+            id="shared-pro-analysis-title"
+            className="text-base font-bold text-foreground"
+          >
+            Exact Offer Ceiling, sensitivity, and advanced strategy modeling are
+            paid tools
           </h2>
           <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-            This free shared view includes the deal&rsquo;s core underwriting. Open the
-            property in TrueCap to tune assumptions or unlock the advanced decision tools.
+            This free shared view includes the deal&rsquo;s core underwriting.
+            Open the property in TrueCap to tune assumptions or unlock the
+            advanced decision tools.
           </p>
-          <Link href="/?utm_source=shared_deal&utm_medium=pro_gate" className="mt-3 inline-flex min-h-11 items-center font-bold text-primary hover:underline">
+          <Link
+            href="/?utm_source=shared_deal&utm_medium=pro_gate"
+            className="mt-3 inline-flex min-h-11 items-center font-bold text-primary hover:underline"
+          >
             Analyze this property in TrueCap →
           </Link>
         </section>
@@ -492,10 +622,12 @@ export function ReadOnlyAnalysisView({
         href="/?utm_source=shared_deal&utm_medium=share_link"
         className="block rounded-2xl bg-primary p-6 sm:p-8 text-center text-primary-foreground no-underline transition-opacity hover:opacity-90"
       >
-        <p className="text-lg sm:text-xl font-extrabold">Analyzed with TrueCap</p>
+        <p className="text-lg sm:text-xl font-extrabold">
+          Analyzed with TrueCap
+        </p>
         <p className="mt-1 text-sm sm:text-base opacity-90">
-          Run your own rental deal free. Cap rate, cash flow, and DSCR from
-          just an address in 60 seconds.
+          Run your own rental deal free. Cap rate, cash flow, and DSCR from just
+          an address in 60 seconds.
         </p>
         <span className="mt-4 inline-block rounded-xl bg-primary-foreground px-4 py-2.5 text-sm font-bold text-primary">
           Try TrueCap free →
@@ -506,9 +638,9 @@ export function ReadOnlyAnalysisView({
           shows verdict + recommendation language, but has no SiteFooter. */}
       <p className="mt-4 px-2 text-center text-[11px] leading-relaxed text-muted-foreground">
         This shared analysis is an automated estimate for screening only, not an
-        appraisal, and not financial, tax, or investment advice. Figures depend on
-        assumptions that may be out of date; verify independently before making any
-        decision.
+        appraisal, and not financial, tax, or investment advice. Figures depend
+        on assumptions that may be out of date; verify independently before
+        making any decision.
       </p>
     </div>
   );

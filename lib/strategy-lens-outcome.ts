@@ -48,6 +48,8 @@ export type StrategyLensMetricsInput = {
   netCashFlow: number;
   /** Cash-on-cash return (%). */
   cocReturn: number;
+  /** False when no initial cash is modeled and CoC is mathematically N/A. */
+  cashOnCashApplicable?: boolean;
   /** Debt-service coverage ratio. */
   dscr: number;
   /** Cap rate (%). */
@@ -90,7 +92,15 @@ function cashFlowMetric(netCashFlow: number): LensOutcomeMetric {
 
 /** Bands mirror cocBenchmarkLabel / the Deal Score CoC tiers
  *  (>7 strong / 5–7 healthy / 3–5 modest / <3 weak). */
-function cocMetric(cocReturn: number): LensOutcomeMetric {
+function cocMetric(cocReturn: number, applicable = true): LensOutcomeMetric {
+  if (!applicable) {
+    return {
+      label: "CoC",
+      value: "N/A",
+      band: "no modeled cash invested",
+      tone: "neutral",
+    };
+  }
   const band =
     cocReturn > 7
       ? "strong"
@@ -182,14 +192,14 @@ function capRateMetric(capRate: number): LensOutcomeMetric {
   };
 }
 
-/** After-tax cash flow — the "does the hold pay for itself?" check an
- *  appreciation investor makes on a red year-1 deal. Sign-based only. */
+/** Signed illustrative after-tax cash flow. A positive estimate is not proof
+ *  the hold pays for itself because deduction usability is taxpayer-specific. */
 function afterTaxCfMetric(afterTaxCF: number): LensOutcomeMetric {
   return {
     label: "After-tax CF",
     value: fmtMoneyPerMo(afterTaxCF),
-    band: afterTaxCF >= 0 ? "covers itself" : "costs you monthly",
-    tone: afterTaxCF >= 0 ? "good" : "bad",
+    band: afterTaxCF >= 0 ? "illustrative estimate ≥ $0" : "illustrative estimate < $0",
+    tone: afterTaxCF >= 0 ? "neutral" : "bad",
   };
 }
 
@@ -206,7 +216,7 @@ export function buildStrategyLensOutcome(
       headline: "You're a cash-flow investor — monthly income, CoC, and DSCR carry this deal:",
       metrics: [
         cashFlowMetric(m.netCashFlow),
-        cocMetric(m.cocReturn),
+        cocMetric(m.cocReturn, m.cashOnCashApplicable !== false),
         dscrMetric(m.dscr, m.monthlyPayment, m.isOwnerOccupant ?? false),
       ],
     };

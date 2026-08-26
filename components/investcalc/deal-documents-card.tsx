@@ -48,6 +48,8 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
   const [docs, setDocs] = useState<DocItem[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [unavailable, setUnavailable] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [downloadFallback, setDownloadFallback] = useState<{ url: string; label: string } | null>(null);
   const [uploading, setUploading] = useState(false);
   // Which row is mid-flight AND which action, so the spinner replaces the
   // icon that was actually pressed (a slow delete used to show nothing).
@@ -59,41 +61,60 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
 
   const prefixFor = (uid: string) => `${uid}/${savedDealId}`;
 
-  const refresh = async (uid: string) => {
-    const { data, error } = await supabase.storage
-      .from(BUCKET)
-      .list(prefixFor(uid), { limit: 100, sortBy: { column: "created_at", order: "desc" } });
-    if (error) {
-      // Bucket not provisioned yet (migration pending) → hide quietly.
-      if (/bucket not found/i.test(error.message)) setUnavailable(true);
-      return;
+  const refresh = async (uid: string): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase.storage
+        .from(BUCKET)
+        .list(prefixFor(uid), { limit: 100, sortBy: { column: "created_at", order: "desc" } });
+      if (error) {
+        // Bucket not provisioned yet (migration pending) → hide quietly.
+        if (/bucket not found/i.test(error.message)) {
+          setUnavailable(true);
+        } else {
+          setLoadError("We couldn't load this deal's documents. Your files have not been removed.");
+        }
+        return false;
+      }
+      const items: DocItem[] = (data ?? [])
+        // .list() can include a placeholder folder row with a null id - skip it.
+        .filter((o) => o.id !== null)
+        .map((o) => ({
+          name: o.name,
+          path: `${prefixFor(uid)}/${o.name}`,
+          size: (o.metadata as { size?: number } | null)?.size ?? null,
+          createdAt: o.created_at ?? null,
+        }));
+      setDocs(items);
+      setLoadError(null);
+      return true;
+    } catch {
+      setLoadError("We couldn't load this deal's documents. Check your connection and try again.");
+      return false;
     }
-    const items: DocItem[] = (data ?? [])
-      // .list() can include a placeholder folder row with a null id - skip it.
-      .filter((o) => o.id !== null)
-      .map((o) => ({
-        name: o.name,
-        path: `${prefixFor(uid)}/${o.name}`,
-        size: (o.metadata as { size?: number } | null)?.size ?? null,
-        createdAt: o.created_at ?? null,
-      }));
-    setDocs(items);
   };
 
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (cancelled) return;
-      if (!user) {
-        setLoaded(true);
-        return;
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (cancelled) return;
+        if (!user) {
+          setLoadError("Sign in again to access this deal's documents.");
+          setLoaded(true);
+          return;
+        }
+        setUserId(user.id);
+        await refresh(user.id);
+        if (!cancelled) setLoaded(true);
+      } catch {
+        if (!cancelled) {
+          setLoadError("We couldn't verify your document access. Check your connection and try again.");
+          setLoaded(true);
+        }
       }
-      setUserId(user.id);
-      await refresh(user.id).catch(() => {});
-      if (!cancelled) setLoaded(true);
     })();
     return () => {
       cancelled = true;
@@ -138,14 +159,35 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
         });
         return;
       }
-      await refresh(userId);
-      toast({ title: "Document uploaded", description: displayName(safeFileName(file.name)) });
+      const refreshed = await refresh(userId);
+      if (refreshed) {
+        toast({ title: "Document uploaded", description: displayName(safeFileName(file.name)) });
+      } else {
+        toast({
+          title: "Uploaded, but the list couldn't refresh",
+          description: "The file was stored. Retry the document list to confirm it here.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Upload failed",
+        description: friendlyToastError(error, {
+          feature: "deal-documents",
+          fallback: "We couldn't upload this file. Please try again.",
+        }),
+        variant: "destructive",
+      });
     } finally {
       setUploading(false);
     }
   };
 
-  const handleDownload = async (path: string) => {
+  const handleDownload = async (path: string, label: string) => {
+    // Open synchronously while this click still has browser user activation.
+    // If popups are blocked, render a normal link after the signed URL arrives.
+    const pendingWindow = window.open("", "_blank");
+    if (pendingWindow) pendingWindow.opener = null;
     setBusy({ path, kind: "download" });
     try {
       const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(path, 60);
@@ -158,9 +200,28 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
           }),
           variant: "destructive",
         });
+        pendingWindow?.close();
         return;
       }
-      window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+      if (pendingWindow) {
+        pendingWindow.location.replace(data.signedUrl);
+      } else {
+        setDownloadFallback({ url: data.signedUrl, label });
+        toast({
+          title: "New tab blocked",
+          description: "Use the Open document link in the Documents card.",
+        });
+      }
+    } catch (error) {
+      pendingWindow?.close();
+      toast({
+        title: "Couldn't open document",
+        description: friendlyToastError(error, {
+          feature: "deal-documents",
+          fallback: "We couldn't open this document. Please try again.",
+        }),
+        variant: "destructive",
+      });
     } finally {
       setBusy(null);
     }
@@ -183,9 +244,25 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
         });
         return;
       }
-      await refresh(userId);
-      // Mirrors the upload toast — the row vanishing was the only signal.
-      toast({ title: "Document deleted", description: label });
+      const refreshed = await refresh(userId);
+      if (refreshed) {
+        toast({ title: "Document deleted", description: label });
+      } else {
+        toast({
+          title: "Deleted, but the list couldn't refresh",
+          description: "Retry the document list to confirm the latest files.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Couldn't delete document",
+        description: friendlyToastError(error, {
+          feature: "deal-documents",
+          fallback: "We couldn't delete this document. Please try again.",
+        }),
+        variant: "destructive",
+      });
     } finally {
       setBusy(null);
     }
@@ -204,7 +281,7 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
           type="button"
           size="sm"
           variant="outline"
-          className="h-8 gap-1.5"
+          className="min-h-11 gap-1.5"
           disabled={uploading || !userId}
           onClick={() => fileInputRef.current?.click()}
         >
@@ -224,7 +301,41 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
         />
       </div>
 
-      {docs.length === 0 ? (
+      {loadError ? (
+        <div role="alert" className="mb-3 rounded-xl border border-destructive/25 bg-destructive/5 p-3">
+          <p className="text-sm font-semibold text-foreground">Couldn&apos;t load documents</p>
+          <p className="mt-1 text-xs text-muted-foreground">{loadError}</p>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="mt-3 min-h-11"
+            disabled={!userId}
+            onClick={() => {
+              if (userId) void refresh(userId);
+            }}
+          >
+            Try again
+          </Button>
+        </div>
+      ) : null}
+
+      {downloadFallback ? (
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-primary/25 bg-primary/5 p-3">
+          <p className="text-xs text-muted-foreground">Your browser blocked the new tab.</p>
+          <a
+            href={downloadFallback.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-semibold text-primary hover:bg-primary/10"
+            onClick={() => setDownloadFallback(null)}
+          >
+            Open {downloadFallback.label}
+          </a>
+        </div>
+      ) : null}
+
+      {!loadError && docs.length === 0 ? (
         <p className="py-2 text-xs text-muted-foreground">
           No documents yet. Upload inspection reports, leases, or photos to keep them with the deal. Max
           10 MB each; private to your account.
@@ -248,7 +359,7 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
                 <button
                   type="button"
                   aria-label={`Download ${label}`}
-                  onClick={() => handleDownload(doc.path)}
+                  onClick={() => handleDownload(doc.path, label)}
                   disabled={isBusy}
                   className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-50"
                 >
@@ -288,6 +399,7 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
                         type="button"
                         variant="ghost"
                         size="sm"
+                        className="min-h-11"
                         onClick={() => setConfirmPath(null)}
                       >
                         Cancel
@@ -296,6 +408,7 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
                         type="button"
                         variant="destructive"
                         size="sm"
+                        className="min-h-11"
                         onClick={() => void handleDelete(doc.path, label)}
                       >
                         Delete

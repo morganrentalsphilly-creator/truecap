@@ -40,7 +40,7 @@ const POPULAR_PAGES = [
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center px-4 pt-16 pb-12 sm:pt-24">
+    <main id="main" className="min-h-screen bg-background flex flex-col items-center px-4 pt-16 pb-12 sm:pt-24">
       {/* Client-only tracker — captures the requested pathname to Sentry
           so we can triage broken inbound links in operational dashboards
           instead of discovering them weeks later via analytics. */}
@@ -87,7 +87,7 @@ export default function NotFound() {
         <div className="mt-5">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 rounded-xl bg-primary text-primary-foreground px-5 py-2.5 text-sm font-bold hover:opacity-90"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-primary text-primary-foreground px-5 py-2.5 text-sm font-bold hover:opacity-90"
           >
             Run a free analysis
             <ArrowUpRight className="size-4" />
@@ -117,6 +117,6 @@ export default function NotFound() {
           );
         })}
       </div>
-    </div>
+    </main>
   );
 }

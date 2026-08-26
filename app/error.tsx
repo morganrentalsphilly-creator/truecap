@@ -34,7 +34,7 @@ export default function GlobalAppError({
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4 text-center">
+    <main id="main" className="min-h-screen bg-background flex flex-col items-center justify-center px-4 text-center">
       <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-red-50 text-[var(--metric-negative)]">
         <AlertTriangle className="size-6" />
       </div>
@@ -57,19 +57,19 @@ export default function GlobalAppError({
         <button
           type="button"
           onClick={() => reset()}
-          className="inline-flex items-center gap-1.5 rounded-xl bg-primary text-primary-foreground px-4 py-2 text-sm font-bold hover:opacity-90"
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-primary text-primary-foreground px-4 py-2 text-sm font-bold hover:opacity-90"
         >
           <RefreshCw className="size-4" />
           Try again
         </button>
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:underline"
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-md text-sm font-bold text-primary hover:underline"
         >
           Go home
           <ArrowUpRight className="size-4" />
         </Link>
       </div>
-    </div>
+    </main>
   );
 }

@@ -12,17 +12,15 @@ describe("legacy Max Offer surface consistency", () => {
     expect(legacyRoute).toContain("<SharedDealShell");
     expect(legacyRoute).not.toContain("maoTarget=");
     expect(viewer).not.toContain("calculateMaxAllowableOffer");
-    expect(viewer).toContain(
-      'offerCeilingAccess?.access === "exact"'
-    );
+    expect(viewer).toContain('offerCeilingAccess?.access === "exact"');
     expect(viewer).toContain(': "Unavailable"');
-    expect(viewer).toContain(
-      "No Offer Ceiling was calculated because this share did not capture"
+    expect(viewer).toMatch(
+      /No Offer Ceiling was calculated because this share did not\s+capture/,
     );
     // Other entitled analysis remains available; only the unsupported number
     // is suppressed.
     expect(viewer).toContain("<SensitivityGrid values={values} />");
-    expect(viewer).toContain("<StrategiesPanel values={values} result={result} />");
+    expect(viewer).toContain("<StrategiesPanel values={values} result={proResult}");
   });
 
   it("routes every saved-deal MAO surface through the shared resolver with client scope", () => {
@@ -40,12 +38,16 @@ describe("legacy Max Offer surface consistency", () => {
       expect(source).toMatch(/persistedMaoTarget(?:\s*:|\s*,)/);
     }
     expect(dashboard).toContain("DASHBOARD_DEALS_SELECT_WITH_CLIENT");
-    expect(dashboard).toContain("if (methodologyResolution.usesRecordedSnapshot) {");
+    expect(dashboard).toContain(
+      "if (methodologyResolution.usesRecordedSnapshot) {",
+    );
     expect(compare).toContain("runCompareQueryWithClient");
-    expect(compare).toContain("if (canShowMao && resolution.usesRecordedSnapshot) {");
+    expect(compare).toContain(
+      "if (canShowMao && resolution.usesRecordedSnapshot) {",
+    );
     expect(compare).toContain("box.isActive && buyBoxHasCriteria(box)");
     expect(workspace).toContain(
-      "if (isPremium && methodologyResolution.usesRecordedSnapshot) {"
+      "if (isPremium && methodologyResolution.usesRecordedSnapshot) {",
     );
   });
 });

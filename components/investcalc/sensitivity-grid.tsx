@@ -70,8 +70,14 @@ function ScenarioCell({
           {fmtPct(result.capRate)} cap
         </span>{" "}
         ·{" "}
-        <span className={cn(pickColor(scenarioName, baseResult.cocReturn, result.cocReturn))}>
-          {fmtPct(result.cocReturn)} CoC
+        <span
+          className={cn(
+            result.totalCashRequired > 0
+              ? pickColor(scenarioName, baseResult.cocReturn, result.cocReturn)
+              : "text-muted-foreground"
+          )}
+        >
+          {result.totalCashRequired > 0 ? `${fmtPct(result.cocReturn)} CoC` : "CoC N/A"}
         </span>{" "}
         ·{" "}
         {isCashPurchase ? (

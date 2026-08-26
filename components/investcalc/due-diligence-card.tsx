@@ -34,7 +34,10 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
   const { toast } = useToast();
   const [items, setItems] = useState<DueDiligenceItem[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [migrationPending, setMigrationPending] = useState(false);
+  const [revision, setRevision] = useState<string | null>(null);
   const [newLabel, setNewLabel] = useState("");
   const [isSaving, startSaving] = useTransition();
   // WS-3: which row's note editor is open (accordion — one at a time keeps
@@ -46,25 +49,33 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
   useEffect(() => {
     let cancelled = false;
     setLoaded(false);
+    setLoadError(null);
     setMigrationPending(false);
     setExpandedId(null);
     void getDealDueDiligenceAction(savedDealId)
       .then((r) => {
         if (cancelled) return;
-        if (r.ok) setItems(r.items);
-        else if (r.code === "MIGRATION_PENDING") setMigrationPending(true);
+        if (r.ok) {
+          setItems(r.items);
+          setRevision(r.revision);
+        } else if (r.code === "MIGRATION_PENDING") {
+          setMigrationPending(true);
+        } else {
+          setLoadError(r.message || "We couldn't load this checklist.");
+        }
         setLoaded(true);
       })
       .catch((err) => {
         if (!cancelled) {
           console.warn("[due-diligence] load failed:", err);
+          setLoadError("We couldn't load this checklist. Check your connection and try again.");
           setLoaded(true);
         }
       });
     return () => {
       cancelled = true;
     };
-  }, [savedDealId]);
+  }, [loadAttempt, savedDealId]);
 
   /**
    * Every mutator commits to local state first (optimistic - the checklist
@@ -84,27 +95,38 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
     onFailure?: () => void,
     failureHint = "Your last change was undone."
   ) => {
+    if (isSaving || loadError) return;
     const dealIdAtSubmit = savedDealId;
     const previous = items;
+    const revisionAtSubmit = revision;
     startSaving(async () => {
       try {
-        const r = await updateDealDueDiligenceAction(dealIdAtSubmit, next);
+        const r = await updateDealDueDiligenceAction(dealIdAtSubmit, next, revisionAtSubmit);
         if (dealIdAtSubmit !== savedDealId) return; // user switched deals mid-save
         if (!r.ok) {
           if (r.code === "MIGRATION_PENDING") {
+            setItems(previous);
             setMigrationPending(true);
             return;
           }
           const fresh = await getDealDueDiligenceAction(dealIdAtSubmit).catch(() => null);
           if (dealIdAtSubmit !== savedDealId) return;
-          setItems(fresh?.ok ? fresh.items : previous);
+          if (fresh?.ok) {
+            setItems(fresh.items);
+            setRevision(fresh.revision);
+          } else {
+            setItems(previous);
+          }
           onFailure?.();
           toast({
             title: "Could not save checklist",
             description: `${r.message} ${failureHint}`,
             variant: "destructive",
           });
+          return;
         }
+        setItems(r.items);
+        setRevision(r.revision);
       } catch (err) {
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, stale-deploy Server Action). The optimistic setItems
@@ -218,6 +240,31 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
 
   if (!loaded) return null;
 
+  if (loadError) {
+    return (
+      <section
+        aria-label="Due diligence"
+        className="rounded-2xl border border-destructive/25 bg-destructive/5 p-4"
+      >
+        <div role="alert">
+          <p className="text-sm font-semibold text-foreground">Couldn&apos;t load due diligence</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {loadError} Editing stays disabled until the saved checklist is available, so unseen items cannot be overwritten.
+          </p>
+        </div>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className="mt-3 min-h-11"
+          onClick={() => setLoadAttempt((attempt) => attempt + 1)}
+        >
+          Try again
+        </Button>
+      </section>
+    );
+  }
+
   if (migrationPending) {
     return (
       <section
@@ -281,6 +328,7 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
                   type="checkbox"
                   checked={item.done}
                   onChange={() => toggle(item.id)}
+                  disabled={isSaving}
                   className="size-4 rounded border-border accent-[var(--brand-green)]"
                 />
               </label>
@@ -290,6 +338,7 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
               <button
                 type="button"
                 onClick={() => toggleNote(item.id)}
+                disabled={isSaving}
                 aria-expanded={isExpanded}
                 aria-controls={`dd-note-${item.id}`}
                 className="flex min-w-0 flex-1 items-center gap-1.5 rounded-md text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
@@ -323,6 +372,7 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
                 type="date"
                 value={item.dueDate ?? ""}
                 onChange={(e) => setDueDate(item.id, e.target.value)}
+                disabled={isSaving}
                 aria-label={`Due date for ${item.label}`}
                 className={cn(
                   "h-11 shrink-0 rounded-md border border-input bg-transparent px-1.5 text-[11px] outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
@@ -337,6 +387,7 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
                 type="button"
                 aria-label={`Remove ${item.label}`}
                 onClick={() => remove(item.id)}
+                disabled={isSaving}
                 className="shrink-0 rounded-md p-1.5 text-muted-foreground/50 transition-colors hover:bg-destructive/10 hover:text-destructive"
               >
                 <X className="size-4" />
@@ -353,6 +404,7 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
                   <Input
                     value={item.note ?? ""}
                     onChange={(e) => setNoteDraft(item.id, e.target.value)}
+                    disabled={isSaving}
                     onBlur={() => commitNote(item.id)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
@@ -384,6 +436,7 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
           id="new-due-diligence-item"
           value={newLabel}
           onChange={(e) => setNewLabel(e.target.value)}
+          disabled={isSaving}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               e.preventDefault();
@@ -393,7 +446,7 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
           placeholder="Add a checklist item…"
           className="h-11 text-sm"
         />
-        <Button type="button" size="sm" variant="outline" className="h-11" onClick={add} disabled={!newLabel.trim()} aria-label="Add checklist item">
+        <Button type="button" size="sm" variant="outline" className="h-11" onClick={add} disabled={isSaving || !newLabel.trim()} aria-label="Add checklist item">
           <Plus className="size-4" aria-hidden />
         </Button>
       </div>

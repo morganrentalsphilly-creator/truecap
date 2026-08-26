@@ -204,6 +204,12 @@ export function buildCanonicalReportData(
 
   const units = buildReportUnits(values, result.monthlyRentalIncome);
   const methodologyVersion = result.methodologyVersion;
+  const tenYearProjectionVersion =
+    typeof result.tenYearProjectionVersion === "number" &&
+    Number.isInteger(result.tenYearProjectionVersion) &&
+    result.tenYearProjectionVersion > 0
+      ? result.tenYearProjectionVersion
+      : null;
   const targetSource: OfferCeilingTargetSource =
     normalizeOfferCeilingTargetSource(input.maxOfferTargetSource) ??
     (input.maxOfferTarget ? "selected-targets" : "screening-defaults");
@@ -233,6 +239,7 @@ export function buildCanonicalReportData(
     generatedAt: input.generatedAt ?? new Date(),
     methodologyVersion,
     methodologyLabel: `${usesRecordedResult ? "Recorded " : ""}${TRUECAP_UNDERWRITING_STANDARD_NAME} v${methodologyVersion}`,
+    tenYearProjectionVersion,
     property: {
       address: values.address,
       type: values.propertyType,
@@ -258,6 +265,10 @@ export function buildCanonicalReportData(
         values.propertyTaxAnnual != null
           ? Number(values.propertyTaxAnnual)
           : null,
+      insuranceMonthlyBill:
+        result.insuranceInputMode === "monthly"
+          ? Number(result.insuranceMonthly)
+          : null,
       insurancePct: Number(result.insurancePctEffective ?? 0),
       maintenancePct: Number(result.maintenancePctEffective ?? 0),
       vacancyPct: Number(values.vacancyPct),
@@ -280,6 +291,7 @@ export function buildCanonicalReportData(
       rationale: score.explanation,
       monthlyCashFlow: result.netCashFlow,
       cocReturn: result.cocReturn,
+      cocApplicable: result.totalCashRequired > 0,
       capRate: result.capRate,
       dscr: result.dscr,
       taxSavings: result.taxSavingsMonthly,
@@ -326,6 +338,7 @@ export function buildCanonicalReportData(
           verdict: getDealTier(downsideResult),
           monthlyCashFlow: downsideResult.netCashFlow,
           cocReturn: downsideResult.cocReturn,
+          cocApplicable: downsideResult.totalCashRequired > 0,
           capRate: downsideResult.capRate,
           dscr: downsideResult.dscr,
         }

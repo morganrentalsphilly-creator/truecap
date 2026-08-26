@@ -13,6 +13,7 @@ import type { ProjectionYear, TenYearProjectionInput } from "@/lib/ten-year-proj
 
 export type ProjectionSource = {
   analysisId: string | null;
+  recorded?: boolean;
   input: TenYearProjectionInput;
   initialYears: ProjectionYear[];
 };
@@ -26,18 +27,20 @@ export function TenYearProjectionsPanel({
     normalizeProjectionYears(source.initialYears)
   );
   const [isLoadingSnapshot, setIsLoadingSnapshot] = useState(false);
-  const [snapshotSource, setSnapshotSource] = useState<"preview" | "local" | "cache" | "generated">(
-    source.analysisId ? "local" : "preview"
+  const [snapshotSource, setSnapshotSource] = useState<
+    "preview" | "recorded" | "local" | "cache" | "generated"
+  >(
+    source.recorded ? "recorded" : source.analysisId ? "local" : "preview"
   );
 
   useEffect(() => {
     setProjectionYears(normalizeProjectionYears(source.initialYears));
-    setSnapshotSource(source.analysisId ? "local" : "preview");
-  }, [source.analysisId, source.initialYears]);
+    setSnapshotSource(source.recorded ? "recorded" : source.analysisId ? "local" : "preview");
+  }, [source.analysisId, source.initialYears, source.recorded]);
 
   useEffect(() => {
     const analysisId = source.analysisId;
-    if (!analysisId) return;
+    if (!analysisId || source.recorded) return;
 
     let cancelled = false;
     setIsLoadingSnapshot(true);
@@ -70,7 +73,7 @@ export function TenYearProjectionsPanel({
     return () => {
       cancelled = true;
     };
-  }, [source.analysisId, source.input]);
+  }, [source.analysisId, source.input, source.recorded]);
 
   if (isLoadingSnapshot && projectionYears.length === 0) {
     return (

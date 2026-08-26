@@ -84,7 +84,7 @@ export default async function AdminTestimonialsPage() {
   const rows = (data as SubmissionRow[] | null) ?? [];
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+    <main id="main" className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
       <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
         Testimonial submissions
       </h1>

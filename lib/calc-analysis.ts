@@ -1,11 +1,16 @@
 import { InvestmentFormValues, isValidRentalUnit } from "./investcalc-schema";
 import { buildTaxStrategyProjection, type TaxStrategyYear } from "./tax-strategy";
-import { buildTenYearProjection, ProjectionYear } from "./ten-year-projections";
+import {
+  buildTenYearProjection,
+  TEN_YEAR_PROJECTION_SNAPSHOT_VERSION,
+  type ProjectionYear,
+} from "./ten-year-projections";
 import {
   TRUECAP_UNDERWRITING_STANDARD_VERSION,
   TRUECAP_UNDERWRITING_STANDARD_V2_VERSION,
   type TrueCapUnderwritingStandardVersion,
 } from "./underwriting-methodology";
+import { resolveV1AnalysisDate } from "./analysis-date";
 
 /** Annual private mortgage insurance as a % of the loan balance, applied to
  *  financed conventional loans with < 20% down and dropped once the loan
@@ -14,13 +19,51 @@ export const DEFAULT_PMI_ANNUAL_RATE_PCT = 0.8;
 /** Down-payment threshold (%) below which PMI applies. */
 export const PMI_DOWN_PAYMENT_THRESHOLD_PCT = 20;
 
+/** Canonical first-month mortgage-insurance estimate shared by the analyzer
+ * and public mortgage tool. PMI is modeled separately from homeowner's
+ * insurance and from lender-style P&I debt service. */
+export function calcInitialPmiMonthly(
+  loanAmount: number,
+  downPaymentPct: number,
+  annualRatePct: number = DEFAULT_PMI_ANNUAL_RATE_PCT,
+): number {
+  if (
+    !Number.isFinite(loanAmount) ||
+    !Number.isFinite(downPaymentPct) ||
+    !Number.isFinite(annualRatePct) ||
+    loanAmount <= 0 ||
+    downPaymentPct >= PMI_DOWN_PAYMENT_THRESHOLD_PCT ||
+    annualRatePct <= 0
+  ) {
+    return 0;
+  }
+  return (loanAmount * (annualRatePct / 100)) / 12;
+}
+
+/** Resolve the screening mortgage-insurance rate without inventing an
+ * owner-occupant product on an investment loan. A user/lender/template value
+ * is authoritative for every property type (including explicit 0). Only an
+ * owner-occupant analysis receives the 0.8% screening default when blank. */
+export function resolvePmiAnnualRatePct(
+  propertyType: InvestmentFormValues["propertyType"],
+  explicitRatePct: number | null | undefined,
+): number {
+  if (explicitRatePct != null && Number.isFinite(explicitRatePct)) {
+    return explicitRatePct;
+  }
+  return propertyType === "owner-occupant"
+    ? DEFAULT_PMI_ANNUAL_RATE_PCT
+    : 0;
+}
+
 export interface AnalysisResult<
   TVersion extends TrueCapUnderwritingStandardVersion = TrueCapUnderwritingStandardVersion,
 > {
   /** Version of the public formula contract used for this result. */
   methodologyVersion: TVersion;
-  /** v2-only audit fields. Omitted from v1 results to preserve their exact
-   * runtime shape and historical snapshot hashes. */
+  /** Audit date used for time-sensitive inputs such as property age. v2
+   * requires it explicitly; v1 uses the persisted input or its documented
+   * deterministic legacy fallback. */
   analysisDate?: string;
   operatingScenario?: "current" | "stabilized";
   rentBasis?: "in-place" | "market" | "pro-forma";
@@ -105,6 +148,10 @@ export interface AnalysisResult<
   closingCosts: number;
   totalCashRequired: number;
   propertyAge: number;
+  /** Independent method version for the embedded long-term projection.
+   * Optional only when reading a recorded legacy result that predates this
+   * audit field; every newly calculated result stamps it. */
+  tenYearProjectionVersion?: number;
   tenYearProjection: ProjectionYear[];
   /** Full 10-year tax strategy projection (same engine as the Tax Strategy panel). */
   taxStrategyYears: TaxStrategyYear[];
@@ -113,6 +160,31 @@ export interface AnalysisResult<
 export type AnyAnalysisResult = AnalysisResult;
 export type V1AnalysisResult = AnalysisResult<typeof TRUECAP_UNDERWRITING_STANDARD_VERSION>;
 export type V2AnalysisResult = AnalysisResult<typeof TRUECAP_UNDERWRITING_STANDARD_V2_VERSION>;
+
+/** Last-resort integrity boundary for direct engine callers that bypass the
+ * form schema (legacy snapshots, share payloads, tests, and future server
+ * integrations). A result containing Infinity/NaN must never reach save,
+ * share, comparison, or report surfaces. */
+function assertFiniteAnalysisResult<T extends AnyAnalysisResult>(result: T): T {
+  const visit = (value: unknown, path: string): void => {
+    if (typeof value === "number") {
+      if (!Number.isFinite(value)) {
+        throw new Error(`Analysis produced a non-finite numeric result at ${path}`);
+      }
+      return;
+    }
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => visit(item, `${path}[${index}]`));
+      return;
+    }
+    if (value && typeof value === "object") {
+      Object.entries(value).forEach(([key, item]) => visit(item, `${path}.${key}`));
+    }
+  };
+
+  visit(result, "analysis");
+  return result;
+}
 
 export function calcMonthlyPayment(principal: number, annualRate: number, years: number): number {
   // Defensive guards — schema enforces years >= 1 and principal >= 0, but
@@ -346,16 +418,15 @@ function calculateAnalysisV2(
   const downPaymentPctEffective = purchasePrice > 0 ? (downPayment / purchasePrice) * 100 : 0;
   const monthlyPayment = calcMonthlyPayment(loanAmount, interestRate, loanTermYears);
   const annualDebtService = monthlyPayment * 12;
-  const pmiAnnualRate =
-    pmiAnnualRatePct != null && Number.isFinite(pmiAnnualRatePct)
-      ? pmiAnnualRatePct
-      : DEFAULT_PMI_ANNUAL_RATE_PCT;
-  const pmiMonthly =
-    loanAmount > 0 &&
-    downPaymentPctEffective < PMI_DOWN_PAYMENT_THRESHOLD_PCT &&
-    pmiAnnualRate > 0
-      ? (loanAmount * (pmiAnnualRate / 100)) / 12
-      : 0;
+  const pmiAnnualRate = resolvePmiAnnualRatePct(
+    values.propertyType,
+    pmiAnnualRatePct,
+  );
+  const pmiMonthly = calcInitialPmiMonthly(
+    loanAmount,
+    downPaymentPctEffective,
+    pmiAnnualRate,
+  );
 
   const closingCostsInputMode = values.closingCostsInputMode;
   let closingCosts: number;
@@ -413,6 +484,7 @@ function calculateAnalysisV2(
     totalOperatingExpenses,
     capexReserveMonthly: capex,
     monthlyPayment,
+    interestRate,
     pmiMonthly,
     pmiNoCancel: pmiNoCancel === true,
     loanAmount,
@@ -432,7 +504,7 @@ function calculateAnalysisV2(
     ? Math.max(currentYear - (yearBuilt ?? currentYear), 0)
     : 0;
 
-  return {
+  return assertFiniteAnalysisResult({
     methodologyVersion: TRUECAP_UNDERWRITING_STANDARD_V2_VERSION,
     analysisDate,
     operatingScenario,
@@ -500,9 +572,10 @@ function calculateAnalysisV2(
     closingCosts,
     totalCashRequired,
     propertyAge,
+    tenYearProjectionVersion: TEN_YEAR_PROJECTION_SNAPSHOT_VERSION,
     tenYearProjection,
     taxStrategyYears,
-  };
+  });
 }
 
 export function calculateAnalysis(
@@ -572,7 +645,8 @@ export function calculateAnalysis(values: InvestmentFormValues): AnyAnalysisResu
 
   const annualRent = monthlyRentalIncome * 12;
 
-  const currentYear = new Date().getFullYear();
+  const analysisDate = resolveV1AnalysisDate(values.analysisDate);
+  const currentYear = Number(analysisDate.slice(0, 4));
   const hasValidYearBuilt = Number.isFinite(yearBuilt);
   const propertyAge = hasValidYearBuilt ? Math.max(currentYear - (yearBuilt ?? currentYear), 0) : 0;
   const maintenancePctEffective = maintenancePct;
@@ -590,8 +664,8 @@ export function calculateAnalysis(values: InvestmentFormValues): AnyAnalysisResu
       ? (propertyTaxAnnual / purchasePrice) * 100
       : propertyTaxPct ?? 1.1;
   const propertyTaxDefault = Math.round((purchasePrice * (propertyTaxPctEffective / 100)) / 12);
-  const insurancePctEffective = insurancePct ?? 0.5;
-  const insuranceDefault = Math.round((purchasePrice * (insurancePctEffective / 100)) / 12);
+  const insurancePctForEstimate = insurancePct ?? 0.5;
+  const insuranceDefault = Math.round((purchasePrice * (insurancePctForEstimate / 100)) / 12);
   // Annual-$ mode: the actual bill off the listing, /12. Blank falls back
   // to the percent estimate; percent mode is byte-identical to before
   // (mirrors the insurance dual-mode branch below).
@@ -603,6 +677,10 @@ export function calculateAnalysis(values: InvestmentFormValues): AnyAnalysisResu
     insuranceInputMode === "monthly"
       ? Math.round(insuranceMonthly ?? insuranceDefault)
       : insuranceDefault;
+  const insurancePctEffective =
+    insuranceInputMode === "monthly" && purchasePrice > 0
+      ? ((insurance * 12) / purchasePrice) * 100
+      : insurancePctForEstimate;
   const hoa = Math.round(hoaMonthly ?? 0);
   const utilities = Math.round(utilitiesMonthly ?? 0);
   const maintenance = Math.round((annualRent * (maintenancePctEffective / 100)) / 12);
@@ -638,21 +716,18 @@ export function calculateAnalysis(values: InvestmentFormValues): AnyAnalysisResu
   const monthlyPayment = Math.round(calcMonthlyPayment(loanAmount, interestRate, loanTermYears));
   const annualDebtService = monthlyPayment * 12;
 
-  // Mortgage insurance: financed loans with < 20% down carry PMI/MIP until the
-  // loan amortizes to ~80% LTV (unless pmiNoCancel — FHA MIP runs for the life
-  // of the loan). It's a real monthly outlay that reduces cash flow (and was
-  // previously ignored, overstating cash flow on low-down / house-hack deals).
-  // Not part of the P&I used for DSCR. The rate is user-overridable
-  // (pmiAnnualRatePct); 0 disables it (lender-paid MI, gift of equity). Model
-  // mortgage insurance ONCE here — never also fold it into the insurance %.
-  const pmiAnnualRate =
-    pmiAnnualRatePct != null && Number.isFinite(pmiAnnualRatePct)
-      ? pmiAnnualRatePct
-      : DEFAULT_PMI_ANNUAL_RATE_PCT;
-  const pmiMonthly =
-    loanAmount > 0 && downPaymentPct < PMI_DOWN_PAYMENT_THRESHOLD_PCT && pmiAnnualRate > 0
-      ? Math.round((loanAmount * (pmiAnnualRate / 100)) / 12)
-      : 0;
+  // Mortgage insurance is an owner-occupant screening default, not a generic
+  // sub-20%-down investor-loan fee. Any explicit lender/template rate remains
+  // authoritative for every property type; explicit 0 disables it. When it is
+  // modeled, it runs until ~80% LTV unless pmiNoCancel is selected for loan-life
+  // MIP. It reduces cash flow but stays outside P&I and lender-style DSCR.
+  const pmiAnnualRate = resolvePmiAnnualRatePct(
+    values.propertyType,
+    pmiAnnualRatePct,
+  );
+  const pmiMonthly = Math.round(
+    calcInitialPmiMonthly(loanAmount, downPaymentPct, pmiAnnualRate),
+  );
 
   // Cash flow (CapEx reserve + PMI both reduce real cash flow)
   const netCashFlow = monthlyRentalIncome - totalOperatingExpenses - monthlyPayment - pmiMonthly;
@@ -712,6 +787,7 @@ export function calculateAnalysis(values: InvestmentFormValues): AnyAnalysisResu
     totalOperatingExpenses,
     capexReserveMonthly: capex,
     monthlyPayment,
+    interestRate,
     pmiMonthly,
     pmiNoCancel: pmiNoCancel === true,
     loanAmount,
@@ -725,8 +801,9 @@ export function calculateAnalysis(values: InvestmentFormValues): AnyAnalysisResu
     includeInterestDeduction: includeInterestDeduction !== false,
   });
 
-  return {
+  return assertFiniteAnalysisResult({
     methodologyVersion: TRUECAP_UNDERWRITING_STANDARD_VERSION,
+    analysisDate,
     monthlyRentalIncome,
     grossScheduledIncomeAnnual,
     vacancyAllowanceAnnual,
@@ -777,7 +854,8 @@ export function calculateAnalysis(values: InvestmentFormValues): AnyAnalysisResu
     closingCosts,
     totalCashRequired,
     propertyAge,
+    tenYearProjectionVersion: TEN_YEAR_PROJECTION_SNAPSHOT_VERSION,
     tenYearProjection,
     taxStrategyYears,
-  };
+  });
 }

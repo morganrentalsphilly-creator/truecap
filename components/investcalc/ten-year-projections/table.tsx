@@ -10,7 +10,7 @@ const COLUMNS = [
   "Year",
   "Rental Income",
   "Operating Expenses",
-  "Annual Debt Service (Principal & Interest)",
+  "Annual Financing Outflow (P&I + Mortgage Insurance)",
   "Net Cash Flow",
   "Tax Effect",
   "After-Tax Cash Flow",
@@ -57,7 +57,7 @@ export function TenYearProjectionTable({
                   {[
                     ["Rental Income", formatCurrency(year.rentalIncomeAnnual)],
                     ["Operating Expenses", formatCurrency(year.operatingExpensesAnnual)],
-                    ["Annual Debt Service", formatCurrency(year.debtServiceAnnual)],
+                    ["Annual Financing Outflow (P&I + Mortgage Insurance)", formatCurrency(year.debtServiceAnnual)],
                     ["Net Cash Flow", formatCurrency(year.netCashFlowAnnual), year.netCashFlowAnnual],
                     ["Tax Effect", formatCurrency(year.taxSavingsAnnual), year.taxSavingsAnnual],
                     ["After-Tax Cash Flow", formatCurrency(year.afterTaxCashFlowAnnual), year.afterTaxCashFlowAnnual],

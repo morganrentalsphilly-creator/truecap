@@ -8,9 +8,8 @@
  * other's component just to share these few strings/types.
  *
  * Both surfaces are on the SAME page, so the live event is the primary
- * channel — the calculator is already mounted when the hero is clicked,
- * which a plain sessionStorage-on-mount handoff would miss. sessionStorage
- * is only a race/refresh fallback.
+ * channel once the calculator is hydrated. sessionStorage and brief live
+ * replays cover slower hydration, refresh, and restricted-storage races.
  */
 
 export const HERO_ANALYZE_EVENT = "truecap:hero-analyze";
@@ -26,3 +25,57 @@ export type HeroAnalyzeDetail = {
   /** True for "Try a sample deal" — calculator runs the full sample flow. */
   sample?: boolean;
 };
+
+type HeroAnalyzeStorage = {
+  getItem: (key: string) => string | null;
+  setItem: (key: string, value: string) => void;
+};
+
+type HeroAnalyzeDeliveryChannel = {
+  storage: HeroAnalyzeStorage;
+  dispatch: (detail: HeroAnalyzeDetail) => void;
+  schedule: (callback: () => void, delayMs: number) => unknown;
+};
+
+/**
+ * Deliver a hero handoff immediately and replay it briefly while it remains
+ * pending. If browser storage is unavailable, the delayed live events become
+ * the fallback instead. The calculator dedupes all deliveries by `token`.
+ */
+export function dispatchHeroAnalyzeWithFallback(
+  detail: HeroAnalyzeDetail,
+  channel: HeroAnalyzeDeliveryChannel
+) {
+  let serialized: string | null = null;
+  let stored = false;
+
+  try {
+    serialized = JSON.stringify(detail);
+    channel.storage.setItem(HERO_ANALYZE_STORAGE_KEY, serialized);
+    stored = true;
+  } catch {
+    // Private browsing and quota restrictions can disable sessionStorage.
+    // The immediate and delayed live events below still deliver the handoff.
+  }
+
+  channel.dispatch(detail);
+
+  const replayIfPending = () => {
+    if (!stored || !serialized) {
+      channel.dispatch(detail);
+      return;
+    }
+
+    try {
+      if (channel.storage.getItem(HERO_ANALYZE_STORAGE_KEY) !== serialized) return;
+    } catch {
+      // Storage became unavailable after the write. A token-deduped live
+      // replay is safer than silently losing the user's action.
+    }
+
+    channel.dispatch(detail);
+  };
+
+  channel.schedule(replayIfPending, 250);
+  channel.schedule(replayIfPending, 1_000);
+}

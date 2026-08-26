@@ -14,51 +14,53 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
-
-const num = (s: string) => {
-  const n = Number(s);
-  return Number.isFinite(n) ? n : 0;
-};
+import { ToolNumberField } from "@/components/tools/tool-number-field";
+import { validateToolNumber } from "@/lib/public-tool-validation";
 
 const fmtMoney = (n: number) =>
   `${n < 0 ? "-" : ""}$${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
 
-function classify(months: number, cashFlow: number): { label: string; color: string; note: string } {
+function classify(months: number | null, cashFlow: number): { label: string; color: string; note: string } {
   if (cashFlow <= 0) {
     return {
-      label: "Never (negative cash flow)",
+      label: "No cash-flow break-even",
       color: "text-[var(--metric-negative)]",
-      note: "Property doesn't break even on cash flow alone — relies on appreciation + equity build for return.",
+      note: "Monthly cash flow is zero or negative, so the entered cash is not recovered from cash flow alone.",
+    };
+  }
+  if (months == null) {
+    return {
+      label: "Break-even unavailable",
+      color: "text-muted-foreground",
+      note: "Fix the highlighted inputs to calculate.",
     };
   }
   if (months <= 60) {
     return {
-      label: "Very fast (<5 years)",
+      label: "Under 5 years",
       color: "text-[var(--metric-positive)]",
-      note: "Strong cash flow play — capital fully returned from rent within 5 years.",
+      note: "At the entered monthly cash flow, the modeled initial cash is recovered within 60 months.",
     };
   }
   if (months <= 120) {
     return {
-      label: "Reasonable (5-10 years)",
-      color: "text-[var(--metric-positive)]",
-      note: "Solid balanced deal — capital recycled within a typical hold period.",
+      label: "5 to 10 years",
+      color: "text-foreground",
+      note: "At the entered monthly cash flow, modeled recovery takes between 60 and 120 months.",
     };
   }
   if (months <= 180) {
     return {
-      label: "Slow (10-15 years)",
+      label: "10 to 15 years",
       color: "text-amber-700",
-      note: "Capital-build is slow — this deal relies on appreciation, not cash flow, for the wealth build.",
+      note: "At the entered monthly cash flow, modeled recovery takes between 120 and 180 months.",
     };
   }
   return {
-    label: "Very slow (15+ years)",
+    label: "More than 15 years",
     color: "text-amber-700",
-    note: "Almost pure appreciation play — only makes sense in fast-growth markets with strong price upside.",
+    note: "Cash-flow recovery alone takes more than 180 months under the entered assumptions.",
   };
 }
 
@@ -68,17 +70,60 @@ export function BreakEvenCalculatorWidget() {
   const [rehab, setRehab] = useState("5000");
   const [monthlyCashFlow, setMonthlyCashFlow] = useState("450");
 
+  const validated = useMemo(
+    () => ({
+      downPayment: validateToolNumber(downPayment, {
+        label: "Down payment",
+        min: 0,
+        max: 100_000_000,
+      }),
+      closingCosts: validateToolNumber(closingCosts, {
+        label: "Closing costs",
+        min: 0,
+        max: 100_000_000,
+      }),
+      rehab: validateToolNumber(rehab, {
+        label: "Rehab and initial repairs",
+        min: 0,
+        max: 100_000_000,
+      }),
+      monthlyCashFlow: validateToolNumber(monthlyCashFlow, {
+        label: "Monthly net cash flow",
+        min: -1_000_000,
+        max: 1_000_000,
+      }),
+    }),
+    [closingCosts, downPayment, monthlyCashFlow, rehab]
+  );
+  const investmentTotal =
+    validated.downPayment.ok &&
+    validated.closingCosts.ok &&
+    validated.rehab.ok
+      ? validated.downPayment.value + validated.closingCosts.value + validated.rehab.value
+      : null;
+  const hasPositiveInvestment = investmentTotal != null && investmentTotal > 0;
+  const hasInvestmentTotalError = investmentTotal != null && investmentTotal <= 0;
+
   const result = useMemo(() => {
-    const totalInvested = num(downPayment) + num(closingCosts) + num(rehab);
-    const cashFlow = num(monthlyCashFlow);
-    if (cashFlow <= 0) return { totalInvested, months: Infinity, years: Infinity, cashFlow };
+    if (
+      !validated.downPayment.ok ||
+      !validated.closingCosts.ok ||
+      !validated.rehab.ok ||
+      !validated.monthlyCashFlow.ok ||
+      !hasPositiveInvestment
+    ) {
+      return null;
+    }
+    const totalInvested =
+      validated.downPayment.value + validated.closingCosts.value + validated.rehab.value;
+    const cashFlow = validated.monthlyCashFlow.value;
+    if (cashFlow <= 0) return { totalInvested, months: null, years: null, cashFlow };
     const months = totalInvested / cashFlow;
     const years = months / 12;
     return { totalInvested, months, years, cashFlow };
-  }, [downPayment, closingCosts, rehab, monthlyCashFlow]);
+  }, [hasPositiveInvestment, validated]);
 
-  const verdict = classify(result.months, result.cashFlow);
-  const isInvalid = !Number.isFinite(result.months);
+  const verdict = result ? classify(result.months, result.cashFlow) : null;
 
   // Moment-of-result handoff into the full analyzer (P2-2 pattern shared by
   // the other tool widgets). Down payment / closing / rehab don't map onto
@@ -88,66 +133,51 @@ export function BreakEvenCalculatorWidget() {
 
   return (
     <div className="rounded-2xl border border-border bg-card p-5 sm:p-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="be-down" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            Down payment
-          </Label>
-          <div className="mt-1 relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
-            <Input id="be-down" type="number" inputMode="decimal" min="0"
-              value={downPayment} onChange={(e) => setDownPayment(e.target.value)} className="pl-7" />
-          </div>
+      <fieldset aria-describedby={hasInvestmentTotalError ? "be-investment-error" : undefined}>
+        <legend className="sr-only">Break-even inputs</legend>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <ToolNumberField id="be-down" label="Down payment" prefix="$" min={0} max={100_000_000} value={downPayment} onChange={(e) => setDownPayment(e.target.value)} error={validated.downPayment.error} />
+          <ToolNumberField id="be-closing" label="Closing costs" prefix="$" min={0} max={100_000_000} value={closingCosts} onChange={(e) => setClosingCosts(e.target.value)} error={validated.closingCosts.error} />
+          <ToolNumberField id="be-rehab" label="Rehab / initial repairs" prefix="$" min={0} max={100_000_000} value={rehab} onChange={(e) => setRehab(e.target.value)} error={validated.rehab.error} />
+          <ToolNumberField id="be-cf" label="Monthly net cash flow" prefix="$" min={-1_000_000} max={1_000_000} value={monthlyCashFlow} onChange={(e) => setMonthlyCashFlow(e.target.value)} error={validated.monthlyCashFlow.error} />
         </div>
-        <div>
-          <Label htmlFor="be-closing" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            Closing costs
-          </Label>
-          <div className="mt-1 relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
-            <Input id="be-closing" type="number" inputMode="decimal" min="0"
-              value={closingCosts} onChange={(e) => setClosingCosts(e.target.value)} className="pl-7" />
-          </div>
-        </div>
-        <div>
-          <Label htmlFor="be-rehab" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            Rehab / initial repairs
-          </Label>
-          <div className="mt-1 relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
-            <Input id="be-rehab" type="number" inputMode="decimal" min="0"
-              value={rehab} onChange={(e) => setRehab(e.target.value)} className="pl-7" />
-          </div>
-        </div>
-        <div>
-          <Label htmlFor="be-cf" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            Monthly net cash flow
-          </Label>
-          <div className="mt-1 relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
-            <Input id="be-cf" type="number" inputMode="decimal"
-              value={monthlyCashFlow} onChange={(e) => setMonthlyCashFlow(e.target.value)} className="pl-7" />
-          </div>
-        </div>
-      </div>
+        {hasInvestmentTotalError ? (
+          <p id="be-investment-error" role="alert" className="mt-3 text-xs font-medium text-destructive">
+            Enter a positive amount for down payment, closing costs, or initial repairs.
+          </p>
+        ) : null}
+      </fieldset>
 
       <div className="mt-6 rounded-xl border border-border bg-muted/30 p-5">
+        <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+          {result && verdict
+            ? result.months == null
+              ? `${verdict.label}. ${verdict.note}`
+              : `${verdict.label}. Modeled break-even ${Math.round(result.months)} months, or ${result.years?.toFixed(1)} years.`
+            : "Fix the highlighted inputs to calculate cash-flow break-even."}
+        </span>
         <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Break-even</p>
-        <p className={cn("mt-1 text-4xl font-extrabold tabular-nums", verdict.color)}>
-          {isInvalid ? "—" : `${Math.round(result.months)} months`}
+        <p className={cn("mt-1 text-4xl font-extrabold tabular-nums", verdict?.color ?? "text-muted-foreground")}>
+          {result?.months != null ? `${Math.round(result.months)} months` : "—"}
         </p>
         <p className="mt-1 text-sm text-muted-foreground tabular-nums">
-          {isInvalid ? "Enter positive cash flow to compute" : `${result.years.toFixed(1)} years · ${fmtMoney(result.totalInvested)} invested`}
+          {result?.months != null && result.years != null
+            ? `${result.years.toFixed(1)} years · ${fmtMoney(result.totalInvested)} modeled initial cash`
+            : result
+              ? `${fmtMoney(result.totalInvested)} modeled initial cash · enter positive monthly cash flow to calculate recovery time`
+              : "Fix the highlighted inputs to calculate"}
         </p>
-        <p className="mt-3 text-sm">
-          <span className={cn("font-bold", verdict.color)}>{verdict.label}.</span>{" "}
-          <span className="text-muted-foreground">{verdict.note}</span>
-        </p>
+        {verdict ? (
+          <p className="mt-3 text-sm">
+            <span className={cn("font-bold", verdict.color)}>{verdict.label}.</span>{" "}
+            <span className="text-muted-foreground">{verdict.note}</span>
+          </p>
+        ) : null}
       </div>
 
       <Link
         href={handoffHref} target="_top"
-        className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
+        className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-md text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="w-4 h-4" />
         Run a full property analysis — cash flow, break-even, 10-year projections — free

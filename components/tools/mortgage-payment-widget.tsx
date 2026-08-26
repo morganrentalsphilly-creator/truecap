@@ -13,6 +13,11 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
+import {
+  calcInitialPmiMonthly,
+  calcMonthlyPayment,
+  DEFAULT_PMI_ANNUAL_RATE_PCT,
+} from "@/lib/calc-analysis";
 
 const num = (s: string) => {
   const n = Number(s);
@@ -22,14 +27,53 @@ const num = (s: string) => {
 const fmtMoney = (n: number) =>
   `${n < 0 ? "-" : ""}$${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
 
-function calcMonthlyPayment(principal: number, annualRatePct: number, years: number): number {
-  if (!Number.isFinite(principal) || principal <= 0) return 0;
-  if (!Number.isFinite(years) || years <= 0) return 0;
-  if (!Number.isFinite(annualRatePct) || annualRatePct < 0) return 0;
-  if (annualRatePct === 0) return principal / (years * 12);
-  const r = annualRatePct / 100 / 12;
-  const n = years * 12;
-  return (principal * r) / (1 - Math.pow(1 + r, -n));
+export type MortgagePaymentEstimateInput = {
+  price: number;
+  downPaymentPct: number;
+  interestRate: number;
+  loanTermYears: number;
+  propertyTaxPct: number;
+  homeownerInsurancePct: number;
+};
+
+/** Pure, testable public-tool calculation. Mortgage insurance deliberately
+ * calls the same helper and default rate as the underwriting engine. */
+export function calculateMortgagePaymentEstimate(
+  input: MortgagePaymentEstimateInput,
+) {
+  const loan = Math.max(
+    0,
+    input.price - (input.price * input.downPaymentPct) / 100,
+  );
+  const downPayment = input.price - loan;
+  const monthlyPI = calcMonthlyPayment(
+    loan,
+    input.interestRate,
+    input.loanTermYears,
+  );
+  const monthlyTax = (input.price * input.propertyTaxPct) / 100 / 12;
+  const monthlyInsurance =
+    (input.price * input.homeownerInsurancePct) / 100 / 12;
+  const monthlyPmi = calcInitialPmiMonthly(
+    loan,
+    input.downPaymentPct,
+    DEFAULT_PMI_ANNUAL_RATE_PCT,
+  );
+  const monthlyTotal =
+    monthlyPI + monthlyTax + monthlyInsurance + monthlyPmi;
+  const totalPayments = monthlyPI * input.loanTermYears * 12;
+  const totalInterest = totalPayments - loan;
+
+  return {
+    loan,
+    downPayment,
+    monthlyPI,
+    monthlyTax,
+    monthlyInsurance,
+    monthlyPmi,
+    monthlyTotal,
+    totalInterest,
+  };
 }
 
 export function MortgagePaymentWidget() {
@@ -41,17 +85,14 @@ export function MortgagePaymentWidget() {
   const [insurancePctInput, setInsurancePctInput] = useState("0.5");
 
   const result = useMemo(() => {
-    const price = num(priceInput);
-    const downPct = num(downPctInput);
-    const loan = Math.max(0, price - (price * downPct) / 100);
-    const downPayment = price - loan;
-    const monthlyPI = calcMonthlyPayment(loan, num(rateInput), num(termInput));
-    const monthlyTax = (price * num(taxPctInput)) / 100 / 12;
-    const monthlyInsurance = (price * num(insurancePctInput)) / 100 / 12;
-    const monthlyPITI = monthlyPI + monthlyTax + monthlyInsurance;
-    const totalPayments = monthlyPI * num(termInput) * 12;
-    const totalInterest = totalPayments - loan;
-    return { loan, downPayment, monthlyPI, monthlyTax, monthlyInsurance, monthlyPITI, totalInterest };
+    return calculateMortgagePaymentEstimate({
+      price: num(priceInput),
+      downPaymentPct: num(downPctInput),
+      interestRate: num(rateInput),
+      loanTermYears: num(termInput),
+      propertyTaxPct: num(taxPctInput),
+      homeownerInsurancePct: num(insurancePctInput),
+    });
   }, [priceInput, downPctInput, rateInput, termInput, taxPctInput, insurancePctInput]);
 
   // Carry the user's home price into the full analyzer (P2-2 handoff).
@@ -85,13 +126,14 @@ export function MortgagePaymentWidget() {
         <div className="bg-[var(--background)] rounded-xl border border-border p-5 sm:p-6 flex flex-col justify-between">
           <div>
             <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              Monthly Payment (PITI)
+              Estimated Monthly Payment
             </div>
             <div className={cn("text-5xl sm:text-6xl font-extrabold mt-1 tabular-nums text-foreground")}>
-              {fmtMoney(result.monthlyPITI)}
+              {fmtMoney(result.monthlyTotal)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Principal + Interest + Tax + Insurance.
+              Principal, interest, property tax, homeowner&apos;s insurance
+              {result.monthlyPmi > 0 ? ", and estimated mortgage insurance." : "."}
             </p>
           </div>
 
@@ -100,8 +142,14 @@ export function MortgagePaymentWidget() {
             <Row label="Down payment" value={fmtMoney(result.downPayment)} />
             <Row label="Monthly P&I" value={fmtMoney(result.monthlyPI)} bold />
             <Row label="Monthly tax" value={fmtMoney(result.monthlyTax)} />
-            <Row label="Monthly insurance" value={fmtMoney(result.monthlyInsurance)} />
+            <Row label="Monthly homeowner's insurance" value={fmtMoney(result.monthlyInsurance)} />
+            <Row label="Estimated monthly PMI" value={fmtMoney(result.monthlyPmi)} />
             <Row label="Total interest over loan" value={fmtMoney(result.totalInterest)} />
+            {result.monthlyPmi > 0 ? (
+              <p className="pt-2 text-[11px] leading-relaxed text-muted-foreground">
+                PMI uses TrueCap&apos;s {DEFAULT_PMI_ANNUAL_RATE_PCT}% annual screening estimate on the starting loan. Verify the actual premium and cancellation rules with the lender.
+              </p>
+            ) : null}
           </div>
         </div>
       </div>

@@ -262,6 +262,15 @@ describe("triageListing", () => {
 describe("rankTriageRows", () => {
   const mk = (over: Partial<TriageRowResult>): TriageRowResult => ({
     input: { address: "x", purchasePrice: 1 },
+    assumptionContext: {
+      screenedAt: "2026-08-25T12:00:00.000Z",
+      interestRatePct: 7,
+      propertyTaxPct: 1.2,
+      state: "PA",
+      enrichmentStatus: "live",
+      rateSource: "fred",
+      taxSource: "state-static",
+    },
     ok: true,
     score: 50,
     recommendation: "Neutral",

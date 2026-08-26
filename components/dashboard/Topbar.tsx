@@ -36,6 +36,7 @@ export function Topbar({
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
   // -1 = nothing actively highlighted (keyboard arrow navigation).
   const [activeIndex, setActiveIndex] = useState(-1);
   // Closed by Escape / an outside click / focus leaving the form, without
@@ -54,31 +55,35 @@ export function Topbar({
     if (debouncedQuery.length < 2) {
       setSuggestions([]);
       setIsLoadingSuggestions(false);
+      setSearchError(null);
       return;
     }
 
     const controller = new AbortController();
     setIsLoadingSuggestions(true);
+    setSearchError(null);
 
     fetch(`/api/dashboard/search-suggestions?q=${encodeURIComponent(debouncedQuery)}`, {
       signal: controller.signal,
       cache: "no-store",
     })
       .then(async (res) => {
-        if (!res.ok) return [];
+        if (!res.ok) throw new Error(`Saved-deal search failed (${res.status})`);
         const payload = (await res.json()) as { suggestions?: Suggestion[] };
         return Array.isArray(payload.suggestions) ? payload.suggestions : [];
       })
       .then((items) => {
         setSuggestions(items);
+        setSearchError(null);
       })
       .catch((error: unknown) => {
         if ((error as { name?: string })?.name !== "AbortError") {
           setSuggestions([]);
+          setSearchError("Couldn’t search saved deals. Press Enter to search the full list, or edit the search to try again.");
         }
       })
       .finally(() => {
-        setIsLoadingSuggestions(false);
+        if (!controller.signal.aborted) setIsLoadingSuggestions(false);
       });
 
     return () => {
@@ -110,9 +115,18 @@ export function Topbar({
   };
 
   const showNoResults =
-    debouncedQuery.length >= 2 && !isLoadingSuggestions && suggestions.length === 0;
+    debouncedQuery.length >= 2 && !isLoadingSuggestions && !searchError && suggestions.length === 0;
   const isOpen =
-    !isPanelDismissed && (suggestions.length > 0 || showNoResults || isLoadingSuggestions);
+    !isPanelDismissed && (suggestions.length > 0 || showNoResults || isLoadingSuggestions || Boolean(searchError));
+  const searchStatus = searchError
+    ? "Saved-deal suggestions are unavailable."
+    : isLoadingSuggestions
+      ? "Searching saved deals."
+      : suggestions.length > 0
+        ? `${suggestions.length} saved deal ${suggestions.length === 1 ? "suggestion" : "suggestions"} available. Use the Up and Down Arrow keys to review.`
+        : showNoResults
+          ? "No saved deal suggestions found."
+          : "";
 
   // The panel is a hand-rolled listbox, not a Radix popover, so it inherits
   // no dismiss behaviour — without this it stays pinned over the dashboard
@@ -177,7 +191,7 @@ export function Topbar({
           <Button
             variant="ghost"
             size="icon"
-            className="h-10 w-10 shrink-0 rounded-xl border border-border bg-background/70 backdrop-blur lg:hidden"
+            className="size-11 shrink-0 rounded-xl border border-border bg-background/70 backdrop-blur lg:hidden"
             aria-label="Open navigation menu"
           >
             <Menu className="h-5 w-5" />
@@ -190,6 +204,8 @@ export function Topbar({
           value={query}
           onChange={(event) => {
             setQuery(event.target.value);
+            setSearchError(null);
+            setActiveIndex(-1);
             // Editing the query reopens a panel closed by Escape / an
             // outside click.
             setIsPanelDismissed(false);
@@ -199,15 +215,19 @@ export function Topbar({
           aria-label="Search saved deals"
           role="combobox"
           aria-expanded={isOpen}
-          aria-controls={SUGGESTIONS_LISTBOX_ID}
+          aria-controls={isOpen ? SUGGESTIONS_LISTBOX_ID : undefined}
           aria-autocomplete="list"
+          aria-describedby="dashboard-search-status"
           // Gated on isOpen as well: when the panel is closed the option
           // elements are unmounted, so pointing at one would be a dangling
           // IDREF on a combobox reporting aria-expanded={false}.
           aria-activedescendant={isOpen && activeIndex >= 0 && suggestions[activeIndex] ? `sugg-${suggestions[activeIndex]!.id}` : undefined}
           autoComplete="off"
-          className="w-full h-10 pl-10 pr-4 rounded-lg bg-muted/60 border border-transparent focus:border-primary focus:bg-background outline-none text-base sm:text-sm transition"
+          className="w-full h-11 pl-10 pr-4 rounded-lg bg-muted/60 border border-transparent focus:border-primary focus:bg-background outline-none text-base sm:text-sm transition focus-visible:ring-2 focus-visible:ring-ring"
         />
+        <span id="dashboard-search-status" className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+          {searchStatus}
+        </span>
 
         {isOpen ? (
           <div
@@ -228,7 +248,8 @@ export function Topbar({
                 role="option"
                 aria-selected={index === activeIndex}
                 type="button"
-                className={`w-full text-left px-3 py-2 transition ${index === activeIndex ? "bg-muted" : "hover:bg-muted/50"}`}
+                tabIndex={-1}
+                className={`min-h-11 w-full px-3 py-2 text-left transition ${index === activeIndex ? "bg-muted" : "hover:bg-muted/50"}`}
                 onMouseEnter={() => setActiveIndex(index)}
                 onClick={() => goToSearch(item.address)}
               >
@@ -237,12 +258,17 @@ export function Topbar({
               </button>
             ))}
             {showNoResults ? (
-              <div className="px-3 py-2 text-xs text-muted-foreground" role="status">
+              <div className="min-h-11 px-3 py-2 text-xs text-muted-foreground" role="option" aria-disabled="true" aria-selected="false">
                 No saved deals match “{debouncedQuery}”.
               </div>
             ) : null}
+            {searchError ? (
+              <div className="min-h-11 px-3 py-2 text-xs font-medium text-destructive" role="option" aria-disabled="true" aria-selected="false">
+                <span role="alert">{searchError}</span>
+              </div>
+            ) : null}
             {isLoadingSuggestions && suggestions.length === 0 ? (
-              <div className="px-3 py-2 text-xs text-muted-foreground" role="status">
+              <div className="min-h-11 px-3 py-2 text-xs text-muted-foreground" role="option" aria-disabled="true" aria-selected="false">
                 Searching…
               </div>
             ) : null}

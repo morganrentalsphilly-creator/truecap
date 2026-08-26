@@ -72,7 +72,10 @@ import {
 import { STARTER_TEMPLATES, type StarterTemplate } from "@/lib/starter-templates";
 import { buildTemplateFormPatch, type TemplateFormPatchEntry } from "@/lib/template-form-patch";
 import type { AnalysisTemplateOption } from "@/app/actions/analysis-templates";
-import { getStrategyByKey } from "@/lib/investor-strategies";
+import {
+  getStrategyByKey,
+  getUnderwritingHeading,
+} from "@/lib/investor-strategies";
 import { AnalyzerStepRail } from "./analyzer-step-rail";
 import {
   computeAnalyzerSteps,
@@ -96,7 +99,11 @@ import { TestimonialPrompt, dispatchProofMoment } from "@/components/marketing/t
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { cn, scrollBehavior } from "@/lib/utils";
-import { saveDealAction } from "@/app/actions/saved-analyses";
+import {
+  saveDealAction,
+  type GetSavedDealForEditingResult,
+} from "@/app/actions/saved-analyses";
+import { parseSavedAnalysisRevision } from "@/lib/saved-analysis-concurrency";
 import { buildDataConfidence, type EnrichmentProvenanceInput } from "@/lib/data-confidence";
 import {
   buildInputConfidence,
@@ -200,11 +207,17 @@ import {
   type OfferCeilingTargetSource,
 } from "@/lib/offer-ceiling-contract";
 import { getAnalyzerCta } from "@/lib/analyzer-cta";
+import { analysisDateForExplicitV1Run } from "@/lib/analysis-date";
 import {
   clearPendingSaveIntent,
   hasPendingSaveIntent,
+  pendingSaveIntentMatchesDraft,
   setPendingSaveIntent,
 } from "@/lib/save-intent";
+import {
+  parseShareAuthIntent,
+  SHARE_AUTH_INTENT_STORAGE_KEY,
+} from "@/lib/share-auth-intent";
 import dynamic from "next/dynamic";
 
 // ── AnalysisDashboard is post-Run-only, so keep it out of the anon
@@ -241,6 +254,14 @@ function preloadAnalysisDashboard() {
 }
 
 type InputTab = "cash-flow" | "projections" | "tax-strategy" | "deal-score";
+type AutofillField = "bedrooms" | "bathrooms" | "sqft" | "purchasePrice" | "monthlyRent";
+type AutofillConflict = {
+  field: AutofillField;
+  label: string;
+  current: number;
+  proposed: number;
+  currency?: boolean;
+};
 const SAVED_ANALYSIS_EDIT_DRAFT_KEY = "truecap_saved_analysis_edit_draft";
 /** Must match SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY in open-saved-deal-in-analyzer.tsx. */
 const SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY = "truecap_saved_analysis_duplicate_draft";
@@ -287,6 +308,21 @@ function consumeSavedDealHandoffPayload(
     return legacy;
   } catch {
     return null;
+  }
+}
+
+/** Keep the analyzer URL aligned with the deal currently attached to the form.
+ * This makes a successful save/reopen refresh-safe and prevents New Analysis
+ * from resurrecting the prior saved row on refresh. */
+function replaceSavedDealUrl(savedDealId: string | null): void {
+  if (typeof window === "undefined") return;
+  try {
+    const url = new URL(window.location.href);
+    if (savedDealId) url.searchParams.set("savedDeal", savedDealId);
+    else url.searchParams.delete("savedDeal");
+    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+  } catch {
+    // URL durability is best-effort; the in-memory analysis remains usable.
   }
 }
 /**
@@ -542,6 +578,7 @@ export function InvestCalcPage({
   isAuthenticated = false,
   userAnalysisDefaults = null,
   advocacyContractEligible = false,
+  initialSavedDeal = null,
 }: {
   canSaveDeals?: boolean;
   canCompareDeals?: boolean;
@@ -570,6 +607,9 @@ export function InvestCalcPage({
   /** Server-derived internal rollout eligibility. This is not an entitlement
    * and must remain false for anonymous/public renders. */
   advocacyContractEligible?: boolean;
+  /** Owner-scoped saved row resolved by the authenticated server route from
+   * /?savedDeal=<id>. Keeping the ID in the URL makes reopen refresh-safe. */
+  initialSavedDeal?: GetSavedDealForEditingResult | null;
   }) {
   const router = useRouter();
   const advocacyDecisionContract =
@@ -587,6 +627,7 @@ export function InvestCalcPage({
   // Active investor-strategy chip ("What's your play?"). null = default full flow.
   const [activeStrategyKey, setActiveStrategyKey] = useState<string | null>(null);
   const activeStrategy = getStrategyByKey(activeStrategyKey);
+  const underwritingHeading = getUnderwritingHeading(activeStrategyKey);
   // What the active play's starter set actually WROTE (field → value), plus
   // the play's label (BROWSER-2). The starter writes are dirty on purpose
   // (the default-template auto-apply skips dirty fields), but "dirty" also
@@ -747,6 +788,7 @@ export function InvestCalcPage({
   const [duplicateCollision, setDuplicateCollision] = useState<{
     existingId: string;
     existingTitle?: string;
+    existingUnderwritingRevision?: number;
     autoAfterAuth?: boolean;
   } | null>(null);
   const [duplicateChoiceBusy, setDuplicateChoiceBusy] = useState<DuplicateAddressChoice | null>(null);
@@ -761,6 +803,10 @@ export function InvestCalcPage({
   const [addressChangedChoiceBusy, setAddressChangedChoiceBusy] =
     useState<AddressChangedChoice | null>(null);
   const [savedDealId, setSavedDealId] = useState<string | null>(null);
+  const [underwritingConflict, setUnderwritingConflict] = useState<{
+    savedDealId: string;
+    autoAfterAuth?: boolean;
+  } | null>(null);
   const [loadedPipelineStage, setLoadedPipelineStage] = useState<string | null>(null);
   const [savedDealCount, setSavedDealCount] = useState(initialSavedDealCount);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -804,16 +850,20 @@ export function InvestCalcPage({
   } | null>(null);
   const [projectionSource, setProjectionSource] = useState<{
     analysisId: string | null;
+    /** Recorded saved results are historical evidence, never a live cache key. */
+    recorded?: boolean;
     input: TenYearProjectionInput;
     initialYears: ProjectionYear[];
   } | null>(null);
   const [taxStrategySource, setTaxStrategySource] = useState<{
     analysisId: string | null;
+    recorded?: boolean;
     input: TaxStrategyInput;
     initialYears: TaxStrategyYear[];
   } | null>(null);
   const [exitScenarioSource, setExitScenarioSource] = useState<{
     analysisId: string | null;
+    recorded?: boolean;
     input: ExitScenarioInput;
     initialYears: ExitScenarioYear[];
   } | null>(null);
@@ -844,6 +894,10 @@ export function InvestCalcPage({
   const pendingResultsScrollRef = useRef(false);
   const formElementRef = useRef<HTMLFormElement | null>(null);
   const savedDealIdRef = useRef<string | null>(null);
+  /** Last server-confirmed write token for the underwriting snapshot. It is
+   * intentionally kept out of persisted drafts: only an owner-scoped reopen
+   * may authorize an update to an existing row. */
+  const savedUnderwritingRevisionRef = useRef<number | null>(null);
   /** Bumped by "Analyze another like this" — an in-flight save whose
    *  generation no longer matches must not attach its id to the forked
    *  form (the fork's savedDealId-null guarantee would be defeated). */
@@ -1146,6 +1200,8 @@ export function InvestCalcPage({
       form.clearErrors();
       setSavedDealId(null);
       savedDealIdRef.current = null;
+      savedUnderwritingRevisionRef.current = null;
+      setUnderwritingConflict(null);
       setLoadedPipelineStage(null);
       lastPersistedFormJsonRef.current = null;
       lastPersistedMaoTargetJsonRef.current = null;
@@ -1873,34 +1929,47 @@ export function InvestCalcPage({
    * RentCast autofill (button-triggered). The cheap enrichment only knows
    * tax / rate / HUD-rent - beds, baths, sqft, and price can ONLY come from
    * RentCast. So an explicit "Autofill from address" button pulls the
-   * property's facts + value/rent estimate and OVERWRITES the autofill-owned
-   * fields (beds, baths, size, price, rent) with the fresh data - the click is
-   * an explicit request for RentCast's numbers, so it replaces whatever was
-   * there. On-demand by design: a comp credit is spent only on a deliberate
-   * click, bounded by the per-user + global caps in the action.
+   * property's facts + value/rent estimate. Empty or autofill-owned fields are
+   * filled directly; manually entered values are preserved until the user
+   * explicitly selects an estimate in the review dialog. On-demand by design:
+   * a comp credit is spent only on a deliberate click, bounded by the per-user
+   * + global caps in the action.
    */
   const [isAutofilling, setIsAutofilling] = useState(false);
   const [autofillUnavailable, setAutofillUnavailable] = useState(false);
+  const [pendingAutofillReview, setPendingAutofillReview] = useState<{
+    enrichment: PropertyEnrichment;
+    conflicts: AutofillConflict[];
+  } | null>(null);
+  const [approvedAutofillFields, setApprovedAutofillFields] = useState<Set<AutofillField>>(
+    () => new Set()
+  );
   // (listingUrl / listingUrlError / listingLinkOpen are declared up top so
   // resetToNewAnalysis can clear them — see the hero listing-link comment.)
 
   const applyComps = useCallback(
-    (e: PropertyEnrichment) => {
+    (e: PropertyEnrichment, approvedOverwrites: ReadonlySet<AutofillField> = new Set()) => {
       const f = e.facts;
       const adopted = selectUnderwritingEnrichment(e);
       const filled: string[] = [];
-      // Explicit click = the user is asking for RentCast's numbers, so
-      // OVERWRITE the autofill-owned fields rather than only filling blanks.
+      const mayWrite = (field: AutofillField, proposed: number) => {
+        const current = Number(form.getValues(field));
+        const manualValueWouldChange =
+          form.getFieldState(field).isDirty &&
+          Number.isFinite(current) &&
+          current !== proposed;
+        return !manualValueWouldChange || approvedOverwrites.has(field);
+      };
       const opts = { shouldDirty: false, shouldTouch: false, shouldValidate: true };
-      if (f?.bedrooms != null) {
+      if (f?.bedrooms != null && mayWrite("bedrooms", f.bedrooms)) {
         form.setValue("bedrooms", f.bedrooms, opts);
         filled.push("beds");
       }
-      if (f?.bathrooms != null) {
+      if (f?.bathrooms != null && mayWrite("bathrooms", f.bathrooms)) {
         form.setValue("bathrooms", f.bathrooms, opts);
         filled.push("baths");
       }
-      if (f?.squareFootage != null) {
+      if (f?.squareFootage != null && mayWrite("sqft", f.squareFootage)) {
         form.setValue("sqft", f.squareFootage, opts);
         filled.push("size");
       }
@@ -1908,7 +1977,10 @@ export function InvestCalcPage({
       // and an empty field, the AVM fills as a labeled, editable ESTIMATE
       // (block below) and is never presented as an asking price.
       const priceIsAsking = adopted.purchasePriceSource === "active-listing";
-      if (adopted.purchasePrice != null) {
+      if (
+        adopted.purchasePrice != null &&
+        mayWrite("purchasePrice", adopted.purchasePrice)
+      ) {
         form.setValue("purchasePrice", adopted.purchasePrice, opts);
         filled.push("asking price");
       }
@@ -1937,7 +2009,11 @@ export function InvestCalcPage({
         filled.push("estimated value");
       }
       const pt = form.getValues("propertyType");
-      if (adopted.monthlyRent != null && (pt === "single-family" || pt === "owner-occupant")) {
+      if (
+        adopted.monthlyRent != null &&
+        (pt === "single-family" || pt === "owner-occupant") &&
+        mayWrite("monthlyRent", adopted.monthlyRent)
+      ) {
         form.setValue("monthlyRent", adopted.monthlyRent, opts);
         setMarketRentEstimate(adopted.monthlyRent);
         enrichmentCaptureRef.current.monthlyRent = {
@@ -1964,6 +2040,51 @@ export function InvestCalcPage({
     [form, toast]
   );
 
+  const findAutofillConflicts = useCallback(
+    (enrichment: PropertyEnrichment): AutofillConflict[] => {
+      const facts = enrichment.facts;
+      const adopted = selectUnderwritingEnrichment(enrichment);
+      const propertyType = form.getValues("propertyType");
+      const candidates: Array<
+        Omit<AutofillConflict, "current" | "proposed"> & {
+          proposed: number | null | undefined;
+        }
+      > = [
+        { field: "bedrooms", label: "Bedrooms", proposed: facts?.bedrooms },
+        { field: "bathrooms", label: "Bathrooms", proposed: facts?.bathrooms },
+        { field: "sqft", label: "Square feet", proposed: facts?.squareFootage },
+        {
+          field: "purchasePrice",
+          label: "Purchase price",
+          proposed: adopted.purchasePrice,
+          currency: true,
+        },
+        {
+          field: "monthlyRent",
+          label: "Monthly rent",
+          proposed:
+            propertyType === "single-family" || propertyType === "owner-occupant"
+              ? adopted.monthlyRent
+              : null,
+          currency: true,
+        },
+      ];
+      return candidates.flatMap((candidate) => {
+        if (candidate.proposed == null || !Number.isFinite(candidate.proposed)) return [];
+        const current = Number(form.getValues(candidate.field));
+        if (
+          !form.getFieldState(candidate.field).isDirty ||
+          !Number.isFinite(current) ||
+          current === candidate.proposed
+        ) {
+          return [];
+        }
+        return [{ ...candidate, current, proposed: candidate.proposed }];
+      });
+    },
+    [form]
+  );
+
   const handleAutofillFromAddress = useCallback(async () => {
     const addr = (form.getValues("address") ?? "").trim();
     if (!addr) {
@@ -1986,7 +2107,13 @@ export function InvestCalcPage({
         return;
       }
       if (r.ok) {
-        applyComps(r.enrichment);
+        const conflicts = findAutofillConflicts(r.enrichment);
+        if (conflicts.length > 0) {
+          setApprovedAutofillFields(new Set());
+          setPendingAutofillReview({ enrichment: r.enrichment, conflicts });
+        } else {
+          applyComps(r.enrichment);
+        }
         return;
       }
       if (r.code === "NOT_CONFIGURED") {
@@ -2045,7 +2172,7 @@ export function InvestCalcPage({
     } finally {
       setIsAutofilling(false);
     }
-  }, [form, applyComps, toast, router]);
+  }, [form, applyComps, findAutofillConflicts, toast, router]);
 
   // Paste a Zillow/Redfin/Realtor link → parse the address from the URL slug
   // (we never fetch the page — those sites block bots with a captcha) and run it
@@ -2410,6 +2537,8 @@ export function InvestCalcPage({
       capexReserveMonthly: result.capex,
       monthlyPayment: result.monthlyPayment,
       pmiMonthly: result.pmiMonthly,
+      pmiNoCancel: values.pmiNoCancel === true,
+      interestRate: values.interestRate,
       loanAmount: result.loanAmount,
       purchasePrice: values.purchasePrice,
       taxSavingsMonthly: result.taxSavingsMonthly,
@@ -2725,11 +2854,32 @@ export function InvestCalcPage({
         /* history unavailable — a stale param only costs a no-op re-read */
       }
     }
-    const reopenPayloadRaw = consumeSavedDealHandoffPayload(
-      SAVED_ANALYSIS_EDIT_DRAFT_KEY,
-      editHandoffNonce,
-      allowLegacyHandoff
-    );
+    if (initialSavedDeal && !initialSavedDeal.ok) {
+      toast({
+        title: "Couldn't open this deal",
+        description: initialSavedDeal.message,
+        variant: "destructive",
+      });
+      resetToNewAnalysis("single-family");
+      setSavedTemplateFallback(null);
+      return;
+    }
+    const reopenPayloadRaw = initialSavedDeal?.ok
+      ? JSON.stringify({
+          id: initialSavedDeal.id,
+          schemaVersion: initialSavedDeal.schemaVersion,
+          methodologyVersion: initialSavedDeal.methodologyVersion,
+          underwritingRevision: initialSavedDeal.underwritingRevision,
+          pipelineStage: initialSavedDeal.pipelineStage,
+          formSnapshot: initialSavedDeal.formSnapshot,
+          templateFallback: initialSavedDeal.templateFallback,
+          resultSnapshot: initialSavedDeal.resultSnapshot,
+        })
+      : consumeSavedDealHandoffPayload(
+          SAVED_ANALYSIS_EDIT_DRAFT_KEY,
+          editHandoffNonce,
+          allowLegacyHandoff
+        );
     const autoExportPdfFlag =
       window.sessionStorage.getItem(SAVED_ANALYSIS_AUTO_EXPORT_PDF_KEY) ??
       window.localStorage.getItem(SAVED_ANALYSIS_AUTO_EXPORT_PDF_KEY);
@@ -2828,6 +2978,7 @@ export function InvestCalcPage({
           templateFallback?: unknown;
           resultSnapshot?: unknown;
           methodologyVersion?: unknown;
+          underwritingRevision?: unknown;
           pipelineStage?: unknown;
         };
         const normalized = normalizeReleasedInvestmentFormSnapshot(parsed.formSnapshot);
@@ -2866,6 +3017,10 @@ export function InvestCalcPage({
           }
           setSavedDealId(parsed.id);
           savedDealIdRef.current = parsed.id;
+          savedUnderwritingRevisionRef.current = parseSavedAnalysisRevision(
+            parsed.underwritingRevision
+          );
+          replaceSavedDealUrl(parsed.id);
           setLoadedPipelineStage(
             typeof parsed.pipelineStage === "string" ? parsed.pipelineStage : null
           );
@@ -2964,11 +3119,21 @@ export function InvestCalcPage({
             });
             return;
           }
+          // A recorded result is immutable historical evidence. Supplying its
+          // saved row ID to a live snapshot action would let today's projection
+          // code overwrite the long-term rows that were recorded at save time.
+          const recordedAnalysisId = resolution.usesRecordedSnapshot ? null : parsed.id;
           const builtProjectionSource = canUseProjections
-            ? buildProjectionSource(parsed.id, hydratedValues, result)
+            ? {
+                ...buildProjectionSource(recordedAnalysisId, hydratedValues, result),
+                recorded: resolution.usesRecordedSnapshot,
+              }
             : null;
           const builtTaxStrategySource = canUseTaxStrategy
-            ? buildTaxStrategySource(parsed.id, hydratedValues, result)
+            ? {
+                ...buildTaxStrategySource(recordedAnalysisId, hydratedValues, result),
+                recorded: resolution.usesRecordedSnapshot,
+              }
             : null;
           setAnalysisResult(result);
           setStaleResultsWarning(false);
@@ -2977,13 +3142,16 @@ export function InvestCalcPage({
           setTaxStrategySource(builtTaxStrategySource);
           setExitScenarioSource(
             canUseExitScenarios
-              ? buildExitScenarioSource(
-                  parsed.id,
-                  hydratedValues,
-                  result,
-                  result.tenYearProjection,
-                  result.taxStrategyYears
-                )
+              ? {
+                  ...buildExitScenarioSource(
+                    recordedAnalysisId,
+                    hydratedValues,
+                    result,
+                    result.tenYearProjection,
+                    result.taxStrategyYears
+                  ),
+                  recorded: resolution.usesRecordedSnapshot,
+                }
               : null
           );
           const frozenScore = parseFrozenDealScore(resolution.result);
@@ -3037,6 +3205,10 @@ export function InvestCalcPage({
           }
           setSavedDealId(parsed.id);
           savedDealIdRef.current = parsed.id;
+          savedUnderwritingRevisionRef.current = parseSavedAnalysisRevision(
+            parsed.underwritingRevision
+          );
+          replaceSavedDealUrl(parsed.id);
           setLoadedPipelineStage(
             typeof parsed.pipelineStage === "string" ? parsed.pipelineStage : null
           );
@@ -3129,6 +3301,10 @@ export function InvestCalcPage({
       if (handoff.purchasePrice !== undefined) form.setValue("purchasePrice", handoff.purchasePrice);
       if (handoff.bedrooms !== undefined) form.setValue("bedrooms", handoff.bedrooms);
       if (handoff.monthlyRent !== undefined) form.setValue("monthlyRent", handoff.monthlyRent);
+      if (handoff.interestRate !== undefined) form.setValue("interestRate", handoff.interestRate);
+      if (handoff.propertyTaxPct !== undefined) {
+        form.setValue("propertyTaxPct", handoff.propertyTaxPct);
+      }
       // A handed-off deal is still a NEW deal: the user's default template
       // may pre-fill the assumption fields (never the handed-off
       // price/rent/beds/address — the patch doesn't touch those).
@@ -3206,7 +3382,7 @@ export function InvestCalcPage({
           // but inert form and must re-Calculate + re-Save manually — a
           // conversion leak at the moment of highest intent. Double-RAF
           // mirrors the PDF-return flow: let RHF flush before submitting.
-          if (isAuthenticated && hasPendingSaveIntent()) {
+          if (isAuthenticated && pendingSaveIntentMatchesDraft(normalized)) {
             autoSaveAfterAuthRef.current = true;
             setIsAutoSaveResuming(true);
             toast({
@@ -3226,6 +3402,48 @@ export function InvestCalcPage({
             });
             return;
           }
+          // A guest who chose Share has already expressed the intent to see
+          // this analysis and finish the disclosure step after auth. The
+          // ShareLinkButton can consume and reopen only after results mount,
+          // so re-run this exact restored draft once for a recent, same-route
+          // analysis intent. Unlike the Save path above, this must never set
+          // autoSaveAfterAuthRef: sharing does not silently persist a deal.
+          if (isAuthenticated) {
+            try {
+              const rawShareIntent = window.sessionStorage.getItem(
+                SHARE_AUTH_INTENT_STORAGE_KEY
+              );
+              const shareIntent = parseShareAuthIntent(rawShareIntent, {
+                currentPath: window.location.pathname,
+              });
+              if (shareIntent?.context === "analysis") {
+                toast({
+                  title: "Welcome back — your analysis is ready to share",
+                  description: addr
+                    ? `Re-running the analysis for ${addr.slice(0, 60)}, then reopening Share.`
+                    : "Re-running your analysis, then reopening Share.",
+                  variant: "success",
+                });
+                requestAnimationFrame(() => {
+                  requestAnimationFrame(() => {
+                    void form.handleSubmit(onSubmit, onError)();
+                  });
+                });
+                queueMicrotask(() => {
+                  isProgrammaticResetRef.current = false;
+                });
+                return;
+              }
+              // Invalid, expired, wrong-route, and wrong-context intents are
+              // not allowed to surprise a later analysis in this tab.
+              if (rawShareIntent) {
+                window.sessionStorage.removeItem(SHARE_AUTH_INTENT_STORAGE_KEY);
+              }
+            } catch {
+              // Session storage is optional. Fall through to the normal
+              // input-only draft restore when it is unavailable.
+            }
+          }
           // Don't auto-calculate - restoring inputs is the contract,
           // running the analysis is the user's intent click. Auto-
           // calculating would race with the loading-spinner UI and
@@ -3244,10 +3462,16 @@ export function InvestCalcPage({
         // Draft parsed but failed schema validation - wipe it so the
         // user isn't stuck with a permanently-rejected blob.
         clearCalcDraftRaw();
+        clearPendingSaveIntent();
       } catch {
         clearCalcDraftRaw();
+        clearPendingSaveIntent();
       }
     }
+
+    // A save intent without its exact restorable draft must never attach to a
+    // later analysis on this browser.
+    if (hasPendingSaveIntent()) clearPendingSaveIntent();
 
     resetToNewAnalysis("single-family");
     setSavedTemplateFallback(null);
@@ -3446,8 +3670,40 @@ export function InvestCalcPage({
     // Use a synchronous snapshot of the live form right after validation. This
     // matches what the user sees (including fields that only exist while mounted)
     // and avoids any mismatch between RHF state and resolver output.
-    const liveParse = releasedInvestmentFormSchema.safeParse(form.getValues());
-    const values: InvestmentFormValues = liveParse.success ? liveParse.data : validated;
+    const currentFormValues = form.getValues();
+    // v1 Property Age feeds the Screening Index, so every explicit run must
+    // carry its own date instead of borrowing the browser's year inside the
+    // engine. Persist it in RHF immediately so Save/Share/draft snapshots use
+    // the exact same serialized input that produced the result. The unreleased
+    // v2 path keeps its existing explicit-date semantics untouched.
+    const runAnalysisDate =
+      currentFormValues.underwritingModelVersion === "2.0"
+        ? currentFormValues.analysisDate
+        : analysisDateForExplicitV1Run({
+            existingAnalysisDate: currentFormValues.analysisDate,
+            // The synthetic sample is a versioned fixture shared with the
+            // homepage. Preserve its audit date so opening the demo never
+            // changes its Screening Index after a calendar-year boundary.
+            // Every real-property run still receives today's UTC date.
+            preserveExisting: pendingSampleRunRef.current,
+          });
+    if (
+      runAnalysisDate &&
+      currentFormValues.analysisDate !== runAnalysisDate
+    ) {
+      form.setValue("analysisDate", runAnalysisDate, {
+        shouldDirty: false,
+        shouldTouch: false,
+        shouldValidate: false,
+      });
+    }
+    const datedFormValues = runAnalysisDate
+      ? { ...currentFormValues, analysisDate: runAnalysisDate }
+      : currentFormValues;
+    const liveParse = releasedInvestmentFormSchema.safeParse(datedFormValues);
+    const values: InvestmentFormValues = liveParse.success
+      ? liveParse.data
+      : { ...validated, ...(runAnalysisDate ? { analysisDate: runAnalysisDate } : {}) };
 
     // If the user changed the purchase price away from the hero auto-
     // estimate, this verdict is on their number now — drop the
@@ -3685,7 +3941,9 @@ export function InvestCalcPage({
         // so a sub-dollar negative never renders "-$0".
         description: autoSavedAfterAuth
           ? "Your underwriting is now available from any device."
-          : `Net cash flow: ${Math.round(result.netCashFlow) < 0 ? "-" : ""}$${Math.abs(Math.round(result.netCashFlow)).toLocaleString()}/mo | Cash-on-cash: ${result.cocReturn.toFixed(1)}%`,
+          : `Net cash flow: ${Math.round(result.netCashFlow) < 0 ? "-" : ""}$${Math.abs(Math.round(result.netCashFlow)).toLocaleString()}/mo | Cash-on-cash: ${
+              result.totalCashRequired > 0 ? `${result.cocReturn.toFixed(1)}%` : "N/A"
+            }`,
         variant: autoSavedAfterAuth ? "success" : undefined,
       });
       // Scroll to the TOP of the results dashboard, not the bottom of
@@ -3725,6 +3983,14 @@ export function InvestCalcPage({
     // validation - otherwise the armed flag would leak onto the user's
     // next manual Calculate and unlock Pro on their own deal.
     pendingSamplePreviewRef.current = false;
+    if (autoSaveAfterAuthRef.current) {
+      // The bound draft itself is invalid, so this intent is terminal. Leaving
+      // it armed would retry on every reload and could later attach to a
+      // different draft after the user edits the form.
+      clearPendingSaveIntent();
+      autoSaveAfterAuthRef.current = false;
+      setIsAutoSaveResuming(false);
+    }
     const findFirstFieldError = (
       value: unknown,
       currentPath = ""
@@ -3849,6 +4115,9 @@ export function InvestCalcPage({
       allowAddressChange?: boolean;
       /** Completing the explicit anonymous Save click after authentication. */
       autoAfterAuth?: boolean;
+      /** Revision captured for an explicit chooser target. Plain updates use
+       * the token attached to the currently reopened deal. */
+      expectedUnderwritingRevisionOverride?: number;
       /** Exact target currently rendered by the results dashboard. This is
        * required for an untouched late-loaded buy-box seed, which otherwise
        * exists only inside the child dashboard until the user edits it. */
@@ -3871,7 +4140,7 @@ export function InvestCalcPage({
     if (targetExistingId && !canUpdateSavedDeals) {
       toast({
         title: "Upgrade required",
-        description: "Upgrade to update saved analyses.",
+        description: "Upgrade to update deals in My Deals.",
         variant: "destructive",
       });
       router.push("/profile#billing");
@@ -3932,6 +4201,12 @@ export function InvestCalcPage({
           maxOfferTargetSourceSnapshot
         );
       }
+      const expectedUnderwritingRevision = targetExistingId
+        ? options.expectedUnderwritingRevisionOverride ??
+          (targetExistingId === savedDealIdRef.current
+            ? savedUnderwritingRevisionRef.current
+            : null)
+        : null;
       const result = await saveDealAction(
         currentValues,
         targetExistingId,
@@ -3939,6 +4214,9 @@ export function InvestCalcPage({
         {
           ...(options.saveAsNewScenario ? { saveAsNewScenario: true } : {}),
           ...(options.allowAddressChange ? { allowAddressChange: true } : {}),
+          ...(targetExistingId && expectedUnderwritingRevision !== null
+            ? { expectedUnderwritingRevision }
+            : {}),
           inputVerification,
           touchedInputFields: confidenceContext.touchedInputFields,
           inputSourceContextProvided: true,
@@ -3960,6 +4238,7 @@ export function InvestCalcPage({
         // A save that came from a chooser dialog succeeded - close it.
         setDuplicateCollision(null);
         setAddressChangedPrompt(null);
+        setUnderwritingConflict(null);
         // Deal-agnostic bookkeeping first — it must run even when a fork
         // races this save (the deal DID persist server-side): the local
         // count feeds the client save-limit gate, and the event refreshes
@@ -3991,6 +4270,8 @@ export function InvestCalcPage({
         }
         setSavedDealId(result.id);
         savedDealIdRef.current = result.id;
+        savedUnderwritingRevisionRef.current = result.underwritingRevision;
+        replaceSavedDealUrl(result.id);
         if (result.mode === "inserted") setLoadedPipelineStage(null);
         // Deal is now persisted server-side - the local anonymous
         // auto-save draft is no longer needed. If we leave it, the
@@ -4116,7 +4397,7 @@ export function InvestCalcPage({
                     analysisMaoTargetSource ??
                     "selected-targets"
                 );
-                setPendingSaveIntent();
+                setPendingSaveIntent(currentValues);
                 // Sign-up, not login — anon savers are mostly first-timers;
                 // the sign-up page has a "Sign in" cross-link that keeps ?next.
                 router.push("/auth/sign-up?next=/");
@@ -4129,6 +4410,11 @@ export function InvestCalcPage({
         return;
       }
       if (result.code === "ENTITLEMENT_SAVE") {
+        if (options.autoAfterAuth) {
+          clearPendingSaveIntent();
+          autoSaveAfterAuthRef.current = false;
+          setIsAutoSaveResuming(false);
+        }
         // Three causes share this code. A PAID user at a finite cap frees
         // space; a FREE user at the 5-deal cap is the product's most natural
         // upgrade moment — it must actually offer the upgrade (deriving
@@ -4164,6 +4450,31 @@ export function InvestCalcPage({
         });
         return;
       }
+      if (result.code === "STALE_DATA") {
+        // Preserve every local edit. The user chooses whether to reload the
+        // newest saved row or keep this work as a separately named scenario;
+        // never guess which version should win.
+        if (targetExistingId) {
+          awaitingResolution = true;
+          setDuplicateCollision(null);
+          setAddressChangedPrompt(null);
+          setUnderwritingConflict({
+            savedDealId: targetExistingId,
+            autoAfterAuth: options.autoAfterAuth,
+          });
+          return;
+        }
+      }
+      if (result.code === "MIGRATION_PENDING") {
+        toast({
+          title: "Saved-deal updates are temporarily paused",
+          description:
+            result.message ??
+            "Apply the saved-analysis concurrency migration before updating existing deals. Your edits are still on this screen.",
+          variant: "destructive",
+        });
+        return;
+      }
       if (result.code === "ADDRESS_CHANGED") {
         // Update path refused: the form's address diverged from the loaded
         // saved deal's. A plain toast here was a dead end (Save re-failed
@@ -4190,6 +4501,8 @@ export function InvestCalcPage({
         setAddressChangedPrompt(null);
         setSavedDealId(null);
         savedDealIdRef.current = null;
+        savedUnderwritingRevisionRef.current = null;
+        setUnderwritingConflict(null);
         lastPersistedFormJsonRef.current = null;
         lastPersistedMaoTargetJsonRef.current = null;
         syncFormDirtyVersusPersisted();
@@ -4226,6 +4539,7 @@ export function InvestCalcPage({
           setDuplicateCollision({
             existingId: result.existingId,
             existingTitle: result.existingTitle,
+            existingUnderwritingRevision: result.existingUnderwritingRevision,
             autoAfterAuth: options.autoAfterAuth,
           });
           return;
@@ -4315,6 +4629,12 @@ export function InvestCalcPage({
         choice === "update"
           ? {
               existingIdOverride: duplicateCollision.existingId,
+              ...(duplicateCollision.existingUnderwritingRevision !== undefined
+                ? {
+                    expectedUnderwritingRevisionOverride:
+                      duplicateCollision.existingUnderwritingRevision,
+                  }
+                : {}),
               autoAfterAuth: duplicateCollision.autoAfterAuth,
             }
           : // forceInsert alongside saveAsNewScenario: "save as scenario"
@@ -4949,6 +5269,7 @@ export function InvestCalcPage({
     // it + re-confirm units every single deal (new-analysis-hardcodes-single-
     // family). The mount-time reset stays single-family.
     resetToNewAnalysis(form.getValues("propertyType") ?? "single-family");
+    replaceSavedDealUrl(null);
     setSavedTemplateFallback(null);
   };
 
@@ -5000,6 +5321,9 @@ export function InvestCalcPage({
     // A save from here is a NEW deal — never an overwrite of the source.
     setSavedDealId(null);
     savedDealIdRef.current = null;
+    savedUnderwritingRevisionRef.current = null;
+    setUnderwritingConflict(null);
+    replaceSavedDealUrl(null);
     setLoadedPipelineStage(null);
     lastPersistedFormJsonRef.current = null;
     lastPersistedMaoTargetJsonRef.current = null;
@@ -5761,11 +6085,11 @@ export function InvestCalcPage({
                 is skipped entirely, so this becomes the page's H1. */}
             {isAuthenticated ? (
               <h1 className="text-2xl sm:text-3xl xl:text-4xl font-extrabold text-foreground mb-2 text-balance">
-                Underwrite a Buy &amp; Hold Rental
+                {underwritingHeading}
               </h1>
             ) : (
               <h2 className="text-2xl sm:text-3xl xl:text-4xl font-extrabold text-foreground mb-2 text-balance">
-                Underwrite a Buy &amp; Hold Rental
+                {underwritingHeading}
               </h2>
             )}
             {/* ONE headline (Choose-TrueCap Phase B, finding 3): this page
@@ -5802,14 +6126,14 @@ export function InvestCalcPage({
                 <Sparkles className="size-4" />
                 Try a sample rental
               </span>
-              <span className="text-[11px] font-medium text-primary-foreground/80">
+              <span className="text-[11px] font-medium text-primary-foreground">
                 Preview a sample Pro report
               </span>
             </button>
           )}
         </div>
 
-        {!focusedResultsMode && activeStrategyKey ? (
+        {!focusedResultsMode ? (
           <div className="mt-4">
             <StrategyChips activeKey={activeStrategyKey} onSelect={handleSelectStrategy} />
           </div>
@@ -6038,6 +6362,7 @@ export function InvestCalcPage({
                   onAddressSelected={handleAddressSelected}
                   onAutofillFromAddress={handleAutofillFromAddress}
                   isAutofilling={isAutofilling}
+                  autofillRequiresAccount={!isAuthenticated}
                   // Show Autofill to anonymous users too — it's the clearest
                   // expression of the core promise. The handler already returns a
                   // graceful "Sign in to autofill" toast for signed-out users, so
@@ -6476,7 +6801,9 @@ export function InvestCalcPage({
                     exactTarget,
                     exactTarget ? normalizedSource : "screening-defaults"
                   );
+                  return exactValues;
                 }
+                return null;
               }}
               onEditAssumptions={() => {
                 setIsEditingAssumptions(true);
@@ -6589,10 +6916,162 @@ export function InvestCalcPage({
         onUpdateExisting={() => void handleDuplicateChoice("update")}
         onSaveAsScenario={() => void handleDuplicateChoice("scenario")}
       />
-      {/* Address-changed chooser - opens when Save targets a loaded saved
-          deal whose address no longer matches the form (same pattern as the
-          duplicate-address chooser above): save the current inputs as a new
-          deal, move the saved deal to the new address, or cancel. */}
+      {/* Autofill conflict review — manually entered values remain authoritative
+          unless the user explicitly selects the returned estimate. */}
+      <Dialog
+        open={pendingAutofillReview !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingAutofillReview(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Review values before autofill</DialogTitle>
+            <DialogDescription>
+              You already entered these values. We&apos;ll keep yours unless you explicitly choose the estimate.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            {pendingAutofillReview?.conflicts.map((conflict) => {
+              const useEstimate = approvedAutofillFields.has(conflict.field);
+              const format = (value: number) =>
+                conflict.currency
+                  ? `$${Math.round(value).toLocaleString("en-US")}${
+                      conflict.field === "monthlyRent" ? "/mo" : ""
+                    }`
+                  : value.toLocaleString("en-US");
+              return (
+                <div
+                  key={conflict.field}
+                  className="flex flex-col gap-3 rounded-xl border border-border p-3 sm:flex-row sm:items-center"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-foreground">{conflict.label}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Yours: <span className="font-medium text-foreground">{format(conflict.current)}</span>
+                      {" · "}Estimate: <span className="font-medium text-foreground">{format(conflict.proposed)}</span>
+                    </p>
+                  </div>
+                  <div
+                    role="group"
+                    aria-label={`${conflict.label} value source`}
+                    className="grid shrink-0 grid-cols-2 gap-1 rounded-xl border border-border bg-muted/30 p-1"
+                  >
+                    <button
+                      type="button"
+                      aria-pressed={!useEstimate}
+                      onClick={() =>
+                        setApprovedAutofillFields((current) => {
+                          const next = new Set(current);
+                          next.delete(conflict.field);
+                          return next;
+                        })
+                      }
+                      className="inline-flex min-h-11 items-center justify-center rounded-lg px-3 text-xs font-semibold text-foreground aria-pressed:bg-card aria-pressed:shadow-sm"
+                    >
+                      Keep mine
+                    </button>
+                    <button
+                      type="button"
+                      aria-pressed={useEstimate}
+                      onClick={() =>
+                        setApprovedAutofillFields((current) => {
+                          const next = new Set(current);
+                          next.add(conflict.field);
+                          return next;
+                        })
+                      }
+                      className="inline-flex min-h-11 items-center justify-center rounded-lg px-3 text-xs font-semibold text-foreground aria-pressed:bg-card aria-pressed:shadow-sm"
+                    >
+                      Use estimate
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="ghost" className="min-h-11" onClick={() => setPendingAutofillReview(null)}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              className="min-h-11"
+              onClick={() => {
+                if (!pendingAutofillReview) return;
+                applyComps(pendingAutofillReview.enrichment, approvedAutofillFields);
+                setPendingAutofillReview(null);
+              }}
+            >
+              Apply reviewed values
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={underwritingConflict !== null}
+        onOpenChange={(next) => {
+          if (next || isSavingDeal) return;
+          const canceledAutomaticSave = Boolean(underwritingConflict?.autoAfterAuth);
+          setUnderwritingConflict(null);
+          if (canceledAutomaticSave) {
+            autoSaveAfterAuthRef.current = false;
+            setIsAutoSaveResuming(false);
+            clearPendingSaveIntent();
+            clearPendingMaoTarget();
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>This underwriting changed elsewhere</DialogTitle>
+            <DialogDescription>
+              A newer saved version exists. Your edits are still on this screen and
+              have not overwritten it. Load the latest version, or keep your edits as
+              a separate scenario.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:justify-between">
+            <Button
+              type="button"
+              variant="outline"
+              className="min-h-11"
+              disabled={isSavingDeal}
+              onClick={() => {
+                const targetId = underwritingConflict?.savedDealId;
+                if (!targetId) return;
+                if (underwritingConflict.autoAfterAuth) {
+                  autoSaveAfterAuthRef.current = false;
+                  setIsAutoSaveResuming(false);
+                  clearPendingSaveIntent();
+                  clearPendingMaoTarget();
+                }
+                window.location.assign(`/?savedDeal=${encodeURIComponent(targetId)}`);
+              }}
+            >
+              Reload latest
+            </Button>
+            <Button
+              type="button"
+              className="min-h-11"
+              disabled={isSavingDeal}
+              onClick={() => {
+                const autoAfterAuth = underwritingConflict?.autoAfterAuth;
+                void performSaveDeal({
+                  forceInsert: true,
+                  saveAsNewScenario: true,
+                  autoAfterAuth,
+                });
+              }}
+            >
+              {isSavingDeal ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
+              Save edits as new scenario
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog
         open={addressChangedPrompt !== null}
         onOpenChange={(next) => {

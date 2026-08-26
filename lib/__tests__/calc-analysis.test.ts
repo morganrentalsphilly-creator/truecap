@@ -194,6 +194,35 @@ describe("cash-on-cash return", () => {
       result.downPayment + result.closingCosts
     );
   });
+
+  it("keeps the historical numeric sentinel when no initial cash is modeled", () => {
+    const result = calculateAnalysis(
+      baseSingleFamily({
+        downPaymentPct: 0,
+        closingCostsPct: 0,
+        rehabBudget: 0,
+        strFurnishingCost: 0,
+        monthlyRent: 8_000,
+      })
+    );
+
+    expect(result.totalCashRequired).toBe(0);
+    // Compatibility value only. Display, score, and target layers must use the
+    // denominator to treat CoC as N/A rather than a real 0% return.
+    expect(result.cocReturn).toBe(0);
+    expect(result.annualCashFlow).toBeGreaterThan(0);
+  });
+
+  it("fails closed before a non-finite result can reach another product surface", () => {
+    expect(() =>
+      calculateAnalysis(
+        baseSingleFamily({
+          strFurnishingCost: Number.MAX_VALUE,
+          rehabBudget: Number.MAX_VALUE,
+        }),
+      ),
+    ).toThrow(/non-finite numeric result/);
+  });
 });
 
 // ──────────────────────────────────────────────────────────────────
@@ -222,8 +251,45 @@ describe("DSCR", () => {
 // PMI — financed conventional loans under 20% down
 // ──────────────────────────────────────────────────────────────────
 describe("PMI", () => {
-  it("applies when down payment < 20% and reduces cash flow", () => {
-    const lowDown = calculateAnalysis(baseSingleFamily({ downPaymentPct: 10 }));
+  it("does not invent owner-occupant PMI for an investor rental when the field is blank", () => {
+    const investor = calculateAnalysis(
+      baseSingleFamily({ downPaymentPct: 15, pmiAnnualRatePct: undefined })
+    );
+    expect(investor.pmiMonthly).toBe(0);
+  });
+
+  it("uses the screening PMI default for an owner-occupant loan when the field is blank", () => {
+    const ownerOccupant = calculateAnalysis(
+      baseSingleFamily({
+        propertyType: "owner-occupant",
+        monthlyRent: undefined,
+        units: [
+          {
+            bedrooms: 2,
+            bathrooms: 1,
+            sqft: 850,
+            monthlyRent: 0,
+            isOwnerOccupied: true,
+          },
+          {
+            bedrooms: 2,
+            bathrooms: 1,
+            sqft: 850,
+            monthlyRent: 1_800,
+            isOwnerOccupied: false,
+          },
+        ],
+        downPaymentPct: 5,
+        pmiAnnualRatePct: undefined,
+      })
+    );
+    expect(ownerOccupant.pmiMonthly).toBeGreaterThan(0);
+  });
+
+  it("applies an explicit lender premium below 20% down and reduces cash flow", () => {
+    const lowDown = calculateAnalysis(
+      baseSingleFamily({ downPaymentPct: 10, pmiAnnualRatePct: 0.8 })
+    );
     expect(lowDown.pmiMonthly).toBeGreaterThan(0);
     const expected =
       lowDown.monthlyRentalIncome -
@@ -240,21 +306,28 @@ describe("PMI", () => {
   });
 
   it("is excluded from DSCR (DSCR uses P&I only)", () => {
-    const lowDown = calculateAnalysis(baseSingleFamily({ downPaymentPct: 10 }));
+    const lowDown = calculateAnalysis(
+      baseSingleFamily({ downPaymentPct: 10, pmiAnnualRatePct: 0.8 })
+    );
     const monthlyNoi =
       lowDown.monthlyRentalIncome - (lowDown.totalOperatingExpenses - lowDown.capex);
     expect(Math.abs(lowDown.dscr - monthlyNoi / lowDown.monthlyPayment)).toBeLessThan(0.001);
   });
 
   it("is in early projection debt service, then drops as the loan pays down", () => {
-    const proj = calculateAnalysis(baseSingleFamily({ downPaymentPct: 10 })).tenYearProjection;
-    const pAndIAnnual = calculateAnalysis(baseSingleFamily({ downPaymentPct: 10 })).monthlyPayment * 12;
+    const lowDown = calculateAnalysis(
+      baseSingleFamily({ downPaymentPct: 10, pmiAnnualRatePct: 0.8 })
+    );
+    const proj = lowDown.tenYearProjection;
+    const pAndIAnnual = lowDown.monthlyPayment * 12;
     expect(proj[0].debtServiceAnnual).toBeGreaterThan(pAndIAnnual); // PMI present year 1
     expect(proj[9].debtServiceAnnual).toBeLessThanOrEqual(proj[0].debtServiceAnnual); // never increases
   });
 
   it("honors a custom pmiAnnualRatePct override", () => {
-    const dflt = calculateAnalysis(baseSingleFamily({ downPaymentPct: 10 }));
+    const dflt = calculateAnalysis(
+      baseSingleFamily({ downPaymentPct: 10, pmiAnnualRatePct: 0.8 })
+    );
     const higher = calculateAnalysis(baseSingleFamily({ downPaymentPct: 10, pmiAnnualRatePct: 1.5 }));
     expect(higher.pmiMonthly).toBeGreaterThan(dflt.pmiMonthly);
     // 1.5% of the loan / 12.
@@ -267,8 +340,9 @@ describe("PMI", () => {
   });
 
   it("pmiNoCancel keeps mortgage insurance for the life of the loan (FHA MIP)", () => {
-    // Deterministic projection: loan starts just above 80% LTV and pays down
-    // below it after year 1, so PMI cancels in year 2 unless pmiNoCancel.
+    // Deterministic legacy-rate projection: loan starts just above 80% LTV and
+    // crosses the threshold during year 1. Cancellable PMI stops that month;
+    // never-canceling MIP remains until payoff.
     const base = {
       monthlyRentalIncome: 2_000,
       totalOperatingExpenses: 500,
@@ -287,8 +361,34 @@ describe("PMI", () => {
     };
     const cancels = buildTenYearProjection({ ...base, pmiNoCancel: false });
     const forLife = buildTenYearProjection({ ...base, pmiNoCancel: true });
-    expect(cancels[0]!.debtServiceAnnual).toBe(forLife[0]!.debtServiceAnnual); // PMI both, year 1
+    expect(cancels[0]!.debtServiceAnnual).toBe(12_000 + 4 * 100);
+    expect(forLife[0]!.debtServiceAnnual).toBe(12_000 + 12 * 100);
     expect(forLife[9]!.debtServiceAnnual).toBeGreaterThan(cancels[9]!.debtServiceAnnual); // MIP stays
+  });
+
+  it("cancels PMI in the exact month scheduled balance reaches 80% LTV", () => {
+    const projection = buildTenYearProjection({
+      monthlyRentalIncome: 2_000,
+      totalOperatingExpenses: 500,
+      capexReserveMonthly: 0,
+      monthlyPayment: 1_000,
+      interestRate: 0,
+      pmiMonthly: 100,
+      pmiNoCancel: false,
+      loanAmount: 82_000,
+      purchasePrice: 100_000,
+      taxSavingsMonthly: 0,
+      annualDepreciation: 0,
+      yearlyInterestSchedule: Array.from({ length: 10 }, () => 0),
+      rentGrowthPct: 0,
+      expenseGrowthPct: 0,
+      taxRate: 0.24,
+      includeInterestDeduction: false,
+    });
+
+    // Opening balances: $82k and $81k carry PMI. Month 3 opens at exactly
+    // $80k and no longer does. The old annual model charged all 12 months.
+    expect(projection[0]!.debtServiceAnnual).toBe(12_000 + 2 * 100);
   });
 
   it("excludes the CapEx reserve from the taxable-income line, not the cash-flow line", () => {
@@ -432,6 +532,21 @@ describe("operating expenses", () => {
     );
     // 300000 * 0.015 / 12 = $375
     expect(result.propertyTax).toBe(375);
+  });
+
+  it("derives the effective insurance percent from the active monthly bill", () => {
+    const result = calculateAnalysis(
+      baseSingleFamily({
+        purchasePrice: 240_000,
+        insuranceInputMode: "monthly",
+        insuranceMonthly: 250,
+        insurancePct: 0.5,
+      }),
+    );
+
+    expect(result.insurance).toBe(250);
+    expect(result.insurancePctInput).toBe(0.5);
+    expect(result.insurancePctEffective).toBeCloseTo(1.25, 10);
   });
 
   it("totalOperatingExpenses = sum of all line items", () => {

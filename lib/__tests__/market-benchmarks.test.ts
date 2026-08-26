@@ -113,4 +113,13 @@ describe("formatCapRateBenchmarkSubline", () => {
     const subline = formatCapRateBenchmarkSubline(8.0, national);
     expect(subline).toContain("U.S.");
   });
+
+  it("labels the planning reference as a dated TrueCap estimate, not a median", () => {
+    const subline = formatCapRateBenchmarkSubline(7.5, phl);
+    expect(subline).toContain("TrueCap's");
+    expect(subline).toContain("estimate");
+    expect(subline).toContain("2025 reference");
+    expect(subline).toContain("methodology");
+    expect(subline.toLowerCase()).not.toContain("median");
+  });
 });

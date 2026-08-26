@@ -71,4 +71,34 @@ describe("buildDealAssumptions — property tax modes", () => {
     expect(a.expenses.propertyTaxAnnual).toBeNull();
     expect(a.expenses.propertyTaxPct).toBe(1.5);
   });
+
+  it("shows the effective insurance default used by the resolved result", () => {
+    const a = buildDealAssumptions(
+      {
+        ...baseSnapshot,
+        insuranceInputMode: "percent",
+        insurancePct: undefined,
+      },
+      { insurance_pct: null },
+      { insurancePctEffective: 0.5, insuranceMonthly: 104 }
+    );
+
+    expect(a.expenses.insuranceInputMode).toBe("percent");
+    expect(a.expenses.insurancePct).toBe(0.5);
+  });
+
+  it("uses the recorded effective monthly insurance when the input adopted a fallback", () => {
+    const a = buildDealAssumptions(
+      {
+        ...baseSnapshot,
+        insuranceInputMode: "monthly",
+        insuranceMonthly: undefined,
+      },
+      { insurance_mo: null },
+      { insurancePctEffective: 0.5, insuranceMonthly: 125 }
+    );
+
+    expect(a.expenses.insuranceInputMode).toBe("monthly");
+    expect(a.expenses.insuranceMonthly).toBe(125);
+  });
 });

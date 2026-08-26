@@ -7,13 +7,14 @@
  * (no entitlement), saves on blur, mirrors the Deal Notes / Due Diligence
  * cards. Renders a graceful notice until the labels migration is applied.
  */
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import * as Sentry from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
 import { Loader2, MapPin } from "lucide-react";
 import { getDealLabelsAction, updateDealLabelsAction, type DealLabels } from "@/app/actions/deal-labels";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 const EMPTY: DealLabels = { nickname: null, market: null, neighborhood: null };
 
@@ -21,35 +22,59 @@ export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
   const router = useRouter();
   const { toast } = useToast();
   const [labels, setLabels] = useState<DealLabels>(EMPTY);
+  const [drafts, setDrafts] = useState<DealLabels>(EMPTY);
   const [loaded, setLoaded] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [migrationPending, setMigrationPending] = useState(false);
   const [isSaving, startSaving] = useTransition();
-  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [saveStatus, setSaveStatus] = useState<"idle" | "dirty" | "saving" | "saved" | "error">("idle");
+  const [failedPatch, setFailedPatch] = useState<Partial<DealLabels> | null>(null);
+  const draftsRef = useRef<DealLabels>(EMPTY);
 
   useEffect(() => {
     let cancelled = false;
     setLoaded(false);
+    setLoadError(null);
     setMigrationPending(false);
+    setSaveStatus("idle");
+    setFailedPatch(null);
     void getDealLabelsAction(savedDealId)
       .then((r) => {
         if (cancelled) return;
-        if (r.ok) setLabels(r.labels);
-        else if (r.code === "MIGRATION_PENDING") setMigrationPending(true);
+        if (r.ok) {
+          setLabels(r.labels);
+          setDrafts(r.labels);
+          draftsRef.current = r.labels;
+        } else if (r.code === "MIGRATION_PENDING") {
+          setMigrationPending(true);
+        } else {
+          setLoadError(r.message || "We couldn't load these deal details.");
+        }
         setLoaded(true);
       })
-      .catch(() => {
-        if (!cancelled) setLoaded(true);
+      .catch((err) => {
+        if (!cancelled) {
+          Sentry.captureException(err, { tags: { feature: "deal-details-load" } });
+          setLoadError("We couldn't load these deal details. Check your connection and try again.");
+          setLoaded(true);
+        }
       });
     return () => {
       cancelled = true;
     };
-  }, [savedDealId]);
+  }, [loadAttempt, savedDealId]);
 
   // Save only the changed field (partial patch) so editing one field on blur
   // never clobbers another whose latest value isn't in this render's state.
   const save = (patch: Partial<DealLabels>) => {
+    if (isSaving || loadError) {
+      setSaveStatus("dirty");
+      return;
+    }
     const dealAtSubmit = savedDealId;
     setSaveStatus("saving");
+    setFailedPatch(null);
     startSaving(async () => {
       try {
         const r = await updateDealLabelsAction(dealAtSubmit, patch);
@@ -57,11 +82,27 @@ export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
         if (!r.ok) {
           if (r.code === "MIGRATION_PENDING") setMigrationPending(true);
           else toast({ title: "Could not save deal details", description: r.message, variant: "destructive" });
+          setFailedPatch(patch);
           setSaveStatus("error");
           return;
         }
         setLabels(r.labels);
-        setSaveStatus("saved");
+        // Only normalize fields that still contain the submitted value. If the
+        // user kept typing while this request was in flight, their newer draft
+        // remains on screen and is correctly marked unsaved.
+        setDrafts((current) => {
+          const next = { ...current };
+          for (const key of Object.keys(patch) as Array<keyof DealLabels>) {
+            if ((current[key] ?? null) === (patch[key] ?? null)) next[key] = r.labels[key];
+          }
+          draftsRef.current = next;
+          return next;
+        });
+        const hasNewerDraft = (Object.keys(draftsRef.current) as Array<keyof DealLabels>).some(
+          (key) => (draftsRef.current[key]?.trim() || null) !== (r.labels[key] ?? null)
+        );
+        setFailedPatch(null);
+        setSaveStatus(hasNewerDraft ? "dirty" : "saved");
         // The nickname leads the workspace h1 and the My Deals rows — both are
         // server-rendered, so without a refresh the Router Cache keeps serving
         // the old name on back-navigation until some other mutation purges it.
@@ -74,6 +115,7 @@ export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
         // retryable; the stale-deal guard mirrors the success path.
         Sentry.captureException(err, { tags: { feature: "deal-details" } });
         if (dealAtSubmit !== savedDealId) return;
+        setFailedPatch(patch);
         setSaveStatus("error");
         toast({
           title: "Could not save deal details",
@@ -85,6 +127,28 @@ export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
   };
 
   if (!loaded) return null;
+
+  if (loadError) {
+    return (
+      <section aria-label="Deal details" className="rounded-2xl border border-destructive/25 bg-destructive/5 p-4">
+        <div role="alert">
+          <p className="text-sm font-semibold text-foreground">Couldn&apos;t load deal details</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {loadError} Editing stays disabled until the saved labels are available.
+          </p>
+        </div>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className="mt-3 min-h-11"
+          onClick={() => setLoadAttempt((attempt) => attempt + 1)}
+        >
+          Try again
+        </Button>
+      </section>
+    );
+  }
 
   if (migrationPending) {
     return (
@@ -119,7 +183,27 @@ export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
           ) : saveStatus === "saved" ? (
             "Saved just now"
           ) : saveStatus === "error" ? (
-            <span className="font-semibold text-destructive">Couldn’t save</span>
+            <span className="inline-flex items-center gap-2">
+              <span className="font-semibold text-destructive">Couldn’t save</span>
+              <button
+                type="button"
+                className="min-h-11 rounded-md px-2 font-semibold text-primary underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                onClick={() => {
+                  if (!failedPatch) return;
+                  const retry = Object.fromEntries(
+                    (Object.keys(failedPatch) as Array<keyof DealLabels>).map((key) => [
+                      key,
+                      draftsRef.current[key]?.trim() || null,
+                    ])
+                  ) as Partial<DealLabels>;
+                  save(retry);
+                }}
+              >
+                Retry
+              </button>
+            </span>
+          ) : saveStatus === "dirty" ? (
+            "Unsaved changes"
           ) : (
             "Not edited"
           )}
@@ -132,13 +216,37 @@ export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
             <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{f.label}</span>
             <Input
               type="text"
-              defaultValue={labels[f.key] ?? ""}
+              value={drafts[f.key] ?? ""}
               placeholder={f.placeholder}
               maxLength={80}
               className="min-h-11"
+              onChange={(event) => {
+                const next = { ...draftsRef.current, [f.key]: event.target.value };
+                draftsRef.current = next;
+                setDrafts(next);
+                setSaveStatus(
+                  (Object.keys(next) as Array<keyof DealLabels>).some(
+                    (key) => (next[key]?.trim() || null) !== (labels[key] ?? null)
+                  )
+                    ? "dirty"
+                    : "saved"
+                );
+              }}
               onBlur={(e) => {
                 const value = e.target.value.trim();
-                if ((labels[f.key] ?? "") === value) return; // unchanged
+                if ((labels[f.key] ?? "") === value) {
+                  const next = { ...draftsRef.current, [f.key]: labels[f.key] };
+                  draftsRef.current = next;
+                  setDrafts(next);
+                  setSaveStatus(
+                    (Object.keys(next) as Array<keyof DealLabels>).some(
+                      (key) => (next[key]?.trim() || null) !== (labels[key] ?? null)
+                    )
+                      ? "dirty"
+                      : "saved"
+                  );
+                  return;
+                }
                 save({ [f.key]: value || null });
               }}
             />

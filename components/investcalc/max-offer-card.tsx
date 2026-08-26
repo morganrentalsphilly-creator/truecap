@@ -381,7 +381,10 @@ export function MaxOfferCard({
               <div>At this price you&apos;d get:</div>
               <div>
                 <span className="font-semibold text-foreground">{mao.achieved.capRate.toFixed(1)}%</span> cap ·{" "}
-                <span className="font-semibold text-foreground">{mao.achieved.cocReturn.toFixed(1)}%</span> CoC ·{" "}
+                <span className="font-semibold text-foreground">
+                  {mao.achieved.totalCashRequired > 0 ? `${mao.achieved.cocReturn.toFixed(1)}%` : "N/A"}
+                </span>{" "}
+                CoC ·{" "}
                 <span className="font-semibold text-foreground">${mao.achieved.netCashFlow.toLocaleString("en-US")}</span>/mo ·{" "}
                 <span className="font-semibold text-foreground">{mao.achieved.dscr > 0 ? mao.achieved.dscr.toFixed(2) : "—"}</span> DSCR
               </div>

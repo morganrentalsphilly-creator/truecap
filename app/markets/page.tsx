@@ -98,7 +98,7 @@ export default function MarketsIndexPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionLd) }} />
       <Header />
 
-      <main className="mx-auto max-w-5xl px-4 sm:px-6 py-8 sm:py-12">
+      <main id="main" className="mx-auto max-w-5xl px-4 sm:px-6 py-8 sm:py-12">
         <p className="flex items-center gap-1.5 text-[11px] uppercase tracking-widest text-primary font-bold">
           <MapPin className="size-3.5" /> Markets
         </p>

@@ -46,7 +46,8 @@ describe("buildStrategyLensOutcome", () => {
     expect(o!.metrics[0].value).toBe("~12%/yr");
     expect(o!.metrics[0].band).toBe("strong");
     expect(o!.metrics[1].band).toBe("strong");
-    expect(o!.metrics[2].band).toBe("covers itself");
+    expect(o!.metrics[2].band).toBe("illustrative estimate ≥ $0");
+    expect(o!.metrics[2].tone).toBe("neutral");
   });
 
   it("bands a weak cash-flow deal without sugarcoating", () => {
@@ -113,7 +114,7 @@ describe("buildStrategyLensOutcome", () => {
     expect(o!.metrics[0].band).toBe("modest");
     expect(o!.metrics[1].band).toBe("relies on price growth");
     expect(o!.metrics[2].value).toBe("-$85/mo");
-    expect(o!.metrics[2].band).toBe("costs you monthly");
+    expect(o!.metrics[2].band).toBe("illustrative estimate < $0");
     expect(o!.metrics[2].tone).toBe("bad");
   });
 });

@@ -56,7 +56,7 @@ const USE_CASES: { icon: typeof Calculator; title: string; body: string }[] = [
   {
     icon: Key,
     title: "FHA 3.5% down — modeled correctly",
-    body: "Set down payment to 3.5%, mark insurance % to include MIP (~0.55-0.85% annual). The starter 'FHA 3.5% owner-occupant' template in Templates pre-fills the right defaults.",
+    body: "Set down payment to 3.5%, enter the lender's annual MIP in the dedicated PMI / MIP field, and select the loan-life option when it applies. Add any upfront premium to closing costs if it is not financed. The starter 'FHA 3.5% owner-occupant' template pre-fills editable screening defaults.",
   },
   {
     icon: Users,

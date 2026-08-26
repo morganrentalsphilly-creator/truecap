@@ -177,7 +177,8 @@ describe("saved underwriting history characterization", () => {
     const recordedResult = calculateAnalysis(values);
     vi.setSystemTime(new Date("2027-01-01T12:00:01.000Z"));
     const newlyComputed = calculateAnalysis(values);
-    expect(newlyComputed.propertyAge).toBe(recordedResult.propertyAge + 1);
+    expect(newlyComputed.propertyAge).toBe(recordedResult.propertyAge);
+    expect(newlyComputed.analysisDate).toBe(recordedResult.analysisDate);
 
     const resolved = resolveSavedAnalysisResult({
       methodologyVersion: recordedResult.methodologyVersion,

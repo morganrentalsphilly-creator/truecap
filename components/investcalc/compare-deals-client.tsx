@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import * as Sentry from "@sentry/nextjs";
 import {
   ArrowLeft,
-  ArrowUpRight,
   BarChart3,
   Building2,
   CalendarDays,
@@ -12,6 +13,7 @@ import {
   Info,
   KeyRound,
   ListTree,
+  Loader2,
   Table2,
   Plus,
   Trophy,
@@ -39,11 +41,12 @@ import { formatRoiHeadline } from "@/lib/extreme-value-format";
 import type { CompareSnapshotV1 } from "@/lib/compare-result-snapshot";
 import {
   METRIC_ROWS,
-  WINNER_TALLY_EXCLUDED_KEYS,
   formatCurrency,
   formatMetric,
   getBestValue,
+  getLeadCountLeaderIds,
   getTypeLabel,
+  tallyScoreMetricLeads,
   type CompareDirection,
   type MetricRow,
   type PropertyType,
@@ -51,13 +54,14 @@ import {
   type StoredRecommendation,
   type StoredRiskLevel,
 } from "@/lib/compare-metrics";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import type { DealScoreBreakdown } from "@/lib/deal-score";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { comparisonGridColumns } from "@/lib/compare-responsive";
+import { CompareDealPicker, type ComparePickerDeal } from "@/components/investcalc/compare-deal-picker";
 
 const MAX_COMPARE_ITEMS = 4;
 const MOBILE_DEAL_COLORS = [
@@ -113,6 +117,9 @@ export type CompareDealViewModel = {
   assumptions: DealAssumptions;
   compareSnapshotVersion: number | null;
   compareSnapshot: CompareSnapshotV1 | null;
+  /** Whether the long-term rows were frozen with the saved result or were
+   * rebuilt as one current-methodology result from legacy saved inputs. */
+  compareSnapshotSource: "recorded" | "recomputed" | null;
   methodologyLabel?: string;
 };
 
@@ -126,18 +133,19 @@ function getTypeClasses(_type: PropertyType | null): string {
   return "bg-card  border border-border/70 text-primary ring-border/70";
 }
 
-function getDesktopCardTopBorderClass(isBestDeal: boolean) {
-  if (isBestDeal) return "";
-  return "border-t-primary !border-t-2";
-}
-
 function fmtPct(v: number | null, decimals = 2): string {
   if (v == null) return "—";
   if (Number.isInteger(v)) return `${v}%`;
   return `${v.toFixed(decimals).replace(/\.?0+$/, "")}%`;
 }
 
-function CompareSnapshotPanel({ snapshot }: { snapshot: CompareSnapshotV1 }) {
+function CompareSnapshotPanel({
+  snapshot,
+  source,
+}: {
+  snapshot: CompareSnapshotV1;
+  source: "recorded" | "recomputed";
+}) {
   const { longTermSummary, assumptions, exitScenarios, taxStrategy } = snapshot;
   const s = exitScenarios.summary;
   const highestProfitExit = exitScenarios.years.reduce<(typeof exitScenarios.years)[number] | null>(
@@ -147,7 +155,9 @@ function CompareSnapshotPanel({ snapshot }: { snapshot: CompareSnapshotV1 }) {
   return (
     <div className="space-y-3 text-xs">
       <div>
-        <p className="mb-1.5 font-bold uppercase tracking-wide text-foreground">Saved assumptions</p>
+        <p className="mb-1.5 font-bold uppercase tracking-wide text-foreground">
+          {source === "recorded" ? "Recorded assumptions" : "Saved inputs used for recompute"}
+        </p>
         <ul className="space-y-1 text-muted-foreground">
           <li>Appreciation: {assumptions.appreciationRate}%</li>
           <li>Selling cost: {assumptions.sellingCostPct}%</li>
@@ -171,7 +181,7 @@ function CompareSnapshotPanel({ snapshot }: { snapshot: CompareSnapshotV1 }) {
                 side="top"
                 className="max-w-xs border border-border bg-popover px-3 py-2 text-xs leading-snug text-popover-foreground shadow-md"
               >
-                Includes rental cash flow plus estimated tax savings over time
+                Includes rental cash flow plus the signed illustrative tax effect over time; the effect may be a benefit or liability
               </TooltipContent>
             </Tooltip>
             <span>{formatCurrency(longTermSummary.tenYearAfterTax)}</span>
@@ -194,6 +204,21 @@ function CompareSnapshotPanel({ snapshot }: { snapshot: CompareSnapshotV1 }) {
           </li>
           <li>Year 10 cash flow: {formatCurrency(longTermSummary.year10CashFlow)}</li>
           <li>Year 10 exit profit: {formatCurrency(longTermSummary.year10Profit)}</li>
+          {snapshot.returnSummary ? (
+            <>
+              <li>Cash invested: {formatCurrency(snapshot.returnSummary.cashInvested)}</li>
+              <li>
+                Equity multiple: {snapshot.returnSummary.equityMultiple == null
+                  ? "—"
+                  : `${snapshot.returnSummary.equityMultiple.toFixed(2)}×`}
+              </li>
+              <li>
+                IRR: {snapshot.returnSummary.irrPct == null
+                  ? "—"
+                  : `${snapshot.returnSummary.irrPct.toFixed(1)}%`}
+              </li>
+            </>
+          ) : null}
           {/* Extreme cumulative ROI (finding 5): framed form leads; raw on title. */}
           <li title={formatRoiHeadline(longTermSummary.totalROI, { decimals: 1 }).title}>
             Total ROI: {formatRoiHeadline(longTermSummary.totalROI, { decimals: 1 }).text}
@@ -237,7 +262,9 @@ function CompareSnapshotPanel({ snapshot }: { snapshot: CompareSnapshotV1 }) {
         </p>
       </div>
       <p className="border-t border-border pt-2 text-[11px] leading-snug text-muted-foreground">
-        Loaded from the saved analysis snapshot (no recalculation).
+        {source === "recorded"
+          ? "Loaded from the recorded saved analysis (no recalculation)."
+          : "Recomputed as one current-methodology result from the saved inputs; recorded and current projection rows are not mixed."}
       </p>
     </div>
   );
@@ -342,13 +369,36 @@ function isCashPurchaseDeal(deal: CompareDealViewModel): boolean {
   return pmt == null || pmt <= 0;
 }
 
+function isCashOnCashApplicable(deal: CompareDealViewModel): boolean {
+  const cashInvested = deal.metrics.totalCashRequired;
+  return cashInvested == null ? deal.metrics.cocReturn != null : cashInvested > 0;
+}
+
+function comparableMetricValue(
+  deal: CompareDealViewModel,
+  row: MetricRow
+): number | null {
+  if (row.key === "cocReturn" && !isCashOnCashApplicable(deal)) return null;
+  return deal.metrics[row.key] ?? null;
+}
+
+function getComparableBestValue(
+  row: MetricRow,
+  deals: CompareDealViewModel[]
+): number | null {
+  const eligibleDeals =
+    row.key === "dscr" ? deals.filter((deal) => !isCashPurchaseDeal(deal)) : deals;
+  return getBestValue(row, eligibleDeals);
+}
+
 /**
  * Render a metric cell value, overriding DSCR for cash purchases. All
  * other metrics fall through to formatMetric unchanged.
  */
 function formatCellValue(deal: CompareDealViewModel, row: MetricRow): string {
   if (row.key === "dscr" && isCashPurchaseDeal(deal)) return "Cash";
-  return formatMetric(deal.metrics[row.key] ?? null, row);
+  if (row.key === "cocReturn" && !isCashOnCashApplicable(deal)) return "N/A";
+  return formatMetric(comparableMetricValue(deal, row), row);
 }
 
 function DscrTooltip({ deal }: { deal: CompareDealViewModel }) {
@@ -385,7 +435,7 @@ function DscrTooltip({ deal }: { deal: CompareDealViewModel }) {
   );
 }
 
-type LongTermMetricKind = "currency" | "percent" | "year";
+type LongTermMetricKind = "currency" | "percent" | "year" | "multiple";
 type LongTermDirection = CompareDirection | "none";
 
 type LongTermMetricRow = {
@@ -416,8 +466,7 @@ const LONG_TERM_METRIC_ROWS: LongTermMetricRow[] = [
     kind: "currency",
     direction: "higher",
     getValue: (d) => d.compareSnapshot?.longTermSummary.tenYearAfterTax ?? null,
-    scoreMetric: true,
-    labelTooltip: "Includes rental cash flow plus estimated tax savings over time",
+    labelTooltip: "Includes rental cash flow plus the signed illustrative tax effect over time; the effect may be a benefit or liability",
   },
   {
     key: "ltYear10AnnualCashFlow",
@@ -434,7 +483,6 @@ const LONG_TERM_METRIC_ROWS: LongTermMetricRow[] = [
     kind: "currency",
     direction: "higher",
     getValue: (d) => d.compareSnapshot?.taxStrategy.totalTaxBenefit ?? null,
-    scoreMetric: true,
     labelTooltip: "Represents tax impact from depreciation and mortgage interest deductions",
   },
   {
@@ -460,13 +508,31 @@ const LONG_TERM_METRIC_ROWS: LongTermMetricRow[] = [
     },
   },
   {
+    key: "ltYear10Equity",
+    label: "Year 10 Equity",
+    subsection: "FROM EXIT SCENARIOS",
+    kind: "currency",
+    direction: "higher",
+    getValue: (d) =>
+      d.compareSnapshot?.exitScenarios.years.find((row) => row.year === 10)?.equity ?? null,
+  },
+  {
+    key: "ltYear10NetSaleProceeds",
+    label: "Year 10 Net Sale Proceeds",
+    subsection: "FROM EXIT SCENARIOS",
+    kind: "currency",
+    direction: "higher",
+    getValue: (d) =>
+      d.compareSnapshot?.exitScenarios.years.find((row) => row.year === 10)?.netSaleProceeds ?? null,
+    scoreMetric: true,
+  },
+  {
     key: "ltYear10Profit",
     label: "Year 10 Profit",
     subsection: "FROM EXIT SCENARIOS",
     kind: "currency",
     direction: "higher",
     getValue: (d) => d.compareSnapshot?.exitScenarios.summary.year10Profit ?? null,
-    scoreMetric: true,
   },
   {
     key: "ltBestYearToSell",
@@ -481,159 +547,89 @@ const LONG_TERM_METRIC_ROWS: LongTermMetricRow[] = [
   },
   {
     key: "ltTotalRoi",
-    label: "Total ROI",
+    label: "Total ROI (cumulative)",
     subsection: "FROM EXIT SCENARIOS",
     kind: "percent",
     direction: "higher",
     getValue: (d) => d.compareSnapshot?.exitScenarios.summary.totalROI ?? null,
+  },
+  {
+    key: "ltEquityMultiple",
+    label: "Equity Multiple",
+    subsection: "FROM EXIT SCENARIOS",
+    kind: "multiple",
+    direction: "higher",
+    getValue: (d) => d.compareSnapshot?.returnSummary?.equityMultiple ?? null,
+    labelTooltip: "Total modeled distributions divided by the recorded cash invested. Available only when it was frozen with the saved result.",
+  },
+  {
+    key: "ltIrr",
+    label: "IRR (annualized)",
+    subsection: "FROM EXIT SCENARIOS",
+    kind: "percent",
+    direction: "higher",
+    getValue: (d) => d.compareSnapshot?.returnSummary?.irrPct ?? null,
     scoreMetric: true,
+    labelTooltip: "Annualized return from the recorded year-by-year cash-flow and exit timeline. Older snapshots may not contain it.",
   },
 ];
 
-function getStrictBestLongTermDealId(row: LongTermMetricRow, deals: CompareDealViewModel[]): string | null {
-  if (row.direction === "none") return null;
+function getBestLongTermDealIds(row: LongTermMetricRow, deals: CompareDealViewModel[]): Set<string> {
+  if (row.direction === "none") return new Set();
   const candidates = deals
     .map((deal) => ({ id: deal.id, value: row.getValue(deal) }))
     .filter((candidate): candidate is { id: string; value: number } => candidate.value != null);
-  if (candidates.length === 0) return null;
+  if (candidates.length === 0) return new Set();
 
   const bestValue =
     row.direction === "higher"
       ? Math.max(...candidates.map((candidate) => candidate.value))
       : Math.min(...candidates.map((candidate) => candidate.value));
-  const atBest = candidates.filter((candidate) => candidate.value === bestValue);
-  return atBest.length === 1 ? atBest[0]!.id : null;
+  return new Set(
+    candidates
+      .filter((candidate) => candidate.value === bestValue)
+      .map((candidate) => candidate.id)
+  );
 }
 
 function getLongTermHighlightedWinCounts(deals: CompareDealViewModel[]): Map<string, number> {
-  const counts = new Map<string, number>(deals.map((deal) => [deal.id, 0]));
-  for (const row of LONG_TERM_METRIC_ROWS.filter((metric) => metric.direction !== "none")) {
-    const winnerId = getStrictBestLongTermDealId(row, deals);
-    if (winnerId) counts.set(winnerId, (counts.get(winnerId) ?? 0) + 1);
-  }
-  return counts;
+  return tallyScoreMetricLeads(
+    deals,
+    LONG_TERM_METRIC_ROWS
+      .filter((row): row is LongTermMetricRow & { direction: CompareDirection } => row.direction !== "none")
+      .map((row) => ({
+        key: row.key,
+        direction: row.direction,
+        scoreMetric: row.scoreMetric,
+        getValue: row.getValue,
+      }))
+  );
 }
 
 function getShortTermHighlightedWinCounts(deals: CompareDealViewModel[]): Map<string, number> {
-  const counts = new Map<string, number>(deals.map((deal) => [deal.id, 0]));
-  for (const row of METRIC_ROWS) {
-    // Offer Ceiling scales with price/NOI, not deal quality — leaving it in the
-    // tally handed the most expensive property a free win on every compare.
-    if (WINNER_TALLY_EXCLUDED_KEYS.has(row.key)) continue;
-    // For DSCR, only rank financed deals against each other - a cash
-    // purchase's stored dscr=0 isn't comparable to a real ratio.
-    const eligibleDeals =
-      row.key === "dscr" ? deals.filter((deal) => !isCashPurchaseDeal(deal)) : deals;
-    const best = getBestValue(row, eligibleDeals);
-    if (best == null) continue;
-    for (const deal of eligibleDeals) {
-      const value = deal.metrics[row.key];
-      if (value != null && value === best) {
-        counts.set(deal.id, (counts.get(deal.id) ?? 0) + 1);
-      }
-    }
-  }
-  return counts;
+  return tallyScoreMetricLeads(
+    deals,
+    METRIC_ROWS.map((row) => ({
+      key: row.key,
+      direction: row.direction,
+      scoreMetric: row.scoreMetric,
+      getValue: (deal: CompareDealViewModel) =>
+        row.key === "dscr" && isCashPurchaseDeal(deal)
+          ? null
+          : comparableMetricValue(deal, row),
+    }))
+  );
 }
 
 function getLeaderIdsFromHighlightedCounts(
   deals: CompareDealViewModel[],
   counts: Map<string, number>
 ): string[] {
-  if (deals.length === 0) return [];
-  const max = Math.max(...deals.map((deal) => counts.get(deal.id) ?? 0));
-  if (max <= 0) return [];
-  return deals.filter((deal) => (counts.get(deal.id) ?? 0) === max).map((deal) => deal.id);
+  return getLeadCountLeaderIds(deals, counts);
 }
 
-function getTopHighlightedIds(
-  deals: CompareDealViewModel[],
-  counts: Map<string, number>,
-  limit: number
-): Set<string> {
-  return new Set(
-    deals
-      .map((deal) => ({ id: deal.id, count: counts.get(deal.id) ?? 0 }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, limit)
-      .filter((deal) => deal.count > 0)
-      .map((deal) => deal.id)
-  );
-}
-
-function getBalancedDealIdsFromHighlightedCounts(
-  deals: CompareDealViewModel[],
-  shortCounts: Map<string, number>,
-  longCounts: Map<string, number>
-): string[] {
-  const topShort = getTopHighlightedIds(deals, shortCounts, 2);
-  const topLong = getTopHighlightedIds(deals, longCounts, 2);
-  return deals.filter((deal) => topShort.has(deal.id) && topLong.has(deal.id)).map((deal) => deal.id);
-}
-
-function getDealRoi(deal: CompareDealViewModel): number {
-  return deal.compareSnapshot?.longTermSummary.totalROI ?? Number.NEGATIVE_INFINITY;
-}
-
-function getCreatedAtTime(deal: CompareDealViewModel): number {
-  return deal.createdAt ? new Date(deal.createdAt).getTime() : Number.NEGATIVE_INFINITY;
-}
-
-function getBestDealIdByWins(
-  deals: CompareDealViewModel[],
-  shortCounts: Map<string, number>,
-  longCounts: Map<string, number>
-): string | null {
-  if (deals.length === 0) return null;
-
-  return deals.reduce((best, deal) => {
-    const dealWins = (shortCounts.get(deal.id) ?? 0) + (longCounts.get(deal.id) ?? 0);
-    const bestWins = (shortCounts.get(best.id) ?? 0) + (longCounts.get(best.id) ?? 0);
-    if (dealWins > bestWins) return deal;
-    if (dealWins < bestWins) return best;
-
-    const dealScore = deal.score ?? Number.NEGATIVE_INFINITY;
-    const bestScore = best.score ?? Number.NEGATIVE_INFINITY;
-    if (dealScore > bestScore) return deal;
-    if (dealScore < bestScore) return best;
-
-    const dealRoi = getDealRoi(deal);
-    const bestRoi = getDealRoi(best);
-    if (dealRoi > bestRoi) return deal;
-    if (dealRoi < bestRoi) return best;
-
-    return getCreatedAtTime(deal) > getCreatedAtTime(best) ? deal : best;
-  }).id;
-}
-
-/**
- * Open the relative metric reference without turning an internal comparison
- * tally into a transaction or pipeline decision. Stage changes remain an
- * explicit per-deal action in the workspace.
- */
-function WinnerActions({
-  winner,
-}: {
-  winner: CompareDealViewModel;
-}) {
-  return (
-    <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border/70 pt-3">
-      <Button asChild size="sm" className="rounded-full">
-        <Link href={`/dashboard/saved-analyses/${winner.id}`}>
-          Open this deal
-          <ArrowUpRight className="ml-1 size-3.5" />
-        </Link>
-      </Button>
-    </div>
-  );
-}
-
-/**
- * The compare grid's only percent-kind long-term row is the cumulative
- * 10-yr Total ROI — extreme values (finding 5) render the framed band in
- * the cell, with the raw figure surfaced on the cell's title attr (see
- * longTermRoiCellTitle). Sane values keep fmtPct exactly as before.
- */
+/** Extreme cumulative ROI values render the framed band. IRR is a distinct
+ * annualized metric and always keeps its own raw percent display. */
 function formatLongTermPercent(value: number): string {
   const headline = formatRoiHeadline(value, { decimals: 1, compact: true });
   return headline.extreme ? headline.text : fmtPct(value, 1);
@@ -641,14 +637,16 @@ function formatLongTermPercent(value: number): string {
 
 /** Raw-value caution for the Total ROI cells; undefined when sane. */
 function longTermRoiCellTitle(row: LongTermMetricRow, value: number | null): string | undefined {
-  if (row.kind !== "percent") return undefined;
+  if (row.key !== "ltTotalRoi") return undefined;
   return formatRoiHeadline(value, { decimals: 1 }).title;
 }
 
 function formatLongTermCell(row: LongTermMetricRow, value: number | null): string {
   if (value == null) return "-";
   if (row.kind === "currency") return formatCurrency(value, row.direction === "higher");
-  if (row.kind === "percent") return formatLongTermPercent(value);
+  if (row.kind === "percent")
+    return row.key === "ltTotalRoi" ? formatLongTermPercent(value) : fmtPct(value, 1);
+  if (row.kind === "multiple") return `${value.toFixed(2)}×`;
   return `Year ${value}`;
 }
 
@@ -682,11 +680,13 @@ function formatCompactLongTermMetric(row: LongTermMetricRow, value: number | nul
     // extreme deals both reading ">300%" beside one trophy look arbitrary
     // — compare is a RANKING surface, so the raw figure rides inline here
     // (small, after the caution). Desktop cells keep hover titles.
+    if (row.key !== "ltTotalRoi") return fmtPct(value, 1);
     const headline = formatRoiHeadline(value, { decimals: 1, compact: true });
     return headline.extreme
       ? `${headline.text} (${Math.round(value)}%)`
       : formatLongTermPercent(value);
   }
+  if (row.kind === "multiple") return `${value.toFixed(2)}×`;
   return `Yr ${value}`;
 }
 
@@ -765,6 +765,8 @@ function MobileMetricValue({
   const text =
     row.key === "dscr" && isCashPurchaseDeal(deal)
       ? "Cash"
+      : row.key === "cocReturn" && !isCashOnCashApplicable(deal)
+        ? "N/A"
       : formatCompactMetric(value, row);
   if (!body) return <p className={className}>{text}</p>;
 
@@ -815,9 +817,21 @@ function MobileLongTermLabel({ row }: { row: LongTermMetricRow }) {
   );
 }
 
-function CompareMobileDealStrip({ deals }: { deals: CompareDealViewModel[] }) {
+function CompareMobileDealStrip({
+  deals,
+  onEditSelection,
+  onRemove,
+  removingId,
+  selectionPending,
+}: {
+  deals: CompareDealViewModel[];
+  onEditSelection: () => void;
+  onRemove: (deal: CompareDealViewModel) => void;
+  removingId: string | null;
+  selectionPending: boolean;
+}) {
   return (
-    <div className="grid grid-cols-4 gap-2">
+    <div className={cn("grid gap-2", comparisonGridColumns(deals.length))}>
       {deals.map((deal, index) => {
         const color = getMobileDealColor(index);
         return (
@@ -833,7 +847,7 @@ function CompareMobileDealStrip({ deals }: { deals: CompareDealViewModel[] }) {
                 {index + 1}
               </span>
               <div className="flex items-center gap-0.5 max-[424px]:mt-1 max-[424px]:basis-full max-[424px]:justify-start">
-                {deal.compareSnapshot ? (
+                {deal.compareSnapshot && deal.compareSnapshotSource ? (
                   <Popover>
                     <Tooltip delayDuration={200}>
                       <TooltipTrigger asChild>
@@ -847,18 +861,23 @@ function CompareMobileDealStrip({ deals }: { deals: CompareDealViewModel[] }) {
                             variant="ghost"
                             size="icon-sm"
                             className="relative size-6 rounded-full text-muted-foreground hover:bg-muted before:absolute before:-inset-y-2 before:-left-2 before:right-0"
-                            aria-label={`View saved projection snapshot for ${deal.address}`}
+                            aria-label={`View ${deal.compareSnapshotSource} projections for ${deal.address}`}
                           >
                             <Table2 className="size-3.5" />
                           </Button>
                         </PopoverTrigger>
                       </TooltipTrigger>
                       <TooltipContent side="bottom" sideOffset={6} className="text-xs">
-                        Saved projections
+                        {deal.compareSnapshotSource === "recorded"
+                          ? "Recorded projections"
+                          : "Recomputed projections"}
                       </TooltipContent>
                     </Tooltip>
                     <PopoverContent className="w-80 max-h-[min(70vh,28rem)] overflow-y-auto" align="start">
-                      <CompareSnapshotPanel snapshot={deal.compareSnapshot} />
+                      <CompareSnapshotPanel
+                        snapshot={deal.compareSnapshot}
+                        source={deal.compareSnapshotSource}
+                      />
                     </PopoverContent>
                   </Popover>
                 ) : null}
@@ -897,121 +916,155 @@ function CompareMobileDealStrip({ deals }: { deals: CompareDealViewModel[] }) {
                 {deal.methodologyLabel}
               </p>
             ) : null}
+            <div className="mt-1.5">
+              <DataConfidenceBadge
+                confidence={deal.dataConfidence}
+                size="xs"
+                propertyType={deal.propertyType}
+              />
+            </div>
             <p className="mt-auto pt-2 text-[10px] font-semibold text-muted-foreground">
               {formatCurrency(deal.purchasePrice)}
             </p>
+            <div className="mt-2 grid grid-cols-2 gap-1.5">
+              <Button asChild variant="outline" size="sm" className="min-h-11 rounded-xl px-2 text-[11px]">
+                <Link href={`/dashboard/saved-analyses/${deal.id}`}>Open</Link>
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="min-h-11 rounded-xl px-2 text-[11px] text-muted-foreground"
+                onClick={() => onRemove(deal)}
+                disabled={selectionPending}
+                aria-label={`Remove ${deal.address} from comparison`}
+              >
+                {removingId === deal.id ? <Loader2 className="size-3.5 animate-spin" /> : <X className="size-3.5" />}
+                Remove
+              </Button>
+            </div>
           </div>
         );
       })}
       {deals.length < MAX_COMPARE_ITEMS ? (
-        <Link
-          href="/dashboard/saved-analyses"
+        <button
+          type="button"
+          onClick={onEditSelection}
+          disabled={selectionPending}
           className="flex min-h-28 flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/60 p-2 text-muted-foreground shadow-sm transition-colors hover:border-primary/40 hover:text-primary"
         >
           <span className="mb-2 flex size-8 items-center justify-center rounded-full border border-border bg-background">
             <Plus className="size-4" />
           </span>
           <span className="text-[11px] font-bold">Add</span>
-        </Link>
+        </button>
       ) : null}
     </div>
   );
 }
 
 function CompareMobileHighlights({
-  bestDeal,
-  highestRoiDeal,
-  strongestDscrDeal,
+  deals,
   shortTermHighlightedWinCounts,
   longTermHighlightedWinCounts,
+  shortTermMetricCount,
+  longTermMetricCount,
 }: {
-  bestDeal: CompareDealViewModel | null;
-  highestRoiDeal: CompareDealViewModel | null;
-  strongestDscrDeal: CompareDealViewModel | null;
+  deals: CompareDealViewModel[];
   shortTermHighlightedWinCounts: Map<string, number>;
   longTermHighlightedWinCounts: Map<string, number>;
+  shortTermMetricCount: number;
+  longTermMetricCount: number;
 }) {
   return (
-    <>
-      {/* DSCR is N/A on all-cash compares — drop that tile entirely rather than
-          show "—", and collapse the row to 2-up so it doesn't leave a gap. */}
-      <div className={`grid gap-2 ${strongestDscrDeal?.metrics.dscr != null ? "grid-cols-3" : "grid-cols-2"}`}>
-        <div className="rounded-2xl bg-card p-3 shadow-sm">
-          <p className="text-[10px] font-extrabold text-primary">Highest metric-lead count</p>
-          <p className="mt-1 line-clamp-2 text-xs font-extrabold leading-tight text-foreground">
-            {bestDeal ? getDealLabel(bestDeal, { short: true }) : "-"}
-          </p>
-        </div>
-        <div className="rounded-2xl bg-card p-3 shadow-sm">
-          <p className="text-[10px] font-extrabold text-primary">
-            {highestRoiDeal?.compareSnapshot?.longTermSummary.totalROI != null
-              ? "Highest modeled 10-yr ROI"
-              : "Highest modeled cash-on-cash"}
-          </p>
-          {/* Extreme cumulative 10-yr ROI (finding 5): framed band + raw on
-              title. The CoC fallback is an ANNUAL year-1 metric — different
-              scale, never framed here. */}
-          <p
-            className="mt-1 text-xs font-extrabold text-foreground"
-            title={
-              highestRoiDeal?.compareSnapshot?.longTermSummary.totalROI != null
-                ? formatRoiHeadline(highestRoiDeal.compareSnapshot.longTermSummary.totalROI, { decimals: 1 }).title
-                : undefined
-            }
-          >
-            {highestRoiDeal?.compareSnapshot?.longTermSummary.totalROI != null
-              ? formatLongTermPercent(highestRoiDeal.compareSnapshot.longTermSummary.totalROI)
-              : fmtPct(highestRoiDeal?.metrics.cocReturn ?? null, 1)}
-          </p>
-        </div>
-        {strongestDscrDeal?.metrics.dscr != null ? (
-          <div className="rounded-2xl bg-card p-3 shadow-sm">
-            <p className="text-[10px] font-extrabold text-primary">Highest model DSCR</p>
-            <p className="mt-1 text-xs font-extrabold text-foreground">
-              {strongestDscrDeal.metrics.dscr.toFixed(2)}
-            </p>
-          </div>
-        ) : null}
+    <div className="rounded-3xl border border-border bg-card p-4 shadow-sm">
+      <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-muted-foreground">
+        Disclosed metric-lead counts
+      </p>
+      <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
+        Near-term counts only monthly cash flow, cap rate, financed-deal DSCR, and required cash. Long-term counts only 10-year cash flow, year-10 net sale proceeds, and recorded IRR when available. Tied row values share the lead; tied totals stay tied. These are relative comparisons, not a recommendation.
+      </p>
+      <div className={cn("mt-3 grid gap-2", comparisonGridColumns(deals.length))}>
+        {deals.map((deal, index) => {
+          const color = getMobileDealColor(index);
+          return (
+            <div key={`${deal.id}-mobile-leads`} className="rounded-2xl bg-muted/40 p-3">
+              <div className="flex items-center gap-1.5">
+                <span className={cn("inline-flex size-5 items-center justify-center rounded-full text-[10px] font-extrabold", color.chip)}>
+                  {index + 1}
+                </span>
+                <span className="truncate text-[10px] font-bold text-foreground">
+                  {getDealLabel(deal, { short: true })}
+                </span>
+              </div>
+              <dl className="mt-2 grid grid-cols-2 gap-2 text-[10px]">
+                <div>
+                  <dt className="text-muted-foreground">Near-term</dt>
+                  <dd className="font-extrabold text-foreground">
+                    {shortTermMetricCount > 0
+                      ? `${shortTermHighlightedWinCounts.get(deal.id) ?? 0} / ${shortTermMetricCount}`
+                      : "No comparable data"}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground">Long-term</dt>
+                  <dd className="font-extrabold text-foreground">
+                    {longTermMetricCount > 0
+                      ? `${longTermHighlightedWinCounts.get(deal.id) ?? 0} / ${longTermMetricCount}`
+                      : "No comparable data"}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          );
+        })}
       </div>
-
-      {bestDeal ? (
-        <div className="rounded-3xl border border-border bg-card p-4 shadow-sm">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-muted-foreground">Comparison reference</p>
-              <h2 className="mt-1 text-base font-extrabold leading-tight text-foreground">{getDealLabel(bestDeal, { short: true })}</h2>
-            </div>
-            <Badge
-              className="rounded-full border border-primary/30 bg-primary/10 text-primary"
-            >
-              Highest lead count
-            </Badge>
-          </div>
-          <p className="mt-2 rounded-lg bg-muted/50 px-2.5 py-1.5 text-[11px] font-medium leading-snug text-muted-foreground">
-            Relative modeled comparison only. This tally does not evaluate every assumption, adopted target, or due-diligence item and is not a recommendation.
-          </p>
-          <div className="mt-4 grid grid-cols-2 gap-2">
-            <div className="rounded-2xl bg-muted/40 p-3">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Near-term score</p>
-              <p className="mt-1 text-lg font-extrabold text-foreground">{shortTermHighlightedWinCounts.get(bestDeal.id) ?? 0}</p>
-              <p className="mt-1 text-[10px] leading-snug text-muted-foreground">Count of row-leading values across cash flow, model DSCR, cap rate, and cash required.</p>
-            </div>
-            <div className="rounded-2xl bg-muted/40 p-3">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Long-term score</p>
-              <p className="mt-1 text-lg font-extrabold text-foreground">{longTermHighlightedWinCounts.get(bestDeal.id) ?? 0}</p>
-              <p className="mt-1 text-[10px] leading-snug text-muted-foreground">Count of row-leading values across modeled 10-year cash flow, equity, profit, and return.</p>
-            </div>
-          </div>
-          <WinnerActions winner={bestDeal} />
-        </div>
-      ) : null}
-    </>
+    </div>
   );
 }
 
-export function CompareDealsClient({ deals }: {
+export function CompareDealsClient({ deals, availableDeals = [], selectionLoadError = false }: {
   deals: CompareDealViewModel[];
+  availableDeals?: ComparePickerDeal[];
+  selectionLoadError?: boolean;
 }) {
+  const router = useRouter();
+  const [selectionOpen, setSelectionOpen] = useState(false);
+  const [selectionError, setSelectionError] = useState<string | null>(null);
+  const [removingId, setRemovingId] = useState<string | null>(null);
+  const [selectionPending, startSelectionTransition] = useTransition();
+
+  const showSelectionEditor = () => {
+    setSelectionError(null);
+    setSelectionOpen(true);
+    window.requestAnimationFrame(() => {
+      document
+        .getElementById("compare-selection-editor")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
+
+  const removeDeal = (deal: CompareDealViewModel) => {
+    if (selectionPending) return;
+    setSelectionError(null);
+    setRemovingId(deal.id);
+    startSelectionTransition(async () => {
+      try {
+        const result = await removeCompareDealAction(deal.id);
+        if (!result.ok) {
+          setSelectionError(result.message);
+          return;
+        }
+        router.refresh();
+      } catch (error) {
+        Sentry.captureException(error, { tags: { feature: "compare-selection" } });
+        setSelectionError("The comparison could not be updated. Your saved deals were not changed; retry when the connection recovers.");
+      } finally {
+        setRemovingId(null);
+      }
+    });
+  };
+
   // Buy-box fit (PV-4) — same listBuyBoxesAction useEffect pattern as My
   // Deals. Failures / no-boxes / free users leave buyBoxes null, so the
   // "Your buy box" row group renders nothing (invisible until useful).
@@ -1074,51 +1127,51 @@ export function CompareDealsClient({ deals }: {
   const longTermHighlightedWinCounts = getLongTermHighlightedWinCounts(deals);
   const shortTermWinnerIds = getLeaderIdsFromHighlightedCounts(deals, shortTermHighlightedWinCounts);
   const longTermWinnerIds = getLeaderIdsFromHighlightedCounts(deals, longTermHighlightedWinCounts);
-  const balancedDealIds = getBalancedDealIdsFromHighlightedCounts(
-    deals,
-    shortTermHighlightedWinCounts,
-    longTermHighlightedWinCounts
-  );
-  const bestDealId = getBestDealIdByWins(deals, shortTermHighlightedWinCounts, longTermHighlightedWinCounts);
-  const bestDeal = deals.find((deal) => deal.id === bestDealId) ?? deals[0] ?? null;
-  const highestRoiDeal = deals.reduce<CompareDealViewModel | null>((best, deal) => {
-    const value = deal.compareSnapshot?.longTermSummary.totalROI ?? deal.metrics.cocReturn ?? Number.NEGATIVE_INFINITY;
-    const bestValue = best?.compareSnapshot?.longTermSummary.totalROI ?? best?.metrics.cocReturn ?? Number.NEGATIVE_INFINITY;
-    return value > bestValue ? deal : best;
-  }, null);
+  const shortTermMetricCount = METRIC_ROWS.filter(
+    (row) =>
+      row.scoreMetric &&
+      deals.some((deal) =>
+        row.key === "dscr" && isCashPurchaseDeal(deal)
+          ? false
+          : comparableMetricValue(deal, row) != null
+      )
+  ).length;
+  const longTermMetricCount = LONG_TERM_METRIC_ROWS.filter(
+    (row) => row.scoreMetric && deals.some((deal) => row.getValue(deal) != null)
+  ).length;
   const extremeRoiCount = deals.filter((deal) =>
     formatRoiHeadline(deal.compareSnapshot?.longTermSummary.totalROI).extreme
   ).length;
-  // Skip cash-purchase deals when ranking strongest DSCR - they have
-  // no loan, so DSCR is N/A and a stored 0 isn't comparable to a real
-  // ratio. If every compared deal is cash, the tile will read "—".
-  const strongestDscrDeal = deals
-    .filter((deal) => !isCashPurchaseDeal(deal))
-    .reduce<CompareDealViewModel | null>((best, deal) => {
-      const value = deal.metrics.dscr ?? Number.NEGATIVE_INFINITY;
-      const bestValue = best?.metrics.dscr ?? Number.NEGATIVE_INFINITY;
-      return value > bestValue ? deal : best;
-    }, null);
+  const visibleMetricRows = METRIC_ROWS.filter(
+    (row) =>
+      !row.key.startsWith("downside") ||
+      deals.some((deal) => comparableMetricValue(deal, row) != null)
+  );
+  const visibleLongTermRows = LONG_TERM_METRIC_ROWS.filter(
+    (row) =>
+      !["ltEquityMultiple", "ltIrr"].includes(row.key) ||
+      deals.some((deal) => row.getValue(deal) != null)
+  );
   const mobileSections = [
     {
       id: "returns",
       title: "Returns",
       icon: TrendingUp,
-      rows: METRIC_ROWS.filter((row) => row.group === "RETURNS"),
+      rows: visibleMetricRows.filter((row) => row.group === "RETURNS"),
       defaultOpen: true,
     },
     {
       id: "risk",
       title: "Coverage & operations",
       icon: Info,
-      rows: METRIC_ROWS.filter((row) => row.group === "RISK"),
+      rows: visibleMetricRows.filter((row) => row.group === "RISK"),
       defaultOpen: false,
     },
     {
       id: "deal",
       title: "Deal",
       icon: Building2,
-      rows: METRIC_ROWS.filter((row) => row.group === "DEAL"),
+      rows: visibleMetricRows.filter((row) => row.group === "DEAL"),
       defaultOpen: false,
     },
   ];
@@ -1127,13 +1180,13 @@ export function CompareDealsClient({ deals }: {
       id: "ten-year",
       title: "10-Year Performance",
       icon: BarChart3,
-      rows: LONG_TERM_METRIC_ROWS.filter((row) => row.subsection === "FROM 10-YEAR PROJECTIONS"),
+      rows: visibleLongTermRows.filter((row) => row.subsection === "FROM 10-YEAR PROJECTIONS"),
     },
     {
       id: "tax",
       title: "Illustrative Tax Impact",
       icon: Table2,
-      rows: LONG_TERM_METRIC_ROWS.filter(
+      rows: visibleLongTermRows.filter(
         (row) => row.subsection === "FROM ILLUSTRATIVE TAX IMPACT"
       ),
     },
@@ -1141,7 +1194,7 @@ export function CompareDealsClient({ deals }: {
       id: "exit",
       title: "Exit Scenarios",
       icon: CalendarDays,
-      rows: LONG_TERM_METRIC_ROWS.filter((row) => row.subsection === "FROM EXIT SCENARIOS"),
+      rows: visibleLongTermRows.filter((row) => row.subsection === "FROM EXIT SCENARIOS"),
     },
   ];
   const desktopSlots = Array.from({ length: MAX_COMPARE_ITEMS }, (_, index) => deals[index] ?? null);
@@ -1158,7 +1211,7 @@ export function CompareDealsClient({ deals }: {
         dealId: deal.id,
         name: deal.scenarioName ? `${deal.address} — ${deal.scenarioName}` : deal.address,
         type: deal.propertyType ?? undefined,
-        coc: deal.metrics.cocReturn ?? null,
+        coc: isCashOnCashApplicable(deal) ? deal.metrics.cocReturn ?? null : null,
         roi: deal.compareSnapshot?.longTermSummary?.totalROI ?? null,
         // DSCR 0 means N/A for a cash purchase, not "worst possible" —
         // passing it through plotted all-cash deals as the riskiest.
@@ -1188,11 +1241,62 @@ export function CompareDealsClient({ deals }: {
               <p className="text-sm text-muted-foreground ">Side-by-side investment analysis</p>
             </div>
           </div>
-
+          <Button
+            type="button"
+            variant="outline"
+            className="min-h-11 rounded-full"
+            onClick={() => {
+              if (selectionOpen) setSelectionOpen(false);
+              else showSelectionEditor();
+            }}
+            aria-expanded={selectionOpen}
+            aria-controls="compare-selection-editor"
+            disabled={selectionPending}
+          >
+            {selectionPending ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}
+            Edit selection
+          </Button>
         </div>
+          {selectionError ? (
+            <div role="alert" className="mb-5 rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+              {selectionError}
+            </div>
+          ) : null}
+          {selectionOpen ? (
+            <section id="compare-selection-editor" aria-labelledby="compare-selection-title" className="mb-5 space-y-3">
+              <div>
+                <h2 id="compare-selection-title" className="text-sm font-extrabold text-foreground">Edit comparison</h2>
+                <p className="mt-1 text-xs text-muted-foreground">Choose 2–4 active saved deals. Updating this list does not change or delete any deal.</p>
+              </div>
+              {selectionLoadError ? (
+                <div role="alert" className="rounded-2xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+                  The saved-deal list could not be loaded. The current comparison is unchanged; refresh and try again.
+                </div>
+              ) : availableDeals.length >= 2 ? (
+                <CompareDealPicker
+                  key={deals.map((deal) => deal.id).join(":")}
+                  deals={availableDeals}
+                  initialSelectedIds={deals.map((deal) => deal.id)}
+                  onComplete={() => setSelectionOpen(false)}
+                />
+              ) : (
+                <div className="rounded-2xl border border-border bg-card p-4 text-sm text-muted-foreground">
+                  Save another active deal before changing this comparison.
+                </div>
+              )}
+            </section>
+          ) : null}
           <div className="mb-5 rounded-2xl border border-border bg-card px-4 py-3 text-xs leading-relaxed text-muted-foreground">
-            Relative modeled comparison only. Row highlights identify the highest or lowest displayed value according to each metric&apos;s direction. A higher modeled value does not establish safety or make an investment recommendation.
+            <p>
+              Relative modeled comparison only. Row highlights identify the highest or lowest displayed value according to each metric&apos;s direction. Tied values share the highlight; no hidden tie-breaker uses Screening Index, ROI, save date, or source order.
+            </p>
+            <p className="mt-2">
+              Near-term lead count uses exactly four nonduplicative decision rows: monthly cash flow, cap rate, financed-deal DSCR, and total cash required. Long-term lead count uses exactly three: 10-year total cash flow, year-10 net sale proceeds, and recorded IRR when available. Target fit appears separately under Your buy box. A higher modeled value does not establish safety or make an investment recommendation.
+            </p>
           </div>
+          <p className="sr-only" aria-live="polite">
+            {selectionPending ? "Updating comparison selection." : ""}
+          </p>
           {extremeRoiCount > 0 ? (
             <div role="note" className="mb-5 rounded-2xl border border-warning/40 bg-warning/10 px-4 py-3 text-xs leading-relaxed text-warning-foreground">
               <span className="font-bold">Extreme modeled 10-year ROI:</span>{" "}
@@ -1200,13 +1304,19 @@ export function CompareDealsClient({ deals }: {
             </div>
           ) : null}
           <div className="space-y-5 xl:hidden">
-            <CompareMobileDealStrip deals={deals} />
+            <CompareMobileDealStrip
+              deals={deals}
+              onEditSelection={showSelectionEditor}
+              onRemove={removeDeal}
+              removingId={removingId}
+              selectionPending={selectionPending}
+            />
             <CompareMobileHighlights
-              bestDeal={bestDeal}
-              highestRoiDeal={highestRoiDeal}
-              strongestDscrDeal={strongestDscrDeal}
+              deals={deals}
               shortTermHighlightedWinCounts={shortTermHighlightedWinCounts}
               longTermHighlightedWinCounts={longTermHighlightedWinCounts}
+              shortTermMetricCount={shortTermMetricCount}
+              longTermMetricCount={longTermMetricCount}
             />
 
             {/* ── Your buy box (PV-4), mobile — one row per compared deal:
@@ -1267,13 +1377,13 @@ export function CompareDealsClient({ deals }: {
                     </AccordionTrigger>
                     <AccordionContent className="space-y-4 pb-4">
                       {section.rows.map((row) => {
-                        const best = getBestValue(row, deals);
+                        const best = getComparableBestValue(row, deals);
                         return (
                           <div key={row.key} className="space-y-2 border-t border-border/70 pt-3 first:border-t-0 first:pt-0">
                             <p className="text-[11px] font-bold text-muted-foreground">{row.label}</p>
-                            <div className="grid grid-cols-4 gap-2">
+                            <div className={cn("grid gap-2", comparisonGridColumns(deals.length))}>
                               {deals.map((deal, index) => {
-                                const value = deal.metrics[row.key];
+                                const value = comparableMetricValue(deal, row);
                                 const isBest = value != null && best != null && value === best;
                                 const color = getMobileDealColor(index);
                                 return (
@@ -1328,14 +1438,14 @@ export function CompareDealsClient({ deals }: {
                     </AccordionTrigger>
                     <AccordionContent className="space-y-4 pb-4">
                       {section.rows.map((row) => {
-                        const strictBestDealId = getStrictBestLongTermDealId(row, deals);
+                        const bestDealIds = getBestLongTermDealIds(row, deals);
                         return (
                           <div key={row.key} className="space-y-2 border-t border-border/70 pt-3 first:border-t-0 first:pt-0">
                             <MobileLongTermLabel row={row} />
-                            <div className="grid grid-cols-4 gap-2">
+                            <div className={cn("grid gap-2", comparisonGridColumns(deals.length))}>
                               {deals.map((deal, index) => {
                                 const value = row.getValue(deal);
-                                const isBest = strictBestDealId === deal.id;
+                                const isBest = bestDealIds.has(deal.id);
                                 const color = getMobileDealColor(index);
                                 return (
                                   <div key={`${deal.id}-${row.key}`} className={cn("rounded-xl p-2 text-center", isBest ? color.bg : "bg-muted/35")}>
@@ -1369,46 +1479,29 @@ export function CompareDealsClient({ deals }: {
             {deals.map((deal) => {
               const TypeIcon = getTypeIcon(deal.propertyType);
               const typeClasses = getTypeClasses(deal.propertyType);
-              const removeAction = removeCompareDealAction.bind(null, deal.id);
               const shortTermScore = shortTermHighlightedWinCounts.get(deal.id) ?? 0;
               const longTermScore = longTermHighlightedWinCounts.get(deal.id) ?? 0;
-              const totalWins = shortTermScore + longTermScore;
               const isShortTermWinner = shortTermWinnerIds.includes(deal.id);
               const isLongTermWinner = longTermWinnerIds.includes(deal.id);
-              const isBalancedDeal = balancedDealIds.includes(deal.id);
-              const isBestDeal = bestDealId === deal.id;
               return (
                 <div
                   key={deal.id}
                   className={cn(
                     "relative flex min-h-[17.5rem] flex-col rounded-2xl border border-t-[3px] border-border/80 bg-card/95 p-5 shadow-[0_16px_48px_rgba(15,23,42,0.07)] ring-2 ring-transparent",
-                    typeClasses,
-                    getDesktopCardTopBorderClass(isBestDeal),
-                    isBestDeal &&
-                      "border-primary/30 ring-primary/30"
+                    typeClasses
                   )}
                 >
-                  {isBestDeal && (
-                    <div
-                      className={cn(
-                        "absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-b-xl rounded-t-sm px-6 py-1 text-xs font-bold text-white shadow-sm",
-                        "bg-primary"
-                      )}
-                    >
-                      Highest metric-lead count
-                    </div>
-                  )}
-                  <form action={removeAction} className="absolute right-4 top-4">
-                    <Button
-                      type="submit"
-                      variant="ghost"
-                      size="icon-sm"
-                      className="size-7 rounded-full text-muted-foreground hover:bg-background/60"
-                      aria-label={`Remove ${deal.address} from comparison`}
-                    >
-                      <X className="size-4" />
-                    </Button>
-                  </form>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-3 top-3 size-11 rounded-full text-muted-foreground hover:bg-background/60"
+                    aria-label={`Remove ${deal.address} from comparison`}
+                    onClick={() => removeDeal(deal)}
+                    disabled={selectionPending}
+                  >
+                    {removingId === deal.id ? <Loader2 className="size-4 animate-spin" /> : <X className="size-4" />}
+                  </Button>
                   <div className="mb-3 flex items-center gap-2.5 pt-1">
                     <span className="flex size-7 items-center justify-center rounded-full bg-primary/10 text-primary">
                       <TypeIcon className="size-3.5" />
@@ -1426,15 +1519,8 @@ export function CompareDealsClient({ deals }: {
                   <p className="mt-6 text-sm font-semibold text-muted-foreground">{formatCurrency(deal.purchasePrice)}</p>
                   <div className="mt-4 flex flex-wrap items-center gap-2">
                     <DataConfidenceBadge confidence={deal.dataConfidence} size="xs" propertyType={deal.propertyType} />
-                    {isBalancedDeal && (
-                      <Badge className="rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-xs font-bold text-primary">
-                        Top-two lead count in both views
-                      </Badge>
-                    )}
-
-
 <div className="ml-auto flex justify-center gap-1 ">
-                    {deal.compareSnapshot ? (
+                    {deal.compareSnapshot && deal.compareSnapshotSource ? (
                       <Popover>
                         <Tooltip delayDuration={200}>
                           <TooltipTrigger asChild>
@@ -1444,18 +1530,23 @@ export function CompareDealsClient({ deals }: {
                                 variant="outline"
                                 size="icon-sm"
                                 className="!px-2 !py-1 h-8 gap-1.5 text-xs font-semibold"
-                                aria-label="View saved projection snapshot"
+                                aria-label={`View ${deal.compareSnapshotSource} projections`}
                               >
                                 <Table2 className="size-3.5" />
                               </Button>
                             </PopoverTrigger>
                           </TooltipTrigger>
                           <TooltipContent side="bottom" sideOffset={6} className="text-xs">
-                            Saved projections
+                            {deal.compareSnapshotSource === "recorded"
+                              ? "Recorded projections"
+                              : "Recomputed projections"}
                           </TooltipContent>
                         </Tooltip>
                         <PopoverContent className="w-80 max-h-[min(70vh,28rem)] overflow-y-auto" align="start">
-                          <CompareSnapshotPanel snapshot={deal.compareSnapshot} />
+                          <CompareSnapshotPanel
+                            snapshot={deal.compareSnapshot}
+                            source={deal.compareSnapshotSource}
+                          />
                         </PopoverContent>
                       </Popover>
                     ) : null}
@@ -1505,7 +1596,7 @@ export function CompareDealsClient({ deals }: {
                       </p>
                       {isShortTermWinner && (
                         <p className="mt-0.5 text-[10px] font-semibold text-primary">
-                          Highest lead count
+                          {shortTermWinnerIds.length > 1 ? "Tied highest lead count" : "Highest lead count"}
                         </p>
                       )}
                     </div>
@@ -1528,31 +1619,25 @@ export function CompareDealsClient({ deals }: {
                       </p>
                       {isLongTermWinner && (
                         <p className="mt-0.5 text-[10px] font-semibold text-primary">
-                          Highest lead count
+                          {longTermWinnerIds.length > 1 ? "Tied highest lead count" : "Highest lead count"}
                         </p>
                       )}
                     </div>
                   </div>
 
-                  {isBalancedDeal && !isBestDeal && (
-                    <p className="mt-3 rounded-lg bg-primary/10 px-2.5 py-1.5 text-[11px] font-medium leading-snug text-primary">
-                      Among the two highest metric-lead counts in both the near-term and long-term views.
-                    </p>
-                  )}
-                  {isBestDeal ? (
-                    <p className="mt-3 rounded-lg bg-muted/50 px-2.5 py-1.5 text-[11px] font-medium leading-snug text-muted-foreground">
-                      Holds the row-leading value in this set on {totalWins} compared metric{totalWins === 1 ? "" : "s"}. This relative tally is not a recommendation; review the saved assumptions and your adopted targets.
-                    </p>
-                  ) : null}
-                  {isBestDeal && (
-                    <WinnerActions winner={deal} />
-                  )}
+                  <div className="mt-auto border-t border-border/70 pt-3">
+                    <Button asChild size="sm" variant="outline" className="min-h-11 w-full rounded-full">
+                      <Link href={`/dashboard/saved-analyses/${deal.id}`}>Open deal</Link>
+                    </Button>
+                  </div>
                 </div>
               );
             })}
             {deals.length < MAX_COMPARE_ITEMS && (
-              <Link
-                href="/dashboard/saved-analyses"
+              <button
+                type="button"
+                onClick={showSelectionEditor}
+                disabled={selectionPending}
                 className="flex min-h-[17.5rem] flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/45 text-muted-foreground shadow-[0_16px_48px_rgba(15,23,42,0.04)] transition-colors hover:border-primary/40 hover:text-primary"
               >
                 <span className="mb-3 flex size-12 items-center justify-center rounded-full border border-border bg-background">
@@ -1560,7 +1645,7 @@ export function CompareDealsClient({ deals }: {
                 </span>
                 <span className="text-sm font-semibold">Add</span>
                 <span className="mt-1 text-xs text-muted-foreground">Up to 4 deals</span>
-              </Link>
+              </button>
             )}
           </div>
 
@@ -1616,12 +1701,12 @@ export function CompareDealsClient({ deals }: {
                     {group === "RISK" ? "COVERAGE & OPERATIONS" : group}
                   </h3>
                 </div>
-                {METRIC_ROWS.filter((row) => row.group === group).map((row) => {
-                  const best = getBestValue(row, deals);
+                {visibleMetricRows.filter((row) => row.group === group).map((row) => {
+                  const best = getComparableBestValue(row, deals);
                   return (
                     <div key={row.key} className="grid grid-cols-4 gap-x-1">
                       {desktopSlots.map((deal, index) => {
-                        const value = deal?.metrics[row.key] ?? null;
+                        const value = deal ? comparableMetricValue(deal, row) : null;
                         const isBest = value != null && best != null && value === best;
                         return (
                           <div
@@ -1672,10 +1757,10 @@ export function CompareDealsClient({ deals }: {
               <div className="grid grid-cols-4">
                 <h3 className="col-span-4 px-1 text-xs font-extrabold tracking-[0.24em] text-muted-foreground">LONG-TERM PERFORMANCE <span className="tracking-[0.18em] text-muted-foreground/70">(10-YEAR VIEW)</span></h3>
               </div>
-              {LONG_TERM_METRIC_ROWS.map((row, rowIndex) => {
-                const prevSubsection = rowIndex > 0 ? LONG_TERM_METRIC_ROWS[rowIndex - 1]!.subsection : null;
+              {visibleLongTermRows.map((row, rowIndex) => {
+                const prevSubsection = rowIndex > 0 ? visibleLongTermRows[rowIndex - 1]!.subsection : null;
                 const showSubsection = row.subsection !== prevSubsection;
-                const strictBestDealId = getStrictBestLongTermDealId(row, deals);
+                const bestDealIds = getBestLongTermDealIds(row, deals);
                 return (
                   <div key={row.key} className="space-y-2">
                     {showSubsection ? (
@@ -1688,7 +1773,7 @@ export function CompareDealsClient({ deals }: {
                     <div className="grid grid-cols-4 gap-x-1">
                       {desktopSlots.map((deal, index) => {
                         const value = deal ? row.getValue(deal) : null;
-                        const isBest = deal ? strictBestDealId === deal.id : false;
+                        const isBest = deal ? bestDealIds.has(deal.id) : false;
                         return (
                           <div
                             key={`${deal?.id ?? "empty"}-${row.key}-${index}`}

@@ -10,6 +10,15 @@ const validResult: NonNullable<StoredTriageBatch["result"]> = {
   rows: [
     {
       input: { address: "1700 W Erie Ave, Philadelphia, PA 19140", purchasePrice: 265000, monthlyRent: 2100, bedrooms: 3 },
+      assumptionContext: {
+        screenedAt: "2026-08-25T12:00:00.000Z",
+        interestRatePct: 6.75,
+        propertyTaxPct: 1.49,
+        state: "PA",
+        enrichmentStatus: "live",
+        rateSource: "fred",
+        taxSource: "state-static",
+      },
       ok: true,
       score: 62,
       recommendation: "Buy",
@@ -80,6 +89,19 @@ describe("parseStoredTriageBatch", () => {
     expect(
       parseStoredTriageBatch(
         JSON.stringify({ ...base, result: { ...validResult, rows: [{ input: { address: 5 } }] } })
+      )
+    ).toBeNull();
+    // Exact screening provenance is required so a restored row cannot silently
+    // reopen under today's different rate/tax assumptions.
+    expect(
+      parseStoredTriageBatch(
+        JSON.stringify({
+          ...base,
+          result: {
+            ...validResult,
+            rows: [{ ...validResult.rows[0], assumptionContext: undefined }],
+          },
+        })
       )
     ).toBeNull();
     // unknown sort keys would break the ranking toggle.

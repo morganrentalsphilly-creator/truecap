@@ -58,6 +58,10 @@ import {
 import type { OwnedEquitySummary } from "@/lib/owned-equity";
 import { computeRowEquity } from "@/lib/owned-equity-series";
 import type { DealRecommendation } from "@/lib/deal-score";
+import {
+  applicableCashOnCashValue,
+  isCashOnCashNotApplicable,
+} from "@/lib/cash-on-cash-applicability";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 import {
   boxesForDealClient,
@@ -164,7 +168,7 @@ function Metric({
 }
 
 const DEAL_SELECT =
-  "id, address, title, property_type, purchase_price, form_snapshot, result_snapshot, methodology_version, net_cash_flow_monthly, pipeline_stage, is_completed, created_at";
+  "id, address, title, property_type, purchase_price, form_snapshot, result_snapshot, methodology_version, underwriting_revision, net_cash_flow_monthly, pipeline_stage, is_completed, created_at";
 
 /**
  * Load the deal with the optional investor nickname (labels migration) and the
@@ -177,7 +181,11 @@ async function fetchDeal(
   supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
   id: string,
   userId: string
-): Promise<{ data: unknown; ownedEquityEnabled: boolean }> {
+): Promise<
+  | { status: "found"; data: unknown; ownedEquityEnabled: boolean }
+  | { status: "not_found"; data: null; ownedEquityEnabled: boolean }
+  | { status: "error"; data: null; ownedEquityEnabled: boolean }
+> {
   const run = (select: string) =>
     supabase
       .from("saved_analyses")
@@ -194,25 +202,38 @@ async function fetchDeal(
   // is the first column dropped. It must never live in DEAL_SELECT: that is
   // this ladder's floor, and a deployment without the Agent Pro migration would
   // fail EVERY rung — 500ing the deal workspace for every user, not just agents.
+  type DealReadResult =
+    | { status: "found"; data: unknown; ownedEquityEnabled: boolean }
+    | { status: "not_found"; data: null; ownedEquityEnabled: boolean }
+    | { status: "error"; data: null; ownedEquityEnabled: boolean };
+  const resolved = (
+    result: { data: unknown; error: { code?: string; message?: string } | null },
+    ownedEquityEnabled: boolean
+  ): DealReadResult => {
+    if (result.error) return { status: "error", data: null, ownedEquityEnabled };
+    if (!result.data) return { status: "not_found", data: null, ownedEquityEnabled };
+    return { status: "found", data: result.data, ownedEquityEnabled };
+  };
+
   const full = await run(`${WITH_LABELS_SELECT}, close_date, client_id`);
-  if (!isMissingColumn(full.error)) return { data: full.data, ownedEquityEnabled: true };
+  if (!isMissingColumn(full.error)) return resolved(full, true);
   // client_id missing → retry the same columns without it. agentClients is
   // already empty on such a deployment, so the picker stays hidden anyway.
   const fullNoClient = await run(`${WITH_LABELS_SELECT}, close_date`);
-  if (!isMissingColumn(fullNoClient.error)) return { data: fullNoClient.data, ownedEquityEnabled: true };
+  if (!isMissingColumn(fullNoClient.error)) return resolved(fullNoClient, true);
   // T2 succeeding pins T1's 42703 on close_date (equity stays off). T2
   // failing means NICKNAME is the missing one — close_date may still exist
   // (migrations applied out of order), so probe it alone before giving up
   // on equity: the workspace tracked equity before nickname joined this
   // select and must keep doing so.
   const withLabels = await run(WITH_LABELS_SELECT);
-  if (!isMissingColumn(withLabels.error)) return { data: withLabels.data, ownedEquityEnabled: false };
+  if (!isMissingColumn(withLabels.error)) return resolved(withLabels, false);
   const withCloseOnly = await run(`${DEAL_SELECT}, close_date`);
   if (!isMissingColumn(withCloseOnly.error)) {
-    return { data: withCloseOnly.data, ownedEquityEnabled: true };
+    return resolved(withCloseOnly, true);
   }
   const base = await run(DEAL_SELECT);
-  return { data: base.data, ownedEquityEnabled: false };
+  return resolved(base, false);
 }
 
 export default async function DealWorkspacePage({
@@ -247,7 +268,7 @@ export default async function DealWorkspacePage({
   }
   const navAccess = getDashboardNavAccess(entitlements);
 
-  const [{ data: profile }, isPremium, { data: deal, ownedEquityEnabled }, buyBoxesResult, activeDealsCountResult] =
+  const [{ data: profile }, isPremium, dealRead, buyBoxesResult, activeDealsCountResult] =
     await Promise.all([
     supabase
       .from("profiles")
@@ -274,6 +295,35 @@ export default async function DealWorkspacePage({
       .eq("is_archived", false),
   ]);
 
+  if (dealRead.status === "error") {
+    return (
+      <main id="main" className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6">
+        <div role="alert" className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6">
+          <h1 className="text-xl font-bold text-foreground">Couldn&apos;t load this deal</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Your deal has not been removed. The workspace could not be reached right now.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Link
+              href={`/dashboard/saved-analyses/${id}`}
+              className="inline-flex min-h-11 items-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"
+            >
+              Try again
+            </Link>
+            <Link
+              href="/dashboard/saved-analyses"
+              className="inline-flex min-h-11 items-center rounded-xl border border-border px-4 text-sm font-semibold text-foreground"
+            >
+              Back to My Deals
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  const { data: deal, ownedEquityEnabled } = dealRead;
+
   // Missing or not owned (the user_id filter makes this an ownership check) →
   // back to the list rather than a dead page.
   if (!deal) {
@@ -289,6 +339,7 @@ export default async function DealWorkspacePage({
     form_snapshot: unknown;
     result_snapshot: Record<string, unknown> | null;
     methodology_version: string | null;
+    underwriting_revision: number;
     net_cash_flow_monthly: number | null;
     pipeline_stage: string | null;
     client_id?: string | null;
@@ -393,7 +444,14 @@ export default async function DealWorkspacePage({
   // Compact underwrite header (DEC-1/WS-1) — same recompute-with-stored-
   // fallback numbers the banner uses. Metrics a legacy snapshot doesn't carry
   // stay null and their tile is OMITTED (never rendered as $0/0.00).
-  const cocPct = fresh ? fresh.cocReturnPct : numOrNull(snap["cocReturn"]);
+  const cashToCloseForCoc = fresh
+    ? fresh.cashToClose
+    : numOrNull(snap["totalCashRequired"]);
+  const cocNotApplicable = isCashOnCashNotApplicable(cashToCloseForCoc);
+  const cocPct = applicableCashOnCashValue(
+    fresh ? fresh.cocReturnPct : numOrNull(snap["cocReturn"]),
+    cashToCloseForCoc
+  );
   const dealScore = fresh ? fresh.score : numOrNull(snap["score"]);
   const recommendation: DealRecommendation | null = fresh
     ? fresh.recommendation
@@ -567,7 +625,7 @@ export default async function DealWorkspacePage({
       />
       <div className="flex-1">
         <main id="main" className="mx-auto max-w-3xl space-y-5 px-4 py-6 sm:px-6 sm:py-8">
-          <div className="min-w-0">
+          <div id="deal-overview" className="min-w-0 scroll-mt-36">
             <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
               <div className="min-w-0">
                 <Link
@@ -657,7 +715,10 @@ export default async function DealWorkspacePage({
                     }
                   />
                 ) : null}
-                <OpenFullAnalysisButton savedDealId={dealRow.id} />
+                <OpenFullAnalysisButton
+                  savedDealId={dealRow.id}
+                  recorded={methodologyResolution.usesRecordedSnapshot}
+                />
                 {methodologyResolution.usesRecordedSnapshot ? (
                   <ReunderwriteAsScenarioButton savedDealId={dealRow.id} />
                 ) : null}
@@ -675,7 +736,11 @@ export default async function DealWorkspacePage({
                 value={fmtCashFlow(netCashFlow)}
                 tone={netCashFlow >= 0 ? "positive" : "negative"}
               />
-              {cocPct != null ? <Metric label="CoC" value={`${cocPct.toFixed(1)}%`} /> : null}
+              {cocNotApplicable ? (
+                <Metric label="CoC" value="N/A" />
+              ) : cocPct != null ? (
+                <Metric label="CoC" value={`${cocPct.toFixed(1)}%`} />
+              ) : null}
               {dscrDisplay ? <Metric label="DSCR" value={dscrDisplay} /> : null}
               {dealScore != null ? (
                 <Metric label="Screening Index" value={`${Math.round(dealScore)}/100`} />
@@ -690,10 +755,11 @@ export default async function DealWorkspacePage({
                 <CompareWithAnotherDealLink savedDealId={dealRow.id} />
               </div>
             ) : null}
-            {/* Contents scent (WS-3): the cards below start under the fold with
-                no hint they exist — one compact chip row jumps to each. */}
-            <DealWorkspaceAnchorChips />
           </div>
+
+          {/* Persistent workspace map (WS-3): this is a direct child of main
+              so its sticky travel range covers every workspace card. */}
+          <DealWorkspaceAnchorChips />
 
           {/* Rate-alert deep link (?rate=): the deal re-underwritten at the
               alert's rate, above the fold — this is what the email promised.
@@ -702,6 +768,7 @@ export default async function DealWorkspacePage({
             <RateAlertReUnderwriteBanner
               savedDealId={dealRow.id}
               values={formValues}
+              underwritingRevision={dealRow.underwriting_revision}
               savedRatePct={rateReUnderwrite.savedRatePct}
               alertRatePct={rateReUnderwrite.alertRatePct}
               before={rateReUnderwrite.before}
@@ -814,24 +881,23 @@ export default async function DealWorkspacePage({
             <SavedDealWatchCard savedDealId={dealRow.id} />
           ) : null}
           <DealDetailsCard savedDealId={dealRow.id} />
-          {/* Anchor targets for the header's contents chips. scroll-mt clears
-              the fixed/sticky Topbar (h-16), same as the analyzer's drill rows. */}
-          <div id="deal-scenarios" className="scroll-mt-24">
+          {/* Anchor targets clear both the h-16 Topbar and sticky workspace nav. */}
+          <div id="deal-scenarios" className="scroll-mt-36">
             <ScenariosCard savedDealId={dealRow.id} />
           </div>
-          <div id="deal-due-diligence" className="scroll-mt-24">
+          <div id="deal-due-diligence" className="scroll-mt-36">
             <DueDiligenceCard savedDealId={dealRow.id} />
           </div>
-          <div id="deal-documents" className="scroll-mt-24">
+          <div id="deal-documents" className="scroll-mt-36">
             <DealDocumentsCard savedDealId={dealRow.id} />
           </div>
           {/* Notes + comments side by side (WS-4): the free-text deal file no
               longer lives only in the analyzer view. Same blob, saves on blur,
               last-write-wins with the analyzer copy. */}
-          <div id="deal-notes" className="scroll-mt-24">
+          <div id="deal-notes" className="scroll-mt-36">
             <DealNotesPanel savedDealId={dealRow.id} />
           </div>
-          <div id="deal-comments" className="scroll-mt-24">
+          <div id="deal-comments" className="scroll-mt-36">
             <DealCommentsPanel savedDealId={dealRow.id} />
           </div>
         </main>

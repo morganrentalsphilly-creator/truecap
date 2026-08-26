@@ -30,7 +30,10 @@ export function SharedDealViewerBuyBox({
   result,
 }: {
   values: InvestmentFormValues;
-  result: AnalysisResult;
+  result: Pick<
+    AnalysisResult,
+    "capRate" | "cocReturn" | "dscr" | "netCashFlow" | "monthlyPayment"
+  >;
 }) {
   // Local session check (cookie read, no server round-trip) so anonymous
   // viewers never even fire the buy-box action. The action re-verifies the
@@ -64,7 +67,7 @@ export function SharedDealViewerBuyBox({
       state: deriveStateFromAddress(values.address),
       isCashPurchase: result.monthlyPayment <= 0,
     }),
-    [values, result]
+    [values, result],
   );
 
   return <BuyBoxVerdictCard enabled={signedIn} metrics={metrics} />;

@@ -4,13 +4,13 @@
  * The Deal Score used to be built ONLY from year-1 operating metrics
  * (cash flow / CoC / cap rate / DSCR). That made it blind to the three
  * non-cash-flow sources of real-estate return — appreciation, loan
- * paydown, and the tax shield — so a genuinely strong long-term hold with
- * negative year-1 cash flow (e.g. a low-money-down deal projecting +678%
+ * paydown — so a genuinely strong long-term hold with
+ * modest year-1 cash flow (e.g. a low-money-down deal projecting +678%
  * total ROI over 10 years) scored 0 / "Avoid — weak fundamentals".
  *
  * The engine now adds a fifth component (Total Return, 0–25) computed from
  * the same exit-scenario engine the Exit Scenarios panel + PDF use, makes
- * the negative-cash-flow penalty after-tax aware, and floors an
+ * keeps personal tax effects out of recommendation scoring, and floors an
  * appreciation play out of the "Avoid" band. These tests pin that
  * behaviour so it can't silently regress.
  *
@@ -89,9 +89,9 @@ function baseSingleFamily(
 }
 
 describe("computeDealScore — appreciation play (the headline fix)", () => {
-  it("does NOT score a strong-total-return / positive-after-tax deal as Avoid", () => {
-    // Tucker-style: negative year-1 pre-tax CF + sub-1 DSCR, but positive
-    // after-tax cash flow and a ~23%/yr projected total return.
+  it("does not let a positive illustrative tax effect rescue negative pre-tax carry", () => {
+    // A user-specific tax estimate is not spendable operating cash. Even a
+    // high projected total return cannot erase the current monthly funding need.
     const r = computeDealScore(
       input({
         monthlyCashFlow: -159,
@@ -105,14 +105,13 @@ describe("computeDealScore — appreciation play (the headline fix)", () => {
       })
     );
     expect(r.breakdown.totalReturnScore).toBe(25);
-    expect(r.recommendation).not.toBe("Avoid");
-    expect(r.recommendation).not.toBe("Risky");
-    expect(r.score).toBeGreaterThanOrEqual(40); // appreciation floor
-    expect(r.riskLevel).not.toBe("High Risk");
-    expect(r.explanation.toLowerCase()).toContain("appreciation play");
+    expect(["Avoid", "Risky"]).toContain(r.recommendation);
+    expect(r.score).toBeLessThan(40);
+    expect(r.explanation.toLowerCase()).not.toContain("appreciation play");
+    expect(r.explanation.toLowerCase()).not.toContain("tax");
   });
 
-  it("still scores a weak deal (no upside, bleeding after-tax) as Avoid/Risky", () => {
+  it("still scores a weak deal (no upside, negative pre-tax carry) as Avoid/Risky", () => {
     const r = computeDealScore(
       input({
         monthlyCashFlow: -350,
@@ -133,9 +132,8 @@ describe("computeDealScore — appreciation play (the headline fix)", () => {
     expect(r.explanation.toLowerCase()).not.toContain("appreciation play");
   });
 
-  it("does not floor a negative-after-tax deal even if total return looks high", () => {
-    // Strong leveraged total return but the owner IS bleeding after-tax →
-    // no appreciation floor (you can't carry it on the tax shield).
+  it("does not floor negative pre-tax carry even if total return looks high", () => {
+    // Strong leveraged total return but monthly owner funding is still needed.
     const r = computeDealScore(
       input({
         monthlyCashFlow: -500,
@@ -214,6 +212,50 @@ describe("computeDealScore — fundamentals still drive the top end", () => {
 });
 
 describe("computeDealScore — invariants", () => {
+  it("omits zero-cash CoC and renormalizes the applicable factors", () => {
+    const baseline = {
+      monthlyCashFlow: 900,
+      cashOnCashApplicable: false,
+      capRate: 7,
+      dscr: 1.3,
+      monthlyPropertyTax: 150,
+      monthlyRentIncome: 3_000,
+      tenYearAnnualizedReturnPct: undefined,
+    } satisfies Partial<DealScoreInput>;
+    const sentinel = computeDealScore(input({ ...baseline, cashOnCashReturn: 0 }));
+    const impossibleExtreme = computeDealScore(
+      input({ ...baseline, cashOnCashReturn: 1_000_000 })
+    );
+
+    expect(sentinel.score).toBe(impossibleExtreme.score);
+    expect(sentinel.breakdown.cocScore).toBe(0);
+    expect(sentinel.breakdown.applicabilityAdjustment).toBeDefined();
+    expect(sentinel.score).toBeGreaterThan(0);
+    expect(sentinel.cashOnCashApplicable).toBe(false);
+    expect(sentinel.explanation.toLowerCase()).not.toContain("cash-on-cash");
+  });
+
+  it("lets a zero-cash deal reach 100 when every applicable factor is maxed", () => {
+    const perfectApplicableFactors = input({
+      monthlyCashFlow: 5_000,
+      cashOnCashReturn: 0,
+      cashOnCashApplicable: false,
+      capRate: 15,
+      dscr: 3,
+      isCashPurchase: true,
+      monthlyPropertyTax: 50,
+      monthlyRentIncome: 5_000,
+      tenYearAnnualizedReturnPct: 40,
+    });
+
+    for (const strategy of ["cash-flow", "balanced", "appreciation"] as const) {
+      const scored = computeDealScore(perfectApplicableFactors, strategy);
+      expect(scored.score).toBe(100);
+      expect(scored.breakdown.cocScore).toBe(0);
+      expect(scored.breakdown.applicabilityAdjustment).toBeDefined();
+    }
+  });
+
   it("is backward-compatible when total-return fields are absent", () => {
     const r = computeDealScore(
       input({
@@ -278,6 +320,34 @@ describe("computeDealScore — invariants", () => {
 });
 
 describe("buildDealScoreInputFromAnalysis — end-to-end wiring", () => {
+  it("treats a missing construction year as unknown, not new construction", () => {
+    const missingValues = baseSingleFamily({ yearBuilt: undefined });
+    const newValues = baseSingleFamily({ yearBuilt: new Date().getFullYear() });
+    const oldValues = baseSingleFamily({ yearBuilt: 1942 });
+
+    const missingInput = buildDealScoreInputFromAnalysis(
+      missingValues,
+      calculateAnalysis(missingValues)
+    );
+    const newInput = buildDealScoreInputFromAnalysis(
+      newValues,
+      calculateAnalysis(newValues)
+    );
+    const oldInput = buildDealScoreInputFromAnalysis(
+      oldValues,
+      calculateAnalysis(oldValues)
+    );
+
+    expect(missingInput.propertyAgeKnown).toBe(false);
+    expect(newInput.propertyAgeKnown).toBe(true);
+    expect(computeDealScore(missingInput).score).toBeLessThan(
+      computeDealScore(newInput).score
+    );
+    expect(computeDealScore(missingInput).score).toBe(
+      computeDealScore(oldInput).score
+    );
+  });
+
   it("computes a total return for the marketing sample deal and keeps it strong", () => {
     const result = calculateAnalysis(SAMPLE_DEAL_VALUES);
     const scoreInput = buildDealScoreInputFromAnalysis(SAMPLE_DEAL_VALUES, result);
@@ -323,6 +393,10 @@ describe("buildDealScoreInputFromAnalysis — end-to-end wiring", () => {
       propertyTaxPct: 1.4,
       interestRate: 7.25,
       monthlyRent: 2_300,
+      // This regression needs a genuinely negative financed carry. v1.1 no
+      // longer invents PMI for investment loans, so model the lender premium
+      // explicitly instead of relying on the retired blank-field default.
+      pmiAnnualRatePct: 0.8,
     });
     const result = calculateAnalysis(values);
     const scoreInput = buildDealScoreInputFromAnalysis(values, result);
@@ -393,13 +467,13 @@ describe("computeTenYearAnnualizedReturnPct — edge branches", () => {
 });
 
 describe("computeDealScore — strategy lens", () => {
-  // Tucker-style appreciation play: negative year-1 CF, positive after-tax,
-  // strong projected total return.
+  // Non-negative pre-tax carry, weak current-return metrics, and strong
+  // projected total return. Personal tax effects are irrelevant to the score.
   const appreciationPlay = input({
-    monthlyCashFlow: -159,
+    monthlyCashFlow: 0,
     cashOnCashReturn: -19,
-    capRate: 7.0,
-    dscr: 0.9,
+    capRate: 3.0,
+    dscr: 0.8,
     monthlyPropertyTax: 200,
     monthlyRentIncome: 2_000,
     afterTaxMonthlyCashFlow: 226,
@@ -433,7 +507,7 @@ describe("computeDealScore — strategy lens", () => {
     expect(cf.score).toBeLessThan(bal.score);
     expect(appr.score).toBeGreaterThan(bal.score);
 
-    // A cash-flow investor should be told to avoid a negative-cash-flow deal…
+    // A cash-flow investor should be told the current-return case is weak…
     expect(["Avoid", "Risky"]).toContain(cf.recommendation);
     // …while an appreciation investor sees its strong long-term return.
     expect(["Neutral", "Buy"]).toContain(appr.recommendation);
@@ -441,7 +515,7 @@ describe("computeDealScore — strategy lens", () => {
 
   it("does not apply the appreciation floor under the cash-flow lens", () => {
     // Balanced floors this deal to 40; the cash-flow lens must be free to
-    // score it below that floor (a negative-CF deal isn't a cash-flow buy).
+    // score it below that floor (long-term upside does not drive that lens).
     expect(computeDealScore(appreciationPlay, "cash-flow").score).toBeLessThan(40);
     expect(computeDealScore(appreciationPlay, "balanced").score).toBe(40);
   });
@@ -475,9 +549,9 @@ describe("computeDealScore — Phase 1: appreciation-floor recalibration + coher
   // the engine itself calls a "solid total return" (its >8%/yr tier) but under
   // 12% got NO floor and cratered to ~13 / Avoid — contradicting its own green
   // metrics and "wealth-building hold" copy. This pins the fix.
-  it("floors an ~10%/yr after-tax-positive appreciation play to Neutral, not Avoid", () => {
+  it("floors an ~10%/yr pre-tax-non-negative appreciation play to Neutral", () => {
     const tenPctPlay = input({
-      monthlyCashFlow: -205,
+      monthlyCashFlow: 0,
       cashOnCashReturn: -3.6,
       capRate: 5.4,
       dscr: 0.87,
@@ -498,14 +572,13 @@ describe("computeDealScore — Phase 1: appreciation-floor recalibration + coher
   });
 
   // Coherence invariant: the headline number and the prose must agree. The
-  // "wealth-building hold" copy and the score floor share ONE predicate, so the
-  // copy can never appear on a deal the score calls Avoid/Risky.
-  it("never shows 'wealth-building hold' copy while the score says Avoid/Risky", () => {
+  // Personal tax estimates must never enter the screening explanation.
+  it("never uses tax-rescue language in the recommendation explanation", () => {
     for (const annual of [9, 12, 18, 25]) {
       for (const strategy of ["balanced", "appreciation"] as const) {
         const r = computeDealScore(
           input({
-            monthlyCashFlow: -180,
+            monthlyCashFlow: 0,
             cashOnCashReturn: -10,
             capRate: 6,
             dscr: 0.9,
@@ -516,18 +589,13 @@ describe("computeDealScore — Phase 1: appreciation-floor recalibration + coher
           }),
           strategy
         );
-        if (r.explanation.toLowerCase().includes("wealth-building hold")) {
-          expect(r.recommendation).not.toBe("Avoid");
-          expect(r.recommendation).not.toBe("Risky");
-          expect(r.score).toBeGreaterThanOrEqual(35);
-        }
+        expect(r.explanation.toLowerCase()).not.toContain("after-tax");
+        expect(r.explanation.toLowerCase()).not.toContain("tax shield");
       }
     }
   });
 
-  // Lens-aware prose: under the cash-flow lens (which doesn't credit
-  // appreciation) a negative-cash-flow deal must NOT be called a wealth-
-  // building hold — it should point the user to the lens that does.
+  // Negative pre-tax carry is not rescued by a tax estimate under any lens.
   it("does not call a negative-CF deal a wealth-building hold under the cash-flow lens", () => {
     const r = computeDealScore(
       input({
@@ -543,7 +611,8 @@ describe("computeDealScore — Phase 1: appreciation-floor recalibration + coher
       "cash-flow"
     );
     expect(r.explanation.toLowerCase()).not.toContain("wealth-building hold");
-    expect(r.explanation.toLowerCase()).toContain("lens");
+    expect(r.explanation.toLowerCase()).toContain("monthly shortfall");
+    expect(r.explanation.toLowerCase()).not.toContain("tax");
   });
 
   // Age softening (-10/-5/-2 → -6/-4/-2): pre-war stock isn't dragged a risk

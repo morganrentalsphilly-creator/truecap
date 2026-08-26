@@ -16,7 +16,7 @@ import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-sch
 export const metadata: Metadata = {
   title: "Free Mortgage Payment Calculator — Full PITI",
   description:
-    "Free PITI mortgage payment calculator for rental investors. Total interest, monthly breakdown, full amortization schedule. No signup.",
+    "Free mortgage payment calculator with P&I, tax, homeowner insurance, and estimated PMI below 20% down. No signup.",
   keywords: [
     "mortgage payment calculator",
     "mortgage calculator",
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Free Mortgage Payment Calculator — Full PITI",
     description:
-      "Compute principal, interest, tax, insurance — and total interest paid over the loan. Built for investors.",
+      "Compute principal, interest, tax, homeowner insurance, estimated PMI, and total interest paid over the loan.",
     url: "/tools/mortgage-payment-calculator",
     type: "website",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap mortgage payment calculator" }],
@@ -95,7 +95,7 @@ export default function MortgagePaymentPage() {
     applicationSubCategory: "Real Estate Calculator",
     operatingSystem: "Web",
     description:
-      "Free PITI mortgage payment calculator for rental investors. Total interest, monthly breakdown, full amortization schedule. No signup.",
+      "Free mortgage payment calculator with P&I, tax, homeowner insurance, and estimated PMI below 20% down. No signup.",
     url: `${siteUrl}/tools/mortgage-payment-calculator`,
     offers: {
       "@type": "Offer",
@@ -133,7 +133,9 @@ export default function MortgagePaymentPage() {
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground mt-2 leading-relaxed">
               Principal, interest, tax, insurance — and the total interest
-              you&apos;ll pay over the life of the loan. Built for rental
+              you&apos;ll pay over the life of the loan. Below 20% down, the
+              estimate also includes mortgage insurance using the same
+              screening assumption as TrueCap&apos;s analyzer. Built for rental
               property investors who need to know the real monthly cost
               before they offer.
             </p>

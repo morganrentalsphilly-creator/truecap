@@ -102,6 +102,7 @@ const reportDataSchema = z
     generatedAt: z.coerce.date(),
     methodologyVersion: z.string().max(40).optional(),
     methodologyLabel: z.string().max(120).optional(),
+    tenYearProjectionVersion: z.number().int().positive().nullable().optional(),
     property: z.object({
       address: z.string().max(300),
       type: z.string().max(60),
@@ -133,6 +134,7 @@ const reportDataSchema = z
       rationale: z.string().max(2000),
       monthlyCashFlow: money,
       cocReturn: z.number(),
+      cocApplicable: z.boolean().optional(),
       capRate: z.number(),
       dscr: z.number(),
       taxSavings: money,

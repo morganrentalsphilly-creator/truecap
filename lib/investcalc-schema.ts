@@ -1,12 +1,21 @@
 import { z } from "zod";
 import { DEFAULT_APPRECIATION_RATE, DEFAULT_SELLING_COST_PCT } from "@/lib/exit-scenarios";
+import { resolveV1AnalysisDate } from "@/lib/analysis-date";
 
 /** Bump when `investmentFormSchema` shape changes; used for persisted snapshots. */
 export const INVESTCALC_SCHEMA_VERSION = 10;
+/** Product-wide lower bound for a supported residential acquisition price.
+ * Keep inverse solvers and coarse preview ranges on the same accepted domain. */
+export const MIN_PURCHASE_PRICE = 10_000;
 /** Product-wide upper bound for a residential acquisition price. Inverse
  * solvers import the same value so an accepted form can never be silently
  * capped at a lower, undocumented search limit. */
 export const MAX_PURCHASE_PRICE = 100_000_000;
+/** Highest supported scheduled monthly rent for one residential unit/property.
+ * This matches the existing calculator control and handoff bounds, and keeps
+ * accepted inputs far below the range where downstream projections can
+ * overflow into Infinity/NaN. */
+export const MAX_MONTHLY_RENT = 1_000_000;
 
 /**
  * The underwriting model version is intentionally separate from
@@ -97,7 +106,7 @@ const optionalYearBuilt = z.preprocess((val) => {
   const n = typeof val === "number" ? val : Number(val);
   if (!Number.isFinite(n)) return undefined;
   return n;
-}, z.number({ invalid_type_error: "Enter a 4-digit year" }).min(1800, "Year must be after 1800").max(new Date().getFullYear() + 5, "Year too far in future").optional());
+}, z.number({ invalid_type_error: "Enter a 4-digit year" }).min(1800, "Year must be after 1800").max(9999, "Enter a 4-digit year").optional());
 
 export const insuranceInputModeSchema = z.enum(["percent", "monthly"]);
 
@@ -129,7 +138,10 @@ export const unitSchema = z.object({
     z.number({ invalid_type_error: "Enter square feet" }).min(50, "Min 50 sq ft")
   ),
   monthlyRent: optionalUnitNumber(
-    z.number({ invalid_type_error: "Enter monthly rent" }).min(0, "Rent must be 0 or more")
+    z
+      .number({ invalid_type_error: "Enter monthly rent" })
+      .min(0, "Rent must be 0 or more")
+      .max(MAX_MONTHLY_RENT, "Monthly rent is too large")
   ),
   isOwnerOccupied: z.boolean().optional(),
 });
@@ -164,7 +176,7 @@ export const investmentFormSchema = z.object({
     .max(200, "Address is too long"),
   purchasePrice: z
     .number({ invalid_type_error: "Enter purchase price" })
-    .min(10000, "Purchase price must be at least $10,000")
+    .min(MIN_PURCHASE_PRICE, "Purchase price must be at least $10,000")
     .max(MAX_PURCHASE_PRICE, "Price too large"),
   yearBuilt: optionalYearBuilt,
 
@@ -193,7 +205,10 @@ export const investmentFormSchema = z.object({
   ),
   sqft: optionalUnitNumber(z.number({ invalid_type_error: "Enter sq ft" }).min(50, "Min 50 sq ft")),
   monthlyRent: optionalUnitNumber(
-    z.number({ invalid_type_error: "Enter monthly rent" }).min(0, "Rent must be 0 or more")
+    z
+      .number({ invalid_type_error: "Enter monthly rent" })
+      .min(0, "Rent must be 0 or more")
+      .max(MAX_MONTHLY_RENT, "Monthly rent is too large")
   ),
 
   // Multi-family units (bounded — see MAX_UNITS: keeps the share-link payload
@@ -223,8 +238,9 @@ export const investmentFormSchema = z.object({
   loanFees: optionalMoney,
   initialReserve: optionalMoney,
   /** Optional PMI / mortgage-insurance annual rate (% of loan balance). When
-   *  omitted, calc-analysis applies DEFAULT_PMI_ANNUAL_RATE_PCT on sub-20%-down
-   *  deals. 0 disables PMI entirely (lender-paid MI, gift-of-equity, etc.). */
+   * omitted, calc-analysis uses its screening default only for sub-20%-down
+   * owner-occupant deals; investor rentals assume 0 unless the lender/template
+   * rate is entered. Explicit 0 disables PMI entirely. */
   pmiAnnualRatePct: z.preprocess((val) => {
     if (val === undefined || val === null || val === "") return undefined;
     const n = typeof val === "number" ? val : Number(val);
@@ -296,6 +312,26 @@ export const investmentFormSchema = z.object({
   // Additive + optional, so INVESTCALC_SCHEMA_VERSION is intentionally NOT bumped.
   rehabBudget: optionalMoneyMo,
 }).superRefine((values, ctx) => {
+  if (typeof values.yearBuilt === "number") {
+    // Once v1 carries an explicit audit date, validation follows that same
+    // date as its Property Age calculation. Otherwise an identical dated
+    // payload could be rejected in December and accepted after a later
+    // calendar-year boundary. Missing-date editor/legacy validation and v2
+    // deliberately retain their released current-year input bound; the v1
+    // calculation itself still uses the documented deterministic fallback.
+    const comparisonYear =
+      values.underwritingModelVersion !== "2.0" && values.analysisDate
+        ? Number(resolveV1AnalysisDate(values.analysisDate).slice(0, 4))
+        : new Date().getFullYear();
+    if (values.yearBuilt > comparisonYear + 5) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["yearBuilt"],
+        message: "Year too far in future",
+      });
+    }
+  }
+
   if (values.underwritingModelVersion === "2.0") {
     const requireNumber = (
       field:
@@ -592,9 +628,23 @@ export const investmentFormSchema = z.object({
     }
   });
 
-  if (values.propertyType !== "owner-occupant") return;
-
   const units = values.units ?? [];
+  if (values.propertyType === "multi-family") {
+    if (!units.some((unit) => isValidRentalUnit(unit))) {
+      // Per-row validation above already identifies a present row with an
+      // invalid rent. This explicit empty-list guard closes the remaining
+      // path where [] used to parse and calculate a meaningless $0-rent deal.
+      if (units.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["units", 0, "monthlyRent"],
+          message: "Add at least one rental unit with rent greater than 0.",
+        });
+      }
+    }
+    return;
+  }
+
   const ownerOccupiedIndexes = units.reduce<number[]>((indexes, unit, index) => {
     if (unit?.isOwnerOccupied) indexes.push(index);
     return indexes;
@@ -869,18 +919,22 @@ function sanitizeSnapshotFields(
  * exact v1 shape instead of acquiring a collection of undefined v2 keys.
  */
 function sanitizeVersionedSnapshotFields(snapshot: Record<string, unknown>) {
+  const analysisDate =
+    typeof snapshot.analysisDate === "string" ? snapshot.analysisDate : undefined;
   const underwritingModelVersion =
     snapshot.underwritingModelVersion === "1.0" ||
     snapshot.underwritingModelVersion === "2.0"
       ? snapshot.underwritingModelVersion
       : undefined;
 
-  if (!underwritingModelVersion) return {};
-  if (underwritingModelVersion === "1.0") return { underwritingModelVersion };
+  if (!underwritingModelVersion) return analysisDate ? { analysisDate } : {};
+  if (underwritingModelVersion === "1.0") {
+    return { underwritingModelVersion, ...(analysisDate ? { analysisDate } : {}) };
+  }
 
   return {
     underwritingModelVersion,
-    analysisDate: typeof snapshot.analysisDate === "string" ? snapshot.analysisDate : undefined,
+    analysisDate,
     unitCount: asNumber(snapshot.unitCount),
     operatingScenario:
       snapshot.operatingScenario === "current" || snapshot.operatingScenario === "stabilized"

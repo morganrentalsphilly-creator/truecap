@@ -2,13 +2,18 @@ import { calculateAnalysis, type AnalysisResult } from "@/lib/calc-analysis";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { normalizeReleasedInvestmentFormSnapshot } from "@/lib/underwriting-model-release";
 import { buildExitScenarios, resolveExitScenarioRates, type ExitScenarioYear } from "@/lib/exit-scenarios";
+import { computeReturnSummaryFromExitYears } from "@/lib/returns";
 import type { TaxStrategyYear } from "@/lib/tax-strategy";
 
 /** Version of `compareSnapshot` + `snapshotVersion` on `result_snapshot` (compare fast path).
  *  Bumped to 2 when exit-tax (recapture + capital gains) changed exit-scenario
  *  totalProfit/ROI semantics — deals saved at v1 carry pre-exit-tax figures, so
- *  surfaces recompute on read via recomputeCompareSnapshotFromForm. */
-export const COMPARE_RESULT_SNAPSHOT_VERSION = 2;
+ *  surfaces recompute on read via recomputeCompareSnapshotFromForm.
+ *
+ *  Bumped to 3 when the canonical return summary (cash invested, equity
+ *  multiple, CAGR and true IRR) was frozen beside the exit rows. Older
+ *  recorded snapshots remain readable and simply omit those cells. */
+export const COMPARE_RESULT_SNAPSHOT_VERSION = 3;
 
 export type CompareSnapshotProjectionYear = {
   year: number;
@@ -69,6 +74,17 @@ export type CompareSnapshotAssumptions = {
   taxRate: number;
 };
 
+export type CompareSnapshotReturnSummary = {
+  cashInvested: number;
+  totalProfit: number;
+  roiPct: number | null;
+  equityMultiple: number | null;
+  cagrPct: number | null;
+  irrPct: number | null;
+  exitTax: number;
+  years: number;
+};
+
 export type CompareSnapshotV1 = {
   projections: {
     years: CompareSnapshotProjectionYear[];
@@ -83,6 +99,10 @@ export type CompareSnapshotV1 = {
   };
   longTermSummary: CompareSnapshotLongTerm;
   assumptions: CompareSnapshotAssumptions;
+  /** Added in snapshot v3. Optional keeps v1/v2 recorded analyses honest:
+   * they display no IRR/equity-multiple value instead of reconstructing one
+   * from today's code. */
+  returnSummary?: CompareSnapshotReturnSummary | null;
 };
 
 function mapTaxYear(y: TaxStrategyYear): CompareSnapshotTaxYear {
@@ -170,6 +190,7 @@ export function buildCompareSnapshotPayload(
   });
 
   const exitSummary = buildExitSummaryFromYears(exitYears);
+  const returnSummary = computeReturnSummaryFromExitYears(exitYears);
   const y10p = projection[9];
   const tenYearCashFlow = y10p?.cumulativeCashFlowAnnual ?? 0;
   const tenYearAfterTax = projection.reduce((s, p) => s + p.afterTaxCashFlowAnnual, 0);
@@ -212,6 +233,7 @@ export function buildCompareSnapshotPayload(
       expenseGrowthPct: values.expenseGrowthPct,
       taxRate: values.taxRatePct ?? 24,
     },
+    returnSummary,
   };
 
   return { snapshotVersion: COMPARE_RESULT_SNAPSHOT_VERSION, compareSnapshot };
@@ -221,14 +243,54 @@ function isRecord(v: unknown): v is Record<string, unknown> {
   return !!v && typeof v === "object" && !Array.isArray(v);
 }
 
+function finiteNumber(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function parseReturnSummary(raw: unknown): CompareSnapshotReturnSummary | undefined {
+  if (!isRecord(raw)) return undefined;
+  const cashInvested = finiteNumber(raw.cashInvested);
+  const totalProfit = finiteNumber(raw.totalProfit);
+  const exitTax = finiteNumber(raw.exitTax);
+  const years = finiteNumber(raw.years);
+  if (cashInvested == null || totalProfit == null || exitTax == null || years == null) {
+    return undefined;
+  }
+
+  const nullableFinite = (value: unknown): number | null | undefined =>
+    value == null ? null : finiteNumber(value) ?? undefined;
+  const roiPct = nullableFinite(raw.roiPct);
+  const equityMultiple = nullableFinite(raw.equityMultiple);
+  const cagrPct = nullableFinite(raw.cagrPct);
+  const irrPct = nullableFinite(raw.irrPct);
+  if (
+    roiPct === undefined ||
+    equityMultiple === undefined ||
+    cagrPct === undefined ||
+    irrPct === undefined
+  ) {
+    return undefined;
+  }
+
+  return {
+    cashInvested,
+    totalProfit,
+    roiPct,
+    equityMultiple,
+    cagrPct,
+    irrPct,
+    exitTax,
+    years,
+  };
+}
+
 /**
- * Recompute the compareSnapshot fresh from a saved deal's form snapshot, using
- * the CURRENT engine — so exit-scenario figures (year-10 profit, Total ROI)
- * reflect today's exit-tax math instead of whatever was persisted at save time.
- * Mirrors the codebase's "recompute on read" philosophy (see
- * recomputeSavedDealVerdict) so old and new saves never show mixed pre/post-tax
- * ROI side by side. Returns null on bad/legacy snapshots; callers fall back to
- * parseCompareSnapshotV1(persisted).
+ * Recompute one internally consistent compare snapshot from saved form inputs
+ * using the current engine. This is only for explicitly unpinned legacy/current
+ * compatibility paths. A recorded result must use its persisted compare
+ * snapshot instead; callers must never use this helper to fill individual
+ * missing rows in recorded history. Returns null when the saved inputs cannot
+ * be normalized or calculated.
  */
 export function recomputeCompareSnapshotFromForm(formSnapshot: unknown): CompareSnapshotV1 | null {
   const values = normalizeReleasedInvestmentFormSnapshot(formSnapshot);
@@ -260,5 +322,6 @@ export function parseCompareSnapshotV1(raw: unknown): CompareSnapshotV1 | null {
   return {
     ...(raw as unknown as CompareSnapshotV1),
     projections: normalizedProjections as CompareSnapshotV1["projections"],
+    returnSummary: parseReturnSummary(raw.returnSummary),
   };
 }

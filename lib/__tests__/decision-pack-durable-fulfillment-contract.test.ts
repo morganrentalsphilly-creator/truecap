@@ -12,6 +12,9 @@ const normalizedFulfillmentMigration = fulfillmentMigration.replace(/\s+/g, " ")
 const compsMigration = read(
   "supabase/migrations/20260824121000_deal_comps_service_role_writes.sql"
 );
+const compsOwnerBindingMigration = read(
+  "supabase/migrations/20260825221000_deal_comps_owner_binding.sql"
+);
 const shareRetentionMigration = read(
   "supabase/review-drafts/public-share-retention-service-role.sql"
 );
@@ -54,7 +57,10 @@ describe("durable Decision Pack schema contract", () => {
       "fulfillment and retention SQL files are review drafts outside the executable migration queue and must not be applied to production"
     );
     expect(normalizedRunbook).toContain(
-      "`deal_comps` hardening migration may be reviewed and promoted independently"
+      "`deal_comps` write-boundary hardening migration is already recorded in production and must not be edited or replayed"
+    );
+    expect(normalizedRunbook).toContain(
+      "the forward-only owner binding remains part of the next reviewed release batch"
     );
     expect(normalizedRunbook).toContain("No live Checkout Session");
   });
@@ -231,6 +237,20 @@ describe("deal_comps service-role write boundary", () => {
     expect(compsMigration).toContain("The safe operational rollback");
     expect(compsMigration).toContain("Do not blindly restore");
     expect(runbook).toContain("do not restore the permissive policies");
+  });
+
+  it("binds each comp row to the owner of its parent saved analysis", () => {
+    expect(compsOwnerBindingMigration).toContain("deal_comps_owned_analysis_fk");
+    expect(compsOwnerBindingMigration).toContain("foreign key (analysis_id, user_id)");
+    expect(compsOwnerBindingMigration).toContain(
+      "references public.saved_analyses(id, user_id)",
+    );
+    expect(compsOwnerBindingMigration).toContain(
+      "dc.user_id is distinct from sa.user_id",
+    );
+    expect(compsOwnerBindingMigration).toContain(
+      "Do not reassign untrusted payloads across tenants.",
+    );
   });
 });
 

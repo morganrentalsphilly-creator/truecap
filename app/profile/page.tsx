@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { BillingConversionTracker } from "@/components/marketing/billing-conversion-tracker";
 import { BillingPanel } from "@/components/profile/billing-panel";
@@ -115,7 +116,7 @@ export default async function ProfilePage({
     redirect("/auth/login");
   }
 
-  const [{ data: profile }, { data: subscriptionRows }, { data: planRows }] = await Promise.all([
+  const [profileResult, subscriptionsResult, plansResult] = await Promise.all([
     supabase
       .from("profiles")
       .select("first_name, last_name, display_name, avatar_url")
@@ -137,6 +138,28 @@ export default async function ProfilePage({
       .eq("is_active", true)
       .order("slug", { ascending: true }),
   ]);
+  const { data: profile, error: profileError } = profileResult;
+  const { data: subscriptionRows, error: subscriptionsError } = subscriptionsResult;
+  const { data: planRows, error: plansError } = plansResult;
+
+  if (profileError || subscriptionsError || plansError) {
+    return (
+      <main id="main" className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6">
+        <div role="alert" className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6">
+          <h1 className="text-xl font-bold text-foreground">Couldn&apos;t load profile and billing</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            TrueCap could not verify your account or subscription right now, so it will not show a Free plan or missing profile by mistake.
+          </p>
+          <Link
+            href="/profile"
+            className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"
+          >
+            Try again
+          </Link>
+        </div>
+      </main>
+    );
+  }
   const subscriptions = (subscriptionRows as SubscriptionRow[] | null) ?? [];
   const actionableStatuses = new Set(["active", "trialing", "past_due", "unpaid", "paused"]);
   const subscription =

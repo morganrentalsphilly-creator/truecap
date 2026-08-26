@@ -75,7 +75,7 @@ function loadGoogleMapsScript(apiKey: string): Promise<void> {
   if (window.google?.maps?.places?.AutocompleteSuggestion) return Promise.resolve();
   if (window.__googleMapsPlacesLoading) return window.__googleMapsPlacesLoading;
 
-  window.__googleMapsPlacesLoading = new Promise<void>((resolve, reject) => {
+  const loading = new Promise<void>((resolve, reject) => {
     const existing = document.getElementById("google-maps-places-script") as HTMLScriptElement | null;
     if (existing) {
       existing.addEventListener("load", () => resolve(), { once: true });
@@ -90,6 +90,15 @@ function loadGoogleMapsScript(apiKey: string): Promise<void> {
     script.onload = () => resolve();
     script.onerror = () => reject(new Error("Failed to load Google Maps script"));
     document.head.appendChild(script);
+  });
+
+  window.__googleMapsPlacesLoading = loading.catch((error) => {
+    // A rejected shared promise otherwise makes every later focus fail
+    // immediately. Remove the failed script so a user can retry after a
+    // transient network or content-blocker change.
+    window.__googleMapsPlacesLoading = undefined;
+    document.getElementById("google-maps-places-script")?.remove();
+    throw error;
   });
 
   return window.__googleMapsPlacesLoading;
@@ -148,6 +157,7 @@ export function AddressAutocomplete({
   const [open, setOpen] = useState(false);
   const [highlight, setHighlight] = useState(0);
   const [scriptReady, setScriptReady] = useState(false);
+  const [autocompleteWarning, setAutocompleteWarning] = useState<string | null>(null);
   // Search progress signal - drives the "Searching…" indicator. Without
   // it, slow networks or blocked Google Places (ad blockers, restricted
   // regions, API key issues) make the dropdown appear "broken" - the
@@ -196,11 +206,15 @@ export function AddressAutocomplete({
   const loadScript = useCallback(() => {
     if (!apiKey || loadStartedRef.current) return;
     loadStartedRef.current = true;
+    setAutocompleteWarning(null);
     loadGoogleMapsScript(apiKey)
       .then(() => {
         if (!window.google?.maps?.places?.AutocompleteSuggestion) {
           console.warn(
             "[AddressAutocomplete] AutocompleteSuggestion not in Places library - enable 'Places API (New)' in Google Cloud Console."
+          );
+          setAutocompleteWarning(
+            "Address suggestions are unavailable. You can still type or paste the full address."
           );
           return;
         }
@@ -208,6 +222,9 @@ export function AddressAutocomplete({
       })
       .catch((err) => {
         console.warn("[AddressAutocomplete] script load failed:", err);
+        setAutocompleteWarning(
+          "Address suggestions could not load. You can still type or paste the full address."
+        );
         loadStartedRef.current = false; // allow a retry on the next focus
       });
   }, [apiKey]);
@@ -264,6 +281,7 @@ export function AddressAutocomplete({
     if (!scriptReady) return;
     const api = window.google?.maps?.places?.AutocompleteSuggestion;
     if (!api) return;
+    setAutocompleteWarning(null);
     setIsSearching(true);
     // Show the "Searching…" hint immediately so the user knows the
     // request is in flight, even before any predictions come back.
@@ -283,6 +301,11 @@ export function AddressAutocomplete({
       setHighlight(0);
     } catch (err) {
       console.warn("[AddressAutocomplete] fetchAutocompleteSuggestions failed:", err);
+      setPredictions([]);
+      setOpen(false);
+      setAutocompleteWarning(
+        "Address suggestions are temporarily unavailable. You can still type or paste the full address."
+      );
     } finally {
       setIsSearching(false);
     }
@@ -477,6 +500,11 @@ export function AddressAutocomplete({
     }
   };
 
+  const autocompleteWarningId = `${fieldId}-autocomplete-warning`;
+  const describedBy = [hasError && errorId ? errorId : null, autocompleteWarning ? autocompleteWarningId : null]
+    .filter(Boolean)
+    .join(" ") || undefined;
+
   return (
     <div ref={containerRef} className="relative w-full">
       <Input
@@ -494,7 +522,7 @@ export function AddressAutocomplete({
         aria-controls={hasSuggestions ? listboxId : undefined}
         aria-activedescendant={hasSuggestions ? `${fieldId}-option-${highlight}` : undefined}
         aria-invalid={hasError || undefined}
-        aria-describedby={hasError && errorId ? errorId : undefined}
+        aria-describedby={describedBy}
         aria-required={required || undefined}
         onChange={handleInputChange}
         onBlur={(e) => {
@@ -519,6 +547,15 @@ export function AddressAutocomplete({
       <span className="sr-only" role="status" aria-live="polite">
         {hasSuggestions ? `${predictions.length} address suggestion${predictions.length === 1 ? "" : "s"} available` : ""}
       </span>
+      {autocompleteWarning ? (
+        <p
+          id={autocompleteWarningId}
+          role="status"
+          className="mt-1 text-xs text-amber-800"
+        >
+          {autocompleteWarning}
+        </p>
+      ) : null}
       {/* In-flight indicator - shows BEFORE predictions land. Without
           this, slow networks or blocked Google Places make the dropdown
           stay closed silently and the user thinks autocomplete is

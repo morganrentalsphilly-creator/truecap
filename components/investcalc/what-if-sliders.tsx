@@ -174,8 +174,12 @@ export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
     const id = window.setTimeout(() => {
       const cf = `${r.netCashFlow >= 0 ? "+" : "-"}$${Math.abs(Math.round(r.netCashFlow)).toLocaleString("en-US")}/mo`;
       const dscr = r.monthlyPayment > 0 ? `, DSCR ${r.dscr.toFixed(2)}` : "";
+      const coc =
+        r.totalCashRequired > 0
+          ? `${r.cocReturn.toFixed(1)}%`
+          : "not applicable because no initial cash is modeled";
       setLiveMsg(
-        `Adjusted: cash flow ${cf}, cap rate ${r.capRate.toFixed(1)}%, cash-on-cash ${r.cocReturn.toFixed(1)}%${dscr}. Screening result: ${tier}; secondary heuristic, not a decision.`
+        `Adjusted: cash flow ${cf}, cap rate ${r.capRate.toFixed(1)}%, cash-on-cash ${coc}${dscr}. Screening result: ${tier}; secondary heuristic, not a decision.`
       );
     }, 350);
     return () => window.clearTimeout(id);

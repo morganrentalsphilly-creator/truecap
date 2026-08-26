@@ -50,7 +50,7 @@ export function SeoAnalyzerCta({
       <Link
         href={href}
         prefetch={false}
-        className="mt-3 inline-flex h-10 shrink-0 items-center gap-1.5 rounded-lg bg-primary px-4 text-sm font-bold text-primary-foreground shadow-[0_8px_22px_rgba(0,112,196,0.24)] hover:bg-primary/95 sm:mt-0"
+        className="mt-3 inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg bg-primary px-4 text-sm font-bold text-primary-foreground shadow-[0_8px_22px_rgba(0,112,196,0.24)] hover:bg-primary/95 sm:mt-0"
       >
         <Calculator className="size-4" />
         Analyze a property free

@@ -59,9 +59,21 @@ export function buildAssumptionEntries(
                 : rent.source === "hud-safmr"
                   ? "HUD rent benchmark (ZIP)"
                   : "HUD rent benchmark (county)",
-            short: "HUD",
+            short:
+              rent.source === "rentcast-estimate"
+                ? "RentCast"
+                : rent.source === "hud-safmr"
+                  ? "HUD SAFMR"
+                  : "HUD FMR",
             manual: false,
-            ...(rent.fetchedAt ? { freshness: /^\d{4}$/.test(rent.fetchedAt) ? `HUD ${rent.fetchedAt}` : `As of ${rent.fetchedAt}` } : {}),
+            ...(rent.fetchedAt
+              ? {
+                  freshness:
+                    rent.source !== "rentcast-estimate" && /^\d{4}$/.test(rent.fetchedAt)
+                      ? `HUD ${rent.fetchedAt}`
+                      : `As of ${rent.fetchedAt}`,
+                }
+              : {}),
           }
         : MANUAL),
     },

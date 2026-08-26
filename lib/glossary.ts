@@ -202,7 +202,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     related: ["capRate", "coc", "dscr", "cashFlow"],
   },
   taxSavings: {
-    term: "Tax Savings",
+    term: "Illustrative Tax Effect",
     slug: "tax-savings",
     category: "metric",
     definition:

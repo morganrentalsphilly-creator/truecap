@@ -18,6 +18,8 @@ interface PropertyDetailsSectionProps {
   /** Pull beds/baths/sqft/price/rent from RentCast for the typed address. */
   onAutofillFromAddress?: () => void;
   isAutofilling?: boolean;
+  /** Guest-visible disclosure: the lookup requires a free account. */
+  autofillRequiresAccount?: boolean;
   /** Show the autofill button (signed-in + provider configured). */
   showAutofill?: boolean;
   /** Show the (optional) Year Built field. Hidden in strategy-focus mode. */
@@ -55,6 +57,7 @@ export function PropertyDetailsSection({
   onAddressSelected,
   onAutofillFromAddress,
   isAutofilling,
+  autofillRequiresAccount = false,
   showAutofill,
   showYearBuilt = true,
   priceLabel,
@@ -102,7 +105,7 @@ export function PropertyDetailsSection({
           type="button"
           variant="outline"
           size="sm"
-          className="mt-2 h-8 gap-1.5"
+          className="mt-2 min-h-11 gap-1.5"
           onClick={onAutofillFromAddress}
           disabled={isAutofilling}
         >
@@ -111,7 +114,11 @@ export function PropertyDetailsSection({
           ) : (
             <Sparkles className="size-3.5" />
           )}
-          {isAutofilling ? "Pulling property data…" : "Autofill from address"}
+          {isAutofilling
+            ? "Pulling property data…"
+            : autofillRequiresAccount
+              ? "Create a free account to autofill"
+              : "Autofill from address"}
         </Button>
       ) : null}
     </div>
@@ -231,7 +238,8 @@ export function YearBuiltField({ form }: { form: UseFormReturn<InvestmentFormVal
         )}
       />
       <p className="mt-1 text-[11px] text-muted-foreground">
-        Used for reference only. It does not auto-adjust your expenses.
+        Used in the Screening Index age-risk check. If left blank, a conservative uncertainty
+        modifier applies. It does not auto-adjust your expense assumptions.
       </p>
       <FieldError id="yearBuilt-error" message={errors.yearBuilt?.message} />
     </div>

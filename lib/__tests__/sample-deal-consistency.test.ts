@@ -14,8 +14,9 @@ import { SAMPLE_DEAL_FIXTURE } from "../sample-deal";
 
 describe("versioned synthetic shared sample", () => {
   it("uses one complete fixture for the property, strategy, and visible targets", () => {
-    expect(SAMPLE_DEAL_FIXTURE.fixtureVersion).toBe("synthetic-rental-v1");
+    expect(SAMPLE_DEAL_FIXTURE.fixtureVersion).toBe("synthetic-rental-v2");
     expect(SAMPLE_DEAL_FIXTURE.synthetic).toBe(true);
+    expect(SAMPLE_DEAL_FIXTURE.values.analysisDate).toBe("2026-08-25");
     expect(SAMPLE_DEAL_FIXTURE.strategyKey).toBe("buy-hold");
     expect(SAMPLE_DEAL_FIXTURE.values.address).toBe(
       "TrueCap Synthetic Sample, Philadelphia, PA 19140, USA"
@@ -53,6 +54,9 @@ describe("versioned synthetic shared sample", () => {
     expect(openedAnalysis.capRate).toBe(homepage.analysis.capRate);
     expect(openedAnalysis.dscr).toBe(homepage.analysis.dscr);
     expect(homepage.maxOffer).not.toBeNull();
+    expect(homepage.analysis.analysisDate).toBe(
+      SAMPLE_DEAL_FIXTURE.values.analysisDate
+    );
     expect(SAMPLE_DEAL_FIXTURE.values.purchasePrice).toBeGreaterThan(
       homepage.maxOffer!.maxPrice
     );
@@ -105,5 +109,7 @@ describe("versioned synthetic shared sample", () => {
     expect(launch.indexOf("setAnalysisMaoTarget")).toBeLessThan(
       launch.indexOf("form.handleSubmit")
     );
+    expect(source).toContain("analysisDateForExplicitV1Run({");
+    expect(source).toContain("preserveExisting: pendingSampleRunRef.current");
   });
 });

@@ -95,14 +95,14 @@ const BP_HOUSE_HACK_FAQ: FaqItem[] = [
         Yes — TrueCap&apos;s down payment field is configurable. Set it
         to 3.5% for FHA, 5% for conventional owner-occupant, 10-15% for
         bigger deals where you want a lower PMI burden. PITI and DSCR
-        recalculate automatically. The FHA mortgage insurance premium
-        (MIP) is not modeled as a separate line — bake it into the
-        insurance field or accept that PITI will be slightly
-        underestimated.
+        recalculate automatically. Enter the lender&apos;s annual FHA mortgage
+        insurance premium in the dedicated PMI / MIP field and select the
+        loan-life option when it applies. If an upfront premium is not
+        financed, include that cash amount in closing costs.
       </>
     ),
     plainTextAnswer:
-      "Yes — TrueCap's down payment field is configurable. Set 3.5% for FHA, 5% for conventional owner-occupant, etc. PITI + DSCR recalc automatically. FHA MIP isn't a separate line — bake into insurance or accept slight PITI underestimate.",
+      "Yes — TrueCap's down payment field is configurable. Set 3.5% for FHA, enter the lender's annual premium in the dedicated PMI / MIP field, and select the loan-life option when it applies. Include any unfinanced upfront premium in closing costs.",
   },
   {
     question: "What's 'effective rent saved' and why does it matter?",

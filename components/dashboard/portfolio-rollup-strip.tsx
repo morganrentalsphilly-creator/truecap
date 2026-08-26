@@ -19,6 +19,10 @@
  * or compete with the deal table for attention.
  */
 import type { SavedAnalysisListItem } from "@/components/investcalc/saved-analyses-page-v2";
+import {
+  applicableCashOnCashValue,
+  isCashOnCashNotApplicable,
+} from "@/lib/cash-on-cash-applicability";
 
 function fmtCurrency(value: number): string {
   return new Intl.NumberFormat("en-US", {
@@ -97,7 +101,11 @@ export function PortfolioRollupStrip({
   let weightedCapDenominator = 0;
   let weightedCocNumerator = 0;
   let weightedCocDenominator = 0;
+  let cocNotApplicableCount = 0;
   for (const item of items) {
+    if (isCashOnCashNotApplicable(item.cashToClose)) {
+      cocNotApplicableCount += 1;
+    }
     if (typeof item.netCashFlowMonthly === "number" && Number.isFinite(item.netCashFlowMonthly)) {
       totalMonthlyCashFlow += item.netCashFlowMonthly;
       cashFlowSampleCount += 1;
@@ -108,8 +116,12 @@ export function PortfolioRollupStrip({
         weightedCapNumerator += item.capRatePct * item.purchasePrice;
         weightedCapDenominator += item.purchasePrice;
       }
-      if (typeof item.cocReturnPct === "number" && Number.isFinite(item.cocReturnPct)) {
-        weightedCocNumerator += item.cocReturnPct * item.purchasePrice;
+      const applicableCoc = applicableCashOnCashValue(
+        item.cocReturnPct,
+        item.cashToClose
+      );
+      if (!isCashOnCashNotApplicable(item.cashToClose) && applicableCoc != null) {
+        weightedCocNumerator += applicableCoc * item.purchasePrice;
         weightedCocDenominator += item.purchasePrice;
       }
     }
@@ -200,8 +212,20 @@ export function PortfolioRollupStrip({
           ) : (
             <RollupTile
               label="Weighted CoC"
-              value={weightedCoc != null ? fmtPct(weightedCoc) : "—"}
-              sub="cash-on-cash blended"
+              value={
+                weightedCoc != null
+                  ? fmtPct(weightedCoc)
+                  : cocNotApplicableCount > 0
+                    ? "N/A"
+                    : "—"
+              }
+              sub={
+                weightedCoc != null && cocNotApplicableCount > 0
+                  ? "blended; excludes zero-cash deals"
+                  : cocNotApplicableCount > 0
+                    ? "no modeled cash invested"
+                    : "cash-on-cash blended"
+              }
               tone="neutral"
             />
           )}

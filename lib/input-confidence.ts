@@ -1,5 +1,5 @@
 /**
- * Input Confidence v1.0
+ * Input Confidence v1.1
  *
  * A deterministic assessment of how decision-ready the INPUTS are. This is
  * intentionally separate from Deal Score / Buy Box fit, which assess the
@@ -10,10 +10,17 @@
 import type { EnrichmentProvenanceInput } from "./data-confidence";
 import type { InvestmentFormValues } from "./investcalc-schema";
 
-export const INPUT_CONFIDENCE_METHOD_VERSION = "1.0" as const;
+/**
+ * v1.1 adds Year Built as a weighted readiness input. Versioning the method
+ * keeps persisted v1.0 assessments historically legible instead of silently
+ * presenting their scores as if they used today's denominator.
+ */
+export const INPUT_CONFIDENCE_METHOD_VERSION = "1.1" as const;
+export const LEGACY_INPUT_CONFIDENCE_METHOD_VERSIONS = ["1.0"] as const;
 
 export const INPUT_CONFIDENCE_FIELD_KEYS = [
   "purchasePrice",
+  "yearBuilt",
   "rent",
   "propertyTax",
   "insurance",
@@ -132,6 +139,7 @@ const FIELD_META: Record<
   Pick<InputConfidenceField, "label" | "weight" | "editTarget">
 > = {
   purchasePrice: { label: "Purchase price", weight: 12, editTarget: "property" },
+  yearBuilt: { label: "Year built", weight: 4, editTarget: "property" },
   rent: { label: "Rent", weight: 16, editTarget: "property" },
   propertyTax: { label: "Property taxes", weight: 8, editTarget: "expenses" },
   insurance: { label: "Insurance", weight: 8, editTarget: "expenses" },
@@ -151,6 +159,7 @@ const INPUT_CONFIDENCE_TOUCHED_FIELD_MAP: Readonly<
   Record<string, InputConfidenceFieldKey>
 > = Object.freeze({
   purchasePrice: "purchasePrice",
+  yearBuilt: "yearBuilt",
   monthlyRent: "rent",
   units: "rent",
   avgDailyRate: "rent",
@@ -363,6 +372,7 @@ export function buildInputConfidence(context: InputConfidenceContext): InputConf
   const verified = verifiedSet(context.verified, values, now);
   const financed = (num(values.downPaymentPct) ?? 100) < 100;
   const pricePresent = (num(values.purchasePrice) ?? 0) > 0;
+  const yearBuiltPresent = (num(values.yearBuilt) ?? 0) > 0;
   const rentPresent = hasRent(values);
   const rentProvenance = provenance?.monthlyRent;
   const rateProvenance = provenance?.interestRate;
@@ -387,6 +397,24 @@ export function buildInputConfidence(context: InputConfidenceContext): InputConf
               verifyAction: "Enter purchase price",
               offerReadyRequired: true,
             })
+    ),
+    field(
+      "yearBuilt",
+      yearBuiltPresent
+        ? explicitVerification("yearBuilt", verified.has("yearBuilt"), {
+            sourceClass: "property-specific",
+            sourceLabel: "Entered year built",
+            reason: "Used in the Screening Index age-risk check, but not yet confirmed against property records.",
+            verifyAction: "Confirm year built from property records",
+            offerReadyRequired: false,
+          })
+        : {
+            sourceClass: "missing",
+            sourceLabel: "Not provided",
+            reason: "Unknown age receives a conservative Screening Index uncertainty modifier.",
+            verifyAction: "Confirm year built from property records",
+            offerReadyRequired: false,
+          }
     ),
     field(
       "rent",
@@ -484,8 +512,10 @@ export function buildInputConfidence(context: InputConfidenceContext): InputConf
             rateProvenance && !rateProvenance.overridden
               ? {
                   sourceClass: "market-benchmark",
-                  sourceLabel: "Market Rate Benchmark",
-                  reason: "FRED owner-occupied national benchmark, not an investor lender quote.",
+                  sourceLabel: "TrueCap estimated market rate",
+                  reason: `TrueCap estimate based on FRED's national owner-occupied mortgage series${
+                    rateProvenance.fetchedAt ? ` as of ${rateProvenance.fetchedAt}` : ""
+                  }; see methodology. This is not an investor-property quote or rate lock.`,
                   verifyAction: "Add lender quote",
                   offerReadyRequired: true,
                 }
@@ -665,6 +695,8 @@ export function inputVerificationFingerprint(
     switch (key) {
       case "purchasePrice":
         return values.purchasePrice ?? null;
+      case "yearBuilt":
+        return values.yearBuilt ?? null;
       case "rent":
         return values.propertyType === "single-family"
           ? [values.monthlyRent ?? null, values.avgDailyRate ?? null, values.occupancyPct ?? null]

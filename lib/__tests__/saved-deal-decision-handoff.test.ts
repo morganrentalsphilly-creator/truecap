@@ -12,13 +12,16 @@ function source(path: string): string {
 describe("saved-deal decision handoff", () => {
   it("selects the owner-scoped pipeline stage and carries it only in edit handoffs", () => {
     const action = source("app/actions/saved-analyses.ts");
+    const home = source("app/home-authed/page.tsx");
+    const analyzer = source("components/investcalc/investcalc-page.tsx");
     const handoff = source("components/investcalc/open-saved-deal-in-analyzer.tsx");
 
-    expect(action).toContain("methodology_version, pipeline_stage, form_snapshot");
-    expect(action).toContain("pipelineStage: dbString");
-    expect(handoff).toMatch(
-      /SAVED_ANALYSIS_EDIT_DRAFT_KEY,[\s\S]*pipelineStage: result\.pipelineStage/
+    expect(action).toContain(
+      "methodology_version, underwriting_revision, pipeline_stage, form_snapshot"
     );
+    expect(action).toContain("pipelineStage: dbString");
+    expect(home).toContain("initialSavedDeal={initialSavedDeal}");
+    expect(analyzer).toContain("pipelineStage: initialSavedDeal.pipelineStage");
     expect(handoff).not.toMatch(
       /SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY,[\s\S]{0,500}pipelineStage/
     );

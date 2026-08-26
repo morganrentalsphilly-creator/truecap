@@ -53,8 +53,10 @@ only changes marketing copy.
 
 ## Public deal counter
 
-The homepage all-time run counter displays the live
-`app_counters.analysis_runs` value with a minimum public floor of 51,900.
-The database value is not changed. Rolling 7-day and 30-day saved-deal counters
-continue to display their raw measured values. The display rule and regression
-guard live in `lib/stats/analysis-runs-display.ts`.
+The homepage all-time run counter displays the live, persisted
+`app_counters.analysis_runs` value. Migration `20260823160000` established the
+owner-confirmed cumulative total of 51,900 once; every later successful
+analyzer run increments that same row. The UI does not add a historical count
+or manufacture a display floor. Rolling 7-day and 30-day saved-deal counters
+also display their raw measured values. The display rule and regression guard
+live in `lib/stats/analysis-runs-display.ts`.

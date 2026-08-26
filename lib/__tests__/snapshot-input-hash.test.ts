@@ -21,6 +21,7 @@ const baseProjectionInput: TenYearProjectionInput = {
   totalOperatingExpenses: 800,
   capexReserveMonthly: 100,
   monthlyPayment: 1_100,
+  interestRate: 6.75,
   pmiMonthly: 0,
   loanAmount: 240_000,
   purchasePrice: 300_000,
@@ -59,6 +60,15 @@ describe("buildTenYearProjectionInputHash", () => {
     const after = buildTenYearProjectionInputHash({
       ...baseProjectionInput,
       capexReserveMonthly: 80,
+    });
+    expect(after).not.toBe(before);
+  });
+
+  it("changes when only the note rate changes (monthly PMI timing input)", () => {
+    const before = buildTenYearProjectionInputHash({ ...baseProjectionInput });
+    const after = buildTenYearProjectionInputHash({
+      ...baseProjectionInput,
+      interestRate: 7.25,
     });
     expect(after).not.toBe(before);
   });

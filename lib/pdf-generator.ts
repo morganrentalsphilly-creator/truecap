@@ -27,6 +27,10 @@ export interface ReportData {
   /** Explicit legacy/frozen provenance. Prefer this over deriving a label from
    * the embedded result version. */
   methodologyLabel?: string;
+  /** Independent method version stamped on the embedded 10-year projection.
+   * Null means a recorded legacy snapshot predates projection sub-versioning;
+   * its rows remain frozen but must not be relabeled as current. */
+  tenYearProjectionVersion?: number | null;
   property: {
     address: string;
     type: string;
@@ -49,6 +53,9 @@ export interface ReportData {
      *  assumptions block prints the bill instead of a percent — the percent
      *  was never the customer's input. Null in percent mode. */
     propertyTaxAnnualBill?: number | null;
+    /** Monthly insurance mode: the modeled monthly bill. When set, reports
+     * print this amount instead of implying the percent-mode field was used. */
+    insuranceMonthlyBill?: number | null;
     insurancePct: number;
     maintenancePct: number;
     vacancyPct: number;
@@ -81,6 +88,8 @@ export interface ReportData {
     rationale: string;
     monthlyCashFlow: number;
     cocReturn: number;
+    /** False when no initial cash is modeled and CoC is mathematically N/A. */
+    cocApplicable?: boolean;
     capRate: number;
     dscr: number;
     taxSavings: number;
@@ -152,6 +161,8 @@ export interface ReportData {
     verdict: string;
     monthlyCashFlow: number;
     cocReturn: number;
+    /** False when no initial cash is modeled and CoC is mathematically N/A. */
+    cocApplicable?: boolean;
     capRate: number;
     dscr: number;
   };
@@ -265,6 +276,14 @@ const fmtCurrency = (n: number, withSign = false) => {
   return s;
 };
 const fmtPct = (n: number, sign = false) => `${sign && n > 0 ? "+" : ""}${n.toFixed(1)}%`;
+
+export function formatReportInsuranceAssumption(
+  expenses: Pick<ReportData["expenses"], "insuranceMonthlyBill" | "insurancePct">,
+): string {
+  return expenses.insuranceMonthlyBill != null
+    ? `${fmtCurrency(expenses.insuranceMonthlyBill)}/mo (monthly amount)`
+    : `${expenses.insurancePct}%`;
+}
 
 function hexToRgb(hex: string): [number, number, number] {
   const h = hex.replace("#", "");
@@ -925,7 +944,7 @@ function pageCover(
   const metrics: Array<[string, string]> = [
     ["MONTHLY CASH FLOW", fmtCurrency(d.performance.monthlyCashFlow, true)],
     ["CAP RATE", fmtPct(d.performance.capRate)],
-    ["CASH-ON-CASH", fmtPct(d.performance.cocReturn)],
+    ["CASH-ON-CASH", d.performance.cocApplicable === false ? "N/A" : fmtPct(d.performance.cocReturn)],
   ];
   if (d.maxOffer !== undefined) {
     metrics.push([
@@ -1395,7 +1414,12 @@ function pageInputs(
   const dscrSub = isCashPurchase ? "cash purchase" : "debt cover";
   const cards: Array<[string, string, "primary" | "success" | "danger" | "neutral" | "violet" | "warn", string?]> = [
     ["Monthly Cash Flow", fmtCurrency(d.performance.monthlyCashFlow), d.performance.monthlyCashFlow >= 0 ? "success" : "danger", "/month"],
-    ["CoC Return", fmtPct(d.performance.cocReturn, true), "primary", "year 1"],
+    [
+      "CoC Return",
+      d.performance.cocApplicable === false ? "N/A" : fmtPct(d.performance.cocReturn, true),
+      d.performance.cocApplicable === false ? "neutral" : "primary",
+      d.performance.cocApplicable === false ? "no modeled cash invested" : "year 1",
+    ],
     ["Cap Rate", fmtPct(d.performance.capRate, true), "violet", "NOI basis"],
     ["DSCR", dscrValue, dscrTone, dscrSub],
     ["Modeled After-Tax CF", fmtCurrency(d.performance.afterTaxCF), "primary", "/month"],
@@ -1666,6 +1690,7 @@ function pageInputs(
     ["Closing costs", `${d.financing.closingCostsPct}% (${fmtCurrency(d.financing.closingCosts)})`],
   ], themeColor);
   y += rowH + 10;
+  const insuranceAssumption = formatReportInsuranceAssumption(d.expenses);
   drawInputBlock(doc, M.left, y, colW, rowH, "Operating Expenses", [
     // Annual-$ tax mode prints the customer's actual bill — printing the
     // unused percent field here used to render "0%" on a paid PDF.
@@ -1675,7 +1700,7 @@ function pageInputs(
         d.expenses.propertyTaxAnnualBill != null
           ? `${fmtCurrency(d.expenses.propertyTaxAnnualBill)}/yr (annual bill)`
           : `${d.expenses.propertyTaxPct}%`
-      } / ${d.expenses.insurancePct}%`,
+      } / ${insuranceAssumption}`,
     ],
     ["Maintenance / Vacancy", `${d.expenses.maintenancePct}% / ${d.expenses.vacancyPct}%`],
     ["Management / CapEx", `${d.expenses.managementPct}% / ${d.expenses.capexPct}%`],
@@ -1917,7 +1942,7 @@ function pageProjection(
         { label: "Gross Rent", value: wfGross, from: 0, color: COLOR.success },
         { label: "Op. Expenses", value: wfGross - wfOpex, from: wfGross, color: COLOR.danger },
         {
-          label: "Debt Service",
+          label: "P&I + MI",
           value: wfGross - wfOpex - wfDebt,
           from: wfGross - wfOpex,
           color: COLOR.warn,
@@ -1960,7 +1985,7 @@ function pageProjection(
   autoTable(doc, {
     startY: y,
     margin: { left: M.left, right: M.right },
-    head: [["Year", "Rental Income", "Op. Expenses", "Debt Service", "Net CF", "Tax Effect", "After-Tax CF", "Cumulative CF"]],
+    head: [["Year", "Rental Income", "Op. Expenses", "P&I + MI", "Net CF", "Tax Effect", "After-Tax CF", "Cumulative CF"]],
     body: d.projection10y.rows.map((r) => [
       `Y${r.y}`,
       fmtCurrency(r.rental),
@@ -2034,8 +2059,8 @@ function pageDownside(
     tone: "primary",
     themeColor,
   });
-  statCard(doc, M.left + 2 * (cw + 12), y, cw, 64, "Stressed CoC", fmtPct(stressed.cocReturn), {
-    tone: stressed.cocReturn >= 0 ? "success" : "danger",
+  statCard(doc, M.left + 2 * (cw + 12), y, cw, 64, "Stressed CoC", stressed.cocApplicable === false ? "N/A" : fmtPct(stressed.cocReturn), {
+    tone: stressed.cocApplicable === false ? "neutral" : stressed.cocReturn >= 0 ? "success" : "danger",
     themeColor,
   });
   statCard(doc, M.left + 3 * (cw + 12), y, cw, 64, "Stressed DSCR", financed ? stressed.dscr.toFixed(2) : "Cash", {
@@ -2097,7 +2122,11 @@ function pageDownside(
 
   const deltaMoney = stressed.monthlyCashFlow - d.performance.monthlyCashFlow;
   const deltaCap = stressed.capRate - d.performance.capRate;
-  const deltaCoc = stressed.cocReturn - d.performance.cocReturn;
+  const cocComparable =
+    d.performance.cocApplicable !== false && stressed.cocApplicable !== false;
+  const deltaCoc = cocComparable
+    ? stressed.cocReturn - d.performance.cocReturn
+    : null;
   const deltaDscr = stressed.dscr - d.performance.dscr;
   autoTable(doc, {
     startY: y,
@@ -2106,7 +2135,12 @@ function pageDownside(
     body: [
       ["Monthly cash flow", `${fmtCurrency(d.performance.monthlyCashFlow, true)}/mo`, `${fmtCurrency(stressed.monthlyCashFlow, true)}/mo`, `${fmtCurrency(deltaMoney, true)}/mo`],
       ["Cap rate", fmtPct(d.performance.capRate), fmtPct(stressed.capRate), `${deltaCap >= 0 ? "+" : ""}${deltaCap.toFixed(1)}pp`],
-      ["Cash-on-cash", fmtPct(d.performance.cocReturn), fmtPct(stressed.cocReturn), `${deltaCoc >= 0 ? "+" : ""}${deltaCoc.toFixed(1)}pp`],
+      [
+        "Cash-on-cash",
+        d.performance.cocApplicable === false ? "N/A" : fmtPct(d.performance.cocReturn),
+        stressed.cocApplicable === false ? "N/A" : fmtPct(stressed.cocReturn),
+        deltaCoc == null ? "—" : `${deltaCoc >= 0 ? "+" : ""}${deltaCoc.toFixed(1)}pp`,
+      ],
       ["DSCR", financed ? d.performance.dscr.toFixed(2) : "Cash purchase", financed ? stressed.dscr.toFixed(2) : "Cash purchase", financed ? `${deltaDscr >= 0 ? "+" : ""}${deltaDscr.toFixed(2)}` : "—"],
     ],
     theme: "plain",
@@ -2653,7 +2687,7 @@ function pageDisclosures(doc: jsPDF, d: ReportData, branding?: BrandingConfig | 
   );
   y = drawParagraph(
     doc,
-    "Returns are computed from the purchase price, financing terms, rents, and operating expenses entered for this property. The 10-year projection grows rents and operating expenses at the rates above and amortizes the loan on its stated schedule. NOI and lender-style DSCR exclude the CapEx reserve; cash flow includes it. PMI/MIP, when modeled, is included in cash flow but excluded from lender-style DSCR.",
+    `Returns are computed from the purchase price, financing terms, rents, and operating expenses entered for this property. The 10-year projection ${d.tenYearProjectionVersion != null ? `uses projection method v${d.tenYearProjectionVersion}` : "comes from a recorded legacy snapshot whose projection method version was not stored"}; it grows rents and operating expenses at the rates above and amortizes the loan on its stated schedule. NOI and lender-style DSCR exclude the CapEx reserve; cash flow includes it. PMI/MIP, when modeled, is included in cash flow but excluded from lender-style DSCR.`,
     M.left,
     y,
     SAFE.w

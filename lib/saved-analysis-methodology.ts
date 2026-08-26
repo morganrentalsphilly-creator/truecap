@@ -184,8 +184,22 @@ export function resolveSavedAnalysisResult(input: {
     // a compatibility check only; none of its VALUES flow into the output.
     // Score metadata is part of the same atomic methodology contract, so a
     // recorded snapshot missing any requested score field also fails closed.
+    // The projection sub-version was introduced after recorded v1.0 snapshots
+    // already existed. Its absence means "recorded-unversioned" provenance,
+    // not an incomplete financial result; the embedded projection rows remain
+    // immutable and are never filled from current math.
+    const backwardCompatibleOptionalResultKeys = new Set([
+      // Persisted before the deterministic Property Age correction. Absence
+      // means the result used the legacy, unrecorded calendar convention; it
+      // must not make an otherwise complete historical result unreadable and
+      // must never be filled with today's date.
+      "analysisDate",
+      "tenYearProjectionVersion",
+    ]);
     const requiredKeys = new Set([
-      ...Object.keys(input.recomputedResult),
+      ...Object.keys(input.recomputedResult).filter(
+        (key) => !backwardCompatibleOptionalResultKeys.has(key)
+      ),
       ...Object.keys(input.recomputedExtras),
     ]);
     const expectsDealScore = [
@@ -260,8 +274,23 @@ export function parseFrozenDealScore(snapshotInput: unknown): DealScoreResult | 
     if (typeof value !== "number" || !Number.isFinite(value)) return null;
     breakdown[key] = value;
   }
+  const applicabilityAdjustment = breakdownRecord.applicabilityAdjustment;
+  if (applicabilityAdjustment != null) {
+    if (
+      typeof applicabilityAdjustment !== "number" ||
+      !Number.isFinite(applicabilityAdjustment)
+    ) {
+      return null;
+    }
+    breakdown.applicabilityAdjustment = applicabilityAdjustment;
+  }
 
   return {
+    scoreMethodologyVersion:
+      typeof snapshot.scoreMethodologyVersion === "string" &&
+      snapshot.scoreMethodologyVersion.trim()
+        ? snapshot.scoreMethodologyVersion
+        : "recorded-unversioned",
     score,
     recommendation: recommendation as DealRecommendation,
     riskLevel: riskLevel as DealRiskLevel,
@@ -270,5 +299,8 @@ export function parseFrozenDealScore(snapshotInput: unknown): DealScoreResult | 
       typeof snapshot.explanation === "string" && snapshot.explanation.trim()
         ? snapshot.explanation
         : "This score is preserved from the saved underwriting standard.",
+    ...(breakdown.applicabilityAdjustment != null
+      ? { cashOnCashApplicable: false as const }
+      : {}),
   };
 }

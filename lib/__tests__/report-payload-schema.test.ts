@@ -23,7 +23,7 @@ function payload() {
     methodologyVersion: "1.0",
     property: { address: "1 Test St", type: "multi-family", yearBuilt: 1926, purchasePrice: 265000, template: "Standard" },
     financing: { downPaymentPct: 20, downPayment: 53000, interestRate: 6.875, loanTerm: 30, closingCostsPct: 3, closingCosts: 7950 },
-    expenses: { propertyTaxPct: 1.4, insurancePct: 0.5, maintenancePct: 5, vacancyPct: 6, managementPct: 8, capexPct: 5, hoaMonthly: 0, utilitiesMonthly: 0, rentGrowth: 3, expenseGrowth: 2.5, appreciation: 3.5, sellingCost: 6, taxRate: 24 },
+    expenses: { propertyTaxPct: 1.4, insurancePct: 1.25, insuranceMonthlyBill: 250, maintenancePct: 5, vacancyPct: 6, managementPct: 8, capexPct: 5, hoaMonthly: 0, utilitiesMonthly: 0, rentGrowth: 3, expenseGrowth: 2.5, appreciation: 3.5, sellingCost: 6, taxRate: 24 },
     units: [
       { label: "Unit 1", beds: 2, baths: 1, sqft: 900, rent: 1300, isOwnerOccupied: true },
       { label: "Unit 2", beds: 2, baths: 1, sqft: 880, rent: 1275 },
@@ -78,6 +78,19 @@ describe("reportDataSchema round trip", () => {
     expect(parsed.operatingStatement?.noi).toBe(28517);
     expect(parsed.operatingStatement?.operatingExpenses[0]?.label).toBe("Property tax");
     expect(parsed.operatingStatement?.isCashPurchase).toBe(false);
+  });
+
+  it("PRESERVES zero-cash CoC applicability instead of rendering the numeric sentinel", () => {
+    const base = payload();
+    const zeroCash = {
+      ...base,
+      performance: { ...base.performance, cocApplicable: false },
+    };
+    expect(reportDataSchema.parse(zeroCash).performance.cocApplicable).toBe(false);
+  });
+
+  it("PRESERVES the monthly insurance amount used by the PDF assumptions copy", () => {
+    expect(reportDataSchema.parse(payload()).expenses.insuranceMonthlyBill).toBe(250);
   });
 
   it("still accepts legacy payloads missing every optional block", () => {

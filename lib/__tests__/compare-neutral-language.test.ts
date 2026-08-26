@@ -12,13 +12,13 @@ describe("comparison neutrality guards", () => {
   const metrics = read("../compare-metrics.ts");
 
   it("frames relative metric positions as modeled comparisons, not investment directives", () => {
-    expect(comparison).toContain("Highest metric-lead count");
     expect(comparison).toContain("Relative modeled comparison only");
     expect(comparison).toContain("does not establish safety or make an investment recommendation");
-    expect(comparison).toContain("Highest modeled 10-yr ROI");
-    expect(comparison).toContain("row-leading value in this set");
+    expect(comparison).toContain("Disclosed metric-lead counts");
+    expect(comparison).toContain("Tied values share the highlight");
+    expect(comparison).toContain("no hidden tie-breaker uses Screening Index, ROI, save date, or source order");
 
-    expect(comparison).not.toMatch(/Most metric wins|Relative leader|Metric leader|Strongest DSCR/);
+    expect(comparison).not.toMatch(/Most metric wins|Relative leader|Metric leader|Strongest DSCR|Comparison reference/);
     expect(comparison).not.toContain("{SIGNAL_LABELS[deal.signal]}");
     expect(comparison).not.toContain("getBadgeClasses(deal.signal)");
   });

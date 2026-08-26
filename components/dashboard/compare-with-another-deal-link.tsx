@@ -58,7 +58,7 @@ export function CompareWithAnotherDealLink({ savedDealId }: { savedDealId: strin
       type="button"
       onClick={handleCompare}
       disabled={isPending}
-      className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline disabled:opacity-60"
+      className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-xs font-semibold text-primary hover:bg-primary/5 hover:underline disabled:opacity-60"
     >
       <GitCompare className="size-3.5" />
       Compare with another deal →
