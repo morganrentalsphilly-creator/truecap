@@ -15,10 +15,14 @@ import { calculateAnalysis } from "@/lib/calc-analysis";
 import { releasedInvestmentFormSchema } from "@/lib/underwriting-model-release";
 import { SharedDealShell } from "@/components/investcalc/shared-deal-shell";
 import { getPublicAgentBranding } from "@/lib/agent-share";
-import { verifyShareAttribution, hashShareValues } from "@/lib/share-attribution";
+import {
+  verifyShareAttribution,
+  hashShareValues,
+} from "@/lib/share-attribution";
 import { getPublicDealComps } from "@/lib/public-deal-comps";
 import { canShowSharedProAnalysis } from "@/lib/public-share-access";
 import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
+import { buildPublicShareAnalysisPayload } from "@/lib/public-share-analysis-result";
 
 // Next.js 15+ makes `params` async (Promise). Without awaiting it, accessing
 // .encoded synchronously throws in dev and silently breaks in prod.
@@ -65,14 +69,18 @@ export default async function PublicDealPage({ params }: Props) {
   // newer required field.
   const parsed = releasedInvestmentFormSchema.safeParse(payload.values);
   if (!parsed.success) {
-    return <InvalidLink reason="This shared analysis was saved in an older format we can no longer render." />;
+    return (
+      <InvalidLink reason="This shared analysis was saved in an older format we can no longer render." />
+    );
   }
 
   let result;
   try {
     result = calculateAnalysis(parsed.data);
   } catch {
-    return <InvalidLink reason="We couldn't recompute the analysis from this share link." />;
+    return (
+      <InvalidLink reason="We couldn't recompute the analysis from this share link." />
+    );
   }
 
   // Co-branding (T6): if a Pro owner shared this, surface their brand + a lead
@@ -90,7 +98,9 @@ export default async function PublicDealPage({ params }: Props) {
     valuesHash,
     sig: payload.meta?.sig,
   });
-  const verifiedOwnerId = attributionVerified ? payload.meta?.ownerId : undefined;
+  const verifiedOwnerId = attributionVerified
+    ? payload.meta?.ownerId
+    : undefined;
   const verifiedDealId = attributionVerified ? payload.meta?.dealId : undefined;
 
   const [agent, comps, showProAnalysis] = await Promise.all([
@@ -102,10 +112,9 @@ export default async function PublicDealPage({ params }: Props) {
   return (
     <SharedDealShell
       values={parsed.data}
-      result={result}
+      analysis={buildPublicShareAnalysisPayload(result, showProAnalysis)}
       comps={comps}
       agent={agent}
-      showProAnalysis={showProAnalysis}
       methodologyVersion={TRUECAP_UNDERWRITING_STANDARD_VERSION}
       legacyMethodologyWarning
       leadCapture={
@@ -124,7 +133,7 @@ export default async function PublicDealPage({ params }: Props) {
 
 function InvalidLink({ reason }: { reason?: string }) {
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4 text-center">
+    <main id="main" className="min-h-screen bg-background flex flex-col items-center justify-center px-4 text-center">
       <div className="text-xs uppercase tracking-widest text-muted-foreground font-bold mb-2">
         TrueCap
       </div>
@@ -137,11 +146,11 @@ function InvalidLink({ reason }: { reason?: string }) {
       </p>
       <Link
         href="/"
-        className="mt-6 inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:underline"
+        className="mt-6 inline-flex min-h-11 items-center gap-1.5 rounded-md px-2 text-sm font-bold text-primary hover:underline"
       >
         Go to TrueCap
-        <ArrowUpRight className="w-4 h-4" />
+        <ArrowUpRight aria-hidden="true" className="w-4 h-4" />
       </Link>
-    </div>
+    </main>
   );
 }

@@ -7,7 +7,9 @@
 // v5: debt service stops once the loan amortizes (loan terms < 10 years no
 // longer charge P&I/PMI in post-payoff years), so cached snapshots for
 // short-term loans regenerate.
-export const TEN_YEAR_PROJECTION_SNAPSHOT_VERSION = 5;
+// v6: cancellable PMI is charged only through the month the scheduled balance
+// reaches 80% LTV instead of for the entire calendar year.
+export const TEN_YEAR_PROJECTION_SNAPSHOT_VERSION = 6;
 
 export interface ProjectionYear {
   year: number;
@@ -28,6 +30,9 @@ export interface TenYearProjectionInput {
    *  from the taxable-income line. */
   capexReserveMonthly: number;
   monthlyPayment: number;
+  /** Annual note rate used to amortize the balance month-by-month for exact
+   * PMI cancellation timing. Optional only for legacy cached inputs. */
+  interestRate?: number;
   /** Monthly PMI (0 if none). Folded into the displayed debt service and
    *  dropped once the loan amortizes to 80% LTV. */
   pmiMonthly?: number;
@@ -68,9 +73,16 @@ export function buildTenYearProjection(input: TenYearProjectionInput): Projectio
 
   // PMI is folded into the displayed debt service for the years it applies and
   // drops once scheduled paydown brings the loan to 80% LTV (purchase basis).
-  const pmiAnnual = (input.pmiMonthly ?? 0) * 12;
+  const pmiMonthly = input.pmiMonthly ?? 0;
   const pmiDropBalance = 0.8 * (input.purchasePrice ?? 0);
   let loanBalance = input.loanAmount ?? 0;
+  const hasMonthlyAmortizationRate =
+    typeof input.interestRate === "number" &&
+    Number.isFinite(input.interestRate) &&
+    input.interestRate >= 0;
+  const monthlyInterestRate = hasMonthlyAmortizationRate
+    ? (input.interestRate ?? 0) / 100 / 12
+    : 0;
 
   // The interest schedule runs exactly as long as the loan does, so a year at
   // or past its end is a year after payoff: P&I stops, and mortgage insurance
@@ -89,20 +101,42 @@ export function buildTenYearProjection(input: TenYearProjectionInput): Projectio
     );
     const yearlyInterestForYear = input.yearlyInterestSchedule?.[index];
 
-    // PMI applies while the loan balance at the start of the year is above the
-    // 80% LTV threshold (or always, for FHA MIP that never cancels); then pay
-    // down the balance for next year's check.
+    // Count mortgage insurance at each month's opening balance. This prevents
+    // a balance that reaches 80% LTV in February from being charged through
+    // December. Exact-rate callers follow the amortization schedule; legacy
+    // inputs without a rate spread that year's known principal evenly across
+    // its 12 months instead of falling back to the old all-or-nothing year.
     const loanPaidOff = amortizedScheduleLength > 0 && index >= amortizedScheduleLength;
-    const pmiThisYear =
-      !loanPaidOff &&
-      pmiAnnual > 0 &&
-      (input.pmiNoCancel === true || loanBalance > pmiDropBalance)
-        ? pmiAnnual
-        : 0;
-    const debtServiceAnnual = loanPaidOff ? 0 : principalAndInterestAnnual + pmiThisYear;
-    if (typeof yearlyInterestForYear === "number") {
-      loanBalance = Math.max(0, loanBalance - Math.max(0, principalAndInterestAnnual - yearlyInterestForYear));
+    let pmiMonthsThisYear = 0;
+    if (!loanPaidOff && loanBalance > 0) {
+      const annualPrincipalFromSchedule =
+        typeof yearlyInterestForYear === "number"
+          ? Math.max(0, principalAndInterestAnnual - yearlyInterestForYear)
+          : 0;
+      const legacyPrincipalPerMonth = annualPrincipalFromSchedule / 12;
+
+      for (let month = 0; month < 12 && loanBalance > 0; month += 1) {
+        if (
+          pmiMonthly > 0 &&
+          (input.pmiNoCancel === true || loanBalance > pmiDropBalance)
+        ) {
+          pmiMonthsThisYear += 1;
+        }
+
+        const principalPortion = hasMonthlyAmortizationRate
+          ? Math.min(
+              Math.max(
+                input.monthlyPayment - loanBalance * monthlyInterestRate,
+                0,
+              ),
+              loanBalance,
+            )
+          : Math.min(legacyPrincipalPerMonth, loanBalance);
+        loanBalance = Math.max(0, loanBalance - principalPortion);
+      }
     }
+    const pmiThisYear = pmiMonthly * pmiMonthsThisYear;
+    const debtServiceAnnual = loanPaidOff ? 0 : principalAndInterestAnnual + pmiThisYear;
 
     const netCashFlowAnnual = rentalIncomeAnnual - operatingExpensesAnnual - debtServiceAnnual;
     // Signed tax EFFECT for the year — not a one-way "savings". Deductions
@@ -148,6 +182,7 @@ export function buildTenYearProjectionInputHash(input: TenYearProjectionInput): 
     // produce a new hash — omitting it served stale cached tax lines.
     capexReserveMonthly: input.capexReserveMonthly,
     monthlyPayment: input.monthlyPayment,
+    interestRate: input.interestRate ?? null,
     pmiMonthly: input.pmiMonthly ?? 0,
     pmiNoCancel: input.pmiNoCancel === true,
     loanAmount: input.loanAmount ?? 0,

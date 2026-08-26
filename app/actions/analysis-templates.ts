@@ -829,7 +829,7 @@ export async function applyTemplateToDealAction(
 
   const { data: dealRow, error: dealErr } = await supabase
     .from("saved_analyses")
-    .select("form_snapshot")
+    .select("form_snapshot, underwriting_revision")
     .eq("id", dealId)
     .eq("user_id", user.id)
     .is("deleted_at", null)
@@ -871,7 +871,11 @@ export async function applyTemplateToDealAction(
     templateId,
   };
 
-  const result = await saveDealAction(merged, dealId);
+  const result = await saveDealAction(merged, dealId, undefined, {
+    expectedUnderwritingRevision: (
+      dealRow as { underwriting_revision?: unknown }
+    ).underwriting_revision,
+  });
   if (!result.ok) {
     return {
       ok: false,

@@ -13,7 +13,6 @@
 import Link from "next/link";
 import { ArrowUpRight, Lock } from "lucide-react";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
-import type { AnalysisResult } from "@/lib/calc-analysis";
 import type { PublicAgentBranding } from "@/lib/agent-share";
 import type { ReportComps } from "@/lib/report-comps";
 import { ReadOnlyAnalysisView } from "@/components/investcalc/read-only-analysis-view";
@@ -22,6 +21,7 @@ import { LeadCaptureForm } from "@/components/investcalc/lead-capture-form";
 import type { MaoTarget } from "@/lib/max-allowable-offer";
 import type { OfferCeilingAccessPayload } from "@/lib/offer-ceiling-access-contract";
 import type { OfferCeilingTargetSource } from "@/lib/offer-ceiling-contract";
+import type { PublicShareAnalysisPayload } from "@/lib/public-share-analysis-result";
 
 export type SharedDealLeadCapture = {
   ownerId: string;
@@ -32,10 +32,9 @@ export type SharedDealLeadCapture = {
 
 export function SharedDealShell({
   values,
-  result,
+  analysis,
   comps,
   agent,
-  showProAnalysis,
   maoTarget,
   maoTargetSource,
   offerCeilingAccess,
@@ -47,11 +46,10 @@ export function SharedDealShell({
   priceEstimated = false,
 }: {
   values: InvestmentFormValues;
-  result: AnalysisResult;
+  /** Entitlement-redacted before crossing into the public client renderer. */
+  analysis: PublicShareAnalysisPayload;
   comps: ReportComps | null;
   agent: PublicAgentBranding | null;
-  /** Pro analysis follows the verified creator's current paid entitlement. */
-  showProAnalysis: boolean;
   /** Exact acquisition criteria captured with an opaque share, when present. */
   maoTarget?: MaoTarget;
   /** Frozen provenance for the captured acquisition criteria. */
@@ -69,6 +67,8 @@ export function SharedDealShell({
   /** The shared price was an automated estimate — never headline it "Asking". */
   priceEstimated?: boolean;
 }) {
+  const tenYearProjectionVersion =
+    analysis.access === "pro" ? analysis.result.tenYearProjectionVersion : undefined;
   return (
     <div className="min-h-screen bg-background">
       <TrackSharedDealView hasAddress={addressIncluded} />
@@ -80,7 +80,11 @@ export function SharedDealShell({
         >
           {agent.logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={agent.logoUrl} alt="" className="h-5 w-auto rounded-sm bg-white/90 p-0.5" />
+            <img
+              src={agent.logoUrl}
+              alt=""
+              className="h-5 w-auto rounded-sm bg-white/90 p-0.5"
+            />
           ) : null}
           <span>Shared by {agent.displayName}</span>
         </div>
@@ -101,12 +105,17 @@ export function SharedDealShell({
       {/* pb-28/sm:pb-16 reserves clearance so the footer's last row scrolls
           clear of the fixed cookie-consent banner (z-50, bottom-0) that overlays
           shares for a first-visit, pre-consent viewer. */}
-      <main id="main" className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-28 sm:pb-16">
+      <main
+        id="main"
+        className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-28 sm:pb-16"
+      >
         <header className="mb-6 sm:mb-8">
           <div className="text-xs uppercase tracking-widest text-muted-foreground font-bold mb-1">
             Shared analysis
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground">{values.address}</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground">
+            {values.address}
+          </h1>
           {values.purchasePrice && (
             <p className="text-sm text-muted-foreground mt-1">
               Purchase price ${values.purchasePrice.toLocaleString("en-US")}
@@ -114,22 +123,28 @@ export function SharedDealShell({
             </p>
           )}
           <p className="mt-2 text-xs text-muted-foreground">
-            TrueCap Underwriting Standard v{methodologyVersion ?? result.methodologyVersion}
+            TrueCap Underwriting Standard v
+            {methodologyVersion ?? analysis.result.methodologyVersion}
+            {analysis.access === "pro"
+              ? ` · 10-year projection ${tenYearProjectionVersion ? `method v${tenYearProjectionVersion}` : "method recorded-unversioned"}`
+              : ""}
           </p>
           {legacyMethodologyWarning ? (
-            <p role="status" className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs leading-relaxed text-foreground">
-              Legacy input-only share: this link predates recorded result snapshots. It has
-              been recalculated with the labeled current standard and should be refreshed
-              before it is used for a decision.
+            <p
+              role="status"
+              className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs leading-relaxed text-foreground"
+            >
+              Legacy input-only share: this link predates recorded result
+              snapshots. It has been recalculated with the labeled current
+              standard and should be refreshed before it is used for a decision.
             </p>
           ) : null}
         </header>
 
         <ReadOnlyAnalysisView
           values={values}
-          result={result}
+          analysis={analysis}
           comps={comps}
-          showProAnalysis={showProAnalysis}
           maoTarget={maoTarget}
           maoTargetSource={maoTargetSource}
           offerCeilingAccess={offerCeilingAccess}
@@ -155,13 +170,14 @@ export function SharedDealShell({
               <Lock className="w-5 h-5 text-primary mt-0.5 shrink-0" />
               <div className="min-w-0 flex-1">
                 <div className="font-bold text-foreground">
-                  See 10-year projections, illustrative tax impact, modeled exit comparisons, and the secondary Screening Index
+                  See 10-year projections, illustrative tax impact, modeled exit
+                  comparisons, and the secondary Screening Index
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
                   The full analysis with multi-year cash flow projections,
                   illustrative depreciation tax modeling, and exit-year
-                  comparison is free to start. Run this property in your own account — your edits stay
-                  private.
+                  comparison is free to start. Run this property in your own
+                  account — your edits stay private.
                 </p>
                 <Link
                   href="/"
@@ -185,7 +201,10 @@ export function SharedDealShell({
           </p>
           <p className="mt-3">
             Built with{" "}
-            <Link href="/" className="font-bold text-foreground hover:underline">
+            <Link
+              href="/"
+              className="font-bold text-foreground hover:underline"
+            >
               TrueCap
             </Link>{" "}
             — transparent, editable rental analysis, free to start.

@@ -21,7 +21,7 @@ export function TenYearProjectionSummaryCards({
           value: formatCurrency(finalYear?.cumulativeCashFlowAnnual ?? 0),
           tone: (finalYear?.cumulativeCashFlowAnnual ?? 0) >= 0 ? "positive" : "negative",
           labelTooltip:
-            "Operating cash flow summed across the 10-year hold, before tax. The after-tax total is higher once the depreciation + mortgage-interest shield is applied - compare the after-tax card.",
+            "Operating cash flow summed across the 10-year hold, before tax. The illustrative after-tax total may be higher or lower depending on modeled taxable rental income and deductions.",
         },
         {
           label: "Best Annual After-Tax CF",
@@ -33,7 +33,7 @@ export function TenYearProjectionSummaryCards({
           value: formatCurrency(totalAfterTax),
           tone: totalAfterTax >= 0 ? "positive" : "negative",
           labelTooltip:
-            "Pre-tax cumulative cash flow plus the estimated depreciation + interest tax shield over the 10-year hold. The gap between this and the pre-tax card is your tax benefit.",
+            "Pre-tax cumulative cash flow plus the signed illustrative tax effect over the 10-year hold. A positive gap is a modeled benefit; a negative gap is a modeled liability. Actual treatment and loss usability vary.",
         },
       ]}
     />

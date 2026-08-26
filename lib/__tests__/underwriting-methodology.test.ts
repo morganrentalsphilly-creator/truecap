@@ -5,7 +5,9 @@ import type { InvestmentFormValues } from "../investcalc-schema";
 import {
   TRUECAP_UNDERWRITING_STANDARD_VERSION,
   UNDERWRITING_FORMULAS,
+  UNDERWRITING_STANDARD_RELEASE_NOTES,
 } from "../underwriting-methodology";
+import { TEN_YEAR_PROJECTION_SNAPSHOT_VERSION } from "../ten-year-projections";
 
 function deal(overrides: Partial<InvestmentFormValues> = {}): InvestmentFormValues {
   return {
@@ -43,11 +45,29 @@ function deal(overrides: Partial<InvestmentFormValues> = {}): InvestmentFormValu
   } as InvestmentFormValues;
 }
 
-describe("TrueCap Underwriting Standard 1.0", () => {
+describe("TrueCap Underwriting Standard 1.1", () => {
   it("stamps every result with the methodology version", () => {
     expect(calculateAnalysis(deal()).methodologyVersion).toBe(
       TRUECAP_UNDERWRITING_STANDARD_VERSION
     );
+  });
+
+  it("publishes the independently versioned PMI projection correction", () => {
+    expect(TEN_YEAR_PROJECTION_SNAPSHOT_VERSION).toBe(6);
+    expect(
+      UNDERWRITING_STANDARD_RELEASE_NOTES.find(
+        (release) => release.revision === "projection-v6-2026-08-25"
+      )?.summary
+    ).toContain("exact scheduled month");
+  });
+
+  it("publishes the independently versioned analysis-date score correction", () => {
+    expect(
+      UNDERWRITING_STANDARD_RELEASE_NOTES.find(
+        (release) =>
+          release.revision === "screening-index-v1.2-analysis-date-2026-08-25"
+      )?.summary
+    ).toContain("Identical serialized inputs no longer change score");
   });
 
   it("publishes the complete canonical formula and limitation registry", () => {
@@ -127,7 +147,9 @@ describe("TrueCap Underwriting Standard 1.0", () => {
   });
 
   it("keeps PMI out of lender-style DSCR while including it in cash flow", () => {
-    const withPmi = calculateAnalysis(deal({ downPaymentPct: 5 }));
+    const withPmi = calculateAnalysis(
+      deal({ downPaymentPct: 5, pmiAnnualRatePct: 0.8 })
+    );
     const withoutPmi = calculateAnalysis(
       deal({ downPaymentPct: 5, pmiAnnualRatePct: 0 })
     );

@@ -13,6 +13,7 @@ import { resolveOwnedEquityBasis } from "@/lib/owned-equity-series";
 import { computeOwnedEquity, monthsOwnedBetween } from "@/lib/owned-equity";
 import { EMPTY_BUY_BOX, type NamedBuyBox } from "@/lib/buy-box";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
+import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
 
 /** Same canonical single-family fixture as calc-analysis.test.ts. */
 function baseDeal(overrides: Partial<InvestmentFormValues> = {}): InvestmentFormValues {
@@ -121,7 +122,7 @@ describe("buildWeeklySummary — active pipeline", () => {
       Math.round(fresh!.netCashFlowMonthly * 2)
     );
     expect(payload!.methodologyNotes).toContain(
-      "Legacy analysis · recomputed with current v1.0."
+      `Legacy analysis · recomputed with current v${TRUECAP_UNDERWRITING_STANDARD_VERSION}.`
     );
   });
 

@@ -34,6 +34,7 @@ export function StrategyLensOutcomeCard({
   const outcome = buildStrategyLensOutcome(strategy, {
     netCashFlow: result.netCashFlow,
     cocReturn: result.cocReturn,
+    cashOnCashApplicable: result.totalCashRequired > 0,
     dscr: result.dscr,
     capRate: result.capRate,
     afterTaxCF: result.afterTaxCF,

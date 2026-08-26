@@ -21,10 +21,12 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { VERDICT_DISPLAY } from "@/lib/verdict-display";
 import {
+  TRUECAP_DEAL_SCORE_METHODOLOGY_VERSION,
   TRUECAP_UNDERWRITING_STANDARD_NAME,
   TRUECAP_UNDERWRITING_STANDARD_VERSION,
   UNDERWRITING_STANDARD_RELEASE_NOTES,
 } from "@/lib/underwriting-methodology";
+import { TEN_YEAR_PROJECTION_SNAPSHOT_VERSION } from "@/lib/ten-year-projections";
 
 export const metadata: Metadata = {
   title: "Methodology",
@@ -64,7 +66,7 @@ export default function MethodologyPage() {
       "How TrueCap computes cap rate, cash-on-cash, DSCR, the target-dependent Offer Ceiling, Screening Index, projections, illustrative tax impact, and modeled exit scenarios.",
     url: `${siteUrl}/methodology`,
     datePublished: "2026-05-24",
-    dateModified: "2026-08-15",
+    dateModified: "2026-08-25",
     author: { "@type": "Organization", name: "TrueCap", url: siteUrl },
     publisher: { "@id": `${siteUrl}/#organization` },
     inLanguage: "en-US",
@@ -151,7 +153,7 @@ export default function MethodologyPage() {
             income. The CapEx reserve is shown below NOI.
           </p>
           <p>
-            <strong>Other income:</strong> Standard v1.0 does not have a
+            <strong>Other income:</strong> Standard v1.1 does not have a
             separate laundry, parking, pet, or utility-income line. Do not
             bury those amounts inside rent without documenting the choice in
             your own records.
@@ -207,6 +209,13 @@ export default function MethodologyPage() {
 
           <h2 className="text-2xl sm:text-3xl">Decision thresholds and Offer Ceiling</h2>
           <h3>Screening Index (Balanced)</h3>
+          <p>
+            Current Screening Index method: v{TRUECAP_DEAL_SCORE_METHODOLOGY_VERSION}.
+            This secondary score is versioned independently from the
+            TrueCap Underwriting Standard v{TRUECAP_UNDERWRITING_STANDARD_VERSION}
+            financial formulas; changing the score method does not change the
+            cash-flow result.
+          </p>
           <div className="not-prose bg-card border border-border rounded-xl p-4 sm:p-5 my-3 text-center font-mono text-xs sm:text-sm">
             Score = round(clamp(component points + risk penalty, 0, 100))
           </div>
@@ -218,7 +227,12 @@ export default function MethodologyPage() {
             cash-flow component with a 0/25/30-point house-hack scale, so their
             component sum can exceed 100 before the final clamp. A risk modifier
             for vacancy, negative cash flow, property age, reserve assumptions,
-            and property-tax burden can subtract at most 30 points. The result is
+            and property-tax burden can subtract at most 30 points. If Year Built
+            is missing, a conservative age-uncertainty modifier applies instead
+            of treating the property as new construction. If modeled initial cash
+            is zero, cash-on-cash is not applicable and its stored compatibility
+            sentinel is not scored. The remaining applicable components are
+            renormalized to the 100-point scale. The result is
             rounded to a whole number and clamped from 0 to 100.
           </p>
           <p>
@@ -246,11 +260,10 @@ export default function MethodologyPage() {
             decision, evidence-readiness measure, Buy Box result, or investment advice.
           </p>
           <p>
-            The saved Screening Index and financial outputs share the same top-level
-            Underwriting Standard version. A future-version saved decision is
-            displayed from its frozen result snapshot until the owner
-            explicitly re-underwrites it; legacy unversioned rows retain the
-            labeled current-engine compatibility behavior.
+            Saved financial outputs retain their top-level Underwriting Standard
+            version, while new saved results also record the Screening Index
+            method version. Historical scores without that submodel field remain
+            frozen and are labeled as recorded rather than silently recalculated.
           </p>
 
           <p>
@@ -345,6 +358,7 @@ export default function MethodologyPage() {
             <li><strong>Rent growth:</strong> 2.5% annual planning assumption, not a forecast</li>
             <li><strong>Expense growth:</strong> 2.5% annual planning assumption, editable independently</li>
             <li><strong>Mortgage:</strong> fully amortized — principal and interest portions recomputed each year</li>
+            <li><strong>PMI / MIP:</strong> method v{TEN_YEAR_PROJECTION_SNAPSHOT_VERSION} checks the scheduled opening balance monthly; cancellable coverage stops at the modeled 80% LTV threshold, while loan-life coverage continues through payoff</li>
             <li><strong>Appreciation:</strong> 3% annual scenario assumption, not an appraisal or forecast</li>
           </ul>
           <p>
@@ -401,7 +415,7 @@ export default function MethodologyPage() {
           <h2 id="version-history" className="scroll-mt-24 text-2xl sm:text-3xl">Methodology version history</h2>
           <ul>
             {UNDERWRITING_STANDARD_RELEASE_NOTES.map((release) => (
-              <li key={release.version}>
+              <li key={release.revision}>
                 <strong>v{release.version} · {release.effectiveDate}:</strong>{" "}
                 {release.summary}
               </li>
@@ -509,7 +523,7 @@ export default function MethodologyPage() {
         </article>
 
         <footer className="mt-12 pt-8 border-t border-border text-sm text-muted-foreground leading-relaxed">
-          Last updated: August 15, 2026. We update this page whenever the
+          Last updated: August 25, 2026. We update this page whenever the
           methodology materially changes.
         </footer>
       </main>

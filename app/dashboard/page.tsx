@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import * as Sentry from "@sentry/nextjs";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { DashboardHome, type DashboardHomeData } from "@/components/dashboard/DashboardHome";
 import { DealLeadsCard } from "@/components/dashboard/DealLeadsCard";
+import { RetryRouteButton } from "@/components/dashboard/retry-route-button";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -20,6 +20,7 @@ import {
 } from "@/lib/entitlements";
 import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { buildDashboardDeal, type SavedAnalysisDashboardRow } from "@/lib/dashboard-deal-mapping";
+import { applicableCashOnCashValue } from "@/lib/cash-on-cash-applicability";
 import {
   recomputeSavedDealVerdict,
   toRecomputedSavedAnalysisSnapshot,
@@ -178,7 +179,10 @@ function buildDashboardData(
           // risk-adjusted return axis divided a stale numerator by a fresh
           // DSCR. Recompute it from the fresh monthly (mirrors Compare).
           annualCashFlow: fresh.netCashFlowMonthly * 12,
-          cocReturnPct: fresh.cocReturnPct,
+          cocReturnPct: applicableCashOnCashValue(
+            fresh.cocReturnPct,
+            fresh.cashToClose
+          ),
           capRatePct: fresh.capRatePct,
           // DSCR + cash-to-close were left on the stale snapshot while every
           // neighbour recomputed fresh, so /dashboard disagreed with the My
@@ -496,13 +500,7 @@ export default async function DashboardPage() {
             <p className="mt-2 text-sm text-muted-foreground">
               Something went wrong loading your deals. This is usually temporary.
             </p>
-            <Link
-              href="/dashboard"
-              prefetch={false}
-              className="mt-4 inline-flex items-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
-            >
-              Reload dashboard
-            </Link>
+            <RetryRouteButton className="mt-4" />
           </div>
         </main>
       </div>
@@ -516,6 +514,7 @@ export default async function DashboardPage() {
     isPremium,
     navAccess.dashboard
   );
+  dashboardData.portfolioAggregateStatus = aggregateResult.error ? "unavailable" : "ready";
   // Offer Ceiling per deal — the number the product is sold on, absent from this
   // screen until now. Recomputed from form_snapshot via the same
   // computeDealOfferLine path My Deals uses (no new math, no new query).

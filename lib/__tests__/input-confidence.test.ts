@@ -6,6 +6,7 @@ import {
   inputVerificationFingerprint,
   INPUT_CONFIDENCE_FIELD_KEYS,
   INPUT_CONFIDENCE_METHOD_VERSION,
+  LEGACY_INPUT_CONFIDENCE_METHOD_VERSIONS,
   mergeInputConfidenceSourceContext,
   normalizeInputVerificationEvidence,
   restoreInputConfidenceSourceContext,
@@ -17,6 +18,7 @@ function values(overrides: Partial<InvestmentFormValues> = {}): InvestmentFormVa
     propertyType: "single-family",
     address: "123 Test St, Philadelphia, PA 19103, USA",
     purchasePrice: 300_000,
+    yearBuilt: 1990,
     monthlyRent: 2_700,
     units: [],
     downPaymentPct: 20,
@@ -42,7 +44,7 @@ function byKey(
   return result.fields.find((item) => item.key === key)!;
 }
 
-describe("Input Confidence v1.0", () => {
+describe("Input Confidence v1.1", () => {
   it("is a separate versioned readiness score, not a probability", () => {
     const result = buildInputConfidence({
       values: values(),
@@ -50,6 +52,7 @@ describe("Input Confidence v1.0", () => {
     });
 
     expect(result.methodVersion).toBe(INPUT_CONFIDENCE_METHOD_VERSION);
+    expect(result.methodVersion).toBe("1.1");
     expect(result.scoreMeaning).toBe("weighted-input-readiness-not-probability");
     expect(result.computedAt).toBe("2026-08-15T12:00:00.000Z");
     expect(result.score).toBeGreaterThanOrEqual(0);
@@ -74,7 +77,9 @@ describe("Input Confidence v1.0", () => {
     expect(byKey(result, "rent").sourceClass).toBe("market-benchmark");
     expect(byKey(result, "rent").sourceLabel).toContain("HUD Rent Benchmark");
     expect(byKey(result, "interestRate").sourceClass).toBe("market-benchmark");
-    expect(byKey(result, "interestRate").sourceLabel).toBe("Market Rate Benchmark");
+    expect(byKey(result, "interestRate").sourceLabel).toBe("TrueCap estimated market rate");
+    expect(byKey(result, "interestRate").reason).toContain("as of 2026-08-13");
+    expect(byKey(result, "interestRate").reason).toContain("methodology");
     expect(byKey(result, "propertyTax").sourceClass).toBe("market-benchmark");
     expect(result.stage).not.toBe("offer-ready");
   });
@@ -104,6 +109,22 @@ describe("Input Confidence v1.0", () => {
 
     expect(byKey(result, "propertyTax").sourceClass).toBe("property-specific");
     expect(byKey(result, "propertyTax").verifyAction).toContain("parcel tax bill");
+  });
+
+  it("marks an omitted Year Built as missing and discloses its score effect", () => {
+    const missing = buildInputConfidence({ values: values({ yearBuilt: undefined }) });
+    const provided = buildInputConfidence({ values: values({ yearBuilt: 1942 }) });
+
+    expect(byKey(missing, "yearBuilt")).toMatchObject({
+      sourceClass: "missing",
+      sourceLabel: "Not provided",
+      earnedPoints: 0,
+    });
+    expect(byKey(missing, "yearBuilt").reason).toContain(
+      "conservative Screening Index uncertainty modifier"
+    );
+    expect(byKey(provided, "yearBuilt").sourceClass).toBe("property-specific");
+    expect(missing.score).toBeLessThan(provided.score);
   });
 
   it("excludes mortgage rate from the denominator for a cash purchase", () => {
@@ -367,6 +388,15 @@ describe("Input Confidence v1.0", () => {
   });
 
   it("fails closed for legacy or malformed persisted source context", () => {
+    const current = buildInputConfidence({ values: values() }).sourceContext;
+    const legacy = { ...current, methodVersion: "1.0" };
+
+    expect(LEGACY_INPUT_CONFIDENCE_METHOD_VERSIONS).toContain("1.0");
+    expect(legacy.methodVersion).not.toBe(INPUT_CONFIDENCE_METHOD_VERSION);
+    expect(restoreInputConfidenceSourceContext(legacy, values())).toEqual({
+      provenance: {},
+      touchedInputFields: [],
+    });
     expect(
       restoreInputConfidenceSourceContext(
         { methodVersion: "future", provenance: { monthlyRent: { source: "hud-fmr" } } },

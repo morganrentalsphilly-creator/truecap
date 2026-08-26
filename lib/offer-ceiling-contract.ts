@@ -44,9 +44,13 @@ export type OfferCeilingRange = {
 };
 
 export type OfferCeilingRangePreview = {
-  lower: number;
+  /** Null means the downside scenario cannot meet the selected targets anywhere
+   * inside the supported purchase-price domain. Never replace it with $0. */
+  lower: number | null;
   upper: number;
   increment: 25_000;
+  downsideFeasible: boolean;
+  upsideFeasible: boolean;
 };
 
 export type OfferCeilingPresentation = {

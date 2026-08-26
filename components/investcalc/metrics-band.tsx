@@ -31,7 +31,8 @@ import { APPRECIATION_PLAY_MIN_ANNUAL_RETURN_PCT } from "@/lib/deal-score";
  *
  * Phase 2: market-aware benchmarks via lib/market-benchmarks. When
  * the address parses to a known metro or state, we surface the
- * local median - "Above the 7.5% Philadelphia median" - which is
+ * local planning estimate, with its period/methodology caveat, rather than
+ * presenting a hand-curated reference as an observed market median.
  * strictly more useful than a national band because a 7% cap rate
  * is excellent in California (4-5% typical) and mediocre in
  * Detroit (9-10% typical).
@@ -44,11 +45,11 @@ function capRateBenchmarkLabel(capRatePct: number, address?: string | null): str
   if (benchmark && benchmark.scope !== "national") {
     return formatCapRateBenchmarkSubline(capRatePct, benchmark);
   }
-  // Factual national reference bands. They add context without assigning an
-  // investment-quality or suitability label.
-  if (capRatePct > 8) return "Above the 8% reference (U.S.)";
-  if (capRatePct > 5) return "Between 5% and 8% (U.S.)";
-  return "Below the 5% reference (U.S.)";
+  // These are TrueCap planning estimates, not an observed single-source index.
+  const caveat = "TrueCap estimate · 2025 reference; see methodology";
+  if (capRatePct > 8) return `Above 8% (U.S.) · ${caveat}`;
+  if (capRatePct > 5) return `Between 5% and 8% (U.S.) · ${caveat}`;
+  return `Below 5% (U.S.) · ${caveat}`;
 }
 
 /**
@@ -89,18 +90,16 @@ function cashFlowBenchmarkLabel(monthlyCashFlow: number): string {
 
 /**
  * Sub-label for the Monthly Cash Flow card. When year-1 cash flow is
- * negative but the depreciation + interest shield flips it positive
- * after-tax, lead with the after-tax figure right on the card - the big
- * red pre-tax number alone misreads as "this deal loses money" when, for
- * a tax-paying owner, it doesn't. Otherwise fall back to the plain
- * benchmark band.
+ * negative but the simplified tax model flips the illustrative estimate
+ * positive, show that estimate without implying the operating loss disappears
+ * or that the taxpayer can currently use every modeled deduction.
  *
  * Exported: the answer hero card reuses this exact label as the
  * benchmark sublabel under the Screening Index, so the two can never disagree.
  */
 export function cashFlowSubLabel(r: AnalysisResult): string {
   if (r.netCashFlow < 0 && r.afterTaxCF >= 0) {
-    return `≈ +$${Math.round(r.afterTaxCF).toLocaleString()}/mo after tax`;
+    return `Illustrative after-tax estimate: +$${Math.round(r.afterTaxCF).toLocaleString()}/mo; usability varies`;
   }
   return cashFlowBenchmarkLabel(r.netCashFlow);
 }
@@ -271,12 +270,24 @@ export function buildMetricTiles({
         key="coc"
         label={sourcedLabel("CoC Return", "scenario")}
         glossaryTerm="coc"
-        value={displayResult ? `${displayResult.cocReturn >= 0 ? "+" : ""}${displayResult.cocReturn.toFixed(1)}%` : "—"}
-        sub={displayResult ? cocBenchmarkLabel(displayResult.cocReturn) : undefined}
+        value={
+          displayResult
+            ? displayResult.totalCashRequired > 0
+              ? `${displayResult.cocReturn >= 0 ? "+" : ""}${displayResult.cocReturn.toFixed(1)}%`
+              : "N/A"
+            : "—"
+        }
+        sub={
+          displayResult
+            ? displayResult.totalCashRequired > 0
+              ? cocBenchmarkLabel(displayResult.cocReturn)
+              : "No modeled cash invested"
+            : undefined
+        }
         // Threshold-driven: green only above the shared 5% reference. A bare
         // non-negative return stays neutral.
         color={
-          displayResult
+          displayResult && displayResult.totalCashRequired > 0
             ? displayResult.cocReturn > 5
               ? "text-[var(--metric-positive)]"
               : displayResult.cocReturn >= 0
@@ -408,13 +419,21 @@ export function buildMetricTiles({
     taxSavings: (
       <MetricCard
         key="taxSavings"
-        label={sourcedLabel("Tax Savings", "base")}
+        label={sourcedLabel("Illustrative Tax Effect", "base")}
         glossaryTerm="taxSavings"
         // Signed net tax effect since the after-tax formula fix — a positive
         // operating result can still owe tax, so the sign must survive fmt()'s Math.abs and
         // the color can't claim "primary-good" for a negative.
         value={result ? `${result.taxSavingsMonthly < 0 ? "-" : ""}${fmt(result.taxSavingsMonthly)}` : "—"}
-        sub="/mo"
+        sub={
+          result
+            ? result.taxSavingsMonthly > 0
+              ? "/mo estimated benefit"
+              : result.taxSavingsMonthly < 0
+                ? "/mo estimated liability"
+                : "/mo no modeled effect"
+            : undefined
+        }
         // Was an unconditional brand tint — $0 of tax impact rendered as a
         // highlighted "good" value. Neutral unless genuinely negative.
         color={result && result.taxSavingsMonthly < 0 ? "text-[var(--metric-negative)]" : undefined}

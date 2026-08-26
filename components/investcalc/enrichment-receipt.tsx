@@ -50,6 +50,13 @@ type Props = {
 
 const fmtPct = (n: number) => String(Number(n.toFixed(2)));
 
+export function enrichmentRentSourceLabel(source: string): string {
+  if (source === "rentcast-estimate") return "RentCast estimate";
+  if (source === "hud-safmr") return "HUD SAFMR";
+  if (source === "hud-fmr") return "HUD FMR";
+  return "market estimate";
+}
+
 /** "a", "a and b", "a, b and c" */
 function joinNatural(parts: string[]): string {
   if (parts.length <= 1) return parts[0] ?? "";
@@ -78,7 +85,9 @@ export function EnrichmentReceipt({
     parts.push(`taxes (${fmtPct(capture.propertyTaxPct.value)}%${detail})`);
   }
   if (capture.monthlyRent) {
-    parts.push(`rent (~$${Math.round(capture.monthlyRent.value).toLocaleString("en-US")}/mo HUD)`);
+    parts.push(
+      `rent (~$${Math.round(capture.monthlyRent.value).toLocaleString("en-US")}/mo ${enrichmentRentSourceLabel(capture.monthlyRent.source)})`
+    );
   }
 
   // Strategy mode: the template chip is dropped from the strip and the

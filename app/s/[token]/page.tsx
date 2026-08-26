@@ -44,6 +44,7 @@ import {
 import { resolveSavedAnalysisResult } from "@/lib/saved-analysis-methodology";
 import type { OfferCeilingAccessPayload } from "@/lib/offer-ceiling-access-contract";
 import { readRecordedOfferCeiling } from "@/lib/recorded-offer-ceiling";
+import { buildPublicShareAnalysisPayload } from "@/lib/public-share-analysis-result";
 
 type Props = { params: Promise<{ token: string }> };
 
@@ -89,7 +90,9 @@ export default async function OpaqueSharePage({ params }: Props) {
   const resolved = await resolvePublicShare(token);
   if (!resolved) notFound();
 
-  const parsed = releasedInvestmentFormSchema.safeParse(resolved.snapshot.values);
+  const parsed = releasedInvestmentFormSchema.safeParse(
+    resolved.snapshot.values,
+  );
   if (!parsed.success) notFound();
 
   let currentResult;
@@ -99,7 +102,7 @@ export default async function OpaqueSharePage({ params }: Props) {
     notFound();
   }
   const currentScore = computeDealScore(
-    buildDealScoreInputFromAnalysis(parsed.data, currentResult)
+    buildDealScoreInputFromAnalysis(parsed.data, currentResult),
   );
   const recordedResolution = resolved.snapshot.resultSnapshot
     ? resolveSavedAnalysisResult({
@@ -119,19 +122,28 @@ export default async function OpaqueSharePage({ params }: Props) {
     resolved.legacyInputOnly &&
     (!resolved.methodologyVersion ||
       resolved.methodologyVersion === TRUECAP_UNDERWRITING_STANDARD_VERSION);
-  const result = recordedResolution?.result ??
+  const result =
+    recordedResolution?.result ??
     (canRecomputeInputOnlyShare ? currentResult : null);
   if (!result) {
     return (
-      <main id="main" className="mx-auto flex min-h-screen max-w-xl items-center px-5 py-16">
+      <main
+        id="main"
+        className="mx-auto flex min-h-screen max-w-xl items-center px-5 py-16"
+      >
         <section className="w-full rounded-2xl border border-border bg-card p-6 shadow-sm">
-          <h1 className="text-2xl font-extrabold text-foreground">This analysis is preserved</h1>
+          <h1 className="text-2xl font-extrabold text-foreground">
+            This analysis is preserved
+          </h1>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-            Its recorded TrueCap result is not complete enough for this viewer. It has not been
-            silently recalculated. Ask the owner to create a refreshed share from a new
-            re-underwritten scenario.
+            Its recorded TrueCap result is not complete enough for this viewer.
+            It has not been silently recalculated. Ask the owner to create a
+            refreshed share from a new re-underwritten scenario.
           </p>
-          <Link href="/" className="mt-4 inline-flex min-h-11 items-center font-bold text-primary hover:underline">
+          <Link
+            href="/"
+            className="mt-4 inline-flex min-h-11 items-center font-bold text-primary hover:underline"
+          >
             Open TrueCap
           </Link>
         </section>
@@ -160,21 +172,23 @@ export default async function OpaqueSharePage({ params }: Props) {
   // otherwise the digest plus the remaining inputs becomes an offline address
   // oracle for anyone testing candidate listings.
   const valuesHash = hashShareValues(displayValues);
-  const sig = ownerId ? signShareAttribution({ ownerId, dealId, valuesHash }) : null;
+  const sig = ownerId
+    ? signShareAttribution({ ownerId, dealId, valuesHash })
+    : null;
   const displayMaoTargetSource: OfferCeilingTargetSource =
     resolved.snapshot.maoTargetSource ?? "selected-targets";
   const displayMaoTarget =
     resolved.snapshot.maoTarget &&
     isAdoptedOfferCeilingTargetSource(displayMaoTargetSource)
-    ? normalizeMaoTargetForFinancing(resolved.snapshot.maoTarget, {
-        isCashPurchase: result.monthlyPayment <= 0,
-      }) ?? undefined
-    : undefined;
+      ? (normalizeMaoTargetForFinancing(resolved.snapshot.maoTarget, {
+          isCashPurchase: result.monthlyPayment <= 0,
+        }) ?? undefined)
+      : undefined;
   let offerCeilingAccess: OfferCeilingAccessPayload | null = null;
   if (displayMaoTarget) {
     const hasRecordedSolve = Object.prototype.hasOwnProperty.call(
       resolved.snapshot,
-      "offerCeilingExact"
+      "offerCeilingExact",
     );
     const recordedCeiling = hasRecordedSolve
       ? readRecordedOfferCeiling({
@@ -200,17 +214,18 @@ export default async function OpaqueSharePage({ params }: Props) {
   return (
     <SharedDealShell
       values={displayValues}
-      result={result}
+      analysis={buildPublicShareAnalysisPayload(result, showProAnalysis)}
       comps={addressVisible ? comps : null}
       agent={agent}
-      showProAnalysis={showProAnalysis}
       maoTarget={displayMaoTarget}
-      maoTargetSource={
-        displayMaoTarget ? displayMaoTargetSource : undefined
-      }
+      maoTargetSource={displayMaoTarget ? displayMaoTargetSource : undefined}
       offerCeilingAccess={offerCeilingAccess}
-      methodologyVersion={resolved.methodologyVersion ?? TRUECAP_UNDERWRITING_STANDARD_VERSION}
-      legacyMethodologyWarning={resolved.legacyUnpinned || resolved.legacyInputOnly}
+      methodologyVersion={
+        resolved.methodologyVersion ?? TRUECAP_UNDERWRITING_STANDARD_VERSION
+      }
+      legacyMethodologyWarning={
+        resolved.legacyUnpinned || resolved.legacyInputOnly
+      }
       recordedResult={Boolean(recordedResolution?.usesRecordedSnapshot)}
       addressIncluded={addressVisible}
       priceEstimated={resolved.snapshot.meta.priceEstimated === true}

@@ -86,6 +86,8 @@ describe("Offer Ceiling server entitlement boundary", () => {
     if (payload.access !== "preview") return;
     expect(payload.range).not.toBeNull();
     if (!payload.range) return;
+    expect(payload.range.lower).not.toBeNull();
+    if (payload.range.lower == null) return;
     expect(payload.range.lower % 25_000).toBe(0);
     expect(payload.range.upper % 25_000).toBe(0);
     expect(Object.keys(payload)).toEqual(["access", "range"]);
@@ -120,9 +122,13 @@ describe("Offer Ceiling server entitlement boundary", () => {
       });
       expect(response).toEqual(baseline);
       if (response.access !== "preview" || !response.range) continue;
-      expect(response.range.lower % 25_000).toBe(0);
+      if (response.range.lower != null) {
+        expect(response.range.lower % 25_000).toBe(0);
+      }
       expect(response.range.upper % 25_000).toBe(0);
-      expect(response.range.lower).not.toBe(maxPurchasePrice);
+      if (response.range.lower != null) {
+        expect(response.range.lower).not.toBe(maxPurchasePrice);
+      }
       expect(response.range.upper).not.toBe(maxPurchasePrice);
     }
   });

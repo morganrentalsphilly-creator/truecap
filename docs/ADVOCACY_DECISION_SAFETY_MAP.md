@@ -1,14 +1,17 @@
 # Advocacy decision-safety implementation map
 
-Status: verified from the repository on 2026-08-24. This document describes
+Status: verified from the repository on 2026-08-25. This document describes
 code behavior, not production-state proof. Live Stripe, Supabase, provider,
 Vercel, email, DNS, and analytics configuration were not mutated or assumed.
 
 ## Safety boundary for this slice
 
 - `calculateAnalysis()` remains the financial source of truth.
-- Underwriting Methodology `1.0`, InvestCalc schema `9`, solver rules,
-  defaults, Deal Score weights, prices, trials, credits, and entitlements are
+- Current first-year underwriting is Methodology `1.1`; recorded `1.0`
+  snapshots remain immutable. The Screening Index submodel is `1.2`, the
+  InvestCalc schema is `10`, and the ten-year projection snapshot is `6`.
+  Each result-producing correction has a named release note and regression
+  corpus; prices, trials, grandfathered Stripe Prices, and entitlements remain
   unchanged.
 - The focused advocacy contract is a presentation adapter behind two gates:
   `NEXT_PUBLIC_TRUECAP_ADVOCACY_DECISION_CONTRACT` and the private server-side
@@ -19,27 +22,28 @@ Vercel, email, DNS, and analytics configuration were not mutated or assumed.
   threshold, entitlement, price, or stored enum. The advocacy flag does not
   roll back those shared presentation labels.
 - Existing save/share/report fields and legacy vocabulary remain compatible at
-  storage and API boundaries. No existing row is rewritten by this slice.
+  storage and API boundaries. Recorded saved results and long-term projections
+  are evidence, not caches: current code never fills them with newer math.
 - Database changes described in migrations or runbooks are expand-only and
   must not be applied until their named production gates are reviewed.
 
 ## Route and surface map
 
-| Workflow | Primary route or component | Authority / notes |
-| --- | --- | --- |
-| Anonymous analyzer | `app/page.tsx` → `components/investcalc/investcalc-page.tsx` | Browser form; server boundaries enforce exact Offer Ceiling and paid exports. Advocacy cohort is forced off. |
-| Authenticated analyzer | `app/home-authed/page.tsx`, `app/dashboard/new/page.tsx` | Server resolves user, plan capabilities, defaults, and private advocacy eligibility. |
-| Focused decision | `components/investcalc/analysis-dashboard.tsx` → `focused-decision-summary.tsx` | Reads one calculation result plus the exact active target. Flagged view adapts this to rule fit, target context, evidence readiness, user decision, and safe next action. |
-| Saved deal list/workspace | `app/dashboard/saved-analyses/page.tsx`, `app/dashboard/saved-analyses/[id]/page.tsx` | Owner-filtered Supabase reads. Current-version and legacy rows may recompute; future-version rows can freeze. |
-| Dashboard / comparison | `app/dashboard/page.tsx`, `app/dashboard/compare/page.tsx` | Server-authenticated saved-deal projections and comparison adapters. |
-| Public sample | `app/sample-decision-memo/page.tsx`, `lib/sample-deal.ts`, `lib/sample-deal-analysis.ts` | Shared synthetic fixture, but target identity/version semantics still require full cross-surface proof. |
-| PDF generation | `app/actions/generate-report-pdf.ts`, `lib/report-data-builder.ts`, `lib/pdf-generator.ts` | Server rebuilds financial outputs from validated inputs; browser receives base64 for unsaved/Pack export. Saved-deal PDFs use private storage and signed URLs. |
-| Opaque share | `app/actions/public-shares.ts`, `app/s/[token]/page.tsx`, `lib/public-share.ts` | 256-bit token, SHA-256 at rest, optional expiry, owner revocation for owned shares, private/no-store and no-referrer response policy. |
-| Legacy share | `app/d/[encoded]/page.tsx`, `lib/share-link.ts` | Frozen v1 decoder; payload is in URL, has no expiry/revocation, and recomputes using current compatible code. Header policy now adds noindex and private/no-store. |
-| Portal / embed | `app/portal/[token]/d/[dealId]/page.tsx`, `app/embed/brand/[token]/page.tsx` | Stateless HMAC scopes with no per-link revocation. Professional surfaces remain dark and are not part of this release. |
-| Pricing / billing | `app/pricing/page.tsx`, `app/actions/billing.ts`, `app/api/stripe/webhooks/route.ts` | Stripe server state and `lib/stripe/plan-prices.ts` mappings are authoritative. No live Price or Product mutation is authorized. |
-| Settings | `app/settings/page.tsx`, `app/settings/branding/page.tsx` | Owner-authenticated preferences and branding; future notifications must be labeled as preview/waitlist rather than current fulfillment. |
-| Legal / methodology | `app/terms/page.tsx`, `app/privacy/page.tsx`, `app/methodology/page.tsx` | Current policies and v1 explanations. Policy transitions require owner-supplied effective dates. |
+| Workflow                  | Primary route or component                                                                 | Authority / notes                                                                                                                                                         |
+| ------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Anonymous analyzer        | `app/page.tsx` → `components/investcalc/investcalc-page.tsx`                               | Browser form; server boundaries enforce exact Offer Ceiling and paid exports. Advocacy cohort is forced off.                                                              |
+| Authenticated analyzer    | `app/home-authed/page.tsx`, `app/dashboard/new/page.tsx`                                   | Server resolves user, plan capabilities, defaults, and private advocacy eligibility.                                                                                      |
+| Focused decision          | `components/investcalc/analysis-dashboard.tsx` → `focused-decision-summary.tsx`            | Reads one calculation result plus the exact active target. Flagged view adapts this to rule fit, target context, evidence readiness, user decision, and safe next action. |
+| Saved deal list/workspace | `app/dashboard/saved-analyses/page.tsx`, `app/dashboard/saved-analyses/[id]/page.tsx`      | Owner-filtered reads. Versioned rows use their recorded result; explicitly legacy rows alone use labeled compatibility recomputation. Full underwriting and notes use independent revision tokens. |
+| Dashboard / comparison    | `app/dashboard/page.tsx`, `app/dashboard/compare/page.tsx`                                 | Server-authenticated saved-deal projections and comparison adapters.                                                                                                      |
+| Public sample             | `app/sample-decision-memo/page.tsx`, `lib/sample-deal.ts`, `lib/sample-deal-analysis.ts`   | One shared synthetic fixture and target contract drive the homepage, opened calculator, result, report, copy, and deterministic cross-surface tests.                       |
+| PDF generation            | `app/actions/generate-report-pdf.ts`, `lib/report-data-builder.ts`, `lib/pdf-generator.ts` | Server rebuilds financial outputs from validated inputs; browser receives base64 for unsaved/Pack export. Saved-deal PDFs use private storage and signed URLs.            |
+| Opaque share              | `app/actions/public-shares.ts`, `app/s/[token]/page.tsx`, `lib/public-share.ts`            | 256-bit token, SHA-256 at rest, optional expiry, owner revocation for owned shares, private/no-store and no-referrer response policy.                                     |
+| Legacy share              | `app/d/[encoded]/page.tsx`, `lib/share-link.ts`                                            | Frozen v1 decoder; payload is in URL, has no expiry/revocation, and recomputes using current compatible code. Header policy now adds noindex and private/no-store.        |
+| Portal / embed            | `app/portal/[token]/d/[dealId]/page.tsx`, `app/embed/brand/[token]/page.tsx`               | Stateless HMAC scopes with no per-link revocation. Professional surfaces remain dark and are not part of this release.                                                    |
+| Pricing / billing         | `app/pricing/page.tsx`, `app/actions/billing.ts`, `app/api/stripe/webhooks/route.ts`       | Stripe server state and `lib/stripe/plan-prices.ts` mappings are authoritative. No live Price or Product mutation is authorized.                                          |
+| Settings                  | `app/settings/page.tsx`, `app/settings/branding/page.tsx`                                  | Owner-authenticated preferences and branding; future notifications must be labeled as preview/waitlist rather than current fulfillment.                                   |
+| Legal / methodology       | `app/terms/page.tsx`, `app/privacy/page.tsx`, `app/methodology/page.tsx`                   | Current policies and v1 explanations. Policy transitions require owner-supplied effective dates.                                                                          |
 
 ## Calculation and serialization path
 
@@ -67,31 +71,37 @@ Vercel, email, DNS, and analytics configuration were not mutated or assumed.
 
 ### Versions
 
-| Contract | Current code version |
-| --- | --- |
-| Underwriting / Deal Score methodology | `1.0` |
-| InvestCalc form schema | `9` |
-| Input Confidence compatibility method | `1.0` |
-| Ten-year projections snapshot | `4` |
-| Tax strategy snapshot | `4` |
-| Exit scenarios snapshot | `3` |
-| PDF snapshot | `9` plus encoded cache dependencies |
-| Advocacy presentation contract | `advocacy-p0-v1` |
+| Contract                              | Current code version                |
+| ------------------------------------- | ----------------------------------- |
+| First-year underwriting methodology   | `1.1` (`1.0` recorded legacy)       |
+| Screening Index methodology           | `1.2`                               |
+| InvestCalc form schema                | `10`                                |
+| Input Confidence compatibility method | `1.0`                               |
+| Ten-year projections snapshot         | `6`                                 |
+| Tax strategy snapshot                 | `4`                                 |
+| Exit scenarios snapshot               | `3`                                 |
+| PDF snapshot                          | `9` plus encoded cache dependencies |
+| Advocacy presentation contract        | `advocacy-p0-v1`                    |
 
 ### Save, restore, and historical behavior
 
-- `app/actions/saved-analyses.ts` validates inputs, recomputes on the server,
-  and stores form/result/version and selected numeric target data.
-- `lib/saved-analysis-methodology.ts` currently recomputes current-version and
-  `legacy-unversioned` rows. It freezes a non-legacy row whose stored
-  methodology differs from the running methodology. Consequently, current-v1
-  history is **not universally immutable** if v1 code changes without a version
-  bump. This is a release blocker for any result-producing change, not a reason
-  to silently change v1 in this slice.
-- `lib/compare-result-snapshot.ts` also recomputes with the current engine.
-- Property age uses the current calendar year. Age-threshold Deal Score output
-  can therefore move on January 1 without a deployment. This is an explicit
-  underwriting/model-risk decision.
+- `app/actions/saved-analyses.ts` validates inputs, calculates on the server,
+  and stores the exact form/result/methodology/target snapshots. Every new save
+  records its independent Screening Index and projection method versions.
+- `lib/saved-analysis-methodology.ts` returns a complete recorded result for
+  every versioned save, including the current version. It never mixes missing
+  historical fields with current calculations. Only explicitly
+  `legacy-unversioned` rows use labeled compatibility recomputation.
+- `lib/compare-result-snapshot.ts` v3 persists canonical comparison metrics;
+  older snapshots remain compatible without reconstructing absent returns or
+  inventing a winner.
+- New v1 analyses persist an explicit UTC analysis date. Direct/legacy payloads
+  without one use the fixed `2026-08-25` compatibility anchor, so identical
+  serialized inputs cannot change score on January 1. An explicit re-underwrite
+  records its new date.
+- `underwriting_revision` and `notes_revision` are independent database-owned
+  optimistic-concurrency tokens. Stale tabs preserve local work and require a
+  reload or an explicit save-as-scenario/save-my-version choice.
 - Rounded display values must remain presentation-only; tests compare canonical
   raw values and documented surface rounding separately.
 
@@ -186,11 +196,11 @@ Skipped/no-profile results are labeled **TrueCap screening defaults**, never
 
 ## Share lifecycle and privacy
 
-| Share | Token/storage | Expiry/revoke | Known limitations |
-| --- | --- | --- | --- |
-| `/s` opaque | Random capability; hash at rest; immutable input/target/version metadata | Default expiry; new links require a signed-in owner who can revoke | Historical ownerless shares remain viewable until expiry but cannot be managed; audience is metadata, not authorization; derived values recompute. The viewer now has a best-effort per-process read brake; distributed enforcement still requires an approved shared rate-limit service. An unapplied service-role-only migration provides bounded purging of already expired/revoked rows, but no retention duration or scheduler has been approved. |
-| `/d` legacy | Full v1 payload base64url-encoded in URL; optional attribution HMAC | None | Irrevocable; methodology/target snapshot absent; must retain byte-compatible decoder. Headers now prevent referrer propagation, indexing, and storage by compliant clients. |
-| Portal/embed | Deterministic stateless HMAC | Global-secret or owning-record state only | No per-link lifecycle; professional surfaces remain dark. |
+| Share        | Token/storage                                                            | Expiry/revoke                                                      | Known limitations                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ------------ | ------------------------------------------------------------------------ | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/s` opaque  | Random capability; hash at rest; immutable input/target/version metadata | Default expiry; new links require a signed-in owner who can revoke | Historical ownerless shares remain viewable until expiry but cannot be managed; audience is metadata, not authorization; derived values recompute. The viewer now has a best-effort per-process read brake; distributed enforcement still requires an approved shared rate-limit service. An unapplied service-role-only migration provides bounded purging of already expired/revoked rows, but no retention duration or scheduler has been approved. |
+| `/d` legacy  | Full v1 payload base64url-encoded in URL; optional attribution HMAC      | None                                                               | Irrevocable; methodology/target snapshot absent; must retain byte-compatible decoder. Headers now prevent referrer propagation, indexing, and storage by compliant clients.                                                                                                                                                                                                                                                                            |
+| Portal/embed | Deterministic stateless HMAC                                             | Global-secret or owning-record state only                          | No per-link lifecycle; professional surfaces remain dark.                                                                                                                                                                                                                                                                                                                                                                                              |
 
 Tokens, claim secrets, addresses, prices, rents, report contents, notes,
 documents, and customer identifiers are blocked from product analytics. Raw
@@ -231,9 +241,11 @@ production privacy check.
   server-controlled report access; open disputes suspend it; a won dispute is
   accepted only after a fresh paid/no-refund check.
 - Signed refund/dispute webhooks are wake-up signals for a fresh Stripe read and
-  durably mark an eligible credit denied or an applied credit reversed. They do
-  not recall a downloaded PDF, remove an already-applied coupon, reprice a
-  subscription, or mutate a Stripe Price.
+  durably mark an eligible credit denied or an applied credit reversed. An
+  applied reversal also creates one server-only pending adjustment obligation,
+  which requires a documented completed action or explicit waiver. They do not
+  recall a downloaded PDF, automatically charge a customer, remove an
+  already-applied coupon, reprice a subscription, or mutate a Stripe Price.
 - Tab/session loss can therefore leave a paid buyer without retrieval. There is
   no complete Pack webhook fulfillment, private artifact, email recovery,
   account claim, delivery retry, or Pack reconciliation loop. The narrow
@@ -246,13 +258,13 @@ production privacy check.
 
 ## Provider map
 
-| Provider/source | Used for | Current fallback / risk |
-| --- | --- | --- |
-| Google Places | Typed address and selected place components | Plain-input fallback. No address may enter analytics or provider error logs. |
-| Static state tax table | Screening property-tax benchmark | Source year/URL are not carried through every returned value. |
-| FRED `MORTGAGE30US` | Screening mortgage-rate observation | 24-hour process cache; failures omit the value. API-key URL logging has been removed. |
-| HUD FMR/SAFMR | Rent benchmark | 30-minute process cache; 5+ bedrooms clamp to 4BR and local lookup can fall to state average without a complete structured mismatch contract. |
-| RentCast | Facts, AVMs, comps, optional active listing | Timeout, HTTP error, malformed response, no-data, and stale fallback are not yet fully discriminated; stale maximum age is not policy-defined. |
+| Provider/source        | Used for                                    | Current fallback / risk                                                                                                                        |
+| ---------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Google Places          | Typed address and selected place components | Plain-input fallback. No address may enter analytics or provider error logs.                                                                   |
+| Static state tax table | Screening property-tax benchmark            | Source year/URL are not carried through every returned value.                                                                                  |
+| FRED `MORTGAGE30US`    | Screening mortgage-rate observation         | 24-hour process cache; failures omit the value. API-key URL logging has been removed.                                                          |
+| HUD FMR/SAFMR          | Rent benchmark                              | 30-minute process cache; 5+ bedrooms clamp to 4BR and local lookup can fall to state average without a complete structured mismatch contract.  |
+| RentCast               | Facts, AVMs, comps, optional active listing | Timeout, HTTP error, malformed response, no-data, and stale fallback are not yet fully discriminated; stale maximum age is not policy-defined. |
 
 No provider result may upgrade evidence readiness merely because it exists.
 RentCast caching, retention, share/PDF redisplay, active-listing display, and
@@ -283,8 +295,10 @@ derived-use rights require an owner-verified provider contract register.
   assumptions. HUD whole-property/unit mismatches must not count as evidence.
 - **Shared recipient:** `/s` resolves the token server-side and renders a
   no-login view; no secure challenge/request/fork workflow ships in P0.
-- **Legacy snapshot/share:** adapters preserve access, but same-v1 recomputation
-  behavior is characterized and no immutable-history claim is made.
+- **Legacy snapshot/share:** versioned saved rows use their recorded results;
+  explicitly unversioned saved rows and the frozen `/d` legacy share decoder
+  retain labeled compatibility recomputation. No current-version result is
+  presented as the historical output of an unversioned payload.
 
 ## Environment and deployment topology
 
@@ -312,21 +326,28 @@ Not provable from the repository and required before limited external rollout:
 - analytics dashboards, alert paging, and data retention;
 - rollback owner availability and tested prior deployment artifact.
 
-## Hard blockers and named decisions
+## Resolved code risks and remaining production gates
 
-| Blocker / decision | Required owner | Gate |
-| --- | --- | --- |
-| Same-v1 saved/share outputs may recompute | Model Risk + Product | Freeze/version policy and historical corpus approval before any formula change. |
-| Cash Screening Index receives synthetic DSCR points | Model Risk / Underwriting | Deliberate Methodology v2 decision; no v1 mutation. |
-| Property-age score uses wall clock | Model Risk / Underwriting | Choose valuation/as-of-date convention. |
-| Buy Boxes lack durable revisions | Product + Data | Expand-only revision contract before claiming profile-version history. |
-| $5 artifact is not durably retrievable | Billing + Data + Operations | Apply reviewed schema/storage/webhook/reconcile/delivery path; prove lost-tab recovery. |
-| Direct authenticated `deal_comps` writes | Security + Data | Apply and verify service-only hardening migration/RLS test. |
-| Historical ownerless share revocation and distributed share lifecycle enforcement remain incomplete | Security + Privacy | Treat historical ownerless links as non-revocable until expiry; approve retention duration/scheduler and a shared rate-limit service; apply and verify the service-role purge migration. The local process brake is defense in depth, not distributed enforcement. |
-| Provider mismatch/stale/outage states incomplete | Data Product + Model Risk | Discriminated provider contract and approved stale-age policy. |
-| Provider redisplay/retention rights unverified | Legal + Data Partnerships | Contract register approval. |
-| Guarantee transition/effective date unspecified | Legal + Business | Owner-supplied policy; do not invent grandfathering/refund treatment. |
-| Founding-price urgency lacks dated approval | Pricing owner + Legal | Remove it or supply effective date and transition policy; billing remains unchanged. |
+The following audit blockers are resolved in the current code and regression
+suite: same-version saved-result drift, projection drift, wall-clock Property
+Age, PDF insurance mismatch, investor-PMI defaults, fabricated comparison
+winners, stale underwriting overwrites, stale note overwrites, hidden active
+strategy, and non-durable saved-deal reopen. They are not called “live” until
+the migration/deployment checks below pass.
+
+| Open gate / decision                                                                                 | Required owner              | Gate                                                                                                                                                                                                                                                               |
+| ---------------------------------------------------------------------------------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Four forward-only migrations are not yet proven live                                                | Release + Data              | The exact batch has replayed twice on PostgreSQL 17. Apply and verify Decision Pack credit adjustments, saved-analysis concurrency, service-only public-share creation, and the `deal_comps` owner binding **before** application deployment. The earlier `20260824121000` permission repair is already recorded in production and must not be edited or replayed. |
+| Authenticated browser proof has not yet run on the disposable CI stack                              | Release                     | The local Supabase job must pass guest→auth auto-save, share continuity, shortlist, dashboard, workspace, scenarios, notes, comparison, document validation, and PDF export without production writes.                                                               |
+| Buy Boxes lack durable revisions                                                                     | Product + Data              | Do not claim historical profile-version identity until an expand-only Buy Box revision contract ships. Exact recorded numeric criteria remain authoritative.                                                                                                       |
+| $5 artifact is not durably retrievable                                                               | Billing + Data + Operations | Keep new Decision Pack sales disabled. Historical paid access follows the approved revoke-on-refund/lost-dispute policy; reactivation still requires immutable storage, webhook fulfillment, reconciliation, and recovery proof.                                      |
+| Historical ownerless share revocation and distributed share lifecycle enforcement remain incomplete | Security + Privacy          | Treat historical ownerless links as non-revocable until expiry; approve retention/scheduler and shared rate limiting before claiming distributed enforcement. New share creation already requires sign-in and owner binding.                                         |
+| Provider redisplay/retention rights and production stale-age policy                                  | Legal + Data Partnerships   | Keep provider values labeled as editable screening evidence; complete the contract register before expanding provider retention/redisplay claims.                                                                                                                  |
+| Production configuration and rollback proof                                                          | Release                     | Verify deployed commit, feature flags, cohort allowlist, Price mappings, webhook events, buckets/RLS, telemetry, DNS, and the prior known-good rollback artifact. No real payment is required or permitted for the smoke test.                                          |
+
+Pricing urgency and the public refund guarantee are disabled in code. The
+Decision Pack is disabled, and the approved Terms record the current one-time
+purchase/refund treatment; no unapproved promise is shown as an active offer.
 
 This map must be updated when a gate is actually proven. A feature flag does
 not make DDL, billing mutations, sent messages, or historical rewrites

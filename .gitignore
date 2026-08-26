@@ -100,9 +100,15 @@ mcps/
 .claude/*
 !.claude/settings.json
 /.pdf_review
+/playwright-report/
+/test-results/
+/playwright/.auth/
 # Regenerable SEO job output. Audited baseline snapshots that belong in the
 # repository live under docs/seo instead.
 /artifacts/seo/
+# Opt-in Playwright evidence is intentionally local and regenerable. Keep it
+# outside Playwright's outputDir so a later validation run cannot erase it.
+/artifacts/current-visual-evidence/
 # `/scripts` removed: that directory holds tracked utility scripts
 # (schedule-all-broadcasts, schedule-daily-campaign, preview-daily-campaign,
 # count-audience-contacts, polish-emails). Ignoring the whole directory

@@ -22,6 +22,11 @@ import { trackEvent } from "@/lib/analytics";
 import { decidePricingCardCta } from "@/lib/billing-plan-cta";
 import { TRIAL_DAYS, willCheckoutGrantTrial } from "@/lib/trial";
 import { featuresForTier } from "@/lib/entitlements-catalog";
+import {
+  formatPublicUsd,
+  PUBLIC_PRO_ANNUAL_USD,
+  PUBLIC_PRO_MONTHLY_USD,
+} from "@/lib/public-pricing";
 
 type ResolvedPrice = { amountLabel: string; period: string } | null;
 
@@ -168,8 +173,8 @@ export function PricingTogglePlans({
     trackEvent("pricing_viewed", properties);
   }, []);
 
-  const monthlyAmount = parsePriceAmount(monthly);
-  const annualAmount = parsePriceAmount(annual);
+  const monthlyAmount = parsePriceAmount(monthly) ?? PUBLIC_PRO_MONTHLY_USD;
+  const annualAmount = parsePriceAmount(annual) ?? PUBLIC_PRO_ANNUAL_USD;
 
   // Derived display values
   const annualMonthlyEquivalent =
@@ -217,9 +222,9 @@ export function PricingTogglePlans({
   const proCard =
     period === "monthly"
       ? {
-          priceTop: monthly?.amountLabel ?? proOfferName,
-          priceSub: monthly ? `/${monthly.period}` : "/month",
-          subline: monthly ? "billed monthly" : "monthly billing",
+          priceTop: monthly?.amountLabel ?? formatPublicUsd(PUBLIC_PRO_MONTHLY_USD),
+          priceSub: `/${monthly?.period ?? "month"}`,
+          subline: "billed monthly",
           slot: "pro_monthly" as const,
         }
       : {
@@ -228,12 +233,10 @@ export function PricingTogglePlans({
               ? `$${annualMonthlyEquivalent.toFixed(
                   annualMonthlyEquivalent % 1 === 0 ? 0 : 2
                 )}`
-              : (annual?.amountLabel ?? proOfferName),
+              : formatPublicUsd(PUBLIC_PRO_ANNUAL_USD / 12),
           priceSub: "/month",
           subline:
-            annual?.amountLabel
-              ? `billed annually (${annual.amountLabel})`
-              : "billed annually",
+            `billed annually (${annual?.amountLabel ?? formatPublicUsd(PUBLIC_PRO_ANNUAL_USD)})`,
           slot: "pro_annual" as const,
         };
   const proCardDecision = decidePricingCardCta(activePaidPlanSlug, proCard.slot);
@@ -335,7 +338,7 @@ export function PricingTogglePlans({
                 Current
               </span>
             ) : (
-              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-primary">
+              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[var(--brand-blue-text)]">
                 Recommended
               </span>
             )}
@@ -392,7 +395,7 @@ export function PricingTogglePlans({
           </div>
           <div className="mt-1 text-xs text-muted-foreground">{proCard.subline}</div>
           <div className="mt-3 flex justify-center">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--metric-positive)]/12 px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-[var(--metric-positive)]">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--metric-positive)]/12 px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-foreground">
                <Sparkles className="size-3" />{
                  billingRecoveryRequired
                    ? "Billing attention needed"

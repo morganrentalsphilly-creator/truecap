@@ -14,7 +14,7 @@
  *              or plain manual entry we can't attribute).
  *   - High   = the two biggest value drivers (rent + rate) are explicitly
  *              verified. A benchmark or hand-entered estimate alone is not
- *              verification. New surfaces use Input Confidence v1.0; this
+ *              verification. New surfaces use versioned Input Confidence; this
  *              object remains as a backward-compatible three-field summary.
  */
 

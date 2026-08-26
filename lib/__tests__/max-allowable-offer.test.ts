@@ -73,6 +73,25 @@ describe("MAO — DSCR price target", () => {
   });
 });
 
+describe("MAO — zero-cash CoC target safety", () => {
+  it("does not let the numeric 0 sentinel pass or fail as a real CoC result", () => {
+    const result = calculateAnalysis(
+      baseSingleFamily({
+        downPaymentPct: 0,
+        closingCostsPct: 0,
+        rehabBudget: 0,
+        strFurnishingCost: 0,
+        monthlyRent: 8_000,
+      })
+    );
+
+    expect(result.totalCashRequired).toBe(0);
+    expect(result.cocReturn).toBe(0);
+    expect(meetsTarget(result, { cocReturn: -100 })).toBe(false);
+    expect(meetsTarget(result, { monthlyCashFlow: 0 })).toBe(true);
+  });
+});
+
 describe("MAO — explicit purchase-price ceiling", () => {
   it("treats a hard price cap as a first-class target and recomputes achieved metrics there", () => {
     const values = baseSingleFamily();

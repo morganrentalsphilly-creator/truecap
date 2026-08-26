@@ -46,6 +46,7 @@ import { getStripe } from "@/lib/stripe/client";
 import { planSlugFromPriceId, type PaidPlanSlug } from "@/lib/stripe/plan-prices";
 import { VERIFIED_CASE_STUDIES } from "@/lib/verified-case-studies";
 import { isAdvocacyInternalUser } from "@/lib/advocacy-rollout";
+import { getSavedDealForEditingAction } from "@/app/actions/saved-analyses";
 
 export const metadata: Metadata = {
   // Same title/description as the static homepage (this IS the homepage
@@ -66,7 +67,7 @@ export const metadata: Metadata = {
 export default async function AuthedHome({
   searchParams,
 }: {
-  searchParams?: Promise<{ billing?: string; session_id?: string }>;
+  searchParams?: Promise<{ billing?: string; session_id?: string; savedDeal?: string }>;
 }) {
   // No JSON-LD here — this route is noindex; the schema.org graph
   // lives on the static public homepage (app/page.tsx) only.
@@ -86,6 +87,20 @@ export default async function AuthedHome({
   // Any failure degrades to value 0; the conversion itself is fired
   // client-side from the URL params and NEVER depends on this lookup.
   const resolvedSearchParams = (await searchParams) ?? {};
+  const requestedSavedDealId =
+    user &&
+    typeof resolvedSearchParams.savedDeal === "string" &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      resolvedSearchParams.savedDeal
+    )
+      ? resolvedSearchParams.savedDeal
+      : null;
+  // Resolve a durable owner-scoped URL on every request. Unlike the former
+  // one-use localStorage handoff, /?savedDeal=<id> survives refresh, history,
+  // bookmarks, and opening the same analysis on another authenticated device.
+  const initialSavedDeal = requestedSavedDealId
+    ? await getSavedDealForEditingAction(requestedSavedDealId)
+    : null;
   let billingConversionValue: number | undefined;
   let billingPurchasedPlan: PaidPlanSlug | null = null;
   if (
@@ -195,6 +210,7 @@ export default async function AuthedHome({
         isAuthenticated={Boolean(user)}
         userAnalysisDefaults={userAnalysisDefaults}
         advocacyContractEligible={isAdvocacyInternalUser(user?.email)}
+        initialSavedDeal={initialSavedDeal}
       />
       {/* Anon fallback only — the SAME seven-block story as app/page.tsx:
           how it works → trust → who it's for → pricing → closing ask → FAQ

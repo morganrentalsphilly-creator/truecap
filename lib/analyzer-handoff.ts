@@ -50,6 +50,10 @@ export interface AnalyzerHandoff {
   monthlyRent?: number;
   /** Maps to bedrooms. */
   bedrooms?: number;
+  /** Exact screened financing assumption, when a shortlist row is promoted. */
+  interestRate?: number;
+  /** Exact screened property-tax assumption, when a shortlist row is promoted. */
+  propertyTaxPct?: number;
   /** Maps to address. */
   address?: string;
   /**
@@ -119,6 +123,16 @@ export function readAnalyzerHandoff(search: string): AnalyzerHandoff | null {
     out.bedrooms = beds;
   }
 
+  const interestRate = toFiniteNum(params.get("rate"));
+  if (interestRate !== undefined && interestRate <= 30) {
+    out.interestRate = interestRate;
+  }
+
+  const propertyTaxPct = toFiniteNum(params.get("tax"));
+  if (propertyTaxPct !== undefined && propertyTaxPct <= 20) {
+    out.propertyTaxPct = propertyTaxPct;
+  }
+
   const address = params.get("address")?.trim();
   if (address && address.length >= 5 && address.length <= 200) {
     out.address = address;
@@ -161,6 +175,16 @@ export function buildAnalyzerHandoffUrl(
   }
   if (typeof input.bedrooms === "number" && input.bedrooms >= 0) {
     params.set("beds", String(input.bedrooms));
+  }
+  if (typeof input.interestRate === "number" && input.interestRate >= 0 && input.interestRate <= 30) {
+    params.set("rate", String(input.interestRate));
+  }
+  if (
+    typeof input.propertyTaxPct === "number" &&
+    input.propertyTaxPct >= 0 &&
+    input.propertyTaxPct <= 20
+  ) {
+    params.set("tax", String(input.propertyTaxPct));
   }
   if (input.address && input.address.trim().length >= 5) {
     params.set("address", input.address.trim());

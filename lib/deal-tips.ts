@@ -32,6 +32,8 @@ export interface DealTipsInput {
   propertyType: DealTipsPropertyType;
   /** `monthlyPayment <= 0` = cash purchase — DSCR is N/A, never tipped. */
   isCashPurchase: boolean;
+  /** False when no modeled initial cash exists and CoC is undefined. */
+  cashOnCashApplicable?: boolean;
   /**
    * The deal's actual metric values (from AnalysisResult), used to quote the
    * deal's own numbers in the tip ("DSCR 1.12 is your thin spot"). Optional —
@@ -89,13 +91,13 @@ export function buildDealTips(input: DealTipsInput): string[] | null {
             ? `Cash flow ${fmtMoney(cf)}/mo is positive but under the $500/mo strong band — trim operating expenses or validate rent comps to close the gap.`
             : `Monthly cash flow is positive but under the $500/mo strong band — trim operating expenses or validate rent comps to close the gap.`
           : cf != null
-            ? `Cash flow is negative (-${fmtMoney(cf)}/mo), leaning on appreciation and tax benefits — negotiate the price or financing until the monthly math turns positive.`
-            : `Cash flow is negative, leaning on appreciation and tax benefits — negotiate the price or financing until the monthly math turns positive.`,
+            ? `Cash flow is negative (-${fmtMoney(cf)}/mo), so the owner must fund the shortfall while relying on a separate appreciation thesis — negotiate the price or financing until the monthly math turns positive.`
+            : `Cash flow is negative, so the owner must fund the shortfall while relying on a separate appreciation thesis — negotiate the price or financing until the monthly math turns positive.`,
     });
   }
 
   // Cash-on-cash — 13 = "5–7% - healthy"; 8 = 3–5% modest; below = weak.
-  if (breakdown.cocScore < 13) {
+  if (input.cashOnCashApplicable !== false && breakdown.cocScore < 13) {
     const coc = metrics?.cocReturn;
     const modest = breakdown.cocScore >= 8;
     // Quote the deal's own number only when its ROUNDED display still sits

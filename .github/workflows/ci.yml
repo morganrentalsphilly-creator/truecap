@@ -1,10 +1,12 @@
 # Continuous integration — runs on every push and PR to main.
 #
-# Four gates, cheapest first:
+# Six gates, cheapest first:
 #   0. build-chain-guard — see below; runs in parallel, blocks the build chain
-#   1. tsc --noEmit   — type errors (fast, catches most AI/human slips)
-#   2. vitest         — the lib/ math tests (calc-analysis, templates, …)
-#   3. next build     — full production build, same as Vercel runs
+#   1. ESLint         — static correctness and React/Next rules
+#   2. tsc --noEmit   — type errors (fast, catches most AI/human slips)
+#   3. vitest         — the lib/ math tests (calc-analysis, templates, …)
+#   4. next build     — full production build, same as Vercel runs
+#   5. Playwright     — public + isolated authenticated user workflows
 #
 # The build step uses dummy env values: every page that needs real
 # secrets reads them at REQUEST time (Supabase/Stripe clients are
@@ -752,6 +754,9 @@ jobs:
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
 
+      - name: Lint
+        run: npm run lint
+
       - name: Type check
         run: npx tsc --noEmit
 
@@ -760,3 +765,95 @@ jobs:
 
       - name: Production build
         run: npm run build
+
+  browser-regressions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      # Authenticated workflows run against a disposable local Supabase stack.
+      # No repository secret and no production account/database is involved,
+      # so every PR—including a fork—gets the same release-critical coverage.
+      PLAYWRIGHT_REQUIRE_AUTH: true
+      PLAYWRIGHT_AUTH_TEST_ENVIRONMENT: isolated
+      PLAYWRIGHT_AUTH_EMAIL: internal-e2e@usetruecap.invalid
+      PLAYWRIGHT_USE_PRODUCTION_SERVER: true
+      SUPABASE_TELEMETRY_DISABLED: 1
+      NEXT_PUBLIC_SITE_URL: http://127.0.0.1:3100
+      STRIPE_SECRET_KEY: sk_test_ci_placeholder
+      STRIPE_WEBHOOK_SECRET: whsec_ci_placeholder
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_ci_placeholder
+      STRIPE_PRICE_PRO_MONTHLY: price_ci_placeholder_monthly
+      STRIPE_PRICE_PRO_ANNUAL: price_ci_placeholder_annual
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Start disposable Supabase
+        timeout-minutes: 12
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --no-install supabase start --yes > "$RUNNER_TEMP/truecap-supabase-start.out"
+
+      - name: Replay all database migrations from a clean database
+        timeout-minutes: 8
+        run: npx --no-install supabase db reset --local --no-seed
+
+      - name: Configure disposable browser account
+        shell: bash
+        run: |
+          set -euo pipefail
+          env_file="$RUNNER_TEMP/truecap-supabase.env"
+          npx --no-install supabase status -o env > "$env_file"
+          set -a
+          source "$env_file"
+          set +a
+          : "${API_URL:?Supabase API_URL missing}"
+          : "${ANON_KEY:?Supabase ANON_KEY missing}"
+          : "${SERVICE_ROLE_KEY:?Supabase SERVICE_ROLE_KEY missing}"
+          if [[ "$API_URL" != "http://127.0.0.1:54321" ]]; then
+            echo "Refusing to seed a non-loopback Supabase URL." >&2
+            exit 1
+          fi
+          auth_password="TcE2e-$(openssl rand -hex 24)"
+          echo "::add-mask::$ANON_KEY"
+          echo "::add-mask::$SERVICE_ROLE_KEY"
+          echo "::add-mask::$auth_password"
+          {
+            echo "E2E_SUPABASE_URL=$API_URL"
+            echo "E2E_SUPABASE_ANON_KEY=$ANON_KEY"
+            echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL"
+            echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON_KEY"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY"
+            echo "PLAYWRIGHT_AUTH_PASSWORD=$auth_password"
+          } >> "$GITHUB_ENV"
+
+      - name: Seed isolated Pro browser user
+        run: node e2e/support/seed-local-user.mjs
+
+      - name: Build the production browser target
+        run: npm run build
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Browser regressions
+        run: npm run test:e2e
+
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-regression-report
+          path: playwright-report/
+          retention-days: 14
+
+      - name: Stop disposable Supabase
+        if: always()
+        run: npx --no-install supabase stop --no-backup --project-id truecap-ci

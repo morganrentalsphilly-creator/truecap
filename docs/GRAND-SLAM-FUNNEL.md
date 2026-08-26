@@ -26,7 +26,9 @@ Recommended retention cohorts:
 
 An **analysis run** is a successful recorded invocation of the analyzer run
 counter—not a unique address, property, user, save, report, or closed deal.
-The public all-time display uses `app_counters.analysis_runs` with a minimum
-floor of 51,900 (if live runs are still below that number). Rolling 7-day and
-30-day values remain raw. Never describe this number as customers, properties
-purchased, offers, or transactions.
+The public all-time display uses the persisted
+`app_counters.analysis_runs` value. Migration `20260823160000` established the
+owner-confirmed cumulative total of 51,900 once, and each later successful run
+increments that same row. The UI adds no historical count and applies no
+display floor. Rolling 7-day and 30-day values remain raw. Never describe this
+number as customers, properties purchased, offers, or transactions.

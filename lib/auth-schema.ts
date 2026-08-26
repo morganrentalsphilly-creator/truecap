@@ -191,6 +191,11 @@ export function safeInternalNextPath(raw: unknown): string {
   return internalNextPathOrNull(raw) ?? "/";
 }
 
+/** Build the canonical login URL without ever accepting an external return path. */
+export function loginPathFor(rawNext: unknown): string {
+  return `/auth/login?next=${encodeURIComponent(safeInternalNextPath(rawNext))}`;
+}
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type SignUpInput = z.infer<typeof signUpSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;

@@ -111,8 +111,13 @@ type RowFallback = {
   insurance_mo?: number | string | null;
 };
 
-export function buildDealAssumptions(formSnapshot: unknown, row: RowFallback): DealAssumptions {
+export function buildDealAssumptions(
+  formSnapshot: unknown,
+  row: RowFallback,
+  resultSnapshot?: unknown
+): DealAssumptions {
   const s = asRecord(formSnapshot) ?? {};
+  const result = asRecord(resultSnapshot) ?? {};
   const insuranceInputMode: DealAssumptions["expenses"]["insuranceInputMode"] =
     s.insuranceInputMode === "monthly" || s.insuranceInputMode === "percent"
       ? s.insuranceInputMode
@@ -148,8 +153,17 @@ export function buildDealAssumptions(formSnapshot: unknown, row: RowFallback): D
     propertyTaxAnnual,
     propertyTaxPct: numFromUnknown(s.propertyTaxPct) ?? toNumber(row.property_tax_pct),
     insuranceInputMode,
-    insurancePct: numFromUnknown(s.insurancePct) ?? toNumber(row.insurance_pct),
-    insuranceMonthly: numFromUnknown(s.insuranceMonthly) ?? toNumber(row.insurance_mo),
+    // A blank percent/monthly input intentionally adopts the engine default.
+    // In that case show the effective value frozen with this exact resolved
+    // result, not an em dash and not a rate regenerated from today's code.
+    insurancePct:
+      numFromUnknown(s.insurancePct) ??
+      numFromUnknown(result.insurancePctEffective) ??
+      toNumber(row.insurance_pct),
+    insuranceMonthly:
+      numFromUnknown(s.insuranceMonthly) ??
+      numFromUnknown(result.insuranceMonthly) ??
+      toNumber(row.insurance_mo),
   };
 
   if (income.totalMonthlyRent == null && row.monthly_rent != null) {

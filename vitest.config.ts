@@ -1,4 +1,4 @@
-import { defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
 import path from "node:path";
 
 export default defineConfig({
@@ -13,6 +13,7 @@ export default defineConfig({
   },
   test: {
     environment: "node",
+    exclude: [...configDefaults.exclude, "e2e/**"],
     // Run all test files in a single forked subprocess. The fork
     // dies cleanly when tests finish, even if any module has a
     // long-lived handle (e.g. Supabase auth's session-refresh

@@ -18,6 +18,7 @@
 import { useMemo, useState } from "react";
 import { Clock, DollarSign, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PUBLIC_PRO_MONTHLY_USD } from "@/lib/public-pricing";
 import { calculateOfferValueEstimate } from "@/lib/offer-value-estimate";
 
 const num = (s: string) => {
@@ -41,9 +42,6 @@ const DEFAULT_DEALS_PER_MONTH = "5";
 const DEFAULT_HOURLY_RATE = "75";
 /** Editable starting point, not a promised saving. */
 const DEFAULT_MINUTES_SAVED_PER_DEAL = "60";
-/** Placeholder Pro monthly price for the breakeven math. */
-const PRO_MONTHLY_PRICE = 29;
-
 /**
  * Persona presets — a starting point for the two editable inputs (deal
  * volume + time value), not separate math. Numbers are deliberately
@@ -60,17 +58,20 @@ const PRESETS = [
 type Props = {
   /**
    * Pro monthly price loaded server-side from Stripe. Falls back to
-   * the hardcoded placeholder if undefined (Stripe key missing in dev,
+   * the shared public-catalog fallback if undefined (Stripe key missing in dev,
    * or Stripe API hiccup). Always passed in dollars, never cents.
    */
   proMonthlyPrice?: number;
 };
 
 export function RoiCalculatorWidget({ proMonthlyPrice }: Props) {
-  // Coalesce: prefer the real Stripe price, fall back to the hardcoded
-  // placeholder so the widget never displays "$0" or NaN math when the
+  // Coalesce: prefer the real Stripe price, fall back to the shared public
+  // catalog so the widget never displays "$0" or NaN math when the
   // Stripe load returned null for any reason.
-  const effectivePrice = proMonthlyPrice && proMonthlyPrice > 0 ? proMonthlyPrice : PRO_MONTHLY_PRICE;
+  const effectivePrice =
+    proMonthlyPrice && proMonthlyPrice > 0
+      ? proMonthlyPrice
+      : PUBLIC_PRO_MONTHLY_USD;
   const [dealsInput, setDealsInput] = useState(DEFAULT_DEALS_PER_MONTH);
   const [rateInput, setRateInput] = useState(DEFAULT_HOURLY_RATE);
   const [minutesInput, setMinutesInput] = useState(DEFAULT_MINUTES_SAVED_PER_DEAL);

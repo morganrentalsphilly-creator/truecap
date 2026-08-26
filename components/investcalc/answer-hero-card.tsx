@@ -49,7 +49,6 @@ import {
   getCashFlowComponentMax,
   getScoreBreakdownSum,
   isAppreciationFloorApplied,
-  recommendationLabel,
 } from "@/lib/deal-score";
 import { buildDealTips } from "@/lib/deal-tips";
 import { NextActionBanner } from "@/components/investcalc/next-action-banner";
@@ -230,7 +229,7 @@ function DealScoreCard({
    *  the Recommendation card beside it always agree with every other surface. */
   dealScoreResult: DealScoreActionResult | null;
   /** True when the Screening Index values as an appreciation play (strong projected
-   *  long-term return + non-negative after-tax cash flow). Surfaces a chip on
+   *  long-term return + non-negative pre-tax operating cash flow). Surfaces a chip on
    *  the score so a Neutral verdict on a red year-1 deal is self-explanatory at
    *  a glance - the same signal that drives the Overview reframe banner. */
   isAppreciationPlay?: boolean;
@@ -342,6 +341,7 @@ function ScoreBreakdownReceipts({
   dealScoreResult,
   propertyType,
   isCashPurchase,
+  cashOnCashApplicable = true,
 }: {
   dealScoreResult: DealScoreActionResult | null;
   /** Property type - the cash-flow tier max + label branch for
@@ -351,6 +351,9 @@ function ScoreBreakdownReceipts({
    *  relabel the DSCR breakdown tile, which otherwise reads
    *  "Above 1.25" - confusing alongside the MetricCard's "Cash purchase". */
   isCashPurchase?: boolean;
+  /** False when total modeled initial cash is $0, so CoC is undefined and is
+   * omitted from the Screening Index component scoring. */
+  cashOnCashApplicable?: boolean;
 }) {
   if (!dealScoreResult?.ok || dealScoreResult.tier !== "pro") return null;
   const { score, recommendation, breakdown } = dealScoreResult.data;
@@ -379,9 +382,10 @@ function ScoreBreakdownReceipts({
         ? "Above $500/mo - strong"
         : breakdown.cashFlowScore >= 8
           ? "Positive but modest ($0–$500/mo)"
-          : "Negative - relies on appreciation + tax to pay off",
-    coc:
-      breakdown.cocScore >= 17
+          : "Negative - requires monthly owner funding",
+    coc: !cashOnCashApplicable
+      ? "N/A - no modeled cash invested"
+      : breakdown.cocScore >= 17
         ? "Above 7% - strong"
         : breakdown.cocScore >= 13
           ? "5–7% - healthy"
@@ -421,6 +425,11 @@ function ScoreBreakdownReceipts({
             : "Heavy penalty - multiple risk factors stacking",
   } as const;
   const metricCell = RECOMMENDATION_STYLES[variantForRecommendation(recommendation)].metricCell;
+  const applicabilityAdjustment = breakdown.applicabilityAdjustment;
+  const formattedApplicabilityAdjustment =
+    applicabilityAdjustment == null
+      ? null
+      : `${applicabilityAdjustment >= 0 ? "+" : ""}${applicabilityAdjustment}`;
 
   return (
     <div className="space-y-3">
@@ -438,6 +447,7 @@ function ScoreBreakdownReceipts({
           max={COMPONENT_MAXES.coc}
           explanation={breakdownExplanations.coc}
           cellClass={metricCell}
+          displayValue={cashOnCashApplicable ? undefined : "N/A"}
         />
         <ScoreBreakdownTile
           label="Cap rate"
@@ -477,21 +487,27 @@ function ScoreBreakdownReceipts({
             // headline, so reconcile explicitly instead of reciting an
             // equation that doesn't add up.
             <>
-              Cash flow ({breakdown.cashFlowScore}), CoC ({breakdown.cocScore}),
+              Cash flow ({breakdown.cashFlowScore}), CoC ({cashOnCashApplicable ? breakdown.cocScore : "not scored"}),
               cap rate ({breakdown.capRateScore}), DSCR ({breakdown.dscrScore}), and 10-year total
               return ({breakdown.totalReturnScore})
               {breakdown.riskPenalty < 0 ? <>, minus a risk penalty of {Math.abs(breakdown.riskPenalty)},</> : null}
+              {formattedApplicabilityAdjustment ? (
+                <>, plus an applicable-factor normalization of {formattedApplicabilityAdjustment},</>
+              ) : null}
               {" "}sum to {componentSum} — but this deal is an appreciation play (strong projected
-              10-year total return with non-negative after-tax cash flow), so the score is held at{" "}
+              10-year total return with non-negative pre-tax operating cash flow), so the score is held at{" "}
               <span className="font-bold text-foreground">{score} / 100</span> instead of reading
               as weak fundamentals.
             </>
           ) : (
             <>
-              Score is the sum of cash flow ({breakdown.cashFlowScore}), CoC ({breakdown.cocScore}),
+              Score is the sum of cash flow ({breakdown.cashFlowScore}), CoC ({cashOnCashApplicable ? breakdown.cocScore : "not scored"}),
               cap rate ({breakdown.capRateScore}), DSCR ({breakdown.dscrScore}), and 10-year total
               return ({breakdown.totalReturnScore}),
               {breakdown.riskPenalty < 0 ? <> minus a risk penalty of {Math.abs(breakdown.riskPenalty)}</> : null}
+              {formattedApplicabilityAdjustment ? (
+                <>, plus an applicable-factor normalization of {formattedApplicabilityAdjustment}</>
+              ) : null}
               {" "}={" "}
               <span className="font-bold text-foreground">{score} / 100</span>.
             </>
@@ -506,6 +522,13 @@ function ScoreBreakdownReceipts({
           {" "}<strong>18–34</strong> {VERDICT_DISPLAY.Risky.label},
           {" "}<strong>&lt;18</strong> {VERDICT_DISPLAY.Avoid.label}.
         </p>
+        {applicabilityAdjustment != null ? (
+          <p className="mt-2 text-muted-foreground">
+            Cash-on-cash is not applicable because modeled cash invested is $0. The remaining
+            applicable factors are normalized to the full 100-point scale; no 0% CoC value is
+            treated as a failure.
+          </p>
+        ) : null}
         <p className="mt-2 text-muted-foreground">
           Looking to improve the score? The largest movers are typically (1) a lower
           purchase price (lifts cap rate and CoC together), (2) better financing terms
@@ -524,6 +547,7 @@ function ScoreBreakdownTile({
   explanation,
   cellClass,
   spanFull,
+  displayValue,
 }: {
   label: string;
   value: number;
@@ -531,8 +555,9 @@ function ScoreBreakdownTile({
   explanation: string;
   cellClass: string;
   spanFull?: boolean;
+  displayValue?: string;
 }) {
-  const valueDisplay = max > 0 ? `${value} / ${max}` : value > 0 ? `+${value}` : `${value}`;
+  const valueDisplay = displayValue ?? (max > 0 ? `${value} / ${max}` : value > 0 ? `+${value}` : `${value}`);
   return (
     <div className={cn("rounded-lg p-2", cellClass, spanFull && "col-span-2")}>
       <div className="flex items-baseline justify-between gap-2">
@@ -605,6 +630,11 @@ export function AnswerHeroCard({
   decisionOwnedUpstream?: boolean;
 }) {
   const isCashPurchase = Boolean(result && result.monthlyPayment <= 0);
+  const cashOnCashApplicable = result
+    ? result.totalCashRequired > 0
+    : dealScoreResult?.ok && dealScoreResult.tier === "pro"
+      ? dealScoreResult.data.cashOnCashApplicable !== false
+      : true;
   // Deal-specific tips from THIS deal's weakest subscores (null when the
   // pro-tier breakdown isn't loaded or nothing is weak enough to call out —
   // buildRecommendationModel then falls back to its canned per-label list).
@@ -615,6 +645,7 @@ export function AnswerHeroCard({
         : null,
     propertyType,
     isCashPurchase,
+    cashOnCashApplicable,
     metrics: result
       ? {
           netCashFlow: result.netCashFlow,
@@ -816,6 +847,7 @@ export function AnswerHeroCard({
                       dealScoreResult={dealScoreResult}
                       propertyType={propertyType}
                       isCashPurchase={isCashPurchase}
+                      cashOnCashApplicable={cashOnCashApplicable}
                     />
                   </div>
                 ) : null}

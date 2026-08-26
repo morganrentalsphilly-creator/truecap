@@ -17,7 +17,7 @@ import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-sch
 export const metadata: Metadata = {
   title: "Free Break-Even Calculator — Months to Recoup Cash",
   description:
-    "Free rental break-even calculator. How many months until cash flow returns your initial investment. Plus healthy break-even benchmarks by strategy.",
+    "Free rental break-even calculator. Estimate how many months the entered cash flow would take to recover the entered initial cash.",
   keywords: [
     "rental property break-even calculator",
     "break-even calculator rental",
@@ -44,7 +44,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What's a good break-even period for a rental property?",
-    a: "Cash-flow markets: 5-10 years is healthy. Balanced markets: 8-15 years. Appreciation markets: 15+ years (the wealth-build comes from appreciation + equity, not cash flow). A break-even past 15 years means you're betting on price growth, not yield.",
+    a: "There is no universal good period. Compare the modeled duration with your own liquidity needs, cash-flow targets, financing, evidence quality, and alternative uses of capital. The result assumes the entered monthly cash flow remains constant.",
   },
   {
     q: "Does break-even include appreciation or equity?",
@@ -56,7 +56,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "If my cash flow is negative, what does break-even mean?",
-    a: "If monthly cash flow is negative, the property never breaks even on cash flow alone — meaning your return depends entirely on appreciation and equity build at sale. That can still work (some great deals are appreciation-only) but you need to model the exit scenario, not just rely on cash flow recovery.",
+    a: "With zero or negative monthly cash flow, there is no cash-flow recovery period under the entered assumptions. Appreciation, principal paydown, future rent changes, taxes, and sale proceeds are outside this calculation and should be modeled separately.",
   },
 ];
 
@@ -89,7 +89,7 @@ export default function BreakEvenCalculatorPage() {
     applicationSubCategory: "Real Estate Calculator",
     operatingSystem: "Web",
     description:
-      "Free rental break-even calculator. How many months until cash flow returns your initial investment. Plus healthy break-even benchmarks by strategy.",
+      "Free rental break-even calculator estimating cash-flow recovery time from entered assumptions.",
     url: `${siteUrl}/tools/break-even-calculator`,
     offers: {
       "@type": "Offer",
@@ -116,7 +116,7 @@ export default function BreakEvenCalculatorPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }} />
       <ToolBreadcrumbSchema toolName="Break-Even Calculator" toolPath="/tools/break-even-calculator" />
 
-      <main className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
+      <main id="main" className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
         <nav aria-label="Breadcrumb" className="mb-6 text-xs">
           <ol className="flex flex-wrap items-center gap-2 text-muted-foreground">
             <li><Link href="/" className="hover:text-foreground">Home</Link></li>
@@ -132,7 +132,7 @@ export default function BreakEvenCalculatorPage() {
           Rental Property Break-Even Calculator
         </h1>
         <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-          Calculate how many months until your rental property&apos;s cash flow returns the cash you put in. Down payment + closing costs + initial repairs ÷ monthly net cash flow. Use it to compare deals on a how-fast-do-I-get-my-money-back basis.
+          Estimate how many months the entered monthly net cash flow would take to recover the entered down payment, closing costs, and initial repairs. The result assumes cash flow stays constant and excludes appreciation, principal paydown, taxes, and sale proceeds.
         </p>
 
         <div className="mt-8">
@@ -169,11 +169,11 @@ export default function BreakEvenCalculatorPage() {
         <section className="mt-12 border-t border-border pt-8">
           <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">Related metrics</h2>
           <div className="flex flex-wrap gap-2 text-sm">
-            <Link href="/glossary/cash-on-cash-return" className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Cash-on-cash return</Link>
-            <Link href="/glossary/cap-rate" className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Cap rate</Link>
-            <Link href="/glossary/irr" className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">IRR</Link>
-            <Link href="/tools/cash-on-cash-calculator" className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Cash-on-cash calculator</Link>
-            <Link href="/tools/cap-rate-calculator" className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Cap rate calculator</Link>
+            <Link href="/glossary/cash-on-cash-return" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Cash-on-cash return</Link>
+            <Link href="/glossary/cap-rate" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Cap rate</Link>
+            <Link href="/glossary/irr" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">IRR</Link>
+            <Link href="/tools/cash-on-cash-calculator" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Cash-on-cash calculator</Link>
+            <Link href="/tools/cap-rate-calculator" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Cap rate calculator</Link>
           </div>
         </section>
 

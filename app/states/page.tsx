@@ -55,7 +55,7 @@ export default function StatesIndexPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
       <Header />
 
-      <main className="mx-auto max-w-5xl px-4 sm:px-6 py-8 sm:py-12">
+      <main id="main" className="mx-auto max-w-5xl px-4 sm:px-6 py-8 sm:py-12">
         <p className="text-[11px] uppercase tracking-widest text-primary font-bold">By state</p>
         <h1 className="mt-2 text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight">
           Rental property investing by state

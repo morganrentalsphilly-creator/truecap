@@ -79,7 +79,7 @@ export default async function ClientPortalPage({
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-8">
+      <main id="main" className="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-8">
         <div className="mb-6">
           <p className="text-xs font-bold uppercase tracking-widest" style={{ color: brandColor }}>
             Prepared for {clientName}

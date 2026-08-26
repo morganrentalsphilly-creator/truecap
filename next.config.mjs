@@ -1,6 +1,34 @@
 import { withSentryConfig } from '@sentry/nextjs';
+import { fileURLToPath } from 'node:url';
+
+const projectRoot = fileURLToPath(new URL('.', import.meta.url));
+
+// Observation-only CSP rollout. This does not block traffic; violations are
+// reduced to non-sensitive directive/origin metadata by /api/csp-report so we
+// can tighten the policy safely before enforcing it with nonces.
+const cspReportOnly = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'self'",
+  "form-action 'self' https://checkout.stripe.com",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com https://*.googletagmanager.com https://*.googleapis.com https://js.stripe.com https://*.posthog.com https://challenges.cloudflare.com",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src 'self' data: https://fonts.gstatic.com",
+  "img-src 'self' data: blob: https:",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.posthog.com https://*.sentry.io https://*.googleapis.com https://api.stripe.com https://challenges.cloudflare.com",
+  "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://challenges.cloudflare.com https://www.google.com",
+  "worker-src 'self' blob:",
+  "manifest-src 'self'",
+  "report-uri /api/csp-report",
+].join("; ");
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // This repository can live below a home directory that has an unrelated
+  // lockfile. Pin both tracing engines to this project so Next never infers a
+  // parent workspace or omits runtime files from a deployment bundle.
+  outputFileTracingRoot: projectRoot,
+  turbopack: { root: projectRoot },
   typescript: {
     // Block production deploys on TypeScript errors. Previously `true`,
     // which meant a future React 19 / Next 16 API change could silently
@@ -83,11 +111,9 @@ const nextConfig = {
     ];
   },
 
-  // Security headers applied to every response. These are the conservative
-  // set — they don't break any third-party integrations (gtag, Sentry tunnel,
-  // PostHog, Stripe, Google Maps Places) because they don't enforce CSP.
-  // Adding CSP would require careful nonce handling for the inline scripts in
-  // app/layout.tsx — defer until you have time to test thoroughly.
+  // Security headers applied to every response. CSP begins in report-only
+  // mode so third-party integrations remain uninterrupted while violations
+  // are inventoried for a later nonce-based enforced policy.
   async headers() {
     return [
       // /embed/* widgets are DESIGNED to be embedded in third-party iframes
@@ -168,6 +194,7 @@ const nextConfig = {
           // IDs) to third-party trackers. strict-origin-when-cross-origin
           // is the safest default that doesn't break analytics.
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Content-Security-Policy-Report-Only", value: cspReportOnly },
         ],
       },
       // Long-cache Cache-Control for static-ish marketing pages. These

@@ -166,16 +166,19 @@ interface AnalysisDashboardProps {
   marketRentEstimate?: number | null;
   projectionSource: {
     analysisId: string | null;
+    recorded?: boolean;
     input: TenYearProjectionInput;
     initialYears: ProjectionYear[];
   } | null;
   taxStrategySource: {
     analysisId: string | null;
+    recorded?: boolean;
     input: TaxStrategyInput;
     initialYears: TaxStrategyYear[];
   } | null;
   exitScenarioSource: {
     analysisId: string | null;
+    recorded?: boolean;
     input: ExitScenarioInput;
     initialYears: ExitScenarioYear[];
   } | null;
@@ -200,7 +203,7 @@ interface AnalysisDashboardProps {
   onPrepareAuthSave: (
     maoTarget?: MaoTarget,
     source?: OfferCeilingTargetSource
-  ) => void;
+  ) => unknown;
   /** Fill the analyzer form from pulled comps (facts + estimates). */
   onApplyComps?: (enrichment: PropertyEnrichment) => void;
   /** Apply the rehab estimator's total to the deal's cash invested. */
@@ -520,18 +523,18 @@ export function AnalysisDashboard({
   const requiresBuyBoxTargetResolution = Boolean(
     isAuthenticated && canUseMaxOffer && !maoTargetOverride && !isSampleProPreview
   );
-  // Buy Box criteria are account-scoped, not property-scoped. Editing the
-  // address re-evaluates fit synchronously against the already-loaded boxes;
-  // it must not reset readiness without triggering a matching refetch.
-  const buyBoxTargetScopeKey = requiresBuyBoxTargetResolution ? "account" : "explicit";
+  // Buy Box criteria are account-scoped, not result-mode-scoped. The card
+  // loads them for every authenticated results session, including the sample
+  // preview. Moving from that preview to edited assumptions must reuse the
+  // completed lookup instead of resetting to `loading` without a refetch.
+  // A guest/auth transition remounts or restarts the account lookup; address,
+  // sample-preview, and explicit-target changes do not.
   const [buyBoxTargetResolutionState, setBuyBoxTargetResolutionState] = useState<
     "loading" | "ready" | "error"
-  >(requiresBuyBoxTargetResolution ? "loading" : "ready");
+  >(isAuthenticated ? "loading" : "ready");
   useEffect(() => {
-    setBuyBoxTargetResolutionState(
-      requiresBuyBoxTargetResolution ? "loading" : "ready"
-    );
-  }, [buyBoxTargetScopeKey, requiresBuyBoxTargetResolution]);
+    setBuyBoxTargetResolutionState(isAuthenticated ? "loading" : "ready");
+  }, [isAuthenticated]);
   const effectiveBuyBoxTargetResolutionState = requiresBuyBoxTargetResolution
     ? buyBoxTargetResolutionState
     : "ready";
@@ -832,8 +835,8 @@ export function AnalysisDashboard({
   // Google OAuth and keeps a "Sign in" cross-link (which threads ?next)
   // for the rare returning user.
   const goToLogin = () => {
-    onPrepareAuthSave(adoptedMaoTarget, adoptedMaoTargetSource);
-    setPendingSaveIntent();
+    const intendedDraft = onPrepareAuthSave(adoptedMaoTarget, adoptedMaoTargetSource);
+    setPendingSaveIntent(intendedDraft);
     router.push("/auth/sign-up?next=/");
   };
   // Auth-aware upgrade routing (BROWSER-1 / STRATEGY-UPSELL-LOGIN-DEADEND):
@@ -878,7 +881,7 @@ export function AnalysisDashboard({
   // title and the hero-corner Save (Phase 2 surfaces the same action in
   // both places; the logic lives once).
   const saveLockedHint = isEditingLockedByPlan
-    ? "Upgrade to update saved analyses."
+    ? "Upgrade to update deals in My Deals."
     : isSaveLimitLockedByPlan
       ? "Saved deal limit reached for your plan."
       : isAuthenticated && !canSaveDeals
@@ -1321,7 +1324,7 @@ export function AnalysisDashboard({
                 {Math.round(dealScoreResult.data.score)}/100
               </p>
               <p className="text-[11px] text-muted-foreground">
-                Secondary screening heuristic — not investment advice.
+                Secondary screening heuristic — not investment advice. Method v{dealScoreResult.data.scoreMethodologyVersion ?? "recorded"}.
               </p>
             </div>
           ) : null}
@@ -1395,6 +1398,7 @@ export function AnalysisDashboard({
           netCashFlow={result.netCashFlow}
           capRate={result.capRate}
           cocReturn={result.cocReturn}
+          totalCashRequired={result.totalCashRequired}
           decisionTone={nextAction?.tone ?? "review"}
           isPaid={canUseMaxOffer}
         />
@@ -1940,14 +1944,23 @@ export function AnalysisDashboard({
           return (
             <div className="flex flex-wrap gap-2">
               {chips.map((c) => (
-                <span
-                  key={c.label}
-                  title={c.hint}
-                  className="inline-flex items-baseline gap-1.5 rounded-full border border-border bg-muted/40 px-3 py-1 text-xs"
-                >
-                  <span className="text-muted-foreground">{c.label}</span>
-                  <span className="font-bold tabular-nums text-foreground">{c.value}</span>
-                </span>
+                <Popover key={c.label}>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      aria-label={`${c.label}: ${c.value}. Show definition`}
+                      className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-border bg-muted/40 px-3 text-xs transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    >
+                      <span className="text-muted-foreground">{c.label}</span>
+                      <span className="font-bold tabular-nums text-foreground">{c.value}</span>
+                      <Info className="size-3 text-muted-foreground" aria-hidden="true" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-72 text-xs leading-relaxed" align="start">
+                    <p className="font-semibold text-foreground">{c.label}</p>
+                    <p className="mt-1 text-muted-foreground">{c.hint}</p>
+                  </PopoverContent>
+                </Popover>
               ))}
             </div>
           );
@@ -1969,13 +1982,13 @@ export function AnalysisDashboard({
                 Long-term projection differs from the year-1 operating result
               </p>
               <p className="text-xs leading-relaxed text-foreground/70">
-                Year-1 cash flow is negative because of the high leverage, but after the
-                year-1 tax effect (depreciation + deductible interest, net of tax on the
-                rental income) it runs about{" "}
+                Year-1 cash flow is negative because of the high leverage. The simplified
+                tax model produces an illustrative after-tax estimate of{" "}
                 <strong className="text-foreground">
                   +${Math.round(result.afterTaxCF).toLocaleString()}/mo
                 </strong>
-                , and the projected 10-year total return is{" "}
+                . Whether deductions are currently usable depends on the taxpayer. The projected
+                10-year total return is{" "}
                 <strong className="text-foreground">
                   ~{Math.round(annualizedReturnPct ?? 0)}%/yr
                 </strong>{" "}
@@ -2533,9 +2546,9 @@ function CashFlowOverTimeStrip({ result }: { result: AnalysisResult }) {
     return `${sign}$${Math.abs(value).toLocaleString()}`;
   };
 
-  // Growth ratio between Y1 and Y10 - surfaced as a single sentence
-  // below the strip so the user immediately gets the "compounding"
-  // insight without doing the math themselves.
+  // Growth ratio between Y1 and Y10 - surfaced as a single sentence without
+  // claiming which assumption caused it. Fixed debt service alone can make cash
+  // flow grow even when rent and expenses use the same growth rate.
   const growthMultiplier =
     yearOne.netCashFlowAnnual > 0
       ? yearTen.netCashFlowAnnual / yearOne.netCashFlowAnnual
@@ -2544,7 +2557,7 @@ function CashFlowOverTimeStrip({ result }: { result: AnalysisResult }) {
     if (growthMultiplier == null) return null;
     if (!Number.isFinite(growthMultiplier)) return null;
     if (growthMultiplier >= 1.05) {
-      return `Cash flow compounds ~${growthMultiplier.toFixed(1)}× over the hold period as rent grows faster than expenses.`;
+      return `Modeled cash flow is ~${growthMultiplier.toFixed(1)}× year 1 by year 10 under your entered rent, expense, and financing assumptions.`;
     }
     if (growthMultiplier < 0.95 && growthMultiplier > 0) {
       return `Cash flow compresses over the hold period - review your rent/expense growth assumptions.`;

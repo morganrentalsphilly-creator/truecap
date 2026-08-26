@@ -8,7 +8,7 @@ export function SnapshotStatusCard({
   isLoading,
 }: {
   title: string;
-  snapshotSource: "preview" | "local" | "cache" | "generated";
+  snapshotSource: "preview" | "recorded" | "local" | "cache" | "generated";
   isLoading: boolean;
 }) {
   return (
@@ -20,6 +20,8 @@ export function SnapshotStatusCard({
           <p className="text-xs text-muted-foreground">
             {snapshotSource === "preview"
               ? "Preview - not saved"
+              : snapshotSource === "recorded"
+                ? "Recorded snapshot - unchanged"
               : snapshotSource === "local"
                 ? "Live saved analysis"
               : snapshotSource === "cache"

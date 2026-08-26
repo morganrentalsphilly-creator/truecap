@@ -25,6 +25,7 @@ interface MomentOfValueUpsellProps {
   netCashFlow: number;
   capRate: number;
   cocReturn: number;
+  totalCashRequired: number;
   decisionTone: "blocked" | "review" | "ready";
   /** True when the viewer is already on a paid plan; if so we render nothing. */
   isPaid: boolean;
@@ -40,6 +41,7 @@ export function MomentOfValueUpsell({
   netCashFlow,
   capRate,
   cocReturn,
+  totalCashRequired,
   decisionTone,
   isPaid,
 }: MomentOfValueUpsellProps) {
@@ -118,7 +120,7 @@ export function MomentOfValueUpsell({
           icon={TrendingUp}
           label="Screened cash flow"
           value={`${fmtMoney(netCashFlow)}/mo`}
-          sub={`${capRate.toFixed(1)}% cap · ${cocReturn.toFixed(1)}% CoC`}
+          sub={`${capRate.toFixed(1)}% cap · ${totalCashRequired > 0 ? `${cocReturn.toFixed(1)}%` : "N/A"} CoC`}
         />
         <FeatureChip
           icon={FileDown}
@@ -189,7 +191,7 @@ export function MomentOfValueUpsell({
 
       {/* Inline note — softens the upsell */}
       <p className="mt-4 border-t border-border/60 pt-3 text-[11px] text-muted-foreground">
-        Cash flow {fmtMoney(netCashFlow)}/mo · cap {capRate.toFixed(1)}% · CoC {cocReturn.toFixed(1)}%.
+        Cash flow {fmtMoney(netCashFlow)}/mo · cap {capRate.toFixed(1)}% · CoC {totalCashRequired > 0 ? `${cocReturn.toFixed(1)}%` : "N/A"}.
         Calculations are estimates based on your inputs. Verify assumptions independently before recording or acting on an investment decision.
       </p>
     </div>

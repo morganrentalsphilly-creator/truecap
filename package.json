@@ -11,6 +11,8 @@
     "start": "next start",
     "lint": "eslint .",
     "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:install": "playwright install chromium",
     "reset-passwords": "node lib/reset-passwords.mjs",
     "schedule-broadcasts": "npx -y tsx scripts/schedule-all-broadcasts.ts",
     "schedule-broadcasts:dry": "npx -y tsx scripts/schedule-all-broadcasts.ts --dry-run",
@@ -72,6 +74,8 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4.2.0",
     "@types/node": "^22",
     "@types/react": "^19",

@@ -18,6 +18,7 @@
  */
 
 import { Check, Database, Target, TrendingUp } from "lucide-react";
+import Link from "next/link";
 import { HeroAddressForm } from "@/components/marketing/hero-address-form";
 import { DealsAnalyzedTicker } from "@/components/marketing/deals-analyzed-ticker";
 import { SAMPLE_DEAL_FIXTURE } from "@/lib/sample-deal";
@@ -274,21 +275,21 @@ function HeroProductMock({ decisionPositioning }: { decisionPositioning: boolean
         <div className="tc-hero-step-2 mt-4 rounded-xl border-2 border-primary/30 bg-[var(--brand-blue-light)] p-4">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest text-primary">
+              <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest text-[var(--brand-blue-text)]">
                 <Target aria-hidden className="size-3.5" /> Offer Ceiling
               </div>
               <div className="mt-1 font-mono text-3xl font-extrabold tabular-nums tracking-tight text-primary">
                 {maxOfferLabel}
               </div>
               {gap != null && gap > 0 ? (
-                <div className="mt-0.5 text-xs font-semibold text-muted-foreground">
+                <div className="mt-0.5 text-xs font-semibold text-foreground/80">
                   ${gap.toLocaleString("en-US")} below the ${listPrice.toLocaleString("en-US")} list price
                 </div>
               ) : null}
-              <p className="mt-1 text-xs text-muted-foreground">
+              <p className="mt-1 text-xs text-foreground/80">
                 {SAMPLE_DEAL_FIXTURE.targetProfile.name} v{SAMPLE_DEAL_FIXTURE.targetProfile.version} · {targetLabel}.
               </p>
-              <p className="mt-1 text-[10px] leading-relaxed text-muted-foreground">
+              <p className="mt-1 text-[10px] leading-relaxed text-foreground/80">
                 Highest modeled price that still meets the sample target profile under the assumptions shown. This is not a recommended offer.
               </p>
             </div>
@@ -342,6 +343,12 @@ function HeroProductMock({ decisionPositioning }: { decisionPositioning: boolean
         <p className="mt-3 text-[10px] leading-relaxed text-muted-foreground">
           Example analysis using editable sample inputs. Estimates are not an appraisal or investment guarantee.
         </p>
+        <Link
+          href="/sample-decision-memo"
+          className="mt-1 inline-flex min-h-11 items-center text-xs font-bold text-primary underline-offset-4 hover:underline"
+        >
+          Open the standalone sample decision memo →
+        </Link>
       </div>
       {/* edge fade */}
       <div className="pointer-events-none absolute inset-x-0 -bottom-6 h-12 bg-gradient-to-t from-background to-transparent" />

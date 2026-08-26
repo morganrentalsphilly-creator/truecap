@@ -162,6 +162,7 @@ export async function mintPublicShare(input: {
         input.resultSnapshot ?? {
           ...currentResult,
           score: currentScore.score,
+          scoreMethodologyVersion: currentScore.scoreMethodologyVersion,
           recommendation: currentScore.recommendation,
           riskLevel: currentScore.riskLevel,
           breakdown: currentScore.breakdown,

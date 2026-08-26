@@ -63,6 +63,7 @@ import { DueThisWeekCard, type AgingDealRow, type DueThisWeekDeal } from "@/comp
 import { BuyBoxNudge } from "@/components/dashboard/buy-box-nudge";
 import type { OwnedEquitySeriesPoint } from "@/lib/owned-equity-series";
 import type { BuyBoxFitSummary } from "@/lib/buy-box";
+import { applicableCashOnCashValue } from "@/lib/cash-on-cash-applicability";
 
 export type DashboardHomeData = {
   user: {
@@ -112,6 +113,8 @@ export type DashboardHomeData = {
       negativeCount: number;
     } | null;
   } | null;
+  /** Explicitly distinguishes a failed full-book read from an empty book. */
+  portfolioAggregateStatus?: "ready" | "unavailable";
   /**
    * Saved deals whose signal changed at today's 30-yr rate (see
    * lib/rate-watch). Null when the rate is unavailable or nothing changed —
@@ -223,13 +226,15 @@ function getInitials(displayName: string, email: string): string {
 }
 
 function getTopDeals(data: DashboardHomeData): DashboardTopDeal[] {
-  return data.topDeals.map((deal) => ({
+  return data.topDeals.map((deal) => {
+    const coc = applicableCashOnCashValue(deal.cocReturnPct, deal.cashToClose);
+    return {
       id: deal.id,
       name: deal.address,
       address: deal.propertyTypeLabel,
       type: deal.propertyTypeLabel,
       capRate: deal.capRatePct == null ? null : Number(deal.capRatePct.toFixed(1)),
-      coc: deal.cocReturnPct == null ? null : Number(deal.cocReturnPct.toFixed(1)),
+      coc: coc == null ? null : Number(coc.toFixed(1)),
       cashFlow: deal.cashFlowMonthly == null ? null : Math.round(deal.cashFlowMonthly),
       price: deal.purchasePrice == null ? null : Math.round(deal.purchasePrice),
       score: deal.score == null ? null : Math.round(deal.score),
@@ -244,7 +249,8 @@ function getTopDeals(data: DashboardHomeData): DashboardTopDeal[] {
       // the badge and the Fit sort stay invisible for them.
       fit: data.buyBox?.fitByDealId[deal.id] ?? null,
       methodologyLabel: deal.methodologyLabel,
-    }));
+    };
+  });
 }
 
 function getRiskReturn(data: DashboardHomeData) {
@@ -253,11 +259,12 @@ function getRiskReturn(data: DashboardHomeData) {
   // (N/A, not 0) — null keeps them off the DSCR axis; the chart notes them.
   const chartDeals = data.allDeals.map((deal) => {
     const isCashPurchase = deal.monthlyPayment != null && deal.monthlyPayment <= 0;
+    const coc = applicableCashOnCashValue(deal.cocReturnPct, deal.cashToClose);
     return {
       dealId: deal.id,
       name: deal.address,
       type: deal.propertyTypeLabel,
-      coc: deal.cocReturnPct,
+      coc,
       roi: deal.roiPct,
       dscr: isCashPurchase ? null : deal.dscr,
       isCashPurchase,
@@ -551,6 +558,7 @@ function getPortfolioTotals(data: DashboardHomeData) {
   // a 20-most-recent sample, and summing a sample silently understated
   // Pipeline Value / Monthly Cash Flow for users with 21+ deals.
   if (data.portfolioAggregates) return data.portfolioAggregates;
+  if (data.portfolioAggregateStatus === "unavailable") return null;
   const valid = data.allDeals.filter((d) => d.purchasePrice != null);
   const totalValue = valid.reduce((s, d) => s + (d.purchasePrice ?? 0), 0);
   const totalCashFlow = data.allDeals.reduce(
@@ -611,18 +619,23 @@ function buildDecisionInsights(deals: DashboardDeal[]) {
   const reviewPick = pick(needsReview);
   const cashPick = pick(cash);
   const roiPick = pick(roi);
+  const cashPickCoc = cashPick
+    ? applicableCashOnCashValue(cashPick.cocReturnPct, cashPick.cashToClose)
+    : null;
 
-  const evidence = (d: DashboardDeal): string =>
-    [
+  const evidence = (d: DashboardDeal): string => {
+    const coc = applicableCashOnCashValue(d.cocReturnPct, d.cashToClose);
+    return [
       d.score != null ? `Secondary Screening Index ${Math.round(d.score)}` : null,
       d.recommendation ? recommendationLabel(d.recommendation) : null,
       d.cashFlowMonthly != null ? `${formatSignedCurrency(d.cashFlowMonthly)}/mo` : null,
       d.capRatePct != null ? `${d.capRatePct.toFixed(1)}% cap` : null,
-      d.cocReturnPct != null ? `${d.cocReturnPct.toFixed(1)}% CoC` : null,
+      coc != null ? `${coc.toFixed(1)}% CoC` : null,
       d.dscr != null ? `DSCR ${d.dscr.toFixed(2)}` : null,
     ]
       .filter(Boolean)
       .join(" · ");
+  };
 
   return [
     bestPick
@@ -651,7 +664,7 @@ function buildDecisionInsights(deals: DashboardDeal[]) {
     cashPick
       ? {
           title: `Strongest cash flow: ${cashPick.address}`,
-          body: `${formatSignedCurrency(cashPick.cashFlowMonthly)}/mo today${cashPick.cocReturnPct != null ? ` · ${cashPick.cocReturnPct.toFixed(1)}% cash-on-cash` : ""}. Next: stress-test vacancy and repairs before you commit.`,
+          body: `${formatSignedCurrency(cashPick.cashFlowMonthly)}/mo today${cashPickCoc != null ? ` · ${cashPickCoc.toFixed(1)}% cash-on-cash` : ""}. Next: stress-test vacancy and repairs before you commit.`,
           tone: "tip" as const,
           action: { label: "Open this deal", href: `/dashboard/saved-analyses/${cashPick.id}` },
         }
@@ -697,9 +710,11 @@ export function DashboardHome({
       highlights: getDecisionHighlights(data),
       insights: buildDecisionInsights(data.allDeals),
       portfolio: getPortfolioTotals(data),
-      decisionCenter: getDecisionCenter(data),
-      kpis: getPortfolioKpis(data),
-      pipeline: getPipelineSummary(data),
+      decisionCenter:
+        data.portfolioAggregateStatus === "unavailable" ? null : getDecisionCenter(data),
+      kpis: data.portfolioAggregateStatus === "unavailable" ? null : getPortfolioKpis(data),
+      pipeline:
+        data.portfolioAggregateStatus === "unavailable" ? null : getPipelineSummary(data),
     }),
     [data]
   );
@@ -711,15 +726,17 @@ export function DashboardHome({
   // chart pass itself off as the whole book. Null (no caption) when the
   // sample IS the full set or the aggregate count is unavailable.
   const sampledNote =
-    data.portfolioAggregates && data.portfolioAggregates.totalCount > data.allDeals.length
+    data.portfolioAggregateStatus === "unavailable"
+      ? `Showing up to ${data.allDeals.length} recent active deals. Full portfolio totals are temporarily unavailable.`
+      : data.portfolioAggregates && data.portfolioAggregates.totalCount > data.allDeals.length
       ? `Showing your ${data.allDeals.length} most recent active deals (of ${data.portfolioAggregates.totalCount}) — totals and Decision Center cover every active deal.`
       : null;
   // Active deals (portfolio.totalCount) vs the full saved set
   // (savedTotalCount = the sidebar "My Deals" badge count). When the user
   // has archived/completed deals the two differ, so we surface both and
   // never show a dashboard number that contradicts the sidebar badge.
-  const savedTotalCount = data.savedTotalCount ?? portfolio.totalCount;
-  const hasArchivedOrCompleted = savedTotalCount > portfolio.totalCount;
+  const savedTotalCount = data.savedTotalCount ?? portfolio?.totalCount ?? data.stats.totalDeals;
+  const hasArchivedOrCompleted = Boolean(portfolio && savedTotalCount > portfolio.totalCount);
   const owned = data.ownedPortfolio ?? null;
   const ownedCount = owned?.count ?? 0;
   // Buy-box awareness (PV-1): headline + Decision Center tile only when the
@@ -748,9 +765,13 @@ export function DashboardHome({
       ? // PV-1: the month-3 question is "do any of MY deals meet MY criteria
         // yet?" — answer it in the headline for configured users.
         `${buyBoxSummary.passingCount} of your ${buyBoxSummary.evaluatedCount} active deals ${buyBoxSummary.passingCount === 1 ? "meets" : "meet"} your buy box.`
-      : hasArchivedOrCompleted
+      : data.portfolioAggregateStatus === "unavailable"
+        ? "Recent active deals are shown below. Full portfolio totals are temporarily unavailable."
+      : hasArchivedOrCompleted && portfolio
         ? `Active pipeline: ${portfolio.totalCount} of ${savedTotalCount} saved ${savedTotalCount === 1 ? "deal" : "deals"}.`
-        : `Your book at a glance — ${portfolio.totalCount} active ${portfolio.totalCount === 1 ? "deal" : "deals"}.`;
+        : portfolio
+          ? `Your book at a glance — ${portfolio.totalCount} active ${portfolio.totalCount === 1 ? "deal" : "deals"}.`
+          : "Your recent active deals are shown below.";
 
   // SCROLL CONTRACT (natural scroll, Jun 2026): the dashboard scrolls the
   // PAGE/body naturally — NOT a viewport-locked inner pane. The shell is a
@@ -843,6 +864,23 @@ export function DashboardHome({
             )}
           </div>
         </div>
+
+        {data.portfolioAggregateStatus === "unavailable" ? (
+          <div
+            role="alert"
+            className="flex flex-col gap-3 rounded-2xl border border-warning/35 bg-warning/10 p-4 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div>
+              <p className="text-sm font-semibold text-foreground">Portfolio totals temporarily unavailable</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Your saved deals are still here. The list below shows recent deals, but TrueCap will not present that sample as your full portfolio.
+              </p>
+            </div>
+            <Button asChild variant="outline" className="min-h-11 shrink-0 rounded-xl">
+              <Link href="/dashboard" prefetch={false}>Retry totals</Link>
+            </Button>
+          </div>
+        ) : null}
 
         {/* ── Decision Center — fact-based comparisons derived from active
             deals: highest Screening Index, first cash-flow-negative deal to
@@ -1121,7 +1159,7 @@ export function DashboardHome({
             tones across the dashboard instead of 4 (was primary,
             success, violet, gold) reads as a serious financial
             product rather than a colorful bento grid. */}
-        {hasAnyDeals ? (
+        {hasAnyDeals && portfolio ? (
           <section>
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">

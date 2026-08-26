@@ -1,7 +1,6 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -9,7 +8,7 @@ const COMPARE_COOKIE = "truecap_compare_ids";
 const MAX_COMPARE_ITEMS = 4;
 
 type CompareActionResult =
-  | { ok: true }
+  | { ok: true; remainingIds?: string[] }
   | { ok: false; code: "SIGN_IN_REQUIRED" | "ENTITLEMENT_REQUIRED" | "LIMIT_EXCEEDED" | "INVALID_SELECTION" | "SERVER_ERROR"; message: string };
 
 function uniqueIds(ids: string[]): string[] {
@@ -43,11 +42,14 @@ export async function getCompareIdsFromCookie(): Promise<string[]> {
 export async function startCompareAction(ids: string[]): Promise<CompareActionResult> {
   const selectedIds = uniqueIds(ids);
 
+  // One ID is a valid seed from "Compare with another deal". The compare
+  // route treats it as a preselected picker state and never renders a
+  // one-column comparison; the inline picker itself requires 2 before submit.
   if (selectedIds.length < 1) {
     return {
       ok: false,
       code: "INVALID_SELECTION",
-      message: "Select at least 1 deal to compare.",
+      message: "Select at least 1 deal to start a comparison.",
     };
   }
 
@@ -148,8 +150,9 @@ export async function addDealToCompareAction(id: string): Promise<CompareActionR
 
 /**
  * Compare-scenarios shortcut (DM-1 / CMP-1): given any saved deal, pre-select
- * its property's scenarios into the compare flow and jump to /dashboard/compare.
- * Reuses the same cookie + entitlement gate as manual compare.
+ * its property's scenarios for the compare flow. The client navigates only
+ * after this action settles, matching the manual compare path and ensuring the
+ * HttpOnly selection cookie is available to /dashboard/compare.
  */
 export async function compareScenariosAction(dealId: string): Promise<CompareActionResult> {
   const id = dealId.trim();
@@ -205,11 +208,32 @@ export async function compareScenariosAction(dealId: string): Promise<CompareAct
   }
 
   await setCompareCookie(ids);
-  redirect("/dashboard/compare");
+  return { ok: true };
 }
 
-export async function removeCompareDealAction(id: string) {
-  const ids = (await getCompareIdsFromCookie()).filter((currentId) => currentId !== id);
+export async function removeCompareDealAction(id: string): Promise<CompareActionResult> {
+  const selectedId = id.trim();
+  if (!selectedId) {
+    return { ok: false, code: "INVALID_SELECTION", message: "Choose a deal to remove." };
+  }
+
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in to edit this comparison." };
+  }
+
+  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  if (!hasPlanFeature(entitlements, "compare_deals")) {
+    return { ok: false, code: "ENTITLEMENT_REQUIRED", message: "Compare is not available for your current plan." };
+  }
+
+  const ids = (await getCompareIdsFromCookie()).filter((currentId) => currentId !== selectedId);
   await setCompareCookie(ids);
-  redirect("/dashboard/compare");
+  // The client refreshes after showing a visible pending/success state. With
+  // one remaining deal the server page opens the seeded picker rather than a
+  // misleading one-column comparison.
+  return { ok: true, remainingIds: ids };
 }

@@ -134,7 +134,7 @@ export function ToolsConversionCta({ calculatorName, hook }: ToolsConversionCtaP
             </div>
             <Link
               href="/auth/sign-up"
-              className="inline-flex h-9 shrink-0 items-center gap-1 rounded-lg bg-primary px-3 text-xs font-bold text-primary-foreground hover:bg-primary/95 sm:h-10 sm:px-4 sm:text-sm"
+              className="inline-flex min-h-11 shrink-0 items-center gap-1 rounded-lg bg-primary px-3 text-xs font-bold text-primary-foreground hover:bg-primary/95 sm:px-4 sm:text-sm"
             >
               Start free
               <ArrowRight className="size-3.5" />
@@ -143,7 +143,7 @@ export function ToolsConversionCta({ calculatorName, hook }: ToolsConversionCtaP
               type="button"
               onClick={handleDismiss}
               aria-label="Dismiss"
-              className="shrink-0 rounded-full p-1.5 text-muted-foreground/60 hover:bg-muted hover:text-foreground"
+              className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground/60 hover:bg-muted hover:text-foreground"
             >
               <X className="size-4" />
             </button>

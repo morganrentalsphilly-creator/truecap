@@ -6,8 +6,8 @@ import {
 } from "@/components/investcalc/saved-analyses-page-v2";
 
 export const metadata: Metadata = {
-  title: "Saved Analyses",
-  description: "Your saved rental property analyses in TrueCap.",
+  title: "My Deals",
+  description: "Your saved rental property deals in TrueCap.",
   alternates: { canonical: "/dashboard/saved-analyses" },
   robots: { index: false, follow: false },
 };
@@ -51,6 +51,8 @@ import { normalizeDataConfidence } from "@/lib/data-confidence";
 import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { StoredRecommendation, StoredRiskLevel } from "@/lib/compare-metrics";
+import { RetryRouteButton } from "@/components/dashboard/retry-route-button";
+import { applicableCashOnCashValue } from "@/lib/cash-on-cash-applicability";
 
 type SortField = "saved" | "cash-flow" | "coc" | "cap-rate" | "price";
 type SortDirection = "asc" | "desc";
@@ -249,6 +251,15 @@ function mapSavedRow(
         canShowMao,
         buyBoxesResolved
       );
+  const cashToClose = fresh
+    ? fresh.cashToClose
+    : numberFromSnapshot(snapshot.totalCashRequired);
+  const cocReturnPct = applicableCashOnCashValue(
+    fresh
+      ? fresh.cocReturnPct
+      : (numberFromSnapshot(snapshot.cocReturn) ?? row.coc_return_pct),
+    cashToClose
+  );
 
   return {
     id: row.id,
@@ -261,9 +272,7 @@ function mapSavedRow(
     netCashFlowMonthly: fresh
       ? fresh.netCashFlowMonthly
       : (numberFromSnapshot(snapshot.netCashFlow) ?? row.net_cash_flow_monthly),
-    cocReturnPct: fresh
-      ? fresh.cocReturnPct
-      : (numberFromSnapshot(snapshot.cocReturn) ?? row.coc_return_pct),
+    cocReturnPct,
     capRatePct: fresh ? fresh.capRatePct : Number.isFinite(parsedCapRate) ? parsedCapRate : null,
     dscr: fresh ? fresh.dscr : numberFromSnapshot(snapshot.dscr),
     isCashPurchase: fresh
@@ -271,7 +280,7 @@ function mapSavedRow(
       : numberFromSnapshot(snapshot.monthlyPayment) != null
         ? numberFromSnapshot(snapshot.monthlyPayment)! <= 0
         : undefined,
-    cashToClose: fresh ? fresh.cashToClose : numberFromSnapshot(snapshot.totalCashRequired),
+    cashToClose,
     score: fresh ? fresh.score : Number.isFinite(parsedScore) ? parsedScore : null,
     recommendation: fresh ? fresh.recommendation : storedRecommendation,
     riskLevel: fresh ? fresh.riskLevel : storedRiskLevel,
@@ -503,10 +512,11 @@ export default async function DashboardSavedAnalysesPage({
           />
           <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
             <div className="rounded-2xl border border-destructive/25 bg-destructive/5 p-6">
-              <h1 className="text-xl font-bold text-foreground">Could not load saved analyses</h1>
+              <h1 className="text-xl font-bold text-foreground">Could not load My Deals</h1>
               <p className="text-sm text-muted-foreground mt-2">
                 Please try again in a few moments.
               </p>
+              <RetryRouteButton className="mt-4" />
             </div>
           </main>
         </div>

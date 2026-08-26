@@ -18,7 +18,7 @@
  * Defensive: gracefully handles the case where the DB migration hasn't
  * been applied yet - shows a quiet inline notice instead of crashing.
  */
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as Sentry from "@sentry/nextjs";
 import { Loader2, NotebookPen } from "lucide-react";
 import {
@@ -26,52 +26,119 @@ import {
   updateSavedDealNotesAction,
 } from "@/app/actions/saved-analyses";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import {
+  getQueuedDealNotesSave,
+  isCurrentDealNotesSave,
+  type QueuedDealNotesSave,
+} from "@/lib/deal-notes-save-lifecycle";
 
 const NOTES_MAX = 10_000;
+
+type NotesConflict = {
+  latestNotes: string;
+  latestRevision: number;
+};
 
 export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
   const { toast } = useToast();
   const [notes, setNotes] = useState<string>("");
   const [initialLoaded, setInitialLoaded] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [migrationPending, setMigrationPending] = useState(false);
-  const [savedTick, setSavedTick] = useState<number>(0);
-  const [isPending, startTransition] = useTransition();
-  const [lastSavedNotes, setLastSavedNotes] = useState<string>("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [revision, setRevision] = useState<number | null>(null);
+  const [conflict, setConflict] = useState<NotesConflict | null>(null);
+  const [recoverableDraft, setRecoverableDraft] = useState<string | null>(null);
+  const [saveStatus, setSaveStatus] = useState<
+    "idle" | "dirty" | "saving" | "saved" | "error" | "conflict"
+  >("idle");
+  const notesRef = useRef("");
+  const lastSavedNotesRef = useRef("");
+  const savedDealIdRef = useRef(savedDealId);
+  const saveRequestRef = useRef<symbol | null>(null);
+  const queuedSaveRequestedRef = useRef(false);
+
+  useEffect(() => {
+    savedDealIdRef.current = savedDealId;
+  }, [savedDealId]);
 
   // Lazy-load the current notes on mount / when the saved deal changes.
   useEffect(() => {
     let cancelled = false;
     setInitialLoaded(false);
+    setLoadError(null);
     setMigrationPending(false);
-    // .catch contains action rejections from becoming unhandled
-    // browser promise rejections. If the action throws (transient
-    // Supabase outage, etc.), the panel just stays in its loading
-    // state - no Sentry false-positive.
+    setSaveStatus("idle");
+    setIsSaving(false);
+    // Invalidate an older deal's request without letting its eventual
+    // completion clear a newer deal's save lifecycle.
+    saveRequestRef.current = null;
+    queuedSaveRequestedRef.current = false;
+    setRevision(null);
+    setConflict(null);
+    setRecoverableDraft(null);
+    // A rejected read must never fall through to an editable empty textarea:
+    // surface a retry state and keep writes unavailable until server truth loads.
     void getSavedDealNotesAction(savedDealId)
       .then((result) => {
         if (cancelled) return;
         if (result.ok) {
-          setNotes(result.notes ?? "");
-          setLastSavedNotes(result.notes ?? "");
+          const stored = result.notes ?? "";
+          notesRef.current = stored;
+          lastSavedNotesRef.current = stored;
+          setNotes(stored);
+          setRevision(result.revision);
         } else if (result.code === "MIGRATION_PENDING") {
           setMigrationPending(true);
+        } else {
+          setLoadError(result.message || "We couldn't load these notes.");
         }
         setInitialLoaded(true);
       })
       .catch((err) => {
         if (!cancelled) {
           console.warn("[deal-notes] load failed:", err);
+          setLoadError("We couldn't load these notes. Check your connection and try again.");
           setInitialLoaded(true);
         }
       });
     return () => {
       cancelled = true;
     };
-  }, [savedDealId]);
+  }, [loadAttempt, savedDealId]);
 
-  const persistOnBlur = () => {
-    if (migrationPending) return;
-    if (notes === lastSavedNotes) return;
+  const persistNotes = (
+    revisionOverride?: number,
+    allowConflictResolution = false,
+    notesOverride?: string
+  ) => {
+    if (migrationPending || loadError) {
+      return;
+    }
+    if (saveRequestRef.current !== null) {
+      // A blur can happen while the prior save is still in flight. Record the
+      // intent instead of issuing an overlapping write; the owner request
+      // compares its submitted snapshot with the latest ref and immediately
+      // chains the newest draft using the revision returned by the server.
+      queuedSaveRequestedRef.current = true;
+      return;
+    }
+    if (conflict && !allowConflictResolution) {
+      return;
+    }
+    const currentNotes = notesOverride ?? notesRef.current;
+    if (currentNotes === lastSavedNotesRef.current) {
+      if (allowConflictResolution) setConflict(null);
+      setSaveStatus("saved");
+      return;
+    }
+    const revisionAtSubmit = revisionOverride ?? revision;
+    if (revisionAtSubmit === null) {
+      setMigrationPending(true);
+      return;
+    }
     // Capture the deal id + notes snapshot AT submit time. If the user
     // switches to a different saved deal mid-save (e.g. clicks another
     // saved deal in the list before the server action returns), we
@@ -79,13 +146,31 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
     // the previous deal - that would mark the new deal's textarea as
     // "saved" when it actually hasn't been touched yet.
     const dealIdAtSubmit = savedDealId;
-    const notesAtSubmit = notes;
-    startTransition(async () => {
+    const notesAtSubmit = currentNotes;
+    const requestToken = Symbol("deal-notes-save");
+    saveRequestRef.current = requestToken;
+    queuedSaveRequestedRef.current = false;
+    setIsSaving(true);
+    setSaveStatus("saving");
+    void (async () => {
+      let queuedSave: QueuedDealNotesSave | null = null;
+      const requestStillOwnsDeal = () =>
+        isCurrentDealNotesSave({
+          submittedDealId: dealIdAtSubmit,
+          currentDealId: savedDealIdRef.current,
+          requestToken,
+          currentRequestToken: saveRequestRef.current,
+        });
       try {
-        const result = await updateSavedDealNotesAction(dealIdAtSubmit, notesAtSubmit);
-        if (dealIdAtSubmit !== savedDealId) {
+        const result = await updateSavedDealNotesAction(
+          dealIdAtSubmit,
+          notesAtSubmit,
+          revisionAtSubmit
+        );
+        if (!requestStillOwnsDeal()) {
           // User switched deals while this save was in flight - its
-          // result is no longer relevant. Discard silently.
+          // result is no longer relevant. The request token also closes the
+          // A → B → A case, where the id alone would look current again.
           return;
         }
         if (!result.ok) {
@@ -93,6 +178,30 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
             setMigrationPending(true);
             return;
           }
+          if (result.code === "STALE_DATA") {
+            const fresh = await getSavedDealNotesAction(dealIdAtSubmit).catch(
+              () => null
+            );
+            if (!requestStillOwnsDeal()) return;
+            if (fresh?.ok) {
+              const latestNotes = fresh.notes ?? "";
+              setRevision(fresh.revision);
+              lastSavedNotesRef.current = latestNotes;
+              setConflict({
+                latestNotes,
+                latestRevision: fresh.revision,
+              });
+              setSaveStatus("conflict");
+              toast({
+                title: "Notes changed elsewhere",
+                description:
+                  "Your draft is preserved. Review the latest saved text, then load it or explicitly save your version.",
+                variant: "destructive",
+              });
+              return;
+            }
+          }
+          setSaveStatus("error");
           toast({
             title: "Could not save notes",
             description: result.message,
@@ -100,8 +209,21 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
           });
           return;
         }
-        setLastSavedNotes(notesAtSubmit);
-        setSavedTick(Date.now());
+        setRevision(result.revision);
+        setConflict(null);
+        lastSavedNotesRef.current = notesAtSubmit;
+        queuedSave = getQueuedDealNotesSave({
+          wasRequested: queuedSaveRequestedRef.current,
+          submittedNotes: notesAtSubmit,
+          currentNotes: notesRef.current,
+          returnedRevision: result.revision,
+        });
+        if (!queuedSave) {
+          queuedSaveRequestedRef.current = false;
+        }
+        setSaveStatus(
+          notesRef.current === notesAtSubmit ? "saved" : "dirty"
+        );
       } catch (err) {
         // The action REJECTED (network blip, cold-start 500, stale-deploy
         // Server Action) rather than returning {ok:false}. Without this the
@@ -109,21 +231,97 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
         // just falls back to "Auto-saves" as if nothing happened. Tell the
         // user it's retryable — the typed text is untouched, so re-blurring
         // retries. Same stale-deal guard as the success path.
+        if (!requestStillOwnsDeal()) return;
         Sentry.captureException(err, { tags: { feature: "deal-notes" } });
-        if (dealIdAtSubmit !== savedDealId) return;
+        setSaveStatus("error");
         toast({
           title: "Could not save notes",
           description: "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
+      } finally {
+        // Only the request that still owns the lifecycle may clear it. A deal
+        // change invalidates this token, and a later save installs a new one.
+        if (saveRequestRef.current === requestToken) {
+          saveRequestRef.current = null;
+          if (dealIdAtSubmit === savedDealIdRef.current) {
+            setIsSaving(false);
+          }
+        }
       }
-    });
+      if (
+        queuedSave &&
+        dealIdAtSubmit === savedDealIdRef.current &&
+        saveRequestRef.current === null
+      ) {
+        // Serialize the newest draft behind the completed write. Passing the
+        // returned revision makes this a safe compare-and-swap rather than an
+        // overlapping last-write-wins update.
+        queuedSaveRequestedRef.current = false;
+        persistNotes(
+          queuedSave.expectedRevision,
+          true,
+          queuedSave.notes
+        );
+      }
+    })();
+  };
+
+  const persistOnBlur = () => persistNotes();
+
+  const loadLatestNotes = () => {
+    if (!conflict) return;
+    const localDraft = notesRef.current;
+    setRecoverableDraft(
+      localDraft === conflict.latestNotes ? null : localDraft
+    );
+    notesRef.current = conflict.latestNotes;
+    lastSavedNotesRef.current = conflict.latestNotes;
+    setNotes(conflict.latestNotes);
+    setRevision(conflict.latestRevision);
+    setConflict(null);
+    setSaveStatus("saved");
+  };
+
+  const restoreRecoverableDraft = () => {
+    if (recoverableDraft === null) return;
+    notesRef.current = recoverableDraft;
+    setNotes(recoverableDraft);
+    setRecoverableDraft(null);
+    setSaveStatus(
+      recoverableDraft === lastSavedNotesRef.current ? "saved" : "dirty"
+    );
   };
 
   // Render nothing while we wait for the first fetch - avoids a flash
   // of empty notes before the saved content arrives.
   if (!initialLoaded) {
     return null;
+  }
+
+  if (loadError) {
+    return (
+      <section
+        aria-label="Deal notes"
+        className="rounded-2xl border border-destructive/25 bg-destructive/5 p-4"
+      >
+        <div role="alert">
+          <p className="text-sm font-semibold text-foreground">Couldn&apos;t load deal notes</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {loadError} Editing stays disabled until the saved notes are available, so they cannot be overwritten.
+          </p>
+        </div>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className="mt-3 min-h-11"
+          onClick={() => setLoadAttempt((attempt) => attempt + 1)}
+        >
+          Try again
+        </Button>
+      </section>
+    );
   }
 
   if (migrationPending) {
@@ -139,9 +337,6 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
   }
 
   const remaining = NOTES_MAX - notes.length;
-  const showSaved =
-    !isPending && savedTick > 0 && Date.now() - savedTick < 4000;
-
   return (
     <section
       aria-label="Deal notes"
@@ -155,26 +350,107 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
           </h3>
         </div>
         <div role="status" aria-live="polite" className="flex items-center gap-2 text-[11px] text-muted-foreground">
-          {isPending ? (
+          {isSaving || saveStatus === "saving" ? (
             <span className="inline-flex items-center gap-1">
               <Loader2 className="size-3 animate-spin" /> Saving…
             </span>
-          ) : showSaved ? (
-            <span className="text-[var(--metric-positive,#16a34a)]">Saved</span>
+          ) : saveStatus === "saved" ? (
+            <span className="text-[var(--metric-positive,#16a34a)]">Saved just now</span>
+          ) : saveStatus === "error" ? (
+            <span className="inline-flex items-center gap-2">
+              <span className="font-semibold text-destructive">Couldn&apos;t save</span>
+              <button
+                type="button"
+                onClick={persistOnBlur}
+                className="min-h-11 rounded-md px-2 font-semibold text-primary underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                Retry
+              </button>
+            </span>
+          ) : saveStatus === "conflict" ? (
+            <span className="font-semibold text-amber-700">Needs review</span>
+          ) : saveStatus === "dirty" ? (
+            <span>Unsaved changes</span>
           ) : (
-            <span>Auto-saves</span>
+            <span>Saved</span>
           )}
         </div>
       </div>
-      <label htmlFor="deal-notes" className="sr-only">
+      {conflict ? (
+        <div
+          role="alert"
+          className="mb-3 rounded-xl border border-amber-500/35 bg-amber-500/10 p-3"
+        >
+          <p className="text-sm font-semibold text-foreground">
+            A newer note was saved elsewhere
+          </p>
+          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+            Your version remains in the editor. The latest saved version is
+            shown below; nothing will be overwritten until you choose.
+          </p>
+          <div className="mt-2 max-h-36 overflow-auto whitespace-pre-wrap rounded-lg border border-border bg-background p-2 text-xs text-foreground">
+            {conflict.latestNotes || "(The latest saved note is empty.)"}
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="min-h-11"
+              onClick={loadLatestNotes}
+              disabled={isSaving}
+            >
+              Load latest
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              className="min-h-11"
+              onClick={() =>
+                persistNotes(conflict.latestRevision, true)
+              }
+              disabled={isSaving}
+            >
+              Save my version
+            </Button>
+          </div>
+        </div>
+      ) : null}
+      {recoverableDraft !== null ? (
+        <div
+          role="status"
+          className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-muted/30 p-3 text-xs text-muted-foreground"
+        >
+          <span>Your prior unsaved draft is preserved.</span>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="min-h-11"
+            onClick={restoreRecoverableDraft}
+          >
+            Restore my draft
+          </Button>
+        </div>
+      ) : null}
+      <label htmlFor="deal-notes-input" className="sr-only">
         Deal notes
       </label>
       <textarea
-        id="deal-notes"
+        id="deal-notes-input"
         value={notes}
         onChange={(event) => {
           const next = event.target.value;
-          setNotes(next.length > NOTES_MAX ? next.slice(0, NOTES_MAX) : next);
+          const clipped = next.length > NOTES_MAX ? next.slice(0, NOTES_MAX) : next;
+          notesRef.current = clipped;
+          setNotes(clipped);
+          setSaveStatus(
+            conflict
+              ? "conflict"
+              : clipped === lastSavedNotesRef.current
+                ? "saved"
+                : "dirty"
+          );
         }}
         onBlur={persistOnBlur}
         rows={4}

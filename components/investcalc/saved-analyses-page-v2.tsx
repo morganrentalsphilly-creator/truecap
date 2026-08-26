@@ -54,7 +54,6 @@ import {
 import { startCompareAction } from "@/app/actions/compare";
 import {
   bulkUpdateSavedDealsAction,
-  completeSavedAnalysisPdfExportAction,
   getSavedAnalysisPdfExportAction,
   updateSavedDealLifecycleStateAction,
   updateSavedDealStageAction,
@@ -86,12 +85,7 @@ import {
   type DealScoreBreakdown,
 } from "@/lib/deal-score";
 import type { ReportData } from "@/lib/pdf-generator";
-import { createBrowserSupabaseClient } from "@/lib/supabase/client";
-import {
-  ANALYSIS_PDF_BUCKET,
-  buildAnalysisPdfObjectPath,
-  PDF_CACHE_VERSION,
-} from "@/lib/pdf-export-constants";
+import { cacheSavedAnalysisPdfExport } from "@/lib/pdf/saved-analysis-cache";
 import {
   buildExitScenarios,
   resolveExitScenarioRates,
@@ -134,7 +128,12 @@ import { TestimonialPrompt, dispatchProofMoment } from "@/components/marketing/t
 import {
   openSavedDealInAnalysisTab as openSavedDealInAnalysisTabShared,
   duplicateSavedDealInAnalyzer,
+  openAnalyzerHandoffWindow,
 } from "@/components/investcalc/open-saved-deal-in-analyzer";
+import {
+  applicableCashOnCashValue,
+  isCashOnCashNotApplicable,
+} from "@/lib/cash-on-cash-applicability";
 
 type SavedSignal = "strong-buy" | "buy" | "neutral" | "risky" | "avoid";
 type SavedPropertyType = "single-family" | "multi-family" | "owner-occupant";
@@ -214,7 +213,7 @@ export type SavedAnalysisListItem = {
 function toBuyBoxMetrics(item: SavedAnalysisListItem): BuyBoxDealMetrics {
   return {
     capRatePct: item.capRatePct,
-    cocPct: item.cocReturnPct,
+    cocPct: applicableCashOnCashValue(item.cocReturnPct, item.cashToClose),
     dscr: item.dscr ?? null,
     cashFlowMonthly: item.netCashFlowMonthly,
     purchasePrice: item.purchasePrice,
@@ -1316,6 +1315,10 @@ export function SavedAnalysesPage({
       setCurrentPage(persisted.currentPage);
     }
     setViewHydrated(true);
+    // Initial hydration only: reacting to later query-string changes would
+    // replay stale persisted filters after the user explicitly clears a
+    // client scope.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   // Optional decision columns (DSCR, cash to close) - off by default so the
   // default table stays uncrowded; remembered per browser.
@@ -1483,7 +1486,12 @@ export function SavedAnalysesPage({
     const valueFor = (item: SavedAnalysisListItem) => {
       if (activeSortField === "saved") return new Date(item.createdAt).getTime();
       if (activeSortField === "cash-flow") return item.netCashFlowMonthly ?? Number.NEGATIVE_INFINITY;
-      if (activeSortField === "coc") return item.cocReturnPct ?? Number.NEGATIVE_INFINITY;
+      if (activeSortField === "coc") {
+        return (
+          applicableCashOnCashValue(item.cocReturnPct, item.cashToClose) ??
+          Number.NEGATIVE_INFINITY
+        );
+      }
       if (activeSortField === "cap-rate") return item.capRatePct ?? Number.NEGATIVE_INFINITY;
       return item.purchasePrice ?? Number.NEGATIVE_INFINITY;
     };
@@ -1843,7 +1851,7 @@ export function SavedAnalysesPage({
         }
         toast({
           title: `Deleted ${result.affectedCount} deal${result.affectedCount === 1 ? "" : "s"}`,
-          description: "Removed from your saved analyses.",
+          description: "Removed from My Deals.",
           variant: "success",
         });
         setSelectedIds([]);
@@ -1884,7 +1892,10 @@ export function SavedAnalysesPage({
           score: item.score,
           purchasePrice: item.purchasePrice,
           netCashFlowMonthly: item.netCashFlowMonthly,
-          cocReturnPct: item.cocReturnPct,
+          cocReturnPct: applicableCashOnCashValue(
+            item.cocReturnPct,
+            item.cashToClose
+          ),
           capRatePct: item.capRatePct,
           dscr: item.dscr ?? null,
           isCashPurchase: item.isCashPurchase ?? false,
@@ -2098,8 +2109,7 @@ export function SavedAnalysesPage({
   };
 
   const handleOpenAnalysisClick = (id: string) => {
-    const targetWindow = window.open("about:blank", "_blank");
-    if (targetWindow) targetWindow.opener = null;
+    const targetWindow = openAnalyzerHandoffWindow();
     setOpeningDealId(id);
     void (async () => {
       try {
@@ -2114,8 +2124,7 @@ export function SavedAnalysesPage({
   // expenses carried over, property identity cleared). Same popup-safe tab
   // pattern as Open; a save from the forked deal is a fresh insert.
   const handleDuplicateDeal = (id: string) => {
-    const targetWindow = window.open("about:blank", "_blank");
-    if (targetWindow) targetWindow.opener = null;
+    const targetWindow = openAnalyzerHandoffWindow();
     setOpeningDealId(id);
     void (async () => {
       try {
@@ -2133,14 +2142,11 @@ export function SavedAnalysesPage({
     })();
   };
 
-  const openPdfUrl = (pdfUrl: string) => {
-    const link = document.createElement("a");
-    link.href = pdfUrl;
-    link.target = "_blank";
-    link.rel = "noopener noreferrer";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+  const openPdfUrlInCurrentTab = (pdfUrl: string) => {
+    // This fallback runs after an async fetch, when browsers commonly block a
+    // new tab because the original click gesture has expired. Same-tab
+    // navigation is not a popup and gives the user a reliable recovery path.
+    window.location.assign(pdfUrl);
   };
 
   const handleExportPdfClick = (id: string) => {
@@ -2169,14 +2175,8 @@ export function SavedAnalysesPage({
             const cacheResp = await fetch(exportResult.pdfUrl);
             if (!cacheResp.ok) throw new Error("Fetch failed");
             const cacheBlob = await cacheResp.blob();
-            const blobUrl = URL.createObjectURL(cacheBlob);
-            const a = document.createElement("a");
-            a.href = blobUrl;
-            a.download = "Investment-Analysis-Report.pdf";
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            URL.revokeObjectURL(blobUrl);
+            const { downloadPdfBlob } = await import("@/lib/pdf/download");
+            downloadPdfBlob(cacheBlob, "Investment-Analysis-Report.pdf");
             toast({
               title: "PDF downloaded",
               description: "Your saved report was downloaded.",
@@ -2187,8 +2187,11 @@ export function SavedAnalysesPage({
             // asked. Same once-per-browser cap applies.
             dispatchProofMoment("pdf_export");
           } catch {
-            // Fallback - try the original popup approach.
-            openPdfUrl(exportResult.pdfUrl);
+            toast({
+              title: "Opening saved PDF",
+              description: "The direct download was unavailable, so the report is opening in this tab.",
+            });
+            openPdfUrlInCurrentTab(exportResult.pdfUrl);
           }
           return;
         }
@@ -2366,8 +2369,6 @@ export function SavedAnalysesPage({
         // gesture had expired and the browser silently blocked it, so Export
         // PDF appeared to do nothing. A download is never treated as a popup.
         downloadPdfFromBase64(pdfResult.pdfBase64, pdfResult.filename);
-        const pdfBytes = Uint8Array.from(atob(pdfResult.pdfBase64), (c) => c.charCodeAt(0));
-        const pdfBlob = new Blob([pdfBytes], { type: "application/pdf" });
 
         // Show a quick success toast so the user knows the export
         // worked even if their browser silently downloaded the file.
@@ -2384,61 +2385,14 @@ export function SavedAnalysesPage({
         // dedicated tag so systemic failures (RLS regression, quota,
         // bucket misconfig) are visible in the dashboard without
         // surfacing as errors to the user.
-        void (async () => {
-          try {
-            const supabase = createBrowserSupabaseClient();
-            const {
-              data: { user },
-            } = await supabase.auth.getUser();
-            if (!user) return;
-            // Path embeds both the composite cache version and the server-issued
-            // fingerprint of the exact saved snapshots used above. An engine
-            // bump OR a target/input edit therefore writes a different object;
-            // the completion action rechecks the fingerprint + row version
-            // before it records that object as current.
-            const filePath = buildAnalysisPdfObjectPath(
-              user.id,
-              exportResult.id,
-              PDF_CACHE_VERSION,
-              exportResult.renderFingerprint
-            );
-            const { error: uploadError } = await supabase.storage
-              .from(ANALYSIS_PDF_BUCKET)
-              .upload(filePath, pdfBlob, {
-                contentType: "application/pdf",
-                upsert: true,
-              });
-            if (uploadError) {
-              Sentry.captureMessage("pdf-cache-write upload failed", {
-                level: "warning",
-                tags: { feature: "pdf-cache-write" },
-                extra: { message: uploadError.message },
-              });
-              return;
-            }
-            // No getPublicUrl: the bucket is private (migration
-            // 20260802120000). The server records the object path and mints a
-            // short-lived signed URL at read time.
-            const completeResult = await completeSavedAnalysisPdfExportAction(
-              exportResult.id,
-              exportResult.renderFingerprint,
-              pdfResult.hasBranding,
-              pdfResult.hasBuyBoxVerdict,
-              pdfResult.buyBoxStateResolved
-            );
-            if (!completeResult.ok && completeResult.code !== "STALE_EXPORT") {
-              Sentry.captureMessage("pdf-cache-write complete action failed", {
-                level: "warning",
-                tags: { feature: "pdf-cache-write" },
-                extra: { code: completeResult.code, message: completeResult.message },
-              });
-            }
-          } catch (err) {
-            Sentry.captureException(err, {
-              tags: { feature: "pdf-cache-write" },
-            });
-          }
-        })();
+        void cacheSavedAnalysisPdfExport({
+          analysisId: exportResult.id,
+          renderFingerprint: exportResult.renderFingerprint,
+          pdfBase64: pdfResult.pdfBase64,
+          renderedWithBranding: pdfResult.hasBranding,
+          renderedWithBuyBoxVerdict: pdfResult.hasBuyBoxVerdict,
+          buyBoxStateResolved: pdfResult.buyBoxStateResolved,
+        });
       } catch (err) {
         // Top-level catch - any error in the regenerate path (parsing,
         // generation, etc.) surfaces a toast AND captures to Sentry so
@@ -2522,7 +2476,7 @@ export function SavedAnalysesPage({
           </Button>
           <div className="h-6 w-px bg-border" />
           <div className="space-y-1">
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">Saved Analyses</h1>
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">My Deals</h1>
             <p className="text-sm text-muted-foreground">{filteredItems.length} deals in your portfolio</p>
           </div>
         </div>
@@ -2555,7 +2509,7 @@ export function SavedAnalysesPage({
             <div className="relative flex-1 max-w-xl">
               <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
               <label htmlFor="saved-analysis-search" className="sr-only">
-                Search saved analyses by address
+                Search your deals by address
               </label>
               <Input
                 id="saved-analysis-search"
@@ -2772,6 +2726,11 @@ export function SavedAnalysesPage({
               const isSelected = selectedIds.includes(item.id);
               const signal = item.signal;
               const PropertyTypeIcon = getTypeIcon(item.propertyType);
+              const cocNotApplicable = isCashOnCashNotApplicable(item.cashToClose);
+              const cocReturnPct = applicableCashOnCashValue(
+                item.cocReturnPct,
+                item.cashToClose
+              );
               // Badge row stays one line: signal + buy-box fit lead, and the
               // status / score-breakdown / data-confidence extras fold behind
               // a compact "+N" popover so completed deals with confidence data
@@ -2880,8 +2839,15 @@ export function SavedAnalysesPage({
                     </div>
                     <div className="rounded-xl bg-muted/40 p-3">
                       <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">CoC</p>
-                      <p className={cn("mt-1 text-sm font-extrabold", (item.cocReturnPct ?? 0) >= 0 ? "text-success" : "text-[var(--metric-negative)]")}>
-                        {toPercent(item.cocReturnPct)}
+                      <p className={cn(
+                        "mt-1 text-sm font-extrabold",
+                        cocNotApplicable
+                          ? "text-muted-foreground"
+                          : (cocReturnPct ?? 0) >= 0
+                            ? "text-success"
+                            : "text-[var(--metric-negative)]"
+                      )}>
+                        {cocNotApplicable ? "N/A" : toPercent(cocReturnPct)}
                       </p>
                     </div>
                     <div className="rounded-xl bg-muted/40 p-3">
@@ -3104,6 +3070,11 @@ export function SavedAnalysesPage({
                   const isSelected = selectedIds.includes(item.id);
                   const signal = item.signal;
                   const PropertyTypeIcon = getTypeIcon(item.propertyType);
+                  const cocNotApplicable = isCashOnCashNotApplicable(item.cashToClose);
+                  const cocReturnPct = applicableCashOnCashValue(
+                    item.cocReturnPct,
+                    item.cashToClose
+                  );
                   return (
                     <tr key={item.id} className={cn("group/row h-16 border-b border-border/80 transition-colors", isSelected ? "bg-primary/5" : "hover:bg-muted/40")}>
                       <td className="px-3 align-middle">
@@ -3224,7 +3195,14 @@ export function SavedAnalysesPage({
                         </div>
                       </td>
                       <td className={cn("whitespace-nowrap text-right font-semibold tabular-nums", (item.netCashFlowMonthly ?? 0) >= 0 ? "text-success" : "text-[var(--metric-negative)]")}>{toMonthCashFlow(item.netCashFlowMonthly)}</td>
-                      <td className={cn("whitespace-nowrap text-right font-semibold tabular-nums", (item.cocReturnPct ?? 0) >= 0 ? "text-success" : "text-[var(--metric-negative)]")}>{toPercent(item.cocReturnPct)}</td>
+                      <td className={cn(
+                        "whitespace-nowrap text-right font-semibold tabular-nums",
+                        cocNotApplicable
+                          ? "text-muted-foreground"
+                          : (cocReturnPct ?? 0) >= 0
+                            ? "text-success"
+                            : "text-[var(--metric-negative)]"
+                      )}>{cocNotApplicable ? "N/A" : toPercent(cocReturnPct)}</td>
                       <td className="whitespace-nowrap text-right font-medium tabular-nums">{toPercent(item.capRatePct)}</td>
                       <td className="whitespace-nowrap text-right font-semibold tabular-nums text-foreground">{toCurrency(item.purchasePrice)}</td>
                       {optionalColumns.dscr ? (

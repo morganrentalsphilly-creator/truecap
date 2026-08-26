@@ -19,6 +19,9 @@ describe("strategy scenario persistence", () => {
     expect(source).toContain("clone.methodology_version = result.methodologyVersion");
     expect(source).toContain("buildCompareSnapshotPayload(");
     expect(source).toContain("buildDealScoreInputFromAnalysis(adjusted, result)");
+    expect(source).toContain(
+      "scoreMethodologyVersion: dealScore.scoreMethodologyVersion"
+    );
     for (const assignment of [
       "clone.down_payment_pct = adjusted.downPaymentPct",
       "clone.maintenance_pct = adjusted.maintenancePct",

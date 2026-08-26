@@ -32,7 +32,7 @@ interface SignupPromptCardProps {
   /** True when the viewer is signed in. If so, render nothing. */
   isAuthenticated: boolean;
   /** Persist the exact analysis snapshot before auth navigation begins. */
-  onPrepareSaveIntent?: () => void;
+  onPrepareSaveIntent?: () => unknown;
 }
 
 export function SignupPromptCard({ address, isAuthenticated, onPrepareSaveIntent }: SignupPromptCardProps) {
@@ -45,8 +45,8 @@ export function SignupPromptCard({ address, isAuthenticated, onPrepareSaveIntent
   if (isAuthenticated || dismissed) return null;
 
   const beginSignup = (method: "google" | "email" | "sign_in") => {
-    onPrepareSaveIntent?.();
-    setPendingSaveIntent();
+    const intendedDraft = onPrepareSaveIntent?.();
+    setPendingSaveIntent(intendedDraft);
     trackEvent("signup_started", { placement: "analysis_result", method });
   };
 

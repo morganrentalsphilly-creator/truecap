@@ -6,7 +6,10 @@
  * calculateMaxAllowableOffer/calculateAnalysis and stays explicitly labeled.
  */
 
-import type { InvestmentFormValues } from "@/lib/investcalc-schema";
+import {
+  MIN_PURCHASE_PRICE,
+  type InvestmentFormValues,
+} from "@/lib/investcalc-schema";
 import {
   calculateMaxAllowableOffer,
   type MaoResult,
@@ -125,15 +128,30 @@ export function buildOfferCeilingRangePreview(
   const base = calculateMaxAllowableOffer(values, previewTarget);
   if (!base) return null;
   const range = calculateOfferCeilingRange(values, previewTarget, base);
-  const candidates = [range.lower, range.base, range.upper].filter(
+  const candidates = [range.base, range.upper].filter(
     (value): value is number => value != null && Number.isFinite(value)
   );
   if (candidates.length === 0) return null;
   const increment = 25_000 as const;
-  const lower = Math.max(0, Math.floor(Math.min(...candidates) / increment) * increment);
+  const downsideFeasible = range.lower != null && Number.isFinite(range.lower);
+  const lower = downsideFeasible
+    ? Math.max(
+        MIN_PURCHASE_PRICE,
+        Math.floor(Math.min(range.lower as number, range.base) / increment) * increment
+      )
+    : null;
   const upper = Math.ceil(Math.max(...candidates) / increment) * increment;
-  const adjustedLower = upper <= lower ? Math.max(0, upper - increment) : lower;
-  return { lower: adjustedLower, upper, increment };
+  const adjustedLower =
+    lower != null && upper <= lower
+      ? Math.max(MIN_PURCHASE_PRICE, upper - increment)
+      : lower;
+  return {
+    lower: adjustedLower,
+    upper: Math.max(MIN_PURCHASE_PRICE, upper),
+    increment,
+    downsideFeasible,
+    upsideFeasible: range.upper != null && Number.isFinite(range.upper),
+  };
 }
 
 export function rankOfferCeilingConstraints(

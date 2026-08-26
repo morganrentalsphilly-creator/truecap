@@ -10,8 +10,8 @@ describe("guest analysis signup continuity", () => {
     const prompt = read("components/marketing/signup-prompt-card.tsx");
     const dashboard = read("components/investcalc/analysis-dashboard.tsx");
     const googleButton = read("components/auth/google-auth-button.tsx");
-    expect(prompt).toContain("setPendingSaveIntent()");
-    expect(prompt).toContain("onPrepareSaveIntent?.()");
+    expect(prompt).toContain("setPendingSaveIntent(intendedDraft)");
+    expect(prompt).toContain("const intendedDraft = onPrepareSaveIntent?.()");
     expect(prompt).toContain('href="/auth/sign-up?next=/"');
     expect(prompt).toContain('href="/auth/login?next=/"');
     expect(prompt).toContain('onBeforeStart={() => beginSignup("google")}');
@@ -26,7 +26,8 @@ describe("guest analysis signup continuity", () => {
 
   it("restores, runs, and persists before acknowledging the intent", () => {
     const calculator = read("components/investcalc/investcalc-page.tsx");
-    expect(calculator).toContain("hasPendingSaveIntent()");
+    expect(calculator).toContain("pendingSaveIntentMatchesDraft(normalized)");
+    expect(calculator).toContain("if (hasPendingSaveIntent()) clearPendingSaveIntent()");
     expect(calculator).toContain("performSaveDeal({ autoAfterAuth: true })");
     expect(calculator).toContain("clearPendingSaveIntent()");
     expect(calculator).toContain("writeCalcDraftWithMaoTarget(");

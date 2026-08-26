@@ -46,6 +46,25 @@ describe("buildAssumptionEntries (truthful assumptions strip)", () => {
     expect(e[0]!.source).toBe("HUD rent benchmark (ZIP)");
   });
 
+  it("never relabels a RentCast estimate as HUD in the compact summary", () => {
+    const e = buildAssumptionEntries(
+      {
+        monthlyRent: {
+          source: "rentcast-estimate",
+          detail: "Property estimate",
+          fetchedAt: "2026-08-25",
+        },
+      },
+      false
+    );
+    expect(e[0]).toMatchObject({
+      source: "RentCast market-rent estimate",
+      short: "RentCast",
+      freshness: "As of 2026-08-25",
+      manual: false,
+    });
+  });
+
   it("carries source freshness when the feed provides it", () => {
     const e = buildAssumptionEntries(
       {

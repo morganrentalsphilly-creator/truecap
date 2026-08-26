@@ -53,6 +53,71 @@ describe("saved-analysis methodology resolution", () => {
     expect((resolved.result as unknown as { score: number }).score).toBe(77);
   });
 
+  it("keeps pre-date recorded results readable without inventing an as-of date", () => {
+    const current = currentResult();
+    const { analysisDate: _omittedLegacyField, ...recordedBeforeDateCapture } =
+      current;
+    const resolved = resolveSavedAnalysisResult({
+      methodologyVersion: current.methodologyVersion,
+      resultSnapshot: recordedBeforeDateCapture,
+      recomputedResult: current,
+      recomputedExtras: {},
+    });
+
+    expect(resolved.mode).toBe("same-version-recorded-snapshot");
+    expect(resolved.result).not.toBeNull();
+    expect(
+      Object.prototype.hasOwnProperty.call(resolved.result, "analysisDate")
+    ).toBe(false);
+  });
+
+  it("keeps a recorded v1 Screening Index immutable across correctness errata", () => {
+    const current = currentResult();
+    const recordedBreakdown = {
+      cashFlowScore: 22,
+      cocScore: 0,
+      capRateScore: 16,
+      dscrScore: 17,
+      totalReturnScore: 25,
+      riskPenalty: 0,
+    };
+    const correctedBreakdown = {
+      ...recordedBreakdown,
+      applicabilityAdjustment: 20,
+    };
+    const resolved = resolveSavedAnalysisResult({
+      methodologyVersion: current.methodologyVersion,
+      resultSnapshot: {
+        ...current,
+        score: 80,
+        recommendation: "Strong Buy",
+        riskLevel: "Low Risk",
+        breakdown: recordedBreakdown,
+        explanation: "Recorded before the v1 Screening Index errata.",
+      },
+      recomputedResult: current,
+      recomputedExtras: {
+        score: 100,
+        recommendation: "Strong Buy",
+        riskLevel: "Low Risk",
+        breakdown: correctedBreakdown,
+        explanation: "Current corrected result.",
+      },
+    });
+    const saved = resolved.result as unknown as {
+      score: number;
+      breakdown: typeof recordedBreakdown & { applicabilityAdjustment?: number };
+      explanation: string;
+    };
+
+    expect(resolved.mode).toBe("same-version-recorded-snapshot");
+    expect(resolved.didRecompute).toBe(false);
+    expect(saved.score).toBe(80);
+    expect(saved.breakdown).toEqual(recordedBreakdown);
+    expect(saved.breakdown.applicabilityAdjustment).toBeUndefined();
+    expect(saved.explanation).toContain("before the v1 Screening Index errata");
+  });
+
   it("labels unversioned snapshots as legacy recomputations", () => {
     const current = currentResult();
     const resolved = resolveSavedAnalysisResult({

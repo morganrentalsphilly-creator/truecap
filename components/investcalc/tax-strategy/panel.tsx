@@ -13,6 +13,7 @@ import type { TaxStrategyInput, TaxStrategyYear } from "@/lib/tax-strategy";
 
 export type TaxStrategySource = {
   analysisId: string | null;
+  recorded?: boolean;
   input: TaxStrategyInput;
   initialYears: TaxStrategyYear[];
 };
@@ -24,18 +25,20 @@ export function TaxStrategyPanel({
 }) {
   const [years, setYears] = useState<TaxStrategyYear[]>(source.initialYears);
   const [isLoadingSnapshot, setIsLoadingSnapshot] = useState(false);
-  const [snapshotSource, setSnapshotSource] = useState<"preview" | "local" | "cache" | "generated">(
-    source.analysisId ? "local" : "preview"
+  const [snapshotSource, setSnapshotSource] = useState<
+    "preview" | "recorded" | "local" | "cache" | "generated"
+  >(
+    source.recorded ? "recorded" : source.analysisId ? "local" : "preview"
   );
 
   useEffect(() => {
     setYears(source.initialYears);
-    setSnapshotSource(source.analysisId ? "local" : "preview");
-  }, [source.analysisId, source.initialYears]);
+    setSnapshotSource(source.recorded ? "recorded" : source.analysisId ? "local" : "preview");
+  }, [source.analysisId, source.initialYears, source.recorded]);
 
   useEffect(() => {
     const analysisId = source.analysisId;
-    if (!analysisId) return;
+    if (!analysisId || source.recorded) return;
 
     let cancelled = false;
     setIsLoadingSnapshot(true);
@@ -68,7 +71,7 @@ export function TaxStrategyPanel({
     return () => {
       cancelled = true;
     };
-  }, [source.analysisId, source.input]);
+  }, [source.analysisId, source.input, source.recorded]);
 
   if (isLoadingSnapshot && years.length === 0) {
     return (

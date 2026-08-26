@@ -124,7 +124,7 @@ describe("TrueCap Underwriting Standard v2 compatibility boundary", () => {
       underwritingModelVersion: "1.0",
     });
 
-    expect(absent.methodologyVersion).toBe("1.0");
+    expect(absent.methodologyVersion).toBe("1.1");
     expect(explicit).toEqual(absent);
     // Characterize v1's intentional intermediate rounding so a future cleanup
     // cannot accidentally route old analyses through exact-annual v2.
@@ -153,6 +153,27 @@ describe("TrueCap Underwriting Standard v2 compatibility boundary", () => {
     expect(calculateAnalysis(normalized as V2Values).methodologyVersion).toBe(
       TRUECAP_UNDERWRITING_STANDARD_V2_VERSION
     );
+  });
+
+  it("defaults mortgage insurance by occupancy while preserving explicit lender inputs", () => {
+    const investor = calculateAnalysis(
+      parseV2({ downPaymentPct: 15, pmiAnnualRatePct: undefined })
+    );
+    const ownerOccupant = calculateAnalysis(
+      parseV2({
+        propertyType: "owner-occupant",
+        unitCount: 2,
+        downPaymentPct: 5,
+        pmiAnnualRatePct: undefined,
+      })
+    );
+    const explicitInvestor = calculateAnalysis(
+      parseV2({ downPaymentPct: 15, pmiAnnualRatePct: 1.1 })
+    );
+
+    expect(investor.pmiMonthly).toBe(0);
+    expect(ownerOccupant.pmiMonthly).toBeGreaterThan(0);
+    expect(explicitInvestor.pmiMonthly).toBeGreaterThan(0);
   });
 
   it("publishes a separate reviewed v2 formula registry without relabeling v1", () => {

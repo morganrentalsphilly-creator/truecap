@@ -52,6 +52,8 @@ function classifyDeal(result: AnalysisResult): {
   const cf = result.netCashFlow;
   const cap = result.capRate;
   const coc = result.cocReturn;
+  const cocApplicable = result.totalCashRequired > 0;
+  const clearsCoc = (threshold: number) => !cocApplicable || coc >= threshold;
   const dscr = result.dscr;
   // Cash purchases have no debt service, so DSCR is undefined.
   // calc-analysis returns 0 in that case — treat it as "not applicable"
@@ -66,18 +68,18 @@ function classifyDeal(result: AnalysisResult): {
   if (isCashPurchase) {
     if (cf < 0) {
       headline = cf < -200 ? "Negative" : "Marginal";
-    } else if (cf >= 400 && cap >= 7 && coc >= 8) {
+    } else if (cf >= 400 && cap >= 7 && clearsCoc(8)) {
       headline = "Strong";
-    } else if (cf >= 100 && cap >= 5 && coc >= 5) {
+    } else if (cf >= 100 && cap >= 5 && clearsCoc(5)) {
       headline = "Solid";
     } else {
       headline = "Mixed";
     }
   } else if (cf < 0 || dscr < 1.0) {
     headline = cf < -200 || dscr < 0.9 ? "Negative" : "Marginal";
-  } else if (cf >= 400 && dscr >= 1.25 && coc >= 10) {
+  } else if (cf >= 400 && dscr >= 1.25 && clearsCoc(10)) {
     headline = "Strong";
-  } else if (cf >= 100 && dscr >= 1.15 && coc >= 6) {
+  } else if (cf >= 100 && dscr >= 1.15 && clearsCoc(6)) {
     headline = "Solid";
   } else {
     headline = "Mixed";
@@ -105,8 +107,9 @@ function classifyDeal(result: AnalysisResult): {
     ? `DSCR is ${dscr.toFixed(2)}, above modeled debt-service breakeven but below the 1.25 screening benchmark; confirm the lender's definition and requirements.`
     : `DSCR of ${dscr.toFixed(2)} is below 1.0 — operating income doesn't cover debt service, so the owner subsidizes the property each month.`;
 
-  const cocSentence =
-    coc >= 12
+  const cocSentence = !cocApplicable
+    ? "Cash-on-cash isn't applicable because no initial cash investment is modeled."
+    : coc >= 12
       ? `Cash-on-cash is ${coc.toFixed(1)}% under the assumptions shown.`
       : coc >= 8
       ? `Cash-on-cash is ${coc.toFixed(1)}% under the assumptions shown.`

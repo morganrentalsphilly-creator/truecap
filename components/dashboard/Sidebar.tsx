@@ -13,6 +13,7 @@ import {
   CircleUserRound,
   Users,
   Target,
+  LockKeyhole,
 } from "lucide-react";
 import { AppLogo } from "@/components/brand/app-logo";
 import type { DashboardNavAccess } from "@/components/dashboard/dashboard-shell";
@@ -110,7 +111,7 @@ export function Sidebar({ activeDealCount, navAccess, mobile = false, onNavigate
             return (
               <Link
                 key={item.label}
-                href={item.enabled ? item.href : "#"}
+                href={item.enabled ? item.href : "/pricing"}
                 // Prefetch ON for in-app dashboard nav (Jun 2026): these
                 // are the tabs a signed-in user bounces between; fetching
                 // the RSC payload on hover makes switches feel instant
@@ -118,15 +119,14 @@ export function Sidebar({ activeDealCount, navAccess, mobile = false, onNavigate
                 // mounted. The prefetch={false} convention elsewhere is
                 // for marketing surfaces, not the app shell.
                 prefetch={item.enabled}
-                aria-disabled={!item.enabled}
                 aria-current={item.active ? "page" : undefined}
-                tabIndex={item.enabled ? undefined : -1}
                 onClick={onNavigate}
+                title={item.enabled ? undefined : `${item.label} is included with TrueCap Pro`}
                 className={`group flex min-h-11 items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                   item.active
                     ? "bg-sidebar-accent text-white shadow-[inset_0_1px_0_oklch(1_0_0_/_0.06)]"
                     : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-white"
-                } ${item.enabled ? "" : "pointer-events-none opacity-40"}`}
+                } ${item.enabled ? "" : "opacity-75 hover:opacity-100"}`}
               >
                 <Icon className="h-[18px] w-[18px]" />
                 <span className="flex-1">{item.label}</span>
@@ -135,6 +135,12 @@ export function Sidebar({ activeDealCount, navAccess, mobile = false, onNavigate
                     {item.badge}
                   </span>
                 )}
+                {!item.enabled ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-sidebar-accent px-1.5 py-0.5 text-[9px] font-bold text-sidebar-foreground/80">
+                    <LockKeyhole className="size-2.5" aria-hidden />
+                    PRO
+                  </span>
+                ) : null}
                 {item.active && <span className="h-1.5 w-1.5 rounded-full bg-primary" />}
               </Link>
             );

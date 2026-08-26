@@ -3,6 +3,7 @@ import type { DealScoreBreakdown } from "@/lib/deal-score";
 import { DEFAULT_PIPELINE_STAGE, isPipelineStage, type PipelineStage } from "@/lib/pipeline";
 import { normalizeDataConfidence, type DataConfidence } from "@/lib/data-confidence";
 import type { DealOfferBasis } from "@/lib/deal-offer-line";
+import { applicableCashOnCashValue } from "@/lib/cash-on-cash-applicability";
 
 type NumericLike = number | string | null | undefined;
 
@@ -200,6 +201,7 @@ function getRiskScore(snapshot: ResultSnapshot): number | null {
 
 export function buildDashboardDeal(row: SavedAnalysisDashboardRow): DashboardDeal {
   const snapshot = row.result_snapshot ?? {};
+  const cashToClose = toNumber(snapshot.totalCashRequired);
   return {
     id: row.id,
     address: getAddress(row),
@@ -208,11 +210,14 @@ export function buildDashboardDeal(row: SavedAnalysisDashboardRow): DashboardDea
     purchasePrice: toNumber(row.purchase_price),
     cashFlowMonthly: firstNumber(snapshot.netCashFlow, snapshot.net_cash_flow, row.net_cash_flow_monthly),
     annualCashFlow: getAnnualCashFlow(snapshot),
-    cocReturnPct: firstNumber(snapshot.cocReturn, row.coc_return_pct),
+    cocReturnPct: applicableCashOnCashValue(
+      firstNumber(snapshot.cocReturn, row.coc_return_pct),
+      cashToClose
+    ),
     capRatePct: toNumber(snapshot.capRate),
     dscr: getDscr(snapshot),
     monthlyPayment: getMonthlyPayment(snapshot),
-    cashToClose: toNumber(snapshot.totalCashRequired),
+    cashToClose,
     roiPct: getRoiPct(snapshot),
     score: toNumber(snapshot.score),
     recommendation: snapshot.recommendation ?? null,

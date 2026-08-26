@@ -60,4 +60,24 @@ describe("buildDashboardDeal", () => {
     expect(deal.address).toBe("Fallback Address");
     expect(deal.roiPct).toBe(199.1);
   });
+
+  it("maps a zero-cash CoC sentinel to N/A instead of 0%", () => {
+    const deal = buildDashboardDeal({
+      id: "deal-zero-cash",
+      address: "1 No Denominator Way",
+      title: null,
+      property_type: "single-family",
+      purchase_price: 250_000,
+      net_cash_flow_monthly: 800,
+      coc_return_pct: 0,
+      created_at: "2026-08-25T00:00:00.000Z",
+      result_snapshot: {
+        cocReturn: 0,
+        totalCashRequired: 0,
+      },
+    });
+
+    expect(deal.cashToClose).toBe(0);
+    expect(deal.cocReturnPct).toBeNull();
+  });
 });

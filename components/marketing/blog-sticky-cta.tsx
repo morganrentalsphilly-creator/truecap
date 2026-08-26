@@ -75,7 +75,7 @@ export function BlogStickyCta() {
         <Link
           href="/"
           prefetch={false}
-          className="inline-flex h-9 shrink-0 items-center gap-1 rounded-lg bg-primary px-3 text-xs font-bold text-primary-foreground hover:bg-primary/95 sm:h-10 sm:px-4 sm:text-sm"
+          className="inline-flex min-h-11 shrink-0 items-center gap-1 rounded-lg bg-primary px-3 text-xs font-bold text-primary-foreground hover:bg-primary/95 sm:px-4 sm:text-sm"
         >
           <Calculator className="size-3.5 sm:size-4" />
           <span className="hidden min-[380px]:inline">Analyze free</span>
@@ -93,7 +93,7 @@ export function BlogStickyCta() {
             }
           }}
           aria-label="Dismiss"
-          className="shrink-0 rounded-full p-1.5 text-muted-foreground/60 hover:bg-muted hover:text-foreground"
+          className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground/60 hover:bg-muted hover:text-foreground"
         >
           <X className="size-4" />
         </button>

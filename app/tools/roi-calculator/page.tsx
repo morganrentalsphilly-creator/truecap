@@ -17,7 +17,7 @@ import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-sch
 export const metadata: Metadata = {
   title: "Free Rental Property ROI Calculator — Total Return",
   description:
-    "Free total ROI calculator. Combines cash flow + principal paydown + appreciation — the real return on a rental, not just one piece of it.",
+    "Free modeled ROI calculator. Combine entered cash flow, principal paydown, and appreciation assumptions into a simple annual estimate.",
   keywords: [
     "rental property roi calculator",
     "real estate roi calculator",
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/tools/roi-calculator" },
   openGraph: {
     title: "Free Rental Property ROI Calculator — Total Return",
-    description: "Total return on a rental — cash flow + principal paydown + appreciation in one number.",
+    description: "Model cash flow, principal paydown, and appreciation assumptions in one simple annual ROI estimate.",
     url: "/tools/roi-calculator",
     type: "website",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap rental property ROI calculator" }],
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
 const FAQS: { q: string; a: string }[] = [
   {
     q: "What's the formula for rental property ROI?",
-    a: "Total ROI = (Annual cash flow + Annual principal paydown + Annual appreciation) ÷ Total cash invested. This captures the full return story — not just cash flow (cash-on-cash) and not just price growth (appreciation). The composite number is what your money actually returned over the year.",
+    a: "Modeled simple annual ROI = (annual cash flow + annual principal paydown + assumed annual appreciation) ÷ total cash invested. Appreciation is an entered estimate, not cash received or a realized return.",
   },
   {
     q: "What's a good ROI on a rental property?",
@@ -48,15 +48,15 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "How is total ROI different from cash-on-cash return?",
-    a: "Cash-on-cash only counts the annual cash flow piece. Total ROI adds principal paydown (the portion of mortgage payment building equity) plus appreciation. On a typical leveraged rental, total ROI is usually 2-3x the cash-on-cash number because the appreciation + equity components add meaningfully even when cash flow is modest.",
+    a: "Cash-on-cash uses annual cash flow divided by cash invested. This simple ROI estimate also adds entered principal paydown and appreciation assumptions, so it answers a different question and may be higher or lower depending on those inputs.",
   },
   {
     q: "How is total ROI different from IRR?",
-    a: "Total ROI is a single-year snapshot. IRR is annualized over the full holding period, including the exit sale. IRR is more accurate for long-hold analysis (10+ years) because it captures compounding. ROI is faster for back-of-napkin comparisons and works well for year-by-year decisions.",
+    a: "This ROI is a simple one-year estimate. IRR uses the timing of multiple cash flows across a holding period and an assumed exit. The two metrics are not interchangeable.",
   },
   {
     q: "Should I include tax savings in ROI?",
-    a: "Optional but common. Adding the depreciation tax shield (after-tax) bumps ROI by 1-3 percentage points for a typical investor in a 24-32% bracket. This calculator focuses on pre-tax ROI for comparability; for after-tax modeling, use the full TrueCap analyzer.",
+    a: "This calculator excludes tax effects. Whether a deduction is available or currently usable depends on the property, ownership, activity rules, basis, and taxpayer. Use the full analyzer only for an illustrative tax scenario, and verify treatment with a qualified tax adviser.",
   },
 ];
 
@@ -89,7 +89,7 @@ export default function RoiCalculatorPage() {
     applicationSubCategory: "Real Estate Calculator",
     operatingSystem: "Web",
     description:
-      "Free total ROI calculator. Combines cash flow + principal paydown + appreciation — the real return on a rental, not just one piece of it.",
+      "Free modeled ROI calculator combining entered cash flow, principal paydown, and appreciation assumptions.",
     url: `${siteUrl}/tools/roi-calculator`,
     offers: {
       "@type": "Offer",
@@ -104,8 +104,8 @@ export default function RoiCalculatorPage() {
     },
     featureList: [
       "Combine cash flow, principal paydown, appreciation",
-      "Full annualized return across hold period",
-      "Compare against alternative investments",
+      "Simple one-year modeled ROI estimate",
+      "Separate contribution from each entered component",
     ],
   };
 
@@ -116,7 +116,7 @@ export default function RoiCalculatorPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }} />
       <ToolBreadcrumbSchema toolName="ROI Calculator" toolPath="/tools/roi-calculator" />
 
-      <main className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
+      <main id="main" className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
         <nav aria-label="Breadcrumb" className="mb-6 text-xs">
           <ol className="flex flex-wrap items-center gap-2 text-muted-foreground">
             <li><Link href="/" className="hover:text-foreground">Home</Link></li>
@@ -132,7 +132,7 @@ export default function RoiCalculatorPage() {
           Rental Property ROI Calculator
         </h1>
         <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-          The real ROI on a rental property is the SUM of three returns — annual cash flow, annual principal paydown, and annual appreciation — divided by the cash you put in. This calculator combines all three. Most investors look at only one and undercount their actual return.
+          Combine entered annual cash flow, principal paydown, and appreciation assumptions, then divide by total cash invested. The result is a modeled simple annual ROI—not IRR, market performance, or a realized return.
         </p>
 
         <div className="mt-8">
@@ -152,7 +152,7 @@ export default function RoiCalculatorPage() {
           <ul className="mt-3 space-y-2 text-base leading-relaxed text-foreground">
             <li><strong>Cash flow:</strong> rent minus all operating expenses minus mortgage. This is the money in your pocket each month, annualized.</li>
             <li><strong>Principal paydown:</strong> the portion of each mortgage payment going to loan balance (not interest). This is equity build — invisible until you sell or refi.</li>
-            <li><strong>Appreciation:</strong> the property&apos;s market value increase. The most-volatile component, market-dependent.</li>
+            <li><strong>Appreciation:</strong> the value change implied by the annual rate you enter. It is uncertain and is not realized unless a future transaction supports it.</li>
           </ul>
           <p className="mt-3 text-base leading-relaxed text-foreground">
             Sum the three and divide by cash invested (down payment + closing + initial rehab) to get a modeled simple annual return under the assumptions entered. It is not IRR or a realized return.
@@ -177,11 +177,11 @@ export default function RoiCalculatorPage() {
         <section className="mt-12 border-t border-border pt-8">
           <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">Related metrics</h2>
           <div className="flex flex-wrap gap-2 text-sm">
-            <Link href="/glossary/cash-on-cash-return" className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Cash-on-cash return</Link>
-            <Link href="/glossary/irr" className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">IRR</Link>
-            <Link href="/glossary/appreciation-rate" className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Appreciation rate</Link>
-            <Link href="/tools/cash-on-cash-calculator" className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Cash-on-cash calculator</Link>
-            <Link href="/tools/break-even-calculator" className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Break-even calculator</Link>
+            <Link href="/glossary/cash-on-cash-return" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Cash-on-cash return</Link>
+            <Link href="/glossary/irr" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">IRR</Link>
+            <Link href="/glossary/appreciation-rate" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Appreciation rate</Link>
+            <Link href="/tools/cash-on-cash-calculator" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Cash-on-cash calculator</Link>
+            <Link href="/tools/break-even-calculator" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Break-even calculator</Link>
           </div>
         </section>
 

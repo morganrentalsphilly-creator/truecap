@@ -19,6 +19,14 @@ const reviewsSource = readFileSync(
   fileURLToPath(new URL("../../app/reviews/page.tsx", import.meta.url)),
   "utf8"
 );
+const offerConfigurationSource = readFileSync(
+  fileURLToPath(new URL("../../docs/OFFER-CONFIGURATION.md", import.meta.url)),
+  "utf8"
+);
+const funnelSource = readFileSync(
+  fileURLToPath(new URL("../../docs/GRAND-SLAM-FUNNEL.md", import.meta.url)),
+  "utf8"
+);
 
 describe("analysis runs display baseline", () => {
   it("publishes only the raw persisted cumulative count", () => {
@@ -40,6 +48,11 @@ describe("analysis runs display baseline", () => {
     expect(counterSource).toContain("migration 20260823160000");
     expect(counterSource).toContain('["total-analyses-run-v2"]');
     expect(reviewsSource).not.toMatch(/50,000 historical|historical analyses attested/i);
+    for (const documentedContract of [offerConfigurationSource, funnelSource]) {
+      expect(documentedContract).toMatch(/migration `20260823160000`/i);
+      expect(documentedContract).not.toMatch(/minimum public floor|minimum\s+floor/i);
+      expect(documentedContract).not.toContain("The database value is not changed");
+    }
   });
 
   it("does not call saved-analysis rows unique deals", () => {

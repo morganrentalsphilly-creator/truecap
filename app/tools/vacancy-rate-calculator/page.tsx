@@ -136,7 +136,7 @@ export default function VacancyRateCalculatorPage() {
         toolPath="/tools/vacancy-rate-calculator"
       />
 
-      <main className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
+      <main id="main" className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
         <nav aria-label="Breadcrumb" className="mb-6 text-xs">
           <ol className="flex flex-wrap items-center gap-2 text-muted-foreground">
             <li>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,6 +28,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
+import { hasPendingSaveIntent } from "@/lib/save-intent";
 
 export function SignUpForm() {
   const router = useRouter();
@@ -42,6 +43,11 @@ export function SignUpForm() {
   const [captchaUnavailable, setCaptchaUnavailable] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [hasPendingDeal, setHasPendingDeal] = useState(false);
+
+  useEffect(() => {
+    setHasPendingDeal(hasPendingSaveIntent());
+  }, []);
 
   const form = useForm<SignUpInput>({
     resolver: zodResolver(signUpSchema),
@@ -129,6 +135,17 @@ export function SignUpForm() {
 
   return (
     <div className="space-y-5">
+      {hasPendingDeal ? (
+        <div
+          role="status"
+          className="rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm text-foreground"
+        >
+          <p className="font-semibold">Your underwriting is waiting on this device.</p>
+          <p className="mt-1 text-muted-foreground">
+            Finish creating your account and we&apos;ll save that exact deal automatically.
+          </p>
+        </div>
+      ) : null}
       {/* Google OAuth — the highest-leverage friction-reducer for cold
           paid traffic. One tap, no password to invent, no confirmation
           email round-trip. Email/password stays below as the fallback. */}

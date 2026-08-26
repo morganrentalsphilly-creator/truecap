@@ -113,8 +113,18 @@ export class AnalysisErrorBoundary extends React.Component<Props, State> {
                 />
                 <FallbackMetric
                   label="CoC return"
-                  value={`${result.cocReturn >= 0 ? "+" : ""}${result.cocReturn.toFixed(1)}%`}
-                  tone={result.cocReturn >= 0 ? "positive" : "negative"}
+                  value={
+                    result.totalCashRequired > 0
+                      ? `${result.cocReturn >= 0 ? "+" : ""}${result.cocReturn.toFixed(1)}%`
+                      : "N/A"
+                  }
+                  tone={
+                    result.totalCashRequired <= 0
+                      ? "neutral"
+                      : result.cocReturn >= 0
+                        ? "positive"
+                        : "negative"
+                  }
                 />
                 <FallbackMetric
                   label="Cap rate"

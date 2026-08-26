@@ -18,6 +18,7 @@ import {
 } from "@/lib/entitlements";
 import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { RetryRouteButton } from "@/components/dashboard/retry-route-button";
 
 type ProfileRow = {
   first_name: string | null;
@@ -82,6 +83,7 @@ export default async function DashboardTemplatesPage() {
             <div className="rounded-2xl border border-destructive/25 bg-destructive/5 p-6">
               <h1 className="text-xl font-bold text-foreground">Could not load templates</h1>
               <p className="text-sm text-muted-foreground mt-2">{result.message}</p>
+              <RetryRouteButton className="mt-4" />
             </div>
           </main>
         </div>

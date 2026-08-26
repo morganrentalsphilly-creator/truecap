@@ -291,12 +291,11 @@ export function getCapRateBenchmark(
 
 // ──────────────────────────────────────────────────────────────────
 // UI formatter — builds the human-readable subline that appears on
-// the Cap Rate metric card. Compares the user's cap rate against
-// the local median and tells them where they stand.
+// the Cap Rate metric card. These hand-curated planning references are
+// TrueCap estimates, not observed medians from a single authoritative series,
+// so the label carries the period and methodology caveat at the point of use.
 //
-// "Above the 7.5% Philadelphia median" — confident, no padding
-// "Below the 4.5% NYC median (5.5%)" — flags underperformance
-// "Near the 6.5% Atlanta median" — within ±0.5pt is "near"
+// "Above TrueCap's 7.5% Philadelphia estimate · 2025 reference; see methodology"
 // ──────────────────────────────────────────────────────────────────
 export function formatCapRateBenchmarkSubline(
   userCapRatePct: number,
@@ -305,12 +304,13 @@ export function formatCapRateBenchmarkSubline(
   const median = benchmark.median;
   const delta = userCapRatePct - median;
   const scopeNote = benchmark.scope === "national" ? "U.S." : benchmark.scopeName;
+  const reference = `TrueCap's ${median.toFixed(1)}% ${scopeNote} estimate · 2025 reference; see methodology`;
 
   if (Math.abs(delta) < 0.5) {
-    return `Near the ${median.toFixed(1)}% ${scopeNote} median`;
+    return `Near ${reference}`;
   }
   if (delta >= 0.5) {
-    return `Above the ${median.toFixed(1)}% ${scopeNote} median`;
+    return `Above ${reference}`;
   }
-  return `Below the ${median.toFixed(1)}% ${scopeNote} median`;
+  return `Below ${reference}`;
 }

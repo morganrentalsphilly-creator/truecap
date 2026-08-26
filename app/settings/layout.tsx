@@ -35,6 +35,8 @@ import {
 import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { getActiveSavedAnalysesCount } from "@/lib/saved-analyses-count";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { loginPathFor } from "@/lib/auth-schema";
+import { getCurrentRequestPath } from "@/lib/request-path";
 
 type ProfileRow = {
   first_name: string | null;
@@ -59,7 +61,7 @@ function getInitials(displayName: string, email: string): string {
 export default async function SettingsLayout({ children }: { children: ReactNode }) {
   const supabase = await createServerSupabaseClient();
   const user = await getRequestUser();
-  if (!user) redirect("/auth/login");
+  if (!user) redirect(loginPathFor(await getCurrentRequestPath("/settings")));
 
   const entitlements = await getRequestEntitlements(user.id);
   const navAccess = getDashboardNavAccess(entitlements);

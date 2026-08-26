@@ -56,6 +56,8 @@ export type ScenarioSummary = {
   scenarioName: string;
   strategyKind: string | null;
   title: string | null;
+  /** The original saved analysis for this property (`scenario_name IS NULL`). */
+  isBase: boolean;
   isSource: boolean;
 };
 
@@ -216,6 +218,7 @@ export async function listScenariosAction(dealId: unknown): Promise<ScenariosLis
       scenarioName: row.scenario_name ?? "Base case",
       strategyKind: isStrategyKind(row.strategy_kind) ? row.strategy_kind : null,
       title: row.title,
+      isBase: row.scenario_name == null,
       isSource: row.id === parsed.data,
     };
   });
@@ -393,6 +396,7 @@ export async function addScenarioAction(input: unknown): Promise<AddScenarioResu
         propertyType: adjusted.propertyType,
         purchasePrice: adjusted.purchasePrice,
         score: dealScore.score,
+        scoreMethodologyVersion: dealScore.scoreMethodologyVersion,
         recommendation: dealScore.recommendation,
         riskLevel: dealScore.riskLevel,
         breakdown: dealScore.breakdown,

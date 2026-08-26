@@ -22,10 +22,18 @@ import { describe, expect, it } from "vitest";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { FEATURE_CATALOG, tierHas, type FeatureKey } from "@/lib/entitlements-catalog";
+import {
+  PUBLIC_PRO_ANNUAL_USD,
+  PUBLIC_PRO_MONTHLY_USD,
+} from "@/lib/public-pricing";
 
 const ROOT = join(__dirname, "..", "..");
 const pricingSource = readFileSync(join(ROOT, "app/pricing/page.tsx"), "utf8");
 const landingSource = readFileSync(join(ROOT, "components/marketing/landing-sections.tsx"), "utf8");
+const roiCalculatorSource = readFileSync(
+  join(ROOT, "components/marketing/roi-calculator-widget.tsx"),
+  "utf8"
+);
 
 /**
  * /pricing rows mapped to the catalog feature they describe. Rows with no
@@ -79,6 +87,13 @@ describe("homepage ladder is derived, not hand-typed", () => {
 });
 
 describe("catalog matches what the product actually does", () => {
+  it("keeps one documented public fallback while Stripe remains billing authority", () => {
+    expect(PUBLIC_PRO_MONTHLY_USD).toBe(29.99);
+    expect(PUBLIC_PRO_ANNUAL_USD).toBe(300);
+    expect(roiCalculatorSource).toContain("PUBLIC_PRO_MONTHLY_USD");
+    expect(roiCalculatorSource).not.toMatch(/const PRO_MONTHLY_PRICE\s*=/);
+  });
+
   it("the $5 PDF tier includes the sections the generator really writes", () => {
     // lib/pdf-generator.ts renders projection10y / taxStrategy / exitScenarios
     // into the export, so the one-time tier must not be marked as excluding

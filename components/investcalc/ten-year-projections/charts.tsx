@@ -29,7 +29,7 @@ const chartConfig = {
   netCashFlowAnnual: { label: "Net Cash Flow", color: "var(--color-chart-1)" },
   rentalIncomeAnnual: { label: "Rental Income", color: "var(--color-chart-2)" },
   operatingExpensesAnnual: { label: "Operating Expenses", color: "var(--color-chart-5)" },
-  debtServiceAnnual: { label: "Debt Service", color: "var(--color-chart-3)" },
+  debtServiceAnnual: { label: "Financing Outflow (P&I + MI)", color: "var(--color-chart-3)" },
   cumulativeCashFlowAnnual: { label: "Cumulative Cash Flow", color: "var(--color-chart-4)" },
 } as const;
 
@@ -77,7 +77,8 @@ export function TenYearProjectionCharts({
             {/* Debt service was previously omitted, so the gap between income
                 and "expenses" looked like healthy cash flow even on a
                 cash-flow-negative deal. Plotting it makes the real squeeze
-                visible - income vs operating expenses AND the mortgage. */}
+                visible - income vs operating expenses, P&I, and modeled
+                mortgage insurance. */}
             <Line
               type="monotone"
               dataKey="debtServiceAnnual"

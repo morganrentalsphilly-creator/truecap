@@ -39,8 +39,10 @@ import {
   isLegacySavedMethodologyVersion,
   resolveSavedAnalysisResult,
 } from "@/lib/saved-analysis-methodology";
+import { buildPublicShareAnalysisPayload } from "@/lib/public-share-analysis-result";
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 type Props = { params: Promise<{ token: string; dealId: string }> };
 
@@ -124,18 +126,26 @@ export default async function PortalDealPage({ params }: Props) {
     result = methodologyResolution.result;
     recordedResult = methodologyResolution.usesRecordedSnapshot;
     legacyMethodologyWarning = isLegacySavedMethodologyVersion(
-      methodologyResolution.storedMethodologyVersion
+      methodologyResolution.storedMethodologyVersion,
     );
     displayedMethodologyVersion =
-      methodologyResolution.storedMethodologyVersion ?? result.methodologyVersion;
-    const savedResultSnapshot = deal.result_snapshot as Record<string, unknown> | null;
-    const savedMaoTarget = normalizeMaoTarget(savedResultSnapshot?.maxOfferTarget);
-    maoTarget = normalizeMaoTargetForFinancing(savedMaoTarget, {
-      isCashPurchase: result.monthlyPayment <= 0,
-    }) ?? undefined;
+      methodologyResolution.storedMethodologyVersion ??
+      result.methodologyVersion;
+    const savedResultSnapshot = deal.result_snapshot as Record<
+      string,
+      unknown
+    > | null;
+    const savedMaoTarget = normalizeMaoTarget(
+      savedResultSnapshot?.maxOfferTarget,
+    );
+    maoTarget =
+      normalizeMaoTargetForFinancing(savedMaoTarget, {
+        isCashPurchase: result.monthlyPayment <= 0,
+      }) ?? undefined;
     maoTargetSource =
-      normalizeOfferCeilingTargetSource(savedResultSnapshot?.maxOfferTargetSource) ??
-      "selected-targets";
+      normalizeOfferCeilingTargetSource(
+        savedResultSnapshot?.maxOfferTargetSource,
+      ) ?? "selected-targets";
     if (!isAdoptedOfferCeilingTargetSource(maoTargetSource)) {
       maoTarget = undefined;
     }
@@ -166,15 +176,18 @@ export default async function PortalDealPage({ params }: Props) {
   ]);
 
   const valuesHash = hashShareValues(values);
-  const sig = signShareAttribution({ ownerId: agentUserId, dealId, valuesHash });
+  const sig = signShareAttribution({
+    ownerId: agentUserId,
+    dealId,
+    valuesHash,
+  });
 
   return (
     <SharedDealShell
       values={values}
-      result={result}
+      analysis={buildPublicShareAnalysisPayload(result, showProAnalysis)}
       comps={comps}
       agent={agent}
-      showProAnalysis={showProAnalysis}
       maoTarget={maoTarget}
       maoTargetSource={maoTargetSource}
       offerCeilingAccess={offerCeilingAccess}
@@ -182,7 +195,9 @@ export default async function PortalDealPage({ params }: Props) {
       legacyMethodologyWarning={legacyMethodologyWarning}
       recordedResult={recordedResult}
       leadCapture={
-        agent ? { ownerId: agentUserId, dealId, valuesHash, sig: sig ?? undefined } : undefined
+        agent
+          ? { ownerId: agentUserId, dealId, valuesHash, sig: sig ?? undefined }
+          : undefined
       }
     />
   );

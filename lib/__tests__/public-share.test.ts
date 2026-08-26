@@ -130,6 +130,9 @@ describe("the share-route privacy contract", () => {
     expect(btn).toContain("Off by default");
     expect(store).toContain("resultSnapshot: capturedResult");
     expect(store).toContain("methodologyVersion: capturedMethodologyVersion");
+    expect(store).toContain(
+      "scoreMethodologyVersion: currentScore.scoreMethodologyVersion",
+    );
     expect(store).toContain("offerCeilingExact");
     expect(store).toContain("const hasRecordedInput = input.resultSnapshot !== undefined");
     expect(store).toContain("adoptedTarget && !usesRecordedSnapshot");

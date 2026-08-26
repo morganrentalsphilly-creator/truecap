@@ -36,13 +36,32 @@ const fmtMoney = (n: number | null) =>
     : `${n >= 0 ? "+" : "-"}$${Math.abs(Math.round(n)).toLocaleString("en-US")}/mo`;
 const fmtPct = (n: number | null) => (n == null ? "—" : `${n.toFixed(1)}% cap`);
 
-export function CompareDealPicker({ deals }: { deals: ComparePickerDeal[] }) {
+export function CompareDealPicker({
+  deals,
+  initialSelectedIds = [],
+  onComplete,
+}: {
+  deals: ComparePickerDeal[];
+  /** A workspace "Compare with another deal" entry seeds the current deal. */
+  initialSelectedIds?: string[];
+  /** Optional in-place editor hook. The route still refreshes from the
+   * server-owned cookie after this fires. */
+  onComplete?: () => void;
+}) {
   const router = useRouter();
   const { toast } = useToast();
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selected, setSelected] = useState<string[]>(() => {
+    const available = new Set(deals.map((deal) => deal.id));
+    return Array.from(new Set(initialSelectedIds))
+      .filter((id) => available.has(id))
+      .slice(0, MAX_COMPARE_ITEMS);
+  });
   const [isPending, startTransition] = useTransition();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const toggle = (id: string) => {
+    if (isPending) return;
+    setErrorMessage(null);
     setSelected((prev) => {
       if (prev.includes(id)) return prev.filter((x) => x !== id);
       if (prev.length >= MAX_COMPARE_ITEMS) {
@@ -60,14 +79,17 @@ export function CompareDealPicker({ deals }: { deals: ComparePickerDeal[] }) {
 
   const onCompare = () => {
     if (!canCompare || isPending) return;
+    setErrorMessage(null);
     startTransition(async () => {
       try {
         const result = await startCompareAction(selected);
         if (result.ok) {
           // Cookie is now set server-side; re-run the page's server component so
           // it reads the new selection and renders the comparison in place.
+          onComplete?.();
           router.refresh();
         } else {
+          setErrorMessage(result.message);
           toast({
             title: "Could not start comparison",
             description: result.message,
@@ -80,6 +102,7 @@ export function CompareDealPicker({ deals }: { deals: ComparePickerDeal[] }) {
         // button spinner clears with nothing happening. Tell the user it's
         // retryable — the selection is preserved.
         Sentry.captureException(err, { tags: { feature: "compare" } });
+        setErrorMessage("Something interrupted the request. Check your connection and try again.");
         toast({
           title: "Could not start comparison",
           description: "Something interrupted the request. Check your connection and try again.",
@@ -90,7 +113,10 @@ export function CompareDealPicker({ deals }: { deals: ComparePickerDeal[] }) {
   };
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5">
+    <div
+      className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5"
+      aria-busy={isPending}
+    >
       <ul className="space-y-2">
         {deals.map((deal) => {
           const isSel = selected.includes(deal.id);
@@ -100,8 +126,9 @@ export function CompareDealPicker({ deals }: { deals: ComparePickerDeal[] }) {
                 type="button"
                 onClick={() => toggle(deal.id)}
                 aria-pressed={isSel}
+                disabled={isPending}
                 className={cn(
-                  "flex w-full items-center gap-3 rounded-xl border p-3 text-left transition",
+                  "flex min-h-11 w-full items-center gap-3 rounded-xl border p-3 text-left transition disabled:cursor-wait disabled:opacity-70",
                   isSel
                     ? "border-primary bg-primary/5 ring-1 ring-primary/30"
                     : "border-border bg-background hover:border-primary/40"
@@ -144,7 +171,13 @@ export function CompareDealPicker({ deals }: { deals: ComparePickerDeal[] }) {
         })}
       </ul>
 
-      <div className="mt-4 flex items-center justify-between gap-3">
+      {errorMessage ? (
+        <p role="alert" className="mt-4 rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+          {errorMessage} Your selection is still here; retry when ready.
+        </p>
+      ) : null}
+
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
         <p className="text-xs text-muted-foreground">
           {selected.length} of {MAX_COMPARE_ITEMS} selected
           {selected.length < 2 ? " - pick at least 2" : ""}
@@ -153,13 +186,16 @@ export function CompareDealPicker({ deals }: { deals: ComparePickerDeal[] }) {
           type="button"
           onClick={onCompare}
           disabled={!canCompare || isPending}
-          className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition disabled:opacity-40"
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition disabled:opacity-40"
         >
           {isPending ? <Loader2 className="size-4 animate-spin" /> : null}
           {canCompare ? `Compare ${selected.length} deals` : "Compare"}
           {!isPending ? <ArrowRight className="size-4" /> : null}
         </button>
       </div>
+      <p className="sr-only" aria-live="polite">
+        {isPending ? "Updating comparison selection." : ""}
+      </p>
     </div>
   );
 }

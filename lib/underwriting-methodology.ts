@@ -5,23 +5,33 @@
  * engine. Keep formula definitions here and implementation arithmetic in
  * calc-analysis.ts. A formula change requires a version bump, test updates,
  * and a methodology-page release note; copy-only changes do not.
+ *
+ * The 2026-08-25 Screening Index errata is deliberately narrower than a
+ * first-year financial-formula release: it makes an undefined ratio
+ * inapplicable, an omitted Year Built uncertain instead of favorable, and
+ * recorded Property Age deterministic through an explicit analysis date.
+ * The independently cached 10-year projection advanced to snapshot method v6
+ * for exact monthly PMI cancellation. The first-year standard advanced to
+ * v1.1 when blank mortgage-insurance inputs became occupancy-aware; both
+ * corrections are named below and recorded result snapshots remain immutable.
  */
 
-export const TRUECAP_UNDERWRITING_STANDARD_VERSION = "1.0" as const;
+export const TRUECAP_UNDERWRITING_STANDARD_LEGACY_V1_VERSION = "1.0" as const;
+export const TRUECAP_UNDERWRITING_STANDARD_VERSION = "1.1" as const;
 /**
  * Opt-in first-year core. v1 remains the public/default contract until every
  * save/share/report surface can persist v2 snapshots without mutation.
  */
 export const TRUECAP_UNDERWRITING_STANDARD_V2_VERSION = "2.0" as const;
 export type TrueCapUnderwritingStandardVersion =
+  | typeof TRUECAP_UNDERWRITING_STANDARD_LEGACY_V1_VERSION
   | typeof TRUECAP_UNDERWRITING_STANDARD_VERSION
   | typeof TRUECAP_UNDERWRITING_STANDARD_V2_VERSION;
 export const TRUECAP_UNDERWRITING_STANDARD_NAME = "TrueCap Underwriting Standard" as const;
-/** Deal Score is part of the same saved-decision contract as the financial
- * outputs. A material score-arithmetic change therefore bumps the whole
- * underwriting standard instead of drifting behind an unrelated version. */
-export const TRUECAP_DEAL_SCORE_METHODOLOGY_VERSION =
-  TRUECAP_UNDERWRITING_STANDARD_VERSION;
+/** Screening Index arithmetic is versioned independently from the unchanged
+ * v1 financial formulas. New saves record this submodel version while older
+ * snapshots remain immutable and are never silently relabeled. */
+export const TRUECAP_DEAL_SCORE_METHODOLOGY_VERSION = "1.2" as const;
 
 export type UnderwritingFormulaKey =
   | "grossScheduledIncome"
@@ -76,7 +86,7 @@ export const UNDERWRITING_FORMULAS: Record<
   },
   otherIncome: {
     label: "Other income",
-    formula: "Not modeled as a separate income line in Standard v1.0",
+    formula: "Not modeled as a separate income line in Standard v1.x",
     convention:
       "Do not silently add laundry, parking, pet, or utility income to the rent field; model it outside TrueCap unless a future version adds a dedicated input.",
   },
@@ -148,7 +158,8 @@ export const UNDERWRITING_FORMULAS: Record<
     label: "Before-tax cash flow",
     formula:
       "Scheduled rent − vacancy − operating expenses − CapEx reserve − principal and interest − PMI/MIP",
-    convention: "Reported monthly and annually before any illustrative income-tax effect.",
+    convention:
+      "Reported monthly and annually before any illustrative income-tax effect. A blank mortgage-insurance rate defaults only for owner-occupant analyses; investment loans require an explicit lender premium.",
   },
   totalCashRequired: {
     label: "Total initial cash required",
@@ -164,7 +175,7 @@ export const UNDERWRITING_FORMULAS: Record<
     label: "Cash-on-cash return",
     formula: "Annual before-tax cash flow ÷ total initial cash required",
     convention:
-      "Initial cash includes down payment, closing costs, entered rehab, and entered STR furnishing/startup costs.",
+      "Initial cash includes down payment, closing costs, entered rehab, and entered STR furnishing/startup costs. When modeled initial cash is zero, CoC is not applicable; the historical stored 0 sentinel is excluded from display, target checks, and Screening Index CoC scoring.",
   },
   dscr: {
     label: "Debt-service coverage ratio (DSCR)",
@@ -174,9 +185,9 @@ export const UNDERWRITING_FORMULAS: Record<
   dealScore: {
     label: "Screening Index (Balanced)",
     formula:
-      "Round and clamp to 0–100: cash-flow points + CoC points + cap-rate points + DSCR points + projected-return points + risk penalty",
+      "Round and clamp to 0–100: applicable component points (renormalized when a component is N/A) + risk penalty",
     convention:
-      "Balanced investment-property maxima are 22, 20, 16, 17, and 25 points. The projected return excludes annual personal-tax benefits but nets modeled selling costs and federal exit-tax defaults. Owner-occupant cash flow instead uses a 30-point maximum before the final 0–100 clamp. Risk penalties are capped at −30; recommendation bands are 75 / 55 / 35 / 18. Qualifying appreciation-play rules are disclosed on the methodology page. The index is secondary triage context, not selected-rule fit, evidence readiness, a probability, an appraisal, or investment advice.",
+      "Balanced investment-property maxima are 22, 20, 16, 17, and 25 points. CoC is omitted when modeled initial cash is zero and the remaining applicable components are renormalized to the 100-point scale. The projected return excludes annual personal-tax benefits but nets modeled selling costs and federal exit-tax defaults. Owner-occupant cash flow instead uses a 30-point maximum before the final 0–100 clamp. Missing Year Built receives a conservative age-uncertainty modifier rather than new-construction treatment. Risk penalties are capped at −30; recommendation bands are 75 / 55 / 35 / 18. Qualifying appreciation-play rules are disclosed on the methodology page. The index is secondary triage context, not selected-rule fit, evidence readiness, a probability, an appraisal, or investment advice.",
   },
   maxOffer: {
     label: "Offer Ceiling",
@@ -356,7 +367,23 @@ export const UNDERWRITING_V2_FORMULAS: Record<
   },
 };
 
+/** Historical v1.0 registry. Result snapshots carrying v1.0 stay frozen; this
+ * entry keeps their former blank-PMI convention auditable without routing new
+ * calculations through it. */
+export const UNDERWRITING_V1_0_FORMULAS: Record<
+  UnderwritingFormulaKey,
+  UnderwritingFormulaDefinition
+> = {
+  ...UNDERWRITING_FORMULAS,
+  beforeTaxCashFlow: {
+    ...UNDERWRITING_FORMULAS.beforeTaxCashFlow,
+    convention:
+      "Historical v1.0 defaulted a blank mortgage-insurance rate to 0.8% on every financed sub-20%-down analysis. Recorded v1.0 results remain frozen; new underwriting uses the occupancy-aware v1.1 convention.",
+  },
+};
+
 export const UNDERWRITING_FORMULAS_BY_VERSION = {
+  [TRUECAP_UNDERWRITING_STANDARD_LEGACY_V1_VERSION]: UNDERWRITING_V1_0_FORMULAS,
   [TRUECAP_UNDERWRITING_STANDARD_VERSION]: UNDERWRITING_FORMULAS,
   [TRUECAP_UNDERWRITING_STANDARD_V2_VERSION]: UNDERWRITING_V2_FORMULAS,
 } as const;
@@ -371,7 +398,36 @@ export const UNDERWRITING_V2_CORE_RELEASE = {
 
 export const UNDERWRITING_STANDARD_RELEASE_NOTES = [
   {
+    revision: "screening-index-v1.2-analysis-date-2026-08-25",
+    version: TRUECAP_DEAL_SCORE_METHODOLOGY_VERSION,
+    effectiveDate: "2026-08-25",
+    summary:
+      "Screening Index reproducibility correction: new v1 analyses persist an explicit UTC analysis date for Property Age, while legacy and direct-engine payloads without a valid date use the fixed 2026-08-25 compatibility anchor. Identical serialized inputs no longer change score at a calendar-year boundary; recorded scores remain immutable.",
+  },
+  {
+    revision: "v1.1-occupancy-aware-pmi-2026-08-25",
     version: TRUECAP_UNDERWRITING_STANDARD_VERSION,
+    effectiveDate: "2026-08-25",
+    summary:
+      "First-year v1.1 model-risk correction: a blank PMI/MIP rate now receives the 0.8% screening default only for owner-occupant analyses. Investment-property analyses model no mortgage insurance unless the user, lender profile, or template supplies a rate; explicit 0 still disables it. Recorded v1.0 results remain immutable.",
+  },
+  {
+    revision: "projection-v6-2026-08-25",
+    version: TRUECAP_UNDERWRITING_STANDARD_VERSION,
+    effectiveDate: "2026-08-25",
+    summary:
+      "Long-term projection snapshot method v6: cancellable PMI/MIP now stops in the exact scheduled month the loan reaches the modeled 80% LTV threshold, while loan-life MIP continues through payoff. Live and cache-backed projections regenerate under v6; previously recorded result snapshots remain unchanged.",
+  },
+  {
+    revision: "screening-index-v1.1-2026-08-25",
+    version: TRUECAP_UNDERWRITING_STANDARD_VERSION,
+    effectiveDate: "2026-08-25",
+    summary:
+      "Screening Index correctness errata for new and explicitly re-underwritten analyses: zero modeled initial cash now makes CoC inapplicable and renormalizes the remaining score factors; missing Year Built receives an uncertainty modifier instead of new-construction treatment. The score correction is independent of the first-year financial formulas, and previously recorded result snapshots remain immutable.",
+  },
+  {
+    revision: "v1-initial-2026-08-15",
+    version: TRUECAP_UNDERWRITING_STANDARD_LEGACY_V1_VERSION,
     effectiveDate: "2026-08-15",
     summary:
       "Initial published standard: lender-style NOI and DSCR, below-the-line CapEx reserve, PMI in cash flow, and signed illustrative tax impact.",

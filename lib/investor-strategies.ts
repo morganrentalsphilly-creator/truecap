@@ -171,3 +171,13 @@ export function getStrategyByKey(key: string | null | undefined): InvestorStrate
   if (!key) return null;
   return INVESTOR_STRATEGIES.find((s) => s.key === key) ?? null;
 }
+
+/** Main analyzer heading follows the selected model instead of claiming that
+ * every active strategy is a buy-and-hold rental. Unknown/cleared keys retain
+ * the familiar default starting experience. */
+export function getUnderwritingHeading(key: string | null | undefined): string {
+  const strategy = getStrategyByKey(key);
+  return strategy
+    ? `${strategy.label} Underwriting`
+    : "Underwrite a Buy & Hold Rental";
+}

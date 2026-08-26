@@ -74,7 +74,7 @@ export default async function ReviewsPage() {
   return (
     <>
       <Header initialUser={null} initialEntitlements={null} />
-      <main className="bg-background">
+      <main id="main" className="bg-background">
         {/* Hero */}
         <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-[var(--brand-blue-light)] via-background to-background">
           <div className="mx-auto max-w-3xl px-4 py-14 text-center sm:px-6 sm:py-20">

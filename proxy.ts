@@ -51,7 +51,15 @@ function applyHostGuard(response: NextResponse, request: NextRequest): NextRespo
 }
 
 export async function proxy(request: NextRequest) {
-  const sessionResponse = await updateSession(request);
+  // Server layouts cannot otherwise recover the requested child pathname.
+  // Forward a private, request-only header so an auth redirect can return the
+  // user to the exact protected screen instead of dropping them at "/".
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set(
+    "x-truecap-request-path",
+    `${request.nextUrl.pathname}${request.nextUrl.search}`
+  );
+  const sessionResponse = await updateSession(request, requestHeaders);
 
   if (request.nextUrl.pathname === "/" && hasSupabaseAuthCookie(request)) {
     // Clone nextUrl so the QUERY STRING survives the rewrite — the old
@@ -63,7 +71,7 @@ export async function proxy(request: NextRequest) {
     const rewriteUrl = request.nextUrl.clone();
     rewriteUrl.pathname = "/home-authed";
     const rewritten = NextResponse.rewrite(rewriteUrl, {
-      request,
+      request: { headers: requestHeaders },
     });
     // Preserve any refreshed session cookies updateSession just set —
     // dropping them would silently log users out on token rotation.

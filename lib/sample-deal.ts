@@ -32,7 +32,11 @@ import type { MaoTarget } from "@/lib/max-allowable-offer";
 
 /** The product lens and exact acquisition criteria demonstrated by the sample. */
 export const SAMPLE_DEAL_STRATEGY_KEY = "buy-hold" as const;
-export const SAMPLE_DEAL_FIXTURE_VERSION = "synthetic-rental-v1" as const;
+export const SAMPLE_DEAL_FIXTURE_VERSION = "synthetic-rental-v2" as const;
+/** A synthetic fixture is historical test data, not a live property lookup.
+ * Pinning its as-of date keeps every preview and opened-demo surface identical
+ * after the calendar year changes. */
+export const SAMPLE_DEAL_ANALYSIS_DATE = "2026-08-25" as const;
 export const SAMPLE_DEAL_MAO_TARGET: MaoTarget = {
   monthlyCashFlow: 750,
   dscr: 1.25,
@@ -45,6 +49,7 @@ export const SAMPLE_DEAL_TARGET_PROFILE = {
 } as const;
 
 export const SAMPLE_DEAL_VALUES = {
+  analysisDate: SAMPLE_DEAL_ANALYSIS_DATE,
   propertyType: "single-family",
   address: "TrueCap Synthetic Sample, Philadelphia, PA 19140, USA",
   purchasePrice: 265_000,

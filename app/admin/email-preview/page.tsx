@@ -120,7 +120,7 @@ export default async function EmailPreviewPage({
           };
 
     return (
-      <div className="min-h-screen bg-background px-4 py-8 sm:px-6">
+      <main id="main" className="min-h-screen bg-background px-4 py-8 sm:px-6">
         <div className="mx-auto max-w-5xl">
           <header className="mb-6 flex flex-col gap-3">
             <div>
@@ -136,7 +136,7 @@ export default async function EmailPreviewPage({
           </header>
           <PreviewFrame html={html} />
         </div>
-      </div>
+      </main>
     );
   }
 
@@ -145,7 +145,7 @@ export default async function EmailPreviewPage({
 
   if (!selectedDate) {
     return (
-      <div className="min-h-screen bg-background px-6 py-12">
+      <main id="main" className="min-h-screen bg-background px-6 py-12">
         <div className="mx-auto max-w-3xl">
           <h1 className="text-2xl font-extrabold text-foreground">Email Preview</h1>
           <p className="mt-4 text-sm text-muted-foreground">
@@ -154,14 +154,14 @@ export default async function EmailPreviewPage({
             (where the date is the Tuesday it should send) and refresh this page.
           </p>
         </div>
-      </div>
+      </main>
     );
   }
 
   const content = await loadContent(selectedDate);
   if (!content) {
     return (
-      <div className="min-h-screen bg-background px-6 py-12">
+      <main id="main" className="min-h-screen bg-background px-6 py-12">
         <div className="mx-auto max-w-3xl">
           <h1 className="text-2xl font-extrabold text-foreground">Email Preview</h1>
           <p className="mt-4 text-sm text-[var(--metric-negative,#dc2626)]">
@@ -170,7 +170,7 @@ export default async function EmailPreviewPage({
             and parses as valid JSON.
           </p>
         </div>
-      </div>
+      </main>
     );
   }
 
@@ -181,7 +181,7 @@ export default async function EmailPreviewPage({
   });
 
   return (
-    <div className="min-h-screen bg-background px-4 py-8 sm:px-6">
+    <main id="main" className="min-h-screen bg-background px-4 py-8 sm:px-6">
       <div className="mx-auto max-w-5xl">
         <header className="mb-6 flex flex-col gap-3">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -208,6 +208,6 @@ export default async function EmailPreviewPage({
             memory — no separate route needed. */}
         <PreviewFrame html={html} />
       </div>
-    </div>
+    </main>
   );
 }
