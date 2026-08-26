@@ -39,7 +39,10 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 2 : undefined,
+  // Authenticated workflows intentionally share one disposable Pro account.
+  // Serial CI execution prevents cross-test writes and retries from racing
+  // one another while still exercising the complete production build.
+  workers: process.env.CI ? 1 : undefined,
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
   use: {
     baseURL: externalBaseUrl ?? localBaseUrl,

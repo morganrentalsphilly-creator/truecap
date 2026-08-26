@@ -21,9 +21,11 @@ async function acceptCookiesIfShown(page: Page) {
 async function openSampleDecision(page: Page) {
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await acceptCookiesIfShown(page);
-  const sampleButton = page.getByRole("button", {
-    name: /view a sample decision|see a sample deal/i,
-  }).first();
+  const sampleButton = page
+    .getByRole("button", {
+      name: /view a sample decision|see a sample deal/i,
+    })
+    .first();
   await expect(sampleButton).toBeEnabled({ timeout: 20_000 });
   await sampleButton.click();
   await expect(page.locator("#decision-summary-title")).toBeVisible({
@@ -32,21 +34,36 @@ async function openSampleDecision(page: Page) {
 }
 
 async function signInFromCurrentPage(page: Page) {
-  if (!authEnvironment.enabled) throw new Error("Authentication is unavailable.");
-  await expect(page.getByRole("heading", { level: 1, name: "Welcome back" })).toBeVisible();
+  if (!authEnvironment.enabled)
+    throw new Error("Authentication is unavailable.");
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Welcome back" }),
+  ).toBeVisible();
   await page.getByLabel("Email", { exact: true }).fill(authEnvironment.email);
-  await page.getByLabel("Password", { exact: true }).fill(authEnvironment.password);
+  await page
+    .getByLabel("Password", { exact: true })
+    .fill(authEnvironment.password);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
 }
 
 async function assertFocusedDecision(page: Page, address: string) {
-  const summary = page.locator("section[aria-labelledby='decision-summary-title']");
+  const summary = page.locator(
+    "section[aria-labelledby='decision-summary-title']",
+  );
   await expect(summary).toBeVisible({ timeout: 30_000 });
   await expect(summary.getByText(address, { exact: true })).toBeVisible();
 }
 
-async function newGuestPage(browser: Browser): Promise<{ page: Page; close: () => Promise<void> }> {
-  const context = await browser.newContext();
+async function newGuestPage(
+  browser: Browser,
+): Promise<{ page: Page; close: () => Promise<void> }> {
+  // This spec runs inside the authenticated project, whose default context
+  // carries the seeded user's storage state. `browser.newContext()` inherits
+  // those project options, so an allegedly "guest" page can otherwise save
+  // immediately as the test user and never exercise the sign-up handoff.
+  const context = await browser.newContext({
+    storageState: { cookies: [], origins: [] },
+  });
   const page = await context.newPage();
   return { page, close: () => context.close() };
 }
@@ -54,7 +71,9 @@ async function newGuestPage(browser: Browser): Promise<{ page: Page; close: () =
 async function makeSampleAddressUnique(page: Page): Promise<string> {
   const address = `E2E ${Date.now()} Regression Ave, Philadelphia, PA 19140`;
   await page.getByText("More actions", { exact: true }).click();
-  await page.getByRole("button", { name: "Edit assumptions", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Edit assumptions", exact: true })
+    .click();
   const form = page.locator('form[data-calc-form="true"]');
   await form.getByLabel("Property Address").fill(address);
   // The submit copy is deliberately role-aware (guest, no-property, and Pro
@@ -78,11 +97,17 @@ test("guest Save survives sign-in, saves automatically, and reopens from its dur
     savedAddress = await makeSampleAddressUnique(guest.page);
     await guest.page.getByRole("button", { name: "Save", exact: true }).click();
 
-    await expect(guest.page).toHaveURL(/\/auth\/sign-up\?next=%2F|\/auth\/sign-up\?next=\//);
-    await guest.page.getByRole("link", { name: "Sign in", exact: true }).click();
+    await expect(guest.page).toHaveURL(
+      /\/auth\/sign-up\?next=%2F|\/auth\/sign-up\?next=\//,
+    );
+    await guest.page
+      .getByRole("link", { name: "Sign in", exact: true })
+      .click();
     await signInFromCurrentPage(guest.page);
 
-    await expect(guest.page.getByText("Deal saved automatically", { exact: true })).toBeVisible({
+    await expect(
+      guest.page.getByText("Deal saved automatically", { exact: true }),
+    ).toBeVisible({
       timeout: 40_000,
     });
     await expect(guest.page).toHaveURL(/[?&]savedDeal=[0-9a-f-]{36}(?:&|$)/i);
@@ -92,7 +117,9 @@ test("guest Save survives sign-in, saves automatically, and reopens from its dur
     await assertFocusedDecision(guest.page, savedAddress);
     await expect(guest.page).toHaveURL(durableUrl);
 
-    const secondDevice = await browser.newContext({ storageState: authStatePath });
+    const secondDevice = await browser.newContext({
+      storageState: authStatePath,
+    });
     try {
       const secondPage = await secondDevice.newPage();
       await secondPage.goto(durableUrl, { waitUntil: "domcontentloaded" });
@@ -103,7 +130,10 @@ test("guest Save survives sign-in, saves automatically, and reopens from its dur
     }
   } finally {
     try {
-      if (savedAddress && /[?&]savedDeal=[0-9a-f-]{36}(?:&|$)/i.test(guest.page.url())) {
+      if (
+        savedAddress &&
+        /[?&]savedDeal=[0-9a-f-]{36}(?:&|$)/i.test(guest.page.url())
+      ) {
         await deleteRegressionDealsByAddress(guest.page, savedAddress);
       }
     } finally {
@@ -119,20 +149,30 @@ test("guest Share returns from sign-in to the same result and reopens disclosure
   const guest = await newGuestPage(browser);
   try {
     await openSampleDecision(guest.page);
-    await guest.page.getByRole("button", { name: "Share", exact: true }).click();
-    const shareDialog = guest.page.getByRole("dialog", { name: "Share this analysis" });
+    await guest.page
+      .getByRole("button", { name: "Share", exact: true })
+      .click();
+    const shareDialog = guest.page.getByRole("dialog", {
+      name: "Share this analysis",
+    });
     await expect(shareDialog).toBeVisible();
-    await shareDialog.getByRole("link", { name: "Sign in", exact: true }).click();
+    await shareDialog
+      .getByRole("link", { name: "Sign in", exact: true })
+      .click();
 
     await signInFromCurrentPage(guest.page);
     await assertFocusedDecision(guest.page, SAMPLE_DEAL_FIXTURE.values.address);
 
-    const resumedDialog = guest.page.getByRole("dialog", { name: "Share this analysis" });
+    const resumedDialog = guest.page.getByRole("dialog", {
+      name: "Share this analysis",
+    });
     await expect(resumedDialog).toBeVisible({ timeout: 30_000 });
     await expect(
-      resumedDialog.getByText("Choose what to disclose", { exact: false })
+      resumedDialog.getByText("Choose what to disclose", { exact: false }),
     ).toBeVisible();
-    await expect(resumedDialog.getByRole("button", { name: "Create secure link" })).toBeVisible();
+    await expect(
+      resumedDialog.getByRole("button", { name: "Create secure link" }),
+    ).toBeVisible();
   } finally {
     await guest.close();
   }

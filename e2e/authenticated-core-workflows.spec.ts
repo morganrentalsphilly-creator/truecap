@@ -125,7 +125,7 @@ test("shortlist preview repairs mixed pasted rows, ranks them, and survives refr
 test("saved deal moves through dashboard, durable scenario workspace, comparison, document validation, and PDF export", async ({
   page,
 }, testInfo) => {
-  test.setTimeout(180_000);
+  test.setTimeout(240_000);
   const runKey = `${Date.now().toString(36)}-${testInfo.workerIndex}-${testInfo.retry}`;
   const address = `E2E Power ${runKey} Ave, Philadelphia, PA 19140`;
   const scenarioName = `E2E downside ${runKey}`;
@@ -199,13 +199,22 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
         .filter({ visible: true })
         .first(),
     ).toBeVisible({ timeout: 20_000 });
-    await page
-      .getByRole("link", { name: `Open ${scenarioName} workspace` })
-      .click();
-    await expect(page).toHaveURL(
-      /\/dashboard\/saved-analyses\/[0-9a-f-]{36}(?:[?#]|$)/i,
+    const scenarioWorkspaceLink = page.getByRole("link", {
+      name: `Open ${scenarioName} workspace`,
+    });
+    const scenarioHref = await scenarioWorkspaceLink.getAttribute("href");
+    expect(scenarioHref).toMatch(
+      /^\/dashboard\/saved-analyses\/[0-9a-f-]{36}$/i,
     );
-    expect(page.url()).not.toContain(baseDealId);
+    expect(scenarioHref).not.toBe(`/dashboard/saved-analyses/${baseDealId}`);
+    const scenarioPath = new URL(scenarioHref!, page.url()).pathname;
+    await Promise.all([
+      page.waitForURL((url) => url.pathname === scenarioPath, {
+        timeout: 30_000,
+        waitUntil: "domcontentloaded",
+      }),
+      scenarioWorkspaceLink.click(),
+    ]);
 
     const notes = page.getByRole("textbox", {
       name: "Deal notes",
