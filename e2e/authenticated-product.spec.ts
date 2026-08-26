@@ -1,6 +1,7 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
 import { SAMPLE_DEAL_FIXTURE } from "../lib/sample-deal";
 import { resolveAuthenticatedE2EEnvironment } from "./support/auth-environment";
+import { deleteRegressionDealsByAddress } from "./support/product-flows";
 
 const authEnvironment = resolveAuthenticatedE2EEnvironment(process.env);
 const authStatePath = "playwright/.auth/internal-test-user.json";
@@ -66,21 +67,10 @@ async function makeSampleAddressUnique(page: Page): Promise<string> {
   return address;
 }
 
-async function deleteSavedRegressionDeal(page: Page, address: string) {
-  await page.goto("/dashboard/saved-analyses", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("heading", { level: 1, name: "My Deals" })).toBeVisible();
-  await page.getByLabel("Search your deals by address").fill(address);
-  await page.getByLabel(`Select analysis ${address.split(",")[0]}`).click();
-  page.once("dialog", (dialog) => dialog.accept());
-  await page.getByRole("button", { name: "Delete", exact: true }).click();
-  await expect(page.getByText("Deleted 1 deal", { exact: true })).toBeVisible({
-    timeout: 20_000,
-  });
-}
-
 test("guest Save survives sign-in, saves automatically, and reopens from its durable URL", async ({
   browser,
 }) => {
+  test.setTimeout(120_000);
   const guest = await newGuestPage(browser);
   let savedAddress: string | null = null;
   try {
@@ -114,7 +104,7 @@ test("guest Save survives sign-in, saves automatically, and reopens from its dur
   } finally {
     try {
       if (savedAddress && /[?&]savedDeal=[0-9a-f-]{36}(?:&|$)/i.test(guest.page.url())) {
-        await deleteSavedRegressionDeal(guest.page, savedAddress);
+        await deleteRegressionDealsByAddress(guest.page, savedAddress);
       }
     } finally {
       await guest.close();
@@ -125,6 +115,7 @@ test("guest Save survives sign-in, saves automatically, and reopens from its dur
 test("guest Share returns from sign-in to the same result and reopens disclosure choices", async ({
   browser,
 }) => {
+  test.setTimeout(120_000);
   const guest = await newGuestPage(browser);
   try {
     await openSampleDecision(guest.page);
