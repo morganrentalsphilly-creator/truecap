@@ -41,6 +41,9 @@ describe("saved deal power-user navigation", () => {
     expect(card).toContain("Later edits stay isolated from every other saved analysis.");
     expect(card).toContain("Open workspace");
     expect(card).toContain("Workspace open");
+    expect(card).toMatch(
+      /<a\s+href=\{`\/dashboard\/saved-analyses\/\$\{s\.id\}`\}/,
+    );
     expect(card).not.toMatch(/>\s*Open\s*</);
   });
 

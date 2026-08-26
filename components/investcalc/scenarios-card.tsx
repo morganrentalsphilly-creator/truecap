@@ -13,7 +13,6 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import * as Sentry from "@sentry/nextjs";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FolderOpen, GitCompare, Layers, Loader2, Plus } from "lucide-react";
 import {
@@ -251,13 +250,15 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
                   Workspace open
                 </span>
               ) : (
-                <Link
+                // Keep this as a native navigation. Next's client router can
+                // abort a same-route dynamic-id transition after prefetching.
+                <a
                   href={`/dashboard/saved-analyses/${s.id}`}
                   aria-label={`Open ${s.scenarioName} workspace`}
                   className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-xs font-semibold text-primary transition-colors hover:bg-primary/5 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                   <FolderOpen aria-hidden className="size-3.5" /> Open workspace
-                </Link>
+                </a>
               )}
             </li>
           );
