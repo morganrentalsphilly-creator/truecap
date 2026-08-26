@@ -13,11 +13,20 @@ import { describe, expect, it } from "vitest";
 const root = process.cwd();
 const read = (path: string) => readFileSync(join(root, path), "utf8");
 
-function sourceSection(source: string, startMarker: string, endMarker: string): string {
+function sourceSection(
+  source: string,
+  startMarker: string,
+  endMarker: string,
+): string {
   const start = source.indexOf(startMarker);
-  expect(start, `missing source marker: ${startMarker}`).toBeGreaterThanOrEqual(0);
+  expect(start, `missing source marker: ${startMarker}`).toBeGreaterThanOrEqual(
+    0,
+  );
   const end = source.indexOf(endMarker, start + startMarker.length);
-  expect(end, `missing source marker after ${startMarker}: ${endMarker}`).toBeGreaterThan(start);
+  expect(
+    end,
+    `missing source marker after ${startMarker}: ${endMarker}`,
+  ).toBeGreaterThan(start);
   return source.slice(start, end);
 }
 
@@ -26,15 +35,17 @@ describe("RentCast AVM reaches the empty price field as a labeled estimate", () 
   const applyComps = sourceSection(
     calculator,
     "const applyComps = useCallback(",
-    "const handleAutofillFromAddress = useCallback("
+    "const handleAutofillFromAddress = useCallback(",
   );
 
   it("fills the AVM only when the field is empty and no listing price exists", () => {
     expect(applyComps).toContain("adopted.purchasePrice == null");
-    expect(applyComps).toContain('isEmptyNumber(form.getValues("purchasePrice"))');
+    expect(applyComps).toContain(
+      'isEmptyNumber(form.getValues("purchasePrice"))',
+    );
     expect(applyComps).toContain("setEstimatedPriceValue(rounded)");
     expect(applyComps).toContain(
-      'setPriceEstimateBasis("RentCast\'s value estimate for this address")'
+      'setPriceEstimateBasis("RentCast\'s value estimate for this address")',
     );
     expect(applyComps).toContain("setPriceEstimated(true)");
   });
@@ -58,10 +69,10 @@ describe("free users are never instructed to perform a Pro-only action", () => {
 
   it("the apply-targets instruction renders only for users who can apply", () => {
     expect(summary).toContain(
-      '? canTunePriceCeiling\n                ? "Review or edit the example targets, then apply at least one'
+      '? canTunePriceCeiling\n                ? "Review or edit the example targets, then apply at least one',
     );
     expect(summary).toContain(
-      "TrueCap Pro calculates the highest modeled price that still meets rules you choose"
+      "TrueCap Pro calculates the highest modeled price that still meets rules you choose",
     );
   });
 
@@ -69,7 +80,7 @@ describe("free users are never instructed to perform a Pro-only action", () => {
     const applyBlock = sourceSection(
       summary,
       "{!targetAdopted && canTunePriceCeiling && !targetBlocked ? (",
-      "Apply the example targets"
+      "Apply the example targets",
     );
     expect(applyBlock).toContain("onClick={onAdoptTarget}");
   });
@@ -104,7 +115,7 @@ describe("free-tier walls answer with a next step", () => {
     const branch = sourceSection(
       calculator,
       'if (r.code === "SIGN_IN_REQUIRED") {',
-      'if (r.code === "ENTITLEMENT_REQUIRED") {'
+      'if (r.code === "ENTITLEMENT_REQUIRED") {',
     );
     expect(branch).toContain("Create a free account to autofill");
     expect(branch).toContain("Create free account");
@@ -115,7 +126,7 @@ describe("free-tier walls answer with a next step", () => {
     const wall = sourceSection(
       calculator,
       'if (result.code === "ENTITLEMENT_SAVE") {',
-      'if (result.code === "ADDRESS_CHANGED") {'
+      'if (result.code === "ADDRESS_CHANGED") {',
     );
     expect(wall).toContain("const isPaidPlan = canUpdateSavedDeals");
     expect(wall).toContain("Free limit: 5 saved deals");
@@ -126,7 +137,7 @@ describe("free-tier walls answer with a next step", () => {
     const saveClick = sourceSection(
       dashboard,
       "const handleSaveClick = () => {",
-      "const handleExportPdf = ("
+      "const handleExportPdf = (",
     );
     expect(saveClick).toContain("Editing saved deals is Pro");
     expect(saveClick).toContain("See Pro plans");
@@ -135,7 +146,7 @@ describe("free-tier walls answer with a next step", () => {
   it("comps entitlement walls route to plans, not a failure toast", () => {
     const comps = read("components/investcalc/property-comps-card.tsx");
     expect(comps).toContain(
-      'if (r.code === "ENTITLEMENT_REQUIRED" || r.code === "CAP_REACHED") {'
+      'if (r.code === "ENTITLEMENT_REQUIRED" || r.code === "CAP_REACHED") {',
     );
     expect(comps).toContain("See plans");
   });
@@ -153,7 +164,7 @@ describe("sold features are reachable from the decision-first results", () => {
     expect(summary).toContain("Export PDF");
     expect(dashboard).toContain("onExportPdf={() => handleExportPdf()}");
     expect(dashboard).toContain(
-      "isExportDisabled={isExporting || (canExportPdf && !isSaved)}"
+      "isExportDisabled={isExporting || (canExportPdf && !isSaved)}",
     );
   });
 
@@ -161,7 +172,9 @@ describe("sold features are reachable from the decision-first results", () => {
     // Outside on purpose: advocacy-accessibility-guards pins that the
     // decision module itself carries no numerical-confidence claim.
     expect(dashboard).toContain('id="screening-index"');
-    expect(dashboard).toContain("Secondary screening heuristic — not investment advice.");
+    expect(dashboard).toContain(
+      "Secondary screening heuristic — not investment advice.",
+    );
     expect(summary).not.toContain("screening-index");
   });
 });
@@ -171,11 +184,13 @@ describe("input-phase traps and mislabels", () => {
 
   it("the primary CTA only becomes the sample launcher on a pristine form", () => {
     expect(calculator).toContain(
-      "const primaryCtaRunsSample = !hasPropertyAvailable && !hasMeaningfulInput"
+      "activeStrategyKey === null && !hasPropertyAvailable && !hasMeaningfulInput",
     );
-    expect(calculator).toContain('type={primaryCtaRunsSample ? "button" : "submit"}');
     expect(calculator).toContain(
-      "onTrySample={primaryCtaRunsSample ? handleTrySampleDeal : undefined}"
+      'type={primaryCtaRunsSample ? "button" : "submit"}',
+    );
+    expect(calculator).toContain(
+      "onTrySample={primaryCtaRunsSample ? handleTrySampleDeal : undefined}",
     );
   });
 
@@ -201,7 +216,7 @@ describe("an estimated price never masquerades as an asking price downstream", (
 
   it("the decision headline is substituted at render when the price is estimated", () => {
     expect(summary).toContain(
-      'rawDecisionLabel.replace(/ at asking\\b/, " at the estimated price")'
+      'rawDecisionLabel.replace(/ at asking\\b/, " at the estimated price")',
     );
   });
 
@@ -210,18 +225,30 @@ describe("an estimated price never masquerades as an asking price downstream", (
     expect(shareButton).toContain("priceEstimated: true");
     expect(summary).toContain("priceIsEstimated={priceIsEstimated}");
     const action = read("app/actions/public-shares.ts");
-    expect(action).toContain("priceEstimated: parsed.data.priceEstimated === true");
+    expect(action).toContain(
+      "let priceEstimated = parsed.data.priceEstimated === true",
+    );
+    expect(action).toContain(
+      "recordedSourceContext?.purchasePriceEstimated === true",
+    );
+    expect(action).toContain("priceEstimated,");
     const lib = read("lib/public-share.ts");
-    expect(lib).toContain("...(input.priceEstimated ? { priceEstimated: true } : {})");
+    expect(lib).toContain(
+      "...(input.priceEstimated ? { priceEstimated: true } : {})",
+    );
     const viewer = read("components/investcalc/read-only-analysis-view.tsx");
     expect(viewer).toContain('priceEstimated ? "Estimated price" : "Asking"');
     const page = read("app/s/[token]/page.tsx");
-    expect(page).toContain("priceEstimated={resolved.snapshot.meta.priceEstimated === true}");
+    expect(page).toContain(
+      "priceEstimated={resolved.snapshot.meta.priceEstimated === true}",
+    );
   });
 
   it("surfaces that cannot know provenance use neutral price wording", () => {
     const table = read("components/dashboard/your-deals-table.tsx");
-    expect(table).not.toContain(">\n                Asking\n              </th>");
+    expect(table).not.toContain(
+      ">\n                Asking\n              </th>",
+    );
     const pdf = read("lib/pdf-generator.ts");
     expect(pdf).toContain("At the analyzed price");
     expect(pdf).not.toContain("At the current asking price");

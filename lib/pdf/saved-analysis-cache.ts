@@ -12,10 +12,8 @@ import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 type SavedAnalysisPdfCacheInput = {
   analysisId: string;
   renderFingerprint: string;
+  artifactAttestation: string;
   pdfBase64: string;
-  renderedWithBranding: boolean;
-  renderedWithBuyBoxVerdict: boolean;
-  buyBoxStateResolved: boolean;
 };
 
 /**
@@ -29,10 +27,8 @@ type SavedAnalysisPdfCacheInput = {
 export async function cacheSavedAnalysisPdfExport({
   analysisId,
   renderFingerprint,
+  artifactAttestation,
   pdfBase64,
-  renderedWithBranding,
-  renderedWithBuyBoxVerdict,
-  buyBoxStateResolved,
 }: SavedAnalysisPdfCacheInput): Promise<void> {
   try {
     const supabase = createBrowserSupabaseClient();
@@ -50,6 +46,7 @@ export async function cacheSavedAnalysisPdfExport({
       analysisId,
       PDF_CACHE_VERSION,
       renderFingerprint,
+      artifactAttestation,
     );
     const { error: uploadError } = await supabase.storage
       .from(ANALYSIS_PDF_BUCKET)
@@ -72,9 +69,7 @@ export async function cacheSavedAnalysisPdfExport({
     const completeResult = await completeSavedAnalysisPdfExportAction(
       analysisId,
       renderFingerprint,
-      renderedWithBranding,
-      renderedWithBuyBoxVerdict,
-      buyBoxStateResolved,
+      artifactAttestation,
     );
     if (!completeResult.ok && completeResult.code !== "STALE_EXPORT") {
       Sentry.captureMessage("pdf-cache-write complete action failed", {

@@ -9,10 +9,11 @@
  * the smart defaults get visible credit after the toast evicts.
  *
  * Derivation is data-only: the parent's live enrichment capture (what
- * enrich-property actually wrote this session) + the template link on the
- * watched form (templateId → resolved name). No click history. The capture
- * is session-scoped by design — it clears on reset / new address — so draft
- * restores and saved-deal loads (where nothing "fired") show no receipt.
+ * enrich-property actually wrote this session). Template provenance belongs
+ * exclusively in the assumptions strip, where it is checked field-by-field;
+ * duplicating it here previously produced contradictory "template applied"
+ * and "default" claims. The capture is session-scoped by design — it clears
+ * on reset / new address — so restored deals show no false receipt.
  *
  * Deliberately NOT an aria-live region: the enrichment toast already
  * announces the same fill to screen readers; a second live region would
@@ -22,12 +23,17 @@
 import type { UseFormReturn } from "react-hook-form";
 import { Check } from "lucide-react";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
-import { resolveTemplateName } from "@/lib/assumption-chips";
+import { unitRentRollWasOverridden } from "@/lib/unit-rent-provenance";
 
 /** Structural view of investcalc-page's EnrichmentCapture ref (value +
  *  source detail per auto-filled field). */
 export type EnrichmentReceiptCapture = {
-  monthlyRent?: { value: number; source: string };
+  monthlyRent?: {
+    value?: number;
+    source: string;
+    rentFingerprint?: string;
+    invalidated?: boolean;
+  };
   interestRate?: { value: number };
   propertyTaxPct?: { value: number; detail?: string };
 };
@@ -39,13 +45,6 @@ type Props = {
   active: boolean;
   /** Read fresh each render (the parent passes its enrichmentCaptureRef). */
   getCapture: () => EnrichmentReceiptCapture;
-  templateOptions: ReadonlyArray<{ id: string; templateName: string }>;
-  savedTemplateFallback: { id: string; templateName: string } | null;
-  /** Mirrors the strip's template-chip gate: with a strategy active the
-   *  template chip is hidden (its edit target is unmounted) and the
-   *  starter assumptions overwrote the template's values — so the
-   *  receipt must not point at a chip that doesn't exist. */
-  hasActiveStrategy?: boolean;
 };
 
 const fmtPct = (n: number) => String(Number(n.toFixed(2)));
@@ -63,52 +62,67 @@ function joinNatural(parts: string[]): string {
   return `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}`;
 }
 
-export function EnrichmentReceipt({
-  form,
-  active,
-  getCapture,
-  templateOptions,
-  savedTemplateFallback,
-  hasActiveStrategy = false,
-}: Props) {
-  // Subscribe to form writes so the receipt appears the moment enrichment /
-  // template auto-apply setValue-writes land (capture mutations always ride
-  // along with those writes). Isolated re-render, SaveAsDefaultsChip pattern.
+export function EnrichmentReceipt({ form, active, getCapture }: Props) {
+  // Capture is ref-backed, so subscribe to form writes to repaint when a
+  // lookup fills rate, tax, or rent without introducing duplicate state.
   form.watch();
   if (!active) return null;
 
   const capture = getCapture();
+  const currentRate = Number(form.getValues("interestRate"));
+  const currentTax = Number(form.getValues("propertyTaxPct"));
+  const currentRent = Number(form.getValues("monthlyRent"));
+  const sameNumber = (current: number, captured: number) =>
+    Number.isFinite(current) && Math.abs(current - captured) < 1e-9;
   const parts: string[] = [];
-  if (capture.interestRate) parts.push(`rate (${fmtPct(capture.interestRate.value)}% FRED)`);
-  if (capture.propertyTaxPct) {
-    const detail = capture.propertyTaxPct.detail ? ` ${capture.propertyTaxPct.detail}` : "";
-    parts.push(`taxes (${fmtPct(capture.propertyTaxPct.value)}%${detail})`);
+  if (
+    capture.interestRate &&
+    sameNumber(currentRate, capture.interestRate.value)
+  ) {
+    parts.push(`rate (${fmtPct(capture.interestRate.value)}% FRED benchmark)`);
   }
-  if (capture.monthlyRent) {
+  if (
+    capture.propertyTaxPct &&
+    form.getValues("propertyTaxInputMode") !== "annual" &&
+    sameNumber(currentTax, capture.propertyTaxPct.value)
+  ) {
+    const detail = capture.propertyTaxPct.detail ?? "State";
     parts.push(
-      `rent (~$${Math.round(capture.monthlyRent.value).toLocaleString("en-US")}/mo ${enrichmentRentSourceLabel(capture.monthlyRent.source)})`
+      `taxes (${fmtPct(capture.propertyTaxPct.value)}% ${detail} state benchmark)`,
+    );
+  }
+  if (
+    capture.monthlyRent?.value != null &&
+    sameNumber(currentRent, capture.monthlyRent.value)
+  ) {
+    parts.push(
+      `rent (~$${Math.round(capture.monthlyRent.value).toLocaleString("en-US")}/mo ${enrichmentRentSourceLabel(capture.monthlyRent.source)})`,
+    );
+  } else if (
+    capture.monthlyRent?.rentFingerprint &&
+    !unitRentRollWasOverridden({
+      capturedFingerprint: capture.monthlyRent.rentFingerprint,
+      invalidated: capture.monthlyRent.invalidated,
+      values: form.getValues(),
+    })
+  ) {
+    parts.push(
+      `per-unit rents (${enrichmentRentSourceLabel(capture.monthlyRent.source)})`,
     );
   }
 
-  // Strategy mode: the template chip is dropped from the strip and the
-  // starter assumptions overwrote the template's values — claiming
-  // "Template applied" would point at a chip that doesn't exist.
-  const templateName = hasActiveStrategy
-    ? null
-    : resolveTemplateName(form.getValues("templateId"), templateOptions, savedTemplateFallback);
-
-  if (parts.length === 0 && !templateName) return null;
-
-  const segments = [
-    parts.length > 0 ? `Filled ${joinNatural(parts)} for you` : null,
-    templateName ? `Template "${templateName}" applied` : null,
-  ].filter(Boolean);
+  if (parts.length === 0) return null;
 
   return (
     <p className="flex items-start gap-2 rounded-xl border border-border bg-card/60 px-3 py-2 text-xs leading-relaxed text-muted-foreground shadow-sm">
-      <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--metric-positive)]" aria-hidden />
+      <Check
+        className="mt-0.5 size-3.5 shrink-0 text-[var(--metric-positive)]"
+        aria-hidden
+      />
       <span className="min-w-0">
-        <span className="font-semibold text-foreground">{segments.join(" · ")}</span>
+        <span className="font-semibold text-foreground">
+          Filled {joinNatural(parts)} for you
+        </span>
         {" — tap a chip below to change anything."}
       </span>
     </p>

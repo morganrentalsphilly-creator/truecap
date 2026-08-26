@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest";
 
 const root = join(import.meta.dirname, "../..");
 const read = (path: string) => readFileSync(join(root, path), "utf8");
+const normalizeSource = (source: string) =>
+  source.replace(/\s+/g, "").replace(/,([)])/g, "$1");
 
 describe("decision workspace UX guards", () => {
   it("keeps Settings and Buy Boxes in primary navigation with touch targets", () => {
@@ -25,8 +27,12 @@ describe("decision workspace UX guards", () => {
 
     expect(source).toContain("Highest screening index");
     expect(source).toContain("Highest modeled upside");
-    expect(source).toContain("The Screening Index is a secondary heuristic, not an");
-    expect(source).toContain("verify every material assumption before relying on a comparison");
+    expect(source).toContain(
+      "The Screening Index is a secondary heuristic, not an",
+    );
+    expect(source).toContain(
+      "verify every material assumption before relying on a comparison",
+    );
     expect(source).not.toMatch(/>\s*Best deal\s*</i);
     expect(source).not.toMatch(/>\s*Best upside\s*</i);
   });
@@ -37,9 +43,13 @@ describe("decision workspace UX guards", () => {
     const compare = read("components/investcalc/compare-deals-client.tsx");
 
     expect(workspace).toContain('altText="Undo marking deal as Passed"');
-    expect(workspace).toContain("updateSavedDealStageAction(savedDealId, stage)");
+    expect(workspace).toContain(
+      "updateSavedDealStageAction(savedDealId, stage)",
+    );
     expect(list).toContain("previousStage: PipelineStage");
-    expect(list).toContain("updateSavedDealStageAction(id, previousStage)");
+    expect(normalizeSource(list)).toContain(
+      normalizeSource("updateSavedDealStageAction(id, previousStage)"),
+    );
     expect(list).toContain('altText="Undo marking deal as Passed"');
     expect(compare).not.toMatch(/Mark all.*Passed/i);
     expect(compare).toContain("Near-term score");
@@ -64,10 +74,16 @@ describe("decision workspace UX guards", () => {
 
     expect(topbar).toContain('className="hidden min-h-11 items-center');
     expect(home).not.toMatch(/className="h-(?:9|10) [^"]*rounded-xl/);
-    expect(home).toContain('className="inline-flex min-h-11 items-center text-xs font-semibold text-primary');
+    expect(home).toContain(
+      'className="inline-flex min-h-11 items-center text-xs font-semibold text-primary',
+    );
     expect(leads).toContain('className="inline-flex min-h-11 items-center');
-    expect(topDeals.match(/inline-flex min-h-11 items-center/g)?.length).toBeGreaterThanOrEqual(2);
+    expect(
+      topDeals.match(/inline-flex min-h-11 items-center/g)?.length,
+    ).toBeGreaterThanOrEqual(2);
     expect(due).toContain("inline-flex min-h-11 min-w-11");
-    expect(due.match(/inline-flex min-h-11/g)?.length).toBeGreaterThanOrEqual(3);
+    expect(due.match(/inline-flex min-h-11/g)?.length).toBeGreaterThanOrEqual(
+      3,
+    );
   });
 });

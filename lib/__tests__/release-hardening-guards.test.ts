@@ -7,7 +7,9 @@ const read = (path: string) => readFileSync(join(process.cwd(), path), "utf8");
 describe("release hardening guards", () => {
   it("preserves the exact protected route through a same-origin login", () => {
     const proxy = read("proxy.ts");
-    expect(proxy).toContain('requestHeaders.set(\n    "x-truecap-request-path"');
+    expect(proxy).toContain(
+      'requestHeaders.set(\n    "x-truecap-request-path"',
+    );
     for (const layout of [
       "app/dashboard/layout.tsx",
       "app/profile/layout.tsx",
@@ -21,11 +23,26 @@ describe("release hardening guards", () => {
 
   it("never silently overwrites dirty property facts during autofill", () => {
     const source = read("components/investcalc/investcalc-page.tsx");
-    expect(source).toContain("manualValueWouldChange");
-    expect(source).toContain("approvedOverwrites.has(field)");
-    expect(source).toContain('aria-label={`${conflict.label} value source`}');
+    const ownership = read("lib/autofill-field-ownership.ts");
+    expect(source).toContain("decideAutofillFieldWrite");
+    expect(source).toContain("currentValue: form.getValues(field)");
+    expect(source).toContain(
+      "explicitlyApproved: approvedOverwrites.has(field)",
+    );
+    expect(ownership).toContain('action: "conflict"');
+    expect(ownership).toContain('reason: "different-value"');
+    expect(source).toContain("aria-label={`${conflict.label} value source`}");
     expect(source).toContain("Keep mine");
     expect(source).toContain("Use estimate");
+  });
+
+  it("protects restored/template rate and tax values from address benchmarks", () => {
+    const source = read("components/investcalc/investcalc-page.tsx");
+    expect(source).toContain("mayAdoptStartingBenchmark");
+    expect(source).toContain("autoApplyEligibleRef.current");
+    expect(source).toContain('!form.getValues("templateId")');
+    expect(source).toContain("!savedDealIdRef.current");
+    expect(source).toContain("replaceableDefault: isReplaceableProductDefault");
   });
 
   it("does not turn aggregate query failure into a zero-value portfolio", () => {
@@ -56,8 +73,10 @@ describe("release hardening guards", () => {
     const config = read("next.config.mjs");
     const route = read("app/api/csp-report/route.ts");
     expect(config).toContain('key: "Content-Security-Policy-Report-Only"');
-    expect(config).not.toContain('key: "Content-Security-Policy", value: cspReportOnly');
-    expect(route).toContain('return `/${parts[0]}/:redacted`');
+    expect(config).not.toContain(
+      'key: "Content-Security-Policy", value: cspReportOnly',
+    );
+    expect(route).toContain("return `/${parts[0]}/:redacted`");
     expect(route).not.toContain("request.text()");
   });
 
@@ -69,7 +88,7 @@ describe("release hardening guards", () => {
     expect(workflow).toContain("name: Build the production browser target");
     expect(workflow).toContain("NEXT_PUBLIC_SUPABASE_URL=$API_URL");
     expect(playwrightConfig).toContain(
-      "npm run start -- --hostname 127.0.0.1 --port 3100"
+      "npm run start -- --hostname 127.0.0.1 --port 3100",
     );
   });
 });

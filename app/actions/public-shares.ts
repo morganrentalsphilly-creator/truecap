@@ -37,6 +37,13 @@ import {
   isAdoptedOfferCeilingTargetSource,
   type OfferCeilingTargetSource,
 } from "@/lib/offer-ceiling-contract";
+import {
+  ANALYZER_STRATEGY_KEYS,
+  resolveCompatibleAnalyzerStrategyKey,
+  type AnalyzerStrategyKey,
+} from "@/lib/analyzer-strategy-persistence";
+import { shouldFreezeSavedMethodology } from "@/lib/saved-analysis-methodology";
+import { normalizeExternalOfferCeilingTargetSource } from "@/lib/external-offer-ceiling-provenance";
 
 export type CreatePublicShareResult =
   | { ok: true; url: string }
@@ -57,7 +64,9 @@ const shareRateLimit = createIpRateLimit({
   maxPerWindow: 40,
 });
 
-export async function createPublicShareAction(input: unknown): Promise<CreatePublicShareResult> {
+export async function createPublicShareAction(
+  input: unknown,
+): Promise<CreatePublicShareResult> {
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -79,29 +88,43 @@ export async function createPublicShareAction(input: unknown): Promise<CreatePub
       maoTargetSource: z
         .enum(["buy-box", "screening-defaults", "selected-targets"])
         .optional(),
-      audience: z.enum(["investment-partner", "client", "lender-review"]).optional(),
+      audience: z
+        .enum(["investment-partner", "client", "lender-review"])
+        .optional(),
       addressVisibility: z.enum(["hidden", "full"]).optional(),
       /** The client's price field currently holds an automated estimate (AVM /
-       *  rent-multiple) the user never replaced. Ignored when the share swaps
-       *  to a saved deal's snapshot, whose provenance this flag can't describe. */
+       *  rent-multiple) the user never replaced. For an exact saved-deal share,
+       *  the frozen snapshot can independently preserve the same warning. */
       priceEstimated: z.boolean().optional(),
+      analyzerStrategyKey: z.enum(ANALYZER_STRATEGY_KEYS).optional(),
     })
     .safeParse(input);
   if (!parsed.success) {
-    return { ok: false, code: "VALIDATION_ERROR", message: "Couldn't read this analysis." };
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "Couldn't read this analysis.",
+    };
   }
   const parsedMaoTarget =
-    parsed.data.maoTarget === undefined ? undefined : normalizeMaoTarget(parsed.data.maoTarget);
+    parsed.data.maoTarget === undefined
+      ? undefined
+      : normalizeMaoTarget(parsed.data.maoTarget);
   if (parsed.data.maoTarget !== undefined && !parsedMaoTarget) {
-    return { ok: false, code: "VALIDATION_ERROR", message: "Couldn't read these targets." };
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "Couldn't read these targets.",
+    };
   }
   const candidateMaoTarget = parsedMaoTarget
-    ? normalizeMaoTargetForFinancing(parsedMaoTarget, {
-        isCashPurchase: calculateAnalysis(parsed.data.values).monthlyPayment <= 0,
-      }) ?? undefined
+    ? (normalizeMaoTargetForFinancing(parsedMaoTarget, {
+        isCashPurchase:
+          calculateAnalysis(parsed.data.values).monthlyPayment <= 0,
+      }) ?? undefined)
     : undefined;
   const candidateMaoTargetSource: OfferCeilingTargetSource =
-    parsed.data.maoTargetSource ??
+    normalizeExternalOfferCeilingTargetSource(parsed.data.maoTargetSource) ??
     (candidateMaoTarget ? "selected-targets" : "screening-defaults");
   const maoTarget =
     candidateMaoTarget &&
@@ -113,7 +136,8 @@ export async function createPublicShareAction(input: unknown): Promise<CreatePub
     return {
       ok: false,
       code: "VALIDATION_ERROR",
-      message: "Too many share links created. Please wait a few minutes and try again.",
+      message:
+        "Too many share links created. Please wait a few minutes and try again.",
     };
   }
 
@@ -122,9 +146,14 @@ export async function createPublicShareAction(input: unknown): Promise<CreatePub
   let dealId: string | undefined;
   let valuesToShare: InvestmentFormValues = parsed.data.values;
   let recordedResultSnapshot: Record<string, unknown> | undefined;
-  let recordedMethodologyVersion: string | undefined;
   let shareMaoTarget = maoTarget;
   let shareMaoTargetSource = candidateMaoTargetSource;
+  let priceEstimated = parsed.data.priceEstimated === true;
+  let analyzerStrategyKey: AnalyzerStrategyKey =
+    resolveCompatibleAnalyzerStrategyKey(
+      parsed.data.analyzerStrategyKey,
+      parsed.data.values,
+    );
   if (parsed.data.dealId) {
     const { data: deal } = await supabase
       .from("saved_analyses")
@@ -133,7 +162,9 @@ export async function createPublicShareAction(input: unknown): Promise<CreatePub
       .eq("user_id", user.id)
       .is("deleted_at", null)
       .maybeSingle();
-    const savedValues = normalizeReleasedInvestmentFormSnapshot(deal?.form_snapshot);
+    const savedValues = normalizeReleasedInvestmentFormSnapshot(
+      deal?.form_snapshot,
+    );
     const normalizedSaved = savedValues
       ? releasedInvestmentFormSchema.safeParse(savedValues)
       : null;
@@ -143,7 +174,8 @@ export async function createPublicShareAction(input: unknown): Promise<CreatePub
     if (
       deal &&
       normalizedSaved?.success &&
-      JSON.stringify(normalizedSaved.data) === JSON.stringify(parsed.data.values)
+      JSON.stringify(normalizedSaved.data) ===
+        JSON.stringify(parsed.data.values)
     ) {
       dealId = parsed.data.dealId;
       valuesToShare = normalizedSaved.data;
@@ -151,14 +183,49 @@ export async function createPublicShareAction(input: unknown): Promise<CreatePub
         deal.result_snapshot && typeof deal.result_snapshot === "object"
           ? (deal.result_snapshot as Record<string, unknown>)
           : undefined;
-      recordedMethodologyVersion =
-        typeof deal.methodology_version === "string"
-          ? deal.methodology_version
-          : undefined;
+      const currentSavedResult = calculateAnalysis(normalizedSaved.data);
+      if (
+        shouldFreezeSavedMethodology(
+          deal.methodology_version,
+          currentSavedResult.methodologyVersion,
+        )
+      ) {
+        return {
+          ok: false,
+          code: "VALIDATION_ERROR",
+          message:
+            "This deal uses an older underwriting standard. Open it, review the current assumptions, and run it again before creating a public link.",
+        };
+      }
+      analyzerStrategyKey = resolveCompatibleAnalyzerStrategyKey(
+        recordedResultSnapshot?.analyzerStrategyKey,
+        normalizedSaved.data,
+      );
+      const recordedInputConfidence =
+        recordedResultSnapshot?.inputConfidence &&
+        typeof recordedResultSnapshot.inputConfidence === "object" &&
+        !Array.isArray(recordedResultSnapshot.inputConfidence)
+          ? (recordedResultSnapshot.inputConfidence as Record<string, unknown>)
+          : null;
+      const recordedSourceContext =
+        recordedInputConfidence?.sourceContext &&
+        typeof recordedInputConfidence.sourceContext === "object" &&
+        !Array.isArray(recordedInputConfidence.sourceContext)
+          ? (recordedInputConfidence.sourceContext as Record<string, unknown>)
+          : null;
+      // Saved input-provenance metadata can preserve a cautionary estimate
+      // warning even if a stale browser render has not restored that flag.
+      // Financial result fields from this JSON are never publication authority.
+      priceEstimated =
+        priceEstimated ||
+        recordedResultSnapshot?.purchasePriceEstimated === true ||
+        recordedSourceContext?.purchasePriceEstimated === true;
       const recordedTarget = normalizeMaoTarget(
-        recordedResultSnapshot?.maxOfferTarget
+        recordedResultSnapshot?.maxOfferTarget,
       );
       const recordedSource = recordedResultSnapshot?.maxOfferTargetSource;
+      const externalRecordedSource =
+        normalizeExternalOfferCeilingTargetSource(recordedSource);
       if (
         recordedTarget &&
         (recordedSource == null ||
@@ -166,7 +233,7 @@ export async function createPublicShareAction(input: unknown): Promise<CreatePub
           recordedSource === "selected-targets")
       ) {
         shareMaoTarget = recordedTarget;
-        shareMaoTargetSource = recordedSource ?? "selected-targets";
+        shareMaoTargetSource = externalRecordedSource ?? "selected-targets";
       }
     }
   }
@@ -181,18 +248,21 @@ export async function createPublicShareAction(input: unknown): Promise<CreatePub
     dealId: dealId ?? null,
     maoTarget: shareMaoTarget ?? undefined,
     maoTargetSource: shareMaoTarget ? shareMaoTargetSource : undefined,
-    resultSnapshot: recordedResultSnapshot,
-    methodologyVersion: recordedMethodologyVersion,
-    audience: (parsed.data.audience ?? "investment-partner") as PublicShareAudience,
-    addressVisibility: (parsed.data.addressVisibility ?? "hidden") as PublicShareAddressVisibility,
-    // Safe under the dealId swap too: that branch only fires when the saved
-    // values byte-match the client values, so the flag describes the same price.
-    priceEstimated: parsed.data.priceEstimated === true,
+    audience: (parsed.data.audience ??
+      "investment-partner") as PublicShareAudience,
+    addressVisibility: (parsed.data.addressVisibility ??
+      "hidden") as PublicShareAddressVisibility,
+    priceEstimated,
+    analyzerStrategyKey,
   });
   if (!path) {
     // Never fall back to a URL containing the analysis payload. Existing /d
     // links remain readable, but all newly minted links fail closed to opaque.
-    return { ok: false, code: "NOT_CONFIGURED", message: "Secure sharing is temporarily unavailable." };
+    return {
+      ok: false,
+      code: "NOT_CONFIGURED",
+      message: "Secure sharing is temporarily unavailable.",
+    };
   }
   return { ok: true, url: `${getSiteUrl()}${path}` };
 }
@@ -209,27 +279,42 @@ export type PublicShareListItem = {
 
 export type ListPublicSharesResult =
   | { ok: true; shares: PublicShareListItem[] }
-  | { ok: false; code: "SIGN_IN_REQUIRED" | "NOT_CONFIGURED" | "SERVER_ERROR"; message: string };
+  | {
+      ok: false;
+      code: "SIGN_IN_REQUIRED" | "NOT_CONFIGURED" | "SERVER_ERROR";
+      message: string;
+    };
 
 export async function listPublicSharesAction(): Promise<ListPublicSharesResult> {
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
+  if (!user)
+    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
 
   const { data, error } = await supabase
     .from("public_shares")
-    .select("id, label, snapshot, created_at, expires_at, revoked_at, last_viewed_at")
+    .select(
+      "id, label, snapshot, created_at, expires_at, revoked_at, last_viewed_at",
+    )
     .eq("owner_id", user.id)
     .order("created_at", { ascending: false })
     .limit(100);
   if (error) {
     if (error.code === "42P01") {
-      return { ok: false, code: "NOT_CONFIGURED", message: "Shares aren't enabled yet." };
+      return {
+        ok: false,
+        code: "NOT_CONFIGURED",
+        message: "Shares aren't enabled yet.",
+      };
     }
     Sentry.captureException(error, { tags: { feature: "public-shares" } });
-    return { ok: false, code: "SERVER_ERROR", message: "Couldn't load your shares." };
+    return {
+      ok: false,
+      code: "SERVER_ERROR",
+      message: "Couldn't load your shares.",
+    };
   }
   return {
     ok: true,
@@ -237,8 +322,11 @@ export async function listPublicSharesAction(): Promise<ListPublicSharesResult> 
       id: String(row.id),
       label: (row.label as string | null) ?? null,
       title:
-        (((row.snapshot as Record<string, unknown> | null)?.meta as Record<string, unknown> | undefined)
-          ?.title as string | undefined) ?? null,
+        ((
+          (row.snapshot as Record<string, unknown> | null)?.meta as
+            | Record<string, unknown>
+            | undefined
+        )?.title as string | undefined) ?? null,
       createdAt: String(row.created_at),
       expiresAt: (row.expires_at as string | null) ?? null,
       revokedAt: (row.revoked_at as string | null) ?? null,
@@ -249,31 +337,55 @@ export async function listPublicSharesAction(): Promise<ListPublicSharesResult> 
 
 export type RevokePublicShareResult =
   | { ok: true }
-  | { ok: false; code: "SIGN_IN_REQUIRED" | "VALIDATION_ERROR" | "NOT_FOUND" | "SERVER_ERROR"; message: string };
+  | {
+      ok: false;
+      code:
+        | "SIGN_IN_REQUIRED"
+        | "VALIDATION_ERROR"
+        | "NOT_FOUND"
+        | "SERVER_ERROR";
+      message: string;
+    };
 
 /** Revoke (kill the link) — RLS scopes the update to the caller's own rows. */
-export async function revokePublicShareAction(input: unknown): Promise<RevokePublicShareResult> {
+export async function revokePublicShareAction(
+  input: unknown,
+): Promise<RevokePublicShareResult> {
   const parsed = z.object({ id: z.string().uuid() }).safeParse(input);
-  if (!parsed.success) return { ok: false, code: "VALIDATION_ERROR", message: "Invalid share." };
+  if (!parsed.success)
+    return { ok: false, code: "VALIDATION_ERROR", message: "Invalid share." };
 
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
+  if (!user)
+    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
 
   const { data, error } = await supabase
     .from("public_shares")
-    .update({ revoked_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+    .update({
+      revoked_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
     .eq("id", parsed.data.id)
     .eq("owner_id", user.id)
     .select("id")
     .maybeSingle();
   if (error) {
     Sentry.captureException(error, { tags: { feature: "public-shares" } });
-    return { ok: false, code: "SERVER_ERROR", message: "Couldn't revoke the link." };
+    return {
+      ok: false,
+      code: "SERVER_ERROR",
+      message: "Couldn't revoke the link.",
+    };
   }
-  if (!data) return { ok: false, code: "NOT_FOUND", message: "That share no longer exists." };
+  if (!data)
+    return {
+      ok: false,
+      code: "NOT_FOUND",
+      message: "That share no longer exists.",
+    };
   await captureServerEvent({ distinctId: user.id, event: "share_revoked" });
   return { ok: true };
 }

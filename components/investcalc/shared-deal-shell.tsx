@@ -22,6 +22,8 @@ import type { MaoTarget } from "@/lib/max-allowable-offer";
 import type { OfferCeilingAccessPayload } from "@/lib/offer-ceiling-access-contract";
 import type { OfferCeilingTargetSource } from "@/lib/offer-ceiling-contract";
 import type { PublicShareAnalysisPayload } from "@/lib/public-share-analysis-result";
+import type { AnalyzerStrategyKey } from "@/lib/analyzer-strategy-persistence";
+import type { SpecialistAnalysisSnapshot } from "@/lib/specialist-analysis-snapshot";
 
 export type SharedDealLeadCapture = {
   ownerId: string;
@@ -41,9 +43,14 @@ export function SharedDealShell({
   leadCapture,
   methodologyVersion,
   legacyMethodologyWarning = false,
+  outputsRecomputed = false,
+  inputsSource = "captured-share",
   recordedResult = false,
   addressIncluded = true,
   priceEstimated = false,
+  specialistAnalysis = null,
+  specialistAnalysisCaptured = false,
+  analyzerStrategyKey = "buy-hold",
 }: {
   values: InvestmentFormValues;
   /** Entitlement-redacted before crossing into the public client renderer. */
@@ -61,14 +68,29 @@ export function SharedDealShell({
   leadCapture?: SharedDealLeadCapture;
   methodologyVersion?: string;
   legacyMethodologyWarning?: boolean;
+  /** True when captured inputs were evaluated by the current server engines
+   * when this view opened, rather than presenting a frozen result payload. */
+  outputsRecomputed?: boolean;
+  /** Whether the displayed inputs were captured with an immutable share or
+   * read from the agent's current saved deal when a portal view opened. */
+  inputsSource?: "captured-share" | "live-saved";
   /** True when result is the immutable output captured with an opaque share. */
   recordedResult?: boolean;
   addressIncluded?: boolean;
   /** The shared price was an automated estimate — never headline it "Asking". */
   priceEstimated?: boolean;
+  /** Entitlement-redacted frozen strategy result. Never pass this to the
+   * client unless the verified share owner may expose Pro analysis. */
+  specialistAnalysis?: SpecialistAnalysisSnapshot | null;
+  /** Non-sensitive availability bit used to distinguish an entitlement gate
+   * from a legacy/malformed snapshot without serializing the result itself. */
+  specialistAnalysisCaptured?: boolean;
+  analyzerStrategyKey?: AnalyzerStrategyKey;
 }) {
   const tenYearProjectionVersion =
-    analysis.access === "pro" ? analysis.result.tenYearProjectionVersion : undefined;
+    analysis.access === "pro"
+      ? analysis.result.tenYearProjectionVersion
+      : undefined;
   return (
     <div className="min-h-screen bg-background">
       <TrackSharedDealView hasAddress={addressIncluded} />
@@ -129,14 +151,17 @@ export function SharedDealShell({
               ? ` · 10-year projection ${tenYearProjectionVersion ? `method v${tenYearProjectionVersion}` : "method recorded-unversioned"}`
               : ""}
           </p>
-          {legacyMethodologyWarning ? (
+          {outputsRecomputed ? (
             <p
               role="status"
               className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs leading-relaxed text-foreground"
             >
-              Legacy input-only share: this link predates recorded result
-              snapshots. It has been recalculated with the labeled current
-              standard and should be refreshed before it is used for a decision.
+              {inputsSource === "live-saved"
+                ? "This view uses the agent’s current saved inputs and selected targets. TrueCap outputs were recomputed server-side when you opened it using the labeled standard."
+                : "The inputs and selected targets were captured when this view was shared. TrueCap outputs were recomputed server-side when you opened it using the labeled standard."}
+              {legacyMethodologyWarning
+                ? " This link uses a legacy publication format; ask the owner to refresh it before relying on it for a decision."
+                : ""}
             </p>
           ) : null}
         </header>
@@ -151,6 +176,9 @@ export function SharedDealShell({
           recordedResult={recordedResult}
           addressIncluded={addressIncluded}
           priceEstimated={priceEstimated}
+          specialistAnalysis={specialistAnalysis}
+          specialistAnalysisCaptured={specialistAnalysisCaptured}
+          analyzerStrategyKey={analyzerStrategyKey}
         />
 
         {/* Agent lead capture (co-branded shares) OR the generic Pro upsell. */}

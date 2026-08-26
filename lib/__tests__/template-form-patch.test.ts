@@ -17,6 +17,8 @@ const baseTemplate: TemplateAssumptionSource = {
   closingCostsPct: 3,
   interestRatePct: 6.25,
   downPaymentPct: 25,
+  pmiAnnualRatePct: 0.55,
+  pmiNoCancel: true,
   expenseGrowthPct: 2.5,
   rentGrowthPct: 3,
   appreciationRatePct: 3,
@@ -27,7 +29,10 @@ const baseTemplate: TemplateAssumptionSource = {
   taxRatePct: 32,
 };
 
-function valueOf(entries: ReturnType<typeof buildTemplateFormPatch>, field: string) {
+function valueOf(
+  entries: ReturnType<typeof buildTemplateFormPatch>,
+  field: string,
+) {
   const entry = entries.find((e) => e.field === field);
   if (!entry) throw new Error(`missing patch entry for ${field}`);
   return entry.value;
@@ -44,6 +49,8 @@ describe("buildTemplateFormPatch", () => {
     expect(valueOf(patch, "insurancePct")).toBe(0.5);
     expect(valueOf(patch, "propertyTaxPct")).toBe(1.4);
     expect(valueOf(patch, "downPaymentPct")).toBe(25);
+    expect(valueOf(patch, "pmiAnnualRatePct")).toBe(0.55);
+    expect(valueOf(patch, "pmiNoCancel")).toBe(true);
     expect(valueOf(patch, "depreciationYears")).toBe(27.5);
     expect(valueOf(patch, "taxRatePct")).toBe(32);
     // The patch never touches deal-identity fields.

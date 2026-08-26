@@ -1,5 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { applyStrategyPreset, describeStrategyPreset } from "@/lib/scenario-presets";
+import {
+  applyStrategyPreset,
+  describeStrategyPreset,
+} from "@/lib/scenario-presets";
 import { STRATEGY_KINDS } from "@/lib/strategy-kinds";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 
@@ -43,6 +46,29 @@ describe("applyStrategyPreset", () => {
     // Input untouched.
     expect(base.downPaymentPct).toBe(20);
     expect(base.mgmtPct).toBe(8);
+  });
+
+  it("clears the STR income model when cloning into a non-STR strategy", () => {
+    const shortTerm = {
+      ...base,
+      propertyType: "single-family" as const,
+      avgDailyRate: 185,
+      occupancyPct: 65,
+      strFurnishingCost: 12_000,
+    } as InvestmentFormValues;
+    for (const kind of [
+      "buy_hold",
+      "section_8",
+      "mtr",
+      "brrrr",
+      "flip",
+    ] as const) {
+      const result = applyStrategyPreset(shortTerm, kind);
+      expect(result.avgDailyRate).toBeUndefined();
+      expect(result.occupancyPct).toBeUndefined();
+      expect(result.strFurnishingCost).toBeUndefined();
+    }
+    expect(shortTerm.avgDailyRate).toBe(185);
   });
 });
 

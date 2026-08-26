@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 import { DollarSign, Percent } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -7,7 +8,10 @@ import { Label } from "@/components/ui/label";
 import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
 import { isAllCashDownPayment } from "@/lib/financing-classification";
-import { FieldError, optionalNumberSetValueAs } from "@/components/investcalc/form-field-helpers";
+import {
+  FieldError,
+  optionalNumberSetValueAs,
+} from "@/components/investcalc/form-field-helpers";
 import { GlossaryTip } from "@/components/investcalc/glossary-tip";
 import { FinancingProfileSelector } from "@/components/investcalc/financing-profile-selector";
 import { isFeatureEnabled } from "@/lib/feature-flags";
@@ -41,14 +45,33 @@ export function FinancingSection({
   // PMI / MIP only applies to a financed loan with < 20% down — show the lever
   // exactly when it's relevant, so it never clutters the standard 20%-down path.
   const pmiApplies =
-    typeof downPaymentPct === "number" && downPaymentPct >= 0 && downPaymentPct < 20;
+    typeof downPaymentPct === "number" &&
+    downPaymentPct >= 0 &&
+    downPaymentPct < 20;
+
+  // Do not let an invalid PMI value become an invisible schema blocker when
+  // the user raises down payment to 20%+ and the conditional field unmounts.
+  // Valid historical values remain available if they later lower the down
+  // payment again; only an already-invalid hidden value is cleared.
+  useEffect(() => {
+    if (pmiApplies) return;
+    const hiddenRate = Number(form.getValues("pmiAnnualRatePct"));
+    if (!Number.isFinite(hiddenRate) || hiddenRate < 0 || hiddenRate > 5) {
+      form.setValue("pmiAnnualRatePct", undefined, {
+        shouldDirty: true,
+        shouldTouch: false,
+        shouldValidate: true,
+      });
+    }
+  }, [form, pmiApplies]);
 
   return (
     // Card chrome unified with the other input sections (PropertyType /
     // PropertyDetails / SingleFamily - all `bg-card` + neutral border).
     // Previously the green tint made the form read as three glued-together
-    // products. Green stays on the icon and the per-field accent borders
-    // to preserve the "this is the financing section" cue.
+    // products. Green stays on the icon and labels to preserve the "this is
+    // the financing section" cue; controls use the shared AA boundary/focus
+    // tokens so their edges remain visible at zoom and in both color modes.
     <div className="bg-card rounded-2xl border border-border shadow-sm p-4 sm:p-6">
       <div className="flex items-center gap-2 mb-5">
         <DollarSign className="w-4 h-4 text-[var(--brand-green)]" />
@@ -63,11 +86,19 @@ export function FinancingSection({
         />
       ) : null}
 
-      <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <div>
-          <Label htmlFor="downPaymentPct" className="text-xs font-semibold text-[var(--brand-green)] mb-1.5 block uppercase tracking-wide">
-            <GlossaryTip term="downPayment" showIcon={false}>Down Payment %</GlossaryTip>
-          </Label>
+          <div className="mb-1.5 flex min-w-0 flex-wrap items-center gap-1.5">
+            <Label
+              htmlFor="downPaymentPct"
+              className="min-w-0 flex-1 text-xs font-semibold uppercase tracking-wide text-[var(--brand-green)] [overflow-wrap:anywhere]"
+            >
+              Down Payment %
+            </Label>
+            <GlossaryTip term="downPayment" className="shrink-0 no-underline">
+              <span className="sr-only">Down payment guidance</span>
+            </GlossaryTip>
+          </div>
           <div className="relative">
             <Input
               {...register("downPaymentPct", { valueAsNumber: true })}
@@ -79,26 +110,41 @@ export function FinancingSection({
               max={100}
               placeholder="20"
               aria-invalid={!!errors.downPaymentPct}
-              aria-describedby={errors.downPaymentPct ? "downPaymentPct-error" : undefined}
+              aria-describedby={
+                errors.downPaymentPct ? "downPaymentPct-error" : undefined
+              }
               className={cn(
-                "pr-8 border-[var(--brand-green)]/30 bg-background focus-visible:ring-[var(--brand-green)]/30",
-                errors.downPaymentPct && "border-destructive"
+                "border-input bg-background pr-8 focus-visible:border-ring focus-visible:ring-ring",
+                errors.downPaymentPct && "border-destructive",
               )}
             />
             <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           </div>
-          <FieldError id="downPaymentPct-error" message={errors.downPaymentPct?.message} />
+          <FieldError
+            id="downPaymentPct-error"
+            message={errors.downPaymentPct?.message}
+          />
           {isAllCash && (
-            <p className="mt-1 text-[11px] leading-snug text-[var(--brand-green)]">
-              Modeling this as an all-cash purchase — no mortgage, so there&apos;s no debt-coverage ratio (DSCR). You&apos;ll still get cash-on-cash and monthly cash flow.
+            <p className="mt-1 text-[11px] leading-snug text-[var(--brand-green)] [overflow-wrap:anywhere]">
+              Modeling this as an all-cash purchase — no mortgage, so
+              there&apos;s no debt-coverage ratio (DSCR). You&apos;ll still get
+              cash-on-cash and monthly cash flow.
             </p>
           )}
         </div>
 
         <div>
-          <Label htmlFor="interestRate" className="text-xs font-semibold text-[var(--brand-green)] mb-1.5 block uppercase tracking-wide">
-            <GlossaryTip term="interestRate" showIcon={false}>Interest Rate %</GlossaryTip>
-          </Label>
+          <div className="mb-1.5 flex min-w-0 flex-wrap items-center gap-1.5">
+            <Label
+              htmlFor="interestRate"
+              className="min-w-0 flex-1 text-xs font-semibold uppercase tracking-wide text-[var(--brand-green)] [overflow-wrap:anywhere]"
+            >
+              Interest Rate %
+            </Label>
+            <GlossaryTip term="interestRate" className="shrink-0 no-underline">
+              <span className="sr-only">Interest rate guidance</span>
+            </GlossaryTip>
+          </div>
           <div className="relative">
             <Input
               {...register("interestRate", { valueAsNumber: true })}
@@ -110,21 +156,34 @@ export function FinancingSection({
               max={30}
               placeholder="6.75"
               aria-invalid={!!errors.interestRate}
-              aria-describedby={errors.interestRate ? "interestRate-error" : undefined}
+              aria-describedby={
+                errors.interestRate ? "interestRate-error" : undefined
+              }
               className={cn(
-                "pr-8 border-[var(--brand-green)]/30 bg-background focus-visible:ring-[var(--brand-green)]/30",
-                errors.interestRate && "border-destructive"
+                "border-input bg-background pr-8 focus-visible:border-ring focus-visible:ring-ring",
+                errors.interestRate && "border-destructive",
               )}
             />
             <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           </div>
-          <FieldError id="interestRate-error" message={errors.interestRate?.message} />
+          <FieldError
+            id="interestRate-error"
+            message={errors.interestRate?.message}
+          />
         </div>
 
         <div>
-          <Label htmlFor="loanTermYears" className="text-xs font-semibold text-[var(--brand-green)] mb-1.5 block uppercase tracking-wide">
-            <GlossaryTip term="loanTerm" showIcon={false}>Loan Term (Years)</GlossaryTip>
-          </Label>
+          <div className="mb-1.5 flex min-w-0 flex-wrap items-center gap-1.5">
+            <Label
+              htmlFor="loanTermYears"
+              className="min-w-0 flex-1 text-xs font-semibold uppercase tracking-wide text-[var(--brand-green)] [overflow-wrap:anywhere]"
+            >
+              Loan Term (Years)
+            </Label>
+            <GlossaryTip term="loanTerm" className="shrink-0 no-underline">
+              <span className="sr-only">Loan term guidance</span>
+            </GlossaryTip>
+          </div>
           <Input
             {...register("loanTermYears", { valueAsNumber: true })}
             id="loanTermYears"
@@ -135,23 +194,40 @@ export function FinancingSection({
             max={50}
             placeholder="30"
             aria-invalid={!!errors.loanTermYears}
-            aria-describedby={errors.loanTermYears ? "loanTermYears-error" : undefined}
+            aria-describedby={
+              errors.loanTermYears ? "loanTermYears-error" : undefined
+            }
             className={cn(
-              "border-[var(--brand-green)]/30 bg-background focus-visible:ring-[var(--brand-green)]/30",
-              errors.loanTermYears && "border-destructive"
+              "border-input bg-background focus-visible:border-ring focus-visible:ring-ring",
+              errors.loanTermYears && "border-destructive",
             )}
           />
-          <FieldError id="loanTermYears-error" message={errors.loanTermYears?.message} />
+          <FieldError
+            id="loanTermYears-error"
+            message={errors.loanTermYears?.message}
+          />
         </div>
 
         <div>
-          <Label htmlFor="closingCostsPct" className="text-xs font-semibold text-[var(--brand-green)] mb-1.5 block uppercase tracking-wide">
-            <GlossaryTip term="closingCosts" showIcon={false}>Closing Costs %</GlossaryTip>
-            {" "}<span className="text-[10px] sm:text-xs text-muted-foreground">(Optional)</span>
-          </Label>
+          <div className="mb-1.5 flex min-w-0 flex-wrap items-center gap-1.5">
+            <Label
+              htmlFor="closingCostsPct"
+              className="min-w-0 flex-1 text-xs font-semibold uppercase tracking-wide text-[var(--brand-green)] [overflow-wrap:anywhere]"
+            >
+              Closing Costs %{" "}
+              <span className="text-[10px] text-muted-foreground sm:text-xs">
+                (Optional)
+              </span>
+            </Label>
+            <GlossaryTip term="closingCosts" className="shrink-0 no-underline">
+              <span className="sr-only">Closing costs guidance</span>
+            </GlossaryTip>
+          </div>
           <div className="relative">
             <Input
-              {...register("closingCostsPct", { setValueAs: optionalNumberSetValueAs })}
+              {...register("closingCostsPct", {
+                setValueAs: optionalNumberSetValueAs,
+              })}
               id="closingCostsPct"
               type="number"
               inputMode="decimal"
@@ -160,24 +236,34 @@ export function FinancingSection({
               max={100}
               placeholder="3"
               aria-invalid={!!errors.closingCostsPct}
-              aria-describedby={errors.closingCostsPct ? "closingCostsPct-error" : undefined}
+              aria-describedby={
+                errors.closingCostsPct ? "closingCostsPct-error" : undefined
+              }
               className={cn(
-                "pr-8 border-[var(--brand-green)]/30 bg-background focus-visible:ring-[var(--brand-green)]/30",
-                errors.closingCostsPct && "border-destructive"
+                "border-input bg-background pr-8 focus-visible:border-ring focus-visible:ring-ring",
+                errors.closingCostsPct && "border-destructive",
               )}
             />
             <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           </div>
-          <p className="text-[11px] text-muted-foreground mt-1">
+          <p className="mt-1 text-[11px] text-muted-foreground [overflow-wrap:anywhere]">
             Defaults to 3% of purchase price if left blank.
           </p>
-          <FieldError id="closingCostsPct-error" message={errors.closingCostsPct?.message} />
+          <FieldError
+            id="closingCostsPct-error"
+            message={errors.closingCostsPct?.message}
+          />
         </div>
 
         <div>
-          <Label htmlFor="rehabBudget" className="text-xs font-semibold text-[var(--brand-green)] mb-1.5 block uppercase tracking-wide">
-            Rehab / Initial Repairs
-            {" "}<span className="text-[10px] sm:text-xs text-muted-foreground">(Optional)</span>
+          <Label
+            htmlFor="rehabBudget"
+            className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-[var(--brand-green)] [overflow-wrap:anywhere]"
+          >
+            Rehab / Initial Repairs{" "}
+            <span className="text-[10px] sm:text-xs text-muted-foreground">
+              (Optional)
+            </span>
           </Label>
           <div className="relative">
             <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -197,33 +283,45 @@ export function FinancingSection({
                   max={1_000_000}
                   placeholder="0"
                   aria-invalid={!!errors.rehabBudget}
-                  aria-describedby={errors.rehabBudget ? "rehabBudget-error" : undefined}
+                  aria-describedby={
+                    errors.rehabBudget ? "rehabBudget-error" : undefined
+                  }
                   className={cn(
-                    "pl-8 border-[var(--brand-green)]/30 bg-background focus-visible:ring-[var(--brand-green)]/30",
-                    errors.rehabBudget && "border-destructive"
+                    "border-input bg-background pl-8 focus-visible:border-ring focus-visible:ring-ring",
+                    errors.rehabBudget && "border-destructive",
                   )}
                 />
               )}
             />
           </div>
-          <p className="text-[11px] text-muted-foreground mt-1">
+          <p className="mt-1 text-[11px] text-muted-foreground [overflow-wrap:anywhere]">
             Up-front repairs — added to cash invested (lowers cash-on-cash).
           </p>
-          <FieldError id="rehabBudget-error" message={errors.rehabBudget?.message} />
+          <FieldError
+            id="rehabBudget-error"
+            message={errors.rehabBudget?.message}
+          />
         </div>
       </div>
 
       {pmiApplies ? (
-        <div className="mt-4 rounded-xl border border-[var(--brand-green)]/20 bg-[var(--brand-green)]/[0.04] p-4">
+        <div className="mt-4 rounded-xl border border-border bg-[var(--brand-green)]/[0.04] p-4">
           <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto] gap-4 sm:items-start">
             <div>
-              <Label htmlFor="pmiAnnualRatePct" className="text-xs font-semibold text-[var(--brand-green)] mb-1.5 block uppercase tracking-wide">
+              <Label
+                htmlFor="pmiAnnualRatePct"
+                className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-[var(--brand-green)] [overflow-wrap:anywhere]"
+              >
                 PMI / MIP rate %
-                <span className="ml-1 normal-case font-normal text-muted-foreground">(under 20% down)</span>
+                <span className="ml-1 normal-case font-normal text-muted-foreground">
+                  (under 20% down)
+                </span>
               </Label>
               <div className="relative max-w-[180px]">
                 <Input
-                  {...register("pmiAnnualRatePct", { setValueAs: optionalNumberSetValueAs })}
+                  {...register("pmiAnnualRatePct", {
+                    setValueAs: optionalNumberSetValueAs,
+                  })}
                   id="pmiAnnualRatePct"
                   type="number"
                   inputMode="decimal"
@@ -232,25 +330,32 @@ export function FinancingSection({
                   max={5}
                   placeholder={usesOwnerOccupantPmiDefault ? "0.8" : "0"}
                   aria-invalid={!!errors.pmiAnnualRatePct}
-                  aria-describedby={errors.pmiAnnualRatePct ? "pmiAnnualRatePct-error" : undefined}
+                  aria-describedby={
+                    errors.pmiAnnualRatePct
+                      ? "pmiAnnualRatePct-error"
+                      : undefined
+                  }
                   className={cn(
-                    "pr-8 border-[var(--brand-green)]/30 bg-background focus-visible:ring-[var(--brand-green)]/30",
-                    errors.pmiAnnualRatePct && "border-destructive"
+                    "border-input bg-background pr-8 focus-visible:border-ring focus-visible:ring-ring",
+                    errors.pmiAnnualRatePct && "border-destructive",
                   )}
                 />
                 <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               </div>
-              <p className="text-[11px] text-muted-foreground mt-1">
+              <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground [overflow-wrap:anywhere]">
                 {usesOwnerOccupantPmiDefault
                   ? "Annual mortgage insurance, % of loan. Owner-occupant screening default: 0.8%; replace it with the lender's premium or enter 0 if none."
                   : "Annual mortgage insurance, % of loan. No premium is assumed for an investment property when this is blank; enter the lender's rate if one applies."}
               </p>
-              <FieldError id="pmiAnnualRatePct-error" message={errors.pmiAnnualRatePct?.message} />
+              <FieldError
+                id="pmiAnnualRatePct-error"
+                message={errors.pmiAnnualRatePct?.message}
+              />
             </div>
 
             <label
               htmlFor="pmiNoCancel"
-              className="flex min-h-11 cursor-pointer select-none items-center gap-2.5 sm:mt-7"
+              className="flex min-h-11 min-w-0 cursor-pointer select-none items-center gap-2.5 sm:mt-7"
             >
               <input
                 {...register("pmiNoCancel")}
@@ -258,9 +363,11 @@ export function FinancingSection({
                 type="checkbox"
                 className="size-5 shrink-0 rounded border-input accent-[var(--brand-green)]"
               />
-              <span className="text-xs leading-snug text-foreground">
+              <span className="min-w-0 text-xs leading-snug text-foreground [overflow-wrap:anywhere]">
                 Runs for the life of the loan
-                <span className="block text-[11px] text-muted-foreground">FHA MIP — doesn&apos;t cancel at 20% equity.</span>
+                <span className="block text-[11px] text-muted-foreground">
+                  FHA MIP — doesn&apos;t cancel at 20% equity.
+                </span>
               </span>
             </label>
           </div>

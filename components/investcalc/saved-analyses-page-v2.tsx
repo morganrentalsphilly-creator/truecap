@@ -41,7 +41,13 @@ import {
   PaginationItem,
 } from "@/components/ui/pagination";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -64,7 +70,11 @@ import { ToastAction } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import { useCookieBannerOpen } from "@/lib/use-cookie-banner";
 import type { StoredRiskLevel } from "@/lib/compare-metrics";
-import { PIPELINE_STAGES, pipelineStageLabel, type PipelineStage } from "@/lib/pipeline";
+import {
+  PIPELINE_STAGES,
+  pipelineStageLabel,
+  type PipelineStage,
+} from "@/lib/pipeline";
 import { nextActionFromVerdict } from "@/lib/next-action";
 import { DataConfidenceBadge } from "@/components/investcalc/data-confidence-badge";
 import { type DataConfidence } from "@/lib/data-confidence";
@@ -81,9 +91,7 @@ import {
 import { calculateAnalysis, type AnalysisResult } from "@/lib/calc-analysis";
 import { buildReportOperatingStatement } from "@/lib/report-operating-statement";
 import { buildReportMaxOffer } from "@/lib/report-max-offer";
-import {
-  type DealScoreBreakdown,
-} from "@/lib/deal-score";
+import { type DealScoreBreakdown } from "@/lib/deal-score";
 import type { ReportData } from "@/lib/pdf-generator";
 import { cacheSavedAnalysisPdfExport } from "@/lib/pdf/saved-analysis-cache";
 import {
@@ -92,8 +100,15 @@ import {
   type ExitScenarioYear,
 } from "@/lib/exit-scenarios";
 import { buildAutoVerdict, getDealTier } from "@/lib/verdict";
-import { applyWhatIfAdjustments, WORST_CASE_PRESET } from "@/components/investcalc/what-if-sliders";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  applyWhatIfAdjustments,
+  WORST_CASE_PRESET,
+} from "@/components/investcalc/what-if-sliders";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { ScoreBreakdown } from "@/components/investcalc/score-breakdown";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 import { BuyBoxNudge } from "@/components/dashboard/buy-box-nudge";
@@ -122,9 +137,16 @@ import {
 } from "@/lib/saved-analysis-methodology";
 import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
 import { parseCompareSnapshotV1 } from "@/lib/compare-result-snapshot";
-import { buildDealsCsv, dealsCsvFilename, type DealsCsvItem } from "@/lib/deals-csv";
+import {
+  buildDealsCsv,
+  dealsCsvFilename,
+  type DealsCsvItem,
+} from "@/lib/deals-csv";
 import { signalDisplay, verdictLabel } from "@/lib/verdict-display";
-import { TestimonialPrompt, dispatchProofMoment } from "@/components/marketing/testimonial-prompt";
+import {
+  TestimonialPrompt,
+  dispatchProofMoment,
+} from "@/components/marketing/testimonial-prompt";
 import {
   openSavedDealInAnalysisTab as openSavedDealInAnalysisTabShared,
   duplicateSavedDealInAnalyzer,
@@ -145,7 +167,12 @@ const PAGE_SIZE = 7;
 /** Optional decision columns on the My Deals table (off by default; the table
  *  already shows cash flow / CoC / cap / price). Persisted per browser. */
 const MYDEALS_COLUMNS_KEY = "truecap_mydeals_columns";
-type OptionalColumns = { dscr: boolean; cashToClose: boolean; market: boolean; neighborhood: boolean };
+type OptionalColumns = {
+  dscr: boolean;
+  cashToClose: boolean;
+  market: boolean;
+  neighborhood: boolean;
+};
 
 export type SavedAnalysisListItem = {
   id: string;
@@ -261,8 +288,12 @@ function OfferLineRow({
   if (offer.kind === "blocked") {
     return (
       <p className="mt-1.5 text-xs text-muted-foreground">
-        <span className="font-semibold text-foreground">Price can’t fix this</span>
-        {offer.reasons.length > 0 ? ` — misses on ${offer.reasons.join(" and ")}` : null}
+        <span className="font-semibold text-foreground">
+          Price can’t fix this
+        </span>
+        {offer.reasons.length > 0
+          ? ` — misses on ${offer.reasons.join(" and ")}`
+          : null}
       </p>
     );
   }
@@ -277,12 +308,11 @@ function OfferLineRow({
     return (
       <div className="mt-1.5 text-xs text-muted-foreground">
         <div>
-          <span className="font-semibold text-success">
-            {clearsLabel}
-          </span>
+          <span className="font-semibold text-success">{clearsLabel}</span>
           {offer.maxPrice != null ? (
             <>
-              {" · "}Offer Ceiling: <span className="tabular-nums">{fmtMoney0(offer.maxPrice)}</span>
+              {" · "}Offer Ceiling:{" "}
+              <span className="tabular-nums">{fmtMoney0(offer.maxPrice)}</span>
             </>
           ) : null}
         </div>
@@ -290,7 +320,8 @@ function OfferLineRow({
           <>
             <div className="mt-0.5">Criteria: {basisLabel}</div>
             <div className="mt-0.5 text-[11px]">
-              Highest modeled price that still meets {basisLabel} under the assumptions shown. This is not a recommended offer or appraisal.
+              Highest modeled price that still meets {basisLabel} under the
+              assumptions shown. This is not a recommended offer or appraisal.
             </div>
           </>
         ) : null}
@@ -299,7 +330,9 @@ function OfferLineRow({
   }
 
   const gap =
-    offer.asking != null && offer.asking > offer.maxPrice ? offer.asking - offer.maxPrice : null;
+    offer.asking != null && offer.asking > offer.maxPrice
+      ? offer.asking - offer.maxPrice
+      : null;
   const gapLabel =
     offer.basis === "buy-box"
       ? "to pass your buy box"
@@ -310,14 +343,17 @@ function OfferLineRow({
     <div className="mt-1.5 text-xs text-muted-foreground">
       <div>
         <span className="font-semibold text-foreground">
-          Offer Ceiling: <span className="tabular-nums">{fmtMoney0(offer.maxPrice)}</span>
+          Offer Ceiling:{" "}
+          <span className="tabular-nums">{fmtMoney0(offer.maxPrice)}</span>
         </span>
         {gap != null ? (
           <>
             {" · "}
             <span className="tabular-nums text-[var(--metric-negative)]">
               −{fmtMoney0(gap)}
-              {offer.discountPct != null && offer.discountPct > 0 ? ` (−${offer.discountPct}%)` : ""}
+              {offer.discountPct != null && offer.discountPct > 0
+                ? ` (−${offer.discountPct}%)`
+                : ""}
             </span>{" "}
             {gapLabel}
           </>
@@ -325,7 +361,9 @@ function OfferLineRow({
       </div>
       {basisLabel ? <div className="mt-0.5">Criteria: {basisLabel}</div> : null}
       <div className="mt-0.5 text-[11px]">
-        Highest modeled price that still meets {basisLabel ?? "the captured targets"} under the assumptions shown. This is not a recommended offer or appraisal.
+        Highest modeled price that still meets{" "}
+        {basisLabel ?? "the captured targets"} under the assumptions shown. This
+        is not a recommended offer or appraisal.
       </div>
     </div>
   );
@@ -356,12 +394,16 @@ function DealClientPicker({
         <button
           type="button"
           disabled={disabled}
-          title={current ? `For ${current.name} — click to change` : "Assign this deal to a client"}
+          title={
+            current
+              ? `For ${current.name} — click to change`
+              : "Assign this deal to a client"
+          }
           className={cn(
             "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium disabled:opacity-50",
             current
               ? "border-primary/30 bg-primary/10 text-primary"
-              : "border-dashed border-border text-muted-foreground hover:text-foreground"
+              : "border-dashed border-border text-muted-foreground hover:text-foreground",
           )}
         >
           <UserRound className="size-3" />
@@ -381,7 +423,9 @@ function DealClientPicker({
               onClick={() => onChange(c.id === clientId ? null : c.id)}
               className={cn(
                 "flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-xs hover:bg-muted disabled:opacity-50",
-                c.id === clientId ? "font-semibold text-primary" : "text-foreground"
+                c.id === clientId
+                  ? "font-semibold text-primary"
+                  : "text-foreground",
               )}
             >
               {c.name}
@@ -407,7 +451,11 @@ function DealClientPicker({
 function fmtCloseDate(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString("en-US", { month: "short", year: "numeric", timeZone: "UTC" });
+  return d.toLocaleDateString("en-US", {
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
 }
 
 /**
@@ -418,7 +466,13 @@ function fmtCloseDate(iso: string): string {
  * The server recomputes equity from the new date on save (router.refresh).
  * Stays invisible for non-completed deals.
  */
-function OwnedEquityCell({ item, enabled }: { item: SavedAnalysisListItem; enabled: boolean }) {
+function OwnedEquityCell({
+  item,
+  enabled,
+}: {
+  item: SavedAnalysisListItem;
+  enabled: boolean;
+}) {
   const router = useRouter();
   const { toast } = useToast();
   const [isSaving, startSaving] = useTransition();
@@ -435,9 +489,16 @@ function OwnedEquityCell({ item, enabled }: { item: SavedAnalysisListItem; enabl
           setEditing(false);
           router.refresh();
         } else if (r.code === "MIGRATION_PENDING") {
-          toast({ title: "Rolling out", description: "Owned-deal equity tracking isn't enabled yet." });
+          toast({
+            title: "Rolling out",
+            description: "Owned-deal equity tracking isn't enabled yet.",
+          });
         } else {
-          toast({ title: "Couldn't save close date", description: r.message, variant: "destructive" });
+          toast({
+            title: "Couldn't save close date",
+            description: r.message,
+            variant: "destructive",
+          });
           // Ghost row (deleted elsewhere) — refresh so it disappears.
           if (r.code === "NOT_FOUND") router.refresh();
         }
@@ -448,7 +509,8 @@ function OwnedEquityCell({ item, enabled }: { item: SavedAnalysisListItem; enabl
         Sentry.captureException(err, { tags: { feature: "saved-analyses" } });
         toast({
           title: "Couldn't save close date",
-          description: "Something interrupted the request. Check your connection and try again.",
+          description:
+            "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
       }
@@ -484,12 +546,18 @@ function OwnedEquityCell({ item, enabled }: { item: SavedAnalysisListItem; enabl
   if (item.closeDate && eq) {
     return (
       <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
-        <span className={cn("font-semibold", eq.equity >= 0 ? "text-success" : "text-[var(--metric-negative)]")}>
+        <span
+          className={cn(
+            "font-semibold",
+            eq.equity >= 0 ? "text-success" : "text-[var(--metric-negative)]",
+          )}
+        >
           Equity ~{fmtMoney0(eq.equity)}
         </span>
         <span className="text-muted-foreground">
-          {fmtMoney0(eq.downPayment)} down · {fmtMoney0(eq.appreciationGain)} appreciation ·{" "}
-          {fmtMoney0(eq.principalPaid)} paid down · since {fmtCloseDate(item.closeDate)}
+          {fmtMoney0(eq.downPayment)} down · {fmtMoney0(eq.appreciationGain)}{" "}
+          appreciation · {fmtMoney0(eq.principalPaid)} paid down · since{" "}
+          {fmtCloseDate(item.closeDate)}
         </span>
         {editing ? (
           dateInput
@@ -559,8 +627,17 @@ function NextActionLine({
         ? "bg-amber-500"
         : "bg-[var(--metric-positive)]";
   return (
-    <p className={cn("flex items-center gap-1.5 text-[11px] text-muted-foreground", className)} title={a.reason}>
-      <span aria-hidden className={cn("inline-block size-1.5 shrink-0 rounded-full", dot)} />
+    <p
+      className={cn(
+        "flex items-center gap-1.5 text-[11px] text-muted-foreground",
+        className,
+      )}
+      title={a.reason}
+    >
+      <span
+        aria-hidden
+        className={cn("inline-block size-1.5 shrink-0 rounded-full", dot)}
+      />
       <span className="font-semibold text-foreground">Next:</span> {a.label}
     </p>
   );
@@ -602,7 +679,8 @@ function readPersistedListView(): PersistedListView | null {
     return {
       searchQuery: typeof p.searchQuery === "string" ? p.searchQuery : "",
       selectedSignal:
-        typeof p.selectedSignal === "string" && p.selectedSignal in SIGNAL_LABELS
+        typeof p.selectedSignal === "string" &&
+        p.selectedSignal in SIGNAL_LABELS
           ? (p.selectedSignal as SavedSignal)
           : "all",
       selectedType:
@@ -613,7 +691,9 @@ function readPersistedListView(): PersistedListView | null {
           : "all",
       buyBoxOnly: p.buyBoxOnly === true,
       currentPage:
-        typeof p.currentPage === "number" && Number.isInteger(p.currentPage) && p.currentPage >= 1
+        typeof p.currentPage === "number" &&
+        Number.isInteger(p.currentPage) &&
+        p.currentPage >= 1
           ? p.currentPage
           : 1,
     };
@@ -644,7 +724,7 @@ function toMonthCashFlow(value: number | null): string {
 }
 
 function recommendationToSavedSignal(
-  recommendation: SavedAnalysisListItem["recommendation"]
+  recommendation: SavedAnalysisListItem["recommendation"],
 ): SavedSignal {
   if (recommendation === "Strong Buy") return "strong-buy";
   if (recommendation === "Buy") return "buy";
@@ -654,14 +734,20 @@ function recommendationToSavedSignal(
 }
 
 function getSignalClasses(signal: SavedSignal): string {
-  if (signal === "strong-buy") return "bg-success/10 text-success border-success/30";
+  if (signal === "strong-buy")
+    return "bg-success/10 text-success border-success/30";
   if (signal === "buy") return "bg-primary/10 text-primary border-primary/30";
-  if (signal === "neutral") return "bg-warning/15 text-warning-foreground border-warning/30";
-  if (signal === "risky") return "bg-warning/15 text-warning-foreground border-warning/30";
+  if (signal === "neutral")
+    return "bg-warning/15 text-warning-foreground border-warning/30";
+  if (signal === "risky")
+    return "bg-warning/15 text-warning-foreground border-warning/30";
   return "bg-destructive/10 text-destructive border-destructive/20";
 }
 
-function getAddressParts(item: SavedAnalysisListItem): { main: string; secondary: string } {
+function getAddressParts(item: SavedAnalysisListItem): {
+  main: string;
+  secondary: string;
+} {
   const address = item.address?.trim();
   const title = item.title?.trim();
   // Scenario saves share the address but carry a distinguishing title
@@ -675,14 +761,21 @@ function getAddressParts(item: SavedAnalysisListItem): { main: string; secondary
   const source = address || title || "Untitled Property";
   // A nickname, when set, leads - the address drops to the secondary line.
   const nickname = item.nickname?.trim();
-  if (nickname) return { main: nickname, secondary: `${source}${scenarioSuffix}` };
+  if (nickname)
+    return { main: nickname, secondary: `${source}${scenarioSuffix}` };
   const parts = source
     .split(",")
     .map((part) => part.trim())
     .filter(Boolean);
   if (parts.length <= 1)
-    return { main: `${source}${scenarioSuffix}`, secondary: "Address details not available" };
-  return { main: `${parts[0]}${scenarioSuffix}`, secondary: parts.slice(1).join(", ") };
+    return {
+      main: `${source}${scenarioSuffix}`,
+      secondary: "Address details not available",
+    };
+  return {
+    main: `${parts[0]}${scenarioSuffix}`,
+    secondary: parts.slice(1).join(", "),
+  };
 }
 
 function getTypeLabel(type: SavedPropertyType | null): string {
@@ -701,10 +794,18 @@ function getTypeIcon(type: SavedPropertyType | null) {
 
 function getStatusBadge(item: SavedAnalysisListItem) {
   if (item.status === "completed") {
-    return <Badge className="rounded-full border border-success/30 bg-success/10 text-success text-[10px] font-semibold">Completed</Badge>;
+    return (
+      <Badge className="rounded-full border border-success/30 bg-success/10 text-success text-[10px] font-semibold">
+        Completed
+      </Badge>
+    );
   }
   if (item.status === "archived") {
-    return <Badge className="rounded-full border border-border bg-muted text-muted-foreground text-[10px] font-semibold">Archived</Badge>;
+    return (
+      <Badge className="rounded-full border border-border bg-muted text-muted-foreground text-[10px] font-semibold">
+        Archived
+      </Badge>
+    );
   }
   return null;
 }
@@ -743,8 +844,12 @@ function buildReportDataFromSavedSnapshot(args: {
     includeDerivedMaxOffer = true,
     methodologyLabel,
   } = args;
-  const projectionYears = Array.isArray(result.tenYearProjection) ? result.tenYearProjection : [];
-  const taxYears = Array.isArray(result.taxStrategyYears) ? result.taxStrategyYears : [];
+  const projectionYears = Array.isArray(result.tenYearProjection)
+    ? result.tenYearProjection
+    : [];
+  const taxYears = Array.isArray(result.taxStrategyYears)
+    ? result.taxStrategyYears
+    : [];
 
   const units =
     values.propertyType === "single-family"
@@ -766,7 +871,8 @@ function buildReportDataFromSavedSnapshot(args: {
           // Carried so the report can exclude it from gross rent, exactly as
           // calc-analysis excludes it from rental income.
           isOwnerOccupied:
-            values.propertyType === "owner-occupant" && Boolean(unit.isOwnerOccupied),
+            values.propertyType === "owner-occupant" &&
+            Boolean(unit.isOwnerOccupied),
         }));
 
   const projectionRows = projectionYears.map((row) => ({
@@ -781,7 +887,10 @@ function buildReportDataFromSavedSnapshot(args: {
   }));
 
   const year1Tax = taxYears.find((row) => row.year === 1);
-  const totalBenefit10y = taxYears.reduce((acc, row) => acc + row.netTaxBenefitAnnual, 0);
+  const totalBenefit10y = taxYears.reduce(
+    (acc, row) => acc + row.netTaxBenefitAnnual,
+    0,
+  );
   const taxRows = taxYears.map((row) => ({
     y: row.year,
     rental: row.rentalIncomeAnnual,
@@ -795,11 +904,13 @@ function buildReportDataFromSavedSnapshot(args: {
   }));
 
   const bestExit = exitYears.reduce<ExitScenarioYear | null>(
-    (best, row) => (best === null || row.totalProfit > best.totalProfit ? row : best),
-    null
+    (best, row) =>
+      best === null || row.totalProfit > best.totalProfit ? row : best,
+    null,
   );
   const year5Exit = exitYears.find((row) => row.year === 5);
-  const year10Exit = exitYears.find((row) => row.year === 10) ?? exitYears[exitYears.length - 1];
+  const year10Exit =
+    exitYears.find((row) => row.year === 10) ?? exitYears[exitYears.length - 1];
   // The exported saved-deal report uses the deal's canonical Balanced score —
   // the same number stored at save time and shown on every surface (My Deals,
   // dashboard, compare, share). The investor lens only reorders metrics on the
@@ -825,7 +936,8 @@ function buildReportDataFromSavedSnapshot(args: {
       })
     : undefined;
 
-  const downsideRatePp = result.monthlyPayment > 0 ? WORST_CASE_PRESET.ratePp : 0;
+  const downsideRatePp =
+    result.monthlyPayment > 0 ? WORST_CASE_PRESET.ratePp : 0;
   let downsideScenario: ReportData["downsideScenario"] | undefined;
   if (includeDerivedScenarios) {
     let downsideResult: AnalysisResult = result;
@@ -836,8 +948,8 @@ function buildReportDataFromSavedSnapshot(args: {
           WORST_CASE_PRESET.rentPct,
           0,
           downsideRatePp,
-          WORST_CASE_PRESET.vacancyPp
-        )
+          WORST_CASE_PRESET.vacancyPp,
+        ),
       );
     } catch {
       // Preserve export for legacy snapshots even if the stress case cannot
@@ -864,7 +976,9 @@ function buildReportDataFromSavedSnapshot(args: {
       type: values.propertyType,
       yearBuilt: values.yearBuilt ?? null,
       purchasePrice: values.purchasePrice,
-      template: templateFallback?.templateName ?? (values.templateId ? "Template Applied" : "Custom"),
+      template:
+        templateFallback?.templateName ??
+        (values.templateId ? "Template Applied" : "Custom"),
     },
     financing: {
       downPaymentPct: values.downPaymentPct,
@@ -879,9 +993,11 @@ function buildReportDataFromSavedSnapshot(args: {
       // propertyTaxPct field is undefined in that mode and printed "0%").
       // result always carries the fresh calculateAnalysis spread, so the
       // effective field exists even for legacy snapshots.
-      propertyTaxPct: Math.round(Number(result.propertyTaxPctEffective ?? 0) * 100) / 100,
+      propertyTaxPct:
+        Math.round(Number(result.propertyTaxPctEffective ?? 0) * 100) / 100,
       propertyTaxAnnualBill:
-        values.propertyTaxInputMode === "annual" && values.propertyTaxAnnual != null
+        values.propertyTaxInputMode === "annual" &&
+        values.propertyTaxAnnual != null
           ? Number(values.propertyTaxAnnual)
           : null,
       insurancePct: Number(result.insurancePctEffective ?? 0),
@@ -982,7 +1098,10 @@ function DealTags({
   const addTag = () => {
     const t = input.trim().replace(/\s+/g, " ").slice(0, 24);
     if (!t) return;
-    if (!tags.some((x) => x.toLowerCase() === t.toLowerCase()) && tags.length < 12) {
+    if (
+      !tags.some((x) => x.toLowerCase() === t.toLowerCase()) &&
+      tags.length < 12
+    ) {
       onSave([...tags, t]);
     }
     setInput("");
@@ -1021,7 +1140,7 @@ function DealTags({
               // activates it regardless of pointer-events.
               revealOnHover && tags.length === 0
                 ? "pointer-events-none opacity-0 transition-opacity group-hover/row:pointer-events-auto group-hover/row:opacity-100 focus:pointer-events-auto focus:opacity-100 focus-visible:pointer-events-auto focus-visible:opacity-100"
-                : null
+                : null,
             )}
           >
             <Tag className="size-3" />
@@ -1043,11 +1162,19 @@ function DealTags({
               placeholder="e.g. BRRRR"
               className="h-8 text-xs"
             />
-            <Button type="button" size="sm" className="h-8" onClick={addTag} disabled={disabled}>
+            <Button
+              type="button"
+              size="sm"
+              className="h-8"
+              onClick={addTag}
+              disabled={disabled}
+            >
               Add
             </Button>
           </div>
-          <p className="mt-1.5 text-[10px] text-muted-foreground">Up to 12 tags, 24 chars each.</p>
+          <p className="mt-1.5 text-[10px] text-muted-foreground">
+            Up to 12 tags, 24 chars each.
+          </p>
         </PopoverContent>
       </Popover>
     </div>
@@ -1092,7 +1219,7 @@ function MobileFilterButton({
         "h-8 rounded-full px-3 text-xs font-bold transition-colors",
         active
           ? "bg-foreground text-background shadow-sm"
-          : "bg-muted/70 text-muted-foreground hover:bg-muted hover:text-foreground"
+          : "bg-muted/70 text-muted-foreground hover:bg-muted hover:text-foreground",
       )}
     >
       {label}
@@ -1126,17 +1253,23 @@ function SortByButton({
         "h-8 px-2.5 rounded-full text-xs font-medium inline-flex items-center gap-1.5 transition-colors",
         isActive
           ? "bg-primary text-primary-foreground shadow-sm"
-          : "text-muted-foreground hover:text-foreground hover:bg-muted"
+          : "text-muted-foreground hover:text-foreground hover:bg-muted",
       )}
     >
       {isActive ? (
-        isAsc ? <ArrowUp aria-hidden className="w-3.5 h-3.5" /> : <ArrowDown aria-hidden className="w-3.5 h-3.5" />
+        isAsc ? (
+          <ArrowUp aria-hidden className="w-3.5 h-3.5" />
+        ) : (
+          <ArrowDown aria-hidden className="w-3.5 h-3.5" />
+        )
       ) : (
         <ChevronsUpDown aria-hidden className="w-3.5 h-3.5" />
       )}
       {label}
       <span className="sr-only">
-        {isActive ? `, sorted ${isDesc ? "descending" : "ascending"}` : ", not sorted"}
+        {isActive
+          ? `, sorted ${isDesc ? "descending" : "ascending"}`
+          : ", not sorted"}
       </span>
     </button>
   );
@@ -1173,7 +1306,7 @@ function SortableTh({
         // below them into collision.
         "whitespace-nowrap text-xs uppercase tracking-wider text-muted-foreground font-bold",
         numeric ? "text-right" : "text-left",
-        className
+        className,
       )}
     >
       <button
@@ -1183,12 +1316,14 @@ function SortableTh({
           "inline-flex min-h-8 items-center gap-1.5 rounded-md px-1 transition-colors",
           numeric ? "flex-row-reverse" : null,
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-          active ? "text-primary" : "hover:text-foreground"
+          active ? "text-primary" : "hover:text-foreground",
         )}
       >
         {label}
         <span className="sr-only">
-          {active ? `, sorted ${isDesc ? "descending" : "ascending"}` : ", not sorted"}
+          {active
+            ? `, sorted ${isDesc ? "descending" : "ascending"}`
+            : ", not sorted"}
         </span>
         {isAsc ? (
           <ArrowUp aria-hidden className="w-3.5 h-3.5" />
@@ -1249,8 +1384,12 @@ export function SavedAnalysesPage({
   const [isStartingCompare, startCompareTransition] = useTransition();
   const [isUpdatingStatus, startUpdateStatusTransition] = useTransition();
   const [openingDealId, setOpeningDealId] = useState<string | null>(null);
-  const [exportingPdfDealId, setExportingPdfDealId] = useState<string | null>(null);
-  const [updatingDealStatusId, setUpdatingDealStatusId] = useState<string | null>(null);
+  const [exportingPdfDealId, setExportingPdfDealId] = useState<string | null>(
+    null,
+  );
+  const [updatingDealStatusId, setUpdatingDealStatusId] = useState<
+    string | null
+  >(null);
 
   // The persisted view (search/filters/page) is restored in a MOUNT EFFECT,
   // not in the useState initializers: this page is SSR'd with defaults, so an
@@ -1268,9 +1407,15 @@ export function SavedAnalysesPage({
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   // Mobile-card tag editing lives behind the ⋯ menu; tracks which card
   // (if any) currently shows the inline DealTags editor.
-  const [editingTagsDealId, setEditingTagsDealId] = useState<string | null>(null);
-  const [selectedSignal, setSelectedSignal] = useState<"all" | SavedSignal>("all");
-  const [selectedType, setSelectedType] = useState<"all" | SavedPropertyType>("all");
+  const [editingTagsDealId, setEditingTagsDealId] = useState<string | null>(
+    null,
+  );
+  const [selectedSignal, setSelectedSignal] = useState<"all" | SavedSignal>(
+    "all",
+  );
+  const [selectedType, setSelectedType] = useState<"all" | SavedPropertyType>(
+    "all",
+  );
   // Buy-box screening: the user's active boxes (null until loaded / none) and a
   // "only deals that meet a box" filter. Invisible-until-useful — both stay
   // dormant for users without an active buy box. `?buyBox=1` seeds the filter
@@ -1284,7 +1429,9 @@ export function SavedAnalysesPage({
   // SSR sees the same param so this initializer is hydration-safe; the
   // persisted value can only turn the filter ON (restore effect below), so
   // a URL seed is never overridden by a stale persisted "off".
-  const [buyBoxOnly, setBuyBoxOnly] = useState(() => searchParams.get("buyBox") === "1");
+  const [buyBoxOnly, setBuyBoxOnly] = useState(
+    () => searchParams.get("buyBox") === "1",
+  );
   // Discovery nudge (PV-2): the user CAN use buy boxes but has never created
   // one — surfaced only alongside ≥3 active deals (moment of need), and
   // dismissible inside BuyBoxNudge (shared localStorage key with the
@@ -1360,9 +1507,16 @@ export function SavedAnalysesPage({
     (optionalColumns.cashToClose ? 1 : 0) +
     (optionalColumns.market ? 1 : 0) +
     (optionalColumns.neighborhood ? 1 : 0);
-  const initialItemIds = useMemo(() => new Set(initialItems.map((item) => item.id)), [initialItems]);
+  const initialItemIds = useMemo(
+    () => new Set(initialItems.map((item) => item.id)),
+    [initialItems],
+  );
   const [selectedIds, setSelectedIds] = useState<string[]>(() =>
-    canCompareDeals ? (initialSelectedIds ?? []).filter((id) => initialItemIds.has(id)).slice(0, 4) : []
+    canCompareDeals
+      ? (initialSelectedIds ?? [])
+          .filter((id) => initialItemIds.has(id))
+          .slice(0, 4)
+      : [],
   );
 
   const enrichedItems = useMemo(
@@ -1371,7 +1525,7 @@ export function SavedAnalysesPage({
         ...item,
         signal: recommendationToSavedSignal(item.recommendation),
       })),
-    [initialItems]
+    [initialItems],
   );
 
   // Load the user's buy boxes once; keep only the switched-on ones with ≥1 rule
@@ -1383,7 +1537,9 @@ export function SavedAnalysesPage({
       .then((result) => {
         if (cancelled) return;
         if (result.ok && result.canUse) {
-          setBuyBoxes(result.boxes.filter((b) => b.isActive && buyBoxHasCriteria(b)));
+          setBuyBoxes(
+            result.boxes.filter((b) => b.isActive && buyBoxHasCriteria(b)),
+          );
           // Zero boxes EVER created (not just zero usable) — a user with an
           // inactive/empty box already knows the feature exists, so no nudge.
           setBuyBoxNudgeEligible(result.boxes.length === 0);
@@ -1416,7 +1572,7 @@ export function SavedAnalysesPage({
       // this row's fit badge or the buy-box filter count.
       const results = evaluateBuyBoxes(
         boxesForDealClient(buyBoxes, item.clientId ?? null),
-        toBuyBoxMetrics(item)
+        toBuyBoxMetrics(item),
       ).filter((r) => r.result.active);
       if (results.length > 0) map.set(item.id, summarizeBuyBoxFit(results));
     }
@@ -1433,8 +1589,12 @@ export function SavedAnalysesPage({
 
   // PV-2 gate: only nudge users with a real list to screen (≥3 active deals).
   const activeDealCount = useMemo(
-    () => enrichedItems.reduce((n, item) => (item.status === "active" ? n + 1 : n), 0),
-    [enrichedItems]
+    () =>
+      enrichedItems.reduce(
+        (n, item) => (item.status === "active" ? n + 1 : n),
+        0,
+      ),
+    [enrichedItems],
   );
 
   // How many saved deals meet at least one active box — shown on the filter chip.
@@ -1458,9 +1618,11 @@ export function SavedAnalysesPage({
   }, [canCompareDeals]);
 
   const filteredItems = useMemo(
-      () =>
+    () =>
       enrichedItems.filter((item) => {
-        const typeLabel = item.propertyType ? getTypeLabel(item.propertyType).toLowerCase() : "";
+        const typeLabel = item.propertyType
+          ? getTypeLabel(item.propertyType).toLowerCase()
+          : "";
         const typeSlug = (item.propertyType ?? "").toLowerCase();
         // `nickname` is included because it is the text the ROW ACTUALLY SHOWS
         // as its bold main line once set — searching for the name you can see
@@ -1469,36 +1631,64 @@ export function SavedAnalysesPage({
         const text =
           `${item.address ?? ""} ${item.title ?? ""} ${item.nickname ?? ""} ${item.scenarioName ?? ""} ${(item.tags ?? []).join(" ")} ${item.id} ${typeLabel} ${typeSlug}`.toLowerCase();
         const matchesSearch = text.includes(searchQuery.toLowerCase().trim());
-        const matchesSignal = selectedSignal === "all" ? true : item.signal === selectedSignal;
-        const matchesType = selectedType === "all" ? true : item.propertyType === selectedType;
-        const matchshowcompare = showcompare ? selectedIds.includes(item.id) : true;
+        const matchesSignal =
+          selectedSignal === "all" ? true : item.signal === selectedSignal;
+        const matchesType =
+          selectedType === "all" ? true : item.propertyType === selectedType;
+        const matchshowcompare = showcompare
+          ? selectedIds.includes(item.id)
+          : true;
         // No-op until the fit map exists so a URL-seeded filter (?buyBox=1)
         // never blanks the list while the boxes are still loading.
-        const matchesBuyBox = !buyBoxOnly || !buyBoxFitById || (buyBoxFitById.get(item.id)?.anyPass ?? false);
-        return matchesSearch && matchesSignal && matchesType && matchshowcompare && matchesBuyBox;
+        const matchesBuyBox =
+          !buyBoxOnly ||
+          !buyBoxFitById ||
+          (buyBoxFitById.get(item.id)?.anyPass ?? false);
+        return (
+          matchesSearch &&
+          matchesSignal &&
+          matchesType &&
+          matchshowcompare &&
+          matchesBuyBox
+        );
       }),
-    [enrichedItems, searchQuery, selectedSignal, selectedType, selectedIds, showcompare, buyBoxOnly, buyBoxFitById]
+    [
+      enrichedItems,
+      searchQuery,
+      selectedSignal,
+      selectedType,
+      selectedIds,
+      showcompare,
+      buyBoxOnly,
+      buyBoxFitById,
+    ],
   );
 
   const displayItems = useMemo(() => {
     if (!activeSortField || !activeSortDirection) return filteredItems;
     const direction = activeSortDirection === "asc" ? 1 : -1;
     const valueFor = (item: SavedAnalysisListItem) => {
-      if (activeSortField === "saved") return new Date(item.createdAt).getTime();
-      if (activeSortField === "cash-flow") return item.netCashFlowMonthly ?? Number.NEGATIVE_INFINITY;
+      if (activeSortField === "saved")
+        return new Date(item.createdAt).getTime();
+      if (activeSortField === "cash-flow")
+        return item.netCashFlowMonthly ?? Number.NEGATIVE_INFINITY;
       if (activeSortField === "coc") {
         return (
           applicableCashOnCashValue(item.cocReturnPct, item.cashToClose) ??
           Number.NEGATIVE_INFINITY
         );
       }
-      if (activeSortField === "cap-rate") return item.capRatePct ?? Number.NEGATIVE_INFINITY;
+      if (activeSortField === "cap-rate")
+        return item.capRatePct ?? Number.NEGATIVE_INFINITY;
       return item.purchasePrice ?? Number.NEGATIVE_INFINITY;
     };
     return [...filteredItems].sort((a, b) => {
       const av = valueFor(a);
       const bv = valueFor(b);
-      if (av === bv) return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      if (av === bv)
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
       return av > bv ? direction : -direction;
     });
   }, [activeSortDirection, activeSortField, filteredItems]);
@@ -1529,7 +1719,8 @@ export function SavedAnalysesPage({
     for (const list of byAddress.values()) {
       if (list.length < 2) continue;
       const newestFirst = [...list].sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       );
       newestFirst.forEach((item, i) => {
         markers.set(item.id, { index: i + 1, total: newestFirst.length });
@@ -1540,16 +1731,29 @@ export function SavedAnalysesPage({
 
   const pageCount = Math.max(1, Math.ceil(displayItems.length / PAGE_SIZE));
   const safeCurrentPage = Math.min(currentPage, pageCount);
-  const pageStartIndex = displayItems.length === 0 ? 0 : (safeCurrentPage - 1) * PAGE_SIZE;
-  const pageEndIndex = Math.min(pageStartIndex + PAGE_SIZE, displayItems.length);
+  const pageStartIndex =
+    displayItems.length === 0 ? 0 : (safeCurrentPage - 1) * PAGE_SIZE;
+  const pageEndIndex = Math.min(
+    pageStartIndex + PAGE_SIZE,
+    displayItems.length,
+  );
   const pagedItems = useMemo(
     () => displayItems.slice(pageStartIndex, pageEndIndex),
-    [displayItems, pageEndIndex, pageStartIndex]
+    [displayItems, pageEndIndex, pageStartIndex],
   );
 
   const resetPageTriggerKey = useMemo(
-    () => `${searchQuery}|${selectedSignal}|${selectedType}|${activeSortField ?? ""}|${activeSortDirection ?? ""}|${showcompare}|${buyBoxOnly ? "bb" : ""}`,
-    [searchQuery, selectedSignal, selectedType, activeSortField, activeSortDirection, showcompare, buyBoxOnly]
+    () =>
+      `${searchQuery}|${selectedSignal}|${selectedType}|${activeSortField ?? ""}|${activeSortDirection ?? ""}|${showcompare}|${buyBoxOnly ? "bb" : ""}`,
+    [
+      searchQuery,
+      selectedSignal,
+      selectedType,
+      activeSortField,
+      activeSortDirection,
+      showcompare,
+      buyBoxOnly,
+    ],
   );
 
   // Reset to page 1 when a filter/sort/search actually CHANGES — but not on
@@ -1585,16 +1789,36 @@ export function SavedAnalysesPage({
   useEffect(() => {
     if (!viewHydrated) return;
     try {
-      const view: PersistedListView = { searchQuery, selectedSignal, selectedType, buyBoxOnly, currentPage };
-      window.sessionStorage.setItem(MYDEALS_VIEW_STATE_KEY, JSON.stringify(view));
+      const view: PersistedListView = {
+        searchQuery,
+        selectedSignal,
+        selectedType,
+        buyBoxOnly,
+        currentPage,
+      };
+      window.sessionStorage.setItem(
+        MYDEALS_VIEW_STATE_KEY,
+        JSON.stringify(view),
+      );
     } catch {
       // private mode — the view state just doesn't persist
     }
-  }, [viewHydrated, searchQuery, selectedSignal, selectedType, buyBoxOnly, currentPage]);
+  }, [
+    viewHydrated,
+    searchQuery,
+    selectedSignal,
+    selectedType,
+    buyBoxOnly,
+    currentPage,
+  ]);
 
   const handleSort = (field: SortField) => {
     const nextDirection: SortDirection =
-      activeSortField !== field ? "asc" : activeSortDirection === "asc" ? "desc" : "asc";
+      activeSortField !== field
+        ? "asc"
+        : activeSortDirection === "asc"
+          ? "desc"
+          : "asc";
     const params = new URLSearchParams(searchParams.toString());
     params.set("sort", field);
     params.set("dir", nextDirection);
@@ -1611,7 +1835,10 @@ export function SavedAnalysesPage({
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
-  const handleDealStatusChange = (id: string, state: SavedAnalysisListItem["status"]) => {
+  const handleDealStatusChange = (
+    id: string,
+    state: SavedAnalysisListItem["status"],
+  ) => {
     setUpdatingDealStatusId(id);
     startUpdateStatusTransition(async () => {
       try {
@@ -1642,7 +1869,8 @@ export function SavedAnalysesPage({
         Sentry.captureException(err, { tags: { feature: "saved-analyses" } });
         toast({
           title: "Could not update deal status",
-          description: "Something interrupted the request. Check your connection and try again.",
+          description:
+            "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
       } finally {
@@ -1654,14 +1882,18 @@ export function SavedAnalysesPage({
   const handleDealStageChange = (
     id: string,
     stage: PipelineStage,
-    previousStage: PipelineStage
+    previousStage: PipelineStage,
   ) => {
     setUpdatingDealStatusId(id);
     startUpdateStatusTransition(async () => {
       try {
         const result = await updateSavedDealStageAction(id, stage);
         if (!result.ok) {
-          toast({ title: "Could not update stage", description: result.message, variant: "destructive" });
+          toast({
+            title: "Could not update stage",
+            description: result.message,
+            variant: "destructive",
+          });
           // Ghost row (deleted elsewhere) — refresh so it disappears.
           if (result.code === "NOT_FOUND") router.refresh();
           return;
@@ -1681,7 +1913,10 @@ export function SavedAnalysesPage({
                   setUpdatingDealStatusId(id);
                   startUpdateStatusTransition(async () => {
                     try {
-                      const undo = await updateSavedDealStageAction(id, previousStage);
+                      const undo = await updateSavedDealStageAction(
+                        id,
+                        previousStage,
+                      );
                       if (!undo.ok) {
                         toast({
                           title: "Could not undo",
@@ -1723,7 +1958,8 @@ export function SavedAnalysesPage({
         Sentry.captureException(err, { tags: { feature: "saved-analyses" } });
         toast({
           title: "Could not update stage",
-          description: "Something interrupted the request. Check your connection and try again.",
+          description:
+            "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
       } finally {
@@ -1738,13 +1974,19 @@ export function SavedAnalysesPage({
       try {
         const result = await setSavedDealClientAction(id, clientId);
         if (!result.ok) {
-          toast({ title: "Could not assign client", description: result.message, variant: "destructive" });
+          toast({
+            title: "Could not assign client",
+            description: result.message,
+            variant: "destructive",
+          });
           if (result.code === "NOT_FOUND") router.refresh();
           return;
         }
         const name = agentClients.find((c) => c.id === clientId)?.name;
         toast({
-          title: clientId ? `Assigned to ${name ?? "client"}` : "Removed from client",
+          title: clientId
+            ? `Assigned to ${name ?? "client"}`
+            : "Removed from client",
           description: clientId
             ? "It now shows on their portal — archived or not."
             : "It no longer shows on their portal.",
@@ -1765,7 +2007,11 @@ export function SavedAnalysesPage({
       try {
         const result = await updateSavedDealTagsAction(id, tags);
         if (!result.ok) {
-          toast({ title: "Could not update tags", description: result.message, variant: "destructive" });
+          toast({
+            title: "Could not update tags",
+            description: result.message,
+            variant: "destructive",
+          });
           // Ghost row (deleted elsewhere) — refresh so it disappears.
           if (result.code === "NOT_FOUND") router.refresh();
           return;
@@ -1778,7 +2024,8 @@ export function SavedAnalysesPage({
         Sentry.captureException(err, { tags: { feature: "saved-analyses" } });
         toast({
           title: "Could not update tags",
-          description: "Something interrupted the request. Check your connection and try again.",
+          description:
+            "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
       } finally {
@@ -1823,7 +2070,8 @@ export function SavedAnalysesPage({
         Sentry.captureException(err, { tags: { feature: "saved-analyses" } });
         toast({
           title: "Could not archive selected deals",
-          description: "Something interrupted the request. Check your connection and try again.",
+          description:
+            "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
       }
@@ -1835,7 +2083,7 @@ export function SavedAnalysesPage({
     // Defensive confirm - deletion is irreversible from the UI even
     // though the DB row stays around with deleted_at set.
     const confirmed = window.confirm(
-      `Delete ${selectedIds.length} deal${selectedIds.length === 1 ? "" : "s"}? This cannot be undone from the UI.`
+      `Delete ${selectedIds.length} deal${selectedIds.length === 1 ? "" : "s"}? This cannot be undone from the UI.`,
     );
     if (!confirmed) return;
     startBulkDeleteTransition(async () => {
@@ -1863,13 +2111,13 @@ export function SavedAnalysesPage({
         Sentry.captureException(err, { tags: { feature: "saved-analyses" } });
         toast({
           title: "Could not delete selected deals",
-          description: "Something interrupted the request. Check your connection and try again.",
+          description:
+            "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
       }
     });
   };
-
 
   // CSV export (Phase 2): downloads WHAT THE USER SEES — the currently
   // filtered + sorted view (displayItems, all pages), not the raw list.
@@ -1894,7 +2142,7 @@ export function SavedAnalysesPage({
           netCashFlowMonthly: item.netCashFlowMonthly,
           cocReturnPct: applicableCashOnCashValue(
             item.cocReturnPct,
-            item.cashToClose
+            item.cashToClose,
           ),
           capRatePct: item.capRatePct,
           dscr: item.dscr ?? null,
@@ -1905,8 +2153,8 @@ export function SavedAnalysesPage({
           tags: item.tags ?? [],
           createdAt: item.createdAt,
           closeDate: item.closeDate ?? null,
-        })
-      )
+        }),
+      ),
     );
     // UTF-8 BOM: Excel on Windows assumes ANSI for BOM-less .csv files,
     // turning "Peña St" into mojibake; Sheets/Numbers ignore the BOM.
@@ -1961,73 +2209,129 @@ export function SavedAnalysesPage({
             {savedMobileFilterCount}
           </span>
         ) : null}
-        <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", mobileFiltersOpen && "rotate-180")} />
-      </button>
-      <div className={cn("space-y-3", mobileFiltersOpen ? "mt-3 sm:mt-0" : "hidden sm:block")}>
-      <div>
-        <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Signal</p>
-        <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 [&>*]:shrink-0 sm:[&>*]:shrink">
-          <MobileFilterButton label="All" active={selectedSignal === "all"} onClick={() => setSelectedSignal("all")} />
-          {(Object.keys(SIGNAL_LABELS) as SavedSignal[]).map((signal) => (
-            <MobileFilterButton
-              key={signal}
-              label={SIGNAL_LABELS[signal]}
-              active={selectedSignal === signal}
-              onClick={() => setSelectedSignal(signal)}
-            />
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Property Type</p>
-        <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 [&>*]:shrink-0 sm:[&>*]:shrink">
-          <MobileFilterButton label="All Types" active={selectedType === "all"} onClick={() => setSelectedType("all")} />
-          <MobileFilterButton label="Single Family" active={selectedType === "single-family"} onClick={() => setSelectedType("single-family")} />
-          <MobileFilterButton label="Multi-Family" active={selectedType === "multi-family"} onClick={() => setSelectedType("multi-family")} />
-          <MobileFilterButton label="Owner Occupant" active={selectedType === "owner-occupant"} onClick={() => setSelectedType("owner-occupant")} />
-        </div>
-      </div>
-
-      <div>
-        <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Status</p>
-        <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 [&>*]:shrink-0 sm:[&>*]:shrink">
-          <MobileFilterButton label="Active" active={activeDealStateFilter === "active"} onClick={() => handleStateFilterChange("active")} />
-          <MobileFilterButton label="Completed" active={activeDealStateFilter === "completed"} onClick={() => handleStateFilterChange("completed")} />
-          <MobileFilterButton label="Archived" active={activeDealStateFilter === "archived"} onClick={() => handleStateFilterChange("archived")} />
-          <MobileFilterButton label="All" active={activeDealStateFilter === "all"} onClick={() => handleStateFilterChange("all")} />
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between rounded-2xl bg-muted/40 px-3 py-2">
-        <span className="text-xs font-semibold text-muted-foreground">Show only selected</span>
-        <Switch
-          id="template-include-interest-deduction-mobile"
-          checked={showcompare ?? false}
-          
-          onCheckedChange={(value) => canCompareDeals && setShowcompare(value ?? false)}
-          aria-label="Show selected analyses only"
+        <ChevronDown
+          className={cn(
+            "h-3.5 w-3.5 transition-transform",
+            mobileFiltersOpen && "rotate-180",
+          )}
         />
-      </div>
+      </button>
+      <div
+        className={cn(
+          "space-y-3",
+          mobileFiltersOpen ? "mt-3 sm:mt-0" : "hidden sm:block",
+        )}
+      >
+        <div>
+          <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+            Signal
+          </p>
+          <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 [&>*]:shrink-0 sm:[&>*]:shrink">
+            <MobileFilterButton
+              label="All"
+              active={selectedSignal === "all"}
+              onClick={() => setSelectedSignal("all")}
+            />
+            {(Object.keys(SIGNAL_LABELS) as SavedSignal[]).map((signal) => (
+              <MobileFilterButton
+                key={signal}
+                label={SIGNAL_LABELS[signal]}
+                active={selectedSignal === signal}
+                onClick={() => setSelectedSignal(signal)}
+              />
+            ))}
+          </div>
+        </div>
 
-      {/* Export the current view (filtered + sorted) as a spreadsheet. Lives
+        <div>
+          <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+            Property Type
+          </p>
+          <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 [&>*]:shrink-0 sm:[&>*]:shrink">
+            <MobileFilterButton
+              label="All Types"
+              active={selectedType === "all"}
+              onClick={() => setSelectedType("all")}
+            />
+            <MobileFilterButton
+              label="Single Family"
+              active={selectedType === "single-family"}
+              onClick={() => setSelectedType("single-family")}
+            />
+            <MobileFilterButton
+              label="Multi-Family"
+              active={selectedType === "multi-family"}
+              onClick={() => setSelectedType("multi-family")}
+            />
+            <MobileFilterButton
+              label="Owner Occupant"
+              active={selectedType === "owner-occupant"}
+              onClick={() => setSelectedType("owner-occupant")}
+            />
+          </div>
+        </div>
+
+        <div>
+          <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+            Status
+          </p>
+          <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 [&>*]:shrink-0 sm:[&>*]:shrink">
+            <MobileFilterButton
+              label="Active"
+              active={activeDealStateFilter === "active"}
+              onClick={() => handleStateFilterChange("active")}
+            />
+            <MobileFilterButton
+              label="Completed"
+              active={activeDealStateFilter === "completed"}
+              onClick={() => handleStateFilterChange("completed")}
+            />
+            <MobileFilterButton
+              label="Archived"
+              active={activeDealStateFilter === "archived"}
+              onClick={() => handleStateFilterChange("archived")}
+            />
+            <MobileFilterButton
+              label="All"
+              active={activeDealStateFilter === "all"}
+              onClick={() => handleStateFilterChange("all")}
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between rounded-2xl bg-muted/40 px-3 py-2">
+          <span className="text-xs font-semibold text-muted-foreground">
+            Show only selected
+          </span>
+          <Switch
+            id="template-include-interest-deduction-mobile"
+            checked={showcompare ?? false}
+            onCheckedChange={(value) =>
+              canCompareDeals && setShowcompare(value ?? false)
+            }
+            aria-label="Show selected analyses only"
+          />
+        </div>
+
+        {/* Export the current view (filtered + sorted) as a spreadsheet. Lives
           inside the Filters disclosure below xl; the xl toolbar has its own
           Export CSV button. */}
-      <button
-        type="button"
-        onClick={handleExportCsv}
-        disabled={displayItems.length === 0}
-        className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-2xl border border-border bg-muted/40 text-xs font-bold text-foreground transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
-      >
-        <FileDown className="h-3.5 w-3.5" />
-        Export CSV ({displayItems.length})
-      </button>
+        <button
+          type="button"
+          onClick={handleExportCsv}
+          disabled={displayItems.length === 0}
+          className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-2xl border border-border bg-muted/40 text-xs font-bold text-foreground transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
+        >
+          <FileDown className="h-3.5 w-3.5" />
+          Export CSV ({displayItems.length})
+        </button>
       </div>
     </div>
   );
 
   const allVisibleSelected =
-    pagedItems.length > 0 && pagedItems.every((item) => selectedIds.includes(item.id));
+    pagedItems.length > 0 &&
+    pagedItems.every((item) => selectedIds.includes(item.id));
 
   const showCompareLimit = () => {
     toast({
@@ -2058,9 +2362,13 @@ export function SavedAnalysesPage({
         const result = await startCompareAction(selectedIds);
         if (!result.ok) {
           toast({
-            title: result.code === "LIMIT_EXCEEDED" ? "Compare limit reached" : "Could not start comparison",
+            title:
+              result.code === "LIMIT_EXCEEDED"
+                ? "Compare limit reached"
+                : "Could not start comparison",
             description: result.message,
-            variant: result.code === "LIMIT_EXCEEDED" ? "warning" : "destructive",
+            variant:
+              result.code === "LIMIT_EXCEEDED" ? "warning" : "destructive",
           });
           return;
         }
@@ -2072,7 +2380,8 @@ export function SavedAnalysesPage({
         Sentry.captureException(err, { tags: { feature: "saved-analyses" } });
         toast({
           title: "Could not start comparison",
-          description: "Something interrupted the request. Check your connection and try again.",
+          description:
+            "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
       }
@@ -2082,7 +2391,10 @@ export function SavedAnalysesPage({
   // The handoff itself is the shared helper (also used by the deal
   // workspace's "Open full analysis" button) — this wrapper only adds My
   // Deals' toast on failure. Behavior identical to the pre-extraction code.
-  const openSavedDealInAnalysisTab = async (id: string, targetWindow: Window | null) => {
+  const openSavedDealInAnalysisTab = async (
+    id: string,
+    targetWindow: Window | null,
+  ) => {
     const result = await openSavedDealInAnalysisTabShared(id, targetWindow);
     if (!result.ok) {
       toast({
@@ -2142,13 +2454,6 @@ export function SavedAnalysesPage({
     })();
   };
 
-  const openPdfUrlInCurrentTab = (pdfUrl: string) => {
-    // This fallback runs after an async fetch, when browsers commonly block a
-    // new tab because the original click gesture has expired. Same-tab
-    // navigation is not a popup and gives the user a reliable recovery path.
-    window.location.assign(pdfUrl);
-  };
-
   const handleExportPdfClick = (id: string) => {
     setExportingPdfDealId(id);
     void (async () => {
@@ -2156,7 +2461,10 @@ export function SavedAnalysesPage({
         const exportResult = await getSavedAnalysisPdfExportAction(id);
         if (!exportResult.ok) {
           toast({
-            title: exportResult.code === "ENTITLEMENT_REQUIRED" ? "Upgrade required" : "Could not export PDF",
+            title:
+              exportResult.code === "ENTITLEMENT_REQUIRED"
+                ? "Upgrade required"
+                : "Could not export PDF",
             description: exportResult.message,
             variant: "destructive",
           });
@@ -2167,40 +2475,29 @@ export function SavedAnalysesPage({
         }
 
         if (exportResult.source === "cache") {
-          // Cache hit - fetch the cached PDF and trigger a download
-          // (instead of opening in a new tab via a link click, which
-          // gets popup-blocked after async work). Falls back to opening
-          // the URL directly if the fetch fails.
-          try {
-            const cacheResp = await fetch(exportResult.pdfUrl);
-            if (!cacheResp.ok) throw new Error("Fetch failed");
-            const cacheBlob = await cacheResp.blob();
-            const { downloadPdfBlob } = await import("@/lib/pdf/download");
-            downloadPdfBlob(cacheBlob, "Investment-Analysis-Report.pdf");
-            toast({
-              title: "PDF downloaded",
-              description: "Your saved report was downloaded.",
-              variant: "success",
-            });
-            // The proof loop only covered the analyzer's export, so a user who
-            // exports from My Deals — a real high-signal moment — was never
-            // asked. Same once-per-browser cap applies.
-            dispatchProofMoment("pdf_export");
-          } catch {
-            toast({
-              title: "Opening saved PDF",
-              description: "The direct download was unavailable, so the report is opening in this tab.",
-            });
-            openPdfUrlInCurrentTab(exportResult.pdfUrl);
-          }
+          const { downloadPdfFromBase64 } = await import("@/lib/pdf/download");
+          downloadPdfFromBase64(
+            exportResult.pdfBase64,
+            "Investment-Analysis-Report.pdf",
+          );
+          toast({
+            title: "PDF downloaded",
+            description: "Your verified saved report was downloaded.",
+            variant: "success",
+          });
+          dispatchProofMoment("pdf_export");
           return;
         }
 
-        const normalized = normalizeReleasedInvestmentFormSnapshot(exportResult.formSnapshot);
+        const normalized = normalizeReleasedInvestmentFormSnapshot(
+          exportResult.formSnapshot,
+        );
         if (!normalized) {
           // Name the failing field so the customer can actually fix it —
           // "not valid enough" with no pointer was a dead end.
-          const issue = describeInvestmentFormSnapshotIssue(exportResult.formSnapshot);
+          const issue = describeInvestmentFormSnapshotIssue(
+            exportResult.formSnapshot,
+          );
           toast({
             title: "Could not export PDF",
             description: issue
@@ -2225,11 +2522,14 @@ export function SavedAnalysesPage({
         // Resolve base financial outputs and Screening Index under one methodology
         // decision. The top-level database version is authoritative; a future
         // mismatch stays frozen instead of being overwritten by this client.
-        const freshVerdict = recomputeSavedDealVerdict(exportResult.formSnapshot);
+        const freshVerdict = recomputeSavedDealVerdict(
+          exportResult.formSnapshot,
+        );
         if (!freshVerdict) {
           toast({
             title: "Could not export PDF",
-            description: "The saved analysis data could not be recomputed safely.",
+            description:
+              "The saved analysis data could not be recomputed safely.",
             variant: "destructive",
           });
           return;
@@ -2255,7 +2555,8 @@ export function SavedAnalysesPage({
           });
           return;
         }
-        const resultSnapshot = resolved.result as AnalysisResult & Record<string, unknown>;
+        const resultSnapshot = resolved.result as AnalysisResult &
+          Record<string, unknown>;
         if (
           resolved.usesRecordedSnapshot &&
           (!Array.isArray(resultSnapshot.tenYearProjection) ||
@@ -2277,8 +2578,13 @@ export function SavedAnalysesPage({
           : computedResult.taxStrategyYears;
         let exitYears: ExitScenarioYear[];
         if (resolved.usesRecordedSnapshot) {
-          const compareSnapshot = parseCompareSnapshotV1(resultSnapshot.compareSnapshot);
-          if (!compareSnapshot || compareSnapshot.exitScenarios.years.length === 0) {
+          const compareSnapshot = parseCompareSnapshotV1(
+            resultSnapshot.compareSnapshot,
+          );
+          if (
+            !compareSnapshot ||
+            compareSnapshot.exitScenarios.years.length === 0
+          ) {
             toast({
               title: "Could not export frozen PDF",
               description:
@@ -2311,8 +2617,12 @@ export function SavedAnalysesPage({
             downPayment: resultSnapshot.downPayment,
             closingCosts: resultSnapshot.closingCosts,
             initialCashInvested: resultSnapshot.totalCashRequired,
-            cumulativeCashFlowByYear: projectionYears.map((row) => row.cumulativeCashFlowAnnual),
-            cumulativeTaxBenefitByYear: taxYears.map((row) => row.cumulativeTaxBenefitAnnual),
+            cumulativeCashFlowByYear: projectionYears.map(
+              (row) => row.cumulativeCashFlowAnnual,
+            ),
+            cumulativeTaxBenefitByYear: taxYears.map(
+              (row) => row.cumulativeTaxBenefitAnnual,
+            ),
           });
         }
         const reportData = buildReportDataFromSavedSnapshot({
@@ -2343,7 +2653,8 @@ export function SavedAnalysesPage({
         // Composed SERVER-SIDE, where the pdf_export entitlement is actually
         // enforced and branding is resolved from the signed-in user's own row.
         // Building it in the browser meant the only gate was a React prop.
-        const { generateReportPdfAction } = await import("@/app/actions/generate-report-pdf");
+        const { generateReportPdfAction } =
+          await import("@/app/actions/generate-report-pdf");
         const { downloadPdfFromBase64 } = await import("@/lib/pdf/download");
         const pdfResult = await generateReportPdfAction({
           values: parsed.data,
@@ -2385,14 +2696,14 @@ export function SavedAnalysesPage({
         // dedicated tag so systemic failures (RLS regression, quota,
         // bucket misconfig) are visible in the dashboard without
         // surfacing as errors to the user.
-        void cacheSavedAnalysisPdfExport({
-          analysisId: exportResult.id,
-          renderFingerprint: exportResult.renderFingerprint,
-          pdfBase64: pdfResult.pdfBase64,
-          renderedWithBranding: pdfResult.hasBranding,
-          renderedWithBuyBoxVerdict: pdfResult.hasBuyBoxVerdict,
-          buyBoxStateResolved: pdfResult.buyBoxStateResolved,
-        });
+        if (pdfResult.cacheAttestation) {
+          void cacheSavedAnalysisPdfExport({
+            analysisId: exportResult.id,
+            renderFingerprint: exportResult.renderFingerprint,
+            artifactAttestation: pdfResult.cacheAttestation,
+            pdfBase64: pdfResult.pdfBase64,
+          });
+        }
       } catch (err) {
         // Top-level catch - any error in the regenerate path (parsing,
         // generation, etc.) surfaces a toast AND captures to Sentry so
@@ -2420,7 +2731,9 @@ export function SavedAnalysesPage({
 
   const toggleAllVisible = () => {
     if (allVisibleSelected) {
-      setSelectedIds((prev) => prev.filter((id) => !pagedItems.some((item) => item.id === id)));
+      setSelectedIds((prev) =>
+        prev.filter((id) => !pagedItems.some((item) => item.id === id)),
+      );
       return;
     }
     setSelectedIds((prev) => {
@@ -2451,8 +2764,16 @@ export function SavedAnalysesPage({
   };
 
   const paginationPages = useMemo(() => {
-    const pages = new Set<number>([1, pageCount, safeCurrentPage - 1, safeCurrentPage, safeCurrentPage + 1]);
-    return [...pages].filter((page) => page >= 1 && page <= pageCount).sort((a, b) => a - b);
+    const pages = new Set<number>([
+      1,
+      pageCount,
+      safeCurrentPage - 1,
+      safeCurrentPage,
+      safeCurrentPage + 1,
+    ]);
+    return [...pages]
+      .filter((page) => page >= 1 && page <= pageCount)
+      .sort((a, b) => a - b);
   }, [pageCount, safeCurrentPage]);
 
   return (
@@ -2463,12 +2784,17 @@ export function SavedAnalysesPage({
         // The floating bulk bar occupies the bottom ~76px of the viewport
         // while a selection is active, so reserve that instead of letting it
         // clip the last row / pagination at maximum scroll.
-        selectedIds.length > 0 ? "pb-28" : "pb-12"
+        selectedIds.length > 0 ? "pb-28" : "pb-12",
       )}
     >
       <section className="w-full px-4 sm:px-6 pt-6 sm:pt-8 space-y-6">
-      <div className="mb-6 flex flex-wrap items-center gap-3">
-          <Button variant="ghost" size="sm" className="mt-1 px-1.5 text-muted-foreground bg-primary/10 sm:bg-transparent" asChild>
+        <div className="mb-6 flex flex-wrap items-center gap-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="mt-1 px-1.5 text-muted-foreground bg-primary/10 sm:bg-transparent"
+            asChild
+          >
             <Link href="/dashboard">
               <ArrowLeft className="w-4 h-4 mr-1.5" />
               <span className="hidden xl:inline">Back</span>
@@ -2476,8 +2802,12 @@ export function SavedAnalysesPage({
           </Button>
           <div className="h-6 w-px bg-border" />
           <div className="space-y-1">
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">My Deals</h1>
-            <p className="text-sm text-muted-foreground">{filteredItems.length} deals in your portfolio</p>
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+              My Deals
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {filteredItems.length} deals in your portfolio
+            </p>
           </div>
         </div>
         {/* Scoped-to-one-client banner. Without it, arriving from the Clients
@@ -2488,17 +2818,25 @@ export function SavedAnalysesPage({
             <UserRound className="size-4 text-primary" aria-hidden />
             <div className="min-w-0 flex-1">
               <p className="text-foreground">
-                Showing deals for <strong className="font-semibold">{clientFilterName}</strong>
+                Showing deals for{" "}
+                <strong className="font-semibold">{clientFilterName}</strong>
               </p>
               <p className="text-xs text-muted-foreground">
-                Open a deal to share its client report, capture follow-up in Notes, and move it to Offer made.
+                Open a deal to share its client report, capture follow-up in
+                Notes, and move it to Offer made.
               </p>
             </div>
             <div className="ml-auto flex items-center gap-3 text-xs font-semibold">
-              <Link href="/dashboard/clients" className="text-primary hover:underline">
+              <Link
+                href="/dashboard/clients"
+                className="text-primary hover:underline"
+              >
                 Back to Clients
               </Link>
-              <Link href="/dashboard/saved-analyses" className="text-primary hover:underline">
+              <Link
+                href="/dashboard/saved-analyses"
+                className="text-primary hover:underline"
+              >
                 Show all deals
               </Link>
             </div>
@@ -2533,7 +2871,10 @@ export function SavedAnalysesPage({
                 value={activeSortField ?? undefined}
                 onValueChange={(value) => handleSort(value as SortField)}
               >
-                <SelectTrigger className="h-9 flex-1 rounded-xl text-xs" aria-label="Sort deals by">
+                <SelectTrigger
+                  className="h-9 flex-1 rounded-xl text-xs"
+                  aria-label="Sort deals by"
+                >
                   <SelectValue placeholder="Date Saved" />
                 </SelectTrigger>
                 <SelectContent>
@@ -2564,11 +2905,41 @@ export function SavedAnalysesPage({
                 <SlidersHorizontal className="w-3.5 h-3.5" />
                 Sort by
               </span>
-              <SortByButton field="saved" label="Date Saved" activeSortField={activeSortField} activeSortDirection={activeSortDirection} onSort={handleSort} />
-              <SortByButton field="cash-flow" label="Cash Flow" activeSortField={activeSortField} activeSortDirection={activeSortDirection} onSort={handleSort} />
-              <SortByButton field="coc" label="CoC Return" activeSortField={activeSortField} activeSortDirection={activeSortDirection} onSort={handleSort} />
-              <SortByButton field="cap-rate" label="Cap Rate" activeSortField={activeSortField} activeSortDirection={activeSortDirection} onSort={handleSort} />
-              <SortByButton field="price" label="Price" activeSortField={activeSortField} activeSortDirection={activeSortDirection} onSort={handleSort} />
+              <SortByButton
+                field="saved"
+                label="Date Saved"
+                activeSortField={activeSortField}
+                activeSortDirection={activeSortDirection}
+                onSort={handleSort}
+              />
+              <SortByButton
+                field="cash-flow"
+                label="Cash Flow"
+                activeSortField={activeSortField}
+                activeSortDirection={activeSortDirection}
+                onSort={handleSort}
+              />
+              <SortByButton
+                field="coc"
+                label="CoC Return"
+                activeSortField={activeSortField}
+                activeSortDirection={activeSortDirection}
+                onSort={handleSort}
+              />
+              <SortByButton
+                field="cap-rate"
+                label="Cap Rate"
+                activeSortField={activeSortField}
+                activeSortDirection={activeSortDirection}
+                onSort={handleSort}
+              />
+              <SortByButton
+                field="price"
+                label="Price"
+                activeSortField={activeSortField}
+                activeSortDirection={activeSortDirection}
+                onSort={handleSort}
+              />
             </div>
           </div>
 
@@ -2587,7 +2958,7 @@ export function SavedAnalysesPage({
                 "inline-flex items-center gap-1.5 self-start rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
                 buyBoxOnly
                   ? "border-[var(--brand-green)] bg-[var(--brand-green)] text-white"
-                  : "border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] text-[var(--brand-green)] hover:bg-[var(--brand-green)]/15"
+                  : "border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] text-[var(--brand-green)] hover:bg-[var(--brand-green)]/15",
               )}
             >
               <Target className="size-3.5" />
@@ -2595,7 +2966,7 @@ export function SavedAnalysesPage({
               <span
                 className={cn(
                   "rounded-full px-1.5 py-px text-[10px] tabular-nums",
-                  buyBoxOnly ? "bg-white/20" : "bg-[var(--brand-green)]/15"
+                  buyBoxOnly ? "bg-white/20" : "bg-[var(--brand-green)]/15",
                 )}
               >
                 {buyBoxMatchCount}
@@ -2608,23 +2979,64 @@ export function SavedAnalysesPage({
           ) : null}
 
           <div className="hidden flex-wrap items-center gap-2 xl:flex">
-            <Tabs value={selectedSignal} onValueChange={(value) => setSelectedSignal(value as "all" | SavedSignal)} className="gap-0">
+            <Tabs
+              value={selectedSignal}
+              onValueChange={(value) =>
+                setSelectedSignal(value as "all" | SavedSignal)
+              }
+              className="gap-0"
+            >
               <TabsList className="bg-muted/60 h-9 rounded-full p-1">
-                <TabsTrigger value="all" className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">All</TabsTrigger>
+                <TabsTrigger
+                  value="all"
+                  className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
+                >
+                  All
+                </TabsTrigger>
                 {(Object.keys(SIGNAL_LABELS) as SavedSignal[]).map((signal) => (
-                  <TabsTrigger key={signal} value={signal} className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">
+                  <TabsTrigger
+                    key={signal}
+                    value={signal}
+                    className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
+                  >
                     {SIGNAL_LABELS[signal]}
                   </TabsTrigger>
                 ))}
               </TabsList>
             </Tabs>
 
-            <Tabs value={selectedType} onValueChange={(value) => setSelectedType(value as "all" | SavedPropertyType)} className="gap-0">
+            <Tabs
+              value={selectedType}
+              onValueChange={(value) =>
+                setSelectedType(value as "all" | SavedPropertyType)
+              }
+              className="gap-0"
+            >
               <TabsList className="bg-muted/60 h-9 rounded-full p-1">
-                <TabsTrigger value="all" className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">All Types</TabsTrigger>
-                <TabsTrigger value="single-family" className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">Single Family</TabsTrigger>
-                <TabsTrigger value="multi-family" className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">Multi-Family</TabsTrigger>
-                <TabsTrigger value="owner-occupant" className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">Owner Occupant</TabsTrigger>
+                <TabsTrigger
+                  value="all"
+                  className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
+                >
+                  All Types
+                </TabsTrigger>
+                <TabsTrigger
+                  value="single-family"
+                  className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
+                >
+                  Single Family
+                </TabsTrigger>
+                <TabsTrigger
+                  value="multi-family"
+                  className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
+                >
+                  Multi-Family
+                </TabsTrigger>
+                <TabsTrigger
+                  value="owner-occupant"
+                  className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
+                >
+                  Owner Occupant
+                </TabsTrigger>
               </TabsList>
             </Tabs>
 
@@ -2635,87 +3047,122 @@ export function SavedAnalysesPage({
                 so the control both did nothing and misdescribed the list. */}
             <Tabs
               value={activeDealStateFilter}
-              onValueChange={(value) => handleStateFilterChange(value as DealStateFilter)}
+              onValueChange={(value) =>
+                handleStateFilterChange(value as DealStateFilter)
+              }
               className={cn("gap-0", clientFilterId ? "hidden" : undefined)}
             >
               <TabsList className="bg-muted/60 h-9 rounded-full p-1">
-                <TabsTrigger value="active" className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">Active</TabsTrigger>
-                <TabsTrigger value="completed" className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">Completed</TabsTrigger>
-                <TabsTrigger value="archived" className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">Archived</TabsTrigger>
-                <TabsTrigger value="all" className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background">All</TabsTrigger>
+                <TabsTrigger
+                  value="active"
+                  className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
+                >
+                  Active
+                </TabsTrigger>
+                <TabsTrigger
+                  value="completed"
+                  className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
+                >
+                  Completed
+                </TabsTrigger>
+                <TabsTrigger
+                  value="archived"
+                  className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
+                >
+                  Archived
+                </TabsTrigger>
+                <TabsTrigger
+                  value="all"
+                  className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
+                >
+                  All
+                </TabsTrigger>
               </TabsList>
             </Tabs>
 
-           
-           <div className="ml-auto flex items-center gap-2">
-            {/* Download the current view (filtered + sorted) as a CSV. */}
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-9 gap-1.5 rounded-full text-xs"
-              onClick={handleExportCsv}
-              disabled={displayItems.length === 0}
-            >
-              <FileDown className="h-3.5 w-3.5" />
-              Export CSV
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-9 gap-1.5 rounded-full text-xs">
-                  <SlidersHorizontal className="h-3.5 w-3.5" />
-                  Columns
-                  {optionalColumnCount > 0 ? (
-                    <span className="rounded-full bg-foreground px-1.5 text-[10px] font-bold leading-4 text-background">
-                      {optionalColumnCount}
-                    </span>
-                  ) : null}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-52">
-                <DropdownMenuLabel>Extra columns</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuCheckboxItem
-                  checked={optionalColumns.dscr}
-                  onCheckedChange={(value) => setOptionalColumn("dscr", value === true)}
-                  onSelect={(event) => event.preventDefault()}
-                >
-                  DSCR
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem
-                  checked={optionalColumns.cashToClose}
-                  onCheckedChange={(value) => setOptionalColumn("cashToClose", value === true)}
-                  onSelect={(event) => event.preventDefault()}
-                >
-                  Cash to close
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem
-                  checked={optionalColumns.market}
-                  onCheckedChange={(value) => setOptionalColumn("market", value === true)}
-                  onSelect={(event) => event.preventDefault()}
-                >
-                  Market
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem
-                  checked={optionalColumns.neighborhood}
-                  onCheckedChange={(value) => setOptionalColumn("neighborhood", value === true)}
-                  onSelect={(event) => event.preventDefault()}
-                >
-                  Neighborhood
-                </DropdownMenuCheckboxItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <div className="inline-flex items-center gap-1.5">
-              <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground mr-1.5">Show only selected</span>
-              <Switch
-                id="template-include-interest-deduction"
-                checked={showcompare ?? false}
-                
-                onCheckedChange={(value)=> canCompareDeals && setShowcompare(value ?? false)}
-                aria-label="Show selected analyses only"
-              />
+            <div className="ml-auto flex items-center gap-2">
+              {/* Download the current view (filtered + sorted) as a CSV. */}
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 gap-1.5 rounded-full text-xs"
+                onClick={handleExportCsv}
+                disabled={displayItems.length === 0}
+              >
+                <FileDown className="h-3.5 w-3.5" />
+                Export CSV
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-9 gap-1.5 rounded-full text-xs"
+                  >
+                    <SlidersHorizontal className="h-3.5 w-3.5" />
+                    Columns
+                    {optionalColumnCount > 0 ? (
+                      <span className="rounded-full bg-foreground px-1.5 text-[10px] font-bold leading-4 text-background">
+                        {optionalColumnCount}
+                      </span>
+                    ) : null}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-52">
+                  <DropdownMenuLabel>Extra columns</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuCheckboxItem
+                    checked={optionalColumns.dscr}
+                    onCheckedChange={(value) =>
+                      setOptionalColumn("dscr", value === true)
+                    }
+                    onSelect={(event) => event.preventDefault()}
+                  >
+                    DSCR
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={optionalColumns.cashToClose}
+                    onCheckedChange={(value) =>
+                      setOptionalColumn("cashToClose", value === true)
+                    }
+                    onSelect={(event) => event.preventDefault()}
+                  >
+                    Cash to close
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={optionalColumns.market}
+                    onCheckedChange={(value) =>
+                      setOptionalColumn("market", value === true)
+                    }
+                    onSelect={(event) => event.preventDefault()}
+                  >
+                    Market
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={optionalColumns.neighborhood}
+                    onCheckedChange={(value) =>
+                      setOptionalColumn("neighborhood", value === true)
+                    }
+                    onSelect={(event) => event.preventDefault()}
+                  >
+                    Neighborhood
+                  </DropdownMenuCheckboxItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <div className="inline-flex items-center gap-1.5">
+                <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground mr-1.5">
+                  Show only selected
+                </span>
+                <Switch
+                  id="template-include-interest-deduction"
+                  checked={showcompare ?? false}
+                  onCheckedChange={(value) =>
+                    canCompareDeals && setShowcompare(value ?? false)
+                  }
+                  aria-label="Show selected analyses only"
+                />
+              </div>
             </div>
-          </div>
-
           </div>
         </div>
 
@@ -2726,10 +3173,12 @@ export function SavedAnalysesPage({
               const isSelected = selectedIds.includes(item.id);
               const signal = item.signal;
               const PropertyTypeIcon = getTypeIcon(item.propertyType);
-              const cocNotApplicable = isCashOnCashNotApplicable(item.cashToClose);
+              const cocNotApplicable = isCashOnCashNotApplicable(
+                item.cashToClose,
+              );
               const cocReturnPct = applicableCashOnCashValue(
                 item.cocReturnPct,
-                item.cashToClose
+                item.cashToClose,
               );
               // Badge row stays one line: signal + buy-box fit lead, and the
               // status / score-breakdown / data-confidence extras fold behind
@@ -2745,7 +3194,7 @@ export function SavedAnalysesPage({
                   key={item.id}
                   className={cn(
                     "rounded-2xl border border-border bg-background p-4 shadow-sm transition-colors",
-                    isSelected && "border-primary/40 bg-primary/5"
+                    isSelected && "border-primary/40 bg-primary/5",
                   )}
                 >
                   <div className="flex items-start gap-3 ">
@@ -2780,7 +3229,14 @@ export function SavedAnalysesPage({
                         ) : null}
                       </Link>
                       <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                        <Badge className={cn("rounded-full border text-xs font-semibold", getSignalClasses(signal))}>{SIGNAL_LABELS[signal]}</Badge>
+                        <Badge
+                          className={cn(
+                            "rounded-full border text-xs font-semibold",
+                            getSignalClasses(signal),
+                          )}
+                        >
+                          {SIGNAL_LABELS[signal]}
+                        </Badge>
                         <BuyBoxFitBadge fit={buyBoxFitById?.get(item.id)} />
                         {foldedBadgeCount > 0 ? (
                           <Popover>
@@ -2793,17 +3249,28 @@ export function SavedAnalysesPage({
                                 +{foldedBadgeCount} more
                               </button>
                             </PopoverTrigger>
-                            <PopoverContent align="start" className="w-auto space-y-2.5 p-3">
+                            <PopoverContent
+                              align="start"
+                              className="w-auto space-y-2.5 p-3"
+                            >
                               {statusBadge || item.dataConfidence ? (
                                 <div className="flex flex-wrap items-center gap-1.5">
                                   {statusBadge}
                                   {item.dataConfidence ? (
-                                    <DataConfidenceBadge confidence={item.dataConfidence} size="xs" propertyType={item.propertyType} />
+                                    <DataConfidenceBadge
+                                      confidence={item.dataConfidence}
+                                      size="xs"
+                                      propertyType={item.propertyType}
+                                    />
                                   ) : null}
                                 </div>
                               ) : null}
                               {item.breakdown && item.score != null ? (
-                                <ScoreBreakdown breakdown={item.breakdown} score={item.score} propertyType={item.propertyType} />
+                                <ScoreBreakdown
+                                  breakdown={item.breakdown}
+                                  score={item.score}
+                                  propertyType={item.propertyType}
+                                />
                               ) : null}
                             </PopoverContent>
                           </Popover>
@@ -2814,10 +3281,31 @@ export function SavedAnalysesPage({
                           {item.methodologyLabel}
                         </p>
                       ) : null}
-                      <p className="mt-1 text-xs text-muted-foreground">{getTypeLabel(item.propertyType)}</p>
-                      <OfferLineRow offer={item.offerLine} basisLabel={item.offerBasisLabel} />
-                      <NextActionLine recommendation={item.recommendation} netCashFlow={item.netCashFlowMonthly} stage={item.status === "completed" ? "closed" : item.pipelineStage} meetsBuyBox={buyBoxFitById?.get(item.id)?.anyPass ?? null} hasCloseDate={item.closeDate != null} className="mt-1.5" />
-                      <OwnedEquityCell item={item} enabled={ownedEquityEnabled} />
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {getTypeLabel(item.propertyType)}
+                      </p>
+                      <OfferLineRow
+                        offer={item.offerLine}
+                        basisLabel={item.offerBasisLabel}
+                      />
+                      <NextActionLine
+                        recommendation={item.recommendation}
+                        netCashFlow={item.netCashFlowMonthly}
+                        stage={
+                          item.status === "completed"
+                            ? "closed"
+                            : item.pipelineStage
+                        }
+                        meetsBuyBox={
+                          buyBoxFitById?.get(item.id)?.anyPass ?? null
+                        }
+                        hasCloseDate={item.closeDate != null}
+                        className="mt-1.5"
+                      />
+                      <OwnedEquityCell
+                        item={item}
+                        enabled={ownedEquityEnabled}
+                      />
                     </div>
                     <label className="flex size-11 shrink-0 cursor-pointer items-center justify-center">
                       <input
@@ -2832,31 +3320,52 @@ export function SavedAnalysesPage({
 
                   <div className="mt-4 grid grid-cols-2 gap-2">
                     <div className="rounded-xl bg-muted/40 p-3">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Cash Flow</p>
-                      <p className={cn("mt-1 text-sm font-extrabold", (item.netCashFlowMonthly ?? 0) >= 0 ? "text-success" : "text-[var(--metric-negative)]")}>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                        Cash Flow
+                      </p>
+                      <p
+                        className={cn(
+                          "mt-1 text-sm font-extrabold",
+                          (item.netCashFlowMonthly ?? 0) >= 0
+                            ? "text-success"
+                            : "text-[var(--metric-negative)]",
+                        )}
+                      >
                         {toMonthCashFlow(item.netCashFlowMonthly)}
                       </p>
                     </div>
                     <div className="rounded-xl bg-muted/40 p-3">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">CoC</p>
-                      <p className={cn(
-                        "mt-1 text-sm font-extrabold",
-                        cocNotApplicable
-                          ? "text-muted-foreground"
-                          : (cocReturnPct ?? 0) >= 0
-                            ? "text-success"
-                            : "text-[var(--metric-negative)]"
-                      )}>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                        CoC
+                      </p>
+                      <p
+                        className={cn(
+                          "mt-1 text-sm font-extrabold",
+                          cocNotApplicable
+                            ? "text-muted-foreground"
+                            : (cocReturnPct ?? 0) >= 0
+                              ? "text-success"
+                              : "text-[var(--metric-negative)]",
+                        )}
+                      >
                         {cocNotApplicable ? "N/A" : toPercent(cocReturnPct)}
                       </p>
                     </div>
                     <div className="rounded-xl bg-muted/40 p-3">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Cap Rate</p>
-                      <p className="mt-1 text-sm font-extrabold text-foreground">{toPercent(item.capRatePct)}</p>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                        Cap Rate
+                      </p>
+                      <p className="mt-1 text-sm font-extrabold text-foreground">
+                        {toPercent(item.capRatePct)}
+                      </p>
                     </div>
                     <div className="rounded-xl bg-muted/40 p-3">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Price</p>
-                      <p className="mt-1 text-sm font-extrabold text-foreground">{toCurrency(item.purchasePrice)}</p>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                        Price
+                      </p>
+                      <p className="mt-1 text-sm font-extrabold text-foreground">
+                        {toCurrency(item.purchasePrice)}
+                      </p>
                     </div>
                   </div>
 
@@ -2870,14 +3379,18 @@ export function SavedAnalysesPage({
                       <DealClientPicker
                         clients={agentClients}
                         clientId={item.clientId ?? null}
-                        disabled={isUpdatingStatus && updatingDealStatusId === item.id}
+                        disabled={
+                          isUpdatingStatus && updatingDealStatusId === item.id
+                        }
                         onChange={(cid) => handleDealClientChange(item.id, cid)}
                       />
                     ) : null}
                     {canUsePipeline && editingTagsDealId === item.id ? (
                       <DealTags
                         tags={item.tags ?? []}
-                        disabled={isUpdatingStatus && updatingDealStatusId === item.id}
+                        disabled={
+                          isUpdatingStatus && updatingDealStatusId === item.id
+                        }
                         onSave={(t) => handleDealTagsChange(item.id, t)}
                       />
                     ) : canUsePipeline && (item.tags?.length ?? 0) > 0 ? (
@@ -2930,7 +3443,9 @@ export function SavedAnalysesPage({
                             ) : (
                               <FileDown className="mr-2 h-3.5 w-3.5" />
                             )}
-                            {!canExportPdf && item.hasSavedPdf ? "Download saved PDF" : "Export PDF"}
+                            {!canExportPdf && item.hasSavedPdf
+                              ? "Download saved PDF"
+                              : "Export PDF"}
                             {!canExportPdf && !item.hasSavedPdf ? (
                               <span className="ml-auto rounded-full bg-primary/10 px-1.5 py-0 text-[9px] font-bold text-primary">
                                 PRO
@@ -2953,27 +3468,38 @@ export function SavedAnalysesPage({
                           {canUsePipeline ? (
                             <DropdownMenuItem
                               onSelect={() =>
-                                setEditingTagsDealId((prev) => (prev === item.id ? null : item.id))
+                                setEditingTagsDealId((prev) =>
+                                  prev === item.id ? null : item.id,
+                                )
                               }
                             >
                               <Tag className="mr-2 h-3.5 w-3.5" />
-                              {editingTagsDealId === item.id ? "Done editing tags" : "Edit tags"}
+                              {editingTagsDealId === item.id
+                                ? "Done editing tags"
+                                : "Edit tags"}
                             </DropdownMenuItem>
                           ) : null}
                           <DropdownMenuSeparator />
-                          <DropdownMenuLabel>{canUsePipeline ? "Stage" : "Status"}</DropdownMenuLabel>
+                          <DropdownMenuLabel>
+                            {canUsePipeline ? "Stage" : "Status"}
+                          </DropdownMenuLabel>
                           {canUsePipeline
                             ? PIPELINE_STAGES.map((s) => (
                                 <DropdownMenuCheckboxItem
                                   key={s.id}
-                                  checked={(item.pipelineStage ?? "analyzing") === s.id}
-                                  disabled={isUpdatingStatus && updatingDealStatusId === item.id}
+                                  checked={
+                                    (item.pipelineStage ?? "analyzing") === s.id
+                                  }
+                                  disabled={
+                                    isUpdatingStatus &&
+                                    updatingDealStatusId === item.id
+                                  }
                                   onCheckedChange={(checked) => {
                                     if (checked) {
                                       handleDealStageChange(
                                         item.id,
                                         s.id,
-                                        item.pipelineStage ?? "analyzing"
+                                        item.pipelineStage ?? "analyzing",
                                       );
                                     }
                                   }}
@@ -2991,9 +3517,13 @@ export function SavedAnalysesPage({
                                 <DropdownMenuCheckboxItem
                                   key={value}
                                   checked={item.status === value}
-                                  disabled={isUpdatingStatus && updatingDealStatusId === item.id}
+                                  disabled={
+                                    isUpdatingStatus &&
+                                    updatingDealStatusId === item.id
+                                  }
                                   onCheckedChange={(checked) => {
-                                    if (checked) handleDealStatusChange(item.id, value);
+                                    if (checked)
+                                      handleDealStatusChange(item.id, value);
                                   }}
                                 >
                                   {label}
@@ -3007,7 +3537,8 @@ export function SavedAnalysesPage({
                   <p className="mt-3 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
                     <CalendarClock className="h-3.5 w-3.5" />
                     <span>
-                      Saved {new Date(item.createdAt).toLocaleDateString("en-US", {
+                      Saved{" "}
+                      {new Date(item.createdAt).toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",
                         year: "numeric",
@@ -3041,27 +3572,78 @@ export function SavedAnalysesPage({
                       />
                     </label>
                   </th>
-                  <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">Property</th>
-                  <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">Signal</th>
-                  <SortableTh numeric field="cash-flow" label="Cash Flow" activeSortField={activeSortField} activeSortDirection={activeSortDirection} onSort={handleSort} />
-                  <SortableTh numeric field="coc" label="CoC" activeSortField={activeSortField} activeSortDirection={activeSortDirection} onSort={handleSort} />
-                  <SortableTh numeric field="cap-rate" label="Cap Rate" activeSortField={activeSortField} activeSortDirection={activeSortDirection} onSort={handleSort} />
-                  <SortableTh numeric field="price" label="Price" activeSortField={activeSortField} activeSortDirection={activeSortDirection} onSort={handleSort} />
+                  <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">
+                    Property
+                  </th>
+                  <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">
+                    Signal
+                  </th>
+                  <SortableTh
+                    numeric
+                    field="cash-flow"
+                    label="Cash Flow"
+                    activeSortField={activeSortField}
+                    activeSortDirection={activeSortDirection}
+                    onSort={handleSort}
+                  />
+                  <SortableTh
+                    numeric
+                    field="coc"
+                    label="CoC"
+                    activeSortField={activeSortField}
+                    activeSortDirection={activeSortDirection}
+                    onSort={handleSort}
+                  />
+                  <SortableTh
+                    numeric
+                    field="cap-rate"
+                    label="Cap Rate"
+                    activeSortField={activeSortField}
+                    activeSortDirection={activeSortDirection}
+                    onSort={handleSort}
+                  />
+                  <SortableTh
+                    numeric
+                    field="price"
+                    label="Price"
+                    activeSortField={activeSortField}
+                    activeSortDirection={activeSortDirection}
+                    onSort={handleSort}
+                  />
                   {optionalColumns.dscr ? (
-                    <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">DSCR</th>
+                    <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">
+                      DSCR
+                    </th>
                   ) : null}
                   {optionalColumns.cashToClose ? (
-                    <th className="whitespace-nowrap text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">Cash to close</th>
+                    <th className="whitespace-nowrap text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">
+                      Cash to close
+                    </th>
                   ) : null}
                   {optionalColumns.market ? (
-                    <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">Market</th>
+                    <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">
+                      Market
+                    </th>
                   ) : null}
                   {optionalColumns.neighborhood ? (
-                    <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">Neighborhood</th>
+                    <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">
+                      Neighborhood
+                    </th>
                   ) : null}
-                  <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">Status</th>
-                  <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">Actions</th>
-                  <SortableTh field="saved" label="Saved" activeSortField={activeSortField} activeSortDirection={activeSortDirection} onSort={handleSort} className="whitespace-nowrap pr-4" />
+                  <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">
+                    Status
+                  </th>
+                  <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">
+                    Actions
+                  </th>
+                  <SortableTh
+                    field="saved"
+                    label="Saved"
+                    activeSortField={activeSortField}
+                    activeSortDirection={activeSortDirection}
+                    onSort={handleSort}
+                    className="whitespace-nowrap pr-4"
+                  />
                 </tr>
               </thead>
               <tbody>
@@ -3070,13 +3652,21 @@ export function SavedAnalysesPage({
                   const isSelected = selectedIds.includes(item.id);
                   const signal = item.signal;
                   const PropertyTypeIcon = getTypeIcon(item.propertyType);
-                  const cocNotApplicable = isCashOnCashNotApplicable(item.cashToClose);
+                  const cocNotApplicable = isCashOnCashNotApplicable(
+                    item.cashToClose,
+                  );
                   const cocReturnPct = applicableCashOnCashValue(
                     item.cocReturnPct,
-                    item.cashToClose
+                    item.cashToClose,
                   );
                   return (
-                    <tr key={item.id} className={cn("group/row h-16 border-b border-border/80 transition-colors", isSelected ? "bg-primary/5" : "hover:bg-muted/40")}>
+                    <tr
+                      key={item.id}
+                      className={cn(
+                        "group/row h-16 border-b border-border/80 transition-colors",
+                        isSelected ? "bg-primary/5" : "hover:bg-muted/40",
+                      )}
+                    >
                       <td className="px-3 align-middle">
                         <label className="flex size-11 cursor-pointer items-center justify-center">
                           <input
@@ -3121,7 +3711,8 @@ export function SavedAnalysesPage({
                                   title="You have more than one saved analysis for this address"
                                 >
                                   {duplicateMarkerById.get(item.id)!.index} of{" "}
-                                  {duplicateMarkerById.get(item.id)!.total} saved here
+                                  {duplicateMarkerById.get(item.id)!.total}{" "}
+                                  saved here
                                 </span>
                               ) : null}
                             </Link>
@@ -3133,11 +3724,17 @@ export function SavedAnalysesPage({
                                 view should spend its height on what DIFFERS
                                 between deals. */}
                             <p className="text-xs text-muted-foreground truncate">
-                              {[getTypeLabel(item.propertyType), item.methodologyLabel]
+                              {[
+                                getTypeLabel(item.propertyType),
+                                item.methodologyLabel,
+                              ]
                                 .filter(Boolean)
                                 .join(" · ")}
                             </p>
-                            <OfferLineRow offer={item.offerLine} basisLabel={item.offerBasisLabel} />
+                            <OfferLineRow
+                              offer={item.offerLine}
+                              basisLabel={item.offerBasisLabel}
+                            />
                             {/* The "Next:" nudge moved into the verdict popover
                                 (see the Signal cell). On a scanning list it was
                                 a full line per row restating the verdict as a
@@ -3146,7 +3743,10 @@ export function SavedAnalysesPage({
                                 better information design next to the WHY than
                                 stacked under the address, and it costs no
                                 height at rest. */}
-                            <OwnedEquityCell item={item} enabled={ownedEquityEnabled} />
+                            <OwnedEquityCell
+                              item={item}
+                              enabled={ownedEquityEnabled}
+                            />
                           </div>
                         </div>
                       </td>
@@ -3170,56 +3770,105 @@ export function SavedAnalysesPage({
                                 aria-label={`Why ${address.main} scored ${SIGNAL_LABELS[signal]}`}
                                 className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                               >
-                                <Badge className={cn("cursor-pointer rounded-full border text-xs font-semibold underline decoration-dotted decoration-1 underline-offset-2", getSignalClasses(signal))}>
+                                <Badge
+                                  className={cn(
+                                    "cursor-pointer rounded-full border text-xs font-semibold underline decoration-dotted decoration-1 underline-offset-2",
+                                    getSignalClasses(signal),
+                                  )}
+                                >
                                   {SIGNAL_LABELS[signal]}
                                 </Badge>
                               </button>
                             </PopoverTrigger>
-                            <PopoverContent align="end" className="w-auto space-y-2.5 p-3">
+                            <PopoverContent
+                              align="end"
+                              className="w-auto space-y-2.5 p-3"
+                            >
                               <NextActionLine
                                 recommendation={item.recommendation}
                                 netCashFlow={item.netCashFlowMonthly}
-                                stage={item.status === "completed" ? "closed" : item.pipelineStage}
-                                meetsBuyBox={buyBoxFitById?.get(item.id)?.anyPass ?? null}
+                                stage={
+                                  item.status === "completed"
+                                    ? "closed"
+                                    : item.pipelineStage
+                                }
+                                meetsBuyBox={
+                                  buyBoxFitById?.get(item.id)?.anyPass ?? null
+                                }
                                 hasCloseDate={item.closeDate != null}
                               />
                               {item.breakdown && item.score != null ? (
-                                <ScoreBreakdown breakdown={item.breakdown} score={item.score} propertyType={item.propertyType} />
+                                <ScoreBreakdown
+                                  breakdown={item.breakdown}
+                                  score={item.score}
+                                  propertyType={item.propertyType}
+                                />
                               ) : null}
                               {item.dataConfidence ? (
-                                <DataConfidenceBadge confidence={item.dataConfidence} size="xs" propertyType={item.propertyType} />
+                                <DataConfidenceBadge
+                                  confidence={item.dataConfidence}
+                                  size="xs"
+                                  propertyType={item.propertyType}
+                                />
                               ) : null}
                             </PopoverContent>
                           </Popover>
                           <BuyBoxFitBadge fit={buyBoxFitById?.get(item.id)} />
                         </div>
                       </td>
-                      <td className={cn("whitespace-nowrap text-right font-semibold tabular-nums", (item.netCashFlowMonthly ?? 0) >= 0 ? "text-success" : "text-[var(--metric-negative)]")}>{toMonthCashFlow(item.netCashFlowMonthly)}</td>
-                      <td className={cn(
-                        "whitespace-nowrap text-right font-semibold tabular-nums",
-                        cocNotApplicable
-                          ? "text-muted-foreground"
-                          : (cocReturnPct ?? 0) >= 0
+                      <td
+                        className={cn(
+                          "whitespace-nowrap text-right font-semibold tabular-nums",
+                          (item.netCashFlowMonthly ?? 0) >= 0
                             ? "text-success"
-                            : "text-[var(--metric-negative)]"
-                      )}>{cocNotApplicable ? "N/A" : toPercent(cocReturnPct)}</td>
-                      <td className="whitespace-nowrap text-right font-medium tabular-nums">{toPercent(item.capRatePct)}</td>
-                      <td className="whitespace-nowrap text-right font-semibold tabular-nums text-foreground">{toCurrency(item.purchasePrice)}</td>
+                            : "text-[var(--metric-negative)]",
+                        )}
+                      >
+                        {toMonthCashFlow(item.netCashFlowMonthly)}
+                      </td>
+                      <td
+                        className={cn(
+                          "whitespace-nowrap text-right font-semibold tabular-nums",
+                          cocNotApplicable
+                            ? "text-muted-foreground"
+                            : (cocReturnPct ?? 0) >= 0
+                              ? "text-success"
+                              : "text-[var(--metric-negative)]",
+                        )}
+                      >
+                        {cocNotApplicable ? "N/A" : toPercent(cocReturnPct)}
+                      </td>
+                      <td className="whitespace-nowrap text-right font-medium tabular-nums">
+                        {toPercent(item.capRatePct)}
+                      </td>
+                      <td className="whitespace-nowrap text-right font-semibold tabular-nums text-foreground">
+                        {toCurrency(item.purchasePrice)}
+                      </td>
                       {optionalColumns.dscr ? (
                         <td className="font-medium tabular-nums text-foreground">
                           {/* "Cash" keys off the explicit flag — a financed deal
                               with negative NOI has a real DSCR ≤ 0 to show. */}
-                          {item.isCashPurchase ? "Cash" : item.dscr == null ? "—" : item.dscr.toFixed(2)}
+                          {item.isCashPurchase
+                            ? "Cash"
+                            : item.dscr == null
+                              ? "—"
+                              : item.dscr.toFixed(2)}
                         </td>
                       ) : null}
                       {optionalColumns.cashToClose ? (
-                        <td className="font-medium tabular-nums text-foreground">{toCurrency(item.cashToClose ?? null)}</td>
+                        <td className="font-medium tabular-nums text-foreground">
+                          {toCurrency(item.cashToClose ?? null)}
+                        </td>
                       ) : null}
                       {optionalColumns.market ? (
-                        <td className="text-foreground">{item.market?.trim() || "—"}</td>
+                        <td className="text-foreground">
+                          {item.market?.trim() || "—"}
+                        </td>
                       ) : null}
                       {optionalColumns.neighborhood ? (
-                        <td className="text-foreground">{item.neighborhood?.trim() || "—"}</td>
+                        <td className="text-foreground">
+                          {item.neighborhood?.trim() || "—"}
+                        </td>
                       ) : null}
                       <td className="pr-2">
                         <div className="flex flex-col gap-2">
@@ -3230,10 +3879,13 @@ export function SavedAnalysesPage({
                                 handleDealStageChange(
                                   item.id,
                                   value as PipelineStage,
-                                  item.pipelineStage ?? "analyzing"
+                                  item.pipelineStage ?? "analyzing",
                                 )
                               }
-                              disabled={isUpdatingStatus && updatingDealStatusId === item.id}
+                              disabled={
+                                isUpdatingStatus &&
+                                updatingDealStatusId === item.id
+                              }
                             >
                               <SelectTrigger className="h-8 w-[150px] rounded-md text-xs">
                                 <SelectValue placeholder="Stage" />
@@ -3249,16 +3901,28 @@ export function SavedAnalysesPage({
                           ) : (
                             <Select
                               value={item.status}
-                              onValueChange={(value) => handleDealStatusChange(item.id, value as SavedAnalysisListItem["status"])}
-                              disabled={isUpdatingStatus && updatingDealStatusId === item.id}
+                              onValueChange={(value) =>
+                                handleDealStatusChange(
+                                  item.id,
+                                  value as SavedAnalysisListItem["status"],
+                                )
+                              }
+                              disabled={
+                                isUpdatingStatus &&
+                                updatingDealStatusId === item.id
+                              }
                             >
                               <SelectTrigger className="h-8 w-[150px] rounded-md text-xs">
                                 <SelectValue placeholder="Status" />
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="active">Active</SelectItem>
-                                <SelectItem value="completed">Completed</SelectItem>
-                                <SelectItem value="archived">Archived</SelectItem>
+                                <SelectItem value="completed">
+                                  Completed
+                                </SelectItem>
+                                <SelectItem value="archived">
+                                  Archived
+                                </SelectItem>
                               </SelectContent>
                             </Select>
                           )}
@@ -3266,15 +3930,23 @@ export function SavedAnalysesPage({
                             <DealClientPicker
                               clients={agentClients}
                               clientId={item.clientId ?? null}
-                              disabled={isUpdatingStatus && updatingDealStatusId === item.id}
-                              onChange={(cid) => handleDealClientChange(item.id, cid)}
+                              disabled={
+                                isUpdatingStatus &&
+                                updatingDealStatusId === item.id
+                              }
+                              onChange={(cid) =>
+                                handleDealClientChange(item.id, cid)
+                              }
                             />
                           ) : null}
                           {canUsePipeline ? (
                             <DealTags
                               tags={item.tags ?? []}
                               revealOnHover
-                              disabled={isUpdatingStatus && updatingDealStatusId === item.id}
+                              disabled={
+                                isUpdatingStatus &&
+                                updatingDealStatusId === item.id
+                              }
                               onSave={(t) => handleDealTagsChange(item.id, t)}
                             />
                           ) : null}
@@ -3336,7 +4008,9 @@ export function SavedAnalysesPage({
                                 ) : (
                                   <FileDown className="mr-2 h-3.5 w-3.5" />
                                 )}
-                                {!canExportPdf && item.hasSavedPdf ? "Download saved PDF" : "Export PDF"}
+                                {!canExportPdf && item.hasSavedPdf
+                                  ? "Download saved PDF"
+                                  : "Export PDF"}
                                 {!canExportPdf && !item.hasSavedPdf ? (
                                   <span className="ml-auto rounded-full bg-primary/10 px-1.5 py-0 text-[9px] font-bold text-primary">
                                     PRO
@@ -3344,7 +4018,9 @@ export function SavedAnalysesPage({
                                 ) : null}
                               </DropdownMenuItem>
                               <DropdownMenuItem asChild>
-                                <Link href={`/dashboard/saved-analyses/${item.id}`}>
+                                <Link
+                                  href={`/dashboard/saved-analyses/${item.id}`}
+                                >
                                   <ClipboardList className="mr-2 h-3.5 w-3.5" />
                                   Deal workspace
                                 </Link>
@@ -3364,12 +4040,15 @@ export function SavedAnalysesPage({
                         <span className="inline-flex items-center gap-1.5">
                           <CalendarClock className="h-3.5 w-3.5" />
                           <span>
-                            {new Date(item.createdAt).toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                              timeZone: "UTC",
-                            })}
+                            {new Date(item.createdAt).toLocaleDateString(
+                              "en-US",
+                              {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                                timeZone: "UTC",
+                              },
+                            )}
                           </span>
                         </span>
                       </td>
@@ -3395,14 +4074,19 @@ export function SavedAnalysesPage({
                     No deals assigned to {clientFilterName} yet
                   </p>
                   <p className="mx-auto mt-1 max-w-md text-xs text-muted-foreground">
-                    Open any deal below and set its client to {clientFilterName} — it appears on their
-                    portal straight away.
+                    Open any deal below and set its client to {clientFilterName}{" "}
+                    — it appears on their portal straight away.
                   </p>
-                  <Button asChild variant="outline" className="mt-4 rounded-full">
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="mt-4 rounded-full"
+                  >
                     <Link href="/dashboard/saved-analyses">Show all deals</Link>
                   </Button>
                 </>
-              ) : initialItems.length === 0 && activeDealStateFilter !== "all" ? (
+              ) : initialItems.length === 0 &&
+                activeDealStateFilter !== "all" ? (
                 /* Empty because of the LIFECYCLE TAB, not because the account is
                    empty — initialItems is already server-filtered. Telling a
                    user with archived deals to "save your first deal" is simply
@@ -3417,8 +4101,14 @@ export function SavedAnalysesPage({
                   <p className="mt-1 text-xs text-muted-foreground">
                     Your other deals may be under a different tab.
                   </p>
-                  <Button asChild variant="outline" className="mt-4 rounded-full">
-                    <Link href="/dashboard/saved-analyses?state=all">Show all deals</Link>
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="mt-4 rounded-full"
+                  >
+                    <Link href="/dashboard/saved-analyses?state=all">
+                      Show all deals
+                    </Link>
                   </Button>
                 </>
               ) : initialItems.length === 0 ? (
@@ -3428,11 +4118,21 @@ export function SavedAnalysesPage({
                   <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                     <Sparkles className="w-5 h-5" />
                   </div>
-                  <p className="text-base font-bold text-foreground">Save your first deal</p>
-                  <p className="mx-auto mt-1 max-w-sm text-sm leading-relaxed text-muted-foreground">
-                    Run a property through the analyzer and click <strong className="text-foreground">Save</strong> on the dashboard. Saved deals show up here with a portfolio rollup, so you can compare, edit, and revisit any deal you&apos;re considering.
+                  <p className="text-base font-bold text-foreground">
+                    Save your first deal
                   </p>
-                  <Button asChild size="lg" className="mt-5 w-full rounded-full sm:w-auto">
+                  <p className="mx-auto mt-1 max-w-sm text-sm leading-relaxed text-muted-foreground">
+                    Run a property through the analyzer and click{" "}
+                    <strong className="text-foreground">Save</strong> on the
+                    dashboard. Saved deals show up here with a portfolio rollup,
+                    so you can compare, edit, and revisit any deal you&apos;re
+                    considering.
+                  </p>
+                  <Button
+                    asChild
+                    size="lg"
+                    className="mt-5 w-full rounded-full sm:w-auto"
+                  >
                     <Link href="/dashboard/new">Open the analyzer</Link>
                   </Button>
                 </>
@@ -3442,8 +4142,12 @@ export function SavedAnalysesPage({
                   <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl bg-muted">
                     <Search className="w-5 h-5 text-muted-foreground" />
                   </div>
-                  <p className="text-sm font-semibold text-foreground">No deals match your filters</p>
-                  <p className="text-xs text-muted-foreground mt-1">Try clearing the search or switching the deal-state tab.</p>
+                  <p className="text-sm font-semibold text-foreground">
+                    No deals match your filters
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Try clearing the search or switching the deal-state tab.
+                  </p>
                   <Button
                     type="button"
                     variant="outline"
@@ -3488,7 +4192,10 @@ export function SavedAnalysesPage({
                   {paginationPages.map((page, index) => {
                     const previousPage = paginationPages[index - 1];
                     return (
-                      <PaginationItem key={page} className="flex items-center gap-1">
+                      <PaginationItem
+                        key={page}
+                        className="flex items-center gap-1"
+                      >
                         {previousPage != null && page - previousPage > 1 && (
                           <span className="flex h-8 w-6 items-center justify-center text-xs text-muted-foreground">
                             ...
@@ -3496,11 +4203,15 @@ export function SavedAnalysesPage({
                         )}
                         <Button
                           type="button"
-                          variant={page === safeCurrentPage ? "outline" : "ghost"}
+                          variant={
+                            page === safeCurrentPage ? "outline" : "ghost"
+                          }
                           size="icon-sm"
                           className="size-8 rounded-full"
                           onClick={() => goToPage(page)}
-                          aria-current={page === safeCurrentPage ? "page" : undefined}
+                          aria-current={
+                            page === safeCurrentPage ? "page" : undefined
+                          }
                         >
                           {page}
                         </Button>
@@ -3527,22 +4238,34 @@ export function SavedAnalysesPage({
 
         <div className="rounded-2xl border border-dashed border-border bg-card/60 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <p className="text-sm text-muted-foreground">
-            Showing {displayItems.length === 0 ? 0 : pageStartIndex + 1}-{pageEndIndex} of {displayItems.length} 
-            {displayItems.length !== initialItems.length ? ` (${initialItems.length} total)` : ""}
+            Showing {displayItems.length === 0 ? 0 : pageStartIndex + 1}-
+            {pageEndIndex} of {displayItems.length}
+            {displayItems.length !== initialItems.length
+              ? ` (${initialItems.length} total)`
+              : ""}
           </p>
           <div className="flex items-center gap-2">
             <Button
               type="button"
               variant="outline"
               className="rounded-full"
-              disabled={!canCompareDeals || selectedIds.length < 1 || isStartingCompare}
+              disabled={
+                !canCompareDeals || selectedIds.length < 1 || isStartingCompare
+              }
               onClick={handleCompareSelected}
-              title={!canCompareDeals ? "Compare is not available for your current plan." : undefined}
+              title={
+                !canCompareDeals
+                  ? "Compare is not available for your current plan."
+                  : undefined
+              }
             >
               <ArrowUpDown className="w-4 h-4 mr-1.5" />
               {isStartingCompare ? "Preparing..." : "Compare Selected"}
             </Button>
-            <Button className="rounded-full bg-primary text-primary-foreground" asChild>
+            <Button
+              className="rounded-full bg-primary text-primary-foreground"
+              asChild
+            >
               <Link href="/dashboard/new">
                 <Sparkles className="w-4 h-4 mr-1.5" />
                 New Analysis
@@ -3582,7 +4305,7 @@ export function SavedAnalysesPage({
             // banner's own safe-area bottom padding grows by.
             cookieBannerOpen
               ? "bottom-[calc(7.5rem+env(safe-area-inset-bottom))] sm:bottom-[calc(5.5rem+env(safe-area-inset-bottom))]"
-              : "bottom-4"
+              : "bottom-4",
           )}
         >
           <div className="flex items-center gap-3">

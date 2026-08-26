@@ -18,6 +18,10 @@ import {
 } from "@/lib/pdf/vector-charts";
 import { loadPdfImage } from "@/lib/pdf/load-image";
 import type { ReportOperatingStatement } from "@/lib/report-operating-statement";
+import type {
+  SpecialistAnalysisSnapshot,
+  SpecialistInputSource,
+} from "@/lib/specialist-analysis-snapshot";
 
 export interface ReportData {
   generatedAt: Date;
@@ -152,8 +156,16 @@ export interface ReportData {
       capRate: number;
       dscr: number;
     };
-    requiredMonthlyRent: { value: number; alreadyMet: boolean; unreachable: boolean } | null;
-    requiredInterestRate: { value: number; alreadyMet: boolean; unreachable: boolean } | null;
+    requiredMonthlyRent: {
+      value: number;
+      alreadyMet: boolean;
+      unreachable: boolean;
+    } | null;
+    requiredInterestRate: {
+      value: number;
+      alreadyMet: boolean;
+      unreachable: boolean;
+    } | null;
   } | null;
   downsideScenario?: {
     /** Reproducible input change, e.g. rent -10% · vacancy +5pp · rate +1pp. */
@@ -218,6 +230,10 @@ export interface ReportData {
    *  Built by lib/report-operating-statement.ts from the engine's own fields;
    *  nothing here is computed in the PDF layer. */
   operatingStatement?: ReportOperatingStatement | null;
+  /** Frozen BRRRR/fix-and-flip inputs and outputs. Canonical reports derive
+   * this server-side or reproduce a validated saved snapshot; legacy and
+   * non-specialist reports omit the section. */
+  specialistAnalysis?: SpecialistAnalysisSnapshot | null;
   /** RentCast sale + rent comps (reference data; never feeds the analysis math).
    *  Optional — the comps page renders only when present + non-empty. */
   comps?: {
@@ -225,8 +241,24 @@ export interface ReportData {
     valueRange: { low: number | null; high: number | null } | null;
     rentEstimate: number | null;
     rentRange: { low: number | null; high: number | null } | null;
-    saleComps: Array<{ address: string; price: number | null; bedrooms: number | null; bathrooms: number | null; squareFootage: number | null; distanceMiles: number | null; pricePerSqft?: number | null }>;
-    rentComps: Array<{ address: string; price: number | null; bedrooms: number | null; bathrooms: number | null; squareFootage: number | null; distanceMiles: number | null; pricePerSqft?: number | null }>;
+    saleComps: Array<{
+      address: string;
+      price: number | null;
+      bedrooms: number | null;
+      bathrooms: number | null;
+      squareFootage: number | null;
+      distanceMiles: number | null;
+      pricePerSqft?: number | null;
+    }>;
+    rentComps: Array<{
+      address: string;
+      price: number | null;
+      bedrooms: number | null;
+      bathrooms: number | null;
+      squareFootage: number | null;
+      distanceMiles: number | null;
+      pricePerSqft?: number | null;
+    }>;
     /** When RentCast returned this. A lender needs to know how stale it is. */
     fetchedAt?: string | null;
   } | null;
@@ -275,10 +307,14 @@ const fmtCurrency = (n: number, withSign = false) => {
   if (n < 0) return `-${s}`;
   return s;
 };
-const fmtPct = (n: number, sign = false) => `${sign && n > 0 ? "+" : ""}${n.toFixed(1)}%`;
+const fmtPct = (n: number, sign = false) =>
+  `${sign && n > 0 ? "+" : ""}${n.toFixed(1)}%`;
 
 export function formatReportInsuranceAssumption(
-  expenses: Pick<ReportData["expenses"], "insuranceMonthlyBill" | "insurancePct">,
+  expenses: Pick<
+    ReportData["expenses"],
+    "insuranceMonthlyBill" | "insurancePct"
+  >,
 ): string {
   return expenses.insuranceMonthlyBill != null
     ? `${fmtCurrency(expenses.insuranceMonthlyBill)}/mo (monthly amount)`
@@ -287,7 +323,11 @@ export function formatReportInsuranceAssumption(
 
 function hexToRgb(hex: string): [number, number, number] {
   const h = hex.replace("#", "");
-  return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+  return [
+    parseInt(h.slice(0, 2), 16),
+    parseInt(h.slice(2, 4), 16),
+    parseInt(h.slice(4, 6), 16),
+  ];
 }
 
 /**
@@ -328,7 +368,8 @@ function splitAddress(address: string): {
   };
 }
 const setFill = (doc: jsPDF, hex: string) => doc.setFillColor(...hexToRgb(hex));
-const setStroke = (doc: jsPDF, hex: string) => doc.setDrawColor(...hexToRgb(hex));
+const setStroke = (doc: jsPDF, hex: string) =>
+  doc.setDrawColor(...hexToRgb(hex));
 const setText = (doc: jsPDF, hex: string) => doc.setTextColor(...hexToRgb(hex));
 
 /**
@@ -383,11 +424,7 @@ function colorLuminance(hex: string): number {
   const b = parseInt(hex.slice(5, 7), 16) / 255;
   const toLinear = (c: number) =>
     c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
-  return (
-    0.2126 * toLinear(r) +
-    0.7152 * toLinear(g) +
-    0.0722 * toLinear(b)
-  );
+  return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
 }
 
 /** WCAG contrast ratio of a colour against white. */
@@ -422,7 +459,11 @@ function resolveThemeTextColor(branding?: BrandingConfig | null): string {
     const candidate =
       "#" +
       [r, g, b]
-        .map((c) => Math.round(c * factor).toString(16).padStart(2, "0"))
+        .map((c) =>
+          Math.round(c * factor)
+            .toString(16)
+            .padStart(2, "0"),
+        )
         .join("");
     if (contrastOnWhite(candidate) >= 4.5) return candidate;
   }
@@ -446,7 +487,7 @@ function resolveThemeTextColor(branding?: BrandingConfig | null): string {
  * Returns null on any failure; callers already fall back to a text wordmark.
  */
 async function loadLogoDataUrl(
-  src: string = "/Logo-png-w.png"
+  src: string = "/Logo-png-w.png",
 ): Promise<{ dataUrl: string; width: number; height: number } | null> {
   const image = await loadPdfImage(src);
   if (!image) return null;
@@ -456,7 +497,8 @@ async function loadLogoDataUrl(
 /** Compact money label for in-chart annotations: 1240000 → "$1.2M", 8400 → "$8.4K". */
 function fmtChartMoney(n: number): string {
   const a = Math.abs(n);
-  if (a >= 1_000_000) return `${n < 0 ? "-" : ""}$${(a / 1_000_000).toFixed(1)}M`;
+  if (a >= 1_000_000)
+    return `${n < 0 ? "-" : ""}$${(a / 1_000_000).toFixed(1)}M`;
   if (a >= 1_000) return `${n < 0 ? "-" : ""}$${Math.round(a / 1000)}K`;
   return `${n < 0 ? "-" : ""}$${Math.round(a)}`;
 }
@@ -468,7 +510,7 @@ function drawHeader(
   totalPages: number,
   _generatedAt: Date,
   logoData: { dataUrl: string; width: number; height: number } | null,
-  branding?: BrandingConfig | null
+  branding?: BrandingConfig | null,
 ) {
   // Theme color — brand color if branded, else TrueCap blue.
   const themeColor = isValidHex(branding?.primaryColorHex ?? null)
@@ -505,7 +547,7 @@ function drawHeader(
         targetWidth,
         targetHeight,
         undefined,
-        "FAST"
+        "FAST",
       );
     } catch {
       // keep header clean even if logo cannot be drawn
@@ -520,7 +562,11 @@ function drawHeader(
     // 120-character company name, and the document title block ("ANALYSIS
     // REPORT" / "Investment Analysis") is right-aligned in the same band —
     // an unbounded wordmark printed straight through it and off the page.
-    doc.text(truncateToWidth(doc, branding.companyName.trim(), SAFE.w * 0.52), M.left, 40);
+    doc.text(
+      truncateToWidth(doc, branding.companyName.trim(), SAFE.w * 0.52),
+      M.left,
+      40,
+    );
   }
 
   // Header subtitle ("Prepared by [Name]") was removed per design
@@ -600,8 +646,15 @@ function drawHeader(
   footerLeft = truncateToWidth(doc, footerLeft, SAFE.w / 3);
 
   doc.text(footerLeft, M.left, footerTextY);
-  doc.text("Confidential — for the named recipient only", PAGE.w / 2, footerTextY, { align: "center" });
-  doc.text(`Page ${pageNum} of ${totalPages}`, PAGE.w - M.right, footerTextY, { align: "right" });
+  doc.text(
+    "Confidential — for the named recipient only",
+    PAGE.w / 2,
+    footerTextY,
+    { align: "center" },
+  );
+  doc.text(`Page ${pageNum} of ${totalPages}`, PAGE.w - M.right, footerTextY, {
+    align: "right",
+  });
 }
 
 function sectionTitle(
@@ -609,7 +662,7 @@ function sectionTitle(
   text: string,
   y: number,
   kicker?: string,
-  themeColor?: string
+  themeColor?: string,
 ) {
   // The kicker label color picks up the brand color when set so the
   // section divider chrome reads as part of the user's identity, not
@@ -623,7 +676,9 @@ function sectionTitle(
   const rawKicker =
     themeColor && isValidHex(themeColor) ? themeColor : COLOR.primary;
   const kickerColor =
-    contrastOnWhite(rawKicker) >= 4.5 ? rawKicker : resolveThemeTextColor({ primaryColorHex: rawKicker });
+    contrastOnWhite(rawKicker) >= 4.5
+      ? rawKicker
+      : resolveThemeTextColor({ primaryColorHex: rawKicker });
   if (kicker) {
     setText(doc, kickerColor);
     doc.setFont("helvetica", "bold");
@@ -650,7 +705,14 @@ function sectionTitle(
 }
 
 // ===================== Card primitives =====================
-function card(doc: jsPDF, x: number, y: number, w: number, h: number, opts: { soft?: boolean } = {}) {
+function card(
+  doc: jsPDF,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  opts: { soft?: boolean } = {},
+) {
   setFill(doc, opts.soft ? COLOR.cardSoft : COLOR.cardBg);
   setStroke(doc, COLOR.border);
   doc.setLineWidth(0.6);
@@ -763,11 +825,13 @@ function decisionColor(decision: NonNullable<ReportData["decision"]>): string {
   if (
     decision.label === "Meets selected rules at asking" ||
     decision.label === "Pursue"
-  ) return COLOR.successText;
+  )
+    return COLOR.successText;
   if (
     decision.label === "Does not meet selected rules at asking" ||
     decision.label === "Pass at this price"
-  ) return COLOR.danger;
+  )
+    return COLOR.danger;
   return COLOR.warnText;
 }
 
@@ -784,7 +848,7 @@ function pageCover(
   doc: jsPDF,
   d: ReportData,
   branding: BrandingConfig | null,
-  logoData: { dataUrl: string; width: number; height: number } | null
+  logoData: { dataUrl: string; width: number; height: number } | null,
 ) {
   const themeColor = resolveThemeColor(branding);
 
@@ -798,14 +862,25 @@ function pageCover(
       const maxW = 132;
       const maxH = 46;
       const aspect =
-        logoData.width > 0 && logoData.height > 0 ? logoData.width / logoData.height : maxW / maxH;
+        logoData.width > 0 && logoData.height > 0
+          ? logoData.width / logoData.height
+          : maxW / maxH;
       let tw = maxW;
       let th = maxW / aspect;
       if (th > maxH) {
         th = maxH;
         tw = maxH * aspect;
       }
-      doc.addImage(logoData.dataUrl, "PNG", M.left, 30, tw, th, undefined, "FAST");
+      doc.addImage(
+        logoData.dataUrl,
+        "PNG",
+        M.left,
+        30,
+        tw,
+        th,
+        undefined,
+        "FAST",
+      );
     } catch {
       // cover stays clean even if the logo can't be drawn
     }
@@ -816,7 +891,11 @@ function pageCover(
     doc.setFontSize(18);
     // Same bound as the running header: the date sits right-aligned in this
     // band, and a 120-character company name would print straight through it.
-    doc.text(truncateToWidth(doc, branding.companyName.trim(), SAFE.w * 0.6), M.left, 54);
+    doc.text(
+      truncateToWidth(doc, branding.companyName.trim(), SAFE.w * 0.6),
+      M.left,
+      54,
+    );
   }
 
   // Tagline, under the wordmark or logo.
@@ -832,7 +911,11 @@ function pageCover(
     doc.setFontSize(9);
     // One line only: the cover's vertical rhythm is fixed, and a wrapped
     // tagline would push into the title zone below.
-    doc.text(truncateToWidth(doc, tagline, SAFE.w * 0.55), M.left, logoData ? 76 : 68);
+    doc.text(
+      truncateToWidth(doc, tagline, SAFE.w * 0.55),
+      M.left,
+      logoData ? 76 : 68,
+    );
   }
 
   // Date, top-right.
@@ -840,10 +923,14 @@ function pageCover(
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.text(
-    d.generatedAt.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+    d.generatedAt.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }),
     PAGE.w - M.right,
     52,
-    { align: "right" }
+    { align: "right" },
   );
 
   // ---- Title zone ----
@@ -860,7 +947,10 @@ function pageCover(
   setText(doc, COLOR.ink);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(30);
-  const addrLines = (doc.splitTextToSize(ap.primary, SAFE.w) as string[]).slice(0, 2);
+  const addrLines = (doc.splitTextToSize(ap.primary, SAFE.w) as string[]).slice(
+    0,
+    2,
+  );
   doc.text(addrLines, M.left, y, { lineHeightFactor: 1.1 });
   y += (addrLines.length - 1) * 30 * 1.1 + 18;
 
@@ -882,11 +972,12 @@ function pageCover(
   setText(doc, COLOR.muted);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10.5);
-  const unitsLabel = d.units.length === 1 ? "1 unit" : `${d.units.length} units`;
+  const unitsLabel =
+    d.units.length === 1 ? "1 unit" : `${d.units.length} units`;
   doc.text(
     `${formatPropertyType(d.property.type)}   ·   Built ${formatYearBuilt(d.property.yearBuilt)}   ·   ${unitsLabel}   ·   ${fmtCurrency(d.property.purchasePrice)}`,
     M.left,
-    y
+    y,
   );
   y += 36;
 
@@ -901,7 +992,10 @@ function pageCover(
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(11);
-  const thesisLines = (doc.splitTextToSize(thesis, textW) as string[]).slice(0, 4);
+  const thesisLines = (doc.splitTextToSize(thesis, textW) as string[]).slice(
+    0,
+    4,
+  );
   const thesisH = thesisLines.length * 11 * 1.4;
   const panelH = Math.round(152 + thesisH + (d.maxOffer ? 12 : 0));
 
@@ -925,11 +1019,7 @@ function pageCover(
   setText(doc, tierColor);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(17);
-  doc.text(
-    decision.label,
-    panelX + 20,
-    py
-  );
+  doc.text(decision.label, panelX + 20, py);
 
   py += 22;
   setText(doc, COLOR.text);
@@ -944,7 +1034,12 @@ function pageCover(
   const metrics: Array<[string, string]> = [
     ["MONTHLY CASH FLOW", fmtCurrency(d.performance.monthlyCashFlow, true)],
     ["CAP RATE", fmtPct(d.performance.capRate)],
-    ["CASH-ON-CASH", d.performance.cocApplicable === false ? "N/A" : fmtPct(d.performance.cocReturn)],
+    [
+      "CASH-ON-CASH",
+      d.performance.cocApplicable === false
+        ? "N/A"
+        : fmtPct(d.performance.cocReturn),
+    ],
   ];
   if (d.maxOffer !== undefined) {
     metrics.push([
@@ -964,7 +1059,16 @@ function pageCover(
     // MAX OFFER picks up the BRAND colour, not a hardcoded TrueCap blue — on
     // a white-label pack this cell was another company's blue sitting between
     // three neutral ones, for no reason a reader could infer.
-    setText(doc, i === 0 ? (d.performance.monthlyCashFlow >= 0 ? COLOR.successText : COLOR.danger) : m[0] === "OFFER CEILING" ? themeColor : COLOR.ink);
+    setText(
+      doc,
+      i === 0
+        ? d.performance.monthlyCashFlow >= 0
+          ? COLOR.successText
+          : COLOR.danger
+        : m[0] === "OFFER CEILING"
+          ? themeColor
+          : COLOR.ink,
+    );
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
     doc.text(m[1], mx, py + 18);
@@ -1003,8 +1107,14 @@ function pageCover(
   doc.setCharSpace(0);
   const terms: Array<[string, string]> = [
     ["PURCHASE PRICE", fmtCurrency(d.property.purchasePrice)],
-    ["DOWN PAYMENT", `${d.financing.downPaymentPct}%  ·  ${fmtCurrency(d.financing.downPayment)}`],
-    ["INTEREST RATE", isCashPurchase ? "Cash purchase" : `${d.financing.interestRate}%`],
+    [
+      "DOWN PAYMENT",
+      `${d.financing.downPaymentPct}%  ·  ${fmtCurrency(d.financing.downPayment)}`,
+    ],
+    [
+      "INTEREST RATE",
+      isCashPurchase ? "Cash purchase" : `${d.financing.interestRate}%`,
+    ],
     ["LOAN TERM", isCashPurchase ? "—" : `${d.financing.loanTerm} yrs`],
   ];
   const tColW = SAFE.w / 4;
@@ -1063,9 +1173,14 @@ function pageCover(
   setText(doc, COLOR.muted);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
-  doc.text("Confidential — for the named recipient only", PAGE.w - M.right, footY + 8, {
-    align: "right",
-  });
+  doc.text(
+    "Confidential — for the named recipient only",
+    PAGE.w - M.right,
+    footY + 8,
+    {
+      align: "right",
+    },
+  );
 }
 
 // ===================== "Your buy box" block =====================
@@ -1083,7 +1198,12 @@ function truncateToWidth(doc: jsPDF, text: string, maxW: number): string {
  * Helvetica has no ✓/✗ glyphs, so these are drawn as line art, matching
  * the in-app card's green check / red cross / muted dash.
  */
-function drawBuyBoxCheckGlyph(doc: jsPDF, x: number, textBaselineY: number, pass: boolean | null) {
+function drawBuyBoxCheckGlyph(
+  doc: jsPDF,
+  x: number,
+  textBaselineY: number,
+  pass: boolean | null,
+) {
   const cy = textBaselineY - 3; // optical center of the 8pt text line
   doc.setLineWidth(1.2);
   if (pass === true) {
@@ -1116,7 +1236,8 @@ function buyBoxCardLayout(doc: jsPDF, v: BuyBoxPdfVerdict, w: number) {
   const personalLineH = 8.5 * 1.35;
   const rows = Math.ceil(v.checks.length / 2);
   const gridTop =
-    44 + (personalLines.length > 0 ? personalLines.length * personalLineH + 8 : 4);
+    44 +
+    (personalLines.length > 0 ? personalLines.length * personalLineH + 8 : 4);
   const height = Math.round(gridTop + rows * 15 + 12);
   return { personalLines, rows, gridTop, height };
 }
@@ -1129,9 +1250,19 @@ function buyBoxCardLayout(doc: jsPDF, v: BuyBoxPdfVerdict, w: number) {
  * tier-colored left stripe + kicker + headline. Tier colors are semantic
  * (green = fits, amber = misses) and never swap with branding.
  */
-function drawBuyBoxVerdictCard(doc: jsPDF, v: BuyBoxPdfVerdict, x: number, y: number, w: number) {
+function drawBuyBoxVerdictCard(
+  doc: jsPDF,
+  v: BuyBoxPdfVerdict,
+  x: number,
+  y: number,
+  w: number,
+) {
   const { personalLines, gridTop, height } = buyBoxCardLayout(doc, v, w);
-  const tierColor = v.passes ? COLOR.success : v.applicableCount > 0 ? COLOR.warn : COLOR.muted;
+  const tierColor = v.passes
+    ? COLOR.success
+    : v.applicableCount > 0
+      ? COLOR.warn
+      : COLOR.muted;
 
   card(doc, x, y, w, height);
   setFill(doc, tierColor);
@@ -1142,14 +1273,21 @@ function drawBuyBoxVerdictCard(doc: jsPDF, v: BuyBoxPdfVerdict, x: number, y: nu
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7);
   doc.setCharSpace(0.8);
-  const kicker = v.multi ? `YOUR BUY BOX — ${v.boxName.toUpperCase()}` : "YOUR BUY BOX";
+  const kicker = v.multi
+    ? `YOUR BUY BOX — ${v.boxName.toUpperCase()}`
+    : "YOUR BUY BOX";
   doc.text(truncateToWidth(doc, kicker, w - 200), x + 16, y + 16);
   // Multi-box rollup, right-aligned on the kicker line ("meets N of M").
   if (v.multi) {
     setText(doc, COLOR.sub);
-    doc.text(`MEETS ${v.passingCount} OF ${v.activeCount} BUY BOXES`, x + w - 16, y + 16, {
-      align: "right",
-    });
+    doc.text(
+      `MEETS ${v.passingCount} OF ${v.activeCount} BUY BOXES`,
+      x + w - 16,
+      y + 16,
+      {
+        align: "right",
+      },
+    );
   }
   doc.setCharSpace(0);
 
@@ -1161,9 +1299,14 @@ function drawBuyBoxVerdictCard(doc: jsPDF, v: BuyBoxPdfVerdict, x: number, y: nu
   setText(doc, COLOR.sub);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
-  doc.text(`${v.passedCount}/${v.applicableCount} criteria met`, x + w - 16, y + 34, {
-    align: "right",
-  });
+  doc.text(
+    `${v.passedCount}/${v.applicableCount} criteria met`,
+    x + w - 16,
+    y + 34,
+    {
+      align: "right",
+    },
+  );
 
   // Personal gap sentence ("Biggest gap — …" / "Tightest margin — …").
   if (personalLines.length > 0) {
@@ -1204,9 +1347,15 @@ function drawOperatingStatement(
   doc: jsPDF,
   st: ReportOperatingStatement,
   startY: number,
-  themeColor: string
+  themeColor: string,
 ): number {
-  let y = sectionTitle(doc, "Year 1 Operating Statement", startY, undefined, themeColor);
+  let y = sectionTitle(
+    doc,
+    "Year 1 Operating Statement",
+    startY,
+    undefined,
+    themeColor,
+  );
   setText(doc, COLOR.sub);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
@@ -1215,7 +1364,7 @@ function drawOperatingStatement(
       ? "Annualized. No financing, so NOI is the bottom line."
       : "Annualized. NOI excludes CapEx, debt service and income tax — the lender-standard definition.",
     M.left,
-    y
+    y,
   );
   y += 16;
 
@@ -1223,23 +1372,56 @@ function drawOperatingStatement(
   const left = M.left;
   const right = M.left + colW + 12;
 
-  type Line = { label: string; value: number; strong?: boolean; rule?: boolean; muted?: boolean };
+  type Line = {
+    label: string;
+    value: number;
+    strong?: boolean;
+    rule?: boolean;
+    muted?: boolean;
+  };
   const lines: Line[] = [
     { label: "Gross scheduled rent", value: st.grossScheduledIncome },
     { label: "Less vacancy allowance", value: -st.vacancyAllowance },
-    { label: "Effective gross income", value: st.effectiveGrossIncome, strong: true, rule: true },
+    {
+      label: "Effective gross income",
+      value: st.effectiveGrossIncome,
+      strong: true,
+      rule: true,
+    },
     ...st.operatingExpenses.map((e) => ({ label: e.label, value: -e.amount })),
-    { label: "Total operating expenses", value: -st.operatingExpensesTotal, rule: true },
-    { label: "Net operating income (NOI)", value: st.noi, strong: true, rule: true },
+    {
+      label: "Total operating expenses",
+      value: -st.operatingExpensesTotal,
+      rule: true,
+    },
+    {
+      label: "Net operating income (NOI)",
+      value: st.noi,
+      strong: true,
+      rule: true,
+    },
   ];
   if (!st.isCashPurchase) {
-    lines.push({ label: "Less debt service (P&I)", value: -st.annualDebtService });
-    if (st.pmiAnnual > 0) lines.push({ label: "Less PMI", value: -st.pmiAnnual });
+    lines.push({
+      label: "Less debt service (P&I)",
+      value: -st.annualDebtService,
+    });
+    if (st.pmiAnnual > 0)
+      lines.push({ label: "Less PMI", value: -st.pmiAnnual });
   }
   if (st.capexReserve > 0) {
-    lines.push({ label: "Less CapEx reserve", value: -st.capexReserve, muted: true });
+    lines.push({
+      label: "Less CapEx reserve",
+      value: -st.capexReserve,
+      muted: true,
+    });
   }
-  lines.push({ label: "Net cash flow", value: st.netCashFlowAnnual, strong: true, rule: true });
+  lines.push({
+    label: "Net cash flow",
+    value: st.netCashFlowAnnual,
+    strong: true,
+    rule: true,
+  });
 
   const lineH = 14;
   const boxH = lines.length * lineH + 20;
@@ -1263,7 +1445,7 @@ function drawOperatingStatement(
           : COLOR.danger
         : line.muted
           ? COLOR.sub
-          : COLOR.text
+          : COLOR.text,
     );
     doc.text(fmtCurrency(line.value), left + colW - 12, ly, { align: "right" });
     ly += lineH;
@@ -1278,11 +1460,25 @@ function drawOperatingStatement(
     : [
         ["Loan amount", fmtCurrency(st.loanAmount)],
         ["Monthly payment (P&I)", fmtCurrency(st.monthlyPayment)],
-        ["PMI (monthly)", st.pmiAnnual > 0 ? fmtCurrency(Math.round(st.pmiAnnual / 12)) : "None"],
+        [
+          "PMI (monthly)",
+          st.pmiAnnual > 0
+            ? fmtCurrency(Math.round(st.pmiAnnual / 12))
+            : "None",
+        ],
         ["Annual debt service", fmtCurrency(st.annualDebtService)],
         ["Total cash to close", fmtCurrency(st.totalCashRequired)],
       ];
-  drawInputBlock(doc, right, y, colW, Math.min(boxH, 92 + facts.length * 4), "Financing", facts, themeColor);
+  drawInputBlock(
+    doc,
+    right,
+    y,
+    colW,
+    Math.min(boxH, 92 + facts.length * 4),
+    "Financing",
+    facts,
+    themeColor,
+  );
 
   return y + boxH + 22;
 }
@@ -1302,7 +1498,7 @@ function pageInputs(
   doc: jsPDF,
   d: ReportData,
   branding?: BrandingConfig | null,
-  buyBox?: BuyBoxPdfVerdict | null
+  buyBox?: BuyBoxPdfVerdict | null,
 ) {
   let y = M.top;
 
@@ -1315,9 +1511,9 @@ function pageInputs(
   // making the white address text unreadable.
   const hasAnyBrandingForPanel = Boolean(
     branding?.logoUrl ||
-      branding?.companyName ||
-      branding?.tagline ||
-      branding?.primaryColorHex
+    branding?.companyName ||
+    branding?.tagline ||
+    branding?.primaryColorHex,
   );
   let heroPanelColor: string;
   if (
@@ -1361,7 +1557,7 @@ function pageInputs(
   doc.text(
     truncateToWidth(doc, addressParts.primary, SAFE.w - 44),
     M.left + 22,
-    y + 28
+    y + 28,
   );
 
   if (addressParts.secondary) {
@@ -1383,7 +1579,8 @@ function pageInputs(
   // Singular/plural fix on "unit/units" so a single-family deal doesn't
   // read as "1 units." Property type formatted to a proper label
   // ("single-family" → "Single Family").
-  const unitsLabel = d.units.length === 1 ? "1 unit" : `${d.units.length} units`;
+  const unitsLabel =
+    d.units.length === 1 ? "1 unit" : `${d.units.length} units`;
   doc.text(
     `${formatPropertyType(d.property.type)}  ·  Built ${formatYearBuilt(d.property.yearBuilt)}  ·  ${unitsLabel}  ·  Purchase ${fmtCurrency(d.property.purchasePrice)}`,
     M.left + 22,
@@ -1409,33 +1606,74 @@ function pageInputs(
   // downPaymentPct >= 100 (the canonical signal in the report payload).
   const isCashPurchase = d.financing.downPaymentPct >= 100;
   const dscrValue = isCashPurchase ? "N/A" : d.performance.dscr.toFixed(2);
-  const dscrTone: "primary" | "success" | "danger" | "neutral" | "violet" | "warn" =
-    isCashPurchase ? "neutral" : d.performance.dscr >= 1.2 ? "success" : "warn";
+  const dscrTone:
+    | "primary"
+    | "success"
+    | "danger"
+    | "neutral"
+    | "violet"
+    | "warn" = isCashPurchase
+    ? "neutral"
+    : d.performance.dscr >= 1.2
+      ? "success"
+      : "warn";
   const dscrSub = isCashPurchase ? "cash purchase" : "debt cover";
-  const cards: Array<[string, string, "primary" | "success" | "danger" | "neutral" | "violet" | "warn", string?]> = [
-    ["Monthly Cash Flow", fmtCurrency(d.performance.monthlyCashFlow), d.performance.monthlyCashFlow >= 0 ? "success" : "danger", "/month"],
+  const cards: Array<
+    [
+      string,
+      string,
+      "primary" | "success" | "danger" | "neutral" | "violet" | "warn",
+      string?,
+    ]
+  > = [
+    [
+      "Monthly Cash Flow",
+      fmtCurrency(d.performance.monthlyCashFlow),
+      d.performance.monthlyCashFlow >= 0 ? "success" : "danger",
+      "/month",
+    ],
     [
       "CoC Return",
-      d.performance.cocApplicable === false ? "N/A" : fmtPct(d.performance.cocReturn, true),
+      d.performance.cocApplicable === false
+        ? "N/A"
+        : fmtPct(d.performance.cocReturn, true),
       d.performance.cocApplicable === false ? "neutral" : "primary",
-      d.performance.cocApplicable === false ? "no modeled cash invested" : "year 1",
+      d.performance.cocApplicable === false
+        ? "no modeled cash invested"
+        : "year 1",
     ],
     ["Cap Rate", fmtPct(d.performance.capRate, true), "violet", "NOI basis"],
     ["DSCR", dscrValue, dscrTone, dscrSub],
-    ["Modeled After-Tax CF", fmtCurrency(d.performance.afterTaxCF), "primary", "/month"],
+    [
+      "Modeled After-Tax CF",
+      fmtCurrency(d.performance.afterTaxCF),
+      "primary",
+      "/month",
+    ],
   ];
   if (d.maxOffer !== undefined) {
     cards.unshift([
       "Offer Ceiling",
       d.maxOffer ? fmtCurrency(d.maxOffer.maxPrice) : "Not solvable",
       "primary",
-      d.maxOffer ? d.maxOffer.sourceLabel ?? "captured targets" : "review inputs",
+      d.maxOffer
+        ? (d.maxOffer.sourceLabel ?? "captured targets")
+        : "review inputs",
     ]);
   }
   cards.forEach((c, i) => {
     const col = i % 3;
     const row = Math.floor(i / 3);
-    statCard(doc, M.left + col * (cw + gap), y + row * (ch + gap), cw, ch, c[0], c[1], { tone: c[2], sub: c[3], themeColor });
+    statCard(
+      doc,
+      M.left + col * (cw + gap),
+      y + row * (ch + gap),
+      cw,
+      ch,
+      c[0],
+      c[1],
+      { tone: c[2], sub: c[3], themeColor },
+    );
   });
   if (d.maxOffer) {
     const criteriaY = y + (ch + gap) * 2 + 2;
@@ -1477,7 +1715,11 @@ function pageInputs(
       setText(doc, COLOR.ink);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(10);
-      doc.text(u.isOwnerOccupied ? `${u.label} — owner occupied` : u.label, x + 12, y + 15);
+      doc.text(
+        u.isOwnerOccupied ? `${u.label} — owner occupied` : u.label,
+        x + 12,
+        y + 15,
+      );
       setText(doc, COLOR.sub);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(7.5);
@@ -1523,7 +1765,9 @@ function pageInputs(
       const k = `${u.beds}/${u.baths}`;
       mix.set(k, (mix.get(k) || 0) + 1);
     });
-    const mixStr = Array.from(mix.entries()).map(([k, n]) => `${n}×${k}`).join("  ·  ");
+    const mixStr = Array.from(mix.entries())
+      .map(([k, n]) => `${n}×${k}`)
+      .join("  ·  ");
     card(doc, M.left, y, SAFE.w, stripH);
     const cols = [
       { label: "UNITS", value: String(d.units.length), big: true },
@@ -1578,10 +1822,9 @@ function pageInputs(
   // before measuring.
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  const rationaleLines = doc.splitTextToSize(
-    decision.rationale,
-    SAFE.w - 32
-  ).slice(0, 7); // hard cap at 7 lines to prevent absurdly long rationales
+  const rationaleLines = doc
+    .splitTextToSize(decision.rationale, SAFE.w - 32)
+    .slice(0, 7); // hard cap at 7 lines to prevent absurdly long rationales
   // Vertical accounting inside the card:
   //   y + 16  → "RULE FIT" kicker (8pt)
   //   y + 34  → headline (13pt)
@@ -1593,7 +1836,7 @@ function pageInputs(
   const lineHeight = 9 * 1.35;
   const cardHeight = Math.max(
     78,
-    Math.round(50 + rationaleLines.length * lineHeight + 16)
+    Math.round(50 + rationaleLines.length * lineHeight + 16),
   );
 
   // PAGE-FIT BACKSTOP. The card is the only element here whose height depends
@@ -1666,52 +1909,111 @@ function pageInputs(
   doc.addPage();
   y = M.top + 12;
 
-
   // Property & Inputs. The reader has seen rule fit and the numbers behind
   // it; this page is the assumptions that produced them.
   y = sectionTitle(doc, "Property & Inputs", y, undefined, themeColor);
   const colW = (SAFE.w - 12) / 2;
   const rowH = 92;
 
-  drawInputBlock(doc, M.left, y, colW, rowH, "Property", [
-    ["Type", formatPropertyType(d.property.type)],
-    ["Year built", formatYearBuilt(d.property.yearBuilt)],
-    ["Purchase price", fmtCurrency(d.property.purchasePrice)],
-    ["Template", d.property.template],
-  ], themeColor);
-  drawInputBlock(doc, M.left + colW + 12, y, colW, rowH, "Financing", [
-    ["Down payment", `${d.financing.downPaymentPct}% (${fmtCurrency(d.financing.downPayment)})`],
-    // A cash purchase has no loan, but loanTermYears is schema-required and
-    // interestRate keeps whatever default was on the form — so this block
-    // printed "7% / 30 yrs" on a page whose own cover strip already said
-    // "Cash purchase".
-    ["Interest rate", isCashPurchaseReport(d) ? "—" : `${d.financing.interestRate}%`],
-    ["Loan term", isCashPurchaseReport(d) ? "—" : `${d.financing.loanTerm} yrs`],
-    ["Closing costs", `${d.financing.closingCostsPct}% (${fmtCurrency(d.financing.closingCosts)})`],
-  ], themeColor);
+  drawInputBlock(
+    doc,
+    M.left,
+    y,
+    colW,
+    rowH,
+    "Property",
+    [
+      ["Type", formatPropertyType(d.property.type)],
+      ["Year built", formatYearBuilt(d.property.yearBuilt)],
+      ["Purchase price", fmtCurrency(d.property.purchasePrice)],
+      ["Template", d.property.template],
+    ],
+    themeColor,
+  );
+  drawInputBlock(
+    doc,
+    M.left + colW + 12,
+    y,
+    colW,
+    rowH,
+    "Financing",
+    [
+      [
+        "Down payment",
+        `${d.financing.downPaymentPct}% (${fmtCurrency(d.financing.downPayment)})`,
+      ],
+      // A cash purchase has no loan, but loanTermYears is schema-required and
+      // interestRate keeps whatever default was on the form — so this block
+      // printed "7% / 30 yrs" on a page whose own cover strip already said
+      // "Cash purchase".
+      [
+        "Interest rate",
+        isCashPurchaseReport(d) ? "—" : `${d.financing.interestRate}%`,
+      ],
+      [
+        "Loan term",
+        isCashPurchaseReport(d) ? "—" : `${d.financing.loanTerm} yrs`,
+      ],
+      [
+        "Closing costs",
+        `${d.financing.closingCostsPct}% (${fmtCurrency(d.financing.closingCosts)})`,
+      ],
+    ],
+    themeColor,
+  );
   y += rowH + 10;
   const insuranceAssumption = formatReportInsuranceAssumption(d.expenses);
-  drawInputBlock(doc, M.left, y, colW, rowH, "Operating Expenses", [
-    // Annual-$ tax mode prints the customer's actual bill — printing the
-    // unused percent field here used to render "0%" on a paid PDF.
+  drawInputBlock(
+    doc,
+    M.left,
+    y,
+    colW,
+    rowH,
+    "Operating Expenses",
     [
-      "Property tax / Insurance",
-      `${
-        d.expenses.propertyTaxAnnualBill != null
-          ? `${fmtCurrency(d.expenses.propertyTaxAnnualBill)}/yr (annual bill)`
-          : `${d.expenses.propertyTaxPct}%`
-      } / ${insuranceAssumption}`,
+      // Annual-$ tax mode prints the customer's actual bill — printing the
+      // unused percent field here used to render "0%" on a paid PDF.
+      [
+        "Property tax / Insurance",
+        `${
+          d.expenses.propertyTaxAnnualBill != null
+            ? `${fmtCurrency(d.expenses.propertyTaxAnnualBill)}/yr (annual bill)`
+            : `${d.expenses.propertyTaxPct}%`
+        } / ${insuranceAssumption}`,
+      ],
+      [
+        "Maintenance / Vacancy",
+        `${d.expenses.maintenancePct}% / ${d.expenses.vacancyPct}%`,
+      ],
+      [
+        "Management / CapEx",
+        `${d.expenses.managementPct}% / ${d.expenses.capexPct}%`,
+      ],
+      [
+        "HOA / Utilities",
+        `${fmtCurrency(d.expenses.hoaMonthly)}/mo  ·  ${fmtCurrency(d.expenses.utilitiesMonthly)}/mo`,
+      ],
     ],
-    ["Maintenance / Vacancy", `${d.expenses.maintenancePct}% / ${d.expenses.vacancyPct}%`],
-    ["Management / CapEx", `${d.expenses.managementPct}% / ${d.expenses.capexPct}%`],
-    ["HOA / Utilities", `${fmtCurrency(d.expenses.hoaMonthly)}/mo  ·  ${fmtCurrency(d.expenses.utilitiesMonthly)}/mo`],
-  ], themeColor);
-  drawInputBlock(doc, M.left + colW + 12, y, colW, rowH, "Assumptions", [
-    ["Rent growth / Expense growth", `${d.expenses.rentGrowth}% / ${d.expenses.expenseGrowth}%`],
-    ["Appreciation", `${d.expenses.appreciation}%/yr`],
-    ["Selling cost", `${d.expenses.sellingCost}%`],
-    ["Tax rate", `${d.expenses.taxRate}%`],
-  ], themeColor);
+    themeColor,
+  );
+  drawInputBlock(
+    doc,
+    M.left + colW + 12,
+    y,
+    colW,
+    rowH,
+    "Assumptions",
+    [
+      [
+        "Rent growth / Expense growth",
+        `${d.expenses.rentGrowth}% / ${d.expenses.expenseGrowth}%`,
+      ],
+      ["Appreciation", `${d.expenses.appreciation}%/yr`],
+      ["Selling cost", `${d.expenses.sellingCost}%`],
+      ["Tax rate", `${d.expenses.taxRate}%`],
+    ],
+    themeColor,
+  );
   y += rowH + 22;
 
   // ── Year-1 operating statement ──────────────────────────────────────────
@@ -1728,13 +2030,12 @@ function pageInputs(
   // A third card on page 1 was redundant chrome. Page 1 now ends with
   // the rule-fit card; the attribution lives in the header
   // and footer where it belongs.
-
 }
 
 function pageDecisionReadiness(
   doc: jsPDF,
   d: ReportData,
-  branding?: BrandingConfig | null
+  branding?: BrandingConfig | null,
 ) {
   const confidence = d.inputConfidence;
   if (!confidence) return;
@@ -1745,7 +2046,9 @@ function pageDecisionReadiness(
         ? "Verify"
         : "Screening";
   const verificationStatus =
-    confidence.unverifiedAssumptions.length === 0 ? "No open items" : "Review required";
+    confidence.unverifiedAssumptions.length === 0
+      ? "No open items"
+      : "Review required";
 
   let y = M.top + 12;
   const themeColor = resolveThemeColor(branding);
@@ -1758,26 +2061,54 @@ function pageDecisionReadiness(
     "The Screening Index summarizes modeled economics for triage. It is secondary to selected rules and is not evidence readiness, a probability of success, an appraisal, or investment advice. Evidence Readiness categorizes how thoroughly the material assumptions have been verified.",
     M.left,
     y,
-    SAFE.w
+    SAFE.w,
   );
   y += 18;
 
   const cw = (SAFE.w - 24) / 3;
   statCard(doc, M.left, y, cw, 60, "Evidence Readiness", evidenceReadiness, {
-    tone: evidenceReadiness === "Evidence complete" ? "success" : evidenceReadiness === "Verify" ? "warn" : "primary",
+    tone:
+      evidenceReadiness === "Evidence complete"
+        ? "success"
+        : evidenceReadiness === "Verify"
+          ? "warn"
+          : "primary",
     sub: "categorical, not probability",
     themeColor,
   });
-  statCard(doc, M.left + cw + 12, y, cw, 60, "Verification Status", verificationStatus, {
-    tone: verificationStatus === "No open items" ? "success" : "warn",
-    sub: "review material assumptions",
-    themeColor,
-  });
-  statCard(doc, M.left + 2 * (cw + 12), y, cw, 60, "Sensitivity Risk", confidence.sensitivityRisk, {
-    tone: confidence.sensitivityRisk === "low" ? "success" : confidence.sensitivityRisk === "moderate" ? "warn" : "danger",
-    sub: "unverified-input risk",
-    themeColor,
-  });
+  statCard(
+    doc,
+    M.left + cw + 12,
+    y,
+    cw,
+    60,
+    "Verification Status",
+    verificationStatus,
+    {
+      tone: verificationStatus === "No open items" ? "success" : "warn",
+      sub: "review material assumptions",
+      themeColor,
+    },
+  );
+  statCard(
+    doc,
+    M.left + 2 * (cw + 12),
+    y,
+    cw,
+    60,
+    "Sensitivity Risk",
+    confidence.sensitivityRisk,
+    {
+      tone:
+        confidence.sensitivityRisk === "low"
+          ? "success"
+          : confidence.sensitivityRisk === "moderate"
+            ? "warn"
+            : "danger",
+      sub: "unverified-input risk",
+      themeColor,
+    },
+  );
   y += 82;
 
   y = sectionTitle(doc, "Explicitly Confirmed", y, undefined, themeColor);
@@ -1795,12 +2126,23 @@ function pageDecisionReadiness(
     setText(doc, COLOR.text);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
-    doc.text("All applicable inputs were explicitly confirmed for this underwrite.", M.left, y);
+    doc.text(
+      "All applicable inputs were explicitly confirmed for this underwrite.",
+      M.left,
+      y,
+    );
   } else {
     autoTable(doc, {
       startY: y,
       margin: { left: M.left, right: M.right },
-      head: [["Input", "Source class", "Current source", "Why it still needs review"]],
+      head: [
+        [
+          "Input",
+          "Source class",
+          "Current source",
+          "Why it still needs review",
+        ],
+      ],
       body: confidence.unverifiedAssumptions.map((item) => [
         item.label,
         item.sourceClass,
@@ -1808,8 +2150,17 @@ function pageDecisionReadiness(
         item.reason,
       ]),
       theme: "grid",
-      styles: { font: "helvetica", fontSize: 7.5, cellPadding: 4, textColor: hexToRgb(COLOR.text) },
-      headStyles: { fillColor: hexToRgb(themeColor), textColor: [255, 255, 255], fontStyle: "bold" },
+      styles: {
+        font: "helvetica",
+        fontSize: 7.5,
+        cellPadding: 4,
+        textColor: hexToRgb(COLOR.text),
+      },
+      headStyles: {
+        fillColor: hexToRgb(themeColor),
+        textColor: [255, 255, 255],
+        fontStyle: "bold",
+      },
       columnStyles: {
         0: { cellWidth: 92 },
         1: { cellWidth: 82 },
@@ -1824,7 +2175,7 @@ function pageDecisionReadiness(
   doc.text(
     `Evidence-readiness method v${confidence.methodVersion}. Confirmations are tied to the input value and must be re-checked after that value changes.`,
     M.left,
-    PAGE.h - M.bottom - 4
+    PAGE.h - M.bottom - 4,
   );
 }
 
@@ -1880,7 +2231,7 @@ function drawInputBlock(
 function pageProjection(
   doc: jsPDF,
   d: ReportData,
-  branding?: BrandingConfig | null
+  branding?: BrandingConfig | null,
 ) {
   let y = M.top + 12;
   const themeColor = resolveThemeColor(branding);
@@ -1898,9 +2249,36 @@ function pageProjection(
 
   // 3 summary cards
   const cw = (SAFE.w - 24) / 3;
-  statCard(doc, M.left, y, cw, 64, "Year 10 Cumulative CF", fmtCurrency(d.projection10y.cumulativeCF), { tone: "success", themeColor });
-  statCard(doc, M.left + cw + 12, y, cw, 64, "Best Annual After-Tax CF", fmtCurrency(d.projection10y.bestAnnualAfterTax), { tone: "primary", themeColor });
-  statCard(doc, M.left + 2 * (cw + 12), y, cw, 64, "10-Year After-Tax Total", fmtCurrency(d.projection10y.totalAfterTax), { tone: "violet", themeColor });
+  statCard(
+    doc,
+    M.left,
+    y,
+    cw,
+    64,
+    "Year 10 Cumulative CF",
+    fmtCurrency(d.projection10y.cumulativeCF),
+    { tone: "success", themeColor },
+  );
+  statCard(
+    doc,
+    M.left + cw + 12,
+    y,
+    cw,
+    64,
+    "Best Annual After-Tax CF",
+    fmtCurrency(d.projection10y.bestAnnualAfterTax),
+    { tone: "primary", themeColor },
+  );
+  statCard(
+    doc,
+    M.left + 2 * (cw + 12),
+    y,
+    cw,
+    64,
+    "10-Year After-Tax Total",
+    fmtCurrency(d.projection10y.totalAfterTax),
+    { tone: "violet", themeColor },
+  );
   y += 64 + 20;
 
   // 2x2 charts
@@ -1933,23 +2311,45 @@ function pageProjection(
       // 10 bars in half a page: per-bar values would collide, and the table
       // directly below carries the exact figures.
       showValues: false,
-    })
+    }),
   );
-  drawChartCard(doc, M.left + chW + 12, y, chW, chH, "Year-1 Cash Flow", (box) =>
-    drawBarChart(doc, {
-      box,
-      data: [
-        { label: "Gross Rent", value: wfGross, from: 0, color: COLOR.success },
-        { label: "Op. Expenses", value: wfGross - wfOpex, from: wfGross, color: COLOR.danger },
-        {
-          label: "P&I + MI",
-          value: wfGross - wfOpex - wfDebt,
-          from: wfGross - wfOpex,
-          color: COLOR.warn,
-        },
-        { label: "Net Cash Flow", value: wfNet, from: 0, color: wfNet >= 0 ? themeColor : COLOR.danger },
-      ].map((bar, i) => ({ ...bar, valueLabel: fmtChartMoney(wfSteps[i]!) })),
-    })
+  drawChartCard(
+    doc,
+    M.left + chW + 12,
+    y,
+    chW,
+    chH,
+    "Year-1 Cash Flow",
+    (box) =>
+      drawBarChart(doc, {
+        box,
+        data: [
+          {
+            label: "Gross Rent",
+            value: wfGross,
+            from: 0,
+            color: COLOR.success,
+          },
+          {
+            label: "Op. Expenses",
+            value: wfGross - wfOpex,
+            from: wfGross,
+            color: COLOR.danger,
+          },
+          {
+            label: "P&I + MI",
+            value: wfGross - wfOpex - wfDebt,
+            from: wfGross - wfOpex,
+            color: COLOR.warn,
+          },
+          {
+            label: "Net Cash Flow",
+            value: wfNet,
+            from: 0,
+            color: wfNet >= 0 ? themeColor : COLOR.danger,
+          },
+        ].map((bar, i) => ({ ...bar, valueLabel: fmtChartMoney(wfSteps[i]!) })),
+      }),
   );
   y += chH + 12;
   drawChartCard(doc, M.left, y, chW, chH, "Cumulative Cash Flow", (box) =>
@@ -1966,18 +2366,25 @@ function pageProjection(
       ],
       endpointLabel: true,
       showPoints: false,
-    })
+    }),
   );
-  drawChartCard(doc, M.left + chW + 12, y, chW, chH, "After-Tax Growth", (box) =>
-    drawBarChart(doc, {
-      box,
-      data: d.projection10y.rows.map((r) => ({
-        label: `Y${r.y}`,
-        value: r.after,
-        color: r.after >= 0 ? COLOR.success : COLOR.danger,
-      })),
-      showValues: false,
-    })
+  drawChartCard(
+    doc,
+    M.left + chW + 12,
+    y,
+    chW,
+    chH,
+    "After-Tax Growth",
+    (box) =>
+      drawBarChart(doc, {
+        box,
+        data: d.projection10y.rows.map((r) => ({
+          label: `Y${r.y}`,
+          value: r.after,
+          color: r.after >= 0 ? COLOR.success : COLOR.danger,
+        })),
+        showValues: false,
+      }),
   );
   y += chH + 20;
 
@@ -1985,13 +2392,30 @@ function pageProjection(
   autoTable(doc, {
     startY: y,
     margin: { left: M.left, right: M.right },
-    head: [["Year", "Rental Income", "Op. Expenses", "P&I + MI", "Net CF", "Tax Effect", "After-Tax CF", "Cumulative CF"]],
+    head: [
+      [
+        "Year",
+        "Rental Income",
+        "Op. Expenses",
+        "P&I + MI",
+        "Net CF",
+        "Tax Effect",
+        "After-Tax CF",
+        "Cumulative CF",
+      ],
+    ],
     body: d.projection10y.rows.map((r) => [
       `Y${r.y}`,
       fmtCurrency(r.rental),
       fmtCurrency(r.opex),
       fmtCurrency(r.debt),
-      { content: fmtCurrency(r.net), styles: { textColor: r.net >= 0 ? hexToRgb(COLOR.successText) : hexToRgb(COLOR.danger) } },
+      {
+        content: fmtCurrency(r.net),
+        styles: {
+          textColor:
+            r.net >= 0 ? hexToRgb(COLOR.successText) : hexToRgb(COLOR.danger),
+        },
+      },
       fmtCurrency(r.tax),
       {
         // Tone follows the SIGN. after-tax CF is netCashFlow + taxSavings with
@@ -2008,11 +2432,26 @@ function pageProjection(
       fmtCurrency(r.cum),
     ]),
     theme: "plain",
-    styles: { font: "helvetica", fontSize: 8.2, cellPadding: 4, lineColor: hexToRgb(COLOR.line), lineWidth: 0.3 },
-    headStyles: { fillColor: hexToRgb(COLOR.cardSoft), textColor: hexToRgb(themeTextColor), fontStyle: "bold", fontSize: 7.5, lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 }, lineColor: hexToRgb(themeColor) },
+    styles: {
+      font: "helvetica",
+      fontSize: 8.2,
+      cellPadding: 4,
+      lineColor: hexToRgb(COLOR.line),
+      lineWidth: 0.3,
+    },
+    headStyles: {
+      fillColor: hexToRgb(COLOR.cardSoft),
+      textColor: hexToRgb(themeTextColor),
+      fontStyle: "bold",
+      fontSize: 7.5,
+      lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 },
+      lineColor: hexToRgb(themeColor),
+    },
     columnStyles: {
       0: { fontStyle: "bold", textColor: hexToRgb(COLOR.ink) },
-      ...Object.fromEntries([1, 2, 3, 4, 5, 6, 7].map((i) => [i, { halign: "right" as const }])),
+      ...Object.fromEntries(
+        [1, 2, 3, 4, 5, 6, 7].map((i) => [i, { halign: "right" as const }]),
+      ),
     },
     alternateRowStyles: { fillColor: [252, 253, 255] },
     didParseCell: alignNumericHeaders,
@@ -2022,7 +2461,7 @@ function pageProjection(
 function pageDownside(
   doc: jsPDF,
   d: ReportData,
-  branding?: BrandingConfig | null
+  branding?: BrandingConfig | null,
 ) {
   if (!d.downsideScenario) return;
   let y = M.top + 12;
@@ -2035,7 +2474,7 @@ function pageDownside(
   doc.setFontSize(9.5);
   const intro = doc.splitTextToSize(
     `A reproducible operating stress: ${d.downsideScenario.label}. This is not a forecast; it shows how the underwrite responds if several assumptions move against you at once.`,
-    SAFE.w
+    SAFE.w,
   );
   doc.text(intro, M.left, y);
   y += intro.length * 12 + 18;
@@ -2047,26 +2486,68 @@ function pageDownside(
   // and printed "Cash purchase" in the DSCR row of a mortgaged property.
   // Non-zero is the real test for "there is debt service".
   const financed = d.performance.dscr !== 0 || stressed.dscr !== 0;
-  const survives = stressed.monthlyCashFlow >= 0 && (!financed || stressed.dscr >= 1);
+  const survives =
+    stressed.monthlyCashFlow >= 0 && (!financed || stressed.dscr >= 1);
   const verdictTone = survives ? "success" : "danger";
 
   const cw = (SAFE.w - 36) / 4;
-  statCard(doc, M.left, y, cw, 64, "Stressed Cash Flow", `${fmtCurrency(stressed.monthlyCashFlow, true)}/mo`, {
-    tone: stressed.monthlyCashFlow >= 0 ? "success" : "danger",
-    themeColor,
-  });
-  statCard(doc, M.left + cw + 12, y, cw, 64, "Stressed Cap Rate", fmtPct(stressed.capRate), {
-    tone: "primary",
-    themeColor,
-  });
-  statCard(doc, M.left + 2 * (cw + 12), y, cw, 64, "Stressed CoC", stressed.cocApplicable === false ? "N/A" : fmtPct(stressed.cocReturn), {
-    tone: stressed.cocApplicable === false ? "neutral" : stressed.cocReturn >= 0 ? "success" : "danger",
-    themeColor,
-  });
-  statCard(doc, M.left + 3 * (cw + 12), y, cw, 64, "Stressed DSCR", financed ? stressed.dscr.toFixed(2) : "Cash", {
-    tone: financed && stressed.dscr < 1 ? "danger" : "neutral",
-    themeColor,
-  });
+  statCard(
+    doc,
+    M.left,
+    y,
+    cw,
+    64,
+    "Stressed Cash Flow",
+    `${fmtCurrency(stressed.monthlyCashFlow, true)}/mo`,
+    {
+      tone: stressed.monthlyCashFlow >= 0 ? "success" : "danger",
+      themeColor,
+    },
+  );
+  statCard(
+    doc,
+    M.left + cw + 12,
+    y,
+    cw,
+    64,
+    "Stressed Cap Rate",
+    fmtPct(stressed.capRate),
+    {
+      tone: "primary",
+      themeColor,
+    },
+  );
+  statCard(
+    doc,
+    M.left + 2 * (cw + 12),
+    y,
+    cw,
+    64,
+    "Stressed CoC",
+    stressed.cocApplicable === false ? "N/A" : fmtPct(stressed.cocReturn),
+    {
+      tone:
+        stressed.cocApplicable === false
+          ? "neutral"
+          : stressed.cocReturn >= 0
+            ? "success"
+            : "danger",
+      themeColor,
+    },
+  );
+  statCard(
+    doc,
+    M.left + 3 * (cw + 12),
+    y,
+    cw,
+    64,
+    "Stressed DSCR",
+    financed ? stressed.dscr.toFixed(2) : "Cash",
+    {
+      tone: financed && stressed.dscr < 1 ? "danger" : "neutral",
+      themeColor,
+    },
+  );
   y += 88;
 
   if (d.maxOffer) {
@@ -2080,7 +2561,11 @@ function pageDownside(
     doc.setCharSpace(0);
     setText(doc, COLOR.ink);
     doc.setFontSize(14);
-    doc.text(`Offer Ceiling ${fmtCurrency(d.maxOffer.maxPrice)}`, M.left + 16, y + 42);
+    doc.text(
+      `Offer Ceiling ${fmtCurrency(d.maxOffer.maxPrice)}`,
+      M.left + 16,
+      y + 42,
+    );
     setText(doc, COLOR.sub);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.5);
@@ -2095,7 +2580,9 @@ function pageDownside(
         : null,
     ].filter((value): value is string => Boolean(value));
     const doctorText = `Criteria: ${d.maxOffer.basis}. At the analyzed price${
-      alternatives.length ? `, the same target could also be reached with ${alternatives.join(" or ")}.` : ", review the verified inputs before negotiating."
+      alternatives.length
+        ? `, the same target could also be reached with ${alternatives.join(" or ")}.`
+        : ", review the verified inputs before negotiating."
     } Highest modeled price that still meets the targets shown under the assumptions shown. This is not a recommended offer.`;
     doc.text(doc.splitTextToSize(doctorText, SAFE.w - 32), M.left + 16, y + 61);
     y += 132;
@@ -2106,16 +2593,18 @@ function pageDownside(
   doc.setFont("helvetica", "bold");
   doc.setFontSize(15);
   doc.text(
-    survives ? "The deal remains cash-flow positive under this stress." : "The deal does not fully survive this stress.",
+    survives
+      ? "The deal remains cash-flow positive under this stress."
+      : "The deal does not fully survive this stress.",
     M.left + 16,
-    y + 27
+    y + 27,
   );
   setText(doc, COLOR.sub);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   const verdictText = doc.splitTextToSize(
     `Stressed rule fit: ${stressed.verdict}. Verify achievable rent, vacancy history, current financing quotes, taxes, insurance, and major repairs before relying on either case.`,
-    SAFE.w - 32
+    SAFE.w - 32,
   );
   doc.text(verdictText, M.left + 16, y + 47);
   y += 102;
@@ -2133,22 +2622,59 @@ function pageDownside(
     margin: { left: M.left, right: M.right },
     head: [["Metric", "Base case", "Downside case", "Change"]],
     body: [
-      ["Monthly cash flow", `${fmtCurrency(d.performance.monthlyCashFlow, true)}/mo`, `${fmtCurrency(stressed.monthlyCashFlow, true)}/mo`, `${fmtCurrency(deltaMoney, true)}/mo`],
-      ["Cap rate", fmtPct(d.performance.capRate), fmtPct(stressed.capRate), `${deltaCap >= 0 ? "+" : ""}${deltaCap.toFixed(1)}pp`],
+      [
+        "Monthly cash flow",
+        `${fmtCurrency(d.performance.monthlyCashFlow, true)}/mo`,
+        `${fmtCurrency(stressed.monthlyCashFlow, true)}/mo`,
+        `${fmtCurrency(deltaMoney, true)}/mo`,
+      ],
+      [
+        "Cap rate",
+        fmtPct(d.performance.capRate),
+        fmtPct(stressed.capRate),
+        `${deltaCap >= 0 ? "+" : ""}${deltaCap.toFixed(1)}pp`,
+      ],
       [
         "Cash-on-cash",
-        d.performance.cocApplicable === false ? "N/A" : fmtPct(d.performance.cocReturn),
+        d.performance.cocApplicable === false
+          ? "N/A"
+          : fmtPct(d.performance.cocReturn),
         stressed.cocApplicable === false ? "N/A" : fmtPct(stressed.cocReturn),
-        deltaCoc == null ? "—" : `${deltaCoc >= 0 ? "+" : ""}${deltaCoc.toFixed(1)}pp`,
+        deltaCoc == null
+          ? "—"
+          : `${deltaCoc >= 0 ? "+" : ""}${deltaCoc.toFixed(1)}pp`,
       ],
-      ["DSCR", financed ? d.performance.dscr.toFixed(2) : "Cash purchase", financed ? stressed.dscr.toFixed(2) : "Cash purchase", financed ? `${deltaDscr >= 0 ? "+" : ""}${deltaDscr.toFixed(2)}` : "—"],
+      [
+        "DSCR",
+        financed ? d.performance.dscr.toFixed(2) : "Cash purchase",
+        financed ? stressed.dscr.toFixed(2) : "Cash purchase",
+        financed ? `${deltaDscr >= 0 ? "+" : ""}${deltaDscr.toFixed(2)}` : "—",
+      ],
     ],
     theme: "plain",
-    styles: { font: "helvetica", fontSize: 9, cellPadding: 6, lineColor: hexToRgb(COLOR.line), lineWidth: 0.3 },
-    headStyles: { fillColor: hexToRgb(COLOR.cardSoft), textColor: hexToRgb(themeTextColor), fontStyle: "bold", fontSize: 8, lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 }, lineColor: hexToRgb(themeColor) },
+    styles: {
+      font: "helvetica",
+      fontSize: 9,
+      cellPadding: 6,
+      lineColor: hexToRgb(COLOR.line),
+      lineWidth: 0.3,
+    },
+    headStyles: {
+      fillColor: hexToRgb(COLOR.cardSoft),
+      textColor: hexToRgb(themeTextColor),
+      fontStyle: "bold",
+      fontSize: 8,
+      lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 },
+      lineColor: hexToRgb(themeColor),
+    },
     columnStyles: {
       0: { fontStyle: "bold", textColor: hexToRgb(COLOR.ink) },
-      2: { textColor: hexToRgb(verdictTone === "success" ? COLOR.success : COLOR.danger), fontStyle: "bold" },
+      2: {
+        textColor: hexToRgb(
+          verdictTone === "success" ? COLOR.success : COLOR.danger,
+        ),
+        fontStyle: "bold",
+      },
     },
     alternateRowStyles: { fillColor: [252, 253, 255] },
     didParseCell: alignNumericHeaders,
@@ -2171,8 +2697,13 @@ function pageDownside(
  * as a mistake rather than a convention. This hook aligns the header to its
  * own column.
  */
-const alignNumericHeaders = (data: { section: string; column: { index: number }; cell: { styles: { halign?: string } } }) => {
-  if (data.section === "head" && data.column.index > 0) data.cell.styles.halign = "right";
+const alignNumericHeaders = (data: {
+  section: string;
+  column: { index: number };
+  cell: { styles: { halign?: string } };
+}) => {
+  if (data.section === "head" && data.column.index > 0)
+    data.cell.styles.halign = "right";
 };
 
 function drawChartCard(
@@ -2182,7 +2713,7 @@ function drawChartCard(
   w: number,
   h: number,
   title: string,
-  draw: (box: ChartBox) => void
+  draw: (box: ChartBox) => void,
 ) {
   card(doc, x, y, w, h);
   setText(doc, COLOR.ink);
@@ -2193,14 +2724,15 @@ function drawChartCard(
   const padTop = 26;
   // Room for the x-axis labels that sit below the plot.
   const padBottom = 18;
-  draw({ x: x + padX, y: y + padTop, w: w - padX * 2, h: h - padTop - padBottom });
+  draw({
+    x: x + padX,
+    y: y + padTop,
+    w: w - padX * 2,
+    h: h - padTop - padBottom,
+  });
 }
 
-function pageTax(
-  doc: jsPDF,
-  d: ReportData,
-  branding?: BrandingConfig | null
-) {
+function pageTax(doc: jsPDF, d: ReportData, branding?: BrandingConfig | null) {
   let y = M.top + 12;
   const themeColor = resolveThemeColor(branding);
   const themeTextColor = resolveThemeTextColor(branding);
@@ -2208,17 +2740,57 @@ function pageTax(
   setText(doc, COLOR.sub);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9.5);
-  doc.text("Modeled rental-income and deduction effects at the entered marginal tax rate.", M.left, y);
+  doc.text(
+    "Modeled rental-income and deduction effects at the entered marginal tax rate.",
+    M.left,
+    y,
+  );
   y += 22;
 
   // 2x2 summary cards
   const cw = (SAFE.w - 12) / 2;
   const ch = 60;
-  statCard(doc, M.left, y, cw, ch, "Year 1 Taxable Rental Income", fmtCurrency(d.taxStrategy.year1Taxable), { tone: d.taxStrategy.year1Taxable < 0 ? "success" : "warn", themeColor });
-  statCard(doc, M.left + cw + 12, y, cw, ch, "Year 1 Modeled Tax Savings", fmtCurrency(d.taxStrategy.year1Savings), { tone: "success", themeColor });
+  statCard(
+    doc,
+    M.left,
+    y,
+    cw,
+    ch,
+    "Year 1 Taxable Rental Income",
+    fmtCurrency(d.taxStrategy.year1Taxable),
+    { tone: d.taxStrategy.year1Taxable < 0 ? "success" : "warn", themeColor },
+  );
+  statCard(
+    doc,
+    M.left + cw + 12,
+    y,
+    cw,
+    ch,
+    "Year 1 Modeled Tax Savings",
+    fmtCurrency(d.taxStrategy.year1Savings),
+    { tone: "success", themeColor },
+  );
   y += ch + 12;
-  statCard(doc, M.left, y, cw, ch, "10-Year Modeled Tax Impact", fmtCurrency(d.taxStrategy.totalBenefit10y), { tone: "primary", themeColor });
-  statCard(doc, M.left + cw + 12, y, cw, ch, "Annual Depreciation", fmtCurrency(d.taxStrategy.annualDepreciation), { tone: "violet", themeColor });
+  statCard(
+    doc,
+    M.left,
+    y,
+    cw,
+    ch,
+    "10-Year Modeled Tax Impact",
+    fmtCurrency(d.taxStrategy.totalBenefit10y),
+    { tone: "primary", themeColor },
+  );
+  statCard(
+    doc,
+    M.left + cw + 12,
+    y,
+    cw,
+    ch,
+    "Annual Depreciation",
+    fmtCurrency(d.taxStrategy.annualDepreciation),
+    { tone: "violet", themeColor },
+  );
   y += ch + 20;
 
   const labels = d.taxStrategy.rows.map((r) => `Y${r.y}`);
@@ -2234,23 +2806,30 @@ function pageTax(
         color: r.savings >= 0 ? COLOR.success : COLOR.danger,
       })),
       showValues: false,
-    })
+    }),
   );
-  drawChartCard(doc, M.left + chW + 12, y, chW, chH, "Taxable Rental Income Trend", (box) =>
-    drawLineChart(doc, {
-      box,
-      labels,
-      series: [
-        {
-          label: "Taxable Income",
-          values: d.taxStrategy.rows.map((r) => r.taxable),
-          color: themeColor,
-          fill: true,
-        },
-      ],
-      endpointLabel: true,
-      showPoints: false,
-    })
+  drawChartCard(
+    doc,
+    M.left + chW + 12,
+    y,
+    chW,
+    chH,
+    "Taxable Rental Income Trend",
+    (box) =>
+      drawLineChart(doc, {
+        box,
+        labels,
+        series: [
+          {
+            label: "Taxable Income",
+            values: d.taxStrategy.rows.map((r) => r.taxable),
+            color: themeColor,
+            fill: true,
+          },
+        ],
+        endpointLabel: true,
+        showPoints: false,
+      }),
   );
   y += chH + 12;
   drawChartCard(doc, M.left, y, chW, chH, "Interest vs Depreciation", (box) =>
@@ -2270,25 +2849,56 @@ function pageTax(
         },
       ],
       showPoints: false,
-    })
+    }),
   );
-  drawChartCard(doc, M.left + chW + 12, y, chW, chH, "Deductions Breakdown", (box) =>
-    drawStackedBarChart(doc, {
-      box,
-      labels,
-      series: [
-        { label: "Op. Expenses", values: d.taxStrategy.rows.map((r) => r.opex), color: COLOR.danger },
-        { label: "Interest", values: d.taxStrategy.rows.map((r) => r.interest), color: COLOR.violet },
-        { label: "Depreciation", values: d.taxStrategy.rows.map((r) => r.dep), color: COLOR.warn },
-      ],
-    })
+  drawChartCard(
+    doc,
+    M.left + chW + 12,
+    y,
+    chW,
+    chH,
+    "Deductions Breakdown",
+    (box) =>
+      drawStackedBarChart(doc, {
+        box,
+        labels,
+        series: [
+          {
+            label: "Op. Expenses",
+            values: d.taxStrategy.rows.map((r) => r.opex),
+            color: COLOR.danger,
+          },
+          {
+            label: "Interest",
+            values: d.taxStrategy.rows.map((r) => r.interest),
+            color: COLOR.violet,
+          },
+          {
+            label: "Depreciation",
+            values: d.taxStrategy.rows.map((r) => r.dep),
+            color: COLOR.warn,
+          },
+        ],
+      }),
   );
   y += chH + 20;
 
   autoTable(doc, {
     startY: y,
     margin: { left: M.left, right: M.right },
-    head: [["Year", "Rental", "Op. Exp.", "Interest Ded.", "Depreciation", "Total Ded.", "Taxable Income", "Modeled Savings", "Net Tax Impact"]],
+    head: [
+      [
+        "Year",
+        "Rental",
+        "Op. Exp.",
+        "Interest Ded.",
+        "Depreciation",
+        "Total Ded.",
+        "Taxable Income",
+        "Modeled Savings",
+        "Net Tax Impact",
+      ],
+    ],
     body: d.taxStrategy.rows.map((r) => [
       `Y${r.y}`,
       fmtCurrency(r.rental),
@@ -2296,27 +2906,57 @@ function pageTax(
       fmtCurrency(r.interest),
       fmtCurrency(r.dep),
       fmtCurrency(r.total),
-      { content: fmtCurrency(r.taxable), styles: { textColor: r.taxable < 0 ? hexToRgb(COLOR.successText) : hexToRgb(COLOR.danger) } },
-      { content: fmtCurrency(r.savings), styles: { textColor: hexToRgb(COLOR.successText), fontStyle: "bold" } },
-      { content: fmtCurrency(r.benefit), styles: { textColor: r.benefit >= 0 ? hexToRgb(COLOR.successText) : hexToRgb(COLOR.danger) } },
+      {
+        content: fmtCurrency(r.taxable),
+        styles: {
+          textColor:
+            r.taxable < 0
+              ? hexToRgb(COLOR.successText)
+              : hexToRgb(COLOR.danger),
+        },
+      },
+      {
+        content: fmtCurrency(r.savings),
+        styles: { textColor: hexToRgb(COLOR.successText), fontStyle: "bold" },
+      },
+      {
+        content: fmtCurrency(r.benefit),
+        styles: {
+          textColor:
+            r.benefit >= 0
+              ? hexToRgb(COLOR.successText)
+              : hexToRgb(COLOR.danger),
+        },
+      },
     ]),
     theme: "plain",
-    styles: { font: "helvetica", fontSize: 7.8, cellPadding: 3.5, lineColor: hexToRgb(COLOR.line), lineWidth: 0.3 },
-    headStyles: { fillColor: hexToRgb(COLOR.cardSoft), textColor: hexToRgb(themeTextColor), fontStyle: "bold", fontSize: 7.2, lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 }, lineColor: hexToRgb(themeColor) },
+    styles: {
+      font: "helvetica",
+      fontSize: 7.8,
+      cellPadding: 3.5,
+      lineColor: hexToRgb(COLOR.line),
+      lineWidth: 0.3,
+    },
+    headStyles: {
+      fillColor: hexToRgb(COLOR.cardSoft),
+      textColor: hexToRgb(themeTextColor),
+      fontStyle: "bold",
+      fontSize: 7.2,
+      lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 },
+      lineColor: hexToRgb(themeColor),
+    },
     columnStyles: {
       0: { fontStyle: "bold", textColor: hexToRgb(COLOR.ink) },
-      ...Object.fromEntries([1, 2, 3, 4, 5, 6, 7, 8].map((i) => [i, { halign: "right" as const }])),
+      ...Object.fromEntries(
+        [1, 2, 3, 4, 5, 6, 7, 8].map((i) => [i, { halign: "right" as const }]),
+      ),
     },
     alternateRowStyles: { fillColor: [252, 253, 255] },
     didParseCell: alignNumericHeaders,
   });
 }
 
-function pageExit(
-  doc: jsPDF,
-  d: ReportData,
-  branding?: BrandingConfig | null
-) {
+function pageExit(doc: jsPDF, d: ReportData, branding?: BrandingConfig | null) {
   let y = M.top + 12;
   const themeColor = resolveThemeColor(branding);
   const themeTextColor = resolveThemeTextColor(branding);
@@ -2324,15 +2964,18 @@ function pageExit(
   setText(doc, COLOR.sub);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9.5);
-  doc.text("Equity build-up and projected sale proceeds across a 10-year hold horizon.", M.left, y);
+  doc.text(
+    "Equity build-up and projected sale proceeds across a 10-year hold horizon.",
+    M.left,
+    y,
+  );
   y += 22;
 
   const cw = (SAFE.w - 12) / 2;
   const ch = 60;
-  const highestProfitExit = d.exitScenarios.rows.reduce<(typeof d.exitScenarios.rows)[number] | null>(
-    (best, row) => (!best || row.profit > best.profit ? row : best),
-    null
-  );
+  const highestProfitExit = d.exitScenarios.rows.reduce<
+    (typeof d.exitScenarios.rows)[number] | null
+  >((best, row) => (!best || row.profit > best.profit ? row : best), null);
   statCard(
     doc,
     M.left,
@@ -2347,16 +2990,38 @@ function pageExit(
           sub: `Year ${highestProfitExit.y} among modeled exits`,
           themeColor,
         }
-      : { tone: "neutral", themeColor }
+      : { tone: "neutral", themeColor },
   );
-  statCard(doc, M.left + cw + 12, y, cw, ch, "Year 5 Profit", fmtCurrency(d.exitScenarios.year5Profit), { tone: "primary", themeColor });
+  statCard(
+    doc,
+    M.left + cw + 12,
+    y,
+    cw,
+    ch,
+    "Year 5 Profit",
+    fmtCurrency(d.exitScenarios.year5Profit),
+    { tone: "primary", themeColor },
+  );
   y += ch + 12;
-  statCard(doc, M.left, y, cw, ch, "Year 10 Profit", fmtCurrency(d.exitScenarios.year10Profit), { tone: "success", themeColor });
+  statCard(
+    doc,
+    M.left,
+    y,
+    cw,
+    ch,
+    "Year 10 Profit",
+    fmtCurrency(d.exitScenarios.year10Profit),
+    { tone: "success", themeColor },
+  );
   // Extreme cumulative ROI (Choose-TrueCap finding 5): the PDF card shows
   // the framed band with the raw figure demoted to the sub line (no hover
   // in print) and a warn tone instead of the celebratory violet. Sane
   // values keep the exact fmtPct formatting as before.
-  const totalRoiHeadline = formatRoiHeadline(d.exitScenarios.totalROI, { decimals: 1, signed: true, compact: true });
+  const totalRoiHeadline = formatRoiHeadline(d.exitScenarios.totalROI, {
+    decimals: 1,
+    signed: true,
+    compact: true,
+  });
   statCard(
     doc,
     M.left + cw + 12,
@@ -2364,10 +3029,16 @@ function pageExit(
     cw,
     ch,
     "Total ROI",
-    totalRoiHeadline.extreme ? totalRoiHeadline.text : fmtPct(d.exitScenarios.totalROI, true),
     totalRoiHeadline.extreme
-      ? { tone: "warn", sub: `${totalRoiHeadline.raw} cumulative — verify assumptions`, themeColor }
-      : { tone: "violet", themeColor }
+      ? totalRoiHeadline.text
+      : fmtPct(d.exitScenarios.totalROI, true),
+    totalRoiHeadline.extreme
+      ? {
+          tone: "warn",
+          sub: `${totalRoiHeadline.raw} cumulative — verify assumptions`,
+          themeColor,
+        }
+      : { tone: "violet", themeColor },
   );
   y += ch + 20;
 
@@ -2392,7 +3063,7 @@ function pageExit(
         },
       ],
       showPoints: false,
-    })
+    }),
   );
   drawChartCard(doc, M.left + chW + 12, y, chW, chH, "Equity Growth", (box) =>
     drawLineChart(doc, {
@@ -2408,7 +3079,7 @@ function pageExit(
       ],
       endpointLabel: true,
       showPoints: false,
-    })
+    }),
   );
   y += chH + 12;
   drawChartCard(doc, M.left, y, chW, chH, "Profit Over Time", (box) =>
@@ -2425,7 +3096,7 @@ function pageExit(
       ],
       endpointLabel: true,
       showPoints: false,
-    })
+    }),
   );
   // WAS a stacked "Profit Breakdown" of Net Sale Proceeds + Total Profit. That
   // chart was wrong twice over: profit is DERIVED from net sale proceeds
@@ -2439,44 +3110,91 @@ function pageExit(
   // Profit already has an honest home in "Profit Over Time" above, signed and
   // against a zero line. This slot now shows the other half of the exit — what
   // the sale actually nets after costs and loan payoff — as a plain series.
-  drawChartCard(doc, M.left + chW + 12, y, chW, chH, "Net Sale Proceeds", (box) =>
-    drawBarChart(doc, {
-      box,
-      data: d.exitScenarios.rows.map((r) => ({
-        label: `Y${r.y}`,
-        value: r.netSale,
-        color: r.netSale >= 0 ? themeColor : COLOR.danger,
-      })),
-      showValues: false,
-    })
+  drawChartCard(
+    doc,
+    M.left + chW + 12,
+    y,
+    chW,
+    chH,
+    "Net Sale Proceeds",
+    (box) =>
+      drawBarChart(doc, {
+        box,
+        data: d.exitScenarios.rows.map((r) => ({
+          label: `Y${r.y}`,
+          value: r.netSale,
+          color: r.netSale >= 0 ? themeColor : COLOR.danger,
+        })),
+        showValues: false,
+      }),
   );
   y += chH + 20;
 
   autoTable(doc, {
     startY: y,
     margin: { left: M.left, right: M.right },
-    head: [["Year", "Property Value", "Loan Balance", "Equity", "Net Sale Proceeds", "Total Profit"]],
+    head: [
+      [
+        "Year",
+        "Property Value",
+        "Loan Balance",
+        "Equity",
+        "Net Sale Proceeds",
+        "Total Profit",
+      ],
+    ],
     body: d.exitScenarios.rows.map((r) => [
       `Y${r.y}`,
       fmtCurrency(r.value),
       fmtCurrency(r.loan),
-      { content: fmtCurrency(r.equity), styles: { textColor: hexToRgb(COLOR.successText), fontStyle: "bold" } },
+      {
+        content: fmtCurrency(r.equity),
+        styles: { textColor: hexToRgb(COLOR.successText), fontStyle: "bold" },
+      },
       fmtCurrency(r.netSale),
-      { content: fmtCurrency(r.profit), styles: { textColor: r.profit >= 0 ? hexToRgb(COLOR.successText) : hexToRgb(COLOR.danger), fontStyle: "bold" } },
+      {
+        content: fmtCurrency(r.profit),
+        styles: {
+          textColor:
+            r.profit >= 0
+              ? hexToRgb(COLOR.successText)
+              : hexToRgb(COLOR.danger),
+          fontStyle: "bold",
+        },
+      },
     ]),
     theme: "plain",
-    styles: { font: "helvetica", fontSize: 8.5, cellPadding: 4.5, lineColor: hexToRgb(COLOR.line), lineWidth: 0.3 },
-    headStyles: { fillColor: hexToRgb(COLOR.cardSoft), textColor: hexToRgb(themeTextColor), fontStyle: "bold", fontSize: 7.5, lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 }, lineColor: hexToRgb(themeColor) },
+    styles: {
+      font: "helvetica",
+      fontSize: 8.5,
+      cellPadding: 4.5,
+      lineColor: hexToRgb(COLOR.line),
+      lineWidth: 0.3,
+    },
+    headStyles: {
+      fillColor: hexToRgb(COLOR.cardSoft),
+      textColor: hexToRgb(themeTextColor),
+      fontStyle: "bold",
+      fontSize: 7.5,
+      lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 },
+      lineColor: hexToRgb(themeColor),
+    },
     columnStyles: {
       0: { fontStyle: "bold", textColor: hexToRgb(COLOR.ink) },
-      ...Object.fromEntries([1, 2, 3, 4, 5].map((i) => [i, { halign: "right" as const }])),
+      ...Object.fromEntries(
+        [1, 2, 3, 4, 5].map((i) => [i, { halign: "right" as const }]),
+      ),
     },
     alternateRowStyles: { fillColor: [252, 253, 255] },
     didParseCell: alignNumericHeaders,
   });
 }
 
-function pageComps(doc: jsPDF, d: ReportData, branding?: BrandingConfig | null) {
+function pageComps(
+  doc: jsPDF,
+  d: ReportData,
+  branding?: BrandingConfig | null,
+) {
   const c = d.comps;
   if (!c) return;
   let y = M.top + 12;
@@ -2492,14 +3210,35 @@ function pageComps(doc: jsPDF, d: ReportData, branding?: BrandingConfig | null) 
   const compsSubtitle = c.fetchedAt
     ? `Comparable sales and rentals near this property. Pulled ${new Date(c.fetchedAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })} via RentCast — reference only, not used in the analysis math.`
     : "Comparable sales and rentals near this property (RentCast). Reference only — not used in the analysis math.";
-  const compsSubtitleLines = doc.splitTextToSize(compsSubtitle, SAFE.w) as string[];
+  const compsSubtitleLines = doc.splitTextToSize(
+    compsSubtitle,
+    SAFE.w,
+  ) as string[];
   doc.text(compsSubtitleLines, M.left, y, { lineHeightFactor: 1.35 });
   y += 22 + (compsSubtitleLines.length - 1) * 12;
 
   const cw = (SAFE.w - 12) / 2;
   const ch = 60;
-  statCard(doc, M.left, y, cw, ch, "Estimated Value", c.valueEstimate != null ? fmtCurrency(c.valueEstimate) : "—", { tone: "primary", themeColor });
-  statCard(doc, M.left + cw + 12, y, cw, ch, "Estimated Rent", c.rentEstimate != null ? `${fmtCurrency(c.rentEstimate)}/mo` : "—", { tone: "success", themeColor });
+  statCard(
+    doc,
+    M.left,
+    y,
+    cw,
+    ch,
+    "Estimated Value",
+    c.valueEstimate != null ? fmtCurrency(c.valueEstimate) : "—",
+    { tone: "primary", themeColor },
+  );
+  statCard(
+    doc,
+    M.left + cw + 12,
+    y,
+    cw,
+    ch,
+    "Estimated Rent",
+    c.rentEstimate != null ? `${fmtCurrency(c.rentEstimate)}/mo` : "—",
+    { tone: "success", themeColor },
+  );
   y += ch + 10;
 
   const valRange =
@@ -2523,27 +3262,29 @@ function pageComps(doc: jsPDF, d: ReportData, branding?: BrandingConfig | null) 
   // $/sqft is the normalizer every comp conversation runs on — without it the
   // reader has to divide six rows in their head to know whether a comp is
   // actually comparable. Computed in lib/report-comps.ts, never here.
-  const rowOf = (perSqftDecimals: 0 | 2) => (s: {
-    address: string;
-    price: number | null;
-    bedrooms: number | null;
-    bathrooms: number | null;
-    squareFootage: number | null;
-    distanceMiles: number | null;
-    pricePerSqft?: number | null;
-  }) => [
-    s.address,
-    s.price != null ? fmtCurrency(s.price) : "—",
-    s.pricePerSqft != null
-      ? perSqftDecimals === 0
-        ? fmtCurrency(s.pricePerSqft)
-        : `$${s.pricePerSqft.toFixed(2)}`
-      : "—",
-    s.bedrooms != null ? String(s.bedrooms) : "—",
-    s.bathrooms != null ? String(s.bathrooms) : "—",
-    s.squareFootage != null ? s.squareFootage.toLocaleString("en-US") : "—",
-    s.distanceMiles != null ? s.distanceMiles.toFixed(2) : "—",
-  ];
+  const rowOf =
+    (perSqftDecimals: 0 | 2) =>
+    (s: {
+      address: string;
+      price: number | null;
+      bedrooms: number | null;
+      bathrooms: number | null;
+      squareFootage: number | null;
+      distanceMiles: number | null;
+      pricePerSqft?: number | null;
+    }) => [
+      s.address,
+      s.price != null ? fmtCurrency(s.price) : "—",
+      s.pricePerSqft != null
+        ? perSqftDecimals === 0
+          ? fmtCurrency(s.pricePerSqft)
+          : `$${s.pricePerSqft.toFixed(2)}`
+        : "—",
+      s.bedrooms != null ? String(s.bedrooms) : "—",
+      s.bathrooms != null ? String(s.bathrooms) : "—",
+      s.squareFootage != null ? s.squareFootage.toLocaleString("en-US") : "—",
+      s.distanceMiles != null ? s.distanceMiles.toFixed(2) : "—",
+    ];
 
   if (c.saleComps.length) {
     doc.setFont("helvetica", "bold");
@@ -2554,21 +3295,44 @@ function pageComps(doc: jsPDF, d: ReportData, branding?: BrandingConfig | null) 
     autoTable(doc, {
       startY: y,
       margin: { left: M.left, right: M.right },
-      head: [["Address", "Sale Price", "$/sqft", "Bd", "Ba", "Sq Ft", "Dist (mi)"]],
+      head: [
+        ["Address", "Sale Price", "$/sqft", "Bd", "Ba", "Sq Ft", "Dist (mi)"],
+      ],
       body: c.saleComps.map(rowOf(0)),
       theme: "plain",
-      styles: { font: "helvetica", fontSize: 8.5, cellPadding: 4.5, lineColor: hexToRgb(COLOR.line), lineWidth: 0.3 },
-      headStyles: { fillColor: hexToRgb(COLOR.cardSoft), textColor: hexToRgb(themeTextColor), fontStyle: "bold", fontSize: 7.5, lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 }, lineColor: hexToRgb(themeColor) },
+      styles: {
+        font: "helvetica",
+        fontSize: 8.5,
+        cellPadding: 4.5,
+        lineColor: hexToRgb(COLOR.line),
+        lineWidth: 0.3,
+      },
+      headStyles: {
+        fillColor: hexToRgb(COLOR.cardSoft),
+        textColor: hexToRgb(themeTextColor),
+        fontStyle: "bold",
+        fontSize: 7.5,
+        lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 },
+        lineColor: hexToRgb(themeColor),
+      },
       columnStyles: {
-        1: { fontStyle: "bold", textColor: hexToRgb(COLOR.ink), halign: "right" },
+        1: {
+          fontStyle: "bold",
+          textColor: hexToRgb(COLOR.ink),
+          halign: "right",
+        },
         // 2..6 — the $/sqft column added one, and a stale range left the
         // distance column alone on the left.
-        ...Object.fromEntries([2, 3, 4, 5, 6].map((i) => [i, { halign: "right" as const }])),
+        ...Object.fromEntries(
+          [2, 3, 4, 5, 6].map((i) => [i, { halign: "right" as const }]),
+        ),
       },
       alternateRowStyles: { fillColor: [252, 253, 255] },
       didParseCell: alignNumericHeaders,
     });
-    y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 18;
+    y =
+      (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable
+        .finalY + 18;
   }
 
   if (c.rentComps.length) {
@@ -2580,21 +3344,476 @@ function pageComps(doc: jsPDF, d: ReportData, branding?: BrandingConfig | null) 
     autoTable(doc, {
       startY: y,
       margin: { left: M.left, right: M.right },
-      head: [["Address", "Rent / mo", "$/sqft", "Bd", "Ba", "Sq Ft", "Dist (mi)"]],
+      head: [
+        ["Address", "Rent / mo", "$/sqft", "Bd", "Ba", "Sq Ft", "Dist (mi)"],
+      ],
       body: c.rentComps.map(rowOf(2)),
       theme: "plain",
-      styles: { font: "helvetica", fontSize: 8.5, cellPadding: 4.5, lineColor: hexToRgb(COLOR.line), lineWidth: 0.3 },
-      headStyles: { fillColor: hexToRgb(COLOR.cardSoft), textColor: hexToRgb(themeTextColor), fontStyle: "bold", fontSize: 7.5, lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 }, lineColor: hexToRgb(themeColor) },
+      styles: {
+        font: "helvetica",
+        fontSize: 8.5,
+        cellPadding: 4.5,
+        lineColor: hexToRgb(COLOR.line),
+        lineWidth: 0.3,
+      },
+      headStyles: {
+        fillColor: hexToRgb(COLOR.cardSoft),
+        textColor: hexToRgb(themeTextColor),
+        fontStyle: "bold",
+        fontSize: 7.5,
+        lineWidth: { bottom: 0.6, top: 0, left: 0, right: 0 },
+        lineColor: hexToRgb(themeColor),
+      },
       columnStyles: {
-        1: { fontStyle: "bold", textColor: hexToRgb(COLOR.ink), halign: "right" },
+        1: {
+          fontStyle: "bold",
+          textColor: hexToRgb(COLOR.ink),
+          halign: "right",
+        },
         // 2..6 — the $/sqft column added one, and a stale range left the
         // distance column alone on the left.
-        ...Object.fromEntries([2, 3, 4, 5, 6].map((i) => [i, { halign: "right" as const }])),
+        ...Object.fromEntries(
+          [2, 3, 4, 5, 6].map((i) => [i, { halign: "right" as const }]),
+        ),
       },
       alternateRowStyles: { fillColor: [252, 253, 255] },
       didParseCell: alignNumericHeaders,
     });
   }
+}
+
+const SPECIALIST_SOURCE_TAG: Record<SpecialistInputSource, string> = {
+  "saved-assumption": "saved",
+  "base-underwrite": "base",
+  "core-analysis": "core",
+  "strategy-default": "default",
+  derived: "derived",
+};
+
+function specialistInputValue(
+  value: string,
+  source: SpecialistInputSource,
+): string {
+  return `${value} [${SPECIALIST_SOURCE_TAG[source]}]`;
+}
+
+/** Dedicated specialist page. Keeping it separate from the rental performance
+ * page prevents a BRRRR refinance or flip sale result from being mistaken for
+ * the core buy-and-hold verdict, cash flow, or Offer Ceiling. */
+function pageSpecialistAnalysis(
+  doc: jsPDF,
+  snapshot: SpecialistAnalysisSnapshot,
+  branding?: BrandingConfig | null,
+) {
+  let y = M.top + 12;
+  const themeColor = resolveThemeColor(branding);
+  const isBrrrr = snapshot.strategy === "brrrr";
+  y = sectionTitle(
+    doc,
+    isBrrrr ? "BRRRR Strategy Analysis" : "Fix-and-Flip Strategy Analysis",
+    y,
+    "Specialist model",
+    themeColor,
+  );
+  y = drawParagraph(
+    doc,
+    isBrrrr
+      ? "A separate buy-rehab-rent-refinance screen using the frozen assumptions below. It supplements the core rental underwrite; it does not replace the report's base verdict or Offer Ceiling."
+      : "A separate buy-rehab-sell screen using the frozen assumptions below. It supplements the core rental underwrite; it does not replace the report's base verdict or Offer Ceiling.",
+    M.left,
+    y,
+    SAFE.w,
+    { size: 9.5, color: COLOR.sub },
+  );
+  y += 8;
+  setText(doc, COLOR.text);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.5);
+  doc.text(
+    `Specialist model v${snapshot.modelVersion} - core underwrite v${snapshot.coreMethodologyVersion}`,
+    M.left,
+    y,
+  );
+  y += 16;
+  setText(doc, COLOR.sub);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.5);
+  doc.text(
+    "Source tags: saved = frozen modeled assumption; base = acquisition form; core = core result; default = visible strategy fallback; derived = calculated carry.",
+    M.left,
+    y,
+  );
+  y += 24;
+
+  y = sectionTitle(
+    doc,
+    "Frozen Strategy Assumptions",
+    y,
+    undefined,
+    themeColor,
+  );
+  const colW = (SAFE.w - 12) / 2;
+  const gap = 12;
+
+  if (snapshot.strategy === "brrrr") {
+    const i = snapshot.effectiveInputs;
+    const s = snapshot.inputSources;
+    const blockH = 128;
+    drawInputBlock(
+      doc,
+      M.left,
+      y,
+      colW,
+      blockH,
+      "Acquisition & project",
+      [
+        [
+          "Purchase price",
+          specialistInputValue(fmtCurrency(i.purchasePrice), s.purchasePrice),
+        ],
+        [
+          "Rehab budget",
+          specialistInputValue(fmtCurrency(i.rehabBudget), s.rehabBudget),
+        ],
+        ["After-repair value", specialistInputValue(fmtCurrency(i.arv), s.arv)],
+        [
+          "Original down payment",
+          specialistInputValue(fmtPct(i.downPaymentPct), s.downPaymentPct),
+        ],
+        [
+          "Acquisition closing",
+          specialistInputValue(
+            fmtPct(i.closingCostsPctAcq),
+            s.closingCostsPctAcq,
+          ),
+        ],
+        [
+          "Hold before refinance",
+          specialistInputValue(`${i.holdMonths} months`, s.holdMonths),
+        ],
+        [
+          "Carry per month",
+          specialistInputValue(
+            fmtCurrency(i.monthlyCarryingCost),
+            s.monthlyCarryingCost,
+          ),
+        ],
+      ],
+      themeColor,
+    );
+    drawInputBlock(
+      doc,
+      M.left + colW + gap,
+      y,
+      colW,
+      blockH,
+      "Refinance & stabilized rent",
+      [
+        [
+          "Refinance LTV",
+          specialistInputValue(fmtPct(i.refiLtvPct), s.refiLtvPct),
+        ],
+        [
+          "Refinance rate",
+          specialistInputValue(fmtPct(i.refiRatePct), s.refiRatePct),
+        ],
+        [
+          "Refinance term",
+          specialistInputValue(`${i.refiTermYears} years`, s.refiTermYears),
+        ],
+        [
+          "Refinance closing",
+          specialistInputValue(
+            fmtPct(i.closingCostsRefiPct),
+            s.closingCostsRefiPct,
+          ),
+        ],
+        [
+          "Monthly rent",
+          specialistInputValue(
+            `${fmtCurrency(i.postRefiMonthlyRent)}/mo`,
+            s.postRefiMonthlyRent,
+          ),
+        ],
+        [
+          "Monthly operating expense",
+          specialistInputValue(
+            `${fmtCurrency(i.postRefiMonthlyOpEx)}/mo`,
+            s.postRefiMonthlyOpEx,
+          ),
+        ],
+      ],
+      themeColor,
+    );
+    y += blockH + 16;
+
+    y = sectionTitle(doc, "Modeled BRRRR Outcome", y, undefined, themeColor);
+    const cardW = (SAFE.w - 24) / 3;
+    const cardH = 60;
+    const o = snapshot.outcome;
+    statCard(
+      doc,
+      M.left,
+      y,
+      cardW,
+      cardH,
+      "Cash Left in Deal",
+      fmtCurrency(o.cashLeftInDeal),
+      { tone: o.cashLeftInDeal <= 0 ? "success" : "primary", themeColor },
+    );
+    statCard(
+      doc,
+      M.left + cardW + 12,
+      y,
+      cardW,
+      cardH,
+      "Post-Refi Cash Flow",
+      fmtCurrency(o.postRefiMonthlyCashFlow),
+      {
+        tone: o.postRefiMonthlyCashFlow >= 0 ? "success" : "danger",
+        sub: "/month",
+        themeColor,
+      },
+    );
+    statCard(
+      doc,
+      M.left + 2 * (cardW + 12),
+      y,
+      cardW,
+      cardH,
+      "Post-Refi CoC",
+      o.isInfiniteReturn ? "Infinite*" : fmtPct(o.postRefiCashOnCashPct ?? 0),
+      {
+        tone: o.postRefiMonthlyCashFlow >= 0 ? "success" : "danger",
+        sub: o.isInfiniteReturn ? "all modeled cash recovered" : "annual",
+        themeColor,
+      },
+    );
+    y += cardH + 8;
+    statCard(
+      doc,
+      M.left,
+      y,
+      cardW,
+      cardH,
+      "New Loan",
+      fmtCurrency(o.newLoanAmount),
+      { tone: "neutral", themeColor },
+    );
+    statCard(
+      doc,
+      M.left + cardW + 12,
+      y,
+      cardW,
+      cardH,
+      "Cash Returned",
+      fmtCurrency(o.cashReturnedAtRefi),
+      { tone: "primary", themeColor },
+    );
+    statCard(
+      doc,
+      M.left + 2 * (cardW + 12),
+      y,
+      cardW,
+      cardH,
+      "Equity Created",
+      fmtCurrency(o.equityCreated),
+      { tone: o.equityCreated >= 0 ? "success" : "danger", themeColor },
+    );
+    y += cardH + 8;
+    drawInputBlock(
+      doc,
+      M.left,
+      y,
+      SAFE.w,
+      114,
+      "Supporting outcome detail",
+      [
+        ["Total acquisition cash invested", fmtCurrency(o.totalCashInvested)],
+        ["Cash needed at refinance", fmtCurrency(o.cashNeededAtRefi)],
+        ["Refinance closing costs", fmtCurrency(o.refiClosingCosts)],
+        ["New monthly principal & interest", fmtCurrency(o.newMonthlyPayment)],
+        ["Total carrying costs", fmtCurrency(o.carryingCostsTotal)],
+        ["Value-add ratio", fmtPct(o.valueAddRatio * 100)],
+      ],
+      themeColor,
+    );
+    y += 122;
+    drawParagraph(
+      doc,
+      "Screening disclosure: refinance proceeds depend on appraisal, lender LTV, seasoning, eligibility, fees, and final loan terms. Verify all of them with the lender. *Infinite means the model recovers all cash left in the deal while showing positive annual cash flow; it is not a guaranteed return.",
+      M.left,
+      y,
+      SAFE.w,
+      { size: 8.5, color: COLOR.sub },
+    );
+    return;
+  }
+
+  const i = snapshot.effectiveInputs;
+  const s = snapshot.inputSources;
+  const blockH = 96;
+  drawInputBlock(
+    doc,
+    M.left,
+    y,
+    colW,
+    blockH,
+    "Acquisition & project",
+    [
+      [
+        "Purchase price",
+        specialistInputValue(fmtCurrency(i.purchasePrice), s.purchasePrice),
+      ],
+      [
+        "Rehab budget",
+        specialistInputValue(fmtCurrency(i.rehabBudget), s.rehabBudget),
+      ],
+      [
+        "Down payment",
+        specialistInputValue(fmtPct(i.downPaymentPct), s.downPaymentPct),
+      ],
+      [
+        "Acquisition closing",
+        specialistInputValue(
+          fmtPct(i.closingCostsPctAcq),
+          s.closingCostsPctAcq,
+        ),
+      ],
+    ],
+    themeColor,
+  );
+  drawInputBlock(
+    doc,
+    M.left + colW + gap,
+    y,
+    colW,
+    blockH,
+    "Sale & carry",
+    [
+      ["After-repair value", specialistInputValue(fmtCurrency(i.arv), s.arv)],
+      [
+        "Selling costs",
+        specialistInputValue(fmtPct(i.sellingCostsPct), s.sellingCostsPct),
+      ],
+      [
+        "Hold period",
+        specialistInputValue(`${i.holdMonths} months`, s.holdMonths),
+      ],
+      [
+        "Carry per month",
+        specialistInputValue(
+          fmtCurrency(i.monthlyCarryingCost),
+          s.monthlyCarryingCost,
+        ),
+      ],
+    ],
+    themeColor,
+  );
+  y += blockH + 16;
+
+  y = sectionTitle(
+    doc,
+    "Modeled Fix-and-Flip Outcome",
+    y,
+    undefined,
+    themeColor,
+  );
+  const cardW = (SAFE.w - 24) / 3;
+  const cardH = 60;
+  const o = snapshot.outcome;
+  statCard(
+    doc,
+    M.left,
+    y,
+    cardW,
+    cardH,
+    "Net Profit",
+    fmtCurrency(o.netProfit),
+    { tone: o.netProfit >= 0 ? "success" : "danger", themeColor },
+  );
+  statCard(
+    doc,
+    M.left + cardW + 12,
+    y,
+    cardW,
+    cardH,
+    "ROI on Cash",
+    fmtPct(o.roiOnCashPct),
+    { tone: o.roiOnCashPct >= 0 ? "success" : "danger", themeColor },
+  );
+  statCard(
+    doc,
+    M.left + 2 * (cardW + 12),
+    y,
+    cardW,
+    cardH,
+    "Annualized ROI",
+    fmtPct(o.annualizedRoiPct),
+    {
+      tone: o.annualizedRoiPct >= 0 ? "success" : "danger",
+      sub: "simple annualization",
+      themeColor,
+    },
+  );
+  y += cardH + 8;
+  statCard(
+    doc,
+    M.left,
+    y,
+    cardW,
+    cardH,
+    "Cash Invested",
+    fmtCurrency(o.totalCashInvested),
+    { tone: "neutral", themeColor },
+  );
+  statCard(
+    doc,
+    M.left + cardW + 12,
+    y,
+    cardW,
+    cardH,
+    "Break-Even ARV",
+    fmtCurrency(o.breakEvenArv),
+    { tone: "warn", themeColor },
+  );
+  statCard(
+    doc,
+    M.left + 2 * (cardW + 12),
+    y,
+    cardW,
+    cardH,
+    "Profit per Day",
+    fmtCurrency(o.profitPerDay),
+    { tone: o.profitPerDay >= 0 ? "success" : "danger", themeColor },
+  );
+  y += cardH + 8;
+  drawInputBlock(
+    doc,
+    M.left,
+    y,
+    SAFE.w,
+    114,
+    "Supporting outcome detail",
+    [
+      ["Cash at acquisition close", fmtCurrency(o.cashAtClose)],
+      ["Acquisition closing costs", fmtCurrency(o.acquisitionClosingCosts)],
+      ["Total carrying costs", fmtCurrency(o.carryingCostsTotal)],
+      ["Selling costs", fmtCurrency(o.sellingCosts)],
+      ["Rehab budget", fmtCurrency(o.rehabBudget)],
+      ["Gross modeled profit", fmtCurrency(o.grossProfit)],
+    ],
+    themeColor,
+  );
+  y += 122;
+  drawParagraph(
+    doc,
+    "Screening disclosure: resale value, construction scope, schedule, financing, selling costs, taxes, and market liquidity can materially change the outcome. Annualized ROI is a simple hold-period screen, not a guaranteed realized return. Verify the scope and disposition assumptions before committing capital.",
+    M.left,
+    y,
+    SAFE.w,
+    { size: 8.5, color: COLOR.sub },
+  );
 }
 
 /**
@@ -2608,7 +3827,7 @@ function drawParagraph(
   x: number,
   y: number,
   w: number,
-  opts: { size?: number; color?: string; leading?: number } = {}
+  opts: { size?: number; color?: string; leading?: number } = {},
 ): number {
   const size = opts.size ?? 9.5;
   const leading = opts.leading ?? 1.45;
@@ -2627,7 +3846,11 @@ function drawParagraph(
  * expects. Both credibility and CYA — an investor report without an
  * assumptions/disclaimer page reads as a back-of-napkin estimate.
  */
-function pageDisclosures(doc: jsPDF, d: ReportData, branding?: BrandingConfig | null) {
+function pageDisclosures(
+  doc: jsPDF,
+  d: ReportData,
+  branding?: BrandingConfig | null,
+) {
   let y = M.top + 12;
   const themeColor = resolveThemeColor(branding);
   y = sectionTitle(doc, "Assumptions & Disclosures", y, undefined, themeColor);
@@ -2637,7 +3860,7 @@ function pageDisclosures(doc: jsPDF, d: ReportData, branding?: BrandingConfig | 
     M.left,
     y,
     SAFE.w,
-    { size: 9.5, color: COLOR.sub }
+    { size: 9.5, color: COLOR.sub },
   );
   y += 16;
 
@@ -2658,7 +3881,7 @@ function pageDisclosures(doc: jsPDF, d: ReportData, branding?: BrandingConfig | 
       ["Appreciation", `${d.expenses.appreciation}% / yr`],
       ["Selling cost", `${d.expenses.sellingCost}%`],
     ],
-    themeColor
+    themeColor,
   );
   drawInputBlock(
     doc,
@@ -2670,10 +3893,13 @@ function pageDisclosures(doc: jsPDF, d: ReportData, branding?: BrandingConfig | 
     [
       ["Vacancy", `${d.expenses.vacancyPct}%`],
       ["Management", `${d.expenses.managementPct}%`],
-      ["Maintenance / CapEx", `${d.expenses.maintenancePct}% / ${d.expenses.capexPct}%`],
+      [
+        "Maintenance / CapEx",
+        `${d.expenses.maintenancePct}% / ${d.expenses.capexPct}%`,
+      ],
       ["Assumed tax rate", `${d.expenses.taxRate}%`],
     ],
-    themeColor
+    themeColor,
   );
   y += rowH + 24;
 
@@ -2683,14 +3909,14 @@ function pageDisclosures(doc: jsPDF, d: ReportData, branding?: BrandingConfig | 
       `${TRUECAP_UNDERWRITING_STANDARD_NAME} v${d.methodologyVersion ?? TRUECAP_UNDERWRITING_STANDARD_VERSION}`,
     y,
     undefined,
-    themeColor
+    themeColor,
   );
   y = drawParagraph(
     doc,
     `Returns are computed from the purchase price, financing terms, rents, and operating expenses entered for this property. The 10-year projection ${d.tenYearProjectionVersion != null ? `uses projection method v${d.tenYearProjectionVersion}` : "comes from a recorded legacy snapshot whose projection method version was not stored"}; it grows rents and operating expenses at the rates above and amortizes the loan on its stated schedule. NOI and lender-style DSCR exclude the CapEx reserve; cash flow includes it. PMI/MIP, when modeled, is included in cash flow but excluded from lender-style DSCR.`,
     M.left,
     y,
-    SAFE.w
+    SAFE.w,
   );
   y += 14;
   y = drawParagraph(
@@ -2698,7 +3924,7 @@ function pageDisclosures(doc: jsPDF, d: ReportData, branding?: BrandingConfig | 
     "Any HUD auto-filled rent is an area rent benchmark, not a property-specific rent opinion or local comparable. Any FRED auto-filled rate is an owner-occupied national mortgage benchmark, not an investor-loan quote, approval, or commitment. Replace both with verified local rents and written lender terms before making an offer.",
     M.left,
     y,
-    SAFE.w
+    SAFE.w,
   );
   y += 14;
   y = drawParagraph(
@@ -2706,7 +3932,7 @@ function pageDisclosures(doc: jsPDF, d: ReportData, branding?: BrandingConfig | 
     "Illustrative tax impact applies the entered marginal rate to modeled rental income and deductions. It does not determine whether losses are usable or model passive-activity, at-risk, material-participation, filing-status, state/local-tax, mixed personal/rental-use allocation, or individual eligibility rules. Exit comparisons rank only the modeled hold years under the stated appreciation, selling-cost, cash-flow, and simplified exit-tax assumptions; the highest modeled profit is not a recommendation to sell in that year.",
     M.left,
     y,
-    SAFE.w
+    SAFE.w,
   );
   y += 22;
 
@@ -2717,7 +3943,7 @@ function pageDisclosures(doc: jsPDF, d: ReportData, branding?: BrandingConfig | 
     M.left,
     y,
     SAFE.w,
-    { color: COLOR.sub }
+    { color: COLOR.sub },
   );
 }
 
@@ -2725,7 +3951,7 @@ function pageDisclosures(doc: jsPDF, d: ReportData, branding?: BrandingConfig | 
 async function buildInvestmentPDFDocument(
   data: ReportData,
   branding?: BrandingConfig | null,
-  mode: ReportMode = "personal"
+  mode: ReportMode = "personal",
 ) {
   const doc = new jsPDF({ unit: "pt", format: "a4", compress: true });
   const d = data;
@@ -2763,7 +3989,9 @@ async function buildInvestmentPDFDocument(
   // undercut the white-label) — drawHeader / pageCover render the company
   // NAME as a text wordmark instead when logoData is null but branding exists.
   const isBranded = Boolean(
-    branding?.companyName?.trim() || branding?.logoUrl || branding?.primaryColorHex
+    branding?.companyName?.trim() ||
+    branding?.logoUrl ||
+    branding?.primaryColorHex,
   );
   if (!logoData && !isBranded) {
     logoData = await loadLogoDataUrl(); // TrueCap default
@@ -2782,6 +4010,10 @@ async function buildInvestmentPDFDocument(
   pageCover(doc, d, branding ?? null, logoData);
   doc.addPage();
   pageInputs(doc, d, branding ?? null, buyBoxVerdict);
+  if (d.specialistAnalysis) {
+    doc.addPage();
+    pageSpecialistAnalysis(doc, d.specialistAnalysis, branding ?? null);
+  }
   if (d.inputConfidence) {
     doc.addPage();
     pageDecisionReadiness(doc, d, branding ?? null);
@@ -2804,7 +4036,10 @@ async function buildInvestmentPDFDocument(
   }
   // Sale + rent comps — reference data valued in every report mode (lenders
   // especially want comps). Renders only when a comp set is present.
-  if (d.comps && (d.comps.saleComps.length > 0 || d.comps.rentComps.length > 0)) {
+  if (
+    d.comps &&
+    (d.comps.saleComps.length > 0 || d.comps.rentComps.length > 0)
+  ) {
     doc.addPage();
     pageComps(doc, d, branding ?? null);
   }
@@ -2842,7 +4077,7 @@ export type InvestmentPdfArtifact = {
 export async function generateInvestmentPDFArtifact(
   data: ReportData,
   branding?: BrandingConfig | null,
-  mode: ReportMode = "personal"
+  mode: ReportMode = "personal",
 ): Promise<InvestmentPdfArtifact> {
   const rendered = await buildInvestmentPDFDocument(data, branding, mode);
   return {
@@ -2855,7 +4090,7 @@ export async function generateInvestmentPDFArtifact(
 export async function generateInvestmentPDFBlob(
   data: ReportData,
   branding?: BrandingConfig | null,
-  mode: ReportMode = "personal"
+  mode: ReportMode = "personal",
 ): Promise<Blob> {
   return (await generateInvestmentPDFArtifact(data, branding, mode)).blob;
 }

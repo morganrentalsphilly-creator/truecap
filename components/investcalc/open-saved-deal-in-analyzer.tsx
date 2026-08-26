@@ -29,18 +29,21 @@ import {
   type OfferCeilingTargetSource,
 } from "@/lib/offer-ceiling-contract";
 import { isReleasedUnderwritingSnapshot } from "@/lib/underwriting-model-release";
+import { normalizeAnalyzerStrategyKey } from "@/lib/analyzer-strategy-persistence";
 
 /** Base of the nonce-keyed edit handoff (`<base>::<nonce>`), and the legacy
  *  shared key a previous deploy's tabs may still hold. Must match
  *  investcalc-page.tsx's reader. */
-export const SAVED_ANALYSIS_EDIT_DRAFT_KEY = "truecap_saved_analysis_edit_draft";
+export const SAVED_ANALYSIS_EDIT_DRAFT_KEY =
+  "truecap_saved_analysis_edit_draft";
 
 /**
  * Duplicate handoff key base — distinct from the edit key so the analyzer
  * forks the deal's ASSUMPTIONS into a brand-new deal (no savedDealId,
  * property identity cleared) instead of opening it for edit-in-place.
  */
-export const SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY = "truecap_saved_analysis_duplicate_draft";
+export const SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY =
+  "truecap_saved_analysis_duplicate_draft";
 
 /** Legacy edit and current duplicate handoff params. Must match investcalc-page.tsx. */
 export const DEAL_EDIT_HANDOFF_PARAM = "dealHandoff";
@@ -102,7 +105,10 @@ function sweepStaleHandoffPayloads(baseKey: string): void {
  * tab's own next "/" navigation (the reader can only clean the copies in
  * the tab that consumes them).
  */
-function writeNonceKeyedHandoffPayload(baseKey: string, payload: Record<string, unknown>): string {
+function writeNonceKeyedHandoffPayload(
+  baseKey: string,
+  payload: Record<string, unknown>,
+): string {
   sweepStaleHandoffPayloads(SAVED_ANALYSIS_EDIT_DRAFT_KEY);
   sweepStaleHandoffPayloads(SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY);
   try {
@@ -114,7 +120,7 @@ function writeNonceKeyedHandoffPayload(baseKey: string, payload: Record<string, 
   const nonce = crypto.randomUUID();
   window.localStorage.setItem(
     `${baseKey}::${nonce}`,
-    JSON.stringify({ ...payload, writtenAt: Date.now() })
+    JSON.stringify({ ...payload, writtenAt: Date.now() }),
   );
   return nonce;
 }
@@ -126,16 +132,17 @@ function writeNonceKeyedHandoffPayload(baseKey: string, payload: Record<string, 
  * Invalid/empty targets are omitted and the analyzer falls back to its normal
  * buy-box/default seed.
  */
-function normalizeSavedDealHandoffTarget(resultSnapshot: Record<string, unknown>): {
+function normalizeSavedDealHandoffTarget(
+  resultSnapshot: Record<string, unknown>,
+): {
   maxOfferTarget: ReturnType<typeof normalizeMaoTarget>;
   maxOfferTargetSource: OfferCeilingTargetSource;
   resultSnapshot: Record<string, unknown>;
 } {
   const maxOfferTarget = normalizeMaoTarget(resultSnapshot.maxOfferTarget);
   const maxOfferTargetSource =
-    normalizeOfferCeilingTargetSource(
-      resultSnapshot.maxOfferTargetSource
-    ) ?? "selected-targets";
+    normalizeOfferCeilingTargetSource(resultSnapshot.maxOfferTargetSource) ??
+    "selected-targets";
   const normalizedResultSnapshot = { ...resultSnapshot };
   if (maxOfferTarget) {
     normalizedResultSnapshot.maxOfferTarget = maxOfferTarget;
@@ -161,7 +168,7 @@ function normalizeSavedDealHandoffTarget(resultSnapshot: Record<string, unknown>
  */
 export async function duplicateSavedDealInAnalyzer(
   id: string,
-  targetWindow: Window | null
+  targetWindow: Window | null,
 ): Promise<{ ok: true } | { ok: false; message: string }> {
   if (!targetWindow) return { ok: false, message: POPUP_BLOCKED_MESSAGE };
 
@@ -174,7 +181,10 @@ export async function duplicateSavedDealInAnalyzer(
     // hand the caller a normal failure so its existing !ok toast fires, instead
     // of leaking an unhandled rejection and stranding the blank tab.
     targetWindow?.close();
-    return { ok: false, message: "Something interrupted the request. Please try again." };
+    return {
+      ok: false,
+      message: "Something interrupted the request. Please try again.",
+    };
   }
   if (!result.ok) {
     targetWindow?.close();
@@ -182,18 +192,23 @@ export async function duplicateSavedDealInAnalyzer(
   }
   if (!isReleasedUnderwritingSnapshot(result.formSnapshot)) {
     targetWindow?.close();
-    return { ok: false, message: "This underwriting model is not available yet." };
+    return {
+      ok: false,
+      message: "This underwriting model is not available yet.",
+    };
   }
   const { maxOfferTarget, maxOfferTargetSource } =
     normalizeSavedDealHandoffTarget(result.resultSnapshot);
+  const analyzerStrategyKey = normalizeAnalyzerStrategyKey(
+    result.resultSnapshot.analyzerStrategyKey,
+  );
   let nonce: string;
   try {
     nonce = writeNonceKeyedHandoffPayload(SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY, {
       formSnapshot: result.formSnapshot,
       templateFallback: result.templateFallback,
-      ...(maxOfferTarget
-        ? { maxOfferTarget, maxOfferTargetSource }
-        : {}),
+      ...(analyzerStrategyKey ? { analyzerStrategyKey } : {}),
+      ...(maxOfferTarget ? { maxOfferTarget, maxOfferTargetSource } : {}),
     });
   } catch {
     targetWindow.close();
@@ -206,13 +221,16 @@ export async function duplicateSavedDealInAnalyzer(
     return { ok: true };
   } catch {
     try {
-      window.localStorage.removeItem(`${SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY}::${nonce}`);
+      window.localStorage.removeItem(
+        `${SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY}::${nonce}`,
+      );
     } catch {
       // Best-effort cleanup only; the normal TTL sweep removes the payload.
     }
     return {
       ok: false,
-      message: "The new tab closed before the deal was ready. Try opening it again.",
+      message:
+        "The new tab closed before the deal was ready. Try opening it again.",
     };
   }
 }
@@ -224,7 +242,7 @@ export async function duplicateSavedDealInAnalyzer(
  */
 export async function openSavedDealInAnalysisTab(
   id: string,
-  targetWindow: Window | null
+  targetWindow: Window | null,
 ): Promise<{ ok: true } | { ok: false; message: string }> {
   if (!targetWindow) return { ok: false, message: POPUP_BLOCKED_MESSAGE };
   // The saved row ID is not secret; the authenticated server route performs
@@ -238,7 +256,8 @@ export async function openSavedDealInAnalysisTab(
   } catch {
     return {
       ok: false,
-      message: "The new tab closed before the deal was ready. Try opening it again.",
+      message:
+        "The new tab closed before the deal was ready. Try opening it again.",
     };
   }
 }
@@ -266,7 +285,10 @@ export function OpenFullAnalysisButton({
     setIsOpening(true);
     void (async () => {
       try {
-        const result = await openSavedDealInAnalysisTab(savedDealId, targetWindow);
+        const result = await openSavedDealInAnalysisTab(
+          savedDealId,
+          targetWindow,
+        );
         if (!result.ok) {
           toast({
             title: "Could not open saved deal",
@@ -302,7 +324,11 @@ export function OpenFullAnalysisButton({
  * can therefore update only the new scenario; the recorded parent row and any
  * share/PDF bound to it remain immutable history.
  */
-export function ReunderwriteAsScenarioButton({ savedDealId }: { savedDealId: string }) {
+export function ReunderwriteAsScenarioButton({
+  savedDealId,
+}: {
+  savedDealId: string;
+}) {
   const { toast } = useToast();
   const [isOpening, setIsOpening] = useState(false);
 
@@ -346,7 +372,7 @@ export function ReunderwriteAsScenarioButton({ savedDealId }: { savedDealId: str
         }
         const opened = await openSavedDealInAnalysisTab(
           cloned.scenarioId,
-          targetWindow
+          targetWindow,
         );
         if (!opened.ok) {
           toast({

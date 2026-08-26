@@ -1,9 +1,12 @@
 import { z } from "zod";
-import { DEFAULT_APPRECIATION_RATE, DEFAULT_SELLING_COST_PCT } from "@/lib/exit-scenarios";
+import {
+  DEFAULT_APPRECIATION_RATE,
+  DEFAULT_SELLING_COST_PCT,
+} from "@/lib/exit-scenarios";
 import { resolveV1AnalysisDate } from "@/lib/analysis-date";
 
 /** Bump when `investmentFormSchema` shape changes; used for persisted snapshots. */
-export const INVESTCALC_SCHEMA_VERSION = 10;
+export const INVESTCALC_SCHEMA_VERSION = 11;
 /** Product-wide lower bound for a supported residential acquisition price.
  * Keep inverse solvers and coarse preview ranges on the same accepted domain. */
 export const MIN_PURCHASE_PRICE = 10_000;
@@ -42,6 +45,13 @@ const optionalMoney = z.preprocess((val) => {
   return n;
 }, z.number().min(0, "Must be 0 or more").max(MAX_PURCHASE_PRICE, "Amount too large").optional());
 
+const optionalPositiveMoney = z.preprocess((val) => {
+  if (val === undefined || val === null || val === "") return undefined;
+  const n = typeof val === "number" ? val : Number(val);
+  if (!Number.isFinite(n)) return undefined;
+  return n;
+}, z.number().min(1, "Must be at least $1").max(MAX_PURCHASE_PRICE, "Amount too large").optional());
+
 const optionalAnalysisDate = z.preprocess(
   (val) => (val === undefined || val === null || val === "" ? undefined : val),
   z
@@ -49,9 +59,12 @@ const optionalAnalysisDate = z.preprocess(
     .regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD")
     .refine((value) => {
       const parsed = new Date(`${value}T00:00:00.000Z`);
-      return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+      return (
+        Number.isFinite(parsed.getTime()) &&
+        parsed.toISOString().slice(0, 10) === value
+      );
     }, "Enter a valid calendar date")
-    .optional()
+    .optional(),
 );
 
 const optionalMoneyMo = z.preprocess((val) => {
@@ -67,6 +80,13 @@ const optionalPercent = z.preprocess((val) => {
   if (!Number.isFinite(n)) return undefined;
   return n;
 }, z.number().min(0, "Must be 0% or more").max(100, "Max 100%").optional());
+
+const optionalInterestRate = z.preprocess((val) => {
+  if (val === undefined || val === null || val === "") return undefined;
+  const n = typeof val === "number" ? val : Number(val);
+  if (!Number.isFinite(n)) return undefined;
+  return n;
+}, z.number().min(0, "Min 0%").max(30, "Max 30%").optional());
 
 const optionalUnitNumber = <T extends z.ZodNumber>(schema: T) =>
   z.preprocess((val) => {
@@ -98,15 +118,23 @@ const requiredExpensePct = (fallback: number, label: string) =>
         invalid_type_error: `Enter ${label} or type 0`,
       })
       .min(0, "Min 0%")
-      .max(50, "Max 50%")
+      .max(50, "Max 50%"),
   );
 
-const optionalYearBuilt = z.preprocess((val) => {
-  if (val === undefined || val === null || val === "") return undefined;
-  const n = typeof val === "number" ? val : Number(val);
-  if (!Number.isFinite(n)) return undefined;
-  return n;
-}, z.number({ invalid_type_error: "Enter a 4-digit year" }).min(1800, "Year must be after 1800").max(9999, "Enter a 4-digit year").optional());
+const optionalYearBuilt = z.preprocess(
+  (val) => {
+    if (val === undefined || val === null || val === "") return undefined;
+    const n = typeof val === "number" ? val : Number(val);
+    if (!Number.isFinite(n)) return undefined;
+    return n;
+  },
+  z
+    .number({ invalid_type_error: "Enter a 4-digit year" })
+    .int("Use a whole year")
+    .min(1800, "Year must be after 1800")
+    .max(9999, "Enter a 4-digit year")
+    .optional(),
+);
 
 export const insuranceInputModeSchema = z.enum(["percent", "monthly"]);
 
@@ -129,26 +157,35 @@ export const MAX_UNITS = 50;
 
 export const unitSchema = z.object({
   bedrooms: optionalUnitNumber(
-    z.number({ invalid_type_error: "Enter number of bedrooms" }).min(0, "Min 0").max(20, "Max 20")
+    z
+      .number({ invalid_type_error: "Enter number of bedrooms" })
+      .int("Use a whole number")
+      .min(0, "Min 0")
+      .max(20, "Max 20"),
   ),
   bathrooms: optionalUnitNumber(
-    z.number({ invalid_type_error: "Enter number of bathrooms" }).min(0, "Min 0").max(20, "Max 20")
+    z
+      .number({ invalid_type_error: "Enter number of bathrooms" })
+      .min(0, "Min 0")
+      .max(20, "Max 20"),
   ),
   sqft: optionalUnitNumber(
-    z.number({ invalid_type_error: "Enter square feet" }).min(50, "Min 50 sq ft")
+    z
+      .number({ invalid_type_error: "Enter square feet" })
+      .min(50, "Min 50 sq ft"),
   ),
   monthlyRent: optionalUnitNumber(
     z
       .number({ invalid_type_error: "Enter monthly rent" })
       .min(0, "Rent must be 0 or more")
-      .max(MAX_MONTHLY_RENT, "Monthly rent is too large")
+      .max(MAX_MONTHLY_RENT, "Monthly rent is too large"),
   ),
   isOwnerOccupied: z.boolean().optional(),
 });
 
 export function isValidRentalUnit(
   unit: z.infer<typeof unitSchema> | undefined | null,
-  options?: { allowZeroRent?: boolean }
+  options?: { allowZeroRent?: boolean },
 ): boolean {
   if (!unit) return false;
   const minRent = options?.allowZeroRent ? 0 : Number.EPSILON;
@@ -164,528 +201,669 @@ export function isValidRentalUnit(
   return typeof unit.monthlyRent === "number" && unit.monthlyRent >= minRent;
 }
 
-export const investmentFormSchema = z.object({
-  /** Missing and explicit 1.0 both retain the historical calculation path. */
-  underwritingModelVersion: underwritingModelVersionSchema.optional(),
-  propertyType: z.enum(["single-family", "multi-family", "owner-occupant"], {
-    required_error: "Select a property type",
-  }),
-  address: z
-    .string()
-    .min(5, "Address must be at least 5 characters")
-    .max(200, "Address is too long"),
-  purchasePrice: z
-    .number({ invalid_type_error: "Enter purchase price" })
-    .min(MIN_PURCHASE_PRICE, "Purchase price must be at least $10,000")
-    .max(MAX_PURCHASE_PRICE, "Price too large"),
-  yearBuilt: optionalYearBuilt,
+export const investmentFormSchema = z
+  .object({
+    /** Missing and explicit 1.0 both retain the historical calculation path. */
+    underwritingModelVersion: underwritingModelVersionSchema.optional(),
+    propertyType: z.enum(["single-family", "multi-family", "owner-occupant"], {
+      required_error: "Select a property type",
+    }),
+    address: z
+      .string()
+      .min(5, "Address must be at least 5 characters")
+      .max(200, "Address is too long"),
+    purchasePrice: z
+      .number({ invalid_type_error: "Enter purchase price" })
+      .min(MIN_PURCHASE_PRICE, "Purchase price must be at least $10,000")
+      .max(MAX_PURCHASE_PRICE, "Price too large"),
+    yearBuilt: optionalYearBuilt,
 
-  // Minimum-credible first-year model (v2 only). These stay optional at the
-  // field level so v1 payloads remain valid; the v2 superRefine branch below
-  // requires each economically material value explicitly (zero is allowed).
-  analysisDate: optionalAnalysisDate,
-  unitCount: optionalUnitNumber(
-    z.number({ invalid_type_error: "Enter unit count" }).int("Use a whole number").min(1, "Min 1 unit").max(MAX_UNITS, `Max ${MAX_UNITS} units`)
-  ),
-  operatingScenario: operatingScenarioSchema.optional(),
-  rentBasis: rentBasisSchema.optional(),
-  currentMonthlyRent: optionalMoneyMo,
-  stabilizedMonthlyRent: optionalMoneyMo,
-  acquisitionCredits: optionalMoney,
-  recurringOtherIncomeMonthly: optionalMoneyMo,
-  recurringOtherExpenseMonthly: optionalMoneyMo,
+    // Minimum-credible first-year model (v2 only). These stay optional at the
+    // field level so v1 payloads remain valid; the v2 superRefine branch below
+    // requires each economically material value explicitly (zero is allowed).
+    analysisDate: optionalAnalysisDate,
+    unitCount: optionalUnitNumber(
+      z
+        .number({ invalid_type_error: "Enter unit count" })
+        .int("Use a whole number")
+        .min(1, "Min 1 unit")
+        .max(MAX_UNITS, `Max ${MAX_UNITS} units`),
+    ),
+    operatingScenario: operatingScenarioSchema.optional(),
+    rentBasis: rentBasisSchema.optional(),
+    currentMonthlyRent: optionalMoneyMo,
+    stabilizedMonthlyRent: optionalMoneyMo,
+    acquisitionCredits: optionalMoney,
+    recurringOtherIncomeMonthly: optionalMoneyMo,
+    recurringOtherExpenseMonthly: optionalMoneyMo,
 
-  // Single-family unit details (optional at parse; required in superRefine when propertyType is single-family).
-  // Must tolerate NaN from react-hook-form valueAsNumber on hidden/unmounted inputs after switching property type.
-  bedrooms: optionalUnitNumber(
-    z.number({ invalid_type_error: "Enter bedrooms" }).min(0, "Min 0").max(20, "Max 20")
-  ),
-  bathrooms: optionalUnitNumber(
-    z.number({ invalid_type_error: "Enter bathrooms" }).min(0, "Min 0").max(20, "Max 20")
-  ),
-  sqft: optionalUnitNumber(z.number({ invalid_type_error: "Enter sq ft" }).min(50, "Min 50 sq ft")),
-  monthlyRent: optionalUnitNumber(
-    z
-      .number({ invalid_type_error: "Enter monthly rent" })
-      .min(0, "Rent must be 0 or more")
-      .max(MAX_MONTHLY_RENT, "Monthly rent is too large")
-  ),
+    // Single-family unit details (optional at parse; required in superRefine when propertyType is single-family).
+    // Must tolerate NaN from react-hook-form valueAsNumber on hidden/unmounted inputs after switching property type.
+    bedrooms: optionalUnitNumber(
+      z
+        .number({ invalid_type_error: "Enter bedrooms" })
+        .int("Use a whole number")
+        .min(0, "Min 0")
+        .max(20, "Max 20"),
+    ),
+    bathrooms: optionalUnitNumber(
+      z
+        .number({ invalid_type_error: "Enter bathrooms" })
+        .min(0, "Min 0")
+        .max(20, "Max 20"),
+    ),
+    sqft: optionalUnitNumber(
+      z.number({ invalid_type_error: "Enter sq ft" }).min(50, "Min 50 sq ft"),
+    ),
+    monthlyRent: optionalUnitNumber(
+      z
+        .number({ invalid_type_error: "Enter monthly rent" })
+        .min(0, "Rent must be 0 or more")
+        .max(MAX_MONTHLY_RENT, "Monthly rent is too large"),
+    ),
 
-  // Multi-family units (bounded — see MAX_UNITS: keeps the share-link payload
-  // and per-unit enrichment fan-out from being an unbounded-work vector).
-  units: z.array(unitSchema).max(MAX_UNITS, `Max ${MAX_UNITS} units`).optional(),
+    // Multi-family units (bounded — see MAX_UNITS: keeps the share-link payload
+    // and per-unit enrichment fan-out from being an unbounded-work vector).
+    units: z
+      .array(unitSchema)
+      .max(MAX_UNITS, `Max ${MAX_UNITS} units`)
+      .optional(),
 
-  // Financing
-  financingMode: financingModeSchema.optional(),
-  fixedDownPaymentAmount: optionalMoney,
-  fixedLoanAmount: optionalMoney,
-  downPaymentPct: z
-    .number({ invalid_type_error: "Enter down payment %" })
-    .min(0, "Min 0%")
-    .max(100, "Max 100%"),
-  interestRate: z
-    .number({ invalid_type_error: "Enter interest rate" })
-    .min(0, "Min 0%")
-    .max(30, "Max 30%"),
-  loanTermYears: z
-    .number({ invalid_type_error: "Enter loan term" })
-    .min(1, "Min 1 year")
-    .max(50, "Max 50 years"),
-  /** Optional; omitted uses default closing cost % (see defaultValues / calc). */
-  closingCostsPct: optionalPercent,
-  closingCostsInputMode: closingCostsInputModeSchema.optional(),
-  closingCostsFixed: optionalMoney,
-  loanFees: optionalMoney,
-  initialReserve: optionalMoney,
-  /** Optional PMI / mortgage-insurance annual rate (% of loan balance). When
-   * omitted, calc-analysis uses its screening default only for sub-20%-down
-   * owner-occupant deals; investor rentals assume 0 unless the lender/template
-   * rate is entered. Explicit 0 disables PMI entirely. */
-  pmiAnnualRatePct: z.preprocess((val) => {
-    if (val === undefined || val === null || val === "") return undefined;
-    const n = typeof val === "number" ? val : Number(val);
-    if (!Number.isFinite(n)) return undefined;
-    return n;
-  }, z.number().min(0, "Min 0%").max(5, "Max 5%").optional()),
-  /** When true, mortgage insurance does NOT cancel at 80% LTV — models FHA MIP,
-   *  which (with the typical <10% down) runs for the life of the loan. */
-  pmiNoCancel: z.boolean().optional(),
+    // Financing
+    financingMode: financingModeSchema.optional(),
+    fixedDownPaymentAmount: optionalMoney,
+    fixedLoanAmount: optionalMoney,
+    downPaymentPct: z
+      .number({ invalid_type_error: "Enter down payment %" })
+      .min(0, "Min 0%")
+      .max(100, "Max 100%"),
+    interestRate: z
+      .number({ invalid_type_error: "Enter interest rate" })
+      .min(0, "Min 0%")
+      .max(30, "Max 30%"),
+    loanTermYears: z
+      .number({ invalid_type_error: "Enter loan term" })
+      .int("Use whole years")
+      .min(1, "Min 1 year")
+      .max(50, "Max 50 years"),
+    /** Optional; omitted uses default closing cost % (see defaultValues / calc). */
+    closingCostsPct: optionalPercent,
+    closingCostsInputMode: closingCostsInputModeSchema.optional(),
+    closingCostsFixed: optionalMoney,
+    loanFees: optionalMoney,
+    initialReserve: optionalMoney,
+    /** Optional PMI / mortgage-insurance annual rate (% of loan balance). When
+     * omitted, calc-analysis uses its screening default only for sub-20%-down
+     * owner-occupant deals; investor rentals assume 0 unless the lender/template
+     * rate is entered. Explicit 0 disables PMI entirely. */
+    pmiAnnualRatePct: z.preprocess((val) => {
+      if (val === undefined || val === null || val === "") return undefined;
+      const n = typeof val === "number" ? val : Number(val);
+      if (!Number.isFinite(n)) return undefined;
+      return n;
+    }, z.number().min(0, "Min 0%").max(5, "Max 5%").optional()),
+    /** When true, mortgage insurance does NOT cancel at 80% LTV — models FHA MIP,
+     *  which (with the typical <10% down) runs for the life of the loan. */
+    pmiNoCancel: z.boolean().optional(),
 
-  // Operating expenses. A deliberate 0 is valid; blank is unknown and blocks
-  // a fresh result instead of silently making the deal look better.
-  maintenancePct: requiredExpensePct(10, "maintenance %"),
-  vacancyPct: requiredExpensePct(5, "vacancy %"),
-  mgmtPct: requiredExpensePct(8, "management %"),
-  capexPct: requiredExpensePct(5, "CapEx reserve %"),
-  templateId: z.preprocess(
-    (val) => (val === "" || val === null ? undefined : val),
-    z.string().uuid("Invalid template").optional()
-  ),
-  buildingValuePct: z
-    .number({ invalid_type_error: "Enter building value %" })
-    .min(0, "Min 0%")
-    .max(100, "Max 100%"),
-  depreciationYears: z.union([z.literal(27.5), z.literal(39)], {
-    invalid_type_error: "Select depreciation period",
-  }),
-  includeInterestDeduction: z.boolean().optional(),
-  taxRatePct: optionalPercent,
-  expenseGrowthPct: z
-    .number({ invalid_type_error: "Enter expense growth rate" })
-    .min(0, "Min 0%")
-    .max(20, "Max 20%"),
-  rentGrowthPct: z
-    .number({ invalid_type_error: "Enter rent growth rate" })
-    .min(0, "Min 0%")
-    .max(20, "Max 20%"),
-  appreciationRatePct: optionalPercent,
-  sellingCostPct: optionalPercent,
+    // Operating expenses. A deliberate 0 is valid; blank is unknown and blocks
+    // a fresh result instead of silently making the deal look better.
+    maintenancePct: requiredExpensePct(10, "maintenance %"),
+    vacancyPct: requiredExpensePct(5, "vacancy %"),
+    mgmtPct: requiredExpensePct(8, "management %"),
+    capexPct: requiredExpensePct(5, "CapEx reserve %"),
+    templateId: z.preprocess(
+      (val) => (val === "" || val === null ? undefined : val),
+      z.string().uuid("Invalid template").optional(),
+    ),
+    buildingValuePct: z
+      .number({ invalid_type_error: "Enter building value %" })
+      .min(0, "Min 0%")
+      .max(100, "Max 100%"),
+    depreciationYears: z.union([z.literal(27.5), z.literal(39)], {
+      invalid_type_error: "Select depreciation period",
+    }),
+    includeInterestDeduction: z.boolean().optional(),
+    taxRatePct: optionalPercent,
+    expenseGrowthPct: z
+      .number({ invalid_type_error: "Enter expense growth rate" })
+      .min(0, "Min 0%")
+      .max(20, "Max 20%"),
+    rentGrowthPct: z
+      .number({ invalid_type_error: "Enter rent growth rate" })
+      .min(0, "Min 0%")
+      .max(20, "Max 20%"),
+    appreciationRatePct: optionalPercent,
+    sellingCostPct: optionalPercent,
 
-  /** Monthly $ overrides when using advanced operating expenses; omitted = use auto estimates / zero. */
-  propertyTaxPct: optionalPercent,
-  // Annual-$ property tax mode (additive + optional, defaults preserve the
-  // percent path byte-for-byte → INVESTCALC_SCHEMA_VERSION intentionally
-  // NOT bumped, same precedent as the STR fields below). propertyTaxAnnual
-  // caps at 1M/yr via optionalMoneyMo — plenty for any residential bill.
-  // .default("percent"): share-link v1 payloads + saved snapshots predate
-  // this field — a REQUIRED enum would fail their safeParse and break
-  // every existing link (§8). Missing → percent → old behavior exactly.
-  propertyTaxInputMode: propertyTaxInputModeSchema.default("percent"),
-  propertyTaxAnnual: optionalMoneyMo,
-  insuranceInputMode: insuranceInputModeSchema,
-  insurancePct: optionalPercent,
-  insuranceMonthly: optionalMoneyMo,
-  hoaMonthly: optionalMoneyMo,
-  utilitiesMonthly: optionalMoneyMo,
-  // Short-term-rental income model (the "Short-term Rental" strategy). When
-  // avgDailyRate is set, calc-analysis derives monthly income from
-  // ADR × occupancy × 365 / 12 instead of monthlyRent, and strFurnishingCost is
-  // a one-time startup cost added to cash required. Additive + optional, so
-  // INVESTCALC_SCHEMA_VERSION is intentionally NOT bumped (existing snapshots
-  // still parse; STR fields default to undefined → long-term-rent behavior).
-  avgDailyRate: optionalMoneyMo,
-  occupancyPct: optionalPercent,
-  strFurnishingCost: optionalMoneyMo,
-  // Up-front rehab / initial repairs (value-add deals). A one-time cost added to
-  // cash required — it lowers cash-on-cash, just like STR furnishing. Kept
-  // honest in v1: it does NOT change the depreciation basis or appreciation.
-  // Additive + optional, so INVESTCALC_SCHEMA_VERSION is intentionally NOT bumped.
-  rehabBudget: optionalMoneyMo,
-}).superRefine((values, ctx) => {
-  if (typeof values.yearBuilt === "number") {
-    // Once v1 carries an explicit audit date, validation follows that same
-    // date as its Property Age calculation. Otherwise an identical dated
-    // payload could be rejected in December and accepted after a later
-    // calendar-year boundary. Missing-date editor/legacy validation and v2
-    // deliberately retain their released current-year input bound; the v1
-    // calculation itself still uses the documented deterministic fallback.
-    const comparisonYear =
-      values.underwritingModelVersion !== "2.0" && values.analysisDate
-        ? Number(resolveV1AnalysisDate(values.analysisDate).slice(0, 4))
-        : new Date().getFullYear();
-    if (values.yearBuilt > comparisonYear + 5) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["yearBuilt"],
-        message: "Year too far in future",
-      });
-    }
-  }
-
-  if (values.underwritingModelVersion === "2.0") {
-    const requireNumber = (
-      field:
-        | "acquisitionCredits"
-        | "recurringOtherIncomeMonthly"
-        | "recurringOtherExpenseMonthly"
-        | "loanFees"
-        | "initialReserve"
-        | "hoaMonthly"
-        | "utilitiesMonthly"
-        | "rehabBudget",
-      label: string
-    ) => {
-      if (typeof values[field] !== "number" || !Number.isFinite(values[field])) {
+    /** Monthly $ overrides when using advanced operating expenses; omitted = use auto estimates / zero. */
+    propertyTaxPct: optionalPercent,
+    // Annual-$ property tax mode (additive + optional, defaults preserve the
+    // percent path byte-for-byte → INVESTCALC_SCHEMA_VERSION intentionally
+    // NOT bumped, same precedent as the STR fields below). propertyTaxAnnual
+    // caps at 1M/yr via optionalMoneyMo — plenty for any residential bill.
+    // .default("percent"): share-link v1 payloads + saved snapshots predate
+    // this field — a REQUIRED enum would fail their safeParse and break
+    // every existing link (§8). Missing → percent → old behavior exactly.
+    propertyTaxInputMode: propertyTaxInputModeSchema.default("percent"),
+    propertyTaxAnnual: optionalMoneyMo,
+    insuranceInputMode: insuranceInputModeSchema,
+    insurancePct: optionalPercent,
+    insuranceMonthly: optionalMoneyMo,
+    hoaMonthly: optionalMoneyMo,
+    utilitiesMonthly: optionalMoneyMo,
+    // Short-term-rental income model (the "Short-term Rental" strategy). When
+    // avgDailyRate is set, calc-analysis derives monthly income from
+    // ADR × occupancy × 365 / 12 instead of monthlyRent, and strFurnishingCost is
+    // a one-time startup cost added to cash required. Additive + optional, so
+    // INVESTCALC_SCHEMA_VERSION is intentionally NOT bumped (existing snapshots
+    // still parse; STR fields default to undefined → long-term-rent behavior).
+    avgDailyRate: optionalMoneyMo,
+    occupancyPct: optionalPercent,
+    strFurnishingCost: optionalMoneyMo,
+    // Up-front rehab / initial repairs (value-add deals). A one-time cost added to
+    // cash required — it lowers cash-on-cash, just like STR furnishing. Kept
+    // honest in v1: it does NOT change the depreciation basis or appreciation.
+    // Additive + optional, so INVESTCALC_SCHEMA_VERSION is intentionally NOT bumped.
+    rehabBudget: optionalMoneyMo,
+    // Durable specialist-model inputs. They remain optional and are ignored by
+    // the core rental engine, but they change the persisted editor contract;
+    // schema version 11 records that boundary. BRRRR/flip cards consume them so
+    // ARV, refi, hold, and sale assumptions survive draft/save/share/reopen.
+    strategyArv: optionalPositiveMoney,
+    strategyHoldMonths: optionalUnitNumber(
+      z
+        .number({ invalid_type_error: "Enter hold months" })
+        .int("Use whole months")
+        .min(0, "Min 0 months")
+        .max(120, "Max 120 months"),
+    ),
+    brrrrRefiLtvPct: optionalPercent,
+    brrrrRefiRatePct: optionalInterestRate,
+    brrrrRefiTermYears: optionalUnitNumber(
+      z
+        .number({ invalid_type_error: "Enter refinance term" })
+        .int("Use whole years")
+        .min(1, "Min 1 year")
+        .max(50, "Max 50 years"),
+    ),
+    brrrrRefiClosingCostsPct: optionalUnitNumber(
+      z
+        .number({ invalid_type_error: "Enter refinance closing costs" })
+        .min(0, "Min 0%")
+        .max(20, "Max 20%"),
+    ),
+    fixFlipSellingCostsPct: optionalUnitNumber(
+      z
+        .number({ invalid_type_error: "Enter selling costs" })
+        .min(0, "Min 0%")
+        .max(30, "Max 30%"),
+    ),
+    fixFlipDownPaymentPct: optionalPercent,
+    fixFlipCarryMonthly: optionalMoneyMo,
+  })
+  .superRefine((values, ctx) => {
+    if (typeof values.yearBuilt === "number") {
+      // Once v1 carries an explicit audit date, validation follows that same
+      // date as its Property Age calculation. Otherwise an identical dated
+      // payload could be rejected in December and accepted after a later
+      // calendar-year boundary. Missing-date editor/legacy validation and v2
+      // deliberately retain their released current-year input bound; the v1
+      // calculation itself still uses the documented deterministic fallback.
+      const comparisonYear =
+        values.underwritingModelVersion !== "2.0" && values.analysisDate
+          ? Number(resolveV1AnalysisDate(values.analysisDate).slice(0, 4))
+          : new Date().getFullYear();
+      if (values.yearBuilt > comparisonYear + 5) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          path: [field],
-          message: `Enter ${label} or type 0`,
+          path: ["yearBuilt"],
+          message: "Year too far in future",
+        });
+      }
+    }
+
+    if (values.underwritingModelVersion === "2.0") {
+      const requireNumber = (
+        field:
+          | "acquisitionCredits"
+          | "recurringOtherIncomeMonthly"
+          | "recurringOtherExpenseMonthly"
+          | "loanFees"
+          | "initialReserve"
+          | "hoaMonthly"
+          | "utilitiesMonthly"
+          | "rehabBudget",
+        label: string,
+      ) => {
+        if (
+          typeof values[field] !== "number" ||
+          !Number.isFinite(values[field])
+        ) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: [field],
+            message: `Enter ${label} or type 0`,
+          });
+        }
+      };
+
+      if (!values.analysisDate) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["analysisDate"],
+          message: "Enter the analysis date",
+        });
+      }
+      if (
+        typeof values.unitCount !== "number" ||
+        !Number.isFinite(values.unitCount)
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["unitCount"],
+          message: "Enter unit count",
+        });
+      }
+      if (!values.operatingScenario) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["operatingScenario"],
+          message: "Select current or stabilized operations",
+        });
+      }
+      if (!values.rentBasis) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["rentBasis"],
+          message: "Select the scheduled-rent basis",
+        });
+      }
+
+      const selectedRentField =
+        values.operatingScenario === "stabilized"
+          ? ("stabilizedMonthlyRent" as const)
+          : ("currentMonthlyRent" as const);
+      const selectedRent = values[selectedRentField];
+      if (
+        typeof selectedRent !== "number" ||
+        !Number.isFinite(selectedRent) ||
+        selectedRent <= 0
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: [selectedRentField],
+          message: "Enter scheduled monthly rent greater than 0",
+        });
+      }
+
+      requireNumber("acquisitionCredits", "acquisition credits");
+      requireNumber(
+        "recurringOtherIncomeMonthly",
+        "recurring other monthly income",
+      );
+      requireNumber(
+        "recurringOtherExpenseMonthly",
+        "recurring other monthly expense",
+      );
+      requireNumber("loanFees", "loan fees");
+      requireNumber("initialReserve", "initial reserve");
+      requireNumber("hoaMonthly", "monthly HOA");
+      requireNumber("utilitiesMonthly", "monthly owner-paid utilities");
+      requireNumber("rehabBudget", "cash-funded immediate repairs");
+
+      if (!values.closingCostsInputMode) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["closingCostsInputMode"],
+          message: "Select fixed or percentage closing costs",
+        });
+      } else if (
+        values.closingCostsInputMode === "percent" &&
+        (typeof values.closingCostsPct !== "number" ||
+          !Number.isFinite(values.closingCostsPct))
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["closingCostsPct"],
+          message: "Enter closing cost % or type 0",
+        });
+      } else if (
+        values.closingCostsInputMode === "fixed" &&
+        (typeof values.closingCostsFixed !== "number" ||
+          !Number.isFinite(values.closingCostsFixed))
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["closingCostsFixed"],
+          message: "Enter fixed closing costs or type 0",
+        });
+      }
+
+      if (!values.financingMode) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["financingMode"],
+          message: "Select cash or a financing structure",
+        });
+      } else if (values.financingMode === "fixed-down") {
+        if (
+          typeof values.fixedDownPaymentAmount !== "number" ||
+          !Number.isFinite(values.fixedDownPaymentAmount)
+        ) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["fixedDownPaymentAmount"],
+            message: "Enter the fixed down payment",
+          });
+        } else if (values.fixedDownPaymentAmount > values.purchasePrice) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["fixedDownPaymentAmount"],
+            message: "Down payment cannot exceed purchase price",
+          });
+        }
+      } else if (values.financingMode === "fixed-loan") {
+        if (
+          typeof values.fixedLoanAmount !== "number" ||
+          !Number.isFinite(values.fixedLoanAmount)
+        ) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["fixedLoanAmount"],
+            message: "Enter the fixed loan amount",
+          });
+        } else if (values.fixedLoanAmount > values.purchasePrice) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["fixedLoanAmount"],
+            message: "Loan amount cannot exceed purchase price",
+          });
+        }
+      }
+      if (values.financingMode === "cash" && values.loanFees !== 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["loanFees"],
+          message: "Cash acquisitions must use $0 loan fees",
+        });
+      }
+
+      if (
+        values.propertyTaxInputMode === "annual" &&
+        (typeof values.propertyTaxAnnual !== "number" ||
+          !Number.isFinite(values.propertyTaxAnnual))
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["propertyTaxAnnual"],
+          message: "Enter the annual property tax or type 0",
+        });
+      }
+      if (
+        values.insuranceInputMode === "monthly" &&
+        (typeof values.insuranceMonthly !== "number" ||
+          !Number.isFinite(values.insuranceMonthly))
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["insuranceMonthly"],
+          message: "Enter monthly insurance or type 0",
+        });
+      }
+
+      const closingCosts =
+        values.closingCostsInputMode === "fixed"
+          ? values.closingCostsFixed
+          : typeof values.closingCostsPct === "number"
+            ? values.purchasePrice * (values.closingCostsPct / 100)
+            : undefined;
+      const downPayment =
+        values.financingMode === "cash"
+          ? values.purchasePrice
+          : values.financingMode === "fixed-down"
+            ? values.fixedDownPaymentAmount
+            : values.financingMode === "fixed-loan" &&
+                typeof values.fixedLoanAmount === "number"
+              ? values.purchasePrice - values.fixedLoanAmount
+              : values.financingMode === "percent-down"
+                ? values.purchasePrice * (values.downPaymentPct / 100)
+                : undefined;
+      if (
+        typeof values.acquisitionCredits === "number" &&
+        typeof downPayment === "number" &&
+        typeof closingCosts === "number" &&
+        typeof values.loanFees === "number" &&
+        typeof values.rehabBudget === "number" &&
+        typeof values.initialReserve === "number" &&
+        values.acquisitionCredits >
+          downPayment +
+            closingCosts +
+            values.loanFees +
+            values.rehabBudget +
+            values.initialReserve
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["acquisitionCredits"],
+          message: "Credits cannot exceed modeled acquisition cash uses",
+        });
+      }
+
+      // v2 uses one explicit property-total scheduled-rent line. Unit rows may
+      // still hold property facts, but they cannot silently replace that line.
+      return;
+    }
+
+    const addSingleFamilyUnitDetailsIssues = () => {
+      // Only monthlyRent is REQUIRED for a single-family run — it's the one
+      // input the cash-flow math can't proceed without. Bedrooms is now OPTIONAL
+      // (Jun 2026): the per-strategy focus flows (e.g. Wholesale → MAO) need an
+      // address-only path, and beds aren't used by calc-analysis or the Deal
+      // Score — they only drive the HUD rent auto-fill + richer reports. Baths +
+      // square feet are likewise optional. Range checks still apply when a value
+      // IS provided (see the field-level schemas above). This loosening is
+      // backward-compatible, so INVESTCALC_SCHEMA_VERSION is intentionally NOT
+      // bumped (existing snapshots still parse).
+      const b = values.bedrooms;
+      if (typeof b === "number" && Number.isFinite(b)) {
+        if (b < 0) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["bedrooms"],
+            message: "Min 0",
+          });
+        } else if (b > 20) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["bedrooms"],
+            message: "Max 20",
+          });
+        }
+      }
+
+      // STR mode is income-driven by nightly rate × occupancy, so monthlyRent
+      // isn't required — both STR inputs are. Treat the presence of EITHER STR
+      // field as STR intent so the validation guides the user to fill the other
+      // (on a visible STR input) rather than erroring on the hidden rent field.
+      const adr = values.avgDailyRate;
+      const occ = values.occupancyPct;
+      const hasAdr = typeof adr === "number" && Number.isFinite(adr) && adr > 0;
+      const hasOcc = typeof occ === "number" && Number.isFinite(occ) && occ > 0;
+      if (hasAdr || hasOcc) {
+        if (!hasAdr) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["avgDailyRate"],
+            message: "Enter a nightly rate",
+          });
+        }
+        if (!hasOcc) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["occupancyPct"],
+            message: "Enter occupancy %",
+          });
+        }
+        return;
+      }
+      const r = values.monthlyRent;
+      if (typeof r !== "number" || !Number.isFinite(r)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["monthlyRent"],
+          message: "Enter monthly rent",
+        });
+      } else if (r <= 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["monthlyRent"],
+          message: "Rent must be greater than 0",
         });
       }
     };
 
-    if (!values.analysisDate) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["analysisDate"],
-        message: "Enter the analysis date",
-      });
-    }
-    if (typeof values.unitCount !== "number" || !Number.isFinite(values.unitCount)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["unitCount"],
-        message: "Enter unit count",
-      });
-    }
-    if (!values.operatingScenario) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["operatingScenario"],
-        message: "Select current or stabilized operations",
-      });
-    }
-    if (!values.rentBasis) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["rentBasis"],
-        message: "Select the scheduled-rent basis",
-      });
-    }
+    const addUnitRowFieldIssues = (
+      unit: z.infer<typeof unitSchema> | undefined,
+      index: number,
+      options?: { allowZeroRent?: boolean },
+    ) => {
+      const u = unit ?? {};
 
-    const selectedRentField =
-      values.operatingScenario === "stabilized"
-        ? ("stabilizedMonthlyRent" as const)
-        : ("currentMonthlyRent" as const);
-    const selectedRent = values[selectedRentField];
-    if (typeof selectedRent !== "number" || !Number.isFinite(selectedRent) || selectedRent <= 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: [selectedRentField],
-        message: "Enter scheduled monthly rent greater than 0",
-      });
-    }
-
-    requireNumber("acquisitionCredits", "acquisition credits");
-    requireNumber("recurringOtherIncomeMonthly", "recurring other monthly income");
-    requireNumber("recurringOtherExpenseMonthly", "recurring other monthly expense");
-    requireNumber("loanFees", "loan fees");
-    requireNumber("initialReserve", "initial reserve");
-    requireNumber("hoaMonthly", "monthly HOA");
-    requireNumber("utilitiesMonthly", "monthly owner-paid utilities");
-    requireNumber("rehabBudget", "cash-funded immediate repairs");
-
-    if (!values.closingCostsInputMode) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["closingCostsInputMode"],
-        message: "Select fixed or percentage closing costs",
-      });
-    } else if (
-      values.closingCostsInputMode === "percent" &&
-      (typeof values.closingCostsPct !== "number" || !Number.isFinite(values.closingCostsPct))
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["closingCostsPct"],
-        message: "Enter closing cost % or type 0",
-      });
-    } else if (
-      values.closingCostsInputMode === "fixed" &&
-      (typeof values.closingCostsFixed !== "number" || !Number.isFinite(values.closingCostsFixed))
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["closingCostsFixed"],
-        message: "Enter fixed closing costs or type 0",
-      });
-    }
-
-    if (!values.financingMode) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["financingMode"],
-        message: "Select cash or a financing structure",
-      });
-    } else if (values.financingMode === "fixed-down") {
+      // Only rent is required per unit (beds/baths/sqft never touch the math
+      // and are range-checked by unitSchema when provided) — so this flags
+      // just the one field the deal genuinely can't run without. This branch
+      // now only fires for a unit that's missing its rent (isValidRentalUnit
+      // gates on rent alone), so it never re-walls the fact fields.
       if (
-        typeof values.fixedDownPaymentAmount !== "number" ||
-        !Number.isFinite(values.fixedDownPaymentAmount)
+        typeof u.monthlyRent !== "number" ||
+        !Number.isFinite(u.monthlyRent)
       ) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          path: ["fixedDownPaymentAmount"],
-          message: "Enter the fixed down payment",
+          path: ["units", index, "monthlyRent"],
+          message: "Enter monthly rent",
         });
-      } else if (values.fixedDownPaymentAmount > values.purchasePrice) {
+      } else if (
+        options?.allowZeroRent ? u.monthlyRent < 0 : u.monthlyRent <= 0
+      ) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          path: ["fixedDownPaymentAmount"],
-          message: "Down payment cannot exceed purchase price",
+          path: ["units", index, "monthlyRent"],
+          message: options?.allowZeroRent
+            ? "Rent must be 0 or more"
+            : "Rent must be greater than 0",
         });
       }
-    } else if (values.financingMode === "fixed-loan") {
-      if (typeof values.fixedLoanAmount !== "number" || !Number.isFinite(values.fixedLoanAmount)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["fixedLoanAmount"],
-          message: "Enter the fixed loan amount",
-        });
-      } else if (values.fixedLoanAmount > values.purchasePrice) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["fixedLoanAmount"],
-          message: "Loan amount cannot exceed purchase price",
-        });
-      }
-    }
-    if (values.financingMode === "cash" && values.loanFees !== 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["loanFees"],
-        message: "Cash acquisitions must use $0 loan fees",
-      });
+    };
+
+    if (values.propertyType === "single-family") {
+      addSingleFamilyUnitDetailsIssues();
+      return;
     }
 
     if (
-      values.propertyTaxInputMode === "annual" &&
-      (typeof values.propertyTaxAnnual !== "number" || !Number.isFinite(values.propertyTaxAnnual))
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["propertyTaxAnnual"],
-        message: "Enter the annual property tax or type 0",
-      });
-    }
-    if (
-      values.insuranceInputMode === "monthly" &&
-      (typeof values.insuranceMonthly !== "number" || !Number.isFinite(values.insuranceMonthly))
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["insuranceMonthly"],
-        message: "Enter monthly insurance or type 0",
-      });
-    }
+      values.propertyType !== "multi-family" &&
+      values.propertyType !== "owner-occupant"
+    )
+      return;
 
-    const closingCosts =
-      values.closingCostsInputMode === "fixed"
-        ? values.closingCostsFixed
-        : typeof values.closingCostsPct === "number"
-          ? values.purchasePrice * (values.closingCostsPct / 100)
-          : undefined;
-    const downPayment =
-      values.financingMode === "cash"
-        ? values.purchasePrice
-        : values.financingMode === "fixed-down"
-          ? values.fixedDownPaymentAmount
-          : values.financingMode === "fixed-loan" && typeof values.fixedLoanAmount === "number"
-            ? values.purchasePrice - values.fixedLoanAmount
-            : values.financingMode === "percent-down"
-              ? values.purchasePrice * (values.downPaymentPct / 100)
-              : undefined;
-    if (
-      typeof values.acquisitionCredits === "number" &&
-      typeof downPayment === "number" &&
-      typeof closingCosts === "number" &&
-      typeof values.loanFees === "number" &&
-      typeof values.rehabBudget === "number" &&
-      typeof values.initialReserve === "number" &&
-      values.acquisitionCredits >
-        downPayment +
-          closingCosts +
-          values.loanFees +
-          values.rehabBudget +
-          values.initialReserve
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["acquisitionCredits"],
-        message: "Credits cannot exceed modeled acquisition cash uses",
-      });
-    }
-
-    // v2 uses one explicit property-total scheduled-rent line. Unit rows may
-    // still hold property facts, but they cannot silently replace that line.
-    return;
-  }
-
-  const addSingleFamilyUnitDetailsIssues = () => {
-    // Only monthlyRent is REQUIRED for a single-family run — it's the one
-    // input the cash-flow math can't proceed without. Bedrooms is now OPTIONAL
-    // (Jun 2026): the per-strategy focus flows (e.g. Wholesale → MAO) need an
-    // address-only path, and beds aren't used by calc-analysis or the Deal
-    // Score — they only drive the HUD rent auto-fill + richer reports. Baths +
-    // square feet are likewise optional. Range checks still apply when a value
-    // IS provided (see the field-level schemas above). This loosening is
-    // backward-compatible, so INVESTCALC_SCHEMA_VERSION is intentionally NOT
-    // bumped (existing snapshots still parse).
-    const b = values.bedrooms;
-    if (typeof b === "number" && Number.isFinite(b)) {
-      if (b < 0) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["bedrooms"], message: "Min 0" });
-      } else if (b > 20) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["bedrooms"], message: "Max 20" });
+    // Every unit row in the list must be complete (not only "at least one valid unit").
+    // Do not add a parent path ["units"] issue: @hookform/resolvers/zod would collapse
+    // nested per-field errors into a single array-level error and hide inline messages.
+    (values.units ?? []).forEach((unit, index) => {
+      const allowZeroRent =
+        values.propertyType === "owner-occupant" && !!unit?.isOwnerOccupied;
+      if (!isValidRentalUnit(unit, { allowZeroRent })) {
+        addUnitRowFieldIssues(unit, index, { allowZeroRent });
       }
-    }
+    });
 
-    // STR mode is income-driven by nightly rate × occupancy, so monthlyRent
-    // isn't required — both STR inputs are. Treat the presence of EITHER STR
-    // field as STR intent so the validation guides the user to fill the other
-    // (on a visible STR input) rather than erroring on the hidden rent field.
-    const adr = values.avgDailyRate;
-    const occ = values.occupancyPct;
-    const hasAdr = typeof adr === "number" && Number.isFinite(adr) && adr > 0;
-    const hasOcc = typeof occ === "number" && Number.isFinite(occ) && occ > 0;
-    if (hasAdr || hasOcc) {
-      if (!hasAdr) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["avgDailyRate"], message: "Enter a nightly rate" });
-      }
-      if (!hasOcc) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["occupancyPct"], message: "Enter occupancy %" });
+    const units = values.units ?? [];
+    if (values.propertyType === "multi-family") {
+      if (!units.some((unit) => isValidRentalUnit(unit))) {
+        // Per-row validation above already identifies a present row with an
+        // invalid rent. This explicit empty-list guard closes the remaining
+        // path where [] used to parse and calculate a meaningless $0-rent deal.
+        if (units.length === 0) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["units", 0, "monthlyRent"],
+            message: "Add at least one rental unit with rent greater than 0.",
+          });
+        }
       }
       return;
     }
-    const r = values.monthlyRent;
-    if (typeof r !== "number" || !Number.isFinite(r)) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["monthlyRent"], message: "Enter monthly rent" });
-    } else if (r <= 0) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["monthlyRent"], message: "Rent must be greater than 0" });
-    }
-  };
 
-  const addUnitRowFieldIssues = (
-    unit: z.infer<typeof unitSchema> | undefined,
-    index: number,
-    options?: { allowZeroRent?: boolean }
-  ) => {
-    const u = unit ?? {};
+    const ownerOccupiedIndexes = units.reduce<number[]>(
+      (indexes, unit, index) => {
+        if (unit?.isOwnerOccupied) indexes.push(index);
+        return indexes;
+      },
+      [],
+    );
 
-    // Only rent is required per unit (beds/baths/sqft never touch the math
-    // and are range-checked by unitSchema when provided) — so this flags
-    // just the one field the deal genuinely can't run without. This branch
-    // now only fires for a unit that's missing its rent (isValidRentalUnit
-    // gates on rent alone), so it never re-walls the fact fields.
-    if (typeof u.monthlyRent !== "number" || !Number.isFinite(u.monthlyRent)) {
+    if (ownerOccupiedIndexes.length === 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ["units", index, "monthlyRent"],
-        message: "Enter monthly rent",
-      });
-    } else if (options?.allowZeroRent ? u.monthlyRent < 0 : u.monthlyRent <= 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["units", index, "monthlyRent"],
-        message: options?.allowZeroRent ? "Rent must be 0 or more" : "Rent must be greater than 0",
+        path: ["units", 0, "isOwnerOccupied"],
+        message: "Choose which unit is owner occupied.",
       });
     }
-  };
 
-  if (values.propertyType === "single-family") {
-    addSingleFamilyUnitDetailsIssues();
-    return;
-  }
-
-  if (values.propertyType !== "multi-family" && values.propertyType !== "owner-occupant") return;
-
-  // Every unit row in the list must be complete (not only "at least one valid unit").
-  // Do not add a parent path ["units"] issue: @hookform/resolvers/zod would collapse
-  // nested per-field errors into a single array-level error and hide inline messages.
-  (values.units ?? []).forEach((unit, index) => {
-    const allowZeroRent = values.propertyType === "owner-occupant" && !!unit?.isOwnerOccupied;
-    if (!isValidRentalUnit(unit, { allowZeroRent })) {
-      addUnitRowFieldIssues(unit, index, { allowZeroRent });
-    }
-  });
-
-  const units = values.units ?? [];
-  if (values.propertyType === "multi-family") {
-    if (!units.some((unit) => isValidRentalUnit(unit))) {
-      // Per-row validation above already identifies a present row with an
-      // invalid rent. This explicit empty-list guard closes the remaining
-      // path where [] used to parse and calculate a meaningless $0-rent deal.
-      if (units.length === 0) {
+    if (ownerOccupiedIndexes.length > 1) {
+      ownerOccupiedIndexes.forEach((index) => {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          path: ["units", 0, "monthlyRent"],
-          message: "Add at least one rental unit with rent greater than 0.",
+          path: ["units", index, "isOwnerOccupied"],
+          message: "Only one unit can be owner occupied.",
         });
-      }
+      });
     }
-    return;
-  }
 
-  const ownerOccupiedIndexes = units.reduce<number[]>((indexes, unit, index) => {
-    if (unit?.isOwnerOccupied) indexes.push(index);
-    return indexes;
-  }, []);
+    const hasValidRental = units.some(
+      (u) => isValidRentalUnit(u) && !u.isOwnerOccupied,
+    );
+    if (hasValidRental) return;
 
-  if (ownerOccupiedIndexes.length === 0) {
+    const rentalIdx = units.findIndex((u) => !u?.isOwnerOccupied);
+    // Incomplete rental row: per-field issues were already added above.
+    if (rentalIdx >= 0) return;
+
+    const idx = Math.max(0, units.length - 1);
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      path: ["units", 0, "isOwnerOccupied"],
-      message: "Choose which unit is owner occupied.",
+      path: ["units", idx, "monthlyRent"],
+      message: "Add a rental unit row (Add Unit) and enter its monthly rent.",
     });
-  }
-
-  if (ownerOccupiedIndexes.length > 1) {
-    ownerOccupiedIndexes.forEach((index) => {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["units", index, "isOwnerOccupied"],
-        message: "Only one unit can be owner occupied.",
-      });
-    });
-  }
-
-  const hasValidRental = units.some((u) => isValidRentalUnit(u) && !u.isOwnerOccupied);
-  if (hasValidRental) return;
-
-  const rentalIdx = units.findIndex((u) => !u?.isOwnerOccupied);
-  // Incomplete rental row: per-field issues were already added above.
-  if (rentalIdx >= 0) return;
-
-  const idx = Math.max(0, units.length - 1);
-  ctx.addIssue({
-    code: z.ZodIssueCode.custom,
-    path: ["units", idx, "monthlyRent"],
-    message: "Add a rental unit row (Add Unit) and complete all rental fields.",
   });
-});
 
 export type InvestmentFormValues = z.infer<typeof investmentFormSchema>;
+export const STRATEGY_MODEL_INPUT_FIELDS = [
+  "strategyArv",
+  "strategyHoldMonths",
+  "brrrrRefiLtvPct",
+  "brrrrRefiRatePct",
+  "brrrrRefiTermYears",
+  "brrrrRefiClosingCostsPct",
+  "fixFlipSellingCostsPct",
+  "fixFlipDownPaymentPct",
+  "fixFlipCarryMonthly",
+] as const;
+export type StrategyModelInputField =
+  (typeof STRATEGY_MODEL_INPUT_FIELDS)[number];
+export type StrategyModelInputs = Pick<
+  InvestmentFormValues,
+  StrategyModelInputField
+>;
+export type StrategyInputField = StrategyModelInputField | "rehabBudget";
+export type StrategyInputs = Pick<InvestmentFormValues, StrategyInputField>;
+export type StrategyInputErrors = Partial<Record<StrategyInputField, string>>;
 export type UnitValues = z.infer<typeof unitSchema>;
-export type UnderwritingModelVersion = z.infer<typeof underwritingModelVersionSchema>;
+export type UnderwritingModelVersion = z.infer<
+  typeof underwritingModelVersionSchema
+>;
 export type OperatingScenario = z.infer<typeof operatingScenarioSchema>;
 export type RentBasis = z.infer<typeof rentBasisSchema>;
 export type FinancingMode = z.infer<typeof financingModeSchema>;
@@ -705,12 +883,17 @@ export type ClosingCostsInputMode = z.infer<typeof closingCostsInputModeSchema>;
  * requirement on Run / Save / Share (which still call the full schema). No
  * schema-shape change → INVESTCALC_SCHEMA_VERSION stays put.
  */
-export function previewParse(values: unknown): ReturnType<typeof investmentFormSchema.safeParse> {
+export function previewParse(
+  values: unknown,
+): ReturnType<typeof investmentFormSchema.safeParse> {
   if (values && typeof values === "object" && !Array.isArray(values)) {
     const v = values as Record<string, unknown>;
     const addr = v.address;
     if (typeof addr !== "string" || addr.trim().length < 5) {
-      return investmentFormSchema.safeParse({ ...v, address: "Preview property" });
+      return investmentFormSchema.safeParse({
+        ...v,
+        address: "Preview property",
+      });
     }
   }
   return investmentFormSchema.safeParse(values);
@@ -750,8 +933,23 @@ export const defaultValues: Partial<InvestmentFormValues> = {
   occupancyPct: undefined,
   strFurnishingCost: undefined,
   rehabBudget: undefined,
+  strategyArv: undefined,
+  strategyHoldMonths: undefined,
+  brrrrRefiLtvPct: undefined,
+  brrrrRefiRatePct: undefined,
+  brrrrRefiTermYears: undefined,
+  brrrrRefiClosingCostsPct: undefined,
+  fixFlipSellingCostsPct: undefined,
+  fixFlipDownPaymentPct: undefined,
+  fixFlipCarryMonthly: undefined,
   units: [
-    { bedrooms: undefined, bathrooms: undefined, sqft: undefined, monthlyRent: undefined, isOwnerOccupied: false },
+    {
+      bedrooms: undefined,
+      bathrooms: undefined,
+      sqft: undefined,
+      monthlyRent: undefined,
+      isOwnerOccupied: false,
+    },
   ],
   downPaymentPct: 20,
   interestRate: 6.75,
@@ -789,7 +987,7 @@ export const defaultValues: Partial<InvestmentFormValues> = {
  * purpose: the UI must ask the user to confirm those property-specific values.
  */
 export function getUnderwritingV2StartingDefaults(
-  analysisDate: string
+  analysisDate: string,
 ): Partial<InvestmentFormValues> {
   return {
     underwritingModelVersion: "2.0",
@@ -809,13 +1007,15 @@ export function getUnderwritingV2StartingDefaults(
 }
 
 function asRecord(value: unknown): Record<string, unknown> | null {
-  if (value && typeof value === "object" && !Array.isArray(value)) return value as Record<string, unknown>;
+  if (value && typeof value === "object" && !Array.isArray(value))
+    return value as Record<string, unknown>;
   return null;
 }
 
 function asNumber(value: unknown): number | undefined {
   if (value === undefined || value === null || value === "") return undefined;
-  if (typeof value === "number") return Number.isFinite(value) ? value : undefined;
+  if (typeof value === "number")
+    return Number.isFinite(value) ? value : undefined;
   if (typeof value === "string") {
     const parsed = Number(value);
     return Number.isFinite(parsed) ? parsed : undefined;
@@ -848,7 +1048,7 @@ function normalizeUnit(raw: unknown): UnitValues {
 function sanitizeSnapshotFields(
   snapshot: Record<string, unknown>,
   propertyType: InvestmentFormValues["propertyType"],
-  units: UnitValues[]
+  units: UnitValues[],
 ) {
   // Legacy (pre-2026-04-28, schema v7/v8) snapshots predate
   // insuranceInputMode — back then a stored insuranceMonthly WAS the typed
@@ -859,7 +1059,8 @@ function sanitizeSnapshotFields(
   // snapshots always serialize the mode, so this never fires on them.
   const legacyInsuranceMonthly = asNumber(snapshot.insuranceMonthly);
   const insuranceInputMode =
-    snapshot.insuranceInputMode === "monthly" || snapshot.insuranceInputMode === "percent"
+    snapshot.insuranceInputMode === "monthly" ||
+    snapshot.insuranceInputMode === "percent"
       ? snapshot.insuranceInputMode
       : legacyInsuranceMonthly !== undefined &&
           legacyInsuranceMonthly > 0 &&
@@ -895,7 +1096,8 @@ function sanitizeSnapshotFields(
     sellingCostPct: asNumber(snapshot.sellingCostPct),
     propertyTaxPct: asNumber(snapshot.propertyTaxPct),
     propertyTaxInputMode:
-      snapshot.propertyTaxInputMode === "annual" || snapshot.propertyTaxInputMode === "percent"
+      snapshot.propertyTaxInputMode === "annual" ||
+      snapshot.propertyTaxInputMode === "percent"
         ? snapshot.propertyTaxInputMode
         : ("percent" as const),
     propertyTaxAnnual: asNumber(snapshot.propertyTaxAnnual),
@@ -908,8 +1110,18 @@ function sanitizeSnapshotFields(
     occupancyPct: asNumber(snapshot.occupancyPct),
     strFurnishingCost: asNumber(snapshot.strFurnishingCost),
     rehabBudget: asNumber(snapshot.rehabBudget),
+    strategyArv: asNumber(snapshot.strategyArv),
+    strategyHoldMonths: asNumber(snapshot.strategyHoldMonths),
+    brrrrRefiLtvPct: asNumber(snapshot.brrrrRefiLtvPct),
+    brrrrRefiRatePct: asNumber(snapshot.brrrrRefiRatePct),
+    brrrrRefiTermYears: asNumber(snapshot.brrrrRefiTermYears),
+    brrrrRefiClosingCostsPct: asNumber(snapshot.brrrrRefiClosingCostsPct),
+    fixFlipSellingCostsPct: asNumber(snapshot.fixFlipSellingCostsPct),
+    fixFlipDownPaymentPct: asNumber(snapshot.fixFlipDownPaymentPct),
+    fixFlipCarryMonthly: asNumber(snapshot.fixFlipCarryMonthly),
     units,
-    templateId: typeof snapshot.templateId === "string" ? snapshot.templateId : undefined,
+    templateId:
+      typeof snapshot.templateId === "string" ? snapshot.templateId : undefined,
   };
 }
 
@@ -920,7 +1132,9 @@ function sanitizeSnapshotFields(
  */
 function sanitizeVersionedSnapshotFields(snapshot: Record<string, unknown>) {
   const analysisDate =
-    typeof snapshot.analysisDate === "string" ? snapshot.analysisDate : undefined;
+    typeof snapshot.analysisDate === "string"
+      ? snapshot.analysisDate
+      : undefined;
   const underwritingModelVersion =
     snapshot.underwritingModelVersion === "1.0" ||
     snapshot.underwritingModelVersion === "2.0"
@@ -929,7 +1143,10 @@ function sanitizeVersionedSnapshotFields(snapshot: Record<string, unknown>) {
 
   if (!underwritingModelVersion) return analysisDate ? { analysisDate } : {};
   if (underwritingModelVersion === "1.0") {
-    return { underwritingModelVersion, ...(analysisDate ? { analysisDate } : {}) };
+    return {
+      underwritingModelVersion,
+      ...(analysisDate ? { analysisDate } : {}),
+    };
   }
 
   return {
@@ -937,7 +1154,8 @@ function sanitizeVersionedSnapshotFields(snapshot: Record<string, unknown>) {
     analysisDate,
     unitCount: asNumber(snapshot.unitCount),
     operatingScenario:
-      snapshot.operatingScenario === "current" || snapshot.operatingScenario === "stabilized"
+      snapshot.operatingScenario === "current" ||
+      snapshot.operatingScenario === "stabilized"
         ? snapshot.operatingScenario
         : undefined,
     rentBasis:
@@ -950,7 +1168,9 @@ function sanitizeVersionedSnapshotFields(snapshot: Record<string, unknown>) {
     stabilizedMonthlyRent: asNumber(snapshot.stabilizedMonthlyRent),
     acquisitionCredits: asNumber(snapshot.acquisitionCredits),
     recurringOtherIncomeMonthly: asNumber(snapshot.recurringOtherIncomeMonthly),
-    recurringOtherExpenseMonthly: asNumber(snapshot.recurringOtherExpenseMonthly),
+    recurringOtherExpenseMonthly: asNumber(
+      snapshot.recurringOtherExpenseMonthly,
+    ),
     financingMode:
       snapshot.financingMode === "cash" ||
       snapshot.financingMode === "percent-down" ||
@@ -971,7 +1191,9 @@ function sanitizeVersionedSnapshotFields(snapshot: Record<string, unknown>) {
   };
 }
 
-export function normalizeInvestmentFormSnapshot(raw: unknown): InvestmentFormValues | null {
+export function normalizeInvestmentFormSnapshot(
+  raw: unknown,
+): InvestmentFormValues | null {
   // Saved rows get the legacy unit-drop retry; the DRAFT path must NOT
   // (normalizeInvestmentFormDraft calls the core with dropInvalidUnits
   // false) — an interrupted draft's mid-typing unit row is exactly what
@@ -981,7 +1203,7 @@ export function normalizeInvestmentFormSnapshot(raw: unknown): InvestmentFormVal
 
 function normalizeSnapshotCore(
   raw: unknown,
-  opts: { dropInvalidUnits: boolean }
+  opts: { dropInvalidUnits: boolean },
 ): InvestmentFormValues | null {
   const snapshot = asRecord(raw);
   if (!snapshot) return null;
@@ -1017,10 +1239,12 @@ function normalizeSnapshotCore(
     // never store such units, so the retry only ever fires on legacy rows.
     const retryUnits = units.filter((unit) =>
       isValidRentalUnit(unit, {
-        allowZeroRent: propertyType === "owner-occupant" && !!unit.isOwnerOccupied,
-      })
+        allowZeroRent:
+          propertyType === "owner-occupant" && !!unit.isOwnerOccupied,
+      }),
     );
-    if (retryUnits.length === 0 || retryUnits.length === units.length) return null;
+    if (retryUnits.length === 0 || retryUnits.length === units.length)
+      return null;
     parsed = investmentFormSchema.safeParse({
       ...defaultValues,
       ...snapshot,
@@ -1061,7 +1285,9 @@ const SNAPSHOT_FIELD_LABELS: Record<string, string> = {
  * "open it and re-save" when opening was the failing step). Returns null
  * when the snapshot actually parses (or isn't an object at all).
  */
-export function describeInvestmentFormSnapshotIssue(raw: unknown): string | null {
+export function describeInvestmentFormSnapshotIssue(
+  raw: unknown,
+): string | null {
   const snapshot = asRecord(raw);
   if (!snapshot) return null;
 
@@ -1109,7 +1335,9 @@ export function describeInvestmentFormSnapshotIssue(raw: unknown): string | null
  * what's waived is only the cross-field completeness (rent present, address
  * length) that Run/Save still enforce via the full schema.
  */
-export function normalizeInvestmentFormDraft(raw: unknown): InvestmentFormValues | null {
+export function normalizeInvestmentFormDraft(
+  raw: unknown,
+): InvestmentFormValues | null {
   // dropInvalidUnits false: a draft that fails strict parsing must fall
   // through to the lenient whitelist below (which preserves ALL normalized
   // units, incl. a mid-typing rent-less row) — the saved-row unit-drop
@@ -1134,7 +1362,8 @@ export function normalizeInvestmentFormDraft(raw: unknown): InvestmentFormValues
   // No raw spread here: without a schema parse to strip unknown keys, only
   // the explicit whitelist may reach form.reset. Address is sanitized by
   // hand (it rides the raw spread in the strict path).
-  const address = typeof snapshot.address === "string" ? snapshot.address.slice(0, 300) : "";
+  const address =
+    typeof snapshot.address === "string" ? snapshot.address.slice(0, 300) : "";
 
   return {
     ...defaultValues,
@@ -1144,9 +1373,19 @@ export function normalizeInvestmentFormDraft(raw: unknown): InvestmentFormValues
   } as InvestmentFormValues;
 }
 
-export function getDefaultUnitsForPropertyType(propertyType: InvestmentFormValues["propertyType"]): UnitValues[] {
+export function getDefaultUnitsForPropertyType(
+  propertyType: InvestmentFormValues["propertyType"],
+): UnitValues[] {
   if (propertyType === "single-family") {
-    return [{ bedrooms: undefined, bathrooms: undefined, sqft: undefined, monthlyRent: undefined, isOwnerOccupied: false }];
+    return [
+      {
+        bedrooms: undefined,
+        bathrooms: undefined,
+        sqft: undefined,
+        monthlyRent: undefined,
+        isOwnerOccupied: false,
+      },
+    ];
   }
   if (propertyType === "owner-occupant") {
     // Seed sensible per-unit defaults so a house-hack run doesn't open with a
@@ -1154,12 +1393,36 @@ export function getDefaultUnitsForPropertyType(propertyType: InvestmentFormValue
     // user just fills the rental unit's rent — exactly like single-family
     // requires rent. Beds/baths/sqft are starting points the user adjusts.
     return [
-      { bedrooms: 2, bathrooms: 1, sqft: 900, monthlyRent: 0, isOwnerOccupied: true },
-      { bedrooms: 2, bathrooms: 1, sqft: 900, monthlyRent: undefined, isOwnerOccupied: false },
+      {
+        bedrooms: 2,
+        bathrooms: 1,
+        sqft: 900,
+        monthlyRent: 0,
+        isOwnerOccupied: true,
+      },
+      {
+        bedrooms: 2,
+        bathrooms: 1,
+        sqft: 900,
+        monthlyRent: undefined,
+        isOwnerOccupied: false,
+      },
     ];
   }
   return [
-    { bedrooms: undefined, bathrooms: undefined, sqft: undefined, monthlyRent: undefined, isOwnerOccupied: false },
-    { bedrooms: undefined, bathrooms: undefined, sqft: undefined, monthlyRent: undefined, isOwnerOccupied: false },
+    {
+      bedrooms: undefined,
+      bathrooms: undefined,
+      sqft: undefined,
+      monthlyRent: undefined,
+      isOwnerOccupied: false,
+    },
+    {
+      bedrooms: undefined,
+      bathrooms: undefined,
+      sqft: undefined,
+      monthlyRent: undefined,
+      isOwnerOccupied: false,
+    },
   ];
 }

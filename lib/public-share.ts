@@ -22,35 +22,57 @@ import "server-only";
  */
 
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
-import { INVESTCALC_SCHEMA_VERSION, type InvestmentFormValues } from "@/lib/investcalc-schema";
-import { generateShareToken, hashShareToken, isWellFormedShareToken } from "@/lib/share-token";
+import {
+  INVESTCALC_SCHEMA_VERSION,
+  type InvestmentFormValues,
+} from "@/lib/investcalc-schema";
+import {
+  generateShareToken,
+  hashShareToken,
+  isWellFormedShareToken,
+} from "@/lib/share-token";
 import * as Sentry from "@sentry/nextjs";
 import type { MaoTarget } from "@/lib/max-allowable-offer";
 import { normalizeMaoTarget } from "@/lib/mao-target-editor";
 import {
   isAdoptedOfferCeilingTargetSource,
-  normalizeOfferCeilingTargetSource,
   type OfferCeilingTargetSource,
 } from "@/lib/offer-ceiling-contract";
+import { normalizeExternalOfferCeilingTargetSource } from "@/lib/external-offer-ceiling-provenance";
 import { isPublicShareExpired } from "@/lib/public-share-lifecycle";
 import { calculateAnalysis } from "@/lib/calc-analysis";
 import {
   buildDealScoreInputFromAnalysis,
   computeDealScore,
 } from "@/lib/deal-score";
-import { resolveSavedAnalysisResult } from "@/lib/saved-analysis-methodology";
-import {
-  resolveOfferCeilingForAccess,
-} from "@/lib/offer-ceiling-server";
-import { readRecordedOfferCeiling } from "@/lib/recorded-offer-ceiling";
+import { resolveOfferCeilingForAccess } from "@/lib/offer-ceiling-server";
 import type { OfferCeilingExactResult } from "@/lib/offer-ceiling-access-contract";
 import { isReleasedUnderwritingModel } from "@/lib/underwriting-model-release";
+import {
+  resolveCompatibleAnalyzerStrategyKey,
+  type AnalyzerStrategyKey,
+} from "@/lib/analyzer-strategy-persistence";
+import {
+  buildSpecialistAnalysisSnapshot,
+  SPECIALIST_ANALYSIS_SNAPSHOT_FIELD,
+  type SpecialistAnalysisSnapshot,
+} from "@/lib/specialist-analysis-snapshot";
+import { shouldFreezeSavedMethodology } from "@/lib/saved-analysis-methodology";
 
-export type PublicShareAudience = "investment-partner" | "client" | "lender-review";
+export type PublicShareAudience =
+  | "investment-partner"
+  | "client"
+  | "lender-review";
 export type PublicShareAddressVisibility = "hidden" | "full";
 
 export type PublicShareSnapshot = {
   values: InvestmentFormValues;
+  /** Exact calculator lens captured with the share. */
+  analyzerStrategyKey?: AnalyzerStrategyKey;
+  /** Strict, versioned specialist result frozen when the share was minted.
+   * New rows duplicate the same validated object inside resultSnapshot so
+   * strategy identity and historical report exports stay self-contained. */
+  specialistAnalysis?: SpecialistAnalysisSnapshot;
   /** Exact result captured when the link was minted. Older input-only shares
    * omit it and remain readable through the visibly labeled legacy path. */
   resultSnapshot?: Record<string, unknown>;
@@ -110,8 +132,14 @@ function asRecord(value: unknown): Record<string, unknown> | null {
     : null;
 }
 
-function isMissingTable(error: { code?: string; message?: string } | null): boolean {
-  return !!error && (error.code === "42P01" || /relation .* does not exist/i.test(error.message ?? ""));
+function isMissingTable(
+  error: { code?: string; message?: string } | null,
+): boolean {
+  return (
+    !!error &&
+    (error.code === "42P01" ||
+      /relation .* does not exist/i.test(error.message ?? ""))
+  );
 }
 
 /**
@@ -125,14 +153,11 @@ export async function mintPublicShare(input: {
   dealId?: string | null;
   maoTarget?: MaoTarget;
   maoTargetSource?: OfferCeilingTargetSource;
-  /** Owner-scoped saved result. Omit for a new unsaved analysis; the server
-   * captures the current result itself. */
-  resultSnapshot?: unknown;
-  methodologyVersion?: unknown;
   audience?: PublicShareAudience;
   addressVisibility?: PublicShareAddressVisibility;
   /** The shared purchase price is an automated estimate, not an asking price. */
   priceEstimated?: boolean;
+  analyzerStrategyKey?: AnalyzerStrategyKey;
 }): Promise<string | null> {
   // This helper writes through the service-role client. Keep the invariant
   // local as well as at the server-action boundary so no future caller can
@@ -149,76 +174,59 @@ export async function mintPublicShare(input: {
         ? input.maoTarget
         : undefined;
     const currentResult = calculateAnalysis(input.values);
+    const analyzerStrategyKey = resolveCompatibleAnalyzerStrategyKey(
+      input.analyzerStrategyKey,
+      input.values,
+    );
     const currentScore = computeDealScore(
-      buildDealScoreInputFromAnalysis(input.values, currentResult)
+      buildDealScoreInputFromAnalysis(input.values, currentResult),
     );
-    const hasRecordedInput = input.resultSnapshot !== undefined;
-    const capturedResolution = resolveSavedAnalysisResult({
-      methodologyVersion:
-        hasRecordedInput
-          ? input.methodologyVersion
-          : currentResult.methodologyVersion,
-      resultSnapshot:
-        input.resultSnapshot ?? {
-          ...currentResult,
-          score: currentScore.score,
-          scoreMethodologyVersion: currentScore.scoreMethodologyVersion,
-          recommendation: currentScore.recommendation,
-          riskLevel: currentScore.riskLevel,
-          breakdown: currentScore.breakdown,
-          explanation: currentScore.explanation,
-        },
-      recomputedResult: currentResult,
-      recomputedExtras: {
-        score: currentScore.score,
-        recommendation: currentScore.recommendation,
-        riskLevel: currentScore.riskLevel,
-        breakdown: currentScore.breakdown,
-        explanation: currentScore.explanation,
-      },
-    });
-    if (!capturedResolution.result) return null;
-    const capturedResult = capturedResolution.result as unknown as Record<string, unknown>;
-    const usesRecordedSnapshot = Boolean(
-      hasRecordedInput && capturedResolution.usesRecordedSnapshot
-    );
-    const capturedMethodologyVersion =
-      usesRecordedSnapshot
-        ? capturedResolution.storedMethodologyVersion
-        : currentResult.methodologyVersion;
+    const capturedResult: Record<string, unknown> = {
+      ...currentResult,
+      score: currentScore.score,
+      scoreMethodologyVersion: currentScore.scoreMethodologyVersion,
+      recommendation: currentScore.recommendation,
+      riskLevel: currentScore.riskLevel,
+      breakdown: currentScore.breakdown,
+      explanation: currentScore.explanation,
+    };
+    const capturedMethodologyVersion = currentResult.methodologyVersion;
     if (!capturedMethodologyVersion) return null;
-    const recordedCeiling = usesRecordedSnapshot
-      ? readRecordedOfferCeiling(capturedResult)
-      : { captured: false as const };
-    // For a saved result, the captured target/source are the authority for
-    // the captured exact solve. Never let a future caller pair that number
-    // with different criteria merely by passing mismatched arguments.
-    const snapshotTarget = recordedCeiling.captured
-      ? recordedCeiling.target
-      : adoptedTarget;
-    const snapshotTargetSource = recordedCeiling.captured
-      ? recordedCeiling.source
-      : candidateSource;
-    const offerCeilingAccess =
-      adoptedTarget && !usesRecordedSnapshot
-        ? resolveOfferCeilingForAccess({
-            values: input.values,
-            target: adoptedTarget,
-            source: candidateSource,
-            paidAccess: true,
-          })
-        : null;
-    const shouldCaptureOfferCeiling = Boolean(
-      snapshotTarget &&
-        (recordedCeiling.captured || offerCeilingAccess?.access === "exact")
+    // public_shares is the immutable publication boundary. Never copy a
+    // result_snapshot from saved_analyses: owners can legitimately edit that
+    // workspace row through the data API. Rebuild and freeze every TrueCap
+    // output here, immediately before the service-role insert.
+    const specialistAnalysis = buildSpecialistAnalysisSnapshot(
+      input.values,
+      currentResult,
+      analyzerStrategyKey,
     );
-    const offerCeilingExact = recordedCeiling.captured
-      ? recordedCeiling.exact
-      : offerCeilingAccess?.access === "exact"
+    capturedResult.analyzerStrategyKey = analyzerStrategyKey;
+    delete capturedResult[SPECIALIST_ANALYSIS_SNAPSHOT_FIELD];
+    if (specialistAnalysis) {
+      capturedResult[SPECIALIST_ANALYSIS_SNAPSHOT_FIELD] = specialistAnalysis;
+    }
+    const snapshotTarget = adoptedTarget;
+    const snapshotTargetSource = candidateSource;
+    const offerCeilingAccess = adoptedTarget
+      ? resolveOfferCeilingForAccess({
+          values: input.values,
+          target: adoptedTarget,
+          source: candidateSource,
+          paidAccess: true,
+        })
+      : null;
+    const shouldCaptureOfferCeiling = Boolean(
+      snapshotTarget && offerCeilingAccess?.access === "exact",
+    );
+    const offerCeilingExact =
+      offerCeilingAccess?.access === "exact"
         ? offerCeilingAccess.exact
         : undefined;
     const snapshot: PublicShareSnapshot = {
       values: input.values,
+      analyzerStrategyKey,
+      ...(specialistAnalysis ? { specialistAnalysis } : {}),
       resultSnapshot: capturedResult,
       ...(snapshotTarget ? { maoTarget: snapshotTarget } : {}),
       ...(snapshotTarget
@@ -254,11 +262,14 @@ export async function mintPublicShare(input: {
       // quiet; anything else (FK failure, RLS change, column drift) is an
       // operational error. The UI fails closed and never mints a /d payload.
       if (!isMissingTable(error)) {
-        Sentry.captureMessage("public_shares insert failed — share creation failed closed", {
-          level: "error",
-          tags: { feature: "public-share", stage: "mint-insert" },
-          extra: { database_code: error.code ?? "unknown" },
-        });
+        Sentry.captureMessage(
+          "public_shares insert failed — share creation failed closed",
+          {
+            level: "error",
+            tags: { feature: "public-share", stage: "mint-insert" },
+            extra: { database_code: error.code ?? "unknown" },
+          },
+        );
       }
       return null;
     }
@@ -272,13 +283,17 @@ export async function mintPublicShare(input: {
  * Resolve a token for the public viewer. Null for anything but a live,
  * unrevoked, unexpired share — one generic outcome, no oracle about WHY.
  */
-export async function resolvePublicShare(token: string): Promise<ResolvedPublicShare | null> {
+export async function resolvePublicShare(
+  token: string,
+): Promise<ResolvedPublicShare | null> {
   if (!isWellFormedShareToken(token)) return null;
   try {
     const admin = createAdminSupabaseClient();
     const { data, error } = await admin
       .from("public_shares")
-      .select("id, owner_id, deal_id, snapshot, calc_version, expires_at, revoked_at")
+      .select(
+        "id, owner_id, deal_id, snapshot, calc_version, expires_at, revoked_at",
+      )
       .eq("token_hash", hashShareToken(token))
       .maybeSingle();
     if (error || !data) return null;
@@ -287,38 +302,99 @@ export async function resolvePublicShare(token: string): Promise<ResolvedPublicS
     if (isPublicShareExpired(row.expires_at)) return null;
 
     const snapshot = row.snapshot as PublicShareSnapshot | null;
-    if (!snapshot || typeof snapshot !== "object" || !snapshot.values) return null;
+    if (!snapshot || typeof snapshot !== "object" || !snapshot.values)
+      return null;
+    if (!snapshot.meta || typeof snapshot.meta !== "object") return null;
     if (!isReleasedUnderwritingModel(snapshot.values)) return null;
+    const rawResultSnapshot = asRecord(snapshot.resultSnapshot);
+    const currentResult = calculateAnalysis(snapshot.values);
+    const storedMethodologyVersion =
+      typeof snapshot.meta.methodologyVersion === "string"
+        ? snapshot.meta.methodologyVersion
+        : null;
+    if (
+      shouldFreezeSavedMethodology(
+        storedMethodologyVersion,
+        currentResult.methodologyVersion,
+      )
+    ) {
+      // This deployment cannot truthfully republish a different formula
+      // contract. The owner must mint a refreshed share after re-underwriting.
+      return null;
+    }
+    const currentScore = computeDealScore(
+      buildDealScoreInputFromAnalysis(snapshot.values, currentResult),
+    );
+    const analyzerStrategyKey = resolveCompatibleAnalyzerStrategyKey(
+      snapshot.analyzerStrategyKey ?? rawResultSnapshot?.analyzerStrategyKey,
+      snapshot.values,
+    );
     const normalizedMaoTarget = normalizeMaoTarget(snapshot.maoTarget);
-    const normalizedMaoTargetSource = normalizeOfferCeilingTargetSource(
-      snapshot.maoTargetSource
+    const normalizedMaoTargetSource = normalizeExternalOfferCeilingTargetSource(
+      snapshot.maoTargetSource,
     );
     // An exact financial snapshot with a target field must never silently
     // reopen under canonical defaults when that field is corrupt or from an
     // unsupported future format.
     if (snapshot.maoTarget !== undefined && !normalizedMaoTarget) return null;
-    if (
-      snapshot.maoTargetSource !== undefined &&
-      !normalizedMaoTargetSource
-    ) {
+    if (snapshot.maoTargetSource !== undefined && !normalizedMaoTargetSource) {
       return null;
     }
+    // Recompute at the read boundary too. Historical rows may predate the
+    // service-role-only insert policy, so even a structurally valid stored
+    // result cannot authenticate a TrueCap-branded public number.
+    const specialistAnalysis = buildSpecialistAnalysisSnapshot(
+      snapshot.values,
+      currentResult,
+      analyzerStrategyKey,
+    );
+    const safeResultSnapshot: Record<string, unknown> = {
+      ...currentResult,
+      score: currentScore.score,
+      scoreMethodologyVersion: currentScore.scoreMethodologyVersion,
+      recommendation: currentScore.recommendation,
+      riskLevel: currentScore.riskLevel,
+      breakdown: currentScore.breakdown,
+      explanation: currentScore.explanation,
+      analyzerStrategyKey,
+    };
+    if (specialistAnalysis) {
+      safeResultSnapshot[SPECIALIST_ANALYSIS_SNAPSHOT_FIELD] =
+        specialistAnalysis;
+    }
+    const adoptedTarget =
+      normalizedMaoTarget &&
+      isAdoptedOfferCeilingTargetSource(
+        normalizedMaoTargetSource ?? "selected-targets",
+      )
+        ? normalizedMaoTarget
+        : undefined;
+    const offerCeilingAccess = adoptedTarget
+      ? resolveOfferCeilingForAccess({
+          values: snapshot.values,
+          target: adoptedTarget,
+          source: normalizedMaoTargetSource ?? "selected-targets",
+          paidAccess: true,
+        })
+      : null;
     const safeSnapshot: PublicShareSnapshot = {
       values: snapshot.values,
-      ...(asRecord(snapshot.resultSnapshot)
-        ? { resultSnapshot: asRecord(snapshot.resultSnapshot)! }
-        : {}),
+      analyzerStrategyKey,
+      ...(specialistAnalysis ? { specialistAnalysis } : {}),
+      resultSnapshot: safeResultSnapshot,
       ...(normalizedMaoTarget ? { maoTarget: normalizedMaoTarget } : {}),
       ...(normalizedMaoTarget
         ? {
-            maoTargetSource:
-              normalizedMaoTargetSource ?? "selected-targets",
+            maoTargetSource: normalizedMaoTargetSource ?? "selected-targets",
           }
         : {}),
-      ...(snapshot.offerCeilingExact !== undefined
-        ? { offerCeilingExact: snapshot.offerCeilingExact }
+      ...(offerCeilingAccess?.access === "exact"
+        ? { offerCeilingExact: offerCeilingAccess.exact }
         : {}),
-      meta: snapshot.meta,
+      meta: {
+        ...snapshot.meta,
+        methodologyVersion: currentResult.methodologyVersion,
+      },
     };
 
     // Best-effort view bookkeeping; never blocks or fails the render.
@@ -326,13 +402,12 @@ export async function resolvePublicShare(token: string): Promise<ResolvedPublicS
       .from("public_shares")
       .update({ last_viewed_at: new Date().toISOString() })
       .eq("id", row.id)
-      .then(() => undefined, () => undefined);
+      .then(
+        () => undefined,
+        () => undefined,
+      );
 
-    const methodologyVersion =
-      typeof snapshot.meta?.methodologyVersion === "string"
-        ? snapshot.meta.methodologyVersion
-        : null;
-    const legacyInputOnly = !asRecord(snapshot.resultSnapshot);
+    const legacyInputOnly = !rawResultSnapshot;
     return {
       snapshot: safeSnapshot,
       ownerId: row.owner_id,
@@ -341,8 +416,8 @@ export async function resolvePublicShare(token: string): Promise<ResolvedPublicS
         typeof snapshot.meta?.schemaVersion === "number"
           ? snapshot.meta.schemaVersion
           : row.calc_version,
-      methodologyVersion,
-      legacyUnpinned: methodologyVersion == null,
+      methodologyVersion: currentResult.methodologyVersion,
+      legacyUnpinned: storedMethodologyVersion == null,
       legacyInputOnly,
     };
   } catch {

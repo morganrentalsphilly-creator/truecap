@@ -24,10 +24,11 @@
  * Everyone else gets ENTITLEMENT_REQUIRED and no bytes.
  *
  * ─── PROVENANCE ────────────────────────────────────────────────────────────
- * Raw form values are validated and every deterministic report figure is
- * rebuilt on this server through the canonical calculation engines. The
- * browser report object is retained only for bounded presentation evidence;
- * its financial figures and methodology labels never reach the renderer.
+ * Raw form values are validated and every report is rebuilt on this server
+ * through the canonical engines. Saved rows contribute owned inputs and
+ * presentation evidence only; their mutable result JSON never reaches the
+ * renderer. A deal pinned to an older formula contract must be explicitly
+ * rerun before it can become a new externally attributed report.
  */
 
 import { z } from "zod";
@@ -52,22 +53,19 @@ import {
 import { createIpRateLimit, getRequestIp } from "@/lib/ip-rate-limit";
 import type { ReportMode } from "@/lib/pdf-export-constants";
 import { buildCanonicalReportData } from "@/lib/report-data-builder";
-import {
-  isLegacySavedMethodologyVersion,
-  resolveSavedAnalysisResult,
-} from "@/lib/saved-analysis-methodology";
+import { shouldFreezeSavedMethodology } from "@/lib/saved-analysis-methodology";
 import { calculateAnalysis } from "@/lib/calc-analysis";
-import {
-  buildDealScoreInputFromAnalysis,
-  computeDealScore,
-} from "@/lib/deal-score";
-import {
-  normalizeOfferCeilingTargetSource,
-} from "@/lib/offer-ceiling-contract";
+import { normalizeExternalOfferCeilingTargetSource } from "@/lib/external-offer-ceiling-provenance";
 import {
   resolveLegacyCompatibleOneTimePdfReportBinding,
   resolveOneTimePdfReportBinding,
 } from "@/lib/one-time-pdf-report-binding";
+import {
+  ANALYZER_STRATEGY_KEYS,
+  resolveCompatibleAnalyzerStrategyKey,
+} from "@/lib/analyzer-strategy-persistence";
+import { PDF_CACHE_VERSION } from "@/lib/pdf-export-constants";
+import { signSavedAnalysisPdfArtifact } from "@/lib/pdf/saved-analysis-artifact-attestation";
 
 export type GenerateReportPdfResult =
   | {
@@ -77,6 +75,9 @@ export type GenerateReportPdfResult =
       hasBranding: boolean;
       hasBuyBoxVerdict: boolean;
       buyBoxStateResolved: boolean;
+      /** HMAC over the exact server-rendered bytes and saved-deal identity.
+       * Present only for a cacheable personal saved export. */
+      cacheAttestation?: string;
     }
   | {
       ok: false;
@@ -104,6 +105,10 @@ const inputSchema = z
     maxOfferTargetSource: z
       .enum(["buy-box", "screening-defaults", "selected-targets"])
       .optional(),
+    // Strategy identity only. Specialist numbers are always rebuilt
+    // server-side. One-time Pack claims intentionally ignore this field because
+    // the historical claim fingerprint did not bind an advanced strategy lens.
+    analyzerStrategyKey: z.enum(ANALYZER_STRATEGY_KEYS).optional(),
     savedExport: z
       .object({
         id: z.string().uuid(),
@@ -168,7 +173,7 @@ async function claimGrantsExport(
         maxOfferTarget: rawMaxOfferTarget,
         maxOfferTargetSource: rawMaxOfferTargetSource,
       },
-      { allowLegacyDefault: true }
+      { allowLegacyDefault: true },
     );
     if (!submittedReportBinding) return false;
 
@@ -176,7 +181,7 @@ async function claimGrantsExport(
     const { data, error } = await admin
       .from("one_time_pdf_purchase_claims")
       .select(
-        "checkout_session_id, claim_secret_hash, deal_fingerprint, report_fingerprint, user_id, consumed_at, expires_at"
+        "checkout_session_id, claim_secret_hash, deal_fingerprint, report_fingerprint, user_id, consumed_at, expires_at",
       )
       .eq("id", claim.id)
       .maybeSingle();
@@ -244,7 +249,7 @@ async function claimGrantsExport(
     const stripeAccess = await retrieveDecisionPackStripeAccess(
       getStripe(),
       data.checkout_session_id as string,
-      claim.id
+      claim.id,
     );
     if (stripeAccess.state !== "allowed") return false;
 
@@ -252,7 +257,7 @@ async function claimGrantsExport(
       valuesToRender,
       reportBinding.target,
       reportBinding.source,
-      claim.secret
+      claim.secret,
     );
     if (data.report_fingerprint) {
       return data.report_fingerprint === reportFingerprint;
@@ -300,7 +305,7 @@ async function checkGate(
       input.claim,
       input.values,
       input.maxOfferTarget,
-      input.maxOfferTargetSource
+      input.maxOfferTargetSource,
     ))
   ) {
     return { allowed: true };
@@ -329,7 +334,8 @@ async function checkGate(
       result: {
         ok: false,
         code: "ENTITLEMENT_REQUIRED",
-        message: "PDF export is a Pro feature. Upgrade to Pro to export this report.",
+        message:
+          "PDF export is a Pro feature. Upgrade to Pro to export this report.",
       },
     };
   }
@@ -364,9 +370,7 @@ type PreparedReportInput =
       trustedPresentation?: Parameters<
         typeof buildCanonicalReportData
       >[0]["trustedPresentation"];
-      trustedRecordedResult?: Parameters<
-        typeof buildCanonicalReportData
-      >[0]["trustedRecordedResult"];
+      analyzerStrategyKey?: unknown;
     }
   | { ok: false; result: GenerateReportPdfResult };
 
@@ -390,7 +394,15 @@ async function prepareReportInput(
       ok: true,
       values: input.values,
       maxOfferTarget: input.maxOfferTarget,
-      maxOfferTargetSource: input.maxOfferTargetSource,
+      maxOfferTargetSource:
+        normalizeExternalOfferCeilingTargetSource(input.maxOfferTargetSource) ??
+        input.maxOfferTargetSource,
+      analyzerStrategyKey: input.claim
+        ? resolveCompatibleAnalyzerStrategyKey(undefined, input.values)
+        : resolveCompatibleAnalyzerStrategyKey(
+            input.analyzerStrategyKey,
+            input.values,
+          ),
     };
   }
 
@@ -398,7 +410,7 @@ async function prepareReportInput(
     await import("@/app/actions/saved-analyses");
   const authority = await getSavedAnalysisPdfExportAction(
     input.savedExport.id,
-    { bypassCache: input.mode !== "personal" }
+    { bypassCache: input.mode !== "personal" },
   );
   if (!authority.ok) {
     return {
@@ -429,7 +441,9 @@ async function prepareReportInput(
       },
     };
   }
-  const trustedValues = normalizeReleasedInvestmentFormSnapshot(authority.formSnapshot);
+  const trustedValues = normalizeReleasedInvestmentFormSnapshot(
+    authority.formSnapshot,
+  );
   if (
     !trustedValues ||
     normalizedValuesJson(input.values) !== normalizedValuesJson(trustedValues)
@@ -448,40 +462,22 @@ async function prepareReportInput(
     authority.resultSnapshot && typeof authority.resultSnapshot === "object"
       ? authority.resultSnapshot
       : {};
-  let trustedRecordedResult: Parameters<
-    typeof buildCanonicalReportData
-  >[0]["trustedRecordedResult"];
-  if (!isLegacySavedMethodologyVersion(authority.methodologyVersion)) {
-    const currentResult = calculateAnalysis(trustedValues);
-    const currentScore = computeDealScore(
-      buildDealScoreInputFromAnalysis(trustedValues, currentResult)
-    );
-    const recorded = resolveSavedAnalysisResult({
-      methodologyVersion: authority.methodologyVersion,
-      resultSnapshot,
-      recomputedResult: currentResult,
-      recomputedExtras: {
-        score: currentScore.score,
-        recommendation: currentScore.recommendation,
-        riskLevel: currentScore.riskLevel,
-        breakdown: currentScore.breakdown,
-        explanation: currentScore.explanation,
-      },
-    });
-    if (!recorded.result || !recorded.usesRecordedSnapshot) {
-      return {
+  const resultSnapshotRecord = resultSnapshot as Record<string, unknown>;
+  const currentResult = calculateAnalysis(trustedValues);
+  if (
+    shouldFreezeSavedMethodology(
+      authority.methodologyVersion,
+      currentResult.methodologyVersion,
+    )
+  ) {
+    return {
+      ok: false,
+      result: {
         ok: false,
-        result: {
-          ok: false,
-          code: "FROZEN_METHODOLOGY",
-          message:
-            "This saved result is incomplete for a reproducible PDF. Create a new scenario and explicitly re-underwrite it with the current standard.",
-        },
-      };
-    }
-    trustedRecordedResult = {
-      methodologyVersion: authority.methodologyVersion,
-      resultSnapshot,
+        code: "FROZEN_METHODOLOGY",
+        message:
+          "This deal uses an older underwriting standard. Open it, review the current assumptions, and run it again before exporting a new report.",
+      },
     };
   }
 
@@ -489,14 +485,17 @@ async function prepareReportInput(
     ok: true,
     values: trustedValues,
     maxOfferTarget: (resultSnapshot as Record<string, unknown>).maxOfferTarget,
-    maxOfferTargetSource: normalizeOfferCeilingTargetSource(
-      (resultSnapshot as Record<string, unknown>).maxOfferTargetSource
+    maxOfferTargetSource: normalizeExternalOfferCeilingTargetSource(
+      (resultSnapshot as Record<string, unknown>).maxOfferTargetSource,
     ),
     trustedPresentation: {
       templateLabel: authority.templateFallback?.templateName ?? null,
       comps: authority.reportComps,
     },
-    trustedRecordedResult,
+    analyzerStrategyKey: resolveCompatibleAnalyzerStrategyKey(
+      resultSnapshotRecord.analyzerStrategyKey,
+      trustedValues,
+    ),
   };
 }
 
@@ -527,15 +526,15 @@ export async function generateReportPdfAction(
     const prepared = await prepareReportInput(parsed.data);
     if (!prepared.ok) return prepared.result;
 
-    // This is the report provenance boundary. Submitted result fields are
-    // intentionally discarded; the renderer only receives canonical server
-    // computations reconstructed from the validated form values.
+    // This is the report provenance boundary. Browser-submitted and
+    // owner-writable saved result fields are discarded; every TrueCap output
+    // is recomputed from validated inputs by the current server engines.
     const canonicalReport = buildCanonicalReportData({
       values: prepared.values,
       maxOfferTarget: prepared.maxOfferTarget,
       maxOfferTargetSource: prepared.maxOfferTargetSource,
       trustedPresentation: prepared.trustedPresentation,
-      trustedRecordedResult: prepared.trustedRecordedResult,
+      analyzerStrategyKey: prepared.analyzerStrategyKey,
     });
 
     // Branding is resolved HERE, never accepted from the caller, so co-branding
@@ -585,6 +584,22 @@ export async function generateReportPdfAction(
       parsed.data.mode as ReportMode,
     );
     const bytes = Buffer.from(await artifact.blob.arrayBuffer());
+    let cacheAttestation: string | null = null;
+    if (parsed.data.savedExport && parsed.data.mode === "personal") {
+      const supabase = await createServerSupabaseClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        cacheAttestation = signSavedAnalysisPdfArtifact({
+          userId: user.id,
+          analysisId: parsed.data.savedExport.id,
+          cacheVersion: PDF_CACHE_VERSION,
+          renderFingerprint: parsed.data.savedExport.renderFingerprint,
+          pdfBytes: bytes,
+        });
+      }
+    }
     return {
       ok: true,
       filename: safeFilename(
@@ -595,6 +610,7 @@ export async function generateReportPdfAction(
       hasBranding: Boolean(branding),
       hasBuyBoxVerdict: artifact.hasBuyBoxVerdict,
       buyBoxStateResolved: artifact.buyBoxStateResolved,
+      ...(cacheAttestation ? { cacheAttestation } : {}),
     };
   } catch (error) {
     Sentry.captureException(error, {

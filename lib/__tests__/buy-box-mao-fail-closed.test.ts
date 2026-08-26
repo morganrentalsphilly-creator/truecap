@@ -2,18 +2,19 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const read = (path: string) => readFileSync(resolve(process.cwd(), path), "utf8");
+const read = (path: string) =>
+  readFileSync(resolve(process.cwd(), path), "utf8");
 
 describe("Buy Box target resolution fails closed", () => {
   it("blocks live Save, Share, and PDF until the account criteria resolve", () => {
     const dashboard = read("components/investcalc/analysis-dashboard.tsx");
     const card = read("components/investcalc/buy-box-verdict-card.tsx");
 
-    expect(card).toContain('if (!result.ok) {');
+    expect(card).toContain("if (!result.ok) {");
     expect(card).toContain('onLoadStateChange?.("error")');
     expect(dashboard).toContain("const effectiveBuyBoxTargetResolutionState");
     expect(dashboard).toContain(
-      'const targetActionsBlocked = effectiveBuyBoxTargetResolutionState !== "ready"'
+      'const targetActionsBlocked = effectiveBuyBoxTargetResolutionState !== "ready"',
     );
     // The two guards split so the plan-lock branch can EXPLAIN itself (toast
     // with an upgrade path) instead of a silent disabled button — but both
@@ -21,7 +22,7 @@ describe("Buy Box target resolution fails closed", () => {
     expect(dashboard).toContain("if (targetActionsBlocked) return;");
     const saveClick = dashboard.slice(
       dashboard.indexOf("const handleSaveClick = () => {"),
-      dashboard.indexOf("const handleExportPdf = (")
+      dashboard.indexOf("const handleExportPdf = ("),
     );
     const lockedBranch = saveClick.indexOf("if (isSaveLockedByPlan) {");
     const lockedReturn = saveClick.indexOf("return;", lockedBranch);
@@ -34,18 +35,18 @@ describe("Buy Box target resolution fails closed", () => {
     // reset by an address without a matching refetch.
     const readinessBlock = dashboard.slice(
       dashboard.indexOf("const requiresBuyBoxTargetResolution"),
-      dashboard.indexOf("const [compsQaData")
+      dashboard.indexOf("const [compsQaData"),
     );
     expect(readinessBlock).not.toContain("values?.address");
     expect(readinessBlock).toMatch(
-      /useState<\s*"loading" \| "ready" \| "error"\s*>\s*\(\s*isAuthenticated \? "loading" : "ready"/
+      /useState<\s*"loading" \| "ready" \| "error"\s*>\s*\(\s*isAuthenticated \? "loading" : "ready"/,
     );
     expect(readinessBlock).toContain(
-      'setBuyBoxTargetResolutionState(isAuthenticated ? "loading" : "ready")'
+      'setBuyBoxTargetResolutionState(isAuthenticated ? "loading" : "ready")',
     );
     expect(readinessBlock).toContain("}, [isAuthenticated]);");
     expect(readinessBlock).not.toContain(
-      'requiresBuyBoxTargetResolution ? "loading" : "ready"'
+      'requiresBuyBoxTargetResolution ? "loading" : "ready"',
     );
   });
 
@@ -55,22 +56,29 @@ describe("Buy Box target resolution fails closed", () => {
     const detail = read("app/dashboard/saved-analyses/[id]/page.tsx");
     const compare = read("app/dashboard/compare/page.tsx");
 
-    expect(home).toContain("if (!persistedMaoTarget && !buyBoxesResolved) continue;");
-    expect(list).toContain("if (!persistedMaoTarget && !buyBoxesResolved) return null;");
+    expect(home).toContain(
+      "if (!persistedMaoTarget && !buyBoxesResolved) continue;",
+    );
+    expect(list).toContain(
+      "if (!persistedMaoTarget && !buyBoxesResolved) return null;",
+    );
     expect(detail).toContain("(storedMaoTarget != null || buyBoxesResolved)");
-    expect(compare).toContain("(persistedMaoTarget != null || buyBoxesResolved)");
+    expect(compare).toContain(
+      "(persistedMaoTarget != null || buyBoxesResolved)",
+    );
   });
 
-  it("makes unresolved or box-bearing rendered PDFs uncacheable", () => {
+  it("never reuses a retained PDF as a current Buy Box export", () => {
     const action = read("app/actions/saved-analyses.ts");
     const generator = read("lib/pdf-generator.ts");
     const server = read("app/actions/generate-report-pdf.ts");
 
     expect(generator).toContain("hasBuyBoxVerdict: buyBoxVerdict !== null");
     expect(server).toContain("hasBuyBoxVerdict: artifact.hasBuyBoxVerdict");
-    expect(action).toContain("renderedWithBuyBoxVerdict ||");
-    expect(action).toContain("!buyBoxStateResolved ||");
-    expect(action).toContain("hasUsableBuyBox !== false ||");
-    expect(action).toContain("if (hasUsableBuyBox === false) {");
+    expect(action).toContain(
+      "Active subscribers always receive a fresh server render",
+    );
+    expect(action).toContain("readVerifiedSavedAnalysisPdfArtifact({");
+    expect(action).not.toContain("if (hasUsableBuyBox === false) {");
   });
 });

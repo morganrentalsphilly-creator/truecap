@@ -14,12 +14,6 @@ import {
   type ReportData,
 } from "@/lib/pdf-generator";
 import { calculateAnalysis } from "@/lib/calc-analysis";
-import {
-  buildDealScoreInputFromAnalysis,
-  computeDealScore,
-} from "@/lib/deal-score";
-import { buildCompareSnapshotPayload } from "@/lib/compare-result-snapshot";
-import { resolveOfferCeilingForAccess } from "@/lib/offer-ceiling-server";
 
 const NOW = new Date("2026-08-23T12:00:00.000Z");
 
@@ -210,7 +204,7 @@ describe("server-owned PDF report data", () => {
       generatedAt: NOW,
     });
     expect(passAtThisPrice.decision?.label).toBe(
-      "Does not meet selected rules at asking"
+      "Does not meet selected rules at asking",
     );
     expect(passAtThisPrice.decision?.clearsSelectedTargets).toBe(false);
     expect(passAtThisPrice.decision?.targetSource).toBe("selected-targets");
@@ -222,7 +216,9 @@ describe("server-owned PDF report data", () => {
       maxOfferTargetSource: "selected-targets",
       generatedAt: NOW,
     });
-    expect(screeningOnly.decision?.label).toBe("Meets selected rules at asking");
+    expect(screeningOnly.decision?.label).toBe(
+      "Meets selected rules at asking",
+    );
     expect(screeningOnly.decision?.readiness).toBe("Screening only");
     expect(screeningOnly.maxOffer?.source).toBe("selected-targets");
   });
@@ -291,68 +287,33 @@ describe("server-owned PDF report data", () => {
     expect(rebuilt.property.template).toBe("Owner-scoped template");
   });
 
-  it("renders an owner-scoped saved PDF from its recorded result snapshot", () => {
+  it("builds every externally attributed result from the current engines", () => {
     const result = calculateAnalysis(SAMPLE_DEAL_VALUES);
-    const score = computeDealScore(
-      buildDealScoreInputFromAnalysis(SAMPLE_DEAL_VALUES, result)
-    );
-    const { snapshotVersion, compareSnapshot } = buildCompareSnapshotPayload(
-      result,
-      SAMPLE_DEAL_VALUES
-    );
-    const recordedYear10Profit =
-      compareSnapshot.exitScenarios.years.find((year) => year.year === 10)!
-        .totalProfit + 1_234;
-    const recordedCompareSnapshot = {
-      ...compareSnapshot,
-      exitScenarios: {
-        ...compareSnapshot.exitScenarios,
-        years: compareSnapshot.exitScenarios.years.map((year) =>
-          year.year === 10
-            ? { ...year, totalProfit: recordedYear10Profit }
-            : year
-        ),
-      },
-    };
-    const capturedOffer = resolveOfferCeilingForAccess({
-      values: SAMPLE_DEAL_VALUES,
-      target: SAMPLE_DEAL_MAO_TARGET,
-      source: "selected-targets",
-      paidAccess: true,
-    });
-    expect(capturedOffer.access).toBe("exact");
-    if (capturedOffer.access !== "exact") throw new Error("expected exact access");
     const report = buildCanonicalReportData({
       values: SAMPLE_DEAL_VALUES,
       maxOfferTarget: SAMPLE_DEAL_MAO_TARGET,
       maxOfferTargetSource: "selected-targets",
       generatedAt: NOW,
-      trustedRecordedResult: {
-        methodologyVersion: result.methodologyVersion,
-        resultSnapshot: {
-          ...result,
-          score: score.score,
-          recommendation: score.recommendation,
-          riskLevel: score.riskLevel,
-          breakdown: score.breakdown,
-          explanation: score.explanation,
-          snapshotVersion,
-          compareSnapshot: recordedCompareSnapshot,
-          maxOfferTarget: SAMPLE_DEAL_MAO_TARGET,
-          maxOfferTargetSource: "selected-targets",
-          offerCeilingExact: capturedOffer.exact,
-        },
-      },
     });
 
     expect(report.methodologyLabel).toBe(
-      `Recorded ${TRUECAP_UNDERWRITING_STANDARD_NAME} v${result.methodologyVersion}`
+      `${TRUECAP_UNDERWRITING_STANDARD_NAME} v${result.methodologyVersion}`,
     );
-    expect(report.exitScenarios.year10Profit).toBe(recordedYear10Profit);
-    expect(report.maxOffer?.maxPrice).toBe(
-      capturedOffer.exact?.presentation.ceiling,
-    );
+    expect(report.performance.monthlyCashFlow).toBe(result.netCashFlow);
     expect(report.maxOffer?.source).toBe("selected-targets");
-    expect(report.downsideScenario).toBeUndefined();
+    expect(report.downsideScenario).toBeDefined();
+  });
+
+  it("does not publish unverified browser target criteria as an owned Buy Box", () => {
+    const report = buildCanonicalReportData({
+      values: SAMPLE_DEAL_VALUES,
+      maxOfferTarget: SAMPLE_DEAL_MAO_TARGET,
+      maxOfferTargetSource: "buy-box",
+      generatedAt: NOW,
+    });
+
+    expect(report.decision?.targetSource).toBe("selected-targets");
+    expect(report.maxOffer?.source).toBe("selected-targets");
+    expect(report.maxOffer?.sourceLabel).not.toMatch(/buy box/i);
   });
 });

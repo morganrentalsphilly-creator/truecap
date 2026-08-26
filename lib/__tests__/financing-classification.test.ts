@@ -8,6 +8,8 @@ import { SAMPLE_DEAL_FIXTURE } from "../sample-deal";
 
 const root = process.cwd();
 const read = (path: string) => readFileSync(join(root, path), "utf8");
+const normalizeSource = (source: string) =>
+  source.replace(/\s+/g, "").replace(/,([)}\]])/g, "$1");
 
 describe("v1 all-cash classification", () => {
   it("treats 0% down as financed and only 100% or more as all-cash", () => {
@@ -40,7 +42,9 @@ describe("v1 all-cash classification", () => {
     const calculator = read("components/investcalc/investcalc-page.tsx");
 
     expect(financing).toContain("isAllCashDownPayment(downPaymentPct)");
-    expect(financing).toContain("downPaymentPct >= 0 && downPaymentPct < 20");
+    expect(normalizeSource(financing)).toContain(
+      normalizeSource("downPaymentPct >= 0 && downPaymentPct < 20"),
+    );
     expect(calculator).toContain(
       "is_cash_purchase: isAllCashDownPayment(values.downPaymentPct)"
     );

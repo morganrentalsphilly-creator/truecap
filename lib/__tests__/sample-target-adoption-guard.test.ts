@@ -14,16 +14,21 @@ import { describe, expect, it } from "vitest";
 const root = process.cwd();
 const calculator = readFileSync(
   join(root, "components/investcalc/investcalc-page.tsx"),
-  "utf8"
+  "utf8",
 );
+const normalizeSource = (source: string) =>
+  source.replace(/\s+/g, "").replace(/,([)}\]])/g, "$1");
 
 function sourceSection(startMarker: string, endMarker: string): string {
   const start = calculator.indexOf(startMarker);
-  expect(start, `missing source marker: ${startMarker}`).toBeGreaterThanOrEqual(0);
-  const end = calculator.indexOf(endMarker, start + startMarker.length);
-  expect(end, `missing source marker after ${startMarker}: ${endMarker}`).toBeGreaterThan(
-    start
+  expect(start, `missing source marker: ${startMarker}`).toBeGreaterThanOrEqual(
+    0,
   );
+  const end = calculator.indexOf(endMarker, start + startMarker.length);
+  expect(
+    end,
+    `missing source marker after ${startMarker}: ${endMarker}`,
+  ).toBeGreaterThan(start);
   return calculator.slice(start, end);
 }
 
@@ -31,7 +36,7 @@ describe("sample-seeded targets never survive as user adoption", () => {
   it("arms the sample-seeded flag at both sample launch sites", () => {
     const launch = sourceSection(
       "const handleTrySampleDeal = () =>",
-      "requestAnimationFrame(() =>"
+      "requestAnimationFrame(() =>",
     );
     expect(launch).toContain("sampleSeededMaoTargetRef.current = true");
     // Double-tap guard: a second click while the first sample submit is
@@ -41,7 +46,7 @@ describe("sample-seeded targets never survive as user adoption", () => {
 
     const submitConsume = sourceSection(
       "const isSampleRun = pendingSampleRunRef.current;",
-      "trackEvent(\"analyzer_started\""
+      'trackEvent("analyzer_started"',
     );
     expect(submitConsume).toContain("sampleSeededMaoTargetRef.current = true");
   });
@@ -49,70 +54,80 @@ describe("sample-seeded targets never survive as user adoption", () => {
   it("clears sample-seeded adoption on the first non-sample submit", () => {
     const submitConsume = sourceSection(
       "const isSampleRun = pendingSampleRunRef.current;",
-      "trackEvent(\"analyzer_started\""
+      'trackEvent("analyzer_started"',
     );
-    expect(submitConsume).toContain("} else if (sampleSeededMaoTargetRef.current) {");
+    expect(submitConsume).toContain(
+      "} else if (sampleSeededMaoTargetRef.current) {",
+    );
     expect(submitConsume).toContain("setAnalysisMaoTarget(null)");
-    expect(submitConsume).toContain('setAnalysisMaoTargetSource("screening-defaults")');
+    expect(submitConsume).toContain(
+      'setAnalysisMaoTargetSource("screening-defaults")',
+    );
     expect(submitConsume).toContain("clearPendingMaoTarget()");
   });
 
   it("clears sample-seeded adoption when the live recompute grades edited values", () => {
     const recompute = sourceSection(
       "// Editing away from the sample deal ends the Pro preview",
-      "setSavedMethodologyLabel(null)"
+      "setSavedMethodologyLabel(null)",
     );
     expect(recompute).toContain("if (sampleSeededMaoTargetRef.current) {");
     expect(recompute).toContain("setAnalysisMaoTarget(null)");
-    expect(recompute).toContain('setAnalysisMaoTargetSource("screening-defaults")');
+    expect(recompute).toContain(
+      'setAnalysisMaoTargetSource("screening-defaults")',
+    );
   });
 
   it("keeps sample-seeded adoption out of the anonymous draft", () => {
     const draftWatcher = sourceSection(
       "* Auto-save draft for anonymous / walk-in users.",
-      "}, CALC_FORM_DRAFT_DEBOUNCE_MS);"
+      "}, CALC_FORM_DRAFT_DEBOUNCE_MS);",
     );
     expect(draftWatcher).toContain(
-      "const sampleSeeded = sampleSeededMaoTargetRef.current"
+      "const sampleSeeded = sampleSeededMaoTargetRef.current",
     );
-    expect(draftWatcher).toContain("sampleSeeded ? null : analysisMaoTargetRef.current");
     expect(draftWatcher).toContain(
-      'sampleSeeded ? "screening-defaults" : analysisMaoTargetSource'
+      "sampleSeeded ? null : analysisMaoTargetRef.current",
+    );
+    expect(draftWatcher).toContain(
+      'sampleSeeded ? "screening-defaults" : analysisMaoTargetSource',
     );
   });
 
   it("keeps sample-seeded adoption out of saved deals and the pre-auth handoff", () => {
     const save = sourceSection(
       "const performSaveDeal = async (",
-      "const handleSaveDeal = async ("
+      "const handleSaveDeal = async (",
     );
     // The flag is captured, then the live state converges to the persisted
     // screening-defaults row — otherwise isMaoTargetDirty pins an
     // un-clearable "Unsaved changes" after saving the demo.
     expect(save).toContain(
-      "const sampleSeededTarget = sampleSeededMaoTargetRef.current"
+      "const sampleSeededTarget = sampleSeededMaoTargetRef.current",
     );
     expect(save).toContain("if (sampleSeededTarget) {");
     expect(save).toContain(
-      "!sampleSeededTarget &&\n        isAdoptedOfferCeilingTargetSource(candidateMaxOfferTargetSource)"
+      "!sampleSeededTarget &&\n        isAdoptedOfferCeilingTargetSource(candidateMaxOfferTargetSource)",
     );
 
     const auth = sourceSection(
-      "onPrepareAuthSave={(\n                maoTarget: MaoTarget | undefined,",
-      "onEditAssumptions={() => {"
+      "onPrepareAuthSave={(",
+      "onEditAssumptions={() => {",
     );
-    expect(auth).toContain(
-      "!sampleSeededMaoTargetRef.current &&\n                  normalizedSource &&"
+    expect(normalizeSource(auth)).toContain(
+      normalizeSource(
+        "!sampleSeededMaoTargetRef.current && normalizedSource &&",
+      ),
     );
   });
 
   it("drops the carried target when forking from the sample", () => {
     const fork = sourceSection(
       "const handleAnalyzeAnotherLikeThis = () =>",
-      "forkGenerationRef.current += 1"
+      "forkGenerationRef.current += 1",
     );
     expect(fork).toContain(
-      "const carriedMaoTarget = sampleSeededMaoTargetRef.current\n      ? null\n      : normalizeMaoTarget(analysisMaoTargetRef.current)"
+      "const carriedMaoTarget = sampleSeededMaoTargetRef.current\n      ? null\n      : normalizeMaoTarget(analysisMaoTargetRef.current)",
     );
     expect(fork).toContain("sampleSeededMaoTargetRef.current = false");
   });
@@ -120,19 +135,19 @@ describe("sample-seeded targets never survive as user adoption", () => {
   it("disarms the flag on explicit adoption, reset, and paid-claim restore", () => {
     const explicitEdit = sourceSection(
       "const handleAnalysisMaoTargetChange = useCallback(",
-      "setRecordedOfferCeiling(invalidateRecordedOfferCeilingForTargetEdit)"
+      "setRecordedOfferCeiling(invalidateRecordedOfferCeilingForTargetEdit)",
     );
     expect(explicitEdit).toContain("sampleSeededMaoTargetRef.current = false");
 
     const clearOutputs = sourceSection(
       "const clearAnalysisOutputs = useCallback(",
-      "setIsEditingAssumptions(false)"
+      "setIsEditingAssumptions(false)",
     );
     expect(clearOutputs).toContain("sampleSeededMaoTargetRef.current = false");
 
     const paidRestore = sourceSection(
       "analysisMaoTargetRef.current = restoredMaoTarget;",
-      "autoExportPdfRef.current = true"
+      "autoExportPdfRef.current = true",
     );
     expect(paidRestore).toContain("sampleSeededMaoTargetRef.current = false");
   });

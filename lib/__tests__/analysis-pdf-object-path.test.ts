@@ -19,6 +19,7 @@ import { describe, expect, it } from "vitest";
 import {
   ANALYSIS_PDF_SIGNED_URL_TTL_SECONDS,
   buildAnalysisPdfObjectPath,
+  parseAttestedAnalysisPdfObjectPath,
   resolveAnalysisPdfObjectPath,
 } from "../pdf-export-constants";
 
@@ -26,6 +27,7 @@ const OWNER = "5deb3957-957c-480d-b793-bcd0618ef1f6";
 const OTHER = "fe357995-65bd-490e-8576-7c4f5c9ef382";
 const DEAL = "06e8d13c-5eb5-46a8-8f79-cae7db6ced2d";
 const RENDER_FINGERPRINT = "0123456789abcdef0123456789abcdef";
+const ARTIFACT_ATTESTATION = "a".repeat(64);
 
 describe("buildAnalysisPdfObjectPath", () => {
   it("puts the owner id first — every analysis-pdfs RLS policy keys off segment 1", () => {
@@ -36,25 +38,65 @@ describe("buildAnalysisPdfObjectPath", () => {
 
   it("embeds the cache version so a bump writes a new object instead of upserting", () => {
     expect(buildAnalysisPdfObjectPath(OWNER, DEAL, 1)).not.toBe(
-      buildAnalysisPdfObjectPath(OWNER, DEAL, 2)
+      buildAnalysisPdfObjectPath(OWNER, DEAL, 2),
     );
   });
 
   it("content-addresses current exports to the exact render fingerprint", () => {
-    const path = buildAnalysisPdfObjectPath(OWNER, DEAL, 42, RENDER_FINGERPRINT);
+    const path = buildAnalysisPdfObjectPath(
+      OWNER,
+      DEAL,
+      42,
+      RENDER_FINGERPRINT,
+    );
     expect(path).toBe(
-      `${OWNER}/${DEAL}/investment-analysis-v42-${RENDER_FINGERPRINT}.pdf`
+      `${OWNER}/${DEAL}/investment-analysis-v42-${RENDER_FINGERPRINT}.pdf`,
     );
     expect(resolveAnalysisPdfObjectPath(path, OWNER)).toBe(path);
   });
 
+  it("round-trips only the exact attested artifact shape", () => {
+    const path = buildAnalysisPdfObjectPath(
+      OWNER,
+      DEAL,
+      42,
+      RENDER_FINGERPRINT,
+      ARTIFACT_ATTESTATION,
+    );
+    expect(parseAttestedAnalysisPdfObjectPath(path, OWNER, DEAL, 42)).toEqual({
+      path,
+      renderFingerprint: RENDER_FINGERPRINT,
+      artifactAttestation: ARTIFACT_ATTESTATION,
+    });
+    expect(
+      parseAttestedAnalysisPdfObjectPath(
+        buildAnalysisPdfObjectPath(OWNER, DEAL, 42, RENDER_FINGERPRINT),
+        OWNER,
+        DEAL,
+        42,
+      ),
+    ).toBeNull();
+    expect(
+      parseAttestedAnalysisPdfObjectPath(path, OWNER, OTHER, 42),
+    ).toBeNull();
+  });
+
   it("rejects an unsafe or malformed render fingerprint instead of placing it in a path", () => {
-    expect(() => buildAnalysisPdfObjectPath(OWNER, DEAL, 42, "../other.pdf")).toThrow(
-      /render fingerprint/i
-    );
+    expect(() =>
+      buildAnalysisPdfObjectPath(OWNER, DEAL, 42, "../other.pdf"),
+    ).toThrow(/render fingerprint/i);
     expect(() => buildAnalysisPdfObjectPath(OWNER, DEAL, 42, "ABCDEF")).toThrow(
-      /render fingerprint/i
+      /render fingerprint/i,
     );
+    expect(() =>
+      buildAnalysisPdfObjectPath(
+        OWNER,
+        DEAL,
+        42,
+        RENDER_FINGERPRINT,
+        "not-an-attestation",
+      ),
+    ).toThrow(/artifact attestation/i);
   });
 
   it("round-trips through the resolver for the owner", () => {
@@ -66,45 +108,53 @@ describe("buildAnalysisPdfObjectPath", () => {
 describe("resolveAnalysisPdfObjectPath", () => {
   it("accepts a bare path owned by the caller", () => {
     expect(
-      resolveAnalysisPdfObjectPath(`${OWNER}/${DEAL}/investment-analysis-v5.pdf`, OWNER)
+      resolveAnalysisPdfObjectPath(
+        `${OWNER}/${DEAL}/investment-analysis-v5.pdf`,
+        OWNER,
+      ),
     ).toBe(`${OWNER}/${DEAL}/investment-analysis-v5.pdf`);
   });
 
   it("parses a legacy public URL back to its path so old rows keep working", () => {
     const legacy = `https://cpfbtvblaufrnxsrvmnm.supabase.co/storage/v1/object/public/analysis-pdfs/${OWNER}/${DEAL}/investment-analysis-v2.pdf`;
     expect(resolveAnalysisPdfObjectPath(legacy, OWNER)).toBe(
-      `${OWNER}/${DEAL}/investment-analysis-v2.pdf`
+      `${OWNER}/${DEAL}/investment-analysis-v2.pdf`,
     );
   });
 
   it("parses a signed URL shape and drops its query string", () => {
     const signed = `https://cpfbtvblaufrnxsrvmnm.supabase.co/storage/v1/object/sign/analysis-pdfs/${OWNER}/${DEAL}/investment-analysis-v2.pdf?token=abc.def`;
     expect(resolveAnalysisPdfObjectPath(signed, OWNER)).toBe(
-      `${OWNER}/${DEAL}/investment-analysis-v2.pdf`
+      `${OWNER}/${DEAL}/investment-analysis-v2.pdf`,
     );
   });
 
   it("decodes percent-encoded path segments", () => {
     const encoded = `https://x.supabase.co/storage/v1/object/public/analysis-pdfs/${OWNER}/${DEAL}/investment%2Danalysis%2Dv2.pdf`;
     expect(resolveAnalysisPdfObjectPath(encoded, OWNER)).toBe(
-      `${OWNER}/${DEAL}/investment-analysis-v2.pdf`
+      `${OWNER}/${DEAL}/investment-analysis-v2.pdf`,
     );
   });
 
   it("REFUSES another tenant's object — the whole point of the fix", () => {
     expect(
-      resolveAnalysisPdfObjectPath(`${OTHER}/${DEAL}/investment-analysis-v5.pdf`, OWNER)
+      resolveAnalysisPdfObjectPath(
+        `${OTHER}/${DEAL}/investment-analysis-v5.pdf`,
+        OWNER,
+      ),
     ).toBeNull();
     expect(
       resolveAnalysisPdfObjectPath(
         `https://x.supabase.co/storage/v1/object/public/analysis-pdfs/${OTHER}/${DEAL}/investment-analysis-v2.pdf`,
-        OWNER
-      )
+        OWNER,
+      ),
     ).toBeNull();
   });
 
   it("refuses path traversal that would climb out of the owner folder", () => {
-    expect(resolveAnalysisPdfObjectPath(`${OWNER}/../${OTHER}/x.pdf`, OWNER)).toBeNull();
+    expect(
+      resolveAnalysisPdfObjectPath(`${OWNER}/../${OTHER}/x.pdf`, OWNER),
+    ).toBeNull();
     expect(resolveAnalysisPdfObjectPath(`${OWNER}/./x.pdf`, OWNER)).toBeNull();
     expect(resolveAnalysisPdfObjectPath(`${OWNER}//x.pdf`, OWNER)).toBeNull();
   });
@@ -113,14 +163,21 @@ describe("resolveAnalysisPdfObjectPath", () => {
     expect(
       resolveAnalysisPdfObjectPath(
         `https://x.supabase.co/storage/v1/object/public/deal-documents/${OWNER}/${DEAL}/x.pdf`,
-        OWNER
-      )
+        OWNER,
+      ),
     ).toBeNull();
-    expect(resolveAnalysisPdfObjectPath("https://evil.example.com/whatever.pdf", OWNER)).toBeNull();
+    expect(
+      resolveAnalysisPdfObjectPath(
+        "https://evil.example.com/whatever.pdf",
+        OWNER,
+      ),
+    ).toBeNull();
   });
 
   it("refuses a bare filename with no owner folder", () => {
-    expect(resolveAnalysisPdfObjectPath("investment-analysis-v5.pdf", OWNER)).toBeNull();
+    expect(
+      resolveAnalysisPdfObjectPath("investment-analysis-v5.pdf", OWNER),
+    ).toBeNull();
     expect(resolveAnalysisPdfObjectPath(`/${OWNER}`, OWNER)).toBeNull();
   });
 
@@ -128,13 +185,15 @@ describe("resolveAnalysisPdfObjectPath", () => {
     expect(resolveAnalysisPdfObjectPath(null, OWNER)).toBeNull();
     expect(resolveAnalysisPdfObjectPath(undefined, OWNER)).toBeNull();
     expect(resolveAnalysisPdfObjectPath("   ", OWNER)).toBeNull();
-    expect(resolveAnalysisPdfObjectPath(`${OWNER}/${DEAL}/x.pdf`, "")).toBeNull();
+    expect(
+      resolveAnalysisPdfObjectPath(`${OWNER}/${DEAL}/x.pdf`, ""),
+    ).toBeNull();
     expect(resolveAnalysisPdfObjectPath("http://[malformed", OWNER)).toBeNull();
   });
 
   it("tolerates a leading slash on a stored path", () => {
     expect(resolveAnalysisPdfObjectPath(`/${OWNER}/${DEAL}/x.pdf`, OWNER)).toBe(
-      `${OWNER}/${DEAL}/x.pdf`
+      `${OWNER}/${DEAL}/x.pdf`,
     );
   });
 });

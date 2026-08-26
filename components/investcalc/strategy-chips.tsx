@@ -1,13 +1,18 @@
 "use client";
 
 /**
- * "What's your play?" strategy chips - the goal-first entry on the calculator.
- * Picking a chip tailors the form (property type + assumption defaults) and
- * tells the results view which tab to lead with. Fully optional: with nothing
- * selected the calculator is unchanged. Free to all users; plays whose headline
- * output is Pro (Offer Ceiling, BRRRR/Flip) surface the existing Pro gate at the result.
+ * Compact analysis-type disclosure for the calculator.
+ *
+ * Buy & Hold is the calculator's effective default even though the parent
+ * intentionally stores that state as `null`. Keeping that distinction here
+ * matters: merely confirming the visible default must never invoke the
+ * parent's strategy handler, which applies a starter set. Specialist modes
+ * still flow through the existing handler, and choosing Buy & Hold while one
+ * is active sends `null` so the parent's proven revert path restores the
+ * pre-strategy assumptions.
  */
 
+import { useId, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import {
   ADVANCED_INVESTOR_STRATEGIES,
@@ -17,6 +22,37 @@ import {
   type InvestorStrategy,
 } from "@/lib/investor-strategies";
 
+export const DEFAULT_STRATEGY_KEY = "buy-hold";
+
+/** The strategy the interface should present as selected. */
+export function getEffectiveStrategyKey(activeKey: string | null): string {
+  return getStrategyByKey(activeKey)?.key ?? DEFAULT_STRATEGY_KEY;
+}
+
+/**
+ * Translate a visible strategy choice into the parent's existing state model.
+ * `undefined` means the choice is already active and no callback may fire.
+ */
+export function resolveStrategySelectionIntent(
+  activeKey: string | null,
+  requestedKey: string,
+): string | null | undefined {
+  const requested = getStrategyByKey(requestedKey);
+  if (!requested) return undefined;
+  if (requested.key === getEffectiveStrategyKey(activeKey)) return undefined;
+  return requested.key === DEFAULT_STRATEGY_KEY ? null : requested.key;
+}
+
+function strategyDisplay(strategy: InvestorStrategy) {
+  const wholesale = strategy.key === "wholesale-mao";
+  return {
+    label: wholesale ? "Wholesale / Offer Ceiling" : strategy.label,
+    tagline: wholesale
+      ? "Offer Ceiling for the selected rules"
+      : strategy.tagline,
+  };
+}
+
 export function StrategyChips({
   activeKey,
   onSelect,
@@ -24,101 +60,177 @@ export function StrategyChips({
   activeKey: string | null;
   onSelect: (key: string | null) => void;
 }) {
-  const active = getStrategyByKey(activeKey);
+  const [expanded, setExpanded] = useState(false);
+  const generatedId = useId();
+  const panelId = `analysis-type-options-${generatedId}`;
+  const disclosureButtonRef = useRef<HTMLButtonElement | null>(null);
+  const effectiveKey = getEffectiveStrategyKey(activeKey);
+  const active = getStrategyByKey(effectiveKey) ?? CORE_INVESTOR_STRATEGIES[0];
+  const ActiveIcon = active.Icon;
+  const activeDisplay = strategyDisplay(active);
+
+  const collapseAndRestoreFocus = () => {
+    setExpanded(false);
+    // The selected option unmounts when the disclosure collapses. Return
+    // keyboard/screen-reader focus to the control that can reopen it instead
+    // of leaving focus on <body>.
+    requestAnimationFrame(() => disclosureButtonRef.current?.focus());
+  };
+
+  const chooseStrategy = (strategy: InvestorStrategy) => {
+    const intent = resolveStrategySelectionIntent(activeKey, strategy.key);
+    if (intent !== undefined) onSelect(intent);
+    collapseAndRestoreFocus();
+  };
+
   const renderStrategy = (strategy: InvestorStrategy) => {
-    const isActive = strategy.key === activeKey;
+    const isActive = strategy.key === effectiveKey;
     const Icon = strategy.Icon;
-    const isWholesaleOfferCeiling = strategy.key === "wholesale-mao";
-    const displayLabel = isWholesaleOfferCeiling
-      ? "Wholesale / Offer Ceiling"
-      : strategy.label;
-    const displayTagline = isWholesaleOfferCeiling
-      ? "Offer Ceiling for the selected rules"
-      : strategy.tagline;
+    const display = strategyDisplay(strategy);
     return (
       <button
         key={strategy.key}
         type="button"
         aria-pressed={isActive}
-        title={displayTagline}
-        onClick={() => onSelect(isActive ? null : strategy.key)}
+        title={display.tagline}
+        onClick={() => chooseStrategy(strategy)}
         className={cn(
-          "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-semibold transition-colors sm:shrink",
+          "flex min-h-11 w-full items-center gap-2 rounded-xl border px-3 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
           isActive
-            ? "border-primary bg-primary text-primary-foreground"
-            : "border-border bg-background text-foreground hover:bg-muted"
+            ? "border-primary bg-primary/10 text-foreground"
+            : "border-border bg-background text-foreground hover:bg-muted",
         )}
       >
-        <Icon aria-hidden className="size-3.5 shrink-0" />
-        {displayLabel}
+        <Icon aria-hidden className="size-4 shrink-0 text-primary" />
+        <span className="min-w-0 flex-1">
+          <span className="block text-xs font-bold [overflow-wrap:anywhere]">
+            {display.label}
+          </span>
+          <span className="block text-[11px] leading-snug text-muted-foreground [overflow-wrap:anywhere]">
+            {display.tagline}
+            {strategy.primaryOutputIsPro ? " · Pro output" : ""}
+          </span>
+        </span>
+        {isActive ? (
+          <span className="shrink-0 rounded-full bg-primary px-2 py-1 text-[10px] font-bold text-primary-foreground">
+            Selected
+          </span>
+        ) : null}
       </button>
     );
   };
 
-  return (
-    <div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-sm font-semibold text-foreground">Strategy</p>
-          <p className="text-[11px] leading-snug text-muted-foreground">
-            Long-term rental acquisition is the core workflow. Other models stay available with their limitations attached.
-          </p>
-        </div>
-        {active ? (
-          // 44px minimum: strategy selection is a primary setup control.
-          // strategy chips below carry, without growing the header row.
-          <button
-            type="button"
-            onClick={() => onSelect(null)}
-            className="inline-flex min-h-11 shrink-0 items-center px-2 text-xs font-semibold text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+  const renderGroup = (
+    label: string,
+    strategies: InvestorStrategy[],
+    description?: string,
+  ) => {
+    const labelId = `${panelId}-${label.toLowerCase().replaceAll(/[^a-z]+/g, "-")}`;
+    return (
+      <div role="group" aria-labelledby={labelId} className="space-y-2">
+        <div>
+          <p
+            id={labelId}
+            className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground"
           >
-            Clear
-          </button>
-        ) : null}
-      </div>
-
-      <p className="mt-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-        Core
-      </p>
-      <div className="mt-3 -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
-        {CORE_INVESTOR_STRATEGIES.map(renderStrategy)}
-      </div>
-
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-          Secondary
-        </span>
-        {SECONDARY_INVESTOR_STRATEGIES.map(renderStrategy)}
-      </div>
-
-      <details
-        className="group mt-3 rounded-xl border border-border bg-muted/20 px-3"
-        open={active?.productStage === "advanced-beta" ? true : undefined}
-      >
-        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-xs font-bold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-          Advanced / Beta strategies
-          <span aria-hidden className="text-muted-foreground transition-transform group-open:rotate-45">+</span>
-        </summary>
-        <p className="pb-2 text-[11px] leading-relaxed text-muted-foreground">
-          BRRRR, flip, wholesale, and STR are screening aids. Their rehab, ARV, lender, operating, regulatory, and exit assumptions require separate evidence.
-        </p>
-        <div className="flex flex-wrap gap-2 border-t border-border py-3">
-          {ADVANCED_INVESTOR_STRATEGIES.map(renderStrategy)}
+            {label}
+          </p>
+          {description ? (
+            <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+              {description}
+            </p>
+          ) : null}
         </div>
-      </details>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {strategies.map(renderStrategy)}
+        </div>
+      </div>
+    );
+  };
 
-      {active ? (
-        <p className="mt-3 rounded-xl bg-primary/5 px-3 py-2 text-xs leading-snug text-foreground">
-          <span className="font-semibold">
-            {active.key === "wholesale-mao" ? "Wholesale / Offer Ceiling" : active.label}:
-          </span>{" "}
-          {active.key === "wholesale-mao"
-            ? "Enter the address and rent — we’ll reverse-solve the Offer Ceiling for the selected return rules."
-            : active.focusHint}
-          {active.limitation ? (
-            <span className="mt-1 block text-muted-foreground">Limit: {active.limitation}</span>
+  return (
+    <div className="rounded-xl border border-border bg-card px-3 py-2.5 shadow-sm sm:px-4">
+      <div className="flex min-h-11 flex-wrap items-center justify-between gap-x-3 gap-y-1">
+        <p className="flex min-w-0 flex-1 basis-[9rem] flex-wrap items-center gap-1.5 text-sm text-foreground">
+          <span className="shrink-0 text-muted-foreground">Analysis type:</span>
+          <span className="inline-flex min-w-0 items-center gap-1.5 font-bold">
+            <ActiveIcon aria-hidden className="size-4 shrink-0 text-primary" />
+            <span className="break-words [overflow-wrap:anywhere]">
+              {activeDisplay.label}
+            </span>
+          </span>
+          {active.productStage !== "core" ? (
+            <span className="hidden shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold text-muted-foreground sm:inline">
+              {active.productStage === "advanced-beta"
+                ? "Advanced / Beta"
+                : "Secondary"}
+            </span>
           ) : null}
         </p>
+        <button
+          ref={disclosureButtonRef}
+          type="button"
+          aria-label={`${expanded ? "Close" : "Change"} analysis type. Current: ${activeDisplay.label}`}
+          aria-expanded={expanded}
+          aria-controls={expanded ? panelId : undefined}
+          onClick={() => setExpanded((open) => !open)}
+          className="ml-auto inline-flex min-h-11 shrink-0 items-center rounded-lg px-3 text-xs font-bold text-primary underline-offset-2 hover:bg-muted hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          {expanded ? "Done" : "Change"}
+        </button>
+      </div>
+
+      {activeKey && active.productStage !== "core" ? (
+        <div
+          role="note"
+          className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] leading-relaxed text-foreground"
+        >
+          <span className="font-bold">{activeDisplay.label} mode.</span>{" "}
+          {active.focusHint}
+          {active.limitation ? (
+            <span className="mt-1 block text-muted-foreground">
+              Verify independently: {active.limitation}
+            </span>
+          ) : null}
+          {active.primaryOutputIsPro ? (
+            <span className="mt-1 block font-medium text-foreground">
+              The headline {activeDisplay.label} model is a Pro feature. The
+              free run still shows cash flow, cap rate, and DSCR.
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+
+      {expanded ? (
+        <div
+          id={panelId}
+          role="region"
+          aria-label="Choose analysis type"
+          className="mt-3 space-y-4 border-t border-border pt-3"
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              event.preventDefault();
+              collapseAndRestoreFocus();
+            }
+          }}
+        >
+          <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] leading-relaxed text-foreground">
+            <span className="font-bold">
+              Changing analysis type can change your property model and apply
+              starter assumptions.
+            </span>{" "}
+            Review every changed value before running the analysis. Returning to
+            Buy &amp; Hold restores your pre-strategy values when available.
+          </p>
+
+          {renderGroup("Core", CORE_INVESTOR_STRATEGIES)}
+          {renderGroup("Secondary", SECONDARY_INVESTOR_STRATEGIES)}
+          {renderGroup(
+            "Advanced / Beta strategies",
+            ADVANCED_INVESTOR_STRATEGIES,
+            "BRRRR, flip, wholesale, and STR are screening aids. Their rehab, ARV, lender, operating, regulatory, and exit assumptions require separate evidence.",
+          )}
+        </div>
       ) : null}
     </div>
   );

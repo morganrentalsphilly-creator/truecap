@@ -277,8 +277,18 @@ const nextConfig = {
         ],
       },
       {
+        // Client portals are bearer-token URLs and can be revoked. Keep the
+        // token out of referrers, search indexes, and every shared cache so a
+        // revoked portal cannot survive in a browser or CDN response cache.
         source: "/portal/:path+",
-        headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
+        headers: [
+          { key: "Referrer-Policy", value: "no-referrer" },
+          {
+            key: "X-Robots-Tag",
+            value: "noindex, nofollow, noarchive, nosnippet",
+          },
+          { key: "Cache-Control", value: "private, no-store" },
+        ],
       },
       {
         source: "/embed/brand/:path+",

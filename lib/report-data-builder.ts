@@ -12,10 +12,7 @@ import {
   investmentFormSchema,
   type InvestmentFormValues,
 } from "@/lib/investcalc-schema";
-import {
-  buildRecordedReportMaxOffer,
-  buildReportMaxOffer,
-} from "@/lib/report-max-offer";
+import { buildReportMaxOffer } from "@/lib/report-max-offer";
 import { buildReportOperatingStatement } from "@/lib/report-operating-statement";
 import { TRUECAP_UNDERWRITING_STANDARD_NAME } from "@/lib/underwriting-methodology";
 import { getDealTier } from "@/lib/verdict";
@@ -27,19 +24,19 @@ import type { ReportData } from "@/lib/pdf-generator";
 import { meetsTarget } from "@/lib/max-allowable-offer";
 import {
   isAdoptedOfferCeilingTargetSource,
-  normalizeOfferCeilingTargetSource,
   type OfferCeilingTargetSource,
 } from "@/lib/offer-ceiling-contract";
+import { normalizeExternalOfferCeilingTargetSource } from "@/lib/external-offer-ceiling-provenance";
 import { describeMaoTarget } from "@/lib/mao-targets";
 import {
   normalizeMaoTarget,
   normalizeMaoTargetForFinancing,
 } from "@/lib/mao-target-editor";
+import { resolveCompatibleAnalyzerStrategyKey } from "@/lib/analyzer-strategy-persistence";
 import {
-  parseFrozenDealScore,
-  resolveSavedAnalysisResult,
-} from "@/lib/saved-analysis-methodology";
-import { parseCompareSnapshotV1 } from "@/lib/compare-result-snapshot";
+  buildSpecialistAnalysisSnapshot,
+  type SpecialistAnalysisSnapshot,
+} from "@/lib/specialist-analysis-snapshot";
 
 export type CanonicalReportBuildInput = {
   /** Raw browser payload. It is parsed again here even when the action schema
@@ -58,16 +55,24 @@ export type CanonicalReportBuildInput = {
   /** Captured target provenance. Invalid/missing values never become a Buy
    * Box claim; they fall back to selected targets or screening defaults. */
   maxOfferTargetSource?: unknown;
-  /** Owner-scoped saved result resolved by the server. When present, the PDF
-   * reproduces that exact recorded result instead of silently calculating the
-   * same form again. Browser callers must never populate this field. */
-  trustedRecordedResult?: {
-    methodologyVersion: unknown;
-    resultSnapshot: unknown;
-  };
+  /** Current analyzer lens. It chooses whether the server should derive a
+   * specialist section, but never supplies calculated specialist outcomes. */
+  analyzerStrategyKey?: unknown;
   /** Test-only clock injection. Production callers omit it. */
   generatedAt?: Date;
 };
+
+function resolveReportSpecialistAnalysis(args: {
+  input: CanonicalReportBuildInput;
+  values: InvestmentFormValues;
+  result: ReturnType<typeof calculateAnalysis>;
+}): SpecialistAnalysisSnapshot | null {
+  const strategyKey = resolveCompatibleAnalyzerStrategyKey(
+    args.input.analyzerStrategyKey,
+    args.values,
+  );
+  return buildSpecialistAnalysisSnapshot(args.values, args.result, strategyKey);
+}
 
 /**
  * Rebuild a complete investment report from accepted form inputs.
@@ -86,76 +91,34 @@ export function buildCanonicalReportData(
   const currentScore = computeDealScore(
     buildDealScoreInputFromAnalysis(values, currentResult),
   );
-  const recordedResolution = input.trustedRecordedResult
-    ? resolveSavedAnalysisResult({
-        methodologyVersion: input.trustedRecordedResult.methodologyVersion,
-        resultSnapshot: input.trustedRecordedResult.resultSnapshot,
-        recomputedResult: currentResult,
-        recomputedExtras: {
-          score: currentScore.score,
-          recommendation: currentScore.recommendation,
-          riskLevel: currentScore.riskLevel,
-          breakdown: currentScore.breakdown,
-          explanation: currentScore.explanation,
-        },
-      })
-    : null;
-  if (recordedResolution && !recordedResolution.result) {
-    throw new Error("Recorded saved-analysis result is incomplete");
-  }
-  const result = recordedResolution?.result ?? currentResult;
-  const recordedScore = recordedResolution
-    ? parseFrozenDealScore(recordedResolution.result)
-    : null;
-  if (recordedResolution && !recordedScore) {
-    throw new Error("Recorded saved-analysis score is incomplete");
-  }
-  const score = recordedScore ?? currentScore;
-  const usesRecordedResult = Boolean(recordedResolution?.usesRecordedSnapshot);
+  const result = currentResult;
+  const score = currentScore;
+  const specialistAnalysis = resolveReportSpecialistAnalysis({
+    input,
+    values,
+    result,
+  });
   const projectionYears = result.tenYearProjection;
   const taxYears = result.taxStrategyYears;
 
-  let exitYears: ExitScenarioYear[];
-  if (usesRecordedResult) {
-    const compareSnapshot = parseCompareSnapshotV1(
-      (result as unknown as Record<string, unknown>).compareSnapshot,
-    );
-    if (!compareSnapshot || compareSnapshot.exitScenarios.years.length === 0) {
-      throw new Error("Recorded saved-analysis exit snapshot is incomplete");
-    }
-    exitYears = compareSnapshot.exitScenarios.years.map((row, index) => ({
-      year: row.year,
-      propertyValue: row.propertyValue,
-      remainingLoanBalance: row.loanBalance,
-      equity: row.equity,
-      sellingCost: row.sellingCost,
-      netSaleProceeds: row.netSaleProceeds,
-      cumulativeCashFlow:
-        projectionYears[index]?.cumulativeCashFlowAnnual ?? 0,
-      cumulativeTaxBenefit:
-        taxYears[index]?.cumulativeTaxBenefitAnnual ?? 0,
-      totalProfit: row.totalProfit,
-    }));
-  } else {
-    exitYears = buildExitScenarios({
-      purchasePrice: values.purchasePrice,
-      ...resolveExitScenarioRates(values),
-      loanAmount: result.loanAmount,
-      interestRate: values.interestRate,
-      loanTermYears: values.loanTermYears,
-      monthlyPayment: result.monthlyPayment,
-      downPayment: result.downPayment,
-      closingCosts: result.closingCosts,
-      initialCashInvested: result.totalCashRequired,
-      cumulativeCashFlowByYear: projectionYears.map(
-        (year) => year.cumulativeCashFlowAnnual,
-      ),
-      cumulativeTaxBenefitByYear: taxYears.map(
-        (year) => year.cumulativeTaxBenefitAnnual,
-      ),
-      annualDepreciation: taxYears[0]?.depreciationDeductionAnnual ?? 0,
-    });
-  }
+  const exitYears: ExitScenarioYear[] = buildExitScenarios({
+    purchasePrice: values.purchasePrice,
+    ...resolveExitScenarioRates(values),
+    loanAmount: result.loanAmount,
+    interestRate: values.interestRate,
+    loanTermYears: values.loanTermYears,
+    monthlyPayment: result.monthlyPayment,
+    downPayment: result.downPayment,
+    closingCosts: result.closingCosts,
+    initialCashInvested: result.totalCashRequired,
+    cumulativeCashFlowByYear: projectionYears.map(
+      (year) => year.cumulativeCashFlowAnnual,
+    ),
+    cumulativeTaxBenefitByYear: taxYears.map(
+      (year) => year.cumulativeTaxBenefitAnnual,
+    ),
+    annualDepreciation: taxYears[0]?.depreciationDeductionAnnual ?? 0,
+  });
 
   const projectionRows = projectionYears.map((row) => ({
     y: row.year,
@@ -190,17 +153,15 @@ export function buildCanonicalReportData(
 
   const downsideRatePp =
     result.monthlyPayment > 0 ? WORST_CASE_PRESET.ratePp : 0;
-  const downsideResult = usesRecordedResult
-    ? null
-    : calculateAnalysis(
-        applyWhatIfAdjustments(
-          values,
-          WORST_CASE_PRESET.rentPct,
-          0,
-          downsideRatePp,
-          WORST_CASE_PRESET.vacancyPp,
-        ),
-      );
+  const downsideResult = calculateAnalysis(
+    applyWhatIfAdjustments(
+      values,
+      WORST_CASE_PRESET.rentPct,
+      0,
+      downsideRatePp,
+      WORST_CASE_PRESET.vacancyPp,
+    ),
+  );
 
   const units = buildReportUnits(values, result.monthlyRentalIncome);
   const methodologyVersion = result.methodologyVersion;
@@ -211,11 +172,11 @@ export function buildCanonicalReportData(
       ? result.tenYearProjectionVersion
       : null;
   const targetSource: OfferCeilingTargetSource =
-    normalizeOfferCeilingTargetSource(input.maxOfferTargetSource) ??
+    normalizeExternalOfferCeilingTargetSource(input.maxOfferTargetSource) ??
     (input.maxOfferTarget ? "selected-targets" : "screening-defaults");
   const normalizedTarget = normalizeMaoTarget(input.maxOfferTarget);
   const targetAdopted = Boolean(
-    normalizedTarget && isAdoptedOfferCeilingTargetSource(targetSource)
+    normalizedTarget && isAdoptedOfferCeilingTargetSource(targetSource),
   );
   const resolvedTarget = targetAdopted
     ? normalizeMaoTargetForFinancing(normalizedTarget, {
@@ -238,7 +199,7 @@ export function buildCanonicalReportData(
   return {
     generatedAt: input.generatedAt ?? new Date(),
     methodologyVersion,
-    methodologyLabel: `${usesRecordedResult ? "Recorded " : ""}${TRUECAP_UNDERWRITING_STANDARD_NAME} v${methodologyVersion}`,
+    methodologyLabel: `${TRUECAP_UNDERWRITING_STANDARD_NAME} v${methodologyVersion}`,
     tenYearProjectionVersion,
     property: {
       address: values.address,
@@ -284,6 +245,7 @@ export function buildCanonicalReportData(
     },
     units,
     operatingStatement: buildReportOperatingStatement(result),
+    specialistAnalysis,
     performance: {
       recommendation: score.recommendation,
       dealScore: score.score,
@@ -320,16 +282,12 @@ export function buildCanonicalReportData(
     // Saved-deal comps are included only when the server resolved them through
     // an owner-scoped read. Anonymous/browser-supplied comps are discarded.
     comps: input.trustedPresentation?.comps ?? null,
-    maxOffer: usesRecordedResult
-      ? buildRecordedReportMaxOffer(
-          input.trustedRecordedResult?.resultSnapshot,
-        )
-      : buildReportMaxOffer({
-          values,
-          result,
-          targetInput: input.maxOfferTarget,
-          targetSourceInput: input.maxOfferTargetSource,
-        }),
+    maxOffer: buildReportMaxOffer({
+      values,
+      result,
+      targetInput: input.maxOfferTarget,
+      targetSourceInput: targetSource,
+    }),
     downsideScenario: downsideResult
       ? {
           label: `Rent ${WORST_CASE_PRESET.rentPct}% · vacancy +${WORST_CASE_PRESET.vacancyPp}pp${

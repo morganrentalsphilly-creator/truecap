@@ -56,7 +56,13 @@ const FIELDS: Array<{
   /** Only where a field needs a caveat the placeholder can't carry. */
   note?: string;
 }> = [
-  { key: "downPaymentPct", label: "Down payment", suffix: "%", group: "Financing", placeholder: "20" },
+  {
+    key: "downPaymentPct",
+    label: "Down payment",
+    suffix: "%",
+    group: "Financing",
+    placeholder: "20",
+  },
   {
     key: "interestRatePct",
     label: "Interest rate",
@@ -64,29 +70,102 @@ const FIELDS: Array<{
     group: "Financing",
     placeholder: "6.75",
     step: "0.01",
-    // Settings showed 6.75 while a new analysis showed ~6.67: the analyzer
-    // prefers today's live FRED rate. Neither number was wrong — the page
-    // just never said the live rate wins.
-    note: "Overridden by today's live rate when available.",
+    note: "Used as your starting assumption. Replace it with a current lender quote before offering.",
   },
-  { key: "loanTermYears", label: "Loan term", suffix: "yr", group: "Financing", placeholder: "30" },
-  { key: "closingCostsPct", label: "Closing costs", suffix: "%", group: "Financing", placeholder: "3" },
-  { key: "vacancyPct", label: "Vacancy", suffix: "%", group: "Operating", placeholder: "5" },
-  { key: "mgmtPct", label: "Management", suffix: "%", group: "Operating", placeholder: "8" },
-  { key: "maintenancePct", label: "Maintenance", suffix: "%", group: "Operating", placeholder: "10" },
-  { key: "capexPct", label: "CapEx reserve", suffix: "%", group: "Operating", placeholder: "5" },
-  { key: "taxRatePct", label: "Income tax rate", suffix: "%", group: "Operating", placeholder: "24" },
-  { key: "rentGrowthPct", label: "Rent growth", suffix: "%", group: "Growth & exit", placeholder: "2.5", step: "0.1" },
-  { key: "expenseGrowthPct", label: "Expense growth", suffix: "%", group: "Growth & exit", placeholder: "2.5", step: "0.1" },
-  { key: "appreciationRatePct", label: "Appreciation", suffix: "%", group: "Growth & exit", placeholder: "3", step: "0.1" },
-  { key: "sellingCostPct", label: "Selling cost", suffix: "%", group: "Growth & exit", placeholder: "6", step: "0.1" },
+  {
+    key: "loanTermYears",
+    label: "Loan term",
+    suffix: "yr",
+    group: "Financing",
+    placeholder: "30",
+  },
+  {
+    key: "closingCostsPct",
+    label: "Closing costs",
+    suffix: "%",
+    group: "Financing",
+    placeholder: "3",
+  },
+  {
+    key: "vacancyPct",
+    label: "Vacancy",
+    suffix: "%",
+    group: "Operating",
+    placeholder: "5",
+  },
+  {
+    key: "mgmtPct",
+    label: "Management",
+    suffix: "%",
+    group: "Operating",
+    placeholder: "8",
+  },
+  {
+    key: "maintenancePct",
+    label: "Maintenance",
+    suffix: "%",
+    group: "Operating",
+    placeholder: "10",
+  },
+  {
+    key: "capexPct",
+    label: "CapEx reserve",
+    suffix: "%",
+    group: "Operating",
+    placeholder: "5",
+  },
+  {
+    key: "taxRatePct",
+    label: "Income tax rate",
+    suffix: "%",
+    group: "Operating",
+    placeholder: "24",
+  },
+  {
+    key: "rentGrowthPct",
+    label: "Rent growth",
+    suffix: "%",
+    group: "Growth & exit",
+    placeholder: "2.5",
+    step: "0.1",
+  },
+  {
+    key: "expenseGrowthPct",
+    label: "Expense growth",
+    suffix: "%",
+    group: "Growth & exit",
+    placeholder: "2.5",
+    step: "0.1",
+  },
+  {
+    key: "appreciationRatePct",
+    label: "Appreciation",
+    suffix: "%",
+    group: "Growth & exit",
+    placeholder: "3",
+    step: "0.1",
+  },
+  {
+    key: "sellingCostPct",
+    label: "Selling cost",
+    suffix: "%",
+    group: "Growth & exit",
+    placeholder: "6",
+    step: "0.1",
+  },
 ];
 
-const DEFAULTS_GROUPS: DefaultsGroup[] = ["Financing", "Operating", "Growth & exit"];
+const DEFAULTS_GROUPS: DefaultsGroup[] = [
+  "Financing",
+  "Operating",
+  "Growth & exit",
+];
 
 export function UserDefaultsCard() {
   const { toast } = useToast();
-  const [values, setValues] = useState<Partial<Record<keyof UserAnalysisDefaults, string>>>({});
+  const [values, setValues] = useState<
+    Partial<Record<keyof UserAnalysisDefaults, string>>
+  >({});
   const [loaded, setLoaded] = useState(false);
   const [migrationPending, setMigrationPending] = useState(false);
   const [isSaving, startSaving] = useTransition();
@@ -102,7 +181,9 @@ export function UserDefaultsCard() {
       .then((result) => {
         if (cancelled) return;
         if (result.ok) {
-          const stringified: Partial<Record<keyof UserAnalysisDefaults, string>> = {};
+          const stringified: Partial<
+            Record<keyof UserAnalysisDefaults, string>
+          > = {};
           for (const [k, v] of Object.entries(result.preferences)) {
             if (typeof v === "number" && Number.isFinite(v)) {
               stringified[k as keyof UserAnalysisDefaults] = String(v);
@@ -161,7 +242,8 @@ export function UserDefaultsCard() {
         Sentry.captureException(err, { tags: { feature: "user-defaults" } });
         toast({
           title: "Could not save defaults",
-          description: "Something interrupted the request. Check your connection and try again.",
+          description:
+            "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
       }
@@ -176,7 +258,8 @@ export function UserDefaultsCard() {
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Sliders className="size-4" />
           <span>
-            Personal defaults will be available once the latest schema update is applied.
+            Personal defaults will be available once the latest schema update is
+            applied.
           </span>
         </div>
       </div>
@@ -190,14 +273,18 @@ export function UserDefaultsCard() {
     >
       <div className="mb-4 flex items-center gap-2">
         <Sliders className="size-4 text-primary" />
-        <h2 id="user-defaults-heading" className="text-base font-bold text-foreground">
+        <h2
+          id="user-defaults-heading"
+          className="text-base font-bold text-foreground"
+        >
           Your analysis defaults
         </h2>
       </div>
       <p className="mb-5 text-sm leading-relaxed text-muted-foreground">
-        Set your preferred starting values for new analyses. Every field is optional —
-        leave it blank to use the engine&apos;s built-in default. These values are
-        applied only when you start a new analysis; they don&apos;t change saved deals.
+        Set your preferred starting values for new analyses. Every field is
+        optional — leave it blank to use the engine&apos;s built-in default.
+        These values are applied only when you start a new analysis; they
+        don&apos;t change saved deals.
       </p>
       {DEFAULTS_GROUPS.map((group) => (
         <fieldset key={group} className="mb-5 last:mb-0">
@@ -222,7 +309,10 @@ export function UserDefaultsCard() {
                     placeholder={field.placeholder}
                     value={values[field.key] ?? ""}
                     onChange={(event) =>
-                      setValues((prev) => ({ ...prev, [field.key]: event.target.value }))
+                      setValues((prev) => ({
+                        ...prev,
+                        [field.key]: event.target.value,
+                      }))
                     }
                     className="h-10 pr-10 text-sm"
                   />
@@ -231,7 +321,9 @@ export function UserDefaultsCard() {
                   </span>
                 </div>
                 {field.note ? (
-                  <p className="text-[10px] leading-tight text-muted-foreground">{field.note}</p>
+                  <p className="text-[10px] leading-tight text-muted-foreground">
+                    {field.note}
+                  </p>
                 ) : null}
               </div>
             ))}

@@ -29,15 +29,14 @@ import {
 import { isFeatureReleased } from "@/lib/entitlements-catalog";
 import {
   isAdoptedOfferCeilingTargetSource,
-  normalizeOfferCeilingTargetSource,
   type OfferCeilingTargetSource,
 } from "@/lib/offer-ceiling-contract";
+import { normalizeExternalOfferCeilingTargetSource } from "@/lib/external-offer-ceiling-provenance";
 import { resolveOfferCeilingForAccess } from "@/lib/offer-ceiling-server";
-import { readRecordedOfferCeiling } from "@/lib/recorded-offer-ceiling";
 import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
 import {
   isLegacySavedMethodologyVersion,
-  resolveSavedAnalysisResult,
+  shouldFreezeSavedMethodology,
 } from "@/lib/saved-analysis-methodology";
 import { buildPublicShareAnalysisPayload } from "@/lib/public-share-analysis-result";
 
@@ -108,29 +107,25 @@ export default async function PortalDealPage({ params }: Props) {
     if (!values) notFound();
     const recomputedVerdict = recomputeSavedDealVerdict(deal.form_snapshot);
     if (!recomputedVerdict) notFound();
-    const methodologyResolution = resolveSavedAnalysisResult({
-      methodologyVersion: deal.methodology_version,
-      resultSnapshot: deal.result_snapshot as Record<string, unknown> | null,
-      recomputedResult: recomputedVerdict.analysisResult,
-      recomputedExtras: {
-        score: recomputedVerdict.score,
-        recommendation: recomputedVerdict.recommendation,
-        riskLevel: recomputedVerdict.riskLevel,
-        breakdown: recomputedVerdict.breakdown,
-        explanation: recomputedVerdict.explanation,
-      },
-    });
-    // A recorded result is atomic: never fill a missing historical field with
-    // today's engine. Incomplete rows fail closed instead of showing a hybrid.
-    if (!methodologyResolution.result) notFound();
-    result = methodologyResolution.result;
-    recordedResult = methodologyResolution.usesRecordedSnapshot;
+    if (
+      shouldFreezeSavedMethodology(
+        deal.methodology_version,
+        recomputedVerdict.analysisResult.methodologyVersion,
+      )
+    ) {
+      // This public route cannot republish an unsupported formula contract.
+      // The agent must explicitly rerun the deal with the current standard.
+      notFound();
+    }
+    // The saved form and targets are agent-selected inputs. All TrueCap
+    // outputs shown to the client are recomputed server-side; owner-writable
+    // result JSON is never publication authority.
+    result = recomputedVerdict.analysisResult;
+    recordedResult = false;
     legacyMethodologyWarning = isLegacySavedMethodologyVersion(
-      methodologyResolution.storedMethodologyVersion,
+      deal.methodology_version,
     );
-    displayedMethodologyVersion =
-      methodologyResolution.storedMethodologyVersion ??
-      result.methodologyVersion;
+    displayedMethodologyVersion = result.methodologyVersion;
     const savedResultSnapshot = deal.result_snapshot as Record<
       string,
       unknown
@@ -143,27 +138,20 @@ export default async function PortalDealPage({ params }: Props) {
         isCashPurchase: result.monthlyPayment <= 0,
       }) ?? undefined;
     maoTargetSource =
-      normalizeOfferCeilingTargetSource(
+      normalizeExternalOfferCeilingTargetSource(
         savedResultSnapshot?.maxOfferTargetSource,
       ) ?? "selected-targets";
     if (!isAdoptedOfferCeilingTargetSource(maoTargetSource)) {
       maoTarget = undefined;
     }
-    if (maoTarget && recordedResult) {
-      const recordedCeiling = readRecordedOfferCeiling(savedResultSnapshot);
-      offerCeilingAccess = recordedCeiling.captured
-        ? ({ access: "exact", exact: recordedCeiling.exact } as const)
-        : null;
-    } else {
-      offerCeilingAccess = maoTarget
-        ? resolveOfferCeilingForAccess({
-            values,
-            target: maoTarget,
-            source: maoTargetSource,
-            paidAccess: true,
-          })
-        : null;
-    }
+    offerCeilingAccess = maoTarget
+      ? resolveOfferCeilingForAccess({
+          values,
+          target: maoTarget,
+          source: maoTargetSource,
+          paidAccess: true,
+        })
+      : null;
   } catch (err) {
     // notFound() throws a Next control-flow error — let it through.
     if (err && typeof err === "object" && "digest" in err) throw err;
@@ -193,6 +181,8 @@ export default async function PortalDealPage({ params }: Props) {
       offerCeilingAccess={offerCeilingAccess}
       methodologyVersion={displayedMethodologyVersion}
       legacyMethodologyWarning={legacyMethodologyWarning}
+      outputsRecomputed
+      inputsSource="live-saved"
       recordedResult={recordedResult}
       leadCapture={
         agent

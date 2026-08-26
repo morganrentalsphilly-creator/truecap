@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Check, ChevronDown, CircleAlert, Database, ShieldCheck } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  CircleAlert,
+  Database,
+  ShieldCheck,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -70,7 +76,7 @@ export function InputConfidenceCard({
         .sort(
           (a, b) =>
             (b.materialityScore ?? -1) - (a.materialityScore ?? -1) ||
-            b.weight - a.weight
+            b.weight - a.weight,
         )
         .slice(0, 3)
         .map((item) => ({
@@ -86,21 +92,22 @@ export function InputConfidenceCard({
   const statusHeadline = advocacyContractEnabled
     ? ledger.readinessLabel
     : showOfferReadyStatus
-    ? confidence.stage === "offer-ready"
-      ? "Offer Ready"
-      : remaining <= 3 && remaining > 0
-        ? "Almost Offer Ready"
-        : confidence.stageLabel
-    : "Input verification";
+      ? confidence.stage === "offer-ready"
+        ? "Offer Ready"
+        : remaining <= 3 && remaining > 0
+          ? "Almost Offer Ready"
+          : confidence.stageLabel
+      : "Input verification";
 
   useEffect(() => {
     const requestedIndex = pendingQueueFocusIndex.current;
     if (requestedIndex == null) return;
     pendingQueueFocusIndex.current = null;
     const actions = cardRef.current?.querySelectorAll<HTMLButtonElement>(
-      "[data-input-confidence-queue-action]"
+      "[data-input-confidence-queue-action]",
     );
-    const nextAction = actions?.[Math.min(requestedIndex, Math.max(0, actions.length - 1))];
+    const nextAction =
+      actions?.[Math.min(requestedIndex, Math.max(0, actions.length - 1))];
     if (nextAction) nextAction.focus();
     else cardRef.current?.focus({ preventScroll: true });
   }, [confidence]);
@@ -116,20 +123,32 @@ export function InputConfidenceCard({
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <Database aria-hidden className="size-4 text-primary" />
-            <h2 id="input-confidence-title" className="text-xs font-extrabold uppercase tracking-widest text-primary">
-              {advocacyContractEnabled ? "Evidence readiness" : "Decision confidence"}
+            <h2
+              id="input-confidence-title"
+              className="text-xs font-extrabold uppercase tracking-widest text-primary"
+            >
+              {advocacyContractEnabled
+                ? "Evidence readiness"
+                : "Decision confidence"}
             </h2>
           </div>
           <div aria-live="polite" aria-atomic="true">
-            <p className="mt-2 text-lg font-extrabold text-foreground">{statusHeadline}</p>
+            <p className="mt-2 text-lg font-extrabold text-foreground">
+              {statusHeadline}
+            </p>
             <p className="mt-1 max-w-xl text-sm leading-relaxed text-muted-foreground">
               {advocacyContractEnabled
                 ? `${ledger.evidenceVerifiedCount} of ${ledger.materialInputCount} material inputs are evidence-verified. ${ledger.userConfirmedCount} are user-confirmed; self-confirmation does not count as evidence.`
                 : showOfferReadyStatus
-                ? confidence.stage === "offer-ready"
-                  ? "The required inputs have been explicitly confirmed for this underwrite. Re-check anything that changes before recording a decision."
-                  : `${remaining} required ${remaining === 1 ? "input" : "inputs"} still need confirmation before this analysis is Offer Ready.`
-                : `${remaining} high-priority ${remaining === 1 ? "input" : "inputs"} still need confirmation before relying on this underwrite.`}
+                  ? confidence.stage === "offer-ready"
+                    ? "The required inputs have been explicitly confirmed for this underwrite. Re-check anything that changes before recording a decision."
+                    : `${remaining} required ${remaining === 1 ? "input" : "inputs"} still need confirmation before this analysis is Offer Ready.`
+                  : `${remaining} high-priority ${remaining === 1 ? "input" : "inputs"} still need confirmation before relying on this underwrite.`}
+            </p>
+            <p className="mt-2 max-w-xl text-xs leading-relaxed text-muted-foreground">
+              Scope: rental base-case inputs. Strategy-specific ARV, refinance,
+              hold-time, and flip assumptions are reviewed separately in their
+              strategy panels.
             </p>
           </div>
         </div>
@@ -137,7 +156,11 @@ export function InputConfidenceCard({
         <div
           role="group"
           className="grid shrink-0 grid-cols-1 gap-2 min-[360px]:grid-cols-3"
-          aria-label={advocacyContractEnabled ? "Evidence readiness summary" : "Decision confidence summary"}
+          aria-label={
+            advocacyContractEnabled
+              ? "Evidence readiness summary"
+              : "Decision confidence summary"
+          }
         >
           {advocacyContractEnabled ? (
             <>
@@ -157,7 +180,9 @@ export function InputConfidenceCard({
             <>
               <SummaryMetric
                 label="Deal Fit"
-                value={dealFitScore == null ? "—" : `${Math.round(dealFitScore)}`}
+                value={
+                  dealFitScore == null ? "—" : `${Math.round(dealFitScore)}`
+                }
                 suffix={dealFitScore == null ? undefined : "/100"}
                 help="Economics"
               />
@@ -182,12 +207,14 @@ export function InputConfidenceCard({
               <span
                 className={cn(
                   "mt-2 inline-flex rounded-full border px-2 py-0.5 text-xs font-bold capitalize",
-                  RISK_STYLE[confidence.sensitivityRisk]
+                  RISK_STYLE[confidence.sensitivityRisk],
                 )}
               >
                 {confidence.sensitivityRisk}
               </span>
-              <p className="mt-1 text-[9px] text-muted-foreground">Unverified-input risk</p>
+              <p className="mt-1 text-[9px] text-muted-foreground">
+                Unverified-input risk
+              </p>
             </div>
           )}
         </div>
@@ -200,16 +227,27 @@ export function InputConfidenceCard({
               <CircleAlert aria-hidden className="size-3.5 text-amber-600" />
               {advocacyContractEnabled ? "Resolve next" : "Verify next"}
             </p>
-            <Button type="button" variant="ghost" size="sm" onClick={onEditAssumptions} className="min-h-11 text-xs">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={onEditAssumptions}
+              className="min-h-11 text-xs"
+            >
               Edit assumptions
             </Button>
           </div>
           <ul className="grid gap-2 lg:grid-cols-3">
             {visibleQueue.map((item, index) => (
-              <li key={item.key} className="rounded-xl border border-border bg-muted/20 p-3">
+              <li
+                key={item.key}
+                className="rounded-xl border border-border bg-muted/20 p-3"
+              >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="text-sm font-bold text-foreground">{item.label}</p>
+                    <p className="text-sm font-bold text-foreground">
+                      {item.label}
+                    </p>
                     <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                       {item.sourceDisplay}
                     </p>
@@ -218,7 +256,8 @@ export function InputConfidenceCard({
                     type="button"
                     data-input-confidence-queue-action
                     onClick={() => {
-                      if (!verified.has(item.key)) pendingQueueFocusIndex.current = index;
+                      if (!verified.has(item.key))
+                        pendingQueueFocusIndex.current = index;
                       onToggleVerified(item.key, !verified.has(item.key));
                     }}
                     aria-pressed={verified.has(item.key)}
@@ -235,7 +274,7 @@ export function InputConfidenceCard({
                       "inline-flex min-h-11 shrink-0 items-center gap-1 rounded-lg border px-3 text-[10px] font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                       verified.has(item.key)
                         ? "border-emerald-300 bg-emerald-50 text-emerald-700"
-                        : "border-border bg-background text-foreground hover:border-primary/40"
+                        : "border-border bg-background text-foreground hover:border-primary/40",
                     )}
                   >
                     <Check aria-hidden className="size-3" />
@@ -248,7 +287,9 @@ export function InputConfidenceCard({
                         : "I verified it"}
                   </button>
                 </div>
-                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{item.reason}</p>
+                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                  {item.reason}
+                </p>
                 {item.verifyAction ? (
                   <button
                     type="button"
@@ -269,8 +310,8 @@ export function InputConfidenceCard({
             {advocacyContractEnabled
               ? "Every material input satisfies the disclosed evidence policy. Evidence complete is not an investment recommendation."
               : showOfferReadyStatus
-              ? "Required inputs confirmed. Offer Ready is a data-readiness status, not a recommendation or guarantee."
-              : "Priority inputs confirmed for this underwrite. Re-check anything that changes before relying on it."}
+                ? "Required inputs confirmed. Offer Ready is a data-readiness status, not a recommendation or guarantee."
+                : "Priority inputs confirmed for this underwrite. Re-check anything that changes before relying on it."}
           </p>
         </div>
       )}
@@ -280,7 +321,10 @@ export function InputConfidenceCard({
           {advocacyContractEnabled
             ? "Open the Assumption Ledger"
             : "See all input sources and scoring rules"}
-          <ChevronDown aria-hidden className="size-4 transition-transform group-open:rotate-180" />
+          <ChevronDown
+            aria-hidden
+            className="size-4 transition-transform group-open:rotate-180"
+          />
         </summary>
         <div
           role="region"
@@ -301,7 +345,9 @@ export function InputConfidenceCard({
                     <li key={item.key} className="space-y-2 p-3 text-xs">
                       <div className="flex items-start justify-between gap-3">
                         <div>
-                          <p className="font-bold text-foreground">{item.label}</p>
+                          <p className="font-bold text-foreground">
+                            {item.label}
+                          </p>
                           <p className="mt-0.5 text-muted-foreground">
                             {SOURCE_CLASS_LABEL[ledgerItem.sourceClass]}
                           </p>
@@ -317,26 +363,37 @@ export function InputConfidenceCard({
                                 ? `Remove user confirmation for ${item.label}`
                                 : `Mark ${item.label} as reviewed and user-confirmed`
                             }
-                            onClick={() => onToggleVerified(item.key, !verified.has(item.key))}
+                            onClick={() =>
+                              onToggleVerified(
+                                item.key,
+                                !verified.has(item.key),
+                              )
+                            }
                             className={cn(
                               "inline-flex min-h-11 shrink-0 items-center gap-1 rounded-md border px-3 text-[10px] font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                               verified.has(item.key)
                                 ? "border-emerald-300 bg-emerald-50 text-emerald-700"
-                                : "border-border bg-background text-muted-foreground hover:text-foreground"
+                                : "border-border bg-background text-muted-foreground hover:text-foreground",
                             )}
                           >
                             <Check aria-hidden className="size-3" />
-                            {verified.has(item.key) ? "User confirmed" : "I reviewed this"}
+                            {verified.has(item.key)
+                              ? "User confirmed"
+                              : "I reviewed this"}
                           </button>
                         )}
                       </div>
-                      <p className="text-muted-foreground">Source: {item.sourceLabel}</p>
                       <p className="text-muted-foreground">
-                        Confirmation: {CONFIRMATION_LABEL[ledgerItem.confirmationType]}
+                        Source: {item.sourceLabel}
+                      </p>
+                      <p className="text-muted-foreground">
+                        Confirmation:{" "}
+                        {CONFIRMATION_LABEL[ledgerItem.confirmationType]}
                       </p>
                       {ledgerItem.hardFlags.length > 0 ? (
                         <p className="font-semibold text-amber-800">
-                          Flags: {ledgerItem.hardFlags.join(", ").replaceAll("-", " ")}
+                          Flags:{" "}
+                          {ledgerItem.hardFlags.join(", ").replaceAll("-", " ")}
                         </p>
                       ) : null}
                     </li>
@@ -346,7 +403,8 @@ export function InputConfidenceCard({
               <div className="hidden overflow-x-auto sm:block">
                 <table className="w-full min-w-[720px] text-left text-xs">
                   <caption className="sr-only">
-                    Assumption source, confirmation type, evidence flags, and review control
+                    Assumption source, confirmation type, evidence flags, and
+                    review control
                   </caption>
                   <thead className="bg-muted/50 text-[10px] uppercase tracking-wider text-muted-foreground">
                     <tr>
@@ -362,11 +420,15 @@ export function InputConfidenceCard({
                       const ledgerItem = ledgerByKey.get(item.key)!;
                       return (
                         <tr key={item.key}>
-                          <td className="px-3 py-2 font-semibold text-foreground">{item.label}</td>
+                          <td className="px-3 py-2 font-semibold text-foreground">
+                            {item.label}
+                          </td>
                           <td className="px-3 py-2 text-muted-foreground">
                             {SOURCE_CLASS_LABEL[ledgerItem.sourceClass]}
                           </td>
-                          <td className="px-3 py-2 text-muted-foreground">{item.sourceLabel}</td>
+                          <td className="px-3 py-2 text-muted-foreground">
+                            {item.sourceLabel}
+                          </td>
                           <td className="px-3 py-2 text-muted-foreground">
                             {CONFIRMATION_LABEL[ledgerItem.confirmationType]}
                             {ledgerItem.hardFlags.length > 0
@@ -385,16 +447,23 @@ export function InputConfidenceCard({
                                     ? `Remove user confirmation for ${item.label}`
                                     : `Mark ${item.label} as reviewed and user-confirmed`
                                 }
-                                onClick={() => onToggleVerified(item.key, !verified.has(item.key))}
+                                onClick={() =>
+                                  onToggleVerified(
+                                    item.key,
+                                    !verified.has(item.key),
+                                  )
+                                }
                                 className={cn(
                                   "inline-flex min-h-11 items-center gap-1 rounded-md border px-3 text-[10px] font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                                   verified.has(item.key)
                                     ? "border-emerald-300 bg-emerald-50 text-emerald-700"
-                                    : "border-border bg-background text-muted-foreground hover:text-foreground"
+                                    : "border-border bg-background text-muted-foreground hover:text-foreground",
                                 )}
                               >
                                 <Check aria-hidden className="size-3" />
-                                {verified.has(item.key) ? "User confirmed" : "I reviewed this"}
+                                {verified.has(item.key)
+                                  ? "User confirmed"
+                                  : "I reviewed this"}
                               </button>
                             )}
                           </td>
@@ -409,7 +478,8 @@ export function InputConfidenceCard({
             <div className="overflow-x-auto">
               <table className="w-full min-w-[760px] text-left text-xs">
                 <caption className="sr-only">
-                  Input source, scoring points, and confirmation status for every underwriting input
+                  Input source, scoring points, and confirmation status for
+                  every underwriting input
                 </caption>
                 <thead className="bg-muted/50 text-[10px] uppercase tracking-wider text-muted-foreground">
                   <tr>
@@ -417,17 +487,27 @@ export function InputConfidenceCard({
                     <th className="px-3 py-2 font-bold">Source class</th>
                     <th className="px-3 py-2 font-bold">Source</th>
                     <th className="px-3 py-2 text-right font-bold">Points</th>
-                    <th className="px-3 py-2 text-right font-bold">Confirmation</th>
+                    <th className="px-3 py-2 text-right font-bold">
+                      Confirmation
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
                   {confidence.fields.map((item) => (
                     <tr key={item.key}>
-                      <td className="px-3 py-2 font-semibold text-foreground">{item.label}</td>
-                      <td className="px-3 py-2 text-muted-foreground">{inputSourceClassLabel(item.sourceClass)}</td>
-                      <td className="px-3 py-2 text-muted-foreground">{item.sourceLabel}</td>
+                      <td className="px-3 py-2 font-semibold text-foreground">
+                        {item.label}
+                      </td>
+                      <td className="px-3 py-2 text-muted-foreground">
+                        {inputSourceClassLabel(item.sourceClass)}
+                      </td>
+                      <td className="px-3 py-2 text-muted-foreground">
+                        {item.sourceLabel}
+                      </td>
                       <td className="px-3 py-2 text-right font-mono tabular-nums text-foreground">
-                        {item.maxPoints === 0 ? "—" : `${item.earnedPoints.toFixed(1)} / ${item.maxPoints}`}
+                        {item.maxPoints === 0
+                          ? "—"
+                          : `${item.earnedPoints.toFixed(1)} / ${item.maxPoints}`}
                       </td>
                       <td className="px-3 py-2 text-right">
                         {item.sourceClass === "not-applicable" ? (
@@ -441,12 +521,17 @@ export function InputConfidenceCard({
                                 ? `Mark ${item.label} as unverified`
                                 : `Confirm ${item.label} as verified`
                             }
-                            onClick={() => onToggleVerified(item.key, !verified.has(item.key))}
+                            onClick={() =>
+                              onToggleVerified(
+                                item.key,
+                                !verified.has(item.key),
+                              )
+                            }
                             className={cn(
                               "inline-flex min-h-11 items-center gap-1 rounded-md border px-3 text-[10px] font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                               verified.has(item.key)
                                 ? "border-emerald-300 bg-emerald-50 text-emerald-700"
-                                : "border-border bg-background text-muted-foreground hover:text-foreground"
+                                : "border-border bg-background text-muted-foreground hover:text-foreground",
                             )}
                           >
                             <Check aria-hidden className="size-3" />
@@ -484,10 +569,14 @@ function SummaryMetric({
 }) {
   return (
     <div className="min-w-0 rounded-xl border border-border bg-background p-3 text-center">
-      <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground sm:text-[10px]">{label}</p>
+      <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground sm:text-[10px]">
+        {label}
+      </p>
       <p className="mt-1 break-words font-mono text-lg font-extrabold tabular-nums text-foreground sm:text-xl">
         {value}
-        {suffix ? <span className="text-xs text-muted-foreground">{suffix}</span> : null}
+        {suffix ? (
+          <span className="text-xs text-muted-foreground">{suffix}</span>
+        ) : null}
       </p>
       <p className="mt-0.5 text-[9px] text-muted-foreground">{help}</p>
     </div>

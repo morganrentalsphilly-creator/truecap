@@ -8,7 +8,6 @@ import { Label } from "@/components/ui/label";
 import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
 import { FieldError } from "@/components/investcalc/form-field-helpers";
-import { GlossaryTip } from "@/components/investcalc/glossary-tip";
 import { CurrencyInput } from "@/components/ui/currency-input";
 
 /**
@@ -58,6 +57,8 @@ const currency0 = new Intl.NumberFormat("en-US", {
   currency: "USD",
   maximumFractionDigits: 0,
 });
+
+const plainLabelClassName = "mb-1.5 block text-sm font-medium text-foreground";
 
 export function SingleFamilyUnitSection({
   form,
@@ -115,25 +116,46 @@ export function SingleFamilyUnitSection({
   const rentEmpty = rentVal == null || Number.isNaN(rentVal);
   const bedsEmpty = beds == null || Number.isNaN(beds);
   const showRentNudge = showBeds && showRent && rentEmpty;
+  const monthlyRentDescribedBy =
+    [
+      showRentNudge ? "monthlyRent-help" : null,
+      errors.monthlyRent ? "monthlyRent-error" : null,
+    ]
+      .filter(Boolean)
+      .join(" ") || undefined;
   const isSecondary = fields === "secondary";
-  const visibleCount = [showBeds, showRent, showBaths, showSqft].filter(Boolean).length;
+  const visibleCount = [showBeds, showRent, showBaths, showSqft].filter(
+    Boolean,
+  ).length;
   const gridCols =
     visibleCount >= 3
-      ? "grid-cols-2 sm:grid-cols-2 xl:grid-cols-4"
+      ? "grid-cols-1 sm:grid-cols-2 xl:grid-cols-4"
       : visibleCount === 2
-        ? "grid-cols-2"
+        ? "grid-cols-1 sm:grid-cols-2"
         : "grid-cols-1";
 
   return (
-    <div className={bare ? undefined : "bg-card rounded-2xl border border-border shadow-sm p-6"}>
+    <div
+      className={
+        bare
+          ? undefined
+          : "bg-card rounded-2xl border border-border shadow-sm p-6"
+      }
+    >
       {!bare ? (
         <div className="flex items-center gap-2 mb-5">
           <Home className="w-4 h-4 text-primary" />
           <span className="font-semibold text-sm text-foreground">
-            {isSecondary ? (extraFields ? "Property extras" : "Bathrooms & size") : "Unit Details"}
+            {isSecondary
+              ? extraFields
+                ? "Property extras"
+                : "Bathrooms & size"
+              : "Unit Details"}
           </span>
           {isSecondary ? (
-            <span className="text-[11px] font-normal text-muted-foreground">(optional)</span>
+            <span className="text-[11px] font-normal text-muted-foreground">
+              (optional)
+            </span>
           ) : null}
         </div>
       ) : null}
@@ -141,8 +163,9 @@ export function SingleFamilyUnitSection({
       <div className={cn("grid gap-4", gridCols)}>
         {showBeds ? (
           <div>
-            <Label htmlFor="bedrooms" className="text-xs font-semibold text-primary mb-1.5 block uppercase tracking-wide">
-              Bedrooms
+            <Label htmlFor="bedrooms" className={plainLabelClassName}>
+              Bedrooms{" "}
+              <span className="text-xs text-muted-foreground">(optional)</span>
             </Label>
             <Input
               {...register("bedrooms", { valueAsNumber: true })}
@@ -157,17 +180,20 @@ export function SingleFamilyUnitSection({
               aria-describedby={errors.bedrooms ? "bedrooms-error" : undefined}
               className={cn(
                 "min-h-11 border-input bg-background",
-                errors.bedrooms && "border-destructive"
+                errors.bedrooms && "border-destructive",
               )}
             />
-            <FieldError id="bedrooms-error" message={errors.bedrooms?.message} />
+            <FieldError
+              id="bedrooms-error"
+              message={errors.bedrooms?.message}
+            />
           </div>
         ) : null}
 
         {incomeMounted ? (
           <div className={cn(!showRent && "hidden")}>
-            <Label htmlFor="monthlyRent" className="text-xs font-semibold text-primary mb-1.5 block uppercase tracking-wide">
-              <GlossaryTip term="onePercentRule" showIcon={false}>{rentLabel ?? "Monthly Rent"}</GlossaryTip>
+            <Label htmlFor="monthlyRent" className={plainLabelClassName}>
+              {rentLabel ?? "Expected gross monthly rent"}
             </Label>
             <div className="relative">
               <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -188,18 +214,24 @@ export function SingleFamilyUnitSection({
                     placeholder="2,800"
                     aria-required="true"
                     aria-invalid={!!errors.monthlyRent}
-                    aria-describedby={errors.monthlyRent ? "monthlyRent-error" : undefined}
+                    aria-describedby={monthlyRentDescribedBy}
                     className={cn(
                       "min-h-11 border-input bg-background pl-8",
-                      errors.monthlyRent && "border-destructive"
+                      errors.monthlyRent && "border-destructive",
                     )}
                   />
                 )}
               />
             </div>
-            <FieldError id="monthlyRent-error" message={errors.monthlyRent?.message} />
+            <FieldError
+              id="monthlyRent-error"
+              message={errors.monthlyRent?.message}
+            />
             {showRentNudge ? (
-              <p className="mt-1 text-[11px] text-muted-foreground">
+              <p
+                id="monthlyRent-help"
+                className="mt-1 text-[11px] text-muted-foreground"
+              >
                 {bedsEmpty
                   ? "Add bedrooms to auto-estimate rent (HUD area data)."
                   : "No rent estimate for this address? Type your expected monthly rent — Zillow/Rentometer's estimate for the ZIP is a good start."}
@@ -210,7 +242,7 @@ export function SingleFamilyUnitSection({
 
         {showBaths ? (
           <div>
-            <Label htmlFor="bathrooms" className="text-xs font-semibold text-primary mb-1.5 block uppercase tracking-wide">
+            <Label htmlFor="bathrooms" className={plainLabelClassName}>
               Bathrooms
             </Label>
             <Input
@@ -223,19 +255,24 @@ export function SingleFamilyUnitSection({
               step={0.5}
               placeholder="2"
               aria-invalid={!!errors.bathrooms}
-              aria-describedby={errors.bathrooms ? "bathrooms-error" : undefined}
+              aria-describedby={
+                errors.bathrooms ? "bathrooms-error" : undefined
+              }
               className={cn(
                 "min-h-11 border-input bg-background",
-                errors.bathrooms && "border-destructive"
+                errors.bathrooms && "border-destructive",
               )}
             />
-            <FieldError id="bathrooms-error" message={errors.bathrooms?.message} />
+            <FieldError
+              id="bathrooms-error"
+              message={errors.bathrooms?.message}
+            />
           </div>
         ) : null}
 
         {showSqft ? (
           <div>
-            <Label htmlFor="sqft" className="text-xs font-semibold text-primary mb-1.5 block uppercase tracking-wide">
+            <Label htmlFor="sqft" className={plainLabelClassName}>
               Square Feet
             </Label>
             <Input
@@ -251,7 +288,7 @@ export function SingleFamilyUnitSection({
               aria-describedby={errors.sqft ? "sqft-error" : undefined}
               className={cn(
                 "min-h-11 border-input bg-background",
-                errors.sqft && "border-destructive"
+                errors.sqft && "border-destructive",
               )}
             />
             <FieldError id="sqft-error" message={errors.sqft?.message} />
@@ -264,16 +301,21 @@ export function SingleFamilyUnitSection({
       </div>
 
       {incomeMounted ? (
-        <div className={cn("mt-4 rounded-xl border border-border bg-muted/30 p-4", !showStr && "hidden")}>
+        <div
+          className={cn(
+            "mt-4 rounded-xl border border-border bg-muted/30 p-4",
+            !showStr && "hidden",
+          )}
+        >
           <div className="flex items-center gap-2 mb-3">
             <CalendarClock className="w-4 h-4 text-primary" />
             <span className="text-xs font-semibold text-foreground uppercase tracking-wide">
               Short-term rental income
             </span>
           </div>
-          <div className="grid gap-4 grid-cols-2 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div>
-              <Label htmlFor="avgDailyRate" className="text-xs font-semibold text-primary mb-1.5 block uppercase tracking-wide">
+              <Label htmlFor="avgDailyRate" className={plainLabelClassName}>
                 Nightly rate
               </Label>
               <div className="relative">
@@ -287,15 +329,23 @@ export function SingleFamilyUnitSection({
                   placeholder="220"
                   aria-required="true"
                   aria-invalid={!!errors.avgDailyRate}
-                  aria-describedby={errors.avgDailyRate ? "avgDailyRate-error" : undefined}
-                  className={cn("pl-8 border-input bg-background", errors.avgDailyRate && "border-destructive")}
+                  aria-describedby={
+                    errors.avgDailyRate ? "avgDailyRate-error" : undefined
+                  }
+                  className={cn(
+                    "min-h-11 border-input bg-background pl-8",
+                    errors.avgDailyRate && "border-destructive",
+                  )}
                 />
               </div>
-              <FieldError id="avgDailyRate-error" message={errors.avgDailyRate?.message} />
+              <FieldError
+                id="avgDailyRate-error"
+                message={errors.avgDailyRate?.message}
+              />
             </div>
 
             <div>
-              <Label htmlFor="occupancyPct" className="text-xs font-semibold text-primary mb-1.5 block uppercase tracking-wide">
+              <Label htmlFor="occupancyPct" className={plainLabelClassName}>
                 Occupancy
               </Label>
               <div className="relative">
@@ -309,17 +359,30 @@ export function SingleFamilyUnitSection({
                   placeholder="65"
                   aria-required="true"
                   aria-invalid={!!errors.occupancyPct}
-                  aria-describedby={errors.occupancyPct ? "occupancyPct-error" : undefined}
-                  className={cn("pl-8 border-input bg-background", errors.occupancyPct && "border-destructive")}
+                  aria-describedby={
+                    errors.occupancyPct ? "occupancyPct-error" : undefined
+                  }
+                  className={cn(
+                    "min-h-11 border-input bg-background pl-8",
+                    errors.occupancyPct && "border-destructive",
+                  )}
                 />
               </div>
-              <FieldError id="occupancyPct-error" message={errors.occupancyPct?.message} />
+              <FieldError
+                id="occupancyPct-error"
+                message={errors.occupancyPct?.message}
+              />
             </div>
 
             <div>
-              <Label htmlFor="strFurnishingCost" className="text-xs font-semibold text-primary mb-1.5 block uppercase tracking-wide">
+              <Label
+                htmlFor="strFurnishingCost"
+                className={plainLabelClassName}
+              >
                 Furnishing
-                <span className="ml-1 normal-case font-normal text-muted-foreground">(one-time)</span>
+                <span className="ml-1 normal-case font-normal text-muted-foreground">
+                  (one-time)
+                </span>
               </Label>
               <div className="relative">
                 <Sofa className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -331,21 +394,41 @@ export function SingleFamilyUnitSection({
                   step="100"
                   placeholder="15000"
                   aria-invalid={!!errors.strFurnishingCost}
-                  aria-describedby={errors.strFurnishingCost ? "strFurnishingCost-error" : undefined}
-                  className={cn("pl-8 border-input bg-background", errors.strFurnishingCost && "border-destructive")}
+                  aria-describedby={
+                    errors.strFurnishingCost
+                      ? "strFurnishingCost-error"
+                      : undefined
+                  }
+                  className={cn(
+                    "min-h-11 border-input bg-background pl-8",
+                    errors.strFurnishingCost && "border-destructive",
+                  )}
                 />
               </div>
-              <FieldError id="strFurnishingCost-error" message={errors.strFurnishingCost?.message} />
+              <FieldError
+                id="strFurnishingCost-error"
+                message={errors.strFurnishingCost?.message}
+              />
             </div>
           </div>
-          <p className="mt-3 text-[11px] text-muted-foreground" aria-live="polite">
+          <p
+            className="mt-3 text-[11px] text-muted-foreground"
+            aria-live="polite"
+          >
             {strMonthlyRevenue != null ? (
               <>
-                ≈ <span className="font-semibold text-foreground">{currency0.format(strMonthlyRevenue)}/mo</span> revenue
-                {" "}(nightly × occupancy × 365 ÷ 12). Furnishing is added to cash invested.
+                ≈{" "}
+                <span className="font-semibold text-foreground">
+                  {currency0.format(strMonthlyRevenue)}/mo
+                </span>{" "}
+                revenue (nightly × occupancy × 365 ÷ 12). Furnishing is added to
+                cash invested.
               </>
             ) : (
-              <>Enter a nightly rate and occupancy — we&apos;ll model the monthly revenue (ADR × occupancy).</>
+              <>
+                Enter a nightly rate and occupancy — we&apos;ll model the
+                monthly revenue (ADR × occupancy).
+              </>
             )}
           </p>
         </div>

@@ -30,6 +30,7 @@ vi.mock("@sentry/nextjs", () => ({
 const OWNER_ID = "04599e0c-f6e1-41e1-a178-350f8644be9f";
 const ANALYSIS_ID = "76631712-31d9-4ece-913a-a363579e05a7";
 const RENDER_FINGERPRINT = "8c4f918d4035f062bc9ff45cb68c1bd8";
+const ARTIFACT_ATTESTATION = "a".repeat(64);
 
 describe("saved-analysis PDF cache persistence", () => {
   beforeEach(() => {
@@ -46,13 +47,11 @@ describe("saved-analysis PDF cache persistence", () => {
     await cacheSavedAnalysisPdfExport({
       analysisId: ANALYSIS_ID,
       renderFingerprint: RENDER_FINGERPRINT,
+      artifactAttestation: ARTIFACT_ATTESTATION,
       pdfBase64: Buffer.from(pdfBytes).toString("base64"),
-      renderedWithBranding: true,
-      renderedWithBuyBoxVerdict: false,
-      buyBoxStateResolved: true,
     });
 
-    const expectedPath = `${OWNER_ID}/${ANALYSIS_ID}/investment-analysis-v${PDF_CACHE_VERSION}-${RENDER_FINGERPRINT}.pdf`;
+    const expectedPath = `${OWNER_ID}/${ANALYSIS_ID}/investment-analysis-v${PDF_CACHE_VERSION}-${RENDER_FINGERPRINT}-${ARTIFACT_ATTESTATION}.pdf`;
     expect(mocks.storageFrom).toHaveBeenCalledWith("analysis-pdfs");
     expect(mocks.upload).toHaveBeenCalledWith(expectedPath, expect.any(Blob), {
       contentType: "application/pdf",
@@ -64,9 +63,7 @@ describe("saved-analysis PDF cache persistence", () => {
     expect(mocks.complete).toHaveBeenCalledWith(
       ANALYSIS_ID,
       RENDER_FINGERPRINT,
-      true,
-      false,
-      true,
+      ARTIFACT_ATTESTATION,
     );
   });
 
@@ -78,10 +75,8 @@ describe("saved-analysis PDF cache persistence", () => {
     await cacheSavedAnalysisPdfExport({
       analysisId: ANALYSIS_ID,
       renderFingerprint: RENDER_FINGERPRINT,
+      artifactAttestation: ARTIFACT_ATTESTATION,
       pdfBase64: Buffer.from("%PDF").toString("base64"),
-      renderedWithBranding: false,
-      renderedWithBuyBoxVerdict: false,
-      buyBoxStateResolved: true,
     });
 
     expect(mocks.complete).not.toHaveBeenCalled();

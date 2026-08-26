@@ -12,7 +12,9 @@ function sourceSection(source: string, start: string, end: string): string {
   const startIndex = source.indexOf(start);
   expect(startIndex, `missing marker: ${start}`).toBeGreaterThanOrEqual(0);
   const endIndex = source.indexOf(end, startIndex + start.length);
-  expect(endIndex, `missing marker after ${start}: ${end}`).toBeGreaterThan(startIndex);
+  expect(endIndex, `missing marker after ${start}: ${end}`).toBeGreaterThan(
+    startIndex,
+  );
   return source.slice(startIndex, endIndex);
 }
 
@@ -80,6 +82,15 @@ function sourceDeal(): InvestmentFormValues {
     occupancyPct: 71,
     strFurnishingCost: 18_000,
     rehabBudget: 42_000,
+    strategyArv: 410_000,
+    strategyHoldMonths: 7,
+    brrrrRefiLtvPct: 72,
+    brrrrRefiRatePct: 7.125,
+    brrrrRefiTermYears: 30,
+    brrrrRefiClosingCostsPct: 2.5,
+    fixFlipSellingCostsPct: 8,
+    fixFlipDownPaymentPct: 18,
+    fixFlipCarryMonthly: 1_450,
   };
 }
 
@@ -105,6 +116,13 @@ describe("repeat-deal draft", () => {
       buildingValuePct: 82,
       expenseGrowthPct: 2.5,
       rentGrowthPct: 3,
+      strategyHoldMonths: 7,
+      brrrrRefiLtvPct: 72,
+      brrrrRefiRatePct: 7.125,
+      brrrrRefiTermYears: 30,
+      brrrrRefiClosingCostsPct: 2.5,
+      fixFlipSellingCostsPct: 8,
+      fixFlipDownPaymentPct: 18,
     });
 
     for (const field of [
@@ -124,6 +142,8 @@ describe("repeat-deal draft", () => {
       "occupancyPct",
       "strFurnishingCost",
       "rehabBudget",
+      "strategyArv",
+      "fixFlipCarryMonthly",
       "templateId",
     ] as const) {
       expect(draft[field], field).toBeUndefined();
@@ -162,16 +182,18 @@ describe("repeat-deal draft", () => {
     const duplicate = sourceSection(
       calculator,
       "// Duplicate handoff (My Deals",
-      "if (reopenPayloadRaw)"
+      "if (reopenPayloadRaw)",
     );
     const analyzeAnother = sourceSection(
       calculator,
       "const handleAnalyzeAnotherLikeThis = () =>",
-      "useEffect(() => {\n    if (!autoExportPdfRef.current)"
+      "useEffect(() => {\n    if (!autoExportPdfRef.current)",
     );
 
     expect(uses).toHaveLength(2);
-    expect(calculator).not.toContain("const forked: Partial<InvestmentFormValues> = {");
+    expect(calculator).not.toContain(
+      "const forked: Partial<InvestmentFormValues> = {",
+    );
     for (const caller of [duplicate, analyzeAnother]) {
       expect(caller).toContain("buildRepeatDealDraft(");
       expect(caller).toContain("setInputVerification({})");
@@ -189,7 +211,7 @@ describe("repeat-deal draft", () => {
     const reset = sourceSection(
       calculator,
       "const resetToNewAnalysis = useCallback(",
-      "const propertyType = form.watch"
+      "const propertyType = form.watch",
     );
 
     expect(reset).toContain("forkGenerationRef.current += 1");
@@ -198,13 +220,11 @@ describe("repeat-deal draft", () => {
     expect(reset).toContain("setEstimatedPriceValue(null)");
     expect(reset).toContain("setPriceEstimateBasis(null)");
     expect(calculator).toContain(
-      "forkGenerationRef.current !== enrichmentGeneration"
+      "forkGenerationRef.current !== enrichmentGeneration",
     );
     expect(calculator).toContain(
-      "forkGenerationRef.current !== autofillGeneration"
+      "forkGenerationRef.current !== autofillGeneration",
     );
-    expect(calculator).toContain(
-      "lastSelectedAddressRef.current !== place"
-    );
+    expect(calculator).toContain("lastSelectedAddressRef.current !== place");
   });
 });
