@@ -129,10 +129,14 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
     startSaving(async () => {
       try {
         const result = await compareScenariosAction(savedDealId);
-        // Success redirects to /dashboard/compare; only an error returns here.
-        if (result && !result.ok) {
+        if (!result.ok) {
           toast({ title: "Couldn't compare scenarios", description: result.message, variant: "destructive" });
+          return;
         }
+        // Keep cookie preparation and navigation as distinct transitions. A
+        // Server Action redirect nested in this pending App Router transition
+        // could prepare the cookie yet leave the workspace URL uncommitted.
+        router.push("/dashboard/compare");
       } catch (err) {
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, stale-deploy Server Action). Without this the Compare

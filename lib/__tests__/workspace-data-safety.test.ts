@@ -72,6 +72,26 @@ describe("saved workspace data safety", () => {
     expect(notes).toContain("setIsSaving(false)");
   });
 
+  it("navigates to scenario comparison only after its server preparation succeeds", () => {
+    const actions = read("app/actions/compare.ts");
+    const actionStart = actions.indexOf("export async function compareScenariosAction");
+    const actionEnd = actions.indexOf("export async function removeCompareDealAction", actionStart);
+    const compareAction = actions.slice(actionStart, actionEnd);
+    const card = read("components/investcalc/scenarios-card.tsx");
+    const handlerStart = card.indexOf("function handleCompare");
+    const handlerEnd = card.indexOf("if (!loaded || hidden)", handlerStart);
+    const compareHandler = card.slice(handlerStart, handlerEnd);
+
+    expect(compareAction).toContain("await setCompareCookie(ids)");
+    expect(compareAction).toContain("return { ok: true }");
+    expect(compareAction).not.toContain("redirect(");
+    expect(compareHandler).toContain("if (!result.ok)");
+    expect(compareHandler).toContain('router.push("/dashboard/compare")');
+    expect(compareHandler.indexOf('router.push("/dashboard/compare")')).toBeGreaterThan(
+      compareHandler.indexOf("if (!result.ok)")
+    );
+  });
+
   it("rejects stale underwriting and note writes with independent revisions", () => {
     const actions = read("app/actions/saved-analyses.ts");
     const notes = read("components/investcalc/deal-notes-panel.tsx");

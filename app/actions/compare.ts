@@ -1,7 +1,6 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -151,8 +150,9 @@ export async function addDealToCompareAction(id: string): Promise<CompareActionR
 
 /**
  * Compare-scenarios shortcut (DM-1 / CMP-1): given any saved deal, pre-select
- * its property's scenarios into the compare flow and jump to /dashboard/compare.
- * Reuses the same cookie + entitlement gate as manual compare.
+ * its property's scenarios for the compare flow. The client navigates only
+ * after this action settles, matching the manual compare path and ensuring the
+ * HttpOnly selection cookie is available to /dashboard/compare.
  */
 export async function compareScenariosAction(dealId: string): Promise<CompareActionResult> {
   const id = dealId.trim();
@@ -208,7 +208,7 @@ export async function compareScenariosAction(dealId: string): Promise<CompareAct
   }
 
   await setCompareCookie(ids);
-  redirect("/dashboard/compare");
+  return { ok: true };
 }
 
 export async function removeCompareDealAction(id: string): Promise<CompareActionResult> {
