@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { SUPABASE_COOKIE_OPTIONS } from "@/lib/supabase/cookie-options";
 import { cookies } from "next/headers";
 
 /**
@@ -12,6 +13,7 @@ export async function createServerSupabaseClient() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      cookieOptions: SUPABASE_COOKIE_OPTIONS,
       cookies: {
         getAll() {
           return cookieStore.getAll();

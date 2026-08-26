@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { SUPABASE_COOKIE_OPTIONS } from "@/lib/supabase/cookie-options";
 import { NextResponse, after, type NextRequest } from "next/server";
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { safeInternalNextPath } from "@/lib/auth-schema";
@@ -62,6 +63,7 @@ export async function GET(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      cookieOptions: SUPABASE_COOKIE_OPTIONS,
       cookies: {
         getAll() {
           return request.cookies.getAll();
