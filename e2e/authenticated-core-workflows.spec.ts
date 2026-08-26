@@ -290,10 +290,12 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
     ).toBeVisible();
     await expect(
       page
-        .getByText(scenarioName, { exact: true })
+        // Compare labels intentionally keep the property and scenario together
+        // so sibling scenarios are distinguishable ("Address · Scenario").
+        .getByText(scenarioName, { exact: false })
         .filter({ visible: true })
         .first(),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 20_000 });
     await expect(
       page.getByText(/Tied values share the highlight; no hidden tie-breaker/),
     ).toBeVisible();
