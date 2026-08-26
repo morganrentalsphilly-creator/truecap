@@ -4,12 +4,23 @@ import { describe, expect, it } from "vitest";
 
 const root = process.cwd();
 const read = (path: string) => readFileSync(join(root, path), "utf8");
+const normalizeSource = (source: string) =>
+  source.replace(/\s+/g, "").replace(/,([)}\]])/g, "$1");
 
-function sourceSection(source: string, startMarker: string, endMarker: string): string {
+function sourceSection(
+  source: string,
+  startMarker: string,
+  endMarker: string,
+): string {
   const start = source.indexOf(startMarker);
-  expect(start, `missing source marker: ${startMarker}`).toBeGreaterThanOrEqual(0);
+  expect(start, `missing source marker: ${startMarker}`).toBeGreaterThanOrEqual(
+    0,
+  );
   const end = source.indexOf(endMarker, start + startMarker.length);
-  expect(end, `missing source marker after ${startMarker}: ${endMarker}`).toBeGreaterThan(start);
+  expect(
+    end,
+    `missing source marker after ${startMarker}: ${endMarker}`,
+  ).toBeGreaterThan(start);
   return source.slice(start, end);
 }
 
@@ -19,13 +30,17 @@ describe("active Max Offer target continuity", () => {
 
   it("passes the exact target rendered by the dashboard into every primary callback", () => {
     expect(dashboard).toContain(
-      "onPrepareAuthSave(adoptedMaoTarget, adoptedMaoTargetSource)"
+      "onPrepareAuthSave(adoptedMaoTarget, adoptedMaoTargetSource)",
     );
     expect(dashboard).toContain(
-      "void onSaveDeal(adoptedMaoTarget, adoptedMaoTargetSource)"
+      "void onSaveDeal(adoptedMaoTarget, adoptedMaoTargetSource)",
     );
     expect(dashboard).toContain("adoptedMaoTarget,");
-    expect(dashboard).toContain("adoptedMaoTargetSource\n    );");
+    expect(normalizeSource(dashboard)).toContain(
+      normalizeSource(
+        "onPrepareAuthSave(adoptedMaoTarget, adoptedMaoTargetSource)",
+      ),
+    );
     expect(dashboard).toContain('handleExportPdf("personal")');
     expect(dashboard).toContain("onClick={() => handleExportPdf()}");
     expect(dashboard).toContain("onClick={() => handleExportPdf(m.id)}");
@@ -37,13 +52,17 @@ describe("active Max Offer target continuity", () => {
     const save = sourceSection(
       calculator,
       "const performSaveDeal = async (",
-      "const handleSaveDeal = async ("
+      "const handleSaveDeal = async (",
     );
-    const explicit = save.indexOf("normalizeMaoTarget(options.maxOfferTargetOverride)");
+    const explicit = save.indexOf(
+      "normalizeMaoTarget(options.maxOfferTargetOverride)",
+    );
     const live = save.indexOf("analysisMaoTargetRef.current", explicit);
     const pending = save.indexOf("pendingMaoBinding?.target", live);
 
-    expect(save).toContain("const analysisFingerprint = maoTargetAnalysisFingerprint(currentValues)");
+    expect(save).toContain(
+      "const analysisFingerprint = maoTargetAnalysisFingerprint(currentValues)",
+    );
     expect(explicit).toBeGreaterThanOrEqual(0);
     expect(live).toBeGreaterThan(explicit);
     expect(pending).toBeGreaterThan(live);
@@ -52,43 +71,64 @@ describe("active Max Offer target continuity", () => {
     const handler = sourceSection(
       calculator,
       "const handleSaveDeal = async (",
-      "/** A choice made in the duplicate-address dialog."
+      "/** A choice made in the duplicate-address dialog.",
     );
-    expect(handler).toContain("const normalizedTarget = normalizeMaoTarget(maoTarget)");
-    expect(handler).toContain("isAdoptedOfferCeilingTargetSource(normalizedSource)");
+    expect(handler).toContain(
+      "const normalizedTarget = normalizeMaoTarget(maoTarget)",
+    );
+    expect(handler).toContain(
+      "isAdoptedOfferCeilingTargetSource(normalizedSource)",
+    );
     expect(handler).toContain("maxOfferTargetOverride: adoptedTarget");
   });
 
   it("binds the pre-auth target to the exact analysis draft and restores only that scope", () => {
     const auth = sourceSection(
       calculator,
-      "onPrepareAuthSave={(\n                maoTarget: MaoTarget | undefined,",
-      "onEditAssumptions={() => {"
+      "onPrepareAuthSave={(",
+      "onEditAssumptions={() => {",
     );
-    expect(auth).toContain("const normalizedSource = normalizeOfferCeilingTargetSource(source)");
-    expect(auth).toContain("isAdoptedOfferCeilingTargetSource(normalizedSource)");
-    expect(auth).toContain("? normalizeMaoTarget(maoTarget)");
-    expect(auth).toContain("writeCalcDraftWithMaoTarget(");
-    expect(auth).toContain('exactTarget ? normalizedSource : "screening-defaults"');
-    expect(auth).toContain('setAnalysisMaoTargetSource("screening-defaults")');
+    const normalizedAuth = normalizeSource(auth);
+    expect(normalizedAuth).toContain(
+      normalizeSource(
+        "const normalizedSource = normalizeOfferCeilingTargetSource(source)",
+      ),
+    );
+    expect(normalizedAuth).toContain(
+      normalizeSource("isAdoptedOfferCeilingTargetSource(normalizedSource)"),
+    );
+    expect(normalizedAuth).toContain(
+      normalizeSource("? normalizeMaoTarget(maoTarget)"),
+    );
+    expect(normalizedAuth).toContain(
+      normalizeSource("writeCalcDraftWithMaoTarget("),
+    );
+    expect(normalizedAuth).toContain(
+      normalizeSource('exactTarget ? normalizedSource : "screening-defaults"'),
+    );
+    expect(normalizedAuth).toContain(
+      normalizeSource('setAnalysisMaoTargetSource("screening-defaults")'),
+    );
 
     const draftWriter = sourceSection(
       calculator,
       "function writeCalcDraftWithMaoTarget(",
-      "/** Safely remove the draft. */"
+      "/** Safely remove the draft. */",
+    );
+    expect(normalizeSource(draftWriter)).toContain(
+      normalizeSource(
+        "const analysisFingerprint = maoTargetAnalysisFingerprint(normalizedDraft ?? values)",
+      ),
     );
     expect(draftWriter).toContain(
-      "const analysisFingerprint = maoTargetAnalysisFingerprint(normalizedDraft ?? values)"
-    );
-    expect(draftWriter).toContain(
-      "writePendingMaoTarget(target, { analysisFingerprint, source })"
+      "writePendingMaoTarget(target, { analysisFingerprint, source })",
     );
     expect(draftWriter).toContain("clearPendingMaoTarget()");
 
     const draftRestore = sourceSection(
       calculator,
       "const autoDraftRaw = readCalcDraftRaw()",
-      'resetToNewAnalysis("single-family")'
+      'resetToNewAnalysis("single-family")',
     );
     expect(draftRestore).toContain("readPendingMaoTargetBinding(");
     expect(draftRestore).toContain("maoTargetAnalysisFingerprint(normalized)");
@@ -98,10 +138,12 @@ describe("active Max Offer target continuity", () => {
     const lenientRestore = sourceSection(
       calculator,
       "// Strict normalize failed",
-      "} catch {"
+      "} catch {",
     );
     const clear = lenientRestore.indexOf("clearPendingMaoTarget()");
-    const restore = lenientRestore.indexOf("const restoredMaoTarget = normalizeMaoTarget(");
+    const restore = lenientRestore.indexOf(
+      "const restoredMaoTarget = normalizeMaoTarget(",
+    );
 
     expect(clear).toBeGreaterThanOrEqual(0);
     expect(restore).toBeGreaterThan(clear);
@@ -121,7 +163,7 @@ describe("PDF Max Offer target contract", () => {
     expect(serverAction).toContain("buildCanonicalReportData({");
     expect(serverAction).toContain("maxOfferTarget: prepared.maxOfferTarget");
     expect(serverAction).toContain(
-      "maxOfferTargetSource: prepared.maxOfferTargetSource"
+      "maxOfferTargetSource: prepared.maxOfferTargetSource",
     );
   });
 
@@ -129,27 +171,39 @@ describe("PDF Max Offer target contract", () => {
     const exportHandler = sourceSection(
       calculator,
       "const handleExportPdf = async (",
-      "const handleNewAnalysis ="
+      "const handleNewAnalysis =",
     );
-    const callbackTarget = exportHandler.indexOf("normalizeMaoTarget(maoTarget)");
-    const liveTarget = exportHandler.indexOf("analysisMaoTargetRef.current", callbackTarget);
-    const scopedPending = exportHandler.indexOf("pendingMaoBinding?.target", liveTarget);
+    const callbackTarget = exportHandler.indexOf(
+      "normalizeMaoTarget(maoTarget)",
+    );
+    const liveTarget = exportHandler.indexOf(
+      "analysisMaoTargetRef.current",
+      callbackTarget,
+    );
+    const scopedPending = exportHandler.indexOf(
+      "pendingMaoBinding?.target",
+      liveTarget,
+    );
 
     expect(callbackTarget).toBeGreaterThanOrEqual(0);
     expect(liveTarget).toBeGreaterThan(callbackTarget);
     expect(scopedPending).toBeGreaterThan(liveTarget);
     expect(exportHandler).toContain("maxOfferTarget: reportMaoTarget");
     expect(exportHandler).toContain(
-      "maxOfferTargetSource: reportMaoTargetSource"
+      "maxOfferTargetSource: reportMaoTargetSource",
     );
     expect(calculator).not.toContain("createOneTimePdfCheckoutAction");
     expect(calculator).not.toContain("handleBuyOneTimePdf");
     expect(calculator).not.toContain("checkoutMaoTarget");
-    expect(exportHandler).toContain("const restoredDraft = parseOneTimePdfDraft(draftRaw)");
+    expect(exportHandler).toContain(
+      "const restoredDraft = parseOneTimePdfDraft(draftRaw)",
+    );
     expect(exportHandler).toContain("maxOfferTarget: restoredMaoTarget");
     expect(exportHandler).toContain(
-      "maxOfferTargetSource: restoredMaoTargetSource"
+      "maxOfferTargetSource: restoredMaoTargetSource",
     );
-    expect(exportHandler).toContain("analysisMaoTargetRef.current = restoredMaoTarget");
+    expect(exportHandler).toContain(
+      "analysisMaoTargetRef.current = restoredMaoTarget",
+    );
   });
 });

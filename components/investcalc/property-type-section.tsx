@@ -21,9 +21,13 @@ interface PropertyTypeSectionProps {
     templateDescription: string | null;
   } | null;
   /** Passed through to the template selector (see template-selector-section). */
-  onTemplatesLoaded?: Parameters<typeof TemplateSelectorSection>[0]["onTemplatesLoaded"];
+  onTemplatesLoaded?: Parameters<
+    typeof TemplateSelectorSection
+  >[0]["onTemplatesLoaded"];
   /** Passed through to the template selector (see template-selector-section). */
-  onExplicitTemplateChange?: Parameters<typeof TemplateSelectorSection>[0]["onExplicitTemplateChange"];
+  onExplicitTemplateChange?: Parameters<
+    typeof TemplateSelectorSection
+  >[0]["onExplicitTemplateChange"];
 }
 
 export function PropertyTypeSection({
@@ -41,7 +45,7 @@ export function PropertyTypeSection({
   const btnRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const selectedIndex = Math.max(
     0,
-    PROPERTY_TYPES.findIndex((t) => t.value === selected)
+    PROPERTY_TYPES.findIndex((t) => t.value === selected),
   );
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     let next = selectedIndex;
@@ -52,7 +56,8 @@ export function PropertyTypeSection({
         break;
       case "ArrowLeft":
       case "ArrowUp":
-        next = (selectedIndex - 1 + PROPERTY_TYPES.length) % PROPERTY_TYPES.length;
+        next =
+          (selectedIndex - 1 + PROPERTY_TYPES.length) % PROPERTY_TYPES.length;
         break;
       case "Home":
         next = 0;
@@ -66,16 +71,18 @@ export function PropertyTypeSection({
     e.preventDefault();
     form.setValue(
       "propertyType",
-      PROPERTY_TYPES[next]!.value as InvestmentFormValues["propertyType"]
+      PROPERTY_TYPES[next]!.value as InvestmentFormValues["propertyType"],
     );
     btnRefs.current[next]?.focus();
   };
 
   return (
-    <div className="bg-card rounded-2xl border border-border shadow-sm p-6">
+    <div className="bg-card rounded-2xl border border-border p-4 shadow-sm sm:p-6">
       <div className="flex items-center gap-2 mb-4">
         <Target className="w-4 h-4 text-primary" />
-        <span className="font-semibold text-sm text-foreground">Property Setup</span>
+        <span className="font-semibold text-sm text-foreground">
+          Property Setup
+        </span>
       </div>
 
       {/* Property type - segmented control. A 3-way choice doesn't need a
@@ -88,7 +95,7 @@ export function PropertyTypeSection({
         <div
           role="radiogroup"
           aria-label="Property type"
-          className="grid grid-cols-3 gap-2"
+          className="grid grid-cols-1 gap-2 min-[320px]:grid-cols-3"
           onKeyDown={handleKeyDown}
         >
           {PROPERTY_TYPES.map((type, i) => {
@@ -97,6 +104,7 @@ export function PropertyTypeSection({
             return (
               <button
                 key={type.value}
+                id={`property-type-${type.value}`}
                 ref={(el) => {
                   btnRefs.current[i] = el;
                 }}
@@ -110,23 +118,26 @@ export function PropertyTypeSection({
                 onClick={() =>
                   form.setValue(
                     "propertyType",
-                    type.value as InvestmentFormValues["propertyType"]
+                    type.value as InvestmentFormValues["propertyType"],
                   )
                 }
                 className={cn(
-                  "flex flex-col items-center justify-center gap-1.5 rounded-xl border px-2 py-3 text-center transition-colors",
+                  "flex min-h-11 flex-col items-center justify-center gap-1.5 rounded-xl border px-2 py-3 text-center transition-colors",
                   isSelected
                     ? "border-primary/30 bg-[var(--brand-blue-light)]"
-                    : "border-border bg-card hover:border-primary/30 hover:bg-muted/40"
+                    : "border-border bg-card hover:border-primary/30 hover:bg-muted/40",
                 )}
               >
                 <Icon
-                  className={cn("h-5 w-5", isSelected ? "text-primary" : "text-muted-foreground")}
+                  className={cn(
+                    "h-5 w-5",
+                    isSelected ? "text-primary" : "text-muted-foreground",
+                  )}
                 />
                 <span
                   className={cn(
                     "text-xs font-medium leading-tight",
-                    isSelected ? "text-primary" : "text-foreground"
+                    isSelected ? "text-primary" : "text-foreground",
                   )}
                 >
                   {type.label}
@@ -144,6 +155,7 @@ export function PropertyTypeSection({
           form={form}
           savedTemplateFallback={savedTemplateFallback}
           onTemplatesLoaded={onTemplatesLoaded}
+          onExplicitTemplateChange={onExplicitTemplateChange}
         />
       </div>
     </div>

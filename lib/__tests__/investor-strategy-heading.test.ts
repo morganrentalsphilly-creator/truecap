@@ -11,12 +11,12 @@ describe("strategy-aware underwriting heading", () => {
   it("keeps the default heading and names every active strategy truthfully", () => {
     expect(getUnderwritingHeading(null)).toBe("Underwrite a Buy & Hold Rental");
     expect(getUnderwritingHeading("unknown-strategy")).toBe(
-      "Underwrite a Buy & Hold Rental"
+      "Underwrite a Buy & Hold Rental",
     );
 
     for (const strategy of INVESTOR_STRATEGIES) {
       expect(getUnderwritingHeading(strategy.key)).toBe(
-        `${strategy.label} Underwriting`
+        `${strategy.label} Underwriting`,
       );
     }
   });
@@ -24,11 +24,15 @@ describe("strategy-aware underwriting heading", () => {
   it("uses the shared heading in both auth outlines without replacing the role-aware CTA", () => {
     const page = readFileSync(
       resolve(process.cwd(), "components/investcalc/investcalc-page.tsx"),
-      "utf8"
+      "utf8",
     );
 
     expect(page.match(/\{underwritingHeading\}/g)).toHaveLength(2);
     expect(page).toContain("const analyzerCta = getAnalyzerCta({");
+    expect(page).toContain("strategyRunCta: activeStrategy?.runCta");
+    expect(page).toContain(
+      "canUseStrategyPrimaryOutput: canUseActiveStrategyPrimaryOutput",
+    );
     expect(page).toContain("{analyzerCta}");
   });
 });

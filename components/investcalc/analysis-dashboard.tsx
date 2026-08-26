@@ -1,6 +1,14 @@
 "use client";
 
-import { useCallback, useDeferredValue, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import {
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
@@ -31,7 +39,11 @@ import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/hooks/use-toast";
 import { AnalysisResult } from "@/lib/calc-analysis";
 import { setPendingSaveIntent } from "@/lib/save-intent";
-import { WhatIfSliders, formatAdjustmentLabel, type WhatIfState } from "@/components/investcalc/what-if-sliders";
+import {
+  WhatIfSliders,
+  formatAdjustmentLabel,
+  type WhatIfState,
+} from "@/components/investcalc/what-if-sliders";
 import { BreakpointSuggestionCard } from "@/components/investcalc/breakpoint-suggestion-card";
 import { StressSurvivabilityCard } from "@/components/investcalc/stress-survivability-card";
 
@@ -45,34 +57,37 @@ import { StressSurvivabilityCard } from "@/components/investcalc/stress-survivab
 const TenYearProjectionsPanel = dynamic(
   () =>
     import("@/components/investcalc/ten-year-projections/panel").then(
-      (m) => m.TenYearProjectionsPanel
+      (m) => m.TenYearProjectionsPanel,
     ),
   {
     ssr: false,
     loading: () => <Skeleton className="h-[420px] w-full rounded-2xl" />,
-  }
+  },
 );
 const TaxStrategyPanel = dynamic(
   () =>
     import("@/components/investcalc/tax-strategy/panel").then(
-      (m) => m.TaxStrategyPanel
+      (m) => m.TaxStrategyPanel,
     ),
   {
     ssr: false,
     loading: () => <Skeleton className="h-[420px] w-full rounded-2xl" />,
-  }
+  },
 );
 const ExitScenariosPanel = dynamic(
   () =>
     import("@/components/investcalc/exit-scenarios/panel").then(
-      (m) => m.ExitScenariosPanel
+      (m) => m.ExitScenariosPanel,
     ),
   {
     ssr: false,
     loading: () => <Skeleton className="h-[420px] w-full rounded-2xl" />,
-  }
+  },
 );
-import { ResultsRegion, ResultsRegionOrFragment } from "@/components/investcalc/results-region";
+import {
+  ResultsRegion,
+  ResultsRegionOrFragment,
+} from "@/components/investcalc/results-region";
 import { MakePriceWorkCard } from "@/components/investcalc/make-price-work-card";
 import { FocusedDecisionSummary } from "@/components/investcalc/focused-decision-summary";
 import { AssumptionImpactCard } from "@/components/investcalc/assumption-impact-card";
@@ -84,6 +99,10 @@ import { nextActionForDeal } from "@/lib/next-action";
 import { getVerdictNarrative } from "@/lib/verdict";
 import { DealDriverInsight } from "@/components/investcalc/deal-driver-insight";
 import { StrategyOutcomeCard } from "@/components/investcalc/strategy-outcome-card";
+import {
+  RecordedSpecialistAnalysisCard,
+  type RecordedSpecialistAnalysisState,
+} from "@/components/investcalc/recorded-specialist-analysis-card";
 import type { InvestorStrategy } from "@/lib/investor-strategies";
 import { deriveStateFromAddress } from "@/lib/buy-box";
 import type { DealQaBuyBoxReport } from "@/lib/deal-qa-context";
@@ -111,7 +130,11 @@ import type { PropertyEnrichment } from "@/lib/property-enrichment/rentcast";
 import { buildCompsRowSummary } from "@/lib/comps-summary";
 import type { DataConfidence } from "@/lib/data-confidence";
 import { REPORT_MODES, type ReportMode } from "@/lib/pdf-export-constants";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Activity, Target } from "lucide-react";
 import { MomentOfValueUpsell } from "@/components/marketing/moment-of-value-upsell";
 import { trackEvent } from "@/lib/analytics";
@@ -136,10 +159,21 @@ import {
   buildMetricTiles,
   getSecondaryMetricKeys,
 } from "@/components/investcalc/metrics-band";
-import type { InvestmentFormValues } from "@/lib/investcalc-schema";
-import { buildProPreviewValues, type ProPreviewKind } from "@/lib/pro-preview-values";
+import type {
+  InvestmentFormValues,
+  StrategyInputErrors,
+  StrategyInputField,
+  StrategyInputs,
+} from "@/lib/investcalc-schema";
+import {
+  buildProPreviewValues,
+  type ProPreviewKind,
+} from "@/lib/pro-preview-values";
 
-import type { ProjectionYear, TenYearProjectionInput } from "@/lib/ten-year-projections";
+import type {
+  ProjectionYear,
+  TenYearProjectionInput,
+} from "@/lib/ten-year-projections";
 import type { TaxStrategyInput, TaxStrategyYear } from "@/lib/tax-strategy";
 import type { ExitScenarioInput, ExitScenarioYear } from "@/lib/exit-scenarios";
 import { computeReturnSummaryFromExitYears } from "@/lib/returns";
@@ -184,13 +218,13 @@ interface AnalysisDashboardProps {
   } | null;
   onSaveDeal: (
     maoTarget?: MaoTarget,
-    source?: OfferCeilingTargetSource
+    source?: OfferCeilingTargetSource,
   ) => void | Promise<void>;
   onCompareDeals: () => void | Promise<void>;
   onExportPdf: (
     mode?: ReportMode,
     maoTarget?: MaoTarget,
-    source?: OfferCeilingTargetSource
+    source?: OfferCeilingTargetSource,
   ) => void | Promise<void>;
   onNewAnalysis: () => void | Promise<void>;
   /** Phase D "copy a row": clear the property identity + results but keep
@@ -202,7 +236,7 @@ interface AnalysisDashboardProps {
   /** Synchronously persist the exact validated snapshot before auth navigation. */
   onPrepareAuthSave: (
     maoTarget?: MaoTarget,
-    source?: OfferCeilingTargetSource
+    source?: OfferCeilingTargetSource,
   ) => unknown;
   /** Fill the analyzer form from pulled comps (facts + estimates). */
   onApplyComps?: (enrichment: PropertyEnrichment) => void;
@@ -211,6 +245,16 @@ interface AnalysisDashboardProps {
   /** Live rehabBudget form value, so the estimator's "Applied" state reflects
    *  the current input (not the last-computed snapshot). */
   currentRehabBudget?: number | null;
+  /** Live persisted BRRRR/flip assumptions shared by the lead and deep cards. */
+  strategyInputs?: Partial<StrategyInputs>;
+  strategyInputErrors?: StrategyInputErrors;
+  onStrategyInputChange?: (
+    field: StrategyInputField,
+    value: number | undefined,
+  ) => void;
+  /** Non-null only while a reopened recorded BRRRR/flip result remains
+   * historical. Edits or an explicit Run clear it and restore live modeling. */
+  recordedSpecialistAnalysis?: RecordedSpecialistAnalysisState;
   isSaving?: boolean;
   isComparing?: boolean;
   isExporting?: boolean;
@@ -260,7 +304,10 @@ interface AnalysisDashboardProps {
   dataConfidence?: DataConfidence | null;
   /** Deterministic 15-field data-readiness assessment. Separate from Deal Fit. */
   inputConfidence?: InputConfidenceResult | null;
-  onToggleInputVerified?: (key: InputConfidenceFieldKey, verified: boolean) => void;
+  onToggleInputVerified?: (
+    key: InputConfidenceFieldKey,
+    verified: boolean,
+  ) => void;
   activeTab?: AnalysisDashboardTab;
   /** Bumped by the caller on every point-at-tab intent, so a SAME-VALUE
    *  re-point (user closed the row, then re-clicked the input tab or
@@ -305,18 +352,35 @@ export type AnalysisDashboardTab =
  * unchanged. The rest are the always-visible cards that joined the ledger as
  * rows (comps, notes).
  */
-export type AnalysisLedgerRowId =
-  | AnalysisDashboardTab
-  | "comps"
-  | "notes";
+export type AnalysisLedgerRowId = AnalysisDashboardTab | "comps" | "notes";
 
 // The six analysis rows, in the exact order the tabs had. `icon` is the
 // same glyph each mobile tab carried (every row keeps a distinct glyph).
-const TABS: { id: AnalysisDashboardTab; label: string; icon: LucideIcon; isPro: boolean }[] = [
+const TABS: {
+  id: AnalysisDashboardTab;
+  label: string;
+  icon: LucideIcon;
+  isPro: boolean;
+}[] = [
   { id: "cash-flow", label: "Cash Flow", icon: TrendingUp, isPro: false },
-  { id: "projections", label: "10-Year Projections", icon: ArrowUpRight, isPro: true },
-  { id: "tax-strategy", label: "Illustrative Tax Impact", icon: FileText, isPro: true },
-  { id: "exit-scenarios", label: "Exit Scenarios", icon: Building2, isPro: true },
+  {
+    id: "projections",
+    label: "10-Year Projections",
+    icon: ArrowUpRight,
+    isPro: true,
+  },
+  {
+    id: "tax-strategy",
+    label: "Illustrative Tax Impact",
+    icon: FileText,
+    isPro: true,
+  },
+  {
+    id: "exit-scenarios",
+    label: "Exit Scenarios",
+    icon: Building2,
+    isPro: true,
+  },
   // Renamed from "Strategies" (Jun 2026 UX pass) - vague label for the
   // not-Excel-power-user audience; the row IS the BRRRR + fix-and-flip
   // + rehab analyzers, so say that.
@@ -335,9 +399,11 @@ const ALL_LEDGER_ROW_IDS: AnalysisLedgerRowId[] = [
 ];
 
 /** Every row starts closed except the lead row (the old "active tab"). */
-function buildInitialOpenRows(lead: AnalysisDashboardTab): Record<AnalysisLedgerRowId, boolean> {
+function buildInitialOpenRows(
+  lead: AnalysisDashboardTab,
+): Record<AnalysisLedgerRowId, boolean> {
   const rows = Object.fromEntries(
-    ALL_LEDGER_ROW_IDS.map((id) => [id, false])
+    ALL_LEDGER_ROW_IDS.map((id) => [id, false]),
   ) as Record<AnalysisLedgerRowId, boolean>;
   rows[lead] = true;
   return rows;
@@ -353,7 +419,7 @@ function buildInitialOpenRows(lead: AnalysisDashboardTab): Record<AnalysisLedger
 function isAppreciationPlayDeal(
   r: AnalysisResult,
   propertyType: string,
-  annualizedReturnPct: number | null
+  annualizedReturnPct: number | null,
 ): boolean {
   return (
     propertyType !== "owner-occupant" &&
@@ -389,6 +455,10 @@ export function AnalysisDashboard({
   onApplyComps,
   onApplyRehab,
   currentRehabBudget,
+  strategyInputs,
+  strategyInputErrors,
+  onStrategyInputChange,
+  recordedSpecialistAnalysis = null,
   isSaving = false,
   isComparing = false,
   isExporting = false,
@@ -437,9 +507,9 @@ export function AnalysisDashboard({
   // old "active tab") starts open so the content the tab bar showed by
   // default - cash flow, or the strategy's primaryTab when a play leads -
   // is still on screen without a tap.
-  const [openRows, setOpenRows] = useState<Record<AnalysisLedgerRowId, boolean>>(() =>
-    buildInitialOpenRows(activeTabProp ?? "cash-flow")
-  );
+  const [openRows, setOpenRows] = useState<
+    Record<AnalysisLedgerRowId, boolean>
+  >(() => buildInitialOpenRows(activeTabProp ?? "cash-flow"));
   const openRow = useCallback((id: AnalysisLedgerRowId) => {
     setOpenRows((prev) => (prev[id] ? prev : { ...prev, [id]: true }));
     // The ledger now lives inside the collapsed "Go deeper" region, so opening
@@ -485,11 +555,12 @@ export function AnalysisDashboard({
           ?.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
       });
     },
-    [openRow]
+    [openRow],
   );
   // When a non-cash-flow strategy is active (Wholesale/BRRRR/Flip), lead the
   // results with that play's real answer instead of the generic buy-box verdict.
-  const strategyLeadsOutput = !!activeStrategy && activeStrategy.primaryTab !== "cash-flow";
+  const strategyLeadsOutput =
+    !!activeStrategy && activeStrategy.primaryTab !== "cash-flow";
   // Show only the first 3 recommendation tips by default - beyond that
   // the Recommendation card starts feeling busy. User can expand to see
   // the rest. Resets implicitly when the parent component re-mounts on
@@ -519,9 +590,13 @@ export function AnalysisDashboard({
   // BuyBoxVerdictCard, the comp set reported up by PropertyCompsCard, the
   // Offer Ceiling solved from the current form values, and the exit-scenario return
   // summary. Absent pieces are simply omitted from the AI context.
-  const [buyBoxQaReport, setBuyBoxQaReport] = useState<DealQaBuyBoxReport | null>(null);
+  const [buyBoxQaReport, setBuyBoxQaReport] =
+    useState<DealQaBuyBoxReport | null>(null);
   const requiresBuyBoxTargetResolution = Boolean(
-    isAuthenticated && canUseMaxOffer && !maoTargetOverride && !isSampleProPreview
+    isAuthenticated &&
+    canUseMaxOffer &&
+    !maoTargetOverride &&
+    !isSampleProPreview,
   );
   // Buy Box criteria are account-scoped, not result-mode-scoped. The card
   // loads them for every authenticated results session, including the sample
@@ -529,9 +604,10 @@ export function AnalysisDashboard({
   // completed lookup instead of resetting to `loading` without a refetch.
   // A guest/auth transition remounts or restarts the account lookup; address,
   // sample-preview, and explicit-target changes do not.
-  const [buyBoxTargetResolutionState, setBuyBoxTargetResolutionState] = useState<
-    "loading" | "ready" | "error"
-  >(isAuthenticated ? "loading" : "ready");
+  const [buyBoxTargetResolutionState, setBuyBoxTargetResolutionState] =
+    useState<"loading" | "ready" | "error">(
+      isAuthenticated ? "loading" : "ready",
+    );
   useEffect(() => {
     setBuyBoxTargetResolutionState(isAuthenticated ? "loading" : "ready");
   }, [isAuthenticated]);
@@ -543,7 +619,9 @@ export function AnalysisDashboard({
     buyBoxTargetResolutionState === "error"
       ? "Your Buy Box could not be loaded. Refresh to retry before saving, sharing, or exporting."
       : "Loading your Buy Box criteria before this action is available.";
-  const [compsQaData, setCompsQaData] = useState<PropertyEnrichment | null>(null);
+  const [compsQaData, setCompsQaData] = useState<PropertyEnrichment | null>(
+    null,
+  );
   // Comps provider NOT_CONFIGURED on this deployment: the card self-hides,
   // so the ledger row shell must hide with it (a header must never front
   // an empty row). Sticky for the session — the provider won't appear
@@ -595,7 +673,10 @@ export function AnalysisDashboard({
   const deferredWhatIfState = useDeferredValue(whatIfState);
   const displayResult: AnalysisResult | null =
     deferredWhatIfState?.result ?? result;
-  const baseAssumptionsSignature = useMemo(() => JSON.stringify(values), [values]);
+  const baseAssumptionsSignature = useMemo(
+    () => JSON.stringify(values),
+    [values],
+  );
   const previousBaseAssumptionsRef = useRef(baseAssumptionsSignature);
   useEffect(() => {
     if (previousBaseAssumptionsRef.current === baseAssumptionsSignature) return;
@@ -608,18 +689,25 @@ export function AnalysisDashboard({
   }, [baseAssumptionsSignature, whatIfState?.isAdjusted]);
   useEffect(() => {
     if (!scenarioResetNotice) return;
-    const timeout = window.setTimeout(() => setScenarioResetNotice(false), 6000);
+    const timeout = window.setTimeout(
+      () => setScenarioResetNotice(false),
+      6000,
+    );
     return () => window.clearTimeout(timeout);
   }, [scenarioResetNotice]);
   // Holistic context for the Overview. Computed from the BASE result (not
   // the what-if state) so dragging sliders doesn't flicker the banner.
   // Reuses the same exit-scenario engine as the Screening Index + PDF.
   const annualizedReturnPct = useMemo(
-    () => (result && values ? computeTenYearAnnualizedReturnPct(values, result) : null),
-    [result, values]
+    () =>
+      result && values
+        ? computeTenYearAnnualizedReturnPct(values, result)
+        : null,
+    [result, values],
   );
   const appreciationPlay =
-    !!result && isAppreciationPlayDeal(result, propertyType, annualizedReturnPct);
+    !!result &&
+    isAppreciationPlayDeal(result, propertyType, annualizedReturnPct);
 
   // ── Deal Q&A grounding context (see the state block above) ──────────
   // Offer Ceiling: only when the user can see the Stress Test solver (Pro / sample
@@ -633,7 +721,7 @@ export function AnalysisDashboard({
       maoTargetOverride
         ? normalizeMaoTargetForFinancing(maoTargetOverride, { isCashPurchase })
         : null,
-    [isCashPurchase, maoTargetOverride]
+    [isCashPurchase, maoTargetOverride],
   );
   const resolvedMaoSeed = useMemo(() => {
     if (!values || !result) return null;
@@ -642,7 +730,14 @@ export function AnalysisDashboard({
     }
     const thresholds = buyBoxQaReport?.maoThresholds ?? null;
     return buildMaoTarget(thresholds, { isCashPurchase });
-  }, [values, result, isCashPurchase, maoTargetOverride, financingSafeOverride, buyBoxQaReport]);
+  }, [
+    values,
+    result,
+    isCashPurchase,
+    maoTargetOverride,
+    financingSafeOverride,
+    buyBoxQaReport,
+  ]);
   const maoTargetAnalysisKey = `${values?.address?.trim().toLowerCase() ?? ""}|${
     maoTargetOverride ? "override" : "standard"
   }|${isCashPurchase ? "cash" : "debt"}`;
@@ -656,12 +751,14 @@ export function AnalysisDashboard({
   // could expose one frame of a DSCR-only solve at the solver's upper bound
   // and let an immediate Save/Share capture that meaningless target.
   const synchronousMaoTarget =
-    maoTargetState.analysisKey !== maoTargetAnalysisKey || !maoTargetState.touched
+    maoTargetState.analysisKey !== maoTargetAnalysisKey ||
+    !maoTargetState.touched
       ? resolvedMaoSeed
       : maoTargetState.target;
   const activeMaoTarget = useMemo(
-    () => normalizeMaoTargetForFinancing(synchronousMaoTarget, { isCashPurchase }),
-    [synchronousMaoTarget, isCashPurchase]
+    () =>
+      normalizeMaoTargetForFinancing(synchronousMaoTarget, { isCashPurchase }),
+    [synchronousMaoTarget, isCashPurchase],
   );
   const resolvedMaoSeedKey = JSON.stringify(resolvedMaoSeed);
   useEffect(() => {
@@ -671,10 +768,13 @@ export function AnalysisDashboard({
       analysisKey: maoTargetAnalysisKey,
     });
   }, [maoTargetAnalysisKey, resolvedMaoSeedKey, resolvedMaoSeed]);
-  const handleMaoTargetChange = useCallback((target: MaoTarget) => {
-    dispatchMaoTarget({ type: "edit", target });
-    onMaoTargetChange?.(target);
-  }, [onMaoTargetChange]);
+  const handleMaoTargetChange = useCallback(
+    (target: MaoTarget) => {
+      dispatchMaoTarget({ type: "edit", target });
+      onMaoTargetChange?.(target);
+    },
+    [onMaoTargetChange],
+  );
   const buyBoxIsTargetSource =
     (maoTargetOverrideSource === "buy-box" && Boolean(financingSafeOverride)) ||
     (!maoTargetOverride &&
@@ -682,21 +782,22 @@ export function AnalysisDashboard({
       buyBoxContributesToMaoTarget(buyBoxQaReport?.maoThresholds ?? null, {
         isCashPurchase,
       }));
-  const offerCeilingTargetSource: OfferCeilingTargetSource = buyBoxIsTargetSource
-    ? "buy-box"
-    : (financingSafeOverride ? maoTargetOverrideSource : null) ??
-      (financingSafeOverride || maoTargetState.touched
-        ? "selected-targets"
-        : "screening-defaults");
+  const offerCeilingTargetSource: OfferCeilingTargetSource =
+    buyBoxIsTargetSource
+      ? "buy-box"
+      : ((financingSafeOverride ? maoTargetOverrideSource : null) ??
+        (financingSafeOverride || maoTargetState.touched
+          ? "selected-targets"
+          : "screening-defaults"));
   const targetAdopted = isAdoptedOfferCeilingTargetSource(
-    offerCeilingTargetSource
+    offerCeilingTargetSource,
   );
   // Screening defaults are examples, not investor instructions. Keep one
   // canonical pair for every persistence/export boundary so Save, Share, PDF,
   // and post-auth continuity cannot silently turn those examples into the
   // user's acquisition criteria.
   const adoptedMaoTarget = targetAdopted
-    ? activeMaoTarget ?? undefined
+    ? (activeMaoTarget ?? undefined)
     : undefined;
   const adoptedMaoTargetSource = targetAdopted
     ? offerCeilingTargetSource
@@ -780,12 +881,12 @@ export function AnalysisDashboard({
         : null;
   const offerCeilingIsLoading = Boolean(
     !recordedOfferCeiling &&
-      offerCeilingRequestKey &&
-      (offerCeilingResolution.key !== offerCeilingRequestKey ||
-        offerCeilingResolution.status === "loading")
+    offerCeilingRequestKey &&
+    (offerCeilingResolution.key !== offerCeilingRequestKey ||
+      offerCeilingResolution.status === "loading"),
   );
   const offerCeilingHasError = Boolean(
-    !recordedOfferCeiling && offerCeilingResolution.status === "error"
+    !recordedOfferCeiling && offerCeilingResolution.status === "error",
   );
   const exactOfferCeiling =
     currentOfferCeilingPayload?.access === "exact"
@@ -795,19 +896,25 @@ export function AnalysisDashboard({
     currentOfferCeilingPayload?.access === "preview"
       ? currentOfferCeilingPayload.range
       : null;
-  const maoQaContext = exactOfferCeiling && activeMaoTarget
-    ? {
-        maxOffer: exactOfferCeiling.presentation.ceiling,
-        basis: describeMaoTarget(activeMaoTarget),
-        fromBuyBox: buyBoxIsTargetSource,
-        achieved: exactOfferCeiling.achieved,
-      }
-    : null;
+  const maoQaContext =
+    exactOfferCeiling && activeMaoTarget
+      ? {
+          maxOffer: exactOfferCeiling.presentation.ceiling,
+          basis: describeMaoTarget(activeMaoTarget),
+          fromBuyBox: buyBoxIsTargetSource,
+          achieved: exactOfferCeiling.achieved,
+        }
+      : null;
 
-  const decisionViewedKey = values && result ? `${values.address}|${values.purchasePrice}` : null;
+  const decisionViewedKey =
+    values && result ? `${values.address}|${values.purchasePrice}` : null;
   const lastDecisionViewedRef = useRef<string | null>(null);
   useEffect(() => {
-    if (!decisionViewedKey || lastDecisionViewedRef.current === decisionViewedKey) return;
+    if (
+      !decisionViewedKey ||
+      lastDecisionViewedRef.current === decisionViewedKey
+    )
+      return;
     lastDecisionViewedRef.current = decisionViewedKey;
     trackEvent("decision_viewed", { property_type: values?.propertyType });
   }, [decisionViewedKey, values?.propertyType]);
@@ -818,7 +925,7 @@ export function AnalysisDashboard({
       exitScenarioSource
         ? computeReturnSummaryFromExitYears(exitScenarioSource.initialYears)
         : null,
-    [exitScenarioSource]
+    [exitScenarioSource],
   );
   const router = useRouter();
   const { toast } = useToast();
@@ -835,7 +942,10 @@ export function AnalysisDashboard({
   // Google OAuth and keeps a "Sign in" cross-link (which threads ?next)
   // for the rare returning user.
   const goToLogin = () => {
-    const intendedDraft = onPrepareAuthSave(adoptedMaoTarget, adoptedMaoTargetSource);
+    const intendedDraft = onPrepareAuthSave(
+      adoptedMaoTarget,
+      adoptedMaoTargetSource,
+    );
     setPendingSaveIntent(intendedDraft);
     router.push("/auth/sign-up?next=/");
   };
@@ -873,10 +983,14 @@ export function AnalysisDashboard({
   // DrillLedger provides the accordion equivalent: ArrowUp/Down + Home/End
   // move focus between row headers.)
 
-  const isEditingLockedByPlan = isAuthenticated && isExistingSavedDeal && !canUpdateSavedDeals;
-  const isSaveLimitLockedByPlan = isAuthenticated && !isExistingSavedDeal && saveDealLimitReached;
+  const isEditingLockedByPlan =
+    isAuthenticated && isExistingSavedDeal && !canUpdateSavedDeals;
+  const isSaveLimitLockedByPlan =
+    isAuthenticated && !isExistingSavedDeal && saveDealLimitReached;
   const isSaveLockedByPlan =
-    isEditingLockedByPlan || isSaveLimitLockedByPlan || (isAuthenticated && !canSaveDeals);
+    isEditingLockedByPlan ||
+    isSaveLimitLockedByPlan ||
+    (isAuthenticated && !canSaveDeals);
   // Why Save is locked - shared verbatim by the toolbar Save button's
   // title and the hero-corner Save (Phase 2 surfaces the same action in
   // both places; the logic lives once).
@@ -918,7 +1032,9 @@ export function AnalysisDashboard({
             : "Upgrade to save deals and reopen them on any device.",
         action: (
           <ToastAction
-            altText={paidAtCap ? "Manage your saved deals" : "See TrueCap Pro plans"}
+            altText={
+              paidAtCap ? "Manage your saved deals" : "See TrueCap Pro plans"
+            }
             onClick={() => {
               if (paidAtCap) {
                 router.push("/dashboard/saved-analyses");
@@ -940,11 +1056,7 @@ export function AnalysisDashboard({
   };
   const handleExportPdf = (mode?: ReportMode) => {
     if (targetActionsBlocked) return;
-    void onExportPdf(
-      mode,
-      adoptedMaoTarget,
-      adoptedMaoTargetSource
-    );
+    void onExportPdf(mode, adoptedMaoTarget, adoptedMaoTargetSource);
   };
   const handlePrepareOffer = () => {
     if (targetActionsBlocked) return;
@@ -1000,7 +1112,8 @@ export function AnalysisDashboard({
   // result while still recording a genuinely new calculation.
   const trackedVerdictResultRef = useRef<AnalysisResult | null>(null);
   useEffect(() => {
-    if (!result || isLoading || trackedVerdictResultRef.current === result) return;
+    if (!result || isLoading || trackedVerdictResultRef.current === result)
+      return;
     trackedVerdictResultRef.current = result;
     trackEvent("verdict_viewed", {
       decision_tone: nextAction?.tone ?? "review",
@@ -1023,7 +1136,14 @@ export function AnalysisDashboard({
       trackedDealFitResultRef.current = result;
       const score = dealScoreResult.data.score;
       trackEvent("deal_fit_viewed", {
-        score_band: score >= 80 ? "80-100" : score >= 60 ? "60-79" : score >= 40 ? "40-59" : "0-39",
+        score_band:
+          score >= 80
+            ? "80-100"
+            : score >= 60
+              ? "60-79"
+              : score >= 40
+                ? "40-59"
+                : "0-39",
         methodology_version: result.methodologyVersion,
       });
     }
@@ -1047,15 +1167,25 @@ export function AnalysisDashboard({
         method_version: inputConfidence.methodVersion,
       });
     }
-  }, [dealScoreResult, inputConfidence, isLoading, result, showInputConfidence]);
+  }, [
+    dealScoreResult,
+    inputConfidence,
+    isLoading,
+    result,
+    showInputConfidence,
+  ]);
 
-  const trackedBuyBoxResultRef = useRef<{ result: AnalysisResult; passes: boolean } | null>(null);
+  const trackedBuyBoxResultRef = useRef<{
+    result: AnalysisResult;
+    passes: boolean;
+  } | null>(null);
   useEffect(() => {
     if (!result || buyBoxAnyPass == null) return;
     if (
       trackedBuyBoxResultRef.current?.result === result &&
       trackedBuyBoxResultRef.current.passes === buyBoxAnyPass
-    ) return;
+    )
+      return;
     trackedBuyBoxResultRef.current = { result, passes: buyBoxAnyPass };
     trackEvent("buy_box_result_viewed", { passes: buyBoxAnyPass });
   }, [buyBoxAnyPass, result]);
@@ -1104,11 +1234,13 @@ export function AnalysisDashboard({
   // never linger in a closed-row phrase.
   const fmtSignedMonthly = (n: number) =>
     `${n >= 0 ? "+" : "−"}$${Math.abs(Math.round(n)).toLocaleString()}/mo`;
-  const annualTaxSavings = result ? Math.round(result.taxSavingsMonthly * 12) : 0;
+  const annualTaxSavings = result
+    ? Math.round(result.taxSavingsMonthly * 12)
+    : 0;
   const rowSummaries: Record<AnalysisLedgerRowId, string> = {
     "cash-flow": result
       ? `$${Math.round(result.monthlyRentalIncome).toLocaleString()} rent − $${Math.round(
-          result.monthlyRentalIncome - result.netCashFlow
+          result.monthlyRentalIncome - result.netCashFlow,
         ).toLocaleString()} costs = ${fmtSignedMonthly(result.netCashFlow)}`
       : "See where the rent goes, month by month",
     projections:
@@ -1116,7 +1248,9 @@ export function AnalysisDashboard({
         ? `~${Math.round(annualizedReturnPct)}%/yr total return over 10 years${
             // Finding 5: beyond the deal-score's own top band (>15%/yr),
             // the closed-row phrase carries the caution too.
-            isExtremeAnnualizedRoi(annualizedReturnPct) ? " — verify assumptions" : ""
+            isExtremeAnnualizedRoi(annualizedReturnPct)
+              ? " — verify assumptions"
+              : ""
           }`
         : "See year-by-year cash flow, equity & returns",
     "tax-strategy":
@@ -1133,12 +1267,17 @@ export function AnalysisDashboard({
           deferredWhatIfState.rentPct,
           deferredWhatIfState.pricePct,
           deferredWhatIfState.ratePp,
-          deferredWhatIfState.vacancyPp
+          deferredWhatIfState.vacancyPp,
         )}: ${fmtSignedMonthly(deferredWhatIfState.result.netCashFlow)}`
       : "Stress it — see what happens when assumptions get worse",
-    comps: buildCompsRowSummary(compsQaData, values?.monthlyRent ?? null, values?.purchasePrice ?? null, {
-      propertyType: values?.propertyType,
-    }),
+    comps: buildCompsRowSummary(
+      compsQaData,
+      values?.monthlyRent ?? null,
+      values?.purchasePrice ?? null,
+      {
+        propertyType: values?.propertyType,
+      },
+    ),
     notes: "Your private notes on this deal",
   };
 
@@ -1181,11 +1320,17 @@ export function AnalysisDashboard({
           role="status"
           className="sticky top-16 z-20 rounded-xl border border-amber-500/40 bg-amber-50 px-4 py-3 text-sm text-amber-950 shadow-sm"
         >
-          <strong>Scenario only.</strong> These numbers are temporary. Your saved base assumptions have not changed. Scenario values below are labeled Scenario; the Decision card and Offer Ceiling remain labeled Base.
+          <strong>Scenario only.</strong> These numbers are temporary. Your
+          saved base assumptions have not changed. Scenario values below are
+          labeled Scenario; the Decision card and Offer Ceiling remain labeled
+          Base.
         </div>
       ) : null}
       {scenarioResetNotice ? (
-        <div role="status" className="rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground">
+        <div
+          role="status"
+          className="rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground"
+        >
           Scenario reset because the base assumptions changed.
         </div>
       ) : null}
@@ -1215,7 +1360,10 @@ export function AnalysisDashboard({
       </h1>
 
       {decisionFirst && result && values && activeMaoTarget ? (
-        <section aria-labelledby="analysis-decision-title" className="space-y-3">
+        <section
+          aria-labelledby="analysis-decision-title"
+          className="space-y-3"
+        >
           <FocusedDecisionSummary
             values={values}
             result={result}
@@ -1230,8 +1378,8 @@ export function AnalysisDashboard({
               isSampleProPreview
                 ? SAMPLE_DEAL_FIXTURE.targetProfile.id
                 : buyBoxIsTargetSource && !maoTargetOverride
-                ? buyBoxQaReport?.selectedBox.id ?? null
-                : null
+                  ? (buyBoxQaReport?.selectedBox.id ?? null)
+                  : null
             }
             targetProfileVersion={
               isSampleProPreview
@@ -1245,8 +1393,8 @@ export function AnalysisDashboard({
               isSampleProPreview
                 ? SAMPLE_DEAL_FIXTURE.targetProfile.name
                 : buyBoxIsTargetSource && !maoTargetOverride
-                ? buyBoxQaReport?.selectedBox.name ?? null
-                : null
+                  ? (buyBoxQaReport?.selectedBox.name ?? null)
+                  : null
             }
             buyBoxFit={
               maoTargetOverrideSource === "buy-box" && maoTargetOverride
@@ -1254,7 +1402,9 @@ export function AnalysisDashboard({
                 : buyBoxAnyPass
             }
             buyBoxHasUnknownRules={Boolean(
-              buyBoxQaReport?.context.checks.some((check) => check.pass == null)
+              buyBoxQaReport?.context.checks.some(
+                (check) => check.pass == null,
+              ),
             )}
             userDecision={userDecision}
             inputConfidence={inputConfidence}
@@ -1268,7 +1418,8 @@ export function AnalysisDashboard({
               targetActionsBlocked
                 ? targetActionsBlockedReason
                 : canExportPdf && !isSaved
-                  ? persistedActionsBlockHint ?? "Save this analysis before exporting PDF."
+                  ? (persistedActionsBlockHint ??
+                    "Save this analysis before exporting PDF.")
                   : !canExportPdf
                     ? "PDF reports are included with TrueCap Pro."
                     : undefined
@@ -1305,6 +1456,7 @@ export function AnalysisDashboard({
             targetResolutionState={effectiveBuyBoxTargetResolutionState}
             targetResolutionMessage={targetActionsBlockedReason}
             advocacyContractEnabled={advocacyDecisionContract}
+            analyzerStrategyKey={activeStrategy?.key ?? "buy-hold"}
           />
           {/* Screening Index — the FREE 0-100 heuristic sold on /pricing and
               computed on every run, which the decision-first rebuild left
@@ -1324,7 +1476,8 @@ export function AnalysisDashboard({
                 {Math.round(dealScoreResult.data.score)}/100
               </p>
               <p className="text-[11px] text-muted-foreground">
-                Secondary screening heuristic — not investment advice. Method v{dealScoreResult.data.scoreMethodologyVersion ?? "recorded"}.
+                Secondary screening heuristic — not investment advice. Method v
+                {dealScoreResult.data.scoreMethodologyVersion ?? "recorded"}.
               </p>
             </div>
           ) : null}
@@ -1348,13 +1501,19 @@ export function AnalysisDashboard({
             activeMaoTarget={activeMaoTarget}
             offerCeiling={exactOfferCeiling}
             isOfferCeilingLoading={offerCeilingIsLoading}
-            hasExactOfferCeilingAccess={currentOfferCeilingPayload?.access === "exact"}
+            hasExactOfferCeilingAccess={
+              currentOfferCeilingPayload?.access === "exact"
+            }
             offerCeilingError={offerCeilingHasError}
             onMaoTargetChange={handleMaoTargetChange}
             onTuneTargetsOpened={() => {
               trackEvent("targets_opened", { placement: "wholesale_outcome" });
             }}
             onUpgrade={goToBilling}
+            strategyInputs={strategyInputs ?? values}
+            strategyInputErrors={strategyInputErrors}
+            onStrategyInputChange={onStrategyInputChange}
+            recordedSpecialistAnalysis={recordedSpecialistAnalysis}
           />
         ) : null
       ) : decisionFirst ? null : (
@@ -1404,7 +1563,11 @@ export function AnalysisDashboard({
         />
       ) : null}
 
-      {(showInputConfidence || advocacyDecisionContract) && result && !isLoading && inputConfidence && onToggleInputVerified ? (
+      {(showInputConfidence || advocacyDecisionContract) &&
+      result &&
+      !isLoading &&
+      inputConfidence &&
+      onToggleInputVerified ? (
         <InputConfidenceCard
           confidence={inputConfidence}
           showOfferReadyStatus={showOfferReadyStatus}
@@ -1422,7 +1585,9 @@ export function AnalysisDashboard({
       {showDealDecisionPack && result && !isLoading ? (
         <PrepareOfferCard
           stage={inputConfidence?.stage ?? null}
-          remainingVerificationCount={inputConfidence?.offerReadyRemaining.length ?? null}
+          remainingVerificationCount={
+            inputConfidence?.offerReadyRemaining.length ?? null
+          }
           isPreparing={isExporting}
           onPrepare={handlePrepareOffer}
         />
@@ -1434,55 +1599,55 @@ export function AnalysisDashboard({
         /* Action bar — identity strip ("what is this?") + Quick Actions
            ("what can I do with it?"). */
         <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-        {/* Identity strip - property type + saved-status badge.
+          {/* Identity strip - property type + saved-status badge.
             Inline, no card chrome. Reads as a header rather than
             a UI element. */}
-        <div className="flex items-center gap-2 px-1">
-          <Building2 className="w-4 h-4 text-primary" />
-          <span className="font-semibold text-foreground">
-            {labelMap[propertyType]}
-          </span>
-          <span
-            className={cn(
-              "rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
-              isSaved
-                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                : isExistingSavedDeal
-                  ? "border-orange-200 bg-orange-50 text-orange-700"
-                  : "border-amber-200 bg-amber-50 text-amber-700"
-            )}
-            title={
-              isSaved
-                ? "All changes saved"
-                : isExistingSavedDeal
-                  ? "You've edited this deal since the last save. Click Save to persist."
-                  : "Complete analysis — click Save to keep this deal."
-            }
-          >
-            {/* "Not saved", never "Preview": the analysis a fresh run shows
+          <div className="flex items-center gap-2 px-1">
+            <Building2 className="w-4 h-4 text-primary" />
+            <span className="font-semibold text-foreground">
+              {labelMap[propertyType]}
+            </span>
+            <span
+              className={cn(
+                "rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
+                isSaved
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                  : isExistingSavedDeal
+                    ? "border-orange-200 bg-orange-50 text-orange-700"
+                    : "border-amber-200 bg-amber-50 text-amber-700",
+              )}
+              title={
+                isSaved
+                  ? "All changes saved"
+                  : isExistingSavedDeal
+                    ? "You've edited this deal since the last save. Click Save to persist."
+                    : "Complete analysis — click Save to keep this deal."
+              }
+            >
+              {/* "Not saved", never "Preview": the analysis a fresh run shows
                 is complete — only persistence is missing. "Preview" read as
                 "this isn't the real result / there's another step"
                 (UX walkthrough P1-5). */}
-            {isSaved
-              ? "Saved"
-              : isExistingSavedDeal
-                ? "Unsaved changes"
-                : "Not saved"}
-          </span>
-          {/* Cross-link to this deal's workspace (checklist, docs, notes,
+              {isSaved
+                ? "Saved"
+                : isExistingSavedDeal
+                  ? "Unsaved changes"
+                  : "Not saved"}
+            </span>
+            {/* Cross-link to this deal's workspace (checklist, docs, notes,
               scenarios) — only when a saved deal is loaded. Contextual link, not
               new top-level nav. */}
-          {isExistingSavedDeal && savedDealId ? (
-            <Link
-              href={`/dashboard/saved-analyses/${savedDealId}`}
-              className="ml-auto inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-primary hover:underline"
-            >
-              Deal workspace
-              <ArrowUpRight className="size-3.5" />
-            </Link>
-          ) : null}
-        </div>
-        {/* Quick Actions - naked button row, no panel chrome.
+            {isExistingSavedDeal && savedDealId ? (
+              <Link
+                href={`/dashboard/saved-analyses/${savedDealId}`}
+                className="ml-auto inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-primary hover:underline"
+              >
+                Deal workspace
+                <ArrowUpRight className="size-3.5" />
+              </Link>
+            ) : null}
+          </div>
+          {/* Quick Actions - naked button row, no panel chrome.
             Previously wrapped in a bordered card with a floating
             "Quick actions" label, which added visual weight without
             adding meaning - the 4 buttons themselves are clearly a
@@ -1492,98 +1657,253 @@ export function AnalysisDashboard({
             slim auto-width "More" overflow - 5-6 cells in grid-cols-4
             wrapped into a ragged second row at ~82px each. sm+ keeps the
             original 4-col grid with every action inline. */}
-        <div className="grid grid-cols-[repeat(3,minmax(0,1fr))_auto] gap-1.5 sm:grid-cols-4 sm:gap-2 xl:min-w-[560px] max-[380px]:gap-1">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleSaveClick}
-                disabled={isSaving || targetActionsBlocked}
-                title={targetActionsBlocked ? targetActionsBlockedReason : saveLockedHint}
-                className="h-11 gap-1 rounded-xl px-2 text-[11px] sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-[10px]"
-              >
-                {isSaving ? (
-                  <Loader2 className="w-3.5 h-3.5 shrink-0 sm:mr-1.5 animate-spin max-[380px]:h-3 max-[380px]:w-3" />
-                ) : (
-                  <Save className="w-3.5 h-3.5 shrink-0 sm:mr-1.5 max-[380px]:h-3 max-[380px]:w-3" />
-                )}
-                <span>Save</span>
-                {isSaveLockedByPlan && (
-                  <span className="ml-0.5 sm:ml-1 rounded-full bg-[var(--brand-orange)] px-1 sm:px-1 py-0.5 text-[9px] sm:text-[9px] font-bold uppercase text-white sm:ml-1.5 sm:px-1.5">
-                    PRO
-                  </span>
-                )}
-              </Button>
-              {/* Hidden below sm - lives in the "More" overflow there. */}
-              <Button
-                variant="outline"
-                size="sm"
-                className="hidden h-11 gap-1 rounded-xl px-2 text-[11px] sm:inline-flex sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-[10px]"
-                onClick={() => void onCompareDeals()}
-                disabled={!isSaved || !canCompareDeals || isComparing}
-                title={
-                  !isSaved
-                    ? persistedActionsBlockHint ?? "Save this analysis before comparing it."
-                    : !canCompareDeals
-                      ? "Compare is not available for your current plan."
-                      : undefined
-                }
-              >
-                {isComparing ? (
-                  <Loader2 className="w-3.5 h-3.5 shrink-0 sm:mr-1.5 animate-spin max-[380px]:h-3 max-[380px]:w-3" />
-                ) : (
-                  <ListTodo className="w-3.5 h-3.5 shrink-0 sm:mr-1.5 max-[380px]:h-3 max-[380px]:w-3" />
-                )}
-                <span className="hidden sm:inline">Compare Deals</span>
-                <span className="sm:hidden">Compare</span>
-              </Button>
-              <Button
-                size="sm"
-                className="h-11 gap-1 rounded-xl bg-primary px-2 text-[11px] font-semibold text-primary-foreground sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-[10px]"
-                onClick={() => handleExportPdf()}
-                // Clickable for users WITHOUT the entitlement on purpose:
-                // the click opens the Pro report upgrade dialog. Existing
-                // paid one-time claims can still recover, but new Pack
-                // checkout is temporarily disabled.
-                disabled={targetActionsBlocked || isExporting || (canExportPdf && !isSaved)}
-                title={
-                  targetActionsBlocked
-                    ? targetActionsBlockedReason
-                    : canExportPdf && !isSaved
-                    ? persistedActionsBlockHint ?? "Save this analysis before exporting PDF."
+          <div className="grid grid-cols-[repeat(3,minmax(0,1fr))_auto] gap-1.5 sm:grid-cols-4 sm:gap-2 xl:min-w-[560px] max-[380px]:gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSaveClick}
+              disabled={isSaving || targetActionsBlocked}
+              title={
+                targetActionsBlocked
+                  ? targetActionsBlockedReason
+                  : saveLockedHint
+              }
+              className="h-11 gap-1 rounded-xl px-2 text-[11px] sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-[10px]"
+            >
+              {isSaving ? (
+                <Loader2 className="w-3.5 h-3.5 shrink-0 sm:mr-1.5 animate-spin max-[380px]:h-3 max-[380px]:w-3" />
+              ) : (
+                <Save className="w-3.5 h-3.5 shrink-0 sm:mr-1.5 max-[380px]:h-3 max-[380px]:w-3" />
+              )}
+              <span>Save</span>
+              {isSaveLockedByPlan && (
+                <span className="ml-0.5 sm:ml-1 rounded-full bg-[var(--brand-orange)] px-1 sm:px-1 py-0.5 text-[9px] sm:text-[9px] font-bold uppercase text-white sm:ml-1.5 sm:px-1.5">
+                  PRO
+                </span>
+              )}
+            </Button>
+            {/* Hidden below sm - lives in the "More" overflow there. */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="hidden h-11 gap-1 rounded-xl px-2 text-[11px] sm:inline-flex sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-[10px]"
+              onClick={() => void onCompareDeals()}
+              disabled={!isSaved || !canCompareDeals || isComparing}
+              title={
+                !isSaved
+                  ? (persistedActionsBlockHint ??
+                    "Save this analysis before comparing it.")
+                  : !canCompareDeals
+                    ? "Compare is not available for your current plan."
+                    : undefined
+              }
+            >
+              {isComparing ? (
+                <Loader2 className="w-3.5 h-3.5 shrink-0 sm:mr-1.5 animate-spin max-[380px]:h-3 max-[380px]:w-3" />
+              ) : (
+                <ListTodo className="w-3.5 h-3.5 shrink-0 sm:mr-1.5 max-[380px]:h-3 max-[380px]:w-3" />
+              )}
+              <span className="hidden sm:inline">Compare Deals</span>
+              <span className="sm:hidden">Compare</span>
+            </Button>
+            <Button
+              size="sm"
+              className="h-11 gap-1 rounded-xl bg-primary px-2 text-[11px] font-semibold text-primary-foreground sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-[10px]"
+              onClick={() => handleExportPdf()}
+              // Clickable for users WITHOUT the entitlement on purpose:
+              // the click opens the Pro report upgrade dialog. Existing
+              // paid one-time claims can still recover, but new Pack
+              // checkout is temporarily disabled.
+              disabled={
+                targetActionsBlocked ||
+                isExporting ||
+                (canExportPdf && !isSaved)
+              }
+              title={
+                targetActionsBlocked
+                  ? targetActionsBlockedReason
+                  : canExportPdf && !isSaved
+                    ? (persistedActionsBlockHint ??
+                      "Save this analysis before exporting PDF.")
                     : !canExportPdf
                       ? "PDF reports are included with TrueCap Pro."
                       : undefined
-                }
-              >
-                {isExporting ? (
-                  <Loader2 className="w-3.5 h-3.5 shrink-0 sm:mr-1.5 animate-spin max-[380px]:h-3 max-[380px]:w-3" />
-                ) : (
-                  <FileDown className="w-3.5 h-3.5 shrink-0 sm:mr-1.5 max-[380px]:h-3 max-[380px]:w-3" />
-                )}
-                <span className="hidden sm:inline">Export PDF</span>
-                <span className="sm:hidden">PDF</span>
-              </Button>
-              {/* Report-style menu - only for users who can actually export
+              }
+            >
+              {isExporting ? (
+                <Loader2 className="w-3.5 h-3.5 shrink-0 sm:mr-1.5 animate-spin max-[380px]:h-3 max-[380px]:w-3" />
+              ) : (
+                <FileDown className="w-3.5 h-3.5 shrink-0 sm:mr-1.5 max-[380px]:h-3 max-[380px]:w-3" />
+              )}
+              <span className="hidden sm:inline">Export PDF</span>
+              <span className="sm:hidden">PDF</span>
+            </Button>
+            {/* Report-style menu - only for users who can actually export
                   (entitled + saved). Lets them pick a lender / partner /
                   personal variant; the main button stays the personal default
                   and keeps its purchase-dialog behavior for everyone else.
                   Hidden below sm - the modes live in the "More" overflow. */}
-              {canExportPdf && isSaved ? (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="hidden h-11 rounded-xl px-2 sm:inline-flex sm:h-10"
+            {canExportPdf && isSaved ? (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="hidden h-11 rounded-xl px-2 sm:inline-flex sm:h-10"
+                    disabled={isExporting || targetActionsBlocked}
+                    aria-label="Choose a report style"
+                    title="Choose a report style (lender / partner / personal)"
+                  >
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="end" className="w-64 p-1.5">
+                  <p className="px-2 py-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                    Export as…
+                  </p>
+                  {REPORT_MODES.map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
                       disabled={isExporting || targetActionsBlocked}
-                      aria-label="Choose a report style"
-                      title="Choose a report style (lender / partner / personal)"
+                      onClick={() => handleExportPdf(m.id)}
+                      className="block w-full cursor-pointer rounded-lg px-2 py-1.5 text-left hover:bg-muted focus-visible:bg-muted focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      <ChevronDown className="h-4 w-4" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent align="end" className="w-64 p-1.5">
-                    <p className="px-2 py-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                      <span className="text-sm font-semibold text-foreground">
+                        {m.label}
+                      </span>
+                      <span className="block text-[11px] leading-snug text-muted-foreground">
+                        {m.description}
+                      </span>
+                    </button>
+                  ))}
+                </PopoverContent>
+              </Popover>
+            ) : null}
+            {/* Phase D "copy a row" — quiet OUTLINE secondary next to the
+                  filled New Analysis so the two paths read differently:
+                  Like This = same assumptions, New Analysis = fresh start.
+                  Pure form operation, so free + anon get it too. Hidden
+                  below sm — lives in the "More" overflow there. */}
+            <Button
+              size="sm"
+              variant="outline"
+              // col-span-2: the label is the feature ("same assumptions" in
+              // the user's own words) and Button is whitespace-nowrap — one
+              // minmax(0,1fr) column would clip it.
+              className="hidden h-11 gap-1 rounded-xl px-2 text-[11px] sm:col-span-2 sm:inline-flex sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm"
+              onClick={onAnalyzeAnotherLikeThis}
+              title="Keeps your assumptions — just enter the next property"
+            >
+              <CopyPlus className="w-3.5 h-3.5 shrink-0 sm:mr-1.5" />
+              <span>Analyze another like this</span>
+            </Button>
+            {/* Hidden below sm — New Analysis lives in "More" there.
+                  Share keeps the 3-up slot instead: the read-only share
+                  link is the growth loop, and burying it a tap deep on
+                  the mobile-majority audience risks the one action that
+                  markets TrueCap for free. */}
+            <Button
+              size="sm"
+              className="hidden h-11 gap-1 rounded-xl bg-primary px-2 text-[11px] font-semibold text-primary-foreground sm:inline-flex sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm"
+              onClick={() => void onNewAnalysis()}
+              title="Create a new analysis"
+            >
+              <Sparkles className="w-3.5 h-3.5 shrink-0 sm:mr-1.5" />
+              <span className="hidden sm:inline">New Analysis</span>
+              <span className="sm:hidden">New</span>
+            </Button>
+            {/* Share is FREE for everyone - the read-only /d/[encoded]
+                  view is the core growth loop (every shared deal markets
+                  TrueCap). Icon-forward and kept in the 3-up row at every
+                  width for exactly that reason. */}
+            <ShareLinkButton
+              values={values}
+              analyzerStrategyKey={activeStrategy?.key ?? "buy-hold"}
+              isAuthenticated={isAuthenticated}
+              savedDealId={savedDealId}
+              priceIsEstimated={priceIsEstimated}
+              maoTarget={adoptedMaoTarget}
+              maoTargetSource={adoptedMaoTargetSource}
+              disabled={targetActionsBlocked}
+              disabledReason={targetActionsBlockedReason}
+              onPrepareAuth={() => {
+                onPrepareAuthSave(adoptedMaoTarget, adoptedMaoTargetSource);
+              }}
+            />
+            {/* Mobile-only "More" overflow - Compare, New Analysis and
+                  the report-style modes fold in here below sm (see the
+                  grid comment above). Every action stays reachable. */}
+            <Popover open={moreActionsOpen} onOpenChange={setMoreActionsOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-11 rounded-xl px-2 sm:hidden max-[380px]:rounded-lg max-[380px]:px-1"
+                  aria-label="More actions"
+                  title="More actions (Compare, Share, report style)"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-56 p-1.5">
+                <button
+                  type="button"
+                  disabled={!isSaved || !canCompareDeals || isComparing}
+                  onClick={() => {
+                    setMoreActionsOpen(false);
+                    void onCompareDeals();
+                  }}
+                  title={
+                    !isSaved
+                      ? (persistedActionsBlockHint ??
+                        "Save this analysis before comparing it.")
+                      : !canCompareDeals
+                        ? "Compare is not available for your current plan."
+                        : undefined
+                  }
+                  className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm font-semibold text-foreground hover:bg-muted focus-visible:bg-muted focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <ListTodo className="size-4 shrink-0 text-muted-foreground" />
+                  Compare Deals
+                </button>
+                {/* Phase D "copy a row" — same-assumptions fork, listed
+                      above New Analysis so the repeat-screening path is
+                      seen first. The subtext carries the distinction the
+                      desktop tooltip makes. */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMoreActionsOpen(false);
+                    onAnalyzeAnotherLikeThis();
+                  }}
+                  className="flex w-full cursor-pointer items-start gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-muted focus-visible:bg-muted focus-visible:outline-none"
+                >
+                  <CopyPlus className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                  <span>
+                    <span className="block text-sm font-semibold text-foreground">
+                      Analyze another like this
+                    </span>
+                    <span className="block text-[11px] leading-snug text-muted-foreground">
+                      Keeps your assumptions — just enter the next property
+                    </span>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMoreActionsOpen(false);
+                    void onNewAnalysis();
+                  }}
+                  title="Create a new analysis"
+                  className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm font-semibold text-foreground hover:bg-muted focus-visible:bg-muted focus-visible:outline-none"
+                >
+                  <Sparkles className="size-4 shrink-0 text-muted-foreground" />
+                  New Analysis
+                </button>
+                {canExportPdf && isSaved ? (
+                  <>
+                    <p className="px-2 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
                       Export as…
                     </p>
                     {REPORT_MODES.map((m) => (
@@ -1591,159 +1911,25 @@ export function AnalysisDashboard({
                         key={m.id}
                         type="button"
                         disabled={isExporting || targetActionsBlocked}
-                        onClick={() => handleExportPdf(m.id)}
+                        onClick={() => {
+                          setMoreActionsOpen(false);
+                          handleExportPdf(m.id);
+                        }}
                         className="block w-full cursor-pointer rounded-lg px-2 py-1.5 text-left hover:bg-muted focus-visible:bg-muted focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        <span className="text-sm font-semibold text-foreground">{m.label}</span>
-                        <span className="block text-[11px] leading-snug text-muted-foreground">{m.description}</span>
+                        <span className="text-sm font-semibold text-foreground">
+                          {m.label}
+                        </span>
+                        <span className="block text-[11px] leading-snug text-muted-foreground">
+                          {m.description}
+                        </span>
                       </button>
                     ))}
-                  </PopoverContent>
-                </Popover>
-              ) : null}
-              {/* Phase D "copy a row" — quiet OUTLINE secondary next to the
-                  filled New Analysis so the two paths read differently:
-                  Like This = same assumptions, New Analysis = fresh start.
-                  Pure form operation, so free + anon get it too. Hidden
-                  below sm — lives in the "More" overflow there. */}
-              <Button
-                size="sm"
-                variant="outline"
-                // col-span-2: the label is the feature ("same assumptions" in
-                // the user's own words) and Button is whitespace-nowrap — one
-                // minmax(0,1fr) column would clip it.
-                className="hidden h-11 gap-1 rounded-xl px-2 text-[11px] sm:col-span-2 sm:inline-flex sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm"
-                onClick={onAnalyzeAnotherLikeThis}
-                title="Keeps your assumptions — just enter the next property"
-              >
-                <CopyPlus className="w-3.5 h-3.5 shrink-0 sm:mr-1.5" />
-                <span>Analyze another like this</span>
-              </Button>
-              {/* Hidden below sm — New Analysis lives in "More" there.
-                  Share keeps the 3-up slot instead: the read-only share
-                  link is the growth loop, and burying it a tap deep on
-                  the mobile-majority audience risks the one action that
-                  markets TrueCap for free. */}
-              <Button
-                size="sm"
-                className="hidden h-11 gap-1 rounded-xl bg-primary px-2 text-[11px] font-semibold text-primary-foreground sm:inline-flex sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm"
-                onClick={() => void onNewAnalysis()}
-                title="Create a new analysis"
-              >
-                <Sparkles className="w-3.5 h-3.5 shrink-0 sm:mr-1.5" />
-                <span className="hidden sm:inline">New Analysis</span>
-                <span className="sm:hidden">New</span>
-              </Button>
-              {/* Share is FREE for everyone - the read-only /d/[encoded]
-                  view is the core growth loop (every shared deal markets
-                  TrueCap). Icon-forward and kept in the 3-up row at every
-                  width for exactly that reason. */}
-              <ShareLinkButton
-                values={values}
-                isAuthenticated={isAuthenticated}
-                savedDealId={savedDealId}
-                maoTarget={adoptedMaoTarget}
-                maoTargetSource={adoptedMaoTargetSource}
-                disabled={targetActionsBlocked}
-                disabledReason={targetActionsBlockedReason}
-                onPrepareAuth={() => {
-                  onPrepareAuthSave(adoptedMaoTarget, adoptedMaoTargetSource);
-                }}
-              />
-              {/* Mobile-only "More" overflow - Compare, New Analysis and
-                  the report-style modes fold in here below sm (see the
-                  grid comment above). Every action stays reachable. */}
-              <Popover open={moreActionsOpen} onOpenChange={setMoreActionsOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-11 rounded-xl px-2 sm:hidden max-[380px]:rounded-lg max-[380px]:px-1"
-                    aria-label="More actions"
-                    title="More actions (Compare, Share, report style)"
-                  >
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent align="end" className="w-56 p-1.5">
-                  <button
-                    type="button"
-                    disabled={!isSaved || !canCompareDeals || isComparing}
-                    onClick={() => {
-                      setMoreActionsOpen(false);
-                      void onCompareDeals();
-                    }}
-                    title={
-                      !isSaved
-                        ? persistedActionsBlockHint ?? "Save this analysis before comparing it."
-                        : !canCompareDeals
-                          ? "Compare is not available for your current plan."
-                          : undefined
-                    }
-                    className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm font-semibold text-foreground hover:bg-muted focus-visible:bg-muted focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <ListTodo className="size-4 shrink-0 text-muted-foreground" />
-                    Compare Deals
-                  </button>
-                  {/* Phase D "copy a row" — same-assumptions fork, listed
-                      above New Analysis so the repeat-screening path is
-                      seen first. The subtext carries the distinction the
-                      desktop tooltip makes. */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMoreActionsOpen(false);
-                      onAnalyzeAnotherLikeThis();
-                    }}
-                    className="flex w-full cursor-pointer items-start gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-muted focus-visible:bg-muted focus-visible:outline-none"
-                  >
-                    <CopyPlus className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                    <span>
-                      <span className="block text-sm font-semibold text-foreground">
-                        Analyze another like this
-                      </span>
-                      <span className="block text-[11px] leading-snug text-muted-foreground">
-                        Keeps your assumptions — just enter the next property
-                      </span>
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMoreActionsOpen(false);
-                      void onNewAnalysis();
-                    }}
-                    title="Create a new analysis"
-                    className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm font-semibold text-foreground hover:bg-muted focus-visible:bg-muted focus-visible:outline-none"
-                  >
-                    <Sparkles className="size-4 shrink-0 text-muted-foreground" />
-                    New Analysis
-                  </button>
-                  {canExportPdf && isSaved ? (
-                    <>
-                      <p className="px-2 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                        Export as…
-                      </p>
-                      {REPORT_MODES.map((m) => (
-                        <button
-                          key={m.id}
-                          type="button"
-                          disabled={isExporting || targetActionsBlocked}
-                          onClick={() => {
-                            setMoreActionsOpen(false);
-                            handleExportPdf(m.id);
-                          }}
-                          className="block w-full cursor-pointer rounded-lg px-2 py-1.5 text-left hover:bg-muted focus-visible:bg-muted focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          <span className="text-sm font-semibold text-foreground">{m.label}</span>
-                          <span className="block text-[11px] leading-snug text-muted-foreground">{m.description}</span>
-                        </button>
-                      ))}
-                    </>
-                  ) : null}
-                </PopoverContent>
-              </Popover>
-              {/* Cross-link to batch triage (/dashboard/triage, "Screen
+                  </>
+                ) : null}
+              </PopoverContent>
+            </Popover>
+            {/* Cross-link to batch triage (/dashboard/triage, "Screen
                   Listings" in the sidebar) - the "I have 5 more listings to
                   check" moment happens right after a single analysis
                   finishes, and this is the only affordance pointing at the
@@ -1751,43 +1937,43 @@ export function AnalysisDashboard({
                   text, NOT another button, so the de-densified toolbar stays
                   calm. Gated on canCompareDeals - the same entitlement that
                   gates the sidebar item - so anon/free users see nothing. */}
-              {/* Save-limit notice - the disabled Save button's title tooltip
+            {/* Save-limit notice - the disabled Save button's title tooltip
                   is desktop-hover-only, so this is the ALWAYS-VISIBLE (mobile
                   included) explanation + the path to act. NOTE: only DELETING
                   frees a slot — the capacity count in saveDealAction counts
                   every non-deleted row, archived included — so the copy must
                   not promise that archiving helps. Muted one-line text, same
                   quiet register as the triage cross-link below. */}
-              {isSaveLimitLockedByPlan ? (
-                <p className="col-span-full px-1 pt-0.5 text-xs text-muted-foreground">
-                  Saved-deal limit reached
-                  {savedDealCount != null && savedDealLimit != null
-                    ? ` (${savedDealCount} of ${savedDealLimit})`
-                    : ""}{" "}
-                  —{" "}
-                  <Link
-                    href="/dashboard/saved-analyses"
-                    className="inline-flex items-center gap-0.5 font-semibold text-primary hover:underline"
-                  >
-                    delete one to free a slot
-                    <ArrowUpRight aria-hidden className="size-3" />
-                  </Link>
-                </p>
-              ) : null}
-              {canCompareDeals ? (
-                <p className="col-span-full px-1 pt-0.5 text-xs text-muted-foreground">
-                  Screening several listings?{" "}
-                  <Link
-                    href="/dashboard/triage"
-                    className="inline-flex items-center gap-0.5 font-semibold text-primary hover:underline"
-                  >
-                    Screen a shortlist
-                    <ArrowUpRight aria-hidden className="size-3" />
-                  </Link>
-                </p>
-              ) : null}
+            {isSaveLimitLockedByPlan ? (
+              <p className="col-span-full px-1 pt-0.5 text-xs text-muted-foreground">
+                Saved-deal limit reached
+                {savedDealCount != null && savedDealLimit != null
+                  ? ` (${savedDealCount} of ${savedDealLimit})`
+                  : ""}{" "}
+                —{" "}
+                <Link
+                  href="/dashboard/saved-analyses"
+                  className="inline-flex items-center gap-0.5 font-semibold text-primary hover:underline"
+                >
+                  delete one to free a slot
+                  <ArrowUpRight aria-hidden className="size-3" />
+                </Link>
+              </p>
+            ) : null}
+            {canCompareDeals ? (
+              <p className="col-span-full px-1 pt-0.5 text-xs text-muted-foreground">
+                Screening several listings?{" "}
+                <Link
+                  href="/dashboard/triage"
+                  className="inline-flex items-center gap-0.5 font-semibold text-primary hover:underline"
+                >
+                  Screen a shortlist
+                  <ArrowUpRight aria-hidden className="size-3" />
+                </Link>
+              </p>
+            ) : null}
+          </div>
         </div>
-      </div>
       ) : null}
 
       {/* "What decides this deal" - elevates the single biggest sensitivity
@@ -1798,14 +1984,27 @@ export function AnalysisDashboard({
           "Why this number"): both render computeAssumptionImpact, and this one
           only elevated the #1 driver the other already ranks first — the
           identical fact, stated twice in a row. */}
-      {!decisionFirst && result && values && !isLoading && !strategyLeadsOutput ? (
-        <DealDriverInsight values={values} result={result} marketRentEstimate={marketRentEstimate} />
+      {!decisionFirst &&
+      result &&
+      values &&
+      !isLoading &&
+      !strategyLeadsOutput ? (
+        <DealDriverInsight
+          values={values}
+          result={result}
+          marketRentEstimate={marketRentEstimate}
+        />
       ) : null}
 
       {/* Existing deterministic breakpoint solver, promoted out of the
           collapsed what-if drawer. On a weak or marginal deal this answers
           the next acquisition question: what has to change for it to work? */}
-      {!decisionFirst && result && values && !isLoading && !strategyLeadsOutput && !showDecisionThresholds ? (
+      {!decisionFirst &&
+      result &&
+      values &&
+      !isLoading &&
+      !strategyLeadsOutput &&
+      !showDecisionThresholds ? (
         <BreakpointSuggestionCard values={values} result={result} />
       ) : null}
 
@@ -1837,7 +2036,11 @@ export function AnalysisDashboard({
       {/* Offer Ceiling is a first-class acquisition answer, not just another
           metric. This compact summary uses the exact same deterministic
           engine and Buy Box target basis as the editable solver below. */}
-      {maoQaContext && values && !strategyLeadsOutput && !showDecisionThresholds && !decisionFirst ? (
+      {maoQaContext &&
+      values &&
+      !strategyLeadsOutput &&
+      !showDecisionThresholds &&
+      !decisionFirst ? (
         <section
           aria-labelledby="max-offer-summary-title"
           className="rounded-2xl border-2 border-primary/30 bg-[var(--brand-blue-light)] p-5 sm:p-6"
@@ -1846,7 +2049,10 @@ export function AnalysisDashboard({
             <div>
               <div className="flex items-center gap-2 text-primary">
                 <Target className="size-4" aria-hidden />
-                <h2 id="max-offer-summary-title" className="text-xs font-extrabold uppercase tracking-widest">
+                <h2
+                  id="max-offer-summary-title"
+                  className="text-xs font-extrabold uppercase tracking-widest"
+                >
                   Offer Ceiling
                 </h2>
                 {maoQaContext.fromBuyBox ? (
@@ -1859,24 +2065,41 @@ export function AnalysisDashboard({
                 ${Math.round(maoQaContext.maxOffer).toLocaleString("en-US")}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Highest modeled price that still meets {maoQaContext.basis} under the assumptions shown. This is not a recommended offer.
+                Highest modeled price that still meets {maoQaContext.basis}{" "}
+                under the assumptions shown. This is not a recommended offer.
               </p>
             </div>
             <div className="text-sm sm:text-right">
               {Number(values.purchasePrice) > maoQaContext.maxOffer ? (
                 <p className="font-bold text-foreground">
-                  ${Math.round(Number(values.purchasePrice) - maoQaContext.maxOffer).toLocaleString("en-US")} below the current price
+                  $
+                  {Math.round(
+                    Number(values.purchasePrice) - maoQaContext.maxOffer,
+                  ).toLocaleString("en-US")}{" "}
+                  below the current price
                 </p>
               ) : (
-                <p className="font-bold text-[var(--brand-green)]">Current price meets these modeled targets</p>
+                <p className="font-bold text-[var(--brand-green)]">
+                  Current price meets these modeled targets
+                </p>
               )}
               <p className="mt-1 text-xs text-muted-foreground">
-                At the ceiling: ${Math.round(maoQaContext.achieved.netCashFlow).toLocaleString("en-US")}/mo · {maoQaContext.achieved.capRate.toFixed(1)}% cap · {maoQaContext.achieved.dscr > 0 ? maoQaContext.achieved.dscr.toFixed(2) : "—"} DSCR
+                At the ceiling: $
+                {Math.round(maoQaContext.achieved.netCashFlow).toLocaleString(
+                  "en-US",
+                )}
+                /mo · {maoQaContext.achieved.capRate.toFixed(1)}% cap ·{" "}
+                {maoQaContext.achieved.dscr > 0
+                  ? maoQaContext.achieved.dscr.toFixed(2)
+                  : "—"}{" "}
+                DSCR
               </p>
               <button
                 type="button"
                 onClick={() => {
-                  trackEvent("targets_opened", { placement: "legacy_max_offer_summary" });
+                  trackEvent("targets_opened", {
+                    placement: "legacy_max_offer_summary",
+                  });
                   document.getElementById("max-offer-result")?.scrollIntoView({
                     behavior: scrollBehavior(),
                     block: "start",
@@ -1884,7 +2107,8 @@ export function AnalysisDashboard({
                 }}
                 className="mt-3 inline-flex min-h-11 items-center gap-1 rounded-md font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                Review and tune targets <ArrowUpRight className="size-4" aria-hidden />
+                Review and tune targets{" "}
+                <ArrowUpRight className="size-4" aria-hidden />
               </button>
             </div>
           </div>
@@ -1901,196 +2125,266 @@ export function AnalysisDashboard({
         payoff="Every metric, and the levers that move them"
         openEvent="the_numbers_opened"
       >
-      <div className={cn("space-y-3", strategyLeadsOutput && "hidden")}>
-        <section aria-labelledby="numbers-section-title" className="space-y-3">
-        <h2 id="numbers-section-title" className="text-sm font-extrabold uppercase tracking-widest text-muted-foreground">
-          {deferredWhatIfState?.isAdjusted ? "Scenario numbers" : "Numbers"}
-        </h2>
-        <MetricsBand
-          tiles={metricTiles}
-          dataConfidence={dataConfidence}
-          dealPropertyType={values?.propertyType}
-        />
+        <div className={cn("space-y-3", strategyLeadsOutput && "hidden")}>
+          <section
+            aria-labelledby="numbers-section-title"
+            className="space-y-3"
+          >
+            <h2
+              id="numbers-section-title"
+              className="text-sm font-extrabold uppercase tracking-widest text-muted-foreground"
+            >
+              {deferredWhatIfState?.isAdjusted ? "Scenario numbers" : "Numbers"}
+            </h2>
+            <MetricsBand
+              tiles={metricTiles}
+              dataConfidence={dataConfidence}
+              dealPropertyType={values?.propertyType}
+            />
 
-        {/* Quick-screen ratios investors use to triage at a glance: break-even
+            {/* Quick-screen ratios investors use to triage at a glance: break-even
             occupancy (how much vacancy the deal can absorb before cash flow
             hits zero), GRM, and rent-to-price (the "1% rule"). Derived from the
             existing result — no new inputs. */}
-        {result && !deferredWhatIfState?.isAdjusted ? (() => {
-          const price = result.loanAmount + result.downPayment;
-          const annualRent = result.monthlyRentalIncome * 12;
-          const grm = annualRent > 0 ? price / annualRent : null;
-          const rentToPrice = price > 0 ? (result.monthlyRentalIncome / price) * 100 : null;
-          // Costs that don't scale with occupancy (vacancy is the occupancy
-          // variable itself) that the collected rent must cover.
-          const fixedCosts =
-            result.totalOperatingExpenses - result.vacancy + result.monthlyPayment + result.pmiMonthly;
-          const breakEvenOcc =
-            result.monthlyRentalIncome > 0 ? (fixedCosts / result.monthlyRentalIncome) * 100 : null;
-          const chips: Array<{ label: string; value: string; hint: string }> = [
-            {
-              label: "Break-even occupancy",
-              value:
-                breakEvenOcc == null ? "—" : breakEvenOcc > 100 ? ">100%" : `${Math.round(breakEvenOcc)}%`,
-              hint: "Occupancy needed to cover all costs — lower means more vacancy cushion.",
-            },
-            { label: "GRM", value: grm == null ? "—" : grm.toFixed(1), hint: "Price ÷ annual gross rent (lower is cheaper)." },
-            {
-              label: "Rent-to-price",
-              value: rentToPrice == null ? "—" : `${rentToPrice.toFixed(2)}%`,
-              hint: "Monthly rent ÷ price — the 1% rule of thumb.",
-            },
-          ];
-          return (
-            <div className="flex flex-wrap gap-2">
-              {chips.map((c) => (
-                <Popover key={c.label}>
-                  <PopoverTrigger asChild>
-                    <button
-                      type="button"
-                      aria-label={`${c.label}: ${c.value}. Show definition`}
-                      className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-border bg-muted/40 px-3 text-xs transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    >
-                      <span className="text-muted-foreground">{c.label}</span>
-                      <span className="font-bold tabular-nums text-foreground">{c.value}</span>
-                      <Info className="size-3 text-muted-foreground" aria-hidden="true" />
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-72 text-xs leading-relaxed" align="start">
-                    <p className="font-semibold text-foreground">{c.label}</p>
-                    <p className="mt-1 text-muted-foreground">{c.hint}</p>
-                  </PopoverContent>
-                </Popover>
-              ))}
-            </div>
-          );
-        })() : null}
+            {result && !deferredWhatIfState?.isAdjusted
+              ? (() => {
+                  const price = result.loanAmount + result.downPayment;
+                  const annualRent = result.monthlyRentalIncome * 12;
+                  const grm = annualRent > 0 ? price / annualRent : null;
+                  const rentToPrice =
+                    price > 0
+                      ? (result.monthlyRentalIncome / price) * 100
+                      : null;
+                  // Costs that don't scale with occupancy (vacancy is the occupancy
+                  // variable itself) that the collected rent must cover.
+                  const fixedCosts =
+                    result.totalOperatingExpenses -
+                    result.vacancy +
+                    result.monthlyPayment +
+                    result.pmiMonthly;
+                  const breakEvenOcc =
+                    result.monthlyRentalIncome > 0
+                      ? (fixedCosts / result.monthlyRentalIncome) * 100
+                      : null;
+                  const chips: Array<{
+                    label: string;
+                    value: string;
+                    hint: string;
+                  }> = [
+                    {
+                      label: "Break-even occupancy",
+                      value:
+                        breakEvenOcc == null
+                          ? "—"
+                          : breakEvenOcc > 100
+                            ? ">100%"
+                            : `${Math.round(breakEvenOcc)}%`,
+                      hint: "Occupancy needed to cover all costs — lower means more vacancy cushion.",
+                    },
+                    {
+                      label: "GRM",
+                      value: grm == null ? "—" : grm.toFixed(1),
+                      hint: "Price ÷ annual gross rent (lower is cheaper).",
+                    },
+                    {
+                      label: "Rent-to-price",
+                      value:
+                        rentToPrice == null
+                          ? "—"
+                          : `${rentToPrice.toFixed(2)}%`,
+                      hint: "Monthly rent ÷ price — the 1% rule of thumb.",
+                    },
+                  ];
+                  return (
+                    <div className="flex flex-wrap gap-2">
+                      {chips.map((c) => (
+                        <Popover key={c.label}>
+                          <PopoverTrigger asChild>
+                            <button
+                              type="button"
+                              aria-label={`${c.label}: ${c.value}. Show definition`}
+                              className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-border bg-muted/40 px-3 text-xs transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            >
+                              <span className="text-muted-foreground">
+                                {c.label}
+                              </span>
+                              <span className="font-bold tabular-nums text-foreground">
+                                {c.value}
+                              </span>
+                              <Info
+                                className="size-3 text-muted-foreground"
+                                aria-hidden="true"
+                              />
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent
+                            className="w-72 text-xs leading-relaxed"
+                            align="start"
+                          >
+                            <p className="font-semibold text-foreground">
+                              {c.label}
+                            </p>
+                            <p className="mt-1 text-muted-foreground">
+                              {c.hint}
+                            </p>
+                          </PopoverContent>
+                        </Popover>
+                      ))}
+                    </div>
+                  );
+                })()
+              : null}
 
-        {/* Appreciation-play context banner - reframes a deal whose
+            {/* Appreciation-play context banner - reframes a deal whose
             year-1 cards read uniformly red (negative cash flow, sub-1
             DSCR) but which pays off after-tax and projects a strong
             10-year total return. Sourced from the BASE result + the same
             exit-scenario engine as the Screening Index, so it never contradicts
             them. Does NOT alter the year-1 facts above - it explains them. */}
-        {appreciationPlay && result && !deferredWhatIfState?.isAdjusted ? (
-          <div className="flex items-start gap-3 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-4">
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-card text-[var(--brand-green)]">
-              <TrendingUp className="size-4" />
-            </span>
-            <div className="space-y-1">
-              <p className="text-sm font-bold text-[var(--brand-green)]">
-                Long-term projection differs from the year-1 operating result
-              </p>
-              <p className="text-xs leading-relaxed text-foreground/70">
-                Year-1 cash flow is negative because of the high leverage. The simplified
-                tax model produces an illustrative after-tax estimate of{" "}
-                <strong className="text-foreground">
-                  +${Math.round(result.afterTaxCF).toLocaleString()}/mo
-                </strong>
-                . Whether deductions are currently usable depends on the taxpayer. The projected
-                10-year total return is{" "}
-                <strong className="text-foreground">
-                  ~{Math.round(annualizedReturnPct ?? 0)}%/yr
-                </strong>{" "}
-                (modeled appreciation + loan paydown). This projection depends on the stated
-                growth and exit assumptions; it does not offset the year-1 shortfall or establish
-                that the property is a suitable investment.
-              </p>
-            </div>
-          </div>
-        ) : null}
+            {appreciationPlay && result && !deferredWhatIfState?.isAdjusted ? (
+              <div className="flex items-start gap-3 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-4">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-card text-[var(--brand-green)]">
+                  <TrendingUp className="size-4" />
+                </span>
+                <div className="space-y-1">
+                  <p className="text-sm font-bold text-[var(--brand-green)]">
+                    Long-term projection differs from the year-1 operating
+                    result
+                  </p>
+                  <p className="text-xs leading-relaxed text-foreground/70">
+                    Year-1 cash flow is negative because of the high leverage.
+                    The simplified tax model produces an illustrative after-tax
+                    estimate of{" "}
+                    <strong className="text-foreground">
+                      +${Math.round(result.afterTaxCF).toLocaleString()}/mo
+                    </strong>
+                    . Whether deductions are currently usable depends on the
+                    taxpayer. The projected 10-year total return is{" "}
+                    <strong className="text-foreground">
+                      ~{Math.round(annualizedReturnPct ?? 0)}%/yr
+                    </strong>{" "}
+                    (modeled appreciation + loan paydown). This projection
+                    depends on the stated growth and exit assumptions; it does
+                    not offset the year-1 shortfall or establish that the
+                    property is a suitable investment.
+                  </p>
+                </div>
+              </div>
+            ) : null}
 
-        {/* Secondary metrics - everything not in the lens's primary 3,
+            {/* Secondary metrics - everything not in the lens's primary 3,
             collapsed by default so the first read stays uncrowded. One tap
             reveals the full metric set. */}
-        <details className="group">
-          <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-1 py-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground">
-            <ChevronRight aria-hidden className="size-3.5 shrink-0 transition-transform group-open:rotate-90" />
-            Show all metrics
-            <span className="h-px flex-1 bg-border" />
-          </summary>
-          <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
-            {secondaryMetricKeys.map((k) => metricTiles[k])}
-          </div>
-        </details>
-        </section>
+            <details className="group">
+              <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-1 py-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground">
+                <ChevronRight
+                  aria-hidden
+                  className="size-3.5 shrink-0 transition-transform group-open:rotate-90"
+                />
+                Show all metrics
+                <span className="h-px flex-1 bg-border" />
+              </summary>
+              <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+                {secondaryMetricKeys.map((k) => metricTiles[k])}
+              </div>
+            </details>
+          </section>
 
-        <section aria-labelledby="risks-section-title" className="space-y-3 pt-2">
-          <h2 id="risks-section-title" className="text-sm font-extrabold uppercase tracking-widest text-muted-foreground">
-            {deferredWhatIfState?.isAdjusted ? "Base risks and verification" : "Risks and verification"}
-          </h2>
-          {result && values && !isLoading && !strategyLeadsOutput ? (
-            <>
-              <DealDriverInsight values={values} result={result} marketRentEstimate={marketRentEstimate} />
-              <AssumptionImpactCard values={values} />
-            </>
-          ) : null}
-        </section>
+          <section
+            aria-labelledby="risks-section-title"
+            className="space-y-3 pt-2"
+          >
+            <h2
+              id="risks-section-title"
+              className="text-sm font-extrabold uppercase tracking-widest text-muted-foreground"
+            >
+              {deferredWhatIfState?.isAdjusted
+                ? "Base risks and verification"
+                : "Risks and verification"}
+            </h2>
+            {result && values && !isLoading && !strategyLeadsOutput ? (
+              <>
+                <DealDriverInsight
+                  values={values}
+                  result={result}
+                  marketRentEstimate={marketRentEstimate}
+                />
+                <AssumptionImpactCard values={values} />
+              </>
+            ) : null}
+          </section>
 
-        {/* Stress-test tools - collapsed by default so the first read of the
+          {/* Stress-test tools - collapsed by default so the first read of the
             Overview is calm (verdict + numbers). One click reveals the live
             what-if sliders + the "what would make it Solid" targets. Closing
             the panel resets any what-if adjustment so the headline cards
             always return to the actual deal. */}
-        {result && values ? (
-          <section aria-labelledby="downside-section-title" className="space-y-3 pt-2">
-          <h2 id="downside-section-title" className="text-sm font-extrabold uppercase tracking-widest text-muted-foreground">
-            Downside scenario
-          </h2>
-          <details
-            className="group"
-            onToggle={(e) => {
-              const open = (e.currentTarget as HTMLDetailsElement).open;
-              setWhatIfOpen(open);
-              if (!open) setWhatIfState(null);
-            }}
-          >
-            <summary className="flex min-h-11 cursor-pointer list-none items-center gap-3 rounded-2xl border border-primary/20 bg-[var(--brand-blue-light)] px-4 py-3 transition-colors hover:border-primary/40">
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-card text-primary">
-                <SlidersHorizontal className="size-4" />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-sm font-bold text-foreground">
-                  Play with the numbers
-                </span>
-                <span className="block text-xs text-muted-foreground">
-                  Drag the levers - or tap Worst case - and watch the screening result move, live.
-                </span>
-              </span>
-              <ChevronRight
-                aria-hidden
-                className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-90"
-              />
-            </summary>
-            <div className="mt-2 space-y-3">
-              <WhatIfSliders
-                key={whatIfOpen ? "open" : "closed"}
-                values={values}
-                baseResult={result}
-                onStateChange={setWhatIfState}
-              />
-              {/* Survivability readout - renders whenever ANY stress is
+          {result && values ? (
+            <section
+              aria-labelledby="downside-section-title"
+              className="space-y-3 pt-2"
+            >
+              <h2
+                id="downside-section-title"
+                className="text-sm font-extrabold uppercase tracking-widest text-muted-foreground"
+              >
+                Downside scenario
+              </h2>
+              <details
+                className="group"
+                onToggle={(e) => {
+                  const open = (e.currentTarget as HTMLDetailsElement).open;
+                  setWhatIfOpen(open);
+                  if (!open) setWhatIfState(null);
+                }}
+              >
+                <summary className="flex min-h-11 cursor-pointer list-none items-center gap-3 rounded-2xl border border-primary/20 bg-[var(--brand-blue-light)] px-4 py-3 transition-colors hover:border-primary/40">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-card text-primary">
+                    <SlidersHorizontal className="size-4" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-bold text-foreground">
+                      Play with the numbers
+                    </span>
+                    <span className="block text-xs text-muted-foreground">
+                      Drag the levers - or tap Worst case - and watch the
+                      screening result move, live.
+                    </span>
+                  </span>
+                  <ChevronRight
+                    aria-hidden
+                    className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-90"
+                  />
+                </summary>
+                <div className="mt-2 space-y-3">
+                  <WhatIfSliders
+                    key={whatIfOpen ? "open" : "closed"}
+                    values={values}
+                    baseResult={result}
+                    onStateChange={setWhatIfState}
+                  />
+                  {/* Survivability readout - renders whenever ANY stress is
                   active (worst-case preset or a hand-dragged slider) and
                   answers "does it still cash-flow?" in plain English.
                   Reads the same deferred state as the metric tiles so the
                   two can never disagree mid-drag. Free for everyone. */}
-              {deferredWhatIfState?.isAdjusted ? (
-                <StressSurvivabilityCard
-                  base={result}
-                  stressed={deferredWhatIfState.result}
-                  adjustmentLabel={formatAdjustmentLabel(
-                    deferredWhatIfState.rentPct,
-                    deferredWhatIfState.pricePct,
-                    deferredWhatIfState.ratePp,
-                    deferredWhatIfState.vacancyPp
-                  )}
-                />
-              ) : null}
-            </div>
-          </details>
-          </section>
-        ) : null}
-      </div>
+                  {deferredWhatIfState?.isAdjusted ? (
+                    <StressSurvivabilityCard
+                      base={result}
+                      stressed={deferredWhatIfState.result}
+                      adjustmentLabel={formatAdjustmentLabel(
+                        deferredWhatIfState.rentPct,
+                        deferredWhatIfState.pricePct,
+                        deferredWhatIfState.ratePp,
+                        deferredWhatIfState.vacancyPp,
+                      )}
+                    />
+                  ) : null}
+                </div>
+              </details>
+            </section>
+          ) : null}
+        </div>
       </ResultsRegionOrFragment>
 
       {/* REGION 3 · WHY THIS NUMBER — deliberately AFTER "The numbers".
@@ -2125,7 +2419,6 @@ export function AnalysisDashboard({
           </div>
         </ResultsRegion>
       ) : null}
-
 
       {/* Sale & rent comps moved into the ledger below ("Check rent
           against the market" row) - Phase 5. The card itself is
@@ -2183,97 +2476,161 @@ export function AnalysisDashboard({
         payoff="Amortization, projections, tax, exits, stress tests, comps"
         openEvent="go_deeper_opened"
       >
-      <section aria-labelledby="long-term-section-title" className="space-y-3">
-      <h2 id="long-term-section-title" className="text-sm font-extrabold uppercase tracking-widest text-muted-foreground">
-        {deferredWhatIfState?.isAdjusted ? "Base long-term analysis" : "Long-term analysis"}
-      </h2>
-      <DrillLedger label="Deeper analysis">
-        {TABS.map((tab) => {
-          const Icon = tab.icon;
-          return (
-            <DrillRow
-              key={tab.id}
-              id={tab.id}
-              title={tab.label}
-              icon={<Icon className="size-4" />}
-              summary={rowSummaries[tab.id]}
-              locked={tab.isPro && !tabEntitlements[tab.id]}
-              open={openRows[tab.id]}
-              onOpenChange={(open) => setRowOpen(tab.id, open)}
-            >
-              {tab.id === "cash-flow" && (
-                <CashFlowTab
-                  result={result}
-                  isLoading={isLoading}
-                  values={values}
-                  isPro={canUseStrategies || canUseSensitivity || canUseProjections}
-                />
-              )}
-              {tab.id === "projections" && !canUseProjections && (
-                <ProFeaturePreview kind="projections" onUpgrade={goToBilling} result={result} values={values} />
-              )}
-              {tab.id === "projections" && canUseProjections && projectionSource && (
-                <TenYearProjectionsPanel source={projectionSource} />
-              )}
-              {tab.id === "projections" && canUseProjections && !projectionSource && (
-                <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
-                  Run the analysis to see the 10-year projection.
-                </div>
-              )}
-              {tab.id === "tax-strategy" && !canUseTaxStrategy && (
-                <ProFeaturePreview kind="tax-strategy" onUpgrade={goToBilling} result={result} values={values} />
-              )}
-              {tab.id === "tax-strategy" && canUseTaxStrategy && taxStrategySource && (
-                <TaxStrategyPanel source={taxStrategySource} />
-              )}
-              {tab.id === "tax-strategy" && canUseTaxStrategy && !taxStrategySource && (
-                <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
-                  Run the analysis to see the illustrative tax-impact view.
-                </div>
-              )}
-              {tab.id === "exit-scenarios" && !canUseExitScenarios && (
-                <ProFeaturePreview kind="exit-scenarios" onUpgrade={goToBilling} result={result} values={values} />
-              )}
-              {tab.id === "exit-scenarios" && canUseExitScenarios && exitScenarioSource && (
-                <ExitScenariosPanel source={exitScenarioSource} />
-              )}
-              {tab.id === "exit-scenarios" && canUseExitScenarios && !exitScenarioSource && (
-                <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
-                  Run the analysis to see exit scenarios.
-                </div>
-              )}
-              {tab.id === "strategies" && !canUseStrategies && (
-                <ProFeaturePreview kind="strategies" onUpgrade={goToBilling} result={result} values={values} />
-              )}
-              {tab.id === "strategies" && canUseStrategies && (
-                <StrategiesPanel values={values} result={result} onApplyRehab={onApplyRehab} currentRehabBudget={currentRehabBudget} />
-              )}
-              {/* Stress Test row — the paid Offer Ceiling is promoted directly
-                  beneath the verdict above. This row now focuses on downside
-                  sensitivity so the same answer never renders twice. */}
-              {tab.id === "stress-test" && (
-                <div className="space-y-4">
-                  {canUseSensitivity ? (
-                    <SensitivityGrid values={values} />
-                  ) : (
-                    <ProInlineGate
-                      icon={Activity}
-                      title="Sensitivity analysis"
-                      description="Stress-test the deal if rent comes in lower, vacancy spikes, or rates rise."
-                      previewBullets={[
-                        "Rent ±10% scenarios",
-                        "Vacancy ±5pp scenarios",
-                        "Interest rate ±1pp scenarios",
-                      ]}
+        <section
+          aria-labelledby="long-term-section-title"
+          className="space-y-3"
+        >
+          <h2
+            id="long-term-section-title"
+            className="text-sm font-extrabold uppercase tracking-widest text-muted-foreground"
+          >
+            {deferredWhatIfState?.isAdjusted
+              ? "Base long-term analysis"
+              : "Long-term analysis"}
+          </h2>
+          <DrillLedger label="Deeper analysis">
+            {TABS.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <DrillRow
+                  key={tab.id}
+                  id={tab.id}
+                  title={tab.label}
+                  icon={<Icon className="size-4" />}
+                  summary={rowSummaries[tab.id]}
+                  locked={tab.isPro && !tabEntitlements[tab.id]}
+                  open={openRows[tab.id]}
+                  onOpenChange={(open) => setRowOpen(tab.id, open)}
+                >
+                  {tab.id === "cash-flow" && (
+                    <CashFlowTab
+                      result={result}
+                      isLoading={isLoading}
+                      values={values}
+                      isPro={
+                        canUseStrategies ||
+                        canUseSensitivity ||
+                        canUseProjections
+                      }
                     />
                   )}
-                </div>
-              )}
-            </DrillRow>
-          );
-        })}
+                  {tab.id === "projections" && !canUseProjections && (
+                    <ProFeaturePreview
+                      kind="projections"
+                      onUpgrade={goToBilling}
+                      result={result}
+                      values={values}
+                    />
+                  )}
+                  {tab.id === "projections" &&
+                    canUseProjections &&
+                    projectionSource && (
+                      <TenYearProjectionsPanel source={projectionSource} />
+                    )}
+                  {tab.id === "projections" &&
+                    canUseProjections &&
+                    !projectionSource && (
+                      <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
+                        Run the analysis to see the 10-year projection.
+                      </div>
+                    )}
+                  {tab.id === "tax-strategy" && !canUseTaxStrategy && (
+                    <ProFeaturePreview
+                      kind="tax-strategy"
+                      onUpgrade={goToBilling}
+                      result={result}
+                      values={values}
+                    />
+                  )}
+                  {tab.id === "tax-strategy" &&
+                    canUseTaxStrategy &&
+                    taxStrategySource && (
+                      <TaxStrategyPanel source={taxStrategySource} />
+                    )}
+                  {tab.id === "tax-strategy" &&
+                    canUseTaxStrategy &&
+                    !taxStrategySource && (
+                      <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
+                        Run the analysis to see the illustrative tax-impact
+                        view.
+                      </div>
+                    )}
+                  {tab.id === "exit-scenarios" && !canUseExitScenarios && (
+                    <ProFeaturePreview
+                      kind="exit-scenarios"
+                      onUpgrade={goToBilling}
+                      result={result}
+                      values={values}
+                    />
+                  )}
+                  {tab.id === "exit-scenarios" &&
+                    canUseExitScenarios &&
+                    exitScenarioSource && (
+                      <ExitScenariosPanel source={exitScenarioSource} />
+                    )}
+                  {tab.id === "exit-scenarios" &&
+                    canUseExitScenarios &&
+                    !exitScenarioSource && (
+                      <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
+                        Run the analysis to see exit scenarios.
+                      </div>
+                    )}
+                  {tab.id === "strategies" && !canUseStrategies && (
+                    <ProFeaturePreview
+                      kind="strategies"
+                      onUpgrade={goToBilling}
+                      result={result}
+                      values={values}
+                    />
+                  )}
+                  {tab.id === "strategies" &&
+                  canUseStrategies &&
+                  recordedSpecialistAnalysis &&
+                  activeStrategy ? (
+                    <RecordedSpecialistAnalysisCard
+                      state={recordedSpecialistAnalysis}
+                      strategyKey={activeStrategy.key}
+                    />
+                  ) : null}
+                  {tab.id === "strategies" &&
+                    canUseStrategies &&
+                    !recordedSpecialistAnalysis && (
+                      <StrategiesPanel
+                        values={values}
+                        result={result}
+                        onApplyRehab={onApplyRehab}
+                        currentRehabBudget={currentRehabBudget}
+                        strategyInputs={strategyInputs ?? values ?? undefined}
+                        strategyInputErrors={strategyInputErrors}
+                        onStrategyInputChange={onStrategyInputChange}
+                      />
+                    )}
+                  {/* Stress Test row — the paid Offer Ceiling is promoted directly
+                  beneath the verdict above. This row now focuses on downside
+                  sensitivity so the same answer never renders twice. */}
+                  {tab.id === "stress-test" && (
+                    <div className="space-y-4">
+                      {canUseSensitivity ? (
+                        <SensitivityGrid values={values} />
+                      ) : (
+                        <ProInlineGate
+                          icon={Activity}
+                          title="Sensitivity analysis"
+                          description="Stress-test the deal if rent comes in lower, vacancy spikes, or rates rise."
+                          previewBullets={[
+                            "Rent ±10% scenarios",
+                            "Vacancy ±5pp scenarios",
+                            "Interest rate ±1pp scenarios",
+                          ]}
+                        />
+                      )}
+                    </div>
+                  )}
+                </DrillRow>
+              );
+            })}
 
-        {/* Sale & rent comps - on-demand external enrichment (RentCast).
+            {/* Sale & rent comps - on-demand external enrichment (RentCast).
             Paid + address gated; pulls only on click (API cost control);
             self-hides if the provider isn't configured. keepMounted: the
             card was always mounted pre-ledger, so its saved-comps mount
@@ -2281,83 +2638,102 @@ export function AnalysisDashboard({
             as before - the row only changes what's VISIBLE. The row shell
             mirrors the card's own enabled gate (authed + address) so a
             header never fronts a card that renders nothing. */}
-        {isAuthenticated && values?.address && !compsUnavailable ? (
-          <DrillRow
-            id="comps"
-            title="Check rent against the market"
-            icon={<Search className="size-4" />}
-            summary={rowSummaries.comps}
-            open={openRows.comps}
-            onOpenChange={(open) => setRowOpen("comps", open)}
-            keepMounted
-          >
-            <PropertyCompsCard
-              enabled={Boolean(isAuthenticated)}
-              address={values.address}
-              propertyType={values.propertyType}
-              bedrooms={values.bedrooms ?? null}
-              bathrooms={values.bathrooms ?? null}
-              squareFootage={values.sqft ?? null}
-              currentRent={values.monthlyRent ?? null}
-              currentPrice={values.purchasePrice ?? null}
-              savedDealId={savedDealId}
-              onApply={onApplyComps}
-              onDataChange={setCompsQaData}
-              onUnavailableChange={setCompsUnavailable}
-            />
-          </DrillRow>
-        ) : null}
+            {isAuthenticated && values?.address && !compsUnavailable ? (
+              <DrillRow
+                id="comps"
+                title="Check rent against the market"
+                icon={<Search className="size-4" />}
+                summary={rowSummaries.comps}
+                open={openRows.comps}
+                onOpenChange={(open) => setRowOpen("comps", open)}
+                keepMounted
+              >
+                <PropertyCompsCard
+                  enabled={Boolean(isAuthenticated)}
+                  address={values.address}
+                  propertyType={values.propertyType}
+                  bedrooms={values.bedrooms ?? null}
+                  bathrooms={values.bathrooms ?? null}
+                  squareFootage={values.sqft ?? null}
+                  currentRent={values.monthlyRent ?? null}
+                  currentPrice={values.purchasePrice ?? null}
+                  savedDealId={savedDealId}
+                  onApply={onApplyComps}
+                  onDataChange={setCompsQaData}
+                  onUnavailableChange={setCompsUnavailable}
+                />
+              </DrillRow>
+            ) : null}
 
-        {/* The 'Where these numbers came from' and 'Ask about this deal'
+            {/* The 'Where these numbers came from' and 'Ask about this deal'
             ledger rows were removed by founder decision 2026-08-17 (low
             utility). Provenance still lives on each input chip and in the
             enrichment receipt; the Deal Q&A server action remains but has
             no mount. */}
-        {/* Deal notes - last row, saved deals only. keepMounted so the
+            {/* Deal notes - last row, saved deals only. keepMounted so the
             panel's first-mount notes fetch still fires when the saved
             deal loads (not on first row open), exactly as before.
             Due-diligence + documents live in the dashboard deal
             workspace (/dashboard/saved-analyses/[id]). */}
-        {isExistingSavedDeal && savedDealId ? (
-          <DrillRow
-            id="notes"
-            title="Notes"
-            icon={<NotebookPen className="size-4" />}
-            summary={rowSummaries.notes}
-            open={openRows.notes}
-            onOpenChange={(open) => setRowOpen("notes", open)}
-            keepMounted
-          >
-            <DealNotesPanel savedDealId={savedDealId} />
-          </DrillRow>
-        ) : null}
-      </DrillLedger>
-      </section>
+            {isExistingSavedDeal && savedDealId ? (
+              <DrillRow
+                id="notes"
+                title="Notes"
+                icon={<NotebookPen className="size-4" />}
+                summary={rowSummaries.notes}
+                open={openRows.notes}
+                onOpenChange={(open) => setRowOpen("notes", open)}
+                keepMounted
+              >
+                <DealNotesPanel savedDealId={savedDealId} />
+              </DrillRow>
+            ) : null}
+          </DrillLedger>
+        </section>
       </ResultsRegionOrFragment>
     </div>
   );
 }
 
-const proPreviewCopy: Record<ProPreviewKind, { title: string; description: string; metrics: string[] }> = {
+const proPreviewCopy: Record<
+  ProPreviewKind,
+  { title: string; description: string; metrics: string[] }
+> = {
   projections: {
     title: "10-Year Projections",
-    description: "Unlock long-term cash flow, after-tax projections, and income trends.",
-    metrics: ["Year 10 Cumulative CF", "Best Annual After-Tax CF", "10-Year After-Tax Cash Flow"],
+    description:
+      "Unlock long-term cash flow, after-tax projections, and income trends.",
+    metrics: [
+      "Year 10 Cumulative CF",
+      "Best Annual After-Tax CF",
+      "10-Year After-Tax Cash Flow",
+    ],
   },
   "tax-strategy": {
     title: "Illustrative Tax Impact",
-    description: "Unlock modeled taxable rental income, depreciation, mortgage interest, and tax impact at the entered marginal rate.",
-    metrics: ["Year 1 Taxable Rental Income", "Year 1 Modeled Tax Impact", "10-Year Modeled Tax Impact"],
+    description:
+      "Unlock modeled taxable rental income, depreciation, mortgage interest, and tax impact at the entered marginal rate.",
+    metrics: [
+      "Year 1 Taxable Rental Income",
+      "Year 1 Modeled Tax Impact",
+      "10-Year Modeled Tax Impact",
+    ],
   },
   "exit-scenarios": {
     title: "Exit Scenarios",
-    description: "Unlock equity growth, sale timing, profit breakdowns, and ROI scenarios.",
+    description:
+      "Unlock equity growth, sale timing, profit breakdowns, and ROI scenarios.",
     metrics: ["Highest Modeled Profit", "Year 5 Profit", "Total ROI"],
   },
   strategies: {
     title: "Strategies",
-    description: "Unlock the BRRRR analyzer, fix-and-flip math, and the rehab cost estimator.",
-    metrics: ["Cash left in deal", "Post-refi cash flow", "Flip annualized ROI"],
+    description:
+      "Unlock the BRRRR analyzer, fix-and-flip math, and the rehab cost estimator.",
+    metrics: [
+      "Cash left in deal",
+      "Post-refi cash flow",
+      "Flip annualized ROI",
+    ],
   },
 };
 
@@ -2409,7 +2785,10 @@ function ProFeaturePreview({
                 ? "Year 10"
                 : "$48,260";
             return (
-              <div key={metric} className="rounded-2xl border border-border bg-card p-4">
+              <div
+                key={metric}
+                className="rounded-2xl border border-border bg-card p-4"
+              >
                 <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                   {metric}
                 </p>
@@ -2419,7 +2798,7 @@ function ProFeaturePreview({
                     "mt-2 text-2xl font-extrabold",
                     tileValue.startsWith("-")
                       ? "text-[var(--metric-negative)]"
-                      : "text-[var(--metric-positive)]"
+                      : "text-[var(--metric-positive)]",
                   )}
                 >
                   {tileValue}
@@ -2433,7 +2812,9 @@ function ProFeaturePreview({
           <div className="flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-primary" />
             <div>
-              <p className="text-sm font-semibold text-foreground">{copy.title}</p>
+              <p className="text-sm font-semibold text-foreground">
+                {copy.title}
+              </p>
               <p className="text-xs text-muted-foreground">Preview snapshot</p>
             </div>
           </div>
@@ -2442,19 +2823,28 @@ function ProFeaturePreview({
         <div className="grid gap-4 xl:grid-cols-2">
           <div className="rounded-2xl border border-border bg-card p-4">
             <p className="mb-4 text-sm font-semibold text-foreground">
-              {kind === "tax-strategy" ? "Annual Tax Savings" : kind === "exit-scenarios" ? "Equity Growth" : "Annual Cash Flow"}
+              {kind === "tax-strategy"
+                ? "Annual Tax Savings"
+                : kind === "exit-scenarios"
+                  ? "Equity Growth"
+                  : "Annual Cash Flow"}
             </p>
             <div className="flex h-56 items-end gap-3 border-t border-border/60 pt-4">
               {bars.map((height, index) => (
-                <div key={index} className="flex flex-1 flex-col items-center gap-2">
+                <div
+                  key={index}
+                  className="flex flex-1 flex-col items-center gap-2"
+                >
                   <div
                     className={cn(
                       "w-full rounded-t-lg",
-                      kind === "tax-strategy" ? "bg-emerald-600" : "bg-primary"
+                      kind === "tax-strategy" ? "bg-emerald-600" : "bg-primary",
                     )}
                     style={{ height }}
                   />
-                  <span className="text-[10px] text-muted-foreground">{index + 1}</span>
+                  <span className="text-[10px] text-muted-foreground">
+                    {index + 1}
+                  </span>
                 </div>
               ))}
             </div>
@@ -2462,13 +2852,31 @@ function ProFeaturePreview({
 
           <div className="rounded-2xl border border-border bg-card p-4">
             <p className="mb-4 text-sm font-semibold text-foreground">
-              {kind === "tax-strategy" ? "Taxable Rental Income Trend" : kind === "exit-scenarios" ? "Property Value vs Loan Balance" : "Income vs Expenses"}
+              {kind === "tax-strategy"
+                ? "Taxable Rental Income Trend"
+                : kind === "exit-scenarios"
+                  ? "Property Value vs Loan Balance"
+                  : "Income vs Expenses"}
             </p>
             <div className="relative h-56 border-t border-border/60">
               <svg viewBox="0 0 420 220" className="h-full w-full">
-                <path d="M20 165 C110 155 190 145 400 105" fill="none" stroke="var(--metric-positive)" strokeWidth="4" />
-                <path d="M20 185 C120 180 240 176 400 162" fill="none" stroke="rgb(219 39 119)" strokeWidth="4" />
-                <path d="M20 55 H400 M20 110 H400 M20 165 H400" stroke="hsl(var(--border))" strokeWidth="1" />
+                <path
+                  d="M20 165 C110 155 190 145 400 105"
+                  fill="none"
+                  stroke="var(--metric-positive)"
+                  strokeWidth="4"
+                />
+                <path
+                  d="M20 185 C120 180 240 176 400 162"
+                  fill="none"
+                  stroke="rgb(219 39 119)"
+                  strokeWidth="4"
+                />
+                <path
+                  d="M20 55 H400 M20 110 H400 M20 165 H400"
+                  stroke="hsl(var(--border))"
+                  strokeWidth="1"
+                />
               </svg>
             </div>
           </div>
@@ -2489,8 +2897,13 @@ function ProFeaturePreview({
                   ? "Know when the exit changes the outcome"
                   : "Test the strategy before committing rehab capital"}
           </h3>
-          <p className="mt-2 text-sm text-muted-foreground">{copy.description}</p>
-          <Button className="mt-4 rounded-full font-semibold" onClick={onUpgrade}>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {copy.description}
+          </p>
+          <Button
+            className="mt-4 rounded-full font-semibold"
+            onClick={onUpgrade}
+          >
             Unlock this decision view
           </Button>
         </div>
@@ -2578,7 +2991,7 @@ function CashFlowOverTimeStrip({ result }: { result: AnalysisResult }) {
           monthly · 10-yr horizon
         </p>
       </div>
-      <div className="grid grid-cols-3 items-stretch gap-2 sm:gap-4">
+      <div className="grid grid-cols-1 items-stretch gap-2 min-[280px]:grid-cols-3 sm:gap-4">
         {points.map((point, index) => {
           const tone =
             point.monthly > 25
@@ -2597,7 +3010,7 @@ function CashFlowOverTimeStrip({ result }: { result: AnalysisResult }) {
               key={point.label}
               className={cn(
                 "relative rounded-xl border border-border bg-background px-3 py-3 sm:px-4 sm:py-4",
-                index === 0 ? "border-primary/30 bg-primary/[0.03]" : null
+                index === 0 ? "border-primary/30 bg-primary/[0.03]" : null,
               )}
             >
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
@@ -2606,7 +3019,7 @@ function CashFlowOverTimeStrip({ result }: { result: AnalysisResult }) {
               <p
                 className={cn(
                   "mt-1 text-lg font-extrabold tabular-nums sm:text-2xl",
-                  valueColor
+                  valueColor,
                 )}
               >
                 {formatMonthly(point.monthly)}
@@ -2708,119 +3121,132 @@ function CashFlowTab({
           <ChevronDown
             className={cn(
               "h-4 w-4 text-muted-foreground transition-transform",
-              showBreakdown ? "rotate-180" : "rotate-0"
+              showBreakdown ? "rotate-180" : "rotate-0",
             )}
             aria-hidden
           />
         </button>
       </div>
       {showBreakdown && (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
-      {/* Monthly income */}
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <TrendingUp className="w-4 h-4 text-[var(--metric-positive)]" />
-          <span className="text-xs font-bold uppercase tracking-widest text-foreground">
-            Monthly Income
-          </span>
-        </div>
-        <div className="space-y-3">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Rental Income</span>
-            <span className="font-medium text-foreground">
-              ${result.monthlyRentalIncome.toLocaleString()}
-            </span>
-          </div>
-          <div className="flex justify-between text-sm border-t border-border pt-2">
-            <span className="font-semibold text-foreground">Total</span>
-            <span className="font-bold text-[var(--metric-positive)]">
-              ${result.monthlyRentalIncome.toLocaleString()}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Operating expenses */}
-      <div>
-        <div className="mb-4">
-          <span className="text-xs font-bold uppercase tracking-widest text-foreground">
-            Operating Expenses
-          </span>
-
-          {!isLoading && result && (result.maintenanceAgeAdjusted || result.capexAgeAdjusted) && (
-        <div className="rounded-2xl border border-[var(--brand-orange)]/25 bg-[var(--brand-orange-light)] py-2 px-3 ">
-          <p className="text-xs font-bold uppercase tracking-widest text-[var(--brand-orange)]">
-            Age Impact on Expenses
-          </p>
-          <div className="mt-2 space-y-1 text-xs">
-            {result.maintenanceAgeAdjusted && (
-              <p className="text-foreground">
-                Maintenance: {fmtPct(result.maintenancePctInput)} &rarr;{" "}
-               <span className="text-foreground font-bold"> {fmtPct(result.maintenancePctEffective)}</span>
-              </p>
-            )}
-            {result.capexAgeAdjusted && (
-              <p className="text-foreground">
-                CapEx: {fmtPct(result.capexPctInput)} &rarr; <span className="text-foreground font-bold"> {fmtPct(result.capexPctEffective)}</span>
-              </p>
-            )}
-          </div>
-          <p className="mt-2 text-xs text-muted-foreground inline-flex items-center gap-1.5">
-            <Info className="w-3.5 h-3.5 text-[var(--brand-orange)]" />
-            Adjusted based on property age ({result.propertyAge} y)
-          </p>
-        </div>
-      )}
-
-        </div>
-        <div className="space-y-2">
-          {[
-            { label: "Property Tax", value: result.propertyTax },
-            { label: "Insurance", value: result.insurance },
-            { label: "HOA", value: result.hoa },
-            { label: "Utilities", value: result.utilities },
-            { label: "Maintenance", value: result.maintenance },
-            { label: "Vacancy", value: result.vacancy },
-            { label: "Management", value: result.management },
-            { label: "CapEx", value: result.capex },
-          ].map(({ label, value }) => (
-            <div key={label} className="flex justify-between text-sm">
-              <span className="text-muted-foreground">{label}</span>
-              <span className="font-medium text-foreground">
-                ${value.toLocaleString()}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
+          {/* Monthly income */}
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <TrendingUp className="w-4 h-4 text-[var(--metric-positive)]" />
+              <span className="text-xs font-bold uppercase tracking-widest text-foreground">
+                Monthly Income
               </span>
             </div>
-          ))}
-          <div className="flex justify-between text-sm border-t border-border pt-2">
-            <span className="font-semibold text-foreground">Total</span>
-            <span className="font-bold text-[var(--metric-negative)]">
-              ${result.totalOperatingExpenses.toLocaleString()}
-            </span>
+            <div className="space-y-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Rental Income</span>
+                <span className="font-medium text-foreground">
+                  ${result.monthlyRentalIncome.toLocaleString()}
+                </span>
+              </div>
+              <div className="flex justify-between text-sm border-t border-border pt-2">
+                <span className="font-semibold text-foreground">Total</span>
+                <span className="font-bold text-[var(--metric-positive)]">
+                  ${result.monthlyRentalIncome.toLocaleString()}
+                </span>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* Debt service */}
-      <div>
-        <div className="mb-4">
-          <span className="text-xs font-bold uppercase tracking-widest text-foreground">
-            Debt Service
-          </span>
-        </div>
-        <div className="space-y-4">
-          <div className="bg-[var(--brand-blue-light)] rounded-xl p-4">
-            <p className="text-xs text-muted-foreground mb-1">Loan Amount</p>
-            <p className="text-xl font-bold text-foreground">
-              ${Math.round(result.loanAmount).toLocaleString()}
-            </p>
+          {/* Operating expenses */}
+          <div>
+            <div className="mb-4">
+              <span className="text-xs font-bold uppercase tracking-widest text-foreground">
+                Operating Expenses
+              </span>
+
+              {!isLoading &&
+                result &&
+                (result.maintenanceAgeAdjusted || result.capexAgeAdjusted) && (
+                  <div className="rounded-2xl border border-[var(--brand-orange)]/25 bg-[var(--brand-orange-light)] py-2 px-3 ">
+                    <p className="text-xs font-bold uppercase tracking-widest text-[var(--brand-orange)]">
+                      Age Impact on Expenses
+                    </p>
+                    <div className="mt-2 space-y-1 text-xs">
+                      {result.maintenanceAgeAdjusted && (
+                        <p className="text-foreground">
+                          Maintenance: {fmtPct(result.maintenancePctInput)}{" "}
+                          &rarr;{" "}
+                          <span className="text-foreground font-bold">
+                            {" "}
+                            {fmtPct(result.maintenancePctEffective)}
+                          </span>
+                        </p>
+                      )}
+                      {result.capexAgeAdjusted && (
+                        <p className="text-foreground">
+                          CapEx: {fmtPct(result.capexPctInput)} &rarr;{" "}
+                          <span className="text-foreground font-bold">
+                            {" "}
+                            {fmtPct(result.capexPctEffective)}
+                          </span>
+                        </p>
+                      )}
+                    </div>
+                    <p className="mt-2 text-xs text-muted-foreground inline-flex items-center gap-1.5">
+                      <Info className="w-3.5 h-3.5 text-[var(--brand-orange)]" />
+                      Adjusted based on property age ({result.propertyAge} y)
+                    </p>
+                  </div>
+                )}
+            </div>
+            <div className="space-y-2">
+              {[
+                { label: "Property Tax", value: result.propertyTax },
+                { label: "Insurance", value: result.insurance },
+                { label: "HOA", value: result.hoa },
+                { label: "Utilities", value: result.utilities },
+                { label: "Maintenance", value: result.maintenance },
+                { label: "Vacancy", value: result.vacancy },
+                { label: "Management", value: result.management },
+                { label: "CapEx", value: result.capex },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">{label}</span>
+                  <span className="font-medium text-foreground">
+                    ${value.toLocaleString()}
+                  </span>
+                </div>
+              ))}
+              <div className="flex justify-between text-sm border-t border-border pt-2">
+                <span className="font-semibold text-foreground">Total</span>
+                <span className="font-bold text-[var(--metric-negative)]">
+                  ${result.totalOperatingExpenses.toLocaleString()}
+                </span>
+              </div>
+            </div>
           </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Loan Payment (P&amp;I)</span>
-            <span className="font-medium text-foreground">
-              ${result.monthlyPayment.toLocaleString()}
-            </span>
-          </div>
-          {/* Removed three blocks that were creating noise:
+
+          {/* Debt service */}
+          <div>
+            <div className="mb-4">
+              <span className="text-xs font-bold uppercase tracking-widest text-foreground">
+                Debt Service
+              </span>
+            </div>
+            <div className="space-y-4">
+              <div className="bg-[var(--brand-blue-light)] rounded-xl p-4">
+                <p className="text-xs text-muted-foreground mb-1">
+                  Loan Amount
+                </p>
+                <p className="text-xl font-bold text-foreground">
+                  ${Math.round(result.loanAmount).toLocaleString()}
+                </p>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">
+                  Loan Payment (P&amp;I)
+                </span>
+                <span className="font-medium text-foreground">
+                  ${result.monthlyPayment.toLocaleString()}
+                </span>
+              </div>
+              {/* Removed three blocks that were creating noise:
               (1) "Monthly Cost Breakdown" dashed-border inner panel —
                   re-stated P&I + tax/insurance/HOA monthly amounts that
                   are already itemized in the Operating Expenses column.
@@ -2832,85 +3258,94 @@ function CashFlowTab({
                   column. NCF is already the headline at the very top of
                   the Cash Flow tab (NetCashFlowCard). Showing it again
                   here just creates visual duplication. */}
-        </div>
+            </div>
 
-        {/* Total cash required */}
-        <div className="mt-6 pt-5 border-t border-border">
-          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">
-            Total Cash Required
-          </p>
-          <div className="flex justify-between text-sm mb-1">
-            <div>
-              <p className="text-muted-foreground">Down Payment</p>
-              <p className="text-xs text-muted-foreground">{fmtPct(result.downPaymentPct)}</p>
-            </div>
-            <span className="font-semibold text-foreground">
-              ${result.downPayment.toLocaleString()}
-            </span>
-          </div>
-          <div className="flex justify-between text-sm mb-1">
-            <div>
-              <p className="text-muted-foreground">Closing Costs</p>
-              <p className="text-xs text-muted-foreground">{fmtPct(result.closingCostsPct)}</p>
-            </div>
-            <span className="font-semibold text-foreground">
-              ${result.closingCosts.toLocaleString()}
-            </span>
-          </div>
-          {/* Up-front rehab + STR furnishing are in totalCashRequired too, so
-              itemize the residual or the lines won't sum to Total Investment. */}
-          {(() => {
-            const upfrontExtra = Math.max(
-              0,
-              Math.round(result.totalCashRequired - result.downPayment - result.closingCosts)
-            );
-            return upfrontExtra > 0 ? (
-              <div className="flex justify-between text-sm mb-3">
-                <p className="text-muted-foreground">Rehab / Furnishing</p>
+            {/* Total cash required */}
+            <div className="mt-6 pt-5 border-t border-border">
+              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">
+                Total Cash Required
+              </p>
+              <div className="flex justify-between text-sm mb-1">
+                <div>
+                  <p className="text-muted-foreground">Down Payment</p>
+                  <p className="text-xs text-muted-foreground">
+                    {fmtPct(result.downPaymentPct)}
+                  </p>
+                </div>
                 <span className="font-semibold text-foreground">
-                  ${upfrontExtra.toLocaleString()}
+                  ${result.downPayment.toLocaleString()}
                 </span>
               </div>
-            ) : (
-              <div className="mb-2" />
-            );
-          })()}
-          <div className="bg-primary rounded-xl p-4 flex justify-between items-center">
-            <p className="text-sm font-semibold text-primary-foreground">
-              Total Investment
-            </p>
-            <p className="text-xl font-extrabold text-primary-foreground">
-              ${result.totalCashRequired.toLocaleString()}
-            </p>
-          </div>
-          {/* Lender-reserves note - DISPLAY-ONLY arithmetic over existing
+              <div className="flex justify-between text-sm mb-1">
+                <div>
+                  <p className="text-muted-foreground">Closing Costs</p>
+                  <p className="text-xs text-muted-foreground">
+                    {fmtPct(result.closingCostsPct)}
+                  </p>
+                </div>
+                <span className="font-semibold text-foreground">
+                  ${result.closingCosts.toLocaleString()}
+                </span>
+              </div>
+              {/* Up-front rehab + STR furnishing are in totalCashRequired too, so
+              itemize the residual or the lines won't sum to Total Investment. */}
+              {(() => {
+                const upfrontExtra = Math.max(
+                  0,
+                  Math.round(
+                    result.totalCashRequired -
+                      result.downPayment -
+                      result.closingCosts,
+                  ),
+                );
+                return upfrontExtra > 0 ? (
+                  <div className="flex justify-between text-sm mb-3">
+                    <p className="text-muted-foreground">Rehab / Furnishing</p>
+                    <span className="font-semibold text-foreground">
+                      ${upfrontExtra.toLocaleString()}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="mb-2" />
+                );
+              })()}
+              <div className="bg-primary rounded-xl p-4 flex justify-between items-center">
+                <p className="text-sm font-semibold text-primary-foreground">
+                  Total Investment
+                </p>
+                <p className="text-xl font-extrabold text-primary-foreground">
+                  ${result.totalCashRequired.toLocaleString()}
+                </p>
+              </div>
+              {/* Lender-reserves note - DISPLAY-ONLY arithmetic over existing
               results (no calc/verdict change). Lenders on financed deals
               typically require 2-6 months of the full housing payment
               (PITI + PMI + HOA) in reserves ON TOP of down payment +
               closing, which blindsides new investors who budgeted only
               the Total Investment above. Hidden on cash purchases
               (monthlyPayment <= 0) - no lender, no reserves. */}
-          {result.monthlyPayment > 0 &&
-            (() => {
-              const pitiMonthly =
-                result.monthlyPayment +
-                result.propertyTax +
-                result.insurance +
-                result.pmiMonthly +
-                result.hoa;
-              const reservesLow = Math.round(pitiMonthly * 2);
-              const reservesHigh = Math.round(pitiMonthly * 6);
-              return (
-                <p className="mt-2 text-xs text-muted-foreground">
-                  Lenders typically also want ~${reservesLow.toLocaleString()}–$
-                  {reservesHigh.toLocaleString()} in reserves (2–6 months of PITI) — plan
-                  cash beyond closing.
-                </p>
-              );
-            })()}
+              {result.monthlyPayment > 0 &&
+                (() => {
+                  const pitiMonthly =
+                    result.monthlyPayment +
+                    result.propertyTax +
+                    result.insurance +
+                    result.pmiMonthly +
+                    result.hoa;
+                  const reservesLow = Math.round(pitiMonthly * 2);
+                  const reservesHigh = Math.round(pitiMonthly * 6);
+                  return (
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Lenders typically also want ~$
+                      {reservesLow.toLocaleString()}–$
+                      {reservesHigh.toLocaleString()} in reserves (2–6 months of
+                      PITI) — plan cash beyond closing.
+                    </p>
+                  );
+                })()}
+            </div>
+          </div>
         </div>
-      </div>
-      </div>
       )}
       {/* Loan amortization - collapsible year-by-year view. Free
           feature, opt-in (click-to-expand). Self-hides on cash

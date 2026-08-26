@@ -6,6 +6,9 @@ function read(relativePath: string): string {
   return readFileSync(fileURLToPath(new URL(relativePath, import.meta.url)), "utf8");
 }
 
+const normalizeSource = (source: string) =>
+  source.replace(/\s+/g, "").replace(/,([)}\]])/g, "$1");
+
 const summary = read("../../components/investcalc/focused-decision-summary.tsx");
 const ledger = read("../../components/investcalc/input-confidence-card.tsx");
 const dashboard = read("../../components/investcalc/analysis-dashboard.tsx");
@@ -13,7 +16,9 @@ const dashboard = read("../../components/investcalc/analysis-dashboard.tsx");
 describe("advocacy decision accessibility and reflow guards", () => {
   it("keeps the decision hierarchy semantic and announces changing results", () => {
     expect(summary).toContain('aria-labelledby="decision-summary-title"');
-    expect(summary).toContain('<h2 id="decision-summary-title"');
+    expect(normalizeSource(summary)).toContain(
+      normalizeSource('<h2 id="decision-summary-title"'),
+    );
     expect(summary).toContain('aria-live="polite"');
     expect(summary).toContain('aria-atomic="true"');
     expect(dashboard).toContain('id="analysis-decision-title"');
@@ -25,8 +30,14 @@ describe("advocacy decision accessibility and reflow guards", () => {
     expect(summary).toContain("max={bounds.max}");
     expect(summary).toContain("step={bounds.step}");
     expect(summary).toContain("aria-invalid={Boolean(targetErrors[field])}");
-    expect(summary).toContain("aria-describedby={targetErrors[field] ? errorId : undefined}");
-    expect(summary).toContain('id={errorId} role="alert"');
+    expect(normalizeSource(summary)).toContain(
+      normalizeSource(
+        "aria-describedby={targetErrors[field] ? errorId : undefined}",
+      ),
+    );
+    expect(normalizeSource(summary)).toContain(
+      normalizeSource('id={errorId} role="alert"'),
+    );
   });
 
   it("preserves 44px controls and visible keyboard focus", () => {
@@ -43,7 +54,9 @@ describe("advocacy decision accessibility and reflow guards", () => {
   });
 
   it("exposes categorical evidence semantics and cash DSCR without a numerical-confidence claim", () => {
-    expect(ledger).toContain('advocacyContractEnabled ? "Evidence readiness"');
+    expect(normalizeSource(ledger)).toContain(
+      normalizeSource('advocacyContractEnabled ? "Evidence readiness"'),
+    );
     expect(ledger).toContain('label="Readiness state"');
     expect(ledger).toContain('help="Not investment advice"');
     expect(summary).toContain('result.monthlyPayment <= 0 ? "N/A"');

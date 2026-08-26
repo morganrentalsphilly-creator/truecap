@@ -17,8 +17,22 @@
  * here instead of being dumped on a paywall tab.
  */
 
-import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
-import { ChevronDown, Hammer, SlidersHorizontal, Target, Wrench, type LucideIcon } from "lucide-react";
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import {
+  ChevronDown,
+  Hammer,
+  SlidersHorizontal,
+  Target,
+  Wrench,
+  type LucideIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,11 +45,20 @@ import {
   MAO_TARGET_BOUNDS,
   type MaoTargetField,
 } from "@/lib/mao-target-editor";
-import type { InvestmentFormValues } from "@/lib/investcalc-schema";
+import type {
+  InvestmentFormValues,
+  StrategyInputErrors,
+  StrategyInputField,
+  StrategyInputs,
+} from "@/lib/investcalc-schema";
 import { calculateAnalysis, type AnalysisResult } from "@/lib/calc-analysis";
 import type { InvestorStrategy } from "@/lib/investor-strategies";
 import { BrrrrCard } from "@/components/investcalc/brrrr-card";
 import { FixFlipCard } from "@/components/investcalc/fix-flip-card";
+import {
+  RecordedSpecialistAnalysisCard,
+  type RecordedSpecialistAnalysisState,
+} from "@/components/investcalc/recorded-specialist-analysis-card";
 
 const usd = (n: number) =>
   new Intl.NumberFormat("en-US", {
@@ -62,6 +85,10 @@ export function StrategyOutcomeCard({
   onMaoTargetChange,
   onTuneTargetsOpened,
   onUpgrade,
+  strategyInputs,
+  strategyInputErrors,
+  onStrategyInputChange,
+  recordedSpecialistAnalysis = null,
 }: {
   strategy: InvestorStrategy;
   values: InvestmentFormValues;
@@ -76,25 +103,46 @@ export function StrategyOutcomeCard({
   onMaoTargetChange: (target: MaoTarget) => void;
   onTuneTargetsOpened?: () => void;
   onUpgrade?: () => void;
+  strategyInputs?: Partial<StrategyInputs>;
+  strategyInputErrors?: StrategyInputErrors;
+  onStrategyInputChange?: (
+    field: StrategyInputField,
+    value: number | undefined,
+  ) => void;
+  /** Frozen state restored with a recorded saved analysis. Null means this is
+   * a live/current result and the interactive cards may calculate normally. */
+  recordedSpecialistAnalysis?: RecordedSpecialistAnalysisState;
 }) {
   // ---- Wholesale → Offer Ceiling ----
   if (strategy.key === "wholesale-mao") {
     if (offerCeilingError && canUseMaxOffer) {
       return (
-        <OutcomeShell icon={Target} eyebrow="Wholesale / Offer Ceiling" title="Offer Ceiling temporarily unavailable">
+        <OutcomeShell
+          icon={Target}
+          eyebrow="Wholesale / Offer Ceiling"
+          title="Offer Ceiling temporarily unavailable"
+        >
           <p role="alert" className="text-sm text-muted-foreground">
-            The secure calculation could not be reached. Retry it from the decision summary above.
+            The secure calculation could not be reached. Retry it from the
+            decision summary above.
           </p>
         </OutcomeShell>
       );
     }
-    if (!canUseMaxOffer || (!isOfferCeilingLoading && !hasExactOfferCeilingAccess)) {
+    if (
+      !canUseMaxOffer ||
+      (!isOfferCeilingLoading && !hasExactOfferCeilingAccess)
+    ) {
       return (
-        <OutcomeShell icon={Target} eyebrow="Wholesale / Offer Ceiling" title="Unlock the Offer Ceiling">
+        <OutcomeShell
+          icon={Target}
+          eyebrow="Wholesale / Offer Ceiling"
+          title="Unlock the Offer Ceiling"
+        >
           <p className="text-sm text-muted-foreground">
-            Set the return criteria that matter to you, then reverse-solve the highest price that
-            clears all of them. The deal-specific ceiling stays locked until you choose Pro or a
-            Pro PDF report.
+            Set the return criteria that matter to you, then reverse-solve the
+            highest price that clears all of them. The deal-specific ceiling
+            stays locked until you choose Pro or a Pro PDF report.
           </p>
           {onUpgrade ? (
             <Button onClick={onUpgrade} className="mt-3 rounded-xl">
@@ -106,7 +154,11 @@ export function StrategyOutcomeCard({
     }
     if (!activeMaoTarget) {
       return (
-        <OutcomeShell icon={Target} eyebrow="Wholesale / Offer Ceiling" title="Calculating the Offer Ceiling">
+        <OutcomeShell
+          icon={Target}
+          eyebrow="Wholesale / Offer Ceiling"
+          title="Calculating the Offer Ceiling"
+        >
           <p role="status" className="text-sm text-muted-foreground">
             Resolving the criteria attached to this analysis…
           </p>
@@ -115,7 +167,11 @@ export function StrategyOutcomeCard({
     }
     if (isOfferCeilingLoading) {
       return (
-        <OutcomeShell icon={Target} eyebrow="Wholesale / Offer Ceiling" title="Calculating the Offer Ceiling">
+        <OutcomeShell
+          icon={Target}
+          eyebrow="Wholesale / Offer Ceiling"
+          title="Calculating the Offer Ceiling"
+        >
           <p role="status" className="text-sm text-muted-foreground">
             Checking access and solving the criteria attached to this analysis…
           </p>
@@ -140,7 +196,11 @@ export function StrategyOutcomeCard({
 
   if (!canUseStrategies) {
     return (
-      <OutcomeShell icon={Icon} eyebrow={strategy.label} title={`Unlock your ${isFlip ? "flip" : "BRRRR"} numbers`}>
+      <OutcomeShell
+        icon={Icon}
+        eyebrow={strategy.label}
+        title={`Unlock your ${isFlip ? "flip" : "BRRRR"} numbers`}
+      >
         <p className="text-sm text-muted-foreground">
           {isFlip
             ? "Model rehab budget, holding costs, and resale margin to see your projected profit and ROI."
@@ -155,12 +215,35 @@ export function StrategyOutcomeCard({
     );
   }
 
+  if (recordedSpecialistAnalysis) {
+    return (
+      <RecordedSpecialistAnalysisCard
+        state={recordedSpecialistAnalysis}
+        strategyKey={strategy.key}
+      />
+    );
+  }
+
   // Pro: lead with the real interactive model so the play shows its actual
   // numbers (rehab/ARV → profit / cash-left-in), just like Wholesale's Offer Ceiling.
   return isFlip ? (
-    <FixFlipCard values={values} result={result} />
+    <FixFlipCard
+      values={values}
+      result={result}
+      defaultRehab={strategyInputs?.rehabBudget}
+      strategyInputs={strategyInputs}
+      strategyInputErrors={strategyInputErrors}
+      onStrategyInputChange={onStrategyInputChange}
+    />
   ) : (
-    <BrrrrCard values={values} result={result} />
+    <BrrrrCard
+      values={values}
+      result={result}
+      defaultRehab={strategyInputs?.rehabBudget}
+      strategyInputs={strategyInputs}
+      strategyInputErrors={strategyInputErrors}
+      onStrategyInputChange={onStrategyInputChange}
+    />
   );
 }
 
@@ -195,16 +278,23 @@ function WholesaleOutcome({
     if (isCashPurchase) delete target.dscr;
     return target;
   }, [activeMaoTarget, isCashPurchase]);
-  const hasTarget = Object.values(maoTarget).some((value) => value !== undefined);
+  const hasTarget = Object.values(maoTarget).some(
+    (value) => value !== undefined,
+  );
   const targetsLabel = describeMaoTarget(maoTarget);
-  const asking = typeof values.purchasePrice === "number" ? values.purchasePrice : null;
+  const asking =
+    typeof values.purchasePrice === "number" ? values.purchasePrice : null;
 
   if (!hasTarget) {
     return (
-      <OutcomeShell icon={Target} eyebrow="Wholesale / Offer Ceiling" title="Set Offer Ceiling rules">
+      <OutcomeShell
+        icon={Target}
+        eyebrow="Wholesale / Offer Ceiling"
+        title="Set Offer Ceiling rules"
+      >
         <p className="text-sm text-muted-foreground">
-          Add at least one return criterion below. TrueCap will then calculate the highest price
-          that clears it using this deal&apos;s assumptions.
+          Add at least one return criterion below. TrueCap will then calculate
+          the highest price that clears it using this deal&apos;s assumptions.
         </p>
         <WholesaleTargetEditor
           key="wholesale-target-editor"
@@ -219,11 +309,16 @@ function WholesaleOutcome({
 
   if (!offerCeiling) {
     return (
-      <OutcomeShell icon={Target} eyebrow="Wholesale / Offer Ceiling" title="No price meets these rules">
+      <OutcomeShell
+        icon={Target}
+        eyebrow="Wholesale / Offer Ceiling"
+        title="No price meets these rules"
+      >
         <p className="text-sm text-muted-foreground">
-          Even at the solver&apos;s lowest supported price, {usd(values.monthlyRent ?? 0)}/mo rent
-          does not clear every selected criterion: {targetsLabel}. Verify the rent assumption or
-          tune the criteria below.
+          Even at the solver&apos;s lowest supported price,{" "}
+          {usd(values.monthlyRent ?? 0)}/mo rent does not clear every selected
+          criterion: {targetsLabel}. Verify the rent assumption or tune the
+          criteria below.
         </p>
         <WholesaleTargetEditor
           key="wholesale-target-editor"
@@ -239,10 +334,16 @@ function WholesaleOutcome({
   const maxPrice = offerCeiling.presentation.ceiling;
   const spread = asking != null ? asking - maxPrice : null;
   const spreadPct =
-    asking && asking > 0 && spread != null ? Math.round((spread / asking) * 100) : null;
+    asking && asking > 0 && spread != null
+      ? Math.round((spread / asking) * 100)
+      : null;
 
   return (
-    <OutcomeShell icon={Target} eyebrow="Wholesale / Offer Ceiling" title="Offer Ceiling">
+    <OutcomeShell
+      icon={Target}
+      eyebrow="Wholesale / Offer Ceiling"
+      title="Offer Ceiling"
+    >
       <p
         aria-live="polite"
         aria-atomic="true"
@@ -250,16 +351,21 @@ function WholesaleOutcome({
       >
         {usd(maxPrice)}
       </p>
-      <p className="mt-2 text-sm text-muted-foreground">Criteria: {targetsLabel}.</p>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Criteria: {targetsLabel}.
+      </p>
       <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-        Highest modeled price that still meets the selected wholesale rules under the assumptions shown.
-        This is not a recommended offer or an appraisal.
+        Highest modeled price that still meets the selected wholesale rules
+        under the assumptions shown. This is not a recommended offer or an
+        appraisal.
       </p>
       {asking != null ? (
         <div className="mt-4 rounded-xl border border-border bg-card/70 p-3">
           <div className="flex items-center justify-between text-xs">
             <span className="text-muted-foreground">Asking price</span>
-            <span className="font-semibold tabular-nums text-foreground">{usd(asking)}</span>
+            <span className="font-semibold tabular-nums text-foreground">
+              {usd(asking)}
+            </span>
           </div>
           <div className="relative my-2 h-2 overflow-hidden rounded-full bg-muted">
             <div
@@ -338,9 +444,11 @@ function WholesaleTargetEditor({
   const editorId = useId();
   const [open, setOpen] = useState(false);
   const [inputs, setInputs] = useState<Record<MaoTargetField, string>>(() =>
-    inputsFromTarget(target)
+    inputsFromTarget(target),
   );
-  const [errors, setErrors] = useState<Partial<Record<MaoTargetField, string>>>({});
+  const [errors, setErrors] = useState<Partial<Record<MaoTargetField, string>>>(
+    {},
+  );
   const targetKey = JSON.stringify(target);
   const previousTargetKeyRef = useRef(targetKey);
   const lastLocallyCommittedTargetKeyRef = useRef(targetKey);
@@ -408,12 +516,18 @@ function WholesaleTargetEditor({
           aria-hidden
         />
       </Button>
-      <div id={editorId} hidden={!open} className="mt-4 rounded-xl border border-border bg-card/70 p-4">
+      <div
+        id={editorId}
+        hidden={!open}
+        className="mt-4 rounded-xl border border-border bg-card/70 p-4"
+      >
         <fieldset>
-          <legend className="text-sm font-bold text-foreground">Wholesale Offer Ceiling rules</legend>
+          <legend className="text-sm font-bold text-foreground">
+            Wholesale Offer Ceiling rules
+          </legend>
           <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-            Change a criterion and the ceiling updates immediately everywhere this analysis is used.
-            Leave a field blank to ignore it.
+            Change a criterion and the ceiling updates immediately everywhere
+            this analysis is used. Leave a field blank to ignore it.
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             {WHOLESALE_TARGET_FIELDS.map(([field, label]) => {
@@ -430,7 +544,8 @@ function WholesaleTargetEditor({
                     id={inputId}
                     type="number"
                     inputMode={
-                      field === "monthlyCashFlow" || field === "maxPurchasePrice"
+                      field === "monthlyCashFlow" ||
+                      field === "maxPurchasePrice"
                         ? "numeric"
                         : "decimal"
                     }
@@ -446,7 +561,11 @@ function WholesaleTargetEditor({
                     className="mt-1 h-11"
                   />
                   {errors[field] ? (
-                    <p id={errorId} role="alert" className="mt-1 text-xs font-medium text-destructive">
+                    <p
+                      id={errorId}
+                      role="alert"
+                      className="mt-1 text-xs font-medium text-destructive"
+                    >
                       {errors[field]}
                     </p>
                   ) : null}
@@ -477,9 +596,13 @@ function OutcomeShell({
         <span className="inline-flex size-7 items-center justify-center rounded-full bg-primary/10 text-primary">
           <Icon className="size-4" />
         </span>
-        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{eyebrow}</p>
+        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          {eyebrow}
+        </p>
       </div>
-      <h2 className="mb-2 text-xl font-extrabold text-foreground sm:text-2xl">{title}</h2>
+      <h2 className="mb-2 text-xl font-extrabold text-foreground sm:text-2xl">
+        {title}
+      </h2>
       {children}
     </div>
   );

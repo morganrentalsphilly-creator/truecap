@@ -113,26 +113,34 @@ export function StickyCalculateBar({
       : null;
     const observers: IntersectionObserver[] = [];
     if (formEl) {
-      const o = new IntersectionObserver(([e]) => setFormInView(e?.isIntersecting ?? false));
+      const o = new IntersectionObserver(([e]) =>
+        setFormInView(e?.isIntersecting ?? false),
+      );
       o.observe(formEl);
       observers.push(o);
     } else {
       setFormInView(true);
     }
     if (submitEl) {
-      const o = new IntersectionObserver(([e]) => setSubmitInView(e?.isIntersecting ?? false));
+      const o = new IntersectionObserver(([e]) =>
+        setSubmitInView(e?.isIntersecting ?? false),
+      );
       o.observe(submitEl);
       observers.push(o);
     }
     if (resultsEl) {
-      const o = new IntersectionObserver(([e]) => setResultsInView(e?.isIntersecting ?? false));
+      const o = new IntersectionObserver(([e]) =>
+        setResultsInView(e?.isIntersecting ?? false),
+      );
       o.observe(resultsEl);
       observers.push(o);
     } else {
       setResultsInView(false);
     }
     if (livePanelEl) {
-      const o = new IntersectionObserver(([e]) => setLivePanelInView(e?.isIntersecting ?? false));
+      const o = new IntersectionObserver(([e]) =>
+        setLivePanelInView(e?.isIntersecting ?? false),
+      );
       o.observe(livePanelEl);
       observers.push(o);
     } else {
@@ -141,13 +149,15 @@ export function StickyCalculateBar({
     return () => observers.forEach((o) => o.disconnect());
   }, [hasResults, hasLivePreview]);
 
-  const visible = pastFold && formInView && !submitInView && !(hasResults && resultsInView);
+  const visible =
+    pastFold && formInView && !submitInView && !(hasResults && resultsInView);
   const rendered = visible || isCalculating;
 
   // Compact verdict readout: pre-results only (caller also gates the prop),
   // never while the spinner has taken over the bar, and never while the
   // in-form LiveVerdictPanel it mirrors is on screen (BROWSER-4).
-  const showReadout = hasLivePreview && !hasResults && !isCalculating && !livePanelInView;
+  const showReadout =
+    hasLivePreview && !hasResults && !isCalculating && !livePanelInView;
 
   useEffect(() => {
     if (!showReadout) setDockExpanded(false);
@@ -199,7 +209,11 @@ export function StickyCalculateBar({
             touchStartYRef.current = null;
             const endY = e.changedTouches[0]?.clientY;
             // Swipe down (finger moved ≥40px toward the bottom) closes.
-            if (startY !== null && typeof endY === "number" && endY - startY >= 40) {
+            if (
+              startY !== null &&
+              typeof endY === "number" &&
+              endY - startY >= 40
+            ) {
               setDockExpanded(false);
             }
           }}
@@ -217,7 +231,9 @@ export function StickyCalculateBar({
               DSCR
             </span>
             <span className="font-mono text-sm font-bold tabular-nums text-foreground">
-              {livePreview.monthlyPayment <= 0 ? "—" : livePreview.dscr.toFixed(2)}
+              {livePreview.monthlyPayment <= 0
+                ? "—"
+                : livePreview.dscr.toFixed(2)}
             </span>
           </div>
         </div>
@@ -226,14 +242,14 @@ export function StickyCalculateBar({
         // Verdict dock: compact live readout + Run, sharing the row. The
         // readout is a button (not a live region) - tapping it toggles the
         // cap-rate/DSCR sheet above.
-        <div className="flex items-stretch gap-2">
+        <div className="flex flex-col items-stretch gap-2 min-[280px]:flex-row">
           <button
             type="button"
             onClick={() => setDockExpanded((v) => !v)}
             aria-expanded={dockExpanded}
             aria-controls="verdict-dock-sheet"
             aria-label={`Live underwriting preview: cash flow ${Math.round(livePreview.netCashFlow)} dollars per month. ${dockExpanded ? "Hide" : "Show"} cap rate and DSCR`}
-            className="flex h-12 min-w-0 flex-1 items-center gap-2 rounded-xl border border-border bg-muted/40 px-2.5 text-left"
+            className="flex min-h-12 min-w-0 flex-1 items-center gap-2 rounded-xl border border-border bg-muted/40 px-2.5 py-2 text-left"
           >
             <span className="shrink-0 rounded-full border border-primary/25 bg-background px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-primary">
               Preview
@@ -247,17 +263,18 @@ export function StickyCalculateBar({
                   // in-form live preview card).
                   Math.round(livePreview.netCashFlow) >= 0
                     ? "text-[var(--metric-positive)]"
-                    : "text-[var(--metric-negative)]"
+                    : "text-[var(--metric-negative)]",
                 )}
               >
                 {Math.round(livePreview.netCashFlow) >= 0 ? "+" : "-"}$
-                {Math.abs(Math.round(livePreview.netCashFlow)).toLocaleString()}/mo
+                {Math.abs(Math.round(livePreview.netCashFlow)).toLocaleString()}
+                /mo
               </span>
             </span>
             <ChevronUp
               className={cn(
                 "ml-auto size-4 shrink-0 text-muted-foreground transition-transform",
-                dockExpanded && "rotate-180"
+                dockExpanded && "rotate-180",
               )}
             />
           </button>
@@ -265,7 +282,7 @@ export function StickyCalculateBar({
             type={onTrySample ? "button" : "submit"}
             onClick={onTrySample}
             disabled={isCalculating}
-            className="flex h-12 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground shadow-md hover:bg-primary/95 disabled:opacity-70"
+            className="flex min-h-12 w-full shrink-0 items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-md hover:bg-primary/95 disabled:opacity-70 min-[280px]:w-auto"
           >
             <Calculator className="size-4" />
             {onTrySample ? "Try sample" : "Run"}
@@ -277,7 +294,7 @@ export function StickyCalculateBar({
           type={onTrySample ? "button" : "submit"}
           onClick={onTrySample}
           disabled={isCalculating}
-          className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-bold text-primary-foreground shadow-md hover:bg-primary/95 disabled:opacity-70"
+          className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-2 py-2 text-center text-sm font-bold leading-snug text-primary-foreground shadow-md hover:bg-primary/95 disabled:opacity-70"
         >
           {isCalculating ? (
             <>

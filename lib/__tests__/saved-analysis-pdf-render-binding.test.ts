@@ -12,7 +12,7 @@ function source(
   resultSnapshot: Record<string, unknown> = {
     netCashFlow: 420,
     maxOfferTarget: { monthlyCashFlow: 500, dscr: 1.25 },
-  }
+  },
 ): SavedAnalysisPdfRenderSource {
   return {
     schemaVersion: 12,
@@ -40,7 +40,7 @@ describe("saved-analysis PDF render binding", () => {
     });
 
     expect(fingerprintSavedAnalysisPdfRender(reordered)).toBe(
-      fingerprintSavedAnalysisPdfRender(first)
+      fingerprintSavedAnalysisPdfRender(first),
     );
   });
 
@@ -54,10 +54,37 @@ describe("saved-analysis PDF render binding", () => {
     const originalFingerprint = fingerprintSavedAnalysisPdfRender(original);
     const editedFingerprint = fingerprintSavedAnalysisPdfRender(edited);
     expect(editedFingerprint).not.toBe(originalFingerprint);
-    expect(savedAnalysisPdfRenderMatches(edited, originalFingerprint)).toBe(false);
+    expect(savedAnalysisPdfRenderMatches(edited, originalFingerprint)).toBe(
+      false,
+    );
     expect(
-      buildAnalysisPdfObjectPath("owner", "deal", 9, editedFingerprint)
-    ).not.toBe(buildAnalysisPdfObjectPath("owner", "deal", 9, originalFingerprint));
+      buildAnalysisPdfObjectPath("owner", "deal", 9, editedFingerprint),
+    ).not.toBe(
+      buildAnalysisPdfObjectPath("owner", "deal", 9, originalFingerprint),
+    );
+  });
+
+  it("changes when only the frozen specialist result changes", () => {
+    const original = source({
+      netCashFlow: 420,
+      specialistAnalysis: {
+        modelVersion: 1,
+        strategy: "fix-flip",
+        outcome: { netProfit: 50_000 },
+      },
+    });
+    const changed = source({
+      netCashFlow: 420,
+      specialistAnalysis: {
+        modelVersion: 1,
+        strategy: "fix-flip",
+        outcome: { netProfit: 49_999 },
+      },
+    });
+
+    expect(fingerprintSavedAnalysisPdfRender(changed)).not.toBe(
+      fingerprintSavedAnalysisPdfRender(original),
+    );
   });
 
   it("changes for form, result, methodology, template, and comps changes", () => {
@@ -96,7 +123,9 @@ describe("saved-analysis PDF render binding", () => {
     ];
 
     for (const variant of variants) {
-      expect(fingerprintSavedAnalysisPdfRender(variant)).not.toBe(originalFingerprint);
+      expect(fingerprintSavedAnalysisPdfRender(variant)).not.toBe(
+        originalFingerprint,
+      );
     }
   });
 
@@ -107,7 +136,11 @@ describe("saved-analysis PDF render binding", () => {
     expect(isSavedAnalysisPdfRenderFingerprint(fingerprint)).toBe(true);
     expect(savedAnalysisPdfRenderMatches(current, fingerprint)).toBe(true);
     expect(savedAnalysisPdfRenderMatches(current, "../stale.pdf")).toBe(false);
-    expect(savedAnalysisPdfRenderMatches(current, fingerprint.toUpperCase())).toBe(false);
-    expect(savedAnalysisPdfRenderMatches(current, `${fingerprint}00`)).toBe(false);
+    expect(
+      savedAnalysisPdfRenderMatches(current, fingerprint.toUpperCase()),
+    ).toBe(false);
+    expect(savedAnalysisPdfRenderMatches(current, `${fingerprint}00`)).toBe(
+      false,
+    );
   });
 });

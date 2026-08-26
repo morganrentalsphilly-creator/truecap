@@ -14,8 +14,8 @@ import "server-only";
  *   - the client must still belong to that agent;
  *   - every deal ASSIGNED to that client (and not deleted) is listed — see the
  *     query below for why archived deals are deliberately included — using
- *     the exact result captured when it was saved. Explicitly legacy rows keep
- *     their labeled compatibility recompute.
+ *     current server-recomputed results. Owner-writable saved result JSON is
+ *     never treated as TrueCap authority on this public surface.
  *
  * Returns null for any failure — bad token, missing entitlement, unknown
  * client, DB error — so the route renders a single generic 404. Never throws.
@@ -23,7 +23,10 @@ import "server-only";
 
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
-import { getPublicAgentBranding, type PublicAgentBranding } from "@/lib/agent-share";
+import {
+  getPublicAgentBranding,
+  type PublicAgentBranding,
+} from "@/lib/agent-share";
 import {
   buyBoxHasCriteria,
   rowToNamedBuyBox,
@@ -35,14 +38,10 @@ import {
   type BuyBoxesRow,
   type NamedBuyBox,
 } from "@/lib/buy-box";
-import {
-  recomputeSavedDealVerdict,
-  toRecomputedSavedAnalysisSnapshot,
-} from "@/lib/recompute-saved-deal-verdict";
+import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
 import {
   isLegacySavedMethodologyVersion,
-  parseFrozenDealScore,
-  resolveSavedAnalysisSnapshot,
+  shouldFreezeSavedMethodology,
 } from "@/lib/saved-analysis-methodology";
 import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
 import {
@@ -58,7 +57,8 @@ export const PORTAL_SCOPE = "client-portal.v1";
  *  so "N deals assigned" can never exceed what the buyer actually sees. */
 export const PORTAL_DEAL_LIMIT = 50;
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export type PortalDeal = {
   id: string;
@@ -94,15 +94,9 @@ export type ClientPortalData = {
 type DealRow = {
   id: string;
   form_snapshot: unknown;
-  result_snapshot: Record<string, unknown> | null;
   methodology_version: string | null;
   address: string | null;
 };
-
-function finiteNumber(value: unknown): number | null {
-  const parsed = typeof value === "number" ? value : Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
-}
 
 export async function loadClientPortal(input: {
   agentUserId: string;
@@ -146,7 +140,7 @@ export async function loadClientPortal(input: {
     // lever, and it is the one the UI offers.
     const { data: rows } = await admin
       .from("saved_analyses")
-      .select("id, form_snapshot, result_snapshot, methodology_version, address")
+      .select("id, form_snapshot, methodology_version, address")
       .eq("user_id", agentUserId)
       .eq("client_id", clientId)
       .is("deleted_at", null)
@@ -181,7 +175,9 @@ export async function loadClientPortal(input: {
       [...clientBoxes].sort((a, b) => a.sortOrder - b.sortOrder)[0] ??
       null;
     if (primaryBox) clientBoxes = [primaryBox];
-    const criteriaSummary = primaryBox ? summarizeBuyBoxCriteria(primaryBox) : null;
+    const criteriaSummary = primaryBox
+      ? summarizeBuyBoxCriteria(primaryBox)
+      : null;
 
     const deals: PortalDeal[] = [];
     for (const row of (rows ?? []) as DealRow[]) {
@@ -190,47 +186,36 @@ export async function loadClientPortal(input: {
       // legacy normalizer can make the row look renderable.
       if (!isReleasedUnderwritingSnapshot(row.form_snapshot)) continue;
       const recomputed = recomputeSavedDealVerdict(row.form_snapshot);
-      const resolution = resolveSavedAnalysisSnapshot({
-        methodologyVersion: row.methodology_version,
-        resultSnapshot: row.result_snapshot,
-        recomputedSnapshot: recomputed
-          ? toRecomputedSavedAnalysisSnapshot(recomputed)
-          : undefined,
-      });
-      const snapshot = resolution.snapshot;
-      const currentVerdict = resolution.didRecompute ? recomputed : null;
-      const frozenScore = resolution.usesRecordedSnapshot
-        ? parseFrozenDealScore(snapshot)
-        : null;
-      const score = currentVerdict?.score ?? frozenScore?.score ?? finiteNumber(snapshot.score);
-      const recommendation =
-        currentVerdict?.recommendation ?? frozenScore?.recommendation;
-      const riskLevel = currentVerdict?.riskLevel ?? frozenScore?.riskLevel;
-      const netCashFlowMonthly =
-        currentVerdict?.netCashFlowMonthly ?? finiteNumber(snapshot.netCashFlow);
-      const capRatePct = currentVerdict?.capRatePct ?? finiteNumber(snapshot.capRate);
-      const cocReturnPct = currentVerdict?.cocReturnPct ?? finiteNumber(snapshot.cocReturn);
-      const dscr = currentVerdict?.dscr ?? finiteNumber(snapshot.dscr);
-      const monthlyPayment =
-        currentVerdict?.monthlyPayment ?? finiteNumber(snapshot.monthlyPayment);
+      if (!recomputed) continue;
+      // A future/older pinned formula cannot be safely republished by this
+      // deployment. The agent must explicitly rerun it first. Current and
+      // unversioned legacy inputs are recalculated atomically below.
       if (
-        score == null ||
-        !recommendation ||
-        !riskLevel ||
-        netCashFlowMonthly == null ||
-        capRatePct == null ||
-        cocReturnPct == null
+        shouldFreezeSavedMethodology(
+          row.methodology_version,
+          recomputed.analysisResult.methodologyVersion,
+        )
       ) {
-        continue; // incomplete stored output — skip, never mix in current math
+        continue;
       }
+      const {
+        score,
+        recommendation,
+        riskLevel,
+        netCashFlowMonthly,
+        capRatePct,
+        cocReturnPct,
+        dscr,
+      } = recomputed;
       const values = normalizeReleasedInvestmentFormSnapshot(row.form_snapshot);
       // Nested portal route — NO deal data in the URL (no public URL may carry
       // encoded analysis payloads). The nested page re-verifies the portal
       // token and the deal's ownership server-side, then uses this same exact
       // recorded result. Future-version rows remain intentionally unlinked:
       // this deployment may not know how to render their complete contract.
-      const sharePath: string | null =
-        values && !resolution.shouldFreeze ? `/portal/${portalToken}/d/${row.id}` : null;
+      const sharePath: string | null = values
+        ? `/portal/${portalToken}/d/${row.id}`
+        : null;
       // Evaluate against the buyer's own criteria (never the agent's other
       // clients' — computeDealOfferLine scopes by client internally).
       let meetsCriteria: boolean | null = null;
@@ -245,17 +230,17 @@ export async function loadClientPortal(input: {
             purchasePrice: values.purchasePrice,
             propertyType: values.propertyType,
             state: deriveStateFromAddress(values.address),
-            isCashPurchase:
-              currentVerdict?.isCashPurchase ??
-              (monthlyPayment != null && monthlyPayment <= 0),
+            isCashPurchase: recomputed.isCashPurchase,
           };
           const evaluated = evaluateBuyBoxes(clientBoxes, metrics).filter(
-            (entry) => entry.result.active
+            (entry) => entry.result.active,
           );
           if (evaluated.length > 0) {
             const fit = summarizeBuyBoxFit(evaluated);
             meetsCriteria = fit.anyPass;
-            gapLine = fit.anyPass ? null : evaluated[0]?.result.personalLine ?? null;
+            gapLine = fit.anyPass
+              ? null
+              : (evaluated[0]?.result.personalLine ?? null);
           }
         } catch {
           /* fit stays null — the card still renders its numbers */
@@ -274,15 +259,11 @@ export async function loadClientPortal(input: {
         capRatePct,
         cocReturnPct,
         sharePath,
-        methodologyLabel: resolution.shouldFreeze
-          ? `Frozen Standard v${resolution.storedMethodologyVersion}`
-          : isLegacySavedMethodologyVersion(resolution.storedMethodologyVersion)
-            ? resolution.didRecompute
-              ? `Legacy analysis · recomputed with current v${TRUECAP_UNDERWRITING_STANDARD_VERSION}`
-              : `Legacy analysis · stored snapshot (current v${TRUECAP_UNDERWRITING_STANDARD_VERSION} recompute unavailable)`
-            : resolution.usesRecordedSnapshot
-              ? `Recorded Standard v${resolution.storedMethodologyVersion}`
-              : `Standard v${resolution.storedMethodologyVersion}`,
+        methodologyLabel: isLegacySavedMethodologyVersion(
+          row.methodology_version,
+        )
+          ? `Legacy analysis · recomputed with current v${TRUECAP_UNDERWRITING_STANDARD_VERSION}`
+          : `Standard v${recomputed.analysisResult.methodologyVersion}`,
       });
     }
 

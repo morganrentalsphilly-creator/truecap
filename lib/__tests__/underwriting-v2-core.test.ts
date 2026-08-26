@@ -111,12 +111,15 @@ const V1_CONTROL: InvestmentFormValues = {
 };
 
 function parseV2(overrides: Partial<V2Values> = {}): V2Values {
-  return investmentFormSchema.parse({ ...FINANCED_V2, ...overrides }) as V2Values;
+  return investmentFormSchema.parse({
+    ...FINANCED_V2,
+    ...overrides,
+  }) as V2Values;
 }
 
 describe("TrueCap Underwriting Standard v2 compatibility boundary", () => {
   it("bumps the persisted editor schema while leaving missing and explicit v1 on identical math", () => {
-    expect(INVESTCALC_SCHEMA_VERSION).toBe(10);
+    expect(INVESTCALC_SCHEMA_VERSION).toBe(11);
 
     const absent = calculateAnalysis(V1_CONTROL);
     const explicit = calculateAnalysis({
@@ -151,13 +154,13 @@ describe("TrueCap Underwriting Standard v2 compatibility boundary", () => {
     expect(normalized?.unitCount).toBe(1);
     expect(normalized?.recurringOtherIncomeMonthly).toBe(125);
     expect(calculateAnalysis(normalized as V2Values).methodologyVersion).toBe(
-      TRUECAP_UNDERWRITING_STANDARD_V2_VERSION
+      TRUECAP_UNDERWRITING_STANDARD_V2_VERSION,
     );
   });
 
   it("defaults mortgage insurance by occupancy while preserving explicit lender inputs", () => {
     const investor = calculateAnalysis(
-      parseV2({ downPaymentPct: 15, pmiAnnualRatePct: undefined })
+      parseV2({ downPaymentPct: 15, pmiAnnualRatePct: undefined }),
     );
     const ownerOccupant = calculateAnalysis(
       parseV2({
@@ -165,10 +168,10 @@ describe("TrueCap Underwriting Standard v2 compatibility boundary", () => {
         unitCount: 2,
         downPaymentPct: 5,
         pmiAnnualRatePct: undefined,
-      })
+      }),
     );
     const explicitInvestor = calculateAnalysis(
-      parseV2({ downPaymentPct: 15, pmiAnnualRatePct: 1.1 })
+      parseV2({ downPaymentPct: 15, pmiAnnualRatePct: 1.1 }),
     );
 
     expect(investor.pmiMonthly).toBe(0);
@@ -177,13 +180,15 @@ describe("TrueCap Underwriting Standard v2 compatibility boundary", () => {
   });
 
   it("publishes a separate reviewed v2 formula registry without relabeling v1", () => {
-    expect(UNDERWRITING_FORMULAS_BY_VERSION["1.0"].otherIncome.formula).toContain(
-      "Not modeled"
+    expect(
+      UNDERWRITING_FORMULAS_BY_VERSION["1.0"].otherIncome.formula,
+    ).toContain("Not modeled");
+    expect(
+      UNDERWRITING_FORMULAS_BY_VERSION["2.0"].otherIncome.formula,
+    ).toContain("recurring other monthly income");
+    expect(UNDERWRITING_FORMULAS_BY_VERSION["2.0"].dscr.label).toBe(
+      "Model DSCR",
     );
-    expect(UNDERWRITING_FORMULAS_BY_VERSION["2.0"].otherIncome.formula).toContain(
-      "recurring other monthly income"
-    );
-    expect(UNDERWRITING_FORMULAS_BY_VERSION["2.0"].dscr.label).toBe("Model DSCR");
   });
 });
 
@@ -204,15 +209,27 @@ describe("v2 independently authored golden outputs", () => {
     expect(Math.abs(result.noiAnnual - 18_917)).toBeLessThanOrEqual(1);
     expect(result.loanAmount).toBeCloseTo(260_000, 10);
     expect(result.monthlyPayment).toBeCloseTo(1_622.0617369557644, 10);
-    expect(Math.abs(result.annualDebtService - 19_464.740843469175)).toBeLessThanOrEqual(1);
-    expect(Math.abs(result.annualCashFlow - -2_332.740843469175)).toBeLessThanOrEqual(1);
-    expect(Math.abs(result.totalCashRequired - 85_237.5)).toBeLessThanOrEqual(1);
+    expect(
+      Math.abs(result.annualDebtService - 19_464.740843469175),
+    ).toBeLessThanOrEqual(1);
+    expect(
+      Math.abs(result.annualCashFlow - -2_332.740843469175),
+    ).toBeLessThanOrEqual(1);
+    expect(Math.abs(result.totalCashRequired - 85_237.5)).toBeLessThanOrEqual(
+      1,
+    );
 
     // Percentage metrics use percentage points; 0.01pp is one basis point.
-    expect(Math.abs(result.capRate - 5.820615384615384)).toBeLessThanOrEqual(0.01);
-    expect(Math.abs(result.cocReturn - -2.7367541791689987)).toBeLessThanOrEqual(0.01);
+    expect(Math.abs(result.capRate - 5.820615384615384)).toBeLessThanOrEqual(
+      0.01,
+    );
+    expect(
+      Math.abs(result.cocReturn - -2.7367541791689987),
+    ).toBeLessThanOrEqual(0.01);
     // A ratio basis point is 0.0001.
-    expect(Math.abs(result.dscr - 0.9718598440187837)).toBeLessThanOrEqual(0.0001);
+    expect(Math.abs(result.dscr - 0.9718598440187837)).toBeLessThanOrEqual(
+      0.0001,
+    );
   });
 
   it("matches a cash, stabilized, fixed-closing-cost worksheet", () => {
@@ -238,7 +255,7 @@ describe("v2 independently authored golden outputs", () => {
         hoaMonthly: 100,
         utilitiesMonthly: 0,
         maintenancePct: 5,
-      })
+      }),
     );
 
     // GSI 40,800; vacancy 2,040; EGI 38,760; opex 12,954; NOI 25,806;
@@ -259,8 +276,12 @@ describe("v2 independently authored golden outputs", () => {
 
 describe("v2 scenario and income-statement boundaries", () => {
   it("keeps current and stabilized rents separate and ignores the legacy rent field", () => {
-    const current = calculateAnalysis(parseV2({ operatingScenario: "current" }));
-    const stabilized = calculateAnalysis(parseV2({ operatingScenario: "stabilized" }));
+    const current = calculateAnalysis(
+      parseV2({ operatingScenario: "current" }),
+    );
+    const stabilized = calculateAnalysis(
+      parseV2({ operatingScenario: "stabilized" }),
+    );
 
     expect(current.monthlyRentalIncome).toBe(2_850);
     expect(stabilized.monthlyRentalIncome).toBe(3_200);
@@ -284,11 +305,8 @@ describe("v2 scenario and income-statement boundaries", () => {
         propertyType: "multi-family",
         unitCount: 2,
         currentMonthlyRent: 5_000,
-        units: [
-          { monthlyRent: 1_000 },
-          { monthlyRent: 2_000 },
-        ],
-      })
+        units: [{ monthlyRent: 1_000 }, { monthlyRent: 2_000 }],
+      }),
     );
 
     expect(result.monthlyRentalIncome).toBe(5_000);
@@ -299,14 +317,18 @@ describe("v2 scenario and income-statement boundaries", () => {
   it("flows other income through GSI/EGI and recurring other expense through NOI", () => {
     const base = calculateAnalysis(parseV2());
     const moreIncome = calculateAnalysis(
-      parseV2({ recurringOtherIncomeMonthly: 225 })
+      parseV2({ recurringOtherIncomeMonthly: 225 }),
     );
     const moreExpense = calculateAnalysis(
-      parseV2({ recurringOtherExpenseMonthly: 185 })
+      parseV2({ recurringOtherExpenseMonthly: 185 }),
     );
 
-    expect(moreIncome.grossScheduledIncomeAnnual - base.grossScheduledIncomeAnnual).toBe(1_200);
-    expect(moreIncome.effectiveGrossIncomeAnnual - base.effectiveGrossIncomeAnnual).toBe(1_140);
+    expect(
+      moreIncome.grossScheduledIncomeAnnual - base.grossScheduledIncomeAnnual,
+    ).toBe(1_200);
+    expect(
+      moreIncome.effectiveGrossIncomeAnnual - base.effectiveGrossIncomeAnnual,
+    ).toBe(1_140);
     // $1,140 EGI gain less 6% maintenance and 8% management on $1,200 GSI.
     expect(moreIncome.noiAnnual - base.noiAnnual).toBe(972);
     expect(base.noiAnnual - moreExpense.noiAnnual).toBe(1_200);
@@ -319,7 +341,8 @@ describe("v2 scenario and income-statement boundaries", () => {
     expect(withReserve.noiAnnual).toBe(withoutReserve.noiAnnual);
     expect(withReserve.capRate).toBe(withoutReserve.capRate);
     expect(withReserve.annualCashFlow).toBe(
-      withoutReserve.annualCashFlow - withReserve.grossScheduledIncomeAnnual * 0.1
+      withoutReserve.annualCashFlow -
+        withReserve.grossScheduledIncomeAnnual * 0.1,
     );
   });
 
@@ -330,11 +353,11 @@ describe("v2 scenario and income-statement boundaries", () => {
 
     expect(zeroManagement.management).toBe(0);
     expect(zeroManagement.noiAnnual - base.noiAnnual).toBe(
-      base.grossScheduledIncomeAnnual * 0.08
+      base.grossScheduledIncomeAnnual * 0.08,
     );
     expect(zeroVacancy.vacancyAllowanceAnnual).toBe(0);
     expect(zeroVacancy.noiAnnual - base.noiAnnual).toBe(
-      base.grossScheduledIncomeAnnual * 0.05
+      base.grossScheduledIncomeAnnual * 0.05,
     );
   });
 });
@@ -342,9 +365,13 @@ describe("v2 scenario and income-statement boundaries", () => {
 describe("v2 acquisition and financing semantics", () => {
   it("reduces initial cash by credits without changing NOI or cash flow", () => {
     const noCredit = calculateAnalysis(parseV2({ acquisitionCredits: 0 }));
-    const withCredit = calculateAnalysis(parseV2({ acquisitionCredits: 10_000 }));
+    const withCredit = calculateAnalysis(
+      parseV2({ acquisitionCredits: 10_000 }),
+    );
 
-    expect(noCredit.totalCashRequired - withCredit.totalCashRequired).toBe(10_000);
+    expect(noCredit.totalCashRequired - withCredit.totalCashRequired).toBe(
+      10_000,
+    );
     expect(withCredit.noiAnnual).toBe(noCredit.noiAnnual);
     expect(withCredit.annualCashFlow).toBe(noCredit.annualCashFlow);
   });
@@ -356,66 +383,82 @@ describe("v2 acquisition and financing semantics", () => {
       { financingMode: "fixed-loan" as const, fixedLoanAmount: 240_000 },
     ]) {
       const withoutRepairs = calculateAnalysis(
-        parseV2({ ...financing, rehabBudget: 0 })
+        parseV2({ ...financing, rehabBudget: 0 }),
       );
       const withRepairs = calculateAnalysis(
-        parseV2({ ...financing, rehabBudget: 25_000 })
+        parseV2({ ...financing, rehabBudget: 25_000 }),
       );
 
       expect(withRepairs.loanAmount).toBe(withoutRepairs.loanAmount);
       expect(withRepairs.monthlyPayment).toBe(withoutRepairs.monthlyPayment);
       expect(withRepairs.noiAnnual).toBe(withoutRepairs.noiAnnual);
-      expect(withRepairs.totalCashRequired - withoutRepairs.totalCashRequired).toBe(25_000);
+      expect(
+        withRepairs.totalCashRequired - withoutRepairs.totalCashRequired,
+      ).toBe(25_000);
     }
   });
 
   it("preserves cash, percentage-down, fixed-down, and fixed-loan price semantics", () => {
-    const cash = calculateAnalysis(parseV2({ financingMode: "cash", loanFees: 0 }));
-    const percent = calculateAnalysis(parseV2({ financingMode: "percent-down" }));
+    const cash = calculateAnalysis(
+      parseV2({ financingMode: "cash", loanFees: 0 }),
+    );
+    const percent = calculateAnalysis(
+      parseV2({ financingMode: "percent-down" }),
+    );
     const fixedDown = calculateAnalysis(
-      parseV2({ financingMode: "fixed-down", fixedDownPaymentAmount: 75_000 })
+      parseV2({ financingMode: "fixed-down", fixedDownPaymentAmount: 75_000 }),
     );
     const fixedLoan = calculateAnalysis(
-      parseV2({ financingMode: "fixed-loan", fixedLoanAmount: 240_000 })
+      parseV2({ financingMode: "fixed-loan", fixedLoanAmount: 240_000 }),
     );
 
     expect([cash.downPayment, cash.loanAmount]).toEqual([325_000, 0]);
-    expect([percent.downPayment, percent.loanAmount]).toEqual([65_000, 260_000]);
-    expect([fixedDown.downPayment, fixedDown.loanAmount]).toEqual([75_000, 250_000]);
-    expect([fixedLoan.downPayment, fixedLoan.loanAmount]).toEqual([85_000, 240_000]);
+    expect([percent.downPayment, percent.loanAmount]).toEqual([
+      65_000, 260_000,
+    ]);
+    expect([fixedDown.downPayment, fixedDown.loanAmount]).toEqual([
+      75_000, 250_000,
+    ]);
+    expect([fixedLoan.downPayment, fixedLoan.loanAmount]).toEqual([
+      85_000, 240_000,
+    ]);
 
     const higherFixedDown = calculateAnalysis(
       parseV2({
         purchasePrice: 350_000,
         financingMode: "fixed-down",
         fixedDownPaymentAmount: 75_000,
-      })
+      }),
     );
     const higherFixedLoan = calculateAnalysis(
       parseV2({
         purchasePrice: 350_000,
         financingMode: "fixed-loan",
         fixedLoanAmount: 240_000,
-      })
+      }),
     );
-    expect([higherFixedDown.downPayment, higherFixedDown.loanAmount]).toEqual([75_000, 275_000]);
-    expect([higherFixedLoan.downPayment, higherFixedLoan.loanAmount]).toEqual([110_000, 240_000]);
+    expect([higherFixedDown.downPayment, higherFixedDown.loanAmount]).toEqual([
+      75_000, 275_000,
+    ]);
+    expect([higherFixedLoan.downPayment, higherFixedLoan.loanAmount]).toEqual([
+      110_000, 240_000,
+    ]);
   });
 
   it("keeps fixed closing costs fixed and percentage closing costs scaling with price", () => {
     const fixed = calculateAnalysis(
-      parseV2({ closingCostsInputMode: "fixed", closingCostsFixed: 8_250 })
+      parseV2({ closingCostsInputMode: "fixed", closingCostsFixed: 8_250 }),
     );
     const higherFixed = calculateAnalysis(
       parseV2({
         purchasePrice: 400_000,
         closingCostsInputMode: "fixed",
         closingCostsFixed: 8_250,
-      })
+      }),
     );
     const percent = calculateAnalysis(parseV2({ closingCostsPct: 2.75 }));
     const higherPercent = calculateAnalysis(
-      parseV2({ purchasePrice: 400_000, closingCostsPct: 2.75 })
+      parseV2({ purchasePrice: 400_000, closingCostsPct: 2.75 }),
     );
 
     expect(fixed.closingCosts).toBe(8_250);
@@ -429,15 +472,23 @@ describe("v2 unknown-value and validation boundary", () => {
   it.each(["hoaMonthly", "utilitiesMonthly", "rehabBudget"] as const)(
     "rejects blank %s while accepting an explicit zero",
     (field) => {
-      const blank = investmentFormSchema.safeParse({ ...FINANCED_V2, [field]: "" });
-      const zero = investmentFormSchema.safeParse({ ...FINANCED_V2, [field]: 0 });
+      const blank = investmentFormSchema.safeParse({
+        ...FINANCED_V2,
+        [field]: "",
+      });
+      const zero = investmentFormSchema.safeParse({
+        ...FINANCED_V2,
+        [field]: 0,
+      });
 
       expect(blank.success).toBe(false);
       if (!blank.success) {
-        expect(blank.error.issues.some((issue) => issue.path[0] === field)).toBe(true);
+        expect(
+          blank.error.issues.some((issue) => issue.path[0] === field),
+        ).toBe(true);
       }
       expect(zero.success).toBe(true);
-    }
+    },
   );
 
   it("provides explicit zero starting assumptions only for a new v2 editor", () => {
@@ -463,13 +514,21 @@ describe("v2 unknown-value and validation boundary", () => {
     "recurringOtherExpenseMonthly",
     "loanFees",
     "initialReserve",
-  ] as const)("rejects a blank %s when new-form starting defaults were not applied", (field) => {
-    const parsed = investmentFormSchema.safeParse({ ...FINANCED_V2, [field]: "" });
-    expect(parsed.success).toBe(false);
-    if (!parsed.success) {
-      expect(parsed.error.issues.some((issue) => issue.path[0] === field)).toBe(true);
-    }
-  });
+  ] as const)(
+    "rejects a blank %s when new-form starting defaults were not applied",
+    (field) => {
+      const parsed = investmentFormSchema.safeParse({
+        ...FINANCED_V2,
+        [field]: "",
+      });
+      expect(parsed.success).toBe(false);
+      if (!parsed.success) {
+        expect(
+          parsed.error.issues.some((issue) => issue.path[0] === field),
+        ).toBe(true);
+      }
+    },
+  );
 
   it("rejects a blank monthly insurance bill and annual tax bill on their own paths", () => {
     const insurance = investmentFormSchema.safeParse({
@@ -486,10 +545,16 @@ describe("v2 unknown-value and validation boundary", () => {
     expect(insurance.success).toBe(false);
     expect(tax.success).toBe(false);
     if (!insurance.success) {
-      expect(insurance.error.issues.some((issue) => issue.path[0] === "insuranceMonthly")).toBe(true);
+      expect(
+        insurance.error.issues.some(
+          (issue) => issue.path[0] === "insuranceMonthly",
+        ),
+      ).toBe(true);
     }
     if (!tax.success) {
-      expect(tax.error.issues.some((issue) => issue.path[0] === "propertyTaxAnnual")).toBe(true);
+      expect(
+        tax.error.issues.some((issue) => issue.path[0] === "propertyTaxAnnual"),
+      ).toBe(true);
     }
   });
 
@@ -505,33 +570,56 @@ describe("v2 unknown-value and validation boundary", () => {
     ];
 
     for (const [field, value] of cases) {
-      const parsed = investmentFormSchema.safeParse({ ...FINANCED_V2, [field]: value });
+      const parsed = investmentFormSchema.safeParse({
+        ...FINANCED_V2,
+        [field]: value,
+      });
       expect(parsed.success, String(field)).toBe(false);
       if (!parsed.success) {
-        expect(parsed.error.issues.some((issue) => issue.path[0] === field), String(field)).toBe(true);
+        expect(
+          parsed.error.issues.some((issue) => issue.path[0] === field),
+          String(field),
+        ).toBe(true);
       }
     }
   });
 
   it("requires the amount selected by each fixed financing or closing-cost mode", () => {
     const cases: Array<[Partial<V2Values>, keyof V2Values]> = [
-      [{ financingMode: "fixed-down", fixedDownPaymentAmount: undefined }, "fixedDownPaymentAmount"],
-      [{ financingMode: "fixed-loan", fixedLoanAmount: undefined }, "fixedLoanAmount"],
-      [{ closingCostsInputMode: "fixed", closingCostsFixed: undefined }, "closingCostsFixed"],
+      [
+        { financingMode: "fixed-down", fixedDownPaymentAmount: undefined },
+        "fixedDownPaymentAmount",
+      ],
+      [
+        { financingMode: "fixed-loan", fixedLoanAmount: undefined },
+        "fixedLoanAmount",
+      ],
+      [
+        { closingCostsInputMode: "fixed", closingCostsFixed: undefined },
+        "closingCostsFixed",
+      ],
     ];
 
     for (const [override, field] of cases) {
-      const parsed = investmentFormSchema.safeParse({ ...FINANCED_V2, ...override });
+      const parsed = investmentFormSchema.safeParse({
+        ...FINANCED_V2,
+        ...override,
+      });
       expect(parsed.success, String(field)).toBe(false);
       if (!parsed.success) {
-        expect(parsed.error.issues.some((issue) => issue.path[0] === field), String(field)).toBe(true);
+        expect(
+          parsed.error.issues.some((issue) => issue.path[0] === field),
+          String(field),
+        ).toBe(true);
       }
     }
   });
 
   it("fails closed when an unparsed caller bypasses the schema with a missing value", () => {
     const invalid = { ...FINANCED_V2, utilitiesMonthly: undefined } as V2Values;
-    expect(() => calculateAnalysis(invalid)).toThrow(/explicit utilitiesMonthly/);
+    expect(() => calculateAnalysis(invalid)).toThrow(
+      /explicit utilitiesMonthly/,
+    );
   });
 
   it("rejects credits that exceed every modeled acquisition cash use", () => {
@@ -541,7 +629,11 @@ describe("v2 unknown-value and validation boundary", () => {
     });
     expect(parsed.success).toBe(false);
     if (!parsed.success) {
-      expect(parsed.error.issues.some((issue) => issue.path[0] === "acquisitionCredits")).toBe(true);
+      expect(
+        parsed.error.issues.some(
+          (issue) => issue.path[0] === "acquisitionCredits",
+        ),
+      ).toBe(true);
     }
   });
 
@@ -553,7 +645,9 @@ describe("v2 unknown-value and validation boundary", () => {
     });
     expect(parsed.success).toBe(false);
     if (!parsed.success) {
-      expect(parsed.error.issues.some((issue) => issue.path[0] === "loanFees")).toBe(true);
+      expect(
+        parsed.error.issues.some((issue) => issue.path[0] === "loanFees"),
+      ).toBe(true);
     }
   });
 });
@@ -568,7 +662,7 @@ describe("v2 monotonic invariants", () => {
   it("increasing a recurring expense cannot improve NOI, cash flow, or target metrics", () => {
     const base = calculateAnalysis(parseV2());
     const higher = calculateAnalysis(
-      parseV2({ recurringOtherExpenseMonthly: 335 })
+      parseV2({ recurringOtherExpenseMonthly: 335 }),
     );
     expect(higher.noiAnnual).toBeLessThan(base.noiAnnual);
     expect(higher.netCashFlow).toBeLessThan(base.netCashFlow);

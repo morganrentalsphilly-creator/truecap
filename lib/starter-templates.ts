@@ -17,6 +17,7 @@
  * order. No DB changes required.
  */
 import type { AnalysisTemplateInput } from "@/lib/analysis-template-schema";
+import type { TemplateAssumptionSource } from "@/lib/template-form-patch";
 
 export type StarterTemplate = {
   /** URL-safe slug — used for analytics and as a stable identifier
@@ -42,7 +43,7 @@ export type StarterTemplate = {
   /** 1-3 word strategy tag. */
   tag: string;
   /** The full template payload — used as-is when cloning. */
-  template: AnalysisTemplateInput;
+  template: AnalysisTemplateInput & TemplateAssumptionSource;
 };
 
 export const STARTER_TEMPLATES: StarterTemplate[] = [
@@ -484,6 +485,8 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
 ];
 
 /** Lookup helper — fetch a single starter by its stable key. */
-export function getStarterTemplate(key: StarterTemplate["key"]): StarterTemplate | undefined {
+export function getStarterTemplate(
+  key: StarterTemplate["key"],
+): StarterTemplate | undefined {
   return STARTER_TEMPLATES.find((s) => s.key === key);
 }

@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest";
 
 const root = process.cwd();
 const read = (path: string) => readFileSync(join(root, path), "utf8");
+const normalizeSource = (source: string) =>
+  source.replace(/\s+/g, "").replace(/,([)}\]])/g, "$1");
 
 function sourceSection(source: string, startMarker: string, endMarker: string): string {
   const start = source.indexOf(startMarker);
@@ -20,10 +22,12 @@ describe("Max Offer entitlement and Wholesale target safety", () => {
   it("fails closed before building a deal-specific MAO context for Free", () => {
     const context = sourceSection(
       dashboard,
-      "const maoQaContext = exactOfferCeiling",
+      "const maoQaContext =",
       "const decisionViewedKey ="
     );
-    expect(context).toContain("exactOfferCeiling && activeMaoTarget");
+    expect(normalizeSource(context)).toContain(
+      normalizeSource("exactOfferCeiling && activeMaoTarget"),
+    );
     expect(context).not.toContain("calculateMaxAllowableOffer");
     expect(dashboard).toContain(
       'currentOfferCeilingPayload?.access === "exact"'
@@ -36,13 +40,18 @@ describe("Max Offer entitlement and Wholesale target safety", () => {
       'if (strategy.key === "wholesale-mao") {',
       "// ---- BRRRR / Fix & Flip"
     );
-    const gate = wholesaleBranch.indexOf("if (!canUseMaxOffer ||");
-    const paidOutcome = wholesaleBranch.indexOf("<WholesaleOutcome");
+    const normalizedWholesaleBranch = normalizeSource(wholesaleBranch);
+    const gate = normalizedWholesaleBranch.indexOf(
+      normalizeSource("if (!canUseMaxOffer ||"),
+    );
+    const paidOutcome = normalizedWholesaleBranch.indexOf("<WholesaleOutcome");
 
     expect(gate).toBeGreaterThanOrEqual(0);
     expect(paidOutcome).toBeGreaterThan(gate);
     expect(wholesaleBranch).not.toContain("calculateMaxAllowableOffer");
-    expect(wholesaleBranch).toContain("The deal-specific ceiling stays locked");
+    expect(normalizedWholesaleBranch).toContain(
+      normalizeSource("The deal-specific ceiling stays locked"),
+    );
   });
 
   it("uses and edits the dashboard's active target instead of a second default", () => {

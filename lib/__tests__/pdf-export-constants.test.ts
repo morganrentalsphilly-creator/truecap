@@ -14,6 +14,7 @@ import {
   encodePdfCacheVersion,
   PDF_CACHE_VERSION,
   PDF_CACHE_VERSION_UNCACHEABLE,
+  PDF_TRUSTED_PROVENANCE_MIN_CACHE_VERSION,
   PDF_SNAPSHOT_VERSION,
 } from "../pdf-export-constants";
 import { EXIT_SCENARIOS_SNAPSHOT_VERSION } from "../exit-scenarios";
@@ -30,11 +31,14 @@ const CURRENT_COMPONENTS: readonly number[] = [
 ];
 
 describe("PDF_CACHE_VERSION", () => {
-  it("invalidates pre-content-bound My Deals reports with snapshot version 9", () => {
-    expect(PDF_SNAPSHOT_VERSION).toBe(9);
+  it("invalidates cached reports that predate byte-level artifact attestation", () => {
+    expect(PDF_SNAPSHOT_VERSION).toBe(11);
     expect(
-      encodePdfCacheVersion([8, ...CURRENT_COMPONENTS.slice(1)])
+      encodePdfCacheVersion([10, ...CURRENT_COMPONENTS.slice(1)]),
     ).not.toBe(PDF_CACHE_VERSION);
+    expect(PDF_CACHE_VERSION).toBeGreaterThanOrEqual(
+      PDF_TRUSTED_PROVENANCE_MIN_CACHE_VERSION,
+    );
   });
 
   it("fits the existing numeric column (positive int, within Postgres integer)", () => {
@@ -43,7 +47,9 @@ describe("PDF_CACHE_VERSION", () => {
     expect(PDF_CACHE_VERSION).toBeLessThanOrEqual(2_147_483_647);
     // Worst case (all five components at the radix ceiling) still fits, so a
     // future bump can never silently overflow the column.
-    expect(encodePdfCacheVersion([49, 49, 49, 49, 49])).toBeLessThanOrEqual(2_147_483_647);
+    expect(encodePdfCacheVersion([49, 49, 49, 49, 49])).toBeLessThanOrEqual(
+      2_147_483_647,
+    );
   });
 
   it("never matches a legacy plain template version (0-9) — old cached PDFs regenerate", () => {
@@ -53,7 +59,9 @@ describe("PDF_CACHE_VERSION", () => {
   });
 
   it("is the deterministic encoding of the current template + engine versions", () => {
-    expect(PDF_CACHE_VERSION).toBe(encodePdfCacheVersion([...CURRENT_COMPONENTS]));
+    expect(PDF_CACHE_VERSION).toBe(
+      encodePdfCacheVersion([...CURRENT_COMPONENTS]),
+    );
   });
 
   it("changes when ANY component version bumps — engine fixes auto-invalidate cached PDFs", () => {
@@ -75,8 +83,14 @@ describe("PDF_CACHE_VERSION", () => {
   });
 
   it("rejects out-of-range components loudly instead of colliding", () => {
-    expect(() => encodePdfCacheVersion([50, 0, 0, 0, 0])).toThrow(/out of range/);
-    expect(() => encodePdfCacheVersion([-1, 0, 0, 0, 0])).toThrow(/out of range/);
-    expect(() => encodePdfCacheVersion([1.5, 0, 0, 0, 0])).toThrow(/out of range/);
+    expect(() => encodePdfCacheVersion([50, 0, 0, 0, 0])).toThrow(
+      /out of range/,
+    );
+    expect(() => encodePdfCacheVersion([-1, 0, 0, 0, 0])).toThrow(
+      /out of range/,
+    );
+    expect(() => encodePdfCacheVersion([1.5, 0, 0, 0, 0])).toThrow(
+      /out of range/,
+    );
   });
 });

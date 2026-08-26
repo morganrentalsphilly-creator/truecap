@@ -36,7 +36,8 @@ export const INPUT_CONFIDENCE_FIELD_KEYS = [
   "rehabBudget",
 ] as const;
 
-export type InputConfidenceFieldKey = (typeof INPUT_CONFIDENCE_FIELD_KEYS)[number];
+export type InputConfidenceFieldKey =
+  (typeof INPUT_CONFIDENCE_FIELD_KEYS)[number];
 
 export type InputSourceClass =
   | "verified"
@@ -48,13 +49,19 @@ export type InputSourceClass =
   | "missing"
   | "not-applicable";
 
+export type StartingAssumptionOrigin = {
+  kind: "account-default" | "template" | "strategy-default";
+  label: string;
+};
+
 export type InputConfidenceStage = "screened" | "verified" | "offer-ready";
 export type SensitivityRisk = "low" | "moderate" | "high";
 
 export type InputVerificationEvidence = Partial<
   Record<
     InputConfidenceFieldKey,
-    boolean | { verifiedAt?: string; evidenceType?: string; fingerprint?: string }
+    | boolean
+    | { verifiedAt?: string; evidenceType?: string; fingerprint?: string }
   >
 >;
 
@@ -99,11 +106,20 @@ export type InputConfidenceSourceContext = {
   /** Field-scoped value fingerprints bind both benchmark attribution and
    * edit provenance to the exact assumption that earned it. */
   fieldFingerprints: Partial<Record<InputConfidenceFieldKey, string>>;
+  startingAssumptionOrigins: Partial<
+    Record<InputConfidenceFieldKey, StartingAssumptionOrigin>
+  >;
+  /** Value-bound AVM/rent-multiple flag; never call this an asking price. */
+  purchasePriceEstimated?: true;
 };
 
 export type RestoredInputConfidenceContext = {
   provenance: EnrichmentProvenanceInput;
   touchedInputFields: string[];
+  startingAssumptionOrigins: Partial<
+    Record<InputConfidenceFieldKey, StartingAssumptionOrigin>
+  >;
+  purchasePriceEstimated: boolean;
 };
 
 export type MergeInputConfidenceSourceContextArgs = {
@@ -111,6 +127,10 @@ export type MergeInputConfidenceSourceContextArgs = {
   values: InvestmentFormValues;
   liveProvenance?: EnrichmentProvenanceInput | null;
   liveTouchedFields?: Record<string, unknown> | ReadonlySet<string> | null;
+  liveStartingAssumptionOrigins?: Partial<
+    Record<InputConfidenceFieldKey, StartingAssumptionOrigin>
+  > | null;
+  livePurchasePriceEstimated?: boolean | null;
 };
 
 export type InputConfidenceContext = {
@@ -119,7 +139,14 @@ export type InputConfidenceContext = {
   /** RHF dirty-fields record or a set of field names. A typed value is still
    * an estimate until the user explicitly verifies it. */
   touchedFields?: Record<string, unknown> | ReadonlySet<string> | null;
-  verified?: InputVerificationEvidence | readonly InputConfidenceFieldKey[] | null;
+  startingAssumptionOrigins?: Partial<
+    Record<InputConfidenceFieldKey, StartingAssumptionOrigin>
+  > | null;
+  purchasePriceEstimated?: boolean;
+  verified?:
+    | InputVerificationEvidence
+    | readonly InputConfidenceFieldKey[]
+    | null;
   now?: Date;
 };
 
@@ -138,19 +165,31 @@ const FIELD_META: Record<
   InputConfidenceFieldKey,
   Pick<InputConfidenceField, "label" | "weight" | "editTarget">
 > = {
-  purchasePrice: { label: "Purchase price", weight: 12, editTarget: "property" },
+  purchasePrice: {
+    label: "Purchase price",
+    weight: 12,
+    editTarget: "property",
+  },
   yearBuilt: { label: "Year built", weight: 4, editTarget: "property" },
   rent: { label: "Rent", weight: 16, editTarget: "property" },
   propertyTax: { label: "Property taxes", weight: 8, editTarget: "expenses" },
   insurance: { label: "Insurance", weight: 8, editTarget: "expenses" },
   interestRate: { label: "Mortgage rate", weight: 10, editTarget: "financing" },
-  downPayment: { label: "Down payment / LTV", weight: 6, editTarget: "financing" },
+  downPayment: {
+    label: "Down payment / LTV",
+    weight: 6,
+    editTarget: "financing",
+  },
   closingCosts: { label: "Closing costs", weight: 4, editTarget: "financing" },
   maintenance: { label: "Maintenance", weight: 6, editTarget: "expenses" },
   capex: { label: "CapEx reserve", weight: 6, editTarget: "expenses" },
   vacancy: { label: "Vacancy", weight: 5, editTarget: "expenses" },
   management: { label: "Management", weight: 5, editTarget: "expenses" },
-  utilities: { label: "Owner-paid utilities", weight: 3, editTarget: "expenses" },
+  utilities: {
+    label: "Owner-paid utilities",
+    weight: 3,
+    editTarget: "expenses",
+  },
   hoa: { label: "HOA", weight: 3, editTarget: "expenses" },
   rehabBudget: { label: "Rehab budget", weight: 4, editTarget: "expenses" },
 };
@@ -185,11 +224,46 @@ const INPUT_CONFIDENCE_TOUCHED_FIELD_MAP: Readonly<
   rehabBudget: "rehabBudget",
 });
 
+export function inputConfidenceKeyForFormField(
+  field: string,
+): InputConfidenceFieldKey | null {
+  return INPUT_CONFIDENCE_TOUCHED_FIELD_MAP[field] ?? null;
+}
+
+export function normalizeStartingAssumptionOrigins(
+  raw: unknown,
+): Partial<Record<InputConfidenceFieldKey, StartingAssumptionOrigin>> {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  const source = raw as Record<string, unknown>;
+  const output: Partial<
+    Record<InputConfidenceFieldKey, StartingAssumptionOrigin>
+  > = {};
+  for (const key of INPUT_CONFIDENCE_FIELD_KEYS) {
+    const item = source[key];
+    if (!item || typeof item !== "object" || Array.isArray(item)) continue;
+    const record = item as Record<string, unknown>;
+    const kind = record.kind;
+    if (
+      kind !== "account-default" &&
+      kind !== "template" &&
+      kind !== "strategy-default"
+    )
+      continue;
+    if (typeof record.label !== "string" || record.label.trim().length === 0)
+      continue;
+    output[key] = { kind, label: record.label.trim().slice(0, 120) };
+  }
+  return output;
+}
+
 const PROVENANCE_CONFIDENCE_FIELD_MAP = Object.freeze({
   monthlyRent: "rent",
   interestRate: "interestRate",
   propertyTaxPct: "propertyTax",
-} as const satisfies Record<keyof EnrichmentProvenanceInput, InputConfidenceFieldKey>);
+} as const satisfies Record<
+  keyof EnrichmentProvenanceInput,
+  InputConfidenceFieldKey
+>);
 
 function num(value: unknown): number | null {
   const parsed = typeof value === "number" ? value : Number(value);
@@ -206,7 +280,7 @@ function isTouched(
 }
 
 function touchedInputFieldNames(
-  touched: InputConfidenceContext["touchedFields"]
+  touched: InputConfidenceContext["touchedFields"],
 ): string[] {
   if (!touched) return [];
   const candidates =
@@ -219,13 +293,16 @@ function touchedInputFieldNames(
     .filter(
       (key): key is string =>
         typeof key === "string" &&
-        Object.prototype.hasOwnProperty.call(INPUT_CONFIDENCE_TOUCHED_FIELD_MAP, key)
+        Object.prototype.hasOwnProperty.call(
+          INPUT_CONFIDENCE_TOUCHED_FIELD_MAP,
+          key,
+        ),
     )
     .slice(0, 64);
 }
 
 function normalizedProvenance(
-  provenance: EnrichmentProvenanceInput | null | undefined
+  provenance: EnrichmentProvenanceInput | null | undefined,
 ): EnrichmentProvenanceInput {
   if (!provenance) return {};
   const output: EnrichmentProvenanceInput = {};
@@ -263,17 +340,25 @@ function normalizedProvenance(
 function buildInputConfidenceSourceContext(
   values: InvestmentFormValues,
   provenance: EnrichmentProvenanceInput | null | undefined,
-  touchedFields: InputConfidenceContext["touchedFields"]
+  touchedFields: InputConfidenceContext["touchedFields"],
+  startingAssumptionOrigins: InputConfidenceContext["startingAssumptionOrigins"],
+  purchasePriceEstimated: boolean,
 ): InputConfidenceSourceContext {
   return {
     methodVersion: INPUT_CONFIDENCE_METHOD_VERSION,
     provenance: normalizedProvenance(provenance),
     touchedInputFields: touchedInputFieldNames(touchedFields),
+    startingAssumptionOrigins: normalizeStartingAssumptionOrigins(
+      startingAssumptionOrigins,
+    ),
+    ...(purchasePriceEstimated
+      ? { purchasePriceEstimated: true as const }
+      : {}),
     fieldFingerprints: Object.fromEntries(
       INPUT_CONFIDENCE_FIELD_KEYS.map((key) => [
         key,
         inputVerificationFingerprint(values, key),
-      ])
+      ]),
     ) as Record<InputConfidenceFieldKey, string>,
   };
 }
@@ -281,7 +366,7 @@ function buildInputConfidenceSourceContext(
 function verifiedSet(
   input: InputConfidenceContext["verified"],
   values: InvestmentFormValues,
-  now: Date
+  now: Date,
 ): Set<InputConfidenceFieldKey> {
   if (!input) return new Set();
   if (Array.isArray(input)) return new Set(input);
@@ -296,14 +381,13 @@ function verifiedSet(
       typeof evidence !== "object" ||
       typeof evidence.fingerprint !== "string" ||
       evidence.fingerprint !== inputVerificationFingerprint(values, key)
-    ) continue;
+    )
+      continue;
     // Lender quotes are unusually time-sensitive. A profile verified more
     // than 30 days ago stays visible as provenance, but it no longer earns
     // Verified input points until the user reconfirms it. Other evidence
     // types retain their existing value-specific expiration behavior.
-    if (
-      evidence.evidenceType === "recent-verified-financing-profile"
-    ) {
+    if (evidence.evidenceType === "recent-verified-financing-profile") {
       const verifiedAt = Date.parse(evidence.verifiedAt ?? "");
       const ageMs = now.getTime() - verifiedAt;
       if (
@@ -321,12 +405,16 @@ function verifiedSet(
 
 type FieldAssessment = Pick<
   InputConfidenceField,
-  "sourceClass" | "sourceLabel" | "reason" | "verifyAction" | "offerReadyRequired"
+  | "sourceClass"
+  | "sourceLabel"
+  | "reason"
+  | "verifyAction"
+  | "offerReadyRequired"
 >;
 
 function field(
   key: InputConfidenceFieldKey,
-  assessment: FieldAssessment
+  assessment: FieldAssessment,
 ): InputConfidenceField {
   const meta = FIELD_META[key];
   const maxPoints = meta.weight;
@@ -345,7 +433,7 @@ function field(
 function explicitVerification(
   key: InputConfidenceFieldKey,
   isVerified: boolean,
-  fallback: FieldAssessment
+  fallback: FieldAssessment,
 ): FieldAssessment {
   return isVerified
     ? {
@@ -359,16 +447,27 @@ function explicitVerification(
 }
 
 function hasRent(values: InvestmentFormValues): boolean {
-  if ((num(values.avgDailyRate) ?? 0) > 0 && (num(values.occupancyPct) ?? 0) > 0) return true;
-  if (values.propertyType === "single-family") return (num(values.monthlyRent) ?? 0) > 0;
+  if (
+    (num(values.avgDailyRate) ?? 0) > 0 &&
+    (num(values.occupancyPct) ?? 0) > 0
+  )
+    return true;
+  if (values.propertyType === "single-family")
+    return (num(values.monthlyRent) ?? 0) > 0;
   return (values.units ?? []).some(
-    (unit) => !unit.isOwnerOccupied && (num(unit.monthlyRent) ?? 0) > 0
+    (unit) => !unit.isOwnerOccupied && (num(unit.monthlyRent) ?? 0) > 0,
   );
 }
 
-export function buildInputConfidence(context: InputConfidenceContext): InputConfidenceResult {
+export function buildInputConfidence(
+  context: InputConfidenceContext,
+): InputConfidenceResult {
   const { values, provenance, touchedFields } = context;
   const now = context.now ?? new Date();
+  const startingAssumptionOrigins = normalizeStartingAssumptionOrigins(
+    context.startingAssumptionOrigins,
+  );
+  const purchasePriceEstimated = context.purchasePriceEstimated === true;
   const verified = verifiedSet(context.verified, values, now);
   const financed = (num(values.downPaymentPct) ?? 100) < 100;
   const pricePresent = (num(values.purchasePrice) ?? 0) > 0;
@@ -377,26 +476,57 @@ export function buildInputConfidence(context: InputConfidenceContext): InputConf
   const rentProvenance = provenance?.monthlyRent;
   const rateProvenance = provenance?.interestRate;
   const taxProvenance = provenance?.propertyTaxPct;
+  const startingAssumption = (
+    key: InputConfidenceFieldKey,
+    fallbackLabel: string,
+    reason: string,
+    verifyAction: string,
+    offerReadyRequired: boolean,
+  ): FieldAssessment => {
+    const origin = startingAssumptionOrigins[key];
+    return {
+      sourceClass: "generic-default",
+      sourceLabel: origin?.label ?? fallbackLabel,
+      reason: origin
+        ? "Reusable starting assumption, not property-specific evidence."
+        : reason,
+      verifyAction,
+      offerReadyRequired,
+    };
+  };
 
   const fields: InputConfidenceField[] = [
     field(
       "purchasePrice",
-      explicitVerification("purchasePrice", verified.has("purchasePrice"),
-        pricePresent
+      explicitVerification(
+        "purchasePrice",
+        verified.has("purchasePrice"),
+        pricePresent && purchasePriceEstimated
           ? {
-              sourceClass: "property-specific",
-              sourceLabel: "Property asking/contract price",
-              reason: "Specific to this property, but not explicitly confirmed.",
+              sourceClass: "local-estimate",
+              sourceLabel: "Automated price estimate",
+              reason:
+                "Screening estimate from market/listing data, not a confirmed asking or contract price.",
               verifyAction: "Confirm asking or contract price",
               offerReadyRequired: true,
             }
-          : {
-              sourceClass: "missing",
-              sourceLabel: "Missing",
-              reason: "A purchase price is required to underwrite the deal.",
-              verifyAction: "Enter purchase price",
-              offerReadyRequired: true,
-            })
+          : pricePresent
+            ? {
+                sourceClass: "property-specific",
+                sourceLabel: "Property asking/contract price",
+                reason:
+                  "Specific to this property, but not explicitly confirmed.",
+                verifyAction: "Confirm asking or contract price",
+                offerReadyRequired: true,
+              }
+            : {
+                sourceClass: "missing",
+                sourceLabel: "Missing",
+                reason: "A purchase price is required to underwrite the deal.",
+                verifyAction: "Enter purchase price",
+                offerReadyRequired: true,
+              },
+      ),
     ),
     field(
       "yearBuilt",
@@ -404,21 +534,25 @@ export function buildInputConfidence(context: InputConfidenceContext): InputConf
         ? explicitVerification("yearBuilt", verified.has("yearBuilt"), {
             sourceClass: "property-specific",
             sourceLabel: "Entered year built",
-            reason: "Used in the Screening Index age-risk check, but not yet confirmed against property records.",
+            reason:
+              "Used in the Screening Index age-risk check, but not yet confirmed against property records.",
             verifyAction: "Confirm year built from property records",
             offerReadyRequired: false,
           })
         : {
             sourceClass: "missing",
             sourceLabel: "Not provided",
-            reason: "Unknown age receives a conservative Screening Index uncertainty modifier.",
+            reason:
+              "Unknown age receives a conservative Screening Index uncertainty modifier.",
             verifyAction: "Confirm year built from property records",
             offerReadyRequired: false,
-          }
+          },
     ),
     field(
       "rent",
-      explicitVerification("rent", verified.has("rent"),
+      explicitVerification(
+        "rent",
+        verified.has("rent"),
         !rentPresent
           ? {
               sourceClass: "missing",
@@ -449,16 +583,21 @@ export function buildInputConfidence(context: InputConfidenceContext): InputConf
                 reason: "Entered value has no attached comp evidence yet.",
                 verifyAction: "Confirm with recent rent comps",
                 offerReadyRequired: true,
-              })
+              },
+      ),
     ),
     field(
       "propertyTax",
-      explicitVerification("propertyTax", verified.has("propertyTax"),
-        values.propertyTaxInputMode === "annual" && (num(values.propertyTaxAnnual) ?? 0) > 0
+      explicitVerification(
+        "propertyTax",
+        verified.has("propertyTax"),
+        values.propertyTaxInputMode === "annual" &&
+          (num(values.propertyTaxAnnual) ?? 0) > 0
           ? {
               sourceClass: "property-specific",
               sourceLabel: "Annual property tax entered",
-              reason: "Property-specific annual amount, not yet explicitly confirmed as the parcel bill.",
+              reason:
+                "Property-specific annual amount, not yet explicitly confirmed as the parcel bill.",
               verifyAction: "Confirm against parcel tax bill",
               offerReadyRequired: true,
             }
@@ -466,151 +605,315 @@ export function buildInputConfidence(context: InputConfidenceContext): InputConf
             ? {
                 sourceClass: "market-benchmark",
                 sourceLabel: "State tax benchmark",
-                reason: "Statewide effective rate can differ materially by parcel.",
+                reason:
+                  "Statewide effective rate can differ materially by parcel.",
                 verifyAction: "Enter parcel tax bill",
                 offerReadyRequired: true,
               }
-            : isTouched(touchedFields, "propertyTaxPct", "propertyTaxAnnual")
-              ? {
-                  sourceClass: "user-estimate",
-                  sourceLabel: "Your tax estimate",
-                  reason: "Entered rate is not linked to a parcel bill.",
-                  verifyAction: "Confirm against parcel tax bill",
-                  offerReadyRequired: true,
-                }
-              : {
-                  sourceClass: "generic-default",
-                  sourceLabel: "TrueCap tax default",
-                  reason: "Generic fallback until a parcel bill or local rate is entered.",
-                  verifyAction: "Enter parcel tax bill",
-                  offerReadyRequired: true,
-                })
+            : startingAssumptionOrigins.propertyTax
+              ? startingAssumption(
+                  "propertyTax",
+                  "TrueCap tax default",
+                  "Generic fallback until a parcel bill or local rate is entered.",
+                  "Enter parcel tax bill",
+                  true,
+                )
+              : isTouched(touchedFields, "propertyTaxPct", "propertyTaxAnnual")
+                ? {
+                    sourceClass: "user-estimate",
+                    sourceLabel: "Your tax estimate",
+                    reason: "Entered rate is not linked to a parcel bill.",
+                    verifyAction: "Confirm against parcel tax bill",
+                    offerReadyRequired: true,
+                  }
+                : startingAssumption(
+                    "propertyTax",
+                    "TrueCap tax default",
+                    "Generic fallback until a parcel bill or local rate is entered.",
+                    "Enter parcel tax bill",
+                    true,
+                  ),
+      ),
     ),
     field(
       "insurance",
-      explicitVerification("insurance", verified.has("insurance"),
-        isTouched(touchedFields, "insuranceMonthly", "insurancePct")
-          ? {
-              sourceClass: "user-estimate",
-              sourceLabel: "Your insurance estimate",
-              reason: "Entered value is not yet confirmed as a carrier quote.",
-              verifyAction: "Add or confirm an insurance quote",
-              offerReadyRequired: true,
-            }
-          : {
-              sourceClass: "generic-default",
-              sourceLabel: "TrueCap insurance default",
-              reason: "Premiums vary by property, coverage, carrier, and borrower.",
-              verifyAction: "Add an insurance quote",
-              offerReadyRequired: true,
-            })
+      explicitVerification(
+        "insurance",
+        verified.has("insurance"),
+        startingAssumptionOrigins.insurance
+          ? startingAssumption(
+              "insurance",
+              "TrueCap insurance default",
+              "Premiums vary by property, coverage, carrier, and borrower.",
+              "Add an insurance quote",
+              true,
+            )
+          : isTouched(touchedFields, "insuranceMonthly", "insurancePct")
+            ? {
+                sourceClass: "user-estimate",
+                sourceLabel: "Your insurance estimate",
+                reason:
+                  "Entered value is not yet confirmed as a carrier quote.",
+                verifyAction: "Add or confirm an insurance quote",
+                offerReadyRequired: true,
+              }
+            : startingAssumption(
+                "insurance",
+                "TrueCap insurance default",
+                "Premiums vary by property, coverage, carrier, and borrower.",
+                "Add an insurance quote",
+                true,
+              ),
+      ),
     ),
     field(
       "interestRate",
       financed
-        ? explicitVerification("interestRate", verified.has("interestRate"),
+        ? explicitVerification(
+            "interestRate",
+            verified.has("interestRate"),
             rateProvenance && !rateProvenance.overridden
               ? {
                   sourceClass: "market-benchmark",
                   sourceLabel: "TrueCap estimated market rate",
                   reason: `TrueCap estimate based on FRED's national owner-occupied mortgage series${
-                    rateProvenance.fetchedAt ? ` as of ${rateProvenance.fetchedAt}` : ""
+                    rateProvenance.fetchedAt
+                      ? ` as of ${rateProvenance.fetchedAt}`
+                      : ""
                   }; see methodology. This is not an investor-property quote or rate lock.`,
                   verifyAction: "Add lender quote",
                   offerReadyRequired: true,
                 }
-              : {
-                  sourceClass: isTouched(touchedFields, "interestRate") ? "user-estimate" : "generic-default",
-                  sourceLabel: isTouched(touchedFields, "interestRate") ? "Your rate estimate" : "TrueCap rate default",
-                  reason: "No current lender quote is attached.",
-                  verifyAction: "Add lender quote",
-                  offerReadyRequired: true,
-                })
+              : startingAssumptionOrigins.interestRate
+                ? startingAssumption(
+                    "interestRate",
+                    "TrueCap rate default",
+                    "No current lender quote is attached.",
+                    "Add lender quote",
+                    true,
+                  )
+                : isTouched(touchedFields, "interestRate")
+                  ? {
+                      sourceClass: "user-estimate",
+                      sourceLabel: "Your rate estimate",
+                      reason: "No current lender quote is attached.",
+                      verifyAction: "Add lender quote",
+                      offerReadyRequired: true,
+                    }
+                  : startingAssumption(
+                      "interestRate",
+                      "TrueCap rate default",
+                      "No current lender quote is attached.",
+                      "Add lender quote",
+                      true,
+                    ),
+          )
         : {
             sourceClass: "not-applicable",
             sourceLabel: "Cash purchase",
             reason: "No mortgage rate is used.",
             verifyAction: null,
             offerReadyRequired: false,
-          }
+          },
     ),
     field(
       "downPayment",
       financed
-        ? explicitVerification("downPayment", verified.has("downPayment"), {
-            sourceClass: isTouched(touchedFields, "downPaymentPct") ? "user-estimate" : "generic-default",
-            sourceLabel: isTouched(touchedFields, "downPaymentPct") ? "Your financing assumption" : "TrueCap financing default",
-            reason: "Confirm LTV/down payment with the selected loan terms.",
-            verifyAction: "Confirm down payment / LTV",
-            offerReadyRequired: true,
-          })
+        ? explicitVerification(
+            "downPayment",
+            verified.has("downPayment"),
+            startingAssumptionOrigins.downPayment
+              ? startingAssumption(
+                  "downPayment",
+                  "TrueCap financing default",
+                  "Confirm LTV/down payment with the selected loan terms.",
+                  "Confirm down payment / LTV",
+                  true,
+                )
+              : isTouched(touchedFields, "downPaymentPct")
+                ? {
+                    sourceClass: "user-estimate",
+                    sourceLabel: "Your financing assumption",
+                    reason:
+                      "Confirm LTV/down payment with the selected loan terms.",
+                    verifyAction: "Confirm down payment / LTV",
+                    offerReadyRequired: true,
+                  }
+                : startingAssumption(
+                    "downPayment",
+                    "TrueCap financing default",
+                    "Confirm LTV/down payment with the selected loan terms.",
+                    "Confirm down payment / LTV",
+                    true,
+                  ),
+          )
         : explicitVerification("downPayment", verified.has("downPayment"), {
             sourceClass: "property-specific",
             sourceLabel: "100% cash assumption",
             reason: "Analysis is modeled without debt.",
             verifyAction: "Confirm cash purchase",
             offerReadyRequired: true,
-          })
+          }),
     ),
     field(
       "closingCosts",
-      explicitVerification("closingCosts", verified.has("closingCosts"), {
-        sourceClass: isTouched(touchedFields, "closingCostsPct") ? "user-estimate" : "generic-default",
-        sourceLabel: isTouched(touchedFields, "closingCostsPct") ? "Your closing-cost estimate" : "TrueCap 3% default",
-        reason: "Actual lender, title, transfer, and escrow costs can differ.",
-        verifyAction: "Confirm closing-cost estimate",
-        offerReadyRequired: true,
-      })
+      explicitVerification(
+        "closingCosts",
+        verified.has("closingCosts"),
+        startingAssumptionOrigins.closingCosts
+          ? startingAssumption(
+              "closingCosts",
+              "TrueCap 3% default",
+              "Actual lender, title, transfer, and escrow costs can differ.",
+              "Confirm closing-cost estimate",
+              true,
+            )
+          : isTouched(touchedFields, "closingCostsPct")
+            ? {
+                sourceClass: "user-estimate",
+                sourceLabel: "Your closing-cost estimate",
+                reason:
+                  "Actual lender, title, transfer, and escrow costs can differ.",
+                verifyAction: "Confirm closing-cost estimate",
+                offerReadyRequired: true,
+              }
+            : startingAssumption(
+                "closingCosts",
+                "TrueCap 3% default",
+                "Actual lender, title, transfer, and escrow costs can differ.",
+                "Confirm closing-cost estimate",
+                true,
+              ),
+      ),
     ),
-    ...([
-      ["maintenance", "maintenancePct", "Maintenance reserve", "Confirm maintenance reserve"],
-      ["capex", "capexPct", "CapEx reserve", "Confirm CapEx reserve"],
-      ["vacancy", "vacancyPct", "Vacancy allowance", "Confirm local vacancy allowance"],
-      ["management", "mgmtPct", "Management assumption", "Confirm management plan or quote"],
-    ] as const).map(([key, formKey, label, action]) =>
+    ...(
+      [
+        [
+          "maintenance",
+          "maintenancePct",
+          "Maintenance reserve",
+          "Confirm maintenance reserve",
+        ],
+        ["capex", "capexPct", "CapEx reserve", "Confirm CapEx reserve"],
+        [
+          "vacancy",
+          "vacancyPct",
+          "Vacancy allowance",
+          "Confirm local vacancy allowance",
+        ],
+        [
+          "management",
+          "mgmtPct",
+          "Management assumption",
+          "Confirm management plan or quote",
+        ],
+      ] as const
+    ).map(([key, formKey, label, action]) =>
       field(
         key,
-        explicitVerification(key, verified.has(key), {
-          sourceClass: isTouched(touchedFields, formKey) ? "user-estimate" : "generic-default",
-          sourceLabel: isTouched(touchedFields, formKey) ? `Your ${label.toLowerCase()}` : `TrueCap ${label.toLowerCase()} default`,
-          reason: "Planning assumption without attached property-specific evidence.",
-          verifyAction: action,
-          offerReadyRequired: true,
-        })
-      )
+        explicitVerification(
+          key,
+          verified.has(key),
+          startingAssumptionOrigins[key]
+            ? startingAssumption(
+                key,
+                `TrueCap ${label.toLowerCase()} default`,
+                "Planning assumption without attached property-specific evidence.",
+                action,
+                true,
+              )
+            : isTouched(touchedFields, formKey)
+              ? {
+                  sourceClass: "user-estimate",
+                  sourceLabel: `Your ${label.toLowerCase()}`,
+                  reason:
+                    "Planning assumption without attached property-specific evidence.",
+                  verifyAction: action,
+                  offerReadyRequired: true,
+                }
+              : startingAssumption(
+                  key,
+                  `TrueCap ${label.toLowerCase()} default`,
+                  "Planning assumption without attached property-specific evidence.",
+                  action,
+                  true,
+                ),
+        ),
+      ),
     ),
-    ...([
-      ["utilities", "utilitiesMonthly", "Owner-paid utilities", "Confirm owner-paid utilities"],
-      ["hoa", "hoaMonthly", "HOA", "Confirm HOA amount or no HOA"],
-    ] as const).map(([key, formKey, label, action]) =>
+    ...(
+      [
+        [
+          "utilities",
+          "utilitiesMonthly",
+          "Owner-paid utilities",
+          "Confirm owner-paid utilities",
+        ],
+        ["hoa", "hoaMonthly", "HOA", "Confirm HOA amount or no HOA"],
+      ] as const
+    ).map(([key, formKey, label, action]) =>
       field(
         key,
-        explicitVerification(key, verified.has(key), {
-          sourceClass: isTouched(touchedFields, formKey) ? "user-estimate" : "generic-default",
-          sourceLabel: isTouched(touchedFields, formKey) ? `Your ${label.toLowerCase()} assumption` : `Unconfirmed $0/default`,
-          reason: "Zero may be correct, but it has not been explicitly confirmed.",
-          verifyAction: action,
-          offerReadyRequired: false,
-        })
-      )
+        explicitVerification(
+          key,
+          verified.has(key),
+          startingAssumptionOrigins[key]
+            ? startingAssumption(
+                key,
+                "Unconfirmed $0/default",
+                "Zero may be correct, but it has not been explicitly confirmed.",
+                action,
+                false,
+              )
+            : isTouched(touchedFields, formKey)
+              ? {
+                  sourceClass: "user-estimate",
+                  sourceLabel: `Your ${label.toLowerCase()} assumption`,
+                  reason:
+                    "Zero may be correct, but it has not been explicitly confirmed.",
+                  verifyAction: action,
+                  offerReadyRequired: false,
+                }
+              : startingAssumption(
+                  key,
+                  "Unconfirmed $0/default",
+                  "Zero may be correct, but it has not been explicitly confirmed.",
+                  action,
+                  false,
+                ),
+        ),
+      ),
     ),
     field(
       "rehabBudget",
       (num(values.rehabBudget) ?? 0) > 0
-        ? explicitVerification("rehabBudget", verified.has("rehabBudget"), {
-            sourceClass: "user-estimate",
-            sourceLabel: "Your rehab estimate",
-            reason: "Entered budget is not yet confirmed by scope or bids.",
-            verifyAction: "Confirm rehab scope and budget",
-            offerReadyRequired: true,
-          })
+        ? explicitVerification(
+            "rehabBudget",
+            verified.has("rehabBudget"),
+            startingAssumptionOrigins.rehabBudget
+              ? startingAssumption(
+                  "rehabBudget",
+                  "TrueCap rehab default",
+                  "Entered budget is not yet confirmed by scope or bids.",
+                  "Confirm rehab scope and budget",
+                  true,
+                )
+              : {
+                  sourceClass: "user-estimate",
+                  sourceLabel: "Your rehab estimate",
+                  reason:
+                    "Entered budget is not yet confirmed by scope or bids.",
+                  verifyAction: "Confirm rehab scope and budget",
+                  offerReadyRequired: true,
+                },
+          )
         : {
             sourceClass: "not-applicable",
             sourceLabel: "No rehab budget modeled",
             reason: "Excluded from scoring unless a rehab budget is entered.",
             verifyAction: null,
             offerReadyRequired: false,
-          }
+          },
     ),
   ];
 
@@ -618,15 +921,22 @@ export function buildInputConfidence(context: InputConfidenceContext): InputConf
   const available = fields.reduce((sum, item) => sum + item.maxPoints, 0);
   const score = available > 0 ? Math.round((earned / available) * 100) : 0;
   const offerReadyRemaining = fields.filter(
-    (item) => item.offerReadyRequired && item.sourceClass !== "verified"
+    (item) => item.offerReadyRequired && item.sourceClass !== "verified",
   );
   const criticalMissing = fields.some(
-    (item) => item.offerReadyRequired && item.sourceClass === "missing"
+    (item) => item.offerReadyRequired && item.sourceClass === "missing",
   );
   const verifiedCoreCount = fields.filter(
     (item) =>
-      (["rent", "propertyTax", "insurance", "interestRate", "downPayment"] as InputConfidenceFieldKey[]).includes(item.key) &&
-      item.sourceClass === "verified"
+      (
+        [
+          "rent",
+          "propertyTax",
+          "insurance",
+          "interestRate",
+          "downPayment",
+        ] as InputConfidenceFieldKey[]
+      ).includes(item.key) && item.sourceClass === "verified",
   ).length;
   const stage: InputConfidenceStage =
     !criticalMissing && score >= 80 && offerReadyRemaining.length === 0
@@ -635,7 +945,11 @@ export function buildInputConfidence(context: InputConfidenceContext): InputConf
         ? "verified"
         : "screened";
   const stageLabel =
-    stage === "offer-ready" ? "Offer Ready" : stage === "verified" ? "Verified" : "Screened";
+    stage === "offer-ready"
+      ? "Offer Ready"
+      : stage === "verified"
+        ? "Verified"
+        : "Screened";
   const rent = fields.find((item) => item.key === "rent");
   const rate = fields.find((item) => item.key === "interestRate");
   const sensitivityRisk: SensitivityRisk =
@@ -647,7 +961,9 @@ export function buildInputConfidence(context: InputConfidenceContext): InputConf
         ? "moderate"
         : "low";
   const verificationQueue = fields
-    .filter((item) => item.verifyAction != null && item.sourceClass !== "verified")
+    .filter(
+      (item) => item.verifyAction != null && item.sourceClass !== "verified",
+    )
     .sort((a, b) => {
       const lostA = a.maxPoints - a.earnedPoints;
       const lostB = b.maxPoints - b.earnedPoints;
@@ -669,14 +985,18 @@ export function buildInputConfidence(context: InputConfidenceContext): InputConf
       [...verified].map((key) => {
         const existing = Array.isArray(context.verified)
           ? true
-          : (context.verified as InputVerificationEvidence | null | undefined)?.[key];
+          : (
+              context.verified as InputVerificationEvidence | null | undefined
+            )?.[key];
         return [key, existing ?? true];
-      })
+      }),
     ) as InputVerificationEvidence,
     sourceContext: buildInputConfidenceSourceContext(
       values,
       provenance,
-      touchedFields
+      touchedFields,
+      startingAssumptionOrigins,
+      purchasePriceEstimated,
     ),
     computedAt: now.toISOString(),
   };
@@ -689,7 +1009,7 @@ export function buildInputConfidence(context: InputConfidenceContext): InputConf
  */
 export function inputVerificationFingerprint(
   values: InvestmentFormValues,
-  key: InputConfidenceFieldKey
+  key: InputConfidenceFieldKey,
 ): string {
   const payload: unknown = (() => {
     switch (key) {
@@ -699,14 +1019,40 @@ export function inputVerificationFingerprint(
         return values.yearBuilt ?? null;
       case "rent":
         return values.propertyType === "single-family"
-          ? [values.monthlyRent ?? null, values.avgDailyRate ?? null, values.occupancyPct ?? null]
-          : (values.units ?? []).map((unit) => [unit.monthlyRent ?? null, Boolean(unit.isOwnerOccupied)]);
+          ? [
+              values.propertyType,
+              values.bedrooms ?? null,
+              values.monthlyRent ?? null,
+              values.avgDailyRate ?? null,
+              values.occupancyPct ?? null,
+            ]
+          : [
+              values.propertyType,
+              (values.units ?? []).map((unit) => [
+                unit.bedrooms ?? null,
+                unit.monthlyRent ?? null,
+                Boolean(unit.isOwnerOccupied),
+              ]),
+            ];
       case "propertyTax":
-        return [values.propertyTaxInputMode ?? "percent", values.propertyTaxPct ?? null, values.propertyTaxAnnual ?? null];
+        return [
+          values.propertyTaxInputMode ?? "percent",
+          values.propertyTaxPct ?? null,
+          values.propertyTaxAnnual ?? null,
+        ];
       case "insurance":
-        return [values.insuranceInputMode, values.insurancePct ?? null, values.insuranceMonthly ?? null];
+        return [
+          values.insuranceInputMode,
+          values.insurancePct ?? null,
+          values.insuranceMonthly ?? null,
+        ];
       case "interestRate":
-        return [values.interestRate, values.loanTermYears, values.pmiAnnualRatePct ?? null, values.pmiNoCancel ?? null];
+        return [
+          values.interestRate,
+          values.loanTermYears,
+          values.pmiAnnualRatePct ?? null,
+          values.pmiNoCancel ?? null,
+        ];
       case "downPayment":
         return values.downPaymentPct;
       case "closingCosts":
@@ -744,14 +1090,24 @@ export function inputVerificationFingerprint(
  */
 export function restoreInputConfidenceSourceContext(
   raw: unknown,
-  values: InvestmentFormValues
+  values: InvestmentFormValues,
 ): RestoredInputConfidenceContext {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
-    return { provenance: {}, touchedInputFields: [] };
+    return {
+      provenance: {},
+      touchedInputFields: [],
+      startingAssumptionOrigins: {},
+      purchasePriceEstimated: false,
+    };
   }
   const record = raw as Record<string, unknown>;
   if (record.methodVersion !== INPUT_CONFIDENCE_METHOD_VERSION) {
-    return { provenance: {}, touchedInputFields: [] };
+    return {
+      provenance: {},
+      touchedInputFields: [],
+      startingAssumptionOrigins: {},
+      purchasePriceEstimated: false,
+    };
   }
   const fingerprints =
     record.fieldFingerprints &&
@@ -786,14 +1142,32 @@ export function restoreInputConfidenceSourceContext(
             typeof key === "string" &&
             Object.prototype.hasOwnProperty.call(
               INPUT_CONFIDENCE_TOUCHED_FIELD_MAP,
-              key
+              key,
             ) &&
-            fingerprintMatches(INPUT_CONFIDENCE_TOUCHED_FIELD_MAP[key])
+            fingerprintMatches(INPUT_CONFIDENCE_TOUCHED_FIELD_MAP[key]),
         )
         .slice(0, 64)
     : [];
 
-  return { provenance, touchedInputFields };
+  const candidateStartingAssumptionOrigins = normalizeStartingAssumptionOrigins(
+    record.startingAssumptionOrigins,
+  );
+  const startingAssumptionOrigins = Object.fromEntries(
+    Object.entries(candidateStartingAssumptionOrigins).filter(([key]) =>
+      fingerprintMatches(key as InputConfidenceFieldKey),
+    ),
+  ) as Partial<Record<InputConfidenceFieldKey, StartingAssumptionOrigin>>;
+
+  const purchasePriceEstimated =
+    record.purchasePriceEstimated === true &&
+    fingerprintMatches("purchasePrice");
+
+  return {
+    provenance,
+    touchedInputFields,
+    startingAssumptionOrigins,
+    purchasePriceEstimated,
+  };
 }
 
 /**
@@ -806,14 +1180,21 @@ export function restoreInputConfidenceSourceContext(
  * must therefore pass `persistedSourceContext: null` after an address change.
  */
 export function mergeInputConfidenceSourceContext(
-  args: MergeInputConfidenceSourceContextArgs
+  args: MergeInputConfidenceSourceContextArgs,
 ): RestoredInputConfidenceContext {
   const restored = restoreInputConfidenceSourceContext(
     args.persistedSourceContext,
-    args.values
+    args.values,
   );
   const liveProvenance = normalizedProvenance(args.liveProvenance);
   const liveTouchedInputFields = touchedInputFieldNames(args.liveTouchedFields);
+  const liveStartingAssumptionOrigins = normalizeStartingAssumptionOrigins(
+    args.liveStartingAssumptionOrigins,
+  );
+  const purchasePriceEstimated =
+    args.livePurchasePriceEstimated == null
+      ? restored.purchasePriceEstimated
+      : args.livePurchasePriceEstimated === true;
 
   return {
     provenance: {
@@ -821,11 +1202,13 @@ export function mergeInputConfidenceSourceContext(
       ...liveProvenance,
     },
     touchedInputFields: Array.from(
-      new Set([
-        ...restored.touchedInputFields,
-        ...liveTouchedInputFields,
-      ])
+      new Set([...restored.touchedInputFields, ...liveTouchedInputFields]),
     ).slice(0, 64),
+    startingAssumptionOrigins: {
+      ...restored.startingAssumptionOrigins,
+      ...liveStartingAssumptionOrigins,
+    },
+    purchasePriceEstimated,
   };
 }
 
@@ -844,7 +1227,9 @@ export function inputSourceClassLabel(sourceClass: InputSourceClass): string {
 }
 
 /** Tolerant parser for saved result snapshots. Invalid/stale keys are ignored. */
-export function normalizeInputVerificationEvidence(raw: unknown): InputVerificationEvidence {
+export function normalizeInputVerificationEvidence(
+  raw: unknown,
+): InputVerificationEvidence {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
   const source = raw as Record<string, unknown>;
   const output: InputVerificationEvidence = {};
@@ -855,10 +1240,15 @@ export function normalizeInputVerificationEvidence(raw: unknown): InputVerificat
     // Boolean legacy evidence and objects without a value fingerprint cannot
     // be safely revalidated after reopen/edit, so they are intentionally
     // dropped instead of being upgraded to an unbounded attestation.
-    if (typeof item.fingerprint !== "string" || item.fingerprint.length === 0) continue;
+    if (typeof item.fingerprint !== "string" || item.fingerprint.length === 0)
+      continue;
     output[key] = {
-      ...(typeof item.verifiedAt === "string" ? { verifiedAt: item.verifiedAt.slice(0, 40) } : {}),
-      ...(typeof item.evidenceType === "string" ? { evidenceType: item.evidenceType.slice(0, 80) } : {}),
+      ...(typeof item.verifiedAt === "string"
+        ? { verifiedAt: item.verifiedAt.slice(0, 40) }
+        : {}),
+      ...(typeof item.evidenceType === "string"
+        ? { evidenceType: item.evidenceType.slice(0, 80) }
+        : {}),
       fingerprint: item.fingerprint.slice(0, 80),
     };
   }

@@ -21,9 +21,17 @@
  */
 import type { ComponentType } from "react";
 import type { LucideProps } from "lucide-react";
-import { Building2, CalendarClock, Hammer, Home, Tag, Wrench } from "lucide-react";
+import {
+  Building2,
+  CalendarClock,
+  Hammer,
+  Home,
+  Tag,
+  Wrench,
+} from "lucide-react";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import type { StarterTemplate } from "@/lib/starter-templates";
+import type { AnalyzerStrategyKey } from "@/lib/analyzer-strategy-persistence";
 
 /** Result tab the strategy leads with. Mirrors AnalysisDashboardTab ids that
  *  exist today; kept as a local union so this module has no UI dependency. */
@@ -31,7 +39,7 @@ export type StrategyPrimaryTab = "cash-flow" | "strategies" | "stress-test";
 
 export interface InvestorStrategy {
   /** Stable slug — analytics + the active-chip identifier. */
-  key: string;
+  key: AnalyzerStrategyKey;
   /** Chip label. */
   label: string;
   /** One-liner under the label / in the focus hint. */
@@ -75,12 +83,14 @@ export const INVESTOR_STRATEGIES: InvestorStrategy[] = [
     starterKey: "long-term-rental",
     primaryTab: "cash-flow",
     primaryOutputIsPro: false,
-    focusHint: "Enter the address and rent — we'll run cap rate, cash-on-cash, and monthly cash flow on buy-and-hold defaults.",
+    focusHint:
+      "Enter the address and rent — we'll run cap rate, cash-on-cash, and monthly cash flow on buy-and-hold defaults.",
   },
   {
     key: "house-hack",
     productStage: "secondary",
-    limitation: "Models the live-in period. Model a later move-out as a separate saved scenario; automatic year-two transition logic is not included.",
+    limitation:
+      "Models the live-in period. Model a later move-out as a separate saved scenario; automatic year-two transition logic is not included.",
     runCta: "Run house-hack numbers",
     label: "House Hack",
     tagline: "Live in one unit",
@@ -89,13 +99,15 @@ export const INVESTOR_STRATEGIES: InvestorStrategy[] = [
     starterKey: "house-hack",
     primaryTab: "cash-flow",
     primaryOutputIsPro: false,
-    focusHint: "Owner-occupant defaults applied — set each unit's rent to see your effective housing cost after the house hack.",
+    focusHint:
+      "Review the owner-occupant assumptions and enter rent for each unit you will lease. The unit you live in is fixed at $0 income so the result shows your effective housing cost.",
   },
   {
     key: "brrrr",
     productStage: "advanced-beta",
-    limitation: "Advanced screening model. Verify rehab, ARV, seasoning, refinance proceeds, and lender terms independently.",
-    runCta: "Run BRRRR numbers",
+    limitation:
+      "Advanced screening model. Verify rehab, ARV, seasoning, refinance proceeds, and lender terms independently.",
+    runCta: "Continue to BRRRR inputs",
     rentLabel: "Stabilized rent (after rehab)",
     label: "BRRRR",
     tagline: "Buy, rehab, rent, refi",
@@ -104,12 +116,14 @@ export const INVESTOR_STRATEGIES: InvestorStrategy[] = [
     starterKey: "brrrr",
     primaryTab: "strategies",
     primaryOutputIsPro: true,
-    focusHint: "BRRRR defaults applied — model the rehab, refinance, and cash left in the deal.",
+    focusHint:
+      "Review the current acquisition assumptions, then add rehab, ARV, and refinance terms to model cash left in the deal.",
   },
   {
     key: "wholesale-mao",
     productStage: "advanced-beta",
-    limitation: "Advanced wholesale view. The rental Offer Ceiling is target-dependent and is not an assignment-fee or buyer-demand forecast.",
+    limitation:
+      "Advanced wholesale view. The rental Offer Ceiling is target-dependent and is not an assignment-fee or buyer-demand forecast.",
     runCta: "Calculate my Offer Ceiling",
     priceLabel: "Asking price",
     rentLabel: "Market rent",
@@ -120,13 +134,15 @@ export const INVESTOR_STRATEGIES: InvestorStrategy[] = [
     starterKey: "wholesaler-mao",
     primaryTab: "stress-test",
     primaryOutputIsPro: true,
-    focusHint: "Enter the address and rent to model the Offer Ceiling for your selected targets. Verify every material assumption before negotiating or offering.",
+    focusHint:
+      "Review the current address, rent, and targets before modeling the Offer Ceiling. Verify every material assumption before negotiating or offering.",
   },
   {
     key: "fix-flip",
     productStage: "advanced-beta",
-    limitation: "Advanced screening model. Verify rehab scope, ARV, holding period, financing, selling costs, and local comps independently.",
-    runCta: "Run flip numbers",
+    limitation:
+      "Advanced screening model. Verify rehab scope, ARV, holding period, financing, selling costs, and local comps independently.",
+    runCta: "Continue to flip inputs",
     rentLabel: "Rent (only if you hold)",
     label: "Fix & Flip",
     tagline: "Rehab and resell",
@@ -135,12 +151,14 @@ export const INVESTOR_STRATEGIES: InvestorStrategy[] = [
     starterKey: "hard-money-flip",
     primaryTab: "strategies",
     primaryOutputIsPro: true,
-    focusHint: "Flip defaults applied — model rehab budget, holding costs, and resale margin.",
+    focusHint:
+      "Review the current acquisition assumptions, then add rehab, ARV, holding costs, and sale terms.",
   },
   {
     key: "short-term",
     productStage: "advanced-beta",
-    limitation: "Beta revenue screen only. It does not fully model platform fees, turnover, lodging tax, seasonality, or local STR eligibility.",
+    limitation:
+      "Beta revenue screen only. It does not fully model platform fees, turnover, lodging tax, seasonality, or local STR eligibility.",
     runCta: "Run STR numbers",
     incomeMode: "str",
     label: "Short-term Rental",
@@ -150,26 +168,40 @@ export const INVESTOR_STRATEGIES: InvestorStrategy[] = [
     starterKey: "short-term-rental",
     primaryTab: "cash-flow",
     primaryOutputIsPro: false,
-    focusHint: "STR defaults applied — enter your nightly rate and occupancy; we'll model the revenue (ADR × occupancy) with higher vacancy and management baked in.",
+    focusHint:
+      "Review the current assumptions, then enter nightly rate and occupancy; revenue is modeled as ADR × occupancy.",
   },
 ];
 
 export const CORE_INVESTOR_STRATEGIES = INVESTOR_STRATEGIES.filter(
-  (strategy) => strategy.productStage === "core"
+  (strategy) => strategy.productStage === "core",
 );
 
 export const SECONDARY_INVESTOR_STRATEGIES = INVESTOR_STRATEGIES.filter(
-  (strategy) => strategy.productStage === "secondary"
+  (strategy) => strategy.productStage === "secondary",
 );
 
 export const ADVANCED_INVESTOR_STRATEGIES = INVESTOR_STRATEGIES.filter(
-  (strategy) => strategy.productStage === "advanced-beta"
+  (strategy) => strategy.productStage === "advanced-beta",
 );
 
 /** Resolve a strategy by key; null/unknown returns null (used for "clear"). */
-export function getStrategyByKey(key: string | null | undefined): InvestorStrategy | null {
+export function getStrategyByKey(
+  key: string | null | undefined,
+): InvestorStrategy | null {
   if (!key) return null;
   return INVESTOR_STRATEGIES.find((s) => s.key === key) ?? null;
+}
+
+/**
+ * Buy & Hold is the general rental workflow, so its property model remains a
+ * user choice. Specialist strategies lock the model their calculations and
+ * copy require (for example House Hack must stay owner-occupant).
+ */
+export function canChoosePropertyTypeForStrategy(
+  key: string | null | undefined,
+): boolean {
+  return key == null || key === "buy-hold";
 }
 
 /** Main analyzer heading follows the selected model instead of claiming that

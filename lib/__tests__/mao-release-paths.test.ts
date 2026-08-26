@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest";
 
 const root = process.cwd();
 const read = (path: string) => readFileSync(join(root, path), "utf8");
+const normalizeSource = (source: string) =>
+  source.replace(/\s+/g, "").replace(/,([)}\]])/g, "$1");
 
 describe("MAO release-path safety", () => {
   it("never solves or displays a numeric live-preview offer for Free", () => {
@@ -19,11 +21,24 @@ describe("MAO release-path safety", () => {
   it("disables new Pack checkout while preserving exact-target paid recovery", () => {
     const calculator = read("components/investcalc/investcalc-page.tsx");
     const action = read("app/actions/one-time-pdf.ts");
-    const capture = calculator.indexOf("const requestedMaoTarget = normalizeMaoTarget(maoTarget)");
-    const purchaseGate = calculator.indexOf("setIsPdfPurchaseDialogOpen(true)", capture);
-    const actionStart = action.indexOf("export async function createOneTimePdfCheckoutAction");
-    const shutdownGate = action.indexOf("if (!decisionPackCheckoutEnabled())", actionStart);
-    const validation = action.indexOf("createCheckoutSchema.safeParse", actionStart);
+    const capture = calculator.indexOf(
+      "const requestedMaoTarget = normalizeMaoTarget(maoTarget)",
+    );
+    const purchaseGate = calculator.indexOf(
+      "setIsPdfPurchaseDialogOpen(true)",
+      capture,
+    );
+    const actionStart = action.indexOf(
+      "export async function createOneTimePdfCheckoutAction",
+    );
+    const shutdownGate = action.indexOf(
+      "if (!decisionPackCheckoutEnabled())",
+      actionStart,
+    );
+    const validation = action.indexOf(
+      "createCheckoutSchema.safeParse",
+      actionStart,
+    );
     const stripe = action.indexOf("const stripe = getStripe()", actionStart);
 
     expect(capture).toBeGreaterThan(-1);
@@ -34,16 +49,26 @@ describe("MAO release-path safety", () => {
     expect(shutdownGate).toBeGreaterThan(actionStart);
     expect(shutdownGate).toBeLessThan(validation);
     expect(shutdownGate).toBeLessThan(stripe);
-    expect(action.slice(shutdownGate, validation)).toContain('code: "FEATURE_DISABLED"');
-    expect(calculator).toContain("const restoredDraft = parseOneTimePdfDraft(draftRaw)");
+    expect(action.slice(shutdownGate, validation)).toContain(
+      'code: "FEATURE_DISABLED"',
+    );
+    expect(calculator).toContain(
+      "const restoredDraft = parseOneTimePdfDraft(draftRaw)",
+    );
     expect(calculator).toContain("restoredMaoTarget = restoredDraft.target");
-    expect(calculator).toContain("restoredMaoTargetSource = restoredDraft.source");
+    expect(calculator).toContain(
+      "restoredMaoTargetSource = restoredDraft.source",
+    );
     expect(calculator).toContain("maxOfferTarget: restoredMaoTarget");
-    expect(calculator).toContain("maxOfferTargetSource: restoredMaoTargetSource");
-    expect(calculator).toContain("analysisMaoTargetRef.current = restoredMaoTarget");
+    expect(calculator).toContain(
+      "maxOfferTargetSource: restoredMaoTargetSource",
+    );
+    expect(calculator).toContain(
+      "analysisMaoTargetRef.current = restoredMaoTarget",
+    );
     expect(calculator).toContain("setAnalysisMaoTarget(restoredMaoTarget)");
     expect(calculator).toContain(
-      "setAnalysisMaoTargetSource(restoredMaoTargetSource)"
+      "setAnalysisMaoTargetSource(restoredMaoTargetSource)",
     );
   });
 
@@ -55,62 +80,71 @@ describe("MAO release-path safety", () => {
     // Sample-seeded example targets are the one exception: the fork carries
     // only USER-adopted targets (see sample-target-adoption-guard.test.ts).
     expect(calculator).toContain(
-      "const carriedMaoTarget = sampleSeededMaoTargetRef.current\n      ? null\n      : normalizeMaoTarget(analysisMaoTargetRef.current)"
-    );
-    expect(calculator).toContain("analysisMaoTargetRef.current = carriedMaoTarget");
-    expect(calculator).toContain(
-      "duplicatedMaoTargetSource"
+      "const carriedMaoTarget = sampleSeededMaoTargetRef.current\n      ? null\n      : normalizeMaoTarget(analysisMaoTargetRef.current)",
     );
     expect(calculator).toContain(
-      "carriedMaoTargetSource"
+      "analysisMaoTargetRef.current = carriedMaoTarget",
     );
+    expect(calculator).toContain("duplicatedMaoTargetSource");
+    expect(calculator).toContain("carriedMaoTargetSource");
     expect(calculator).toContain(
-      "setAnalysisMaoTargetSource(carriedMaoTargetSource)"
+      "setAnalysisMaoTargetSource(carriedMaoTargetSource)",
     );
   });
 
   it("rebinds the active target whenever an unsaved draft evolves", () => {
     const calculator = read("components/investcalc/investcalc-page.tsx");
-    const watcherStart = calculator.indexOf("Auto-save draft for anonymous / walk-in users");
+    const watcherStart = calculator.indexOf(
+      "Auto-save draft for anonymous / walk-in users",
+    );
     const watcherEnd = calculator.indexOf(
       "Initialize from a one-time saved-analysis handoff",
-      watcherStart
+      watcherStart,
     );
     const watcher = calculator.slice(watcherStart, watcherEnd);
 
     expect(calculator).toContain("function writeCalcDraftWithMaoTarget(");
     expect(calculator).toContain(
-      "const normalizedDraft = normalizeReleasedInvestmentFormDraft(values)"
+      "const normalizedDraft = normalizeReleasedInvestmentFormDraft(values)",
     );
-    expect(calculator).toContain(
-      "maoTargetAnalysisFingerprint(normalizedDraft ?? values)"
+    expect(normalizeSource(calculator)).toContain(
+      normalizeSource(
+        "maoTargetAnalysisFingerprint(normalizedDraft ?? values)",
+      ),
     );
     // The rebind carries the ACTIVE target — except sample-seeded example
     // targets, which must never persist as adoption (locked decision; see
     // sample-target-adoption-guard.test.ts).
     expect(watcher).toContain(
-      "sampleSeeded ? null : analysisMaoTargetRef.current"
+      "sampleSeeded ? null : analysisMaoTargetRef.current",
     );
     expect(watcher).toContain(
-      'sampleSeeded ? "screening-defaults" : analysisMaoTargetSource'
+      'sampleSeeded ? "screening-defaults" : analysisMaoTargetSource',
     );
   });
 
   it("preserves the normalized acquisition target when a strategy scenario recomputes", () => {
     const scenarios = read("app/actions/scenarios.ts");
     const recomputeStart = scenarios.indexOf("if (strategyKind) {");
-    const recomputeEnd = scenarios.indexOf("const { data: inserted", recomputeStart);
+    const recomputeEnd = scenarios.indexOf(
+      "const { data: inserted",
+      recomputeStart,
+    );
     const recompute = scenarios.slice(recomputeStart, recomputeEnd);
 
-    expect(recompute).toContain(
-      "normalizeMaoTarget(deal.result_snapshot?.maxOfferTarget)"
+    expect(normalizeSource(recompute)).toContain(
+      normalizeSource(
+        "normalizeMaoTarget(deal.result_snapshot?.maxOfferTarget)",
+      ),
     );
     expect(recompute).toContain(
-      "recomputedResultSnapshot.maxOfferTarget = sourceMaoTarget"
+      "recomputedResultSnapshot.maxOfferTarget = sourceMaoTarget",
     );
-    expect(recompute).toContain("clone.result_snapshot = recomputedResultSnapshot");
+    expect(recompute).toContain(
+      "clone.result_snapshot = recomputedResultSnapshot",
+    );
     expect(recompute).not.toContain(
-      "clone.result_snapshot = result as unknown as Record<string, unknown>"
+      "clone.result_snapshot = result as unknown as Record<string, unknown>",
     );
   });
 });

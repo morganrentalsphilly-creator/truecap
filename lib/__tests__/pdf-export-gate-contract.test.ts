@@ -24,14 +24,18 @@ const read = (path: string) => readFileSync(join(ROOT, path), "utf8");
 
 /** Strip comments so prose ABOUT the pattern never satisfies a check for it. */
 function stripComments(source: string): string {
-  return source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^[ \t]*\/\/.*$/gm, "");
+  return source
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/^[ \t]*\/\/.*$/gm, "");
 }
 
 const serverAction = stripComments(read("app/actions/generate-report-pdf.ts"));
 const generator = stripComments(read("lib/pdf-generator.ts"));
-const analyzer = stripComments(read("components/investcalc/investcalc-page.tsx"));
+const analyzer = stripComments(
+  read("components/investcalc/investcalc-page.tsx"),
+);
 const savedAnalyses = stripComments(
-  read("components/investcalc/saved-analyses-page-v2.tsx")
+  read("components/investcalc/saved-analyses-page-v2.tsx"),
 );
 const loadImage = stripComments(read("lib/pdf/load-image.ts"));
 
@@ -63,11 +67,13 @@ describe("PDF export gate lives on the server", () => {
   });
 
   it("checks the pdf_export entitlement before rendering anything", () => {
-    expect(serverAction).toContain('hasPlanFeature(entitlements, "pdf_export")');
+    expect(serverAction).toContain(
+      'hasPlanFeature(entitlements, "pdf_export")',
+    );
     expect(serverAction).toContain("getEntitlementsForUser");
     // The gate must run BEFORE the generator is even imported.
     expect(serverAction.indexOf("checkGate")).toBeLessThan(
-      serverAction.indexOf("generateInvestmentPDFArtifact")
+      serverAction.indexOf("generateInvestmentPDFArtifact"),
     );
   });
 
@@ -80,7 +86,7 @@ describe("PDF export gate lives on the server", () => {
     // The catch inside claimGrantsExport must return false, never true.
     const fn = serverAction.slice(
       serverAction.indexOf("async function claimGrantsExport"),
-      serverAction.indexOf("async function checkGate")
+      serverAction.indexOf("async function checkGate"),
     );
     expect(fn).toContain("return false");
     expect(fn).not.toMatch(/catch\s*(\([^)]*\))?\s*\{\s*return true/);
@@ -101,36 +107,47 @@ describe("PDF export gate lives on the server", () => {
     expect(serverAction).toContain("claimGrantsExport(");
     expect(serverAction).toContain("input.maxOfferTargetSource");
     expect(serverAction.indexOf("await claimGrantsExport(")).toBeLessThan(
-      serverAction.indexOf("generateInvestmentPDFArtifact")
+      serverAction.indexOf("generateInvestmentPDFArtifact"),
     );
   });
 
   it("rebuilds the renderer payload server-side after the gate", () => {
-    const rebuildCall = serverAction.indexOf("const canonicalReport = buildCanonicalReportData");
-    expect(rebuildCall).toBeGreaterThan(serverAction.indexOf("checkGate(parsed.data)"));
-    expect(serverAction).toContain("generateInvestmentPDFArtifact(\n      canonicalReport");
+    const rebuildCall = serverAction.indexOf(
+      "const canonicalReport = buildCanonicalReportData",
+    );
+    expect(rebuildCall).toBeGreaterThan(
+      serverAction.indexOf("checkGate(parsed.data)"),
+    );
+    expect(serverAction).toContain(
+      "generateInvestmentPDFArtifact(\n      canonicalReport",
+    );
     expect(rebuildCall).toBeLessThan(
-      serverAction.indexOf("generateInvestmentPDFArtifact")
+      serverAction.indexOf("generateInvestmentPDFArtifact"),
     );
     const rebuildBlock = serverAction.slice(
       rebuildCall,
-      serverAction.indexOf("const { getBranding }")
+      serverAction.indexOf("const { getBranding }"),
     );
     expect(rebuildBlock).not.toContain("parsed.data.report");
   });
 
-  it("uses the owner-scoped recorded result and fails closed when it is incomplete", () => {
-    const freezeCheck = serverAction.indexOf(
-      "if (!recorded.result || !recorded.usesRecordedSnapshot)"
+  it("uses owner-scoped inputs, rejects frozen methodology, and recomputes outputs", () => {
+    const freezeCheck = serverAction.indexOf("shouldFreezeSavedMethodology(");
+    const rebuildCall = serverAction.indexOf(
+      "const canonicalReport = buildCanonicalReportData",
     );
-    const rebuildCall = serverAction.indexOf("const canonicalReport = buildCanonicalReportData");
     expect(serverAction).toContain('code: "FROZEN_METHODOLOGY"');
     expect(freezeCheck).toBeGreaterThan(-1);
     expect(freezeCheck).toBeLessThan(rebuildCall);
-    expect(serverAction).toContain("trustedRecordedResult");
-    expect(serverAction).toContain("resultSnapshot,");
+    expect(serverAction).not.toContain("trustedRecordedResult");
     expect(serverAction).toContain(
-      "authority.renderFingerprint !== input.savedExport.renderFingerprint"
+      "const currentResult = calculateAnalysis(trustedValues)",
+    );
+    expect(serverAction).toContain(
+      "const canonicalReport = buildCanonicalReportData",
+    );
+    expect(serverAction).toContain(
+      "authority.renderFingerprint !== input.savedExport.renderFingerprint",
     );
   });
 
@@ -138,7 +155,9 @@ describe("PDF export gate lives on the server", () => {
     // getBranding() deliberately does NOT gate reads (a downgraded user should
     // still see their saved branding), so the gate has to live here. For a
     // while each layer's comment claimed the other one did it.
-    expect(serverAction).toContain('hasPlanFeature(entitlements, "custom_branding")');
+    expect(serverAction).toContain(
+      'hasPlanFeature(entitlements, "custom_branding")',
+    );
   });
 
   it("resolves branding server-side rather than trusting the caller", () => {
@@ -154,11 +173,13 @@ describe("no client surface can compose a PDF by itself", () => {
       // A value import of the generator would put jsPDF back in the browser
       // and make a client-side render possible again.
       const valueImports = source.match(
-        /import\s+(?!type\b)[^;]*from\s+["']@\/lib\/pdf-generator["']/g
+        /import\s+(?!type\b)[^;]*from\s+["']@\/lib\/pdf-generator["']/g,
       );
       expect(valueImports).toBeNull();
 
-      const dynamicImports = source.match(/await\s+import\(\s*["']@\/lib\/pdf-generator["']\s*\)/g);
+      const dynamicImports = source.match(
+        /await\s+import\(\s*["']@\/lib\/pdf-generator["']\s*\)/g,
+      );
       expect(dynamicImports).toBeNull();
     });
 
@@ -211,7 +232,7 @@ describe("server-side logo fetching is allowlisted", () => {
 
   it("checks the allowlist before fetching, not after", () => {
     expect(loadImage.indexOf("isAllowedLogoUrl(source)")).toBeLessThan(
-      loadImage.indexOf("readBytes(source)")
+      loadImage.indexOf("readBytes(source)"),
     );
   });
 });

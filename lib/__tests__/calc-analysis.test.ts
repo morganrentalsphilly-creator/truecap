@@ -17,10 +17,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import {
-  buildExitScenarios,
-  type ExitScenarioInput,
-} from "../exit-scenarios";
+import { buildExitScenarios, type ExitScenarioInput } from "../exit-scenarios";
 import { analyzeBrrrr } from "../brrrr-analysis";
 import {
   analyzeFixFlip,
@@ -35,7 +32,9 @@ import type { InvestmentFormValues } from "../investcalc-schema";
 // ──────────────────────────────────────────────────────────────────
 
 /** A canonical single-family deal used as the baseline across tests. */
-function baseSingleFamily(overrides: Partial<InvestmentFormValues> = {}): InvestmentFormValues {
+function baseSingleFamily(
+  overrides: Partial<InvestmentFormValues> = {},
+): InvestmentFormValues {
   return {
     propertyType: "single-family",
     address: "1205 N 5th St, Philadelphia, PA 19122, USA",
@@ -82,10 +81,10 @@ describe("monthly mortgage payment (via calculateAnalysis)", () => {
     const result = calculateAnalysis(
       baseSingleFamily({
         purchasePrice: 125_000,
-        downPaymentPct: 20,       // loan = 100,000
+        downPaymentPct: 20, // loan = 100,000
         interestRate: 6,
         loanTermYears: 30,
-      })
+      }),
     );
     expect(result.loanAmount).toBe(100_000);
     expect(Math.abs(result.monthlyPayment - 600)).toBeLessThanOrEqual(1);
@@ -97,10 +96,10 @@ describe("monthly mortgage payment (via calculateAnalysis)", () => {
     const result = calculateAnalysis(
       baseSingleFamily({
         purchasePrice: 250_000,
-        downPaymentPct: 20,       // loan = 200,000
+        downPaymentPct: 20, // loan = 200,000
         interestRate: 7,
         loanTermYears: 30,
-      })
+      }),
     );
     expect(result.loanAmount).toBe(200_000);
     expect(Math.abs(result.monthlyPayment - 1331)).toBeLessThanOrEqual(2);
@@ -110,10 +109,10 @@ describe("monthly mortgage payment (via calculateAnalysis)", () => {
     const result = calculateAnalysis(
       baseSingleFamily({
         purchasePrice: 120_000,
-        downPaymentPct: 50,       // loan = 60,000
+        downPaymentPct: 50, // loan = 60,000
         interestRate: 0,
         loanTermYears: 30,
-      })
+      }),
     );
     // 60000 / 360 = 166.67/mo
     expect(Math.abs(result.monthlyPayment - 167)).toBeLessThanOrEqual(1);
@@ -124,7 +123,7 @@ describe("monthly mortgage payment (via calculateAnalysis)", () => {
       baseSingleFamily({
         downPaymentPct: 100,
         interestRate: 7,
-      })
+      }),
     );
     expect(result.loanAmount).toBe(0);
     expect(result.monthlyPayment).toBe(0);
@@ -142,7 +141,10 @@ describe("cap rate", () => {
     // NOI = (rent - operating expenses EXCLUDING the CapEx reserve) * 12.
     // CapEx is a below-the-line return-of-capital reserve, not an operating
     // expense (matches the glossary + the lender-standard NOI definition).
-    const noi = (result.monthlyRentalIncome - (result.totalOperatingExpenses - result.capex)) * 12;
+    const noi =
+      (result.monthlyRentalIncome -
+        (result.totalOperatingExpenses - result.capex)) *
+      12;
     const expectedCapRate = (noi / 245_000) * 100;
     expect(Math.abs(result.capRate - expectedCapRate)).toBeLessThan(0.01);
   });
@@ -159,10 +161,10 @@ describe("cap rate", () => {
   it("EXCLUDES debt service from NOI", () => {
     // Two deals — same NOI, different financing. Cap rate MUST be identical.
     const cash = calculateAnalysis(
-      baseSingleFamily({ downPaymentPct: 100, interestRate: 0 })
+      baseSingleFamily({ downPaymentPct: 100, interestRate: 0 }),
     );
     const financed = calculateAnalysis(
-      baseSingleFamily({ downPaymentPct: 20, interestRate: 7 })
+      baseSingleFamily({ downPaymentPct: 20, interestRate: 7 }),
     );
     expect(Math.abs(cash.capRate - financed.capRate)).toBeLessThan(0.01);
   });
@@ -191,7 +193,7 @@ describe("cash-on-cash return", () => {
   it("totalCashRequired = downPayment + closingCosts (no rehab in headline)", () => {
     const result = calculateAnalysis(baseSingleFamily());
     expect(result.totalCashRequired).toBe(
-      result.downPayment + result.closingCosts
+      result.downPayment + result.closingCosts,
     );
   });
 
@@ -203,7 +205,7 @@ describe("cash-on-cash return", () => {
         rehabBudget: 0,
         strFurnishingCost: 0,
         monthlyRent: 8_000,
-      })
+      }),
     );
 
     expect(result.totalCashRequired).toBe(0);
@@ -233,16 +235,15 @@ describe("DSCR", () => {
     const result = calculateAnalysis(baseSingleFamily());
     // DSCR NOI excludes the CapEx reserve (lender-standard).
     const monthlyNoi =
-      result.monthlyRentalIncome - (result.totalOperatingExpenses - result.capex);
+      result.monthlyRentalIncome -
+      (result.totalOperatingExpenses - result.capex);
     const expectedDscr =
       result.monthlyPayment > 0 ? monthlyNoi / result.monthlyPayment : 0;
     expect(Math.abs(result.dscr - expectedDscr)).toBeLessThan(0.001);
   });
 
   it("cash purchase returns DSCR = 0 (sentinel for N/A)", () => {
-    const result = calculateAnalysis(
-      baseSingleFamily({ downPaymentPct: 100 })
-    );
+    const result = calculateAnalysis(baseSingleFamily({ downPaymentPct: 100 }));
     expect(result.dscr).toBe(0);
   });
 });
@@ -253,7 +254,7 @@ describe("DSCR", () => {
 describe("PMI", () => {
   it("does not invent owner-occupant PMI for an investor rental when the field is blank", () => {
     const investor = calculateAnalysis(
-      baseSingleFamily({ downPaymentPct: 15, pmiAnnualRatePct: undefined })
+      baseSingleFamily({ downPaymentPct: 15, pmiAnnualRatePct: undefined }),
     );
     expect(investor.pmiMonthly).toBe(0);
   });
@@ -281,14 +282,14 @@ describe("PMI", () => {
         ],
         downPaymentPct: 5,
         pmiAnnualRatePct: undefined,
-      })
+      }),
     );
     expect(ownerOccupant.pmiMonthly).toBeGreaterThan(0);
   });
 
   it("applies an explicit lender premium below 20% down and reduces cash flow", () => {
     const lowDown = calculateAnalysis(
-      baseSingleFamily({ downPaymentPct: 10, pmiAnnualRatePct: 0.8 })
+      baseSingleFamily({ downPaymentPct: 10, pmiAnnualRatePct: 0.8 }),
     );
     expect(lowDown.pmiMonthly).toBeGreaterThan(0);
     const expected =
@@ -300,42 +301,59 @@ describe("PMI", () => {
   });
 
   it("is 0 at 20%+ down and on a cash purchase", () => {
-    expect(calculateAnalysis(baseSingleFamily({ downPaymentPct: 20 })).pmiMonthly).toBe(0);
-    expect(calculateAnalysis(baseSingleFamily({ downPaymentPct: 25 })).pmiMonthly).toBe(0);
-    expect(calculateAnalysis(baseSingleFamily({ downPaymentPct: 100 })).pmiMonthly).toBe(0);
+    expect(
+      calculateAnalysis(baseSingleFamily({ downPaymentPct: 20 })).pmiMonthly,
+    ).toBe(0);
+    expect(
+      calculateAnalysis(baseSingleFamily({ downPaymentPct: 25 })).pmiMonthly,
+    ).toBe(0);
+    expect(
+      calculateAnalysis(baseSingleFamily({ downPaymentPct: 100 })).pmiMonthly,
+    ).toBe(0);
   });
 
   it("is excluded from DSCR (DSCR uses P&I only)", () => {
     const lowDown = calculateAnalysis(
-      baseSingleFamily({ downPaymentPct: 10, pmiAnnualRatePct: 0.8 })
+      baseSingleFamily({ downPaymentPct: 10, pmiAnnualRatePct: 0.8 }),
     );
     const monthlyNoi =
-      lowDown.monthlyRentalIncome - (lowDown.totalOperatingExpenses - lowDown.capex);
-    expect(Math.abs(lowDown.dscr - monthlyNoi / lowDown.monthlyPayment)).toBeLessThan(0.001);
+      lowDown.monthlyRentalIncome -
+      (lowDown.totalOperatingExpenses - lowDown.capex);
+    expect(
+      Math.abs(lowDown.dscr - monthlyNoi / lowDown.monthlyPayment),
+    ).toBeLessThan(0.001);
   });
 
   it("is in early projection debt service, then drops as the loan pays down", () => {
     const lowDown = calculateAnalysis(
-      baseSingleFamily({ downPaymentPct: 10, pmiAnnualRatePct: 0.8 })
+      baseSingleFamily({ downPaymentPct: 10, pmiAnnualRatePct: 0.8 }),
     );
     const proj = lowDown.tenYearProjection;
     const pAndIAnnual = lowDown.monthlyPayment * 12;
     expect(proj[0].debtServiceAnnual).toBeGreaterThan(pAndIAnnual); // PMI present year 1
-    expect(proj[9].debtServiceAnnual).toBeLessThanOrEqual(proj[0].debtServiceAnnual); // never increases
+    expect(proj[9].debtServiceAnnual).toBeLessThanOrEqual(
+      proj[0].debtServiceAnnual,
+    ); // never increases
   });
 
   it("honors a custom pmiAnnualRatePct override", () => {
     const dflt = calculateAnalysis(
-      baseSingleFamily({ downPaymentPct: 10, pmiAnnualRatePct: 0.8 })
+      baseSingleFamily({ downPaymentPct: 10, pmiAnnualRatePct: 0.8 }),
     );
-    const higher = calculateAnalysis(baseSingleFamily({ downPaymentPct: 10, pmiAnnualRatePct: 1.5 }));
+    const higher = calculateAnalysis(
+      baseSingleFamily({ downPaymentPct: 10, pmiAnnualRatePct: 1.5 }),
+    );
     expect(higher.pmiMonthly).toBeGreaterThan(dflt.pmiMonthly);
     // 1.5% of the loan / 12.
-    expect(higher.pmiMonthly).toBe(Math.round((higher.loanAmount * (1.5 / 100)) / 12));
+    expect(higher.pmiMonthly).toBe(
+      Math.round((higher.loanAmount * (1.5 / 100)) / 12),
+    );
   });
 
   it("pmiAnnualRatePct = 0 disables PMI entirely (lender-paid MI)", () => {
-    const r = calculateAnalysis(baseSingleFamily({ downPaymentPct: 10, pmiAnnualRatePct: 0 }));
+    const r = calculateAnalysis(
+      baseSingleFamily({ downPaymentPct: 10, pmiAnnualRatePct: 0 }),
+    );
     expect(r.pmiMonthly).toBe(0);
   });
 
@@ -363,7 +381,9 @@ describe("PMI", () => {
     const forLife = buildTenYearProjection({ ...base, pmiNoCancel: true });
     expect(cancels[0]!.debtServiceAnnual).toBe(12_000 + 4 * 100);
     expect(forLife[0]!.debtServiceAnnual).toBe(12_000 + 12 * 100);
-    expect(forLife[9]!.debtServiceAnnual).toBeGreaterThan(cancels[9]!.debtServiceAnnual); // MIP stays
+    expect(forLife[9]!.debtServiceAnnual).toBeGreaterThan(
+      cancels[9]!.debtServiceAnnual,
+    ); // MIP stays
   });
 
   it("cancels PMI in the exact month scheduled balance reaches 80% LTV", () => {
@@ -404,15 +424,24 @@ describe("PMI", () => {
       taxRate: 0.24,
       includeInterestDeduction: false,
     };
-    const noReserve = buildTenYearProjection({ ...base, capexReserveMonthly: 0 });
-    const withReserve = buildTenYearProjection({ ...base, capexReserveMonthly: 100 });
+    const noReserve = buildTenYearProjection({
+      ...base,
+      capexReserveMonthly: 0,
+    });
+    const withReserve = buildTenYearProjection({
+      ...base,
+      capexReserveMonthly: 100,
+    });
     // Cash flow is identical — the reserve is still a real outflow.
-    expect(withReserve[0]!.netCashFlowAnnual).toBe(noReserve[0]!.netCashFlowAnnual);
+    expect(withReserve[0]!.netCashFlowAnnual).toBe(
+      noReserve[0]!.netCashFlowAnnual,
+    );
     // But the reserve no longer shelters rental income, so the after-tax line is
     // lower by exactly reserveAnnual × taxRate = 100 × 12 × 0.24 = 288.
-    expect(noReserve[0]!.afterTaxCashFlowAnnual - withReserve[0]!.afterTaxCashFlowAnnual).toBe(
-      Math.round(100 * 12 * 0.24)
-    );
+    expect(
+      noReserve[0]!.afterTaxCashFlowAnnual -
+        withReserve[0]!.afterTaxCashFlowAnnual,
+    ).toBe(Math.round(100 * 12 * 0.24));
   });
 });
 
@@ -427,7 +456,7 @@ describe("short-term rental income", () => {
         avgDailyRate: 220,
         occupancyPct: 65,
         vacancyPct: 0, // STR: occupancy captures vacancy, so no separate haircut
-      })
+      }),
     );
     // 220 × 365 × 0.65 / 12 = 4,349.58…
     expect(result.monthlyRentalIncome).toBeCloseTo((220 * 365 * 0.65) / 12, 2);
@@ -440,21 +469,30 @@ describe("short-term rental income", () => {
         avgDailyRate: 150,
         occupancyPct: 50,
         vacancyPct: 0,
-      })
+      }),
     );
     expect(result.monthlyRentalIncome).toBeCloseTo((150 * 365 * 0.5) / 12, 2);
   });
 
   it("falls back to monthlyRent when no nightly rate is set", () => {
     const result = calculateAnalysis(
-      baseSingleFamily({ monthlyRent: 2_100, avgDailyRate: undefined, occupancyPct: undefined })
+      baseSingleFamily({
+        monthlyRent: 2_100,
+        avgDailyRate: undefined,
+        occupancyPct: undefined,
+      }),
     );
     expect(result.monthlyRentalIncome).toBe(2_100);
   });
 
   it("adds furnishing as a one-time cost to cash invested (lowers cash-on-cash)", () => {
     const withoutFurnishing = calculateAnalysis(
-      baseSingleFamily({ monthlyRent: undefined, avgDailyRate: 200, occupancyPct: 60, vacancyPct: 0 })
+      baseSingleFamily({
+        monthlyRent: undefined,
+        avgDailyRate: 200,
+        occupancyPct: 60,
+        vacancyPct: 0,
+      }),
     );
     const withFurnishing = calculateAnalysis(
       baseSingleFamily({
@@ -463,11 +501,11 @@ describe("short-term rental income", () => {
         occupancyPct: 60,
         vacancyPct: 0,
         strFurnishingCost: 20_000,
-      })
+      }),
     );
     expect(withFurnishing.totalCashRequired).toBeCloseTo(
       withoutFurnishing.totalCashRequired + 20_000,
-      2
+      2,
     );
     // Same income + more cash invested ⇒ strictly lower cash-on-cash.
     expect(withFurnishing.cocReturn).toBeLessThan(withoutFurnishing.cocReturn);
@@ -480,8 +518,13 @@ describe("short-term rental income", () => {
 describe("rehab budget", () => {
   it("adds to cash invested and lowers cash-on-cash (not NOI/cap)", () => {
     const without = calculateAnalysis(baseSingleFamily());
-    const withRehab = calculateAnalysis(baseSingleFamily({ rehabBudget: 25_000 }));
-    expect(withRehab.totalCashRequired).toBeCloseTo(without.totalCashRequired + 25_000, 2);
+    const withRehab = calculateAnalysis(
+      baseSingleFamily({ rehabBudget: 25_000 }),
+    );
+    expect(withRehab.totalCashRequired).toBeCloseTo(
+      without.totalCashRequired + 25_000,
+      2,
+    );
     expect(withRehab.cocReturn).toBeLessThan(without.cocReturn);
     // Rehab is cash-only in v1 — NOI and cap rate are untouched.
     expect(withRehab.capRate).toBeCloseTo(without.capRate, 6);
@@ -490,10 +533,13 @@ describe("rehab budget", () => {
 
   it("stacks with STR furnishing in cash required", () => {
     const both = calculateAnalysis(
-      baseSingleFamily({ rehabBudget: 10_000, strFurnishingCost: 15_000 })
+      baseSingleFamily({ rehabBudget: 10_000, strFurnishingCost: 15_000 }),
     );
     const neither = calculateAnalysis(baseSingleFamily());
-    expect(both.totalCashRequired).toBeCloseTo(neither.totalCashRequired + 25_000, 2);
+    expect(both.totalCashRequired).toBeCloseTo(
+      neither.totalCashRequired + 25_000,
+      2,
+    );
   });
 });
 
@@ -506,7 +552,7 @@ describe("operating expenses", () => {
       baseSingleFamily({
         monthlyRent: 2_000,
         vacancyPct: 6,
-      })
+      }),
     );
     // annualRent = 24000; vacancy = 24000 * 0.06 / 12 = $120
     expect(result.vacancy).toBe(120);
@@ -517,7 +563,7 @@ describe("operating expenses", () => {
       baseSingleFamily({
         monthlyRent: 2_500,
         mgmtPct: 10,
-      })
+      }),
     );
     // annualRent = 30000; mgmt = 30000 * 0.10 / 12 = $250
     expect(result.management).toBe(250);
@@ -528,7 +574,7 @@ describe("operating expenses", () => {
       baseSingleFamily({
         purchasePrice: 300_000,
         propertyTaxPct: 1.5,
-      })
+      }),
     );
     // 300000 * 0.015 / 12 = $375
     expect(result.propertyTax).toBe(375);
@@ -593,7 +639,7 @@ describe("annual depreciation", () => {
         purchasePrice: 245_000,
         buildingValuePct: 80,
         depreciationYears: 27.5,
-      })
+      }),
     );
     // (245000 * 0.80) / 27.5 = 7,127.27 → rounds to 7,127
     expect(Math.abs(result.annualDepreciation - 7_127)).toBeLessThanOrEqual(1);
@@ -717,7 +763,9 @@ describe("ten-year projection", () => {
     });
     // year-1 = 12,000; year-10 = 12,000 × 1.03^9 ≈ 15,657
     const expectedY10 = Math.round(12_000 * Math.pow(1.03, 9));
-    expect(Math.abs(years[9]!.rentalIncomeAnnual - expectedY10)).toBeLessThanOrEqual(2);
+    expect(
+      Math.abs(years[9]!.rentalIncomeAnnual - expectedY10),
+    ).toBeLessThanOrEqual(2);
   });
 
   it("tax effect is a SIGNED net — a shield on paper-loss years", () => {
@@ -737,7 +785,7 @@ describe("ten-year projection", () => {
     });
     expect(years[0]!.taxSavingsAnnual).toBe(Math.round(6_000 * 0.24)); // +1,440
     expect(years[0]!.afterTaxCashFlowAnnual).toBe(
-      years[0]!.netCashFlowAnnual + years[0]!.taxSavingsAnnual
+      years[0]!.netCashFlowAnnual + years[0]!.taxSavingsAnnual,
     );
   });
 
@@ -758,7 +806,9 @@ describe("ten-year projection", () => {
     });
     expect(years[0]!.taxSavingsAnnual).toBe(-Math.round(25_000 * 0.24)); // −6,000
     // After-tax must be BELOW pre-tax net cash flow — the old formula got this wrong.
-    expect(years[0]!.afterTaxCashFlowAnnual).toBeLessThan(years[0]!.netCashFlowAnnual);
+    expect(years[0]!.afterTaxCashFlowAnnual).toBeLessThan(
+      years[0]!.netCashFlowAnnual,
+    );
   });
 });
 
@@ -782,7 +832,9 @@ describe("exit scenarios", () => {
     };
     const years = buildExitScenarios(input);
     const expectedY5 = Math.round(245_000 * Math.pow(1.03, 5));
-    expect(Math.abs(years[4]!.propertyValue - expectedY5)).toBeLessThanOrEqual(1);
+    expect(Math.abs(years[4]!.propertyValue - expectedY5)).toBeLessThanOrEqual(
+      1,
+    );
   });
 
   it("totalProfit = netSaleProceeds + cumulativeCashFlow + cumulativeTaxBenefit - initialInvestment - exitTax", () => {
@@ -796,8 +848,12 @@ describe("exit scenarios", () => {
       monthlyPayment: 1_304,
       downPayment: 49_000,
       closingCosts: 7_350,
-      cumulativeCashFlowByYear: [4000, 8000, 12000, 16000, 20000, 24000, 28000, 32000, 36000, 40000],
-      cumulativeTaxBenefitByYear: [1500, 3000, 4500, 6000, 7500, 9000, 10500, 12000, 13500, 15000],
+      cumulativeCashFlowByYear: [
+        4000, 8000, 12000, 16000, 20000, 24000, 28000, 32000, 36000, 40000,
+      ],
+      cumulativeTaxBenefitByYear: [
+        1500, 3000, 4500, 6000, 7500, 9000, 10500, 12000, 13500, 15000,
+      ],
     };
     const years = buildExitScenarios(input);
     const y10 = years[9]!;
@@ -821,12 +877,17 @@ describe("exit scenarios", () => {
       monthlyPayment: 1_304,
       downPayment: 49_000,
       closingCosts: 7_350,
-      cumulativeCashFlowByYear: Array(10).fill(0).map((_, i) => (i + 1) * 4000),
+      cumulativeCashFlowByYear: Array(10)
+        .fill(0)
+        .map((_, i) => (i + 1) * 4000),
       cumulativeTaxBenefitByYear: Array(10).fill(0),
     };
     const lean = buildExitScenarios(base)[9]!;
     // $40k rehab pushes total cash in to 49k + 7.35k + 40k = 96,350.
-    const withRehab = buildExitScenarios({ ...base, initialCashInvested: 96_350 })[9]!;
+    const withRehab = buildExitScenarios({
+      ...base,
+      initialCashInvested: 96_350,
+    })[9]!;
     expect(withRehab.totalProfit).toBe(lean.totalProfit - 40_000);
   });
 
@@ -870,7 +931,7 @@ describe("BRRRR analysis", () => {
       refiTermYears: 30,
       closingCostsPctAcq: 3,
       closingCostsRefiPct: 2,
-      downPaymentPct: 100,           // all-cash acquisition
+      downPaymentPct: 100, // all-cash acquisition
       holdMonths: 6,
       monthlyCarryingCost: 500,
       postRefiMonthlyOpEx: 800,
@@ -915,7 +976,7 @@ describe("BRRRR analysis", () => {
       refiTermYears: 30,
       closingCostsPctAcq: 3,
       closingCostsRefiPct: 2,
-      downPaymentPct: 100,            // all cash, no original loan to pay off
+      downPaymentPct: 100, // all cash, no original loan to pay off
       holdMonths: 6,
       monthlyCarryingCost: 200,
       postRefiMonthlyOpEx: 600,
@@ -972,7 +1033,7 @@ describe("BRRRR analysis", () => {
       refiTermYears: 30,
       closingCostsPctAcq: 3,
       closingCostsRefiPct: 2,
-      downPaymentPct: 100,           // all-cash acquisition
+      downPaymentPct: 100, // all-cash acquisition
       holdMonths: 6,
       monthlyCarryingCost: 500,
       postRefiMonthlyOpEx: 800,
@@ -1013,6 +1074,21 @@ describe("fix-and-flip analysis", () => {
     expect(estimateFixFlipCarryingCost(values, result, 25)).toBe(1_900);
     // The no-result fallback follows the same input-mode contract.
     expect(estimateFixFlipCarryingCost(values, null, 25)).toBe(1_900);
+  });
+
+  it("preserves an explicit 0% acquisition rate in the carry screen", () => {
+    const values = baseSingleFamily({
+      purchasePrice: 240_000,
+      interestRate: 0,
+      propertyTaxInputMode: "annual",
+      propertyTaxAnnual: 0,
+      insuranceInputMode: "monthly",
+      insuranceMonthly: 0,
+      utilitiesMonthly: 0,
+    });
+    const result = calculateAnalysis(values);
+    expect(estimateFixFlipCarryingCost(values, result, 25)).toBe(0);
+    expect(estimateFixFlipCarryingCost(values, null, 25)).toBe(0);
   });
 
   it("breakEvenArv satisfies ARV × (1 - sellPct) = total cost ex-selling", () => {
@@ -1081,8 +1157,12 @@ describe("end-to-end sanity check (Philadelphia $245k deal)", () => {
   });
 
   it("hand-derived: cap rate is independent of financing", () => {
-    const financed = calculateAnalysis(baseSingleFamily({ downPaymentPct: 20 }));
-    const allCash = calculateAnalysis(baseSingleFamily({ downPaymentPct: 100 }));
+    const financed = calculateAnalysis(
+      baseSingleFamily({ downPaymentPct: 20 }),
+    );
+    const allCash = calculateAnalysis(
+      baseSingleFamily({ downPaymentPct: 100 }),
+    );
     expect(Math.abs(financed.capRate - allCash.capRate)).toBeLessThan(0.01);
   });
 
@@ -1100,7 +1180,10 @@ describe("property tax input mode", () => {
   it("percent mode (and legacy snapshots with no mode) is byte-identical to before", () => {
     const base = calculateAnalysis(baseSingleFamily());
     const explicitPercent = calculateAnalysis(
-      baseSingleFamily({ propertyTaxInputMode: "percent", propertyTaxAnnual: 5_000 })
+      baseSingleFamily({
+        propertyTaxInputMode: "percent",
+        propertyTaxAnnual: 5_000,
+      }),
     );
     // 245,000 * 1.1% / 12 = 224.58… → 225
     expect(base.propertyTax).toBe(225);
@@ -1111,14 +1194,20 @@ describe("property tax input mode", () => {
 
   it("annual mode uses the actual bill / 12", () => {
     const r = calculateAnalysis(
-      baseSingleFamily({ propertyTaxInputMode: "annual", propertyTaxAnnual: 4_200 })
+      baseSingleFamily({
+        propertyTaxInputMode: "annual",
+        propertyTaxAnnual: 4_200,
+      }),
     );
     expect(r.propertyTax).toBe(350);
   });
 
   it("annual mode with a blank bill falls back to the percent estimate", () => {
     const r = calculateAnalysis(
-      baseSingleFamily({ propertyTaxInputMode: "annual", propertyTaxAnnual: undefined })
+      baseSingleFamily({
+        propertyTaxInputMode: "annual",
+        propertyTaxAnnual: undefined,
+      }),
     );
     expect(r.propertyTax).toBe(225);
   });
@@ -1126,32 +1215,46 @@ describe("property tax input mode", () => {
   it("propertyTaxPctEffective reports the % the math actually used", () => {
     // Percent mode: the typed % (or the 1.1 default when blank) passes through.
     expect(
-      calculateAnalysis(baseSingleFamily({ propertyTaxPct: 2.05 })).propertyTaxPctEffective
+      calculateAnalysis(baseSingleFamily({ propertyTaxPct: 2.05 }))
+        .propertyTaxPctEffective,
     ).toBe(2.05);
     expect(
-      calculateAnalysis(baseSingleFamily({ propertyTaxPct: undefined })).propertyTaxPctEffective
+      calculateAnalysis(baseSingleFamily({ propertyTaxPct: undefined }))
+        .propertyTaxPctEffective,
     ).toBe(1.1);
     // Annual-$ mode: derived from the bill — NOT the unused percent field
     // (the PDF assumptions line used to print "0%" and the saved column
     // fabricated 1.1% from exactly this gap).
     const annual = calculateAnalysis(
-      baseSingleFamily({ propertyTaxInputMode: "annual", propertyTaxAnnual: 4_900 })
+      baseSingleFamily({
+        propertyTaxInputMode: "annual",
+        propertyTaxAnnual: 4_900,
+      }),
     );
     // 4,900 / 245,000 × 100 = 2%
     expect(annual.propertyTaxPctEffective).toBeCloseTo(2, 10);
     // Blank bill in annual mode falls back to the percent path.
     const blankBill = calculateAnalysis(
-      baseSingleFamily({ propertyTaxInputMode: "annual", propertyTaxAnnual: undefined })
+      baseSingleFamily({
+        propertyTaxInputMode: "annual",
+        propertyTaxAnnual: undefined,
+      }),
     );
     expect(blankBill.propertyTaxPctEffective).toBe(1.1);
   });
 
   it("the bill flows through cash flow, cap rate, and DSCR consistently", () => {
     const cheap = calculateAnalysis(
-      baseSingleFamily({ propertyTaxInputMode: "annual", propertyTaxAnnual: 1_200 })
+      baseSingleFamily({
+        propertyTaxInputMode: "annual",
+        propertyTaxAnnual: 1_200,
+      }),
     );
     const dear = calculateAnalysis(
-      baseSingleFamily({ propertyTaxInputMode: "annual", propertyTaxAnnual: 9_600 })
+      baseSingleFamily({
+        propertyTaxInputMode: "annual",
+        propertyTaxAnnual: 9_600,
+      }),
     );
     // $700/mo more tax → exactly $700/mo less cash flow.
     expect(cheap.netCashFlow - dear.netCashFlow).toBe(700);

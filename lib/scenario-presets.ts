@@ -21,7 +21,12 @@ import { isStrategyKind, type StrategyKind } from "@/lib/strategy-kinds";
 /** Per-strategy assumption overrides (only the fields listed above). */
 const PRESETS: Record<
   StrategyKind,
-  Partial<Pick<InvestmentFormValues, "downPaymentPct" | "mgmtPct" | "vacancyPct" | "maintenancePct">>
+  Partial<
+    Pick<
+      InvestmentFormValues,
+      "downPaymentPct" | "mgmtPct" | "vacancyPct" | "maintenancePct"
+    >
+  >
 > = {
   buy_hold: {},
   // Owner-occupant financing — the house-hack advantage.
@@ -41,12 +46,15 @@ const PRESETS: Record<
 
 const DESCRIPTIONS: Record<StrategyKind, string | null> = {
   buy_hold: null,
-  house_hack: "Sets the down payment to 3.5% (owner-occupant financing).",
-  brrrr: "Sets 25% down (a typical post-refinance 75% LTV). Model the rehab + refi in the BRRRR card.",
-  flip: "Starts as a copy of this deal — model the flip in the Fix & Flip card.",
-  section_8: "Lowers vacancy to 3% for stable voucher tenancy. Set rent to your area's HUD Fair Market Rent.",
+  house_hack:
+    "Requires an Owner Occupant analysis with one owner unit, then sets the down payment to 3.5%.",
+  brrrr:
+    "Requires a Single Family analysis. Sets 25% down; complete rehab and refinance assumptions in the BRRRR card.",
+  flip: "Requires a Single Family analysis. Starts as a copy — complete the sale assumptions in the Fix & Flip card.",
+  section_8:
+    "Lowers vacancy to 3% for stable voucher tenancy. Set rent to your area's HUD Fair Market Rent.",
   mtr: "Raises management, vacancy, and maintenance for furnished mid-term operations. Set your furnished monthly rent.",
-  str: "Raises management to 22% and vacancy to 28% for short-term operations. Set your ADR × occupancy as the monthly rent.",
+  str: "Requires a Short-term analysis with nightly rate and occupancy, then raises management to 22% and vacancy to 28%.",
 };
 
 /**
@@ -55,16 +63,38 @@ const DESCRIPTIONS: Record<StrategyKind, string | null> = {
  */
 export function applyStrategyPreset(
   values: InvestmentFormValues,
-  kind: StrategyKind | null | undefined
+  kind: StrategyKind | null | undefined,
 ): InvestmentFormValues {
   if (!kind) return values;
   const overrides = PRESETS[kind];
-  if (!overrides || Object.keys(overrides).length === 0) return values;
-  return { ...values, ...overrides };
+  const clearsShortTermIncome =
+    kind !== "str" &&
+    (values.avgDailyRate != null ||
+      values.occupancyPct != null ||
+      values.strFurnishingCost != null);
+  if (
+    (!overrides || Object.keys(overrides).length === 0) &&
+    !clearsShortTermIncome
+  ) {
+    return values;
+  }
+  return {
+    ...values,
+    ...overrides,
+    ...(clearsShortTermIncome
+      ? {
+          avgDailyRate: undefined,
+          occupancyPct: undefined,
+          strFurnishingCost: undefined,
+        }
+      : {}),
+  };
 }
 
 /** Human description of what a preset changes (null = no changes / plain copy).
  *  Accepts a raw string (e.g. a <select> value) and guards it. */
-export function describeStrategyPreset(kind: string | null | undefined): string | null {
+export function describeStrategyPreset(
+  kind: string | null | undefined,
+): string | null {
   return isStrategyKind(kind) ? DESCRIPTIONS[kind] : null;
 }

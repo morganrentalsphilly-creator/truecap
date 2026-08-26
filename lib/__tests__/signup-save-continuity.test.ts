@@ -4,6 +4,8 @@ import { join } from "node:path";
 
 const root = process.cwd();
 const read = (path: string) => readFileSync(join(root, path), "utf8");
+const normalizeSource = (source: string) =>
+  source.replace(/\s+/g, "").replace(/,([)}\]])/g, "$1");
 
 describe("guest analysis signup continuity", () => {
   it("arms save intent for Google, email signup, and login with a safe return", () => {
@@ -16,10 +18,10 @@ describe("guest analysis signup continuity", () => {
     expect(prompt).toContain('href="/auth/login?next=/"');
     expect(prompt).toContain('onBeforeStart={() => beginSignup("google")}');
     expect(dashboard).toContain(
-      "onPrepareAuthSave(adoptedMaoTarget, adoptedMaoTargetSource)"
+      "onPrepareAuthSave(adoptedMaoTarget, adoptedMaoTargetSource)",
     );
     expect(dashboard).toContain(
-      "const targetAdopted = isAdoptedOfferCeilingTargetSource("
+      "const targetAdopted = isAdoptedOfferCeilingTargetSource(",
     );
     expect(googleButton).toContain("onBeforeStart?.()");
   });
@@ -27,35 +29,45 @@ describe("guest analysis signup continuity", () => {
   it("restores, runs, and persists before acknowledging the intent", () => {
     const calculator = read("components/investcalc/investcalc-page.tsx");
     expect(calculator).toContain("pendingSaveIntentMatchesDraft(normalized)");
-    expect(calculator).toContain("if (hasPendingSaveIntent()) clearPendingSaveIntent()");
-    expect(calculator).toContain("performSaveDeal({ autoAfterAuth: true })");
+    expect(calculator).toContain(
+      "if (hasPendingSaveIntent()) clearPendingSaveIntent()",
+    );
+    expect(normalizeSource(calculator)).toContain(
+      normalizeSource("performSaveDeal({ autoAfterAuth: true })"),
+    );
     expect(calculator).toContain("clearPendingSaveIntent()");
     expect(calculator).toContain("writeCalcDraftWithMaoTarget(");
     expect(calculator).toContain(
-      "isAdoptedOfferCeilingTargetSource(normalizedSource)"
+      "isAdoptedOfferCeilingTargetSource(normalizedSource)",
     );
     expect(calculator).toContain(
-      'exactTarget ? normalizedSource : "screening-defaults"'
+      'exactTarget ? normalizedSource : "screening-defaults"',
     );
     // The adoption check now also excludes sample-seeded example targets
     // (locked decision; see sample-target-adoption-guard.test.ts).
-    expect(calculator).toContain(
-      "const targetWasAdopted =\n        !sampleSeededTarget &&\n        isAdoptedOfferCeilingTargetSource("
+    expect(normalizeSource(calculator)).toContain(
+      normalizeSource(
+        "const targetWasAdopted = !sampleSeededTarget && isAdoptedOfferCeilingTargetSource(",
+      ),
     );
     expect(calculator).toContain(
-      "const maxOfferTargetSnapshot = targetWasAdopted"
-    );
-    expect(calculator).toContain("autoAfterAuth: duplicateCollision.autoAfterAuth");
-    expect(calculator).toContain(
-      "options.existingIdOverride ??"
+      "const maxOfferTargetSnapshot = targetWasAdopted",
     );
     expect(calculator).toContain(
-      "options.autoAfterAuth || options.forceInsert ? null : savedDealId"
+      "autoAfterAuth: duplicateCollision.autoAfterAuth",
+    );
+    expect(calculator).toContain("options.existingIdOverride ??");
+    expect(calculator).toContain(
+      "options.autoAfterAuth || options.forceInsert ? null : savedDealId",
     );
     expect(calculator).toContain("isAutoSaveResuming");
     expect(calculator).toContain("if (saveInFlightRef.current) return false");
     expect(calculator).toContain("saveInFlightRef.current = false");
-    expect(calculator).toContain("const cancelledAutoSave = Boolean(duplicateCollision?.autoAfterAuth)");
+    expect(normalizeSource(calculator)).toContain(
+      normalizeSource(
+        "const cancelledAutoSave = Boolean(duplicateCollision?.autoAfterAuth)",
+      ),
+    );
     expect(calculator).toContain('title: "Automatic save canceled"');
     expect(calculator).toContain("setIsAutoSaveResuming(false)");
     expect(calculator).toContain('trackEvent("analysis_saved_after_signup"');

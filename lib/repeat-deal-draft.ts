@@ -12,7 +12,7 @@ import {
  * source is never mutated so the saved historical record remains frozen.
  */
 export function buildRepeatDealDraft(
-  source: InvestmentFormValues
+  source: InvestmentFormValues,
 ): Partial<InvestmentFormValues> {
   return {
     ...source,
@@ -39,6 +39,11 @@ export function buildRepeatDealDraft(
     occupancyPct: undefined,
     strFurnishingCost: undefined,
     rehabBudget: undefined,
+    strategyArv: undefined,
+    // Timing, refinance terms, selling-cost policy, and acquisition leverage
+    // are reusable strategy assumptions—the action explicitly promises the
+    // next deal will keep them. Property-specific dollar estimates do not.
+    fixFlipCarryMonthly: undefined,
 
     // Tax and insurance may have been derived from the prior address even
     // when represented as percentages. Clear both forms so the next property

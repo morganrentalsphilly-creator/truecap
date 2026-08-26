@@ -27,13 +27,17 @@ import type { EnrichmentProvenanceInput } from "@/lib/data-confidence";
  *  (the chip reuses the exact handleStepNavigate mechanics); "extras" is the
  *  bathrooms/sqft block inside the advanced region (#step-extras), which has
  *  no analyzer step of its own. */
-export type AssumptionChipTarget = "property" | "financing" | "expenses" | "extras";
+export type AssumptionChipTarget =
+  | "property"
+  | "financing"
+  | "expenses"
+  | "extras";
 
 export type AssumptionChipBadge = {
   /** Provenance vocabulary shared with the result-state strip, plus "play"
    *  for values written by an active strategy and "default" for untouched
    *  product starting values. */
-  kind: "live" | "hud" | "state" | "yours" | "play" | "default";
+  kind: "live" | "hud" | "state" | "yours" | "play" | "template" | "default";
   /** Display text, e.g. "live rate", "PA", "yours", "BRRRR". */
   text: string;
 };
@@ -46,6 +50,8 @@ export type AssumptionChip = {
   /** Template chip renders a ✓ when true. */
   applied?: boolean;
   target: AssumptionChipTarget;
+  /** Exact control that receives focus after the chip reveals its panel. */
+  focusFieldId?: string;
   /**
    * Changes exactly when an auto-fill lands on this chip (enrichment writes
    * its provenance / a template links its id). The strip pulses a chip when
@@ -61,6 +67,7 @@ export type AssumptionChipValues = {
   propertyType?: string;
   downPaymentPct?: unknown;
   interestRate?: unknown;
+  loanTermYears?: unknown;
   propertyTaxInputMode?: string;
   propertyTaxPct?: unknown;
   propertyTaxAnnual?: unknown;
@@ -78,6 +85,10 @@ export type AssumptionChipOptions = {
   /** True when the user touched any operating-expense field (same flag the
    *  result strip receives) — flips insurance/vacancy badges to "yours". */
   expensesEdited: boolean;
+  /** Exact fields the user edited in this or a restored session. This is
+   * intentionally per-field: editing HOA must not relabel vacancy or
+   * insurance as if the user changed those values. */
+  userEditedFields?: ReadonlySet<string>;
   /** Resolved display name for values.templateId (see resolveTemplateName). */
   templateName: string | null;
   /** True when a "What's your play?" strategy is active: the property-type +
@@ -90,6 +101,10 @@ export type AssumptionChipOptions = {
    *  are RHF-dirty (dirtiness is load-bearing for the template auto-apply).
    *  Null/absent = no play applied this session. */
   strategyPlay?: { label: string; ownedFields: ReadonlySet<string> } | null;
+  /** Fields whose current values still match the linked template. A field
+   * drops out as soon as the user changes it, so "template" is always a
+   * value-bound statement rather than stale click history. */
+  templateOwnedFields?: ReadonlySet<string>;
 };
 
 /** Number-or-null coercion for RHF values (NaN / "" / non-numeric → null). */
@@ -125,10 +140,10 @@ export function computeExpensesEdited(
   /** Fields still owned by an active play's starter set (see
    *  computeStrategyOwnedFields): dirty on purpose but NOT user edits, so
    *  they must not flip the "yours" provenance badge (BROWSER-2). */
-  strategyOwnedFields?: ReadonlySet<string>
+  strategyOwnedFields?: ReadonlySet<string>,
 ): boolean {
   return EXPENSE_EDIT_FIELDS.some(
-    (f) => Boolean(dirtyFields[f]) && !strategyOwnedFields?.has(f)
+    (f) => Boolean(dirtyFields[f]) && !strategyOwnedFields?.has(f),
   );
 }
 
@@ -148,7 +163,7 @@ export type StrategyAppliedSnapshot = {
  */
 export function computeStrategyOwnedFields(
   applied: StrategyAppliedSnapshot | null | undefined,
-  values: Record<string, unknown>
+  values: Record<string, unknown>,
 ): Set<string> {
   const owned = new Set<string>();
   if (!applied) return owned;
@@ -156,10 +171,26 @@ export function computeStrategyOwnedFields(
     const a = num(appliedValue);
     const c = num(values[field]);
     const stillApplied =
-      a != null && c != null ? Math.abs(a - c) < 1e-9 : values[field] === appliedValue;
+      a != null && c != null
+        ? Math.abs(a - c) < 1e-9
+        : values[field] === appliedValue;
     if (stillApplied) owned.add(field);
   }
   return owned;
+}
+
+/** Generic value-bound ownership used for linked templates. Restores,
+ * explicit picks and auto-applies all converge on the same rule: a source
+ * owns a field only while the current value still equals the value it
+ * supplied. */
+export function computeValueBoundOwnedFields(
+  appliedFields: Record<string, unknown>,
+  values: Record<string, unknown>,
+): Set<string> {
+  return computeStrategyOwnedFields(
+    { label: "applied values", fields: appliedFields },
+    values,
+  );
 }
 
 /** templateId → display name: the loaded Pro template list first, then the
@@ -168,7 +199,7 @@ export function computeStrategyOwnedFields(
 export function resolveTemplateName(
   templateId: string | null | undefined,
   options: ReadonlyArray<{ id: string; templateName: string }>,
-  fallback: { id: string; templateName: string } | null | undefined
+  fallback: { id: string; templateName: string } | null | undefined,
 ): string | null {
   if (!templateId) return null;
   const match = options.find((t) => t.id === templateId);
@@ -180,14 +211,13 @@ export function resolveTemplateName(
 export function buildAssumptionChips(
   values: AssumptionChipValues,
   provenance: EnrichmentProvenanceInput,
-  opts: AssumptionChipOptions
+  opts: AssumptionChipOptions,
 ): AssumptionChip[] {
   // One vocabulary for sources on both sides of Calculate: reuse the
   // result-strip's entry builder instead of re-deriving manual/auto flags.
   const entries = buildAssumptionEntries(provenance, opts.expensesEdited);
   const rateEntry = entries.find((e) => e.label === "Mortgage rate");
   const taxEntry = entries.find((e) => e.label === "Property tax");
-  const expensesEntry = entries.find((e) => e.label === "Expenses");
 
   const chips: AssumptionChip[] = [];
 
@@ -196,89 +226,156 @@ export function buildAssumptionChips(
   // defaults, not user edits (BROWSER-2). Enrichment ("live"/"state") still
   // wins where present: it's fresher, address-specific data.
   const play = opts.strategyPlay ?? null;
-  const playOwns = (...fields: string[]) =>
-    Boolean(play && fields.some((f) => play.ownedFields.has(f)));
-  const playBadge: AssumptionChipBadge | null = play
-    ? { kind: "play", text: play.label }
-    : null;
+  const playOwned = (...fields: string[]) =>
+    play ? fields.filter((field) => play.ownedFields.has(field)) : [];
+  const templateOwned = (...fields: string[]) =>
+    fields.filter((field) => opts.templateOwnedFields?.has(field));
+  const userEdited = (...fields: string[]) =>
+    fields.some((field) => opts.userEditedFields?.has(field));
+  const templateBadge: AssumptionChipBadge = {
+    kind: "template",
+    text: "template",
+  };
 
   // ── Financing: "20% down @ 6.9%" (+ "live rate" when FRED-filled) ──────
   const down = num(values.downPaymentPct);
   const rate = num(values.interestRate);
+  const term = num(values.loanTermYears);
   const rateIsLive = Boolean(rateEntry && !rateEntry.manual);
+  const templateFinancing = templateOwned("downPaymentPct", "interestRate");
+  const playFinancing = playOwned("downPaymentPct", "interestRate");
+  const financingIsCustom =
+    userEdited("downPaymentPct", "interestRate", "loanTermYears") ||
+    down !== 20 ||
+    rate !== 6.75 ||
+    term !== 30;
+  const scopedFinancingSource = (
+    fields: string[],
+    source: "template" | "play",
+  ): AssumptionChipBadge | null => {
+    if (fields.length === 0) return null;
+    const detail =
+      fields.length === 2
+        ? "down + rate"
+        : fields[0] === "interestRate"
+          ? "rate"
+          : "down";
+    return source === "template"
+      ? { kind: "template", text: `template ${detail}` }
+      : play
+        ? { kind: "play", text: `${play.label}: ${detail}` }
+        : null;
+  };
   chips.push({
     id: "financing",
     label:
       down != null && rate != null
-        ? `${fmtPct(down)}% down @ ${fmtPct(rate)}%`
+        ? `${fmtPct(down)}% down · ${fmtPct(rate)}% interest${term != null ? ` · ${fmtPct(term)} years` : ""}`
         : "Financing —",
     badge: rateIsLive
       ? { kind: "live", text: "live rate" }
-      : playOwns("interestRate", "downPaymentPct")
-        ? playBadge
-        : provenance.interestRate
-          ? { kind: "yours", text: "yours" }
-          : { kind: "default", text: "default" },
+      : (scopedFinancingSource(templateFinancing, "template") ??
+        scopedFinancingSource(playFinancing, "play") ??
+        (provenance.interestRate || financingIsCustom
+          ? { kind: "yours", text: "custom financing" }
+          : { kind: "default", text: "TrueCap default" })),
     target: "financing",
+    focusFieldId: "downPaymentPct",
     pulseKey: rateIsLive ? "rate:fred" : null,
   });
 
   // ── Taxes: percent, or the typed annual bill when that mode wins ───────
   const taxAnnual = num(values.propertyTaxAnnual);
-  const taxAnnualMode = values.propertyTaxInputMode === "annual" && taxAnnual != null;
+  const taxAnnualMode =
+    values.propertyTaxInputMode === "annual" && taxAnnual != null;
   const taxIsState = Boolean(taxEntry && !taxEntry.manual);
+  const templateOwnsActiveTax =
+    !taxAnnualMode && templateOwned("propertyTaxPct").length === 1;
+  const playOwnsActiveTax =
+    !taxAnnualMode && playOwned("propertyTaxPct").length === 1;
+  const taxIsCustom =
+    taxAnnualMode ||
+    userEdited("propertyTaxPct", "propertyTaxAnnual", "propertyTaxInputMode") ||
+    (num(values.propertyTaxPct) ?? 1.1) !== 1.1;
   chips.push({
     id: "taxes",
     label: taxAnnualMode
       ? `Taxes $${fmtMoney(taxAnnual)}/yr`
-      : `Taxes ${fmtPct(num(values.propertyTaxPct) ?? 1.1)}%`,
+      : `Taxes ${fmtPct(num(values.propertyTaxPct) ?? 1.1)}% of price/year`,
     badge: taxIsState
-      ? { kind: "state", text: provenance.propertyTaxPct?.detail ?? "state" }
-      : playOwns("propertyTaxPct")
-        ? playBadge
-        : provenance.propertyTaxPct
-          ? { kind: "yours", text: "yours" }
-          : { kind: "default", text: "default" },
+      ? {
+          kind: "state",
+          text: `${provenance.propertyTaxPct?.detail ?? "State"} state benchmark`,
+        }
+      : templateOwnsActiveTax
+        ? templateBadge
+        : playOwnsActiveTax && play
+          ? { kind: "play", text: play.label }
+          : provenance.propertyTaxPct || taxIsCustom
+            ? { kind: "yours", text: "yours" }
+            : { kind: "default", text: "TrueCap default" },
     target: "expenses",
+    focusFieldId: "propertyTaxAmount",
     pulseKey: taxIsState ? "tax:state" : null,
   });
 
   // ── Insurance + vacancy: smart defaults unless the user edited them ────
-  const expensesYours = Boolean(expensesEntry?.manual);
+  // Never use the result strip's aggregate "expenses were edited" flag to
+  // label a specific chip. Each visible value owns its own provenance.
   const insMo = num(values.insuranceMonthly);
+  const insuranceUsesMonthly =
+    values.insuranceInputMode === "monthly" && insMo != null;
+  const activeInsuranceField = insuranceUsesMonthly
+    ? "insuranceMonthly"
+    : "insurancePct";
+  const templateOwnsActiveInsurance =
+    templateOwned(activeInsuranceField).length === 1;
+  const playOwnsActiveInsurance = playOwned(activeInsuranceField).length === 1;
+  const insuranceIsCustom =
+    insuranceUsesMonthly ||
+    userEdited("insuranceInputMode", activeInsuranceField) ||
+    (num(values.insurancePct) ?? 0.5) !== 0.5;
   chips.push({
     id: "insurance",
     label:
       values.insuranceInputMode === "monthly" && insMo != null
         ? `Insurance $${fmtMoney(insMo)}/mo`
-        : `Insurance ${fmtPct(num(values.insurancePct) ?? 0.5)}%`,
-    badge: playOwns("insurancePct", "insuranceMonthly")
-      ? playBadge
-      : expensesYours
-        ? { kind: "yours", text: "yours" }
-        : { kind: "default", text: "default" },
+        : `Insurance ${fmtPct(num(values.insurancePct) ?? 0.5)}% of price/year`,
+    badge: templateOwnsActiveInsurance
+      ? templateBadge
+      : playOwnsActiveInsurance && play
+        ? { kind: "play", text: play.label }
+        : insuranceIsCustom
+          ? { kind: "yours", text: "yours" }
+          : { kind: "default", text: "TrueCap default" },
     target: "expenses",
+    focusFieldId: "insuranceAmount",
     pulseKey: null,
   });
   chips.push({
     id: "vacancy",
-    label: `Vacancy ${fmtPct(num(values.vacancyPct) ?? 5)}%`,
-    badge: playOwns("vacancyPct")
-      ? playBadge
-      : expensesYours
-        ? { kind: "yours", text: "yours" }
-        : { kind: "default", text: "default" },
+    label: `Vacancy ${fmtPct(num(values.vacancyPct) ?? 5)}% of rent`,
+    badge:
+      templateOwned("vacancyPct").length === 1
+        ? templateBadge
+        : playOwned("vacancyPct").length === 1 && play
+          ? { kind: "play", text: play.label }
+          : userEdited("vacancyPct") || (num(values.vacancyPct) ?? 5) !== 5
+            ? { kind: "yours", text: "yours" }
+            : { kind: "default", text: "TrueCap default" },
     target: "expenses",
+    focusFieldId: "vacancyPct",
     pulseKey: null,
   });
 
   // ── Template: only when a template is linked and its card is mounted ───
   if (values.templateId && !opts.hasActiveStrategy) {
+    const templateStillOwnsValues = (opts.templateOwnedFields?.size ?? 0) > 0;
     chips.push({
       id: "template",
-      label: `Template: ${opts.templateName ?? "applied"}`,
+      label: `${templateStillOwnsValues ? "Template" : "Template reference"}: ${opts.templateName ?? "unavailable"}`,
       badge: null,
-      applied: true,
+      applied: templateStillOwnsValues,
       target: "property",
       pulseKey: `tpl:${values.templateId}`,
     });
@@ -293,7 +390,8 @@ export function buildAssumptionChips(
     // !activeStrategy) and #step-extras only holds baths/sqft — don't
     // advertise a value the user can't edit where the tap lands.
     const yearBuiltEditable = !(isSingleFamily && opts.hasActiveStrategy);
-    if (yearBuiltEditable && yearBuilt != null && yearBuilt > 0) parts.push(`Built ${yearBuilt}`);
+    if (yearBuiltEditable && yearBuilt != null && yearBuilt > 0)
+      parts.push(`Built ${yearBuilt}`);
     if (isSingleFamily) {
       const baths = num(values.bathrooms);
       const sqft = num(values.sqft);

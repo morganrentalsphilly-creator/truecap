@@ -16,7 +16,9 @@ import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
 
 /** Same canonical single-family fixture as calc-analysis.test.ts. */
-function baseDeal(overrides: Partial<InvestmentFormValues> = {}): InvestmentFormValues {
+function baseDeal(
+  overrides: Partial<InvestmentFormValues> = {},
+): InvestmentFormValues {
   return {
     propertyType: "single-family",
     address: "1205 N 5th St, Philadelphia, PA 19122, USA",
@@ -55,7 +57,9 @@ function baseDeal(overrides: Partial<InvestmentFormValues> = {}): InvestmentForm
 
 const ASOF = new Date("2026-07-06T12:00:00Z");
 
-function row(overrides: Partial<WeeklySummaryDealRow> = {}): WeeklySummaryDealRow {
+function row(
+  overrides: Partial<WeeklySummaryDealRow> = {},
+): WeeklySummaryDealRow {
   return {
     id: overrides.id ?? "deal-1",
     title: "N 5th St",
@@ -72,7 +76,9 @@ function row(overrides: Partial<WeeklySummaryDealRow> = {}): WeeklySummaryDealRo
   };
 }
 
-function ctx(overrides: Partial<WeeklySummaryContext> = {}): WeeklySummaryContext {
+function ctx(
+  overrides: Partial<WeeklySummaryContext> = {},
+): WeeklySummaryContext {
   return {
     ratePair: null,
     buyBoxes: [],
@@ -103,7 +109,7 @@ describe("buildWeeklySummary — skip rules", () => {
   it("returns null when every deal is passed (nothing to say)", () => {
     const payload = buildWeeklySummary(
       [row({ pipeline_stage: "passed", is_archived: true })],
-      ctx()
+      ctx(),
     );
     expect(payload).toBeNull();
   });
@@ -119,17 +125,19 @@ describe("buildWeeklySummary — active pipeline", () => {
     const fresh = recomputeSavedDealVerdict(baseDeal());
     expect(fresh).not.toBeNull();
     expect(payload!.pipeline!.monthlyCashFlow).toBe(
-      Math.round(fresh!.netCashFlowMonthly * 2)
+      Math.round(fresh!.netCashFlowMonthly * 2),
     );
     expect(payload!.methodologyNotes).toContain(
-      `Legacy analysis · recomputed with current v${TRUECAP_UNDERWRITING_STANDARD_VERSION}.`
+      `Legacy analysis · recomputed with current v${TRUECAP_UNDERWRITING_STANDARD_VERSION}.`,
     );
   });
 
-  it("falls back to the stored net_cash_flow_monthly when the snapshot is garbage", () => {
-    const rows = [row({ form_snapshot: { junk: true }, net_cash_flow_monthly: 275 })];
+  it("omits malformed inputs instead of publishing a stored result fallback", () => {
+    const rows = [
+      row({ form_snapshot: { junk: true }, net_cash_flow_monthly: 275 }),
+    ];
     const payload = buildWeeklySummary(rows, ctx());
-    expect(payload!.pipeline!.monthlyCashFlow).toBe(275);
+    expect(payload).toBeNull();
   });
 
   it("excludes closed and passed deals from the pipeline", () => {
@@ -171,15 +179,20 @@ describe("buildWeeklySummary — owned portfolio", () => {
       close_date: closeDate,
       form_snapshot: baseDeal(),
     });
-    const summary = computeOwnedEquity(basis!.input, monthsOwnedBetween(basis!.closeDate, ASOF));
+    const summary = computeOwnedEquity(
+      basis!.input,
+      monthsOwnedBetween(basis!.closeDate, ASOF),
+    );
     expect(payload!.owned!.totalEquity).toBe(Math.round(summary!.equity));
-    expect(payload!.owned!.equityGain).toBe(Math.round(summary!.totalEquityGain));
+    expect(payload!.owned!.equityGain).toBe(
+      Math.round(summary!.totalEquityGain),
+    );
   });
 
   it("counts undated owned deals but reports null equity", () => {
     const payload = buildWeeklySummary(
       [row({ pipeline_stage: "closed", is_completed: true, close_date: null })],
-      ctx()
+      ctx(),
     );
     expect(payload!.owned!.count).toBe(1);
     expect(payload!.owned!.datedCount).toBe(0);
@@ -200,7 +213,7 @@ describe("buildWeeklySummary — rate mover", () => {
     const rows = [row({ form_snapshot: baseDeal({ interestRate: 8.5 }) })];
     const payload = buildWeeklySummary(
       rows,
-      ctx({ ratePair: { current: 5.5, previous: 5.75 } })
+      ctx({ ratePair: { current: 5.5, previous: 5.75 } }),
     );
     expect(payload!.rateMover).not.toBeNull();
     expect(payload!.rateMover!.currentRatePct).toBe(5.5);
@@ -219,7 +232,7 @@ describe("buildWeeklySummary — rate mover", () => {
     const rows = [row({ form_snapshot: baseDeal({ interestRate: 8.5 }) })];
     const payload = buildWeeklySummary(
       rows,
-      ctx({ ratePair: { current: 5.5, previous: 5.62 } })
+      ctx({ ratePair: { current: 5.5, previous: 5.62 } }),
     );
     expect(payload!.rateMover).not.toBeNull();
     expect(payload!.rateMover!.weeklyMovePp).toBeCloseTo(-0.12, 6);
@@ -231,7 +244,7 @@ describe("buildWeeklySummary — rate mover", () => {
     // Saved at 7%, market at 7.05% — below the per-deal delta, no story.
     const payload = buildWeeklySummary(
       [row()],
-      ctx({ ratePair: { current: 7.05, previous: 7.0 } })
+      ctx({ ratePair: { current: 7.05, previous: 7.0 } }),
     );
     expect(payload!.rateMover).not.toBeNull();
     expect(payload!.rateMover!.changedCount).toBe(0);
@@ -241,7 +254,12 @@ describe("buildWeeklySummary — rate mover", () => {
 
 describe("buildWeeklySummary — due this week", () => {
   const items = [
-    { id: "inspection", label: "Inspection", done: false, dueDate: "2026-07-04" }, // overdue
+    {
+      id: "inspection",
+      label: "Inspection",
+      done: false,
+      dueDate: "2026-07-04",
+    }, // overdue
     { id: "appraisal", label: "Appraisal", done: false, dueDate: "2026-07-09" }, // due soon
     { id: "title", label: "Title", done: true, dueDate: "2026-07-01" }, // done → excluded
     { id: "survey", label: "Survey", done: false, dueDate: "2026-09-01" }, // scheduled → excluded
@@ -251,7 +269,7 @@ describe("buildWeeklySummary — due this week", () => {
     const rows = [row({ id: "a" })];
     const payload = buildWeeklySummary(
       rows,
-      ctx({ dueDiligence: [{ analysisId: "a", items }] })
+      ctx({ dueDiligence: [{ analysisId: "a", items }] }),
     );
     expect(payload!.dueItems).toHaveLength(2);
     expect(payload!.dueItems[0]).toMatchObject({
@@ -260,14 +278,20 @@ describe("buildWeeklySummary — due this week", () => {
       itemLabel: "Inspection",
       status: "overdue",
     });
-    expect(payload!.dueItems[1]).toMatchObject({ itemLabel: "Appraisal", status: "due-soon" });
+    expect(payload!.dueItems[1]).toMatchObject({
+      itemLabel: "Appraisal",
+      status: "due-soon",
+    });
   });
 
   it("ignores checklists on closed/passed deals", () => {
-    const rows = [row({ id: "a", pipeline_stage: "closed", is_completed: true }), row({ id: "b" })];
+    const rows = [
+      row({ id: "a", pipeline_stage: "closed", is_completed: true }),
+      row({ id: "b" }),
+    ];
     const payload = buildWeeklySummary(
       rows,
-      ctx({ dueDiligence: [{ analysisId: "a", items }] })
+      ctx({ dueDiligence: [{ analysisId: "a", items }] }),
     );
     expect(payload!.dueItems).toHaveLength(0);
   });
@@ -281,7 +305,7 @@ describe("buildWeeklySummary — due this week", () => {
     }));
     const payload = buildWeeklySummary(
       [row({ id: "a" })],
-      ctx({ dueDiligence: [{ analysisId: "a", items: many }] })
+      ctx({ dueDiligence: [{ analysisId: "a", items: many }] }),
     );
     expect(payload!.dueItems).toHaveLength(WEEKLY_SUMMARY_MAX_DUE_ITEMS);
   });
@@ -294,20 +318,69 @@ describe("buildWeeklySummary — buy-box line", () => {
 
   it("counts passing deals against active boxes with criteria", () => {
     const generous = namedBox({ id: "box-1", minCashFlowMonthly: -10_000 });
-    const payload = buildWeeklySummary([row({ id: "a" }), row({ id: "b" })], ctx({ buyBoxes: [generous] }));
-    expect(payload!.buyBox).toEqual({ passingCount: 2, evaluatedCount: 2, boxCount: 1 });
+    const payload = buildWeeklySummary(
+      [row({ id: "a" }), row({ id: "b" })],
+      ctx({ buyBoxes: [generous] }),
+    );
+    expect(payload!.buyBox).toEqual({
+      passingCount: 2,
+      evaluatedCount: 2,
+      boxCount: 1,
+    });
+  });
+
+  it("uses the validated form snapshot when denormalized Buy Box fields drift", () => {
+    const phillySingleFamily = namedBox({
+      id: "box-canonical-inputs",
+      maxPurchasePrice: 300_000,
+      propertyTypes: ["single-family"],
+      targetStates: ["PA"],
+    });
+    const payload = buildWeeklySummary(
+      [
+        row({
+          // These owner-writable/cache columns deliberately contradict the
+          // released form snapshot and must never drive an emailed claim.
+          address: "1 Market St, San Francisco, CA 94105",
+          property_type: "multi-family",
+          purchase_price: 999_000,
+          form_snapshot: baseDeal(),
+        }),
+      ],
+      ctx({ buyBoxes: [phillySingleFamily] }),
+    );
+
+    expect(payload?.buyBox).toEqual({
+      passingCount: 1,
+      evaluatedCount: 1,
+      boxCount: 1,
+    });
   });
 
   it("fails deals against an impossible box", () => {
     const impossible = namedBox({ id: "box-2", minCashFlowMonthly: 900_000 });
-    const payload = buildWeeklySummary([row()], ctx({ buyBoxes: [impossible] }));
-    expect(payload!.buyBox).toEqual({ passingCount: 0, evaluatedCount: 1, boxCount: 1 });
+    const payload = buildWeeklySummary(
+      [row()],
+      ctx({ buyBoxes: [impossible] }),
+    );
+    expect(payload!.buyBox).toEqual({
+      passingCount: 0,
+      evaluatedCount: 1,
+      boxCount: 1,
+    });
   });
 
   it("ignores inactive boxes and boxes without criteria", () => {
-    const inactive = namedBox({ id: "box-3", minCashFlowMonthly: -10_000, isActive: false });
+    const inactive = namedBox({
+      id: "box-3",
+      minCashFlowMonthly: -10_000,
+      isActive: false,
+    });
     const empty = namedBox({ id: "box-4" }); // no criteria at all
-    const payload = buildWeeklySummary([row()], ctx({ buyBoxes: [inactive, empty] }));
+    const payload = buildWeeklySummary(
+      [row()],
+      ctx({ buyBoxes: [inactive, empty] }),
+    );
     expect(payload!.buyBox).toBeNull();
   });
 });
@@ -318,17 +391,19 @@ describe("weeklySummarySubject", () => {
     const fresh = recomputeSavedDealVerdict(baseDeal())!;
     expect(weeklySummarySubject(payload)).toBe(
       `Your week in deals — 1 active deal, ${fresh.netCashFlowMonthly < 0 ? "-" : ""}$${Math.abs(
-        Math.round(fresh.netCashFlowMonthly)
-      ).toLocaleString("en-US")}/mo pipeline`
+        Math.round(fresh.netCashFlowMonthly),
+      ).toLocaleString("en-US")}/mo pipeline`,
     );
   });
 
   it("falls back to the owned line when there's no pipeline", () => {
     const payload = buildWeeklySummary(
       [row({ pipeline_stage: "closed", is_completed: true })],
-      ctx()
+      ctx(),
     )!;
-    expect(weeklySummarySubject(payload)).toBe("Your week in deals — 1 owned property");
+    expect(weeklySummarySubject(payload)).toBe(
+      "Your week in deals — 1 owned property",
+    );
   });
 });
 

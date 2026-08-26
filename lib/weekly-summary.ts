@@ -12,25 +12,24 @@
  * app/api/cron/send-weekly-summary/route.ts.
  *
  * INVARIANT: every number comes from the SAME lib the dashboard uses —
- * recomputeSavedDealVerdict (recompute-on-read with stored fallback),
+ * recomputeSavedDealVerdict (server recompute from normalized inputs),
  * owned-equity-series, rate-watch, due-diligence, buy-box. The email may
  * never disagree with the product.
  */
 
-import {
-  recomputeSavedDealVerdict,
-  toRecomputedSavedAnalysisSnapshot,
-} from "@/lib/recompute-saved-deal-verdict";
+import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
 import {
   isLegacySavedMethodologyVersion,
-  resolveSavedAnalysisSnapshot,
-  type SavedAnalysisSnapshotResolution,
+  shouldFreezeSavedMethodology,
 } from "@/lib/saved-analysis-methodology";
 import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
 import { resolveOwnedEquityBasis } from "@/lib/owned-equity-series";
 import { computeOwnedEquity, monthsOwnedBetween } from "@/lib/owned-equity";
 import { buildRateWatch } from "@/lib/rate-watch";
-import { RATE_ALERTS_MIN_WEEKLY_MOVE_PP, type RateAlertDeal } from "@/lib/rate-alerts";
+import {
+  RATE_ALERTS_MIN_WEEKLY_MOVE_PP,
+  type RateAlertDeal,
+} from "@/lib/rate-alerts";
 import {
   dueDiligenceItemStatus,
   normalizeDueDiligenceItems,
@@ -51,7 +50,10 @@ import {
   isPipelineStage,
   type PipelineStage,
 } from "@/lib/pipeline";
-import { isReleasedUnderwritingSnapshot } from "@/lib/underwriting-model-release";
+import {
+  isReleasedUnderwritingSnapshot,
+  normalizeReleasedInvestmentFormSnapshot,
+} from "@/lib/underwriting-model-release";
 
 /** Cap the due-deadline list — a summary, not a report. */
 export const WEEKLY_SUMMARY_MAX_DUE_ITEMS = 6;
@@ -167,23 +169,10 @@ function stageForRow(row: WeeklySummaryDealRow): PipelineStage {
   });
 }
 
-/** Recompute-on-read cash flow with stored fallback — the dashboard's
- *  exact pattern (fresh engine number, else the denormalized column). */
-function cashFlowForRow(
-  row: WeeklySummaryDealRow,
-  fresh: ReturnType<typeof recomputeSavedDealVerdict>,
-  resolution: SavedAnalysisSnapshotResolution,
-): number {
-  const stored = Number(resolution.snapshot.netCashFlow);
-  return fresh
-    ? fresh.netCashFlowMonthly
-    : Number.isFinite(stored)
-      ? stored
-      : (row.net_cash_flow_monthly ?? 0);
-}
-
 function isBuyBoxPropertyType(t: unknown): t is BuyBoxPropertyType {
-  return t === "single-family" || t === "multi-family" || t === "owner-occupant";
+  return (
+    t === "single-family" || t === "multi-family" || t === "owner-occupant"
+  );
 }
 
 /** Biggest mover = the changed deal with the largest cash-flow swing. */
@@ -191,7 +180,9 @@ function pickBiggestMover(changed: RateAlertDeal[]): RateAlertDeal | null {
   let best: RateAlertDeal | null = null;
   let bestSwing = -1;
   for (const deal of changed) {
-    const swing = Math.abs(deal.after.monthlyCashFlow - deal.before.monthlyCashFlow);
+    const swing = Math.abs(
+      deal.after.monthlyCashFlow - deal.before.monthlyCashFlow,
+    );
     if (swing > bestSwing) {
       best = deal;
       bestSwing = swing;
@@ -213,42 +204,62 @@ export function buildWeeklySummary(
   // A recorded internal v2 result is not a released email surface. Filter on
   // the raw marker before the normal recorded-result fallback can include it.
   const releasedDeals = userDeals.filter((row) =>
-    isReleasedUnderwritingSnapshot(row.form_snapshot)
+    isReleasedUnderwritingSnapshot(row.form_snapshot),
   );
   if (releasedDeals.length === 0) return null;
 
   // One recompute per row, shared by every section (pipeline totals, buy-box
   // metrics, owned cash flow) so the sections can't disagree with each other.
-  const freshById = new Map<string, ReturnType<typeof recomputeSavedDealVerdict>>();
-  const resolutionById = new Map<string, SavedAnalysisSnapshotResolution>();
+  const freshById = new Map<
+    string,
+    NonNullable<ReturnType<typeof recomputeSavedDealVerdict>>
+  >();
+  const normalizedValuesById = new Map<
+    string,
+    NonNullable<ReturnType<typeof normalizeReleasedInvestmentFormSnapshot>>
+  >();
+  const frozenVersions = new Set<string>();
   for (const row of releasedDeals) {
-    const recomputed = recomputeSavedDealVerdict(row.form_snapshot);
-    const resolution = resolveSavedAnalysisSnapshot({
-      methodologyVersion: row.methodology_version,
-      resultSnapshot: row.result_snapshot,
-      recomputedSnapshot: recomputed
-        ? toRecomputedSavedAnalysisSnapshot(recomputed)
-        : undefined,
-    });
-    resolutionById.set(row.id, resolution);
-    freshById.set(row.id, resolution.didRecompute ? recomputed : null);
+    // Treat the validated form snapshot as the single source of truth for
+    // every published metric and Buy Box criterion. Denormalized row columns
+    // are owner-editable/cache fields and may have drifted.
+    const normalizedValues = normalizeReleasedInvestmentFormSnapshot(
+      row.form_snapshot,
+    );
+    if (!normalizedValues) continue;
+    const recomputed = recomputeSavedDealVerdict(normalizedValues);
+    if (!recomputed) continue;
+    if (
+      shouldFreezeSavedMethodology(
+        row.methodology_version,
+        recomputed.analysisResult.methodologyVersion,
+      )
+    ) {
+      if (row.methodology_version) frozenVersions.add(row.methodology_version);
+      continue;
+    }
+    freshById.set(row.id, recomputed);
+    normalizedValuesById.set(row.id, normalizedValues);
   }
 
-  const activeRows = releasedDeals.filter((r) => isActiveStage(stageForRow(r)));
-  const ownedRows = releasedDeals.filter((r) => stageForRow(r) === "closed");
+  const publishableDeals = releasedDeals.filter((row) => freshById.has(row.id));
+  if (publishableDeals.length === 0) return null;
+  const activeRows = publishableDeals.filter((r) =>
+    isActiveStage(stageForRow(r)),
+  );
+  const ownedRows = publishableDeals.filter((r) => stageForRow(r) === "closed");
 
   // ── Active pipeline ────────────────────────────────────────────────
   let pipeline: WeeklySummaryPipeline | null = null;
   if (activeRows.length > 0) {
     let cashFlow = 0;
     for (const row of activeRows) {
-      cashFlow += cashFlowForRow(
-        row,
-        freshById.get(row.id) ?? null,
-        resolutionById.get(row.id)!
-      );
+      cashFlow += freshById.get(row.id)!.netCashFlowMonthly;
     }
-    pipeline = { count: activeRows.length, monthlyCashFlow: Math.round(cashFlow) };
+    pipeline = {
+      count: activeRows.length,
+      monthlyCashFlow: Math.round(cashFlow),
+    };
   }
 
   // ── Owned portfolio (SHARED owned-equity helpers — never re-derived) ──
@@ -259,15 +270,17 @@ export function buildWeeklySummary(
     let equityGain = 0;
     let datedCount = 0;
     for (const row of ownedRows) {
-      const resolution = resolutionById.get(row.id)!;
-      cashFlow += cashFlowForRow(row, freshById.get(row.id) ?? null, resolution);
-      const basis = resolution.shouldFreeze ? null : resolveOwnedEquityBasis({
+      cashFlow += freshById.get(row.id)!.netCashFlowMonthly;
+      const basis = resolveOwnedEquityBasis({
         is_completed: true, // owned by stage; the legacy flag may lag pipeline_stage
         close_date: row.close_date ?? null,
         form_snapshot: row.form_snapshot,
       });
       const summary = basis
-        ? computeOwnedEquity(basis.input, monthsOwnedBetween(basis.closeDate, context.asOf))
+        ? computeOwnedEquity(
+            basis.input,
+            monthsOwnedBetween(basis.closeDate, context.asOf),
+          )
         : null;
       if (summary) {
         totalEquity += summary.equity;
@@ -291,42 +304,20 @@ export function buildWeeklySummary(
   // methodology policy explicitly instead of claiming every value was
   // recomputed. This keeps legacy compatibility honest across future bumps.
   const methodologyNotes: string[] = [];
-  const resolutions = [...resolutionById.values()];
   if (
-    resolutions.some(
-      (resolution) =>
-        isLegacySavedMethodologyVersion(resolution.storedMethodologyVersion) &&
-        resolution.didRecompute
+    publishableDeals.some((row) =>
+      isLegacySavedMethodologyVersion(row.methodology_version),
     )
   ) {
     methodologyNotes.push(
-      `Legacy analysis · recomputed with current v${TRUECAP_UNDERWRITING_STANDARD_VERSION}.`
+      `Legacy analysis · recomputed with current v${TRUECAP_UNDERWRITING_STANDARD_VERSION}.`,
     );
   }
-  if (
-    resolutions.some(
-      (resolution) =>
-        isLegacySavedMethodologyVersion(resolution.storedMethodologyVersion) &&
-        !resolution.didRecompute
-    )
-  ) {
+  if (frozenVersions.size > 0) {
     methodologyNotes.push(
-      `Legacy analysis · stored snapshot where current v${TRUECAP_UNDERWRITING_STANDARD_VERSION} could not recompute.`
-    );
-  }
-  const frozenVersions = [
-    ...new Set(
-      resolutions
-        .filter((resolution) => resolution.shouldFreeze)
-        .map((resolution) => resolution.storedMethodologyVersion)
-        .filter((version): version is string => Boolean(version))
-    ),
-  ];
-  if (frozenVersions.length > 0) {
-    methodologyNotes.push(
-      `Frozen analyses retain their saved Standard ${frozenVersions
+      `Analyses on unsupported Standard ${[...frozenVersions]
         .map((version) => `v${version}`)
-        .join(", ")}; they were not recomputed.`
+        .join(", ")} were omitted until they are re-underwritten.`,
     );
   }
 
@@ -340,7 +331,7 @@ export function buildWeeklySummary(
     activeRows.length > 0
   ) {
     const watch = buildRateWatch(
-      activeRows.filter((r) => !resolutionById.get(r.id)?.shouldFreeze).map((r) => ({
+      activeRows.map((r) => ({
         id: r.id,
         title: r.title,
         address: r.address,
@@ -357,7 +348,8 @@ export function buildWeeklySummary(
       // when the rate ACTUALLY moved this week (the rate-alerts cron's own
       // week-over-week trigger threshold); quiet weeks keep the rates line
       // with topDeal null.
-      const weekMoved = Math.abs(weeklyMovePp) >= RATE_ALERTS_MIN_WEEKLY_MOVE_PP;
+      const weekMoved =
+        Math.abs(weeklyMovePp) >= RATE_ALERTS_MIN_WEEKLY_MOVE_PP;
       rateMover = {
         currentRatePct: pair.current,
         previousRatePct: pair.previous,
@@ -399,34 +391,30 @@ export function buildWeeklySummary(
 
   // ── Buy-box fit (SHARED buy-box primitives; dashboard's metric wiring) ──
   let buyBox: WeeklySummaryBuyBox | null = null;
-  const activeBoxes = context.buyBoxes.filter((b) => b.isActive && buyBoxHasCriteria(b));
+  const activeBoxes = context.buyBoxes.filter(
+    (b) => b.isActive && buyBoxHasCriteria(b),
+  );
   if (activeBoxes.length > 0 && activeRows.length > 0) {
     let passingCount = 0;
     for (const row of activeRows) {
-      const fresh = freshById.get(row.id) ?? null;
-      const snapshot = resolutionById.get(row.id)?.snapshot ?? {};
-      const storedCapRate = Number(snapshot.capRate);
-      const storedCoc = Number(snapshot.cocReturn);
-      const storedDscr = Number(snapshot.dscr);
-      const storedPayment = Number(snapshot.monthlyPayment);
+      const fresh = freshById.get(row.id)!;
+      const values = normalizedValuesById.get(row.id)!;
       const metrics: BuyBoxDealMetrics = {
-        capRatePct: fresh ? fresh.capRatePct : Number.isFinite(storedCapRate) ? storedCapRate : null,
-        cocPct: fresh ? fresh.cocReturnPct : Number.isFinite(storedCoc) ? storedCoc : null,
-        dscr: fresh ? fresh.dscr : Number.isFinite(storedDscr) ? storedDscr : null,
-        cashFlowMonthly: cashFlowForRow(
-          row,
-          fresh,
-          resolutionById.get(row.id)!
-        ),
-        purchasePrice: row.purchase_price ?? null,
-        propertyType: isBuyBoxPropertyType(row.property_type) ? row.property_type : null,
-        state: deriveStateFromAddress(row.address),
+        capRatePct: fresh.capRatePct,
+        cocPct: fresh.cocReturnPct,
+        dscr: fresh.dscr,
+        cashFlowMonthly: fresh.netCashFlowMonthly,
+        purchasePrice: values.purchasePrice,
+        propertyType: isBuyBoxPropertyType(values.propertyType)
+          ? values.propertyType
+          : null,
+        state: deriveStateFromAddress(values.address),
         // calc-analysis canon: monthlyPayment <= 0 = cash purchase → DSCR N/A.
-        isCashPurchase: fresh
-          ? fresh.isCashPurchase
-          : Number.isFinite(storedPayment) && storedPayment <= 0,
+        isCashPurchase: fresh.isCashPurchase,
       };
-      const results = evaluateBuyBoxes(activeBoxes, metrics).filter((r) => r.result.active);
+      const results = evaluateBuyBoxes(activeBoxes, metrics).filter(
+        (r) => r.result.active,
+      );
       if (results.length === 0) continue;
       if (summarizeBuyBoxFit(results).anyPass) passingCount += 1;
     }
@@ -454,12 +442,16 @@ const fmtMoney = (n: number) =>
 export function weeklySummarySubject(payload: WeeklySummaryPayload): string {
   if (payload.pipeline) {
     const deals =
-      payload.pipeline.count === 1 ? "1 active deal" : `${payload.pipeline.count} active deals`;
+      payload.pipeline.count === 1
+        ? "1 active deal"
+        : `${payload.pipeline.count} active deals`;
     return `Your week in deals — ${deals}, ${fmtMoney(payload.pipeline.monthlyCashFlow)}/mo pipeline`;
   }
   if (payload.owned) {
     const props =
-      payload.owned.count === 1 ? "1 owned property" : `${payload.owned.count} owned properties`;
+      payload.owned.count === 1
+        ? "1 owned property"
+        : `${payload.owned.count} owned properties`;
     return `Your week in deals — ${props}`;
   }
   return "Your TrueCap weekly summary";
@@ -471,7 +463,9 @@ export function weeklySummarySubject(payload: WeeklySummaryPayload): string {
  * ISO week, no matter how often the cron fires or retries.
  */
 export function isoWeekKey(date: Date): string {
-  const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  const d = new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
+  );
   // Shift to the Thursday of this ISO week — its year is the ISO year.
   const day = d.getUTCDay() || 7;
   d.setUTCDate(d.getUTCDate() + 4 - day);

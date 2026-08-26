@@ -4,7 +4,10 @@ import { toServerErrorResult } from "@/lib/db-error";
 import * as Sentry from "@sentry/nextjs";
 import { z } from "zod";
 import { calculateAnalysis } from "@/lib/calc-analysis";
-import { computeDealScore, buildDealScoreInputFromAnalysis } from "@/lib/deal-score";
+import {
+  computeDealScore,
+  buildDealScoreInputFromAnalysis,
+} from "@/lib/deal-score";
 import {
   getEntitlementsForUser,
   getSavedDealLimitLabel,
@@ -19,9 +22,15 @@ import {
 } from "@/lib/investcalc-schema";
 import {
   isReleasedUnderwritingSnapshot,
+  normalizeReleasedInvestmentFormSnapshot,
   releasedInvestmentFormSchema,
 } from "@/lib/underwriting-model-release";
-import { flagsForStage, isPipelineStage, normalizeTags, type PipelineStage } from "@/lib/pipeline";
+import {
+  flagsForStage,
+  isPipelineStage,
+  normalizeTags,
+  type PipelineStage,
+} from "@/lib/pipeline";
 import {
   buildDataConfidence,
   shouldPreserveStoredDataConfidence,
@@ -30,6 +39,8 @@ import {
 import {
   buildInputConfidence,
   normalizeInputVerificationEvidence,
+  normalizeStartingAssumptionOrigins,
+  restoreInputConfidenceSourceContext,
 } from "@/lib/input-confidence";
 import {
   defaultDueDiligenceItems,
@@ -37,24 +48,29 @@ import {
   type DueDiligenceItem,
 } from "@/lib/due-diligence";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { DEFAULT_APPRECIATION_RATE, DEFAULT_SELLING_COST_PCT } from "@/lib/exit-scenarios";
+import {
+  DEFAULT_APPRECIATION_RATE,
+  DEFAULT_SELLING_COST_PCT,
+} from "@/lib/exit-scenarios";
 import { buildCompareSnapshotPayload } from "@/lib/compare-result-snapshot";
 import {
   ANALYSIS_PDF_BUCKET,
-  ANALYSIS_PDF_SIGNED_URL_TTL_SECONDS,
   buildAnalysisPdfObjectPath,
+  isSavedAnalysisPdfArtifactAttestation,
+  parseAttestedAnalysisPdfObjectPath,
   PDF_CACHE_VERSION,
-  PDF_CACHE_VERSION_UNCACHEABLE,
-  resolveAnalysisPdfObjectPath,
+  PDF_TRUSTED_PROVENANCE_MIN_CACHE_VERSION,
 } from "@/lib/pdf-export-constants";
+import { verifySavedAnalysisPdfArtifact } from "@/lib/pdf/saved-analysis-artifact-attestation";
 import {
   boxesForDealClient,
-  buyBoxHasCriteria,
   deriveStateFromAddress,
-  type BuyBoxCriteria,
   type BuyBoxDealMetrics,
 } from "@/lib/buy-box";
-import { buildBuyBoxPdfVerdict, type BuyBoxPdfVerdict } from "@/lib/pdf-buy-box";
+import {
+  buildBuyBoxPdfVerdict,
+  type BuyBoxPdfVerdict,
+} from "@/lib/pdf-buy-box";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 import { isFeatureEnabled } from "@/lib/feature-flags";
 import {
@@ -83,6 +99,17 @@ import {
   INITIAL_SAVED_ANALYSIS_REVISION,
   parseSavedAnalysisRevision,
 } from "@/lib/saved-analysis-concurrency";
+import {
+  normalizeAnalyzerStrategyKey,
+  resolveCompatibleAnalyzerStrategyKey,
+  resolveAnalyzerStrategyForPersistence,
+  type AnalyzerStrategyKey,
+} from "@/lib/analyzer-strategy-persistence";
+import {
+  buildSpecialistAnalysisSnapshot,
+  readRecordedSpecialistAnalysisSnapshot,
+  SPECIALIST_ANALYSIS_SNAPSHOT_FIELD,
+} from "@/lib/specialist-analysis-snapshot";
 
 export type SaveDealResult =
   | {
@@ -159,15 +186,20 @@ export type UpdateSavedDealLifecycleResult =
   | { ok: true }
   | {
       ok: false;
-      code: "SIGN_IN_REQUIRED" | "ENTITLEMENT_REQUIRED" | "NOT_FOUND" | "VALIDATION_ERROR" | "SERVER_ERROR";
+      code:
+        | "SIGN_IN_REQUIRED"
+        | "ENTITLEMENT_REQUIRED"
+        | "NOT_FOUND"
+        | "VALIDATION_ERROR"
+        | "SERVER_ERROR";
       message: string;
     };
 
 export type GetSavedAnalysisPdfExportResult =
-  // `pdfUrl` on a cache hit is a SHORT-LIVED SIGNED url
-  // (ANALYSIS_PDF_SIGNED_URL_TTL_SECONDS), not a public one — use it
-  // immediately, never persist or share it.
-  | { ok: true; source: "cache"; pdfUrl: string }
+  // Cached bytes are downloaded and HMAC-verified on the server before they
+  // cross this boundary. A signed storage URL would reintroduce a race where
+  // an owner overwrites the object after verification but before download.
+  | { ok: true; source: "cache"; pdfBase64: string }
   | {
       ok: true;
       source: "regenerate";
@@ -219,13 +251,46 @@ type SavedTemplateFallback = {
   templateDescription: string | null;
 };
 
+async function readVerifiedSavedAnalysisPdfArtifact(input: {
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>;
+  userId: string;
+  analysisId: string;
+  cacheVersion: number;
+  path: string;
+  renderFingerprint: string;
+  artifactAttestation: string;
+}): Promise<string | null> {
+  try {
+    const { data, error } = await input.supabase.storage
+      .from(ANALYSIS_PDF_BUCKET)
+      .download(input.path);
+    if (error || !data) return null;
+    const bytes = new Uint8Array(await data.arrayBuffer());
+    if (
+      !verifySavedAnalysisPdfArtifact({
+        userId: input.userId,
+        analysisId: input.analysisId,
+        cacheVersion: input.cacheVersion,
+        renderFingerprint: input.renderFingerprint,
+        pdfBytes: bytes,
+        attestation: input.artifactAttestation,
+      })
+    ) {
+      return null;
+    }
+    return Buffer.from(bytes).toString("base64");
+  } catch {
+    return null;
+  }
+}
+
 const SAVED_ANALYSIS_PDF_EXPORT_SELECT =
   "id, schema_version, methodology_version, form_snapshot, result_snapshot, financing_profile_id, financing_profile_version, financing_profile_snapshot, property_type, address, purchase_price, year_built, loan_term_years, interest_rate_pct, down_payment_pct, closing_costs_pct, bedrooms, bathrooms, sqft, monthly_rent, property_tax_pct, insurance_input_mode, insurance_pct, insurance_mo, hoa_mo, utilities_mo, maintenance_pct, vacancy_pct, management_pct, capex_pct, building_value_pct, depreciation_years, include_interest_deduction, tax_rate_pct, expense_growth_pct, rent_growth_pct, template_id, appreciation_rate_pct, selling_cost_pct, pdf_url, pdf_snapshot_version, updated_at" as const;
 
 function savedAnalysisPdfRenderSource(
   row: Record<string, unknown>,
   templateFallback: SavedTemplateFallback | null,
-  reportComps: ReportComps | null
+  reportComps: ReportComps | null,
 ): SavedAnalysisPdfRenderSource {
   return {
     schemaVersion: Number(row.schema_version ?? 1),
@@ -238,13 +303,34 @@ function savedAnalysisPdfRenderSource(
 }
 
 function asRecord(value: unknown): Record<string, unknown> | null {
-  if (value && typeof value === "object" && !Array.isArray(value)) return value as Record<string, unknown>;
+  if (value && typeof value === "object" && !Array.isArray(value))
+    return value as Record<string, unknown>;
   return null;
+}
+
+function freezeSpecialistAnalysisIntoResult(input: {
+  resultSnapshot: Record<string, unknown>;
+  values: InvestmentFormValues;
+  result: ReturnType<typeof calculateAnalysis>;
+  strategyKey: AnalyzerStrategyKey;
+}): void {
+  const specialistAnalysis = buildSpecialistAnalysisSnapshot(
+    input.values,
+    input.result,
+    input.strategyKey,
+  );
+  if (specialistAnalysis) {
+    input.resultSnapshot[SPECIALIST_ANALYSIS_SNAPSHOT_FIELD] =
+      specialistAnalysis;
+  } else {
+    delete input.resultSnapshot[SPECIALIST_ANALYSIS_SNAPSHOT_FIELD];
+  }
 }
 
 function dbNumber(value: unknown): number | undefined {
   if (value === null || value === undefined || value === "") return undefined;
-  if (typeof value === "number") return Number.isFinite(value) ? value : undefined;
+  if (typeof value === "number")
+    return Number.isFinite(value) ? value : undefined;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : undefined;
 }
@@ -261,8 +347,9 @@ function isMissingSavedAnalysisConcurrencyColumn(error: {
   code?: string;
   message?: string;
 }): boolean {
-  const namesConcurrencyColumn =
-    /underwriting_revision|notes_revision/i.test(error.message ?? "");
+  const namesConcurrencyColumn = /underwriting_revision|notes_revision/i.test(
+    error.message ?? "",
+  );
   return (
     namesConcurrencyColumn &&
     (error.code === "42703" ||
@@ -271,7 +358,9 @@ function isMissingSavedAnalysisConcurrencyColumn(error: {
   );
 }
 
-function buildEditFormSnapshotFromRow(row: Record<string, unknown>): Record<string, unknown> {
+function buildEditFormSnapshotFromRow(
+  row: Record<string, unknown>,
+): Record<string, unknown> {
   const rawSnapshot = asRecord(row.form_snapshot) ?? {};
 
   return {
@@ -290,31 +379,41 @@ function buildEditFormSnapshotFromRow(row: Record<string, unknown>): Record<stri
     bathrooms: rawSnapshot.bathrooms ?? dbNumber(row.bathrooms),
     sqft: rawSnapshot.sqft ?? dbNumber(row.sqft),
     monthlyRent: rawSnapshot.monthlyRent ?? dbNumber(row.monthly_rent),
-    downPaymentPct: rawSnapshot.downPaymentPct ?? dbNumber(row.down_payment_pct),
+    downPaymentPct:
+      rawSnapshot.downPaymentPct ?? dbNumber(row.down_payment_pct),
     interestRate: rawSnapshot.interestRate ?? dbNumber(row.interest_rate_pct),
     loanTermYears: rawSnapshot.loanTermYears ?? dbNumber(row.loan_term_years),
-    closingCostsPct: rawSnapshot.closingCostsPct ?? dbNumber(row.closing_costs_pct),
+    closingCostsPct:
+      rawSnapshot.closingCostsPct ?? dbNumber(row.closing_costs_pct),
     maintenancePct: rawSnapshot.maintenancePct ?? dbNumber(row.maintenance_pct),
     vacancyPct: rawSnapshot.vacancyPct ?? dbNumber(row.vacancy_pct),
     mgmtPct: rawSnapshot.mgmtPct ?? dbNumber(row.management_pct),
     capexPct: rawSnapshot.capexPct ?? dbNumber(row.capex_pct),
-    buildingValuePct: rawSnapshot.buildingValuePct ?? dbNumber(row.building_value_pct),
-    depreciationYears: rawSnapshot.depreciationYears ?? dbNumber(row.depreciation_years),
+    buildingValuePct:
+      rawSnapshot.buildingValuePct ?? dbNumber(row.building_value_pct),
+    depreciationYears:
+      rawSnapshot.depreciationYears ?? dbNumber(row.depreciation_years),
     includeInterestDeduction:
-      rawSnapshot.includeInterestDeduction ?? dbBoolean(row.include_interest_deduction),
+      rawSnapshot.includeInterestDeduction ??
+      dbBoolean(row.include_interest_deduction),
     taxRatePct: rawSnapshot.taxRatePct ?? dbNumber(row.tax_rate_pct),
-    expenseGrowthPct: rawSnapshot.expenseGrowthPct ?? dbNumber(row.expense_growth_pct),
+    expenseGrowthPct:
+      rawSnapshot.expenseGrowthPct ?? dbNumber(row.expense_growth_pct),
     rentGrowthPct: rawSnapshot.rentGrowthPct ?? dbNumber(row.rent_growth_pct),
-    propertyTaxPct: rawSnapshot.propertyTaxPct ?? dbNumber(row.property_tax_pct),
+    propertyTaxPct:
+      rawSnapshot.propertyTaxPct ?? dbNumber(row.property_tax_pct),
     insuranceInputMode:
       rawSnapshot.insuranceInputMode ??
-      (row.insurance_input_mode === "percent" || row.insurance_input_mode === "monthly"
+      (row.insurance_input_mode === "percent" ||
+      row.insurance_input_mode === "monthly"
         ? row.insurance_input_mode
         : undefined),
     insurancePct: rawSnapshot.insurancePct ?? dbNumber(row.insurance_pct),
-    insuranceMonthly: rawSnapshot.insuranceMonthly ?? dbNumber(row.insurance_mo),
+    insuranceMonthly:
+      rawSnapshot.insuranceMonthly ?? dbNumber(row.insurance_mo),
     hoaMonthly: rawSnapshot.hoaMonthly ?? dbNumber(row.hoa_mo),
-    utilitiesMonthly: rawSnapshot.utilitiesMonthly ?? dbNumber(row.utilities_mo),
+    utilitiesMonthly:
+      rawSnapshot.utilitiesMonthly ?? dbNumber(row.utilities_mo),
     templateId: rawSnapshot.templateId ?? dbString(row.template_id),
     units: Array.isArray(rawSnapshot.units) ? rawSnapshot.units : undefined,
     appreciationRatePct:
@@ -338,7 +437,7 @@ function buildEditFormSnapshotFromRow(row: Record<string, unknown>): Record<stri
 async function findSavedAnalysesByAddress(
   supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
   userId: string,
-  address: string
+  address: string,
 ): Promise<{
   rows: Array<{
     id: string;
@@ -349,7 +448,9 @@ async function findSavedAnalysesByAddress(
 }> {
   const { data, error } = await supabase
     .from("saved_analyses")
-    .select("id, title, underwriting_revision, form_address:form_snapshot->>address")
+    .select(
+      "id, title, underwriting_revision, form_address:form_snapshot->>address",
+    )
     .eq("user_id", userId)
     .is("deleted_at", null)
     // Oldest first so [0] is the original deal when scenarios already exist.
@@ -358,25 +459,39 @@ async function findSavedAnalysesByAddress(
   if (error || !data) {
     return {
       rows: [],
-      migrationPending: Boolean(error && isMissingSavedAnalysisConcurrencyColumn(error)),
+      migrationPending: Boolean(
+        error && isMissingSavedAnalysisConcurrencyColumn(error),
+      ),
     };
   }
 
   const needle = address.trim().toLowerCase();
   return {
     rows: (data as Array<Record<string, unknown>>)
-      .filter((row) => (dbString(row.form_address) ?? "").trim().toLowerCase() === needle)
+      .filter(
+        (row) =>
+          (dbString(row.form_address) ?? "").trim().toLowerCase() === needle,
+      )
       .map((row) => ({
         id: String(row.id),
         title: dbString(row.title) ?? null,
-        underwritingRevision: parseSavedAnalysisRevision(row.underwriting_revision),
+        underwritingRevision: parseSavedAnalysisRevision(
+          row.underwriting_revision,
+        ),
       })),
     migrationPending: false,
   };
 }
 
 const provenanceFieldSchema = z.object({
-  source: z.enum(["hud-fmr", "hud-safmr", "rentcast-estimate", "fred", "state-static", "manual"]),
+  source: z.enum([
+    "hud-fmr",
+    "hud-safmr",
+    "rentcast-estimate",
+    "fred",
+    "state-static",
+    "manual",
+  ]),
   fetchedAt: z.string().max(40).nullish(),
   detail: z.string().max(160).optional(),
   overridden: z.boolean().optional(),
@@ -396,13 +511,16 @@ async function resolveAppliedFinancingProfile(
   supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
   userId: string,
   rawSnapshot: unknown,
-  values: InvestmentFormValues
+  values: InvestmentFormValues,
 ): Promise<
   | { ok: true; snapshot: FinancingProfileSnapshot | null }
   | { ok: false; error: unknown }
 > {
   const parsed = financingProfileSnapshotSchema.safeParse(rawSnapshot);
-  if (!parsed.success || !financingProfileMatchesAnalysis(parsed.data, values)) {
+  if (
+    !parsed.success ||
+    !financingProfileMatchesAnalysis(parsed.data, values)
+  ) {
     return { ok: true, snapshot: null };
   }
 
@@ -418,7 +536,9 @@ async function resolveAppliedFinancingProfile(
   if (error) return { ok: false, error };
   if (!data) return { ok: true, snapshot: null };
 
-  const current = rowToFinancingProfile(data as unknown as Record<string, unknown>);
+  const current = rowToFinancingProfile(
+    data as unknown as Record<string, unknown>,
+  );
   if (parsed.data.termsVersion !== current.termsVersion) {
     return { ok: true, snapshot: null };
   }
@@ -431,9 +551,11 @@ async function resolveAppliedFinancingProfile(
 }
 
 function parseStoredFinancingProfileSnapshot(
-  row: Record<string, unknown>
+  row: Record<string, unknown>,
 ): FinancingProfileSnapshot | null {
-  const parsed = financingProfileSnapshotSchema.safeParse(row.financing_profile_snapshot);
+  const parsed = financingProfileSnapshotSchema.safeParse(
+    row.financing_profile_snapshot,
+  );
   if (!parsed.success) return null;
 
   const storedVersion = dbNumber(row.financing_profile_version);
@@ -448,17 +570,42 @@ function parseStoredFinancingProfileSnapshot(
 /** Never trust the mutable embedded financingProfile object on a read. Its
  * canonical identity/version/snapshot live in dedicated top-level columns and
  * are validated together before crossing the server-action boundary. */
-function buildTrustedResultSnapshot(row: Record<string, unknown>): Record<string, unknown> {
+function buildTrustedResultSnapshot(
+  row: Record<string, unknown>,
+): Record<string, unknown> {
   const snapshot = { ...(asRecord(row.result_snapshot) ?? {}) };
   const financingProfile = parseStoredFinancingProfileSnapshot(row);
   if (financingProfile) snapshot.financingProfile = financingProfile;
   else delete snapshot.financingProfile;
+  const normalizedValues = normalizeReleasedInvestmentFormSnapshot(
+    row.form_snapshot,
+  );
+  const analyzerStrategyKey = normalizedValues
+    ? resolveCompatibleAnalyzerStrategyKey(
+        snapshot.analyzerStrategyKey,
+        normalizedValues,
+      )
+    : normalizeAnalyzerStrategyKey(snapshot.analyzerStrategyKey);
+  const specialistAnalysis = analyzerStrategyKey
+    ? readRecordedSpecialistAnalysisSnapshot({
+        resultSnapshot: snapshot,
+        strategyKey: analyzerStrategyKey,
+        coreMethodologyVersion: row.methodology_version,
+      })
+    : null;
+  if (analyzerStrategyKey) snapshot.analyzerStrategyKey = analyzerStrategyKey;
+  else delete snapshot.analyzerStrategyKey;
+  if (specialistAnalysis) {
+    snapshot[SPECIALIST_ANALYSIS_SNAPSHOT_FIELD] = specialistAnalysis;
+  } else {
+    delete snapshot[SPECIALIST_ANALYSIS_SNAPSHOT_FIELD];
+  }
   return snapshot;
 }
 
 function sameFinancingProfileSnapshot(
   left: FinancingProfileSnapshot,
-  right: FinancingProfileSnapshot
+  right: FinancingProfileSnapshot,
 ): boolean {
   // Both values have passed the same strict Zod schema, which also emits
   // their keys in the same deterministic order. This compares every frozen
@@ -487,6 +634,12 @@ export async function saveDealAction(
     /** UI edit provenance only; this can raise a generic default to a user
      * estimate, never to Verified. */
     touchedInputFields?: string[];
+    /** Value-bound source labels for reusable strategy/template/account
+     * starting assumptions. These never count as user-entered evidence. */
+    startingAssumptionOrigins?: unknown;
+    /** True only while purchase price is an AVM/rent-multiple screening
+     * estimate. This remains value-bound and must survive save/reopen. */
+    purchasePriceEstimated?: boolean;
     /** Sentinel from context-aware analyzer clients. When true, an empty
      * provenance object means prior value-bound sources were rechecked and
      * invalidated; older callers omit this and retain the legacy preserve-on-
@@ -500,10 +653,13 @@ export async function saveDealAction(
      * underwriting snapshot. Null explicitly clears a prior custom target. */
     maxOfferTarget?: unknown;
     maxOfferTargetSource?: unknown;
+    /** Validated calculator lens. Stored inside the recorded result so the
+     * editor can reopen BRRRR/flip/wholesale/house-hack without guessing. */
+    analyzerStrategyKey?: unknown;
     /** Revision returned when this exact saved underwriting was opened or
      * last updated. Required on every update; inserts omit it. */
     expectedUnderwritingRevision?: unknown;
-  }
+  },
 ): Promise<SaveDealResult> {
   const supabase = await createServerSupabaseClient();
   const {
@@ -516,7 +672,11 @@ export async function saveDealAction(
 
   const parsed = releasedInvestmentFormSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, code: "VALIDATION_ERROR", message: "Invalid form payload" };
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "Invalid form payload",
+    };
   }
 
   const entitlements = await getEntitlementsForUser(supabase, user.id);
@@ -531,19 +691,49 @@ export async function saveDealAction(
   const values = parsed.data;
   const sanitizedUnits = (values.units ?? []).filter((unit) =>
     isValidRentalUnit(unit, {
-      allowZeroRent: values.propertyType === "owner-occupant" && !!unit.isOwnerOccupied,
-    })
+      allowZeroRent:
+        values.propertyType === "owner-occupant" && !!unit.isOwnerOccupied,
+    }),
   );
   const sanitizedValues: InvestmentFormValues = {
     ...values,
     units: sanitizedUnits,
   };
+  const analyzerStrategyOptionProvided = Boolean(
+    options &&
+    Object.prototype.hasOwnProperty.call(options, "analyzerStrategyKey"),
+  );
+  const explicitAnalyzerStrategy = normalizeAnalyzerStrategyKey(
+    options?.analyzerStrategyKey,
+  );
+  if (
+    analyzerStrategyOptionProvided &&
+    options?.analyzerStrategyKey != null &&
+    !explicitAnalyzerStrategy
+  ) {
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "Invalid analysis type",
+    };
+  }
+  const analyzerStrategyKey = resolveAnalyzerStrategyForPersistence({
+    requestedKey: explicitAnalyzerStrategy,
+    requestedKeyProvided: analyzerStrategyOptionProvided,
+    values: sanitizedValues,
+  });
   const maxOfferTargetOptionProvided = Boolean(
-    options && Object.prototype.hasOwnProperty.call(options, "maxOfferTarget")
+    options && Object.prototype.hasOwnProperty.call(options, "maxOfferTarget"),
   );
   const maxOfferTarget =
-    options?.maxOfferTarget == null ? null : normalizeMaoTarget(options.maxOfferTarget);
-  if (maxOfferTargetOptionProvided && options?.maxOfferTarget != null && !maxOfferTarget) {
+    options?.maxOfferTarget == null
+      ? null
+      : normalizeMaoTarget(options.maxOfferTarget);
+  if (
+    maxOfferTargetOptionProvided &&
+    options?.maxOfferTarget != null &&
+    !maxOfferTarget
+  ) {
     return {
       ok: false,
       code: "VALIDATION_ERROR",
@@ -551,10 +741,11 @@ export async function saveDealAction(
     };
   }
   const maxOfferTargetSourceOptionProvided = Boolean(
-    options && Object.prototype.hasOwnProperty.call(options, "maxOfferTargetSource")
+    options &&
+    Object.prototype.hasOwnProperty.call(options, "maxOfferTargetSource"),
   );
   const maxOfferTargetSource = normalizeOfferCeilingTargetSource(
-    options?.maxOfferTargetSource
+    options?.maxOfferTargetSource,
   );
   if (
     maxOfferTargetSourceOptionProvided &&
@@ -569,7 +760,9 @@ export async function saveDealAction(
   }
   if (
     maxOfferTarget &&
-    !isAdoptedOfferCeilingTargetSource(maxOfferTargetSource ?? "selected-targets")
+    !isAdoptedOfferCeilingTargetSource(
+      maxOfferTargetSource ?? "selected-targets",
+    )
   ) {
     return {
       ok: false,
@@ -579,19 +772,25 @@ export async function saveDealAction(
   }
   const financingProfileOptionProvided = Boolean(
     isFeatureEnabled("financing_profiles") &&
-      options &&
-      Object.prototype.hasOwnProperty.call(options, "financingProfileSnapshot")
+    options &&
+    Object.prototype.hasOwnProperty.call(options, "financingProfileSnapshot"),
   );
   let appliedFinancingProfile: FinancingProfileSnapshot | null = null;
-  if (financingProfileOptionProvided && options?.financingProfileSnapshot != null) {
+  if (
+    financingProfileOptionProvided &&
+    options?.financingProfileSnapshot != null
+  ) {
     const resolvedProfile = await resolveAppliedFinancingProfile(
       supabase,
       user.id,
       options.financingProfileSnapshot,
-      sanitizedValues
+      sanitizedValues,
     );
     if (!resolvedProfile.ok) {
-      return toServerErrorResult(resolvedProfile.error, "saved-analyses-financing-profile");
+      return toServerErrorResult(
+        resolvedProfile.error,
+        "saved-analyses-financing-profile",
+      );
     }
     appliedFinancingProfile = resolvedProfile.snapshot;
   }
@@ -600,8 +799,13 @@ export async function saveDealAction(
   // Holistic (total-return-aware) score — computed server-side from the real
   // form values + result via the shared builder, so the saved score matches
   // what investcalc-page and the hero render for the same deal.
-  const dealScore = computeDealScore(buildDealScoreInputFromAnalysis(sanitizedValues, result));
-  const { snapshotVersion, compareSnapshot } = buildCompareSnapshotPayload(result, sanitizedValues);
+  const dealScore = computeDealScore(
+    buildDealScoreInputFromAnalysis(sanitizedValues, result),
+  );
+  const { snapshotVersion, compareSnapshot } = buildCompareSnapshotPayload(
+    result,
+    sanitizedValues,
+  );
   const resultSnapshotWithScore = {
     ...result,
     propertyType: sanitizedValues.propertyType,
@@ -614,7 +818,14 @@ export async function saveDealAction(
     explanation: dealScore.explanation,
     snapshotVersion,
     compareSnapshot,
+    analyzerStrategyKey,
   } as Record<string, unknown>;
+  freezeSpecialistAnalysisIntoResult({
+    resultSnapshot: resultSnapshotWithScore,
+    values: sanitizedValues,
+    result,
+    strategyKey: analyzerStrategyKey,
+  });
   if (maxOfferTarget) {
     resultSnapshotWithScore.maxOfferTarget = maxOfferTarget;
     resultSnapshotWithScore.maxOfferTargetSource =
@@ -626,8 +837,10 @@ export async function saveDealAction(
       : `${values.propertyType} analysis`;
 
   const closingCostsPctEffective = values.closingCostsPct ?? 3;
-  const appreciationRatePctStored = sanitizedValues.appreciationRatePct ?? DEFAULT_APPRECIATION_RATE;
-  const sellingCostPctStored = sanitizedValues.sellingCostPct ?? DEFAULT_SELLING_COST_PCT;
+  const appreciationRatePctStored =
+    sanitizedValues.appreciationRatePct ?? DEFAULT_APPRECIATION_RATE;
+  const sellingCostPctStored =
+    sanitizedValues.sellingCostPct ?? DEFAULT_SELLING_COST_PCT;
   const formSnapshotPersisted = {
     ...sanitizedValues,
     appreciationRatePct: appreciationRatePctStored,
@@ -638,7 +851,9 @@ export async function saveDealAction(
   // enrich-property filled (and whether the user overrode them); we compute
   // the High/Medium/Low level here from that + completeness, and persist it.
   const provenanceParsed = saveProvenanceSchema.safeParse(provenanceInput);
-  const provenanceFields = provenanceParsed.success ? provenanceParsed.data : undefined;
+  const provenanceFields = provenanceParsed.success
+    ? provenanceParsed.data
+    : undefined;
   // "Did the client actually attribute any field?" — an empty/absent input
   // must not be treated as "everything is manual now" on the update path
   // below: a reopened deal's enrichment capture doesn't survive the edit
@@ -646,9 +861,9 @@ export async function saveDealAction(
   // confidence on every re-save.
   const provenanceProvided = Boolean(
     provenanceFields &&
-      (provenanceFields.monthlyRent ||
-        provenanceFields.interestRate ||
-        provenanceFields.propertyTaxPct)
+    (provenanceFields.monthlyRent ||
+      provenanceFields.interestRate ||
+      provenanceFields.propertyTaxPct),
   );
   const dataConfidence = buildDataConfidence(
     provenanceFields as EnrichmentProvenanceInput | undefined,
@@ -656,19 +871,26 @@ export async function saveDealAction(
       hasRent: result.monthlyRentalIncome > 0,
       hasPrice: (sanitizedValues.purchasePrice ?? 0) > 0,
       hasBeds: (sanitizedValues.bedrooms ?? 0) > 0,
-    }
+    },
   );
-  const inputConfidence = buildInputConfidence({
+  let inputConfidence = buildInputConfidence({
     values: sanitizedValues,
     provenance: provenanceFields as EnrichmentProvenanceInput | undefined,
     touchedFields: new Set(
       (options?.touchedInputFields ?? [])
         .filter((key): key is string => typeof key === "string")
-        .slice(0, 64)
+        .slice(0, 64),
     ),
+    startingAssumptionOrigins: normalizeStartingAssumptionOrigins(
+      options?.startingAssumptionOrigins,
+    ),
+    purchasePriceEstimated: options?.purchasePriceEstimated === true,
     verified: normalizeInputVerificationEvidence(options?.inputVerification),
   });
   resultSnapshotWithScore.inputConfidence = inputConfidence;
+  if (options?.purchasePriceEstimated === true) {
+    resultSnapshotWithScore.purchasePriceEstimated = true;
+  }
   if (financingProfileOptionProvided) {
     resultSnapshotWithScore.financingProfile = appliedFinancingProfile;
   }
@@ -713,7 +935,8 @@ export async function saveDealAction(
     capex_pct: sanitizedValues.capexPct,
     building_value_pct: sanitizedValues.buildingValuePct,
     depreciation_years: sanitizedValues.depreciationYears,
-    include_interest_deduction: sanitizedValues.includeInterestDeduction ?? true,
+    include_interest_deduction:
+      sanitizedValues.includeInterestDeduction ?? true,
     tax_rate_pct: sanitizedValues.taxRatePct ?? 24,
     expense_growth_pct: sanitizedValues.expenseGrowthPct,
     rent_growth_pct: sanitizedValues.rentGrowthPct,
@@ -734,9 +957,13 @@ export async function saveDealAction(
     ...(financingProfileOptionProvided
       ? {
           financing_profile_id: appliedFinancingProfile?.profileId ?? null,
-          financing_profile_version: appliedFinancingProfile?.termsVersion ?? null,
+          financing_profile_version:
+            appliedFinancingProfile?.termsVersion ?? null,
           financing_profile_snapshot:
-            (appliedFinancingProfile as unknown as Record<string, unknown> | null) ?? null,
+            (appliedFinancingProfile as unknown as Record<
+              string,
+              unknown
+            > | null) ?? null,
         }
       : {}),
   };
@@ -745,10 +972,10 @@ export async function saveDealAction(
   if (candidateExistingId) {
     const expectedRevisionOptionProvided = Boolean(
       options &&
-        Object.prototype.hasOwnProperty.call(
-          options,
-          "expectedUnderwritingRevision"
-        )
+      Object.prototype.hasOwnProperty.call(
+        options,
+        "expectedUnderwritingRevision",
+      ),
     );
     if (!expectedRevisionOptionProvided) {
       return {
@@ -759,7 +986,7 @@ export async function saveDealAction(
       };
     }
     const expectedUnderwritingRevision = parseSavedAnalysisRevision(
-      options?.expectedUnderwritingRevision
+      options?.expectedUnderwritingRevision,
     );
     if (expectedUnderwritingRevision === null) {
       return {
@@ -771,7 +998,7 @@ export async function saveDealAction(
     const { data: existing, error: existingErr } = await supabase
       .from("saved_analyses")
       .select(
-        "id, address, title, data_confidence, result_snapshot, financing_profile_id, financing_profile_version, financing_profile_snapshot, underwriting_revision"
+        "id, address, title, data_confidence, result_snapshot, financing_profile_id, financing_profile_version, financing_profile_snapshot, underwriting_revision",
       )
       .eq("id", candidateExistingId)
       .eq("user_id", user.id)
@@ -799,12 +1026,13 @@ export async function saveDealAction(
       return {
         ok: false,
         code: "DEAL_DELETED",
-        message: "This saved deal was deleted or archived, so it can't be updated.",
+        message:
+          "This saved deal was deleted or archived, so it can't be updated.",
       };
     }
 
     const storedUnderwritingRevision = parseSavedAnalysisRevision(
-      (existing as Record<string, unknown>).underwriting_revision
+      (existing as Record<string, unknown>).underwriting_revision,
     );
     if (storedUnderwritingRevision === null) {
       return {
@@ -823,20 +1051,73 @@ export async function saveDealAction(
       };
     }
 
+    const existingSnapshot = asRecord(
+      (existing as Record<string, unknown>).result_snapshot,
+    );
+    // Server-side maintenance callers (rate alerts, template application)
+    // cannot resend the analyzer's live source ledger. Revalidate the stored
+    // ledger against the new values field by field: unchanged HUD/FRED/user
+    // sources survive, while every changed fingerprint fails closed. Current
+    // analyzer callers send the explicit sentinel and remain authoritative.
+    if (options?.inputSourceContextProvided !== true) {
+      const storedInputConfidence = asRecord(existingSnapshot?.inputConfidence);
+      const restoredInputContext = restoreInputConfidenceSourceContext(
+        storedInputConfidence?.sourceContext,
+        sanitizedValues,
+      );
+      inputConfidence = buildInputConfidence({
+        values: sanitizedValues,
+        provenance: restoredInputContext.provenance,
+        touchedFields: new Set(restoredInputContext.touchedInputFields),
+        startingAssumptionOrigins:
+          restoredInputContext.startingAssumptionOrigins,
+        purchasePriceEstimated: restoredInputContext.purchasePriceEstimated,
+        verified: normalizeInputVerificationEvidence(
+          storedInputConfidence?.verificationEvidence,
+        ),
+      });
+      resultSnapshotWithScore.inputConfidence = inputConfidence;
+      if (restoredInputContext.purchasePriceEstimated) {
+        resultSnapshotWithScore.purchasePriceEstimated = true;
+      } else {
+        delete resultSnapshotWithScore.purchasePriceEstimated;
+      }
+      const payloadConfidence = asRecord(payload.data_confidence);
+      if (payloadConfidence)
+        payloadConfidence.inputConfidence = inputConfidence;
+    }
+    // Older/internal callers that do not know about calculator lenses must
+    // not erase one on an unrelated update (rate alert, template apply, or
+    // another future server-side maintenance action).
+    const updatedAnalyzerStrategyKey = resolveAnalyzerStrategyForPersistence({
+      requestedKey: explicitAnalyzerStrategy,
+      requestedKeyProvided: analyzerStrategyOptionProvided,
+      existingResultSnapshot: existingSnapshot,
+      values: sanitizedValues,
+    });
+    resultSnapshotWithScore.analyzerStrategyKey = updatedAnalyzerStrategyKey;
+    // The specialist result changes atomically with its form, core result,
+    // methodology, and strategy identity. An older maintenance caller may
+    // preserve the stored lens, but it never preserves stale specialist math.
+    freezeSpecialistAnalysisIntoResult({
+      resultSnapshot: resultSnapshotWithScore,
+      values: sanitizedValues,
+      result,
+      strategyKey: updatedAnalyzerStrategyKey,
+    });
+
     // Older/internal callers that do not know about custom targets must not
     // erase one on an unrelated update. Current analyzer callers send the
     // option explicitly (including null when the user intentionally has no
     // custom target), so their snapshot remains authoritative.
     if (!maxOfferTargetOptionProvided) {
-      const existingSnapshot = asRecord(
-        (existing as Record<string, unknown>).result_snapshot
-      );
       const storedTarget = normalizeMaoTarget(existingSnapshot?.maxOfferTarget);
       if (storedTarget) {
         resultSnapshotWithScore.maxOfferTarget = storedTarget;
         resultSnapshotWithScore.maxOfferTargetSource =
-          normalizeOfferCeilingTargetSource(existingSnapshot?.maxOfferTargetSource) ??
-          "selected-targets";
+          normalizeOfferCeilingTargetSource(
+            existingSnapshot?.maxOfferTargetSource,
+          ) ?? "selected-targets";
       }
     }
 
@@ -850,10 +1131,10 @@ export async function saveDealAction(
     }
 
     const capturedTarget = normalizeMaoTarget(
-      resultSnapshotWithScore.maxOfferTarget
+      resultSnapshotWithScore.maxOfferTarget,
     );
     const capturedTargetSource = normalizeOfferCeilingTargetSource(
-      resultSnapshotWithScore.maxOfferTargetSource
+      resultSnapshotWithScore.maxOfferTargetSource,
     );
     if (
       capturedTarget &&
@@ -880,7 +1161,8 @@ export async function saveDealAction(
     }
 
     const addressChanged =
-      (existing.address ?? "").trim().toLowerCase() !== addressTrimmed.toLowerCase();
+      (existing.address ?? "").trim().toLowerCase() !==
+      addressTrimmed.toLowerCase();
     if (addressChanged && options?.allowAddressChange !== true) {
       // The form's address diverged from the saved deal's. Updating in
       // place would silently rewrite the old property's row, so the caller
@@ -912,7 +1194,7 @@ export async function saveDealAction(
         {
           p_user_id: user.id,
           p_address: addressTrimmed,
-        }
+        },
       );
       if (dupErr) {
         return toServerErrorResult(dupErr, "saved-analyses");
@@ -921,7 +1203,7 @@ export async function saveDealAction(
         const collisionLookup = await findSavedAnalysesByAddress(
           supabase,
           user.id,
-          addressTrimmed
+          addressTrimmed,
         );
         if (collisionLookup.migrationPending) {
           return {
@@ -941,7 +1223,10 @@ export async function saveDealAction(
                 existingId: collision.id,
                 existingTitle: collision.title ?? undefined,
                 ...(collision.underwritingRevision !== null
-                  ? { existingUnderwritingRevision: collision.underwritingRevision }
+                  ? {
+                      existingUnderwritingRevision:
+                        collision.underwritingRevision,
+                    }
                   : {}),
               }
             : {}),
@@ -955,13 +1240,15 @@ export async function saveDealAction(
     // (allowAddressChange), the derived title (the new address) must win
     // instead - preserving the old-address title would misname the deal
     // in My Deals.
-    const preservedTitle = addressChanged ? undefined : dbString(existing.title)?.trim();
+    const preservedTitle = addressChanged
+      ? undefined
+      : dbString(existing.title)?.trim();
     // Older callers cannot resend a reopened deal's source context, so their
     // absent provenance keeps the stored legacy summary. The current analyzer
     // sends an explicit sentinel after fingerprint revalidation; its empty
     // provenance is authoritative and clears sources invalidated by edits.
     const existingDataConfidence = asRecord(
-      (existing as Record<string, unknown>).data_confidence
+      (existing as Record<string, unknown>).data_confidence,
     );
     let trustedProfileFieldsForUpdate: {
       financing_profile_id: string | null;
@@ -980,7 +1267,7 @@ export async function saveDealAction(
       options?.financingProfileSnapshot != null
     ) {
       const submitted = financingProfileSnapshotSchema.safeParse(
-        options.financingProfileSnapshot
+        options.financingProfileSnapshot,
       );
       const existingRecord = existing as Record<string, unknown>;
       const stored = parseStoredFinancingProfileSnapshot(existingRecord);
@@ -990,12 +1277,15 @@ export async function saveDealAction(
         sameFinancingProfileSnapshot(submitted.data, stored) &&
         financingProfileMatchesAnalysis(stored, sanitizedValues)
       ) {
-        const storedRecord = asRecord(existingRecord.financing_profile_snapshot);
+        const storedRecord = asRecord(
+          existingRecord.financing_profile_snapshot,
+        );
         if (storedRecord) {
           appliedFinancingProfile = stored;
           resultSnapshotWithScore.financingProfile = stored;
           trustedProfileFieldsForUpdate = {
-            financing_profile_id: dbString(existingRecord.financing_profile_id) ?? null,
+            financing_profile_id:
+              dbString(existingRecord.financing_profile_id) ?? null,
             financing_profile_version: stored.termsVersion,
             financing_profile_snapshot: storedRecord,
           };
@@ -1017,7 +1307,8 @@ export async function saveDealAction(
       ) {
         resultSnapshotWithScore.financingProfile = stored;
         trustedProfileFieldsForUpdate = {
-          financing_profile_id: dbString(existingRecord.financing_profile_id) ?? null,
+          financing_profile_id:
+            dbString(existingRecord.financing_profile_id) ?? null,
           financing_profile_version: stored.termsVersion,
           financing_profile_snapshot: storedRecord,
         };
@@ -1049,7 +1340,11 @@ export async function saveDealAction(
         : payloadWithTrustedProfile;
     const { data, error } = await supabase
       .from("saved_analyses")
-      .update(preservedTitle ? { ...updatePayload, title: preservedTitle } : updatePayload)
+      .update(
+        preservedTitle
+          ? { ...updatePayload, title: preservedTitle }
+          : updatePayload,
+      )
       .eq("id", existing.id)
       .eq("user_id", user.id)
       .eq("underwriting_revision", expectedUnderwritingRevision)
@@ -1097,7 +1392,7 @@ export async function saveDealAction(
     }
 
     const nextUnderwritingRevision = parseSavedAnalysisRevision(
-      (data as Record<string, unknown>).underwriting_revision
+      (data as Record<string, unknown>).underwriting_revision,
     );
     if (nextUnderwritingRevision === null) {
       return {
@@ -1123,7 +1418,7 @@ export async function saveDealAction(
     const sameAddressLookup = await findSavedAnalysesByAddress(
       supabase,
       user.id,
-      addressTrimmed
+      addressTrimmed,
     );
     if (sameAddressLookup.migrationPending) {
       return {
@@ -1137,10 +1432,13 @@ export async function saveDealAction(
       insertTitle = `${title.slice(0, 180)} — Scenario ${sameAddressLookup.rows.length + 1}`;
     }
   } else {
-    const { data: addressTaken, error: dupErr } = await supabase.rpc("saved_analyses_address_taken", {
-      p_user_id: user.id,
-      p_address: addressTrimmed,
-    });
+    const { data: addressTaken, error: dupErr } = await supabase.rpc(
+      "saved_analyses_address_taken",
+      {
+        p_user_id: user.id,
+        p_address: addressTrimmed,
+      },
+    );
     if (dupErr) {
       return toServerErrorResult(dupErr, "saved-analyses");
     }
@@ -1152,7 +1450,7 @@ export async function saveDealAction(
       const collisionLookup = await findSavedAnalysesByAddress(
         supabase,
         user.id,
-        addressTrimmed
+        addressTrimmed,
       );
       if (collisionLookup.migrationPending) {
         return {
@@ -1172,7 +1470,10 @@ export async function saveDealAction(
               existingId: collision.id,
               existingTitle: collision.title ?? undefined,
               ...(collision.underwritingRevision !== null
-                ? { existingUnderwritingRevision: collision.underwritingRevision }
+                ? {
+                    existingUnderwritingRevision:
+                      collision.underwritingRevision,
+                  }
                 : {}),
             }
           : {}),
@@ -1201,12 +1502,12 @@ export async function saveDealAction(
   if (maxOfferTarget) {
     const canCaptureOfferCeiling = await hasPaidPlanSubscription(
       supabase,
-      user.id
+      user.id,
     );
     if (canCaptureOfferCeiling) {
       const capturedTargetSource =
         normalizeOfferCeilingTargetSource(
-          resultSnapshotWithScore.maxOfferTargetSource
+          resultSnapshotWithScore.maxOfferTargetSource,
         ) ?? "selected-targets";
       const capturedAccess = resolveOfferCeilingForAccess({
         values: sanitizedValues,
@@ -1250,7 +1551,7 @@ export async function saveDealAction(
   }
 
   const insertedRevision = parseSavedAnalysisRevision(
-    (data as Record<string, unknown>).underwriting_revision
+    (data as Record<string, unknown>).underwriting_revision,
   );
   if (insertedRevision === null) {
     return {
@@ -1267,7 +1568,9 @@ export async function saveDealAction(
   };
 }
 
-export async function getSavedDealForEditingAction(id: string): Promise<GetSavedDealForEditingResult> {
+export async function getSavedDealForEditingAction(
+  id: string,
+): Promise<GetSavedDealForEditingResult> {
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -1284,7 +1587,7 @@ export async function getSavedDealForEditingAction(id: string): Promise<GetSaved
   const { data, error } = await supabase
     .from("saved_analyses")
     .select(
-      "id, schema_version, methodology_version, underwriting_revision, pipeline_stage, form_snapshot, result_snapshot, financing_profile_id, financing_profile_version, financing_profile_snapshot, property_type, address, purchase_price, year_built, loan_term_years, interest_rate_pct, down_payment_pct, closing_costs_pct, bedrooms, bathrooms, sqft, monthly_rent, property_tax_pct, insurance_input_mode, insurance_pct, insurance_mo, hoa_mo, utilities_mo, maintenance_pct, vacancy_pct, management_pct, capex_pct, building_value_pct, depreciation_years, include_interest_deduction, tax_rate_pct, expense_growth_pct, rent_growth_pct, template_id, appreciation_rate_pct, selling_cost_pct"
+      "id, schema_version, methodology_version, underwriting_revision, pipeline_stage, form_snapshot, result_snapshot, financing_profile_id, financing_profile_version, financing_profile_snapshot, property_type, address, purchase_price, year_built, loan_term_years, interest_rate_pct, down_payment_pct, closing_costs_pct, bedrooms, bathrooms, sqft, monthly_rent, property_tax_pct, insurance_input_mode, insurance_pct, insurance_mo, hoa_mo, utilities_mo, maintenance_pct, vacancy_pct, management_pct, capex_pct, building_value_pct, depreciation_years, include_interest_deduction, tax_rate_pct, expense_growth_pct, rent_growth_pct, template_id, appreciation_rate_pct, selling_cost_pct",
     )
     .eq("id", id.trim())
     .eq("user_id", user.id)
@@ -1320,7 +1623,7 @@ export async function getSavedDealForEditingAction(id: string): Promise<GetSaved
   }
 
   const underwritingRevision = parseSavedAnalysisRevision(
-    (data as Record<string, unknown>).underwriting_revision
+    (data as Record<string, unknown>).underwriting_revision,
   );
   if (underwritingRevision === null) {
     return {
@@ -1363,9 +1666,11 @@ export async function getSavedDealForEditingAction(id: string): Promise<GetSaved
     ok: true,
     id: String(data.id),
     schemaVersion: Number(data.schema_version ?? 1),
-    methodologyVersion: dbString((data as Record<string, unknown>).methodology_version) ?? null,
+    methodologyVersion:
+      dbString((data as Record<string, unknown>).methodology_version) ?? null,
     underwritingRevision,
-    pipelineStage: dbString((data as Record<string, unknown>).pipeline_stage) ?? null,
+    pipelineStage:
+      dbString((data as Record<string, unknown>).pipeline_stage) ?? null,
     formSnapshot: buildEditFormSnapshotFromRow(data as Record<string, unknown>),
     templateFallback,
     resultSnapshot: buildTrustedResultSnapshot(data as Record<string, unknown>),
@@ -1374,7 +1679,7 @@ export async function getSavedDealForEditingAction(id: string): Promise<GetSaved
 
 async function getTemplateFallback(
   supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
-  templateId: string | undefined
+  templateId: string | undefined,
 ): Promise<SavedTemplateFallback | null> {
   if (!templateId) return null;
 
@@ -1390,7 +1695,9 @@ async function getTemplateFallback(
     id: String(templateRow.id),
     templateName: String(templateRow.template_name),
     templateDescription:
-      typeof templateRow.template_description === "string" ? templateRow.template_description : null,
+      typeof templateRow.template_description === "string"
+        ? templateRow.template_description
+        : null,
   };
 }
 
@@ -1403,7 +1710,7 @@ async function getTemplateFallback(
 async function getSavedAnalysisReportComps(
   supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
   savedDealId: string,
-  userId: string
+  userId: string,
 ): Promise<ReportComps | null> {
   try {
     const { data, error } = await supabase
@@ -1414,60 +1721,11 @@ async function getSavedAnalysisReportComps(
       .maybeSingle();
     if (error || !data) return null;
     return enrichmentToReportComps(
-      (data as { payload?: PropertyEnrichment | null }).payload ?? null
+      (data as { payload?: PropertyEnrichment | null }).payload ?? null,
     );
   } catch {
     // Optional reference data must not block a financial report. A missing
     // migration or malformed legacy payload simply produces no comps page.
-    return null;
-  }
-}
-
-/**
- * Does this user currently have ≥1 active buy box with at least one
- * criterion (and the plan feature to use it)? This is exactly the condition
- * under which an exported PDF carries the "Your buy box" block (see
- * getBuyBoxPdfVerdictAction), so the PDF cache keys off it:
- *   - read:  bypass the cached PDF so box edits always reflect on export
- *            (mirrors the branding bypass directly above the cache check);
- *   - write: store block-carrying PDFs with PDF_CACHE_VERSION_UNCACHEABLE,
- *            so deleting the last box (or downgrading) can never re-serve a
- *            stale block from cache.
- * Returns `null` when the lookup itself fails. Cache reads and writes treat
- * that unknown state conservatively, so a transient database error can never
- * bless a box-bearing artifact as reusable.
- */
-async function userHasUsableBuyBox(
-  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
-  userId: string,
-  entitlements: Awaited<ReturnType<typeof getEntitlementsForUser>>
-): Promise<boolean | null> {
-  if (!hasPlanFeature(entitlements, "buy_box")) return false;
-  try {
-    const { data, error } = await supabase
-      .from("user_buy_boxes")
-      .select(
-        "min_cap_rate_pct, min_coc_pct, min_dscr, min_cash_flow_monthly, max_purchase_price, property_types, target_states"
-      )
-      .eq("user_id", userId)
-      .eq("is_active", true);
-    if (error || !data) return null;
-    return data.some((row) => {
-      const r = row as Record<string, unknown>;
-      return buyBoxHasCriteria({
-        minCapRatePct: dbNumber(r.min_cap_rate_pct) ?? null,
-        minCocPct: dbNumber(r.min_coc_pct) ?? null,
-        minDscr: dbNumber(r.min_dscr) ?? null,
-        minCashFlowMonthly: dbNumber(r.min_cash_flow_monthly) ?? null,
-        maxPurchasePrice: dbNumber(r.max_purchase_price) ?? null,
-        propertyTypes: Array.isArray(r.property_types)
-          ? (r.property_types as BuyBoxCriteria["propertyTypes"])
-          : [],
-        targetStates: Array.isArray(r.target_states) ? (r.target_states as string[]) : [],
-        isActive: true,
-      });
-    });
-  } catch {
     return null;
   }
 }
@@ -1486,7 +1744,9 @@ const buyBoxPdfMetricsSchema = z
     dscr: z.number().finite().nullable(),
     cashFlowMonthly: z.number().finite().nullable(),
     purchasePrice: z.number().finite().nullable(),
-    propertyType: z.enum(["single-family", "multi-family", "owner-occupant"]).nullable(),
+    propertyType: z
+      .enum(["single-family", "multi-family", "owner-occupant"])
+      .nullable(),
     address: z.string().max(500).nullable(),
     isCashPurchase: z.boolean(),
   })
@@ -1508,11 +1768,15 @@ export type BuyBoxPdfVerdictActionResult =
  * lib/buy-box primitives (via buildBuyBoxPdfVerdict).
  */
 export async function getBuyBoxPdfVerdictAction(
-  input: unknown
+  input: unknown,
 ): Promise<BuyBoxPdfVerdictActionResult> {
   const parsed = buyBoxPdfMetricsSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, code: "VALIDATION_ERROR", message: "Invalid deal metrics payload." };
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "Invalid deal metrics payload.",
+    };
   }
 
   const listed = await listBuyBoxesAction();
@@ -1551,7 +1815,7 @@ export async function getBuyBoxPdfVerdictAction(
 
 export async function getSavedAnalysisPdfExportAction(
   id: string,
-  options?: { bypassCache?: boolean }
+  _options?: { bypassCache?: boolean },
 ): Promise<GetSavedAnalysisPdfExportResult> {
   const supabase = await createServerSupabaseClient();
   const {
@@ -1616,17 +1880,26 @@ export async function getSavedAnalysisPdfExportAction(
   // download the stored artifact, but cannot regenerate it from changed
   // inputs, branding, methodology, or report templates.
   if (!canGeneratePdf) {
-    if (!cachedPdfUrl) {
+    if (
+      !cachedPdfUrl ||
+      cachedVersion < PDF_TRUSTED_PROVENANCE_MIN_CACHE_VERSION
+    ) {
       return {
         ok: false,
         code: "ENTITLEMENT_REQUIRED",
-        message: "No saved PDF exists for this deal. Creating a new report requires Pro.",
+        message:
+          "No currently verified saved PDF exists for this deal. Creating a new report requires Pro.",
       };
     }
 
-    const objectPath = resolveAnalysisPdfObjectPath(cachedPdfUrl, user.id);
-    if (!objectPath) {
-      Sentry.captureMessage("retained-pdf path invalid", {
+    const cachedArtifact = parseAttestedAnalysisPdfObjectPath(
+      cachedPdfUrl,
+      user.id,
+      savedDealId,
+      cachedVersion,
+    );
+    if (!cachedArtifact) {
+      Sentry.captureMessage("retained-pdf attestation path invalid", {
         level: "warning",
         tags: { feature: "retained-pdf-access" },
         extra: { savedDealId },
@@ -1634,25 +1907,33 @@ export async function getSavedAnalysisPdfExportAction(
       return {
         ok: false,
         code: "SERVER_ERROR",
-        message: "Your saved PDF couldn't be opened. Contact hello@usetruecap.com and we'll help recover it.",
+        message:
+          "Your saved PDF couldn't be opened. Contact hello@usetruecap.com and we'll help recover it.",
       };
     }
 
-    const { data: signed, error: signError } = await supabase.storage
-      .from(ANALYSIS_PDF_BUCKET)
-      .createSignedUrl(objectPath, ANALYSIS_PDF_SIGNED_URL_TTL_SECONDS);
-    if (signed?.signedUrl) {
-      return { ok: true, source: "cache", pdfUrl: signed.signedUrl };
+    const pdfBase64 = await readVerifiedSavedAnalysisPdfArtifact({
+      supabase,
+      userId: user.id,
+      analysisId: savedDealId,
+      cacheVersion: cachedVersion,
+      path: cachedArtifact.path,
+      renderFingerprint: cachedArtifact.renderFingerprint,
+      artifactAttestation: cachedArtifact.artifactAttestation,
+    });
+    if (pdfBase64) {
+      return { ok: true, source: "cache", pdfBase64 };
     }
-    Sentry.captureMessage("retained-pdf sign failed", {
+    Sentry.captureMessage("retained-pdf attestation failed", {
       level: "warning",
       tags: { feature: "retained-pdf-access" },
-      extra: { savedDealId, message: signError?.message },
+      extra: { savedDealId },
     });
     return {
       ok: false,
       code: "SERVER_ERROR",
-      message: "Your saved PDF couldn't be opened. Contact hello@usetruecap.com and we'll help recover it.",
+      message:
+        "Your saved PDF couldn't be opened. Contact hello@usetruecap.com and we'll help recover it.",
     };
   }
 
@@ -1666,107 +1947,17 @@ export async function getSavedAnalysisPdfExportAction(
     getTemplateFallback(supabase, dbString(row.template_id)),
     getSavedAnalysisReportComps(supabase, savedDealId, user.id),
   ]);
-  const renderSource = savedAnalysisPdfRenderSource(row, templateFallback, reportComps);
-  const renderFingerprint = fingerprintSavedAnalysisPdfRender(renderSource);
-  const expectedPdfPath = buildAnalysisPdfObjectPath(
-    user.id,
-    savedDealId,
-    PDF_CACHE_VERSION,
-    renderFingerprint
+  const renderSource = savedAnalysisPdfRenderSource(
+    row,
+    templateFallback,
+    reportComps,
   );
-  const cachedObjectPath = cachedPdfUrl
-    ? resolveAnalysisPdfObjectPath(cachedPdfUrl, user.id)
-    : null;
-
-  // Cache check — only serve cached PDF if:
-  //   1) it exists,
-  //   2) its snapshot version matches the current template version, AND
-  //   3) its object path fingerprint matches the current render source, AND
-  //   4) the user has NO branding configured.
-  //
-  // The third condition exists because cached PDFs don't track the
-  // branding state they were generated with. If a user updates their
-  // logo, brand color, or "Prepared by" name, the cached PDF would
-  // still show the old branding indefinitely (until PDF_CACHE_VERSION
-  // bumped). Bypassing cache for branded users means their changes
-  // always reflect on the next export, at the cost of regenerating
-  // (~3-5s + an upload). Acceptable tradeoff — branded users care
-  // more about accuracy than speed.
-  let hasUserBranding = false;
-  try {
-    const { data: brandingRow, error: brandingError } = await supabase
-      .from("branding")
-      .select("id")
-      .eq("user_id", user.id)
-      .maybeSingle();
-    if (brandingError) {
-      // Surface query errors to Sentry but don't fail the export.
-      // Falling through to normal cache logic means branded users get
-      // a possibly-stale cached PDF, which is better UX than blocking
-      // the export entirely. The Sentry capture makes systemic
-      // failures (RLS misconfig, table missing, network) visible.
-      Sentry.captureMessage("branding-lookup query error", {
-        level: "warning",
-        tags: { feature: "pdf-cache-branding-lookup" },
-        extra: { message: brandingError.message, code: brandingError.code },
-      });
-    } else {
-      hasUserBranding = Boolean(brandingRow);
-    }
-  } catch (err) {
-    Sentry.captureException(err, {
-      tags: { feature: "pdf-cache-branding-lookup" },
-    });
-    // Fall through to the normal cache logic on unexpected failures.
-  }
-
-  // Version match is against the COMPOSITE template+engine version (see
-  // PDF_CACHE_VERSION) — legacy rows storing the old plain template version
-  // (0-4) simply never match and regenerate. Never throws on odd legacy
-  // values: dbNumber already coerced non-numeric to 0 above.
-  if (
-    options?.bypassCache !== true &&
-    cachedPdfUrl &&
-    cachedVersion === PDF_CACHE_VERSION &&
-    cachedObjectPath === expectedPdfPath &&
-    !hasUserBranding &&
-    // Input confirmations can change without any financial-engine version
-    // changing. A cached Decision Readiness page would then retain stale
-    // "verified" evidence, so this report shape is intentionally regenerated.
-    !isFeatureEnabled("input_confidence")
-  ) {
-    // Buy-box exports bypass the cache for the same reason branded ones do:
-    // cached PDFs don't track the buy-box state they were generated with.
-    // While the user has a usable buy box, every export regenerates so the
-    // "Your buy box" block always reflects their CURRENT criteria (edits,
-    // new boxes, default changes). Checked only on the would-serve-cache
-    // path so the regenerate path pays no extra query.
-    const hasUsableBuyBox = await userHasUsableBuyBox(supabase, user.id, entitlements);
-    if (hasUsableBuyBox === false) {
-      // The bucket is PRIVATE (migration 20260802120000) — it used to be
-      // public, which made every user's underwrite anonymously listable and
-      // downloadable. Never hand back a durable URL: mint a short-lived
-      // signed one, scoped by RLS to the caller's own folder. `supabase` here
-      // is the cookie-bound user client, so signing an object outside
-      // `<user.id>/` fails at the policy — a non-owner cannot mint a URL.
-      if (cachedObjectPath) {
-        const { data: signed, error: signError } = await supabase.storage
-          .from(ANALYSIS_PDF_BUCKET)
-          .createSignedUrl(cachedObjectPath, ANALYSIS_PDF_SIGNED_URL_TTL_SECONDS);
-        if (signed?.signedUrl) {
-          return { ok: true, source: "cache", pdfUrl: signed.signedUrl };
-        }
-        // Object gone / policy denied / storage hiccup: fall through to the
-        // regenerate path so the export still works, and leave a breadcrumb
-        // so a systemic failure (e.g. the migration not applied) is visible.
-        Sentry.captureMessage("pdf-cache-sign failed", {
-          level: "warning",
-          tags: { feature: "pdf-cache-sign" },
-          extra: { message: signError?.message },
-        });
-      }
-    }
-  }
+  const renderFingerprint = fingerprintSavedAnalysisPdfRender(renderSource);
+  // Active subscribers always receive a fresh server render. This makes
+  // mutable branding, Buy Boxes, evidence confirmations, and future report
+  // state correct by construction. The attested artifact is retained only
+  // for read-only post-cancellation access; owner storage and row fields are
+  // never a publication authority for a current export.
 
   return {
     ok: true,
@@ -1798,9 +1989,7 @@ export async function getSavedAnalysisPdfExportAction(
 export async function completeSavedAnalysisPdfExportAction(
   id: string,
   renderFingerprint: string,
-  renderedWithBranding: boolean,
-  renderedWithBuyBoxVerdict: boolean,
-  buyBoxStateResolved: boolean
+  artifactAttestation: string,
 ): Promise<CompleteSavedAnalysisPdfExportResult> {
   const supabase = await createServerSupabaseClient();
   const {
@@ -1808,23 +1997,33 @@ export async function completeSavedAnalysisPdfExportAction(
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in to save PDF exports." };
+    return {
+      ok: false,
+      code: "SIGN_IN_REQUIRED",
+      message: "Please sign in to save PDF exports.",
+    };
   }
 
   const entitlements = await getEntitlementsForUser(supabase, user.id);
   if (!hasPlanFeature(entitlements, "pdf_export")) {
-    return { ok: false, code: "ENTITLEMENT_REQUIRED", message: "PDF export is not available for your current plan." };
+    return {
+      ok: false,
+      code: "ENTITLEMENT_REQUIRED",
+      message: "PDF export is not available for your current plan.",
+    };
   }
 
   const savedDealId = id.trim();
   if (
     !savedDealId ||
     !isSavedAnalysisPdfRenderFingerprint(renderFingerprint) ||
-    typeof renderedWithBranding !== "boolean" ||
-    typeof renderedWithBuyBoxVerdict !== "boolean" ||
-    typeof buyBoxStateResolved !== "boolean"
+    !isSavedAnalysisPdfArtifactAttestation(artifactAttestation)
   ) {
-    return { ok: false, code: "VALIDATION_ERROR", message: "Invalid PDF export payload." };
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "Invalid PDF export payload.",
+    };
   }
 
   const { data: currentData, error: currentError } = await supabase
@@ -1857,8 +2056,12 @@ export async function completeSavedAnalysisPdfExportAction(
   ]);
   if (
     !savedAnalysisPdfRenderMatches(
-      savedAnalysisPdfRenderSource(currentRow, currentTemplateFallback, currentReportComps),
-      renderFingerprint
+      savedAnalysisPdfRenderSource(
+        currentRow,
+        currentTemplateFallback,
+        currentReportComps,
+      ),
+      renderFingerprint,
     )
   ) {
     return {
@@ -1872,48 +2075,19 @@ export async function completeSavedAnalysisPdfExportAction(
     user.id,
     savedDealId,
     PDF_CACHE_VERSION,
-    renderFingerprint
+    renderFingerprint,
+    artifactAttestation,
   );
-
-  // A PDF generated while the user has a usable buy box or Decision
-  // Readiness evidence carries mutable state the version composite cannot
-  // see. Store it uncacheable so later edits cannot re-serve stale criteria
-  // or confirmations.
-  const hasUsableBuyBox = await userHasUsableBuyBox(supabase, user.id, entitlements);
-  const hasMutableDecisionReadiness = isFeatureEnabled("input_confidence");
-  // `renderedWithBranding` relays the server renderer's actual outcome from
-  // generateReportPdfAction. It is not an authorization input; it protects
-  // the normal delete-branding race: even if
-  // the branding row disappears before completion, those branded bytes remain
-  // uncacheable for paid reads (while the retained artifact still exists for
-  // a later downgrade). Recheck the row too so creating branding between
-  // render and completion is also conservative.
-  let hasCurrentBranding = false;
-  try {
-    const { data: brandingRow } = await supabase
-      .from("branding")
-      .select("id")
-      .eq("user_id", user.id)
-      .maybeSingle();
-    hasCurrentBranding = Boolean(brandingRow);
-  } catch {
-    // The relayed renderer outcome still protects the artifact just made.
-  }
 
   const { data, error } = await supabase
     .from("saved_analyses")
     .update({
       pdf_url: pdfPath,
       pdf_generated_at: new Date().toISOString(),
-      pdf_snapshot_version:
-        renderedWithBranding ||
-        hasCurrentBranding ||
-        renderedWithBuyBoxVerdict ||
-        !buyBoxStateResolved ||
-        hasUsableBuyBox !== false ||
-        hasMutableDecisionReadiness
-          ? PDF_CACHE_VERSION_UNCACHEABLE
-          : PDF_CACHE_VERSION,
+      // This is a retained artifact, not a current-output cache. Active users
+      // always regenerate; canceled users may read these exact HMAC-verified
+      // bytes without receiving a new paid render.
+      pdf_snapshot_version: PDF_CACHE_VERSION,
       last_activity_at: new Date().toISOString(),
     })
     .eq("id", savedDealId)
@@ -1966,7 +2140,7 @@ export type UpdateSavedDealNotesResult =
 export async function updateSavedDealNotesAction(
   id: string,
   notes: string,
-  expectedRevision: unknown
+  expectedRevision: unknown,
 ): Promise<UpdateSavedDealNotesResult> {
   const supabase = await createServerSupabaseClient();
   const {
@@ -1982,7 +2156,11 @@ export async function updateSavedDealNotesAction(
   }
   const expectedNotesRevision = parseSavedAnalysisRevision(expectedRevision);
   if (expectedNotesRevision === null) {
-    return { ok: false, code: "VALIDATION_ERROR", message: "Invalid notes revision." };
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "Invalid notes revision.",
+    };
   }
   const { data, error } = await supabase
     .from("saved_analyses")
@@ -2016,7 +2194,8 @@ export async function updateSavedDealNotesAction(
       .eq("user_id", user.id)
       .is("deleted_at", null)
       .maybeSingle();
-    if (currentError) return toServerErrorResult(currentError, "saved-analyses");
+    if (currentError)
+      return toServerErrorResult(currentError, "saved-analyses");
     if (!current) {
       return { ok: false, code: "NOT_FOUND", message: "Deal not found." };
     }
@@ -2028,7 +2207,7 @@ export async function updateSavedDealNotesAction(
     };
   }
   const revision = parseSavedAnalysisRevision(
-    (data as Record<string, unknown>).notes_revision
+    (data as Record<string, unknown>).notes_revision,
   );
   if (revision === null) {
     return {
@@ -2044,11 +2223,17 @@ export async function updateSavedDealNotesAction(
  * Fetch the notes for a single saved deal. Returns null if the deal
  * has no notes yet, or if the migration isn't applied (defensive).
  */
-export async function getSavedDealNotesAction(
-  id: string
-): Promise<
+export async function getSavedDealNotesAction(id: string): Promise<
   | { ok: true; notes: string | null; revision: number }
-  | { ok: false; code: "SIGN_IN_REQUIRED" | "MIGRATION_PENDING" | "NOT_FOUND" | "SERVER_ERROR"; message: string }
+  | {
+      ok: false;
+      code:
+        | "SIGN_IN_REQUIRED"
+        | "MIGRATION_PENDING"
+        | "NOT_FOUND"
+        | "SERVER_ERROR";
+      message: string;
+    }
 > {
   const supabase = await createServerSupabaseClient();
   const {
@@ -2065,8 +2250,15 @@ export async function getSavedDealNotesAction(
     .is("deleted_at", null)
     .maybeSingle();
   if (error) {
-    if (error.code === "42703" || /column .* does not exist/i.test(error.message)) {
-      return { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." };
+    if (
+      error.code === "42703" ||
+      /column .* does not exist/i.test(error.message)
+    ) {
+      return {
+        ok: false,
+        code: "MIGRATION_PENDING",
+        message: "Schema migration pending.",
+      };
     }
     return toServerErrorResult(error, "saved-analyses");
   }
@@ -2074,7 +2266,7 @@ export async function getSavedDealNotesAction(
     return { ok: false, code: "NOT_FOUND", message: "Deal was not found." };
   }
   const revision = parseSavedAnalysisRevision(
-    (data as Record<string, unknown>).notes_revision
+    (data as Record<string, unknown>).notes_revision,
   );
   if (revision === null) {
     return {
@@ -2092,7 +2284,7 @@ export async function getSavedDealNotesAction(
 
 export async function updateSavedDealLifecycleStateAction(
   id: string,
-  state: "active" | "completed" | "archived"
+  state: "active" | "completed" | "archived",
 ): Promise<UpdateSavedDealLifecycleResult> {
   const supabase = await createServerSupabaseClient();
   const {
@@ -2100,7 +2292,11 @@ export async function updateSavedDealLifecycleStateAction(
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in to update deal status." };
+    return {
+      ok: false,
+      code: "SIGN_IN_REQUIRED",
+      message: "Please sign in to update deal status.",
+    };
   }
 
   const savedDealId = id.trim();
@@ -2110,10 +2306,22 @@ export async function updateSavedDealLifecycleStateAction(
 
   const updatePayload =
     state === "active"
-      ? { is_completed: false, is_archived: false, last_activity_at: new Date().toISOString() }
+      ? {
+          is_completed: false,
+          is_archived: false,
+          last_activity_at: new Date().toISOString(),
+        }
       : state === "completed"
-        ? { is_completed: true, is_archived: false, last_activity_at: new Date().toISOString() }
-        : { is_completed: false, is_archived: true, last_activity_at: new Date().toISOString() };
+        ? {
+            is_completed: true,
+            is_archived: false,
+            last_activity_at: new Date().toISOString(),
+          }
+        : {
+            is_completed: false,
+            is_archived: true,
+            last_activity_at: new Date().toISOString(),
+          };
 
   const { data, error } = await supabase
     .from("saved_analyses")
@@ -2143,7 +2351,7 @@ export async function updateSavedDealLifecycleStateAction(
  */
 export async function updateSavedDealStageAction(
   id: string,
-  stage: PipelineStage
+  stage: PipelineStage,
 ): Promise<UpdateSavedDealLifecycleResult> {
   const supabase = await createServerSupabaseClient();
   const {
@@ -2151,17 +2359,29 @@ export async function updateSavedDealStageAction(
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in to update deal stage." };
+    return {
+      ok: false,
+      code: "SIGN_IN_REQUIRED",
+      message: "Please sign in to update deal stage.",
+    };
   }
 
   const savedDealId = id.trim();
   if (!savedDealId || !isPipelineStage(stage)) {
-    return { ok: false, code: "VALIDATION_ERROR", message: "Invalid deal or stage." };
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "Invalid deal or stage.",
+    };
   }
 
   const entitlements = await getEntitlementsForUser(supabase, user.id);
   if (!hasPlanFeature(entitlements, "pipeline")) {
-    return { ok: false, code: "ENTITLEMENT_REQUIRED", message: "Pipeline stages are a Pro feature." };
+    return {
+      ok: false,
+      code: "ENTITLEMENT_REQUIRED",
+      message: "Pipeline stages are a Pro feature.",
+    };
   }
 
   const { data, error } = await supabase
@@ -2205,7 +2425,12 @@ export type SetCloseDateResult =
   | { ok: true }
   | {
       ok: false;
-      code: "SIGN_IN_REQUIRED" | "VALIDATION_ERROR" | "MIGRATION_PENDING" | "NOT_FOUND" | "SERVER_ERROR";
+      code:
+        | "SIGN_IN_REQUIRED"
+        | "VALIDATION_ERROR"
+        | "MIGRATION_PENDING"
+        | "NOT_FOUND"
+        | "SERVER_ERROR";
       message: string;
     };
 
@@ -2217,14 +2442,18 @@ export type SetCloseDateResult =
  */
 export async function setSavedDealCloseDateAction(
   id: string,
-  closeDate: string | null
+  closeDate: string | null,
 ): Promise<SetCloseDateResult> {
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in to update this deal." };
+    return {
+      ok: false,
+      code: "SIGN_IN_REQUIRED",
+      message: "Please sign in to update this deal.",
+    };
   }
 
   const savedDealId = id.trim();
@@ -2239,17 +2468,32 @@ export async function setSavedDealCloseDateAction(
   let value: string | null = null;
   if (closeDate != null) {
     const trimmed = closeDate.trim();
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed) || Number.isNaN(new Date(trimmed).getTime())) {
-      return { ok: false, code: "VALIDATION_ERROR", message: "Enter a valid date." };
+    if (
+      !/^\d{4}-\d{2}-\d{2}$/.test(trimmed) ||
+      Number.isNaN(new Date(trimmed).getTime())
+    ) {
+      return {
+        ok: false,
+        code: "VALIDATION_ERROR",
+        message: "Enter a valid date.",
+      };
     }
     if (trimmed > new Date().toISOString().slice(0, 10)) {
-      return { ok: false, code: "VALIDATION_ERROR", message: "Close date can't be in the future." };
+      return {
+        ok: false,
+        code: "VALIDATION_ERROR",
+        message: "Close date can't be in the future.",
+      };
     }
     // Sane floor: native date inputs can commit partial years (e.g. 0001)
     // mid-typing; a pre-1900 close date is never real and would produce a
     // multi-millennium months-owned figure.
     if (trimmed < "1900-01-01") {
-      return { ok: false, code: "VALIDATION_ERROR", message: "Enter a valid close date." };
+      return {
+        ok: false,
+        code: "VALIDATION_ERROR",
+        message: "Enter a valid close date.",
+      };
     }
     value = trimmed;
   }
@@ -2264,8 +2508,15 @@ export async function setSavedDealCloseDateAction(
     .maybeSingle();
 
   if (error) {
-    if (error.code === "42703" || /column .* does not exist/i.test(error.message ?? "")) {
-      return { ok: false, code: "MIGRATION_PENDING", message: "Owned-deal tracking isn't enabled yet." };
+    if (
+      error.code === "42703" ||
+      /column .* does not exist/i.test(error.message ?? "")
+    ) {
+      return {
+        ok: false,
+        code: "MIGRATION_PENDING",
+        message: "Owned-deal tracking isn't enabled yet.",
+      };
     }
     return toServerErrorResult(error, "saved-analyses");
   }
@@ -2279,14 +2530,19 @@ export type UpdateSavedDealTagsResult =
   | { ok: true; tags: string[] }
   | {
       ok: false;
-      code: "SIGN_IN_REQUIRED" | "ENTITLEMENT_REQUIRED" | "NOT_FOUND" | "VALIDATION_ERROR" | "SERVER_ERROR";
+      code:
+        | "SIGN_IN_REQUIRED"
+        | "ENTITLEMENT_REQUIRED"
+        | "NOT_FOUND"
+        | "VALIDATION_ERROR"
+        | "SERVER_ERROR";
       message: string;
     };
 
 /** Replace a saved deal's tags (Pro). Tags are normalized server-side. */
 export async function updateSavedDealTagsAction(
   id: string,
-  tags: unknown
+  tags: unknown,
 ): Promise<UpdateSavedDealTagsResult> {
   const supabase = await createServerSupabaseClient();
   const {
@@ -2294,7 +2550,11 @@ export async function updateSavedDealTagsAction(
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in to update tags." };
+    return {
+      ok: false,
+      code: "SIGN_IN_REQUIRED",
+      message: "Please sign in to update tags.",
+    };
   }
 
   const savedDealId = id.trim();
@@ -2304,7 +2564,11 @@ export async function updateSavedDealTagsAction(
 
   const entitlements = await getEntitlementsForUser(supabase, user.id);
   if (!hasPlanFeature(entitlements, "pipeline")) {
-    return { ok: false, code: "ENTITLEMENT_REQUIRED", message: "Deal tags are a Pro feature." };
+    return {
+      ok: false,
+      code: "ENTITLEMENT_REQUIRED",
+      message: "Deal tags are a Pro feature.",
+    };
   }
 
   const normalized = normalizeTags(tags);
@@ -2331,7 +2595,12 @@ export type SetSavedDealClientResult =
   | { ok: true; clientId: string | null }
   | {
       ok: false;
-      code: "SIGN_IN_REQUIRED" | "ENTITLEMENT_REQUIRED" | "VALIDATION_ERROR" | "NOT_FOUND" | "SERVER_ERROR";
+      code:
+        | "SIGN_IN_REQUIRED"
+        | "ENTITLEMENT_REQUIRED"
+        | "VALIDATION_ERROR"
+        | "NOT_FOUND"
+        | "SERVER_ERROR";
       message: string;
     };
 
@@ -2345,7 +2614,7 @@ export type SetSavedDealClientResult =
  */
 export async function setSavedDealClientAction(
   id: string,
-  clientId: string | null
+  clientId: string | null,
 ): Promise<SetSavedDealClientResult> {
   const supabase = await createServerSupabaseClient();
   const {
@@ -2366,7 +2635,11 @@ export async function setSavedDealClientAction(
 
   const entitlements = await getEntitlementsForUser(supabase, user.id);
   if (!hasPlanFeature(entitlements, "client_buy_box")) {
-    return { ok: false, code: "ENTITLEMENT_REQUIRED", message: "Client assignment is an Agent Pro feature." };
+    return {
+      ok: false,
+      code: "ENTITLEMENT_REQUIRED",
+      message: "Client assignment is an Agent Pro feature.",
+    };
   }
 
   if (clientId !== null) {
@@ -2377,7 +2650,11 @@ export async function setSavedDealClientAction(
       .eq("agent_user_id", user.id)
       .maybeSingle();
     if (!ownedClient) {
-      return { ok: false, code: "VALIDATION_ERROR", message: "That client isn't on your roster." };
+      return {
+        ok: false,
+        code: "VALIDATION_ERROR",
+        message: "That client isn't on your roster.",
+      };
     }
   }
 
@@ -2406,7 +2683,11 @@ export async function setSavedDealClientAction(
   return { ok: true, clientId };
 }
 
-export type SavedDealBrief = { id: string; label: string; pipelineStage: string | null };
+export type SavedDealBrief = {
+  id: string;
+  label: string;
+  pipelineStage: string | null;
+};
 export type ListSavedDealsBriefResult =
   | { ok: true; deals: SavedDealBrief[] }
   | { ok: false; code: "SIGN_IN_REQUIRED" | "SERVER_ERROR"; message: string };
@@ -2431,9 +2712,17 @@ export async function listSavedDealsBriefAction(): Promise<ListSavedDealsBriefRe
       .limit(200);
   // scenario_name ships in the properties/scenarios migration — retry without
   // it (address-only labels) while the column doesn't exist yet.
-  let { data, error } = await runQuery("id, address, title, pipeline_stage, created_at, scenario_name");
-  if (error && (error.code === "42703" || /column .* does not exist/i.test(error.message ?? ""))) {
-    ({ data, error } = await runQuery("id, address, title, pipeline_stage, created_at"));
+  let { data, error } = await runQuery(
+    "id, address, title, pipeline_stage, created_at, scenario_name",
+  );
+  if (
+    error &&
+    (error.code === "42703" ||
+      /column .* does not exist/i.test(error.message ?? ""))
+  ) {
+    ({ data, error } = await runQuery(
+      "id, address, title, pipeline_stage, created_at",
+    ));
   }
   if (error) {
     return toServerErrorResult(error, "saved-analyses");
@@ -2446,10 +2735,12 @@ export async function listSavedDealsBriefAction(): Promise<ListSavedDealsBriefRe
       pipeline_stage: string | null;
       scenario_name?: string | null;
     };
-    const base = row.address?.trim() || row.title?.trim() || "Untitled property";
+    const base =
+      row.address?.trim() || row.title?.trim() || "Untitled property";
     // Sibling scenarios share one address — the scenario name keeps picker
     // rows tellable apart (matches the My Deals row suffix).
-    const scenario = typeof row.scenario_name === "string" ? row.scenario_name.trim() : "";
+    const scenario =
+      typeof row.scenario_name === "string" ? row.scenario_name.trim() : "";
     return {
       id: row.id,
       label: scenario ? `${base} — ${scenario}` : base,
@@ -2473,13 +2764,21 @@ export type DealDueDiligenceResult =
       message: string;
     };
 
-function isMissingDueDiligenceTable(error: { code?: string; message?: string }): boolean {
-  return error.code === "42P01" || /relation .* does not exist/i.test(error.message ?? "");
+function isMissingDueDiligenceTable(error: {
+  code?: string;
+  message?: string;
+}): boolean {
+  return (
+    error.code === "42P01" ||
+    /relation .* does not exist/i.test(error.message ?? "")
+  );
 }
 
 /** Read a saved deal's due-diligence checklist. Seeds the default checklist
  *  when the deal has none yet. Tolerant of the migration being unapplied. */
-export async function getDealDueDiligenceAction(id: string): Promise<DealDueDiligenceResult> {
+export async function getDealDueDiligenceAction(
+  id: string,
+): Promise<DealDueDiligenceResult> {
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -2513,15 +2812,23 @@ export async function getDealDueDiligenceAction(id: string): Promise<DealDueDili
     .maybeSingle();
   if (error) {
     if (isMissingDueDiligenceTable(error)) {
-      return { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." };
+      return {
+        ok: false,
+        code: "MIGRATION_PENDING",
+        message: "Schema migration pending.",
+      };
     }
     return toServerErrorResult(error, "saved-analyses");
   }
-  const stored = data ? normalizeDueDiligenceItems((data as { items?: unknown }).items) : [];
+  const stored = data
+    ? normalizeDueDiligenceItems((data as { items?: unknown }).items)
+    : [];
   return {
     ok: true,
     items: stored.length > 0 ? stored : defaultDueDiligenceItems(),
-    revision: data ? (data as { updated_at?: string | null }).updated_at ?? null : null,
+    revision: data
+      ? ((data as { updated_at?: string | null }).updated_at ?? null)
+      : null,
   };
 }
 
@@ -2535,7 +2842,7 @@ export async function getDealDueDiligenceAction(id: string): Promise<DealDueDili
 export async function updateDealDueDiligenceAction(
   id: string,
   items: unknown,
-  expectedRevision: unknown
+  expectedRevision: unknown,
 ): Promise<DealDueDiligenceResult> {
   const supabase = await createServerSupabaseClient();
   const {
@@ -2549,8 +2856,16 @@ export async function updateDealDueDiligenceAction(
     return { ok: false, code: "VALIDATION_ERROR", message: "Invalid deal id." };
   }
   const normalized = normalizeDueDiligenceItems(items);
-  if (expectedRevision !== null && (typeof expectedRevision !== "string" || Number.isNaN(Date.parse(expectedRevision)))) {
-    return { ok: false, code: "VALIDATION_ERROR", message: "Invalid checklist revision." };
+  if (
+    expectedRevision !== null &&
+    (typeof expectedRevision !== "string" ||
+      Number.isNaN(Date.parse(expectedRevision)))
+  ) {
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "Invalid checklist revision.",
+    };
   }
   const revision = expectedRevision as string | null;
 
@@ -2590,14 +2905,19 @@ export async function updateDealDueDiligenceAction(
   const { data: written, error } = write;
   if (error) {
     if (isMissingDueDiligenceTable(error)) {
-      return { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." };
+      return {
+        ok: false,
+        code: "MIGRATION_PENDING",
+        message: "Schema migration pending.",
+      };
     }
     // Another client created the row after this caller read "no row".
     if (revision === null && error.code === "23505") {
       return {
         ok: false,
         code: "STALE_DATA",
-        message: "This checklist changed elsewhere. Reload the latest version before saving again.",
+        message:
+          "This checklist changed elsewhere. Reload the latest version before saving again.",
       };
     }
     return toServerErrorResult(error, "saved-analyses");
@@ -2608,7 +2928,8 @@ export async function updateDealDueDiligenceAction(
     return {
       ok: false,
       code: "STALE_DATA",
-      message: "This checklist changed elsewhere. Reload the latest version before saving again.",
+      message:
+        "This checklist changed elsewhere. Reload the latest version before saving again.",
     };
   }
   return {
@@ -2636,11 +2957,15 @@ export async function updateDealDueDiligenceAction(
  */
 export type BulkSavedDealActionResult =
   | { ok: true; affectedCount: number }
-  | { ok: false; code: "SIGN_IN_REQUIRED" | "VALIDATION_ERROR" | "SERVER_ERROR"; message: string };
+  | {
+      ok: false;
+      code: "SIGN_IN_REQUIRED" | "VALIDATION_ERROR" | "SERVER_ERROR";
+      message: string;
+    };
 
 export async function bulkUpdateSavedDealsAction(
   ids: string[],
-  action: "archive" | "delete" | "activate"
+  action: "archive" | "delete" | "activate",
 ): Promise<BulkSavedDealActionResult> {
   const supabase = await createServerSupabaseClient();
   const {
@@ -2655,12 +2980,16 @@ export async function bulkUpdateSavedDealsAction(
     new Set(
       (ids ?? [])
         .map((id) => (typeof id === "string" ? id.trim() : ""))
-        .filter(Boolean)
-    )
+        .filter(Boolean),
+    ),
   );
 
   if (cleanedIds.length === 0) {
-    return { ok: false, code: "VALIDATION_ERROR", message: "No deals selected." };
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "No deals selected.",
+    };
   }
   if (cleanedIds.length > 100) {
     return {

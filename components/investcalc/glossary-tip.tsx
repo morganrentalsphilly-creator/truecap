@@ -68,7 +68,7 @@ export function GlossaryTip({
             aria-label={`${entry.term} - what's this?`}
             className={cn(
               "inline-flex min-h-11 min-w-11 items-center justify-center gap-1 cursor-help rounded-sm underline decoration-dotted decoration-muted-foreground/40 underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-              className
+              className,
             )}
             onClick={(e) => {
               // Tap target on touch; stop the click from reaching a wrapping
@@ -85,16 +85,16 @@ export function GlossaryTip({
             }}
           >
             {children}
-            {showIcon && (
-              <HelpCircle className="w-3 h-3 text-muted-foreground opacity-70" />
-            )}
+            {showIcon && <HelpCircle className="h-3 w-3 text-foreground" />}
           </span>
         </TooltipTrigger>
         <TooltipContent
           side="top"
           className="max-w-xs text-xs leading-relaxed bg-popover text-popover-foreground border border-border shadow-md px-3 py-2"
         >
-          <div className="font-semibold text-foreground mb-0.5">{entry.term}</div>
+          <div className="font-semibold text-foreground mb-0.5">
+            {entry.term}
+          </div>
           <p className="text-muted-foreground">{entry.definition}</p>
           {entry.benchmark && (
             <p className="text-muted-foreground mt-1.5 pt-1.5 border-t border-border italic">

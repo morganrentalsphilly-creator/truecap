@@ -16,6 +16,7 @@
  */
 
 import { z } from "zod";
+import { specialistAnalysisSnapshotSchema } from "@/lib/specialist-analysis-snapshot";
 
 const money = z.number().finite();
 const row = <T extends z.ZodRawShape>(shape: T) => z.object(shape).strict();
@@ -82,7 +83,7 @@ const inputConfidenceSchema = z
             sourceLabel: z.string().max(160),
             reason: z.string().max(500),
           })
-          .strict()
+          .strict(),
       )
       .max(60),
   })
@@ -124,7 +125,7 @@ const reportDataSchema = z
           // counting the owner's unit in gross rent — the same trap that
           // blanked the comps $/sqft column.
           isOwnerOccupied: z.boolean().optional(),
-        })
+        }),
       )
       .max(60),
     performance: z.object({
@@ -166,6 +167,9 @@ const reportDataSchema = z
       })
       .nullable()
       .optional(),
+    // Shared strict versioned schema: declaring this nested block is required
+    // or z.object() silently strips it before the PDF renderer sees it.
+    specialistAnalysis: specialistAnalysisSnapshotSchema.nullable().optional(),
     // This evidence is the only browser-supplied report block preserved by
     // the server rebuild (along with bounded comps), so it must never remain
     // `unknown`: an arbitrary object could otherwise reach the renderer.
@@ -195,9 +199,13 @@ const reportDataSchema = z
     comps: z
       .object({
         valueEstimate: money.nullable(),
-        valueRange: z.object({ low: money.nullable(), high: money.nullable() }).nullable(),
+        valueRange: z
+          .object({ low: money.nullable(), high: money.nullable() })
+          .nullable(),
         rentEstimate: money.nullable(),
-        rentRange: z.object({ low: money.nullable(), high: money.nullable() }).nullable(),
+        rentRange: z
+          .object({ low: money.nullable(), high: money.nullable() })
+          .nullable(),
         saleComps: z.array(compRow).max(50),
         rentComps: z.array(compRow).max(50),
         // Same trap as pricePerSqft above: undeclared meant the "Pulled

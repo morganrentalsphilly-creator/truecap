@@ -7,10 +7,10 @@
  * EXTRACTED from the standalone "Paste a listing link" dashed card that used
  * to render above the form in investcalc-page.tsx — same input id, copy,
  * Enter-to-submit and error state; only the chrome changed. Closed: a
- * one-line text toggle ("or paste a Zillow/Redfin link") under the address
+ * one-line text toggle ("Use a listing link to fill the address") under the address
  * input. Open: the URL row swaps IN for the address input (the parent
  * CSS-hides the address block — it stays MOUNTED so RHF registration and
- * enrichment writes are untouched) with a "type the address instead" toggle
+ * enrichment writes are untouched) with a "Use the address instead" toggle
  * back. The parse → hero-handoff → enrichment behavior lives in the parent
  * (handleListingUrl), unchanged.
  *
@@ -69,22 +69,31 @@ export function ListingLinkInput({
       <button
         type="button"
         onClick={() => onOpenChange(true)}
-        className="mt-2 block text-xs font-semibold text-primary underline-offset-2 hover:underline"
+        className="mt-2 inline-flex min-h-11 max-w-full items-center whitespace-normal py-2 text-left text-xs font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
       >
-        or paste a Zillow/Redfin link
+        Use a listing link to fill the address
       </button>
     );
   }
 
   return (
     <div>
-      <label htmlFor="listing-url" className="text-xs font-semibold text-foreground">
+      <label
+        htmlFor="listing-url"
+        className="text-xs font-semibold text-foreground"
+      >
         Paste a listing link
       </label>
-      <p className="mt-0.5 text-[11px] text-muted-foreground">
-        Zillow, Redfin, or Realtor.com — TrueCap extracts the address from the URL, then starts rent, rate, and tax from labeled area or national screening benchmarks. It does not import the listing price, taxes, photos, or seller claims.
+      <p
+        id="listing-url-help"
+        className="mt-0.5 text-[11px] text-muted-foreground"
+      >
+        Zillow, Redfin, or Realtor.com — TrueCap extracts the address from the
+        URL, then starts rent, rate, and tax from labeled area or national
+        screening benchmarks. It does not import the listing price, taxes,
+        photos, or seller claims.
       </p>
-      <div className="mt-2 flex gap-2">
+      <div className="mt-2 flex flex-wrap gap-2">
         <input
           id="listing-url"
           ref={urlInputRef}
@@ -100,16 +109,18 @@ export function ListingLinkInput({
           }}
           placeholder="https://www.zillow.com/homedetails/…"
           aria-invalid={hasError || undefined}
-          aria-describedby={hasError ? "listing-url-error" : undefined}
-          className="min-w-0 flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm"
+          aria-describedby={
+            hasError ? "listing-url-help listing-url-error" : "listing-url-help"
+          }
+          className="min-h-11 min-w-0 flex-[1_1_18rem] rounded-lg border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         />
         <button
           type="button"
           onClick={onSubmit}
           disabled={!value.trim()}
-          className="shrink-0 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+          className="min-h-11 max-w-full shrink-0 whitespace-normal rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Pull it in
+          Use address from link
         </button>
       </div>
       {hasError ? (
@@ -125,9 +136,9 @@ export function ListingLinkInput({
       <button
         type="button"
         onClick={() => onOpenChange(false)}
-        className="mt-2 block text-xs font-semibold text-primary underline-offset-2 hover:underline"
+        className="mt-2 inline-flex min-h-11 max-w-full items-center whitespace-normal py-2 text-left text-xs font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
       >
-        type the address instead
+        Use the address instead
       </button>
     </div>
   );

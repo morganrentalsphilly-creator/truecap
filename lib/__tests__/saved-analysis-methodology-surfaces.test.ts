@@ -10,9 +10,7 @@ const SERVER_SAVED_SURFACES = [
   "app/dashboard/saved-analyses/[id]/page.tsx",
   "app/dashboard/page.tsx",
   "app/dashboard/compare/page.tsx",
-  "lib/client-portal.ts",
   "app/actions/user-buy-boxes.ts",
-  "lib/weekly-summary.ts",
 ] as const;
 
 describe("saved-analysis methodology surface contract", () => {
@@ -23,16 +21,33 @@ describe("saved-analysis methodology surface contract", () => {
       expect(source).toContain("methodology_version");
       expect(source).toContain("resolveSavedAnalysisSnapshot");
       expect(source).toMatch(/methodologyVersion:\s*\w+\.methodology_version/);
-    }
+    },
+  );
+
+  it.each(["lib/client-portal.ts", "lib/weekly-summary.ts"])(
+    "%s recomputes externally attributed numbers and rejects frozen methodology",
+    (path) => {
+      const source = read(path);
+      expect(source).toContain("methodology_version");
+      expect(source).toContain("recomputeSavedDealVerdict");
+      expect(source).toContain("shouldFreezeSavedMethodology");
+      expect(source).not.toContain("resolveSavedAnalysisSnapshot");
+    },
   );
 
   it("returns top-level methodology and trusted financing provenance to edit and PDF clients", () => {
     const source = read("app/actions/saved-analyses.ts");
-    expect(source.match(/methodology_version/g)?.length ?? 0).toBeGreaterThanOrEqual(5);
-    expect(source.match(/financing_profile_snapshot/g)?.length ?? 0).toBeGreaterThanOrEqual(3);
+    expect(
+      source.match(/methodology_version/g)?.length ?? 0,
+    ).toBeGreaterThanOrEqual(5);
+    expect(
+      source.match(/financing_profile_snapshot/g)?.length ?? 0,
+    ).toBeGreaterThanOrEqual(3);
     expect(source).toContain("buildTrustedResultSnapshot");
     expect(source).toContain("parseStoredFinancingProfileSnapshot");
-    expect(source.match(/methodologyVersion:/g)?.length ?? 0).toBeGreaterThanOrEqual(3);
+    expect(
+      source.match(/methodologyVersion:/g)?.length ?? 0,
+    ).toBeGreaterThanOrEqual(3);
   });
 
   it("routes analyzer restore and saved-PDF generation through the canonical result resolver", () => {
@@ -54,7 +69,9 @@ describe("saved-analysis methodology surface contract", () => {
     expect(action).toContain('source: "cache"');
     expect(action).toContain("Creating a new report requires Pro");
     expect(page).toContain('exportResult.code === "ENTITLEMENT_REQUIRED"');
-    expect(page).not.toMatch(/if \(!canExportPdf\) \{[\s\S]{0,250}router\.push\("\/profile#billing"\);[\s\S]{0,80}return;/);
+    expect(page).not.toMatch(
+      /if \(!canExportPdf\) \{[\s\S]{0,250}router\.push\("\/profile#billing"\);[\s\S]{0,80}return;/,
+    );
   });
 
   it("labels every user-visible legacy saved-deal view as a current-version recomputation", () => {
@@ -67,7 +84,9 @@ describe("saved-analysis methodology surface contract", () => {
       "components/investcalc/investcalc-page.tsx",
       "components/investcalc/saved-analyses-page-v2.tsx",
     ]) {
-      expect(read(path)).toContain("Legacy analysis · recomputed with current v");
+      expect(read(path)).toContain(
+        "Legacy analysis · recomputed with current v",
+      );
     }
   });
 

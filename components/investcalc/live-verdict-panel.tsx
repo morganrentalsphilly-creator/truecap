@@ -39,9 +39,16 @@ type Props = {
   livePreview: LivePreviewSnapshot | null;
   /** Debounced screen-reader announcement (owned by investcalc-page). */
   livePreviewMsg: string;
+  /** Three high-impact assumptions shown as a concise preview summary. */
+  assumptionBasis?: string;
 };
 
-export function LiveVerdictPanel({ active, livePreview, livePreviewMsg }: Props) {
+export function LiveVerdictPanel({
+  active,
+  livePreview,
+  livePreviewMsg,
+  assumptionBasis,
+}: Props) {
   return (
     <>
       {/* Live instant-verdict preview - forms as the user types, before
@@ -54,7 +61,12 @@ export function LiveVerdictPanel({ active, livePreview, livePreviewMsg }: Props)
           The visible card is NOT a live region (it would churn the whole
           verbose card on every keystroke). */}
       {active ? (
-        <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        <span
+          className="sr-only"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
           {livePreviewMsg}
         </span>
       ) : null}
@@ -84,7 +96,19 @@ export function LiveVerdictPanel({ active, livePreview, livePreviewMsg }: Props)
               Preliminary
             </span>
           </div>
-          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          <p className="mb-1 text-sm font-bold leading-snug text-foreground">
+            {Math.round(livePreview.netCashFlow) >= 0
+              ? `About $${Math.abs(Math.round(livePreview.netCashFlow)).toLocaleString()}/month positive at these assumptions.`
+              : `About $${Math.abs(Math.round(livePreview.netCashFlow)).toLocaleString()}/month negative at these assumptions.`}
+          </p>
+          {assumptionBasis ? (
+            <p className="mb-3 text-[11px] leading-snug text-muted-foreground">
+              Key assumptions shown: {assumptionBasis}. Price, rent, financing,
+              taxes, and all expenses are included; review them before relying
+              on this screen.
+            </p>
+          ) : null}
+          <div className="grid grid-cols-1 gap-2 min-[320px]:grid-cols-3 sm:gap-3">
             <div>
               <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
                 Cash flow
@@ -96,7 +120,7 @@ export function LiveVerdictPanel({ active, livePreview, livePreviewMsg }: Props)
                   // sub-dollar negative (e.g. -$0.30) never renders "-$0".
                   Math.round(livePreview.netCashFlow) >= 0
                     ? "text-[var(--metric-positive)]"
-                    : "text-[var(--metric-negative)]"
+                    : "text-[var(--metric-negative)]",
                 )}
               >
                 {Math.round(livePreview.netCashFlow) >= 0 ? "+" : "-"}$
@@ -124,7 +148,9 @@ export function LiveVerdictPanel({ active, livePreview, livePreviewMsg }: Props)
                 </GlossaryTip>
               </div>
               <div className="font-mono text-lg font-bold tabular-nums text-foreground sm:text-xl">
-                {livePreview.monthlyPayment <= 0 ? "—" : livePreview.dscr.toFixed(2)}
+                {livePreview.monthlyPayment <= 0
+                  ? "—"
+                  : livePreview.dscr.toFixed(2)}
               </div>
             </div>
           </div>
@@ -132,17 +158,20 @@ export function LiveVerdictPanel({ active, livePreview, livePreviewMsg }: Props)
               address won't cash-flow at asking price, and "Negative · 0/100"
               with no next move invites a bounce. The break-even price turns
               it into an invitation to play with the one lever they control. */}
-          {Math.round(livePreview.netCashFlow) < 0 && livePreview.breakEvenPrice != null ? (
+          {Math.round(livePreview.netCashFlow) < 0 &&
+          livePreview.breakEvenPrice != null ? (
             <p className="mt-2.5 rounded-lg bg-background/60 px-2.5 py-2 text-[11px] font-semibold leading-snug text-foreground">
               Breaks even near{" "}
               <span className="font-mono font-bold">
                 ${Math.round(livePreview.breakEvenPrice).toLocaleString()}
               </span>{" "}
-              — review that modeled break-even point against the price assumption.
+              — review that modeled break-even point against the price
+              assumption.
             </p>
           ) : Math.round(livePreview.netCashFlow) < 0 ? (
             <p className="mt-2.5 rounded-lg bg-background/60 px-2.5 py-2 text-[11px] font-semibold leading-snug text-foreground">
-              Negative at these assumptions. Run the full analysis to review the price, rent, financing, and expense levers.
+              Negative at these assumptions. Run the full analysis to review the
+              price, rent, financing, and expense levers.
             </p>
           ) : livePreview.limitingFactor ? (
             // Mixed/Marginal get the same next-move treatment Negative
@@ -154,7 +183,8 @@ export function LiveVerdictPanel({ active, livePreview, livePreviewMsg }: Props)
             </p>
           ) : null}
           <p className="mt-2.5 text-[11px] leading-snug text-muted-foreground">
-            Updating as you type — run the full analysis for projections, illustrative tax impact &amp; modeled exits.
+            Updating as you type — run the full analysis for projections,
+            illustrative tax impact &amp; modeled exits.
           </p>
         </div>
       ) : null}

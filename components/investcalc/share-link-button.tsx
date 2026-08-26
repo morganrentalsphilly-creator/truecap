@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
+import type { AnalyzerStrategyKey } from "@/lib/analyzer-strategy-persistence";
 import type { MaoTarget } from "@/lib/max-allowable-offer";
 import type { OfferCeilingTargetSource } from "@/lib/offer-ceiling-contract";
 import {
@@ -63,6 +64,8 @@ interface ShareLinkButtonProps {
   disabledReason?: string;
   /** Best-effort draft persistence before leaving for authentication. */
   onPrepareAuth?: () => void;
+  /** Exact calculator lens whose specialist outcome is being shared. */
+  analyzerStrategyKey?: AnalyzerStrategyKey | null;
 }
 
 export function ShareLinkButton({
@@ -77,6 +80,7 @@ export function ShareLinkButton({
   disabled: externallyDisabled = false,
   disabledReason,
   onPrepareAuth,
+  analyzerStrategyKey,
 }: ShareLinkButtonProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -104,7 +108,7 @@ export function ShareLinkButton({
     try {
       window.sessionStorage.setItem(
         SHARE_AUTH_INTENT_STORAGE_KEY,
-        serializeShareAuthIntent({ returnPath, context })
+        serializeShareAuthIntent({ returnPath, context }),
       );
     } catch {
       // The analysis draft still restores even when tab storage is unavailable.
@@ -149,16 +153,20 @@ export function ShareLinkButton({
         setMyShares((current) =>
           current
             ? current.map((s) =>
-                s.id === id ? { ...s, revokedAt: new Date().toISOString() } : s
+                s.id === id ? { ...s, revokedAt: new Date().toISOString() } : s,
               )
-            : current
+            : current,
         );
         toast({
           title: "Link revoked",
           description: "That share link no longer opens for anyone.",
         });
       } else {
-        toast({ title: "Couldn't revoke", description: r.message, variant: "destructive" });
+        toast({
+          title: "Couldn't revoke",
+          description: r.message,
+          variant: "destructive",
+        });
       }
     } catch {
       toast({
@@ -180,7 +188,8 @@ export function ShareLinkButton({
       const raw = window.sessionStorage.getItem(SHARE_AUTH_INTENT_STORAGE_KEY);
       const intent = parseShareAuthIntent(raw, { currentPath: returnPath });
       if (!intent || intent.context !== context) {
-        if (raw) window.sessionStorage.removeItem(SHARE_AUTH_INTENT_STORAGE_KEY);
+        if (raw)
+          window.sessionStorage.removeItem(SHARE_AUTH_INTENT_STORAGE_KEY);
         return;
       }
       window.sessionStorage.removeItem(SHARE_AUTH_INTENT_STORAGE_KEY);
@@ -188,7 +197,9 @@ export function ShareLinkButton({
       setCopied(false);
       setSessionAuthRequired(false);
       setIncludeAddress(false);
-      setAudience(context === "client-report" ? "client" : "investment-partner");
+      setAudience(
+        context === "client-report" ? "client" : "investment-partner",
+      );
       setOpen(true);
     } catch {
       // Storage is optional; the user can still open Share manually.
@@ -224,6 +235,7 @@ export function ShareLinkButton({
         maoTargetSource: maoTargetSource ?? undefined,
         audience,
         addressVisibility: includeAddress ? "full" : "hidden",
+        analyzerStrategyKey: analyzerStrategyKey ?? "buy-hold",
         ...(priceIsEstimated ? { priceEstimated: true } : {}),
       });
       if (!opaque.ok) {
@@ -269,12 +281,15 @@ export function ShareLinkButton({
       }
     } catch {
       // Fallback for browsers without clipboard API: select the input.
-      const el = document.getElementById("share-link-url") as HTMLInputElement | null;
+      const el = document.getElementById(
+        "share-link-url",
+      ) as HTMLInputElement | null;
       el?.select();
     }
   };
 
-  const missingRequiredValues = !values || !values.purchasePrice || !values.address;
+  const missingRequiredValues =
+    !values || !values.purchasePrice || !values.address;
   const disabled = externallyDisabled || missingRequiredValues;
 
   return (
@@ -284,17 +299,20 @@ export function ShareLinkButton({
         variant="outline"
         onClick={openShare}
         disabled={disabled || isPreparing}
-        className={cn("min-h-11 gap-1.5 rounded-xl text-xs sm:text-sm", className)}
+        className={cn(
+          "min-h-11 gap-1.5 rounded-xl text-xs sm:text-sm",
+          className,
+        )}
         title={
           externallyDisabled
-            ? disabledReason ?? "This action is temporarily unavailable."
+            ? (disabledReason ?? "This action is temporarily unavailable.")
             : missingRequiredValues
-            ? "Enter an address and price first"
-            : !isAuthenticated
-              ? "Sign in to create a share link"
-              : context === "client-report"
-                ? "Share a read-only client report"
-                : "Share a read-only view of this deal"
+              ? "Enter an address and price first"
+              : !isAuthenticated
+                ? "Sign in to create a share link"
+                : context === "client-report"
+                  ? "Share a read-only client report"
+                  : "Share a read-only view of this deal"
         }
       >
         {isPreparing ? (
@@ -323,7 +341,9 @@ export function ShareLinkButton({
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>
-              {context === "client-report" ? "Share client report" : "Share this analysis"}
+              {context === "client-report"
+                ? "Share client report"
+                : "Share this analysis"}
             </DialogTitle>
             <DialogDescription>
               {needsSignIn
@@ -337,10 +357,13 @@ export function ShareLinkButton({
           {needsSignIn ? (
             <div className="space-y-4 rounded-xl border border-border bg-muted/30 p-4">
               <div>
-                <p className="font-semibold text-foreground">Sign in to create this link</p>
+                <p className="font-semibold text-foreground">
+                  Sign in to create this link
+                </p>
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                  New links belong to your account, so you can revoke them later. After
-                  authentication, you’ll return to this page and can finish sharing.
+                  New links belong to your account, so you can revoke them
+                  later. After authentication, you’ll return to this page and
+                  can finish sharing.
                 </p>
               </div>
               <div className="grid gap-2 sm:grid-cols-2">
@@ -353,7 +376,11 @@ export function ShareLinkButton({
                     Create free account
                   </Link>
                 </Button>
-                <Button asChild variant="outline" className="min-h-11 rounded-xl font-semibold">
+                <Button
+                  asChild
+                  variant="outline"
+                  className="min-h-11 rounded-xl font-semibold"
+                >
                   <Link
                     href={`/auth/login?next=${encodedReturnPath}`}
                     onClick={prepareAuthNavigation}
@@ -367,14 +394,21 @@ export function ShareLinkButton({
           ) : !shareUrl ? (
             <div className="space-y-4">
               <fieldset>
-                <legend className="text-sm font-semibold text-foreground">Intended audience</legend>
+                <legend className="text-sm font-semibold text-foreground">
+                  Intended audience
+                </legend>
                 <div className="mt-2 grid gap-2 sm:grid-cols-3">
-                  {([
-                    ["investment-partner", "Partner"],
-                    ["client", "Client"],
-                    ["lender-review", "Lender review"],
-                  ] as const).map(([value, label]) => (
-                    <label key={value} className="flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-border px-3 text-sm focus-within:ring-2 focus-within:ring-ring">
+                  {(
+                    [
+                      ["investment-partner", "Partner"],
+                      ["client", "Client"],
+                      ["lender-review", "Lender review"],
+                    ] as const
+                  ).map(([value, label]) => (
+                    <label
+                      key={value}
+                      className="flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-border px-3 text-sm focus-within:ring-2 focus-within:ring-ring"
+                    >
                       <input
                         type="radio"
                         name="share-audience"
@@ -396,10 +430,13 @@ export function ShareLinkButton({
                   onChange={(event) => setIncludeAddress(event.target.checked)}
                 />
                 <span>
-                  <span className="font-semibold text-foreground">Include the exact property address</span>
+                  <span className="font-semibold text-foreground">
+                    Include the exact property address
+                  </span>
                   <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">
-                    Off by default. The shared page still includes underwriting outputs and the
-                    financial assumptions needed to explain them.
+                    Off by default. The shared page still includes underwriting
+                    outputs and the financial assumptions needed to explain
+                    them.
                   </span>
                 </span>
               </label>
@@ -410,7 +447,11 @@ export function ShareLinkButton({
                 disabled={isPreparing}
                 className="min-h-11 w-full rounded-xl font-semibold"
               >
-                {isPreparing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden /> : <Share2 className="mr-2 h-4 w-4" aria-hidden />}
+                {isPreparing ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
+                ) : (
+                  <Share2 className="mr-2 h-4 w-4" aria-hidden />
+                )}
                 {isPreparing ? "Creating secure link…" : "Create secure link"}
               </Button>
             </div>
@@ -424,21 +465,21 @@ export function ShareLinkButton({
                 aria-label="Shareable URL"
                 className="min-h-11 flex-1 truncate rounded-md border border-input bg-background px-3 py-2 font-mono text-xs text-foreground"
               />
-            <Button
-              type="button"
-              onClick={copy}
-              className="h-auto rounded-md bg-primary px-3 font-semibold text-primary-foreground"
-            >
-              {copied ? (
-                <>
-                  <Check className="mr-1 h-3.5 w-3.5" /> Copied
-                </>
-              ) : (
-                <>
-                  <Copy className="mr-1 h-3.5 w-3.5" /> Copy
-                </>
-              )}
-            </Button>
+              <Button
+                type="button"
+                onClick={copy}
+                className="h-auto rounded-md bg-primary px-3 font-semibold text-primary-foreground"
+              >
+                {copied ? (
+                  <>
+                    <Check className="mr-1 h-3.5 w-3.5" /> Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy className="mr-1 h-3.5 w-3.5" /> Copy
+                  </>
+                )}
+              </Button>
             </div>
           )}
 
@@ -455,7 +496,10 @@ export function ShareLinkButton({
                       ? new Date(s.expiresAt).getTime() < Date.now()
                       : false;
                   return (
-                    <li key={s.id} className="flex items-center justify-between gap-3 text-xs">
+                    <li
+                      key={s.id}
+                      className="flex items-center justify-between gap-3 text-xs"
+                    >
                       <span className="min-w-0 flex-1 truncate text-foreground">
                         {s.title || s.label || "Shared analysis"}
                         <span className="ml-1 text-muted-foreground">
@@ -480,7 +524,10 @@ export function ShareLinkButton({
                         >
                           {revokingId === s.id ? (
                             <>
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
+                              <Loader2
+                                className="h-3.5 w-3.5 animate-spin"
+                                aria-hidden
+                              />
                               <span className="sr-only">Revoking…</span>
                             </>
                           ) : (
@@ -503,14 +550,14 @@ export function ShareLinkButton({
           <p className="text-[11px] text-muted-foreground">
             {needsSignIn ? (
               <>
-                Existing links still open without an account. Creating a new link requires
-                sign-in so it has an owner who can revoke it.
+                Existing links still open without an account. Creating a new
+                link requires sign-in so it has an owner who can revoke it.
               </>
             ) : (
               <>
-                The link opens a snapshot of the analysis at this moment. Anyone who receives
-                the link can open it. If you change inputs later and want viewers to see updates,
-                generate a new share link.{" "}
+                The link opens a snapshot of the analysis at this moment. Anyone
+                who receives the link can open it. If you change inputs later
+                and want viewers to see updates, generate a new share link.{" "}
                 {myShares && myShares.length > 0
                   ? "Revoke any link above and it stops opening immediately; links also expire automatically."
                   : "Links you create can be revoked from this dialog and expire automatically."}{" "}

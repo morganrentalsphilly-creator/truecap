@@ -44,6 +44,12 @@ import { TEN_YEAR_PROJECTION_SNAPSHOT_VERSION } from "@/lib/ten-year-projections
 //       target used to render them. Also removes current-engine Max Offer / Deal
 //       Doctor math from reports frozen to an incompatible methodology. Any v8
 //       artifact could predate either guard and must not be re-served.
+//  10 - Publication-authority hardening: PDFs now recompute every TrueCap
+//       result from validated saved inputs and never render owner-writable
+//       result JSON. Pre-v10 retained artifacts are quarantined.
+//  11 - Artifact-attestation hardening: cached bytes are HMAC-bound to the
+//       server render, owner, deal, version, and input fingerprint. Cached
+//       objects are downloaded and verified before TrueCap returns them.
 //
 // NOT bumped for the July 2026 "Your buy box" block: that block renders
 // ONLY for users with an active buy box, and those users' exports bypass
@@ -52,7 +58,7 @@ import { TEN_YEAR_PROJECTION_SNAPSHOT_VERSION } from "@/lib/ten-year-projections
 // block-carrying PDFs are stored uncacheable (see
 // PDF_CACHE_VERSION_UNCACHEABLE). Box-less users' PDFs stay byte-identical,
 // so flushing their caches with a bump would be pure regeneration waste.
-export const PDF_SNAPSHOT_VERSION = 9;
+export const PDF_SNAPSHOT_VERSION = 11;
 export const ANALYSIS_PDF_BUCKET = "analysis-pdfs";
 
 /**
@@ -63,6 +69,16 @@ export const ANALYSIS_PDF_BUCKET = "analysis-pdfs";
  * leaked through history / a shared screenshot dies quickly.
  */
 export const ANALYSIS_PDF_SIGNED_URL_TTL_SECONDS = 120;
+
+const PDF_ARTIFACT_ATTESTATION_PATTERN = /^[a-f0-9]{64}$/;
+
+export function isSavedAnalysisPdfArtifactAttestation(
+  value: unknown,
+): value is string {
+  return (
+    typeof value === "string" && PDF_ARTIFACT_ATTESTATION_PATTERN.test(value)
+  );
+}
 
 /**
  * THE object path for a cached export. Single source of truth — the client
@@ -82,7 +98,8 @@ export function buildAnalysisPdfObjectPath(
   userId: string,
   analysisId: string,
   cacheVersion: number,
-  renderFingerprint?: string
+  renderFingerprint?: string,
+  artifactAttestation?: string,
 ): string {
   if (
     renderFingerprint !== undefined &&
@@ -90,8 +107,45 @@ export function buildAnalysisPdfObjectPath(
   ) {
     throw new Error("Invalid saved-analysis PDF render fingerprint");
   }
+  if (
+    artifactAttestation !== undefined &&
+    (!renderFingerprint ||
+      !isSavedAnalysisPdfArtifactAttestation(artifactAttestation))
+  ) {
+    throw new Error("Invalid saved-analysis PDF artifact attestation");
+  }
   const renderSuffix = renderFingerprint ? `-${renderFingerprint}` : "";
-  return `${userId}/${analysisId}/investment-analysis-v${cacheVersion}${renderSuffix}.pdf`;
+  const attestationSuffix = artifactAttestation
+    ? `-${artifactAttestation}`
+    : "";
+  return `${userId}/${analysisId}/investment-analysis-v${cacheVersion}${renderSuffix}${attestationSuffix}.pdf`;
+}
+
+export type AttestedAnalysisPdfObjectPath = {
+  path: string;
+  renderFingerprint: string;
+  artifactAttestation: string;
+};
+
+/** Parse only the current attested path shape for one exact owner/deal/version. */
+export function parseAttestedAnalysisPdfObjectPath(
+  stored: string | null | undefined,
+  userId: string,
+  analysisId: string,
+  cacheVersion: number,
+): AttestedAnalysisPdfObjectPath | null {
+  const path = resolveAnalysisPdfObjectPath(stored, userId);
+  if (!path) return null;
+  const prefix = `${userId}/${analysisId}/investment-analysis-v${cacheVersion}-`;
+  if (!path.startsWith(prefix) || !path.endsWith(".pdf")) return null;
+  const identity = path.slice(prefix.length, -4);
+  const match = identity.match(/^([a-f0-9]{32})-([a-f0-9]{64})$/);
+  if (!match) return null;
+  return {
+    path,
+    renderFingerprint: match[1]!,
+    artifactAttestation: match[2]!,
+  };
 }
 
 /**
@@ -113,7 +167,7 @@ export function buildAnalysisPdfObjectPath(
  */
 export function resolveAnalysisPdfObjectPath(
   stored: string | null | undefined,
-  userId: string
+  userId: string,
 ): string | null {
   if (!stored || !userId) return null;
 
@@ -146,7 +200,11 @@ export function resolveAnalysisPdfObjectPath(
 
   const segments = candidate.split("/");
   if (segments.length < 2) return null;
-  if (segments.some((segment) => segment === "" || segment === "." || segment === "..")) {
+  if (
+    segments.some(
+      (segment) => segment === "" || segment === "." || segment === "..",
+    )
+  ) {
     return null;
   }
   if (segments[0] !== userId) return null;
@@ -185,7 +243,9 @@ const PDF_CACHE_VERSION_RADIX = 50;
 export function encodePdfCacheVersion(versions: readonly number[]): number {
   return versions.reduce((acc, v) => {
     if (!Number.isInteger(v) || v < 0 || v >= PDF_CACHE_VERSION_RADIX) {
-      throw new Error(`PDF cache version component out of range [0, ${PDF_CACHE_VERSION_RADIX}): ${v}`);
+      throw new Error(
+        `PDF cache version component out of range [0, ${PDF_CACHE_VERSION_RADIX}): ${v}`,
+      );
     }
     return acc * PDF_CACHE_VERSION_RADIX + v;
   }, 0);
@@ -212,6 +272,14 @@ export const PDF_CACHE_VERSION = encodePdfCacheVersion([
   EXIT_SCENARIOS_SNAPSHOT_VERSION,
 ]);
 
+/** Earliest composite version whose renderer never accepted saved result JSON
+ * as publication authority. This fixed floor intentionally does not move when
+ * later template/engine components change: a downgraded owner may retain any
+ * already-generated v11+ attested artifact, but no pre-v11 PDF is re-served. */
+export const PDF_TRUSTED_PROVENANCE_MIN_CACHE_VERSION = encodePdfCacheVersion([
+  11, 0, 0, 0, 0,
+]);
+
 /**
  * Report modes — who the PDF is for. Each tailors which sections appear:
  *   - personal: the full report (cash flow, projection, tax strategy, exit).
@@ -225,9 +293,33 @@ export const PDF_CACHE_VERSION = encodePdfCacheVersion([
  */
 export type ReportMode = "personal" | "lender" | "partner" | "agent";
 
-export const REPORT_MODES: ReadonlyArray<{ id: ReportMode; label: string; description: string }> = [
-  { id: "personal", label: "Personal", description: "Full report — cash flow, projection, illustrative tax impact, and modeled exit comparisons." },
-  { id: "lender", label: "Lender", description: "Debt-service focus — performance, property, and the 10-year projection. Excludes personal tax and modeled exits." },
-  { id: "partner", label: "Partner", description: "Returns focus — performance, projection, and modeled exit comparisons. Excludes personal tax." },
-  { id: "agent", label: "Agent / client", description: "Client-facing returns summary to send branded to a buyer — performance, projection, and modeled exit comparisons. Excludes personal tax." },
+export const REPORT_MODES: ReadonlyArray<{
+  id: ReportMode;
+  label: string;
+  description: string;
+}> = [
+  {
+    id: "personal",
+    label: "Personal",
+    description:
+      "Full report — cash flow, projection, illustrative tax impact, and modeled exit comparisons.",
+  },
+  {
+    id: "lender",
+    label: "Lender",
+    description:
+      "Debt-service focus — performance, property, and the 10-year projection. Excludes personal tax and modeled exits.",
+  },
+  {
+    id: "partner",
+    label: "Partner",
+    description:
+      "Returns focus — performance, projection, and modeled exit comparisons. Excludes personal tax.",
+  },
+  {
+    id: "agent",
+    label: "Agent / client",
+    description:
+      "Client-facing returns summary to send branded to a buyer — performance, projection, and modeled exit comparisons. Excludes personal tax.",
+  },
 ];

@@ -31,19 +31,12 @@ import { canShowSharedProAnalysis } from "@/lib/public-share-access";
 import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
 import { resolveOfferCeilingForAccess } from "@/lib/offer-ceiling-server";
 import { normalizeMaoTargetForFinancing } from "@/lib/mao-target-editor";
-import Link from "next/link";
 import { createIpRateLimit, getRequestIp } from "@/lib/ip-rate-limit";
 import {
   isAdoptedOfferCeilingTargetSource,
   type OfferCeilingTargetSource,
 } from "@/lib/offer-ceiling-contract";
-import {
-  buildDealScoreInputFromAnalysis,
-  computeDealScore,
-} from "@/lib/deal-score";
-import { resolveSavedAnalysisResult } from "@/lib/saved-analysis-methodology";
 import type { OfferCeilingAccessPayload } from "@/lib/offer-ceiling-access-contract";
-import { readRecordedOfferCeiling } from "@/lib/recorded-offer-ceiling";
 import { buildPublicShareAnalysisPayload } from "@/lib/public-share-analysis-result";
 
 type Props = { params: Promise<{ token: string }> };
@@ -101,55 +94,7 @@ export default async function OpaqueSharePage({ params }: Props) {
   } catch {
     notFound();
   }
-  const currentScore = computeDealScore(
-    buildDealScoreInputFromAnalysis(parsed.data, currentResult),
-  );
-  const recordedResolution = resolved.snapshot.resultSnapshot
-    ? resolveSavedAnalysisResult({
-        methodologyVersion: resolved.methodologyVersion,
-        resultSnapshot: resolved.snapshot.resultSnapshot,
-        recomputedResult: currentResult,
-        recomputedExtras: {
-          score: currentScore.score,
-          recommendation: currentScore.recommendation,
-          riskLevel: currentScore.riskLevel,
-          breakdown: currentScore.breakdown,
-          explanation: currentScore.explanation,
-        },
-      })
-    : null;
-  const canRecomputeInputOnlyShare =
-    resolved.legacyInputOnly &&
-    (!resolved.methodologyVersion ||
-      resolved.methodologyVersion === TRUECAP_UNDERWRITING_STANDARD_VERSION);
-  const result =
-    recordedResolution?.result ??
-    (canRecomputeInputOnlyShare ? currentResult : null);
-  if (!result) {
-    return (
-      <main
-        id="main"
-        className="mx-auto flex min-h-screen max-w-xl items-center px-5 py-16"
-      >
-        <section className="w-full rounded-2xl border border-border bg-card p-6 shadow-sm">
-          <h1 className="text-2xl font-extrabold text-foreground">
-            This analysis is preserved
-          </h1>
-          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-            Its recorded TrueCap result is not complete enough for this viewer.
-            It has not been silently recalculated. Ask the owner to create a
-            refreshed share from a new re-underwritten scenario.
-          </p>
-          <Link
-            href="/"
-            className="mt-4 inline-flex min-h-11 items-center font-bold text-primary hover:underline"
-          >
-            Open TrueCap
-          </Link>
-        </section>
-      </main>
-    );
-  }
+  const result = currentResult;
 
   // Access, branding, comps, and lead attribution are bound to immutable,
   // typed row columns selected by the service-role resolver. Snapshot JSON is
@@ -186,29 +131,12 @@ export default async function OpaqueSharePage({ params }: Props) {
       : undefined;
   let offerCeilingAccess: OfferCeilingAccessPayload | null = null;
   if (displayMaoTarget) {
-    const hasRecordedSolve = Object.prototype.hasOwnProperty.call(
-      resolved.snapshot,
-      "offerCeilingExact",
-    );
-    const recordedCeiling = hasRecordedSolve
-      ? readRecordedOfferCeiling({
-          maxOfferTarget: resolved.snapshot.maoTarget,
-          maxOfferTargetSource: resolved.snapshot.maoTargetSource,
-          offerCeilingExact: resolved.snapshot.offerCeilingExact,
-        })
-      : { captured: false as const };
-    if (recordedCeiling.captured) {
-      offerCeilingAccess = showProAnalysis
-        ? { access: "exact", exact: recordedCeiling.exact }
-        : { access: "preview", range: null };
-    } else if (resolved.legacyInputOnly) {
-      offerCeilingAccess = resolveOfferCeilingForAccess({
-        values: parsed.data,
-        target: displayMaoTarget,
-        source: displayMaoTargetSource,
-        paidAccess: showProAnalysis,
-      });
-    }
+    offerCeilingAccess = resolveOfferCeilingForAccess({
+      values: parsed.data,
+      target: displayMaoTarget,
+      source: displayMaoTargetSource,
+      paidAccess: showProAnalysis,
+    });
   }
 
   return (
@@ -226,9 +154,13 @@ export default async function OpaqueSharePage({ params }: Props) {
       legacyMethodologyWarning={
         resolved.legacyUnpinned || resolved.legacyInputOnly
       }
-      recordedResult={Boolean(recordedResolution?.usesRecordedSnapshot)}
+      outputsRecomputed
+      recordedResult={false}
       addressIncluded={addressVisible}
       priceEstimated={resolved.snapshot.meta.priceEstimated === true}
+      specialistAnalysis={null}
+      specialistAnalysisCaptured={false}
+      analyzerStrategyKey={resolved.snapshot.analyzerStrategyKey ?? "buy-hold"}
       leadCapture={
         agent && ownerId
           ? { ownerId, dealId, valuesHash, sig: sig ?? undefined }

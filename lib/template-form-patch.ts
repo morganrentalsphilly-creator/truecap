@@ -9,8 +9,8 @@ import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 export type TemplateAssumptionSource = {
   propertyTaxPct: number;
   insuranceInputMode: "percent" | "monthly";
-  insurancePct: number | null;
-  insuranceMo: number | null;
+  insurancePct?: number | null;
+  insuranceMo?: number | null;
   maintenancePct: number;
   vacancyPct: number;
   managementPct: number;
@@ -18,6 +18,8 @@ export type TemplateAssumptionSource = {
   closingCostsPct: number;
   interestRatePct: number;
   downPaymentPct: number;
+  pmiAnnualRatePct?: number | null;
+  pmiNoCancel?: boolean | null;
   expenseGrowthPct: number;
   rentGrowthPct: number;
   appreciationRatePct: number;
@@ -53,7 +55,7 @@ export type TemplateFormPatchEntry = {
  */
 export function buildTemplateFormPatch(
   template: TemplateAssumptionSource,
-  opts?: { skipFields?: ReadonlySet<keyof InvestmentFormValues> }
+  opts?: { skipFields?: ReadonlySet<keyof InvestmentFormValues> },
 ): TemplateFormPatchEntry[] {
   const entries: TemplateFormPatchEntry[] = [
     { field: "propertyTaxPct", value: template.propertyTaxPct },
@@ -67,14 +69,25 @@ export function buildTemplateFormPatch(
     { field: "closingCostsPct", value: template.closingCostsPct },
     { field: "interestRate", value: template.interestRatePct },
     { field: "downPaymentPct", value: template.downPaymentPct },
+    {
+      field: "pmiAnnualRatePct",
+      value: template.pmiAnnualRatePct ?? undefined,
+    },
+    { field: "pmiNoCancel", value: template.pmiNoCancel ?? undefined },
     { field: "expenseGrowthPct", value: template.expenseGrowthPct },
     { field: "rentGrowthPct", value: template.rentGrowthPct },
     { field: "appreciationRatePct", value: template.appreciationRatePct },
     { field: "sellingCostPct", value: template.sellingCostPct },
     { field: "buildingValuePct", value: template.buildingValuePct },
     { field: "depreciationYears", value: template.depreciationYears },
-    { field: "includeInterestDeduction", value: template.includeInterestDeduction },
-    { field: "taxRatePct", value: template.taxRatePct === 24 ? undefined : template.taxRatePct },
+    {
+      field: "includeInterestDeduction",
+      value: template.includeInterestDeduction,
+    },
+    {
+      field: "taxRatePct",
+      value: template.taxRatePct === 24 ? undefined : template.taxRatePct,
+    },
   ];
   const skip = opts?.skipFields;
   return skip ? entries.filter((entry) => !skip.has(entry.field)) : entries;

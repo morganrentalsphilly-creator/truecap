@@ -5,6 +5,8 @@ import { describe, expect, it } from "vitest";
 import { METRIC_ROWS, getBestValue } from "@/lib/compare-metrics";
 
 const read = (path: string) => readFileSync(join(process.cwd(), path), "utf8");
+const normalizeSource = (source: string) =>
+  source.replace(/\s+/g, "").replace(/,([)}\]])/g, "$1");
 
 describe("calculation trust copy and applicability guards", () => {
   it("uses signed illustrative-tax language on every analysis surface", () => {
@@ -51,7 +53,9 @@ describe("calculation trust copy and applicability guards", () => {
     );
     expect(projectionCharts).toContain("Financing Outflow (P&I + MI)");
     expect(pdf).toContain('label: "P&I + MI"');
-    expect(pdf).toContain('"Op. Expenses", "P&I + MI", "Net CF"');
+    expect(normalizeSource(pdf)).toContain(
+      normalizeSource('"Op. Expenses", "P&I + MI", "Net CF"'),
+    );
   });
 
   it("keeps Screening Index cash-flow language pre-tax and never promises a tax rescue", () => {

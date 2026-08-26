@@ -68,7 +68,10 @@ const SENTRY_TAGS = { feature: "weekly-summary-cron" } as const;
 
 /** Latest two weekly MORTGAGE30US observations, newest first. Null on any
  *  failure — the summary's rate section simply goes quiet (non-fatal). */
-async function fetchRatePair(): Promise<{ current: number; previous: number } | null> {
+async function fetchRatePair(): Promise<{
+  current: number;
+  previous: number;
+} | null> {
   const apiKey = process.env.FRED_API_KEY;
   if (!apiKey) return null;
   const url = new URL("https://api.stlouisfed.org/fred/series/observations");
@@ -80,7 +83,9 @@ async function fetchRatePair(): Promise<{ current: number; previous: number } | 
   try {
     const res = await fetch(url.toString(), { cache: "no-store" });
     if (!res.ok) return null;
-    const json = (await res.json()) as { observations?: Array<{ value: string }> };
+    const json = (await res.json()) as {
+      observations?: Array<{ value: string }>;
+    };
     const [latest, prior] = json.observations ?? [];
     const current = Number(latest?.value);
     const previous = Number(prior?.value);
@@ -98,11 +103,17 @@ function maskEmail(email: string): string {
 }
 
 function isMissingColumn(error: { code?: string; message?: string }): boolean {
-  return error.code === "42703" || /column .* does not exist/i.test(error.message ?? "");
+  return (
+    error.code === "42703" ||
+    /column .* does not exist/i.test(error.message ?? "")
+  );
 }
 
 function isMissingTable(error: { code?: string; message?: string }): boolean {
-  return error.code === "42P01" || /relation .* does not exist/i.test(error.message ?? "");
+  return (
+    error.code === "42P01" ||
+    /relation .* does not exist/i.test(error.message ?? "")
+  );
 }
 
 /** Compact per-user preview line for the dry-run JSON. */
@@ -140,7 +151,9 @@ export async function GET(request: Request) {
   // 2. Kill switch.
   const mode = resolveMode();
   if (mode === "off") {
-    console.log("[weekly-summary] WEEKLY_SUMMARY_MODE is off — skipping (feature dormant)");
+    console.log(
+      "[weekly-summary] WEEKLY_SUMMARY_MODE is off — skipping (feature dormant)",
+    );
     return NextResponse.json({ skipped: true, reason: "mode_off" });
   }
 
@@ -174,8 +187,9 @@ export async function GET(request: Request) {
     // migration — retry without it on 42703 (equity simply stays hidden,
     // mirroring the dashboard's tolerance).
     const DEAL_COLS =
-      "id, user_id, title, address, property_type, purchase_price, net_cash_flow_monthly, pipeline_stage, is_completed, is_archived, methodology_version, result_snapshot, form_snapshot";
-    let dealRows: Array<WeeklySummaryDealRow & { user_id: string }> | null = null;
+      "id, user_id, title, address, property_type, purchase_price, net_cash_flow_monthly, pipeline_stage, is_completed, is_archived, methodology_version, form_snapshot";
+    let dealRows: Array<WeeklySummaryDealRow & { user_id: string }> | null =
+      null;
     const dealResult = await admin
       .from("saved_analyses")
       .select(`${DEAL_COLS}, close_date`)
@@ -220,7 +234,7 @@ export async function GET(request: Request) {
       admin
         .from("user_buy_boxes")
         .select(
-          "id, user_id, name, strategy_kind, min_cap_rate_pct, min_coc_pct, min_dscr, min_cash_flow_monthly, max_purchase_price, property_types, target_states, is_active, is_default, sort_order"
+          "id, user_id, name, strategy_kind, min_cap_rate_pct, min_coc_pct, min_dscr, min_cash_flow_monthly, max_purchase_price, property_types, target_states, is_active, is_default, sort_order",
         )
         .in("user_id", optedInIds),
     ]);
@@ -228,11 +242,17 @@ export async function GET(request: Request) {
     const dueByUser = new Map<string, WeeklySummaryDueDiligenceRow[]>();
     if (ddResult.error) {
       if (!isMissingTable(ddResult.error)) {
-        Sentry.captureMessage("weekly-summary cron: due-diligence read failed — section omitted", {
-          level: "warning",
-          tags: SENTRY_TAGS,
-          extra: { code: ddResult.error.code, message: ddResult.error.message },
-        });
+        Sentry.captureMessage(
+          "weekly-summary cron: due-diligence read failed — section omitted",
+          {
+            level: "warning",
+            tags: SENTRY_TAGS,
+            extra: {
+              code: ddResult.error.code,
+              message: ddResult.error.message,
+            },
+          },
+        );
       }
     } else {
       for (const r of ddResult.data ?? []) {
@@ -246,11 +266,17 @@ export async function GET(request: Request) {
     const boxesByUser = new Map<string, NamedBuyBox[]>();
     if (boxResult.error) {
       if (!isMissingTable(boxResult.error)) {
-        Sentry.captureMessage("weekly-summary cron: buy-boxes read failed — section omitted", {
-          level: "warning",
-          tags: SENTRY_TAGS,
-          extra: { code: boxResult.error.code, message: boxResult.error.message },
-        });
+        Sentry.captureMessage(
+          "weekly-summary cron: buy-boxes read failed — section omitted",
+          {
+            level: "warning",
+            tags: SENTRY_TAGS,
+            extra: {
+              code: boxResult.error.code,
+              message: boxResult.error.message,
+            },
+          },
+        );
       }
     } else {
       for (const r of boxResult.data ?? []) {
@@ -267,7 +293,8 @@ export async function GET(request: Request) {
     const now = new Date();
     const isoWeek = isoWeekKey(now);
     const todayISO = now.toISOString().slice(0, 10);
-    const summaries: Array<{ userId: string; payload: WeeklySummaryPayload }> = [];
+    const summaries: Array<{ userId: string; payload: WeeklySummaryPayload }> =
+      [];
     for (const [userId, deals] of dealsByUser) {
       const payload = buildWeeklySummary(deals, {
         ratePair,
@@ -280,7 +307,11 @@ export async function GET(request: Request) {
       if (summaries.length >= MAX_SENDS_PER_RUN) break;
     }
     if (summaries.length === 0) {
-      return NextResponse.json({ skipped: true, reason: "nothing_to_say", isoWeek });
+      return NextResponse.json({
+        skipped: true,
+        reason: "nothing_to_say",
+        isoWeek,
+      });
     }
 
     // 7. Build + (dry-preview | claim-then-send) one email per user.
@@ -295,7 +326,8 @@ export async function GET(request: Request) {
     let alreadySent = 0;
 
     for (const { userId, payload } of summaries) {
-      const { data: userData, error: userError } = await admin.auth.admin.getUserById(userId);
+      const { data: userData, error: userError } =
+        await admin.auth.admin.getUserById(userId);
       const email = userData?.user?.email;
       if (userError || !email) continue;
 
@@ -305,15 +337,22 @@ export async function GET(request: Request) {
 
       if (mode === "dry") {
         // ZERO sends, ZERO writes — preview only.
-        preview.push({ to: maskEmail(email), subject, ...previewSections(payload) });
+        preview.push({
+          to: maskEmail(email),
+          subject,
+          ...previewSections(payload),
+        });
         continue;
       }
 
       if (!resendKey) {
-        Sentry.captureMessage("weekly-summary cron: RESEND_API_KEY missing in live mode", {
-          level: "error",
-          tags: SENTRY_TAGS,
-        });
+        Sentry.captureMessage(
+          "weekly-summary cron: RESEND_API_KEY missing in live mode",
+          {
+            level: "error",
+            tags: SENTRY_TAGS,
+          },
+        );
         return NextResponse.json({ error: "Not configured" }, { status: 500 });
       }
 
@@ -360,14 +399,19 @@ export async function GET(request: Request) {
         });
         if (!sendRes.ok) {
           const body = await sendRes.text().catch(() => "");
-          Sentry.captureMessage(`weekly-summary cron: Resend send failed (${sendRes.status})`, {
-            level: "error",
-            tags: SENTRY_TAGS,
-            extra: { body: body.slice(0, 300) },
-          });
+          Sentry.captureMessage(
+            `weekly-summary cron: Resend send failed (${sendRes.status})`,
+            {
+              level: "error",
+              tags: SENTRY_TAGS,
+              extra: { body: body.slice(0, 300) },
+            },
+          );
           continue; // keep sending to remaining users
         }
-        const json = (await sendRes.json().catch(() => ({}))) as { id?: string };
+        const json = (await sendRes.json().catch(() => ({}))) as {
+          id?: string;
+        };
         resendId = json.id ?? null;
       } catch (err) {
         Sentry.captureMessage("weekly-summary cron: Resend network error", {
@@ -385,13 +429,18 @@ export async function GET(request: Request) {
           .update({ resend_id: resendId })
           .eq("user_id", userId)
           .eq("iso_week", isoWeek)
-          .then(() => undefined, () => undefined);
+          .then(
+            () => undefined,
+            () => undefined,
+          );
       }
       sent += 1;
     }
 
     if (mode === "dry") {
-      console.log(`[weekly-summary] DRY RUN — ${preview.length} emails would send`);
+      console.log(
+        `[weekly-summary] DRY RUN — ${preview.length} emails would send`,
+      );
       return NextResponse.json({
         mode: "dry",
         isoWeek,
@@ -404,7 +453,7 @@ export async function GET(request: Request) {
     }
 
     console.log(
-      `[weekly-summary] LIVE — sent ${sent}/${summaries.length} (${alreadySent} already sent this week)`
+      `[weekly-summary] LIVE — sent ${sent}/${summaries.length} (${alreadySent} already sent this week)`,
     );
     return NextResponse.json({
       mode: "live",
@@ -417,7 +466,9 @@ export async function GET(request: Request) {
     Sentry.captureMessage("weekly-summary cron: unhandled failure", {
       level: "error",
       tags: SENTRY_TAGS,
-      extra: { message: error instanceof Error ? error.message : String(error) },
+      extra: {
+        message: error instanceof Error ? error.message : String(error),
+      },
     });
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }

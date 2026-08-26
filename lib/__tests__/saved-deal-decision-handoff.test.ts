@@ -9,6 +9,9 @@ function source(path: string): string {
   return readFileSync(join(root, path), "utf8");
 }
 
+const normalizeSource = (value: string) =>
+  value.replace(/\s+/g, "").replace(/,([)}\]])/g, "$1");
+
 describe("saved-deal decision handoff", () => {
   it("selects the owner-scoped pipeline stage and carries it only in edit handoffs", () => {
     const action = source("app/actions/saved-analyses.ts");
@@ -19,7 +22,9 @@ describe("saved-deal decision handoff", () => {
     expect(action).toContain(
       "methodology_version, underwriting_revision, pipeline_stage, form_snapshot"
     );
-    expect(action).toContain("pipelineStage: dbString");
+    expect(normalizeSource(action)).toContain(
+      normalizeSource("pipelineStage: dbString"),
+    );
     expect(home).toContain("initialSavedDeal={initialSavedDeal}");
     expect(analyzer).toContain("pipelineStage: initialSavedDeal.pipelineStage");
     expect(handoff).not.toMatch(

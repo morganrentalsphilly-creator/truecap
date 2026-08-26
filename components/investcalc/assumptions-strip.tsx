@@ -37,11 +37,16 @@ import {
   buildAssumptionChips,
   computeExpensesEdited,
   computeStrategyOwnedFields,
+  computeValueBoundOwnedFields,
   resolveTemplateName,
   type AssumptionChip,
   type AssumptionChipTarget,
   type StrategyAppliedSnapshot,
 } from "@/lib/assumption-chips";
+import {
+  buildTemplateFormPatch,
+  type TemplateAssumptionSource,
+} from "@/lib/template-form-patch";
 import { getStrategyByKey } from "@/lib/investor-strategies";
 import { cn } from "@/lib/utils";
 
@@ -60,9 +65,12 @@ type Props = {
   /** Mirror of the advanced block's open state (for aria-expanded + the
    *  "Hide details" affordance). */
   advancedOpen: boolean;
+  /** Nested operating-expense disclosure state, so expense chips announce
+   * the region they actually reveal rather than only the outer panel. */
+  expenseDetailsOpen?: boolean;
   /** Chip tap → open the advanced block + scroll to the matching anchor.
    *  Thin wrap of investcalc-page's handleStepNavigate. */
-  onNavigate: (target: AssumptionChipTarget) => void;
+  onNavigate: (target: AssumptionChipTarget, focusFieldId?: string) => void;
   /** "Hide details" → the existing toggleAdvanced (records the user's
    *  remembered preference exactly as the old button did). */
   onHideDetails: () => void;
@@ -74,7 +82,9 @@ type Props = {
   strategyApplied?: StrategyAppliedSnapshot | null;
   /** Loaded Pro templates + the saved-deal fallback row, for resolving the
    *  template chip's display name from the watched templateId. */
-  templateOptions: ReadonlyArray<{ id: string; templateName: string }>;
+  templateOptions: ReadonlyArray<
+    TemplateAssumptionSource & { id: string; templateName: string }
+  >;
   savedTemplateFallback: { id: string; templateName: string } | null;
   /** Strip footer slot (SaveAsDefaultsChip — renders null until useful). */
   footer?: ReactNode;
@@ -85,6 +95,7 @@ export function AssumptionsStrip({
   getProvenance,
   getTouchedInputFields,
   advancedOpen,
+  expenseDetailsOpen = false,
   onNavigate,
   onHideDetails,
   activeStrategyKey,
@@ -105,23 +116,51 @@ export function AssumptionsStrip({
   // edit diverges the value and drops the field from the set.
   const strategyOwnedFields = computeStrategyOwnedFields(
     strategyApplied,
-    values as unknown as Record<string, unknown>
+    values as unknown as Record<string, unknown>,
   );
+  const selectedTemplate = values.templateId
+    ? templateOptions.find((template) => template.id === values.templateId)
+    : null;
+  const templateOwnedFields = selectedTemplate
+    ? computeValueBoundOwnedFields(
+        Object.fromEntries(
+          buildTemplateFormPatch(selectedTemplate).map(({ field, value }) => [
+            field,
+            value,
+          ]),
+        ),
+        values as unknown as Record<string, unknown>,
+      )
+    : new Set<string>();
   const sourceTouchedFields: Record<string, unknown> = {
     ...(form.formState.dirtyFields as Record<string, unknown>),
   };
   for (const key of getTouchedInputFields?.() ?? []) {
     sourceTouchedFields[key] = true;
   }
-  const expensesEdited = computeExpensesEdited(sourceTouchedFields, strategyOwnedFields);
+  const expensesEdited = computeExpensesEdited(
+    sourceTouchedFields,
+    strategyOwnedFields,
+  );
+  const userEditedFields = new Set(
+    Object.entries(sourceTouchedFields)
+      .filter(([, touched]) => Boolean(touched))
+      .map(([field]) => field),
+  );
   const activeStrategy = getStrategyByKey(activeStrategyKey);
   const chips = buildAssumptionChips(values, provenance, {
     expensesEdited,
-    templateName: resolveTemplateName(values.templateId, templateOptions, savedTemplateFallback),
+    userEditedFields,
+    templateName: resolveTemplateName(
+      values.templateId,
+      templateOptions,
+      savedTemplateFallback,
+    ),
     hasActiveStrategy: Boolean(activeStrategy),
     strategyPlay: strategyApplied
       ? { label: strategyApplied.label, ownedFields: strategyOwnedFields }
       : null,
+    templateOwnedFields,
   });
 
   // ── Arrival pulse ─────────────────────────────────────────────────────
@@ -149,7 +188,9 @@ export function AssumptionsStrip({
   // post-mount quiet window kills that; real auto-fills need a user
   // action (address pick) or a server roundtrip and land later.
   const mountedAtRef = useRef(Date.now());
-  const pulseSignature = chips.map((c) => `${c.id}=${c.pulseKey ?? ""}`).join("|");
+  const pulseSignature = chips
+    .map((c) => `${c.id}=${c.pulseKey ?? ""}`)
+    .join("|");
   useEffect(() => {
     const current: Record<string, string | null> = {};
     for (const part of pulseSignature.split("|")) {
@@ -161,7 +202,7 @@ export function AssumptionsStrip({
     if (!prev) return;
     if (Date.now() - mountedAtRef.current < 800) return;
     const arrived = Object.keys(current).filter(
-      (id) => current[id] != null && current[id] !== prev[id]
+      (id) => current[id] != null && current[id] !== prev[id],
     );
     if (arrived.length === 0) return;
     setPulsing((p) => {
@@ -185,31 +226,51 @@ export function AssumptionsStrip({
   }, [pulseSignature]);
 
   // Focus landing zone for the "Hide details" collapse (see the button).
-  const headingRef = useRef<HTMLParagraphElement | null>(null);
+  const headingRef = useRef<HTMLHeadingElement | null>(null);
 
   // Every chip target that opens the #advanced-options block gets the
   // disclosure semantics. "property" belongs here too: its #step-type panel
   // moved INSIDE the advanced block in Phase 4, so the template + MF-extras
   // chips expand the same region as their siblings and must announce it
   // (A11Y-PROPERTY-CHIP-ARIA).
-  const advancedTargets: AssumptionChipTarget[] = ["financing", "expenses", "extras", "property"];
+  const advancedTargets: AssumptionChipTarget[] = [
+    "financing",
+    "expenses",
+    "extras",
+    "property",
+  ];
   const renderChip = (chip: AssumptionChip) => {
     const opensAdvanced = advancedTargets.includes(chip.target);
+    const isExpanded =
+      chip.target === "expenses"
+        ? advancedOpen && expenseDetailsOpen
+        : advancedOpen;
     return (
       <button
         key={chip.id}
         type="button"
-        onClick={() => onNavigate(chip.target)}
-        aria-controls={opensAdvanced ? "advanced-options" : undefined}
-        aria-expanded={opensAdvanced ? advancedOpen : undefined}
+        onClick={() => onNavigate(chip.target, chip.focusFieldId)}
+        aria-controls={
+          opensAdvanced
+            ? chip.target === "expenses"
+              ? "advanced-options operating-expenses-details"
+              : "advanced-options"
+            : undefined
+        }
+        aria-expanded={opensAdvanced ? isExpanded : undefined}
         className={cn(
-          "inline-flex min-h-11 items-center gap-1.5 rounded-full border border-border bg-background px-3 py-2 text-xs font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-          pulsing[chip.id] && "animate-pulse border-primary bg-primary/10"
+          "inline-flex min-h-11 max-w-full items-center gap-1.5 rounded-full border border-border bg-background px-3 py-2 text-xs font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          pulsing[chip.id] && "animate-pulse border-primary bg-primary/10",
         )}
       >
-        <span className="max-w-56 truncate">{chip.label}</span>
+        <span className="min-w-0 whitespace-normal text-left leading-snug">
+          {chip.label}
+        </span>
         {chip.applied ? (
-          <Check className="size-3 shrink-0 text-[var(--metric-positive)]" aria-hidden />
+          <Check
+            className="size-3 shrink-0 text-[var(--metric-positive)]"
+            aria-hidden
+          />
         ) : null}
         {chip.badge ? (
           <span
@@ -217,7 +278,7 @@ export function AssumptionsStrip({
               "rounded-full px-1.5 py-0.5 text-[10px] font-bold leading-none",
               chip.badge.kind === "yours" || chip.badge.kind === "default"
                 ? "bg-muted text-muted-foreground"
-                : "bg-primary/10 text-primary"
+                : "bg-primary/10 text-primary",
             )}
           >
             {chip.badge.text}
@@ -236,15 +297,16 @@ export function AssumptionsStrip({
         <div className="min-w-0">
           {/* tabIndex={-1}: focus landing zone for the "Hide details"
               handoff below — never in the tab order itself. */}
-          <p
+          <h2
             ref={headingRef}
             tabIndex={-1}
             className="text-sm font-semibold text-foreground focus:outline-none"
           >
-            Starting assumptions
-          </p>
+            Review assumptions
+          </h2>
           <p className="text-[11px] leading-snug text-muted-foreground">
-            Product defaults and imported benchmarks stay labeled and editable.
+            These values drive the preview. Every source is labeled, and every
+            number is editable.
           </p>
         </div>
         {advancedOpen ? (

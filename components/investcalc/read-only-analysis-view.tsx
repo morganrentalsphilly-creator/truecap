@@ -3,10 +3,10 @@
 /**
  * Read-only analysis view rendered on the public /d/[encoded] share page.
  *
- * Shows the headline metric tiles, Offer Ceiling card, sensitivity grid, and
- * Strategies tab content (rehab estimator, BRRRR, fix-and-flip). All
- * computed client-side from the encoded form snapshot - no auth, no
- * server actions needed.
+ * Shows the headline metric tiles, Offer Ceiling card, and the strategy data
+ * the server explicitly authorized. Recorded opaque shares render only a
+ * validated frozen specialist snapshot; they never recompute historical
+ * BRRRR or fix-and-flip results in the browser.
  *
  * Hides the four Pro-gated tabs (10-year, tax strategy, exit scenarios,
  * Screening Index) - those become upgrade prompts on the parent page.
@@ -37,6 +37,12 @@ import {
 import { computeAssumptionImpact } from "@/lib/assumption-impact";
 import { trackEvent } from "@/lib/analytics";
 import type { PublicShareAnalysisPayload } from "@/lib/public-share-analysis-result";
+import type { AnalyzerStrategyKey } from "@/lib/analyzer-strategy-persistence";
+import {
+  isSpecialistAnalyzerStrategyKey,
+  type SpecialistAnalysisSnapshot,
+  type SpecialistInputSource,
+} from "@/lib/specialist-analysis-snapshot";
 
 interface ReadOnlyAnalysisViewProps {
   values: InvestmentFormValues;
@@ -58,6 +64,12 @@ interface ReadOnlyAnalysisViewProps {
   addressIncluded?: boolean;
   /** True when the snapshot's price was an automated estimate (share meta). */
   priceEstimated?: boolean;
+  /** Server-validated and entitlement-authorized frozen strategy output. */
+  specialistAnalysis?: SpecialistAnalysisSnapshot | null;
+  /** True when a valid snapshot exists but the current share view is not
+   * entitled to receive its numbers. No financial output crosses that gate. */
+  specialistAnalysisCaptured?: boolean;
+  analyzerStrategyKey?: AnalyzerStrategyKey;
 }
 
 const fmtCash = (n: number) =>
@@ -94,6 +106,359 @@ function MetricTile({
       </span>
       {sub && <span className="text-xs text-muted-foreground">{sub}</span>}
     </div>
+  );
+}
+
+const SPECIALIST_SOURCE_LABEL: Record<SpecialistInputSource, string> = {
+  "saved-assumption": "Frozen modeled assumption",
+  "base-underwrite": "Base underwrite",
+  "core-analysis": "Frozen core result",
+  "strategy-default": "Strategy fallback",
+  derived: "Derived at capture",
+};
+
+function FrozenStrategyMetric({
+  label,
+  value,
+  note,
+  tone = "neutral",
+}: {
+  label: string;
+  value: string;
+  note?: string;
+  tone?: "neutral" | "positive" | "negative";
+}) {
+  return (
+    <div className="rounded-xl border border-border bg-background p-3 sm:p-4">
+      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        {label}
+      </p>
+      <p
+        className={cn(
+          "mt-1 font-mono text-xl font-extrabold tabular-nums sm:text-2xl",
+          tone === "positive" && "text-[var(--metric-positive)]",
+          tone === "negative" && "text-[var(--metric-negative)]",
+          tone === "neutral" && "text-foreground",
+        )}
+      >
+        {value}
+      </p>
+      {note ? (
+        <p className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground">
+          {note}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function FrozenAssumption({
+  label,
+  value,
+  source,
+}: {
+  label: string;
+  value: string;
+  source: SpecialistInputSource;
+}) {
+  return (
+    <div className="flex items-start justify-between gap-3 border-b border-border/70 py-2 last:border-b-0">
+      <div className="min-w-0">
+        <p className="text-xs font-semibold text-foreground">{label}</p>
+        <p className="text-[10px] leading-relaxed text-muted-foreground">
+          {SPECIALIST_SOURCE_LABEL[source]}
+        </p>
+      </div>
+      <p className="shrink-0 font-mono text-xs font-bold tabular-nums text-foreground">
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function FrozenSpecialistAnalysis({
+  snapshot,
+}: {
+  snapshot: SpecialistAnalysisSnapshot;
+}) {
+  const isBrrrr = snapshot.strategy === "brrrr";
+  const title = isBrrrr
+    ? "Recorded BRRRR strategy snapshot"
+    : "Recorded fix-and-flip strategy snapshot";
+  const subtitle = isBrrrr
+    ? "Buy, rehab, rent, refinance screening"
+    : "Buy, rehab, resell screening";
+
+  return (
+    <section
+      className="rounded-2xl border-2 border-primary/25 bg-card p-5 shadow-sm sm:p-6"
+      aria-labelledby="recorded-specialist-analysis-title"
+    >
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-[10px] font-extrabold uppercase tracking-widest text-primary">
+            Frozen strategy analysis
+          </p>
+          <h2
+            id="recorded-specialist-analysis-title"
+            className="mt-1 text-xl font-extrabold tracking-tight text-foreground sm:text-2xl"
+          >
+            {title}
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
+        </div>
+        <p className="w-fit rounded-full border border-primary/25 bg-[var(--brand-blue-light)] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-primary">
+          Model v{snapshot.modelVersion} · core v
+          {snapshot.coreMethodologyVersion}
+        </p>
+      </div>
+
+      <div className="mt-4 rounded-xl border border-primary/20 bg-[var(--brand-blue-light)] p-3 text-xs leading-relaxed text-foreground">
+        These are the exact specialist assumptions and outputs captured with
+        this share. They have not been recalculated when you opened the link,
+        and they do not replace the base rental verdict or Offer Ceiling.
+      </div>
+
+      {snapshot.strategy === "brrrr" ? (
+        <>
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <FrozenStrategyMetric
+              label="Cash left in deal"
+              value={fmtCash(snapshot.outcome.cashLeftInDeal)}
+              tone={
+                snapshot.outcome.cashLeftInDeal <= 0 ? "positive" : "neutral"
+              }
+            />
+            <FrozenStrategyMetric
+              label="Post-refi cash flow"
+              value={`${fmtCash(snapshot.outcome.postRefiMonthlyCashFlow)}/mo`}
+              tone={
+                snapshot.outcome.postRefiMonthlyCashFlow >= 0
+                  ? "positive"
+                  : "negative"
+              }
+            />
+            <FrozenStrategyMetric
+              label="Post-refi cash-on-cash"
+              value={
+                snapshot.outcome.isInfiniteReturn
+                  ? "Infinite*"
+                  : fmtPct(snapshot.outcome.postRefiCashOnCashPct ?? 0)
+              }
+              note={
+                snapshot.outcome.isInfiniteReturn
+                  ? "All modeled cash recovered with positive annual cash flow"
+                  : "Annual modeled return"
+              }
+              tone={
+                snapshot.outcome.postRefiMonthlyCashFlow >= 0
+                  ? "positive"
+                  : "negative"
+              }
+            />
+            <FrozenStrategyMetric
+              label="New loan"
+              value={fmtCash(snapshot.outcome.newLoanAmount)}
+            />
+            <FrozenStrategyMetric
+              label="Cash returned"
+              value={fmtCash(snapshot.outcome.cashReturnedAtRefi)}
+            />
+            <FrozenStrategyMetric
+              label="Equity created"
+              value={fmtCash(snapshot.outcome.equityCreated)}
+              tone={
+                snapshot.outcome.equityCreated >= 0 ? "positive" : "negative"
+              }
+            />
+          </div>
+          <div className="mt-4 grid gap-3 lg:grid-cols-2">
+            <div className="rounded-xl border border-border bg-muted/20 p-3">
+              <h3 className="text-sm font-bold text-foreground">
+                Project assumptions
+              </h3>
+              <FrozenAssumption
+                label="Purchase price"
+                value={fmtCash(snapshot.effectiveInputs.purchasePrice)}
+                source={snapshot.inputSources.purchasePrice}
+              />
+              <FrozenAssumption
+                label="Rehab budget"
+                value={fmtCash(snapshot.effectiveInputs.rehabBudget)}
+                source={snapshot.inputSources.rehabBudget}
+              />
+              <FrozenAssumption
+                label="After-repair value"
+                value={fmtCash(snapshot.effectiveInputs.arv)}
+                source={snapshot.inputSources.arv}
+              />
+              <FrozenAssumption
+                label="Hold before refinance"
+                value={`${snapshot.effectiveInputs.holdMonths} months`}
+                source={snapshot.inputSources.holdMonths}
+              />
+            </div>
+            <div className="rounded-xl border border-border bg-muted/20 p-3">
+              <h3 className="text-sm font-bold text-foreground">
+                Refinance assumptions
+              </h3>
+              <FrozenAssumption
+                label="Refinance LTV"
+                value={`${snapshot.effectiveInputs.refiLtvPct.toFixed(1)}%`}
+                source={snapshot.inputSources.refiLtvPct}
+              />
+              <FrozenAssumption
+                label="Refinance rate"
+                value={`${snapshot.effectiveInputs.refiRatePct.toFixed(2)}%`}
+                source={snapshot.inputSources.refiRatePct}
+              />
+              <FrozenAssumption
+                label="Refinance term"
+                value={`${snapshot.effectiveInputs.refiTermYears} years`}
+                source={snapshot.inputSources.refiTermYears}
+              />
+              <FrozenAssumption
+                label="Monthly carrying cost"
+                value={`${fmtCash(snapshot.effectiveInputs.monthlyCarryingCost)}/mo`}
+                source={snapshot.inputSources.monthlyCarryingCost}
+              />
+            </div>
+          </div>
+          <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
+            Refinance proceeds depend on appraisal, lender LTV, seasoning,
+            eligibility, fees, and final loan terms. Verify each item with the
+            lender. *Infinite is a model state, not a guaranteed return.
+          </p>
+        </>
+      ) : (
+        <>
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <FrozenStrategyMetric
+              label="Net profit"
+              value={fmtCash(snapshot.outcome.netProfit)}
+              tone={snapshot.outcome.netProfit >= 0 ? "positive" : "negative"}
+            />
+            <FrozenStrategyMetric
+              label="ROI on cash"
+              value={fmtPct(snapshot.outcome.roiOnCashPct)}
+              tone={
+                snapshot.outcome.roiOnCashPct >= 0 ? "positive" : "negative"
+              }
+            />
+            <FrozenStrategyMetric
+              label="Annualized ROI"
+              value={fmtPct(snapshot.outcome.annualizedRoiPct)}
+              note="Simple hold-period annualization"
+              tone={
+                snapshot.outcome.annualizedRoiPct >= 0 ? "positive" : "negative"
+              }
+            />
+            <FrozenStrategyMetric
+              label="Cash invested"
+              value={fmtCash(snapshot.outcome.totalCashInvested)}
+            />
+            <FrozenStrategyMetric
+              label="Break-even ARV"
+              value={fmtCash(snapshot.outcome.breakEvenArv)}
+            />
+            <FrozenStrategyMetric
+              label="Profit per day"
+              value={fmtCash(snapshot.outcome.profitPerDay)}
+              tone={
+                snapshot.outcome.profitPerDay >= 0 ? "positive" : "negative"
+              }
+            />
+          </div>
+          <div className="mt-4 grid gap-3 lg:grid-cols-2">
+            <div className="rounded-xl border border-border bg-muted/20 p-3">
+              <h3 className="text-sm font-bold text-foreground">
+                Project assumptions
+              </h3>
+              <FrozenAssumption
+                label="Purchase price"
+                value={fmtCash(snapshot.effectiveInputs.purchasePrice)}
+                source={snapshot.inputSources.purchasePrice}
+              />
+              <FrozenAssumption
+                label="Rehab budget"
+                value={fmtCash(snapshot.effectiveInputs.rehabBudget)}
+                source={snapshot.inputSources.rehabBudget}
+              />
+              <FrozenAssumption
+                label="After-repair value"
+                value={fmtCash(snapshot.effectiveInputs.arv)}
+                source={snapshot.inputSources.arv}
+              />
+              <FrozenAssumption
+                label="Hold period"
+                value={`${snapshot.effectiveInputs.holdMonths} months`}
+                source={snapshot.inputSources.holdMonths}
+              />
+            </div>
+            <div className="rounded-xl border border-border bg-muted/20 p-3">
+              <h3 className="text-sm font-bold text-foreground">
+                Acquisition and sale assumptions
+              </h3>
+              <FrozenAssumption
+                label="Down payment"
+                value={`${snapshot.effectiveInputs.downPaymentPct.toFixed(1)}%`}
+                source={snapshot.inputSources.downPaymentPct}
+              />
+              <FrozenAssumption
+                label="Acquisition closing costs"
+                value={`${snapshot.effectiveInputs.closingCostsPctAcq.toFixed(1)}%`}
+                source={snapshot.inputSources.closingCostsPctAcq}
+              />
+              <FrozenAssumption
+                label="Selling costs"
+                value={`${snapshot.effectiveInputs.sellingCostsPct.toFixed(1)}%`}
+                source={snapshot.inputSources.sellingCostsPct}
+              />
+              <FrozenAssumption
+                label="Monthly carrying cost"
+                value={`${fmtCash(snapshot.effectiveInputs.monthlyCarryingCost)}/mo`}
+                source={snapshot.inputSources.monthlyCarryingCost}
+              />
+            </div>
+          </div>
+          <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
+            Resale value, construction scope, schedule, financing, selling
+            costs, taxes, and market liquidity can materially change this
+            screening result. Verify the scope and disposition assumptions
+            before committing capital.
+          </p>
+        </>
+      )}
+    </section>
+  );
+}
+
+function FrozenSpecialistUnavailable({
+  strategyKey,
+  capturedButRestricted,
+}: {
+  strategyKey: "brrrr" | "fix-flip";
+  capturedButRestricted: boolean;
+}) {
+  const strategyLabel = strategyKey === "brrrr" ? "BRRRR" : "fix-and-flip";
+  return (
+    <section
+      role="status"
+      className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-5 sm:p-6"
+      aria-labelledby="recorded-specialist-unavailable-title"
+    >
+      <h2
+        id="recorded-specialist-unavailable-title"
+        className="text-base font-bold text-foreground"
+      >
+        Recorded {strategyLabel} analysis is unavailable in this view
+      </h2>
+      <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+        {capturedButRestricted
+          ? "This share contains a frozen Pro strategy result, but this view is not authorized to receive those numbers. Nothing has been recalculated or exposed."
+          : "This recorded share does not contain a valid frozen strategy snapshot. TrueCap has not substituted today’s model. Ask the owner to re-underwrite the deal and create a refreshed link."}
+      </p>
+    </section>
   );
 }
 
@@ -226,10 +591,18 @@ export function ReadOnlyAnalysisView({
   recordedResult = false,
   addressIncluded = true,
   priceEstimated = false,
+  specialistAnalysis = null,
+  specialistAnalysisCaptured = false,
+  analyzerStrategyKey = "buy-hold",
 }: ReadOnlyAnalysisViewProps) {
   const router = useRouter();
   const result = analysis.result;
   const proResult = analysis.access === "pro" ? analysis.result : null;
+  const isSpecialistLens = isSpecialistAnalyzerStrategyKey(analyzerStrategyKey);
+  const authorizedSpecialistAnalysis =
+    proResult && specialistAnalysis?.strategy === analyzerStrategyKey
+      ? specialistAnalysis
+      : null;
   const adoptedMaoTarget =
     maoTarget && isAdoptedOfferCeilingTargetSource(maoTargetSource)
       ? maoTarget
@@ -556,6 +929,17 @@ export function ReadOnlyAnalysisView({
       </button>
 
       {comps ? <SharedDealComps comps={comps} /> : null}
+
+      {authorizedSpecialistAnalysis ? (
+        <FrozenSpecialistAnalysis snapshot={authorizedSpecialistAnalysis} />
+      ) : recordedResult && isSpecialistLens ? (
+        <FrozenSpecialistUnavailable
+          strategyKey={analyzerStrategyKey}
+          capturedButRestricted={
+            specialistAnalysisCaptured || Boolean(specialistAnalysis)
+          }
+        />
+      ) : null}
 
       {proResult && !recordedResult ? (
         <>

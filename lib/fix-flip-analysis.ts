@@ -53,16 +53,17 @@ export type FixFlipResult = {
 export function estimateFixFlipCarryingCost(
   values: InvestmentFormValues | null,
   result: AnalysisResult | null | undefined,
-  downPaymentPct: number
+  downPaymentPct: number,
 ): number {
   if (!values) return 0;
   const price = Number(values.purchasePrice) || 0;
-  const ratePct = Number(values.interestRate) || 7;
+  const ratePct = Number(values.interestRate ?? 7);
   const loan = price * (1 - downPaymentPct / 100);
   const monthlyInterest = (loan * (ratePct / 100)) / 12;
   const monthlyTax =
     result?.propertyTax ??
-    (values.propertyTaxInputMode === "annual" && values.propertyTaxAnnual != null
+    (values.propertyTaxInputMode === "annual" &&
+    values.propertyTaxAnnual != null
       ? values.propertyTaxAnnual / 12
       : (price * ((values.propertyTaxPct ?? 1.1) / 100)) / 12);
   const monthlyInsurance =
@@ -75,7 +76,7 @@ export function estimateFixFlipCarryingCost(
     result?.utilities ?? (Number(values.utilitiesMonthly) || 0);
 
   return Math.round(
-    monthlyInterest + monthlyTax + monthlyInsurance + monthlyUtilities
+    monthlyInterest + monthlyTax + monthlyInsurance + monthlyUtilities,
   );
 }
 

@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest";
 
 const ROOT = process.cwd();
 const read = (path: string) => readFileSync(join(ROOT, path), "utf8");
+const normalizeSource = (source: string) =>
+  source.replace(/\s+/g, "").replace(/,([)}\]])/g, "$1");
 
 describe("historical result reproducibility wiring", () => {
   it("uses the recorded snapshot for same-version saved results", () => {
@@ -23,9 +25,7 @@ describe("historical result reproducibility wiring", () => {
     expect(compare).toContain(
       "resolution.usesRecordedSnapshot\n      ? parseCompareSnapshotV1",
     );
-    expect(compare).toContain(
-      "compareSnapshotSource: compareSnapshot",
-    );
+    expect(compare).toContain("compareSnapshotSource: compareSnapshot");
     expect(compareClient).toContain(
       "Loaded from the recorded saved analysis (no recalculation).",
     );
@@ -34,31 +34,31 @@ describe("historical result reproducibility wiring", () => {
     );
   });
 
-  it("binds saved PDF generation to the owner-scoped recorded result", () => {
+  it("binds saved PDF generation to owned inputs and recomputes publication outputs", () => {
     const action = read("app/actions/generate-report-pdf.ts");
     const builder = read("lib/report-data-builder.ts");
-    expect(action).toContain("trustedRecordedResult");
+    expect(action).toContain("shouldFreezeSavedMethodology(");
     expect(action).toContain(
-      "if (!recorded.result || !recorded.usesRecordedSnapshot)",
+      "const currentResult = calculateAnalysis(trustedValues)",
     );
-    expect(builder).toContain("input.trustedRecordedResult");
-    expect(builder).toContain("parseCompareSnapshotV1");
-    expect(builder).toContain("maxOffer: usesRecordedResult");
+    expect(action).not.toContain("trustedRecordedResult");
+    expect(builder).not.toContain("input.trustedRecordedResult");
+    expect(builder).not.toContain("parseCompareSnapshotV1");
+    expect(builder).toContain("const result = currentResult");
+    expect(builder).toContain("maxOffer: buildReportMaxOffer");
   });
 
   it("captures opaque-share outputs and labels legacy input-only shares", () => {
     const store = read("lib/public-share.ts");
     const route = read("app/s/[token]/page.tsx");
+    const legacyRoute = read("app/d/[encoded]/page.tsx");
     const view = read("components/investcalc/read-only-analysis-view.tsx");
     expect(store).toContain("resultSnapshot: capturedResult");
     expect(store).toContain("offerCeilingExact");
-    expect(route).toContain(
-      "recordedResult={Boolean(recordedResolution?.usesRecordedSnapshot)}",
-    );
-    expect(route).toContain("canRecomputeInputOnlyShare");
-    expect(view).toMatch(
-      /Sensitivity figures are\s+intentionally not regenerated/,
-    );
+    expect(route).toContain("recordedResult={false}");
+    expect(route).toContain("outputsRecomputed");
+    expect(route).not.toContain("resolveSavedAnalysisResult");
+    expect(legacyRoute).toContain("outputsRecomputed");
     expect(view).toContain("proResult && !recordedResult");
   });
 
@@ -84,17 +84,30 @@ describe("historical result reproducibility wiring", () => {
 
   it("never refreshes immutable recorded long-term rows through live snapshot actions", () => {
     const page = read("components/investcalc/investcalc-page.tsx");
-    expect(page).toContain(
-      "const recordedAnalysisId = resolution.usesRecordedSnapshot ? null : parsed.id",
+    const normalizedPage = normalizeSource(page);
+    expect(normalizedPage).toContain(
+      normalizeSource(
+        "const recordedAnalysisId = resolution.usesRecordedSnapshot ? null : parsed.id",
+      ),
     );
-    expect(page).toContain(
-      "buildProjectionSource(recordedAnalysisId, hydratedValues, result)",
+    expect(normalizedPage).toContain(
+      normalizeSource(
+        "buildProjectionSource(recordedAnalysisId, hydratedValues, result)",
+      ),
     );
-    expect(page).toContain(
-      "buildTaxStrategySource(recordedAnalysisId, hydratedValues, result)",
+    expect(normalizedPage).toContain(
+      normalizeSource(
+        "buildTaxStrategySource(recordedAnalysisId, hydratedValues, result)",
+      ),
     );
-    expect(page).toMatch(/buildExitScenarioSource\(\s*recordedAnalysisId,\s*hydratedValues,/);
-    expect(page).toContain("recorded: resolution.usesRecordedSnapshot");
+    expect(normalizedPage).toContain(
+      normalizeSource(
+        "buildExitScenarioSource(recordedAnalysisId, hydratedValues,",
+      ),
+    );
+    expect(normalizedPage).toContain(
+      normalizeSource("recorded: resolution.usesRecordedSnapshot"),
+    );
   });
 
   it("carries lifetime mortgage-insurance semantics into live projections", () => {
@@ -102,20 +115,24 @@ describe("historical result reproducibility wiring", () => {
     expect(page).toContain("pmiNoCancel: values.pmiNoCancel === true");
   });
 
-  it("keeps client portal cards and detail pages on the same recorded result", () => {
+  it("keeps client portal cards and detail pages on the same current server recompute", () => {
     const portalList = read("lib/client-portal.ts");
     const portalDetail = read("app/portal/[token]/d/[dealId]/page.tsx");
-    expect(portalList).toContain("resolution.usesRecordedSnapshot");
-    expect(portalList).toContain("Recorded Standard v");
-    expect(portalDetail).toContain("resolveSavedAnalysisResult({");
-    expect(portalDetail).toContain(
-      "if (!methodologyResolution.result) notFound()",
+    expect(portalList).toContain(
+      "recomputeSavedDealVerdict(row.form_snapshot)",
     );
-    expect(portalDetail).toContain("if (maoTarget && recordedResult)");
+    expect(portalList).toContain("shouldFreezeSavedMethodology(");
+    expect(portalList).not.toContain("resolveSavedAnalysisSnapshot");
     expect(portalDetail).toContain(
-      "readRecordedOfferCeiling(savedResultSnapshot)",
+      "recomputeSavedDealVerdict(deal.form_snapshot)",
     );
-    expect(portalDetail).not.toContain("calculateAnalysis(values)");
+    expect(portalDetail).toContain("result = recomputedVerdict.analysisResult");
+    expect(portalDetail).toContain("resolveOfferCeilingForAccess({");
+    expect(portalDetail).not.toContain("readRecordedOfferCeiling(");
+    expect(portalDetail).toContain("outputsRecomputed");
+    expect(portalDetail).toContain('inputsSource="live-saved"');
+    const shell = read("components/investcalc/shared-deal-shell.tsx");
+    expect(shell).toContain("This view uses the agent’s current saved inputs");
   });
 
   it("offers re-underwriting as a cloned scenario, leaving the parent intact", () => {

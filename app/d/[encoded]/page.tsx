@@ -117,6 +117,7 @@ export default async function PublicDealPage({ params }: Props) {
       agent={agent}
       methodologyVersion={TRUECAP_UNDERWRITING_STANDARD_VERSION}
       legacyMethodologyWarning
+      outputsRecomputed
       leadCapture={
         agent && verifiedOwnerId
           ? {
@@ -133,7 +134,10 @@ export default async function PublicDealPage({ params }: Props) {
 
 function InvalidLink({ reason }: { reason?: string }) {
   return (
-    <main id="main" className="min-h-screen bg-background flex flex-col items-center justify-center px-4 text-center">
+    <main
+      id="main"
+      className="min-h-screen bg-background flex flex-col items-center justify-center px-4 text-center"
+    >
       <div className="text-xs uppercase tracking-widest text-muted-foreground font-bold mb-2">
         TrueCap
       </div>

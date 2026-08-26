@@ -8,9 +8,9 @@
  *   2. BRRRR analyzer
  *   3. Fix-and-flip analyzer
  *
- * The rehab estimator's total is lifted up here so it can default into
- * the rehab-budget input of both BRRRR and Fix-and-Flip. The user can
- * still type their own number in either card to override.
+ * The rehab estimator is a preview until the user explicitly applies it.
+ * Specialist models read only the form's applied rehab value, so editing the
+ * estimator cannot create two contradictory answers for the same deal.
  */
 
 import { useMemo, useState } from "react";
@@ -18,7 +18,12 @@ import { RehabEstimatorCard } from "@/components/investcalc/rehab-estimator-card
 import { BrrrrCard } from "@/components/investcalc/brrrr-card";
 import { FixFlipCard } from "@/components/investcalc/fix-flip-card";
 import { AnalysisResult } from "@/lib/calc-analysis";
-import type { InvestmentFormValues } from "@/lib/investcalc-schema";
+import type {
+  InvestmentFormValues,
+  StrategyInputErrors,
+  StrategyInputField,
+  StrategyInputs,
+} from "@/lib/investcalc-schema";
 
 interface StrategiesPanelProps {
   values: InvestmentFormValues | null;
@@ -28,6 +33,12 @@ interface StrategiesPanelProps {
   /** Live rehabBudget form value (not the last-computed snapshot), so "Applied"
    *  reflects the current input immediately after Apply. */
   currentRehabBudget?: number | null;
+  strategyInputs?: Partial<StrategyInputs>;
+  strategyInputErrors?: StrategyInputErrors;
+  onStrategyInputChange?: (
+    field: StrategyInputField,
+    value: number | undefined,
+  ) => void;
 }
 
 function deriveDefaultSqft(values: InvestmentFormValues | null): number | null {
@@ -40,7 +51,9 @@ function deriveDefaultSqft(values: InvestmentFormValues | null): number | null {
   return sum > 0 ? sum : null;
 }
 
-function deriveDefaultBaths(values: InvestmentFormValues | null): number | null {
+function deriveDefaultBaths(
+  values: InvestmentFormValues | null,
+): number | null {
   if (!values) return null;
   const top = Number(values.bathrooms);
   if (Number.isFinite(top) && top > 0) return top;
@@ -49,7 +62,15 @@ function deriveDefaultBaths(values: InvestmentFormValues | null): number | null 
   return sum > 0 ? sum : null;
 }
 
-export function StrategiesPanel({ values, result, onApplyRehab, currentRehabBudget }: StrategiesPanelProps) {
+export function StrategiesPanel({
+  values,
+  result,
+  onApplyRehab,
+  currentRehabBudget,
+  strategyInputs,
+  strategyInputErrors,
+  onStrategyInputChange,
+}: StrategiesPanelProps) {
   const [rehabTotal, setRehabTotal] = useState<number>(0);
 
   const defaultSqft = useMemo(() => deriveDefaultSqft(values), [values]);
@@ -93,12 +114,18 @@ export function StrategiesPanel({ values, result, onApplyRehab, currentRehabBudg
       <BrrrrCard
         values={values}
         result={result}
-        defaultRehab={rehabTotal}
+        defaultRehab={currentRehabBudget ?? 0}
+        strategyInputs={strategyInputs}
+        strategyInputErrors={strategyInputErrors}
+        onStrategyInputChange={onStrategyInputChange}
       />
       <FixFlipCard
         values={values}
         result={result}
-        defaultRehab={rehabTotal}
+        defaultRehab={currentRehabBudget ?? 0}
+        strategyInputs={strategyInputs}
+        strategyInputErrors={strategyInputErrors}
+        onStrategyInputChange={onStrategyInputChange}
       />
     </div>
   );

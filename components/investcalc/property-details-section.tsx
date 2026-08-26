@@ -8,8 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
-import { FieldError, optionalNumberSetValueAs } from "@/components/investcalc/form-field-helpers";
-import { AddressAutocomplete, type SelectedAddress } from "@/components/investcalc/address-autocomplete";
+import {
+  FieldError,
+  optionalNumberSetValueAs,
+} from "@/components/investcalc/form-field-helpers";
+import {
+  AddressAutocomplete,
+  type SelectedAddress,
+} from "@/components/investcalc/address-autocomplete";
 import { CurrencyInput } from "@/components/ui/currency-input";
 
 interface PropertyDetailsSectionProps {
@@ -30,8 +36,8 @@ interface PropertyDetailsSectionProps {
    * ADDITIVE chrome variant (calculator redesign Phase 4, hero unification):
    * "bare" drops this section's own card wrapper + "Property Details" header
    * so the fields compose inside the hero's single bordered card, renders
-   * the question-language group headers ("Where's the deal?" / "What does it
-   * cost?"), and omits the old 2-line "Fastest start" signpost (the hero's
+   * numbered property and purchase-price group legends, and omits the old
+   * 2-line "Fastest start" signpost (the hero's
    * one-line signpost replaces it). Default ("card") keeps today's
    * standalone chrome byte-identical for any other mount.
    */
@@ -74,7 +80,10 @@ export function PropertyDetailsSection({
   /* Address - Google Places autocomplete attached when key is set */
   const addressBlock = (
     <div className={hideAddressInput ? "hidden" : undefined}>
-      <Label htmlFor="address" className="text-sm font-medium text-foreground mb-1 block">
+      <Label
+        htmlFor="address"
+        className="text-sm font-medium text-foreground mb-1 block"
+      >
         Property Address
       </Label>
       {/* First-run signpost (card chrome only — on the analyzer the page
@@ -88,7 +97,9 @@ export function PropertyDetailsSection({
       {!bare ? (
         <p className="mb-1.5 text-[11px] leading-snug text-muted-foreground">
           <span className="font-semibold text-foreground">Fastest start</span>
-          {" - type an address and we auto-fill rates, taxes & (where public data covers it) area rent. Or just enter price & rent to see a provisional screening result. Everything stays editable."}
+          {
+            " - type an address and we auto-fill rates, taxes & (where public data covers it) area rent. Or just enter price & rent to see a provisional screening result. Everything stays editable."
+          }
         </p>
       ) : null}
       <AddressAutocomplete
@@ -101,25 +112,39 @@ export function PropertyDetailsSection({
       />
       <FieldError id="address-error" message={errors.address?.message} />
       {showAutofill && onAutofillFromAddress ? (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="mt-2 min-h-11 gap-1.5"
-          onClick={onAutofillFromAddress}
-          disabled={isAutofilling}
-        >
-          {isAutofilling ? (
-            <Loader2 className="size-3.5 animate-spin" />
-          ) : (
-            <Sparkles className="size-3.5" />
-          )}
-          {isAutofilling
-            ? "Pulling property data…"
-            : autofillRequiresAccount
-              ? "Create a free account to autofill"
-              : "Autofill from address"}
-        </Button>
+        <div className="mt-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-auto min-h-11 max-w-full gap-1.5 whitespace-normal px-3 py-2 text-left leading-snug sm:text-center"
+            onClick={onAutofillFromAddress}
+            disabled={isAutofilling}
+            aria-describedby="property-lookup-help"
+          >
+            {isAutofilling ? (
+              <Loader2
+                aria-hidden="true"
+                className="size-3.5 shrink-0 animate-spin"
+              />
+            ) : (
+              <Sparkles aria-hidden="true" className="size-3.5 shrink-0" />
+            )}
+            {isAutofilling
+              ? "Looking up property details…"
+              : autofillRequiresAccount
+                ? "Create a free account to autofill"
+                : "Look up property details"}
+          </Button>
+          <p
+            id="property-lookup-help"
+            className="mt-1.5 max-w-prose text-[11px] leading-snug text-muted-foreground"
+          >
+            Optional. Look up available property facts and estimates.
+            You&apos;ll review any changes; values you entered will not be
+            replaced silently.
+          </p>
+        </div>
       ) : null}
     </div>
   );
@@ -129,13 +154,18 @@ export function PropertyDetailsSection({
      instead). Single column below sm: at 375px the 2-col split squeezed
      the marquee Price input to ~140px next to an optional field. */
   const priceGrid = (
-    <div className={cn("grid gap-4", showYearBuilt ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1")}>
+    <div
+      className={cn(
+        "grid gap-4",
+        showYearBuilt ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1",
+      )}
+    >
       <div>
-        {bare ? (
-          <p className="mb-2 text-sm font-semibold text-foreground">What does it cost?</p>
-        ) : null}
-        <Label htmlFor="purchasePrice" className="text-sm font-medium text-foreground mb-1.5 block">
-          {priceLabel ?? "Purchase Price"}
+        <Label
+          htmlFor="purchasePrice"
+          className="text-sm font-medium text-foreground mb-1.5 block"
+        >
+          {priceLabel ?? (bare ? "Price to analyze" : "Purchase Price")}
         </Label>
         <div className="relative">
           <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -156,16 +186,22 @@ export function PropertyDetailsSection({
                 placeholder="385,000"
                 aria-required="true"
                 aria-invalid={!!errors.purchasePrice}
-                aria-describedby={errors.purchasePrice ? "purchasePrice-error" : undefined}
+                aria-describedby={
+                  errors.purchasePrice ? "purchasePrice-error" : undefined
+                }
                 className={cn(
                   "min-h-11 border-input bg-background pl-8",
-                  errors.purchasePrice && "border-destructive focus-visible:ring-destructive"
+                  errors.purchasePrice &&
+                    "border-destructive focus-visible:ring-destructive",
                 )}
               />
             )}
           />
         </div>
-        <FieldError id="purchasePrice-error" message={errors.purchasePrice?.message} />
+        <FieldError
+          id="purchasePrice-error"
+          message={errors.purchasePrice?.message}
+        />
       </div>
 
       {showYearBuilt ? <YearBuiltField form={form} /> : null}
@@ -175,13 +211,20 @@ export function PropertyDetailsSection({
   if (bare) {
     return (
       <div className="space-y-6">
-        <div>
-          <p className="mb-2 text-sm font-semibold text-foreground">Where&apos;s the deal?</p>
+        <fieldset className="min-w-0 border-0 p-0">
+          <legend className="mb-2 text-sm font-semibold text-foreground">
+            1. Property
+          </legend>
           {addressBlock}
           {listingLinkSlot}
           {sampleSlot}
-        </div>
-        {priceGrid}
+        </fieldset>
+        <fieldset className="min-w-0 border-0 p-0">
+          <legend className="mb-2 text-sm font-semibold text-foreground">
+            2. Purchase price
+          </legend>
+          {priceGrid}
+        </fieldset>
       </div>
     );
   }
@@ -190,7 +233,9 @@ export function PropertyDetailsSection({
     <div className="bg-card rounded-2xl border border-border shadow-sm p-6">
       <div className="flex items-center gap-2 mb-5">
         <Home className="w-4 h-4 text-primary" />
-        <span className="font-semibold text-sm text-foreground">Property Details</span>
+        <span className="font-semibold text-sm text-foreground">
+          Property Details
+        </span>
       </div>
 
       <div className="space-y-4">
@@ -210,7 +255,11 @@ export function PropertyDetailsSection({
  * property type. PropertyDetailsSection still renders it when showYearBuilt
  * is on (the default), so any card-chrome mount stays byte-identical.
  */
-export function YearBuiltField({ form }: { form: UseFormReturn<InvestmentFormValues> }) {
+export function YearBuiltField({
+  form,
+}: {
+  form: UseFormReturn<InvestmentFormValues>;
+}) {
   const {
     register,
     formState: { errors },
@@ -218,14 +267,18 @@ export function YearBuiltField({ form }: { form: UseFormReturn<InvestmentFormVal
 
   return (
     <div>
-      <Label htmlFor="yearBuilt" className="text-sm font-medium text-foreground mb-1.5 block">
-        Year Built <span className="text-xs text-muted-foreground">(Optional)</span>
+      <Label
+        htmlFor="yearBuilt"
+        className="text-sm font-medium text-foreground mb-1.5 block"
+      >
+        Year Built{" "}
+        <span className="text-xs text-muted-foreground">(Optional)</span>
       </Label>
       <Input
         {...register("yearBuilt", { setValueAs: optionalNumberSetValueAs })}
         id="yearBuilt"
         type="number"
-        inputMode="decimal"
+        inputMode="numeric"
         min={1800}
         max={new Date().getFullYear() + 5}
         step={1}
@@ -234,12 +287,14 @@ export function YearBuiltField({ form }: { form: UseFormReturn<InvestmentFormVal
         aria-describedby={errors.yearBuilt ? "yearBuilt-error" : undefined}
         className={cn(
           "min-h-11 border-input bg-background",
-          errors.yearBuilt && "border-destructive focus-visible:ring-destructive"
+          errors.yearBuilt &&
+            "border-destructive focus-visible:ring-destructive",
         )}
       />
       <p className="mt-1 text-[11px] text-muted-foreground">
-        Used in the Screening Index age-risk check. If left blank, a conservative uncertainty
-        modifier applies. It does not auto-adjust your expense assumptions.
+        Used in the Screening Index age-risk check. If left blank, a
+        conservative uncertainty modifier applies. It does not auto-adjust your
+        expense assumptions.
       </p>
       <FieldError id="yearBuilt-error" message={errors.yearBuilt?.message} />
     </div>

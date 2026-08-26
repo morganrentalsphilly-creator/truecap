@@ -14,14 +14,21 @@ const metricsBand = readFileSync(
   join(process.cwd(), "components/investcalc/metrics-band.tsx"),
   "utf8"
 );
+const normalizeSource = (source: string) =>
+  source.replace(/\s+/g, "").replace(/,([)}\]])/g, "$1");
 
 describe("what-if scenario safety", () => {
   it("keeps temporary numbers explicitly labeled and resets on base edits", () => {
-    expect(dashboard).toContain(
-      "These numbers are temporary. Your saved base assumptions have not changed."
+    const normalizedDashboard = normalizeSource(dashboard);
+    expect(normalizedDashboard).toContain(
+      normalizeSource(
+        "These numbers are temporary. Your saved base assumptions have not changed.",
+      ),
     );
-    expect(dashboard).toContain(
-      "Scenario values below are labeled Scenario; the Decision card and Offer Ceiling remain labeled Base."
+    expect(normalizedDashboard).toContain(
+      normalizeSource(
+        "Scenario values below are labeled Scenario; the Decision card and Offer Ceiling remain labeled Base.",
+      ),
     );
     expect(dashboard).toContain("previousBaseAssumptionsRef");
     expect(dashboard).toContain("setWhatIfState(null)");
