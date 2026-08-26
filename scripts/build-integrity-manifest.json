@@ -1,24 +1,24 @@
 {
   "_readme": "Pinned sha256 of every file that executes during a build (or decides what does). Verified by scripts/verify-build-integrity.mjs in the build-chain-guard CI job. Any drift fails CI until someone regenerates this file on purpose: `node scripts/verify-build-integrity.mjs --update`. Exists because of the 2026-06-01 incident — see the header of that script.",
   "algorithm": "sha256",
-  "generatedAt": "2026-08-24T15:51:45.216Z",
+  "generatedAt": "2026-08-26T03:33:11.654Z",
   "files": {
-    ".github/workflows/ci.yml": "c54fe4d12c25433eafa20f6c657bf816f2fd3616f3b4eb8e8076d848f7131cfb",
+    ".github/workflows/ci.yml": "0c331ae1fc002e4abbaeda51b9b3c12f810597f9d13ec0c8e7833078ec5b4e4c",
     "eslint.config.mjs": "50ef27101a8f02892b83d543ae9be26afa81e2fe4f0a87f1bfeebda77b8e22fc",
     "instrumentation-client.ts": "6f89d202075bbc6fd3537ddcf665180885dc6824cf2e0cbc19ecae9f0610f24d",
     "instrumentation.ts": "158fe4c748f1599b56a1681e417ceddcda7ce40b988f95fca298c5ab548ca38c",
-    "next.config.mjs": "b81fb4437bbed6ddcecfce3ea3bf851a0c7b36575cc1ec087d686662ecfaf7bc",
-    "package-lock.json": "e8d149f4990d9400a224fc806f21a687d1a36177b48a692589fc51ed9ebfbcce",
-    "package.json": "4743c782c3d6744286d28a709f7266756d1d6214fac719dcf3223829e4bc27ab",
+    "next.config.mjs": "570d3a9522b3725e267bddef26ec2e3e92ebd194c2c5835a09210370e2f5906d",
+    "package-lock.json": "6dd76f735cc3e1ac9b87c86a134bd01bdd3b3fa65eb34c3fba666edbdd8077b0",
+    "package.json": "b5dc773f6e29f0dfd0034fd069ddda6814b14b3db697b66468eec863dc89ffcc",
     "postcss.config.mjs": "54b5708e687b8c9ecc8dbeebf29801dbec1213f890c5e018d7ca9c1541a6f7e3",
-    "proxy.ts": "6f27ea9f2ffe27aae6fb7426eafe56998abc98e74bb6a15195568d13e533064f",
+    "proxy.ts": "123cf1cc7c6f23413a7b9720e7f084253cced578d515d9c1595defacca3a39b8",
     "scripts/check-agent-blog-content.mjs": "a18480b403ca419192791f167a712cc789af741a7335670c4299e5ce6c94ae4f",
     "scripts/verify-build-integrity.mjs": "6378f59189a32b5737eaee6287d899c314178e7b3f5b676a825646d3cbd2d470",
     "sentry.edge.config.ts": "503fe2762c49f5a439116d51ea5ca5990ce7f9c4a771e0c105711c08977dab51",
     "sentry.server.config.ts": "bfa45eb2582d6a251eebff745b8b881df8cb9b1b39c43c9aeabad23f07ed4261",
     "tsconfig.json": "3793702e98a6da2c82b03ecfca1a48a25c79b170abacb97f23937784550e206b",
     "vercel.json": "be8b5dde330ce13e82e100158817395902a9e8a4d0c1b18342689e0ce3bc1bbe",
-    "vitest.config.ts": "2d1334b02146540e5201e65632de8fc5c699173eb89db956d31c14cc19d6c4b8"
+    "vitest.config.ts": "a0ea6e1b86b04e882be1bd84e9fae697028f0421623e2c9d38948e01cae1faaa"
   },
   "_contentScannedReadme": "Build-executed files the SEO agent is deliberately allowed to write, so they are NOT hash-pinned above — a pin would be red on every content PR and would turn `--update` into a reflex, which is the one habit that empties this control of meaning. Their control is gate 1b (scripts/check-agent-blog-content.mjs), a heuristic token scan, NOT a proof. Listed here so the registry of build-executed files is complete: verify-build-integrity.mjs fails if one of these disappears or if .github/workflows/ci.yml stops naming it, i.e. if it silently loses its coverage.",
   "contentScanned": {
