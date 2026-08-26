@@ -58,6 +58,10 @@ export async function saveUniqueSampleDeal(
   address: string,
 ): Promise<string> {
   await openSampleDecision(page);
+  // Intentionally let the authenticated account-scoped Buy Box lookup finish
+  // while the sample preview is active. Editing after that exact ordering
+  // regresses if the parent resets readiness without starting a new lookup.
+  await page.waitForLoadState("networkidle");
   await page.getByText("More actions", { exact: true }).click();
   await page
     .getByRole("button", { name: "Edit assumptions", exact: true })
@@ -75,7 +79,9 @@ export async function saveUniqueSampleDeal(
   await expect(summary.getByText(address, { exact: true })).toBeVisible({
     timeout: 30_000,
   });
-  await summary.getByRole("button", { name: "Save", exact: true }).click();
+  const save = summary.getByRole("button", { name: "Save", exact: true });
+  await expect(save).toBeEnabled({ timeout: 20_000 });
+  await save.click();
   await expect(page).toHaveURL(/[?&]savedDeal=[0-9a-f-]{36}(?:&|$)/i, {
     timeout: 30_000,
   });

@@ -523,18 +523,18 @@ export function AnalysisDashboard({
   const requiresBuyBoxTargetResolution = Boolean(
     isAuthenticated && canUseMaxOffer && !maoTargetOverride && !isSampleProPreview
   );
-  // Buy Box criteria are account-scoped, not property-scoped. Editing the
-  // address re-evaluates fit synchronously against the already-loaded boxes;
-  // it must not reset readiness without triggering a matching refetch.
-  const buyBoxTargetScopeKey = requiresBuyBoxTargetResolution ? "account" : "explicit";
+  // Buy Box criteria are account-scoped, not result-mode-scoped. The card
+  // loads them for every authenticated results session, including the sample
+  // preview. Moving from that preview to edited assumptions must reuse the
+  // completed lookup instead of resetting to `loading` without a refetch.
+  // A guest/auth transition remounts or restarts the account lookup; address,
+  // sample-preview, and explicit-target changes do not.
   const [buyBoxTargetResolutionState, setBuyBoxTargetResolutionState] = useState<
     "loading" | "ready" | "error"
-  >(requiresBuyBoxTargetResolution ? "loading" : "ready");
+  >(isAuthenticated ? "loading" : "ready");
   useEffect(() => {
-    setBuyBoxTargetResolutionState(
-      requiresBuyBoxTargetResolution ? "loading" : "ready"
-    );
-  }, [buyBoxTargetScopeKey, requiresBuyBoxTargetResolution]);
+    setBuyBoxTargetResolutionState(isAuthenticated ? "loading" : "ready");
+  }, [isAuthenticated]);
   const effectiveBuyBoxTargetResolutionState = requiresBuyBoxTargetResolution
     ? buyBoxTargetResolutionState
     : "ready";

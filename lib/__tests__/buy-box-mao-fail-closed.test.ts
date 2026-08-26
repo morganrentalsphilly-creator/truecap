@@ -37,6 +37,16 @@ describe("Buy Box target resolution fails closed", () => {
       dashboard.indexOf("const [compsQaData")
     );
     expect(readinessBlock).not.toContain("values?.address");
+    expect(readinessBlock).toMatch(
+      /useState<\s*"loading" \| "ready" \| "error"\s*>\s*\(\s*isAuthenticated \? "loading" : "ready"/
+    );
+    expect(readinessBlock).toContain(
+      'setBuyBoxTargetResolutionState(isAuthenticated ? "loading" : "ready")'
+    );
+    expect(readinessBlock).toContain("}, [isAuthenticated]);");
+    expect(readinessBlock).not.toContain(
+      'requiresBuyBoxTargetResolution ? "loading" : "ready"'
+    );
   });
 
   it("never substitutes defaults on paid saved-deal surfaces after a box lookup failure", () => {
