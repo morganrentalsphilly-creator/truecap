@@ -14,8 +14,8 @@ setup("authenticate the isolated internal test account", async ({ page }) => {
   await page.goto("/auth/login?next=/dashboard/saved-analyses", {
     waitUntil: "domcontentloaded",
   });
-  await page.getByLabel("Email").fill(authEnvironment.email);
-  await page.getByLabel("Password").fill(authEnvironment.password);
+  await page.getByLabel("Email", { exact: true }).fill(authEnvironment.email);
+  await page.getByLabel("Password", { exact: true }).fill(authEnvironment.password);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
 
   await expect(page).toHaveURL(/\/dashboard\/saved-analyses(?:[?#]|$)/, {

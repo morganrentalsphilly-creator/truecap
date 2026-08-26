@@ -33,8 +33,8 @@ async function openSampleDecision(page: Page) {
 async function signInFromCurrentPage(page: Page) {
   if (!authEnvironment.enabled) throw new Error("Authentication is unavailable.");
   await expect(page.getByRole("heading", { level: 1, name: "Welcome back" })).toBeVisible();
-  await page.getByLabel("Email").fill(authEnvironment.email);
-  await page.getByLabel("Password").fill(authEnvironment.password);
+  await page.getByLabel("Email", { exact: true }).fill(authEnvironment.email);
+  await page.getByLabel("Password", { exact: true }).fill(authEnvironment.password);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
 }
 
