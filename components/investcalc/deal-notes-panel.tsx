@@ -364,11 +364,11 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
           </Button>
         </div>
       ) : null}
-      <label htmlFor="deal-notes" className="sr-only">
+      <label htmlFor="deal-notes-input" className="sr-only">
         Deal notes
       </label>
       <textarea
-        id="deal-notes"
+        id="deal-notes-input"
         value={notes}
         onChange={(event) => {
           const next = event.target.value;

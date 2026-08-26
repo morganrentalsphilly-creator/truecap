@@ -8,6 +8,7 @@ describe("saved deal power-user navigation", () => {
   it("keeps a semantic, keyboard-safe workspace map available while scrolling", () => {
     const nav = read("components/investcalc/deal-workspace-anchor-chips.tsx");
     const page = read("app/dashboard/saved-analyses/[id]/page.tsx");
+    const notes = read("components/investcalc/deal-notes-panel.tsx");
 
     expect(nav).toContain('aria-label="Deal workspace sections"');
     expect(nav).toContain('className="sticky top-16');
@@ -27,6 +28,8 @@ describe("saved deal power-user navigation", () => {
     ]) {
       expect(page).toContain(`id="${id}" className="scroll-mt-36"`);
     }
+    expect(notes).toContain('htmlFor="deal-notes-input"');
+    expect(notes).toContain('id="deal-notes-input"');
   });
 
   it("labels Base and linked scenarios without implying edits cross-contaminate", () => {
