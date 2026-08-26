@@ -26,6 +26,24 @@ Sentry.init({
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
   sendDefaultPii: false,
 
+  // Expected, already-handled noise — appended per CLAUDE.md §3.9 (add with a
+  // comment explaining the source; never disable Sentry or drop sample rates).
+  //
+  // A browser holding a stale/rotated refresh token makes @supabase/auth-js
+  // log this twice per request from inside its own _emitInitialSession. It is
+  // NOT an outage and NOT uncaught: auth-js returns { user: null }, clears the
+  // dead cookie, and the visitor continues anonymously (measured in
+  // production: / → 200, /dashboard → 307 /auth/login, no loop). Because
+  // proxy.ts runs on every route, this benign event was the single loudest
+  // cluster in the dashboard — ranking ABOVE the /api/stripe/webhooks
+  // money-path errors, which is the real reason to filter it.
+  ignoreErrors: [
+    /Invalid Refresh Token/i,
+    /Refresh Token Not Found/i,
+    /refresh_token_not_found/i,
+    /AuthApiError: Refresh token is not valid/i,
+  ],
+
   beforeBreadcrumb(breadcrumb) {
     return scrubSentryBreadcrumbUrl(breadcrumb);
   },
