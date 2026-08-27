@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import {
   ChevronDown,
   CopyPlus,
@@ -700,6 +701,20 @@ export function FocusedDecisionSummary({
             >
               Apply the example targets
             </button>
+          ) : null}
+          {!targetAdopted && canTunePriceCeiling && !targetBlocked ? (
+            <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
+              Prefer these filled in automatically? Every analysis uses your{" "}
+              <Link
+                href="/settings#buy-boxes"
+                className="font-semibold text-primary underline underline-offset-2"
+              >
+                Buy Box
+              </Link>{" "}
+              when you have one — set it once and TrueCap applies it to every
+              deal. A Buy Box assigned to a client screens that client&rsquo;s
+              deals, not yours.
+            </p>
           ) : null}
           {targetAdopted ? (
             <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">

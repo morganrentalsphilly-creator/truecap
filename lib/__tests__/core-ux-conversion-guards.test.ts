@@ -266,3 +266,21 @@ describe("an estimated price never masquerades as an asking price downstream", (
     expect(calculator).toContain('form.setFocus("bedrooms")');
   });
 });
+
+describe("Offer Ceiling targets come from the user's own Buy Box", () => {
+  it("the analyzer scopes buy boxes to the agent's own, not a client's", () => {
+    // A client-assigned box holds THAT BUYER's criteria. Five other surfaces
+    // already apply boxesForDealClient; the analyzer silently did not, so a
+    // client's rules could drive a personal analysis (and a user whose only
+    // box was client-scoped got "Set targets first" forever).
+    const card = read("components/investcalc/buy-box-verdict-card.tsx");
+    expect(card).toContain("boxesForDealClient(result.boxes, null)");
+    expect(card).toContain('boxesForDealClient,');
+  });
+
+  it("the not-adopted state points at the Buy Box as the durable answer", () => {
+    const summary = read("components/investcalc/focused-decision-summary.tsx");
+    expect(summary).toContain("/settings#buy-boxes");
+    expect(summary).toContain("set it once and TrueCap applies it to every");
+  });
+});

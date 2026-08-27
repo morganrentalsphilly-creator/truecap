@@ -15,6 +15,7 @@ import Link from "next/link";
 import { Check, ChevronDown, Minus, Target, X } from "lucide-react";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 import {
+  boxesForDealClient,
   buyBoxHasCriteria,
   evaluateBuyBoxes,
   selectDecidingBuyBoxResult,
@@ -102,8 +103,17 @@ export function BuyBoxVerdictCard({
           return;
         }
         // Only adopt boxes the user can use, that are switched on and have ≥1 rule.
+        // Scope matters too: a client-assigned box holds THAT BUYER's criteria
+        // (lib/buy-box.ts boxesForDealClient — "clientId set → screens ONLY
+        // deals assigned to that client"). The analyzer is a personal surface,
+        // so it must use the agent's OWN boxes; every other surface that reads
+        // buy boxes already applies this rule, and this one silently did not.
         if (result.canUse) {
-          setBoxes(result.boxes.filter((b) => b.isActive && buyBoxHasCriteria(b)));
+          setBoxes(
+            boxesForDealClient(result.boxes, null).filter(
+              (b) => b.isActive && buyBoxHasCriteria(b)
+            )
+          );
         } else {
           setBoxes([]);
         }
