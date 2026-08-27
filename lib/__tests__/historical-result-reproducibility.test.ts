@@ -141,7 +141,11 @@ describe("historical result reproducibility wiring", () => {
       "components/investcalc/open-saved-deal-in-analyzer.tsx",
     );
     expect(workspace).toContain("ReunderwriteAsScenarioButton");
-    expect(handoff).toContain("Re-underwrite as new scenario");
+    // The control CLONES; it does not recompute (addScenarioAction skips the
+    // recompute block when strategyKind is null). The label must not promise
+    // an underwrite the code never performs.
+    expect(handoff).toContain("Duplicate as new scenario");
+    expect(handoff).not.toContain("Re-underwrite as new scenario");
     expect(handoff).toContain("addScenarioAction({");
     expect(handoff).toContain("cloned.scenarioId");
   });

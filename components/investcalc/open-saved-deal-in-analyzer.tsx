@@ -347,7 +347,7 @@ export function ReunderwriteAsScenarioButton({
     void (async () => {
       try {
         const now = new Date();
-        const scenarioName = `Re-underwrite ${now.toLocaleDateString("en-US", {
+        const scenarioName = `Copy ${now.toLocaleDateString("en-US", {
           month: "short",
           day: "numeric",
           year: "numeric",
@@ -364,7 +364,7 @@ export function ReunderwriteAsScenarioButton({
         if (!cloned.ok) {
           targetWindow?.close();
           toast({
-            title: "Could not create re-underwrite scenario",
+            title: "Could not duplicate this deal",
             description: cloned.message,
             variant: "destructive",
           });
@@ -384,7 +384,7 @@ export function ReunderwriteAsScenarioButton({
       } catch {
         targetWindow?.close();
         toast({
-          title: "Could not create re-underwrite scenario",
+          title: "Could not duplicate this deal",
           description: "Something interrupted the request. Please try again.",
           variant: "destructive",
         });
@@ -399,14 +399,14 @@ export function ReunderwriteAsScenarioButton({
       type="button"
       onClick={handleClick}
       disabled={isOpening}
-      className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg bg-primary px-3 text-xs font-bold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-60"
+      className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg border border-border bg-background px-3 text-xs font-bold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-60"
     >
       {isOpening ? (
         <Loader2 aria-hidden className="size-3.5 animate-spin" />
       ) : (
         <RefreshCw aria-hidden className="size-3.5" />
       )}
-      Re-underwrite as new scenario
+      Duplicate as new scenario
     </button>
   );
 }

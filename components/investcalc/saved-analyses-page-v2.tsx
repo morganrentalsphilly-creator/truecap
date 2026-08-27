@@ -2986,7 +2986,7 @@ export function SavedAnalysesPage({
               }
               className="gap-0"
             >
-              <TabsList className="bg-muted/60 h-9 rounded-full p-1">
+              <TabsList className="bg-muted/60 h-auto rounded-full p-1">
                 <TabsTrigger
                   value="all"
                   className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
@@ -3012,7 +3012,7 @@ export function SavedAnalysesPage({
               }
               className="gap-0"
             >
-              <TabsList className="bg-muted/60 h-9 rounded-full p-1">
+              <TabsList className="bg-muted/60 h-auto rounded-full p-1">
                 <TabsTrigger
                   value="all"
                   className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
@@ -3052,7 +3052,7 @@ export function SavedAnalysesPage({
               }
               className={cn("gap-0", clientFilterId ? "hidden" : undefined)}
             >
-              <TabsList className="bg-muted/60 h-9 rounded-full p-1">
+              <TabsList className="bg-muted/60 h-auto rounded-full p-1">
                 <TabsTrigger
                   value="active"
                   className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
