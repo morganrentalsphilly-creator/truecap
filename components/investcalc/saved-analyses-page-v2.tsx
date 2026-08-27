@@ -84,6 +84,7 @@ import {
   pipelineStageLabel,
   type PipelineStage,
 } from "@/lib/pipeline";
+import { confirmPipelineStageChange } from "@/lib/pipeline-pass-confirmation";
 import { nextActionFromVerdict } from "@/lib/next-action";
 import { DataConfidenceBadge } from "@/components/investcalc/data-confidence-badge";
 import { type DataConfidence } from "@/lib/data-confidence";
@@ -2020,6 +2021,15 @@ export function SavedAnalysesPage({
     stage: PipelineStage,
     previousStage: PipelineStage,
   ) => {
+    if (
+      !confirmPipelineStageChange({
+        previousStage,
+        nextStage: stage,
+        confirm: (message) => window.confirm(message),
+      })
+    ) {
+      return;
+    }
     setUpdatingDealStatusId(id);
     startUpdateStatusTransition(async () => {
       try {
@@ -2045,6 +2055,7 @@ export function SavedAnalysesPage({
             stage === "passed" ? (
               <ToastAction
                 altText="Undo marking deal as Passed"
+                className="min-h-11"
                 onClick={() => {
                   setUpdatingDealStatusId(id);
                   startUpdateStatusTransition(async () => {

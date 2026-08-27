@@ -9,6 +9,8 @@ type Props = {
   stage: InputConfidenceStage | null;
   remainingVerificationCount: number | null;
   isPreparing: boolean;
+  actionsBlocked?: boolean;
+  actionsBlockedReason?: string;
   onPrepare: () => void;
 };
 
@@ -16,6 +18,8 @@ export function PrepareOfferCard({
   stage,
   remainingVerificationCount,
   isPreparing,
+  actionsBlocked = false,
+  actionsBlockedReason,
   onPrepare,
 }: Props) {
   return (
@@ -45,7 +49,8 @@ export function PrepareOfferCard({
           <Button
             type="button"
             size="lg"
-            disabled={isPreparing}
+            disabled={isPreparing || actionsBlocked}
+            title={actionsBlocked ? actionsBlockedReason : undefined}
             aria-busy={isPreparing}
             onClick={onPrepare}
             className="min-h-11 w-full gap-2 rounded-xl sm:w-auto"
@@ -56,6 +61,14 @@ export function PrepareOfferCard({
           <p className="mt-2 max-w-56 text-[10px] leading-relaxed text-muted-foreground sm:text-right">
             Creates an analysis package. It does not submit or sign a purchase agreement.
           </p>
+          {actionsBlocked && actionsBlockedReason ? (
+            <p
+              role="status"
+              className="mt-2 max-w-56 text-xs font-semibold leading-relaxed text-amber-800 sm:text-right dark:text-amber-200"
+            >
+              {actionsBlockedReason}
+            </p>
+          ) : null}
         </div>
       </div>
     </section>

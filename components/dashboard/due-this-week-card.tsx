@@ -93,7 +93,7 @@ const MAX_ROWS = 5;
  * week?" Surfaces due-diligence deadlines (inspection / appraisal / financing
  * contingencies) that are OVERDUE or due within 7 days across the user's active
  * saved deals, so a lapsing contingency never hides inside a deal the user
- * hasn't opened. Each row deep-links to that deal's detail page.
+ * hasn't opened. Each row deep-links to that deal's due-diligence section.
  *
  * Invisible until useful: renders NULL when nothing is overdue or due within
  * 7 days — no empty state to explain. Status is computed with the shared
@@ -203,7 +203,7 @@ export function DueThisWeekCard({
           {shown.map((row) => (
             <li key={`${row.dealId}-${row.label}`}>
               <Link
-                href={`/dashboard/saved-analyses/${row.dealId}`}
+                href={`/dashboard/saved-analyses/${row.dealId}#deal-due-diligence`}
                 prefetch={false}
                 className="flex items-start gap-2.5 rounded-xl bg-muted/40 px-3 py-2 transition-colors hover:bg-muted"
               >

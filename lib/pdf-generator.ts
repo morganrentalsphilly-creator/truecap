@@ -274,6 +274,30 @@ export interface ReportData {
   } | null;
 }
 
+export type PdfInputReviewStatus =
+  | "User review complete"
+  | "Review in progress"
+  | "Screening only";
+
+/**
+ * Legacy browser input-confidence stages describe self-review, not documentary
+ * evidence. Keep that distinction explicit anywhere those stages are rendered
+ * into a report so "Offer Ready" can never be promoted to an evidence claim.
+ */
+export function resolvePdfInputReviewStatus(
+  stageLabel: string,
+): PdfInputReviewStatus {
+  if (stageLabel === "Offer Ready") return "User review complete";
+  if (stageLabel === "Verified") return "Review in progress";
+  return "Screening only";
+}
+
+export const PDF_INPUT_REVIEW_DISCLOSURE =
+  "The Screening Index summarizes modeled economics for triage. It is secondary to selected rules and is not a probability of success, an appraisal, or investment advice. Input Review records browser-based user confirmation only; it is not documentary evidence or third-party verification.";
+
+export const PDF_INPUT_REVIEW_FOOTNOTE =
+  "User confirmations are self-reported, are not documentary evidence or third-party verification, and must be re-checked after a value changes.";
+
 // ===================== Design tokens =====================
 const COLOR = {
   ink: "#0B1220",
@@ -2051,26 +2075,21 @@ function pageDecisionReadiness(
 ) {
   const confidence = d.inputConfidence;
   if (!confidence) return;
-  const evidenceReadiness =
-    confidence.stageLabel === "Offer Ready"
-      ? "Evidence complete"
-      : confidence.stageLabel === "Verified"
-        ? "Verify"
-        : "Screening";
-  const verificationStatus =
+  const inputReviewStatus = resolvePdfInputReviewStatus(confidence.stageLabel);
+  const reviewStatus =
     confidence.unverifiedAssumptions.length === 0
-      ? "No open items"
+      ? "No open reviews"
       : "Review required";
 
   let y = M.top + 12;
   const themeColor = resolveThemeColor(branding);
-  y = sectionTitle(doc, "Assumption Readiness", y, undefined, themeColor);
+  y = sectionTitle(doc, "Assumption Review", y, undefined, themeColor);
   setText(doc, COLOR.sub);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9.5);
   y = drawParagraph(
     doc,
-    "The Screening Index summarizes modeled economics for triage. It is secondary to selected rules and is not evidence readiness, a probability of success, an appraisal, or investment advice. Evidence Readiness categorizes how thoroughly the material assumptions have been verified.",
+    PDF_INPUT_REVIEW_DISCLOSURE,
     M.left,
     y,
     SAFE.w,
@@ -2078,14 +2097,14 @@ function pageDecisionReadiness(
   y += 18;
 
   const cw = (SAFE.w - 24) / 3;
-  statCard(doc, M.left, y, cw, 60, "Evidence Readiness", evidenceReadiness, {
+  statCard(doc, M.left, y, cw, 60, "Input Review", inputReviewStatus, {
     tone:
-      evidenceReadiness === "Evidence complete"
+      inputReviewStatus === "User review complete"
         ? "success"
-        : evidenceReadiness === "Verify"
+        : inputReviewStatus === "Review in progress"
           ? "warn"
           : "primary",
-    sub: "categorical, not probability",
+    sub: "self-reported, not evidence",
     themeColor,
   });
   statCard(
@@ -2094,10 +2113,10 @@ function pageDecisionReadiness(
     y,
     cw,
     60,
-    "Verification Status",
-    verificationStatus,
+    "Review Status",
+    reviewStatus,
     {
-      tone: verificationStatus === "No open items" ? "success" : "warn",
+      tone: reviewStatus === "No open reviews" ? "success" : "warn",
       sub: "review material assumptions",
       themeColor,
     },
@@ -2117,29 +2136,29 @@ function pageDecisionReadiness(
           : confidence.sensitivityRisk === "moderate"
             ? "warn"
             : "danger",
-      sub: "unverified-input risk",
+      sub: "open-input risk",
       themeColor,
     },
   );
   y += 82;
 
-  y = sectionTitle(doc, "Explicitly Confirmed", y, undefined, themeColor);
+  y = sectionTitle(doc, "User-Confirmed Inputs", y, undefined, themeColor);
   setText(doc, COLOR.text);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   const verifiedText = confidence.verifiedAssumptions.length
     ? confidence.verifiedAssumptions.join("  ·  ")
-    : "No assumptions were explicitly confirmed when this report was generated.";
+    : "No assumptions were user-confirmed when this report was generated.";
   y = drawParagraph(doc, verifiedText, M.left, y, SAFE.w);
   y += 18;
 
-  y = sectionTitle(doc, "Still To Verify", y, undefined, themeColor);
+  y = sectionTitle(doc, "Still To Review", y, undefined, themeColor);
   if (confidence.unverifiedAssumptions.length === 0) {
     setText(doc, COLOR.text);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
     doc.text(
-      "All applicable inputs were explicitly confirmed for this underwrite.",
+      "All applicable inputs were user-confirmed for this underwrite.",
       M.left,
       y,
     );
@@ -2181,13 +2200,13 @@ function pageDecisionReadiness(
     });
   }
 
-  setText(doc, COLOR.muted);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.5);
-  doc.text(
-    `Evidence-readiness method v${confidence.methodVersion}. Confirmations are tied to the input value and must be re-checked after that value changes.`,
+  drawParagraph(
+    doc,
+    `Input-review method v${confidence.methodVersion}. ${PDF_INPUT_REVIEW_FOOTNOTE}`,
     M.left,
-    PAGE.h - M.bottom - 4,
+    PAGE.h - M.bottom - 22,
+    SAFE.w,
+    { size: 7.5, color: COLOR.muted, leading: 1.15 },
   );
 }
 

@@ -41,6 +41,12 @@ import {
   SHARE_AUTH_INTENT_STORAGE_KEY,
 } from "@/lib/share-auth-intent";
 
+const SHARE_AUDIENCE_LABEL = {
+  "investment-partner": "Partner",
+  client: "Client",
+  "lender-review": "Lender review",
+} as const;
+
 interface ShareLinkButtonProps {
   values: InvestmentFormValues | null;
   /** Presentation hint only. The server action independently authenticates
@@ -99,11 +105,25 @@ export function ShareLinkButton({
   // choices. Keep its in-flight state visible like the neighboring actions.
   const [isPreparing, setIsPreparing] = useState(false);
   const [sessionAuthRequired, setSessionAuthRequired] = useState(false);
-  // The dialog is also where owners manage links: the create copy promises
-  // "you can revoke them later", so the revoke control must live here too
-  // (the list/revoke actions existed server-side with no UI caller).
+  // The dialog manages every owner-scoped link, including links attached to a
+  // different or soft-deleted deal. Rows are labeled with property, audience,
+  // disclosure, and time so no live capability becomes impossible to revoke.
   const [myShares, setMyShares] = useState<PublicShareListItem[] | null>(null);
+  const [sharesListState, setSharesListState] = useState<
+    "idle" | "loading" | "ready" | "error"
+  >("idle");
+  const [sharesReloadToken, setSharesReloadToken] = useState(0);
+  const [nextSharesOffset, setNextSharesOffset] = useState<number | null>(null);
+  const [isLoadingOlderShares, setIsLoadingOlderShares] = useState(false);
+  const [createdShare, setCreatedShare] = useState<{
+    id: string;
+    dealId: string | null;
+  } | null>(null);
   const [revokingId, setRevokingId] = useState<string | null>(null);
+  const [confirmingRevokeId, setConfirmingRevokeId] = useState<string | null>(
+    null,
+  );
+  const [showAllShares, setShowAllShares] = useState(false);
   const { toast } = useToast();
   const needsSignIn = !isAuthenticated || sessionAuthRequired;
   const returnPath = resolveShareAuthReturnPath(pathname, context);
@@ -124,35 +144,82 @@ export function ShareLinkButton({
     }
   };
 
-  // Load the owner's existing links whenever the dialog opens (and refresh
-  // after a mint — shareUrl in deps). NOT_CONFIGURED / errors keep the
-  // section hidden; managing links is additive, never blocking.
+  // Always load the first owner-wide page. Scoping this list to the current
+  // deal would strand links after a deal is soft-deleted or when the user is
+  // working in another analysis.
   useEffect(() => {
-    if (!open || needsSignIn) return;
+    if (!open || needsSignIn) {
+      setMyShares(null);
+      setSharesListState("idle");
+      setNextSharesOffset(null);
+      return;
+    }
     let cancelled = false;
-    listPublicSharesAction()
+    setMyShares(null);
+    setSharesListState("loading");
+    setNextSharesOffset(null);
+    listPublicSharesAction({ offset: 0 })
       .then((r) => {
-        if (!cancelled && r.ok) setMyShares(r.shares);
+        if (!cancelled && r.ok) {
+          setMyShares(r.shares);
+          setNextSharesOffset(r.nextOffset);
+          setSharesListState("ready");
+        } else if (!cancelled) {
+          setSharesListState("error");
+        }
       })
       .catch(() => {
-        /* list is best-effort; the create flow must never break on it */
+        if (!cancelled) setSharesListState("error");
       });
     return () => {
       cancelled = true;
     };
-  }, [open, needsSignIn, shareUrl]);
+  }, [open, needsSignIn, shareUrl, sharesReloadToken]);
 
-  const revokeShare = async (id: string) => {
+  const loadOlderShares = async () => {
+    if (nextSharesOffset === null || isLoadingOlderShares) return;
+    setIsLoadingOlderShares(true);
+    try {
+      const result = await listPublicSharesAction({
+        offset: nextSharesOffset,
+      });
+      if (!result.ok) {
+        toast({
+          title: "Couldn't load older links",
+          description: result.message,
+          variant: "destructive",
+        });
+        return;
+      }
+      setMyShares((current) => {
+        const byId = new Map((current ?? []).map((share) => [share.id, share]));
+        for (const share of result.shares) byId.set(share.id, share);
+        return Array.from(byId.values());
+      });
+      setNextSharesOffset(result.nextOffset);
+    } catch {
+      toast({
+        title: "Couldn't load older links",
+        description: "Try again in a moment.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingOlderShares(false);
+    }
+  };
+
+  const revokeShare = async (id: string, dealId: string | null) => {
     setRevokingId(id);
     try {
-      const r = await revokePublicShareAction({ id });
+      const r = await revokePublicShareAction({ id, dealId });
       if (r.ok) {
-        // Revoking the newest row while the just-minted URL sits in the copy
-        // box would leave a dead link with a live Copy button — clear it.
-        // (The list is created-desc, so the just-minted link is row 0.)
-        if (myShares && myShares[0]?.id === id && shareUrl) {
+        // Only the exact row returned by the mint owns the current copy box.
+        // Never clear a different live URL merely because an older row sorts
+        // first in the management list.
+        if (createdShare?.id === id) {
           setShareUrl("");
           setCopied(false);
+          setCreatedShare(null);
         }
         setMyShares((current) =>
           current
@@ -180,6 +247,7 @@ export function ShareLinkButton({
       });
     } finally {
       setRevokingId(null);
+      setConfirmingRevokeId(null);
     }
   };
 
@@ -199,6 +267,8 @@ export function ShareLinkButton({
       window.sessionStorage.removeItem(SHARE_AUTH_INTENT_STORAGE_KEY);
       setShareUrl("");
       setCopied(false);
+      setCreatedShare(null);
+      setShowAllShares(false);
       setSessionAuthRequired(false);
       setIncludeAddress(false);
       setAudience(
@@ -214,6 +284,8 @@ export function ShareLinkButton({
     if (!values) return;
     setShareUrl("");
     setCopied(false);
+    setCreatedShare(null);
+    setShowAllShares(false);
     setSessionAuthRequired(false);
     // Privacy choices are per-link intent. Never carry an earlier explicit
     // disclosure into the next share dialog.
@@ -252,6 +324,7 @@ export function ShareLinkButton({
         throw new Error(opaque.code);
       }
       setShareUrl(opaque.url);
+      setCreatedShare({ id: opaque.id, dealId: opaque.dealId });
       setCopied(false);
       trackEvent("share_created", {
         audience,
@@ -296,6 +369,12 @@ export function ShareLinkButton({
   const missingRequiredValues =
     !values || !values.purchasePrice || !values.address;
   const disabled = externallyDisabled || missingRequiredValues;
+  const listedShares = myShares?.filter(
+    (share) => share.id !== createdShare?.id,
+  );
+  const visibleShares = showAllShares
+    ? listedShares
+    : listedShares?.slice(0, 5);
 
   return (
     <>
@@ -339,7 +418,16 @@ export function ShareLinkButton({
           standard fade+zoom, Escape-to-close, focus trap, scroll lock,
           overlay-click dismiss, and a built-in close button. Controlled open
           so disclosure and authentication choices stay inside the modal. */}
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog
+        open={open}
+        onOpenChange={(nextOpen) => {
+          setOpen(nextOpen);
+          if (!nextOpen) {
+            setConfirmingRevokeId(null);
+            setShowAllShares(false);
+          }
+        }}
+      >
         {/* sm:-prefixed, so the primitive's `max-w-[calc(100%-2rem)]` phone
             gutter survives tailwind-merge (an unprefixed max-w-* deletes it
             and the dialog goes edge-to-edge). */}
@@ -354,7 +442,7 @@ export function ShareLinkButton({
               {needsSignIn
                 ? "Sign in or create a free account to make a new share link. Anyone who receives the link can view it without signing in."
                 : context === "client-report"
-                  ? "Create a read-only snapshot for the assigned client. The exact address stays hidden unless you explicitly include it."
+                  ? "Create a read-only link for the assigned client. The exact address stays hidden unless you explicitly include it."
                   : "Choose what to disclose, then create an opaque, expiring link. The exact address stays hidden by default."}
             </DialogDescription>
           </DialogHeader>
@@ -366,9 +454,9 @@ export function ShareLinkButton({
                   Sign in to create this link
                 </p>
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                  New links belong to your account, so you can revoke them
-                  later. After authentication, you’ll return to this page and
-                  can finish sharing.
+                  {savedDealId
+                    ? "After authentication, you’ll return to this saved deal and can create and manage its links here."
+                    : "After authentication, you’ll return here to create the link. Unattached links stay labeled by property and time so you can revoke them here later."}
                 </p>
               </div>
               <div className="grid gap-2 sm:grid-cols-2">
@@ -461,41 +549,148 @@ export function ShareLinkButton({
               </Button>
             </div>
           ) : (
-            <div className="flex gap-2">
-              <input
-                id="share-link-url"
-                readOnly
-                value={shareUrl}
-                onFocus={(e) => e.currentTarget.select()}
-                aria-label="Shareable URL"
-                className="min-h-11 flex-1 truncate rounded-md border border-input bg-background px-3 py-2 font-mono text-xs text-foreground"
-              />
-              <Button
-                type="button"
-                onClick={copy}
-                className="h-auto rounded-md bg-primary px-3 font-semibold text-primary-foreground"
-              >
-                {copied ? (
-                  <>
-                    <Check className="mr-1 h-3.5 w-3.5" /> Copied
-                  </>
-                ) : (
-                  <>
-                    <Copy className="mr-1 h-3.5 w-3.5" /> Copy
-                  </>
-                )}
-              </Button>
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <input
+                  id="share-link-url"
+                  readOnly
+                  value={shareUrl}
+                  onFocus={(e) => e.currentTarget.select()}
+                  aria-label="Shareable URL"
+                  className="min-h-11 flex-1 truncate rounded-md border border-input bg-background px-3 py-2 font-mono text-xs text-foreground"
+                />
+                <Button
+                  type="button"
+                  onClick={copy}
+                  className="h-auto min-h-11 rounded-md bg-primary px-3 font-semibold text-primary-foreground"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="mr-1 h-3.5 w-3.5" /> Copied
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="mr-1 h-3.5 w-3.5" /> Copy
+                    </>
+                  )}
+                </Button>
+              </div>
+              {createdShare ? (
+                <div className="rounded-lg border border-border bg-muted/20 p-2">
+                  {confirmingRevokeId !== createdShare.id ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-auto min-h-11 w-full"
+                      onClick={() => setConfirmingRevokeId(createdShare.id)}
+                    >
+                      Revoke this link
+                    </Button>
+                  ) : (
+                    <div
+                      role="group"
+                      aria-label="Confirm current share-link revocation"
+                      className="p-1 text-xs"
+                    >
+                      <p className="font-semibold text-foreground">
+                        Revoke this link?
+                      </p>
+                      <p className="mt-1 text-muted-foreground">
+                        It will stop opening immediately for everyone who has it.
+                      </p>
+                      <div className="mt-2 flex flex-wrap justify-end gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="h-auto min-h-11"
+                          disabled={revokingId === createdShare.id}
+                          onClick={() => setConfirmingRevokeId(null)}
+                        >
+                          Keep link
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          className="h-auto min-h-11"
+                          disabled={revokingId === createdShare.id}
+                          onClick={() =>
+                            void revokeShare(
+                              createdShare.id,
+                              createdShare.dealId,
+                            )
+                          }
+                        >
+                          {revokingId === createdShare.id
+                            ? "Revoking…"
+                            : "Yes, revoke link"}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : null}
             </div>
           )}
 
-          {!needsSignIn && myShares && myShares.length > 0 ? (
+          {!needsSignIn && sharesListState === "loading" ? (
+            <p
+              role="status"
+              className="rounded-xl border border-border bg-muted/20 p-3 text-xs text-muted-foreground"
+            >
+              Loading your existing share links…
+            </p>
+          ) : null}
+
+          {!needsSignIn && sharesListState === "error" ? (
+            <div
+              role="alert"
+              className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 text-xs"
+            >
+              <p className="font-semibold text-foreground">
+                Existing links could not be loaded
+              </p>
+              <p className="mt-1 leading-relaxed text-muted-foreground">
+                You can still create a new link, but retry before assuming no
+                older links are live.
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                className="mt-2 h-auto min-h-11 w-full text-xs"
+                onClick={() => setSharesReloadToken((current) => current + 1)}
+              >
+                Retry loading links
+              </Button>
+            </div>
+          ) : null}
+
+          {!needsSignIn &&
+          sharesListState === "ready" &&
+          listedShares?.length === 0 ? (
+            <p className="rounded-xl border border-border bg-muted/20 p-3 text-xs text-muted-foreground">
+              No other share links on this account.
+            </p>
+          ) : null}
+
+          {!needsSignIn && listedShares && listedShares.length > 0 ? (
             <div className="rounded-xl border border-border bg-muted/20 p-3">
               <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                Your share links
+                Manage all share links
               </p>
               <ul className="mt-2 space-y-2">
-                {myShares.slice(0, 5).map((s) => {
+                {visibleShares?.map((s) => {
                   const revoked = Boolean(s.revokedAt);
+                  const createdLabel = new Date(s.createdAt).toLocaleString([], {
+                    dateStyle: "medium",
+                    timeStyle: "medium",
+                  });
+                  const audienceLabel = s.audience
+                    ? SHARE_AUDIENCE_LABEL[s.audience]
+                    : "Shared view";
+                  const addressLabel =
+                    s.addressVisibility === "full"
+                      ? "address included"
+                      : "address hidden";
                   const expired =
                     !revoked && s.expiresAt
                       ? new Date(s.expiresAt).getTime() < Date.now()
@@ -503,51 +698,127 @@ export function ShareLinkButton({
                   return (
                     <li
                       key={s.id}
-                      className="flex items-center justify-between gap-3 text-xs"
+                      className="rounded-lg border border-border/70 bg-background p-2 text-xs"
                     >
-                      <span className="min-w-0 flex-1 truncate text-foreground">
-                        {s.title || s.label || "Shared analysis"}
-                        <span className="ml-1 text-muted-foreground">
-                          · {new Date(s.createdAt).toLocaleDateString()}
-                          {revoked
-                            ? " · revoked"
-                            : expired
-                              ? " · expired"
-                              : s.lastViewedAt
-                                ? " · viewed"
-                                : ""}
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="min-w-0 flex-1 truncate text-foreground">
+                          {s.propertyLabel ||
+                            s.title ||
+                            s.label ||
+                            "Shared analysis"}
+                          <span className="mt-0.5 block truncate text-muted-foreground">
+                            {savedDealId && s.dealId === savedDealId
+                              ? "this saved deal"
+                              : s.dealId
+                                ? "another saved deal"
+                                : "unattached"} ·{" "}
+                            {audienceLabel} · {addressLabel} · {createdLabel}
+                            {revoked
+                              ? " · revoked"
+                              : expired
+                                ? " · expired"
+                                : s.lastViewedAt
+                                  ? " · viewed"
+                                  : ""}
+                          </span>
                         </span>
-                      </span>
-                      {!revoked && !expired ? (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="h-8 rounded-lg px-2.5 text-xs"
-                          disabled={revokingId === s.id}
-                          aria-label={`Revoke link "${s.title || s.label || "Shared analysis"}" created ${new Date(s.createdAt).toLocaleDateString()}`}
-                          onClick={() => void revokeShare(s.id)}
+                        {!revoked && !expired ? (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="h-auto min-h-11 rounded-lg px-3 text-xs"
+                            disabled={revokingId === s.id}
+                            aria-expanded={confirmingRevokeId === s.id}
+                            aria-controls={`revoke-confirmation-${s.id}`}
+                            aria-label={`Revoke ${audienceLabel.toLowerCase()} link for ${s.propertyLabel || s.title || s.label || "shared analysis"} created ${createdLabel}`}
+                            onClick={() => setConfirmingRevokeId(s.id)}
+                          >
+                            Revoke
+                          </Button>
+                        ) : null}
+                      </div>
+                      {confirmingRevokeId === s.id && !revoked && !expired ? (
+                        <div
+                          id={`revoke-confirmation-${s.id}`}
+                          role="group"
+                          aria-label="Confirm share-link revocation"
+                          className="mt-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3"
                         >
-                          {revokingId === s.id ? (
-                            <>
-                              <Loader2
-                                className="h-3.5 w-3.5 animate-spin"
-                                aria-hidden
-                              />
-                              <span className="sr-only">Revoking…</span>
-                            </>
-                          ) : (
-                            "Revoke"
-                          )}
-                        </Button>
+                          <p className="font-semibold text-foreground">
+                            Revoke this link?
+                          </p>
+                          <p className="mt-1 leading-relaxed text-muted-foreground">
+                            It will stop opening immediately for everyone who has
+                            it.
+                          </p>
+                          <div className="mt-3 flex flex-wrap justify-end gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className="h-auto min-h-11"
+                              disabled={revokingId === s.id}
+                              onClick={() => setConfirmingRevokeId(null)}
+                            >
+                              Keep link
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              className="h-auto min-h-11"
+                              disabled={revokingId === s.id}
+                              onClick={() => void revokeShare(s.id, s.dealId)}
+                            >
+                              {revokingId === s.id ? (
+                                <>
+                                  <Loader2
+                                    className="h-4 w-4 animate-spin"
+                                    aria-hidden
+                                  />
+                                  Revoking…
+                                </>
+                              ) : (
+                                "Yes, revoke link"
+                              )}
+                            </Button>
+                          </div>
+                        </div>
                       ) : null}
                     </li>
                   );
                 })}
               </ul>
-              {myShares.length > 5 ? (
-                <p className="mt-2 text-[11px] text-muted-foreground">
-                  Showing your 5 most recent links.
-                </p>
+              {listedShares.length > 5 ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="mt-2 h-auto min-h-11 w-full text-xs"
+                  onClick={() => setShowAllShares((current) => !current)}
+                >
+                  {showAllShares
+                    ? "Show 5 most recent links"
+                    : `Show all ${listedShares.length} links`}
+                </Button>
+              ) : null}
+              {showAllShares && nextSharesOffset !== null ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="mt-2 h-auto min-h-11 w-full text-xs"
+                  disabled={isLoadingOlderShares}
+                  onClick={() => void loadOlderShares()}
+                >
+                  {isLoadingOlderShares ? (
+                    <>
+                      <Loader2
+                        className="mr-2 h-4 w-4 animate-spin"
+                        aria-hidden
+                      />
+                      Loading older links…
+                    </>
+                  ) : (
+                    "Load older links"
+                  )}
+                </Button>
               ) : null}
             </div>
           ) : null}
@@ -556,16 +827,22 @@ export function ShareLinkButton({
             {needsSignIn ? (
               <>
                 Existing links still open without an account. Creating a new
-                link requires sign-in so it has an owner who can revoke it.
+                link requires sign-in. {savedDealId
+                  ? "Links safely attached to this saved deal can be managed here after sign-in."
+                  : "Unattached links remain labeled and revocable here after sign-in."}
               </>
             ) : (
               <>
-                The link opens a snapshot of the analysis at this moment. Anyone
-                who receives the link can open it. If you change inputs later
-                and want viewers to see updates, generate a new share link.{" "}
-                {myShares && myShares.length > 0
-                  ? "Revoke any link above and it stops opening immediately; links also expire automatically."
-                  : "Links you create can be revoked from this dialog and expire automatically."}{" "}
+                The link captures the analysis inputs at this moment. When it is
+                opened, TrueCap recalculates the results using the current
+                compatible underwriting methodology and labels that
+                recomputation. Anyone who receives the link can open it. Later
+                edits to your deal are not included; create a new link to share
+                changed inputs.{" "}
+                This dialog manages share links across your account, including
+                links from unsaved edits and deals you later remove. Older
+                links remain available through Load older links.{" "}
+                Links also expire automatically. {" "}
                 Still treat one like a document you chose to share.
               </>
             )}

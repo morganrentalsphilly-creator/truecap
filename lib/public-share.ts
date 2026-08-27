@@ -155,9 +155,16 @@ function isMissingTable(
 }
 
 /**
- * Mint a share. Returns the public path (`/s/<token>`) or null when the table
- * doesn't exist yet or the insert fails. Callers must fail closed.
+ * Mint a share. Returns the public path plus the owner-visible row identity so
+ * the creating UI can always offer exact revocation, including for an
+ * unattached/unsaved analysis. Returns null when storage is unavailable.
  */
+export type MintedPublicShare = {
+  path: string;
+  id: string;
+  dealId: string | null;
+};
+
 export async function mintPublicShare(input: {
   values: InvestmentFormValues;
   title?: string;
@@ -171,7 +178,7 @@ export async function mintPublicShare(input: {
   priceEstimated?: boolean;
   analyzerStrategyKey?: AnalyzerStrategyKey;
   offerCeilingDecisionBasis?: unknown;
-}): Promise<string | null> {
+}): Promise<MintedPublicShare | null> {
   // This helper writes through the service-role client. Keep the invariant
   // local as well as at the server-action boundary so no future caller can
   // accidentally mint a new ownerless row.
@@ -290,16 +297,20 @@ export async function mintPublicShare(input: {
         ...(input.priceEstimated ? { priceEstimated: true } : {}),
       },
     };
-    const { error } = await admin.from("public_shares").insert({
-      token_hash: hashShareToken(token),
-      owner_id: input.ownerId,
-      deal_id: input.dealId ?? null,
-      snapshot,
-      // Kept for backward-compatible storage while the real underwriting
-      // version lives in snapshot.meta.methodologyVersion. Existing database
-      // rows used this integer as a form-schema version, not a formula pin.
-      calc_version: INVESTCALC_SCHEMA_VERSION,
-    });
+    const { data: inserted, error } = await admin
+      .from("public_shares")
+      .insert({
+        token_hash: hashShareToken(token),
+        owner_id: input.ownerId,
+        deal_id: input.dealId ?? null,
+        snapshot,
+        // Kept for backward-compatible storage while the real underwriting
+        // version lives in snapshot.meta.methodologyVersion. Existing database
+        // rows used this integer as a form-schema version, not a formula pin.
+        calc_version: INVESTCALC_SCHEMA_VERSION,
+      })
+      .select("id")
+      .single();
     if (error) {
       // A pre-migration missing table is the one expected cause and stays
       // quiet; anything else (FK failure, RLS change, column drift) is an
@@ -316,7 +327,12 @@ export async function mintPublicShare(input: {
       }
       return null;
     }
-    return `/s/${token}`;
+    if (!inserted?.id) return null;
+    return {
+      path: `/s/${token}`,
+      id: String(inserted.id),
+      dealId: input.dealId ?? null,
+    };
   } catch {
     return null;
   }

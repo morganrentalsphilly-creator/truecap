@@ -1440,6 +1440,9 @@ export async function saveDealAction(
       .eq("user_id", user.id)
       .eq("underwriting_revision", expectedUnderwritingRevision)
       .eq("is_archived", false)
+      // Fail closed if another writer records a Pass without updating the
+      // compatibility flag. Keep legacy null stages editable.
+      .or("pipeline_stage.is.null,pipeline_stage.neq.passed")
       .is("deleted_at", null)
       .select("id, underwriting_revision")
       .maybeSingle();

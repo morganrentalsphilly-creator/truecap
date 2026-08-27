@@ -26,7 +26,7 @@ describe("Buy Box target resolution fails closed", () => {
     // The two guards split so the plan-lock branch can EXPLAIN itself (toast
     // with an upgrade path) instead of a silent disabled button — but both
     // still return before onSaveDeal, so the fail-closed contract holds.
-    expect(dashboard).toContain("if (targetActionsBlocked) return;");
+    expect(dashboard).toContain("if (resultActionsBlocked) return;");
     const saveClick = dashboard.slice(
       dashboard.indexOf("const handleSaveClick = () => {"),
       dashboard.indexOf("const handleExportPdf = ("),

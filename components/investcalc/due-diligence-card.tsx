@@ -282,12 +282,12 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
 
   return (
     <section aria-label="Due diligence" className="rounded-2xl border border-border bg-card p-4 sm:p-5">
-      <div className="mb-3 flex items-center justify-between gap-3">
+      <div className="mb-3 flex flex-col items-start gap-2 min-[360px]:flex-row min-[360px]:items-center min-[360px]:justify-between min-[360px]:gap-3">
         <div className="flex items-center gap-2">
           <ClipboardCheck className="size-4 text-primary" />
           <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">Due diligence</h3>
         </div>
-        <div role="status" aria-live="polite" className="flex items-center gap-2 text-[11px] text-muted-foreground">
+        <div role="status" aria-live="polite" className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
           {dueSummary.overdue > 0 ? (
             <span className="rounded-full bg-[var(--metric-negative)]/10 px-2 py-0.5 font-semibold text-[var(--metric-negative)]">
               {dueSummary.overdue} overdue
@@ -321,86 +321,88 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
           const status = dueDiligenceItemStatus(item, todayISO);
           const isExpanded = expandedId === item.id;
           return (
-            <li key={item.id} className="group">
-              <div className="flex items-center gap-2.5">
-              <label className="flex size-11 shrink-0 cursor-pointer items-center justify-center" aria-label={`Mark ${item.label} ${item.done ? "incomplete" : "complete"}`}>
-                <input
-                  type="checkbox"
-                  checked={item.done}
-                  onChange={() => toggle(item.id)}
+            <li key={item.id} className="group rounded-xl bg-muted/20 p-2 sm:bg-transparent sm:p-0">
+              <div className="grid grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] items-start gap-x-2 gap-y-2 sm:grid-cols-[2.75rem_minmax(0,1fr)_auto_2.75rem] sm:items-center">
+                <label className="col-start-1 row-start-1 flex size-11 shrink-0 cursor-pointer items-center justify-center" aria-label={`Mark ${item.label} ${item.done ? "incomplete" : "complete"}`}>
+                  <input
+                    type="checkbox"
+                    checked={item.done}
+                    onChange={() => toggle(item.id)}
+                    disabled={isSaving}
+                    className="size-4 rounded border-border accent-[var(--brand-green)]"
+                  />
+                </label>
+                {/* WS-3: the label is the expand/collapse control (big tap
+                    target on mobile; a real <button>, so Enter/Space work).
+                    aria-expanded + aria-controls tie it to the note region. */}
+                <button
+                  type="button"
+                  onClick={() => toggleNote(item.id)}
                   disabled={isSaving}
-                  className="size-4 rounded border-border accent-[var(--brand-green)]"
-                />
-              </label>
-              {/* WS-3: the label is the expand/collapse control (big tap
-                  target on mobile; a real <button>, so Enter/Space work).
-                  aria-expanded + aria-controls tie it to the note region. */}
-              <button
-                type="button"
-                onClick={() => toggleNote(item.id)}
-                disabled={isSaving}
-                aria-expanded={isExpanded}
-                aria-controls={`dd-note-${item.id}`}
-                className="flex min-w-0 flex-1 items-center gap-1.5 rounded-md text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-              >
-                <span
-                  className={cn(
-                    "min-w-0 truncate text-sm",
-                    item.done ? "text-muted-foreground line-through" : "text-foreground"
-                  )}
+                  aria-expanded={isExpanded}
+                  aria-controls={`dd-note-${item.id}`}
+                  className="col-start-2 row-start-1 flex min-h-11 min-w-0 items-center gap-1.5 rounded-md text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                 >
-                  {item.label}
-                </span>
-                <ChevronDown
-                  aria-hidden
+                  <span className="min-w-0 flex-1 sm:flex sm:items-center sm:gap-2">
+                    <span
+                      className={cn(
+                        "block min-w-0 whitespace-normal break-words text-sm leading-snug sm:flex-1 sm:truncate",
+                        item.done ? "text-muted-foreground line-through" : "text-foreground"
+                      )}
+                    >
+                      {item.label}
+                    </span>
+                    {status === "overdue" ? (
+                      <span className="mt-1 inline-flex shrink-0 rounded-full bg-[var(--metric-negative)]/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[var(--metric-negative)] sm:mt-0">
+                        Overdue
+                      </span>
+                    ) : status === "due-soon" ? (
+                      <span className="mt-1 inline-flex shrink-0 rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700 sm:mt-0">
+                        Due soon
+                      </span>
+                    ) : null}
+                  </span>
+                  <ChevronDown
+                    aria-hidden
+                    className={cn(
+                      "size-3.5 shrink-0 text-muted-foreground/50 transition-transform",
+                      isExpanded && "rotate-180"
+                    )}
+                  />
+                </button>
+                <input
+                  type="date"
+                  value={item.dueDate ?? ""}
+                  onChange={(e) => setDueDate(item.id, e.target.value)}
+                  disabled={isSaving}
+                  aria-label={`Due date for ${item.label}`}
                   className={cn(
-                    "size-3.5 shrink-0 text-muted-foreground/50 transition-transform",
-                    isExpanded && "rotate-180"
+                    "col-span-2 col-start-2 row-start-2 h-11 w-full min-w-0 rounded-md border border-input bg-transparent px-2 text-sm outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:col-span-1 sm:col-start-3 sm:row-start-1 sm:w-[9.5rem] sm:text-[11px]",
+                    status === "overdue"
+                      ? "text-[var(--metric-negative)]"
+                      : item.dueDate
+                        ? "text-foreground"
+                        : "text-muted-foreground/60"
                   )}
                 />
-              </button>
-              {status === "overdue" ? (
-                <span className="shrink-0 rounded-full bg-[var(--metric-negative)]/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[var(--metric-negative)]">
-                  Overdue
-                </span>
-              ) : status === "due-soon" ? (
-                <span className="shrink-0 rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700">
-                  Due soon
-                </span>
-              ) : null}
-              <input
-                type="date"
-                value={item.dueDate ?? ""}
-                onChange={(e) => setDueDate(item.id, e.target.value)}
-                disabled={isSaving}
-                aria-label={`Due date for ${item.label}`}
-                className={cn(
-                  "h-11 shrink-0 rounded-md border border-input bg-transparent px-1.5 text-[11px] outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
-                  status === "overdue"
-                    ? "text-[var(--metric-negative)]"
-                    : item.dueDate
-                      ? "text-foreground"
-                      : "text-muted-foreground/60"
-                )}
-              />
-              <button
-                type="button"
-                aria-label={`Remove ${item.label}`}
-                onClick={() => remove(item.id)}
-                disabled={isSaving}
-                className="shrink-0 rounded-md p-1.5 text-muted-foreground/50 transition-colors hover:bg-destructive/10 hover:text-destructive"
-              >
-                <X className="size-4" />
-              </button>
+                <button
+                  type="button"
+                  aria-label={`Remove ${item.label}`}
+                  onClick={() => remove(item.id)}
+                  disabled={isSaving}
+                  className="col-start-3 row-start-1 inline-flex size-11 items-center justify-center rounded-md text-muted-foreground/50 transition-colors hover:bg-destructive/10 hover:text-destructive sm:col-start-4"
+                >
+                  <X aria-hidden className="size-4" />
+                </button>
               </div>
               {/* Collapsed note preview — one truncated muted line under the
                   label so the context ("Inspector: Mike @ ProCheck, Thu 2pm")
                   is visible without opening the row. */}
               {!isExpanded && item.note ? (
-                <p className="ml-[26px] truncate pr-8 text-xs text-muted-foreground">{item.note}</p>
+                <p className="mt-1.5 truncate text-xs text-muted-foreground sm:ml-[52px] sm:pr-11">{item.note}</p>
               ) : null}
               {isExpanded ? (
-                <div id={`dd-note-${item.id}`} className="ml-[26px] mt-1.5 pr-8">
+                <div id={`dd-note-${item.id}`} className="mt-1.5 sm:ml-[52px] sm:pr-11">
                   <Input
                     value={item.note ?? ""}
                     onChange={(e) => setNoteDraft(item.id, e.target.value)}

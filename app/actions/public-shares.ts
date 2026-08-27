@@ -53,7 +53,7 @@ import {
 } from "@/lib/offer-ceiling-decision-basis";
 
 export type CreatePublicShareResult =
-  | { ok: true; url: string }
+  | { ok: true; url: string; id: string; dealId: string | null }
   | {
       ok: false;
       code: "SIGN_IN_REQUIRED" | "VALIDATION_ERROR" | "NOT_CONFIGURED";
@@ -289,7 +289,7 @@ export async function createPublicShareAction(
     }
   }
 
-  const path = await mintPublicShare({
+  const minted = await mintPublicShare({
     values: valuesToShare,
     title:
       parsed.data.addressVisibility === "full"
@@ -307,7 +307,7 @@ export async function createPublicShareAction(
     analyzerStrategyKey,
     offerCeilingDecisionBasis: shareDecisionBasis ?? undefined,
   });
-  if (!path) {
+  if (!minted) {
     // Never fall back to a URL containing the analysis payload. Existing /d
     // links remain readable, but all newly minted links fail closed to opaque.
     return {
@@ -316,13 +316,22 @@ export async function createPublicShareAction(
       message: "Secure sharing is temporarily unavailable.",
     };
   }
-  return { ok: true, url: `${getSiteUrl()}${path}` };
+  return {
+    ok: true,
+    url: `${getSiteUrl()}${minted.path}`,
+    id: minted.id,
+    dealId: minted.dealId,
+  };
 }
 
 export type PublicShareListItem = {
   id: string;
+  dealId: string | null;
   label: string | null;
   title: string | null;
+  propertyLabel: string | null;
+  audience: PublicShareAudience | null;
+  addressVisibility: PublicShareAddressVisibility | null;
   createdAt: string;
   expiresAt: string | null;
   revokedAt: string | null;
@@ -330,14 +339,33 @@ export type PublicShareListItem = {
 };
 
 export type ListPublicSharesResult =
-  | { ok: true; shares: PublicShareListItem[] }
+  | {
+      ok: true;
+      shares: PublicShareListItem[];
+      nextOffset: number | null;
+    }
   | {
       ok: false;
-      code: "SIGN_IN_REQUIRED" | "NOT_CONFIGURED" | "SERVER_ERROR";
+      code:
+        | "SIGN_IN_REQUIRED"
+        | "VALIDATION_ERROR"
+        | "NOT_CONFIGURED"
+        | "SERVER_ERROR";
       message: string;
     };
 
-export async function listPublicSharesAction(): Promise<ListPublicSharesResult> {
+export async function listPublicSharesAction(
+  input: unknown,
+): Promise<ListPublicSharesResult> {
+  const parsed = z.object({ offset: z.number().int().min(0) }).safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "Invalid share-link page.",
+    };
+  }
+
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -345,14 +373,20 @@ export async function listPublicSharesAction(): Promise<ListPublicSharesResult> 
   if (!user)
     return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
 
+  // This is deliberately owner-wide rather than scoped to the analysis that
+  // opened the dialog. A link can outlive a soft-deleted deal, and an owner
+  // must always have a route back to every link they can still revoke.
+  const pageSize = 100;
   const { data, error } = await supabase
     .from("public_shares")
     .select(
-      "id, label, snapshot, created_at, expires_at, revoked_at, last_viewed_at",
+      "id, deal_id, label, snapshot, created_at, expires_at, revoked_at, last_viewed_at",
     )
     .eq("owner_id", user.id)
     .order("created_at", { ascending: false })
-    .limit(100);
+    // Supabase ranges are inclusive. Fetch one extra row to prove that an
+    // older page exists without ever imposing a silent lifetime cap.
+    .range(parsed.data.offset, parsed.data.offset + pageSize);
   if (error) {
     if (error.code === "42P01") {
       return {
@@ -368,22 +402,44 @@ export async function listPublicSharesAction(): Promise<ListPublicSharesResult> 
       message: "Couldn't load your shares.",
     };
   }
+  const rows = (data ?? []) as Record<string, unknown>[];
+  const hasMore = rows.length > pageSize;
   return {
     ok: true,
-    shares: ((data ?? []) as Record<string, unknown>[]).map((row) => ({
-      id: String(row.id),
-      label: (row.label as string | null) ?? null,
-      title:
-        ((
-          (row.snapshot as Record<string, unknown> | null)?.meta as
-            | Record<string, unknown>
-            | undefined
-        )?.title as string | undefined) ?? null,
-      createdAt: String(row.created_at),
-      expiresAt: (row.expires_at as string | null) ?? null,
-      revokedAt: (row.revoked_at as string | null) ?? null,
-      lastViewedAt: (row.last_viewed_at as string | null) ?? null,
-    })),
+    nextOffset: hasMore ? parsed.data.offset + pageSize : null,
+    shares: rows.slice(0, pageSize).map((row) => {
+      const meta = (row.snapshot as Record<string, unknown> | null)?.meta as
+        | Record<string, unknown>
+        | undefined;
+      const snapshotValues = (row.snapshot as Record<string, unknown> | null)
+        ?.values as Record<string, unknown> | undefined;
+      const audience = meta?.audience;
+      const addressVisibility = meta?.addressVisibility;
+      return {
+        id: String(row.id),
+        dealId: typeof row.deal_id === "string" ? row.deal_id : null,
+        label: (row.label as string | null) ?? null,
+        title: (meta?.title as string | undefined) ?? null,
+        propertyLabel:
+          typeof snapshotValues?.address === "string"
+            ? snapshotValues.address.trim().slice(0, 200) || null
+            : null,
+        audience:
+          audience === "investment-partner" ||
+          audience === "client" ||
+          audience === "lender-review"
+            ? audience
+            : null,
+        addressVisibility:
+          addressVisibility === "hidden" || addressVisibility === "full"
+            ? addressVisibility
+            : null,
+        createdAt: String(row.created_at),
+        expiresAt: (row.expires_at as string | null) ?? null,
+        revokedAt: (row.revoked_at as string | null) ?? null,
+        lastViewedAt: (row.last_viewed_at as string | null) ?? null,
+      };
+    }),
   };
 }
 
@@ -403,7 +459,9 @@ export type RevokePublicShareResult =
 export async function revokePublicShareAction(
   input: unknown,
 ): Promise<RevokePublicShareResult> {
-  const parsed = z.object({ id: z.string().uuid() }).safeParse(input);
+  const parsed = z
+    .object({ id: z.string().uuid(), dealId: z.string().uuid().nullable() })
+    .safeParse(input);
   if (!parsed.success)
     return { ok: false, code: "VALIDATION_ERROR", message: "Invalid share." };
 
@@ -414,7 +472,7 @@ export async function revokePublicShareAction(
   if (!user)
     return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("public_shares")
     .update({
       revoked_at: new Date().toISOString(),
@@ -422,8 +480,11 @@ export async function revokePublicShareAction(
     })
     .eq("id", parsed.data.id)
     .eq("owner_id", user.id)
-    .select("id")
-    .maybeSingle();
+    .select("id");
+  query = parsed.data.dealId
+    ? query.eq("deal_id", parsed.data.dealId)
+    : query.is("deal_id", null);
+  const { data, error } = await query.maybeSingle();
   if (error) {
     Sentry.captureException(error, { tags: { feature: "public-shares" } });
     return {

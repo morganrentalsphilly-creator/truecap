@@ -404,6 +404,26 @@ const OPERATING_EXPENSE_FIELD_PATHS = new Set([
   "includeInterestDeduction",
   "taxRatePct",
 ]);
+const INPUT_CONFIDENCE_FORM_FIELD: Record<
+  InputConfidenceFieldKey,
+  string
+> = {
+  purchasePrice: "purchasePrice",
+  yearBuilt: "yearBuilt",
+  rent: "monthlyRent",
+  propertyTax: "propertyTaxAmount",
+  insurance: "insuranceAmount",
+  interestRate: "interestRate",
+  downPayment: "downPaymentPct",
+  closingCosts: "closingCostsPct",
+  maintenance: "maintenancePct",
+  capex: "capexPct",
+  vacancy: "vacancyPct",
+  management: "mgmtPct",
+  utilities: "utilitiesMonthly",
+  hoa: "hoaMonthly",
+  rehabBudget: "rehabBudget",
+};
 const SAVED_ANALYSIS_EDIT_DRAFT_KEY = "truecap_saved_analysis_edit_draft";
 /** Must match SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY in open-saved-deal-in-analyzer.tsx. */
 const SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY =
@@ -1197,6 +1217,11 @@ export function InvestCalcPage({
   );
   const [savedDealCount, setSavedDealCount] = useState(initialSavedDealCount);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  // Offer-criteria edits live inside the focused result until Apply is chosen.
+  // Include that local draft in the page-level loss guards used by the shell.
+  const [hasUnappliedTargetDraft, setHasUnappliedTargetDraft] = useState(false);
+  const hasPendingDealChanges =
+    hasUnsavedChanges || hasUnappliedTargetDraft;
   const [isComparingDeals, setIsComparingDeals] = useState(false);
   // Same-tick double-click guard for the atomic save → add → navigate flow.
   const compareInFlightRef = useRef(false);
@@ -6727,6 +6752,14 @@ export function InvestCalcPage({
     maoTarget?: MaoTarget,
     source?: OfferCeilingTargetSource,
   ) => {
+    if (hasUnappliedTargetDraft) {
+      toast({
+        title: "Finish your criteria edits first",
+        description: "Apply or cancel the criteria edits before saving.",
+        variant: "warning",
+      });
+      return false;
+    }
     const normalizedTarget = normalizeMaoTarget(maoTarget);
     let normalizedSource =
       normalizeOfferCeilingTargetSource(source) ??
@@ -6908,6 +6941,14 @@ export function InvestCalcPage({
     maoTargetSource?: OfferCeilingTargetSource,
   ) => {
     if (!analysisResult) return;
+    if (hasUnappliedTargetDraft) {
+      toast({
+        title: "Finish your criteria edits first",
+        description: "Apply or cancel the criteria edits before exporting.",
+        variant: "warning",
+      });
+      return;
+    }
     // Capture the exact target before the entitlement chooser returns early.
     // The one-time Pack dialog opens on that early path, then Stripe performs
     // a full-page round trip; without this synchronous ref update the Pack
@@ -6955,13 +6996,13 @@ export function InvestCalcPage({
     try {
       const values = form.getValues();
       let savedExport: { id: string; renderFingerprint: string } | undefined;
-      // A reopened saved result is historical evidence. Bind its analyzer
-      // export to the same owner-scoped snapshot/fingerprint path as My Deals
-      // instead of rebuilding its PDF from today's engine.
+      // Bind a reopened saved result to the same owner-scoped input/fingerprint
+      // path as My Deals. The server remains the publication authority and
+      // recomputes report outputs under the current compatible methodology.
       if (
         !oneTimeUnlocked &&
         savedDealId &&
-        !hasUnsavedChanges &&
+        !hasPendingDealChanges &&
         recordedOfferCeiling !== null
       ) {
         const { getSavedAnalysisPdfExportAction } =
@@ -7174,8 +7215,8 @@ export function InvestCalcPage({
         description: (
           <span>
             {savedExport
-              ? "Your report was exported from the recorded saved analysis."
-              : "Your report was exported from the latest live analysis data."}
+              ? "Your report was generated from the saved inputs using the current compatible underwriting methodology."
+              : "Your report was generated from the latest live inputs using the current underwriting methodology."}
             {brandingHint}
           </span>
         ),
@@ -7468,14 +7509,16 @@ export function InvestCalcPage({
     // a misclick here is irrecoverable. A native confirm() is the
     // lightest possible guard - no modal infrastructure needed.
     const shouldConfirm =
-      hasUnsavedChanges ||
+      hasPendingDealChanges ||
       (!savedDealId && (Boolean(analysisResult) || form.formState.isDirty));
     if (shouldConfirm) {
       const ok =
         typeof window === "undefined"
           ? true
           : window.confirm(
-              "Start a new analysis? Your current work will be cleared.\n\nIf you want to keep this deal, cancel and save it first.",
+              hasUnappliedTargetDraft
+                ? "Start a new analysis? Your unapplied criteria edits will be cleared.\n\nCancel, then apply or cancel those edits first."
+                : "Start a new analysis? Your current work will be cleared.\n\nIf you want to keep this deal, cancel and save it first.",
             );
       if (!ok) return;
     }
@@ -7518,12 +7561,14 @@ export function InvestCalcPage({
    * before clearing them just as New Analysis does.
    */
   const handleAnalyzeAnotherLikeThis = () => {
-    const shouldConfirm = hasUnsavedChanges || !savedDealId;
+    const shouldConfirm = hasPendingDealChanges || !savedDealId;
     const ok =
       !shouldConfirm || typeof window === "undefined"
         ? true
         : window.confirm(
-            "Analyze another property? This unsaved result will be cleared.\n\nReusable financing and general operating assumptions will remain. Offer criteria will be matched again for the next property. Save first if you want to keep this deal.",
+            hasUnappliedTargetDraft
+              ? "Analyze another property? Your unapplied criteria edits will be cleared.\n\nCancel, then apply or cancel those edits first."
+              : "Analyze another property? This unsaved result will be cleared.\n\nReusable financing and general operating assumptions will remain. Offer criteria will be matched again for the next property. Save first if you want to keep this deal.",
           );
     if (!ok) return;
     isProgrammaticResetRef.current = true;
@@ -7673,15 +7718,16 @@ export function InvestCalcPage({
 
   /**
    * Workflow protection - warn before unloading the page when the
-   * user has unsaved edits to an existing saved deal. We deliberately
-   * skip this for anonymous users (no save path) and brand-new
-   * previews (localStorage auto-save catches them on next visit).
+   * user has unsaved edits to an existing saved deal. Anonymous and brand-new
+   * form edits still use local draft recovery, but component-local criteria
+   * edits cannot be recovered and therefore also arm this guard.
    * Browser policy ignores custom messages now, but the prompt itself
    * still fires - that's enough to prevent the accidental close.
    */
   useEffect(() => {
     const shouldWarn =
-      isAuthenticated && Boolean(savedDealId) && hasUnsavedChanges;
+      hasUnappliedTargetDraft ||
+      (isAuthenticated && Boolean(savedDealId) && hasUnsavedChanges);
     if (!shouldWarn) return;
     const handler = (event: BeforeUnloadEvent) => {
       event.preventDefault();
@@ -7692,7 +7738,12 @@ export function InvestCalcPage({
     };
     window.addEventListener("beforeunload", handler);
     return () => window.removeEventListener("beforeunload", handler);
-  }, [isAuthenticated, savedDealId, hasUnsavedChanges]);
+  }, [
+    hasUnappliedTargetDraft,
+    hasUnsavedChanges,
+    isAuthenticated,
+    savedDealId,
+  ]);
 
   /**
    * Same protection for IN-APP navigation: beforeunload never fires for App
@@ -7707,7 +7758,8 @@ export function InvestCalcPage({
    */
   useEffect(() => {
     const shouldWarn =
-      isAuthenticated && Boolean(savedDealId) && hasUnsavedChanges;
+      hasUnappliedTargetDraft ||
+      (isAuthenticated && Boolean(savedDealId) && hasUnsavedChanges);
     if (!shouldWarn) return;
     const handler = (event: MouseEvent) => {
       if (event.defaultPrevented) return;
@@ -7745,7 +7797,9 @@ export function InvestCalcPage({
         return;
       }
       const confirmed = window.confirm(
-        "You have unsaved changes on this deal — leave without saving?",
+        hasUnappliedTargetDraft
+          ? "You have unapplied criteria edits — leave and discard them?"
+          : "You have unsaved changes on this deal — leave without saving?",
       );
       if (!confirmed) {
         event.preventDefault();
@@ -7754,13 +7808,26 @@ export function InvestCalcPage({
     };
     document.addEventListener("click", handler, true);
     return () => document.removeEventListener("click", handler, true);
-  }, [isAuthenticated, savedDealId, hasUnsavedChanges]);
+  }, [
+    hasUnappliedTargetDraft,
+    hasUnsavedChanges,
+    isAuthenticated,
+    savedDealId,
+  ]);
 
   const handleCompareDeals = async (
     maoTarget?: MaoTarget,
     source?: OfferCeilingTargetSource,
   ) => {
     if (compareInFlightRef.current) return;
+    if (hasUnappliedTargetDraft) {
+      toast({
+        title: "Finish your criteria edits first",
+        description: "Apply or cancel the criteria edits before comparing.",
+        variant: "warning",
+      });
+      return;
+    }
     trackEvent("comparison_started", { source: "analysis_result" });
     if (!isAuthenticated) {
       toast({
@@ -7784,7 +7851,7 @@ export function InvestCalcPage({
     setIsComparingDeals(true);
     try {
       let dealIdForCompare = savedDealId;
-      if (!dealIdForCompare || hasUnsavedChanges) {
+      if (!dealIdForCompare || hasPendingDealChanges) {
         // Reset before this exact attempt; a previous successful Save must
         // never authorize Compare after the current save opened a conflict or
         // duplicate-address chooser instead of completing.
@@ -8297,6 +8364,67 @@ export function InvestCalcPage({
     inputVerification,
     resolveLiveInputConfidenceContext,
   ]);
+
+  const handleReviewVerificationInput = useCallback(
+    (key: InputConfidenceFieldKey) => {
+      const field = currentInputConfidence?.fields.find(
+        (candidate) => candidate.key === key,
+      );
+      const propertyType = form.getValues("propertyType");
+      const strategyKey = resolveCompatibleAnalyzerStrategyKey(
+        activeStrategyKeyRef.current,
+        form.getValues(),
+      );
+      const needsAdvancedPanel = key !== "purchasePrice" && key !== "rent";
+
+      setIsEditingAssumptions(true);
+      if (needsAdvancedPanel) setAdvancedOpen(true);
+      if (field?.editTarget === "expenses") setExpenseDetailsOpen(true);
+
+      requestAnimationFrame(() => {
+        window.setTimeout(() => {
+          const fieldId = INPUT_CONFIDENCE_FORM_FIELD[key];
+          let input: HTMLElement | null = null;
+          if (key === "rent" && strategyKey === "short-term") {
+            // The legacy monthlyRent input stays mounted but CSS-hidden in STR
+            // mode. Focus the visible nightly-rate control instead; occupancy
+            // sits beside it in the same income group.
+            input = document.getElementById("avgDailyRate");
+          } else if (key === "rent" && propertyType !== "single-family") {
+            // Rent is a rollup across every unit. Focus the full income group,
+            // never an arbitrary first row (or the read-only owner unit in a
+            // house hack), so the investor reviews the complete rent roll.
+            input = document.getElementById("step-income");
+          } else {
+            input = document.getElementById(fieldId);
+          }
+          if (input) {
+            input.focus({ preventScroll: true });
+            input.scrollIntoView({
+              behavior: scrollBehavior(),
+              block: "center",
+            });
+            return;
+          }
+
+          const fallbackAnchor =
+            key === "rent"
+              ? "step-income"
+              : key === "yearBuilt"
+              ? "step-extras"
+              : field?.editTarget === "financing" ||
+                  field?.editTarget === "expenses"
+                ? `step-${field.editTarget}`
+                : "step-property";
+          document.getElementById(fallbackAnchor)?.scrollIntoView({
+            behavior: scrollBehavior(),
+            block: "start",
+          });
+        }, 70);
+      });
+    },
+    [currentInputConfidence, form],
+  );
 
   const handleToggleInputVerified = useCallback(
     (key: InputConfidenceFieldKey, verified: boolean) => {
@@ -9336,7 +9464,8 @@ export function InvestCalcPage({
                     MF/house-hack: the units block, mount unchanged. */}
                   <fieldset
                     id="step-income"
-                    className="min-w-0 scroll-mt-24 border-0 p-0"
+                    tabIndex={-1}
+                    className="min-w-0 scroll-mt-24 rounded-xl border-0 p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <legend className="mb-2 text-sm font-semibold text-foreground">
                       3. Rental income
@@ -10021,9 +10150,10 @@ export function InvestCalcPage({
                         ?.scrollIntoView({
                           behavior: scrollBehavior(),
                           block: "start",
-                        });
+                      });
                     });
                   }}
+                  onReviewVerificationInput={handleReviewVerificationInput}
                   onApplyComps={handleApplyComps}
                   onApplyRehab={handleApplyRehab}
                   currentRehabBudget={liveStrategyInputs.rehabBudget ?? null}
@@ -10033,7 +10163,7 @@ export function InvestCalcPage({
                   isSaving={isSavingDeal || isAutoSaveResuming}
                   isComparing={isComparingDeals}
                   isExporting={isExportingPdf}
-                  isSaved={Boolean(savedDealId) && !hasUnsavedChanges}
+                  isSaved={Boolean(savedDealId) && !hasPendingDealChanges}
                   isExistingSavedDeal={Boolean(savedDealId)}
                   savedDealId={savedDealId}
                   userDecision={userDecisionFromPipelineStage(
@@ -10063,6 +10193,7 @@ export function InvestCalcPage({
                   maoTargetOverrideSource={analysisMaoTargetSource}
                   adoptedDecisionBasis={analysisDecisionBasis}
                   onMaoTargetChange={handleAnalysisMaoTargetChange}
+                  onTargetDraftBlockingChange={setHasUnappliedTargetDraft}
                   recordedOfferCeiling={recordedOfferCeiling}
                   activeTab={activeDashboardTab}
                   activeTabNonce={activeTabNonce}
@@ -10073,9 +10204,11 @@ export function InvestCalcPage({
                   persistedActionsBlockHint={
                     !savedDealId
                       ? "Save this analysis first to compare or export a PDF."
-                      : hasUnsavedChanges
-                        ? "Save your latest changes before comparing or exporting a PDF."
-                        : undefined
+                      : hasUnappliedTargetDraft
+                        ? "Apply or cancel your criteria edits before comparing or exporting."
+                        : hasUnsavedChanges
+                          ? "Save your latest changes before comparing or exporting a PDF."
+                          : undefined
                   }
                 />
               </AnalysisErrorBoundary>
