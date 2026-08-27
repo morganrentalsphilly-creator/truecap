@@ -15,7 +15,7 @@
  * toast, never a broken redirect.
  */
 
-import { useTransition } from "react";
+import { useRef, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { GitCompare } from "lucide-react";
 import { startCompareAction } from "@/app/actions/compare";
@@ -25,8 +25,11 @@ export function CompareWithAnotherDealLink({ savedDealId }: { savedDealId: strin
   const router = useRouter();
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
+  const compareRequestInFlightRef = useRef(false);
 
   function handleCompare() {
+    if (compareRequestInFlightRef.current || isPending) return;
+    compareRequestInFlightRef.current = true;
     startTransition(async () => {
       try {
         const result = await startCompareAction([savedDealId]);
@@ -49,6 +52,8 @@ export function CompareWithAnotherDealLink({ savedDealId }: { savedDealId: strin
           description: "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
+      } finally {
+        compareRequestInFlightRef.current = false;
       }
     });
   }

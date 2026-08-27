@@ -13,6 +13,9 @@ describe("external Offer Ceiling provenance", () => {
     expect(
       normalizeExternalOfferCeilingTargetSource("screening-defaults"),
     ).toBe("screening-defaults");
+    expect(
+      normalizeExternalOfferCeilingTargetSource("starter-criteria"),
+    ).toBe("starter-criteria");
     expect(normalizeExternalOfferCeilingTargetSource("crafted")).toBeNull();
   });
 });

@@ -27,7 +27,6 @@ import {
   Target,
   Trash2,
   X,
-  ClipboardList,
   CopyPlus,
   UserRound,
   Check,
@@ -140,6 +139,13 @@ import {
 } from "@/lib/saved-analysis-methodology";
 import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
 import { parseCompareSnapshotV1 } from "@/lib/compare-result-snapshot";
+import {
+  addToBulkDealSelection,
+  MAX_BULK_DEAL_SELECTION,
+  MAX_COMPARE_DEAL_SELECTION,
+  reconcileSavedDealSelection,
+  type SavedDealSelectionRow,
+} from "@/lib/saved-deal-selection";
 import {
   buildDealsCsv,
   dealsCsvFilename,
@@ -292,6 +298,9 @@ function OfferLineRow({
   basisLabel?: string | null;
 }) {
   if (!offer) return null;
+  const usesStarterCriteria = basisLabel?.startsWith(
+    "TrueCap starter criteria",
+  );
 
   // No price fixes a wrong market or property type — so don't quote one.
   if (offer.kind === "blocked") {
@@ -312,7 +321,9 @@ function OfferLineRow({
       offer.basis === "buy-box"
         ? "Clears your buy box"
         : offer.basis === "saved-target"
-          ? "Clears your selected targets"
+          ? usesStarterCriteria
+            ? "Clears TrueCap starter criteria"
+            : "Clears your selected targets"
           : "Clears TrueCap’s default targets";
     return (
       <div className="mt-1.5 text-xs text-muted-foreground">
@@ -349,7 +360,9 @@ function OfferLineRow({
     offer.basis === "buy-box"
       ? "to pass your buy box"
       : offer.basis === "saved-target"
-        ? "to meet your selected targets"
+        ? usesStarterCriteria
+          ? "to meet TrueCap starter criteria"
+          : "to meet your selected targets"
         : "to meet TrueCap’s default targets";
   return (
     <div className="mt-1.5 text-xs text-muted-foreground">
@@ -1400,6 +1413,7 @@ export function SavedAnalysesPage({
   // Delete has no other entry point — so it lifts above the banner instead.
   const cookieBannerOpen = useCookieBannerOpen();
   const [isStartingCompare, startCompareTransition] = useTransition();
+  const compareRequestInFlightRef = useRef(false);
   const [isUpdatingStatus, startUpdateStatusTransition] = useTransition();
   const [openingDealId, setOpeningDealId] = useState<string | null>(null);
   const [exportingPdfDealId, setExportingPdfDealId] = useState<string | null>(
@@ -1537,9 +1551,22 @@ export function SavedAnalysesPage({
     canCompareDeals
       ? (initialSelectedIds ?? [])
           .filter((id) => initialItemIds.has(id))
-          .slice(0, 4)
+          .slice(0, MAX_COMPARE_DEAL_SELECTION)
       : [],
   );
+  const latestSelectionRows = useMemo<SavedDealSelectionRow[]>(
+    () => initialItems.map(({ id, status }) => ({ id, status })),
+    [initialItems],
+  );
+  const previousSelectionRowsRef = useRef(latestSelectionRows);
+
+  useEffect(() => {
+    const previousRows = previousSelectionRowsRef.current;
+    setSelectedIds((current) =>
+      reconcileSavedDealSelection(current, previousRows, latestSelectionRows),
+    );
+    previousSelectionRowsRef.current = latestSelectionRows;
+  }, [latestSelectionRows]);
 
   const enrichedItems = useMemo(
     () =>
@@ -2109,10 +2136,17 @@ export function SavedAnalysesPage({
           });
           return;
         }
+        const skippedCount = result.skippedCount ?? 0;
         toast({
-          title: `Archived ${result.affectedCount} deal${result.affectedCount === 1 ? "" : "s"}`,
-          description: "Find them under the Archived filter.",
-          variant: "success",
+          title:
+            skippedCount > 0
+              ? `Archived ${result.affectedCount}; skipped ${skippedCount} changed deal${skippedCount === 1 ? "" : "s"}`
+              : `Archived ${result.affectedCount} deal${result.affectedCount === 1 ? "" : "s"}`,
+          description:
+            skippedCount > 0
+              ? "Those deals changed status during the action and were left untouched. The list has been refreshed."
+              : "Find them under the Archived filter.",
+          variant: skippedCount > 0 ? "warning" : "success",
         });
         setSelectedIds([]);
         router.refresh();
@@ -2398,13 +2432,21 @@ export function SavedAnalysesPage({
     });
   };
 
+  const showBulkLimit = () => {
+    toast({
+      title: "Selection limit reached",
+      description: `Bulk actions support up to ${MAX_BULK_DEAL_SELECTION} deals at a time.`,
+      variant: "warning",
+    });
+  };
+
   const handleCompareSelected = () => {
     // Hard guard against rapid double-clicks. The button's disabled
     // attribute alone isn't sufficient - React 19's useTransition
     // doesn't synchronously flip isStartingCompare, so a fast second
     // click can fire startCompareAction twice and race two
     // router.push() calls, manifesting as a "stuck" compare flow.
-    if (isStartingCompare) return;
+    if (compareRequestInFlightRef.current || isStartingCompare) return;
     if (!canCompareDeals) {
       toast({
         title: "Upgrade required",
@@ -2412,6 +2454,10 @@ export function SavedAnalysesPage({
         variant: "destructive",
       });
       router.push("/profile#billing");
+      return;
+    }
+    if (selectedIds.length > MAX_COMPARE_DEAL_SELECTION) {
+      showCompareLimit();
       return;
     }
     const compareItems = selectedIds
@@ -2438,6 +2484,7 @@ export function SavedAnalysesPage({
       });
       return;
     }
+    compareRequestInFlightRef.current = true;
     startCompareTransition(async () => {
       try {
         const result = await startCompareAction(selectedIds);
@@ -2465,6 +2512,8 @@ export function SavedAnalysesPage({
             "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
+      } finally {
+        compareRequestInFlightRef.current = false;
       }
     });
   };
@@ -2472,15 +2521,12 @@ export function SavedAnalysesPage({
   const toggleOne = (id: string) => {
     setSelectedIds((prev) => {
       if (prev.includes(id)) return prev.filter((current) => current !== id);
-      // The 4-deal ceiling is a COMPARE constraint, so it only applies to users
-      // who can compare. Free users select to archive/delete — and delete is
-      // their only way to free a slot at the 5-deal cap, so capping their
-      // selection at 4 (or blocking it outright, as this did) left them stuck.
-      if (canCompareDeals && prev.length >= 4) {
-        showCompareLimit();
+      const next = addToBulkDealSelection(prev, [id]);
+      if (next.limitReached) {
+        showBulkLimit();
         return prev;
       }
-      return [...prev, id];
+      return next.selectedIds;
     });
   };
 
@@ -2789,25 +2835,12 @@ export function SavedAnalysesPage({
       return;
     }
     setSelectedIds((prev) => {
-      const merged = new Set(prev);
-      let reachedLimit = false;
-      for (const item of pagedItems) {
-        if (prev.includes(item.id)) continue;
-        // The 4-item cap is a COMPARE constraint, so it must not apply to a
-        // user who cannot compare. PAGE_SIZE is 7, so on any page with 5+ rows
-        // a free user clicking "select all" to bulk-archive or bulk-delete
-        // silently got only 4 rows selected, plus a toast about a Compare
-        // limit for a feature they do not have.
-        if (canCompareDeals && merged.size >= 4) {
-          reachedLimit = true;
-          break;
-        }
-        merged.add(item.id);
-      }
-      if (reachedLimit) {
-        showCompareLimit();
-      }
-      return [...merged];
+      const next = addToBulkDealSelection(
+        prev,
+        pagedItems.map((item) => item.id),
+      );
+      if (next.limitReached) showBulkLimit();
+      return next.selectedIds;
     });
   };
 
@@ -3526,8 +3559,8 @@ export function SavedAnalysesPage({
                           asChild
                         >
                           <Link
-                            href={`/dashboard/new?savedDeal=${encodeURIComponent(item.id)}`}
-                            aria-label={`Open analysis for ${address.main}`}
+                            href={`/dashboard/saved-analyses/${item.id}`}
+                            aria-label={`Open deal workspace for ${address.main}`}
                           >
                             <ArrowRight className="mr-1 h-3.5 w-3.5" />
                             Open
@@ -3565,9 +3598,9 @@ export function SavedAnalysesPage({
                             ) : null}
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
-                            <Link href={`/dashboard/saved-analyses/${item.id}`}>
-                              <ClipboardList className="mr-2 h-3.5 w-3.5" />
-                              Deal workspace
+                            <Link href={`/dashboard/new?savedDeal=${encodeURIComponent(item.id)}`}>
+                              <SlidersHorizontal className="mr-2 h-3.5 w-3.5" />
+                              Edit assumptions
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem
@@ -4104,10 +4137,10 @@ export function SavedAnalysesPage({
                             // the narrowest part of the table. Under an ACTIONS
                             // header, next to a ⋯ menu, "Open" is unambiguous —
                             // and the full phrase stays in the accessible name.
-                            aria-label={`Open analysis for ${address.main}`}
+                            aria-label={`Open deal workspace for ${address.main}`}
                           >
                               <Link
-                                href={`/dashboard/new?savedDeal=${encodeURIComponent(item.id)}`}
+                                href={`/dashboard/saved-analyses/${item.id}`}
                               >
                                 <ArrowRight className="mr-1 h-3.5 w-3.5" />
                                 Open
@@ -4154,10 +4187,10 @@ export function SavedAnalysesPage({
                               </DropdownMenuItem>
                               <DropdownMenuItem asChild>
                                 <Link
-                                  href={`/dashboard/saved-analyses/${item.id}`}
+                                  href={`/dashboard/new?savedDeal=${encodeURIComponent(item.id)}`}
                                 >
-                                  <ClipboardList className="mr-2 h-3.5 w-3.5" />
-                                  Deal workspace
+                                  <SlidersHorizontal className="mr-2 h-3.5 w-3.5" />
+                                  Edit assumptions
                                 </Link>
                               </DropdownMenuItem>
                               <DropdownMenuItem

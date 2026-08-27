@@ -162,8 +162,8 @@ export function SharedDealShell({
               className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs leading-relaxed text-foreground"
             >
               {inputsSource === "live-saved"
-                ? "This view uses the agent’s current saved inputs and selected targets. TrueCap outputs were recomputed server-side when you opened it using the labeled standard."
-                : "The inputs and selected targets were captured when this view was shared. TrueCap outputs were recomputed server-side when you opened it using the labeled standard."}
+                ? `This view uses the agent’s current saved inputs and ${maoTargetSource === "starter-criteria" ? "adopted TrueCap starter criteria" : maoTargetSource === "buy-box" ? "captured Buy Box criteria" : "selected targets"}. TrueCap outputs were recomputed server-side when you opened it using the labeled standard.`
+                : `The inputs and ${maoTargetSource === "starter-criteria" ? "adopted TrueCap starter criteria" : maoTargetSource === "buy-box" ? "captured Buy Box criteria" : "selected targets"} were captured when this view was shared. TrueCap outputs were recomputed server-side when you opened it using the labeled standard.`}
               {legacyMethodologyWarning
                 ? " This link uses a legacy publication format; ask the owner to refresh it before relying on it for a decision."
                 : ""}

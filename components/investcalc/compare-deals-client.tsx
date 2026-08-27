@@ -23,6 +23,7 @@ import {
 import { removeCompareDealAction } from "@/app/actions/compare";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 import {
+  boxesForDealClient,
   buyBoxHasCriteria,
   deriveStateFromAddress,
   evaluateBuyBoxes,
@@ -94,6 +95,9 @@ const MOBILE_DEAL_COLORS = [
 export type CompareDealViewModel = {
   id: string;
   address: string;
+  /** Agent Pro buyer assigned to this deal. Client-specific Buy Boxes must
+   * never influence a different buyer's comparison verdict. */
+  clientId?: string | null;
   /** Workspace-scenario label (DM-1). Sibling scenarios share one address, so
    *  compare labels suffix this to stay tellable apart. */
   scenarioName?: string | null;
@@ -380,6 +384,46 @@ function NetCashFlowTooltip({ deal }: { deal: CompareDealViewModel }) {
 function isCashPurchaseDeal(deal: CompareDealViewModel): boolean {
   const pmt = deal.metrics.monthlyPayment;
   return pmt == null || pmt <= 0;
+}
+
+export function buildCompareBuyBoxFitById(
+  deals: CompareDealViewModel[],
+  buyBoxes: NamedBuyBox[] | null,
+  methodologiesComparable: boolean,
+): Map<string, { fit: BuyBoxFitSummary; personalLine: string | null }> | null {
+  if (!methodologiesComparable) return null;
+  if (!buyBoxes || buyBoxes.length === 0) return null;
+
+  const map = new Map<
+    string,
+    { fit: BuyBoxFitSummary; personalLine: string | null }
+  >();
+  for (const deal of deals) {
+    const metrics: BuyBoxDealMetrics = {
+      capRatePct: deal.metrics.capRate ?? null,
+      cocPct: deal.metrics.cocReturn ?? null,
+      dscr: isCashPurchaseDeal(deal) ? null : deal.metrics.dscr ?? null,
+      cashFlowMonthly: deal.metrics.netCashFlow ?? null,
+      purchasePrice: deal.purchasePrice,
+      propertyType: deal.propertyType,
+      state: deriveStateFromAddress(deal.address),
+      isCashPurchase: isCashPurchaseDeal(deal),
+    };
+    const applicableBoxes = boxesForDealClient(
+      buyBoxes,
+      deal.clientId ?? null,
+    );
+    const results = evaluateBuyBoxes(applicableBoxes, metrics).filter(
+      (result) => result.result.active,
+    );
+    if (results.length === 0) continue;
+    const lead = results.find((result) => result.result.passes) ?? results[0];
+    map.set(deal.id, {
+      fit: summarizeBuyBoxFit(results),
+      personalLine: lead?.result.personalLine ?? null,
+    });
+  }
+  return map.size > 0 ? map : null;
 }
 
 function isCashOnCashApplicable(deal: CompareDealViewModel): boolean {
@@ -1120,33 +1164,11 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
   // else the highest-priority active box (evaluateBuyBoxes is default-first)
   // — the exact rule the deal workspace uses.
   const buyBoxFitById = useMemo(() => {
-    if (!methodologiesComparable) return null;
-    if (!buyBoxes || buyBoxes.length === 0) return null;
-    const map = new Map<string, { fit: BuyBoxFitSummary; personalLine: string | null }>();
-    for (const deal of deals) {
-      const metrics: BuyBoxDealMetrics = {
-        capRatePct: deal.metrics.capRate ?? null,
-        cocPct: deal.metrics.cocReturn ?? null,
-        // DSCR 0 means N/A for a cash purchase, not "worst possible" —
-        // passing it through plotted all-cash deals as the riskiest.
-        dscr: isCashPurchaseDeal(deal) ? null : deal.metrics.dscr ?? null,
-        cashFlowMonthly: deal.metrics.netCashFlow ?? null,
-        purchasePrice: deal.purchasePrice,
-        propertyType: deal.propertyType,
-        state: deriveStateFromAddress(deal.address),
-        // Cash purchases have no debt service → the DSCR criterion is
-        // skipped (N/A), never failed — same canon as the DSCR column.
-        isCashPurchase: isCashPurchaseDeal(deal),
-      };
-      const results = evaluateBuyBoxes(buyBoxes, metrics).filter((r) => r.result.active);
-      if (results.length === 0) continue;
-      const lead = results.find((r) => r.result.passes) ?? results[0];
-      map.set(deal.id, {
-        fit: summarizeBuyBoxFit(results),
-        personalLine: lead?.result.personalLine ?? null,
-      });
-    }
-    return map.size > 0 ? map : null;
+    return buildCompareBuyBoxFitById(
+      deals,
+      buyBoxes,
+      methodologiesComparable,
+    );
   }, [buyBoxes, deals, methodologiesComparable]);
 
   const shortTermHighlightedWinCounts = getShortTermHighlightedWinCounts(deals);

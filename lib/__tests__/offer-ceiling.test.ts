@@ -48,8 +48,24 @@ const values: InvestmentFormValues = {
 describe("Offer Ceiling presentation model", () => {
   it("does not treat product screening defaults as the investor's adopted targets", () => {
     expect(isAdoptedOfferCeilingTargetSource("screening-defaults")).toBe(false);
+    expect(isAdoptedOfferCeilingTargetSource("starter-criteria")).toBe(true);
     expect(isAdoptedOfferCeilingTargetSource("selected-targets")).toBe(true);
     expect(isAdoptedOfferCeilingTargetSource("buy-box")).toBe(true);
+  });
+
+  it("labels explicitly adopted starter criteria without calling them user-selected", () => {
+    const target = { monthlyCashFlow: 0, dscr: 1.25 };
+    const solved = calculateMaxAllowableOffer(values, target);
+    expect(solved).not.toBeNull();
+    if (!solved) return;
+
+    expect(
+      buildOfferCeilingPresentation({
+        values,
+        result: solved,
+        source: "starter-criteria",
+      }).sourceLabel,
+    ).toBe("Under TrueCap starter criteria");
   });
 
   it("adds source, list gap, binding constraint, and re-solved uncertainty range", () => {

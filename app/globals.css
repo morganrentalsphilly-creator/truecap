@@ -518,6 +518,10 @@ body[data-truecap-results-mode="true"] .truecap-marketing-tail {
   display: none !important;
 }
 
+body[data-truecap-results-mode="true"] [data-marketing-mobile-nav] {
+  display: none !important;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {
     .tc-reveal {

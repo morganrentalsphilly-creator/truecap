@@ -76,6 +76,62 @@ for (const viewport of VIEWPORTS) {
   });
 }
 
+test("homepage sample preview keeps its reading order at zoom-sensitive widths", async ({
+  page,
+}) => {
+  for (const width of [195, 640, 768, 1023]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+
+    const card = page.locator('[data-hero-sample-card=""]');
+    const property = page.locator('[data-hero-sample-property=""]');
+    const status = page.locator('[data-hero-sample-status=""]');
+    const offer = page.locator('[data-hero-sample-offer=""]');
+    for (const element of [card, property, status, offer]) {
+      await expect(element).toBeVisible();
+      await expectContainedInViewport(page, element, 100);
+    }
+
+    const propertyBox = await property.boundingBox();
+    const statusBox = await status.boundingBox();
+    expect(propertyBox).not.toBeNull();
+    expect(statusBox).not.toBeNull();
+    expect(propertyBox!.y + propertyBox!.height).toBeLessThanOrEqual(
+      statusBox!.y + 1,
+    );
+
+    const textOverflow = await property.evaluate((element) => ({
+      clientWidth: element.clientWidth,
+      scrollWidth: element.scrollWidth,
+    }));
+    expect(textOverflow.scrollWidth).toBeLessThanOrEqual(
+      textOverflow.clientWidth + 1,
+    );
+  }
+});
+
+test("the marketing prompt yields while the investor is using the calculator", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 643, height: 732 });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const rejectCookies = page.getByRole("button", {
+    name: "Reject",
+    exact: true,
+  });
+  await expect(rejectCookies).toBeVisible();
+  await rejectCookies.click();
+
+  const conversionBar = page.locator("[data-conversion-bar-root]");
+  await page.evaluate(() => window.scrollTo(0, 900));
+  await expect(conversionBar).toBeVisible();
+
+  const calculator = page.locator('form[data-calc-form="true"]');
+  await calculator.scrollIntoViewIfNeeded();
+  await expect(calculator).toBeVisible();
+  await expect(conversionBar).toBeHidden();
+});
+
 test("calculator inputs reflow at a 195 CSS-pixel effective viewport", async ({
   page,
 }) => {
@@ -204,7 +260,7 @@ test("specialist strategy framing stays visible and usable at 200% mobile zoom",
   await expectContainedInViewport(page, warning, 80);
   await expect(
     page.locator('button[data-inform-submit="true"]'),
-  ).toHaveAccessibleName(/Screen rental baseline free/i);
+  ).toHaveAccessibleName(/Add address to run full analysis/i);
 });
 
 test("a restored advanced-strategy draft keeps its analysis identity", async ({
@@ -261,12 +317,12 @@ test("a legacy synthetic sample draft cannot replace the investor's next deal", 
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await waitForCalculatorReady(page);
 
-  await expect(page.getByLabel("Property Address", { exact: true })).toHaveValue(
-    "",
-  );
   await expect(
-    page.getByText("Draft restored from this browser"),
-  ).toHaveCount(0);
+    page.getByLabel("Property Address", { exact: true }),
+  ).toHaveValue("");
+  await expect(page.getByText("Draft restored from this browser")).toHaveCount(
+    0,
+  );
   await expect(
     page.getByRole("button", { name: "Try a sample deal", exact: true }),
   ).toBeVisible();
@@ -337,7 +393,9 @@ test("anonymous sample reaches the decision-first result with one click", async 
     "section[aria-labelledby='decision-summary-title']",
   );
   await expect(
-    summary.getByText(SAMPLE_DEAL_FIXTURE.values.address, { exact: true }),
+    summary.getByText(SAMPLE_DEAL_FIXTURE.display.shortAddress, {
+      exact: true,
+    }),
   ).toBeVisible();
   await expect(
     summary.getByText("Offer Ceiling", { exact: true }),
@@ -351,6 +409,15 @@ test("anonymous sample reaches the decision-first result with one click", async 
     await expect(action).toBeVisible();
     await expectMinimumTouchTarget(action);
   }
+  await expect(page.locator("[data-marketing-mobile-nav]")).toBeHidden();
+  const primaryActions = summary.locator(
+    '[aria-label="Primary result actions"]',
+  );
+  const primaryActionsBox = await primaryActions.boundingBox();
+  expect(primaryActionsBox).not.toBeNull();
+  expect(primaryActionsBox!.y + primaryActionsBox!.height).toBeLessThanOrEqual(
+    844,
+  );
 
   // Move away and back with the keyboard so this proves a real focus-visible
   // state rather than only checking that JavaScript can call element.focus().

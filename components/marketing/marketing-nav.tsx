@@ -83,6 +83,7 @@ export function MarketingNavMobile() {
   return (
     <nav
       aria-label="Main"
+      data-marketing-mobile-nav=""
       className="flex items-center gap-4 overflow-x-auto border-b border-border bg-card/60 px-4 py-2 lg:hidden"
     >
       <Link href="/" className={`${linkClass} whitespace-nowrap`}>

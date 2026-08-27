@@ -92,6 +92,7 @@ const createCheckoutSchema = z
     maxOfferTargetSource: z.enum([
       "buy-box",
       "screening-defaults",
+      "starter-criteria",
       "selected-targets",
     ]),
   })
@@ -302,6 +303,7 @@ const verifySchema = z
     maxOfferTargetSource: z.enum([
       "buy-box",
       "screening-defaults",
+      "starter-criteria",
       "selected-targets",
     ]).optional(),
   })

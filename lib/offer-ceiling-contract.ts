@@ -1,16 +1,23 @@
 export type OfferCeilingTargetSource =
   | "buy-box"
   | "screening-defaults"
+  | "starter-criteria"
   | "selected-targets";
 
 /**
  * A modeled price threshold is eligible only after the investor adopts a
- * rule set. Product screening defaults are examples, not the user's targets.
+ * rule set. `starter-criteria` preserves that the investor accepted TrueCap's
+ * visible starter rules unchanged; untouched background screening defaults
+ * remain examples and are not adopted.
  */
 export function isAdoptedOfferCeilingTargetSource(
   source: OfferCeilingTargetSource
 ): boolean {
-  return source === "buy-box" || source === "selected-targets";
+  return (
+    source === "buy-box" ||
+    source === "starter-criteria" ||
+    source === "selected-targets"
+  );
 }
 
 export function normalizeOfferCeilingTargetSource(
@@ -18,6 +25,7 @@ export function normalizeOfferCeilingTargetSource(
 ): OfferCeilingTargetSource | null {
   return value === "buy-box" ||
     value === "screening-defaults" ||
+    value === "starter-criteria" ||
     value === "selected-targets"
     ? value
     : null;

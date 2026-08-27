@@ -34,6 +34,20 @@ test("capture public product evidence without entering checkout", async ({
     animations: "disabled",
   });
 
+  for (const width of [768, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const sampleCard = page.locator('[data-hero-sample-card=""]');
+    await expect(sampleCard).toBeVisible();
+    await sampleCard.screenshot({
+      path: `${evidenceDirectory}/homepage-sample-${width}.png`,
+      animations: "disabled",
+    });
+  }
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+
   const calculator = page.locator('form[data-calc-form="true"]');
   await expect(calculator).toBeVisible();
   await calculator.screenshot({

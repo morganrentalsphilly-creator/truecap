@@ -73,7 +73,12 @@ import {
   type BuyBoxFitSummary,
   type BuyBoxPropertyType,
 } from "@/lib/buy-box";
-import { isActiveStage, isPipelineStage, DEFAULT_PIPELINE_STAGE } from "@/lib/pipeline";
+import { isActiveStage } from "@/lib/pipeline";
+import {
+  effectiveSavedDealStage,
+  isSavedDealArchived,
+  isSavedDealCompleted,
+} from "@/lib/saved-deal-lifecycle";
 import {
   getDashboardNavAccess,
   hasDashboardAccess,
@@ -168,7 +173,7 @@ function Metric({
 }
 
 const DEAL_SELECT =
-  "id, address, title, property_type, purchase_price, form_snapshot, result_snapshot, methodology_version, underwriting_revision, net_cash_flow_monthly, pipeline_stage, is_completed, created_at";
+  "id, address, title, property_type, purchase_price, form_snapshot, result_snapshot, methodology_version, underwriting_revision, net_cash_flow_monthly, pipeline_stage, is_completed, is_archived, created_at";
 
 /**
  * Load the deal with the optional investor nickname (labels migration) and the
@@ -345,6 +350,7 @@ export default async function DealWorkspacePage({
     pipeline_stage: string | null;
     client_id?: string | null;
     is_completed: boolean | null;
+    is_archived: boolean | null;
     created_at: string | null;
     /** Investor nickname — absent until the labels migration is applied. */
     nickname?: string | null;
@@ -361,12 +367,13 @@ export default async function DealWorkspacePage({
   const nickname = typeof dealRow.nickname === "string" && dealRow.nickname.trim() ? dealRow.nickname.trim() : null;
   const addressLabel = dealRow.address?.trim() || dealRow.title?.trim() || "Untitled property";
   const heading = nickname ?? addressLabel;
-  const stage = isPipelineStage(dealRow.pipeline_stage) ? dealRow.pipeline_stage : null;
-  // Lifecycle has two dimensions: pipeline_stage (Pro pipeline plans) and
-  // is_completed (the plain Status select syncs only this flag, never stage).
-  // Treat a status-completed deal exactly like stage === "closed" so this
-  // page agrees with the My Deals row for the same deal.
-  const isClosedDeal = stage === "closed" || dealRow.is_completed === true;
+  // Terminal lifecycle fails closed across both the pipeline stage and its
+  // compatibility flags. Older rows and concurrent lifecycle writes can carry
+  // only one side; neither an archived nor a completed deal may accidentally
+  // re-enter shopping advice, Offer Ceiling, or Compare.
+  const stage = effectiveSavedDealStage(dealRow);
+  const isClosedDeal = isSavedDealCompleted(dealRow);
+  const isArchivedDeal = isSavedDealArchived(dealRow);
   const canUsePipeline = hasPlanFeature(entitlements, "pipeline");
   const canUseClientWorkflow = hasPlanFeature(entitlements, "client_buy_box");
   // Agent Pro roster for the "For client" control. Skipped (and failure-safe)
@@ -386,7 +393,8 @@ export default async function DealWorkspacePage({
   const showCompareLink =
     hasPlanFeature(entitlements, "compare_deals") &&
     !isClosedDeal &&
-    isActiveStage(stage ?? DEFAULT_PIPELINE_STAGE) &&
+    !isArchivedDeal &&
+    isActiveStage(stage) &&
     (activeDealsCount ?? 0) >= 2;
 
   // Recommended next step from the saved underwrite (cash flow + DSCR),
@@ -562,7 +570,7 @@ export default async function DealWorkspacePage({
   let shareMaoTargetSource: OfferCeilingTargetSource | undefined =
     storedMaoTarget ? storedMaoTargetSource : undefined;
   const isShoppingStage =
-    !isClosedDeal && (stage == null || isActiveStage(stage));
+    !isClosedDeal && !isArchivedDeal && isActiveStage(stage);
   if (isPremium && methodologyResolution.usesRecordedSnapshot) {
     const recorded = recordedDealOfferLine({
       snapshot: dealRow.result_snapshot,
@@ -603,14 +611,19 @@ export default async function DealWorkspacePage({
     meetsBuyBox: buyBoxFit ? buyBoxFit.anyPass : null,
     // Status-completed deals get the closed-stage advice (track equity), not
     // shopping-stage advice — same lifecycle merge as the equity card below.
-    stage: isClosedDeal ? "closed" : (stage ?? undefined),
+    stage,
     // With a close date recorded the banner stops instructing the user to
     // add one directly above the equity card that already shows it.
     hasCloseDate: closeDate != null,
   });
 
   const nextActionCta =
-    isClosedDeal && ownedEquityEnabled && !closeDate
+    isArchivedDeal
+      ? {
+          label: "Review archived deals",
+          href: "/dashboard/saved-analyses?state=archived",
+        }
+      : isClosedDeal && ownedEquityEnabled && !closeDate
       ? { label: "Add close date", href: "#owned-equity" }
       : nextAction.tone === "ready"
         ? { label: "Open checklist", href: "#deal-due-diligence" }
@@ -704,7 +717,7 @@ export default async function DealWorkspacePage({
                 {canUsePipeline ? (
                   <DealStageSelect
                     savedDealId={dealRow.id}
-                    stage={stage ?? DEFAULT_PIPELINE_STAGE}
+                    stage={stage}
                   />
                 ) : null}
                 {/* Agent Pro: assign this deal to a buyer right here — the
@@ -729,10 +742,12 @@ export default async function DealWorkspacePage({
                     }
                   />
                 ) : null}
-                <OpenFullAnalysisButton
-                  savedDealId={dealRow.id}
-                  recorded={methodologyResolution.usesRecordedSnapshot}
-                />
+                {!isArchivedDeal ? (
+                  <OpenFullAnalysisButton
+                    savedDealId={dealRow.id}
+                    recorded={methodologyResolution.usesRecordedSnapshot}
+                  />
+                ) : null}
                 {methodologyResolution.usesRecordedSnapshot ? (
                   <ReunderwriteAsScenarioButton savedDealId={dealRow.id} />
                 ) : null}
@@ -780,7 +795,7 @@ export default async function DealWorkspacePage({
           {/* Rate-alert deep link (?rate=): the deal re-underwritten at the
               alert's rate, above the fold — this is what the email promised.
               Shows only while the param is present (implicit dismiss). */}
-          {rateReUnderwrite && formValues ? (
+          {!isArchivedDeal && rateReUnderwrite && formValues ? (
             <RateAlertReUnderwriteBanner
               savedDealId={dealRow.id}
               values={formValues}
@@ -881,7 +896,7 @@ export default async function DealWorkspacePage({
           ) : null}
           <DealAgingNudge
             dealId={dealRow.id}
-            stage={stage ?? DEFAULT_PIPELINE_STAGE}
+            stage={stage}
             createdAt={dealRow.created_at}
             address={heading}
           />

@@ -267,6 +267,7 @@ import {
 import {
   captureBuyBoxDecisionBasis,
   captureSelectedTargetsDecisionBasis,
+  captureStarterCriteriaDecisionBasis,
   normalizeOfferCeilingDecisionBasis,
   OFFER_CEILING_DECISION_BASIS_FIELD,
   type OfferCeilingDecisionBasis,
@@ -625,6 +626,19 @@ function restoreDecisionBasisBinding(input: {
   // Legacy snapshots recorded only a numeric target and, sometimes, the word
   // "buy-box". That is copied criteria—not proof of a current profile.
   return { basis: null, source: "selected-targets", needsReview: true };
+}
+
+function captureNonBuyBoxDecisionBasis(input: {
+  source: Exclude<
+    OfferCeilingTargetSource,
+    "buy-box" | "screening-defaults"
+  >;
+  target: MaoTarget;
+  strategyKey: AnalyzerStrategyKey;
+}): OfferCeilingDecisionBasis {
+  return input.source === "starter-criteria"
+    ? captureStarterCriteriaDecisionBasis(input)
+    : captureSelectedTargetsDecisionBasis(input);
 }
 
 /**
@@ -4213,6 +4227,7 @@ export function InvestCalcPage({
       });
       resetToNewAnalysis("single-family");
       setSavedTemplateFallback(null);
+      replaceSavedDealUrl(null);
       return;
     }
     const reopenPayloadRaw = initialSavedDeal?.ok
@@ -5305,6 +5320,10 @@ export function InvestCalcPage({
       !advancedOpen && !!el && el.closest("#advanced-options") !== null;
     if (!inCollapsedAdvanced && !inCollapsedExpenseDetails) {
       focusPath();
+      findEl()?.scrollIntoView({
+        behavior: scrollBehavior(),
+        block: "center",
+      });
       return;
     }
     setAdvancedOpen(true);
@@ -5469,7 +5488,7 @@ export function InvestCalcPage({
     pendingSampleRunRef.current = false;
     if (isSampleRun) {
       setAnalysisMaoTarget({ ...SAMPLE_DEAL_FIXTURE.maoTarget });
-      setAnalysisMaoTargetSource("selected-targets");
+      setAnalysisMaoTargetSource(SAMPLE_DEAL_FIXTURE.targetProfile.source);
       const sampleBasis = captureSelectedTargetsDecisionBasis({
         target: SAMPLE_DEAL_FIXTURE.maoTarget,
         strategyKey: SAMPLE_DEAL_FIXTURE.strategyKey,
@@ -5682,25 +5701,17 @@ export function InvestCalcPage({
       // scroll below, which no-ops on the unmounted dashboard) belong to a
       // deal that's no longer on screen.
       if (forkGenerationRef.current !== runGeneration) return;
-      toast({
-        title: autoSavedAfterAuth
-          ? "Deal saved automatically"
-          : "Analysis Complete",
-        // Rounded like every other surface that shows this number (an
-        // unrounded float renders "$1,234.567/mo" — reads like a bug), and
-        // "Cash-on-cash" spelled out: the toast is the one line every
-        // first-run user reads, so no unexpanded jargon.
-        // Sign keyed off the SAME rounded value (live-verdict-panel pattern)
-        // so a sub-dollar negative never renders "-$0".
-        description: autoSavedAfterAuth
-          ? "Your underwriting is now available from any device."
-          : `Net cash flow: ${Math.round(result.netCashFlow) < 0 ? "-" : ""}$${Math.abs(Math.round(result.netCashFlow)).toLocaleString()}/mo | Cash-on-cash: ${
-              result.totalCashRequired > 0
-                ? `${result.cocReturn.toFixed(1)}%`
-                : "N/A"
-            }`,
-        variant: autoSavedAfterAuth ? "success" : undefined,
-      });
+      // The focused result is the completion feedback. A second, generic
+      // "Analysis Complete" toast duplicated the same metrics, competed with
+      // the result handoff, and could cover mobile actions. Keep a toast only
+      // when authentication also completed a distinct background save.
+      if (autoSavedAfterAuth) {
+        toast({
+          title: "Deal saved automatically",
+          description: "Your underwriting is now available from any device.",
+          variant: "success",
+        });
+      }
     } finally {
       isCalculatingRef.current = false;
       setIsCalculating(false);
@@ -5931,13 +5942,21 @@ export function InvestCalcPage({
         // Financing changed after target adoption. DSCR is meaningless for an
         // all-cash deal, so converge the parent state to the exact target that
         // can safely be persisted instead of letting Save send a stale rule.
+        const financingSafeTargetSource = candidateMaxOfferTarget
+          ? candidateMaxOfferTargetSource === "starter-criteria"
+            ? "starter-criteria"
+            : "selected-targets"
+          : "screening-defaults";
         analysisMaoTargetRef.current = candidateMaxOfferTarget;
         setAnalysisMaoTarget(candidateMaxOfferTarget);
-        setAnalysisMaoTargetSource(
-          candidateMaxOfferTarget ? "selected-targets" : "screening-defaults",
-        );
+        setAnalysisMaoTargetSource(financingSafeTargetSource);
+        candidateMaxOfferTargetSource = financingSafeTargetSource;
         const normalizedBasis = candidateMaxOfferTarget
-          ? captureSelectedTargetsDecisionBasis({
+          ? captureNonBuyBoxDecisionBasis({
+              source:
+                financingSafeTargetSource === "starter-criteria"
+                  ? "starter-criteria"
+                  : "selected-targets",
               target: candidateMaxOfferTarget,
               strategyKey: currentAnalyzerStrategyKey(),
             })
@@ -5991,7 +6010,11 @@ export function InvestCalcPage({
         candidateMaxOfferTargetSource = "selected-targets";
       }
       if (maxOfferTargetSnapshot && !decisionBasisSnapshot) {
-        decisionBasisSnapshot = captureSelectedTargetsDecisionBasis({
+        decisionBasisSnapshot = captureNonBuyBoxDecisionBasis({
+          source:
+            candidateMaxOfferTargetSource === "starter-criteria"
+              ? "starter-criteria"
+              : "selected-targets",
           target: maxOfferTargetSnapshot,
           strategyKey: currentAnalyzerStrategyKey(),
         });
@@ -6479,7 +6502,11 @@ export function InvestCalcPage({
         normalizedSource = "selected-targets";
       }
       if (!decisionBasis) {
-        decisionBasis = captureSelectedTargetsDecisionBasis({
+        decisionBasis = captureNonBuyBoxDecisionBasis({
+          source:
+            normalizedSource === "starter-criteria"
+              ? "starter-criteria"
+              : "selected-targets",
           target: adoptedTarget,
           strategyKey: currentAnalyzerStrategyKey(),
         });
@@ -7151,7 +7178,11 @@ export function InvestCalcPage({
       analysisMaoTargetRef.current = restoredMaoTarget;
       setAnalysisMaoTarget(restoredMaoTarget);
       setAnalysisMaoTargetSource(restoredMaoTargetSource);
-      const restoredDecisionBasis = captureSelectedTargetsDecisionBasis({
+      const restoredDecisionBasis = captureNonBuyBoxDecisionBasis({
+        source:
+          restoredMaoTargetSource === "starter-criteria"
+            ? "starter-criteria"
+            : "selected-targets",
         target: restoredMaoTarget,
         strategyKey: currentAnalyzerStrategyKey(),
       });
@@ -7584,7 +7615,12 @@ export function InvestCalcPage({
     // validation as a defense against any intervening reset.
     analysisMaoTargetRef.current = { ...SAMPLE_DEAL_FIXTURE.maoTarget };
     setAnalysisMaoTarget({ ...SAMPLE_DEAL_FIXTURE.maoTarget });
-    setAnalysisMaoTargetSource("selected-targets");
+    // The synthetic fixture carries a versioned, explicitly adopted example
+    // profile. Keep its source tied to that fixture contract instead of
+    // silently treating it as the ordinary starter criteria. The
+    // sampleSeeded flag below prevents this demo-only adoption from ever
+    // becoming the investor's saved or next-deal criteria.
+    setAnalysisMaoTargetSource(SAMPLE_DEAL_FIXTURE.targetProfile.source);
     const sampleBasis = captureSelectedTargetsDecisionBasis({
       target: SAMPLE_DEAL_FIXTURE.maoTarget,
       strategyKey: SAMPLE_DEAL_FIXTURE.strategyKey,
@@ -7611,15 +7647,6 @@ export function InvestCalcPage({
     strategyRevertRef.current = null;
     setActiveStrategyKey(SAMPLE_DEAL_FIXTURE.strategyKey);
     activeStrategyKeyRef.current = SAMPLE_DEAL_FIXTURE.strategyKey;
-
-    // Show the toast right away so the user sees confirmation that
-    // the demo loaded - important because the submit fires async and
-    // we want a UI signal that *something* happened on click.
-    toast({
-      title: "Sample rental loaded",
-      description:
-        "Running illustrative sample assumptions with a full Pro report preview unlocked for this demo.",
-    });
 
     // Defer the submit to the next paint frame. RHF's setValue calls
     // above schedule re-renders asynchronously - submitting in the same
@@ -8144,6 +8171,9 @@ export function InvestCalcPage({
   const showEmptyStateSampleLine =
     isInputPhase && isAuthenticated && !hasMeaningfulInput && !listingLinkOpen;
   const hasPropertyAvailable = Boolean(watchedAddress?.trim());
+  const needsAddressForFullAnalysis =
+    !hasPropertyAvailable &&
+    (hasMeaningfulInput || activeStrategyKey !== null || form.formState.isDirty);
   // The primary CTA may become the sample launcher ONLY on a pristine form
   // that is still using the implicit Buy & Hold default.
   // With price/rent already typed (address pending), one tap on what looks
@@ -8169,6 +8199,7 @@ export function InvestCalcPage({
     canCalculateMaxOffer: canUseMaxOffer,
     strategyRunCta: activeStrategy?.runCta,
     canUseStrategyPrimaryOutput: canUseActiveStrategyPrimaryOutput,
+    requiresAddressBeforeRun: needsAddressForFullAnalysis,
   });
   const hasAdoptedAnalysisTarget = Boolean(
     analysisMaoTarget &&
@@ -8194,12 +8225,12 @@ export function InvestCalcPage({
     hasExplicitPreRunCriteriaChoice
       ? preRunBuyBoxTarget
         ? "buy-box"
-        : "selected-targets"
+        : "starter-criteria"
       : decisionBasisNeedsReview && analysisMaoTarget
       ? "selected-targets"
       : preRunBuyBoxTarget
         ? "buy-box"
-        : "selected-targets";
+        : "starter-criteria";
   const shouldUseAdoptedPreRunTarget =
     hasAdoptedAnalysisTarget && !hasExplicitPreRunCriteriaChoice;
   const preRunEditorBaseTarget = shouldUseAdoptedPreRunTarget
@@ -8253,8 +8284,14 @@ export function InvestCalcPage({
     showResults &&
     !isCalculating &&
     !isEditingAssumptions;
+  const decisionCriteriaBlockPrimaryAction =
+    !needsAddressForFullAnalysis &&
+    (preRunCriteriaInvalid ||
+      (needsPreRunTargetChoice && preRunBuyBoxState === "loading"));
   const primaryActionLabel = isAddressEnrichmentPending
     ? "Finishing property lookup…"
+    : needsAddressForFullAnalysis
+      ? analyzerCta
     : needsPreRunTargetChoice && preRunBuyBoxState === "loading"
         ? "Loading your criteria…"
       : activeRunPromisesOfferCeiling
@@ -8274,7 +8311,14 @@ export function InvestCalcPage({
     const decisionBasis =
       source === "buy-box" && buyBox
         ? captureBuyBoxDecisionBasis({ box: buyBox, target, strategyKey })
-        : captureSelectedTargetsDecisionBasis({ target, strategyKey });
+        : captureNonBuyBoxDecisionBasis({
+            source:
+              source === "starter-criteria"
+                ? "starter-criteria"
+                : "selected-targets",
+            target,
+            strategyKey,
+          });
     analysisMaoTargetRef.current = target;
     setAnalysisMaoTarget(target);
     setAnalysisMaoTargetSource(source);
@@ -8298,6 +8342,11 @@ export function InvestCalcPage({
   const handlePrimaryRunAction = async (options?: {
     withoutOfferCeiling?: boolean;
   }) => {
+    if (needsAddressForFullAnalysis) {
+      void form.trigger("address");
+      focusInvalidField("address");
+      return;
+    }
     if (primaryCtaRunsSample) {
       handleTrySampleDeal();
       return;
@@ -8382,7 +8431,12 @@ export function InvestCalcPage({
   // analyzer over the form and even over the RESULTS, eating ~90px of a
   // phone viewport mid-analysis (UX walkthrough P1-4). Event-based so the
   // marketing component needs no import from the calculator tree.
-  const analyzerEngaged = hasMeaningfulInput || analysisResult !== null;
+  // Address or result state is durable evidence of a real analysis. React Hook
+  // Form can mark programmatically seeded defaults dirty during hydration, so
+  // `isDirty` would suppress the marketing prompt before the visitor acts.
+  // The conversion bar's IntersectionObserver independently hides it whenever
+  // the calculator itself is on screen, including price/rent-only drafts.
+  const analyzerEngaged = hasPropertyAvailable || analysisResult !== null;
   useEffect(() => {
     if (!analyzerEngaged) return;
     window.dispatchEvent(new Event("tc-analyzer-engaged"));
@@ -8706,8 +8760,7 @@ export function InvestCalcPage({
                   disabled={
                     isCalculating ||
                     isAddressEnrichmentPending ||
-                    preRunCriteriaInvalid ||
-                    (needsPreRunTargetChoice && preRunBuyBoxState === "loading")
+                    decisionCriteriaBlockPrimaryAction
                   }
                   onClick={() => void handlePrimaryRunAction()}
                 >
@@ -9093,12 +9146,14 @@ export function InvestCalcPage({
                                 ? `: ${analysisDecisionBasis.rules.boxName}`
                                 : ""
                             }`
-                          : "Using your selected criteria"
+                          : analysisMaoTargetSource === "starter-criteria"
+                            ? "Using TrueCap starter criteria"
+                            : "Using your selected criteria"
                         : preRunBuyBoxState === "loading"
                           ? "Loading your saved criteria…"
                           : preRunBuyBox
                             ? `Will use Buy Box: ${preRunBuyBox.name}`
-                            : "Will use starter criteria"}
+                            : "Will use TrueCap starter criteria"}
                       </p>
                       <p className="mt-1 text-sm text-foreground/80">
                         {preRunBuyBoxState === "loading" &&
@@ -9109,10 +9164,9 @@ export function InvestCalcPage({
                       {preRunBuyBoxState === "error" &&
                       !hasAdoptedAnalysisTarget ? (
                         <p className="mt-2 text-xs font-medium text-amber-800 dark:text-amber-200">
-                          Your Buy Boxes could not be loaded. TrueCap will use the
-                        starter
-                          criteria shown here; you can change them before
-                        calculating.
+                          Your Buy Boxes could not be loaded. TrueCap will use
+                          the starter criteria shown here; you can change them
+                          before calculating.
                         </p>
                       ) : null}
                     </div>
@@ -9226,8 +9280,7 @@ export function InvestCalcPage({
                 onClick={() => void handlePrimaryRunAction()}
                 disabled={
                   isCalculating ||
-                  preRunCriteriaInvalid ||
-                  (needsPreRunTargetChoice && preRunBuyBoxState === "loading")
+                  decisionCriteriaBlockPrimaryAction
                 }
                 data-inform-submit="true"
                 className={cn(
@@ -9302,7 +9355,7 @@ export function InvestCalcPage({
             hasResults={analysisResult !== null}
             ctaLabel={primaryActionLabel}
             isActionDisabled={
-              needsPreRunTargetChoice && preRunBuyBoxState === "loading"
+              decisionCriteriaBlockPrimaryAction
             }
             onTrySample={primaryCtaRunsSample ? handleTrySampleDeal : undefined}
             onCalculate={
@@ -9333,8 +9386,8 @@ export function InvestCalcPage({
         {!isEditingAssumptions &&
           (showResults || isCalculating || analysisResult !== null) && (
           <div
-            className="mt-8 scroll-mt-24 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              data-analysis-results="true"
+            className="mt-8 scroll-mt-32 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:scroll-mt-24"
+            data-analysis-results="true"
             role="region"
             tabIndex={-1}
             aria-label="Analysis results"

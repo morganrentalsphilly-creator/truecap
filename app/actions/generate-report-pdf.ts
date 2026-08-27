@@ -103,7 +103,12 @@ const inputSchema = z
     report: reportDataSchema.optional(),
     maxOfferTarget: z.unknown().optional(),
     maxOfferTargetSource: z
-      .enum(["buy-box", "screening-defaults", "selected-targets"])
+      .enum([
+        "buy-box",
+        "screening-defaults",
+        "starter-criteria",
+        "selected-targets",
+      ])
       .optional(),
     // Strategy identity only. Specialist numbers are always rebuilt
     // server-side. One-time Pack claims intentionally ignore this field because

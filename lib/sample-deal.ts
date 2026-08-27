@@ -101,7 +101,7 @@ export function isTrueCapSyntheticSampleAddress(value: unknown): boolean {
 
 /** Short display strings shared by the hero card. */
 export const SAMPLE_DEAL_DISPLAY = {
-  shortAddress: "Synthetic sample · Philadelphia",
+  shortAddress: "Philadelphia rental example",
   subtitle: `Single Family · $${SAMPLE_DEAL_VALUES.purchasePrice.toLocaleString("en-US")} · Built ${SAMPLE_DEAL_VALUES.yearBuilt}`,
 } as const;
 

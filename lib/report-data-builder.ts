@@ -192,6 +192,8 @@ export function buildCanonicalReportData(
   const decisionSourceLabel =
     targetSource === "buy-box"
       ? "the captured Buy Box financial targets"
+      : targetSource === "starter-criteria"
+        ? "the adopted TrueCap starter criteria"
       : targetSource === "selected-targets"
         ? "the selected targets"
         : "the visible screening defaults";
@@ -263,8 +265,12 @@ export function buildCanonicalReportData(
       label: !targetAdopted
         ? "Preliminary underwriting"
         : clearsSelectedTargets
-          ? "Meets selected rules at asking"
-          : "Does not meet selected rules at asking",
+          ? targetSource === "starter-criteria"
+            ? "Meets TrueCap starter criteria at asking"
+            : "Meets selected rules at asking"
+          : targetSource === "starter-criteria"
+            ? "Does not meet TrueCap starter criteria at asking"
+            : "Does not meet selected rules at asking",
       readiness: "Screening only",
       clearsSelectedTargets,
       targetSource,

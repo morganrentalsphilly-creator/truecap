@@ -32,6 +32,11 @@ import {
   type PipelineStage,
 } from "@/lib/pipeline";
 import {
+  isSavedDealActive,
+  isSavedDealArchived,
+  persistedLifecycleForSimpleState,
+} from "@/lib/saved-deal-lifecycle";
+import {
   buildDataConfidence,
   shouldPreserveStoredDataConfidence,
   type EnrichmentProvenanceInput,
@@ -181,6 +186,7 @@ export type GetSavedDealForEditingResult =
         | "SIGN_IN_REQUIRED"
         | "ENTITLEMENT_REQUIRED"
         | "NOT_FOUND"
+        | "DEAL_ARCHIVED"
         | "MIGRATION_PENDING"
         | "VALIDATION_ERROR"
         | "SERVER_ERROR";
@@ -1047,7 +1053,7 @@ export async function saveDealAction(
     const { data: existing, error: existingErr } = await supabase
       .from("saved_analyses")
       .select(
-        "id, address, title, data_confidence, result_snapshot, financing_profile_id, financing_profile_version, financing_profile_snapshot, underwriting_revision",
+        "id, address, title, data_confidence, result_snapshot, financing_profile_id, financing_profile_version, financing_profile_snapshot, underwriting_revision, pipeline_stage, is_archived",
       )
       .eq("id", candidateExistingId)
       .eq("user_id", user.id)
@@ -1077,6 +1083,19 @@ export async function saveDealAction(
         code: "DEAL_DELETED",
         message:
           "This saved deal was deleted or archived, so it can't be updated.",
+      };
+    }
+
+    // Archive is a terminal workflow transition, not a hidden edit mode. This
+    // preflight handles a deal archived before this save began; the conditional
+    // UPDATE below independently closes the race where another tab archives it
+    // after this read but before the write.
+    if (isSavedDealArchived(existing as Record<string, unknown>)) {
+      return {
+        ok: false,
+        code: "DEAL_DELETED",
+        message:
+          "This deal was archived while you were editing it. Restore it from Archived deals before updating it, or save these inputs as a new deal.",
       };
     }
 
@@ -1420,6 +1439,7 @@ export async function saveDealAction(
       .eq("id", existing.id)
       .eq("user_id", user.id)
       .eq("underwriting_revision", expectedUnderwritingRevision)
+      .eq("is_archived", false)
       .is("deleted_at", null)
       .select("id, underwriting_revision")
       .maybeSingle();
@@ -1439,7 +1459,7 @@ export async function saveDealAction(
     if (!data) {
       const { data: current, error: currentError } = await supabase
         .from("saved_analyses")
-        .select("id")
+        .select("id, pipeline_stage, is_archived")
         .eq("id", existing.id)
         .eq("user_id", user.id)
         .is("deleted_at", null)
@@ -1452,7 +1472,15 @@ export async function saveDealAction(
           ok: false,
           code: "DEAL_DELETED",
           message:
-            "This saved deal was deleted or archived while you were saving.",
+            "This saved deal was deleted while you were saving.",
+        };
+      }
+      if (isSavedDealArchived(current as Record<string, unknown>)) {
+        return {
+          ok: false,
+          code: "DEAL_DELETED",
+          message:
+            "This deal was archived while you were saving. Restore it from Archived deals before updating it, or save these inputs as a new deal.",
         };
       }
       return {
@@ -1642,6 +1670,7 @@ export async function saveDealAction(
 
 export async function getSavedDealForEditingAction(
   id: string,
+  options?: { allowArchivedSource?: boolean },
 ): Promise<GetSavedDealForEditingResult> {
   const supabase = await createServerSupabaseClient();
   const {
@@ -1659,7 +1688,7 @@ export async function getSavedDealForEditingAction(
   const { data, error } = await supabase
     .from("saved_analyses")
     .select(
-      "id, schema_version, methodology_version, underwriting_revision, pipeline_stage, form_snapshot, result_snapshot, financing_profile_id, financing_profile_version, financing_profile_snapshot, property_type, address, purchase_price, year_built, loan_term_years, interest_rate_pct, down_payment_pct, closing_costs_pct, bedrooms, bathrooms, sqft, monthly_rent, property_tax_pct, insurance_input_mode, insurance_pct, insurance_mo, hoa_mo, utilities_mo, maintenance_pct, vacancy_pct, management_pct, capex_pct, building_value_pct, depreciation_years, include_interest_deduction, tax_rate_pct, expense_growth_pct, rent_growth_pct, template_id, appreciation_rate_pct, selling_cost_pct",
+      "id, schema_version, methodology_version, underwriting_revision, pipeline_stage, form_snapshot, result_snapshot, financing_profile_id, financing_profile_version, financing_profile_snapshot, property_type, address, purchase_price, year_built, loan_term_years, interest_rate_pct, down_payment_pct, closing_costs_pct, bedrooms, bathrooms, sqft, monthly_rent, property_tax_pct, insurance_input_mode, insurance_pct, insurance_mo, hoa_mo, utilities_mo, maintenance_pct, vacancy_pct, management_pct, capex_pct, building_value_pct, depreciation_years, include_interest_deduction, tax_rate_pct, expense_growth_pct, rent_growth_pct, template_id, appreciation_rate_pct, selling_cost_pct, is_completed, is_archived",
     )
     .eq("id", id.trim())
     .eq("user_id", user.id)
@@ -1683,6 +1712,18 @@ export async function getSavedDealForEditingAction(
       ok: false,
       code: "NOT_FOUND",
       message: "This saved analysis is no longer available.",
+    };
+  }
+
+  if (
+    options?.allowArchivedSource !== true &&
+    isSavedDealArchived(data)
+  ) {
+    return {
+      ok: false,
+      code: "DEAL_ARCHIVED",
+      message:
+        "This deal is archived. Restore it from Archived deals before editing it.",
     };
   }
 
@@ -2377,23 +2418,10 @@ export async function updateSavedDealLifecycleStateAction(
   }
 
   const updatePayload =
-    state === "active"
-      ? {
-          is_completed: false,
-          is_archived: false,
-          last_activity_at: new Date().toISOString(),
-        }
-      : state === "completed"
-        ? {
-            is_completed: true,
-            is_archived: false,
-            last_activity_at: new Date().toISOString(),
-          }
-        : {
-            is_completed: false,
-            is_archived: true,
-            last_activity_at: new Date().toISOString(),
-          };
+    {
+      ...persistedLifecycleForSimpleState(state),
+      last_activity_at: new Date().toISOString(),
+    };
 
   const { data, error } = await supabase
     .from("saved_analyses")
@@ -3016,7 +3044,7 @@ export async function updateDealDueDiligenceAction(
  *
  * Why a separate action vs N calls to updateSavedDealLifecycleStateAction:
  *   - Single DB round trip instead of N
- *   - Atomic from the user's perspective (either all succeed or none)
+ *   - One lifecycle transition shared by every selected row
  *   - Soft-delete (deleted_at = now) for "delete" — preserves history
  *     and lets us restore by clearing deleted_at if a user complains
  *
@@ -3028,7 +3056,13 @@ export async function updateDealDueDiligenceAction(
  * indicate a UI bug or a scraping attempt.
  */
 export type BulkSavedDealActionResult =
-  | { ok: true; affectedCount: number }
+  | {
+      ok: true;
+      affectedCount: number;
+      /** Rows that changed lifecycle after validation and were therefore
+       * deliberately left untouched by the conditional archive update. */
+      skippedCount?: number;
+    }
   | {
       ok: false;
       code: "SIGN_IN_REQUIRED" | "VALIDATION_ERROR" | "SERVER_ERROR";
@@ -3072,12 +3106,44 @@ export async function bulkUpdateSavedDealsAction(
   }
 
   const nowIso = new Date().toISOString();
+
+  if (action === "archive") {
+    const { data: lifecycleRows, error: lifecycleError } = await supabase
+      .from("saved_analyses")
+      .select("id, pipeline_stage, is_completed, is_archived")
+      .in("id", cleanedIds)
+      .eq("user_id", user.id)
+      .is("deleted_at", null);
+
+    if (lifecycleError) {
+      return toServerErrorResult(lifecycleError, "saved-analyses");
+    }
+
+    if (
+      lifecycleRows?.length !== cleanedIds.length ||
+      lifecycleRows.some((row) => !isSavedDealActive(row))
+    ) {
+      return {
+        ok: false,
+        code: "VALIDATION_ERROR",
+        message:
+          "Only active deals can be archived. Refresh My Deals and remove completed, passed, already archived, or unavailable deals from the selection.",
+      };
+    }
+  }
+
   const updatePayload =
     action === "delete"
       ? { deleted_at: nowIso }
       : action === "archive"
-        ? { is_archived: true, is_completed: false, last_activity_at: nowIso }
-        : { is_archived: false, is_completed: false, last_activity_at: nowIso };
+        ? {
+            ...persistedLifecycleForSimpleState("archived"),
+            last_activity_at: nowIso,
+          }
+        : {
+            ...persistedLifecycleForSimpleState("active"),
+            last_activity_at: nowIso,
+          };
 
   let query = supabase
     .from("saved_analyses")
@@ -3090,6 +3156,14 @@ export async function bulkUpdateSavedDealsAction(
   if (action !== "delete") {
     query = query.is("deleted_at", null);
   }
+  // These flag predicates close the archive-vs-complete race between the
+  // preflight and this write without letting Archive resurrect a terminal
+  // row. PostgREST multi-row updates are not transactional with that earlier
+  // read, so a concurrent lifecycle change can produce a partial success;
+  // report that truthfully below instead of claiming the whole action failed.
+  if (action === "archive") {
+    query = query.eq("is_completed", false).eq("is_archived", false);
+  }
 
   const { data, error } = await query.select("id");
 
@@ -3097,5 +3171,12 @@ export async function bulkUpdateSavedDealsAction(
     return toServerErrorResult(error, "saved-analyses");
   }
 
-  return { ok: true, affectedCount: data?.length ?? 0 };
+  const affectedCount = data?.length ?? 0;
+  return {
+    ok: true,
+    affectedCount,
+    ...(action === "archive" && affectedCount < cleanedIds.length
+      ? { skippedCount: cleanedIds.length - affectedCount }
+      : {}),
+  };
 }

@@ -182,6 +182,23 @@ describe("pending authentication continuity", () => {
     });
   });
 
+  it("preserves adopted starter provenance through the guest auth handoff", () => {
+    installLocalStorage();
+    const analysisFingerprint = maoTargetAnalysisFingerprint(
+      SAMPLE_DEAL_FIXTURE.values,
+    );
+    writePendingMaoTarget(SAMPLE_DEAL_FIXTURE.maoTarget, {
+      analysisFingerprint: analysisFingerprint!,
+      source: "starter-criteria",
+      now: 1_000,
+    });
+
+    expect(readPendingMaoTargetBinding(analysisFingerprint, 2_000)).toEqual({
+      target: SAMPLE_DEAL_FIXTURE.maoTarget,
+      source: "starter-criteria",
+    });
+  });
+
   const DAY_MS = 24 * 60 * 60 * 1000;
   const analysisFingerprint = maoTargetAnalysisFingerprint({
     address: "1700 W Erie Ave",

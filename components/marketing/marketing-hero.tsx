@@ -28,7 +28,8 @@ import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { buildWhatNeedsToBeTrue } from "@/lib/decision-thresholds";
 
 export function MarketingHero() {
-  const { homepageHeadline, newHomepagePositioningEnabled } = getMarketingOfferConfig();
+  const { homepageHeadline, newHomepagePositioningEnabled } =
+    getMarketingOfferConfig();
   return (
     <section className="truecap-marketing-shell relative overflow-hidden border-b border-border bg-gradient-to-b from-[var(--brand-blue-light)] via-background to-background">
       {/* Soft ambient accent behind the preview — a single tinted blob,
@@ -43,7 +44,7 @@ export function MarketingHero() {
         {/* Asymmetric split: conversion copy left, live preview right.
             Collapses to a single column below lg — mobile gets the copy
             + form first, then the preview. */}
-        <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] lg:gap-14">
+         <div className="grid grid-cols-[minmax(0,1fr)] items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] lg:gap-14">
           {/* ── Left: value prop + the primary action ─────────────── */}
           <div className="tc-rise-in max-w-2xl">
             {/* Friction-removal eyebrow: answers cost, signup, and card
@@ -72,15 +73,22 @@ export function MarketingHero() {
                 chip four lines up says the same thing verbatim (mobile
                 density audit LAND-3). */}
             <p className="mt-3 hidden flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground sm:flex">
-              <Check aria-hidden className="size-3.5 shrink-0 text-[var(--metric-positive)]" />
-              <span>No signup required. No credit card. Screen deals free.</span>
+              <Check
+                aria-hidden
+                className="size-3.5 shrink-0 text-[var(--metric-positive)]"
+              />
+              <span>
+                No signup required. No credit card. Screen deals free.
+              </span>
             </p>
           </div>
 
           {/* This is an acquisition answer, not a duplicate calculator, so it
               remains useful proof on mobile as well as desktop. */}
-          <div className="tc-rise-in tc-delay-2 w-full lg:justify-self-end">
-            <HeroProductMock decisionPositioning={newHomepagePositioningEnabled} />
+          <div className="tc-rise-in tc-delay-2 min-w-0 w-full lg:justify-self-end">
+            <HeroProductMock
+              decisionPositioning={newHomepagePositioningEnabled}
+            />
           </div>
         </div>
 
@@ -98,12 +106,17 @@ export function MarketingHero() {
                   unique proof elements (ticker + quote) carry the mobile
                   band (mobile density audit LAND-6). */}
               <p className="hidden text-xs font-medium text-foreground/80 sm:block">
-                Auto-fills screening benchmarks for rent, rate &amp; tax · Editable assumptions · Cap rate · CoC · DSCR · cash flow
+                Auto-fills screening benchmarks for rent, rate &amp; tax ·
+                Editable assumptions · Cap rate · CoC · DSCR · cash flow
               </p>
               <p className="hidden text-[11px] leading-relaxed text-muted-foreground sm:block">
-                Uses <strong className="font-semibold text-foreground">HUD</strong> area-rent benchmarks,{" "}
-                <strong className="font-semibold text-foreground">FRED</strong> owner-occupied rate benchmarks, and{" "}
-                <strong className="font-semibold text-foreground">state</strong> tax estimates, all editable.
+                Uses{" "}
+                <strong className="font-semibold text-foreground">HUD</strong>{" "}
+                area-rent benchmarks,{" "}
+                <strong className="font-semibold text-foreground">FRED</strong>{" "}
+                owner-occupied rate benchmarks, and{" "}
+                <strong className="font-semibold text-foreground">state</strong>{" "}
+                tax estimates, all editable.
               </p>
               <div className="pt-1">
                 <DealsAnalyzedTicker
@@ -120,9 +133,14 @@ export function MarketingHero() {
                 Customer quotes render only from the verified proof registry
                 further down the page. */}
             <div className="flex items-start gap-2.5 border-t border-border pt-4 sm:border-l sm:border-t-0 sm:pl-6 sm:pt-0">
-              <Database className="mt-0.5 size-4 shrink-0 text-primary/50" aria-hidden />
+              <Database
+                className="mt-0.5 size-4 shrink-0 text-primary/50"
+                aria-hidden
+              />
               <p className="text-xs leading-relaxed text-muted-foreground">
-                <strong className="text-foreground">No black-box inputs.</strong>{" "}
+                <strong className="text-foreground">
+                  No black-box inputs.
+                </strong>{" "}
                 Every starting assumption is labeled with its source or as your
                 input, stays editable, and carries a clear verification step.
               </p>
@@ -197,13 +215,20 @@ const HERO_ANIM_CSS = `
 }
 `;
 
-function HeroProductMock({ decisionPositioning }: { decisionPositioning: boolean }) {
+function HeroProductMock({
+  decisionPositioning,
+}: {
+  decisionPositioning: boolean;
+}) {
   // COMPUTED, not hard-coded: the card renders the REAL engine output for
   // the REAL sample deal the "View a sample report" button loads. Sharing
   // lib/sample-deal.ts + computing here makes card/analysis divergence
   // impossible. Server component, so this runs at build/ISR time — zero
   // client cost.
-  const { analysis: result, dealScore: score, maxOffer } = calculateSampleDealOutcome();
+  const {
+    analysis: result,
+    maxOffer,
+  } = calculateSampleDealOutcome();
   const cf = Math.round(result.netCashFlow);
   const cfLabel = `${cf >= 0 ? "+" : "-"}$${Math.abs(cf).toLocaleString("en-US")}`;
   const capLabel = `${result.capRate.toFixed(1)}%`;
@@ -218,18 +243,37 @@ function HeroProductMock({ decisionPositioning }: { decisionPositioning: boolean
   const listPrice = Number(SAMPLE_DEAL_FIXTURE.values.purchasePrice);
   const gap = maxOffer ? listPrice - maxOffer.maxPrice : null;
   const target = { monthlyCashFlow: targetCashFlow, dscr: 1.25 };
-  const decisionThresholds = buildWhatNeedsToBeTrue(SAMPLE_DEAL_FIXTURE.values, target);
+  const decisionThresholds = buildWhatNeedsToBeTrue(
+    SAMPLE_DEAL_FIXTURE.values,
+    target,
+  );
   const askingClears = decisionThresholds?.targetAlreadyMet ?? false;
   const requiredRent = decisionThresholds?.requiredRent ?? null;
   const maxRate = decisionThresholds?.maxInterestRate ?? null;
+  const viabilityPaths = [
+    decisionThresholds?.maxPrice.thresholdValue != null
+      ? `Price ≤ $${Math.round(decisionThresholds.maxPrice.thresholdValue).toLocaleString("en-US")}`
+      : "Review the asking price",
+    requiredRent?.status === "change_required" &&
+    requiredRent.thresholdValue != null
+      ? `Rent ≥ $${Math.round(requiredRent.thresholdValue).toLocaleString("en-US")}/mo`
+      : null,
+    maxRate?.status === "change_required" && maxRate.thresholdValue != null
+      ? `Rate ≤ ${maxRate.thresholdValue.toFixed(2)}%`
+      : null,
+  ].filter((path): path is string => path !== null);
 
   return (
-    <div className="relative mx-auto w-full max-w-lg">
+    <div className="relative mx-auto min-w-0 w-full max-w-lg">
       {/* Inline keyframes — see HERO_ANIM_CSS comment above. */}
       <style dangerouslySetInnerHTML={{ __html: HERO_ANIM_CSS }} />
 
       {/* card */}
-      <div className="rounded-2xl border border-border bg-card p-4 shadow-[0_24px_70px_rgba(15,23,42,0.10)] sm:p-6">
+      <article
+        aria-label="Illustrative sample analysis"
+        data-hero-sample-card=""
+         className="w-full min-w-0 max-w-full rounded-2xl border border-border bg-card p-4 shadow-[0_24px_70px_rgba(15,23,42,0.10)] max-[250px]:p-3 sm:p-6"
+      >
         {/* browser chrome + a small LIVE indicator communicating that the
             analyzer is running, not a static screenshot. */}
         <div className="mb-4 flex items-center gap-1.5">
@@ -238,118 +282,145 @@ function HeroProductMock({ decisionPositioning }: { decisionPositioning: boolean
           <span className="size-2.5 rounded-full bg-emerald-400/80" />
           <span className="ml-3 min-w-0 flex-1 truncate rounded-full bg-muted px-3 py-0.5 text-[10px] font-medium text-muted-foreground">
             <span className="sm:hidden">usetruecap.com</span>
-            <span className="hidden sm:inline">usetruecap.com / {SAMPLE_DEAL_FIXTURE.display.shortAddress}</span>
+            <span className="hidden sm:inline">
+              usetruecap.com / {SAMPLE_DEAL_FIXTURE.display.shortAddress}
+            </span>
           </span>
           <span
             aria-label="Example analysis"
             className="ml-1 inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-widest text-[var(--brand-green)]"
           >
-            <span aria-hidden className="tc-hero-pulse-dot animate-pulse size-1.5 rounded-full bg-[var(--brand-green)]" />
+            <span
+              aria-hidden
+              className="tc-hero-pulse-dot animate-pulse size-1.5 rounded-full bg-[var(--brand-green)]"
+            />
             Example
           </span>
         </div>
 
-        {/* address + verdict row. */}
-        <div className="flex flex-col gap-2 border-b border-border pb-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-3">
-          <div className="tc-hero-step-1 min-w-0 sm:flex-1">
-            <div className="text-base font-extrabold text-foreground sm:text-lg">{SAMPLE_DEAL_FIXTURE.display.shortAddress}</div>
-            <div className="text-xs text-muted-foreground">{SAMPLE_DEAL_FIXTURE.display.subtitle}</div>
+        {/* Keep identity and outcome in separate rows. The card is capped at
+            32rem even on wide screens, so viewport breakpoints cannot safely
+            infer its available inline size. The old sm:flex row collapsed the
+            property name to ~25px between 640–1023px and at common zoom levels. */}
+        <div
+          data-hero-sample-summary=""
+          className="border-b border-border pb-4"
+        >
+          <div data-hero-sample-property="" className="tc-hero-step-1 min-w-0">
+            <div className="text-pretty text-base font-extrabold leading-snug text-foreground sm:text-lg">
+              {SAMPLE_DEAL_FIXTURE.display.shortAddress}
+            </div>
+            <div className="mt-0.5 break-words text-xs leading-relaxed text-muted-foreground">
+              {SAMPLE_DEAL_FIXTURE.display.subtitle}
+            </div>
           </div>
-          <div className="tc-hero-step-5 flex flex-wrap items-center gap-1.5 sm:gap-2">
+           <div
+             data-hero-sample-status=""
+             className="tc-hero-step-5 mt-3 min-w-0"
+           >
             <span
-              className={`rounded-full px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white sm:px-2.5 sm:py-1 sm:text-[10px] ${
-                askingClears ? "bg-[var(--brand-green)]" : "bg-[var(--brand-orange)]"
+              className={`min-w-0 rounded-lg border px-3 py-2 text-xs font-bold leading-snug ${
+                askingClears
+                  ? "border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] text-[var(--brand-green)]"
+                  : "border-[var(--brand-orange)]/30 bg-[var(--brand-orange-light)] text-[var(--brand-orange-text)]"
               }`}
             >
-              {askingClears
-                ? "Meets selected rules at asking"
-                : "Does not meet selected rules at asking"}
-            </span>
-            <span className="rounded-full bg-primary px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white sm:px-2.5 sm:py-1 sm:text-[10px]">
-              Screening Index {Math.round(score.score)}/100
-            </span>
-          </div>
+               {askingClears
+                 ? "Asking meets the sample targets"
+                 : "Asking misses the sample targets"}
+             </span>
+           </div>
         </div>
 
         {/* Acquisition answer first; supporting metrics stay subordinate. */}
-        <div className="tc-hero-step-2 mt-4 rounded-xl border-2 border-primary/30 bg-[var(--brand-blue-light)] p-4">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest text-[var(--brand-blue-text)]">
-                <Target aria-hidden className="size-3.5" /> Offer Ceiling
-              </div>
-              <div className="mt-1 font-mono text-3xl font-extrabold tabular-nums tracking-tight text-primary">
-                {maxOfferLabel}
-              </div>
-              {gap != null && gap > 0 ? (
-                <div className="mt-0.5 text-xs font-semibold text-foreground/80">
-                  ${gap.toLocaleString("en-US")} below the ${listPrice.toLocaleString("en-US")} list price
-                </div>
-              ) : null}
-              <p className="mt-1 text-xs text-foreground/80">
-                {SAMPLE_DEAL_FIXTURE.targetProfile.name} v{SAMPLE_DEAL_FIXTURE.targetProfile.version} · {targetLabel}.
-              </p>
-              <p className="mt-1 text-[10px] leading-relaxed text-foreground/80">
-                Highest modeled price that still meets the sample target profile under the assumptions shown. This is not a recommended offer.
-              </p>
-            </div>
-            <span className="rounded-full bg-[var(--brand-green)] px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white">
-              Example targets
-            </span>
+        <div
+          data-hero-sample-offer=""
+          className="tc-hero-step-2 mt-4 min-w-0 rounded-xl border-2 border-primary/30 bg-[var(--brand-blue-light)] p-3 min-[320px]:p-4"
+        >
+          <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest text-[var(--brand-blue-text)]">
+            <Target aria-hidden className="size-3.5" /> Offer Ceiling
           </div>
+          <div className="mt-1 break-words font-mono text-2xl font-extrabold tabular-nums tracking-tight text-primary min-[320px]:text-3xl">
+            {maxOfferLabel}
+          </div>
+          {gap != null && gap > 0 ? (
+            <div className="mt-0.5 text-xs font-semibold text-foreground/80">
+              ${gap.toLocaleString("en-US")} below the $
+              {listPrice.toLocaleString("en-US")} list price
+            </div>
+          ) : null}
+           <p className="mt-1 text-xs text-foreground/80">
+             Example criteria · {targetLabel}.
+           </p>
+           <p className="mt-1 text-[10px] leading-relaxed text-foreground/80">
+             Highest modeled price meeting these example criteria. This is not
+             a recommended offer.
+           </p>
         </div>
 
         {decisionPositioning ? (
-          <>
-            <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-3 sm:gap-3">
-              <MockTile label="At asking" value={askingClears ? "Meets" : "Misses"} tone={askingClears ? "success" : "primary"} sub="selected sample rules" stepClass="tc-hero-step-3" />
-              <MockTile label="Evidence status" value="Illustrative" tone="primary" sub="not property facts" stepClass="tc-hero-step-4" />
-              <MockTile label="Target profile" value="Synthetic" tone="primary" sub={`v${SAMPLE_DEAL_FIXTURE.targetProfile.version}`} stepClass="tc-hero-step-5" />
+          !askingClears ? (
+            <div className="tc-hero-step-3 mt-3 min-w-0 rounded-xl border border-primary/20 bg-primary/5 p-3 text-xs text-foreground">
+              <p className="text-[10px] font-extrabold uppercase tracking-wider text-primary">
+                What would make this sample work
+              </p>
+              <p className="mt-1 break-words font-semibold leading-relaxed">
+                {viabilityPaths.join(" · ")}
+              </p>
             </div>
-            {!askingClears ? (
-              <div className="tc-hero-step-6 mt-3 rounded-xl border border-primary/20 bg-primary/5 p-3 text-xs text-foreground">
-                <strong>Modeled paths to meet the sample targets:</strong>{" "}
-                {decisionThresholds?.maxPrice.thresholdValue != null
-                  ? `price ≤ $${Math.round(decisionThresholds.maxPrice.thresholdValue).toLocaleString("en-US")}`
-                  : "review the asking price"}
-                {requiredRent?.status === "change_required" && requiredRent.thresholdValue != null
-                  ? ` or rent ≥ $${Math.round(requiredRent.thresholdValue).toLocaleString("en-US")}/mo`
-                  : ""}
-                {maxRate?.status === "change_required" && maxRate.thresholdValue != null
-                  ? ` or rate ≤ ${maxRate.thresholdValue.toFixed(2)}%`
-                  : ""}
-                .
-              </div>
-            ) : null}
-          </>
+          ) : null
         ) : (
           <div className="mt-3 grid grid-cols-1 gap-2 min-[360px]:grid-cols-3 sm:gap-3">
-            <MockTile label="Target cash flow" value={`$${targetCashFlow}`} tone="primary" sub="per month" stepClass="tc-hero-step-3" />
-            <MockTile label="DSCR at max" value={maxOffer ? maxOffer.achieved.dscr.toFixed(2) : "—"} tone="success" sub="target ≥ 1.25" stepClass="tc-hero-step-4" />
-            <MockTile label="At list" value={cfLabel} tone="success" sub={`${capLabel} cap`} stepClass="tc-hero-step-5" />
+            <MockTile
+              label="Target cash flow"
+              value={`$${targetCashFlow}`}
+              tone="primary"
+              sub="per month"
+              stepClass="tc-hero-step-3"
+            />
+            <MockTile
+              label="DSCR at max"
+              value={maxOffer ? maxOffer.achieved.dscr.toFixed(2) : "—"}
+              tone="success"
+              sub="target ≥ 1.25"
+              stepClass="tc-hero-step-4"
+            />
+            <MockTile
+              label="At list"
+              value={cfLabel}
+              tone="success"
+              sub={`${capLabel} cap`}
+              stepClass="tc-hero-step-5"
+            />
           </div>
         )}
 
         {/* Verdict line — final step 6, one concise sentence. */}
-        <div className={`${decisionPositioning ? "" : "tc-hero-step-6"} mt-4 flex items-start gap-2 rounded-xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-3 text-xs text-foreground`}>
-          <TrendingUp aria-hidden className="mt-0.5 size-4 shrink-0 text-[var(--brand-green)]" />
-          <span>
-            <strong>Selected-rule fit:</strong>{" "}
-            {maxOffer && gap != null && gap > 0
-              ? `Asking is $${gap.toLocaleString("en-US")} above the ${maxOfferLabel} Offer Ceiling and misses the example $${targetCashFlow}/mo cash-flow target.`
-              : "The asking price meets the example targets under the illustrative assumptions. Verify the material inputs before recording a decision."}
-          </span>
-        </div>
+        {!decisionPositioning ? (
+          <div className="tc-hero-step-6 mt-4 flex items-start gap-2 rounded-xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-3 text-xs text-foreground">
+            <TrendingUp
+              aria-hidden
+              className="mt-0.5 size-4 shrink-0 text-[var(--brand-green)]"
+            />
+            <span>
+              <strong>Selected-rule fit:</strong>{" "}
+              {maxOffer && gap != null && gap > 0
+                ? `Asking is $${gap.toLocaleString("en-US")} above the ${maxOfferLabel} Offer Ceiling and misses the example $${targetCashFlow}/mo cash-flow target.`
+                : "The asking price meets the example targets under the illustrative assumptions. Verify the material inputs before recording a decision."}
+            </span>
+          </div>
+        ) : null}
         <p className="mt-3 text-[10px] leading-relaxed text-muted-foreground">
-          Example analysis using editable sample inputs. Estimates are not an appraisal or investment guarantee.
+          Illustrative analysis using editable sample inputs. Estimates are not
+          an appraisal or investment guarantee.
         </p>
-        <Link
-          href="/sample-decision-memo"
-          className="mt-1 inline-flex min-h-11 items-center text-xs font-bold text-primary underline-offset-4 hover:underline"
-        >
+         <Link
+           href="/sample-decision-memo"
+           className="mt-1 flex min-h-11 max-w-full items-center break-words text-xs font-bold leading-relaxed text-primary underline-offset-4 hover:underline"
+         >
           Open the standalone sample decision memo →
         </Link>
-      </div>
+      </article>
       {/* edge fade */}
       <div className="pointer-events-none absolute inset-x-0 -bottom-6 h-12 bg-gradient-to-t from-background to-transparent" />
     </div>
@@ -381,13 +452,19 @@ function MockTile({
     <div
       className={`min-w-0 rounded-xl border border-border bg-background p-3 ${stepClass ?? ""}`}
     >
-      <div className={`text-[10px] font-bold uppercase tracking-widest text-muted-foreground ${small ? "" : "sm:text-[10px]"}`}>
+      <div
+        className={`text-[10px] font-bold uppercase tracking-widest text-muted-foreground ${small ? "" : "sm:text-[10px]"}`}
+      >
         {label}
       </div>
-      <div className={`mt-1 font-extrabold tabular-nums ${color} ${small ? "text-lg" : "text-lg sm:text-xl"}`}>
+      <div
+        className={`mt-1 font-extrabold tabular-nums ${color} ${small ? "text-lg" : "text-lg sm:text-xl"}`}
+      >
         {value}
       </div>
-      {sub ? <div className="text-[10px] text-muted-foreground">{sub}</div> : null}
+      {sub ? (
+        <div className="text-[10px] text-muted-foreground">{sub}</div>
+      ) : null}
     </div>
   );
 }
