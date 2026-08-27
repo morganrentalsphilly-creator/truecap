@@ -68,10 +68,14 @@ test("mobile investor can set criteria, calculate once, and start a fresh analys
   await expect(criteria).toContainText("cash flow ≥ $100/mo");
   await expectNoHorizontalOverflow(page);
 
-  const analyze = form.getByRole("button", {
-    name: "Analyze deal & calculate ceiling",
-    exact: true,
-  });
+  // The mobile sticky action intentionally mirrors this CTA once the
+  // canonical in-form button has scrolled out of view. Target the stable
+  // in-form control so the regression proves the one-click calculation path
+  // without becoming ambiguous when both controls are mounted in the DOM.
+  const analyze = form.locator('button[data-inform-submit="true"]');
+  await expect(analyze).toHaveAccessibleName(
+    "Analyze deal & calculate ceiling",
+  );
   await expect(analyze).toBeEnabled();
   await analyze.click();
 
