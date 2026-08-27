@@ -513,9 +513,12 @@ export function FocusedDecisionSummary({
             reason: `${nextVerification.label} is a material ${nextVerification.sourceLabel.toLowerCase()} input`,
           }
         : {
-            label: "Review downside and verification",
-            reason:
-              "The current assumptions clear the adopted rules; TrueCap does not infer the investment decision.",
+            label: advocacyContractEnabled
+              ? "Double-check the biggest cash-flow drivers"
+              : "Review downside and verification",
+            reason: advocacyContractEnabled
+              ? "Review the current values and sources below before recording your decision."
+              : "The current assumptions clear the adopted rules; TrueCap does not infer the investment decision.",
           };
   const resolvedNextAction = legacyResolvedNextAction;
   const nextVerificationAction = nextVerification
@@ -1157,21 +1160,23 @@ export function FocusedDecisionSummary({
         </div>
       ) : null}
 
-      <div className="mt-4 rounded-xl border border-amber-500/25 bg-amber-500/5 p-3">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-          {targetAdopted
-            ? "Two assumptions most likely to move the decision"
-            : "What can move the result"}
-        </p>
-        <ol className="mt-2 grid gap-1 text-sm font-semibold text-foreground sm:grid-cols-2">
-          {sensitivityLabels.map((label, index) => (
-            <li key={label}>
-              <span className="text-muted-foreground">{index + 1}.</span>{" "}
-              {label}
-            </li>
-          ))}
-        </ol>
-      </div>
+      {!advocacyContractEnabled && sensitivityLabels.length > 0 ? (
+        <div className="mt-4 rounded-xl border border-amber-500/25 bg-amber-500/5 p-3">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            {targetAdopted
+              ? "Two assumptions most likely to move the decision"
+              : "What can move the result"}
+          </p>
+          <ol className="mt-2 grid gap-1 text-sm font-semibold text-foreground sm:grid-cols-2">
+            {sensitivityLabels.map((label, index) => (
+              <li key={label}>
+                <span className="text-muted-foreground">{index + 1}.</span>{" "}
+                {label}
+              </li>
+            ))}
+          </ol>
+        </div>
+      ) : null}
 
       <details className="group mt-2 rounded-xl border border-border bg-muted/20 px-2 py-1">
         <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg px-3 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">

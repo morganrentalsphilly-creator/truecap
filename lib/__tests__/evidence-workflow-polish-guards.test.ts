@@ -107,14 +107,13 @@ describe("evidence workflow usability guards", () => {
     );
   });
 
-  it("opens the saved checklist only for the exact persisted inputs", () => {
+  it("keeps offer checks independent from saving and the workspace checklist", () => {
     const dashboard = read("components/investcalc/analysis-dashboard.tsx");
     const evidence = read("components/investcalc/input-confidence-card.tsx");
 
-    expect(dashboard).toContain("isCurrentAnalysisSaved={isSaved}");
-    expect(evidence).toContain(
-      "savedDealId && isCurrentAnalysisSaved ?",
-    );
-    expect(evidence).toContain("Save to use checklist");
+    expect(dashboard).not.toContain("isCurrentAnalysisSaved={isSaved}");
+    expect(evidence).not.toContain("onSaveForVerification");
+    expect(evidence).not.toContain("Save to use checklist");
+    expect(evidence).not.toContain("Open deal checklist");
   });
 });
