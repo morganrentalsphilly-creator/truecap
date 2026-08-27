@@ -4616,11 +4616,33 @@ export function InvestCalcPage({
             (pendingMaoBinding.source !== "buy-box" &&
               maoTargetFingerprint(pendingMaoBinding.target) ===
                 maoTargetFingerprint(SAMPLE_DEAL_FIXTURE.maoTarget));
+          // The exact demo is sometimes written deliberately for a just-clicked
+          // Save or Share authentication handoff. That recent, draft-bound
+          // intent is not stale sample residue: it must survive long enough to
+          // restore the result and complete the action without a second click.
+          const resumesPendingSaveAfterAuth =
+            isAuthenticated && pendingSaveIntentMatchesDraft(normalized);
+          let resumesPendingShareAfterAuth = false;
+          if (isAuthenticated) {
+            try {
+              resumesPendingShareAfterAuth =
+                parseShareAuthIntent(
+                  window.sessionStorage.getItem(
+                    SHARE_AUTH_INTENT_STORAGE_KEY,
+                  ),
+                  { currentPath: window.location.pathname },
+                )?.context === "analysis";
+            } catch {
+              /* unavailable tab storage — no resumable share intent */
+            }
+          }
           const isSyntheticSampleDraft =
             restoredAnalyzerStrategyKey === SAMPLE_DEAL_FIXTURE.strategyKey &&
             formSnapshotForCompare(normalized) ===
               formSnapshotForCompare(sampleValues) &&
-            pendingTargetMatchesSample;
+            pendingTargetMatchesSample &&
+            !resumesPendingSaveAfterAuth &&
+            !resumesPendingShareAfterAuth;
           if (isSyntheticSampleDraft) {
             // Clean up drafts created by older releases that did persist the
             // demo. A synthetic sample must never become the default starting
@@ -4716,7 +4738,7 @@ export function InvestCalcPage({
           // but inert form and must re-Calculate + re-Save manually — a
           // conversion leak at the moment of highest intent. Double-RAF
           // mirrors the PDF-return flow: let RHF flush before submitting.
-          if (isAuthenticated && pendingSaveIntentMatchesDraft(normalized)) {
+          if (resumesPendingSaveAfterAuth) {
             autoSaveAfterAuthRef.current = true;
             setIsAutoSaveResuming(true);
             toast({
@@ -5073,6 +5095,7 @@ export function InvestCalcPage({
     }
     const explicitlyTargetless = explicitTargetlessRunRef.current;
     explicitTargetlessRunRef.current = false;
+    const isPendingSampleRun = pendingSampleRunRef.current;
     const runPromisesOfferCeiling = analysisRunPromisesOfferCeiling({
       canCalculateMaxOffer: canUseMaxOffer,
       strategyKey: activeStrategyKeyRef.current,
@@ -5081,7 +5104,7 @@ export function InvestCalcPage({
       runPromisesOfferCeiling &&
       (!analysisMaoTargetRef.current ||
         decisionBasisNeedsReview ||
-        sampleSeededMaoTargetRef.current) &&
+        (sampleSeededMaoTargetRef.current && !isPendingSampleRun)) &&
       !explicitlyTargetless
     ) {
       toast({

@@ -138,6 +138,8 @@ describe("sample-seeded targets never survive as user adoption", () => {
       calculator.indexOf("const restoredAnalyzerStrategyKey ="),
     ).toBeLessThan(calculator.indexOf("const isSyntheticSampleDraft ="));
     expect(calculator).toContain("pendingTargetMatchesSample");
+    expect(calculator).toContain("!resumesPendingSaveAfterAuth");
+    expect(calculator).toContain("!resumesPendingShareAfterAuth");
     expect(calculator).toContain('pendingMaoBinding.source !== "buy-box"');
     expect(calculator).not.toContain(
       "normalized.purchasePrice === sampleValues.purchasePrice",
@@ -150,6 +152,7 @@ describe("sample-seeded targets never survive as user adoption", () => {
       "// Warm the dynamic AnalysisDashboard chunk",
     );
     expect(submitGate).toContain("sampleSeededMaoTargetRef.current");
+    expect(submitGate).toContain("!isPendingSampleRun");
 
     const visibleGate = sourceSection(
       "const hasAdoptedAnalysisTarget = Boolean(",
