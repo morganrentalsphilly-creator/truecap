@@ -13,6 +13,7 @@
  */
 
 export const HERO_ANALYZE_EVENT = "truecap:hero-analyze";
+export const HERO_ANALYZE_STATUS_EVENT = "truecap:hero-analyze-status";
 export const HERO_ANALYZE_STORAGE_KEY = "truecap_pending_hero_analyze";
 
 export type HeroAnalyzeDetail = {
@@ -25,6 +26,81 @@ export type HeroAnalyzeDetail = {
   /** True for "Try a sample deal" — calculator runs the full sample flow. */
   sample?: boolean;
 };
+
+/** Calculator acknowledgement for the hero's in-page handoff. */
+export type HeroAnalyzeStatusDetail = {
+  token: string;
+  status: "received" | "needs-input" | "ready" | "cancelled";
+};
+
+export type ListingImportMissingField = {
+  /** React Hook Form path used by the calculator's focus helper. */
+  path: string;
+  /** Investor-facing description of the one remaining input. */
+  label: string;
+};
+
+type ListingImportSnapshot = {
+  propertyType?: string;
+  purchasePrice?: unknown;
+  bedrooms?: unknown;
+  monthlyRent?: unknown;
+  units?: Array<{
+    monthlyRent?: unknown;
+    isOwnerOccupied?: boolean;
+  }>;
+};
+
+function isMissingPositiveNumber(value: unknown) {
+  if (value === undefined || value === null || value === "") return true;
+  const parsed = Number(value);
+  return !Number.isFinite(parsed) || parsed <= 0;
+}
+
+/**
+ * Describe only the inputs that still block a useful first underwriting run
+ * after a listing URL supplied the address. Bedrooms are an alternative route
+ * to an area-rent estimate, not an additional requirement, so the label says
+ * that explicitly instead of implying both bedrooms and rent are required.
+ */
+export function getListingImportMissingFields(
+  snapshot: ListingImportSnapshot,
+): ListingImportMissingField[] {
+  const missing: ListingImportMissingField[] = [];
+  if (isMissingPositiveNumber(snapshot.purchasePrice)) {
+    missing.push({ path: "purchasePrice", label: "asking price" });
+  }
+
+  if (
+    snapshot.propertyType === "multi-family" ||
+    snapshot.propertyType === "owner-occupant"
+  ) {
+    const units = snapshot.units ?? [];
+    units.forEach((unit, index) => {
+      if (unit?.isOwnerOccupied) return;
+      if (isMissingPositiveNumber(unit?.monthlyRent)) {
+        missing.push({
+          path: `units.${index}.monthlyRent`,
+          label: `monthly rent for unit ${index + 1}`,
+        });
+      }
+    });
+    return missing;
+  }
+
+  if (isMissingPositiveNumber(snapshot.monthlyRent)) {
+    missing.push(
+      isMissingPositiveNumber(snapshot.bedrooms)
+        ? {
+            path: "bedrooms",
+            label: "bedrooms to estimate area rent, or monthly rent",
+          }
+        : { path: "monthlyRent", label: "monthly rent" },
+    );
+  }
+
+  return missing;
+}
 
 type HeroAnalyzeStorage = {
   getItem: (key: string) => string | null;

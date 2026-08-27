@@ -937,7 +937,7 @@ export function TemplatesManagementPage({
                 No saved deals yet — analyze a property and save it, then apply this template to it.
               </p>
               <Button asChild className="mt-3 rounded-full" onClick={() => setApplyForTemplate(null)}>
-                <Link href="/dashboard/new">Analyze a property</Link>
+                <Link href="/dashboard/new?fresh=1">Analyze a property</Link>
               </Button>
             </div>
           ) : (

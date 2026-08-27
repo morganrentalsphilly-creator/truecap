@@ -183,14 +183,14 @@ describe("input-phase traps and mislabels", () => {
   const calculator = read("components/investcalc/investcalc-page.tsx");
 
   it("the primary CTA only becomes the sample launcher on a pristine form", () => {
-    expect(calculator).toContain(
-      "activeStrategyKey === null &&\n    !hasPropertyAvailable &&\n    !hasMeaningfulInput &&\n    !form.formState.isDirty",
+    expect(calculator.replace(/\s+/g, "")).toContain(
+      "activeStrategyKey===null&&!hasPropertyAvailable&&!hasMeaningfulInput&&!form.formState.isDirty",
     );
     expect(calculator).toContain(
       "onClick={() => void handlePrimaryRunAction()}",
     );
-    expect(calculator).toContain(
-      "onTrySample={primaryCtaRunsSample ? handleTrySampleDeal : undefined}",
+    expect(calculator.replace(/\s+/g, "")).toContain(
+      "onTrySample={primaryCtaRunsSample?handleTrySampleDeal:undefined}",
     );
   });
 

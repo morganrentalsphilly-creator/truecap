@@ -161,7 +161,7 @@ describe("non-pointer help and concise announcements", () => {
     );
     expect(normalizeSource(source)).toContain(
       normalizeSource(
-        'uppercase tracking-widest text-foreground/80">Next action',
+        'uppercase tracking-widest text-foreground/75">Best next step',
       ),
     );
     expect(normalizeSource(source)).toContain(

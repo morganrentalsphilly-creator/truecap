@@ -14,7 +14,6 @@ export const metadata: Metadata = {
 import { PortfolioRollupStrip } from "@/components/dashboard/portfolio-rollup-strip";
 import { RefreshOnReturn } from "@/components/investcalc/refresh-on-return";
 import { Topbar } from "@/components/dashboard/Topbar";
-import { getCompareIdsFromCookie } from "@/app/actions/compare";
 import {
   getDashboardNavAccess,
   hasDashboardAccess,
@@ -335,7 +334,13 @@ function normalizeDealStateFilter(value: string | undefined): DealStateFilter {
 export default async function DashboardSavedAnalysesPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ sort?: string; dir?: string; state?: string; client?: string }>;
+  searchParams?: Promise<{
+    sort?: string;
+    dir?: string;
+    state?: string;
+    client?: string;
+    q?: string;
+  }>;
 }) {
   const supabase = await createServerSupabaseClient();
   const user = await getRequestUser();
@@ -350,13 +355,12 @@ export default async function DashboardSavedAnalysesPage({
   }
   const navAccess = getDashboardNavAccess(entitlements);
 
-  const [{ data: profile }, compareIds, isPremium, buyBoxesResult, clientsResult] = await Promise.all([
+  const [{ data: profile }, isPremium, buyBoxesResult, clientsResult] = await Promise.all([
     supabase
       .from("profiles")
       .select("first_name, last_name, display_name, avatar_url")
       .eq("id", user.id)
       .maybeSingle(),
-    getCompareIdsFromCookie(),
     hasPaidPlanSubscription(supabase, user.id),
     // Batched here rather than awaited after the deals query: the offer lines
     // need it, but nothing about it depends on the deals, so it must not sit
@@ -573,7 +577,6 @@ export default async function DashboardSavedAnalysesPage({
           />
           <SavedAnalysesPage
             initialItems={mappedItems}
-            initialSelectedIds={compareIds}
             ownedEquityEnabled={ownedEquityEnabled}
             activeSortField={sortField}
             activeSortDirection={sortDirection}

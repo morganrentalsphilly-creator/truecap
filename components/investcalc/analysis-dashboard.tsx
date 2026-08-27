@@ -1736,11 +1736,13 @@ export function AnalysisDashboard({
 
       {(showInputConfidence || advocacyDecisionContract) &&
       result &&
+      values &&
       !isLoading &&
       inputConfidence &&
       onToggleInputVerified ? (
         <InputConfidenceCard
           confidence={inputConfidence}
+          values={values}
           showOfferReadyStatus={showOfferReadyStatus}
           advocacyContractEnabled={advocacyDecisionContract}
           dealFitScore={

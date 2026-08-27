@@ -7,7 +7,11 @@ import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEven
 import { UserMenu } from "@/components/auth/user-menu";
 import { Button } from "@/components/ui/button";
 import { SheetTrigger } from "@/components/ui/sheet";
-import { setPendingSavedListSearch } from "@/lib/dashboard-saved-search-bridge";
+import {
+  buildDashboardSavedSearchHref,
+  DASHBOARD_SAVED_SEARCH_RELEASE_EVENT,
+  reportDashboardSavedSearchReleased,
+} from "@/lib/dashboard-saved-search-bridge";
 import { requestMountedNewAnalysis } from "@/lib/new-analysis-navigation";
 
 type TopbarProps = {
@@ -23,14 +27,7 @@ type Suggestion = { id: string; address: string; propertyType: string };
 
 const SUGGESTIONS_LISTBOX_ID = "dashboard-search-suggestions";
 
-export function Topbar({
-  displayName,
-  email,
-  initials,
-  avatarSrc,
-  isPremium = false,
-  canAccessDashboard = true,
-}: TopbarProps) {
+export function Topbar({ displayName, email, initials, avatarSrc, isPremium = false, canAccessDashboard = true }: TopbarProps) {
   const router = useRouter();
   const pathname = usePathname() ?? "";
   const searchFormRef = useRef<HTMLFormElement | null>(null);
@@ -45,6 +42,19 @@ export function Topbar({
   // throwing away the fetched matches — typing again reopens the panel.
   const [isPanelDismissed, setIsPanelDismissed] = useState(false);
   const normalizedQuery = useMemo(() => query.trim(), [query]);
+
+  useEffect(() => {
+    const clearReleasedSearch = () => {
+      setQuery("");
+      setDebouncedQuery("");
+      setSuggestions([]);
+      setSearchError(null);
+      setActiveIndex(-1);
+      setIsPanelDismissed(true);
+    };
+    window.addEventListener(DASHBOARD_SAVED_SEARCH_RELEASE_EVENT, clearReleasedSearch);
+    return () => window.removeEventListener(DASHBOARD_SAVED_SEARCH_RELEASE_EVENT, clearReleasedSearch);
+  }, []);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -99,16 +109,24 @@ export function Topbar({
   }, [suggestions]);
 
   const goToSearch = (value: string) => {
-    const trimmed = value.trim();
-    if (!trimmed) return;
-    setPendingSavedListSearch(trimmed);
+    const href = buildDashboardSavedSearchHref(value);
+    if (!href) {
+      if (pathname === "/dashboard/saved-analyses") {
+        reportDashboardSavedSearchReleased();
+        router.push("/dashboard/saved-analyses?state=all");
+      }
+      setSuggestions([]);
+      setActiveIndex(-1);
+      setIsPanelDismissed(true);
+      return;
+    }
     setSuggestions([]);
     setActiveIndex(-1);
     setIsPanelDismissed(true);
     // Route to the dashboard-shell variant so the sidebar + topbar stay
     // mounted. The bare `/saved-analyses` route uses the marketing layout
     // and would visually kick the user out of the dashboard.
-    router.push("/dashboard/saved-analyses");
+    router.push(href);
   };
 
   const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -116,10 +134,8 @@ export function Topbar({
     goToSearch(query);
   };
 
-  const showNoResults =
-    debouncedQuery.length >= 2 && !isLoadingSuggestions && !searchError && suggestions.length === 0;
-  const isOpen =
-    !isPanelDismissed && (suggestions.length > 0 || showNoResults || isLoadingSuggestions || Boolean(searchError));
+  const showNoResults = debouncedQuery.length >= 2 && !isLoadingSuggestions && !searchError && suggestions.length === 0;
+  const isOpen = !isPanelDismissed && (suggestions.length > 0 || showNoResults || isLoadingSuggestions || Boolean(searchError));
   const searchStatus = searchError
     ? "Saved-deal suggestions are unavailable."
     : isLoadingSuggestions
@@ -200,82 +216,82 @@ export function Topbar({
           </Button>
         </SheetTrigger>
         <form ref={searchFormRef} className="relative flex-1 max-w-xl" onSubmit={handleSearchSubmit} role="search">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-        <input
-          name="dashboard-saved-search"
-          value={query}
-          onChange={(event) => {
-            setQuery(event.target.value);
-            setSearchError(null);
-            setActiveIndex(-1);
-            // Editing the query reopens a panel closed by Escape / an
-            // outside click.
-            setIsPanelDismissed(false);
-          }}
-          onKeyDown={handleKeyDown}
-          placeholder="Search your saved deals by address…"
-          aria-label="Search saved deals"
-          role="combobox"
-          aria-expanded={isOpen}
-          aria-controls={isOpen ? SUGGESTIONS_LISTBOX_ID : undefined}
-          aria-autocomplete="list"
-          aria-describedby="dashboard-search-status"
-          // Gated on isOpen as well: when the panel is closed the option
-          // elements are unmounted, so pointing at one would be a dangling
-          // IDREF on a combobox reporting aria-expanded={false}.
-          aria-activedescendant={isOpen && activeIndex >= 0 && suggestions[activeIndex] ? `sugg-${suggestions[activeIndex]!.id}` : undefined}
-          autoComplete="off"
-          className="w-full h-11 pl-10 pr-4 rounded-lg bg-muted/60 border border-transparent focus:border-primary focus:bg-background outline-none text-base sm:text-sm transition focus-visible:ring-2 focus-visible:ring-ring"
-        />
-        <span id="dashboard-search-status" className="sr-only" role="status" aria-live="polite" aria-atomic="true">
-          {searchStatus}
-        </span>
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <input
+            name="dashboard-saved-search"
+            value={query}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setSearchError(null);
+              setActiveIndex(-1);
+              // Editing the query reopens a panel closed by Escape / an
+              // outside click.
+              setIsPanelDismissed(false);
+            }}
+            onKeyDown={handleKeyDown}
+            placeholder="Search your saved deals by address…"
+            aria-label="Search saved deals"
+            role="combobox"
+            aria-expanded={isOpen}
+            aria-controls={isOpen ? SUGGESTIONS_LISTBOX_ID : undefined}
+            aria-autocomplete="list"
+            aria-describedby="dashboard-search-status"
+            // Gated on isOpen as well: when the panel is closed the option
+            // elements are unmounted, so pointing at one would be a dangling
+            // IDREF on a combobox reporting aria-expanded={false}.
+            aria-activedescendant={isOpen && activeIndex >= 0 && suggestions[activeIndex] ? `sugg-${suggestions[activeIndex]!.id}` : undefined}
+            autoComplete="off"
+            className="w-full h-11 pl-10 pr-4 rounded-lg bg-muted/60 border border-transparent focus:border-primary focus:bg-background outline-none text-base sm:text-sm transition focus-visible:ring-2 focus-visible:ring-ring"
+          />
+          <span id="dashboard-search-status" className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+            {searchStatus}
+          </span>
 
-        {isOpen ? (
-          <div
-            id={SUGGESTIONS_LISTBOX_ID}
-            role="listbox"
-            aria-label="Saved deal matches"
-            // Keep focus in the input while picking with the mouse (the
-            // aria-activedescendant pattern). Without this, Safari moves
-            // focus to <body> on mousedown, the focus-out dismiss unmounts
-            // the row, and the click never lands on the suggestion.
-            onMouseDown={(event) => event.preventDefault()}
-            className="absolute top-[calc(100%+0.4rem)] left-0 right-0 max-h-[60vh] overflow-y-auto rounded-lg border border-border bg-card shadow-lg z-30"
-          >
-            {suggestions.map((item, index) => (
-              <button
-                key={item.id}
-                id={`sugg-${item.id}`}
-                role="option"
-                aria-selected={index === activeIndex}
-                type="button"
-                tabIndex={-1}
-                className={`min-h-11 w-full px-3 py-2 text-left transition ${index === activeIndex ? "bg-muted" : "hover:bg-muted/50"}`}
-                onMouseEnter={() => setActiveIndex(index)}
-                onClick={() => goToSearch(item.address)}
-              >
-                <div className="text-sm font-medium text-foreground truncate">{item.address}</div>
-                <div className="text-xs text-muted-foreground truncate">{item.propertyType}</div>
-              </button>
-            ))}
-            {showNoResults ? (
-              <div className="min-h-11 px-3 py-2 text-xs text-muted-foreground" role="option" aria-disabled="true" aria-selected="false">
-                No saved deals match “{debouncedQuery}”.
-              </div>
-            ) : null}
-            {searchError ? (
-              <div className="min-h-11 px-3 py-2 text-xs font-medium text-destructive" role="option" aria-disabled="true" aria-selected="false">
-                <span role="alert">{searchError}</span>
-              </div>
-            ) : null}
-            {isLoadingSuggestions && suggestions.length === 0 ? (
-              <div className="min-h-11 px-3 py-2 text-xs text-muted-foreground" role="option" aria-disabled="true" aria-selected="false">
-                Searching…
-              </div>
-            ) : null}
-          </div>
-        ) : null}
+          {isOpen ? (
+            <div
+              id={SUGGESTIONS_LISTBOX_ID}
+              role="listbox"
+              aria-label="Saved deal matches"
+              // Keep focus in the input while picking with the mouse (the
+              // aria-activedescendant pattern). Without this, Safari moves
+              // focus to <body> on mousedown, the focus-out dismiss unmounts
+              // the row, and the click never lands on the suggestion.
+              onMouseDown={(event) => event.preventDefault()}
+              className="absolute top-[calc(100%+0.4rem)] left-0 right-0 max-h-[60vh] overflow-y-auto rounded-lg border border-border bg-card shadow-lg z-30"
+            >
+              {suggestions.map((item, index) => (
+                <button
+                  key={item.id}
+                  id={`sugg-${item.id}`}
+                  role="option"
+                  aria-selected={index === activeIndex}
+                  type="button"
+                  tabIndex={-1}
+                  className={`min-h-11 w-full px-3 py-2 text-left transition ${index === activeIndex ? "bg-muted" : "hover:bg-muted/50"}`}
+                  onMouseEnter={() => setActiveIndex(index)}
+                  onClick={() => goToSearch(item.address)}
+                >
+                  <div className="text-sm font-medium text-foreground truncate">{item.address}</div>
+                  <div className="text-xs text-muted-foreground truncate">{item.propertyType}</div>
+                </button>
+              ))}
+              {showNoResults ? (
+                <div className="min-h-11 px-3 py-2 text-xs text-muted-foreground" role="option" aria-disabled="true" aria-selected="false">
+                  No saved deals match “{debouncedQuery}”.
+                </div>
+              ) : null}
+              {searchError ? (
+                <div className="min-h-11 px-3 py-2 text-xs font-medium text-destructive" role="option" aria-disabled="true" aria-selected="false">
+                  <span role="alert">{searchError}</span>
+                </div>
+              ) : null}
+              {isLoadingSuggestions && suggestions.length === 0 ? (
+                <div className="min-h-11 px-3 py-2 text-xs text-muted-foreground" role="option" aria-disabled="true" aria-selected="false">
+                  Searching…
+                </div>
+              ) : null}
+            </div>
+          ) : null}
         </form>
 
         <div className="flex items-center gap-2 ml-auto">
@@ -284,7 +300,7 @@ export function Topbar({
               md+ only and the topbar otherwise leads with searching EXISTING
               deals. 44px touch target. */}
           <Link
-            href="/dashboard/new"
+            href="/dashboard/new?fresh=1"
             prefetch={false}
             aria-label="New analysis"
             onClick={(event) => {
@@ -294,12 +310,15 @@ export function Topbar({
               }
             }}
             className="inline-flex size-11 items-center justify-center rounded-lg text-white transition hover:opacity-90 md:hidden"
-            style={{ background: "var(--gradient-premium)", boxShadow: "var(--shadow-glow)" }}
+            style={{
+              background: "var(--gradient-premium)",
+              boxShadow: "var(--shadow-glow)",
+            }}
           >
             <Sparkles className="h-5 w-5" />
           </Link>
           <Link
-            href="/dashboard/new"
+            href="/dashboard/new?fresh=1"
             prefetch={false}
             onClick={(event) => {
               if (pathname === "/dashboard/new") {
@@ -308,7 +327,10 @@ export function Topbar({
               }
             }}
             className="hidden min-h-11 items-center gap-2 rounded-lg px-4 text-sm font-semibold text-white transition hover:opacity-90 md:inline-flex"
-            style={{ background: "var(--gradient-premium)", boxShadow: "var(--shadow-glow)" }}
+            style={{
+              background: "var(--gradient-premium)",
+              boxShadow: "var(--shadow-glow)",
+            }}
           >
             <Sparkles className="h-4 w-4" />
             New Analysis

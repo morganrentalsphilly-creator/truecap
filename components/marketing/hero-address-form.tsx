@@ -26,13 +26,25 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useForm, type DefaultValues } from "react-hook-form";
-import { ArrowRight, Calculator, Link2, MapPin, Sparkles } from "lucide-react";
-import { AddressAutocomplete, type SelectedAddress } from "@/components/investcalc/address-autocomplete";
+import {
+  ArrowRight,
+  Calculator,
+  Link2,
+  Loader2,
+  MapPin,
+  Sparkles,
+} from "lucide-react";
+import {
+  AddressAutocomplete,
+  type SelectedAddress,
+} from "@/components/investcalc/address-autocomplete";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import {
   dispatchHeroAnalyzeWithFallback,
   HERO_ANALYZE_EVENT,
+  HERO_ANALYZE_STATUS_EVENT,
   type HeroAnalyzeDetail,
+  type HeroAnalyzeStatusDetail,
 } from "@/lib/hero-handoff";
 import { trackEvent } from "@/lib/analytics";
 import { parseListingUrl } from "@/lib/listing-url";
@@ -57,7 +69,9 @@ function dispatchHeroAnalyze(detail: HeroAnalyzeDetail) {
     storage: window.sessionStorage,
     dispatch: (payload) => {
       window.dispatchEvent(
-        new CustomEvent<HeroAnalyzeDetail>(HERO_ANALYZE_EVENT, { detail: payload })
+        new CustomEvent<HeroAnalyzeDetail>(HERO_ANALYZE_EVENT, {
+          detail: payload,
+        }),
       );
     },
     schedule: (callback, delayMs) => window.setTimeout(callback, delayMs),
@@ -78,7 +92,11 @@ export function HeroAddressForm() {
   // Last suggestion the user actually picked (carries state/county/zip).
   const selectedRef = useRef<SelectedAddress | null>(null);
   const addressStartedRef = useRef(false);
+  const activeHandoffTokenRef = useRef<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [handoffStatus, setHandoffStatus] = useState<
+    "sending" | HeroAnalyzeStatusDetail["status"] | null
+  >(null);
   const [hydrated, setHydrated] = useState(false);
   const [entryMode, setEntryMode] = useState<"address" | "listing">("address");
   const [listingUrl, setListingUrl] = useState("");
@@ -89,20 +107,49 @@ export function HeroAddressForm() {
   // for that brief window so an early tap is never silently lost.
   useEffect(() => setHydrated(true), []);
 
+  // The calculator acknowledges the actual async handoff. This keeps the CTA
+  // tied to real work instead of a cosmetic timer that could stop while the
+  // lookup was still running (or spin after the calculator was already ready).
+  useEffect(() => {
+    const onStatus = (event: Event) => {
+      const detail = (event as CustomEvent<HeroAnalyzeStatusDetail>).detail;
+      if (!detail || detail.token !== activeHandoffTokenRef.current) return;
+      setHandoffStatus(detail.status);
+      setSubmitting(detail.status === "received");
+    };
+    window.addEventListener(
+      HERO_ANALYZE_STATUS_EVENT,
+      onStatus as EventListener,
+    );
+    return () =>
+      window.removeEventListener(
+        HERO_ANALYZE_STATUS_EVENT,
+        onStatus as EventListener,
+      );
+  }, []);
+
   const handleAnalyze = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (handoffStatus === "needs-input" || handoffStatus === "ready") {
+      scrollToCalculator();
+      return;
+    }
 
     if (entryMode === "listing") {
       const parsed = parseListingUrl(listingUrl);
       if (!parsed) {
         setListingError(
-          "Paste a supported Zillow, Redfin, Realtor.com, Homes.com, or Trulia property link."
+          "Paste a supported Zillow, Redfin, Realtor.com, Homes.com, or Trulia property link.",
         );
         return;
       }
 
       setListingError(null);
       setSubmitting(true);
+      setHandoffStatus("sending");
+      const token = `listing:${newToken()}`;
+      activeHandoffTokenRef.current = token;
       // Privacy: only coarse entry/source signals are captured. The listing
       // URL and parsed address never leave the underwriting handoff.
       trackEvent("hero_address_submit", {
@@ -116,12 +163,12 @@ export function HeroAddressForm() {
       });
       trackEvent("homepage_primary_cta", { source: "hero_listing" });
       dispatchHeroAnalyze({
-        token: `listing:${newToken()}`,
+        token,
         address: parsed.address,
         state: parsed.state,
+        zip: parsed.zip,
       });
       scrollToCalculator();
-      window.setTimeout(() => setSubmitting(false), 1200);
       return;
     }
 
@@ -133,6 +180,7 @@ export function HeroAddressForm() {
       return;
     }
     setSubmitting(true);
+    setHandoffStatus("sending");
     const picked = selectedRef.current;
     const sameAsPicked = picked && picked.formattedAddress.trim() === address;
     // Funnel: top of the hero-start path. No address string sent (PII).
@@ -145,17 +193,16 @@ export function HeroAddressForm() {
       entry_kind: "address",
     });
     trackEvent("homepage_primary_cta", { source: "hero_address" });
+    const token = newToken();
+    activeHandoffTokenRef.current = token;
     dispatchHeroAnalyze({
-      token: newToken(),
+      token,
       address,
       state: sameAsPicked ? picked.state : undefined,
       county: sameAsPicked ? picked.county : undefined,
       zip: sameAsPicked ? picked.zip : undefined,
     });
     scrollToCalculator();
-    // The calculator takes over from here; drop the spinner shortly so the
-    // button doesn't look stuck if the user scrolls back up.
-    window.setTimeout(() => setSubmitting(false), 1200);
   };
 
   const handleTrySample = () => {
@@ -178,6 +225,9 @@ export function HeroAddressForm() {
           onClick={() => {
             setEntryMode("address");
             setListingError(null);
+            setSubmitting(false);
+            setHandoffStatus(null);
+            activeHandoffTokenRef.current = null;
           }}
           className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3.5 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 aria-pressed:bg-card aria-pressed:text-foreground aria-pressed:shadow-sm"
         >
@@ -190,6 +240,9 @@ export function HeroAddressForm() {
           onClick={() => {
             setEntryMode("listing");
             selectedRef.current = null;
+            setSubmitting(false);
+            setHandoffStatus(null);
+            activeHandoffTokenRef.current = null;
           }}
           className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3.5 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 aria-pressed:bg-card aria-pressed:text-foreground aria-pressed:shadow-sm"
         >
@@ -199,6 +252,20 @@ export function HeroAddressForm() {
       </div>
       <form
         onSubmit={handleAnalyze}
+        onChangeCapture={(event) => {
+          if (!(event.target instanceof HTMLInputElement)) return;
+          const target = event.target;
+          if (
+            entryMode !== "address" ||
+            target.name !== "address" ||
+            !handoffStatus
+          ) {
+            return;
+          }
+          activeHandoffTokenRef.current = null;
+          setSubmitting(false);
+          setHandoffStatus(null);
+        }}
         onFocusCapture={() => {
           if (addressStartedRef.current) return;
           addressStartedRef.current = true;
@@ -218,6 +285,9 @@ export function HeroAddressForm() {
                 // "Analyze free" can hand them to the calculator for the
                 // same HUD/FRED/state auto-fill an in-form selection gets.
                 selectedRef.current = place;
+                activeHandoffTokenRef.current = null;
+                setSubmitting(false);
+                setHandoffStatus(null);
               }}
             />
           ) : (
@@ -235,20 +305,36 @@ export function HeroAddressForm() {
                 onChange={(event) => {
                   setListingUrl(event.target.value);
                   if (listingError) setListingError(null);
+                  if (handoffStatus) {
+                    activeHandoffTokenRef.current = null;
+                    setSubmitting(false);
+                    setHandoffStatus(null);
+                  }
                 }}
                 placeholder="Paste a Zillow, Redfin, or Realtor.com link"
                 aria-invalid={Boolean(listingError)}
-                aria-describedby={listingError ? "hero-listing-url-error" : "hero-listing-url-help"}
+                aria-describedby={
+                  listingError
+                    ? "hero-listing-url-error"
+                    : "hero-listing-url-help"
+                }
                 className="h-12 w-full rounded-xl border border-input bg-background px-4 text-base shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 sm:h-14"
               />
               <p
-                id={listingError ? "hero-listing-url-error" : "hero-listing-url-help"}
+                id={
+                  listingError
+                    ? "hero-listing-url-error"
+                    : "hero-listing-url-help"
+                }
                 role={listingError ? "alert" : undefined}
                 className={`mt-1.5 px-1 text-xs ${
-                  listingError ? "font-medium text-destructive" : "text-muted-foreground"
+                  listingError
+                    ? "font-medium text-destructive"
+                    : "text-muted-foreground"
                 }`}
               >
-                {listingError ?? "We parse the address, then ask you to verify imported values."}
+                {listingError ??
+                  "We extract the address from the link. You’ll confirm the asking price and rent below; signed-in lookup may find additional property facts."}
               </p>
             </div>
           )}
@@ -256,13 +342,52 @@ export function HeroAddressForm() {
         <button
           type="submit"
           disabled={submitting || !hydrated}
+          aria-busy={submitting || undefined}
           className="group inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] disabled:opacity-70 sm:h-14"
         >
-          <Calculator className="size-4" />
-          Underwrite rental
+          {submitting ? (
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+          ) : (
+            <Calculator className="size-4" aria-hidden="true" />
+          )}
+          {handoffStatus === "sending"
+            ? entryMode === "listing"
+              ? "Extracting address…"
+              : "Sending address…"
+            : handoffStatus === "received"
+              ? "Looking up starting assumptions…"
+              : handoffStatus === "needs-input"
+                ? "Continue in calculator"
+                : handoffStatus === "ready"
+                  ? "Ready below"
+                  : handoffStatus === "cancelled"
+                    ? "Use this address instead"
+                    : entryMode === "listing"
+                      ? "Use listing address"
+                      : "Start with this address"}
           <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
         </button>
       </form>
+      <p
+        className="sr-only"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {handoffStatus === "sending"
+          ? entryMode === "listing"
+            ? "Extracting the listing address."
+            : "Sending the address to the calculator."
+          : handoffStatus === "received"
+            ? "Address received. Looking up available starting assumptions."
+            : handoffStatus === "needs-input"
+              ? "Address added. Continue in the calculator with the missing deal inputs."
+              : handoffStatus === "ready"
+                ? "The calculator is ready below."
+                : handoffStatus === "cancelled"
+                  ? "The previous property was kept. Submit again to replace it."
+                  : ""}
+      </p>
 
       {/* Secondary actions. The process link answers the explicit "how does
           this work?" objection while the sample remains a no-address path.

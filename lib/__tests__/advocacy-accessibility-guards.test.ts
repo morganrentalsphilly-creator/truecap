@@ -44,7 +44,7 @@ describe("advocacy decision accessibility and reflow guards", () => {
 
   it("preserves 44px controls and visible keyboard focus", () => {
     expect(summary).toContain("h-11 w-full gap-2 rounded-xl");
-    expect(summary).toContain("h-11 w-full rounded-xl px-4");
+    expect(summary).toContain('className="h-11 rounded-xl px-4"');
     expect(ledger).toContain("min-h-11");
     expect(ledger).toContain("focus-visible:ring-2 focus-visible:ring-ring");
   });
@@ -52,6 +52,9 @@ describe("advocacy decision accessibility and reflow guards", () => {
   it("uses mobile ledger cards before enabling the wide table", () => {
     expect(ledger).toContain('<ul className="divide-y divide-border sm:hidden">');
     expect(ledger).toContain('<div className="hidden overflow-x-auto sm:block">');
+    expect(ledger).toContain("data-assumption-ledger-value={item.key}");
+    expect(ledger).toContain(">Value</th>");
+    expect(dashboard).toContain("values={values}");
     expect(summary).toContain("break-all");
   });
 

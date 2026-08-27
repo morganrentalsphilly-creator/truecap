@@ -22,6 +22,8 @@
  */
 
 import { useEffect, useRef } from "react";
+import { CheckCircle2, Loader2 } from "lucide-react";
+import type { ListingImportMissingField } from "@/lib/hero-handoff";
 
 type ListingLinkInputProps = {
   /** URL-row visibility. Controlled by the parent, which mirrors it to
@@ -34,7 +36,21 @@ type ListingLinkInputProps = {
   hasError: boolean;
   /** Parse + hero-handoff (the parent's existing handleListingUrl). */
   onSubmit: () => void;
+  /** Durable state for the listing address most recently handed to the form. */
+  importStatus?: {
+    phase: "looking-up" | "needs-input";
+    missingFields: ListingImportMissingField[];
+  } | null;
+  /** Continue at the first input the listing could not provide. */
+  onFocusMissingField?: (path: string) => void;
 };
+
+function formatMissingFields(fields: ListingImportMissingField[]) {
+  const labels = fields.map((field) => field.label);
+  if (labels.length <= 1) return labels[0] ?? "required deal inputs";
+  if (labels.length === 2) return `${labels[0]} and ${labels[1]}`;
+  return `${labels.slice(0, -1).join(", ")}, and ${labels.at(-1)}`;
+}
 
 export function ListingLinkInput({
   open,
@@ -43,6 +59,8 @@ export function ListingLinkInput({
   onValueChange,
   hasError,
   onSubmit,
+  importStatus,
+  onFocusMissingField,
 }: ListingLinkInputProps) {
   const urlInputRef = useRef<HTMLInputElement | null>(null);
   // Focus follows the toggle, but ONLY on user-driven transitions (tracked
@@ -64,20 +82,67 @@ export function ListingLinkInput({
     }
   }, [open]);
 
+  const firstMissingField = importStatus?.missingFields[0];
+  const importStatusPanel = importStatus ? (
+    <div className="mb-2 rounded-xl border border-primary/30 bg-[var(--brand-blue-light)] px-3 py-3 text-sm">
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="flex items-start gap-2"
+      >
+        {importStatus.phase === "looking-up" ? (
+          <Loader2
+            aria-hidden="true"
+            className="mt-0.5 size-4 shrink-0 animate-spin text-primary"
+          />
+        ) : (
+          <CheckCircle2
+            aria-hidden="true"
+            className="mt-0.5 size-4 shrink-0 text-primary"
+          />
+        )}
+        <div className="min-w-0">
+          <p className="font-semibold text-foreground">Address extracted</p>
+          <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+            {importStatus.phase === "looking-up"
+              ? "Looking up available starting assumptions. We’ll keep every value editable."
+              : `Still needed: ${formatMissingFields(importStatus.missingFields)}.`}
+          </p>
+        </div>
+      </div>
+      {importStatus.phase === "needs-input" && firstMissingField ? (
+        <button
+          type="button"
+          onClick={() => onFocusMissingField?.(firstMissingField.path)}
+          className="mt-2 inline-flex min-h-11 max-w-full items-center rounded-lg border border-primary/30 bg-background px-3 py-2 text-left text-xs font-semibold text-primary shadow-sm hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        >
+          Continue with {firstMissingField.label}
+        </button>
+      ) : null}
+    </div>
+  ) : null;
+
   if (!open) {
     return (
-      <button
-        type="button"
-        onClick={() => onOpenChange(true)}
-        className="mt-2 inline-flex min-h-11 max-w-full items-center whitespace-normal py-2 text-left text-xs font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-      >
-        Use a listing link to fill the address
-      </button>
+      <div className="mt-2">
+        {importStatusPanel}
+        <button
+          type="button"
+          onClick={() => onOpenChange(true)}
+          className="inline-flex min-h-11 max-w-full items-center whitespace-normal py-2 text-left text-xs font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        >
+          {importStatus
+            ? "Use a different listing link"
+            : "Use a listing link to fill the address"}
+        </button>
+      </div>
     );
   }
 
   return (
     <div>
+      {importStatusPanel}
       <label
         htmlFor="listing-url"
         className="text-xs font-semibold text-foreground"

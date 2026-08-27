@@ -163,9 +163,10 @@ describe("client-scoped list and portal cannot disagree (audit regression)", () 
 
   it("a client-scoped list ignores persisted session filters", () => {
     // Replaying a stale search on a fresh "show me Dana's deals" intent
-    // silently re-created the empty-list bug.
+    // silently re-created the empty-list bug. A URL-backed explicit search is
+    // the same fresh retrieval intent and also bypasses the persisted view.
     expect(read("components/investcalc/saved-analyses-page-v2.tsx")).toMatch(
-      /if \(clientFilterId\) \{\s*\n\s*setViewHydrated\(true\);\s*\n\s*return;/
+      /if \(clientFilterId \|\| explicitSearchQuery\) \{\s*\n\s*setViewHydrated\(true\);\s*\n\s*return;/,
     );
   });
 });

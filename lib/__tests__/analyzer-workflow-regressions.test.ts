@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   NEW_ANALYSIS_REQUEST_EVENT,
   requestMountedNewAnalysis,
+  shouldStartFreshAnalysis,
 } from "@/lib/new-analysis-navigation";
 
 const ROOT = process.cwd();
@@ -54,7 +55,7 @@ describe("dashboard-shell New Analysis continuity", () => {
       "onClick={(event) => {",
       "title={item.enabled",
     );
-    expect(sidebarHandler).toContain('item.href === "/dashboard/new"');
+    expect(sidebarHandler).toContain('item.href.startsWith("/dashboard/new")');
     expect(sidebarHandler).toContain('pathname === "/dashboard/new"');
     expect(sidebarHandler).toContain("event.preventDefault()");
     expect(sidebarHandler).toContain("requestMountedNewAnalysis()");
@@ -64,7 +65,9 @@ describe("dashboard-shell New Analysis continuity", () => {
       '<div className="flex items-center gap-2 ml-auto">',
       '<div className="pl-3 ml-1 border-l border-border">',
     );
-    expect(topbarActions.match(/href="\/dashboard\/new"/g)).toHaveLength(2);
+    expect(
+      topbarActions.match(/href="\/dashboard\/new\?fresh=1"/g),
+    ).toHaveLength(2);
     expect(topbarActions.match(/pathname === "\/dashboard\/new"/g)).toHaveLength(2);
     expect(topbarActions.match(/event\.preventDefault\(\)/g)).toHaveLength(2);
     expect(topbarActions.match(/requestMountedNewAnalysis\(\)/g)).toHaveLength(2);
@@ -82,6 +85,54 @@ describe("dashboard-shell New Analysis continuity", () => {
       "window.removeEventListener(NEW_ANALYSIS_REQUEST_EVENT, onRequest)",
     );
     expect(listener).toContain("const onRequest = () => handleNewAnalysis()");
+  });
+
+  it("starts fresh across routes but preserves specific saved, handoff, and billing continuations", () => {
+    const base = {
+      requested: true,
+      hasInitialSavedDeal: false,
+      hasEditHandoff: false,
+      hasDuplicateHandoff: false,
+      hasAnalyzerHandoff: false,
+      hasBillingReturn: false,
+    };
+
+    expect(shouldStartFreshAnalysis(base)).toBe(true);
+    for (const protectedPath of [
+      "hasInitialSavedDeal",
+      "hasEditHandoff",
+      "hasDuplicateHandoff",
+      "hasAnalyzerHandoff",
+      "hasBillingReturn",
+    ] as const) {
+      expect(
+        shouldStartFreshAnalysis({ ...base, [protectedPath]: true }),
+      ).toBe(false);
+    }
+    expect(shouldStartFreshAnalysis({ ...base, requested: false })).toBe(false);
+  });
+
+  it("consumes the fresh instruction once before draft restore or a later save", () => {
+    const calculator = read("components/investcalc/investcalc-page.tsx");
+    const mountInitialization = section(
+      calculator,
+      "Initialize from a one-time saved-analysis handoff",
+      "const reopenPayloadRaw",
+    );
+    expect(mountInitialization).toContain(
+      'const requestedExplicitFreshAnalysis = handoffParams.get("fresh") === "1"',
+    );
+    expect(mountInitialization).toContain('url.searchParams.delete("fresh")');
+    expect(mountInitialization).toContain("shouldStartFreshAnalysis({");
+    expect(mountInitialization).toContain('resetToNewAnalysis("single-family")');
+    expect(mountInitialization.indexOf('url.searchParams.delete("fresh")')).toBeLessThan(
+      mountInitialization.indexOf("shouldStartFreshAnalysis({"),
+    );
+
+    const savedDeals = read(
+      "components/investcalc/saved-analyses-page-v2.tsx",
+    );
+    expect(savedDeals.match(/href="\/dashboard\/new\?fresh=1"/g)).toHaveLength(2);
   });
 
   it("lets the dedicated reset handler own the warning instead of prompting twice", () => {
@@ -307,6 +358,16 @@ describe("assumption editing return path", () => {
     expect(editingBanner).toContain("primaryActionLabel");
     expect(editingBanner).toContain("void handlePrimaryRunAction()");
     expect(editingBanner).toContain("decisionCriteriaBlockPrimaryAction");
+    expect(editingBanner).toContain("Done editing");
+    expect(editingBanner).toContain("handleBackToResult");
+    expect(editingBanner).toContain('data-edit-live-readout="true"');
+    expect(editingBanner).toContain("Live · unsaved");
+    expect(editingBanner).toContain(
+      "Last complete result · fix the highlighted input",
+    );
+    expect(editingBanner).toContain("analysisResult.netCashFlow");
+    expect(editingBanner).toContain("analysisResult.capRate");
+    expect(editingBanner).toContain("analysisResult.dscr");
   });
 });
 
@@ -365,25 +426,32 @@ describe("address request and enrichment sequencing", () => {
   });
 
   it("lets an accidental property selection truly return to the prior address", () => {
+    const propertySwap = section(
+      calculator,
+      "const preparePropertySwap = useCallback",
+      "/** Address-selected entry point",
+    );
     const addressChange = section(
       calculator,
       "const handleAddressSelected = useCallback",
       "/**\n   * After an address has been picked",
     );
 
-    expect(addressChange).toContain("hasPropertySpecificValues");
-    expect(addressChange).toContain("Choose Cancel to return to the previous address");
-    expect(addressChange).toContain(
-      'form.setValue("address", previousPlace!.formattedAddress',
+    expect(propertySwap).toContain("hasPropertySpecificValues");
+    expect(propertySwap).toContain("Choose Cancel to return to the previous address");
+    expect(propertySwap).toContain(
+      'form.setValue("address", previousAddress',
     );
-    expect(addressChange).toContain('title: "Kept the previous property"');
-    expect(addressChange.indexOf('title: "Kept the previous property"')).toBeLessThan(
+    expect(propertySwap).toContain('title: "Kept the previous property"');
+    expect(addressChange).toContain("if (!preparePropertySwap(place)) return");
+    expect(addressChange.indexOf("preparePropertySwap(place)")).toBeLessThan(
       addressChange.indexOf("lastSelectedAddressRef.current = place"),
     );
-    expect(addressChange).toContain("`units.${index}.bedrooms`");
-    expect(addressChange).toContain("`units.${index}.bathrooms`");
-    expect(addressChange).toContain("`units.${index}.sqft`");
-    expect(addressChange).not.toContain("Previous values kept for review");
+    expect(propertySwap).toContain("getDefaultUnitsForPropertyType");
+    expect(propertySwap).toContain('form.setValue("yearBuilt", undefined');
+    expect(propertySwap).toContain('form.setValue("propertyTaxAnnual", undefined');
+    expect(propertySwap).toContain('form.setValue("insuranceMonthly", undefined');
+    expect(propertySwap).not.toContain("Previous values kept for review");
   });
 
   it("seeds prior-property identity before the first swap after every restore path", () => {
@@ -430,6 +498,38 @@ describe("address request and enrichment sequencing", () => {
     expect(submit).toContain("Finishing the property lookup");
     expect(submit).toContain("form.handleSubmit(onSubmit, onError)");
   });
+
+  it("rejects enrichment that returns after the property model changed", () => {
+    const enrichment = section(
+      calculator,
+      "const runPropertyEnrichment = useCallback",
+      "const runTrackedPropertyEnrichment = useCallback",
+    );
+
+    expect(enrichment).toContain(
+      'form.getValues("propertyType") !== currentPropertyType',
+    );
+  });
+});
+
+describe("async score consistency", () => {
+  const calculator = read("components/investcalc/investcalc-page.tsx");
+
+  it("cannot pair a stale server score with newly edited metrics", () => {
+    const loader = section(
+      calculator,
+      "const loadDealScore = async",
+      "const form = useForm",
+    );
+
+    expect(calculator).toContain("const dealScoreRequestRef = useRef(0)");
+    expect(loader).toContain("const scoreRequest = ++dealScoreRequestRef.current");
+    expect(loader).toContain("scoreInputFingerprint");
+    expect(loader).toContain(
+      "formSnapshotForCompare(form.getValues()) !== scoreInputFingerprint",
+    );
+    expect(calculator).toContain("dealScoreRequestRef.current += 1");
+  });
 });
 
 describe("result editing and deleted-deal recovery", () => {
@@ -453,7 +553,7 @@ describe("result editing and deleted-deal recovery", () => {
     );
     expect(resultMount).toContain("{!isEditingAssumptions &&");
     expect(compact(calculator)).toContain(
-      'isEditingAssumptions ? "Update analysis"',
+      'isEditingAssumptions ? "Recalculate analysis"',
     );
     expect(calculator).toContain("{activeRunPromisesOfferCeiling ? (");
   });

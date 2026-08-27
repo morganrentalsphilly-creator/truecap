@@ -101,7 +101,9 @@ describe("calculator control accessibility guards", () => {
     expect(hero).toContain('htmlFor="hero-listing-url"');
     expect(hero).toContain('id="hero-listing-url"');
     expect(hero).toContain('aria-invalid={Boolean(listingError)}');
-    expect(hero).toContain('aria-describedby={listingError ? "hero-listing-url-error" : "hero-listing-url-help"}');
+    expect(hero.replace(/\s+/g, "")).toContain(
+      'aria-describedby={listingError?"hero-listing-url-error":"hero-listing-url-help"}',
+    );
     expect(hero).toContain("min-h-11");
   });
 });

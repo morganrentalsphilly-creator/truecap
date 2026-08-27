@@ -225,7 +225,7 @@ export function ClientsWorkspace({
           <Link href="/settings#buy-boxes" className="text-primary hover:underline">
             Manage Buy Boxes
           </Link>
-          <Link href="/dashboard/new" className="text-primary hover:underline">
+          <Link href="/dashboard/new?fresh=1" className="text-primary hover:underline">
             Analyze a property
           </Link>
           <Link href="/dashboard/saved-analyses" className="text-primary hover:underline">

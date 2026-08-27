@@ -1,6 +1,13 @@
 "use client";
 
-import { Fragment, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import {
+  Fragment,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import * as Sentry from "@sentry/nextjs";
@@ -80,7 +87,13 @@ import {
 import { nextActionFromVerdict } from "@/lib/next-action";
 import { DataConfidenceBadge } from "@/components/investcalc/data-confidence-badge";
 import { type DataConfidence } from "@/lib/data-confidence";
-import { consumePendingSavedListSearch } from "@/lib/dashboard-saved-search-bridge";
+import {
+  DASHBOARD_SAVED_SEARCH_RELEASE_EVENT,
+  DASHBOARD_SAVED_SEARCH_PARAM,
+  normalizeDashboardSavedSearchQuery,
+  removeDashboardSavedSearchParam,
+  reportDashboardSavedSearchReleased,
+} from "@/lib/dashboard-saved-search-bridge";
 import { Switch } from "../ui/switch";
 import {
   describeInvestmentFormSnapshotIssue,
@@ -389,9 +402,7 @@ function OfferLineRow({
         <summary className="inline-flex min-h-11 cursor-pointer items-center font-semibold text-primary underline-offset-2 hover:underline">
           View exact criteria
         </summary>
-        <p className="mt-1">
-          Criteria: {basisLabel ?? "Captured targets"}
-        </p>
+        <p className="mt-1">Criteria: {basisLabel ?? "Captured targets"}</p>
         <p className="mt-1">
           Highest modeled price that still meets these criteria under the
           assumptions shown. This is not a recommended offer or appraisal.
@@ -1371,7 +1382,6 @@ function SortableTh({
 
 export function SavedAnalysesPage({
   initialItems,
-  initialSelectedIds,
   activeSortField,
   activeSortDirection,
   activeDealStateFilter,
@@ -1384,7 +1394,6 @@ export function SavedAnalysesPage({
   clientFilterName = null,
 }: {
   initialItems: SavedAnalysisListItem[];
-  initialSelectedIds?: string[];
   activeSortField: SortField | null;
   activeSortDirection: SortDirection | null;
   activeDealStateFilter: DealStateFilter;
@@ -1432,6 +1441,10 @@ export function SavedAnalysesPage({
   // effect below so a pre-restore run can't clobber the stored view with
   // defaults (StrictMode's double effect pass included).
   const [viewHydrated, setViewHydrated] = useState(false);
+
+  const explicitSearchQuery = normalizeDashboardSavedSearchQuery(
+    searchParams.get(DASHBOARD_SAVED_SEARCH_PARAM),
+  );
 
   const [searchQuery, setSearchQuery] = useState("");
   const [showcompare, setShowcompare] = useState(false);
@@ -1486,7 +1499,7 @@ export function SavedAnalysesPage({
     // it silently re-creates the very bug this scope was added to fix: the
     // roster says "3 deals assigned", the list shows one or none, and the
     // reason is an invisible filter set on a different visit.
-    if (clientFilterId) {
+    if (clientFilterId || explicitSearchQuery) {
       setViewHydrated(true);
       return;
     }
@@ -1544,17 +1557,10 @@ export function SavedAnalysesPage({
     (optionalColumns.cashToClose ? 1 : 0) +
     (optionalColumns.market ? 1 : 0) +
     (optionalColumns.neighborhood ? 1 : 0);
-  const initialItemIds = useMemo(
-    () => new Set(initialItems.map((item) => item.id)),
-    [initialItems],
-  );
-  const [selectedIds, setSelectedIds] = useState<string[]>(() =>
-    canCompareDeals
-      ? (initialSelectedIds ?? [])
-          .filter((id) => initialItemIds.has(id))
-          .slice(0, MAX_COMPARE_DEAL_SELECTION)
-      : [],
-  );
+  // Row selection is local, explicit bulk intent. Comparison membership lives
+  // in its HttpOnly cookie and is consumed only by the Compare workspace; it
+  // must never pre-check rows that expose one-click Archive/Delete actions.
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const latestSelectionRows = useMemo<SavedDealSelectionRow[]>(
     () => initialItems.map(({ id, status }) => ({ id, status })),
     [initialItems],
@@ -1658,10 +1664,59 @@ export function SavedAnalysesPage({
     return n;
   }, [buyBoxFitById]);
 
+  const appliedExplicitSearchRef = useRef<string | null>(null);
   useEffect(() => {
-    const pending = consumePendingSavedListSearch();
-    if (pending) setSearchQuery(pending);
+    if (!viewHydrated) return;
+    if (!explicitSearchQuery) {
+      appliedExplicitSearchRef.current = null;
+      return;
+    }
+    if (appliedExplicitSearchRef.current === explicitSearchQuery) return;
+    appliedExplicitSearchRef.current = explicitSearchQuery;
+
+    // A topbar search is a fresh retrieval intent, not another filter layered
+    // over an invisible view from a previous visit. Reset every client-side
+    // narrowing control and any prior bulk selection before showing matches.
+    setSearchQuery(explicitSearchQuery);
+    setSelectedSignal("all");
+    setSelectedType("all");
+    setBuyBoxOnly(false);
+    setShowcompare(false);
+    setSelectedIds([]);
+    setCurrentPage(1);
+  }, [explicitSearchQuery, viewHydrated]);
+
+  useEffect(() => {
+    const clearReleasedSearch = () => {
+      appliedExplicitSearchRef.current = null;
+      setSearchQuery("");
+      setCurrentPage(1);
+    };
+    window.addEventListener(
+      DASHBOARD_SAVED_SEARCH_RELEASE_EVENT,
+      clearReleasedSearch,
+    );
+    return () =>
+      window.removeEventListener(
+        DASHBOARD_SAVED_SEARCH_RELEASE_EVENT,
+        clearReleasedSearch,
+      );
   }, []);
+
+  const releaseUrlBackedSearch = () => {
+    if (!explicitSearchQuery || typeof window === "undefined") return;
+    const nextHref = removeDashboardSavedSearchParam(window.location.href);
+    // Preserve Next's internal history state. Replacing only the visible URL
+    // avoids a server navigation while ensuring refresh/Back cannot resurrect
+    // the Topbar query after the user has taken control of the local input.
+    window.history.replaceState(window.history.state, "", nextHref);
+    reportDashboardSavedSearchReleased();
+  };
+
+  const handleSearchQueryChange = (value: string) => {
+    releaseUrlBackedSearch();
+    setSearchQuery(value);
+  };
 
   useEffect(() => {
     if (!canCompareDeals) {
@@ -1746,7 +1801,7 @@ export function SavedAnalysesPage({
           const value = valueFor(item);
           return Number.isFinite(value) ? value : null;
         },
-        activeSortDirection
+        activeSortDirection,
       );
     }
     return [...filteredItems].sort((a, b) => {
@@ -1768,10 +1823,10 @@ export function SavedAnalysesPage({
     () =>
       new Set(
         filteredItems.map(
-          (item) => item.methodologyComparisonKey ?? "current:unknown"
-        )
+          (item) => item.methodologyComparisonKey ?? "current:unknown",
+        ),
       ).size > 1,
-    [filteredItems]
+    [filteredItems],
   );
 
   /**
@@ -2464,17 +2519,17 @@ export function SavedAnalysesPage({
     const compareItems = selectedIds
       .map((id) => enrichedItems.find((item) => item.id === id))
       .filter(
-        (item): item is (typeof enrichedItems)[number] => item !== undefined
+        (item): item is (typeof enrichedItems)[number] => item !== undefined,
       );
     const methodologyCohorts = compareItems.map(
-      (item) => item.methodologyComparisonKey
+      (item) => item.methodologyComparisonKey,
     );
     if (
       compareItems.length !== selectedIds.length ||
       !areMethodologyCohortsComparable(methodologyCohorts)
     ) {
       const hasUnavailableMethodology = methodologyCohorts.some(
-        (cohort) => !cohort || cohort.startsWith("unavailable:")
+        (cohort) => !cohort || cohort.startsWith("unavailable:"),
       );
       toast({
         title: "Re-underwrite before comparing",
@@ -2898,9 +2953,7 @@ export function SavedAnalysesPage({
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
               My Deals
             </h1>
-            <p className="text-sm text-muted-foreground">
-              {dealCountLabel}
-            </p>
+            <p className="text-sm text-muted-foreground">{dealCountLabel}</p>
           </div>
         </div>
         {/* Scoped-to-one-client banner. Without it, arriving from the Clients
@@ -2946,7 +2999,9 @@ export function SavedAnalysesPage({
                 id="saved-analysis-search"
                 placeholder="Search by address..."
                 value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
+                onChange={(event) =>
+                  handleSearchQueryChange(event.target.value)
+                }
                 className="h-11 rounded-xl border-border bg-muted/60 pl-9"
               />
             </div>
@@ -3109,106 +3164,108 @@ export function SavedAnalysesPage({
               id="desktop-deal-filters"
               className={desktopFiltersOpen ? "contents" : "hidden"}
             >
-            <Tabs
-              value={selectedSignal}
-              onValueChange={(value) =>
-                setSelectedSignal(value as "all" | SavedSignal)
-              }
-              className="gap-0"
-            >
-              <TabsList className="bg-muted/60 h-auto rounded-full p-1">
-                <TabsTrigger
-                  value="all"
-                  className="h-11 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
-                  >
-                  All
-                </TabsTrigger>
-                {(Object.keys(SIGNAL_LABELS) as SavedSignal[]).map((signal) => (
+              <Tabs
+                value={selectedSignal}
+                onValueChange={(value) =>
+                  setSelectedSignal(value as "all" | SavedSignal)
+                }
+                className="gap-0"
+              >
+                <TabsList className="bg-muted/60 h-auto rounded-full p-1">
                   <TabsTrigger
-                    key={signal}
-                    value={signal}
+                    value="all"
                     className="h-11 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
-                      >
-                    {SIGNAL_LABELS[signal]}
+                  >
+                    All
                   </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
+                  {(Object.keys(SIGNAL_LABELS) as SavedSignal[]).map(
+                    (signal) => (
+                      <TabsTrigger
+                        key={signal}
+                        value={signal}
+                        className="h-11 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
+                      >
+                        {SIGNAL_LABELS[signal]}
+                      </TabsTrigger>
+                    ),
+                  )}
+                </TabsList>
+              </Tabs>
 
-            <Tabs
-              value={selectedType}
-              onValueChange={(value) =>
-                setSelectedType(value as "all" | SavedPropertyType)
-              }
-              className="gap-0"
-            >
-              <TabsList className="bg-muted/60 h-auto rounded-full p-1">
-                <TabsTrigger
-                  value="all"
-                  className="h-11 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
+              <Tabs
+                value={selectedType}
+                onValueChange={(value) =>
+                  setSelectedType(value as "all" | SavedPropertyType)
+                }
+                className="gap-0"
+              >
+                <TabsList className="bg-muted/60 h-auto rounded-full p-1">
+                  <TabsTrigger
+                    value="all"
+                    className="h-11 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
                   >
-                  All Types
-                </TabsTrigger>
-                <TabsTrigger
-                  value="single-family"
-                  className="h-11 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
+                    All Types
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="single-family"
+                    className="h-11 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
                   >
-                  Single Family
-                </TabsTrigger>
-                <TabsTrigger
-                  value="multi-family"
-                  className="h-11 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
+                    Single Family
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="multi-family"
+                    className="h-11 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
                   >
-                  Multi-Family
-                </TabsTrigger>
-                <TabsTrigger
-                  value="owner-occupant"
-                  className="h-11 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
+                    Multi-Family
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="owner-occupant"
+                    className="h-11 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
                   >
-                  Owner Occupant
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+                    Owner Occupant
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
 
-            {/* Hidden while scoped to a client: the server deliberately shows
+              {/* Hidden while scoped to a client: the server deliberately shows
                 ALL of that client's deals (so the roster count, this list and
                 the buyer's portal agree), which made these tabs inert — they
                 still highlighted "Active" while archived rows were on screen,
                 so the control both did nothing and misdescribed the list. */}
-            <Tabs
-              value={activeDealStateFilter}
-              onValueChange={(value) =>
-                handleStateFilterChange(value as DealStateFilter)
-              }
-              className={cn("gap-0", clientFilterId && "hidden")}
-            >
-              <TabsList className="bg-muted/60 h-auto rounded-full p-1">
-                <TabsTrigger
-                  value="active"
-                  className="h-11 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
+              <Tabs
+                value={activeDealStateFilter}
+                onValueChange={(value) =>
+                  handleStateFilterChange(value as DealStateFilter)
+                }
+                className={cn("gap-0", clientFilterId && "hidden")}
+              >
+                <TabsList className="bg-muted/60 h-auto rounded-full p-1">
+                  <TabsTrigger
+                    value="active"
+                    className="h-11 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
                   >
-                  Active
-                </TabsTrigger>
-                <TabsTrigger
-                  value="completed"
-                  className="h-11 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
+                    Active
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="completed"
+                    className="h-11 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
                   >
-                  Completed
-                </TabsTrigger>
-                <TabsTrigger
-                  value="archived"
-                  className="h-11 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
+                    Completed
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="archived"
+                    className="h-11 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
                   >
-                  Archived
-                </TabsTrigger>
-                <TabsTrigger
-                  value="all"
-                  className="h-11 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
+                    Archived
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="all"
+                    className="h-11 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
                   >
-                  All
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+                    All
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
 
             <div className="ml-auto flex items-center gap-2">
@@ -3327,240 +3384,244 @@ export function SavedAnalysesPage({
                     item.methodologyComparisonKey);
               return (
                 <Fragment key={item.id}>
-                {startsMethodologyCohort ? (
-                  <div className="rounded-xl border border-border bg-muted/40 px-3 py-2">
-                    <p className="text-xs font-bold text-foreground">
-                      {item.methodologyGroupLabel ?? "Current underwriting"}
-                    </p>
-                    <p className="text-[11px] text-muted-foreground">
-                      Sorted only against deals using this underwriting version.
-                    </p>
-                  </div>
-                ) : null}
-                <article
-                  className={cn(
-                    "rounded-2xl border border-border bg-background p-4 shadow-sm transition-colors",
-                    isSelected && "border-primary/40 bg-primary/5",
-                  )}
-                >
-                  <div className="flex items-start gap-3 ">
-                    <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                      <PropertyTypeIcon className="w-4 h-4" />
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      {/* Name click = the deal's workspace (same-tab, like every
+                  {startsMethodologyCohort ? (
+                    <div className="rounded-xl border border-border bg-muted/40 px-3 py-2">
+                      <p className="text-xs font-bold text-foreground">
+                        {item.methodologyGroupLabel ?? "Current underwriting"}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground">
+                        Sorted only against deals using this underwriting
+                        version.
+                      </p>
+                    </div>
+                  ) : null}
+                  <article
+                    className={cn(
+                      "rounded-2xl border border-border bg-background p-4 shadow-sm transition-colors",
+                      isSelected && "border-primary/40 bg-primary/5",
+                    )}
+                  >
+                    <div className="flex items-start gap-3 ">
+                      <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                        <PropertyTypeIcon className="w-4 h-4" />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        {/* Name click = the deal's workspace (same-tab, like every
                           other workspace deep-link). The analyzer handoff stays
                           one click away on the Open button below. */}
-                      <Link
-                        href={`/dashboard/saved-analyses/${item.id}`}
-                        title={item.address ?? undefined}
-                        className="flex max-w-full items-center gap-2 text-left text-base font-bold leading-tight text-foreground hover:text-primary"
-                      >
-                        <span className="truncate">{address.main}</span>
-                        {item.scenarioName ? (
-                          // Sibling scenarios share the address (and nickname) —
-                          // this suffix keeps them tellable apart at a glance.
-                          <span className="shrink-0 rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
-                            Scenario · {item.scenarioName}
-                          </span>
-                        ) : duplicateMarkerById.has(item.id) ? (
-                          // Unnamed duplicate saves at one address.
-                          <span
-                            className="shrink-0 rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold text-muted-foreground"
-                            title="You have more than one saved analysis for this address"
-                          >
-                            {duplicateMarkerById.get(item.id)!.index} of{" "}
-                            {duplicateMarkerById.get(item.id)!.total} saved here
-                          </span>
-                        ) : null}
-                      </Link>
-                      <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                        <Badge
-                          className={cn(
-                            "rounded-full border text-xs font-semibold",
-                            getSignalClasses(signal),
-                          )}
+                        <Link
+                          href={`/dashboard/saved-analyses/${item.id}`}
+                          title={item.address ?? undefined}
+                          className="flex max-w-full items-center gap-2 text-left text-base font-bold leading-tight text-foreground hover:text-primary"
                         >
-                          {SIGNAL_LABELS[signal]}
-                        </Badge>
-                        {item.methodologyLabel ? (
-                          <Badge
-                            variant="outline"
-                            className="rounded-full text-[10px] font-semibold text-muted-foreground"
-                            title={
-                              item.methodologyIsCurrent === false
-                                ? `${item.methodologyLabel}. Re-underwrite this deal before comparing it with the current model.`
-                                : item.methodologyLabel
-                            }
-                          >
-                            {item.methodologyLabel}
-                          </Badge>
-                        ) : null}
-                        <BuyBoxFitBadge fit={buyBoxFitById?.get(item.id)} />
-                        {foldedBadgeCount > 0 ? (
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <button
-                                type="button"
-                                aria-label={`${foldedBadgeCount} more detail${foldedBadgeCount === 1 ? "" : "s"} for ${address.main}`}
-                                className="text-[11px] font-semibold text-primary underline-offset-2 hover:underline"
-                              >
-                                +{foldedBadgeCount} more
-                              </button>
-                            </PopoverTrigger>
-                            <PopoverContent
-                              align="start"
-                              className="w-auto space-y-2.5 p-3"
+                          <span className="truncate">{address.main}</span>
+                          {item.scenarioName ? (
+                            // Sibling scenarios share the address (and nickname) —
+                            // this suffix keeps them tellable apart at a glance.
+                            <span className="shrink-0 rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                              Scenario · {item.scenarioName}
+                            </span>
+                          ) : duplicateMarkerById.has(item.id) ? (
+                            // Unnamed duplicate saves at one address.
+                            <span
+                              className="shrink-0 rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold text-muted-foreground"
+                              title="You have more than one saved analysis for this address"
                             >
-                              {statusBadge || item.dataConfidence ? (
-                                <div className="flex flex-wrap items-center gap-1.5">
-                                  {statusBadge}
-                                  {item.dataConfidence ? (
-                                    <DataConfidenceBadge
-                                      confidence={item.dataConfidence}
-                                      size="xs"
-                                      propertyType={item.propertyType}
-                                    />
-                                  ) : null}
-                                </div>
-                              ) : null}
-                              {item.breakdown && item.score != null ? (
-                                <ScoreBreakdown
-                                  breakdown={item.breakdown}
-                                  score={item.score}
-                                  propertyType={item.propertyType}
-                                />
-                              ) : null}
-                            </PopoverContent>
-                          </Popover>
-                        ) : null}
+                              {duplicateMarkerById.get(item.id)!.index} of{" "}
+                              {duplicateMarkerById.get(item.id)!.total} saved
+                              here
+                            </span>
+                          ) : null}
+                        </Link>
+                        <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                          <Badge
+                            className={cn(
+                              "rounded-full border text-xs font-semibold",
+                              getSignalClasses(signal),
+                            )}
+                          >
+                            {SIGNAL_LABELS[signal]}
+                          </Badge>
+                          {item.methodologyLabel ? (
+                            <Badge
+                              variant="outline"
+                              className="rounded-full text-[10px] font-semibold text-muted-foreground"
+                              title={
+                                item.methodologyIsCurrent === false
+                                  ? `${item.methodologyLabel}. Re-underwrite this deal before comparing it with the current model.`
+                                  : item.methodologyLabel
+                              }
+                            >
+                              {item.methodologyLabel}
+                            </Badge>
+                          ) : null}
+                          <BuyBoxFitBadge fit={buyBoxFitById?.get(item.id)} />
+                          {foldedBadgeCount > 0 ? (
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <button
+                                  type="button"
+                                  aria-label={`${foldedBadgeCount} more detail${foldedBadgeCount === 1 ? "" : "s"} for ${address.main}`}
+                                  className="text-[11px] font-semibold text-primary underline-offset-2 hover:underline"
+                                >
+                                  +{foldedBadgeCount} more
+                                </button>
+                              </PopoverTrigger>
+                              <PopoverContent
+                                align="start"
+                                className="w-auto space-y-2.5 p-3"
+                              >
+                                {statusBadge || item.dataConfidence ? (
+                                  <div className="flex flex-wrap items-center gap-1.5">
+                                    {statusBadge}
+                                    {item.dataConfidence ? (
+                                      <DataConfidenceBadge
+                                        confidence={item.dataConfidence}
+                                        size="xs"
+                                        propertyType={item.propertyType}
+                                      />
+                                    ) : null}
+                                  </div>
+                                ) : null}
+                                {item.breakdown && item.score != null ? (
+                                  <ScoreBreakdown
+                                    breakdown={item.breakdown}
+                                    score={item.score}
+                                    propertyType={item.propertyType}
+                                  />
+                                ) : null}
+                              </PopoverContent>
+                            </Popover>
+                          ) : null}
+                        </div>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {getTypeLabel(item.propertyType)}
+                        </p>
+                        <OfferLineRow
+                          offer={item.offerLine}
+                          basisLabel={item.offerBasisLabel}
+                        />
+                        <NextActionLine
+                          recommendation={item.recommendation}
+                          netCashFlow={item.netCashFlowMonthly}
+                          stage={
+                            item.status === "completed"
+                              ? "closed"
+                              : item.pipelineStage
+                          }
+                          meetsBuyBox={
+                            buyBoxFitById?.get(item.id)?.anyPass ?? null
+                          }
+                          hasCloseDate={item.closeDate != null}
+                          className="mt-1.5"
+                        />
+                        <OwnedEquityCell
+                          item={item}
+                          enabled={ownedEquityEnabled}
+                        />
                       </div>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {getTypeLabel(item.propertyType)}
-                      </p>
-                      <OfferLineRow
-                        offer={item.offerLine}
-                        basisLabel={item.offerBasisLabel}
-                      />
-                      <NextActionLine
-                        recommendation={item.recommendation}
-                        netCashFlow={item.netCashFlowMonthly}
-                        stage={
-                          item.status === "completed"
-                            ? "closed"
-                            : item.pipelineStage
-                        }
-                        meetsBuyBox={
-                          buyBoxFitById?.get(item.id)?.anyPass ?? null
-                        }
-                        hasCloseDate={item.closeDate != null}
-                        className="mt-1.5"
-                      />
-                      <OwnedEquityCell
-                        item={item}
-                        enabled={ownedEquityEnabled}
-                      />
+                      <label className="flex size-11 shrink-0 cursor-pointer items-center justify-center">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleOne(item.id)}
+                          aria-label={`Select analysis ${address.main}`}
+                          className="size-4 rounded border-border disabled:cursor-not-allowed disabled:opacity-40"
+                        />
+                      </label>
                     </div>
-                    <label className="flex size-11 shrink-0 cursor-pointer items-center justify-center">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => toggleOne(item.id)}
-                        aria-label={`Select analysis ${address.main}`}
-                        className="size-4 rounded border-border disabled:cursor-not-allowed disabled:opacity-40"
-                      />
-                    </label>
-                  </div>
 
-                  <div className="mt-4 grid grid-cols-2 gap-2">
-                    <div className="rounded-xl bg-muted/40 p-3">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                        Cash Flow
-                      </p>
-                      <p
-                        className={cn(
-                          "mt-1 text-sm font-extrabold",
-                          (item.netCashFlowMonthly ?? 0) >= 0
-                            ? "text-success"
-                            : "text-[var(--metric-negative)]",
-                        )}
-                      >
-                        {toMonthCashFlow(item.netCashFlowMonthly)}
-                      </p>
-                    </div>
-                    <div className="rounded-xl bg-muted/40 p-3">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                        CoC
-                      </p>
-                      <p
-                        className={cn(
-                          "mt-1 text-sm font-extrabold",
-                          cocNotApplicable
-                            ? "text-muted-foreground"
-                            : (cocReturnPct ?? 0) >= 0
+                    <div className="mt-4 grid grid-cols-2 gap-2">
+                      <div className="rounded-xl bg-muted/40 p-3">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                          Cash Flow
+                        </p>
+                        <p
+                          className={cn(
+                            "mt-1 text-sm font-extrabold",
+                            (item.netCashFlowMonthly ?? 0) >= 0
                               ? "text-success"
                               : "text-[var(--metric-negative)]",
-                        )}
-                      >
-                        {cocNotApplicable ? "N/A" : toPercent(cocReturnPct)}
-                      </p>
+                          )}
+                        >
+                          {toMonthCashFlow(item.netCashFlowMonthly)}
+                        </p>
+                      </div>
+                      <div className="rounded-xl bg-muted/40 p-3">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                          CoC
+                        </p>
+                        <p
+                          className={cn(
+                            "mt-1 text-sm font-extrabold",
+                            cocNotApplicable
+                              ? "text-muted-foreground"
+                              : (cocReturnPct ?? 0) >= 0
+                                ? "text-success"
+                                : "text-[var(--metric-negative)]",
+                          )}
+                        >
+                          {cocNotApplicable ? "N/A" : toPercent(cocReturnPct)}
+                        </p>
+                      </div>
+                      <div className="rounded-xl bg-muted/40 p-3">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                          Cap Rate
+                        </p>
+                        <p className="mt-1 text-sm font-extrabold text-foreground">
+                          {toPercent(item.capRatePct)}
+                        </p>
+                      </div>
+                      <div className="rounded-xl bg-muted/40 p-3">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                          Price
+                        </p>
+                        <p className="mt-1 text-sm font-extrabold text-foreground">
+                          {toCurrency(item.purchasePrice)}
+                        </p>
+                      </div>
                     </div>
-                    <div className="rounded-xl bg-muted/40 p-3">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                        Cap Rate
-                      </p>
-                      <p className="mt-1 text-sm font-extrabold text-foreground">
-                        {toPercent(item.capRatePct)}
-                      </p>
-                    </div>
-                    <div className="rounded-xl bg-muted/40 p-3">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                        Price
-                      </p>
-                      <p className="mt-1 text-sm font-extrabold text-foreground">
-                        {toCurrency(item.purchasePrice)}
-                      </p>
-                    </div>
-                  </div>
 
-                  {/* One primary Open action + a ⋯ overflow menu — mirrors the
+                    {/* One primary Open action + a ⋯ overflow menu — mirrors the
                       desktop table's consolidation below. Stage/status and tag
                       editing live in the menu; tags stay visible as read-only
                       chips so the card keeps its context without the expanded
                       editor + selects that used to add ~190px per card. */}
-                  <div className="mt-4 grid gap-3">
-                    {agentClients.length > 0 ? (
-                      <DealClientPicker
-                        clients={agentClients}
-                        clientId={item.clientId ?? null}
-                        disabled={
-                          isUpdatingStatus && updatingDealStatusId === item.id
-                        }
-                        onChange={(cid) => handleDealClientChange(item.id, cid)}
-                      />
-                    ) : null}
-                    {canUsePipeline && editingTagsDealId === item.id ? (
-                      <DealTags
-                        tags={item.tags ?? []}
-                        disabled={
-                          isUpdatingStatus && updatingDealStatusId === item.id
-                        }
-                        onSave={(t) => handleDealTagsChange(item.id, t)}
-                      />
-                    ) : canUsePipeline && (item.tags?.length ?? 0) > 0 ? (
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        {(item.tags ?? []).map((tag) => (
-                          <span
-                            key={tag}
-                            className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-foreground"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    ) : null}
-                    <div className="flex items-center gap-2">
-                      <Button
+                    <div className="mt-4 grid gap-3">
+                      {agentClients.length > 0 ? (
+                        <DealClientPicker
+                          clients={agentClients}
+                          clientId={item.clientId ?? null}
+                          disabled={
+                            isUpdatingStatus && updatingDealStatusId === item.id
+                          }
+                          onChange={(cid) =>
+                            handleDealClientChange(item.id, cid)
+                          }
+                        />
+                      ) : null}
+                      {canUsePipeline && editingTagsDealId === item.id ? (
+                        <DealTags
+                          tags={item.tags ?? []}
+                          disabled={
+                            isUpdatingStatus && updatingDealStatusId === item.id
+                          }
+                          onSave={(t) => handleDealTagsChange(item.id, t)}
+                        />
+                      ) : canUsePipeline && (item.tags?.length ?? 0) > 0 ? (
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          {(item.tags ?? []).map((tag) => (
+                            <span
+                              key={tag}
+                              className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-foreground"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
+                      <div className="flex items-center gap-2">
+                        <Button
                           variant="outline"
                           size="sm"
                           className="h-11 flex-1 rounded-xl px-2.5 text-xs"
@@ -3578,128 +3639,131 @@ export function SavedAnalysesPage({
                           <DropdownMenuTrigger asChild>
                             <Button
                               type="button"
-                        variant="outline"
-                        size="sm"
-                        className="h-11 w-11 shrink-0 rounded-xl p-0"
+                              variant="outline"
+                              size="sm"
+                              className="h-11 w-11 shrink-0 rounded-xl p-0"
                               aria-label={`More actions for ${address.main}`}
-                          >
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-56">
-                          <DropdownMenuItem
-                            onSelect={() => handleExportPdfClick(item.id)}
-                            disabled={exportingPdfDealId === item.id}
-                          >
-                            {exportingPdfDealId === item.id ? (
-                              <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <FileDown className="mr-2 h-3.5 w-3.5" />
-                            )}
-                            {!canExportPdf && item.hasSavedPdf
-                              ? "Download saved PDF"
-                              : "Export PDF"}
-                            {!canExportPdf && !item.hasSavedPdf ? (
-                              <span className="ml-auto rounded-full bg-primary/10 px-1.5 py-0 text-[9px] font-bold text-primary">
-                                PRO
-                              </span>
-                            ) : null}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link href={`/dashboard/new?savedDeal=${encodeURIComponent(item.id)}`}>
-                              <SlidersHorizontal className="mr-2 h-3.5 w-3.5" />
-                              Edit assumptions
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onSelect={() => handleDuplicateDeal(item.id)}
-                            disabled={openingDealId === item.id}
-                          >
-                            <CopyPlus className="mr-2 h-3.5 w-3.5" />
-                            Duplicate
-                          </DropdownMenuItem>
-                          {canUsePipeline ? (
-                            <DropdownMenuItem
-                              onSelect={() =>
-                                setEditingTagsDealId((prev) =>
-                                  prev === item.id ? null : item.id,
-                                )
-                              }
                             >
-                              <Tag className="mr-2 h-3.5 w-3.5" />
-                              {editingTagsDealId === item.id
-                                ? "Done editing tags"
-                                : "Edit tags"}
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-56">
+                            <DropdownMenuItem
+                              onSelect={() => handleExportPdfClick(item.id)}
+                              disabled={exportingPdfDealId === item.id}
+                            >
+                              {exportingPdfDealId === item.id ? (
+                                <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <FileDown className="mr-2 h-3.5 w-3.5" />
+                              )}
+                              {!canExportPdf && item.hasSavedPdf
+                                ? "Download saved PDF"
+                                : "Export PDF"}
+                              {!canExportPdf && !item.hasSavedPdf ? (
+                                <span className="ml-auto rounded-full bg-primary/10 px-1.5 py-0 text-[9px] font-bold text-primary">
+                                  PRO
+                                </span>
+                              ) : null}
                             </DropdownMenuItem>
-                          ) : null}
-                          <DropdownMenuSeparator />
-                          <DropdownMenuLabel>
-                            {canUsePipeline ? "Stage" : "Status"}
-                          </DropdownMenuLabel>
-                          {canUsePipeline
-                            ? PIPELINE_STAGES.map((s) => (
-                                <DropdownMenuCheckboxItem
-                                  key={s.id}
-                                  checked={
-                                    (item.pipelineStage ?? "analyzing") === s.id
-                                  }
-                                  disabled={
-                                    isUpdatingStatus &&
-                                    updatingDealStatusId === item.id
-                                  }
-                                  onCheckedChange={(checked) => {
-                                    if (checked) {
-                                      handleDealStageChange(
-                                        item.id,
-                                        s.id,
-                                        item.pipelineStage ?? "analyzing",
-                                      );
+                            <DropdownMenuItem asChild>
+                              <Link
+                                href={`/dashboard/new?savedDeal=${encodeURIComponent(item.id)}`}
+                              >
+                                <SlidersHorizontal className="mr-2 h-3.5 w-3.5" />
+                                Edit assumptions
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onSelect={() => handleDuplicateDeal(item.id)}
+                              disabled={openingDealId === item.id}
+                            >
+                              <CopyPlus className="mr-2 h-3.5 w-3.5" />
+                              Duplicate
+                            </DropdownMenuItem>
+                            {canUsePipeline ? (
+                              <DropdownMenuItem
+                                onSelect={() =>
+                                  setEditingTagsDealId((prev) =>
+                                    prev === item.id ? null : item.id,
+                                  )
+                                }
+                              >
+                                <Tag className="mr-2 h-3.5 w-3.5" />
+                                {editingTagsDealId === item.id
+                                  ? "Done editing tags"
+                                  : "Edit tags"}
+                              </DropdownMenuItem>
+                            ) : null}
+                            <DropdownMenuSeparator />
+                            <DropdownMenuLabel>
+                              {canUsePipeline ? "Stage" : "Status"}
+                            </DropdownMenuLabel>
+                            {canUsePipeline
+                              ? PIPELINE_STAGES.map((s) => (
+                                  <DropdownMenuCheckboxItem
+                                    key={s.id}
+                                    checked={
+                                      (item.pipelineStage ?? "analyzing") ===
+                                      s.id
                                     }
-                                  }}
-                                >
-                                  {s.label}
-                                </DropdownMenuCheckboxItem>
-                              ))
-                            : (
-                                [
-                                  ["active", "Active"],
-                                  ["completed", "Completed"],
-                                  ["archived", "Archived"],
-                                ] as const
-                              ).map(([value, label]) => (
-                                <DropdownMenuCheckboxItem
-                                  key={value}
-                                  checked={item.status === value}
-                                  disabled={
-                                    isUpdatingStatus &&
-                                    updatingDealStatusId === item.id
-                                  }
-                                  onCheckedChange={(checked) => {
-                                    if (checked)
-                                      handleDealStatusChange(item.id, value);
-                                  }}
-                                >
-                                  {label}
-                                </DropdownMenuCheckboxItem>
-                              ))}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                                    disabled={
+                                      isUpdatingStatus &&
+                                      updatingDealStatusId === item.id
+                                    }
+                                    onCheckedChange={(checked) => {
+                                      if (checked) {
+                                        handleDealStageChange(
+                                          item.id,
+                                          s.id,
+                                          item.pipelineStage ?? "analyzing",
+                                        );
+                                      }
+                                    }}
+                                  >
+                                    {s.label}
+                                  </DropdownMenuCheckboxItem>
+                                ))
+                              : (
+                                  [
+                                    ["active", "Active"],
+                                    ["completed", "Completed"],
+                                    ["archived", "Archived"],
+                                  ] as const
+                                ).map(([value, label]) => (
+                                  <DropdownMenuCheckboxItem
+                                    key={value}
+                                    checked={item.status === value}
+                                    disabled={
+                                      isUpdatingStatus &&
+                                      updatingDealStatusId === item.id
+                                    }
+                                    onCheckedChange={(checked) => {
+                                      if (checked)
+                                        handleDealStatusChange(item.id, value);
+                                    }}
+                                  >
+                                    {label}
+                                  </DropdownMenuCheckboxItem>
+                                ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </div>
-                  </div>
 
-                  <p className="mt-3 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <CalendarClock className="h-3.5 w-3.5" />
-                    <span>
-                      Saved{" "}
-                      {new Date(item.createdAt).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                        timeZone: "UTC",
-                      })}
-                    </span>
-                  </p>
-                </article>
+                    <p className="mt-3 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <CalendarClock className="h-3.5 w-3.5" />
+                      <span>
+                        Saved{" "}
+                        {new Date(item.createdAt).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                          timeZone: "UTC",
+                        })}
+                      </span>
+                    </p>
+                  </article>
                 </Fragment>
               );
             })}
@@ -3820,85 +3884,86 @@ export function SavedAnalysesPage({
                         item.methodologyComparisonKey);
                   return (
                     <Fragment key={item.id}>
-                    {startsMethodologyCohort ? (
-                      <tr className="border-b border-border bg-muted/45">
-                        <td
-                          colSpan={10 + optionalColumnCount}
-                          className="py-2 text-left"
-                        >
-                          <span className="font-bold text-foreground">
-                            {item.methodologyGroupLabel ?? "Current underwriting"}
-                          </span>
-                          <span className="ml-2 text-xs text-muted-foreground">
-                            Sorted only within this underwriting version
-                          </span>
-                        </td>
-                      </tr>
-                    ) : null}
-                    <tr
-                      className={cn(
-                        "group/row h-16 border-b border-border/80 transition-colors",
-                        isSelected ? "bg-primary/5" : "hover:bg-muted/40",
-                      )}
-                    >
-                      <td className="px-3 align-middle">
-                        <label className="flex size-11 cursor-pointer items-center justify-center">
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={() => toggleOne(item.id)}
-                            aria-label={`Select analysis ${address.main}`}
-                            className="size-4 rounded border-border disabled:cursor-not-allowed disabled:opacity-40"
-                          />
-                        </label>
-                      </td>
-                      <td className="pr-2">
-                        <div className="flex items-start gap-2">
-                          <span className="mt-0.5 inline-flex size-7 rounded-full bg-primary/10 text-primary items-center justify-center shrink-0">
-                            <PropertyTypeIcon className="w-3.5 h-3.5" />
-                          </span>
-                          <div className="min-w-0">
-                            {/* Name click = the deal's workspace (same-tab). The
-                                analyzer stays one click away via Open Analysis. */}
-                            <Link
-                              href={`/dashboard/saved-analyses/${item.id}`}
-                              title={item.address ?? undefined}
-                              className="flex max-w-full items-center gap-2 text-left font-semibold text-foreground hover:text-primary"
-                            >
-                              <span className="truncate">{address.main}</span>
-                              {item.scenarioName ? (
-                                // Sibling scenarios share the address (and
-                                // nickname) — keep the rows tellable apart.
-                                <span className="shrink-0 rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
-                                  Scenario · {item.scenarioName}
-                                </span>
-                              ) : duplicateMarkerById.has(item.id) ? (
-                                // Two saves of the SAME address with no scenario
-                                // name are otherwise identical rows carrying
-                                // different scores — the exact confusion
-                                // duplicateMarkerById was built for. The mobile
-                                // card has always shown this; the desktop row
-                                // dropped it, which is the viewport where the
-                                // duplicates sit next to each other.
-                                <span
-                                  className="shrink-0 rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold text-muted-foreground"
-                                  title="You have more than one saved analysis for this address"
-                                >
-                                  {duplicateMarkerById.get(item.id)!.index} of{" "}
-                                  {duplicateMarkerById.get(item.id)!.total}{" "}
-                                  saved here
-                                </span>
-                              ) : null}
-                            </Link>
-                            {getStatusBadge(item)}
-                            <p className="text-xs text-muted-foreground truncate">
-                              {getTypeLabel(item.propertyType)}
-                            </p>
-                            <OfferLineRow
-                              offer={item.offerLine}
-                              basisLabel={item.offerBasisLabel}
+                      {startsMethodologyCohort ? (
+                        <tr className="border-b border-border bg-muted/45">
+                          <td
+                            colSpan={10 + optionalColumnCount}
+                            className="py-2 text-left"
+                          >
+                            <span className="font-bold text-foreground">
+                              {item.methodologyGroupLabel ??
+                                "Current underwriting"}
+                            </span>
+                            <span className="ml-2 text-xs text-muted-foreground">
+                              Sorted only within this underwriting version
+                            </span>
+                          </td>
+                        </tr>
+                      ) : null}
+                      <tr
+                        className={cn(
+                          "group/row h-16 border-b border-border/80 transition-colors",
+                          isSelected ? "bg-primary/5" : "hover:bg-muted/40",
+                        )}
+                      >
+                        <td className="px-3 align-middle">
+                          <label className="flex size-11 cursor-pointer items-center justify-center">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => toggleOne(item.id)}
+                              aria-label={`Select analysis ${address.main}`}
+                              className="size-4 rounded border-border disabled:cursor-not-allowed disabled:opacity-40"
                             />
-                            {/* The "Next:" nudge moved into the verdict popover
+                          </label>
+                        </td>
+                        <td className="pr-2">
+                          <div className="flex items-start gap-2">
+                            <span className="mt-0.5 inline-flex size-7 rounded-full bg-primary/10 text-primary items-center justify-center shrink-0">
+                              <PropertyTypeIcon className="w-3.5 h-3.5" />
+                            </span>
+                            <div className="min-w-0">
+                              {/* Name click = the deal's workspace (same-tab). The
+                                analyzer stays one click away via Open Analysis. */}
+                              <Link
+                                href={`/dashboard/saved-analyses/${item.id}`}
+                                title={item.address ?? undefined}
+                                className="flex max-w-full items-center gap-2 text-left font-semibold text-foreground hover:text-primary"
+                              >
+                                <span className="truncate">{address.main}</span>
+                                {item.scenarioName ? (
+                                  // Sibling scenarios share the address (and
+                                  // nickname) — keep the rows tellable apart.
+                                  <span className="shrink-0 rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                                    Scenario · {item.scenarioName}
+                                  </span>
+                                ) : duplicateMarkerById.has(item.id) ? (
+                                  // Two saves of the SAME address with no scenario
+                                  // name are otherwise identical rows carrying
+                                  // different scores — the exact confusion
+                                  // duplicateMarkerById was built for. The mobile
+                                  // card has always shown this; the desktop row
+                                  // dropped it, which is the viewport where the
+                                  // duplicates sit next to each other.
+                                  <span
+                                    className="shrink-0 rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold text-muted-foreground"
+                                    title="You have more than one saved analysis for this address"
+                                  >
+                                    {duplicateMarkerById.get(item.id)!.index} of{" "}
+                                    {duplicateMarkerById.get(item.id)!.total}{" "}
+                                    saved here
+                                  </span>
+                                ) : null}
+                              </Link>
+                              {getStatusBadge(item)}
+                              <p className="text-xs text-muted-foreground truncate">
+                                {getTypeLabel(item.propertyType)}
+                              </p>
+                              <OfferLineRow
+                                offer={item.offerLine}
+                                basisLabel={item.offerBasisLabel}
+                              />
+                              {/* The "Next:" nudge moved into the verdict popover
                                 (see the Signal cell). On a scanning list it was
                                 a full line per row restating the verdict as a
                                 sentence — every "Don't buy at this price" row
@@ -3906,15 +3971,15 @@ export function SavedAnalysesPage({
                                 better information design next to the WHY than
                                 stacked under the address, and it costs no
                                 height at rest. */}
-                            <OwnedEquityCell
-                              item={item}
-                              enabled={ownedEquityEnabled}
-                            />
+                              <OwnedEquityCell
+                                item={item}
+                                enabled={ownedEquityEnabled}
+                              />
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="pr-2">
-                        {/* The VERDICT BADGE IS the "Why?" trigger.
+                        </td>
+                        <td className="pr-2">
+                          {/* The VERDICT BADGE IS the "Why?" trigger.
                             This cell used to stack three things: the badge, a
                             separate "Why?" link beside it, and a data-confidence
                             pill on its own line below. The confidence pill read
@@ -3925,228 +3990,229 @@ export function SavedAnalysesPage({
                             nothing became unreachable; it just stopped shouting.
                             Falls back to a plain badge when there is nothing to
                             show, so the row never offers a dead click. */}
-                        <div className="flex flex-col items-start gap-1.5">
-                          <div className="flex flex-wrap items-center gap-1.5">
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <button
-                                type="button"
-                                aria-label={`Why ${address.main} scored ${SIGNAL_LABELS[signal]}`}
-                                className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                              >
-                                <Badge
-                                  className={cn(
-                                    "cursor-pointer rounded-full border text-xs font-semibold underline decoration-dotted decoration-1 underline-offset-2",
-                                    getSignalClasses(signal),
-                                  )}
+                          <div className="flex flex-col items-start gap-1.5">
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <button
+                                    type="button"
+                                    aria-label={`Why ${address.main} scored ${SIGNAL_LABELS[signal]}`}
+                                    className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                  >
+                                    <Badge
+                                      className={cn(
+                                        "cursor-pointer rounded-full border text-xs font-semibold underline decoration-dotted decoration-1 underline-offset-2",
+                                        getSignalClasses(signal),
+                                      )}
+                                    >
+                                      {SIGNAL_LABELS[signal]}
+                                    </Badge>
+                                  </button>
+                                </PopoverTrigger>
+                                <PopoverContent
+                                  align="end"
+                                  className="w-auto space-y-2.5 p-3"
                                 >
-                                  {SIGNAL_LABELS[signal]}
+                                  <NextActionLine
+                                    recommendation={item.recommendation}
+                                    netCashFlow={item.netCashFlowMonthly}
+                                    stage={
+                                      item.status === "completed"
+                                        ? "closed"
+                                        : item.pipelineStage
+                                    }
+                                    meetsBuyBox={
+                                      buyBoxFitById?.get(item.id)?.anyPass ??
+                                      null
+                                    }
+                                    hasCloseDate={item.closeDate != null}
+                                  />
+                                  {item.breakdown && item.score != null ? (
+                                    <ScoreBreakdown
+                                      breakdown={item.breakdown}
+                                      score={item.score}
+                                      propertyType={item.propertyType}
+                                    />
+                                  ) : null}
+                                  {item.dataConfidence ? (
+                                    <DataConfidenceBadge
+                                      confidence={item.dataConfidence}
+                                      size="xs"
+                                      propertyType={item.propertyType}
+                                    />
+                                  ) : null}
+                                </PopoverContent>
+                              </Popover>
+                              {item.methodologyLabel ? (
+                                <Badge
+                                  variant="outline"
+                                  className="rounded-full text-[10px] font-semibold text-muted-foreground"
+                                  title={
+                                    item.methodologyIsCurrent === false
+                                      ? `${item.methodologyLabel}. Re-underwrite this deal before comparing it with the current model.`
+                                      : item.methodologyLabel
+                                  }
+                                >
+                                  {item.methodologyLabel}
                                 </Badge>
-                              </button>
-                            </PopoverTrigger>
-                            <PopoverContent
-                              align="end"
-                              className="w-auto space-y-2.5 p-3"
-                            >
-                              <NextActionLine
-                                recommendation={item.recommendation}
-                                netCashFlow={item.netCashFlowMonthly}
-                                stage={
-                                  item.status === "completed"
-                                    ? "closed"
-                                    : item.pipelineStage
-                                }
-                                meetsBuyBox={
-                                  buyBoxFitById?.get(item.id)?.anyPass ?? null
-                                }
-                                hasCloseDate={item.closeDate != null}
-                              />
-                              {item.breakdown && item.score != null ? (
-                                <ScoreBreakdown
-                                  breakdown={item.breakdown}
-                                  score={item.score}
-                                  propertyType={item.propertyType}
-                                />
                               ) : null}
-                              {item.dataConfidence ? (
-                                <DataConfidenceBadge
-                                  confidence={item.dataConfidence}
-                                  size="xs"
-                                  propertyType={item.propertyType}
-                                />
-                              ) : null}
-                            </PopoverContent>
-                          </Popover>
-                          {item.methodologyLabel ? (
-                            <Badge
-                              variant="outline"
-                              className="rounded-full text-[10px] font-semibold text-muted-foreground"
-                              title={
-                                item.methodologyIsCurrent === false
-                                  ? `${item.methodologyLabel}. Re-underwrite this deal before comparing it with the current model.`
-                                  : item.methodologyLabel
-                              }
-                            >
-                              {item.methodologyLabel}
-                            </Badge>
-                          ) : null}
+                            </div>
+                            <BuyBoxFitBadge fit={buyBoxFitById?.get(item.id)} />
                           </div>
-                          <BuyBoxFitBadge fit={buyBoxFitById?.get(item.id)} />
-                        </div>
-                      </td>
-                      <td
-                        className={cn(
-                          "whitespace-nowrap text-right font-semibold tabular-nums",
-                          (item.netCashFlowMonthly ?? 0) >= 0
-                            ? "text-success"
-                            : "text-[var(--metric-negative)]",
-                        )}
-                      >
-                        {toMonthCashFlow(item.netCashFlowMonthly)}
-                      </td>
-                      <td
-                        className={cn(
-                          "whitespace-nowrap text-right font-semibold tabular-nums",
-                          cocNotApplicable
-                            ? "text-muted-foreground"
-                            : (cocReturnPct ?? 0) >= 0
+                        </td>
+                        <td
+                          className={cn(
+                            "whitespace-nowrap text-right font-semibold tabular-nums",
+                            (item.netCashFlowMonthly ?? 0) >= 0
                               ? "text-success"
                               : "text-[var(--metric-negative)]",
-                        )}
-                      >
-                        {cocNotApplicable ? "N/A" : toPercent(cocReturnPct)}
-                      </td>
-                      <td className="whitespace-nowrap text-right font-medium tabular-nums">
-                        {toPercent(item.capRatePct)}
-                      </td>
-                      <td className="whitespace-nowrap text-right font-semibold tabular-nums text-foreground">
-                        {toCurrency(item.purchasePrice)}
-                      </td>
-                      {optionalColumns.dscr ? (
-                        <td className="font-medium tabular-nums text-foreground">
-                          {/* "Cash" keys off the explicit flag — a financed deal
-                              with negative NOI has a real DSCR ≤ 0 to show. */}
-                          {item.isCashPurchase
-                            ? "Cash"
-                            : item.dscr == null
-                              ? "—"
-                              : item.dscr.toFixed(2)}
-                        </td>
-                      ) : null}
-                      {optionalColumns.cashToClose ? (
-                        <td className="font-medium tabular-nums text-foreground">
-                          {toCurrency(item.cashToClose ?? null)}
-                        </td>
-                      ) : null}
-                      {optionalColumns.market ? (
-                        <td className="text-foreground">
-                          {item.market?.trim() || "—"}
-                        </td>
-                      ) : null}
-                      {optionalColumns.neighborhood ? (
-                        <td className="text-foreground">
-                          {item.neighborhood?.trim() || "—"}
-                        </td>
-                      ) : null}
-                      <td className="pr-2">
-                        <div className="flex flex-col gap-2">
-                          {canUsePipeline ? (
-                            <Select
-                              value={item.pipelineStage ?? "analyzing"}
-                              onValueChange={(value) =>
-                                handleDealStageChange(
-                                  item.id,
-                                  value as PipelineStage,
-                                  item.pipelineStage ?? "analyzing",
-                                )
-                              }
-                              disabled={
-                                isUpdatingStatus &&
-                                updatingDealStatusId === item.id
-                              }
-                            >
-                              <SelectTrigger className="h-11 w-[150px] rounded-md text-xs">
-                                <SelectValue placeholder="Stage" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {PIPELINE_STAGES.map((s) => (
-                                  <SelectItem key={s.id} value={s.id}>
-                                    {s.label}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          ) : (
-                            <Select
-                              value={item.status}
-                              onValueChange={(value) =>
-                                handleDealStatusChange(
-                                  item.id,
-                                  value as SavedAnalysisListItem["status"],
-                                )
-                              }
-                              disabled={
-                                isUpdatingStatus &&
-                                updatingDealStatusId === item.id
-                              }
-                            >
-                              <SelectTrigger className="h-11 w-[150px] rounded-md text-xs">
-                                <SelectValue placeholder="Status" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="active">Active</SelectItem>
-                                <SelectItem value="completed">
-                                  Completed
-                                </SelectItem>
-                                <SelectItem value="archived">
-                                  Archived
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
                           )}
-                          {agentClients.length > 0 ? (
-                            <DealClientPicker
-                              clients={agentClients}
-                              clientId={item.clientId ?? null}
-                              disabled={
-                                isUpdatingStatus &&
-                                updatingDealStatusId === item.id
-                              }
-                              onChange={(cid) =>
-                                handleDealClientChange(item.id, cid)
-                              }
-                            />
-                          ) : null}
-                          {canUsePipeline ? (
-                            <DealTags
-                              tags={item.tags ?? []}
-                              revealOnHover
-                              disabled={
-                                isUpdatingStatus &&
-                                updatingDealStatusId === item.id
-                              }
-                              onSave={(t) => handleDealTagsChange(item.id, t)}
-                            />
-                          ) : null}
-                        </div>
-                      </td>
-                      <td className="pr-2">
-                        {/* Consolidated: a single primary "Open Analysis" plus a
+                        >
+                          {toMonthCashFlow(item.netCashFlowMonthly)}
+                        </td>
+                        <td
+                          className={cn(
+                            "whitespace-nowrap text-right font-semibold tabular-nums",
+                            cocNotApplicable
+                              ? "text-muted-foreground"
+                              : (cocReturnPct ?? 0) >= 0
+                                ? "text-success"
+                                : "text-[var(--metric-negative)]",
+                          )}
+                        >
+                          {cocNotApplicable ? "N/A" : toPercent(cocReturnPct)}
+                        </td>
+                        <td className="whitespace-nowrap text-right font-medium tabular-nums">
+                          {toPercent(item.capRatePct)}
+                        </td>
+                        <td className="whitespace-nowrap text-right font-semibold tabular-nums text-foreground">
+                          {toCurrency(item.purchasePrice)}
+                        </td>
+                        {optionalColumns.dscr ? (
+                          <td className="font-medium tabular-nums text-foreground">
+                            {/* "Cash" keys off the explicit flag — a financed deal
+                              with negative NOI has a real DSCR ≤ 0 to show. */}
+                            {item.isCashPurchase
+                              ? "Cash"
+                              : item.dscr == null
+                                ? "—"
+                                : item.dscr.toFixed(2)}
+                          </td>
+                        ) : null}
+                        {optionalColumns.cashToClose ? (
+                          <td className="font-medium tabular-nums text-foreground">
+                            {toCurrency(item.cashToClose ?? null)}
+                          </td>
+                        ) : null}
+                        {optionalColumns.market ? (
+                          <td className="text-foreground">
+                            {item.market?.trim() || "—"}
+                          </td>
+                        ) : null}
+                        {optionalColumns.neighborhood ? (
+                          <td className="text-foreground">
+                            {item.neighborhood?.trim() || "—"}
+                          </td>
+                        ) : null}
+                        <td className="pr-2">
+                          <div className="flex flex-col gap-2">
+                            {canUsePipeline ? (
+                              <Select
+                                value={item.pipelineStage ?? "analyzing"}
+                                onValueChange={(value) =>
+                                  handleDealStageChange(
+                                    item.id,
+                                    value as PipelineStage,
+                                    item.pipelineStage ?? "analyzing",
+                                  )
+                                }
+                                disabled={
+                                  isUpdatingStatus &&
+                                  updatingDealStatusId === item.id
+                                }
+                              >
+                                <SelectTrigger className="h-11 w-[150px] rounded-md text-xs">
+                                  <SelectValue placeholder="Stage" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {PIPELINE_STAGES.map((s) => (
+                                    <SelectItem key={s.id} value={s.id}>
+                                      {s.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              <Select
+                                value={item.status}
+                                onValueChange={(value) =>
+                                  handleDealStatusChange(
+                                    item.id,
+                                    value as SavedAnalysisListItem["status"],
+                                  )
+                                }
+                                disabled={
+                                  isUpdatingStatus &&
+                                  updatingDealStatusId === item.id
+                                }
+                              >
+                                <SelectTrigger className="h-11 w-[150px] rounded-md text-xs">
+                                  <SelectValue placeholder="Status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="active">Active</SelectItem>
+                                  <SelectItem value="completed">
+                                    Completed
+                                  </SelectItem>
+                                  <SelectItem value="archived">
+                                    Archived
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                            )}
+                            {agentClients.length > 0 ? (
+                              <DealClientPicker
+                                clients={agentClients}
+                                clientId={item.clientId ?? null}
+                                disabled={
+                                  isUpdatingStatus &&
+                                  updatingDealStatusId === item.id
+                                }
+                                onChange={(cid) =>
+                                  handleDealClientChange(item.id, cid)
+                                }
+                              />
+                            ) : null}
+                            {canUsePipeline ? (
+                              <DealTags
+                                tags={item.tags ?? []}
+                                revealOnHover
+                                disabled={
+                                  isUpdatingStatus &&
+                                  updatingDealStatusId === item.id
+                                }
+                                onSave={(t) => handleDealTagsChange(item.id, t)}
+                              />
+                            ) : null}
+                          </div>
+                        </td>
+                        <td className="pr-2">
+                          {/* Consolidated: a single primary "Open Analysis" plus a
                             ⋯ overflow menu for the secondary actions. Previously
                             three full-width buttons here overflowed the row and
                             truncated the table. */}
-                        <div className="flex items-center gap-1.5">
-                          <Button
+                          <div className="flex items-center gap-1.5">
+                            <Button
                               variant="outline"
-                            size="sm"
-                            className="h-11 rounded-lg px-3 text-xs"
+                              size="sm"
+                              className="h-11 rounded-lg px-3 text-xs"
                               asChild
                               // "Open Analysis" + icon ran ~130px on every row, in
-                            // the narrowest part of the table. Under an ACTIONS
-                            // header, next to a ⋯ menu, "Open" is unambiguous —
-                            // and the full phrase stays in the accessible name.
-                            aria-label={`Open deal workspace for ${address.main}`}
-                          >
+                              // the narrowest part of the table. Under an ACTIONS
+                              // header, next to a ⋯ menu, "Open" is unambiguous —
+                              // and the full phrase stays in the accessible name.
+                              aria-label={`Open deal workspace for ${address.main}`}
+                            >
                               <Link
                                 href={`/dashboard/saved-analyses/${item.id}`}
                               >
@@ -4154,20 +4220,20 @@ export function SavedAnalysesPage({
                                 Open
                               </Link>
                             </Button>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                className="h-11 w-11 rounded-lg p-0"
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-11 w-11 rounded-lg p-0"
                                   aria-label={`More actions for ${address.main}`}
-                              >
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-44">
-                              {/* In-flight state, matching the mobile card.
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-44">
+                                {/* In-flight state, matching the mobile card.
                                   The desktop menu closes on select and nothing
                                   in the row showed work was happening, while
                                   the handler recomputes the analysis, rebuilds
@@ -4175,60 +4241,60 @@ export function SavedAnalysesPage({
                                   PDF server-side — so a user with no feedback
                                   reasonably clicks again and pays for a second
                                   render. */}
-                              <DropdownMenuItem
-                                onSelect={() => handleExportPdfClick(item.id)}
-                                disabled={exportingPdfDealId === item.id}
-                              >
-                                {exportingPdfDealId === item.id ? (
-                                  <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-                                ) : (
-                                  <FileDown className="mr-2 h-3.5 w-3.5" />
-                                )}
-                                {!canExportPdf && item.hasSavedPdf
-                                  ? "Download saved PDF"
-                                  : "Export PDF"}
-                                {!canExportPdf && !item.hasSavedPdf ? (
-                                  <span className="ml-auto rounded-full bg-primary/10 px-1.5 py-0 text-[9px] font-bold text-primary">
-                                    PRO
-                                  </span>
-                                ) : null}
-                              </DropdownMenuItem>
-                              <DropdownMenuItem asChild>
-                                <Link
-                                  href={`/dashboard/new?savedDeal=${encodeURIComponent(item.id)}`}
+                                <DropdownMenuItem
+                                  onSelect={() => handleExportPdfClick(item.id)}
+                                  disabled={exportingPdfDealId === item.id}
                                 >
-                                  <SlidersHorizontal className="mr-2 h-3.5 w-3.5" />
-                                  Edit assumptions
-                                </Link>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onSelect={() => handleDuplicateDeal(item.id)}
-                                disabled={openingDealId === item.id}
-                              >
-                                <CopyPlus className="mr-2 h-3.5 w-3.5" />
-                                Duplicate
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      </td>
-                      <td className="whitespace-nowrap pr-4 text-muted-foreground">
-                        <span className="inline-flex items-center gap-1.5">
-                          <CalendarClock className="h-3.5 w-3.5" />
-                          <span>
-                            {new Date(item.createdAt).toLocaleDateString(
-                              "en-US",
-                              {
-                                month: "short",
-                                day: "numeric",
-                                year: "numeric",
-                                timeZone: "UTC",
-                              },
-                            )}
+                                  {exportingPdfDealId === item.id ? (
+                                    <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                                  ) : (
+                                    <FileDown className="mr-2 h-3.5 w-3.5" />
+                                  )}
+                                  {!canExportPdf && item.hasSavedPdf
+                                    ? "Download saved PDF"
+                                    : "Export PDF"}
+                                  {!canExportPdf && !item.hasSavedPdf ? (
+                                    <span className="ml-auto rounded-full bg-primary/10 px-1.5 py-0 text-[9px] font-bold text-primary">
+                                      PRO
+                                    </span>
+                                  ) : null}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                  <Link
+                                    href={`/dashboard/new?savedDeal=${encodeURIComponent(item.id)}`}
+                                  >
+                                    <SlidersHorizontal className="mr-2 h-3.5 w-3.5" />
+                                    Edit assumptions
+                                  </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onSelect={() => handleDuplicateDeal(item.id)}
+                                  disabled={openingDealId === item.id}
+                                >
+                                  <CopyPlus className="mr-2 h-3.5 w-3.5" />
+                                  Duplicate
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </td>
+                        <td className="whitespace-nowrap pr-4 text-muted-foreground">
+                          <span className="inline-flex items-center gap-1.5">
+                            <CalendarClock className="h-3.5 w-3.5" />
+                            <span>
+                              {new Date(item.createdAt).toLocaleDateString(
+                                "en-US",
+                                {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                  timeZone: "UTC",
+                                },
+                              )}
+                            </span>
                           </span>
-                        </span>
-                      </td>
-                    </tr>
+                        </td>
+                      </tr>
                     </Fragment>
                   );
                 })}
@@ -4311,7 +4377,7 @@ export function SavedAnalysesPage({
                     size="lg"
                     className="mt-5 w-full rounded-full sm:w-auto"
                   >
-                    <Link href="/dashboard/new">Open the analyzer</Link>
+                    <Link href="/dashboard/new?fresh=1">Open the analyzer</Link>
                   </Button>
                 </>
               ) : (
@@ -4333,6 +4399,7 @@ export function SavedAnalysesPage({
                     onClick={() => {
                       // These live in React state + sessionStorage, so the old
                       // <Link> to this same route cleared nothing at all.
+                      releaseUrlBackedSearch();
                       setSearchQuery("");
                       setSelectedSignal("all");
                       setSelectedType("all");
@@ -4444,7 +4511,7 @@ export function SavedAnalysesPage({
               className="rounded-full bg-primary text-primary-foreground"
               asChild
             >
-              <Link href="/dashboard/new">
+              <Link href="/dashboard/new?fresh=1">
                 <Sparkles className="w-4 h-4 mr-1.5" />
                 New Analysis
               </Link>
@@ -4453,29 +4520,17 @@ export function SavedAnalysesPage({
         </div>
       </section>
 
-      {/*
-        Floating bulk-action bar - visible only when at least one deal
-        is checkbox-selected. Sticky to the bottom of the viewport so
-        users can scroll through long lists without losing access to
-        the actions. Centered + max-width so it doesn't span the whole
-        screen on desktop.
-
-        The Compare button up in the section bar is the "primary"
-        action (Pro feature, high intent). This bar provides the
-        management actions (archive, delete) that apply regardless of
-        plan. Free users can still organize their list.
-      */}
+      {/* Selected-actions bar: Compare and Clear stay visible at every width.
+          Destructive management lives behind an explicit overflow so a phone
+          user never mistakes Archive/Delete for the primary selection action. */}
       {selectedIds.length > 0 ? (
         <div
           role="region"
-          aria-label="Bulk actions"
+          aria-label="Selected deal actions"
+          aria-live="polite"
+          aria-atomic="true"
           className={cn(
-            // flex-wrap: the Archive/Delete pair is shrink-0 (the Button cva
-            // base sets it), so on a narrow phone it could not give back any
-            // width and painted OUTSIDE this rounded card — "Delete" sheared
-            // off mid-word past the card edge at 320px. Wrapping lets the
-            // actions drop to a second line instead of escaping the bar.
-            "fixed inset-x-0 z-40 mx-auto flex w-[min(680px,calc(100vw-32px))] flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card/95 px-4 py-3 shadow-2xl backdrop-blur",
+            "fixed inset-x-0 z-40 mx-auto flex w-[min(680px,calc(100vw-32px))] flex-col gap-2 rounded-2xl border border-border bg-card/95 px-4 py-3 shadow-2xl backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:gap-3",
             // While consent is still pending, sit ABOVE the banner instead of
             // behind it. The banner measures ~96px below sm (its one-line copy
             // wraps to two on the narrowest phones) and ~78px from sm; the
@@ -4483,56 +4538,95 @@ export function SavedAnalysesPage({
             // banner's own safe-area bottom padding grows by.
             cookieBannerOpen
               ? "bottom-[calc(7.5rem+env(safe-area-inset-bottom))] sm:bottom-[calc(5.5rem+env(safe-area-inset-bottom))]"
-              : "bottom-4",
+              : "bottom-[calc(1rem+env(safe-area-inset-bottom))]",
           )}
         >
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 items-center gap-3">
             <span className="inline-flex h-7 min-w-[28px] items-center justify-center rounded-full bg-primary px-2 text-xs font-bold text-primary-foreground">
               {selectedIds.length}
             </span>
-            <p className="text-sm font-semibold text-foreground">
+            <p className="truncate text-sm font-semibold text-foreground">
               {selectedIds.length === 1 ? "deal" : "deals"} selected
             </p>
-            <button
-              type="button"
-              onClick={() => setSelectedIds([])}
-              className="hidden min-h-11 items-center gap-1 rounded-lg px-2 text-xs font-semibold text-muted-foreground hover:bg-muted hover:text-foreground sm:inline-flex"
-            >
-              <X className="h-3.5 w-3.5" />
-              Clear
-            </button>
           </div>
-          <div className="flex flex-1 items-center justify-end gap-2 max-[380px]:justify-center">
+          <div className="grid w-full grid-cols-3 gap-2 sm:flex sm:w-auto sm:items-center">
             <Button
               type="button"
-              variant="outline"
+              variant="default"
               size="sm"
-              className="h-11 rounded-full px-3 text-xs"
-              onClick={handleBulkArchive}
-              disabled={bulkRunning}
+              onClick={handleCompareSelected}
+              disabled={isStartingCompare || bulkRunning}
+              title={
+                !canCompareDeals
+                  ? "Compare is not available for your current plan."
+                  : undefined
+              }
+              className="h-11 min-w-0 rounded-full px-3 text-xs"
             >
-              {isBulkArchiving ? (
+              {isStartingCompare ? (
                 <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
               ) : (
-                <Archive className="mr-1.5 h-3.5 w-3.5" />
+                <ArrowUpDown className="mr-1.5 h-3.5 w-3.5" />
               )}
-              Archive
+              Compare
             </Button>
             <Button
               type="button"
-              variant="outline"
+              variant="ghost"
               size="sm"
-              className="h-11 rounded-full border-[var(--metric-negative)]/40 px-3 text-xs text-[var(--metric-negative)] hover:bg-[var(--metric-negative)]/10 hover:text-[var(--metric-negative)]"
-              onClick={handleBulkDelete}
-              disabled={bulkRunning}
+              onClick={() => setSelectedIds([])}
+              className="h-11 min-w-0 rounded-full px-3 text-xs"
             >
-              {isBulkDeleting ? (
-                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <Trash2 className="mr-1.5 h-3.5 w-3.5" />
-              )}
-              Delete
+              <X className="mr-1.5 h-3.5 w-3.5" />
+              Clear
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={bulkRunning}
+                  className="h-11 min-w-0 rounded-full px-3 text-xs"
+                  aria-label="Manage selected deals"
+                >
+                  {bulkRunning ? (
+                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <MoreHorizontal className="mr-1.5 h-3.5 w-3.5" />
+                  )}
+                  Manage
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" side="top" className="w-56">
+                <DropdownMenuLabel>Manage selected deals</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onSelect={handleBulkArchive}
+                  disabled={bulkRunning}
+                  className="min-h-11"
+                >
+                  {isBulkArchiving ? (
+                    <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Archive className="mr-2 h-3.5 w-3.5" />
+                  )}
+                  Archive selected
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={handleBulkDelete}
+                  disabled={bulkRunning}
+                  className="min-h-11 text-[var(--metric-negative)] focus:text-[var(--metric-negative)]"
+                >
+                  {isBulkDeleting ? (
+                    <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Trash2 className="mr-2 h-3.5 w-3.5" />
+                  )}
+                  Delete selected
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       ) : null}

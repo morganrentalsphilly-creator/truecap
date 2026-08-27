@@ -10,7 +10,9 @@
  */
 
 import { cn } from "@/lib/utils";
+import { useCookieBannerOpen } from "@/lib/use-cookie-banner";
 import { GlossaryTip } from "./glossary-tip";
+import { useEffect, useState, type ReactNode } from "react";
 
 /** The lightweight pre-run verdict snapshot computed by the form watcher. */
 export type LivePreviewSnapshot = {
@@ -41,13 +43,74 @@ type Props = {
   livePreviewMsg: string;
   /** Three high-impact assumptions shown as a concise preview summary. */
   assumptionBasis?: string;
+  /** Desktop cockpit action placed directly beneath the live preview. */
+  desktopAction?: ReactNode;
 };
+
+function DesktopAction({ children }: { children: ReactNode }) {
+  const [submitInView, setSubmitInView] = useState(false);
+  const cookieBannerOpen = useCookieBannerOpen();
+
+  useEffect(() => {
+    const submit = document.querySelector<HTMLElement>(
+      '[data-inform-submit="true"]',
+    );
+    if (!submit) {
+      setSubmitInView(false);
+      return;
+    }
+
+    let frame = 0;
+    const update = () => {
+      const rect = submit.getBoundingClientRect();
+      const cookieBanner = cookieBannerOpen
+        ? document.querySelector<HTMLElement>(
+            '[role="dialog"][aria-label="Cookie consent"]',
+          )
+        : null;
+      const unobscuredBottom =
+        cookieBanner?.getBoundingClientRect().top ?? window.innerHeight;
+
+      // IntersectionObserver reports elements behind fixed overlays as
+      // visible. Retire the cockpit action only when the canonical form CTA
+      // is fully usable between the sticky header and any consent banner.
+      setSubmitInView(
+        rect.width > 0 &&
+          rect.height > 0 &&
+          rect.top >= 72 &&
+          rect.bottom <= unobscuredBottom - 12,
+      );
+    };
+    const scheduleUpdate = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(update);
+    };
+    const resizeObserver =
+      typeof ResizeObserver === "undefined"
+        ? null
+        : new ResizeObserver(scheduleUpdate);
+    resizeObserver?.observe(submit);
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate);
+    update();
+    return () => {
+      window.cancelAnimationFrame(frame);
+      resizeObserver?.disconnect();
+      window.removeEventListener("scroll", scheduleUpdate);
+      window.removeEventListener("resize", scheduleUpdate);
+    };
+  }, [cookieBannerOpen]);
+
+  if (submitInView) return null;
+  return <div className="mt-3 hidden lg:block">{children}</div>;
+}
 
 export function LiveVerdictPanel({
   active,
   livePreview,
   livePreviewMsg,
   assumptionBasis,
+  desktopAction,
 }: Props) {
   return (
     <>
@@ -212,6 +275,9 @@ export function LiveVerdictPanel({
             illustrative tax impact &amp; modeled exits.
           </p>
         </div>
+      ) : null}
+      {active && desktopAction ? (
+        <DesktopAction>{desktopAction}</DesktopAction>
       ) : null}
     </>
   );

@@ -152,7 +152,11 @@ test("guest Share returns from sign-in to the same result and reopens disclosure
   const guest = await newGuestPage(browser);
   try {
     await openSampleDecision(guest.page);
-    await guest.page
+    const resultSummary = guest.page.locator(
+      "section[aria-labelledby='decision-summary-title']",
+    );
+    await resultSummary.getByText("More actions", { exact: true }).click();
+    await resultSummary
       .getByRole("button", { name: "Share", exact: true })
       .click();
     const shareDialog = guest.page.getByRole("dialog", {

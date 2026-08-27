@@ -23,6 +23,10 @@ import {
   applicableCashOnCashValue,
   isCashOnCashNotApplicable,
 } from "@/lib/cash-on-cash-applicability";
+import {
+  hasCompleteMetricCoverage,
+  summarizeKnownMetric,
+} from "@/lib/portfolio-metric-coverage";
 
 function fmtCurrency(value: number): string {
   return new Intl.NumberFormat("en-US", {
@@ -94,27 +98,29 @@ export function PortfolioRollupStrip({
 
   // Weighted averages use purchase price as weight. Skip items missing
   // the needed field rather than letting them poison the average.
-  let totalMonthlyCashFlow = 0;
-  let cashFlowSampleCount = 0;
+  const cashFlowSummary = summarizeKnownMetric(
+    items.map((item) => item.netCashFlowMonthly),
+  );
   let totalPurchasePrice = 0;
+  let purchasePriceSampleCount = 0;
   let weightedCapNumerator = 0;
   let weightedCapDenominator = 0;
+  let capRateSampleCount = 0;
   let weightedCocNumerator = 0;
   let weightedCocDenominator = 0;
+  let cocSampleCount = 0;
   let cocNotApplicableCount = 0;
   for (const item of items) {
     if (isCashOnCashNotApplicable(item.cashToClose)) {
       cocNotApplicableCount += 1;
     }
-    if (typeof item.netCashFlowMonthly === "number" && Number.isFinite(item.netCashFlowMonthly)) {
-      totalMonthlyCashFlow += item.netCashFlowMonthly;
-      cashFlowSampleCount += 1;
-    }
     if (typeof item.purchasePrice === "number" && Number.isFinite(item.purchasePrice) && item.purchasePrice > 0) {
       totalPurchasePrice += item.purchasePrice;
+      purchasePriceSampleCount += 1;
       if (typeof item.capRatePct === "number" && Number.isFinite(item.capRatePct)) {
         weightedCapNumerator += item.capRatePct * item.purchasePrice;
         weightedCapDenominator += item.purchasePrice;
+        capRateSampleCount += 1;
       }
       const applicableCoc = applicableCashOnCashValue(
         item.cocReturnPct,
@@ -123,6 +129,7 @@ export function PortfolioRollupStrip({
       if (!isCashOnCashNotApplicable(item.cashToClose) && applicableCoc != null) {
         weightedCocNumerator += applicableCoc * item.purchasePrice;
         weightedCocDenominator += item.purchasePrice;
+        cocSampleCount += 1;
       }
     }
   }
@@ -130,7 +137,7 @@ export function PortfolioRollupStrip({
   // If literally nothing in the set has a cash flow value, the rollup
   // collapses to placeholders — hide the whole strip rather than show
   // a row of em-dashes.
-  if (cashFlowSampleCount === 0 && totalPurchasePrice === 0) return null;
+  if (cashFlowSummary.knownCount === 0 && totalPurchasePrice === 0) return null;
 
   const weightedCap =
     weightedCapDenominator > 0 ? weightedCapNumerator / weightedCapDenominator : null;
@@ -167,21 +174,25 @@ export function PortfolioRollupStrip({
           <RollupTile
             label="Monthly Cash Flow"
             value={
-              cashFlowSampleCount > 0
-                ? fmtMonthlyCashFlow(totalMonthlyCashFlow)
+              cashFlowSummary.knownCount > 0
+                ? fmtMonthlyCashFlow(cashFlowSummary.total)
                 : "—"
             }
             sub={
-              cashFlowSampleCount > 0
-                ? `~${fmtCurrency(totalMonthlyCashFlow * 12)} / yr`
+              cashFlowSummary.knownCount > 0
+                ? `${
+                    hasCompleteMetricCoverage(cashFlowSummary)
+                      ? ""
+                      : `Known across ${cashFlowSummary.knownCount} of ${cashFlowSummary.totalCount} · `
+                  }~${fmtCurrency(cashFlowSummary.total * 12)} / yr`
                 : "no data"
             }
             tone={
-              cashFlowSampleCount === 0
+              cashFlowSummary.knownCount === 0
                 ? "neutral"
-                : totalMonthlyCashFlow > 0
+                : cashFlowSummary.total > 0
                   ? "positive"
-                  : totalMonthlyCashFlow < 0
+                  : cashFlowSummary.total < 0
                     ? "negative"
                     : "neutral"
             }
@@ -189,13 +200,21 @@ export function PortfolioRollupStrip({
           <RollupTile
             label={valueTile.label}
             value={totalPurchasePrice > 0 ? fmtCurrency(totalPurchasePrice) : "—"}
-            sub={valueTile.sub}
+            sub={
+              purchasePriceSampleCount === items.length
+                ? valueTile.sub
+                : `${valueTile.sub} · ${purchasePriceSampleCount} of ${items.length} with data`
+            }
             tone="neutral"
           />
           <RollupTile
             label="Weighted cap rate"
             value={weightedCap != null ? fmtPct(weightedCap) : "—"}
-            sub="by purchase price"
+            sub={
+              capRateSampleCount === items.length
+                ? "by purchase price"
+                : `by purchase price · ${capRateSampleCount} of ${items.length} with data`
+            }
             tone="neutral"
           />
           {showOwnedEquity ? (
@@ -220,8 +239,8 @@ export function PortfolioRollupStrip({
                     : "—"
               }
               sub={
-                weightedCoc != null && cocNotApplicableCount > 0
-                  ? "blended; excludes zero-cash deals"
+                weightedCoc != null && cocSampleCount < items.length
+                  ? `by purchase price · ${cocSampleCount} of ${items.length} with data${cocNotApplicableCount > 0 ? "; excludes zero-cash deals" : ""}`
                   : cocNotApplicableCount > 0
                     ? "no modeled cash invested"
                     : "cash-on-cash blended"

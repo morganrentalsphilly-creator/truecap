@@ -160,9 +160,14 @@ export async function deleteRegressionDealsByAddress(
   if (selected === 0) return 0;
 
   page.once("dialog", (dialog) => dialog.accept());
-  const bulkActions = page.getByRole("region", { name: "Bulk actions" });
-  await bulkActions
-    .getByRole("button", { name: "Delete", exact: true })
+  const selectedActions = page.getByRole("region", {
+    name: "Selected deal actions",
+  });
+  await selectedActions
+    .getByRole("button", { name: "Manage selected deals", exact: true })
+    .click();
+  await page
+    .getByRole("menuitem", { name: "Delete selected", exact: true })
     .click();
   await expect(
     page.getByText(

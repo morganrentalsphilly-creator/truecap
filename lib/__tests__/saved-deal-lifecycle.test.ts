@@ -109,12 +109,20 @@ describe("archived lifecycle server boundaries", () => {
     expect(workspace).toContain("{!isArchivedDeal ? (");
   });
 
-  it("lets archived assumptions seed a distinct active scenario without reopening the source", () => {
+  it("starts every cloned scenario active without mutating the source lifecycle", () => {
     const scenarios = read("app/actions/scenarios.ts");
+    const cloneBoundary = scenarios.slice(
+      scenarios.indexOf("const clone: Record<string, unknown> = { ...deal }"),
+      scenarios.indexOf("clone.pdf_url = null"),
+    );
 
-    expect(scenarios).toContain("isSavedDealArchived({");
-    expect(scenarios).toContain(
+    expect(cloneBoundary).toContain(
       'Object.assign(clone, persistedLifecycleForSimpleState("active"))',
     );
+    expect(cloneBoundary).toContain(
+      'if ("close_date" in clone) clone.close_date = null',
+    );
+    expect(cloneBoundary).not.toContain("isSavedDealArchived");
+    expect(cloneBoundary).not.toContain("Object.assign(deal,");
   });
 });
