@@ -55,7 +55,7 @@ describe("saved deal power-user navigation", () => {
     const page = read("app/dashboard/saved-analyses/[id]/page.tsx");
 
     expect(handoff).toContain('{recorded ? "View recorded analysis" : "Edit assumptions"}');
-    expect(handoff).toContain("Re-underwrite as new scenario");
+    expect(handoff).toContain("Duplicate as new scenario");
     expect(page).toContain("recorded={methodologyResolution.usesRecordedSnapshot}");
   });
 
