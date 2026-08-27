@@ -8630,10 +8630,10 @@ export function InvestCalcPage({
         ? "Loading your criteria…"
         : activeRunPromisesOfferCeiling
           ? isEditingAssumptions
-            ? "Update analysis"
+            ? "Recalculate analysis"
             : "Analyze deal & calculate ceiling"
           : isEditingAssumptions
-            ? "View updated result"
+            ? "Recalculate analysis"
             : analyzerCta;
 
   const commitPreRunTarget = (
@@ -9114,7 +9114,7 @@ export function InvestCalcPage({
                       className="min-h-11 shrink-0"
                       onClick={handleBackToResult}
                     >
-                      View live result
+                      Done editing
                     </Button>
                     <Button
                       type="button"

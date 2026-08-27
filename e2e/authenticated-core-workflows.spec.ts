@@ -122,7 +122,7 @@ test("mobile investor can set criteria, calculate once, and start a fresh analys
     .getByLabel("Expected gross monthly rent", { exact: true })
     .fill("2500");
   await expect(liveEditReadout).toContainText("Live · unsaved");
-  await page.getByRole("button", { name: "Back to result", exact: true }).click();
+  await page.getByRole("button", { name: "Done editing", exact: true }).click();
   await expect(summary).toBeVisible();
 
   // On the already-mounted /dashboard/new route, the compact header control

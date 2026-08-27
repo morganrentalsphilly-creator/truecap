@@ -358,7 +358,7 @@ describe("assumption editing return path", () => {
     expect(editingBanner).toContain("primaryActionLabel");
     expect(editingBanner).toContain("void handlePrimaryRunAction()");
     expect(editingBanner).toContain("decisionCriteriaBlockPrimaryAction");
-    expect(editingBanner).toContain("View live result");
+    expect(editingBanner).toContain("Done editing");
     expect(editingBanner).toContain("handleBackToResult");
     expect(editingBanner).toContain('data-edit-live-readout="true"');
     expect(editingBanner).toContain("Live · unsaved");
@@ -553,7 +553,7 @@ describe("result editing and deleted-deal recovery", () => {
     );
     expect(resultMount).toContain("{!isEditingAssumptions &&");
     expect(compact(calculator)).toContain(
-      'isEditingAssumptions ? "Update analysis"',
+      'isEditingAssumptions ? "Recalculate analysis"',
     );
     expect(calculator).toContain("{activeRunPromisesOfferCeiling ? (");
   });
