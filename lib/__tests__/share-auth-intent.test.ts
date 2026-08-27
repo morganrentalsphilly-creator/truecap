@@ -2,10 +2,24 @@ import { describe, expect, it } from "vitest";
 
 import {
   parseShareAuthIntent,
+  resolveShareAuthReturnPath,
   serializeShareAuthIntent,
 } from "@/lib/share-auth-intent";
 
 describe("share authentication intent", () => {
+  it("canonicalizes homepage analysis handoffs to the signed-in analyzer", () => {
+    expect(resolveShareAuthReturnPath("/", "analysis")).toBe(
+      "/dashboard/new",
+    );
+    expect(resolveShareAuthReturnPath("/home-authed", "analysis")).toBe(
+      "/dashboard/new",
+    );
+    expect(resolveShareAuthReturnPath("/", "client-report")).toBe("/");
+    expect(resolveShareAuthReturnPath("/dashboard/new", "analysis")).toBe(
+      "/dashboard/new",
+    );
+  });
+
   it("restores a recent same-route intent without storing deal data", () => {
     const raw = serializeShareAuthIntent({
       returnPath: "/dashboard/new",

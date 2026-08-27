@@ -45,7 +45,9 @@ test("mobile investor can set criteria, calculate once, and start a fresh analys
   // Establish debt financing explicitly so this regression is independent of
   // the test account's saved defaults (an all-cash default correctly disables
   // DSCR as a criterion).
-  await page.getByRole("button", { name: /down @/i }).click();
+  await page
+    .getByRole("button", { name: /down.*interest/i })
+    .click();
   await form.getByLabel("Down Payment %", { exact: true }).fill("20");
   await form.getByLabel("Interest Rate %", { exact: true }).fill("6.5");
 

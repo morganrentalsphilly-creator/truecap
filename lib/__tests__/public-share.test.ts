@@ -213,9 +213,7 @@ describe("the share-route privacy contract", () => {
 
     expect(btn).toContain("href={`/auth/sign-up?next=${encodedReturnPath}`}");
     expect(btn).toContain("href={`/auth/login?next=${encodedReturnPath}`}");
-    expect(btn).toContain(
-      'pathname.startsWith("/") && !pathname.startsWith("//")',
-    );
+    expect(btn).toContain("resolveShareAuthReturnPath(pathname, context)");
     expect(btn).toContain("onClick={prepareAuthNavigation}");
     expect(btn).toContain(
       "Draft continuity is best-effort and must never block authentication",
