@@ -36,6 +36,7 @@ import { trackEvent } from "@/lib/analytics";
 import { useToast } from "@/hooks/use-toast";
 import {
   parseShareAuthIntent,
+  resolveShareAuthReturnPath,
   serializeShareAuthIntent,
   SHARE_AUTH_INTENT_STORAGE_KEY,
 } from "@/lib/share-auth-intent";
@@ -105,8 +106,7 @@ export function ShareLinkButton({
   const [revokingId, setRevokingId] = useState<string | null>(null);
   const { toast } = useToast();
   const needsSignIn = !isAuthenticated || sessionAuthRequired;
-  const returnPath =
-    pathname.startsWith("/") && !pathname.startsWith("//") ? pathname : "/";
+  const returnPath = resolveShareAuthReturnPath(pathname, context);
   const encodedReturnPath = encodeURIComponent(returnPath);
   const prepareAuthNavigation = () => {
     try {

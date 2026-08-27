@@ -6,10 +6,9 @@
  * Buy & Hold is the calculator's effective default even though the parent
  * intentionally stores that state as `null`. Keeping that distinction here
  * matters: merely confirming the visible default must never invoke the
- * parent's strategy handler, which applies a starter set. Specialist modes
- * still flow through the existing handler, and choosing Buy & Hold while one
- * is active sends `null` so the parent's proven revert path restores the
- * pre-strategy assumptions.
+ * parent's strategy handler. Every real change pauses for an explicit choice:
+ * keep the live assumptions, apply the specialist starter set, or—when
+ * returning to Buy & Hold—restore the captured pre-strategy assumptions.
  */
 
 import { useId, useRef, useState } from "react";
@@ -23,6 +22,13 @@ import {
 } from "@/lib/investor-strategies";
 
 export const DEFAULT_STRATEGY_KEY = "buy-hold";
+
+export type StrategyAssumptionMode = "keep" | "starter" | "restore";
+
+export type StrategyStarterPreview = {
+  changedFieldCount: number;
+  highlights: string[];
+};
 
 /** The strategy the interface should present as selected. */
 export function getEffectiveStrategyKey(activeKey: string | null): string {
@@ -56,14 +62,25 @@ function strategyDisplay(strategy: InvestorStrategy) {
 export function StrategyChips({
   activeKey,
   onSelect,
+  getStarterChangePreview,
+  canRestoreAssumptions = false,
 }: {
   activeKey: string | null;
-  onSelect: (key: string | null) => void;
+  onSelect: (key: string | null,
+    assumptionMode: StrategyAssumptionMode,
+  ) => void;
+  getStarterChangePreview?: (key: string) => StrategyStarterPreview | null;
+  /** True only when this browser has the actual pre-strategy snapshot. */
+  canRestoreAssumptions?: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [pendingStrategy, setPendingStrategy] =
+    useState<InvestorStrategy | null>(null);
   const generatedId = useId();
   const panelId = `analysis-type-options-${generatedId}`;
+  const confirmationTitleId = `${panelId}-confirmation-title`;
   const disclosureButtonRef = useRef<HTMLButtonElement | null>(null);
+  const keepAssumptionsButtonRef = useRef<HTMLButtonElement | null>(null);
   const effectiveKey = getEffectiveStrategyKey(activeKey);
   const active = getStrategyByKey(effectiveKey) ?? CORE_INVESTOR_STRATEGIES[0];
   const ActiveIcon = active.Icon;
@@ -71,6 +88,7 @@ export function StrategyChips({
 
   const collapseAndRestoreFocus = () => {
     setExpanded(false);
+    setPendingStrategy(null);
     // The selected option unmounts when the disclosure collapses. Return
     // keyboard/screen-reader focus to the control that can reopen it instead
     // of leaving focus on <body>.
@@ -79,12 +97,27 @@ export function StrategyChips({
 
   const chooseStrategy = (strategy: InvestorStrategy) => {
     const intent = resolveStrategySelectionIntent(activeKey, strategy.key);
-    if (intent !== undefined) onSelect(intent);
+    if (intent === undefined) {
+      collapseAndRestoreFocus();
+      return;
+    }
+    setPendingStrategy(strategy);
+    requestAnimationFrame(() => keepAssumptionsButtonRef.current?.focus());
+  };
+
+  const confirmStrategyChange = (assumptionMode: StrategyAssumptionMode) => {
+    if (!pendingStrategy) return;
+    const intent = resolveStrategySelectionIntent(
+      activeKey,
+      pendingStrategy.key,
+    );
+    if (intent !== undefined) onSelect(intent, assumptionMode);
     collapseAndRestoreFocus();
   };
 
   const renderStrategy = (strategy: InvestorStrategy) => {
     const isActive = strategy.key === effectiveKey;
+    const isPending = strategy.key === pendingStrategy?.key;
     const Icon = strategy.Icon;
     const display = strategyDisplay(strategy);
     return (
@@ -98,7 +131,9 @@ export function StrategyChips({
           "flex min-h-11 w-full items-center gap-2 rounded-xl border px-3 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
           isActive
             ? "border-primary bg-primary/10 text-foreground"
-            : "border-border bg-background text-foreground hover:bg-muted",
+            : isPending
+              ? "border-primary bg-primary/5 text-foreground"
+              : "border-border bg-background text-foreground hover:bg-muted",
         )}
       >
         <Icon aria-hidden className="size-4 shrink-0 text-primary" />
@@ -111,7 +146,11 @@ export function StrategyChips({
             {strategy.primaryOutputIsPro ? " · Pro output" : ""}
           </span>
         </span>
-        {isActive ? (
+        {isPending ? (
+          <span className="shrink-0 rounded-full border border-primary/30 bg-primary/10 px-2 py-1 text-[10px] font-bold text-primary">
+            Review
+          </span>
+        ) : isActive ? (
           <span className="shrink-0 rounded-full bg-primary px-2 py-1 text-[10px] font-bold text-primary-foreground">
             Selected
           </span>
@@ -173,7 +212,13 @@ export function StrategyChips({
           aria-label={`${expanded ? "Close" : "Change"} analysis type. Current: ${activeDisplay.label}`}
           aria-expanded={expanded}
           aria-controls={expanded ? panelId : undefined}
-          onClick={() => setExpanded((open) => !open)}
+          onClick={() => {
+            if (expanded) {
+              collapseAndRestoreFocus();
+            } else {
+              setExpanded(true);
+            }
+          }}
           className="ml-auto inline-flex min-h-11 shrink-0 items-center rounded-lg px-3 text-xs font-bold text-primary underline-offset-2 hover:bg-muted hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           {expanded ? "Done" : "Change"}
@@ -220,8 +265,106 @@ export function StrategyChips({
               starter assumptions.
             </span>{" "}
             Review every changed value before running the analysis. Returning to
-            Buy &amp; Hold restores your pre-strategy values when available.
+            Buy &amp; Hold lets you keep current assumptions or restore the
+            pre-strategy values when available.
           </p>
+
+          {pendingStrategy ? (
+            <div
+              role="region"
+              aria-live="polite"
+              aria-labelledby={confirmationTitleId}
+              className="rounded-xl border border-primary/30 bg-primary/5 p-3 sm:p-4"
+            >
+              <h3
+                id={confirmationTitleId}
+                className="text-sm font-extrabold text-foreground"
+              >
+                Switch to {strategyDisplay(pendingStrategy).label}?
+              </h3>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                Choose what TrueCap should do with the assumptions already in
+                this deal. Nothing changes until you confirm.
+              </p>
+
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                <button
+                  ref={keepAssumptionsButtonRef}
+                  type="button"
+                  onClick={() => confirmStrategyChange("keep")}
+                  className="min-h-11 rounded-xl border border-primary bg-primary px-3 py-2 text-left text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  <span className="flex items-center justify-between gap-2 text-xs font-extrabold">
+                    Keep my assumptions
+                    <span className="rounded-full bg-primary-foreground/15 px-2 py-0.5 text-[10px] font-bold">
+                      Recommended
+                    </span>
+                  </span>
+                  <span className="mt-1 block text-[11px] leading-snug text-primary-foreground/85">
+                    Keep financing, expenses, growth, and tax inputs. Only
+                    model-required fields may change.
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    confirmStrategyChange(
+                      pendingStrategy.key === DEFAULT_STRATEGY_KEY
+                        ? canRestoreAssumptions
+                          ? "restore"
+                          : "starter"
+                        : "starter",
+                    )
+                  }
+                  className="min-h-11 rounded-xl border border-border bg-background px-3 py-2 text-left text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  <span className="text-xs font-extrabold">
+                    {pendingStrategy.key === DEFAULT_STRATEGY_KEY
+                      ? canRestoreAssumptions
+                        ? "Restore pre-strategy assumptions"
+                        : "Apply Buy & Hold starter values"
+                      : "Apply strategy starter values"}
+                  </span>
+                  <span className="mt-1 block text-[11px] leading-snug text-muted-foreground">
+                    {pendingStrategy.key === DEFAULT_STRATEGY_KEY
+                      ? canRestoreAssumptions
+                        ? "Return shared fields to the values captured before the specialist strategy was applied."
+                        : "No earlier browser snapshot is available. Replace shared assumptions with the Buy & Hold starter set."
+                      : (() => {
+                          const preview = getStarterChangePreview?.(
+                            pendingStrategy.key,
+                          );
+                          if (!preview) {
+                            return "Replace shared assumptions with this strategy's starter set.";
+                          }
+                          if (preview.changedFieldCount === 0) {
+                            return "The starter values already match your current assumptions.";
+                          }
+                          const details = preview.highlights.join(" · ");
+                          const remainder =
+                            preview.changedFieldCount -
+                            preview.highlights.length;
+                          return `${preview.changedFieldCount} fields would change${details ? `: ${details}` : ""}${remainder > 0 ? ` · +${remainder} more` : ""}.`;
+                        })()}
+                  </span>
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setPendingStrategy(null);
+                  requestAnimationFrame(() =>
+                    disclosureButtonRef.current?.focus(),
+                  );
+                }}
+                className="mt-2 inline-flex min-h-11 items-center rounded-lg px-3 text-xs font-bold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : null}
 
           {renderGroup("Core", CORE_INVESTOR_STRATEGIES)}
           {renderGroup("Secondary", SECONDARY_INVESTOR_STRATEGIES)}

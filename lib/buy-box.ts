@@ -12,7 +12,8 @@
 
 import type { AnalyzerStrategyKey } from "@/lib/analyzer-strategy-persistence";
 
-export type BuyBoxPropertyType = "single-family" | "multi-family" | "owner-occupant";
+export type BuyBoxPropertyType =
+  | "single-family" | "multi-family" | "owner-occupant";
 
 export type BuyBoxCriteria = {
   minCapRatePct: number | null;
@@ -556,6 +557,39 @@ export function boxesForPersonalAnalyzerStrategy(
       box.strategyKind == null ||
       (strategyKind != null && box.strategyKind === strategyKind),
   );
+}
+
+/**
+ * Whether a saved Buy Box can truthfully be proposed before an analysis runs.
+ *
+ * The analyzer knows the property type and can usually derive a state from the
+ * address at this point, but it does not yet have calculated deal metrics.
+ * Market- or property-scoped boxes must match those known facts before they
+ * can supply Offer Ceiling criteria. If a required market is still unknown we
+ * fail closed instead of silently applying the first saved box to the wrong
+ * property.
+ */
+export function buyBoxMatchesPropertyScope(
+  box: Pick<NamedBuyBox, "propertyTypes" | "targetStates">,
+  property: {
+    propertyType: BuyBoxPropertyType | null | undefined;
+    state: string | null | undefined;
+  },
+): boolean {
+  if (
+    box.propertyTypes.length > 0 &&
+    (!property.propertyType ||
+      !box.propertyTypes.includes(property.propertyType))
+  ) {
+    return false;
+  }
+  if (box.targetStates.length > 0) {
+    const normalizedState = property.state?.trim().toUpperCase() ?? "";
+    if (!normalizedState || !box.targetStates.includes(normalizedState)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 /**

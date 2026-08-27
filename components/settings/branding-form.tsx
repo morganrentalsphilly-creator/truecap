@@ -19,7 +19,6 @@
  */
 
 import { useEffect, useRef, useState, useTransition } from "react";
-import Image from "next/image";
 import { Loader2, Upload, X } from "lucide-react";
 import {
   saveBranding,
@@ -28,7 +27,8 @@ import {
   type BrandingValues,
 } from "@/app/actions/branding";
 
-type Status = { kind: "idle" } | { kind: "saving" } | { kind: "saved" } | { kind: "error"; message: string };
+type Status =
+  | { kind: "idle" } | { kind: "saving" } | { kind: "saved" } | { kind: "error"; message: string };
 
 const TRUECAP_BLUE = "#1A4FBA"; // matches lib/pdf-generator.ts COLOR.primary fallback
 
@@ -159,22 +159,31 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
                 id="branding-logo-file"
                 disabled={logoUploading}
               />
-              <label
-                htmlFor="branding-logo-file"
-                className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-border bg-card px-3 py-2 text-sm font-semibold text-foreground transition hover:bg-muted disabled:opacity-50"
+              <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                disabled={logoUploading}
+                className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-border bg-card px-3 py-2 text-sm font-semibold text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {logoUploading ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  <Loader2
+                    aria-hidden="true"
+                    className="h-3.5 w-3.5 animate-spin"
+                  />
                 ) : (
-                  <Upload className="h-3.5 w-3.5" />
+                  <Upload aria-hidden="true" className="h-3.5 w-3.5" />
                 )}
-                {logoUrl ? "Replace logo" : "Upload logo"}
-              </label>
+                {logoUploading
+                  ? "Uploading logo…"
+                  : logoUrl
+                    ? "Replace logo"
+                    : "Upload logo"}
+              </button>
               {logoUrl ? (
                 <button
                   type="button"
                   onClick={() => setLogoUrl(null)}
-                  className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+                  className="inline-flex min-h-11 items-center gap-1 rounded-lg px-2 text-xs text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <X className="h-3 w-3" />
                   Remove
@@ -203,21 +212,25 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
                     : TRUECAP_BLUE
                 }
                 onChange={(e) => setPrimaryColor(e.target.value.toUpperCase())}
-                className="h-10 w-12 cursor-pointer rounded-md border border-border bg-transparent"
+                className="h-11 w-12 cursor-pointer rounded-md border border-border bg-transparent"
                 aria-label="Pick brand color"
               />
+              <label htmlFor="branding-primary-color-hex" className="sr-only">
+                Primary brand color hex code
+              </label>
               <input
                 type="text"
+                id="branding-primary-color-hex"
                 value={primaryColor}
                 onChange={(e) => setPrimaryColor(e.target.value.trim())}
                 placeholder="#1A4FBA"
                 maxLength={7}
-                className="w-32 rounded-lg border border-border bg-background px-3 py-2 text-sm font-mono uppercase tabular-nums"
+                className="h-11 w-32 rounded-lg border border-border bg-background px-3 py-2 text-sm font-mono uppercase tabular-nums"
               />
               <button
                 type="button"
                 onClick={() => setPrimaryColor("")}
-                className="text-xs text-muted-foreground hover:text-foreground"
+                className="inline-flex min-h-11 items-center rounded-lg px-2 text-xs text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 Reset
               </button>
@@ -329,7 +342,7 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
           <button
             type="submit"
             disabled={isPending || logoUploading}
-            className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-60"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-60"
           >
             {isPending ? (
               <>
@@ -424,7 +437,9 @@ function Field({
         {label}
       </legend>
       {children}
-      {hint ? <p className="text-[11px] text-muted-foreground">{hint}</p> : null}
+      {hint ? (
+        <p className="text-[11px] text-muted-foreground">{hint}</p>
+      ) : null}
     </fieldset>
   );
 }
@@ -458,7 +473,7 @@ function TextInput({
       name={name}
       autoComplete={autoComplete}
       aria-label={ariaLabel}
-      className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none"
+      className="min-h-11 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     />
   );
 }
@@ -471,8 +486,3 @@ function todayShort() {
     day: "numeric",
   });
 }
-
-// Silence unused-import warning — Image is intentionally imported in case
-// we swap the <img> tags to next/image later. For now we use <img> so
-// the Storage public URL works without next.config.js remote-pattern config.
-void Image;

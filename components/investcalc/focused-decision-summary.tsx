@@ -43,7 +43,6 @@ import {
   buildAssumptionLedger,
   buildDecisionTargetContext,
   deriveRuleFit,
-  offerCeilingHelperCopy,
   offerCeilingSemanticStatus,
   ruleFitLabel,
   userDecisionLabel,
@@ -88,7 +87,10 @@ type Props = {
   onTuneTargetsOpened: () => void;
   onEditAssumptions: () => void;
   onSave: () => void;
-  onCompareDeals: () => void | Promise<void>;
+  onCompareDeals: (
+    maoTarget?: MaoTarget,
+    source?: OfferCeilingTargetSource,
+  ) => void | Promise<void>;
   onAnalyzeAnotherLikeThis: () => void;
   onNewAnalysis: () => void | Promise<void>;
   onUpgrade: () => void;
@@ -96,7 +98,6 @@ type Props = {
   isComparing?: boolean;
   isSaved?: boolean;
   canCompareDeals?: boolean;
-  persistedActionsBlockHint?: string;
   isSaveLocked?: boolean;
   saveLockedHint?: string;
   savedDealId?: string | null;
@@ -294,7 +295,6 @@ export function FocusedDecisionSummary({
   isComparing = false,
   isSaved = false,
   canCompareDeals = false,
-  persistedActionsBlockHint,
   isSaveLocked = false,
   saveLockedHint,
   savedDealId,
@@ -516,7 +516,7 @@ export function FocusedDecisionSummary({
   });
   const targetBlocked = targetResolutionState !== "ready";
   const targetDraftBlockMessage =
-    "Apply or cancel the target edits before saving, sharing, or exporting.";
+    "Apply or cancel the criteria edits before saving, sharing, or exporting.";
   const resultActionsBlocked = targetBlocked || targetDraftBlocksActions;
   const resultActionsBlockedReason = targetBlocked
     ? targetResolutionMessage
@@ -710,18 +710,8 @@ export function FocusedDecisionSummary({
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             {priceIsEstimated ? "Est. price" : "Asking"}{" "}
-            {money(Number(values.purchasePrice))} · Underwriting model v
-            {result.methodologyVersion ?? "current"} · 10-year projection{" "}
-            {result.tenYearProjectionVersion
-              ? `method v${result.tenYearProjectionVersion}`
-              : "method recorded-unversioned"}
+            {money(Number(values.purchasePrice))}
           </p>
-          {advocacyContractEnabled && targetAdopted ? (
-            <p className="mt-2 text-xs font-semibold text-muted-foreground">
-              User decision: {userDecisionLabel(userDecision)}. TrueCap reports
-              rule fit; it does not record Pursue or Pass from the metrics.
-            </p>
-          ) : null}
         </div>
 
         {!targetAdopted ? (
@@ -750,29 +740,20 @@ export function FocusedDecisionSummary({
           <p className="mt-1 font-mono text-3xl font-extrabold tabular-nums text-primary max-[250px]:text-2xl">
             {offerCeilingHeadline}
           </p>
-          <p className="mt-1 text-xs font-semibold text-foreground">
-            {!targetAdopted
-              ? "Example targets are not adopted"
-              : targetBlocked
-                ? targetResolutionMessage
-                : advocacyContractEnabled
-                  ? `${targetContext.profileName}${
-                      targetContext.origin &&
-                      targetContext.origin !== "user-selected"
-                        ? ` · ${targetContext.origin.replaceAll("-", " ")}`
-                        : ""
-                    } · ${targetVersionLabel}`
-                  : `${targetSource === "buy-box" && buyBoxName ? `Under Buy Box: ${buyBoxName}` : (offerCeiling?.sourceLabel ?? (targetSource === "screening-defaults" ? "Under screening defaults" : targetSource === "buy-box" ? "Under your Buy Box" : "Under your selected targets"))} · ${canShowPriceCeiling ? "Exact ceiling" : "Coarse range preview"}`}
-          </p>
+          {targetBlocked ? (
+            <p className="mt-1 text-xs font-semibold text-foreground">
+              {targetResolutionMessage}
+            </p>
+          ) : null}
           {!targetBlocked ? (
-            <p className="mt-1 text-[11px] leading-relaxed text-foreground">
-              {targetAdopted ? "Targets" : "Examples"}: {targetLabel}
+            <p className="mt-1 text-xs leading-relaxed text-foreground">
+              {targetAdopted ? "Criteria" : "Example criteria"}: {targetLabel}
             </p>
           ) : null}
           {advocacyContractEnabled && targetDeltaNotice ? (
             <p className="mt-2 rounded-md border border-primary/20 bg-background/70 px-2 py-1.5 text-[11px] leading-relaxed text-foreground">
-              {targetDeltaNotice.message} This comparison is session-only;
-              Save to record the current criteria with the analysis.
+              {targetDeltaNotice.message} This comparison is session-only; Save
+              to record the current criteria with the analysis.
             </p>
           ) : null}
           {offerCeilingError && onRetryOfferCeiling ? (
@@ -784,8 +765,47 @@ export function FocusedDecisionSummary({
               Retry Offer Ceiling
             </button>
           ) : null}
-          {offerCeiling ? (
-            <div className="mt-2 space-y-1 text-[11px] leading-relaxed text-muted-foreground">
+          <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+            {!targetAdopted
+              ? canTunePriceCeiling
+                ? "Choose at least one criterion to calculate a modeled price threshold."
+                : "TrueCap Pro calculates the highest modeled price that still meets rules you choose — like the examples above — plus the binding constraint and a screening range."
+              : "Highest modeled price that still meets the criteria shown. This is not a recommended offer."}
+          </p>
+          <details className="group mt-2 border-t border-primary/15 pt-1">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg text-xs font-semibold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
+              How this ceiling was calculated
+              <ChevronDown
+                aria-hidden
+                className="size-4 transition-transform group-open:rotate-180"
+              />
+            </summary>
+            <div className="space-y-1.5 pb-1 text-[11px] leading-relaxed text-muted-foreground">
+              <p>
+                {advocacyContractEnabled
+                  ? `${targetContext.profileName}${
+                      targetContext.origin &&
+                      targetContext.origin !== "user-selected"
+                        ? ` · ${targetContext.origin.replaceAll("-", " ")}`
+                        : ""
+                    } · ${targetVersionLabel}`
+                  : `${targetSource === "buy-box" && buyBoxName ? `Under Buy Box: ${buyBoxName}` : (offerCeiling?.sourceLabel ?? (targetSource === "screening-defaults" ? "Under screening defaults" : targetSource === "buy-box" ? "Under your Buy Box" : "Under your selected targets"))} · ${canShowPriceCeiling ? "Exact ceiling" : "Coarse range preview"}`}
+              </p>
+              <p>
+                Underwriting model v
+            {result.methodologyVersion ?? "current"} · 10-year projection{" "}
+            {result.tenYearProjectionVersion
+              ? `method v${result.tenYearProjectionVersion}`
+              : "method recorded-unversioned"}
+          </p>
+          {advocacyContractEnabled && targetAdopted ? (
+            <p>
+              User decision: {userDecisionLabel(userDecision)}. TrueCap reports
+              rule fit; it does not record Pursue or Pass from the metrics.
+            </p>
+          ) : null}
+              {offerCeiling ? (
+            <>
               <p>
                 Binding:{" "}
                 {offerCeiling.bindingConstraints
@@ -806,44 +826,36 @@ export function FocusedDecisionSummary({
                   : money(offerCeiling.range.upper)}{" "}
                 if {offerCeiling.range.label}.
               </p>
-            </div>
-          ) : null}
-          <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-            {!targetAdopted
-              ? canTunePriceCeiling
-                ? "Review or edit the example targets, then apply at least one before TrueCap calculates a modeled price threshold."
-                : "TrueCap Pro calculates the highest modeled price that still meets rules you choose — like the examples above — plus the binding constraint and a screening range."
-              : advocacyContractEnabled
-                ? offerCeilingHelperCopy(targetContext)
-                : "Calculated from the targets shown above. This is not a recommended offer."}
-          </p>
-          {!targetAdopted && canTunePriceCeiling && !targetBlocked ? (
-            <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
-              Prefer these filled in automatically? Every analysis uses your{" "}
-              <Link
-                href="/settings#buy-boxes"
-                className="font-semibold text-primary underline underline-offset-2"
-              >
-                Buy Box
-              </Link>{" "}
-              when you have one — set it once and TrueCap applies it to every
-              deal. A Buy Box assigned to a client screens that client&rsquo;s
-              deals, not yours.
-            </p>
-          ) : null}
-          {targetAdopted ? (
-            <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+            </>
+              ) : null}
+              {targetAdopted
+              ? (
+                <p>
               When price changes, percentage-based down payment, closing costs,
               tax, insurance, and debt scale with it. Rent and dollar-based tax,
               insurance, HOA, utilities, and repairs stay fixed.
             </p>
           ) : null}
-          {advocacyContractEnabled ? (
-            <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+          {!targetAdopted && canTunePriceCeiling && !targetBlocked ? (
+                <p>
+                  Save reusable criteria in your{" "}
+                  <Link
+                    href="/settings#buy-boxes"
+                    className="font-semibold text-primary underline underline-offset-2"
+                  >
+                    Buy Box
+                  </Link>
+                  .
+                </p>
+              ) : null}
+              {advocacyContractEnabled ? (
+            <p>
               Model output—not an appraisal, market value, acceptance
               prediction, or recommended offer.
             </p>
           ) : null}
+        </div>
+          </details>
         </div>
 
         {targetAdopted ? (
@@ -893,9 +905,9 @@ export function FocusedDecisionSummary({
           >
             <SlidersHorizontal className="size-4" aria-hidden />
             {tuneOpen
-              ? "Cancel target edits"
+              ? "Cancel criteria edits"
               : targetAdopted
-                ? "Tune targets"
+                ? "Tune criteria"
                 : "Set criteria"}
             <ChevronDown
               className={`size-4 transition-transform ${tuneOpen ? "rotate-180" : ""}`}
@@ -912,6 +924,15 @@ export function FocusedDecisionSummary({
             Unlock target price
           </Button>
         ) : null}
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onEditAssumptions}
+          className="h-11 gap-2 rounded-xl max-[250px]:h-auto max-[250px]:w-full max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight"
+        >
+          <Edit3 className="size-4" aria-hidden />
+          Edit assumptions
+        </Button>
         <Button
           type="button"
           variant="outline"
@@ -951,16 +972,6 @@ export function FocusedDecisionSummary({
           onPrepareAuth={onPrepareAuthShare}
           className="h-11 rounded-xl px-4"
         />
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onAnalyzeAnotherLikeThis}
-          className="min-h-11 gap-2 rounded-xl max-[250px]:w-full max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight"
-          title="Keeps reusable financing and operating assumptions while clearing property-specific values"
-        >
-          <CopyPlus className="size-4" aria-hidden />
-          Next deal · keep assumptions
-        </Button>
       </div>
       {targetDraftBlocksActions ? (
         <p
@@ -1015,7 +1026,8 @@ export function FocusedDecisionSummary({
           >
             <div className="rounded-xl border border-border bg-background p-3">
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                {advocacyContractEnabled ? "Target profile" : "Target rules"}
+                {advocacyContractEnabled ? "Criteria profile"
+                  : "Offer criteria"}
               </p>
               <p className="mt-1 text-sm font-extrabold text-foreground">
                 {!targetAdopted
@@ -1023,7 +1035,7 @@ export function FocusedDecisionSummary({
                   : advocacyContractEnabled
                     ? targetContext.profileName
                     : targetSource !== "buy-box"
-                      ? "Selected targets"
+                      ? "Selected criteria"
                       : buyBoxFit == null
                         ? "Checking…"
                         : buyBoxFit
@@ -1157,49 +1169,53 @@ export function FocusedDecisionSummary({
             )}
             Export PDF
           </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={onEditAssumptions}
-            className="h-11 gap-2 rounded-xl max-[250px]:h-auto max-[250px]:w-full max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight"
-          >
-            <Edit3 className="size-4" aria-hidden />
-            Edit assumptions
-          </Button>
+          {savedDealId ? (
+            <Button asChild variant="outline" className="h-11 gap-2 rounded-xl">
+              <Link href={`/dashboard/saved-analyses/${savedDealId}`}>
+                <ListTodo className="size-4" aria-hidden />
+                Deal workspace
+              </Link>
+            </Button>
+          ) : null}
           {canCompareDeals ? (
             <Button
               type="button"
               variant="outline"
-              onClick={() => void onCompareDeals()}
-              disabled={!isSaved || isComparing}
+              onClick={() => void onCompareDeals(
+                  targetAdopted ? target : undefined,
+                  targetAdopted ? targetSource : undefined,
+                )}
+              disabled={resultActionsBlocked || isSaving || isComparing}
               aria-label={
                 !isSaved
-                  ? "Compare deals — save this analysis first"
-                  : "Compare deals"
+                  ? "Save and compare deals" : "Compare deals"
               }
               title={
-                !isSaved
-                  ? (persistedActionsBlockHint ??
-                    "Save this analysis before comparing it.")
-                  : undefined
+                resultActionsBlocked
+                  ? resultActionsBlockedReason
+                  : !isSaved
+                  ? "Save this analysis and add it to the compare workspace."
+                    : undefined
               }
               className="min-h-11 gap-2 rounded-xl max-[250px]:w-full max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight"
             >
               {isComparing ? (
                 <Loader2 className="size-4 animate-spin" aria-hidden />
+              ) : !isSaved ? (
+                <Save className="size-4" aria-hidden />
               ) : (
                 <ListTodo className="size-4" aria-hidden />
               )}
-              Compare deals
+              {!isSaved ? "Save & compare" : "Compare deals"}
             </Button>
           ) : (
             <Button
-              type="button"
-              variant="outline"
+            type="button"
+            variant="outline"
               onClick={onUpgrade}
-              className="min-h-11 gap-2 rounded-xl max-[250px]:w-full max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight"
-            >
-              <ListTodo className="size-4" aria-hidden />
+            className="min-h-11 gap-2 rounded-xl max-[250px]:w-full max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight"
+          >
+            <ListTodo className="size-4" aria-hidden />
               Compare with Pro
             </Button>
           )}
@@ -1212,10 +1228,21 @@ export function FocusedDecisionSummary({
             <Sparkles className="size-4" aria-hidden />
             New analysis
           </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onAnalyzeAnotherLikeThis}
+            className="min-h-11 gap-2 rounded-xl max-[250px]:w-full max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight"
+            title="Keeps reusable financing and operating assumptions, clears property values, and matches Offer criteria again for the next deal"
+          >
+            <CopyPlus className="size-4" aria-hidden />
+            Next deal · copy assumptions
+          </Button>
         </div>
         {canCompareDeals && !isSaved ? (
           <p className="px-2 pb-3 text-xs text-muted-foreground" role="status">
-            Save this analysis to compare it with another deal.
+            Your current analysis and Offer criteria will be saved before it is
+            added to Compare.
           </p>
         ) : null}
       </details>
@@ -1228,7 +1255,7 @@ export function FocusedDecisionSummary({
         >
           <fieldset>
             <legend className="text-sm font-bold text-foreground">
-              Offer Ceiling rules
+              Offer criteria
             </legend>
             <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
               {targetAdopted

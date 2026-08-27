@@ -27,10 +27,10 @@ describe("decision workspace UX guards", () => {
 
     expect(source).toContain("Highest screening index");
     expect(source).toContain("Highest modeled upside");
-    expect(source).toContain(
+    expect(source.replace(/\s+/g, " ")).toContain(
       "The Screening Index is a secondary heuristic, not an",
     );
-    expect(source).toContain(
+    expect(source.replace(/\s+/g, " ")).toContain(
       "verify every material assumption before relying on a comparison",
     );
     expect(source).not.toMatch(/>\s*Best deal\s*</i);
@@ -84,6 +84,62 @@ describe("decision workspace UX guards", () => {
     expect(due).toContain("inline-flex min-h-11 min-w-11");
     expect(due.match(/inline-flex min-h-11/g)?.length).toBeGreaterThanOrEqual(
       3,
+    );
+  });
+
+  it("keeps every Analyze another property action inside the dashboard workflow", () => {
+    const home = read("components/dashboard/DashboardHome.tsx");
+    const analyzeActions = home.match(
+      /label: "Analyze another property", href: "[^"]+"/g,
+    );
+
+    expect(analyzeActions?.length).toBe(2);
+    expect(analyzeActions).toEqual([
+      'label: "Analyze another property", href: "/dashboard/new"',
+      'label: "Analyze another property", href: "/dashboard/new"',
+    ]);
+  });
+
+  it("makes every deal-workspace next action directly executable", () => {
+    const workspace = read("app/dashboard/saved-analyses/[id]/page.tsx");
+    const banner = read("components/investcalc/next-action-banner.tsx");
+
+    expect(workspace).toContain(
+      '{ label: "Add close date", href: "#owned-equity" }',
+    );
+    expect(workspace).toContain(
+      '{ label: "Open checklist", href: "#deal-due-diligence" }',
+    );
+    expect(workspace).toContain(
+      "label: methodologyResolution.usesRecordedSnapshot",
+    );
+    expect(workspace).toContain("cta={nextActionCta}");
+    expect(banner).toContain('import Link from "next/link"');
+    expect(banner).toContain("inline-flex min-h-11");
+  });
+
+  it("keeps advanced desktop filters collapsed without hiding utility actions", () => {
+    const list = read("components/investcalc/saved-analyses-page-v2.tsx");
+
+    expect(list).toContain(
+      "const [desktopFiltersOpen, setDesktopFiltersOpen] = useState(false)",
+    );
+    expect(list).toContain('aria-controls="desktop-deal-filters"');
+    expect(list).toContain(
+      'className={desktopFiltersOpen ? "contents" : "hidden"}',
+    );
+    expect(list).toContain("Export CSV");
+    expect(list).toContain("Columns");
+  });
+
+  it("resets a specialist property model together with its strategy", () => {
+    const analyzer = read("components/investcalc/investcalc-page.tsx");
+
+    expect(analyzer).toContain(
+      'activeStrategyKeyRef.current\n        ? "single-family"',
+    );
+    expect(analyzer).toContain(
+      "visually become Buy & Hold while retaining owner-occupant math",
     );
   });
 });

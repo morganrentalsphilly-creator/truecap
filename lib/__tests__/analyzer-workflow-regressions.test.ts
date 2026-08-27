@@ -105,7 +105,8 @@ describe("dashboard-shell New Analysis continuity", () => {
   it("restores a saved deal from a refresh-safe, owner-scoped dashboard URL", () => {
     const route = read("app/dashboard/new/page.tsx");
 
-    expect(route).toContain("searchParams?: Promise<{ savedDeal?: string }>");
+    expect(route).toContain("searchParams?: Promise<{");
+    expect(route).toContain("savedDeal?: string;");
     expect(route).toContain("requestedSavedDealId");
     expect(route).toContain(
       "await getSavedDealForEditingAction(requestedSavedDealId)",
@@ -118,8 +119,53 @@ describe("dashboard-shell New Analysis continuity", () => {
   });
 });
 
+describe("atomic Save & compare", () => {
+  const calculator = read("components/investcalc/investcalc-page.tsx");
+  const summary = read("components/investcalc/focused-decision-summary.tsx");
+
+  it("persists the exact current analysis before adding its completed id", () => {
+    const flow = section(
+      calculator,
+      "const handleCompareDeals = async",
+      '/**\n   * "Try a sample deal"',
+    );
+
+    expect(flow).toContain("if (compareInFlightRef.current) return");
+    expect(flow).toContain("lastCompletedSaveDealIdRef.current = null");
+    expect(flow).toContain("await handleSaveDeal(maoTarget, source)");
+    expect(flow).toContain("if (saved !== true) return");
+    expect(flow).toContain(
+      "dealIdForCompare = lastCompletedSaveDealIdRef.current",
+    );
+    expect(flow).toContain("await addDealToCompareAction(dealIdForCompare)");
+    expect(
+      flow.indexOf("await handleSaveDeal(maoTarget, source)"),
+    ).toBeLessThan(
+      flow.indexOf("await addDealToCompareAction(dealIdForCompare)"),
+    );
+    expect(flow.indexOf("if (!result.ok)")).toBeLessThan(
+      flow.indexOf('router.push("/dashboard/compare")'),
+    );
+    expect(flow).not.toContain('title: "Save required"');
+  });
+
+  it("offers Save & compare without disabling an eligible unsaved result", () => {
+    expect(summary).toContain('!isSaved ? "Save & compare" : "Compare deals"');
+    expect(summary).toContain("targetAdopted ? target : undefined");
+    expect(summary).toContain("targetAdopted ? targetSource : undefined");
+    expect(summary).toContain(
+      "disabled={resultActionsBlocked || isSaving || isComparing}",
+    );
+    expect(summary).not.toContain("disabled={!isSaved || isComparing}");
+    expect(summary).toContain(
+      "Your current analysis and Offer criteria will be saved before it is",
+    );
+  });
+});
+
 describe("pre-run Offer Ceiling criteria", () => {
   const calculator = read("components/investcalc/investcalc-page.tsx");
+  const editor = read("components/investcalc/pre-run-criteria-editor.tsx");
 
   it("requires visible criteria only for the general Buy & Hold and Wholesale ceiling promises", () => {
     const gate = section(
@@ -133,7 +179,7 @@ describe("pre-run Offer Ceiling criteria", () => {
     expect(normalized).toContain("canCalculateMaxOffer: canUseMaxOffer");
     expect(normalized).toContain("strategyKey: activeStrategyKey");
     expect(normalized).toContain(
-      "activeRunPromisesOfferCeiling && !hasAdoptedAnalysisTarget",
+      "activeRunPromisesOfferCeiling && (!hasAdoptedAnalysisTarget || hasExplicitPreRunCriteriaChoice)",
     );
     expect(normalized).not.toContain("!isEditingAssumptions");
   });
@@ -150,19 +196,33 @@ describe("pre-run Offer Ceiling criteria", () => {
       "useEffect(() => {\n    if (postAnalysisMode)",
     );
 
-    expect(decisionPanel).toContain('aria-label="Decision criteria"');
+    expect(decisionPanel).toContain('aria-label="Offer Ceiling criteria"');
     expect(decisionPanel).toContain("decisionTargetLabel");
-    expect(decisionPanel).toContain("Starting criteria — not yet applied");
-    expect(decisionPanel).toContain("Review before use");
+    expect(decisionPanel).toContain("Will use Buy Box");
+    expect(decisionPanel).toContain("Will use starter criteria");
+    expect(decisionPanel).toContain("Change criteria");
+    expect(decisionPanel).toContain("PreRunCriteriaEditor");
+    expect(decisionPanel).toContain("eligiblePreRunBuyBoxes.map");
     expect(decisionPanel).not.toContain("!isEditingAssumptions");
-    expect(actions).toContain("Use my Buy Box & calculate ceiling");
-    expect(actions).toContain("Use these criteria & calculate ceiling");
+    expect(actions).toContain("Analyze deal & calculate ceiling");
+    expect(actions).toContain("commitPreRunTarget(");
     expect(actions).toContain("analysisMaoTargetRef.current = target");
-    expect(actions).toContain("setAnalysisMaoTargetSource(proposedPreRunSource)");
+    expect(actions).toContain("setAnalysisMaoTargetSource(source)");
     expect(actions).toContain("writeCalcDraftWithMaoTarget(");
     expect(actions.indexOf("analysisMaoTargetRef.current = target")).toBeLessThan(
-      actions.indexOf("form.handleSubmit(onSubmit, onError)"),
+      actions.indexOf("form.handleSubmit(onSubmit, onError)"));
+  });
+
+  it("makes the visible draft the only one-click calculation source", () => {
+    expect(compact(editor)).toContain("onChange( nextValidation.target");
+    expect(editor).not.toContain("Use these criteria");
+    expect(calculator).toContain("const preRunCriteriaInvalid =");
+    expect(calculator).toContain("activePreRunCriteriaDraft?.dirty");
+    expect(calculator).toContain(
+      "Correct the highlighted value or choose at least one criterion",
     );
+    expect(calculator).toContain("hasExplicitPreRunCriteriaChoice");
+    expect(calculator).toContain("decisionBasisNeedsReviewRef.current");
   });
 
   it("allows one explicit operating-economics run without converting missing criteria into an error", () => {
@@ -182,9 +242,7 @@ describe("pre-run Offer Ceiling criteria", () => {
     expect(actionHandler).toContain("analysisMaoTargetRef.current = null");
     expect(actionHandler).toContain('setAnalysisMaoTargetSource("screening-defaults")');
     expect(actionHandler).toContain("form.handleSubmit(onSubmit, onError)");
-    expect(calculator).toContain(
-      "Analyze operating economics without an Offer Ceiling",
-    );
+    expect(calculator).toContain("Analyze cash flow without an Offer Ceiling");
 
     expect(submitGate).toContain("explicitTargetlessRunRef.current = false");
     expect(submitGate).toContain("!explicitlyTargetless");
@@ -280,7 +338,7 @@ describe("address request and enrichment sequencing", () => {
     expect(autocomplete).toContain("setNoMatches(preds.length === 0)");
     expect(autocomplete).toContain("noMatches ? noMatchesId : null");
     expect(autocomplete).toContain("aria-describedby={describedBy}");
-    expect(autocomplete).toContain('id={noMatchesId}');
+    expect(autocomplete).toContain("id={noMatchesId}");
     expect(autocomplete).toContain('role="status"');
     expect(autocomplete).toContain(
       "No address matches yet. Keep typing or paste the complete street,",
@@ -303,9 +361,9 @@ describe("address request and enrichment sequencing", () => {
     expect(addressChange.indexOf('title: "Kept the previous property"')).toBeLessThan(
       addressChange.indexOf("lastSelectedAddressRef.current = place"),
     );
-    expect(addressChange).toContain('`units.${index}.bedrooms`');
-    expect(addressChange).toContain('`units.${index}.bathrooms`');
-    expect(addressChange).toContain('`units.${index}.sqft`');
+    expect(addressChange).toContain("`units.${index}.bedrooms`");
+    expect(addressChange).toContain("`units.${index}.bathrooms`");
+    expect(addressChange).toContain("`units.${index}.sqft`");
     expect(addressChange).not.toContain("Previous values kept for review");
   });
 
@@ -375,7 +433,9 @@ describe("result editing and deleted-deal recovery", () => {
       "const areAnalysisTabsEnabled = Boolean(analysisResult) && !isCalculating && !isEditingAssumptions",
     );
     expect(resultMount).toContain("{!isEditingAssumptions &&");
-    expect(calculator).toContain('isEditingAssumptions\n              ? "View updated result"');
+    expect(compact(calculator)).toContain(
+      'isEditingAssumptions ? "Update analysis"',
+    );
     expect(calculator).toContain("{activeRunPromisesOfferCeiling ? (");
   });
 

@@ -8,13 +8,13 @@ import {
   Archive,
   ArrowDown,
   ArrowLeft,
+  ArrowRight,
   ArrowUp,
   ArrowUpDown,
   Building2,
   CalendarClock,
   ChevronDown,
   ChevronsUpDown,
-  ExternalLink,
   FileDown,
   Home,
   KeyRound,
@@ -151,7 +151,6 @@ import {
   dispatchProofMoment,
 } from "@/components/marketing/testimonial-prompt";
 import {
-  openSavedDealInAnalysisTab as openSavedDealInAnalysisTabShared,
   duplicateSavedDealInAnalyzer,
   openAnalyzerHandoffWindow,
 } from "@/components/investcalc/open-saved-deal-in-analyzer";
@@ -419,7 +418,7 @@ function DealClientPicker({
               : "Assign this deal to a client"
           }
           className={cn(
-            "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium disabled:opacity-50",
+            "inline-flex min-h-11 items-center gap-1 rounded-full border px-3 py-2 text-[11px] font-medium disabled:opacity-50",
             current
               ? "border-primary/30 bg-primary/10 text-primary"
               : "border-dashed border-border text-muted-foreground hover:text-foreground",
@@ -441,7 +440,7 @@ function DealClientPicker({
               disabled={disabled}
               onClick={() => onChange(c.id === clientId ? null : c.id)}
               className={cn(
-                "flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-xs hover:bg-muted disabled:opacity-50",
+                "flex min-h-11 w-full items-center justify-between rounded-md px-2 py-2 text-left text-xs hover:bg-muted disabled:opacity-50",
                 c.id === clientId
                   ? "font-semibold text-primary"
                   : "text-foreground",
@@ -457,7 +456,7 @@ function DealClientPicker({
             type="button"
             disabled={disabled}
             onClick={() => onChange(null)}
-            className="mt-1 w-full rounded-md border-t border-border px-2 py-1.5 text-left text-xs text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-50"
+            className="mt-1 min-h-11 w-full rounded-md border-t border-border px-2 py-2 text-left text-xs text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-50"
           >
             Remove from client
           </button>
@@ -557,7 +556,7 @@ function OwnedEquityCell({
         if (e.key === "Enter") commit((e.target as HTMLInputElement).value);
       }}
       aria-label="Close date"
-      className="h-8 rounded-lg border border-input bg-background px-2 text-xs text-foreground"
+      className="h-11 rounded-lg border border-input bg-background px-2 text-xs text-foreground"
     />
   );
 
@@ -584,7 +583,7 @@ function OwnedEquityCell({
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="font-semibold text-primary hover:underline"
+            className="inline-flex min-h-11 items-center rounded-lg px-2 font-semibold text-primary hover:bg-muted hover:underline"
           >
             Edit
           </button>
@@ -1138,7 +1137,7 @@ function DealTags({
             disabled={disabled}
             aria-label={`Remove ${tag}`}
             onClick={() => onSave(tags.filter((x) => x !== tag))}
-            className="text-muted-foreground hover:text-foreground disabled:opacity-50"
+            className="inline-flex size-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-50"
           >
             <X className="size-3" />
           </button>
@@ -1150,7 +1149,7 @@ function DealTags({
             type="button"
             disabled={disabled}
             className={cn(
-              "inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2 py-0.5 text-[11px] font-medium text-muted-foreground hover:text-foreground disabled:opacity-50",
+              "inline-flex min-h-11 items-center gap-1 rounded-full border border-dashed border-border px-3 py-2 text-[11px] font-medium text-muted-foreground hover:text-foreground disabled:opacity-50",
               // pointer-events-none at rest, or opacity-0 leaves an INVISIBLE
               // BUT CLICKABLE target: the cell reserves the button's height,
               // so clicking that apparently-blank strip opened a tag popover
@@ -1179,12 +1178,12 @@ function DealTags({
                 }
               }}
               placeholder="e.g. BRRRR"
-              className="h-8 text-xs"
+              className="h-11 text-xs"
             />
             <Button
               type="button"
               size="sm"
-              className="h-8"
+              className="h-11"
               onClick={addTag}
               disabled={disabled}
             >
@@ -1424,6 +1423,10 @@ export function SavedAnalysesPage({
   // Below sm the filter chip groups collapse behind one "Filters"
   // disclosure (defaults are All/All/Active, so it opens showing 0 active).
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  // Desktop keeps the same advanced filters one click away instead of putting
+  // three full chip rows between search and the first deal. Search, sort,
+  // export, columns and selected-only remain visible at all times.
+  const [desktopFiltersOpen, setDesktopFiltersOpen] = useState(false);
   // Mobile-card tag editing lives behind the ⋯ menu; tracks which card
   // (if any) currently shows the inline DealTags editor.
   const [editingTagsDealId, setEditingTagsDealId] = useState<string | null>(
@@ -2232,6 +2235,10 @@ export function SavedAnalysesPage({
     (selectedType !== "all" ? 1 : 0) +
     (activeDealStateFilter !== "active" ? 1 : 0) +
     (showcompare ? 1 : 0);
+  const advancedDesktopFilterCount =
+    (selectedSignal !== "all" ? 1 : 0) +
+    (selectedType !== "all" ? 1 : 0) +
+    (activeDealStateFilter !== "active" ? 1 : 0);
 
   // A plain function, deliberately NOT a component, and called as
   // {renderMobileFilters()} rather than rendered as a JSX element.
@@ -2462,23 +2469,6 @@ export function SavedAnalysesPage({
     });
   };
 
-  // The handoff itself is the shared helper (also used by the deal
-  // workspace's "Open full analysis" button) — this wrapper only adds My
-  // Deals' toast on failure. Behavior identical to the pre-extraction code.
-  const openSavedDealInAnalysisTab = async (
-    id: string,
-    targetWindow: Window | null,
-  ) => {
-    const result = await openSavedDealInAnalysisTabShared(id, targetWindow);
-    if (!result.ok) {
-      toast({
-        title: "Could not open saved deal",
-        description: result.message,
-        variant: "destructive",
-      });
-    }
-  };
-
   const toggleOne = (id: string) => {
     setSelectedIds((prev) => {
       if (prev.includes(id)) return prev.filter((current) => current !== id);
@@ -2494,21 +2484,9 @@ export function SavedAnalysesPage({
     });
   };
 
-  const handleOpenAnalysisClick = (id: string) => {
-    const targetWindow = openAnalyzerHandoffWindow();
-    setOpeningDealId(id);
-    void (async () => {
-      try {
-        await openSavedDealInAnalysisTab(id, targetWindow);
-      } finally {
-        setOpeningDealId(null);
-      }
-    })();
-  };
-
   // "Duplicate" — fork this deal's assumptions into a NEW analysis (financing/
-  // expenses carried over, property identity cleared). Same popup-safe tab
-  // pattern as Open; a save from the forked deal is a fresh insert.
+  // expenses carried over, property identity cleared). Duplication intentionally
+  // keeps the popup-safe second-tab pattern; a save from the fork is a fresh insert.
   const handleDuplicateDeal = (id: string) => {
     const targetWindow = openAnalyzerHandoffWindow();
     setOpeningDealId(id);
@@ -2928,7 +2906,7 @@ export function SavedAnalysesPage({
                 placeholder="Search by address..."
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                className="pl-9 h-10 rounded-xl bg-muted/60 border-border"
+                className="h-11 rounded-xl border-border bg-muted/60 pl-9"
               />
             </div>
             {/* Phone width: the five sort pills collapse into one compact
@@ -2946,7 +2924,7 @@ export function SavedAnalysesPage({
                 onValueChange={(value) => handleSort(value as SortField)}
               >
                 <SelectTrigger
-                  className="h-9 flex-1 rounded-xl text-xs"
+                  className="h-11 flex-1 rounded-xl text-xs"
                   aria-label="Sort deals by"
                 >
                   <SelectValue placeholder="Date Saved" />
@@ -3039,7 +3017,7 @@ export function SavedAnalysesPage({
               onClick={() => setBuyBoxOnly((v) => !v)}
               aria-pressed={buyBoxOnly}
               className={cn(
-                "inline-flex items-center gap-1.5 self-start rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
+                "inline-flex min-h-11 items-center gap-1.5 self-start rounded-full border px-3 py-2 text-xs font-semibold transition-colors",
                 buyBoxOnly
                   ? "border-[var(--brand-green)] bg-[var(--brand-green)] text-white"
                   : "border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] text-[var(--brand-green)] hover:bg-[var(--brand-green)]/15",
@@ -3063,6 +3041,33 @@ export function SavedAnalysesPage({
           ) : null}
 
           <div className="hidden flex-wrap items-center gap-2 xl:flex">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-11 gap-1.5 rounded-xl px-3 text-xs"
+              onClick={() => setDesktopFiltersOpen((open) => !open)}
+              aria-expanded={desktopFiltersOpen}
+              aria-controls="desktop-deal-filters"
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5" />
+              Filters
+              {advancedDesktopFilterCount > 0 ? (
+                <span className="rounded-full bg-foreground px-1.5 text-[10px] font-bold leading-4 text-background">
+                  {advancedDesktopFilterCount}
+                </span>
+              ) : null}
+              <ChevronDown
+                className={cn(
+                  "h-3.5 w-3.5 transition-transform",
+                  desktopFiltersOpen && "rotate-180",
+                )}
+              />
+            </Button>
+            <div
+              id="desktop-deal-filters"
+              className={desktopFiltersOpen ? "contents" : "hidden"}
+            >
             <Tabs
               value={selectedSignal}
               onValueChange={(value) =>
@@ -3073,16 +3078,16 @@ export function SavedAnalysesPage({
               <TabsList className="bg-muted/60 h-auto rounded-full p-1">
                 <TabsTrigger
                   value="all"
-                  className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
-                >
+                  className="h-11 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
+                  >
                   All
                 </TabsTrigger>
                 {(Object.keys(SIGNAL_LABELS) as SavedSignal[]).map((signal) => (
                   <TabsTrigger
                     key={signal}
                     value={signal}
-                    className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
-                  >
+                    className="h-11 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
+                      >
                     {SIGNAL_LABELS[signal]}
                   </TabsTrigger>
                 ))}
@@ -3099,26 +3104,26 @@ export function SavedAnalysesPage({
               <TabsList className="bg-muted/60 h-auto rounded-full p-1">
                 <TabsTrigger
                   value="all"
-                  className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
-                >
+                  className="h-11 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
+                  >
                   All Types
                 </TabsTrigger>
                 <TabsTrigger
                   value="single-family"
-                  className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
-                >
+                  className="h-11 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
+                  >
                   Single Family
                 </TabsTrigger>
                 <TabsTrigger
                   value="multi-family"
-                  className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
-                >
+                  className="h-11 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
+                  >
                   Multi-Family
                 </TabsTrigger>
                 <TabsTrigger
                   value="owner-occupant"
-                  className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
-                >
+                  className="h-11 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
+                  >
                   Owner Occupant
                 </TabsTrigger>
               </TabsList>
@@ -3134,42 +3139,43 @@ export function SavedAnalysesPage({
               onValueChange={(value) =>
                 handleStateFilterChange(value as DealStateFilter)
               }
-              className={cn("gap-0", clientFilterId ? "hidden" : undefined)}
+              className={cn("gap-0", clientFilterId && "hidden")}
             >
               <TabsList className="bg-muted/60 h-auto rounded-full p-1">
                 <TabsTrigger
                   value="active"
-                  className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
-                >
+                  className="h-11 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
+                  >
                   Active
                 </TabsTrigger>
                 <TabsTrigger
                   value="completed"
-                  className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
-                >
+                  className="h-11 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
+                  >
                   Completed
                 </TabsTrigger>
                 <TabsTrigger
                   value="archived"
-                  className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
-                >
+                  className="h-11 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
+                  >
                   Archived
                 </TabsTrigger>
                 <TabsTrigger
                   value="all"
-                  className="h-9 sm:h-7 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
-                >
+                  className="h-11 rounded-full px-3 text-xs data-[state=active]:bg-foreground data-[state=active]:text-background"
+                  >
                   All
                 </TabsTrigger>
               </TabsList>
             </Tabs>
+            </div>
 
             <div className="ml-auto flex items-center gap-2">
               {/* Download the current view (filtered + sorted) as a CSV. */}
               <Button
                 variant="outline"
                 size="sm"
-                className="h-9 gap-1.5 rounded-full text-xs"
+                className="h-11 gap-1.5 rounded-xl text-xs"
                 onClick={handleExportCsv}
                 disabled={displayItems.length === 0}
               >
@@ -3181,7 +3187,7 @@ export function SavedAnalysesPage({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-9 gap-1.5 rounded-full text-xs"
+                    className="h-11 gap-1.5 rounded-xl text-xs"
                   >
                     <SlidersHorizontal className="h-3.5 w-3.5" />
                     Columns
@@ -3514,28 +3520,27 @@ export function SavedAnalysesPage({
                     ) : null}
                     <div className="flex items-center gap-2">
                       <Button
-                        type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-11 flex-1 rounded-xl px-2.5 text-xs"
+                          asChild
+                        >
+                          <Link
+                            href={`/dashboard/new?savedDeal=${encodeURIComponent(item.id)}`}
+                            aria-label={`Open analysis for ${address.main}`}
+                          >
+                            <ArrowRight className="mr-1 h-3.5 w-3.5" />
+                            Open
+                          </Link>
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              type="button"
                         variant="outline"
                         size="sm"
-                        className="h-10 flex-1 rounded-xl px-2.5 text-xs"
-                        onClick={() => handleOpenAnalysisClick(item.id)}
-                        disabled={openingDealId === item.id}
-                      >
-                        {openingDealId === item.id ? (
-                          <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
-                        ) : (
-                          <ExternalLink className="w-3.5 h-3.5 mr-1" />
-                        )}
-                        Open
-                      </Button>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            className="h-10 w-10 shrink-0 rounded-xl p-0"
-                            aria-label={`More actions for ${address.main}`}
+                        className="h-11 w-11 shrink-0 rounded-xl p-0"
+                              aria-label={`More actions for ${address.main}`}
                           >
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
@@ -4019,7 +4024,7 @@ export function SavedAnalysesPage({
                                 updatingDealStatusId === item.id
                               }
                             >
-                              <SelectTrigger className="h-8 w-[150px] rounded-md text-xs">
+                              <SelectTrigger className="h-11 w-[150px] rounded-md text-xs">
                                 <SelectValue placeholder="Stage" />
                               </SelectTrigger>
                               <SelectContent>
@@ -4044,7 +4049,7 @@ export function SavedAnalysesPage({
                                 updatingDealStatusId === item.id
                               }
                             >
-                              <SelectTrigger className="h-8 w-[150px] rounded-md text-xs">
+                              <SelectTrigger className="h-11 w-[150px] rounded-md text-xs">
                                 <SelectValue placeholder="Status" />
                               </SelectTrigger>
                               <SelectContent>
@@ -4091,33 +4096,31 @@ export function SavedAnalysesPage({
                             truncated the table. */}
                         <div className="flex items-center gap-1.5">
                           <Button
-                            type="button"
-                            variant="outline"
+                              variant="outline"
                             size="sm"
-                            className="h-8 rounded-md px-2.5 text-xs"
-                            onClick={() => handleOpenAnalysisClick(item.id)}
-                            disabled={openingDealId === item.id}
-                            // "Open Analysis" + icon ran ~130px on every row, in
+                            className="h-11 rounded-lg px-3 text-xs"
+                              asChild
+                              // "Open Analysis" + icon ran ~130px on every row, in
                             // the narrowest part of the table. Under an ACTIONS
                             // header, next to a ⋯ menu, "Open" is unambiguous —
                             // and the full phrase stays in the accessible name.
                             aria-label={`Open analysis for ${address.main}`}
                           >
-                            {openingDealId === item.id ? (
-                              <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
-                            ) : (
-                              <ExternalLink className="w-3.5 h-3.5 mr-1" />
-                            )}
-                            Open
-                          </Button>
+                              <Link
+                                href={`/dashboard/new?savedDeal=${encodeURIComponent(item.id)}`}
+                              >
+                                <ArrowRight className="mr-1 h-3.5 w-3.5" />
+                                Open
+                              </Link>
+                            </Button>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button
                                 type="button"
                                 variant="outline"
                                 size="sm"
-                                className="h-8 w-8 rounded-md p-0"
-                                aria-label={`More actions for ${address.main}`}
+                                className="h-11 w-11 rounded-lg p-0"
+                                  aria-label={`More actions for ${address.main}`}
                               >
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
@@ -4315,7 +4318,7 @@ export function SavedAnalysesPage({
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="h-8 rounded-full px-3"
+                      className="h-11 rounded-full px-3"
                       disabled={safeCurrentPage === 1}
                       onClick={() => goToPage(safeCurrentPage - 1)}
                     >
@@ -4330,7 +4333,7 @@ export function SavedAnalysesPage({
                         className="flex items-center gap-1"
                       >
                         {previousPage != null && page - previousPage > 1 && (
-                          <span className="flex h-8 w-6 items-center justify-center text-xs text-muted-foreground">
+                          <span className="flex h-11 w-6 items-center justify-center text-xs text-muted-foreground">
                             ...
                           </span>
                         )}
@@ -4340,7 +4343,7 @@ export function SavedAnalysesPage({
                             page === safeCurrentPage ? "outline" : "ghost"
                           }
                           size="icon-sm"
-                          className="size-8 rounded-full"
+                          className="size-11 rounded-full"
                           onClick={() => goToPage(page)}
                           aria-current={
                             page === safeCurrentPage ? "page" : undefined
@@ -4356,7 +4359,7 @@ export function SavedAnalysesPage({
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="h-8 rounded-full px-3"
+                      className="h-11 rounded-full px-3"
                       disabled={safeCurrentPage === pageCount}
                       onClick={() => goToPage(safeCurrentPage + 1)}
                     >
@@ -4451,7 +4454,7 @@ export function SavedAnalysesPage({
             <button
               type="button"
               onClick={() => setSelectedIds([])}
-              className="hidden text-xs font-semibold text-muted-foreground hover:text-foreground sm:inline-flex sm:items-center sm:gap-1"
+              className="hidden min-h-11 items-center gap-1 rounded-lg px-2 text-xs font-semibold text-muted-foreground hover:bg-muted hover:text-foreground sm:inline-flex"
             >
               <X className="h-3.5 w-3.5" />
               Clear
@@ -4462,7 +4465,7 @@ export function SavedAnalysesPage({
               type="button"
               variant="outline"
               size="sm"
-              className="h-9 rounded-full px-3 text-xs"
+              className="h-11 rounded-full px-3 text-xs"
               onClick={handleBulkArchive}
               disabled={bulkRunning}
             >
@@ -4477,7 +4480,7 @@ export function SavedAnalysesPage({
               type="button"
               variant="outline"
               size="sm"
-              className="h-9 rounded-full border-[var(--metric-negative)]/40 px-3 text-xs text-[var(--metric-negative)] hover:bg-[var(--metric-negative)]/10 hover:text-[var(--metric-negative)]"
+              className="h-11 rounded-full border-[var(--metric-negative)]/40 px-3 text-xs text-[var(--metric-negative)] hover:bg-[var(--metric-negative)]/10 hover:text-[var(--metric-negative)]"
               onClick={handleBulkDelete}
               disabled={bulkRunning}
             >

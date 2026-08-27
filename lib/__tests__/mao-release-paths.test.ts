@@ -72,21 +72,20 @@ describe("MAO release-path safety", () => {
     );
   });
 
-  it("carries selected targets into both saved and in-flow assumption forks", () => {
+  it("re-resolves criteria for both duplicate and in-flow next-deal paths", () => {
     const calculator = read("components/investcalc/investcalc-page.tsx");
 
-    expect(calculator).toContain("maxOfferTarget?: unknown");
-    expect(calculator).toContain("normalizeMaoTarget(parsed.maxOfferTarget)");
-    // Sample-seeded example targets are the one exception: the fork carries
-    // only USER-adopted targets (see sample-target-adoption-guard.test.ts).
+    expect(calculator).not.toContain("normalizeMaoTarget(parsed.maxOfferTarget)");
     expect(calculator).toContain(
-      "const carriedMaoTarget = sampleSeededMaoTargetRef.current\n      ? null\n      : normalizeMaoTarget(analysisMaoTargetRef.current)",
+      "A duplicate has no property identity yet. Never carry the source",
     );
+    expect(calculator).toContain('null,\n            "screening-defaults"');
+    expect(calculator).toContain("const carriedMaoTarget = null");
+    expect(calculator).toContain("const carriedDecisionBasis = null");
     expect(calculator).toContain(
       "analysisMaoTargetRef.current = carriedMaoTarget",
     );
-    expect(calculator).toContain("duplicatedMaoTargetSource");
-    expect(calculator).toContain("carriedMaoTargetSource");
+    expect(calculator).toContain("const carriedMaoTargetSource = null");
     expect(calculator).toContain(
       "setAnalysisMaoTargetSource(carriedMaoTargetSource)",
     );

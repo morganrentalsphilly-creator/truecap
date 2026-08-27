@@ -32,6 +32,10 @@ interface PropertyDetailsSectionProps {
   showYearBuilt?: boolean;
   /** Override the "Purchase Price" label (e.g. "Asking price" for wholesale). */
   priceLabel?: string;
+  /** Durable provenance for a programmatically filled price. */
+  priceSourceLabel?: string | null;
+  /** Called only when the investor edits the price field directly. */
+  onPurchasePriceEdited?: () => void;
   /**
    * ADDITIVE chrome variant (calculator redesign Phase 4, hero unification):
    * "bare" drops this section's own card wrapper + "Property Details" header
@@ -67,6 +71,8 @@ export function PropertyDetailsSection({
   showAutofill,
   showYearBuilt = true,
   priceLabel,
+  priceSourceLabel,
+  onPurchasePriceEdited,
   chrome = "card",
   listingLinkSlot,
   hideAddressInput,
@@ -178,7 +184,10 @@ export function PropertyDetailsSection({
                 name={field.name}
                 value={field.value}
                 onBlur={field.onBlur}
-                onValueChange={field.onChange}
+                onValueChange={(value) => {
+                  field.onChange(value);
+                  onPurchasePriceEdited?.();
+                }}
                 id="purchasePrice"
                 min={10_000}
                 max={100_000_000}
@@ -187,7 +196,12 @@ export function PropertyDetailsSection({
                 aria-required="true"
                 aria-invalid={!!errors.purchasePrice}
                 aria-describedby={
-                  errors.purchasePrice ? "purchasePrice-error" : undefined
+                  [
+                    errors.purchasePrice ? "purchasePrice-error" : null,
+                    priceSourceLabel ? "purchase-price-source" : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" ") || undefined
                 }
                 className={cn(
                   "min-h-11 border-input bg-background pl-8",
@@ -202,6 +216,14 @@ export function PropertyDetailsSection({
           id="purchasePrice-error"
           message={errors.purchasePrice?.message}
         />
+        {priceSourceLabel ? (
+          <p
+            id="purchase-price-source"
+            className="mt-1.5 text-xs font-medium text-muted-foreground"
+          >
+            Source: {priceSourceLabel}. Review before relying on it.
+          </p>
+        ) : null}
       </div>
 
       {showYearBuilt ? <YearBuiltField form={form} /> : null}

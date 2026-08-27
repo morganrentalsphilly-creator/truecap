@@ -28,7 +28,7 @@ describe("focused decision safety", () => {
     expect(summary).toContain("rangePreview");
     expect(summary).toContain('"Coarse range preview"');
     expect(summary).toContain("meetsMaoTarget(result, target)");
-    expect(summary).toContain("Offer Ceiling rules");
+    expect(summary).toContain("Offer criteria");
     expect(summary).toContain("aria-expanded={tuneOpen}");
     expect(summary).toContain('aria-live="polite"');
     expect(summary).toContain("canTunePriceCeiling ? (");
@@ -40,7 +40,7 @@ describe("focused decision safety", () => {
       'isSaving ? "Saving…" : isSaved ? "Saved" : "Save"',
     );
     expect(summary).toContain(
-      "Apply or cancel the target edits before saving, sharing, or exporting.",
+      "Apply or cancel the criteria edits before saving, sharing, or exporting.",
     );
     expect(summary).not.toContain("Apply the example targets");
     expect(summary).not.toContain("Set targets first");
@@ -91,7 +91,7 @@ describe("focused decision safety", () => {
       "utf8",
     );
     const editorStart = summary.indexOf(
-      'legend className="text-sm font-bold text-foreground">\n              Offer Ceiling rules',
+      'legend className="text-sm font-bold text-foreground">\n              Offer criteria',
     );
     const editor = summary.slice(editorStart);
     const changeHandler = editor.indexOf("onChange={(event) =>");
@@ -138,8 +138,9 @@ describe("focused decision safety", () => {
       "utf8",
     );
     expect(summary).toContain("This comparison is session-only;");
-    expect(summary).toContain(
-      "Save to record the current criteria with the analysis.",
+    expect(normalizeSource(summary)).toContain(
+      normalizeSource(
+      "Save to record the current criteria with the analysis."),
     );
     expect(summary).not.toContain(
       "prior target criteria remain preserved in the previous snapshot",

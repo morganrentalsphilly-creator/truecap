@@ -4,6 +4,7 @@
  * computed by lib/next-action.ts so the wording/logic stays in one place.
  * Server-renderable (no client hooks).
  */
+import Link from "next/link";
 import { AlertTriangle, AlertCircle, CheckCircle2 } from "lucide-react";
 import type { NextAction } from "@/lib/next-action";
 
@@ -32,13 +33,15 @@ export function NextActionBanner({
   action: NextAction;
   /** Optional in-place CTA so the instruction is doable where it's shown
    *  (e.g. the closed stage's "add a close date" jumps to the equity card).
-   *  Plain anchor — server-renderable, works for same-page #fragments too. */
+   *  Next Link is server-renderable and works for same-page #fragments too. */
   cta?: { label: string; href: string };
 }) {
   const t = TONE[action.tone];
   const Icon = t.icon;
   return (
-    <div className={`flex items-start gap-3 rounded-2xl border p-4 ${t.wrap}`}>
+    <div className={`flex flex-col gap-3 rounded-2xl border p-4 sm:flex-row sm:items-start ${t.wrap}`}
+    >
+      <div className="flex min-w-0 flex-1 items-start gap-3">
       <Icon aria-hidden className={`mt-0.5 size-5 shrink-0 ${t.iconClass}`} />
       <div className="min-w-0 flex-1">
         <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
@@ -47,13 +50,14 @@ export function NextActionBanner({
         <div className="text-sm font-bold text-foreground">{action.label}</div>
         <div className="text-xs text-muted-foreground">{action.reason}.</div>
       </div>
+      </div>
       {cta ? (
-        <a
+        <Link
           href={cta.href}
-          className="shrink-0 self-center rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted"
+          className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-lg border border-border bg-background px-3 text-xs font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:w-auto sm:self-center"
         >
           {cta.label}
-        </a>
+        </Link>
       ) : null}
     </div>
   );

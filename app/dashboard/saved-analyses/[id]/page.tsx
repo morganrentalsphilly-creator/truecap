@@ -207,7 +207,8 @@ async function fetchDeal(
     | { status: "not_found"; data: null; ownedEquityEnabled: boolean }
     | { status: "error"; data: null; ownedEquityEnabled: boolean };
   const resolved = (
-    result: { data: unknown; error: { code?: string; message?: string } | null },
+    result: { data: unknown; error: { code?: string; message?: string } | null;
+    },
     ownedEquityEnabled: boolean
   ): DealReadResult => {
     if (result.error) return { status: "error", data: null, ownedEquityEnabled };
@@ -372,7 +373,9 @@ export default async function DealWorkspacePage({
   // for every other tier, which leaves the control hidden.
   const agentClients = canUseClientWorkflow
     ? await listAgentClientsAction()
-        .then((r) => (r.ok ? r.clients.filter((c) => !c.isArchived).map((c) => ({ id: c.id, name: c.name })) : []))
+        .then((r) =>
+          r.ok ? r.clients.filter((c) => !c.isArchived).map((c) => ({ id: c.id, name: c.name })) : [],
+        )
         .catch(() => [])
     : [];
   // Workspace → Compare cross-link: only when comparing can actually work —
@@ -606,14 +609,25 @@ export default async function DealWorkspacePage({
     hasCloseDate: closeDate != null,
   });
 
+  const nextActionCta =
+    isClosedDeal && ownedEquityEnabled && !closeDate
+      ? { label: "Add close date", href: "#owned-equity" }
+      : nextAction.tone === "ready"
+        ? { label: "Open checklist", href: "#deal-due-diligence" }
+        : {
+            label: methodologyResolution.usesRecordedSnapshot
+              ? "View analysis"
+              : "Edit assumptions",
+            href: `/dashboard/new?savedDeal=${encodeURIComponent(dealRow.id)}`,
+          };
+
   const displayName = getDisplayName((profile as ProfileRow | null) ?? null, user.email);
   const initials = getInitials(displayName, user.email ?? "");
 
   return (
     <div className="flex-1 min-w-0 flex flex-col">
-      {/* "Open full analysis" edits happen in another tab — re-fetch the
-          workspace header when the user tabs back so it shows the just-saved
-          underwrite. */}
+      {/* Re-fetch after returning from any secondary tab (for example a newly
+          duplicated scenario) so workspace state cannot go stale. */}
       <RefreshOnReturn />
       <Topbar
         displayName={displayName}
@@ -730,7 +744,9 @@ export default async function DealWorkspacePage({
             <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5">
               {/* Was `{recommendation}` raw — the same deal read "Avoid" here
                   and "Pass" in the My Deals list one click away. */}
-              {recommendation ? <Verdict recommendation={recommendation} /> : null}
+              {recommendation ? (
+                <Verdict recommendation={recommendation} />
+              ) : null}
               <Metric
                 label="Cash flow"
                 value={fmtCashFlow(netCashFlow)}
@@ -779,15 +795,10 @@ export default async function DealWorkspacePage({
           <div>
             <NextActionBanner
               action={nextAction}
-              // The closed-stage instruction ("add a close date") is doable in
-              // place: jump to the owned-equity card below (M3-2/WOW-4). Only
-              // offered while there's still a date to add and the close_date
-              // migration is live.
-              cta={
-                isClosedDeal && ownedEquityEnabled && !closeDate
-                  ? { label: "Add close date", href: "#owned-equity" }
-                  : undefined
-              }
+              // Every instruction is executable where it appears: fix/review
+              // in the analysis, verify a ready deal in the checklist, or add
+              // the missing close date to a completed deal.
+              cta={nextActionCta}
             />
             {buyBoxPersonalLine ? (
               // The one personal line from the user's own buy box — muted,
@@ -853,7 +864,8 @@ export default async function DealWorkspacePage({
                         Targets: {maoBasisLabel}
                       </div>
                       <div className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-                        Highest modeled price that still meets {maoBasisLabel} under the assumptions shown. This is not a recommended offer or appraisal.
+                        Highest modeled price that still meets {maoBasisLabel}{" "}
+                        under the assumptions shown. This is not a recommended offer or appraisal.
                       </div>
                     </>
                   ) : null}

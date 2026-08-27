@@ -21,15 +21,22 @@
  */
 
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { InvestCalcPage } from "@/components/investcalc/investcalc-page";
 import { Topbar } from "@/components/dashboard/Topbar";
+import { BillingSuccessBanner } from "@/components/marketing/billing-success-banner";
 import { getAnalyzerCapabilities } from "@/lib/analyzer-capabilities";
 import { getDashboardNavAccess, hasPaidPlanSubscription } from "@/lib/entitlements";
 import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { isAdvocacyInternalUser } from "@/lib/advocacy-rollout";
 import { getSavedDealForEditingAction } from "@/app/actions/saved-analyses";
+import { getStripe } from "@/lib/stripe/client";
+import {
+  planSlugFromPriceId,
+  type PaidPlanSlug,
+} from "@/lib/stripe/plan-prices";
 
 export const metadata: Metadata = {
   title: "New analysis",
@@ -59,7 +66,10 @@ function getInitials(displayName: string, email: string): string {
 export default async function NewAnalysisPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ savedDeal?: string }>;
+  searchParams?: Promise<{ savedDeal?: string;
+    billing?: string;
+    session_id?: string;
+  }>;
 }) {
   const supabase = await createServerSupabaseClient();
   const user = await getRequestUser();
@@ -78,6 +88,46 @@ export default async function NewAnalysisPage({
   const initialSavedDeal = requestedSavedDealId
     ? await getSavedDealForEditingAction(requestedSavedDealId)
     : null;
+
+  // Stripe returns subscription buyers directly to the authenticated
+  // analyzer. Resolve the paid amount from the Checkout Session (available
+  // immediately) rather than racing the webhook-written subscription row.
+  // This value is only a server-rendered conversion hint; the banner's server
+  // action independently verifies the recent Session, user, plan, and Price
+  // before it emits success UI or analytics.
+  let billingConversionValue: number | undefined;
+  let billingPurchasedPlan: PaidPlanSlug | null = null;
+  if (
+    resolvedSearchParams.billing === "success" &&
+    process.env.STRIPE_SECRET_KEY
+  ) {
+    const sessionId = resolvedSearchParams.session_id;
+    if (
+      typeof sessionId === "string" &&
+      /^cs_[a-zA-Z0-9_]{8,240}$/.test(sessionId)
+    ) {
+      try {
+        const stripe = getStripe();
+        const session = await stripe.checkout.sessions.retrieve(sessionId, {
+          expand: ["line_items"],
+        });
+        // Never attach a conversion value or plan hint from another user's
+        // Checkout Session.
+        if (session.client_reference_id === user.id) {
+          const purchasedPrice = session.line_items?.data?.[0]?.price;
+          if (purchasedPrice?.unit_amount != null) {
+            billingConversionValue = purchasedPrice.unit_amount / 100;
+          }
+          billingPurchasedPlan = planSlugFromPriceId(purchasedPrice?.id);
+        }
+      } catch (error) {
+        console.warn(
+          "[billing] could not resolve checkout session for conversion value:",
+          error instanceof Error ? error.message : error,
+        );
+      }
+    }
+  }
 
   const [capabilities, { data: profile }, isPremium] = await Promise.all([
     getAnalyzerCapabilities(supabase, user),
@@ -101,6 +151,12 @@ export default async function NewAnalysisPage({
         isPremium={isPremium}
         canAccessDashboard={navAccess.dashboard}
       />
+      <Suspense fallback={null}>
+        <BillingSuccessBanner
+          conversionValue={billingConversionValue}
+          purchasedPlanSlug={billingPurchasedPlan ?? undefined}
+        />
+      </Suspense>
       <div className="flex-1">
         <InvestCalcPage
           key={requestedSavedDealId ?? "new-analysis"}

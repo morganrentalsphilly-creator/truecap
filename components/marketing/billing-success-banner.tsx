@@ -5,19 +5,13 @@
  * acknowledgment + entitlement self-heal.
  *
  * Stripe checkout's success_url points at
- * `/?billing=success&session_id={CHECKOUT_SESSION_ID}` (app/actions/
- * billing.ts) so a new subscriber lands back on the calculator with
- * their auto-saved draft + welcome-back banner — and completes the save
- * they paid for — instead of the old /profile form.
+ * `/dashboard/new?billing=success&session_id={CHECKOUT_SESSION_ID}`
+ * (app/actions/billing.ts) so a new subscriber lands back in the signed-in
+ * analyzer with the app shell still available.
  *
- * Mounted on BOTH homepage variants (they never render together):
- *  - app/page.tsx (STATIC): wrapped in <Suspense>. useSearchParams()
- *    reads the browser URL, so the billing params are seen even though
- *    the HTML is prerendered without them, and the page stays static.
- *  - app/home-authed/page.tsx (DYNAMIC — proxy.ts rewrites "/" here for
- *    signed-in users, i.e. every real post-checkout landing since
- *    checkout requires sign-in): the server resolves `conversionValue`
- *    (plan list price from the Stripe session) for value-based bidding.
+ * The normal mount is app/dashboard/new/page.tsx, where the server resolves
+ * `conversionValue` from the user-bound Stripe Session. app/page.tsx retains
+ * a static, fail-closed compatibility mount for legacy return URLs.
  *
  * Behavior when billing=success:
  *  1. Verifies the Checkout Session server-side against Stripe, the signed-in
@@ -66,8 +60,8 @@ const PRO_ACTIVATION_POLL_INTERVAL_MS = 2000;
 const PRO_ACTIVATION_POLL_MAX_ATTEMPTS = 10;
 
 export function BillingSuccessBanner({
-  /** Plan list price (dollars) resolved server-side on /home-authed; the
-   *  static-page mount omits it and the conversion fires with value 0. */
+  /** Plan list price (dollars) resolved server-side on /dashboard/new; the
+   *  legacy static-page mount omits it and the conversion fires with value 0. */
   conversionValue,
   purchasedPlanSlug,
 }: {
@@ -321,7 +315,7 @@ export function BillingSuccessBanner({
       <BillingConversionTracker
         billingStatus={verifiedReturn ? "success" : undefined}
         value={verifiedReturn?.conversionValue}
-        transactionId={verifiedReturn ? sessionId ?? undefined : undefined}
+        transactionId={verifiedReturn ? (sessionId ?? undefined) : undefined}
       />
       {showBanner ? (
         <div role="status" className="mx-auto w-full max-w-6xl px-4 pt-4 sm:px-6">

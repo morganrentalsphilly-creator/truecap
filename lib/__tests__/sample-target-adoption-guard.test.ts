@@ -122,7 +122,9 @@ describe("sample-seeded targets never survive as user adoption", () => {
   });
 
   it("never restores the synthetic demo as the investor's next draft", () => {
-    expect(calculator).toContain("sampleSeededMaoTargetRef.current\n        )");
+    expect(normalizeSource(calculator)).toContain(
+      normalizeSource("sampleSeededMaoTargetRef.current)"),
+    );
     expect(calculator).toContain("const isSyntheticSampleDraft =");
     expect(calculator).toContain("const matchesSyntheticSampleDraft =");
     expect(calculator).toContain("clearCalcDraftRaw();");
@@ -184,14 +186,14 @@ describe("sample-seeded targets never survive as user adoption", () => {
     ).toBe(2);
   });
 
-  it("drops the carried target when forking from the sample", () => {
+  it("re-resolves criteria for every in-flow next deal", () => {
     const fork = sourceSection(
       "const handleAnalyzeAnotherLikeThis = () =>",
       "forkGenerationRef.current += 1",
     );
-    expect(fork).toContain(
-      "const carriedMaoTarget = sampleSeededMaoTargetRef.current\n      ? null\n      : normalizeMaoTarget(analysisMaoTargetRef.current)",
-    );
+    expect(fork).toContain("const carriedMaoTarget = null");
+    expect(fork).toContain("const carriedDecisionBasis = null");
+    expect(fork).toContain("setPreRunCriteriaChoice(null)");
     expect(fork).toContain("sampleSeededMaoTargetRef.current = false");
   });
 

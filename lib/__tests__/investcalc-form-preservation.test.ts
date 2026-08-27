@@ -290,8 +290,8 @@ describe("planStrategyRevert", () => {
 /**
  * A faithful stand-in for handleSelectStrategy's write sequence
  * (components/investcalc/investcalc-page.tsx): snapshot the revertable
- * fields BEFORE any write, apply the play (property type → starter
- * assumptions → template unlink → STR income swap) while recording exactly
+ * fields BEFORE any write, apply the play (property type → optional starter
+ * assumptions/template unlink → STR income swap) while recording exactly
  * which fields were written, then roll the revert bookkeeping forward.
  * "Clear" replays planStrategyRevert against the live form the same way.
  */
@@ -318,21 +318,23 @@ function makeLens(initial: FormBag) {
     type(field: string, value: unknown) {
       form[field] = value;
     },
-    /** A "What's your play?" chip click. */
-    play(play: Play) {
+    /** A confirmed "What's your play?" choice. */
+    play(play: Play, assumptionMode: "keep" | "starter" = "starter") {
       const preWrite = pick();
       const written = new Set<string>();
       if (form.propertyType !== play.propertyType) {
         form.propertyType = play.propertyType;
         written.add("propertyType");
       }
-      for (const [field, value] of Object.entries(play.starter)) {
+      if (assumptionMode === "starter") {
+        for (const [field, value] of Object.entries(play.starter)) {
         form[field] = value;
         written.add(field);
       }
       if (form.templateId) {
         form.templateId = undefined;
         written.add("templateId");
+        }
       }
       if (play.incomeMode === "str") {
         form.monthlyRent = undefined;
@@ -363,6 +365,48 @@ const SHORT_TERM: Play = {
   incomeMode: "str",
   starter: { interestRate: 7, downPaymentPct: 20, vacancyPct: 10, propertyTaxPct: 1.2 },
 };
+
+describe("strategy assumption choice", () => {
+  it("keeps shared assumptions and the linked template by default-safe choice", () => {
+    const lens = makeLens({
+      propertyType: "multi-family",
+      templateId: "my-template",
+      interestRate: 6.25,
+      downPaymentPct: 30,
+      vacancyPct: 3,
+    });
+
+    lens.play(BRRRR, "keep");
+
+    expect(lens.form).toMatchObject({
+      propertyType: "single-family",
+      templateId: "my-template",
+      interestRate: 6.25,
+      downPaymentPct: 30,
+      vacancyPct: 3,
+    });
+  });
+
+  it("applies starter values only after the explicit starter choice", () => {
+    const lens = makeLens({
+      propertyType: "multi-family",
+      templateId: "my-template",
+      interestRate: 6.25,
+      downPaymentPct: 30,
+      vacancyPct: 3,
+    });
+
+    lens.play(BRRRR, "starter");
+
+    expect(lens.form).toMatchObject({
+      propertyType: "single-family",
+      interestRate: 7.5,
+      downPaymentPct: 25,
+      vacancyPct: 6,
+    });
+    expect(lens.form.templateId).toBeUndefined();
+  });
+});
 
 describe("strategy lens — a play the user typed between chips", () => {
   it("keeps a value typed BETWEEN two plays when the second play never writes it", () => {

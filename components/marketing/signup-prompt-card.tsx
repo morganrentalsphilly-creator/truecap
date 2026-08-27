@@ -127,7 +127,7 @@ export function SignupPromptCard({ address, isAuthenticated, onPrepareSaveIntent
         </div>
 
         <Link
-          href="/auth/sign-up?next=/"
+          href="/auth/sign-up?next=/dashboard/new"
           onClick={() => beginSignup("email")}
           className="group inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground transition-colors hover:bg-muted"
         >
@@ -140,7 +140,7 @@ export function SignupPromptCard({ address, isAuthenticated, onPrepareSaveIntent
       <p className="mt-4 border-t border-border/60 pt-3 text-[11px] text-muted-foreground">
         Always free · No card · Already have an account?{" "}
         <Link
-          href="/auth/login?next=/"
+          href="/auth/login?next=/dashboard/new"
           onClick={() => beginSignup("sign_in")}
           className="inline-flex min-h-11 min-w-11 items-center justify-center px-1 font-semibold text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >

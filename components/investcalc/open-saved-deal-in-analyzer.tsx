@@ -1,10 +1,10 @@
 "use client";
 
 /**
- * Open a saved deal in the analyzer. Edit/reopen uses a durable owner-scoped
- * `/dashboard/new?savedDeal=<id>` URL resolved on the authenticated server
- * route, so the
- * analysis survives refresh, history, bookmarks, and another signed-in device.
+ * Open a saved deal in the analyzer. Primary edit/reopen surfaces use a normal
+ * Link to the durable owner-scoped `/dashboard/new?savedDeal=<id>` URL, which
+ * is resolved on the authenticated server route and survives refresh, history,
+ * bookmarks, and another signed-in device.
  *
  * Duplicate/fork remains a NONCE-KEYED handoff: each fork writes its payload to a localStorage
  * key derived from a fresh crypto.randomUUID() and opens the tab at
@@ -15,12 +15,13 @@
  * window.open-created tabs COPY the opener's sessionStorage at creation, so
  * a copy written for open #1 shadows open #2's payload.
  *
- * Extracted from saved-analyses-page-v2.tsx so both My Deals and the deal
- * workspace ([id] page) open the analysis identically. The helper returns an
- * ok-union instead of toasting so each surface keeps its own error UI.
+ * The exported window helper remains for duplicate/re-underwrite flows that
+ * intentionally create a second working context. It returns an ok-union
+ * instead of toasting so each caller keeps its own error UI.
  */
 import { useState } from "react";
-import { ExternalLink, Loader2, RefreshCw } from "lucide-react";
+import Link from "next/link";
+import { Eye, Loader2, PencilLine, RefreshCw } from "lucide-react";
 import { getSavedDealForEditingAction } from "@/app/actions/saved-analyses";
 import { addScenarioAction } from "@/app/actions/scenarios";
 import { useToast } from "@/hooks/use-toast";
@@ -291,9 +292,9 @@ export async function openSavedDealInAnalysisTab(
 }
 
 /**
- * "Open full analysis" button for the deal workspace header — opens the full
- * underwrite (verdict, projections, tax strategy, exit scenarios) in a new
- * tab via the shared handoff above.
+ * "Open full analysis" button for the deal workspace header. This is a normal
+ * same-tab link: opening an existing deal is part of the primary workflow, so
+ * it should preserve Back/history and must not depend on popup permission.
  */
 export function OpenFullAnalysisButton({
   savedDealId,
@@ -303,47 +304,18 @@ export function OpenFullAnalysisButton({
   /** Recorded methodology snapshots open read-only; current analyses can update in place. */
   recorded?: boolean;
 }) {
-  const { toast } = useToast();
-  const [isOpening, setIsOpening] = useState(false);
-
-  const handleClick = () => {
-    if (isOpening) return;
-    // Open synchronously inside the click so popup blockers allow it.
-    const targetWindow = openAnalyzerHandoffWindow();
-    setIsOpening(true);
-    void (async () => {
-      try {
-        const result = await openSavedDealInAnalysisTab(
-          savedDealId,
-          targetWindow,
-        );
-        if (!result.ok) {
-          toast({
-            title: "Could not open saved deal",
-            description: result.message,
-            variant: "destructive",
-          });
-        }
-      } finally {
-        setIsOpening(false);
-      }
-    })();
-  };
-
   return (
-    <button
-      type="button"
-      onClick={handleClick}
-      disabled={isOpening}
-      className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg border border-border bg-background px-3 text-xs font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-60"
+    <Link
+      href={`/dashboard/new?savedDeal=${encodeURIComponent(savedDealId)}`}
+      className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg border border-border bg-background px-3 text-xs font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
-      {isOpening ? (
-        <Loader2 aria-hidden className="size-3.5 animate-spin" />
+      {recorded ? (
+        <Eye aria-hidden className="size-3.5" />
       ) : (
-        <ExternalLink aria-hidden className="size-3.5" />
+        <PencilLine aria-hidden className="size-3.5" />
       )}
       {recorded ? "View recorded analysis" : "Edit assumptions"}
-    </button>
+    </Link>
   );
 }
 

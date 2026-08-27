@@ -188,6 +188,15 @@ test("specialist strategy framing stays visible and usable at 200% mobile zoom",
   await expectContainedInViewport(page, brrrr, 80);
   await expectMinimumTouchTarget(brrrr);
   await brrrr.click();
+  const confirmation = chooser.getByRole("region", {
+    name: "Switch to BRRRR?",
+  });
+  const keepAssumptions = confirmation.getByRole("button", {
+    name: /Keep my assumptions/i,
+  });
+  await expectContainedInViewport(page, keepAssumptions, 80);
+  await expectMinimumTouchTarget(keepAssumptions);
+  await keepAssumptions.click();
 
   const warning = page.getByRole("note");
   await expect(warning).toContainText("BRRRR mode");
@@ -335,7 +344,7 @@ test("anonymous sample reaches the decision-first result with one click", async 
   ).toBeVisible();
   await expect(summary.getByText(/cash flow after reserve/i)).toBeVisible();
   await expect(summary.getByText("Model DSCR", { exact: true })).toBeVisible();
-  const tuneTargets = summary.getByRole("button", { name: /tune targets/i });
+  const tuneTargets = summary.getByRole("button", { name: /tune criteria/i });
   const save = summary.getByRole("button", { name: /^save/i });
   const share = summary.getByRole("button", { name: /^share/i });
   for (const action of [tuneTargets, save, share]) {

@@ -119,7 +119,7 @@ export function AutosaveIndicator({ form }: Props) {
       {isSaving ? (
         <>
           <Loader2 className="size-3 animate-spin" />
-          Saving…
+          Saving draft…
         </>
       ) : saveFailed ? (
         <span className="inline-flex items-center gap-1.5 text-[var(--metric-negative,#dc2626)]">
@@ -129,7 +129,7 @@ export function AutosaveIndicator({ form }: Props) {
       ) : (
         <>
           <Check className="size-3 text-[var(--brand-green)]" />
-          Auto-saved · {relative}
+          Draft saved on this device · {relative}
         </>
       )}
     </span>

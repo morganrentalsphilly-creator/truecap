@@ -69,7 +69,7 @@ describe("free users are never instructed to perform a Pro-only action", () => {
 
   it("the apply-targets instruction renders only for users who can apply", () => {
     expect(summary).toContain(
-      '? canTunePriceCeiling\n                ? "Review or edit the example targets, then apply at least one',
+      '? canTunePriceCeiling\n                ? "Choose at least one criterion to calculate',
     );
     expect(summary).toContain(
       "TrueCap Pro calculates the highest modeled price that still meets rules you choose",
@@ -186,7 +186,9 @@ describe("input-phase traps and mislabels", () => {
     expect(calculator).toContain(
       "activeStrategyKey === null &&\n    !hasPropertyAvailable &&\n    !hasMeaningfulInput &&\n    !form.formState.isDirty",
     );
-    expect(calculator).toContain('onClick={() => void handlePrimaryRunAction()}');
+    expect(calculator).toContain(
+      "onClick={() => void handlePrimaryRunAction()}",
+    );
     expect(calculator).toContain(
       "onTrySample={primaryCtaRunsSample ? handleTrySampleDeal : undefined}",
     );
@@ -280,6 +282,6 @@ describe("Offer Ceiling targets come from the user's own Buy Box", () => {
   it("the not-adopted state points at the Buy Box as the durable answer", () => {
     const summary = read("components/investcalc/focused-decision-summary.tsx");
     expect(summary).toContain("/settings#buy-boxes");
-    expect(summary).toContain("set it once and TrueCap applies it to every");
+    expect(summary).toContain("Save reusable criteria in your");
   });
 });

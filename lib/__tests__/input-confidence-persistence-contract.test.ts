@@ -22,7 +22,7 @@ describe("Input Confidence analyzer persistence contract", () => {
     // from" ledger row) was removed by founder decision 2026-08-17, so the
     // data-confidence badge is the remaining live consumer of restored
     // provenance.
-    expect(analyzer).toContain("buildDataConfidence(liveResultSourceContext.provenance");
+    expect(analyzer.replace(/\s+/g, "")).toContain("buildDataConfidence(liveResultSourceContext.provenance");
   });
 
   it("binds restored source context to the saved address and clears it on forks", () => {

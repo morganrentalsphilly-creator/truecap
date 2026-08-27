@@ -15,6 +15,23 @@ function isSafeLocalPath(path: string): boolean {
   return path.startsWith("/") && !path.startsWith("//");
 }
 
+/** The public homepage is only an anonymous entry surface. Once analysis
+ * authentication succeeds, resume inside the canonical signed-in analyzer so
+ * the stored draft and the share intent are evaluated against the same route. */
+export function resolveShareAuthReturnPath(
+  pathname: string,
+  context: ShareAuthIntentContext,
+): string {
+  const safePath = isSafeLocalPath(pathname) ? pathname : "/";
+  if (
+    context === "analysis" &&
+    (safePath === "/" || safePath === "/home-authed")
+  ) {
+    return "/dashboard/new";
+  }
+  return safePath;
+}
+
 export function serializeShareAuthIntent({
   returnPath,
   context,

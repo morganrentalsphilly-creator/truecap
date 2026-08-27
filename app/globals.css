@@ -1,5 +1,5 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
+@import "tailwindcss";
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -22,6 +22,13 @@
   --accent-foreground: oklch(0.3 0.04 255);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.99 0 0);
+  /* Semantic status colors must exist outside `.dashboard-shell` too: auth,
+     public, and portal surfaces use the corresponding Tailwind utilities. */
+  --success: oklch(0.5 0.16 158);
+  --success-foreground: oklch(0.99 0 0);
+  --warning: oklch(0.78 0.16 75);
+  --warning-foreground: oklch(0.2 0.05 60);
+  --gold: oklch(0.56 0.13 85);
   /* 3.22:1 against white so input/card boundaries remain perceivable. */
   --border: oklch(0.65 0.02 240);
   --input: oklch(0.65 0.02 240);
@@ -48,7 +55,7 @@
   /* Text-safe blue for small labels on --brand-blue-light (4.73:1).
      Keep --brand-blue/--primary unchanged for buttons, icons, and larger type. */
   --brand-blue-text: oklch(0.49 0.18 240);
-  --brand-green: oklch(0.50 0.15 155);
+  --brand-green: oklch(0.5 0.15 155);
   --brand-green-light: oklch(0.95 0.04 155);
   /* One AA-safe orange: 4.63:1 against white for both text and badges. */
   --brand-orange: oklch(0.58 0.18 42);
@@ -58,7 +65,7 @@
      the light tint is 4.69:1; white on the solid badge is 4.63:1. */
   --brand-orange-text: oklch(0.54 0.18 42);
   --brand-orange-solid: oklch(0.58 0.18 42);
-  --metric-positive: oklch(0.50 0.16 155);
+  --metric-positive: oklch(0.5 0.16 155);
   --metric-negative: oklch(0.55 0.22 15);
 }
 
@@ -79,13 +86,18 @@
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.396 0.141 25.723);
   --destructive-foreground: oklch(0.637 0.237 25.331);
+  --success: oklch(0.72 0.16 158);
+  --success-foreground: oklch(0.18 0.03 158);
+  --warning: oklch(0.52 0.14 65);
+  --warning-foreground: oklch(0.98 0.01 75);
+  --gold: oklch(0.8 0.13 85);
   --border: oklch(0.269 0 0);
   --input: oklch(0.269 0 0);
   --ring: oklch(0.439 0 0);
   --chart-1: oklch(0.58 0.16 240);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.70 0.14 195);
+  --chart-4: oklch(0.7 0.14 195);
   --chart-5: oklch(0.645 0.246 16.439);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
@@ -98,8 +110,8 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-sans-variable), 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-mono-variable), 'DM Mono', ui-monospace, monospace;
+  --font-sans: var(--font-sans-variable), "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono-variable), "DM Mono", ui-monospace, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -117,6 +129,7 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
   --color-gold: var(--gold);
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
@@ -204,16 +217,16 @@ textarea,
     position: relative;
   }
   /* Prevent number input spinners on mobile */
-  input[type='number']::-webkit-inner-spin-button,
-  input[type='number']::-webkit-outer-spin-button {
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
     -webkit-appearance: none;
     margin: 0;
   }
-  input[type='number'] {
+  input[type="number"] {
     -moz-appearance: textfield;
   }
   /* Improve tap targets on touch devices */
-  button, [role='button'], input, select, textarea {
+  button, [role="button"], input, select, textarea {
     touch-action: manipulation;
   }
   /* WCAG 2.1 AA interaction baseline. Component variants can be visually
@@ -222,7 +235,7 @@ textarea,
     min-inline-size: 2.75rem !important;
     min-block-size: 2.75rem !important;
   }
-  :where(input:not([type='checkbox']):not([type='radio']):not([type='hidden']), select, textarea) {
+  :where(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]), select, textarea) {
     min-block-size: 2.75rem;
   }
   :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
@@ -384,7 +397,7 @@ textarea,
      "Strong Buy/Buy" pills) clears 4.5:1 on the white dashboard cards (was
      ~2.5:1). Matches the proven-accessible --metric-positive; the only non-text
      uses are faint /30 and /5 tints, so the shift there is imperceptible. */
-  --success: oklch(0.50 0.16 158);
+  --success: oklch(0.5 0.16 158);
   --success-foreground: oklch(0.99 0 0);
   --warning: oklch(0.78 0.16 75);
   --warning-foreground: oklch(0.2 0.05 60);
@@ -415,7 +428,7 @@ textarea,
   --ai-insights-bg: linear-gradient(135deg, oklch(0.99 0.005 260), oklch(0.97 0.02 280));
   /* Compare page xl background (previously a hardcoded light gradient). */
   --compare-surface: radial-gradient(circle at top right, rgba(0, 112, 196, 0.08), transparent 32%), linear-gradient(180deg, #f8fbff, #eef4f8);
-  font-family: var(--font-sans-variable), 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans-variable), "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
 }
 
 /* The mobile nav sheet is portaled OUTSIDE .dashboard-shell and can't
@@ -427,7 +440,7 @@ textarea,
   --sidebar-accent-foreground: oklch(0.99 0 0);
   --sidebar-border: oklch(0.28 0.04 262);
   --gradient-sidebar: linear-gradient(180deg, oklch(0.2 0.05 262), oklch(0.15 0.04 260));
-  font-family: var(--font-sans-variable), 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans-variable), "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
 }
 
 /* The dashboard is intentionally ALWAYS LIGHT. It shares the marketing /
@@ -475,7 +488,7 @@ textarea,
 .tc-delay-2 { animation-delay: 0.12s; }
 .tc-delay-3 { animation-delay: 0.18s; }
 .tc-delay-4 { animation-delay: 0.24s; }
-.tc-delay-5 { animation-delay: 0.30s; }
+.tc-delay-5 { animation-delay: 0.3s; }
 
 /* Skeleton shimmer (taste-skill loading state) — a soft sweep across
    placeholder boxes instead of a flat pulse. Degrades safely: the global

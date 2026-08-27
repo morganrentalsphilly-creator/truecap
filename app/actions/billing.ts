@@ -90,7 +90,7 @@ function buildSubscriptionCheckoutSessionParams(args: {
       ? [{ coupon: intent.stripe_discount_coupon_id }]
       : undefined,
     allow_promotion_codes: intent.stripe_discount_coupon_id ? undefined : true,
-    success_url: `${siteUrl}/?billing=success&session_id={CHECKOUT_SESSION_ID}`,
+    success_url: `${siteUrl}/dashboard/new?billing=success&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${siteUrl}/pricing?billing=checkout_cancelled#plans`,
     metadata: {
       checkout_intent_id: intent.id,
