@@ -644,6 +644,54 @@ test("anonymous sample reaches the decision-first result with one click", async 
   await expectNoHorizontalOverflow(page);
 });
 
+test("next deal confirms the reset, clears property facts, and keeps reusable assumptions", async ({
+  page,
+}) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+
+  const acceptCookies = page.getByRole("button", { name: /accept all/i });
+  if (await acceptCookies.isVisible()) await acceptCookies.click();
+
+  await page.getByRole("button", { name: /view a sample decision/i }).click();
+  const nextDeal = page.getByRole("button", {
+    name: "Next deal · keep assumptions",
+    exact: true,
+  });
+  await expect(nextDeal).toBeVisible({ timeout: 20_000 });
+
+  let confirmationMessage = "";
+  page.once("dialog", async (dialog) => {
+    confirmationMessage = dialog.message();
+    await dialog.accept();
+  });
+  await nextDeal.click();
+
+  expect(confirmationMessage).toContain("Analyze another property?");
+  await expect(
+    page.getByRole("heading", {
+      level: 2,
+      name: "Buy & Hold Underwriting",
+    }),
+  ).toBeVisible();
+  const address = page.getByLabel("Property Address", { exact: true });
+  await expect(address).toHaveValue("");
+  await expect(address).toBeFocused();
+  await expect(
+    page.getByLabel("Price to analyze", { exact: true }),
+  ).toHaveValue("");
+  await expect(
+    page.getByLabel("Expected gross monthly rent", { exact: true }),
+  ).toHaveValue("");
+  await expect(
+    page.getByRole("button", {
+      name: /20% down · 6\.6% interest · 30 years/i,
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Reusable assumptions kept", { exact: true }),
+  ).toBeVisible();
+});
+
 test("public homepage and pricing have no serious WCAG 2.1 AA violations", async ({
   page,
 }) => {
