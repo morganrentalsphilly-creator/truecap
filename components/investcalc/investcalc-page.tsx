@@ -4636,11 +4636,13 @@ export function InvestCalcPage({
               /* unavailable tab storage — no resumable share intent */
             }
           }
-          const isSyntheticSampleDraft =
+          const matchesSyntheticSampleDraft =
             restoredAnalyzerStrategyKey === SAMPLE_DEAL_FIXTURE.strategyKey &&
             formSnapshotForCompare(normalized) ===
               formSnapshotForCompare(sampleValues) &&
-            pendingTargetMatchesSample &&
+            pendingTargetMatchesSample;
+          const isSyntheticSampleDraft =
+            matchesSyntheticSampleDraft &&
             !resumesPendingSaveAfterAuth &&
             !resumesPendingShareAfterAuth;
           if (isSyntheticSampleDraft) {
@@ -4741,6 +4743,21 @@ export function InvestCalcPage({
           if (resumesPendingSaveAfterAuth) {
             autoSaveAfterAuthRef.current = true;
             setIsAutoSaveResuming(true);
+            // The guest already chose Save after seeing a completed result.
+            // Authentication can add Pro capabilities, but it must not turn
+            // that completed free screen into a new, blocking target-setup
+            // task. Resume the exact kind of run they left: the synthetic
+            // sample keeps its fixture criteria; a real targetless screen
+            // remains targetless and saves automatically.
+            if (matchesSyntheticSampleDraft) {
+              pendingSampleRunRef.current = true;
+              pendingSamplePreviewRef.current = true;
+            } else if (
+              !pendingMaoTarget ||
+              restoredDecisionBinding.needsReview
+            ) {
+              explicitTargetlessRunRef.current = true;
+            }
             toast({
               title: "Welcome back — saving your deal",
               description: addr
@@ -4773,6 +4790,20 @@ export function InvestCalcPage({
                 currentPath: window.location.pathname,
               });
               if (shareIntent?.context === "analysis") {
+                // Share is the same continuity contract as Save: sign-in is
+                // authorization, not permission to replace the completed
+                // result with a target-setup dead end. The sample reruns with
+                // its fixture criteria; a real targetless screen stays
+                // targetless for this one resumed action.
+                if (matchesSyntheticSampleDraft) {
+                  pendingSampleRunRef.current = true;
+                  pendingSamplePreviewRef.current = true;
+                } else if (
+                  !pendingMaoTarget ||
+                  restoredDecisionBinding.needsReview
+                ) {
+                  explicitTargetlessRunRef.current = true;
+                }
                 toast({
                   title: "Welcome back — your analysis is ready to share",
                   description: addr
@@ -5102,9 +5133,10 @@ export function InvestCalcPage({
     });
     if (
       runPromisesOfferCeiling &&
+      !isPendingSampleRun &&
       (!analysisMaoTargetRef.current ||
         decisionBasisNeedsReview ||
-        (sampleSeededMaoTargetRef.current && !isPendingSampleRun)) &&
+        sampleSeededMaoTargetRef.current) &&
       !explicitlyTargetless
     ) {
       toast({

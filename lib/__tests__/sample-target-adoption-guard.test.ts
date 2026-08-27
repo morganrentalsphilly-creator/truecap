@@ -124,6 +124,7 @@ describe("sample-seeded targets never survive as user adoption", () => {
   it("never restores the synthetic demo as the investor's next draft", () => {
     expect(calculator).toContain("sampleSeededMaoTargetRef.current\n        )");
     expect(calculator).toContain("const isSyntheticSampleDraft =");
+    expect(calculator).toContain("const matchesSyntheticSampleDraft =");
     expect(calculator).toContain("clearCalcDraftRaw();");
     expect(calculator).toContain(
       "A synthetic sample must never become the default starting",
@@ -152,7 +153,7 @@ describe("sample-seeded targets never survive as user adoption", () => {
       "// Warm the dynamic AnalysisDashboard chunk",
     );
     expect(submitGate).toContain("sampleSeededMaoTargetRef.current");
-    expect(submitGate).toContain("!isPendingSampleRun");
+    expect(submitGate).toContain("!isPendingSampleRun &&");
 
     const visibleGate = sourceSection(
       "const hasAdoptedAnalysisTarget = Boolean(",
@@ -166,6 +167,22 @@ describe("sample-seeded targets never survive as user adoption", () => {
       "const baseline = lastComputedFormJsonRef.current",
     );
     expect(recompute).toContain("if (pendingSampleRunRef.current) return");
+  });
+
+  it("resumes an already-requested Save or Share without a new criteria dead end", () => {
+    const restore = sourceSection(
+      "const resumesPendingSaveAfterAuth =",
+      "// Don't auto-calculate - restoring inputs is the contract",
+    );
+    expect(restore).toContain("if (matchesSyntheticSampleDraft) {");
+    expect(restore).toContain("pendingSampleRunRef.current = true");
+    expect(restore).toContain("explicitTargetlessRunRef.current = true");
+    expect(restore.match(/pendingSampleRunRef\.current = true/g)?.length).toBe(
+      2,
+    );
+    expect(
+      restore.match(/explicitTargetlessRunRef\.current = true/g)?.length,
+    ).toBe(2);
   });
 
   it("drops the carried target when forking from the sample", () => {

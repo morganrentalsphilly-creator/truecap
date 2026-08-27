@@ -35,7 +35,6 @@ import {
   SocialProof,
 } from "@/components/marketing/landing-sections";
 import { CaseStudiesSection } from "@/components/marketing/case-study";
-import { OnboardingTour } from "@/components/marketing/onboarding-tour";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { TrackLandingView } from "@/components/analytics/track-landing-view";
 import { StickyConversionBar } from "@/components/marketing/sticky-conversion-bar";
@@ -163,7 +162,6 @@ export default async function AuthedHome({
     canUseMaxOffer,
     canUseSensitivity,
     canUseStrategies,
-    canUseBuyBox,
   } = await getAnalyzerCapabilities(supabase, user);
 
   // (canUseShareLinks was removed: share links are deliberately FREE for
@@ -234,17 +232,10 @@ export default async function AuthedHome({
       )}
       {/* Sticky scroll-activated CTA bar for cold visitors only. Renders
           nothing for auth'd users. */}
-      {/* Onboarding tour — only fires for signed-in users with zero
-          saved deals (the clear first-time-signup signal). 3-step
-          floating card that walks them through Try Sample → Save →
-          See Pro. Dismissible, persisted to localStorage. */}
-      {user && (
-        <OnboardingTour
-          isAuthenticated={true}
-          savedDealCount={savedDealCount ?? 0}
-          canUseBuyBox={canUseBuyBox}
-        />
-      )}
+      {/* The analyzer itself now provides progressive, contextual guidance.
+          Do not place a first-run tour over its controls: the former floating
+          five-step card obscured and intercepted the primary Calculate action
+          for exactly the zero-deal users who needed the clearest first run. */}
       {/* Engagement signal pump for Google Ads — fires dataLayer scroll
           depth events so the bidding algorithm has something to
           optimize against beyond rare conversions. */}
