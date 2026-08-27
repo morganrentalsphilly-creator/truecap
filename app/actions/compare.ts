@@ -1,6 +1,15 @@
 "use server";
 
 import { cookies } from "next/headers";
+import {
+  recomputeSavedDealVerdict,
+  toRecomputedSavedAnalysisSnapshot,
+} from "@/lib/recompute-saved-deal-verdict";
+import {
+  isLegacySavedMethodologyVersion,
+  resolveSavedAnalysisSnapshot,
+} from "@/lib/saved-analysis-methodology";
+import { areMethodologyCohortsComparable } from "@/lib/compare-metrics";
 import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -10,6 +19,86 @@ const MAX_COMPARE_ITEMS = 4;
 type CompareActionResult =
   | { ok: true; remainingIds?: string[] }
   | { ok: false; code: "SIGN_IN_REQUIRED" | "ENTITLEMENT_REQUIRED" | "LIMIT_EXCEEDED" | "INVALID_SELECTION" | "SERVER_ERROR"; message: string };
+
+type CompareMethodologyRow = {
+  id: string;
+  methodology_version: string | null;
+  result_snapshot: unknown;
+  form_snapshot: unknown;
+};
+
+function compareMethodologyCohort(row: CompareMethodologyRow): string | null {
+  const recomputed = recomputeSavedDealVerdict(row.form_snapshot);
+  const resolution = resolveSavedAnalysisSnapshot({
+    methodologyVersion: row.methodology_version,
+    resultSnapshot: row.result_snapshot,
+    recomputedSnapshot: recomputed
+      ? toRecomputedSavedAnalysisSnapshot(recomputed)
+      : undefined,
+  });
+
+  if (resolution.usesRecordedSnapshot) {
+    if (isLegacySavedMethodologyVersion(resolution.storedMethodologyVersion)) {
+      // Unknown unversioned snapshots cannot establish that they were produced
+      // by the same formulas. Make each one explicitly unsafe until it is
+      // re-underwritten instead of treating "legacy" as a shared cohort.
+      return `unavailable:legacy-unversioned:${row.id}`;
+    }
+    return `recorded:${resolution.storedMethodologyVersion ?? "legacy-unversioned"}`;
+  }
+  if (resolution.didRecompute || resolution.mode === "current-computation") {
+    return `computed:${resolution.currentMethodologyVersion}`;
+  }
+  return null;
+}
+
+async function getCompareSelectionError(
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  userId: string,
+  selectedIds: string[]
+): Promise<Extract<CompareActionResult, { ok: false }> | null> {
+  const { data, error } = await supabase
+    .from("saved_analyses")
+    .select("id, methodology_version, result_snapshot, form_snapshot")
+    .eq("user_id", userId)
+    .is("deleted_at", null)
+    .eq("is_completed", false)
+    .eq("is_archived", false)
+    .in("id", selectedIds);
+
+  if (error) {
+    return {
+      ok: false,
+      code: "SERVER_ERROR",
+      message: "Could not prepare comparison.",
+    };
+  }
+
+  const rows = (data ?? []) as unknown as CompareMethodologyRow[];
+  if (rows.length !== selectedIds.length) {
+    return {
+      ok: false,
+      code: "INVALID_SELECTION",
+      message: "Some selected deals are no longer available.",
+    };
+  }
+
+  const cohorts = rows.map(compareMethodologyCohort);
+  if (!areMethodologyCohortsComparable(cohorts)) {
+    const hasUnavailableMethodology = cohorts.some(
+      (cohort) => !cohort || cohort.startsWith("unavailable:")
+    );
+    return {
+      ok: false,
+      code: "INVALID_SELECTION",
+      message: hasUnavailableMethodology
+        ? "At least one selected deal does not have a complete comparable calculation record. Re-underwrite it first."
+        : "Selected deals use different calculation methods. Re-underwrite them under one method before comparing.",
+    };
+  }
+
+  return null;
+}
 
 function uniqueIds(ids: string[]): string[] {
   return [...new Set(ids.map((id) => id.trim()).filter(Boolean))];
@@ -75,22 +164,12 @@ export async function startCompareAction(ids: string[]): Promise<CompareActionRe
     return { ok: false, code: "ENTITLEMENT_REQUIRED", message: "Compare is not available for your current plan." };
   }
 
-  const { count, error } = await supabase
-    .from("saved_analyses")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", user.id)
-    .is("deleted_at", null)
-    .eq("is_completed", false)
-    .eq("is_archived", false)
-    .in("id", selectedIds);
-
-  if (error) {
-    return { ok: false, code: "SERVER_ERROR", message: "Could not prepare comparison." };
-  }
-
-  if ((count ?? 0) !== selectedIds.length) {
-    return { ok: false, code: "INVALID_SELECTION", message: "Some selected deals are no longer available." };
-  }
+  const selectionError = await getCompareSelectionError(
+    supabase,
+    user.id,
+    selectedIds
+  );
+  if (selectionError) return selectionError;
 
   await setCompareCookie(selectedIds);
   return { ok: true };
@@ -127,22 +206,12 @@ export async function addDealToCompareAction(id: string): Promise<CompareActionR
     return { ok: false, code: "ENTITLEMENT_REQUIRED", message: "Compare is not available for your current plan." };
   }
 
-  const { count, error } = await supabase
-    .from("saved_analyses")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", user.id)
-    .is("deleted_at", null)
-    .eq("is_completed", false)
-    .eq("is_archived", false)
-    .in("id", selectedIds);
-
-  if (error) {
-    return { ok: false, code: "SERVER_ERROR", message: "Could not prepare comparison." };
-  }
-
-  if ((count ?? 0) !== selectedIds.length) {
-    return { ok: false, code: "INVALID_SELECTION", message: "Some selected deals are no longer available." };
-  }
+  const selectionError = await getCompareSelectionError(
+    supabase,
+    user.id,
+    selectedIds
+  );
+  if (selectionError) return selectionError;
 
   await setCompareCookie(selectedIds);
   return { ok: true };
@@ -206,6 +275,9 @@ export async function compareScenariosAction(dealId: string): Promise<CompareAct
   if (ids.length < 2) {
     return { ok: false, code: "INVALID_SELECTION", message: "Add another scenario before comparing." };
   }
+
+  const selectionError = await getCompareSelectionError(supabase, user.id, ids);
+  if (selectionError) return selectionError;
 
   await setCompareCookie(ids);
   return { ok: true };

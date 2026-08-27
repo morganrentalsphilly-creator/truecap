@@ -76,13 +76,13 @@ describe("free users are never instructed to perform a Pro-only action", () => {
     );
   });
 
-  it("tune-capable users get a one-click explicit apply for the example targets", () => {
-    const applyBlock = sourceSection(
-      summary,
-      "{!targetAdopted && canTunePriceCeiling && !targetBlocked ? (",
-      "Apply the example targets",
+  it("tune-capable users get one validated explicit Apply surface", () => {
+    expect(summary).not.toContain("Apply the example targets");
+    expect(summary).toContain("onClick={applyTargetDraft}");
+    expect(summary).toContain(
+      'targetAdopted ? "Update criteria" : "Apply criteria"',
     );
-    expect(applyBlock).toContain("onClick={onAdoptTarget}");
+    expect(summary).toContain("targetDraftInvalid ||");
   });
 
   it("internal provenance slugs stay out of the UI labels", () => {
@@ -184,11 +184,9 @@ describe("input-phase traps and mislabels", () => {
 
   it("the primary CTA only becomes the sample launcher on a pristine form", () => {
     expect(calculator).toContain(
-      "activeStrategyKey === null && !hasPropertyAvailable && !hasMeaningfulInput",
+      "activeStrategyKey === null &&\n    !hasPropertyAvailable &&\n    !hasMeaningfulInput &&\n    !form.formState.isDirty",
     );
-    expect(calculator).toContain(
-      'type={primaryCtaRunsSample ? "button" : "submit"}',
-    );
+    expect(calculator).toContain('onClick={() => void handlePrimaryRunAction()}');
     expect(calculator).toContain(
       "onTrySample={primaryCtaRunsSample ? handleTrySampleDeal : undefined}",
     );
@@ -274,8 +272,9 @@ describe("Offer Ceiling targets come from the user's own Buy Box", () => {
     // client's rules could drive a personal analysis (and a user whose only
     // box was client-scoped got "Set targets first" forever).
     const card = read("components/investcalc/buy-box-verdict-card.tsx");
-    expect(card).toContain("boxesForDealClient(result.boxes, null)");
-    expect(card).toContain('boxesForDealClient,');
+    expect(card).toContain("boxesForPersonalAnalyzerStrategy(");
+    expect(card).toContain("analyzerStrategyKey");
+    expect(card).toContain("boxesForPersonalAnalyzerStrategy,");
   });
 
   it("the not-adopted state points at the Buy Box as the durable answer", () => {

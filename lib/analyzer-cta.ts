@@ -17,3 +17,20 @@ export function getAnalyzerCta(input: {
   if (input.canCalculateMaxOffer) return "Calculate my Offer Ceiling";
   return "Analyze this property free";
 }
+
+/**
+ * Only the default/Buy & Hold and Wholesale workflows promise an Offer
+ * Ceiling as the primary run outcome. Specialist workflows have their own
+ * inputs and outputs and must never be blocked by a rental-target gate.
+ */
+export function analysisRunPromisesOfferCeiling(input: {
+  canCalculateMaxOffer: boolean;
+  strategyKey: string | null | undefined;
+}): boolean {
+  return (
+    input.canCalculateMaxOffer &&
+    (input.strategyKey == null ||
+      input.strategyKey === "buy-hold" ||
+      input.strategyKey === "wholesale-mao")
+  );
+}

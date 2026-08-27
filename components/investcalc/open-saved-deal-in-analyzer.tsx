@@ -2,7 +2,8 @@
 
 /**
  * Open a saved deal in the analyzer. Edit/reopen uses a durable owner-scoped
- * `/?savedDeal=<id>` URL resolved on the authenticated server route, so the
+ * `/dashboard/new?savedDeal=<id>` URL resolved on the authenticated server
+ * route, so the
  * analysis survives refresh, history, bookmarks, and another signed-in device.
  *
  * Duplicate/fork remains a NONCE-KEYED handoff: each fork writes its payload to a localStorage
@@ -30,6 +31,11 @@ import {
 } from "@/lib/offer-ceiling-contract";
 import { isReleasedUnderwritingSnapshot } from "@/lib/underwriting-model-release";
 import { normalizeAnalyzerStrategyKey } from "@/lib/analyzer-strategy-persistence";
+import {
+  normalizeOfferCeilingDecisionBasis,
+  OFFER_CEILING_DECISION_BASIS_FIELD,
+  type OfferCeilingDecisionBasis,
+} from "@/lib/offer-ceiling-decision-basis";
 
 /** Base of the nonce-keyed edit handoff (`<base>::<nonce>`), and the legacy
  *  shared key a previous deploy's tabs may still hold. Must match
@@ -137,12 +143,26 @@ function normalizeSavedDealHandoffTarget(
 ): {
   maxOfferTarget: ReturnType<typeof normalizeMaoTarget>;
   maxOfferTargetSource: OfferCeilingTargetSource;
+  offerCeilingDecisionBasis: OfferCeilingDecisionBasis | null;
   resultSnapshot: Record<string, unknown>;
 } {
   const maxOfferTarget = normalizeMaoTarget(resultSnapshot.maxOfferTarget);
-  const maxOfferTargetSource =
+  let maxOfferTargetSource =
     normalizeOfferCeilingTargetSource(resultSnapshot.maxOfferTargetSource) ??
     "selected-targets";
+  const offerCeilingDecisionBasis = maxOfferTarget
+    ? normalizeOfferCeilingDecisionBasis(
+        resultSnapshot[OFFER_CEILING_DECISION_BASIS_FIELD],
+        { target: maxOfferTarget, source: maxOfferTargetSource },
+      )
+    : null;
+  if (
+    maxOfferTarget &&
+    maxOfferTargetSource === "buy-box" &&
+    !offerCeilingDecisionBasis
+  ) {
+    maxOfferTargetSource = "selected-targets";
+  }
   const normalizedResultSnapshot = { ...resultSnapshot };
   if (maxOfferTarget) {
     normalizedResultSnapshot.maxOfferTarget = maxOfferTarget;
@@ -154,6 +174,7 @@ function normalizeSavedDealHandoffTarget(
   return {
     maxOfferTarget,
     maxOfferTargetSource,
+    offerCeilingDecisionBasis,
     resultSnapshot: normalizedResultSnapshot,
   };
 }
@@ -197,7 +218,11 @@ export async function duplicateSavedDealInAnalyzer(
       message: "This underwriting model is not available yet.",
     };
   }
-  const { maxOfferTarget, maxOfferTargetSource } =
+  const {
+    maxOfferTarget,
+    maxOfferTargetSource,
+    offerCeilingDecisionBasis,
+  } =
     normalizeSavedDealHandoffTarget(result.resultSnapshot);
   const analyzerStrategyKey = normalizeAnalyzerStrategyKey(
     result.resultSnapshot.analyzerStrategyKey,
@@ -209,12 +234,15 @@ export async function duplicateSavedDealInAnalyzer(
       templateFallback: result.templateFallback,
       ...(analyzerStrategyKey ? { analyzerStrategyKey } : {}),
       ...(maxOfferTarget ? { maxOfferTarget, maxOfferTargetSource } : {}),
+      ...(offerCeilingDecisionBasis
+        ? { offerCeilingDecisionBasis }
+        : {}),
     });
   } catch {
     targetWindow.close();
     return { ok: false, message: HANDOFF_STORAGE_BLOCKED_MESSAGE };
   }
-  const href = `/?${DEAL_DUPLICATE_HANDOFF_PARAM}=${nonce}`;
+  const href = `/dashboard/new?${DEAL_DUPLICATE_HANDOFF_PARAM}=${nonce}`;
   try {
     if (targetWindow.closed) throw new Error("Target tab closed");
     targetWindow.location.href = href;
@@ -248,7 +276,7 @@ export async function openSavedDealInAnalysisTab(
   // The saved row ID is not secret; the authenticated server route performs
   // the ownership check before returning any data. A stable URL is durable
   // across refresh, history, bookmarks, and another signed-in device.
-  const href = `/?savedDeal=${encodeURIComponent(id)}`;
+  const href = `/dashboard/new?savedDeal=${encodeURIComponent(id)}`;
   try {
     if (targetWindow.closed) throw new Error("Target tab closed");
     targetWindow.location.href = href;

@@ -15,11 +15,12 @@
  * uses); nothing here computes a price.
  */
 
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowUpDown, ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { DashboardDeal } from "@/lib/dashboard-deal-mapping";
+import { sortDealsWithinMethodologyCohorts } from "@/lib/dashboard-deal-mapping";
 import { Verdict } from "@/components/investcalc/verdict";
 
 // No timestamp exists on DashboardDeal, so there is no "recently updated"
@@ -89,23 +90,40 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
 
   const sorted = useMemo(() => {
     const rows = [...deals];
+    if (sortKey !== "address") {
+      const valueFor = (deal: DashboardDeal) => {
+        if (sortKey === "score") return deal.score;
+        if (sortKey === "maxOffer") return deal.maxOffer ?? null;
+        return gapOf(deal);
+      };
+      return sortDealsWithinMethodologyCohorts(
+        rows,
+        valueFor,
+        desc ? "desc" : "asc"
+      );
+    }
     rows.sort((a, b) => {
       const dir = desc ? -1 : 1;
       switch (sortKey) {
         case "address":
           return dir * (a.address ?? "").localeCompare(b.address ?? "");
-        case "score":
-          return dir * ((a.score ?? -1) - (b.score ?? -1));
-        case "maxOffer":
-          return dir * ((a.maxOffer ?? -1) - (b.maxOffer ?? -1));
-        case "gap":
-          return dir * ((gapOf(a) ?? Number.NEGATIVE_INFINITY) - (gapOf(b) ?? Number.NEGATIVE_INFINITY));
         default:
-          return dir * ((gapOf(a) ?? Number.NEGATIVE_INFINITY) - (gapOf(b) ?? Number.NEGATIVE_INFINITY));
+          return 0;
       }
     });
     return rows;
   }, [deals, sortKey, desc]);
+
+  const methodologySensitiveSort = sortKey !== "address";
+  const hasMixedMethodologies = useMemo(
+    () =>
+      new Set(
+        deals.map(
+          (deal) => deal.methodologyComparisonKey ?? "current:unknown"
+        )
+      ).size > 1,
+    [deals]
+  );
 
   if (deals.length === 0) return null;
 
@@ -140,6 +158,13 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
         </Link>
       </div>
 
+      {methodologySensitiveSort && hasMixedMethodologies ? (
+        <p className="border-t border-border bg-muted/30 px-4 py-2 text-xs text-muted-foreground sm:px-5">
+          Current and recorded model versions are grouped, then sorted only
+          within their own version.
+        </p>
+      ) : null}
+
       {/* Phones and tablets get real deal cards rather than a clipped six-column
           table. The same `sorted` array powers both layouts, so changing the
           compact sort controls preserves the exact desktop ordering contract. */}
@@ -173,12 +198,27 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
         </div>
 
         <div className="space-y-3 p-3 sm:p-4">
-          {sorted.map((deal) => {
+          {sorted.map((deal, dealIndex) => {
             const gap = gapOf(deal);
             const dealHeadingId = `dashboard-deal-${deal.id}`;
+            const startsMethodologyCohort =
+              methodologySensitiveSort &&
+              (dealIndex === 0 ||
+                sorted[dealIndex - 1]?.methodologyComparisonKey !==
+                  deal.methodologyComparisonKey);
             return (
+              <Fragment key={deal.id}>
+              {startsMethodologyCohort ? (
+                <div className="rounded-xl border border-border bg-muted/40 px-3 py-2">
+                  <p className="text-xs font-bold text-foreground">
+                    {deal.methodologyGroupLabel ?? "Current underwriting"}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Sorted only within this model version.
+                  </p>
+                </div>
+              ) : null}
               <article
-                key={deal.id}
                 aria-labelledby={dealHeadingId}
                 className="rounded-xl border border-border bg-background p-4 shadow-sm"
               >
@@ -191,6 +231,18 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                   <span className="min-w-0 break-words">{deal.address ?? "Untitled deal"}</span>
                   <ArrowUpRight aria-hidden className="size-4 shrink-0" />
                 </Link>
+                {deal.methodologyLabel ? (
+                  <span
+                    className="mt-1 inline-flex rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold text-muted-foreground"
+                    title={
+                      deal.methodologyIsCurrent === false
+                        ? `${deal.methodologyLabel}. Re-underwrite before comparing with the current model.`
+                        : deal.methodologyLabel
+                    }
+                  >
+                    {deal.methodologyLabel}
+                  </span>
+                ) : null}
 
                 <dl className="mt-3 grid grid-cols-2 gap-3">
                   <div className="rounded-lg bg-muted/30 p-3">
@@ -210,13 +262,15 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                     </dd>
                   </div>
                   {deal.maxOffer != null && deal.maxOfferBasisLabel ? (
-                    <div className="col-span-2 rounded-lg border border-primary/15 bg-[var(--brand-blue-light)] p-3">
-                      <dt className="text-[10px] font-bold uppercase tracking-wider text-primary">
-                        Offer Ceiling criteria
-                      </dt>
-                      <dd className="mt-1 break-words text-xs leading-relaxed text-foreground">
-                        {deal.maxOfferBasisLabel}
-                      </dd>
+                    <div className="col-span-2">
+                      <details className="text-xs text-muted-foreground">
+                        <summary className="inline-flex min-h-11 cursor-pointer items-center font-semibold text-primary underline-offset-2 hover:underline">
+                          View exact Offer Ceiling criteria
+                        </summary>
+                        <p className="mt-1 break-words leading-relaxed">
+                          Criteria: {deal.maxOfferBasisLabel}
+                        </p>
+                      </details>
                     </div>
                   ) : null}
                   <div className="rounded-lg border border-border p-3">
@@ -260,6 +314,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                   )}
                 </div>
               </article>
+              </Fragment>
             );
           })}
         </div>
@@ -289,8 +344,26 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
           <tbody>
             {sorted.map((deal, i) => {
               const gap = gapOf(deal);
+              const startsMethodologyCohort =
+                methodologySensitiveSort &&
+                (i === 0 ||
+                  sorted[i - 1]?.methodologyComparisonKey !==
+                    deal.methodologyComparisonKey);
               return (
-                <tr key={deal.id} className={i % 2 === 0 ? "bg-card" : "bg-muted/20"}>
+                <Fragment key={deal.id}>
+                {startsMethodologyCohort ? (
+                  <tr className="border-y border-border bg-muted/40">
+                    <td colSpan={6} className="px-3 py-2 text-left">
+                      <span className="text-xs font-bold text-foreground">
+                        {deal.methodologyGroupLabel ?? "Current underwriting"}
+                      </span>
+                      <span className="ml-2 text-[11px] text-muted-foreground">
+                        Sorted only within this model version
+                      </span>
+                    </td>
+                  </tr>
+                ) : null}
+                <tr className={i % 2 === 0 ? "bg-card" : "bg-muted/20"}>
                   <td className="max-w-[240px] px-3 py-2.5">
                     <Link
                       href={`/dashboard/saved-analyses/${deal.id}`}
@@ -299,15 +372,32 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                     >
                       {deal.address ?? "Untitled deal"}
                     </Link>
+                    {deal.methodologyLabel ? (
+                      <span
+                        className="mt-0.5 inline-flex rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold text-muted-foreground"
+                        title={
+                          deal.methodologyIsCurrent === false
+                            ? `${deal.methodologyLabel}. Re-underwrite before comparing with the current model.`
+                            : deal.methodologyLabel
+                        }
+                      >
+                        {deal.methodologyLabel}
+                      </span>
+                    ) : null}
                   </td>
                   <td className="px-3 py-2.5 text-right text-foreground">
                     <div className="whitespace-nowrap font-mono font-bold tabular-nums">
                       {money(deal.maxOffer)}
                     </div>
                     {deal.maxOffer != null && deal.maxOfferBasisLabel ? (
-                      <div className="ml-auto mt-0.5 max-w-[220px] text-[10px] leading-tight text-muted-foreground">
-                        Criteria: {deal.maxOfferBasisLabel}
-                      </div>
+                      <details className="ml-auto mt-0.5 max-w-[220px] text-left text-[10px] leading-tight text-muted-foreground">
+                        <summary className="inline-flex min-h-11 cursor-pointer items-center font-semibold text-primary underline-offset-2 hover:underline">
+                          View exact criteria
+                        </summary>
+                        <p className="mt-1">
+                          Criteria: {deal.maxOfferBasisLabel}
+                        </p>
+                      </details>
                     ) : null}
                   </td>
                   <td className="whitespace-nowrap px-3 py-2.5 text-right font-mono tabular-nums text-muted-foreground">
@@ -354,6 +444,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                     {deal.score ?? "—"}
                   </td>
                 </tr>
+                </Fragment>
               );
             })}
           </tbody>

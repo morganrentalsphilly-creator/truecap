@@ -114,7 +114,7 @@ export type DashboardHomeData = {
     } | null;
   } | null;
   /** Explicitly distinguishes a failed full-book read from an empty book. */
-  portfolioAggregateStatus?: "ready" | "unavailable";
+  portfolioAggregateStatus?: "ready" | "unavailable" | "mixed-methodology";
   /**
    * Saved deals whose signal changed at today's 30-yr rate (see
    * lib/rate-watch). Null when the rate is unavailable or nothing changed —
@@ -154,7 +154,8 @@ export type DashboardHomeData = {
    */
   ownedPortfolio?: {
     count: number;
-    monthlyCashFlow: number;
+    /** Null when completed deals span incompatible/unknown calculation records. */
+    monthlyCashFlow: number | null;
     totalEquity: number | null;
     equityGain: number | null;
     /** How many owned deals have a close date driving the equity figures. */
@@ -558,7 +559,11 @@ function getPortfolioTotals(data: DashboardHomeData) {
   // a 20-most-recent sample, and summing a sample silently understated
   // Pipeline Value / Monthly Cash Flow for users with 21+ deals.
   if (data.portfolioAggregates) return data.portfolioAggregates;
-  if (data.portfolioAggregateStatus === "unavailable") return null;
+  if (
+    data.portfolioAggregateStatus === "unavailable" ||
+    data.portfolioAggregateStatus === "mixed-methodology"
+  )
+    return null;
   const valid = data.allDeals.filter((d) => d.purchasePrice != null);
   const totalValue = valid.reduce((s, d) => s + (d.purchasePrice ?? 0), 0);
   const totalCashFlow = data.allDeals.reduce(
@@ -703,19 +708,43 @@ export function DashboardHome({
   // interactions etc.) is pure waste. `data` comes from the server
   // component and is referentially stable per page load.
   const { topDeals, riskReturn, dealComparison, highlights, insights, portfolio, decisionCenter, kpis, pipeline } = useMemo(
-    () => ({
-      topDeals: getTopDeals(data),
-      riskReturn: getRiskReturn(data),
-      dealComparison: getDealComparison(data),
-      highlights: getDecisionHighlights(data),
-      insights: buildDecisionInsights(data.allDeals),
-      portfolio: getPortfolioTotals(data),
-      decisionCenter:
-        data.portfolioAggregateStatus === "unavailable" ? null : getDecisionCenter(data),
-      kpis: data.portfolioAggregateStatus === "unavailable" ? null : getPortfolioKpis(data),
-      pipeline:
-        data.portfolioAggregateStatus === "unavailable" ? null : getPipelineSummary(data),
-    }),
+    () => {
+      // The legacy dashboard modules contain rankings and charts beyond the
+      // focused Your Deals table. When the book spans methodologies, feed those
+      // modules only the current cohort rather than comparing unlike outputs.
+      const comparableData =
+        data.portfolioAggregateStatus === "mixed-methodology"
+          ? {
+              ...data,
+              allDeals: data.allDeals.filter(
+                (deal) => deal.methodologyIsCurrent !== false
+              ),
+              topDeals: data.topDeals.filter(
+                (deal) => deal.methodologyIsCurrent !== false
+              ),
+            }
+          : data;
+      return {
+        topDeals: getTopDeals(comparableData),
+        riskReturn: getRiskReturn(comparableData),
+        dealComparison: getDealComparison(comparableData),
+        highlights: getDecisionHighlights(comparableData),
+        insights: buildDecisionInsights(comparableData.allDeals),
+        portfolio: getPortfolioTotals(data),
+        decisionCenter:
+          data.portfolioAggregateStatus === "unavailable" ||
+          data.portfolioAggregateStatus === "mixed-methodology"
+            ? null
+            : getDecisionCenter(data),
+        kpis:
+          data.portfolioAggregateStatus === "unavailable" ||
+          data.portfolioAggregateStatus === "mixed-methodology"
+            ? null
+            : getPortfolioKpis(data),
+        pipeline:
+          data.portfolioAggregateStatus === "unavailable" ? null : getPipelineSummary(data),
+      };
+    },
     [data]
   );
 
@@ -728,6 +757,8 @@ export function DashboardHome({
   const sampledNote =
     data.portfolioAggregateStatus === "unavailable"
       ? `Showing up to ${data.allDeals.length} recent active deals. Full portfolio totals are temporarily unavailable.`
+      : data.portfolioAggregateStatus === "mixed-methodology"
+        ? "Recorded and current underwriting versions are shown separately; formula-dependent totals and winners are withheld until the recorded deals are re-underwritten."
       : data.portfolioAggregates && data.portfolioAggregates.totalCount > data.allDeals.length
       ? `Showing your ${data.allDeals.length} most recent active deals (of ${data.portfolioAggregates.totalCount}) — totals and Decision Center cover every active deal.`
       : null;
@@ -767,6 +798,8 @@ export function DashboardHome({
         `${buyBoxSummary.passingCount} of your ${buyBoxSummary.evaluatedCount} active deals ${buyBoxSummary.passingCount === 1 ? "meets" : "meet"} your buy box.`
       : data.portfolioAggregateStatus === "unavailable"
         ? "Recent active deals are shown below. Full portfolio totals are temporarily unavailable."
+      : data.portfolioAggregateStatus === "mixed-methodology"
+        ? "Active deals are shown below. Recorded and current underwriting versions are not blended."
       : hasArchivedOrCompleted && portfolio
         ? `Active pipeline: ${portfolio.totalCount} of ${savedTotalCount} saved ${savedTotalCount === 1 ? "deal" : "deals"}.`
         : portfolio
@@ -878,6 +911,29 @@ export function DashboardHome({
             </div>
             <Button asChild variant="outline" className="min-h-11 shrink-0 rounded-xl">
               <Link href="/dashboard" prefetch={false}>Retry totals</Link>
+            </Button>
+          </div>
+        ) : null}
+
+        {data.portfolioAggregateStatus === "mixed-methodology" ? (
+          <div
+            role="status"
+            className="flex flex-col gap-3 rounded-2xl border border-warning/35 bg-warning/10 p-4 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                Recorded and current underwriting stay separate
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                TrueCap will not blend or crown winners across different model
+                versions. Re-underwrite recorded deals before comparing the
+                book as one set.
+              </p>
+            </div>
+            <Button asChild variant="outline" className="min-h-11 shrink-0 rounded-xl">
+              <Link href="/dashboard/saved-analyses" prefetch={false}>
+                Review recorded deals
+              </Link>
             </Button>
           </div>
         ) : null}
@@ -1121,17 +1177,21 @@ export function DashboardHome({
                   <div
                     className={cn(
                       "mt-1 text-lg font-extrabold tabular-nums leading-tight break-words sm:text-2xl",
-                      owned.monthlyCashFlow > 0
+                      owned.monthlyCashFlow != null && owned.monthlyCashFlow > 0
                         ? "text-[var(--metric-positive,#16a34a)]"
-                        : owned.monthlyCashFlow < 0
+                        : owned.monthlyCashFlow != null && owned.monthlyCashFlow < 0
                           ? "text-[var(--metric-negative,#dc2626)]"
                           : "text-foreground"
                     )}
                   >
-                    {formatSignedCurrency(owned.monthlyCashFlow)}
+                    {owned.monthlyCashFlow == null
+                      ? "—"
+                      : formatSignedCurrency(owned.monthlyCashFlow)}
                   </div>
                   <div className="mt-0.5 text-[11px] text-muted-foreground">
-                    ~{formatCurrency(owned.monthlyCashFlow * 12)} / yr, projected
+                    {owned.monthlyCashFlow == null
+                      ? "Different calculation records; re-underwrite to combine."
+                      : `~${formatCurrency(owned.monthlyCashFlow * 12)} / yr, projected`}
                   </div>
                 </div>
               </div>

@@ -1,7 +1,10 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
 import { SAMPLE_DEAL_FIXTURE } from "../lib/sample-deal";
 import { resolveAuthenticatedE2EEnvironment } from "./support/auth-environment";
-import { deleteRegressionDealsByAddress } from "./support/product-flows";
+import {
+  deleteRegressionDealsByAddress,
+  replaceSampleAddressForRegression,
+} from "./support/product-flows";
 
 const authEnvironment = resolveAuthenticatedE2EEnvironment(process.env);
 const authStatePath = "playwright/.auth/internal-test-user.json";
@@ -75,7 +78,7 @@ async function makeSampleAddressUnique(page: Page): Promise<string> {
     .getByRole("button", { name: "Edit assumptions", exact: true })
     .click();
   const form = page.locator('form[data-calc-form="true"]');
-  await form.getByLabel("Property Address").fill(address);
+  await replaceSampleAddressForRegression(page, address);
   // The submit copy is deliberately role-aware (guest, no-property, and Pro
   // users see different truthful labels). Target the stable semantic action
   // instead of coupling this regression to one entitlement's marketing copy.

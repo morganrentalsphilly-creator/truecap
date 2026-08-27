@@ -29,6 +29,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { isRecordedPriceEstimated } from "@/lib/recorded-price-provenance";
 import { createIpRateLimit, getRequestIp } from "@/lib/ip-rate-limit";
 import {
+  maoTargetFingerprint,
   normalizeMaoTarget,
   normalizeMaoTargetForFinancing,
 } from "@/lib/mao-target-editor";
@@ -45,6 +46,11 @@ import {
 } from "@/lib/analyzer-strategy-persistence";
 import { shouldFreezeSavedMethodology } from "@/lib/saved-analysis-methodology";
 import { normalizeExternalOfferCeilingTargetSource } from "@/lib/external-offer-ceiling-provenance";
+import {
+  captureSelectedTargetsDecisionBasis,
+  normalizeOfferCeilingDecisionBasis,
+  OFFER_CEILING_DECISION_BASIS_FIELD,
+} from "@/lib/offer-ceiling-decision-basis";
 
 export type CreatePublicShareResult =
   | { ok: true; url: string }
@@ -98,6 +104,7 @@ export async function createPublicShareAction(
        *  the frozen snapshot can independently preserve the same warning. */
       priceEstimated: z.boolean().optional(),
       analyzerStrategyKey: z.enum(ANALYZER_STRATEGY_KEYS).optional(),
+      offerCeilingDecisionBasis: z.unknown().optional(),
     })
     .safeParse(input);
   if (!parsed.success) {
@@ -124,7 +131,7 @@ export async function createPublicShareAction(
           calculateAnalysis(parsed.data.values).monthlyPayment <= 0,
       }) ?? undefined)
     : undefined;
-  const candidateMaoTargetSource: OfferCeilingTargetSource =
+  let candidateMaoTargetSource: OfferCeilingTargetSource =
     normalizeExternalOfferCeilingTargetSource(parsed.data.maoTargetSource) ??
     (candidateMaoTarget ? "selected-targets" : "screening-defaults");
   const maoTarget =
@@ -146,15 +153,37 @@ export async function createPublicShareAction(
   // crafted call could attach someone else's saved comps/branding to a share.
   let dealId: string | undefined;
   let valuesToShare: InvestmentFormValues = parsed.data.values;
-  let recordedResultSnapshot: Record<string, unknown> | undefined;
-  let shareMaoTarget = maoTarget;
-  let shareMaoTargetSource = candidateMaoTargetSource;
+  const shareMaoTarget = maoTarget;
   let priceEstimated = parsed.data.priceEstimated === true;
   let analyzerStrategyKey: AnalyzerStrategyKey =
     resolveCompatibleAnalyzerStrategyKey(
       parsed.data.analyzerStrategyKey,
       parsed.data.values,
     );
+  let shareDecisionBasis = shareMaoTarget
+    ? normalizeOfferCeilingDecisionBasis(
+        parsed.data.offerCeilingDecisionBasis,
+        {
+          target: shareMaoTarget,
+          source: candidateMaoTargetSource,
+          strategyKey: analyzerStrategyKey,
+        },
+      )
+    : null;
+  if (
+    shareMaoTarget &&
+    candidateMaoTargetSource === "buy-box" &&
+    !shareDecisionBasis
+  ) {
+    candidateMaoTargetSource = "selected-targets";
+  }
+  if (shareMaoTarget && !shareDecisionBasis) {
+    shareDecisionBasis = captureSelectedTargetsDecisionBasis({
+      target: shareMaoTarget,
+      strategyKey: analyzerStrategyKey,
+    });
+  }
+  const shareMaoTargetSource = candidateMaoTargetSource;
   if (parsed.data.dealId) {
     const { data: deal } = await supabase
       .from("saved_analyses")
@@ -172,15 +201,15 @@ export async function createPublicShareAction(
     // Use the recorded saved result only when the browser is sharing those
     // exact saved inputs. If the user has unsaved edits, mint a fresh share
     // without attaching the old deal's comps/attribution or result snapshot.
-    if (
+    const formSnapshotMatches = Boolean(
       deal &&
-      normalizedSaved?.success &&
-      JSON.stringify(normalizedSaved.data) ===
-        JSON.stringify(parsed.data.values)
-    ) {
-      dealId = parsed.data.dealId;
+        normalizedSaved?.success &&
+        JSON.stringify(normalizedSaved.data) ===
+          JSON.stringify(parsed.data.values),
+    );
+    if (deal && normalizedSaved?.success && formSnapshotMatches) {
       valuesToShare = normalizedSaved.data;
-      recordedResultSnapshot =
+      const recordedResultSnapshot =
         deal.result_snapshot && typeof deal.result_snapshot === "object"
           ? (deal.result_snapshot as Record<string, unknown>)
           : undefined;
@@ -198,10 +227,6 @@ export async function createPublicShareAction(
             "This deal uses an older underwriting standard. Open it, review the current assumptions, and run it again before creating a public link.",
         };
       }
-      analyzerStrategyKey = resolveCompatibleAnalyzerStrategyKey(
-        recordedResultSnapshot?.analyzerStrategyKey,
-        normalizedSaved.data,
-      );
       // Saved input-provenance metadata can preserve a cautionary estimate
       // warning even if a stale browser render has not restored that flag.
       // Financial result fields from this JSON are never publication authority.
@@ -211,16 +236,50 @@ export async function createPublicShareAction(
         recordedResultSnapshot?.maxOfferTarget,
       );
       const recordedSource = recordedResultSnapshot?.maxOfferTargetSource;
-      const externalRecordedSource =
-        normalizeExternalOfferCeilingTargetSource(recordedSource);
-      if (
+      const recordedAdoptedTarget =
         recordedTarget &&
         (recordedSource == null ||
           recordedSource === "buy-box" ||
           recordedSource === "selected-targets")
-      ) {
-        shareMaoTarget = recordedTarget;
-        shareMaoTargetSource = externalRecordedSource ?? "selected-targets";
+          ? recordedTarget
+          : undefined;
+      const recordedBindingSource = recordedAdoptedTarget
+        ? (recordedSource ?? "selected-targets")
+        : undefined;
+      const recordedDecisionBasis = recordedAdoptedTarget
+        ? normalizeOfferCeilingDecisionBasis(
+            recordedResultSnapshot?.[OFFER_CEILING_DECISION_BASIS_FIELD],
+            {
+              target: recordedAdoptedTarget,
+              source: recordedBindingSource,
+              strategyKey: resolveCompatibleAnalyzerStrategyKey(
+                recordedResultSnapshot?.analyzerStrategyKey,
+                normalizedSaved.data,
+              ),
+            },
+          )
+        : null;
+      const incomingBindingSource = shareMaoTarget
+        ? (parsed.data.maoTargetSource ?? "selected-targets")
+        : undefined;
+      const targetBindingMatches =
+        maoTargetFingerprint(shareMaoTarget) ===
+          maoTargetFingerprint(recordedAdoptedTarget) &&
+        incomingBindingSource === recordedBindingSource &&
+        (shareDecisionBasis?.rulesFingerprint ?? null) ===
+          (recordedDecisionBasis?.rulesFingerprint ?? null);
+
+      // A matching form is not enough: targets are result-producing inputs.
+      // Attribute the publication to the saved deal only when the exact target
+      // fingerprint AND source also match its recorded snapshot. Otherwise the
+      // owner's current target remains authoritative and the share is minted
+      // as a fresh, unattributed publication instead of silently reverting it.
+      if (targetBindingMatches) {
+        dealId = parsed.data.dealId;
+        analyzerStrategyKey = resolveCompatibleAnalyzerStrategyKey(
+          recordedResultSnapshot?.analyzerStrategyKey,
+          normalizedSaved.data,
+        );
       }
     }
   }
@@ -241,6 +300,7 @@ export async function createPublicShareAction(
       "hidden") as PublicShareAddressVisibility,
     priceEstimated,
     analyzerStrategyKey,
+    offerCeilingDecisionBasis: shareDecisionBasis ?? undefined,
   });
   if (!path) {
     // Never fall back to a URL containing the analysis payload. Existing /d

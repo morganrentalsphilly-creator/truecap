@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import * as Sentry from "@sentry/nextjs";
@@ -69,7 +69,10 @@ import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import { useCookieBannerOpen } from "@/lib/use-cookie-banner";
-import type { StoredRiskLevel } from "@/lib/compare-metrics";
+import {
+  areMethodologyCohortsComparable,
+  type StoredRiskLevel,
+} from "@/lib/compare-metrics";
 import {
   PIPELINE_STAGES,
   pipelineStageLabel,
@@ -156,6 +159,7 @@ import {
   applicableCashOnCashValue,
   isCashOnCashNotApplicable,
 } from "@/lib/cash-on-cash-applicability";
+import { sortDealsWithinMethodologyCohorts } from "@/lib/dashboard-deal-mapping";
 
 type SavedSignal = "strong-buy" | "buy" | "neutral" | "risky" | "avoid";
 type SavedPropertyType = "single-family" | "multi-family" | "owner-occupant";
@@ -197,6 +201,12 @@ export type SavedAnalysisListItem = {
   breakdown?: DealScoreBreakdown | null;
   /** Honest saved-methodology provenance from the canonical server resolver. */
   methodologyLabel?: string;
+  /** Cohort for comparing the visible derived metrics. */
+  methodologyComparisonKey?: string;
+  /** Heading for methodology-aware derived-metric sorts. */
+  methodologyGroupLabel?: string;
+  /** Historical rows fail closed for live Buy Box screening. */
+  methodologyIsCurrent?: boolean;
   pipelineStage?: PipelineStage;
   tags?: string[];
   dataConfidence?: DataConfidence | null;
@@ -317,13 +327,16 @@ function OfferLineRow({
           ) : null}
         </div>
         {offer.maxPrice != null && basisLabel ? (
-          <>
-            <div className="mt-0.5">Criteria: {basisLabel}</div>
-            <div className="mt-0.5 text-[11px]">
-              Highest modeled price that still meets {basisLabel} under the
+          <details className="mt-0.5 text-[11px]">
+            <summary className="inline-flex min-h-11 cursor-pointer items-center font-semibold text-primary underline-offset-2 hover:underline">
+              View exact criteria
+            </summary>
+            <p className="mt-1">Criteria: {basisLabel}</p>
+            <p className="mt-1">
+              Highest modeled price that still meets these criteria under the
               assumptions shown. This is not a recommended offer or appraisal.
-            </div>
-          </>
+            </p>
+          </details>
         ) : null}
       </div>
     );
@@ -359,12 +372,18 @@ function OfferLineRow({
           </>
         ) : null}
       </div>
-      {basisLabel ? <div className="mt-0.5">Criteria: {basisLabel}</div> : null}
-      <div className="mt-0.5 text-[11px]">
-        Highest modeled price that still meets{" "}
-        {basisLabel ?? "the captured targets"} under the assumptions shown. This
-        is not a recommended offer or appraisal.
-      </div>
+      <details className="mt-0.5 text-[11px]">
+        <summary className="inline-flex min-h-11 cursor-pointer items-center font-semibold text-primary underline-offset-2 hover:underline">
+          View exact criteria
+        </summary>
+        <p className="mt-1">
+          Criteria: {basisLabel ?? "Captured targets"}
+        </p>
+        <p className="mt-1">
+          Highest modeled price that still meets these criteria under the
+          assumptions shown. This is not a recommended offer or appraisal.
+        </p>
+      </details>
     </div>
   );
 }
@@ -1568,6 +1587,9 @@ export function SavedAnalysesPage({
     if (!buyBoxes || buyBoxes.length === 0) return null;
     const map = new Map<string, BuyBoxFitSummary>();
     for (const item of enrichedItems) {
+      // Live criteria must not imply that a frozen historical result is
+      // directly comparable with the current underwriting standard.
+      if (item.methodologyIsCurrent === false) continue;
       // Scope to the deal's own client: another buyer's box must not drive
       // this row's fit badge or the buy-box filter count.
       const results = evaluateBuyBoxes(
@@ -1682,6 +1704,20 @@ export function SavedAnalysesPage({
         return item.capRatePct ?? Number.NEGATIVE_INFINITY;
       return item.purchasePrice ?? Number.NEGATIVE_INFINITY;
     };
+    if (
+      activeSortField === "cash-flow" ||
+      activeSortField === "coc" ||
+      activeSortField === "cap-rate"
+    ) {
+      return sortDealsWithinMethodologyCohorts(
+        filteredItems,
+        (item) => {
+          const value = valueFor(item);
+          return Number.isFinite(value) ? value : null;
+        },
+        activeSortDirection
+      );
+    }
     return [...filteredItems].sort((a, b) => {
       const av = valueFor(a);
       const bv = valueFor(b);
@@ -1692,6 +1728,20 @@ export function SavedAnalysesPage({
       return av > bv ? direction : -direction;
     });
   }, [activeSortDirection, activeSortField, filteredItems]);
+
+  const isMethodologySensitiveSort =
+    activeSortField === "cash-flow" ||
+    activeSortField === "coc" ||
+    activeSortField === "cap-rate";
+  const hasMixedMethodologyCohorts = useMemo(
+    () =>
+      new Set(
+        filteredItems.map(
+          (item) => item.methodologyComparisonKey ?? "current:unknown"
+        )
+      ).size > 1,
+    [filteredItems]
+  );
 
   /**
    * Same-address duplicates, LABELLED not merged.
@@ -2357,6 +2407,30 @@ export function SavedAnalysesPage({
       router.push("/profile#billing");
       return;
     }
+    const compareItems = selectedIds
+      .map((id) => enrichedItems.find((item) => item.id === id))
+      .filter(
+        (item): item is (typeof enrichedItems)[number] => item !== undefined
+      );
+    const methodologyCohorts = compareItems.map(
+      (item) => item.methodologyComparisonKey
+    );
+    if (
+      compareItems.length !== selectedIds.length ||
+      !areMethodologyCohortsComparable(methodologyCohorts)
+    ) {
+      const hasUnavailableMethodology = methodologyCohorts.some(
+        (cohort) => !cohort || cohort.startsWith("unavailable:")
+      );
+      toast({
+        title: "Re-underwrite before comparing",
+        description: hasUnavailableMethodology
+          ? "At least one selected deal does not have a complete comparable calculation record. Open and re-underwrite it first."
+          : "The selected deals use different calculation methods. Re-underwrite them under one method before comparing.",
+        variant: "destructive",
+      });
+      return;
+    }
     startCompareTransition(async () => {
       try {
         const result = await startCompareAction(selectedIds);
@@ -2943,6 +3017,16 @@ export function SavedAnalysesPage({
             </div>
           </div>
 
+          {isMethodologySensitiveSort && hasMixedMethodologyCohorts ? (
+            <p
+              role="status"
+              className="rounded-xl border border-border bg-muted/45 px-3 py-2 text-xs text-muted-foreground"
+            >
+              Results are grouped by underwriting version. Current and recorded
+              calculations are never ranked against each other.
+            </p>
+          ) : null}
+
           {renderMobileFilters()}
 
           {/* Real buy-box screening — only when the user has ≥1 active box.
@@ -3168,7 +3252,7 @@ export function SavedAnalysesPage({
 
         <div className="rounded-2xl border border-border bg-card overflow-hidden">
           <div className="space-y-3 p-3 xl:hidden">
-            {pagedItems.map((item) => {
+            {pagedItems.map((item, itemIndex) => {
               const address = getAddressParts(item);
               const isSelected = selectedIds.includes(item.id);
               const signal = item.signal;
@@ -3189,9 +3273,24 @@ export function SavedAnalysesPage({
                 (statusBadge ? 1 : 0) +
                 (item.breakdown && item.score != null ? 1 : 0) +
                 (item.dataConfidence ? 1 : 0);
+              const startsMethodologyCohort =
+                isMethodologySensitiveSort &&
+                (itemIndex === 0 ||
+                  pagedItems[itemIndex - 1]?.methodologyComparisonKey !==
+                    item.methodologyComparisonKey);
               return (
+                <Fragment key={item.id}>
+                {startsMethodologyCohort ? (
+                  <div className="rounded-xl border border-border bg-muted/40 px-3 py-2">
+                    <p className="text-xs font-bold text-foreground">
+                      {item.methodologyGroupLabel ?? "Current underwriting"}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">
+                      Sorted only against deals using this underwriting version.
+                    </p>
+                  </div>
+                ) : null}
                 <article
-                  key={item.id}
                   className={cn(
                     "rounded-2xl border border-border bg-background p-4 shadow-sm transition-colors",
                     isSelected && "border-primary/40 bg-primary/5",
@@ -3237,6 +3336,19 @@ export function SavedAnalysesPage({
                         >
                           {SIGNAL_LABELS[signal]}
                         </Badge>
+                        {item.methodologyLabel ? (
+                          <Badge
+                            variant="outline"
+                            className="rounded-full text-[10px] font-semibold text-muted-foreground"
+                            title={
+                              item.methodologyIsCurrent === false
+                                ? `${item.methodologyLabel}. Re-underwrite this deal before comparing it with the current model.`
+                                : item.methodologyLabel
+                            }
+                          >
+                            {item.methodologyLabel}
+                          </Badge>
+                        ) : null}
                         <BuyBoxFitBadge fit={buyBoxFitById?.get(item.id)} />
                         {foldedBadgeCount > 0 ? (
                           <Popover>
@@ -3276,11 +3388,6 @@ export function SavedAnalysesPage({
                           </Popover>
                         ) : null}
                       </div>
-                      {item.methodologyLabel ? (
-                        <p className="mt-1 text-[10px] text-muted-foreground">
-                          {item.methodologyLabel}
-                        </p>
-                      ) : null}
                       <p className="mt-1 text-xs text-muted-foreground">
                         {getTypeLabel(item.propertyType)}
                       </p>
@@ -3547,6 +3654,7 @@ export function SavedAnalysesPage({
                     </span>
                   </p>
                 </article>
+                </Fragment>
               );
             })}
           </div>
@@ -3647,7 +3755,7 @@ export function SavedAnalysesPage({
                 </tr>
               </thead>
               <tbody>
-                {pagedItems.map((item) => {
+                {pagedItems.map((item, itemIndex) => {
                   const address = getAddressParts(item);
                   const isSelected = selectedIds.includes(item.id);
                   const signal = item.signal;
@@ -3659,9 +3767,29 @@ export function SavedAnalysesPage({
                     item.cocReturnPct,
                     item.cashToClose,
                   );
+                  const startsMethodologyCohort =
+                    isMethodologySensitiveSort &&
+                    (itemIndex === 0 ||
+                      pagedItems[itemIndex - 1]?.methodologyComparisonKey !==
+                        item.methodologyComparisonKey);
                   return (
+                    <Fragment key={item.id}>
+                    {startsMethodologyCohort ? (
+                      <tr className="border-b border-border bg-muted/45">
+                        <td
+                          colSpan={10 + optionalColumnCount}
+                          className="py-2 text-left"
+                        >
+                          <span className="font-bold text-foreground">
+                            {item.methodologyGroupLabel ?? "Current underwriting"}
+                          </span>
+                          <span className="ml-2 text-xs text-muted-foreground">
+                            Sorted only within this underwriting version
+                          </span>
+                        </td>
+                      </tr>
+                    ) : null}
                     <tr
-                      key={item.id}
                       className={cn(
                         "group/row h-16 border-b border-border/80 transition-colors",
                         isSelected ? "bg-primary/5" : "hover:bg-muted/40",
@@ -3717,19 +3845,8 @@ export function SavedAnalysesPage({
                               ) : null}
                             </Link>
                             {getStatusBadge(item)}
-                            {/* ONE meta line, not three stacked ones. Property
-                                type and provenance each had their own row of
-                                vertical space while saying something short and
-                                largely constant down the column; a scanning
-                                view should spend its height on what DIFFERS
-                                between deals. */}
                             <p className="text-xs text-muted-foreground truncate">
-                              {[
-                                getTypeLabel(item.propertyType),
-                                item.methodologyLabel,
-                              ]
-                                .filter(Boolean)
-                                .join(" · ")}
+                              {getTypeLabel(item.propertyType)}
                             </p>
                             <OfferLineRow
                               offer={item.offerLine}
@@ -3763,6 +3880,7 @@ export function SavedAnalysesPage({
                             Falls back to a plain badge when there is nothing to
                             show, so the row never offers a dead click. */}
                         <div className="flex flex-col items-start gap-1.5">
+                          <div className="flex flex-wrap items-center gap-1.5">
                           <Popover>
                             <PopoverTrigger asChild>
                               <button
@@ -3813,6 +3931,20 @@ export function SavedAnalysesPage({
                               ) : null}
                             </PopoverContent>
                           </Popover>
+                          {item.methodologyLabel ? (
+                            <Badge
+                              variant="outline"
+                              className="rounded-full text-[10px] font-semibold text-muted-foreground"
+                              title={
+                                item.methodologyIsCurrent === false
+                                  ? `${item.methodologyLabel}. Re-underwrite this deal before comparing it with the current model.`
+                                  : item.methodologyLabel
+                              }
+                            >
+                              {item.methodologyLabel}
+                            </Badge>
+                          ) : null}
+                          </div>
                           <BuyBoxFitBadge fit={buyBoxFitById?.get(item.id)} />
                         </div>
                       </td>
@@ -4053,6 +4185,7 @@ export function SavedAnalysesPage({
                         </span>
                       </td>
                     </tr>
+                    </Fragment>
                   );
                 })}
               </tbody>

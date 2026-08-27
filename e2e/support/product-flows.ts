@@ -1,4 +1,5 @@
 import { expect, type Page } from "@playwright/test";
+import { SAMPLE_DEAL_FIXTURE } from "../../lib/sample-deal";
 
 export async function acceptCookiesIfShown(page: Page): Promise<void> {
   const acceptCookies = page.getByRole("button", { name: /accept all/i });
@@ -53,6 +54,39 @@ export async function openSampleDecision(page: Page): Promise<void> {
   });
 }
 
+/**
+ * Turn the synthetic sample into a unique regression deal through the same
+ * safety flow a user sees. Changing a property deliberately clears the old
+ * property's price, rent, beds, and physical facts; this helper accepts that
+ * warning and then explicitly re-enters the fixture values so the surrounding
+ * test can focus on save/share/workspace continuity.
+ */
+export async function replaceSampleAddressForRegression(
+  page: Page,
+  address: string,
+): Promise<void> {
+  const form = page.locator('form[data-calc-form="true"]');
+  const addressInput = form.getByLabel("Property Address");
+  let addressChangeMessage = "";
+  page.once("dialog", async (dialog) => {
+    addressChangeMessage = dialog.message();
+    await dialog.accept();
+  });
+  await addressInput.fill(address);
+  await addressInput.press("Tab");
+  expect(addressChangeMessage).toContain("Use this new property?");
+
+  const price = form.getByLabel("Price to analyze");
+  const rent = form.getByLabel("Expected gross monthly rent");
+  await expect(price).toHaveValue("");
+  await expect(rent).toHaveValue("");
+  await price.fill(String(SAMPLE_DEAL_FIXTURE.values.purchasePrice));
+  await form
+    .getByLabel("Bedrooms (optional)")
+    .fill(String(SAMPLE_DEAL_FIXTURE.values.bedrooms));
+  await rent.fill(String(SAMPLE_DEAL_FIXTURE.values.monthlyRent));
+}
+
 export async function saveUniqueSampleDeal(
   page: Page,
   address: string,
@@ -68,7 +102,7 @@ export async function saveUniqueSampleDeal(
     .click();
 
   const form = page.locator('form[data-calc-form="true"]');
-  await form.getByLabel("Property Address").fill(address);
+  await replaceSampleAddressForRegression(page, address);
   const submit = form.locator('button[data-inform-submit="true"]');
   await expect(submit).toBeEnabled();
   await submit.click();

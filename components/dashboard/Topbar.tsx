@@ -2,12 +2,13 @@
 
 import { Menu, Search, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { UserMenu } from "@/components/auth/user-menu";
 import { Button } from "@/components/ui/button";
 import { SheetTrigger } from "@/components/ui/sheet";
 import { setPendingSavedListSearch } from "@/lib/dashboard-saved-search-bridge";
+import { requestMountedNewAnalysis } from "@/lib/new-analysis-navigation";
 
 type TopbarProps = {
   displayName: string;
@@ -31,6 +32,7 @@ export function Topbar({
   canAccessDashboard = true,
 }: TopbarProps) {
   const router = useRouter();
+  const pathname = usePathname() ?? "";
   const searchFormRef = useRef<HTMLFormElement | null>(null);
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -285,6 +287,12 @@ export function Topbar({
             href="/dashboard/new"
             prefetch={false}
             aria-label="New analysis"
+            onClick={(event) => {
+              if (pathname === "/dashboard/new") {
+                event.preventDefault();
+                requestMountedNewAnalysis();
+              }
+            }}
             className="inline-flex size-11 items-center justify-center rounded-lg text-white transition hover:opacity-90 md:hidden"
             style={{ background: "var(--gradient-premium)", boxShadow: "var(--shadow-glow)" }}
           >
@@ -293,6 +301,12 @@ export function Topbar({
           <Link
             href="/dashboard/new"
             prefetch={false}
+            onClick={(event) => {
+              if (pathname === "/dashboard/new") {
+                event.preventDefault();
+                requestMountedNewAnalysis();
+              }
+            }}
             className="hidden min-h-11 items-center gap-2 rounded-lg px-4 text-sm font-semibold text-white transition hover:opacity-90 md:inline-flex"
             style={{ background: "var(--gradient-premium)", boxShadow: "var(--shadow-glow)" }}
           >

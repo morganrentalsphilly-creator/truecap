@@ -29,6 +29,7 @@ import { getDashboardNavAccess, hasPaidPlanSubscription } from "@/lib/entitlemen
 import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { isAdvocacyInternalUser } from "@/lib/advocacy-rollout";
+import { getSavedDealForEditingAction } from "@/app/actions/saved-analyses";
 
 export const metadata: Metadata = {
   title: "New analysis",
@@ -55,13 +56,28 @@ function getInitials(displayName: string, email: string): string {
   return (displayName || email || "U").slice(0, 2).toUpperCase();
 }
 
-export default async function NewAnalysisPage() {
+export default async function NewAnalysisPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ savedDeal?: string }>;
+}) {
   const supabase = await createServerSupabaseClient();
   const user = await getRequestUser();
   if (!user) redirect("/auth/login");
 
   const entitlements = await getRequestEntitlements(user.id);
   const navAccess = getDashboardNavAccess(entitlements);
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const requestedSavedDealId =
+    typeof resolvedSearchParams.savedDeal === "string" &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      resolvedSearchParams.savedDeal,
+    )
+      ? resolvedSearchParams.savedDeal
+      : null;
+  const initialSavedDeal = requestedSavedDealId
+    ? await getSavedDealForEditingAction(requestedSavedDealId)
+    : null;
 
   const [capabilities, { data: profile }, isPremium] = await Promise.all([
     getAnalyzerCapabilities(supabase, user),
@@ -87,6 +103,7 @@ export default async function NewAnalysisPage() {
       />
       <div className="flex-1">
         <InvestCalcPage
+          key={requestedSavedDealId ?? "new-analysis"}
           canSaveDeals={capabilities.canSaveDeals}
           canCompareDeals={capabilities.canCompareDeals}
           canExportPdf={capabilities.canExportPdf}
@@ -104,6 +121,7 @@ export default async function NewAnalysisPage() {
           isAuthenticated
           userAnalysisDefaults={capabilities.userAnalysisDefaults}
           advocacyContractEligible={isAdvocacyInternalUser(user.email)}
+          initialSavedDeal={initialSavedDeal}
         />
       </div>
     </div>

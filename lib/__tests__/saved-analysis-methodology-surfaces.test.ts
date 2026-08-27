@@ -76,18 +76,30 @@ describe("saved-analysis methodology surface contract", () => {
 
   it("labels every user-visible legacy saved-deal view as a current-version recomputation", () => {
     for (const path of [
-      "app/dashboard/saved-analyses/page.tsx",
       "app/dashboard/saved-analyses/[id]/page.tsx",
-      "app/dashboard/page.tsx",
       "app/dashboard/compare/page.tsx",
       "lib/client-portal.ts",
       "components/investcalc/investcalc-page.tsx",
-      "components/investcalc/saved-analyses-page-v2.tsx",
     ]) {
       expect(read(path)).toContain(
         "Legacy analysis · recomputed with current v",
       );
     }
+
+    // The two list/dashboard server surfaces now centralize this wording with
+    // the cohort metadata that also prevents cross-version ranking.
+    for (const path of [
+      "app/dashboard/saved-analyses/page.tsx",
+      "app/dashboard/page.tsx",
+    ]) {
+      expect(read(path)).toContain("resolveDealMethodologyPresentation");
+    }
+    expect(read("lib/dashboard-deal-mapping.ts")).toContain(
+      "Legacy analysis · recomputed with current v",
+    );
+    expect(read("components/investcalc/saved-analyses-page-v2.tsx")).toContain(
+      "item.methodologyLabel",
+    );
   });
 
   it("never routes saved analyses by the mutable snapshot's embedded version", () => {

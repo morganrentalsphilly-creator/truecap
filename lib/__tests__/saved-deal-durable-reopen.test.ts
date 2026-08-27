@@ -12,17 +12,21 @@ describe("durable saved-deal reopen", () => {
       opener.indexOf("export function OpenFullAnalysisButton"),
     );
 
-    expect(openFunction).toContain("`/?savedDeal=${encodeURIComponent(id)}`");
+    expect(openFunction).toContain(
+      "`/dashboard/new?savedDeal=${encodeURIComponent(id)}`",
+    );
     expect(openFunction).not.toContain("writeNonceKeyedHandoffPayload");
     expect(openFunction).not.toContain("getSavedDealForEditingAction");
   });
 
   it("resolves the stable ID on the authenticated server route and hydrates the analyzer", () => {
-    const home = read("app/home-authed/page.tsx");
+    const dashboardAnalyzer = read("app/dashboard/new/page.tsx");
     const analyzer = read("components/investcalc/investcalc-page.tsx");
 
-    expect(home).toContain("getSavedDealForEditingAction(requestedSavedDealId)");
-    expect(home).toContain("initialSavedDeal={initialSavedDeal}");
+    expect(dashboardAnalyzer).toContain(
+      "getSavedDealForEditingAction(requestedSavedDealId)",
+    );
+    expect(dashboardAnalyzer).toContain("initialSavedDeal={initialSavedDeal}");
     expect(analyzer).toContain("initialSavedDeal = null");
     expect(analyzer).toContain("initialSavedDeal.ok");
     expect(analyzer).toContain('url.searchParams.set("savedDeal", savedDealId)');

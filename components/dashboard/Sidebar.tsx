@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { AppLogo } from "@/components/brand/app-logo";
 import type { DashboardNavAccess } from "@/components/dashboard/dashboard-shell";
+import { requestMountedNewAnalysis } from "@/lib/new-analysis-navigation";
 
 type SidebarProps = {
   activeDealCount: number;
@@ -120,7 +121,17 @@ export function Sidebar({ activeDealCount, navAccess, mobile = false, onNavigate
                 // for marketing surfaces, not the app shell.
                 prefetch={item.enabled}
                 aria-current={item.active ? "page" : undefined}
-                onClick={onNavigate}
+                onClick={(event) => {
+                  onNavigate?.();
+                  if (
+                    item.enabled &&
+                    item.href === "/dashboard/new" &&
+                    pathname === "/dashboard/new"
+                  ) {
+                    event.preventDefault();
+                    requestMountedNewAnalysis();
+                  }
+                }}
                 title={item.enabled ? undefined : `${item.label} is included with TrueCap Pro`}
                 className={`group flex min-h-11 items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                   item.active

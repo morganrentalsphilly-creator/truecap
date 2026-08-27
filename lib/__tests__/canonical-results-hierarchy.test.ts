@@ -44,7 +44,7 @@ describe("canonical first-year results hierarchy", () => {
     const summary = read("components/investcalc/focused-decision-summary.tsx");
     const dashboard = read("components/investcalc/analysis-dashboard.tsx");
 
-    expect(summary).toContain("Analyze another like this");
+    expect(summary).toContain("Next deal · keep assumptions");
     expect(summary).toContain("New analysis");
     expect(summary).toContain("Compare deals");
     expect(summary).toContain("onCompareDeals");

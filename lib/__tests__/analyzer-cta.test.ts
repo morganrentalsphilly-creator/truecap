@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { getAnalyzerCta } from "../analyzer-cta";
+import {
+  analysisRunPromisesOfferCeiling,
+  getAnalyzerCta,
+} from "../analyzer-cta";
 
 describe("role-aware analyzer CTA", () => {
   it("offers the shared sample when no property is available", () => {
@@ -48,5 +51,40 @@ describe("role-aware analyzer CTA", () => {
         canUseStrategyPrimaryOutput: true,
       }),
     ).toBe("Run STR numbers");
+  });
+});
+
+describe("Offer Ceiling run gate", () => {
+  it("requires criteria only for default, Buy & Hold, and Wholesale Pro runs", () => {
+    for (const strategyKey of [null, "buy-hold", "wholesale-mao"]) {
+      expect(
+        analysisRunPromisesOfferCeiling({
+          canCalculateMaxOffer: true,
+          strategyKey,
+        }),
+      ).toBe(true);
+    }
+    for (const strategyKey of [
+      "house-hack",
+      "brrrr",
+      "fix-flip",
+      "short-term",
+    ]) {
+      expect(
+        analysisRunPromisesOfferCeiling({
+          canCalculateMaxOffer: true,
+          strategyKey,
+        }),
+      ).toBe(false);
+    }
+  });
+
+  it("never gates a free run", () => {
+    expect(
+      analysisRunPromisesOfferCeiling({
+        canCalculateMaxOffer: false,
+        strategyKey: "buy-hold",
+      }),
+    ).toBe(false);
   });
 });

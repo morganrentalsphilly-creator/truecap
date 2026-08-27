@@ -262,6 +262,32 @@ describe("the share-route privacy contract", () => {
     );
   });
 
+  it("never replaces a target-only share edit with the saved target", () => {
+    const action = read("app/actions/public-shares.ts");
+    const targetMatch = action.indexOf("const targetBindingMatches =");
+    const attribution = action.indexOf(
+      "dealId = parsed.data.dealId;",
+      targetMatch,
+    );
+    const mint = action.indexOf("mintPublicShare({", attribution);
+
+    expect(action).toContain("maoTargetFingerprint(shareMaoTarget)");
+    expect(action).toContain("maoTargetFingerprint(recordedAdoptedTarget)");
+    expect(action).toContain(
+      "incomingBindingSource === recordedBindingSource",
+    );
+    expect(targetMatch).toBeGreaterThanOrEqual(0);
+    expect(attribution).toBeGreaterThan(targetMatch);
+    expect(action.slice(targetMatch, attribution)).toContain(
+      "if (targetBindingMatches)",
+    );
+    expect(mint).toBeGreaterThan(attribution);
+    expect(action.slice(attribution, mint)).not.toContain(
+      "shareMaoTarget = recordedTarget",
+    );
+    expect(action).toContain("maoTarget: shareMaoTarget ?? undefined");
+  });
+
   it("preserves target provenance through focused share, workspace share, and fork", () => {
     const focused = read("components/investcalc/focused-decision-summary.tsx");
     const workspace = read("app/dashboard/saved-analyses/[id]/page.tsx");

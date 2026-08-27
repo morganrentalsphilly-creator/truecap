@@ -29,10 +29,12 @@ describe("advocacy decision accessibility and reflow guards", () => {
     expect(summary).toContain("min={bounds.min}");
     expect(summary).toContain("max={bounds.max}");
     expect(summary).toContain("step={bounds.step}");
-    expect(summary).toContain("aria-invalid={Boolean(targetErrors[field])}");
+    expect(summary).toContain(
+      "aria-invalid={Boolean(\n                        targetDraftValidation.errors[field]",
+    );
     expect(normalizeSource(summary)).toContain(
       normalizeSource(
-        "aria-describedby={targetErrors[field] ? errorId : undefined}",
+        "aria-describedby={targetDraftValidation.errors[field] ? errorId : undefined}",
       ),
     );
     expect(normalizeSource(summary)).toContain(

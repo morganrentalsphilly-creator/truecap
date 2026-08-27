@@ -110,6 +110,11 @@ import {
   readRecordedSpecialistAnalysisSnapshot,
   SPECIALIST_ANALYSIS_SNAPSHOT_FIELD,
 } from "@/lib/specialist-analysis-snapshot";
+import {
+  captureSelectedTargetsDecisionBasis,
+  normalizeOfferCeilingDecisionBasis,
+  OFFER_CEILING_DECISION_BASIS_FIELD,
+} from "@/lib/offer-ceiling-decision-basis";
 
 export type SaveDealResult =
   | {
@@ -653,6 +658,9 @@ export async function saveDealAction(
      * underwriting snapshot. Null explicitly clears a prior custom target. */
     maxOfferTarget?: unknown;
     maxOfferTargetSource?: unknown;
+    /** Immutable criteria identity paired with maxOfferTarget. Stored inside
+     * result_snapshot, so no schema migration is required. */
+    offerCeilingDecisionBasis?: unknown;
     /** Validated calculator lens. Stored inside the recorded result so the
      * editor can reopen BRRRR/flip/wholesale/house-hack without guessing. */
     analyzerStrategyKey?: unknown;
@@ -744,7 +752,7 @@ export async function saveDealAction(
     options &&
     Object.prototype.hasOwnProperty.call(options, "maxOfferTargetSource"),
   );
-  const maxOfferTargetSource = normalizeOfferCeilingTargetSource(
+  let maxOfferTargetSource = normalizeOfferCeilingTargetSource(
     options?.maxOfferTargetSource,
   );
   if (
@@ -757,6 +765,45 @@ export async function saveDealAction(
       code: "VALIDATION_ERROR",
       message: "Invalid price-ceiling target source",
     };
+  }
+  const decisionBasisOptionProvided = Boolean(
+    options &&
+      Object.prototype.hasOwnProperty.call(
+        options,
+        "offerCeilingDecisionBasis",
+      ),
+  );
+  let offerCeilingDecisionBasis = maxOfferTarget
+    ? normalizeOfferCeilingDecisionBasis(
+        options?.offerCeilingDecisionBasis,
+        {
+          target: maxOfferTarget,
+          ...(maxOfferTargetSource ? { source: maxOfferTargetSource } : {}),
+          strategyKey: analyzerStrategyKey,
+        },
+      )
+    : null;
+  if (
+    decisionBasisOptionProvided &&
+    options?.offerCeilingDecisionBasis != null &&
+    !offerCeilingDecisionBasis
+  ) {
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "The Offer Ceiling criteria identity no longer matches this analysis",
+    };
+  }
+  if (maxOfferTarget && maxOfferTargetSource === "buy-box" && !offerCeilingDecisionBasis) {
+    // Legacy callers knew only the number and an anonymous source label. Keep
+    // the number but never attribute it to whichever live Buy Box exists now.
+    maxOfferTargetSource = "selected-targets";
+  }
+  if (maxOfferTarget && !offerCeilingDecisionBasis) {
+    offerCeilingDecisionBasis = captureSelectedTargetsDecisionBasis({
+      target: maxOfferTarget,
+      strategyKey: analyzerStrategyKey,
+    });
   }
   if (
     maxOfferTarget &&
@@ -830,6 +877,8 @@ export async function saveDealAction(
     resultSnapshotWithScore.maxOfferTarget = maxOfferTarget;
     resultSnapshotWithScore.maxOfferTargetSource =
       maxOfferTargetSource ?? "selected-targets";
+    resultSnapshotWithScore[OFFER_CEILING_DECISION_BASIS_FIELD] =
+      offerCeilingDecisionBasis;
   }
   const title =
     values.address.trim().length > 0
@@ -1118,6 +1167,29 @@ export async function saveDealAction(
           normalizeOfferCeilingTargetSource(
             existingSnapshot?.maxOfferTargetSource,
           ) ?? "selected-targets";
+        if (!decisionBasisOptionProvided) {
+          const storedBasis = normalizeOfferCeilingDecisionBasis(
+            existingSnapshot?.[OFFER_CEILING_DECISION_BASIS_FIELD],
+            {
+              target: storedTarget,
+              source: resultSnapshotWithScore.maxOfferTargetSource,
+              strategyKey: updatedAnalyzerStrategyKey,
+            },
+          );
+          if (storedBasis) {
+            resultSnapshotWithScore[OFFER_CEILING_DECISION_BASIS_FIELD] =
+              storedBasis;
+          } else if (
+            resultSnapshotWithScore.maxOfferTargetSource === "buy-box"
+          ) {
+            resultSnapshotWithScore.maxOfferTargetSource = "selected-targets";
+            resultSnapshotWithScore[OFFER_CEILING_DECISION_BASIS_FIELD] =
+              captureSelectedTargetsDecisionBasis({
+                target: storedTarget,
+                strategyKey: updatedAnalyzerStrategyKey,
+              });
+          }
+        }
       }
     }
 

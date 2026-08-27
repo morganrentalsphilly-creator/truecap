@@ -32,8 +32,18 @@ describe("focused decision safety", () => {
     expect(summary).toContain("aria-expanded={tuneOpen}");
     expect(summary).toContain('aria-live="polite"');
     expect(summary).toContain("canTunePriceCeiling ? (");
-    expect(summary).toContain("applyMaoTargetInput(target, field, rawValue)");
-    expect(summary).toContain("if (rawValue.trim())");
+    expect(summary).toContain("validateTargetDraft(targetInputs");
+    expect(summary).toContain("const applyTargetDraft = () =>");
+    expect(summary).toContain("onTargetChange(nextTarget)");
+    expect(summary).toContain("targetDraftBlocksActions");
+    expect(summary).toContain(
+      'isSaving ? "Saving…" : isSaved ? "Saved" : "Save"',
+    );
+    expect(summary).toContain(
+      "Apply or cancel the target edits before saving, sharing, or exporting.",
+    );
+    expect(summary).not.toContain("Apply the example targets");
+    expect(summary).not.toContain("Set targets first");
     expect(summary).toContain("!clearsTargets");
     expect(summary).not.toContain(
       "Negotiate to ${money(offerCeiling.ceiling)} or less — or pass",
@@ -75,6 +85,67 @@ describe("focused decision safety", () => {
     expect(saveAction).toContain("if (!maxOfferTargetOptionProvided)");
   });
 
+  it("keeps target typing local until one validated Apply or Update", () => {
+    const summary = readFileSync(
+      join(root, "components/investcalc/focused-decision-summary.tsx"),
+      "utf8",
+    );
+    const editorStart = summary.indexOf(
+      'legend className="text-sm font-bold text-foreground">\n              Offer Ceiling rules',
+    );
+    const editor = summary.slice(editorStart);
+    const changeHandler = editor.indexOf("onChange={(event) =>");
+    const explicitApply = editor.indexOf("onClick={applyTargetDraft}");
+
+    expect(editorStart).toBeGreaterThanOrEqual(0);
+    expect(changeHandler).toBeGreaterThanOrEqual(0);
+    expect(explicitApply).toBeGreaterThan(changeHandler);
+    expect(editor.slice(changeHandler, explicitApply)).toContain(
+      "setTargetInputs",
+    );
+    expect(editor.slice(changeHandler, explicitApply)).not.toContain(
+      "onTargetChange(",
+    );
+    expect(editor).toContain('targetAdopted ? "Update criteria" : "Apply criteria"');
+    expect(editor).toContain("targetDraftInvalid ||");
+    expect(editor).toContain("targetAdopted && !targetDraftDirty");
+  });
+
+  it("leads a targetless result with operating facts and keeps setup secondary", () => {
+    const summary = readFileSync(
+      join(root, "components/investcalc/focused-decision-summary.tsx"),
+      "utf8",
+    );
+    const targetlessSnapshot = summary.indexOf(
+      "!targetAdopted ? (\n          <FirstYearSnapshot",
+    );
+    const optionalCriteria = summary.indexOf("Optional decision criteria");
+
+    expect(targetlessSnapshot).toBeGreaterThanOrEqual(0);
+    expect(optionalCriteria).toBeGreaterThan(targetlessSnapshot);
+    expect(summary).toContain(
+      "Positive operating screen at entered assumptions",
+    );
+    expect(summary).toContain(
+      "Negative operating screen at entered assumptions",
+    );
+    expect(summary).toContain("The operating economics above are available now.");
+  });
+
+  it("labels the prior-target delta as session-only", () => {
+    const summary = readFileSync(
+      join(root, "components/investcalc/focused-decision-summary.tsx"),
+      "utf8",
+    );
+    expect(summary).toContain("This comparison is session-only;");
+    expect(summary).toContain(
+      "Save to record the current criteria with the analysis.",
+    );
+    expect(summary).not.toContain(
+      "prior target criteria remain preserved in the previous snapshot",
+    );
+  });
+
   it("keeps the marketing tail hidden while assumptions are edited post-analysis", () => {
     const calculator = readFileSync(
       join(root, "components/investcalc/investcalc-page.tsx"),
@@ -95,7 +166,7 @@ describe("focused decision safety", () => {
     );
     expect(dashboard.match(/<BuyBoxVerdictCard/g)).toHaveLength(1);
     expect(dashboard).toContain(
-      "onLoadStateChange={setBuyBoxTargetResolutionState}",
+      "onLoadStateChange={handleBuyBoxTargetResolutionChange}",
     );
   });
 

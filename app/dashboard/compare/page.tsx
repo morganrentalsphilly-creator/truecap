@@ -190,6 +190,27 @@ function methodologyLabel(resolution: ReturnType<typeof resolveSavedAnalysisSnap
   return `Standard v${resolution.storedMethodologyVersion}`;
 }
 
+/**
+ * Values are comparable only when both the public underwriting version and
+ * their provenance match. A recorded result and a compatibility recompute can
+ * differ even when their visible version text is the same, so provenance is
+ * deliberately part of this key.
+ */
+function methodologyCohort(
+  resolution: ReturnType<typeof resolveSavedAnalysisSnapshot>,
+  recordId: string,
+): string {
+  if (resolution.usesRecordedSnapshot) {
+    return isLegacySavedMethodologyVersion(resolution.storedMethodologyVersion)
+      ? `unavailable:legacy-unversioned:${recordId}`
+      : `recorded:${resolution.storedMethodologyVersion}`;
+  }
+  if (resolution.didRecompute || resolution.mode === "current-computation") {
+    return `computed:${resolution.currentMethodologyVersion}`;
+  }
+  return `unavailable:${resolution.mode}`;
+}
+
 function mapDeal(
   row: SavedAnalysisRow,
   activeBuyBoxes: NamedBuyBox[] = [],
@@ -370,6 +391,7 @@ function mapDeal(
         : "recomputed"
       : null,
     methodologyLabel: methodologyLabel(resolution),
+    methodologyCohort: methodologyCohort(resolution, row.id),
   };
 }
 
@@ -432,6 +454,7 @@ async function loadComparePickerDeals(
         : (toNumber(snap.netCashFlow) ?? toNumber(r.net_cash_flow_monthly)),
       capRate: resolvedCurrent ? resolvedCurrent.capRatePct : toNumber(snap.capRate),
       methodologyLabel: methodologyLabel(resolution),
+      methodologyCohort: methodologyCohort(resolution, r.id),
     } satisfies ComparePickerDeal;
   });
 

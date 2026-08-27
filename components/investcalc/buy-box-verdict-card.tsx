@@ -12,10 +12,10 @@
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Check, ChevronDown, Minus, Target, X } from "lucide-react";
+import { Check, ChevronDown, Loader2, Minus, RefreshCw, Target, X } from "lucide-react";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 import {
-  boxesForDealClient,
+  boxesForPersonalAnalyzerStrategy,
   buyBoxHasCriteria,
   evaluateBuyBoxes,
   selectDecidingBuyBoxResult,
@@ -23,6 +23,11 @@ import {
   type BuyBoxDealMetrics,
   type NamedBuyBox,
 } from "@/lib/buy-box";
+import type { AnalyzerStrategyKey } from "@/lib/analyzer-strategy-persistence";
+import {
+  namedBuyBoxFromDecisionBasis,
+  type OfferCeilingDecisionBasis,
+} from "@/lib/offer-ceiling-decision-basis";
 import { buildBuyBoxQaReport, type DealQaBuyBoxReport } from "@/lib/deal-qa-context";
 import {
   chooseMaoTargetFromBuyBox,
@@ -47,6 +52,10 @@ export function BuyBoxVerdictCard({
   onFitChange,
   onQaContextChange,
   onLoadStateChange,
+  analyzerStrategyKey,
+  adoptedDecisionBasis,
+  retryToken = 0,
+  onRetry,
 }: {
   enabled: boolean;
   metrics: BuyBoxDealMetrics | null;
@@ -70,6 +79,18 @@ export function BuyBoxVerdictCard({
    *  parent uses this to prevent Save/Share/PDF from capturing the fallback
    *  target during the async account lookup. */
   onLoadStateChange?: (state: "loading" | "ready" | "error") => void;
+  /** Only personal boxes for this exact analyzer strategy (plus deliberately
+   *  unscoped boxes) may influence the verdict or Offer Ceiling target. */
+  analyzerStrategyKey?: AnalyzerStrategyKey | null;
+  /** Exact immutable basis adopted before this analysis ran. `null` is an
+   * explicit instruction not to substitute whichever live Buy Box happens to
+   * pass today; `undefined` retains the account-overlay behavior used by the
+   * standalone shared-deal viewer. */
+  adoptedDecisionBasis?: OfferCeilingDecisionBasis | null;
+  /** Parent-owned retry counter lets the top-of-result notice and this inline
+   *  card trigger the same scoped lookup without a full-page refresh. */
+  retryToken?: number;
+  onRetry?: () => void;
 }) {
   const [boxes, setBoxes] = useState<NamedBuyBox[] | null>(null);
   const [lookupState, setLookupState] = useState<"idle" | "loading" | "resolved" | "error">(
@@ -78,6 +99,11 @@ export function BuyBoxVerdictCard({
   // Mobile-only progressive disclosure for the per-criterion grid — the
   // headline + personal line answer "does it fit?"; the grid is detail.
   const [showChecks, setShowChecks] = useState(false);
+  const lastDeliveryKeyRef = useRef<string | null | undefined>(undefined);
+  const frozenDecisionBox = useMemo(
+    () => namedBuyBoxFromDecisionBasis(adoptedDecisionBasis),
+    [adoptedDecisionBasis],
+  );
 
   useEffect(() => {
     if (!enabled) {
@@ -85,8 +111,23 @@ export function BuyBoxVerdictCard({
       setLookupState("resolved");
       return;
     }
+    // The analyzer passes this prop explicitly. Evaluate the one frozen box
+    // selected before Run; never re-query and switch to a different passing
+    // box after the result exists. A custom/legacy basis intentionally yields
+    // no Buy Box verdict rather than inventing current-profile provenance.
+    if (adoptedDecisionBasis !== undefined) {
+      setBoxes(frozenDecisionBox ? [frozenDecisionBox] : []);
+      setLookupState("resolved");
+      lastDeliveryKeyRef.current = undefined;
+      onFitChange?.(null);
+      onQaContextChange?.(null);
+      return;
+    }
     setBoxes(null);
     setLookupState("loading");
+    // A retry can resolve to the same report as the prior success. It still
+    // must redeliver `ready` after the transient failure.
+    lastDeliveryKeyRef.current = undefined;
     onFitChange?.(null);
     onQaContextChange?.(null);
     onLoadStateChange?.("loading");
@@ -102,15 +143,15 @@ export function BuyBoxVerdictCard({
           onLoadStateChange?.("error");
           return;
         }
-        // Only adopt boxes the user can use, that are switched on and have ≥1 rule.
-        // Scope matters too: a client-assigned box holds THAT BUYER's criteria
-        // (lib/buy-box.ts boxesForDealClient — "clientId set → screens ONLY
-        // deals assigned to that client"). The analyzer is a personal surface,
-        // so it must use the agent's OWN boxes; every other surface that reads
-        // buy boxes already applies this rule, and this one silently did not.
+        // Only adopt personal boxes for this exact analysis lens (plus boxes
+        // deliberately saved without a strategy). Client-assigned criteria and
+        // mismatched strategies must never drive a personal verdict or ceiling.
         if (result.canUse) {
           setBoxes(
-            boxesForDealClient(result.boxes, null).filter(
+            boxesForPersonalAnalyzerStrategy(
+              result.boxes,
+              analyzerStrategyKey,
+            ).filter(
               (b) => b.isActive && buyBoxHasCriteria(b)
             )
           );
@@ -135,7 +176,16 @@ export function BuyBoxVerdictCard({
     return () => {
       cancelled = true;
     };
-  }, [enabled, onFitChange, onLoadStateChange, onQaContextChange]);
+  }, [
+    analyzerStrategyKey,
+    adoptedDecisionBasis,
+    enabled,
+    frozenDecisionBox,
+    onFitChange,
+    onLoadStateChange,
+    onQaContextChange,
+    retryToken,
+  ]);
 
   const evaluated = useMemo(() => {
     if (!boxes || boxes.length === 0 || !metrics) return null;
@@ -155,7 +205,6 @@ export function BuyBoxVerdictCard({
     () => (evaluated ? buildBuyBoxQaReport(evaluated.results, evaluated.summary) : null),
     [evaluated]
   );
-  const lastDeliveryKeyRef = useRef<string | null | undefined>(undefined);
   useEffect(() => {
     if (lookupState !== "resolved") return;
     const key = JSON.stringify({ anyPass, qaReport });
@@ -207,6 +256,58 @@ export function BuyBoxVerdictCard({
       return null;
     }
   }, [values, metrics, evaluated]);
+
+  if (enabled && lookupState === "loading") {
+    return (
+      <section
+        aria-label="Buy Box rules"
+        role="status"
+        className="flex items-start gap-3 rounded-2xl border border-primary/20 bg-[var(--brand-blue-light)] p-4 text-sm text-foreground sm:p-5"
+      >
+        <Loader2
+          className="mt-0.5 size-4 shrink-0 animate-spin text-primary"
+          aria-hidden
+        />
+        <div>
+          <p className="font-bold">Loading strategy-matched Buy Box rules…</p>
+          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+            Base underwriting remains visible. TrueCap will not claim a Buy
+            Box-backed Offer Ceiling until the matching rules resolve.
+          </p>
+        </div>
+      </section>
+    );
+  }
+
+  if (enabled && lookupState === "error") {
+    return (
+      <section
+        aria-label="Buy Box rules unavailable"
+        role="alert"
+        className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 sm:p-5"
+      >
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-bold">Buy Box rules are temporarily unavailable</p>
+            <p className="mt-1 text-xs leading-relaxed text-amber-900/80">
+              No Buy Box fit or target-backed Offer Ceiling is being claimed.
+              You can still save, share, or export the base underwriting;
+              explicitly selected targets remain labeled separately.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onRetry}
+            disabled={!onRetry}
+            className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-lg border border-amber-500/50 bg-background px-3 text-xs font-bold text-amber-950 transition-colors hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <RefreshCw className="size-4" aria-hidden />
+            Retry Buy Box
+          </button>
+        </div>
+      </section>
+    );
+  }
 
   if (!evaluated) return null;
 

@@ -113,6 +113,11 @@ import {
 } from "@/lib/mao-targets";
 import type { MaoTarget } from "@/lib/max-allowable-offer";
 import {
+  decisionBasisBuyBoxName,
+  normalizeOfferCeilingDecisionBasis,
+  type OfferCeilingDecisionBasis,
+} from "@/lib/offer-ceiling-decision-basis";
+import {
   isAdoptedOfferCeilingTargetSource,
   type OfferCeilingTargetSource,
 } from "@/lib/offer-ceiling-contract";
@@ -323,6 +328,10 @@ interface AnalysisDashboardProps {
   /** Provenance persisted with an override. Without this, reopening a target
    * captured from a Buy Box would be mislabeled as a manual edit. */
   maoTargetOverrideSource?: OfferCeilingTargetSource | null;
+  /** Immutable criteria identity selected before this analysis ran. An
+   * explicit null prevents a later live Buy Box lookup from changing the
+   * verdict basis after the Offer Ceiling was calculated. */
+  adoptedDecisionBasis?: OfferCeilingDecisionBasis | null;
   /** Lifts explicit target edits so Save and Share preserve the same basis. */
   onMaoTargetChange?: (target: MaoTarget) => void;
   /** Recorded solve captured atomically with a saved result. Null means this
@@ -491,6 +500,7 @@ export function AnalysisDashboard({
   persistedActionsBlockHint,
   maoTargetOverride = null,
   maoTargetOverrideSource = null,
+  adoptedDecisionBasis,
   onMaoTargetChange,
   recordedOfferCeiling = null,
   advocacyContractEligible = false,
@@ -581,18 +591,46 @@ export function AnalysisDashboard({
   // the 375px first paint). Resets on remount, matching the old banner.
   const [sampleBannerDismissed, setSampleBannerDismissed] = useState(false);
 
-  // Buy-box fit reported up by BuyBoxVerdictCard (client-side fetch lives
-  // there), consumed by the Next Action banner so both speak with one
-  // voice. null = no active box / not evaluated.
-  const [buyBoxAnyPass, setBuyBoxAnyPass] = useState<boolean | null>(null);
+  const activeBuyBoxStrategyKey = activeStrategy?.key ?? "buy-hold";
+  // Bind child-reported Buy Box data to the strategy that produced it. A
+  // strategy switch renders before effects run; without this synchronous key
+  // guard, the prior strategy's fit/targets could flash for one committed
+  // frame and start an Offer Ceiling request on mismatched criteria.
+  const [buyBoxFitState, setBuyBoxFitState] = useState<{
+    strategyKey: string;
+    value: boolean | null;
+  }>({ strategyKey: activeBuyBoxStrategyKey, value: null });
+  const buyBoxAnyPass =
+    buyBoxFitState.strategyKey === activeBuyBoxStrategyKey
+      ? buyBoxFitState.value
+      : null;
+  const handleBuyBoxFitChange = useCallback(
+    (value: boolean | null) => {
+      setBuyBoxFitState({ strategyKey: activeBuyBoxStrategyKey, value });
+    },
+    [activeBuyBoxStrategyKey],
+  );
   // Deal Q&A grounding depth — assembled ONLY from what this surface already
   // computes/holds (no new fetches): the buy-box evaluation reported up by
   // BuyBoxVerdictCard, the comp set reported up by PropertyCompsCard, the
   // Offer Ceiling solved from the current form values, and the exit-scenario return
   // summary. Absent pieces are simply omitted from the AI context.
-  const [buyBoxQaReport, setBuyBoxQaReport] =
-    useState<DealQaBuyBoxReport | null>(null);
+  const [buyBoxQaState, setBuyBoxQaState] = useState<{
+    strategyKey: string;
+    report: DealQaBuyBoxReport | null;
+  }>({ strategyKey: activeBuyBoxStrategyKey, report: null });
+  const buyBoxQaReport =
+    buyBoxQaState.strategyKey === activeBuyBoxStrategyKey
+      ? buyBoxQaState.report
+      : null;
+  const handleBuyBoxQaContextChange = useCallback(
+    (report: DealQaBuyBoxReport | null) => {
+      setBuyBoxQaState({ strategyKey: activeBuyBoxStrategyKey, report });
+    },
+    [activeBuyBoxStrategyKey],
+  );
   const requiresBuyBoxTargetResolution = Boolean(
+    adoptedDecisionBasis === undefined &&
     isAuthenticated &&
     canUseMaxOffer &&
     !maoTargetOverride &&
@@ -604,21 +642,58 @@ export function AnalysisDashboard({
   // completed lookup instead of resetting to `loading` without a refetch.
   // A guest/auth transition remounts or restarts the account lookup; address,
   // sample-preview, and explicit-target changes do not.
-  const [buyBoxTargetResolutionState, setBuyBoxTargetResolutionState] =
-    useState<"loading" | "ready" | "error">(
-      isAuthenticated ? "loading" : "ready",
-    );
+  const [buyBoxTargetResolution, setBuyBoxTargetResolution] = useState<{
+    strategyKey: string;
+    state: "loading" | "ready" | "error";
+  }>({
+    strategyKey: activeBuyBoxStrategyKey,
+    state: isAuthenticated ? "loading" : "ready",
+  });
+  const buyBoxTargetResolutionState =
+    buyBoxTargetResolution.strategyKey === activeBuyBoxStrategyKey
+      ? buyBoxTargetResolution.state
+      : "loading";
+  const handleBuyBoxTargetResolutionChange = useCallback(
+    (state: "loading" | "ready" | "error") => {
+      setBuyBoxTargetResolution({
+        strategyKey: activeBuyBoxStrategyKey,
+        state,
+      });
+    },
+    [activeBuyBoxStrategyKey],
+  );
   useEffect(() => {
-    setBuyBoxTargetResolutionState(isAuthenticated ? "loading" : "ready");
-  }, [isAuthenticated]);
+    setBuyBoxTargetResolution({
+      strategyKey: activeBuyBoxStrategyKey,
+      state: isAuthenticated ? "loading" : "ready",
+    });
+  }, [activeBuyBoxStrategyKey, isAuthenticated]);
+  const [buyBoxRetryToken, setBuyBoxRetryToken] = useState(0);
+  const retryBuyBoxResolution = useCallback(() => {
+    setBuyBoxTargetResolution({
+      strategyKey: activeBuyBoxStrategyKey,
+      state: "loading",
+    });
+    setBuyBoxRetryToken((current) => current + 1);
+  }, [activeBuyBoxStrategyKey]);
+  const buyBoxResolutionUnavailable =
+    requiresBuyBoxTargetResolution &&
+    buyBoxTargetResolutionState === "error";
+  // A lookup error fails closed for every target-dependent claim but must not
+  // strand the base underwriting workflow. Treat the target editor as ready
+  // with no adopted Buy Box so Save/Share/PDF persist only base assumptions.
   const effectiveBuyBoxTargetResolutionState = requiresBuyBoxTargetResolution
-    ? buyBoxTargetResolutionState
+    ? buyBoxResolutionUnavailable
+      ? "ready"
+      : buyBoxTargetResolutionState
     : "ready";
-  const targetActionsBlocked = effectiveBuyBoxTargetResolutionState !== "ready";
-  const targetActionsBlockedReason =
-    buyBoxTargetResolutionState === "error"
-      ? "Your Buy Box could not be loaded. Refresh to retry before saving, sharing, or exporting."
-      : "Loading your Buy Box criteria before this action is available.";
+  const targetActionsBlocked =
+    effectiveBuyBoxTargetResolutionState === "loading";
+  const targetActionsBlockedReason = targetActionsBlocked
+    ? "Checking saved Buy Box rules for this strategy. TrueCap will only ask you to set targets after this check finishes."
+    : buyBoxResolutionUnavailable
+      ? "Buy Box rules are unavailable. Save, share, and export remain available, but no Buy Box fit or Buy Box-backed Offer Ceiling is being claimed."
+      : undefined;
   const [compsQaData, setCompsQaData] = useState<PropertyEnrichment | null>(
     null,
   );
@@ -723,6 +798,30 @@ export function AnalysisDashboard({
         : null,
     [isCashPurchase, maoTargetOverride],
   );
+  const normalizedDecisionBasis = useMemo(
+    () =>
+      normalizeOfferCeilingDecisionBasis(adoptedDecisionBasis, {
+        ...(financingSafeOverride ? { target: financingSafeOverride } : {}),
+        ...(maoTargetOverrideSource
+          ? { source: maoTargetOverrideSource }
+          : {}),
+        strategyKey: activeBuyBoxStrategyKey,
+      }),
+    [
+      activeBuyBoxStrategyKey,
+      adoptedDecisionBasis,
+      financingSafeOverride,
+      maoTargetOverrideSource,
+    ],
+  );
+  // Historical rows recorded only `source: buy-box` without a box identity or
+  // immutable rules. Treat those numbers as copied selected criteria; never
+  // relabel them with whichever live Buy Box happens to exist today.
+  const effectiveMaoTargetOverrideSource =
+    maoTargetOverrideSource === "buy-box" &&
+    normalizedDecisionBasis?.source !== "buy-box"
+      ? "selected-targets"
+      : maoTargetOverrideSource;
   const resolvedMaoSeed = useMemo(() => {
     if (!values || !result) return null;
     if (maoTargetOverride) {
@@ -776,8 +875,10 @@ export function AnalysisDashboard({
     [onMaoTargetChange],
   );
   const buyBoxIsTargetSource =
-    (maoTargetOverrideSource === "buy-box" && Boolean(financingSafeOverride)) ||
-    (!maoTargetOverride &&
+    (normalizedDecisionBasis?.source === "buy-box" &&
+      Boolean(financingSafeOverride)) ||
+    (adoptedDecisionBasis === undefined &&
+      !maoTargetOverride &&
       !maoTargetState.touched &&
       buyBoxContributesToMaoTarget(buyBoxQaReport?.maoThresholds ?? null, {
         isCashPurchase,
@@ -785,7 +886,7 @@ export function AnalysisDashboard({
   const offerCeilingTargetSource: OfferCeilingTargetSource =
     buyBoxIsTargetSource
       ? "buy-box"
-      : ((financingSafeOverride ? maoTargetOverrideSource : null) ??
+      : ((financingSafeOverride ? effectiveMaoTargetOverrideSource : null) ??
         (financingSafeOverride || maoTargetState.touched
           ? "selected-targets"
           : "screening-defaults"));
@@ -1334,19 +1435,25 @@ export function AnalysisDashboard({
           Scenario reset because the base assumptions changed.
         </div>
       ) : null}
-      {targetActionsBlocked ? (
+      {requiresBuyBoxTargetResolution &&
+      buyBoxTargetResolutionState !== "ready" ? (
         <div
           role={buyBoxTargetResolutionState === "error" ? "alert" : "status"}
-          className="flex flex-col gap-2 rounded-xl border border-primary/20 bg-[var(--brand-blue-light)] px-4 py-3 text-sm text-foreground sm:flex-row sm:items-center sm:justify-between"
+          className={cn(
+            "flex flex-col gap-2 rounded-xl border px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between",
+            buyBoxTargetResolutionState === "error"
+              ? "border-amber-300 bg-amber-50 text-amber-950"
+              : "border-primary/20 bg-[var(--brand-blue-light)] text-foreground",
+          )}
         >
           <span>{targetActionsBlockedReason}</span>
           {buyBoxTargetResolutionState === "error" ? (
             <button
               type="button"
-              onClick={() => window.location.reload()}
-              className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg border border-primary/30 px-3 font-semibold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              onClick={retryBuyBoxResolution}
+              className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg border border-amber-500/50 bg-background px-3 font-semibold text-amber-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              Refresh and retry
+              Retry Buy Box
             </button>
           ) : null}
         </div>
@@ -1359,7 +1466,53 @@ export function AnalysisDashboard({
         First-pass underwriting
       </h1>
 
-      {decisionFirst && result && values && activeMaoTarget ? (
+      {decisionFirst &&
+      !strategyLeadsOutput &&
+      targetActionsBlocked &&
+      result &&
+      values ? (
+        <section
+          aria-label="Base underwriting while decision rules load"
+          className="rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6"
+        >
+          <p className="truncate text-sm font-semibold text-muted-foreground">
+            {values.address}
+          </p>
+          <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-foreground">
+            Base underwriting is ready
+          </h2>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="rounded-xl border border-border bg-muted/20 p-3">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                Cash flow after reserve
+              </p>
+              <p className="mt-1 font-mono text-lg font-extrabold tabular-nums text-foreground">
+                {result.netCashFlow < 0 ? "-" : ""}$
+                {Math.round(Math.abs(result.netCashFlow)).toLocaleString(
+                  "en-US",
+                )}
+                /mo
+              </p>
+            </div>
+            <div className="rounded-xl border border-border bg-muted/20 p-3">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                Model DSCR
+              </p>
+              <p className="mt-1 font-mono text-lg font-extrabold tabular-nums text-foreground">
+                {Number.isFinite(result.dscr) ? result.dscr.toFixed(2) : "N/A"}
+              </p>
+            </div>
+          </div>
+          <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+            Checking the saved Buy Box rules for this strategy before showing
+            any target-backed fit or Offer Ceiling.
+          </p>
+        </section>
+      ) : decisionFirst &&
+        !strategyLeadsOutput &&
+        result &&
+        values &&
+        activeMaoTarget ? (
         <section
           aria-labelledby="analysis-decision-title"
           className="space-y-3"
@@ -1377,8 +1530,9 @@ export function AnalysisDashboard({
             targetProfileId={
               isSampleProPreview
                 ? SAMPLE_DEAL_FIXTURE.targetProfile.id
-                : buyBoxIsTargetSource && !maoTargetOverride
-                  ? (buyBoxQaReport?.selectedBox.id ?? null)
+                : normalizedDecisionBasis?.source === "buy-box" &&
+                    normalizedDecisionBasis.rules.kind === "buy-box"
+                  ? normalizedDecisionBasis.rules.boxId
                   : null
             }
             targetProfileVersion={
@@ -1392,14 +1546,12 @@ export function AnalysisDashboard({
             buyBoxName={
               isSampleProPreview
                 ? SAMPLE_DEAL_FIXTURE.targetProfile.name
-                : buyBoxIsTargetSource && !maoTargetOverride
-                  ? (buyBoxQaReport?.selectedBox.name ?? null)
-                  : null
+                : decisionBasisBuyBoxName(normalizedDecisionBasis)
             }
             buyBoxFit={
-              maoTargetOverrideSource === "buy-box" && maoTargetOverride
-                ? null
-                : buyBoxAnyPass
+              normalizedDecisionBasis?.source === "buy-box"
+                ? buyBoxAnyPass
+                : null
             }
             buyBoxHasUnknownRules={Boolean(
               buyBoxQaReport?.context.checks.some(
@@ -1457,6 +1609,7 @@ export function AnalysisDashboard({
             targetResolutionMessage={targetActionsBlockedReason}
             advocacyContractEnabled={advocacyDecisionContract}
             analyzerStrategyKey={activeStrategy?.key ?? "buy-hold"}
+            adoptedDecisionBasis={normalizedDecisionBasis}
           />
           {/* Screening Index — the FREE 0-100 heuristic sold on /pricing and
               computed on every run, which the decision-first rebuild left
@@ -1508,6 +1661,17 @@ export function AnalysisDashboard({
             onMaoTargetChange={handleMaoTargetChange}
             onTuneTargetsOpened={() => {
               trackEvent("targets_opened", { placement: "wholesale_outcome" });
+            }}
+            onReviewCriteria={() => {
+              onEditAssumptions();
+              requestAnimationFrame(() => {
+                const criteria = document.getElementById("decision-criteria");
+                criteria?.scrollIntoView({
+                  behavior: scrollBehavior(),
+                  block: "start",
+                });
+                criteria?.focus({ preventScroll: true });
+              });
             }}
             onUpgrade={goToBilling}
             strategyInputs={strategyInputs ?? values}
@@ -1592,10 +1756,12 @@ export function AnalysisDashboard({
           onPrepare={handlePrepareOffer}
         />
       ) : null}
-      {/* The focused decision summary owns Save, Share, target tuning and
-          assumption editing when decision-first is on. Keep this legacy
-          six-action toolbar behind the kill switch only. */}
-      {!decisionFirst ? (
+      {/* The focused decision summary owns these actions for the default
+          Buy & Hold flow. Specialist strategies intentionally omit that
+          generic decision hero, so this established toolbar keeps Save,
+          Share, PDF, Compare, repeat analysis and editing reachable beneath
+          their strategy-specific outcome. */}
+      {!decisionFirst || strategyLeadsOutput ? (
         /* Action bar — identity strip ("what is this?") + Quick Actions
            ("what can I do with it?"). */
         <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
@@ -2015,7 +2181,8 @@ export function AnalysisDashboard({
           Screening Index. */}
       {result && values ? (
         <BuyBoxVerdictCard
-          enabled={Boolean(isAuthenticated)}
+          key={activeStrategy?.key ?? "buy-hold"}
+          enabled={Boolean(isAuthenticated && canUseMaxOffer)}
           metrics={{
             capRatePct: result.capRate ?? null,
             cocPct: result.cocReturn ?? null,
@@ -2027,9 +2194,13 @@ export function AnalysisDashboard({
             isCashPurchase: result.monthlyPayment <= 0,
           }}
           values={values}
-          onFitChange={setBuyBoxAnyPass}
-          onQaContextChange={setBuyBoxQaReport}
-          onLoadStateChange={setBuyBoxTargetResolutionState}
+          analyzerStrategyKey={activeStrategy?.key ?? "buy-hold"}
+          adoptedDecisionBasis={normalizedDecisionBasis}
+          retryToken={buyBoxRetryToken}
+          onRetry={retryBuyBoxResolution}
+          onFitChange={handleBuyBoxFitChange}
+          onQaContextChange={handleBuyBoxQaContextChange}
+          onLoadStateChange={handleBuyBoxTargetResolutionChange}
         />
       ) : null}
 
@@ -2125,7 +2296,7 @@ export function AnalysisDashboard({
         payoff="Every metric, and the levers that move them"
         openEvent="the_numbers_opened"
       >
-        <div className={cn("space-y-3", strategyLeadsOutput && "hidden")}>
+        <div className="space-y-3">
           <section
             aria-labelledby="numbers-section-title"
             className="space-y-3"

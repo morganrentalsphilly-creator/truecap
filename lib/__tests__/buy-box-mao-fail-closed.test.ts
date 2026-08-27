@@ -6,7 +6,7 @@ const read = (path: string) =>
   readFileSync(resolve(process.cwd(), path), "utf8");
 
 describe("Buy Box target resolution fails closed", () => {
-  it("blocks live Save, Share, and PDF until the account criteria resolve", () => {
+  it("blocks while resolving, then permits base persistence without a Buy Box claim after failure", () => {
     const dashboard = read("components/investcalc/analysis-dashboard.tsx");
     const card = read("components/investcalc/buy-box-verdict-card.tsx");
 
@@ -14,7 +14,14 @@ describe("Buy Box target resolution fails closed", () => {
     expect(card).toContain('onLoadStateChange?.("error")');
     expect(dashboard).toContain("const effectiveBuyBoxTargetResolutionState");
     expect(dashboard).toContain(
-      'const targetActionsBlocked = effectiveBuyBoxTargetResolutionState !== "ready"',
+      'effectiveBuyBoxTargetResolutionState === "loading"',
+    );
+    expect(dashboard).toContain("buyBoxResolutionUnavailable");
+    expect(dashboard).toContain(
+      "Save, share, and export remain available, but no Buy Box fit or Buy Box-backed Offer Ceiling is being claimed.",
+    );
+    expect(dashboard).toContain(
+      "const adoptedMaoTarget = targetAdopted",
     );
     // The two guards split so the plan-lock branch can EXPLAIN itself (toast
     // with an upgrade path) instead of a silent disabled button — but both
@@ -38,13 +45,15 @@ describe("Buy Box target resolution fails closed", () => {
       dashboard.indexOf("const [compsQaData"),
     );
     expect(readinessBlock).not.toContain("values?.address");
-    expect(readinessBlock).toMatch(
-      /useState<\s*"loading" \| "ready" \| "error"\s*>\s*\(\s*isAuthenticated \? "loading" : "ready"/,
+    expect(readinessBlock).toContain(
+      'state: "loading" | "ready" | "error";',
     );
     expect(readinessBlock).toContain(
-      'setBuyBoxTargetResolutionState(isAuthenticated ? "loading" : "ready")',
+      'state: isAuthenticated ? "loading" : "ready"',
     );
-    expect(readinessBlock).toContain("}, [isAuthenticated]);");
+    expect(readinessBlock).toContain(
+      "}, [activeBuyBoxStrategyKey, isAuthenticated]);",
+    );
     expect(readinessBlock).not.toContain(
       'requiresBuyBoxTargetResolution ? "loading" : "ready"',
     );

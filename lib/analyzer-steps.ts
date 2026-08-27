@@ -8,17 +8,23 @@
  *
  * Steps map to the form's real sections:
  *   property  → property type + address + purchase price
- *   income    → the rentable unit(s): beds + rent (SFR uses bedrooms+monthlyRent,
+ *   income    → the rentable unit(s): rent (bedrooms are an optional fact,
  *               MF/owner-occupant use the units array)
  *   financing → down payment % / rate / term (ships with smart defaults)
- *   expenses  → operating %s + tax/insurance (defaults + coercion = always runnable)
- *   decision  → the result (verdict / Deal Score / MAO), reachable after a run
+ *   expenses  → the four required operating percentages
+ *   decision  → the result, with target readiness distinguished when supplied
  *
  * Kept pure + dependency-light so it's unit-testable and safe to call on
  * every keystroke from the (large) analyzer component.
  */
 
-import { isValidRentalUnit, type UnitValues } from "@/lib/investcalc-schema";
+import {
+  MAX_MONTHLY_RENT,
+  MAX_PURCHASE_PRICE,
+  MIN_PURCHASE_PRICE,
+  isValidRentalUnit,
+  type UnitValues,
+} from "@/lib/investcalc-schema";
 
 export type AnalyzerStepId =
   | "property"
@@ -47,6 +53,20 @@ export interface AnalyzerStepInput {
   downPaymentPct?: number;
   interestRate?: number;
   loanTermYears?: number;
+  maintenancePct?: number;
+  vacancyPct?: number;
+  mgmtPct?: number;
+  capexPct?: number;
+}
+
+export interface AnalyzerStepOptions {
+  hasResults: boolean;
+  /**
+   * Whether the result has adopted decision criteria for an Offer Ceiling.
+   * Omit when the caller has no target concept; `false` keeps Decision in
+   * progress even though the base operating analysis exists.
+   */
+  hasDecisionCriteria?: boolean;
 }
 
 const isNum = (n: unknown): n is number =>
@@ -66,14 +86,24 @@ export function isAnalyzerStepId(value: string): value is AnalyzerStepId {
 
 export function computeAnalyzerSteps(
   v: AnalyzerStepInput,
-  opts: { hasResults: boolean }
+  opts: AnalyzerStepOptions
 ): AnalyzerStep[] {
   // Property — address + purchase price. Year/baths/sqft are optional accuracy
   // boosters and don't gate the step.
-  const hasAddress = typeof v.address === "string" && v.address.trim().length >= 5;
-  const hasPrice = isNum(v.purchasePrice) && v.purchasePrice >= 10000;
+  const addressLength = typeof v.address === "string" ? v.address.trim().length : 0;
+  const hasAddress = addressLength >= 5 && addressLength <= 200;
+  const hasPrice =
+    isNum(v.purchasePrice) &&
+    v.purchasePrice >= MIN_PURCHASE_PRICE &&
+    v.purchasePrice <= MAX_PURCHASE_PRICE;
+  const hasAnyAddress = addressLength > 0;
+  const hasAnyPrice = isNum(v.purchasePrice);
   const property: StepStatus =
-    hasAddress && hasPrice ? "complete" : hasAddress || hasPrice ? "partial" : "empty";
+    hasAddress && hasPrice
+      ? "complete"
+      : hasAnyAddress || hasAnyPrice
+        ? "partial"
+        : "empty";
 
   // Income — the rentable unit(s).
   let income: StepStatus;
@@ -86,23 +116,68 @@ export function computeAnalyzerSteps(
     const anyEntry = units.some((u) => isNum(u.monthlyRent) || isNum(u.bedrooms));
     income = allComplete ? "complete" : anyEntry ? "partial" : "empty";
   } else {
-    const hasBeds = isNum(v.bedrooms);
-    const hasRent = isNum(v.monthlyRent) && v.monthlyRent > 0;
-    income = hasBeds && hasRent ? "complete" : hasBeds || hasRent ? "partial" : "empty";
+    const bedrooms = v.bedrooms;
+    const monthlyRent = v.monthlyRent;
+    const hasBeds = isNum(bedrooms);
+    const bedsAreValid = !hasBeds || (bedrooms >= 0 && bedrooms <= 20);
+    const hasRent = isNum(monthlyRent);
+    const rentIsValid =
+      hasRent && monthlyRent > 0 && monthlyRent <= MAX_MONTHLY_RENT;
+    income = rentIsValid && bedsAreValid
+      ? "complete"
+      : hasBeds || hasRent
+        ? "partial"
+        : "empty";
   }
 
-  // Financing — required down/rate/term ship with smart defaults, so this is
-  // "complete" out of the box and only drops to "partial" if a field is cleared.
-  const financing: StepStatus =
-    isNum(v.downPaymentPct) && isNum(v.interestRate) && isNum(v.loanTermYears)
-      ? "complete"
-      : "partial";
+  // Financing — mirror the schema ranges instead of treating any three finite
+  // numbers (including impossible rates/terms) as complete.
+  const financingValues = [
+    v.downPaymentPct,
+    v.interestRate,
+    v.loanTermYears,
+  ];
+  const hasAnyFinancing = financingValues.some(isNum);
+  const financingIsValid =
+    isNum(v.downPaymentPct) &&
+    v.downPaymentPct >= 0 &&
+    v.downPaymentPct <= 100 &&
+    isNum(v.interestRate) &&
+    v.interestRate >= 0 &&
+    v.interestRate <= 30 &&
+    isNum(v.loanTermYears) &&
+    Number.isInteger(v.loanTermYears) &&
+    v.loanTermYears >= 1 &&
+    v.loanTermYears <= 50;
+  const financing: StepStatus = financingIsValid
+    ? "complete"
+    : hasAnyFinancing
+      ? "partial"
+      : "empty";
 
-  // Expenses — operating %s default and coerce to a runnable set (empty → 0),
-  // so the deal can always be run on defaults.
-  const expenses: StepStatus = "complete";
+  // Expenses — these four percentages are required by the schema. Explicit 0
+  // is valid; a cleared or out-of-range value is not complete.
+  const expenseValues = [
+    v.maintenancePct,
+    v.vacancyPct,
+    v.mgmtPct,
+    v.capexPct,
+  ];
+  const hasAnyExpense = expenseValues.some(isNum);
+  const expensesAreValid = expenseValues.every(
+    (value) => isNum(value) && value >= 0 && value <= 50,
+  );
+  const expenses: StepStatus = expensesAreValid
+    ? "complete"
+    : hasAnyExpense
+      ? "partial"
+      : "empty";
 
-  const decision: StepStatus = opts.hasResults ? "complete" : "pending";
+  const decision: StepStatus = !opts.hasResults
+    ? "pending"
+    : opts.hasDecisionCriteria === false
+      ? "partial"
+      : "complete";
 
   return [
     { id: "property", label: "Property", status: property },

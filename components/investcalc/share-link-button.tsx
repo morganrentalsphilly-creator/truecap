@@ -25,6 +25,7 @@ import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import type { AnalyzerStrategyKey } from "@/lib/analyzer-strategy-persistence";
 import type { MaoTarget } from "@/lib/max-allowable-offer";
 import type { OfferCeilingTargetSource } from "@/lib/offer-ceiling-contract";
+import type { OfferCeilingDecisionBasis } from "@/lib/offer-ceiling-decision-basis";
 import {
   createPublicShareAction,
   listPublicSharesAction,
@@ -55,6 +56,8 @@ interface ShareLinkButtonProps {
   priceIsEstimated?: boolean;
   /** Provenance shown beside that exact target. */
   maoTargetSource?: OfferCeilingTargetSource | null;
+  /** Immutable rule identity paired with the target. */
+  adoptedDecisionBasis?: OfferCeilingDecisionBasis | null;
   /** Agent Pro deal workspace context. This changes only the user-facing label
    *  and emits the already-declared, PII-safe client-report funnel event. */
   context?: "analysis" | "client-report";
@@ -75,6 +78,7 @@ export function ShareLinkButton({
   savedDealId,
   maoTarget,
   maoTargetSource,
+  adoptedDecisionBasis,
   priceIsEstimated = false,
   context = "analysis",
   disabled: externallyDisabled = false,
@@ -233,6 +237,7 @@ export function ShareLinkButton({
         dealId: savedDealId ?? undefined,
         maoTarget: maoTarget ?? undefined,
         maoTargetSource: maoTargetSource ?? undefined,
+        offerCeilingDecisionBasis: adoptedDecisionBasis ?? undefined,
         audience,
         addressVisibility: includeAddress ? "full" : "hidden",
         analyzerStrategyKey: analyzerStrategyKey ?? "buy-hold",

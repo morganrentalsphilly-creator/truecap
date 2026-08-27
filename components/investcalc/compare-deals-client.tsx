@@ -121,7 +121,20 @@ export type CompareDealViewModel = {
    * rebuilt as one current-methodology result from legacy saved inputs. */
   compareSnapshotSource: "recorded" | "recomputed" | null;
   methodologyLabel?: string;
+  methodologyCohort: string;
 };
+
+export function areDealMethodologiesComparable(
+  deals: Pick<CompareDealViewModel, "methodologyCohort">[]
+): boolean {
+  if (deals.length === 0) return false;
+  const cohort = deals[0]?.methodologyCohort;
+  return Boolean(
+    cohort &&
+      !cohort.startsWith("unavailable:") &&
+      deals.every((deal) => deal.methodologyCohort === cohort)
+  );
+}
 
 function getTypeIcon(type: PropertyType | null) {
   if (type === "multi-family") return Building2;
@@ -382,10 +395,11 @@ function comparableMetricValue(
   return deal.metrics[row.key] ?? null;
 }
 
-function getComparableBestValue(
+export function getComparableBestValue(
   row: MetricRow,
   deals: CompareDealViewModel[]
 ): number | null {
+  if (!areDealMethodologiesComparable(deals)) return null;
   const eligibleDeals =
     row.key === "dscr" ? deals.filter((deal) => !isCashPurchaseDeal(deal)) : deals;
   return getBestValue(row, eligibleDeals);
@@ -575,11 +589,15 @@ const LONG_TERM_METRIC_ROWS: LongTermMetricRow[] = [
 ];
 
 function getBestLongTermDealIds(row: LongTermMetricRow, deals: CompareDealViewModel[]): Set<string> {
+  if (!areDealMethodologiesComparable(deals)) return new Set();
   if (row.direction === "none") return new Set();
   const candidates = deals
     .map((deal) => ({ id: deal.id, value: row.getValue(deal) }))
-    .filter((candidate): candidate is { id: string; value: number } => candidate.value != null);
-  if (candidates.length === 0) return new Set();
+    .filter(
+      (candidate): candidate is { id: string; value: number } =>
+        candidate.value != null && Number.isFinite(candidate.value)
+    );
+  if (candidates.length < 2) return new Set();
 
   const bestValue =
     row.direction === "higher"
@@ -593,6 +611,9 @@ function getBestLongTermDealIds(row: LongTermMetricRow, deals: CompareDealViewMo
 }
 
 function getLongTermHighlightedWinCounts(deals: CompareDealViewModel[]): Map<string, number> {
+  if (!areDealMethodologiesComparable(deals)) {
+    return new Map(deals.map((deal) => [deal.id, 0]));
+  }
   return tallyScoreMetricLeads(
     deals,
     LONG_TERM_METRIC_ROWS
@@ -606,7 +627,10 @@ function getLongTermHighlightedWinCounts(deals: CompareDealViewModel[]): Map<str
   );
 }
 
-function getShortTermHighlightedWinCounts(deals: CompareDealViewModel[]): Map<string, number> {
+export function getShortTermHighlightedWinCounts(deals: CompareDealViewModel[]): Map<string, number> {
+  if (!areDealMethodologiesComparable(deals)) {
+    return new Map(deals.map((deal) => [deal.id, 0]));
+  }
   return tallyScoreMetricLeads(
     deals,
     METRIC_ROWS.map((row) => ({
@@ -621,7 +645,7 @@ function getShortTermHighlightedWinCounts(deals: CompareDealViewModel[]): Map<st
   );
 }
 
-function getLeaderIdsFromHighlightedCounts(
+export function getLeaderIdsFromHighlightedCounts(
   deals: CompareDealViewModel[],
   counts: Map<string, number>
 ): string[] {
@@ -1033,6 +1057,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
   const [selectionError, setSelectionError] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [selectionPending, startSelectionTransition] = useTransition();
+  const methodologiesComparable = areDealMethodologiesComparable(deals);
 
   const showSelectionEditor = () => {
     setSelectionError(null);
@@ -1095,6 +1120,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
   // else the highest-priority active box (evaluateBuyBoxes is default-first)
   // — the exact rule the deal workspace uses.
   const buyBoxFitById = useMemo(() => {
+    if (!methodologiesComparable) return null;
     if (!buyBoxes || buyBoxes.length === 0) return null;
     const map = new Map<string, { fit: BuyBoxFitSummary; personalLine: string | null }>();
     for (const deal of deals) {
@@ -1121,24 +1147,35 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
       });
     }
     return map.size > 0 ? map : null;
-  }, [buyBoxes, deals]);
+  }, [buyBoxes, deals, methodologiesComparable]);
 
   const shortTermHighlightedWinCounts = getShortTermHighlightedWinCounts(deals);
   const longTermHighlightedWinCounts = getLongTermHighlightedWinCounts(deals);
   const shortTermWinnerIds = getLeaderIdsFromHighlightedCounts(deals, shortTermHighlightedWinCounts);
   const longTermWinnerIds = getLeaderIdsFromHighlightedCounts(deals, longTermHighlightedWinCounts);
-  const shortTermMetricCount = METRIC_ROWS.filter(
-    (row) =>
-      row.scoreMetric &&
-      deals.some((deal) =>
-        row.key === "dscr" && isCashPurchaseDeal(deal)
-          ? false
-          : comparableMetricValue(deal, row) != null
-      )
-  ).length;
-  const longTermMetricCount = LONG_TERM_METRIC_ROWS.filter(
-    (row) => row.scoreMetric && deals.some((deal) => row.getValue(deal) != null)
-  ).length;
+  const shortTermMetricCount = methodologiesComparable
+    ? METRIC_ROWS.filter(
+        (row) =>
+          row.scoreMetric &&
+          deals.filter((deal) => {
+            const value =
+              row.key === "dscr" && isCashPurchaseDeal(deal)
+                ? null
+                : comparableMetricValue(deal, row);
+            return value != null && Number.isFinite(value);
+          }).length >= 2
+      ).length
+    : 0;
+  const longTermMetricCount = methodologiesComparable
+    ? LONG_TERM_METRIC_ROWS.filter(
+        (row) =>
+          row.scoreMetric &&
+          deals.filter((deal) => {
+            const value = row.getValue(deal);
+            return value != null && Number.isFinite(value);
+          }).length >= 2
+      ).length
+    : 0;
   const extremeRoiCount = deals.filter((deal) =>
     formatRoiHeadline(deal.compareSnapshot?.longTermSummary.totalROI).extreme
   ).length;
@@ -1288,12 +1325,31 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
           ) : null}
           <div className="mb-5 rounded-2xl border border-border bg-card px-4 py-3 text-xs leading-relaxed text-muted-foreground">
             <p>
-              Relative modeled comparison only. Row highlights identify the highest or lowest displayed value according to each metric&apos;s direction. Tied values share the highlight; no hidden tie-breaker uses Screening Index, ROI, save date, or source order.
+              Relative modeled comparison only. When every deal uses the same calculation cohort, row highlights identify the highest or lowest displayed value according to each metric&apos;s direction. Tied values share the highlight; no hidden tie-breaker uses Screening Index, ROI, save date, or source order.
             </p>
             <p className="mt-2">
               Near-term lead count uses exactly four nonduplicative decision rows: monthly cash flow, cap rate, financed-deal DSCR, and total cash required. Long-term lead count uses exactly three: 10-year total cash flow, year-10 net sale proceeds, and recorded IRR when available. Target fit appears separately under Your buy box. A higher modeled value does not establish safety or make an investment recommendation.
             </p>
           </div>
+          {!methodologiesComparable ? (
+            <section role="alert" aria-labelledby="methodology-comparison-paused" className="mb-5 rounded-2xl border border-warning/50 bg-warning/10 px-4 py-4 text-sm text-warning-foreground">
+              <h2 id="methodology-comparison-paused" className="font-extrabold">
+                Comparison highlights paused
+              </h2>
+              <p className="mt-1 leading-relaxed">
+                These saved deals were calculated under different versions or from different result sources. Their historical numbers remain visible, but TrueCap will not name a winner, award metric leads, show trophies, or plot them together until they are re-underwritten under one calculation method.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {deals.map((deal, index) => (
+                  <Button key={`${deal.id}-reunderwrite`} asChild variant="outline" size="sm" className="min-h-11 rounded-full border-warning/50 bg-background">
+                    <Link href={`/dashboard/new?savedDeal=${encodeURIComponent(deal.id)}`}>
+                      Re-underwrite deal {index + 1} to compare
+                    </Link>
+                  </Button>
+                ))}
+              </div>
+            </section>
+          ) : null}
           <p className="sr-only" aria-live="polite">
             {selectionPending ? "Updating comparison selection." : ""}
           </p>
@@ -1311,13 +1367,15 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
               removingId={removingId}
               selectionPending={selectionPending}
             />
-            <CompareMobileHighlights
-              deals={deals}
-              shortTermHighlightedWinCounts={shortTermHighlightedWinCounts}
-              longTermHighlightedWinCounts={longTermHighlightedWinCounts}
-              shortTermMetricCount={shortTermMetricCount}
-              longTermMetricCount={longTermMetricCount}
-            />
+            {methodologiesComparable ? (
+              <CompareMobileHighlights
+                deals={deals}
+                shortTermHighlightedWinCounts={shortTermHighlightedWinCounts}
+                longTermHighlightedWinCounts={longTermHighlightedWinCounts}
+                shortTermMetricCount={shortTermMetricCount}
+                longTermMetricCount={longTermMetricCount}
+              />
+            ) : null}
 
             {/* ── Your buy box (PV-4), mobile — one row per compared deal:
                 numbered chip + Meets/Misses pill + the fit's personal line.
@@ -1592,9 +1650,11 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                           isShortTermWinner && "text-primary"
                         )}
                       >
-                        {shortTermScore} lead{shortTermScore === 1 ? "" : "s"}
+                        {methodologiesComparable
+                          ? `${shortTermScore} lead${shortTermScore === 1 ? "" : "s"}`
+                          : "Not comparable"}
                       </p>
-                      {isShortTermWinner && (
+                      {methodologiesComparable && isShortTermWinner && (
                         <p className="mt-0.5 text-[10px] font-semibold text-primary">
                           {shortTermWinnerIds.length > 1 ? "Tied highest lead count" : "Highest lead count"}
                         </p>
@@ -1615,9 +1675,11 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                           isLongTermWinner && "text-primary"
                         )}
                       >
-                        {longTermScore} lead{longTermScore === 1 ? "" : "s"}
+                        {methodologiesComparable
+                          ? `${longTermScore} lead${longTermScore === 1 ? "" : "s"}`
+                          : "Not comparable"}
                       </p>
-                      {isLongTermWinner && (
+                      {methodologiesComparable && isLongTermWinner && (
                         <p className="mt-0.5 text-[10px] font-semibold text-primary">
                           {longTermWinnerIds.length > 1 ? "Tied highest lead count" : "Highest lead count"}
                         </p>
@@ -1831,7 +1893,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
           {/* Risk vs Return — relocated from the dashboard. Needs at least
               two deals to say anything: over a set of one it would name the
               same address as best-return AND safest. */}
-          {riskReturnDeals.length >= 2 ? (
+          {methodologiesComparable && riskReturnDeals.length >= 2 ? (
             <div className="mt-6">
               <RiskReturn deals={riskReturnDeals} />
             </div>

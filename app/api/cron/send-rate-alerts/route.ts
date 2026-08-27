@@ -140,7 +140,9 @@ export async function GET(request: Request) {
     // …with saved, non-archived deals.
     const { data: dealRows, error: dealError } = await admin
       .from("saved_analyses")
-      .select("id, user_id, title, address, form_snapshot")
+      .select(
+        "id, user_id, title, address, form_snapshot, methodology_version, result_snapshot",
+      )
       .in("user_id", optedInIds)
       .is("deleted_at", null)
       .neq("is_archived", true);
@@ -164,6 +166,8 @@ export async function GET(request: Request) {
         address: row.address as string | null,
         values,
         currentRatePct: rates.current,
+        methodologyVersion: row.methodology_version,
+        recordedSnapshot: row.result_snapshot,
       });
       if (!alert) continue;
       const list = alertsByUser.get(row.user_id as string) ?? [];

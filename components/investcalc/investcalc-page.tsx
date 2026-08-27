@@ -105,9 +105,11 @@ import {
 import {
   DRAFT_ANALYZER_STRATEGY_FIELD,
   activeStrategyStateKey,
+  normalizeAnalyzerStrategyKey,
   persistedAnalyzerStrategyKey,
   readDraftAnalyzerStrategyKey,
   resolveCompatibleAnalyzerStrategyKey,
+  type AnalyzerStrategyKey,
 } from "@/lib/analyzer-strategy-persistence";
 import {
   isSpecialistAnalyzerStrategyKey,
@@ -143,6 +145,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { cn, scrollBehavior } from "@/lib/utils";
+import { NEW_ANALYSIS_REQUEST_EVENT } from "@/lib/new-analysis-navigation";
 import {
   saveDealAction,
   type GetSavedDealForEditingResult,
@@ -190,6 +193,7 @@ import {
   maoTargetAnalysisFingerprint,
   maoTargetFingerprint,
   normalizeMaoTarget,
+  normalizeMaoTargetForFinancing,
   readPendingMaoTarget,
   readPendingMaoTargetBinding,
   writePendingMaoTarget,
@@ -241,6 +245,24 @@ import {
 
 import { enrichPropertyAction } from "@/app/actions/enrich-property";
 import { getPropertyCompsAction } from "@/app/actions/property-comps";
+import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
+import {
+  boxesForPersonalAnalyzerStrategy,
+  buyBoxHasCriteria,
+  type NamedBuyBox,
+} from "@/lib/buy-box";
+import {
+  captureBuyBoxDecisionBasis,
+  captureSelectedTargetsDecisionBasis,
+  normalizeOfferCeilingDecisionBasis,
+  OFFER_CEILING_DECISION_BASIS_FIELD,
+  type OfferCeilingDecisionBasis,
+} from "@/lib/offer-ceiling-decision-basis";
+import {
+  buildMaoTarget,
+  chooseMaoTargetFromBuyBox,
+  describeMaoTarget,
+} from "@/lib/mao-targets";
 import type { SelectedAddress } from "./address-autocomplete";
 import type {
   TenYearProjectionInput,
@@ -261,7 +283,10 @@ import {
   normalizeOfferCeilingTargetSource,
   type OfferCeilingTargetSource,
 } from "@/lib/offer-ceiling-contract";
-import { getAnalyzerCta } from "@/lib/analyzer-cta";
+import {
+  analysisRunPromisesOfferCeiling,
+  getAnalyzerCta,
+} from "@/lib/analyzer-cta";
 import { analysisDateForExplicitV1Run } from "@/lib/analysis-date";
 import {
   clearPendingSaveIntent,
@@ -477,9 +502,38 @@ function writeCalcDraftWithMaoTarget(
   sourceInput?: unknown,
   strategyKeyInput?: unknown,
   inputConfidenceSourceContext?: InputConfidenceSourceContext | null,
+  decisionBasisInput?: unknown,
 ): void {
   if (!isReleasedUnderwritingSnapshot(values)) return;
   try {
+    // A target-only change can call this writer without rebuilding the input
+    // confidence ledger. Preserve the already-bound ledger instead of
+    // accidentally erasing provenance simply because no form field changed.
+    let sourceContext = inputConfidenceSourceContext;
+    let existingDecisionBasis: OfferCeilingDecisionBasis | null = null;
+    if (sourceContext === undefined || decisionBasisInput === undefined) {
+      const currentDraft = readCalcDraftRaw();
+      if (currentDraft) {
+        try {
+          const parsed = JSON.parse(currentDraft) as Record<string, unknown>;
+          const existing = parsed[DRAFT_INPUT_CONFIDENCE_SOURCE_CONTEXT_FIELD];
+          if (
+            sourceContext === undefined &&
+            existing &&
+            typeof existing === "object"
+          ) {
+            sourceContext = existing as InputConfidenceSourceContext;
+          }
+          if (decisionBasisInput === undefined) {
+            existingDecisionBasis = normalizeOfferCeilingDecisionBasis(
+              parsed[OFFER_CEILING_DECISION_BASIS_FIELD],
+            );
+          }
+        } catch {
+          /* malformed legacy draft — write the valid current form below */
+        }
+      }
+    }
     // A draft may be intentionally incomplete while the user is still
     // configuring a specialist lens (for example STR before ADR is entered).
     // Preserve the explicit enum identity here; strict formula compatibility
@@ -488,15 +542,22 @@ function writeCalcDraftWithMaoTarget(
       strategyKeyInput,
       values as { avgDailyRate?: unknown },
     );
+    const decisionBasis =
+      decisionBasisInput === undefined
+        ? existingDecisionBasis
+        : normalizeOfferCeilingDecisionBasis(decisionBasisInput);
     writeCalcDraftRaw(
       JSON.stringify({
         ...(values as Record<string, unknown>),
         [DRAFT_ANALYZER_STRATEGY_FIELD]: strategyKey,
-        ...(inputConfidenceSourceContext
+        ...(sourceContext
           ? {
               [DRAFT_INPUT_CONFIDENCE_SOURCE_CONTEXT_FIELD]:
-                inputConfidenceSourceContext,
+                sourceContext,
             }
+          : {}),
+        ...(decisionBasis
+          ? { [OFFER_CEILING_DECISION_BASIS_FIELD]: decisionBasis }
           : {}),
       }),
     );
@@ -527,6 +588,29 @@ function clearCalcDraftRaw(): void {
   } catch {
     /* no-op */
   }
+}
+
+function restoreDecisionBasisBinding(input: {
+  basis: unknown;
+  target: MaoTarget | null;
+  source: unknown;
+  strategyKey: AnalyzerStrategyKey;
+}): {
+  basis: OfferCeilingDecisionBasis | null;
+  source: OfferCeilingTargetSource | null;
+  needsReview: boolean;
+} {
+  if (!input.target) return { basis: null, source: null, needsReview: false };
+  const source = normalizeOfferCeilingTargetSource(input.source);
+  const basis = normalizeOfferCeilingDecisionBasis(input.basis, {
+    target: input.target,
+    ...(source ? { source } : {}),
+    strategyKey: input.strategyKey,
+  });
+  if (basis) return { basis, source: basis.source, needsReview: false };
+  // Legacy snapshots recorded only a numeric target and, sometimes, the word
+  // "buy-box". That is copied criteria—not proof of a current profile.
+  return { basis: null, source: "selected-targets", needsReview: true };
 }
 
 /**
@@ -827,6 +911,8 @@ export function InvestCalcPage({
     null,
   );
   const activeStrategyKeyRef = useRef<string | null>(null);
+  const currentAnalyzerStrategyKey = (): AnalyzerStrategyKey =>
+    normalizeAnalyzerStrategyKey(activeStrategyKeyRef.current) ?? "buy-hold";
   useEffect(() => {
     activeStrategyKeyRef.current = activeStrategyKey;
   }, [activeStrategyKey]);
@@ -1051,6 +1137,8 @@ export function InvestCalcPage({
   const [addressChangedChoiceBusy, setAddressChangedChoiceBusy] =
     useState<AddressChangedChoice | null>(null);
   const [savedDealId, setSavedDealId] = useState<string | null>(null);
+  const [deletedDealRecoveryActive, setDeletedDealRecoveryActive] =
+    useState(false);
   const [underwritingConflict, setUnderwritingConflict] = useState<{
     savedDealId: string;
     autoAfterAuth?: boolean;
@@ -1084,6 +1172,19 @@ export function InvestCalcPage({
   );
   const [analysisMaoTargetSource, setAnalysisMaoTargetSource] =
     useState<OfferCeilingTargetSource | null>(null);
+  const [analysisDecisionBasis, setAnalysisDecisionBasis] =
+    useState<OfferCeilingDecisionBasis | null>(null);
+  const [decisionBasisNeedsReview, setDecisionBasisNeedsReview] =
+    useState(false);
+  // Set only by the explicit "operating economics without an Offer Ceiling"
+  // action. The normal Pro path must adopt visible criteria before a run, but
+  // this one-shot escape hatch is intentional and must not be mistaken for a
+  // missing-target error inside onSubmit.
+  const explicitTargetlessRunRef = useRef(false);
+  const [personalBuyBoxes, setPersonalBuyBoxes] = useState<NamedBuyBox[]>([]);
+  const [preRunBuyBoxState, setPreRunBuyBoxState] = useState<
+    "idle" | "loading" | "ready" | "error"
+  >(isAuthenticated && canUseMaxOffer ? "loading" : "idle");
   const pendingSamplePreviewRef = useRef(false);
   const pendingSampleRunRef = useRef(false);
   const autoSaveAfterAuthRef = useRef(false);
@@ -1160,6 +1261,9 @@ export function InvestCalcPage({
   const forkGenerationRef = useRef(0);
   const lastPersistedFormJsonRef = useRef<string | null>(null);
   const analysisMaoTargetRef = useRef<MaoTarget | null>(analysisMaoTarget);
+  const analysisDecisionBasisRef = useRef<OfferCeilingDecisionBasis | null>(
+    analysisDecisionBasis,
+  );
   /** True while the CURRENT adopted-target state was seeded by the synthetic
    *  sample demo rather than an explicit user action. The sample's targets are
    *  EXAMPLE rules — they must never survive as "your selected targets" once
@@ -1185,15 +1289,24 @@ export function InvestCalcPage({
    * every prior attestation rather than letting it follow the numbers. */
   const inputVerificationAddressRef = useRef<string | null>(null);
   const isCalculatingRef = useRef(false);
+  const addressEnrichmentPromiseRef = useRef<Promise<void> | null>(null);
+  const deferredRunAfterEnrichmentRef = useRef(false);
+  const [isAddressEnrichmentPending, setIsAddressEnrichmentPending] =
+    useState(false);
   const autoExportPdfRef = useRef(false);
   const currentSaveDealLimitReached =
     saveDealLimitReached ||
     (savedDealLimit !== null && savedDealCount >= savedDealLimit);
-  const areAnalysisTabsEnabled = Boolean(analysisResult) && !isCalculating;
+  const areAnalysisTabsEnabled =
+    Boolean(analysisResult) && !isCalculating && !isEditingAssumptions;
 
   useEffect(() => {
     analysisMaoTargetRef.current = analysisMaoTarget;
   }, [analysisMaoTarget]);
+
+  useEffect(() => {
+    analysisDecisionBasisRef.current = analysisDecisionBasis;
+  }, [analysisDecisionBasis]);
 
   const mapInputTabToDashboardTab = useCallback(
     (tab: InputTab): AnalysisDashboardTab | null => {
@@ -1420,6 +1533,13 @@ export function InvestCalcPage({
       analysisMaoTargetRef.current = target;
       setAnalysisMaoTarget(target);
       setAnalysisMaoTargetSource("selected-targets");
+      const decisionBasis = captureSelectedTargetsDecisionBasis({
+        target,
+        strategyKey: currentAnalyzerStrategyKey(),
+      });
+      analysisDecisionBasisRef.current = decisionBasis;
+      setAnalysisDecisionBasis(decisionBasis);
+      setDecisionBasisNeedsReview(false);
       // Editing the rules IS explicit adoption — even if the editor was
       // seeded by the sample, the user has now made these targets theirs.
       sampleSeededMaoTargetRef.current = false;
@@ -1429,8 +1549,26 @@ export function InvestCalcPage({
       // beside historical base metrics for one mixed-methodology view.
       setRecordedOfferCeiling(invalidateRecordedOfferCeilingForTargetEdit);
       syncFormDirtyVersusPersisted();
+      // A new/guest analysis has no server row yet, so target-only edits must
+      // travel with the local draft just like form-field edits. The form.watch
+      // draft writer does not fire for this separate target state.
+      if (!savedDealIdRef.current) {
+        const values = form.getValues();
+        try {
+          writeCalcDraftWithMaoTarget(
+            values,
+            target,
+            "selected-targets",
+            activeStrategyKeyRef.current,
+            undefined,
+            decisionBasis,
+          );
+        } catch {
+          /* storage unavailable — current-session target remains intact */
+        }
+      }
     },
-    [syncFormDirtyVersusPersisted],
+    [form, syncFormDirtyVersusPersisted],
   );
 
   const clearAnalysisOutputs = useCallback(() => {
@@ -1457,6 +1595,9 @@ export function InvestCalcPage({
     setIsSampleProPreview(false);
     setAnalysisMaoTarget(null);
     setAnalysisMaoTargetSource(null);
+    analysisDecisionBasisRef.current = null;
+    setAnalysisDecisionBasis(null);
+    setDecisionBasisNeedsReview(false);
     sampleSeededMaoTargetRef.current = false;
     clearPendingMaoTarget();
     setIsEditingAssumptions(false);
@@ -1726,6 +1867,27 @@ export function InvestCalcPage({
     zip: string | null;
     normalizedAddress: string | null;
   } | null>(null);
+  const seedRestoredAddressIdentity = (address: string | null | undefined) => {
+    const formattedAddress = address?.trim();
+    if (!formattedAddress) {
+      lastSelectedAddressRef.current = null;
+      lastEnrichedAddressRef.current = null;
+      lastEnrichedGeoRef.current = null;
+      return;
+    }
+    const parsed = parseAddressLocation(formattedAddress);
+    const restoredPlace: SelectedAddress = {
+      formattedAddress,
+      ...(parsed.state ? { state: parsed.state } : {}),
+      ...(parsed.zip ? { zip: parsed.zip } : {}),
+    };
+    lastSelectedAddressRef.current = restoredPlace;
+    lastEnrichedAddressRef.current = formattedAddress;
+    lastEnrichedGeoRef.current = {
+      state: restoredPlace.state,
+      ...autofillPropertyIdentity(restoredPlace),
+    };
+  };
 
   /**
    * One source-of-truth for every confidence/provenance consumer. A reopened
@@ -1980,13 +2142,30 @@ export function InvestCalcPage({
         ? parsedBedrooms
         : undefined;
 
-      const enrichment = await enrichPropertyAction({
-        state: place.state,
-        county: place.county,
-        zip: place.zip,
-        propertyType: currentPropertyType,
-        bedrooms,
-      });
+      let enrichment: Awaited<ReturnType<typeof enrichPropertyAction>>;
+      try {
+        enrichment = await enrichPropertyAction({
+          state: place.state,
+          county: place.county,
+          zip: place.zip,
+          propertyType: currentPropertyType,
+          bedrooms,
+        });
+      } catch (error) {
+        // A network rejection or stale-deploy Server Action must never leave
+        // the analyzer stuck in a loading state. Enrichment is optional: keep
+        // the user's explicit values authoritative and let them continue.
+        console.warn("[property enrichment] lookup failed:", error);
+        if (!opts?.silent) {
+          toast({
+            title: "Property lookup unavailable",
+            description:
+              "You can keep underwriting with the values you enter. Try Autofill again when the connection recovers.",
+            variant: "warning",
+          });
+        }
+        return;
+      }
 
       // Stale-completion guard (same contract as performSaveDeal's
       // saveGeneration): "Analyze another like this" or a newer address
@@ -2169,9 +2348,92 @@ export function InvestCalcPage({
     [form, toast, userAnalysisDefaults],
   );
 
+  const runTrackedPropertyEnrichment = useCallback(
+    (place: SelectedAddress, opts?: { silent?: boolean }) => {
+      const request = runPropertyEnrichment(place, opts);
+      addressEnrichmentPromiseRef.current = request;
+      setIsAddressEnrichmentPending(true);
+      void request.finally(() => {
+        if (addressEnrichmentPromiseRef.current !== request) return;
+        addressEnrichmentPromiseRef.current = null;
+        setIsAddressEnrichmentPending(false);
+      });
+      return request;
+    },
+    [runPropertyEnrichment],
+  );
+
   /** Address-selected entry point (passed to PropertyDetailsSection). */
   const handleAddressSelected = useCallback(
     async (place: SelectedAddress) => {
+      const previousPlace = lastSelectedAddressRef.current;
+      const changedProperty = Boolean(
+        previousPlace &&
+          !isSameAutofillProperty(
+            autofillPropertyIdentity(previousPlace),
+            place,
+          ),
+      );
+      if (changedProperty) {
+        const currentValues = form.getValues();
+        const hasPropertySpecificValues = Boolean(
+          currentValues.purchasePrice ||
+            currentValues.monthlyRent ||
+            currentValues.bedrooms != null ||
+            currentValues.bathrooms != null ||
+            currentValues.sqft != null ||
+            currentValues.units?.some(
+              (unit) =>
+                unit.monthlyRent != null ||
+                unit.bedrooms != null ||
+                unit.bathrooms != null ||
+                unit.sqft != null,
+            ),
+        );
+        if (hasPropertySpecificValues) {
+          const useNewProperty = window.confirm(
+            "Use this new property?\n\nChoose OK to use it and clear the previous property’s price, rent, bedrooms, and physical details. Financing and general operating assumptions will stay. Choose Cancel to return to the previous address.",
+          );
+          if (!useNewProperty) {
+            form.setValue("address", previousPlace!.formattedAddress, {
+              shouldDirty: true,
+              shouldTouch: true,
+              shouldValidate: true,
+            });
+            toast({
+              title: "Kept the previous property",
+              description: "No property facts or assumptions were changed.",
+            });
+            return;
+          }
+          const clearOpts = {
+            shouldDirty: true,
+            shouldTouch: false,
+            shouldValidate: false,
+          } as const;
+          form.setValue(
+            "purchasePrice",
+            undefined as unknown as number,
+            clearOpts,
+          );
+          form.setValue("monthlyRent", undefined, clearOpts);
+          form.setValue("bedrooms", undefined, clearOpts);
+          form.setValue("bathrooms", undefined, clearOpts);
+          form.setValue("sqft", undefined, clearOpts);
+          const units = form.getValues("units") ?? [];
+          for (let index = 0; index < units.length; index += 1) {
+            form.setValue(`units.${index}.monthlyRent`, undefined, clearOpts);
+            form.setValue(`units.${index}.bedrooms`, undefined, clearOpts);
+            form.setValue(`units.${index}.bathrooms`, undefined, clearOpts);
+            form.setValue(`units.${index}.sqft`, undefined, clearOpts);
+          }
+          toast({
+            title: "Property-specific values cleared",
+            description:
+              "Financing and general operating assumptions were kept for the new address.",
+          });
+        }
+      }
       enrichedUnitsRef.current.clear();
       lastSelectedAddressRef.current = place;
       // runPropertyEnrichment owns the identity check. It clears captures for
@@ -2179,9 +2441,9 @@ export function InvestCalcPage({
       // a same-address re-selection whose display formatting changed.
       // Funnel step - boolean only; never location/address data.
       trackEvent("address_selected", { has_state: Boolean(place.state) });
-      await runPropertyEnrichment(place);
+      await runTrackedPropertyEnrichment(place);
     },
-    [runPropertyEnrichment],
+    [form, runTrackedPropertyEnrichment, toast],
   );
 
   /**
@@ -2207,7 +2469,7 @@ export function InvestCalcPage({
     // an unhandled promise rejection in the browser (which fires
     // Sentry's "Load failed" / "Failed to fetch" alerts on mobile).
     // Enrichment is best-effort by design; failure is silent.
-    runPropertyEnrichment(place, { silent: false }).catch((err) => {
+    runTrackedPropertyEnrichment(place, { silent: false }).catch((err) => {
       console.warn("[bedrooms watcher] enrichment failed:", err);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -2230,9 +2492,72 @@ export function InvestCalcPage({
   const watchedAddress = form.watch("address");
   const watchedMonthlyRent = form.watch("monthlyRent");
   const watchedDownPaymentPct = form.watch("downPaymentPct");
+  useEffect(() => {
+    if (!isAuthenticated || !canUseMaxOffer) {
+      setPersonalBuyBoxes([]);
+      setPreRunBuyBoxState("idle");
+      return;
+    }
+    let cancelled = false;
+    setPreRunBuyBoxState("loading");
+    void listBuyBoxesAction()
+      .then((result) => {
+        if (cancelled) return;
+        if (!result.ok || !result.canUse) {
+          setPersonalBuyBoxes([]);
+          setPreRunBuyBoxState(result.ok ? "ready" : "error");
+          return;
+        }
+        setPersonalBuyBoxes(result.boxes);
+        setPreRunBuyBoxState("ready");
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setPersonalBuyBoxes([]);
+        setPreRunBuyBoxState("error");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [canUseMaxOffer, isAuthenticated]);
+
+  const preRunBuyBox = useMemo(() => {
+    const compatible = boxesForPersonalAnalyzerStrategy(
+      personalBuyBoxes,
+      activeStrategyKey as AnalyzerStrategyKey | null,
+    )
+      .filter((box) => box.isActive && buyBoxHasCriteria(box))
+      .sort((a, b) =>
+        a.isDefault === b.isDefault
+          ? a.sortOrder - b.sortOrder
+          : a.isDefault
+            ? -1
+            : 1,
+      );
+    return compatible[0] ?? null;
+  }, [activeStrategyKey, personalBuyBoxes]);
+  const preRunBuyBoxTarget = useMemo(
+    () =>
+      preRunBuyBox
+        ? chooseMaoTargetFromBuyBox(preRunBuyBox, {
+            isCashPurchase: isAllCashDownPayment(watchedDownPaymentPct),
+          })
+        : null,
+    [preRunBuyBox, watchedDownPaymentPct],
+  );
+  const starterPreRunTarget = useMemo(
+    () =>
+      buildMaoTarget(null, {
+        isCashPurchase: isAllCashDownPayment(watchedDownPaymentPct),
+      }),
+    [watchedDownPaymentPct],
+  );
   const watchedInterestRate = form.watch("interestRate");
   const watchedLoanTermYears = form.watch("loanTermYears");
   const watchedVacancyPct = form.watch("vacancyPct");
+  const watchedMaintenancePct = form.watch("maintenancePct");
+  const watchedMgmtPct = form.watch("mgmtPct");
+  const watchedCapexPct = form.watch("capexPct");
   const livePreviewAssumptionBasis = [
     compactPercent(watchedDownPaymentPct) != null
       ? `${compactPercent(watchedDownPaymentPct)}% down`
@@ -2260,8 +2585,19 @@ export function InvestCalcPage({
           downPaymentPct: watchedDownPaymentPct,
           interestRate: watchedInterestRate,
           loanTermYears: watchedLoanTermYears,
+          maintenancePct: watchedMaintenancePct,
+          vacancyPct: watchedVacancyPct,
+          mgmtPct: watchedMgmtPct,
+          capexPct: watchedCapexPct,
         },
-        { hasResults: analysisResult != null },
+        {
+          hasResults: analysisResult != null,
+          hasDecisionCriteria: Boolean(
+            analysisMaoTarget &&
+              analysisMaoTargetSource &&
+              isAdoptedOfferCeilingTargetSource(analysisMaoTargetSource),
+          ),
+        },
       ),
     [
       propertyType,
@@ -2273,7 +2609,13 @@ export function InvestCalcPage({
       watchedDownPaymentPct,
       watchedInterestRate,
       watchedLoanTermYears,
+      watchedMaintenancePct,
+      watchedVacancyPct,
+      watchedMgmtPct,
+      watchedCapexPct,
       analysisResult,
+      analysisMaoTarget,
+      analysisMaoTargetSource,
     ],
   );
 
@@ -3342,6 +3684,11 @@ export function InvestCalcPage({
   // snapshot fetch/upsert server actions on every keystroke.
   recomputeOutputsFromFormRef.current = () => {
     if (isProgrammaticResetRef.current || isCalculatingRef.current) return;
+    // The sample launcher stages many field writes before its deferred submit.
+    // Treat that window as one atomic demo run; a live recompute in between
+    // would retire the sample criteria before the background-tab backstop can
+    // submit the fixture.
+    if (pendingSampleRunRef.current) return;
     const baseline = lastComputedFormJsonRef.current;
     // No prior run → the first FULL compute stays an explicit Run (preserving
     // the funnel events, loading state, and server-action gating in onSubmit).
@@ -3436,6 +3783,9 @@ export function InvestCalcPage({
       analysisMaoTargetRef.current = null;
       setAnalysisMaoTarget(null);
       setAnalysisMaoTargetSource("screening-defaults");
+      analysisDecisionBasisRef.current = null;
+      setAnalysisDecisionBasis(null);
+      setDecisionBasisNeedsReview(false);
       clearPendingMaoTarget();
     }
     // These outputs were just recomputed from the live form. They are no
@@ -3541,6 +3891,16 @@ export function InvestCalcPage({
       if (savedDealIdRef.current) return;
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => {
+        // The synthetic demo is a disposable product tour, not the investor's
+        // next deal. Persisting its values made every later login reopen the
+        // sample as an apparent draft and forced repeat users to clear it by
+        // hand before real work. Preserve any earlier genuine draft instead.
+        if (
+          pendingSampleRunRef.current ||
+          sampleSeededMaoTargetRef.current
+        ) {
+          return;
+        }
         // Sample-seeded example targets are session theater, not user
         // adoption — persisting them would resurrect "your selected
         // targets" on the next reload of a deal the user never targeted.
@@ -3555,6 +3915,7 @@ export function InvestCalcPage({
             currentValues,
             form.formState.dirtyFields as Record<string, unknown>,
           ),
+          sampleSeeded ? null : analysisDecisionBasisRef.current,
         );
       }, CALC_FORM_DRAFT_DEBOUNCE_MS);
     });
@@ -3649,6 +4010,7 @@ export function InvestCalcPage({
           formSnapshot?: unknown;
           maxOfferTarget?: unknown;
           maxOfferTargetSource?: unknown;
+          offerCeilingDecisionBasis?: unknown;
           analyzerStrategyKey?: unknown;
         };
         // Lenient fallback: the fork wipes address/price/rents anyway, so a
@@ -3663,11 +4025,12 @@ export function InvestCalcPage({
           const forked = buildRepeatDealDraft(normalized);
           prevPropertyTypeRef.current = normalized.propertyType;
           form.reset(forked);
+          const duplicatedAnalyzerStrategyKey = persistedAnalyzerStrategyKey(
+            parsed.analyzerStrategyKey,
+            normalized,
+          );
           const duplicatedActiveStrategy = activeStrategyStateKey(
-            persistedAnalyzerStrategyKey(
-              parsed.analyzerStrategyKey,
-              normalized,
-            ),
+            duplicatedAnalyzerStrategyKey,
           );
           activeStrategyKeyRef.current = duplicatedActiveStrategy;
           setActiveStrategyKey(duplicatedActiveStrategy);
@@ -3679,17 +4042,28 @@ export function InvestCalcPage({
             ? (normalizeOfferCeilingTargetSource(parsed.maxOfferTargetSource) ??
               "selected-targets")
             : null;
+          const duplicatedDecisionBinding = restoreDecisionBasisBinding({
+            basis: parsed.offerCeilingDecisionBasis,
+            target: duplicatedMaoTarget,
+            source: duplicatedMaoTargetSource,
+            strategyKey: duplicatedAnalyzerStrategyKey,
+          });
           analysisMaoTargetRef.current = duplicatedMaoTarget;
           setAnalysisMaoTarget(duplicatedMaoTarget);
-          setAnalysisMaoTargetSource(duplicatedMaoTargetSource);
+          setAnalysisMaoTargetSource(duplicatedDecisionBinding.source);
+          analysisDecisionBasisRef.current = duplicatedDecisionBinding.basis;
+          setAnalysisDecisionBasis(duplicatedDecisionBinding.basis);
+          setDecisionBasisNeedsReview(duplicatedDecisionBinding.needsReview);
           // Persist the blank-identity fork immediately; the debounced watcher
           // is intentionally suppressed during this programmatic reset. Later
           // user edits rebind the same target through the normal draft writer.
           writeCalcDraftWithMaoTarget(
             forked,
             duplicatedMaoTarget,
-            duplicatedMaoTargetSource,
+            duplicatedDecisionBinding.source,
             activeStrategyKeyRef.current,
+            undefined,
+            duplicatedDecisionBinding.basis,
           );
           setInputVerification({});
           inputVerificationAddressRef.current = null;
@@ -3775,6 +4149,7 @@ export function InvestCalcPage({
           };
           prevPropertyTypeRef.current = hydratedValues.propertyType;
           form.reset(hydratedValues);
+          seedRestoredAddressIdentity(hydratedValues.address);
           setSavedDealId(parsed.id);
           savedDealIdRef.current = parsed.id;
           savedUnderwritingRevisionRef.current = parseSavedAnalysisRevision(
@@ -3822,15 +4197,24 @@ export function InvestCalcPage({
           const restoredMaoTargetSource = normalizeOfferCeilingTargetSource(
             savedResultRecord?.maxOfferTargetSource,
           );
+          const restoredDecisionBinding = restoreDecisionBasisBinding({
+            basis: savedResultRecord?.[OFFER_CEILING_DECISION_BASIS_FIELD],
+            target: restoredMaoTarget,
+            source: restoredMaoTargetSource,
+            strategyKey: restoredAnalyzerStrategyKey,
+          });
           analysisMaoTargetRef.current = restoredMaoTarget;
           lastPersistedMaoTargetJsonRef.current =
             maoTargetFingerprint(restoredMaoTarget);
           setAnalysisMaoTarget(restoredMaoTarget);
           setAnalysisMaoTargetSource(
             restoredMaoTarget
-              ? (restoredMaoTargetSource ?? "selected-targets")
+              ? restoredDecisionBinding.source
               : null,
           );
+          analysisDecisionBasisRef.current = restoredDecisionBinding.basis;
+          setAnalysisDecisionBasis(restoredDecisionBinding.basis);
+          setDecisionBasisNeedsReview(restoredDecisionBinding.needsReview);
           const savedInputConfidence =
             savedResultRecord?.inputConfidence &&
             typeof savedResultRecord.inputConfidence === "object" &&
@@ -4033,6 +4417,7 @@ export function InvestCalcPage({
           );
           prevPropertyTypeRef.current = lenient.propertyType;
           form.reset(lenient);
+          seedRestoredAddressIdentity(lenient.address);
           persistedInputConfidenceSourceContextRef.current = null;
           persistedInputConfidenceAddressRef.current = null;
           setInputVerification({});
@@ -4043,11 +4428,12 @@ export function InvestCalcPage({
             !Array.isArray(parsed.resultSnapshot)
               ? (parsed.resultSnapshot as Record<string, unknown>)
               : null;
+          const restoredAnalyzerStrategyKey = persistedAnalyzerStrategyKey(
+            lenientResultRecord?.analyzerStrategyKey,
+            lenient,
+          );
           const restoredActiveStrategy = activeStrategyStateKey(
-            persistedAnalyzerStrategyKey(
-              lenientResultRecord?.analyzerStrategyKey,
-              lenient,
-            ),
+            restoredAnalyzerStrategyKey,
           );
           activeStrategyKeyRef.current = restoredActiveStrategy;
           setActiveStrategyKey(restoredActiveStrategy);
@@ -4079,15 +4465,25 @@ export function InvestCalcPage({
                   .maxOfferTargetSource
               : null,
           );
+          const restoredDecisionBinding = restoreDecisionBasisBinding({
+            basis:
+              lenientResultRecord?.[OFFER_CEILING_DECISION_BASIS_FIELD],
+            target: restoredMaoTarget,
+            source: restoredTargetSource,
+            strategyKey: restoredAnalyzerStrategyKey,
+          });
           analysisMaoTargetRef.current = restoredMaoTarget;
           lastPersistedMaoTargetJsonRef.current =
             maoTargetFingerprint(restoredMaoTarget);
           setAnalysisMaoTarget(restoredMaoTarget);
           setAnalysisMaoTargetSource(
             restoredMaoTarget
-              ? (restoredTargetSource ?? "selected-targets")
+              ? restoredDecisionBinding.source
               : null,
           );
+          analysisDecisionBasisRef.current = restoredDecisionBinding.basis;
+          setAnalysisDecisionBasis(restoredDecisionBinding.basis);
+          setDecisionBasisNeedsReview(restoredDecisionBinding.needsReview);
           toast({
             title: "One field needs a fix",
             description: issue
@@ -4207,25 +4603,86 @@ export function InvestCalcPage({
         // for and the catch below then wiped them.
         const normalized = normalizeReleasedInvestmentFormDraft(parsedDraft);
         if (normalized) {
-          prevPropertyTypeRef.current = normalized.propertyType;
-          form.reset(normalized);
+          const sampleValues = SAMPLE_DEAL_FIXTURE.values;
+          const restoredAnalyzerStrategyKey = persistedAnalyzerStrategyKey(
+            readDraftAnalyzerStrategyKey(parsedDraft),
+            normalized,
+          );
           const pendingMaoBinding = readPendingMaoTargetBinding(
             maoTargetAnalysisFingerprint(normalized),
           );
+          const pendingTargetMatchesSample =
+            !pendingMaoBinding ||
+            (pendingMaoBinding.source !== "buy-box" &&
+              maoTargetFingerprint(pendingMaoBinding.target) ===
+                maoTargetFingerprint(SAMPLE_DEAL_FIXTURE.maoTarget));
+          // The exact demo is sometimes written deliberately for a just-clicked
+          // Save or Share authentication handoff. That recent, draft-bound
+          // intent is not stale sample residue: it must survive long enough to
+          // restore the result and complete the action without a second click.
+          const resumesPendingSaveAfterAuth =
+            isAuthenticated && pendingSaveIntentMatchesDraft(normalized);
+          let resumesPendingShareAfterAuth = false;
+          if (isAuthenticated) {
+            try {
+              resumesPendingShareAfterAuth =
+                parseShareAuthIntent(
+                  window.sessionStorage.getItem(
+                    SHARE_AUTH_INTENT_STORAGE_KEY,
+                  ),
+                  { currentPath: window.location.pathname },
+                )?.context === "analysis";
+            } catch {
+              /* unavailable tab storage — no resumable share intent */
+            }
+          }
+          const matchesSyntheticSampleDraft =
+            restoredAnalyzerStrategyKey === SAMPLE_DEAL_FIXTURE.strategyKey &&
+            formSnapshotForCompare(normalized) ===
+              formSnapshotForCompare(sampleValues) &&
+            pendingTargetMatchesSample;
+          const isSyntheticSampleDraft =
+            matchesSyntheticSampleDraft &&
+            !resumesPendingSaveAfterAuth &&
+            !resumesPendingShareAfterAuth;
+          if (isSyntheticSampleDraft) {
+            // Clean up drafts created by older releases that did persist the
+            // demo. A synthetic sample must never become the default starting
+            // point for an authenticated investor's next work session.
+            clearCalcDraftRaw();
+            clearPendingMaoTarget();
+            resetToNewAnalysis("single-family");
+            queueMicrotask(() => {
+              isProgrammaticResetRef.current = false;
+            });
+            return;
+          }
+          prevPropertyTypeRef.current = normalized.propertyType;
+          form.reset(normalized);
+          seedRestoredAddressIdentity(normalized.address);
           const pendingMaoTarget = pendingMaoBinding?.target ?? null;
-          analysisMaoTargetRef.current = pendingMaoTarget;
-          setAnalysisMaoTarget(pendingMaoTarget);
-          setAnalysisMaoTargetSource(
-            pendingMaoTarget
-              ? (pendingMaoBinding?.source ?? "selected-targets")
-              : null,
-          );
           const draftRecord =
             parsedDraft &&
             typeof parsedDraft === "object" &&
             !Array.isArray(parsedDraft)
               ? (parsedDraft as Record<string, unknown>)
               : null;
+          const restoredDecisionBinding = restoreDecisionBasisBinding({
+            basis: draftRecord?.[OFFER_CEILING_DECISION_BASIS_FIELD],
+            target: pendingMaoTarget,
+            source: pendingMaoBinding?.source,
+            strategyKey: restoredAnalyzerStrategyKey,
+          });
+          analysisMaoTargetRef.current = pendingMaoTarget;
+          setAnalysisMaoTarget(pendingMaoTarget);
+          setAnalysisMaoTargetSource(
+            pendingMaoTarget
+              ? restoredDecisionBinding.source
+              : null,
+          );
+          analysisDecisionBasisRef.current = restoredDecisionBinding.basis;
+          setAnalysisDecisionBasis(restoredDecisionBinding.basis);
+          setDecisionBasisNeedsReview(restoredDecisionBinding.needsReview);
           const draftSourceContext =
             draftRecord?.[DRAFT_INPUT_CONFIDENCE_SOURCE_CONTEXT_FIELD];
           const restoredDraftSourceContext =
@@ -4259,10 +4716,7 @@ export function InvestCalcPage({
           setInputVerification({});
           inputVerificationAddressRef.current = null;
           const restoredActiveStrategy = activeStrategyStateKey(
-            persistedAnalyzerStrategyKey(
-              readDraftAnalyzerStrategyKey(parsedDraft),
-              normalized,
-            ),
+            restoredAnalyzerStrategyKey,
           );
           activeStrategyKeyRef.current = restoredActiveStrategy;
           setActiveStrategyKey(restoredActiveStrategy);
@@ -4286,9 +4740,24 @@ export function InvestCalcPage({
           // but inert form and must re-Calculate + re-Save manually — a
           // conversion leak at the moment of highest intent. Double-RAF
           // mirrors the PDF-return flow: let RHF flush before submitting.
-          if (isAuthenticated && pendingSaveIntentMatchesDraft(normalized)) {
+          if (resumesPendingSaveAfterAuth) {
             autoSaveAfterAuthRef.current = true;
             setIsAutoSaveResuming(true);
+            // The guest already chose Save after seeing a completed result.
+            // Authentication can add Pro capabilities, but it must not turn
+            // that completed free screen into a new, blocking target-setup
+            // task. Resume the exact kind of run they left: the synthetic
+            // sample keeps its fixture criteria; a real targetless screen
+            // remains targetless and saves automatically.
+            if (matchesSyntheticSampleDraft) {
+              pendingSampleRunRef.current = true;
+              pendingSamplePreviewRef.current = true;
+            } else if (
+              !pendingMaoTarget ||
+              restoredDecisionBinding.needsReview
+            ) {
+              explicitTargetlessRunRef.current = true;
+            }
             toast({
               title: "Welcome back — saving your deal",
               description: addr
@@ -4321,6 +4790,20 @@ export function InvestCalcPage({
                 currentPath: window.location.pathname,
               });
               if (shareIntent?.context === "analysis") {
+                // Share is the same continuity contract as Save: sign-in is
+                // authorization, not permission to replace the completed
+                // result with a target-setup dead end. The sample reruns with
+                // its fixture criteria; a real targetless screen stays
+                // targetless for this one resumed action.
+                if (matchesSyntheticSampleDraft) {
+                  pendingSampleRunRef.current = true;
+                  pendingSamplePreviewRef.current = true;
+                } else if (
+                  !pendingMaoTarget ||
+                  restoredDecisionBinding.needsReview
+                ) {
+                  explicitTargetlessRunRef.current = true;
+                }
                 toast({
                   title: "Welcome back — your analysis is ready to share",
                   description: addr
@@ -4438,20 +4921,31 @@ export function InvestCalcPage({
     });
   }, [form, propertyType]);
 
+  const hasResultsForFocusHandoff = analysisResult !== null;
   useEffect(() => {
-    if (!pendingResultsScrollRef.current || isCalculating || !analysisResult)
+    if (
+      !pendingResultsScrollRef.current ||
+      isCalculating ||
+      !hasResultsForFocusHandoff
+    )
       return;
+    // Consume the handoff before scheduling it. Changes to scores, save state,
+    // or other result details can rerender this surface later, but they must
+    // never pull focus away from whatever the user is doing.
     pendingResultsScrollRef.current = false;
-    setTimeout(() => {
+    const frame = requestAnimationFrame(() => {
       const resultsSection = document.querySelector(
         "[data-analysis-results='true']",
       );
-      resultsSection?.scrollIntoView({
+      if (!(resultsSection instanceof HTMLElement)) return;
+      resultsSection.scrollIntoView({
         behavior: scrollBehavior(),
         block: "start",
       });
-    }, 100);
-  }, [analysisResult, isCalculating]);
+      resultsSection.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [hasResultsForFocusHandoff, isCalculating]);
 
   // Restore the user's remembered advanced-options preference.
   useEffect(() => {
@@ -4608,6 +5102,50 @@ export function InvestCalcPage({
   };
 
   const onSubmit = async (validated: InvestmentFormValues) => {
+    const pendingEnrichment = addressEnrichmentPromiseRef.current;
+    if (pendingEnrichment) {
+      if (deferredRunAfterEnrichmentRef.current) return;
+      deferredRunAfterEnrichmentRef.current = true;
+      toast({
+        title: "Finishing the property lookup",
+        description:
+          "We’ll run automatically as soon as the address-based assumptions are ready.",
+      });
+      try {
+        await pendingEnrichment;
+      } catch {
+        // Enrichment is best-effort. The explicit form values remain the
+        // calculation authority if the lookup fails.
+      } finally {
+        deferredRunAfterEnrichmentRef.current = false;
+      }
+      requestAnimationFrame(() => {
+        void form.handleSubmit(onSubmit, onError)();
+      });
+      return;
+    }
+    const explicitlyTargetless = explicitTargetlessRunRef.current;
+    explicitTargetlessRunRef.current = false;
+    const isPendingSampleRun = pendingSampleRunRef.current;
+    const runPromisesOfferCeiling = analysisRunPromisesOfferCeiling({
+      canCalculateMaxOffer: canUseMaxOffer,
+      strategyKey: activeStrategyKeyRef.current,
+    });
+    if (
+      runPromisesOfferCeiling &&
+      !isPendingSampleRun &&
+      (!analysisMaoTargetRef.current ||
+        decisionBasisNeedsReview ||
+        sampleSeededMaoTargetRef.current) &&
+      !explicitlyTargetless
+    ) {
+      toast({
+        title: "Choose decision criteria first",
+        description:
+          "Use the criteria shown above to calculate an Offer Ceiling, or choose the operating-economics option to continue without one.",
+      });
+      return;
+    }
     // Warm the dynamic AnalysisDashboard chunk in parallel with the calc
     // (covers programmatic runs — hero handoff, saved-deal restore —
     // that never focused a form field). No-op if already loaded.
@@ -4690,6 +5228,13 @@ export function InvestCalcPage({
     if (isSampleRun) {
       setAnalysisMaoTarget({ ...SAMPLE_DEAL_FIXTURE.maoTarget });
       setAnalysisMaoTargetSource("selected-targets");
+      const sampleBasis = captureSelectedTargetsDecisionBasis({
+        target: SAMPLE_DEAL_FIXTURE.maoTarget,
+        strategyKey: SAMPLE_DEAL_FIXTURE.strategyKey,
+      });
+      analysisDecisionBasisRef.current = sampleBasis;
+      setAnalysisDecisionBasis(sampleBasis);
+      setDecisionBasisNeedsReview(false);
       sampleSeededMaoTargetRef.current = true;
     } else if (sampleSeededMaoTargetRef.current) {
       // The sample's example targets live for exactly the sample run — the
@@ -4702,6 +5247,9 @@ export function InvestCalcPage({
       analysisMaoTargetRef.current = null;
       setAnalysisMaoTarget(null);
       setAnalysisMaoTargetSource("screening-defaults");
+      analysisDecisionBasisRef.current = null;
+      setAnalysisDecisionBasis(null);
+      setDecisionBasisNeedsReview(false);
       clearPendingMaoTarget();
     }
 
@@ -4911,33 +5459,6 @@ export function InvestCalcPage({
             }`,
         variant: autoSavedAfterAuth ? "success" : undefined,
       });
-      // Scroll to the TOP of the results dashboard, not the bottom of
-      // the page. The previous behavior dumped users at the footer past
-      // the entire dashboard, which felt jarring + made the headline
-      // metrics + recommendation card invisible until they scrolled
-      // back up. We use the data-attribute marker so we're not coupled
-      // to a fragile DOM structure. By this point the dashboard has
-      // already mounted (setShowResults(true) ran upstream and
-      // loadDealScore awaited a server roundtrip), so the RAF is
-      // belt-and-suspenders for layout-paint settle.
-      requestAnimationFrame(() => {
-        const target = document.querySelector('[data-analysis-results="true"]');
-        if (
-          target &&
-          typeof (target as HTMLElement).getBoundingClientRect === "function"
-        ) {
-          const rect = (target as HTMLElement).getBoundingClientRect();
-          // Subtract a small offset so the results card isn't flush
-          // with the top edge - gives the eye some breathing room.
-          const y = window.scrollY + rect.top - 16;
-          window.scrollTo({ top: y, behavior: scrollBehavior() });
-          // Move keyboard/screen-reader focus to the results region too, so
-          // non-sighted users land on the verdict instead of being stranded
-          // on the submit button while the page scrolls visually past them.
-          // preventScroll: our own smooth scroll above owns the motion.
-          (target as HTMLElement).focus({ preventScroll: true });
-        }
-      });
     } finally {
       isCalculatingRef.current = false;
       setIsCalculating(false);
@@ -5142,16 +5663,48 @@ export function InvestCalcPage({
       const analysisFingerprint = maoTargetAnalysisFingerprint(currentValues);
       const pendingMaoBinding =
         readPendingMaoTargetBinding(analysisFingerprint);
-      const candidateMaxOfferTarget =
+      const rawCandidateMaxOfferTarget =
         normalizeMaoTarget(options.maxOfferTargetOverride) ??
         analysisMaoTargetRef.current ??
         pendingMaoBinding?.target ??
         null;
-      const candidateMaxOfferTargetSource =
+      const candidateMaxOfferTarget = normalizeMaoTargetForFinancing(
+        rawCandidateMaxOfferTarget,
+        {
+          isCashPurchase: isAllCashDownPayment(
+            currentValues.downPaymentPct,
+          ),
+        },
+      );
+      let candidateMaxOfferTargetSource =
         options.maxOfferTargetSourceOverride ??
         analysisMaoTargetSource ??
         pendingMaoBinding?.source ??
         (candidateMaxOfferTarget ? "selected-targets" : "screening-defaults");
+      if (
+        rawCandidateMaxOfferTarget &&
+        maoTargetFingerprint(rawCandidateMaxOfferTarget) !==
+          maoTargetFingerprint(candidateMaxOfferTarget)
+      ) {
+        // Financing changed after target adoption. DSCR is meaningless for an
+        // all-cash deal, so converge the parent state to the exact target that
+        // can safely be persisted instead of letting Save send a stale rule.
+        analysisMaoTargetRef.current = candidateMaxOfferTarget;
+        setAnalysisMaoTarget(candidateMaxOfferTarget);
+        setAnalysisMaoTargetSource(
+          candidateMaxOfferTarget ? "selected-targets" : "screening-defaults",
+        );
+        const normalizedBasis = candidateMaxOfferTarget
+          ? captureSelectedTargetsDecisionBasis({
+              target: candidateMaxOfferTarget,
+              strategyKey: currentAnalyzerStrategyKey(),
+            })
+          : null;
+        analysisDecisionBasisRef.current = normalizedBasis;
+        setAnalysisDecisionBasis(normalizedBasis);
+        setDecisionBasisNeedsReview(false);
+        if (!candidateMaxOfferTarget) clearPendingMaoTarget();
+      }
       // Sample-seeded example targets never persist as an adoption — a saved
       // copy of (or fork from) the demo records screening-defaults until the
       // user adopts rules themselves. The DISPLAYED state must converge to
@@ -5164,6 +5717,9 @@ export function InvestCalcPage({
         analysisMaoTargetRef.current = null;
         setAnalysisMaoTarget(null);
         setAnalysisMaoTargetSource("screening-defaults");
+        analysisDecisionBasisRef.current = null;
+        setAnalysisDecisionBasis(null);
+        setDecisionBasisNeedsReview(false);
         clearPendingMaoTarget();
       }
       const targetWasAdopted =
@@ -5172,6 +5728,32 @@ export function InvestCalcPage({
       const maxOfferTargetSnapshot = targetWasAdopted
         ? candidateMaxOfferTarget
         : null;
+      let decisionBasisSnapshot = maxOfferTargetSnapshot
+        ? normalizeOfferCeilingDecisionBasis(
+            analysisDecisionBasisRef.current,
+            {
+              target: maxOfferTargetSnapshot,
+              source: candidateMaxOfferTargetSource,
+              strategyKey: currentAnalyzerStrategyKey(),
+            },
+          )
+        : null;
+      // A historical target with only the anonymous `buy-box` source cannot
+      // be attributed to any current account row. Preserve the exact numeric
+      // criteria as selected custom rules and capture that truthful basis.
+      if (
+        maxOfferTargetSnapshot &&
+        candidateMaxOfferTargetSource === "buy-box" &&
+        !decisionBasisSnapshot
+      ) {
+        candidateMaxOfferTargetSource = "selected-targets";
+      }
+      if (maxOfferTargetSnapshot && !decisionBasisSnapshot) {
+        decisionBasisSnapshot = captureSelectedTargetsDecisionBasis({
+          target: maxOfferTargetSnapshot,
+          strategyKey: currentAnalyzerStrategyKey(),
+        });
+      }
       const maxOfferTargetSourceSnapshot: OfferCeilingTargetSource =
         maxOfferTargetSnapshot
           ? candidateMaxOfferTargetSource
@@ -5179,7 +5761,12 @@ export function InvestCalcPage({
       if (maxOfferTargetSnapshot && !analysisMaoTargetRef.current) {
         analysisMaoTargetRef.current = maxOfferTargetSnapshot;
         setAnalysisMaoTarget(maxOfferTargetSnapshot);
+      }
+      if (maxOfferTargetSnapshot) {
         setAnalysisMaoTargetSource(maxOfferTargetSourceSnapshot);
+        analysisDecisionBasisRef.current = decisionBasisSnapshot;
+        setAnalysisDecisionBasis(decisionBasisSnapshot);
+        setDecisionBasisNeedsReview(false);
       }
       const expectedUnderwritingRevision = targetExistingId
         ? (options.expectedUnderwritingRevisionOverride ??
@@ -5208,6 +5795,7 @@ export function InvestCalcPage({
             : {}),
           maxOfferTarget: maxOfferTargetSnapshot,
           maxOfferTargetSource: maxOfferTargetSourceSnapshot,
+          offerCeilingDecisionBasis: decisionBasisSnapshot,
           analyzerStrategyKey: activeStrategyKeyRef.current ?? "buy-hold",
         },
       );
@@ -5225,6 +5813,7 @@ export function InvestCalcPage({
         setDuplicateCollision(null);
         setAddressChangedPrompt(null);
         setUnderwritingConflict(null);
+        setDeletedDealRecoveryActive(false);
         // Deal-agnostic bookkeeping first — it must run even when a fork
         // races this save (the deal DID persist server-side): the local
         // count feeds the client save-limit gate, and the event refreshes
@@ -5402,6 +5991,7 @@ export function InvestCalcPage({
                     currentValues,
                     form.formState.dirtyFields as Record<string, unknown>,
                   ),
+                  decisionBasisSnapshot,
                 );
                 setPendingSaveIntent(currentValues);
                 // Sign-up, not login — anon savers are mostly first-timers;
@@ -5515,9 +6105,29 @@ export function InvestCalcPage({
         savedDealIdRef.current = null;
         savedUnderwritingRevisionRef.current = null;
         setUnderwritingConflict(null);
+        replaceSavedDealUrl(null);
         lastPersistedFormJsonRef.current = null;
         lastPersistedMaoTargetJsonRef.current = null;
-        syncFormDirtyVersusPersisted();
+        const recoveryValues = form.getValues();
+        try {
+          writeCalcDraftWithMaoTarget(
+            recoveryValues,
+            analysisMaoTargetRef.current,
+            analysisMaoTargetSource,
+            activeStrategyKeyRef.current,
+            buildLiveInputConfidenceSourceContext(
+              recoveryValues,
+              form.formState.dirtyFields as Record<string, unknown>,
+            ),
+            analysisDecisionBasisRef.current,
+          );
+        } catch {
+          /* storage unavailable — the on-screen recovery path still remains */
+        }
+        // There is no persisted baseline after detaching, so the generic dirty
+        // synchronizer would call this clean. Keep the recovery truth explicit.
+        setHasUnsavedChanges(true);
+        setDeletedDealRecoveryActive(true);
         toast({
           title: "This deal was deleted",
           description:
@@ -5611,7 +6221,7 @@ export function InvestCalcPage({
     source?: OfferCeilingTargetSource,
   ) => {
     const normalizedTarget = normalizeMaoTarget(maoTarget);
-    const normalizedSource =
+    let normalizedSource =
       normalizeOfferCeilingTargetSource(source) ??
       (normalizedTarget ? "selected-targets" : "screening-defaults");
     const adoptedTarget =
@@ -5619,12 +6229,32 @@ export function InvestCalcPage({
         ? normalizedTarget
         : null;
     if (adoptedTarget) {
+      let decisionBasis = normalizeOfferCeilingDecisionBasis(
+        analysisDecisionBasisRef.current,
+        {
+          target: adoptedTarget,
+          source: normalizedSource,
+          strategyKey: currentAnalyzerStrategyKey(),
+        },
+      );
+      if (normalizedSource === "buy-box" && !decisionBasis) {
+        normalizedSource = "selected-targets";
+      }
+      if (!decisionBasis) {
+        decisionBasis = captureSelectedTargetsDecisionBasis({
+          target: adoptedTarget,
+          strategyKey: currentAnalyzerStrategyKey(),
+        });
+      }
       // Adopt the exact target the child rendered before starting IO. This
       // captures an untouched buy-box seed and keeps a failed save visibly
       // dirty instead of claiming the old persisted target is still current.
       analysisMaoTargetRef.current = adoptedTarget;
       setAnalysisMaoTarget(adoptedTarget);
       setAnalysisMaoTargetSource(normalizedSource);
+      analysisDecisionBasisRef.current = decisionBasis;
+      setAnalysisDecisionBasis(decisionBasis);
+      setDecisionBasisNeedsReview(false);
       syncFormDirtyVersusPersisted();
     }
     return performSaveDeal({
@@ -5757,7 +6387,7 @@ export function InvestCalcPage({
     });
     toast({
       title: "Rehab added to the deal",
-      description: `$${amount.toLocaleString()} added to cash invested — re-run to see the impact on cash-on-cash.`,
+      description: `$${amount.toLocaleString()} added to cash invested. Your live result is updating now.`,
     });
   };
 
@@ -6283,6 +6913,13 @@ export function InvestCalcPage({
       analysisMaoTargetRef.current = restoredMaoTarget;
       setAnalysisMaoTarget(restoredMaoTarget);
       setAnalysisMaoTargetSource(restoredMaoTargetSource);
+      const restoredDecisionBasis = captureSelectedTargetsDecisionBasis({
+        target: restoredMaoTarget,
+        strategyKey: currentAnalyzerStrategyKey(),
+      });
+      analysisDecisionBasisRef.current = restoredDecisionBasis;
+      setAnalysisDecisionBasis(restoredDecisionBasis);
+      setDecisionBasisNeedsReview(false);
       // A verified paid claim is the opposite of sample theater — never let a
       // stale sample flag strip the recorded target from the rebuilt report.
       sampleSeededMaoTargetRef.current = false;
@@ -6293,6 +6930,7 @@ export function InvestCalcPage({
           shouldTouch: false,
         });
       });
+      seedRestoredAddressIdentity(restoredValues.address);
       // Auto-export once the analysis result lands (existing effect
       // watches autoExportPdfRef). Same double-RAF as the sample deal:
       // let RHF flush before submitting.
@@ -6315,7 +6953,9 @@ export function InvestCalcPage({
     // a misclick here is irrecoverable. A native confirm() is the
     // lightest possible guard - no modal infrastructure needed.
     const shouldConfirm =
-      Boolean(analysisResult) || hasUnsavedChanges || Boolean(savedDealId);
+      hasUnsavedChanges ||
+      (!savedDealId &&
+        (Boolean(analysisResult) || form.formState.isDirty));
     if (shouldConfirm) {
       const ok =
         typeof window === "undefined"
@@ -6332,7 +6972,19 @@ export function InvestCalcPage({
     resetToNewAnalysis(form.getValues("propertyType") ?? "single-family");
     replaceSavedDealUrl(null);
     setSavedTemplateFallback(null);
+    setDeletedDealRecoveryActive(false);
   };
+
+  // Dashboard-shell New Analysis controls stay mounted with this route. A
+  // same-route Next.js Link does not remount the calculator, so handle the
+  // shell's explicit reset request through the same guarded path as the
+  // in-report action.
+  useEffect(() => {
+    const onRequest = () => handleNewAnalysis();
+    window.addEventListener(NEW_ANALYSIS_REQUEST_EVENT, onRequest);
+    return () =>
+      window.removeEventListener(NEW_ANALYSIS_REQUEST_EVENT, onRequest);
+  });
 
   /**
    * "Analyze another like this" (Phase D) — the in-flow copy-a-row. From the
@@ -6348,11 +7000,12 @@ export function InvestCalcPage({
    * before clearing them just as New Analysis does.
    */
   const handleAnalyzeAnotherLikeThis = () => {
+    const shouldConfirm = hasUnsavedChanges || !savedDealId;
     const ok =
-      typeof window === "undefined"
+      !shouldConfirm || typeof window === "undefined"
         ? true
         : window.confirm(
-            "Analyze another property? This clears the current property's address, income, tax, insurance, repairs, and results.\n\nReusable financing, general operating assumptions, and targets will remain. Save first if you want to keep this deal.",
+            "Analyze another property? This unsaved result will be cleared.\n\nReusable financing, general operating assumptions, and targets will remain. Save first if you want to keep this deal.",
           );
     if (!ok) return;
     isProgrammaticResetRef.current = true;
@@ -6380,9 +7033,24 @@ export function InvestCalcPage({
     const carriedMaoTarget = sampleSeededMaoTargetRef.current
       ? null
       : normalizeMaoTarget(analysisMaoTargetRef.current);
-    const carriedMaoTargetSource = carriedMaoTarget
-      ? (analysisMaoTargetSource ?? "selected-targets")
+    const carriedDecisionBasis = carriedMaoTarget
+      ? normalizeOfferCeilingDecisionBasis(
+          analysisDecisionBasisRef.current,
+          {
+            target: carriedMaoTarget,
+            ...(analysisMaoTargetSource
+              ? { source: analysisMaoTargetSource }
+              : {}),
+            strategyKey: currentAnalyzerStrategyKey(),
+          },
+        )
       : null;
+    const carriedMaoTargetSource = carriedMaoTarget
+      ? (carriedDecisionBasis?.source ?? "selected-targets")
+      : null;
+    const carriedBasisNeedsReview = Boolean(
+      carriedMaoTarget && !carriedDecisionBasis,
+    );
     sampleSeededMaoTargetRef.current = false;
     // Invalidate any in-flight save: performSaveDeal's completion must not
     // re-attach the SOURCE deal's id (or clear the fork draft) after this
@@ -6444,6 +7112,9 @@ export function InvestCalcPage({
     analysisMaoTargetRef.current = carriedMaoTarget;
     setAnalysisMaoTarget(carriedMaoTarget);
     setAnalysisMaoTargetSource(carriedMaoTargetSource);
+    analysisDecisionBasisRef.current = carriedDecisionBasis;
+    setAnalysisDecisionBasis(carriedDecisionBasis);
+    setDecisionBasisNeedsReview(carriedBasisNeedsReview);
     setIsCalculating(false);
     isCalculatingRef.current = false;
     // The forked assumptions are the point — the default-template auto-apply
@@ -6463,6 +7134,7 @@ export function InvestCalcPage({
         carriedMaoTargetSource,
         activeStrategyKeyRef.current,
         forkedInputSourceContext,
+        carriedDecisionBasis,
       );
     } catch {
       /* storage unavailable — the fork still works for this session */
@@ -6550,6 +7222,15 @@ export function InvestCalcPage({
       }
       // External navigations hard-unload → beforeunload above already covers them.
       if (destination.origin !== window.location.origin) return;
+      // The dashboard shell's same-route New Analysis links dispatch the
+      // calculator's guarded reset event. Let that one owner show the warning;
+      // prompting here as well made users confirm the same reset twice.
+      if (
+        window.location.pathname === "/dashboard/new" &&
+        destination.pathname === "/dashboard/new"
+      ) {
+        return;
+      }
       // Hash-only jump on the current page: no navigation, nothing lost.
       if (
         destination.pathname === window.location.pathname &&
@@ -6648,8 +7329,16 @@ export function InvestCalcPage({
     // back into the dashboard. The early seed makes the launch atomic from
     // the user's perspective. onSubmit reasserts the same fixture after
     // validation as a defense against any intervening reset.
+    analysisMaoTargetRef.current = { ...SAMPLE_DEAL_FIXTURE.maoTarget };
     setAnalysisMaoTarget({ ...SAMPLE_DEAL_FIXTURE.maoTarget });
     setAnalysisMaoTargetSource("selected-targets");
+    const sampleBasis = captureSelectedTargetsDecisionBasis({
+      target: SAMPLE_DEAL_FIXTURE.maoTarget,
+      strategyKey: SAMPLE_DEAL_FIXTURE.strategyKey,
+    });
+    analysisDecisionBasisRef.current = sampleBasis;
+    setAnalysisDecisionBasis(sampleBasis);
+    setDecisionBasisNeedsReview(false);
     sampleSeededMaoTargetRef.current = true;
     // Apply each field via setValue so RHF dirties and the form's
     // controlled inputs re-render with the new values immediately.
@@ -6660,6 +7349,7 @@ export function InvestCalcPage({
         shouldTouch: false,
       });
     });
+    seedRestoredAddressIdentity(SAMPLE_DEAL_FIXTURE.values.address);
 
     // Arm the one-shot Pro preview for this run - consumed in onSubmit.
     pendingSamplePreviewRef.current = true;
@@ -6701,6 +7391,41 @@ export function InvestCalcPage({
       requestAnimationFrame(fireSampleSubmit);
     });
     setTimeout(fireSampleSubmit, 150);
+  };
+
+  /**
+   * Hero/listing handoffs can finish asynchronously after they fill the form.
+   * They may auto-run free/specialist economics, but a Pro Offer Ceiling must
+   * never fail *after* the user thinks the listing import already completed.
+   * Stop before results when criteria still need explicit review and move the
+   * user to the visible pre-run decision card.
+   */
+  const submitProgrammaticHandoff = () => {
+    const needsCriteria =
+      analysisRunPromisesOfferCeiling({
+        canCalculateMaxOffer: canUseMaxOffer,
+        strategyKey: activeStrategyKeyRef.current,
+      }) &&
+      (!analysisMaoTargetRef.current ||
+        decisionBasisNeedsReview ||
+        sampleSeededMaoTargetRef.current);
+    if (needsCriteria) {
+      toast({
+        title: "Review your decision criteria",
+        description:
+          "The property is filled in. Review the criteria shown, then calculate the Offer Ceiling.",
+      });
+      requestAnimationFrame(() => {
+        const criteria = document.getElementById("decision-criteria");
+        criteria?.scrollIntoView({
+          behavior: scrollBehavior(),
+          block: "center",
+        });
+        criteria?.focus({ preventScroll: true });
+      });
+      return;
+    }
+    void form.handleSubmit(onSubmit, onError)();
   };
 
   // Latest-closure assignment for the hero address handoff (refs declared
@@ -6808,6 +7533,15 @@ export function InvestCalcPage({
     };
     enrichedUnitsRef.current.clear();
     lastSelectedAddressRef.current = place;
+    const handoffGeneration = forkGenerationRef.current;
+    const handoffPropertyType = form.getValues("propertyType");
+    const handoffAddressKey = normalizeAutofillPropertyAddress(address);
+    const handoffStillCurrent = () =>
+      lastHeroTokenRef.current === detail.token &&
+      forkGenerationRef.current === handoffGeneration &&
+      form.getValues("propertyType") === handoffPropertyType &&
+      normalizeAutofillPropertyAddress(form.getValues("address")) ===
+        handoffAddressKey;
 
     // Run the SAME enrichment an in-form selection triggers (rent/rate/
     // tax), THEN estimate a purchase price from the address-specific rent
@@ -6816,10 +7550,11 @@ export function InvestCalcPage({
     // never persist it or pass it off as the real asking price.
     void (async () => {
       try {
-        await runPropertyEnrichment(place);
+        await runTrackedPropertyEnrichment(place);
       } catch (err) {
         console.warn("[hero handoff] enrichment failed:", err);
       }
+      if (!handoffStillCurrent()) return;
 
       // Listing-link paste by a Pro user: the portal page is bot-blocked, so the
       // only way to get the real property facts (beds/baths/sqft) + value + rent
@@ -6836,7 +7571,7 @@ export function InvestCalcPage({
             // just the AVM estimate — the whole point of pasting the listing.
             includeListing: true,
           });
-          if (r.ok) {
+          if (r.ok && handoffStillCurrent()) {
             applyComps(r.enrichment);
             compsFilled = true;
           }
@@ -6844,6 +7579,8 @@ export function InvestCalcPage({
           console.warn("[listing comps] lookup failed:", err);
         }
       }
+
+      if (!handoffStillCurrent()) return;
 
       const canEstimate =
         form.getValues("propertyType") === "single-family" &&
@@ -6856,6 +7593,7 @@ export function InvestCalcPage({
           state: resolvedState,
         });
         if (est) {
+          if (!handoffStillCurrent()) return;
           form.setValue("purchasePrice", est.price, {
             shouldDirty: false,
             shouldValidate: false,
@@ -6868,7 +7606,7 @@ export function InvestCalcPage({
           // calls before validation (same pattern as the sample deal).
           requestAnimationFrame(() => {
             requestAnimationFrame(() => {
-              void form.handleSubmit(onSubmit, onError)();
+              submitProgrammaticHandoff();
             });
           });
           return;
@@ -6878,13 +7616,14 @@ export function InvestCalcPage({
       // Comps already populated price + rent (Pro listing paste) → run the
       // verdict straight away instead of landing on the price field.
       if (
+        handoffStillCurrent() &&
         compsFilled &&
         !isEmptyNumber(form.getValues("purchasePrice")) &&
         !isEmptyNumber(form.getValues("monthlyRent"))
       ) {
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
-            void form.handleSubmit(onSubmit, onError)();
+            submitProgrammaticHandoff();
           });
         });
         return;
@@ -7089,6 +7828,11 @@ export function InvestCalcPage({
    * input is a single click from the verdict.
    */
   const handleEditPrice = () => {
+    setIsEditingAssumptions(true);
+    // Purchase price is a primary field. Opening every financing/expense
+    // control at the same time turns a one-field correction into a wall of
+    // inputs, which is especially punishing in repeated-deal work.
+    setAdvancedOpen(false);
     if (typeof window !== "undefined") {
       const el = document.getElementById("main");
       if (el)
@@ -7155,7 +7899,10 @@ export function InvestCalcPage({
   // wholesale/STR button would silently replace that intent and its starter
   // assumptions, so specialist modes always keep their own submit path.
   const primaryCtaRunsSample =
-    activeStrategyKey === null && !hasPropertyAvailable && !hasMeaningfulInput;
+    activeStrategyKey === null &&
+    !hasPropertyAvailable &&
+    !hasMeaningfulInput &&
+    !form.formState.isDirty;
   const canUseActiveStrategyPrimaryOutput =
     !activeStrategy?.primaryOutputIsPro ||
     (activeStrategy.key === "wholesale-mao"
@@ -7167,13 +7914,135 @@ export function InvestCalcPage({
     strategyRunCta: activeStrategy?.runCta,
     canUseStrategyPrimaryOutput: canUseActiveStrategyPrimaryOutput,
   });
+  const hasAdoptedAnalysisTarget = Boolean(
+    analysisMaoTarget &&
+      analysisMaoTargetSource &&
+      !decisionBasisNeedsReview &&
+      !sampleSeededMaoTargetRef.current &&
+      isAdoptedOfferCeilingTargetSource(analysisMaoTargetSource),
+  );
+  const activeRunPromisesOfferCeiling = analysisRunPromisesOfferCeiling({
+    canCalculateMaxOffer: canUseMaxOffer,
+    strategyKey: activeStrategyKey,
+  });
+  const needsPreRunTargetChoice =
+    activeRunPromisesOfferCeiling &&
+    !hasAdoptedAnalysisTarget;
+  const proposedPreRunTarget =
+    decisionBasisNeedsReview && analysisMaoTarget
+      ? analysisMaoTarget
+      : (preRunBuyBoxTarget ?? starterPreRunTarget);
+  const proposedPreRunSource: OfferCeilingTargetSource =
+    decisionBasisNeedsReview && analysisMaoTarget
+      ? "selected-targets"
+      : preRunBuyBoxTarget
+        ? "buy-box"
+        : "selected-targets";
+  const visibleDecisionTarget = hasAdoptedAnalysisTarget
+    ? analysisMaoTarget
+    : proposedPreRunTarget;
+  const decisionTargetLabel = visibleDecisionTarget
+    ? describeMaoTarget(visibleDecisionTarget)
+    : "No decision criteria selected";
   const focusedResultsMode =
     Boolean(analysisResult) &&
     showResults &&
     !isCalculating &&
     !isEditingAssumptions;
   const postAnalysisMode =
-    Boolean(analysisResult) && showResults && !isCalculating;
+    Boolean(analysisResult) &&
+    showResults &&
+    !isCalculating &&
+    !isEditingAssumptions;
+  const primaryActionLabel = isAddressEnrichmentPending
+    ? "Finishing property lookup…"
+    : needsPreRunTargetChoice && preRunBuyBoxState === "loading"
+        ? "Loading decision criteria…"
+        : needsPreRunTargetChoice && preRunBuyBoxTarget
+          ? decisionBasisNeedsReview
+            ? "Review criteria & calculate ceiling"
+            : "Use my Buy Box & calculate ceiling"
+          : needsPreRunTargetChoice
+            ? "Use these criteria & calculate ceiling"
+            : isEditingAssumptions
+              ? "View updated result"
+              : analyzerCta;
+
+  const handlePrimaryRunAction = async (options?: {
+    withoutOfferCeiling?: boolean;
+  }) => {
+    if (primaryCtaRunsSample) {
+      handleTrySampleDeal();
+      return;
+    }
+
+    const pendingEnrichment = addressEnrichmentPromiseRef.current;
+    if (pendingEnrichment) {
+      if (deferredRunAfterEnrichmentRef.current) return;
+      deferredRunAfterEnrichmentRef.current = true;
+      toast({
+        title: "Finishing the property lookup",
+        description:
+          "We’ll continue automatically as soon as the address-based assumptions are ready.",
+      });
+      try {
+        await pendingEnrichment;
+      } catch {
+        // Best-effort enrichment failed; explicit inputs remain authoritative.
+      } finally {
+        deferredRunAfterEnrichmentRef.current = false;
+      }
+    }
+
+    if (options?.withoutOfferCeiling) {
+      explicitTargetlessRunRef.current = true;
+      analysisMaoTargetRef.current = null;
+      setAnalysisMaoTarget(null);
+      setAnalysisMaoTargetSource("screening-defaults");
+      analysisDecisionBasisRef.current = null;
+      setAnalysisDecisionBasis(null);
+      setDecisionBasisNeedsReview(false);
+      sampleSeededMaoTargetRef.current = false;
+      clearPendingMaoTarget();
+    } else if (needsPreRunTargetChoice) {
+      if (preRunBuyBoxState === "loading") {
+        toast({
+          title: "Decision criteria are still loading",
+          description:
+            "Wait a moment, or analyze the operating economics without an Offer Ceiling.",
+        });
+        return;
+      }
+      const target = { ...proposedPreRunTarget };
+      const strategyKey = currentAnalyzerStrategyKey();
+      const decisionBasis =
+        proposedPreRunSource === "buy-box" && preRunBuyBox
+          ? captureBuyBoxDecisionBasis({
+              box: preRunBuyBox,
+              target,
+              strategyKey,
+            })
+          : captureSelectedTargetsDecisionBasis({ target, strategyKey });
+      analysisMaoTargetRef.current = target;
+      setAnalysisMaoTarget(target);
+      setAnalysisMaoTargetSource(proposedPreRunSource);
+      analysisDecisionBasisRef.current = decisionBasis;
+      setAnalysisDecisionBasis(decisionBasis);
+      setDecisionBasisNeedsReview(false);
+      sampleSeededMaoTargetRef.current = false;
+      const values = form.getValues();
+      writeCalcDraftWithMaoTarget(
+        values,
+        target,
+        proposedPreRunSource,
+        activeStrategyKeyRef.current,
+        undefined,
+        decisionBasis,
+      );
+    }
+
+    void form.handleSubmit(onSubmit, onError)();
+  };
 
   useEffect(() => {
     if (postAnalysisMode) {
@@ -7203,6 +8072,29 @@ export function InvestCalcPage({
   );
   return (
     <div className="min-h-screen bg-background">
+      {deletedDealRecoveryActive ? (
+        <div
+          role="alert"
+          className="mx-auto mt-4 flex max-w-7xl flex-col gap-3 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm sm:flex-row sm:items-center"
+        >
+          <div className="min-w-0 flex-1">
+            <p className="font-bold text-foreground">Your edits are safe on this device</p>
+            <p className="text-muted-foreground">
+              The saved deal was removed in another tab. This analysis is now an
+              unsaved new deal; save it again to keep it in My Deals.
+            </p>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            className="min-h-11 shrink-0"
+            disabled={isSavingDeal}
+            onClick={() => void performSaveDeal({ forceInsert: true })}
+          >
+            Save as new deal
+          </Button>
+        </div>
+      ) : null}
       {/* Hero section */}
       <section
         className={cn(
@@ -7444,13 +8336,60 @@ export function InvestCalcPage({
           onKeyDown={(event) => {
             if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
               event.preventDefault();
-              void form.handleSubmit(onSubmit, onError)();
+              void handlePrimaryRunAction();
+              return;
+            }
+            if (
+              event.key === "Enter" &&
+              !event.defaultPrevented &&
+              event.target instanceof HTMLInputElement
+            ) {
+              // Plain Enter should never surprise-run a financial analysis.
+              // Move through the visible form instead; Cmd/Ctrl+Enter and the
+              // explicit primary button remain the deliberate run actions.
+              event.preventDefault();
+              const fields = Array.from(
+                formElementRef.current?.querySelectorAll<HTMLElement>(
+                  "input:not([disabled]):not([type='hidden']), select:not([disabled])",
+                ) ?? [],
+              ).filter((field) => field.offsetParent !== null);
+              const index = fields.indexOf(event.target);
+              fields[index + 1]?.focus();
             }
           }}
           noValidate
           className={focusedResultsMode ? "hidden" : undefined}
         >
           <div className="space-y-5">
+            {isEditingAssumptions && analysisResult ? (
+              <section
+                aria-label="Editing analysis assumptions"
+                className="sticky top-2 z-30 flex flex-col gap-3 rounded-2xl border border-primary/25 bg-background/95 p-4 shadow-lg backdrop-blur sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div className="min-w-0">
+                  <p className="font-bold text-foreground">
+                    Editing this analysis
+                  </p>
+                  <p className="mt-0.5 text-sm text-muted-foreground">
+                    {needsPreRunTargetChoice
+                      ? "Review the visible decision criteria below. The update action will adopt those criteria before calculating an Offer Ceiling."
+                      : "Change only what you need, then update the result. Your saved deal is unchanged until you press Save."}
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  className="min-h-11 shrink-0"
+                  disabled={
+                    isCalculating ||
+                    isAddressEnrichmentPending ||
+                    (needsPreRunTargetChoice && preRunBuyBoxState === "loading")
+                  }
+                  onClick={() => void handlePrimaryRunAction()}
+                >
+                  {primaryActionLabel}
+                </Button>
+              </section>
+            ) : null}
             {/* Guided step rail (AN-1) - sticky orientation + jump navigation
                 over the existing form. Additive: reads values + scrolls only;
                 never gates input or changes the manual run flow.
@@ -7803,14 +8742,64 @@ export function InvestCalcPage({
                 )}
               </div>
 
+              {activeRunPromisesOfferCeiling ? (
+                <section
+                  id="decision-criteria"
+                  tabIndex={-1}
+                  aria-label="Decision criteria"
+                  className="rounded-2xl border border-primary/20 bg-[var(--brand-blue-light)] p-4 lg:col-span-3"
+                >
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                      <p className="text-xs font-extrabold uppercase tracking-wide text-primary">
+                        Decision criteria
+                      </p>
+                      <p className="mt-1 font-semibold text-foreground">
+                        {hasAdoptedAnalysisTarget
+                          ? analysisMaoTargetSource === "buy-box"
+                            ? `Using Buy Box${preRunBuyBox ? `: ${preRunBuyBox.name}` : ""}`
+                            : "Using your selected criteria"
+                          : preRunBuyBoxState === "loading"
+                            ? "Loading your strategy-matched Buy Box…"
+                            : preRunBuyBoxTarget && preRunBuyBox
+                              ? `Ready to use Buy Box: ${preRunBuyBox.name}`
+                              : "Starting criteria — not yet applied"}
+                      </p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {preRunBuyBoxState === "loading" &&
+                        !hasAdoptedAnalysisTarget
+                          ? "TrueCap is checking for saved criteria before promising an Offer Ceiling."
+                          : decisionTargetLabel}
+                      </p>
+                      {preRunBuyBoxState === "error" &&
+                      !hasAdoptedAnalysisTarget ? (
+                        <p className="mt-1 text-xs font-medium text-amber-800">
+                          Your Buy Box could not be loaded. The displayed starter
+                          criteria can still be adopted explicitly, or you can run
+                          the operating screen without a ceiling.
+                        </p>
+                      ) : null}
+                    </div>
+                    {!hasAdoptedAnalysisTarget ? (
+                      <span className="shrink-0 rounded-full border border-primary/25 bg-background px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-primary">
+                        Review before use
+                      </span>
+                    ) : null}
+                  </div>
+                </section>
+              ) : null}
+
               {/* Calculate button - solid brand color (gradient was too
                 visually heavy and competed with the verdict card
                 downstream). Copy standardized to "Run analysis" to
                 match the homepage "Run a deal - 60 seconds" register. */}
               <Button
-                type={primaryCtaRunsSample ? "button" : "submit"}
-                onClick={primaryCtaRunsSample ? handleTrySampleDeal : undefined}
-                disabled={isCalculating}
+                type="button"
+                onClick={() => void handlePrimaryRunAction()}
+                disabled={
+                  isCalculating ||
+                  (needsPreRunTargetChoice && preRunBuyBoxState === "loading")
+                }
                 data-inform-submit="true"
                 className={cn(
                   "h-14 w-full rounded-2xl text-base font-bold shadow-lg transition-all max-[250px]:h-auto max-[250px]:min-h-14 max-[250px]:whitespace-normal max-[250px]:px-2 max-[250px]:py-3 max-[250px]:text-center max-[250px]:text-sm max-[250px]:leading-tight",
@@ -7826,11 +8815,23 @@ export function InvestCalcPage({
                 ) : (
                   <>
                     <Calculator className="w-5 h-5 mr-2" />
-                    {analyzerCta}
+                    {primaryActionLabel}
                     <ArrowUpRight className="w-5 h-5 ml-2" />
                   </>
                 )}
               </Button>
+              {needsPreRunTargetChoice ? (
+                <button
+                  type="button"
+                  onClick={() =>
+                    void handlePrimaryRunAction({ withoutOfferCeiling: true })
+                  }
+                  disabled={isCalculating}
+                  className="min-h-11 w-full rounded-xl px-4 py-2 text-sm font-semibold text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:col-span-3"
+                >
+                  Analyze operating economics without an Offer Ceiling
+                </button>
+              ) : null}
               {/* Bottom row: keyboard hint (left) + autosave indicator
                 (right). Both desktop-only - mobile users get the
                 sticky bottom Calculate bar instead, and the autosave
@@ -7861,8 +8862,16 @@ export function InvestCalcPage({
           <StickyCalculateBar
             isCalculating={isCalculating}
             hasResults={analysisResult !== null}
-            ctaLabel={analyzerCta}
+            ctaLabel={primaryActionLabel}
+            isActionDisabled={
+              needsPreRunTargetChoice && preRunBuyBoxState === "loading"
+            }
             onTrySample={primaryCtaRunsSample ? handleTrySampleDeal : undefined}
+            onCalculate={
+              primaryCtaRunsSample
+                ? undefined
+                : () => void handlePrimaryRunAction()
+            }
             // Verdict dock readout: only pre-results (same gate as the
             // in-form LiveVerdictPanel), and suppressed while a solve-
             // oriented play is active (showGenericLivePreview). Once a real
@@ -7883,10 +8892,12 @@ export function InvestCalcPage({
             cannot blank the whole post-calc surface. The fallback
             surfaces the headline metrics directly from analysisResult
             so the user's numbers are never lost. */}
-        {(showResults || isCalculating || analysisResult !== null) && (
+        {!isEditingAssumptions &&
+          (showResults || isCalculating || analysisResult !== null) && (
           <div
-            className="mt-8 scroll-mt-4 focus-visible:outline-none"
+            className="mt-8 scroll-mt-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             data-analysis-results="true"
+            role="region"
             tabIndex={-1}
             aria-label="Analysis results"
           >
@@ -8023,6 +9034,9 @@ export function InvestCalcPage({
                     analysisMaoTargetRef.current = null;
                     setAnalysisMaoTarget(null);
                     setAnalysisMaoTargetSource("screening-defaults");
+                    analysisDecisionBasisRef.current = null;
+                    setAnalysisDecisionBasis(null);
+                    setDecisionBasisNeedsReview(false);
                   }
                   if (exactValues) {
                     writeCalcDraftWithMaoTarget(
@@ -8034,6 +9048,9 @@ export function InvestCalcPage({
                         exactValues,
                         form.formState.dirtyFields as Record<string, unknown>,
                       ),
+                      exactTarget
+                        ? analysisDecisionBasisRef.current
+                        : null,
                     );
                     return exactValues;
                   }
@@ -8041,7 +9058,10 @@ export function InvestCalcPage({
                 }}
                 onEditAssumptions={() => {
                   setIsEditingAssumptions(true);
-                  setAdvancedOpen(true);
+                  // Return to the short underwriting form first. Investors can
+                  // open the exact assumption chip they need; the generic Edit
+                  // action should not explode the entire advanced form.
+                  setAdvancedOpen(false);
                   requestAnimationFrame(() => {
                     document
                       .querySelector('[data-calc-form="true"]')
@@ -8086,6 +9106,7 @@ export function InvestCalcPage({
                 advocacyContractEligible={advocacyContractEligible}
                 maoTargetOverride={analysisMaoTarget}
                 maoTargetOverrideSource={analysisMaoTargetSource}
+                adoptedDecisionBasis={analysisDecisionBasis}
                 onMaoTargetChange={handleAnalysisMaoTargetChange}
                 recordedOfferCeiling={recordedOfferCeiling}
                 activeTab={activeDashboardTab}
@@ -8104,7 +9125,7 @@ export function InvestCalcPage({
               />
             </AnalysisErrorBoundary>
           </div>
-        )}
+          )}
       </main>
       {/* Anonymous email capture - fires 5s after a successful analysis
           for unauthenticated users only. Captures the email and schedules
@@ -8309,7 +9330,7 @@ export function InvestCalcPage({
                   clearPendingMaoTarget();
                 }
                 window.location.assign(
-                  `/?savedDeal=${encodeURIComponent(targetId)}`,
+                  `${isAuthenticated ? "/dashboard/new" : "/"}?savedDeal=${encodeURIComponent(targetId)}`,
                 );
               }}
             >

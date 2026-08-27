@@ -4,8 +4,139 @@ import { DEFAULT_PIPELINE_STAGE, isPipelineStage, type PipelineStage } from "@/l
 import { normalizeDataConfidence, type DataConfidence } from "@/lib/data-confidence";
 import type { DealOfferBasis } from "@/lib/deal-offer-line";
 import { applicableCashOnCashValue } from "@/lib/cash-on-cash-applicability";
+import {
+  LEGACY_UNVERSIONED_METHODOLOGY,
+  normalizeSavedMethodologyVersion,
+} from "@/lib/saved-analysis-methodology";
+import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
 
 type NumericLike = number | string | null | undefined;
+
+/** Metadata for safely comparing visible saved-deal metrics. */
+export type DealMethodologyPresentation = {
+  comparisonKey: string;
+  groupLabel: string;
+  badgeLabel: string | null;
+  isCurrent: boolean;
+};
+
+export function resolveDealMethodologyPresentation(input: {
+  storedMethodologyVersion: unknown;
+  usesRecordedSnapshot: boolean;
+  didRecompute: boolean;
+  currentMethodologyVersion?: string;
+  /** Used only to keep unknown, unversioned snapshots from being treated as
+   * one comparable cohort. Their formula lineage is unknowable, so each row
+   * must fail closed until it is explicitly re-underwritten. */
+  recordId?: string;
+}): DealMethodologyPresentation {
+  const currentVersion =
+    input.currentMethodologyVersion ?? TRUECAP_UNDERWRITING_STANDARD_VERSION;
+  const storedVersion = normalizeSavedMethodologyVersion(
+    input.storedMethodologyVersion
+  );
+
+  // The comparison key describes the methodology that produced the VISIBLE
+  // metrics, not merely the version stored on the database row.
+  if (input.didRecompute || !input.usesRecordedSnapshot) {
+    return {
+      comparisonKey: `current:${currentVersion}`,
+      groupLabel: `Current v${currentVersion}`,
+      badgeLabel:
+        storedVersion == null ||
+        storedVersion === LEGACY_UNVERSIONED_METHODOLOGY
+          ? `Legacy analysis · recomputed with current v${currentVersion}`
+          : null,
+      isCurrent: true,
+    };
+  }
+
+  // A recorded snapshot stays in a recorded cohort even when its formula
+  // version matches today's engine. Compare uses the same provenance boundary:
+  // a frozen historical output must never be crowned against a live recompute
+  // merely because the version string happens to match.
+  if (storedVersion === currentVersion) {
+    return {
+      comparisonKey: `recorded:${currentVersion}`,
+      groupLabel: `Recorded v${currentVersion}`,
+      badgeLabel: `Recorded v${currentVersion}`,
+      // The immutable snapshot is a separate comparison provenance, but it
+      // was produced by the currently released formula and remains eligible
+      // for current Buy Box screening. Ordinary newly saved deals land here.
+      isCurrent: true,
+    };
+  }
+
+  if (
+    storedVersion == null ||
+    storedVersion === LEGACY_UNVERSIONED_METHODOLOGY
+  ) {
+    return {
+      comparisonKey: `unavailable:legacy-unversioned:${input.recordId ?? "unknown"}`,
+      groupLabel: "Recorded legacy · re-underwrite to compare",
+      badgeLabel: "Recorded legacy · re-underwrite",
+      isCurrent: false,
+    };
+  }
+
+  const recordedVersion = storedVersion;
+  const recordedLabel = `Recorded v${recordedVersion}`;
+  return {
+    comparisonKey: `recorded:${recordedVersion}`,
+    groupLabel: recordedLabel,
+    badgeLabel: recordedLabel,
+    isCurrent: false,
+  };
+}
+
+export type MethodologyComparableDeal = {
+  createdAt?: string;
+  methodologyComparisonKey?: string;
+  methodologyGroupLabel?: string;
+  methodologyIsCurrent?: boolean;
+};
+
+/**
+ * Current results lead; recorded cohorts follow and are sorted only within
+ * their own formula version. Missing metrics remain last in either direction.
+ */
+export function sortDealsWithinMethodologyCohorts<
+  T extends MethodologyComparableDeal,
+>(
+  deals: readonly T[],
+  valueFor: (deal: T) => number | null,
+  direction: "asc" | "desc"
+): T[] {
+  const directionMultiplier = direction === "asc" ? 1 : -1;
+  return [...deals].sort((a, b) => {
+    const aCurrent = a.methodologyIsCurrent !== false;
+    const bCurrent = b.methodologyIsCurrent !== false;
+    if (aCurrent !== bCurrent) return aCurrent ? -1 : 1;
+
+    const aKey = a.methodologyComparisonKey ?? "current:unknown";
+    const bKey = b.methodologyComparisonKey ?? "current:unknown";
+    if (aKey !== bKey) {
+      // Never use the metric to order unlike cohorts.
+      return aKey.localeCompare(bKey, undefined, {
+        numeric: true,
+        sensitivity: "base",
+      });
+    }
+
+    const aValue = valueFor(a);
+    const bValue = valueFor(b);
+    const aUsable = typeof aValue === "number" && Number.isFinite(aValue);
+    const bUsable = typeof bValue === "number" && Number.isFinite(bValue);
+    if (aUsable !== bUsable) return aUsable ? -1 : 1;
+    if (aUsable && bUsable && aValue !== bValue) {
+      return aValue > bValue ? directionMultiplier : -directionMultiplier;
+    }
+    return (
+      new Date(b.createdAt ?? 0).getTime() -
+      new Date(a.createdAt ?? 0).getTime()
+    );
+  });
+}
 
 type CompareSnapshotLike = {
   longTermSummary?: {
@@ -133,6 +264,12 @@ export type DashboardDeal = {
   dataConfidence?: DataConfidence | null;
   /** Visible provenance for legacy/frozen saved decisions. */
   methodologyLabel?: string;
+  /** Formula cohort for dashboard ranking and aggregation. */
+  methodologyComparisonKey?: string;
+  /** Visible cohort heading for mixed-version books. */
+  methodologyGroupLabel?: string;
+  /** False when the visible metrics are an older recorded standard. */
+  methodologyIsCurrent?: boolean;
 };
 
 export function toNumber(value: NumericLike): number | null {

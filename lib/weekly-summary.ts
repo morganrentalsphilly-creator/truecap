@@ -336,6 +336,8 @@ export function buildWeeklySummary(
         title: r.title,
         address: r.address,
         form_snapshot: r.form_snapshot,
+        methodology_version: r.methodology_version,
+        result_snapshot: r.result_snapshot,
       })),
       pair.current,
     );
