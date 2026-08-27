@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import * as Sentry from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Check, Loader2 } from "lucide-react";
@@ -26,6 +27,10 @@ export type ComparePickerDeal = {
   netCashFlow: number | null;
   capRate: number | null;
   methodologyLabel?: string;
+  /** Exact version + provenance cohort. Only identical cohorts may be
+   * selected together; this prevents a historical snapshot from being ranked
+   * against a result recomputed by a different engine. */
+  methodologyCohort: string;
 };
 
 const MAX_COMPARE_ITEMS = 4;
@@ -35,6 +40,45 @@ const fmtMoney = (n: number | null) =>
     ? "—"
     : `${n >= 0 ? "+" : "-"}$${Math.abs(Math.round(n)).toLocaleString("en-US")}/mo`;
 const fmtPct = (n: number | null) => (n == null ? "—" : `${n.toFixed(1)}% cap`);
+
+export function isComparableMethodologyCohort(cohort: string | null | undefined): boolean {
+  return Boolean(cohort && !cohort.startsWith("unavailable:"));
+}
+
+export function arePickerMethodologiesCompatible(
+  deals: Pick<ComparePickerDeal, "methodologyCohort">[]
+): boolean {
+  if (deals.length === 0) return false;
+  const cohort = deals[0]?.methodologyCohort;
+  return (
+    isComparableMethodologyCohort(cohort) &&
+    deals.every((deal) => deal.methodologyCohort === cohort)
+  );
+}
+
+export function normalizeMethodologySelection(
+  deals: ComparePickerDeal[],
+  selectedIds: string[]
+): { selectedIds: string[]; droppedIds: string[] } {
+  const dealById = new Map(deals.map((deal) => [deal.id, deal]));
+  const requested = Array.from(new Set(selectedIds))
+    .map((id) => dealById.get(id))
+    .filter((deal): deal is ComparePickerDeal => Boolean(deal));
+  const anchor = requested.find((deal) =>
+    isComparableMethodologyCohort(deal.methodologyCohort)
+  );
+  if (!anchor) {
+    return { selectedIds: [], droppedIds: requested.map((deal) => deal.id) };
+  }
+  const selected = requested
+    .filter((deal) => deal.methodologyCohort === anchor.methodologyCohort)
+    .slice(0, MAX_COMPARE_ITEMS);
+  const selectedSet = new Set(selected.map((deal) => deal.id));
+  return {
+    selectedIds: selected.map((deal) => deal.id),
+    droppedIds: requested.filter((deal) => !selectedSet.has(deal.id)).map((deal) => deal.id),
+  };
+}
 
 export function CompareDealPicker({
   deals,
@@ -50,32 +94,53 @@ export function CompareDealPicker({
 }) {
   const router = useRouter();
   const { toast } = useToast();
-  const [selected, setSelected] = useState<string[]>(() => {
-    const available = new Set(deals.map((deal) => deal.id));
-    return Array.from(new Set(initialSelectedIds))
-      .filter((id) => available.has(id))
-      .slice(0, MAX_COMPARE_ITEMS);
-  });
+  const initialSelection = normalizeMethodologySelection(deals, initialSelectedIds);
+  const [selected, setSelected] = useState<string[]>(initialSelection.selectedIds);
   const [isPending, startTransition] = useTransition();
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(() =>
+    initialSelection.droppedIds.length > 0
+      ? "Some previously selected deals used a different calculation method. They were removed so this comparison cannot name a false leader."
+      : null
+  );
+
+  const dealById = new Map(deals.map((deal) => [deal.id, deal]));
+  const selectedDeals = selected
+    .map((id) => dealById.get(id))
+    .filter((deal): deal is ComparePickerDeal => Boolean(deal));
+  const selectedCohort = selectedDeals[0]?.methodologyCohort ?? null;
 
   const toggle = (id: string) => {
     if (isPending) return;
     setErrorMessage(null);
-    setSelected((prev) => {
-      if (prev.includes(id)) return prev.filter((x) => x !== id);
-      if (prev.length >= MAX_COMPARE_ITEMS) {
-        toast({
-          title: "Up to 4 deals",
-          description: "You can compare up to 4 deals at a time.",
-        });
-        return prev;
-      }
-      return [...prev, id];
-    });
+    if (selected.includes(id)) {
+      setSelected((prev) => prev.filter((selectedId) => selectedId !== id));
+      return;
+    }
+    const candidate = dealById.get(id);
+    if (!candidate || !isComparableMethodologyCohort(candidate.methodologyCohort)) {
+      setErrorMessage(
+        "This saved deal does not have a complete comparable calculation record. Re-underwrite it before adding it."
+      );
+      return;
+    }
+    if (selectedCohort && candidate.methodologyCohort !== selectedCohort) {
+      setErrorMessage(
+        `This deal uses ${candidate.methodologyLabel ?? "a different calculation method"}. Re-underwrite it before comparing it with the selected deals.`
+      );
+      return;
+    }
+    if (selected.length >= MAX_COMPARE_ITEMS) {
+      toast({
+        title: "Up to 4 deals",
+        description: "You can compare up to 4 deals at a time.",
+      });
+      return;
+    }
+    setSelected((prev) => [...prev, id]);
   };
 
-  const canCompare = selected.length >= 2;
+  const canCompare =
+    selected.length >= 2 && arePickerMethodologiesCompatible(selectedDeals);
 
   const onCompare = () => {
     if (!canCompare || isPending) return;
@@ -89,7 +154,7 @@ export function CompareDealPicker({
           onComplete?.();
           router.refresh();
         } else {
-          setErrorMessage(result.message);
+          setErrorMessage(`${result.message} Your selection is still here.`);
           toast({
             title: "Could not start comparison",
             description: result.message,
@@ -102,7 +167,7 @@ export function CompareDealPicker({
         // button spinner clears with nothing happening. Tell the user it's
         // retryable — the selection is preserved.
         Sentry.captureException(err, { tags: { feature: "compare" } });
-        setErrorMessage("Something interrupted the request. Check your connection and try again.");
+        setErrorMessage("Something interrupted the request. Your selection is still here; check your connection and try again.");
         toast({
           title: "Could not start comparison",
           description: "Something interrupted the request. Check your connection and try again.",
@@ -117,21 +182,34 @@ export function CompareDealPicker({
       className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5"
       aria-busy={isPending}
     >
+      {selectedCohort ? (
+        <p role="status" className="mb-4 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-xs leading-relaxed text-muted-foreground">
+          Comparing one calculation cohort: <span className="font-semibold text-foreground">{selectedDeals[0]?.methodologyLabel ?? "matching saved methodology"}</span>. Deals calculated another way stay unselectable until they are re-underwritten.
+        </p>
+      ) : null}
       <ul className="space-y-2">
         {deals.map((deal) => {
           const isSel = selected.includes(deal.id);
+          const isMethodologyBlocked =
+            !isSel &&
+            (!isComparableMethodologyCohort(deal.methodologyCohort) ||
+              Boolean(selectedCohort && deal.methodologyCohort !== selectedCohort));
+          const methodologyDescriptionId = `compare-methodology-${deal.id}`;
           return (
-            <li key={deal.id}>
+            <li key={deal.id} className="rounded-xl">
               <button
                 type="button"
                 onClick={() => toggle(deal.id)}
                 aria-pressed={isSel}
+                aria-disabled={isMethodologyBlocked}
+                aria-describedby={methodologyDescriptionId}
                 disabled={isPending}
                 className={cn(
                   "flex min-h-11 w-full items-center gap-3 rounded-xl border p-3 text-left transition disabled:cursor-wait disabled:opacity-70",
                   isSel
                     ? "border-primary bg-primary/5 ring-1 ring-primary/30"
-                    : "border-border bg-background hover:border-primary/40"
+                    : "border-border bg-background hover:border-primary/40",
+                  isMethodologyBlocked && "cursor-not-allowed border-border/70 bg-muted/25 opacity-70"
                 )}
               >
                 <span
@@ -155,7 +233,7 @@ export function CompareDealPicker({
                     {deal.signal ? ` · ${signalDisplay(deal.signal).shortLabel}` : ""}
                   </span>
                   {deal.methodologyLabel ? (
-                    <span className="mt-0.5 block text-[10px] text-muted-foreground">
+                    <span id={methodologyDescriptionId} className="mt-1 inline-flex rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
                       {deal.methodologyLabel}
                     </span>
                   ) : null}
@@ -166,6 +244,17 @@ export function CompareDealPicker({
                   </span>
                 ) : null}
               </button>
+              {isMethodologyBlocked ? (
+                <p className="px-3 pb-2 pt-1 text-xs leading-relaxed text-muted-foreground">
+                  Different calculation record.{" "}
+                  <Link
+                    href={`/dashboard/new?savedDeal=${encodeURIComponent(deal.id)}`}
+                    className="inline-flex min-h-11 items-center font-semibold text-primary underline underline-offset-2"
+                  >
+                    Re-underwrite to compare
+                  </Link>
+                </p>
+              ) : null}
             </li>
           );
         })}
@@ -173,7 +262,7 @@ export function CompareDealPicker({
 
       {errorMessage ? (
         <p role="alert" className="mt-4 rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
-          {errorMessage} Your selection is still here; retry when ready.
+          {errorMessage}
         </p>
       ) : null}
 
@@ -194,7 +283,9 @@ export function CompareDealPicker({
         </button>
       </div>
       <p className="sr-only" aria-live="polite">
-        {isPending ? "Updating comparison selection." : ""}
+        {isPending
+          ? "Updating comparison selection."
+          : `${selected.length} comparable ${selected.length === 1 ? "deal" : "deals"} selected.`}
       </p>
     </div>
   );

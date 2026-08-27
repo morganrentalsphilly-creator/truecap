@@ -121,6 +121,50 @@ describe("sample-seeded targets never survive as user adoption", () => {
     );
   });
 
+  it("never restores the synthetic demo as the investor's next draft", () => {
+    expect(calculator).toContain("sampleSeededMaoTargetRef.current\n        )");
+    expect(calculator).toContain("const isSyntheticSampleDraft =");
+    expect(calculator).toContain("clearCalcDraftRaw();");
+    expect(calculator).toContain(
+      "A synthetic sample must never become the default starting",
+    );
+    expect(calculator).toContain(
+      "formSnapshotForCompare(normalized) ===",
+    );
+    expect(calculator).toContain(
+      "restoredAnalyzerStrategyKey === SAMPLE_DEAL_FIXTURE.strategyKey",
+    );
+    expect(
+      calculator.indexOf("const restoredAnalyzerStrategyKey ="),
+    ).toBeLessThan(calculator.indexOf("const isSyntheticSampleDraft ="));
+    expect(calculator).toContain("pendingTargetMatchesSample");
+    expect(calculator).toContain('pendingMaoBinding.source !== "buy-box"');
+    expect(calculator).not.toContain(
+      "normalized.purchasePrice === sampleValues.purchasePrice",
+    );
+  });
+
+  it("cannot use sample criteria to satisfy a later Offer Ceiling run", () => {
+    const submitGate = sourceSection(
+      "const runPromisesOfferCeiling = analysisRunPromisesOfferCeiling",
+      "// Warm the dynamic AnalysisDashboard chunk",
+    );
+    expect(submitGate).toContain("sampleSeededMaoTargetRef.current");
+
+    const visibleGate = sourceSection(
+      "const hasAdoptedAnalysisTarget = Boolean(",
+      "const proposedPreRunTarget =",
+    );
+    expect(visibleGate).toContain("!sampleSeededMaoTargetRef.current");
+    expect(visibleGate).not.toContain("!isEditingAssumptions");
+
+    const recompute = sourceSection(
+      "recomputeOutputsFromFormRef.current = () =>",
+      "const baseline = lastComputedFormJsonRef.current",
+    );
+    expect(recompute).toContain("if (pendingSampleRunRef.current) return");
+  });
+
   it("drops the carried target when forking from the sample", () => {
     const fork = sourceSection(
       "const handleAnalyzeAnotherLikeThis = () =>",

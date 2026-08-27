@@ -133,7 +133,9 @@ describe("portal and saved-deal Max Offer continuity", () => {
       "normalizeSavedDealHandoffTarget(result.resultSnapshot)",
     );
     expect(duplicate).toContain("? { maxOfferTarget, maxOfferTargetSource }");
-    expect(edit).toContain("`/?savedDeal=${encodeURIComponent(id)}`");
+    expect(edit).toContain(
+      "`/dashboard/new?savedDeal=${encodeURIComponent(id)}`",
+    );
     expect(edit).not.toContain("writeNonceKeyedHandoffPayload");
     expect(normalizeSource(analyzer)).toContain(
       normalizeSource("normalizeMaoTarget(savedResultRecord?.maxOfferTarget)"),

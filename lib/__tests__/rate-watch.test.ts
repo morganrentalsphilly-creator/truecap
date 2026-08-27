@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { buildRateWatch, type RateWatchDealRow } from "@/lib/rate-watch";
+import {
+  buildRateWatch,
+  resolveComparableSavedMetricCohort,
+  type RateWatchDealRow,
+} from "@/lib/rate-watch";
+import { calculateAnalysis } from "@/lib/calc-analysis";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
+import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
 
 /** Same canonical single-family fixture as rate-alerts.test.ts. */
 function baseDeal(overrides: Partial<InvestmentFormValues> = {}): InvestmentFormValues {
@@ -46,6 +52,8 @@ const row = (id: string, snapshot: unknown, title?: string): RateWatchDealRow =>
   title: title ?? null,
   address: null,
   form_snapshot: snapshot,
+  methodology_version: TRUECAP_UNDERWRITING_STANDARD_VERSION,
+  result_snapshot: null,
 });
 
 describe("buildRateWatch", () => {
@@ -68,6 +76,7 @@ describe("buildRateWatch", () => {
     expect(result).not.toBeNull();
     expect(result!.changedDeals).toHaveLength(0);
     expect(result!.monitoredCount).toBe(1);
+    expect(result!.excludedMethodologyCount).toBe(0);
   });
 
   it("surfaces deals whose signal flips and excludes unchanged ones", () => {
@@ -85,6 +94,7 @@ describe("buildRateWatch", () => {
     expect(result!.changedDeals[0]!.improved).toBe(true);
     // Both deals are watched even though only one changed.
     expect(result!.monitoredCount).toBe(2);
+    expect(result!.excludedMethodologyCount).toBe(0);
   });
 
   it("skips rows whose form snapshot doesn't validate", () => {
@@ -95,5 +105,60 @@ describe("buildRateWatch", () => {
     const result = buildRateWatch(rows, 5.5);
     expect(result).not.toBeNull();
     expect(result!.changedDeals.map((d) => d.id)).toEqual(["good"]);
+  });
+
+  it("counts only methodology-eligible deals as monitored", () => {
+    const values = baseDeal({ interestRate: 8.5 });
+    const current = row("current", values, "Current");
+    const frozen: RateWatchDealRow = {
+      ...row("frozen", values, "Frozen"),
+      methodology_version: "1.0",
+      result_snapshot: calculateAnalysis(values),
+    };
+    const result = buildRateWatch([current, frozen], 5.5);
+
+    expect(result).not.toBeNull();
+    expect(result!.monitoredCount).toBe(1);
+    expect(result!.excludedMethodologyCount).toBe(1);
+    expect(result!.changedDeals.map((deal) => deal.id)).toEqual(["current"]);
+  });
+
+  it("suppresses a recorded current row whose saved baseline no longer attests", () => {
+    const values = baseDeal({ interestRate: 8.5 });
+    const recorded = calculateAnalysis(values);
+    const drifted: RateWatchDealRow = {
+      ...row("drifted", values),
+      result_snapshot: { ...recorded, dscr: recorded.dscr + 0.05 },
+    };
+
+    expect(buildRateWatch([drifted], 5.5)).toBeNull();
+  });
+});
+
+describe("resolveComparableSavedMetricCohort", () => {
+  it("keeps computed and recorded values in separate cohorts", () => {
+    expect(
+      resolveComparableSavedMetricCohort({
+        methodologyVersion: TRUECAP_UNDERWRITING_STANDARD_VERSION,
+        resultSnapshot: null,
+        recomputedSnapshot: { netCashFlow: 100 },
+      }),
+    ).toBe(`current-computed:${TRUECAP_UNDERWRITING_STANDARD_VERSION}`);
+    expect(
+      resolveComparableSavedMetricCohort({
+        methodologyVersion: TRUECAP_UNDERWRITING_STANDARD_VERSION,
+        resultSnapshot: { netCashFlow: 100 },
+        recomputedSnapshot: { netCashFlow: 100 },
+      }),
+    ).toBe(`recorded:${TRUECAP_UNDERWRITING_STANDARD_VERSION}`);
+  });
+
+  it("rejects an unavailable legacy stored fallback", () => {
+    expect(
+      resolveComparableSavedMetricCohort({
+        methodologyVersion: null,
+        resultSnapshot: { netCashFlow: 100 },
+      }),
+    ).toBeNull();
   });
 });

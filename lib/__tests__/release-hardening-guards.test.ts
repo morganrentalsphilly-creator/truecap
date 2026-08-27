@@ -48,7 +48,10 @@ describe("release hardening guards", () => {
   it("does not turn aggregate query failure into a zero-value portfolio", () => {
     const route = read("app/dashboard/page.tsx");
     const home = read("components/dashboard/DashboardHome.tsx");
-    expect(route).toContain('aggregateResult.error ? "unavailable" : "ready"');
+    expect(route).toContain("dashboardData.portfolioAggregateStatus = aggregateResult.error");
+    expect(route).toContain('? "unavailable"');
+    expect(route).toContain('? "mixed-methodology"');
+    expect(route).toContain(': "ready"');
     expect(home).toContain('portfolioAggregateStatus === "unavailable"');
     expect(home).toContain("Full portfolio totals are temporarily unavailable");
   });

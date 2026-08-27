@@ -62,6 +62,12 @@ import {
   TRUECAP_UNDERWRITING_STANDARD_LEGACY_V1_VERSION,
   TRUECAP_UNDERWRITING_STANDARD_VERSION,
 } from "@/lib/underwriting-methodology";
+import {
+  captureSelectedTargetsDecisionBasis,
+  normalizeOfferCeilingDecisionBasis,
+  OFFER_CEILING_DECISION_BASIS_FIELD,
+  type OfferCeilingDecisionBasis,
+} from "@/lib/offer-ceiling-decision-basis";
 
 export type PublicShareAudience =
   | "investment-partner"
@@ -84,6 +90,8 @@ export type PublicShareSnapshot = {
   maoTarget?: MaoTarget;
   /** Frozen provenance for those criteria. */
   maoTargetSource?: OfferCeilingTargetSource;
+  /** Immutable criteria identity paired with maoTarget. */
+  offerCeilingDecisionBasis?: OfferCeilingDecisionBasis;
   /** Exact solved output captured with the link. Undefined means no adopted
    * target; null means the adopted target had no supported solution. */
   offerCeilingExact?: OfferCeilingExactResult | null;
@@ -162,6 +170,7 @@ export async function mintPublicShare(input: {
   /** The shared purchase price is an automated estimate, not an asking price. */
   priceEstimated?: boolean;
   analyzerStrategyKey?: AnalyzerStrategyKey;
+  offerCeilingDecisionBasis?: unknown;
 }): Promise<string | null> {
   // This helper writes through the service-role client. Keep the invariant
   // local as well as at the server-action boundary so no future caller can
@@ -172,7 +181,7 @@ export async function mintPublicShare(input: {
   try {
     const admin = createAdminSupabaseClient();
     const token = generateShareToken();
-    const candidateSource = input.maoTargetSource ?? "selected-targets";
+    let candidateSource = input.maoTargetSource ?? "selected-targets";
     const adoptedTarget =
       input.maoTarget && isAdoptedOfferCeilingTargetSource(candidateSource)
         ? input.maoTarget
@@ -182,6 +191,29 @@ export async function mintPublicShare(input: {
       input.analyzerStrategyKey,
       input.values,
     );
+    let offerCeilingDecisionBasis = adoptedTarget
+      ? normalizeOfferCeilingDecisionBasis(
+          input.offerCeilingDecisionBasis,
+          {
+            target: adoptedTarget,
+            source: candidateSource,
+            strategyKey: analyzerStrategyKey,
+          },
+        )
+      : null;
+    if (
+      adoptedTarget &&
+      candidateSource === "buy-box" &&
+      !offerCeilingDecisionBasis
+    ) {
+      candidateSource = "selected-targets";
+    }
+    if (adoptedTarget && !offerCeilingDecisionBasis) {
+      offerCeilingDecisionBasis = captureSelectedTargetsDecisionBasis({
+        target: adoptedTarget,
+        strategyKey: analyzerStrategyKey,
+      });
+    }
     const currentScore = computeDealScore(
       buildDealScoreInputFromAnalysis(input.values, currentResult),
     );
@@ -206,6 +238,10 @@ export async function mintPublicShare(input: {
       analyzerStrategyKey,
     );
     capturedResult.analyzerStrategyKey = analyzerStrategyKey;
+    if (offerCeilingDecisionBasis) {
+      capturedResult[OFFER_CEILING_DECISION_BASIS_FIELD] =
+        offerCeilingDecisionBasis;
+    }
     delete capturedResult[SPECIALIST_ANALYSIS_SNAPSHOT_FIELD];
     if (specialistAnalysis) {
       capturedResult[SPECIALIST_ANALYSIS_SNAPSHOT_FIELD] = specialistAnalysis;
@@ -237,6 +273,9 @@ export async function mintPublicShare(input: {
         ? {
             maoTargetSource: snapshotTargetSource,
           }
+        : {}),
+      ...(offerCeilingDecisionBasis
+        ? { offerCeilingDecisionBasis }
         : {}),
       ...(shouldCaptureOfferCeiling ? { offerCeilingExact } : {}),
       meta: {
@@ -351,7 +390,7 @@ export async function resolvePublicShare(
       snapshot.values,
     );
     const normalizedMaoTarget = normalizeMaoTarget(snapshot.maoTarget);
-    const normalizedMaoTargetSource = normalizeExternalOfferCeilingTargetSource(
+    let normalizedMaoTargetSource = normalizeExternalOfferCeilingTargetSource(
       snapshot.maoTargetSource,
     );
     // An exact financial snapshot with a target field must never silently
@@ -360,6 +399,33 @@ export async function resolvePublicShare(
     if (snapshot.maoTarget !== undefined && !normalizedMaoTarget) return null;
     if (snapshot.maoTargetSource !== undefined && !normalizedMaoTargetSource) {
       return null;
+    }
+    let offerCeilingDecisionBasis = normalizedMaoTarget
+      ? normalizeOfferCeilingDecisionBasis(
+          snapshot.offerCeilingDecisionBasis ??
+            rawResultSnapshot?.[OFFER_CEILING_DECISION_BASIS_FIELD],
+          {
+            target: normalizedMaoTarget,
+            ...(normalizedMaoTargetSource
+              ? { source: normalizedMaoTargetSource }
+              : {}),
+            strategyKey: analyzerStrategyKey,
+          },
+        )
+      : null;
+    if (
+      normalizedMaoTarget &&
+      normalizedMaoTargetSource === "buy-box" &&
+      !offerCeilingDecisionBasis
+    ) {
+      normalizedMaoTargetSource = "selected-targets";
+    }
+    if (normalizedMaoTarget && !offerCeilingDecisionBasis) {
+      offerCeilingDecisionBasis = captureSelectedTargetsDecisionBasis({
+        target: normalizedMaoTarget,
+        strategyKey: analyzerStrategyKey,
+        capturedAt: snapshot.meta.sharedAt,
+      });
     }
     // Recompute at the read boundary too. Historical rows may predate the
     // service-role-only insert policy, so even a structurally valid stored
@@ -382,6 +448,10 @@ export async function resolvePublicShare(
     if (specialistAnalysis) {
       safeResultSnapshot[SPECIALIST_ANALYSIS_SNAPSHOT_FIELD] =
         specialistAnalysis;
+    }
+    if (offerCeilingDecisionBasis) {
+      safeResultSnapshot[OFFER_CEILING_DECISION_BASIS_FIELD] =
+        offerCeilingDecisionBasis;
     }
     const adoptedTarget =
       normalizedMaoTarget &&
@@ -408,6 +478,9 @@ export async function resolvePublicShare(
         ? {
             maoTargetSource: normalizedMaoTargetSource ?? "selected-targets",
           }
+        : {}),
+      ...(offerCeilingDecisionBasis
+        ? { offerCeilingDecisionBasis }
         : {}),
       ...(offerCeilingAccess?.access === "exact"
         ? { offerCeilingExact: offerCeilingAccess.exact }

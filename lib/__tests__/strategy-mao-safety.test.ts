@@ -42,7 +42,7 @@ describe("Max Offer entitlement and Wholesale target safety", () => {
     );
     const normalizedWholesaleBranch = normalizeSource(wholesaleBranch);
     const gate = normalizedWholesaleBranch.indexOf(
-      normalizeSource("if (!canUseMaxOffer ||"),
+      normalizeSource("if (!canUseMaxOffer)"),
     );
     const paidOutcome = normalizedWholesaleBranch.indexOf("<WholesaleOutcome");
 
@@ -54,16 +54,11 @@ describe("Max Offer entitlement and Wholesale target safety", () => {
     );
   });
 
-  it("uses and edits the dashboard's active target instead of a second default", () => {
+  it("uses the dashboard target and sends edits to the single Decision editor", () => {
     const paidOutcome = sourceSection(
       strategyCard,
       "function WholesaleOutcome({",
-      "function targetInput("
-    );
-    const editor = sourceSection(
-      strategyCard,
-      "function WholesaleTargetEditor({",
-      "function OutcomeShell("
+      "function ReviewTargetCriteriaButton("
     );
 
     expect(dashboard).toContain("activeMaoTarget={activeMaoTarget}");
@@ -75,15 +70,33 @@ describe("Max Offer entitlement and Wholesale target safety", () => {
     );
     expect(strategyCard).not.toContain("calculateMaxAllowableOffer");
     expect(strategyCard).not.toContain("buildMaoTarget");
-    expect(editor).toContain("applyMaoTargetInput(target, field, rawValue)");
-    expect(editor).toContain("onTargetChange(update.target)");
-    expect(editor).toContain("aria-expanded={open}");
-    expect(editor).toContain("aria-invalid={Boolean(errors[field])}");
-    expect(editor).toContain("min={bounds.min}");
-    expect(editor).toContain("max={bounds.max}");
-    expect(editor).toContain("step={bounds.step}");
+    expect(strategyCard).not.toContain("WholesaleTargetEditor");
+    expect(strategyCard).toContain("ReviewTargetCriteriaButton");
+    expect(strategyCard).toContain('"offer-ceiling-criteria-trigger"');
+    expect(strategyCard).toContain("trigger?.click()");
     expect(strategyCard).not.toContain("Adjust targets in Stress Test");
     expect(strategyCard).not.toContain("onJumpToTab");
+  });
+
+  it("never upsells an entitled Wholesale user merely because criteria are missing", () => {
+    const wholesaleBranch = sourceSection(
+      strategyCard,
+      'if (strategy.key === "wholesale-mao") {',
+      "// ---- BRRRR / Fix & Flip"
+    );
+    const paidMissingTarget = sourceSection(
+      wholesaleBranch,
+      "if (!activeMaoTarget) {",
+      "if (isOfferCeilingLoading)"
+    );
+
+    expect(wholesaleBranch).toContain("if (!canUseMaxOffer)");
+    expect(wholesaleBranch).not.toContain(
+      "!canUseMaxOffer ||\n      (!isOfferCeilingLoading && !hasExactOfferCeilingAccess)",
+    );
+    expect(paidMissingTarget).toContain("Your Pro access is active");
+    expect(paidMissingTarget).toContain("Choose your Offer Ceiling criteria");
+    expect(paidMissingTarget).not.toContain("Compare Pro plans");
   });
 
   it("keeps every supported PDF export on the same explicitly adopted target", () => {

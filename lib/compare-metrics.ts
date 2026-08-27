@@ -31,6 +31,17 @@ export type ScoreMetricRule<T> = {
   getValue: (deal: T) => number | null;
 };
 
+/** A comparison may be seeded with one deal, but every selected deal must
+ * already have a usable result provenance and all selections must belong to
+ * the exact same version + provenance cohort. */
+export function areMethodologyCohortsComparable(
+  cohorts: readonly (string | null | undefined)[]
+): boolean {
+  const cohort = cohorts[0]?.trim();
+  if (!cohort || cohort.startsWith("unavailable:")) return false;
+  return cohorts.every((candidate) => candidate?.trim() === cohort);
+}
+
 export function buildCanonicalMonthlyNoiMetrics(input: {
   noiAnnual: number | null;
   operatingExpensesAnnual: number | null;
@@ -149,8 +160,14 @@ export function getBestValue(row: MetricRow, deals: { metrics: Record<string, nu
       : deals;
   const values = eligibleDeals
     .map((deal) => deal.metrics[row.key])
-    .filter((value): value is number => value != null);
-  if (values.length === 0) return null;
+    .filter(
+      (value): value is number =>
+        value != null && Number.isFinite(value)
+    );
+  // A populated value is not a comparison. Requiring two real candidates
+  // prevents a sparse historical row from winning by default simply because
+  // every other deal recorded N/A for this metric.
+  if (values.length < 2) return null;
   return row.direction === "higher" ? Math.max(...values) : Math.min(...values);
 }
 
@@ -175,7 +192,10 @@ export function tallyScoreMetricLeads<T extends { id: string }>(
       .filter((candidate): candidate is { deal: T; value: number } =>
         candidate.value != null && Number.isFinite(candidate.value)
       );
-    if (candidates.length === 0) continue;
+    // One eligible candidate cannot lead a comparison row. Leaving every
+    // count at zero also prevents downstream lead/trophy UI from endorsing a
+    // deal by default when its peers have no comparable value.
+    if (candidates.length < 2) continue;
 
     const bestValue =
       rule.direction === "higher"

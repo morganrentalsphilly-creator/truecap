@@ -81,6 +81,7 @@ describe("calculation trust copy and applicability guards", () => {
     const best = getBestValue(cocRow, [
       { metrics: { cocReturn: 0, totalCashRequired: 0 } },
       { metrics: { cocReturn: -2, totalCashRequired: 50_000 } },
+      { metrics: { cocReturn: -4, totalCashRequired: 40_000 } },
     ]);
     expect(best).toBe(-2);
   });

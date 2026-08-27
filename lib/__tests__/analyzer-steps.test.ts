@@ -21,19 +21,37 @@ describe("computeAnalyzerSteps", () => {
     expect(steps.map((s) => s.id)).toEqual(ANALYZER_STEP_IDS);
   });
 
-  it("empty form: property/income empty, expenses complete (defaults), decision pending", () => {
+  it("empty form: property/income/expenses empty and decision pending", () => {
     const steps = computeAnalyzerSteps({ propertyType: "single-family" }, { hasResults: false });
     expect(statusOf(steps, "property")).toBe("empty");
     expect(statusOf(steps, "income")).toBe("empty");
-    expect(statusOf(steps, "expenses")).toBe("complete");
+    expect(statusOf(steps, "expenses")).toBe("empty");
     expect(statusOf(steps, "decision")).toBe("pending");
   });
 
-  it("financing is complete with defaults, partial if a required field is cleared", () => {
+  it("financing is complete only when all values are within schema ranges", () => {
     expect(statusOf(computeAnalyzerSteps(FIN, { hasResults: false }), "financing")).toBe("complete");
     expect(
       statusOf(
         computeAnalyzerSteps({ downPaymentPct: 20, loanTermYears: 30 }, { hasResults: false }),
+        "financing"
+      )
+    ).toBe("partial");
+    expect(
+      statusOf(
+        computeAnalyzerSteps(
+          { downPaymentPct: 101, interestRate: 6.75, loanTermYears: 30 },
+          { hasResults: false }
+        ),
+        "financing"
+      )
+    ).toBe("partial");
+    expect(
+      statusOf(
+        computeAnalyzerSteps(
+          { downPaymentPct: 20, interestRate: -1, loanTermYears: 30.5 },
+          { hasResults: false }
+        ),
         "financing"
       )
     ).toBe("partial");
@@ -60,11 +78,43 @@ describe("computeAnalyzerSteps", () => {
     ).toBe("partial");
   });
 
-  it("SFR income: needs beds + positive rent for complete", () => {
+  it("SFR income: bedrooms are optional; valid positive rent is complete", () => {
     const base = { propertyType: "single-family" as const };
     expect(statusOf(computeAnalyzerSteps({ ...base, bedrooms: 3 }, { hasResults: false }), "income")).toBe("partial");
     expect(statusOf(computeAnalyzerSteps({ ...base, bedrooms: 3, monthlyRent: 0 }, { hasResults: false }), "income")).toBe("partial");
+    expect(statusOf(computeAnalyzerSteps({ ...base, monthlyRent: 1850 }, { hasResults: false }), "income")).toBe("complete");
     expect(statusOf(computeAnalyzerSteps({ ...base, bedrooms: 3, monthlyRent: 1850 }, { hasResults: false }), "income")).toBe("complete");
+    expect(statusOf(computeAnalyzerSteps({ ...base, bedrooms: 21, monthlyRent: 1850 }, { hasResults: false }), "income")).toBe("partial");
+  });
+
+  it("expenses require all four valid reviewed percentages and accept explicit zero", () => {
+    const reviewed = {
+      maintenancePct: 10,
+      vacancyPct: 5,
+      mgmtPct: 8,
+      capexPct: 0,
+    };
+    expect(
+      statusOf(computeAnalyzerSteps(reviewed, { hasResults: false }), "expenses")
+    ).toBe("complete");
+    expect(
+      statusOf(
+        computeAnalyzerSteps(
+          { ...reviewed, vacancyPct: undefined },
+          { hasResults: false }
+        ),
+        "expenses"
+      )
+    ).toBe("partial");
+    expect(
+      statusOf(
+        computeAnalyzerSteps(
+          { ...reviewed, mgmtPct: 51 },
+          { hasResults: false }
+        ),
+        "expenses"
+      )
+    ).toBe("partial");
   });
 
   it("MF income: complete when every rental unit has RENT (facts optional, Batch B)", () => {
@@ -101,6 +151,27 @@ describe("computeAnalyzerSteps", () => {
 
   it("decision flips to complete once results exist", () => {
     expect(statusOf(computeAnalyzerSteps({}, { hasResults: true }), "decision")).toBe("complete");
+  });
+
+  it("decision remains in progress when base results exist without target criteria", () => {
+    expect(
+      statusOf(
+        computeAnalyzerSteps(
+          {},
+          { hasResults: true, hasDecisionCriteria: false }
+        ),
+        "decision"
+      )
+    ).toBe("partial");
+    expect(
+      statusOf(
+        computeAnalyzerSteps(
+          {},
+          { hasResults: true, hasDecisionCriteria: true }
+        ),
+        "decision"
+      )
+    ).toBe("complete");
   });
 
   it("isAnalyzerStepId guards correctly", () => {

@@ -26,11 +26,10 @@ import {
   toRecomputedSavedAnalysisSnapshot,
 } from "@/lib/recompute-saved-deal-verdict";
 import {
-  isLegacySavedMethodologyVersion,
   parseFrozenDealScore,
   resolveSavedAnalysisSnapshot,
 } from "@/lib/saved-analysis-methodology";
-import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
+import { resolveDealMethodologyPresentation } from "@/lib/dashboard-deal-mapping";
 import { computeRowEquity } from "@/lib/owned-equity-series";
 import { DEFAULT_PIPELINE_STAGE, isActiveStage, isPipelineStage } from "@/lib/pipeline";
 import { computeDealOfferLine, type DealOfferResult } from "@/lib/deal-offer-line";
@@ -204,6 +203,13 @@ function mapSavedRow(
   });
   const snapshot = resolution.snapshot as NonNullable<SavedAnalysisRow["result_snapshot"]>;
   const fresh = resolution.didRecompute ? recomputed : null;
+  const methodology = resolveDealMethodologyPresentation({
+    storedMethodologyVersion: resolution.storedMethodologyVersion,
+    usesRecordedSnapshot: resolution.usesRecordedSnapshot,
+    didRecompute: resolution.didRecompute,
+    currentMethodologyVersion: resolution.currentMethodologyVersion,
+    recordId: row.id,
+  });
   const frozenScore = resolution.usesRecordedSnapshot
     ? parseFrozenDealScore(snapshot)
     : null;
@@ -285,22 +291,10 @@ function mapSavedRow(
     recommendation: fresh ? fresh.recommendation : storedRecommendation,
     riskLevel: fresh ? fresh.riskLevel : storedRiskLevel,
     breakdown: fresh?.breakdown ?? frozenScore?.breakdown ?? null,
-    // Only when there is something NOTABLE to say. This used to return a
-    // string on every branch, so the common path printed "Standard v1.0" as a
-    // dedicated line on every single row — the same words, every time, telling
-    // the reader nothing and costing a line of vertical space per deal. A
-    // provenance note is worth space when the analysis is FROZEN or LEGACY;
-    // otherwise the standard is simply the current one, which the report and
-    // the disclosures already state.
-    methodologyLabel: resolution.shouldFreeze
-      ? `Frozen Standard v${resolution.storedMethodologyVersion}`
-      : isLegacySavedMethodologyVersion(resolution.storedMethodologyVersion)
-        ? resolution.didRecompute
-          ? `Legacy analysis · recomputed with current v${TRUECAP_UNDERWRITING_STANDARD_VERSION}`
-          : `Legacy analysis · stored snapshot (current v${TRUECAP_UNDERWRITING_STANDARD_VERSION} recompute unavailable)`
-        : resolution.usesRecordedSnapshot
-          ? `Recorded Standard v${resolution.storedMethodologyVersion}`
-          : undefined,
+    methodologyLabel: methodology.badgeLabel ?? undefined,
+    methodologyComparisonKey: methodology.comparisonKey,
+    methodologyGroupLabel: methodology.groupLabel,
+    methodologyIsCurrent: methodology.isCurrent,
     pipelineStage: isPipelineStage(row.pipeline_stage) ? row.pipeline_stage : DEFAULT_PIPELINE_STAGE,
     tags: Array.isArray(row.tags) ? row.tags.filter((t): t is string => typeof t === "string") : [],
     clientId: row.client_id ?? null,
@@ -495,6 +489,8 @@ export default async function DashboardSavedAnalysesPage({
       )
     )
     .filter((row): row is SavedAnalysisListItem => Boolean(row));
+  const hasMixedMetricMethodologies =
+    new Set(mappedItems.map((item) => item.methodologyComparisonKey)).size > 1;
   const displayName = getDisplayName((profile as ProfileRow | null) ?? null, user.email);
   const initials = getInitials(displayName, user.email ?? "");
 
@@ -542,13 +538,39 @@ export default async function DashboardSavedAnalysesPage({
           canAccessDashboard={navAccess.dashboard}
         />
         <div className="flex-1">
+          {hasMixedMetricMethodologies ? (
+            <section
+              role="status"
+              aria-label="Underwriting version notice"
+              className="mx-auto mt-1 w-full max-w-7xl px-4 pt-4 sm:px-6 sm:pt-6"
+            >
+              <div className="rounded-xl border border-amber-500/35 bg-amber-500/10 px-4 py-3 text-sm">
+                <p className="font-bold text-foreground">
+                  Recorded and current results are kept separate
+                </p>
+                <p className="mt-1 text-muted-foreground">
+                  Portfolio totals are withheld because this view contains
+                  different underwriting versions. The full deal list remains
+                  available below, grouped within each version when you sort by
+                  a calculated result.
+                </p>
+              </div>
+            </section>
+          ) : null}
           {/* Portfolio rollup — one-glance summary across the filtered
               set. Self-hides when fewer than 2 deals are in scope, so
               it never competes with empty-state UX. */}
           {/* Scope "all" when filtered to a client: the set includes completed and
               archived deals, so labeling it the ACTIVE pipeline (and summing
               closed deals into it) would misstate what is on screen. */}
-          <PortfolioRollupStrip items={mappedItems} scope={clientFilterId ? "all" : activeDealStateFilter} />
+          {/* Blending formula-dependent metrics across standards would imply
+              precision these rows do not share. Keep the list complete, but
+              fail closed on the aggregate until the old deals are explicitly
+              re-underwritten. */}
+          <PortfolioRollupStrip
+            items={hasMixedMetricMethodologies ? [] : mappedItems}
+            scope={clientFilterId ? "all" : activeDealStateFilter}
+          />
           <SavedAnalysesPage
             initialItems={mappedItems}
             initialSelectedIds={compareIds}

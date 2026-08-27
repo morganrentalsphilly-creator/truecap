@@ -49,6 +49,10 @@ type Props = {
   ctaLabel?: string;
   /** When supplied, the no-property action loads the shared sample. */
   onTrySample?: () => void;
+  /** Optional deliberate run handler for pre-submit target/enrichment gates. */
+  onCalculate?: () => void;
+  /** Mirrors the in-form action's disabled state while criteria resolve. */
+  isActionDisabled?: boolean;
 };
 
 export function StickyCalculateBar({
@@ -58,6 +62,8 @@ export function StickyCalculateBar({
   livePreview = null,
   ctaLabel = "Run analysis",
   onTrySample,
+  onCalculate,
+  isActionDisabled = false,
 }: Props) {
   const [pastFold, setPastFold] = useState(false);
   const [formInView, setFormInView] = useState(true);
@@ -279,21 +285,21 @@ export function StickyCalculateBar({
             />
           </button>
           <button
-            type={onTrySample ? "button" : "submit"}
-            onClick={onTrySample}
-            disabled={isCalculating}
+            type={onTrySample || onCalculate ? "button" : "submit"}
+            onClick={onTrySample ?? onCalculate}
+            disabled={isCalculating || isActionDisabled}
             className="flex min-h-12 w-full shrink-0 items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-md hover:bg-primary/95 disabled:opacity-70 min-[280px]:w-auto"
           >
             <Calculator className="size-4" />
-            {onTrySample ? "Try sample" : "Run"}
+            {ctaLabel}
             <ArrowUpRight className="size-4" />
           </button>
         </div>
       ) : (
         <button
-          type={onTrySample ? "button" : "submit"}
-          onClick={onTrySample}
-          disabled={isCalculating}
+          type={onTrySample || onCalculate ? "button" : "submit"}
+          onClick={onTrySample ?? onCalculate}
+          disabled={isCalculating || isActionDisabled}
           className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-2 py-2 text-center text-sm font-bold leading-snug text-primary-foreground shadow-md hover:bg-primary/95 disabled:opacity-70"
         >
           {isCalculating ? (

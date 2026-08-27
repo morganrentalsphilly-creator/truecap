@@ -149,6 +149,8 @@ export function AddressAutocomplete({
   const inputRef = useRef<HTMLInputElement | null>(null);
   const sessionTokenRef = useRef<SessionToken | null>(null);
   const debounceRef = useRef<number | null>(null);
+  const predictionRequestRef = useRef(0);
+  const selectionRequestRef = useRef(0);
   // One-shot guard for the deferred Maps-script load + the latest typed value,
   // used to re-run the search once the (lazy) script becomes ready.
   const loadStartedRef = useRef(false);
@@ -164,6 +166,7 @@ export function AddressAutocomplete({
   // user types but nothing happens. Surfacing the search state makes
   // the silence visible.
   const [isSearching, setIsSearching] = useState(false);
+  const [noMatches, setNoMatches] = useState(false);
   // On mobile the on-screen keyboard can hide a below-input dropdown; this caps
   // the dropdown to the space above the keyboard (measured via visualViewport)
   // so suggestions stay tappable. undefined = use the CSS fallback (desktop).
@@ -282,7 +285,9 @@ export function AddressAutocomplete({
     const api = window.google?.maps?.places?.AutocompleteSuggestion;
     if (!api) return;
     setAutocompleteWarning(null);
+    setNoMatches(false);
     setIsSearching(true);
+    const requestId = ++predictionRequestRef.current;
     // Show the "Searching…" hint immediately so the user knows the
     // request is in flight, even before any predictions come back.
     setOpen(true);
@@ -292,14 +297,24 @@ export function AddressAutocomplete({
         sessionToken: ensureSessionToken(),
         includedRegionCodes: ["us"],
       });
+      // Responses are not guaranteed to resolve in typing order. Never let an
+      // older query replace the suggestions for the address now on screen.
+      if (
+        requestId !== predictionRequestRef.current ||
+        input !== lastValueRef.current
+      ) {
+        return;
+      }
       const preds = suggestions
         .map((s) => s.placePrediction)
         .filter((p): p is PlacePrediction => p !== null)
         .slice(0, 5);
       setPredictions(preds);
+      setNoMatches(preds.length === 0);
       setOpen(preds.length > 0);
       setHighlight(0);
     } catch (err) {
+      if (requestId !== predictionRequestRef.current) return;
       console.warn("[AddressAutocomplete] fetchAutocompleteSuggestions failed:", err);
       setPredictions([]);
       setOpen(false);
@@ -307,7 +322,7 @@ export function AddressAutocomplete({
         "Address suggestions are temporarily unavailable. You can still type or paste the full address."
       );
     } finally {
-      setIsSearching(false);
+      if (requestId === predictionRequestRef.current) setIsSearching(false);
     }
   };
 
@@ -332,6 +347,9 @@ export function AddressAutocomplete({
 
     const value = e.target.value;
     lastValueRef.current = value;
+    // Any edit supersedes a place-details request started from an older value.
+    selectionRequestRef.current += 1;
+    setNoMatches(false);
     // A real keystroke/paste in the field — arms the typed-address commit.
     typedSinceCommitRef.current = true;
     // Belt-and-suspenders: also kick off the deferred load here — covers paste /
@@ -349,6 +367,8 @@ export function AddressAutocomplete({
   };
 
   const handleSelect = async (prediction: PlacePrediction) => {
+    const selectionId = ++selectionRequestRef.current;
+    const selectedFromValue = lastValueRef.current;
     setOpen(false);
     setPredictions([]);
     try {
@@ -357,6 +377,12 @@ export function AddressAutocomplete({
         fields: ["formattedAddress", "addressComponents"],
         sessionToken: sessionTokenRef.current ?? undefined,
       });
+      if (
+        selectionId !== selectionRequestRef.current ||
+        selectedFromValue !== lastValueRef.current
+      ) {
+        return;
+      }
       sessionTokenRef.current = null; // Reset for next selection cycle
 
       if (place.formattedAddress) {
@@ -399,6 +425,7 @@ export function AddressAutocomplete({
         }
       }
     } catch (err) {
+      if (selectionId !== selectionRequestRef.current) return;
       console.warn("[AddressAutocomplete] failed to resolve place:", err);
       // Fall back to the prediction text
       const text = prediction.text?.toString();
@@ -501,7 +528,8 @@ export function AddressAutocomplete({
   };
 
   const autocompleteWarningId = `${fieldId}-autocomplete-warning`;
-  const describedBy = [hasError && errorId ? errorId : null, autocompleteWarning ? autocompleteWarningId : null]
+  const noMatchesId = `${fieldId}-no-matches`;
+  const describedBy = [hasError && errorId ? errorId : null, autocompleteWarning ? autocompleteWarningId : null, noMatches ? noMatchesId : null]
     .filter(Boolean)
     .join(" ") || undefined;
 
@@ -554,6 +582,16 @@ export function AddressAutocomplete({
           className="mt-1 text-xs text-amber-800"
         >
           {autocompleteWarning}
+        </p>
+      ) : null}
+      {noMatches && !isSearching && !autocompleteWarning ? (
+        <p
+          id={noMatchesId}
+          role="status"
+          className="mt-1 text-xs text-muted-foreground"
+        >
+          No address matches yet. Keep typing or paste the complete street,
+          city, state, and ZIP.
         </p>
       ) : null}
       {/* In-flight indicator - shows BEFORE predictions land. Without

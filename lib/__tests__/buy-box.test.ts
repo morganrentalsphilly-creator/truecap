@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   EMPTY_BUY_BOX,
+  boxesForPersonalAnalyzerStrategy,
   buyBoxHasCriteria,
   countBuyBoxFit,
   deriveStateFromAddress,
@@ -202,7 +203,12 @@ describe("deriveStateFromAddress", () => {
 function namedBox(
   id: string,
   criteria: Partial<BuyBoxCriteria>,
-  meta?: Partial<Pick<NamedBuyBox, "name" | "strategyKind" | "isDefault" | "sortOrder">>
+  meta?: Partial<
+    Pick<
+      NamedBuyBox,
+      "name" | "strategyKind" | "isDefault" | "sortOrder" | "clientId"
+    >
+  >
 ): NamedBuyBox {
   return {
     ...EMPTY_BUY_BOX,
@@ -212,8 +218,53 @@ function namedBox(
     strategyKind: meta?.strategyKind ?? null,
     isDefault: meta?.isDefault ?? false,
     sortOrder: meta?.sortOrder ?? 0,
+    clientId: meta?.clientId ?? null,
   };
 }
+
+describe("boxesForPersonalAnalyzerStrategy", () => {
+  const boxes = [
+    namedBox("unscoped", { minDscr: 1.2 }),
+    namedBox("buy-hold", { minDscr: 1.25 }, { strategyKind: "buy_hold" }),
+    namedBox("house-hack", { minDscr: 1.1 }, { strategyKind: "house_hack" }),
+    namedBox("brrrr", { minDscr: 1.15 }, { strategyKind: "brrrr" }),
+    namedBox("flip", { minDscr: 1.05 }, { strategyKind: "flip" }),
+    namedBox("str", { minDscr: 1.3 }, { strategyKind: "str" }),
+    namedBox("unknown", { minDscr: 1.4 }, { strategyKind: "future_model" }),
+    namedBox(
+      "client-unscoped",
+      { minDscr: 1.5 },
+      { clientId: "client-1" },
+    ),
+    namedBox(
+      "client-buy-hold",
+      { minDscr: 1.6 },
+      { strategyKind: "buy_hold", clientId: "client-1" },
+    ),
+  ];
+
+  it.each([
+    ["buy-hold", ["unscoped", "buy-hold"]],
+    ["house-hack", ["unscoped", "house-hack"]],
+    ["brrrr", ["unscoped", "brrrr"]],
+    ["fix-flip", ["unscoped", "flip"]],
+    ["short-term", ["unscoped", "str"]],
+    ["wholesale-mao", ["unscoped"]],
+  ] as const)("keeps only personal %s and unscoped boxes", (strategy, ids) => {
+    expect(
+      boxesForPersonalAnalyzerStrategy(boxes, strategy).map((box) => box.id),
+    ).toEqual(ids);
+  });
+
+  it("treats a missing analyzer strategy as the default Buy & Hold lens", () => {
+    expect(
+      boxesForPersonalAnalyzerStrategy(boxes, null).map((box) => box.id),
+    ).toEqual(["unscoped", "buy-hold"]);
+    expect(
+      boxesForPersonalAnalyzerStrategy(boxes, undefined).map((box) => box.id),
+    ).toEqual(["unscoped", "buy-hold"]);
+  });
+});
 
 describe("evaluateBuyBoxes (multiple boxes)", () => {
   it("evaluates every box, ordered default-first then by sort order", () => {

@@ -33,6 +33,7 @@ describe("strategy-aware underwriting heading", () => {
     expect(page).toContain(
       "canUseStrategyPrimaryOutput: canUseActiveStrategyPrimaryOutput",
     );
-    expect(page).toContain("{analyzerCta}");
+    expect(page).toContain(": analyzerCta;");
+    expect(page).toContain("{primaryActionLabel}");
   });
 });

@@ -24,13 +24,14 @@ import { computeAssumptionImpact } from "@/lib/assumption-impact";
 import type { MaoTarget } from "@/lib/max-allowable-offer";
 import { meetsMaoTarget } from "@/lib/mao-target-evaluation";
 import {
-  applyMaoTargetInput,
   EMPTY_MAO_TARGET_ERROR,
   MAO_TARGET_BOUNDS,
+  maoTargetFingerprint,
   type MaoTargetField,
 } from "@/lib/mao-target-editor";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import type { AnalyzerStrategyKey } from "@/lib/analyzer-strategy-persistence";
+import type { OfferCeilingDecisionBasis } from "@/lib/offer-ceiling-decision-basis";
 import type {
   OfferCeilingPresentation,
   OfferCeilingRangePreview,
@@ -105,6 +106,7 @@ type Props = {
   targetResolutionMessage?: string;
   advocacyContractEnabled?: boolean;
   analyzerStrategyKey?: AnalyzerStrategyKey;
+  adoptedDecisionBasis?: OfferCeilingDecisionBasis | null;
 };
 
 type TargetDeltaNotice = {
@@ -120,6 +122,119 @@ function money(value: number): string {
 
 function targetInput(value: number | undefined): string {
   return value == null ? "" : String(value);
+}
+
+const TARGET_FIELDS = [
+  ["capRate", "Target cap rate (%)"],
+  ["cocReturn", "Target cash-on-cash (%)"],
+  ["monthlyCashFlow", "Min cash flow ($/mo)"],
+  ["dscr", "Min DSCR"],
+  ["maxPurchasePrice", "Max purchase price ($)"],
+] as const satisfies ReadonlyArray<readonly [MaoTargetField, string]>;
+
+export type TargetInputs = Record<MaoTargetField, string>;
+type TargetDraftValidation = {
+  target: MaoTarget | null;
+  errors: Partial<Record<MaoTargetField, string>>;
+  formError: string | null;
+};
+
+function inputsFromTarget(target: MaoTarget): TargetInputs {
+  return {
+    capRate: targetInput(target.capRate),
+    cocReturn: targetInput(target.cocReturn),
+    monthlyCashFlow: targetInput(target.monthlyCashFlow),
+    dscr: targetInput(target.dscr),
+    maxPurchasePrice: targetInput(target.maxPurchasePrice),
+  };
+}
+
+/** Validate the whole draft atomically. Field-by-field commits made it
+ * possible for the visible editor to disagree with Save/Share/PDF. */
+export function validateTargetDraft(
+  inputs: TargetInputs,
+  options: { isCashPurchase: boolean },
+): TargetDraftValidation {
+  const target: MaoTarget = {};
+  const errors: Partial<Record<MaoTargetField, string>> = {};
+
+  for (const [field] of TARGET_FIELDS) {
+    if (options.isCashPurchase && field === "dscr") continue;
+    const rawValue = inputs[field].trim();
+    if (!rawValue) continue;
+
+    const value = Number(rawValue);
+    const bounds = MAO_TARGET_BOUNDS[field];
+    if (
+      !Number.isFinite(value) ||
+      value < bounds.min ||
+      value > bounds.max
+    ) {
+      errors[field] = `${bounds.label} must be between ${bounds.min.toLocaleString()} and ${bounds.max.toLocaleString()}.`;
+      continue;
+    }
+    const stepCount = (value - bounds.min) / bounds.step;
+    if (Math.abs(stepCount - Math.round(stepCount)) > 1e-8) {
+      errors[field] = `${bounds.label} must use increments of ${bounds.step}.`;
+      continue;
+    }
+    target[field] = value;
+  }
+
+  if (Object.keys(errors).length > 0) {
+    return { target: null, errors, formError: null };
+  }
+  if (!Object.values(target).some((value) => value !== undefined)) {
+    return { target: null, errors, formError: EMPTY_MAO_TARGET_ERROR };
+  }
+  return { target, errors, formError: null };
+}
+
+function FirstYearSnapshot({
+  result,
+  isScenarioActive,
+}: {
+  result: AnalysisResult;
+  isScenarioActive: boolean;
+}) {
+  return (
+    <div
+      className="grid grid-cols-1 gap-3 min-[280px]:grid-cols-2 sm:grid-cols-3"
+      aria-label="First-year investment snapshot"
+    >
+      <div className="rounded-xl border border-primary/20 bg-[var(--brand-blue-light)] p-3">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          {isScenarioActive
+            ? "Base cash flow after reserve"
+            : "Cash flow after reserve"}
+        </p>
+        <p className="mt-1 font-mono text-xl font-extrabold tabular-nums text-foreground">
+          {money(result.netCashFlow)}/mo
+        </p>
+      </div>
+      <div className="rounded-xl border border-primary/20 bg-[var(--brand-blue-light)] p-3">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          Cash needed
+        </p>
+        <p className="mt-1 font-mono text-xl font-extrabold tabular-nums text-foreground">
+          {money(result.totalCashRequired)}
+        </p>
+      </div>
+      <div className="rounded-xl border border-border bg-muted/30 p-3">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          Model DSCR
+        </p>
+        <p className="mt-1 font-mono text-xl font-extrabold tabular-nums text-foreground">
+          {result.monthlyPayment <= 0 ? "N/A" : result.dscr.toFixed(2)}
+        </p>
+        {result.monthlyPayment <= 0 ? (
+          <p className="mt-1 text-[10px] text-muted-foreground">
+            No modeled debt service
+          </p>
+        ) : null}
+      </div>
+    </div>
+  );
 }
 
 const IMPACT_TO_CONFIDENCE_KEY = {
@@ -189,6 +304,7 @@ export function FocusedDecisionSummary({
   targetResolutionMessage,
   advocacyContractEnabled = false,
   analyzerStrategyKey = "buy-hold",
+  adoptedDecisionBasis,
 }: Props) {
   const allDrivers = useMemo(() => computeAssumptionImpact(values), [values]);
   const drivers = allDrivers.slice(0, 2);
@@ -218,81 +334,57 @@ export function FocusedDecisionSummary({
   );
   const targetEditorId = useId();
   const [tuneOpen, setTuneOpen] = useState(false);
-  const [targetInputs, setTargetInputs] = useState<
-    Record<MaoTargetField, string>
-  >(() => ({
-    capRate: targetInput(target.capRate),
-    cocReturn: targetInput(target.cocReturn),
-    monthlyCashFlow: targetInput(target.monthlyCashFlow),
-    dscr: targetInput(target.dscr),
-    maxPurchasePrice: targetInput(target.maxPurchasePrice),
-  }));
-  const [targetErrors, setTargetErrors] = useState<
-    Partial<Record<MaoTargetField, string>>
-  >({});
+  const [targetInputs, setTargetInputs] = useState<TargetInputs>(() =>
+    inputsFromTarget(target),
+  );
   const targetKey = JSON.stringify(target);
-  const lastLocallyCommittedTargetKeyRef = useRef(targetKey);
   const previousTargetKeyRef = useRef(targetKey);
 
-  // Buy-box or sample targets can resolve after first paint. Track actual prop
-  // changes so a local invalid draft survives ordinary re-renders, while a
-  // new target from another solver surface still replaces that stale draft.
+  // Buy-box, sample, or another visible target surface can resolve after first
+  // paint. The parent is authoritative after an explicit commit, so replace
+  // this draft only when that committed target actually changes.
   useEffect(() => {
     if (previousTargetKeyRef.current === targetKey) return;
     previousTargetKeyRef.current = targetKey;
-    // This is the parent acknowledging our own valid edit. The visible raw
-    // value already matches, so retain it (including user-friendly formatting)
-    // and simply release the invalid-draft protection.
-    if (targetKey === lastLocallyCommittedTargetKeyRef.current) {
-      return;
-    }
-    // A sample/buy-box seed or the deeper solver changed the target. Replace
-    // any stale local draft so every editor surface shows the same criteria.
-    setTargetInputs({
-      capRate: targetInput(target.capRate),
-      cocReturn: targetInput(target.cocReturn),
-      monthlyCashFlow: targetInput(target.monthlyCashFlow),
-      dscr: targetInput(target.dscr),
-      maxPurchasePrice: targetInput(target.maxPurchasePrice),
-    });
-    setTargetErrors({});
-    lastLocallyCommittedTargetKeyRef.current = targetKey;
-  }, [
-    target.capRate,
-    target.cocReturn,
-    target.dscr,
-    target.maxPurchasePrice,
-    target.monthlyCashFlow,
-    targetKey,
-  ]);
+    setTargetInputs(inputsFromTarget(target));
+  }, [target, targetKey]);
 
-  const updateTargetField = (field: MaoTargetField, rawValue: string) => {
-    const update = applyMaoTargetInput(target, field, rawValue);
-    if (!update.ok) {
-      // Preserve the visible final criterion when blanking it is rejected;
-      // otherwise the field would look empty while the unchanged criterion
-      // still participates in the ceiling math. Out-of-range typed values do
-      // remain visible so their connected error is actionable.
-      if (rawValue.trim()) {
-        setTargetInputs((current) => ({ ...current, [field]: rawValue }));
-      }
-      setTargetErrors((current) => ({
-        ...current,
-        [field]: update.error,
-      }));
-      return;
-    }
+  const isCashPurchase = result.monthlyPayment <= 0;
+  const targetDraftValidation = useMemo(
+    () => validateTargetDraft(targetInputs, { isCashPurchase }),
+    [isCashPurchase, targetInputs],
+  );
+  const draftTargetFingerprint = targetDraftValidation.target
+    ? maoTargetFingerprint(targetDraftValidation.target)
+    : null;
+  const committedTargetFingerprint = maoTargetFingerprint(target);
+  const canonicalInputsKey = JSON.stringify(inputsFromTarget(target));
+  const targetDraftDirty = targetDraftValidation.target
+    ? draftTargetFingerprint !== committedTargetFingerprint
+    : JSON.stringify(targetInputs) !== canonicalInputsKey;
+  const targetDraftInvalid = Boolean(
+    targetDraftValidation.formError ||
+      Object.values(targetDraftValidation.errors).some(Boolean),
+  );
+  const targetDraftBlocksActions = targetDraftDirty || targetDraftInvalid;
 
-    setTargetInputs((current) => ({ ...current, [field]: rawValue }));
-    lastLocallyCommittedTargetKeyRef.current = JSON.stringify(update.target);
-    setTargetErrors((current) => {
-      const next = { ...current, [field]: undefined };
-      for (const key of Object.keys(next) as MaoTargetField[]) {
-        if (next[key] === EMPTY_MAO_TARGET_ERROR) next[key] = undefined;
-      }
-      return next;
-    });
-    onTargetChange(update.target);
+  const resetTargetDraft = () => {
+    setTargetInputs(inputsFromTarget(target));
+  };
+
+  const applyTargetDraft = () => {
+    const nextTarget = targetDraftValidation.target;
+    if (!nextTarget) return;
+    if (
+      !targetAdopted &&
+      maoTargetFingerprint(nextTarget) === committedTargetFingerprint
+    ) {
+      onAdoptTarget();
+    } else {
+      onTargetChange(nextTarget);
+    }
+    setTargetInputs(inputsFromTarget(nextTarget));
+    setTuneOpen(false);
   };
   // The verdict must reconcile with the exact ceiling shown beside it. A deal
   // can have positive cash flow and still miss the selected $/mo or DSCR bar.
@@ -304,7 +396,9 @@ export function FocusedDecisionSummary({
         ? "Verify first"
         : "Screening only";
   const legacyDecisionLabel = !targetAdopted
-    ? "Preliminary underwriting"
+    ? result.netCashFlow >= 0
+      ? "Positive operating screen at entered assumptions"
+      : "Negative operating screen at entered assumptions"
     : !clearsTargets || buyBoxFit === false
       ? "Does not meet selected rules at asking"
       : "Meets selected rules at asking";
@@ -352,7 +446,9 @@ export function FocusedDecisionSummary({
     ? (evidenceLedger?.readinessLabel ?? "Screening")
     : legacyReadinessLabel;
   const rawDecisionLabel = !targetAdopted
-    ? "Preliminary underwriting"
+    ? result.netCashFlow >= 0
+      ? "Positive operating screen at entered assumptions"
+      : "Negative operating screen at entered assumptions"
     : advocacyContractEnabled
       ? ruleFitLabel(ruleFit)
       : legacyDecisionLabel;
@@ -373,11 +469,20 @@ export function FocusedDecisionSummary({
     .slice(0, 2);
   const nextVerification = inputConfidence?.verificationQueue[0];
   const legacyResolvedNextAction = !targetAdopted
-    ? {
-        label: "Review and adopt return targets",
-        reason:
-          "TrueCap only calculates a price threshold from targets you've applied — examples don't count.",
-      }
+    ? canTunePriceCeiling
+      ? {
+          label: "Choose the criteria for your Offer Ceiling",
+          reason:
+            "The operating screen is complete. Apply at least one return criterion only if you want TrueCap to calculate a modeled price threshold.",
+        }
+      : {
+          label:
+            nextVerification?.verifyAction ??
+            "Review risks and verify the assumptions",
+          reason: nextVerification
+            ? `${nextVerification.label} is the next material input to verify before making your own decision.`
+            : "The operating economics above are available now. Review the downside and verify the assumptions before making your own decision.",
+        }
     : !clearsTargets
       ? offerCeiling
         ? {
@@ -410,6 +515,14 @@ export function FocusedDecisionSummary({
     target,
   });
   const targetBlocked = targetResolutionState !== "ready";
+  const targetDraftBlockMessage =
+    "Apply or cancel the target edits before saving, sharing, or exporting.";
+  const resultActionsBlocked = targetBlocked || targetDraftBlocksActions;
+  const resultActionsBlockedReason = targetBlocked
+    ? targetResolutionMessage
+    : targetDraftBlocksActions
+      ? targetDraftBlockMessage
+      : undefined;
   const lastResolvedTargetRef = useRef<{
     rulesSnapshotVersion: string;
     ceiling: number | null;
@@ -542,8 +655,8 @@ export function FocusedDecisionSummary({
 
   const offerCeilingHeadline = !targetAdopted
     ? canTunePriceCeiling
-      ? "Set targets first"
-      : "Pro feature"
+      ? "Choose criteria"
+      : "Available with Pro"
     : targetResolutionState === "loading"
       ? advocacyContractEnabled
         ? "Loading target rules…"
@@ -611,6 +724,13 @@ export function FocusedDecisionSummary({
           ) : null}
         </div>
 
+        {!targetAdopted ? (
+          <FirstYearSnapshot
+            result={result}
+            isScenarioActive={isScenarioActive}
+          />
+        ) : null}
+
         <div className="rounded-xl border border-primary/25 bg-[var(--brand-blue-light)] p-4">
           <span
             className="sr-only"
@@ -621,7 +741,11 @@ export function FocusedDecisionSummary({
             {offerCeilingAnnouncement}
           </span>
           <p className="text-[11px] font-extrabold uppercase tracking-widest text-[var(--brand-blue-text)]">
-            {isScenarioActive ? "Base Offer Ceiling" : "Offer Ceiling"}
+            {!targetAdopted
+              ? "Optional decision criteria"
+              : isScenarioActive
+                ? "Base Offer Ceiling"
+                : "Offer Ceiling"}
           </p>
           <p className="mt-1 font-mono text-3xl font-extrabold tabular-nums text-primary max-[250px]:text-2xl">
             {offerCeilingHeadline}
@@ -647,8 +771,8 @@ export function FocusedDecisionSummary({
           ) : null}
           {advocacyContractEnabled && targetDeltaNotice ? (
             <p className="mt-2 rounded-md border border-primary/20 bg-background/70 px-2 py-1.5 text-[11px] leading-relaxed text-foreground">
-              {targetDeltaNotice.message} The prior target criteria remain
-              preserved in the previous snapshot.
+              {targetDeltaNotice.message} This comparison is session-only;
+              Save to record the current criteria with the analysis.
             </p>
           ) : null}
           {offerCeilingError && onRetryOfferCeiling ? (
@@ -694,15 +818,6 @@ export function FocusedDecisionSummary({
                 : "Calculated from the targets shown above. This is not a recommended offer."}
           </p>
           {!targetAdopted && canTunePriceCeiling && !targetBlocked ? (
-            <button
-              type="button"
-              onClick={onAdoptTarget}
-              className="mt-2 inline-flex min-h-11 items-center rounded-lg border border-primary/30 bg-background px-3 text-xs font-bold text-primary transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              Apply the example targets
-            </button>
-          ) : null}
-          {!targetAdopted && canTunePriceCeiling && !targetBlocked ? (
             <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
               Prefer these filled in automatically? Every analysis uses your{" "}
               <Link
@@ -731,42 +846,12 @@ export function FocusedDecisionSummary({
           ) : null}
         </div>
 
-        <div
-          className="grid grid-cols-1 gap-3 min-[280px]:grid-cols-2 sm:grid-cols-3"
-          aria-label="First-year investment snapshot"
-        >
-          <div className="rounded-xl border border-primary/20 bg-[var(--brand-blue-light)] p-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-              {isScenarioActive
-                ? "Base cash flow after reserve"
-                : "Cash flow after reserve"}
-            </p>
-            <p className="mt-1 font-mono text-xl font-extrabold tabular-nums text-foreground">
-              {money(result.netCashFlow)}/mo
-            </p>
-          </div>
-          <div className="rounded-xl border border-primary/20 bg-[var(--brand-blue-light)] p-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-              Cash needed
-            </p>
-            <p className="mt-1 font-mono text-xl font-extrabold tabular-nums text-foreground">
-              {money(result.totalCashRequired)}
-            </p>
-          </div>
-          <div className="rounded-xl border border-border bg-muted/30 p-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-              Model DSCR
-            </p>
-            <p className="mt-1 font-mono text-xl font-extrabold tabular-nums text-foreground">
-              {result.monthlyPayment <= 0 ? "N/A" : result.dscr.toFixed(2)}
-            </p>
-            {result.monthlyPayment <= 0 ? (
-              <p className="mt-1 text-[10px] text-muted-foreground">
-                No modeled debt service
-              </p>
-            ) : null}
-          </div>
-        </div>
+        {targetAdopted ? (
+          <FirstYearSnapshot
+            result={result}
+            isScenarioActive={isScenarioActive}
+          />
+        ) : null}
       </div>
 
       <div className="mt-4 rounded-xl border border-amber-500/25 bg-amber-500/5 p-3">
@@ -791,18 +876,13 @@ export function FocusedDecisionSummary({
       >
         {canTunePriceCeiling ? (
           <Button
+            id="offer-ceiling-criteria-trigger"
             type="button"
             onClick={() => {
-              if (!tuneOpen) onTuneTargetsOpened();
               if (tuneOpen) {
-                setTargetInputs({
-                  capRate: targetInput(target.capRate),
-                  cocReturn: targetInput(target.cocReturn),
-                  monthlyCashFlow: targetInput(target.monthlyCashFlow),
-                  dscr: targetInput(target.dscr),
-                  maxPurchasePrice: targetInput(target.maxPurchasePrice),
-                });
-                setTargetErrors({});
+                resetTargetDraft();
+              } else {
+                onTuneTargetsOpened();
               }
               setTuneOpen(!tuneOpen);
             }}
@@ -812,7 +892,11 @@ export function FocusedDecisionSummary({
             className="h-11 gap-2 rounded-xl"
           >
             <SlidersHorizontal className="size-4" aria-hidden />
-            {targetAdopted ? "Tune targets" : "Set targets"}
+            {tuneOpen
+              ? "Cancel target edits"
+              : targetAdopted
+                ? "Tune targets"
+                : "Set criteria"}
             <ChevronDown
               className={`size-4 transition-transform ${tuneOpen ? "rotate-180" : ""}`}
               aria-hidden
@@ -832,8 +916,11 @@ export function FocusedDecisionSummary({
           type="button"
           variant="outline"
           onClick={onSave}
-          disabled={isSaving || targetBlocked}
-          title={isSaveLocked ? saveLockedHint : undefined}
+          disabled={isSaving || resultActionsBlocked}
+          title={
+            resultActionsBlockedReason ??
+            (isSaveLocked ? saveLockedHint : undefined)
+          }
           className="h-11 gap-2 rounded-xl max-[250px]:h-auto max-[250px]:w-full max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight"
         >
           {isSaving ? (
@@ -841,7 +928,7 @@ export function FocusedDecisionSummary({
           ) : (
             <Save className="size-4" aria-hidden />
           )}
-          Save
+          {isSaving ? "Saving…" : isSaved ? "Saved" : "Save"}
           {isSaveLocked ? (
             <span className="ml-0.5 rounded-full bg-[var(--brand-orange)] px-1.5 py-0.5 text-[9px] font-bold uppercase text-white">
               PRO
@@ -856,12 +943,33 @@ export function FocusedDecisionSummary({
           priceIsEstimated={priceIsEstimated}
           maoTarget={targetAdopted ? target : undefined}
           maoTargetSource={targetAdopted ? targetSource : undefined}
-          disabled={targetBlocked}
-          disabledReason={targetResolutionMessage}
+          adoptedDecisionBasis={
+            targetAdopted ? adoptedDecisionBasis : undefined
+          }
+          disabled={resultActionsBlocked}
+          disabledReason={resultActionsBlockedReason}
           onPrepareAuth={onPrepareAuthShare}
           className="h-11 rounded-xl px-4"
         />
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onAnalyzeAnotherLikeThis}
+          className="min-h-11 gap-2 rounded-xl max-[250px]:w-full max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight"
+          title="Keeps reusable financing and operating assumptions while clearing property-specific values"
+        >
+          <CopyPlus className="size-4" aria-hidden />
+          Next deal · keep assumptions
+        </Button>
       </div>
+      {targetDraftBlocksActions ? (
+        <p
+          role="status"
+          className="mt-2 text-xs font-medium text-amber-800 dark:text-amber-200"
+        >
+          {targetDraftBlockMessage}
+        </p>
+      ) : null}
 
       <details className="group mt-2 rounded-xl border border-border bg-muted/20 px-2 py-1">
         <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg px-3 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
@@ -1038,8 +1146,8 @@ export function FocusedDecisionSummary({
             type="button"
             variant="outline"
             onClick={onExportPdf}
-            disabled={targetBlocked || isExportDisabled}
-            title={exportHint}
+            disabled={resultActionsBlocked || isExportDisabled}
+            title={resultActionsBlockedReason ?? exportHint}
             className="h-11 gap-2 rounded-xl"
           >
             {isExporting ? (
@@ -1097,16 +1205,6 @@ export function FocusedDecisionSummary({
           )}
           <Button
             type="button"
-            variant="outline"
-            onClick={onAnalyzeAnotherLikeThis}
-            className="min-h-11 gap-2 rounded-xl max-[250px]:w-full max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight"
-            title="Keeps reusable assumptions and clears property-specific values"
-          >
-            <CopyPlus className="size-4" aria-hidden />
-            Analyze another like this
-          </Button>
-          <Button
-            type="button"
             variant="ghost"
             onClick={() => void onNewAnalysis()}
             className="min-h-11 gap-2 rounded-xl max-[250px]:w-full max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight"
@@ -1134,19 +1232,11 @@ export function FocusedDecisionSummary({
             </legend>
             <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
               {targetAdopted
-                ? "Change any target and the Offer Ceiling above updates immediately. Leave a field blank to ignore it."
-                : "These are product examples, not your targets. Review or change them, then apply the rule set to calculate a modeled threshold."}
+                ? "Edit the criteria, then choose Update criteria. The Offer Ceiling and saved outputs do not change while you type. Leave a field blank to ignore it."
+                : "These are product examples, not your targets. Review or change them, then explicitly apply the criteria to calculate a modeled threshold."}
             </p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-              {(
-                [
-                  ["capRate", "Target cap rate (%)"],
-                  ["cocReturn", "Target cash-on-cash (%)"],
-                  ["monthlyCashFlow", "Min cash flow ($/mo)"],
-                  ["dscr", "Min DSCR"],
-                  ["maxPurchasePrice", "Max purchase price ($)"],
-                ] as const
-              ).map(([field, label]) => {
+              {TARGET_FIELDS.map(([field, label]) => {
                 const bounds = MAO_TARGET_BOUNDS[field];
                 const inputId = `${targetEditorId}-${field}`;
                 const errorId = `${inputId}-error`;
@@ -1173,37 +1263,66 @@ export function FocusedDecisionSummary({
                       placeholder={isCashDscr ? "N/A — cash" : "Any"}
                       disabled={isCashDscr}
                       onChange={(event) =>
-                        updateTargetField(field, event.target.value)
+                        setTargetInputs((current) => ({
+                          ...current,
+                          [field]: event.target.value,
+                        }))
                       }
-                      aria-invalid={Boolean(targetErrors[field])}
+                      aria-invalid={Boolean(
+                        targetDraftValidation.errors[field],
+                      )}
                       aria-describedby={
-                        targetErrors[field] ? errorId : undefined
+                        targetDraftValidation.errors[field]
+                          ? errorId
+                          : undefined
                       }
-                      className="mt-1"
+                      className="mt-1 h-11"
                     />
-                    {targetErrors[field] ? (
+                    {targetDraftValidation.errors[field] ? (
                       <p
                         id={errorId}
                         role="alert"
                         className="mt-1 text-xs font-medium text-destructive"
                       >
-                        {targetErrors[field]}
+                        {targetDraftValidation.errors[field]}
                       </p>
                     ) : null}
                   </div>
                 );
               })}
             </div>
-            {!targetAdopted ? (
+            {targetDraftValidation.formError ? (
+              <p
+                role="alert"
+                className="mt-3 text-xs font-medium text-destructive"
+              >
+                {targetDraftValidation.formError}
+              </p>
+            ) : null}
+            <div className="mt-4 flex flex-wrap gap-2">
               <Button
                 type="button"
-                onClick={onAdoptTarget}
-                disabled={Object.values(targetErrors).some(Boolean)}
-                className="mt-4 min-h-11 rounded-xl"
+                onClick={applyTargetDraft}
+                disabled={
+                  targetDraftInvalid ||
+                  (targetAdopted && !targetDraftDirty)
+                }
+                className="min-h-11 rounded-xl"
               >
-                Apply these targets
+                {targetAdopted ? "Update criteria" : "Apply criteria"}
               </Button>
-            ) : null}
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => {
+                  resetTargetDraft();
+                  setTuneOpen(false);
+                }}
+                className="min-h-11 rounded-xl"
+              >
+                Cancel
+              </Button>
+            </div>
           </fieldset>
         </div>
       ) : null}

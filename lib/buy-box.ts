@@ -10,6 +10,8 @@
  * the inline verdict card can evaluate locally without a round-trip.
  */
 
+import type { AnalyzerStrategyKey } from "@/lib/analyzer-strategy-persistence";
+
 export type BuyBoxPropertyType = "single-family" | "multi-family" | "owner-occupant";
 
 export type BuyBoxCriteria = {
@@ -414,6 +416,22 @@ export type NamedBuyBox = BuyBoxCriteria & {
   clientId?: string | null;
 };
 
+/**
+ * Canonical analyzer lenses and persisted Buy Box strategy ids use different
+ * spelling. Keep the conversion beside the scope filter so every personal
+ * analyzer surface makes the same fail-closed choice. Wholesale has no
+ * equivalent persisted strategy kind; only deliberately unscoped boxes can
+ * apply to that lens.
+ */
+const BUY_BOX_STRATEGY_FOR_ANALYZER: Record<AnalyzerStrategyKey, string | null> = {
+  "buy-hold": "buy_hold",
+  "house-hack": "house_hack",
+  brrrr: "brrrr",
+  "wholesale-mao": null,
+  "fix-flip": "flip",
+  "short-term": "str",
+};
+
 export type NamedBuyBoxResult = {
   box: NamedBuyBox;
   result: BuyBoxResult;
@@ -517,6 +535,27 @@ export function boxesForDealClient(
   dealClientId: string | null | undefined
 ): NamedBuyBox[] {
   return boxes.filter((b) => b.clientId == null || b.clientId === dealClientId);
+}
+
+/**
+ * Buy Boxes that may drive a personal analyzer result for one strategy.
+ *
+ * A personal analysis must never inherit a client-assigned box or criteria
+ * saved for a different investing model. A null/undefined analyzer key is the
+ * product's default Buy & Hold lens, not an "all strategies" wildcard. Every
+ * lens also accepts explicitly unscoped (`strategyKind: null`) personal boxes.
+ */
+export function boxesForPersonalAnalyzerStrategy(
+  boxes: NamedBuyBox[],
+  analyzerStrategyKey: AnalyzerStrategyKey | null | undefined,
+): NamedBuyBox[] {
+  const strategyKind =
+    BUY_BOX_STRATEGY_FOR_ANALYZER[analyzerStrategyKey ?? "buy-hold"];
+  return boxesForDealClient(boxes, null).filter(
+    (box) =>
+      box.strategyKind == null ||
+      (strategyKind != null && box.strategyKind === strategyKind),
+  );
 }
 
 /**

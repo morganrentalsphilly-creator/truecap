@@ -17,8 +17,13 @@
  * assumption stays exactly as the user saved it.
  */
 
-import { calculateAnalysis } from "@/lib/calc-analysis";
+import { calculateAnalysis, type AnalysisResult } from "@/lib/calc-analysis";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
+import {
+  resolveSavedAnalysisSnapshot,
+  type SavedAnalysisResolutionMode,
+} from "@/lib/saved-analysis-methodology";
+import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
 import { getDealTier, type DealTier } from "@/lib/verdict";
 
 /**
@@ -65,6 +70,21 @@ export type RateAlertDeal = {
   improved: boolean;
 };
 
+export type RateAlertEvaluation = {
+  /** True only when both rate legs can be attributed to one known engine. */
+  eligible: boolean;
+  alert: RateAlertDeal | null;
+  methodologyMode: SavedAnalysisResolutionMode;
+};
+
+/**
+ * A same-version recorded row may be rate-watched only after today's engine
+ * reproduces the recorded baseline closely enough to prove that changing the
+ * rate—not formula drift—caused the story change.
+ */
+export const RATE_ALERT_RECORDED_CASH_FLOW_TOLERANCE_DOLLARS = 1;
+export const RATE_ALERT_RECORDED_DSCR_TOLERANCE = 0.01;
+
 function metricsFor(values: InvestmentFormValues): RateAlertMetrics | null {
   const result = calculateAnalysis(values);
   // Cash purchases have no debt service — rate moves don't touch them.
@@ -75,6 +95,71 @@ function metricsFor(values: InvestmentFormValues): RateAlertMetrics | null {
     dscrBand: dscrBand(result.dscr),
     tier: getDealTier(result),
   };
+}
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+}
+
+function finiteSnapshotNumber(value: unknown): number | null {
+  if (typeof value === "number") return Number.isFinite(value) ? value : null;
+  if (typeof value !== "string" || value.trim() === "") return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function recordedMetrics(snapshotInput: unknown): RateAlertMetrics | null {
+  const snapshot = asRecord(snapshotInput);
+  if (!snapshot) return null;
+  const netCashFlow = finiteSnapshotNumber(snapshot.netCashFlow);
+  const dscr = finiteSnapshotNumber(snapshot.dscr);
+  const capRate = finiteSnapshotNumber(snapshot.capRate);
+  const cocReturn = finiteSnapshotNumber(snapshot.cocReturn);
+  const totalCashRequired = finiteSnapshotNumber(snapshot.totalCashRequired);
+  const monthlyPayment = finiteSnapshotNumber(snapshot.monthlyPayment);
+  if (
+    netCashFlow == null ||
+    dscr == null ||
+    capRate == null ||
+    cocReturn == null ||
+    totalCashRequired == null ||
+    monthlyPayment == null
+  ) {
+    return null;
+  }
+  const resultForTier = {
+    netCashFlow,
+    dscr,
+    capRate,
+    cocReturn,
+    totalCashRequired,
+    monthlyPayment,
+  } as AnalysisResult;
+  return {
+    monthlyCashFlow: Math.round(netCashFlow),
+    dscr,
+    dscrBand: dscrBand(dscr),
+    tier: getDealTier(resultForTier),
+  };
+}
+
+function recordedBaselineMatchesCurrentEngine(
+  recorded: RateAlertMetrics,
+  current: RateAlertMetrics,
+): boolean {
+  const sameCashFlowSign =
+    (recorded.monthlyCashFlow >= 0) === (current.monthlyCashFlow >= 0);
+  return (
+    sameCashFlowSign &&
+    Math.abs(recorded.monthlyCashFlow - current.monthlyCashFlow) <=
+      RATE_ALERT_RECORDED_CASH_FLOW_TOLERANCE_DOLLARS &&
+    recorded.dscrBand === current.dscrBand &&
+    Math.abs(recorded.dscr - current.dscr) <=
+      RATE_ALERT_RECORDED_DSCR_TOLERANCE &&
+    recorded.tier === current.tier
+  );
 }
 
 const fmtMoney = (n: number) =>
@@ -88,29 +173,83 @@ const fmtMoney = (n: number) =>
  *  - the numbers moved but no STATE changed (tier, DSCR band,
  *    cash-flow sign all identical) — we alert on stories, not decimals.
  */
-export function buildRateAlertForDeal(args: {
+export type BuildRateAlertArgs = {
   id: string;
   title?: string | null;
   address?: string | null;
   values: InvestmentFormValues;
   currentRatePct: number;
-}): RateAlertDeal | null {
+  /** Authoritative saved_analyses.methodology_version column. */
+  methodologyVersion: unknown;
+  /** Immutable saved result used only to attest a recorded baseline. */
+  recordedSnapshot: unknown;
+};
+
+/**
+ * Shared dashboard/email eligibility boundary. It returns eligibility
+ * separately from the optional alert so Rate Watch can count only deals it is
+ * truthfully monitoring even when today's rate does not change their state.
+ */
+export function evaluateRateAlertForDeal(
+  args: BuildRateAlertArgs,
+): RateAlertEvaluation {
   const { values, currentRatePct } = args;
 
-  const savedRatePct = values.interestRate;
-  if (typeof savedRatePct !== "number" || !Number.isFinite(savedRatePct)) return null;
-  if (Math.abs(savedRatePct - currentRatePct) < RATE_ALERTS_MIN_DEAL_DELTA_PP) return null;
-
   const before = metricsFor(values);
-  if (!before) return null; // cash purchase
+  const methodology = resolveSavedAnalysisSnapshot({
+    methodologyVersion: args.methodologyVersion,
+    resultSnapshot: args.recordedSnapshot,
+    // A valid released form produced `before`, so current computation is
+    // available. The resolver needs only a non-empty marker to route legacy
+    // rows into its explicit compatibility-recompute cohort.
+    recomputedSnapshot: before ? { netCashFlow: before.monthlyCashFlow } : undefined,
+    currentMethodologyVersion: TRUECAP_UNDERWRITING_STANDARD_VERSION,
+  });
+
+  if (!before) {
+    return { eligible: false, alert: null, methodologyMode: methodology.mode };
+  }
+
+  let eligible = false;
+  if (
+    methodology.mode === "current-computation" ||
+    methodology.mode === "legacy-recomputed"
+  ) {
+    eligible = true;
+  } else if (methodology.mode === "same-version-recorded-snapshot") {
+    const recorded = recordedMetrics(args.recordedSnapshot);
+    eligible = Boolean(
+      recorded && recordedBaselineMatchesCurrentEngine(recorded, before),
+    );
+  }
+
+  // Frozen versions and every stored/unavailable fallback have no executable
+  // engine contract here. A same-version recording that no longer reproduces
+  // also fails closed: never call formula drift a rate-driven change.
+  if (!eligible) {
+    return { eligible: false, alert: null, methodologyMode: methodology.mode };
+  }
+
+  const savedRatePct = values.interestRate;
+  if (typeof savedRatePct !== "number" || !Number.isFinite(savedRatePct)) {
+    return { eligible: false, alert: null, methodologyMode: methodology.mode };
+  }
+  if (Math.abs(savedRatePct - currentRatePct) < RATE_ALERTS_MIN_DEAL_DELTA_PP) {
+    return { eligible: true, alert: null, methodologyMode: methodology.mode };
+  }
+
   const after = metricsFor({ ...values, interestRate: currentRatePct });
-  if (!after) return null;
+  if (!after) {
+    return { eligible: false, alert: null, methodologyMode: methodology.mode };
+  }
 
   const tierChanged = before.tier !== after.tier;
   const bandChanged = before.dscrBand !== after.dscrBand;
   const signFlipped =
     (before.monthlyCashFlow >= 0) !== (after.monthlyCashFlow >= 0);
-  if (!tierChanged && !bandChanged && !signFlipped) return null;
+  if (!tierChanged && !bandChanged && !signFlipped) {
+    return { eligible: true, alert: null, methodologyMode: methodology.mode };
+  }
 
   const changes: string[] = [];
   if (signFlipped) {
@@ -135,15 +274,25 @@ export function buildRateAlertForDeal(args: {
   }
 
   return {
-    id: args.id,
-    label: args.title?.trim() || args.address?.trim() || "Saved deal",
-    savedRatePct,
-    currentRatePct,
-    before,
-    after,
-    changes,
-    improved: currentRatePct < savedRatePct,
+    eligible: true,
+    methodologyMode: methodology.mode,
+    alert: {
+      id: args.id,
+      label: args.title?.trim() || args.address?.trim() || "Saved deal",
+      savedRatePct,
+      currentRatePct,
+      before,
+      after,
+      changes,
+      improved: currentRatePct < savedRatePct,
+    },
   };
+}
+
+export function buildRateAlertForDeal(
+  args: BuildRateAlertArgs,
+): RateAlertDeal | null {
+  return evaluateRateAlertForDeal(args).alert;
 }
 
 /** Subject line for a user's alert email. */

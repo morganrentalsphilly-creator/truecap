@@ -28,9 +28,17 @@ export function ScreeningRecord({
   deals: DashboardDeal[];
   totalSavedDeals: number;
 }) {
+  const comparableDeals = deals.filter(
+    (deal) => deal.methodologyIsCurrent !== false
+  );
+  const recordedDealCount = deals.length - comparableDeals.length;
   // "Works at asking" = the solved Offer Ceiling meets or beats what they're
-  // asking. Only deals with BOTH numbers can be judged.
-  const judged = deals.filter((d) => d.maxOffer != null && d.purchasePrice != null);
+  // asking. Only current-methodology deals with BOTH numbers can be judged;
+  // historical ceilings remain visible in the table but are never blended
+  // into this comparison ratio.
+  const judged = comparableDeals.filter(
+    (d) => d.maxOffer != null && d.purchasePrice != null
+  );
   const clearing = judged.filter((d) => (d.maxOffer as number) >= (d.purchasePrice as number));
 
   return (
@@ -64,6 +72,12 @@ export function ScreeningRecord({
           ? "Once your deals have an Offer Ceiling, this shows how many meet the modeled targets at the asking price."
           : `${clearing.length} of ${judged.length} deals shown here have an Offer Ceiling at or above their asking price. Verify the material inputs, then record your own decision.`}
       </p>
+      {recordedDealCount > 0 ? (
+        <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+          {recordedDealCount} recorded-version {recordedDealCount === 1 ? "deal is" : "deals are"}{" "}
+          excluded until explicitly re-underwritten with the current model.
+        </p>
+      ) : null}
     </section>
   );
 }

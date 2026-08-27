@@ -17,34 +17,17 @@
  * here instead of being dumped on a paywall tab.
  */
 
+import { useMemo, type ReactNode } from "react";
 import {
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
-import {
-  ChevronDown,
   Hammer,
-  SlidersHorizontal,
   Target,
   Wrench,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import type { MaoTarget } from "@/lib/max-allowable-offer";
 import type { OfferCeilingExactResult } from "@/lib/offer-ceiling-access-contract";
 import { describeMaoTarget } from "@/lib/mao-targets";
-import {
-  applyMaoTargetInput,
-  EMPTY_MAO_TARGET_ERROR,
-  MAO_TARGET_BOUNDS,
-  type MaoTargetField,
-} from "@/lib/mao-target-editor";
 import type {
   InvestmentFormValues,
   StrategyInputErrors,
@@ -67,9 +50,9 @@ const usd = (n: number) =>
     maximumFractionDigits: 0,
   }).format(Math.round(n));
 
-// The dashboard owns the active Offer Ceiling target. Wholesale consumes and edits that
-// same object so its headline, Save/Share/PDF, and every other price-ceiling
-// surface cannot drift onto a second set of criteria.
+// The dashboard owns the active Offer Ceiling target. Wholesale reads that
+// same object, while criteria edits return to the analyzer's authoritative
+// pre-run editor so Save/Share/PDF cannot drift onto a second set of criteria.
 
 export function StrategyOutcomeCard({
   strategy,
@@ -82,8 +65,8 @@ export function StrategyOutcomeCard({
   isOfferCeilingLoading,
   hasExactOfferCeilingAccess,
   offerCeilingError,
-  onMaoTargetChange,
   onTuneTargetsOpened,
+  onReviewCriteria,
   onUpgrade,
   strategyInputs,
   strategyInputErrors,
@@ -102,6 +85,7 @@ export function StrategyOutcomeCard({
   offerCeilingError: boolean;
   onMaoTargetChange: (target: MaoTarget) => void;
   onTuneTargetsOpened?: () => void;
+  onReviewCriteria?: () => void;
   onUpgrade?: () => void;
   strategyInputs?: Partial<StrategyInputs>;
   strategyInputErrors?: StrategyInputErrors;
@@ -123,16 +107,17 @@ export function StrategyOutcomeCard({
           title="Offer Ceiling temporarily unavailable"
         >
           <p role="alert" className="text-sm text-muted-foreground">
-            The secure calculation could not be reached. Retry it from the
-            decision summary above.
+            The secure calculation could not be reached. Review the criteria
+            and run the analysis again.
           </p>
+          <ReviewTargetCriteriaButton
+            onOpened={onTuneTargetsOpened}
+            onReviewCriteria={onReviewCriteria}
+          />
         </OutcomeShell>
       );
     }
-    if (
-      !canUseMaxOffer ||
-      (!isOfferCeilingLoading && !hasExactOfferCeilingAccess)
-    ) {
+    if (!canUseMaxOffer) {
       return (
         <OutcomeShell
           icon={Target}
@@ -157,11 +142,16 @@ export function StrategyOutcomeCard({
         <OutcomeShell
           icon={Target}
           eyebrow="Wholesale / Offer Ceiling"
-          title="Calculating the Offer Ceiling"
+          title="Choose your Offer Ceiling criteria"
         >
-          <p role="status" className="text-sm text-muted-foreground">
-            Resolving the criteria attached to this analysis…
+          <p className="text-sm text-muted-foreground">
+            Your Pro access is active. Choose at least one return criterion in
+            the analysis before TrueCap calculates a modeled price threshold.
           </p>
+          <ReviewTargetCriteriaButton
+            onOpened={onTuneTargetsOpened}
+            onReviewCriteria={onReviewCriteria}
+          />
         </OutcomeShell>
       );
     }
@@ -178,14 +168,33 @@ export function StrategyOutcomeCard({
         </OutcomeShell>
       );
     }
+    if (!hasExactOfferCeilingAccess) {
+      return (
+        <OutcomeShell
+          icon={Target}
+          eyebrow="Wholesale / Offer Ceiling"
+          title="Offer Ceiling unavailable"
+        >
+          <p role="status" className="text-sm text-muted-foreground">
+            TrueCap could not verify exact Offer Ceiling access for this
+            result. Review the criteria and run the analysis again; your
+            existing Pro plan remains unchanged.
+          </p>
+          <ReviewTargetCriteriaButton
+            onOpened={onTuneTargetsOpened}
+            onReviewCriteria={onReviewCriteria}
+          />
+        </OutcomeShell>
+      );
+    }
     return (
       <WholesaleOutcome
         values={values}
         result={result}
         activeMaoTarget={activeMaoTarget}
         offerCeiling={offerCeiling}
-        onMaoTargetChange={onMaoTargetChange}
         onTuneTargetsOpened={onTuneTargetsOpened}
+        onReviewCriteria={onReviewCriteria}
       />
     );
   }
@@ -252,15 +261,15 @@ function WholesaleOutcome({
   result,
   activeMaoTarget,
   offerCeiling,
-  onMaoTargetChange,
   onTuneTargetsOpened,
+  onReviewCriteria,
 }: {
   values: InvestmentFormValues;
   result: AnalysisResult | null;
   activeMaoTarget: MaoTarget;
   offerCeiling: OfferCeilingExactResult | null;
-  onMaoTargetChange: (target: MaoTarget) => void;
   onTuneTargetsOpened?: () => void;
+  onReviewCriteria?: () => void;
 }) {
   const isCashPurchase = useMemo(() => {
     if (result) return result.monthlyPayment <= 0;
@@ -293,15 +302,12 @@ function WholesaleOutcome({
         title="Set Offer Ceiling rules"
       >
         <p className="text-sm text-muted-foreground">
-          Add at least one return criterion below. TrueCap will then calculate
-          the highest price that clears it using this deal&apos;s assumptions.
+          Add at least one return criterion. TrueCap will then calculate the
+          highest price that clears it using this deal&apos;s assumptions.
         </p>
-        <WholesaleTargetEditor
-          key="wholesale-target-editor"
-          target={maoTarget}
-          isCashPurchase={isCashPurchase}
-          onTargetChange={onMaoTargetChange}
+        <ReviewTargetCriteriaButton
           onOpened={onTuneTargetsOpened}
+          onReviewCriteria={onReviewCriteria}
         />
       </OutcomeShell>
     );
@@ -318,14 +324,11 @@ function WholesaleOutcome({
           Even at the solver&apos;s lowest supported price,{" "}
           {usd(values.monthlyRent ?? 0)}/mo rent does not clear every selected
           criterion: {targetsLabel}. Verify the rent assumption or tune the
-          criteria below.
+          criteria.
         </p>
-        <WholesaleTargetEditor
-          key="wholesale-target-editor"
-          target={maoTarget}
-          isCashPurchase={isCashPurchase}
-          onTargetChange={onMaoTargetChange}
+        <ReviewTargetCriteriaButton
           onOpened={onTuneTargetsOpened}
+          onReviewCriteria={onReviewCriteria}
         />
       </OutcomeShell>
     );
@@ -397,185 +400,44 @@ function WholesaleOutcome({
           </p>
         </div>
       ) : null}
-      <WholesaleTargetEditor
-        key="wholesale-target-editor"
-        target={maoTarget}
-        isCashPurchase={isCashPurchase}
-        onTargetChange={onMaoTargetChange}
+      <ReviewTargetCriteriaButton
         onOpened={onTuneTargetsOpened}
+        onReviewCriteria={onReviewCriteria}
       />
     </OutcomeShell>
   );
 }
 
-function targetInput(value: number | undefined): string {
-  return value == null ? "" : String(value);
-}
-
-function inputsFromTarget(target: MaoTarget): Record<MaoTargetField, string> {
-  return {
-    capRate: targetInput(target.capRate),
-    cocReturn: targetInput(target.cocReturn),
-    monthlyCashFlow: targetInput(target.monthlyCashFlow),
-    dscr: targetInput(target.dscr),
-    maxPurchasePrice: targetInput(target.maxPurchasePrice),
-  };
-}
-
-const WHOLESALE_TARGET_FIELDS = [
-  ["capRate", "Target cap rate (%)"],
-  ["cocReturn", "Target cash-on-cash (%)"],
-  ["monthlyCashFlow", "Min cash flow ($/mo)"],
-  ["dscr", "Min DSCR"],
-  ["maxPurchasePrice", "Max purchase price ($)"],
-] as const satisfies ReadonlyArray<readonly [MaoTargetField, string]>;
-
-function WholesaleTargetEditor({
-  target,
-  isCashPurchase,
-  onTargetChange,
+function ReviewTargetCriteriaButton({
   onOpened,
+  onReviewCriteria,
 }: {
-  target: MaoTarget;
-  isCashPurchase: boolean;
-  onTargetChange: (target: MaoTarget) => void;
   onOpened?: () => void;
+  onReviewCriteria?: () => void;
 }) {
-  const editorId = useId();
-  const [open, setOpen] = useState(false);
-  const [inputs, setInputs] = useState<Record<MaoTargetField, string>>(() =>
-    inputsFromTarget(target),
-  );
-  const [errors, setErrors] = useState<Partial<Record<MaoTargetField, string>>>(
-    {},
-  );
-  const targetKey = JSON.stringify(target);
-  const previousTargetKeyRef = useRef(targetKey);
-  const lastLocallyCommittedTargetKeyRef = useRef(targetKey);
-
-  // Another target editor (for example the focused Decision card) may update
-  // the shared parent target. Adopt that external change, but preserve a local
-  // invalid draft until this editor's user fixes it.
-  useEffect(() => {
-    if (previousTargetKeyRef.current === targetKey) return;
-    previousTargetKeyRef.current = targetKey;
-    if (lastLocallyCommittedTargetKeyRef.current === targetKey) return;
-    setInputs(inputsFromTarget(target));
-    setErrors({});
-    lastLocallyCommittedTargetKeyRef.current = targetKey;
-  }, [target, targetKey]);
-
-  const updateField = (field: MaoTargetField, rawValue: string) => {
-    const update = applyMaoTargetInput(target, field, rawValue);
-    if (!update.ok) {
-      // Never make the UI look as if the final criterion was removed while it
-      // still participates in the price calculation.
-      if (rawValue.trim()) {
-        setInputs((current) => ({ ...current, [field]: rawValue }));
-      }
-      setErrors((current) => ({ ...current, [field]: update.error }));
-      return;
-    }
-
-    setInputs((current) => ({ ...current, [field]: rawValue }));
-    lastLocallyCommittedTargetKeyRef.current = JSON.stringify(update.target);
-    setErrors((current) => {
-      const next = { ...current, [field]: undefined };
-      for (const key of Object.keys(next) as MaoTargetField[]) {
-        if (next[key] === EMPTY_MAO_TARGET_ERROR) next[key] = undefined;
-      }
-      return next;
-    });
-    onTargetChange(update.target);
-  };
-
-  const toggleEditor = () => {
-    if (!open) {
-      onOpened?.();
-    } else {
-      setInputs(inputsFromTarget(target));
-      setErrors({});
-    }
-    setOpen((current) => !current);
-  };
-
   return (
-    <div className="mt-4 border-t border-primary/15 pt-4">
-      <Button
-        type="button"
-        variant="outline"
-        onClick={toggleEditor}
-        aria-expanded={open}
-        aria-controls={editorId}
-        className="h-11 gap-2 rounded-xl"
-      >
-        <SlidersHorizontal className="size-4" aria-hidden />
-        Tune Offer Ceiling rules
-        <ChevronDown
-          className={`size-4 transition-transform ${open ? "rotate-180" : ""}`}
-          aria-hidden
-        />
-      </Button>
-      <div
-        id={editorId}
-        hidden={!open}
-        className="mt-4 rounded-xl border border-border bg-card/70 p-4"
-      >
-        <fieldset>
-          <legend className="text-sm font-bold text-foreground">
-            Wholesale Offer Ceiling rules
-          </legend>
-          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-            Change a criterion and the ceiling updates immediately everywhere
-            this analysis is used. Leave a field blank to ignore it.
-          </p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-            {WHOLESALE_TARGET_FIELDS.map(([field, label]) => {
-              const bounds = MAO_TARGET_BOUNDS[field];
-              const inputId = `${editorId}-${field}`;
-              const errorId = `${inputId}-error`;
-              const cashDscr = isCashPurchase && field === "dscr";
-              return (
-                <div key={field}>
-                  <Label htmlFor={inputId} className="text-xs">
-                    {label}
-                  </Label>
-                  <Input
-                    id={inputId}
-                    type="number"
-                    inputMode={
-                      field === "monthlyCashFlow" ||
-                      field === "maxPurchasePrice"
-                        ? "numeric"
-                        : "decimal"
-                    }
-                    min={bounds.min}
-                    max={bounds.max}
-                    step={bounds.step}
-                    value={cashDscr ? "" : inputs[field]}
-                    placeholder={cashDscr ? "N/A — cash" : "Any"}
-                    disabled={cashDscr}
-                    onChange={(event) => updateField(field, event.target.value)}
-                    aria-invalid={Boolean(errors[field])}
-                    aria-describedby={errors[field] ? errorId : undefined}
-                    className="mt-1 h-11"
-                  />
-                  {errors[field] ? (
-                    <p
-                      id={errorId}
-                      role="alert"
-                      className="mt-1 text-xs font-medium text-destructive"
-                    >
-                      {errors[field]}
-                    </p>
-                  ) : null}
-                </div>
-              );
-            })}
-          </div>
-        </fieldset>
-      </div>
-    </div>
+    <Button
+      type="button"
+      variant="outline"
+      onClick={() => {
+        onOpened?.();
+        if (onReviewCriteria) {
+          onReviewCriteria();
+          return;
+        }
+        const trigger = document.getElementById(
+          "offer-ceiling-criteria-trigger",
+        ) as HTMLButtonElement | null;
+        if (trigger?.getAttribute("aria-expanded") !== "true") {
+          trigger?.click();
+        }
+        trigger?.focus({ preventScroll: true });
+        trigger?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }}
+      className="mt-4 min-h-11 rounded-xl"
+    >
+      Review criteria
+    </Button>
   );
 }
 

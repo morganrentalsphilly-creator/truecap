@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import {
   buildRateAlertForDeal,
   buildRateReUnderwrite,
   dscrBand,
+  evaluateRateAlertForDeal,
   parseRateAlertRateParam,
   RATE_ALERT_PARAM_MAX_PCT,
   RATE_ALERT_PARAM_MIN_PCT,
@@ -10,7 +13,14 @@ import {
   rateAlertDealUrl,
   rateAlertSubject,
 } from "@/lib/rate-alerts";
+import { calculateAnalysis } from "@/lib/calc-analysis";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
+import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
+
+const CURRENT_COMPUTATION = {
+  methodologyVersion: TRUECAP_UNDERWRITING_STANDARD_VERSION,
+  recordedSnapshot: null,
+} as const;
 
 /** Same canonical single-family fixture as calc-analysis.test.ts. */
 function baseDeal(overrides: Partial<InvestmentFormValues> = {}): InvestmentFormValues {
@@ -63,6 +73,7 @@ describe("dscrBand", () => {
 describe("buildRateAlertForDeal", () => {
   it("returns null when the rate barely moved (below per-deal delta)", () => {
     const alert = buildRateAlertForDeal({
+      ...CURRENT_COMPUTATION,
       id: "d1",
       values: baseDeal({ interestRate: 7 }),
       currentRatePct: 7 + RATE_ALERTS_MIN_DEAL_DELTA_PP - 0.01,
@@ -72,6 +83,7 @@ describe("buildRateAlertForDeal", () => {
 
   it("returns null for cash purchases (no debt service to reprice)", () => {
     const alert = buildRateAlertForDeal({
+      ...CURRENT_COMPUTATION,
       id: "d2",
       values: baseDeal({ downPaymentPct: 100 }),
       currentRatePct: 5,
@@ -84,6 +96,7 @@ describe("buildRateAlertForDeal", () => {
     // the same tier/band/sign — no email-worthy story.
     const values = baseDeal({ interestRate: 7, monthlyRent: 2_600 });
     const alert = buildRateAlertForDeal({
+      ...CURRENT_COMPUTATION,
       id: "d3",
       values,
       currentRatePct: 6.7,
@@ -99,6 +112,7 @@ describe("buildRateAlertForDeal", () => {
     // flip positive and/or change DSCR band — a state change.
     const values = baseDeal({ interestRate: 8.5 });
     const alert = buildRateAlertForDeal({
+      ...CURRENT_COMPUTATION,
       id: "d4",
       title: "N 5th St duplex",
       values,
@@ -117,6 +131,7 @@ describe("buildRateAlertForDeal", () => {
   it("flags deterioration when rates rise", () => {
     const values = baseDeal({ interestRate: 5.5 });
     const alert = buildRateAlertForDeal({
+      ...CURRENT_COMPUTATION,
       id: "d5",
       address: "1205 N 5th St",
       values,
@@ -130,6 +145,7 @@ describe("buildRateAlertForDeal", () => {
 
   it("falls back to 'Saved deal' label when title and address are blank", () => {
     const alert = buildRateAlertForDeal({
+      ...CURRENT_COMPUTATION,
       id: "d6",
       title: "  ",
       address: null,
@@ -138,6 +154,118 @@ describe("buildRateAlertForDeal", () => {
     });
     expect(alert).not.toBeNull();
     expect(alert!.label).toBe("Saved deal");
+  });
+
+  it("allows a same-version recording only when today's saved-rate baseline attests", () => {
+    const values = baseDeal({ interestRate: 8.5 });
+    const recordedSnapshot = calculateAnalysis(values);
+    const evaluation = evaluateRateAlertForDeal({
+      id: "attested",
+      values,
+      currentRatePct: 5.5,
+      methodologyVersion: TRUECAP_UNDERWRITING_STANDARD_VERSION,
+      recordedSnapshot,
+    });
+
+    expect(evaluation.methodologyMode).toBe("same-version-recorded-snapshot");
+    expect(evaluation.eligible).toBe(true);
+    expect(evaluation.alert).not.toBeNull();
+  });
+
+  it("suppresses a same-version recording when formula drift breaks baseline parity", () => {
+    const values = baseDeal({ interestRate: 8.5 });
+    const baseline = calculateAnalysis(values);
+    const recordedSnapshot = {
+      ...baseline,
+      netCashFlow: baseline.netCashFlow + 25,
+    };
+    const evaluation = evaluateRateAlertForDeal({
+      id: "drifted",
+      values,
+      currentRatePct: 5.5,
+      methodologyVersion: TRUECAP_UNDERWRITING_STANDARD_VERSION,
+      recordedSnapshot,
+    });
+
+    expect(evaluation.methodologyMode).toBe("same-version-recorded-snapshot");
+    expect(evaluation.eligible).toBe(false);
+    expect(evaluation.alert).toBeNull();
+  });
+
+  it("does not coerce missing recorded metrics to zero during attestation", () => {
+    const evaluation = evaluateRateAlertForDeal({
+      id: "incomplete-recording",
+      values: baseDeal({ interestRate: 8.5 }),
+      currentRatePct: 5.5,
+      methodologyVersion: TRUECAP_UNDERWRITING_STANDARD_VERSION,
+      recordedSnapshot: {
+        netCashFlow: null,
+        dscr: null,
+        capRate: null,
+        cocReturn: null,
+        totalCashRequired: null,
+        monthlyPayment: null,
+      },
+    });
+
+    expect(evaluation.methodologyMode).toBe("same-version-recorded-snapshot");
+    expect(evaluation.eligible).toBe(false);
+    expect(evaluation.alert).toBeNull();
+  });
+
+  it("suppresses frozen methodology rows without a historical engine dispatcher", () => {
+    const values = baseDeal({ interestRate: 8.5 });
+    const evaluation = evaluateRateAlertForDeal({
+      id: "frozen",
+      values,
+      currentRatePct: 5.5,
+      methodologyVersion: "1.0",
+      recordedSnapshot: calculateAnalysis(values),
+    });
+
+    expect(evaluation.methodologyMode).toBe("frozen-version-snapshot");
+    expect(evaluation.eligible).toBe(false);
+    expect(evaluation.alert).toBeNull();
+  });
+
+  it("keeps a legacy row eligible only through the explicit current-engine recompute", () => {
+    const evaluation = evaluateRateAlertForDeal({
+      id: "legacy",
+      values: baseDeal({ interestRate: 8.5 }),
+      currentRatePct: 5.5,
+      methodologyVersion: null,
+      recordedSnapshot: {},
+    });
+
+    expect(evaluation.methodologyMode).toBe("legacy-recomputed");
+    expect(evaluation.eligible).toBe(true);
+    expect(evaluation.alert).not.toBeNull();
+  });
+});
+
+describe("rate-alert methodology wiring", () => {
+  it("passes authoritative methodology and recorded baseline through every scheduled caller", () => {
+    const rateCron = readFileSync(
+      join(process.cwd(), "app/api/cron/send-rate-alerts/route.ts"),
+      "utf8",
+    );
+    const weeklyCron = readFileSync(
+      join(process.cwd(), "app/api/cron/send-weekly-summary/route.ts"),
+      "utf8",
+    );
+    const weeklySummary = readFileSync(
+      join(process.cwd(), "lib/weekly-summary.ts"),
+      "utf8",
+    );
+
+    for (const source of [rateCron, weeklyCron]) {
+      expect(source).toContain("methodology_version");
+      expect(source).toContain("result_snapshot");
+    }
+    expect(rateCron).toContain("methodologyVersion: row.methodology_version");
+    expect(rateCron).toContain("recordedSnapshot: row.result_snapshot");
+    expect(weeklySummary).toContain("methodology_version: r.methodology_version");
+    expect(weeklySummary).toContain("result_snapshot: r.result_snapshot");
   });
 });
 

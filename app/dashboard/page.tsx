@@ -19,23 +19,28 @@ import {
   hasPlanFeature,
 } from "@/lib/entitlements";
 import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
-import { buildDashboardDeal, type SavedAnalysisDashboardRow } from "@/lib/dashboard-deal-mapping";
+import {
+  buildDashboardDeal,
+  resolveDealMethodologyPresentation,
+  sortDealsWithinMethodologyCohorts,
+  type SavedAnalysisDashboardRow,
+} from "@/lib/dashboard-deal-mapping";
 import { applicableCashOnCashValue } from "@/lib/cash-on-cash-applicability";
 import {
   recomputeSavedDealVerdict,
   toRecomputedSavedAnalysisSnapshot,
 } from "@/lib/recompute-saved-deal-verdict";
-import {
-  isLegacySavedMethodologyVersion,
-  resolveSavedAnalysisSnapshot,
-} from "@/lib/saved-analysis-methodology";
-import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
+import { resolveSavedAnalysisSnapshot } from "@/lib/saved-analysis-methodology";
 import { recomputeCompareSnapshotFromForm } from "@/lib/compare-result-snapshot";
 import { getSavedAnalysesTotalCount } from "@/lib/saved-analyses-count";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { DEAL_AGING_MIN_DAYS, DEAL_AGING_STAGES, daysSinceSaved } from "@/lib/deal-aging";
 import { isPipelineStage, pipelineStageMeta } from "@/lib/pipeline";
-import { buildRateWatch } from "@/lib/rate-watch";
+import {
+  buildRateWatch,
+  resolveComparableSavedMetricCohort,
+  type RateWatchDealRow,
+} from "@/lib/rate-watch";
 import { rateAlertEmailsLive } from "@/lib/rate-alerts-mode";
 import { computeOwnedEquity, monthsOwnedBetween } from "@/lib/owned-equity";
 import {
@@ -149,15 +154,19 @@ function buildDashboardData(
         : undefined,
     });
     const fresh = resolution.didRecompute ? recomputed : null;
+    const methodology = resolveDealMethodologyPresentation({
+      storedMethodologyVersion: resolution.storedMethodologyVersion,
+      usesRecordedSnapshot: resolution.usesRecordedSnapshot,
+      didRecompute: resolution.didRecompute,
+      currentMethodologyVersion: resolution.currentMethodologyVersion,
+      recordId: row.id,
+    });
     const deal = {
       ...baseDeal,
-      methodologyLabel: resolution.shouldFreeze
-        ? `Frozen Standard v${resolution.storedMethodologyVersion}`
-        : isLegacySavedMethodologyVersion(resolution.storedMethodologyVersion)
-          ? resolution.didRecompute
-            ? `Legacy analysis · recomputed with current v${TRUECAP_UNDERWRITING_STANDARD_VERSION}`
-            : `Legacy analysis · stored snapshot (current v${TRUECAP_UNDERWRITING_STANDARD_VERSION} recompute unavailable)`
-          : `Standard v${resolution.storedMethodologyVersion}`,
+      methodologyLabel: methodology.badgeLabel ?? undefined,
+      methodologyComparisonKey: methodology.comparisonKey,
+      methodologyGroupLabel: methodology.groupLabel,
+      methodologyIsCurrent: methodology.isCurrent,
     };
     // Recompute-on-read: score AND the headline financials (cash flow / CoC /
     // cap) come from the live engine, so the dashboard never shows numbers that
@@ -211,8 +220,11 @@ function buildDashboardData(
       totalDeals: deals.length,
     },
     allDeals: deals,
-    topDeals: deals
-      .sort((a, b) => (b.score ?? -1) - (a.score ?? -1) || (b.cashFlowMonthly ?? -Infinity) - (a.cashFlowMonthly ?? -Infinity))
+    topDeals: sortDealsWithinMethodologyCohorts(
+      deals,
+      (deal) => deal.score,
+      "desc"
+    )
       .slice(0, 6),
   };
 }
@@ -266,7 +278,7 @@ export default async function DashboardPage() {
     supabase
       .from("saved_analyses")
       .select(
-        "id, title, address, purchase_price, net_cash_flow_monthly, methodology_version, cap_rate_raw:result_snapshot->>capRate, ncf_snapshot:result_snapshot->>netCashFlow, score_raw:result_snapshot->>score, recommendation_raw:result_snapshot->>recommendation, roi_raw:result_snapshot->compareSnapshot->longTermSummary->>totalROI, form_snapshot, created_at, pipeline_stage"
+        "id, title, address, purchase_price, net_cash_flow_monthly, methodology_version, cap_rate_raw:result_snapshot->>capRate, ncf_snapshot:result_snapshot->>netCashFlow, dscr_raw:result_snapshot->>dscr, monthly_payment_raw:result_snapshot->>monthlyPayment, coc_return_raw:result_snapshot->>cocReturn, total_cash_required_raw:result_snapshot->>totalCashRequired, score_raw:result_snapshot->>score, recommendation_raw:result_snapshot->>recommendation, roi_raw:result_snapshot->compareSnapshot->longTermSummary->>totalROI, form_snapshot, created_at, pipeline_stage"
       )
       .eq("user_id", user.id)
       .is("deleted_at", null)
@@ -358,6 +370,10 @@ export default async function DashboardPage() {
     net_cash_flow_monthly: number | null;
     cap_rate_raw: string | null;
     ncf_snapshot: string | null;
+    dscr_raw: string | null;
+    monthly_payment_raw: string | null;
+    coc_return_raw: string | null;
+    total_cash_required_raw: string | null;
     score_raw: string | null;
     recommendation_raw: string | null;
     roi_raw: string | null;
@@ -370,6 +386,7 @@ export default async function DashboardPage() {
     pipeline_stage: string | null;
   };
   let portfolioAggregates: DashboardHomeData["portfolioAggregates"] = null;
+  let hasMixedActiveMethodologies = false;
   // Hoisted so the rate watch below can reuse the full active set; null when
   // the aggregate query failed (rate watch then falls back to the sample).
   let fullActiveRows: AggregateRow[] | null = null;
@@ -404,6 +421,7 @@ export default async function DashboardPage() {
     let worstNegative: { id: string; address: string; cashFlowMonthly: number } | null = null;
     let bestRoi: { id: string; address: string; roiPct: number } | null = null;
     let negativeCount = 0;
+    const methodologyCohorts = new Set<string>();
     for (const r of aggRows) {
       // Recompute-on-read so the portfolio totals stay in lockstep with the
       // per-deal cards (which now recompute too) and the live engine. Falls
@@ -422,6 +440,14 @@ export default async function DashboardPage() {
           : undefined,
       });
       const fresh = resolution.didRecompute ? recomputed : null;
+      const methodology = resolveDealMethodologyPresentation({
+        storedMethodologyVersion: resolution.storedMethodologyVersion,
+        usesRecordedSnapshot: resolution.usesRecordedSnapshot,
+        didRecompute: resolution.didRecompute,
+        currentMethodologyVersion: resolution.currentMethodologyVersion,
+        recordId: r.id,
+      });
+      methodologyCohorts.add(methodology.comparisonKey);
       const label = aggregateRowLabel(r);
       if (r.purchase_price != null) {
         totalValue += r.purchase_price;
@@ -481,14 +507,17 @@ export default async function DashboardPage() {
         bestRoi = { id: r.id, address: label, roiPct: roi };
       }
     }
-    portfolioAggregates = {
-      totalValue,
-      totalCashFlow,
-      weightedCap: capDen > 0 ? capNum / capDen : null,
-      activeCount,
-      totalCount: aggRows.length,
-      winners: { bestByScore, worstNegative, bestRoi, negativeCount },
-    };
+    hasMixedActiveMethodologies = methodologyCohorts.size > 1;
+    if (!hasMixedActiveMethodologies) {
+      portfolioAggregates = {
+        totalValue,
+        totalCashFlow,
+        weightedCap: capDen > 0 ? capNum / capDen : null,
+        activeCount,
+        totalCount: aggRows.length,
+        winners: { bestByScore, worstNegative, bestRoi, negativeCount },
+      };
+    }
   }
 
   if (error) {
@@ -514,7 +543,11 @@ export default async function DashboardPage() {
     isPremium,
     navAccess.dashboard
   );
-  dashboardData.portfolioAggregateStatus = aggregateResult.error ? "unavailable" : "ready";
+  dashboardData.portfolioAggregateStatus = aggregateResult.error
+    ? "unavailable"
+    : hasMixedActiveMethodologies
+      ? "mixed-methodology"
+      : "ready";
   // Offer Ceiling per deal — the number the product is sold on, absent from this
   // screen until now. Recomputed from form_snapshot via the same
   // computeDealOfferLine path My Deals uses (no new math, no new query).
@@ -679,7 +712,14 @@ export default async function DashboardPage() {
   if (activeBuyBoxes.length > 0 && dashboardData.allDeals.length > 0) {
     const fitByDealId: Record<string, BuyBoxFitSummary> = {};
     let passingCount = 0;
+    let evaluatedCount = 0;
+    let excludedRecordedMethodology = false;
     for (const deal of dashboardData.allDeals) {
+      if (deal.methodologyIsCurrent === false) {
+        excludedRecordedMethodology = true;
+        continue;
+      }
+      evaluatedCount += 1;
       const metrics: BuyBoxDealMetrics = {
         capRatePct: deal.capRatePct,
         cocPct: deal.cocReturnPct,
@@ -707,15 +747,16 @@ export default async function DashboardPage() {
       dashboardData.buyBox = {
         activeBoxCount: activeBuyBoxes.length,
         passingCount,
-        evaluatedCount: dashboardData.allDeals.length,
+        evaluatedCount,
         // The detailed query is capped at DASHBOARD_ACTIVE_DEALS_LIMIT; the
         // "X of your N deals" headline/tile only render when the evaluated
         // set IS the full active set (under the cap, or the unbounded
         // aggregate query confirms nothing was left out). Per-deal badges
         // and the Fit sort stay correct on the sample either way.
         complete:
-          (rows ?? []).length < DASHBOARD_ACTIVE_DEALS_LIMIT ||
-          (fullActiveRows != null && fullActiveRows.length <= dashboardData.allDeals.length),
+          !excludedRecordedMethodology &&
+          ((rows ?? []).length < DASHBOARD_ACTIVE_DEALS_LIMIT ||
+            (fullActiveRows != null && fullActiveRows.length <= dashboardData.allDeals.length)),
         fitByDealId,
       };
       // PV-6: stable-boost passing deals into the top-6 slice so a deal that
@@ -766,16 +807,34 @@ export default async function DashboardPage() {
   // monitored too — the email cron scans ALL non-archived deals, and the strip
   // must never tell a different story ("Monitoring 20" while 23 are watched).
   // Falls back to the 20-row sample only if the aggregate query failed.
-  dashboardData.rateWatch = buildRateWatch(
-    fullActiveRows ??
-      ((rows ?? []) as Array<{
-        id: string;
-        title: string | null;
-        address: string | null;
-        form_snapshot: unknown;
-      }>),
-    currentRate
-  );
+  const rateWatchRows: RateWatchDealRow[] = fullActiveRows
+    ? fullActiveRows.map((row) => ({
+        id: row.id,
+        title: row.title,
+        address: row.address,
+        form_snapshot: row.form_snapshot,
+        methodology_version: row.methodology_version,
+        // The unbounded dashboard query keeps this attestation payload scalar:
+        // enough to prove current-engine parity without downloading every
+        // recorded ten-year projection in result_snapshot.
+        result_snapshot: {
+          netCashFlow: row.ncf_snapshot,
+          dscr: row.dscr_raw,
+          capRate: row.cap_rate_raw,
+          cocReturn: row.coc_return_raw,
+          totalCashRequired: row.total_cash_required_raw,
+          monthlyPayment: row.monthly_payment_raw,
+        },
+      }))
+    : ((rows ?? []) as SavedAnalysisDashboardRow[]).map((row) => ({
+        id: row.id,
+        title: row.title,
+        address: row.address,
+        form_snapshot: row.form_snapshot,
+        methodology_version: row.methodology_version,
+        result_snapshot: row.result_snapshot,
+      }));
+  dashboardData.rateWatch = buildRateWatch(rateWatchRows, currentRate);
   // Truthful-alerts flag: the strip only promises alert EMAILS when the
   // send-rate-alerts cron is actually live (G1 fallback — see lib/rate-alerts-mode).
   dashboardData.alertsLive = rateAlertEmailsLive();
@@ -823,6 +882,8 @@ export default async function DashboardPage() {
   } else if (ownedRows.length > 0) {
     const now = new Date();
     let ownedCashFlow = 0;
+    let ownedCashFlowComplete = true;
+    const ownedCashFlowCohorts = new Set<string>();
     let totalEquity = 0;
     let equityGain = 0;
     let datedCount = 0;
@@ -837,12 +898,36 @@ export default async function DashboardPage() {
           : undefined,
       });
       const fresh = resolution.didRecompute ? recomputed : null;
-      const frozenCashFlow = Number(resolution.snapshot.netCashFlow);
-      ownedCashFlow += fresh
+      const frozenCashFlowRaw = resolution.snapshot.netCashFlow;
+      const frozenCashFlow =
+        typeof frozenCashFlowRaw === "number"
+          ? frozenCashFlowRaw
+          : typeof frozenCashFlowRaw === "string" &&
+              frozenCashFlowRaw.trim() !== ""
+            ? Number(frozenCashFlowRaw)
+            : null;
+      const cohort = resolveComparableSavedMetricCohort({
+        methodologyVersion: r.methodology_version,
+        resultSnapshot: r.result_snapshot,
+        recomputedSnapshot: recomputed
+          ? toRecomputedSavedAnalysisSnapshot(recomputed)
+          : undefined,
+      });
+      const rowCashFlow = fresh
         ? fresh.netCashFlowMonthly
-        : Number.isFinite(frozenCashFlow)
+        : resolution.usesRecordedSnapshot &&
+            frozenCashFlow != null &&
+            Number.isFinite(frozenCashFlow)
           ? frozenCashFlow
-          : (r.net_cash_flow_monthly ?? 0);
+          : null;
+      if (cohort && rowCashFlow != null && Number.isFinite(rowCashFlow)) {
+        ownedCashFlowCohorts.add(cohort);
+        ownedCashFlow += rowCashFlow;
+      } else {
+        // Never turn a missing/unknown contribution into $0 and call the
+        // remainder a portfolio total.
+        ownedCashFlowComplete = false;
+      }
       const basis = resolution.shouldFreeze ? null : resolveOwnedEquityBasis(r);
       const summary = basis
         ? computeOwnedEquity(basis.input, monthsOwnedBetween(basis.closeDate, now))
@@ -856,7 +941,10 @@ export default async function DashboardPage() {
     }
     dashboardData.ownedPortfolio = {
       count: ownedRows.length,
-      monthlyCashFlow: ownedCashFlow,
+      monthlyCashFlow:
+        ownedCashFlowComplete && ownedCashFlowCohorts.size === 1
+          ? ownedCashFlow
+          : null,
       totalEquity: datedCount > 0 ? totalEquity : null,
       equityGain: datedCount > 0 ? equityGain : null,
       datedCount,
