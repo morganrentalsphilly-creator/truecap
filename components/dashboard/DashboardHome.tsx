@@ -105,9 +105,11 @@ export type DashboardHomeData = {
      * getDecisionCenter/getPortfolioKpis fall back to the sample.
      */
     winners?: {
-      bestByScore: { id: string; address: string; score: number; recommendation: string } | null;
+      bestByScore: { id: string; address: string; score: number; recommendation: string;
+      } | null;
       /** Most negative cash-flow deal; null = a TRUE all-clear over the full set. */
-      worstNegative: { id: string; address: string; cashFlowMonthly: number } | null;
+      worstNegative: { id: string; address: string; cashFlowMonthly: number;
+      } | null;
       bestRoi: { id: string; address: string; roiPct: number } | null;
       /** Cash-flow-negative deal count over the full active set. */
       negativeCount: number;
@@ -464,7 +466,7 @@ function getDecisionCenter(data: DashboardHomeData) {
   const nextAction =
     deals.length >= 2
       ? { label: "Compare your top deals", href: "/dashboard/compare" }
-      : { label: "Analyze another property", href: "/" };
+      : { label: "Analyze another property", href: "/dashboard/new" };
   return { best, needsReview, bestUpside, negativeCount, nextAction };
 }
 
@@ -652,7 +654,7 @@ function buildDecisionInsights(deals: DashboardDeal[]) {
           tone: "opportunity" as const,
           action: canCompare
             ? { label: "Compare deals", href: "/dashboard/compare" }
-            : { label: "Analyze another property", href: "/" },
+            : { label: "Analyze another property", href: "/dashboard/new" },
         }
       : null,
     reviewPick
@@ -784,7 +786,9 @@ export function DashboardHome({
   const headerSubtitle = !hasAnyDeals
     ? ownedCount > 0
       ? `You own ${ownedCount} ${ownedCount === 1 ? "property" : "properties"}${
-          owned?.totalEquity != null ? ` · ~${formatCurrency(owned.totalEquity, true)} equity` : ""
+          owned?.totalEquity != null
+            ? ` · ~${formatCurrency(owned.totalEquity, true)} equity`
+            : ""
         }.`
       : savedTotalCount > 0
         ? // Scope-neutral: this branch also catches completed-not-archived
@@ -994,7 +998,9 @@ export function DashboardHome({
                     decisionCenter.needsReview ? "text-destructive" : "text-muted-foreground"
                   )}
                 >
-                  {decisionCenter.needsReview ? <AlertTriangle className="h-3.5 w-3.5" /> : null} Needs review
+                  {decisionCenter.needsReview ? (
+                    <AlertTriangle className="h-3.5 w-3.5" />
+                  ) : null}{" "} Needs review
                 </div>
                 {decisionCenter.needsReview ? (
                   <>
@@ -1047,7 +1053,8 @@ export function DashboardHome({
                     <Target className="h-3.5 w-3.5" /> Meets your buy box
                   </div>
                   <div className="mt-1 truncate text-sm font-bold text-foreground">
-                    {buyBoxSummary.passingCount} of {buyBoxSummary.evaluatedCount} deals
+                    {buyBoxSummary.passingCount} of {" "}
+                    {buyBoxSummary.evaluatedCount} deals
                   </div>
                   <div className="truncate text-xs text-muted-foreground">
                     {buyBoxSummary.passingCount > 0
@@ -1110,7 +1117,7 @@ export function DashboardHome({
             <div className="rounded-2xl border border-border bg-gradient-to-br from-card via-card to-card/60 p-4 shadow-sm sm:p-5">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h2 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-                  Owned portfolio · {owned.count} {owned.count === 1 ? "property" : "properties"}
+                  Owned portfolio · {owned.count}{" "} {owned.count === 1 ? "property" : "properties"}
                 </h2>
                 <Link
                   href="/dashboard/saved-analyses?state=completed"
@@ -1292,12 +1299,17 @@ export function DashboardHome({
                   </div>
                   <div className="mt-1 text-lg font-bold text-foreground">
                     {kpis.avgScore == null ? "—" : Math.round(kpis.avgScore)}
-                    {kpis.avgScore != null ? <span className="text-xs font-medium text-muted-foreground"> / 100</span> : null}
+                    {kpis.avgScore != null ? (
+                          <span className="text-xs font-medium text-muted-foreground">
+                            {" "}
+                            / 100</span>
+                        ) : null}
                   </div>
                 </div>
                 <div className="rounded-xl border border-border bg-card p-3">
                   <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    <Layers className="h-3.5 w-3.5" /> <GlossaryTip term="dscr">Weighted DSCR</GlossaryTip>
+                    <Layers className="h-3.5 w-3.5" />{" "}
+                        <GlossaryTip term="dscr">Weighted DSCR</GlossaryTip>
                   </div>
                   <div className="mt-1 text-lg font-bold text-foreground">
                     {kpis.weightedDscr == null ? "—" : `${kpis.weightedDscr.toFixed(2)}×`}
@@ -1511,7 +1523,9 @@ export function DashboardHome({
             otherwise). Deliberate flagged exception to invisible-until-useful
             (principle 5): one sentence + link, one self-contained component,
             shared dismissal key with the My Deals nudge — never double-nag. */}
-        {hasAnyDeals && data.allDeals.length <= 3 ? <BuyBoxNudge variant="dashboard" /> : null}
+        {hasAnyDeals && data.allDeals.length <= 3 ? (
+          <BuyBoxNudge variant="dashboard" />
+        ) : null}
 
         {/* ── Empty-state hero — when 0 active deals AND nothing owned.
             An owner with 0 active deals gets the Owned portfolio section

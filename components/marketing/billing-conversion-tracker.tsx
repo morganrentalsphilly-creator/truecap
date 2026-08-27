@@ -4,11 +4,10 @@
  * Tiny client-side helper that fires the "paid_subscribed" Google Ads
  * conversion event when the user lands on a page with ?billing=success.
  *
- * PRIMARY mount: the post-checkout landing on the homepage — Stripe's
- * success_url is `/?billing=success&session_id=…` and this tracker is
- * mounted (via components/marketing/billing-success-banner.tsx) on BOTH
- * homepage render paths: the static app/page.tsx AND the auth-rewritten
- * app/home-authed/page.tsx. /profile keeps a legacy mount for old links.
+ * PRIMARY mount: the post-checkout /dashboard/new analyzer landing — Stripe's
+ * success_url includes `?billing=success&session_id=…` and this tracker is
+ * mounted through components/marketing/billing-success-banner.tsx. The static
+ * homepage and /profile retain compatibility mounts for old links.
  *
  * Renders nothing; mounting is the side effect. The `value` should be
  * the dollar amount of the plan they just bought so Google can use
@@ -24,7 +23,7 @@ interface Props {
   /** Dollar amount of the plan to send as the conversion value (defaults 0). */
   value?: number;
   /** Stripe checkout SESSION id — the dedup key so a refresh doesn't
-   *  double-fire (identical across the static and authed landing paths). */
+   *  double-fire (identical across every compatibility landing path). */
   transactionId?: string;
 }
 
@@ -34,7 +33,7 @@ export function BillingConversionTracker({ billingStatus, value, transactionId }
     // Use sessionStorage as a second dedup line in case the user refreshes
     // the ?billing=success landing after the conversion already fired.
     // The checkout SESSION id is the canonical transactionId (stable across
-    // the static "/" and /home-authed render paths, and available instantly
+    // every return path, and available instantly
     // — unlike the subscription row, which waits on the Stripe webhook).
     const key = `tc_paid_${transactionId ?? "unknown"}`;
     try {

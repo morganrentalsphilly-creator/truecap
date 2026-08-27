@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   EMPTY_BUY_BOX,
   boxesForPersonalAnalyzerStrategy,
+  buyBoxMatchesPropertyScope,
   buyBoxHasCriteria,
   countBuyBoxFit,
   deriveStateFromAddress,
@@ -263,6 +264,61 @@ describe("boxesForPersonalAnalyzerStrategy", () => {
     expect(
       boxesForPersonalAnalyzerStrategy(boxes, undefined).map((box) => box.id),
     ).toEqual(["unscoped", "buy-hold"]);
+  });
+});
+
+describe("buyBoxMatchesPropertyScope", () => {
+  const scoped = namedBox(
+    "philly-sfr",
+    { minDscr: 1.25 },
+    {
+      strategyKind: "buy_hold",
+    },
+  );
+  scoped.propertyTypes = ["single-family"];
+  scoped.targetStates = ["PA"];
+
+  it("matches a known property type and market", () => {
+    expect(
+      buyBoxMatchesPropertyScope(scoped, {
+        propertyType: "single-family",
+        state: "pa",
+      }),
+    ).toBe(true);
+  });
+
+  it("rejects the wrong property type or market", () => {
+    expect(
+      buyBoxMatchesPropertyScope(scoped, {
+        propertyType: "multi-family",
+        state: "PA",
+      }),
+    ).toBe(false);
+    expect(
+      buyBoxMatchesPropertyScope(scoped, {
+        propertyType: "single-family",
+        state: "NJ",
+      }),
+    ).toBe(false);
+  });
+
+  it("fails closed when a market-scoped box has no resolved state", () => {
+    expect(
+      buyBoxMatchesPropertyScope(scoped, {
+        propertyType: "single-family",
+        state: null,
+      }),
+    ).toBe(false);
+  });
+
+  it("allows unscoped criteria before an address is resolved", () => {
+    const unscoped = namedBox("general", { minDscr: 1.25 });
+    expect(
+      buyBoxMatchesPropertyScope(unscoped, {
+        propertyType: "single-family",
+        state: null,
+      }),
+    ).toBe(true);
   });
 });
 

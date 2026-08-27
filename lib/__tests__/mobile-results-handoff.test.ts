@@ -57,7 +57,7 @@ describe("completed-result focus handoff", () => {
     expect(resultRegion).toContain("tabIndex={-1}");
     expect(resultRegion).toContain('aria-label="Analysis results"');
     expect(calculator).toContain(
-      'scroll-mt-4 focus-visible:outline-none focus-visible:ring-2',
+      "scroll-mt-24 focus-visible:outline-none focus-visible:ring-2",
     );
     expect(handoff).toContain("requestAnimationFrame");
     expect(handoff).toContain("resultsSection.scrollIntoView");

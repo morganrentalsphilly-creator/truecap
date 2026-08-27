@@ -15,7 +15,7 @@ const normalizeSource = (value: string) =>
 describe("saved-deal decision handoff", () => {
   it("selects the owner-scoped pipeline stage and carries it only in edit handoffs", () => {
     const action = source("app/actions/saved-analyses.ts");
-    const home = source("app/home-authed/page.tsx");
+    const dashboardAnalyzer = source("app/dashboard/new/page.tsx");
     const analyzer = source("components/investcalc/investcalc-page.tsx");
     const handoff = source("components/investcalc/open-saved-deal-in-analyzer.tsx");
 
@@ -25,7 +25,7 @@ describe("saved-deal decision handoff", () => {
     expect(normalizeSource(action)).toContain(
       normalizeSource("pipelineStage: dbString"),
     );
-    expect(home).toContain("initialSavedDeal={initialSavedDeal}");
+    expect(dashboardAnalyzer).toContain("initialSavedDeal={initialSavedDeal}");
     expect(analyzer).toContain("pipelineStage: initialSavedDeal.pipelineStage");
     expect(handoff).not.toMatch(
       /SAVED_ANALYSIS_DUPLICATE_DRAFT_KEY,[\s\S]{0,500}pipelineStage/
@@ -39,7 +39,7 @@ describe("saved-deal decision handoff", () => {
     expect(analyzer).toContain(
       "savedDealId ? loadedPipelineStage : null"
     );
-    expect(analyzer).toContain("typeof parsed.pipelineStage === \"string\"");
+    expect(analyzer).toContain('typeof parsed.pipelineStage === "string"');
     expect(dashboard).toContain("userDecision={userDecision}");
   });
 });

@@ -11,6 +11,10 @@ const source = readFileSync(
   join(process.cwd(), "components/investcalc/strategy-chips.tsx"),
   "utf8",
 );
+const pageSource = readFileSync(
+  join(process.cwd(), "components/investcalc/investcalc-page.tsx"),
+  "utf8",
+);
 const normalizeSource = (value: string) =>
   value.replace(/\s+/g, "").replace(/,([)}\]])/g, "$1");
 
@@ -91,7 +95,62 @@ describe("compact strategy selector", () => {
   });
 
   it("never sends the destructive default key through the callback", () => {
-    expect(source).toContain("if (intent !== undefined) onSelect(intent)");
+    expect(source).toContain(
+      "if (intent !== undefined) onSelect(intent, assumptionMode)",
+    );
     expect(source).not.toContain('onSelect("buy-hold")');
+  });
+
+  it("requires an explicit safe assumption choice before changing strategy", () => {
+    expect(source).toContain("setPendingStrategy(strategy)");
+    expect(source).toContain("Nothing changes until you confirm.");
+    expect(source).toContain("Keep my assumptions");
+    expect(source).toContain("Recommended");
+    expect(source).toContain("Apply strategy starter values");
+    expect(source).toContain("Restore pre-strategy assumptions");
+    expect(source).toContain('confirmStrategyChange("keep")');
+    expect(source).toContain('? "restore"');
+    expect(source).toContain(': "starter"');
+    expect(source).toContain("getStarterChangePreview");
+    expect(source).toContain("changedFieldCount");
+    expect(source).toContain("keepAssumptionsButtonRef.current?.focus()");
+    expect(source).toContain("canRestoreAssumptions");
+    expect(source).toContain("Apply Buy & Hold starter values");
+    expect(pageSource).toContain(
+      "canRestoreAssumptions={strategyRevertRef.current !== null}",
+    );
+    expect(normalizeSource(pageSource)).toContain(
+      normalizeSource(
+        'form.setValue("propertyType", defaultStrategy.propertyType, strOpts)',
+      ),
+    );
+  });
+
+  it("keeps confirmation actions keyboard-visible and touch-friendly", () => {
+    expect(source).toContain("aria-labelledby={confirmationTitleId}");
+    expect(source.match(/min-h-11/g)?.length).toBeGreaterThanOrEqual(4);
+    expect(source).toContain("focus-visible:ring-2");
+    expect(source).toContain("collapseAndRestoreFocus");
+  });
+
+  it("preserves shared inputs unless the user explicitly selects starter values", () => {
+    expect(pageSource).toContain(
+      'assumptionMode: StrategyAssumptionMode = "starter"',
+    );
+    expect(pageSource).toContain('assumptionMode === "keep"');
+    expect(normalizeSource(pageSource)).toContain(
+      normalizeSource(
+        'assumptionMode === "starter" ? applyStarterAssumptions(strategy.starterKey) : null',
+      ),
+    );
+    expect(pageSource).toContain(
+      'assumptionMode === "starter" && form.getValues("templateId")',
+    );
+    expect(pageSource).toContain(
+      'handleSelectStrategy(key, "chip", assumptionMode)',
+    );
+    expect(pageSource).toContain(
+      "getStarterChangePreview={getStrategyStarterChangePreview}",
+    );
   });
 });

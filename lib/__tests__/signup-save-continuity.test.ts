@@ -14,8 +14,8 @@ describe("guest analysis signup continuity", () => {
     const googleButton = read("components/auth/google-auth-button.tsx");
     expect(prompt).toContain("setPendingSaveIntent(intendedDraft)");
     expect(prompt).toContain("const intendedDraft = onPrepareSaveIntent?.()");
-    expect(prompt).toContain('href="/auth/sign-up?next=/"');
-    expect(prompt).toContain('href="/auth/login?next=/"');
+    expect(prompt).toContain('href="/auth/sign-up?next=/dashboard/new"');
+    expect(prompt).toContain('href="/auth/login?next=/dashboard/new"');
     expect(prompt).toContain('onBeforeStart={() => beginSignup("google")}');
     expect(dashboard).toContain(
       "onPrepareAuthSave(adoptedMaoTarget, adoptedMaoTargetSource)",

@@ -17,6 +17,115 @@ test.beforeEach(() => {
   test.skip(!authEnvironment.enabled, authSkipReason);
 });
 
+test("mobile investor can set criteria, calculate once, and start a fresh analysis from either shell control", async ({
+  page,
+}) => {
+  test.setTimeout(120_000);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/dashboard/new", { waitUntil: "domcontentloaded" });
+  await acceptCookiesIfShown(page);
+
+  const form = page.locator('form[data-calc-form="true"]');
+  await expect(form).toBeVisible({ timeout: 20_000 });
+  await expect(form).toHaveAttribute("data-calculator-ready", "true", {
+    timeout: 20_000,
+  });
+
+  // Enter a complete first-pass deal directly. This intentionally does not
+  // click an address suggestion or invoke address autofill: a typed listing
+  // must remain a supported, one-pass underwriting path.
+  const address = form.getByLabel("Property Address", { exact: true });
+  await address.fill("2560 Collins St, Philadelphia, PA 19125, USA");
+  await form.getByLabel("Price to analyze", { exact: true }).fill("215000");
+  await form.getByLabel("Bedrooms (optional)", { exact: true }).fill("3");
+  await form
+    .getByLabel("Expected gross monthly rent", { exact: true })
+    .fill("2500");
+
+  // Establish debt financing explicitly so this regression is independent of
+  // the test account's saved defaults (an all-cash default correctly disables
+  // DSCR as a criterion).
+  await page.getByRole("button", { name: /down @/i }).click();
+  await form.getByLabel("Down Payment %", { exact: true }).fill("20");
+  await form.getByLabel("Interest Rate %", { exact: true }).fill("6.5");
+
+  const criteria = page.getByRole("region", {
+    name: "Offer Ceiling criteria",
+  });
+  await expect(criteria).toBeVisible({ timeout: 20_000 });
+  await expect(criteria).toContainText(/cash flow|DSCR/i);
+  await criteria.getByText("Change criteria", { exact: true }).click();
+
+  const cashFlowCriterion = criteria.getByLabel("Min cash flow ($/mo)", {
+    exact: true,
+  });
+  const dscrCriterion = criteria.getByLabel("Min DSCR", { exact: true });
+  await expect(cashFlowCriterion).toBeEditable();
+  await expect(dscrCriterion).toBeEditable();
+  await cashFlowCriterion.fill("100");
+  await expect(criteria).toContainText("cash flow ≥ $100/mo");
+  await expectNoHorizontalOverflow(page);
+
+  const analyze = form.getByRole("button", {
+    name: "Analyze deal & calculate ceiling",
+    exact: true,
+  });
+  await expect(analyze).toBeEnabled();
+  await analyze.click();
+
+  const summary = page.locator(
+    "section[aria-labelledby='decision-summary-title']",
+  );
+  await expect(summary).toBeVisible({ timeout: 30_000 });
+  await expect(
+    summary.getByText("Offer Ceiling", { exact: true }),
+  ).toBeVisible();
+  await expect(summary.getByText("Model DSCR", { exact: true })).toBeVisible();
+  await expect(summary).toContainText("cash flow ≥ $100/mo");
+  await expect(
+    summary.getByRole("button", { name: "Edit assumptions", exact: true }),
+  ).toBeVisible();
+  await expect(summary.getByText(/set targets first/i)).toHaveCount(0);
+  await expectNoHorizontalOverflow(page);
+
+  // On the already-mounted /dashboard/new route, the compact header control
+  // must reset the calculator rather than becoming a same-route no-op.
+  const headerNewAnalysis = page
+    .locator("header")
+    .getByRole("link", { name: "New analysis", exact: true });
+  await expect(headerNewAnalysis).toBeVisible();
+  const headerDialogPromise = page.waitForEvent("dialog");
+  const headerClickPromise = headerNewAnalysis.click();
+  const headerDialog = await headerDialogPromise;
+  expect(headerDialog.message()).toContain("Start a new analysis?");
+  await headerDialog.accept();
+  await headerClickPromise;
+  await expect(form).toBeVisible();
+  await expect(address).toHaveValue("");
+
+  // The equivalent link in the mobile drawer must close the drawer and issue
+  // the same guarded reset even though the pathname does not change.
+  await address.fill("123 Mobile Regression Ave, Philadelphia, PA 19125");
+  await page
+    .getByRole("button", { name: "Open navigation menu", exact: true })
+    .click();
+  const drawer = page.getByRole("dialog", { name: "Dashboard navigation" });
+  await expect(drawer).toBeVisible();
+  const drawerNewAnalysis = drawer
+    .getByRole("navigation", { name: "Dashboard (mobile)" })
+    .getByRole("link", { name: "New Analysis", exact: true });
+  await expect(drawerNewAnalysis).toBeVisible();
+  const drawerDialogPromise = page.waitForEvent("dialog");
+  const drawerClickPromise = drawerNewAnalysis.click();
+  const drawerDialog = await drawerDialogPromise;
+  expect(drawerDialog.message()).toContain("Start a new analysis?");
+  await drawerDialog.accept();
+  await drawerClickPromise;
+  await expect(drawer).toBeHidden();
+  await expect(address).toHaveValue("");
+  await expectNoHorizontalOverflow(page);
+});
+
 test("shortlist preview repairs mixed pasted rows, ranks them, and survives refresh", async ({
   page,
 }) => {

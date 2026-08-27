@@ -88,10 +88,11 @@ export function ListingLinkInput({
         id="listing-url-help"
         className="mt-0.5 text-[11px] text-muted-foreground"
       >
-        Zillow, Redfin, or Realtor.com — TrueCap extracts the address from the
-        URL, then starts rent, rate, and tax from labeled area or national
-        screening benchmarks. It does not import the listing price, taxes,
-        photos, or seller claims.
+        Zillow, Redfin, or Realtor.com — TrueCap extracts the address. When
+        available, a signed-in lookup can also fill the active asking price and
+        property facts; other values remain labeled estimates. It never imports
+        listing photos, seller claims, or the actual tax bill. Review every
+        value before relying on it.
       </p>
       <div className="mt-2 flex flex-wrap gap-2">
         <input

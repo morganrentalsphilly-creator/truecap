@@ -160,14 +160,10 @@ export default function Home() {
           deliberately omitted — not worth a reload-loop risk on the highest-
           traffic page for a rare edge.) */}
       <Header initialUser={null} initialEntitlements={null} />
-      {/* Post-checkout landing (?billing=success) — Google Ads purchase
-          conversion + one-time "Pro unlocked" banner. Pure client
-          component reading useSearchParams (NOT cookies/headers), so the
-          page stays static; the Suspense boundary satisfies the CSR
-          bailout requirement. Real post-checkout users normally hit
-          /home-authed via the auth-cookie rewrite — this mount covers
-          the proxy cookie-miss edge so the paid-ads conversion can
-          never be lost. */}
+      {/* Legacy post-checkout compatibility mount. New subscription Checkout
+          Sessions return to /dashboard/new; keeping this fail-closed client
+          reader preserves conversion recovery for older return URLs without
+          making the public homepage dynamic. */}
       <Suspense fallback={null}>
         <BillingSuccessBanner />
       </Suspense>

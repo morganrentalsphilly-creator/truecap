@@ -225,7 +225,10 @@ interface AnalysisDashboardProps {
     maoTarget?: MaoTarget,
     source?: OfferCeilingTargetSource,
   ) => void | Promise<void>;
-  onCompareDeals: () => void | Promise<void>;
+  onCompareDeals: (
+    maoTarget?: MaoTarget,
+    source?: OfferCeilingTargetSource,
+  ) => void | Promise<void>;
   onExportPdf: (
     mode?: ReportMode,
     maoTarget?: MaoTarget,
@@ -1048,7 +1051,7 @@ export function AnalysisDashboard({
       adoptedMaoTargetSource,
     );
     setPendingSaveIntent(intendedDraft);
-    router.push("/auth/sign-up?next=/");
+    router.push("/auth/sign-up?next=/dashboard/new");
   };
   // Auth-aware upgrade routing (BROWSER-1 / STRATEGY-UPSELL-LOGIN-DEADEND):
   // /profile is auth-gated and server-redirects anonymous users to
@@ -1128,8 +1131,8 @@ export function AnalysisDashboard({
           ? "This deal stays saved exactly as it was. Upgrade to update it in place."
           : isSaveLimitLockedByPlan
             ? canUpdateSavedDeals
-              ? "Archive or delete a deal to free a slot."
-              : "Delete or archive a deal to free a slot, or go Pro for unlimited saved deals."
+              ? "Delete a deal to free a slot. Archived deals still count toward the limit."
+              : "Delete a deal to free a slot, or go Pro for unlimited saved deals. Archived deals still count."
             : "Upgrade to save deals and reopen them on any device.",
         action: (
           <ToastAction
@@ -1461,8 +1464,7 @@ export function AnalysisDashboard({
 
       <h1
         id="analysis-decision-title"
-        className="text-balance text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl"
-      >
+        className="sr-only">
         First-pass underwriting
       </h1>
 
@@ -1597,7 +1599,6 @@ export function AnalysisDashboard({
             isComparing={isComparing}
             isSaved={isSaved}
             canCompareDeals={canCompareDeals}
-            persistedActionsBlockHint={persistedActionsBlockHint}
             isSaveLocked={isSaveLockedByPlan}
             saveLockedHint={saveLockedHint}
             savedDealId={savedDealId}
