@@ -39,6 +39,7 @@ import type {
 } from "@/lib/offer-ceiling-contract";
 import type { InputConfidenceResult } from "@/lib/input-confidence";
 import { trackEvent } from "@/lib/analytics";
+import { scrollBehavior } from "@/lib/utils";
 import {
   buildAssumptionLedger,
   buildDecisionTargetContext,
@@ -325,6 +326,7 @@ export function FocusedDecisionSummary({
     [allDrivers],
   );
   const targetEditorId = useId();
+  const targetEditorRef = useRef<HTMLDivElement | null>(null);
   const [tuneOpen, setTuneOpen] = useState(false);
   const [targetInputs, setTargetInputs] = useState<TargetInputs>(() =>
     inputsFromTarget(target),
@@ -340,6 +342,26 @@ export function FocusedDecisionSummary({
     previousTargetKeyRef.current = targetKey;
     setTargetInputs(inputsFromTarget(target));
   }, [target, targetKey]);
+
+  // Keep the interaction anchored to the control that opened it. The editor
+  // used to render after every decision card and the secondary action panel,
+  // so Tune criteria appeared to do nothing on a phone and forced desktop
+  // users to hunt below the fold. Reveal, scroll, and focus as one action.
+  useEffect(() => {
+    if (!tuneOpen) return;
+    const frame = window.requestAnimationFrame(() => {
+      const editor = targetEditorRef.current;
+      if (!editor) return;
+      editor.scrollIntoView({
+        behavior: scrollBehavior(),
+        block: "nearest",
+      });
+      editor
+        .querySelector<HTMLInputElement>('input:not([disabled])')
+        ?.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [tuneOpen]);
 
   const isCashPurchase = result.monthlyPayment <= 0;
   const targetDraftValidation = useMemo(
@@ -985,6 +1007,118 @@ export function FocusedDecisionSummary({
         </p>
       ) : null}
 
+      {canTunePriceCeiling ? (
+        <div
+          ref={targetEditorRef}
+          id={targetEditorId}
+          hidden={!tuneOpen}
+          data-offer-criteria-editor=""
+          className="mt-3 scroll-mt-24 rounded-xl border border-primary/25 bg-primary/[0.035] p-4"
+        >
+          <fieldset>
+            <legend className="text-sm font-bold text-foreground">
+              Offer criteria
+            </legend>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+              {targetAdopted
+                ? "Edit the criteria, then choose Update criteria. The Offer Ceiling and saved outputs do not change while you type. Leave a field blank to ignore it."
+                : "These are product examples, not your targets. Review or change them, then explicitly apply the criteria to calculate a modeled threshold."}
+            </p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+              {TARGET_FIELDS.map(([field, label]) => {
+                const bounds = MAO_TARGET_BOUNDS[field];
+                const inputId = `${targetEditorId}-${field}`;
+                const errorId = `${inputId}-error`;
+                const isCashDscr =
+                  field === "dscr" && result.monthlyPayment <= 0;
+                return (
+                  <div key={field}>
+                    <Label htmlFor={inputId} className="text-xs">
+                      {label}
+                    </Label>
+                    <Input
+                      id={inputId}
+                      type="number"
+                      inputMode={
+                        field === "monthlyCashFlow" ||
+                        field === "maxPurchasePrice"
+                          ? "numeric"
+                          : "decimal"
+                      }
+                      min={bounds.min}
+                      max={bounds.max}
+                      step={bounds.step}
+                      value={isCashDscr ? "" : targetInputs[field]}
+                      placeholder={isCashDscr ? "N/A — cash" : "Any"}
+                      disabled={isCashDscr}
+                      onChange={(event) =>
+                        setTargetInputs((current) => ({
+                          ...current,
+                          [field]: event.target.value,
+                        }))
+                      }
+                      aria-invalid={Boolean(
+                        targetDraftValidation.errors[field],
+                      )}
+                      aria-describedby={
+                        targetDraftValidation.errors[field]
+                          ? errorId
+                          : undefined
+                      }
+                      className="mt-1 h-11"
+                    />
+                    {targetDraftValidation.errors[field] ? (
+                      <p
+                        id={errorId}
+                        role="alert"
+                        className="mt-1 text-xs font-medium text-destructive"
+                      >
+                        {targetDraftValidation.errors[field]}
+                      </p>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+            {targetDraftValidation.formError ? (
+              <p
+                role="alert"
+                className="mt-3 text-xs font-medium text-destructive"
+              >
+                {targetDraftValidation.formError}
+              </p>
+            ) : null}
+            <div
+              data-offer-criteria-actions=""
+              className="sticky bottom-0 z-10 -mx-4 -mb-4 mt-4 grid grid-cols-2 gap-2 border-t border-border bg-background/95 px-4 py-3 backdrop-blur sm:static sm:mx-0 sm:mb-0 sm:flex sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none"
+            >
+              <Button
+                type="button"
+                onClick={applyTargetDraft}
+                disabled={
+                  targetDraftInvalid ||
+                  (targetAdopted && !targetDraftDirty)
+                }
+                className="min-h-11 rounded-xl"
+              >
+                {targetAdopted ? "Update criteria" : "Apply criteria"}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => {
+                  resetTargetDraft();
+                  setTuneOpen(false);
+                }}
+                className="min-h-11 rounded-xl"
+              >
+                Cancel
+              </Button>
+            </div>
+          </fieldset>
+        </div>
+      ) : null}
+
       {nextVerification ? (
         <p
           className="mt-3 rounded-lg border border-border bg-muted/25 px-3 py-2 text-xs leading-relaxed text-foreground"
@@ -1301,112 +1435,6 @@ export function FocusedDecisionSummary({
         ) : null}
       </details>
 
-      {canTunePriceCeiling ? (
-        <div
-          id={targetEditorId}
-          hidden={!tuneOpen}
-          className="mt-4 rounded-xl border border-border bg-muted/20 p-4"
-        >
-          <fieldset>
-            <legend className="text-sm font-bold text-foreground">
-              Offer criteria
-            </legend>
-            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-              {targetAdopted
-                ? "Edit the criteria, then choose Update criteria. The Offer Ceiling and saved outputs do not change while you type. Leave a field blank to ignore it."
-                : "These are product examples, not your targets. Review or change them, then explicitly apply the criteria to calculate a modeled threshold."}
-            </p>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-              {TARGET_FIELDS.map(([field, label]) => {
-                const bounds = MAO_TARGET_BOUNDS[field];
-                const inputId = `${targetEditorId}-${field}`;
-                const errorId = `${inputId}-error`;
-                const isCashDscr =
-                  field === "dscr" && result.monthlyPayment <= 0;
-                return (
-                  <div key={field}>
-                    <Label htmlFor={inputId} className="text-xs">
-                      {label}
-                    </Label>
-                    <Input
-                      id={inputId}
-                      type="number"
-                      inputMode={
-                        field === "monthlyCashFlow" ||
-                        field === "maxPurchasePrice"
-                          ? "numeric"
-                          : "decimal"
-                      }
-                      min={bounds.min}
-                      max={bounds.max}
-                      step={bounds.step}
-                      value={isCashDscr ? "" : targetInputs[field]}
-                      placeholder={isCashDscr ? "N/A — cash" : "Any"}
-                      disabled={isCashDscr}
-                      onChange={(event) =>
-                        setTargetInputs((current) => ({
-                          ...current,
-                          [field]: event.target.value,
-                        }))
-                      }
-                      aria-invalid={Boolean(
-                        targetDraftValidation.errors[field],
-                      )}
-                      aria-describedby={
-                        targetDraftValidation.errors[field]
-                          ? errorId
-                          : undefined
-                      }
-                      className="mt-1 h-11"
-                    />
-                    {targetDraftValidation.errors[field] ? (
-                      <p
-                        id={errorId}
-                        role="alert"
-                        className="mt-1 text-xs font-medium text-destructive"
-                      >
-                        {targetDraftValidation.errors[field]}
-                      </p>
-                    ) : null}
-                  </div>
-                );
-              })}
-            </div>
-            {targetDraftValidation.formError ? (
-              <p
-                role="alert"
-                className="mt-3 text-xs font-medium text-destructive"
-              >
-                {targetDraftValidation.formError}
-              </p>
-            ) : null}
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Button
-                type="button"
-                onClick={applyTargetDraft}
-                disabled={
-                  targetDraftInvalid ||
-                  (targetAdopted && !targetDraftDirty)
-                }
-                className="min-h-11 rounded-xl"
-              >
-                {targetAdopted ? "Update criteria" : "Apply criteria"}
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => {
-                  resetTargetDraft();
-                  setTuneOpen(false);
-                }}
-                className="min-h-11 rounded-xl"
-              >
-                Cancel
-              </Button>
-            </div>
-          </fieldset>
-        </div>
-      ) : null}
     </section>
   );
 }

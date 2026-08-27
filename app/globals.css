@@ -242,7 +242,7 @@ textarea,
     outline: 3px solid var(--ring);
     outline-offset: 2px;
   }
-  /* The homepage's mobile StickyCalculateBar and the StickyConversionBar are
+  /* The homepage's phone/tablet StickyCalculateBar and StickyConversionBar are
      both fixed bottom-0. PRIORITY: the product bar wins — while the user is
      inside the calculator form (the calc bar publishes data-calc-bar on <html>
      when it renders), the marketing funnel bar yields. The old rule had this
@@ -250,9 +250,10 @@ textarea,
      banner with the actual submit bar suppressed. The calc bar now retires
      itself outside the form / while the submit button or results are on
      screen, so the funnel bar still owns the marketing sections. */
-  /* Scoped below sm: the calc bar is sm:hidden (renders but is invisible on
-     desktop), so its data-calc-bar attr must not suppress the desktop pill. */
-  @media (max-width: 639.9px) {
+  /* Scoped below lg: the calc bar is lg:hidden (renders but is invisible in
+     the desktop cockpit), so its data-calc-bar attr must not suppress the
+     desktop pill. */
+  @media (max-width: 1023.9px) {
     html[data-calc-bar="1"] [data-conversion-bar-root] {
       display: none;
     }
@@ -273,15 +274,15 @@ textarea,
   body:has([data-sticky-bottom-bar]) [data-site-footer] {
     padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
   }
-  /* The calculator's submit bar is different: it is `sm:hidden fixed …`, so
-     from 640px up it stays MOUNTED with display:none and :has() still matches
-     it. Unscoped, this rule pinned 72px of dead footer space onto the
-     homepage at desktop widths and toggled the document height mid-scroll as
-     the bar mounted/unmounted. Scope it below sm, exactly like the
+  /* The calculator's submit bar is different: it is `lg:hidden fixed …`, so
+     from 1024px up it stays MOUNTED with display:none and :has() still matches
+     it. Unscoped, this rule pins 72px of dead footer space onto the homepage
+     at desktop widths and toggles the document height mid-scroll as the bar
+     mounts/unmounts. Scope it below lg, exactly like the
      html[data-calc-bar="1"] rule two blocks above, which is scoped for the
-     same reason. Phones — where the bar really does overlay the footer's
-     legal row — are unaffected. */
-  @media (max-width: 639.9px) {
+     same reason. Phones and tablets — where the bar really can overlay the
+     footer's legal row — retain the clearance. */
+  @media (max-width: 1023.9px) {
     body:has([data-sticky-calc-bar]) [data-site-footer] {
       padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
     }

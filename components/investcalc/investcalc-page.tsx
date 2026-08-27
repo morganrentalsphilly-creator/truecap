@@ -1225,6 +1225,14 @@ export function InvestCalcPage({
   // this one-shot escape hatch is intentional and must not be mistaken for a
   // missing-target error inside onSubmit.
   const explicitTargetlessRunRef = useRef(false);
+  // Hero/listing imports must finish through the exact same decision path as
+  // the visible Calculate button. Keep the latest closure here because those
+  // imports complete asynchronously and their listener is intentionally
+  // subscribed only once.
+  const primaryRunActionRef = useRef<
+    (options?: { withoutOfferCeiling?: boolean }) => Promise<void>
+  >(async () => {});
+  const pendingProgrammaticHandoffGenerationRef = useRef<number | null>(null);
   const [personalBuyBoxes, setPersonalBuyBoxes] = useState<NamedBuyBox[]>([]);
   // null = pick the highest-priority box that matches this property;
   // "starter" = explicitly use the visible starter criteria; any other value
@@ -1240,6 +1248,11 @@ export function InvestCalcPage({
   const [preRunBuyBoxState, setPreRunBuyBoxState] = useState<
     "idle" | "loading" | "ready" | "error"
   >(isAuthenticated && canUseMaxOffer ? "loading" : "idle");
+  // Hero/listing handlers can await enrichment across several renders. Read
+  // the current criteria-load state at the moment that handoff finishes, not
+  // the value captured when the import started.
+  const preRunBuyBoxStateRef = useRef(preRunBuyBoxState);
+  preRunBuyBoxStateRef.current = preRunBuyBoxState;
   const pendingSamplePreviewRef = useRef(false);
   const pendingSampleRunRef = useRef(false);
   const autoSaveAfterAuthRef = useRef(false);
@@ -7674,38 +7687,32 @@ export function InvestCalcPage({
   };
 
   /**
-   * Hero/listing handoffs can finish asynchronously after they fill the form.
-   * They may auto-run free/specialist economics, but a Pro Offer Ceiling must
-   * never fail *after* the user thinks the listing import already completed.
-   * Stop before results when criteria still need explicit review and move the
-   * user to the visible pre-run decision card.
+   * Hero/listing handoffs finish through the same one-click path as the visible
+   * Calculate action. The criteria card already shows exactly which Buy Box or
+   * starter criteria will be adopted, so sending the investor backward for a
+   * second confirmation only made a successful import feel broken.
    */
   const submitProgrammaticHandoff = () => {
-    const needsCriteria =
+    const isWaitingForCriteria =
       analysisRunPromisesOfferCeiling({
         canCalculateMaxOffer: canUseMaxOffer,
         strategyKey: activeStrategyKeyRef.current,
       }) &&
+      preRunBuyBoxStateRef.current === "loading" &&
       (!analysisMaoTargetRef.current ||
-        decisionBasisNeedsReview ||
+        decisionBasisNeedsReviewRef.current ||
         sampleSeededMaoTargetRef.current);
-    if (needsCriteria) {
+    if (isWaitingForCriteria) {
+      pendingProgrammaticHandoffGenerationRef.current =
+        forkGenerationRef.current;
       toast({
-        title: "Review your decision criteria",
+        title: "Finishing your decision criteria",
         description:
-          "The property is filled in. Review the criteria shown, then calculate the Offer Ceiling.",
-      });
-      requestAnimationFrame(() => {
-        const criteria = document.getElementById("decision-criteria");
-        criteria?.scrollIntoView({
-          behavior: scrollBehavior(),
-          block: "center",
-        });
-        criteria?.focus({ preventScroll: true });
+          "The property is ready. We’ll continue the analysis automatically as soon as your Buy Boxes finish loading.",
       });
       return;
     }
-    void form.handleSubmit(onSubmit, onError)();
+    void primaryRunActionRef.current();
   };
 
   // Latest-closure assignment for the hero address handoff (refs declared
@@ -8416,6 +8423,27 @@ export function InvestCalcPage({
     void form.handleSubmit(onSubmit, onError)();
   };
 
+  // Programmatic imports and explicit clicks now share one owner for target
+  // adoption, validation, enrichment sequencing, and submit. If a handoff
+  // arrived while Buy Boxes were loading, resume it exactly once when loading
+  // settles (the starter criteria remain a safe fallback on lookup failure).
+  primaryRunActionRef.current = handlePrimaryRunAction;
+  useEffect(() => {
+    const pendingGeneration =
+      pendingProgrammaticHandoffGenerationRef.current;
+    if (
+      pendingGeneration === null ||
+      preRunBuyBoxState === "loading"
+    ) {
+      return;
+    }
+    pendingProgrammaticHandoffGenerationRef.current = null;
+    // A reset or "next deal" invalidates every in-flight handoff. Never let a
+    // late Buy Box response submit a different property than the imported one.
+    if (pendingGeneration !== forkGenerationRef.current) return;
+    void primaryRunActionRef.current();
+  }, [preRunBuyBoxState]);
+
   useEffect(() => {
     if (postAnalysisMode) {
       document.body.setAttribute("data-truecap-results-mode", "true");
@@ -8973,7 +9001,12 @@ export function InvestCalcPage({
               <div className="lg:col-start-4 lg:col-span-2 lg:row-start-1 lg:row-span-6">
                 <div className="lg:sticky lg:top-24">
                   <LiveVerdictPanel
-                    active={!showResults && !analysisResult && !isCalculating}
+                    active={
+                      !showResults &&
+                      !analysisResult &&
+                      !isCalculating &&
+                      showGenericLivePreview
+                    }
                     // Suppressed while a solve-oriented play is active — see
                     // showGenericLivePreview. The SR message is gated with it so
                     // screen readers never hear the contradictory verdict either.
@@ -9345,11 +9378,11 @@ export function InvestCalcPage({
             </div>
             {/* end DESKTOP COCKPIT grid wrapper */}
           </div>
-          {/* Mobile sticky bottom Calculate bar. Inside the form so its
+          {/* Phone/tablet sticky bottom Calculate bar. Inside the form so its
               type="submit" triggers the same onSubmit handler the
               in-form button does. Appears once the user scrolls past
               ~600px so we never double up on the visible Calculate
-              button. */}
+              button, and retires at the lg desktop cockpit. */}
           <StickyCalculateBar
             isCalculating={isCalculating}
             hasResults={analysisResult !== null}

@@ -251,7 +251,7 @@ describe("pre-run Offer Ceiling criteria", () => {
     expect(submitGate).toContain("Choose decision criteria first");
   });
 
-  it("stops hero and listing auto-runs before results when Pro criteria need review", () => {
+  it("continues hero and listing imports through the same one-click criteria path", () => {
     const handoff = section(
       calculator,
       "const submitProgrammaticHandoff = () =>",
@@ -265,10 +265,29 @@ describe("pre-run Offer Ceiling criteria", () => {
 
     expect(handoff).toContain("analysisRunPromisesOfferCeiling({");
     expect(handoff).toContain("!analysisMaoTargetRef.current");
-    expect(handoff).toContain("Review your decision criteria");
-    expect(handoff).toContain('document.getElementById("decision-criteria")');
+    expect(handoff).toContain('preRunBuyBoxStateRef.current === "loading"');
+    expect(handoff).toContain(
+      "pendingProgrammaticHandoffGenerationRef.current =",
+    );
+    expect(handoff).toContain("forkGenerationRef.current");
+    expect(handoff).toContain("We’ll continue the analysis automatically");
+    expect(handoff).toContain("primaryRunActionRef.current()");
+    expect(handoff).not.toContain("Review your decision criteria");
+    expect(handoff).not.toContain('document.getElementById("decision-criteria")');
     expect(hero.match(/submitProgrammaticHandoff\(\)/g)).toHaveLength(2);
     expect(hero).not.toContain("form.handleSubmit(onSubmit, onError)");
+
+    expect(calculator).toContain(
+      "primaryRunActionRef.current = handlePrimaryRunAction",
+    );
+    expect(compact(calculator)).toContain(
+      compact(
+        'pendingGeneration === null || preRunBuyBoxState === "loading"',
+      ),
+    );
+    expect(calculator).toContain(
+      "pendingGeneration !== forkGenerationRef.current",
+    );
   });
 });
 

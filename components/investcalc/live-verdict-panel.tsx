@@ -70,6 +70,31 @@ export function LiveVerdictPanel({
           {livePreviewMsg}
         </span>
       ) : null}
+      {active && !livePreview ? (
+        <aside
+          data-live-verdict-empty=""
+          aria-label="Live screening preview guidance"
+          className="hidden min-h-56 items-center rounded-2xl border border-dashed border-border/80 bg-card/60 p-6 lg:flex"
+        >
+          <div className="max-w-sm">
+            <p className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <span
+                aria-hidden="true"
+                className="size-2 rounded-full bg-primary/35"
+              />
+              Live screening preview
+            </p>
+            <p className="mt-3 text-base font-semibold text-foreground">
+              Your preliminary numbers will appear here
+            </p>
+            <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+              Enter the price and expected monthly rent to see a live screening
+              preview. Add the address when you&apos;re ready to run the full
+              analysis.
+            </p>
+          </div>
+        </aside>
+      ) : null}
       {active && livePreview ? (
         // data-live-verdict: observed by StickyCalculateBar so the dock
         // readout suppresses itself while this card is on screen — the same
