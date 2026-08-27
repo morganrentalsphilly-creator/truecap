@@ -233,7 +233,10 @@ import {
   DuplicateAddressDialog,
   type DuplicateAddressChoice,
 } from "@/components/investcalc/duplicate-address-dialog";
-import { SAMPLE_DEAL_FIXTURE } from "@/lib/sample-deal";
+import {
+  isTrueCapSyntheticSampleAddress,
+  SAMPLE_DEAL_FIXTURE,
+} from "@/lib/sample-deal";
 import { estimatePurchasePrice } from "@/lib/estimate-price";
 import { parseListingUrl } from "@/lib/listing-url";
 import { parseAddressLocation } from "@/lib/parse-address";
@@ -4603,7 +4606,6 @@ export function InvestCalcPage({
         // for and the catch below then wiped them.
         const normalized = normalizeReleasedInvestmentFormDraft(parsedDraft);
         if (normalized) {
-          const sampleValues = SAMPLE_DEAL_FIXTURE.values;
           const restoredAnalyzerStrategyKey = persistedAnalyzerStrategyKey(
             readDraftAnalyzerStrategyKey(parsedDraft),
             normalized,
@@ -4611,11 +4613,6 @@ export function InvestCalcPage({
           const pendingMaoBinding = readPendingMaoTargetBinding(
             maoTargetAnalysisFingerprint(normalized),
           );
-          const pendingTargetMatchesSample =
-            !pendingMaoBinding ||
-            (pendingMaoBinding.source !== "buy-box" &&
-              maoTargetFingerprint(pendingMaoBinding.target) ===
-                maoTargetFingerprint(SAMPLE_DEAL_FIXTURE.maoTarget));
           // The exact demo is sometimes written deliberately for a just-clicked
           // Save or Share authentication handoff. That recent, draft-bound
           // intent is not stale sample residue: it must survive long enough to
@@ -4638,9 +4635,7 @@ export function InvestCalcPage({
           }
           const matchesSyntheticSampleDraft =
             restoredAnalyzerStrategyKey === SAMPLE_DEAL_FIXTURE.strategyKey &&
-            formSnapshotForCompare(normalized) ===
-              formSnapshotForCompare(sampleValues) &&
-            pendingTargetMatchesSample;
+            isTrueCapSyntheticSampleAddress(normalized.address);
           const isSyntheticSampleDraft =
             matchesSyntheticSampleDraft &&
             !resumesPendingSaveAfterAuth &&

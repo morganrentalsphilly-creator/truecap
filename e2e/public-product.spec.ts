@@ -229,6 +229,40 @@ test("a restored advanced-strategy draft keeps its analysis identity", async ({
   ).toHaveAccessibleName(/Screen rental baseline free/i);
 });
 
+test("a legacy synthetic sample draft cannot replace the investor's next deal", async ({
+  page,
+}) => {
+  await page.addInitScript(
+    ({ values }) => {
+      const legacyValues = { ...values } as Record<string, unknown>;
+      // The v1 synthetic fixture predates the pinned audit date. This exact
+      // hidden-field drift caused the whole-form equality guard to miss the
+      // disposable demo during the production smoke test.
+      delete legacyValues.analysisDate;
+      window.localStorage.setItem(
+        "truecap_calc_form_draft_v1",
+        JSON.stringify({
+          ...legacyValues,
+          __truecapAnalyzerStrategyKey: "buy-hold",
+        }),
+      );
+    },
+    { values: SAMPLE_DEAL_FIXTURE.values },
+  );
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await waitForCalculatorReady(page);
+
+  await expect(page.getByLabel("Property Address", { exact: true })).toHaveValue(
+    "",
+  );
+  await expect(
+    page.getByText("Draft restored from this browser"),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Try a sample deal", exact: true }),
+  ).toBeVisible();
+});
+
 test("switching tax and insurance modes cannot strand an invalid hidden value", async ({
   page,
 }) => {
