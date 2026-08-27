@@ -228,9 +228,16 @@ describe("an estimated price never masquerades as an asking price downstream", (
     expect(action).toContain(
       "let priceEstimated = parsed.data.priceEstimated === true",
     );
-    expect(action).toContain(
-      "recordedSourceContext?.purchasePriceEstimated === true",
-    );
+    // Saved provenance must still override a stale browser flag. The
+    // derivation now lives in one shared helper so the opaque share viewer
+    // and the agent client portal cannot label the same deal differently.
+    expect(action).toContain("isRecordedPriceEstimated(recordedResultSnapshot)");
+    const portal = read("app/portal/[token]/d/[dealId]/page.tsx");
+    expect(portal).toContain("isRecordedPriceEstimated(savedResultSnapshot)");
+    expect(portal).toContain("priceEstimated={portalPriceEstimated}");
+    const provenance = read("lib/recorded-price-provenance.ts");
+    expect(provenance).toContain("purchasePriceEstimated");
+    expect(provenance).toContain("sourceContext");
     expect(action).toContain("priceEstimated,");
     const lib = read("lib/public-share.ts");
     expect(lib).toContain(

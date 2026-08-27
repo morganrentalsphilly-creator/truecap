@@ -26,6 +26,7 @@ import {
   type PublicShareAudience,
 } from "@/lib/public-share";
 import { getSiteUrl } from "@/lib/site-url";
+import { isRecordedPriceEstimated } from "@/lib/recorded-price-provenance";
 import { createIpRateLimit, getRequestIp } from "@/lib/ip-rate-limit";
 import {
   normalizeMaoTarget,
@@ -201,25 +202,11 @@ export async function createPublicShareAction(
         recordedResultSnapshot?.analyzerStrategyKey,
         normalizedSaved.data,
       );
-      const recordedInputConfidence =
-        recordedResultSnapshot?.inputConfidence &&
-        typeof recordedResultSnapshot.inputConfidence === "object" &&
-        !Array.isArray(recordedResultSnapshot.inputConfidence)
-          ? (recordedResultSnapshot.inputConfidence as Record<string, unknown>)
-          : null;
-      const recordedSourceContext =
-        recordedInputConfidence?.sourceContext &&
-        typeof recordedInputConfidence.sourceContext === "object" &&
-        !Array.isArray(recordedInputConfidence.sourceContext)
-          ? (recordedInputConfidence.sourceContext as Record<string, unknown>)
-          : null;
       // Saved input-provenance metadata can preserve a cautionary estimate
       // warning even if a stale browser render has not restored that flag.
       // Financial result fields from this JSON are never publication authority.
       priceEstimated =
-        priceEstimated ||
-        recordedResultSnapshot?.purchasePriceEstimated === true ||
-        recordedSourceContext?.purchasePriceEstimated === true;
+        priceEstimated || isRecordedPriceEstimated(recordedResultSnapshot);
       const recordedTarget = normalizeMaoTarget(
         recordedResultSnapshot?.maxOfferTarget,
       );
