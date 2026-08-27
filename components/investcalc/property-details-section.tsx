@@ -146,15 +146,15 @@ export function PropertyDetailsSection({
             )}
             {isAutofilling
               ? "Looking up property details…"
-              : autofillRequiresAccount
-                ? "Create a free account to autofill"
-                : "Look up property details"}
+              : "Look up property details"}
           </Button>
           <p
             id="property-lookup-help"
             className="mt-1.5 max-w-prose text-[11px] leading-snug text-muted-foreground"
           >
-            Optional. Look up available property facts and estimates.
+            {autofillRequiresAccount
+              ? "Optional. A free account is required to look up available property facts and estimates."
+              : "Optional. Look up available property facts and estimates."}{" "}
             You&apos;ll review any changes; values you entered will not be
             replaced silently.
           </p>

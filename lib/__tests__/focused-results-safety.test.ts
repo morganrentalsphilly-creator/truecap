@@ -111,6 +111,26 @@ describe("focused decision safety", () => {
     expect(editor).toContain("targetAdopted && !targetDraftDirty");
   });
 
+  it("opens criteria beside its trigger with focus and reachable mobile actions", () => {
+    const summary = readFileSync(
+      join(root, "components/investcalc/focused-decision-summary.tsx"),
+      "utf8",
+    );
+    const editor = summary.indexOf('data-offer-criteria-editor=""');
+    const verification = summary.indexOf('data-result-next-verification=""');
+    const moreActions = summary.lastIndexOf("More actions");
+
+    expect(editor).toBeGreaterThanOrEqual(0);
+    expect(editor).toBeLessThan(verification);
+    expect(editor).toBeLessThan(moreActions);
+    expect(summary).toContain("targetEditorRef.current");
+    expect(summary).toContain("scrollIntoView({");
+    expect(summary).toContain("scrollBehavior()");
+    expect(summary).toContain("querySelector<HTMLInputElement>");
+    expect(summary).toContain('data-offer-criteria-actions=""');
+    expect(summary).toContain("sticky bottom-0");
+  });
+
   it("leads a targetless result with operating facts and keeps setup secondary", () => {
     const summary = readFileSync(
       join(root, "components/investcalc/focused-decision-summary.tsx"),

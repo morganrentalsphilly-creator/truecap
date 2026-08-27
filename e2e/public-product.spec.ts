@@ -132,6 +132,45 @@ test("the marketing prompt yields while the investor is using the calculator", a
   await expect(conversionBar).toBeHidden();
 });
 
+test("tablet investors keep one reachable analysis action below the desktop cockpit", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 768, height: 800 });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await waitForCalculatorReady(page);
+
+  const form = page.locator('form[data-calc-form="true"]');
+  const inFormAction = page.locator('[data-inform-submit="true"]');
+  const stickyAction = page.locator('[data-sticky-calc-bar=""]');
+
+  for (const width of [768, 1023]) {
+    await page.setViewportSize({ width, height: 800 });
+    await page.evaluate(() => window.scrollTo(0, 0));
+
+    // Stop just before the in-form action enters the viewport. This is the
+    // long tablet-form gap where the fixed action must remain available.
+    await page.evaluate(() => {
+      const submit = document.querySelector('[data-inform-submit="true"]');
+      if (!(submit instanceof HTMLElement)) {
+        throw new Error("Missing in-form analysis action");
+      }
+      const submitTop = submit.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo(0, Math.max(601, submitTop - window.innerHeight - 80));
+    });
+
+    await expect(form).toBeInViewport();
+    await expect(inFormAction).not.toBeInViewport();
+    await expect(stickyAction).toBeVisible();
+    await expectMinimumTouchTarget(stickyAction.getByRole("button"));
+
+    // The observer retires the fixed action as soon as its in-form equivalent
+    // is visible, so extending it to tablets never produces duplicate CTAs.
+    await inFormAction.scrollIntoViewIfNeeded();
+    await expect(inFormAction).toBeVisible();
+    await expect(stickyAction).toBeHidden();
+  }
+});
+
 test("calculator inputs reflow at a 195 CSS-pixel effective viewport", async ({
   page,
 }) => {
@@ -418,6 +457,24 @@ test("anonymous sample reaches the decision-first result with one click", async 
   expect(primaryActionsBox!.y + primaryActionsBox!.height).toBeLessThanOrEqual(
     844,
   );
+
+  // Tuning stays anchored to the action that opened it. The first editable
+  // criterion receives focus, and Apply/Cancel remain reachable while the
+  // longer phone editor scrolls.
+  await tuneTargets.click();
+  const criteriaEditor = summary.locator('[data-offer-criteria-editor=""]');
+  await expect(criteriaEditor).toBeVisible();
+  const firstCriterion = criteriaEditor.locator("input:not([disabled])").first();
+  await expect(firstCriterion).toBeFocused();
+  const criteriaActions = criteriaEditor.locator(
+    '[data-offer-criteria-actions=""]',
+  );
+  await expect(criteriaActions).toBeVisible();
+  const cancelCriteria = criteriaActions.getByRole("button", { name: "Cancel" });
+  await expectMinimumTouchTarget(cancelCriteria);
+  await expectNoHorizontalOverflow(page);
+  await cancelCriteria.click();
+  await expect(criteriaEditor).toBeHidden();
 
   // Move away and back with the keyboard so this proves a real focus-visible
   // state rather than only checking that JavaScript can call element.focus().

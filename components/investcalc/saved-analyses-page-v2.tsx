@@ -165,6 +165,7 @@ import {
   isCashOnCashNotApplicable,
 } from "@/lib/cash-on-cash-applicability";
 import { sortDealsWithinMethodologyCohorts } from "@/lib/dashboard-deal-mapping";
+import { savedDealsListCountLabel } from "@/lib/saved-deals-list-copy";
 
 type SavedSignal = "strong-buy" | "buy" | "neutral" | "risky" | "avoid";
 type SavedPropertyType = "single-family" | "multi-family" | "owner-occupant";
@@ -2861,6 +2862,13 @@ export function SavedAnalysesPage({
       .sort((a, b) => a - b);
   }, [pageCount, safeCurrentPage]);
 
+  const dealCountLabel = savedDealsListCountLabel({
+    visibleCount: filteredItems.length,
+    scopedCount: initialItems.length,
+    scope: activeDealStateFilter,
+    clientName: clientFilterName,
+  });
+
   return (
     <main
       id="main"
@@ -2891,7 +2899,7 @@ export function SavedAnalysesPage({
               My Deals
             </h1>
             <p className="text-sm text-muted-foreground">
-              {filteredItems.length} deals in your portfolio
+              {dealCountLabel}
             </p>
           </div>
         </div>
@@ -4243,8 +4251,9 @@ export function SavedAnalysesPage({
                     No deals assigned to {clientFilterName} yet
                   </p>
                   <p className="mx-auto mt-1 max-w-md text-xs text-muted-foreground">
-                    Open any deal below and set its client to {clientFilterName}{" "}
-                    — it appears on their portal straight away.
+                    Show all deals, open the one you want, then assign it to{" "}
+                    {clientFilterName}. It will appear on their portal straight
+                    away.
                   </p>
                   <Button
                     asChild

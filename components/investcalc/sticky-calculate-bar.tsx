@@ -1,12 +1,12 @@
 "use client";
 
 /**
- * Sticky bottom Calculate bar - MOBILE ONLY. Appears once the user has
+ * Sticky bottom Calculate bar - PHONE AND TABLET. Appears once the user has
  * scrolled past the PropertyDetailsSection (so we don't double up on
  * the in-form Calculate button when it's still on screen). Submits the
  * primary `<form>` it's nested under, mirroring the in-form button's
- * behavior. Hidden on desktop because the form column is short enough
- * to keep the in-form button reachable.
+ * behavior. Hidden from the lg desktop cockpit upward, where the form column
+ * is short enough to keep the in-form button reachable.
  *
  * Note: this component is rendered INSIDE the investcalc-page form so
  * the implicit `type="submit"` triggers the same submit handler the
@@ -188,7 +188,7 @@ export function StickyCalculateBar({
   return (
     <div
       data-sticky-calc-bar=""
-      className="sm:hidden fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 px-3 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] shadow-[0_-12px_28px_rgba(15,23,42,0.10)] backdrop-blur supports-[backdrop-filter]:bg-card/85"
+      className="lg:hidden fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 px-3 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] shadow-[0_-12px_28px_rgba(15,23,42,0.10)] backdrop-blur supports-[backdrop-filter]:bg-card/85"
       role="presentation"
     >
       {contextLabel ? (

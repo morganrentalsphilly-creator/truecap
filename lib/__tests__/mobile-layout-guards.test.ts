@@ -97,13 +97,13 @@ describe("mobile layout guards", () => {
     // The calculator's own submit bar is matched via its existing attribute…
     const calcBar = read("../../components/investcalc/sticky-calculate-bar.tsx");
     expect(calcBar).toContain('data-sticky-calc-bar=""');
-    // …but it is `sm:hidden`, i.e. it stays MOUNTED with display:none from
-    // 640px up, so :has() matches it on desktop too. Its footer-padding
-    // branch MUST stay inside the below-sm media query or it re-grows 72px
-    // of dead footer space at desktop widths (round-2 regression).
-    expect(calcBar).toContain("sm:hidden fixed");
+    // …but it is `lg:hidden`, i.e. it stays MOUNTED with display:none from
+    // 1024px up, so :has() matches it in the desktop cockpit too. Its
+    // footer-padding branch MUST stay inside the below-lg media query or it
+    // re-grows 72px of dead footer space at desktop widths.
+    expect(calcBar).toContain("lg:hidden fixed");
     expect(css).toMatch(
-      /@media \(max-width: 639\.9px\) \{\s*body:has\(\[data-sticky-calc-bar\]\) \[data-site-footer\] \{\s*padding-bottom: calc\(4\.5rem \+ env\(safe-area-inset-bottom\)\);\s*\}\s*\}/
+      /@media \(max-width: 1023\.9px\) \{\s*body:has\(\[data-sticky-calc-bar\]\) \[data-site-footer\] \{\s*padding-bottom: calc\(4\.5rem \+ env\(safe-area-inset-bottom\)\);\s*\}\s*\}/
     );
     // And it must not ALSO appear unscoped anywhere.
     expect(css).not.toContain("body:has([data-sticky-bottom-bar], [data-sticky-calc-bar])");
