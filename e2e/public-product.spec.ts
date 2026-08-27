@@ -179,18 +179,45 @@ test("desktop investors can run from the live preview without hunting below the 
   await waitForCalculatorReady(page);
 
   const form = page.locator('form[data-calc-form="true"]');
-  await form.scrollIntoViewIfNeeded();
   const desktopAction = page.locator('[data-desktop-run-action="true"]');
   const inFormAction = page.locator('[data-inform-submit="true"]');
+
+  // A form taller than the viewport has no single "in view" position, so
+  // scrollIntoViewIfNeeded() may align its bottom and immediately retire the
+  // cockpit action. Pin the start of the underwriting form below the sticky
+  // header to exercise the actual desktop entry state deterministically.
+  await form.evaluate((element) => {
+    const top = element.getBoundingClientRect().top + window.scrollY;
+    window.scrollTo(0, Math.max(0, top - 96));
+  });
 
   await expect(desktopAction).toBeVisible();
   await expectMinimumTouchTarget(desktopAction);
   await expect(desktopAction).toHaveAccessibleName(/analy|sample/i);
 
-  // The sticky cockpit action retires when its canonical in-form equivalent
-  // enters view, preventing two primary controls in the same desktop screen.
-  await inFormAction.scrollIntoViewIfNeeded();
+  // A first-visit consent banner must not trick the cockpit into retiring
+  // while the canonical action is geometrically intersecting but covered.
+  const cookieConsent = page.getByRole("dialog", { name: "Cookie consent" });
+  await expect(cookieConsent).toBeVisible();
+  await inFormAction.evaluate((element) => {
+    const banner = document.querySelector<HTMLElement>(
+      '[role="dialog"][aria-label="Cookie consent"]',
+    );
+    if (!banner) throw new Error("Missing cookie consent banner");
+    const submitTop = element.getBoundingClientRect().top + window.scrollY;
+    window.scrollTo(0, submitTop - banner.getBoundingClientRect().top - 8);
+  });
   await expect(inFormAction).toBeVisible();
+  await expect(desktopAction).toBeVisible();
+
+  // Once the obstruction is gone and the canonical CTA is comfortably in
+  // view, the duplicate cockpit action retires.
+  await cookieConsent
+    .getByRole("button", { name: "Reject", exact: true })
+    .click();
+  await inFormAction.evaluate((element) =>
+    element.scrollIntoView({ block: "center" }),
+  );
   await expect(desktopAction).toBeHidden();
 });
 
@@ -217,13 +244,17 @@ test("a second listing can never inherit the first property's price and rent", a
     exact: true,
   });
   await openListingInput.click();
-  await form.getByLabel("Paste a listing link", { exact: true }).fill(listingUrl);
+  await form
+    .getByLabel("Paste a listing link", { exact: true })
+    .fill(listingUrl);
   const firstDialogPromise = page.waitForEvent("dialog");
   const firstSubmitPromise = form
     .getByRole("button", { name: "Use address from link", exact: true })
     .click();
   const firstDialog = await firstDialogPromise;
-  expect(firstDialog.message()).toContain("clear the previous property’s price");
+  expect(firstDialog.message()).toContain(
+    "clear the previous property’s price",
+  );
   await firstDialog.dismiss();
   await firstSubmitPromise;
   await expect(address).toHaveValue(
@@ -233,7 +264,9 @@ test("a second listing can never inherit the first property's price and rent", a
   await expect(rent).toHaveValue("1,550");
 
   await openListingInput.click();
-  await form.getByLabel("Paste a listing link", { exact: true }).fill(listingUrl);
+  await form
+    .getByLabel("Paste a listing link", { exact: true })
+    .fill(listingUrl);
   const secondDialogPromise = page.waitForEvent("dialog");
   const secondSubmitPromise = form
     .getByRole("button", { name: "Use address from link", exact: true })
@@ -437,9 +470,9 @@ test("a legacy synthetic sample draft cannot replace the investor's next deal", 
   await expect(page.getByText("Draft restored from this browser")).toHaveCount(
     0,
   );
-  await expect(
-    page.getByRole("button", { name: "Try a sample deal", exact: true }),
-  ).toBeVisible();
+  const freshDealAction = page.locator('button[data-inform-submit="true"]');
+  await expect(freshDealAction).toBeVisible();
+  await expect(freshDealAction).toHaveAccessibleName("Try a sample deal");
 });
 
 test("switching tax and insurance modes cannot strand an invalid hidden value", async ({
@@ -494,7 +527,8 @@ test("anonymous sample reaches the decision-first result with one click", async 
   await page.goto("/", { waitUntil: "domcontentloaded" });
 
   const acceptCookies = page.getByRole("button", { name: /accept all/i });
-  if (await acceptCookies.isVisible()) await acceptCookies.click();
+  await expect(acceptCookies).toBeVisible();
+  await acceptCookies.click();
   const sampleButton = page.getByRole("button", {
     name: /view a sample decision/i,
   });
@@ -518,7 +552,10 @@ test("anonymous sample reaches the decision-first result with one click", async 
   await expect(summary.getByText("Model DSCR", { exact: true })).toBeVisible();
   const tuneTargets = summary.getByRole("button", { name: /tune criteria/i });
   const save = summary.getByRole("button", { name: /^save/i });
-  const nextDeal = summary.getByRole("button", { name: "Next deal", exact: true });
+  const nextDeal = summary.getByRole("button", {
+    name: "Next deal · keep assumptions",
+    exact: true,
+  });
   for (const action of [tuneTargets, save, nextDeal]) {
     await expect(action).toBeVisible();
     await expectMinimumTouchTarget(action);
@@ -540,13 +577,17 @@ test("anonymous sample reaches the decision-first result with one click", async 
   await tuneTargets.click();
   const criteriaEditor = summary.locator('[data-offer-criteria-editor=""]');
   await expect(criteriaEditor).toBeVisible();
-  const firstCriterion = criteriaEditor.locator("input:not([disabled])").first();
+  const firstCriterion = criteriaEditor
+    .locator("input:not([disabled])")
+    .first();
   await expect(firstCriterion).toBeFocused();
   const criteriaActions = criteriaEditor.locator(
     '[data-offer-criteria-actions=""]',
   );
   await expect(criteriaActions).toBeVisible();
-  const cancelCriteria = criteriaActions.getByRole("button", { name: "Cancel" });
+  const cancelCriteria = criteriaActions.getByRole("button", {
+    name: "Cancel",
+  });
   await expectMinimumTouchTarget(cancelCriteria);
   await expectNoHorizontalOverflow(page);
   await cancelCriteria.click();
