@@ -4,9 +4,9 @@
  *
  * ALSO: homepage cache split. app/page.tsx is statically generated
  * (edge-cached — the paid-traffic LCP/TTFB win), and the auth-aware
- * cookie verifier lives at app/home-authed/page.tsx. When a request for "/"
- * carries a Supabase auth cookie, we REWRITE to that dynamic verifier; a
- * valid session then redirects to the canonical /dashboard/new analyzer.
+ * homepage lives at app/home-authed/page.tsx. When a request for "/"
+ * carries a Supabase auth cookie, we REWRITE (not redirect — the URL
+ * bar still shows "/") to the dynamic variant.
  *
  * This is routing-for-caching, NOT auth enforcement (per the no-auth-
  * logic-in-proxy convention): cookie presence is only a cache hint.
@@ -64,9 +64,10 @@ export async function proxy(request: NextRequest) {
   if (request.nextUrl.pathname === "/" && hasSupabaseAuthCookie(request)) {
     // Clone nextUrl so the QUERY STRING survives the rewrite — the old
     // `new URL("/home-authed", request.url)` form dropped it, which hid
-    // params like a legacy Stripe checkout landing's `?billing=success&
-    // session_id=…` from /home-authed's validated handoff to /dashboard/new.
-    // Path-only change; requests without a query behave exactly as before.
+    // params like the Stripe checkout landing's `?billing=success&
+    // session_id=…` from /home-authed's server-side searchParams (the
+    // Google Ads conversion value is resolved there). Path-only change;
+    // requests without a query behave exactly as before.
     const rewriteUrl = request.nextUrl.clone();
     rewriteUrl.pathname = "/home-authed";
     const rewritten = NextResponse.rewrite(rewriteUrl, {
