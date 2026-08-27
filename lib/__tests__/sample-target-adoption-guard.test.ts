@@ -130,7 +130,7 @@ describe("sample-seeded targets never survive as user adoption", () => {
       "A synthetic sample must never become the default starting",
     );
     expect(calculator).toContain(
-      "formSnapshotForCompare(normalized) ===",
+      "isTrueCapSyntheticSampleAddress(normalized.address)",
     );
     expect(calculator).toContain(
       "restoredAnalyzerStrategyKey === SAMPLE_DEAL_FIXTURE.strategyKey",
@@ -138,10 +138,9 @@ describe("sample-seeded targets never survive as user adoption", () => {
     expect(
       calculator.indexOf("const restoredAnalyzerStrategyKey ="),
     ).toBeLessThan(calculator.indexOf("const isSyntheticSampleDraft ="));
-    expect(calculator).toContain("pendingTargetMatchesSample");
     expect(calculator).toContain("!resumesPendingSaveAfterAuth");
     expect(calculator).toContain("!resumesPendingShareAfterAuth");
-    expect(calculator).toContain('pendingMaoBinding.source !== "buy-box"');
+    expect(calculator).not.toContain("pendingTargetMatchesSample");
     expect(calculator).not.toContain(
       "normalized.purchasePrice === sampleValues.purchasePrice",
     );

@@ -83,6 +83,22 @@ export const SAMPLE_DEAL_VALUES = {
   sellingCostPct: 6,
 } as InvestmentFormValues;
 
+/**
+ * Stable identity for disposable demo drafts across fixture revisions.
+ *
+ * Older releases persisted the synthetic sample before its analysis date and
+ * several assumptions were version-pinned. Comparing the entire form therefore
+ * misses exactly those historical drafts and makes the demo look like the
+ * investor's unfinished work. The sentinel address is deliberately not a real
+ * property, so it is the safe backwards-compatible identity boundary.
+ */
+export function isTrueCapSyntheticSampleAddress(value: unknown): boolean {
+  if (typeof value !== "string") return false;
+  const normalize = (address: string) =>
+    address.trim().replace(/\s+/g, " ").toLocaleLowerCase("en-US");
+  return normalize(value) === normalize(SAMPLE_DEAL_VALUES.address);
+}
+
 /** Short display strings shared by the hero card. */
 export const SAMPLE_DEAL_DISPLAY = {
   shortAddress: "Synthetic sample · Philadelphia",

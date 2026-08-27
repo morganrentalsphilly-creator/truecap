@@ -10,7 +10,10 @@ import {
 import { calculateMaxAllowableOffer } from "../max-allowable-offer";
 import { describeMaoTarget } from "../mao-targets";
 import { calculateSampleDealOutcome } from "../sample-deal-analysis";
-import { SAMPLE_DEAL_FIXTURE } from "../sample-deal";
+import {
+  isTrueCapSyntheticSampleAddress,
+  SAMPLE_DEAL_FIXTURE,
+} from "../sample-deal";
 
 describe("versioned synthetic shared sample", () => {
   it("uses one complete fixture for the property, strategy, and visible targets", () => {
@@ -30,6 +33,28 @@ describe("versioned synthetic shared sample", () => {
     expect(describeMaoTarget(SAMPLE_DEAL_FIXTURE.maoTarget)).toBe(
       "cash flow ≥ $750/mo · DSCR ≥ 1.25"
     );
+  });
+
+  it("recognizes historical disposable sample drafts by their sentinel address", () => {
+    expect(
+      isTrueCapSyntheticSampleAddress(SAMPLE_DEAL_FIXTURE.values.address),
+    ).toBe(true);
+    expect(
+      isTrueCapSyntheticSampleAddress(
+        "  TRUECAP   SYNTHETIC SAMPLE, Philadelphia, PA 19140, USA  ",
+      ),
+    ).toBe(true);
+    expect(
+      isTrueCapSyntheticSampleAddress(
+        "1700 W Erie Ave, Philadelphia, PA 19140, USA",
+      ),
+    ).toBe(false);
+    expect(
+      isTrueCapSyntheticSampleAddress(
+        "TrueCap Synthetic Sample House, Philadelphia, PA 19140, USA",
+      ),
+    ).toBe(false);
+    expect(isTrueCapSyntheticSampleAddress(null)).toBe(false);
   });
 
   it("returns identical homepage and opened-analysis decision numbers", () => {
