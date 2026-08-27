@@ -25,7 +25,12 @@ const inverseSolveSchema = z
   .nullable();
 const exactSchema = z.object({
   presentation: z.object({
-    source: z.enum(["buy-box", "screening-defaults", "selected-targets"]),
+    source: z.enum([
+      "buy-box",
+      "screening-defaults",
+      "starter-criteria",
+      "selected-targets",
+    ]),
     sourceLabel: z.string(),
     ceiling: finite,
     askingPrice: finite,
@@ -151,6 +156,8 @@ export function recordedDealOfferLine(input: {
   const basisLabel =
     captured.source === "buy-box"
       ? `your captured Buy Box targets — ${describeMaoTarget(captured.target)}`
+      : captured.source === "starter-criteria"
+        ? `TrueCap starter criteria — ${describeMaoTarget(captured.target)}`
       : `your saved targets — ${describeMaoTarget(captured.target)}`;
   if (!captured.exact) return { offer: null, basisLabel };
 

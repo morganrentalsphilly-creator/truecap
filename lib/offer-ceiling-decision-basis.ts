@@ -42,15 +42,23 @@ type SelectedTargetRulesSnapshot = {
   criteria: MaoTarget;
 };
 
+type StarterCriteriaRulesSnapshot = {
+  kind: "starter-criteria";
+  criteria: MaoTarget;
+};
+
 export type OfferCeilingDecisionBasis = {
   version: typeof OFFER_CEILING_DECISION_BASIS_VERSION;
   capturedAt: string;
   strategyKey: AnalyzerStrategyKey;
-  source: "buy-box" | "selected-targets";
+  source: "buy-box" | "starter-criteria" | "selected-targets";
   target: MaoTarget;
   /** Deterministic fingerprint of source + strategy + immutable rule snapshot. */
   rulesFingerprint: string;
-  rules: BuyBoxRulesSnapshot | SelectedTargetRulesSnapshot;
+  rules:
+    | BuyBoxRulesSnapshot
+    | StarterCriteriaRulesSnapshot
+    | SelectedTargetRulesSnapshot;
 };
 
 const PROPERTY_TYPES = new Set<BuyBoxPropertyType>([
@@ -224,6 +232,33 @@ export function captureSelectedTargetsDecisionBasis(input: {
   };
 }
 
+/** Capture explicit acceptance of the visible TrueCap starter criteria
+ * without relabeling those unchanged product defaults as user-authored. */
+export function captureStarterCriteriaDecisionBasis(input: {
+  target: MaoTarget;
+  strategyKey: AnalyzerStrategyKey;
+  capturedAt?: string;
+}): OfferCeilingDecisionBasis {
+  const target = normalizeMaoTarget(input.target);
+  if (!target) throw new Error("A starter-criteria basis requires a valid target");
+  const rules: StarterCriteriaRulesSnapshot = {
+    kind: "starter-criteria",
+    criteria: target,
+  };
+  const seed = {
+    source: "starter-criteria" as const,
+    strategyKey: input.strategyKey,
+    target,
+    rules,
+  };
+  return {
+    version: OFFER_CEILING_DECISION_BASIS_VERSION,
+    capturedAt: captureTime(input.capturedAt),
+    ...seed,
+    rulesFingerprint: rulesFingerprint(seed),
+  };
+}
+
 export function normalizeOfferCeilingDecisionBasis(
   value: unknown,
   expected?: {
@@ -239,14 +274,19 @@ export function normalizeOfferCeilingDecisionBasis(
   const capturedAt = normalizedCapturedAt(record.capturedAt);
   const strategyKey = normalizeAnalyzerStrategyKey(record.strategyKey);
   const source =
-    record.source === "buy-box" || record.source === "selected-targets"
+    record.source === "buy-box" ||
+    record.source === "starter-criteria" ||
+    record.source === "selected-targets"
       ? record.source
       : null;
   const target = normalizeMaoTarget(record.target);
   const rawRules = asRecord(record.rules);
   if (!capturedAt || !strategyKey || !source || !target || !rawRules) return null;
 
-  let rules: BuyBoxRulesSnapshot | SelectedTargetRulesSnapshot;
+  let rules:
+    | BuyBoxRulesSnapshot
+    | StarterCriteriaRulesSnapshot
+    | SelectedTargetRulesSnapshot;
   if (source === "buy-box") {
     const criteria = normalizeCriteria(rawRules.criteria);
     if (
@@ -275,8 +315,10 @@ export function normalizeOfferCeilingDecisionBasis(
     };
   } else {
     const criteria = normalizeMaoTarget(rawRules.criteria);
-    if (rawRules.kind !== "selected-targets" || !criteria) return null;
-    rules = { kind: "selected-targets", criteria };
+    const expectedKind =
+      source === "starter-criteria" ? "starter-criteria" : "selected-targets";
+    if (rawRules.kind !== expectedKind || !criteria) return null;
+    rules = { kind: expectedKind, criteria };
     if (maoTargetFingerprint(criteria) !== maoTargetFingerprint(target)) {
       return null;
     }

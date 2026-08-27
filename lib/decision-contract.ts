@@ -62,6 +62,7 @@ export type AssumptionHardFlag =
 export type TargetProfileOrigin =
   | "user-selected"
   | "inherited"
+  | "truecap-starter-criteria"
   | "truecap-screening-defaults";
 
 export type DecisionTargetContext = {
@@ -155,14 +156,23 @@ export function buildDecisionTargetContext(args: {
   inherited?: boolean;
 }): DecisionTargetContext {
   const isDefaults = args.source === "screening-defaults";
-  const profileId = isDefaults ? "truecap-screening-defaults" : args.profileId?.trim() || null;
+  const isStarter = args.source === "starter-criteria";
+  const profileId = isDefaults
+    ? "truecap-screening-defaults"
+    : isStarter
+      ? "truecap-starter-criteria"
+      : args.profileId?.trim() || null;
   const profileVersion = isDefaults
     ? "screening-defaults-v1"
-    : args.profileVersion?.trim() || null;
+    : isStarter
+      ? "starter-criteria-v1"
+      : args.profileVersion?.trim() || null;
   const profileName = isDefaults
     ? "TrueCap screening defaults"
-    : args.profileName?.trim() ||
-      (args.source === "buy-box" ? "Captured selected targets" : "Selected targets");
+    : isStarter
+      ? "TrueCap starter criteria"
+      : args.profileName?.trim() ||
+        (args.source === "buy-box" ? "Captured selected targets" : "Selected targets");
   const targetFingerprint = maoTargetFingerprint(args.target);
 
   return {
@@ -183,6 +193,8 @@ export function buildDecisionTargetContext(args: {
     source: args.source,
     origin: isDefaults
       ? "truecap-screening-defaults"
+      : isStarter
+        ? "truecap-starter-criteria"
       : args.inherited
         ? "inherited"
         : "user-selected",

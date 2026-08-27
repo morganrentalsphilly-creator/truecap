@@ -199,7 +199,7 @@ describe("pre-run Offer Ceiling criteria", () => {
     expect(decisionPanel).toContain('aria-label="Offer Ceiling criteria"');
     expect(decisionPanel).toContain("decisionTargetLabel");
     expect(decisionPanel).toContain("Will use Buy Box");
-    expect(decisionPanel).toContain("Will use starter criteria");
+    expect(decisionPanel).toContain("Will use TrueCap starter criteria");
     expect(decisionPanel).toContain("Change criteria");
     expect(decisionPanel).toContain("PreRunCriteriaEditor");
     expect(decisionPanel).toContain("eligiblePreRunBuyBoxes.map");
@@ -208,6 +208,8 @@ describe("pre-run Offer Ceiling criteria", () => {
     expect(actions).toContain("commitPreRunTarget(");
     expect(actions).toContain("analysisMaoTargetRef.current = target");
     expect(actions).toContain("setAnalysisMaoTargetSource(source)");
+    expect(actions).toContain('"starter-criteria"');
+    expect(actions).toContain("captureNonBuyBoxDecisionBasis");
     expect(actions).toContain("writeCalcDraftWithMaoTarget(");
     expect(actions.indexOf("analysisMaoTargetRef.current = target")).toBeLessThan(
       actions.indexOf("form.handleSubmit(onSubmit, onError)"));
@@ -285,9 +287,7 @@ describe("assumption editing return path", () => {
     expect(editingBanner).toContain("visible decision criteria below");
     expect(editingBanner).toContain("primaryActionLabel");
     expect(editingBanner).toContain("void handlePrimaryRunAction()");
-    expect(editingBanner).toContain(
-      '(needsPreRunTargetChoice && preRunBuyBoxState === "loading")',
-    );
+    expect(editingBanner).toContain("decisionCriteriaBlockPrimaryAction");
   });
 });
 

@@ -81,6 +81,19 @@ describe("advocacy-first decision contract", () => {
     expect(first.rulesSnapshotVersion).not.toBe(second.rulesSnapshotVersion);
   });
 
+  it("keeps adopted starter criteria distinct from user-selected targets", () => {
+    const context = buildDecisionTargetContext({
+      target: SAMPLE_DEAL_FIXTURE.maoTarget,
+      source: "starter-criteria",
+    });
+
+    expect(context.profileId).toBe("truecap-starter-criteria");
+    expect(context.profileName).toBe("TrueCap starter criteria");
+    expect(context.profileVersion).toBe("starter-criteria-v1");
+    expect(context.origin).toBe("truecap-starter-criteria");
+    expect(context.source).toBe("starter-criteria");
+  });
+
   it("uses a real supplied profile version and never synthesizes one for an unversioned Buy Box", () => {
     const versioned = buildDecisionTargetContext({
       target: SAMPLE_DEAL_FIXTURE.maoTarget,

@@ -39,6 +39,7 @@ const money = (value: number) =>
 
 function sourceLabel(source: OfferCeilingTargetSource): string {
   if (source === "buy-box") return "Under your Buy Box";
+  if (source === "starter-criteria") return "Under TrueCap starter criteria";
   if (source === "selected-targets") return "Under your selected targets";
   return "Under screening defaults";
 }

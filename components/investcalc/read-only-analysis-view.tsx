@@ -626,8 +626,12 @@ export function ReadOnlyAnalysisView({
     criteriaMet == null
       ? "Preliminary underwriting"
       : criteriaMet
-        ? "Meets selected rules at asking"
-        : "Does not meet selected rules at asking";
+        ? maoTargetSource === "starter-criteria"
+          ? "Meets TrueCap starter criteria at asking"
+          : "Meets selected rules at asking"
+        : maoTargetSource === "starter-criteria"
+          ? "Does not meet TrueCap starter criteria at asking"
+          : "Does not meet selected rules at asking";
   const ceilingDisplay = offerCeiling
     ? fmtCash(offerCeiling.ceiling)
     : offerCeilingAccess?.access === "exact" && maoTarget

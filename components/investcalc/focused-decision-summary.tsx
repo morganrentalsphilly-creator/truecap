@@ -200,7 +200,7 @@ function FirstYearSnapshot({
 }) {
   return (
     <div
-      className="grid grid-cols-1 gap-3 min-[280px]:grid-cols-2 sm:grid-cols-3"
+      className="grid grid-cols-1 gap-3 min-[280px]:grid-cols-2"
       aria-label="First-year investment snapshot"
     >
       <div className="rounded-xl border border-primary/20 bg-[var(--brand-blue-light)] p-3">
@@ -211,14 +211,6 @@ function FirstYearSnapshot({
         </p>
         <p className="mt-1 font-mono text-xl font-extrabold tabular-nums text-foreground">
           {money(result.netCashFlow)}/mo
-        </p>
-      </div>
-      <div className="rounded-xl border border-primary/20 bg-[var(--brand-blue-light)] p-3">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-          Cash needed
-        </p>
-        <p className="mt-1 font-mono text-xl font-extrabold tabular-nums text-foreground">
-          {money(result.totalCashRequired)}
         </p>
       </div>
       <div className="rounded-xl border border-border bg-muted/30 p-3">
@@ -400,8 +392,12 @@ export function FocusedDecisionSummary({
       ? "Positive operating screen at entered assumptions"
       : "Negative operating screen at entered assumptions"
     : !clearsTargets || buyBoxFit === false
-      ? "Does not meet selected rules at asking"
-      : "Meets selected rules at asking";
+      ? targetSource === "starter-criteria"
+        ? "Does not meet TrueCap starter criteria at asking"
+        : "Does not meet selected rules at asking"
+      : targetSource === "starter-criteria"
+        ? "Meets TrueCap starter criteria at asking"
+        : "Meets selected rules at asking";
   const targetContext = useMemo(
     () =>
       buildDecisionTargetContext({
@@ -414,6 +410,11 @@ export function FocusedDecisionSummary({
       }),
     [buyBoxName, target, targetProfileId, targetProfileVersion, targetSource],
   );
+  const isSampleCriteria =
+    targetProfileId === "truecap-synthetic-sample-target";
+  const displayAddress = isSampleCriteria
+    ? "Philadelphia rental example"
+    : values.address;
   const evidenceLedger = useMemo(
     () =>
       inputConfidence
@@ -427,7 +428,11 @@ export function FocusedDecisionSummary({
   // rulesSnapshotVersion) are untouched. Raw slugs and schema-version suffixes
   // read as debug output on the main result, so they never render verbatim.
   const targetVersionLabel =
-    targetContext.identityStatus === "screening-defaults"
+    isSampleCriteria
+      ? "example criteria profile"
+      : targetSource === "starter-criteria"
+      ? "TrueCap starter criteria"
+      : targetContext.identityStatus === "screening-defaults"
       ? "example rules"
       : targetContext.profileVersion
         ? `profile v${targetContext.profileVersion}`
@@ -450,21 +455,33 @@ export function FocusedDecisionSummary({
       ? "Positive operating screen at entered assumptions"
       : "Negative operating screen at entered assumptions"
     : advocacyContractEnabled
-      ? ruleFitLabel(ruleFit)
+      ? isSampleCriteria
+        ? ruleFitLabel(ruleFit).replace("selected rules", "sample criteria")
+        : targetSource === "starter-criteria"
+        ? ruleFitLabel(ruleFit).replace(
+            "selected rules",
+            "TrueCap starter criteria",
+          )
+        : ruleFitLabel(ruleFit)
       : legacyDecisionLabel;
   // Render-time substitution only (the contract's ruleFitLabel identifiers are
   // pinned elsewhere): an estimated price can't be judged "at asking" in the
   // same card whose subtitle says "Est. price".
-  const decisionLabel = priceIsEstimated
-    ? rawDecisionLabel.replace(/ at asking\b/, " at the estimated price")
+  const sourceAwareDecisionLabel = isSampleCriteria
+    ? rawDecisionLabel.replace("selected rules", "sample criteria")
     : rawDecisionLabel;
-  const breakpointLabels = [
-    ...exactBreakpointLabels,
-    ...drivers.map(
+  const decisionLabel = priceIsEstimated
+    ? sourceAwareDecisionLabel.replace(
+        / at asking\b/,
+        " at the estimated price",
+      )
+    : sourceAwareDecisionLabel;
+  const viabilityLabels = exactBreakpointLabels.slice(0, 2);
+  const sensitivityLabels = drivers
+    .map(
       (driver) =>
         `${driver.label} ${driver.deltaLabel} moves cash flow about ±${money(driver.cashFlowSwing / 2)}/mo`,
-    ),
-  ]
+    )
     .filter((label, index, all) => all.indexOf(label) === index)
     .slice(0, 2);
   const nextVerification = inputConfidence?.verificationQueue[0];
@@ -693,8 +710,8 @@ export function FocusedDecisionSummary({
       <div className="space-y-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="truncate text-sm font-semibold text-muted-foreground">
-              {values.address}
+            <p className="min-w-0 break-words text-sm font-semibold leading-snug text-muted-foreground">
+              {displayAddress}
             </p>
             {isScenarioActive ? (
               <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-foreground">
@@ -783,13 +800,13 @@ export function FocusedDecisionSummary({
             <div className="space-y-1.5 pb-1 text-[11px] leading-relaxed text-muted-foreground">
               <p>
                 {advocacyContractEnabled
-                  ? `${targetContext.profileName}${
+                  ? `${isSampleCriteria ? "Example criteria" : targetContext.profileName}${
                       targetContext.origin &&
                       targetContext.origin !== "user-selected"
                         ? ` · ${targetContext.origin.replaceAll("-", " ")}`
                         : ""
                     } · ${targetVersionLabel}`
-                  : `${targetSource === "buy-box" && buyBoxName ? `Under Buy Box: ${buyBoxName}` : (offerCeiling?.sourceLabel ?? (targetSource === "screening-defaults" ? "Under screening defaults" : targetSource === "buy-box" ? "Under your Buy Box" : "Under your selected targets"))} · ${canShowPriceCeiling ? "Exact ceiling" : "Coarse range preview"}`}
+                  : `${isSampleCriteria ? "Under sample criteria" : targetSource === "buy-box" && buyBoxName ? `Under Buy Box: ${buyBoxName}` : (offerCeiling?.sourceLabel ?? (targetSource === "screening-defaults" ? "Under screening defaults" : targetSource === "starter-criteria" ? "Under TrueCap starter criteria" : targetSource === "buy-box" ? "Under your Buy Box" : "Under your selected targets"))} · ${canShowPriceCeiling ? "Exact ceiling" : "Coarse range preview"}`}
               </p>
               <p>
                 Underwriting model v
@@ -864,26 +881,11 @@ export function FocusedDecisionSummary({
             isScenarioActive={isScenarioActive}
           />
         ) : null}
-      </div>
 
-      <div className="mt-4 rounded-xl border border-amber-500/25 bg-amber-500/5 p-3">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-          {targetAdopted
-            ? "Two assumptions most likely to move the decision"
-            : "What can move the result"}
-        </p>
-        <ol className="mt-2 grid gap-1 text-sm font-semibold text-foreground sm:grid-cols-2">
-          {breakpointLabels.map((label, index) => (
-            <li key={label}>
-              <span className="text-muted-foreground">{index + 1}.</span>{" "}
-              {label}
-            </li>
-          ))}
-        </ol>
       </div>
 
       <div
-        className="mt-4 flex flex-wrap gap-2 border-t border-border pt-4"
+        className="mt-4 grid grid-cols-1 gap-2 border-t border-border pt-4 min-[320px]:grid-cols-2 sm:flex sm:flex-wrap"
         aria-label="Primary result actions"
       >
         {canTunePriceCeiling ? (
@@ -901,7 +903,7 @@ export function FocusedDecisionSummary({
             aria-expanded={tuneOpen}
             aria-controls={targetEditorId}
             disabled={targetBlocked}
-            className="h-11 gap-2 rounded-xl"
+            className="h-11 w-full gap-2 rounded-xl sm:w-auto"
           >
             <SlidersHorizontal className="size-4" aria-hidden />
             {tuneOpen
@@ -918,7 +920,7 @@ export function FocusedDecisionSummary({
           <Button
             type="button"
             onClick={onUpgrade}
-            className="min-h-11 gap-2 rounded-xl"
+            className="min-h-11 w-full gap-2 rounded-xl sm:w-auto"
           >
             <LockKeyhole className="size-4" aria-hidden />
             Unlock target price
@@ -928,10 +930,11 @@ export function FocusedDecisionSummary({
           type="button"
           variant="outline"
           onClick={onEditAssumptions}
-          className="h-11 gap-2 rounded-xl max-[250px]:h-auto max-[250px]:w-full max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight"
+          aria-label="Edit assumptions"
+          className="h-11 w-full gap-2 rounded-xl max-[250px]:h-auto max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight sm:w-auto"
         >
           <Edit3 className="size-4" aria-hidden />
-          Edit assumptions
+          Edit inputs
         </Button>
         <Button
           type="button"
@@ -942,7 +945,7 @@ export function FocusedDecisionSummary({
             resultActionsBlockedReason ??
             (isSaveLocked ? saveLockedHint : undefined)
           }
-          className="h-11 gap-2 rounded-xl max-[250px]:h-auto max-[250px]:w-full max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight"
+          className="h-11 w-full gap-2 rounded-xl max-[250px]:h-auto max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight sm:w-auto"
         >
           {isSaving ? (
             <Loader2 className="size-4 animate-spin" aria-hidden />
@@ -970,7 +973,7 @@ export function FocusedDecisionSummary({
           disabled={resultActionsBlocked}
           disabledReason={resultActionsBlockedReason}
           onPrepareAuth={onPrepareAuthShare}
-          className="h-11 rounded-xl px-4"
+          className="h-11 w-full rounded-xl px-4 sm:w-auto"
         />
       </div>
       {targetDraftBlocksActions ? (
@@ -982,6 +985,49 @@ export function FocusedDecisionSummary({
         </p>
       ) : null}
 
+      {nextVerification ? (
+        <p
+          className="mt-3 rounded-lg border border-border bg-muted/25 px-3 py-2 text-xs leading-relaxed text-foreground"
+          data-result-next-verification=""
+        >
+          <span className="font-extrabold">Verify next:</span>{" "}
+          {nextVerification.verifyAction ?? `Verify ${nextVerification.label}`}.
+          Current source: {nextVerification.sourceLabel}.
+        </p>
+      ) : null}
+
+      {viabilityLabels.length > 0 ? (
+        <div className="mt-4 rounded-xl border border-primary/20 bg-primary/5 p-3">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            Fastest paths to meet your criteria
+          </p>
+          <ol className="mt-2 grid gap-1 text-sm font-semibold text-foreground sm:grid-cols-2">
+            {viabilityLabels.map((label, index) => (
+              <li key={label}>
+                <span className="text-muted-foreground">{index + 1}.</span>{" "}
+                {label}
+              </li>
+            ))}
+          </ol>
+        </div>
+      ) : null}
+
+      <div className="mt-4 rounded-xl border border-amber-500/25 bg-amber-500/5 p-3">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          {targetAdopted
+            ? "Two assumptions most likely to move the decision"
+            : "What can move the result"}
+        </p>
+        <ol className="mt-2 grid gap-1 text-sm font-semibold text-foreground sm:grid-cols-2">
+          {sensitivityLabels.map((label, index) => (
+            <li key={label}>
+              <span className="text-muted-foreground">{index + 1}.</span>{" "}
+              {label}
+            </li>
+          ))}
+        </ol>
+      </div>
+
       <details className="group mt-2 rounded-xl border border-border bg-muted/20 px-2 py-1">
         <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg px-3 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
           Decision context and key numbers
@@ -992,9 +1038,17 @@ export function FocusedDecisionSummary({
         </summary>
         <div className="space-y-3 border-t border-border px-2 py-3">
           <div
-            className="grid grid-cols-1 gap-3 min-[280px]:grid-cols-2 sm:grid-cols-3"
+            className="grid grid-cols-1 gap-3 min-[280px]:grid-cols-2 lg:grid-cols-4"
             aria-label="Secondary first-year metrics"
           >
+            <div className="rounded-xl border border-border bg-background p-3">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                Cash needed
+              </p>
+              <p className="mt-1 font-mono text-lg font-extrabold tabular-nums text-foreground">
+                {money(result.totalCashRequired)}
+              </p>
+            </div>
             <div className="rounded-xl border border-border bg-background p-3">
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                 Annual NOI

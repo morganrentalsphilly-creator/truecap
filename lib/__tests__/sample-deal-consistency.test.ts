@@ -112,10 +112,8 @@ describe("versioned synthetic shared sample", () => {
       "utf8"
     );
 
-    expect(hero).toContain('"Does not meet selected rules at asking"');
-    expect(hero).toContain(
-      "Screening Index {Math.round(score.score)}/100"
-    );
+    expect(hero).toContain('"Asking misses the sample targets"');
+    expect(hero).not.toContain("Screening Index {Math.round(score.score)}/100");
     expect(hero).not.toContain("recommendationLabel(score.recommendation)");
   });
 

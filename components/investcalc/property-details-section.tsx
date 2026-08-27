@@ -86,12 +86,20 @@ export function PropertyDetailsSection({
   /* Address - Google Places autocomplete attached when key is set */
   const addressBlock = (
     <div className={hideAddressInput ? "hidden" : undefined}>
-      <Label
-        htmlFor="address"
-        className="text-sm font-medium text-foreground mb-1 block"
-      >
-        Property Address
-      </Label>
+      <div className="mb-1 flex items-center gap-2">
+        <Label
+          htmlFor="address"
+          className="text-sm font-medium text-foreground"
+        >
+          Property Address
+        </Label>
+        <span
+          aria-hidden="true"
+          className="text-xs font-semibold text-muted-foreground"
+        >
+          Required
+        </span>
+      </div>
       {/* First-run signpost (card chrome only — on the analyzer the page
           heading carries the one-line "Type an address — we fill your assumptions."
           signpost instead).

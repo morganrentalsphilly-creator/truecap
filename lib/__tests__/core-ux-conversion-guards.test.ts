@@ -215,9 +215,8 @@ describe("an estimated price never masquerades as an asking price downstream", (
   const summary = read("components/investcalc/focused-decision-summary.tsx");
 
   it("the decision headline is substituted at render when the price is estimated", () => {
-    expect(summary).toContain(
-      'rawDecisionLabel.replace(/ at asking\\b/, " at the estimated price")',
-    );
+    expect(summary).toContain("sourceAwareDecisionLabel.replace(");
+    expect(summary).toContain('" at the estimated price",');
   });
 
   it("share links carry the estimate flag end to end", () => {

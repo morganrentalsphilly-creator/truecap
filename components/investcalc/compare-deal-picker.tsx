@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import * as Sentry from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
@@ -97,6 +97,7 @@ export function CompareDealPicker({
   const initialSelection = normalizeMethodologySelection(deals, initialSelectedIds);
   const [selected, setSelected] = useState<string[]>(initialSelection.selectedIds);
   const [isPending, startTransition] = useTransition();
+  const compareRequestInFlightRef = useRef(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(() =>
     initialSelection.droppedIds.length > 0
       ? "Some previously selected deals used a different calculation method. They were removed so this comparison cannot name a false leader."
@@ -143,8 +144,9 @@ export function CompareDealPicker({
     selected.length >= 2 && arePickerMethodologiesCompatible(selectedDeals);
 
   const onCompare = () => {
-    if (!canCompare || isPending) return;
+    if (!canCompare || compareRequestInFlightRef.current || isPending) return;
     setErrorMessage(null);
+    compareRequestInFlightRef.current = true;
     startTransition(async () => {
       try {
         const result = await startCompareAction(selected);
@@ -173,6 +175,8 @@ export function CompareDealPicker({
           description: "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
+      } finally {
+        compareRequestInFlightRef.current = false;
       }
     });
   };

@@ -976,7 +976,12 @@ export function DashboardHome({
                 buyBoxSummary ? "sm:grid-cols-2 xl:grid-cols-4" : "sm:grid-cols-3"
               )}
             >
-              <div className="rounded-xl border border-success/30 bg-success/5 p-3">
+              <Link
+                href={decisionCenter.best ? `/dashboard/saved-analyses/${decisionCenter.best.id}` : "/dashboard/saved-analyses"}
+                prefetch={false}
+                aria-label={`Open highest-screening deal: ${decisionCenter.best?.address ?? "My Deals"}`}
+                className="rounded-xl border border-success/30 bg-success/5 p-3 transition hover:bg-success/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
                 <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-success">
                   <Award className="h-3.5 w-3.5" /> Highest screening index
                 </div>
@@ -985,10 +990,14 @@ export function DashboardHome({
                   {decisionCenter.best?.score != null ? `Screening Index ${Math.round(decisionCenter.best.score)}` : "—"}
                   {decisionCenter.best?.recommendation ? ` · ${recommendationLabel(decisionCenter.best.recommendation)}` : ""}
                 </div>
-              </div>
-              <div
+                <span className="mt-2 inline-flex min-h-11 items-center text-xs font-semibold text-success">Open deal →</span>
+              </Link>
+              <Link
+                href={decisionCenter.needsReview ? `/dashboard/saved-analyses/${decisionCenter.needsReview.id}` : "/dashboard/saved-analyses?state=active"}
+                prefetch={false}
+                aria-label={decisionCenter.needsReview ? `Review ${decisionCenter.needsReview.address}` : "View active deals"}
                 className={cn(
-                  "rounded-xl border p-3",
+                  "rounded-xl border p-3 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   decisionCenter.needsReview ? "border-destructive/30 bg-destructive/5" : "border-border bg-muted/20"
                 )}
               >
@@ -1012,8 +1021,16 @@ export function DashboardHome({
                 ) : (
                   <div className="mt-1 text-sm font-semibold text-foreground">All active deals cash-flow positive ✓</div>
                 )}
-              </div>
-              <div className="rounded-xl border border-primary/30 bg-primary/5 p-3">
+                <span className="mt-2 inline-flex min-h-11 items-center text-xs font-semibold text-primary">
+                  {decisionCenter.needsReview ? "Review deal →" : "View active deals →"}
+                </span>
+              </Link>
+              <Link
+                href={decisionCenter.bestUpside ? `/dashboard/saved-analyses/${decisionCenter.bestUpside.id}` : "/dashboard/saved-analyses"}
+                prefetch={false}
+                aria-label={`Open highest modeled-upside deal: ${decisionCenter.bestUpside?.address ?? "My Deals"}`}
+                className="rounded-xl border border-primary/30 bg-primary/5 p-3 transition hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
                 <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-primary">
                   <TrendingUp className="h-3.5 w-3.5" /> Highest modeled upside
                 </div>
@@ -1030,7 +1047,10 @@ export function DashboardHome({
                     ? bestUpsideSubline(decisionCenter.bestUpside.roiPct).text
                     : "Run a 10-yr projection"}
                 </div>
-              </div>
+                <span className="mt-2 inline-flex min-h-11 items-center text-xs font-semibold text-primary">
+                  {decisionCenter.bestUpside ? "Open deal →" : "View My Deals →"}
+                </span>
+              </Link>
               {/* PV-1: the personal tile — how many active deals pass the
                   user's own criteria, deep-linking to My Deals pre-filtered
                   to the fits (?buyBox=1 seeds the existing buyBoxOnly

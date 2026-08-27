@@ -4,6 +4,7 @@ import type { NamedBuyBox } from "@/lib/buy-box";
 import {
   captureBuyBoxDecisionBasis,
   captureSelectedTargetsDecisionBasis,
+  captureStarterCriteriaDecisionBasis,
   namedBuyBoxFromDecisionBasis,
   normalizeOfferCeilingDecisionBasis,
 } from "@/lib/offer-ceiling-decision-basis";
@@ -88,5 +89,27 @@ describe("Offer Ceiling decision basis", () => {
     expect(basis.source).toBe("selected-targets");
     expect(namedBuyBoxFromDecisionBasis(basis)).toBeNull();
     expect(normalizeOfferCeilingDecisionBasis(basis)).toEqual(basis);
+  });
+
+  it("captures unchanged starter criteria as an adopted starter source", () => {
+    const basis = captureStarterCriteriaDecisionBasis({
+      target: { monthlyCashFlow: 0, dscr: 1.25 },
+      strategyKey: "buy-hold",
+      capturedAt: "2026-08-26T12:00:00.000Z",
+    });
+
+    expect(basis.source).toBe("starter-criteria");
+    expect(basis.rules.kind).toBe("starter-criteria");
+    expect(namedBuyBoxFromDecisionBasis(basis)).toBeNull();
+    expect(
+      normalizeOfferCeilingDecisionBasis(basis, {
+        source: "starter-criteria",
+      }),
+    ).toEqual(basis);
+    expect(
+      normalizeOfferCeilingDecisionBasis(basis, {
+        source: "selected-targets",
+      }),
+    ).toBeNull();
   });
 });

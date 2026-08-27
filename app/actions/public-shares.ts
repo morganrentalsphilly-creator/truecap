@@ -93,7 +93,12 @@ export async function createPublicShareAction(
       dealId: z.string().uuid().optional(),
       maoTarget: z.unknown().optional(),
       maoTargetSource: z
-        .enum(["buy-box", "screening-defaults", "selected-targets"])
+        .enum([
+          "buy-box",
+          "screening-defaults",
+          "starter-criteria",
+          "selected-targets",
+        ])
         .optional(),
       audience: z
         .enum(["investment-partner", "client", "lender-review"])

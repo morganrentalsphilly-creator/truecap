@@ -243,6 +243,7 @@ function normalizePendingTargetSource(
 ): OfferCeilingTargetSource | null {
   return value === "buy-box" ||
     value === "screening-defaults" ||
+    value === "starter-criteria" ||
     value === "selected-targets"
     ? value
     : null;

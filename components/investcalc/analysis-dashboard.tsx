@@ -514,6 +514,12 @@ export function AnalysisDashboard({
   const showDealDecisionPack = isFeatureEnabled("deal_decision_pack");
   const advocacyDecisionContract =
     advocacyContractEligible && isFeatureEnabled("advocacy_decision_contract");
+  const resultDisclosureKey = savedDealId
+    ? `saved:${savedDealId}`
+    : `unsaved:${values?.address ?? ""}:${values?.purchasePrice ?? ""}:${result?.analysisDate ?? ""}:${result?.netCashFlow ?? ""}`;
+  const resultDisclosureStorageScope = savedDealId
+    ? `saved:${savedDealId}`
+    : null;
   // Ledger open state (Phase 5) - replaces the single activeTab. Rows are
   // INDEPENDENT multi-open accordions: opening one never closes a sibling
   // (single-open enforcement was explicitly rejected). The lead row (the
@@ -1477,7 +1483,7 @@ export function AnalysisDashboard({
           aria-label="Base underwriting while decision rules load"
           className="rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6"
         >
-          <p className="truncate text-sm font-semibold text-muted-foreground">
+          <p className="text-sm font-semibold leading-snug text-muted-foreground [overflow-wrap:anywhere]">
             {values.address}
           </p>
           <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-foreground">
@@ -2291,8 +2297,10 @@ export function AnalysisDashboard({
       {/* REGION 3 · THE NUMBERS — metrics grid + stress tools behind one
           disclosure when decision-first is on; a loose block otherwise. */}
       <ResultsRegionOrFragment
+        key={`numbers:${resultDisclosureKey}`}
         enabled={decisionFirst}
         id="the-numbers"
+        storageScope={resultDisclosureStorageScope}
         question="The numbers"
         payoff="Every metric, and the levers that move them"
         openEvent="the_numbers_opened"
@@ -2569,7 +2577,9 @@ export function AnalysisDashboard({
            drivers, behind ONE collapsed disclosure. Previously four
            separate top-level blocks that each restated the conclusion. */
         <ResultsRegion
+          key={`why:${resultDisclosureKey}`}
           id="why-this-number"
+          storageScope={resultDisclosureStorageScope}
           question="Why this number"
           payoff="The reasoning, the risks, and what would have to change"
           openEvent="why_this_number_opened"
@@ -2642,8 +2652,10 @@ export function AnalysisDashboard({
           BRRRR/flip, stress test, comps. One entry point, reachable from
           near the top, instead of eight stacked top-level rows. */}
       <ResultsRegionOrFragment
+        key={`deeper:${resultDisclosureKey}`}
         enabled={decisionFirst}
         id="go-deeper"
+        storageScope={resultDisclosureStorageScope}
         question="Go deeper"
         payoff="Amortization, projections, tax, exits, stress tests, comps"
         openEvent="go_deeper_opened"

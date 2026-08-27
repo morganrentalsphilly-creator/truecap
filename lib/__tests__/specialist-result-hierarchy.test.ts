@@ -50,9 +50,15 @@ describe("specialist result hierarchy", () => {
     expect(dashboard).not.toContain(
       'cn("space-y-3", strategyLeadsOutput && "hidden")',
     );
-    expect(dashboard).toContain(
-      '<ResultsRegionOrFragment\n        enabled={decisionFirst}\n        id="the-numbers"',
+    const numbersRegion = sourceSection(
+      dashboard,
+      "{/* REGION 3 · THE NUMBERS",
+      "{/* REGION 4",
     );
+    expect(numbersRegion).toContain("<ResultsRegionOrFragment");
+    expect(numbersRegion).toContain("enabled={decisionFirst}");
+    expect(numbersRegion).toContain('id="the-numbers"');
+    expect(numbersRegion).toContain("storageScope={resultDisclosureStorageScope}");
     expect(dashboard).toContain('<div className="space-y-3">');
   });
 

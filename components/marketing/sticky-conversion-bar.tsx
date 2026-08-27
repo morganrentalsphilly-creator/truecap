@@ -39,12 +39,24 @@ export function StickyConversionBar() {
   // over the form/results just eats ~90px of phone viewport while telling
   // an active user to "try it". InvestCalcPage dispatches the event.
   const [analyzerEngaged, setAnalyzerEngaged] = useState(false);
+  const [calculatorInView, setCalculatorInView] = useState(false);
   const cookieBannerOpen = useCookieBannerOpen();
 
   useEffect(() => {
     const onEngaged = () => setAnalyzerEngaged(true);
     window.addEventListener("tc-analyzer-engaged", onEngaged);
     return () => window.removeEventListener("tc-analyzer-engaged", onEngaged);
+  }, []);
+
+  useEffect(() => {
+    const calculator = document.querySelector('form[data-calc-form="true"]');
+    if (!calculator || typeof IntersectionObserver === "undefined") return;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      setCalculatorInView(entry?.isIntersecting ?? false);
+    });
+    observer.observe(calculator);
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
@@ -71,7 +83,12 @@ export function StickyConversionBar() {
 
   // Don't stack behind the opaque cookie-consent banner on a first visit,
   // and stand down entirely once the visitor is inside the analyzer.
-  const showing = !dismissed && visible && !cookieBannerOpen && !analyzerEngaged;
+  const showing =
+    !dismissed &&
+    visible &&
+    !cookieBannerOpen &&
+    !analyzerEngaged &&
+    !calculatorInView;
 
   if (!showing) return null;
 
@@ -87,14 +104,15 @@ export function StickyConversionBar() {
     <div
       data-conversion-bar-root=""
       data-sticky-bottom-bar=""
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 px-3 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] shadow-[0_-12px_28px_rgba(15,23,42,0.10)] backdrop-blur supports-[backdrop-filter]:bg-card/85 sm:px-4 sm:pt-3 sm:pb-[max(env(safe-area-inset-bottom),0.75rem)]">
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 px-3 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] shadow-[0_-12px_28px_rgba(15,23,42,0.10)] backdrop-blur supports-[backdrop-filter]:bg-card/85 sm:px-4 sm:pt-3 sm:pb-[max(env(safe-area-inset-bottom),0.75rem)]"
+    >
       <div className="mx-auto flex max-w-5xl items-center gap-3">
         <div className="min-w-0 flex-1">
           <p className="truncate text-xs font-bold text-foreground sm:text-sm">
-            The property is active. Know whether it deserves a closer look.
+            Have a rental in mind? See whether the numbers work.
           </p>
           <p className="hidden truncate text-[11px] text-muted-foreground sm:block">
-            No card · No signup · 60 seconds to first answer
+            No card · No signup · Editable assumptions
           </p>
         </div>
         <button
@@ -106,15 +124,19 @@ export function StickyConversionBar() {
           {/* Standardized to match the homepage's primary CTA verb.
               Sub-380px tiny phones fall back to "Try it" because the
               full label wraps. */}
-          <span className="hidden min-[380px]:inline">Analyze free</span>
-          <span className="min-[380px]:hidden">Try it</span>
+          <span className="hidden min-[380px]:inline">Start analysis</span>
+          <span className="min-[380px]:hidden">Start</span>
           <ArrowRight className="size-3.5 sm:size-4" />
         </button>
         <button
           type="button"
           onClick={() => {
             setDismissed(true);
-            try { window.localStorage.setItem(STORAGE_KEY, "1"); } catch { /* ignore */ }
+            try {
+              window.localStorage.setItem(STORAGE_KEY, "1");
+            } catch {
+              /* ignore */
+            }
           }}
           aria-label="Dismiss"
           className="shrink-0 rounded-full p-1.5 text-muted-foreground/60 hover:bg-muted hover:text-foreground"

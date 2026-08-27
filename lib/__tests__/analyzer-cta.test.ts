@@ -11,6 +11,16 @@ describe("role-aware analyzer CTA", () => {
     ).toBe("Try a sample deal");
   });
 
+  it("asks for the required address without pretending entered price and rent are runnable", () => {
+    expect(
+      getAnalyzerCta({
+        hasProperty: false,
+        canCalculateMaxOffer: true,
+        requiresAddressBeforeRun: true,
+      }),
+    ).toBe("Add address to run full analysis");
+  });
+
   it("frames a guest run as free analysis", () => {
     expect(
       getAnalyzerCta({ hasProperty: true, canCalculateMaxOffer: false }),

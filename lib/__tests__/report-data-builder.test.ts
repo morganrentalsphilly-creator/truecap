@@ -244,6 +244,21 @@ describe("server-owned PDF report data", () => {
     });
     expect(withExamplesOnly.decision?.label).toBe("Preliminary underwriting");
     expect(withExamplesOnly.maxOffer).toBeNull();
+
+    const withAdoptedStarter = buildCanonicalReportData({
+      values: SAMPLE_DEAL_VALUES,
+      maxOfferTarget: SAMPLE_DEAL_MAO_TARGET,
+      maxOfferTargetSource: "starter-criteria",
+      generatedAt: NOW,
+    });
+    expect(withAdoptedStarter.decision?.targetSource).toBe("starter-criteria");
+    expect(withAdoptedStarter.decision?.label).toMatch(
+      /TrueCap starter criteria/,
+    );
+    expect(withAdoptedStarter.maxOffer).toMatchObject({
+      source: "starter-criteria",
+      sourceLabel: "Under TrueCap starter criteria",
+    });
   });
 
   it("prints canonical STR revenue and leaves a missing construction year unknown", () => {

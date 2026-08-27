@@ -30,6 +30,7 @@ export function ResultsRegion({
   question,
   payoff,
   defaultOpen = false,
+  storageScope,
   openEvent,
   children,
 }: {
@@ -40,6 +41,9 @@ export function ResultsRegion({
   /** One line under the header. */
   payoff?: string;
   defaultOpen?: boolean;
+  /** Optional per-analysis scope. `null` disables persistence for an unsaved
+   * run so disclosure choices never leak into the next property. */
+  storageScope?: string | null;
   /** Fired once, the first time the region is opened in this session. */
   openEvent?: FunnelEvent;
   children: ReactNode;
@@ -54,12 +58,19 @@ export function ResultsRegion({
    * Returning users therefore emitted an "opened" event on every page load.
    */
   const restoringRef = useRef(false);
+  const storageKey =
+    storageScope === null
+      ? null
+      : `${STORAGE_PREFIX}${storageScope ? `${storageScope}:` : ""}${id}`;
 
   // Read persisted state after mount so server and first client render agree.
   useEffect(() => {
+    setOpen(defaultOpen);
+    firedRef.current = false;
     setHydrated(true);
+    if (!storageKey) return;
     try {
-      const stored = window.localStorage.getItem(`${STORAGE_PREFIX}${id}`);
+      const stored = window.localStorage.getItem(storageKey);
       if (stored === "1" || stored === "0") {
         // Consumed by the first onToggle that follows (see handleToggle).
         // A microtask cannot clear this: the `toggle` event is dispatched as
@@ -71,7 +82,7 @@ export function ResultsRegion({
     } catch {
       // Private mode / storage disabled — keep the default.
     }
-  }, [id]);
+  }, [defaultOpen, storageKey]);
 
   const handleToggle = (next: boolean) => {
     setOpen(next);
@@ -81,10 +92,12 @@ export function ResultsRegion({
       restoringRef.current = false;
       return;
     }
-    try {
-      window.localStorage.setItem(`${STORAGE_PREFIX}${id}`, next ? "1" : "0");
-    } catch {
-      // Persistence is best-effort; the region still works.
+    if (storageKey) {
+      try {
+        window.localStorage.setItem(storageKey, next ? "1" : "0");
+      } catch {
+        // Persistence is best-effort; the region still works.
+      }
     }
     if (next && openEvent && !firedRef.current) {
       firedRef.current = true;

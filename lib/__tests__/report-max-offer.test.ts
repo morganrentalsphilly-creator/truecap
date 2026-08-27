@@ -80,6 +80,17 @@ describe("report Max Offer and Deal Doctor", () => {
       targetSourceInput: "screening-defaults",
     });
     expect(screeningExamples).toBeNull();
+
+    const adoptedStarter = buildReportMaxOffer({
+      values,
+      result,
+      targetInput: target,
+      targetSourceInput: "starter-criteria",
+    });
+    expect(adoptedStarter).toMatchObject({
+      source: "starter-criteria",
+      sourceLabel: "Under TrueCap starter criteria",
+    });
   });
 
   it("fails closed to the canonical basis for an invalid persisted target", () => {

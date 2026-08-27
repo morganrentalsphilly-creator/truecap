@@ -76,6 +76,31 @@ describe("recorded Offer Ceiling", () => {
     ).toMatchObject({ captured: true, exact: null });
   });
 
+  it("round-trips an adopted starter solve without relabeling it as user-selected", () => {
+    const access = resolveOfferCeilingForAccess({
+      values: SAMPLE_DEAL_VALUES,
+      target: SAMPLE_DEAL_MAO_TARGET,
+      source: "starter-criteria",
+      paidAccess: true,
+    });
+    expect(access.access).toBe("exact");
+    if (access.access !== "exact") return;
+
+    const snapshot = {
+      maxOfferTarget: SAMPLE_DEAL_MAO_TARGET,
+      maxOfferTargetSource: "starter-criteria",
+      offerCeilingExact: access.exact,
+    };
+    const captured = readRecordedOfferCeiling(snapshot);
+    expect(captured).toMatchObject({
+      captured: true,
+      source: "starter-criteria",
+    });
+    expect(
+      recordedDealOfferLine({ snapshot, isShoppingStage: true })?.basisLabel,
+    ).toContain("TrueCap starter criteria");
+  });
+
   it("fails closed when exact output is corrupt or paired with different provenance", () => {
     const snapshot = capturedSnapshot();
     expect(

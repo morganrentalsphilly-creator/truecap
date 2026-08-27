@@ -65,6 +65,10 @@ import {
   SPECIALIST_ANALYSIS_SNAPSHOT_FIELD,
 } from "@/lib/specialist-analysis-snapshot";
 import { retargetUnchangedScenarioResultSnapshot } from "@/lib/scenario-result-snapshot";
+import {
+  isSavedDealArchived,
+  persistedLifecycleForSimpleState,
+} from "@/lib/saved-deal-lifecycle";
 
 export type ScenarioSummary = {
   id: string;
@@ -441,6 +445,20 @@ export async function addScenarioAction(
   clone.property_id = propertyId;
   clone.scenario_name = scenarioName;
   clone.strategy_kind = strategyKind;
+  // An archived row may donate assumptions to a new scenario, but the clone
+  // is a distinct deal to evaluate. Never inherit the terminal Passed/archive
+  // lifecycle or the newly created scenario becomes impossible to open.
+  if (
+    isSavedDealArchived({
+      pipeline_stage: deal.pipeline_stage,
+      is_completed:
+        typeof deal.is_completed === "boolean" ? deal.is_completed : null,
+      is_archived:
+        typeof deal.is_archived === "boolean" ? deal.is_archived : null,
+    })
+  ) {
+    Object.assign(clone, persistedLifecycleForSimpleState("active"));
+  }
   // Never inherit the source deal's cached PDF: the export cache checks only
   // pdf_url presence + version (no input hash), so a carried-over URL would
   // serve the BASE case's report for this scenario. Same reset saveDealAction

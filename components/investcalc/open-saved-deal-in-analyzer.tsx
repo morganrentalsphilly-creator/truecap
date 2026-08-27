@@ -196,7 +196,9 @@ export async function duplicateSavedDealInAnalyzer(
 
   let result: Awaited<ReturnType<typeof getSavedDealForEditingAction>>;
   try {
-    result = await getSavedDealForEditingAction(id);
+    result = await getSavedDealForEditingAction(id, {
+      allowArchivedSource: true,
+    });
   } catch {
     // The action REJECTED rather than returning {ok:false} (network blip,
     // cold-start 500, stale-deploy Server Action). Close the pre-opened tab and

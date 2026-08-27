@@ -105,6 +105,8 @@ export interface ReportData {
     label:
       | "Meets selected rules at asking"
       | "Does not meet selected rules at asking"
+      | "Meets TrueCap starter criteria at asking"
+      | "Does not meet TrueCap starter criteria at asking"
       | "Preliminary underwriting"
       | "Cannot determine"
       | "Pursue"
@@ -112,7 +114,11 @@ export interface ReportData {
       | "Pass at this price";
     readiness: "Ready" | "Verify first" | "Screening only";
     clearsSelectedTargets: boolean;
-    targetSource: "buy-box" | "screening-defaults" | "selected-targets";
+    targetSource:
+      | "buy-box"
+      | "screening-defaults"
+      | "starter-criteria"
+      | "selected-targets";
     targetBasis: string;
     rationale: string;
   };
@@ -139,7 +145,11 @@ export interface ReportData {
   maxOffer?: {
     maxPrice: number;
     basis: string;
-    source?: "buy-box" | "screening-defaults" | "selected-targets";
+    source?:
+      | "buy-box"
+      | "screening-defaults"
+      | "starter-criteria"
+      | "selected-targets";
     sourceLabel?: string;
     currentPriceGap: number;
     bindingConstraints?: string[];
@@ -824,11 +834,13 @@ function reportDecision(d: ReportData): NonNullable<ReportData["decision"]> {
 function decisionColor(decision: NonNullable<ReportData["decision"]>): string {
   if (
     decision.label === "Meets selected rules at asking" ||
+    decision.label === "Meets TrueCap starter criteria at asking" ||
     decision.label === "Pursue"
   )
     return COLOR.successText;
   if (
     decision.label === "Does not meet selected rules at asking" ||
+    decision.label === "Does not meet TrueCap starter criteria at asking" ||
     decision.label === "Pass at this price"
   )
     return COLOR.danger;

@@ -3,7 +3,11 @@ export function getAnalyzerCta(input: {
   canCalculateMaxOffer: boolean;
   strategyRunCta?: string;
   canUseStrategyPrimaryOutput?: boolean;
+  requiresAddressBeforeRun?: boolean;
 }): string {
+  if (input.requiresAddressBeforeRun) {
+    return "Add address to run full analysis";
+  }
   if (!input.hasProperty) return "Try a sample deal";
   // A specialist label may promise a Pro-only model (BRRRR, flip, or
   // wholesale). Use it only when this customer can actually receive that

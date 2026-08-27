@@ -61,6 +61,7 @@ import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 import { buyBoxHasCriteria, type NamedBuyBox } from "@/lib/buy-box";
 import { normalizeDataConfidence, type DataConfidence } from "@/lib/data-confidence";
 import { DEFAULT_PIPELINE_STAGE, type PipelineStage } from "@/lib/pipeline";
+import { isSavedDealActive } from "@/lib/saved-deal-lifecycle";
 
 const MAX_COMPARE_ITEMS = 4;
 
@@ -359,6 +360,7 @@ function mapDeal(
 
   return {
     id: row.id,
+    clientId: row.client_id ?? null,
     // Prefer a differing title ("<address> — Scenario 2") so scenario rows
     // are tellable apart in the picker; otherwise title derives from address.
     address:
@@ -412,14 +414,28 @@ async function loadComparePickerDeals(
       .order("created_at", { ascending: false });
 
   let { data: pickerRows, error: pickerError } = await runPickerQuery(
-    `${pickerSelect}, scenario_name`
+    `${pickerSelect}, scenario_name, pipeline_stage`
   );
+  if (isMissingColumnError(pickerError)) {
+    ({ data: pickerRows, error: pickerError } = await runPickerQuery(
+      `${pickerSelect}, scenario_name`,
+    ));
+  }
   if (isMissingColumnError(pickerError)) {
     ({ data: pickerRows, error: pickerError } = await runPickerQuery(pickerSelect));
   }
   if (pickerError) return { deals: [], hasError: true };
 
-  const deals = ((pickerRows ?? []) as unknown[]).map((row) => {
+  const deals = ((pickerRows ?? []) as unknown[])
+    .filter((row) => {
+      const candidate = row as SavedAnalysisRow;
+      return isSavedDealActive({
+        pipeline_stage: candidate.pipeline_stage,
+        is_completed: false,
+        is_archived: false,
+      });
+    })
+    .map((row) => {
     const r = row as SavedAnalysisRow;
     const recomputed = recomputeSavedDealVerdict(r.form_snapshot);
     const resolution = resolveSavedAnalysisSnapshot({
@@ -652,9 +668,17 @@ export default async function DashboardComparePage() {
   // come back loosely typed — cast through unknown (same as the My Deals list).
   const rowById = new Map(
     ((rows ?? []) as unknown[])
-      .filter((row) =>
-        isReleasedUnderwritingSnapshot((row as SavedAnalysisRow).form_snapshot)
-      )
+      .filter((row) => {
+        const candidate = row as SavedAnalysisRow;
+        return (
+          isReleasedUnderwritingSnapshot(candidate.form_snapshot) &&
+          isSavedDealActive({
+            pipeline_stage: candidate.pipeline_stage,
+            is_completed: false,
+            is_archived: false,
+          })
+        );
+      })
       .map((row) => {
       const r = row as SavedAnalysisRow;
       return [r.id, r] as const;
