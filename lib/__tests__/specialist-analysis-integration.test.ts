@@ -34,7 +34,10 @@ describe("specialist snapshot integration guards", () => {
       "...(specialistAnalysis ? { specialistAnalysis } : {})",
     );
     expect(store).toContain("Recompute at the read boundary too");
-    expect(store).toContain("shouldFreezeSavedMethodology(");
+    // Superseded-but-known standards are republished with the legacy banner;
+    // only an unknown/future contract fails closed (locked decision 7).
+    expect(store).toContain("storedMethodologyIsRenderable");
+    expect(store).toContain("TRUECAP_UNDERWRITING_STANDARD_LEGACY_V1_VERSION");
   });
 
   it("keeps public specialist data behind the server-authorized Pro boundary", () => {

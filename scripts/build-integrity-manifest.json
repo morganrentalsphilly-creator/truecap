@@ -1,7 +1,7 @@
 {
   "_readme": "Pinned sha256 of every file that executes during a build (or decides what does). Verified by scripts/verify-build-integrity.mjs in the build-chain-guard CI job. Any drift fails CI until someone regenerates this file on purpose: `node scripts/verify-build-integrity.mjs --update`. Exists because of the 2026-06-01 incident — see the header of that script.",
   "algorithm": "sha256",
-  "generatedAt": "2026-08-26T16:09:57.027Z",
+  "generatedAt": "2026-08-26T23:56:14.130Z",
   "files": {
     ".github/workflows/ci.yml": "0c331ae1fc002e4abbaeda51b9b3c12f810597f9d13ec0c8e7833078ec5b4e4c",
     "eslint.config.mjs": "50ef27101a8f02892b83d543ae9be26afa81e2fe4f0a87f1bfeebda77b8e22fc",
@@ -14,7 +14,7 @@
     "proxy.ts": "123cf1cc7c6f23413a7b9720e7f084253cced578d515d9c1595defacca3a39b8",
     "scripts/check-agent-blog-content.mjs": "a18480b403ca419192791f167a712cc789af741a7335670c4299e5ce6c94ae4f",
     "scripts/verify-build-integrity.mjs": "6378f59189a32b5737eaee6287d899c314178e7b3f5b676a825646d3cbd2d470",
-    "sentry.edge.config.ts": "503fe2762c49f5a439116d51ea5ca5990ce7f9c4a771e0c105711c08977dab51",
+    "sentry.edge.config.ts": "14030b26f093eae180beead8b6edd09d4892f184e78cd864154f736d686e17c0",
     "sentry.server.config.ts": "bfa45eb2582d6a251eebff745b8b881df8cb9b1b39c43c9aeabad23f07ed4261",
     "tsconfig.json": "3793702e98a6da2c82b03ecfca1a48a25c79b170abacb97f23937784550e206b",
     "vercel.json": "be8b5dde330ce13e82e100158817395902a9e8a4d0c1b18342689e0ce3bc1bbe",

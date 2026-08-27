@@ -170,7 +170,10 @@ describe("the share-route privacy contract", () => {
     expect(store).toContain(
       "const currentResult = calculateAnalysis(input.values)",
     );
-    expect(store).toContain("shouldFreezeSavedMethodology(");
+    // Superseded-but-known standards are republished with the legacy banner;
+    // only an unknown/future contract fails closed (locked decision 7).
+    expect(store).toContain("storedMethodologyIsRenderable");
+    expect(store).toContain("TRUECAP_UNDERWRITING_STANDARD_LEGACY_V1_VERSION");
     expect(store).toContain("Recompute at the read boundary too");
     expect(route).not.toContain("resolveSavedAnalysisResult");
     expect(route).not.toContain("readRecordedOfferCeiling");

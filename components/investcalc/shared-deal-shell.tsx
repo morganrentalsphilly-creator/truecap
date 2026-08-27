@@ -140,7 +140,12 @@ export function SharedDealShell({
           </h1>
           {values.purchasePrice && (
             <p className="text-sm text-muted-foreground mt-1">
-              Purchase price ${values.purchasePrice.toLocaleString("en-US")}
+              {/* The body already labels an estimated price honestly; this
+                  header stated it as a bare fact, so the first line a
+                  recipient read contradicted the disclosure below it. */}
+              {priceEstimated ? "Estimated price" : "Purchase price"} $
+              {values.purchasePrice.toLocaleString("en-US")}
+              {priceEstimated ? " (automated estimate)" : ""}
               {values.yearBuilt ? ` · built ${values.yearBuilt}` : ""}
             </p>
           )}

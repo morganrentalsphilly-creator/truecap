@@ -18,6 +18,12 @@ import { hasPaidPlanSubscription } from "@/lib/entitlements";
 import { fetchRentCastEnrichment, type PropertyEnrichment } from "@/lib/property-enrichment/rentcast";
 import { captureServerEvent } from "@/lib/posthog-server";
 
+import * as Sentry from "@sentry/nextjs";
+
+/** One report per server instance — a structural cache failure is a
+ *  standing condition, not a per-request event. */
+let hasReportedCacheReadFailure = false;
+
 const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 // Hard monthly cap on LIVE enrichments (each ≈ 2 RentCast API calls; a
@@ -180,11 +186,28 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
 
   // Cache-first. Read the row once; serve it if fresh, keep it as a stale
   // fallback for the cap / fetch-failure paths below.
-  const { data: cached } = await admin
+  const { data: cached, error: cacheReadError } = await admin
     .from("property_enrichment_cache")
     .select("payload, fetched_at")
     .eq("address_key", key)
     .maybeSingle();
+  // The error was previously destructured away, so a MISSING TABLE looked
+  // identical to a cache miss: every lookup silently fell through to the
+  // metered RentCast API and the 30-day cache never saved a call. Report the
+  // structural failure once per cold start — loudly enough to notice, not so
+  // loudly that a transient blip floods Sentry. Never fail the user's
+  // request: an unreadable cache must still serve a live lookup.
+  if (cacheReadError && !hasReportedCacheReadFailure) {
+    hasReportedCacheReadFailure = true;
+    Sentry.captureMessage(
+      "[property-comps] enrichment cache unreadable — serving uncached (paid) lookups",
+      {
+        level: "error",
+        tags: { feature: "property-comps", stage: "cache-read" },
+        extra: { code: cacheReadError.code ?? null },
+      }
+    );
+  }
   const cachedPayload = cached ? (cached as { payload: PropertyEnrichment }).payload : null;
   // When the asking price is requested, only serve a cached payload whose
   // listing was actually CHECKED (listingChecked) — a confirmed "not listed"

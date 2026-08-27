@@ -57,7 +57,11 @@ import {
   SPECIALIST_ANALYSIS_SNAPSHOT_FIELD,
   type SpecialistAnalysisSnapshot,
 } from "@/lib/specialist-analysis-snapshot";
-import { shouldFreezeSavedMethodology } from "@/lib/saved-analysis-methodology";
+import { LEGACY_UNVERSIONED_METHODOLOGY } from "@/lib/saved-analysis-methodology";
+import {
+  TRUECAP_UNDERWRITING_STANDARD_LEGACY_V1_VERSION,
+  TRUECAP_UNDERWRITING_STANDARD_VERSION,
+} from "@/lib/underwriting-methodology";
 
 export type PublicShareAudience =
   | "investment-partner"
@@ -312,16 +316,33 @@ export async function resolvePublicShare(
       typeof snapshot.meta.methodologyVersion === "string"
         ? snapshot.meta.methodologyVersion
         : null;
-    if (
-      shouldFreezeSavedMethodology(
-        storedMethodologyVersion,
-        currentResult.methodologyVersion,
-      )
-    ) {
-      // This deployment cannot truthfully republish a different formula
-      // contract. The owner must mint a refreshed share after re-underwriting.
+    // Fail closed ONLY on a contract this deployment cannot render.
+    //
+    // The previous check rejected any stored version != the running standard,
+    // so the 1.0 -> 1.1 bump silently 404'd every share link already sent to a
+    // recipient — links the owner cannot even see are broken, with no notice
+    // on either side. A version we still hold formulas for is renderable: the
+    // viewer recomputes under the current standard and shows the
+    // legacy/unpinned banner that exists precisely to disclose that. An
+    // unknown or future version still fails closed (locked decision 7).
+    // RELEASED standards only — deliberately not the whole formula registry.
+    // v2 exists in UNDERWRITING_FORMULAS_BY_VERSION for internal/golden work
+    // and is explicitly not released to customer-facing boundaries, of which
+    // a public share is one (see lib/underwriting-model-release.ts).
+    const storedMethodologyIsRenderable =
+      storedMethodologyVersion == null ||
+      storedMethodologyVersion === LEGACY_UNVERSIONED_METHODOLOGY ||
+      storedMethodologyVersion === TRUECAP_UNDERWRITING_STANDARD_VERSION ||
+      storedMethodologyVersion === TRUECAP_UNDERWRITING_STANDARD_LEGACY_V1_VERSION;
+    if (!storedMethodologyIsRenderable) {
+      // Unknown/future formula contract — the owner must mint a refreshed
+      // share after re-underwriting.
       return null;
     }
+    const supersededMethodology =
+      storedMethodologyVersion != null &&
+      storedMethodologyVersion !== LEGACY_UNVERSIONED_METHODOLOGY &&
+      storedMethodologyVersion !== currentResult.methodologyVersion;
     const currentScore = computeDealScore(
       buildDealScoreInputFromAnalysis(snapshot.values, currentResult),
     );
@@ -417,7 +438,10 @@ export async function resolvePublicShare(
           ? snapshot.meta.schemaVersion
           : row.calc_version,
       methodologyVersion: currentResult.methodologyVersion,
-      legacyUnpinned: storedMethodologyVersion == null,
+      // A share recorded under a superseded standard is republished with the
+      // same "recalculated under the labeled current standard — refresh
+      // before relying on it" disclosure as an unpinned legacy share.
+      legacyUnpinned: storedMethodologyVersion == null || supersededMethodology,
       legacyInputOnly,
     };
   } catch {

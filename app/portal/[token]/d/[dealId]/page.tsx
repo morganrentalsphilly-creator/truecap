@@ -27,6 +27,7 @@ import {
   normalizeMaoTargetForFinancing,
 } from "@/lib/mao-target-editor";
 import { isFeatureReleased } from "@/lib/entitlements-catalog";
+import { isRecordedPriceEstimated } from "@/lib/recorded-price-provenance";
 import {
   isAdoptedOfferCeilingTargetSource,
   type OfferCeilingTargetSource,
@@ -69,6 +70,10 @@ export default async function PortalDealPage({ params }: Props) {
   let recordedResult = false;
   let legacyMethodologyWarning = false;
   let displayedMethodologyVersion: string | undefined;
+  // An agent's buyer must get the same estimate labelling the opaque
+  // share viewer gives. This portal never passed the flag, so an
+  // AVM-derived price reached a client presented as an asking price.
+  let portalPriceEstimated = false;
   try {
     const admin = createAdminSupabaseClient();
 
@@ -130,6 +135,7 @@ export default async function PortalDealPage({ params }: Props) {
       string,
       unknown
     > | null;
+    portalPriceEstimated = isRecordedPriceEstimated(savedResultSnapshot);
     const savedMaoTarget = normalizeMaoTarget(
       savedResultSnapshot?.maxOfferTarget,
     );
@@ -180,6 +186,7 @@ export default async function PortalDealPage({ params }: Props) {
       maoTargetSource={maoTargetSource}
       offerCeilingAccess={offerCeilingAccess}
       methodologyVersion={displayedMethodologyVersion}
+      priceEstimated={portalPriceEstimated}
       legacyMethodologyWarning={legacyMethodologyWarning}
       outputsRecomputed
       inputsSource="live-saved"
