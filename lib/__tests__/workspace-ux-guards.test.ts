@@ -46,7 +46,27 @@ describe("decision workspace UX guards", () => {
     const list = read("components/investcalc/saved-analyses-page-v2.tsx");
     const compare = read("components/investcalc/compare-deals-client.tsx");
 
+    const workspaceConfirmation = workspace.indexOf(
+      "confirmPipelineStageChange({",
+    );
+    const workspaceWrite = workspace.indexOf(
+      "updateSavedDealStageAction(savedDealId, next)",
+    );
+    const listConfirmation = list.indexOf("confirmPipelineStageChange({");
+    const listWrite = list.indexOf("updateSavedDealStageAction(id, stage)");
+
+    expect(workspaceConfirmation).toBeGreaterThan(-1);
+    expect(workspaceWrite).toBeGreaterThan(workspaceConfirmation);
+    expect(listConfirmation).toBeGreaterThan(-1);
+    expect(listWrite).toBeGreaterThan(listConfirmation);
+    expect(workspace).toContain("confirm: (message) => window.confirm(message)");
+    expect(list).toContain("confirm: (message) => window.confirm(message)");
+
     expect(workspace).toContain('altText="Undo marking deal as Passed"');
+    expect(workspace).toContain('className="min-h-11"');
+    expect(workspace).toContain(
+      'className="h-11 w-[150px] rounded-md text-xs"',
+    );
     expect(workspace).toContain(
       "updateSavedDealStageAction(savedDealId, stage)",
     );
@@ -55,6 +75,7 @@ describe("decision workspace UX guards", () => {
       normalizeSource("updateSavedDealStageAction(id, previousStage)"),
     );
     expect(list).toContain('altText="Undo marking deal as Passed"');
+    expect(list).toContain('className="min-h-11"');
     expect(compare).not.toMatch(/Mark all.*Passed/i);
     expect(compare).toContain("Near-term score");
     expect(compare).toContain("Long-term score");

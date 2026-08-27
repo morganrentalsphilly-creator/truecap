@@ -153,11 +153,9 @@ export function confidenceLabel(level: ConfidenceLevel): string {
  * about a Medium/Low rating, which left the most actionable part of the feature
  * unspoken. This closes that loop.
  *
- * Derived from the SAME rule as computeConfidenceLevel above, so the advice can
- * never contradict the rating it explains. In particular: that rule returns
- * "high" whenever rent and rate both carry provenance, so a deal that is NOT
- * high while both are sourced can only have failed the completeness check —
- * which is why that case advises filling in rent/price rather than re-fetching.
+ * Derived from the SAME rule as computeConfidenceLevel above. A High result
+ * requires explicit browser confirmation of rent and rate; merely carrying a
+ * HUD/FRED/manual provenance record is not enough and never becomes evidence.
  */
 export function describeConfidenceGap(
   confidence: DataConfidence,

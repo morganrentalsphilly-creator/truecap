@@ -41,13 +41,11 @@ import type { InputConfidenceResult } from "@/lib/input-confidence";
 import { trackEvent } from "@/lib/analytics";
 import { scrollBehavior } from "@/lib/utils";
 import {
-  buildAssumptionLedger,
   buildDecisionTargetContext,
   deriveRuleFit,
   offerCeilingSemanticStatus,
   ruleFitLabel,
   userDecisionLabel,
-  type AssumptionSensitivity,
   type UserDecision,
 } from "@/lib/decision-contract";
 
@@ -86,6 +84,8 @@ type Props = {
   onTargetChange: (target: MaoTarget) => void;
   onAdoptTarget: () => void;
   onTuneTargetsOpened: () => void;
+  /** Keep lower result actions from bypassing unapplied/invalid criteria. */
+  onTargetDraftBlockingChange?: (blocked: boolean) => void;
   onEditAssumptions: () => void;
   onSave: () => void;
   onCompareDeals: (
@@ -228,17 +228,6 @@ function FirstYearSnapshot({
   );
 }
 
-const IMPACT_TO_CONFIDENCE_KEY = {
-  rent: "rent",
-  interestRate: "interestRate",
-  purchasePrice: "purchasePrice",
-  vacancyPct: "vacancy",
-  mgmtPct: "management",
-  maintenancePct: "maintenance",
-  capexPct: "capex",
-  propertyTaxPct: "propertyTax",
-} as const;
-
 /**
  * The decision viewport: one compact, factual answer before the deeper report.
  * All numbers come from the same frozen values/result snapshot as the rest of
@@ -275,6 +264,7 @@ export function FocusedDecisionSummary({
   onTargetChange,
   onAdoptTarget,
   onTuneTargetsOpened,
+  onTargetDraftBlockingChange,
   onEditAssumptions,
   onSave,
   onCompareDeals,
@@ -298,30 +288,6 @@ export function FocusedDecisionSummary({
 }: Props) {
   const allDrivers = useMemo(() => computeAssumptionImpact(values), [values]);
   const drivers = allDrivers.slice(0, 2);
-  const assumptionSensitivity = useMemo(
-    () =>
-      Object.fromEntries(
-        allDrivers.flatMap((driver) => {
-          const key =
-            IMPACT_TO_CONFIDENCE_KEY[
-              driver.key as keyof typeof IMPACT_TO_CONFIDENCE_KEY
-            ];
-          return key
-            ? [
-                [
-                  key,
-                  {
-                    cashFlowSwing: driver.cashFlowSwing,
-                    dscrSwing: driver.dscrSwing,
-                    deltaLabel: driver.deltaLabel,
-                  } satisfies AssumptionSensitivity,
-                ],
-              ]
-            : [];
-        }),
-      ),
-    [allDrivers],
-  );
   const targetEditorId = useId();
   const targetEditorRef = useRef<HTMLDivElement | null>(null);
   const [tuneOpen, setTuneOpen] = useState(false);
@@ -379,6 +345,14 @@ export function FocusedDecisionSummary({
   );
   const targetDraftBlocksActions = targetDraftDirty || targetDraftInvalid;
 
+  useEffect(() => {
+    onTargetDraftBlockingChange?.(targetDraftBlocksActions);
+  }, [onTargetDraftBlockingChange, targetDraftBlocksActions]);
+  useEffect(
+    () => () => onTargetDraftBlockingChange?.(false),
+    [onTargetDraftBlockingChange],
+  );
+
   const resetTargetDraft = () => {
     setTargetInputs(inputsFromTarget(target));
   };
@@ -434,15 +408,6 @@ export function FocusedDecisionSummary({
   const displayAddress = isSampleCriteria
     ? "Philadelphia rental example"
     : values.address;
-  const evidenceLedger = useMemo(
-    () =>
-      inputConfidence
-        ? buildAssumptionLedger(inputConfidence, {
-            sensitivity: assumptionSensitivity,
-          })
-        : null,
-    [assumptionSensitivity, inputConfidence],
-  );
   // Human phrasing only — the underlying contract identifiers (profileVersion,
   // rulesSnapshotVersion) are untouched. Raw slugs and schema-version suffixes
   // read as debug output on the main result, so they never render verbatim.
@@ -466,7 +431,7 @@ export function FocusedDecisionSummary({
     hasUnevaluableSelectedRules: buyBoxHasUnknownRules,
   });
   const readinessLabel = advocacyContractEnabled
-    ? (evidenceLedger?.readinessLabel ?? "Screening")
+    ? "Screening only"
     : legacyReadinessLabel;
   const rawDecisionLabel = !targetAdopted
     ? result.netCashFlow >= 0
@@ -510,6 +475,12 @@ export function FocusedDecisionSummary({
           reason:
             "The operating screen is complete. Apply at least one return criterion only if you want TrueCap to calculate a modeled price threshold.",
         }
+      : advocacyContractEnabled
+        ? {
+            label: "Review the operating screen",
+            reason:
+              "No investor criteria are attached, so TrueCap is showing the entered economics without inferring a Pursue or Pass decision.",
+          }
       : {
           label:
             nextVerification?.verifyAction ??
@@ -532,7 +503,9 @@ export function FocusedDecisionSummary({
             reason:
               "No qualifying Offer Ceiling was found under the current assumptions. Record the investment decision yourself.",
           }
-      : legacyReadinessLabel !== "Ready" && nextVerification
+      : !advocacyContractEnabled &&
+          legacyReadinessLabel !== "Ready" &&
+          nextVerification
         ? {
             label:
               nextVerification.verifyAction ??
@@ -563,7 +536,7 @@ export function FocusedDecisionSummary({
   });
   const targetBlocked = targetResolutionState !== "ready";
   const targetDraftBlockMessage =
-    "Apply or cancel the criteria edits before saving, sharing, or exporting.";
+    "Apply or cancel the criteria edits before taking another action.";
   const resultActionsBlocked = targetBlocked || targetDraftBlocksActions;
   const resultActionsBlockedReason = targetBlocked
     ? targetResolutionMessage
@@ -889,12 +862,22 @@ export function FocusedDecisionSummary({
               {!targetAdopted && canTunePriceCeiling && !targetBlocked ? (
                 <p>
                   Save reusable criteria in your{" "}
-                  <Link
-                    href="/settings#buy-boxes"
-                    className="font-semibold text-primary underline underline-offset-2"
-                  >
-                    Buy Box
-                  </Link>
+                  {targetDraftBlocksActions ? (
+                    <span
+                      aria-disabled="true"
+                      title={targetDraftBlockMessage}
+                      className="font-semibold text-muted-foreground"
+                    >
+                      Buy Box
+                    </span>
+                  ) : (
+                    <Link
+                      href="/settings#buy-boxes"
+                      className="font-semibold text-primary underline underline-offset-2"
+                    >
+                      Buy Box
+                    </Link>
+                  )}
                   .
                 </p>
               ) : null}
@@ -962,6 +945,8 @@ export function FocusedDecisionSummary({
           type="button"
           variant="outline"
           onClick={onEditAssumptions}
+          disabled={resultActionsBlocked}
+          title={resultActionsBlockedReason}
           aria-label="Edit assumptions"
           className="h-11 w-full gap-2 rounded-xl max-[250px]:h-auto max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight sm:w-auto"
         >
@@ -995,8 +980,12 @@ export function FocusedDecisionSummary({
           type="button"
           variant="outline"
           onClick={onAnalyzeAnotherLikeThis}
+          disabled={resultActionsBlocked}
           className="h-11 w-full gap-2 rounded-xl sm:w-auto"
-          title="Keep reusable financing and operating assumptions, then enter the next property"
+          title={
+            resultActionsBlockedReason ??
+            "Keep reusable financing and operating assumptions, then enter the next property"
+          }
         >
           <CopyPlus className="size-4" aria-hidden />
           Next deal · keep assumptions
@@ -1139,7 +1128,9 @@ export function FocusedDecisionSummary({
         ) : null}
       </div>
 
-      {nextVerification && !nextActionCoversVerification ? (
+      {!advocacyContractEnabled &&
+      nextVerification &&
+      !nextActionCoversVerification ? (
         <p
           className="mt-3 rounded-lg border border-border bg-muted/25 px-3 py-2 text-xs leading-relaxed text-foreground"
           data-result-next-verification=""
@@ -1230,7 +1221,7 @@ export function FocusedDecisionSummary({
           </div>
 
           <div
-            className={`grid grid-cols-1 gap-3 min-[280px]:grid-cols-2 ${advocacyContractEnabled ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}
+            className="grid grid-cols-1 gap-3 min-[280px]:grid-cols-2 lg:grid-cols-3"
           >
             <div className="rounded-xl border border-border bg-background p-3">
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
@@ -1264,37 +1255,21 @@ export function FocusedDecisionSummary({
                 </>
               ) : null}
             </div>
-            <div className="rounded-xl border border-border bg-background p-3">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                {advocacyContractEnabled
-                  ? "Evidence readiness"
-                  : "Assumption status"}
-              </p>
-              <p className="mt-1 text-sm font-extrabold text-foreground">
-                {readinessLabel}
-              </p>
-              {advocacyContractEnabled && evidenceLedger ? (
-                <p className="mt-1 text-[10px] text-muted-foreground">
-                  {evidenceLedger.evidenceVerifiedCount} of{" "}
-                  {evidenceLedger.materialInputCount} material inputs
-                  evidence-verified
+            {!advocacyContractEnabled ? (
+              <div className="rounded-xl border border-border bg-background p-3">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  Assumption status
                 </p>
-              ) : nextVerification ? (
-                <p className="mt-1 text-[10px] text-muted-foreground">
-                  Weakest material input: {nextVerification.label}
+                <p className="mt-1 text-sm font-extrabold text-foreground">
+                  {readinessLabel}
                 </p>
-              ) : null}
-              {advocacyContractEnabled &&
-              evidenceLedger?.highestImpactUnresolved ? (
-                <p className="mt-1 text-[10px] text-muted-foreground">
-                  {evidenceLedger.highestImpactUnresolved.materialityScore !=
-                  null
-                    ? "Highest-impact unresolved"
-                    : "Next unresolved input"}
-                  : {evidenceLedger.highestImpactUnresolved.label}
-                </p>
-              ) : null}
-            </div>
+                {nextVerification ? (
+                  <p className="mt-1 text-[10px] text-muted-foreground">
+                    Weakest material input: {nextVerification.label}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
             {advocacyContractEnabled ? (
               <div className="rounded-xl border border-border bg-background p-3">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
@@ -1381,12 +1356,29 @@ export function FocusedDecisionSummary({
             className="h-11 rounded-xl px-4"
           />
           {savedDealId ? (
-            <Button asChild variant="outline" className="h-11 gap-2 rounded-xl">
-              <Link href={`/dashboard/saved-analyses/${savedDealId}`}>
+            resultActionsBlocked ? (
+              <Button
+                type="button"
+                variant="outline"
+                disabled
+                title={resultActionsBlockedReason}
+                className="h-11 gap-2 rounded-xl"
+              >
                 <ListTodo className="size-4" aria-hidden />
                 Deal workspace
-              </Link>
-            </Button>
+              </Button>
+            ) : (
+              <Button
+                asChild
+                variant="outline"
+                className="h-11 gap-2 rounded-xl"
+              >
+                <Link href={`/dashboard/saved-analyses/${savedDealId}`}>
+                  <ListTodo className="size-4" aria-hidden />
+                  Deal workspace
+                </Link>
+              </Button>
+            )
           ) : null}
           {canCompareDeals ? (
             <Button
@@ -1423,6 +1415,8 @@ export function FocusedDecisionSummary({
               type="button"
               variant="outline"
               onClick={onUpgrade}
+              disabled={resultActionsBlocked}
+              title={resultActionsBlockedReason}
               className="min-h-11 gap-2 rounded-xl max-[250px]:w-full max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight"
             >
               <ListTodo className="size-4" aria-hidden />
@@ -1433,6 +1427,8 @@ export function FocusedDecisionSummary({
             type="button"
             variant="ghost"
             onClick={() => void onNewAnalysis()}
+            disabled={resultActionsBlocked}
+            title={resultActionsBlockedReason}
             className="min-h-11 gap-2 rounded-xl max-[250px]:w-full max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight"
           >
             <Sparkles className="size-4" aria-hidden />

@@ -53,6 +53,9 @@ describe("historical result reproducibility wiring", () => {
     const route = read("app/s/[token]/page.tsx");
     const legacyRoute = read("app/d/[encoded]/page.tsx");
     const view = read("components/investcalc/read-only-analysis-view.tsx");
+    const shareDialog = read(
+      "components/investcalc/share-link-button.tsx",
+    );
     expect(store).toContain("resultSnapshot: capturedResult");
     expect(store).toContain("offerCeilingExact");
     expect(route).toContain("recordedResult={false}");
@@ -60,6 +63,15 @@ describe("historical result reproducibility wiring", () => {
     expect(route).not.toContain("resolveSavedAnalysisResult");
     expect(legacyRoute).toContain("outputsRecomputed");
     expect(view).toContain("proResult && !recordedResult");
+    expect(shareDialog).toContain(
+      "The link captures the analysis inputs at this moment.",
+    );
+    expect(shareDialog).toContain(
+      "recalculates the results using the current",
+    );
+    expect(shareDialog).not.toContain(
+      "The link opens a snapshot of the analysis at this moment.",
+    );
   });
 
   it("replays a recorded analyzer solve and binds its PDF to the owned row", () => {
@@ -74,7 +86,13 @@ describe("historical result reproducibility wiring", () => {
     expect(page).toContain('bypassCache: mode !== "personal"');
     expect(page).toContain("...(savedExport ? { savedExport } : {})");
     expect(page).toContain(
+      "Your report was generated from the saved inputs using the current compatible underwriting methodology.",
+    );
+    expect(page).not.toContain(
       "Your report was exported from the recorded saved analysis.",
+    );
+    expect(page).toContain(
+      "Your report was generated from the latest live inputs using the current underwriting methodology.",
     );
     expect(dashboard).toContain("!recordedOfferCeiling &&");
     expect(dashboard).toContain(

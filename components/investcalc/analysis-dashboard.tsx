@@ -241,6 +241,8 @@ interface AnalysisDashboardProps {
   onAnalyzeAnotherLikeThis: () => void;
   /** Leave focused results mode and reveal the real assumption form. */
   onEditAssumptions: () => void;
+  /** Reveal and focus the exact material input selected from verification. */
+  onReviewVerificationInput?: (key: InputConfidenceFieldKey) => void;
   /** Synchronously persist the exact validated snapshot before auth navigation. */
   onPrepareAuthSave: (
     maoTarget?: MaoTarget,
@@ -337,6 +339,9 @@ interface AnalysisDashboardProps {
   adoptedDecisionBasis?: OfferCeilingDecisionBasis | null;
   /** Lifts explicit target edits so Save and Share preserve the same basis. */
   onMaoTargetChange?: (target: MaoTarget) => void;
+  /** Reports local, unapplied criteria edits to the page shell so reload and
+   *  global navigation cannot discard them silently. */
+  onTargetDraftBlockingChange?: (blocked: boolean) => void;
   /** Recorded solve captured atomically with a saved result. Null means this
    * is a live/current underwrite. A recorded uncaptured row suppresses the
    * current solver rather than mixing methodologies. */
@@ -463,6 +468,7 @@ export function AnalysisDashboard({
   onNewAnalysis,
   onAnalyzeAnotherLikeThis,
   onEditAssumptions,
+  onReviewVerificationInput,
   onPrepareAuthSave,
   onApplyComps,
   onApplyRehab,
@@ -505,6 +511,7 @@ export function AnalysisDashboard({
   maoTargetOverrideSource = null,
   adoptedDecisionBasis,
   onMaoTargetChange,
+  onTargetDraftBlockingChange,
   recordedOfferCeiling = null,
   advocacyContractEligible = false,
 }: AnalysisDashboardProps) {
@@ -703,6 +710,25 @@ export function AnalysisDashboard({
     : buyBoxResolutionUnavailable
       ? "Buy Box rules are unavailable. Save, share, and export remain available, but no Buy Box fit or Buy Box-backed Offer Ceiling is being claimed."
       : undefined;
+  const [targetDraftActionsBlocked, setTargetDraftActionsBlocked] =
+    useState(false);
+  useEffect(() => {
+    onTargetDraftBlockingChange?.(targetDraftActionsBlocked);
+  }, [onTargetDraftBlockingChange, targetDraftActionsBlocked]);
+  useEffect(
+    () => () => onTargetDraftBlockingChange?.(false),
+    [onTargetDraftBlockingChange],
+  );
+  const resultActionsBlocked =
+    targetActionsBlocked || targetDraftActionsBlocked;
+  const resultActionsBlockedReason = targetDraftActionsBlocked
+    ? "Apply or cancel your criteria edits before taking another action."
+    : targetActionsBlockedReason;
+  const verificationActionsBlocked =
+    resultActionsBlocked;
+  const verificationActionsBlockedReason = targetDraftActionsBlocked
+    ? "Apply or cancel your criteria edits before reviewing inputs or opening the checklist."
+    : targetActionsBlockedReason;
   const [compsQaData, setCompsQaData] = useState<PropertyEnrichment | null>(
     null,
   );
@@ -1114,7 +1140,7 @@ export function AnalysisDashboard({
   // The ONE save entry point - used by the toolbar button and the
   // hero-corner Save so the sign-in redirect + handler never diverge.
   const handleSaveClick = () => {
-    if (targetActionsBlocked) return;
+    if (resultActionsBlocked) return;
     if (!isAuthenticated) {
       goToLogin();
       return;
@@ -1165,11 +1191,11 @@ export function AnalysisDashboard({
     void onSaveDeal(adoptedMaoTarget, adoptedMaoTargetSource);
   };
   const handleExportPdf = (mode?: ReportMode) => {
-    if (targetActionsBlocked) return;
+    if (resultActionsBlocked) return;
     void onExportPdf(mode, adoptedMaoTarget, adoptedMaoTargetSource);
   };
   const handlePrepareOffer = () => {
-    if (targetActionsBlocked) return;
+    if (resultActionsBlocked) return;
     trackEvent("prepare_my_offer_clicked", {
       offer_ready_stage: inputConfidence?.stage ?? "unknown",
     });
@@ -1595,6 +1621,7 @@ export function AnalysisDashboard({
             onTuneTargetsOpened={() => {
               trackEvent("targets_opened", { placement: "decision_summary" });
             }}
+            onTargetDraftBlockingChange={setTargetDraftActionsBlocked}
             onEditAssumptions={onEditAssumptions}
             onSave={handleSaveClick}
             onCompareDeals={onCompareDeals}
@@ -1751,7 +1778,15 @@ export function AnalysisDashboard({
               : null
           }
           onEditAssumptions={onEditAssumptions}
+          onReviewInput={onReviewVerificationInput}
           onToggleVerified={onToggleInputVerified}
+          savedDealId={savedDealId}
+          isCurrentAnalysisSaved={isSaved}
+          onSaveForVerification={handleSaveClick}
+          isSaving={isSaving}
+          analyzerStrategyKey={activeStrategy?.key ?? "buy-hold"}
+          actionsBlocked={verificationActionsBlocked}
+          actionsBlockedReason={verificationActionsBlockedReason}
         />
       ) : null}
 
@@ -1762,6 +1797,8 @@ export function AnalysisDashboard({
             inputConfidence?.offerReadyRemaining.length ?? null
           }
           isPreparing={isExporting}
+          actionsBlocked={resultActionsBlocked}
+          actionsBlockedReason={resultActionsBlockedReason}
           onPrepare={handlePrepareOffer}
         />
       ) : null}

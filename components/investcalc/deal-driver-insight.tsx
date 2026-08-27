@@ -79,9 +79,10 @@ export function DealDriverInsight({
   const advice = DRIVER_ADVICE[top.key];
   const noun = advice?.noun ?? top.label.toLowerCase();
 
-  // Concrete rent reality-check vs the HUD area benchmark — only for the rent
-  // driver, single-family, and only when we actually fetched a benchmark for
-  // this address. Turns "verify your rent" into a ground-truth comparison.
+  // Concrete context vs the HUD area benchmark — only for the rent driver,
+  // single-family, and only when we actually fetched a benchmark for this
+  // address. HUD FMR is an area-level screening reference, never a substitute
+  // for current comparable leases or other property-specific evidence.
   const enteredRent =
     values.propertyType === "single-family" && typeof values.monthlyRent === "number"
       ? Math.round(values.monthlyRent)
@@ -116,19 +117,22 @@ export function DealDriverInsight({
               <>
                 Your <strong className="text-foreground">${enteredRent.toLocaleString()}</strong> rent is in
                 line with the <strong className="text-foreground">${market.toLocaleString()}</strong> HUD area
-                estimate — a good sign it&apos;s achievable.
+                benchmark. That is a screening reference, not property-specific evidence; verify it with current
+                comparable leases before relying on the result.
               </>
             ) : rentDiffPct > 0 ? (
               <>
                 Your <strong className="text-foreground">${enteredRent.toLocaleString()}</strong> rent is{" "}
                 <strong className="text-foreground">{rentDiffPct}% above</strong> the ${market.toLocaleString()}{" "}
-                HUD area estimate — verify it against local evidence, or the screening result weakens fast.
+                HUD area benchmark. Verify the entered rent with current comparable leases; HUD is not a
+                property-specific rent estimate.
               </>
             ) : (
               <>
                 Your <strong className="text-foreground">${enteredRent.toLocaleString()}</strong> rent is{" "}
                 <strong className="text-foreground">{Math.abs(rentDiffPct)}% below</strong> the $
-                {market.toLocaleString()} HUD area estimate — you may be leaving upside on the table.
+                {market.toLocaleString()} HUD area benchmark. Review the gap, but do not change the underwrite
+                without current comparable leases or other property-specific evidence.
               </>
             )}
           </p>

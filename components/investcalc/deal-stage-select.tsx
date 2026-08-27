@@ -26,6 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PIPELINE_STAGES, pipelineStageLabel, type PipelineStage } from "@/lib/pipeline";
+import { confirmPipelineStageChange } from "@/lib/pipeline-pass-confirmation";
 import { trackEvent } from "@/lib/analytics";
 
 export function DealStageSelect({
@@ -48,6 +49,15 @@ export function DealStageSelect({
   const handleChange = (value: string) => {
     const next = value as PipelineStage;
     if (next === stage) return;
+    if (
+      !confirmPipelineStageChange({
+        previousStage: stage,
+        nextStage: next,
+        confirm: (message) => window.confirm(message),
+      })
+    ) {
+      return;
+    }
     setDisplayStage(next);
     startSaving(async () => {
       try {
@@ -72,6 +82,7 @@ export function DealStageSelect({
             next === "passed" ? (
               <ToastAction
                 altText="Undo marking deal as Passed"
+                className="min-h-11"
                 onClick={() => {
                   setDisplayStage(stage);
                   startSaving(async () => {
@@ -134,7 +145,7 @@ export function DealStageSelect({
 
   return (
     <Select value={displayStage} onValueChange={handleChange} disabled={isSaving}>
-      <SelectTrigger aria-label="Pipeline stage" className="h-8 w-[150px] rounded-md text-xs">
+      <SelectTrigger aria-label="Pipeline stage" className="h-11 w-[150px] rounded-md text-xs">
         <SelectValue placeholder="Stage" />
       </SelectTrigger>
       <SelectContent>

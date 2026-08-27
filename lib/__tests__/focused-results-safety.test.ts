@@ -40,7 +40,7 @@ describe("focused decision safety", () => {
       'isSaving ? "Saving…" : isSaved ? "Saved" : "Save"',
     );
     expect(summary).toContain(
-      "Apply or cancel the criteria edits before saving, sharing, or exporting.",
+      "Apply or cancel the criteria edits before taking another action.",
     );
     expect(summary).not.toContain("Apply the example targets");
     expect(summary).not.toContain("Set targets first");

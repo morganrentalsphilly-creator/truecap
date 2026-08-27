@@ -94,16 +94,72 @@ describe("free users are never instructed to perform a Pro-only action", () => {
 
 describe("share links are revocable from the share dialog", () => {
   const shareButton = read("components/investcalc/share-link-button.tsx");
+  const shareActions = read("app/actions/public-shares.ts");
+  const shareStore = read("lib/public-share.ts");
 
-  it("lists the owner's links and wires the revoke action", () => {
-    expect(shareButton).toContain("listPublicSharesAction()");
-    expect(shareButton).toContain("revokePublicShareAction({ id })");
-    expect(shareButton).toContain("Your share links");
-    expect(shareButton).toContain('"Revoke"');
+  it("owner-scopes and paginates every safely described link", () => {
+    expect(shareButton).toContain(
+      "listPublicSharesAction({ offset: 0 })",
+    );
+    expect(shareButton).toContain("Manage all share links");
+    expect(shareButton).toContain("s.propertyLabel");
+    expect(shareButton).toContain(
+      "savedDealId && s.dealId === savedDealId",
+    );
+    expect(shareButton).toContain('"another saved deal"');
+    expect(shareButton).toContain('"unattached"');
+    expect(shareActions).toContain(
+      ".object({ offset: z.number().int().min(0) })",
+    );
+    expect(shareActions).toContain('.eq("owner_id", user.id)');
+    expect(shareActions).toContain(".range(parsed.data.offset");
+    expect(shareActions).toContain("nextOffset:");
+    expect(shareActions).toContain("audience:");
+    expect(shareActions).toContain("addressVisibility:");
+    expect(shareActions).toContain("propertyLabel:");
+    expect(shareButton).toContain("SHARE_AUDIENCE_LABEL[s.audience]");
+    expect(shareButton).toContain('timeStyle: "medium"');
+    expect(shareButton).toContain("Show all ${listedShares.length} links");
+    expect(shareButton).toContain("showAllShares");
+    expect(shareButton).toContain("Load older links");
+    expect(shareButton).toContain("loadOlderShares");
+    expect(shareButton).toContain('sharesListState === "error"');
+    expect(shareButton).toContain("Existing links could not be loaded");
+    expect(shareButton).toContain("Retry loading links");
+    expect(shareButton).toContain('role="alert"');
   });
 
-  it("the dialog no longer promises revocation lives somewhere else", () => {
-    expect(shareButton).not.toContain("can be\n                revoked there");
+  it("requires a full-size confirmation and revokes the exact nullable scope", () => {
+    expect(shareButton).toContain(
+      "revokePublicShareAction({ id, dealId })",
+    );
+    expect(shareButton).toContain("Revoke this link?");
+    expect(shareButton).toContain("It will stop opening immediately");
+    expect(shareButton).toContain("Yes, revoke link");
+    expect(shareButton).toContain('className="h-auto min-h-11');
+    expect(shareActions).toContain(
+      '.object({ id: z.string().uuid(), dealId: z.string().uuid().nullable() })',
+    );
+    expect(shareActions).toContain('.eq("id", parsed.data.id)');
+    expect(shareActions).toContain('.eq("owner_id", user.id)');
+  });
+
+  it("keeps newly minted unsaved or dirty-analysis links revocable", () => {
+    expect(shareStore).toContain('.select("id")');
+    expect(shareStore).toContain("id: String(inserted.id)");
+    expect(shareActions).toContain("id: minted.id");
+    expect(shareActions).toContain("dealId: minted.dealId");
+    expect(shareButton).toContain(
+      "setCreatedShare({ id: opaque.id, dealId: opaque.dealId })",
+    );
+    expect(shareButton).toContain("Revoke this link");
+    expect(shareButton).toContain("createdShare.dealId");
+    expect(shareButton).toContain(
+      "This dialog manages share links across your account",
+    );
+    expect(shareButton).toContain("setShareUrl(opaque.url)");
+    expect(shareButton).toContain("navigator.clipboard.writeText(shareUrl)");
+    expect(shareButton).toContain("Links also expire automatically.");
   });
 });
 

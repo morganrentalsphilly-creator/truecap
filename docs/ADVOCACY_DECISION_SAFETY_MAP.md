@@ -153,6 +153,12 @@ Skipped/no-profile results are labeled **TrueCap screening defaults**, never
   authority marker can earn evidence-attached/cited or third-party-verified
   status. No current analyzer caller supplies that authority, so “Evidence
   complete” is intentionally unreachable in the cohort today.
+- Because that server evidence path does not yet exist, the cohort UI does not
+  present an Evidence Readiness score, a completion meter, or self-confirmation
+  controls. It presents a compact **Verify before relying on this deal** plan:
+  the next material input, its current source, a direct assumptions action, and
+  a route to the saved deal's due-diligence checklist. The full policy ledger
+  remains a compatibility model, not a customer task tracker.
 - Missing/default provenance, stale data, geography mismatch, unit/property
   mismatch, conflicts, redistribution restrictions, and provider failure block
   evidence verification.
@@ -168,9 +174,12 @@ Skipped/no-profile results are labeled **TrueCap screening defaults**, never
 - `lib/next-action.ts` is the shared global presentation helper. Phase 5.9
   replaces offer directives with review/verification wording for every cohort;
   this copy cleanup is intentionally outside the advocacy rollout flag.
-- The flagged surface uses `buildSafeNextAction()` instead. Before evidence
-  completion it can resolve target context or verify a material input. After
-  evidence completion it can record the user decision or share for review.
+- The focused result keeps the acquisition question first: target/rule fit and
+  the binding price constraint determine its **Best next step**. Verification
+  is a separate compact plan immediately below the result, so an impossible
+  evidence-completion state cannot block the investor from understanding the
+  economics. `buildSafeNextAction()` remains a pure policy helper for a future
+  server-backed evidence workflow; it is not a production UI authority today.
 - It never instructs the user to make/submit an offer, calls the property a
   good investment, or states a safely payable price.
 

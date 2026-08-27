@@ -73,10 +73,25 @@ describe("archived lifecycle server boundaries", () => {
   it("rejects archived reopen/update races while allowing an explicit duplicate source", () => {
     const actions = read("app/actions/saved-analyses.ts");
     const opener = read("components/investcalc/open-saved-deal-in-analyzer.tsx");
+    const saveAction = actions.slice(
+      actions.indexOf("export async function saveDealAction"),
+      actions.indexOf("export async function getSavedDealForEditingAction"),
+    );
+    const saveUpdateBoundary = saveAction.slice(
+      saveAction.indexOf(
+        '.eq("underwriting_revision", expectedUnderwritingRevision)',
+      ),
+      saveAction.indexOf("const nextUnderwritingRevision"),
+    );
 
     expect(actions).toContain('code: "DEAL_ARCHIVED"');
     expect(actions).toContain("options?.allowArchivedSource !== true");
-    expect(actions).toContain('.eq("is_archived", false)');
+    expect(saveUpdateBoundary).toContain('.eq("is_archived", false)');
+    expect(saveUpdateBoundary).toContain(
+      '.or("pipeline_stage.is.null,pipeline_stage.neq.passed")',
+    );
+    expect(saveUpdateBoundary).toContain('code: "DEAL_DELETED"');
+    expect(saveUpdateBoundary).toContain("isSavedDealArchived(current");
     expect(opener).toContain("allowArchivedSource: true");
   });
 

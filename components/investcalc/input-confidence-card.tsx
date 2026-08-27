@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Link from "next/link";
 import {
   Check,
   ChevronDown,
   CircleAlert,
+  ClipboardCheck,
   Database,
   ShieldCheck,
 } from "lucide-react";
@@ -17,6 +19,7 @@ import {
 } from "@/lib/input-confidence";
 import { formatAssumptionLedgerValue } from "@/lib/assumption-ledger-value";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
+import type { AnalyzerStrategyKey } from "@/lib/analyzer-strategy-persistence";
 import {
   buildAssumptionLedger,
   type AssumptionConfirmationType,
@@ -32,7 +35,16 @@ type Props = {
   showOfferReadyStatus?: boolean;
   advocacyContractEnabled?: boolean;
   onEditAssumptions: () => void;
+  onReviewInput?: (key: InputConfidenceFieldKey) => void;
   onToggleVerified: (key: InputConfidenceFieldKey, verified: boolean) => void;
+  savedDealId?: string | null;
+  /** True only when the displayed inputs match the persisted saved row. */
+  isCurrentAnalysisSaved?: boolean;
+  onSaveForVerification?: () => void;
+  isSaving?: boolean;
+  analyzerStrategyKey?: AnalyzerStrategyKey;
+  actionsBlocked?: boolean;
+  actionsBlockedReason?: string;
 };
 
 const RISK_STYLE = {
@@ -58,9 +70,10 @@ const CONFIRMATION_LABEL: Record<AssumptionConfirmationType, string> = {
 };
 
 /**
- * Decision-trust summary. The advocacy cohort uses categorical evidence
- * readiness and keeps browser self-confirmation separate from evidence. The
- * legacy Input Confidence score remains available only outside that cohort.
+ * Decision-trust summary. The advocacy cohort gets a task-oriented verification
+ * plan because the current product has no owner-scoped evidence ingestion path;
+ * it must not imply that browser self-confirmation can complete evidence review.
+ * The legacy Input Confidence score remains available only outside that cohort.
  */
 export function InputConfidenceCard({
   confidence,
@@ -69,7 +82,15 @@ export function InputConfidenceCard({
   showOfferReadyStatus = true,
   advocacyContractEnabled = false,
   onEditAssumptions,
+  onReviewInput,
   onToggleVerified,
+  savedDealId = null,
+  isCurrentAnalysisSaved = false,
+  onSaveForVerification,
+  isSaving = false,
+  analyzerStrategyKey = "buy-hold",
+  actionsBlocked = false,
+  actionsBlockedReason,
 }: Props) {
   const cardRef = useRef<HTMLElement>(null);
   const pendingQueueFocusIndex = useRef<number | null>(null);
@@ -94,6 +115,27 @@ export function InputConfidenceCard({
       }));
   const verified = new Set(confidence.verifiedFields);
   const ledgerByKey = new Map(ledger.items.map((item) => [item.key, item]));
+  const confidenceByKey = new Map(
+    confidence.fields.map((item) => [item.key, item]),
+  );
+  const materialVerificationItems = ledger.items
+    .filter((item) => item.material && !item.evidenceVerified)
+    .sort(
+      (a, b) =>
+        (b.materialityScore ?? -1) - (a.materialityScore ?? -1) ||
+        b.weight - a.weight,
+    );
+  const nextMaterialVerification = materialVerificationItems[0] ?? null;
+  const verificationLabel = (item: (typeof ledger.items)[number]) => {
+    if (item.key !== "rent") return item.label;
+    if (analyzerStrategyKey === "short-term") {
+      return "Nightly rate and occupancy";
+    }
+    if (values.propertyType !== "single-family") return "All unit rents";
+    return item.label;
+  };
+  const verificationInstruction = (item: (typeof ledger.items)[number]) =>
+    `Check ${verificationLabel(item).toLowerCase()} and update it if needed`;
   const statusHeadline = advocacyContractEnabled
     ? ledger.readinessLabel
     : showOfferReadyStatus
@@ -116,6 +158,187 @@ export function InputConfidenceCard({
     if (nextAction) nextAction.focus();
     else cardRef.current?.focus({ preventScroll: true });
   }, [confidence]);
+
+  if (advocacyContractEnabled) {
+    const nextField = nextMaterialVerification
+      ? confidenceByKey.get(nextMaterialVerification.key)
+      : null;
+    const verificationComplete = ledger.readiness === "evidence-complete";
+
+    return (
+      <section
+        ref={cardRef}
+        tabIndex={-1}
+        aria-labelledby="input-confidence-title"
+        data-verification-plan=""
+        className="rounded-2xl border border-border bg-card p-4 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:p-5"
+      >
+        <div className="flex items-start gap-3">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <ClipboardCheck aria-hidden className="size-5" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <h2
+              id="input-confidence-title"
+              className="text-base font-extrabold text-foreground"
+            >
+              Verify before relying on this deal
+            </h2>
+            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+              {verificationComplete
+                ? "Property-specific support is recorded for the material assumptions. Recheck anything that changes."
+                : "The math is ready for screening. Before you act, replace estimates with property facts such as rent comps, a lender quote, tax records, insurance, and condition findings."}
+            </p>
+          </div>
+        </div>
+
+        {nextMaterialVerification && nextField ? (
+          <div className="mt-4 rounded-xl border border-amber-500/25 bg-amber-500/5 p-3">
+            <p className="text-[10px] font-extrabold uppercase tracking-widest text-amber-800">
+              Check before relying
+            </p>
+            <p className="mt-1 text-sm font-extrabold text-foreground">
+              {verificationInstruction(nextMaterialVerification)}
+            </p>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+              {verificationLabel(nextMaterialVerification)}: {formatAssumptionLedgerValue(
+                nextMaterialVerification.key,
+                values,
+              )}
+              . Current basis: {nextField.sourceLabel}.
+            </p>
+          </div>
+        ) : null}
+
+        {actionsBlocked && actionsBlockedReason ? (
+          <p
+            role="status"
+            className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-xs font-medium leading-relaxed text-amber-900"
+          >
+            {actionsBlockedReason}
+          </p>
+        ) : null}
+
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+          <Button
+            type="button"
+            onClick={() => {
+              if (nextMaterialVerification && onReviewInput) {
+                onReviewInput(nextMaterialVerification.key);
+                return;
+              }
+              onEditAssumptions();
+            }}
+            disabled={actionsBlocked}
+            title={actionsBlocked ? actionsBlockedReason : undefined}
+            className="min-h-11 rounded-xl"
+          >
+            {nextMaterialVerification
+              ? `Review ${verificationLabel(nextMaterialVerification).toLowerCase()}`
+              : "Review assumptions"}
+          </Button>
+          {savedDealId && isCurrentAnalysisSaved ? (
+            actionsBlocked ? (
+              <Button
+                type="button"
+                variant="outline"
+                disabled
+                title={actionsBlockedReason}
+                className="min-h-11 rounded-xl"
+              >
+                Open deal checklist
+              </Button>
+            ) : (
+              <Button
+                asChild
+                variant="outline"
+                className="min-h-11 rounded-xl"
+              >
+                <Link
+                  href={`/dashboard/saved-analyses/${savedDealId}#deal-due-diligence`}
+                >
+                  Open deal checklist
+                </Link>
+              </Button>
+            )
+          ) : onSaveForVerification ? (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onSaveForVerification}
+              disabled={isSaving || actionsBlocked}
+              title={actionsBlocked ? actionsBlockedReason : undefined}
+              className="min-h-11 rounded-xl"
+            >
+              {isSaving ? "Saving…" : "Save to use checklist"}
+            </Button>
+          ) : null}
+        </div>
+
+        {materialVerificationItems.length > 0 ? (
+          <details className="group mt-4 border-t border-border pt-2">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-lg px-1 text-sm font-semibold text-foreground marker:content-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              See every material assumption
+              <ChevronDown
+                aria-hidden
+                className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
+              />
+            </summary>
+            <ul
+              className="mt-2 divide-y divide-border rounded-xl border border-border"
+              aria-label="Material inputs to verify"
+            >
+              {materialVerificationItems.map((item) => {
+                const field = confidenceByKey.get(item.key);
+                return (
+                  <li
+                    key={item.key}
+                    className="grid gap-2 p-3 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center sm:gap-x-4"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-foreground">
+                        {verificationLabel(item)}
+                      </p>
+                      <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+                        {verificationInstruction(item)}
+                      </p>
+                    </div>
+                    <div className="min-w-0 text-left sm:text-right">
+                      <p className="font-mono text-sm font-bold tabular-nums text-foreground">
+                        {formatAssumptionLedgerValue(item.key, values)}
+                      </p>
+                      <p className="mt-0.5 break-words text-xs text-muted-foreground">
+                        {field?.sourceLabel ?? "Source needs review"}
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      aria-label={`Review ${verificationLabel(item).toLowerCase()}`}
+                      disabled={actionsBlocked}
+                      title={actionsBlocked ? actionsBlockedReason : undefined}
+                      onClick={() =>
+                        onReviewInput ? onReviewInput(item.key) : onEditAssumptions()
+                      }
+                      className="min-h-11 justify-self-start rounded-lg px-3 sm:justify-self-end"
+                    >
+                      Review
+                    </Button>
+                  </li>
+                );
+              })}
+            </ul>
+          </details>
+        ) : null}
+
+        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+          The saved checklist tracks your follow-up work; it does not silently
+          change the underwriting. Return to this analysis and enter confirmed
+          amounts before relying on the result.
+        </p>
+      </section>
+    );
+  }
 
   return (
     <section
