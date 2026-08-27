@@ -546,7 +546,7 @@ function ComparePickerScreen({
                   : "Save a couple of deals first, then come back to compare them."}
               </p>
               <Button className="mt-4 min-h-11 rounded-full" asChild>
-                <Link href="/dashboard/new">Analyze a property</Link>
+                <Link href="/dashboard/new?fresh=1">Analyze a property</Link>
               </Button>
             </div>
           )}

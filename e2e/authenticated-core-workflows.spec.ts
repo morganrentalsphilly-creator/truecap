@@ -94,6 +94,37 @@ test("mobile investor can set criteria, calculate once, and start a fresh analys
   await expect(summary.getByText(/set targets first/i)).toHaveCount(0);
   await expectNoHorizontalOverflow(page);
 
+  // Spreadsheet-parity loop: changing one assumption keeps the decision
+  // feedback visible and clearly unsaved. An incomplete edit must retain the
+  // last complete metrics with an explicit stale label, never a blank screen.
+  await summary
+    .getByRole("button", { name: "Edit assumptions", exact: true })
+    .click();
+  const liveEditReadout = page.locator('[data-edit-live-readout="true"]');
+  await expect(liveEditReadout).toBeVisible();
+  await expect(liveEditReadout).toContainText("Live · unsaved");
+  const cashFlowReadout = liveEditReadout
+    .locator("div")
+    .filter({ hasText: /^Cash flow/ })
+    .first();
+  const originalCashFlow = await cashFlowReadout.textContent();
+  await form
+    .getByLabel("Expected gross monthly rent", { exact: true })
+    .fill("2700");
+  await expect.poll(() => cashFlowReadout.textContent()).not.toBe(originalCashFlow);
+  await form
+    .getByLabel("Expected gross monthly rent", { exact: true })
+    .fill("");
+  await expect(liveEditReadout).toContainText(
+    "Last complete result · fix the highlighted input",
+  );
+  await form
+    .getByLabel("Expected gross monthly rent", { exact: true })
+    .fill("2500");
+  await expect(liveEditReadout).toContainText("Live · unsaved");
+  await page.getByRole("button", { name: "Back to result", exact: true }).click();
+  await expect(summary).toBeVisible();
+
   // On the already-mounted /dashboard/new route, the compact header control
   // must reset the calculator rather than becoming a same-route no-op.
   const headerNewAnalysis = page
@@ -130,6 +161,49 @@ test("mobile investor can set criteria, calculate once, and start a fresh analys
   await expect(drawer).toBeHidden();
   await expect(address).toHaveValue("");
   await expectNoHorizontalOverflow(page);
+
+  // Cross-route shell navigation remounts the analyzer, so it cannot rely on
+  // the same-route reset event above. Leave a real autosaved draft behind,
+  // move to My Deals, and prove ?fresh=1 wins over that stale draft exactly
+  // once and is removed before a future save or refresh can repeat it.
+  await address.fill("909 Cross Route Regression Ave, Philadelphia, PA 19125");
+  await form.getByLabel("Price to analyze", { exact: true }).fill("225000");
+  await form
+    .getByLabel("Expected gross monthly rent", { exact: true })
+    .fill("2400");
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        window.localStorage.getItem("truecap_calc_form_draft_v1"),
+      ),
+    )
+    .not.toBeNull();
+
+  await page.goto("/dashboard/saved-analyses", {
+    waitUntil: "domcontentloaded",
+  });
+  const crossRouteNewAnalysis = page
+    .locator("header")
+    .getByRole("link", { name: "New analysis", exact: true });
+  await expect(crossRouteNewAnalysis).toBeVisible();
+  await crossRouteNewAnalysis.click();
+  await expect(page).toHaveURL((url) =>
+    url.pathname === "/dashboard/new" && !url.searchParams.has("fresh"),
+  );
+  const remountedForm = page.locator('form[data-calc-form="true"]');
+  await expect(remountedForm).toHaveAttribute("data-calculator-ready", "true", {
+    timeout: 20_000,
+  });
+  await expect(
+    remountedForm.getByLabel("Property Address", { exact: true }),
+  ).toHaveValue("");
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        window.localStorage.getItem("truecap_calc_form_draft_v1"),
+      ),
+    )
+    .toBeNull();
 });
 
 test("shortlist preview repairs mixed pasted rows, ranks them, and survives refresh", async ({
@@ -265,6 +339,50 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
         .first(),
     ).toBeVisible();
     await expectNoHorizontalOverflow(page);
+
+    // Mobile repeated-use safety: selection exposes the high-frequency
+    // Compare/Clear actions without putting Archive/Delete one tap away.
+    await page.goto("/dashboard/saved-analyses", {
+      waitUntil: "domcontentloaded",
+    });
+    const addressLine = address.split(",")[0] ?? address;
+    await page.getByLabel("Search your deals by address").fill(addressLine);
+    const selectedDeal = page
+      .getByLabel(`Select analysis ${addressLine}`, { exact: true })
+      .filter({ visible: true })
+      .first();
+    await selectedDeal.check();
+    const selectedActions = page.getByRole("region", {
+      name: "Selected deal actions",
+    });
+    await expect(selectedActions).toBeVisible();
+    for (const name of ["Compare", "Clear", "Manage selected deals"]) {
+      const action = selectedActions.getByRole("button", {
+        name,
+        exact: true,
+      });
+      await expect(action).toBeVisible();
+      const box = await action.boundingBox();
+      expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
+    }
+    await expect(
+      selectedActions.getByRole("button", { name: /archive|delete/i }),
+    ).toHaveCount(0);
+    await selectedActions
+      .getByRole("button", { name: "Manage selected deals", exact: true })
+      .click();
+    await expect(
+      page.getByRole("menuitem", { name: "Archive selected", exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("menuitem", { name: "Delete selected", exact: true }),
+    ).toBeVisible();
+    await page.keyboard.press("Escape");
+    await selectedActions
+      .getByRole("button", { name: "Clear", exact: true })
+      .click();
+    await expect(selectedActions).toBeHidden();
+    await expect(selectedDeal).not.toBeChecked();
 
     await page.goto(`/dashboard/saved-analyses/${baseDealId}`, {
       waitUntil: "domcontentloaded",

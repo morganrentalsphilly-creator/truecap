@@ -11,6 +11,7 @@
 
 import { cn } from "@/lib/utils";
 import { GlossaryTip } from "./glossary-tip";
+import { useEffect, useState, type ReactNode } from "react";
 
 /** The lightweight pre-run verdict snapshot computed by the form watcher. */
 export type LivePreviewSnapshot = {
@@ -41,13 +42,33 @@ type Props = {
   livePreviewMsg: string;
   /** Three high-impact assumptions shown as a concise preview summary. */
   assumptionBasis?: string;
+  /** Desktop cockpit action placed directly beneath the live preview. */
+  desktopAction?: ReactNode;
 };
+
+function DesktopAction({ children }: { children: ReactNode }) {
+  const [submitInView, setSubmitInView] = useState(false);
+
+  useEffect(() => {
+    const submit = document.querySelector('[data-inform-submit="true"]');
+    if (!submit) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      setSubmitInView(entry?.isIntersecting ?? false);
+    });
+    observer.observe(submit);
+    return () => observer.disconnect();
+  }, []);
+
+  if (submitInView) return null;
+  return <div className="mt-3 hidden lg:block">{children}</div>;
+}
 
 export function LiveVerdictPanel({
   active,
   livePreview,
   livePreviewMsg,
   assumptionBasis,
+  desktopAction,
 }: Props) {
   return (
     <>
@@ -212,6 +233,9 @@ export function LiveVerdictPanel({
             illustrative tax impact &amp; modeled exits.
           </p>
         </div>
+      ) : null}
+      {active && desktopAction ? (
+        <DesktopAction>{desktopAction}</DesktopAction>
       ) : null}
     </>
   );

@@ -19,7 +19,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { StatCard } from "@/components/dashboard/StatCard";
-import { REVEAL_DEAL_EVENT, TopDeals, type DashboardTopDeal } from "@/components/dashboard/TopDeals";
+import {
+  REVEAL_DEAL_EVENT,
+  TopDeals,
+  type DashboardTopDeal,
+} from "@/components/dashboard/TopDeals";
 import { AIInsights } from "@/components/dashboard/AIInsights";
 import { dealAnchorSelector, pickRenderedAnchor } from "@/lib/deal-anchor";
 
@@ -28,22 +32,34 @@ import { dealAnchorSelector, pickRenderedAnchor } from "@/lib/deal-anchor";
 // empty-portfolio users never download it at all, and everyone else
 // gets the headline numbers painted before the charts hydrate.
 const ChartSkeleton = ({ heightClass }: { heightClass: string }) => (
-  <div className={`${heightClass} animate-pulse rounded-2xl border border-border bg-card`} />
+  <div
+    className={`${heightClass} animate-pulse rounded-2xl border border-border bg-card`}
+  />
 );
 const PortfolioChart = dynamic(
-  () => import("@/components/dashboard/PortfolioChart").then((m) => m.PortfolioChart),
-  { ssr: false, loading: () => <ChartSkeleton heightClass="h-[320px]" /> }
+  () =>
+    import("@/components/dashboard/PortfolioChart").then(
+      (m) => m.PortfolioChart,
+    ),
+  { ssr: false, loading: () => <ChartSkeleton heightClass="h-[320px]" /> },
 );
 const RiskReturn = dynamic(
   () => import("@/components/dashboard/RiskReturn").then((m) => m.RiskReturn),
-  { ssr: false, loading: () => <ChartSkeleton heightClass="h-[320px]" /> }
+  { ssr: false, loading: () => <ChartSkeleton heightClass="h-[320px]" /> },
 );
 const OwnedEquityChart = dynamic(
-  () => import("@/components/dashboard/owned-equity-chart").then((m) => m.OwnedEquityChart),
-  { ssr: false, loading: () => <ChartSkeleton heightClass="h-[380px]" /> }
+  () =>
+    import("@/components/dashboard/owned-equity-chart").then(
+      (m) => m.OwnedEquityChart,
+    ),
+  { ssr: false, loading: () => <ChartSkeleton heightClass="h-[380px]" /> },
 );
 import type { DashboardDeal } from "@/lib/dashboard-deal-mapping";
-import { mapRiskLevelToRisk, resolveReturnMetric, resolveRiskMetric } from "@/lib/dashboard-risk-return";
+import {
+  mapRiskLevelToRisk,
+  resolveReturnMetric,
+  resolveRiskMetric,
+} from "@/lib/dashboard-risk-return";
 import {
   EXTREME_ROI_CUMULATIVE_PCT,
   formatRoiHeadline,
@@ -59,11 +75,19 @@ import { PIPELINE_STAGES, type PipelineStage } from "@/lib/pipeline";
 export type { DashboardDeal } from "@/lib/dashboard-deal-mapping";
 import { RateWatchStrip } from "@/components/dashboard/RateWatchStrip";
 import type { RateWatchSummary } from "@/lib/rate-watch";
-import { DueThisWeekCard, type AgingDealRow, type DueThisWeekDeal } from "@/components/dashboard/due-this-week-card";
+import {
+  DueThisWeekCard,
+  type AgingDealRow,
+  type DueThisWeekDeal,
+} from "@/components/dashboard/due-this-week-card";
 import { BuyBoxNudge } from "@/components/dashboard/buy-box-nudge";
 import type { OwnedEquitySeriesPoint } from "@/lib/owned-equity-series";
 import type { BuyBoxFitSummary } from "@/lib/buy-box";
 import { applicableCashOnCashValue } from "@/lib/cash-on-cash-applicability";
+import {
+  hasCompleteMetricCoverage,
+  summarizeKnownMetric,
+} from "@/lib/portfolio-metric-coverage";
 
 export type DashboardHomeData = {
   user: {
@@ -97,6 +121,8 @@ export type DashboardHomeData = {
     weightedCap: number | null;
     activeCount: number;
     totalCount: number;
+    cashFlowSampleCount: number;
+    capRateSampleCount: number;
     /**
      * Decision Center / KPI winners computed server-side over the FULL
      * active set (NT-4) — scalars only, never the row set. Without these a
@@ -105,10 +131,17 @@ export type DashboardHomeData = {
      * getDecisionCenter/getPortfolioKpis fall back to the sample.
      */
     winners?: {
-      bestByScore: { id: string; address: string; score: number; recommendation: string;
+      bestByScore: {
+        id: string;
+        address: string;
+        score: number;
+        recommendation: string;
       } | null;
       /** Most negative cash-flow deal; null = a TRUE all-clear over the full set. */
-      worstNegative: { id: string; address: string; cashFlowMonthly: number;
+      worstNegative: {
+        id: string;
+        address: string;
+        cashFlowMonthly: number;
       } | null;
       bestRoi: { id: string; address: string; roiPct: number } | null;
       /** Cash-flow-negative deal count over the full active set. */
@@ -189,7 +222,10 @@ export type DashboardHomeData = {
   } | null;
 };
 
-function formatCurrency(value: number | null | undefined, compact = false): string {
+function formatCurrency(
+  value: number | null | undefined,
+  compact = false,
+): string {
   if (value == null || Number.isNaN(value)) return "-";
   return new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -218,7 +254,10 @@ function formatPercent(value: number | null | undefined): string {
 function bestUpsideSubline(roiPct: number): { text: string; title?: string } {
   const headline = formatRoiHeadline(roiPct, { decimals: 1, compact: true });
   return headline.extreme
-    ? { text: `${headline.text} 10-yr ROI — verify assumptions`, title: headline.title }
+    ? {
+        text: `${headline.text} 10-yr ROI — verify assumptions`,
+        title: headline.title,
+      }
     : { text: `${headline.text} 10-yr ROI · verify assumptions` };
 }
 
@@ -236,9 +275,11 @@ function getTopDeals(data: DashboardHomeData): DashboardTopDeal[] {
       name: deal.address,
       address: deal.propertyTypeLabel,
       type: deal.propertyTypeLabel,
-      capRate: deal.capRatePct == null ? null : Number(deal.capRatePct.toFixed(1)),
+      capRate:
+        deal.capRatePct == null ? null : Number(deal.capRatePct.toFixed(1)),
       coc: coc == null ? null : Number(coc.toFixed(1)),
-      cashFlow: deal.cashFlowMonthly == null ? null : Math.round(deal.cashFlowMonthly),
+      cashFlow:
+        deal.cashFlowMonthly == null ? null : Math.round(deal.cashFlowMonthly),
       price: deal.purchasePrice == null ? null : Math.round(deal.purchasePrice),
       score: deal.score == null ? null : Math.round(deal.score),
       signal: deal.recommendation,
@@ -261,7 +302,8 @@ function getRiskReturn(data: DashboardHomeData) {
   // the chart can toggle the X axis client-side. Cash purchases have no DSCR
   // (N/A, not 0) — null keeps them off the DSCR axis; the chart notes them.
   const chartDeals = data.allDeals.map((deal) => {
-    const isCashPurchase = deal.monthlyPayment != null && deal.monthlyPayment <= 0;
+    const isCashPurchase =
+      deal.monthlyPayment != null && deal.monthlyPayment <= 0;
     const coc = applicableCashOnCashValue(deal.cocReturnPct, deal.cashToClose);
     return {
       dealId: deal.id,
@@ -274,10 +316,18 @@ function getRiskReturn(data: DashboardHomeData) {
       // Dot size encodes cash to close (capital required) — the spec's
       // "dot size = cash needed". Falls back to ~25% of price when the
       // cash figure is unknown so the point still renders sensibly.
-      size: Math.max(80, Math.round((deal.cashToClose ?? (deal.purchasePrice ?? 0) * 0.25) / 500)),
+      size: Math.max(
+        80,
+        Math.round(
+          (deal.cashToClose ?? (deal.purchasePrice ?? 0) * 0.25) / 500,
+        ),
+      ),
       cashNeeded: deal.cashToClose ?? undefined,
       score: deal.score ?? undefined,
-      cashFlow: deal.cashFlowMonthly == null ? undefined : Math.round(deal.cashFlowMonthly),
+      cashFlow:
+        deal.cashFlowMonthly == null
+          ? undefined
+          : Math.round(deal.cashFlowMonthly),
     };
   });
 
@@ -285,7 +335,8 @@ function getRiskReturn(data: DashboardHomeData) {
     .map((deal) => {
       const returnValue = resolveReturnMetric(deal).value;
       const riskValue = resolveRiskMetric(deal).value;
-      if (returnValue == null || riskValue == null || riskValue === 0) return null;
+      if (returnValue == null || riskValue == null || riskValue === 0)
+        return null;
       return { deal, value: returnValue / riskValue };
     })
     .filter((item): item is NonNullable<typeof item> => Boolean(item))
@@ -293,7 +344,10 @@ function getRiskReturn(data: DashboardHomeData) {
 
   const highestReturn = [...data.allDeals]
     .map((deal) => ({ deal, value: resolveReturnMetric(deal).value }))
-    .filter((item): item is { deal: DashboardDeal; value: number } => item.value != null)
+    .filter(
+      (item): item is { deal: DashboardDeal; value: number } =>
+        item.value != null,
+    )
     .sort((a, b) => b.value - a.value)[0]?.deal;
 
   // For "Safest deal" ranking, treat cash purchases (monthlyPayment <= 0)
@@ -302,7 +356,8 @@ function getRiskReturn(data: DashboardHomeData) {
   // them to Infinity in the comparator so they win over any financed deal.
   const safest = [...data.allDeals]
     .map((deal) => {
-      const isCashPurchase = deal.monthlyPayment != null && deal.monthlyPayment <= 0;
+      const isCashPurchase =
+        deal.monthlyPayment != null && deal.monthlyPayment <= 0;
       return {
         deal,
         dscr: isCashPurchase ? Infinity : deal.dscr,
@@ -341,13 +396,17 @@ function getDealComparison(data: DashboardHomeData) {
   // X-axis tick. Append a counter so each deal keeps a distinct tick.
   const seen = new Map<string, number>();
   return data.allDeals.map((deal) => {
-    const base = deal.address.length > 18 ? `${deal.address.slice(0, 18)}...` : deal.address;
+    const base =
+      deal.address.length > 18
+        ? `${deal.address.slice(0, 18)}...`
+        : deal.address;
     const n = (seen.get(base) ?? 0) + 1;
     seen.set(base, n);
     return {
       name: n > 1 ? `${base} (${n})` : base,
       score: deal.score == null ? null : Math.round(deal.score),
-      cashFlow: deal.cashFlowMonthly == null ? null : Math.round(deal.cashFlowMonthly),
+      cashFlow:
+        deal.cashFlowMonthly == null ? null : Math.round(deal.cashFlowMonthly),
       roi: deal.roiPct == null ? null : Number(deal.roiPct.toFixed(1)),
     };
   });
@@ -355,7 +414,10 @@ function getDealComparison(data: DashboardHomeData) {
 
 function getDealAnchorId(deal: DashboardDeal | undefined, index = 0) {
   if (!deal) return "";
-  return (deal.id ?? `${deal.address}-${index}`).replace(/[^a-zA-Z0-9_-]/g, "-");
+  return (deal.id ?? `${deal.address}-${index}`).replace(
+    /[^a-zA-Z0-9_-]/g,
+    "-",
+  );
 }
 
 function revealDealAnchor(el: Element) {
@@ -402,7 +464,9 @@ function scrollToDeal(deal: DashboardDeal | undefined, index = 0) {
   // the commit). The retry must use the same rendered-anchor lookup — the
   // collapsed deal's desktop <tr> is present-but-hidden the whole time, so
   // getElementById would "succeed" on it and scroll nowhere.
-  window.dispatchEvent(new CustomEvent(REVEAL_DEAL_EVENT, { detail: { anchorId: id } }));
+  window.dispatchEvent(
+    new CustomEvent(REVEAL_DEAL_EVENT, { detail: { anchorId: id } }),
+  );
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       const revealed = findRenderedDealAnchor(id);
@@ -413,9 +477,16 @@ function scrollToDeal(deal: DashboardDeal | undefined, index = 0) {
 
 function getDecisionHighlights(data: DashboardHomeData) {
   const deals = data.topDeals;
-  const byScore = [...deals].sort((a, b) => (b.score ?? -1) - (a.score ?? -1))[0];
-  const byCashFlow = [...deals].sort((a, b) => (b.cashFlowMonthly ?? -Infinity) - (a.cashFlowMonthly ?? -Infinity))[0];
-  const byRoi = [...deals].filter((deal) => deal.roiPct != null).sort((a, b) => (b.roiPct ?? -Infinity) - (a.roiPct ?? -Infinity))[0];
+  const byScore = [...deals].sort(
+    (a, b) => (b.score ?? -1) - (a.score ?? -1),
+  )[0];
+  const byCashFlow = [...deals].sort(
+    (a, b) =>
+      (b.cashFlowMonthly ?? -Infinity) - (a.cashFlowMonthly ?? -Infinity),
+  )[0];
+  const byRoi = [...deals]
+    .filter((deal) => deal.roiPct != null)
+    .sort((a, b) => (b.roiPct ?? -Infinity) - (a.roiPct ?? -Infinity))[0];
   return { byScore, byCashFlow, byRoi };
 }
 
@@ -433,12 +504,19 @@ function getDecisionCenter(data: DashboardHomeData) {
   const deals = data.allDeals;
   if (deals.length === 0) return null;
   const winners = data.portfolioAggregates?.winners ?? null;
-  const sampleBest = [...deals].sort((a, b) => (b.score ?? -1) - (a.score ?? -1))[0] ?? null;
-  const negatives = deals.filter((d) => d.cashFlowMonthly != null && d.cashFlowMonthly < 0);
+  const sampleBest =
+    [...deals].sort((a, b) => (b.score ?? -1) - (a.score ?? -1))[0] ?? null;
+  const negatives = deals.filter(
+    (d) => d.cashFlowMonthly != null && d.cashFlowMonthly < 0,
+  );
   const sampleNeedsReview =
-    [...negatives].sort((a, b) => (a.cashFlowMonthly ?? 0) - (b.cashFlowMonthly ?? 0))[0] ?? null;
+    [...negatives].sort(
+      (a, b) => (a.cashFlowMonthly ?? 0) - (b.cashFlowMonthly ?? 0),
+    )[0] ?? null;
   const sampleBestUpside =
-    [...deals].filter((d) => d.roiPct != null).sort((a, b) => (b.roiPct ?? -Infinity) - (a.roiPct ?? -Infinity))[0] ??
+    [...deals]
+      .filter((d) => d.roiPct != null)
+      .sort((a, b) => (b.roiPct ?? -Infinity) - (a.roiPct ?? -Infinity))[0] ??
     null;
   // A null full-set "best" just means no snapshot recomputed (legacy book) —
   // the sample's stored-score winner is still better than an empty tile.
@@ -454,7 +532,8 @@ function getDecisionCenter(data: DashboardHomeData) {
       : (winners?.bestByScore ?? sampleBest);
   const bestUpside =
     winners?.bestRoi && sampleBestUpside
-      ? (winners.bestRoi.roiPct ?? -Infinity) >= (sampleBestUpside.roiPct ?? -Infinity)
+      ? (winners.bestRoi.roiPct ?? -Infinity) >=
+        (sampleBestUpside.roiPct ?? -Infinity)
         ? winners.bestRoi
         : sampleBestUpside
       : (winners?.bestRoi ?? sampleBestUpside);
@@ -463,11 +542,32 @@ function getDecisionCenter(data: DashboardHomeData) {
   // never overwrite it with a sample-derived value in either direction.
   const needsReview = winners ? winners.worstNegative : sampleNeedsReview;
   const negativeCount = winners ? winners.negativeCount : negatives.length;
+  const cashFlowKnownCount = data.portfolioAggregates
+    ? data.portfolioAggregates.cashFlowSampleCount
+    : deals.filter(
+        (deal) =>
+          typeof deal.cashFlowMonthly === "number" &&
+          Number.isFinite(deal.cashFlowMonthly),
+      ).length;
+  const cashFlowTotalCount = data.portfolioAggregates
+    ? data.portfolioAggregates.totalCount
+    : deals.length;
+  const cashFlowCoverageComplete =
+    cashFlowKnownCount === cashFlowTotalCount;
   const nextAction =
     deals.length >= 2
       ? { label: "Compare your top deals", href: "/dashboard/compare" }
-      : { label: "Analyze another property", href: "/dashboard/new" };
-  return { best, needsReview, bestUpside, negativeCount, nextAction };
+      : { label: "Analyze another property", href: "/dashboard/new?fresh=1" };
+  return {
+    best,
+    needsReview,
+    bestUpside,
+    negativeCount,
+    cashFlowKnownCount,
+    cashFlowTotalCount,
+    cashFlowCoverageComplete,
+    nextAction,
+  };
 }
 
 /**
@@ -499,12 +599,18 @@ function getPortfolioKpis(data: DashboardHomeData) {
     // alarm on a book that's actually safer for being un-levered. RiskReturn
     // and the "safest deal" insight already exclude cash; this KPI was the gap.
     const isCashPurchase = d.monthlyPayment != null && d.monthlyPayment <= 0;
-    if (!isCashPurchase && d.dscr != null && d.purchasePrice != null && d.purchasePrice > 0) {
+    if (
+      !isCashPurchase &&
+      d.dscr != null &&
+      d.purchasePrice != null &&
+      d.purchasePrice > 0
+    ) {
       dscrNumerator += d.dscr * d.purchasePrice;
       dscrDenominator += d.purchasePrice;
     }
   }
-  const weightedDscr = dscrDenominator > 0 ? dscrNumerator / dscrDenominator : null;
+  const weightedDscr =
+    dscrDenominator > 0 ? dscrNumerator / dscrDenominator : null;
 
   const withCash = deals.filter((d) => d.cashToClose != null);
   const cashToClose = withCash.length
@@ -516,9 +622,31 @@ function getPortfolioKpis(data: DashboardHomeData) {
   // deal #23 bleeds is a false all-clear. Sample fallback when absent.
   const needsReviewCount =
     data.portfolioAggregates?.winners?.negativeCount ??
-    deals.filter((d) => d.cashFlowMonthly != null && d.cashFlowMonthly < 0).length;
+    deals.filter((d) => d.cashFlowMonthly != null && d.cashFlowMonthly < 0)
+      .length;
 
-  return { avgScore, weightedDscr, cashToClose, needsReviewCount };
+  const cashFlowKnownCount = data.portfolioAggregates
+    ? data.portfolioAggregates.cashFlowSampleCount
+    : deals.filter(
+        (deal) =>
+          typeof deal.cashFlowMonthly === "number" &&
+          Number.isFinite(deal.cashFlowMonthly),
+      ).length;
+  const cashFlowTotalCount = data.portfolioAggregates
+    ? data.portfolioAggregates.totalCount
+    : deals.length;
+  const cashFlowCoverageComplete =
+    cashFlowKnownCount === cashFlowTotalCount;
+
+  return {
+    avgScore,
+    weightedDscr,
+    cashToClose,
+    needsReviewCount,
+    cashFlowKnownCount,
+    cashFlowTotalCount,
+    cashFlowCoverageComplete,
+  };
 }
 
 /**
@@ -568,9 +696,8 @@ function getPortfolioTotals(data: DashboardHomeData) {
     return null;
   const valid = data.allDeals.filter((d) => d.purchasePrice != null);
   const totalValue = valid.reduce((s, d) => s + (d.purchasePrice ?? 0), 0);
-  const totalCashFlow = data.allDeals.reduce(
-    (s, d) => s + (d.cashFlowMonthly ?? 0),
-    0
+  const cashFlowSummary = summarizeKnownMetric(
+    data.allDeals.map((deal) => deal.cashFlowMonthly),
   );
   const capWeighted = valid.reduce(
     (acc, d) => {
@@ -579,15 +706,25 @@ function getPortfolioTotals(data: DashboardHomeData) {
       if (cap == null || price <= 0) return acc;
       return { num: acc.num + cap * price, den: acc.den + price };
     },
-    { num: 0, den: 0 }
+    { num: 0, den: 0 },
   );
-  const weightedCap = capWeighted.den > 0 ? capWeighted.num / capWeighted.den : null;
+  const capRateSampleCount = valid.reduce(
+    (count, deal) =>
+      deal.capRatePct != null && Number.isFinite(deal.capRatePct)
+        ? count + 1
+        : count,
+    0,
+  );
+  const weightedCap =
+    capWeighted.den > 0 ? capWeighted.num / capWeighted.den : null;
   return {
     totalValue,
-    totalCashFlow,
+    totalCashFlow: cashFlowSummary.total,
     weightedCap,
     activeCount: valid.length,
     totalCount: data.allDeals.length,
+    cashFlowSampleCount: cashFlowSummary.knownCount,
+    capRateSampleCount,
   };
 }
 
@@ -610,7 +747,10 @@ function buildDecisionInsights(deals: DashboardDeal[]) {
   const needsReview = [...deals]
     .filter((d) => d.cashFlowMonthly != null && d.cashFlowMonthly < 0)
     .sort((a, b) => (a.cashFlowMonthly ?? 0) - (b.cashFlowMonthly ?? 0))[0];
-  const cash = [...deals].sort((a, b) => (b.cashFlowMonthly ?? -Infinity) - (a.cashFlowMonthly ?? -Infinity))[0];
+  const cash = [...deals].sort(
+    (a, b) =>
+      (b.cashFlowMonthly ?? -Infinity) - (a.cashFlowMonthly ?? -Infinity),
+  )[0];
   const roi = [...deals]
     .filter((d) => d.roiPct != null)
     .sort((a, b) => (b.roiPct ?? -Infinity) - (a.roiPct ?? -Infinity))[0];
@@ -633,9 +773,13 @@ function buildDecisionInsights(deals: DashboardDeal[]) {
   const evidence = (d: DashboardDeal): string => {
     const coc = applicableCashOnCashValue(d.cocReturnPct, d.cashToClose);
     return [
-      d.score != null ? `Secondary Screening Index ${Math.round(d.score)}` : null,
+      d.score != null
+        ? `Secondary Screening Index ${Math.round(d.score)}`
+        : null,
       d.recommendation ? recommendationLabel(d.recommendation) : null,
-      d.cashFlowMonthly != null ? `${formatSignedCurrency(d.cashFlowMonthly)}/mo` : null,
+      d.cashFlowMonthly != null
+        ? `${formatSignedCurrency(d.cashFlowMonthly)}/mo`
+        : null,
       d.capRatePct != null ? `${d.capRatePct.toFixed(1)}% cap` : null,
       coc != null ? `${coc.toFixed(1)}% CoC` : null,
       d.dscr != null ? `DSCR ${d.dscr.toFixed(2)}` : null,
@@ -654,7 +798,10 @@ function buildDecisionInsights(deals: DashboardDeal[]) {
           tone: "opportunity" as const,
           action: canCompare
             ? { label: "Compare deals", href: "/dashboard/compare" }
-            : { label: "Analyze another property", href: "/dashboard/new" },
+            : {
+                label: "Analyze another property",
+                href: "/dashboard/new?fresh=1",
+              },
         }
       : null,
     reviewPick
@@ -665,7 +812,10 @@ function buildDecisionInsights(deals: DashboardDeal[]) {
           // Deep-link to the named deal so "fix it" is one tap, not a hunt
           // through the list (the deal-detail screen is where re-underwriting,
           // lowering the offer, and exporting actually happen).
-          action: { label: "Open this deal", href: `/dashboard/saved-analyses/${reviewPick.id}` },
+          action: {
+            label: "Open this deal",
+            href: `/dashboard/saved-analyses/${reviewPick.id}`,
+          },
         }
       : null,
     cashPick
@@ -673,7 +823,10 @@ function buildDecisionInsights(deals: DashboardDeal[]) {
           title: `Strongest cash flow: ${cashPick.address}`,
           body: `${formatSignedCurrency(cashPick.cashFlowMonthly)}/mo today${cashPickCoc != null ? ` · ${cashPickCoc.toFixed(1)}% cash-on-cash` : ""}. Next: stress-test vacancy and repairs before you commit.`,
           tone: "tip" as const,
-          action: { label: "Open this deal", href: `/dashboard/saved-analyses/${cashPick.id}` },
+          action: {
+            label: "Open this deal",
+            href: `/dashboard/saved-analyses/${cashPick.id}`,
+          },
         }
       : null,
     roiPick
@@ -685,7 +838,10 @@ function buildDecisionInsights(deals: DashboardDeal[]) {
             ? `Unusually high projected 10-yr ROI — ${formatPercent(roiPick.roiPct)} cumulative is above the ${EXTREME_ROI_CUMULATIVE_PCT}% band at ${roiPick.riskLevel ?? "unrated"} risk. Verify rent, price, and appreciation, then check exit scenarios for IRR and equity multiple before trusting it.`
             : `${formatPercent(roiPick.roiPct)} projected 10-yr ROI at ${roiPick.riskLevel ?? "unrated"} risk. Note: that's cumulative — check the deal's exit scenarios for IRR and equity multiple before trusting it.`,
           tone: "opportunity" as const,
-          action: { label: "Open this deal", href: `/dashboard/saved-analyses/${roiPick.id}` },
+          action: {
+            label: "Open this deal",
+            href: `/dashboard/saved-analyses/${roiPick.id}`,
+          },
         }
       : null,
   ].filter((item): item is NonNullable<typeof item> => Boolean(item));
@@ -709,46 +865,55 @@ export function DashboardHome({
   // several times each, and re-running them on every re-render (Topbar
   // interactions etc.) is pure waste. `data` comes from the server
   // component and is referentially stable per page load.
-  const { topDeals, riskReturn, dealComparison, highlights, insights, portfolio, decisionCenter, kpis, pipeline } = useMemo(
-    () => {
-      // The legacy dashboard modules contain rankings and charts beyond the
-      // focused Your Deals table. When the book spans methodologies, feed those
-      // modules only the current cohort rather than comparing unlike outputs.
-      const comparableData =
+  const {
+    topDeals,
+    riskReturn,
+    dealComparison,
+    highlights,
+    insights,
+    portfolio,
+    decisionCenter,
+    kpis,
+    pipeline,
+  } = useMemo(() => {
+    // The legacy dashboard modules contain rankings and charts beyond the
+    // focused Your Deals table. When the book spans methodologies, feed those
+    // modules only the current cohort rather than comparing unlike outputs.
+    const comparableData =
+      data.portfolioAggregateStatus === "mixed-methodology"
+        ? {
+            ...data,
+            allDeals: data.allDeals.filter(
+              (deal) => deal.methodologyIsCurrent !== false,
+            ),
+            topDeals: data.topDeals.filter(
+              (deal) => deal.methodologyIsCurrent !== false,
+            ),
+          }
+        : data;
+    return {
+      topDeals: getTopDeals(comparableData),
+      riskReturn: getRiskReturn(comparableData),
+      dealComparison: getDealComparison(comparableData),
+      highlights: getDecisionHighlights(comparableData),
+      insights: buildDecisionInsights(comparableData.allDeals),
+      portfolio: getPortfolioTotals(data),
+      decisionCenter:
+        data.portfolioAggregateStatus === "unavailable" ||
         data.portfolioAggregateStatus === "mixed-methodology"
-          ? {
-              ...data,
-              allDeals: data.allDeals.filter(
-                (deal) => deal.methodologyIsCurrent !== false
-              ),
-              topDeals: data.topDeals.filter(
-                (deal) => deal.methodologyIsCurrent !== false
-              ),
-            }
-          : data;
-      return {
-        topDeals: getTopDeals(comparableData),
-        riskReturn: getRiskReturn(comparableData),
-        dealComparison: getDealComparison(comparableData),
-        highlights: getDecisionHighlights(comparableData),
-        insights: buildDecisionInsights(comparableData.allDeals),
-        portfolio: getPortfolioTotals(data),
-        decisionCenter:
-          data.portfolioAggregateStatus === "unavailable" ||
-          data.portfolioAggregateStatus === "mixed-methodology"
-            ? null
-            : getDecisionCenter(data),
-        kpis:
-          data.portfolioAggregateStatus === "unavailable" ||
-          data.portfolioAggregateStatus === "mixed-methodology"
-            ? null
-            : getPortfolioKpis(data),
-        pipeline:
-          data.portfolioAggregateStatus === "unavailable" ? null : getPipelineSummary(data),
-      };
-    },
-    [data]
-  );
+          ? null
+          : getDecisionCenter(data),
+      kpis:
+        data.portfolioAggregateStatus === "unavailable" ||
+        data.portfolioAggregateStatus === "mixed-methodology"
+          ? null
+          : getPortfolioKpis(data),
+      pipeline:
+        data.portfolioAggregateStatus === "unavailable"
+          ? null
+          : getPipelineSummary(data),
+    };
+  }, [data]);
 
   const hasAnyDeals = data.allDeals.length > 0;
   // NT-4: the charts + deal list below run on the 20-most-recent sample by
@@ -761,15 +926,32 @@ export function DashboardHome({
       ? `Showing up to ${data.allDeals.length} recent active deals. Full portfolio totals are temporarily unavailable.`
       : data.portfolioAggregateStatus === "mixed-methodology"
         ? "Recorded and current underwriting versions are shown separately; formula-dependent totals and winners are withheld until the recorded deals are re-underwritten."
-      : data.portfolioAggregates && data.portfolioAggregates.totalCount > data.allDeals.length
-      ? `Showing your ${data.allDeals.length} most recent active deals (of ${data.portfolioAggregates.totalCount}) — totals and Decision Center cover every active deal.`
-      : null;
+        : data.portfolioAggregates &&
+            data.portfolioAggregates.totalCount > data.allDeals.length
+          ? `Showing your ${data.allDeals.length} most recent active deals (of ${data.portfolioAggregates.totalCount}) — totals and Decision Center cover every active deal.`
+          : null;
   // Active deals (portfolio.totalCount) vs the full saved set
   // (savedTotalCount = the sidebar "My Deals" badge count). When the user
   // has archived/completed deals the two differ, so we surface both and
   // never show a dashboard number that contradicts the sidebar badge.
-  const savedTotalCount = data.savedTotalCount ?? portfolio?.totalCount ?? data.stats.totalDeals;
-  const hasArchivedOrCompleted = Boolean(portfolio && savedTotalCount > portfolio.totalCount);
+  const savedTotalCount =
+    data.savedTotalCount ?? portfolio?.totalCount ?? data.stats.totalDeals;
+  const hasArchivedOrCompleted = Boolean(
+    portfolio && savedTotalCount > portfolio.totalCount,
+  );
+  const portfolioCashFlowCoverageComplete = Boolean(
+    portfolio &&
+    hasCompleteMetricCoverage({
+      knownCount: portfolio.cashFlowSampleCount,
+      totalCount: portfolio.totalCount,
+    }),
+  );
+  const portfolioPriceCoverageComplete = Boolean(
+    portfolio && portfolio.activeCount === portfolio.totalCount,
+  );
+  const portfolioCapCoverageComplete = Boolean(
+    portfolio && portfolio.capRateSampleCount === portfolio.totalCount,
+  );
   const owned = data.ownedPortfolio ?? null;
   const ownedCount = owned?.count ?? 0;
   // Buy-box awareness (PV-1): headline + Decision Center tile only when the
@@ -777,7 +959,9 @@ export function DashboardHome({
   // there are ≥2 active deals — the FFM-2 gate (CONFLICT #8): a 1-deal user
   // gets the honest nudge card, not a fourth tile crowning a set of one.
   const buyBoxSummary =
-    data.buyBox && data.buyBox.complete && data.allDeals.length >= 2 ? data.buyBox : null;
+    data.buyBox && data.buyBox.complete && data.allDeals.length >= 2
+      ? data.buyBox
+      : null;
   // FALSE-HEADER FIX (M3-1): "No saved deals yet" was factually wrong for a
   // customer whose deals all CLOSED (savedTotalCount > 0, active = 0) — the
   // product's success case. Owners get their portfolio as the headline;
@@ -802,13 +986,13 @@ export function DashboardHome({
         `${buyBoxSummary.passingCount} of your ${buyBoxSummary.evaluatedCount} active deals ${buyBoxSummary.passingCount === 1 ? "meets" : "meet"} your buy box.`
       : data.portfolioAggregateStatus === "unavailable"
         ? "Recent active deals are shown below. Full portfolio totals are temporarily unavailable."
-      : data.portfolioAggregateStatus === "mixed-methodology"
-        ? "Active deals are shown below. Recorded and current underwriting versions are not blended."
-      : hasArchivedOrCompleted && portfolio
-        ? `Active pipeline: ${portfolio.totalCount} of ${savedTotalCount} saved ${savedTotalCount === 1 ? "deal" : "deals"}.`
-        : portfolio
-          ? `Your book at a glance — ${portfolio.totalCount} active ${portfolio.totalCount === 1 ? "deal" : "deals"}.`
-          : "Your recent active deals are shown below.";
+        : data.portfolioAggregateStatus === "mixed-methodology"
+          ? "Active deals are shown below. Recorded and current underwriting versions are not blended."
+          : hasArchivedOrCompleted && portfolio
+            ? `Active pipeline: ${portfolio.totalCount} of ${savedTotalCount} saved ${savedTotalCount === 1 ? "deal" : "deals"}.`
+            : portfolio
+              ? `Your book at a glance — ${portfolio.totalCount} active ${portfolio.totalCount === 1 ? "deal" : "deals"}.`
+              : "Your recent active deals are shown below.";
 
   // SCROLL CONTRACT (natural scroll, Jun 2026): the dashboard scrolls the
   // PAGE/body naturally — NOT a viewport-locked inner pane. The shell is a
@@ -826,7 +1010,8 @@ export function DashboardHome({
   const emailLocalPart = data.user.email.split("@")[0] ?? "";
   const candidateName = data.user.displayName.split(" ")[0] ?? "";
   const firstName =
-    candidateName && candidateName.toLowerCase() !== emailLocalPart.toLowerCase()
+    candidateName &&
+    candidateName.toLowerCase() !== emailLocalPart.toLowerCase()
       ? candidateName
       : "";
 
@@ -840,7 +1025,10 @@ export function DashboardHome({
         isPremium={data.user.isPremium}
         canAccessDashboard={data.user.canAccessDashboard}
       />
-      <main id="main" className="flex-1 px-4 py-4 space-y-6 sm:px-6 sm:py-6 sm:space-y-8 lg:px-8">
+      <main
+        id="main"
+        className="flex-1 px-4 py-4 space-y-6 sm:px-6 sm:py-6 sm:space-y-8 lg:px-8"
+      >
         {/* ── Header + quick actions ──────────────────────────────── */}
         {/* Top-right action buttons (Analyze Property / My Deals /
             Compare) now ONLY render on mobile (`lg:hidden`). On desktop
@@ -866,7 +1054,11 @@ export function DashboardHome({
                 already carries the gradient analyze CTA — two identical
                 primary buttons in the first viewport wrapped this row to
                 two lines at 375px (mobile density audit DH-4). */}
-            <Button asChild variant="outline" className="min-h-11 rounded-xl px-4 text-sm">
+            <Button
+              asChild
+              variant="outline"
+              className="min-h-11 rounded-xl px-4 text-sm"
+            >
               <Link href="/dashboard/saved-analyses" prefetch={false}>
                 <Briefcase className="h-4 w-4" />
                 My Deals
@@ -908,13 +1100,23 @@ export function DashboardHome({
             className="flex flex-col gap-3 rounded-2xl border border-warning/35 bg-warning/10 p-4 sm:flex-row sm:items-center sm:justify-between"
           >
             <div>
-              <p className="text-sm font-semibold text-foreground">Portfolio totals temporarily unavailable</p>
+              <p className="text-sm font-semibold text-foreground">
+                Portfolio totals temporarily unavailable
+              </p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Your saved deals are still here. The list below shows recent deals, but TrueCap will not present that sample as your full portfolio.
+                Your saved deals are still here. The list below shows recent
+                deals, but TrueCap will not present that sample as your full
+                portfolio.
               </p>
             </div>
-            <Button asChild variant="outline" className="min-h-11 shrink-0 rounded-xl">
-              <Link href="/dashboard" prefetch={false}>Retry totals</Link>
+            <Button
+              asChild
+              variant="outline"
+              className="min-h-11 shrink-0 rounded-xl"
+            >
+              <Link href="/dashboard" prefetch={false}>
+                Retry totals
+              </Link>
             </Button>
           </div>
         ) : null}
@@ -930,11 +1132,15 @@ export function DashboardHome({
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
                 TrueCap will not blend or crown winners across different model
-                versions. Re-underwrite recorded deals before comparing the
-                book as one set.
+                versions. Re-underwrite recorded deals before comparing the book
+                as one set.
               </p>
             </div>
-            <Button asChild variant="outline" className="min-h-11 shrink-0 rounded-xl">
+            <Button
+              asChild
+              variant="outline"
+              className="min-h-11 shrink-0 rounded-xl"
+            >
               <Link href="/dashboard/saved-analyses" prefetch={false}>
                 Review recorded deals
               </Link>
@@ -946,15 +1152,20 @@ export function DashboardHome({
             deals: highest Screening Index, first cash-flow-negative deal to
             review, highest modeled 10-yr upside, and a next workflow action. */}
         {decisionCenter ? (
-          <section aria-label="Decision center" className="rounded-2xl border border-border bg-card p-4 sm:p-5">
+          <section
+            aria-label="Decision center"
+            className="rounded-2xl border border-border bg-card p-4 sm:p-5"
+          >
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="min-w-0">
                 <h2 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
                   Decision center
                 </h2>
                 <p className="mt-1 max-w-3xl text-xs leading-relaxed text-muted-foreground">
-                  These highlights compare modeled outputs only. The Screening Index is a secondary heuristic, not an
-                  investment directive; verify every material assumption before relying on a comparison.
+                  These highlights compare modeled outputs only. The Screening
+                  Index is a secondary heuristic, not an investment directive;
+                  verify every material assumption before relying on a
+                  comparison.
                 </p>
               </div>
               <Link
@@ -973,11 +1184,17 @@ export function DashboardHome({
             <div
               className={cn(
                 "mt-3 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:grid sm:overflow-visible sm:pb-0 [&>*]:min-w-[72%] [&>*]:snap-start sm:[&>*]:min-w-0",
-                buyBoxSummary ? "sm:grid-cols-2 xl:grid-cols-4" : "sm:grid-cols-3"
+                buyBoxSummary
+                  ? "sm:grid-cols-2 xl:grid-cols-4"
+                  : "sm:grid-cols-3",
               )}
             >
               <Link
-                href={decisionCenter.best ? `/dashboard/saved-analyses/${decisionCenter.best.id}` : "/dashboard/saved-analyses"}
+                href={
+                  decisionCenter.best
+                    ? `/dashboard/saved-analyses/${decisionCenter.best.id}`
+                    : "/dashboard/saved-analyses"
+                }
                 prefetch={false}
                 aria-label={`Open highest-screening deal: ${decisionCenter.best?.address ?? "My Deals"}`}
                 className="rounded-xl border border-success/30 bg-success/5 p-3 transition hover:bg-success/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -985,48 +1202,96 @@ export function DashboardHome({
                 <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-success">
                   <Award className="h-3.5 w-3.5" /> Highest screening index
                 </div>
-                <div className="mt-1 truncate text-sm font-bold text-foreground">{decisionCenter.best?.address ?? "—"}</div>
-                <div className="truncate text-xs text-muted-foreground">
-                  {decisionCenter.best?.score != null ? `Screening Index ${Math.round(decisionCenter.best.score)}` : "—"}
-                  {decisionCenter.best?.recommendation ? ` · ${recommendationLabel(decisionCenter.best.recommendation)}` : ""}
+                <div className="mt-1 truncate text-sm font-bold text-foreground">
+                  {decisionCenter.best?.address ?? "—"}
                 </div>
-                <span className="mt-2 inline-flex min-h-11 items-center text-xs font-semibold text-success">Open deal →</span>
+                <div className="truncate text-xs text-muted-foreground">
+                  {decisionCenter.best?.score != null
+                    ? `Screening Index ${Math.round(decisionCenter.best.score)}`
+                    : "—"}
+                  {decisionCenter.best?.recommendation
+                    ? ` · ${recommendationLabel(decisionCenter.best.recommendation)}`
+                    : ""}
+                </div>
+                <span className="mt-2 inline-flex min-h-11 items-center text-xs font-semibold text-success">
+                  Open deal →
+                </span>
               </Link>
               <Link
-                href={decisionCenter.needsReview ? `/dashboard/saved-analyses/${decisionCenter.needsReview.id}` : "/dashboard/saved-analyses?state=active"}
+                href={
+                  decisionCenter.needsReview
+                    ? `/dashboard/saved-analyses/${decisionCenter.needsReview.id}`
+                    : "/dashboard/saved-analyses?state=active"
+                }
                 prefetch={false}
-                aria-label={decisionCenter.needsReview ? `Review ${decisionCenter.needsReview.address}` : "View active deals"}
+                aria-label={
+                  decisionCenter.needsReview
+                    ? `Review ${decisionCenter.needsReview.address}`
+                    : decisionCenter.cashFlowCoverageComplete
+                      ? "View active deals"
+                      : "Review deals missing cash-flow data"
+                }
                 className={cn(
                   "rounded-xl border p-3 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                  decisionCenter.needsReview ? "border-destructive/30 bg-destructive/5" : "border-border bg-muted/20"
+                  decisionCenter.needsReview
+                    ? "border-destructive/30 bg-destructive/5"
+                    : decisionCenter.cashFlowCoverageComplete
+                      ? "border-border bg-muted/20"
+                      : "border-warning/35 bg-warning/10",
                 )}
               >
                 <div
                   className={cn(
                     "flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest",
-                    decisionCenter.needsReview ? "text-destructive" : "text-muted-foreground"
+                    decisionCenter.needsReview
+                      ? "text-destructive"
+                      : decisionCenter.cashFlowCoverageComplete
+                        ? "text-muted-foreground"
+                        : "text-warning-foreground",
                   )}
                 >
-                  {decisionCenter.needsReview ? (
+                  {decisionCenter.needsReview ||
+                  !decisionCenter.cashFlowCoverageComplete ? (
                     <AlertTriangle className="h-3.5 w-3.5" />
-                  ) : null}{" "} Needs review
+                  ) : null}{" "}
+                  Needs review
                 </div>
                 {decisionCenter.needsReview ? (
                   <>
-                    <div className="mt-1 truncate text-sm font-bold text-foreground">{decisionCenter.needsReview.address}</div>
+                    <div className="mt-1 truncate text-sm font-bold text-foreground">
+                      {decisionCenter.needsReview.address}
+                    </div>
                     <div className="truncate text-xs text-muted-foreground">
-                      {formatSignedCurrency(decisionCenter.needsReview.cashFlowMonthly)}/mo · {decisionCenter.negativeCount} cash-flow negative
+                      {formatSignedCurrency(
+                        decisionCenter.needsReview.cashFlowMonthly,
+                      )}
+                      /mo · {decisionCenter.negativeCount} cash-flow negative
                     </div>
                   </>
+                ) : decisionCenter.cashFlowCoverageComplete ? (
+                  <div className="mt-1 text-sm font-semibold text-foreground">
+                    All active deals cash-flow positive ✓
+                  </div>
                 ) : (
-                  <div className="mt-1 text-sm font-semibold text-foreground">All active deals cash-flow positive ✓</div>
+                  <div className="mt-1 text-sm font-semibold text-foreground">
+                    Cash flow known for {decisionCenter.cashFlowKnownCount} of{" "}
+                    {decisionCenter.cashFlowTotalCount} active deals
+                  </div>
                 )}
                 <span className="mt-2 inline-flex min-h-11 items-center text-xs font-semibold text-primary">
-                  {decisionCenter.needsReview ? "Review deal →" : "View active deals →"}
+                  {decisionCenter.needsReview
+                    ? "Review deal →"
+                    : decisionCenter.cashFlowCoverageComplete
+                      ? "View active deals →"
+                      : "Review missing data →"}
                 </span>
               </Link>
               <Link
-                href={decisionCenter.bestUpside ? `/dashboard/saved-analyses/${decisionCenter.bestUpside.id}` : "/dashboard/saved-analyses"}
+                href={
+                  decisionCenter.bestUpside
+                    ? `/dashboard/saved-analyses/${decisionCenter.bestUpside.id}`
+                    : "/dashboard/saved-analyses"
+                }
                 prefetch={false}
                 aria-label={`Open highest modeled-upside deal: ${decisionCenter.bestUpside?.address ?? "My Deals"}`}
                 className="rounded-xl border border-primary/30 bg-primary/5 p-3 transition hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -1034,12 +1299,15 @@ export function DashboardHome({
                 <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-primary">
                   <TrendingUp className="h-3.5 w-3.5" /> Highest modeled upside
                 </div>
-                <div className="mt-1 truncate text-sm font-bold text-foreground">{decisionCenter.bestUpside?.address ?? "—"}</div>
+                <div className="mt-1 truncate text-sm font-bold text-foreground">
+                  {decisionCenter.bestUpside?.address ?? "—"}
+                </div>
                 <div
                   className="truncate text-xs text-muted-foreground"
                   title={
                     decisionCenter.bestUpside?.roiPct != null
-                      ? bestUpsideSubline(decisionCenter.bestUpside.roiPct).title
+                      ? bestUpsideSubline(decisionCenter.bestUpside.roiPct)
+                          .title
                       : undefined
                   }
                 >
@@ -1048,7 +1316,9 @@ export function DashboardHome({
                     : "Run a 10-yr projection"}
                 </div>
                 <span className="mt-2 inline-flex min-h-11 items-center text-xs font-semibold text-primary">
-                  {decisionCenter.bestUpside ? "Open deal →" : "View My Deals →"}
+                  {decisionCenter.bestUpside
+                    ? "Open deal →"
+                    : "View My Deals →"}
                 </span>
               </Link>
               {/* PV-1: the personal tile — how many active deals pass the
@@ -1073,7 +1343,7 @@ export function DashboardHome({
                     <Target className="h-3.5 w-3.5" /> Meets your buy box
                   </div>
                   <div className="mt-1 truncate text-sm font-bold text-foreground">
-                    {buyBoxSummary.passingCount} of {" "}
+                    {buyBoxSummary.passingCount} of{" "}
                     {buyBoxSummary.evaluatedCount} deals
                   </div>
                   <div className="truncate text-xs text-muted-foreground">
@@ -1093,13 +1363,19 @@ export function DashboardHome({
             answer, so it sits at the top of the action lane. Status is
             computed in the viewer's local time; renders nothing when nothing
             is overdue or due within 7 days — invisible until useful. */}
-        <DueThisWeekCard deals={data.dueThisWeek ?? []} agingDeals={data.agingDeals ?? []} />
+        <DueThisWeekCard
+          deals={data.dueThisWeek ?? []}
+          agingDeals={data.agingDeals ?? []}
+        />
 
         {/* Rate watch — re-underwrites saved deals at today's 30-yr rate and
             surfaces the ones whose signal changed since they were saved (the
             retention hook; same pure logic as the weekly rate-alert email).
             Renders nothing when nothing changed — invisible until useful. */}
-        <RateWatchStrip rateWatch={data.rateWatch ?? null} alertsLive={data.alertsLive ?? false} />
+        <RateWatchStrip
+          rateWatch={data.rateWatch ?? null}
+          alertsLive={data.alertsLive ?? false}
+        />
 
         {/* ── Your deals (Aug-2026 rebuild) ─────────────────────────
             ONE table replacing Portfolio Overview, Pipeline, Top
@@ -1112,9 +1388,14 @@ export function DashboardHome({
             {/* Truthfulness: the table shows a bounded recent sample. Without
                 this line a 40-deal user reads 20 rows as their whole book. */}
             {sampledNote ? (
-              <p className="px-1 text-[11px] text-muted-foreground">{sampledNote}</p>
+              <p className="px-1 text-[11px] text-muted-foreground">
+                {sampledNote}
+              </p>
             ) : null}
-            <ScreeningRecord deals={data.allDeals} totalSavedDeals={data.savedTotalCount ?? data.stats.totalDeals} />
+            <ScreeningRecord
+              deals={data.allDeals}
+              totalSavedDeals={data.savedTotalCount ?? data.stats.totalDeals}
+            />
           </>
         ) : null}
 
@@ -1137,7 +1418,8 @@ export function DashboardHome({
             <div className="rounded-2xl border border-border bg-gradient-to-br from-card via-card to-card/60 p-4 shadow-sm sm:p-5">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h2 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-                  Owned portfolio · {owned.count}{" "} {owned.count === 1 ? "property" : "properties"}
+                  Owned portfolio · {owned.count}{" "}
+                  {owned.count === 1 ? "property" : "properties"}
                 </h2>
                 <Link
                   href="/dashboard/saved-analyses?state=completed"
@@ -1153,7 +1435,9 @@ export function DashboardHome({
                     Owned Equity
                   </div>
                   <div className="mt-1 text-lg font-extrabold tabular-nums leading-tight break-words text-foreground sm:text-2xl">
-                    {owned.totalEquity != null ? `~${formatCurrency(owned.totalEquity)}` : "—"}
+                    {owned.totalEquity != null
+                      ? `~${formatCurrency(owned.totalEquity)}`
+                      : "—"}
                   </div>
                   <div className="mt-0.5 text-[11px] text-muted-foreground">
                     {owned.totalEquity == null ? (
@@ -1188,10 +1472,12 @@ export function DashboardHome({
                         ? "text-[var(--metric-positive,#16a34a)]"
                         : owned.equityGain != null && owned.equityGain < 0
                           ? "text-[var(--metric-negative,#dc2626)]"
-                          : "text-foreground"
+                          : "text-foreground",
                     )}
                   >
-                    {owned.equityGain != null ? formatSignedCurrency(owned.equityGain) : "—"}
+                    {owned.equityGain != null
+                      ? formatSignedCurrency(owned.equityGain)
+                      : "—"}
                   </div>
                   <div className="mt-0.5 text-[11px] text-muted-foreground">
                     appreciation + principal paydown
@@ -1206,9 +1492,10 @@ export function DashboardHome({
                       "mt-1 text-lg font-extrabold tabular-nums leading-tight break-words sm:text-2xl",
                       owned.monthlyCashFlow != null && owned.monthlyCashFlow > 0
                         ? "text-[var(--metric-positive,#16a34a)]"
-                        : owned.monthlyCashFlow != null && owned.monthlyCashFlow < 0
+                        : owned.monthlyCashFlow != null &&
+                            owned.monthlyCashFlow < 0
                           ? "text-[var(--metric-negative,#dc2626)]"
-                          : "text-foreground"
+                          : "text-foreground",
                     )}
                   >
                     {owned.monthlyCashFlow == null
@@ -1234,8 +1521,7 @@ export function DashboardHome({
 
         {!focusedDashboard ? (
           <>
-
-        {/* ── Portfolio overview — answers "what's my book worth?" ──
+            {/* ── Portfolio overview — answers "what's my book worth?" ──
             Trimmed from 4 StatCards to 2 hero cards + 1 stat strip.
             Pipeline Value and Monthly Cash Flow are the answers
             investors want first; Weighted Cap Rate and Saved Deals are
@@ -1246,169 +1532,252 @@ export function DashboardHome({
             tones across the dashboard instead of 4 (was primary,
             success, violet, gold) reads as a serious financial
             product rather than a colorful bento grid. */}
-        {hasAnyDeals && portfolio ? (
-          <section>
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                Portfolio overview
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <StatCard
-                label="Pipeline Value"
-                value={formatCurrency(portfolio.totalValue, true)}
-                change={null}
-                changeLabel={`across ${portfolio.activeCount} ${portfolio.activeCount === 1 ? "deal" : "deals"}`}
-                icon={Briefcase}
-                spark={[]}
-                tone="primary"
-                changeSuffix=""
-              />
-              <StatCard
-                label="Monthly Cash Flow"
-                value={formatSignedCurrency(portfolio.totalCashFlow)}
-                change={null}
-                changeLabel={`If all ${portfolio.activeCount} active ${portfolio.activeCount === 1 ? "deal" : "deals"} closed at current assumptions: ${formatSignedCurrency(portfolio.totalCashFlow)}/month.`}
-                icon={DollarSign}
-                spark={[]}
-                tone="success"
-                changeSuffix=""
-              />
-            </div>
-            {/* One-line stat strip — supplementary context that doesn't
+            {hasAnyDeals && portfolio ? (
+              <section>
+                <div className="mb-3 flex items-center justify-between">
+                  <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                    Portfolio overview
+                  </h2>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <StatCard
+                    label="Pipeline Value"
+                    value={
+                      portfolio.activeCount > 0
+                        ? formatCurrency(portfolio.totalValue, true)
+                        : "—"
+                    }
+                    change={null}
+                    changeLabel={
+                      portfolioPriceCoverageComplete
+                        ? `Across all ${portfolio.totalCount} active ${portfolio.totalCount === 1 ? "deal" : "deals"}.`
+                        : `Known total across ${portfolio.activeCount} of ${portfolio.totalCount} active deals with price data.`
+                    }
+                    icon={Briefcase}
+                    spark={[]}
+                    tone="primary"
+                    changeSuffix=""
+                  />
+                  <StatCard
+                    label="Monthly Cash Flow"
+                    value={
+                      portfolio.cashFlowSampleCount > 0
+                        ? formatSignedCurrency(portfolio.totalCashFlow)
+                        : "—"
+                    }
+                    change={null}
+                    changeLabel={
+                      portfolio.cashFlowSampleCount === 0
+                        ? `No cash-flow data is recorded for these ${portfolio.totalCount} active ${portfolio.totalCount === 1 ? "deal" : "deals"}.`
+                        : portfolioCashFlowCoverageComplete
+                          ? `If all ${portfolio.totalCount} active ${portfolio.totalCount === 1 ? "deal" : "deals"} closed at current assumptions: ${formatSignedCurrency(portfolio.totalCashFlow)}/month.`
+                          : `Known total across ${portfolio.cashFlowSampleCount} of ${portfolio.totalCount} active deals at current assumptions: ${formatSignedCurrency(portfolio.totalCashFlow)}/month.`
+                    }
+                    icon={DollarSign}
+                    spark={[]}
+                    tone="success"
+                    changeSuffix=""
+                  />
+                </div>
+                {/* One-line stat strip — supplementary context that doesn't
                 deserve full StatCard chrome. Dot-separators visually
                 connect them as a single fact line. */}
-            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 rounded-xl border border-border bg-card/40 px-4 py-2.5 text-xs text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5">
-                <Percent className="h-3.5 w-3.5 text-muted-foreground/60" />
-                <span className="font-semibold text-foreground">
-                  {portfolio.weightedCap == null ? "-" : `${portfolio.weightedCap.toFixed(2)}%`}
-                </span>
-                <GlossaryTip term="capRate"><span>weighted cap rate</span></GlossaryTip>
-              </span>
-              <span aria-hidden className="hidden text-muted-foreground/40 sm:inline">·</span>
-              <span className="inline-flex items-center gap-1.5">
-                <Layers className="h-3.5 w-3.5 text-muted-foreground/60" />
-                <span className="font-semibold text-foreground">{portfolio.totalCount}</span>
-                <span>active</span>
-              </span>
-              {hasArchivedOrCompleted ? (
-                <>
-                  <span aria-hidden className="hidden text-muted-foreground/40 sm:inline">·</span>
-                  <span>
-                    <span className="font-semibold text-foreground">{savedTotalCount}</span>{" "}
-                    saved total
+                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 rounded-xl border border-border bg-card/40 px-4 py-2.5 text-xs text-muted-foreground">
+                  <span className="inline-flex items-center gap-1.5">
+                    <Percent className="h-3.5 w-3.5 text-muted-foreground/60" />
+                    <span className="font-semibold text-foreground">
+                      {portfolio.weightedCap == null
+                        ? "-"
+                        : `${portfolio.weightedCap.toFixed(2)}%`}
+                    </span>
+                    <GlossaryTip term="capRate">
+                      <span>weighted cap rate</span>
+                    </GlossaryTip>
+                    {!portfolioCapCoverageComplete ? (
+                      <span>
+                        · {portfolio.capRateSampleCount} of{" "}
+                        {portfolio.totalCount} with data
+                      </span>
+                    ) : null}
                   </span>
-                </>
-              ) : null}
-              <span aria-hidden className="hidden text-muted-foreground/40 sm:inline">·</span>
-              <span>
-                <span className="font-semibold text-foreground">{portfolio.activeCount}</span>{" "}
-                with price data
-              </span>
-            </div>
-            {/* ── Portfolio KPIs — book quality (avg score), leverage safety
+                  <span
+                    aria-hidden
+                    className="hidden text-muted-foreground/40 sm:inline"
+                  >
+                    ·
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Layers className="h-3.5 w-3.5 text-muted-foreground/60" />
+                    <span className="font-semibold text-foreground">
+                      {portfolio.totalCount}
+                    </span>
+                    <span>active</span>
+                  </span>
+                  {hasArchivedOrCompleted ? (
+                    <>
+                      <span
+                        aria-hidden
+                        className="hidden text-muted-foreground/40 sm:inline"
+                      >
+                        ·
+                      </span>
+                      <span>
+                        <span className="font-semibold text-foreground">
+                          {savedTotalCount}
+                        </span>{" "}
+                        saved total
+                      </span>
+                    </>
+                  ) : null}
+                  <span
+                    aria-hidden
+                    className="hidden text-muted-foreground/40 sm:inline"
+                  >
+                    ·
+                  </span>
+                  <span>
+                    <span className="font-semibold text-foreground">
+                      {portfolio.activeCount}
+                    </span>{" "}
+                    with price data
+                  </span>
+                </div>
+                {/* ── Portfolio KPIs — book quality (avg score), leverage safety
                 (weighted DSCR), capital at work (cash to close), and how many
                 deals need attention. Complements the value/cash-flow headlines
                 above without adding new inputs. */}
-            {kpis ? (
-              <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
-                <div className="rounded-xl border border-border bg-card p-3">
-                  <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    <Award className="h-3.5 w-3.5" /> Avg Screening Index · secondary
-                  </div>
-                  <div className="mt-1 text-lg font-bold text-foreground">
-                    {kpis.avgScore == null ? "—" : Math.round(kpis.avgScore)}
-                    {kpis.avgScore != null ? (
+                {kpis ? (
+                  <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
+                    <div className="rounded-xl border border-border bg-card p-3">
+                      <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                        <Award className="h-3.5 w-3.5" /> Avg Screening Index ·
+                        secondary
+                      </div>
+                      <div className="mt-1 text-lg font-bold text-foreground">
+                        {kpis.avgScore == null
+                          ? "—"
+                          : Math.round(kpis.avgScore)}
+                        {kpis.avgScore != null ? (
                           <span className="text-xs font-medium text-muted-foreground">
                             {" "}
-                            / 100</span>
+                            / 100
+                          </span>
                         ) : null}
-                  </div>
-                </div>
-                <div className="rounded-xl border border-border bg-card p-3">
-                  <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    <Layers className="h-3.5 w-3.5" />{" "}
+                      </div>
+                    </div>
+                    <div className="rounded-xl border border-border bg-card p-3">
+                      <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                        <Layers className="h-3.5 w-3.5" />{" "}
                         <GlossaryTip term="dscr">Weighted DSCR</GlossaryTip>
+                      </div>
+                      <div className="mt-1 text-lg font-bold text-foreground">
+                        {kpis.weightedDscr == null
+                          ? "—"
+                          : `${kpis.weightedDscr.toFixed(2)}×`}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground">
+                        {kpis.weightedDscr == null
+                          ? "cash purchases only"
+                          : kpis.weightedDscr >= 1.25
+                            ? "above 1.25 lender bar"
+                            : "below 1.25 lender bar"}
+                      </div>
+                    </div>
+                    <div className="rounded-xl border border-border bg-card p-3">
+                      <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                        <DollarSign className="h-3.5 w-3.5" /> Cash to Close
+                      </div>
+                      <div className="mt-1 text-lg font-bold text-foreground">
+                        {kpis.cashToClose == null
+                          ? "—"
+                          : formatCurrency(kpis.cashToClose, true)}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground">
+                        down + closing, active deals
+                      </div>
+                    </div>
+                    <div
+                      className={cn(
+                        "rounded-xl border p-3",
+                        kpis.needsReviewCount > 0
+                          ? "border-destructive/30 bg-destructive/5"
+                          : kpis.cashFlowCoverageComplete
+                            ? "border-border bg-card"
+                            : "border-warning/35 bg-warning/10",
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest",
+                          kpis.needsReviewCount > 0
+                            ? "text-destructive"
+                            : kpis.cashFlowCoverageComplete
+                              ? "text-muted-foreground"
+                              : "text-warning-foreground",
+                        )}
+                      >
+                        <AlertTriangle className="h-3.5 w-3.5" /> Needs Review
+                      </div>
+                      <div className="mt-1 text-lg font-bold text-foreground">
+                        {!kpis.cashFlowCoverageComplete &&
+                        kpis.needsReviewCount === 0
+                          ? "—"
+                          : kpis.needsReviewCount}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground">
+                        {!kpis.cashFlowCoverageComplete
+                          ? `${kpis.cashFlowKnownCount} of ${kpis.cashFlowTotalCount} with cash-flow data`
+                          : kpis.needsReviewCount === 0
+                          ? "all cash-flow positive"
+                          : kpis.needsReviewCount === 1
+                            ? "deal cash-flow negative"
+                            : "deals cash-flow negative"}
+                      </div>
+                    </div>
                   </div>
-                  <div className="mt-1 text-lg font-bold text-foreground">
-                    {kpis.weightedDscr == null ? "—" : `${kpis.weightedDscr.toFixed(2)}×`}
-                  </div>
-                  <div className="text-[10px] text-muted-foreground">
-                    {kpis.weightedDscr == null
-                      ? "cash purchases only"
-                      : kpis.weightedDscr >= 1.25
-                        ? "above 1.25 lender bar"
-                        : "below 1.25 lender bar"}
-                  </div>
-                </div>
-                <div className="rounded-xl border border-border bg-card p-3">
-                  <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    <DollarSign className="h-3.5 w-3.5" /> Cash to Close
-                  </div>
-                  <div className="mt-1 text-lg font-bold text-foreground">
-                    {kpis.cashToClose == null ? "—" : formatCurrency(kpis.cashToClose, true)}
-                  </div>
-                  <div className="text-[10px] text-muted-foreground">down + closing, active deals</div>
-                </div>
-                <div
-                  className={cn(
-                    "rounded-xl border p-3",
-                    kpis.needsReviewCount > 0 ? "border-destructive/30 bg-destructive/5" : "border-border bg-card"
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest",
-                      kpis.needsReviewCount > 0 ? "text-destructive" : "text-muted-foreground"
-                    )}
-                  >
-                    <AlertTriangle className="h-3.5 w-3.5" /> Needs Review
-                  </div>
-                  <div className="mt-1 text-lg font-bold text-foreground">{kpis.needsReviewCount}</div>
-                  <div className="text-[10px] text-muted-foreground">
-                    {kpis.needsReviewCount === 0
-                      ? "all cash-flow positive"
-                      : kpis.needsReviewCount === 1
-                        ? "deal cash-flow negative"
-                        : "deals cash-flow negative"}
-                  </div>
-                </div>
-              </div>
+                ) : null}
+              </section>
             ) : null}
-          </section>
-        ) : null}
 
-        {/* ── Pipeline summary — count + value per acquisition stage.
+            {/* ── Pipeline summary — count + value per acquisition stage.
             Self-hides unless deals span ≥2 stages (Pro feature; invisible
             until the user actually moves deals through the funnel). */}
-        {pipeline ? (
-          <section>
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Pipeline</h2>
-              <Link
-                href="/dashboard/saved-analyses"
-                prefetch={false}
-                className="inline-flex min-h-11 items-center text-xs font-semibold text-primary underline-offset-2 hover:underline"
-              >
-                Manage →
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
-              {pipeline.segments.map((seg) => (
-                <div key={seg.id} className="rounded-xl border border-border bg-card p-3">
-                  <div className="truncate text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    {seg.label}
-                  </div>
-                  <div className="mt-1 text-lg font-bold text-foreground">{seg.count}</div>
-                  <div className="truncate text-[11px] text-muted-foreground">{formatCurrency(seg.value, true)}</div>
+            {pipeline ? (
+              <section>
+                <div className="mb-3 flex items-center justify-between">
+                  <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                    Pipeline
+                  </h2>
+                  <Link
+                    href="/dashboard/saved-analyses"
+                    prefetch={false}
+                    className="inline-flex min-h-11 items-center text-xs font-semibold text-primary underline-offset-2 hover:underline"
+                  >
+                    Manage →
+                  </Link>
                 </div>
-              ))}
-            </div>
-          </section>
-        ) : null}
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+                  {pipeline.segments.map((seg) => (
+                    <div
+                      key={seg.id}
+                      className="rounded-xl border border-border bg-card p-3"
+                    >
+                      <div className="truncate text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                        {seg.label}
+                      </div>
+                      <div className="mt-1 text-lg font-bold text-foreground">
+                        {seg.count}
+                      </div>
+                      <div className="truncate text-[11px] text-muted-foreground">
+                        {formatCurrency(seg.value, true)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            ) : null}
 
-        {/* ── Spotlight rail — best of the book by 3 lenses ──────────
+            {/* ── Spotlight rail — best of the book by 3 lenses ──────────
             Converted from 3 full-width StatCards (which visually
             duplicated the portfolio row above) to a distinct compact
             list style. Each row: icon + metric label + headline value
@@ -1416,97 +1785,106 @@ export function DashboardHome({
             mobile. Visually distinct from the StatCards above so the
             eye doesn't read "7 of the same thing." Clickable: hover +
             chevron affordance signals the deep-link interaction. */}
-        {hasAnyDeals && data.allDeals.length >= 2 && data.topDeals.length > 0 ? (
-          // hidden below sm: these 3 rows are a subset of what Decision
-          // Center + Portfolio Signals already show — on a phone this was
-          // the 4th re-summarization of the same deals before any deal
-          // list (mobile density audit DH-1). Desktop unchanged.
-          // ≥2 gate (FFM-2, mirrors getPipelineSummary's ≥2 pattern): with
-          // one saved deal all three "best of" rows crown the same address
-          // — fake-analytics padding on a truth-layer product. The 1-deal
-          // slot renders the honest nudge card below instead.
-          <section className="hidden sm:block">
-            <div className="mb-3">
-              <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                Top performers
-              </h2>
-            </div>
-            <div className="overflow-hidden rounded-xl border border-border bg-card divide-y divide-border">
-              {(
-                [
-                  {
-                    icon: Award,
-                    label: "Highest Screening Index",
-                    value:
-                      highlights.byScore?.score == null
-                        ? "—"
-                        : `${Math.round(highlights.byScore.score)} / 100`,
-                    valueTitle: undefined,
-                    address: highlights.byScore?.address ?? "—",
-                    deal: highlights.byScore,
-                  },
-                  {
-                    icon: DollarSign,
-                    label: "Highest Cash Flow",
-                    value: formatSignedCurrency(highlights.byCashFlow?.cashFlowMonthly),
-                    valueTitle: undefined,
-                    address: highlights.byCashFlow?.address ?? "—",
-                    deal: highlights.byCashFlow,
-                  },
-                  {
-                    icon: TrendingUp,
-                    // 10-yr ROI is cumulative (exitScenarios.summary.totalROI)
-                    // — label carries the time-frame so 900%+ values don't
-                    // read as nonsense beside annual cap rates. Extreme
-                    // values (finding 5) render the framed band; the raw
-                    // figure stays reachable via valueTitle (title attr).
-                    label: "Highest 10-Yr ROI (cumulative)",
-                    value: formatRoiHeadline(highlights.byRoi?.roiPct, { decimals: 1, compact: true }).text,
-                    valueTitle: formatRoiHeadline(highlights.byRoi?.roiPct, { decimals: 1, compact: true }).title,
-                    address: highlights.byRoi?.address ?? "—",
-                    deal: highlights.byRoi,
-                  },
-                ] as const
-              ).map((row) => {
-                const Icon = row.icon;
-                return (
-                  <button
-                    key={row.label}
-                    type="button"
-                    onClick={() => scrollToDeal(row.deal)}
-                    aria-label={`${row.label}: ${row.address} — jump to it in the deal list`}
-                    className="group flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-muted/40 sm:gap-4 sm:px-5 sm:py-3.5"
-                  >
-                    <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                      <Icon className="size-4" />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                        {row.label}
-                      </span>
-                      <span className="block truncate text-sm font-semibold text-foreground sm:text-[15px]">
-                        {row.address}
-                      </span>
-                    </span>
-                    <span className="shrink-0 text-right">
-                      <span
-                        className="block text-sm font-extrabold tabular-nums text-foreground sm:text-lg"
-                        title={row.valueTitle}
+            {hasAnyDeals &&
+            data.allDeals.length >= 2 &&
+            data.topDeals.length > 0 ? (
+              // hidden below sm: these 3 rows are a subset of what Decision
+              // Center + Portfolio Signals already show — on a phone this was
+              // the 4th re-summarization of the same deals before any deal
+              // list (mobile density audit DH-1). Desktop unchanged.
+              // ≥2 gate (FFM-2, mirrors getPipelineSummary's ≥2 pattern): with
+              // one saved deal all three "best of" rows crown the same address
+              // — fake-analytics padding on a truth-layer product. The 1-deal
+              // slot renders the honest nudge card below instead.
+              <section className="hidden sm:block">
+                <div className="mb-3">
+                  <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                    Top performers
+                  </h2>
+                </div>
+                <div className="overflow-hidden rounded-xl border border-border bg-card divide-y divide-border">
+                  {(
+                    [
+                      {
+                        icon: Award,
+                        label: "Highest Screening Index",
+                        value:
+                          highlights.byScore?.score == null
+                            ? "—"
+                            : `${Math.round(highlights.byScore.score)} / 100`,
+                        valueTitle: undefined,
+                        address: highlights.byScore?.address ?? "—",
+                        deal: highlights.byScore,
+                      },
+                      {
+                        icon: DollarSign,
+                        label: "Highest Cash Flow",
+                        value: formatSignedCurrency(
+                          highlights.byCashFlow?.cashFlowMonthly,
+                        ),
+                        valueTitle: undefined,
+                        address: highlights.byCashFlow?.address ?? "—",
+                        deal: highlights.byCashFlow,
+                      },
+                      {
+                        icon: TrendingUp,
+                        // 10-yr ROI is cumulative (exitScenarios.summary.totalROI)
+                        // — label carries the time-frame so 900%+ values don't
+                        // read as nonsense beside annual cap rates. Extreme
+                        // values (finding 5) render the framed band; the raw
+                        // figure stays reachable via valueTitle (title attr).
+                        label: "Highest 10-Yr ROI (cumulative)",
+                        value: formatRoiHeadline(highlights.byRoi?.roiPct, {
+                          decimals: 1,
+                          compact: true,
+                        }).text,
+                        valueTitle: formatRoiHeadline(
+                          highlights.byRoi?.roiPct,
+                          { decimals: 1, compact: true },
+                        ).title,
+                        address: highlights.byRoi?.address ?? "—",
+                        deal: highlights.byRoi,
+                      },
+                    ] as const
+                  ).map((row) => {
+                    const Icon = row.icon;
+                    return (
+                      <button
+                        key={row.label}
+                        type="button"
+                        onClick={() => scrollToDeal(row.deal)}
+                        aria-label={`${row.label}: ${row.address} — jump to it in the deal list`}
+                        className="group flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-muted/40 sm:gap-4 sm:px-5 sm:py-3.5"
                       >
-                        {row.value}
-                      </span>
-                    </span>
-                    <ArrowUpDown
-                      aria-hidden
-                      className="hidden size-3.5 shrink-0 text-muted-foreground/30 transition group-hover:translate-x-0.5 group-hover:text-primary sm:block sm:size-4"
-                    />
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-        ) : null}
-
+                        <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                          <Icon className="size-4" />
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                            {row.label}
+                          </span>
+                          <span className="block truncate text-sm font-semibold text-foreground sm:text-[15px]">
+                            {row.address}
+                          </span>
+                        </span>
+                        <span className="shrink-0 text-right">
+                          <span
+                            className="block text-sm font-extrabold tabular-nums text-foreground sm:text-lg"
+                            title={row.valueTitle}
+                          >
+                            {row.value}
+                          </span>
+                        </span>
+                        <ArrowUpDown
+                          aria-hidden
+                          className="hidden size-3.5 shrink-0 text-muted-foreground/30 transition group-hover:translate-x-0.5 group-hover:text-primary sm:block sm:size-4"
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+            ) : null}
           </>
         ) : null}
 
@@ -1522,13 +1900,20 @@ export function DashboardHome({
               <div>
                 {/* "active" — the sidebar's My Deals badge counts archived/
                     completed too, so a bare "1 saved deal" could contradict it. */}
-                <h2 className="text-sm font-semibold text-foreground">You have 1 active deal</h2>
+                <h2 className="text-sm font-semibold text-foreground">
+                  You have 1 active deal
+                </h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Save a second deal to unlock rankings, risk/return, and side-by-side compare.
+                  Save a second deal to unlock rankings, risk/return, and
+                  side-by-side compare.
                 </p>
               </div>
-              <Button asChild variant="outline" className="min-h-11 shrink-0 rounded-xl px-4 text-sm">
-                <Link href="/dashboard/new" prefetch={false}>
+              <Button
+                asChild
+                variant="outline"
+                className="min-h-11 shrink-0 rounded-xl px-4 text-sm"
+              >
+                <Link href="/dashboard/new?fresh=1" prefetch={false}>
                   <Plus className="h-4 w-4" />
                   Analyze another property
                 </Link>
@@ -1557,9 +1942,13 @@ export function DashboardHome({
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
               <Briefcase className="h-7 w-7" />
             </div>
-            <h2 className="text-xl font-bold text-foreground">Your dashboard is ready</h2>
+            <h2 className="text-xl font-bold text-foreground">
+              Your dashboard is ready
+            </h2>
             <p className="mt-2 text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
-              Run {savedTotalCount > 0 ? "a" : "your first"} rental property through the analyzer and save it. You&apos;ll see portfolio totals, top performers, and risk/return analysis here.
+              Run {savedTotalCount > 0 ? "a" : "your first"} rental property
+              through the analyzer and save it. You&apos;ll see portfolio
+              totals, top performers, and risk/return analysis here.
               {/* FFM-3: the one personalization feature worth naming up front —
                   a buy box makes every future deal get a personal pass/fail. */}{" "}
               Set{" "}
@@ -1575,11 +1964,16 @@ export function DashboardHome({
             <Button
               asChild
               className="mt-5 min-h-11 rounded-xl px-5"
-              style={{ background: "var(--gradient-premium)", boxShadow: "var(--shadow-glow)" }}
+              style={{
+                background: "var(--gradient-premium)",
+                boxShadow: "var(--shadow-glow)",
+              }}
             >
-              <Link href="/dashboard/new">
+              <Link href="/dashboard/new?fresh=1">
                 <Plus className="h-4 w-4" />
-                {savedTotalCount > 0 ? "Analyze a property" : "Analyze your first property"}
+                {savedTotalCount > 0
+                  ? "Analyze a property"
+                  : "Analyze your first property"}
               </Link>
             </Button>
           </div>
@@ -1605,7 +1999,9 @@ export function DashboardHome({
                     themselves stay (they're deal-count-aware via FFM-4). */}
                 <AIInsights
                   data={insights}
-                  riskReturnInsights={data.allDeals.length >= 2 ? riskReturn.insights : undefined}
+                  riskReturnInsights={
+                    data.allDeals.length >= 2 ? riskReturn.insights : undefined
+                  }
                 />
               </div>
               <div className="xl:col-span-2">
@@ -1615,7 +2011,9 @@ export function DashboardHome({
             {/* NT-4: honest sample label — only renders when deals were
                 actually left out of the charts above. */}
             {sampledNote ? (
-              <p className="mt-2 px-1 text-[11px] text-muted-foreground">{sampledNote}</p>
+              <p className="mt-2 px-1 text-[11px] text-muted-foreground">
+                {sampledNote}
+              </p>
             ) : null}
           </div>
         ) : null}
@@ -1631,7 +2029,9 @@ export function DashboardHome({
           <div>
             <TopDeals data={topDeals} />
             {sampledNote ? (
-              <p className="mt-2 px-1 text-[11px] text-muted-foreground">{sampledNote}</p>
+              <p className="mt-2 px-1 text-[11px] text-muted-foreground">
+                {sampledNote}
+              </p>
             ) : null}
           </div>
         ) : null}

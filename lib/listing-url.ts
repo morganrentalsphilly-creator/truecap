@@ -25,6 +25,8 @@ export interface ParsedListing {
   address: string;
   /** Two-letter state, uppercased, when recoverable from the slug. */
   state?: string;
+  /** Five-digit ZIP, when recoverable from the slug. */
+  zip?: string;
   /** Which portal the URL was recognized as. */
   source: "zillow" | "redfin" | "realtor" | "homes" | "trulia" | "generic";
 }
@@ -52,13 +54,29 @@ function findState(address: string): string | undefined {
   return undefined;
 }
 
+/** Find a five-digit ZIP while ignoring an optional ZIP+4 suffix. */
+function findZip(address: string): string | undefined {
+  const tokens = address.split(/\s+/);
+  for (let index = 0; index < tokens.length - 1; index += 1) {
+    if (!US_STATES.has(tokens[index].toUpperCase())) continue;
+    const next = tokens[index + 1].match(/^(\d{5})(?:-\d{4})?$/);
+    if (next) return next[1];
+  }
+  // Redfin places ZIP inside the street slug, before the separately encoded
+  // city/state segments. The final ZIP-shaped token is the safest fallback:
+  // it avoids treating a five-digit street number as the ZIP.
+  const matches = [...address.matchAll(/\b(\d{5})(?:-\d{4})?\b/g)];
+  return matches.at(-1)?.[1];
+}
+
 function finalize(slug: string, source: ParsedListing["source"]): ParsedListing | null {
   const address = deslug(slug);
   // Require something that plausibly contains a street number + a state, so we
   // don't hand the geocoder a city-only or junk slug.
   if (!/\d/.test(address)) return null;
   const state = findState(address);
-  return { address, state, source };
+  const zip = findZip(address);
+  return { address, state, zip, source };
 }
 
 /**
@@ -111,6 +129,7 @@ export function parseListingUrl(raw: string): ParsedListing | null {
         return {
           address,
           state: US_STATES.has(st.toUpperCase()) ? st.toUpperCase() : findState(address),
+          zip: findZip(address),
           source: "redfin",
         };
       }
@@ -135,7 +154,12 @@ export function parseListingUrl(raw: string): ParsedListing | null {
   if (candidate) {
     const address = deslug(candidate);
     if (findState(address) || /\b\d{5}\b/.test(address)) {
-      return { address, state: findState(address), source: "generic" };
+      return {
+        address,
+        state: findState(address),
+        zip: findZip(address),
+        source: "generic",
+      };
     }
   }
 

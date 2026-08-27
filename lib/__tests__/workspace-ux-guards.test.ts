@@ -18,8 +18,12 @@ describe("decision workspace UX guards", () => {
 
   it("explains aggregate cash flow as a current-assumption portfolio scenario", () => {
     const source = read("components/dashboard/DashboardHome.tsx");
-    expect(source).toContain("If all ${portfolio.activeCount} active");
+    expect(source).toContain("If all ${portfolio.totalCount} active");
     expect(source).toContain("closed at current assumptions");
+    expect(source).toContain(
+      "Known total across ${portfolio.cashFlowSampleCount} of ${portfolio.totalCount} active deals",
+    );
+    expect(source).toContain("portfolio.cashFlowSampleCount === 0");
   });
 
   it("keeps Decision Center comparisons factual instead of issuing investment directives", () => {
@@ -89,14 +93,14 @@ describe("decision workspace UX guards", () => {
 
   it("keeps every Analyze another property action inside the dashboard workflow", () => {
     const home = read("components/dashboard/DashboardHome.tsx");
-    const analyzeActions = home.match(
-      /label: "Analyze another property", href: "[^"]+"/g,
+    const analyzeActions = home.replace(/\s+/g, "").match(
+      /label:"Analyzeanotherproperty",href:"[^"]+"/g,
     );
 
     expect(analyzeActions?.length).toBe(2);
     expect(analyzeActions).toEqual([
-      'label: "Analyze another property", href: "/dashboard/new"',
-      'label: "Analyze another property", href: "/dashboard/new"',
+      'label:"Analyzeanotherproperty",href:"/dashboard/new?fresh=1"',
+      'label:"Analyzeanotherproperty",href:"/dashboard/new?fresh=1"',
     ]);
   });
 

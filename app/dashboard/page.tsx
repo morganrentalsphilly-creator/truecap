@@ -411,6 +411,8 @@ export default async function DashboardPage() {
     let capNum = 0;
     let capDen = 0;
     let activeCount = 0;
+    let cashFlowSampleCount = 0;
+    let capRateSampleCount = 0;
     // NT-4: Decision Center / KPI winners tracked over the FULL active set —
     // scalars only (id + label + value), never the row set, so a 21+-deal
     // user's deal #23 can win "Best deal" or trip "Needs review" without
@@ -460,6 +462,7 @@ export default async function DashboardPage() {
         if (Number.isFinite(cap) && r.purchase_price > 0) {
           capNum += cap * r.purchase_price;
           capDen += r.purchase_price;
+          capRateSampleCount += 1;
         }
       }
       // Cash flow with the SAME fresh → snapshot → denormalized fallback chain
@@ -475,7 +478,10 @@ export default async function DashboardPage() {
             ? ncfSnap
             : r.net_cash_flow_monthly;
       }
-      totalCashFlow += ncf ?? 0;
+      if (typeof ncf === "number" && Number.isFinite(ncf)) {
+        totalCashFlow += ncf;
+        cashFlowSampleCount += 1;
+      }
       const resolvedScore = fresh?.score ?? (r.score_raw != null ? Number(r.score_raw) : null);
       const resolvedRecommendation = fresh?.recommendation ?? r.recommendation_raw;
       if (
@@ -515,6 +521,8 @@ export default async function DashboardPage() {
         weightedCap: capDen > 0 ? capNum / capDen : null,
         activeCount,
         totalCount: aggRows.length,
+        cashFlowSampleCount,
+        capRateSampleCount,
         winners: { bestByScore, worstNegative, bestRoi, negativeCount },
       };
     }

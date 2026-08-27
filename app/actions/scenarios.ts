@@ -65,10 +65,7 @@ import {
   SPECIALIST_ANALYSIS_SNAPSHOT_FIELD,
 } from "@/lib/specialist-analysis-snapshot";
 import { retargetUnchangedScenarioResultSnapshot } from "@/lib/scenario-result-snapshot";
-import {
-  isSavedDealArchived,
-  persistedLifecycleForSimpleState,
-} from "@/lib/saved-deal-lifecycle";
+import { persistedLifecycleForSimpleState } from "@/lib/saved-deal-lifecycle";
 
 export type ScenarioSummary = {
   id: string;
@@ -445,20 +442,14 @@ export async function addScenarioAction(
   clone.property_id = propertyId;
   clone.scenario_name = scenarioName;
   clone.strategy_kind = strategyKind;
-  // An archived row may donate assumptions to a new scenario, but the clone
-  // is a distinct deal to evaluate. Never inherit the terminal Passed/archive
-  // lifecycle or the newly created scenario becomes impossible to open.
-  if (
-    isSavedDealArchived({
-      pipeline_stage: deal.pipeline_stage,
-      is_completed:
-        typeof deal.is_completed === "boolean" ? deal.is_completed : null,
-      is_archived:
-        typeof deal.is_archived === "boolean" ? deal.is_archived : null,
-    })
-  ) {
-    Object.assign(clone, persistedLifecycleForSimpleState("active"));
-  }
+  // The source may donate assumptions from any lifecycle state, but a scenario
+  // is always a new deal to evaluate. Never inherit Passed, Closed, or stale
+  // compatibility flags that would hide or lock the newly created scenario.
+  Object.assign(clone, persistedLifecycleForSimpleState("active"));
+  // A scenario is a fresh underwriting branch, not a second owned property.
+  // Clear the source close date when that optional column exists so closing
+  // the scenario later cannot backdate its equity history to the base deal.
+  if ("close_date" in clone) clone.close_date = null;
   // Never inherit the source deal's cached PDF: the export cache checks only
   // pdf_url presence + version (no input hash), so a carried-over URL would
   // serve the BASE case's report for this scenario. Same reset saveDealAction

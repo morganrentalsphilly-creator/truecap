@@ -9,6 +9,7 @@ describe("parseListingUrl", () => {
     expect(r).not.toBeNull();
     expect(r!.source).toBe("zillow");
     expect(r!.state).toBe("AZ");
+    expect(r!.zip).toBe("85382");
     expect(r!.address).toBe("16601 N 25th Ave Phoenix AZ 85382");
   });
 
@@ -19,6 +20,7 @@ describe("parseListingUrl", () => {
     expect(r).not.toBeNull();
     expect(r!.source).toBe("redfin");
     expect(r!.state).toBe("CA");
+    expect(r!.zip).toBe("94110");
     expect(r!.address).toContain("123 Main St");
     expect(r!.address).toContain("San Francisco");
     expect(r!.address).toContain("CA");
@@ -31,6 +33,7 @@ describe("parseListingUrl", () => {
     expect(r).not.toBeNull();
     expect(r!.source).toBe("realtor");
     expect(r!.state).toBe("TX");
+    expect(r!.zip).toBe("78701");
     expect(r!.address).toContain("123 Main St");
     expect(r!.address).toContain("78701");
   });
@@ -39,6 +42,7 @@ describe("parseListingUrl", () => {
     const r = parseListingUrl("https://www.homes.com/property/450-W-2nd-St-Reno-NV-89503/id-987/");
     expect(r).not.toBeNull();
     expect(r!.state).toBe("NV");
+    expect(r!.zip).toBe("89503");
     expect(r!.address).toContain("450 W 2nd St");
   });
 

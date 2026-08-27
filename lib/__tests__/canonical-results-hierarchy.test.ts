@@ -44,13 +44,23 @@ describe("canonical first-year results hierarchy", () => {
     const summary = read("components/investcalc/focused-decision-summary.tsx");
     const dashboard = read("components/investcalc/analysis-dashboard.tsx");
 
-    expect(summary).toContain("Next deal · copy assumptions");
+    expect(summary).toContain("Next deal");
+    expect(summary).toContain("ShareLinkButton");
     expect(summary).toContain("New analysis");
     expect(summary).toContain("Compare deals");
     expect(summary).toContain("onCompareDeals");
     expect(dashboard).toContain("onAnalyzeAnotherLikeThis={onAnalyzeAnotherLikeThis}");
     expect(dashboard).toContain("onNewAnalysis={onNewAnalysis}");
     expect(dashboard).toContain("onCompareDeals={onCompareDeals}");
+  });
+
+  it("keeps the contextual next step visible without opening decision details", () => {
+    const summary = read("components/investcalc/focused-decision-summary.tsx");
+
+    expect(summary).toContain('data-result-next-action=""');
+    expect(summary.indexOf('data-result-next-action=""')).toBeLessThan(
+      summary.indexOf("Decision context and key numbers"),
+    );
   });
 
   it("puts the complete first-year investment snapshot above secondary actions", () => {

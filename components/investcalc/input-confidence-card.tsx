@@ -15,6 +15,8 @@ import {
   type InputConfidenceFieldKey,
   type InputConfidenceResult,
 } from "@/lib/input-confidence";
+import { formatAssumptionLedgerValue } from "@/lib/assumption-ledger-value";
+import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import {
   buildAssumptionLedger,
   type AssumptionConfirmationType,
@@ -24,6 +26,8 @@ import { cn } from "@/lib/utils";
 
 type Props = {
   confidence: InputConfidenceResult;
+  /** Frozen values used for the displayed analysis, never live form edits. */
+  values: InvestmentFormValues;
   dealFitScore?: number | null;
   showOfferReadyStatus?: boolean;
   advocacyContractEnabled?: boolean;
@@ -60,6 +64,7 @@ const CONFIRMATION_LABEL: Record<AssumptionConfirmationType, string> = {
  */
 export function InputConfidenceCard({
   confidence,
+  values,
   dealFitScore,
   showOfferReadyStatus = true,
   advocacyContractEnabled = false,
@@ -348,6 +353,13 @@ export function InputConfidenceCard({
                           <p className="font-bold text-foreground">
                             {item.label}
                           </p>
+                          <p
+                            className="mt-0.5 break-words font-mono text-sm font-bold tabular-nums text-foreground"
+                            data-assumption-ledger-value={item.key}
+                          >
+                            <span className="sr-only">Value: </span>
+                            {formatAssumptionLedgerValue(item.key, values)}
+                          </p>
                           <p className="mt-0.5 text-muted-foreground">
                             {SOURCE_CLASS_LABEL[ledgerItem.sourceClass]}
                           </p>
@@ -403,12 +415,13 @@ export function InputConfidenceCard({
               <div className="hidden overflow-x-auto sm:block">
                 <table className="w-full min-w-[720px] text-left text-xs">
                   <caption className="sr-only">
-                    Assumption source, confirmation type, evidence flags, and
-                    review control
+                    Assumption values, sources, confirmation types, evidence
+                    flags, and review controls
                   </caption>
                   <thead className="bg-muted/50 text-[10px] uppercase tracking-wider text-muted-foreground">
                     <tr>
                       <th className="px-3 py-2 font-bold">Input</th>
+                      <th className="px-3 py-2 font-bold">Value</th>
                       <th className="px-3 py-2 font-bold">Source class</th>
                       <th className="px-3 py-2 font-bold">Source</th>
                       <th className="px-3 py-2 font-bold">Confirmation</th>
@@ -422,6 +435,12 @@ export function InputConfidenceCard({
                         <tr key={item.key}>
                           <td className="px-3 py-2 font-semibold text-foreground">
                             {item.label}
+                          </td>
+                          <td
+                            className="whitespace-nowrap px-3 py-2 font-mono font-semibold tabular-nums text-foreground"
+                            data-assumption-ledger-value={item.key}
+                          >
+                            {formatAssumptionLedgerValue(item.key, values)}
                           </td>
                           <td className="px-3 py-2 text-muted-foreground">
                             {SOURCE_CLASS_LABEL[ledgerItem.sourceClass]}
@@ -475,75 +494,145 @@ export function InputConfidenceCard({
               </div>
             </>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[760px] text-left text-xs">
-                <caption className="sr-only">
-                  Input source, scoring points, and confirmation status for
-                  every underwriting input
-                </caption>
-                <thead className="bg-muted/50 text-[10px] uppercase tracking-wider text-muted-foreground">
-                  <tr>
-                    <th className="px-3 py-2 font-bold">Input</th>
-                    <th className="px-3 py-2 font-bold">Source class</th>
-                    <th className="px-3 py-2 font-bold">Source</th>
-                    <th className="px-3 py-2 text-right font-bold">Points</th>
-                    <th className="px-3 py-2 text-right font-bold">
-                      Confirmation
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {confidence.fields.map((item) => (
-                    <tr key={item.key}>
-                      <td className="px-3 py-2 font-semibold text-foreground">
-                        {item.label}
-                      </td>
-                      <td className="px-3 py-2 text-muted-foreground">
-                        {inputSourceClassLabel(item.sourceClass)}
-                      </td>
-                      <td className="px-3 py-2 text-muted-foreground">
-                        {item.sourceLabel}
-                      </td>
-                      <td className="px-3 py-2 text-right font-mono tabular-nums text-foreground">
-                        {item.maxPoints === 0
-                          ? "—"
-                          : `${item.earnedPoints.toFixed(1)} / ${item.maxPoints}`}
-                      </td>
-                      <td className="px-3 py-2 text-right">
-                        {item.sourceClass === "not-applicable" ? (
-                          <span className="text-muted-foreground">—</span>
-                        ) : (
-                          <button
-                            type="button"
-                            aria-pressed={verified.has(item.key)}
-                            aria-label={
-                              verified.has(item.key)
-                                ? `Mark ${item.label} as unverified`
-                                : `Confirm ${item.label} as verified`
-                            }
-                            onClick={() =>
-                              onToggleVerified(
-                                item.key,
-                                !verified.has(item.key),
-                              )
-                            }
-                            className={cn(
-                              "inline-flex min-h-11 items-center gap-1 rounded-md border px-3 text-[10px] font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                              verified.has(item.key)
-                                ? "border-emerald-300 bg-emerald-50 text-emerald-700"
-                                : "border-border bg-background text-muted-foreground hover:text-foreground",
-                            )}
-                          >
-                            <Check aria-hidden className="size-3" />
-                            {verified.has(item.key) ? "Confirmed" : "Confirm"}
-                          </button>
-                        )}
-                      </td>
+            <>
+              <ul className="divide-y divide-border sm:hidden">
+                {confidence.fields.map((item) => (
+                  <li key={item.key} className="space-y-2 p-3 text-xs">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-bold text-foreground">
+                          {item.label}
+                        </p>
+                        <p
+                          className="mt-0.5 break-words font-mono text-sm font-bold tabular-nums text-foreground"
+                          data-assumption-ledger-value={item.key}
+                        >
+                          <span className="sr-only">Value: </span>
+                          {formatAssumptionLedgerValue(item.key, values)}
+                        </p>
+                        <p className="mt-1 text-muted-foreground">
+                          {inputSourceClassLabel(item.sourceClass)} ·{" "}
+                          {item.sourceLabel}
+                        </p>
+                        <p className="mt-1 text-muted-foreground">
+                          Confidence points:{" "}
+                          {item.maxPoints === 0
+                            ? "not applicable"
+                            : `${item.earnedPoints.toFixed(1)} of ${item.maxPoints}`}
+                        </p>
+                      </div>
+                      {item.sourceClass === "not-applicable" ? (
+                        <span className="shrink-0 text-muted-foreground">
+                          N/A
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          aria-pressed={verified.has(item.key)}
+                          aria-label={
+                            verified.has(item.key)
+                              ? `Mark ${item.label} as unverified`
+                              : `Confirm ${item.label} as verified`
+                          }
+                          onClick={() =>
+                            onToggleVerified(item.key, !verified.has(item.key))
+                          }
+                          className={cn(
+                            "inline-flex min-h-11 shrink-0 items-center gap-1 rounded-md border px-3 text-[10px] font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                            verified.has(item.key)
+                              ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                              : "border-border bg-background text-muted-foreground hover:text-foreground",
+                          )}
+                        >
+                          <Check aria-hidden className="size-3" />
+                          {verified.has(item.key) ? "Confirmed" : "Confirm"}
+                        </button>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              <div
+                className="hidden overflow-x-auto sm:block"
+                tabIndex={0}
+                aria-label="Scrollable input confidence table"
+              >
+                <table className="w-full min-w-[760px] text-left text-xs">
+                  <caption className="sr-only">
+                    Input value, source, scoring points, and confirmation status
+                    for every underwriting input
+                  </caption>
+                  <thead className="bg-muted/50 text-[10px] uppercase tracking-wider text-muted-foreground">
+                    <tr>
+                      <th className="px-3 py-2 font-bold">Input</th>
+                      <th className="px-3 py-2 font-bold">Value</th>
+                      <th className="px-3 py-2 font-bold">Source class</th>
+                      <th className="px-3 py-2 font-bold">Source</th>
+                      <th className="px-3 py-2 text-right font-bold">Points</th>
+                      <th className="px-3 py-2 text-right font-bold">
+                        Confirmation
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {confidence.fields.map((item) => (
+                      <tr key={item.key}>
+                        <td className="px-3 py-2 font-semibold text-foreground">
+                          {item.label}
+                        </td>
+                        <td
+                          className="whitespace-nowrap px-3 py-2 font-mono font-semibold tabular-nums text-foreground"
+                          data-assumption-ledger-value={item.key}
+                        >
+                          {formatAssumptionLedgerValue(item.key, values)}
+                        </td>
+                        <td className="px-3 py-2 text-muted-foreground">
+                          {inputSourceClassLabel(item.sourceClass)}
+                        </td>
+                        <td className="px-3 py-2 text-muted-foreground">
+                          {item.sourceLabel}
+                        </td>
+                        <td className="px-3 py-2 text-right font-mono tabular-nums text-foreground">
+                          {item.maxPoints === 0
+                            ? "—"
+                            : `${item.earnedPoints.toFixed(1)} / ${item.maxPoints}`}
+                        </td>
+                        <td className="px-3 py-2 text-right">
+                          {item.sourceClass === "not-applicable" ? (
+                            <span className="text-muted-foreground">—</span>
+                          ) : (
+                            <button
+                              type="button"
+                              aria-pressed={verified.has(item.key)}
+                              aria-label={
+                                verified.has(item.key)
+                                  ? `Mark ${item.label} as unverified`
+                                  : `Confirm ${item.label} as verified`
+                              }
+                              onClick={() =>
+                                onToggleVerified(
+                                  item.key,
+                                  !verified.has(item.key),
+                                )
+                              }
+                              className={cn(
+                                "inline-flex min-h-11 items-center gap-1 rounded-md border px-3 text-[10px] font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                                verified.has(item.key)
+                                  ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                                  : "border-border bg-background text-muted-foreground hover:text-foreground",
+                              )}
+                            >
+                              <Check aria-hidden className="size-3" />
+                              {verified.has(item.key) ? "Confirmed" : "Confirm"}
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
           <p className="border-t border-border bg-muted/20 px-3 py-2 text-[10px] leading-relaxed text-muted-foreground">
             {advocacyContractEnabled

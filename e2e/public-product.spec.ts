@@ -171,6 +171,81 @@ test("tablet investors keep one reachable analysis action below the desktop cock
   }
 });
 
+test("desktop investors can run from the live preview without hunting below the form", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await waitForCalculatorReady(page);
+
+  const form = page.locator('form[data-calc-form="true"]');
+  await form.scrollIntoViewIfNeeded();
+  const desktopAction = page.locator('[data-desktop-run-action="true"]');
+  const inFormAction = page.locator('[data-inform-submit="true"]');
+
+  await expect(desktopAction).toBeVisible();
+  await expectMinimumTouchTarget(desktopAction);
+  await expect(desktopAction).toHaveAccessibleName(/analy|sample/i);
+
+  // The sticky cockpit action retires when its canonical in-form equivalent
+  // enters view, preventing two primary controls in the same desktop screen.
+  await inFormAction.scrollIntoViewIfNeeded();
+  await expect(inFormAction).toBeVisible();
+  await expect(desktopAction).toBeHidden();
+});
+
+test("a second listing can never inherit the first property's price and rent", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await waitForCalculatorReady(page);
+
+  const form = page.locator('form[data-calc-form="true"]');
+  await form.scrollIntoViewIfNeeded();
+  const address = form.getByLabel("Property Address", { exact: true });
+  const price = form.getByLabel("Price to analyze", { exact: true });
+  const rent = form.getByLabel("Expected gross monthly rent", { exact: true });
+  await address.fill("2560 Collins St, Philadelphia, PA 19125, USA");
+  await price.fill("215000");
+  await rent.fill("1550");
+
+  const listingUrl =
+    "https://www.zillow.com/homedetails/909-New-Deal-St-Philadelphia-PA-19140/123456_zpid/";
+  const openListingInput = form.getByRole("button", {
+    name: "Use a listing link to fill the address",
+    exact: true,
+  });
+  await openListingInput.click();
+  await form.getByLabel("Paste a listing link", { exact: true }).fill(listingUrl);
+  const firstDialogPromise = page.waitForEvent("dialog");
+  const firstSubmitPromise = form
+    .getByRole("button", { name: "Use address from link", exact: true })
+    .click();
+  const firstDialog = await firstDialogPromise;
+  expect(firstDialog.message()).toContain("clear the previous property’s price");
+  await firstDialog.dismiss();
+  await firstSubmitPromise;
+  await expect(address).toHaveValue(
+    "2560 Collins St, Philadelphia, PA 19125, USA",
+  );
+  await expect(price).toHaveValue("215,000");
+  await expect(rent).toHaveValue("1,550");
+
+  await openListingInput.click();
+  await form.getByLabel("Paste a listing link", { exact: true }).fill(listingUrl);
+  const secondDialogPromise = page.waitForEvent("dialog");
+  const secondSubmitPromise = form
+    .getByRole("button", { name: "Use address from link", exact: true })
+    .click();
+  const secondDialog = await secondDialogPromise;
+  await secondDialog.accept();
+  await secondSubmitPromise;
+  await expect(address).toHaveValue(/909 New Deal St Philadelphia PA 19140/i);
+  await expect(price).not.toHaveValue("215,000");
+  await expect(rent).not.toHaveValue("1,550");
+});
+
 test("calculator inputs reflow at a 195 CSS-pixel effective viewport", async ({
   page,
 }) => {
@@ -443,11 +518,12 @@ test("anonymous sample reaches the decision-first result with one click", async 
   await expect(summary.getByText("Model DSCR", { exact: true })).toBeVisible();
   const tuneTargets = summary.getByRole("button", { name: /tune criteria/i });
   const save = summary.getByRole("button", { name: /^save/i });
-  const share = summary.getByRole("button", { name: /^share/i });
-  for (const action of [tuneTargets, save, share]) {
+  const nextDeal = summary.getByRole("button", { name: "Next deal", exact: true });
+  for (const action of [tuneTargets, save, nextDeal]) {
     await expect(action).toBeVisible();
     await expectMinimumTouchTarget(action);
   }
+  await expect(summary.locator('[data-result-next-action=""]')).toBeVisible();
   await expect(page.locator("[data-marketing-mobile-nav]")).toBeHidden();
   const primaryActions = summary.locator(
     '[aria-label="Primary result actions"]',
@@ -514,6 +590,14 @@ test("anonymous sample reaches the decision-first result with one click", async 
       decisionDisclosure.evaluate((element) => element.hasAttribute("open")),
     )
     .toBe(true);
+
+  const moreActions = summary
+    .locator("summary")
+    .filter({ hasText: "More actions" });
+  await moreActions.click();
+  const share = summary.getByRole("button", { name: /^share/i });
+  await expect(share).toBeVisible();
+  await expectMinimumTouchTarget(share);
 
   await expectNoSeriousAccessibilityViolations(page);
   await expectNoHorizontalOverflow(page);

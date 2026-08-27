@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   dispatchHeroAnalyzeWithFallback,
+  getListingImportMissingFields,
   HERO_ANALYZE_STORAGE_KEY,
   type HeroAnalyzeDetail,
 } from "@/lib/hero-handoff";
@@ -65,5 +66,55 @@ describe("hero analysis handoff", () => {
     scheduled.get(1_000)?.();
 
     expect(dispatch).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("listing import completion", () => {
+  it("names the minimum next inputs without implying bedrooms and rent are both required", () => {
+    expect(
+      getListingImportMissingFields({
+        propertyType: "single-family",
+      }),
+    ).toEqual([
+      { path: "purchasePrice", label: "asking price" },
+      {
+        path: "bedrooms",
+        label: "bedrooms to estimate area rent, or monthly rent",
+      },
+    ]);
+
+    expect(
+      getListingImportMissingFields({
+        propertyType: "single-family",
+        purchasePrice: 325_000,
+        bedrooms: 3,
+      }),
+    ).toEqual([{ path: "monthlyRent", label: "monthly rent" }]);
+  });
+
+  it("clears once the required single-family inputs are usable", () => {
+    expect(
+      getListingImportMissingFields({
+        propertyType: "single-family",
+        purchasePrice: 325_000,
+        monthlyRent: 2_600,
+      }),
+    ).toEqual([]);
+  });
+
+  it("identifies the exact rentable unit that remains for a house hack", () => {
+    expect(
+      getListingImportMissingFields({
+        propertyType: "owner-occupant",
+        purchasePrice: 450_000,
+        units: [
+          { isOwnerOccupied: true },
+          { monthlyRent: 1_650 },
+          { monthlyRent: undefined },
+        ],
+      }),
+    ).toEqual([
+      { path: "units.2.monthlyRent", label: "monthly rent for unit 3" },
+    ]);
   });
 });

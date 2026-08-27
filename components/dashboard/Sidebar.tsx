@@ -39,8 +39,9 @@ export function Sidebar({ activeDealCount, navAccess, mobile = false, onNavigate
   // `/dashboard` should only match the exact path so it doesn't also
   // light up for /dashboard/saved-analyses. Sub-routes match on prefix.
   const isActive = (href: string): boolean => {
-    if (href === "/dashboard") return pathname === "/dashboard";
-    return pathname === href || pathname.startsWith(`${href}/`);
+    const pathOnly = href.split("?", 1)[0] ?? href;
+    if (pathOnly === "/dashboard") return pathname === "/dashboard";
+    return pathname === pathOnly || pathname.startsWith(`${pathOnly}/`);
   };
 
   const nav = [
@@ -50,7 +51,7 @@ export function Sidebar({ activeDealCount, navAccess, mobile = false, onNavigate
     // link that /dashboard would immediately redirect to My Deals. Free users
     // still reach the dashboard area via the "My Deals" item just below.
     { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard", enabled: navAccess.overview },
-    { icon: PlusCircle, label: "New Analysis", href: "/dashboard/new", enabled: true },
+    { icon: PlusCircle, label: "New Analysis", href: "/dashboard/new?fresh=1", enabled: true },
     // ACTIVE deals only — the badge must agree with what /dashboard/saved-analyses
     // shows on arrival, which defaults to the Active filter. Counting archived
     // and completed deals here made the badge read higher than the list.
@@ -125,7 +126,7 @@ export function Sidebar({ activeDealCount, navAccess, mobile = false, onNavigate
                   onNavigate?.();
                   if (
                     item.enabled &&
-                    item.href === "/dashboard/new" &&
+                    item.href.startsWith("/dashboard/new") &&
                     pathname === "/dashboard/new"
                   ) {
                     event.preventDefault();
