@@ -1,12 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import Link from "next/link";
+import { useEffect, useMemo, useRef } from "react";
 import {
   Check,
   ChevronDown,
   CircleAlert,
-  ClipboardCheck,
   Database,
   ShieldCheck,
 } from "lucide-react";
@@ -14,9 +12,11 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   inputSourceClassLabel,
+  type InputConfidenceField,
   type InputConfidenceFieldKey,
   type InputConfidenceResult,
 } from "@/lib/input-confidence";
+import { computeAssumptionImpact } from "@/lib/assumption-impact";
 import { formatAssumptionLedgerValue } from "@/lib/assumption-ledger-value";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import type { AnalyzerStrategyKey } from "@/lib/analyzer-strategy-persistence";
@@ -37,11 +37,6 @@ type Props = {
   onEditAssumptions: () => void;
   onReviewInput?: (key: InputConfidenceFieldKey) => void;
   onToggleVerified: (key: InputConfidenceFieldKey, verified: boolean) => void;
-  savedDealId?: string | null;
-  /** True only when the displayed inputs match the persisted saved row. */
-  isCurrentAnalysisSaved?: boolean;
-  onSaveForVerification?: () => void;
-  isSaving?: boolean;
   analyzerStrategyKey?: AnalyzerStrategyKey;
   actionsBlocked?: boolean;
   actionsBlockedReason?: string;
@@ -69,11 +64,119 @@ const CONFIRMATION_LABEL: Record<AssumptionConfirmationType, string> = {
   "third-party-verified": "Third-party verified",
 };
 
+const IMPACT_FIELD_KEY: Readonly<Record<string, InputConfidenceFieldKey>> = {
+  rent: "rent",
+  interestRate: "interestRate",
+  purchasePrice: "purchasePrice",
+  vacancyPct: "vacancy",
+  mgmtPct: "management",
+  maintenancePct: "maintenance",
+  capexPct: "capex",
+  propertyTaxPct: "propertyTax",
+};
+
+const EDIT_ACTION_LABEL: Record<InputConfidenceFieldKey, string> = {
+  purchasePrice: "Edit price",
+  yearBuilt: "Edit year built",
+  rent: "Edit rent",
+  propertyTax: "Edit taxes",
+  insurance: "Edit insurance",
+  interestRate: "Edit rate",
+  downPayment: "Edit financing",
+  closingCosts: "Edit closing costs",
+  maintenance: "Edit maintenance",
+  capex: "Edit CapEx",
+  vacancy: "Edit vacancy",
+  management: "Edit management",
+  utilities: "Edit utilities",
+  hoa: "Edit HOA",
+  rehabBudget: "Edit rehab budget",
+};
+
+const CHECK_INSTRUCTION: Record<InputConfidenceFieldKey, string> = {
+  purchasePrice: "Confirm against the current asking price or contract.",
+  yearBuilt: "Confirm with the property record.",
+  rent: "Compare with current nearby rentals.",
+  propertyTax: "Replace estimates with the current parcel tax bill.",
+  insurance: "Replace estimates with an insurance quote.",
+  interestRate: "Replace benchmarks with your lender quote.",
+  downPayment: "Confirm the loan-to-value with your lender.",
+  closingCosts: "Confirm with your lender and title estimate.",
+  maintenance: "Adjust for the property's age and condition.",
+  capex: "Check that reserves cover the roof, HVAC, and other big systems.",
+  vacancy: "Adjust to the local market and lease-up plan.",
+  management: "Confirm your property manager's fee, or use 0% if self-managing.",
+  utilities: "Confirm which utilities the owner pays.",
+  hoa: "Confirm the current HOA amount.",
+  rehabBudget: "Confirm the scope and contractor budget.",
+};
+
+function offerCheckLabel(
+  field: InputConfidenceField,
+  strategy: AnalyzerStrategyKey,
+  propertyType: InvestmentFormValues["propertyType"],
+): string {
+  if (field.key !== "rent") return field.label;
+  if (strategy === "short-term") return "Nightly rate and occupancy";
+  if (propertyType === "owner-occupant") return "Rental-unit rents";
+  if (propertyType === "multi-family") return "Unit rents";
+  return field.label;
+}
+
+function offerCheckSource(
+  field: InputConfidenceField,
+  strategy: AnalyzerStrategyKey,
+  propertyType: InvestmentFormValues["propertyType"],
+): string {
+  if (field.key !== "rent" || field.sourceLabel !== "Your entered rent") {
+    return field.sourceLabel;
+  }
+  if (strategy === "short-term") {
+    return "Your entered nightly rate and occupancy";
+  }
+  if (propertyType === "owner-occupant") {
+    return "Your entered rental-unit rents";
+  }
+  if (propertyType === "multi-family") return "Your entered unit rents";
+  return field.sourceLabel;
+}
+
+function offerCheckInstruction(
+  field: InputConfidenceField,
+  strategy: AnalyzerStrategyKey,
+  propertyType: InvestmentFormValues["propertyType"],
+): string {
+  if (field.sourceClass === "missing") {
+    return `Add ${offerCheckLabel(field, strategy, propertyType).toLowerCase()} before relying on the result.`;
+  }
+  if (field.key === "rent" && strategy === "short-term") {
+    return "Check the nightly rate and occupancy against recent local performance.";
+  }
+  if (field.key === "rent" && propertyType !== "single-family") {
+    return "Compare each rented unit with current nearby rentals.";
+  }
+  return CHECK_INSTRUCTION[field.key];
+}
+
+function offerCheckActionLabel(
+  field: InputConfidenceField,
+  strategy: AnalyzerStrategyKey,
+  propertyType: InvestmentFormValues["propertyType"],
+): string {
+  const label = offerCheckLabel(field, strategy, propertyType);
+  if (field.sourceClass === "missing") return `Add ${label.toLowerCase()}`;
+  if (field.key !== "rent") return EDIT_ACTION_LABEL[field.key];
+  if (strategy === "short-term") return "Edit rate & occupancy";
+  if (propertyType === "owner-occupant") return "Edit rental-unit rents";
+  if (propertyType === "multi-family") return "Edit unit rents";
+  return EDIT_ACTION_LABEL.rent;
+}
+
 /**
- * Decision-trust summary. The advocacy cohort gets a task-oriented verification
- * plan because the current product has no owner-scoped evidence ingestion path;
- * it must not imply that browser self-confirmation can complete evidence review.
- * The legacy Input Confidence score remains available only outside that cohort.
+ * Decision-trust summary. The advocacy cohort gets a compact offer check
+ * because the current product has no owner-scoped evidence ingestion path; it
+ * must not imply that browser edits can complete evidence review. The legacy
+ * Input Confidence score remains available only outside that cohort.
  */
 export function InputConfidenceCard({
   confidence,
@@ -84,10 +187,6 @@ export function InputConfidenceCard({
   onEditAssumptions,
   onReviewInput,
   onToggleVerified,
-  savedDealId = null,
-  isCurrentAnalysisSaved = false,
-  onSaveForVerification,
-  isSaving = false,
   analyzerStrategyKey = "buy-hold",
   actionsBlocked = false,
   actionsBlockedReason,
@@ -115,27 +214,30 @@ export function InputConfidenceCard({
       }));
   const verified = new Set(confidence.verifiedFields);
   const ledgerByKey = new Map(ledger.items.map((item) => [item.key, item]));
-  const confidenceByKey = new Map(
-    confidence.fields.map((item) => [item.key, item]),
-  );
-  const materialVerificationItems = ledger.items
-    .filter((item) => item.material && !item.evidenceVerified)
-    .sort(
-      (a, b) =>
-        (b.materialityScore ?? -1) - (a.materialityScore ?? -1) ||
-        b.weight - a.weight,
-    );
-  const nextMaterialVerification = materialVerificationItems[0] ?? null;
-  const verificationLabel = (item: (typeof ledger.items)[number]) => {
-    if (item.key !== "rent") return item.label;
-    if (analyzerStrategyKey === "short-term") {
-      return "Nightly rate and occupancy";
-    }
-    if (values.propertyType !== "single-family") return "All unit rents";
-    return item.label;
-  };
-  const verificationInstruction = (item: (typeof ledger.items)[number]) =>
-    `Check ${verificationLabel(item).toLowerCase()} and update it if needed`;
+  const offerChecks = useMemo(() => {
+    if (!advocacyContractEnabled) return [];
+    const impactKeys = computeAssumptionImpact(values)
+      .map((driver) => IMPACT_FIELD_KEY[driver.key])
+      .filter((key): key is InputConfidenceFieldKey => Boolean(key));
+    const fallbackKeys = confidence.fields
+      .filter(
+        (field) =>
+          field.offerReadyRequired &&
+          field.sourceClass !== "not-applicable" &&
+          field.sourceClass !== "verified",
+      )
+      .sort((a, b) => b.weight - a.weight)
+      .map((field) => field.key);
+    const orderedKeys = Array.from(new Set([...impactKeys, ...fallbackKeys]));
+
+    return orderedKeys
+      .map((key) => confidence.fields.find((field) => field.key === key))
+      .filter(
+        (field): field is InputConfidenceField =>
+          Boolean(field) && field?.sourceClass !== "verified",
+      )
+      .slice(0, 2);
+  }, [advocacyContractEnabled, confidence.fields, values]);
   const statusHeadline = advocacyContractEnabled
     ? ledger.readinessLabel
     : showOfferReadyStatus
@@ -160,182 +262,111 @@ export function InputConfidenceCard({
   }, [confidence]);
 
   if (advocacyContractEnabled) {
-    const nextField = nextMaterialVerification
-      ? confidenceByKey.get(nextMaterialVerification.key)
-      : null;
-    const verificationComplete = ledger.readiness === "evidence-complete";
-
     return (
       <section
         ref={cardRef}
         tabIndex={-1}
         aria-labelledby="input-confidence-title"
         data-verification-plan=""
-        className="rounded-2xl border border-border bg-card p-4 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:p-5"
+        className="rounded-2xl border border-border bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <div className="flex items-start gap-3">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            <ClipboardCheck aria-hidden className="size-5" />
-          </span>
-          <div className="min-w-0 flex-1">
-            <h2
-              id="input-confidence-title"
-              className="text-base font-extrabold text-foreground"
-            >
-              Verify before relying on this deal
-            </h2>
-            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-              {verificationComplete
-                ? "Property-specific support is recorded for the material assumptions. Recheck anything that changes."
-                : "The math is ready for screening. Before you act, replace estimates with property facts such as rent comps, a lender quote, tax records, insurance, and condition findings."}
-            </p>
-          </div>
+        <div className="px-4 pb-3 pt-4 sm:px-5 sm:pt-5">
+          <h2
+            id="input-confidence-title"
+            className="text-xs font-extrabold uppercase tracking-widest text-primary"
+          >
+            Before you offer
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Double-check the biggest cash-flow drivers. Edit anything that
+            looks wrong.
+          </p>
         </div>
-
-        {nextMaterialVerification && nextField ? (
-          <div className="mt-4 rounded-xl border border-amber-500/25 bg-amber-500/5 p-3">
-            <p className="text-[10px] font-extrabold uppercase tracking-widest text-amber-800">
-              Check before relying
-            </p>
-            <p className="mt-1 text-sm font-extrabold text-foreground">
-              {verificationInstruction(nextMaterialVerification)}
-            </p>
-            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-              {verificationLabel(nextMaterialVerification)}: {formatAssumptionLedgerValue(
-                nextMaterialVerification.key,
-                values,
-              )}
-              . Current basis: {nextField.sourceLabel}.
-            </p>
-          </div>
-        ) : null}
 
         {actionsBlocked && actionsBlockedReason ? (
           <p
             role="status"
-            className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-xs font-medium leading-relaxed text-amber-900"
+            className="mx-4 mb-3 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-xs font-medium leading-relaxed text-amber-900 sm:mx-5"
           >
             {actionsBlockedReason}
           </p>
         ) : null}
 
-        <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-          <Button
-            type="button"
-            onClick={() => {
-              if (nextMaterialVerification && onReviewInput) {
-                onReviewInput(nextMaterialVerification.key);
-                return;
-              }
-              onEditAssumptions();
-            }}
-            disabled={actionsBlocked}
-            title={actionsBlocked ? actionsBlockedReason : undefined}
-            className="min-h-11 rounded-xl"
-          >
-            {nextMaterialVerification
-              ? `Review ${verificationLabel(nextMaterialVerification).toLowerCase()}`
-              : "Review assumptions"}
-          </Button>
-          {savedDealId && isCurrentAnalysisSaved ? (
-            actionsBlocked ? (
+        {offerChecks.length > 0 ? (
+          <ul className="divide-y divide-border border-t border-border">
+            {offerChecks.map((field) => {
+              const label = offerCheckLabel(
+                field,
+                analyzerStrategyKey,
+                values.propertyType,
+              );
+              const actionLabel = offerCheckActionLabel(
+                field,
+                analyzerStrategyKey,
+                values.propertyType,
+              );
+              return (
+                <li
+                  key={field.key}
+                  className="grid gap-3 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:px-5"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-foreground">
+                      {label} · {formatAssumptionLedgerValue(field.key, values)}
+                    </p>
+                    <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+                      {offerCheckSource(
+                        field,
+                        analyzerStrategyKey,
+                        values.propertyType,
+                      )}
+                      {" — "}
+                      {offerCheckInstruction(
+                        field,
+                        analyzerStrategyKey,
+                        values.propertyType,
+                      )}
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    aria-label={`${actionLabel}: ${label}`}
+                    onClick={() =>
+                      onReviewInput
+                        ? onReviewInput(field.key)
+                        : onEditAssumptions()
+                    }
+                    disabled={actionsBlocked}
+                    title={actionsBlocked ? actionsBlockedReason : undefined}
+                    className="min-h-11 w-full rounded-xl sm:w-auto"
+                  >
+                    {actionLabel}
+                  </Button>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <div className="border-t border-border px-4 py-3 sm:px-5">
+            <p className="text-sm text-muted-foreground">
+              The key inputs were previously confirmed. Recheck them if the
+              property or financing changes.
+            </p>
+            <div className="mt-2">
               <Button
                 type="button"
                 variant="outline"
-                disabled
-                title={actionsBlockedReason}
+                onClick={onEditAssumptions}
+                disabled={actionsBlocked}
+                title={actionsBlocked ? actionsBlockedReason : undefined}
                 className="min-h-11 rounded-xl"
               >
-                Open deal checklist
+                Edit assumptions
               </Button>
-            ) : (
-              <Button
-                asChild
-                variant="outline"
-                className="min-h-11 rounded-xl"
-              >
-                <Link
-                  href={`/dashboard/saved-analyses/${savedDealId}#deal-due-diligence`}
-                >
-                  Open deal checklist
-                </Link>
-              </Button>
-            )
-          ) : onSaveForVerification ? (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onSaveForVerification}
-              disabled={isSaving || actionsBlocked}
-              title={actionsBlocked ? actionsBlockedReason : undefined}
-              className="min-h-11 rounded-xl"
-            >
-              {isSaving ? "Saving…" : "Save to use checklist"}
-            </Button>
-          ) : null}
-        </div>
-
-        {materialVerificationItems.length > 0 ? (
-          <details className="group mt-4 border-t border-border pt-2">
-            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-lg px-1 text-sm font-semibold text-foreground marker:content-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-              See every material assumption
-              <ChevronDown
-                aria-hidden
-                className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
-              />
-            </summary>
-            <ul
-              className="mt-2 divide-y divide-border rounded-xl border border-border"
-              aria-label="Material inputs to verify"
-            >
-              {materialVerificationItems.map((item) => {
-                const field = confidenceByKey.get(item.key);
-                return (
-                  <li
-                    key={item.key}
-                    className="grid gap-2 p-3 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center sm:gap-x-4"
-                  >
-                    <div className="min-w-0">
-                      <p className="text-sm font-bold text-foreground">
-                        {verificationLabel(item)}
-                      </p>
-                      <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-                        {verificationInstruction(item)}
-                      </p>
-                    </div>
-                    <div className="min-w-0 text-left sm:text-right">
-                      <p className="font-mono text-sm font-bold tabular-nums text-foreground">
-                        {formatAssumptionLedgerValue(item.key, values)}
-                      </p>
-                      <p className="mt-0.5 break-words text-xs text-muted-foreground">
-                        {field?.sourceLabel ?? "Source needs review"}
-                      </p>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      aria-label={`Review ${verificationLabel(item).toLowerCase()}`}
-                      disabled={actionsBlocked}
-                      title={actionsBlocked ? actionsBlockedReason : undefined}
-                      onClick={() =>
-                        onReviewInput ? onReviewInput(item.key) : onEditAssumptions()
-                      }
-                      className="min-h-11 justify-self-start rounded-lg px-3 sm:justify-self-end"
-                    >
-                      Review
-                    </Button>
-                  </li>
-                );
-              })}
-            </ul>
-          </details>
-        ) : null}
-
-        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-          The saved checklist tracks your follow-up work; it does not silently
-          change the underwriting. Return to this analysis and enter confirmed
-          amounts before relying on the result.
-        </p>
+            </div>
+          </div>
+        )}
       </section>
     );
   }

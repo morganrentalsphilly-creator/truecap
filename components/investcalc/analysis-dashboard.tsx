@@ -727,7 +727,7 @@ export function AnalysisDashboard({
   const verificationActionsBlocked =
     resultActionsBlocked;
   const verificationActionsBlockedReason = targetDraftActionsBlocked
-    ? "Apply or cancel your criteria edits before reviewing inputs or opening the checklist."
+    ? "Apply or cancel your criteria edits before reviewing inputs."
     : targetActionsBlockedReason;
   const [compsQaData, setCompsQaData] = useState<PropertyEnrichment | null>(
     null,
@@ -1766,7 +1766,10 @@ export function AnalysisDashboard({
       values &&
       !isLoading &&
       inputConfidence &&
-      onToggleInputVerified ? (
+      onToggleInputVerified &&
+      (!advocacyDecisionContract || !strategyLeadsOutput) &&
+      (!advocacyDecisionContract ||
+        (!isSampleProPreview && !deferredWhatIfState?.isAdjusted)) ? (
         <InputConfidenceCard
           confidence={inputConfidence}
           values={values}
@@ -1780,10 +1783,6 @@ export function AnalysisDashboard({
           onEditAssumptions={onEditAssumptions}
           onReviewInput={onReviewVerificationInput}
           onToggleVerified={onToggleInputVerified}
-          savedDealId={savedDealId}
-          isCurrentAnalysisSaved={isSaved}
-          onSaveForVerification={handleSaveClick}
-          isSaving={isSaving}
           analyzerStrategyKey={activeStrategy?.key ?? "buy-hold"}
           actionsBlocked={verificationActionsBlocked}
           actionsBlockedReason={verificationActionsBlockedReason}
@@ -2518,16 +2517,22 @@ export function AnalysisDashboard({
               className="text-sm font-extrabold uppercase tracking-widest text-muted-foreground"
             >
               {deferredWhatIfState?.isAdjusted
-                ? "Base risks and verification"
-                : "Risks and verification"}
+                ? advocacyDecisionContract
+                  ? "Base risks"
+                  : "Base risks and verification"
+                : advocacyDecisionContract
+                  ? "Risks"
+                  : "Risks and verification"}
             </h2>
             {result && values && !isLoading && !strategyLeadsOutput ? (
               <>
-                <DealDriverInsight
-                  values={values}
-                  result={result}
-                  marketRentEstimate={marketRentEstimate}
-                />
+                {!advocacyDecisionContract ? (
+                  <DealDriverInsight
+                    values={values}
+                    result={result}
+                    marketRentEstimate={marketRentEstimate}
+                  />
+                ) : null}
                 <AssumptionImpactCard values={values} />
               </>
             ) : null}
