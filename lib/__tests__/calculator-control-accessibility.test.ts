@@ -9,8 +9,15 @@ function read(relativePath: string): string {
 const financing = read("../../components/investcalc/financing-section.tsx");
 const expenses = read("../../components/investcalc/operating-expenses-section.tsx");
 
-function controlWindow(source: string, id: string): string {
-  const idAt = source.indexOf(`id="${id}"`);
+function controlWindow(
+  source: string,
+  id: string,
+  occurrence: "first" | "last" = "first",
+): string {
+  const idAt =
+    occurrence === "last"
+      ? source.lastIndexOf(`id="${id}"`)
+      : source.indexOf(`id="${id}"`);
   expect(idAt, `${id} should be rendered`).toBeGreaterThan(-1);
   return source.slice(Math.max(0, idAt - 500), idAt + 1_200);
 }
@@ -34,7 +41,13 @@ describe("calculator control accessibility guards", () => {
     ] as const;
 
     for (const [id, min, max, step] of expected) {
-      const control = controlWindow(financing, id);
+      // Closing costs render one of two mutually exclusive controls with the
+      // same accessible id. The percentage control is the second branch.
+      const control = controlWindow(
+        financing,
+        id,
+        id === "closingCostsPct" ? "last" : "first",
+      );
       expect(control).toContain(min);
       expect(control).toContain(max);
       expect(control).toContain(step);

@@ -55,7 +55,6 @@ const MATRIX: Row[] = [
   { feature: "Lifecycle stage", truecap: "Pre-purchase — underwrite the deal", buildium: "Post-purchase — operate at scale", winner: "tie" },
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", buildium: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", buildium: "Not modeled", winner: "truecap" },
-  { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", buildium: "Not modeled", winner: "truecap" },
   { feature: "Secondary Screening Index", truecap: "Free — 0-100 triage score + factor breakdown", buildium: "Not applicable", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", buildium: "Not applicable", winner: "truecap" },
   { feature: "Tenant + lease management", truecap: "No", buildium: "Yes — portfolio operations", winner: "buildium" },
@@ -242,7 +241,7 @@ export default function VsBuildiumPage() {
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Want to see just the underwriting half? Try the{" "}
-            <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">
+            <Link href="/#main" className="font-semibold text-primary hover:underline">
               cap rate calculator
             </Link>{" "}
             or the full{" "}
@@ -266,7 +265,7 @@ export default function VsBuildiumPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
-            Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
+            Pro adds 10-year cash-flow and equity projections, sensitivity,
             Offer Ceiling, co-branded share links, and PDF reports with Pro; see live pricing for current terms.
             No card to start.
           </p>

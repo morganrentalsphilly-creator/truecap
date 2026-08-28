@@ -21,7 +21,7 @@ const trustItems = [
   {
     icon: Database,
     title: "Transparent starting data",
-    description: "HUD rent benchmarks, FRED rate benchmarks and state tax estimates—labeled and editable.",
+    description: "HUD rent and FRED rate benchmarks are labeled and editable. Property tax stays a manual, locally verified input.",
   },
   {
     icon: ShieldCheck,

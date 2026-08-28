@@ -70,6 +70,8 @@ import {
   type BuyBoxDealMetrics,
   type BuyBoxFitSummary,
 } from "@/lib/buy-box";
+import { calculateMaoIrr } from "@/lib/mao-target-evaluation";
+import { getBuyBoxAuthorizedDealIds } from "@/lib/buy-box-access-server";
 
 const DASHBOARD_ACTIVE_DEALS_LIMIT = 20;
 const DASHBOARD_DEALS_SELECT =
@@ -154,6 +156,12 @@ function buildDashboardData(
         : undefined,
     });
     const fresh = resolution.didRecompute ? recomputed : null;
+    const values = fresh
+      ? normalizeReleasedInvestmentFormSnapshot(row.form_snapshot)
+      : null;
+    const irr = fresh && values
+      ? calculateMaoIrr(values, fresh.analysisResult)
+      : null;
     const methodology = resolveDealMethodologyPresentation({
       storedMethodologyVersion: resolution.storedMethodologyVersion,
       usesRecordedSnapshot: resolution.usesRecordedSnapshot,
@@ -198,6 +206,8 @@ function buildDashboardData(
           // Deals list (which already uses fresh.dscr/cashToClose). Carry them.
           dscr: fresh.dscr,
           cashToClose: fresh.cashToClose,
+          irrPct: irr?.primaryIrrPct ?? null,
+          irrStatus: irr?.status ?? "none",
           // monthlyPayment feeds the buy-box fit loop's cash-purchase
           // derivation (monthlyPayment <= 0) — stale snapshots missing it
           // made the SAME deal pass here but miss on My Deals (which uses
@@ -617,6 +627,18 @@ export default async function DashboardPage() {
       ? buyBoxesResult.boxes.filter((b) => b.isActive && buyBoxHasCriteria(b))
       : [];
   const buyBoxesResolved = Boolean(buyBoxesResult?.ok);
+  const authorizedBuyBoxDealIds =
+    activeBuyBoxes.length > 0
+      ? await getBuyBoxAuthorizedDealIds({
+          supabase,
+          userId: user.id,
+          hasPaidAccess: isPremium,
+          deals: ((rows ?? []) as SavedAnalysisDashboardRow[]).map((row) => ({
+            id: row.id,
+            values: normalizeReleasedInvestmentFormSnapshot(row.form_snapshot),
+          })),
+        })
+      : new Set<string>();
   // FEATURE_CATALOG marks Offer Ceiling as `gate: "paid"`; production Pro plan JSON has
   // no `mao` feature flag. Paid subscription status is therefore the complete
   // and fail-closed gate here.
@@ -723,6 +745,7 @@ export default async function DashboardPage() {
     let evaluatedCount = 0;
     let excludedRecordedMethodology = false;
     for (const deal of dashboardData.allDeals) {
+      if (!authorizedBuyBoxDealIds.has(deal.id)) continue;
       if (deal.methodologyIsCurrent === false) {
         excludedRecordedMethodology = true;
         continue;
@@ -740,6 +763,9 @@ export default async function DashboardPage() {
         // the DSCR criterion is skipped (N/A), never failed — same derivation
         // as getRiskReturn / getPortfolioKpis.
         isCashPurchase: deal.monthlyPayment != null && deal.monthlyPayment <= 0,
+        cashRequired: deal.cashToClose ?? null,
+        irrPct: deal.irrPct ?? null,
+        irrStatus: deal.irrStatus ?? "none",
       };
       // The dashboard is the agent's OWN portfolio. Passing null scopes to
       // boxes with no client (lib/buy-box boxesForDealClient) — otherwise one
@@ -762,6 +788,8 @@ export default async function DashboardPage() {
         // aggregate query confirms nothing was left out). Per-deal badges
         // and the Fit sort stay correct on the sample either way.
         complete:
+          (isPremium ||
+            authorizedBuyBoxDealIds.size === dashboardData.allDeals.length) &&
           !excludedRecordedMethodology &&
           ((rows ?? []).length < DASHBOARD_ACTIVE_DEALS_LIMIT ||
             (fullActiveRows != null && fullActiveRows.length <= dashboardData.allDeals.length)),

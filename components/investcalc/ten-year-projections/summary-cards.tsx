@@ -6,8 +6,10 @@ import { formatCurrency } from "@/components/investcalc/analysis-panels/shared/f
 
 export function TenYearProjectionSummaryCards({
   projectionYears,
+  showTaxMetrics = false,
 }: {
   projectionYears: ProjectionYear[];
+  showTaxMetrics?: boolean;
 }) {
   const finalYear = projectionYears[projectionYears.length - 1];
   const bestAfterTax = Math.max(...projectionYears.map((year) => year.afterTaxCashFlowAnnual));
@@ -21,20 +23,24 @@ export function TenYearProjectionSummaryCards({
           value: formatCurrency(finalYear?.cumulativeCashFlowAnnual ?? 0),
           tone: (finalYear?.cumulativeCashFlowAnnual ?? 0) >= 0 ? "positive" : "negative",
           labelTooltip:
-            "Operating cash flow summed across the 10-year hold, before tax. The illustrative after-tax total may be higher or lower depending on modeled taxable rental income and deductions.",
+            "Operating cash flow summed across the 10-year hold, before tax.",
         },
-        {
-          label: "Best Annual After-Tax CF",
-          value: formatCurrency(bestAfterTax),
-          tone: bestAfterTax >= 0 ? "positive" : "negative",
-        },
-        {
-          label: "10-Yr Cumulative CF (After-Tax)",
-          value: formatCurrency(totalAfterTax),
-          tone: totalAfterTax >= 0 ? "positive" : "negative",
-          labelTooltip:
-            "Pre-tax cumulative cash flow plus the signed illustrative tax effect over the 10-year hold. A positive gap is a modeled benefit; a negative gap is a modeled liability. Actual treatment and loss usability vary.",
-        },
+        ...(showTaxMetrics
+          ? [
+              {
+                label: "Best Annual After-Tax CF",
+                value: formatCurrency(bestAfterTax),
+                tone: bestAfterTax >= 0 ? ("positive" as const) : ("negative" as const),
+              },
+              {
+                label: "10-Yr Cumulative CF (After-Tax)",
+                value: formatCurrency(totalAfterTax),
+                tone: totalAfterTax >= 0 ? ("positive" as const) : ("negative" as const),
+                labelTooltip:
+                  "Pre-tax cumulative cash flow plus the signed illustrative tax effect over the 10-year hold. A positive gap is a modeled benefit; a negative gap is a modeled liability. Actual treatment and loss usability vary.",
+              },
+            ]
+          : []),
       ]}
     />
   );

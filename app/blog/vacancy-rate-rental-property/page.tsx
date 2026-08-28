@@ -297,7 +297,7 @@ export default function VacancyRatePost() {
             every month. Hold reserves accordingly. Stress-test your own
             numbers in the{" "}
             <Link
-              href="/tools/cash-on-cash-calculator"
+              href="/#main"
               className="text-primary font-semibold hover:underline"
             >
               cash-on-cash calculator
@@ -330,7 +330,7 @@ export default function VacancyRatePost() {
             number guarantees approval or future collections.
             Run both versions in the{" "}
             <Link
-              href="/tools/dscr-calculator"
+              href="/#main"
               className="text-primary font-semibold hover:underline"
             >
               DSCR calculator

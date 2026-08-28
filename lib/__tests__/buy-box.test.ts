@@ -83,7 +83,7 @@ describe("evaluateBuyBox", () => {
     );
     const dscr = r.checks.find((c) => c.id === "dscr")!;
     expect(dscr.pass).toBeNull();
-    expect(dscr.actual).toBe("N/A (cash)");
+    expect(dscr.actual).toBe("N/A — no debt service");
     // No applicable checks → not a pass.
     expect(r.passes).toBe(false);
     expect(r.failedCount).toBe(0);
@@ -99,6 +99,48 @@ describe("evaluateBuyBox", () => {
     // CoC still applies and passes.
     expect(r.passes).toBe(true);
     expect(r.passedCount).toBe(1);
+  });
+
+  it("requires one unique IRR and never guesses through multiple roots", () => {
+    const criteria = { ...EMPTY_BUY_BOX, minIrrPct: 10 };
+    const unique = evaluateBuyBox(criteria, {
+      ...baseMetrics,
+      irrPct: 12,
+      irrStatus: "unique",
+    });
+    expect(unique.passes).toBe(true);
+
+    const ambiguous = evaluateBuyBox(criteria, {
+      ...baseMetrics,
+      irrPct: 12,
+      irrStatus: "multiple",
+    });
+    expect(ambiguous.passes).toBe(false);
+    expect(ambiguous.checks[0]).toMatchObject({
+      id: "irr",
+      pass: false,
+      actual: "Unsupported (multiple IRRs)",
+    });
+  });
+
+  it("fails a cash-required rule closed when the modeled cash is missing", () => {
+    const criteria = { ...EMPTY_BUY_BOX, maxCashRequired: 75_000 };
+    expect(
+      evaluateBuyBox(criteria, {
+        ...baseMetrics,
+        cashRequired: 70_000,
+      }).passes,
+    ).toBe(true);
+    const unavailable = evaluateBuyBox(criteria, {
+      ...baseMetrics,
+      cashRequired: null,
+    });
+    expect(unavailable.passes).toBe(false);
+    expect(unavailable.checks[0]).toMatchObject({
+      id: "cashRequired",
+      pass: false,
+      actual: "Unavailable",
+    });
   });
 
   it("fails a deal in the wrong market / wrong type", () => {

@@ -22,6 +22,7 @@ import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
 import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "cap-rate-vs-cash-on-cash-vs-dscr";
@@ -119,8 +120,18 @@ export default function BlogPost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "TrueCap", item: `${siteUrl}/` },
-      { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "TrueCap",
+        item: `${siteUrl}/`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: `${siteUrl}/blog`,
+      },
       { "@type": "ListItem", position: 3, name: TITLE, item: canonicalUrl },
     ],
   };
@@ -136,9 +147,18 @@ export default function BlogPost() {
 
   return (
     <div className="min-h-screen bg-background">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
+      />
 
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <header className="mb-8 sm:mb-10">
@@ -179,28 +199,57 @@ export default function BlogPost() {
             every first-time investor in 2026&apos;s rate environment.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">Cap rate vs cash-on-cash vs DSCR — the short answer</h2>
+          <h2 className="text-2xl sm:text-3xl">
+            Cap rate vs cash-on-cash vs DSCR — the short answer
+          </h2>
           <p>
-            <strong>Cap rate</strong> measures the property&apos;s unleveraged return (use it to compare properties). <strong>Cash-on-cash return</strong> measures the return on YOUR specific cash invested after financing (use it to make personal investment decisions). <strong>DSCR</strong> measures the property&apos;s ability to cover its mortgage payment from rent (lenders use it to decide whether to fund the loan).
+            <strong>Cap rate</strong> measures the property&apos;s unleveraged
+            return (use it to compare properties).{" "}
+            <strong>Cash-on-cash return</strong> measures the return on YOUR
+            specific cash invested after financing (use it to make personal
+            investment decisions). <strong>DSCR</strong> measures the
+            property&apos;s ability to cover its mortgage payment from rent
+            (lenders use it to decide whether to fund the loan).
           </p>
-          <p>
-            Three metrics, three completely different jobs:
-          </p>
+          <p>Three metrics, three completely different jobs:</p>
           <ul>
             <li>
-              <strong><Link href="/glossary/cap-rate" className="text-primary font-semibold hover:underline">Cap rate</Link></strong> — the property&apos;s unleveraged annual
-              return. Use it to <em>compare properties</em> against each other
-              and against alternatives like bonds.
+              <strong>
+                <Link
+                  href="/glossary/cap-rate"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  Cap rate
+                </Link>
+              </strong>{" "}
+              — the property&apos;s unleveraged annual return. Use it to{" "}
+              <em>compare properties</em> against each other and against
+              alternatives like bonds.
             </li>
             <li>
-              <strong><Link href="/glossary/cash-on-cash-return" className="text-primary font-semibold hover:underline">Cash-on-cash return</Link></strong> — the return on the cash YOU
-              specifically invest. Use it to <em>make your personal investment
-              decision</em>: is this worth my capital?
+              <strong>
+                <Link
+                  href="/glossary/cash-on-cash-return"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  Cash-on-cash return
+                </Link>
+              </strong>{" "}
+              — the return on the cash YOU specifically invest. Use it to{" "}
+              <em>make your personal investment decision</em>: is this worth my
+              capital?
             </li>
             <li>
-              <strong><Link href="/glossary/dscr" className="text-primary font-semibold hover:underline">DSCR</Link></strong> — the property&apos;s ability to cover its
-              mortgage from operating income. Use it to <em>get financed</em>:
-              will a lender say yes?
+              <strong>
+                <Link
+                  href="/glossary/dscr"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  DSCR
+                </Link>
+              </strong>{" "}
+              — the property&apos;s ability to cover its mortgage from operating
+              income. Use it to <em>get financed</em>: will a lender say yes?
             </li>
           </ul>
           <p>
@@ -208,7 +257,9 @@ export default function BlogPost() {
             means you&apos;re missing critical risk.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">Cap rate — what it actually tells you</h2>
+          <h2 className="text-2xl sm:text-3xl">
+            Cap rate — what it actually tells you
+          </h2>
           <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
             <div className="text-sm sm:text-base font-mono">
               <span className="font-bold">Cap Rate</span> = NOI ÷ Purchase Price
@@ -221,7 +272,13 @@ export default function BlogPost() {
             Cap rate is the property&apos;s earning power as if you owned it
             free-and-clear. No mortgage, no financing, no leverage. Just rent
             in, expenses out, divided by what you paid. The numerator,{" "}
-            <Link href="/glossary/noi" className="text-primary font-semibold hover:underline">NOI</Link>, is the single most-disputed line in residential underwriting.
+            <Link
+              href="/glossary/noi"
+              className="text-primary font-semibold hover:underline"
+            >
+              NOI
+            </Link>
+            , is the single most-disputed line in residential underwriting.
           </p>
           <p>
             <strong>Why it matters:</strong> cap rate is the only metric that
@@ -247,25 +304,31 @@ export default function BlogPost() {
             earns). Cap rate alone can&apos;t tell you which.
           </p>
           <p>
-            <Link href="/tools/cap-rate-calculator" className="text-primary font-semibold hover:underline">
+            <Link
+              href="/#main"
+              className="text-primary font-semibold hover:underline"
+            >
               Use our free cap rate calculator →
             </Link>
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">Cash-on-cash — what it actually tells you</h2>
+          <h2 className="text-2xl sm:text-3xl">
+            Cash-on-cash — what it actually tells you
+          </h2>
           <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
             <div className="text-sm sm:text-base font-mono">
-              <span className="font-bold">CoC</span> = Annual Cash Flow ÷ Total Cash Invested
+              <span className="font-bold">CoC</span> = Annual Cash Flow ÷ Total
+              Cash Invested
             </div>
             <div className="text-xs text-muted-foreground mt-2">
               after mortgage P&amp;I, after closing costs, after rehab
             </div>
           </div>
           <p>
-            Cash-on-cash measures the return on the cash <em>you specifically
-            invested</em>, after the lender takes their cut. If you put $60,000
-            into a deal and it produces $5,000 of cash flow per year, that&apos;s
-            an 8.3% CoC.
+            Cash-on-cash measures the return on the cash{" "}
+            <em>you specifically invested</em>, after the lender takes their
+            cut. If you put $60,000 into a deal and it produces $5,000 of cash
+            flow per year, that&apos;s an 8.3% CoC.
           </p>
           <p>
             <strong>Why it matters:</strong> this is the metric for your
@@ -278,33 +341,40 @@ export default function BlogPost() {
             acceptable in most 2026 markets, below 5% needs an appreciation
             story. Compare against your alternatives — if you can get 5% from
             high-yield savings with zero risk, a 5% CoC on a rental needs to
-            offer something extra (appreciation, tax savings, optionality).
+            offer something extra under an explicitly sourced scenario, while
+            any tax outcome remains taxpayer-specific.
           </p>
           <p>
             <strong>Where it breaks:</strong> CoC doesn&apos;t account for
             principal paydown (your mortgage balance is dropping monthly — real
-            wealth being built), appreciation (the property&apos;s value is
-            usually growing), or tax savings (depreciation often makes the deal
-            net-positive on an after-tax basis even when cash flow is thin).
-            For a full picture, pair CoC with a 10-year projection.
+            equity being built), a separately sourced appreciation scenario, or
+            taxpayer-specific tax effects. For a broader view, pair CoC with
+            explicitly stated scenarios and keep current operating cash flow
+            distinct from projected value and tax outcomes.
           </p>
           <p>
-            <Link href="/tools/cash-on-cash-calculator" className="text-primary font-semibold hover:underline">
+            <Link
+              href="/#main"
+              className="text-primary font-semibold hover:underline"
+            >
               Compute cash-on-cash return →
             </Link>
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">DSCR — what it actually tells you</h2>
+          <h2 className="text-2xl sm:text-3xl">
+            DSCR — what it actually tells you
+          </h2>
           <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
             <div className="text-sm sm:text-base font-mono">
-              <span className="font-bold">DSCR</span> = Annual NOI ÷ Annual Debt Service
+              <span className="font-bold">DSCR</span> = Annual NOI ÷ Annual Debt
+              Service
             </div>
           </div>
           <p>
-            DSCR (Debt Service Coverage Ratio) measures whether the property
-            can cover its own mortgage payments from operating income alone. A
-            DSCR of 1.25 means the property earns $1.25 of NOI for every $1.00
-            of mortgage payment.
+            DSCR (Debt Service Coverage Ratio) measures whether the property can
+            cover its own mortgage payments from operating income alone. A DSCR
+            of 1.25 means the property earns $1.25 of NOI for every $1.00 of
+            mortgage payment.
           </p>
           <p>
             <strong>Why it matters:</strong> DSCR is a primary coverage metric
@@ -315,50 +385,56 @@ export default function BlogPost() {
           </p>
           <p>
             <strong>The benchmark rule:</strong> there is no market-wide
-            approval threshold. Ask the lender for its current formula,
-            accepted rent evidence, payment components, rounding, minimum,
-            and pricing tiers. Use a separate, more conservative operating
-            DSCR for your own risk decision.
+            approval threshold. Ask the lender for its current formula, accepted
+            rent evidence, payment components, rounding, minimum, and pricing
+            tiers. Use a separate, more conservative operating DSCR for your own
+            risk decision.
           </p>
           <p>
             <strong>Where it breaks:</strong> DSCR tells you nothing about
-            return. A property could have high modeled DSCR and low modeled
-            CoC because of a large equity contribution. DSCR is one financing
-            input, not a return metric or approval promise.
+            return. A property could have high modeled DSCR and low modeled CoC
+            because of a large equity contribution. DSCR is one financing input,
+            not a return metric or approval promise.
           </p>
           <p>
-            <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">
+            <Link
+              href="/#main"
+              className="text-primary font-semibold hover:underline"
+            >
               Compute DSCR →
             </Link>
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">The 2026 trap: negative leverage</h2>
+          <h2 className="text-2xl sm:text-3xl">
+            The 2026 trap: negative leverage
+          </h2>
           <p>
             Here&apos;s the trap that&apos;s catching almost every first-time
             investor in the current rate environment.
           </p>
           <p>
             From 2010 to 2022, interest rates were almost always below cap
-            rates. If a property had a 6% cap rate and your mortgage was at
-            4%, leverage made you money — you borrowed at 4%, the property
-            returned 6%, and you kept the 2% spread on every borrowed dollar.
+            rates. If a property had a 6% cap rate and your mortgage was at 4%,
+            leverage made you money — you borrowed at 4%, the property returned
+            6%, and you kept the 2% spread on every borrowed dollar.
             Cash-on-cash was usually higher than cap rate. This was called
             <em> positive leverage.</em>
           </p>
           <p>
             In 2026, with 30-year fixed investment-property rates at 6.5-7.5%
-            and cap rates in most markets at 5-7%, the math flips. If a
-            property has a 6% cap rate and your mortgage is at 7%, every
-            borrowed dollar costs more than it earns. Cash-on-cash falls
-            <em> below</em> cap rate. This is <strong>negative leverage</strong>,
-            and it&apos;s the dominant problem in 2026 underwriting.
+            and cap rates in most markets at 5-7%, the math flips. If a property
+            has a 6% cap rate and your mortgage is at 7%, every borrowed dollar
+            costs more than it earns. Cash-on-cash falls
+            <em> below</em> cap rate. This is <strong>negative leverage</strong>
+            , and it&apos;s the dominant problem in 2026 underwriting.
           </p>
           <p>
             How to spot it: compare your cap rate to your effective borrowing
             rate. If borrowing rate exceeds cap rate, you have negative
-            leverage. The deal can still work — if appreciation, tax savings,
-            or principal paydown compensates — but you need to know what
-            you&apos;re signing up for.
+            leverage. An upside value scenario, principal paydown, or a
+            taxpayer-specific tax outcome does not erase a current operating
+            shortfall; model each separately and decide whether you can carry
+            the downside.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">Side-by-side comparison</h2>
@@ -366,10 +442,18 @@ export default function BlogPost() {
             <table className="w-full min-w-[560px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
-                  <th className="text-left p-3 font-bold text-foreground">What it measures</th>
-                  <th className="text-left p-3 font-bold text-foreground">Cap rate</th>
-                  <th className="text-left p-3 font-bold text-foreground">Cash-on-cash</th>
-                  <th className="text-left p-3 font-bold text-foreground">DSCR</th>
+                  <th className="text-left p-3 font-bold text-foreground">
+                    What it measures
+                  </th>
+                  <th className="text-left p-3 font-bold text-foreground">
+                    Cap rate
+                  </th>
+                  <th className="text-left p-3 font-bold text-foreground">
+                    Cash-on-cash
+                  </th>
+                  <th className="text-left p-3 font-bold text-foreground">
+                    DSCR
+                  </th>
                 </tr>
               </thead>
               <tbody className="[&_td]:p-3 [&_td]:border-b [&_td]:border-border [&_tr:last-child_td]:border-0">
@@ -401,7 +485,7 @@ export default function BlogPost() {
                   <td className="text-muted-foreground">Cash purchase?</td>
                   <td>Same as CoC</td>
                   <td>Same as cap rate</td>
-                  <td>N/A (no debt)</td>
+                  <td>{NO_DEBT_SERVICE_DSCR_LABEL}</td>
                 </tr>
               </tbody>
             </table>
@@ -416,16 +500,16 @@ export default function BlogPost() {
           <p>
             Skip DSCR and you&apos;ll find a great-looking deal you can&apos;t
             get a loan for. Skip cash-on-cash and you&apos;ll buy a property
-            with great cap rate that doesn&apos;t actually make money after
-            your mortgage payment. Skip cap rate and you&apos;ll overpay for a
+            with great cap rate that doesn&apos;t actually make money after your
+            mortgage payment. Skip cap rate and you&apos;ll overpay for a
             property that&apos;s cheap in your specific financing scenario but
             objectively overpriced for its market.
           </p>
           <p>
             All three numbers live next to each other in TrueCap&apos;s main
-            analyzer, alongside the rest of the underwriting math (10-year
-            projection, illustrative tax impact, exit scenarios). Run a real deal in 60
-            seconds.
+            analyzer, alongside the released 10-year cash-flow and equity
+            projection, sensitivity grid, and Offer Ceiling. Run a real deal in
+            60 seconds.
           </p>
 
           <div className="not-prose">
@@ -441,7 +525,10 @@ export default function BlogPost() {
 
           <h2 className="text-2xl sm:text-3xl">FAQ</h2>
           {FAQS.map((f, i) => (
-            <details key={i} className="not-prose bg-card border border-border rounded-xl p-4 sm:p-5 mb-3">
+            <details
+              key={i}
+              className="not-prose bg-card border border-border rounded-xl p-4 sm:p-5 mb-3"
+            >
               <summary className="cursor-pointer font-bold text-foreground">
                 {f.q}
               </summary>
@@ -453,14 +540,19 @@ export default function BlogPost() {
         </article>
 
         <RelatedBlogPosts currentSlug={SLUG} />
-      <div className="max-w-3xl mx-auto px-4 sm:px-6"><NewsletterSignup variant="expanded" source="blog" /></div>
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          <NewsletterSignup variant="expanded" source="blog" />
+        </div>
 
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
             Want the full underwriting workflow? TrueCap turns each of these
-            metrics — plus 10-year projection, illustrative tax impact, exit scenarios —
-            into a single live analyzer.{" "}
-            <Link href="/" className="font-bold text-foreground hover:underline">
+            metrics — plus a 10-year cash-flow and equity projection,
+            sensitivity, and Offer Ceiling — into a single live analyzer.{" "}
+            <Link
+              href="/"
+              className="font-bold text-foreground hover:underline"
+            >
               Open the analyzer →
             </Link>
           </p>

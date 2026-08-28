@@ -24,6 +24,8 @@ const MAO_TARGET_FIELDS = [
   "cocReturn",
   "monthlyCashFlow",
   "dscr",
+  "minIrrPct",
+  "maxCashRequired",
   "maxPurchasePrice",
 ] as const satisfies ReadonlyArray<keyof MaoTarget>;
 

@@ -13,7 +13,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Check, ChevronDown, Loader2, Minus, RefreshCw, Target, X } from "lucide-react";
-import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
+import { listBuyBoxesForDealAction } from "@/app/actions/user-buy-boxes";
 import {
   boxesForPersonalAnalyzerStrategy,
   buyBoxHasCriteria,
@@ -123,6 +123,17 @@ export function BuyBoxVerdictCard({
       onQaContextChange?.(null);
       return;
     }
+    // The only account-overlay consumer is a public/shared deal. It must send
+    // the full canonical values so the server can bind evaluation access to the
+    // exact immutable deal key; metrics alone are forgeable and insufficient.
+    if (!values) {
+      setBoxes([]);
+      setLookupState("resolved");
+      onFitChange?.(null);
+      onQaContextChange?.(null);
+      onLoadStateChange?.("ready");
+      return;
+    }
     setBoxes(null);
     setLookupState("loading");
     // A retry can resolve to the same report as the prior success. It still
@@ -132,7 +143,7 @@ export function BuyBoxVerdictCard({
     onQaContextChange?.(null);
     onLoadStateChange?.("loading");
     let cancelled = false;
-    void listBuyBoxesAction()
+    void listBuyBoxesForDealAction(values)
       .then((result) => {
         if (cancelled) return;
         if (!result.ok) {
@@ -185,6 +196,7 @@ export function BuyBoxVerdictCard({
     onLoadStateChange,
     onQaContextChange,
     retryToken,
+    values,
   ]);
 
   const evaluated = useMemo(() => {

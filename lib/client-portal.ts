@@ -50,6 +50,7 @@ import {
 } from "@/lib/underwriting-model-release";
 import type { DealRecommendation, DealRiskLevel } from "@/lib/deal-score";
 import { isFeatureReleased } from "@/lib/entitlements-catalog";
+import { calculateMaoIrr } from "@/lib/mao-target-evaluation";
 
 export const PORTAL_SCOPE = "client-portal.v1";
 
@@ -222,6 +223,7 @@ export async function loadClientPortal(input: {
       let gapLine: string | null = null;
       if (clientBoxes.length > 0 && values) {
         try {
+          const irr = calculateMaoIrr(values, recomputed.analysisResult);
           const metrics: BuyBoxDealMetrics = {
             capRatePct,
             cocPct: cocReturnPct,
@@ -231,6 +233,9 @@ export async function loadClientPortal(input: {
             propertyType: values.propertyType,
             state: deriveStateFromAddress(values.address),
             isCashPurchase: recomputed.isCashPurchase,
+            cashRequired: recomputed.cashToClose,
+            irrPct: irr.primaryIrrPct,
+            irrStatus: irr.status,
           };
           const evaluated = evaluateBuyBoxes(clientBoxes, metrics).filter(
             (entry) => entry.result.active,

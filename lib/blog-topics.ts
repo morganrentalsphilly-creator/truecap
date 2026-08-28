@@ -51,14 +51,7 @@ export const BLOG_TOPICS: BlogTopic[] = [
       "operating-expense-ratio-rental-property",
       "return-on-equity-rental-property",
     ],
-    calculatorSlugs: [
-      "cap-rate-calculator",
-      "cash-on-cash-calculator",
-      "noi-calculator",
-      "dscr-calculator",
-      "gross-rent-multiplier-calculator",
-      "1-percent-rule-calculator",
-    ],
+    calculatorSlugs: ["gross-rent-multiplier-calculator", "1-percent-rule-calculator"],
   },
   {
     slug: "financing",
@@ -81,11 +74,7 @@ export const BLOG_TOPICS: BlogTopic[] = [
       "debt-to-income-ratio-investment-property",
       "negative-leverage-real-estate",
     ],
-    calculatorSlugs: [
-      "mortgage-payment-calculator",
-      "dscr-calculator",
-      "closing-cost-calculator",
-    ],
+    calculatorSlugs: ["mortgage-payment-calculator", "closing-cost-calculator"],
   },
   {
     slug: "tax",
@@ -103,7 +92,9 @@ export const BLOG_TOPICS: BlogTopic[] = [
       "bonus-depreciation-rental-property-2026",
       "property-tax-reassessment-rental-property",
     ],
-    calculatorSlugs: ["rental-property-tax-calculator"],
+    // Tax modeling is educational-only until a scenario-based engine is
+    // released. Do not route readers into the retired calculator stub.
+    calculatorSlugs: [],
   },
   {
     slug: "strategy",
@@ -111,7 +102,7 @@ export const BLOG_TOPICS: BlogTopic[] = [
     description:
       "Rental strategies — BRRRR, house hacking, Section 8, rehab, off-market sourcing, and single- vs multi-family.",
     intro:
-      "Same property, different strategy, different outcome. BRRRR recycles your capital; a house hack gets you in for less; Section 8 trades a process for stability. These guides compare the plays; the analyzer scores any of them.",
+      "Same property, different strategy, different outcome. These educational guides compare the plays; use the released analyzer only for a stabilized rental screen under reviewed assumptions.",
     postSlugs: [
       "brrrr-method-explained",
       "house-hacking-explained",
@@ -125,7 +116,7 @@ export const BLOG_TOPICS: BlogTopic[] = [
       "short-term-rental-underwriting-playbook",
       "70-percent-rule-house-flipping",
     ],
-    calculatorSlugs: ["brrrr-calculator", "rehab-cost-estimator", "roi-calculator"],
+    calculatorSlugs: ["rehab-cost-estimator", "arv-calculator"],
   },
   {
     slug: "markets",
@@ -135,7 +126,7 @@ export const BLOG_TOPICS: BlogTopic[] = [
     intro:
       "Where you buy sets the ceiling on what any strategy can do. Cash-flow metros and appreciation metros reward different plays. These guides cover market selection; our market and state pages add sourced local snapshots.",
     postSlugs: ["best-states-for-rental-investors-2026", "cash-flow-vs-appreciation"],
-    calculatorSlugs: ["cap-rate-calculator", "cash-on-cash-calculator"],
+    calculatorSlugs: ["gross-rent-multiplier-calculator", "1-percent-rule-calculator", "vacancy-rate-calculator"],
   },
   {
     slug: "deal-analysis",
@@ -152,12 +143,7 @@ export const BLOG_TOPICS: BlogTopic[] = [
       "exit-cap-rate-rental-property",
       "how-truecap-verdict-engine-works",
     ],
-    calculatorSlugs: [
-      "cap-rate-calculator",
-      "cash-on-cash-calculator",
-      "dscr-calculator",
-      "roi-calculator",
-    ],
+    calculatorSlugs: ["break-even-calculator", "gross-rent-multiplier-calculator", "1-percent-rule-calculator"],
   },
   {
     slug: "due-diligence",
@@ -172,11 +158,7 @@ export const BLOG_TOPICS: BlogTopic[] = [
       "how-to-estimate-rent-rental-property",
       "buying-rental-property-with-tenants",
     ],
-    calculatorSlugs: [
-      "gross-rent-multiplier-calculator",
-      "1-percent-rule-calculator",
-      "noi-calculator",
-    ],
+    calculatorSlugs: ["gross-rent-multiplier-calculator", "1-percent-rule-calculator"],
   },
   {
     slug: "comparisons",
@@ -199,11 +181,7 @@ export const BLOG_TOPICS: BlogTopic[] = [
       "stessa-vs-avail-vs-baselane",
       "hostfully-vs-hostaway-vs-guesty",
     ],
-    calculatorSlugs: [
-      "cap-rate-calculator",
-      "cash-on-cash-calculator",
-      "brrrr-calculator",
-    ],
+    calculatorSlugs: ["arv-calculator"],
   },
 ];
 

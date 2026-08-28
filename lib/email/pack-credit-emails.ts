@@ -6,11 +6,11 @@ import "server-only";
  * Scheduled once when a Deal Decision Pack claim is consumed AND its Pro
  * credit is granted (verifyOneTimePdfPaymentAction → best-effort extras):
  *   - day 0: the credit exists + honest expiry date
- *   - day 5: 2-days-left reminder (the 7-day window is real, so the
+ *   - day 28: 2-days-left reminder (the 30-day window is real, so the
  *     countdown is honest — prompt rule: no manufactured urgency)
  *
  * Gating is structural: this only runs when the credit was actually
- * granted, which itself requires STRIPE_PACK_CREDIT_COUPON_ID. Idempotency
+ * granted, which itself requires STRIPE_PACK_CREDIT_900_COUPON_ID. Idempotency
  * is the claim's atomic consumption — this function is reached exactly once
  * per claim. Buyer email comes from Stripe checkout (customer_details).
  * Best-effort: failures land in Sentry and never affect the PDF.
@@ -18,7 +18,7 @@ import "server-only";
 
 import * as Sentry from "@sentry/nextjs";
 import { escapeHtml } from "@/lib/html-escape";
-import { TRIAL_DAYS } from "@/lib/trial";
+import { PRODUCT_EVALUATION_DAYS } from "@/lib/product-access";
 
 function wrapHtml(inner: string, unsubscribeMailbox: string): string {
   return `<!doctype html><html><body style="font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color: #1f2937; line-height: 1.6; max-width: 560px; margin: 0 auto; padding: 24px 16px;">
@@ -65,13 +65,14 @@ export async function schedulePackCreditEmails(input: {
         checkout. No code to remember.</p>
         <p>Pro is the repeat version of the report you just bought: a target-dependent Offer Ceiling,
         Buy Box rule fit, downside stress test, and adviser/lender review exports on
-        every deal—with a ${escapeHtml(String(TRIAL_DAYS))}-day free trial for eligible new
-        subscribers. Review current billing and cancellation terms before checkout.</p>
+        every deal. New accounts receive a ${escapeHtml(String(PRODUCT_EVALUATION_DAYS))}-day
+        no-card product evaluation; subscribing later is a separate, explicit checkout.
+        Review current billing and cancellation terms before checkout.</p>
         <p><a href="${siteUrlHtml}/pricing?utm_source=email&utm_campaign=pack-credit-day0"><strong>See Pro plans</strong></a></p>
       `,
     },
     {
-      delayDays: 5,
+      delayDays: 28,
       subject: `2 days left on your $${dollars} Pro credit`,
       html: `
         <p>A plain reminder, not a countdown clock: the $${escapeHtml(String(dollars))}
@@ -79,7 +80,7 @@ export async function schedulePackCreditEmails(input: {
         that's the real window, and it doesn't come back.</p>
         <p>If you've already upgraded, the credit applied automatically and
         you can ignore this. If not, it takes one checkout:</p>
-        <p><a href="${siteUrlHtml}/pricing?utm_source=email&utm_campaign=pack-credit-day5"><strong>Use the credit toward Pro</strong></a></p>
+        <p><a href="${siteUrlHtml}/pricing?utm_source=email&utm_campaign=pack-credit-day28"><strong>Use the credit toward Pro</strong></a></p>
         <p style="font-size: 13px; color: #6b7280;">Not the right time? That's
         fine — your report is yours forever either way.</p>
       `,

@@ -170,16 +170,37 @@ describe("the share-route privacy contract", () => {
     expect(store).toContain(
       "const currentResult = calculateAnalysis(input.values)",
     );
-    // Superseded-but-known standards are republished with the legacy banner;
-    // only an unknown/future contract fails closed (locked decision 7).
-    expect(store).toContain("storedMethodologyIsRenderable");
-    expect(store).toContain("TRUECAP_UNDERWRITING_STANDARD_LEGACY_V1_VERSION");
+    // No historical publication may be silently recalculated under the current
+    // formula contract. Its owner must re-underwrite and mint a replacement.
+    expect(store).toContain(
+      "storedMethodologyVersion !== currentResult.methodologyVersion",
+    );
+    expect(store).toContain("review/re-underwrite it under the current standard");
+    expect(store).not.toContain("storedMethodologyIsRenderable");
+    expect(store).not.toContain("TRUECAP_UNDERWRITING_STANDARD_V1_2_VERSION");
     expect(store).toContain("Recompute at the read boundary too");
     expect(route).not.toContain("resolveSavedAnalysisResult");
     expect(route).not.toContain("readRecordedOfferCeiling");
     expect(route).toContain("const result = currentResult");
     expect(route).toContain("recordedResult={false}");
     expect(route).toContain("outputsRecomputed");
+  });
+
+  it("blocks a saved analysis on an older public formula before minting a replacement share", () => {
+    const action = read("app/actions/public-shares.ts");
+    const savedRead = action.indexOf('.from("saved_analyses")');
+    const freezeCheck = action.indexOf(
+      "shouldFreezeSavedMethodology(",
+      savedRead,
+    );
+    const mint = action.indexOf("mintPublicShare({", freezeCheck);
+
+    expect(savedRead).toBeGreaterThan(-1);
+    expect(freezeCheck).toBeGreaterThan(savedRead);
+    expect(action.slice(freezeCheck, mint)).toContain(
+      "run it again before creating a public link",
+    );
+    expect(mint).toBeGreaterThan(freezeCheck);
   });
 
   it("authenticates before the service-role mint and requires an owner", () => {
@@ -227,7 +248,7 @@ describe("the share-route privacy contract", () => {
     );
   });
 
-  it("keeps historical opaque and legacy viewers plus owner-scoped revoke", () => {
+  it("keeps compatible opaque and legacy routes plus owner-scoped revoke", () => {
     const action = read("app/actions/public-shares.ts");
     const store = read("lib/public-share.ts");
     const opaqueViewer = read("app/s/[token]/page.tsx");

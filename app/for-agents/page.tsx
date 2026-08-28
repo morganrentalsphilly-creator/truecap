@@ -14,13 +14,14 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { permanentRedirect } from "next/navigation";
 import { ArrowRight, ArrowUpRight, Calculator, FileDown, Share2, ShieldCheck, Sparkles, Zap } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { TrackedMarketingLink } from "@/components/marketing/tracked-marketing-link";
 import { loadStripeDisplayPrice } from "@/lib/stripe/display-prices";
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
-import { TRIAL_DAYS } from "@/lib/trial";
+import { PRODUCT_EVALUATION_DAYS } from "@/lib/product-access";
 import { AgentProPageTracker } from "@/components/analytics/agent-pro-page-tracker";
 import { AgentProofSection } from "@/components/marketing/testimonial-card";
 
@@ -71,6 +72,7 @@ const USE_CASES: { icon: typeof Calculator; title: string; body: string }[] = [
 
 export default async function ForAgentsPage() {
   const agentProConfigured = isAgentProConfigured();
+  if (!agentProConfigured) permanentRedirect("/pricing");
   const [agentMonthly, agentAnnual] = agentProConfigured
     ? await Promise.all([
         loadStripeDisplayPrice("agent_pro_monthly"),
@@ -126,7 +128,7 @@ export default async function ForAgentsPage() {
                     {agentAnnual.amountLabel}/{agentAnnual.period}
                   </span>
                 ) : null}
-                <span className="text-muted-foreground">{TRIAL_DAYS}-day trial for new subscribers</span>
+                <span className="text-muted-foreground">{PRODUCT_EVALUATION_DAYS}-day evaluation · no card</span>
                 <span className="text-muted-foreground">Client roster included · up to 100 clients</span>
               </>
             ) : (
@@ -284,11 +286,11 @@ export default async function ForAgentsPage() {
               what counts as a good cap rate in 2026
             </Link>
             , or the standalone{" "}
-            <Link href="/tools/cap-rate-calculator" className="text-primary font-semibold hover:underline">
+            <Link href="/#main" className="text-primary font-semibold hover:underline">
               cap rate
             </Link>{" "}
             and{" "}
-            <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">
+            <Link href="/#main" className="text-primary font-semibold hover:underline">
               DSCR
             </Link>{" "}
             calculators. They land on a single, well-cited page — better
@@ -370,7 +372,7 @@ export default async function ForAgentsPage() {
             <p className="mb-5 text-sm font-bold">
               {agentMonthly ? `${agentMonthly.amountLabel}/${agentMonthly.period}` : "See live pricing"}
               {agentAnnual ? ` · ${agentAnnual.amountLabel}/${agentAnnual.period}` : ""}
-              {` · ${TRIAL_DAYS}-day trial for new subscribers · client roster included`}
+              {` · ${PRODUCT_EVALUATION_DAYS}-day no-card evaluation · client roster included`}
             </p>
           ) : (
             <p className="mb-5 text-sm font-bold">

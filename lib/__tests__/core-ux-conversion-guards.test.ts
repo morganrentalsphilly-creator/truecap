@@ -216,11 +216,14 @@ describe("sold features are reachable from the decision-first results", () => {
   const summary = read("components/investcalc/focused-decision-summary.tsx");
   const dashboard = read("components/investcalc/analysis-dashboard.tsx");
 
-  it("PDF export renders in the decision card with the legacy gating", () => {
+  it("PDF export permits an exact anonymous decision without dropping the saved-deal gate", () => {
     expect(summary).toContain("Export PDF");
     expect(dashboard).toContain("onExportPdf={() => handleExportPdf()}");
     expect(dashboard).toContain(
-      "isExportDisabled={isExporting || (canExportPdf && !isSaved)}",
+      "canExportPdf && !canExportUnsavedPdf && !isSaved",
+    );
+    expect(dashboard).toContain(
+      "isExportDisabled={isExporting || exportNeedsSave}",
     );
   });
 

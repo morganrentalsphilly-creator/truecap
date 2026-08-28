@@ -584,7 +584,7 @@ export default function BlogPost() {
             own housing cost while you are there: at $1,500 for the other
             unit, your effective monthly housing expense is $1,768 instead of
             $3,268. Size your own version in the{" "}
-            <Link href="/tools/house-hacking-calculator" className="text-primary font-semibold hover:underline">
+            <Link href="/?strategy=house-hack#main" className="text-primary font-semibold hover:underline">
               house hacking calculator
             </Link>
             , and read{" "}
@@ -617,7 +617,7 @@ export default function BlogPost() {
             </Link>{" "}
             are worth reading before you assume the easier qualification is
             free, and the{" "}
-            <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">
+            <Link href="/#main" className="text-primary font-semibold hover:underline">
               DSCR calculator
             </Link>{" "}
             will tell you whether the property clears 1.20 before you pay for
@@ -688,7 +688,7 @@ export default function BlogPost() {
           <p>
             The cheap defence against both is arithmetic before offers.
             Underwriting a listing takes about a minute in the{" "}
-            <Link href="/tools/rental-cash-flow-calculator" className="text-primary font-semibold hover:underline">
+            <Link href="/#main" className="text-primary font-semibold hover:underline">
               rental cash flow calculator
             </Link>{" "}
             or the full analyzer, and the whole point is to spend $0 discovering

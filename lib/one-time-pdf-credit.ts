@@ -4,7 +4,7 @@
  * a caller must supply an explicitly approved policy before it can return an
  * eligible credit.
  */
-export const ONE_TIME_PDF_PRO_CREDIT_POLICY_VERSION = "draft-v1" as const;
+export const ONE_TIME_PDF_PRO_CREDIT_POLICY_VERSION = "launch-v2" as const;
 
 export type OneTimePdfProCreditPolicy = {
   enabled: boolean;

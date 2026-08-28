@@ -53,12 +53,11 @@ const MATRIX: Row[] = [
   { feature: "Lifecycle stage", truecap: "Pre-purchase — underwrite the deal", quickbooksrental: "Post-purchase — general accounting", winner: "tie" },
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", quickbooksrental: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", quickbooksrental: "Not modeled", winner: "truecap" },
-  { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", quickbooksrental: "Yes — but requires manual setup", winner: "tie" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", quickbooksrental: "Not applicable", winner: "truecap" },
   { feature: "Rental-specific categorization", truecap: "Forward-looking expense modeling", quickbooksrental: "Manual setup — generic categories", winner: "truecap" },
   { feature: "Bank-feed sync", truecap: "No", quickbooksrental: "Yes — connect any US bank", winner: "quickbooksrental" },
   { feature: "Per-property P&L", truecap: "Forward projection per deal", quickbooksrental: "Class / Location tracking (manual)", winner: "tie" },
-  { feature: "Schedule E export", truecap: "Forward tax projection", quickbooksrental: "Yes — but requires Schedule E mapping", winner: "tie" },
+  { feature: "Schedule E export", truecap: "No", quickbooksrental: "Yes — but requires Schedule E mapping", winner: "quickbooksrental" },
   { feature: "Rental rent collection", truecap: "No", quickbooksrental: "Yes — invoicing + ACH (Online only)", winner: "quickbooksrental" },
   { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", quickbooksrental: "Trial only; from ~$15-90/mo (as of 2026)", winner: "truecap" },
   { feature: "Built specifically for landlords", truecap: "Yes", quickbooksrental: "No — general business accounting", winner: "truecap" },
@@ -73,7 +72,7 @@ export default function VsQuickbooksRentalPage() {
     url: `${siteUrl}/vs/quickbooks-rental`,
     description:
       "QuickBooks is general-purpose accounting many landlords default to. TrueCap is pre-purchase rental underwriting. Honest comparison and what to use for accounting instead.",
-    dateModified: "2026-06-07",
+    dateModified: "2026-08-27",
     publisher: { "@id": `${siteUrl}/#organization` },
   };
 
@@ -238,7 +237,7 @@ export default function VsQuickbooksRentalPage() {
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Want to see just the underwriting half? Try the{" "}
-            <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">
+            <Link href="/#main" className="font-semibold text-primary hover:underline">
               cap rate calculator
             </Link>{" "}
             or the full{" "}
@@ -262,7 +261,7 @@ export default function VsQuickbooksRentalPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
-            Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
+            Pro adds 10-year cash-flow and equity projections, sensitivity,
             Offer Ceiling, co-branded share links, and PDF reports with Pro; see live pricing for current terms.
             No card to start.
           </p>
@@ -344,11 +343,11 @@ const QUICKBOOKS_FAQ: FaqItem[] = [
     question: "What&apos;s the cheapest rental accounting setup?",
     answer: (
       <>
-        Stessa free covers unlimited properties + bank-feed sync + Schedule E. Baselane free adds banking + rent collection alongside. For most landlords, the free tiers of either are cheaper and simpler than QuickBooks ($15-90/month). QuickBooks makes sense if you have non-rental businesses too.
+        Stessa publishes a free Essentials plan with paid Manage and Pro tiers; its current pricing places Schedule E on Manage and Pro. Baselane also publishes a free entry point with banking and rent collection. Compare live limits and fees with QuickBooks before choosing; QuickBooks may still fit landlords with non-rental businesses.
       </>
     ),
     plainTextAnswer:
-      "Stessa free: unlimited properties + bank-feed sync + Schedule E. Baselane free: adds banking + rent collection. Both cheaper + simpler than QuickBooks ($15-90/mo). QB makes sense if you have non-rental businesses.",
+      "Stessa publishes free Essentials plus paid Manage and Pro, with Schedule E on the current paid tiers. Baselane also publishes a free entry point with banking and rent collection. Compare live limits and fees with QuickBooks.",
   },
 ];
 

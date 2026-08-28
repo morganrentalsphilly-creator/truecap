@@ -106,10 +106,10 @@ const SEQUENCE: SequenceEmail[] = [
     <li><strong>Cash flow after reserves</strong> — only real once CapEx + vacancy + maintenance are set aside.</li>
     <li><strong>Sensitivity</strong> — does it survive a 10% rent drop or a 1-point rate bump?</li>
     <li><strong>10-year projection</strong> — year-1 cash flow lies; model rent + expense growth.</li>
-    <li><strong>The exit</strong> — modeled profit across hold years, after assumed selling costs and taxes.</li>
+    <li><strong>The evidence</strong> — replace every area-level benchmark with a property-specific quote, record, or inspection finding.</li>
   </ol>
   <p style="margin:0 0 20px 0;color:#374151;line-height:1.6;font-size:15px;">
-    The free screen covers cap rate, cash-on-cash, DSCR, cash flow, a secondary Screening Index, and selected-rule fit. The index is for triage—not evidence readiness, an appraisal, lender approval, or investment advice. Pro adds sensitivity, 10-year projections, and modeled exits. Review every starting assumption before relying on the result.
+    The free screen covers cap rate, cash-on-cash, DSCR, cash flow, a secondary Screening Index, and selected-rule fit. The index is for triage—not evidence readiness, an appraisal, lender approval, or investment advice. Pro adds sensitivity, 10-year cash-flow and equity projections, comparison tools, and review reports. Review every starting assumption before relying on the result.
   </p>
   <div style="text-align:center;margin:24px 0;">
     <a href="${siteUrlHtml}" style="display:inline-block;background:#0070c4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">Run a deal in 60 seconds</a>
@@ -152,12 +152,13 @@ const SEQUENCE: SequenceEmail[] = [
   <h1 style="margin:0 0 12px 0;font-size:22px;font-weight:800;line-height:1.2;">What does year 10 actually look like?</h1>
   <p style="margin:0 0 16px 0;color:#374151;line-height:1.6;font-size:15px;">
     Year-one cash flow is only one part of the acquisition decision. Rent and
-    expenses can change, debt pays down, and the exit assumption can dominate
-    the long-term result.
+    expenses can change and debt pays down, so a longer hold view can differ
+    materially from the first-year screen.
   </p>
   <p style="margin:0 0 20px 0;color:#374151;line-height:1.6;font-size:15px;">
-    TrueCap Pro shows you the full 10-year projection — cash flow, equity, illustrative after-tax dollars, and modeled exit-year comparisons.
-    Same deal, complete picture.
+    TrueCap Pro shows a 10-year planning projection for cash flow and equity,
+    using editable growth and financing assumptions. It is a scenario, not a
+    forecast or a complete sale-and-tax model.
   </p>
   <div style="text-align:center;margin:24px 0;">
     <a href="${siteUrlHtml}/pricing" style="display:inline-block;background:#0070c4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">See Pro features</a>
@@ -173,7 +174,7 @@ const SEQUENCE: SequenceEmail[] = [
 <div style="max-width:560px;margin:32px auto;padding:32px 24px;background:#fff;border-radius:16px;border:1px solid #e5e7eb;">
   <h1 style="margin:0 0 12px 0;font-size:22px;font-weight:800;line-height:1.2;">Ready for a repeatable review workflow?</h1>
   <p style="margin:0 0 16px 0;color:#374151;line-height:1.6;font-size:15px;">
-    Reviewing ${addressHtml ? `<strong>${addressHtml}</strong>` : "a deal"} with a lender, partner, or adviser? Pro adds selected-rule fit, a target-dependent Offer Ceiling, downside testing, 10-year projections, illustrative tax impact, modeled exit comparisons, and PDF reports. The Offer Ceiling is not a recommended offer.
+    Reviewing ${addressHtml ? `<strong>${addressHtml}</strong>` : "a deal"} with a lender, partner, or adviser? Pro adds selected-rule fit, a target-dependent Offer Ceiling, downside testing, 10-year cash-flow and equity projections, saved-deal comparison, and PDF reports. The Offer Ceiling is not a recommended offer.
   </p>
   <p style="margin:0 0 20px 0;color:#374151;line-height:1.6;font-size:15px;">
     Compare Pro plans and current terms before starting checkout. New one-time report purchases are temporarily unavailable.

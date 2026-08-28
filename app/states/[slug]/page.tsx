@@ -316,23 +316,23 @@ export default async function StatePage({
             </li>
             <li>
               Compute returns with the{" "}
-              <Link href="/tools/cap-rate-calculator" className="text-primary font-semibold hover:underline">
+              <Link href="/#main" className="text-primary font-semibold hover:underline">
                 cap rate calculator
               </Link>{" "}
               and the{" "}
-              <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">
+              <Link href="/#main" className="text-primary font-semibold hover:underline">
                 DSCR calculator
               </Link>{" "}
               using local property tax + insurance figures.
             </li>
             <li>
-              Match the deal to your strategy — see the playbooks for{" "}
+              Match the deal to your strategy — see the released workflow for{" "}
               <Link href="/for-buy-and-hold" className="text-primary font-semibold hover:underline">
                 buy-and-hold investors
               </Link>{" "}
-              and{" "}
-              <Link href="/for-brrrr" className="text-primary font-semibold hover:underline">
-                BRRRR operators
+              or review the educational{" "}
+              <Link href="/blog/brrrr-method-explained" className="text-primary font-semibold hover:underline">
+                BRRRR sequence
               </Link>
               .
             </li>

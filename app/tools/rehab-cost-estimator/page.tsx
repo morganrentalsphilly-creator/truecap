@@ -11,20 +11,18 @@ import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-sch
 export const metadata: Metadata = {
   title: "Free Rehab Cost Estimator — Budget by Sq Ft",
   description:
-    "Free rehab cost estimator for flips, BRRRRs, and value-add rentals. Sq-ft defaults for cosmetic, kitchen, bath, and systems. Plus how to budget accurately.",
+    "Free renovation cost estimator with editable square-foot and per-room defaults for cosmetic, kitchen, bath, and systems work.",
   keywords: [
     "rehab cost estimator",
     "rehab calculator",
     "renovation cost calculator",
-    "fix and flip rehab estimator",
-    "BRRRR rehab budget",
     "rental property rehab",
   ],
   alternates: { canonical: "/tools/rehab-cost-estimator" },
   openGraph: {
     title: "Free Rehab Cost Estimator — Budget by Sq Ft",
     description:
-      "Estimate rehab cost in seconds with sq-ft-based defaults for every common work item. Plus a how-to on building a defensible budget.",
+      "Estimate rehab cost in seconds with sq-ft-based defaults for every common work item. Plus how to turn a directional estimate into real contractor bids.",
     url: "/tools/rehab-cost-estimator",
     type: "website",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap rehab cost estimator" }],
@@ -38,7 +36,7 @@ export const metadata: Metadata = {
 const FAQS = [
   {
     q: "How accurate is a sq-ft-based rehab estimate?",
-    a: "Directional, not bid-quality. The defaults in this tool are mid-market 2024-25 contractor pricing surveys. Real bids vary 30-50% based on local labor rates, material availability, scope clarity, and contractor markup. Use this estimator to triage deals; get three real bids before committing.",
+    a: "Directional, not bid-quality. The defaults are TrueCap planning starting points, not current market pricing or a survey of contractors, and every line is editable. Real bids vary widely with local labor rates, material availability, scope clarity, and contractor markup. Use this estimator to triage deals; get local bids before committing.",
   },
   {
     q: "What contingency should I budget?",
@@ -46,7 +44,7 @@ const FAQS = [
   },
   {
     q: "Should I include holding costs in the rehab budget?",
-    a: "Treat them separately. Rehab cost = labor + materials + permits + dumpster + supervision. Holding costs (mortgage interest, taxes, insurance, utilities while no rent is coming in) are a separate line item. The TrueCap BRRRR and Fix-and-Flip calculators handle both — the rehab cost from this tool flows into the rehab input, holding costs get computed separately from your financing assumptions.",
+    a: "Treat them separately. Rehab cost = labor + materials + permits + dumpster + supervision. Holding costs (mortgage interest, taxes, insurance, and utilities while no rent is coming in) belong in a dated project ledger. TrueCap's integrated BRRRR and fix-and-flip lifecycle models are not currently released.",
   },
   {
     q: "How do I estimate a kitchen renovation?",
@@ -92,7 +90,7 @@ export default function RehabEstimatorPage() {
     applicationSubCategory: "Real Estate Calculator",
     operatingSystem: "Web",
     description:
-      "Free rehab cost estimator for flips, BRRRRs, and value-add rentals. Sq-ft defaults for cosmetic, kitchen, bath, and systems. Plus how to budget accurately.",
+      "Free renovation cost estimator with editable square-foot and per-room defaults for cosmetic, kitchen, bath, and systems work.",
     url: `${siteUrl}/tools/rehab-cost-estimator`,
     offers: {
       "@type": "Offer",
@@ -131,28 +129,34 @@ export default function RehabEstimatorPage() {
             <p className="text-base sm:text-lg text-muted-foreground mt-2 leading-relaxed">
               Sq-ft-based pricing for every common rehab work item — paint,
               flooring, kitchens, baths, roofs, HVAC, electrical, plumbing.
-              Mid-market defaults you can override. Use it to triage flips
-              and BRRRRs before committing to detailed contractor bids.
+              Mid-market defaults you can override. Use it for early scope and
+              budget triage before committing to detailed contractor bids.
             </p>
           </header>
 
           <RehabEstimatorCard />
 
           <article className="prose prose-slate max-w-none mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
+            <p>
+              <strong>Educational guide:</strong> This page estimates renovation
+              scope only. TrueCap does not currently expose integrated flip or
+              BRRRR lifecycle modeling.
+            </p>
             <h2 className="text-2xl sm:text-3xl">Why an estimator at all?</h2>
             <p>
-              You can&apos;t underwrite a flip or BRRRR without a rehab
+              You can&apos;t screen a property that needs work without a renovation
               number. You also can&apos;t get a real contractor bid on every
-              property you&apos;re considering. The fix is a sq-ft-based
-              estimator: directional enough to filter the universe of
+              property you&apos;re considering. An early sq-ft-based
+              estimator is directional enough to filter the universe of
               potential deals down to the 10% worth a real bid.
             </p>
             <p>
-              This tool ships with 2024-25 mid-market defaults for every
+              This tool ships with editable TrueCap planning defaults for every
               common rehab work item. Pick the scope, the calculator does
               the math, you get a number in seconds. Then add a contingency
-              percentage (10-20% is standard) and you have a defensible
-              budget. For the full methodology behind these numbers, read{" "}
+              percentage (10-20% is common) and you have a directional planning
+              figure to screen with — replace it with local contractor bids
+              before you commit. For how these defaults are built, read{" "}
               <Link href="/blog/how-to-estimate-rehab-costs" className="font-semibold text-primary hover:underline">how to estimate rehab costs</Link>.
             </p>
 
@@ -173,10 +177,9 @@ export default function RehabEstimatorPage() {
               </li>
               <li>
                 <strong>Use the total as your underwriting input.</strong>{" "}
-                When you run the full{" "}
-                <Link href="/tools/brrrr-calculator" className="font-semibold text-primary hover:underline">BRRRR calculator</Link>{" "}
-                or Fix-and-Flip in TrueCap, the
-                rehab estimator&apos;s total flows in as the default. New to
+                Carry the total into your own project ledger; TrueCap&apos;s
+                integrated BRRRR and fix-and-flip models are not currently
+                released. New to
                 the strategy? Start with{" "}
                 <Link href="/blog/brrrr-method-explained" className="font-semibold text-primary hover:underline">the BRRRR method explained</Link>.
               </li>
@@ -261,21 +264,19 @@ export default function RehabEstimatorPage() {
           </article>
 
           <section className="mt-10 sm:mt-12 rounded-2xl bg-primary text-primary-foreground p-6 sm:p-8">
-            <h2 className="text-xl sm:text-2xl font-extrabold mb-2">Plug the estimate into a full BRRRR or flip</h2>
+            <h2 className="text-xl sm:text-2xl font-extrabold mb-2">Carry the estimate into a reviewed project ledger</h2>
             <p className="text-sm sm:text-base opacity-90 mb-4">
-              The rehab number is one input. TrueCap runs the full BRRRR
-              (cash-out math, post-refi cash flow, infinite return detection)
-              and Fix-and-Flip (net profit, ROI, annualized, profit per day)
-              with the rehab estimate flowing in automatically.
+              The rehab number is one input. Keep acquisition financing,
+              construction carry, draws, lease-up, refinance or sale proceeds,
+              and every capital contribution in a separate dated ledger. Use
+              TrueCap&apos;s released analyzer only for the stabilized rental case.
             </p>
             <ul className="text-sm space-y-1.5 mb-5 opacity-90">
               {[
-                "Rehab estimator total flows into BRRRR + Flip inputs",
-                "BRRRR: cash left in deal, post-refi CF, infinite-return detection",
-                "Fix-and-Flip: net profit, ROI, annualized ROI, profit/day, break-even ARV",
-                "Save up to 5 deals free — unlimited with Pro",
-                "Compare side-by-side (Pro)",
-                "Export PDF reports with Pro",
+                "Line-item rehab range by scope of work",
+                "Separate dated ledger for construction-period cash flows",
+                "Contractor bids and contingency replace the early estimate",
+                "Released stabilized-rental screen after renovation",
                 "Free to start",
               ].map((line) => (
                 <li key={line} className="flex items-start gap-2">
@@ -285,7 +286,7 @@ export default function RehabEstimatorPage() {
               ))}
             </ul>
             <Link href="/" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
-              Open the full TrueCap analyzer
+              Open the released rental analyzer
               <ArrowUpRight className="w-4 h-4" />
             </Link>
           </section>
@@ -297,7 +298,7 @@ export default function RehabEstimatorPage() {
           <ToolEmbedInvite slug="rehab-cost-estimator" />
 
 
-          <ToolsConversionCta calculatorName="Rehab estimator" hook="TrueCap connects rehab budget straight into the BRRRR + fix-and-flip analyzers — so you can see whether the rehab pays for itself after refi or sale." />
+          <ToolsConversionCta calculatorName="Rehab estimator" hook="Use the released rental analyzer to screen a stabilized hold after renovation, and keep construction-period contributions, financing, and sale or refinance costs in a separate project ledger." />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}

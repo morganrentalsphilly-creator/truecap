@@ -33,11 +33,29 @@ describe("underwriting enrichment adoption", () => {
   it("uses an active-listing price while keeping the AVM separate", () => {
     expect(
       selectUnderwritingEnrichment(
-        enrichment({ listPrice: 399_900, valueEstimate: 425_000 })
+        enrichment({
+          listPrice: 399_900,
+          listingStatus: "Active",
+          valueEstimate: 425_000,
+        })
       )
     ).toMatchObject({
       purchasePrice: 399_900,
       purchasePriceSource: "active-listing",
     });
   });
+
+  it.each([undefined, null, "Pending", "Sold", "Off Market"])(
+    "rejects a positive provider price unless status is explicitly active (%s)",
+    (listingStatus) => {
+      expect(
+        selectUnderwritingEnrichment(
+          enrichment({ listPrice: 399_900, listingStatus }),
+        ),
+      ).toMatchObject({
+        purchasePrice: null,
+        purchasePriceSource: null,
+      });
+    },
+  );
 });

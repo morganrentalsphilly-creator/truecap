@@ -9,7 +9,7 @@
  * and a total.
  *
  * Does not write to the form - exposes its total via an optional
- * onTotalChange callback so the BRRRR / Flip cards can consume it.
+ * onTotalChange callback so an enclosing panel can consume the total.
  */
 
 import { useEffect, useId, useMemo, useState } from "react";
@@ -148,9 +148,9 @@ export function RehabEstimatorCard({
         </button>
       </div>
       <p className="text-xs text-muted-foreground mb-4">
-        Mid-market defaults from contractor pricing surveys - use as a starting
-        point, not a binding bid. Total flows into the BRRRR &amp; Fix-and-Flip
-        cards below.
+        Directional planning defaults you can edit — not bid-quality pricing and
+        not current market data. Get local contractor bids before committing to
+        a number.
       </p>
 
       <div className="grid grid-cols-3 gap-3 mb-3">

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { InvestmentFormValues } from "../investcalc-schema";
 import {
   buildInputConfidence,
+  formatPurchasePriceSourceLabel,
   inputVerificationFingerprint,
   INPUT_CONFIDENCE_FIELD_KEYS,
   INPUT_CONFIDENCE_METHOD_VERSION,
@@ -95,6 +96,113 @@ describe("Input Confidence v1.1", () => {
       values({ purchasePrice: 310_000 }),
     );
     expect(edited.purchasePriceEstimated).toBe(false);
+  });
+
+  it("persists dated RentCast asking-price lineage as property-specific and unverified", () => {
+    const original = values({ purchasePrice: 399_900 });
+    const source = {
+      kind: "active-listing" as const,
+      provider: "rentcast" as const,
+      fetchedAt: "2026-08-27T12:00:00.000Z",
+    };
+    const readiness = buildInputConfidence({
+      values: original,
+      purchasePriceSource: source,
+    });
+
+    expect(byKey(readiness, "purchasePrice")).toMatchObject({
+      sourceClass: "property-specific",
+      sourceLabel:
+        "RentCast active listing asking price · source date 2026-08-27",
+      verifyAction: "Confirm asking or contract price",
+    });
+    expect(readiness.verifiedFields).not.toContain("purchasePrice");
+    expect(readiness.sourceContext.purchasePriceSource).toEqual(source);
+    expect(formatPurchasePriceSourceLabel(source)).toContain("2026-08-27");
+
+    const reopened = restoreInputConfidenceSourceContext(
+      readiness.sourceContext,
+      original,
+    );
+    expect(reopened.purchasePriceSource).toEqual(source);
+    expect(reopened.purchasePriceEstimated).toBe(false);
+
+    const edited = restoreInputConfidenceSourceContext(
+      readiness.sourceContext,
+      values({ purchasePrice: 401_000 }),
+    );
+    expect(edited.purchasePriceSource).toBeNull();
+  });
+
+  it("persists a RentCast AVM as a dated local estimate, never an asking price", () => {
+    const source = {
+      kind: "avm-estimate" as const,
+      provider: "rentcast" as const,
+      fetchedAt: "2026-08-27T12:00:00.000Z",
+    };
+    const readiness = buildInputConfidence({
+      values: values({ purchasePrice: 425_000 }),
+      purchasePriceSource: source,
+    });
+
+    expect(byKey(readiness, "purchasePrice")).toMatchObject({
+      sourceClass: "local-estimate",
+      sourceLabel: "RentCast AVM estimate · source date 2026-08-27",
+    });
+    expect(readiness.sourceContext.purchasePriceEstimated).toBe(true);
+    expect(readiness.sourceContext.purchasePriceSource).toEqual(source);
+  });
+
+  it("lets structured active-listing lineage override a stale legacy estimate flag", () => {
+    const source = {
+      kind: "active-listing" as const,
+      provider: "rentcast" as const,
+      fetchedAt: "2026-08-27T12:00:00.000Z",
+    };
+    const original = values({ purchasePrice: 399_900 });
+    const readiness = buildInputConfidence({
+      values: original,
+      purchasePriceEstimated: true,
+      purchasePriceSource: source,
+    });
+
+    expect(byKey(readiness, "purchasePrice").sourceClass).toBe(
+      "property-specific",
+    );
+    expect(readiness.sourceContext.purchasePriceEstimated).toBeUndefined();
+
+    const persistedAvm = buildInputConfidence({
+      values: original,
+      purchasePriceSource: { ...source, kind: "avm-estimate" },
+    }).sourceContext;
+    const adoptedListing = mergeInputConfidenceSourceContext({
+      persistedSourceContext: persistedAvm,
+      values: original,
+      livePurchasePriceSource: source,
+    });
+    expect(adoptedListing.purchasePriceEstimated).toBe(false);
+    expect(adoptedListing.purchasePriceSource).toEqual(source);
+  });
+
+  it("lets an explicit edit clear a still-equal restored price source", () => {
+    const original = values({ purchasePrice: 399_900 });
+    const persisted = buildInputConfidence({
+      values: original,
+      purchasePriceSource: {
+        kind: "active-listing",
+        provider: "rentcast",
+        fetchedAt: "2026-08-27T12:00:00.000Z",
+      },
+    }).sourceContext;
+
+    const cleared = mergeInputConfidenceSourceContext({
+      persistedSourceContext: persisted,
+      values: original,
+      livePurchasePriceSource: null,
+      livePurchasePriceEstimated: false,
+    });
+    expect(cleared.purchasePriceSource).toBeNull();
+    expect(cleared.purchasePriceEstimated).toBe(false);
   });
 
   it("labels HUD rent and FRED rates as benchmarks, never verified facts", () => {
@@ -521,6 +629,7 @@ describe("Input Confidence v1.1", () => {
       touchedInputFields: [],
       startingAssumptionOrigins: {},
       purchasePriceEstimated: false,
+      purchasePriceSource: null,
     });
     expect(
       restoreInputConfidenceSourceContext(
@@ -535,6 +644,7 @@ describe("Input Confidence v1.1", () => {
       touchedInputFields: [],
       startingAssumptionOrigins: {},
       purchasePriceEstimated: false,
+      purchasePriceSource: null,
     });
   });
 });

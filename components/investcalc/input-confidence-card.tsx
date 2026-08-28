@@ -195,6 +195,26 @@ export function InputConfidenceCard({
   const pendingQueueFocusIndex = useRef<number | null>(null);
   const remaining = confidence.offerReadyRemaining.length;
   const ledger = buildAssumptionLedger(confidence);
+  const readinessSteps = [
+    {
+      label: "Preliminary screen",
+      detail: "Important inputs may still be estimates",
+    },
+    {
+      label: "Assumptions reviewed",
+      detail: "Core inputs have been explicitly reviewed",
+    },
+    {
+      label: "Offer-ready",
+      detail: "Every required input has been confirmed",
+    },
+  ] as const;
+  const readinessStep =
+    confidence.stage === "offer-ready"
+      ? 2
+      : confidence.stage === "verified"
+        ? 1
+        : 0;
   const visibleQueue = advocacyContractEnabled
     ? ledger.items
         .filter((item) => item.material && !item.evidenceVerified)
@@ -242,10 +262,12 @@ export function InputConfidenceCard({
     ? ledger.readinessLabel
     : showOfferReadyStatus
       ? confidence.stage === "offer-ready"
-        ? "Offer Ready"
+        ? "Offer-ready"
         : remaining <= 3 && remaining > 0
-          ? "Almost Offer Ready"
-          : confidence.stageLabel
+          ? "Almost offer-ready"
+          : confidence.stage === "verified"
+            ? "Assumptions reviewed"
+            : "Preliminary screen"
       : "Input verification";
 
   useEffect(() => {
@@ -479,6 +501,57 @@ export function InputConfidenceCard({
         </div>
       </div>
 
+      {showOfferReadyStatus ? (
+        <ol
+          aria-label="Underwriting readiness"
+          className="mt-5 grid gap-2 sm:grid-cols-3"
+        >
+          {readinessSteps.map((step, index) => {
+            const completed = index < readinessStep;
+            const current = index === readinessStep;
+            return (
+              <li
+                key={step.label}
+                aria-current={current ? "step" : undefined}
+                className={cn(
+                  "rounded-xl border p-3",
+                  current
+                    ? "border-primary/40 bg-primary/[0.06]"
+                    : completed
+                      ? "border-emerald-300/60 bg-emerald-50/60"
+                      : "border-border bg-muted/20",
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <span
+                    aria-hidden
+                    className={cn(
+                      "flex size-6 shrink-0 items-center justify-center rounded-full border text-[11px] font-extrabold",
+                      completed
+                        ? "border-emerald-600 bg-emerald-600 text-white"
+                        : current
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-background text-muted-foreground",
+                    )}
+                  >
+                    {completed ? <Check className="size-3.5" /> : index + 1}
+                  </span>
+                  <span className="text-xs font-extrabold text-foreground">
+                    {step.label}
+                  </span>
+                </div>
+                <p className="mt-1.5 text-[10px] leading-relaxed text-muted-foreground">
+                  {step.detail}
+                </p>
+                <span className="sr-only">
+                  {completed ? "Completed" : current ? "Current state" : "Not reached"}
+                </span>
+              </li>
+            );
+          })}
+        </ol>
+      ) : null}
+
       {visibleQueue.length > 0 ? (
         <div className="mt-5 border-t border-border pt-4">
           <div className="mb-3 flex items-center justify-between gap-3">
@@ -493,7 +566,12 @@ export function InputConfidenceCard({
               onClick={onEditAssumptions}
               className="min-h-11 text-xs"
             >
-              Edit assumptions
+              {/* Deliberately NOT "Edit assumptions". The decision summary's
+                  primary control already carries that name, and this row can
+                  render at the same time — two buttons with one accessible
+                  name pointing at the same handler is a screen-reader trap,
+                  and it is what made the page-scoped e2e locator ambiguous. */}
+              Edit inputs
             </Button>
           </div>
           <ul className="grid gap-2 lg:grid-cols-3">

@@ -26,7 +26,7 @@
  */
 
 /**
- * "agent_pro" (2026-08, Morgan-approved at $59/mo): everything in Pro plus the
+ * "agent_pro" (2026-08 launch catalog: $49/mo): everything in Pro plus the
  * agent toolkit — client rosters, client-scoped buy boxes, and co-branded
  * client reports. Portal and white-label code remain entitlement-gated but are
  * intentionally unavailable until their public-link controls and license terms
@@ -71,10 +71,14 @@ export interface FeatureSpec {
   freeLimit?: string;
   /** Limit qualifier shown on the pro tier (e.g. "unlimited", "50/mo"). */
   proLimit?: string;
-  /** Limit qualifier shown on the $5 one-time tier (e.g. "One deal", "In the PDF"). */
+  /** Limit qualifier shown on the $9 one-time tier (e.g. "One deal", "In the PDF"). */
   oneTimeLimit?: string;
+  /** Browser-bound product policy layered above plan tiers. */
+  anonymousLimit?: string;
+  /** No-card evaluation policy layered above plan tiers. */
+  evaluationLimit?: string;
   category: FeatureCategory;
-  /** How it's gated at runtime — "flag" = plans.entitlements feature string; "paid" = paid-plan status only; "always" = everyone; "stripe_one_time" = $5 checkout. */
+  /** How it's gated at runtime — "flag" = plans.entitlements feature string; "paid" = paid-plan status only; "always" = everyone; "stripe_one_time" = $9 checkout. */
   gate: "flag" | "paid" | "always" | "stripe_one_time";
   /**
    * false = the entitlement exists in the plan JSON but marketing must NOT
@@ -100,16 +104,16 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureSpec> = {
   dashboard_access: { key: "dashboard_access", label: "Dashboard access", tiers: ["free", "pro", "agent_pro"], category: "pipeline", gate: "flag" },
   dashboard_insights: { key: "dashboard_insights", label: "Portfolio insights & analytics", tiers: ["pro", "agent_pro"], category: "pipeline", gate: "flag" },
   compare_deals: { key: "compare_deals", label: "Compare deals side-by-side", tiers: ["pro", "agent_pro"], proLimit: "up to 4", category: "analysis", gate: "flag" },
-  mao: { key: "mao", label: "Offer Ceiling — highest modeled price for your targets", tiers: ["one_time_pdf", "pro", "agent_pro"], oneTimeLimit: "In the PDF", category: "analysis", gate: "paid" },
-  sensitivity: { key: "sensitivity", label: "Sensitivity grid — stress-test the deal", tiers: ["pro", "agent_pro"], category: "analysis", gate: "paid" },
-  strategies: { key: "strategies", label: "BRRRR + fix-and-flip + rehab estimator", tiers: ["pro", "agent_pro"], category: "analysis", gate: "paid" },
+  mao: { key: "mao", label: "Offer Ceiling — highest modeled price for your targets", tiers: ["one_time_pdf", "pro", "agent_pro"], anonymousLimit: "one exact deal", evaluationLimit: "three exact metered deals", oneTimeLimit: "In the PDF", category: "analysis", gate: "paid" },
+  sensitivity: { key: "sensitivity", label: "Sensitivity grid — stress-test the deal", tiers: ["pro", "agent_pro"], anonymousLimit: "one exact deal", evaluationLimit: "three exact metered deals", category: "analysis", gate: "paid" },
+  strategies: { key: "strategies", label: "Specialist BRRRR and fix-and-flip models", tiers: ["pro", "agent_pro"], category: "analysis", gate: "paid", shipped: false },
   projections: { key: "projections", label: "10-year cash flow & equity projection", tiers: ["one_time_pdf", "pro", "agent_pro"], oneTimeLimit: "In the PDF", category: "analysis", gate: "flag" },
-  tax_strategy: { key: "tax_strategy", label: "Illustrative tax impact — depreciation & interest", tiers: ["one_time_pdf", "pro", "agent_pro"], oneTimeLimit: "In the PDF", category: "analysis", gate: "flag" },
-  exit_scenarios: { key: "exit_scenarios", label: "Exit scenarios — modeled hold-year comparison", tiers: ["one_time_pdf", "pro", "agent_pro"], oneTimeLimit: "In the PDF", category: "analysis", gate: "flag" },
+  tax_strategy: { key: "tax_strategy", label: "Tax-loss and depreciation scenarios", tiers: ["one_time_pdf", "pro", "agent_pro"], oneTimeLimit: "In the PDF", category: "analysis", gate: "flag", shipped: false },
+  exit_scenarios: { key: "exit_scenarios", label: "Modeled sale and exit scenarios", tiers: ["one_time_pdf", "pro", "agent_pro"], oneTimeLimit: "In the PDF", category: "analysis", gate: "flag", shipped: false },
   // Comps are a separate entitlement above. An anonymous one-time buyer can
   // purchase the Pack without an account or saved comp set, so bundling comps
   // into this label would promise content the generated report may not have.
-  pdf_export: { key: "pdf_export", label: "Deal Decision Pack PDF", tiers: ["one_time_pdf", "pro", "agent_pro"], freeLimit: "one-time per deal", oneTimeLimit: "One deal", proLimit: "unlimited", category: "reporting", gate: "flag" },
+  pdf_export: { key: "pdf_export", label: "Decision memo/report PDF", tiers: ["one_time_pdf", "pro", "agent_pro"], anonymousLimit: "one exact deal", evaluationLimit: "three exact saved, metered deals", oneTimeLimit: "One deal", proLimit: "unlimited", category: "reporting", gate: "flag" },
   custom_branding: { key: "custom_branding", label: "Custom branding — PDFs + co-branded lead-capture share pages", tiers: ["pro", "agent_pro"], category: "reporting", gate: "flag" },
   // Sharing is FREE for everyone (the growth loop): basic links are TrueCap-branded.
   // Pro adds co-branded share pages + lead capture via `custom_branding` (separate key).
@@ -152,7 +156,7 @@ export function isFeatureReleased(key: FeatureKey): boolean {
 export function featuresForTier(tier: Tier): FeatureSpec[] {
   return (Object.keys(FEATURE_CATALOG) as FeatureKey[])
     .map((k) => FEATURE_CATALOG[k])
-    .filter((f) => f.tiers.includes(tier));
+    .filter((f) => f.tiers.includes(tier) && f.shipped !== false);
 }
 
 /** The tier-appropriate limit qualifier ("up to 5" on free, "unlimited" on pro), if any. */
@@ -172,19 +176,25 @@ function capitalize(s: string): string {
 }
 
 /**
- * One feature's row of ladder cells, in LADDER_TIERS order: `true` when the
- * tier includes it outright, the qualifier string when it includes it with a
- * limit ("Up to 5", "In the PDF"), and `false` when it doesn't.
+ * One feature's row of ladder cells, in LADDER_TIERS order. The homepage names
+ * its first column "First decision", so an explicit anonymousLimit overlays
+ * the free-plan cell there without pretending `tierHas("free", key)` is true.
+ * Other cells are `true` when the tier includes the feature outright, the
+ * qualifier string when limited ("Up to 5", "In the PDF"), and `false` when
+ * unavailable.
  *
  * This is what makes the pricing matrices single-sourced. The rendered rows
  * used to hand-type these three cells, and that is precisely how the homepage
- * came to claim Free couldn't save deals (it can — 5) and that the $5 PDF
+ * came to claim Free couldn't save deals (it can — 5) and that the one-time PDF
  * omitted projections (it doesn't) — both contradicting /pricing at the exact
  * moment someone decides to pay.
  */
 export function ladderCellsForFeature(key: FeatureKey): (boolean | string)[] {
   const spec = FEATURE_CATALOG[key];
   return LADDER_TIERS.map((tier) => {
+    if (tier === "free" && spec.anonymousLimit) {
+      return capitalize(spec.anonymousLimit);
+    }
     if (!spec.tiers.includes(tier)) return false;
     const limit =
       tier === "free" ? spec.freeLimit : tier === "one_time_pdf" ? spec.oneTimeLimit : spec.proLimit;

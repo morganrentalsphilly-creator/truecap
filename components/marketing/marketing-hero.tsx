@@ -13,14 +13,12 @@
  * so it's the most honest, on-brand asset and needs no external CDN.
  *
  * SERVER COMPONENT. The only client behavior is the tiny
- * <HeroAddressForm /> island (address field + handoff) and the
- * <DealsAnalyzedTicker />, so the rest of this tree ships zero JS.
+ * <HeroAddressForm /> island (address field + handoff), so the rest of this
+ * tree ships zero JS.
  */
 
 import { Check, Database, Target, TrendingUp } from "lucide-react";
-import Link from "next/link";
 import { HeroAddressForm } from "@/components/marketing/hero-address-form";
-import { DealsAnalyzedTicker } from "@/components/marketing/deals-analyzed-ticker";
 import { SAMPLE_DEAL_FIXTURE } from "@/lib/sample-deal";
 import { calculateSampleDealOutcome } from "@/lib/sample-deal-analysis";
 import { describeMaoTarget } from "@/lib/mao-targets";
@@ -61,7 +59,7 @@ export function MarketingHero() {
             </h1>
             <p className="mt-4 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
               {newHomepagePositioningEnabled
-                ? "Get a preliminary rental screen in minutes, adjust every modeled assumption, and calculate the price that fits your targets."
+                ? "Paste a listing or enter an address. TrueCap shows cash flow, DSCR and the highest price that meets your buy box—plus which assumptions still need verification."
                 : "Enter an address for a first-pass screen with labeled, editable assumptions. Pro adds a target-dependent Offer Ceiling. Starting benchmarks are not property-specific facts or quotes."}
             </p>
 
@@ -69,17 +67,15 @@ export function MarketingHero() {
                 calculator below via a window event (hero-address-form.tsx). */}
             <HeroAddressForm />
 
-            {/* Risk-reversal line — desktop-only; on phones the eyebrow
-                chip four lines up says the same thing verbatim (mobile
-                density audit LAND-3). */}
-            <p className="mt-3 hidden flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground sm:flex">
+            {/* Keep the full risk reversal next to the primary action at every
+                viewport. Mobile paid traffic must not have to infer account or
+                card requirements from a generic eyebrow. */}
+            <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
               <Check
                 aria-hidden
                 className="size-3.5 shrink-0 text-[var(--metric-positive)]"
               />
-              <span>
-                No signup required. No credit card. Screen deals free.
-              </span>
+              <span>No account or card. Your first complete Offer Ceiling is included.</span>
             </p>
           </div>
 
@@ -92,47 +88,17 @@ export function MarketingHero() {
           </div>
         </div>
 
-        {/* Trust band — proof line, data sources, live count, and one
-            outcome quote, grouped beneath the split with divider rules
+        {/* Trust band — data-source disclosure grouped beneath the split with divider rules
             instead of card boxes (Rule 4: logic-grouping over card overuse). */}
-        {/* Mobile: tighter gap to the proof band — the desktop-only capability
-            lines above it leave a dead zone between the CTAs and the ticker
-            on phones (UX walkthrough P2-10). Desktop rhythm unchanged. */}
+        {/* Keep the disclosure adjacent to the product proof on mobile and desktop. */}
         <div className="tc-reveal mt-7 border-t border-border pt-5 sm:mt-14 sm:pt-8">
-          <div className="grid gap-6 sm:gap-8 lg:grid-cols-[1.5fr_1fr]">
-            <div className="space-y-1.5">
-              {/* Capability + sources lines are desktop-only: both restate
-                  the subheadline word-for-word two viewports up; the two
-                  unique proof elements (ticker + quote) carry the mobile
-                  band (mobile density audit LAND-6). */}
-              <p className="hidden text-xs font-medium text-foreground/80 sm:block">
-                Auto-fills screening benchmarks for rent, rate &amp; tax ·
-                Editable assumptions · Cap rate · CoC · DSCR · cash flow
-              </p>
-              <p className="hidden text-[11px] leading-relaxed text-muted-foreground sm:block">
-                Uses{" "}
-                <strong className="font-semibold text-foreground">HUD</strong>{" "}
-                area-rent benchmarks,{" "}
-                <strong className="font-semibold text-foreground">FRED</strong>{" "}
-                owner-occupied rate benchmarks, and{" "}
-                <strong className="font-semibold text-foreground">state</strong>{" "}
-                tax estimates, all editable.
-              </p>
-              <div className="pt-1">
-                <DealsAnalyzedTicker
-                  source="runs"
-                  minimum={1}
-                  plus
-                  labelSuffix="property analyses run with TrueCap"
-                />
-              </div>
-            </div>
+          <div className="mx-auto max-w-3xl">
             {/* Proof that cannot drift or be overstated: the product labels
                 each starting assumption as sourced, user-entered, or a smart
                 default, and exposes the date/year when the source provides it.
                 Customer quotes render only from the verified proof registry
                 further down the page. */}
-            <div className="flex items-start gap-2.5 border-t border-border pt-4 sm:border-l sm:border-t-0 sm:pl-6 sm:pt-0">
+            <div className="flex items-start gap-2.5">
               <Database
                 className="mt-0.5 size-4 shrink-0 text-primary/50"
                 aria-hidden
@@ -414,12 +380,6 @@ function HeroProductMock({
           Illustrative analysis using editable sample inputs. Estimates are not
           an appraisal or investment guarantee.
         </p>
-         <Link
-           href="/sample-decision-memo"
-           className="mt-1 flex min-h-11 max-w-full items-center break-words text-xs font-bold leading-relaxed text-primary underline-offset-4 hover:underline"
-         >
-          Open the standalone sample decision memo →
-        </Link>
       </article>
       {/* edge fade */}
       <div className="pointer-events-none absolute inset-x-0 -bottom-6 h-12 bg-gradient-to-t from-background to-transparent" />

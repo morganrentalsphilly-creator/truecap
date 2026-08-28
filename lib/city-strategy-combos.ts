@@ -12,8 +12,15 @@
  * Each combo = a new ranking URL with focused search intent.
  */
 
+import {
+  featureFlags,
+  isSpecialistStrategyEnabled,
+  type FeatureFlagState,
+} from "@/lib/feature-flags";
+
 export type StrategyKey =
   | "brrrr"
+  | "fix-flip"
   | "cash-flow"
   | "house-hack"
   | "section-8"
@@ -44,7 +51,7 @@ export type CombinedCityStrategy = {
   relatedPosts?: string[];
 };
 
-export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
+const ALL_CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
   // ─── PHILADELPHIA ───
   {
     citySlug: "philadelphia",
@@ -895,6 +902,21 @@ export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] = [
     relatedPosts: ["cash-flow-vs-appreciation"],
   },
 ];
+
+/** Only released specialist models may create crawlable city-strategy pages.
+ * The authored entries stay available for a future flag-on build, while the
+ * exported registry is the sole source used by static params, sitemap,
+ * navigation, and llms.txt. */
+export function getReleasedCityStrategyCombos(
+  state: FeatureFlagState = featureFlags,
+): CombinedCityStrategy[] {
+  return ALL_CITY_STRATEGY_COMBOS.filter((combo) =>
+    isSpecialistStrategyEnabled(combo.strategy, state),
+  );
+}
+
+export const CITY_STRATEGY_COMBOS: CombinedCityStrategy[] =
+  getReleasedCityStrategyCombos();
 
 /** Find a combo by city slug + strategy. */
 export function getCityStrategyCombo(

@@ -5,15 +5,15 @@
   "weekLabel": "Launch",
   "marketSnapshot": {
     "headline": "Underwrite any rental in 60 seconds — without the spreadsheet.",
-    "body": "TrueCap was built for a fast first-pass screen with editable assumptions. Paste an address to review cap rate, cash-on-cash, DSCR, cash flow, selected-rule fit, and a secondary Screening Index. Pro adds the target-dependent Offer Ceiling, sensitivity, projections, and modeled exits. The examples below are illustrations, not verified properties or investment recommendations.",
+    "body": "TrueCap was built for a fast first-pass screen with editable assumptions. Paste an address to review cap rate, cash-on-cash, DSCR, cash flow, selected-rule fit, and a secondary Screening Index. Investor Pro adds the target-dependent Offer Ceiling, sensitivity, 10-year cash-flow and equity projections, comparison, and reports. The examples below are illustrations, not verified properties or investment recommendations.",
     "stats": [
       {
         "label": "Avg time to underwrite",
         "value": "60 sec"
       },
       {
-        "label": "Free analyses",
-        "value": "Unlimited"
+        "label": "Preliminary screens",
+        "value": "No account"
       },
       {
         "label": "Current Pro terms",
@@ -48,13 +48,13 @@
   },
   "qa": {
     "question": "Why should I use TrueCap instead of my spreadsheet (or BiggerPockets, or DealCheck, or Mashvisor)?",
-    "answer": "Three reasons to test it against your current workflow. (1) Speed: address lookup can provide property details plus labeled HUD, FRED, and state-level starting benchmarks, subject to coverage. (2) Transparent math: cap rate, cash-on-cash, DSCR, cash flow, and assumptions stay visible and editable. (3) Paid decision tools: the target-dependent Offer Ceiling, sensitivity, projections, modeled exits, reports, and repeat-deal workflows. The Offer Ceiling is not a recommended offer. TrueCap is an estimate and screening aid, not a source of property-specific truth or a substitute for your spreadsheet, inspection, lender, appraiser, CPA, or attorney."
+    "answer": "Three reasons to test it against your current workflow. (1) Speed: address lookup can provide property details plus labeled HUD, FRED, and state-level starting benchmarks, subject to coverage. (2) Transparent math: cap rate, cash-on-cash, DSCR, cash flow, and assumptions stay visible and editable. (3) Paid decision tools: the target-dependent Offer Ceiling, sensitivity, 10-year cash-flow and equity projections, comparison, reports, and repeat-deal workflows. The Offer Ceiling is not a recommended offer. TrueCap is an estimate and screening aid, not a source of property-specific truth or a substitute for your spreadsheet, inspection, lender, appraiser, CPA, or attorney."
   },
   "shipNote": {
     "title": "Start with the free TrueCap analyzer",
     "items": [
-      "Free: unlimited cap rate, cash-on-cash, DSCR, monthly cash flow — auto-filled with property tax + rent",
-      "Pro: see the pricing page for current price, trial eligibility, and the complete feature list",
+      "Free: preliminary cap rate, cash-on-cash, DSCR, and monthly cash flow with labeled starting assumptions",
+      "New accounts: 21-day no-card evaluation for three complete Pro deals and one full comparison",
       "Open the analyzer →"
     ]
   }

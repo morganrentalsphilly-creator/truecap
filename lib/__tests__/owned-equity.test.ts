@@ -5,6 +5,10 @@ import {
   remainingLoanBalance,
   type OwnedEquityInput,
 } from "../owned-equity";
+import {
+  buildLoanAmortizationSchedule,
+  loanBalanceAfterPayments,
+} from "../loan-amortization";
 
 describe("remainingLoanBalance", () => {
   it("equals the full principal at month 0", () => {
@@ -30,6 +34,26 @@ describe("remainingLoanBalance", () => {
 
   it("returns 0 for a cash purchase (no loan)", () => {
     expect(remainingLoanBalance(0, 6.75, 30, 60)).toBe(0);
+  });
+
+  it("matches the canonical schedule for interest-only and balloon terms", () => {
+    const schedule = buildLoanAmortizationSchedule({
+      principal: 300_000,
+      annualRatePct: 7,
+      termYears: 10,
+      maturityTermYears: 10,
+      amortizationTermYears: 30,
+      interestOnlyMonths: 24,
+    });
+
+    for (const month of [0, 12, 24, 25, 60, 119, 120]) {
+      expect(
+        remainingLoanBalance(300_000, 7, 10, month, {
+          amortizationTermYears: 30,
+          interestOnlyMonths: 24,
+        }),
+      ).toBeCloseTo(loanBalanceAfterPayments(schedule, month), 8);
+    }
   });
 });
 
@@ -91,5 +115,19 @@ describe("computeOwnedEquity", () => {
   it("the equity identity holds at an arbitrary month", () => {
     const s = computeOwnedEquity(base, 87)!;
     expect(s.equity).toBeCloseTo(s.downPayment + s.appreciationGain + s.principalPaid, 2);
+  });
+
+  it("does not invent principal paydown during an interest-only period", () => {
+    const interestOnly = computeOwnedEquity(
+      {
+        ...base,
+        termYears: 10,
+        amortizationTermYears: 30,
+        interestOnlyMonths: 24,
+      },
+      18,
+    )!;
+    expect(interestOnly.loanBalance).toBeCloseTo(base.loanAmount, 8);
+    expect(interestOnly.principalPaid).toBeCloseTo(0, 8);
   });
 });

@@ -21,10 +21,12 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { User } from "@supabase/supabase-js";
 import {
   getEntitlementsForUser,
+  getProductEvaluationAccessForUser,
   hasPaidPlanSubscription,
   hasPlanFeature,
   hasSavedDealCapacity,
 } from "@/lib/entitlements";
+import { isFeatureReleased } from "@/lib/entitlements-catalog";
 
 export type AnalyzerCapabilities = {
   /** Returned so callers don't re-query for savedDealLimit etc. */
@@ -50,7 +52,7 @@ export async function getAnalyzerCapabilities(
   supabase: SupabaseClient,
   user: User | null
 ): Promise<AnalyzerCapabilities> {
-  const [entitlements, defaultsQuery, canUpdateSavedDeals, savedCountQuery] = user
+  const [entitlements, defaultsQuery, hasPaidSubscription, savedCountQuery, evaluationAccess] = user
     ? await Promise.all([
         getEntitlementsForUser(supabase, user.id),
         supabase
@@ -64,8 +66,9 @@ export async function getAnalyzerCapabilities(
           .select("*", { count: "exact", head: true })
           .eq("user_id", user.id)
           .is("deleted_at", null),
+        getProductEvaluationAccessForUser(supabase, user.id),
       ])
-    : [null, null, false, null];
+    : [null, null, false, null, null];
 
   // Sanitize the stored preferences bag: only finite numbers survive, so a
   // corrupted row can never inject a non-numeric default into the form.
@@ -83,28 +86,42 @@ export async function getAnalyzerCapabilities(
   // Any paid plan unlocks these — derived from hasPaidPlanSubscription so a
   // new gate doesn't need a per-plan migration (see the original note in
   // app/home-authed/page.tsx).
-  const isPaidPlan = canUpdateSavedDeals;
+  const isPaidPlan = hasPaidSubscription;
+  const hasEvaluationDealAccess = evaluationAccess?.canAnalyzeProDeal === true;
+  const hasEvaluationArtifactAccess =
+    evaluationAccess?.canExportDecisionPack === true;
 
   return {
     entitlements,
     savedDealCount,
     userAnalysisDefaults,
     canSaveDeals: entitlements ? hasPlanFeature(entitlements, "save_deal") : false,
-    canUpdateSavedDeals,
+    canUpdateSavedDeals: isPaidPlan || hasEvaluationDealAccess,
     saveDealLimitReached: entitlements
       ? !hasSavedDealCapacity(entitlements, savedDealCount ?? 0)
       : false,
     canCompareDeals: entitlements ? hasPlanFeature(entitlements, "compare_deals") : false,
-    canExportPdf: entitlements ? hasPlanFeature(entitlements, "pdf_export") : false,
-    canUseProjections: entitlements ? hasPlanFeature(entitlements, "projections") : false,
-    canUseTaxStrategy: entitlements ? hasPlanFeature(entitlements, "tax_strategy") : false,
-    canUseExitScenarios: entitlements ? hasPlanFeature(entitlements, "exit_scenarios") : false,
+    canExportPdf:
+      (entitlements ? hasPlanFeature(entitlements, "pdf_export") : false) ||
+      hasEvaluationArtifactAccess,
+    // Artifact access is deliberately resource-bound inside the PDF action.
+    // Treating it as broad UI access would let a fourth, unmetered deal expose
+    // Pro projections after the three-run allowance was exhausted.
+    canUseProjections: entitlements
+      ? hasPlanFeature(entitlements, "projections")
+      : false,
+    canUseTaxStrategy: isFeatureReleased("tax_strategy") && entitlements
+      ? hasPlanFeature(entitlements, "tax_strategy")
+      : false,
+    canUseExitScenarios: isFeatureReleased("exit_scenarios") && entitlements
+      ? hasPlanFeature(entitlements, "exit_scenarios")
+      : false,
     // Deal Score is FREE for everyone — the headline 0-100 verdict converts
     // better given away than gated. Depth stays gated above/below.
     canUseDealScore: true,
-    canUseMaxOffer: isPaidPlan,
-    canUseSensitivity: isPaidPlan,
-    canUseStrategies: isPaidPlan,
+    canUseMaxOffer: !user || isPaidPlan || hasEvaluationDealAccess,
+    canUseSensitivity: !user || isPaidPlan || hasEvaluationDealAccess,
+    canUseStrategies: isFeatureReleased("strategies") && isPaidPlan,
     canUseBuyBox: entitlements ? hasPlanFeature(entitlements, "buy_box") : false,
   };
 }

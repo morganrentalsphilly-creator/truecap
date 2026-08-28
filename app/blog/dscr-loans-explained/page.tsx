@@ -203,7 +203,7 @@ export default function BlogPost() {
             minimum satisfies one condition; it does not guarantee approval.
           </p>
           <p>
-            <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">
+            <Link href="/#main" className="text-primary font-semibold hover:underline">
               Compute DSCR on a real property →
             </Link>
           </p>
@@ -363,7 +363,7 @@ export default function BlogPost() {
 
           <div className="not-prose">
             <Link
-              href="/tools/dscr-calculator"
+              href="/#main"
               className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-3 rounded-xl font-bold hover:opacity-95 transition-opacity"
             >
               <Calculator className="w-4 h-4" />

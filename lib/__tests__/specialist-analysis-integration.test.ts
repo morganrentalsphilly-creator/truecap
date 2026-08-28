@@ -34,10 +34,12 @@ describe("specialist snapshot integration guards", () => {
       "...(specialistAnalysis ? { specialistAnalysis } : {})",
     );
     expect(store).toContain("Recompute at the read boundary too");
-    // Superseded-but-known standards are republished with the legacy banner;
-    // only an unknown/future contract fails closed (locked decision 7).
-    expect(store).toContain("storedMethodologyIsRenderable");
-    expect(store).toContain("TRUECAP_UNDERWRITING_STANDARD_LEGACY_V1_VERSION");
+    // Superseded shares fail closed instead of recomputing specialist or core
+    // outputs under a different standard.
+    expect(store).toContain(
+      "storedMethodologyVersion !== currentResult.methodologyVersion",
+    );
+    expect(store).not.toContain("storedMethodologyIsRenderable");
   });
 
   it("keeps public specialist data behind the server-authorized Pro boundary", () => {

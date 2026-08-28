@@ -74,7 +74,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Does the lack of state income tax help my Tampa rental's after-tax cash flow?",
-    a: "Florida does not impose an individual state income tax, which can change an investor's after-tax result compared with a state that does. The size of that difference depends on residency, entity structure, federal treatment, and the other state's rules. TrueCap's Illustrative Tax Impact view applies the single marginal rate you enter; it does not separately calculate federal, state, or local returns. Use a CPA and your actual filing facts for this comparison.",
+    a: "Florida does not impose an individual state income tax, which can change an investor's after-tax result compared with a state that does. The size of that difference depends on residency, entity structure, federal treatment, and the other state's rules. TrueCap does not currently expose a tax-specific module; use a qualified professional and your actual filing facts for this comparison.",
   },
   {
     q: "Are Tampa STRs (short-term rentals / Airbnb) still a good play?",

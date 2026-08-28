@@ -457,14 +457,14 @@ export default function OperatingExpenseRatioPost() {
               price cut, but plenty of investors wave through the OER assumption
               that causes it. The{" "}
               <Link
-                href="/tools/cap-rate-calculator"
+                href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
                 cap rate calculator
               </Link>{" "}
               and the{" "}
               <Link
-                href="/tools/noi-calculator"
+                href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
                 NOI calculator

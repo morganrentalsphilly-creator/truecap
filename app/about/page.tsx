@@ -105,7 +105,7 @@ export default function AboutPage() {
             TrueCap is built by one person: <strong>Morgan Page</strong>, a
             rental investor in Philadelphia. It started as the tool he wanted
             for his own underwriting — a way to get from an address to a
-            defensible answer in about a minute — and it&apos;s still how he
+            source-labeled first-pass answer in about a minute — and it&apos;s still how he
             runs the deals he considers.
           </p>
 

@@ -1,10 +1,11 @@
 import { createServerClient } from "@supabase/ssr";
 import { SUPABASE_COOKIE_OPTIONS } from "@/lib/supabase/cookie-options";
 import { NextResponse, after, type NextRequest } from "next/server";
-import type { EmailOtpType } from "@supabase/supabase-js";
+import type { EmailOtpType, User } from "@supabase/supabase-js";
 import { safeInternalNextPath } from "@/lib/auth-schema";
 import { sendLifecycleEmailNow } from "@/lib/email/send-lifecycle";
 import { getSiteUrl } from "@/lib/site-url";
+import { captureServerEvent } from "@/lib/posthog-server";
 
 /**
  * Fire the instant welcome email after a confirmation establishes a
@@ -24,6 +25,29 @@ function scheduleWelcome(
       getSiteUrl()
     )
   );
+}
+
+/** OAuth sign-up bypasses the email form's client telemetry. Record only a
+ * genuinely new Google identity, using the opaque auth UUID and no profile
+ * data. Returning OAuth logins intentionally emit nothing. */
+function scheduleNewOAuthAccountAnalytics(user: User | null | undefined) {
+  if (!user || user.app_metadata?.provider !== "google") return;
+  const createdAt = Date.parse(user.created_at);
+  if (!Number.isFinite(createdAt)) return;
+  const ageMs = Date.now() - createdAt;
+  if (ageMs < 0 || ageMs > 10 * 60 * 1000) return;
+  after(async () => {
+    await captureServerEvent({
+      distinctId: user.id,
+      event: "account_created",
+      properties: { method: "google", needs_email_confirmation: false },
+    });
+    await captureServerEvent({
+      distinctId: user.id,
+      event: "product_evaluation_started",
+      properties: { source: "account_created" },
+    });
+  });
 }
 
 /**
@@ -85,6 +109,7 @@ export async function GET(request: NextRequest) {
       // Signup confirmation comes through the PKCE code flow. Welcome is
       // deduped, so welcoming on any first successful exchange is safe.
       scheduleWelcome(data.user);
+      scheduleNewOAuthAccountAnalytics(data.user);
       return redirectResponse;
     }
     return NextResponse.redirect(

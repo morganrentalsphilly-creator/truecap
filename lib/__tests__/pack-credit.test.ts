@@ -8,11 +8,12 @@ import {
   findEligiblePackCredit,
   getPackCreditCouponId,
   isPackCreditConfigured,
+  stripePackCreditCouponMatchesCatalog,
 } from "@/lib/pack-credit";
 import { evaluateOneTimePdfProCredit } from "@/lib/one-time-pdf-credit";
 import type { DecisionPackStripeReader } from "@/lib/stripe/decision-pack-access";
 
-const ORIGINAL_COUPON = process.env.STRIPE_PACK_CREDIT_COUPON_ID;
+const ORIGINAL_COUPON = process.env.STRIPE_PACK_CREDIT_900_COUPON_ID;
 const CLAIM_ID = "11111111-1111-4111-8111-111111111111";
 
 function eligibleCreditAdmin() {
@@ -27,7 +28,7 @@ function eligibleCreditAdmin() {
       data: {
         id: CLAIM_ID,
         checkout_session_id: "cs_test_pack_credit",
-        pro_credit_amount_cents: 500,
+        pro_credit_amount_cents: 900,
         pro_credit_eligible_until: "2026-08-30T00:00:00.000Z",
       },
       error: null,
@@ -57,12 +58,12 @@ function currentStripe(input: {
     {
       id: "ch_test_pack_credit",
       object: "charge",
-      amount_captured: 500,
+      amount_captured: 900,
       amount_refunded: input.amountRefunded ?? 0,
       captured: true,
       disputed: Boolean(input.disputeStatus),
       paid: true,
-      refunded: (input.amountRefunded ?? 0) >= 500,
+      refunded: (input.amountRefunded ?? 0) >= 900,
       status: "succeeded",
       payment_intent: "pi_test_pack_credit",
     } as unknown as Stripe.Charge,
@@ -103,38 +104,53 @@ function currentStripe(input: {
 }
 
 afterEach(() => {
-  if (ORIGINAL_COUPON === undefined) delete process.env.STRIPE_PACK_CREDIT_COUPON_ID;
-  else process.env.STRIPE_PACK_CREDIT_COUPON_ID = ORIGINAL_COUPON;
+  if (ORIGINAL_COUPON === undefined) delete process.env.STRIPE_PACK_CREDIT_900_COUPON_ID;
+  else process.env.STRIPE_PACK_CREDIT_900_COUPON_ID = ORIGINAL_COUPON;
 });
 
 describe("pack credit configuration", () => {
   it("fails closed while the Stripe coupon env is unset or blank", () => {
-    delete process.env.STRIPE_PACK_CREDIT_COUPON_ID;
+    delete process.env.STRIPE_PACK_CREDIT_900_COUPON_ID;
     expect(getPackCreditCouponId()).toBeNull();
     expect(isPackCreditConfigured()).toBe(false);
     expect(buildPackCreditPolicy().enabled).toBe(false);
 
-    process.env.STRIPE_PACK_CREDIT_COUPON_ID = "   ";
+    process.env.STRIPE_PACK_CREDIT_900_COUPON_ID = "   ";
     expect(getPackCreditCouponId()).toBeNull();
     expect(isPackCreditConfigured()).toBe(false);
   });
 
-  it("enables the 7-day, 100%-of-purchase policy once the coupon exists", () => {
-    process.env.STRIPE_PACK_CREDIT_COUPON_ID = " coup_pack5 ";
-    expect(getPackCreditCouponId()).toBe("coup_pack5");
+  it("enables the 30-day, 100%-of-purchase policy once the coupon exists", () => {
+    process.env.STRIPE_PACK_CREDIT_900_COUPON_ID = " coup_pack9 ";
+    expect(getPackCreditCouponId()).toBe("coup_pack9");
     expect(buildPackCreditPolicy()).toEqual({
       enabled: true,
       eligibilityWindowDays: PACK_CREDIT_WINDOW_DAYS,
       creditPercent: 100,
       allowedCurrency: "usd",
     });
-    expect(PACK_CREDIT_WINDOW_DAYS).toBe(7);
+    expect(PACK_CREDIT_WINDOW_DAYS).toBe(30);
+  });
+
+  it("accepts only an active exact $9 USD duration-once coupon", () => {
+    const exact = {
+      valid: true,
+      duration: "once",
+      amount_off: 900,
+      currency: "usd",
+      percent_off: null,
+    };
+    expect(stripePackCreditCouponMatchesCatalog(exact)).toBe(true);
+    expect(stripePackCreditCouponMatchesCatalog({ ...exact, amount_off: 500 })).toBe(false);
+    expect(stripePackCreditCouponMatchesCatalog({ ...exact, duration: "forever" })).toBe(false);
+    expect(stripePackCreditCouponMatchesCatalog({ ...exact, valid: false })).toBe(false);
+    expect(stripePackCreditCouponMatchesCatalog({ ...exact, percent_off: 100 })).toBe(false);
   });
 });
 
 describe("pack credit end-to-end policy decision", () => {
-  it("grants a $5 credit with a 7-day window on a fresh paid claim", () => {
-    process.env.STRIPE_PACK_CREDIT_COUPON_ID = "coup_pack5";
+  it("grants a $9 credit with a 30-day window on a fresh paid claim", () => {
+    process.env.STRIPE_PACK_CREDIT_900_COUPON_ID = "coup_pack9";
     const paidAt = "2026-08-17T12:00:00.000Z";
     const decision = evaluateOneTimePdfProCredit({
       purchase: {
@@ -147,26 +163,26 @@ describe("pack credit end-to-end policy decision", () => {
     });
     expect(decision).toEqual({
       status: "eligible",
-      amountCents: 500,
+      amountCents: 900,
       currency: "usd",
-      eligibleUntil: "2026-08-24T12:00:00.000Z",
-      policyVersion: "draft-v1",
+      eligibleUntil: "2026-09-16T12:00:00.000Z",
+      policyVersion: "launch-v2",
     });
   });
 
   it("expires the credit exactly after the window and stays dormant unconfigured", () => {
-    process.env.STRIPE_PACK_CREDIT_COUPON_ID = "coup_pack5";
+    process.env.STRIPE_PACK_CREDIT_900_COUPON_ID = "coup_pack9";
     const paidAt = "2026-08-01T00:00:00.000Z";
     const expired = evaluateOneTimePdfProCredit({
-      purchase: { paidAt, purchaseAmountCents: 500, purchaseCurrency: "usd" },
+      purchase: { paidAt, purchaseAmountCents: 900, purchaseCurrency: "usd" },
       policy: buildPackCreditPolicy(),
-      now: new Date("2026-08-09T00:00:00.001Z"),
+      now: new Date("2026-08-31T00:00:00.001Z"),
     });
     expect(expired.status).toBe("expired");
 
-    delete process.env.STRIPE_PACK_CREDIT_COUPON_ID;
+    delete process.env.STRIPE_PACK_CREDIT_900_COUPON_ID;
     const dormant = evaluateOneTimePdfProCredit({
-      purchase: { paidAt, purchaseAmountCents: 500, purchaseCurrency: "usd" },
+      purchase: { paidAt, purchaseAmountCents: 900, purchaseCurrency: "usd" },
       policy: buildPackCreditPolicy(),
       now: new Date("2026-08-02T00:00:00.000Z"),
     });
@@ -182,7 +198,7 @@ describe("pack credit checkout-time Stripe revalidation", () => {
       findEligiblePackCredit(eligibleCreditAdmin(), CLAIM_ID, now, currentStripe())
     ).resolves.toEqual({
       claimId: CLAIM_ID,
-      amountCents: 500,
+      amountCents: 900,
       eligibleUntil: "2026-08-30T00:00:00.000Z",
     });
   });

@@ -131,6 +131,8 @@ export type DealQaBuyBoxReport = {
     minCocPct: number | null;
     minDscr: number | null;
     minCashFlowMonthly: number | null;
+    minIrrPct?: number | null;
+    maxCashRequired?: number | null;
     maxPurchasePrice: number | null;
   };
 };
@@ -185,6 +187,8 @@ export function buildBuyBoxQaReport(
       minCocPct: primary.box.minCocPct,
       minDscr: primary.box.minDscr,
       minCashFlowMonthly: primary.box.minCashFlowMonthly,
+      minIrrPct: primary.box.minIrrPct ?? null,
+      maxCashRequired: primary.box.maxCashRequired ?? null,
       maxPurchasePrice: primary.box.maxPurchasePrice,
     },
   };
@@ -242,7 +246,8 @@ export function buildProjectionQaContext(
     totalProfit: s.totalProfit,
     roiPct: fin(s.roiPct),
     cagrPct: fin(s.cagrPct),
-    irrPct: fin(s.irrPct),
+    // Multiple IRRs are mathematically valid but not a safe single headline.
+    irrPct: s.irrStatus === "multiple" ? null : fin(s.irrPct),
     equityMultiple: fin(s.equityMultiple),
   };
 }

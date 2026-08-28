@@ -8,10 +8,11 @@ describe("canonical touch targets", () => {
   it("keeps every homepage entry action at least 44 CSS pixels tall", () => {
     const hero = read("components/marketing/hero-address-form.tsx");
     const sampleAction = hero.slice(
-      hero.indexOf("onClick={handleTrySample}"),
-      hero.indexOf("</button>", hero.indexOf("onClick={handleTrySample}"))
+      hero.indexOf('href="/sample-decision-memo"'),
+      hero.indexOf("</Link>", hero.indexOf('href="/sample-decision-memo"'))
     );
 
+    expect(sampleAction).toContain('href="/sample-decision-memo"');
     expect(sampleAction).toContain("min-h-11");
   });
 
@@ -26,8 +27,12 @@ describe("canonical touch targets", () => {
     expect(signup.match(/flex size-11/g)).toHaveLength(2);
     expect(update.match(/flex size-11/g)).toHaveLength(2);
     expect(login).toContain('aria-label={showPassword ? "Hide password" : "Show password"}');
-    expect(signup).toContain('aria-label={showConfirmPassword ? "Hide password" : "Show password"}');
-    expect(update).toContain('aria-label={showConfirmPassword ? "Hide password" : "Show password"}');
+    expect(signup).toMatch(
+      /showConfirmPassword\s*\?\s*"Hide confirmation password"\s*:\s*"Show confirmation password"/,
+    );
+    expect(update).toMatch(
+      /showConfirmPassword\s*\?\s*"Hide confirmation password"\s*:\s*"Show confirmation password"/,
+    );
   });
 
   it("keeps adjacent analysis, dashboard, and conversion controls at 44 pixels", () => {

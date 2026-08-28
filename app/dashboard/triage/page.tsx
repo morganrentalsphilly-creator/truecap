@@ -46,23 +46,26 @@ export default async function DashboardTriagePage() {
   const user = await getRequestUser();
   if (!user) redirect("/auth/login");
 
-  const entitlements = await getRequestEntitlements(user.id);
-  // Same Pro gate the server action enforces (compare_deals — the power-tool
-  // tier). A free/insufficient user is bounced home rather than shown a
-  // dead surface.
-  if (!hasDashboardAccess(entitlements) || !hasPlanFeature(entitlements, "compare_deals")) {
+  const [entitlements, isPremium] = await Promise.all([
+    getRequestEntitlements(user.id),
+    hasPaidPlanSubscription(supabase, user.id),
+  ]);
+  // Batch screening is not the evaluation's one side-by-side comparison. It
+  // remains paid-only at both the route and action boundaries.
+  if (
+    !isPremium ||
+    !hasDashboardAccess(entitlements) ||
+    !hasPlanFeature(entitlements, "compare_deals")
+  ) {
     redirect("/");
   }
   const navAccess = getDashboardNavAccess(entitlements);
 
-  const [{ data: profile }, isPremium] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("first_name, last_name, display_name, avatar_url")
-      .eq("id", user.id)
-      .maybeSingle(),
-    hasPaidPlanSubscription(supabase, user.id),
-  ]);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("first_name, last_name, display_name, avatar_url")
+    .eq("id", user.id)
+    .maybeSingle();
   const displayName = getDisplayName((profile as ProfileRow | null) ?? null, user.email);
   const initials = getInitials(displayName, user.email ?? "");
 

@@ -30,7 +30,9 @@ export type OperatingStatementLine = {
 
 export type ReportOperatingStatement = {
   grossScheduledIncome: number;
+  recurringOtherIncome?: number;
   vacancyAllowance: number;
+  renovationIncomeLoss?: number;
   effectiveGrossIncome: number;
   operatingExpenses: OperatingStatementLine[];
   operatingExpensesTotal: number;
@@ -44,6 +46,22 @@ export type ReportOperatingStatement = {
   /** Financing facts a lender or partner asks for before anything else. */
   loanAmount: number;
   monthlyPayment: number;
+  initialMonthlyLoanPayment?: number;
+  amortizingMonthlyLoanPayment?: number;
+  interestOnlyMonths?: number;
+  amortizationTermYears?: number;
+  loanMaturityTermYears?: number;
+  balloonPayment?: number;
+  balloonMonth?: number;
+  downPayment?: number;
+  closingCosts?: number;
+  loanPointsAmount?: number;
+  originationFee?: number;
+  loanFees?: number;
+  initialReserve?: number;
+  lenderEscrowDeposit?: number;
+  lenderReserveDeposit?: number;
+  acquisitionCredits?: number;
   totalCashRequired: number;
   /** True when there is no loan — the debt lines are then meaningless. */
   isCashPurchase: boolean;
@@ -52,7 +70,7 @@ export type ReportOperatingStatement = {
 const annualize = (monthly: number) => Math.round(monthly * 12);
 
 export function buildReportOperatingStatement(
-  result: AnalysisResult
+  result: AnalysisResult,
 ): ReportOperatingStatement {
   // Vacancy is deliberately ABSENT from this list: the engine reclassifies it
   // above the NOI line as an income allowance (see calc-analysis.ts), and
@@ -68,11 +86,37 @@ export function buildReportOperatingStatement(
     { label: "Management", amount: annualize(result.management) },
     { label: "HOA", amount: annualize(result.hoa) },
     { label: "Utilities", amount: annualize(result.utilities) },
+    {
+      label: "Other recurring expense",
+      amount: annualize(result.recurringOtherExpenseMonthly ?? 0),
+    },
+    {
+      label: "Turnover reserve",
+      amount: annualize(result.turnoverReserveMonthly ?? 0),
+    },
+    {
+      label: "Leasing reserve",
+      amount: annualize(result.leasingReserveMonthly ?? 0),
+    },
+    {
+      label: "Landscaping",
+      amount: annualize(result.landscapingMonthly ?? 0),
+    },
+    {
+      label: "Pest control",
+      amount: annualize(result.pestControlMonthly ?? 0),
+    },
+    {
+      label: "Administrative",
+      amount: annualize(result.administrativeMonthly ?? 0),
+    },
   ].filter((line) => line.amount > 0);
 
   return {
     grossScheduledIncome: result.grossScheduledIncomeAnnual,
+    recurringOtherIncome: result.recurringOtherIncomeAnnual ?? 0,
     vacancyAllowance: result.vacancyAllowanceAnnual,
+    renovationIncomeLoss: result.renovationIncomeLossAnnual ?? 0,
     effectiveGrossIncome: result.effectiveGrossIncomeAnnual,
     operatingExpenses,
     // From the engine, NOT the sum of the lines above — a zero-valued line is
@@ -86,6 +130,22 @@ export function buildReportOperatingStatement(
     netCashFlowAnnual: annualize(result.netCashFlow),
     loanAmount: result.loanAmount,
     monthlyPayment: result.monthlyPayment,
+    initialMonthlyLoanPayment: result.initialMonthlyLoanPayment,
+    amortizingMonthlyLoanPayment: result.amortizingMonthlyLoanPayment,
+    interestOnlyMonths: result.interestOnlyMonths,
+    amortizationTermYears: result.amortizationTermYears,
+    loanMaturityTermYears: result.loanMaturityTermYears,
+    balloonPayment: result.balloonPayment,
+    balloonMonth: result.balloonMonth,
+    downPayment: result.downPayment,
+    closingCosts: result.closingCosts,
+    loanPointsAmount: result.loanPointsAmount,
+    originationFee: result.originationFee,
+    loanFees: result.loanFees,
+    initialReserve: result.initialReserve,
+    lenderEscrowDeposit: result.lenderEscrowDeposit,
+    lenderReserveDeposit: result.lenderReserveDeposit,
+    acquisitionCredits: result.acquisitionCredits,
     totalCashRequired: result.totalCashRequired,
     isCashPurchase: result.monthlyPayment <= 0,
   };

@@ -19,7 +19,7 @@ export default function Image() {
   return renderVsOgImage({
     competitor: "Stessa",
     tagline:
-      "Stessa is rental accounting for properties you own. TrueCap is the underwrite for properties you're thinking about buying.",
+      "Both support acquisition analysis; Stessa also spans marketplace discovery, accounting, and operations.",
     slug: "stessa",
   });
 }

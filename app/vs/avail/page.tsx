@@ -60,7 +60,6 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis",      truecap: "Yes — full engine, free tier",                                          avail: "Not modeled",                                                            winner: "truecap" },
   { feature: "Cash flow projection",                truecap: "Pro — 10-year with rent + expense + appreciation",                       avail: "Not modeled",                                                            winner: "truecap" },
   { feature: "Sensitivity grid",                    truecap: "Pro — rent ±10%, vacancy ±5pp, rate ±1pp",                                avail: "Not modeled",                                                            winner: "truecap" },
-  { feature: "Illustrative tax impact",             truecap: "Pro — depreciation + interest + modeled after-tax CF",                    avail: "Not modeled",                                                            winner: "truecap" },
   { feature: "Secondary Screening Index",               truecap: "Free — 0-100 triage score + factor breakdown",                              avail: "Not applicable",                                                          winner: "truecap" },
   { feature: "Rental listing distribution",         truecap: "No",                                                                      avail: "Yes — syndicated to Realtor.com, Apartments.com, Zillow, etc.",           winner: "avail" },
   { feature: "Online rental application",           truecap: "No",                                                                      avail: "Yes — customizable forms",                                               winner: "avail" },
@@ -280,11 +279,11 @@ export default function VsAvailPage() {
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Want to start with just the underwrite? Try the{" "}
-            <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">
+            <Link href="/#main" className="font-semibold text-primary hover:underline">
               cap rate calculator
             </Link>
             ,{" "}
-            <Link href="/tools/cash-on-cash-calculator" className="font-semibold text-primary hover:underline">
+            <Link href="/#main" className="font-semibold text-primary hover:underline">
               cash-on-cash calculator
             </Link>
             , or the full{" "}
@@ -308,8 +307,8 @@ export default function VsAvailPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly
-            cash flow and plain read-only share links. Pro adds projections,
-            sensitivity, illustrative tax impact, exit scenarios, Offer Ceiling,
+            cash flow and plain read-only share links. Pro adds 10-year
+            cash-flow and equity projections, sensitivity, Offer Ceiling,
             co-branding, and included PDFs. New one-time PDF checkout is
             temporarily unavailable. No card to start.
           </p>
@@ -389,7 +388,7 @@ const AVAIL_FAQ: FaqItem[] = [
         and includes listings, lease signing, and ACH rent collection.
         &quot;Unlimited Plus&quot; is ~$7/unit/month (as of 2026) for
         advanced features. TrueCap is free for core underwriting math;
-        Pro adds projections, sensitivity, illustrative tax impact,
+        Pro adds 10-year cash-flow and equity projections, sensitivity,
         co-branded share links, and included PDFs. New one-time PDF checkout
         is temporarily unavailable; see TrueCap&apos;s live pricing page for current terms.
       </>

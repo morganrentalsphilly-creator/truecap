@@ -50,7 +50,7 @@ const TOOLS = [
     name: "TrueCap",
     bestFor: "Best owner-occupant property type + effective-rent-saved math",
     url: "/vs/biggerpockets-for-house-hacking",
-    pricing: "Free; Pro $29.99/mo",
+    pricing: "Free core; paid Investor Pro — see live pricing",
     freeCovers: [
       "Explicit 'owner-occupant' property type with per-unit setup",
       "Mark which unit you live in — TrueCap excludes it from rent income",
@@ -294,9 +294,9 @@ export default function BestRentalAnalysisToolForHouseHackersPost() {
               one of your real deals through it. TrueCap is free for the core
               underwriting, takes 60 seconds, no signup required. For a house
               hack, check whether the rented units cover the debt with the{" "}
-              <Link href="/tools/dscr-calculator" className="font-semibold text-primary hover:underline">DSCR calculator</Link>, see
+              <Link href="/#main" className="font-semibold text-primary hover:underline">DSCR calculator</Link>, see
               the return on your down payment with the{" "}
-              <Link href="/tools/cash-on-cash-calculator" className="font-semibold text-primary hover:underline">cash-on-cash return calculator</Link>, and
+              <Link href="/#main" className="font-semibold text-primary hover:underline">cash-on-cash return calculator</Link>, and
               follow the owner-occupied math step by step in our{" "}
               <Link href="/blog/house-hack-underwriting-guide" className="font-semibold text-primary hover:underline">house hack underwriting guide</Link>.
             </p>

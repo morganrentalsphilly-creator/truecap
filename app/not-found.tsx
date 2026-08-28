@@ -30,7 +30,7 @@ export const metadata: Metadata = {
 };
 
 const POPULAR_PAGES = [
-  { href: "/tools", label: "Free calculators", icon: Calculator, blurb: "Cap rate, DSCR, BRRRR, NOI, and 10 more." },
+  { href: "/tools", label: "Free calculators", icon: Calculator, blurb: "Mortgage, vacancy, rent-to-price, rehab, and cost screens." },
   { href: "/blog", label: "Blog", icon: BookOpen, blurb: "Deep dives on rental analysis + underwriting." },
   { href: "/glossary", label: "Glossary", icon: HelpCircle, blurb: "Plain-English definitions for 33 metrics." },
   { href: "/markets/philadelphia", label: "Market guides", icon: MapPin, blurb: "City-level rental market intel." },

@@ -184,7 +184,10 @@ export function parseSaleListing(raw: unknown): SaleListing | null {
   const active = items.find((o) => String(o.status ?? "").toLowerCase() === "active");
   if (!active) return null;
   const listPrice = num(active.price);
-  if (listPrice == null) return null;
+  // Provider zeroes, negative sentinels, and whitespace-coerced zeroes mean
+  // "unavailable", never a live asking price. Fail closed so callers fall
+  // back to an explicitly labeled estimate or ask the user for the price.
+  if (listPrice == null || listPrice <= 0) return null;
   return {
     listPrice,
     status: str(active.status),

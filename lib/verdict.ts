@@ -9,6 +9,7 @@
  */
 
 import type { AnalysisResult } from "@/lib/calc-analysis";
+import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
 
 export interface VerdictInputs {
   result: AnalysisResult;
@@ -100,7 +101,7 @@ function classifyDeal(result: AnalysisResult): {
       : `Cap rate is ${cap.toFixed(1)}%; verify rent and operating expenses before comparing it with local alternatives.`;
 
   const dscrSentence = isCashPurchase
-    ? `DSCR isn't applicable for an all-cash purchase — no lender debt service to cover.`
+    ? `DSCR: ${NO_DEBT_SERVICE_DSCR_LABEL}. An all-cash purchase has no lender debt service to cover.`
     : dscr >= 1.25
     ? `DSCR is ${dscr.toFixed(2)}, above the 1.25 screening benchmark; actual lender definitions and requirements vary.`
     : dscr >= 1.0

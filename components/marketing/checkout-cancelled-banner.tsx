@@ -14,10 +14,11 @@
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Info, X } from "lucide-react";
-import { TRIAL_LABEL } from "@/lib/trial";
+import type { PricingEvaluationSummary } from "@/lib/pricing-evaluation";
 
 export function CheckoutCancelledBanner({
   hadPriorSubscription = false,
+  evaluation,
 }: {
   /**
    * Mirrors the checkout repeat-trial guard (billing.ts grants the trial only
@@ -27,6 +28,8 @@ export function CheckoutCancelledBanner({
    * promise-vs-behavior contradiction the trial copy elsewhere avoids.
    */
   hadPriorSubscription?: boolean;
+  /** Server-read evaluation state; never infer live access from history alone. */
+  evaluation: PricingEvaluationSummary;
 }) {
   const searchParams = useSearchParams();
   const [dismissed, setDismissed] = useState(false);
@@ -47,9 +50,15 @@ export function CheckoutCancelledBanner({
           {/* One template string, not `{TRIAL_LABEL} is…` JSX segments — the
               SSR comment separators between segments ate the space after the
               expression in prod ("trialis"). */}
-          {hadPriorSubscription
-            ? "Your plan is here whenever you're ready to pick it back up."
-            : `Your ${TRIAL_LABEL} is still here whenever you're ready.`}
+          {evaluation.status === "active"
+            ? "Your active no-card product evaluation is unaffected; subscribe only when you choose to."
+            : hadPriorSubscription
+              ? "Your plan is here whenever you're ready to pick it back up."
+              : evaluation.status === "exhausted"
+                ? "Your included evaluation runs are already complete; no subscription was started."
+                : evaluation.status === "expired"
+                  ? "Your evaluation has already ended; no subscription was started."
+                  : "Free screening remains available; subscribe only when you choose to."}
         </span>
       </p>
       <button

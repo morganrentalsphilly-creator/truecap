@@ -10,7 +10,8 @@ describe("listing-to-analyzer handoff", () => {
     const hero = read("components/marketing/hero-address-form.tsx");
     expect(hero).toContain("HERO_ANALYZE_STATUS_EVENT");
     expect(hero).toContain('"Looking up starting assumptions…"');
-    expect(hero).toContain('"Use listing address"');
+    expect(hero).toContain('"Use this address instead"');
+    expect(hero).toContain('"Analyze listing free"');
     expect(hero).not.toContain(
       "window.setTimeout(() => setSubmitting(false), 1200)",
     );

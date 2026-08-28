@@ -98,8 +98,18 @@ export default function PitiExplainedPost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "TrueCap", item: `${siteUrl}/` },
-      { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "TrueCap",
+        item: `${siteUrl}/`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: `${siteUrl}/blog`,
+      },
       { "@type": "ListItem", position: 3, name: TITLE, item: canonicalUrl },
     ],
   };
@@ -151,14 +161,14 @@ export default function PitiExplainedPost() {
               · {READING_TIME} min read
             </p>
             <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
-              Almost every mortgage calculator hands you a principal-and-interest
-              number and calls it your payment. It isn&apos;t. The amount that
-              actually leaves your account each month is PITI — principal,
-              interest, taxes, and insurance — and on a typical rental the two
-              letters most calculators ignore add a quarter to a third on top of
-              the loan payment. Here&apos;s how each piece works with 2026
-              numbers, and how PITI becomes the input for DSCR, break-even, and
-              cash flow.
+              Almost every mortgage calculator hands you a
+              principal-and-interest number and calls it your payment. It
+              isn&apos;t. The amount that actually leaves your account each
+              month is PITI — principal, interest, taxes, and insurance — and on
+              a typical rental the two letters most calculators ignore add a
+              quarter to a third on top of the loan payment. Here&apos;s how
+              each piece works with 2026 numbers, and how PITI becomes the input
+              for DSCR, break-even, and cash flow.
             </p>
           </header>
 
@@ -176,8 +186,8 @@ export default function PitiExplainedPost() {
               property taxes go to the county, and a hazard/landlord insurance
               premium protects the building. Lenders bundle all four because all
               four have to be paid for the loan to stay current — an unpaid tax
-              bill becomes a lien that outranks the mortgage, and a lapsed policy
-              leaves their collateral uninsured.
+              bill becomes a lien that outranks the mortgage, and a lapsed
+              policy leaves their collateral uninsured.
             </p>
             <p>
               You will also see <strong>PITIA</strong> — the same thing with an{" "}
@@ -192,18 +202,19 @@ export default function PitiExplainedPost() {
               The worked example: a $250k single-family rental
             </h2>
             <p>
-              Take a $250,000 single-family rental bought as a non-owner-occupied
-              investment with 25% down ($62,500), financing $187,500 on a 30-year
-              fixed at 7%. Here is the full PITI, built one letter at a time.
+              Take a $250,000 single-family rental bought as a
+              non-owner-occupied investment with 25% down ($62,500), financing
+              $187,500 on a 30-year fixed at 7%. Here is the full PITI, built
+              one letter at a time.
             </p>
             <p>
               <strong>Principal &amp; interest.</strong> $187,500 at 7% over 30
               years works out to about <strong>$1,247/month</strong>. (Quick
               mental math: $100k at 7% for 30 years is ~$665/month, so 1.875 ×
               $665 ≈ $1,247.) Early on, the split is lopsided — in month one
-              roughly $1,094 of that is interest and only $153 is principal — but
-              the total stays flat for the life of the loan. Check any rate and
-              term with the{" "}
+              roughly $1,094 of that is interest and only $153 is principal —
+              but the total stays flat for the life of the loan. Check any rate
+              and term with the{" "}
               <Link
                 href="/tools/mortgage-payment-calculator"
                 className="text-primary font-semibold hover:underline"
@@ -215,55 +226,51 @@ export default function PitiExplainedPost() {
             <p>
               <strong>Taxes.</strong> Property tax varies wildly by state and
               county — from under 0.5% of value a year (Hawaii, Alabama) to over
-              2% (New Jersey, Illinois, parts of Texas). At a 1.2% effective rate
-              on $250,000, that&apos;s $3,000/year, or{" "}
-              <strong>$250/month</strong>. Estimate yours from the assessed value
-              and local millage, or use the{" "}
-              <Link
-                href="/tools/rental-property-tax-calculator"
-                className="text-primary font-semibold hover:underline"
-              >
-                rental property tax calculator
-              </Link>{" "}
-              — and read the reassessment warning below before you trust the
-              number on the listing.
+              2% (New Jersey, Illinois, parts of Texas). At a 1.2% effective
+              rate on $250,000, that&apos;s $3,000/year, or{" "}
+              <strong>$250/month</strong>. Verify the parcel&apos;s current
+              assessment, exemptions, millage, and reassessment rules with the
+              county assessor or treasurer before trusting the number on the
+              listing.
             </p>
             <p>
               <strong>Insurance.</strong> A landlord policy (a DP-3 dwelling
               policy, not the homeowner&apos;s HO-3 you&apos;d buy for your own
               house) typically runs more than an owner-occupied quote because it
-              adds loss-of-rent coverage and liability for tenant claims. Call it
-              $1,800/year, or <strong>$150/month</strong>. In coastal or
+              adds loss-of-rent coverage and liability for tenant claims. Call
+              it $1,800/year, or <strong>$150/month</strong>. In coastal or
               wildfire-exposed markets it can be multiples of that, and rising
-              premiums are one of the biggest line-item surprises of the last few
-              years.
+              premiums are one of the biggest line-item surprises of the last
+              few years.
             </p>
             <p>
-              Add it up: $1,247 + $250 + $150 = <strong>$1,647/month PITI</strong>.
-              The taxes-and-insurance slice is $400 — about <strong>32% on top
-              of the $1,247 loan payment.</strong> An investor who underwrote
-              this deal on principal and interest alone just understated the real
-              payment by nearly a third before a single repair or vacancy.
+              Add it up: $1,247 + $250 + $150 ={" "}
+              <strong>$1,647/month PITI</strong>. The taxes-and-insurance slice
+              is $400 — about{" "}
+              <strong>32% on top of the $1,247 loan payment.</strong> An
+              investor who underwrote this deal on principal and interest alone
+              just understated the real payment by nearly a third before a
+              single repair or vacancy.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
               How escrow actually works
             </h2>
             <p>
-              You don&apos;t write the county a check once a year. With an escrow
-              (impound) account, the servicer collects one-twelfth of your annual
-              taxes and insurance every month alongside principal and interest,
-              holds it, and pays the bills when they come due. On our deal that
-              escrow portion is the $400/month — $250 toward the $3,000 tax bill,
-              $150 toward the $1,800 premium.
+              You don&apos;t write the county a check once a year. With an
+              escrow (impound) account, the servicer collects one-twelfth of
+              your annual taxes and insurance every month alongside principal
+              and interest, holds it, and pays the bills when they come due. On
+              our deal that escrow portion is the $400/month — $250 toward the
+              $3,000 tax bill, $150 toward the $1,800 premium.
             </p>
             <p>
               Two mechanics trip people up. First, the{" "}
               <strong>escrow cushion</strong>: federal rules (RESPA) let the
-              servicer keep up to two months of T&amp;I as a buffer, which is why
-              you pre-fund several months of escrow at closing on top of your
-              down payment — it shows up in prepaids on the settlement statement,
-              covered in the{" "}
+              servicer keep up to two months of T&amp;I as a buffer, which is
+              why you pre-fund several months of escrow at closing on top of
+              your down payment — it shows up in prepaids on the settlement
+              statement, covered in the{" "}
               <Link
                 href="/blog/closing-costs-investment-property"
                 className="text-primary font-semibold hover:underline"
@@ -293,9 +300,9 @@ export default function PitiExplainedPost() {
               The most expensive PITI mistake is copying the property-tax figure
               straight off the listing or the seller&apos;s last bill. In many
               jurisdictions the assessed value resets toward your{" "}
-              <em>purchase price</em> after a sale. If the current owner has held
-              the place for fifteen years, their assessment — and their tax bill
-              — can be far below what yours will be the year after you buy.
+              <em>purchase price</em> after a sale. If the current owner has
+              held the place for fifteen years, their assessment — and their tax
+              bill — can be far below what yours will be the year after you buy.
             </p>
             <p>
               Suppose the seller&apos;s bill reflects a $150,000 assessment at
@@ -319,14 +326,14 @@ export default function PitiExplainedPost() {
             <ul>
               <li>
                 <strong>Higher interest rate.</strong> Non-owner-occupied loans
-                price roughly 0.5–0.75 percentage points above an
-                owner-occupied rate for the same borrower — that alone adds about
-                $75–115/month to the P&amp;I on a $187,500 loan.
+                price roughly 0.5–0.75 percentage points above an owner-occupied
+                rate for the same borrower — that alone adds about $75–115/month
+                to the P&amp;I on a $187,500 loan.
               </li>
               <li>
                 <strong>Bigger down payment, usually no PMI.</strong> Investment
-                loans want 20–25% down (more on 2–4 units), which keeps you at or
-                below 80% LTV and sidesteps private mortgage insurance.
+                loans want 20–25% down (more on 2–4 units), which keeps you at
+                or below 80% LTV and sidesteps private mortgage insurance.
                 House-hackers on an owner-occupied loan are the exception — less
                 down, but PMI until they reach ~20% equity.
               </li>
@@ -337,11 +344,11 @@ export default function PitiExplainedPost() {
               </li>
               <li>
                 <strong>Lenders quote PITIA and judge it against rent.</strong>{" "}
-                On a primary residence the lender checks PITI against your income
-                (the front-end ratio). On a rental — especially with a DSCR loan
-                — the lender checks PITIA against the property&apos;s rent. That
-                changes PITI from a number you simply pay into the number that
-                decides how much you can borrow.
+                On a primary residence the lender checks PITI against your
+                income (the front-end ratio). On a rental — especially with a
+                DSCR loan — the lender checks PITIA against the property&apos;s
+                rent. That changes PITI from a number you simply pay into the
+                number that decides how much you can borrow.
               </li>
             </ul>
 
@@ -349,10 +356,10 @@ export default function PitiExplainedPost() {
               From PITI to DSCR
             </h2>
             <p>
-              Some DSCR programs use a rent-to-PITIA ratio, while other
-              lender and investor formulas differ. In this illustration, our
-              rental brings $2,100/month and carries $1,647 of PITI (no HOA, so
-              PITIA is the same $1,647):
+              Some DSCR programs use a rent-to-PITIA ratio, while other lender
+              and investor formulas differ. In this illustration, our rental
+              brings $2,100/month and carries $1,647 of PITI (no HOA, so PITIA
+              is the same $1,647):
             </p>
             <p>
               <strong>DSCR = $2,100 ÷ $1,647 = 1.27.</strong>
@@ -362,7 +369,8 @@ export default function PitiExplainedPost() {
               lender threshold, approval, or pricing. If you used only the
               $1,247 P&amp;I, the ratio would be 1.68; adding the stated taxes
               and insurance changes it to 1.27. Ask the lender for its exact
-              formula and current requirements. Walk through the full mechanics in{" "}
+              formula and current requirements. Walk through the full mechanics
+              in{" "}
               <Link
                 href="/blog/how-to-calculate-dscr"
                 className="text-primary font-semibold hover:underline"
@@ -371,7 +379,7 @@ export default function PitiExplainedPost() {
               </Link>
               , or run a property through the{" "}
               <Link
-                href="/tools/dscr-calculator"
+                href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
                 DSCR calculator
@@ -413,12 +421,12 @@ export default function PitiExplainedPost() {
             <p>
               Total monthly cost with professional management: ~$2,130 — a hair{" "}
               <em>above</em> the $2,100 rent, so the deal runs about{" "}
-              <strong>−$30/month</strong>. Self-managed, you drop the $168 PM fee
-              and net roughly <strong>+$138/month</strong>. Same property, same
-              PITI; the difference between a small loss and a thin profit is
-              entirely in the costs PITI never showed you. The lender was happy at
-              1.27 DSCR — DSCR only looks at PITIA — which is exactly why a loan
-              approval is not the same thing as a good deal.
+              <strong>−$30/month</strong>. Self-managed, you drop the $168 PM
+              fee and net roughly <strong>+$138/month</strong>. Same property,
+              same PITI; the difference between a small loss and a thin profit
+              is entirely in the costs PITI never showed you. The lender was
+              happy at 1.27 DSCR — DSCR only looks at PITIA — which is exactly
+              why a loan approval is not the same thing as a good deal.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -428,10 +436,10 @@ export default function PitiExplainedPost() {
               Flip the question around. With self-management and the reserve
               assumptions above, your fixed monthly outflow is the $1,647 PITI
               plus $315 of vacancy and reserves — about $1,962. That&apos;s your{" "}
-              <strong>break-even rent</strong>: below it the property bleeds, above
-              it it earns. At $2,100 you&apos;re $138 over the line; a single
-              percentage point of extra vacancy or a $40/month insurance hike at
-              renewal eats a big slice of that margin. The{" "}
+              <strong>break-even rent</strong>: below it the property bleeds,
+              above it it earns. At $2,100 you&apos;re $138 over the line; a
+              single percentage point of extra vacancy or a $40/month insurance
+              hike at renewal eats a big slice of that margin. The{" "}
               <Link
                 href="/tools/break-even-calculator"
                 className="text-primary font-semibold hover:underline"
@@ -442,9 +450,9 @@ export default function PitiExplainedPost() {
             </p>
             <p>
               One caution: PITI mixes financing (P&amp;I) with operating costs
-              (T&amp;I). Net operating income does the opposite — it excludes the
-              loan but includes taxes and insurance, because NOI measures the
-              property before financing. If that distinction is fuzzy, the{" "}
+              (T&amp;I). Net operating income does the opposite — it excludes
+              the loan but includes taxes and insurance, because NOI measures
+              the property before financing. If that distinction is fuzzy, the{" "}
               <Link
                 href="/blog/how-to-calculate-noi-rental-property"
                 className="text-primary font-semibold hover:underline"
@@ -457,13 +465,11 @@ export default function PitiExplainedPost() {
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
               A quick way to estimate PITI on any listing
             </h2>
-            <p>
-              You can get within a few percent in under a minute:
-            </p>
+            <p>You can get within a few percent in under a minute:</p>
             <ul>
               <li>
-                <strong>P&amp;I:</strong> for a 30-year loan at 7%, multiply each
-                $100k borrowed by ~$665 (at 6.5%, ~$632; at 7.5%, ~$700).
+                <strong>P&amp;I:</strong> for a 30-year loan at 7%, multiply
+                each $100k borrowed by ~$665 (at 6.5%, ~$632; at 7.5%, ~$700).
               </li>
               <li>
                 <strong>Taxes:</strong> purchase price × local effective rate ÷
@@ -471,8 +477,8 @@ export default function PitiExplainedPost() {
               </li>
               <li>
                 <strong>Insurance:</strong> $1,500–2,400/year for an average
-                single-family landlord policy, divided by 12 — higher near coasts
-                and in wildfire zones.
+                single-family landlord policy, divided by 12 — higher near
+                coasts and in wildfire zones.
               </li>
               <li>
                 <strong>Association dues:</strong> add the monthly HOA/condo fee
@@ -481,15 +487,17 @@ export default function PitiExplainedPost() {
               </li>
             </ul>
             <p>
-              For our $250k example: 1.875 × $665 = $1,247, plus $250 taxes, plus
-              $150 insurance = $1,647. The full{" "}
-              <Link href="/" className="text-primary font-semibold hover:underline">
+              For our $250k example: 1.875 × $665 = $1,247, plus $250 taxes,
+              plus $150 insurance = $1,647. The full{" "}
+              <Link
+                href="/"
+                className="text-primary font-semibold hover:underline"
+              >
                 TrueCap analyzer
               </Link>{" "}
               does this automatically — it pulls a current rate, estimates taxes
-              and insurance from the address, layers in vacancy and reserves, and
-              returns cash flow, DSCR, and a selected-rule fit in one
-              pass.
+              and insurance from the address, layers in vacancy and reserves,
+              and returns cash flow, DSCR, and a selected-rule fit in one pass.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -510,14 +518,14 @@ export default function PitiExplainedPost() {
             <p>
               PITI is the honest version of &quot;the payment&quot; — the loan
               plus the two ownership costs that ride with it — and on a rental
-              it&apos;s the number your lender underwrites and the floor your rent
-              has to clear. Estimate all four letters from your own purchase
-              price (not the seller&apos;s old tax bill), remember taxes and
-              insurance drift upward, and never confuse PITI with the all-in
-              cost: vacancy, maintenance, reserves, and management still sit on
-              top. Get PITI right and the rest of the underwrite —{" "}
+              it&apos;s the number your lender underwrites and the floor your
+              rent has to clear. Estimate all four letters from your own
+              purchase price (not the seller&apos;s old tax bill), remember
+              taxes and insurance drift upward, and never confuse PITI with the
+              all-in cost: vacancy, maintenance, reserves, and management still
+              sit on top. Get PITI right and the rest of the underwrite —{" "}
               <Link
-                href="/tools/dscr-calculator"
+                href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
                 DSCR

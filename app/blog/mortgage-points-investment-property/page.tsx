@@ -386,7 +386,7 @@ export default function MortgagePointsPost() {
               break-even. A lower rate means a lower payment, and a lower payment
               means a higher{" "}
               <Link
-                href="/tools/dscr-calculator"
+                href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
                 debt-service-coverage ratio
@@ -456,7 +456,7 @@ export default function MortgagePointsPost() {
               payment) but also raise your cash in the deal (the points are cash
               out of pocket). Run both through{" "}
               <Link
-                href="/tools/cash-on-cash-calculator"
+                href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
                 cash-on-cash

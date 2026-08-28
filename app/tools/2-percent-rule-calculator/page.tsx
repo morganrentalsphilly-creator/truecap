@@ -246,7 +246,7 @@ export default function TwoPercentRuleCalculatorPage() {
             <p>
               The same logic applies to unusually high cap rates — a
               theme the{" "}
-              <Link href="/tools/cap-rate-calculator" className="text-primary font-semibold hover:underline">cap rate calculator</Link>{" "}
+              <Link href="/#main" className="text-primary font-semibold hover:underline">cap rate calculator</Link>{" "}
               page covers: high yield prices in high risk. No rent-to-price
               band is a verdict; the bands are prompts for the next
               question.
@@ -261,7 +261,7 @@ export default function TwoPercentRuleCalculatorPage() {
               insurance, vacancy, maintenance, or management — the exact
               costs that are usually elevated in the neighborhoods where
               2% ratios appear. Stack the{" "}
-              <Link href="/tools/50-percent-rule-calculator" className="text-primary font-semibold hover:underline">50% rule calculator</Link>{" "}
+              <Link href="/#main" className="text-primary font-semibold hover:underline">50% rule calculator</Link>{" "}
               on top for a 3-second expense check: if half the rent
               disappears into operating costs, does the deal still clear
               your mortgage payment?

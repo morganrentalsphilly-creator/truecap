@@ -15,7 +15,10 @@ import type {
   InputSourceClass,
   InputVerificationEvidence,
 } from "@/lib/input-confidence";
-import { MAX_PURCHASE_PRICE } from "@/lib/investcalc-schema";
+import {
+  MAX_PURCHASE_PRICE,
+  type InvestmentFormValues,
+} from "@/lib/investcalc-schema";
 import type { MaoTarget } from "@/lib/max-allowable-offer";
 import { meetsMaoTarget } from "@/lib/mao-target-evaluation";
 import { maoTargetFingerprint } from "@/lib/mao-target-editor";
@@ -358,6 +361,8 @@ export function buildAssumptionLedger(
 
 export function deriveRuleFit(args: {
   result: AnalysisResult | null;
+  /** Accepted inputs are required to evaluate a contribution-aware IRR rule. */
+  values?: InvestmentFormValues | null;
   target: MaoTarget | null;
   targetResolutionState?: "loading" | "ready" | "error";
   targetSource?: OfferCeilingTargetSource;
@@ -386,7 +391,7 @@ export function deriveRuleFit(args: {
   }
   if (
     (usesBuyBox && args.buyBoxFit === false) ||
-    !meetsMaoTarget(args.result, args.target)
+    !meetsMaoTarget(args.result, args.target, args.values ?? undefined)
   ) {
     return "does_not_meet_selected_rules";
   }

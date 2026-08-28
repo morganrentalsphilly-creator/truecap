@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -12,7 +12,7 @@ const tracked = (globs: string[]) =>
     maxBuffer: 16 * 1024 * 1024,
   })
     .split("\n")
-    .filter(Boolean);
+    .filter((file) => Boolean(file) && existsSync(join(ROOT, file)));
 
 const comparisonPages = tracked(["app/vs/page.tsx", "app/vs/*/page.tsx"]);
 const comparisonSurfaces = tracked(["app/vs/**/*.tsx"]);
@@ -83,16 +83,16 @@ describe("comparison claim truth", () => {
   });
 
   it("keeps DealCheck and TrueCap capabilities on their actual gates", () => {
-    for (const file of [
-      "app/vs/dealcheck-for-brrrr/page.tsx",
-      "app/vs/dealcheck-for-fix-and-flip/page.tsx",
-      "app/vs/dealcheck-for-short-term-rentals/page.tsx",
-    ]) {
-      const source = read(file);
-      expect(source, file).toContain("included on Starter");
-      expect(source, file).toContain("professional reports");
-      expect(source, file).toContain("https://dealcheck.io/pricing/");
-    }
+    expect(read("app/vs/dealcheck-for-brrrr/page.tsx")).toContain(
+      'permanentRedirect("/blog/brrrr-method-explained")'
+    );
+    expect(read("app/vs/dealcheck-for-fix-and-flip/page.tsx")).toContain(
+      'permanentRedirect("/blog/70-percent-rule-house-flipping")'
+    );
+    const strComparison = read("app/vs/dealcheck-for-short-term-rentals/page.tsx");
+    expect(strComparison).toContain("included on Starter");
+    expect(strComparison).toContain("professional reports");
+    expect(strComparison).toContain("https://dealcheck.io/pricing/");
 
     expect(read("app/vs/excel/page.tsx")).toContain("No per-deal revision history");
     expect(read("app/vs/biggerpockets-for-house-hacking/page.tsx")).toContain(

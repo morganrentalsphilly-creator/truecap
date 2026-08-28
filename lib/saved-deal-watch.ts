@@ -32,6 +32,7 @@ import {
   calculateMaxAllowableOffer,
   type MaoTarget,
 } from "@/lib/max-allowable-offer";
+import { calculateMaoIrr } from "@/lib/mao-target-evaluation";
 
 export const SAVED_DEAL_WATCH_VERSION = "1.0" as const;
 export const DEFAULT_MATERIAL_GAP_CHANGE_DOLLARS = 5_000;
@@ -273,6 +274,7 @@ function buyBoxMetrics(
   askingPrice: number,
   result: ReturnType<typeof calculateAnalysis>
 ): BuyBoxDealMetrics {
+  const irr = calculateMaoIrr(values, result);
   return {
     capRatePct: result.capRate,
     cocPct: result.cocReturn,
@@ -287,6 +289,9 @@ function buyBoxMetrics(
         : null,
     state: deriveStateFromAddress(values.address),
     isCashPurchase: result.monthlyPayment <= 0,
+    cashRequired: result.totalCashRequired,
+    irrPct: irr.primaryIrrPct,
+    irrStatus: irr.status,
   };
 }
 

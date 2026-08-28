@@ -47,6 +47,7 @@ import {
   type WeeklySummaryDueDiligenceRow,
   type WeeklySummaryPayload,
 } from "@/lib/weekly-summary";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 import type { NamedBuyBox } from "@/lib/buy-box";
 import { resolveWeeklySummaryMode } from "@/lib/weekly-summary-mode";
 import { getPaidUserIds } from "@/lib/paid-user-ids";
@@ -233,9 +234,10 @@ export async function GET(request: Request) {
         .in("user_id", optedInIds),
       admin
         .from("user_buy_boxes")
-        .select(
-          "id, user_id, name, strategy_kind, min_cap_rate_pct, min_coc_pct, min_dscr, min_cash_flow_monthly, max_purchase_price, property_types, target_states, is_active, is_default, sort_order",
-        )
+        // `*` is deliberate compatibility here: the table is additive and
+        // this cron already treats the section as optional. It reads both the
+        // new IRR/cash criteria after migration and legacy rows before it.
+        .select("*")
         .in("user_id", optedInIds),
     ]);
 
@@ -302,6 +304,9 @@ export async function GET(request: Request) {
         dueDiligence: dueByUser.get(userId) ?? [],
         todayISO,
         asOf: now,
+        ownedPortfolioActualsReleased: isFeatureEnabled(
+          "owned_portfolio_actuals",
+        ),
       });
       if (payload) summaries.push({ userId, payload });
       if (summaries.length >= MAX_SENDS_PER_RUN) break;

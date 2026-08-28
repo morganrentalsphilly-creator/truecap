@@ -57,8 +57,10 @@ export function Sidebar({ activeDealCount, navAccess, mobile = false, onNavigate
     // and completed deals here made the badge read higher than the list.
     { icon: Briefcase, label: "My Deals", href: "/dashboard/saved-analyses", badge: String(activeDealCount), enabled: navAccess.myDeals },
     { icon: ListTodo, label: "Compare Deals", href: "/dashboard/compare", enabled: navAccess.compareDeals },
-    // Batch triage — the power-tool tier, same gate as Compare.
-    { icon: ListChecks, label: "Screen a shortlist", href: "/dashboard/triage", enabled: navAccess.compareDeals },
+    // Batch triage stays paid-only. Evaluation users can spend their one
+    // side-by-side comparison without inheriting this separate bulk tool;
+    // `overview` is paid-plan-only while `compareDeals` may be evaluative.
+    { icon: ListChecks, label: "Screen a shortlist", href: "/dashboard/triage", enabled: navAccess.compareDeals && navAccess.overview },
     { icon: FileBarChart, label: "Strategy Profiles", href: "/dashboard/templates", enabled: navAccess.templates },
     { icon: Users, label: "Clients", href: "/dashboard/clients", enabled: navAccess.clients },
     // Buy Boxes are decision criteria, not an account setting. Give them a

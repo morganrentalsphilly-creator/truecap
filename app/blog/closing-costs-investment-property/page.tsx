@@ -278,7 +278,7 @@ export default function ClosingCostsPost() {
             </p>
             <p>
               On our duplex: $62,500 down + $12,600 closing = <strong>$75,100 cash in</strong>. If the property throws off $6,000/yr in cash flow, your{" "}
-              <Link href="/tools/cash-on-cash-calculator" className="text-primary font-semibold hover:underline">
+              <Link href="/#main" className="text-primary font-semibold hover:underline">
                 cash-on-cash return
               </Link>{" "}
               is 8.0% against total cash invested — not the 9.6% you&apos;d get if you only counted the down payment. Investors who ignore closing costs systematically overstate their returns by a point or more. Read{" "}
@@ -289,7 +289,7 @@ export default function ClosingCostsPost() {
             </p>
             <p>
               Closing costs don&apos;t touch your{" "}
-              <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">
+              <Link href="/#main" className="text-primary font-semibold hover:underline">
                 DSCR
               </Link>{" "}
               — that ratio is about debt service vs. operating income and ignores how much cash you brought to the table — but they do extend the time it takes to recoup your investment. Always underwrite the all-in number, not the down payment.

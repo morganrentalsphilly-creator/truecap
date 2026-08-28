@@ -359,7 +359,7 @@ export default function BreakEvenOccupancyPost() {
               is about $18,000 — essentially identical to the $17,964 debt service,
               for a{" "}
               <Link
-                href="/tools/dscr-calculator"
+                href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
                 DSCR

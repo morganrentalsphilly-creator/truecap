@@ -10,14 +10,19 @@ import { getStripe } from "@/lib/stripe/client";
 import { withTrueCapCheckoutBranding } from "@/lib/stripe/checkout-branding";
 import {
   getPrimaryPlanPriceId,
+  isAgentProConfigured,
   isPaidPlanSlug,
   type PaidPlanSlug,
 } from "@/lib/stripe/plan-prices";
 import { verifyCheckoutReturnCandidate } from "@/lib/stripe/checkout-return";
 import { captureServerEvent } from "@/lib/posthog-server";
-import { TRIAL_DAYS } from "@/lib/trial";
+import { stripePriceMatchesCatalog } from "@/lib/public-pricing";
 import { resolvePostAnalysisOfferCoupon } from "@/lib/post-analysis-offer";
-import { findEligiblePackCredit, getPackCreditCouponId } from "@/lib/pack-credit";
+import {
+  findEligiblePackCredit,
+  getPackCreditCouponId,
+  stripePackCreditCouponMatchesCatalog,
+} from "@/lib/pack-credit";
 import {
   acquireSubscriptionCheckoutIntent,
   bindSubscriptionCheckoutCustomer,
@@ -230,6 +235,9 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
   if (!parsed.success) {
     return { ok: false, code: "PLAN_NOT_FOUND", message: "Invalid billing plan." };
   }
+  if (parsed.data.planSlug.startsWith("agent_pro") && !isAgentProConfigured()) {
+    return { ok: false, code: "PLAN_NOT_FOUND", message: "Selected plan is not available." };
+  }
 
   const supabase = await createServerSupabaseClient();
   const {
@@ -271,29 +279,6 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
         "You already have a TrueCap subscription. Use Manage billing to switch plans or restore billing safely.",
     };
   }
-
-  // Repeat-trial guard: the free trial is a FIRST-time offer. A returning user
-  // who ever subscribed before (any status, incl. canceled/incomplete) does NOT
-  // get it again — otherwise cancel-and-resubscribe farms a fresh trial each
-  // cycle. Only grant the trial when there's no prior subscription row at all.
-  const { data: priorSubscription, error: priorSubscriptionError } = await supabase
-    .from("subscriptions")
-    .select("id")
-    .eq("user_id", user.id)
-    .limit(1)
-    .maybeSingle();
-  if (priorSubscriptionError) {
-    Sentry.captureException(priorSubscriptionError, {
-      tags: { feature: "billing-checkout", guard: "trial-history" },
-      extra: { userId: user.id },
-    });
-    return {
-      ok: false,
-      code: "SERVER_ERROR",
-      message: "We couldn't safely verify trial eligibility. Please try again shortly.",
-    };
-  }
-  const grantTrial = !priorSubscription;
 
   const [{ data: profile }, { data: plan, error: planError }] = await Promise.all([
     supabase
@@ -377,6 +362,35 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
     };
   }
 
+  try {
+    const configuredPrice = await getStripe().prices.retrieve(priceId);
+    if (!stripePriceMatchesCatalog(parsed.data.planSlug, configuredPrice)) {
+      Sentry.captureMessage(
+        `billing: checkout blocked because ${parsed.data.planSlug} does not match the committed catalog`,
+        {
+          level: "error",
+          tags: { feature: "billing-checkout", guard: "catalog-match" },
+          extra: { planSlug: parsed.data.planSlug },
+        }
+      );
+      return {
+        ok: false,
+        code: "MISSING_PRICE",
+        message: "This plan is temporarily unavailable while billing configuration is verified.",
+      };
+    }
+  } catch (error) {
+    Sentry.captureException(error, {
+      tags: { feature: "billing-checkout", guard: "catalog-price-read" },
+      extra: { planSlug: parsed.data.planSlug },
+    });
+    return {
+      ok: false,
+      code: "MISSING_PRICE",
+      message: "This plan is temporarily unavailable while billing configuration is verified.",
+    };
+  }
+
   // Campaign links must fail CLOSED. A recognized code with a missing Stripe
   // coupon is a discount we cannot honor; creating a full-price session would
   // charge more than the email promised.
@@ -417,11 +431,11 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
     const annualCoupon =
       parsed.data.planSlug === "pro_annual" ? process.env.STRIPE_ANNUAL_DISCOUNT_COUPON_ID : undefined;
     // Pack credit (founder-approved 2026-08-17): a Deal Decision Pack bought
-    // within its 7-day window is credited toward the first Pro invoice. It is
+    // within its 30-day window is credited toward the first Pro invoice. It is
     // money the customer already paid us — NOT a discount offer — so it
     // outranks the campaign and annual coupons in the single discount slot
     // Stripe checkout accepts. Pro tiers only (same scoping as the campaign
-    // coupons); fail-closed on STRIPE_PACK_CREDIT_COUPON_ID; a lookup failure
+    // coupons); fail-closed on STRIPE_PACK_CREDIT_900_COUPON_ID; a lookup failure
     // degrades to a normal full-price checkout rather than blocking it.
     // With a trial the coupon lands on the first REAL invoice — the credit is
     // attached at redemption and survives the trial delay.
@@ -429,7 +443,15 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
     const packCreditCouponId = getPackCreditCouponId();
     if (packCreditCouponId && !parsed.data.planSlug.startsWith("agent_pro")) {
       try {
-        packCredit = await findEligiblePackCredit(admin, user.id, new Date(), stripe);
+        const coupon = await stripe.coupons.retrieve(packCreditCouponId);
+        if ("deleted" in coupon || !stripePackCreditCouponMatchesCatalog(coupon)) {
+          Sentry.captureMessage("Pack credit coupon does not match the $9 launch contract", {
+            level: "error",
+            tags: { feature: "billing-checkout", mismatch: "pack-credit-coupon" },
+          });
+        } else {
+          packCredit = await findEligiblePackCredit(admin, user.id, new Date(), stripe);
+        }
       } catch (error) {
         Sentry.captureException(error, {
           tags: { feature: "billing-checkout", flow: "pack_credit_lookup" },
@@ -439,19 +461,15 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
     }
     const creditCoupon = packCredit ? packCreditCouponId : null;
     const appliedCoupon = creditCoupon ?? offerCoupon ?? annualCoupon;
-    // Free trial on eligible first subscriptions. Card is collected at
-    // checkout and auto-charges when the trial ends. The duration is the same
-    // imported constant every public surface renders; a hidden environment
-    // override previously allowed checkout and the offer to contradict each
-    // other.
-    const proTrialDays = TRIAL_DAYS;
     let checkoutProfileCustomerId = profile?.stripe_customer_id ?? null;
     const acquireInput = {
       userId: user.id,
       planSlug: parsed.data.planSlug,
       stripePriceId: priceId,
       stripeDiscountCouponId: appliedCoupon ?? null,
-      trialDays: grantTrial && proTrialDays > 0 ? proTrialDays : 0,
+      // The product evaluation happens before checkout, without a card.
+      // Subscription Checkout is an immediate, explicitly priced purchase.
+      trialDays: 0,
       packCreditClaimId: packCredit?.claimId ?? null,
     };
     let acquisition = await acquireSubscriptionCheckoutIntent(admin, acquireInput);
@@ -1169,6 +1187,13 @@ export async function createSwitchPlanPortalSessionAction(input: unknown): Promi
     return { ok: false, code: "PLAN_NOT_FOUND", message: "Invalid target plan." };
   }
   const targetPlanSlug = parsed.data.targetPlanSlug;
+  // This action is directly callable; hiding Agent Pro in the pricing/profile
+  // UI is not an authorization boundary. Keep the server-side release switch
+  // identical to new checkout so a configured-but-unreleased Price cannot be
+  // sold through the Customer Portal flow.
+  if (targetPlanSlug.startsWith("agent_pro") && !isAgentProConfigured()) {
+    return { ok: false, code: "PLAN_NOT_FOUND", message: "Selected plan is not available." };
+  }
 
   const supabase = await createServerSupabaseClient();
   const {
@@ -1249,6 +1274,26 @@ export async function createSwitchPlanPortalSessionAction(input: unknown): Promi
 
   try {
     const stripe = getStripe();
+    // A portal switch charges the target Price just as surely as Checkout does.
+    // Re-read it from Stripe and enforce the committed active USD amount and
+    // cadence before publishing a confirmation flow; stale env configuration
+    // must never turn a UI switch into an unexpected charge.
+    const targetPrice = await stripe.prices.retrieve(targetPriceId);
+    if (!stripePriceMatchesCatalog(targetPlanSlug, targetPrice)) {
+      Sentry.captureMessage(
+        `billing: plan switch blocked because ${targetPlanSlug} does not match the committed catalog`,
+        {
+          level: "error",
+          tags: { feature: "billing-switch", guard: "catalog-match" },
+          extra: { targetPlanSlug },
+        }
+      );
+      return {
+        ok: false,
+        code: "MISSING_PRICE",
+        message: "That plan is temporarily unavailable while billing configuration is verified.",
+      };
+    }
     // subscription_update_confirm needs the SUBSCRIPTION ITEM id, which only
     // Stripe has — the DB stores the subscription id, not its item id. A
     // single-item subscription is the only shape we sell.

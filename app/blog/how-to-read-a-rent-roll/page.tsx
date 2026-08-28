@@ -432,7 +432,7 @@ export default function HowToReadARentRollPost() {
             into the $520,000 ask. Buy on the stabilized number and you have paid
             today for work you have not done yet. Send the EGI into the{" "}
             <Link
-              href="/tools/noi-calculator"
+              href="/#main"
               className="text-primary font-semibold hover:underline"
             >
               NOI calculator
@@ -558,7 +558,7 @@ export default function HowToReadARentRollPost() {
             deposits, and estoppels before you trust a total. Then take the income
             you can actually prove into the{" "}
             <Link
-              href="/tools/noi-calculator"
+              href="/#main"
               className="text-primary font-semibold hover:underline"
             >
               NOI calculator

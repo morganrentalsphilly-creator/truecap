@@ -51,11 +51,11 @@
     "answer": "Pull recent appraisal-vs-sale data from your lender or PM, OR look at the relationship between listing prices and final closing prices in the area. Markets where appraisals consistently match sale prices (final closing within 1-2% of contract price): appraisal-friendly. Markets where 8-15% of deals fall through due to low appraisals or sellers reduce price to match appraisal: appraisal-hostile. Generally appraisal-friendly: stable suburban markets, B-tier neighborhoods with active comparable sales. Generally appraisal-hostile: rapidly gentrifying neighborhoods where rehabbed properties are setting new comps faster than appraisers can absorb, very-low-volume areas where comps are thin, and parts of Detroit/Cleveland/Memphis where the appraisal-vs-sale gap has been 5-10% for years. The practical rule: budget a 5% appraisal haircut on your ARV in unknown markets, and only go below 5% haircut after you have local data."
   },
   "shipNote": {
-    "title": "Run BRRRR math before you offer",
+    "title": "Build the complete BRRRR ledger before you offer",
     "items": [
-      "TrueCap BRRRR analyzer: model purchase + rehab + ARV + refi cash-out in one view",
-      "Pro: sensitivity grid shows what happens if your ARV comes in 5-10% under expectation",
-      "Stress-test your next BRRRR →"
+      "TrueCap's integrated BRRRR lifecycle model is not currently released",
+      "Use the released analyzer only for a separate stabilized-rental screen; it excludes construction carry and lease-up",
+      "Read the BRRRR methodology guide →"
     ]
   }
 }

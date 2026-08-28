@@ -42,6 +42,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import type { AnalysisResult } from "@/lib/calc-analysis";
+import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
 import type { NextAction } from "@/lib/next-action";
 import type { DealScoreActionResult } from "@/app/actions/deal-score";
 import {
@@ -399,7 +400,7 @@ function ScoreBreakdownReceipts({
           ? "5–6.5% - fair for the market"
           : "Below 5% - returns rely on price growth",
     dscr: isCashPurchase
-      ? "N/A - all-cash purchase (no debt to cover)"
+      ? NO_DEBT_SERVICE_DSCR_LABEL
       : breakdown.dscrScore >= 13
         ? "Above 1.20 - clears lender threshold"
         : breakdown.dscrScore >= 7

@@ -2,11 +2,12 @@
 
 /**
  * The site's primary navigation — four destinations, in the order of the
- * story: Analyze | Pricing | For Agents | Learn.
+ * story: Analyze | Pricing | Learn. Agent Pro stays out of public navigation
+ * until its complete workflow is explicitly released.
  *
  * Why this exists: the header carried NO marketing nav at all. A visitor on the
  * homepage could reach /pricing (via the Pro pill) and nothing else — every
- * other page (methodology, the /vs comparisons, the blog, 19 free calculators,
+ * other page (methodology, the /vs comparisons, the blog, free educational tools,
  * the glossary) was reachable only from the footer. That is a large part of why
  * the site read as several disconnected products rather than one.
  *
@@ -31,7 +32,7 @@ import {
 
 const LEARN_LINKS: { label: string; href: string; hint: string }[] = [
   { label: "How we calculate", href: "/methodology", hint: "Every formula, shown" },
-  { label: "Free calculators", href: "/tools", hint: "Cap rate, DSCR, BRRRR…" },
+  { label: "Free calculators", href: "/tools", hint: "Mortgage, GRM, vacancy, rehab…" },
   { label: "Compare tools", href: "/vs", hint: "TrueCap vs the alternatives" },
   { label: "Guides", href: "/blog", hint: "How to underwrite, explained" },
   { label: "Glossary", href: "/glossary", hint: "Plain-English definitions" },
@@ -49,9 +50,6 @@ export function MarketingNav() {
       </Link>
       <Link href="/pricing" className={linkClass}>
         Pricing
-      </Link>
-      <Link href="/for-agents" className={linkClass}>
-        For Agents
       </Link>
       <DropdownMenu>
         <DropdownMenuTrigger className={`inline-flex items-center gap-1 ${linkClass}`}>
@@ -91,9 +89,6 @@ export function MarketingNavMobile() {
       </Link>
       <Link href="/pricing" className={`${linkClass} whitespace-nowrap`}>
         Pricing
-      </Link>
-      <Link href="/for-agents" className={`${linkClass} whitespace-nowrap`}>
-        For Agents
       </Link>
       <Link href="/methodology" className={`${linkClass} whitespace-nowrap`}>
         Learn

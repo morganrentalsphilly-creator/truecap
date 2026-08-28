@@ -25,6 +25,7 @@ import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
 import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "what-is-a-good-dscr";
@@ -92,7 +93,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What is the DSCR on a cash purchase?",
-    a: "Undefined — with no loan there's no debt service, so the ratio has no denominator. Analysis tools (TrueCap included) report DSCR as N/A on cash deals rather than showing a misleading number. For a cash purchase, judge the deal on cap rate and cash-on-cash return instead.",
+    a: `Undefined — with no loan there's no debt service, so the ratio has no denominator. TrueCap reports DSCR as ${NO_DEBT_SERVICE_DSCR_LABEL} on cash deals rather than showing a misleading number. For a cash purchase, judge the deal on cap rate and cash-on-cash return instead.`,
   },
 ];
 
@@ -233,7 +234,7 @@ export default function BlogPost() {
           <p>
             If the property has no mortgage, there&apos;s no denominator —
             DSCR on a cash purchase is undefined, and honest tools report it
-            as N/A rather than pretending it&apos;s infinite. For the full
+            as {NO_DEBT_SERVICE_DSCR_LABEL} rather than pretending it&apos;s infinite. For the full
             walkthrough of the formula, including which expenses belong in
             NOI, see our{" "}
             <Link href="/blog/how-to-calculate-dscr" className="text-primary font-semibold hover:underline">
@@ -320,7 +321,7 @@ export default function BlogPost() {
             conservative.) This is the negotiating math that a DSCR target
             actually gives you: not a pass/fail grade on the listing, but a
             defensible ceiling on what you can pay. Our{" "}
-            <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">
+            <Link href="/#main" className="text-primary font-semibold hover:underline">
               free DSCR calculator
             </Link>{" "}
             runs this in both directions — DSCR at your numbers, and the
@@ -361,7 +362,7 @@ export default function BlogPost() {
             25% to 35% is cash that now sits in the walls earning the
             property&apos;s return instead of yours: it lifts DSCR while it
             drags your{" "}
-            <Link href="/tools/cash-on-cash-calculator" className="text-primary font-semibold hover:underline">
+            <Link href="/#main" className="text-primary font-semibold hover:underline">
               cash-on-cash return
             </Link>, and when the loan constant tops the cap rate you can buy
             your way into{" "}
@@ -442,7 +443,7 @@ export default function BlogPost() {
             stays above 1.0 in the bad year. That&apos;s the standard
             commercial underwriters actually apply, and it&apos;s free to
             apply yourself with a{" "}
-            <Link href="/tools/rental-cash-flow-calculator" className="text-primary font-semibold hover:underline">
+            <Link href="/#main" className="text-primary font-semibold hover:underline">
               cash flow calculator
             </Link>{" "}
             and ten minutes of pessimism.
@@ -499,7 +500,7 @@ export default function BlogPost() {
 
           <p>
             Or, if you just want the standalone ratio:{" "}
-            <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">
+            <Link href="/#main" className="text-primary font-semibold hover:underline">
               free DSCR calculator →
             </Link>
           </p>

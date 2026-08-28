@@ -221,7 +221,7 @@ export default async function ProfilePage({
         : [
             "Save and compare deals",
             "10-year projections",
-            "Illustrative tax impact and modeled exit comparisons",
+            "Downside sensitivity and Offer Ceiling",
             "Professional PDF exports",
           ],
     }));
@@ -241,13 +241,25 @@ export default async function ProfilePage({
 
   return (
     <>
-      {/* Fires the Google Ads paid-subscription conversion event when the
-          user lands here from a Stripe checkout success redirect. */}
-      <BillingConversionTracker
-        billingStatus={resolvedSearchParams.billing}
-        value={subscriptionValue}
-        transactionId={subscriptionRow?.stripe_subscription_id ?? undefined}
-      />
+      {/* Compatibility mount: fires the Google Ads paid-subscription
+          conversion when a subscriber lands here from an OLD checkout success
+          link. Stripe's real success_url is /dashboard/new (app/actions/
+          billing.ts:98), which mounts the tracker through
+          billing-success-banner.tsx.
+
+          Gated on justSubscribedSlug — i.e. an active/trialing subscription
+          actually exists. Without the gate, any signed-in visitor loading
+          /profile?billing=success reports a paid conversion to Google Ads with
+          no Stripe verification at all, and an inflated conversion count is
+          worse than a missing one: it trains bidding toward traffic that never
+          paid. */}
+      {justSubscribedSlug ? (
+        <BillingConversionTracker
+          billingStatus={resolvedSearchParams.billing}
+          value={subscriptionValue}
+          transactionId={subscriptionRow?.stripe_subscription_id ?? undefined}
+        />
+      ) : null}
       <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-5  space-y-10">
         <ProfileForm
           userId={user.id}
@@ -301,7 +313,7 @@ export default async function ProfilePage({
                     features: [
                       "Save and compare deals",
                       "10-year projections",
-                      "Illustrative tax impact and modeled exit comparisons",
+                      "Downside sensitivity and Offer Ceiling",
                       "Professional PDF exports",
                     ],
                   },
@@ -315,7 +327,7 @@ export default async function ProfilePage({
                     features: [
                       "Save and compare deals",
                       "10-year projections",
-                      "Illustrative tax impact and modeled exit comparisons",
+                      "Downside sensitivity and Offer Ceiling",
                       "Professional PDF exports",
                     ],
                   },

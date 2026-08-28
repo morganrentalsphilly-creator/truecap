@@ -58,10 +58,12 @@ import {
   normalizeOfferCeilingTargetSource,
 } from "@/lib/offer-ceiling-contract";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
+import { activeMeteredEvaluationComparisonGrantsAccess } from "@/lib/evaluation-access-server";
 import { buyBoxHasCriteria, type NamedBuyBox } from "@/lib/buy-box";
 import { normalizeDataConfidence, type DataConfidence } from "@/lib/data-confidence";
 import { DEFAULT_PIPELINE_STAGE, type PipelineStage } from "@/lib/pipeline";
 import { isSavedDealActive } from "@/lib/saved-deal-lifecycle";
+import { isFeatureReleased } from "@/lib/entitlements-catalog";
 
 const MAX_COMPARE_ITEMS = 4;
 
@@ -313,8 +315,8 @@ function mapDeal(
     // After-tax figures from the SAME recompute as netCashFlow so the grid
     // reconciles (afterTaxCF = netCashFlow + taxSavingsMonthly) — the stored
     // snapshot predates the PMI/CapEx-taxable corrections for older deals and
-    // could crown the wrong deal on the after-tax winner highlight. Falls back
-    // to the stored values for legacy/unparseable forms.
+    // could make the after-tax directional comparison inconsistent. Falls
+    // back to the stored values for legacy/unparseable forms.
     afterTaxCF: resolvedCurrent ? resolvedCurrent.afterTaxCF : toNumber(snapshot.afterTaxCF),
     annualCashFlow: resolvedCurrent ? resolvedCurrent.netCashFlowMonthly * 12 : toNumber(snapshot.annualCashFlow),
     dscr: resolvedCurrent ? resolvedCurrent.dscr : toNumber(snapshot.dscr),
@@ -564,21 +566,47 @@ export default async function DashboardComparePage() {
     redirect("/auth/login");
   }
 
-  const entitlements = await getRequestEntitlements(user.id);
-  if (!hasDashboardAccess(entitlements) || !hasPlanFeature(entitlements, "compare_deals")) {
-    redirect("/");
-  }
-  const navAccess = getDashboardNavAccess(entitlements);
-
-  const [{ data: profile }, ids, isPremium] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("first_name, last_name, display_name, avatar_url")
-      .eq("id", user.id)
-      .maybeSingle(),
+  const [entitlements, ids, isPremium] = await Promise.all([
+    getRequestEntitlements(user.id),
     getCompareIdsFromCookie(),
     hasPaidPlanSubscription(supabase, user.id),
   ]);
+  if (!hasDashboardAccess(entitlements)) {
+    redirect("/");
+  }
+  const hasFreshComparisonAccess = hasPlanFeature(entitlements, "compare_deals");
+  const hasExactMeteredComparison =
+    ids.length >= 2 &&
+    (await activeMeteredEvaluationComparisonGrantsAccess(
+      supabase,
+      user.id,
+      ids,
+    ));
+  const canOpenComparison =
+    ids.length >= 2
+      ? isPremium || hasExactMeteredComparison
+      : hasFreshComparisonAccess;
+  if (!canOpenComparison) redirect("/");
+  // Buy Box fit is itself part of the paid comparison decision. Evaluation
+  // users may see it only for the exact comparison selection already recorded
+  // in the immutable usage ledger above; a broad, still-active evaluation must
+  // not let an unrelated/stale selection inherit personalized fit.
+  const canEvaluateBuyBox = isPremium || hasExactMeteredComparison;
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("first_name, last_name, display_name, avatar_url")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const navAccess = getDashboardNavAccess(entitlements);
+  const showTaxComparison =
+    hasPlanFeature(entitlements, "tax_strategy") &&
+    isFeatureReleased("tax_strategy");
+  const showExitComparison =
+    hasPlanFeature(entitlements, "exit_scenarios") &&
+    isFeatureReleased("exit_scenarios");
+
   const displayName = getDisplayName((profile as ProfileRow | null) ?? null, user.email);
   const initials = getInitials(displayName, user.email ?? "");
   // Offer Ceiling uses the catalog's paid-status gate. Requiring a nonexistent `mao`
@@ -685,17 +713,20 @@ export default async function DashboardComparePage() {
       })
   );
   const [buyBoxesResult, pickerLoad] = await Promise.all([
-    listBuyBoxesAction().catch(() => null),
+    canEvaluateBuyBox
+      ? listBuyBoxesAction().catch(() => null)
+      : Promise.resolve(null),
     loadComparePickerDeals(supabase, user.id),
   ]);
   const activeCompareBuyBoxes =
-    buyBoxesResult && buyBoxesResult.ok && buyBoxesResult.canUse
+    canEvaluateBuyBox && buyBoxesResult && buyBoxesResult.ok
       ? buyBoxesResult.boxes.filter((box) => box.isActive && buyBoxHasCriteria(box))
       : [];
-  const compareBuyBoxesResolved = Boolean(buyBoxesResult?.ok);
+  const compareBuyBoxesResolved =
+    !canEvaluateBuyBox || Boolean(buyBoxesResult?.ok);
   const deals = ids.map((id) => rowById.get(id)).filter((row): row is SavedAnalysisRow => Boolean(row))
-    // Buy boxes resolve on the same canUse gate the dashboard and My Deals
-    // use, so a Compare row's Offer Ceiling matches those screens exactly.
+    // The paid/exact-comparison authorization above, not the broad plan-feature
+    // hint returned by the list action, is the authority for this consumer.
     .map((row) =>
       mapDeal(row, activeCompareBuyBoxes, canShowMao, compareBuyBoxesResolved)
     );
@@ -756,6 +787,9 @@ export default async function DashboardComparePage() {
             deals={deals.slice(0, MAX_COMPARE_ITEMS)}
             availableDeals={pickerLoad.deals}
             selectionLoadError={pickerLoad.hasError}
+            canEvaluateBuyBox={canEvaluateBuyBox}
+            showTaxComparison={showTaxComparison}
+            showExitComparison={showExitComparison}
           />
         </div>
       </div>

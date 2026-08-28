@@ -152,7 +152,10 @@ describe("buildWeeklySummary — active pipeline", () => {
 
   it("derives the stage from legacy flags when pipeline_stage is null", () => {
     const rows = [row({ pipeline_stage: null, is_completed: true })];
-    const payload = buildWeeklySummary(rows, ctx());
+    const payload = buildWeeklySummary(
+      rows,
+      ctx({ ownedPortfolioActualsReleased: true }),
+    );
     expect(payload!.pipeline).toBeNull();
     expect(payload!.owned).not.toBeNull();
     expect(payload!.owned!.count).toBe(1);
@@ -168,7 +171,10 @@ describe("buildWeeklySummary — owned portfolio", () => {
       is_completed: true,
       close_date: closeDate,
     });
-    const payload = buildWeeklySummary([ownedRow], ctx());
+    const payload = buildWeeklySummary(
+      [ownedRow],
+      ctx({ ownedPortfolioActualsReleased: true }),
+    );
     expect(payload!.owned).not.toBeNull();
     expect(payload!.owned!.count).toBe(1);
     expect(payload!.owned!.datedCount).toBe(1);
@@ -192,12 +198,20 @@ describe("buildWeeklySummary — owned portfolio", () => {
   it("counts undated owned deals but reports null equity", () => {
     const payload = buildWeeklySummary(
       [row({ pipeline_stage: "closed", is_completed: true, close_date: null })],
-      ctx(),
+      ctx({ ownedPortfolioActualsReleased: true }),
     );
     expect(payload!.owned!.count).toBe(1);
     expect(payload!.owned!.datedCount).toBe(0);
     expect(payload!.owned!.totalEquity).toBeNull();
     expect(payload!.owned!.equityGain).toBeNull();
+  });
+
+  it("keeps modeled owned performance out of production payloads by default", () => {
+    const payload = buildWeeklySummary(
+      [row({ pipeline_stage: "closed", is_completed: true })],
+      ctx(),
+    );
+    expect(payload).toBeNull();
   });
 });
 
@@ -399,7 +413,7 @@ describe("weeklySummarySubject", () => {
   it("falls back to the owned line when there's no pipeline", () => {
     const payload = buildWeeklySummary(
       [row({ pipeline_stage: "closed", is_completed: true })],
-      ctx(),
+      ctx({ ownedPortfolioActualsReleased: true }),
     )!;
     expect(weeklySummarySubject(payload)).toBe(
       "Your week in deals — 1 owned property",

@@ -24,16 +24,15 @@ import { BuyBoxVerdictCard } from "@/components/investcalc/buy-box-verdict-card"
 import { deriveStateFromAddress, type BuyBoxDealMetrics } from "@/lib/buy-box";
 import type { AnalysisResult } from "@/lib/calc-analysis";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
+import { calculateMaoIrr } from "@/lib/mao-target-evaluation";
+import type { PublicShareCoreAnalysisResult } from "@/lib/public-share-analysis-result";
 
 export function SharedDealViewerBuyBox({
   values,
   result,
 }: {
   values: InvestmentFormValues;
-  result: Pick<
-    AnalysisResult,
-    "capRate" | "cocReturn" | "dscr" | "netCashFlow" | "monthlyPayment"
-  >;
+  result: AnalysisResult | PublicShareCoreAnalysisResult;
 }) {
   // Local session check (cookie read, no server round-trip) so anonymous
   // viewers never even fire the buy-box action. The action re-verifies the
@@ -57,7 +56,14 @@ export function SharedDealViewerBuyBox({
   // Same metrics mapping as the BuyBoxVerdictCard mount in
   // analysis-dashboard.tsx — incl. the cash-purchase DSCR N/A rule.
   const metrics = useMemo<BuyBoxDealMetrics>(
-    () => ({
+    () => {
+      // A core public share deliberately omits the paid 10-year projection.
+      // Do not recreate or infer an IRR from that reduced payload: an active
+      // IRR target must fail closed until the viewer imports and reruns it.
+      const irr = "tenYearProjection" in result
+        ? calculateMaoIrr(values, result)
+        : null;
+      return {
       capRatePct: result.capRate ?? null,
       cocPct: result.cocReturn ?? null,
       dscr: result.dscr ?? null,
@@ -66,9 +72,13 @@ export function SharedDealViewerBuyBox({
       propertyType: values.propertyType,
       state: deriveStateFromAddress(values.address),
       isCashPurchase: result.monthlyPayment <= 0,
-    }),
+      cashRequired: result.totalCashRequired ?? null,
+      irrPct: irr?.primaryIrrPct ?? null,
+      irrStatus: irr?.status ?? "none",
+    };
+    },
     [values, result],
   );
 
-  return <BuyBoxVerdictCard enabled={signedIn} metrics={metrics} />;
+  return <BuyBoxVerdictCard enabled={signedIn} metrics={metrics} values={values} />;
 }

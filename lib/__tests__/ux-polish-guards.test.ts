@@ -19,7 +19,6 @@ describe("global skip-link destinations", () => {
     "app/tools/roi-calculator/page.tsx",
     "app/tools/break-even-calculator/page.tsx",
     "app/tools/closing-cost-calculator/page.tsx",
-    "app/tools/rental-property-tax-calculator/page.tsx",
     "app/tools/vacancy-rate-calculator/page.tsx",
     "app/admin/seo/page.tsx",
     "app/admin/testimonials/page.tsx",
@@ -173,6 +172,15 @@ describe("non-pointer help and concise announcements", () => {
 });
 
 describe("browser capability recovery and crawl path", () => {
+  it("redirects the unreleased tax calculator to educational material", () => {
+    const source = read("app/tools/rental-property-tax-calculator/page.tsx");
+    expect(source).toContain(
+      'permanentRedirect("/blog/rental-property-tax-deductions")',
+    );
+    expect(source).not.toContain("RentalPropertyTaxCalculatorWidget");
+    expect(source).not.toContain("SoftwareApplication");
+  });
+
   it("surfaces blocked tabs and storage, and avoids async PDF popups", () => {
     const handoff = read(
       "components/investcalc/open-saved-deal-in-analyzer.tsx",
@@ -194,7 +202,7 @@ describe("browser capability recovery and crawl path", () => {
   });
 
   it("links the sitemap sample memo from the homepage sample context", () => {
-    expect(read("components/marketing/marketing-hero.tsx")).toContain(
+    expect(read("components/marketing/hero-address-form.tsx")).toContain(
       'href="/sample-decision-memo"',
     );
   });

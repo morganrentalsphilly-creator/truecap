@@ -112,7 +112,7 @@ export function PropertyDetailsSection({
         <p className="mb-1.5 text-[11px] leading-snug text-muted-foreground">
           <span className="font-semibold text-foreground">Fastest start</span>
           {
-            " - type an address and we auto-fill rates, taxes & (where public data covers it) area rent. Or just enter price & rent to see a provisional screening result. Everything stays editable."
+            " - type an address and we fill a national rate benchmark plus (where HUD data covers it) an area-rent benchmark. Enter the property tax from a local bill or reviewed rate. Or just enter price & rent to see a provisional screening result. Everything stays editable."
           }
         </p>
       ) : null}

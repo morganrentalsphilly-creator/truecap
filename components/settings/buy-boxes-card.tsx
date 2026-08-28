@@ -42,11 +42,13 @@ const RETURN_FIELDS = [
   { key: "minCapRatePct", label: "Min cap rate", suffix: "%", step: "0.1", placeholder: "6" },
   { key: "minCocPct", label: "Min cash-on-cash", suffix: "%", step: "0.1", placeholder: "8" },
   { key: "minDscr", label: "Min DSCR", suffix: "×", step: "0.05", placeholder: "1.25" },
+  { key: "minIrrPct", label: "Min 10-year pre-tax IRR", suffix: "%", step: "0.1", placeholder: "12" },
 ] as const;
 
 const MONEY_FIELDS = [
   { key: "minCashFlowMonthly", label: "Min monthly cash flow", step: "25", placeholder: "200" },
   { key: "maxPurchasePrice", label: "Max purchase price", step: "5000", placeholder: "300000" },
+  { key: "maxCashRequired", label: "Max cash required", step: "500", placeholder: "75000" },
 ] as const;
 
 const PROPERTY_TYPES: BuyBoxPropertyType[] = ["single-family", "multi-family", "owner-occupant"];
@@ -55,7 +57,9 @@ type NumericKey =
   | "minCapRatePct"
   | "minCocPct"
   | "minDscr"
+  | "minIrrPct"
   | "minCashFlowMonthly"
+  | "maxCashRequired"
   | "maxPurchasePrice";
 
 function parseNum(raw: string): number | null {
@@ -97,7 +101,9 @@ function boxToEditor(box: NamedBuyBox): EditorState {
       minCapRatePct: s(box.minCapRatePct),
       minCocPct: s(box.minCocPct),
       minDscr: s(box.minDscr),
+      minIrrPct: s(box.minIrrPct ?? null),
       minCashFlowMonthly: s(box.minCashFlowMonthly),
+      maxCashRequired: s(box.maxCashRequired ?? null),
       maxPurchasePrice: s(box.maxPurchasePrice),
     },
     propertyTypes: box.propertyTypes,
@@ -112,7 +118,15 @@ function emptyEditor(makeDefault: boolean): EditorState {
     name: "",
     strategyKind: "",
     clientId: "",
-    fields: { minCapRatePct: "", minCocPct: "", minDscr: "", minCashFlowMonthly: "", maxPurchasePrice: "" },
+    fields: {
+      minCapRatePct: "",
+      minCocPct: "",
+      minDscr: "",
+      minIrrPct: "",
+      minCashFlowMonthly: "",
+      maxCashRequired: "",
+      maxPurchasePrice: "",
+    },
     propertyTypes: [],
     targetStates: [],
     isActive: true,
@@ -233,7 +247,9 @@ export function BuyBoxesCard() {
           minCapRatePct: parseNum(editor.fields.minCapRatePct),
           minCocPct: parseNum(editor.fields.minCocPct),
           minDscr: parseNum(editor.fields.minDscr),
+          minIrrPct: parseNum(editor.fields.minIrrPct),
           minCashFlowMonthly: parseNum(editor.fields.minCashFlowMonthly),
+          maxCashRequired: parseNum(editor.fields.maxCashRequired),
           maxPurchasePrice: parseNum(editor.fields.maxPurchasePrice),
           propertyTypes: editor.propertyTypes,
           targetStates: editor.targetStates,
@@ -643,7 +659,7 @@ function BoxEditorForm({
         ) : null}
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {RETURN_FIELDS.map((field) => (
           <div key={field.key} className="space-y-1">
             <Label htmlFor={`bb-${field.key}`} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
@@ -668,7 +684,7 @@ function BoxEditorForm({
         ))}
       </div>
 
-      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
         {MONEY_FIELDS.map((field) => (
           <div key={field.key} className="space-y-1">
             <Label htmlFor={`bb-${field.key}`} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">

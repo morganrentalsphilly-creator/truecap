@@ -1,10 +1,12 @@
+import { PRODUCT_EVALUATION_DAYS } from "@/lib/product-access";
+
 /**
- * Single source of truth for the Pro free-trial length. Shared by Stripe
- * checkout (app/actions/billing.ts) and every marketing surface so the promise
- * and the behavior cannot drift behind a deployment-only override.
+ * Backward-compatible names for older marketing imports. This is a product
+ * evaluation, not a Stripe subscription trial: no card is collected and no
+ * charge is scheduled when it begins.
  */
-export const TRIAL_DAYS = 14;
-export const TRIAL_LABEL = `${TRIAL_DAYS}-day free trial`;
+export const TRIAL_DAYS = PRODUCT_EVALUATION_DAYS;
+export const TRIAL_LABEL = `${TRIAL_DAYS}-day no-card product evaluation`;
 
 /**
  * Mirror of the checkout repeat-trial guard (app/actions/billing.ts:
@@ -18,5 +20,6 @@ export const TRIAL_LABEL = `${TRIAL_DAYS}-day free trial`;
  * billing.ts, change this (and the helper) in lockstep.
  */
 export function willCheckoutGrantTrial(hadPriorSubscription: boolean): boolean {
-  return !hadPriorSubscription;
+  void hadPriorSubscription;
+  return false;
 }

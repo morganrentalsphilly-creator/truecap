@@ -11,7 +11,7 @@
  * Usage (inside an /tools/<slug>/page.tsx file):
  *   import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
  *   ...
- *   <ToolBreadcrumbSchema toolPath="/tools/cap-rate-calculator" toolName="Cap rate calculator" />
+ *   <ToolBreadcrumbSchema toolPath="/tools/mortgage-payment-calculator" toolName="Mortgage payment calculator" />
  *
  * Renders only the <script type="application/ld+json"> tag — no
  * visible UI. Pair with a real visible breadcrumb (the back-link

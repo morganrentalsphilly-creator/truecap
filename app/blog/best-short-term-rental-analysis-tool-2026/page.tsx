@@ -70,11 +70,11 @@ const TOOLS = [
     name: "TrueCap (underwriting)",
     bestFor: "Best STR underwriting with LTR/STR scenario comparison",
     url: "/vs/dealcheck-for-short-term-rentals",
-    pricing: "Free; Pro $29.99/mo",
+    pricing: "Free core; paid Investor Pro — see live pricing",
     freeCovers: [
       "Plug AirDNA monthly revenue into rent field; run full cap rate / DSCR / cash flow",
       "Compare LTR vs STR scenarios on same property",
-      "Illustrative tax impact (Pro — straight-line depreciation + interest)"
+      "No tax-specific module; use a qualified professional for STR eligibility and taxpayer-specific treatment"
     ],
     freeGates: [
       "Sensitivity grid stress-tests STR revenue ±10% (Pro)",
@@ -153,7 +153,7 @@ const FAQ_ITEMS = [
   { q: "AirDNA vs Mashvisor for STR — which one?", a: "AirDNA is more STR-specific and considered the gold standard for ADR / occupancy / RevPAR data. Mashvisor covers both STR and LTR plus broader market analysis. STR-primary investors lean AirDNA. Investors toggling between LTR and STR on the same property lean Mashvisor's broader scope." },
   { q: "Can TrueCap model short-term rental revenue?", a: "Yes, indirectly — every input in TrueCap is editable. Plug AirDNA's projected monthly STR revenue (gross income ÷ 12, discounted for vacancy + cleaning) into the rent field, run the full underwrite. TrueCap doesn't pull AirDNA data automatically; you copy the number across." },
   { q: "What management rate should I use for STR underwriting?", a: "Long-term rentals: 8-10%. Short-term rentals: 20-25% with a full-service PM (channel management + guest comms + cleaning coordination). If you self-manage, 0-5% (just covering software + cleaner coordination) but be honest about your time. TrueCap's management field is editable." },
-  { q: "Does TrueCap support the STR tax loophole?", a: "TrueCap does not determine STR-loophole eligibility or model cost-segregation components and bonus depreciation. Pro's Illustrative Tax Impact view models rental income, entered expenses, straight-line depreciation, and optional mortgage interest at your entered marginal rate. Use a CPA for material-participation, REPS, cost-segregation, and bonus-depreciation modeling." },
+  { q: "Does TrueCap support the STR tax loophole?", a: "No. TrueCap does not currently expose a tax-specific analysis module, determine STR eligibility, or model cost-segregation components and bonus depreciation. Use a qualified tax professional for material-participation, REPS, cost-segregation, and taxpayer-specific modeling." },
 ];
 
 const DECISION_LINES: Array<{ q: string; a: string }> = [
@@ -330,9 +330,9 @@ export default function BestShortTermRentalAnalysisTool2026Post() {
               one of your real deals through it. TrueCap is free for the core
               underwriting, takes 60 seconds, no signup required. Pressure-test
               the financing on a short-term rental with the{" "}
-              <Link href="/tools/dscr-calculator" className="font-semibold text-primary hover:underline">DSCR calculator</Link>, check
+              <Link href="/#main" className="font-semibold text-primary hover:underline">DSCR calculator</Link>, check
               the return on your cash with the{" "}
-              <Link href="/tools/roi-calculator" className="font-semibold text-primary hover:underline">ROI calculator</Link>, and
+              <Link href="/#main" className="font-semibold text-primary hover:underline">ROI calculator</Link>, and
               walk through the full nightly-rate math in our{" "}
               <Link href="/blog/short-term-rental-underwriting-playbook" className="font-semibold text-primary hover:underline">short-term rental underwriting playbook</Link>.
             </p>

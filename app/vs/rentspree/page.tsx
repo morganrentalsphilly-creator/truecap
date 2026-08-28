@@ -53,7 +53,6 @@ const MATRIX: Row[] = [
   { feature: "Primary use", truecap: "Pre-purchase underwriting (cap rate, DSCR, cash flow)", rentspree: "Tenant screening + rental applications", winner: "tie" },
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", rentspree: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", rentspree: "Not modeled", winner: "truecap" },
-  { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", rentspree: "Not modeled", winner: "truecap" },
   { feature: "Secondary Screening Index", truecap: "Free — 0-100 triage score + factor breakdown", rentspree: "Not applicable", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", rentspree: "Not applicable", winner: "truecap" },
   { feature: "Tenant credit / criminal reports", truecap: "No", rentspree: "Yes — TransUnion-backed", winner: "rentspree" },
@@ -242,7 +241,7 @@ export default function VsRentspreePage() {
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Want to see just the underwriting half? Try the{" "}
-            <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">
+            <Link href="/#main" className="font-semibold text-primary hover:underline">
               cap rate calculator
             </Link>{" "}
             or the full{" "}
@@ -266,7 +265,7 @@ export default function VsRentspreePage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
-            Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
+            Pro adds 10-year cash-flow and equity projections, sensitivity,
             Offer Ceiling, co-branded share links, and PDF reports with Pro; see live pricing for current terms.
             No card to start.
           </p>

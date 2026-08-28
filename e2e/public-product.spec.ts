@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Locator, type Page } from "@playwright/test";
+import { readFileSync } from "node:fs";
 import { SAMPLE_DEAL_FIXTURE } from "../lib/sample-deal";
 
 const VIEWPORTS = [
@@ -75,6 +76,58 @@ for (const viewport of VIEWPORTS) {
     await expectNoHorizontalOverflow(page);
   });
 }
+
+test("mobile hero leads with the decision outcome and keeps empty submissions at the field", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+
+  const hero = page.locator(".truecap-marketing-shell");
+  await expect(
+    hero.getByRole("heading", {
+      level: 1,
+      name: "Know your walk-away price before you make the offer.",
+    }),
+  ).toBeVisible();
+  await expect(
+    hero.getByText(
+      "No account or card. Your first complete Offer Ceiling is included.",
+      { exact: true },
+    ),
+  ).toBeVisible();
+
+  const form = hero.locator('form[data-hero-address-form=""]');
+  const address = form.getByLabel("Property address", { exact: true });
+  await expect(address).toHaveAttribute("aria-required", "true");
+  // Two distinct no-address paths, deliberately. The BUTTON runs the sample in
+  // place (the journey the authenticated guest specs drive); the LINK is the
+  // only internal link to /sample-decision-memo, which is in the sitemap and
+  // would otherwise be orphaned.
+  await expect(
+    hero.getByRole("button", { name: "View a sample decision →", exact: true }),
+  ).toHaveCount(1);
+  await expect(
+    hero.getByRole("link", { name: "Read the written memo", exact: true }),
+  ).toHaveCount(1);
+
+  const scrollBefore = await page.evaluate(() => window.scrollY);
+  await form
+    .getByRole("button", { name: "Analyze a deal free", exact: true })
+    .click();
+  await expect(
+    form.getByRole("alert").filter({
+      hasText: "Enter a property address to analyze this deal.",
+    }),
+  ).toBeVisible();
+  await expect(address).toBeFocused();
+  await expect
+    .poll(() => page.evaluate(() => window.scrollY))
+    .toBe(scrollBefore);
+
+  await expectNoHorizontalOverflow(page);
+  await expectNoSeriousAccessibilityViolations(page);
+});
 
 test("homepage sample preview keeps its reading order at zoom-sensitive widths", async ({
   page,
@@ -370,7 +423,7 @@ test("a hidden expense validation error reopens both panels and focuses the fiel
   await expect(page.locator("#vacancyPct-error")).toBeVisible();
 });
 
-test("specialist strategy framing stays visible and usable at 200% mobile zoom", async ({
+test("release-gated specialist strategies stay dark at 200% mobile zoom", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 195, height: 844 });
@@ -385,14 +438,30 @@ test("specialist strategy framing stays visible and usable at 200% mobile zoom",
   await changeType.click();
 
   const chooser = page.getByRole("region", { name: "Choose analysis type" });
-  const brrrr = chooser.getByRole("button", {
-    name: /BRRRR Buy, rehab, rent, refi/i,
+  await expectContainedInViewport(page, chooser, 80);
+
+  // The unfinished BRRRR and flip models must not be discoverable or
+  // materializable through the public analyzer. Keep exercising a released
+  // advanced option so this also protects the zoom-sensitive chooser layout.
+  await expect(
+    chooser.getByRole("button", {
+      name: /BRRRR Buy, rehab, rent, refi/i,
+    }),
+  ).toHaveCount(0);
+  await expect(
+    chooser.getByRole("button", {
+      name: /Fix & Flip Rehab and resell/i,
+    }),
+  ).toHaveCount(0);
+
+  const shortTerm = chooser.getByRole("button", {
+    name: /Short-term Rental Nightly \/ STR/i,
   });
-  await expectContainedInViewport(page, brrrr, 80);
-  await expectMinimumTouchTarget(brrrr);
-  await brrrr.click();
+  await expectContainedInViewport(page, shortTerm, 80);
+  await expectMinimumTouchTarget(shortTerm);
+  await shortTerm.click();
   const confirmation = chooser.getByRole("region", {
-    name: "Switch to BRRRR?",
+    name: "Switch to Short-term Rental?",
   });
   const keepAssumptions = confirmation.getByRole("button", {
     name: /Keep my assumptions/i,
@@ -402,15 +471,13 @@ test("specialist strategy framing stays visible and usable at 200% mobile zoom",
   await keepAssumptions.click();
 
   const warning = page.getByRole("note");
-  await expect(warning).toContainText("BRRRR mode");
+  await expect(warning).toContainText("Short-term Rental mode");
   await expect(warning).toContainText("Verify independently");
   await expectContainedInViewport(page, warning, 80);
-  await expect(
-    page.locator('button[data-inform-submit="true"]'),
-  ).toHaveAccessibleName(/Add address to run full analysis/i);
+  await expectNoHorizontalOverflow(page);
 });
 
-test("a restored advanced-strategy draft keeps its analysis identity", async ({
+test("a restored dark-strategy draft falls back safely to Buy & Hold", async ({
   page,
 }) => {
   await page.addInitScript(
@@ -430,15 +497,43 @@ test("a restored advanced-strategy draft keeps its analysis identity", async ({
   await waitForCalculatorReady(page);
 
   await expect(
-    page.getByRole("heading", { level: 2, name: "BRRRR Underwriting" }),
+    page.getByRole("heading", {
+      level: 2,
+      name: "Underwrite a Buy & Hold Rental",
+    }),
   ).toBeVisible();
   await expect(
     page.getByText("Draft restored from this browser"),
   ).toBeVisible();
-  await expect(page.getByRole("note")).toContainText("BRRRR mode");
+  await expect(
+    page.getByRole("button", {
+      name: "Change analysis type. Current: Buy & Hold",
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("note").filter({ hasText: "BRRRR mode" }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByLabel("Property Address", { exact: true }),
+  ).toHaveValue(SAMPLE_DEAL_FIXTURE.values.address);
   await expect(
     page.locator('button[data-inform-submit="true"]'),
-  ).toHaveAccessibleName(/Screen rental baseline free/i);
+  ).toHaveAccessibleName(/Calculate my Offer Ceiling/i);
+
+  await page
+    .getByRole("button", {
+      name: "Change analysis type. Current: Buy & Hold",
+    })
+    .click();
+  const chooser = page.getByRole("region", { name: "Choose analysis type" });
+  await expect(
+    chooser.getByRole("button", {
+      name: /BRRRR Buy, rehab, rent, refi/i,
+    }),
+  ).toHaveCount(0);
+  await expect(
+    chooser.getByRole("button", { name: /Fix & Flip Rehab and resell/i }),
+  ).toHaveCount(0);
 });
 
 test("a legacy synthetic sample draft cannot replace the investor's next deal", async ({
@@ -472,10 +567,18 @@ test("a legacy synthetic sample draft cannot replace the investor's next deal", 
   );
   const freshDealAction = page.locator('button[data-inform-submit="true"]');
   await expect(freshDealAction).toBeVisible();
-  await expect(freshDealAction).toHaveAccessibleName("Try a sample deal");
+  await expect(freshDealAction).toHaveAccessibleName(
+    "Analyze deal & calculate ceiling",
+  );
+  await expect(
+    page.getByRole("button", {
+      name: "Try a synthetic sample rental and preview a sample Pro report",
+      exact: true,
+    }),
+  ).toBeVisible();
 });
 
-test("switching tax and insurance modes cannot strand an invalid hidden value", async ({
+test("released operating tax and insurance modes cannot strand an invalid hidden value", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -484,7 +587,9 @@ test("switching tax and insurance modes cannot strand an invalid hidden value", 
 
   await page
     .getByRole("button", {
-      name: /Taxes 1\.1% of price\/year TrueCap default/i,
+      // Property tax is labeled a PRELIMINARY FALLBACK with a "verify locally"
+      // badge — released underwriting never auto-fills a parcel bill.
+      name: /Taxes 1\.1% preliminary fallback verify locally/i,
     })
     .click();
 
@@ -514,10 +619,14 @@ test("switching tax and insurance modes cannot strand an invalid hidden value", 
     .click();
   await expect(monthlyInsurance).toHaveValue("");
 
-  const deductionSwitch = page.getByRole("switch", {
-    name: "Include interest deduction in estimated tax savings",
-  });
-  await expectMinimumTouchTarget(deductionSwitch);
+  // Property tax and insurance remain released operating-expense inputs. The
+  // separate income-tax deduction model is dark-launched, so this regression
+  // must not require (or accidentally re-expose) its retired public control.
+  await expect(
+    page.getByRole("switch", {
+      name: "Include interest deduction in estimated tax savings",
+    }),
+  ).toHaveCount(0);
 });
 
 test("anonymous sample reaches the decision-first result with one click", async ({
@@ -530,7 +639,8 @@ test("anonymous sample reaches the decision-first result with one click", async 
   await expect(acceptCookies).toBeVisible();
   await acceptCookies.click();
   const sampleButton = page.getByRole("button", {
-    name: /view a sample decision/i,
+    name: "Try a synthetic sample rental and preview a sample Pro report",
+    exact: true,
   });
   await expect(sampleButton).toBeEnabled({ timeout: 20_000 });
   await sampleButton.click();
@@ -560,6 +670,12 @@ test("anonymous sample reaches the decision-first result with one click", async 
     await expect(action).toBeVisible();
     await expectMinimumTouchTarget(action);
   }
+  expect(
+    await nextDeal.evaluate(
+      (element) => element.scrollWidth <= element.clientWidth + 1,
+    ),
+    "The long next-deal label must wrap inside its mobile button",
+  ).toBe(true);
   await expect(summary.locator('[data-result-next-action=""]')).toBeVisible();
   await expect(page.locator("[data-marketing-mobile-nav]")).toBeHidden();
   const primaryActions = summary.locator(
@@ -640,19 +756,210 @@ test("anonymous sample reaches the decision-first result with one click", async 
   await expect(share).toBeVisible();
   await expectMinimumTouchTarget(share);
 
+  // The public report gate is a real modal: keyboard focus must enter it,
+  // remain inside while tabbing, and return to the exact trigger on Escape.
+  const exportPdf = summary.getByRole("button", {
+    name: "Export PDF",
+    exact: true,
+  });
+  await exportPdf.click();
+  const reportDialog = page.getByRole("dialog", {
+    name: "PDF reports are included with Pro",
+  });
+  await expect(reportDialog).toBeVisible();
+  await expect
+    .poll(() =>
+      reportDialog.evaluate((element) =>
+        element.contains(document.activeElement),
+      ),
+    )
+    .toBe(true);
+  for (let step = 0; step < 4; step += 1) {
+    await page.keyboard.press("Tab");
+    expect(
+      await reportDialog.evaluate((element) =>
+        element.contains(document.activeElement),
+      ),
+    ).toBe(true);
+  }
+  await page.keyboard.press("Escape");
+  await expect(reportDialog).toBeHidden();
+  await expect(exportPdf).toBeFocused();
+
   await expectNoSeriousAccessibilityViolations(page);
   await expectNoHorizontalOverflow(page);
+});
+
+test("one real anonymous deal receives an exact decision and bound PDF, then a second deal fails closed", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await waitForCalculatorReady(page);
+
+  const runDeal = async (input: {
+    address: string;
+    price: string;
+    rent: string;
+  }) => {
+    const form = page.locator('form[data-calc-form="true"]');
+    await form
+      .getByLabel("Property Address", { exact: true })
+      .fill(input.address);
+    await form
+      .getByLabel("Price to analyze", { exact: true })
+      .fill(input.price);
+    await form
+      .getByLabel("Expected gross monthly rent", { exact: true })
+      .fill(input.rent);
+    await form
+      .getByRole("button", {
+        name: "Analyze deal & calculate ceiling",
+        exact: true,
+      })
+      .last()
+      .click();
+    const summary = page.locator(
+      "section[aria-labelledby='decision-summary-title']",
+    );
+    await expect(summary).toBeVisible({ timeout: 20_000 });
+    return summary;
+  };
+
+  const first = await runDeal({
+    address: "100 Grant Test Ave, Columbus, OH 43215",
+    price: "250000",
+    rent: "2400",
+  });
+  await expect(first.getByText("Offer Ceiling", { exact: true })).toBeVisible();
+  await expect(
+    first.getByText("Assumption status", { exact: true }),
+  ).toBeAttached();
+  await expect(first.locator("[data-result-next-action='']")).toBeVisible();
+  const ceilingDetails = first
+    .locator("summary")
+    .filter({ hasText: "How this ceiling was calculated" });
+  await ceilingDetails.click();
+  await expect(first.getByText(/Exact ceiling/)).toBeVisible();
+  await expect(first.getByText(/^Binding:/)).toBeVisible();
+  await expect(first.getByText(/^Screening range:/)).toBeVisible();
+
+  const goDeeper = page
+    .locator("details")
+    .filter({ hasText: "Go deeper" })
+    .first();
+  if (!(await goDeeper.evaluate((element) => element.hasAttribute("open")))) {
+    await goDeeper.locator("summary").first().click();
+  }
+  const grantedStressTest = page.locator("[data-drill-row='stress-test']");
+  await expect(grantedStressTest).toBeVisible();
+  await expect(grantedStressTest.getByText("PRO", { exact: true })).toHaveCount(
+    0,
+  );
+  await grantedStressTest.getByRole("button", { name: /Stress Test/ }).click();
+  await expect(
+    grantedStressTest.getByText("Sensitivity analysis", { exact: true }),
+  ).toBeVisible();
+
+  await first.locator("summary").filter({ hasText: "More actions" }).click();
+  const downloadPromise = page.waitForEvent("download", { timeout: 30_000 });
+  await first.getByRole("button", { name: "Export PDF", exact: true }).click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toMatch(/Investment-Report-\d+\.pdf$/);
+  const downloadPath = await download.path();
+  expect(
+    downloadPath,
+    "the browser must receive a real PDF artifact",
+  ).not.toBeNull();
+  const pdfBytes = readFileSync(downloadPath!);
+  expect(pdfBytes.subarray(0, 5).toString("ascii")).toBe("%PDF-");
+  expect(pdfBytes.length).toBeGreaterThan(5_000);
+
+  // Ordinary edit-in-place must revoke browser presentation access before
+  // the debounced live recompute. The server cookie remains bound to deal 1,
+  // but deal 2's client-computed sensitivity and unsaved-PDF affordance must
+  // fail closed without requiring another explicit Run.
+  await first.getByRole("button", { name: "Edit assumptions" }).click();
+  const editForm = page.locator('form[data-calc-form="true"]');
+  await editForm
+    .getByLabel("Price to analyze", { exact: true })
+    .fill("255000");
+  await page.getByRole("button", { name: "Done editing" }).click();
+  await expect(first).toBeVisible();
+  await expect(
+    first.getByText("Asking $255,000", { exact: true }),
+  ).toBeVisible({ timeout: 20_000 });
+  await first.locator("summary").filter({ hasText: "More actions" }).click();
+  await expect(
+    first.getByRole("button", { name: "Export PDF", exact: true }),
+  ).toHaveAttribute("title", "PDF reports are included with TrueCap Pro.");
+  await first
+    .locator("summary")
+    .filter({ hasText: "How this ceiling was calculated" })
+    .click();
+  await expect(first.getByText(/Coarse range preview/)).toBeVisible({
+    timeout: 20_000,
+  });
+  await expect(first.getByText(/Exact ceiling/)).toHaveCount(0);
+
+  const changedGoDeeper = page
+    .locator("details")
+    .filter({ hasText: "Go deeper" })
+    .first();
+  if (
+    !(await changedGoDeeper.evaluate((element) => element.hasAttribute("open")))
+  ) {
+    await changedGoDeeper.locator("summary").first().click();
+  }
+  const changedStressTest = page.locator("[data-drill-row='stress-test']");
+  await expect(changedStressTest).toBeVisible();
+  await expect(
+    changedStressTest.getByText("PRO", { exact: true }),
+  ).toBeVisible();
+  await changedStressTest.getByRole("button", { name: /Stress Test/ }).click();
+  await expect(
+    changedStressTest.getByText("Sensitivity analysis", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    changedStressTest.getByText("Rent ±10% scenarios"),
+  ).toBeVisible();
+
+  const nextDeal = first.getByRole("button", {
+    name: "Next deal · keep assumptions",
+    exact: true,
+  });
+  page.once("dialog", (dialog) => dialog.accept());
+  await nextDeal.click();
+  const second = await runDeal({
+    address: "200 Second Test St, Columbus, OH 43215",
+    price: "275000",
+    rent: "2450",
+  });
+  await expect(
+    page.getByText("No-signup decision used", { exact: true }),
+  ).toBeVisible();
+  await second.locator("summary").filter({ hasText: "More actions" }).click();
+  await second.getByRole("button", { name: "Export PDF", exact: true }).click();
+  await expect(
+    page.getByRole("dialog", { name: "PDF reports are included with Pro" }),
+  ).toBeVisible();
 });
 
 test("next deal confirms the reset, clears property facts, and keeps reusable assumptions", async ({
   page,
 }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
+  await waitForCalculatorReady(page);
 
   const acceptCookies = page.getByRole("button", { name: /accept all/i });
   if (await acceptCookies.isVisible()) await acceptCookies.click();
 
-  await page.getByRole("button", { name: /view a sample decision/i }).click();
+  await page
+    .getByRole("button", {
+      name: "Try a synthetic sample rental and preview a sample Pro report",
+      exact: true,
+    })
+    .click();
   const nextDeal = page.getByRole("button", {
     name: "Next deal · keep assumptions",
     exact: true,
@@ -690,6 +997,33 @@ test("next deal confirms the reset, clears property facts, and keeps reusable as
   await expect(
     page.getByText("Reusable assumptions kept", { exact: true }),
   ).toBeVisible();
+
+  // The synthetic sample is a disposable preview, not the visitor's one
+  // no-signup decision. Prove that the same browser can still claim its first
+  // exact Offer Ceiling after leaving the sample while the reusable financing
+  // assumptions remain intact.
+  await address.fill("300 Sample Follow-up Ave, Columbus, OH 43215");
+  await page.getByLabel("Price to analyze", { exact: true }).fill("250000");
+  await page
+    .getByLabel("Expected gross monthly rent", { exact: true })
+    .fill("2400");
+  await page
+    .locator('form[data-calc-form="true"]')
+    .getByRole("button", {
+      name: "Analyze deal & calculate ceiling",
+      exact: true,
+    })
+    .last()
+    .click();
+  const firstRealDecision = page.locator(
+    "section[aria-labelledby='decision-summary-title']",
+  );
+  await expect(firstRealDecision).toBeVisible({ timeout: 20_000 });
+  const ceilingDetails = firstRealDecision
+    .locator("summary")
+    .filter({ hasText: "How this ceiling was calculated" });
+  await ceilingDetails.click();
+  await expect(firstRealDecision.getByText(/Exact ceiling/)).toBeVisible();
 });
 
 test("public homepage and pricing have no serious WCAG 2.1 AA violations", async ({

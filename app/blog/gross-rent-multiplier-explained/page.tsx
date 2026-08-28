@@ -565,7 +565,7 @@ export default function GrossRentMultiplierPost() {
             </Link>
             , confirm the implied cap rate in the{" "}
             <Link
-              href="/tools/cap-rate-calculator"
+              href="/#main"
               className="text-primary font-semibold hover:underline"
             >
               cap rate calculator

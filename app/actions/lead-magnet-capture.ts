@@ -57,12 +57,13 @@ const SEQUENCE: Array<{
     delayDays: 0,
     subject: "Your Market Intelligence Pack (state benchmarks + HUD rents)",
     build: ({ siteUrlHtml }) => `
-      <p>Here it is — every state's investing benchmarks on one table, the
+      <p>Here it is — state-by-state buy-and-hold screening references, the
       rent-to-price screen, and HUD rent benchmarks for 150 tracked markets:</p>
       <p><a href="${siteUrlHtml}${PACK_PATH}"><strong>Download the Market Intelligence Pack (PDF)</strong></a></p>
       <p>It compiles labeled HUD Fair Market Rent, state tax-rate, and
       landlord-law reference material. Coverage and dates vary. These are
-      screening references, not property facts, legal advice, or quotes.</p>
+      buy-and-hold screening references, not strategy recommendations,
+      property facts, legal advice, or quotes.</p>
       <p><a href="${siteUrlHtml}/?utm_source=email&utm_campaign=mip-day0">Analyze any address free — Pro adds a target-dependent Offer Ceiling →</a></p>
     `,
   },

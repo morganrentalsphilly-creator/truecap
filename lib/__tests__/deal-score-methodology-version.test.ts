@@ -22,7 +22,7 @@ const input = {
 
 describe("Screening Index methodology version", () => {
   it("versions score arithmetic independently from unchanged core financial math", () => {
-    expect(TRUECAP_DEAL_SCORE_METHODOLOGY_VERSION).toBe("1.2");
-    expect(computeDealScore(input).scoreMethodologyVersion).toBe("1.2");
+    expect(TRUECAP_DEAL_SCORE_METHODOLOGY_VERSION).toBe("1.3");
+    expect(computeDealScore(input).scoreMethodologyVersion).toBe("1.3");
   });
 });

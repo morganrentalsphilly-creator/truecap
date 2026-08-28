@@ -2,7 +2,7 @@
  * Blog post: the 70% rule for house flipping (and BRRRR).
  *
  * Targets queries: "70 percent rule house flipping", "70% rule real
- * estate", "how to calculate offer ceiling flip", "70%-rule offer ceiling",
+ * estate", "how to calculate 70%-rule price screen flip", "70%-rule price screen",
  * "ARV minus repairs formula", "how to calculate ARV", "70 rule BRRRR",
  * "what should I offer on a flip", "70 percent rule calculator".
  *
@@ -26,11 +26,11 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "70-percent-rule-house-flipping";
 const TITLE =
-  "The 70% rule for house flipping (and BRRRR): calculate an Offer Ceiling (2026)";
+  "The 70% rule for house flipping (and BRRRR): calculate a 70%-rule price screen (2026)";
 // SERP-facing title (metadata/og only): kept ≤50 chars so the root
 // layout's "%s | TrueCap" template stays inside the ~60-char SERP
 // window. The on-page <h1> keeps the longer editorial TITLE.
-const SERP_TITLE = "70% rule for flipping: Offer Ceiling (2026)";
+const SERP_TITLE = "70% rule for flipping: the price screen (2026)";
 const DESCRIPTION =
   "The 70% rule caps your offer at 70% of ARV minus repairs. Here's the formula, a worked flip and BRRRR example, and when 70% is the wrong number.";
 const PUBLISHED_AT = "2026-07-05";
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
   keywords: [
     "70 percent rule house flipping",
     "70% rule real estate",
-    "Offer Ceiling",
+    "70%-rule price screen",
     "how to calculate ARV",
     "ARV minus repairs formula",
     "how much to offer on a flip",
@@ -66,7 +66,7 @@ export const metadata: Metadata = {
 const FAQS = [
   {
     q: "What is the 70% rule in house flipping?",
-    a: "It's a rule of thumb that calculates a screening boundary at 70% of a property's projected ARV minus repairs. On a property modeled at $300,000 renovated with $45,000 of work, the 70%-rule Offer Ceiling is (0.70 × $300,000) − $45,000 = $165,000. The 30% held back is not all profit; it covers buying, holding, and selling costs first. This is not a recommended offer or appraisal.",
+    a: "It's a rule of thumb that calculates a screening boundary at 70% of a property's projected ARV minus repairs. On a property modeled at $300,000 renovated with $45,000 of work, the 70%-rule price screen is (0.70 × $300,000) − $45,000 = $165,000. The 30% held back is not all profit; it covers buying, holding, and selling costs first. This is not a recommended offer or appraisal.",
   },
   {
     q: "How do you calculate ARV (after-repair value)?",
@@ -82,7 +82,7 @@ const FAQS = [
   },
   {
     q: "What if there aren't good comparable sales?",
-    a: "Thin comps are a real risk because ARV drives the rule. Widen the search carefully and adjust for relevant differences. If you still cannot support a credible ARV, label the uncertainty, test a wider margin, and verify before recording a decision. An Offer Ceiling built on a guessed ARV is still a guess.",
+    a: "Thin comps are a real risk because ARV drives the rule. Widen the search carefully and adjust for relevant differences. If you still cannot support a credible ARV, label the uncertainty, test a wider margin, and verify before recording a decision. A 70%-rule price screen built on a guessed ARV is still a guess.",
   },
 ];
 
@@ -179,12 +179,12 @@ export default function SeventyPercentRulePost() {
               What the 70% rule actually says
             </h2>
             <p>
-              The rule calculates a <strong>70%-rule Offer Ceiling</strong>—a
+              The rule calculates a <strong>70%-rule price screen</strong>—a
               screening boundary intended to leave room for modeled costs and profit:
             </p>
             <div className="rounded-xl border border-border bg-muted/30 p-5">
               <code className="text-sm sm:text-base text-foreground font-mono">
-                Offer Ceiling = (ARV × 0.70) − Repair costs
+                70%-rule price screen = (ARV × 0.70) − Repair costs
               </code>
             </div>
             <p>
@@ -198,7 +198,7 @@ export default function SeventyPercentRulePost() {
             </p>
             <div className="rounded-xl border border-border bg-muted/30 p-5">
               <code className="text-sm sm:text-base text-foreground font-mono">
-                Offer Ceiling = (0.70 × $300,000) − $45,000 = $165,000
+                70%-rule price screen = (0.70 × $300,000) − $45,000 = $165,000
               </code>
             </div>
             <p>
@@ -214,7 +214,7 @@ export default function SeventyPercentRulePost() {
                 ARV calculator
               </Link>{" "}
               runs this exact formula against your own comps — the comps-based
-              ARV, the Offer Ceiling at any multiplier, and the 75% refi line in one
+              ARV, the 70%-rule price screen at any multiplier, and the 75% refi line in one
               screen. Already have the ARV? The free{" "}
               <Link
                 href="/tools/70-percent-rule-calculator"
@@ -222,7 +222,7 @@ export default function SeventyPercentRulePost() {
               >
                 70% rule calculator
               </Link>{" "}
-              shows the Offer Ceiling at 60/65/70/75% side by side.)
+              shows the 70%-rule price screen at 60/65/70/75% side by side.)
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -281,7 +281,7 @@ export default function SeventyPercentRulePost() {
                 </thead>
                 <tbody>
                   <tr>
-                    <td>At Offer Ceiling</td>
+                    <td>At 70%-rule price screen</td>
                     <td className="text-right">$165,000</td>
                   </tr>
                   <tr>
@@ -415,7 +415,7 @@ export default function SeventyPercentRulePost() {
             <p>
               ARV sets the top of the deal; the repair estimate sets how much of
               it you keep. Get the rehab wrong and the 70% rule faithfully hands
-              you an Offer Ceiling that&apos;s also wrong. A rough 2026 scope-to-cost
+              you a 70%-rule price screen that&apos;s also wrong. A rough 2026 scope-to-cost
               ladder, per finished square foot:
             </p>
             <ul className="list-disc pl-6 space-y-1">
@@ -553,12 +553,12 @@ export default function SeventyPercentRulePost() {
               refinance is about the room the transaction costs need. Miss high on
               the rehab or drag the timeline and you leave more cash in — the{" "}
               <Link
-                href="/tools/brrrr-calculator"
+                href="/blog/brrrr-method-explained"
                 className="text-primary font-semibold hover:underline"
               >
-                BRRRR calculator
+                BRRRR workflow guide
               </Link>{" "}
-              shows exactly how much. And if the{" "}
+              explains which inputs a complete model needs. And if the{" "}
               <Link
                 href="/blog/how-to-refinance-a-rental-property"
                 className="text-primary font-semibold hover:underline"
@@ -568,7 +568,7 @@ export default function SeventyPercentRulePost() {
               won&apos;t cash-flow after all that, the deal was never a BRRRR — it
               was a flip you forgot to sell. Pressure-test it as a{" "}
               <Link
-                href="/tools/cap-rate-calculator"
+                href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
                 hold on cap rate and DSCR
@@ -580,13 +580,13 @@ export default function SeventyPercentRulePost() {
               The honest version: solve the offer backward
             </h2>
             <p>
-              The 70% rule is triage, not underwriting. A more complete Offer Ceiling starts
+              The 70% rule is triage, not underwriting. A more complete 70%-rule price screen starts
               from ARV and subtracts modeled costs plus
               the profit you require, leaving the price as the remainder:
             </p>
             <div className="rounded-xl border border-border bg-muted/30 p-5">
               <code className="text-sm sm:text-base text-foreground font-mono">
-                Offer Ceiling = ARV − selling − holding − buying − rehab − required
+                70%-rule price screen = ARV − selling − holding − buying − rehab − required
                 profit
               </code>
             </div>
@@ -596,7 +596,7 @@ export default function SeventyPercentRulePost() {
             </p>
             <div className="rounded-xl border border-border bg-muted/30 p-5">
               <code className="text-sm sm:text-base text-foreground font-mono">
-                Offer Ceiling = $300,000 − $19,500 − $15,000 − $3,300 − $45,000 −
+                70%-rule price screen = $300,000 − $19,500 − $15,000 − $3,300 − $45,000 −
                 $50,000 = $167,200
               </code>
             </div>
@@ -640,11 +640,11 @@ export default function SeventyPercentRulePost() {
               <Link href="/" className="text-primary font-semibold hover:underline">
                 TrueCap analyzer
               </Link>{" "}
-              runs a property&apos;s Offer Ceiling, cash flow, cap rate, and DSCR from
+              runs a property&apos;s 70%-rule price screen, cash flow, cap rate, and DSCR from
               the same inputs — so whether you&apos;re flipping it or holding it,
               you can see the number that protects your spread before you write the
               offer. None of this is investment or lending advice; confirm your own
-              costs, comps, and financing terms before recording a decision. The Offer Ceiling is not a recommended offer.
+              costs, comps, and financing terms before recording a decision. The 70%-rule price screen is not a recommended offer.
             </p>
           </div>
         </article>

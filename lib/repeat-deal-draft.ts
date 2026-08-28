@@ -23,6 +23,17 @@ export function buildRepeatDealDraft(
     bathrooms: undefined,
     sqft: undefined,
     monthlyRent: undefined,
+    stabilizedMonthlyRent: undefined,
+    currentPropertyValue: undefined,
+    stabilizedPropertyValue: undefined,
+    operatingScenario: "current",
+    recurringOtherIncomeMonthly: undefined,
+    recurringOtherExpenseMonthly: undefined,
+    turnoverReserveMonthly: undefined,
+    leasingReserveMonthly: undefined,
+    landscapingMonthly: undefined,
+    pestControlMonthly: undefined,
+    administrativeMonthly: undefined,
     // Unit count and per-unit facts are listing facts too. Keep the selected
     // property model, but return to its blank minimum structure.
     units: getDefaultUnitsForPropertyType(source.propertyType).map((unit) => ({
@@ -31,6 +42,7 @@ export function buildRepeatDealDraft(
       bathrooms: undefined,
       sqft: undefined,
       monthlyRent: undefined,
+      stabilizedMonthlyRent: undefined,
     })),
 
     // STR revenue and setup costs describe the prior property, not the user's
@@ -44,6 +56,14 @@ export function buildRepeatDealDraft(
     // are reusable strategy assumptions—the action explicitly promises the
     // next deal will keep them. Property-specific dollar estimates do not.
     fixFlipCarryMonthly: undefined,
+    acquisitionCredits: undefined,
+    closingCostsInputMode: "percent",
+    closingCostsFixed: undefined,
+    originationFee: undefined,
+    loanFees: undefined,
+    initialReserve: undefined,
+    lenderEscrowDeposit: undefined,
+    lenderReserveDeposit: undefined,
 
     // Tax and insurance may have been derived from the prior address even
     // when represented as percentages. Clear both forms so the next property

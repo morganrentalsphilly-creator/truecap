@@ -118,7 +118,7 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
       // the default 0.8% conventional PMI applied on top of the 3.5%-down loan).
       insurancePct: 0.5,
       // FHA annual MIP ≈ 0.55% of the loan, and with <10% down it runs for the
-      // life of the loan (never cancels at 80% LTV).
+      // life of the loan (rather than conventional scheduled 78% termination).
       pmiAnnualRatePct: 0.55,
       pmiNoCancel: true,
       maintenancePct: 8,
@@ -142,7 +142,7 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
     key: "brrrr",
     tag: "Capital recycler",
     cardDescription:
-      "Buy, Rehab, Rent, Refinance, Repeat. Higher CapEx + maint reserves for the value-add property. Initial rate models hard-money — drop to your refi rate after stabilization.",
+      "Stabilized-rental assumption preset only; it does not model acquisition, rehab timing, or refinance proceeds. The integrated BRRRR lifecycle model is not currently released.",
     template: {
       templateName: "Starter — BRRRR",
       templateDescription: "Value-add buy/rehab/rent/refi",
@@ -346,7 +346,7 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
     key: "hard-money-flip",
     tag: "Fix & flip",
     cardDescription:
-      "Short-term flip on hard money — high rate + points, larger down, heavy holding costs during rehab. Re-run at sale; hold/appreciation assumptions don't drive a flip.",
+      "Rental-screening assumption preset only; it does not calculate flip profit, sale proceeds, or project timing. The integrated fix-and-flip model is not currently released.",
     template: {
       templateName: "Starter — Hard-money flip",
       templateDescription: "Fix-and-flip / hard-money defaults",
@@ -402,7 +402,7 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
     key: "portfolio-refi",
     tag: "Refinance",
     cardDescription:
-      "Refinance / cash-out on a property you own. Lower stabilized rate and reset terms — model the post-refi cash flow before you pull the trigger.",
+      "Saved stabilized-rental assumptions only; it does not calculate cash-out proceeds or compare refinance exits. Integrated exit scenarios are not currently released.",
     template: {
       templateName: "Starter — Portfolio refinance",
       templateDescription: "Refi / cash-out scenario defaults",

@@ -10,6 +10,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { CapRateCalculatorWidget } from "@/components/tools/cap-rate-calculator-widget";
@@ -18,6 +19,7 @@ import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
+import { isCalculatorReleased } from "@/lib/calculator-registry";
 export const metadata: Metadata = {
   title: "Free Cap Rate Calculator — What's a Good Cap Rate",
   description:
@@ -78,6 +80,8 @@ const FAQS: { q: string; a: string }[] = [
 ];
 
 export default function CapRateCalculatorPage() {
+  if (!isCalculatorReleased("cap-rate-calculator")) notFound();
+
   const siteUrl = getSiteUrl();
 
   const webAppLd = {
@@ -349,8 +353,8 @@ export default function CapRateCalculatorPage() {
             </p>
             <p>
               When you&apos;re ready to go deeper — cash-on-cash, DSCR,
-              monthly cash flow, 10-year projections, illustrative tax impact, modeled exit
-              scenarios, and a secondary Screening Index — you can run the full analysis
+              monthly cash flow, 10-year cash-flow and equity projections,
+              sensitivity, Offer Ceiling, and a secondary Screening Index — you can run the full analysis
               free at TrueCap.
             </p>
 
@@ -382,16 +386,16 @@ export default function CapRateCalculatorPage() {
             </h2>
             <p className="text-sm sm:text-base opacity-90 mb-4">
               Cap rate is a great filter, but real underwriting needs cash
-              flow, cash-on-cash, DSCR, 10-year projections, tax savings,
-              exit scenarios, and a secondary Screening Index. TrueCap does all of it from
+              flow, cash-on-cash, DSCR, 10-year cash-flow and equity projections,
+              sensitivity, Offer Ceiling, and a secondary Screening Index. TrueCap does all of it from
               the same property inputs you used here.
             </p>
             <ul className="text-sm space-y-1.5 mb-5 opacity-90">
               {[
                 "Cash flow, cap rate, CoC, DSCR — auto-calculated",
                 "10-year projection with rent + expense growth (Pro)",
-                "Depreciation modeling and tax savings (Pro)",
-                "Sell / refi / hold exit comparison (Pro)",
+                "Downside sensitivity grid (Pro)",
+                "Target-dependent Offer Ceiling (Pro)",
                 "Screening Index with a factor breakdown for triage",
                 "Free to start — no credit card",
               ].map((line) => (
@@ -415,7 +419,7 @@ export default function CapRateCalculatorPage() {
               tool has no embeddable widget. See the component header. */}
           <ToolEmbedInvite slug="cap-rate-calculator" />
 
-          <ToolsConversionCta calculatorName="Cap rate calculator" hook="TrueCap's full analyzer runs cap rate plus cash-on-cash, DSCR, 10-year projection, tax savings, and exit scenarios — all on the same deal. Save your work, compare deals, share a link." />
+          <ToolsConversionCta calculatorName="Cap rate calculator" hook="TrueCap's full analyzer runs cap rate plus cash-on-cash, DSCR, cash flow, a 10-year cash-flow and equity projection, sensitivity, and Offer Ceiling. Save your work, compare deals, and share a link." />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}

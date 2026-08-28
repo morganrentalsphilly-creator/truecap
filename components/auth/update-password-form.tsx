@@ -157,7 +157,11 @@ export function UpdatePasswordForm() {
                   type="button"
                   onClick={() => setShowConfirmPassword((value) => !value)}
                   className="absolute right-0.5 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                  aria-label={
+                    showConfirmPassword
+                      ? "Hide confirmation password"
+                      : "Show confirmation password"
+                  }
                 >
                   {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>

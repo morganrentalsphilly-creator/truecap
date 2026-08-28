@@ -20,13 +20,21 @@ export const FEATURE_FLAG_KEYS = [
   "batch_underwriting",
   "agent_client_matching",
   "new_homepage_positioning",
+  // Model-risk release gates. Historical frozen snapshots remain parseable,
+  // but no live/public specialist surface is exposed while these are false.
+  "brrrr_strategy_model",
+  "fix_flip_strategy_model",
+  // The current owned view contains modeled equity/cash flow only. Keep it
+  // dark until actual transactions and provenance are stored separately from
+  // underwriting projections.
+  "owned_portfolio_actuals",
   // Owner: Product + Model Risk. Dark until the P0 parity/comprehension gates
   // pass. Roll back by setting the public env value to "0"/"false" and
   // rebuilding/redeploying (NEXT_PUBLIC values are build-time); no stored data,
   // formulas, prices, or entitlements depend on this presentation flag.
   "advocacy_decision_contract",
-  // Aug-2026 hierarchy rebuild. Both default ON: they ARE the rebuild, and
-  // the flags exist so a regression can be reverted without a redeploy.
+  // Aug-2026 hierarchy rebuild. Both default ON: they ARE the rebuild. As
+  // NEXT_PUBLIC build-time values, changing either requires rebuild/redeploy.
   "decision_first_results",
   "focused_dashboard",
 ] as const;
@@ -46,18 +54,23 @@ export const FEATURE_FLAG_ENV_KEYS = {
   batch_underwriting: "NEXT_PUBLIC_TRUECAP_BATCH_UNDERWRITING",
   agent_client_matching: "NEXT_PUBLIC_TRUECAP_AGENT_CLIENT_MATCHING",
   new_homepage_positioning: "NEXT_PUBLIC_TRUECAP_NEW_HOMEPAGE_POSITIONING",
+  brrrr_strategy_model: "NEXT_PUBLIC_TRUECAP_BRRRR_STRATEGY_MODEL",
+  fix_flip_strategy_model: "NEXT_PUBLIC_TRUECAP_FIX_FLIP_STRATEGY_MODEL",
+  owned_portfolio_actuals: "NEXT_PUBLIC_TRUECAP_OWNED_PORTFOLIO_ACTUALS",
   advocacy_decision_contract: "NEXT_PUBLIC_TRUECAP_ADVOCACY_DECISION_CONTRACT",
   decision_first_results: "NEXT_PUBLIC_TRUECAP_DECISION_FIRST_RESULTS",
   focused_dashboard: "NEXT_PUBLIC_TRUECAP_FOCUSED_DASHBOARD",
 } as const satisfies Record<FeatureFlagKey, `NEXT_PUBLIC_${string}`>;
 
 /**
- * All new behavior starts dark. Flags can be enabled independently after the
- * migration and the corresponding UI/integration are deployed and verified.
+ * Released behavior defaults on and remains kill-switchable. Unfinished
+ * behavior defaults dark. Input review and the readiness vocabulary are part
+ * of every analysis, not experiments: hiding them would turn preliminary
+ * benchmarks back into unlabeled facts.
  */
 export const DEFAULT_FEATURE_FLAGS: FeatureFlagState = Object.freeze({
-  input_confidence: false,
-  offer_ready_status: false,
+  input_confidence: true,
+  offer_ready_status: true,
   what_needs_to_be_true_v2: false,
   financing_profiles: false,
   deal_decision_pack: false,
@@ -65,13 +78,16 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlagState = Object.freeze({
   saved_deal_watch: false,
   batch_underwriting: false,
   agent_client_matching: false,
-  new_homepage_positioning: false,
+  new_homepage_positioning: true,
+  brrrr_strategy_model: false,
+  fix_flip_strategy_model: false,
+  owned_portfolio_actuals: false,
   advocacy_decision_contract: false,
   // These two default TRUE, unlike every flag above. They are not new
   // behavior being introduced dark — they are the shipped Aug-2026
   // information hierarchy, and the flag exists so a regression can be
-  // switched off in Vercel without a redeploy. Set the env to "0"/"false"
-  // to fall back to the pre-rebuild layout.
+  // switched off through deployment configuration followed by a rebuild.
+  // Set the env to "0"/"false" to fall back to the pre-rebuild layout.
   decision_first_results: true,
   focused_dashboard: true,
 });
@@ -116,6 +132,10 @@ const runtimeOverrides: Partial<Record<FeatureFlagKey, FeatureFlagOverride>> = {
   batch_underwriting: process.env.NEXT_PUBLIC_TRUECAP_BATCH_UNDERWRITING,
   agent_client_matching: process.env.NEXT_PUBLIC_TRUECAP_AGENT_CLIENT_MATCHING,
   new_homepage_positioning: process.env.NEXT_PUBLIC_TRUECAP_NEW_HOMEPAGE_POSITIONING,
+  brrrr_strategy_model: process.env.NEXT_PUBLIC_TRUECAP_BRRRR_STRATEGY_MODEL,
+  fix_flip_strategy_model: process.env.NEXT_PUBLIC_TRUECAP_FIX_FLIP_STRATEGY_MODEL,
+  owned_portfolio_actuals:
+    process.env.NEXT_PUBLIC_TRUECAP_OWNED_PORTFOLIO_ACTUALS,
   advocacy_decision_contract:
     process.env.NEXT_PUBLIC_TRUECAP_ADVOCACY_DECISION_CONTRACT,
   decision_first_results: process.env.NEXT_PUBLIC_TRUECAP_DECISION_FIRST_RESULTS,
@@ -129,4 +149,32 @@ export function isFeatureEnabled(
   state: FeatureFlagState = featureFlags
 ): boolean {
   return state[key];
+}
+
+export function isSpecialistStrategyEnabled(
+  strategy: string | null | undefined,
+  state: FeatureFlagState = featureFlags,
+): boolean {
+  if (strategy === "brrrr") return state.brrrr_strategy_model;
+  if (strategy === "fix-flip") return state.fix_flip_strategy_model;
+  return true;
+}
+
+/** Scenario rows use the database vocabulary (`flip`) while analyzer and
+ * frozen specialist snapshots use `fix-flip`. Keep that translation at the
+ * release boundary so the two specialist models cannot accidentally share a
+ * flag or inherit the permissive non-specialist default above. */
+export function isScenarioStrategyEnabled(
+  strategyKind: string | null | undefined,
+  state: FeatureFlagState = featureFlags,
+): boolean {
+  if (strategyKind === "brrrr") return state.brrrr_strategy_model;
+  if (strategyKind === "flip") return state.fix_flip_strategy_model;
+  return true;
+}
+
+export function hasAnySpecialistStrategyEnabled(
+  state: FeatureFlagState = featureFlags,
+): boolean {
+  return state.brrrr_strategy_model || state.fix_flip_strategy_model;
 }

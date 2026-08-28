@@ -19,7 +19,7 @@ export default function Image() {
   return renderVsOgImage({
     competitor: "BiggerPockets",
     tagline:
-      "BiggerPockets is the household name. TrueCap is the modern alternative with a deeper free tier and address auto-fill.",
+      "Compare BiggerPockets' membership calculator with TrueCap's no-account preliminary screen and labeled starting assumptions.",
     slug: "biggerpockets-calculator",
   });
 }

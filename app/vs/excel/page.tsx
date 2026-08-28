@@ -66,8 +66,6 @@ const MATRIX: Row[] = [
   { feature: "Audit trail / version history",     truecap: "No per-deal revision history; Pro can edit saved deals",                   excel: "Cloud sheets may provide version history; local files need a process",     winner: "excel" },
   { feature: "Glossary / explanation of metrics", truecap: (<>Inline tooltips + a <Link href="/glossary" className="font-semibold text-primary hover:underline">real estate glossary</Link> with full definitions per term</>),              excel: "Whatever you remember from your last research session",                    winner: "truecap" },
   { feature: "PDF export for review",             truecap: "Included with Pro",                                                     excel: "Print or export to PDF with workbook-defined formatting",                 winner: "truecap" },
-  { feature: "Illustrative tax impact",           truecap: "Pro — depreciation at entered marginal rate + modeled after-tax CF",     excel: "Possible if you build the formulas",                                       winner: "truecap" },
-  { feature: "BRRRR / fix-and-flip analyzers",    truecap: "Dedicated Pro workflows",                                                  excel: "Custom build per deal type",                                              winner: "truecap" },
   { feature: "Cost",                              truecap: "Free core and paid Pro — see live pricing",                              excel: "$0 if already licensed; otherwise plan-dependent",                       winner: "tie" },
 ];
 
@@ -182,9 +180,9 @@ export default function VsExcelPage() {
           </ul>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Want to sanity-check one formula before you trust a whole sheet? Run the standalone{" "}
-            <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">cap rate calculator</Link>
+            <Link href="/#main" className="font-semibold text-primary hover:underline">cap rate calculator</Link>
             {" "}or{" "}
-            <Link href="/tools/dscr-calculator" className="font-semibold text-primary hover:underline">DSCR calculator</Link>
+            <Link href="/#main" className="font-semibold text-primary hover:underline">DSCR calculator</Link>
             {" "}— same documented engine as the full analyzer. And if you&apos;re building the income statement by hand, our guide to a{" "}
             <Link href="/blog/rental-property-pro-forma-explained" className="font-semibold text-primary hover:underline">rental property pro forma</Link>
             {" "}walks through every line a spreadsheet should have.
@@ -267,16 +265,15 @@ const EXCEL_FAQ: FaqItem[] = [
     question: "Does TrueCap handle BRRRR and fix-and-flip like my spreadsheet does?",
     answer: (
       <>
-        Yes — TrueCap Pro has dedicated BRRRR and fix-and-flip analyzers
-        with their own input forms, ARV-driven refi math, holding cost
-        modeling, and profit/cash-out summaries. The Pro tier also
-        includes a sensitivity grid (rent ±10%, vacancy ±5pp, rate
-        ±1pp) and an Offer Ceiling solver — both extremely
-        annoying to maintain in a spreadsheet.
+        Not currently. TrueCap&apos;s released rehab, ARV, and rental tools can
+        support individual inputs, but the integrated BRRRR and fix-and-flip
+        lifecycle models are disabled. Keep a reviewed spreadsheet or use
+        another released product for dated contributions, renovation financing,
+        refinance or sale proceeds, and project-level returns.
       </>
     ),
     plainTextAnswer:
-      "Yes — TrueCap has dedicated BRRRR and fix-and-flip analyzers with ARV-driven refi math, holding cost modeling, and profit/cash-out summaries. Pro also includes a sensitivity grid and Offer Ceiling solver — both annoying to maintain in Excel.",
+      "Not currently. TrueCap offers separate rehab, ARV, and stabilized-rental tools, but its integrated BRRRR and fix-and-flip lifecycle models are disabled. Use a reviewed spreadsheet or another released product for the complete project ledger.",
   },
   {
     question: "What if I still want to use Excel after trying TrueCap?",

@@ -17,7 +17,7 @@ import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema"
 export const metadata: Metadata = {
   title: "DealCheck vs TrueCap for STR Deals (2026)",
   description:
-    "Both calculators can model STRs. Compare seasonal ADR, occupancy, AirDNA-input workflows, and the limits of each tool's tax modeling.",
+    "Compare TrueCap and DealCheck for STR screening: user-supplied revenue, occupancy assumptions, financing, and explicit tax-eligibility boundaries.",
   keywords: [
     "dealcheck short term rental",
     "dealcheck airbnb calculator",
@@ -45,7 +45,7 @@ const MATRIX: Row[] = [
   { feature: "ADR + occupancy input model", truecap: "Editable rent field — plug AirDNA monthly projection", dealcheck: "Editable rent field — same approach", winner: "tie" },
   { feature: "Seasonal occupancy curve modeling", truecap: "Single blended ADR + occupancy; compare manual scenarios", dealcheck: "Annualized only", winner: "tie" },
   { feature: "AirDNA / Mashvisor data integration", truecap: "Manual — paste AirDNA's projected monthly revenue into rent field", dealcheck: "Same approach", winner: "tie" },
-  { feature: "Bonus depreciation / STR tax eligibility", truecap: "Not determined — review with a CPA", dealcheck: "Standard tax view", winner: "tie" },
+  { feature: "Bonus depreciation / STR tax eligibility", truecap: "No tax-specific module; review with a qualified professional", dealcheck: "Verify the current calculator scope and eligibility limits", winner: "tie" },
   { feature: "Cost-segregation component modeling", truecap: "Not modeled", dealcheck: "Manual", winner: "tie" },
   { feature: "Editable property-management rate", truecap: "Yes — adjustable management %", dealcheck: "Yes", winner: "tie" },
   { feature: "Higher utilities + cleaning fees", truecap: "Yes — utilities + maintenance fields handle the STR overhead", dealcheck: "Yes", winner: "tie" },
@@ -78,11 +78,14 @@ const NICHE_FAQ: FaqItem[] = [
     question: "Does TrueCap support the STR tax loophole?",
     answer: (
       <>
-        Not as a tax-eligibility or cost-segregation engine. TrueCap&apos;s Illustrative Tax Impact view models rental income, entered operating expenses, straight-line depreciation, and optional mortgage interest at the marginal rate you enter. It does not determine material participation or REPS, classify cost-segregation components, or calculate bonus depreciation. Use a CPA&apos;s model for those items.
+        No. TrueCap does not currently expose a tax-specific analysis module and
+        does not determine material participation or REPS, classify
+        cost-segregation components, or calculate bonus depreciation. Use a
+        qualified tax professional&apos;s taxpayer-specific model for those items.
       </>
     ),
     plainTextAnswer:
-      "No — TrueCap does not determine STR-loophole eligibility or model cost-segregation components and bonus depreciation. Its Illustrative Tax Impact view models rental income, entered expenses, straight-line depreciation, and optional mortgage interest at an entered marginal rate. Use a CPA for tax-specific modeling.",
+      "No. TrueCap does not currently expose a tax-specific module, determine STR eligibility, or model cost-segregation components and bonus depreciation. Use a qualified tax professional for taxpayer-specific modeling.",
   },
   {
     question: "What management rate should I use for STR analysis?",
@@ -113,7 +116,7 @@ export default function VsDealcheckForShortTermRentalsPage() {
     "@type": "WebPage",
     name: "DealCheck vs TrueCap for STR Deals (2026)",
     url: `${siteUrl}/vs/dealcheck-for-short-term-rentals`,
-    description: "Both calculators can model STRs. Compare seasonal ADR, occupancy, AirDNA-input workflows, and the limits of each tool's tax modeling.",
+    description: "Compare TrueCap and DealCheck for STR screening: user-supplied revenue, occupancy assumptions, financing, and explicit tax-eligibility boundaries.",
     dateModified: "2026-06-07",
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -174,7 +177,7 @@ export default function VsDealcheckForShortTermRentalsPage() {
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You&apos;re underwriting a property as a potential STR.</li>
                 <li>You want to compare LTR vs STR scenarios side-by-side.</li>
-                <li>You want rental cash flow and a clearly labeled illustrative tax view.</li>
+                <li>You want rental cash flow, financing, DSCR, and editable operating assumptions.</li>
                 <li>You want a free tier that covers basic STR underwriting.</li>
               </ul>
             </div>
@@ -254,7 +257,7 @@ export default function VsDealcheckForShortTermRentalsPage() {
             {" "}breaks down seasonal revenue into a defensible analysis, and our roundup of the{" "}
             <Link href="/blog/best-short-term-rental-analysis-tool-2026" className="font-semibold text-primary hover:underline">best short-term rental analysis tools for 2026</Link>
             {" "}covers where the ADR and occupancy data should come from. For a quick single-metric check, the standalone{" "}
-            <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">cap rate calculator</Link>
+            <Link href="/#main" className="font-semibold text-primary hover:underline">cap rate calculator</Link>
             {" "}runs the same engine.
           </p>
         </section>
@@ -267,7 +270,7 @@ export default function VsDealcheckForShortTermRentalsPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             Free covers the standard cap rate, CoC, DSCR, and cash flow. Pro adds
-            projections, sensitivity, illustrative tax impact, modeled exit comparisons, Offer Ceiling,
+            10-year cash-flow and equity projections, sensitivity, Offer Ceiling,
             and included PDFs. New one-time PDF checkout is temporarily unavailable; see live
             pricing for current terms.
           </p>

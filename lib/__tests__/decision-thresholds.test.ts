@@ -7,6 +7,7 @@ import {
 } from "../decision-thresholds";
 import type { InvestmentFormValues } from "../investcalc-schema";
 import { meetsTarget, type MaoTarget } from "../max-allowable-offer";
+import { calculateMaoIrr } from "../mao-target-evaluation";
 
 function singleFamily(overrides: Partial<InvestmentFormValues> = {}): InvestmentFormValues {
   return {
@@ -61,6 +62,25 @@ function expectExactPass(
 }
 
 describe("What Needs To Be True — canonical one-variable boundaries", () => {
+  it("rechecks IRR price, rent, and rate boundaries with their exact input timelines", () => {
+    const values = singleFamily();
+    const current = calculateAnalysis(values);
+    const currentIrr = calculateMaoIrr(values, current);
+    expect(currentIrr.status).toBe("unique");
+    const target: MaoTarget = {
+      minIrrPct: currentIrr.primaryIrrPct! + 1,
+    };
+
+    const result = buildWhatNeedsToBeTrue(values, target);
+    expect(result?.targetAlreadyMet).toBe(false);
+    expect(result?.maxPrice.status).toBe("change_required");
+    expect(result?.maxPrice.rechecked).toBe(true);
+    expect(result?.requiredRent.status).toBe("change_required");
+    expect(result?.requiredRent.rechecked).toBe(true);
+    expect(result?.maxInterestRate.status).toBe("change_required");
+    expect(result?.maxInterestRate.rechecked).toBe(true);
+  });
+
   it("accepts a hard purchase-price cap as a complete decision target", () => {
     const result = buildWhatNeedsToBeTrue(singleFamily(), {
       maxPurchasePrice: 200_000,

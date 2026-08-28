@@ -37,6 +37,8 @@ export type BuyBoxReturnThresholds = Pick<
   | "minCocPct"
   | "minDscr"
   | "minCashFlowMonthly"
+  | "minIrrPct"
+  | "maxCashRequired"
   | "maxPurchasePrice"
 >;
 
@@ -48,7 +50,8 @@ export function buyBoxHasReturnTargets(box: BuyBoxReturnThresholds): boolean {
     box.minCapRatePct != null ||
     (box.minCocPct != null && box.minCocPct >= 0) ||
     box.minDscr != null ||
-    box.minCashFlowMonthly != null
+    box.minCashFlowMonthly != null ||
+    box.minIrrPct != null
   );
 }
 
@@ -62,12 +65,21 @@ export function buyBoxContributesToMaoTarget(
   box: BuyBoxReturnThresholds | null | undefined,
   opts: { isCashPurchase: boolean }
 ): boolean {
-  if (!box || (!buyBoxHasReturnTargets(box) && box.maxPurchasePrice == null)) return false;
+  if (
+    !box ||
+    (!buyBoxHasReturnTargets(box) &&
+      box.maxCashRequired == null &&
+      box.maxPurchasePrice == null)
+  ) {
+    return false;
+  }
   if (!opts.isCashPurchase) return true;
   return (
     box.minCapRatePct != null ||
     (box.minCocPct != null && box.minCocPct >= 0) ||
     box.minCashFlowMonthly != null ||
+    box.minIrrPct != null ||
+    box.maxCashRequired != null ||
     box.maxPurchasePrice != null
   );
 }
@@ -82,7 +94,10 @@ export function buildMaoTarget(
   opts: { isCashPurchase: boolean }
 ): MaoTarget {
   const boxShapesCeiling =
-    box && (buyBoxHasReturnTargets(box) || box.maxPurchasePrice != null);
+    box &&
+    (buyBoxHasReturnTargets(box) ||
+      box.maxCashRequired != null ||
+      box.maxPurchasePrice != null);
   const target: MaoTarget =
     boxShapesCeiling
       ? {
@@ -94,6 +109,10 @@ export function buildMaoTarget(
             ? { monthlyCashFlow: box.minCashFlowMonthly }
             : {}),
           ...(box.minDscr != null ? { dscr: box.minDscr } : {}),
+          ...(box.minIrrPct != null ? { minIrrPct: box.minIrrPct } : {}),
+          ...(box.maxCashRequired != null
+            ? { maxCashRequired: box.maxCashRequired }
+            : {}),
           ...(box.maxPurchasePrice != null
             ? { maxPurchasePrice: box.maxPurchasePrice }
             : {}),
@@ -108,6 +127,8 @@ export function buildMaoTarget(
       target.capRate === undefined &&
       target.cocReturn === undefined &&
       target.monthlyCashFlow === undefined &&
+      target.minIrrPct === undefined &&
+      target.maxCashRequired === undefined &&
       target.maxPurchasePrice === undefined
     ) {
       target.monthlyCashFlow = DEFAULT_MAO_TARGET.monthlyCashFlow;
@@ -187,6 +208,12 @@ export function describeMaoTarget(target: MaoTarget): string {
   if (target.dscr !== undefined) parts.push(`DSCR ≥ ${num(target.dscr)}`);
   if (target.capRate !== undefined) parts.push(`cap rate ≥ ${num(target.capRate)}%`);
   if (target.cocReturn !== undefined) parts.push(`cash-on-cash ≥ ${num(target.cocReturn)}%`);
+  if (target.minIrrPct !== undefined) {
+    parts.push(`10-year pre-tax IRR ≥ ${num(target.minIrrPct)}%`);
+  }
+  if (target.maxCashRequired !== undefined) {
+    parts.push(`cash required ≤ ${money(target.maxCashRequired)}`);
+  }
   if (target.maxPurchasePrice !== undefined) {
     parts.push(`purchase price ≤ ${money(target.maxPurchasePrice)}`);
   }

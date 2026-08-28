@@ -18,6 +18,6 @@ export const contentType = "image/png";
 export default function Image() {
   return renderToolOgImage({
     name: "70% rule calculator",
-    tagline: "Offer Ceiling = 70% of ARV minus repairs, shown at 60 / 65 / 70 / 75% for screening.",
+    tagline: "70%-rule price screen = 70% of ARV minus repairs, shown at 60 / 65 / 70 / 75% for screening.",
   });
 }

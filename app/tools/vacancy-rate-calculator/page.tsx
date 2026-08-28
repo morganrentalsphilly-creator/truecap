@@ -251,19 +251,19 @@ export default function VacancyRateCalculatorPage() {
           </h2>
           <div className="flex flex-wrap gap-2 text-sm">
             <Link
-              href="/tools/cap-rate-calculator"
+              href="/#main"
               className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
             >
               Cap rate
             </Link>
             <Link
-              href="/tools/noi-calculator"
+              href="/#main"
               className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
             >
               NOI
             </Link>
             <Link
-              href="/tools/cash-on-cash-calculator"
+              href="/#main"
               className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
             >
               Cash-on-cash

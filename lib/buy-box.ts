@@ -11,6 +11,7 @@
  */
 
 import type { AnalyzerStrategyKey } from "@/lib/analyzer-strategy-persistence";
+import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
 
 export type BuyBoxPropertyType =
   | "single-family" | "multi-family" | "owner-occupant";
@@ -20,6 +21,10 @@ export type BuyBoxCriteria = {
   minCocPct: number | null;
   minDscr: number | null;
   minCashFlowMonthly: number | null;
+  /** Minimum unique 10-year pre-tax IRR. Optional for legacy snapshots. */
+  minIrrPct?: number | null;
+  /** Maximum modeled acquisition cash. Optional for legacy snapshots. */
+  maxCashRequired?: number | null;
   maxPurchasePrice: number | null;
   /** Allowed property types; [] = any. */
   propertyTypes: BuyBoxPropertyType[];
@@ -34,6 +39,8 @@ export const EMPTY_BUY_BOX: BuyBoxCriteria = {
   minCocPct: null,
   minDscr: null,
   minCashFlowMonthly: null,
+  minIrrPct: null,
+  maxCashRequired: null,
   maxPurchasePrice: null,
   propertyTypes: [],
   targetStates: [],
@@ -47,6 +54,8 @@ export function buyBoxHasCriteria(c: BuyBoxCriteria): boolean {
     c.minCocPct != null ||
     c.minDscr != null ||
     c.minCashFlowMonthly != null ||
+    c.minIrrPct != null ||
+    c.maxCashRequired != null ||
     c.maxPurchasePrice != null ||
     c.propertyTypes.length > 0 ||
     c.targetStates.length > 0
@@ -59,6 +68,10 @@ export type BuyBoxDealMetrics = {
   cocPct: number | null;
   dscr: number | null;
   cashFlowMonthly: number | null;
+  /** Unique 10-year pre-tax IRR when the signed cash-flow timeline has one. */
+  irrPct?: number | null;
+  irrStatus?: "unique" | "multiple" | "none";
+  cashRequired?: number | null;
   purchasePrice: number | null;
   propertyType: BuyBoxPropertyType | null;
   /** 2-letter state code derived from the address, or null if unknown. */
@@ -72,6 +85,8 @@ export type BuyBoxCheckId =
   | "coc"
   | "dscr"
   | "cashFlow"
+  | "irr"
+  | "cashRequired"
   | "price"
   | "propertyType"
   | "state";
@@ -211,7 +226,7 @@ export function evaluateBuyBox(criteria: BuyBoxCriteria, metrics: BuyBoxDealMetr
       id: "dscr",
       label: "DSCR",
       target: `≥ ${ratio(criteria.minDscr)}`,
-      actual: cashNa ? "N/A (cash)" : a == null ? "N/A" : ratio(a),
+      actual: cashNa ? NO_DEBT_SERVICE_DSCR_LABEL : a == null ? "N/A" : ratio(a),
       pass: cashNa || a == null ? null : a >= criteria.minDscr,
     };
     checks.push(check);
@@ -236,6 +251,64 @@ export function evaluateBuyBox(criteria: BuyBoxCriteria, metrics: BuyBoxDealMetr
       const diff = a - criteria.minCashFlowMonthly;
       check.gapText = minGapText(diff, `${money(Math.abs(diff))}/mo`);
       gaps.push({ check, isMiss: diff < 0, rel: relGap(diff, criteria.minCashFlowMonthly) });
+    }
+  }
+
+  if (criteria.minIrrPct != null) {
+    const a = metrics.irrPct;
+    const uniqueIrr =
+      metrics.irrStatus === "unique" &&
+      typeof a === "number" &&
+      Number.isFinite(a)
+        ? a
+        : null;
+    const check: BuyBoxCheck = {
+      id: "irr",
+      label: "10-year pre-tax IRR",
+      target: `≥ ${pct(criteria.minIrrPct)}`,
+      actual: uniqueIrr != null
+        ? pct(uniqueIrr)
+        : metrics.irrStatus === "multiple"
+          ? "Unsupported (multiple IRRs)"
+          : "Unavailable",
+      // Unlike a missing optional display metric, an adopted IRR rule must
+      // fail closed. It is never silently skipped or replaced with CAGR/ROI.
+      pass: uniqueIrr != null ? uniqueIrr >= criteria.minIrrPct : false,
+    };
+    checks.push(check);
+    if (uniqueIrr != null) {
+      const diff = uniqueIrr - criteria.minIrrPct;
+      check.gapText = minGapText(diff, gapPp(diff));
+      gaps.push({ check, isMiss: diff < 0, rel: relGap(diff, criteria.minIrrPct) });
+    }
+  }
+
+  if (criteria.maxCashRequired != null) {
+    const a = metrics.cashRequired;
+    const availableCash =
+      typeof a === "number" && Number.isFinite(a) ? a : null;
+    const check: BuyBoxCheck = {
+      id: "cashRequired",
+      label: "Cash required",
+      target: `≤ ${money(criteria.maxCashRequired)}`,
+      actual: availableCash != null ? money(availableCash) : "Unavailable",
+      pass:
+        availableCash != null
+          ? availableCash <= criteria.maxCashRequired
+          : false,
+    };
+    checks.push(check);
+    if (availableCash != null) {
+      const diff = criteria.maxCashRequired - availableCash;
+      check.gapText =
+        diff >= 0
+          ? `${money(Math.abs(diff))} below maximum`
+          : `${money(Math.abs(diff))} over maximum`;
+      gaps.push({
+        check,
+        isMiss: diff < 0,
+        rel: relGap(diff, criteria.maxCashRequired),
+      });
     }
   }
 
@@ -472,6 +545,8 @@ export type BuyBoxesRow = {
   min_coc_pct: number | string | null;
   min_dscr: number | string | null;
   min_cash_flow_monthly: number | string | null;
+  min_irr_pct?: number | string | null;
+  max_cash_required?: number | string | null;
   max_purchase_price: number | string | null;
   property_types: string[] | null;
   target_states: string[] | null;
@@ -511,6 +586,8 @@ export function rowToNamedBuyBox(row: BuyBoxesRow): NamedBuyBox {
     minCocPct: toNumOrNull(row.min_coc_pct),
     minDscr: toNumOrNull(row.min_dscr),
     minCashFlowMonthly: toNumOrNull(row.min_cash_flow_monthly),
+    minIrrPct: toNumOrNull(row.min_irr_pct),
+    maxCashRequired: toNumOrNull(row.max_cash_required),
     maxPurchasePrice: toNumOrNull(row.max_purchase_price),
     propertyTypes,
     targetStates,
@@ -524,6 +601,10 @@ export function summarizeBuyBoxCriteria(box: NamedBuyBox): string {
   if (box.minCocPct != null) parts.push(`CoC ≥ ${box.minCocPct}%`);
   if (box.minDscr != null) parts.push(`DSCR ≥ ${box.minDscr}`);
   if (box.minCashFlowMonthly != null) parts.push(`CF ≥ $${box.minCashFlowMonthly}/mo`);
+  if (box.minIrrPct != null) parts.push(`10y IRR ≥ ${box.minIrrPct}%`);
+  if (box.maxCashRequired != null) {
+    parts.push(`Cash ≤ $${Math.round(box.maxCashRequired).toLocaleString("en-US")}`);
+  }
   if (box.maxPurchasePrice != null)
     parts.push(`≤ $${Math.round(box.maxPurchasePrice).toLocaleString("en-US")}`);
   if (box.propertyTypes.length) parts.push(box.propertyTypes.map(buyBoxPropertyTypeLabel).join("/"));

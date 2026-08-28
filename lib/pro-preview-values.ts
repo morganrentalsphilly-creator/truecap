@@ -41,16 +41,17 @@ export function buildProPreviewValues(
   const taxYears = result.taxStrategyYears;
 
   if (kind === "projections") {
-    // Tiles: Year 10 Cumulative CF / Best Annual After-Tax CF / 10-Year
-    // After-Tax Cash Flow — straight from the embedded projection engine.
+    // Tiles: Year 10 Cumulative CF / Best Annual CF / 10-Year operating CF —
+    // straight from the embedded projection engine. Taxpayer-specific effects
+    // remain outside the released projection headline.
     if (!Array.isArray(projection) || projection.length === 0) return null;
     const lastYear = projection[projection.length - 1]!;
-    const bestAfterTax = Math.max(...projection.map((y) => y.afterTaxCashFlowAnnual));
-    const totalAfterTax = projection.reduce((sum, y) => sum + y.afterTaxCashFlowAnnual, 0);
+    const bestAnnualCashFlow = Math.max(...projection.map((y) => y.netCashFlowAnnual));
+    const totalOperatingCashFlow = projection.reduce((sum, y) => sum + y.netCashFlowAnnual, 0);
     return [
       formatProPreviewMoney(lastYear.cumulativeCashFlowAnnual),
-      formatProPreviewMoney(bestAfterTax),
-      formatProPreviewMoney(totalAfterTax),
+      formatProPreviewMoney(bestAnnualCashFlow),
+      formatProPreviewMoney(totalOperatingCashFlow),
     ];
   }
 

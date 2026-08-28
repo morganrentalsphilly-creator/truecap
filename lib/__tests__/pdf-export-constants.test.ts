@@ -32,7 +32,7 @@ const CURRENT_COMPONENTS: readonly number[] = [
 
 describe("PDF_CACHE_VERSION", () => {
   it("invalidates cached reports that predate byte-level artifact attestation", () => {
-    expect(PDF_SNAPSHOT_VERSION).toBe(11);
+    expect(PDF_SNAPSHOT_VERSION).toBe(12);
     expect(
       encodePdfCacheVersion([10, ...CURRENT_COMPONENTS.slice(1)]),
     ).not.toBe(PDF_CACHE_VERSION);

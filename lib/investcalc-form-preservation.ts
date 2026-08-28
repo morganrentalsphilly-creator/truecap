@@ -68,6 +68,7 @@ const EMPTY_UNIT: UnitValues = {
   bathrooms: undefined,
   sqft: undefined,
   monthlyRent: undefined,
+  stabilizedMonthlyRent: undefined,
   isOwnerOccupied: false,
 };
 
@@ -89,6 +90,8 @@ function mergeUnit(carried: UnitValues | undefined, fallback: UnitValues | undef
     bathrooms: carried?.bathrooms ?? base.bathrooms,
     sqft: carried?.sqft ?? base.sqft,
     monthlyRent: carried?.monthlyRent ?? base.monthlyRent,
+    stabilizedMonthlyRent:
+      carried?.stabilizedMonthlyRent ?? base.stabilizedMonthlyRent,
     isOwnerOccupied: carried?.isOwnerOccupied ?? base.isOwnerOccupied ?? false,
   };
 }

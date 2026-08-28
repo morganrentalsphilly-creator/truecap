@@ -37,7 +37,6 @@ export function StrategyLensOutcomeCard({
     cashOnCashApplicable: result.totalCashRequired > 0,
     dscr: result.dscr,
     capRate: result.capRate,
-    afterTaxCF: result.afterTaxCF,
     monthlyPayment: result.monthlyPayment,
     annualizedReturnPct,
     isOwnerOccupant,

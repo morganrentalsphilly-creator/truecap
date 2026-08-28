@@ -22,6 +22,13 @@ export type OfferCeilingExactResult = {
     cocReturn?: number;
     capRate: number;
     dscr: number;
+    /** Debt service at the achieved ceiling; optional on legacy captures. */
+    monthlyPayment?: number;
+    /** Modeled acquisition cash at the captured ceiling. */
+    totalCashRequired?: number;
+    /** Unique 10-year pre-tax IRR; null when unavailable/ambiguous. */
+    irrPct?: number | null;
+    irrStatus?: "unique" | "multiple" | "none";
   };
   makePriceWork: {
     currentMeets: boolean;

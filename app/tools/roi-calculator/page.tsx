@@ -7,12 +7,14 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { getSiteUrl } from "@/lib/site-url";
 import { RoiCalculatorWidget } from "@/components/tools/roi-calculator-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
 import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
+import { isCalculatorReleased } from "@/lib/calculator-registry";
 
 export const metadata: Metadata = {
   title: "Free Rental Property ROI Calculator — Total Return",
@@ -56,11 +58,13 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Should I include tax savings in ROI?",
-    a: "This calculator excludes tax effects. Whether a deduction is available or currently usable depends on the property, ownership, activity rules, basis, and taxpayer. Use the full analyzer only for an illustrative tax scenario, and verify treatment with a qualified tax adviser.",
+    a: "This calculator excludes tax effects. Whether a deduction is available or currently usable depends on the property, ownership, activity rules, basis, and taxpayer. Build a taxpayer-specific scenario with a qualified tax adviser; TrueCap does not currently expose a tax-specific analysis module.",
   },
 ];
 
 export default function RoiCalculatorPage() {
+  if (!isCalculatorReleased("roi-calculator")) notFound();
+
   const siteUrl = getSiteUrl();
   const ld = {
     "@context": "https://schema.org",

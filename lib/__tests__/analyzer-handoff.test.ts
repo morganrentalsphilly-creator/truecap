@@ -55,8 +55,11 @@ describe("readAnalyzerHandoff", () => {
     expect(readAnalyzerHandoff("?type=commercial&rent=1500")).toEqual({ monthlyRent: 1500 });
   });
 
-  it("seeds a valid strategy (persona deep link)", () => {
-    expect(readAnalyzerHandoff("?strategy=brrrr")).toEqual({ strategy: "brrrr" });
+  it("seeds a released strategy and rejects dark specialist strategies", () => {
+    expect(readAnalyzerHandoff("?strategy=brrrr")).toBeNull();
+    expect(readAnalyzerHandoff("?strategy=fix-flip&rent=1500")).toEqual({
+      monthlyRent: 1500,
+    });
     expect(readAnalyzerHandoff("?strategy=house-hack&price=400000")).toEqual({
       strategy: "house-hack",
       purchasePrice: 400000,
@@ -69,8 +72,9 @@ describe("readAnalyzerHandoff", () => {
   });
 
   it("keeps the local strategy-key mirror in sync with the registry", () => {
-    // HANDOFF_STRATEGY_KEYS is a dependency-free mirror of the "What's your
-    // play?" registry — this is the guard that keeps them from drifting.
+    // HANDOFF_STRATEGY_KEYS mirrors the "What's your play?" registry — this
+    // guard keeps validation from drifting even though release checks can
+    // suppress a known key.
     expect([...HANDOFF_STRATEGY_KEYS].sort()).toEqual(
       INVESTOR_STRATEGIES.map((s) => s.key).sort()
     );
@@ -117,9 +121,20 @@ describe("buildAnalyzerHandoffUrl", () => {
     );
   });
 
-  it("carries a strategy and round-trips it", () => {
-    const url = buildAnalyzerHandoffUrl({ strategy: "fix-flip" });
-    expect(url).toContain("strategy=fix-flip");
-    expect(readAnalyzerHandoff(url.slice(url.indexOf("?")))).toEqual({ strategy: "fix-flip" });
+  it("carries a released strategy and never emits a dark one", () => {
+    const releasedUrl = buildAnalyzerHandoffUrl({ strategy: "buy-hold" });
+    expect(releasedUrl).toContain("strategy=buy-hold");
+    expect(readAnalyzerHandoff(releasedUrl.slice(releasedUrl.indexOf("?")))).toEqual({
+      strategy: "buy-hold",
+    });
+
+    const darkUrl = buildAnalyzerHandoffUrl({
+      purchasePrice: 200000,
+      strategy: "fix-flip",
+    });
+    expect(darkUrl).not.toContain("strategy=");
+    expect(readAnalyzerHandoff(darkUrl.slice(darkUrl.indexOf("?")))).toEqual({
+      purchasePrice: 200000,
+    });
   });
 });

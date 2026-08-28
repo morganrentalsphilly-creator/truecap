@@ -258,7 +258,7 @@ export default function ReturnOnEquityPost() {
               lands at about $16,100 — a 6.4% cap rate and a 1.08 DSCR. Cash flow
               is thin: roughly $1,130 a year, about $94 a month, for a first-year{" "}
               <Link
-                href="/tools/cash-on-cash-calculator"
+                href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
                 cash-on-cash return

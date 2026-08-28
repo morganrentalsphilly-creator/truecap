@@ -66,7 +66,7 @@ export default function Image() {
               display: "flex",
             }}
           >
-            Underwrite a flip in 60 seconds — ARV to net profit
+            Fix-and-flip planning starts with reviewed inputs
           </div>
         </div>
 
@@ -80,9 +80,8 @@ export default function Image() {
               display: "flex",
             }}
           >
-            ARV, rehab, holding cost, net profit, break-even, annualized
-            ROI, and Offer Ceiling — all live as you type. Free to
-            start.
+            Released rehab, ARV, and 70% rule tools. The integrated project
+            profit model is not currently released.
           </div>
         </div>
 
@@ -98,7 +97,7 @@ export default function Image() {
           }}
         >
           <div style={{ display: "flex" }}>
-            Real estate investment analyzer
+            Educational planning resources
           </div>
           <div style={{ fontWeight: 700, color: BRAND_BLUE, display: "flex" }}>
             usetruecap.com

@@ -4,14 +4,15 @@
  *   npx tsx scripts/build-market-intelligence-pack.ts
  *
  * Generates public/downloads/truecap-market-intelligence-pack.pdf from the
- * SAME data files that power the live /states and /markets pages
- * (lib/states.ts, lib/markets/cities.ts, lib/markets/hud-rents.ts), so the
- * PDF can never disagree with the site. Re-run whenever those files change
- * and commit the regenerated PDF.
+ * same benchmark files that power the live /states and /markets pages
+ * (lib/states.ts, lib/markets/cities.ts, lib/markets/hud-rents.ts). Re-run
+ * whenever those files change and commit the regenerated PDF.
  *
  * Content rules (trust language): every number is a benchmark from the
  * repo's sourced data — no forecasts, no invented "hot market" claims. The
  * rent-to-price screen is arithmetic on the state medians, labeled as such.
+ * The final column is deliberately limited to neutral buy-and-hold screening
+ * prompts; it does not recommend specialist strategies or a specific market.
  */
 
 import { promises as fs } from "node:fs";
@@ -30,6 +31,22 @@ const MUTED = "#6b7280";
 
 function money(n: number): string {
   return `$${n.toLocaleString("en-US")}`;
+}
+
+function buyAndHoldScreeningNote(tier: string, landlord: string): string {
+  const operatingScreen =
+    tier === "Cash flow"
+      ? "Screen current long-term rent against operating costs, reserves, and financing."
+      : tier === "Appreciation"
+        ? "Require a conservative long-term cash-flow case; do not rely on appreciation to carry the property."
+        : "Screen long-term rent, operating costs, reserves, financing, and downside assumptions together.";
+  const rulesScreen =
+    landlord === "Tenant-leaning"
+      ? " Verify current local landlord-tenant rules and timelines."
+      : landlord === "Mixed"
+        ? " Verify current city and county rules and timelines."
+        : " Verify current city and county requirements.";
+  return `${operatingScreen}${rulesScreen}`;
 }
 
 async function main() {
@@ -52,7 +69,7 @@ async function main() {
   doc.setTextColor(MUTED);
   doc.text(
     doc.splitTextToSize(
-      "State-by-state investing benchmarks, the rent-to-price screen, and HUD rent benchmarks for the markets TrueCap tracks — the same sourced data that pre-fills every TrueCap analysis.",
+      "State-by-state buy-and-hold screening references, the rent-to-price screen, and HUD rent benchmarks for markets TrueCap tracks - drawn from the same labeled reference datasets used in TrueCap.",
       pageWidth - margin * 2
     ),
     margin,
@@ -61,16 +78,16 @@ async function main() {
   doc.setFontSize(11);
   doc.setTextColor(INK);
   const bullets = [
-    "1. Every state, one table — tax, landlord law, eviction timeline, medians",
-    "2. The rent-to-price screen — where state medians still clear 0.7%+",
-    "3. HUD rent benchmarks — 2BR/3BR Fair Market Rents by tracked market",
+    "1. Every state, one table - tax, landlord law, eviction timeline, medians",
+    "2. The rent-to-price screen - where state medians still clear 0.7%+",
+    "3. HUD rent benchmarks - 2BR/3BR Fair Market Rents by tracked market",
   ];
   bullets.forEach((b, i) => doc.text(b, margin, 224 + i * 22));
   doc.setFontSize(9);
   doc.setTextColor(MUTED);
   doc.text(
     doc.splitTextToSize(
-      "Benchmarks, not quotes. Rents are HUD area Fair Market Rents, taxes are state effective-rate estimates, and medians are metro-level — always verify a specific property with local comps, the actual tax bill, and written loan terms before you offer. Generated from the public data behind usetruecap.com/states and /markets.",
+      "Screening references, not quotes or recommendations. Rents are HUD area Fair Market Rents, taxes are state effective-rate estimates, and medians are metro-level. Verify a specific property with current local comps, the actual tax bill, condition, title, operating history, and written loan terms before you offer. Generated from the public data behind usetruecap.com/states and /markets.",
       pageWidth - margin * 2
     ),
     margin,
@@ -114,7 +131,7 @@ async function main() {
   doc.setTextColor(MUTED);
   doc.text(
     doc.splitTextToSize(
-      "Monthly median rent ÷ median home price, straight from the table above. The classic \"1% rule\" is rare at state level in 2026 — treat 0.7%+ as \"worth screening\", then let the full underwrite (not this ratio) make the decision.",
+      "Monthly median rent ÷ median home price, straight from the table above. The classic \"1% rule\" is rare at state level in 2026. Treat 0.7%+ as a prompt for property-level buy-and-hold screening, not a recommendation or decision.",
       pageWidth - margin * 2
     ),
     margin,
@@ -124,14 +141,20 @@ async function main() {
     .map((s) => ({
       name: `${s.name} (${s.abbr})`,
       ratio: (s.medianRent / s.medianHomePrice) * 100,
-      strategies: s.bestStrategies.slice(0, 2).join(", "),
+      screeningNote: buyAndHoldScreeningNote(s.tier, s.landlord),
       tier: s.tier,
     }))
     .sort((a, b) => b.ratio - a.ratio);
   autoTable(doc, {
     startY: 128,
-    head: [["Rank", "State", "Rent ÷ price", "Tier", "Fits strategies"]],
-    body: ranked.map((r, i) => [String(i + 1), r.name, `${r.ratio.toFixed(2)}%`, r.tier, r.strategies]),
+    head: [["Rank", "State", "Rent ÷ price", "Tier", "Buy-and-hold screening note"]],
+    body: ranked.map((r, i) => [
+      String(i + 1),
+      r.name,
+      `${r.ratio.toFixed(2)}%`,
+      r.tier,
+      r.screeningNote,
+    ]),
     styles: { fontSize: 8, cellPadding: 3, textColor: INK },
     headStyles: { fillColor: BRAND_BLUE, fontSize: 8 },
     alternateRowStyles: { fillColor: "#f3f7fb" },
@@ -147,7 +170,7 @@ async function main() {
   doc.setTextColor(MUTED);
   doc.text(
     doc.splitTextToSize(
-      "HUD area Fair Market Rents for the markets TrueCap tracks (ZIP-level detail where available on each market page). These are the same benchmarks TrueCap pre-fills — every one editable.",
+      "HUD area Fair Market Rents for the markets TrueCap tracks (ZIP-level detail where available on each market page). These labeled screening references are editable in TrueCap; verify current property-level rent support.",
       pageWidth - margin * 2
     ),
     margin,
@@ -178,7 +201,7 @@ async function main() {
     doc.setTextColor(MUTED);
     doc.setFont("helvetica", "normal");
     doc.text(
-      "TrueCap Market Intelligence Pack · Sourced from HUD FMR + state data · Every assumption editable at usetruecap.com",
+      "TrueCap Market Intelligence Pack · HUD FMR + state screening references · Verify every property at usetruecap.com",
       margin,
       h - 24
     );

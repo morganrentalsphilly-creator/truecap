@@ -338,7 +338,7 @@ export function RentalPropertyTaxCalculatorWidget() {
         className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="w-4 h-4" />
-        Run the full analysis with these numbers — cash flow, depreciation, after-tax return — free
+        Run the released rental screen with these inputs — cash flow, cap rate, CoC, and DSCR — free
         <ArrowUpRight className="w-4 h-4" />
       </Link>
     </div>

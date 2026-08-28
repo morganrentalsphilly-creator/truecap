@@ -22,6 +22,14 @@ import type {
   SpecialistAnalysisSnapshot,
   SpecialistInputSource,
 } from "@/lib/specialist-analysis-snapshot";
+import {
+  formatDscr,
+  NO_DEBT_SERVICE_DSCR_LABEL,
+  SIMPLIFIED_RENOVATION_DOWNTIME_LABEL,
+  STEADY_STATE_RENOVATION_LABEL,
+} from "@/lib/financial-presentation";
+import { isSpecialistStrategyEnabled } from "@/lib/feature-flags";
+import { isFeatureReleased } from "@/lib/entitlements-catalog";
 
 export interface ReportData {
   generatedAt: Date;
@@ -40,6 +48,8 @@ export interface ReportData {
     type: string;
     yearBuilt: number | null;
     purchasePrice: number;
+    currentValue?: number | null;
+    stabilizedValue?: number | null;
     template: string;
   };
   financing: {
@@ -49,6 +59,23 @@ export interface ReportData {
     loanTerm: number;
     closingCostsPct: number;
     closingCosts: number;
+    loanPointsPct?: number;
+    loanPointsAmount?: number;
+    originationFee?: number;
+    loanFees?: number;
+    initialReserve?: number;
+    lenderEscrowDeposit?: number;
+    lenderReserveDeposit?: number;
+    acquisitionCredits?: number;
+    interestOnlyMonths?: number;
+    amortizationTermYears?: number;
+    maturityTermYears?: number;
+    initialMonthlyPayment?: number;
+    amortizingMonthlyPayment?: number;
+    balloonPayment?: number;
+    balloonMonth?: number;
+    /** Up-front rehab included in cash required; 0/absent for no rehab. */
+    rehabBudget?: number;
   };
   expenses: {
     /** Effective annual % of price (derived from the bill in annual-$ mode). */
@@ -67,6 +94,17 @@ export interface ReportData {
     capexPct: number;
     hoaMonthly: number;
     utilitiesMonthly: number;
+    recurringOtherIncomeMonthly?: number;
+    recurringOtherExpenseMonthly?: number;
+    turnoverReserveMonthly?: number;
+    leasingReserveMonthly?: number;
+    landscapingMonthly?: number;
+    pestControlMonthly?: number;
+    administrativeMonthly?: number;
+    renovationStartMonth?: number;
+    renovationDurationMonths?: number;
+    renovationRentLossPct?: number;
+    renovationIncomeLossAnnual?: number;
     rentGrowth: number;
     expenseGrowth: number;
     appreciation: number;
@@ -79,6 +117,7 @@ export interface ReportData {
     baths: number;
     sqft: number;
     rent: number;
+    stabilizedRent?: number;
     /** The owner's own unit on a house hack. calc-analysis EXCLUDES it from
      *  rental income, so the report must exclude it from gross rent too or
      *  the cover contradicts the operating statement. Optional for legacy
@@ -165,6 +204,9 @@ export interface ReportData {
       cocReturn: number;
       capRate: number;
       dscr: number;
+      totalCashRequired?: number;
+      irrPct?: number | null;
+      irrStatus?: "unique" | "multiple" | "none";
     };
     requiredMonthlyRent: {
       value: number;
@@ -190,17 +232,28 @@ export interface ReportData {
   };
   projection10y: {
     cumulativeCF: number;
-    bestAnnualAfterTax: number;
-    totalAfterTax: number;
+    /** Current released pre-tax presentation fields. */
+    bestAnnualPreTax?: number;
+    year10Equity?: number;
+    /** Historical payload compatibility only; never rendered as a headline. */
+    bestAnnualAfterTax?: number;
+    totalAfterTax?: number;
     rows: Array<{
       y: number;
       rental: number;
       opex: number;
       debt: number;
       net: number;
-      tax: number;
-      after: number;
       cum: number;
+      propertyValue?: number;
+      loanBalance?: number;
+      equity?: number;
+      renovationIncomeLoss?: number;
+      balloon?: number;
+      financingOutflow?: number;
+      /** Historical payload compatibility only; not rendered in projection. */
+      tax?: number;
+      after?: number;
     }>;
   };
   taxStrategy: {
@@ -1384,6 +1437,7 @@ function drawOperatingStatement(
   st: ReportOperatingStatement,
   startY: number,
   themeColor: string,
+  financingFallback?: ReportData["financing"],
 ): number {
   let y = sectionTitle(
     doc,
@@ -1417,7 +1471,23 @@ function drawOperatingStatement(
   };
   const lines: Line[] = [
     { label: "Gross scheduled rent", value: st.grossScheduledIncome },
+    ...((st.recurringOtherIncome ?? 0) > 0
+      ? [
+          {
+            label: "Other recurring income",
+            value: st.recurringOtherIncome ?? 0,
+          },
+        ]
+      : []),
     { label: "Less vacancy allowance", value: -st.vacancyAllowance },
+    ...((st.renovationIncomeLoss ?? 0) > 0
+      ? [
+          {
+            label: "Less simplified renovation downtime",
+            value: -(st.renovationIncomeLoss ?? 0),
+          },
+        ]
+      : []),
     {
       label: "Effective gross income",
       value: st.effectiveGrossIncome,
@@ -1453,7 +1523,10 @@ function drawOperatingStatement(
     });
   }
   lines.push({
-    label: "Net cash flow",
+    label:
+      (st.balloonPayment ?? 0) > 0
+        ? "Recurring operating cash flow (excl. balloon)"
+        : "Net cash flow",
     value: st.netCashFlowAnnual,
     strong: true,
     rule: true,
@@ -1495,7 +1568,33 @@ function drawOperatingStatement(
       ]
     : [
         ["Loan amount", fmtCurrency(st.loanAmount)],
-        ["Monthly payment (P&I)", fmtCurrency(st.monthlyPayment)],
+        [
+          (st.interestOnlyMonths ?? 0) > 0
+            ? "Initial interest-only payment"
+            : "Initial monthly payment (P&I)",
+          fmtCurrency(
+            st.initialMonthlyLoanPayment ??
+              financingFallback?.initialMonthlyPayment ??
+              st.monthlyPayment,
+          ),
+        ],
+        [
+          "Amortizing monthly payment",
+          fmtCurrency(
+            st.amortizingMonthlyLoanPayment ??
+              financingFallback?.amortizingMonthlyPayment ??
+              st.monthlyPayment,
+          ),
+        ],
+        ["Interest-only period", `${st.interestOnlyMonths ?? 0} months`],
+        [
+          "Amortization / maturity",
+          `${st.amortizationTermYears ?? financingFallback?.amortizationTermYears ?? financingFallback?.loanTerm ?? "—"} yrs / ${st.loanMaturityTermYears ?? financingFallback?.maturityTermYears ?? financingFallback?.loanTerm ?? "—"} yrs (month ${st.balloonMonth ?? financingFallback?.balloonMonth ?? (((st.loanMaturityTermYears ?? financingFallback?.maturityTermYears ?? financingFallback?.loanTerm ?? 0) * 12) || "—")})`,
+        ],
+        [
+          "Balloon due at maturity",
+          fmtCurrency(st.balloonPayment ?? financingFallback?.balloonPayment ?? 0),
+        ],
         [
           "PMI (monthly)",
           st.pmiAnnual > 0
@@ -1503,20 +1602,77 @@ function drawOperatingStatement(
             : "None",
         ],
         ["Annual debt service", fmtCurrency(st.annualDebtService)],
+        ...((st.loanPointsAmount ?? 0) > 0
+          ? [
+              ["Loan points", fmtCurrency(st.loanPointsAmount ?? 0)] as [
+                string,
+                string,
+              ],
+            ]
+          : []),
+        ...((st.originationFee ?? 0) > 0
+          ? [
+              ["Origination fee", fmtCurrency(st.originationFee ?? 0)] as [
+                string,
+                string,
+              ],
+            ]
+          : []),
+        ...((st.loanFees ?? 0) > 0
+          ? [
+              ["Other lender fees", fmtCurrency(st.loanFees ?? 0)] as [
+                string,
+                string,
+              ],
+            ]
+          : []),
+        ...((st.lenderEscrowDeposit ?? 0) > 0
+          ? [
+              [
+                "Lender escrow deposit",
+                fmtCurrency(st.lenderEscrowDeposit ?? 0),
+              ] as [string, string],
+            ]
+          : []),
+        ...((st.lenderReserveDeposit ?? 0) > 0
+          ? [
+              [
+                "Lender reserve deposit",
+                fmtCurrency(st.lenderReserveDeposit ?? 0),
+              ] as [string, string],
+            ]
+          : []),
+        ...((st.initialReserve ?? 0) > 0
+          ? [
+              [
+                "Investor opening reserve",
+                fmtCurrency(st.initialReserve ?? 0),
+              ] as [string, string],
+            ]
+          : []),
+        ...((st.acquisitionCredits ?? 0) > 0
+          ? [
+              [
+                "Less acquisition credits",
+                `−${fmtCurrency(st.acquisitionCredits ?? 0)}`,
+              ] as [string, string],
+            ]
+          : []),
         ["Total cash to close", fmtCurrency(st.totalCashRequired)],
       ];
+  const financingBoxH = Math.max(boxH, 36 + facts.length * 14);
   drawInputBlock(
     doc,
     right,
     y,
     colW,
-    Math.min(boxH, 92 + facts.length * 4),
+    financingBoxH,
     "Financing",
     facts,
     themeColor,
   );
 
-  return y + boxH + 22;
+  return y + Math.max(boxH, financingBoxH) + 22;
 }
 
 /**
@@ -1640,8 +1796,9 @@ function pageInputs(
   const gap = 10;
   // Cash purchase => no debt service => DSCR isn't applicable. Detect via
   // downPaymentPct >= 100 (the canonical signal in the report payload).
-  const isCashPurchase = d.financing.downPaymentPct >= 100;
-  const dscrValue = isCashPurchase ? "N/A" : d.performance.dscr.toFixed(2);
+  const isCashPurchase =
+    d.operatingStatement?.isCashPurchase ?? d.financing.downPaymentPct >= 100;
+  const dscrValue = formatDscr(d.performance.dscr, !isCashPurchase);
   const dscrTone:
     | "primary"
     | "success"
@@ -1663,7 +1820,9 @@ function pageInputs(
     ]
   > = [
     [
-      "Monthly Cash Flow",
+      (d.financing.balloonPayment ?? 0) > 0
+        ? "Recurring Monthly CF (excl. balloon)"
+        : "Monthly Cash Flow",
       fmtCurrency(d.performance.monthlyCashFlow),
       d.performance.monthlyCashFlow >= 0 ? "success" : "danger",
       "/month",
@@ -1680,13 +1839,15 @@ function pageInputs(
     ],
     ["Cap Rate", fmtPct(d.performance.capRate, true), "violet", "NOI basis"],
     ["DSCR", dscrValue, dscrTone, dscrSub],
-    [
-      "Modeled After-Tax CF",
+  ];
+  if (isFeatureReleased("tax_strategy")) {
+    cards.push([
+      "Illustrative After-Tax CF",
       fmtCurrency(d.performance.afterTaxCF),
       "primary",
-      "/month",
-    ],
-  ];
+      "/month · scenario only",
+    ]);
+  }
   if (d.maxOffer !== undefined) {
     cards.unshift([
       "Offer Ceiling",
@@ -1759,7 +1920,12 @@ function pageInputs(
       setText(doc, COLOR.sub);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(7.5);
-      ["BEDS", "BATHS", "SQ FT", "RENT"].forEach((lbl, j) => {
+      [
+        "BEDS",
+        "BATHS",
+        "SQ FT",
+        u.stabilizedRent != null ? "CURRENT → STAB" : "RENT",
+      ].forEach((lbl, j) => {
         doc.text(lbl, x + 12 + j * ((uW - 24) / 4), y + 36);
       });
       setText(doc, COLOR.ink);
@@ -1771,7 +1937,13 @@ function pageInputs(
         String(u.beds),
         String(u.baths),
         String(u.sqft),
-        u.isOwnerOccupied ? "—" : u.rent ? `${fmtCurrency(u.rent)}/mo` : "$0",
+        u.isOwnerOccupied
+          ? "—"
+          : u.stabilizedRent != null
+            ? `${fmtCurrency(u.rent)} → ${fmtCurrency(u.stabilizedRent)}`
+            : u.rent
+              ? `${fmtCurrency(u.rent)}/mo`
+              : "$0",
       ].forEach((v, j) => {
         doc.text(v, x + 12 + j * ((uW - 24) / 4), y + 52);
       });
@@ -1795,6 +1967,13 @@ function pageInputs(
     const incomeUnits = d.units.filter((u) => !u.isOwnerOccupied);
     const ownerUnits = d.units.length - incomeUnits.length;
     const grossRent = incomeUnits.reduce((sum, u) => sum + (u.rent || 0), 0);
+    const stabilizedGrossRent = incomeUnits.reduce(
+      (sum, u) => sum + (u.stabilizedRent ?? u.rent ?? 0),
+      0,
+    );
+    const hasStabilizedRent = incomeUnits.some(
+      (unit) => unit.stabilizedRent != null,
+    );
     const avgRent = incomeUnits.length > 0 ? grossRent / incomeUnits.length : 0;
     const mix = new Map<string, number>();
     d.units.forEach((u) => {
@@ -1809,8 +1988,14 @@ function pageInputs(
       { label: "UNITS", value: String(d.units.length), big: true },
       { label: "UNIT MIX (BD/BA)", value: mixStr, big: false },
       {
-        label: ownerUnits > 0 ? "GROSS RENT (RENTED)" : "GROSS RENT",
-        value: `${fmtCurrency(grossRent)}/mo`,
+        label: hasStabilizedRent
+          ? "GROSS RENT CURRENT / STAB"
+          : ownerUnits > 0
+            ? "GROSS RENT (RENTED)"
+            : "GROSS RENT",
+        value: hasStabilizedRent
+          ? `${fmtCurrency(grossRent)} / ${fmtCurrency(stabilizedGrossRent)}`
+          : `${fmtCurrency(grossRent)}/mo`,
         big: true,
       },
       {
@@ -1949,87 +2134,199 @@ function pageInputs(
   // it; this page is the assumptions that produced them.
   y = sectionTitle(doc, "Property & Inputs", y, undefined, themeColor);
   const colW = (SAFE.w - 12) / 2;
-  const rowH = 92;
+
+  const propertyRows: Array<[string, string]> = [
+    ["Type", formatPropertyType(d.property.type)],
+    ["Year built", formatYearBuilt(d.property.yearBuilt)],
+    ["Purchase price", fmtCurrency(d.property.purchasePrice)],
+  ];
+  if (d.property.currentValue != null || d.property.stabilizedValue != null) {
+    propertyRows.push([
+      "Current / stabilized value",
+      `${d.property.currentValue != null ? fmtCurrency(d.property.currentValue) : "—"} / ${d.property.stabilizedValue != null ? fmtCurrency(d.property.stabilizedValue) : "—"}`,
+    ]);
+  }
+  propertyRows.push(["Template", d.property.template]);
+
+  const financingRows: Array<[string, string]> = [
+    [
+      "Down payment",
+      `${d.financing.downPaymentPct}% (${fmtCurrency(d.financing.downPayment)})`,
+    ],
+    [
+      "Interest rate",
+      isCashPurchaseReport(d) ? "—" : `${d.financing.interestRate}%`,
+    ],
+    [
+      "Amortization / maturity",
+      isCashPurchaseReport(d)
+        ? "—"
+        : `${d.financing.amortizationTermYears ?? d.financing.loanTerm} yrs / ${d.financing.maturityTermYears ?? d.financing.loanTerm} yrs`,
+    ],
+    [
+      "Closing costs",
+      `${d.financing.closingCostsPct}% (${fmtCurrency(d.financing.closingCosts)})`,
+    ],
+  ];
+  if (!isCashPurchaseReport(d)) {
+    financingRows.splice(
+      3,
+      0,
+      [
+      "Initial / amortizing payment",
+        `${fmtCurrency(d.financing.initialMonthlyPayment ?? d.operatingStatement?.initialMonthlyLoanPayment ?? d.operatingStatement?.monthlyPayment ?? 0)} / ${fmtCurrency(d.financing.amortizingMonthlyPayment ?? d.operatingStatement?.amortizingMonthlyLoanPayment ?? d.operatingStatement?.monthlyPayment ?? 0)}`,
+      ],
+      [
+        "Interest-only / maturity month",
+        `${d.financing.interestOnlyMonths ?? 0} months / month ${d.financing.balloonMonth ?? d.financing.loanTerm * 12}`,
+      ],
+      ["Balloon due", fmtCurrency(d.financing.balloonPayment ?? 0)],
+    );
+    const pointsAndFees =
+      (d.financing.loanPointsAmount ?? 0) +
+      (d.financing.originationFee ?? 0) +
+      (d.financing.loanFees ?? 0);
+    if (pointsAndFees > 0) {
+      financingRows.push(["Points + lender fees", fmtCurrency(pointsAndFees)]);
+    }
+    const escrowAndReserves =
+      (d.financing.lenderEscrowDeposit ?? 0) +
+      (d.financing.lenderReserveDeposit ?? 0) +
+      (d.financing.initialReserve ?? 0);
+    if (escrowAndReserves > 0) {
+      financingRows.push([
+        "Escrows + opening reserves",
+        fmtCurrency(escrowAndReserves),
+      ]);
+    }
+  }
+  if ((d.financing.acquisitionCredits ?? 0) > 0) {
+    financingRows.push([
+      "Acquisition credits",
+      `−${fmtCurrency(d.financing.acquisitionCredits ?? 0)}`,
+    ]);
+  }
+
+  // Every row is drawn at a fixed 14pt cadence beginning 36pt below the card
+  // top. Size each paired row from its actual content instead of a coarse
+  // "advanced" flag: even a plain financed deal now has seven lifecycle rows
+  // and used to print the last three through the card below it.
+  const inputBlockHeight = (...groups: Array<Array<[string, string]>>) =>
+    Math.max(92, 36 + Math.max(...groups.map((rows) => rows.length)) * 14);
+  const topRowH = inputBlockHeight(propertyRows, financingRows);
 
   drawInputBlock(
     doc,
     M.left,
     y,
     colW,
-    rowH,
+    topRowH,
     "Property",
-    [
-      ["Type", formatPropertyType(d.property.type)],
-      ["Year built", formatYearBuilt(d.property.yearBuilt)],
-      ["Purchase price", fmtCurrency(d.property.purchasePrice)],
-      ["Template", d.property.template],
-    ],
+    propertyRows,
     themeColor,
   );
+  const operatingAssumptions: Array<[string, string]> = [
+    ["Vacancy", `${d.expenses.vacancyPct}%`],
+    ["Management", `${d.expenses.managementPct}%`],
+    [
+      "Maintenance / CapEx",
+      `${d.expenses.maintenancePct}% / ${d.expenses.capexPct}%`,
+    ],
+  ];
+  if (isFeatureReleased("tax_strategy")) {
+    operatingAssumptions.push(["Assumed tax rate", `${d.expenses.taxRate}%`]);
+  }
   drawInputBlock(
     doc,
     M.left + colW + 12,
     y,
     colW,
-    rowH,
+    topRowH,
     "Financing",
-    [
-      [
-        "Down payment",
-        `${d.financing.downPaymentPct}% (${fmtCurrency(d.financing.downPayment)})`,
-      ],
-      // A cash purchase has no loan, but loanTermYears is schema-required and
-      // interestRate keeps whatever default was on the form — so this block
-      // printed "7% / 30 yrs" on a page whose own cover strip already said
-      // "Cash purchase".
-      [
-        "Interest rate",
-        isCashPurchaseReport(d) ? "—" : `${d.financing.interestRate}%`,
-      ],
-      [
-        "Loan term",
-        isCashPurchaseReport(d) ? "—" : `${d.financing.loanTerm} yrs`,
-      ],
-      [
-        "Closing costs",
-        `${d.financing.closingCostsPct}% (${fmtCurrency(d.financing.closingCosts)})`,
-      ],
-    ],
+    financingRows,
     themeColor,
   );
-  y += rowH + 10;
+  y += topRowH + 10;
   const insuranceAssumption = formatReportInsuranceAssumption(d.expenses);
+  const operatingExpenseRows: Array<[string, string]> = [
+    [
+      "Property tax / Insurance",
+      `${
+        d.expenses.propertyTaxAnnualBill != null
+          ? `${fmtCurrency(d.expenses.propertyTaxAnnualBill)}/yr (annual bill)`
+          : `${d.expenses.propertyTaxPct}%`
+      } / ${insuranceAssumption}`,
+    ],
+    [
+      "Maintenance / Vacancy",
+      `${d.expenses.maintenancePct}% / ${d.expenses.vacancyPct}%`,
+    ],
+    [
+      "Management / CapEx",
+      `${d.expenses.managementPct}% / ${d.expenses.capexPct}%`,
+    ],
+    [
+      "HOA / Utilities",
+      `${fmtCurrency(d.expenses.hoaMonthly)}/mo  ·  ${fmtCurrency(d.expenses.utilitiesMonthly)}/mo`,
+    ],
+  ];
+  if (
+    (d.expenses.recurringOtherIncomeMonthly ?? 0) > 0 ||
+    (d.expenses.recurringOtherExpenseMonthly ?? 0) > 0
+  ) {
+    operatingExpenseRows.push([
+      "Other income / fixed expense",
+      `${fmtCurrency(d.expenses.recurringOtherIncomeMonthly ?? 0)} / ${fmtCurrency(d.expenses.recurringOtherExpenseMonthly ?? 0)}/mo`,
+    ]);
+  }
+  if (
+    (d.expenses.turnoverReserveMonthly ?? 0) > 0 ||
+    (d.expenses.leasingReserveMonthly ?? 0) > 0
+  ) {
+    operatingExpenseRows.push([
+      "Turnover / leasing reserves",
+      `${fmtCurrency(d.expenses.turnoverReserveMonthly ?? 0)} / ${fmtCurrency(d.expenses.leasingReserveMonthly ?? 0)}/mo`,
+    ]);
+  }
+  if (
+    (d.expenses.landscapingMonthly ?? 0) > 0 ||
+    (d.expenses.pestControlMonthly ?? 0) > 0 ||
+    (d.expenses.administrativeMonthly ?? 0) > 0
+  ) {
+    operatingExpenseRows.push([
+      "Landscape / pest / admin",
+      `${fmtCurrency(d.expenses.landscapingMonthly ?? 0)} / ${fmtCurrency(d.expenses.pestControlMonthly ?? 0)} / ${fmtCurrency(d.expenses.administrativeMonthly ?? 0)}`,
+    ]);
+  }
+  const assumptionRows: Array<[string, string]> = [
+    [
+      "Rent growth / Expense growth",
+      `${d.expenses.rentGrowth}% / ${d.expenses.expenseGrowth}%`,
+    ],
+    ["Appreciation", `${d.expenses.appreciation}%/yr`],
+    ["Selling cost", `${d.expenses.sellingCost}%`],
+    ["Tax rate", `${d.expenses.taxRate}%`],
+    ...((d.expenses.renovationStartMonth ?? 0) > 0
+      ? [
+          [
+            "Simplified downtime",
+            `month ${d.expenses.renovationStartMonth} · ${d.expenses.renovationDurationMonths ?? 0} months · ${d.expenses.renovationRentLossPct ?? 0}% rent reduction`,
+          ] as [string, string],
+        ]
+      : []),
+  ];
+  const lowerRowH = inputBlockHeight(
+    operatingExpenseRows,
+    assumptionRows,
+  );
   drawInputBlock(
     doc,
     M.left,
     y,
     colW,
-    rowH,
+    lowerRowH,
     "Operating Expenses",
-    [
-      // Annual-$ tax mode prints the customer's actual bill — printing the
-      // unused percent field here used to render "0%" on a paid PDF.
-      [
-        "Property tax / Insurance",
-        `${
-          d.expenses.propertyTaxAnnualBill != null
-            ? `${fmtCurrency(d.expenses.propertyTaxAnnualBill)}/yr (annual bill)`
-            : `${d.expenses.propertyTaxPct}%`
-        } / ${insuranceAssumption}`,
-      ],
-      [
-        "Maintenance / Vacancy",
-        `${d.expenses.maintenancePct}% / ${d.expenses.vacancyPct}%`,
-      ],
-      [
-        "Management / CapEx",
-        `${d.expenses.managementPct}% / ${d.expenses.capexPct}%`,
-      ],
-      [
-        "HOA / Utilities",
-        `${fmtCurrency(d.expenses.hoaMonthly)}/mo  ·  ${fmtCurrency(d.expenses.utilitiesMonthly)}/mo`,
-      ],
-    ],
+    operatingExpenseRows,
     themeColor,
   );
   drawInputBlock(
@@ -2037,27 +2334,25 @@ function pageInputs(
     M.left + colW + 12,
     y,
     colW,
-    rowH,
+    lowerRowH,
     "Assumptions",
-    [
-      [
-        "Rent growth / Expense growth",
-        `${d.expenses.rentGrowth}% / ${d.expenses.expenseGrowth}%`,
-      ],
-      ["Appreciation", `${d.expenses.appreciation}%/yr`],
-      ["Selling cost", `${d.expenses.sellingCost}%`],
-      ["Tax rate", `${d.expenses.taxRate}%`],
-    ],
+    assumptionRows,
     themeColor,
   );
-  y += rowH + 22;
+  y += lowerRowH + 22;
 
   // ── Year-1 operating statement ──────────────────────────────────────────
   // The lender view. Everything above states assumptions; this states what
   // they produce, in the order an underwriter reads it. Skipped entirely for
   // legacy report payloads that predate the field.
   if (d.operatingStatement) {
-    y = drawOperatingStatement(doc, d.operatingStatement, y, themeColor);
+    y = drawOperatingStatement(
+      doc,
+      d.operatingStatement,
+      y,
+      themeColor,
+      d.financing,
+    );
   }
 
   // PREPARED BY card was removed — the header subtitle now renders
@@ -2087,13 +2382,7 @@ function pageDecisionReadiness(
   setText(doc, COLOR.sub);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9.5);
-  y = drawParagraph(
-    doc,
-    PDF_INPUT_REVIEW_DISCLOSURE,
-    M.left,
-    y,
-    SAFE.w,
-  );
+  y = drawParagraph(doc, PDF_INPUT_REVIEW_DISCLOSURE, M.left, y, SAFE.w);
   y += 18;
 
   const cw = (SAFE.w - 24) / 3;
@@ -2107,20 +2396,11 @@ function pageDecisionReadiness(
     sub: "self-reported, not evidence",
     themeColor,
   });
-  statCard(
-    doc,
-    M.left + cw + 12,
-    y,
-    cw,
-    60,
-    "Review Status",
-    reviewStatus,
-    {
-      tone: reviewStatus === "No open reviews" ? "success" : "warn",
-      sub: "review material assumptions",
-      themeColor,
-    },
-  );
+  statCard(doc, M.left + cw + 12, y, cw, 60, "Review Status", reviewStatus, {
+    tone: reviewStatus === "No open reviews" ? "success" : "warn",
+    sub: "review material assumptions",
+    themeColor,
+  });
   statCard(
     doc,
     M.left + 2 * (cw + 12),
@@ -2272,11 +2552,35 @@ function pageProjection(
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9.5);
   doc.text(
-    "Projected cash flow, after-tax returns, and compounding equity over a 10-year hold period.",
+    "Projected pre-tax operating cash flow and modeled equity over a 10-year hold period.",
     M.left,
     y,
   );
   y += 22;
+  const projectionHasBalloon = d.projection10y.rows.some(
+    (row) => (row.balloon ?? 0) > 0,
+  );
+  if (projectionHasBalloon) {
+    y = drawParagraph(
+      doc,
+      "A contractual balloon is shown separately from recurring P&I + mortgage insurance and is included in net and cumulative cash flow when due.",
+      M.left,
+      y - 8,
+      SAFE.w,
+      { size: 8, color: COLOR.warnText },
+    );
+    y += 8;
+  }
+
+  const bestAnnualPreTax =
+    d.projection10y.bestAnnualPreTax ??
+    (d.projection10y.rows.length
+      ? Math.max(...d.projection10y.rows.map((row) => row.net))
+      : 0);
+  const year10Equity =
+    d.projection10y.year10Equity ??
+    d.projection10y.rows[d.projection10y.rows.length - 1]?.equity ??
+    0;
 
   // 3 summary cards
   const cw = (SAFE.w - 24) / 3;
@@ -2296,8 +2600,8 @@ function pageProjection(
     y,
     cw,
     64,
-    "Best Annual After-Tax CF",
-    fmtCurrency(d.projection10y.bestAnnualAfterTax),
+    "Best Annual Pre-Tax CF",
+    fmtCurrency(bestAnnualPreTax),
     { tone: "primary", themeColor },
   );
   statCard(
@@ -2306,8 +2610,8 @@ function pageProjection(
     y,
     cw,
     64,
-    "10-Year After-Tax Total",
-    fmtCurrency(d.projection10y.totalAfterTax),
+    "Year 10 Modeled Equity",
+    fmtCurrency(year10Equity),
     { tone: "violet", themeColor },
   );
   y += 64 + 20;
@@ -2326,10 +2630,17 @@ function pageProjection(
   const wfGross = wfRow.rental;
   const wfOpex = wfRow.opex;
   const wfDebt = wfRow.debt;
+  const wfBalloon = wfRow.balloon ?? 0;
   const wfNet = wfRow.net;
   // Labels show the SIGNED STEP each bar represents, not the running total —
   // a waterfall reads as "+30K, -11K, -16K, = 3K".
-  const wfSteps = [wfGross, -wfOpex, -wfDebt, wfNet];
+  const wfSteps = [
+    wfGross,
+    -wfOpex,
+    -wfDebt,
+    ...(wfBalloon > 0 ? [-wfBalloon] : []),
+    wfNet,
+  ];
 
   drawChartCard(doc, M.left, y, chW, chH, "Annual Cash Flow", (box) =>
     drawBarChart(doc, {
@@ -2373,6 +2684,16 @@ function pageProjection(
             from: wfGross - wfOpex,
             color: COLOR.warn,
           },
+          ...(wfBalloon > 0
+            ? [
+                {
+                  label: "Balloon",
+                  value: wfGross - wfOpex - wfDebt - wfBalloon,
+                  from: wfGross - wfOpex - wfDebt,
+                  color: COLOR.danger,
+                },
+              ]
+            : []),
           {
             label: "Net Cash Flow",
             value: wfNet,
@@ -2399,23 +2720,16 @@ function pageProjection(
       showPoints: false,
     }),
   );
-  drawChartCard(
-    doc,
-    M.left + chW + 12,
-    y,
-    chW,
-    chH,
-    "After-Tax Growth",
-    (box) =>
-      drawBarChart(doc, {
-        box,
-        data: d.projection10y.rows.map((r) => ({
-          label: `Y${r.y}`,
-          value: r.after,
-          color: r.after >= 0 ? COLOR.success : COLOR.danger,
-        })),
-        showValues: false,
-      }),
+  drawChartCard(doc, M.left + chW + 12, y, chW, chH, "Modeled Equity", (box) =>
+    drawBarChart(doc, {
+      box,
+      data: d.projection10y.rows.map((r) => ({
+        label: `Y${r.y}`,
+        value: r.equity ?? 0,
+        color: (r.equity ?? 0) >= 0 ? COLOR.success : COLOR.danger,
+      })),
+      showValues: false,
+    }),
   );
   y += chH + 20;
 
@@ -2429,10 +2743,12 @@ function pageProjection(
         "Rental Income",
         "Op. Expenses",
         "P&I + MI",
+        ...(projectionHasBalloon ? ["Balloon"] : []),
         "Net CF",
-        "Tax Effect",
-        "After-Tax CF",
         "Cumulative CF",
+        "Property Value",
+        "Loan Balance",
+        "Modeled Equity",
       ],
     ],
     body: d.projection10y.rows.map((r) => [
@@ -2440,6 +2756,9 @@ function pageProjection(
       fmtCurrency(r.rental),
       fmtCurrency(r.opex),
       fmtCurrency(r.debt),
+      ...(projectionHasBalloon
+        ? [(r.balloon ?? 0) > 0 ? fmtCurrency(r.balloon ?? 0) : "—"]
+        : []),
       {
         content: fmtCurrency(r.net),
         styles: {
@@ -2447,20 +2766,10 @@ function pageProjection(
             r.net >= 0 ? hexToRgb(COLOR.successText) : hexToRgb(COLOR.danger),
         },
       },
-      fmtCurrency(r.tax),
-      {
-        // Tone follows the SIGN. after-tax CF is netCashFlow + taxSavings with
-        // savings floored at 0, so it is negative on any negative-cash-flow
-        // deal — and printing a loss in bold green, directly beside a "Net CF"
-        // column that correctly renders red, told the reader the opposite of
-        // the truth.
-        content: fmtCurrency(r.after),
-        styles: {
-          textColor: hexToRgb(r.after >= 0 ? COLOR.successText : COLOR.danger),
-          fontStyle: "bold",
-        },
-      },
       fmtCurrency(r.cum),
+      fmtCurrency(r.propertyValue ?? 0),
+      fmtCurrency(r.loanBalance ?? 0),
+      fmtCurrency(r.equity ?? 0),
     ]),
     theme: "plain",
     styles: {
@@ -2481,7 +2790,10 @@ function pageProjection(
     columnStyles: {
       0: { fontStyle: "bold", textColor: hexToRgb(COLOR.ink) },
       ...Object.fromEntries(
-        [1, 2, 3, 4, 5, 6, 7].map((i) => [i, { halign: "right" as const }]),
+        Array.from(
+          { length: projectionHasBalloon ? 9 : 8 },
+          (_, index) => index + 1,
+        ).map((i) => [i, { halign: "right" as const }]),
       ),
     },
     alternateRowStyles: { fillColor: [252, 253, 255] },
@@ -2511,12 +2823,11 @@ function pageDownside(
   y += intro.length * 12 + 18;
 
   const stressed = d.downsideScenario;
-  // A financed deal with NEGATIVE NOI has a NEGATIVE dscr, not zero
-  // (calc-analysis: `annualDebtService > 0 ? noiAnnual / annualDebtService : 0`),
-  // so `dscr > 0` classified the worst deals in the product as cash purchases
-  // and printed "Cash purchase" in the DSCR row of a mortgaged property.
-  // Non-zero is the real test for "there is debt service".
-  const financed = d.performance.dscr !== 0 || stressed.dscr !== 0;
+  // Financing applicability comes from the canonical operating statement,
+  // never from the DSCR value (a financed deal may have negative NOI/DSCR).
+  const financed = !(
+    d.operatingStatement?.isCashPurchase ?? d.financing.downPaymentPct >= 100
+  );
   const survives =
     stressed.monthlyCashFlow >= 0 && (!financed || stressed.dscr >= 1);
   const verdictTone = survives ? "success" : "danger";
@@ -2573,7 +2884,7 @@ function pageDownside(
     cw,
     64,
     "Stressed DSCR",
-    financed ? stressed.dscr.toFixed(2) : "Cash",
+    formatDscr(stressed.dscr, financed),
     {
       tone: financed && stressed.dscr < 1 ? "danger" : "neutral",
       themeColor,
@@ -2654,7 +2965,9 @@ function pageDownside(
     head: [["Metric", "Base case", "Downside case", "Change"]],
     body: [
       [
-        "Monthly cash flow",
+        (d.financing.balloonPayment ?? 0) > 0
+          ? "Recurring monthly CF (excl. balloon)"
+          : "Monthly cash flow",
         `${fmtCurrency(d.performance.monthlyCashFlow, true)}/mo`,
         `${fmtCurrency(stressed.monthlyCashFlow, true)}/mo`,
         `${fmtCurrency(deltaMoney, true)}/mo`,
@@ -2677,9 +2990,11 @@ function pageDownside(
       ],
       [
         "DSCR",
-        financed ? d.performance.dscr.toFixed(2) : "Cash purchase",
-        financed ? stressed.dscr.toFixed(2) : "Cash purchase",
-        financed ? `${deltaDscr >= 0 ? "+" : ""}${deltaDscr.toFixed(2)}` : "—",
+        formatDscr(d.performance.dscr, financed),
+        formatDscr(stressed.dscr, financed),
+        financed
+          ? `${deltaDscr >= 0 ? "+" : ""}${deltaDscr.toFixed(2)}`
+          : NO_DEBT_SERVICE_DSCR_LABEL,
       ],
     ],
     theme: "plain",
@@ -3899,13 +4214,24 @@ function pageDisclosures(
   // two-column layout.
   const colW = (SAFE.w - 12) / 2;
   const rowH = 92;
+  const operatingAssumptions: Array<[string, string]> = [
+    ["Vacancy", `${d.expenses.vacancyPct}%`],
+    ["Management", `${d.expenses.managementPct}%`],
+    [
+      "Maintenance / CapEx",
+      `${d.expenses.maintenancePct}% / ${d.expenses.capexPct}%`,
+    ],
+  ];
+  if (isFeatureReleased("tax_strategy")) {
+    operatingAssumptions.push(["Assumed tax rate", `${d.expenses.taxRate}%`]);
+  }
   drawInputBlock(
     doc,
     M.left,
     y,
     colW,
     rowH,
-    "Growth & Exit",
+    "Growth Assumptions",
     [
       ["Rent growth", `${d.expenses.rentGrowth}% / yr`],
       ["Expense growth", `${d.expenses.expenseGrowth}% / yr`],
@@ -3920,16 +4246,8 @@ function pageDisclosures(
     y,
     colW,
     rowH,
-    "Operating & Tax",
-    [
-      ["Vacancy", `${d.expenses.vacancyPct}%`],
-      ["Management", `${d.expenses.managementPct}%`],
-      [
-        "Maintenance / CapEx",
-        `${d.expenses.maintenancePct}% / ${d.expenses.capexPct}%`,
-      ],
-      ["Assumed tax rate", `${d.expenses.taxRate}%`],
-    ],
+    "Operating Assumptions",
+    operatingAssumptions,
     themeColor,
   );
   y += rowH + 24;
@@ -3944,12 +4262,39 @@ function pageDisclosures(
   );
   y = drawParagraph(
     doc,
-    `Returns are computed from the purchase price, financing terms, rents, and operating expenses entered for this property. The 10-year projection ${d.tenYearProjectionVersion != null ? `uses projection method v${d.tenYearProjectionVersion}` : "comes from a recorded legacy snapshot whose projection method version was not stored"}; it grows rents and operating expenses at the rates above and amortizes the loan on its stated schedule. NOI and lender-style DSCR exclude the CapEx reserve; cash flow includes it. PMI/MIP, when modeled, is included in cash flow but excluded from lender-style DSCR.`,
+    `Returns are computed from the purchase price, financing terms, rents, and operating expenses entered for this property. The 10-year projection ${d.tenYearProjectionVersion != null ? `uses projection method v${d.tenYearProjectionVersion}` : "comes from a recorded legacy snapshot whose projection method version was not stored"}; scheduled-rent percentage costs move with projected rent while fixed-dollar costs use expense growth, and the loan follows its stated schedule. NOI and lender-style DSCR exclude the CapEx reserve; cash flow includes it. PMI/MIP, when modeled, is included in cash flow but excluded from lender-style DSCR.`,
     M.left,
     y,
     SAFE.w,
   );
   y += 14;
+  if (
+    (d.financing.rehabBudget ?? 0) > 0 ||
+    d.expenses.renovationStartMonth != null
+  ) {
+    y = drawParagraph(
+      doc,
+      d.expenses.renovationStartMonth != null
+        ? SIMPLIFIED_RENOVATION_DOWNTIME_LABEL
+        : STEADY_STATE_RENOVATION_LABEL,
+      M.left,
+      y,
+      SAFE.w,
+      { color: COLOR.warnText },
+    );
+    y += 14;
+  }
+  if ((d.financing.balloonPayment ?? 0) > 0) {
+    y = drawParagraph(
+      doc,
+      `Headline and Year-1 operating cash flow are recurring operating figures and exclude the ${fmtCurrency(d.financing.balloonPayment ?? 0)} maturity balloon. The 10-year projection shows that balloon separately in month ${d.financing.balloonMonth ?? "—"} and includes it in that year's net and cumulative cash flow.`,
+      M.left,
+      y,
+      SAFE.w,
+      { color: COLOR.warnText },
+    );
+    y += 14;
+  }
   y = drawParagraph(
     doc,
     "Any HUD auto-filled rent is an area rent benchmark, not a property-specific rent opinion or local comparable. Any FRED auto-filled rate is an owner-occupied national mortgage benchmark, not an investor-loan quote, approval, or commitment. Replace both with verified local rents and written lender terms before making an offer.",
@@ -3958,14 +4303,27 @@ function pageDisclosures(
     SAFE.w,
   );
   y += 14;
-  y = drawParagraph(
-    doc,
-    "Illustrative tax impact applies the entered marginal rate to modeled rental income and deductions. It does not determine whether losses are usable or model passive-activity, at-risk, material-participation, filing-status, state/local-tax, mixed personal/rental-use allocation, or individual eligibility rules. Exit comparisons rank only the modeled hold years under the stated appreciation, selling-cost, cash-flow, and simplified exit-tax assumptions; the highest modeled profit is not a recommendation to sell in that year.",
-    M.left,
-    y,
-    SAFE.w,
-  );
-  y += 22;
+  if (isFeatureReleased("tax_strategy")) {
+    y = drawParagraph(
+      doc,
+      "Illustrative tax impact applies the entered marginal rate to modeled rental income and deductions. It does not determine whether losses are usable or model passive-activity, at-risk, material-participation, filing-status, state/local-tax, mixed personal/rental-use allocation, or individual eligibility rules.",
+      M.left,
+      y,
+      SAFE.w,
+    );
+    y += 14;
+  }
+  if (isFeatureReleased("exit_scenarios")) {
+    y = drawParagraph(
+      doc,
+      "Exit comparisons rank only the modeled hold years under the stated appreciation, selling-cost, cash-flow, and simplified exit-tax assumptions; the highest modeled profit is not a recommendation to sell in that year.",
+      M.left,
+      y,
+      SAFE.w,
+    );
+    y += 14;
+  }
+  y += 8;
 
   y = sectionTitle(doc, "Disclaimer", y, undefined, themeColor);
   y = drawParagraph(
@@ -4041,7 +4399,10 @@ async function buildInvestmentPDFDocument(
   pageCover(doc, d, branding ?? null, logoData);
   doc.addPage();
   pageInputs(doc, d, branding ?? null, buyBoxVerdict);
-  if (d.specialistAnalysis) {
+  if (
+    d.specialistAnalysis &&
+    isSpecialistStrategyEnabled(d.specialistAnalysis.strategy)
+  ) {
     doc.addPage();
     pageSpecialistAnalysis(doc, d.specialistAnalysis, branding ?? null);
   }
@@ -4056,12 +4417,12 @@ async function buildInvestmentPDFDocument(
   }
   pageProjection(doc, d, branding ?? null);
   // Tax Strategy is a personal-tax view — only the full personal report.
-  if (mode === "personal") {
+  if (mode === "personal" && isFeatureReleased("tax_strategy")) {
     doc.addPage();
     pageTax(doc, d, branding ?? null);
   }
   // Exit Scenarios (returns/IRR) go to personal, partner + agent, not lender.
-  if (mode !== "lender") {
+  if (mode !== "lender" && isFeatureReleased("exit_scenarios")) {
     doc.addPage();
     pageExit(doc, d, branding ?? null);
   }

@@ -24,13 +24,8 @@ import { MarketingHero } from "@/components/marketing/marketing-hero";
 import {
   DataSourcesSection,
   FinalCta,
-  NeverOverpayGuarantee,
   HomepageFaq,
-  HowTrueCapWorks,
-  ProblemBlock,
-  OfferEngineSection,
   PdfProUpsell,
-  Personas,
   SocialProof,
 } from "@/components/marketing/landing-sections";
 import { CaseStudiesSection } from "@/components/marketing/case-study";
@@ -152,25 +147,21 @@ export default async function AuthedHome({
         saveDealLimitReached={saveDealLimitReached}
         initialSavedDealCount={savedDealCount ?? 0}
         savedDealLimit={entitlements?.max_saved_deals ?? null}
-        isAuthenticated={false}
+        isAuthenticated={Boolean(user)}
         userAnalysisDefaults={userAnalysisDefaults}
         advocacyContractEligible={false}
       />
-      {/* Anon fallback only — the SAME seven-block story as app/page.tsx:
-          how it works → trust → who it's for → pricing → closing ask → FAQ
-          (the live analyzer above is the product proof). Lockstep is enforced
+      {/* Anon fallback only — the SAME seven-block story as app/page.tsx.
+          The live analyzer above is interactive product proof. Lockstep is enforced
           by lib/__tests__/homepage-lockstep.test.ts. */}
       {!user && (
         <div className="truecap-marketing-tail contents">
-          <ProblemBlock />
-          <HowTrueCapWorks />
-          <SocialProof />
-          <CaseStudiesSection studies={VERIFIED_CASE_STUDIES} />
           <DataSourcesSection />
-          <OfferEngineSection />
           <PdfProUpsell />
-          <NeverOverpayGuarantee />
-          <Personas />
+          <div data-homepage-block="real-proof" className="contents">
+            <SocialProof />
+            <CaseStudiesSection studies={VERIFIED_CASE_STUDIES} />
+          </div>
           <HomepageFaq />
           <FinalCta />
           <StickyConversionBar />

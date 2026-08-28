@@ -21,7 +21,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { ladderCellsForFeature } from "@/lib/entitlements-catalog";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { execFileSync } from "node:child_process";
 
@@ -35,7 +35,7 @@ function tracked(globs: string[]): string[] {
     maxBuffer: 16 * 1024 * 1024,
   })
     .split("\n")
-    .filter(Boolean);
+    .filter((file) => Boolean(file) && existsSync(join(ROOT, file)));
 }
 
 /** app/changelog is a historical narrative — its past entries describe a

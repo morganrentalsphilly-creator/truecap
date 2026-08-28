@@ -189,7 +189,7 @@ export default function ForHouseHackersPage() {
             <li><strong>FHA 3.5% template ready to clone.</strong> One click pre-fills the down %, MIP, term, vacancy assumption.</li>
             <li><strong>Per-unit rent.</strong> Multi-family mode lets you model each unit independently — the only way to get house-hack math right.</li>
             <li><strong>Separate transition scenario.</strong> Preserve the live-in assumptions, then model the later full-rental state as a distinct saved scenario.</li>
-            <li><strong>Mixed-use tax caveat.</strong> The Pro view is a general rental illustration; it does not allocate basis, depreciation, or interest between personal and rental use. Replace it with a CPA&apos;s mixed-use calculation.</li>
+            <li><strong>Mixed-use boundary.</strong> TrueCap does not currently expose a tax-specific module or allocate basis, depreciation, or interest between personal and rental use. Build that calculation with a qualified tax professional.</li>
           </ul>
         </section>
 
@@ -207,17 +207,17 @@ export default function ForHouseHackersPage() {
               single-family vs multi-family
             </Link>{" "}
             properties. Screen candidates fast with the free{" "}
-            <Link href="/tools/house-hacking-calculator" className="text-primary font-semibold hover:underline">
+            <Link href="/?strategy=house-hack#main" className="text-primary font-semibold hover:underline">
               house hacking calculator
             </Link>{" "}
             — your effective housing cost after tenant rent, in seconds.
             Once you&apos;ve picked a property, ground the
             numbers with the{" "}
-            <Link href="/tools/cap-rate-calculator" className="text-primary font-semibold hover:underline">
+            <Link href="/#main" className="text-primary font-semibold hover:underline">
               cap rate
             </Link>{" "}
             and{" "}
-            <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">
+            <Link href="/#main" className="text-primary font-semibold hover:underline">
               DSCR
             </Link>{" "}
             calculators for the rented portion, then run the year-1 screen
@@ -256,21 +256,9 @@ export default function ForHouseHackersPage() {
         </section>
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
-          Different strategy? See pages for{" "}
+          Evaluating a non-owner-occupied rental? See TrueCap for{" "}
           <Link href="/for-buy-and-hold" className="font-bold text-foreground hover:underline">
-            buy-and-hold
-          </Link>
-          ,{" "}
-          <Link href="/for-brrrr" className="font-bold text-foreground hover:underline">
-            BRRRR operators
-          </Link>
-          ,{" "}
-          <Link href="/for-flippers" className="font-bold text-foreground hover:underline">
-            fix-and-flippers
-          </Link>
-          , and{" "}
-          <Link href="/for-agents" className="font-bold text-foreground hover:underline">
-            agents
+            buy-and-hold investors
           </Link>
           .
         </footer>

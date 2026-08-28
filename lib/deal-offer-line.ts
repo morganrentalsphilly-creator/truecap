@@ -45,6 +45,7 @@ import {
   meetsTarget,
   type MaoTarget,
 } from "@/lib/max-allowable-offer";
+import { calculateMaoIrr } from "@/lib/mao-target-evaluation";
 
 /**
  * The offer line for a shopping-stage deal:
@@ -162,6 +163,7 @@ export function computeDealOfferLine(
   const scopedBoxes = boxesForDealClient(activeBuyBoxes, opts.dealClientId ?? null);
 
   if (scopedBoxes.length > 0) {
+    const irr = calculateMaoIrr(formValues, analysis);
     const metrics: BuyBoxDealMetrics = {
       capRatePct: analysis.capRate,
       cocPct: analysis.cocReturn,
@@ -171,6 +173,9 @@ export function computeDealOfferLine(
       propertyType: toBuyBoxPropertyType(formValues.propertyType),
       state: deriveStateFromAddress(formValues.address),
       isCashPurchase,
+      cashRequired: analysis.totalCashRequired,
+      irrPct: irr.primaryIrrPct,
+      irrStatus: irr.status,
     };
     const boxResults = evaluateBuyBoxes(scopedBoxes, metrics).filter((r) => r.result.active);
     if (boxResults.length > 0) {
@@ -200,7 +205,11 @@ export function computeDealOfferLine(
       basisLabel = `your saved targets — ${describeMaoTarget(usablePersistedMaoTarget)}`;
       let clearsAtAsking = false;
       try {
-        clearsAtAsking = meetsTarget(analysis, usablePersistedMaoTarget);
+        clearsAtAsking = meetsTarget(
+          analysis,
+          usablePersistedMaoTarget,
+          formValues,
+        );
       } catch {
         // Fall through to the solver alone. A bad row never crashes the list.
       }

@@ -33,7 +33,7 @@ import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema"
 export const metadata: Metadata = {
   title: "Bricked AI vs TrueCap (2026): Flip ARV vs Rentals",
   description:
-    "Bricked tells flippers what a house is worth — AI comps, ARV, repair costs. TrueCap tells investors what a rental will earn — cash flow, DSCR, taxes, exit. Honest side-by-side.",
+    "Bricked focuses on AI comps, ARV, and repair costs. TrueCap screens stabilized rental cash flow, cap rate, CoC, and DSCR from reviewed assumptions.",
   keywords: [
     "bricked ai alternative",
     "bricked ai review",
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Bricked AI vs TrueCap (2026): Flip ARV vs Rentals",
     description:
-      "Bricked: AI comps, ARV, repair costs for flippers. TrueCap: cash flow, DSCR, taxes for rental investors. Honest comparison.",
+      "Bricked: AI comps, ARV, and repair costs. TrueCap: stabilized rental cash flow, cap rate, CoC, and DSCR.",
     url: "/vs/bricked",
     type: "website",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs Bricked AI" }],
@@ -61,8 +61,7 @@ const MATRIX: Row[] = [
   { feature: "Primary purpose", truecap: "Rental returns calculator — is this a good investment?", bricked: "AI valuation — what's it worth, what do repairs cost?", winner: "tie" },
   { feature: "Built for", truecap: "Buy-and-hold investors, house-hackers, agents", bricked: "Flippers, wholesalers, acquisition teams", winner: "tie" },
   { feature: "Cash flow / cap rate / CoC / DSCR", truecap: "Yes — full engine, free tier", bricked: "Not modeled", winner: "truecap" },
-  { feature: "10-year projection + exit scenarios", truecap: "Pro — rent/expense growth, modeled hold-year comparison", bricked: "Not modeled", winner: "truecap" },
-  { feature: "Illustrative tax impact", truecap: "Pro — entered marginal rate + modeled after-tax CF", bricked: "Not modeled", winner: "truecap" },
+  { feature: "10-year cash-flow + equity projection", truecap: "Pro — editable rent, expense, value, and financing assumptions", bricked: "Not modeled", winner: "truecap" },
   { feature: "Financing math (PITI, amortization, DSCR)", truecap: "Yes — full loan modeling", bricked: "Not included", winner: "truecap" },
   { feature: "Comps + ARV / market value", truecap: "Purchase price is user input — no AVM", bricked: "Yes — AI-selected comps from MLS + county data, ARV + CMV", winner: "bricked" },
   { feature: "Repair cost estimates", truecap: "Rehab estimator with sq-ft-based defaults", bricked: "Itemized, ZIP-localized material + labor costs", winner: "bricked" },
@@ -84,7 +83,7 @@ export default function VsBrickedPage() {
     name: "Bricked AI vs TrueCap (2026): Flip ARV vs Rentals",
     url: `${siteUrl}/vs/bricked`,
     description:
-      "Bricked tells flippers what a house is worth — AI comps, ARV, repair costs. TrueCap tells investors what a rental will earn — cash flow, DSCR, taxes, exit.",
+      "Bricked focuses on AI comps, ARV, and repair costs. TrueCap screens stabilized rental cash flow, cap rate, CoC, and DSCR.",
     dateModified: "2026-06-12",
     publisher: { "@id": `${siteUrl}/#organization` },
   };
@@ -119,8 +118,8 @@ export default function VsBrickedPage() {
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             Bricked is an AI valuation tool — it finds comps, estimates repairs, and
             prices cash offers for flippers and wholesalers working at volume. TrueCap
-            is a returns calculator — it tells a rental investor what a property will
-            actually earn: cash flow, DSCR, illustrative taxes, and modeled exit outcomes. Both say
+            is a rental-screening calculator — it estimates cash flow, cap rate, CoC,
+            and DSCR from reviewed assumptions. Both say
             &quot;underwrite in seconds.&quot; They mean different things by it.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
@@ -156,7 +155,7 @@ export default function VsBrickedPage() {
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You&apos;re deciding whether a rental deserves your down payment.</li>
                 <li>You want cash flow, DSCR, cap rate, and CoC — with financing math baked in.</li>
-                <li>You want 10-year projections, illustrative tax impact, and modeled exit comparisons on every deal.</li>
+                <li>You want sensitivity and a 10-year cash-flow and equity planning projection.</li>
                 <li>You analyze a few deals a month and don&apos;t want a $49+ metered plan.</li>
               </ul>
             </div>
@@ -237,7 +236,7 @@ export default function VsBrickedPage() {
         {/* Complementary workflow */}
         <section className="mb-12 sm:mb-16 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-6 sm:p-8">
           <h2 className="text-xl sm:text-2xl font-extrabold text-[var(--brand-green)] mb-3">
-            How TrueCap + Bricked fit together (BRRRR &amp; flip-to-hold)
+            How the released tools can fit together
           </h2>
           <ol className="space-y-2.5 text-sm sm:text-base leading-relaxed text-foreground list-decimal pl-5">
             <li>
@@ -245,17 +244,18 @@ export default function VsBrickedPage() {
               localized repair estimates answer the valuation question.
             </li>
             <li>
-              <strong>Plug both numbers into TrueCap&apos;s BRRRR analyzer.</strong>{" "}
-              ARV drives the cash-out refi math; the repair figure feeds your all-in cost.
+              <strong>Keep ARV and repair costs in a complete project ledger.</strong>{" "}
+              TrueCap&apos;s integrated BRRRR and flip models are not currently released.
             </li>
             <li>
-              <strong>TrueCap answers the question Bricked can&apos;t:</strong> after the
-              refi, does this property cash-flow? What&apos;s the DSCR a lender sees? How
-              much capital comes back out?
+              <strong>Use TrueCap for the stabilized rental screen.</strong> Enter the
+              expected post-renovation rent, operating expenses, and permanent loan to
+              test cash flow and DSCR separately from the renovation ledger.
             </li>
             <li>
-              <strong>Stress-test before you commit.</strong> TrueCap&apos;s sensitivity
-              grid varies ARV ±10% — the single biggest BRRRR risk — in one view.
+              <strong>Stress-test each model.</strong> Vary ARV, rehab, timeline,
+              refinance terms, and later capital contributions in the project ledger;
+              use TrueCap&apos;s released grid for rent, vacancy, and rate sensitivity.
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
@@ -264,8 +264,8 @@ export default function VsBrickedPage() {
               free TrueCap analyzer
             </Link>{" "}
             or the{" "}
-            <Link href="/tools/brrrr-calculator" className="font-semibold text-primary hover:underline">
-              BRRRR calculator
+            <Link href="/blog/brrrr-method-explained" className="font-semibold text-primary hover:underline">
+              BRRRR workflow guide
             </Link>
             .
           </p>
@@ -279,9 +279,9 @@ export default function VsBrickedPage() {
             Find out what the deal actually earns — free.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow with no
-            account and no analysis cap. Pro adds projections, illustrative tax impact, modeled exit
-            scenarios, BRRRR + flip analyzers, and PDF reports in
+            TrueCap&apos;s no-account preliminary screen covers cap rate, CoC, DSCR, and monthly cash flow.
+            The first complete decision and evaluation allowances are shown on the pricing page. Pro adds 10-year cash-flow and equity
+            projections, sensitivity, Offer Ceiling, saved-deal comparison, and PDF reports in
             one paid plan. See live pricing for the current rate and limits.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -325,14 +325,14 @@ const BRICKED_FAQ: FaqItem[] = [
         For rental investors, yes — for wholesalers, not really. Bricked is an AI
         valuation tool: comps, ARV, and repair estimates for people making cash
         offers at volume. TrueCap is a returns calculator: cash flow, DSCR, cap
-        rate, 10-year projections, and illustrative tax impact for people underwriting
+        rate, sensitivity, and 10-year cash-flow and equity projections for people underwriting
         a rental. If you searched &quot;Bricked alternative&quot; because you
         wanted to review a property&apos;s modeled returns, TrueCap supports that
         workflow — and it&apos;s free to start.
       </>
     ),
     plainTextAnswer:
-      "For rental investors yes; for wholesalers not really. Bricked is AI valuation (comps, ARV, repairs) for volume cash offers. TrueCap is a returns calculator for rental underwriting (cash flow, DSCR, projections, tax). Free to start.",
+      "For rental investors yes; for wholesalers not really. Bricked is AI valuation (comps, ARV, repairs) for volume cash offers. TrueCap screens stabilized rental assumptions with cash flow, DSCR, sensitivity, and projections. Free to start.",
   },
   {
     question: "Does Bricked calculate cash flow or DSCR?",
@@ -386,15 +386,14 @@ const BRICKED_FAQ: FaqItem[] = [
       <>
         If you flip at volume, Bricked&apos;s comps + repair engine fits your
         acquisition workflow. If you flip occasionally — or you&apos;re deciding
-        between flipping and holding — TrueCap Pro&apos;s fix-and-flip analyzer
-        (net profit, annualized ROI, break-even ARV) plus the BRRRR analyzer covers
-        the strategy math in Pro, while hold analysis lets you compare modeled
-        outcomes under your assumptions. Check live pricing and choose the workflow
-        that matches the decision you need to review.
+        between flipping and holding, use a complete project ledger for the flip
+        and TrueCap&apos;s released core analyzer for the stabilized rental fallback.
+        TrueCap&apos;s integrated fix-and-flip and BRRRR models are not currently
+        released. Choose a released workflow that matches the decision you need.
       </>
     ),
     plainTextAnswer:
-      "Bricked focuses on acquisition and comp workflows. TrueCap Pro includes flip, BRRRR, and hold-analysis tools. Check live pricing and choose the workflow that matches the decision you need to review.",
+      "Bricked focuses on acquisition and comp workflows. TrueCap currently supports the stabilized rental screen but not an integrated flip or BRRRR lifecycle model. Use a complete project ledger for the project cash flows.",
   },
 ];
 

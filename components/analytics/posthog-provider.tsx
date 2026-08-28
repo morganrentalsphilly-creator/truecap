@@ -57,6 +57,38 @@ function hasSupabaseAuthCookie(): boolean {
   });
 }
 
+/**
+ * Emit cumulative return milestones from the account's server-authored
+ * creation time. The UUID is used only to scope a local dedupe key; it is not
+ * attached as an event property. These are intentionally "returned on or
+ * after day N" milestones, not exact-day retention windows (the dashboard
+ * query plan documents both definitions).
+ */
+function trackRetentionMilestones(userId: string, createdAt: string): void {
+  if (typeof window === "undefined") return;
+  const createdAtMs = Date.parse(createdAt);
+  if (!Number.isFinite(createdAtMs)) return;
+  const accountAgeDays = Math.floor((Date.now() - createdAtMs) / 86_400_000);
+  const milestones = [
+    { days: 30, event: "retained_30d" as const },
+    { days: 90, event: "retained_90d" as const },
+  ];
+  for (const milestone of milestones) {
+    if (accountAgeDays < milestone.days) continue;
+    const key = `truecap_${milestone.event}_v1_${userId}`;
+    try {
+      if (window.localStorage.getItem(key) === "1") continue;
+      // Set first so Strict Mode, route transitions, or parallel tabs cannot
+      // turn a milestone into a noisy page-view counter.
+      window.localStorage.setItem(key, "1");
+      trackEvent(milestone.event, { activity: "authenticated_visit" });
+    } catch {
+      // Storage may be unavailable in hardened browsers. Analytics must never
+      // interfere with authentication or navigation.
+    }
+  }
+}
+
 function PostHogTracker() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -185,6 +217,7 @@ function PostHogTracker() {
           .then(({ data }) => {
             if (cancelled || !data.user) return;
             identifyUser(data.user.id);
+            trackRetentionMilestones(data.user.id, data.user.created_at);
           })
           .catch((err) => {
             console.warn("[posthog-provider] initial identify failed:", err);
@@ -194,6 +227,7 @@ function PostHogTracker() {
           (event, session) => {
             if (event === "SIGNED_IN" && session?.user) {
               identifyUser(session.user.id);
+              trackRetentionMilestones(session.user.id, session.user.created_at);
             } else if (event === "SIGNED_OUT") {
               resetAnalytics();
             }

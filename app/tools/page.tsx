@@ -26,7 +26,7 @@ import {
 export const metadata: Metadata = {
   title: "Free Real Estate Calculators",
   description:
-    "Free, no-signup rental property calculators. Cap rate, cash-on-cash, BRRRR, 1% rule, and more — backed by the same math that powers the TrueCap full analyzer.",
+    "Free, no-signup rental property utilities for mortgage payments, rent-to-price screens, vacancy, closing costs, rehab budgets, ARV, and more.",
   alternates: { canonical: "/tools" },
   openGraph: {
     title: "Free Real Estate Calculators",
@@ -86,9 +86,9 @@ export default function ToolsLandingPage() {
             Free real estate calculators
           </h1>
           <p className="text-base text-muted-foreground mt-2 leading-relaxed">
-            No signup. Same math that powers the full TrueCap analyzer —
-            packaged as single-purpose tools so you can answer one question
-            in seconds.
+            No signup. These are narrow educational screens and input utilities,
+            not substitutes for the full TrueCap underwrite. Use the analyzer
+            when a decision depends on cash flow, NOI, DSCR, or returns.
           </p>
         </header>
 
@@ -152,9 +152,10 @@ export default function ToolsLandingPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-4">
             Single-purpose calculators are great for triaging deals. When
-            you&apos;re ready to underwrite — cash flow, projections, tax
-            savings, a secondary Screening Index, exit scenarios, BRRRR, fix-and-flip — open
-            the full TrueCap analyzer. Free to start.
+            you&apos;re ready to underwrite a stabilized rental, open the full
+            TrueCap analyzer for cash flow, cap rate, cash-on-cash return,
+            DSCR, projections, sensitivity, and a target-dependent Offer
+            Ceiling. Free to start.
           </p>
           <Link
             href="/"

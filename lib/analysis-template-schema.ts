@@ -56,6 +56,8 @@ export const analysisTemplateSchema = z.object({
       minCocPct: z.number().min(0).max(1000).nullish(),
       minDscr: z.number().min(0).max(100).nullish(),
       minCashFlowMonthly: z.number().min(-1_000_000).max(1_000_000).nullish(),
+      minIrrPct: z.number().min(-99.9).max(1000).nullish(),
+      maxCashRequired: z.number().min(0).max(1_000_000_000).nullish(),
       maxPurchasePrice: z.number().min(0).max(1_000_000_000).nullish(),
     })
     .nullish(),

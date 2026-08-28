@@ -301,7 +301,7 @@ export default function DtiInvestmentPropertyPost() {
               nothing to your income and a small drag to your debt, despite
               renting for $446 a month more than its payment. In your own{" "}
               <Link
-                href="/tools/cash-on-cash-calculator"
+                href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
                 cash-on-cash math
@@ -463,7 +463,7 @@ export default function DtiInvestmentPropertyPost() {
               instead of personal DTI as the primary qualifying ratio —
               whether its rent covers its debt service, measured by the{" "}
               <Link
-                href="/tools/dscr-calculator"
+                href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
                 debt-service-coverage ratio

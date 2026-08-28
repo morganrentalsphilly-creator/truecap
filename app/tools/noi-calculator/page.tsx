@@ -9,12 +9,14 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { getSiteUrl } from "@/lib/site-url";
 import { NoiCalculatorWidget } from "@/components/tools/noi-calculator-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
 import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
+import { isCalculatorReleased } from "@/lib/calculator-registry";
 
 export const metadata: Metadata = {
   title: "Free NOI Calculator — Net Operating Income + OpEx",
@@ -72,6 +74,8 @@ const FAQS: { q: string; a: string }[] = [
 ];
 
 export default function NoiCalculatorPage() {
+  if (!isCalculatorReleased("noi-calculator")) notFound();
+
   const siteUrl = getSiteUrl();
   const webAppLd = {
     "@context": "https://schema.org",
@@ -244,7 +248,7 @@ export default function NoiCalculatorPage() {
 
           <ToolsConversionCta
             calculatorName="NOI calculator"
-            hook="TrueCap's full analyzer takes NOI further: cap rate, CoC, DSCR, 10-year projection, tax savings, exit scenarios — all derived from the NOI you just calculated. Free to use, save deals, share with your lender."
+            hook="TrueCap's full analyzer takes NOI further: cap rate, CoC, DSCR, cash flow, a 10-year cash-flow and equity projection, sensitivity, and Offer Ceiling. Free to use, save deals, and share a review link."
           />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">

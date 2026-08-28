@@ -18,6 +18,12 @@ describe("Input Confidence analyzer persistence contract", () => {
     expect(analyzer).toContain("mergeInputConfidenceSourceContext({");
     expect(analyzer).toContain("confidenceContext.provenance");
     expect(analyzer).toContain("touchedInputFields: confidenceContext.touchedInputFields");
+    expect(analyzer).toContain(
+      "purchasePriceSource: confidenceContext.purchasePriceSource",
+    );
+    expect(savedAnalysesAction.replace(/\s+/g, "")).toContain(
+      "normalizePurchasePriceSourceContext(options?.purchasePriceSource",
+    );
     // The results-side AssumptionsSourceStrip ("Where these numbers came
     // from" ledger row) was removed by founder decision 2026-08-17, so the
     // data-confidence badge is the remaining live consumer of restored
@@ -30,6 +36,15 @@ describe("Input Confidence analyzer persistence contract", () => {
     expect(analyzer).toContain("persistedAddress === currentAddress");
     expect(analyzer.match(/persistedInputConfidenceSourceContextRef\.current = null/g)?.length)
       .toBeGreaterThanOrEqual(6);
+  });
+
+  it("binds the visible purchase-price receipt to address and value", () => {
+    expect(analyzer).toContain("purchasePriceProvenanceAddressRef");
+    expect(analyzer).toContain("purchasePriceProvenanceValueRef");
+    expect(analyzer).toContain("purchasePriceSourceRef.current = null");
+    expect(analyzer.replace(/\s+/g, "")).toContain(
+      "formatPurchasePriceSourceLabel(restoredSourceContext.purchasePriceSource",
+    );
   });
 
   it("marks context-aware saves so an intentional empty context clears stale legacy sources", () => {

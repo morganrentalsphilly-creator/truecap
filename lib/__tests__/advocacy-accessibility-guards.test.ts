@@ -131,7 +131,11 @@ describe("advocacy decision accessibility and reflow guards", () => {
     expect(summary).not.toContain("evidenceLedger");
     expect(summary).toContain("!advocacyContractEnabled &&");
     expect(summary).toContain('"Screening only"');
-    expect(summary).toContain('result.monthlyPayment <= 0 ? "N/A"');
+    expect(normalizeSource(summary)).toContain(
+      normalizeSource(
+        "result.monthlyPayment <= 0 ? NO_DEBT_SERVICE_DSCR_LABEL : result.dscr.toFixed(2)",
+      ),
+    );
     expect(summary).not.toContain("Screening Index");
     expect(summary).not.toContain("dealScoreResult");
     expect(summary).toContain(

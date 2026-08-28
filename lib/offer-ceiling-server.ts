@@ -65,7 +65,7 @@ function exactResult(
 
   const requiredMonthlyRent = solveRequiredMonthlyRent(values, target);
   const requiredInterestRate = solveRequiredInterestRate(values, target);
-  const currentMeets = meetsTarget(calculateAnalysis(values), target);
+  const currentMeets = meetsTarget(calculateAnalysis(values), target, values);
   const decisionThresholds = buildWhatNeedsToBeTrue(values, target);
   const money = (value: number) =>
     `${value < 0 ? "-" : ""}$${Math.abs(Math.round(value)).toLocaleString("en-US")}`;
@@ -105,6 +105,16 @@ function exactResult(
       cocReturn: result.achieved.cocReturn,
       capRate: result.achieved.capRate,
       dscr: result.achieved.dscr,
+      monthlyPayment: result.achieved.monthlyPayment,
+      ...(target.maxCashRequired !== undefined
+        ? { totalCashRequired: result.achieved.totalCashRequired }
+        : {}),
+      ...(target.minIrrPct !== undefined
+        ? {
+            irrPct: result.achievedIrr?.primaryIrrPct ?? null,
+            irrStatus: result.achievedIrr?.status ?? "none",
+          }
+        : {}),
     },
     makePriceWork: {
       currentMeets,
@@ -140,9 +150,10 @@ function exactResult(
 /**
  * Server-only policy + calculation boundary.
  *
- * Exact access is granted only by a server-verified paid subscription or by
- * the one public demo fixture. Everyone else receives a coarse range and no
- * exact or inverse-solver fields.
+ * The caller supplies a server-verified access decision: a paid subscription,
+ * exact metered evaluation deal, or exact signed no-signup deal grant. The one
+ * public demo fixture is also allowed. Everyone else receives a coarse range
+ * and no exact or inverse-solver fields.
  */
 export function resolveOfferCeilingForAccess(input: {
   values: InvestmentFormValues;

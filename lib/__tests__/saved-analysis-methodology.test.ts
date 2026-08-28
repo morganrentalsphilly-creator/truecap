@@ -171,6 +171,30 @@ describe("saved-analysis methodology resolution", () => {
     expect(shouldFreezeSavedMethodology(current.methodologyVersion, current.methodologyVersion)).toBe(false);
   });
 
+  it("freezes recorded v1.2 snapshots after the v1.3 formula release", () => {
+    const current = currentResult();
+    expect(current.methodologyVersion).toBe("1.3");
+    const recorded = {
+      ...current,
+      methodologyVersion: "1.2" as const,
+      netCashFlow: -12_345,
+    };
+
+    const resolved = resolveSavedAnalysisResult({
+      methodologyVersion: "1.2",
+      resultSnapshot: recorded,
+      recomputedResult: current,
+      recomputedExtras: {},
+    });
+
+    expect(shouldFreezeSavedMethodology("1.2", current.methodologyVersion)).toBe(true);
+    expect(resolved.mode).toBe("frozen-version-snapshot");
+    expect(resolved.usesRecordedSnapshot).toBe(true);
+    expect(resolved.didRecompute).toBe(false);
+    expect(resolved.result?.methodologyVersion).toBe("1.2");
+    expect(resolved.result?.netCashFlow).toBe(-12_345);
+  });
+
   it("freezes Deal Score and every stored financial field atomically", () => {
     const current = currentResult();
     const resolved = resolveSavedAnalysisSnapshot({

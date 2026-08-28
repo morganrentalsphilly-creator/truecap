@@ -98,6 +98,9 @@ export default defineConfig({
             process.env.E2E_SUPABASE_URL?.trim() || "http://127.0.0.1:54321",
           NEXT_PUBLIC_SUPABASE_ANON_KEY:
             process.env.E2E_SUPABASE_ANON_KEY?.trim() || "truecap-e2e-anon-key",
+          SHARE_LINK_SECRET:
+            process.env.SHARE_LINK_SECRET?.trim() ||
+            "truecap-e2e-anonymous-decision-signing-secret",
         },
       },
 });

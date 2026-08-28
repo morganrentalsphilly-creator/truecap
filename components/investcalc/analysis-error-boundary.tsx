@@ -26,6 +26,7 @@ import { AlertTriangle, RotateCw } from "lucide-react";
 import * as Sentry from "@sentry/nextjs";
 import { Button } from "@/components/ui/button";
 import type { AnalysisResult } from "@/lib/calc-analysis";
+import { formatDscr } from "@/lib/financial-presentation";
 
 type Props = {
   /** Optional - passed so the fallback can show the user's numbers
@@ -133,9 +134,7 @@ export class AnalysisErrorBoundary extends React.Component<Props, State> {
                 />
                 <FallbackMetric
                   label="DSCR"
-                  value={
-                    result.monthlyPayment > 0 ? result.dscr.toFixed(2) : "—"
-                  }
+                  value={formatDscr(result.dscr, result.monthlyPayment > 0)}
                   tone="neutral"
                 />
               </div>

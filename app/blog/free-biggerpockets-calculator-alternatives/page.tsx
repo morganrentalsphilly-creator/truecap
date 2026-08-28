@@ -34,7 +34,7 @@ const TITLE_PLAIN = "Free BiggerPockets Calculator Alternatives (2026)";
 const DESCRIPTION =
   "BiggerPockets' calculators stop after 5 free reports, then Pro is $390/yr. Six genuinely free alternatives for 2026 — and what each free tier really covers.";
 const PUBLISHED_AT = "2026-07-14";
-const MODIFIED_AT = "2026-07-14";
+const MODIFIED_AT = "2026-08-27";
 const READING_TIME_MIN = 10;
 
 export const metadata: Metadata = {
@@ -77,9 +77,9 @@ const TOOLS: Tool[] = [
   {
     rank: 1,
     name: "TrueCap",
-    bestFor: "Best free replacement for the BP rental calculator",
+    bestFor: "No-account preliminary rental screening",
     url: "/vs/biggerpockets-calculator",
-    pricing: "Free; Pro $29.99/mo (or $300/yr annual)",
+    pricing: "Free core; paid Investor Pro — see live pricing",
     disclosure:
       "Full disclosure: TrueCap is our tool. We put it first because the free tier does the same job as the BP rental calculator — with no report count to run out of. The side-by-side comparison shows where BiggerPockets still wins.",
     freeCovers: [
@@ -91,7 +91,7 @@ const TOOLS: Tool[] = [
     ],
     freeGates: [
       "Editing + unlimited saves + comparing deals (Pro)",
-      "10-year projections, illustrative tax impact, sensitivity (Pro)",
+      "10-year cash-flow and equity projections + sensitivity (Pro)",
       "PDF export + co-branded share links (Pro)",
     ],
     pickIf:
@@ -136,19 +136,20 @@ const TOOLS: Tool[] = [
   {
     rank: 4,
     name: "Stessa (Essentials plan)",
-    bestFor: "Best free tool after you close",
+    bestFor: "Public acquisition calculator plus free accounting entry point",
     url: "/vs/stessa",
-    pricing: "Essentials free; Manage $12/mo, Pro $28/mo (billed annually)",
+    pricing: "Essentials free; paid Manage and Pro — verify live pricing",
     freeCovers: [
-      "Free bookkeeping with bank feeds on unlimited properties",
-      "Rent collection and Schedule E-ready reporting",
+      "Public rental returns and income-tax calculator",
+      "Accounting and basic financial reports under current Essentials terms",
     ],
     freeGates: [
-      "Not an underwriting tool — no pre-purchase deal analysis to speak of",
-      "Advanced reports and budgeting sit in the paid tiers",
+      "Marketplace access and terms should be verified on Stessa's live pages",
+      "Schedule E is listed on current Manage and Pro plans",
+      "No target-derived Offer Ceiling described in official sources reviewed",
     ],
     pickIf:
-      "You're replacing the parts of BiggerPockets Pro you'd use after buying, not the calculator itself.",
+      "You want a public acquisition calculator plus a free entry plan for ongoing accounting.",
   },
   {
     rank: 5,
@@ -291,7 +292,7 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
               alternatives — including one we make, clearly labeled — plus an
               honest note on when Pro is actually the right buy.
             </p>
-            <p className="mt-4 text-xs text-muted-foreground">Published {PUBLISHED_AT}</p>
+            <p className="mt-4 text-xs text-muted-foreground">Published {PUBLISHED_AT} · Updated {MODIFIED_AT}</p>
             <BlogByline />
           </header>
 
@@ -305,7 +306,8 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
               adds saving (up to 15 properties) and native apps.{" "}
               <strong>Calculator.net</strong>{" "}
               is the no-signup one-pager, <strong>Stessa</strong>{" "}
-              covers the post-purchase side free, <strong>RentCast</strong>{" "}
+              publishes a marketplace acquisition workflow and a free
+              accounting entry plan, <strong>RentCast</strong>{" "}
               gives you a free rent number, and a{" "}
               <strong>spreadsheet</strong>{" "}
               — including BiggerPockets&apos; own free templates — remains the
@@ -438,9 +440,9 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
               free tool and compare it against your last BP report. TrueCap&apos;s
               core underwriting is free with no signup and no report count — or
               start with a single metric via the{" "}
-              <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">cap rate calculator</Link>,{" "}
-              <Link href="/tools/cash-on-cash-calculator" className="font-semibold text-primary hover:underline">cash-on-cash calculator</Link>, or{" "}
-              <Link href="/tools/dscr-calculator" className="font-semibold text-primary hover:underline">DSCR calculator</Link>. If
+              <Link href="/#main" className="font-semibold text-primary hover:underline">cap rate calculator</Link>,{" "}
+              <Link href="/#main" className="font-semibold text-primary hover:underline">cash-on-cash calculator</Link>, or{" "}
+              <Link href="/#main" className="font-semibold text-primary hover:underline">DSCR calculator</Link>. If
               you&apos;re comparing paid tools too, the wider roundup is in our{" "}
               <Link href="/blog/best-rental-property-calculator-2026" className="font-semibold text-primary hover:underline">best rental property calculators of 2026</Link>.
             </p>

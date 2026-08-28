@@ -248,11 +248,11 @@ export default function BlogPost() {
             leaves NOI of $28,800 − $12,838 = <strong>$15,962</strong>, and a
             cap rate of $15,962 ÷ $250,000 = <strong>6.4%</strong>. (Run your
             own line items in the{" "}
-            <Link href="/tools/noi-calculator" className="text-primary font-semibold hover:underline">
+            <Link href="/#main" className="text-primary font-semibold hover:underline">
               NOI calculator
             </Link>{" "}
             or go straight to the{" "}
-            <Link href="/tools/cap-rate-calculator" className="text-primary font-semibold hover:underline">
+            <Link href="/#main" className="text-primary font-semibold hover:underline">
               cap rate calculator
             </Link>
             .)

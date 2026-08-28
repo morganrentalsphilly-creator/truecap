@@ -47,7 +47,7 @@ describe("v1 analysis-date determinism", () => {
     expect(after).toEqual(before);
     expect(after.result.analysisDate).toBe("2026-12-31");
     expect(after.result.propertyAge).toBe(21);
-    expect(after.score.scoreMethodologyVersion).toBe("1.2");
+    expect(after.score.scoreMethodologyVersion).toBe("1.3");
   });
 
   it("anchors legacy/direct calls with no date instead of reading the wall clock", () => {

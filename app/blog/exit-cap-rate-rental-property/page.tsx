@@ -213,7 +213,7 @@ export default function ExitCapRatePost() {
               want to see how the cap rate and NOI move together on today&apos;s
               side of the trade first, the{" "}
               <Link
-                href="/tools/cap-rate-calculator"
+                href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
                 cap rate calculator
@@ -335,7 +335,7 @@ export default function ExitCapRatePost() {
               0.88x — a loss — at 7.5%. If you want to feel how the going-in side
               of this drives the exit, rebuild the NOI line in the{" "}
               <Link
-                href="/tools/noi-calculator"
+                href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
                 NOI calculator

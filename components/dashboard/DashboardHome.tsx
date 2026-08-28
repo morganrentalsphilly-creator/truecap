@@ -26,6 +26,7 @@ import {
 } from "@/components/dashboard/TopDeals";
 import { AIInsights } from "@/components/dashboard/AIInsights";
 import { dealAnchorSelector, pickRenderedAnchor } from "@/lib/deal-anchor";
+import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
 
 // The two recharts-heavy panels load as their own chunks so the
 // dashboard's initial JS ships without the ~100KB charting library —
@@ -56,7 +57,6 @@ const OwnedEquityChart = dynamic(
 );
 import type { DashboardDeal } from "@/lib/dashboard-deal-mapping";
 import {
-  mapRiskLevelToRisk,
   resolveReturnMetric,
   resolveRiskMetric,
 } from "@/lib/dashboard-risk-return";
@@ -350,35 +350,19 @@ function getRiskReturn(data: DashboardHomeData) {
     )
     .sort((a, b) => b.value - a.value)[0]?.deal;
 
-  // For "Safest deal" ranking, treat cash purchases (monthlyPayment <= 0)
-  // as effectively the safest possible debt structure — they have no debt
-  // service to cover. Their stored dscr=0 is N/A, not "underwater". We map
-  // them to Infinity in the comparator so they win over any financed deal.
+  // Debt coverage is meaningful only for financed deals. An all-cash deal has
+  // no debt service, so DSCR is N/A and cannot be promoted into an overall
+  // safety claim. Rank financed deals by DSCR only; other risks remain outside
+  // this narrow comparison signal.
   const safest = [...data.allDeals]
-    .map((deal) => {
-      const isCashPurchase =
-        deal.monthlyPayment != null && deal.monthlyPayment <= 0;
-      return {
-        deal,
-        dscr: isCashPurchase ? Infinity : deal.dscr,
-        mappedRisk: mapRiskLevelToRisk(deal.riskLevel),
-      };
-    })
-    .filter((item) => item.dscr != null || item.mappedRisk != null)
-    .sort((a, b) => {
-      // DSCR (~1-2, higher = safer) and mappedRisk (0.8-1.2, LOWER = safer) are
-      // different scales with opposite polarity — never compare across them. So:
-      // deals that have a DSCR rank among themselves by DSCR; a deal WITH a DSCR
-      // outranks one without (can't put them on one scale); only when NEITHER
-      // has a DSCR do we fall back to the risk-level scale. The old `||` compared
-      // a real DSCR against -Infinity, dumping every DSCR-less deal to the bottom.
-      const aHasDscr = a.dscr != null;
-      const bHasDscr = b.dscr != null;
-      if (aHasDscr && bHasDscr) return (b.dscr as number) - (a.dscr as number);
-      if (aHasDscr) return -1;
-      if (bHasDscr) return 1;
-      return (a.mappedRisk ?? Infinity) - (b.mappedRisk ?? Infinity);
-    })[0]?.deal;
+    .filter(
+      (deal) =>
+        deal.monthlyPayment != null &&
+        deal.monthlyPayment > 0 &&
+        deal.dscr != null &&
+        Number.isFinite(deal.dscr),
+    )
+    .sort((a, b) => (b.dscr as number) - (a.dscr as number))[0];
 
   return {
     chartDeals,
@@ -611,6 +595,9 @@ function getPortfolioKpis(data: DashboardHomeData) {
   }
   const weightedDscr =
     dscrDenominator > 0 ? dscrNumerator / dscrDenominator : null;
+  const allCashOnly = deals.every(
+    (deal) => deal.monthlyPayment != null && deal.monthlyPayment <= 0,
+  );
 
   const withCash = deals.filter((d) => d.cashToClose != null);
   const cashToClose = withCash.length
@@ -641,6 +628,7 @@ function getPortfolioKpis(data: DashboardHomeData) {
   return {
     avgScore,
     weightedDscr,
+    allCashOnly,
     cashToClose,
     needsReviewCount,
     cashFlowKnownCount,
@@ -835,8 +823,8 @@ function buildDecisionInsights(deals: DashboardDeal[]) {
           // Extreme cumulative ROI (finding 5): lead with the caution, keep
           // the raw figure as the secondary clause instead of the headline.
           body: isExtremeCumulativeRoi(roiPick.roiPct)
-            ? `Unusually high projected 10-yr ROI — ${formatPercent(roiPick.roiPct)} cumulative is above the ${EXTREME_ROI_CUMULATIVE_PCT}% band at ${roiPick.riskLevel ?? "unrated"} risk. Verify rent, price, and appreciation, then check exit scenarios for IRR and equity multiple before trusting it.`
-            : `${formatPercent(roiPick.roiPct)} projected 10-yr ROI at ${roiPick.riskLevel ?? "unrated"} risk. Note: that's cumulative — check the deal's exit scenarios for IRR and equity multiple before trusting it.`,
+            ? `Unusually high projected 10-yr ROI — ${formatPercent(roiPick.roiPct)} cumulative is above the ${EXTREME_ROI_CUMULATIVE_PCT}% band at ${roiPick.riskLevel ?? "unrated"} risk. Verify rent, price, appreciation, and the full cash-flow timeline before trusting it.`
+            : `${formatPercent(roiPick.roiPct)} projected 10-yr ROI at ${roiPick.riskLevel ?? "unrated"} risk. Note: that's cumulative — review the cash-flow timeline and assumptions before trusting it.`,
           tone: "opportunity" as const,
           action: {
             label: "Open this deal",
@@ -952,7 +940,12 @@ export function DashboardHome({
   const portfolioCapCoverageComplete = Boolean(
     portfolio && portfolio.capRateSampleCount === portfolio.totalCount,
   );
-  const owned = data.ownedPortfolio ?? null;
+  // Modeled equity is not actual portfolio performance. Keep the entire
+  // surface (including its header language and empty-state branch) dark until
+  // actual transactions and provenance are implemented separately.
+  const owned = isFeatureEnabled("owned_portfolio_actuals")
+    ? data.ownedPortfolio ?? null
+    : null;
   const ownedCount = owned?.count ?? 0;
   // Buy-box awareness (PV-1): headline + Decision Center tile only when the
   // user has ≥1 active box AND the server evaluated the FULL active set AND
@@ -1672,12 +1665,16 @@ export function DashboardHome({
                       </div>
                       <div className="mt-1 text-lg font-bold text-foreground">
                         {kpis.weightedDscr == null
-                          ? "—"
+                          ? kpis.allCashOnly
+                            ? NO_DEBT_SERVICE_DSCR_LABEL
+                            : "—"
                           : `${kpis.weightedDscr.toFixed(2)}×`}
                       </div>
                       <div className="text-[10px] text-muted-foreground">
                         {kpis.weightedDscr == null
-                          ? "cash purchases only"
+                          ? kpis.allCashOnly
+                            ? "all active deals are cash purchases"
+                            : "no financed DSCR data"
                           : kpis.weightedDscr >= 1.25
                             ? "above 1.25 lender bar"
                             : "below 1.25 lender bar"}

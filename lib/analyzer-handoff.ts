@@ -6,14 +6,17 @@
  * We pass them as URL query params (?price=&rent=&beds=&address=) rather than
  * localStorage so the handoff works cross-origin from embeds too.
  *
- * Pure + dependency-free so it's unit-testable and safe to import on both the
- * client widgets (build the URL) and the analyzer (read the params).
+ * Pure and client-safe so it's unit-testable and safe to import on both the
+ * client widgets (build the URL) and the analyzer (read the params). Strategy
+ * parsing also enforces the build-time specialist-model release gates.
  *
  * Only a small, common set of fields is supported — the ones that map cleanly
  * onto the analyzer's primary single-family inputs. A partial handoff (e.g.
  * price + rent only, from the cap-rate calculator) is fine: the analyzer
  * prefills what's provided and leaves the rest on defaults.
  */
+
+import { isSpecialistStrategyEnabled } from "@/lib/feature-flags";
 
 /** The three property types the analyzer supports (mirrors the form enum;
  *  kept local so this module stays dependency-free). */
@@ -42,6 +45,19 @@ export const HANDOFF_STRATEGY_KEYS: readonly HandoffStrategyKey[] = [
   "fix-flip",
   "short-term",
 ];
+
+/** A known key is not necessarily a released key. This check is shared by
+ * inbound parsing and outbound URL creation so a dark strategy can neither be
+ * emitted by first-party links nor materialized from a crafted URL. */
+export function isReleasedHandoffStrategy(
+  value: string | null | undefined,
+): value is HandoffStrategyKey {
+  return Boolean(
+    value &&
+      (HANDOFF_STRATEGY_KEYS as readonly string[]).includes(value) &&
+      isSpecialistStrategyEnabled(value),
+  );
+}
 
 export interface AnalyzerHandoff {
   /** Maps to purchasePrice. */
@@ -149,8 +165,8 @@ export function readAnalyzerHandoff(search: string): AnalyzerHandoff | null {
   // chip. Same contract as `type`: validated against the known keys, anything
   // else silently ignored so a bad link never crashes init.
   const rawStrategy = params.get("strategy")?.trim();
-  if (rawStrategy && (HANDOFF_STRATEGY_KEYS as readonly string[]).includes(rawStrategy)) {
-    out.strategy = rawStrategy as HandoffStrategyKey;
+  if (isReleasedHandoffStrategy(rawStrategy)) {
+    out.strategy = rawStrategy;
   }
 
   return Object.keys(out).length > 0 ? out : null;
@@ -193,7 +209,7 @@ export function buildAnalyzerHandoffUrl(
     // single-family is the analyzer default — omit it to keep links clean.
     params.set("type", input.propertyType);
   }
-  if (input.strategy) {
+  if (isReleasedHandoffStrategy(input.strategy)) {
     params.set("strategy", input.strategy);
   }
   params.set("utm_source", opts?.utmSource ?? "tool-handoff");

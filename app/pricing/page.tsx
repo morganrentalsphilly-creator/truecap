@@ -11,7 +11,7 @@
  * the auto-resume treats as mutually exclusive — it never re-fires.
  */
 
-import { TRIAL_DAYS, TRIAL_LABEL } from "@/lib/trial";
+import { PRODUCT_EVALUATION_DAYS } from "@/lib/product-access";
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -22,6 +22,7 @@ import { PricingTogglePlans } from "@/components/marketing/pricing-toggle-plans"
 import {
   getEntitlementsForUser,
   getActivePaidPlanSlug,
+  getProductEvaluationAccessForUser,
   hasAnySubscriptionHistory,
   hasCheckoutRecoverySubscription,
 } from "@/lib/entitlements";
@@ -31,15 +32,19 @@ import { loadStripeDisplayPrice } from "@/lib/stripe/display-prices";
 
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
-import { DealsAnalyzedTicker } from "@/components/marketing/deals-analyzed-ticker";
 import { TestimonialStrip } from "@/components/marketing/testimonial-card";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { rateAlertEmailsLive } from "@/lib/rate-alerts-mode";
 import { getSiteUrl } from "@/lib/site-url";
+import { formatPublicUsd, PUBLIC_PRO_MONTHLY_USD } from "@/lib/public-pricing";
+import {
+  formatPricingEvaluationAllowance,
+  summarizePricingEvaluation,
+} from "@/lib/pricing-evaluation";
 export const metadata: Metadata = {
   title: "Pricing — Screen Free, Repeat with Pro",
   description:
-    `Screen rental deals free. New subscribers get a ${TRIAL_DAYS}-day free trial of Pro to calculate an Offer Ceiling, apply a Buy Box, stress-test downside, compare opportunities, and generate reports.`,
+    `Complete a rental decision free, then create an account for a ${PRODUCT_EVALUATION_DAYS}-day no-card evaluation with three Pro deals and one comparison.`,
   alternates: { canonical: "/pricing" },
   openGraph: {
     title: "TrueCap pricing — Free screening, repeatable Pro underwriting",
@@ -64,15 +69,15 @@ const FAQS: { q: string; a: string }[] = [
     // app/page.tsx. Offer Ceiling, sensitivity, BRRRR/fix-and-flip, and share
     // links are PRO features — a previous version of this answer
     // claimed they were free, contradicting every other surface.
-    a: "Yes. The cash-flow analyzer — cap rate, CoC, DSCR, monthly cash flow, address auto-fill, the 0–100 Screening Index, and plain-English screening context — is free forever and unlimited. No card required to start. Pro adds a personal Buy Box, Offer Ceiling, sensitivity grid, BRRRR + fix-and-flip, 10-year projections, illustrative tax impact, modeled exit comparisons, co-branded shareable links, and PDF reports.",
+    a: "Yes. Your first personalized decision includes asking-price cash flow, selected-rule fit, a target-backed Offer Ceiling, a downside check, and next steps. No account or card is required. Create an account to keep the work and begin the no-card evaluation.",
   },
   {
     q: "Can I cancel anytime?",
     a: "Yes. Cancel from your profile in one click. Your Pro features stay active until the end of the period you've paid for, then automatically downgrade to Free.",
   },
   {
-    q: "How does the Pro trial work?",
-    a: `Stripe collects a card at checkout. New subscribers get full Pro access for ${TRIAL_DAYS} days, and you can cancel online anytime. Subscription billing starts after the trial unless you cancel first. Returning subscribers start paid access immediately and are not eligible for another free trial.`,
+    q: "How does the product evaluation work?",
+    a: `A new account receives ${PRODUCT_EVALUATION_DAYS} days to complete three Pro deal analyses and one full comparison. No card is collected, no charge is scheduled, and nothing auto-renews. If you later subscribe, checkout shows the exact charge before you confirm.`,
   },
   {
     q: "Do I keep my saved deals if I downgrade?",
@@ -85,11 +90,11 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "How accurate is the auto-fill?",
-    a: "Rent uses a HUD area benchmark (ZIP-level when available, otherwise county-level), not a property-specific rent comp. The rate uses FRED's national owner-occupied 30-year benchmark, not an investor lender quote. Property tax starts from a state effective-rate estimate. Every field is editable—replace these screening defaults with local comps, the actual tax bill, insurance, and written loan terms before relying on the result.",
+    a: "Rent uses a HUD area benchmark (ZIP-level when available, otherwise an FMR area), not a property-specific rent comp. The rate uses FRED's national owner-occupied 30-year benchmark, not an investor lender quote. Property tax is manual: enter a local annual bill or reviewed rate; until then the model discloses its generic 1.1% preliminary fallback. Replace every screening assumption with property-specific evidence before relying on the result.",
   },
   {
     q: "Is this for agents, investors, or both?",
-    a: "Both. Investors use TrueCap to underwrite their own deals. Agents use it to send a defensible analysis to a client at the showing. The shared-link feature was built for exactly that hand-off.",
+    a: "Both. Investors use TrueCap to screen their own deals. Agents can share a reviewable analysis with a client, with the entered assumptions and verification caveats intact. The shared-link feature was built for that hand-off.",
   },
 ];
 
@@ -98,23 +103,21 @@ const FEATURE_COMPARISON: Array<[
   free: boolean | string,
   pro: boolean | string,
 ]> = [
-  ["Unlimited analyses", true, true],
+  ["Unlimited preliminary core screens", true, true],
   ["Cap rate · CoC · DSCR · cash flow", true, true],
-  ["Auto-fill (HUD rent · FRED rate · state tax)", true, true],
+  ["Labeled HUD rent · FRED rate benchmarks", true, true],
   ["Screening Index (0–100) with factor breakdown", true, true],
   ["Sale + rent comps from the address", "1 free", "50 / mo"],
-  ["Offer Ceiling · Sensitivity grid", false, true],
-  ["BRRRR + fix-and-flip + rehab estimator", false, true],
+  ["Offer Ceiling · downside sensitivity", "First complete decision", true],
   ["Shareable read-only deal links", true, true],
   ["10-year cash flow projection", false, true],
-  ["Illustrative tax impact + depreciation", false, true],
-  ["Modeled exit-year comparison", false, true],
   ["Buy Box auto-screening", false, true],
   ["Deal pipeline + tags (CRM)", false, true],
   ["Saved analysis templates", false, true],
   ["Due-diligence checklist + document vault", false, true],
   ["Rate-drop alerts on saved deals", false, true],
-  ["Lender · partner · personal PDF reports", false, true],
+  ["Decision memo/report", "First decision", true],
+  ["Lender · partner report modes", false, true],
   ["Save deals", "Up to 5", "Unlimited"],
   ["Compare deals side-by-side", false, "Up to 4"],
   ["Priority support", false, true],
@@ -128,12 +131,9 @@ export default async function PricingPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // hadPriorSubscription mirrors the repeat-trial guard in
-  // app/actions/billing.ts (any subscription row, any status): checkout only
-  // grants the free trial to first-time subscribers, so the plan cards swap
-  // their trial-promising copy for a "Welcome back" variant when the trial
-  // won't be granted. Anonymous visitors keep the trial copy — they're
-  // overwhelmingly first-time, and checkout re-checks after signup anyway.
+  // Signed-in evaluation copy comes from the actual evaluation row plus its
+  // immutable usage ledger. Subscription history is still needed for checkout
+  // recovery messaging, but it is never treated as proof of live allowances.
   // Agent Pro renders ONLY when its Stripe price env is configured — until
   // then the tier is fully plumbed but invisible (nothing to sell yet).
   // Whether Agent Pro EXISTS is a configuration fact (env + plan rows), not a
@@ -150,6 +150,7 @@ export default async function PricingPage() {
     activePaidPlanSlug,
     hadPriorSubscription,
     billingRecoveryRequired,
+    productEvaluationAccess,
   ] = await Promise.all([
     loadStripeDisplayPrice("pro_monthly"),
     loadStripeDisplayPrice("pro_annual"),
@@ -158,7 +159,12 @@ export default async function PricingPage() {
     user ? getActivePaidPlanSlug(supabase, user.id) : Promise.resolve(null),
     user ? hasAnySubscriptionHistory(supabase, user.id) : Promise.resolve(false),
     user ? hasCheckoutRecoverySubscription(supabase, user.id) : Promise.resolve(false),
+    user
+      ? getProductEvaluationAccessForUser(supabase, user.id)
+      : Promise.resolve(null),
   ]);
+  const pricingEvaluation = summarizePricingEvaluation(productEvaluationAccess);
+  const evaluationAllowance = formatPricingEvaluationAllowance(pricingEvaluation);
   const entitlements = user ? await getEntitlementsForUser(supabase, user.id) : null;
   const siteUrl = getSiteUrl();
   const recurringOffers = [
@@ -214,15 +220,17 @@ export default async function PricingPage() {
               From first screen to shareable underwrite. <span className="text-primary">One review workflow.</span>
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-balance text-[15px] leading-relaxed text-muted-foreground sm:text-lg">
-              {/* Trial-promising hero variant must mirror the checkout guard
-                  (billing.ts repeat-trial check) exactly like the plan cards
-                  below — an ex-subscriber sees "go Pro", not a trial that
-                  checkout won't grant. */}
               {!user
-                ? `Screen any deal free. New subscribers get a ${TRIAL_DAYS}-day free trial of ${proOfferName}; returning subscribers start paid access immediately.`
-                : hadPriorSubscription
+                ? `Complete your first decision free. Create an account for ${PRODUCT_EVALUATION_DAYS} days, three ${proOfferName} deals, and one comparison — no card.`
+                : activePaidPlanSlug || billingRecoveryRequired
                   ? `Screen any deal free. Use ${proOfferName} to review rule fit, the Offer Ceiling, what could break, and how to share the underwrite.`
-                  : `Screen any deal free, then use a ${TRIAL_LABEL} of ${proOfferName} to review rule fit, the Offer Ceiling, what could break, and how to share the underwrite.`}
+                  : pricingEvaluation.status === "active" && evaluationAllowance
+                  ? `Your no-card evaluation has ${evaluationAllowance}.`
+                  : pricingEvaluation.status === "exhausted"
+                    ? "Your included evaluation runs are complete. Keep screening deals free, or subscribe when you want another complete Pro decision."
+                    : pricingEvaluation.status === "expired"
+                      ? "Your no-card evaluation has ended. Keep screening deals free, or subscribe when you want another complete Pro decision."
+                      : `Screen any deal free. Use ${proOfferName} to review rule fit, the Offer Ceiling, what could break, and how to share the underwrite.`}
             </p>
             <div className="mt-6 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
               <Link
@@ -232,17 +240,11 @@ export default async function PricingPage() {
                 Analyze a property free
               </Link>
               <Link
-                href="#plans"
+                href="#pro"
                 className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-card px-5 py-3 text-sm font-bold text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 See Pro plans
               </Link>
-            </div>
-            {/* Real-data social proof — investors arriving at /pricing
-                are evaluating credibility. A live count of recent
-                analyses converts skepticism faster than testimonials. */}
-            <div className="mt-5 flex justify-center">
-              <DealsAnalyzedTicker window="7d" />
             </div>
           </div>
         </section>
@@ -282,7 +284,10 @@ export default async function PricingPage() {
               points back here with ?billing=checkout_cancelled. Suspense keeps
               the page's rendering unaffected by the banner's useSearchParams. */}
           <Suspense fallback={null}>
-            <CheckoutCancelledBanner hadPriorSubscription={hadPriorSubscription} />
+            <CheckoutCancelledBanner
+              hadPriorSubscription={hadPriorSubscription}
+              evaluation={pricingEvaluation}
+            />
           </Suspense>
           <PricingTogglePlans
             monthly={monthly}
@@ -291,7 +296,7 @@ export default async function PricingPage() {
             agentAnnual={agentAnnual}
             isAuthenticated={Boolean(user)}
             activePaidPlanSlug={activePaidPlanSlug}
-            hadPriorSubscription={hadPriorSubscription}
+            evaluation={pricingEvaluation}
             billingRecoveryRequired={billingRecoveryRequired}
             agentProConfigured={agentProConfigured}
             proOfferName={proOfferName}
@@ -308,8 +313,7 @@ export default async function PricingPage() {
               <strong className="text-foreground">
                 Overpaying by even 3% on a $250,000 rental costs $7,500
               </strong>{" "}
-              — before you collect a dollar of rent. Pro
-              {monthly?.amountLabel ? ` is ${monthly.amountLabel}/mo and` : ""} computes
+              — before you collect a dollar of rent. {proOfferName} is {formatPublicUsd(PUBLIC_PRO_MONTHLY_USD)}/month and computes
               an Offer Ceiling under the selected targets on every deal you review.
             </p>
           </div>
@@ -331,21 +335,12 @@ export default async function PricingPage() {
             </span>
             <span aria-hidden className="text-muted-foreground/40">·</span>
             <span>
-              {!user ? (
-                <>
-                  <strong className="text-foreground">
-                    New subscribers get a {TRIAL_DAYS}-day free trial
-                  </strong>
-                  ; returning subscribers start paid access immediately
-                </>
-              ) : hadPriorSubscription ? (
-                <><strong className="text-foreground">Full access immediately</strong></>
-              ) : (
-                <><strong className="text-foreground">{TRIAL_DAYS} days of full Pro</strong> before subscription billing</>
-              )}
+              <strong className="text-foreground">
+                {PRODUCT_EVALUATION_DAYS}-day evaluation · 3 Pro deals · 1 comparison
+              </strong>
             </span>
             <span aria-hidden className="text-muted-foreground/40">·</span>
-            <span>Secure billing by <strong className="text-foreground">Stripe</strong></span>
+            <span><strong className="text-foreground">No card, no auto-renewal</strong></span>
           </div>
         </section>
 

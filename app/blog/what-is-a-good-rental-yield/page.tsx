@@ -262,7 +262,7 @@ export default function BlogPost() {
             wrong — but only one of them knows the property has a roof, a tax
             bill, and occasional empty months. (Run your own line items in
             the{" "}
-            <Link href="/tools/noi-calculator" className="text-primary font-semibold hover:underline">
+            <Link href="/#main" className="text-primary font-semibold hover:underline">
               NOI calculator
             </Link>{" "}
             if you want to stress the expense budget.)
@@ -354,7 +354,7 @@ export default function BlogPost() {
             a 10.8% gross yield — just to break even, and about{" "}
             <strong>$2,360/month</strong> — a 12.9% gross yield — to hit DSCR
             1.25. Check any deal&apos;s coverage in the{" "}
-            <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">
+            <Link href="/#main" className="text-primary font-semibold hover:underline">
               DSCR calculator
             </Link>
             ; the levers that move the bar are down payment, rate, and the
@@ -366,7 +366,7 @@ export default function BlogPost() {
             financed math becomes winnable. Whether a specific deal inside
             that band actually wins depends on its tax county, its insurance
             premium, your rate, and your down payment. The{" "}
-            <Link href="/tools/rental-cash-flow-calculator" className="text-primary font-semibold hover:underline">
+            <Link href="/#main" className="text-primary font-semibold hover:underline">
               cash flow calculator
             </Link>{" "}
             runs the whole stack — rent to NOI to debt service to monthly
@@ -404,7 +404,7 @@ export default function BlogPost() {
             line by line and compute the real NOI. This is where the
             twin-property gaps surface, where pro-forma fantasy vacancy gets
             corrected, and where a{" "}
-            <Link href="/tools/cap-rate-calculator" className="text-primary font-semibold hover:underline">
+            <Link href="/#main" className="text-primary font-semibold hover:underline">
               cap rate
             </Link>{" "}
             you&apos;d actually defend gets built.

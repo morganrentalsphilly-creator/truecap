@@ -11,12 +11,15 @@ import {
   maoTargetFingerprint,
   type MaoTargetField,
 } from "@/lib/mao-target-editor";
+import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
 
 const FIELDS = [
   ["capRate", "Target cap rate (%)"],
   ["cocReturn", "Target cash-on-cash (%)"],
   ["monthlyCashFlow", "Min cash flow ($/mo)"],
   ["dscr", "Min DSCR"],
+  ["minIrrPct", "Min 10-year pre-tax IRR (%)"],
+  ["maxCashRequired", "Max cash required ($)"],
   ["maxPurchasePrice", "Max purchase price ($)"],
 ] as const satisfies ReadonlyArray<readonly [MaoTargetField, string]>;
 
@@ -29,6 +32,9 @@ function inputsFromTarget(target: MaoTarget): Inputs {
     monthlyCashFlow:
       target.monthlyCashFlow == null ? "" : String(target.monthlyCashFlow),
     dscr: target.dscr == null ? "" : String(target.dscr),
+    minIrrPct: target.minIrrPct == null ? "" : String(target.minIrrPct),
+    maxCashRequired:
+      target.maxCashRequired == null ? "" : String(target.maxCashRequired),
     maxPurchasePrice:
       target.maxPurchasePrice == null ? "" : String(target.maxPurchasePrice),
   };
@@ -108,7 +114,7 @@ export function PreRunCriteriaEditor({
         Leave a field blank to ignore it. The main Analyze button uses the exact
         values below for this analysis.
       </p>
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {FIELDS.map(([field, label]) => {
           const bounds = MAO_TARGET_BOUNDS[field];
           const inputId = `${uid}-${field}`;
@@ -123,7 +129,9 @@ export function PreRunCriteriaEditor({
                 id={inputId}
                 type="number"
                 inputMode={
-                  field === "monthlyCashFlow" || field === "maxPurchasePrice"
+                  field === "monthlyCashFlow" ||
+                  field === "maxCashRequired" ||
+                  field === "maxPurchasePrice"
                     ? "numeric"
                     : "decimal"
                 }
@@ -131,7 +139,7 @@ export function PreRunCriteriaEditor({
                 max={bounds.max}
                 step={bounds.step}
                 value={cashDscr ? "" : inputs[field]}
-                placeholder={cashDscr ? "N/A — cash" : "Any"}
+                placeholder={cashDscr ? NO_DEBT_SERVICE_DSCR_LABEL : "Any"}
                 disabled={cashDscr}
                 onChange={(event) => {
                   const nextInputs = {

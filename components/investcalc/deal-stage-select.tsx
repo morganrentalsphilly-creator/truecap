@@ -26,7 +26,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PIPELINE_STAGES, pipelineStageLabel, type PipelineStage } from "@/lib/pipeline";
-import { confirmPipelineStageChange } from "@/lib/pipeline-pass-confirmation";
+import {
+  confirmPipelineStageChange,
+  promptForPipelinePassReason,
+} from "@/lib/pipeline-pass-confirmation";
 import { trackEvent } from "@/lib/analytics";
 
 export function DealStageSelect({
@@ -58,10 +61,27 @@ export function DealStageSelect({
     ) {
       return;
     }
+    const reason = promptForPipelinePassReason({
+      previousStage: stage,
+      nextStage: next,
+      prompt: (message) => window.prompt(message),
+    });
+    if (next === "passed" && !reason) {
+      toast({
+        title: "Pass reason required",
+        description: "Add the reason you are passing so the Deal Log stays useful.",
+        variant: "destructive",
+      });
+      return;
+    }
     setDisplayStage(next);
     startSaving(async () => {
       try {
-        const result = await updateSavedDealStageAction(savedDealId, next);
+        const result = await updateSavedDealStageAction(
+          savedDealId,
+          next,
+          reason ? { reason } : undefined,
+        );
         if (!result.ok) {
           setDisplayStage(stage);
           toast({
@@ -75,7 +95,7 @@ export function DealStageSelect({
           title: next === "passed" ? "Marked as Passed" : "Stage updated",
           description:
             next === "passed"
-              ? `Recorded as your decision. Undo restores ${pipelineStageLabel(stage)}.`
+              ? `Reason recorded in Deal Log. Undo restores ${pipelineStageLabel(stage)}.`
               : `Moved to ${pipelineStageLabel(next)}.`,
           variant: "success",
           action:
@@ -87,7 +107,11 @@ export function DealStageSelect({
                   setDisplayStage(stage);
                   startSaving(async () => {
                     try {
-                      const undo = await updateSavedDealStageAction(savedDealId, stage);
+                      const undo = await updateSavedDealStageAction(
+                        savedDealId,
+                        stage,
+                        { note: "Pass decision undone." },
+                      );
                       if (!undo.ok) {
                         setDisplayStage("passed");
                         toast({

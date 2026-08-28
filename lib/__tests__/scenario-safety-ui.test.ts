@@ -38,9 +38,9 @@ describe("what-if scenario safety", () => {
     expect(metricsBand).toContain(
       'source === "scenario" ? "Scenario" : "Base"'
     );
-    expect(metricsBand).toContain(
-      'sourcedLabel("Monthly Cash Flow", "scenario")'
-    );
+    expect(metricsBand).toContain('"Recurring Monthly Cash Flow (excl. balloon)"');
+    expect(metricsBand).toContain(': "Monthly Cash Flow"');
+    expect(metricsBand).toContain('"scenario",');
     expect(metricsBand).toContain('sourcedLabel("After-Tax CF", "base")');
     expect(dashboard).toContain('"Base risks and verification"');
     expect(dashboard).toContain('"Base long-term analysis"');

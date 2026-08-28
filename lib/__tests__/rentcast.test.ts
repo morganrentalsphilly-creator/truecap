@@ -30,6 +30,9 @@ describe("parseSaleListing", () => {
   it("accepts a single object and returns null without a usable price", () => {
     expect(parseSaleListing({ status: "Active", price: 410000 })!.listPrice).toBe(410000);
     expect(parseSaleListing({ status: "Active" })).toBeNull();
+    expect(parseSaleListing({ status: "Active", price: 0 })).toBeNull();
+    expect(parseSaleListing({ status: "Active", price: -1 })).toBeNull();
+    expect(parseSaleListing({ status: "Active", price: "   " })).toBeNull();
     expect(parseSaleListing([])).toBeNull();
     expect(parseSaleListing(null)).toBeNull();
   });

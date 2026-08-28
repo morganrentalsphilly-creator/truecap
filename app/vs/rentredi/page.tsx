@@ -60,7 +60,6 @@ const MATRIX: Row[] = [
   { feature: "Cap rate / CoC / DSCR analysis",     truecap: "Yes — full engine, free tier",                                          rentredi: "Not modeled",                                                       winner: "truecap" },
   { feature: "10-year projection",                 truecap: "Pro — rent growth + expense growth + appreciation",                     rentredi: "Not modeled",                                                       winner: "truecap" },
   { feature: "Sensitivity grid",                   truecap: "Pro — rent ±10%, vacancy ±5pp, rate ±1pp",                                rentredi: "Not modeled",                                                       winner: "truecap" },
-  { feature: "Illustrative tax impact",            truecap: "Pro — depreciation + interest + modeled after-tax CF",                   rentredi: "Not modeled",                                                       winner: "truecap" },
   { feature: "Screening Index (0-100)",                 truecap: "Free — with subscore breakdown",                                          rentredi: "Not modeled",                                                       winner: "truecap" },
   { feature: "Selected-rule fit",                  truecap: "Yes — named targets with supporting economics",                         rentredi: "Not applicable",                                                    winner: "truecap" },
   { feature: "Online rent collection",             truecap: "No",                                                                     rentredi: "Yes — ACH + card, late fees, auto-pay",                              winner: "rentredi" },
@@ -156,7 +155,7 @@ export default function VsRentRediPage() {
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>Underwriting a property before you buy.</li>
                 <li>Comparing two or three potential deals side-by-side.</li>
-                <li>Modeling 10-year cash flow, illustrative tax impact, and exit scenarios.</li>
+                <li>Modeling 10-year cash flow and equity under editable assumptions.</li>
                 <li>Stress-testing assumptions (rent, vacancy, rate).</li>
                 <li>Sharing a polished read-only deal analysis with partners or lenders.</li>
               </ul>
@@ -275,11 +274,11 @@ export default function VsRentRediPage() {
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Want to see the underwriting step in action? Try the{" "}
-            <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">
+            <Link href="/#main" className="font-semibold text-primary hover:underline">
               cap rate calculator
             </Link>{" "}
             or the{" "}
-            <Link href="/tools/dscr-calculator" className="font-semibold text-primary hover:underline">
+            <Link href="/#main" className="font-semibold text-primary hover:underline">
               DSCR calculator
             </Link>
             , or read the guide on{" "}
@@ -300,8 +299,8 @@ export default function VsRentRediPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly
             cash flow and plain read-only share links. Pro adds co-branding,
-            10-year projections, illustrative tax impact, sensitivity, Offer Ceiling,
-            strategy analyzers, and included PDFs. New one-time PDF checkout is
+            10-year cash-flow and equity projections, sensitivity, Offer Ceiling,
+            saved-deal comparison, and included PDFs. New one-time PDF checkout is
             temporarily unavailable. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">

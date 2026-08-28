@@ -10,8 +10,10 @@ import {
 import { calculateMaxAllowableOffer } from "../max-allowable-offer";
 import { describeMaoTarget } from "../mao-targets";
 import { calculateSampleDealOutcome } from "../sample-deal-analysis";
+import { isFeatureReleased } from "../entitlements-catalog";
 import {
   isTrueCapSyntheticSampleAddress,
+  sampleProPreviewAddsCapability,
   SAMPLE_DEAL_FIXTURE,
 } from "../sample-deal";
 
@@ -98,8 +100,8 @@ describe("versioned synthetic shared sample", () => {
     }).toMatchInlineSnapshot(`
       {
         "capRate": 9.3328,
-        "cashFlow": 554,
-        "dealScore": 81,
+        "cashFlow": 554.04,
+        "dealScore": 86,
         "dscr": 1.5222,
         "maxOffer": 236000,
       }
@@ -134,5 +136,102 @@ describe("versioned synthetic shared sample", () => {
     );
     expect(source).toContain("analysisDateForExplicitV1Run({");
     expect(source).toContain("preserveExisting: pendingSampleRunRef.current");
+  });
+});
+
+/**
+ * The sample Pro preview is a marketing demo for a visitor who does NOT have
+ * the paid report. It costs the viewer their own framing — the property is
+ * relabelled "Philadelphia rental example" and the criteria are presented as
+ * product examples — so it must switch OFF for anyone who already has every
+ * panel it can show. The live regression: `tax_strategy` and `exit_scenarios`
+ * were marked `shipped: false`, which pins them false for every plan, so the
+ * old four-way "already fully Pro" conjunction could never be satisfied. A
+ * subscriber who clicked Share on the sample and signed back in was demoted
+ * into demo framing and lost the address off their own decision summary.
+ */
+describe("sample Pro preview only runs when it can still show something", () => {
+  const fullyEntitled = {
+    canUseProjections: true,
+    canUseTaxStrategy: true,
+    canUseExitScenarios: true,
+    canUseDealScore: true,
+  };
+
+  it("stays off for a subscriber who already has every previewable panel", () => {
+    expect(sampleProPreviewAddsCapability(fullyEntitled)).toBe(false);
+  });
+
+  it("never counts a panel the catalog has not released", () => {
+    // The visitor has exactly what a released catalog can grant them. An
+    // unreleased panel is missing for everyone and is not unlocked by the
+    // preview either, so it must not keep the preview armed.
+    expect(
+      sampleProPreviewAddsCapability({
+        ...fullyEntitled,
+        canUseTaxStrategy: isFeatureReleased("tax_strategy"),
+        canUseExitScenarios: isFeatureReleased("exit_scenarios"),
+      }),
+    ).toBe(false);
+  });
+
+  it("still previews the full report for a free or anonymous visitor", () => {
+    expect(
+      sampleProPreviewAddsCapability({
+        canUseProjections: false,
+        canUseTaxStrategy: false,
+        canUseExitScenarios: false,
+        // Screening Index is free for everyone; projections are not.
+        canUseDealScore: true,
+      }),
+    ).toBe(true);
+  });
+
+  it("keeps the analyzer's arm flag routed through the released-panel gate", () => {
+    const source = readFileSync(
+      resolve(process.cwd(), "components/investcalc/investcalc-page.tsx"),
+      "utf8",
+    );
+
+    expect(source).toContain("pendingSamplePreviewRef.current &&");
+    expect(source).toContain("sampleProPreviewAddsCapability({");
+    // The raw conjunction is the defect: it treats an unreleased panel as
+    // proof the visitor is missing something.
+    expect(source).not.toMatch(
+      /canUseProjections\s*&&\s*canUseTaxStrategy\s*&&\s*canUseExitScenarios\s*&&\s*canUseDealScore/,
+    );
+  });
+
+  it("substitutes the example label only while the preview is showing", () => {
+    const normalize = (value: string) => value.replace(/\s+/g, " ");
+    const dashboard = readFileSync(
+      resolve(process.cwd(), "components/investcalc/analysis-dashboard.tsx"),
+      "utf8",
+    );
+    const summary = readFileSync(
+      resolve(
+        process.cwd(),
+        "components/investcalc/focused-decision-summary.tsx",
+      ),
+      "utf8",
+    );
+
+    // Preview → sample target profile → example label instead of the address.
+    // Each hop must stay intact, or the gate above stops protecting anything.
+    expect(normalize(dashboard)).toContain(
+      normalize(
+        "targetProfileId={ isSampleProPreview ? SAMPLE_DEAL_FIXTURE.targetProfile.id",
+      ),
+    );
+    expect(normalize(summary)).toContain(
+      normalize(
+        `const isSampleCriteria = targetProfileId === "${SAMPLE_DEAL_FIXTURE.targetProfile.id}";`,
+      ),
+    );
+    expect(normalize(summary)).toContain(
+      normalize(
+        `const displayAddress = isSampleCriteria ? "${SAMPLE_DEAL_FIXTURE.display.shortAddress}" : values.address;`,
+      ),
+    );
   });
 });

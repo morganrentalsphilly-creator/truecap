@@ -30,5 +30,14 @@ export function isRecordedPriceEstimated(
     !Array.isArray(inputConfidence.sourceContext)
       ? (inputConfidence.sourceContext as Record<string, unknown>)
       : null;
-  return sourceContext?.purchasePriceEstimated === true;
+  const purchasePriceSource =
+    sourceContext?.purchasePriceSource &&
+    typeof sourceContext.purchasePriceSource === "object" &&
+    !Array.isArray(sourceContext.purchasePriceSource)
+      ? (sourceContext.purchasePriceSource as Record<string, unknown>)
+      : null;
+  return (
+    sourceContext?.purchasePriceEstimated === true ||
+    purchasePriceSource?.kind === "avm-estimate"
+  );
 }

@@ -25,6 +25,7 @@ import {
 } from "@/lib/market-benchmarks";
 import type { AnalysisDashboardTab } from "./analysis-dashboard";
 import { APPRECIATION_PLAY_MIN_ANNUAL_RETURN_PCT } from "@/lib/deal-score";
+import { formatDscr } from "@/lib/financial-presentation";
 
 /**
  * Inline market-context labels surfaced under each metric tile.
@@ -40,7 +41,10 @@ import { APPRECIATION_PLAY_MIN_ANNUAL_RETURN_PCT } from "@/lib/deal-score";
  * Falls back to national bands when the address doesn't parse (free
  * form input, non-US address, no state code detectable).
  */
-function capRateBenchmarkLabel(capRatePct: number, address?: string | null): string {
+function capRateBenchmarkLabel(
+  capRatePct: number,
+  address?: string | null,
+): string {
   const benchmark = getCapRateBenchmark(address);
   if (benchmark && benchmark.scope !== "national") {
     return formatCapRateBenchmarkSubline(capRatePct, benchmark);
@@ -60,7 +64,10 @@ function capRateBenchmarkLabel(capRatePct: number, address?: string | null): str
  * red only when the cap rate is negative. Replaces the old `>= 5 ? green` rule
  * that lit up green on a 5.4% cap sitting BELOW a 7.5% local median.
  */
-function capRateBenchmarkColor(capRatePct: number, address?: string | null): string | undefined {
+function capRateBenchmarkColor(
+  capRatePct: number,
+  address?: string | null,
+): string | undefined {
   if (capRatePct < 0) return "text-[var(--metric-negative)]";
   const benchmark = getCapRateBenchmark(address);
   if (benchmark && benchmark.scope !== "national") {
@@ -88,19 +95,10 @@ function cashFlowBenchmarkLabel(monthlyCashFlow: number): string {
   return "Negative before tax";
 }
 
-/**
- * Sub-label for the Monthly Cash Flow card. When year-1 cash flow is
- * negative but the simplified tax model flips the illustrative estimate
- * positive, show that estimate without implying the operating loss disappears
- * or that the taxpayer can currently use every modeled deduction.
- *
- * Exported: the answer hero card reuses this exact label as the
- * benchmark sublabel under the Screening Index, so the two can never disagree.
- */
-export function cashFlowSubLabel(r: AnalysisResult): string {
-  if (r.netCashFlow < 0 && r.afterTaxCF >= 0) {
-    return `Illustrative after-tax estimate: +$${Math.round(r.afterTaxCF).toLocaleString()}/mo; usability varies`;
-  }
+/** Pre-tax cash-flow context shared by the metric band and answer hero. */
+export function cashFlowSubLabel(
+  r: Pick<AnalysisResult, "netCashFlow">,
+): string {
   return cashFlowBenchmarkLabel(r.netCashFlow);
 }
 
@@ -144,7 +142,8 @@ function MetricCard({
     <div
       className={cn(
         "relative flex flex-col gap-1 rounded-2xl border border-border bg-card p-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)] sm:p-5",
-        onSelect && "transition-colors hover:border-primary/40 focus-within:border-primary/40"
+        onSelect &&
+          "transition-colors hover:border-primary/40 focus-within:border-primary/40",
       )}
     >
       {onSelect ? (
@@ -168,7 +167,12 @@ function MetricCard({
       {isLoading ? (
         <Skeleton className="h-7 sm:h-8 w-20 sm:w-24 mt-1" />
       ) : (
-        <span className={cn("font-mono text-xl font-bold tabular-nums tracking-tight sm:text-2xl", color ?? "text-foreground")}>
+        <span
+          className={cn(
+            "font-mono text-xl font-bold tabular-nums tracking-tight sm:text-2xl",
+            color ?? "text-foreground",
+          )}
+        >
           {value}
         </span>
       )}
@@ -181,8 +185,18 @@ function MetricCard({
   );
 }
 
-const METRIC_ORDER = ["cashFlow", "coc", "capRate", "dscr", "return", "afterTax", "annualCf", "taxSavings"];
+const METRIC_ORDER = [
+  "cashFlow",
+  "coc",
+  "capRate",
+  "dscr",
+  "return",
+  "afterTax",
+  "annualCf",
+  "taxSavings",
+];
 const CORE_METRIC_KEYS = ["cashFlow", "capRate", "dscr"] as const;
+const TAX_METRIC_KEYS = new Set(["afterTax", "taxSavings"]);
 
 /** Which analysis section explains each metric — used by the tap-to-jump
  *  wiring. Ids ARE the existing AnalysisDashboardTab ids (unchanged). */
@@ -197,9 +211,15 @@ const METRIC_JUMP_TARGETS: Record<string, AnalysisDashboardTab> = {
   taxSavings: "tax-strategy",
 };
 
-export function getSecondaryMetricKeys(): string[] {
+export function getSecondaryMetricKeys({
+  includeTaxMetrics = false,
+}: {
+  includeTaxMetrics?: boolean;
+} = {}): string[] {
   return METRIC_ORDER.filter(
-    (key) => !CORE_METRIC_KEYS.includes(key as (typeof CORE_METRIC_KEYS)[number])
+    (key) =>
+      !CORE_METRIC_KEYS.includes(key as (typeof CORE_METRIC_KEYS)[number]) &&
+      (includeTaxMetrics || !TAX_METRIC_KEYS.has(key)),
   );
 }
 
@@ -237,7 +257,9 @@ export function buildMetricTiles({
   onMetricSelect?: (tab: AnalysisDashboardTab) => void;
 }): Record<string, ReactNode> {
   const jump = (key: string) =>
-    onMetricSelect ? () => onMetricSelect(METRIC_JUMP_TARGETS[key] ?? "cash-flow") : undefined;
+    onMetricSelect
+      ? () => onMetricSelect(METRIC_JUMP_TARGETS[key] ?? "cash-flow")
+      : undefined;
   const sourcedLabel = (label: string, source: "scenario" | "base") =>
     isScenarioActive
       ? `${source === "scenario" ? "Scenario" : "Base"} ${label}`
@@ -246,9 +268,20 @@ export function buildMetricTiles({
     cashFlow: (
       <MetricCard
         key="cashFlow"
-        label={sourcedLabel("Monthly Cash Flow", "scenario")}
+        label={sourcedLabel(
+          (displayResult?.balloonPayment ?? 0) > 0
+            ? "Recurring Monthly Cash Flow (excl. balloon)"
+            : "Monthly Cash Flow",
+          "scenario",
+        )}
         glossaryTerm="cashFlow"
-        value={displayResult ? (displayResult.netCashFlow >= 0 ? `+${fmt(displayResult.netCashFlow)}` : `-${fmt(displayResult.netCashFlow)}`) : "—"}
+        value={
+          displayResult
+            ? displayResult.netCashFlow >= 0
+              ? `+${fmt(displayResult.netCashFlow)}`
+              : `-${fmt(displayResult.netCashFlow)}`
+            : "—"
+        }
         sub={displayResult ? cashFlowSubLabel(displayResult) : undefined}
         // Matches the caption's bands (lib/strategy-lens-outcome cashFlowMetric):
         // a -$40/mo deal is "≈break-even", not alarm-red.
@@ -309,8 +342,16 @@ export function buildMetricTiles({
         // CoC keep their signs (they're genuinely signed returns); a
         // negative cap rate still shows its "-" via toFixed.
         value={displayResult ? `${displayResult.capRate.toFixed(1)}%` : "—"}
-        sub={displayResult ? capRateBenchmarkLabel(displayResult.capRate, address) : undefined}
-        color={displayResult ? capRateBenchmarkColor(displayResult.capRate, address) : undefined}
+        sub={
+          displayResult
+            ? capRateBenchmarkLabel(displayResult.capRate, address)
+            : undefined
+        }
+        color={
+          displayResult
+            ? capRateBenchmarkColor(displayResult.capRate, address)
+            : undefined
+        }
         isLoading={isLoading}
         onSelect={jump("capRate")}
       />
@@ -320,11 +361,15 @@ export function buildMetricTiles({
         key="dscr"
         label={sourcedLabel("Model DSCR", "scenario")}
         glossaryTerm="dscr"
-        value={displayResult ? (displayResult.monthlyPayment <= 0 ? "—" : displayResult.dscr.toFixed(2)) : "—"}
+        value={
+          displayResult
+            ? formatDscr(displayResult.dscr, displayResult.monthlyPayment > 0)
+            : "—"
+        }
         sub={
           displayResult
             ? displayResult.monthlyPayment <= 0
-              ? "Cash purchase"
+              ? undefined
               : displayResult.dscr >= 1.25
                 ? "At or above the 1.25 reference"
                 : displayResult.dscr >= 1.0
@@ -361,7 +406,11 @@ export function buildMetricTiles({
         key="return"
         label={sourcedLabel("10-Yr Return", "base")}
         glossaryTerm="tenYearReturn"
-        value={annualizedReturnPct != null ? `~${Math.round(annualizedReturnPct)}%/yr` : "—"}
+        value={
+          annualizedReturnPct != null
+            ? `~${Math.round(annualizedReturnPct)}%/yr`
+            : "—"
+        }
         // Extreme annualized return (finding 5): the per-year figure stays
         // (it's legible), but the sub leads with the caution and the green
         // celebration color drops — same band as the cumulative framing
@@ -394,11 +443,19 @@ export function buildMetricTiles({
         key="afterTax"
         label={sourcedLabel("After-Tax CF", "base")}
         glossaryTerm="afterTaxCF"
-        value={result ? `${result.afterTaxCF >= 0 ? "+" : "-"}${fmt(result.afterTaxCF)}` : "—"}
+        value={
+          result
+            ? `${result.afterTaxCF >= 0 ? "+" : "-"}${fmt(result.afterTaxCF)}`
+            : "—"
+        }
         sub="/mo"
         // No threshold caption on this tile, so no verdict colour — only the
         // genuinely-bad case is marked.
-        color={result && result.afterTaxCF < 0 ? "text-[var(--metric-negative)]" : undefined}
+        color={
+          result && result.afterTaxCF < 0
+            ? "text-[var(--metric-negative)]"
+            : undefined
+        }
         isLoading={isLoading}
         onSelect={jump("afterTax")}
       />
@@ -408,10 +465,18 @@ export function buildMetricTiles({
         key="annualCf"
         label={sourcedLabel("Annual CF", "base")}
         glossaryTerm="cashFlow"
-        value={result ? `${result.annualCashFlow >= 0 ? "+" : "-"}${fmt(result.annualCashFlow)}` : "—"}
+        value={
+          result
+            ? `${result.annualCashFlow >= 0 ? "+" : "-"}${fmt(result.annualCashFlow)}`
+            : "—"
+        }
         sub="/yr"
         // Same as after-tax: annualising a monthly figure adds no threshold.
-        color={result && result.annualCashFlow < 0 ? "text-[var(--metric-negative)]" : undefined}
+        color={
+          result && result.annualCashFlow < 0
+            ? "text-[var(--metric-negative)]"
+            : undefined
+        }
         isLoading={isLoading}
         onSelect={jump("annualCf")}
       />
@@ -424,7 +489,11 @@ export function buildMetricTiles({
         // Signed net tax effect since the after-tax formula fix — a positive
         // operating result can still owe tax, so the sign must survive fmt()'s Math.abs and
         // the color can't claim "primary-good" for a negative.
-        value={result ? `${result.taxSavingsMonthly < 0 ? "-" : ""}${fmt(result.taxSavingsMonthly)}` : "—"}
+        value={
+          result
+            ? `${result.taxSavingsMonthly < 0 ? "-" : ""}${fmt(result.taxSavingsMonthly)}`
+            : "—"
+        }
         sub={
           result
             ? result.taxSavingsMonthly > 0
@@ -436,7 +505,11 @@ export function buildMetricTiles({
         }
         // Was an unconditional brand tint — $0 of tax impact rendered as a
         // highlighted "good" value. Neutral unless genuinely negative.
-        color={result && result.taxSavingsMonthly < 0 ? "text-[var(--metric-negative)]" : undefined}
+        color={
+          result && result.taxSavingsMonthly < 0
+            ? "text-[var(--metric-negative)]"
+            : undefined
+        }
         isLoading={isLoading}
         onSelect={jump("taxSavings")}
       />
@@ -464,14 +537,25 @@ export function MetricsBand({
           Overview
         </span>
         <span className="h-px flex-1 bg-border" />
-        {dataConfidence ? <DataConfidenceBadge confidence={dataConfidence} propertyType={dealPropertyType} /> : null}
+        {dataConfidence ? (
+          <DataConfidenceBadge
+            confidence={dataConfidence}
+            propertyType={dealPropertyType}
+          />
+        ) : null}
       </div>
 
       {/* Fixed first-year metrics. The leading cash-flow tile spans both
           columns on narrow phones so its label and value remain readable. */}
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
         {CORE_METRIC_KEYS.map((k, i) => (
-          <div key={k} className={cn("min-w-0 [&>*]:h-full", i === 0 && "col-span-2 sm:col-span-1")}>
+          <div
+            key={k}
+            className={cn(
+              "min-w-0 [&>*]:h-full",
+              i === 0 && "col-span-2 sm:col-span-1",
+            )}
+          >
             {tiles[k]}
           </div>
         ))}

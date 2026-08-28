@@ -5,6 +5,7 @@ import {
   DEFAULT_APPRECIATION_RATE,
   DEFAULT_SELLING_COST_PCT,
 } from "@/lib/exit-scenarios";
+import { computeReturnSummaryFromExitYears } from "@/lib/returns";
 // One-way dependency: verdict-display imports only the TYPE from here (erased
 // at compile time), so there is no runtime cycle.
 import { VERDICT_DISPLAY, verdictLabel } from "@/lib/verdict-display";
@@ -41,11 +42,14 @@ export const dealScoreInputSchema = z.object({
    */
   afterTaxMonthlyCashFlow: z.number().optional(),
   /**
-   * Projected 10-year ANNUALIZED total return on invested cash — the blend
+   * Projected 10-year ANNUALIZED pre-tax return — the blend
    * of pre-tax operating cash flow, appreciation, and loan paydown realized
-   * at a year-10 sale, net modeled selling costs and federal exit-tax
-   * defaults (computed by the same exit-scenario engine the Exit Scenarios
-   * panel + PDF use). Annual personal tax benefits are deliberately excluded.
+   * at a year-10 sale, net modeled selling costs (computed by the same
+   * contribution-aware exit/return engines used for reconciliation). It is
+   * CAGR when all capital is contributed at acquisition and the unique,
+   * money-weighted IRR when later negative cash flow requires more capital.
+   * Ambiguous multiple-root IRRs are omitted. Personal tax benefits and
+   * exit-tax assumptions are deliberately excluded from this diagnostic.
    * This is the "wealth-building"
    * dimension a year-1-only score is blind to. Optional; when absent the
    * total-return component scores 0 (graceful degradation to the prior
@@ -57,25 +61,27 @@ export const dealScoreInputSchema = z.object({
 export type DealScoreInput = z.infer<typeof dealScoreInputSchema>;
 
 /**
- * Compute the projected 10-year ANNUALIZED total return on invested cash,
- * reusing the SAME exit-scenario engine as the Exit Scenarios panel and the
- * PDF — so the score's "total return" can never diverge from what the user
- * sees elsewhere in the product.
+ * Compute a projected 10-year annualized pre-tax return, reusing the SAME
+ * exit-scenario and contribution-aware return engines as the sale ledger.
+ * The diagnostic uses CAGR only when all capital is contributed at t0. When
+ * operating losses require later contributions, CAGR is undefined, so a
+ * unique money-weighted IRR is used instead. Multiple/no-root IRRs are
+ * omitted rather than collapsed into a misleading headline.
  *
  * Total return blends all four real-estate return sources:
  *   - pre-tax operating cash flow             → result.tenYearProjection
  *   - appreciation + loan paydown at sale    → buildExitScenarios()
  *
- * year-10 totalProfit / total cash invested = cumulative ROI; we annualize
- * it so the figure is hold-length-comparable and not as wildly inflated by
- * leverage as the raw cumulative number. Returns null when it can't be
- * computed (no cash invested), in which case the score omits the dimension.
+ * Returns null when no unambiguous annualized result can be computed, in
+ * which case the score omits this dimension.
  */
 export function computeTenYearAnnualizedReturnPct(
   values: {
     purchasePrice: number;
     interestRate: number;
     loanTermYears: number;
+    amortizationTermYears?: number;
+    interestOnlyMonths?: number;
     appreciationRatePct?: number;
     sellingCostPct?: number;
   },
@@ -86,8 +92,11 @@ export function computeTenYearAnnualizedReturnPct(
     closingCosts: number;
     totalCashRequired: number;
     tenYearProjection: { cumulativeCashFlowAnnual: number }[];
-    taxStrategyYears: { cumulativeTaxBenefitAnnual: number; depreciationDeductionAnnual?: number }[];
-  }
+    taxStrategyYears: {
+      cumulativeTaxBenefitAnnual: number;
+      depreciationDeductionAnnual?: number;
+    }[];
+  },
 ): number | null {
   if (!(result.totalCashRequired > 0)) return null;
   if (result.tenYearProjection.length === 0) return null;
@@ -99,31 +108,45 @@ export function computeTenYearAnnualizedReturnPct(
     loanAmount: result.loanAmount,
     interestRate: values.interestRate,
     loanTermYears: values.loanTermYears,
+    amortizationTermYears: values.amortizationTermYears ?? values.loanTermYears,
+    interestOnlyMonths: values.interestOnlyMonths ?? 0,
     monthlyPayment: result.monthlyPayment,
     downPayment: result.downPayment,
     closingCosts: result.closingCosts,
     // Measure exit profit against ALL cash in (incl. rehab + furnishing) so the
     // cumulativeRoi numerator + the totalCashRequired denominator below agree.
     initialCashInvested: result.totalCashRequired,
-    cumulativeCashFlowByYear: result.tenYearProjection.map((y) => y.cumulativeCashFlowAnnual),
+    cumulativeCashFlowByYear: result.tenYearProjection.map(
+      (y) => y.cumulativeCashFlowAnnual,
+    ),
     // Deal Fit must remain taxpayer-agnostic. The separate Illustrative Tax
     // Impact view can show the signed estimate, but assumed passive-loss
     // usability must never rescue or inflate the recommendation score.
     cumulativeTaxBenefitByYear: result.taxStrategyYears.map(() => 0),
-    annualDepreciation: result.taxStrategyYears[0]?.depreciationDeductionAnnual ?? 0,
+    annualDepreciation:
+      result.taxStrategyYears[0]?.depreciationDeductionAnnual ?? 0,
+    recaptureTaxRatePct: 0,
+    capitalGainsTaxRatePct: 0,
   });
 
   const year10 = exitYears[exitYears.length - 1];
   if (!year10) return null;
 
-  // Cumulative ROI over the hold, e.g. 6.788 for a +678.8% total return.
-  const cumulativeRoi = year10.totalProfit / result.totalCashRequired;
-  const growthBase = 1 + cumulativeRoi;
-  // Losing more than your entire basis → treat as a full loss for scoring
-  // (can't take the 10th root of a non-positive number).
-  if (growthBase <= 0) return -100;
-  const annualized = Math.pow(growthBase, 1 / 10) - 1;
-  return annualized * 100;
+  const summary = computeReturnSummaryFromExitYears(exitYears);
+  if (!summary) return null;
+  if (summary.cagrStatus === "available") return summary.cagrPct;
+  if (
+    summary.cagrStatus === "later-contributions" &&
+    summary.irrStatus === "unique"
+  ) {
+    return summary.irrPct;
+  }
+  // A complete loss has a well-defined -100% total return even though a
+  // geometric CAGR cannot be computed from a zero terminal distribution.
+  if (summary.totalContributions > 0 && summary.totalDistributions <= 0) {
+    return -100;
+  }
+  return null;
 }
 
 /**
@@ -162,10 +185,16 @@ export function buildDealScoreInputFromAnalysis(
     closingCosts: number;
     totalCashRequired: number;
     tenYearProjection: { cumulativeCashFlowAnnual: number }[];
-    taxStrategyYears: { cumulativeTaxBenefitAnnual: number; depreciationDeductionAnnual?: number }[];
-  }
+    taxStrategyYears: {
+      cumulativeTaxBenefitAnnual: number;
+      depreciationDeductionAnnual?: number;
+    }[];
+  },
 ): DealScoreInput {
-  const tenYearAnnualizedReturnPct = computeTenYearAnnualizedReturnPct(values, result);
+  const tenYearAnnualizedReturnPct = computeTenYearAnnualizedReturnPct(
+    values,
+    result,
+  );
   return dealScoreInputSchema.parse({
     propertyType: values.propertyType,
     monthlyCashFlow: result.netCashFlow,
@@ -189,7 +218,12 @@ export function buildDealScoreInputFromAnalysis(
   });
 }
 
-export type DealRecommendation = "Strong Buy" | "Buy" | "Neutral" | "Risky" | "Avoid";
+export type DealRecommendation =
+  | "Strong Buy"
+  | "Buy"
+  | "Neutral"
+  | "Risky"
+  | "Avoid";
 
 /**
  * DISPLAY-layer labels for the recommendation tiers. The INTERNAL value
@@ -211,13 +245,14 @@ export type DealRecommendation = "Strong Buy" | "Buy" | "Neutral" | "Risky" | "A
 // adds tone + icon + screen-reader text. These two exports are kept as
 // re-exports so the ~10 existing call sites keep working, but new code should
 // render <Verdict> (components/investcalc/verdict.tsx) instead.
-export const RECOMMENDATION_DISPLAY_LABELS: Record<DealRecommendation, string> = {
-  "Strong Buy": VERDICT_DISPLAY["Strong Buy"].label,
-  Buy: VERDICT_DISPLAY.Buy.label,
-  Neutral: VERDICT_DISPLAY.Neutral.label,
-  Risky: VERDICT_DISPLAY.Risky.label,
-  Avoid: VERDICT_DISPLAY.Avoid.label,
-};
+export const RECOMMENDATION_DISPLAY_LABELS: Record<DealRecommendation, string> =
+  {
+    "Strong Buy": VERDICT_DISPLAY["Strong Buy"].label,
+    Buy: VERDICT_DISPLAY.Buy.label,
+    Neutral: VERDICT_DISPLAY.Neutral.label,
+    Risky: VERDICT_DISPLAY.Risky.label,
+    Avoid: VERDICT_DISPLAY.Avoid.label,
+  };
 
 export function recommendationLabel(recommendation: string): string {
   return verdictLabel(recommendation);
@@ -328,7 +363,7 @@ export const OWNER_OCCUPANT_CASH_FLOW_MAX = 30;
  *  Owner-occupant deals cap at OWNER_OCCUPANT_CASH_FLOW_MAX (30); everything
  *  else uses the investor scale (COMPONENT_MAXES.cashFlow, 22). */
 export function getCashFlowComponentMax(
-  propertyType: DealScoreInput["propertyType"] | null | undefined
+  propertyType: DealScoreInput["propertyType"] | null | undefined,
 ): number {
   return propertyType === "owner-occupant"
     ? OWNER_OCCUPANT_CASH_FLOW_MAX
@@ -360,9 +395,12 @@ export function getScoreBreakdownSum(breakdown: DealScoreBreakdown): number {
  *  reciting an equation that doesn't add up. */
 export function isAppreciationFloorApplied(
   breakdown: DealScoreBreakdown,
-  score: number
+  score: number,
 ): boolean {
-  const summed = Math.max(0, Math.min(100, Math.round(getScoreBreakdownSum(breakdown))));
+  const summed = Math.max(
+    0,
+    Math.min(100, Math.round(getScoreBreakdownSum(breakdown))),
+  );
   return score > summed;
 }
 
@@ -378,9 +416,30 @@ interface StrategyWeights {
 }
 
 const STRATEGY_WEIGHTS: Record<DealStrategy, StrategyWeights> = {
-  "cash-flow": { cashFlow: 1.7, coc: 1.5, capRate: 1.0, dscr: 1.4, totalReturn: 0.3, appreciationFloor: false },
-  balanced: { cashFlow: 1.0, coc: 1.0, capRate: 1.0, dscr: 1.0, totalReturn: 1.0, appreciationFloor: true },
-  appreciation: { cashFlow: 0.5, coc: 0.7, capRate: 1.3, dscr: 0.6, totalReturn: 1.9, appreciationFloor: true },
+  "cash-flow": {
+    cashFlow: 1.7,
+    coc: 1.5,
+    capRate: 1.0,
+    dscr: 1.4,
+    totalReturn: 0.3,
+    appreciationFloor: false,
+  },
+  balanced: {
+    cashFlow: 1.0,
+    coc: 1.0,
+    capRate: 1.0,
+    dscr: 1.0,
+    totalReturn: 1.0,
+    appreciationFloor: true,
+  },
+  appreciation: {
+    cashFlow: 0.5,
+    coc: 0.7,
+    capRate: 1.3,
+    dscr: 0.6,
+    totalReturn: 1.9,
+    appreciationFloor: true,
+  },
 };
 
 /** 100 / (Σ applicable componentMax × multiplier) — maps the weighted
@@ -389,7 +448,7 @@ const STRATEGY_WEIGHTS: Record<DealStrategy, StrategyWeights> = {
  * silently cost the deal up to 20 points. */
 function strategyNormFactor(
   w: StrategyWeights,
-  cashOnCashApplicable = true
+  cashOnCashApplicable = true,
 ): number {
   const weightedMax =
     COMPONENT_MAXES.cashFlow * w.cashFlow +
@@ -414,7 +473,9 @@ function resolveScoringCashFlow(input: DealScoreInput): number {
 }
 
 /** Owner-occupant, near break-even cash flow, and debt service covered — not comparable to investment "high risk". */
-function isOwnerOccupantNearBreakEvenForRiskLabel(input: DealScoreInput): boolean {
+function isOwnerOccupantNearBreakEvenForRiskLabel(
+  input: DealScoreInput,
+): boolean {
   if (!isOwnerOccupantDeal(input)) return false;
   // Cash purchases have no debt service to cover; skip the DSCR check.
   if (!input.isCashPurchase && input.dscr < 1) return false;
@@ -438,13 +499,19 @@ function isAppreciationPlay(input: DealScoreInput): boolean {
   if (isOwnerOccupantDeal(input)) return false;
   const annual = input.tenYearAnnualizedReturnPct;
   if (annual == null) return false;
-  return annual > APPRECIATION_PLAY_MIN_ANNUAL_RETURN_PCT && resolveScoringCashFlow(input) >= 0;
+  return (
+    annual > APPRECIATION_PLAY_MIN_ANNUAL_RETURN_PCT &&
+    resolveScoringCashFlow(input) >= 0
+  );
 }
 
 /** Does this deal qualify for the appreciation-play score floor? An
  *  appreciation play, but only under a lens where long-term return counts (not
  *  the cash-flow lens, where a negative-cash-flow deal genuinely isn't a buy). */
-function qualifiesForAppreciationFloor(input: DealScoreInput, strategy: DealStrategy): boolean {
+function qualifiesForAppreciationFloor(
+  input: DealScoreInput,
+  strategy: DealStrategy,
+): boolean {
   if (!STRATEGY_WEIGHTS[strategy].appreciationFloor) return false;
   return isAppreciationPlay(input);
 }
@@ -464,13 +531,20 @@ function getCashFlowScore(input: DealScoreInput): number {
     return 0;
   }
 
-  if (input.monthlyCashFlow > OWNER_OCCUPANT_NEAR_ZERO_THRESHOLD) return OWNER_OCCUPANT_CASH_FLOW_MAX;
+  if (input.monthlyCashFlow > OWNER_OCCUPANT_NEAR_ZERO_THRESHOLD)
+    return OWNER_OCCUPANT_CASH_FLOW_MAX;
   if (input.monthlyCashFlow >= -OWNER_OCCUPANT_NEAR_ZERO_THRESHOLD) return 25;
   return 0;
 }
 
-function getRecommendation(score: number, input: DealScoreInput): DealRecommendation {
-  if (isOwnerOccupantDeal(input) && input.monthlyCashFlow >= -OWNER_OCCUPANT_NEAR_ZERO_THRESHOLD) {
+function getRecommendation(
+  score: number,
+  input: DealScoreInput,
+): DealRecommendation {
+  if (
+    isOwnerOccupantDeal(input) &&
+    input.monthlyCashFlow >= -OWNER_OCCUPANT_NEAR_ZERO_THRESHOLD
+  ) {
     if (score >= 75) return "Strong Buy";
     return "Buy";
   }
@@ -496,10 +570,7 @@ function getRiskLevelBase(score: number): DealRiskLevel {
 
 function getRiskLevel(score: number, input: DealScoreInput): DealRiskLevel {
   const base = getRiskLevelBase(score);
-  if (
-    base === "High Risk" &&
-    isOwnerOccupantNearBreakEvenForRiskLabel(input)
-  ) {
+  if (base === "High Risk" && isOwnerOccupantNearBreakEvenForRiskLabel(input)) {
     if (score >= 32) return "Moderate";
     if (score >= 22) return "Balanced";
     return "Low Return";
@@ -507,7 +578,10 @@ function getRiskLevel(score: number, input: DealScoreInput): DealRiskLevel {
   return base;
 }
 
-function getAgeRiskPenalty(propertyAge: number, propertyAgeKnown = true): number {
+function getAgeRiskPenalty(
+  propertyAge: number,
+  propertyAgeKnown = true,
+): number {
   // Softened from -10/-5/-2. In pre-war markets (Philadelphia, the Northeast)
   // an 80+ year building is ordinary stock, not a 10-point risk — and genuine
   // age-driven condition risk is already captured separately by the
@@ -528,15 +602,19 @@ function buildExplanation(
   breakdown: DealScoreBreakdown,
   score: number,
   recommendation: DealRecommendation,
-  strategy: DealStrategy
+  strategy: DealStrategy,
 ): string {
   const strengths: string[] = [];
   const weaknesses: string[] = [];
 
   // Strength thresholds match the rebalanced tier maxes (CF 22, CoC 20,
   // cap 16, DSCR 17, total return 25).
-  if (breakdown.cashFlowScore >= 14) strengths.push("positive monthly cash flow");
-  if (isOwnerOccupantDeal(input) && input.monthlyCashFlow >= -OWNER_OCCUPANT_NEAR_ZERO_THRESHOLD) {
+  if (breakdown.cashFlowScore >= 14)
+    strengths.push("positive monthly cash flow");
+  if (
+    isOwnerOccupantDeal(input) &&
+    input.monthlyCashFlow >= -OWNER_OCCUPANT_NEAR_ZERO_THRESHOLD
+  ) {
     strengths.push("housing cost is kept near break-even");
   }
   if (input.cashOnCashApplicable && breakdown.cocScore >= 13) {
@@ -544,20 +622,29 @@ function buildExplanation(
   }
   if (breakdown.capRateScore >= 9) strengths.push("solid cap rate");
   if (breakdown.dscrScore >= 13) strengths.push("strong debt-service coverage");
-  if (breakdown.totalReturnScore >= 20) strengths.push("strong projected 10-year total return");
-  else if (breakdown.totalReturnScore >= 14) strengths.push("solid long-term total return");
+  if (breakdown.totalReturnScore >= 20)
+    strengths.push("strong projected 10-year total return");
+  else if (breakdown.totalReturnScore >= 14)
+    strengths.push("solid long-term total return");
   if (input.vacancyRate > 8) weaknesses.push("elevated vacancy risk");
-  if (!isOwnerOccupantDeal(input) && input.monthlyCashFlow < 0) weaknesses.push("negative cash flow");
-  if (isOwnerOccupantDeal(input) && input.monthlyCashFlow < -OWNER_OCCUPANT_NEAR_ZERO_THRESHOLD) {
+  if (!isOwnerOccupantDeal(input) && input.monthlyCashFlow < 0)
+    weaknesses.push("negative cash flow");
+  if (
+    isOwnerOccupantDeal(input) &&
+    input.monthlyCashFlow < -OWNER_OCCUPANT_NEAR_ZERO_THRESHOLD
+  ) {
     weaknesses.push("owner costs still well above break-even");
   }
   if (input.capexPct > 10) weaknesses.push("high CapEx burden");
   else if (input.capexPct > 5) weaknesses.push("moderate CapEx burden");
   if (input.maintenancePct > 10) weaknesses.push("high maintenance burden");
-  else if (input.maintenancePct > 5) weaknesses.push("moderate maintenance burden");
+  else if (input.maintenancePct > 5)
+    weaknesses.push("moderate maintenance burden");
   if (input.monthlyRentIncome > 0) {
-    const propertyTaxToRentPct = (input.monthlyPropertyTax / input.monthlyRentIncome) * 100;
-    if (propertyTaxToRentPct > 15) weaknesses.push("high property-tax burden relative to rent");
+    const propertyTaxToRentPct =
+      (input.monthlyPropertyTax / input.monthlyRentIncome) * 100;
+    if (propertyTaxToRentPct > 15)
+      weaknesses.push("high property-tax burden relative to rent");
   }
   if (!input.propertyAgeKnown) {
     weaknesses.push("unverified property age");
@@ -574,7 +661,8 @@ function buildExplanation(
   if (!input.isCashPurchase && breakdown.dscrScore === 0) {
     weaknesses.push("limited debt-service cushion");
   }
-  if (input.isCashPurchase) strengths.push("no debt service (all-cash purchase)");
+  if (input.isCashPurchase)
+    strengths.push("no debt service (all-cash purchase)");
 
   // Investment deals with negative year-1 cash flow where debt service
   // doesn't cover (or it's an all-cash deal losing money operationally).
@@ -619,7 +707,10 @@ function buildExplanation(
     );
   }
 
-  if (isOwnerOccupantDeal(input) && input.monthlyCashFlow >= -OWNER_OCCUPANT_NEAR_ZERO_THRESHOLD) {
+  if (
+    isOwnerOccupantDeal(input) &&
+    input.monthlyCashFlow >= -OWNER_OCCUPANT_NEAR_ZERO_THRESHOLD
+  ) {
     if (input.monthlyCashFlow > OWNER_OCCUPANT_NEAR_ZERO_THRESHOLD) {
       return "This owner-occupant deal performs better than break-even while helping offset living costs.";
     }
@@ -655,7 +746,7 @@ function buildExplanation(
 
 export function computeDealScore(
   input: DealScoreInput,
-  strategy: DealStrategy = "balanced"
+  strategy: DealStrategy = "balanced",
 ): DealScoreResult {
   const cashFlowScore = getCashFlowScore(input);
 
@@ -664,33 +755,46 @@ export function computeDealScore(
   // 7-9% strong, 5-7% healthy.
   const coc = input.cashOnCashReturn;
   const cocScore = input.cashOnCashApplicable
-    ? coc > 10 ? 20
-      : coc > 7 ? 17
-      : coc > 5 ? 13
-      : coc > 3 ? 8
-      : coc > 1 ? 3
-      : 0
+    ? coc > 10
+      ? 20
+      : coc > 7
+        ? 17
+        : coc > 5
+          ? 13
+          : coc > 3
+            ? 8
+            : coc > 1
+              ? 3
+              : 0
     : 0;
 
   // Cap rate — 5-tier granular on a 16-pt max. 7% cap is a realistic 2026
   // "good deal" benchmark.
   const capRateScore =
-    input.capRate > 8 ? 16
-    : input.capRate > 6.5 ? 13
-    : input.capRate > 5 ? 9
-    : input.capRate > 4 ? 4
-    : 0;
+    input.capRate > 8
+      ? 16
+      : input.capRate > 6.5
+        ? 13
+        : input.capRate > 5
+          ? 9
+          : input.capRate > 4
+            ? 4
+            : 0;
 
   // DSCR — 5-tier on a 17-pt max. Cash purchases get full credit (no debt).
   // >1.30 "loaned without question"; 1.20 "above floor, fundable"; 1.10
   // tight; 1.0+ covers debt but below lender standards; <1.0 underwater.
   const dscrScore = input.isCashPurchase
     ? 17
-    : input.dscr > 1.30 ? 17
-    : input.dscr > 1.20 ? 13
-    : input.dscr >= 1.10 ? 7
-    : input.dscr >= 1.0 ? 3
-    : 0;
+    : input.dscr > 1.3
+      ? 17
+      : input.dscr > 1.2
+        ? 13
+        : input.dscr >= 1.1
+          ? 7
+          : input.dscr >= 1.0
+            ? 3
+            : 0;
 
   // Total return — the wealth-building dimension a year-1-only score is
   // blind to. Annualized 10-year total return on invested cash (pre-tax cash
@@ -698,13 +802,19 @@ export function computeDealScore(
   // Annual personal tax benefits are excluded. 0-25 max. Absent → 0.
   const annual = input.tenYearAnnualizedReturnPct;
   const totalReturnScore =
-    annual == null ? 0
-    : annual > 15 ? 25
-    : annual > 11 ? 20
-    : annual > 8 ? 14
-    : annual > 5 ? 8
-    : annual > 2 ? 3
-    : 0;
+    annual == null
+      ? 0
+      : annual > 15
+        ? 25
+        : annual > 11
+          ? 20
+          : annual > 8
+            ? 14
+            : annual > 5
+              ? 8
+              : annual > 2
+                ? 3
+                : 0;
 
   let riskPenalty = 0;
   if (input.vacancyRate > 8) riskPenalty -= 10;
@@ -712,7 +822,8 @@ export function computeDealScore(
   // counted as spendable operating cash and therefore cannot soften it.
   if (
     (!isOwnerOccupantDeal(input) && input.monthlyCashFlow < 0) ||
-    (isOwnerOccupantDeal(input) && input.monthlyCashFlow < -OWNER_OCCUPANT_NEAR_ZERO_THRESHOLD)
+    (isOwnerOccupantDeal(input) &&
+      input.monthlyCashFlow < -OWNER_OCCUPANT_NEAR_ZERO_THRESHOLD)
   ) {
     riskPenalty += resolveScoringCashFlow(input) >= 0 ? -6 : -16;
   }
@@ -728,7 +839,8 @@ export function computeDealScore(
     else if (highCapex || highMaintenance) riskPenalty -= 5;
   }
   if (input.monthlyRentIncome > 0) {
-    const propertyTaxToRentPct = (input.monthlyPropertyTax / input.monthlyRentIncome) * 100;
+    const propertyTaxToRentPct =
+      (input.monthlyPropertyTax / input.monthlyRentIncome) * 100;
     if (propertyTaxToRentPct > 15) riskPenalty -= 8;
     else if (propertyTaxToRentPct > 10) riskPenalty -= 4;
   }
@@ -765,7 +877,10 @@ export function computeDealScore(
   // under the cash-flow lens, where a negative-cash-flow deal genuinely isn't a
   // buy. This is the explicit fix for the year-1-only score labeling a +678%
   // total-return deal "Avoid / 0".
-  if (qualifiesForAppreciationFloor(input, strategy) && score < APPRECIATION_FLOOR_SCORE) {
+  if (
+    qualifiesForAppreciationFloor(input, strategy) &&
+    score < APPRECIATION_FLOOR_SCORE
+  ) {
     score = APPRECIATION_FLOOR_SCORE;
   }
 
@@ -778,9 +893,7 @@ export function computeDealScore(
     dscrScore,
     totalReturnScore,
     riskPenalty,
-    ...(input.cashOnCashApplicable
-      ? {}
-      : { applicabilityAdjustment }),
+    ...(input.cashOnCashApplicable ? {} : { applicabilityAdjustment }),
   };
 
   return {
@@ -789,7 +902,15 @@ export function computeDealScore(
     recommendation,
     riskLevel: getRiskLevel(score, input),
     breakdown,
-    explanation: buildExplanation(input, breakdown, score, recommendation, strategy),
-    ...(input.cashOnCashApplicable ? {} : { cashOnCashApplicable: false as const }),
+    explanation: buildExplanation(
+      input,
+      breakdown,
+      score,
+      recommendation,
+      strategy,
+    ),
+    ...(input.cashOnCashApplicable
+      ? {}
+      : { cashOnCashApplicable: false as const }),
   };
 }

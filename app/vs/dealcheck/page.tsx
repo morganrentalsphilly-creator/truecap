@@ -225,18 +225,18 @@ export default function VsDealCheckPage() {
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Prefer to kick the tires on a single metric first? Try the
             standalone{" "}
-            <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">
+            <Link href="/#main" className="font-semibold text-primary hover:underline">
               cap rate calculator
             </Link>
             ,{" "}
-            <Link href="/tools/dscr-calculator" className="font-semibold text-primary hover:underline">
+            <Link href="/#main" className="font-semibold text-primary hover:underline">
               DSCR calculator
             </Link>
             , or{" "}
-            <Link href="/tools/brrrr-calculator" className="font-semibold text-primary hover:underline">
-              BRRRR calculator
+            <Link href="/blog/brrrr-method-explained" className="font-semibold text-primary hover:underline">
+              BRRRR workflow guide
             </Link>{" "}
-            — same engine as the full analyzer, narrower scope. For the
+            — released calculators with narrower scope. For the
             workflow itself, our guide on{" "}
             <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">
               60-second underwriting

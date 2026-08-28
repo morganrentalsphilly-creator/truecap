@@ -40,6 +40,7 @@ import type {
 import type { InputConfidenceResult } from "@/lib/input-confidence";
 import { trackEvent } from "@/lib/analytics";
 import { scrollBehavior } from "@/lib/utils";
+import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
 import {
   buildDecisionTargetContext,
   deriveRuleFit,
@@ -131,6 +132,8 @@ const TARGET_FIELDS = [
   ["cocReturn", "Target cash-on-cash (%)"],
   ["monthlyCashFlow", "Min cash flow ($/mo)"],
   ["dscr", "Min DSCR"],
+  ["minIrrPct", "Min 10-year pre-tax IRR (%)"],
+  ["maxCashRequired", "Max cash required ($)"],
   ["maxPurchasePrice", "Max purchase price ($)"],
 ] as const satisfies ReadonlyArray<readonly [MaoTargetField, string]>;
 
@@ -147,6 +150,8 @@ function inputsFromTarget(target: MaoTarget): TargetInputs {
     cocReturn: targetInput(target.cocReturn),
     monthlyCashFlow: targetInput(target.monthlyCashFlow),
     dscr: targetInput(target.dscr),
+    minIrrPct: targetInput(target.minIrrPct),
+    maxCashRequired: targetInput(target.maxCashRequired),
     maxPurchasePrice: targetInput(target.maxPurchasePrice),
   };
 }
@@ -216,7 +221,9 @@ function FirstYearSnapshot({
           Model DSCR
         </p>
         <p className="mt-1 font-mono text-xl font-extrabold tabular-nums text-foreground">
-          {result.monthlyPayment <= 0 ? "N/A" : result.dscr.toFixed(2)}
+          {result.monthlyPayment <= 0
+            ? NO_DEBT_SERVICE_DSCR_LABEL
+            : result.dscr.toFixed(2)}
         </p>
         {result.monthlyPayment <= 0 ? (
           <p className="mt-1 text-[10px] text-muted-foreground">
@@ -373,7 +380,7 @@ export function FocusedDecisionSummary({
   };
   // The verdict must reconcile with the exact ceiling shown beside it. A deal
   // can have positive cash flow and still miss the selected $/mo or DSCR bar.
-  const clearsTargets = meetsMaoTarget(result, target);
+  const clearsTargets = meetsMaoTarget(result, target, values);
   const legacyReadinessLabel =
     inputConfidence?.stage === "offer-ready"
       ? "Ready"
@@ -424,6 +431,7 @@ export function FocusedDecisionSummary({
             : "profile version unavailable";
   const ruleFit = deriveRuleFit({
     result,
+    values,
     target,
     targetResolutionState,
     targetSource,
@@ -950,11 +958,10 @@ export function FocusedDecisionSummary({
           onClick={onEditAssumptions}
           disabled={resultActionsBlocked}
           title={resultActionsBlockedReason}
-          aria-label="Edit assumptions"
           className="h-11 w-full gap-2 rounded-xl max-[250px]:h-auto max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight sm:w-auto"
         >
           <Edit3 className="size-4" aria-hidden />
-          Edit inputs
+          Edit assumptions
         </Button>
         <Button
           type="button"
@@ -984,7 +991,7 @@ export function FocusedDecisionSummary({
           variant="outline"
           onClick={onAnalyzeAnotherLikeThis}
           disabled={resultActionsBlocked}
-          className="h-11 w-full gap-2 rounded-xl sm:w-auto"
+          className="h-auto min-h-11 w-full gap-2 whitespace-normal rounded-xl py-2 text-center leading-tight sm:h-11 sm:w-auto sm:whitespace-nowrap sm:py-0"
           title={
             resultActionsBlockedReason ??
             "Keep reusable financing and operating assumptions, then enter the next property"
@@ -1020,7 +1027,7 @@ export function FocusedDecisionSummary({
                 ? "Edit the criteria, then choose Update criteria. The Offer Ceiling and saved outputs do not change while you type. Leave a field blank to ignore it."
                 : "These are product examples, not your targets. Review or change them, then explicitly apply the criteria to calculate a modeled threshold."}
             </p>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {TARGET_FIELDS.map(([field, label]) => {
                 const bounds = MAO_TARGET_BOUNDS[field];
                 const inputId = `${targetEditorId}-${field}`;
@@ -1037,6 +1044,7 @@ export function FocusedDecisionSummary({
                       type="number"
                       inputMode={
                         field === "monthlyCashFlow" ||
+                        field === "maxCashRequired" ||
                         field === "maxPurchasePrice"
                           ? "numeric"
                           : "decimal"
@@ -1045,7 +1053,7 @@ export function FocusedDecisionSummary({
                       max={bounds.max}
                       step={bounds.step}
                       value={isCashDscr ? "" : targetInputs[field]}
-                      placeholder={isCashDscr ? "N/A — cash" : "Any"}
+                      placeholder={isCashDscr ? NO_DEBT_SERVICE_DSCR_LABEL : "Any"}
                       disabled={isCashDscr}
                       onChange={(event) =>
                         setTargetInputs((current) => ({

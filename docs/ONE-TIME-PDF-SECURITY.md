@@ -55,18 +55,19 @@ If new sales are ever reconsidered, use the durable-fulfillment runbook and a
 separately approved test-mode activation. Do not reactivate either checkout
 gate from this historical recovery document.
 
-No Stripe price, coupon, checkout amount, subscription entitlement, or webhook
-signature/dispatch logic changed.
+No live Stripe price, coupon, checkout amount, subscription entitlement, or
+webhook configuration is changed by repository code.
 
 ## Pack-to-Pro credit and approved refund/dispute policy
 
 The ledger records immutable purchase amount/currency and credit audit fields
 (`status`, policy version, amount, eligibility expiry, applied timestamp,
 external reference, credited user). The credit mechanism remains fail-closed:
-only a configured `STRIPE_PACK_CREDIT_COUPON_ID` can make an eligible paid $5
-claim available for the seven-day first-Pro-invoice credit. Without that
-server-only configuration, claims remain `not_configured` and no credit is
-promised or applied.
+only a configured `STRIPE_PACK_CREDIT_900_COUPON_ID` can make an eligible paid
+$9 claim available for the 30-day first-Pro-invoice credit. Historical $5
+claims retain paid-report recovery but do not consume a mismatched coupon.
+Without that server-only configuration, claims remain `not_configured` and no
+credit is promised or applied.
 
 Morgan approved the refund/dispute policy on 2026-08-24. The retained
 historical flow enforces it as follows:

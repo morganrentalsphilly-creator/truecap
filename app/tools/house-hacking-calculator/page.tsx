@@ -14,6 +14,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { HouseHackingCalculatorWidget } from "@/components/tools/house-hacking-calculator-widget";
@@ -22,6 +23,7 @@ import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
+import { isCalculatorReleased } from "@/lib/calculator-registry";
 export const metadata: Metadata = {
   title: "Free House Hacking Calculator — Live for Less",
   description:
@@ -82,6 +84,8 @@ const FAQS: { q: string; a: string }[] = [
 ];
 
 export default function HouseHackingCalculatorPage() {
+  if (!isCalculatorReleased("house-hacking-calculator")) notFound();
+
   const siteUrl = getSiteUrl();
 
   const webAppLd = {
@@ -390,7 +394,7 @@ export default function HouseHackingCalculatorPage() {
                 "Per-unit rents for the duplex / triplex / fourplex math",
                 "Cash flow, cap rate, CoC, DSCR — auto-calculated",
                 "Separate saved full-rental scenario and comparison (Pro)",
-                "Tax treatment of the rented portion (Pro)",
+                "Tax treatment stays outside the released analyzer",
                 "Free to start — no credit card",
               ].map((line) => (
                 <li key={line} className="flex items-start gap-2">

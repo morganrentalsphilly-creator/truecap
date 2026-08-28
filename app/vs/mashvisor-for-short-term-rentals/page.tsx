@@ -45,7 +45,6 @@ const MATRIX: Row[] = [
   { feature: "STR revenue projection (ADR + occupancy)", truecap: "Manual — plug monthly revenue into rent field", mashvisor: "Yes — automated from Airbnb data", winner: "mashvisor" },
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", mashvisor: "Listing-level cap rate based on assumed inputs", winner: "truecap" },
   { feature: "Mortgage + financing math (PITI + amortization)", truecap: "Yes — full", mashvisor: "Limited", winner: "truecap" },
-  { feature: "Illustrative tax impact", truecap: "Pro — straight-line depreciation + interest + modeled after-tax CF; no STR-eligibility determination", mashvisor: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", mashvisor: "Forward STR revenue forecast", winner: "tie" },
   { feature: "Secondary Screening Index", truecap: "Free — 0-100 triage score + factor breakdown", mashvisor: "Investibility score per property", winner: "tie" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", mashvisor: "STR-focused; LTR rent estimates included", winner: "tie" },
@@ -78,21 +77,21 @@ const NICHE_FAQ: FaqItem[] = [
     question: "Does Mashvisor do underwriting?",
     answer: (
       <>
-        Sort of — Mashvisor shows listing-level cap rate estimates based on its assumed inputs (rent, vacancy, expenses). It doesn&apos;t do per-deal underwriting at TrueCap&apos;s depth (DSCR, sensitivity, projection, and illustrative tax impact). Mashvisor narrows the field; TrueCap models the shortlisted property from editable assumptions.
+        Sort of — Mashvisor shows listing-level cap rate estimates based on its assumed inputs (rent, vacancy, expenses). TrueCap adds editable financing, DSCR, sensitivity, and a cash-flow and equity projection for a shortlisted property. It does not currently expose a tax-specific module.
       </>
     ),
     plainTextAnswer:
-      "Sort of — listing-level cap rate from assumed inputs. Not deep per-deal underwriting (no DSCR, sensitivity, projection, or tax-impact view). Mashvisor narrows; TrueCap underwrites the user-reviewed assumptions.",
+      "Mashvisor shows listing-level cap rate from assumed inputs. TrueCap adds editable financing, DSCR, sensitivity, and a cash-flow and equity projection, but no tax-specific module.",
   },
   {
     question: "Can I use TrueCap free with Mashvisor data?",
     answer: (
       <>
-        Yes. TrueCap free covers cap rate, CoC, DSCR, cash flow on every analysis. Pull Mashvisor&apos;s projected monthly STR revenue, override TrueCap&apos;s HUD rent benchmark with it, run the analysis. Pro adds projections + illustrative tax impact + sensitivity if you need them.
+        Yes. TrueCap free covers cap rate, CoC, DSCR, and cash flow on every analysis. Pull Mashvisor&apos;s projected monthly STR revenue, replace TrueCap&apos;s area benchmark with it, and review every operating assumption. Pro adds a 10-year cash-flow and equity projection plus sensitivity.
       </>
     ),
     plainTextAnswer:
-      "Yes. TrueCap free covers cap rate, CoC, DSCR, cash flow. Pull Mashvisor&apos;s monthly STR revenue, override TrueCap&apos;s HUD rent, run analysis. Pro adds projections + tax + sensitivity.",
+      "Yes. TrueCap free covers cap rate, CoC, DSCR, and cash flow. Replace the area benchmark with reviewed STR revenue and operating assumptions. Pro adds a 10-year cash-flow and equity projection plus sensitivity.",
   },
   {
     question: "Is Mashvisor&apos;s $70-300/mo worth it?",
@@ -247,7 +246,7 @@ export default function VsMashvisorForShortTermRentalsPage() {
             {" "}walks through turning revenue projections into a complete modeled underwrite, and the{" "}
             <Link href="/blog/best-short-term-rental-analysis-tool-2026" className="font-semibold text-primary hover:underline">best STR analysis tools of 2026</Link>
             {" "}rounds up where the data comes from. To check the math on one metric first, try the standalone{" "}
-            <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">cap rate calculator</Link>.
+            <Link href="/#main" className="font-semibold text-primary hover:underline">cap rate calculator</Link>.
           </p>
         </section>
 
@@ -259,8 +258,8 @@ export default function VsMashvisorForShortTermRentalsPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             Free covers the standard cap rate, CoC, DSCR, cash flow, and plain
-            read-only share links. Pro adds projections, sensitivity, illustrative
-            tax impact, modeled exit comparisons, Offer Ceiling, co-branding, and included
+            read-only share links. Pro adds 10-year cash-flow and equity projections,
+            sensitivity, Offer Ceiling, co-branding, and included
             PDFs. New one-time PDF checkout is temporarily unavailable.
           </p>
           <div className="flex flex-wrap gap-3">

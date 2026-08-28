@@ -96,7 +96,7 @@ describe("authenticated analyzer consolidation", () => {
 
   it("keeps the stale-cookie anonymous fallback intact", () => {
     expect(cookieCheckHome).toContain("{!user && <MarketingHero />}");
-    expect(cookieCheckHome).toContain("isAuthenticated={false}");
+    expect(cookieCheckHome).toContain("isAuthenticated={Boolean(user)}");
     expect(cookieCheckHome).toContain("{!user && (");
     expect(cookieCheckHome).toContain("{!user ? <SiteFooter /> : null}");
     expect(cookieCheckHome.indexOf("redirect(`/dashboard/new")).toBeLessThan(

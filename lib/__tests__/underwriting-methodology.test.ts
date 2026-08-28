@@ -1,15 +1,22 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 import { calcMonthlyPayment, calculateAnalysis } from "../calc-analysis";
 import type { InvestmentFormValues } from "../investcalc-schema";
 import {
+  TRUECAP_DEAL_SCORE_METHODOLOGY_VERSION,
+  TRUECAP_UNDERWRITING_STANDARD_V1_2_VERSION,
   TRUECAP_UNDERWRITING_STANDARD_VERSION,
   UNDERWRITING_FORMULAS,
+  UNDERWRITING_FORMULAS_BY_VERSION,
   UNDERWRITING_STANDARD_RELEASE_NOTES,
 } from "../underwriting-methodology";
 import { TEN_YEAR_PROJECTION_SNAPSHOT_VERSION } from "../ten-year-projections";
 
-function deal(overrides: Partial<InvestmentFormValues> = {}): InvestmentFormValues {
+function deal(
+  overrides: Partial<InvestmentFormValues> = {},
+): InvestmentFormValues {
   return {
     propertyType: "single-family",
     address: "123 Test St, Philadelphia, PA 19103, USA",
@@ -45,28 +52,85 @@ function deal(overrides: Partial<InvestmentFormValues> = {}): InvestmentFormValu
   } as InvestmentFormValues;
 }
 
-describe("TrueCap Underwriting Standard 1.1", () => {
+describe("TrueCap Underwriting Standard 1.3", () => {
   it("stamps every result with the methodology version", () => {
     expect(calculateAnalysis(deal()).methodologyVersion).toBe(
-      TRUECAP_UNDERWRITING_STANDARD_VERSION
+      TRUECAP_UNDERWRITING_STANDARD_VERSION,
     );
   });
 
-  it("publishes the independently versioned PMI projection correction", () => {
-    expect(TEN_YEAR_PROJECTION_SNAPSHOT_VERSION).toBe(6);
+  it("publishes canonical amortization and automatic PMI termination", () => {
+    expect(TEN_YEAR_PROJECTION_SNAPSHOT_VERSION).toBe(10);
     expect(
       UNDERWRITING_STANDARD_RELEASE_NOTES.find(
-        (release) => release.revision === "projection-v6-2026-08-25"
-      )?.summary
-    ).toContain("exact scheduled month");
+        (release) =>
+          release.revision === "v1.2-full-precision-amortization-2026-08-27",
+      )?.summary,
+    ).toContain("full-precision contractual amortization schedule");
+    expect(
+      UNDERWRITING_STANDARD_RELEASE_NOTES.find(
+        (release) =>
+          release.revision === "projection-v8-rental-mi-policy-2026-08-27",
+      )?.summary,
+    ).toContain("investment-property loans");
+    expect(
+      UNDERWRITING_STANDARD_RELEASE_NOTES.find(
+        (release) =>
+          release.revision ===
+          "projection-v10-buy-and-hold-contract-2026-08-27",
+      )?.summary,
+    ).toContain("$68,718.45682362831 to $68,738.45682362831");
+    expect(UNDERWRITING_FORMULAS.loanAmortization.convention).toContain(
+      "rounding only at display boundaries",
+    );
+    expect(
+      UNDERWRITING_FORMULAS_BY_VERSION["1.1"].loanAmortization.convention,
+    ).toContain("Historical v1.1 rounded");
+  });
+
+  it("versions the pre-tax, contribution-aware projected return without relabeling v1.2", () => {
+    expect(TRUECAP_UNDERWRITING_STANDARD_VERSION).toBe("1.3");
+    expect(TRUECAP_DEAL_SCORE_METHODOLOGY_VERSION).toBe("1.3");
+    expect(TRUECAP_UNDERWRITING_STANDARD_V1_2_VERSION).toBe("1.2");
+    expect(UNDERWRITING_FORMULAS.dealScore.convention).toContain(
+      "The projected return is pre-tax",
+    );
+    expect(UNDERWRITING_FORMULAS.dealScore.convention).toContain(
+      "excludes annual personal-tax effects and modeled exit taxes",
+    );
+    expect(UNDERWRITING_FORMULAS.dealScore.convention).toContain(
+      "later negative operating cash flow as additional contributed capital",
+    );
+    expect(
+      UNDERWRITING_FORMULAS_BY_VERSION["1.2"].dealScore.convention,
+    ).toContain("federal exit-tax defaults");
+    expect(
+      UNDERWRITING_STANDARD_RELEASE_NOTES.find(
+        (release) =>
+          release.revision ===
+          "v1.3-pre-tax-contribution-aware-return-2026-08-27",
+      )?.summary,
+    ).toContain("require explicit re-underwriting");
+
+    const methodologyPage = readFileSync(
+      resolve(process.cwd(), "app/methodology/page.tsx"),
+      "utf8",
+    );
+    expect(methodologyPage).toContain(
+      "Negative operating years\n            count as additional contributed capital",
+    );
+    expect(methodologyPage).toContain("modeled exit taxes");
+    expect(methodologyPage).not.toContain(
+      "exit engine&apos;s federal capital-gain",
+    );
   });
 
   it("publishes the independently versioned analysis-date score correction", () => {
     expect(
       UNDERWRITING_STANDARD_RELEASE_NOTES.find(
         (release) =>
-          release.revision === "screening-index-v1.2-analysis-date-2026-08-25"
-      )?.summary
+          release.revision === "screening-index-v1.2-analysis-date-2026-08-25",
+      )?.summary,
     ).toContain("Identical serialized inputs no longer change score");
   });
 
@@ -108,16 +172,20 @@ describe("TrueCap Underwriting Standard 1.1", () => {
   it("reconciles the income statement to NOI without hidden categories", () => {
     const result = calculateAnalysis(deal());
 
-    expect(result.grossScheduledIncomeAnnual).toBe(result.monthlyRentalIncome * 12);
+    expect(result.grossScheduledIncomeAnnual).toBe(
+      result.monthlyRentalIncome * 12,
+    );
     expect(result.vacancyAllowanceAnnual).toBe(result.vacancy * 12);
     expect(result.effectiveGrossIncomeAnnual).toBe(
-      result.grossScheduledIncomeAnnual - result.vacancyAllowanceAnnual
+      result.grossScheduledIncomeAnnual - result.vacancyAllowanceAnnual,
     );
     expect(result.noiAnnual).toBe(
-      result.effectiveGrossIncomeAnnual - result.operatingExpensesAnnual
+      result.effectiveGrossIncomeAnnual - result.operatingExpensesAnnual,
     );
     expect(result.noiAnnual).toBe(
-      (result.monthlyRentalIncome - (result.totalOperatingExpenses - result.capex)) * 12
+      (result.monthlyRentalIncome -
+        (result.totalOperatingExpenses - result.capex)) *
+        12,
     );
   });
 
@@ -125,15 +193,21 @@ describe("TrueCap Underwriting Standard 1.1", () => {
     const values = deal({ rehabBudget: 12_500, strFurnishingCost: 7_500 });
     const result = calculateAnalysis(values);
 
-    expect(result.capRate).toBeCloseTo((result.noiAnnual / values.purchasePrice) * 100, 10);
+    expect(result.capRate).toBeCloseTo(
+      (result.noiAnnual / values.purchasePrice) * 100,
+      10,
+    );
     expect(result.annualDebtService).toBe(result.monthlyPayment * 12);
-    expect(result.dscr).toBeCloseTo(result.noiAnnual / result.annualDebtService, 10);
+    expect(result.dscr).toBeCloseTo(
+      result.noiAnnual / result.annualDebtService,
+      10,
+    );
     expect(result.cocReturn).toBeCloseTo(
       (result.annualCashFlow / result.totalCashRequired) * 100,
-      10
+      10,
     );
     expect(result.totalCashRequired).toBe(
-      result.downPayment + result.closingCosts + 12_500 + 7_500
+      result.downPayment + result.closingCosts + 12_500 + 7_500,
     );
   });
 
@@ -148,16 +222,18 @@ describe("TrueCap Underwriting Standard 1.1", () => {
 
   it("keeps PMI out of lender-style DSCR while including it in cash flow", () => {
     const withPmi = calculateAnalysis(
-      deal({ downPaymentPct: 5, pmiAnnualRatePct: 0.8 })
+      deal({ downPaymentPct: 5, pmiAnnualRatePct: 0.8 }),
     );
     const withoutPmi = calculateAnalysis(
-      deal({ downPaymentPct: 5, pmiAnnualRatePct: 0 })
+      deal({ downPaymentPct: 5, pmiAnnualRatePct: 0 }),
     );
 
     expect(withPmi.pmiMonthly).toBeGreaterThan(0);
     expect(withPmi.noiAnnual).toBe(withoutPmi.noiAnnual);
     expect(withPmi.dscr).toBe(withoutPmi.dscr);
-    expect(withPmi.netCashFlow).toBe(withoutPmi.netCashFlow - withPmi.pmiMonthly);
+    expect(withPmi.netCashFlow).toBe(
+      withoutPmi.netCashFlow - withPmi.pmiMonthly,
+    );
   });
 
   it("uses a cash-purchase sentinel without producing NaN or Infinity", () => {
@@ -166,7 +242,11 @@ describe("TrueCap Underwriting Standard 1.1", () => {
     expect(result.loanAmount).toBe(0);
     expect(result.annualDebtService).toBe(0);
     expect(result.dscr).toBe(0);
-    for (const value of [result.capRate, result.cocReturn, result.netCashFlow]) {
+    for (const value of [
+      result.capRate,
+      result.cocReturn,
+      result.netCashFlow,
+    ]) {
       expect(Number.isFinite(value)).toBe(true);
     }
   });
@@ -186,7 +266,7 @@ describe("TrueCap Underwriting Standard 1.1", () => {
         insuranceInputMode: "monthly",
         insuranceMonthly: 225,
         insurancePct: undefined,
-      })
+      }),
     );
 
     expect(result.propertyTax).toBe(500);
@@ -199,7 +279,7 @@ describe("TrueCap Underwriting Standard 1.1", () => {
         result.utilities +
         result.maintenance +
         result.management) *
-        12
+        12,
     );
   });
 
@@ -212,7 +292,7 @@ describe("TrueCap Underwriting Standard 1.1", () => {
           { bedrooms: 2, monthlyRent: 0, isOwnerOccupied: true },
           { bedrooms: 2, monthlyRent: 1_650, isOwnerOccupied: false },
         ],
-      })
+      }),
     );
 
     expect(result.monthlyRentalIncome).toBe(1_650);

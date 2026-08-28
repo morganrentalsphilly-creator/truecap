@@ -9,6 +9,7 @@
 
 import type { AnalysisResult } from "@/lib/calc-analysis";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
+import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
 import { getDealTier } from "@/lib/verdict";
 
 const money = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
@@ -31,7 +32,7 @@ export function buildDealQaContext(
     `Monthly rental income: ${money(result.monthlyRentalIncome)}`,
     `Monthly operating expenses: ${money(result.totalOperatingExpenses)}`,
     isCash
-      ? `Financing: all-cash purchase (no loan, DSCR not applicable)`
+      ? `Financing: all-cash purchase (no loan); DSCR: ${NO_DEBT_SERVICE_DSCR_LABEL}`
       : `Financing: ${values.downPaymentPct ?? 0}% down, ${values.interestRate}% rate, ${values.loanTermYears}-year term, monthly payment ${money(result.monthlyPayment)}`,
     `Loan amount: ${money(result.loanAmount)}`,
     `Cash invested (down + closing): ${money(result.downPayment + result.closingCosts)}`,

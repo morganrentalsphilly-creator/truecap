@@ -248,6 +248,9 @@ export type DashboardDeal = {
    *  Optional/back-compatible so existing DashboardDeal literals (e.g. in
    *  tests) don't need to supply it. */
   cashToClose?: number | null;
+  /** Unique target-method IRR when this row was recomputed by the current engine. */
+  irrPct?: number | null;
+  irrStatus?: "unique" | "multiple" | "none";
   roiPct: number | null;
   score: number | null;
   recommendation: string | null;

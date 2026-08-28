@@ -66,7 +66,7 @@ export default function Image() {
               display: "flex",
             }}
           >
-            Buy, Rehab, Rent, Refinance — see how much capital comes back
+            BRRRR planning resources, with the model boundary made clear
           </div>
         </div>
 
@@ -80,8 +80,8 @@ export default function Image() {
               display: "flex",
             }}
           >
-            Model the full BRRRR loop: hard-money buy, rehab cost, ARV-based
-            refi, and your stabilized cash flow against the new debt.
+            Released rehab, ARV, DSCR, and stabilized-rental tools. The
+            integrated lifecycle model is not currently released.
           </div>
         </div>
 
@@ -97,7 +97,7 @@ export default function Image() {
           }}
         >
           <div style={{ display: "flex" }}>
-            Real estate investment analyzer
+            Educational planning resources
           </div>
           <div style={{ fontWeight: 700, color: BRAND_BLUE, display: "flex" }}>
             usetruecap.com

@@ -17,9 +17,9 @@
  *  - All entitlement props below are the anonymous-visitor values.
  *    If you add a prop to InvestCalcPage, set it here to exactly what
  *    app/home-authed/page.tsx computes for user == null.
- *  - DealsAnalyzedTicker (inside MarketingHero) uses the admin client
- *    at render time; under ISR that runs at build/revalidate — the
- *    count refreshes hourly, which is fine for a trust badge.
+ *  - Acquisition pages deliberately do not publish the legacy cumulative
+ *    analysis counter because it includes an owner-confirmed seed and repeat
+ *    runs rather than a unique-customer or unique-property population.
  */
 
 import type { Metadata } from "next";
@@ -31,13 +31,8 @@ import { MarketingHero } from "@/components/marketing/marketing-hero";
 import {
   DataSourcesSection,
   FinalCta,
-  NeverOverpayGuarantee,
   HomepageFaq,
-  HowTrueCapWorks,
-  ProblemBlock,
-  OfferEngineSection,
   PdfProUpsell,
-  Personas,
   SocialProof,
 } from "@/components/marketing/landing-sections";
 import { CaseStudiesSection } from "@/components/marketing/case-study";
@@ -49,8 +44,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { VERIFIED_CASE_STUDIES } from "@/lib/verified-case-studies";
 
 // ISR: prerendered at build, regenerated in the background at most
-// hourly. Keeps the DealsAnalyzedTicker count and any content edits
-// fresh without giving up edge caching.
+// hourly. Keeps content edits fresh without giving up edge caching.
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
@@ -187,8 +181,9 @@ export default function Home() {
           the user == null branch in app/home-authed/page.tsx.
           NOTE: canUseDealScore is intentionally TRUE for everyone — the
           headline 0-100 Screening Index is given away free (it converts better
-          unlocked than as a blurred teaser). Only the DEPTH (projections /
-          tax / exit / save / PDF / compare) stays Pro. */}
+          unlocked than as a blurred teaser). The one exact no-signup decision
+          may export its personal report; repeat projections, tax/exit, saving,
+          comparison, and reusable workflows stay gated. */}
       <InvestCalcPage
         canSaveDeals={false}
         canCompareDeals={false}
@@ -197,8 +192,8 @@ export default function Home() {
         canUseTaxStrategy={false}
         canUseExitScenarios={false}
         canUseDealScore={true}
-        canUseMaxOffer={false}
-        canUseSensitivity={false}
+        canUseMaxOffer={true}
+        canUseSensitivity={true}
         canUseStrategies={false}
         canUpdateSavedDeals={false}
         saveDealLimitReached={false}
@@ -210,33 +205,19 @@ export default function Home() {
         // Presence-only env check — safe on a static page (baked at
         // build; the key VALUE never reaches the client).
       />
-      {/* ONE STORY: Analyze the deal → Know your number → Make the offer.
-          The page used to run eleven sections that each sold a capability
-          (spreadsheet pain, how it works, the acquisition pipeline, a press
-          bar, a PDF upsell), leaving the visitor to assemble the product
-          themselves. It is now seven blocks that follow the spine:
-          hero → proof (the live analyzer above) → how it works → trust →
-          who it's for → pricing → closing ask. The FAQ stays last: it
-          emits FAQPage JSON-LD for rich results.
+      {/* Seven-block acquisition story:
+          1 outcome (hero), 2 interactive product proof (live analyzer),
+          3 trustworthy numbers, 4 Free vs Pro, 5 verified proof when records
+          exist, 6 objections/FAQ, 7 final CTA.
           MUST stay in lockstep with app/home-authed/page.tsx. */}
       <div className="truecap-marketing-tail contents">
-        {/* 2026-08 conversion order: problem (dollar-denominated stake) →
-            how it works → proof → trust → offer stack →
-            segmented paths → FAQ (objection-ordered) → closing ask. */}
-        <ProblemBlock />
-        <HowTrueCapWorks />
-        <SocialProof />
-        <CaseStudiesSection studies={VERIFIED_CASE_STUDIES} />
-        {/* Trust: transparent methodology, editable assumptions, sources shown. */}
         <DataSourcesSection />
-        <OfferEngineSection />
-        {/* Upgrade path: Free → Pro; new one-time report checkout is disabled. */}
         <PdfProUpsell />
-        <NeverOverpayGuarantee />
-        {/* Segmented paths — investor / agent / house-hacker self-ID. */}
-        <Personas />
+        <div data-homepage-block="real-proof" className="contents">
+          <SocialProof />
+          <CaseStudiesSection studies={VERIFIED_CASE_STUDIES} />
+        </div>
         <HomepageFaq />
-        {/* Closing ask — back to the address field. */}
         <FinalCta />
         {/* Sticky scroll-activated CTA bar — cold visitors only, and this
             page only serves cold visitors. */}

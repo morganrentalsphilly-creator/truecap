@@ -43,6 +43,26 @@ describe("Product Overhaul analytics wiring", () => {
     expect(comps).not.toContain("properties: { address:");
   });
 
+  it("wires launch activation and cumulative retention milestones", () => {
+    const calculator = read("components/investcalc/investcalc-page.tsx");
+    const signup = read("components/auth/sign-up-form.tsx");
+    const provider = read("components/analytics/posthog-provider.tsx");
+    const callback = read("app/auth/callback/route.ts");
+    const queryPlan = read("docs/launch-analytics-query-plan.md");
+    expect(calculator).toContain('trackEvent("first_analysis_completed", {');
+    expect(calculator).toContain('trackEvent("evaluation_deal_completed", {');
+    expect(calculator).toContain('trackEvent("second_deal_completed", {');
+    expect(signup).toContain('trackEvent("account_created", {');
+    expect(callback).toContain('event: "account_created"');
+    expect(callback).toContain('method: "google"');
+    expect(callback).toContain('event: "product_evaluation_started"');
+    expect(provider).toContain('event: "retained_30d" as const');
+    expect(provider).toContain('event: "retained_90d" as const');
+    expect(provider).toContain('activity: "authenticated_visit"');
+    expect(queryPlan).toContain("days 30–59");
+    expect(queryPlan).toContain("days 90–119");
+  });
+
   it("wires the Pro paywall, paid-claim recovery, and input-readiness workflows", () => {
     const calculator = read("components/investcalc/investcalc-page.tsx");
     expect(calculator).toContain('trackEvent("paywall_viewed", {');
@@ -88,5 +108,12 @@ describe("Product Overhaul analytics wiring", () => {
         plan: "pro_monthly",
       })
     ).toEqual({ plan: "pro_monthly" });
+    expect(
+      sanitizeAnalyticsEventProperties("retained_30d", {
+        activity: "authenticated_visit",
+        user_id: "private-user-id",
+        purchase_price: 300_000,
+      })
+    ).toEqual({ activity: "authenticated_visit" });
   });
 });

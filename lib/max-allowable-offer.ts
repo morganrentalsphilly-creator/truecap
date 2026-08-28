@@ -17,7 +17,11 @@ import {
   MAX_PURCHASE_PRICE,
   type InvestmentFormValues,
 } from "@/lib/investcalc-schema";
-import { meetsMaoTarget } from "@/lib/mao-target-evaluation";
+import {
+  calculateMaoIrr,
+  meetsMaoTarget,
+} from "@/lib/mao-target-evaluation";
+import type { IrrAnalysis } from "@/lib/returns";
 
 export type MaoTarget = {
   /** Target cap rate as a percent (e.g. 8 for 8%). */
@@ -28,6 +32,10 @@ export type MaoTarget = {
   monthlyCashFlow?: number;
   /** Target DSCR (e.g. 1.25). Ignored for cash purchases (no debt service). */
   dscr?: number;
+  /** Minimum unique 10-year pre-tax IRR, as a percent. */
+  minIrrPct?: number;
+  /** Maximum modeled cash required at acquisition, in dollars. */
+  maxCashRequired?: number;
   /** Absolute purchase-price ceiling in dollars (for example, a Buy Box budget). */
   maxPurchasePrice?: number;
 };
@@ -40,12 +48,20 @@ export type MaoResult = {
   /** AnalysisResult at maxPrice itself — the "at this price you'd get..." readout
    *  must describe the number the user sees, not the unrounded solver price. */
   achieved: AnalysisResult;
+  /** Present when IRR is one of the selected targets. A non-unique result can
+   * never be returned as a passing ceiling, but retaining the status keeps
+   * binding-constraint presentation explicit and auditable. */
+  achievedIrr?: IrrAnalysis;
 };
 
 /** True when an analysis result satisfies every provided target. Shared by the
  *  price solver and the inverse (required-input) solvers below. */
-export function meetsTarget(r: AnalysisResult, target: MaoTarget): boolean {
-  return meetsMaoTarget(r, target);
+export function meetsTarget(
+  r: AnalysisResult,
+  target: MaoTarget,
+  values?: InvestmentFormValues,
+): boolean {
+  return meetsMaoTarget(r, target, values);
 }
 
 function hasAnyTarget(t: MaoTarget): boolean {
@@ -54,6 +70,8 @@ function hasAnyTarget(t: MaoTarget): boolean {
     t.cocReturn !== undefined ||
     t.monthlyCashFlow !== undefined ||
     t.dscr !== undefined ||
+    t.minIrrPct !== undefined ||
+    t.maxCashRequired !== undefined ||
     t.maxPurchasePrice !== undefined
   );
 }
@@ -141,6 +159,8 @@ function hasOnlyDscrTarget(target: MaoTarget): boolean {
     target.capRate === undefined &&
     target.cocReturn === undefined &&
     target.monthlyCashFlow === undefined &&
+    target.minIrrPct === undefined &&
+    target.maxCashRequired === undefined &&
     target.maxPurchasePrice === undefined
   );
 }
@@ -151,9 +171,17 @@ function verifiedDisplayedResult(
   price: number
 ): MaoResult | null {
   const achieved = safeCalc({ ...values, purchasePrice: price });
-  if (!achieved || !meetsTarget(achieved, target)) return null;
+  const displayedValues = { ...values, purchasePrice: price };
+  if (!achieved || !meetsTarget(achieved, target, displayedValues)) return null;
   if (hasOnlyDscrTarget(target) && achieved.monthlyPayment <= 0) return null;
-  return { target, maxPrice: price, achieved };
+  return {
+    target,
+    maxPrice: price,
+    achieved,
+    ...(target.minIrrPct !== undefined
+      ? { achievedIrr: calculateMaoIrr(displayedValues, achieved) }
+      : {}),
+  };
 }
 
 /**
@@ -256,7 +284,10 @@ export function calculateMaxAllowableOffer(
     return null;
   }
 
-  const meetsTargets = (r: AnalysisResult): boolean => meetsTarget(r, target);
+  const meetsTargets = (
+    r: AnalysisResult,
+    candidateValues: InvestmentFormValues,
+  ): boolean => meetsTarget(r, target, candidateValues);
 
   // The upper-bound result serves two trust checks: a DSCR-only solve must
   // actually have debt somewhere in its allowed domain, and a v2 credit-bound
@@ -276,7 +307,15 @@ export function calculateMaxAllowableOffer(
     maxPrice,
     maxResult
   );
-  if (!firstUsable || !meetsTargets(firstUsable.result)) return null;
+  if (
+    !firstUsable ||
+    !meetsTargets(firstUsable.result, {
+      ...values,
+      purchasePrice: firstUsable.price,
+    })
+  ) {
+    return null;
+  }
   const minPrice = firstUsable.price;
 
   // Quick reject: if the minimum-price scenario already fails, the targets
@@ -291,7 +330,10 @@ export function calculateMaxAllowableOffer(
   // without ever testing it, which used to shave an extra $500 from an exact
   // $200,000 budget. If the bound clears every target, return its displayed
   // floor immediately; no higher price is permitted by this solve.
-  if (maxResult && meetsTargets(maxResult)) {
+  if (
+    maxResult &&
+    meetsTargets(maxResult, { ...values, purchasePrice: maxPrice })
+  ) {
     const roundedPrice = Math.max(minPrice, Math.floor(maxPrice / 500) * 500);
     return verifiedDisplayedResult(values, target, roundedPrice);
   }
@@ -308,7 +350,7 @@ export function calculateMaxAllowableOffer(
       hi = mid;
       continue;
     }
-    if (meetsTargets(result)) {
+    if (meetsTargets(result, { ...values, purchasePrice: mid })) {
       best = { price: mid, result };
       // Targets met → can we go higher?
       lo = mid;
@@ -328,7 +370,25 @@ export function calculateMaxAllowableOffer(
   const roundedPrice = Math.max(minPrice, Math.floor(best.price / 500) * 500);
   // Recompute the readout AT the displayed price so "at this price you'd
   // get..." describes the number the user actually sees.
-  return verifiedDisplayedResult(values, target, roundedPrice);
+  // When the mathematical boundary itself sits exactly on a $500 step,
+  // bisection approaches it from below and `best` can be $0.01 shy. Flooring
+  // that internal value would underquote the genuine displayed ceiling by a
+  // full step. Probe the grid point immediately below the known failing side
+  // and retain it only after a complete canonical recheck; otherwise fall
+  // back to the conservative floor.
+  const boundaryGridPrice = Math.max(
+    roundedPrice,
+    Math.min(maxPrice, Math.floor(hi / 500) * 500),
+  );
+  const boundaryGridResult = verifiedDisplayedResult(
+    values,
+    target,
+    boundaryGridPrice,
+  );
+  return (
+    boundaryGridResult ??
+    verifiedDisplayedResult(values, target, roundedPrice)
+  );
 }
 
 // ---- Inverse solvers: "what would it take to make THIS price work?" ----
@@ -362,7 +422,7 @@ export function solveRequiredMonthlyRent(
   if (!Number.isFinite(current)) return null;
 
   const base = safeCalc(values);
-  if (base && meetsTarget(base, target)) {
+  if (base && meetsTarget(base, target, values)) {
     return { value: current, alreadyMet: true, unreachable: false, achieved: base };
   }
 
@@ -375,7 +435,7 @@ export function solveRequiredMonthlyRent(
   const rentCeiling = Math.ceil(rawCeiling);
   const hiResult = safeCalc(withSolvedRent(values, rentField, rentCeiling));
   if (!hiResult) return null;
-  if (!meetsTarget(hiResult, target)) {
+  if (!meetsTarget(hiResult, target, withSolvedRent(values, rentField, rentCeiling))) {
     return {
       value: rentCeiling,
       alreadyMet: false,
@@ -384,27 +444,42 @@ export function solveRequiredMonthlyRent(
     };
   }
 
-  // Higher rent always helps — binary-search the LOWEST rent that still meets.
-  let lo = 0;
+  // The product displays rent in whole dollars, so search the displayed domain
+  // directly. Searching fractional dollars and then applying Math.ceil can
+  // still miss by one dollar when finite bisection tolerance lands just below
+  // the true boundary. `hiB` is always a verified passing whole-dollar value;
+  // `lo` is a failing sentinel. Higher rent is monotone for every supported
+  // target, which is the same invariant the prior fractional search relied on.
+  let lo = -1;
   let hiB = rentCeiling;
-  let bestV = rentCeiling;
-  for (let i = 0; i < iterations; i++) {
-    const mid = (lo + hiB) / 2;
+  const integerIterations = Math.max(
+    iterations,
+    Math.ceil(Math.log2(Math.max(1, rentCeiling + 1))) + 1
+  );
+  for (let i = 0; i < integerIterations && hiB - lo > 1; i++) {
+    const mid = Math.floor((lo + hiB) / 2);
     const r = safeCalc(withSolvedRent(values, rentField, mid));
-    if (r && meetsTarget(r, target)) {
-      bestV = mid;
+    if (r && meetsTarget(r, target, withSolvedRent(values, rentField, mid))) {
       hiB = mid;
     } else {
       lo = mid;
     }
   }
-  // Required rent is a minimum: round UP, never to nearest. Rounding down can
-  // put the displayed threshold back on the failing side of the boundary.
-  const displayedRent = Math.ceil(bestV);
+  // `hiB` is the lowest verified whole-dollar rent that passes.
+  const displayedRent = hiB;
   const achievedAtDisplayed = safeCalc(
     withSolvedRent(values, rentField, displayedRent)
   );
-  if (!achievedAtDisplayed || !meetsTarget(achievedAtDisplayed, target)) return null;
+  if (
+    !achievedAtDisplayed ||
+    !meetsTarget(
+      achievedAtDisplayed,
+      target,
+      withSolvedRent(values, rentField, displayedRent),
+    )
+  ) {
+    return null;
+  }
   return {
     value: displayedRent,
     alreadyMet: false,
@@ -428,7 +503,7 @@ export function solveRequiredInterestRate(
   const current = Number(values.interestRate);
   if (!Number.isFinite(current)) return null;
 
-  if (base && meetsTarget(base, target)) {
+  if (base && meetsTarget(base, target, values)) {
     return { value: current, alreadyMet: true, unreachable: false, achieved: base };
   }
 
@@ -438,7 +513,7 @@ export function solveRequiredInterestRate(
   // rate can fix it.
   const loResult = safeCalc({ ...values, interestRate: 0 });
   if (!loResult) return null;
-  if (!meetsTarget(loResult, target)) {
+  if (!meetsTarget(loResult, target, { ...values, interestRate: 0 })) {
     return { value: 0, alreadyMet: false, unreachable: true, achieved: loResult };
   }
 
@@ -449,7 +524,7 @@ export function solveRequiredInterestRate(
   for (let i = 0; i < iterations; i++) {
     const mid = (lo + hi) / 2;
     const r = safeCalc({ ...values, interestRate: mid });
-    if (r && meetsTarget(r, target)) {
+    if (r && meetsTarget(r, target, { ...values, interestRate: mid })) {
       bestV = mid;
       lo = mid;
     } else {
@@ -461,7 +536,15 @@ export function solveRequiredInterestRate(
   // never describe two different scenarios.
   const displayedRate = Math.floor(bestV * 100) / 100;
   const achievedAtDisplayed = safeCalc({ ...values, interestRate: displayedRate });
-  if (!achievedAtDisplayed || !meetsTarget(achievedAtDisplayed, target)) return null;
+  if (
+    !achievedAtDisplayed ||
+    !meetsTarget(achievedAtDisplayed, target, {
+      ...values,
+      interestRate: displayedRate,
+    })
+  ) {
+    return null;
+  }
   return {
     value: displayedRate,
     alreadyMet: false,

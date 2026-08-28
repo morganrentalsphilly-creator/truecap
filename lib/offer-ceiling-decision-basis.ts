@@ -88,12 +88,25 @@ function normalizeCriteria(value: unknown): BuyBoxCriteria | null {
   const minDscr = nullableFinite(record.minDscr);
   const minCashFlowMonthly = nullableFinite(record.minCashFlowMonthly);
   const maxPurchasePrice = nullableFinite(record.maxPurchasePrice);
+  const hasMinIrrPct = Object.prototype.hasOwnProperty.call(record, "minIrrPct");
+  const hasMaxCashRequired = Object.prototype.hasOwnProperty.call(
+    record,
+    "maxCashRequired",
+  );
+  const minIrrPct = hasMinIrrPct
+    ? nullableFinite(record.minIrrPct)
+    : undefined;
+  const maxCashRequired = hasMaxCashRequired
+    ? nullableFinite(record.maxCashRequired)
+    : undefined;
   if (
     minCapRatePct === undefined ||
     minCocPct === undefined ||
     minDscr === undefined ||
     minCashFlowMonthly === undefined ||
     maxPurchasePrice === undefined ||
+    (hasMinIrrPct && minIrrPct === undefined) ||
+    (hasMaxCashRequired && maxCashRequired === undefined) ||
     !Array.isArray(record.propertyTypes) ||
     !Array.isArray(record.targetStates) ||
     typeof record.isActive !== "boolean"
@@ -116,6 +129,8 @@ function normalizeCriteria(value: unknown): BuyBoxCriteria | null {
     minDscr,
     minCashFlowMonthly,
     maxPurchasePrice,
+    ...(hasMinIrrPct ? { minIrrPct: minIrrPct! } : {}),
+    ...(hasMaxCashRequired ? { maxCashRequired: maxCashRequired! } : {}),
     propertyTypes: [...propertyTypes],
     targetStates: [...targetStates],
     isActive: record.isActive,
@@ -182,6 +197,12 @@ export function captureBuyBoxDecisionBasis(input: {
     minDscr: input.box.minDscr,
     minCashFlowMonthly: input.box.minCashFlowMonthly,
     maxPurchasePrice: input.box.maxPurchasePrice,
+    ...(input.box.minIrrPct !== undefined
+      ? { minIrrPct: input.box.minIrrPct }
+      : {}),
+    ...(input.box.maxCashRequired !== undefined
+      ? { maxCashRequired: input.box.maxCashRequired }
+      : {}),
     propertyTypes: [...input.box.propertyTypes],
     targetStates: [...input.box.targetStates],
     isActive: input.box.isActive,

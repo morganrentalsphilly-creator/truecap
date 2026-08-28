@@ -45,15 +45,19 @@ describe("decision workspace UX guards", () => {
     const workspace = read("components/investcalc/deal-stage-select.tsx");
     const list = read("components/investcalc/saved-analyses-page-v2.tsx");
     const compare = read("components/investcalc/compare-deals-client.tsx");
+    const normalizedWorkspace = normalizeSource(workspace);
+    const normalizedList = normalizeSource(list);
 
-    const workspaceConfirmation = workspace.indexOf(
+    const workspaceConfirmation = normalizedWorkspace.indexOf(
       "confirmPipelineStageChange({",
     );
-    const workspaceWrite = workspace.indexOf(
-      "updateSavedDealStageAction(savedDealId, next)",
+    const workspaceWrite = normalizedWorkspace.indexOf(
+      "updateSavedDealStageAction(savedDealId,next,",
     );
-    const listConfirmation = list.indexOf("confirmPipelineStageChange({");
-    const listWrite = list.indexOf("updateSavedDealStageAction(id, stage)");
+    const listConfirmation = normalizedList.indexOf("confirmPipelineStageChange({");
+    const listWrite = normalizedList.indexOf(
+      "updateSavedDealStageAction(id,stage,",
+    );
 
     expect(workspaceConfirmation).toBeGreaterThan(-1);
     expect(workspaceWrite).toBeGreaterThan(workspaceConfirmation);
@@ -61,24 +65,34 @@ describe("decision workspace UX guards", () => {
     expect(listWrite).toBeGreaterThan(listConfirmation);
     expect(workspace).toContain("confirm: (message) => window.confirm(message)");
     expect(list).toContain("confirm: (message) => window.confirm(message)");
+    expect(workspace).toContain("promptForPipelinePassReason({");
+    expect(list).toContain("promptForPipelinePassReason({");
+    expect(workspace).toContain('title: "Pass reason required"');
+    expect(list).toContain('title: "Pass reason required"');
 
     expect(workspace).toContain('altText="Undo marking deal as Passed"');
     expect(workspace).toContain('className="min-h-11"');
     expect(workspace).toContain(
       'className="h-11 w-[150px] rounded-md text-xs"',
     );
-    expect(workspace).toContain(
-      "updateSavedDealStageAction(savedDealId, stage)",
+    expect(normalizedWorkspace).toContain(
+      normalizeSource(
+        'updateSavedDealStageAction(savedDealId, stage, { note: "Pass decision undone." })',
+      ),
     );
     expect(list).toContain("previousStage: PipelineStage");
-    expect(normalizeSource(list)).toContain(
-      normalizeSource("updateSavedDealStageAction(id, previousStage)"),
+    expect(normalizedList).toContain(
+      normalizeSource(
+        'updateSavedDealStageAction(id, previousStage, { note: "Pass decision undone." })',
+      ),
     );
     expect(list).toContain('altText="Undo marking deal as Passed"');
     expect(list).toContain('className="min-h-11"');
     expect(compare).not.toMatch(/Mark all.*Passed/i);
-    expect(compare).toContain("Near-term score");
-    expect(compare).toContain("Long-term score");
+    expect(compare).not.toContain("Near-term score");
+    expect(compare).not.toContain("Long-term score");
+    expect(compare).not.toContain("<Trophy");
+    expect(compare).toContain("Review assumption matrix");
   });
 
   it("announces explicit persistence states instead of promising save-on-blur", () => {

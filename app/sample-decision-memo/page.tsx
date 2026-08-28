@@ -7,6 +7,7 @@ import { SAMPLE_DEAL_FIXTURE } from "@/lib/sample-deal";
 import { buildOfferCeilingPresentation } from "@/lib/offer-ceiling";
 import { describeMaoTarget } from "@/lib/mao-targets";
 import { TRUECAP_UNDERWRITING_STANDARD_NAME } from "@/lib/underwriting-methodology";
+import { formatDscr } from "@/lib/financial-presentation";
 
 export const metadata: Metadata = {
   title: "Sample Rental Decision Memo",
@@ -121,7 +122,7 @@ export default function SampleDecisionMemoPage() {
                 ["Monthly cash flow", money(analysis.netCashFlow)],
                 ["Cap rate", `${analysis.capRate.toFixed(2)}%`],
                 ["Cash-on-cash", `${analysis.cocReturn.toFixed(2)}%`],
-                ["DSCR", analysis.monthlyPayment > 0 ? analysis.dscr.toFixed(2) : "N/A — cash"],
+                ["DSCR", formatDscr(analysis.dscr, analysis.monthlyPayment > 0)],
               ].map(([label, value]) => (
                 <div key={label}>
                   <dt className="text-xs text-muted-foreground">{label}</dt>
@@ -175,7 +176,7 @@ export default function SampleDecisionMemoPage() {
         </section>
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <Link href="/#calculator" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-5 font-bold text-primary-foreground">
+          <Link href="/#main" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-5 font-bold text-primary-foreground">
             Analyze a Deal <ArrowRight className="ml-2 size-4" aria-hidden />
           </Link>
           <Link href="/pricing" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-card px-5 font-bold">

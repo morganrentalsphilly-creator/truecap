@@ -34,6 +34,9 @@ describe("responsive comparison columns", () => {
     expect(client).toContain('getElementById("compare-selection-editor")');
     expect(client).toContain("min-h-11");
     expect(client).toContain("removingId === deal.id");
+    expect(client).toContain('aria-label="Comparison scale"');
+    expect(client).toContain('className="grid shrink-0 grid-cols-2');
+    expect(client).toContain('className="overflow-x-auto pb-3"');
     expect(picker).toContain('aria-busy={isPending}');
     expect(picker).toContain('role="alert"');
   });

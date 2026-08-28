@@ -156,14 +156,14 @@ describe("buildDealsCsv", () => {
     });
   });
 
-  it("renders a cash-purchase DSCR (stored as 0) as 'Cash'", () => {
+  it("renders a cash-purchase DSCR with the canonical N/A label", () => {
     const csv = buildDealsCsv([makeItem({ address: "10 Oak Ave", dscr: 0, isCashPurchase: true })]);
-    expect(records(csv)[1].split(",")[10]).toBe("Cash");
+    expect(records(csv)[1].split(",")[10]).toBe("N/A — no debt service");
   });
 
-  it("renders a FINANCED deal with DSCR <= 0 as the number, not 'Cash'", () => {
+  it("renders a FINANCED deal with DSCR <= 0 as the number, not the cash label", () => {
     // Negative NOI on a financed deal → DSCR is a real (bad) number the
-    // investor needs to see. Labeling it "Cash" hid a failing deal.
+    // investor needs to see. Labeling it N/A would hide a failing deal.
     // "-0.42" starts with "-" so the injection hardening quote-prefixes it,
     // same as every negative numeric cell.
     const negative = buildDealsCsv([
@@ -177,11 +177,11 @@ describe("buildDealsCsv", () => {
     expect(records(zero)[1].split(",")[10]).toBe("0.00");
   });
 
-  it("renders 'Cash' for a cash purchase even when dscr is missing", () => {
+  it("renders the canonical label for a cash purchase even when dscr is missing", () => {
     const csv = buildDealsCsv([
       makeItem({ address: "10 Oak Ave", dscr: null, isCashPurchase: true }),
     ]);
-    expect(records(csv)[1].split(",")[10]).toBe("Cash");
+    expect(records(csv)[1].split(",")[10]).toBe("N/A — no debt service");
   });
 
   it("passes an unparseable createdAt through untouched", () => {

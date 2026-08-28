@@ -36,7 +36,17 @@ function payload() {
       capexReserve: 2160, netCashFlowAnnual: 2040, loanAmount: 212000, monthlyPayment: 1392,
       totalCashRequired: 60950, isCashPurchase: false,
     },
-    projection10y: { cumulativeCF: 2080, bestAnnualAfterTax: 1040, totalAfterTax: 2080, rows },
+    projection10y: {
+      cumulativeCF: 2080,
+      bestAnnualPreTax: 1040,
+      year10Equity: 60000,
+      rows: rows.map((row) => ({
+        ...row,
+        propertyValue: 270000,
+        loanBalance: 210000,
+        equity: 60000,
+      })),
+    },
     taxStrategy: { year1Taxable: -100, year1Savings: 400, totalBenefit10y: 800, annualDepreciation: 7636,
       rows: rows.map((r) => ({ y: r.y, rental: r.rental, opex: r.opex, interest: 15900, dep: 7636, total: 34536, taxable: -4536, savings: 400, benefit: 400 })) },
     exitScenarios: { bestYear: 2, year5Profit: 1, year10Profit: 2, totalROI: 10,
@@ -65,6 +75,17 @@ describe("reportDataSchema round trip", () => {
 
   it("PRESERVES comps fetchedAt — stripping it drops the provenance line", () => {
     expect(reportDataSchema.parse(payload()).comps?.fetchedAt).toBe("2026-08-12T00:00:00Z");
+  });
+
+  it("PRESERVES the released pre-tax projection and modeled-equity fields", () => {
+    const projection = reportDataSchema.parse(payload()).projection10y;
+    expect(projection.bestAnnualPreTax).toBe(1040);
+    expect(projection.year10Equity).toBe(60000);
+    expect(projection.rows[0]).toMatchObject({
+      propertyValue: 270000,
+      loanBalance: 210000,
+      equity: 60000,
+    });
   });
 
   it("PRESERVES units isOwnerOccupied — stripping it double-counts the owner's rent", () => {

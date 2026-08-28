@@ -146,6 +146,7 @@ export default async function PortalDealPage({ params }: Props) {
     maoTargetSource =
       normalizeExternalOfferCeilingTargetSource(
         savedResultSnapshot?.maxOfferTargetSource,
+        { target: maoTarget, values },
       ) ?? "selected-targets";
     if (!isAdoptedOfferCeilingTargetSource(maoTargetSource)) {
       maoTarget = undefined;

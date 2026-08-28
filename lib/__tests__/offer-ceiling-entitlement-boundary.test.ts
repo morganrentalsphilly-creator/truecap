@@ -177,4 +177,16 @@ describe("Offer Ceiling server entitlement boundary", () => {
     expect(dashboard).toContain(".catch(() => {");
     expect(summary).toContain("Retry Offer Ceiling");
   });
+
+  it("rate-limits anonymous inverse solves before invoking the solver", () => {
+    const action = repoFile("app/actions/offer-ceiling.ts");
+    const limiter = action.indexOf(
+      "anonymousOfferCeilingRateLimit.isOverLimit(await getRequestIp())",
+    );
+    const solve = action.indexOf("resolveOfferCeilingForAccess({");
+    expect(limiter).toBeGreaterThan(-1);
+    expect(limiter).toBeLessThan(solve);
+    expect(action).toContain('code: "RATE_LIMITED"');
+    expect(action).toContain("maxPerWindow: 120");
+  });
 });

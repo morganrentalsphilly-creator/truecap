@@ -23,9 +23,17 @@ import {
   analyzeFixFlip,
   estimateFixFlipCarryingCost,
 } from "../fix-flip-analysis";
-import { calculateAnalysis } from "../calc-analysis";
+import {
+  calcMonthlyPayment,
+  calculateAnalysis,
+  mortgageInsuranceRunsToPayoff,
+} from "../calc-analysis";
 import { buildTenYearProjection } from "../ten-year-projections";
 import type { InvestmentFormValues } from "../investcalc-schema";
+import {
+  buildLoanAmortizationSchedule,
+  loanBalanceAfterPayments,
+} from "../loan-amortization";
 
 // ──────────────────────────────────────────────────────────────────
 // Helpers
@@ -345,8 +353,9 @@ describe("PMI", () => {
     );
     expect(higher.pmiMonthly).toBeGreaterThan(dflt.pmiMonthly);
     // 1.5% of the loan / 12.
-    expect(higher.pmiMonthly).toBe(
-      Math.round((higher.loanAmount * (1.5 / 100)) / 12),
+    expect(higher.pmiMonthly).toBeCloseTo(
+      (higher.loanAmount * (1.5 / 100)) / 12,
+      12,
     );
   });
 
@@ -357,18 +366,26 @@ describe("PMI", () => {
     expect(r.pmiMonthly).toBe(0);
   });
 
+  it("never applies owner-home automatic PMI termination to a rental loan", () => {
+    expect(mortgageInsuranceRunsToPayoff("single-family", false)).toBe(true);
+    expect(mortgageInsuranceRunsToPayoff("multi-family", false)).toBe(true);
+    expect(mortgageInsuranceRunsToPayoff("owner-occupant", false)).toBe(false);
+    expect(mortgageInsuranceRunsToPayoff("owner-occupant", true)).toBe(true);
+  });
+
   it("pmiNoCancel keeps mortgage insurance for the life of the loan (FHA MIP)", () => {
-    // Deterministic legacy-rate projection: loan starts just above 80% LTV and
-    // crosses the threshold during year 1. Cancellable PMI stops that month;
-    // never-canceling MIP remains until payoff.
+    // The loan starts just above automatic termination and crosses scheduled
+    // 78% LTV during year 1. Loan-life MIP remains until payoff.
     const base = {
       monthlyRentalIncome: 2_000,
       totalOperatingExpenses: 500,
       capexReserveMonthly: 0,
-      monthlyPayment: 1_000,
+      monthlyPayment: 82_000 / 120,
+      interestRate: 0,
+      loanTermYears: 10,
       pmiMonthly: 100,
       loanAmount: 82_000,
-      purchasePrice: 100_000, // 80% LTV drop threshold = $80,000
+      purchasePrice: 100_000, // automatic drop threshold = $78,000
       taxSavingsMonthly: 0,
       annualDepreciation: 0,
       yearlyInterestSchedule: Array.from({ length: 10 }, () => 5_000), // $7k principal/yr
@@ -379,20 +396,21 @@ describe("PMI", () => {
     };
     const cancels = buildTenYearProjection({ ...base, pmiNoCancel: false });
     const forLife = buildTenYearProjection({ ...base, pmiNoCancel: true });
-    expect(cancels[0]!.debtServiceAnnual).toBe(12_000 + 4 * 100);
-    expect(forLife[0]!.debtServiceAnnual).toBe(12_000 + 12 * 100);
+    expect(cancels[0]!.debtServiceAnnual).toBeCloseTo(8_200 + 6 * 100, 8);
+    expect(forLife[0]!.debtServiceAnnual).toBeCloseTo(8_200 + 12 * 100, 8);
     expect(forLife[9]!.debtServiceAnnual).toBeGreaterThan(
       cancels[9]!.debtServiceAnnual,
     ); // MIP stays
   });
 
-  it("cancels PMI in the exact month scheduled balance reaches 80% LTV", () => {
+  it("automatically terminates PMI in the exact month scheduled balance reaches 78% LTV", () => {
     const projection = buildTenYearProjection({
       monthlyRentalIncome: 2_000,
       totalOperatingExpenses: 500,
       capexReserveMonthly: 0,
       monthlyPayment: 1_000,
       interestRate: 0,
+      loanTermYears: 82 / 12,
       pmiMonthly: 100,
       pmiNoCancel: false,
       loanAmount: 82_000,
@@ -406,9 +424,9 @@ describe("PMI", () => {
       includeInterestDeduction: false,
     });
 
-    // Opening balances: $82k and $81k carry PMI. Month 3 opens at exactly
-    // $80k and no longer does. The old annual model charged all 12 months.
-    expect(projection[0]!.debtServiceAnnual).toBe(12_000 + 2 * 100);
+    // Opening balances $82k, $81k, $80k, and $79k carry PMI. Month 5 opens
+    // at exactly $78k and no longer does. The old annual model used 80%.
+    expect(projection[0]!.debtServiceAnnual).toBe(12_000 + 4 * 100);
   });
 
   it("excludes the CapEx reserve from the taxable-income line, not the cash-flow line", () => {
@@ -691,11 +709,14 @@ describe("ten-year projection", () => {
     // A 5-year schedule means the loan is paid off entering year 6 — the
     // projection must not keep charging P&I (it did, contradicting the
     // exit-scenario balance table on the same analysis).
+    const payment = calcMonthlyPayment(200_000, 6.75, 5);
     const years = buildTenYearProjection({
       monthlyRentalIncome: 2_000,
       totalOperatingExpenses: 500,
       capexReserveMonthly: 0,
-      monthlyPayment: 3_937,
+      monthlyPayment: payment,
+      interestRate: 6.75,
+      loanTermYears: 5,
       loanAmount: 200_000,
       purchasePrice: 250_000,
       taxSavingsMonthly: 0,
@@ -707,7 +728,7 @@ describe("ten-year projection", () => {
       includeInterestDeduction: true,
     });
     for (const y of years.slice(0, 5)) {
-      expect(y.debtServiceAnnual).toBe(3_937 * 12);
+      expect(y.debtServiceAnnual).toBeCloseTo(payment * 12, 8);
     }
     for (const y of years.slice(5)) {
       expect(y.debtServiceAnnual).toBe(0);
@@ -717,11 +738,14 @@ describe("ten-year projection", () => {
   });
 
   it("never-canceling MIP (pmiNoCancel) also stops once the loan is paid off", () => {
+    const payment = calcMonthlyPayment(200_000, 6.75, 5);
     const years = buildTenYearProjection({
       monthlyRentalIncome: 2_000,
       totalOperatingExpenses: 500,
       capexReserveMonthly: 0,
-      monthlyPayment: 3_937,
+      monthlyPayment: payment,
+      interestRate: 6.75,
+      loanTermYears: 5,
       pmiMonthly: 150,
       pmiNoCancel: true,
       loanAmount: 200_000,
@@ -734,7 +758,7 @@ describe("ten-year projection", () => {
       taxRate: 0.24,
       includeInterestDeduction: true,
     });
-    expect(years[4]!.debtServiceAnnual).toBe(3_937 * 12 + 150 * 12);
+    expect(years[4]!.debtServiceAnnual).toBeCloseTo(payment * 12 + 150 * 12, 8);
     expect(years[5]!.debtServiceAnnual).toBe(0);
   });
 
@@ -816,6 +840,36 @@ describe("ten-year projection", () => {
 // 9. Exit scenarios — appreciation compounds; total profit accounts for all 3 sources
 // ──────────────────────────────────────────────────────────────────
 describe("exit scenarios", () => {
+  it("uses the same full-precision scheduled payoff balance as the canonical loan engine", () => {
+    const schedule = buildLoanAmortizationSchedule({
+      principal: 196_000,
+      annualRatePct: 7,
+      termYears: 30,
+    });
+    const years = buildExitScenarios({
+      purchasePrice: 245_000,
+      appreciationRate: 3,
+      sellingCostPct: 6,
+      loanAmount: 196_000,
+      interestRate: 7,
+      loanTermYears: 30,
+      // Exit v4 derives the contractual payment from the shared terms; this
+      // legacy hash field cannot create a second, divergent balance schedule.
+      monthlyPayment: 1,
+      downPayment: 49_000,
+      closingCosts: 7_350,
+      cumulativeCashFlowByYear: Array(10).fill(0),
+      cumulativeTaxBenefitByYear: Array(10).fill(0),
+    });
+
+    for (const year of years) {
+      expect(year.remainingLoanBalance).toBeCloseTo(
+        loanBalanceAfterPayments(schedule, year.year * 12),
+        8,
+      );
+    }
+  });
+
   it("year-N property value = price × (1 + rate)^N", () => {
     const input: ExitScenarioInput = {
       purchasePrice: 245_000,
@@ -1139,7 +1193,8 @@ describe("fix-and-flip analysis", () => {
     });
     // 6-month hold → annualizer is 2x
     const expected = Math.round(r.roiOnCashPct * 2 * 10) / 10;
-    expect(Math.abs(r.annualizedRoiPct - expected)).toBeLessThanOrEqual(0.2);
+    expect(r.annualizedRoiPct).not.toBeNull();
+    expect(Math.abs(r.annualizedRoiPct! - expected)).toBeLessThanOrEqual(0.2);
   });
 });
 

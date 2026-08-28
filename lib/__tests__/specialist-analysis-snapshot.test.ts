@@ -70,7 +70,7 @@ describe("specialist analysis snapshots", () => {
   it("preserves an explicit $0 flip carry instead of replacing it with the derived carry", () => {
     const values = specialistValues({
       rehabBudget: 0,
-      strategyHoldMonths: 0,
+      strategyHoldMonths: 1,
       fixFlipSellingCostsPct: 0,
       fixFlipDownPaymentPct: 0,
       fixFlipCarryMonthly: 0,
@@ -87,7 +87,7 @@ describe("specialist analysis snapshots", () => {
     }
     expect(snapshot.effectiveInputs).toMatchObject({
       rehabBudget: 0,
-      holdMonths: 0,
+      holdMonths: 1,
       sellingCostsPct: 0,
       downPaymentPct: 0,
       monthlyCarryingCost: 0,
@@ -248,7 +248,7 @@ describe("specialist analysis snapshots", () => {
     ).toBeNull();
   });
 
-  it("derives only current specialist reports and preserves the strict report wire shape", () => {
+  it("keeps new specialist report sections dark by default", () => {
     const values = specialistValues({
       fixFlipSellingCostsPct: 0,
       fixFlipCarryMonthly: 0,
@@ -258,12 +258,7 @@ describe("specialist analysis snapshots", () => {
       analyzerStrategyKey: "fix-flip",
       generatedAt: new Date("2026-08-26T12:00:00.000Z"),
     });
-    expect(current.specialistAnalysis?.strategy).toBe("fix-flip");
-    expect(
-      current.specialistAnalysis?.strategy === "fix-flip"
-        ? current.specialistAnalysis.inputSources.monthlyCarryingCost
-        : null,
-    ).toBe("saved-assumption");
+    expect(current.specialistAnalysis).toBeNull();
 
     const parsedReport = reportDataSchema.parse(current);
     expect(parsedReport.specialistAnalysis).toEqual(current.specialistAnalysis);
@@ -282,7 +277,7 @@ describe("specialist analysis snapshots", () => {
     expect(generalLens.specialistAnalysis).toBeNull();
   });
 
-  it("adds exactly one clearly separated PDF page for a specialist snapshot", async () => {
+  it("does not add a specialist PDF page while the model gate is off", async () => {
     const values = specialistValues();
     const generatedAt = new Date("2026-08-26T12:00:00.000Z");
     const baseReport = buildCanonicalReportData({ values, generatedAt });
@@ -300,8 +295,6 @@ describe("specialist analysis snapshots", () => {
       return pdf.match(/\/Type \/Page\b/g)?.length ?? 0;
     };
 
-    expect(await pageCount(specialistBlob)).toBe(
-      (await pageCount(baseBlob)) + 1,
-    );
+    expect(await pageCount(specialistBlob)).toBe(await pageCount(baseBlob));
   });
 });

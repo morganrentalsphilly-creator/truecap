@@ -27,6 +27,10 @@ import { getSiteUrl } from "@/lib/site-url";
 import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
 import { truncateMetaDescription } from "@/lib/utils";
 
+// A dark specialist entry must not be resolved as an on-demand dynamic route.
+// Only release-filtered build-time params are routable.
+export const dynamicParams = false;
+
 export async function generateStaticParams() {
   return CITY_STRATEGY_COMBOS.map((c) => ({
     city: c.citySlug,
@@ -41,7 +45,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { city, strategy } = await params;
   const combo = getCityStrategyCombo(city, strategy);
-  if (!combo) return { title: "Combo not found" };
+  if (!combo) {
+    return {
+      title: "Guide unavailable",
+      robots: { index: false, follow: false },
+    };
+  }
   // Keyword-first ("house hacking philadelphia"-class query) + year,
   // trimmed to the SERP window: longest combo is 46 chars, so with the
   // layout's " | TrueCap" the title never gets clipped.

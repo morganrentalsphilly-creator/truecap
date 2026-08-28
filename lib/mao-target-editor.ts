@@ -7,6 +7,8 @@ export type MaoTargetField =
   | "cocReturn"
   | "monthlyCashFlow"
   | "dscr"
+  | "minIrrPct"
+  | "maxCashRequired"
   | "maxPurchasePrice";
 
 export const MAO_TARGET_BOUNDS: Record<
@@ -24,6 +26,22 @@ export const MAO_TARGET_BOUNDS: Record<
   // while older valid buy-box seeds remain shareable and saveable.
   monthlyCashFlow: { label: "Minimum monthly cash flow", min: -1000000, max: 1000000, step: 25 },
   dscr: { label: "Minimum DSCR", min: 0, max: 100, step: 0.05 },
+  // IRR is economically admissible only above -100%. The solver accepts a
+  // negative floor but still requires one unique contribution-aware root.
+  minIrrPct: {
+    label: "Minimum 10-year pre-tax IRR",
+    min: -99.9,
+    max: 1000,
+    step: 0.1,
+  },
+  // Total acquisition cash can exceed purchase price when closing costs,
+  // reserves, loan fees, repairs, and furnishing are included.
+  maxCashRequired: {
+    label: "Maximum cash required",
+    min: 0,
+    max: 1_000_000_000,
+    step: 500,
+  },
   maxPurchasePrice: {
     label: "Maximum purchase price",
     min: 0,
@@ -71,6 +89,8 @@ export function normalizeMaoTarget(input: unknown): MaoTarget | null {
     "cocReturn",
     "monthlyCashFlow",
     "dscr",
+    "minIrrPct",
+    "maxCashRequired",
     "maxPurchasePrice",
   ]);
   if (Object.keys(record).some((key) => !allowed.has(key as MaoTargetField))) return null;
@@ -103,6 +123,8 @@ export function maoTargetFingerprint(input: unknown): string {
           cocReturn: target.cocReturn,
           monthlyCashFlow: target.monthlyCashFlow,
           dscr: target.dscr,
+          minIrrPct: target.minIrrPct,
+          maxCashRequired: target.maxCashRequired,
           maxPurchasePrice: target.maxPurchasePrice,
         }
       : null

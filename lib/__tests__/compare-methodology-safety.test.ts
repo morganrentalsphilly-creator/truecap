@@ -44,12 +44,14 @@ function pickerDeal(
 function comparisonDeal(
   id: string,
   methodologyCohort: string,
-  metrics: Record<string, number | null>
+  metrics: Record<string, number | null>,
+  purchasePrice = 100_000,
 ): CompareDealViewModel {
   return {
     id,
     methodologyCohort,
     metrics,
+    purchasePrice,
   } as unknown as CompareDealViewModel;
 }
 
@@ -179,6 +181,28 @@ describe("methodology-safe leader and highlight behavior", () => {
     });
     expect(getLeaderIdsFromHighlightedCounts(sparse, counts)).toEqual([]);
   });
+
+  it("uses normalized values for directional shading in per-$100k mode", () => {
+    const differentlySizedDeals = [
+      comparisonDeal(
+        "smaller",
+        "recorded:1.1",
+        { ...baseMetrics, netCashFlow: 500 },
+        100_000,
+      ),
+      comparisonDeal(
+        "larger",
+        "recorded:1.1",
+        { ...baseMetrics, netCashFlow: 1_000 },
+        300_000,
+      ),
+    ];
+
+    expect(getComparableBestValue(metric, differentlySizedDeals)).toBe(1_000);
+    expect(
+      getComparableBestValue(metric, differentlySizedDeals, "per_100k_purchase"),
+    ).toBe(500);
+  });
 });
 
 describe("methodology safety UX guards", () => {
@@ -199,10 +223,11 @@ describe("methodology safety UX guards", () => {
 
   it("keeps old numbers visible but suppresses every comparative endorsement", () => {
     expect(client).toContain("Comparison highlights paused");
-    expect(client).toContain("will not name a winner, award metric leads, show trophies, or plot them together");
+    expect(client).toContain("directional row shading and the chart are paused");
     expect(client).toContain("methodologiesComparable && riskReturnDeals.length >= 2");
-    expect(client).toContain("methodologiesComparable ? (");
     expect(client).toContain("Re-underwrite deal {index + 1} to compare");
+    expect(client).not.toContain("<Trophy");
+    expect(client).not.toMatch(/Near-term score|Long-term score|lead count/);
   });
 
   it("blocks mixed or unsafe My Deals submissions before the transition can navigate", () => {
@@ -251,7 +276,7 @@ describe("methodology safety UX guards", () => {
     expect(read("../../lib/compare-metrics.ts")).toContain(
       "if (values.length < 2) return null"
     );
+    expect(client).toContain("if (values.length < 2) return null");
     expect(client).toContain("if (candidates.length < 2) return new Set()");
-    expect(client).toContain("}).length >= 2");
   });
 });

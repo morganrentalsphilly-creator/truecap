@@ -17,6 +17,8 @@
  *  - null / non-finite metrics serialize as empty cells.
  */
 
+import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
+
 /** One exported row. Structurally close to `SavedAnalysisListItem` so the
  *  My Deals page can map items with minimal glue; kept as its own type so
  *  this lib never imports from `components/`. */
@@ -41,7 +43,7 @@ export type DealsCsvItem = {
   cocReturnPct: number | null;
   capRatePct: number | null;
   /** null = unknown. A financed deal with negative NOI legitimately has
-   *  DSCR ≤ 0 — only isCashPurchase marks DSCR as N/A ("Cash"). */
+   *  DSCR ≤ 0 — only isCashPurchase marks DSCR as not applicable. */
   dscr?: number | null;
   isCashPurchase?: boolean;
   cashToClose?: number | null;
@@ -91,12 +93,12 @@ function numCell(value: number | null | undefined): string {
   return String(Math.round(value * 100) / 100);
 }
 
-/** Mirrors the list UI's DSCR cell: cash purchase → "Cash", unknown → empty,
+/** Mirrors the list UI's DSCR cell: cash purchase → canonical N/A, unknown → empty,
  *  else 2 decimals. Keyed off the explicit isCashPurchase flag — a financed
  *  deal whose NOI goes negative has a real DSCR ≤ 0 and must export the
- *  number, not "Cash". */
+ *  number, not the cash-purchase label. */
 function dscrCell(dscr: number | null | undefined, isCashPurchase: boolean | undefined): string {
-  if (isCashPurchase) return "Cash";
+  if (isCashPurchase) return NO_DEBT_SERVICE_DSCR_LABEL;
   if (dscr == null) return "";
   return dscr.toFixed(2);
 }

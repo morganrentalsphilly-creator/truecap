@@ -28,6 +28,10 @@ describe("embed invite wiring", () => {
     const wrongSlug: string[] = [];
     for (const slug of toolSlugs) {
       const src = readFileSync(join(TOOLS_DIR, slug, "page.tsx"), "utf8");
+      // Retired tools retain a permanent redirect so old inbound links do not
+      // 404. They are not released calculators and must not advertise an
+      // embeddable widget for the removed surface.
+      if (/permanentRedirect\(/.test(src)) continue;
       if (!src.includes("<ToolEmbedInvite")) {
         missing.push(slug);
         continue;

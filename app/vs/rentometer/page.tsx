@@ -112,7 +112,7 @@ export default function VsRentometerPage() {
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You want a FULL deal underwrite — cap rate, CoC, DSCR, NCF, 10-yr projection.</li>
                 <li>You want to decide whether to buy, not just what rent to charge.</li>
-                <li>You want operating expense + mortgage + tax modeling included.</li>
+                <li>You want operating expenses, mortgage debt service, and an editable property-tax input included.</li>
                 <li>You want cash flow, returns, and selected-rule fit for each property.</li>
                 <li>You want unlimited free analyses.</li>
               </ul>
@@ -160,9 +160,9 @@ export default function VsRentometerPage() {
           </div>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             A rent number only matters once it flows into returns. Drop your Rentometer comp into the standalone{" "}
-            <Link href="/tools/cash-on-cash-calculator" className="font-semibold text-primary hover:underline">cash-on-cash return calculator</Link>
+            <Link href="/#main" className="font-semibold text-primary hover:underline">cash-on-cash return calculator</Link>
             {" "}or{" "}
-            <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">cap rate calculator</Link>
+            <Link href="/#main" className="font-semibold text-primary hover:underline">cap rate calculator</Link>
             {" "}to see what that rent actually earns. For the full income statement behind those metrics, our{" "}
             <Link href="/blog/rental-property-pro-forma-explained" className="font-semibold text-primary hover:underline">rental property pro forma guide</Link>
             {" "}lays out every line.

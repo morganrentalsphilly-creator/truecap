@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
+import { formatDscr } from "@/lib/financial-presentation";
 
 const num = (s: string) => {
   const n = Number(s);
@@ -193,7 +194,7 @@ export function RentalCashFlowCalculatorWidget() {
             <Row label="Annual cash flow" value={fmtMoney(result.annualCashFlow)} bold />
             <Row
               label="DSCR (NOI ÷ debt service)"
-              value={result.isCashPurchase ? "N/A (no loan)" : result.dscr.toFixed(2)}
+              value={formatDscr(result.dscr, !result.isCashPurchase)}
             />
           </div>
           {result.pmiLikely && (
@@ -210,7 +211,7 @@ export function RentalCashFlowCalculatorWidget() {
         className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="w-4 h-4" />
-        Run the full analysis with these numbers — cap rate, CoC, DSCR, projections, tax, exit — free
+        Run the full analysis with these numbers — cap rate, CoC, DSCR, and cash-flow projections — free
         <ArrowUpRight className="w-4 h-4" />
       </Link>
     </div>

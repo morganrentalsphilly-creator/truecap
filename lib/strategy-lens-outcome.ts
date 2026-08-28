@@ -22,6 +22,7 @@
 
 import type { DealStrategy } from "./deal-score";
 import { isExtremeAnnualizedRoi } from "./extreme-value-format";
+import { NO_DEBT_SERVICE_DSCR_LABEL } from "./financial-presentation";
 
 /** Chip color intent — maps to the metric-positive/negative CSS vars. */
 export type LensMetricTone = "good" | "neutral" | "bad";
@@ -54,8 +55,6 @@ export type StrategyLensMetricsInput = {
   dscr: number;
   /** Cap rate (%). */
   capRate: number;
-  /** Monthly after-tax cash flow ($). */
-  afterTaxCF: number;
   /** Monthly debt-service payment; <= 0 means a cash purchase (DSCR N/A). */
   monthlyPayment: number;
   /** 10-yr annualized total return (%); null when projections unavailable. */
@@ -127,7 +126,12 @@ function dscrMetric(
   isOwnerOccupant: boolean
 ): LensOutcomeMetric {
   if (monthlyPayment <= 0) {
-    return { label: "DSCR", value: "—", band: "all-cash, no debt to cover", tone: "neutral" };
+    return {
+      label: "DSCR",
+      value: NO_DEBT_SERVICE_DSCR_LABEL,
+      band: "not applicable",
+      tone: "neutral",
+    };
   }
   if (dscr >= 1.25) {
     return { label: "DSCR", value: dscr.toFixed(2), band: "comfortable", tone: "good" };
@@ -192,17 +196,6 @@ function capRateMetric(capRate: number): LensOutcomeMetric {
   };
 }
 
-/** Signed illustrative after-tax cash flow. A positive estimate is not proof
- *  the hold pays for itself because deduction usability is taxpayer-specific. */
-function afterTaxCfMetric(afterTaxCF: number): LensOutcomeMetric {
-  return {
-    label: "After-tax CF",
-    value: fmtMoneyPerMo(afterTaxCF),
-    band: afterTaxCF >= 0 ? "illustrative estimate ≥ $0" : "illustrative estimate < $0",
-    tone: afterTaxCF >= 0 ? "neutral" : "bad",
-  };
-}
-
 /**
  * Build the lens outcome strip for the active investor lens.
  * Returns null for "balanced" (the default) — no lens, no strip.
@@ -228,7 +221,7 @@ export function buildStrategyLensOutcome(
       metrics: [
         tenYearReturnMetric(m.annualizedReturnPct),
         capRateMetric(m.capRate),
-        afterTaxCfMetric(m.afterTaxCF),
+        cashFlowMetric(m.netCashFlow),
       ],
     };
   }

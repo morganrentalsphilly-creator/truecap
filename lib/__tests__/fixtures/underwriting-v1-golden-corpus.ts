@@ -45,7 +45,7 @@ const BASE_V1_INPUT: InvestmentFormValues = {
 };
 
 export type UnderwritingV1GoldenExpected = {
-  methodologyVersion: "1.1";
+  methodologyVersion: "1.3";
   monthlyRentalIncome: number;
   propertyTax: number;
   insurance: number;
@@ -76,37 +76,50 @@ export type UnderwritingV1GoldenCase = {
 
 // Expected values are intentionally literal. Never regenerate or accept these
 // automatically: a change requires an explicit methodology review.
+// Projection v10's reviewed Year-10 cumulative-cash-flow corrections are:
+// financed 68718.45682362831 -> 68738.45682362831; cash 239306 -> 239260;
+// zero-rate 64070 -> 64083; permanent-PMI 39781.358626307505 ->
+// 39793.358626307505; multifamily 80947.89908408822 -> 81093.89908408822;
+// owner-occupant -110501.54338047245 -> -110502.54338047245; STR
+// -14572.510547569109 -> -14684.510547569109; negative-carry
+// -474875.2811355402 -> -474891.2811355402; rehab 86430.53674047743 ->
+// 86396.53674047743. Fixed dollars alone now use expense growth; each
+// percentage-of-rent line follows that year's scheduled rent.
 export const UNDERWRITING_V1_GOLDEN_CORPUS: UnderwritingV1GoldenCase[] = [
   {
     id: "financed_sfr_standard",
     rationale: "Conventional 20%-down single-family baseline.",
     values: { ...BASE_V1_INPUT },
     expected: {
-      methodologyVersion: "1.1",
+      methodologyVersion: "1.3",
       monthlyRentalIncome: 2_600,
       propertyTax: 229,
       insurance: 104,
       totalOperatingExpenses: 931,
       noiAnnual: 21_588,
       loanAmount: 200_000,
-      monthlyPayment: 1_297,
+      monthlyPayment: 1297.1961931364306,
       pmiMonthly: 0,
-      netCashFlow: 372,
-      cocReturn: 7.763478260869565,
+      netCashFlow: 371.80380686356943,
+      cocReturn: 7.759383795413623,
       capRate: 8.6352,
-      dscr: 1.387047031611411,
+      dscr: 1.3868372490750849,
       totalCashRequired: 57_500,
       taxSavingsMonthly: -8,
-      afterTaxCF: 364,
-      year10CumulativeCashFlow: 68_742,
-      year10CumulativeTaxBenefit: -9_195,
+      afterTaxCF: 363.80380686356943,
+      // Projection v10 correction: rent-linked percentage expenses now move
+      // with projected rent while fixed-dollar costs alone use expense growth.
+      // Reviewed baseline delta: 68718.45682362831 -> 68738.45682362831.
+      year10CumulativeCashFlow: 68738.45682362831,
+      year10CumulativeTaxBenefit: -9_197,
       dealScore: 80,
       dscrScore: 17,
     },
   },
   {
     id: "cash_annual_tax_monthly_insurance",
-    rationale: "Cash purchase with exact-dollar tax and insurance inputs; DSCR is N/A.",
+    rationale:
+      "Cash purchase with exact-dollar tax and insurance inputs; DSCR is N/A.",
     values: {
       ...BASE_V1_INPUT,
       address: "200 Cash Ave, Camden, NJ 08103",
@@ -123,7 +136,7 @@ export const UNDERWRITING_V1_GOLDEN_CORPUS: UnderwritingV1GoldenCase[] = [
       insurancePct: undefined,
     },
     expected: {
-      methodologyVersion: "1.1",
+      methodologyVersion: "1.3",
       monthlyRentalIncome: 3_000,
       propertyTax: 350,
       insurance: 180,
@@ -139,7 +152,7 @@ export const UNDERWRITING_V1_GOLDEN_CORPUS: UnderwritingV1GoldenCase[] = [
       totalCashRequired: 309_000,
       taxSavingsMonthly: -278,
       afterTaxCF: 1_502,
-      year10CumulativeCashFlow: 239_306,
+      year10CumulativeCashFlow: 239_260,
       year10CumulativeTaxBenefit: -40_018,
       dealScore: 63,
       dscrScore: 17,
@@ -147,7 +160,8 @@ export const UNDERWRITING_V1_GOLDEN_CORPUS: UnderwritingV1GoldenCase[] = [
   },
   {
     id: "zero_rate_financed",
-    rationale: "Zero-interest financed branch uses principal divided by payment count.",
+    rationale:
+      "Zero-interest financed branch uses principal divided by payment count.",
     values: {
       ...BASE_V1_INPUT,
       address: "300 Zero Rate Rd, Reading, PA 19601",
@@ -158,7 +172,7 @@ export const UNDERWRITING_V1_GOLDEN_CORPUS: UnderwritingV1GoldenCase[] = [
       loanTermYears: 15,
     },
     expected: {
-      methodologyVersion: "1.1",
+      methodologyVersion: "1.3",
       monthlyRentalIncome: 1_800,
       propertyTax: 165,
       insurance: 75,
@@ -174,7 +188,7 @@ export const UNDERWRITING_V1_GOLDEN_CORPUS: UnderwritingV1GoldenCase[] = [
       totalCashRequired: 50_400,
       taxSavingsMonthly: -185,
       afterTaxCF: 211,
-      year10CumulativeCashFlow: 64_070,
+      year10CumulativeCashFlow: 64_083,
       year10CumulativeTaxBenefit: -26_527,
       dealScore: 85,
       dscrScore: 17,
@@ -182,7 +196,8 @@ export const UNDERWRITING_V1_GOLDEN_CORPUS: UnderwritingV1GoldenCase[] = [
   },
   {
     id: "low_down_permanent_pmi",
-    rationale: "Low-down financed acquisition with explicit non-canceling mortgage insurance.",
+    rationale:
+      "Low-down financed acquisition with explicit non-canceling mortgage insurance.",
     values: {
       ...BASE_V1_INPUT,
       address: "400 Low Down Ln, Wilmington, DE 19801",
@@ -195,31 +210,32 @@ export const UNDERWRITING_V1_GOLDEN_CORPUS: UnderwritingV1GoldenCase[] = [
       pmiNoCancel: true,
     },
     expected: {
-      methodologyVersion: "1.1",
+      methodologyVersion: "1.3",
       monthlyRentalIncome: 3_700,
       propertyTax: 321,
       insurance: 146,
       totalOperatingExpenses: 1_318,
       noiAnnual: 30_804,
       loanAmount: 332_500,
-      monthlyPayment: 2_102,
-      pmiMonthly: 236,
-      netCashFlow: 44,
-      cocReturn: 1.8857142857142857,
+      monthlyPayment: 2101.6261781141047,
+      pmiMonthly: 235.52083333333334,
+      netCashFlow: 44.852988552561925,
+      cocReturn: 1.9222709379669398,
       capRate: 8.801142857142857,
-      dscr: 1.2212178877259752,
+      dscr: 1.2214351090275715,
       totalCashRequired: 28_000,
       taxSavingsMonthly: 30,
-      afterTaxCF: 74,
-      year10CumulativeCashFlow: 39_679,
-      year10CumulativeTaxBenefit: -8_491,
+      afterTaxCF: 74.85298855256192,
+      year10CumulativeCashFlow: 39793.358626307505,
+      year10CumulativeTaxBenefit: -8_485,
       dealScore: 63,
       dscrScore: 13,
     },
   },
   {
     id: "three_unit_multifamily",
-    rationale: "Multi-unit income sums every valid rental unit and ignores the SFR rent field.",
+    rationale:
+      "Multi-unit income sums every valid rental unit and ignores the SFR rent field.",
     values: {
       ...BASE_V1_INPUT,
       propertyType: "multi-family",
@@ -242,31 +258,32 @@ export const UNDERWRITING_V1_GOLDEN_CORPUS: UnderwritingV1GoldenCase[] = [
       insurancePct: undefined,
     },
     expected: {
-      methodologyVersion: "1.1",
+      methodologyVersion: "1.3",
       monthlyRentalIncome: 5_150,
       propertyTax: 650,
       insurance: 350,
       totalOperatingExpenses: 2_186,
       noiAnnual: 38_664,
       loanAmount: 393_750,
-      monthlyPayment: 2_646,
+      monthlyPayment: 2646.1258409659317,
       pmiMonthly: 0,
-      netCashFlow: 318,
-      cocReturn: 2.595918367346939,
+      netCashFlow: 317.87415903406827,
+      cocReturn: 2.5948910941556593,
       capRate: 7.364571428571429,
-      dscr: 1.217687074829932,
+      dscr: 1.2176291656725793,
       totalCashRequired: 147_000,
       taxSavingsMonthly: 108,
-      afterTaxCF: 426,
-      year10CumulativeCashFlow: 80_963,
-      year10CumulativeTaxBenefit: -2_024,
+      afterTaxCF: 425.87415903406827,
+      year10CumulativeCashFlow: 81093.89908408822,
+      year10CumulativeTaxBenefit: -2_026,
       dealScore: 47,
       dscrScore: 13,
     },
   },
   {
     id: "owner_occupant_duplex",
-    rationale: "Owner unit is excluded from rental income while the rental unit remains included.",
+    rationale:
+      "Owner unit is excluded from rental income while the rental unit remains included.",
     values: {
       ...BASE_V1_INPUT,
       propertyType: "owner-occupant",
@@ -275,8 +292,20 @@ export const UNDERWRITING_V1_GOLDEN_CORPUS: UnderwritingV1GoldenCase[] = [
       yearBuilt: 1915,
       monthlyRent: undefined,
       units: [
-        { bedrooms: 2, bathrooms: 1, sqft: 900, monthlyRent: 0, isOwnerOccupied: true },
-        { bedrooms: 2, bathrooms: 1, sqft: 900, monthlyRent: 1_900, isOwnerOccupied: false },
+        {
+          bedrooms: 2,
+          bathrooms: 1,
+          sqft: 900,
+          monthlyRent: 0,
+          isOwnerOccupied: true,
+        },
+        {
+          bedrooms: 2,
+          bathrooms: 1,
+          sqft: 900,
+          monthlyRent: 1_900,
+          isOwnerOccupied: false,
+        },
       ],
       downPaymentPct: 3.5,
       interestRate: 6.25,
@@ -284,31 +313,32 @@ export const UNDERWRITING_V1_GOLDEN_CORPUS: UnderwritingV1GoldenCase[] = [
       pmiNoCancel: true,
     },
     expected: {
-      methodologyVersion: "1.1",
+      methodologyVersion: "1.3",
       monthlyRentalIncome: 1_900,
       propertyTax: 298,
       insurance: 135,
       totalOperatingExpenses: 870,
       noiAnnual: 13_500,
       loanAmount: 313_625,
-      monthlyPayment: 1_931,
-      pmiMonthly: 144,
-      netCashFlow: -1_045,
-      cocReturn: -59.360946745562124,
+      monthlyPayment: 1931.0430698372704,
+      pmiMonthly: 143.74479166666669,
+      netCashFlow: -1044.7878615039372,
+      cocReturn: -59.34889627477986,
       capRate: 4.153846153846154,
-      dscr: 0.5825996892801657,
+      dscr: 0.5825866950211546,
       totalCashRequired: 21_125,
       taxSavingsMonthly: 321,
-      afterTaxCF: -724,
-      year10CumulativeCashFlow: -110_527,
-      year10CumulativeTaxBenefit: 31_559,
+      afterTaxCF: -723.7878615039372,
+      year10CumulativeCashFlow: -110502.54338047245,
+      year10CumulativeTaxBenefit: 31_558,
       dealScore: 0,
       dscrScore: 0,
     },
   },
   {
     id: "short_term_rental",
-    rationale: "STR income uses ADR times occupancy and includes furnishing cash at acquisition.",
+    rationale:
+      "STR income uses ADR times occupancy and includes furnishing cash at acquisition.",
     values: {
       ...BASE_V1_INPUT,
       address: "700 Nightly Stay Dr, Pocono Lake, PA 18347",
@@ -330,31 +360,32 @@ export const UNDERWRITING_V1_GOLDEN_CORPUS: UnderwritingV1GoldenCase[] = [
       insurancePct: undefined,
     },
     expected: {
-      methodologyVersion: "1.1",
+      methodologyVersion: "1.3",
       monthlyRentalIncome: 4_148.833333333333,
       propertyTax: 500,
       insurance: 260,
       totalOperatingExpenses: 2_253,
       noiAnnual: 25_234,
       loanAmount: 337_500,
-      monthlyPayment: 2_245,
+      monthlyPayment: 2245.395921229743,
       pmiMonthly: 0,
-      netCashFlow: -349.16666666666697,
-      cocReturn: -2.602484472049692,
+      netCashFlow: -349.56258789641015,
+      cocReturn: -2.6054354377372184,
       capRate: 5.607555555555555,
-      dscr: 0.9366740905716406,
+      dscr: 0.936508930764276,
       totalCashRequired: 161_000,
       taxSavingsMonthly: 244,
-      afterTaxCF: -105.16666666666697,
-      year10CumulativeCashFlow: -14_525,
-      year10CumulativeTaxBenefit: 18_711,
+      afterTaxCF: -105.56258789641015,
+      year10CumulativeCashFlow: -14684.510547569109,
+      year10CumulativeTaxBenefit: 18_708,
       dealScore: 0,
       dscrScore: 0,
     },
   },
   {
     id: "negative_cash_flow_high_expense",
-    rationale: "Negative-cash-flow deal locks loss signs, tax effect, and low Deal Score.",
+    rationale:
+      "Negative-cash-flow deal locks loss signs, tax effect, and low Deal Score.",
     values: {
       ...BASE_V1_INPUT,
       address: "800 Expense Heavy Ct, Newark, NJ 07102",
@@ -372,33 +403,34 @@ export const UNDERWRITING_V1_GOLDEN_CORPUS: UnderwritingV1GoldenCase[] = [
       utilitiesMonthly: 250,
     },
     expected: {
-      methodologyVersion: "1.1",
+      methodologyVersion: "1.3",
       monthlyRentalIncome: 1_900,
       propertyTax: 458,
       insurance: 208,
       totalOperatingExpenses: 2_076,
       noiAnnual: 168,
       loanAmount: 450_000,
-      monthlyPayment: 3_460,
+      monthlyPayment: 3460.1106761295014,
       pmiMonthly: 300,
-      netCashFlow: -3_936,
-      cocReturn: -72.66461538461539,
+      netCashFlow: -3936.1106761295014,
+      cocReturn: -72.66665863623695,
       capRate: 0.0336,
-      dscr: 0.004046242774566474,
+      dscr: 0.004046113350241292,
       totalCashRequired: 65_000,
       taxSavingsMonthly: 1_068,
-      afterTaxCF: -2_868,
-      // Projection snapshot v6 stops cancellable PMI in the month the balance
-      // reaches 80% LTV, removing two obsolete $300 charges in year 10.
-      year10CumulativeCashFlow: -474_262,
-      year10CumulativeTaxBenefit: 123_986,
+      afterTaxCF: -2868.1106761295014,
+      // Projection snapshot v7 uses the canonical full-precision schedule and
+      // statutory scheduled 78% automatic PMI termination.
+      year10CumulativeCashFlow: -474891.2811355402,
+      year10CumulativeTaxBenefit: 123_981,
       dealScore: 0,
       dscrScore: 0,
     },
   },
   {
     id: "rehab_cash_requirement",
-    rationale: "Up-front rehab is part of cash required and CoC without changing purchase basis.",
+    rationale:
+      "Up-front rehab is part of cash required and CoC without changing purchase basis.",
     values: {
       ...BASE_V1_INPUT,
       address: "900 Rehab Blvd, Chester, PA 19013",
@@ -410,25 +442,28 @@ export const UNDERWRITING_V1_GOLDEN_CORPUS: UnderwritingV1GoldenCase[] = [
       rehabBudget: 65_000,
     },
     expected: {
-      methodologyVersion: "1.1",
+      methodologyVersion: "1.3",
       monthlyRentalIncome: 2_100,
       propertyTax: 147,
       insurance: 67,
       totalOperatingExpenses: 697,
       noiAnnual: 18_096,
       loanAmount: 128_000,
-      monthlyPayment: 852,
+      monthlyPayment: 851.5871938293545,
       pmiMonthly: 0,
-      netCashFlow: 551,
-      cocReturn: 6.495088408644401,
+      netCashFlow: 551.4128061706455,
+      cocReturn: 6.499954493170673,
       capRate: 11.31,
-      dscr: 1.7699530516431925,
+      dscr: 1.7708110348852673,
       totalCashRequired: 101_800,
       taxSavingsMonthly: -85,
-      afterTaxCF: 466,
-      year10CumulativeCashFlow: 86_381,
-      year10CumulativeTaxBenefit: -16_628,
-      dealScore: 61,
+      afterTaxCF: 466.41280617064547,
+      year10CumulativeCashFlow: 86396.53674047743,
+      year10CumulativeTaxBenefit: -16_622,
+      // Reviewed v1.3 change: the Screening Index now uses the pre-tax,
+      // contribution-aware money-weighted return instead of the former
+      // initial-cash CAGR-like proxy.
+      dealScore: 66,
       dscrScore: 17,
     },
   },

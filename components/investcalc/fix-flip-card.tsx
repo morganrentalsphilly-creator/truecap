@@ -44,7 +44,8 @@ const fmt = (n: number) =>
   n === Infinity
     ? "∞"
     : `${n < 0 ? "-" : ""}$${Math.round(Math.abs(n)).toLocaleString("en-US")}`;
-const fmtPct = (n: number) => (Number.isFinite(n) ? `${n.toFixed(1)}%` : "—");
+const fmtPct = (n: number | null) =>
+  n != null && Number.isFinite(n) ? `${n.toFixed(1)}%` : "N/A";
 
 export function FixFlipCard({
   values,
@@ -485,8 +486,14 @@ export function FixFlipCard({
             <Metric
               label="Simple annualized ROI"
               value={fmtPct(analysis.annualizedRoiPct)}
-              positive={analysis.annualizedRoiPct > 20}
-              negative={analysis.annualizedRoiPct < 0}
+              positive={
+                analysis.annualizedRoiPct != null &&
+                analysis.annualizedRoiPct > 20
+              }
+              negative={
+                analysis.annualizedRoiPct != null &&
+                analysis.annualizedRoiPct < 0
+              }
             />
             <Metric
               label="Profit / day"

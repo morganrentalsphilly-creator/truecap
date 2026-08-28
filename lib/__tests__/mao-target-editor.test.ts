@@ -55,6 +55,39 @@ describe("applyMaoTargetInput", () => {
     ).toBe(false);
   });
 
+  it("validates the IRR and cash-required target bounds and increments", () => {
+    expect(
+      applyMaoTargetInput(
+        { monthlyCashFlow: 0 },
+        "minIrrPct",
+        "12.5",
+      ),
+    ).toEqual({
+      ok: true,
+      target: { monthlyCashFlow: 0, minIrrPct: 12.5 },
+    });
+    expect(
+      applyMaoTargetInput(
+        { monthlyCashFlow: 0 },
+        "maxCashRequired",
+        "75000",
+      ),
+    ).toEqual({
+      ok: true,
+      target: { monthlyCashFlow: 0, maxCashRequired: 75_000 },
+    });
+    expect(
+      applyMaoTargetInput({ monthlyCashFlow: 0 }, "minIrrPct", "-100").ok,
+    ).toBe(false);
+    expect(
+      applyMaoTargetInput(
+        { monthlyCashFlow: 0 },
+        "maxCashRequired",
+        "75250",
+      ).ok,
+    ).toBe(false);
+  });
+
   it("removes a blank criterion when another valid criterion remains", () => {
     expect(
       applyMaoTargetInput({ monthlyCashFlow: 750, dscr: 1.25 }, "monthlyCashFlow", "")
@@ -90,6 +123,12 @@ describe("normalizeMaoTarget", () => {
       dscr: 1.25,
       maxPurchasePrice: 300_000,
     });
+  });
+
+  it("round-trips optional IRR and maximum-cash criteria", () => {
+    expect(
+      normalizeMaoTarget({ minIrrPct: 12.5, maxCashRequired: 75_000 }),
+    ).toEqual({ minIrrPct: 12.5, maxCashRequired: 75_000 });
   });
 
   it("fails closed for empty, extra-key, nonnumeric, and out-of-range targets", () => {

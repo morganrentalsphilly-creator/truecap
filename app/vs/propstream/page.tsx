@@ -53,7 +53,6 @@ const MATRIX: Row[] = [
   { feature: "Lifecycle stage", truecap: "Underwriting — does this deal pencil?", propstream: "Lead generation — find motivated sellers", winner: "tie" },
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", propstream: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", propstream: "Not modeled", winner: "truecap" },
-  { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", propstream: "Not modeled", winner: "truecap" },
   { feature: "Secondary Screening Index", truecap: "Free — 0-100 triage score + factor breakdown", propstream: "Not applicable", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", propstream: "Property data only — no underwriting", winner: "truecap" },
   { feature: "Skip tracing", truecap: "No", propstream: "Yes — owner phone + email lookup", winner: "propstream" },
@@ -244,7 +243,7 @@ export default function VsPropstreamPage() {
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Want to see just the underwriting half? Try the{" "}
-            <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">
+            <Link href="/#main" className="font-semibold text-primary hover:underline">
               cap rate calculator
             </Link>{" "}
             or the full{" "}
@@ -268,7 +267,7 @@ export default function VsPropstreamPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
-            Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
+            Pro adds 10-year cash-flow and equity projections, sensitivity,
             Offer Ceiling, co-branded share links, and PDF reports with Pro; see live pricing for current terms.
             No card to start.
           </p>
@@ -340,11 +339,11 @@ const PROPSTREAM_FAQ: FaqItem[] = [
     question: "Does TrueCap have a free tier? PropStream doesn&apos;t.",
     answer: (
       <>
-        Yes — TrueCap&apos;s free tier covers cap rate, cash-on-cash, DSCR, cash flow, and address auto-fill on unlimited analyses. No card required. Pro adds projections, illustrative tax impact, sensitivity, and included PDFs. See TrueCap&apos;s live pricing page for current rates. PropStream is paid-only — no real free tier beyond a trial.
+        Yes — TrueCap&apos;s no-account preliminary screen covers cap rate, cash-on-cash, DSCR, cash flow, and labeled address starting assumptions. No card is required. Complete-decision allowances and Pro terms are shown on TrueCap&apos;s live pricing page. PropStream is paid-only beyond its current trial terms.
       </>
     ),
     plainTextAnswer:
-      "Yes. TrueCap free covers cap rate, CoC, DSCR, cash flow, address auto-fill on unlimited analyses. Pro adds advanced analysis and reporting; see TrueCap's live pricing page for current rates. PropStream has no real free tier.",
+      "Yes. TrueCap provides no-account preliminary screens with cap rate, CoC, DSCR, cash flow, and labeled address starting assumptions. Complete-decision allowances and Pro terms are on the live pricing page. Verify PropStream's current trial and paid terms on its official site.",
   },
   {
     question: "What&apos;s the best PropStream alternative for finding deals?",

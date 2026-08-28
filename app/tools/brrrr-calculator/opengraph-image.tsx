@@ -11,13 +11,14 @@
 import { renderToolOgImage, OG_SIZE } from "@/lib/og/tool-og-template";
 
 export const runtime = "edge";
-export const alt = "BRRRR calculator — TrueCap";
+export const alt = "BRRRR planning model not currently released — TrueCap";
 export const size = OG_SIZE;
 export const contentType = "image/png";
 
 export default function Image() {
   return renderToolOgImage({
-    name: "BRRRR calculator",
-    tagline: "Buy · Rehab · Rent · Refinance · Repeat. Models the cash-out math and the post-refi cash flow.",
+    name: "BRRRR planning",
+    tagline:
+      "The integrated acquisition, rehab, refinance, and stabilized-rental model is not currently released.",
   });
 }

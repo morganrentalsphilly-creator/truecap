@@ -20,7 +20,11 @@
 // the hydration cost for all the static markup. Keep it that way - any
 // new interactive piece should be its own small island, not a reason to
 // flip this whole file back to client.
-import { TRIAL_DAYS } from "@/lib/trial";
+import {
+  PRODUCT_EVALUATION_COMPARISON_LIMIT,
+  PRODUCT_EVALUATION_DAYS,
+  PRODUCT_EVALUATION_DEAL_LIMIT,
+} from "@/lib/product-access";
 import { ladderCellsForFeature, type FeatureKey } from "@/lib/entitlements-catalog";
 import Link from "next/link";
 import {
@@ -87,7 +91,7 @@ const SPINE_STEPS = [
     icon: Search,
     title: "Start with an address",
     body:
-      "Rent, mortgage rate and property tax auto-fill from HUD, FRED and your state's rates. Financing, vacancy and every expense stay yours to change — nothing is hidden or hard-coded.",
+      "Area rent and a national owner-occupied mortgage-rate benchmark can fill from HUD and FRED. Property tax stays manual because a state aggregate is not a parcel bill. Every assumption stays yours to review and change.",
   },
   {
     key: "decide",
@@ -104,9 +108,7 @@ const SPINE_STEPS = [
     title: "Review the Offer Ceiling",
     body:
       "TrueCap calculates the highest modeled price that still meets the selected targets under the assumptions shown. Compare that Offer Ceiling with asking, then verify the inputs before recording your decision.",
-    // The section this replaced disclosed that the max-offer solver is Pro.
-    // Dropping that made the homepage sell a paid feature as the free product.
-    proNote: "The Offer Ceiling solver is part of Pro",
+    proNote: "Included in your first complete decision",
   },
 ] as const;
 
@@ -200,7 +202,7 @@ const OFFER_MODULES = [
   [Target, "Offer Ceiling", "Calculate the highest modeled price that still meets your return targets under the assumptions shown."],
   [Activity, "Downside Stress Test", "See how lower rent, higher vacancy, price, and rate changes affect the decision."],
   [GitCompareArrows, "Deal Comparison", "Put saved opportunities side by side to review their modeled tradeoffs consistently."],
-  [BarChart3, "Long-Term Wealth View", "Model cash flow, debt paydown, equity, tax effects, and exit scenarios over time."],
+  [BarChart3, "Long-Term Wealth View", "Model cash flow, debt paydown, and equity over a 10-year holding period."],
   [ListChecks, "Acquisition Pipeline", "Move saved deals from research to offer, under contract, closed, or passed."],
   [FileText, "Lender & Partner Reports", "Package the underwrite for lenders, partners, clients, or internal review."],
 ] as const;
@@ -280,8 +282,9 @@ export function FinalCta() {
           <span className="text-primary">Review the Offer Ceiling.</span>
         </h2>
         <p className="mx-auto mt-3 max-w-[52ch] text-balance text-sm leading-relaxed text-muted-foreground">
-          Cash flow, cap rate, CoC, DSCR and your Screening Index are free, with no account
-          needed. Projections, tax, exit scenarios and the Offer Ceiling solver are Pro.
+          Your first complete decision includes cash flow, cap rate, CoC, DSCR,
+          rule-fit context, the Offer Ceiling, downside checks, and next steps—no
+          account or card required.
         </p>
         <ScrollToFormButton analyticsSource="final_cta" className="group mt-6 inline-flex h-12 items-center gap-1.5 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] hover:-translate-y-0.5 transition-transform">
           Analyze a property free
@@ -351,7 +354,7 @@ export function SocialProof() {
             href="/reviews"
             className="text-sm font-bold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
           >
-            See all verified reviews and proof →
+            See verified proof &amp; methodology →
           </Link>
         </div>
       </div>
@@ -493,11 +496,11 @@ export function VsCompetitors() {
 const HOMEPAGE_FAQS: { q: string; a: string }[] = [
   {
     q: "Why not just use a free calculator?",
-    a: "Free calculators — including TrueCap's own free analyzer — give you metrics such as cap rate, cash flow, and DSCR. Pro adds a target-backed Offer Ceiling, Buy Box rule-fit results with reasons, downside testing, and reports for lender or partner review. The Offer Ceiling is the highest modeled price that still meets the selected targets under the assumptions shown; it is not advice or an appraisal.",
+    a: "Most free calculators stop at metrics. TrueCap's first complete decision also shows selected-rule fit, a target-backed Offer Ceiling, downside checks, and next steps. The Offer Ceiling is the highest modeled price that still meets the selected targets under the assumptions shown; it is not advice or an appraisal.",
   },
   {
     q: "What does the auto-fill provide?",
-    a: "Rent starts from a HUD area benchmark (ZIP-level when available, otherwise county-level), not a property-specific rent comp. The rate starts from FRED's national owner-occupied 30-year benchmark, not an investor lender quote. Property tax uses a state effective-rate estimate. Every field is editable - replace screening defaults with local comps, the actual tax bill, insurance, and written loan terms before recording or acting on an investment decision.",
+    a: "Rent starts from a HUD area benchmark (ZIP-level when available, otherwise an FMR area), not a property-specific rent comp. The rate starts from FRED's national owner-occupied 30-year benchmark, not an investor lender quote. Property tax is not auto-filled from the retired static state table: enter a local annual bill or reviewed rate. Until then, the model labels its generic 1.1% tax assumption as a preliminary fallback. Replace every screening assumption with property-specific evidence before recording or acting on an investment decision.",
   },
   {
     // The guarantee sentence is appended dynamically in HomepageFaq so the
@@ -507,16 +510,11 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Is TrueCap really free?",
-    // Free CAN save (up to 5 deals) — what Pro actually adds on the saved-deal
-    // axis is editing saved deals, unlimited saves, and compare. A previous
-    // version claimed saving itself was a Pro add-on, contradicting the
-    // pricing card's Free save-up-to-5 bullet and the runtime gate
-    // (pricing-copy-guards.test.ts locks this).
-    a: "Yes. The cash-flow analyzer - cap rate, CoC, DSCR, monthly cash flow, address auto-fill, the 0-100 Screening Index, and plain-English screening context - is free forever and unlimited. No card required. Free even saves up to 5 deals. Pro adds editing, unlimited saved deals, comparisons, PDF reports, a personal Buy Box, and advanced modules including BRRRR, Fix-and-Flip, Sensitivity, 10-year projections, illustrative tax impact, and modeled exit comparisons.",
+    a: `Yes. Your first complete decision needs no account or card. Create an account to start a ${PRODUCT_EVALUATION_DAYS}-day, no-card evaluation covering up to ${PRODUCT_EVALUATION_DEAL_LIMIT} deals and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. Investor Pro is for repeating the verified workflow, saving and revisiting deals, comparisons, reports, and reusable Buy Box assumptions.`,
   },
   {
     q: "Do I need a credit card?",
-    a: "No. The free analyzer needs zero signup and zero card - type an address and go. You only create an account if you want to save deals or unlock Pro.",
+    a: `No. The first complete decision needs no signup or card. Creating an account starts a ${PRODUCT_EVALUATION_DAYS}-day product evaluation with no payment method and no automatic subscription.`,
   },
   {
     q: "Can I edit the assumptions?",
@@ -524,15 +522,15 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
   },
   {
     q: "When should I upgrade to Pro?",
-    a: "Use Free to screen unlimited deals. Upgrade to Pro for an interactive Offer Ceiling workflow, Buy Box screening, downside testing, unlimited saves, comparisons, reusable assumptions, branded reports, and unlimited exports. Pro is month-to-month - cancel anytime.",
+    a: "Upgrade when you want to repeat the decision workflow after the product evaluation: revisit saved deals, compare opportunities, reuse Buy Box assumptions, and produce reports. Monthly Pro can be cancelled anytime.",
   },
   {
-    q: "How does the Pro trial work?",
-    a: `Stripe collects a card at checkout. New subscribers get full Pro access for ${TRIAL_DAYS} days, and you can cancel online anytime. Subscription billing starts after the trial unless you cancel first. Returning subscribers start paid access immediately and are not eligible for another free trial.`,
+    q: "How does the product evaluation work?",
+    a: `Create an account to evaluate the product for ${PRODUCT_EVALUATION_DAYS} days, up to ${PRODUCT_EVALUATION_DEAL_LIMIT} completed deals and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. No card is collected, nothing auto-renews, and checkout clearly shows the amount due before a paid subscription begins.`,
   },
   {
-    q: "Does this work for BRRRR or fix-and-flip deals?",
-    a: "Yes. Pro includes the BRRRR analyzer (cash-out refi math, post-refi cash flow, infinite-return alerts), the Fix-and-Flip analyzer (net profit, ROI, annualized ROI, break-even ARV), and the Rehab Cost Estimator (sq-ft-based defaults for every common work item).",
+    q: "Why are some advanced strategy modules unavailable?",
+    a: "TrueCap keeps specialist strategy, tax, and modeled-sale outputs behind release gates until their formulas, disclosures, regression tests, and presentation meet the same standard as the core buy-and-hold workflow. Standalone tools remain educational first-pass calculators, not acquisition decisions.",
   },
   {
     q: "Is this financial advice?",
@@ -690,7 +688,7 @@ export function DataSourcesSection() {
 // Pro's monthly price is deliberately NOT printed here (it's loaded live
 // from Stripe on /pricing); the Pro card below links out so the two can
 // never drift. "true" → included, "false" → not, string → a qualifier.
-const LADDER_SUBHEADERS = ["Free forever", "Pro plans"] as const;
+const LADDER_SUBHEADERS = ["First decision", "Paid plan"] as const;
 /**
  * The Free / Pro ladder. Historical one-time Pack checkout is disabled.
  *
@@ -705,16 +703,19 @@ const LADDER_SUBHEADERS = ["Free forever", "Pro plans"] as const;
  */
 const LADDER_ROWS: { label: string; cells: (boolean | string)[] }[] = (
   [
-    { label: "Analyze unlimited deals", key: null, cells: [true, true, true] },
+    { label: "Complete decision workflow", key: null, cells: ["1 decision", true, true] },
     { label: "Cap rate · CoC · DSCR · cash flow", key: "cash_flow" },
     { label: "0-100 Screening Index + modeled context", key: "deal_score" },
-    { label: "Lender-facing PDF export", key: "pdf_export" },
+    {
+      label: "Decision memo/report",
+      key: "pdf_export",
+    },
     { label: "Offer Ceiling + Deal Doctor thresholds", key: "mao" },
     { label: "Save & revisit deals", key: "save_deal" },
     { label: "Compare deals side-by-side", key: "compare_deals" },
     { label: "Buy Box: selected-rule fit on every deal", key: "buy_box" },
-    { label: "10-year projections · tax · exit", key: "projections" },
-    { label: "BRRRR · fix & flip · sensitivity", key: "strategies" },
+    { label: "10-year cash-flow projection", key: "projections" },
+    { label: "Downside sensitivity checks", key: "sensitivity" },
   ] as { label: string; key: FeatureKey | null; cells?: (boolean | string)[] }[]
 ).map(({ label, key, cells }) => {
   const fullCells = cells ?? ladderCellsForFeature(key!);
@@ -846,8 +847,7 @@ export function PdfProUpsell() {
                 <ArrowRight aria-hidden className="size-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
               <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                New subscribers get full Pro access free for {TRIAL_DAYS} days. Card required
-                at checkout; cancel before the trial ends to avoid a subscription charge.
+                Create an account for a {PRODUCT_EVALUATION_DAYS}-day evaluation covering up to {PRODUCT_EVALUATION_DEAL_LIMIT} deals and {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. No card and no automatic subscription.
               </p>
             </div>
           </div>
@@ -889,10 +889,8 @@ const PERSONAS: {
     icon: Users,
     title: "For agents",
     body: "Share a labeled screening analysis or Pro report for review with investor clients and lenders; it is not an appraisal or approval.",
-    // No seed: agents run whatever their client is buying — no single play
-    // (or property type) fits, so the plain analyzer is the right landing.
-    // The page link is the first homepage-body path to /for-agents.
-    pagePath: { href: "/for-agents", label: "See the agent workflow" },
+    // Agent Pro is unreleased. Keep this persona limited to the released
+    // analyzer/share workflow and do not link to the gated sales page.
   },
   {
     icon: Home,

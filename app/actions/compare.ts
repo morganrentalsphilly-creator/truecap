@@ -12,6 +12,8 @@ import {
 import { areMethodologyCohortsComparable } from "@/lib/compare-metrics";
 import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { consumeProductEvaluationUsageAction } from "@/app/actions/product-evaluation";
+import { activeMeteredEvaluationComparisonGrantsAccess } from "@/lib/evaluation-access-server";
 
 const COMPARE_COOKIE = "truecap_compare_ids";
 const MAX_COMPARE_ITEMS = 4;
@@ -100,6 +102,24 @@ async function getCompareSelectionError(
   return null;
 }
 
+async function consumeComparisonSelection(
+  selectedIds: string[],
+): Promise<Extract<CompareActionResult, { ok: false }> | null> {
+  const usage = await consumeProductEvaluationUsageAction({
+    kind: "comparison",
+    dealIds: selectedIds,
+  });
+  if (usage.ok) return null;
+  return {
+    ok: false,
+    code: usage.code === "SERVER_ERROR" ? "SERVER_ERROR" : "ENTITLEMENT_REQUIRED",
+    message:
+      usage.code === "SERVER_ERROR"
+        ? "Could not verify comparison access. Try again."
+        : usage.message,
+  };
+}
+
 function uniqueIds(ids: string[]): string[] {
   return [...new Set(ids.map((id) => id.trim()).filter(Boolean))];
 }
@@ -159,9 +179,11 @@ export async function startCompareAction(ids: string[]): Promise<CompareActionRe
     return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in to compare deals." };
   }
 
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
-  if (!hasPlanFeature(entitlements, "compare_deals")) {
-    return { ok: false, code: "ENTITLEMENT_REQUIRED", message: "Compare is not available for your current plan." };
+  if (selectedIds.length < 2) {
+    const entitlements = await getEntitlementsForUser(supabase, user.id);
+    if (!hasPlanFeature(entitlements, "compare_deals")) {
+      return { ok: false, code: "ENTITLEMENT_REQUIRED", message: "Compare is not available for your current plan." };
+    }
   }
 
   const selectionError = await getCompareSelectionError(
@@ -170,6 +192,11 @@ export async function startCompareAction(ids: string[]): Promise<CompareActionRe
     selectedIds
   );
   if (selectionError) return selectionError;
+
+  if (selectedIds.length >= 2) {
+    const usageError = await consumeComparisonSelection(selectedIds);
+    if (usageError) return usageError;
+  }
 
   await setCompareCookie(selectedIds);
   return { ok: true };
@@ -201,9 +228,11 @@ export async function addDealToCompareAction(id: string): Promise<CompareActionR
     return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in to compare deals." };
   }
 
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
-  if (!hasPlanFeature(entitlements, "compare_deals")) {
-    return { ok: false, code: "ENTITLEMENT_REQUIRED", message: "Compare is not available for your current plan." };
+  if (selectedIds.length < 2) {
+    const entitlements = await getEntitlementsForUser(supabase, user.id);
+    if (!hasPlanFeature(entitlements, "compare_deals")) {
+      return { ok: false, code: "ENTITLEMENT_REQUIRED", message: "Compare is not available for your current plan." };
+    }
   }
 
   const selectionError = await getCompareSelectionError(
@@ -212,6 +241,11 @@ export async function addDealToCompareAction(id: string): Promise<CompareActionR
     selectedIds
   );
   if (selectionError) return selectionError;
+
+  if (selectedIds.length >= 2) {
+    const usageError = await consumeComparisonSelection(selectedIds);
+    if (usageError) return usageError;
+  }
 
   await setCompareCookie(selectedIds);
   return { ok: true };
@@ -235,11 +269,6 @@ export async function compareScenariosAction(dealId: string): Promise<CompareAct
   } = await supabase.auth.getUser();
   if (!user) {
     return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in to compare deals." };
-  }
-
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
-  if (!hasPlanFeature(entitlements, "compare_deals")) {
-    return { ok: false, code: "ENTITLEMENT_REQUIRED", message: "Compare is not available for your current plan." };
   }
 
   const { data: deal, error: dealError } = await supabase
@@ -279,6 +308,9 @@ export async function compareScenariosAction(dealId: string): Promise<CompareAct
   const selectionError = await getCompareSelectionError(supabase, user.id, ids);
   if (selectionError) return selectionError;
 
+  const usageError = await consumeComparisonSelection(ids);
+  if (usageError) return usageError;
+
   await setCompareCookie(ids);
   return { ok: true };
 }
@@ -297,15 +329,22 @@ export async function removeCompareDealAction(id: string): Promise<CompareAction
     return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in to edit this comparison." };
   }
 
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
-  if (!hasPlanFeature(entitlements, "compare_deals")) {
+  const ids = await getCompareIdsFromCookie();
+  const [entitlements, meteredComparison] = await Promise.all([
+    getEntitlementsForUser(supabase, user.id),
+    activeMeteredEvaluationComparisonGrantsAccess(supabase, user.id, ids),
+  ]);
+  if (
+    !hasPlanFeature(entitlements, "compare_deals") &&
+    !meteredComparison
+  ) {
     return { ok: false, code: "ENTITLEMENT_REQUIRED", message: "Compare is not available for your current plan." };
   }
 
-  const ids = (await getCompareIdsFromCookie()).filter((currentId) => currentId !== selectedId);
-  await setCompareCookie(ids);
+  const remainingIds = ids.filter((currentId) => currentId !== selectedId);
+  await setCompareCookie(remainingIds);
   // The client refreshes after showing a visible pending/success state. With
   // one remaining deal the server page opens the seeded picker rather than a
   // misleading one-column comparison.
-  return { ok: true, remainingIds: ids };
+  return { ok: true, remainingIds };
 }

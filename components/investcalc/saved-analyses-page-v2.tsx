@@ -84,7 +84,10 @@ import {
   pipelineStageLabel,
   type PipelineStage,
 } from "@/lib/pipeline";
-import { confirmPipelineStageChange } from "@/lib/pipeline-pass-confirmation";
+import {
+  confirmPipelineStageChange,
+  promptForPipelinePassReason,
+} from "@/lib/pipeline-pass-confirmation";
 import { nextActionFromVerdict } from "@/lib/next-action";
 import { DataConfidenceBadge } from "@/components/investcalc/data-confidence-badge";
 import { type DataConfidence } from "@/lib/data-confidence";
@@ -180,6 +183,7 @@ import {
 } from "@/lib/cash-on-cash-applicability";
 import { sortDealsWithinMethodologyCohorts } from "@/lib/dashboard-deal-mapping";
 import { savedDealsListCountLabel } from "@/lib/saved-deals-list-copy";
+import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
 
 type SavedSignal = "strong-buy" | "buy" | "neutral" | "risky" | "avoid";
 type SavedPropertyType = "single-family" | "multi-family" | "owner-occupant";
@@ -214,6 +218,8 @@ export type SavedAnalysisListItem = {
   isCashPurchase?: boolean;
   /** Cash needed to close (down payment + closing costs). */
   cashToClose?: number | null;
+  irrPct?: number | null;
+  irrStatus?: "unique" | "multiple" | "none";
   score: number | null;
   recommendation: "Strong Buy" | "Buy" | "Neutral" | "Risky" | "Avoid";
   riskLevel: StoredRiskLevel;
@@ -280,6 +286,9 @@ function toBuyBoxMetrics(item: SavedAnalysisListItem): BuyBoxDealMetrics {
     // not-cash so a financed deal that recomputed to DSCR 0 still gets its DSCR
     // criterion applied rather than silently skipped.
     isCashPurchase: item.isCashPurchase ?? false,
+    cashRequired: item.cashToClose ?? null,
+    irrPct: item.irrPct ?? null,
+    irrStatus: item.irrStatus ?? "none",
   };
 }
 
@@ -919,15 +928,16 @@ function buildReportDataFromSavedSnapshot(args: {
             Boolean(unit.isOwnerOccupied),
         }));
 
-  const projectionRows = projectionYears.map((row) => ({
+  const projectionRows = projectionYears.map((row, index) => ({
     y: row.year,
     rental: row.rentalIncomeAnnual,
     opex: row.operatingExpensesAnnual,
     debt: row.debtServiceAnnual,
     net: row.netCashFlowAnnual,
-    tax: row.taxSavingsAnnual,
-    after: row.afterTaxCashFlowAnnual,
     cum: row.cumulativeCashFlowAnnual,
+    propertyValue: exitYears[index]?.propertyValue ?? values.purchasePrice,
+    loanBalance: exitYears[index]?.remainingLoanBalance ?? 0,
+    equity: exitYears[index]?.equity ?? values.purchasePrice,
   }));
 
   const year1Tax = taxYears.find((row) => row.year === 1);
@@ -1076,10 +1086,10 @@ function buildReportDataFromSavedSnapshot(args: {
     downsideScenario,
     projection10y: {
       cumulativeCF: projectionRows[projectionRows.length - 1]?.cum ?? 0,
-      bestAnnualAfterTax: projectionRows.length
-        ? Math.max(...projectionRows.map((row) => row.after))
+      bestAnnualPreTax: projectionRows.length
+        ? Math.max(...projectionRows.map((row) => row.net))
         : 0,
-      totalAfterTax: projectionRows.reduce((acc, row) => acc + row.after, 0),
+      year10Equity: projectionRows[projectionRows.length - 1]?.equity ?? 0,
       rows: projectionRows,
     },
     taxStrategy: {
@@ -1389,6 +1399,7 @@ export function SavedAnalysesPage({
   canCompareDeals = false,
   canExportPdf = false,
   canUsePipeline = false,
+  buyBoxAuthorizedDealIds = [],
   ownedEquityEnabled = false,
   agentClients = [],
   clientFilterId = null,
@@ -1401,6 +1412,8 @@ export function SavedAnalysesPage({
   canCompareDeals?: boolean;
   canExportPdf?: boolean;
   canUsePipeline?: boolean;
+  /** Paid rows or exact active evaluation-ledger rows authorized server-side. */
+  buyBoxAuthorizedDealIds?: string[];
   /** True once the close_date column exists — gates the owned-equity capture so
    *  the prompt stays invisible until the migration is applied. */
   ownedEquityEnabled?: boolean;
@@ -1584,6 +1597,10 @@ export function SavedAnalysesPage({
       })),
     [initialItems],
   );
+  const buyBoxAuthorizedDealIdSet = useMemo(
+    () => new Set(buyBoxAuthorizedDealIds),
+    [buyBoxAuthorizedDealIds],
+  );
 
   // Load the user's buy boxes once; keep only the switched-on ones with ≥1 rule
   // (same gate as the single-deal verdict card). Failures / no-boxes / free
@@ -1625,6 +1642,7 @@ export function SavedAnalysesPage({
     if (!buyBoxes || buyBoxes.length === 0) return null;
     const map = new Map<string, BuyBoxFitSummary>();
     for (const item of enrichedItems) {
+      if (!buyBoxAuthorizedDealIdSet.has(item.id)) continue;
       // Live criteria must not imply that a frozen historical result is
       // directly comparable with the current underwriting standard.
       if (item.methodologyIsCurrent === false) continue;
@@ -1637,7 +1655,7 @@ export function SavedAnalysesPage({
       if (results.length > 0) map.set(item.id, summarizeBuyBoxFit(results));
     }
     return map.size > 0 ? map : null;
-  }, [buyBoxes, enrichedItems]);
+  }, [buyBoxAuthorizedDealIdSet, buyBoxes, enrichedItems]);
 
   // If the filter is on but the boxes go away (deleted in another tab) or the
   // user arrived via ?buyBox=1 without a usable box, drop it — but only AFTER
@@ -1975,11 +1993,44 @@ export function SavedAnalysesPage({
   const handleDealStatusChange = (
     id: string,
     state: SavedAnalysisListItem["status"],
+    previousStage: PipelineStage,
   ) => {
+    const nextStage: PipelineStage =
+      state === "completed"
+        ? "closed"
+        : state === "archived"
+          ? "passed"
+          : "analyzing";
+    if (
+      !confirmPipelineStageChange({
+        previousStage,
+        nextStage,
+        confirm: (message) => window.confirm(message),
+      })
+    ) {
+      return;
+    }
+    const reason = promptForPipelinePassReason({
+      previousStage,
+      nextStage,
+      prompt: (message) => window.prompt(message),
+    });
+    if (nextStage === "passed" && !reason) {
+      toast({
+        title: "Pass reason required",
+        description: "Add the reason you are passing so the Deal Log stays useful.",
+        variant: "destructive",
+      });
+      return;
+    }
     setUpdatingDealStatusId(id);
     startUpdateStatusTransition(async () => {
       try {
-        const result = await updateSavedDealLifecycleStateAction(id, state);
+        const result = await updateSavedDealLifecycleStateAction(
+          id,
+          state,
+          reason ? { reason } : undefined,
+        );
         if (!result.ok) {
           toast({
             title: "Could not update deal status",
@@ -2030,10 +2081,27 @@ export function SavedAnalysesPage({
     ) {
       return;
     }
+    const reason = promptForPipelinePassReason({
+      previousStage,
+      nextStage: stage,
+      prompt: (message) => window.prompt(message),
+    });
+    if (stage === "passed" && !reason) {
+      toast({
+        title: "Pass reason required",
+        description: "Add the reason you are passing so the Deal Log stays useful.",
+        variant: "destructive",
+      });
+      return;
+    }
     setUpdatingDealStatusId(id);
     startUpdateStatusTransition(async () => {
       try {
-        const result = await updateSavedDealStageAction(id, stage);
+        const result = await updateSavedDealStageAction(
+          id,
+          stage,
+          reason ? { reason } : undefined,
+        );
         if (!result.ok) {
           toast({
             title: "Could not update stage",
@@ -2048,7 +2116,7 @@ export function SavedAnalysesPage({
           title: stage === "passed" ? "Marked as Passed" : "Stage updated",
           description:
             stage === "passed"
-              ? `Recorded as your decision. Undo restores ${pipelineStageLabel(previousStage)}.`
+              ? `Reason recorded in Deal Log. Undo restores ${pipelineStageLabel(previousStage)}.`
               : `Moved to ${pipelineStageLabel(stage)}.`,
           variant: "success",
           action:
@@ -2063,6 +2131,7 @@ export function SavedAnalysesPage({
                       const undo = await updateSavedDealStageAction(
                         id,
                         previousStage,
+                        { note: "Pass decision undone." },
                       );
                       if (!undo.ok) {
                         toast({
@@ -2192,9 +2261,30 @@ export function SavedAnalysesPage({
 
   const handleBulkArchive = () => {
     if (selectedIds.length === 0 || bulkRunning) return;
+    const reason = promptForPipelinePassReason({
+      previousStage: "analyzing",
+      nextStage: "passed",
+      prompt: () =>
+        window.prompt(
+          "Why are you passing on these selected deals? This reason will be recorded in each Deal Log.",
+        ),
+    });
+    if (!reason) {
+      toast({
+        title: "Pass reason required",
+        description:
+          "Add one reason to record on every selected deal before archiving.",
+        variant: "destructive",
+      });
+      return;
+    }
     startBulkArchiveTransition(async () => {
       try {
-        const result = await bulkUpdateSavedDealsAction(selectedIds, "archive");
+        const result = await bulkUpdateSavedDealsAction(
+          selectedIds,
+          "archive",
+          { reason },
+        );
         if (!result.ok) {
           toast({
             title: "Could not archive selected deals",
@@ -3751,7 +3841,11 @@ export function SavedAnalysesPage({
                                     }
                                     onCheckedChange={(checked) => {
                                       if (checked)
-                                        handleDealStatusChange(item.id, value);
+                                        handleDealStatusChange(
+                                          item.id,
+                                          value,
+                                          item.pipelineStage ?? "analyzing",
+                                        );
                                     }}
                                   >
                                     {label}
@@ -4101,10 +4195,10 @@ export function SavedAnalysesPage({
                         </td>
                         {optionalColumns.dscr ? (
                           <td className="font-medium tabular-nums text-foreground">
-                            {/* "Cash" keys off the explicit flag — a financed deal
+                            {/* The canonical N/A label keys off the explicit flag — a financed deal
                               with negative NOI has a real DSCR ≤ 0 to show. */}
                             {item.isCashPurchase
-                              ? "Cash"
+                              ? NO_DEBT_SERVICE_DSCR_LABEL
                               : item.dscr == null
                                 ? "—"
                                 : item.dscr.toFixed(2)}
@@ -4160,6 +4254,7 @@ export function SavedAnalysesPage({
                                   handleDealStatusChange(
                                     item.id,
                                     value as SavedAnalysisListItem["status"],
+                                    item.pipelineStage ?? "analyzing",
                                   )
                                 }
                                 disabled={
@@ -4614,7 +4709,12 @@ export function SavedAnalysesPage({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onSelect={handleBulkArchive}
-                  disabled={bulkRunning}
+                  disabled={bulkRunning || !canUsePipeline}
+                  title={
+                    !canUsePipeline
+                      ? "Pipeline archiving is not available for your current plan."
+                      : undefined
+                  }
                   className="min-h-11"
                 >
                   {isBulkArchiving ? (

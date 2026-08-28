@@ -27,7 +27,7 @@ describe("focused decision safety", () => {
     expect(summary).toContain("canShowPriceCeiling");
     expect(summary).toContain("rangePreview");
     expect(summary).toContain('"Coarse range preview"');
-    expect(summary).toContain("meetsMaoTarget(result, target)");
+    expect(summary).toContain("meetsMaoTarget(result, target, values)");
     expect(summary).toContain("Offer criteria");
     expect(summary).toContain("aria-expanded={tuneOpen}");
     expect(summary).toContain('aria-live="polite"');

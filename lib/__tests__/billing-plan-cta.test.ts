@@ -56,6 +56,34 @@ describe("switch target price-id resolution", () => {
     delete process.env.STRIPE_PRICE_PRO_ANNUAL;
     expect(getPrimaryPlanPriceId("pro_annual")).toBeNull();
   });
+
+  it("server-gates unreleased Agent Pro and validates the exact Stripe catalog price before a portal switch", () => {
+    const billing = readFileSync(join(ROOT, "app/actions/billing.ts"), "utf8");
+    const switchStart = billing.indexOf(
+      "export async function createSwitchPlanPortalSessionAction",
+    );
+    const releaseGate = billing.indexOf(
+      'targetPlanSlug.startsWith("agent_pro") && !isAgentProConfigured()',
+      switchStart,
+    );
+    const priceRead = billing.indexOf(
+      "stripe.prices.retrieve(targetPriceId)",
+      switchStart,
+    );
+    const catalogGuard = billing.indexOf(
+      "stripePriceMatchesCatalog(targetPlanSlug, targetPrice)",
+      priceRead,
+    );
+    const portalCreate = billing.indexOf(
+      "stripe.billingPortal.sessions.create",
+      switchStart,
+    );
+
+    expect(releaseGate).toBeGreaterThan(switchStart);
+    expect(priceRead).toBeGreaterThan(releaseGate);
+    expect(catalogGuard).toBeGreaterThan(priceRead);
+    expect(portalCreate).toBeGreaterThan(catalogGuard);
+  });
 });
 
 describe("decidePricingCardCta — exact plan and tier messaging", () => {

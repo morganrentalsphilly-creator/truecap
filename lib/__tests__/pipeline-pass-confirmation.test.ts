@@ -2,7 +2,9 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
   MARK_AS_PASSED_CONFIRMATION,
+  PASS_REASON_PROMPT,
   confirmPipelineStageChange,
+  promptForPipelinePassReason,
 } from "@/lib/pipeline-pass-confirmation";
 
 describe("single-deal Pass confirmation", () => {
@@ -44,5 +46,35 @@ describe("single-deal Pass confirmation", () => {
       }),
     ).toBe(true);
     expect(confirm).not.toHaveBeenCalled();
+  });
+
+  it("requires and normalizes a reason after Pass confirmation", () => {
+    const prompt = vi.fn(() => "  Inspection\n  exposed foundation risk  ");
+
+    expect(
+      promptForPipelinePassReason({
+        previousStage: "under_contract",
+        nextStage: "passed",
+        prompt,
+      }),
+    ).toBe("Inspection exposed foundation risk");
+    expect(prompt).toHaveBeenCalledWith(PASS_REASON_PROMPT);
+  });
+
+  it("treats a cancelled or blank Pass reason as incomplete", () => {
+    expect(
+      promptForPipelinePassReason({
+        previousStage: "analyzing",
+        nextStage: "passed",
+        prompt: () => "   ",
+      }),
+    ).toBeNull();
+    expect(
+      promptForPipelinePassReason({
+        previousStage: "analyzing",
+        nextStage: "offer",
+        prompt: () => null,
+      }),
+    ).toBeUndefined();
   });
 });

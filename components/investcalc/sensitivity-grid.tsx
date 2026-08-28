@@ -18,6 +18,7 @@ import {
   type SensitivityRow,
 } from "@/lib/sensitivity-analysis";
 import { AnalysisResult } from "@/lib/calc-analysis";
+import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
 
 interface SensitivityGridProps {
   values: InvestmentFormValues | null;
@@ -81,7 +82,9 @@ function ScenarioCell({
         </span>{" "}
         ·{" "}
         {isCashPurchase ? (
-          <span className="text-muted-foreground">cash</span>
+          <span className="text-muted-foreground">
+            DSCR {NO_DEBT_SERVICE_DSCR_LABEL}
+          </span>
         ) : (
           <span className={cn(pickColor(scenarioName, baseResult.dscr, result.dscr))}>
             DSCR {result.dscr.toFixed(2)}

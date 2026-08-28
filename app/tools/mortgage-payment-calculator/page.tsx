@@ -205,14 +205,14 @@ export default function MortgagePaymentPage() {
               A mortgage payment is just one input in a real underwrite.
               You also need to know your DSCR (does the property cover
               the payment? — run the{" "}
-              <Link href="/tools/dscr-calculator" className="font-semibold text-primary hover:underline">DSCR calculator</Link>),
+              <Link href="/#main" className="font-semibold text-primary hover:underline">DSCR calculator</Link>),
               cash-on-cash return (what does your money
               actually earn?), the upfront cash to close (estimate it with the{" "}
               <Link href="/tools/closing-cost-calculator" className="font-semibold text-primary hover:underline">closing cost calculator</Link>),
-              10-year projection (does this compound?),
-              and tax position (how much do you actually keep?). TrueCap&apos;s
-              full analyzer runs all of those at once — free to start, no
-              card required.
+              and a 10-year cash-flow and equity projection (how might the
+              stabilized hold evolve?). TrueCap&apos;s full analyzer runs those
+              released rental screens together — free to start, no card
+              required.
             </p>
           </article>
 
@@ -225,7 +225,7 @@ export default function MortgagePaymentPage() {
 
           <ToolsConversionCta
             calculatorName="Mortgage payment calculator"
-            hook="The full TrueCap analyzer plugs your mortgage payment into the bigger picture: DSCR, cash flow, 10-year projection, tax savings, exit scenarios. Free to use, save deals, share with your lender."
+            hook="The full TrueCap analyzer plugs your mortgage payment into the bigger picture: DSCR, cash flow, a 10-year cash-flow and equity projection, sensitivity, and Offer Ceiling. Free to use, save deals, and share a review link."
           />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">

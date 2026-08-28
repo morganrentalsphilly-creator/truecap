@@ -87,6 +87,8 @@ describe("resolveOwnedEquityBasis / computeRowEquity", () => {
       loanAmount: result.loanAmount,
       annualRatePct: 7,
       termYears: 30,
+      amortizationTermYears: 30,
+      interestOnlyMonths: 0,
       appreciationRatePct: 3,
     });
     expect(basis!.closeDate.toISOString().slice(0, 10)).toBe("2025-01-15");
@@ -108,6 +110,30 @@ describe("resolveOwnedEquityBasis / computeRowEquity", () => {
     expect(summary!.equity).toBeCloseTo(
       summary!.downPayment + summary!.appreciationGain + summary!.principalPaid,
       2,
+    );
+  });
+
+  it("carries released interest-only and balloon assumptions into owned equity", () => {
+    const row = ownedRow({
+      form_snapshot: baseSingleFamily({
+        loanTermYears: 10,
+        amortizationTermYears: 30,
+        interestOnlyMonths: 24,
+      }),
+    });
+    const basis = resolveOwnedEquityBasis(row);
+    expect(basis?.input).toMatchObject({
+      termYears: 10,
+      amortizationTermYears: 30,
+      interestOnlyMonths: 24,
+    });
+
+    const duringInterestOnly = computeRowEquity(row, new Date("2026-07-15"));
+    expect(duringInterestOnly?.monthsOwned).toBe(18);
+    expect(duringInterestOnly?.principalPaid).toBeCloseTo(0, 8);
+    expect(duringInterestOnly?.loanBalance).toBeCloseTo(
+      basis?.input.loanAmount ?? 0,
+      8,
     );
   });
 });

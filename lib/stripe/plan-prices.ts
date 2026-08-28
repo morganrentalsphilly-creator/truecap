@@ -84,10 +84,14 @@ export function planSlugFromPriceId(priceId: string | null | undefined): PaidPla
 }
 
 /**
- * Is the Agent Pro tier configured on this deployment? True only when a
- * checkout-able price exists. The tier ships fully plumbed but INERT: until
- * STRIPE_PRICE_AGENT_PRO_MONTHLY is set (and the plans rows are migrated),
- * no pricing surface shows it and checkout rejects it as PLAN_NOT_FOUND.
+ * Is the Agent Pro tier configured on this deployment? True whenever a
+ * checkout-able price exists — no separate release flag.
+ *
+ * Agent Pro is a LIVE, selling tier (founder decision, 2026-08-28): production
+ * lists it at $59.99/mo with a working checkout. A TRUECAP_AGENT_PRO_RELEASED
+ * gate lived here briefly and would have silently delisted a product that is
+ * already taking money, because production never set that variable. Gate on
+ * the Stripe Price alone, the way main always has.
  */
 export function isAgentProConfigured(): boolean {
   return getPrimaryPlanPriceId("agent_pro_monthly") != null;

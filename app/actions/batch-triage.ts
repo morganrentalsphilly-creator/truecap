@@ -14,7 +14,11 @@ import { toServerErrorResult } from "@/lib/db-error";
 
 import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
+import {
+  getEntitlementsForUser,
+  hasPaidPlanSubscription,
+  hasPlanFeature,
+} from "@/lib/entitlements";
 import { buyBoxHasCriteria, deriveStateFromAddress, type NamedBuyBox } from "@/lib/buy-box";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 import { enrichPropertyAction } from "@/app/actions/enrich-property";
@@ -70,8 +74,11 @@ export async function screenBatchAction(rawInput: unknown): Promise<BatchTriageR
     return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
   }
 
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
-  if (!hasPlanFeature(entitlements, "compare_deals")) {
+  const [entitlements, hasPaidPlan] = await Promise.all([
+    getEntitlementsForUser(supabase, user.id),
+    hasPaidPlanSubscription(supabase, user.id),
+  ]);
+  if (!hasPaidPlan || !hasPlanFeature(entitlements, "compare_deals")) {
     return {
       ok: false,
       code: "ENTITLEMENT_REQUIRED",
@@ -108,8 +115,11 @@ export async function screenBatchAction(rawInput: unknown): Promise<BatchTriageR
       if (usable.length > 0) boxes = usable;
     }
 
-    // Enrich once per DISTINCT state (rate is the same everywhere; tax is
-    // per-state). Failures degrade to engine defaults — never block.
+    // Fetch the national FRED rate once per distinct-state group (the grouping
+    // preserves the existing cache/handoff shape). Property tax is
+    // intentionally not auto-filled from the retired static state table;
+    // batch screens retain the disclosed generic preliminary fallback until
+    // the user opens a row and enters a local bill or reviewed rate.
     const enrichmentByState = new Map<string, TriageEnrichment>();
     const screenedAt = new Date().toISOString();
     const distinctStates = Array.from(
@@ -120,13 +130,11 @@ export async function screenBatchAction(rawInput: unknown): Promise<BatchTriageR
         const e = await enrichPropertyAction({ state });
         enrichmentByState.set(state, {
           interestRate: e.interestRate,
-          propertyTaxPct: e.propertyTaxPct,
           screenedAt,
           state,
-          status:
-            e.meta.mortgageRate && e.meta.propertyTax ? "live" : "fallback",
+          status: e.meta.mortgageRate ? "live" : "fallback",
           rateSource: e.meta.mortgageRate ? "fred" : "default",
-          taxSource: e.meta.propertyTax ? "state-static" : "default",
+          taxSource: "default",
         });
       } catch {
         enrichmentByState.set(state, {
@@ -235,8 +243,11 @@ export async function extractTriageListingsAction(rawInput: unknown): Promise<Ex
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
 
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
-  if (!hasPlanFeature(entitlements, "compare_deals")) {
+  const [entitlements, hasPaidPlan] = await Promise.all([
+    getEntitlementsForUser(supabase, user.id),
+    hasPaidPlanSubscription(supabase, user.id),
+  ]);
+  if (!hasPaidPlan || !hasPlanFeature(entitlements, "compare_deals")) {
     return { ok: false, code: "ENTITLEMENT_REQUIRED", message: "Batch triage is a Pro feature." };
   }
 

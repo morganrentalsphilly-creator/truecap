@@ -120,6 +120,7 @@ export function buildOfferCeilingRangePreview(
   // criterion, there is no safe calculated preview to return.
   const {
     maxPurchasePrice: _ignoredCallerCap,
+    maxCashRequired: _ignoredCallerCashCap,
     ...previewTarget
   } = target;
   if (Object.values(previewTarget).every((value) => value === undefined)) {
@@ -203,6 +204,26 @@ export function rankOfferCeilingConstraints(
       `DSCR ≥ ${target.dscr}`,
       achieved.dscr - target.dscr,
       target.dscr
+    );
+  }
+  if (
+    target.minIrrPct !== undefined &&
+    result.achievedIrr?.status === "unique" &&
+    result.achievedIrr.primaryIrrPct !== null
+  ) {
+    add(
+      "irr",
+      `10-year pre-tax IRR ≥ ${target.minIrrPct}%`,
+      result.achievedIrr.primaryIrrPct - target.minIrrPct,
+      target.minIrrPct,
+    );
+  }
+  if (target.maxCashRequired !== undefined) {
+    add(
+      "cash-required",
+      `Cash required ≤ ${money(target.maxCashRequired)}`,
+      target.maxCashRequired - achieved.totalCashRequired,
+      target.maxCashRequired,
     );
   }
   if (target.maxPurchasePrice !== undefined) {

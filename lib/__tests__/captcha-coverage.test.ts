@@ -17,7 +17,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { execSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const ROOT = join(__dirname, "..", "..");
@@ -43,7 +43,12 @@ const GATED_ACTIONS = [
 function tsxFiles(): string[] {
   return execSync("git ls-files app components", { cwd: ROOT, encoding: "utf8" })
     .split("\n")
-    .filter((f) => /\.(ts|tsx)$/.test(f) && !f.includes("__tests__"));
+    .filter(
+      (f) =>
+        /\.(ts|tsx)$/.test(f) &&
+        !f.includes("__tests__") &&
+        existsSync(join(ROOT, f)),
+    );
 }
 
 describe("every captcha-gated Supabase call forwards a token", () => {
