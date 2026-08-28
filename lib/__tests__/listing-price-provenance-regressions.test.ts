@@ -45,6 +45,8 @@ describe("listing-price provenance regressions", () => {
     "components/investcalc/property-details-section.tsx",
   );
   const listingLink = read("components/investcalc/listing-link-input.tsx");
+  const inputConfidence = read("lib/input-confidence.ts");
+  const savedAnalyses = read("app/actions/saved-analyses.ts");
 
   it("adopts only an active-listing asking price and preserves a user's populated value", () => {
     expect(
@@ -58,7 +60,11 @@ describe("listing-price provenance regressions", () => {
 
     expect(
       selectUnderwritingEnrichment(
-        enrichment({ valueEstimate: 425_000, listPrice: 399_900 }),
+        enrichment({
+          valueEstimate: 425_000,
+          listPrice: 399_900,
+          listingStatus: "Active",
+        }),
       ),
     ).toMatchObject({
       purchasePrice: 399_900,
@@ -103,13 +109,36 @@ describe("listing-price provenance regressions", () => {
     );
     expect(propertyDetails).toContain("onPurchasePriceEdited?.()");
 
-    expect(analyzer).toContain(
-      'setPurchasePriceSourceLabel("RentCast value estimate")',
+    expect(analyzer).toContain('kind: "avm-estimate"');
+    expect(analyzer).toContain('kind: "active-listing"');
+    expect(analyzer).toContain("fetchedAt: e.fetchedAt");
+    expect(inputConfidence).toContain(
+      "RentCast active listing asking price · source date",
     );
-    expect(analyzer).toContain('"Active listing asking price via RentCast"');
+    expect(inputConfidence).toContain("RentCast AVM estimate · source date");
     expect(analyzer).toContain("priceSourceLabel={purchasePriceSourceLabel}");
     expect(analyzer).toContain("onPurchasePriceEdited={() => {");
     expect(analyzer).toContain("setPurchasePriceSourceLabel(null)");
+  });
+
+  it("persists provider lineage through save/reopen and invalidates it on edits", () => {
+    expect(inputConfidence).toContain(
+      "purchasePriceSource?: PurchasePriceSourceContext",
+    );
+    expect(inputConfidence).toContain(
+      'fingerprintMatches("purchasePrice")',
+    );
+    expect(analyzer).toContain(
+      "purchasePriceSource: confidenceContext.purchasePriceSource",
+    );
+    expect(savedAnalyses.replace(/\s+/g, "")).toContain(
+      "normalizePurchasePriceSourceContext(options?.purchasePriceSource",
+    );
+    expect(analyzer).toContain("purchasePriceProvenanceAddressRef.current");
+    expect(analyzer).toContain("purchasePriceProvenanceValueRef.current");
+    expect(analyzer).toContain('name === "address"');
+    expect(analyzer).toContain('name === "purchasePrice"');
+    expect(analyzer).toContain("onPurchasePriceEdited={() => {");
   });
 
   it("claims an active asking price in the autofill toast only after writing it", () => {

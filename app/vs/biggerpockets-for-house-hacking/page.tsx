@@ -62,7 +62,6 @@ const MATRIX: Row[] = [
   { feature: "Address auto-fill (rent/rate/tax)",       truecap: "Yes — HUD FMR per unit + FRED rate + state property tax",          biggerpockets: "Manual entry",                                  winner: "truecap" },
   { feature: "DSCR screening ratio",                    truecap: "Yes — screening output, not a lender approval model",               biggerpockets: "Available in its calculator; not lender approval", winner: "tie" },
   { feature: "Post-move-out scenario",                  truecap: "Save a separate fully rented scenario; no move-out-year switch",     biggerpockets: "Adjust and save a separate scenario",             winner: "tie" },
-  { feature: "Illustrative tax impact", truecap: "General rental illustration; mixed-use allocation not modeled",     biggerpockets: "Pro — standard tax view",                       winner: "tie" },
   { feature: "Sensitivity grid (vacancy on rental units)", truecap: "Pro — rent ±10%, vacancy ±5pp on rental units only",             biggerpockets: "Manual re-runs",                                winner: "truecap" },
   { feature: "Mobile UX at the showing",                truecap: "PWA installable",                                                    biggerpockets: "Desktop-leaning calculator + separate mobile app", winner: "tie" },
   { feature: "Free tier covers house hacking",          truecap: "Yes — core owner-occupant underwriting on free tier",                biggerpockets: "Current calculator presents results as a Pro feature", winner: "truecap" },
@@ -318,9 +317,9 @@ export default function VsBiggerPocketsForHouseHackingPage() {
             New to running an owner-occupant deal? Our{" "}
             <Link href="/blog/house-hack-underwriting-guide" className="font-semibold text-primary hover:underline">house hack underwriting guide</Link>
             {" "}walks through counting only the rental units&apos; income. To pressure-test a single metric, the standalone{" "}
-            <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">cap rate calculator</Link>
+            <Link href="/#main" className="font-semibold text-primary hover:underline">cap rate calculator</Link>
             {" "}and{" "}
-            <Link href="/tools/cash-on-cash-calculator" className="font-semibold text-primary hover:underline">cash-on-cash return calculator</Link>
+            <Link href="/#main" className="font-semibold text-primary hover:underline">cash-on-cash return calculator</Link>
             {" "}run the same engine as the full analyzer.
           </p>
         </section>
@@ -335,8 +334,8 @@ export default function VsBiggerPocketsForHouseHackingPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap&apos;s free tier covers owner-occupant property
             types, per-unit rent + status, FHA financing, and
-            effective-rent-saved math. Pro adds projections, illustrative
-            tax impact, sensitivity, and side-by-side saved-deal comparison.
+            effective-rent-saved math. Pro adds a 10-year cash-flow and equity
+            planning view, sensitivity, Offer Ceiling, and saved-deal comparison.
             Model post-move-out as a separate fully rented scenario; see live
             pricing and check trial eligibility.
           </p>
@@ -363,8 +362,6 @@ export default function VsBiggerPocketsForHouseHackingPage() {
           <Link href="/vs/biggerpockets-calculator" className="font-bold text-foreground hover:underline">TrueCap vs BiggerPockets</Link>
           {" · "}
           <Link href="/vs/dealcheck" className="font-bold text-foreground hover:underline">TrueCap vs DealCheck</Link>
-          {" · "}
-          <Link href="/vs/dealcheck-for-brrrr" className="font-bold text-foreground hover:underline">DealCheck for BRRRR</Link>
         </footer>
       </main>
       <SiteFooter />

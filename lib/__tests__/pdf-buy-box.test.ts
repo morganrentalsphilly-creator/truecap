@@ -135,7 +135,7 @@ describe("buildBuyBoxPdfVerdict", () => {
     });
     const dscr = v!.checks.find((c) => c.id === "dscr")!;
     expect(dscr.pass).toBeNull();
-    expect(dscr.actual).toBe("N/A (cash)");
+    expect(dscr.actual).toBe("N/A — no debt service");
     expect(v!.applicableCount).toBe(0);
     expect(v!.passes).toBe(false);
     expect(v!.headline).toBe("Can't evaluate on this deal yet");

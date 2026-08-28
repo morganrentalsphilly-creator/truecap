@@ -19,7 +19,7 @@
 import { describe, expect, it } from "vitest";
 
 import { calculateAnalysis } from "../calc-analysis";
-import { getDealTier } from "../verdict";
+import { getDealTier, getVerdictNarrative } from "../verdict";
 import type { InvestmentFormValues } from "../investcalc-schema";
 
 function baseSingleFamily(
@@ -121,6 +121,9 @@ describe("getDealTier — cash purchase (no debt service)", () => {
     expect(r.capRate).toBeGreaterThanOrEqual(7);
     expect(r.cocReturn).toBeGreaterThanOrEqual(8);
     expect(getDealTier(r)).toBe("Strong");
+    expect(getVerdictNarrative({ result: r }).sentences).toContain(
+      "DSCR: N/A — no debt service. An all-cash purchase has no lender debt service to cover.",
+    );
   });
 
   it("classifies a modest cash deal as Mixed (cap below 5)", () => {

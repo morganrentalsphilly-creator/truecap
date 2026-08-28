@@ -86,7 +86,7 @@ describe("WCAG 2.1 AA remediation guards", () => {
     expect(portfolioChart).toContain('role="group"');
     expect(portfolioChart).toContain("aria-pressed={metric === item.id}");
     expect(riskReturn).toContain('role="group"');
-    expect(riskReturn).toContain("aria-pressed={metric === m.id}");
+    expect(riskReturn).toContain("aria-pressed={effectiveMetric === m.id}");
   });
 
   it("does not point aria-describedby at an absent description", () => {

@@ -249,7 +249,7 @@ export default function NegativeLeveragePost() {
             <p>
               The property&apos;s unlevered yield is its{" "}
               <Link
-                href="/tools/cap-rate-calculator"
+                href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
                 cap rate
@@ -272,7 +272,7 @@ export default function NegativeLeveragePost() {
             <p>
               You can make this exact rather than directional. Your levered{" "}
               <Link
-                href="/tools/cash-on-cash-calculator"
+                href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
                 cash-on-cash return
@@ -381,7 +381,7 @@ export default function NegativeLeveragePost() {
               <strong>1.17 DSCR</strong>. It is profitable. It is within shouting
               distance of the 1.20 to 1.25{" "}
               <Link
-                href="/tools/dscr-calculator"
+                href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
                 debt-service-coverage ratio

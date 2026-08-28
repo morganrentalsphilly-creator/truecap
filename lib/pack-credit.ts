@@ -16,16 +16,15 @@ import "server-only";
  *   3. The Stripe webhook transitions the claim eligible→'applied' when the
  *      checkout completes (session.metadata.pack_credit_claim_id).
  *
- * FAIL-CLOSED: everything gates on STRIPE_PACK_CREDIT_COUPON_ID — a Stripe
- * coupon Morgan creates once ($5 off, duration "once", USD). Until that env
+ * FAIL-CLOSED: everything gates on STRIPE_PACK_CREDIT_900_COUPON_ID — a Stripe
+ * coupon the owner creates once ($9 off, duration "once", USD). Until that env
  * var is set, claims stay 'not_configured' (today's dormant behavior) and no
  * surface may promise a credit. This mirrors the POST_ANALYSIS_COUPON_ID
  * pattern in lib/post-analysis-offer.ts.
  *
- * SCOPE GUARD: the single configured coupon is priced for the $5 'current'
- * pack variant, so only claims whose credit amount is exactly $5 (500 cents)
- * are redeemable. If a $9/$15/$19 price experiment goes live, mint a matching
- * coupon and extend this module before promising those buyers a credit.
+ * SCOPE GUARD: only claims whose credit amount is exactly the launch Pack
+ * price ($9 / 900 cents) are redeemable. Historical $5 claims retain their
+ * paid-report recovery but cannot be paired with a differently valued coupon.
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -36,18 +35,35 @@ import {
   type DecisionPackStripeReader,
 } from "@/lib/stripe/decision-pack-access";
 
-export const PACK_CREDIT_WINDOW_DAYS = 7;
+export const PACK_CREDIT_WINDOW_DAYS = 30;
 
-/** Cents the configured Stripe coupon refunds — the $5 'current' pack. */
-export const PACK_CREDIT_REDEEMABLE_AMOUNT_CENTS = 500;
+/** Cents the configured Stripe coupon refunds — the $9 launch Pack. */
+export const PACK_CREDIT_REDEEMABLE_AMOUNT_CENTS = 900;
 
 export function getPackCreditCouponId(): string | null {
-  const value = process.env.STRIPE_PACK_CREDIT_COUPON_ID?.trim();
+  const value = process.env.STRIPE_PACK_CREDIT_900_COUPON_ID?.trim();
   return value ? value : null;
 }
 
 export function isPackCreditConfigured(): boolean {
   return getPackCreditCouponId() !== null;
+}
+
+/** Fail-closed validation for the Stripe coupon before Checkout uses it. */
+export function stripePackCreditCouponMatchesCatalog(coupon: {
+  valid?: boolean;
+  duration?: string | null;
+  amount_off?: number | null;
+  currency?: string | null;
+  percent_off?: number | null;
+}): boolean {
+  return (
+    coupon.valid === true &&
+    coupon.duration === "once" &&
+    coupon.amount_off === PACK_CREDIT_REDEEMABLE_AMOUNT_CENTS &&
+    coupon.currency?.toLowerCase() === "usd" &&
+    coupon.percent_off == null
+  );
 }
 
 export function buildPackCreditPolicy(): OneTimePdfProCreditPolicy {

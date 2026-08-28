@@ -53,7 +53,6 @@ const MATRIX: Row[] = [
   { feature: "Lifecycle stage", truecap: "Pre-purchase — underwrite the deal", baselane: "Post-purchase — banking + bookkeeping + ops", winner: "tie" },
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", baselane: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", baselane: "Not modeled", winner: "truecap" },
-  { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", baselane: "Yes — actuals tracking for Schedule E", winner: "tie" },
   { feature: "Secondary Screening Index", truecap: "Free — 0-100 triage score + factor breakdown", baselane: "Not applicable", winner: "truecap" },
   { feature: "Sensitivity grid", truecap: "Pro — rent ±10%, vacancy ±5pp, rate ±1pp", baselane: "Not modeled", winner: "truecap" },
   { feature: "Rental business banking", truecap: "No", baselane: "Yes — FDIC-insured business checking", winner: "baselane" },
@@ -142,9 +141,9 @@ export default function VsBaselanePage() {
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You&apos;re evaluating a property before making an offer.</li>
-                <li>You want forward-looking projections (10-yr cash flow, exit scenarios).</li>
+                <li>You want a 10-year planning projection for cash flow and equity.</li>
                 <li>You want standardized economics and rule-fit context to compare 2-3 deals side-by-side.</li>
-                <li>You want defensible numbers for a lender or partner.</li>
+                <li>You want source-labeled assumptions for a partner review, with inputs independently verified.</li>
               </ul>
             </div>
             <div>
@@ -244,7 +243,7 @@ export default function VsBaselanePage() {
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Want to see just the underwriting half? Try the{" "}
-            <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">
+            <Link href="/#main" className="font-semibold text-primary hover:underline">
               cap rate calculator
             </Link>{" "}
             or the full{" "}
@@ -268,7 +267,7 @@ export default function VsBaselanePage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
-            Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
+            Pro adds 10-year cash-flow and equity projections, sensitivity,
             Offer Ceiling, co-branded share links, and PDF reports with Pro; see live pricing for current terms.
             No card to start.
           </p>

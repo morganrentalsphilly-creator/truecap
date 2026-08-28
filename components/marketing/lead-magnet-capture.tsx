@@ -157,9 +157,9 @@ export function LeadMagnetInline({ source = "inline" }: { source?: string }) {
         The Market Intelligence Pack
       </h3>
       <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-        Every state&apos;s investing benchmarks on one table, the rent-to-price
-        screen, and HUD rent benchmarks for 150 markets — the same sourced data
-        that pre-fills every TrueCap analysis.
+        State-by-state buy-and-hold screening references, the rent-to-price
+        screen, and HUD rent benchmarks for 150 tracked markets. Property-level
+        verification still matters.
       </p>
       {captured ? (
         <CapturedState downloadUrl={downloadUrl} />
@@ -248,8 +248,8 @@ export function LeadMagnetExitIntent() {
         Leaving? Take the state-by-state numbers with you.
       </p>
       <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-        The Market Intelligence Pack: every state&apos;s benchmarks, the
-        rent-to-price screen, HUD rents for 150 markets. Free PDF.
+        The Market Intelligence Pack: state buy-and-hold screening references,
+        the rent-to-price screen, and HUD rents for 150 tracked markets. Free PDF.
       </p>
       {captured ? (
         <CapturedState downloadUrl={downloadUrl} />

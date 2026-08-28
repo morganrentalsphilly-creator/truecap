@@ -16,6 +16,7 @@ import {
   type MaoTarget,
 } from "../max-allowable-offer";
 import type { InvestmentFormValues } from "../investcalc-schema";
+import { calculateMaoIrr } from "../mao-target-evaluation";
 
 function baseSingleFamily(overrides: Partial<InvestmentFormValues> = {}): InvestmentFormValues {
   return {
@@ -163,6 +164,65 @@ describe("MAO — explicit purchase-price ceiling", () => {
 
     expect(solveRequiredMonthlyRent(values, target)?.unreachable).toBe(true);
     expect(solveRequiredInterestRate(values, target)?.unreachable).toBe(true);
+  });
+});
+
+describe("MAO — IRR and acquisition-cash targets", () => {
+  it("uses maximum cash required as a first-class price constraint", () => {
+    const values = baseSingleFamily();
+    const anchorPrice = 180_000;
+    const anchor = calculateAnalysis({ ...values, purchasePrice: anchorPrice });
+    const target: MaoTarget = {
+      maxCashRequired: anchor.totalCashRequired,
+    };
+
+    const solved = calculateMaxAllowableOffer(values, target, {
+      maxPrice: 300_000,
+    });
+
+    expect(solved).not.toBeNull();
+    expect(solved?.maxPrice).toBe(anchorPrice);
+    expect(solved?.achieved.totalCashRequired).toBeLessThanOrEqual(
+      target.maxCashRequired!,
+    );
+    const next = calculateAnalysis({
+      ...values,
+      purchasePrice: anchorPrice + 500,
+    });
+    expect(next.totalCashRequired).toBeGreaterThan(target.maxCashRequired!);
+  });
+
+  it("solves minimum IRR from the canonical 10-year pre-tax cash-flow timeline", () => {
+    const values = baseSingleFamily();
+    const anchorPrice = 180_000;
+    const anchorValues = { ...values, purchasePrice: anchorPrice };
+    const anchor = calculateAnalysis(anchorValues);
+    const anchorIrr = calculateMaoIrr(anchorValues, anchor);
+
+    expect(anchorIrr.status).toBe("unique");
+    expect(anchorIrr.primaryIrrPct).not.toBeNull();
+    const target: MaoTarget = { minIrrPct: anchorIrr.primaryIrrPct! };
+    const solved = calculateMaxAllowableOffer(values, target, {
+      maxPrice: 300_000,
+    });
+
+    expect(solved).not.toBeNull();
+    expect(solved?.maxPrice).toBe(anchorPrice);
+    expect(solved?.achievedIrr?.status).toBe("unique");
+    expect(solved?.achievedIrr?.primaryIrrPct).toBeGreaterThanOrEqual(
+      target.minIrrPct!,
+    );
+  });
+
+  it("fails an IRR rule closed when accepted form inputs are unavailable", () => {
+    const values = baseSingleFamily({ purchasePrice: 180_000 });
+    const result = calculateAnalysis(values);
+    const irr = calculateMaoIrr(values, result);
+    expect(irr.status).toBe("unique");
+    const target = { minIrrPct: irr.primaryIrrPct! - 0.1 };
+
+    expect(meetsTarget(result, target)).toBe(false);
+    expect(meetsTarget(result, target, values)).toBe(true);
   });
 });
 

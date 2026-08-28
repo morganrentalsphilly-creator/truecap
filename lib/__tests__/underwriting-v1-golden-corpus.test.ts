@@ -18,7 +18,7 @@ const CORPUS_CLOCK = new Date("2026-08-24T12:00:00.000Z");
 function captureGoldenOutput(valuesInput: unknown): UnderwritingV1GoldenExpected {
   const values = investmentFormSchema.parse(valuesInput);
   const result = calculateAnalysis(values);
-  if (result.methodologyVersion !== "1.1") {
+  if (result.methodologyVersion !== "1.3") {
     throw new Error("The reviewed v1 corpus must never dispatch through another methodology");
   }
   const score = computeDealScore(
@@ -52,7 +52,7 @@ function captureGoldenOutput(valuesInput: unknown): UnderwritingV1GoldenExpected
   };
 }
 
-describe("TrueCap Underwriting Standard v1.1 reviewed golden corpus", () => {
+describe("TrueCap Underwriting Standard v1.3 reviewed golden corpus", () => {
   beforeAll(() => {
     vi.useFakeTimers();
     vi.setSystemTime(CORPUS_CLOCK);

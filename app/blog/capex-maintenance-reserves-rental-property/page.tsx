@@ -345,7 +345,7 @@ export default function CapexReservesPost() {
             </Link>
             . Run your own numbers both ways in the{" "}
             <Link
-              href="/tools/cash-on-cash-calculator"
+              href="/#main"
               className="text-primary font-semibold hover:underline"
             >
               cash-on-cash calculator
@@ -369,14 +369,14 @@ export default function CapexReservesPost() {
             &quot;7% cap&quot; with no capex line and your 7% cap with
             $300/month reserved describe two very different properties. The{" "}
             <Link
-              href="/tools/noi-calculator"
+              href="/#main"
               className="text-primary font-semibold hover:underline"
             >
               NOI calculator
             </Link>{" "}
             and{" "}
             <Link
-              href="/tools/cap-rate-calculator"
+              href="/#main"
               className="text-primary font-semibold hover:underline"
             >
               cap rate calculator

@@ -3,7 +3,7 @@
 /**
  * Enrichment receipt — the durable, in-flow one-liner under the hero fields
  * (calculator redesign Phase 3, blueprint §1 item 3): "Filled rate (6.9%
- * FRED), taxes (1.31% PA) and rent (~$1,850 HUD) for you."
+ * FRED) and rent (~$1,850 HUD) for you."
  *
  * Toasts are RETAINED — this complements them as the persistent record so
  * the smart defaults get visible credit after the toast evicts.
@@ -35,7 +35,6 @@ export type EnrichmentReceiptCapture = {
     invalidated?: boolean;
   };
   interestRate?: { value: number };
-  propertyTaxPct?: { value: number; detail?: string };
 };
 
 type Props = {
@@ -70,7 +69,6 @@ export function EnrichmentReceipt({ form, active, getCapture }: Props) {
 
   const capture = getCapture();
   const currentRate = Number(form.getValues("interestRate"));
-  const currentTax = Number(form.getValues("propertyTaxPct"));
   const currentRent = Number(form.getValues("monthlyRent"));
   const sameNumber = (current: number, captured: number) =>
     Number.isFinite(current) && Math.abs(current - captured) < 1e-9;
@@ -80,16 +78,6 @@ export function EnrichmentReceipt({ form, active, getCapture }: Props) {
     sameNumber(currentRate, capture.interestRate.value)
   ) {
     parts.push(`rate (${fmtPct(capture.interestRate.value)}% FRED benchmark)`);
-  }
-  if (
-    capture.propertyTaxPct &&
-    form.getValues("propertyTaxInputMode") !== "annual" &&
-    sameNumber(currentTax, capture.propertyTaxPct.value)
-  ) {
-    const detail = capture.propertyTaxPct.detail ?? "State";
-    parts.push(
-      `taxes (${fmtPct(capture.propertyTaxPct.value)}% ${detail} state benchmark)`,
-    );
   }
   if (
     capture.monthlyRent?.value != null &&

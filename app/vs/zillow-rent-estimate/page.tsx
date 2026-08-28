@@ -184,9 +184,9 @@ export default function VsZillowRentPage() {
           </p>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             A rent estimate is just the first input — the decision lives downstream. Push your number through the standalone{" "}
-            <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">cap rate calculator</Link>
+            <Link href="/#main" className="font-semibold text-primary hover:underline">cap rate calculator</Link>
             {" "}and{" "}
-            <Link href="/tools/cash-on-cash-calculator" className="font-semibold text-primary hover:underline">cash-on-cash return calculator</Link>
+            <Link href="/#main" className="font-semibold text-primary hover:underline">cash-on-cash return calculator</Link>
             {" "}to turn it into a return. Our guide on{" "}
             <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">underwriting a rental in 60 seconds</Link>
             {" "}shows the whole path from address to a reviewed underwrite.

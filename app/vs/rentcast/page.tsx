@@ -53,7 +53,6 @@ const MATRIX: Row[] = [
   { feature: "Primary purpose", truecap: "Per-deal underwriting calculator", rentcast: "Rent + property value estimation", winner: "tie" },
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", rentcast: "Not modeled", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", rentcast: "Not modeled", winner: "truecap" },
-  { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", rentcast: "Not modeled", winner: "truecap" },
   { feature: "Secondary Screening Index", truecap: "Free — 0-100 triage score + factor breakdown", rentcast: "Not applicable", winner: "truecap" },
   { feature: "Rent comp data", truecap: "HUD Fair Market Rent (county-level, gov-published)", rentcast: "Yes — listings-based comps with addresses", winner: "rentcast" },
   { feature: "Property value estimate", truecap: "Purchase price as user input", rentcast: "Yes — automated valuation model", winner: "rentcast" },
@@ -233,7 +232,7 @@ export default function VsRentcastPage() {
               <strong>Plug that rent into TrueCap.</strong> Override the auto-filled HUD rent with RentCast&apos;s number. Everything downstream recalculates.
             </li>
             <li>
-              <strong>Run the full underwrite in TrueCap.</strong> Cap rate, DSCR, cash flow, 10-year projection, illustrative tax impact.
+              <strong>Run the stabilized-rental underwrite in TrueCap.</strong> Cap rate, DSCR, cash flow, sensitivity, and a 10-year cash-flow and equity projection.
             </li>
             <li>
               <strong>Save the deal + revisit later.</strong> TrueCap&apos;s saved-deal feature lets you re-run with updated assumptions when market data shifts.
@@ -241,7 +240,7 @@ export default function VsRentcastPage() {
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Want to see just the underwriting half? Try the{" "}
-            <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">
+            <Link href="/#main" className="font-semibold text-primary hover:underline">
               cap rate calculator
             </Link>{" "}
             or the full{" "}
@@ -265,7 +264,7 @@ export default function VsRentcastPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
-            Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
+            Pro adds 10-year cash-flow and equity projections, sensitivity,
             Offer Ceiling, co-branded share links, and PDF reports with Pro; see live pricing for current terms.
             No card to start.
           </p>
@@ -337,11 +336,11 @@ const RENTCAST_FAQ: FaqItem[] = [
     question: "Which has a better free tier?",
     answer: (
       <>
-        TrueCap — unlimited analyses, cap rate, CoC, DSCR, NCF, monthly cash flow all on the free tier. RentCast&apos;s free tier limits the number of property lookups per month and doesn&apos;t include the API. If you only need rent estimates occasionally, both work; if you&apos;re underwriting multiple deals a week, TrueCap free is more useful.
+        TrueCap provides no-account preliminary screens with cap rate, CoC, DSCR, NOI, and monthly cash flow. RentCast&apos;s free tier limits property lookups and excludes its API. They solve different jobs: use rent evidence for the assumption, then use an underwriting workflow to test the deal.
       </>
     ),
     plainTextAnswer:
-      "TrueCap — unlimited analyses on the free tier with full metrics. RentCast&apos;s free tier caps property lookups and excludes API. For weekly underwriting, TrueCap free is more useful.",
+      "TrueCap provides no-account preliminary screens with core rental metrics. RentCast's free tier caps property lookups and excludes its API. Compare them as underwriting workflow versus rent-data evidence, and verify current limits on both official sites.",
   },
   {
     question: "Can I use RentCast&apos;s data in TrueCap?",

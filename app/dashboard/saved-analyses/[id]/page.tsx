@@ -24,6 +24,10 @@ import { ScenariosCard } from "@/components/investcalc/scenarios-card";
 import { NextActionBanner } from "@/components/investcalc/next-action-banner";
 import { DealAgingNudge } from "@/components/investcalc/deal-aging-nudge";
 import { DealStageSelect } from "@/components/investcalc/deal-stage-select";
+import {
+  DealHistoryTimeline,
+  type DealHistoryAvailability,
+} from "@/components/investcalc/deal-history-timeline";
 import { DealClientSelect } from "@/components/investcalc/deal-client-select";
 import { ShareLinkButton } from "@/components/investcalc/share-link-button";
 import { listAgentClientsAction } from "@/app/actions/agent-clients";
@@ -93,7 +97,14 @@ import {
   resolveSavedAnalysisSnapshot,
 } from "@/lib/saved-analysis-methodology";
 import { isFeatureEnabled } from "@/lib/feature-flags";
+import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
+import { calculateMaoIrr } from "@/lib/mao-target-evaluation";
+import { activeMeteredEvaluationDealGrantsAccess } from "@/lib/evaluation-access-server";
 import { Verdict } from "@/components/investcalc/verdict";
+import {
+  parseSavedDealHistoryEvents,
+  type SavedDealHistoryEvent,
+} from "@/lib/deal-history";
 
 export const metadata: Metadata = {
   title: "Deal workspace",
@@ -242,6 +253,42 @@ async function fetchDeal(
   return resolved(base, false);
 }
 
+async function fetchDealHistory(
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  id: string,
+  userId: string,
+): Promise<{
+  availability: DealHistoryAvailability;
+  events: SavedDealHistoryEvent[];
+}> {
+  const { data, error } = await supabase
+    .from("saved_deal_history_events")
+    .select(
+      "id, old_stage, new_stage, decision_status, reason, note, actor_user_id, occurred_at",
+    )
+    .eq("saved_analysis_id", id)
+    .eq("user_id", userId)
+    .order("occurred_at", { ascending: false })
+    .limit(12);
+
+  if (error) {
+    const migrationPending =
+      error.code === "42P01" ||
+      error.code === "42703" ||
+      /saved_deal_history_events|column .* does not exist/i.test(
+        error.message ?? "",
+      );
+    return {
+      availability: migrationPending ? "migration_pending" : "error",
+      events: [],
+    };
+  }
+  return {
+    availability: "ready",
+    events: parseSavedDealHistoryEvents(data),
+  };
+}
+
 export default async function DealWorkspacePage({
   params,
   searchParams,
@@ -274,7 +321,14 @@ export default async function DealWorkspacePage({
   }
   const navAccess = getDashboardNavAccess(entitlements);
 
-  const [{ data: profile }, isPremium, dealRead, buyBoxesResult, activeDealsCountResult] =
+  const [
+    { data: profile },
+    isPremium,
+    dealRead,
+    dealHistoryRead,
+    buyBoxesResult,
+    activeDealsCountResult,
+  ] =
     await Promise.all([
     supabase
       .from("profiles")
@@ -283,6 +337,7 @@ export default async function DealWorkspacePage({
       .maybeSingle(),
     hasPaidPlanSubscription(supabase, user.id),
     fetchDeal(supabase, id, user.id),
+    fetchDealHistory(supabase, id, user.id),
     // Buy-box fit (PV-5): the same RLS-scoped user_buy_boxes read My Deals
     // uses (listBuyBoxesAction — canUse gate + MIGRATION_PENDING tolerance
     // built in). Any failure, missing table, or entitlement miss degrades to
@@ -440,9 +495,15 @@ export default async function DealWorkspacePage({
   const isCashPurchase = fresh ? fresh.isCashPurchase : monthlyPayment <= 0;
   // Current-engine form values — reused by the max-offer solver and the
   // owned-equity estimate. Null for legacy snapshots that don't validate.
+  // The separately retained normalized snapshot is also the immutable
+  // evaluation-resource identity: a recorded/frozen presentation must still
+  // be revisitable when it is one of the exact three metered deals.
+  const evaluationResourceValues = normalizeReleasedInvestmentFormSnapshot(
+    dealRow.form_snapshot,
+  );
   const formValues = isFrozenMethodologySnapshot
     ? null
-    : normalizeReleasedInvestmentFormSnapshot(dealRow.form_snapshot);
+    : evaluationResourceValues;
 
   // Rate-alert deep link: re-underwrite at the alert's rate (pure preview —
   // the saved deal is NOT mutated by opening the link; the banner's one
@@ -470,11 +531,14 @@ export default async function DealWorkspacePage({
         (RECOMMENDATION_TIERS as readonly string[]).includes(snap["recommendation"])
       ? (snap["recommendation"] as DealRecommendation)
       : null;
-  // Mirrors the My Deals DSCR column: "Cash" keys off the explicit cash flag
+  // Mirrors the My Deals DSCR column: canonical N/A keys off the explicit cash flag
   // (a financed deal with negative NOI has a real DSCR ≤ 0 to show); null
-  // (legacy snapshot without dscr) still omits the tile rather than trusting
-  // a derived cash flag from an incomplete snapshot.
-  const dscrDisplay = dscr == null ? null : isCashPurchase ? "Cash" : dscr.toFixed(2);
+  // means a legacy financed snapshot did not carry the metric.
+  const dscrDisplay = isCashPurchase
+    ? NO_DEBT_SERVICE_DSCR_LABEL
+    : dscr == null
+      ? null
+      : dscr.toFixed(2);
 
   // Owned equity (M3-2/WOW-4) — closed/completed deals only. ONE definition of
   // owned equity everywhere: the shared computeRowEquity (lib/owned-equity-
@@ -498,8 +562,21 @@ export default async function DealWorkspacePage({
   // recomputed-with-stored-fallback numbers the banner uses, server-side
   // (pure, no IO). null when the user has no usable box — the banner and the
   // personal line then behave exactly as before.
+  const canEvaluateBuyBox =
+    isPremium ||
+    Boolean(
+      evaluationResourceValues &&
+        (await activeMeteredEvaluationDealGrantsAccess(
+          supabase,
+          user.id,
+          evaluationResourceValues,
+        )),
+    );
   const activeBuyBoxes =
-    buyBoxesResult && buyBoxesResult.ok && buyBoxesResult.canUse
+    canEvaluateBuyBox &&
+    buyBoxesResult &&
+    buyBoxesResult.ok &&
+    buyBoxesResult.canUse
       ? boxesForDealClient(
           buyBoxesResult.boxes.filter((b) => b.isActive && buyBoxHasCriteria(b)),
           // Scope to THIS deal's client — a box belonging to another buyer must
@@ -507,7 +584,7 @@ export default async function DealWorkspacePage({
           dealRow.client_id ?? null
         )
       : [];
-  const buyBoxesResolved = Boolean(buyBoxesResult?.ok);
+  const buyBoxesResolved = canEvaluateBuyBox && Boolean(buyBoxesResult?.ok);
   let buyBoxFit: BuyBoxFitSummary | null = null;
   // The fit's one personal, number-carrying line ("Biggest gap — Cap rate:
   // 5.2% vs ≥ 6.0% (0.8pp short)") from the box that decides the verdict:
@@ -522,6 +599,9 @@ export default async function DealWorkspacePage({
       dealRow.property_type === "owner-occupant"
         ? dealRow.property_type
         : null;
+    const irr = fresh && formValues
+      ? calculateMaoIrr(formValues, fresh.analysisResult)
+      : null;
     const metrics: BuyBoxDealMetrics = {
       capRatePct: fresh ? fresh.capRatePct : numOrNull(snap["capRate"]),
       cocPct,
@@ -533,6 +613,9 @@ export default async function DealWorkspacePage({
       // calc-analysis canon: monthlyPayment <= 0 means a cash purchase, so
       // the DSCR criterion is skipped (N/A), never failed.
       isCashPurchase,
+      cashRequired: fresh?.cashToClose ?? numOrNull(snap["totalCashRequired"]),
+      irrPct: irr?.primaryIrrPct ?? null,
+      irrStatus: irr?.status ?? "none",
     };
     const boxResults = evaluateBuyBoxes(activeBuyBoxes, metrics).filter((r) => r.result.active);
     if (boxResults.length > 0) {
@@ -899,6 +982,11 @@ export default async function DealWorkspacePage({
             stage={stage}
             createdAt={dealRow.created_at}
             address={heading}
+          />
+          <DealHistoryTimeline
+            availability={dealHistoryRead.availability}
+            currentStage={stage}
+            events={dealHistoryRead.events}
           />
           {/* Dormant Saved Deal Watch setup. Both this server render and all
               actions fail closed behind the flag. The card persists explicit

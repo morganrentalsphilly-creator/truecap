@@ -57,14 +57,10 @@ import { schedulePackCreditEmails } from "@/lib/email/pack-credit-emails";
 import { createIpRateLimit, getRequestIp } from "@/lib/ip-rate-limit";
 import { decisionPackCheckoutEnabled } from "@/lib/decision-pack-checkout-gate";
 
-/** Existing production $5 price; experiments require their own configured id. */
-const ONE_TIME_PDF_PRICE_FALLBACK = "price_1TgYY33yTn6y2v95pIAe2ABs";
-
 function getOneTimePdfPriceId(): string | null {
-  const { singleDealPriceVariant, singleDeal } = getMarketingOfferConfig();
+  const { singleDeal } = getMarketingOfferConfig();
   const configured = process.env[singleDeal.stripeEnvKey]?.trim();
-  if (configured) return configured;
-  return singleDealPriceVariant === "current" ? ONE_TIME_PDF_PRICE_FALLBACK : null;
+  return configured || null;
 }
 
 function getSiteUrl(): string {
@@ -191,6 +187,29 @@ export async function createOneTimePdfCheckoutAction(
         ok: false,
         code: "MISSING_PRICE",
         message: "This single-deal offer is temporarily unavailable. Please try Pro or contact support.",
+      };
+    }
+    const stripePrice = await stripe.prices.retrieve(priceId);
+    const expectedAmountCents = Math.round(offer.singleDeal.amount * 100);
+    if (
+      stripePrice.active !== true ||
+      stripePrice.type !== "one_time" ||
+      stripePrice.currency.toLowerCase() !== "usd" ||
+      stripePrice.unit_amount !== expectedAmountCents
+    ) {
+      Sentry.captureMessage("Deal Decision Pack Stripe Price does not match the launch catalog", {
+        level: "error",
+        tags: { feature: "billing-checkout", mismatch: "decision-pack-price" },
+        extra: {
+          variant: offer.singleDealPriceVariant,
+          expectedAmountCents,
+          configuredPriceId: priceId,
+        },
+      });
+      return {
+        ok: false,
+        code: "MISSING_PRICE",
+        message: "Billing setup does not match the displayed Decision Pack price. No checkout was created.",
       };
     }
     const claimId = randomUUID();
@@ -538,7 +557,7 @@ async function recordPackPurchaseExtrasBestEffort(
 
     // Grant ONLY what redemption can actually deliver (review findings
     // 2026-08-17): findEligiblePackCredit matches claims bound to a signed-in
-    // user AND worth exactly the configured $5 coupon. An anonymous purchase
+    // user AND worth exactly the configured $9 coupon. An anonymous purchase
     // or a price-experiment variant therefore stays 'not_configured' — no
     // credit row, no promise emails, no toast — instead of promising an
     // automatic credit checkout can never attach.
@@ -590,7 +609,7 @@ async function recordPackPurchaseExtrasBestEffort(
 
     if (decision.status !== "eligible" || !grantable) return undefined;
 
-    // Credit countdown emails (day 0 + day 5) — idempotent because a claim
+    // Credit countdown emails (day 0 + day 28) — idempotent because a claim
     // consumes exactly once; only reached when the credit really exists AND
     // is redeemable by this (signed-in) buyer.
     if (input.buyerEmail) {

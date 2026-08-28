@@ -331,7 +331,7 @@ export default function BlogPost() {
 
           <p>
             Or, if you just want the standalone math:{" "}
-            <Link href="/tools/cap-rate-calculator" className="text-primary font-semibold hover:underline">
+            <Link href="/#main" className="text-primary font-semibold hover:underline">
               free cap-rate calculator →
             </Link>
           </p>

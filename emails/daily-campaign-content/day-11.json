@@ -9,9 +9,9 @@
     "A useful scenario is refinance proceeds = entered ARV × an assumed LTV, compared with all-in cash. Treat the LTV as an input to verify with a lender; there is no universal 70-75% cash-out limit.",
     "Illustration only: buy at $200,000, enter $40,000 rehab and $10,000 closing and holding, for $250,000 all-in. At an assumed $310,000 appraisal and 75% LTV, modeled gross proceeds are $232,500 before refinance costs and lender adjustments, leaving at least $17,500 in the deal.",
     "Stress both ARV and rehab, then also test lower eligible proceeds, longer timing, refinance costs, and the stabilized payment. Meeting a modeled threshold does not guarantee an appraisal or loan approval.",
-    "TrueCap Pro provides an interactive BRRRR model and sensitivity views using the assumptions you enter. See the pricing page for current plan details."
+    "TrueCap's integrated BRRRR lifecycle model is not currently released. You can use the released analyzer to screen stabilized rental economics separately, but build the acquisition, construction carry, payoff, refinance, and lease-up ledger with your lender and project team."
   ],
-  "cta_text": "See the BRRRR analyzer",
-  "cta_url": "https://usetruecap.com/pricing",
+  "cta_text": "Read the BRRRR methodology guide",
+  "cta_url": "https://usetruecap.com/blog/brrrr-method-explained",
   "signature_note": null
 }

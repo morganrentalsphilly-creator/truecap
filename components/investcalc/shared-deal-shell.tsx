@@ -203,13 +203,12 @@ export function SharedDealShell({
               <Lock className="w-5 h-5 text-primary mt-0.5 shrink-0" />
               <div className="min-w-0 flex-1">
                 <div className="font-bold text-foreground">
-                  See 10-year projections, illustrative tax impact, modeled exit
-                  comparisons, and the secondary Screening Index
+                  See 10-year cash-flow and equity projections, an Offer Ceiling,
+                  downside sensitivity, and the secondary Screening Index
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
-                  The full analysis with multi-year cash flow projections,
-                  illustrative depreciation tax modeling, and exit-year
-                  comparison is free to start. Run this property in your own
+                  The full analysis with multi-year cash flow and equity projections,
+                  target review, and downside checks is free to start. Run this property in your own
                   account — your edits stay private.
                 </p>
                 <Link

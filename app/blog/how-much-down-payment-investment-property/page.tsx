@@ -235,7 +235,7 @@ export default function DownPaymentPost() {
               Let&apos;s make this concrete. A $250,000 single-family rental, 30-year fixed at
               7.25% (a realistic <Link href="/blog/dscr-loans-explained" className="text-primary font-semibold hover:underline">investment rate</Link> in
               June 2026), renting for $2,500/month — right at the{" "}
-              <Link href="/tools/cap-rate-calculator" className="text-primary font-semibold hover:underline">
+              <Link href="/#main" className="text-primary font-semibold hover:underline">
                 1% rule
               </Link>{" "}
               line. After honest operating expenses (5% vacancy, 8% management, 5%
@@ -254,7 +254,7 @@ export default function DownPaymentPost() {
                 mortgage payment calculator
               </Link>{" "}
               and the{" "}
-              <Link href="/tools/cash-on-cash-calculator" className="text-primary font-semibold hover:underline">
+              <Link href="/#main" className="text-primary font-semibold hover:underline">
                 cash-on-cash calculator
               </Link>
               . The pattern is the surprising part.
@@ -359,7 +359,7 @@ export default function DownPaymentPost() {
             <ul>
               <li><strong>Leverage sign.</strong> If your cap rate beats the loan constant, less down lifts your cash-on-cash. If it doesn&apos;t (the common case at 2026 rates), more down does. Check it deal by deal.</li>
               <li><strong>DSCR headroom.</strong> Lenders and your own safety both want{" "}
-              <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">
+              <Link href="/#main" className="text-primary font-semibold hover:underline">
                 DSCR
               </Link>{" "}
               comfortably above 1.0 — 1.20+ is a healthy buffer. More down raises DSCR; if a deal only clears 1.0 at 25% down, that&apos;s the market telling you it&apos;s thin.</li>

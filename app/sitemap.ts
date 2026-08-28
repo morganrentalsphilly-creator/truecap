@@ -8,10 +8,12 @@ import { CALCULATOR_REGISTRY } from "@/lib/calculator-registry";
 import { BLOG_TOPICS } from "@/lib/blog-topics";
 import { BLOG_POSTS } from "@/app/blog/page";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
+import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const siteUrl = getSiteUrl();
   const { guaranteeEnabled } = getMarketingOfferConfig();
+  const agentProConfigured = isAgentProConfigured();
 
   // lastModified policy: only emit a date we can stand behind — a blog
   // post's publishedAt or a hand-stamped content-release date. The evergreen
@@ -49,7 +51,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  // City + strategy combo pages — 12+ long-tail URLs ranking for
+  // City + strategy combo pages. The imported registry is release-filtered,
+  // so a dark specialist model cannot enter the sitemap even though its
+  // authored content remains ready for a future flag-on build.
+  // Released entries target long-tail URLs ranking for
   // "BRRRR Philadelphia" / "cash flow Cleveland" / "Section 8 Memphis"
   // and similar high-intent niche queries.
   const cityStrategyUrls: MetadataRoute.Sitemap = CITY_STRATEGY_COMBOS.map(
@@ -219,16 +224,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.7,
     },
-    {
-      url: `${siteUrl}/for-agents`,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${siteUrl}/for-flippers`,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
+    ...(agentProConfigured
+      ? [
+          {
+            url: `${siteUrl}/for-agents`,
+            changeFrequency: "monthly" as const,
+            priority: 0.6,
+          },
+        ]
+      : []),
     {
       url: `${siteUrl}/for-buy-and-hold`,
       changeFrequency: "monthly",
@@ -236,11 +240,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${siteUrl}/for-house-hackers`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${siteUrl}/for-brrrr`,
       changeFrequency: "monthly",
       priority: 0.7,
     },
@@ -341,9 +340,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${siteUrl}/vs/privy`,             lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.6 },
     { url: `${siteUrl}/vs/quickbooks-rental`, lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.6 },
     // Niche use-case /vs pages (long-tail audience slicing).
-    { url: `${siteUrl}/vs/dealcheck-for-brrrr`,              lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
     { url: `${siteUrl}/vs/biggerpockets-for-house-hacking`,  lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${siteUrl}/vs/dealcheck-for-fix-and-flip`,         lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
     { url: `${siteUrl}/vs/dealcheck-for-short-term-rentals`,   lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
     { url: `${siteUrl}/vs/mashvisor-for-short-term-rentals`,   lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
     {

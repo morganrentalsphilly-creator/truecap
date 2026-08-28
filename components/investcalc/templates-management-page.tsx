@@ -17,7 +17,10 @@ import {
   Target,
   Trash2,
 } from "lucide-react";
-import { STARTER_TEMPLATES, type StarterTemplate } from "@/lib/starter-templates";
+import {
+  STARTER_TEMPLATES,
+  type StarterTemplate,
+} from "@/lib/starter-templates";
 import type { AnalysisTemplateOption } from "@/app/actions/analysis-templates";
 import {
   applyTemplateToDealAction,
@@ -30,10 +33,15 @@ import {
   updateAnalysisTemplateAction,
   type TemplateVersionSummary,
 } from "@/app/actions/analysis-templates";
-import { listSavedDealsBriefAction, type SavedDealBrief } from "@/app/actions/saved-analyses";
+import {
+  listSavedDealsBriefAction,
+  type SavedDealBrief,
+} from "@/app/actions/saved-analyses";
 import { upsertBuyBoxAction } from "@/app/actions/user-buy-boxes";
 import { trackEvent } from "@/lib/analytics";
 import type { AnalysisTemplateInput } from "@/lib/analysis-template-schema";
+import { isFeatureReleased } from "@/lib/entitlements-catalog";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import {
@@ -63,18 +71,41 @@ import { TemplateFormDialog } from "@/components/investcalc/template-form-dialog
 import Link from "next/link";
 
 const TEMPLATE_PAGE_SIZE = 10;
+const TAX_STRATEGY_RELEASED = isFeatureReleased("tax_strategy");
+const EXIT_SCENARIOS_RELEASED = isFeatureReleased("exit_scenarios");
+const RELEASED_STARTER_TEMPLATES = STARTER_TEMPLATES.filter((starter) => {
+  if (starter.key === "brrrr") {
+    return isFeatureEnabled("brrrr_strategy_model");
+  }
+  if (starter.key === "hard-money-flip") {
+    return isFeatureEnabled("fix_flip_strategy_model");
+  }
+  if (starter.key === "portfolio-refi") {
+    return EXIT_SCENARIOS_RELEASED;
+  }
+  return true;
+});
 
 function toPercentLabel(value: number): string {
   return `${value.toFixed(1)}%`;
 }
 
-function formatBuyBoxSummary(bb: NonNullable<AnalysisTemplateOption["buyBox"]>): string {
+function formatBuyBoxSummary(
+  bb: NonNullable<AnalysisTemplateOption["buyBox"]>,
+): string {
   const parts: string[] = [];
   if (bb.minCapRatePct != null) parts.push(`cap ≥${bb.minCapRatePct}%`);
   if (bb.minCocPct != null) parts.push(`CoC ≥${bb.minCocPct}%`);
   if (bb.minDscr != null) parts.push(`DSCR ≥${bb.minDscr}`);
-  if (bb.minCashFlowMonthly != null) parts.push(`CF ≥$${bb.minCashFlowMonthly.toLocaleString()}`);
-  if (bb.maxPurchasePrice != null) parts.push(`≤$${Math.round(bb.maxPurchasePrice).toLocaleString()}`);
+  if (bb.minCashFlowMonthly != null)
+    parts.push(`CF ≥$${bb.minCashFlowMonthly.toLocaleString()}`);
+  if (EXIT_SCENARIOS_RELEASED && bb.minIrrPct != null) {
+    parts.push(`10y IRR ≥${bb.minIrrPct}%`);
+  }
+  if (bb.maxCashRequired != null)
+    parts.push(`cash ≤$${Math.round(bb.maxCashRequired).toLocaleString()}`);
+  if (bb.maxPurchasePrice != null)
+    parts.push(`≤$${Math.round(bb.maxPurchasePrice).toLocaleString()}`);
   return parts.join(" · ");
 }
 
@@ -102,7 +133,9 @@ const DEFAULT_TEMPLATE_VALUES: AnalysisTemplateInput = {
   taxRatePct: 24,
 };
 
-function getTemplateValues(template: AnalysisTemplateOption): AnalysisTemplateInput {
+function getTemplateValues(
+  template: AnalysisTemplateOption,
+): AnalysisTemplateInput {
   return {
     templateName: template.templateName,
     templateDescription: template.templateDescription ?? "",
@@ -138,11 +171,13 @@ export function TemplatesManagementPage({
   const [templates, setTemplates] = useState(initialTemplates);
   const [searchQuery, setSearchQuery] = useState("");
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
-  const [editingTemplate, setEditingTemplate] = useState<AnalysisTemplateOption | null>(null);
+  const [editingTemplate, setEditingTemplate] =
+    useState<AnalysisTemplateOption | null>(null);
   const [dialogInitialValues, setDialogInitialValues] =
     useState<AnalysisTemplateInput>(DEFAULT_TEMPLATE_VALUES);
   const [isSaving, setIsSaving] = useState(false);
-  const [templateToDelete, setTemplateToDelete] = useState<AnalysisTemplateOption | null>(null);
+  const [templateToDelete, setTemplateToDelete] =
+    useState<AnalysisTemplateOption | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -150,23 +185,41 @@ export function TemplatesManagementPage({
     const q = searchQuery.trim().toLowerCase();
     if (!q) return templates;
     return templates.filter((template) => {
-      const hay = `${template.templateName} ${template.templateDescription ?? ""}`.toLowerCase();
+      const hay =
+        `${template.templateName} ${template.templateDescription ?? ""}`.toLowerCase();
       return hay.includes(q);
     });
   }, [searchQuery, templates]);
 
-  const pageCount = Math.max(1, Math.ceil(filteredTemplates.length / TEMPLATE_PAGE_SIZE));
+  const pageCount = Math.max(
+    1,
+    Math.ceil(filteredTemplates.length / TEMPLATE_PAGE_SIZE),
+  );
   const safeCurrentPage = Math.min(currentPage, pageCount);
-  const pageStartIndex = filteredTemplates.length === 0 ? 0 : (safeCurrentPage - 1) * TEMPLATE_PAGE_SIZE;
-  const pageEndIndex = Math.min(pageStartIndex + TEMPLATE_PAGE_SIZE, filteredTemplates.length);
+  const pageStartIndex =
+    filteredTemplates.length === 0
+      ? 0
+      : (safeCurrentPage - 1) * TEMPLATE_PAGE_SIZE;
+  const pageEndIndex = Math.min(
+    pageStartIndex + TEMPLATE_PAGE_SIZE,
+    filteredTemplates.length,
+  );
   const pagedTemplates = useMemo(
     () => filteredTemplates.slice(pageStartIndex, pageEndIndex),
-    [filteredTemplates, pageEndIndex, pageStartIndex]
+    [filteredTemplates, pageEndIndex, pageStartIndex],
   );
 
   const paginationPages = useMemo(() => {
-    const pages = new Set<number>([1, pageCount, safeCurrentPage - 1, safeCurrentPage, safeCurrentPage + 1]);
-    return [...pages].filter((page) => page >= 1 && page <= pageCount).sort((a, b) => a - b);
+    const pages = new Set<number>([
+      1,
+      pageCount,
+      safeCurrentPage - 1,
+      safeCurrentPage,
+      safeCurrentPage + 1,
+    ]);
+    return [...pages]
+      .filter((page) => page >= 1 && page <= pageCount)
+      .sort((a, b) => a - b);
   }, [pageCount, safeCurrentPage]);
 
   useEffect(() => {
@@ -220,7 +273,9 @@ export function TemplatesManagementPage({
 
       if (!result.ok) {
         toast({
-          title: editingTemplate ? "Template update failed" : "Template save failed",
+          title: editingTemplate
+            ? "Template update failed"
+            : "Template save failed",
           description: result.message,
           variant: "destructive",
         });
@@ -229,7 +284,9 @@ export function TemplatesManagementPage({
 
       setTemplates((prev) => {
         if (!editingTemplate) return [...prev, result.template];
-        return prev.map((tpl) => (tpl.id === result.template.id ? result.template : tpl));
+        return prev.map((tpl) =>
+          tpl.id === result.template.id ? result.template : tpl,
+        );
       });
       toast({
         title: editingTemplate ? "Template updated" : "Template created",
@@ -255,7 +312,9 @@ export function TemplatesManagementPage({
         });
         return;
       }
-      setTemplates((prev) => prev.filter((tpl) => tpl.id !== templateToDelete.id));
+      setTemplates((prev) =>
+        prev.filter((tpl) => tpl.id !== templateToDelete.id),
+      );
       toast({
         title: "Template deleted",
         description: `"${templateToDelete.templateName}" was removed.`,
@@ -267,26 +326,39 @@ export function TemplatesManagementPage({
   };
 
   const [busyTemplateId, setBusyTemplateId] = useState<string | null>(null);
-  const [applyForTemplate, setApplyForTemplate] = useState<AnalysisTemplateOption | null>(null);
+  const [applyForTemplate, setApplyForTemplate] =
+    useState<AnalysisTemplateOption | null>(null);
   const [dealOptions, setDealOptions] = useState<SavedDealBrief[]>([]);
   const [loadingDeals, setLoadingDeals] = useState(false);
   const [selectedDealId, setSelectedDealId] = useState<string>("");
   const [applyingToDeal, setApplyingToDeal] = useState(false);
-  const [versionsForTemplate, setVersionsForTemplate] = useState<AnalysisTemplateOption | null>(null);
+  const [versionsForTemplate, setVersionsForTemplate] =
+    useState<AnalysisTemplateOption | null>(null);
   const [versions, setVersions] = useState<TemplateVersionSummary[]>([]);
   const [loadingVersions, setLoadingVersions] = useState(false);
-  const [restoringVersionId, setRestoringVersionId] = useState<string | null>(null);
+  const [restoringVersionId, setRestoringVersionId] = useState<string | null>(
+    null,
+  );
 
   const handleSetDefault = async (template: AnalysisTemplateOption) => {
     setBusyTemplateId(template.id);
     try {
       const result = await setDefaultTemplateAction(template.id);
       if (!result.ok) {
-        toast({ title: "Couldn't set default", description: result.message, variant: "destructive" });
+        toast({
+          title: "Couldn't set default",
+          description: result.message,
+          variant: "destructive",
+        });
         return;
       }
-      setTemplates((prev) => prev.map((t) => ({ ...t, isDefault: t.id === template.id })));
-      toast({ title: "Default template set", description: `"${template.templateName}" is now your default.` });
+      setTemplates((prev) =>
+        prev.map((t) => ({ ...t, isDefault: t.id === template.id })),
+      );
+      toast({
+        title: "Default template set",
+        description: `"${template.templateName}" is now your default.`,
+      });
     } finally {
       setBusyTemplateId(null);
     }
@@ -297,11 +369,18 @@ export function TemplatesManagementPage({
     try {
       const result = await duplicateTemplateAction(template.id);
       if (!result.ok) {
-        toast({ title: "Couldn't duplicate", description: result.message, variant: "destructive" });
+        toast({
+          title: "Couldn't duplicate",
+          description: result.message,
+          variant: "destructive",
+        });
         return;
       }
       setTemplates((prev) => [...prev, result.template]);
-      toast({ title: "Template duplicated", description: `Created "${result.template.templateName}".` });
+      toast({
+        title: "Template duplicated",
+        description: `Created "${result.template.templateName}".`,
+      });
     } finally {
       setBusyTemplateId(null);
     }
@@ -318,6 +397,8 @@ export function TemplatesManagementPage({
         minCocPct: template.buyBox.minCocPct ?? null,
         minDscr: template.buyBox.minDscr ?? null,
         minCashFlowMonthly: template.buyBox.minCashFlowMonthly ?? null,
+        minIrrPct: template.buyBox.minIrrPct ?? null,
+        maxCashRequired: template.buyBox.maxCashRequired ?? null,
         maxPurchasePrice: template.buyBox.maxPurchasePrice ?? null,
         propertyTypes: [],
         targetStates: [],
@@ -325,10 +406,18 @@ export function TemplatesManagementPage({
         isDefault: true,
       });
       if (!result.ok) {
-        toast({ title: "Couldn't set Buy Box", description: result.message, variant: "destructive" });
+        toast({
+          title: "Couldn't set Buy Box",
+          description: result.message,
+          variant: "destructive",
+        });
         return;
       }
-      trackEvent("buy_box_saved", { source: "template", is_default: true, has_strategy: false });
+      trackEvent("buy_box_saved", {
+        source: "template",
+        is_default: true,
+        has_strategy: false,
+      });
       toast({
         title: "Buy Box updated",
         description: `Now using "${template.templateName}" targets as your Buy Box.`,
@@ -346,7 +435,12 @@ export function TemplatesManagementPage({
     void listSavedDealsBriefAction()
       .then((res) => {
         if (res.ok) setDealOptions(res.deals);
-        else toast({ title: "Couldn't load your deals", description: res.message, variant: "destructive" });
+        else
+          toast({
+            title: "Couldn't load your deals",
+            description: res.message,
+            variant: "destructive",
+          });
       })
       .catch(() => {
         /* non-critical */
@@ -358,12 +452,20 @@ export function TemplatesManagementPage({
     if (!applyForTemplate || !selectedDealId) return;
     setApplyingToDeal(true);
     try {
-      const res = await applyTemplateToDealAction(selectedDealId, applyForTemplate.id);
+      const res = await applyTemplateToDealAction(
+        selectedDealId,
+        applyForTemplate.id,
+      );
       if (!res.ok) {
-        toast({ title: "Couldn't apply template", description: res.message, variant: "destructive" });
+        toast({
+          title: "Couldn't apply template",
+          description: res.message,
+          variant: "destructive",
+        });
         return;
       }
-      const dealLabel = dealOptions.find((d) => d.id === selectedDealId)?.label ?? "the deal";
+      const dealLabel =
+        dealOptions.find((d) => d.id === selectedDealId)?.label ?? "the deal";
       toast({
         title: "Template applied",
         description: `Re-ran ${dealLabel} with "${applyForTemplate.templateName}".`,
@@ -381,7 +483,12 @@ export function TemplatesManagementPage({
     void listTemplateVersionsAction(template.id)
       .then((res) => {
         if (res.ok) setVersions(res.versions);
-        else toast({ title: "Couldn't load history", description: res.message, variant: "destructive" });
+        else
+          toast({
+            title: "Couldn't load history",
+            description: res.message,
+            variant: "destructive",
+          });
       })
       .catch(() => {
         /* non-critical */
@@ -393,13 +500,25 @@ export function TemplatesManagementPage({
     if (!versionsForTemplate) return;
     setRestoringVersionId(versionId);
     try {
-      const res = await restoreTemplateVersionAction(versionsForTemplate.id, versionId);
+      const res = await restoreTemplateVersionAction(
+        versionsForTemplate.id,
+        versionId,
+      );
       if (!res.ok) {
-        toast({ title: "Couldn't restore version", description: res.message, variant: "destructive" });
+        toast({
+          title: "Couldn't restore version",
+          description: res.message,
+          variant: "destructive",
+        });
         return;
       }
-      setTemplates((prev) => prev.map((t) => (t.id === res.template.id ? res.template : t)));
-      toast({ title: "Version restored", description: `"${res.template.templateName}" was restored.` });
+      setTemplates((prev) =>
+        prev.map((t) => (t.id === res.template.id ? res.template : t)),
+      );
+      toast({
+        title: "Version restored",
+        description: `"${res.template.templateName}" was restored.`,
+      });
       setVersionsForTemplate(null);
     } finally {
       setRestoringVersionId(null);
@@ -409,9 +528,14 @@ export function TemplatesManagementPage({
   return (
     <main id="main" className="min-h-full bg-muted/30 pb-12">
       <section className="w-full px-4 sm:px-6 xl:px-8 pt-6 sm:pt-8 space-y-4 sm:space-y-6">
-      <div className="grid gap-3 sm:flex sm:flex-wrap sm:items-center">
-            <div className="flex min-w-0 items-center gap-3">
-            <Button variant="ghost" size="sm" className="mt-1 px-1.5 text-muted-foreground bg-primary/10 sm:bg-transparent" asChild>
+        <div className="grid gap-3 sm:flex sm:flex-wrap sm:items-center">
+          <div className="flex min-w-0 items-center gap-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mt-1 px-1.5 text-muted-foreground bg-primary/10 sm:bg-transparent"
+              asChild
+            >
               <Link href="/dashboard">
                 <ArrowLeft className="w-4 h-4 mr-1.5" />
                 <span className="hidden xl:inline">Back</span>
@@ -419,18 +543,24 @@ export function TemplatesManagementPage({
             </Button>
             <div className="h-6 w-px bg-border" />
             <div className="space-y-1">
-              <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground xl:text-3xl">Templates</h1>
-              <p className="text-xs md:text-sm text-muted-foreground ">Manage reusable assumptions for your analyses.</p>
+              <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground xl:text-3xl">
+                Templates
+              </h1>
+              <p className="text-xs md:text-sm text-muted-foreground ">
+                Manage reusable assumptions for your analyses.
+              </p>
             </div>
-            </div>
-            <Button className="w-full rounded-full sm:ml-auto sm:w-auto" onClick={openCreateDialog}>
+          </div>
+          <Button
+            className="w-full rounded-full sm:ml-auto sm:w-auto"
+            onClick={openCreateDialog}
+          >
             <Plus className="w-4 h-4 mr-1.5" />
             New Template
           </Button>
-          </div>
+        </div>
 
-        {/* Starter templates - prebuilt strategies (Long-term, House
-            hack, FHA, BRRRR, STR). Each opens the create dialog
+        {/* Starter templates - released prebuilt assumption sets. Each opens the create dialog
             pre-populated with the starter's values so the user can
             tweak before saving - perfect for new users who don't yet
             know what every percent field means. */}
@@ -442,10 +572,11 @@ export function TemplatesManagementPage({
             </h2>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            Each one opens with editable defaults - make it yours, save it once, reuse it forever.
+            Each one opens with editable defaults - make it yours, save it once,
+            reuse it forever.
           </p>
           <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {STARTER_TEMPLATES.map((starter) => (
+            {RELEASED_STARTER_TEMPLATES.map((starter) => (
               <article
                 key={starter.key}
                 className="flex flex-col gap-2 rounded-xl border border-border bg-background p-3 shadow-sm"
@@ -463,16 +594,28 @@ export function TemplatesManagementPage({
                 </p>
                 <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
                   <span>
-                    <strong className="text-foreground">{starter.template.downPaymentPct}%</strong> down
+                    <strong className="text-foreground">
+                      {starter.template.downPaymentPct}%
+                    </strong>{" "}
+                    down
                   </span>
                   <span>
-                    <strong className="text-foreground">{starter.template.interestRatePct}%</strong> rate
+                    <strong className="text-foreground">
+                      {starter.template.interestRatePct}%
+                    </strong>{" "}
+                    rate
                   </span>
                   <span>
-                    <strong className="text-foreground">{starter.template.vacancyPct}%</strong> vacancy
+                    <strong className="text-foreground">
+                      {starter.template.vacancyPct}%
+                    </strong>{" "}
+                    vacancy
                   </span>
                   <span>
-                    <strong className="text-foreground">{starter.template.managementPct}%</strong> mgmt
+                    <strong className="text-foreground">
+                      {starter.template.managementPct}%
+                    </strong>{" "}
+                    mgmt
                   </span>
                 </div>
                 <Button
@@ -491,7 +634,9 @@ export function TemplatesManagementPage({
 
         <div className="flex items-baseline gap-2 pt-1">
           <FileText className="size-4 text-muted-foreground" />
-          <h2 className="text-sm font-bold uppercase tracking-widest text-foreground">Your templates</h2>
+          <h2 className="text-sm font-bold uppercase tracking-widest text-foreground">
+            Your templates
+          </h2>
         </div>
         <div className="rounded-2xl border border-border bg-card p-3 sm:p-4">
           <div className="relative max-w-md">
@@ -509,14 +654,19 @@ export function TemplatesManagementPage({
         <div className="rounded-2xl border border-border bg-card overflow-hidden">
           <div className="space-y-3 p-3 xl:hidden">
             {pagedTemplates.map((template) => (
-              <article key={template.id} className="rounded-2xl border border-border bg-background p-4 shadow-sm">
+              <article
+                key={template.id}
+                className="rounded-2xl border border-border bg-background p-4 shadow-sm"
+              >
                 <div className="flex items-start gap-3">
                   <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <FileText className="w-4 h-4" />
                   </span>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-1.5">
-                      <h2 className="text-base font-bold leading-tight text-foreground">{template.templateName}</h2>
+                      <h2 className="text-base font-bold leading-tight text-foreground">
+                        {template.templateName}
+                      </h2>
                       {template.isDefault ? (
                         <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
                           <Star className="size-3" /> Default
@@ -527,7 +677,8 @@ export function TemplatesManagementPage({
                       {template.templateDescription?.trim() || "No description"}
                     </p>
                     <p className="mt-1 text-[11px] text-muted-foreground">
-                      Used by {template.usedCount ?? 0} {(template.usedCount ?? 0) === 1 ? "deal" : "deals"}
+                      Used by {template.usedCount ?? 0}{" "}
+                      {(template.usedCount ?? 0) === 1 ? "deal" : "deals"}
                     </p>
                     {template.buyBox ? (
                       <p className="mt-1 text-[11px] font-medium text-primary">
@@ -539,21 +690,39 @@ export function TemplatesManagementPage({
 
                 <div className="mt-4 grid grid-cols-2 gap-2">
                   <div className="rounded-xl bg-muted/40 p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Down Payment</p>
-                    <p className="mt-1 text-sm font-extrabold text-foreground">{toPercentLabel(template.downPaymentPct)}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      Down Payment
+                    </p>
+                    <p className="mt-1 text-sm font-extrabold text-foreground">
+                      {toPercentLabel(template.downPaymentPct)}
+                    </p>
                   </div>
                   <div className="rounded-xl bg-muted/40 p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Interest Rate</p>
-                    <p className="mt-1 text-sm font-extrabold text-foreground">{toPercentLabel(template.interestRatePct)}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      Interest Rate
+                    </p>
+                    <p className="mt-1 text-sm font-extrabold text-foreground">
+                      {toPercentLabel(template.interestRatePct)}
+                    </p>
                   </div>
                   <div className="rounded-xl bg-muted/40 p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Vacancy</p>
-                    <p className="mt-1 text-sm font-extrabold text-foreground">{toPercentLabel(template.vacancyPct)}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      Vacancy
+                    </p>
+                    <p className="mt-1 text-sm font-extrabold text-foreground">
+                      {toPercentLabel(template.vacancyPct)}
+                    </p>
                   </div>
-                  <div className="rounded-xl bg-muted/40 p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Tax Rate</p>
-                    <p className="mt-1 text-sm font-extrabold text-foreground">{toPercentLabel(template.taxRatePct)}</p>
-                  </div>
+                  {TAX_STRATEGY_RELEASED ? (
+                    <div className="rounded-xl bg-muted/40 p-3">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                        Tax Rate
+                      </p>
+                      <p className="mt-1 text-sm font-extrabold text-foreground">
+                        {toPercentLabel(template.taxRatePct)}
+                      </p>
+                    </div>
+                  ) : null}
                 </div>
 
                 <div className="mt-4 grid grid-cols-2 gap-2">
@@ -583,7 +752,9 @@ export function TemplatesManagementPage({
                     variant="outline"
                     size="sm"
                     className="h-10 rounded-xl"
-                    disabled={template.isDefault || busyTemplateId === template.id}
+                    disabled={
+                      template.isDefault || busyTemplateId === template.id
+                    }
                     onClick={() => handleSetDefault(template)}
                   >
                     <Star className="w-4 h-4 mr-1.5" />
@@ -656,9 +827,11 @@ export function TemplatesManagementPage({
                   <th className="text-right px-4 text-xs uppercase tracking-wider text-muted-foreground font-bold">
                     Vacancy
                   </th>
-                  <th className="text-right px-4 text-xs uppercase tracking-wider text-muted-foreground font-bold">
-                    Tax Rate
-                  </th>
+                  {TAX_STRATEGY_RELEASED ? (
+                    <th className="text-right px-4 text-xs uppercase tracking-wider text-muted-foreground font-bold">
+                      Tax Rate
+                    </th>
+                  ) : null}
                   <th className="text-right px-4 text-xs uppercase tracking-wider text-muted-foreground font-bold">
                     Actions
                   </th>
@@ -666,7 +839,10 @@ export function TemplatesManagementPage({
               </thead>
               <tbody>
                 {pagedTemplates.map((template) => (
-                  <tr key={template.id} className="h-[68px] border-b border-border/80 hover:bg-muted/40">
+                  <tr
+                    key={template.id}
+                    className="h-[68px] border-b border-border/80 hover:bg-muted/40"
+                  >
                     <td className="px-4">
                       <div className="flex items-center gap-2">
                         <span className="mt-0.5 inline-flex size-7 rounded-full bg-primary/10 text-primary items-center justify-center shrink-0">
@@ -674,7 +850,9 @@ export function TemplatesManagementPage({
                         </span>
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
-                            <p className="font-semibold text-foreground truncate">{template.templateName}</p>
+                            <p className="font-semibold text-foreground truncate">
+                              {template.templateName}
+                            </p>
                             {template.isDefault ? (
                               <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-primary">
                                 <Star className="size-2.5" /> Default
@@ -682,7 +860,8 @@ export function TemplatesManagementPage({
                             ) : null}
                           </div>
                           <p className="text-[11px] text-muted-foreground">
-                            Used by {template.usedCount ?? 0} {(template.usedCount ?? 0) === 1 ? "deal" : "deals"}
+                            Used by {template.usedCount ?? 0}{" "}
+                            {(template.usedCount ?? 0) === 1 ? "deal" : "deals"}
                           </p>
                         </div>
                       </div>
@@ -690,10 +869,20 @@ export function TemplatesManagementPage({
                     <td className="px-4 text-muted-foreground max-w-[320px] truncate">
                       {template.templateDescription?.trim() || "No description"}
                     </td>
-                    <td className="px-4 text-right tabular-nums text-foreground">{toPercentLabel(template.downPaymentPct)}</td>
-                    <td className="px-4 text-right tabular-nums text-foreground">{toPercentLabel(template.interestRatePct)}</td>
-                    <td className="px-4 text-right tabular-nums text-foreground">{toPercentLabel(template.vacancyPct)}</td>
-                    <td className="px-4 text-right tabular-nums text-foreground">{toPercentLabel(template.taxRatePct)}</td>
+                    <td className="px-4 text-right tabular-nums text-foreground">
+                      {toPercentLabel(template.downPaymentPct)}
+                    </td>
+                    <td className="px-4 text-right tabular-nums text-foreground">
+                      {toPercentLabel(template.interestRatePct)}
+                    </td>
+                    <td className="px-4 text-right tabular-nums text-foreground">
+                      {toPercentLabel(template.vacancyPct)}
+                    </td>
+                    {TAX_STRATEGY_RELEASED ? (
+                      <td className="px-4 text-right tabular-nums text-foreground">
+                        {toPercentLabel(template.taxRatePct)}
+                      </td>
+                    ) : null}
                     <td className="px-4">
                       <div className="flex items-center justify-end gap-1.5">
                         <Button
@@ -754,11 +943,16 @@ export function TemplatesManagementPage({
                               </DropdownMenuItem>
                             ) : null}
                             <DropdownMenuItem
-                              disabled={template.isDefault || busyTemplateId === template.id}
+                              disabled={
+                                template.isDefault ||
+                                busyTemplateId === template.id
+                              }
                               onSelect={() => handleSetDefault(template)}
                             >
                               <Star className="mr-2 h-4 w-4" />
-                              {template.isDefault ? "Default template" : "Set as default"}
+                              {template.isDefault
+                                ? "Default template"
+                                : "Set as default"}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               disabled={busyTemplateId === template.id}
@@ -767,7 +961,9 @@ export function TemplatesManagementPage({
                               <Copy className="mr-2 h-4 w-4" />
                               Duplicate
                             </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={() => openVersionDialog(template)}>
+                            <DropdownMenuItem
+                              onSelect={() => openVersionDialog(template)}
+                            >
                               <History className="mr-2 h-4 w-4" />
                               Version history
                             </DropdownMenuItem>
@@ -784,7 +980,8 @@ export function TemplatesManagementPage({
           {filteredTemplates.length > 0 ? (
             <div className="flex flex-col gap-3 border-t border-border bg-muted/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-xs text-muted-foreground">
-                Showing {pageStartIndex + 1}-{pageEndIndex} of {filteredTemplates.length} templates
+                Showing {pageStartIndex + 1}-{pageEndIndex} of{" "}
+                {filteredTemplates.length} templates
               </p>
               {pageCount > 1 ? (
                 <Pagination className="mx-0 w-auto justify-start sm:justify-end">
@@ -797,7 +994,11 @@ export function TemplatesManagementPage({
                           setCurrentPage(Math.max(1, safeCurrentPage - 1));
                         }}
                         aria-disabled={safeCurrentPage <= 1}
-                        className={safeCurrentPage <= 1 ? "pointer-events-none opacity-50" : ""}
+                        className={
+                          safeCurrentPage <= 1
+                            ? "pointer-events-none opacity-50"
+                            : ""
+                        }
                       />
                     </PaginationItem>
                     {paginationPages.map((page) => (
@@ -819,10 +1020,16 @@ export function TemplatesManagementPage({
                         href="#"
                         onClick={(e) => {
                           e.preventDefault();
-                          setCurrentPage(Math.min(pageCount, safeCurrentPage + 1));
+                          setCurrentPage(
+                            Math.min(pageCount, safeCurrentPage + 1),
+                          );
                         }}
                         aria-disabled={safeCurrentPage >= pageCount}
-                        className={safeCurrentPage >= pageCount ? "pointer-events-none opacity-50" : ""}
+                        className={
+                          safeCurrentPage >= pageCount
+                            ? "pointer-events-none opacity-50"
+                            : ""
+                        }
                       />
                     </PaginationItem>
                   </PaginationContent>
@@ -833,7 +1040,9 @@ export function TemplatesManagementPage({
 
           {filteredTemplates.length === 0 && (
             <div className="py-16 px-6 text-center">
-              <p className="text-sm font-semibold text-foreground">No templates found</p>
+              <p className="text-sm font-semibold text-foreground">
+                No templates found
+              </p>
               <p className="text-xs text-muted-foreground mt-1">
                 Try a different search or create a new template.
               </p>
@@ -867,15 +1076,19 @@ export function TemplatesManagementPage({
           <DialogHeader>
             <DialogTitle>Delete template?</DialogTitle>
             <DialogDescription>
-              This action cannot be undone. Review the template details before confirming.
+              This action cannot be undone. Review the template details before
+              confirming.
             </DialogDescription>
           </DialogHeader>
 
           {templateToDelete && (
             <div className="rounded-xl border border-border bg-muted/30 p-3 space-y-1">
-              <p className="text-sm font-semibold text-foreground">{templateToDelete.templateName}</p>
+              <p className="text-sm font-semibold text-foreground">
+                {templateToDelete.templateName}
+              </p>
               <p className="text-xs text-muted-foreground">
-                {templateToDelete.templateDescription?.trim() || "No description"}
+                {templateToDelete.templateDescription?.trim() ||
+                  "No description"}
               </p>
             </div>
           )}
@@ -922,8 +1135,10 @@ export function TemplatesManagementPage({
           <DialogHeader>
             <DialogTitle>Apply template to a deal</DialogTitle>
             <DialogDescription>
-              Re-runs the deal with {applyForTemplate?.templateName ?? "this template"} assumptions. Price,
-              beds, and rent stay; financing, expenses, and growth update.
+              Re-runs the deal with{" "}
+              {applyForTemplate?.templateName ?? "this template"} assumptions.
+              Price, beds, and rent stay; financing, expenses, and growth
+              update.
             </DialogDescription>
           </DialogHeader>
 
@@ -934,15 +1149,23 @@ export function TemplatesManagementPage({
           ) : dealOptions.length === 0 ? (
             <div className="py-6 text-center">
               <p className="text-sm text-muted-foreground">
-                No saved deals yet — analyze a property and save it, then apply this template to it.
+                No saved deals yet — analyze a property and save it, then apply
+                this template to it.
               </p>
-              <Button asChild className="mt-3 rounded-full" onClick={() => setApplyForTemplate(null)}>
+              <Button
+                asChild
+                className="mt-3 rounded-full"
+                onClick={() => setApplyForTemplate(null)}
+              >
                 <Link href="/dashboard/new?fresh=1">Analyze a property</Link>
               </Button>
             </div>
           ) : (
             <div className="space-y-1.5">
-              <label htmlFor="apply-deal-select" className="text-xs font-semibold text-muted-foreground">
+              <label
+                htmlFor="apply-deal-select"
+                className="text-xs font-semibold text-muted-foreground"
+              >
                 Choose a saved deal
               </label>
               <select
@@ -1001,8 +1224,9 @@ export function TemplatesManagementPage({
           <DialogHeader>
             <DialogTitle>Version history</DialogTitle>
             <DialogDescription>
-              Saved versions of {versionsForTemplate?.templateName ?? "this template"}. Restore one to roll
-              its assumptions back.
+              Saved versions of{" "}
+              {versionsForTemplate?.templateName ?? "this template"}. Restore
+              one to roll its assumptions back.
             </DialogDescription>
           </DialogHeader>
 
@@ -1027,8 +1251,10 @@ export function TemplatesManagementPage({
                       {i === 0 ? " · current" : ""}
                     </p>
                     <p className="text-[11px] text-muted-foreground">
-                      {new Date(v.createdAt).toLocaleString()} · {v.downPaymentPct ?? "—"}% down ·{" "}
-                      {v.interestRatePct ?? "—"}% rate · {v.vacancyPct ?? "—"}% vac
+                      {new Date(v.createdAt).toLocaleString()} ·{" "}
+                      {v.downPaymentPct ?? "—"}% down ·{" "}
+                      {v.interestRatePct ?? "—"}% rate · {v.vacancyPct ?? "—"}%
+                      vac
                     </p>
                   </div>
                   <Button
@@ -1038,7 +1264,11 @@ export function TemplatesManagementPage({
                     disabled={i === 0 || restoringVersionId != null}
                     onClick={() => void handleRestoreVersion(v.id)}
                   >
-                    {restoringVersionId === v.id ? <Loader2 className="w-4 h-4 animate-spin" /> : "Restore"}
+                    {restoringVersionId === v.id ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      "Restore"
+                    )}
                   </Button>
                 </div>
               ))}

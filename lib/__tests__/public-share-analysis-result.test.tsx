@@ -148,7 +148,7 @@ describe("public share analysis result boundary", () => {
     }
   });
 
-  it("renders signed illustrative-tax tiles only for a Pro share", () => {
+  it("keeps signed illustrative-tax tiles dark while tax strategy is unreleased", () => {
     const liabilityResult = {
       ...result,
       taxSavingsMonthly: -25,
@@ -164,9 +164,9 @@ describe("public share analysis result boundary", () => {
       />,
     );
 
-    expect(html).toContain("Illustrative Tax Effect");
-    expect(html).toContain("Estimated liability / month");
-    expect(html).toContain("Illustrative After-Tax CF");
+    expect(html).not.toContain("Illustrative Tax Effect");
+    expect(html).not.toContain("Estimated liability / month");
+    expect(html).not.toContain("Illustrative After-Tax CF");
   });
 
   it("binds both public routes to the same server redaction builder", () => {

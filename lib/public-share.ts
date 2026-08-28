@@ -57,11 +57,7 @@ import {
   SPECIALIST_ANALYSIS_SNAPSHOT_FIELD,
   type SpecialistAnalysisSnapshot,
 } from "@/lib/specialist-analysis-snapshot";
-import { LEGACY_UNVERSIONED_METHODOLOGY } from "@/lib/saved-analysis-methodology";
-import {
-  TRUECAP_UNDERWRITING_STANDARD_LEGACY_V1_VERSION,
-  TRUECAP_UNDERWRITING_STANDARD_VERSION,
-} from "@/lib/underwriting-methodology";
+import { isSpecialistStrategyEnabled } from "@/lib/feature-flags";
 import {
   captureSelectedTargetsDecisionBasis,
   normalizeOfferCeilingDecisionBasis,
@@ -239,11 +235,13 @@ export async function mintPublicShare(input: {
     // result_snapshot from saved_analyses: owners can legitimately edit that
     // workspace row through the data API. Rebuild and freeze every TrueCap
     // output here, immediately before the service-role insert.
-    const specialistAnalysis = buildSpecialistAnalysisSnapshot(
-      input.values,
-      currentResult,
-      analyzerStrategyKey,
-    );
+    const specialistAnalysis = isSpecialistStrategyEnabled(analyzerStrategyKey)
+      ? buildSpecialistAnalysisSnapshot(
+          input.values,
+          currentResult,
+          analyzerStrategyKey,
+        )
+      : null;
     capturedResult.analyzerStrategyKey = analyzerStrategyKey;
     if (offerCeilingDecisionBasis) {
       capturedResult[OFFER_CEILING_DECISION_BASIS_FIELD] =
@@ -340,7 +338,8 @@ export async function mintPublicShare(input: {
 
 /**
  * Resolve a token for the public viewer. Null for anything but a live,
- * unrevoked, unexpired share — one generic outcome, no oracle about WHY.
+ * unrevoked, unexpired share recorded under the current public underwriting
+ * standard — one generic outcome, no oracle about WHY.
  */
 export async function resolvePublicShare(
   token: string,
@@ -371,33 +370,17 @@ export async function resolvePublicShare(
       typeof snapshot.meta.methodologyVersion === "string"
         ? snapshot.meta.methodologyVersion
         : null;
-    // Fail closed ONLY on a contract this deployment cannot render.
-    //
-    // The previous check rejected any stored version != the running standard,
-    // so the 1.0 -> 1.1 bump silently 404'd every share link already sent to a
-    // recipient — links the owner cannot even see are broken, with no notice
-    // on either side. A version we still hold formulas for is renderable: the
-    // viewer recomputes under the current standard and shows the
-    // legacy/unpinned banner that exists precisely to disclose that. An
-    // unknown or future version still fails closed (locked decision 7).
-    // RELEASED standards only — deliberately not the whole formula registry.
-    // v2 exists in UNDERWRITING_FORMULAS_BY_VERSION for internal/golden work
-    // and is explicitly not released to customer-facing boundaries, of which
-    // a public share is one (see lib/underwriting-model-release.ts).
-    const storedMethodologyIsRenderable =
-      storedMethodologyVersion == null ||
-      storedMethodologyVersion === LEGACY_UNVERSIONED_METHODOLOGY ||
-      storedMethodologyVersion === TRUECAP_UNDERWRITING_STANDARD_VERSION ||
-      storedMethodologyVersion === TRUECAP_UNDERWRITING_STANDARD_LEGACY_V1_VERSION;
-    if (!storedMethodologyIsRenderable) {
-      // Unknown/future formula contract — the owner must mint a refreshed
-      // share after re-underwriting.
+    // A public link must never show current arithmetic under an older label or
+    // disagree with the recorded saved result that produced it. The immutable
+    // historical JSON is not trusted as calculation authority (some rows
+    // predate the service-role-only publication boundary), so the safe
+    // compatibility policy is to fail closed for every missing, superseded, or
+    // future contract. The owner replacement path is explicit: reopen the deal,
+    // review/re-underwrite it under the current standard, and mint a new link.
+    // The action and PDF export enforce the same boundary for saved analyses.
+    if (storedMethodologyVersion !== currentResult.methodologyVersion) {
       return null;
     }
-    const supersededMethodology =
-      storedMethodologyVersion != null &&
-      storedMethodologyVersion !== LEGACY_UNVERSIONED_METHODOLOGY &&
-      storedMethodologyVersion !== currentResult.methodologyVersion;
     const currentScore = computeDealScore(
       buildDealScoreInputFromAnalysis(snapshot.values, currentResult),
     );
@@ -408,6 +391,7 @@ export async function resolvePublicShare(
     const normalizedMaoTarget = normalizeMaoTarget(snapshot.maoTarget);
     let normalizedMaoTargetSource = normalizeExternalOfferCeilingTargetSource(
       snapshot.maoTargetSource,
+      { target: normalizedMaoTarget, values: snapshot.values },
     );
     // An exact financial snapshot with a target field must never silently
     // reopen under canonical defaults when that field is corrupt or from an
@@ -446,11 +430,13 @@ export async function resolvePublicShare(
     // Recompute at the read boundary too. Historical rows may predate the
     // service-role-only insert policy, so even a structurally valid stored
     // result cannot authenticate a TrueCap-branded public number.
-    const specialistAnalysis = buildSpecialistAnalysisSnapshot(
-      snapshot.values,
-      currentResult,
-      analyzerStrategyKey,
-    );
+    const specialistAnalysis = isSpecialistStrategyEnabled(analyzerStrategyKey)
+      ? buildSpecialistAnalysisSnapshot(
+          snapshot.values,
+          currentResult,
+          analyzerStrategyKey,
+        )
+      : null;
     const safeResultSnapshot: Record<string, unknown> = {
       ...currentResult,
       score: currentScore.score,
@@ -527,10 +513,7 @@ export async function resolvePublicShare(
           ? snapshot.meta.schemaVersion
           : row.calc_version,
       methodologyVersion: currentResult.methodologyVersion,
-      // A share recorded under a superseded standard is republished with the
-      // same "recalculated under the labeled current standard — refresh
-      // before relying on it" disclosure as an unpinned legacy share.
-      legacyUnpinned: storedMethodologyVersion == null || supersededMethodology,
+      legacyUnpinned: false,
       legacyInputOnly,
     };
   } catch {

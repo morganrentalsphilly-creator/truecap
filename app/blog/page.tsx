@@ -117,6 +117,7 @@ export const BLOG_POSTS: BlogPost[] = [
       "Seven real DealCheck alternatives with verified July 2026 pricing — TrueCap (that's us, disclosed), BiggerPockets' calculators, Stessa, Mashvisor, RentCast, Rentometer, and the spreadsheet option — plus an honest section on when sticking with DealCheck is the right call.",
     readingTimeMinutes: 11,
     publishedAt: "2026-07-14",
+    modifiedAt: "2026-08-27",
     available: true,
   },
   {
@@ -126,6 +127,7 @@ export const BLOG_POSTS: BlogPost[] = [
       "BiggerPockets' calculators stop after 5 free reports; the rest sits behind Pro at $390/yr. Six genuinely free alternatives ranked — TrueCap (that's us, disclosed), DealCheck's free Starter plan, Calculator.net, Stessa, RentCast, and spreadsheets — plus when Pro is actually worth it.",
     readingTimeMinutes: 10,
     publishedAt: "2026-07-14",
+    modifiedAt: "2026-08-27",
     available: true,
   },
   {
@@ -511,6 +513,7 @@ export const BLOG_POSTS: BlogPost[] = [
       "Honest 2026 ranking of the 7 most popular rental property calculators — TrueCap, DealCheck, BiggerPockets, Mashvisor, Stessa, Excel, and Roofstock — across free tier depth, pricing, mobile, and audience fit.",
     readingTimeMinutes: 12,
     publishedAt: "2026-06-07",
+    modifiedAt: "2026-08-27",
     available: true,
   },
   {
@@ -520,6 +523,7 @@ export const BLOG_POSTS: BlogPost[] = [
       "Honest 2026 ranking of the 5 best truly-free rental property calculators — TrueCap, BiggerPockets' free reports, Stessa's calculator, Excel templates, and Zillow's mortgage calculator. What each free tier covers and where the gates kick in.",
     readingTimeMinutes: 9,
     publishedAt: "2026-06-07",
+    modifiedAt: "2026-08-27",
     available: true,
   },
   {
@@ -556,15 +560,17 @@ export const BLOG_POSTS: BlogPost[] = [
       "Honest 3-way comparison of DealCheck, BiggerPockets Calculator, and TrueCap. Free tier depth, pricing, projections, mobile, and which fits which investor.",
     readingTimeMinutes: 11,
     publishedAt: "2026-06-07",
+    modifiedAt: "2026-08-16",
     available: true,
   },
   {
     slug: "dealcheck-vs-stessa-vs-truecap",
     title: "DealCheck vs Stessa vs TrueCap: which one do you actually need?",
     excerpt:
-      "An honest 3-way comparison of DealCheck, Stessa, and TrueCap. Different tools for different stages — pre-purchase underwriting vs post-purchase operations — with concrete tradeoffs.",
+      "A dated 3-way comparison of DealCheck, Stessa, and TrueCap. All three support acquisition analysis; Stessa also spans listing discovery and owned-property operations.",
     readingTimeMinutes: 11,
     publishedAt: "2026-06-07",
+    modifiedAt: "2026-08-27",
     available: true,
   },
   {
@@ -580,9 +586,10 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "stessa-vs-avail-vs-baselane",
     title: "Stessa vs Avail vs Baselane: 3-way landlord ops comparison",
     excerpt:
-      "Stessa is accounting. Avail is leasing + rent collection. Baselane bundles both with banking. Honest 3-way comparison plus where TrueCap fits before any of them.",
+      "Stessa spans acquisition through operations; Avail emphasizes leasing and rent collection; Baselane combines banking and bookkeeping. Updated with dated official sources.",
     readingTimeMinutes: 10,
     publishedAt: "2026-06-07",
+    modifiedAt: "2026-08-27",
     available: true,
   },
   {
@@ -772,6 +779,7 @@ export default function BlogIndexPage() {
       headline: p.title,
       url: `${siteUrl}/blog/${p.slug}`,
       datePublished: p.publishedAt,
+      dateModified: p.modifiedAt ?? p.publishedAt,
     })),
   };
 
@@ -841,7 +849,9 @@ export default function BlogIndexPage() {
                   {post.excerpt}
                 </p>
                 <p className="text-[11px] uppercase tracking-widest text-muted-foreground font-bold mt-3">
-                  {new Date(post.publishedAt).toLocaleDateString("en-US", {
+                  {post.modifiedAt ? "Updated " : ""}
+                  {new Date(post.modifiedAt ?? post.publishedAt).toLocaleDateString("en-US", {
+                    timeZone: "UTC",
                     year: "numeric",
                     month: "short",
                     day: "numeric",

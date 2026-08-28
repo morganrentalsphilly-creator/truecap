@@ -159,7 +159,7 @@ export function DscrCalculatorWidget() {
         className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="w-4 h-4" />
-        Run a full property analysis — DSCR, cash flow, projections, exit — free
+        Run a full property analysis — DSCR, cash flow, and cash-flow and equity projections — free
         <ArrowUpRight className="w-4 h-4" />
       </Link>
     </div>

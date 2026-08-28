@@ -40,7 +40,9 @@ function sourceFiles(): string[] {
     encoding: "utf8",
     maxBuffer: 16 * 1024 * 1024,
   });
-  return out.split("\n").filter((f) => /\.(tsx|ts)$/.test(f));
+  return out
+    .split("\n")
+    .filter((f) => /\.(tsx|ts)$/.test(f) && existsSync(join(ROOT, f)));
 }
 
 const LEAF_FILES = [

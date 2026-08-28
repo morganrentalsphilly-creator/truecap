@@ -4,6 +4,7 @@ import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getEntitlementsForUser } from "@/lib/entitlements";
 import { toServerErrorResult } from "@/lib/db-error";
+import { isFeatureReleased } from "@/lib/entitlements-catalog";
 import {
   buildTaxStrategyInputHash,
   buildTaxStrategyProjection,
@@ -26,7 +27,7 @@ export type TaxStrategySnapshotResult =
     }
   | {
       ok: false;
-      code: "SIGN_IN_REQUIRED" | "ENTITLEMENT_REQUIRED" | "NOT_FOUND" | "SERVER_ERROR";
+      code: "NOT_RELEASED" | "SIGN_IN_REQUIRED" | "ENTITLEMENT_REQUIRED" | "NOT_FOUND" | "SERVER_ERROR";
       message: string;
     };
 
@@ -51,6 +52,14 @@ function mapSnapshotRow(row: SnapshotRow): TaxStrategySnapshotPayload {
 export async function getTaxStrategySnapshotAction(
   request: TaxStrategySnapshotRequest
 ): Promise<TaxStrategySnapshotResult> {
+  if (!isFeatureReleased("tax_strategy")) {
+    return {
+      ok: false,
+      code: "NOT_RELEASED",
+      message: "Illustrative tax projections are not currently released.",
+    };
+  }
+
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },

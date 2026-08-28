@@ -130,7 +130,11 @@ describe("historical result reproducibility wiring", () => {
 
   it("carries lifetime mortgage-insurance semantics into live projections", () => {
     const page = read("components/investcalc/investcalc-page.tsx");
-    expect(page).toContain("pmiNoCancel: values.pmiNoCancel === true");
+    expect(normalizeSource(page)).toContain(
+      normalizeSource(
+        "pmiNoCancel: mortgageInsuranceRunsToPayoff(values.propertyType, values.pmiNoCancel)",
+      ),
+    );
   });
 
   it("keeps client portal cards and detail pages on the same current server recompute", () => {

@@ -5,10 +5,10 @@
  * selected work-item IDs (plus optional bath count + contingency pct)
  * and returns a per-item breakdown and totals.
  *
- * Defaults are mid-market estimates from common contractor pricing
- * surveys (HomeAdvisor / RemodelingMagazine 2024-25). They are
- * intentionally rough — the field is a starting point, not a binding
- * quote.
+ * Built-in amounts are illustrative product defaults. They are not derived
+ * from a current contractor survey, location, inspection, permit set, or bid.
+ * The UI must label them that way and let the user replace each selected
+ * line with their own planning amount.
  */
 
 export type RehabWorkItem = {
@@ -72,6 +72,24 @@ export type RehabResult = {
   total: number;
 };
 
+/** Illustrative built-in line total before any user override. Exported so the
+ * editor can show the exact placeholder that the pure calculator will use. */
+export function illustrativeRehabWorkItemCost(
+  item: RehabWorkItem,
+  sqftInput: number,
+  bathCountInput: number,
+): number {
+  const sqft = Math.max(0, Number(sqftInput) || 0);
+  const baths = Math.max(1, Number(bathCountInput) || 1);
+  if (typeof item.defaultCostPerSqft === "number" && sqft > 0) {
+    return Math.round(item.defaultCostPerSqft * sqft);
+  }
+  if (typeof item.flatCost === "number") {
+    return Math.round(item.perBath ? item.flatCost * baths : item.flatCost);
+  }
+  return 0;
+}
+
 export function estimateRehab(inputs: RehabInputs): RehabResult {
   const sqft = Math.max(0, Number(inputs.sqft) || 0);
   const baths = Math.max(1, Number(inputs.bathCount) || 1);
@@ -82,17 +100,16 @@ export function estimateRehab(inputs: RehabInputs): RehabResult {
     if (!inputs.selectedItems.includes(it.id)) continue;
 
     const override = inputs.overrides?.[it.id];
-    if (typeof override === "number" && Number.isFinite(override)) {
+    if (
+      typeof override === "number" &&
+      Number.isFinite(override) &&
+      override >= 0
+    ) {
       lines.push({ id: it.id, label: it.label, cost: Math.round(override), source: "override" });
       continue;
     }
 
-    let cost = 0;
-    if (typeof it.defaultCostPerSqft === "number" && sqft > 0) {
-      cost = it.defaultCostPerSqft * sqft;
-    } else if (typeof it.flatCost === "number") {
-      cost = it.perBath ? it.flatCost * baths : it.flatCost;
-    }
+    const cost = illustrativeRehabWorkItemCost(it, sqft, baths);
     lines.push({ id: it.id, label: it.label, cost: Math.round(cost), source: "default" });
   }
 

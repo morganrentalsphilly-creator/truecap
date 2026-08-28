@@ -221,7 +221,7 @@ export default async function ProfilePage({
         : [
             "Save and compare deals",
             "10-year projections",
-            "Illustrative tax impact and modeled exit comparisons",
+            "Downside sensitivity and Offer Ceiling",
             "Professional PDF exports",
           ],
     }));
@@ -301,7 +301,7 @@ export default async function ProfilePage({
                     features: [
                       "Save and compare deals",
                       "10-year projections",
-                      "Illustrative tax impact and modeled exit comparisons",
+                      "Downside sensitivity and Offer Ceiling",
                       "Professional PDF exports",
                     ],
                   },
@@ -315,7 +315,7 @@ export default async function ProfilePage({
                     features: [
                       "Save and compare deals",
                       "10-year projections",
-                      "Illustrative tax impact and modeled exit comparisons",
+                      "Downside sensitivity and Offer Ceiling",
                       "Professional PDF exports",
                     ],
                   },

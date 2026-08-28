@@ -14,6 +14,7 @@ import {
   type ReportData,
 } from "@/lib/pdf-generator";
 import { calculateAnalysis } from "@/lib/calc-analysis";
+import { DEFAULT_MAO_TARGET } from "@/lib/mao-targets";
 
 const NOW = new Date("2026-08-23T12:00:00.000Z");
 
@@ -27,6 +28,19 @@ function canonical(): ReportData {
 }
 
 describe("server-owned PDF report data", () => {
+  it("uses pre-tax cash flow and modeled equity on the released projection page", () => {
+    const report = canonical();
+    expect(report.projection10y.bestAnnualPreTax).toBe(
+      Math.max(...report.projection10y.rows.map((row) => row.net)),
+    );
+    expect(report.projection10y.year10Equity).toBe(
+      report.projection10y.rows.at(-1)?.equity,
+    );
+    expect(report.projection10y.rows.every((row) => row.equity != null)).toBe(
+      true,
+    );
+  });
+
   it("preserves and prints the active monthly insurance bill", () => {
     const report = buildCanonicalReportData({
       values: {
@@ -238,16 +252,39 @@ describe("server-owned PDF report data", () => {
 
     const withExamplesOnly = buildCanonicalReportData({
       values: SAMPLE_DEAL_VALUES,
-      maxOfferTarget: SAMPLE_DEAL_MAO_TARGET,
+      maxOfferTarget: DEFAULT_MAO_TARGET,
       maxOfferTargetSource: "screening-defaults",
       generatedAt: NOW,
     });
     expect(withExamplesOnly.decision?.label).toBe("Preliminary underwriting");
     expect(withExamplesOnly.maxOffer).toBeNull();
 
-    const withAdoptedStarter = buildCanonicalReportData({
+    const forgedScreeningDefaults = buildCanonicalReportData({
       values: SAMPLE_DEAL_VALUES,
       maxOfferTarget: SAMPLE_DEAL_MAO_TARGET,
+      maxOfferTargetSource: "screening-defaults",
+      generatedAt: NOW,
+    });
+    expect(forgedScreeningDefaults.decision?.targetSource).toBe(
+      "selected-targets",
+    );
+    expect(forgedScreeningDefaults.maxOffer?.source).toBe("selected-targets");
+
+    const forgedStarterClaim = buildCanonicalReportData({
+      values: SAMPLE_DEAL_VALUES,
+      maxOfferTarget: SAMPLE_DEAL_MAO_TARGET,
+      maxOfferTargetSource: "starter-criteria",
+      generatedAt: NOW,
+    });
+    expect(forgedStarterClaim.decision?.targetSource).toBe("selected-targets");
+    expect(forgedStarterClaim.decision?.label).not.toMatch(
+      /TrueCap starter criteria/,
+    );
+    expect(forgedStarterClaim.maxOffer?.source).toBe("selected-targets");
+
+    const withAdoptedStarter = buildCanonicalReportData({
+      values: SAMPLE_DEAL_VALUES,
+      maxOfferTarget: DEFAULT_MAO_TARGET,
       maxOfferTargetSource: "starter-criteria",
       generatedAt: NOW,
     });

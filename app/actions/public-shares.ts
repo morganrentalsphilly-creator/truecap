@@ -3,10 +3,12 @@
 /**
  * Public-share server actions: create/list/revoke (signed-in owners only).
  *
- * Existing opaque shares remain publicly readable by capability token,
- * including historical rows whose owner_id is null. New rows, however, must
- * be attached to an authenticated owner so the product can accurately promise
- * revocation. Authentication therefore happens before the service-role mint.
+ * Existing opaque shares remain publicly readable by capability token only
+ * while their recorded underwriting version matches the running public
+ * standard. Superseded links fail closed until the owner re-underwrites and
+ * mints a replacement. New rows must be attached to an authenticated owner so
+ * the product can accurately promise revocation. Authentication therefore
+ * happens before the service-role mint.
  *
  * Revocation goes through the caller's OWN session client, so RLS — not this
  * code — is the boundary that stops cross-account revocation.
@@ -137,7 +139,10 @@ export async function createPublicShareAction(
       }) ?? undefined)
     : undefined;
   let candidateMaoTargetSource: OfferCeilingTargetSource =
-    normalizeExternalOfferCeilingTargetSource(parsed.data.maoTargetSource) ??
+    normalizeExternalOfferCeilingTargetSource(parsed.data.maoTargetSource, {
+      target: candidateMaoTarget,
+      values: parsed.data.values,
+    }) ??
     (candidateMaoTarget ? "selected-targets" : "screening-defaults");
   const maoTarget =
     candidateMaoTarget &&

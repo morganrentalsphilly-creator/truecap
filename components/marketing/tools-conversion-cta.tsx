@@ -88,7 +88,7 @@ export function ToolsConversionCta({ calculatorName, hook }: ToolsConversionCtaP
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
           {hook ??
-            "The full TrueCap analyzer runs every metric at once — cap rate, CoC, DSCR, cash flow, 10-year projection, tax savings, exit scenarios. Save your deal, run sensitivity, share it. Always free to start."}
+            "The full TrueCap analyzer runs the core rental screen at once — cap rate, CoC, DSCR, cash flow, and editable assumptions. Save the deal, compare scenarios, and share the review. Free to start."}
         </p>
         <div className="mt-5 flex flex-wrap items-center gap-3">
           <Link
@@ -129,7 +129,7 @@ export function ToolsConversionCta({ calculatorName, hook }: ToolsConversionCtaP
                 Save this {calculatorName.toLowerCase()} to TrueCap — free.
               </p>
               <p className="hidden truncate text-[11px] text-muted-foreground sm:block">
-                Full analyzer + 10-yr projection + PDF export. No card.
+                Core analyzer + saved review workflow. No card.
               </p>
             </div>
             <Link

@@ -8,6 +8,7 @@
 
 import { ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
+import type { RefObject } from "react";
 import {
   Dialog,
   DialogContent,
@@ -20,11 +21,13 @@ import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 interface PdfPurchaseDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  returnFocusRef?: RefObject<HTMLElement | null>;
 }
 
 export function PdfPurchaseDialog({
   open,
   onOpenChange,
+  returnFocusRef,
 }: PdfPurchaseDialogProps) {
   const { proOfferName } = getMarketingOfferConfig();
   return (
@@ -32,7 +35,15 @@ export function PdfPurchaseDialog({
       {/* Short-viewport max-h + scroll comes from the DialogContent base
           (components/ui/dialog.tsx) so the one-time option can never render
           below the fold unreachable. */}
-      <DialogContent className="sm:max-w-md">
+      <DialogContent
+        className="sm:max-w-md"
+        onCloseAutoFocus={(event) => {
+          const trigger = returnFocusRef?.current;
+          if (!trigger?.isConnected) return;
+          event.preventDefault();
+          trigger.focus();
+        }}
+      >
         <DialogHeader>
           <DialogTitle>PDF reports are included with Pro</DialogTitle>
           <DialogDescription>
@@ -67,17 +78,25 @@ export function PdfPurchaseDialog({
 
           <div className="rounded-xl border border-border/70 bg-muted/35 px-3 py-2.5 text-[11px] leading-relaxed text-muted-foreground">
             <p>
-              <strong className="text-foreground">Already purchased a one-time report?</strong>{" "}
-              Existing paid claims and recovery remain supported. This temporary shutdown affects
-              new purchases only.
+              <strong className="text-foreground">
+                Already purchased a one-time report?
+              </strong>{" "}
+              Existing paid claims and recovery remain supported. This temporary
+              shutdown affects new purchases only.
             </p>
             <p className="mt-1.5">
               Need help? Email{" "}
-              <a href="mailto:hello@usetruecap.com" className="font-semibold text-primary hover:underline">
+              <a
+                href="mailto:hello@usetruecap.com"
+                className="font-semibold text-primary hover:underline"
+              >
                 hello@usetruecap.com
               </a>
               . Purchase is subject to our{" "}
-              <Link href="/terms" className="font-semibold text-primary hover:underline">
+              <Link
+                href="/terms"
+                className="font-semibold text-primary hover:underline"
+              >
                 Terms
               </Link>
               .

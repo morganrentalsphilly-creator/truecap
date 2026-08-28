@@ -27,9 +27,17 @@ const projectionRow = row({
   opex: money,
   debt: money,
   net: money,
-  tax: money,
-  after: money,
   cum: money,
+  propertyValue: money.optional(),
+  loanBalance: money.optional(),
+  equity: money.optional(),
+  renovationIncomeLoss: money.optional(),
+  balloon: money.optional(),
+  financingOutflow: money.optional(),
+  // Accepted only for historical browser payload compatibility. The server
+  // rebuilds report data and the released projection page never renders them.
+  tax: money.optional(),
+  after: money.optional(),
 });
 
 const taxRow = row({
@@ -109,6 +117,8 @@ const reportDataSchema = z
       type: z.string().max(60),
       yearBuilt: z.number().nullable(),
       purchasePrice: money,
+      currentValue: money.nullable().optional(),
+      stabilizedValue: money.nullable().optional(),
       template: z.string().max(120),
     }),
     financing: z.record(z.string(), z.number()),
@@ -121,6 +131,7 @@ const reportDataSchema = z
           baths: z.number(),
           sqft: z.number(),
           rent: money,
+          stabilizedRent: money.optional(),
           // Declared, or zod strips it and the cover silently goes back to
           // counting the owner's unit in gross rent — the same trap that
           // blanked the comps $/sqft column.
@@ -149,7 +160,9 @@ const reportDataSchema = z
     operatingStatement: z
       .object({
         grossScheduledIncome: money,
+        recurringOtherIncome: money.optional(),
         vacancyAllowance: money,
+        renovationIncomeLoss: money.optional(),
         effectiveGrossIncome: money,
         operatingExpenses: z
           .array(z.object({ label: z.string().max(60), amount: money }))
@@ -162,6 +175,22 @@ const reportDataSchema = z
         netCashFlowAnnual: money,
         loanAmount: money,
         monthlyPayment: money,
+        initialMonthlyLoanPayment: money.optional(),
+        amortizingMonthlyLoanPayment: money.optional(),
+        interestOnlyMonths: money.optional(),
+        amortizationTermYears: money.optional(),
+        loanMaturityTermYears: money.optional(),
+        balloonPayment: money.optional(),
+        balloonMonth: money.optional(),
+        downPayment: money.optional(),
+        closingCosts: money.optional(),
+        loanPointsAmount: money.optional(),
+        originationFee: money.optional(),
+        loanFees: money.optional(),
+        initialReserve: money.optional(),
+        lenderEscrowDeposit: money.optional(),
+        lenderReserveDeposit: money.optional(),
+        acquisitionCredits: money.optional(),
         totalCashRequired: money,
         isCashPurchase: z.boolean(),
       })
@@ -178,8 +207,10 @@ const reportDataSchema = z
     downsideScenario: z.unknown().optional(),
     projection10y: z.object({
       cumulativeCF: money,
-      bestAnnualAfterTax: money,
-      totalAfterTax: money,
+      bestAnnualPreTax: money.optional(),
+      year10Equity: money.optional(),
+      bestAnnualAfterTax: money.optional(),
+      totalAfterTax: money.optional(),
       rows: z.array(projectionRow).max(120),
     }),
     taxStrategy: z.object({

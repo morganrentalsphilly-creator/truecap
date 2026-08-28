@@ -270,7 +270,7 @@ export default function GrmCalculatorPage() {
 
           <ToolsConversionCta
             calculatorName="GRM calculator"
-            hook="GRM is a screening tool. Once you find a deal worth a real underwrite, TrueCap's full analyzer gives you cap rate, cash-on-cash, DSCR, 10-year projection, tax savings, exit scenarios — all the metrics GRM can't tell you. Free to start."
+            hook="GRM is a screening tool. Once a deal deserves a fuller underwrite, TrueCap adds cap rate, cash-on-cash, DSCR, cash flow, a 10-year cash-flow and equity projection, sensitivity, and Offer Ceiling. Free to start."
           />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">

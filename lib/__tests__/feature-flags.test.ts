@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import {
   DEFAULT_FEATURE_FLAGS,
   FEATURE_FLAG_ENV_KEYS,
   FEATURE_FLAG_KEYS,
   isFeatureEnabled,
+  hasAnySpecialistStrategyEnabled,
+  isSpecialistStrategyEnabled,
   resolveFeatureFlags,
   type FeatureFlagKey,
 } from "@/lib/feature-flags";
@@ -17,11 +21,17 @@ describe("product feature flags", () => {
    *
    *   KILL-SWITCH flags gate behavior that is already shipped (the Aug-2026
    *   information hierarchy). They default ON — the product IS the new
-   *   layout — and exist so a regression can be switched off in Vercel
-   *   without a redeploy. Defaulting these off would ship the rebuild dark
-   *   and silently keep the old layout live.
+   *   layout. A NEXT_PUBLIC change still requires a rebuild/redeploy.
+   *   Defaulting these off would ship the rebuild dark and silently keep the
+   *   old layout live.
    */
-  const KILL_SWITCH_FLAGS: FeatureFlagKey[] = ["decision_first_results", "focused_dashboard"];
+  const KILL_SWITCH_FLAGS: FeatureFlagKey[] = [
+    "input_confidence",
+    "offer_ready_status",
+    "new_homepage_positioning",
+    "decision_first_results",
+    "focused_dashboard",
+  ];
 
   it("declares every requested rollout flag exactly once and defaults it off", () => {
     expect(FEATURE_FLAG_KEYS).toEqual([
@@ -35,6 +45,9 @@ describe("product feature flags", () => {
       "batch_underwriting",
       "agent_client_matching",
       "new_homepage_positioning",
+      "brrrr_strategy_model",
+      "fix_flip_strategy_model",
+      "owned_portfolio_actuals",
       "advocacy_decision_contract",
       "decision_first_results",
       "focused_dashboard",
@@ -46,7 +59,7 @@ describe("product feature flags", () => {
     }
   });
 
-  it("kill-switch flags can be turned OFF by env without a redeploy", () => {
+  it("kill-switch flags can be turned OFF by an explicit build-time env value", () => {
     for (const key of KILL_SWITCH_FLAGS) {
       expect(isFeatureEnabled(key, resolveFeatureFlags({ [key]: "0" })), key).toBe(false);
       expect(isFeatureEnabled(key, resolveFeatureFlags({ [key]: "false" })), key).toBe(false);
@@ -71,11 +84,11 @@ describe("product feature flags", () => {
     }
   );
 
-  it("fails closed for empty, missing, and unrecognized configuration", () => {
-    expect(resolveFeatureFlags({ input_confidence: "" }).input_confidence).toBe(false);
-    expect(resolveFeatureFlags({ input_confidence: "tru" }).input_confidence).toBe(false);
-    expect(resolveFeatureFlags({ input_confidence: undefined }).input_confidence).toBe(false);
-    expect(resolveFeatureFlags().input_confidence).toBe(false);
+  it("falls back to each flag's safe release default for empty or unrecognized configuration", () => {
+    expect(resolveFeatureFlags({ input_confidence: "" }).input_confidence).toBe(true);
+    expect(resolveFeatureFlags({ input_confidence: "tru" }).input_confidence).toBe(true);
+    expect(resolveFeatureFlags({ input_confidence: undefined }).input_confidence).toBe(true);
+    expect(resolveFeatureFlags().input_confidence).toBe(true);
   });
 
   it("supports boolean overrides without changing unrelated defaults", () => {
@@ -87,6 +100,35 @@ describe("product feature flags", () => {
     expect(flags.input_confidence).toBe(true);
     expect(flags.three_deal_guarantee).toBe(false);
     expect(flags.deal_decision_pack).toBe(false);
+  });
+
+  it("keeps both specialist finance models dark unless independently released", () => {
+    const dark = resolveFeatureFlags();
+    expect(hasAnySpecialistStrategyEnabled(dark)).toBe(false);
+    expect(isSpecialistStrategyEnabled("brrrr", dark)).toBe(false);
+    expect(isSpecialistStrategyEnabled("fix-flip", dark)).toBe(false);
+    expect(isSpecialistStrategyEnabled("buy-hold", dark)).toBe(true);
+
+    const brrrrOnly = resolveFeatureFlags({ brrrr_strategy_model: true });
+    expect(hasAnySpecialistStrategyEnabled(brrrrOnly)).toBe(true);
+    expect(isSpecialistStrategyEnabled("brrrr", brrrrOnly)).toBe(true);
+    expect(isSpecialistStrategyEnabled("fix-flip", brrrrOnly)).toBe(false);
+  });
+
+  it("keeps modeled owned-portfolio performance off every customer summary", () => {
+    expect(resolveFeatureFlags().owned_portfolio_actuals).toBe(false);
+    const dashboard = readFileSync(
+      join(process.cwd(), "components/dashboard/DashboardHome.tsx"),
+      "utf8",
+    );
+    const weeklyRoute = readFileSync(
+      join(process.cwd(), "app/api/cron/send-weekly-summary/route.ts"),
+      "utf8",
+    );
+    expect(dashboard).toContain('isFeatureEnabled("owned_portfolio_actuals")');
+    expect(weeklyRoute).toContain(
+      'isFeatureEnabled(\n          "owned_portfolio_actuals",',
+    );
   });
 
   it("maps every flag to a unique, public build-time environment variable", () => {

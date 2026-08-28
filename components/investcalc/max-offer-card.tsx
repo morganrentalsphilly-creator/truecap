@@ -36,6 +36,7 @@ import {
   MAO_TARGET_BOUNDS,
   type MaoTargetField,
 } from "@/lib/mao-target-editor";
+import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
 import {
   WhatNeedsToBeTrueCard,
   type ApplicableDecisionThreshold,
@@ -65,6 +66,9 @@ function inputsFromTarget(target: MaoTarget): Record<MaoTargetField, string> {
     monthlyCashFlow:
       target.monthlyCashFlow == null ? "" : String(target.monthlyCashFlow),
     dscr: target.dscr == null ? "" : String(target.dscr),
+    minIrrPct: target.minIrrPct == null ? "" : String(target.minIrrPct),
+    maxCashRequired:
+      target.maxCashRequired == null ? "" : String(target.maxCashRequired),
     maxPurchasePrice:
       target.maxPurchasePrice == null ? "" : String(target.maxPurchasePrice),
   };
@@ -179,6 +183,8 @@ export function MaxOfferCard({
     target.cocReturn === undefined &&
     target.monthlyCashFlow === undefined &&
     target.dscr === undefined &&
+    target.minIrrPct === undefined &&
+    target.maxCashRequired === undefined &&
     target.maxPurchasePrice === undefined;
 
   const active = Boolean(values) && !noneSet;
@@ -206,6 +212,8 @@ export function MaxOfferCard({
   const cocId = `${uid}-coc`;
   const cashFlowId = `${uid}-cash-flow`;
   const dscrId = `${uid}-dscr`;
+  const irrId = `${uid}-irr`;
+  const maxCashRequiredId = `${uid}-max-cash-required`;
   const maxPurchasePriceId = `${uid}-max-purchase-price`;
 
   return (
@@ -226,7 +234,7 @@ export function MaxOfferCard({
         make your current price work. Uses your current rent, financing, and operating assumptions.
       </p>
 
-      <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2 sm:grid-cols-3 sm:gap-4 xl:grid-cols-5">
+      <div className="grid grid-cols-1 gap-3 min-[360px]:grid-cols-2 sm:grid-cols-3 sm:gap-4 xl:grid-cols-4">
         <div>
           <Label htmlFor={capRateId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
             Target Cap Rate <span className="sr-only">percent, </span><span className="font-normal lowercase tracking-normal">(opt)</span>
@@ -312,7 +320,7 @@ export function MaxOfferCard({
           <Label htmlFor={dscrId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
             Min DSCR{" "}
             <span className="font-normal lowercase tracking-normal">
-              {isCashDeal ? "(n/a — cash purchase)" : "(opt)"}
+              {isCashDeal ? NO_DEBT_SERVICE_DSCR_LABEL : "(opt)"}
             </span>
           </Label>
           <Input
@@ -324,7 +332,7 @@ export function MaxOfferCard({
             step={MAO_TARGET_BOUNDS.dscr.step}
             value={isCashDeal ? "" : targetInputs.dscr}
             onChange={edit("dscr")}
-            placeholder={isCashDeal ? "N/A — cash" : "1.25"}
+            placeholder={isCashDeal ? NO_DEBT_SERVICE_DSCR_LABEL : "1.25"}
             disabled={isCashDeal}
             aria-invalid={Boolean(targetErrors.dscr)}
             aria-describedby={targetErrors.dscr ? `${dscrId}-error` : undefined}
@@ -333,6 +341,60 @@ export function MaxOfferCard({
           {targetErrors.dscr ? (
             <p id={`${dscrId}-error`} role="alert" className="mt-1 text-xs font-medium text-destructive">
               {targetErrors.dscr}
+            </p>
+          ) : null}
+        </div>
+        <div>
+          <Label htmlFor={irrId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+            Min 10-Year Pre-Tax IRR <span className="sr-only">percent, </span><span className="font-normal lowercase tracking-normal">(opt)</span>
+          </Label>
+          <div className="relative">
+            <Input
+              id={irrId}
+              type="number"
+              inputMode="decimal"
+              min={MAO_TARGET_BOUNDS.minIrrPct.min}
+              max={MAO_TARGET_BOUNDS.minIrrPct.max}
+              step={MAO_TARGET_BOUNDS.minIrrPct.step}
+              value={targetInputs.minIrrPct}
+              onChange={edit("minIrrPct")}
+              placeholder="Any"
+              aria-invalid={Boolean(targetErrors.minIrrPct)}
+              aria-describedby={targetErrors.minIrrPct ? `${irrId}-error` : undefined}
+              className="h-11 border-input bg-background pr-7"
+            />
+            <span aria-hidden className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
+          </div>
+          {targetErrors.minIrrPct ? (
+            <p id={`${irrId}-error`} role="alert" className="mt-1 text-xs font-medium text-destructive">
+              {targetErrors.minIrrPct}
+            </p>
+          ) : null}
+        </div>
+        <div>
+          <Label htmlFor={maxCashRequiredId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+            Max Cash Required <span className="font-normal lowercase tracking-normal">(opt)</span>
+          </Label>
+          <div className="relative">
+            <span aria-hidden className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">$</span>
+            <Input
+              id={maxCashRequiredId}
+              type="number"
+              inputMode="numeric"
+              min={MAO_TARGET_BOUNDS.maxCashRequired.min}
+              max={MAO_TARGET_BOUNDS.maxCashRequired.max}
+              step={MAO_TARGET_BOUNDS.maxCashRequired.step}
+              value={targetInputs.maxCashRequired}
+              onChange={edit("maxCashRequired")}
+              placeholder="Any"
+              aria-invalid={Boolean(targetErrors.maxCashRequired)}
+              aria-describedby={targetErrors.maxCashRequired ? `${maxCashRequiredId}-error` : undefined}
+              className="h-11 border-input bg-background pl-7"
+            />
+          </div>
+          {targetErrors.maxCashRequired ? (
+            <p id={`${maxCashRequiredId}-error`} role="alert" className="mt-1 text-xs font-medium text-destructive">
+              {targetErrors.maxCashRequired}
             </p>
           ) : null}
         </div>
@@ -386,8 +448,38 @@ export function MaxOfferCard({
                 </span>{" "}
                 CoC ·{" "}
                 <span className="font-semibold text-foreground">${mao.achieved.netCashFlow.toLocaleString("en-US")}</span>/mo ·{" "}
-                <span className="font-semibold text-foreground">{mao.achieved.dscr > 0 ? mao.achieved.dscr.toFixed(2) : "—"}</span> DSCR
+                <span className="font-semibold text-foreground">
+                  {isCashDeal
+                    ? NO_DEBT_SERVICE_DSCR_LABEL
+                    : mao.achieved.dscr.toFixed(2)}
+                </span>{" "}
+                DSCR
               </div>
+              {target.minIrrPct !== undefined || target.maxCashRequired !== undefined ? (
+                <div>
+                  {target.minIrrPct !== undefined ? (
+                    <>
+                      <span className="font-semibold text-foreground">
+                        {mao.achievedIrr?.status === "unique" && mao.achievedIrr.primaryIrrPct != null
+                          ? `${mao.achievedIrr.primaryIrrPct.toFixed(1)}%`
+                          : "Unsupported"}
+                      </span>{" "}
+                      10-year pre-tax IRR
+                    </>
+                  ) : null}
+                  {target.minIrrPct !== undefined && target.maxCashRequired !== undefined
+                    ? " · "
+                    : null}
+                  {target.maxCashRequired !== undefined ? (
+                    <>
+                      <span className="font-semibold text-foreground">
+                        {money(mao.achieved.totalCashRequired)}
+                      </span>{" "}
+                      cash required
+                    </>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
           )}
         </div>

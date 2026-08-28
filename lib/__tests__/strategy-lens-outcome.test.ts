@@ -10,7 +10,6 @@ const base: StrategyLensMetricsInput = {
   cocReturn: 9.1,
   dscr: 1.41,
   capRate: 7.2,
-  afterTaxCF: 410,
   monthlyPayment: 1400,
   annualizedReturnPct: 12.4,
 };
@@ -34,20 +33,21 @@ describe("buildStrategyLensOutcome", () => {
     expect(o!.metrics.every((m) => m.tone === "good")).toBe(true);
   });
 
-  it("appreciation lens leads with 10-yr return, cap rate, and after-tax CF", () => {
+  it("appreciation lens leads with 10-yr return, cap rate, and pre-tax cash flow", () => {
     const o = buildStrategyLensOutcome("appreciation", base);
     expect(o).not.toBeNull();
     expect(o!.headline).toMatch(/appreciation investor/i);
     expect(o!.metrics.map((m) => m.label)).toEqual([
       "10-yr return",
       "Cap rate",
-      "After-tax CF",
+      "Cash flow",
     ]);
     expect(o!.metrics[0].value).toBe("~12%/yr");
     expect(o!.metrics[0].band).toBe("strong");
     expect(o!.metrics[1].band).toBe("strong");
-    expect(o!.metrics[2].band).toBe("illustrative estimate ≥ $0");
-    expect(o!.metrics[2].tone).toBe("neutral");
+    expect(o!.metrics[2].value).toBe("+$350/mo after all expenses");
+    expect(o!.metrics[2].band).toBe("solid");
+    expect(o!.metrics[2].tone).toBe("good");
   });
 
   it("bands a weak cash-flow deal without sugarcoating", () => {
@@ -89,8 +89,8 @@ describe("buildStrategyLensOutcome", () => {
 
   it("marks DSCR N/A on an all-cash purchase (no debt service)", () => {
     const o = buildStrategyLensOutcome("cash-flow", { ...base, monthlyPayment: 0 });
-    expect(o!.metrics[2].value).toBe("—");
-    expect(o!.metrics[2].band).toMatch(/all-cash/i);
+    expect(o!.metrics[2].value).toBe("N/A — no debt service");
+    expect(o!.metrics[2].band).toBe("not applicable");
     expect(o!.metrics[2].tone).toBe("neutral");
   });
 
@@ -104,17 +104,17 @@ describe("buildStrategyLensOutcome", () => {
     expect(o!.metrics[0].tone).toBe("neutral");
   });
 
-  it("flags negative after-tax cash flow on the appreciation lens", () => {
+  it("flags negative pre-tax cash flow on the appreciation lens", () => {
     const o = buildStrategyLensOutcome("appreciation", {
       ...base,
       annualizedReturnPct: 6.5,
       capRate: 4.1,
-      afterTaxCF: -85,
+      netCashFlow: -85,
     });
     expect(o!.metrics[0].band).toBe("modest");
     expect(o!.metrics[1].band).toBe("relies on price growth");
-    expect(o!.metrics[2].value).toBe("-$85/mo");
-    expect(o!.metrics[2].band).toBe("illustrative estimate < $0");
-    expect(o!.metrics[2].tone).toBe("bad");
+    expect(o!.metrics[2].value).toBe("-$85/mo after all expenses");
+    expect(o!.metrics[2].band).toBe("≈break-even");
+    expect(o!.metrics[2].tone).toBe("neutral");
   });
 });

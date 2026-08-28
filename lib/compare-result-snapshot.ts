@@ -76,11 +76,16 @@ export type CompareSnapshotAssumptions = {
 
 export type CompareSnapshotReturnSummary = {
   cashInvested: number;
+  totalContributions?: number;
+  totalDistributions?: number;
+  hasLaterContributions?: boolean;
   totalProfit: number;
   roiPct: number | null;
   equityMultiple: number | null;
   cagrPct: number | null;
   irrPct: number | null;
+  irrStatus?: "unique" | "multiple" | "none";
+  irrRootsPct?: number[];
   exitTax: number;
   years: number;
 };
@@ -272,13 +277,34 @@ function parseReturnSummary(raw: unknown): CompareSnapshotReturnSummary | undefi
     return undefined;
   }
 
+  const totalContributions = finiteNumber(raw.totalContributions);
+  const totalDistributions = finiteNumber(raw.totalDistributions);
+  const hasLaterContributions =
+    typeof raw.hasLaterContributions === "boolean"
+      ? raw.hasLaterContributions
+      : undefined;
+  const irrStatus =
+    raw.irrStatus === "unique" ||
+    raw.irrStatus === "multiple" ||
+    raw.irrStatus === "none"
+      ? raw.irrStatus
+      : undefined;
+  const irrRootsPct = Array.isArray(raw.irrRootsPct)
+    ? raw.irrRootsPct.map(finiteNumber).filter((value): value is number => value != null)
+    : undefined;
+
   return {
     cashInvested,
+    ...(totalContributions != null ? { totalContributions } : {}),
+    ...(totalDistributions != null ? { totalDistributions } : {}),
+    ...(hasLaterContributions != null ? { hasLaterContributions } : {}),
     totalProfit,
     roiPct,
     equityMultiple,
     cagrPct,
     irrPct,
+    ...(irrStatus ? { irrStatus } : {}),
+    ...(irrRootsPct ? { irrRootsPct } : {}),
     exitTax,
     years,
   };

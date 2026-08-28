@@ -202,7 +202,7 @@ export default function PhiladelphiaMarketPage() {
               <ArrowUpRight className="size-4" />
             </Link>
             <Link
-              href="/tools/cap-rate-calculator"
+              href="/#main"
               className="inline-flex h-12 items-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted"
             >
               Standalone cap rate calculator
@@ -323,8 +323,8 @@ export default function PhiladelphiaMarketPage() {
             rent + appreciation thesis doesn&apos;t.
           </p>
           <p>
-            <Link href="/tools/brrrr-calculator" className="text-primary font-semibold hover:underline">
-              Model a Philly BRRRR →
+            <Link href="/blog/brrrr-method-explained" className="text-primary font-semibold hover:underline">
+              Review the BRRRR workflow →
             </Link>
           </p>
 

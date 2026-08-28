@@ -23,11 +23,16 @@ import {
 import { compareScenariosAction } from "@/app/actions/compare";
 import { STRATEGY_KINDS, strategyLabel } from "@/lib/strategy-kinds";
 import { describeStrategyPreset } from "@/lib/scenario-presets";
+import { isScenarioStrategyEnabled } from "@/lib/feature-flags";
 import { trackEvent } from "@/lib/analytics";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+const RELEASED_STRATEGY_KINDS = STRATEGY_KINDS.filter((kind) =>
+  isScenarioStrategyEnabled(kind),
+);
 
 export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
   const router = useRouter();
@@ -232,7 +237,8 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
                   <span className="rounded-full border border-border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
                     {kindLabel}
                   </span>
-                  {s.strategyKind ? (
+                  {s.strategyKind &&
+                  isScenarioStrategyEnabled(s.strategyKind) ? (
                     <span className="rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
                       {strategyLabel(s.strategyKind)}
                     </span>
@@ -279,7 +285,7 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
               <Input
                 id="scenario-name"
                 value={name}
-                placeholder="e.g. BRRRR"
+                placeholder="e.g. Lower-rate case"
                 onChange={(e) => setName(e.target.value)}
                 className="h-11 text-sm"
               />
@@ -297,7 +303,7 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
                 className="h-11 w-full rounded-md border border-input bg-background px-3 text-base md:text-sm"
               >
                 <option value="">No strategy</option>
-                {STRATEGY_KINDS.map((k) => (
+                {RELEASED_STRATEGY_KINDS.map((k) => (
                   <option key={k} value={k}>
                     {strategyLabel(k)}
                   </option>

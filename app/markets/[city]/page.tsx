@@ -6,9 +6,11 @@
  * app/markets/philadelphia) but scales from a dataset so we can add
  * cities without hand-writing a page each time.
  *
- * Cap-rate context and property tax come from the same sources the
- * analyzer uses (getCapRateBenchmark, getStatePropertyTaxPct), so the
- * page never drifts from the product's own numbers. Bespoke static
+ * Cap-rate context uses the same benchmark helper the product uses
+ * (getCapRateBenchmark). The state property-tax figure is a STATEWIDE
+ * BENCHMARK shown for market context only — the released analyzer does not
+ * consume it, and property tax there is a manual, preliminary input rather
+ * than a parcel bill. Bespoke static
  * routes under app/markets/<city>/page.tsx take precedence over this
  * dynamic route, so existing pages are untouched.
  */
@@ -37,17 +39,25 @@ import { marketStrategyFit } from "@/lib/market-strategy-fit";
 import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
 import { LeadMagnetInline } from "@/components/marketing/lead-magnet-capture";
 import { getStatePropertyTaxPct } from "@/lib/property-enrichment/state-property-tax";
+import { isCalculatorReleased } from "@/lib/calculator-registry";
 import { CityStrategyGuides } from "@/components/marketing/city-strategy-guides";
 import { getSiteUrl } from "@/lib/site-url";
 import { STATES } from "@/lib/states";
 
-const RELATED_TOOLS: { slug: string; label: string }[] = [
-  { slug: "cap-rate-calculator", label: "Cap rate calculator" },
-  { slug: "cash-on-cash-calculator", label: "Cash-on-cash calculator" },
-  { slug: "dscr-calculator", label: "DSCR calculator" },
+// Candidates only. Anything not currently released is filtered out below, so
+// a market page can never link a reader to a gated tool. The previous list
+// pointed four of its five links at calculators that now fail closed.
+const RELATED_TOOL_CANDIDATES: { slug: string; label: string }[] = [
   { slug: "mortgage-payment-calculator", label: "Mortgage payment calculator" },
-  { slug: "rental-property-tax-calculator", label: "Rental property tax calculator" },
+  { slug: "break-even-calculator", label: "Break-even calculator" },
+  { slug: "vacancy-rate-calculator", label: "Vacancy rate calculator" },
+  { slug: "closing-cost-calculator", label: "Closing cost calculator" },
+  { slug: "gross-rent-multiplier-calculator", label: "Gross rent multiplier" },
 ];
+
+const RELATED_TOOLS = RELATED_TOOL_CANDIDATES.filter((tool) =>
+  isCalculatorReleased(tool.slug),
+);
 
 export async function generateStaticParams() {
   return getMarketCityParams();
@@ -455,7 +465,8 @@ export default async function MarketCityPage({
             pages via CityStrategyGuides so the two can't drift. */}
         <CityStrategyGuides citySlug={data.slug} cityName={data.name} />
 
-        {/* Related calculators */}
+        {/* Related calculators — released only; hidden if the gate empties it. */}
+        {RELATED_TOOLS.length > 0 ? (
         <section className="mt-12 border-t border-border pt-6">
           <p className="flex items-center gap-1.5 text-xs uppercase tracking-widest text-muted-foreground font-bold mb-3">
             <Calculator className="size-3.5" /> Free calculators
@@ -468,6 +479,7 @@ export default async function MarketCityPage({
             ))}
           </div>
         </section>
+        ) : null}
 
         {/* Related reading */}
         {data.relatedPosts.length > 0 ? (

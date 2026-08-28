@@ -51,11 +51,11 @@
     "answer": "Start with the assessor or tax appeal body's instructions for the property's jurisdiction and tax year. Confirm the filing deadline, who may file, the valuation date and assessment ratio, required forms, admissible evidence, fees, hearing procedure, review scope, and further appeal rights. Gather evidence that follows those rules; raw price-per-square-foot comparisons may not be sufficient. Consider a qualified local attorney, appraiser, tax professional, or appeal specialist when the amount or procedure is material. Model a reduction only as a scenario until a final decision is issued."
   },
   "shipNote": {
-    "title": "Just shipped: honest after-tax math",
+    "title": "Keep property-tax assumptions editable",
     "items": [
       "Free: paste an address and TrueCap pre-fills a property-tax estimate for the state — so a tax appeal win shows up in your numbers the moment you drop in the lower bill",
-      "Pro: the Illustrative Tax Impact panel shows depreciation, deductions, and modeled after-tax cash flow year by year, with the assumptions and limitations stated",
-      "See your deal after-tax →"
+      "TrueCap does not currently release a taxpayer-specific depreciation or after-tax module",
+      "Use adviser-reviewed tax scenarios outside the screening result →"
     ]
   }
 }

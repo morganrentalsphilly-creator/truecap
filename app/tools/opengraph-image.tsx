@@ -14,9 +14,9 @@ export const contentType = "image/png";
 export default function Image() {
   return renderToolOgImage({
     name: "Free real estate calculators",
-    tagline: `${CALCULATOR_COUNT} single-purpose tools — cap rate, cash-on-cash, BRRRR, DSCR, NOI, mortgage, GRM, rehab, 1% rule, and more. No signup.`,
+    tagline: `${CALCULATOR_COUNT} single-purpose educational tools — mortgage, GRM, vacancy, closing costs, rehab, ARV, rent-to-price rules, and more. No signup.`,
     sectionLabel: "Collection",
     pills: [`${CALCULATOR_COUNT} calculators`, "No signup", "Free forever"],
-    footerLeft: "Cap rate · CoC · DSCR · NOI · GRM · BRRRR · 1% rule",
+    footerLeft: "Mortgage · GRM · vacancy · rehab · ARV · rent-to-price",
   });
 }

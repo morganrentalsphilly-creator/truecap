@@ -8,19 +8,65 @@ function read(relativePath: string): string {
 
 describe("comparison neutrality guards", () => {
   const comparison = read("../../components/investcalc/compare-deals-client.tsx");
+  const comparePage = read("../../app/dashboard/compare/page.tsx");
+  const compareAction = read("../../app/actions/compare.ts");
+  const evaluationAction = read("../../app/actions/product-evaluation.ts");
   const chart = read("../../components/dashboard/RiskReturn.tsx");
   const metrics = read("../compare-metrics.ts");
+  const analyticsDictionary = read("../analytics-event-dictionary.ts");
 
   it("frames relative metric positions as modeled comparisons, not investment directives", () => {
     expect(comparison).toContain("Relative modeled comparison only");
     expect(comparison).toContain("does not establish safety or make an investment recommendation");
-    expect(comparison).toContain("Disclosed metric-lead counts");
-    expect(comparison).toContain("Tied values share the highlight");
+    expect(comparison).toContain("subtle row shading marks the highest or lowest displayed value");
+    expect(comparison).toContain("Tied values share the same shading");
     expect(comparison).toContain("no hidden tie-breaker uses Screening Index, ROI, save date, or source order");
 
     expect(comparison).not.toMatch(/Most metric wins|Relative leader|Metric leader|Strongest DSCR|Comparison reference/);
+    expect(comparison).not.toMatch(/Near-term score|Long-term score|lead count/);
+    expect(comparison).not.toContain("Trophy");
     expect(comparison).not.toContain("{SIGNAL_LABELS[deal.signal]}");
     expect(comparison).not.toContain("getBadgeClasses(deal.signal)");
+  });
+
+  it("offers scale-aware review and makes assumption differences inspectable", () => {
+    expect(comparison).toContain("Comparison scale");
+    expect(comparison).toContain("As saved");
+    expect(comparison).toContain("Per $100k purchase price");
+    expect(comparison).toContain("normalizeComparisonValue");
+    expect(comparison).toContain('aria-pressed={normalizationMode === mode}');
+    expect(comparison).toContain("Saved assumptions differ");
+    expect(comparison).toContain("Review assumption matrix");
+    expect(comparison).toContain("scaling dollar values does not align the underlying assumptions");
+    expect(comparison).toContain('role={hasDifferences ? "alert" : "note"}');
+  });
+
+  it("gates unreleased tax and exit surfaces and records one privacy-safe evaluation use", () => {
+    expect(comparePage).toContain('isFeatureReleased("tax_strategy")');
+    expect(comparePage).toContain('isFeatureReleased("exit_scenarios")');
+    expect(comparePage).toContain("showTaxComparison={showTaxComparison}");
+    expect(comparePage).toContain("showExitComparison={showExitComparison}");
+    expect(comparison).toContain('row.subsection !== "FROM ILLUSTRATIVE TAX IMPACT"');
+    expect(comparison).toContain('row.subsection !== "FROM EXIT SCENARIOS"');
+    expect(compareAction).toContain("consumeProductEvaluationUsageAction");
+    expect(compareAction).toContain('kind: "comparison"');
+    expect(
+      compareAction.indexOf(
+        "const usageError = await consumeComparisonSelection(selectedIds)",
+      ),
+    ).toBeLessThan(
+      compareAction.indexOf("await setCompareCookie(selectedIds)"),
+    );
+    expect(comparePage).toContain(
+      "activeMeteredEvaluationComparisonGrantsAccess",
+    );
+    expect(comparePage).not.toContain("consumeProductEvaluationUsageAction");
+    expect(evaluationAction).toContain("buildEvaluationComparisonResourceKey");
+    expect(evaluationAction).toContain("wasNewUsage");
+    expect(evaluationAction).toContain('event: "evaluation_comparison_used"');
+    expect(analyticsDictionary).toContain(
+      'evaluation_comparison_used: define("product", "account-aggregate", ["count_bucket"])',
+    );
   });
 
   it("describes the chart axes without calling model DSCR a safety verdict or target", () => {

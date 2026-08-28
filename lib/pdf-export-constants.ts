@@ -50,6 +50,10 @@ import { TEN_YEAR_PROJECTION_SNAPSHOT_VERSION } from "@/lib/ten-year-projections
 //  11 - Artifact-attestation hardening: cached bytes are HMAC-bound to the
 //       server render, owner, deal, version, and input fingerprint. Cached
 //       objects are downloaded and verified before TrueCap returns them.
+//  12 - Release-truth remediation: the current projection page is explicitly
+//       pre-tax cash flow plus modeled equity, and unreleased tax/exit sections
+//       and disclosures are omitted. Older cached reports could expose fields
+//       that are no longer part of the released product.
 //
 // NOT bumped for the July 2026 "Your buy box" block: that block renders
 // ONLY for users with an active buy box, and those users' exports bypass
@@ -58,7 +62,7 @@ import { TEN_YEAR_PROJECTION_SNAPSHOT_VERSION } from "@/lib/ten-year-projections
 // block-carrying PDFs are stored uncacheable (see
 // PDF_CACHE_VERSION_UNCACHEABLE). Box-less users' PDFs stay byte-identical,
 // so flushing their caches with a bump would be pure regeneration waste.
-export const PDF_SNAPSHOT_VERSION = 11;
+export const PDF_SNAPSHOT_VERSION = 12;
 export const ANALYSIS_PDF_BUCKET = "analysis-pdfs";
 
 /**
@@ -282,14 +286,9 @@ export const PDF_TRUSTED_PROVENANCE_MIN_CACHE_VERSION = encodePdfCacheVersion([
 
 /**
  * Report modes — who the PDF is for. Each tailors which sections appear:
- *   - personal: the full report (cash flow, projection, tax strategy, exit).
- *   - lender:   debt-service focus — performance, property, 10-yr projection.
- *               Drops personal tax strategy + speculative exit scenarios.
- *   - partner:  returns focus — performance, projection, exit scenarios.
- *               Drops personal tax strategy.
- *   - agent:    client-facing returns summary — same sections as partner,
- *               meant to be sent branded (your logo/color/contact) to a buyer
- *               client. Drops personal tax.
+ * Unreleased tax and exit sections are omitted from every mode. The audience
+ * modes tailor the released property, financing, performance, projection, and
+ * assumptions sections.
  */
 export type ReportMode = "personal" | "lender" | "partner" | "agent";
 
@@ -302,24 +301,24 @@ export const REPORT_MODES: ReadonlyArray<{
     id: "personal",
     label: "Personal",
     description:
-      "Full report — cash flow, projection, illustrative tax impact, and modeled exit comparisons.",
+      "Full released report — property, financing, cash flow, projection, and assumptions.",
   },
   {
     id: "lender",
     label: "Lender",
     description:
-      "Debt-service focus — performance, property, and the 10-year projection. Excludes personal tax and modeled exits.",
+      "Debt-service focus — performance, property, financing, and the 10-year projection.",
   },
   {
     id: "partner",
     label: "Partner",
     description:
-      "Returns focus — performance, projection, and modeled exit comparisons. Excludes personal tax.",
+      "Returns focus — performance, cash flow, equity, projection, and assumptions.",
   },
   {
     id: "agent",
     label: "Agent / client",
     description:
-      "Client-facing returns summary to send branded to a buyer — performance, projection, and modeled exit comparisons. Excludes personal tax.",
+      "Client-facing summary to send branded to a buyer — property, performance, projection, and assumptions.",
   },
 ];

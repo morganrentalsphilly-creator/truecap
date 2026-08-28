@@ -25,6 +25,7 @@
  */
 
 import type { AnalysisResult } from "./calc-analysis";
+import { NO_DEBT_SERVICE_DSCR_LABEL } from "./financial-presentation";
 
 /** The lender coverage line quoted throughout the app (Deal Score
  *  breakdown: "Above 1.20 - clears lender threshold"). Display-only —
@@ -156,7 +157,11 @@ export function buildStressSurvivability(
   let dscr: StressSurvivability["dscr"];
   if (stressed.monthlyPayment <= 0) {
     // Same convention as the DSCR metric card: cash purchase → N/A.
-    dscr = { value: null, band: "cash", label: "DSCR n/a — cash purchase" };
+    dscr = {
+      value: null,
+      band: "cash",
+      label: NO_DEBT_SERVICE_DSCR_LABEL,
+    };
   } else {
     const v = stressed.dscr;
     const shown = v.toFixed(2);

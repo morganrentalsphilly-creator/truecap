@@ -40,6 +40,7 @@ export function SignupPromptCard({ address, isAuthenticated, onPrepareSaveIntent
   useEffect(() => {
     if (!isAuthenticated && !dismissed) {
       trackEvent("signup_prompt_viewed", { placement: "analysis_result" });
+      trackEvent("save_prompt_shown", { placement: "analysis_result" });
     }
   }, [dismissed, isAuthenticated]);
   if (isAuthenticated || dismissed) return null;

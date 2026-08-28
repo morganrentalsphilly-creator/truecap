@@ -8,6 +8,7 @@
  */
 
 import { calculateAnalysis, type AnalysisResult } from "@/lib/calc-analysis";
+import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import {
   calculateMaxAllowableOffer,
@@ -136,6 +137,8 @@ function hasAnyTarget(target: MaoTarget): boolean {
     target.cocReturn !== undefined ||
     target.monthlyCashFlow !== undefined ||
     target.dscr !== undefined ||
+    target.minIrrPct !== undefined ||
+    target.maxCashRequired !== undefined ||
     target.maxPurchasePrice !== undefined
   );
 }
@@ -170,13 +173,19 @@ function commonThreshold(args: {
   thresholdValue: number | null;
   requiredChange?: number | null;
   recheckedAnalysis?: AnalysisResult | null;
+  recheckedValues?: InvestmentFormValues | null;
   target: MaoTarget;
   reason: string;
 }): DecisionThreshold {
   const requiredChange = args.requiredChange ?? null;
   const basis = args.currentValue;
   const rechecked =
-    args.recheckedAnalysis != null && meetsTarget(args.recheckedAnalysis, args.target);
+    args.recheckedAnalysis != null &&
+    meetsTarget(
+      args.recheckedAnalysis,
+      args.target,
+      args.recheckedValues ?? undefined,
+    );
   return {
     id: args.id,
     label: args.label,
@@ -227,7 +236,8 @@ function solveMaxPrice(
   // If the product's upper supported price still passes, that supported
   // boundary is safer and more exact than presenting the solver's penultimate
   // bisection step as an economic maximum.
-  if (atSearchLimit && meetsTarget(atSearchLimit, target)) {
+  const searchLimitValues = { ...values, purchasePrice: maxPrice };
+  if (atSearchLimit && meetsTarget(atSearchLimit, target, searchLimitValues)) {
     return commonThreshold({
       id: "max_purchase_price",
       label: "Maximum purchase price within the supported range",
@@ -238,6 +248,7 @@ function solveMaxPrice(
       thresholdValue: maxPrice,
       requiredChange: 0,
       recheckedAnalysis: atSearchLimit,
+      recheckedValues: searchLimitValues,
       target,
       reason: "The complete target still passes at the supported Offer Ceiling.",
     });
@@ -260,8 +271,9 @@ function solveMaxPrice(
     });
   }
 
-  const exact = safeCalc({ ...values, purchasePrice: solved.maxPrice });
-  if (!exact || !meetsTarget(exact, target)) {
+  const exactValues = { ...values, purchasePrice: solved.maxPrice };
+  const exact = safeCalc(exactValues);
+  if (!exact || !meetsTarget(exact, target, exactValues)) {
     return unavailableThreshold({
       id: "max_purchase_price",
       label: "Maximum purchase price",
@@ -286,6 +298,7 @@ function solveMaxPrice(
     thresholdValue: solved.maxPrice,
     requiredChange: changeRequired ? reduction : 0,
     recheckedAnalysis: exact,
+    recheckedValues: exactValues,
     target,
     reason: changeRequired
       ? "Reducing only purchase price to this displayed boundary passes the complete target."
@@ -351,8 +364,9 @@ function solveRent(
     });
   }
 
-  const exact = safeCalc({ ...values, monthlyRent: solved.value });
-  if (!exact || !meetsTarget(exact, target)) {
+  const exactValues = { ...values, monthlyRent: solved.value };
+  const exact = safeCalc(exactValues);
+  if (!exact || !meetsTarget(exact, target, exactValues)) {
     return unavailableThreshold({
       id: "required_monthly_rent",
       label: "Required monthly rent",
@@ -377,6 +391,7 @@ function solveRent(
     thresholdValue: solved.value,
     requiredChange: changeRequired ? increase : 0,
     recheckedAnalysis: exact,
+    recheckedValues: exactValues,
     target,
     reason: changeRequired
       ? "Increasing only monthly rent to this whole-dollar boundary passes the complete target."
@@ -425,8 +440,9 @@ function solveMaxRate(
     });
   }
 
-  const exact = safeCalc({ ...values, interestRate: solved.value });
-  if (!exact || !meetsTarget(exact, target)) {
+  const exactValues = { ...values, interestRate: solved.value };
+  const exact = safeCalc(exactValues);
+  if (!exact || !meetsTarget(exact, target, exactValues)) {
     return unavailableThreshold({
       id: "max_interest_rate",
       label: "Maximum interest rate",
@@ -451,6 +467,7 @@ function solveMaxRate(
     thresholdValue: solved.value,
     requiredChange: changeRequired ? reduction : 0,
     recheckedAnalysis: exact,
+    recheckedValues: exactValues,
     target,
     reason: changeRequired
       ? "Reducing only the rate to this 0.01-point boundary passes the complete target."
@@ -512,6 +529,7 @@ function solveCashNeededReduction(
       thresholdValue: current.totalCashRequired,
       requiredChange: 0,
       recheckedAnalysis: current,
+      recheckedValues: values,
       target,
       reason: "The complete target already passes; no cash-needed reduction is required.",
     });
@@ -543,7 +561,7 @@ function solveCashNeededReduction(
     };
   }
 
-  if (!meetsTarget(current, targetWithoutCoc(target))) {
+  if (!meetsTarget(current, targetWithoutCoc(target), values)) {
     const common = unavailableThreshold({
       ...base,
       status: "unreachable",
@@ -606,7 +624,10 @@ function solveCashNeededReduction(
   let exact = adjustedValues ? safeCalc(adjustedValues) : null;
   for (
     let i = 0;
-    i < 5 && adjustedValues && exact && !meetsTarget(exact, target);
+    i < 5 &&
+    adjustedValues &&
+    exact &&
+    !meetsTarget(exact, target, adjustedValues);
     i += 1
   ) {
     displayedReduction += 1;
@@ -614,7 +635,11 @@ function solveCashNeededReduction(
     exact = adjustedValues ? safeCalc(adjustedValues) : null;
   }
 
-  if (!adjustedValues || !exact || !meetsTarget(exact, target)) {
+  if (
+    !adjustedValues ||
+    !exact ||
+    !meetsTarget(exact, target, adjustedValues)
+  ) {
     const common = unavailableThreshold({
       ...base,
       status: "unreachable",
@@ -641,6 +666,7 @@ function solveCashNeededReduction(
     thresholdValue: exact.totalCashRequired,
     requiredChange: displayedReduction,
     recheckedAnalysis: exact,
+    recheckedValues: adjustedValues,
     target,
     reason: sellerCreditSupported
       ? "The reduction fits within modeled closing costs; lender and loan-program credit limits still require verification."
@@ -697,15 +723,19 @@ function solveMaxRehabBudget(
       "A positive maximum rehab budget requires positive annual cash flow and a positive cash-on-cash target."
     );
   }
-  if (!meetsTarget(current, targetWithoutCoc(target))) {
+  if (!meetsTarget(current, targetWithoutCoc(target), values)) {
     return unavailable(
       "unreachable",
       "Changing rehab cannot repair another active target because rehab only changes cash invested."
     );
   }
 
-  const withoutRehab = safeCalc({ ...values, rehabBudget: 0 });
-  if (!withoutRehab || !meetsTarget(withoutRehab, target)) {
+  const withoutRehabValues = { ...values, rehabBudget: 0 };
+  const withoutRehab = safeCalc(withoutRehabValues);
+  if (
+    !withoutRehab ||
+    !meetsTarget(withoutRehab, target, withoutRehabValues)
+  ) {
     return unavailable(
       "unreachable",
       "The complete target does not pass even with the rehab budget set to $0."
@@ -722,12 +752,22 @@ function solveMaxRehabBudget(
   // A maximum rounds down. Recheck the displayed dollar and walk down a few
   // dollars if floating-point equality lands just over the target.
   let displayedMaximum = Math.floor(rawMaximum);
-  let exact = safeCalc({ ...values, rehabBudget: displayedMaximum });
-  for (let i = 0; i < 5 && exact && !meetsTarget(exact, target); i += 1) {
+  let exactValues = { ...values, rehabBudget: displayedMaximum };
+  let exact = safeCalc(exactValues);
+  for (
+    let i = 0;
+    i < 5 && exact && !meetsTarget(exact, target, exactValues);
+    i += 1
+  ) {
     displayedMaximum -= 1;
-    exact = safeCalc({ ...values, rehabBudget: displayedMaximum });
+    exactValues = { ...values, rehabBudget: displayedMaximum };
+    exact = safeCalc(exactValues);
   }
-  if (!exact || displayedMaximum < 0 || !meetsTarget(exact, target)) {
+  if (
+    !exact ||
+    displayedMaximum < 0 ||
+    !meetsTarget(exact, target, exactValues)
+  ) {
     return unavailable("unreachable", "The displayed rehab boundary failed its exact recheck.");
   }
 
@@ -740,6 +780,7 @@ function solveMaxRehabBudget(
     thresholdValue: displayedMaximum,
     requiredChange: changeRequired ? reduction : 0,
     recheckedAnalysis: exact,
+    recheckedValues: exactValues,
     target,
     reason: changeRequired
       ? "Reducing only rehab to this whole-dollar boundary passes the complete target."
@@ -807,16 +848,21 @@ function solveOperatingExpenses(
     target.capRate !== undefined ||
     target.cocReturn !== undefined ||
     target.monthlyCashFlow !== undefined ||
+    target.minIrrPct !== undefined ||
     (target.dscr !== undefined && current.monthlyPayment > 0);
   if (!hasExpenseSensitiveTarget) {
     return unavailable(
       "not_applicable",
-      "No active target responds to recurring expenses (cash-purchase DSCR is not applicable)."
+      `No active target responds to recurring expenses (cash-purchase DSCR: ${NO_DEBT_SERVICE_DSCR_LABEL}).`
     );
   }
 
-  const zeroNonCapex = safeCalc(withNonCapexExpenseBudget(values, 0));
-  if (!zeroNonCapex || !meetsTarget(zeroNonCapex, target)) {
+  const zeroNonCapexValues = withNonCapexExpenseBudget(values, 0);
+  const zeroNonCapex = safeCalc(zeroNonCapexValues);
+  if (
+    !zeroNonCapex ||
+    !meetsTarget(zeroNonCapex, target, zeroNonCapexValues)
+  ) {
     return unavailable(
       "unreachable",
       "The complete target still fails with non-CapEx recurring expenses at $0 and the current CapEx reserve held fixed."
@@ -833,14 +879,24 @@ function solveOperatingExpenses(
   );
   hi = Math.min(hi, searchLimit);
 
-  let highResult = safeCalc(withNonCapexExpenseBudget(values, hi));
-  while (highResult && meetsTarget(highResult, target) && hi < searchLimit) {
+  let highValues = withNonCapexExpenseBudget(values, hi);
+  let highResult = safeCalc(highValues);
+  while (
+    highResult &&
+    meetsTarget(highResult, target, highValues) &&
+    hi < searchLimit
+  ) {
     lo = hi;
     hi = Math.min(searchLimit, hi * 2);
-    highResult = safeCalc(withNonCapexExpenseBudget(values, hi));
+    highValues = withNonCapexExpenseBudget(values, hi);
+    highResult = safeCalc(highValues);
   }
 
-  if (highResult && meetsTarget(highResult, target) && hi === searchLimit) {
+  if (
+    highResult &&
+    meetsTarget(highResult, target, highValues) &&
+    hi === searchLimit
+  ) {
     return unavailable(
       "not_applicable",
       "No finite recurring-expense boundary was found inside the configured safety range."
@@ -853,19 +909,24 @@ function solveOperatingExpenses(
   // Whole-dollar maximum: find the largest passing synthetic budget.
   let left = lo;
   let right = hi - 1;
-  let bestResult = safeCalc(withNonCapexExpenseBudget(values, lo)) ?? zeroNonCapex;
+  let bestValues = withNonCapexExpenseBudget(values, lo);
+  const initialBestResult = safeCalc(bestValues);
+  let bestResult = initialBestResult ?? zeroNonCapex;
+  if (!initialBestResult) bestValues = zeroNonCapexValues;
   while (left <= right) {
     const mid = Math.floor((left + right) / 2);
-    const result = safeCalc(withNonCapexExpenseBudget(values, mid));
-    if (result && meetsTarget(result, target)) {
+    const midValues = withNonCapexExpenseBudget(values, mid);
+    const result = safeCalc(midValues);
+    if (result && meetsTarget(result, target, midValues)) {
       bestResult = result;
+      bestValues = midValues;
       left = mid + 1;
     } else {
       right = mid - 1;
     }
   }
 
-  if (!meetsTarget(bestResult, target)) {
+  if (!meetsTarget(bestResult, target, bestValues)) {
     return unavailable("unreachable", "The displayed recurring-expense boundary failed its exact recheck.");
   }
 
@@ -879,6 +940,7 @@ function solveOperatingExpenses(
     thresholdValue: maximumTotal,
     requiredChange: changeRequired ? reduction : 0,
     recheckedAnalysis: bestResult,
+    recheckedValues: bestValues,
     target,
     reason: changeRequired
       ? "Reducing aggregate non-CapEx expenses to this boundary passes; the current CapEx reserve is held fixed."
@@ -930,7 +992,8 @@ export function buildWhatNeedsToBeTrue(
   if (!current) return null;
 
   const targetIsEmpty = !hasAnyTarget(target);
-  const targetAlreadyMet = !targetIsEmpty && meetsTarget(current, target);
+  const targetAlreadyMet =
+    !targetIsEmpty && meetsTarget(current, target, values);
   if (targetIsEmpty) {
     const n = (args: {
       id: DecisionThresholdId;

@@ -103,12 +103,21 @@ function enrichment(overrides: Partial<PropertyEnrichment> = {}): PropertyEnrich
 
 function returnSummary(overrides: Partial<ReturnSummary> = {}): ReturnSummary {
   return {
+    initialCashInvested: 60_000,
     cashInvested: 60_000,
+    totalContributions: 60_000,
+    totalDistributions: 180_000,
+    hasLaterContributions: false,
     totalProfit: 120_000,
     roiPct: 200,
+    roiDefinition: "net-profit-over-all-contributions",
     equityMultiple: 3,
     cagrPct: 11.6,
+    cagrStatus: "available",
     irrPct: 14.2,
+    irrStatus: "unique",
+    irrRootsPct: [14.2],
+    irrReason: null,
     exitTax: 9_000,
     years: 10,
     ...overrides,
@@ -210,6 +219,17 @@ describe("buildProjectionQaContext", () => {
   it("returns null without an anchorable summary", () => {
     expect(buildProjectionQaContext(null)).toBeNull();
     expect(buildProjectionQaContext(returnSummary({ totalProfit: Number.NaN }))).toBeNull();
+  });
+
+  it("does not reduce a multiple-root IRR timeline to one AI headline", () => {
+    const ctx = buildProjectionQaContext(
+      returnSummary({
+        irrPct: 10,
+        irrStatus: "multiple",
+        irrRootsPct: [10, 20],
+      }),
+    );
+    expect(ctx?.irrPct).toBeNull();
   });
 });
 

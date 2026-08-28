@@ -37,6 +37,7 @@ import {
   buildSpecialistAnalysisSnapshot,
   type SpecialistAnalysisSnapshot,
 } from "@/lib/specialist-analysis-snapshot";
+import { isSpecialistStrategyEnabled } from "@/lib/feature-flags";
 
 export type CanonicalReportBuildInput = {
   /** Raw browser payload. It is parsed again here even when the action schema
@@ -71,6 +72,7 @@ function resolveReportSpecialistAnalysis(args: {
     args.input.analyzerStrategyKey,
     args.values,
   );
+  if (!isSpecialistStrategyEnabled(strategyKey)) return null;
   return buildSpecialistAnalysisSnapshot(args.values, args.result, strategyKey);
 }
 
@@ -107,6 +109,8 @@ export function buildCanonicalReportData(
     loanAmount: result.loanAmount,
     interestRate: values.interestRate,
     loanTermYears: values.loanTermYears,
+    amortizationTermYears: values.amortizationTermYears ?? values.loanTermYears,
+    interestOnlyMonths: values.interestOnlyMonths ?? 0,
     monthlyPayment: result.monthlyPayment,
     downPayment: result.downPayment,
     closingCosts: result.closingCosts,
@@ -120,15 +124,19 @@ export function buildCanonicalReportData(
     annualDepreciation: taxYears[0]?.depreciationDeductionAnnual ?? 0,
   });
 
-  const projectionRows = projectionYears.map((row) => ({
+  const projectionRows = projectionYears.map((row, index) => ({
     y: row.year,
     rental: row.rentalIncomeAnnual,
     opex: row.operatingExpensesAnnual,
     debt: row.debtServiceAnnual,
     net: row.netCashFlowAnnual,
-    tax: row.taxSavingsAnnual,
-    after: row.afterTaxCashFlowAnnual,
     cum: row.cumulativeCashFlowAnnual,
+    propertyValue: exitYears[index]?.propertyValue ?? values.purchasePrice,
+    loanBalance: exitYears[index]?.remainingLoanBalance ?? 0,
+    equity: exitYears[index]?.equity ?? values.purchasePrice,
+    renovationIncomeLoss: row.renovationIncomeLossAnnual,
+    balloon: row.balloonPaymentAnnual,
+    financingOutflow: row.financingOutflowAnnual,
   }));
   const taxRows = taxYears.map((row) => ({
     y: row.year,
@@ -171,10 +179,12 @@ export function buildCanonicalReportData(
     result.tenYearProjectionVersion > 0
       ? result.tenYearProjectionVersion
       : null;
-  const targetSource: OfferCeilingTargetSource =
-    normalizeExternalOfferCeilingTargetSource(input.maxOfferTargetSource) ??
-    (input.maxOfferTarget ? "selected-targets" : "screening-defaults");
   const normalizedTarget = normalizeMaoTarget(input.maxOfferTarget);
+  const targetSource: OfferCeilingTargetSource =
+    normalizeExternalOfferCeilingTargetSource(input.maxOfferTargetSource, {
+      target: normalizedTarget,
+      values,
+    }) ?? (normalizedTarget ? "selected-targets" : "screening-defaults");
   const targetAdopted = Boolean(
     normalizedTarget && isAdoptedOfferCeilingTargetSource(targetSource),
   );
@@ -187,16 +197,16 @@ export function buildCanonicalReportData(
     ? describeMaoTarget(resolvedTarget)
     : "No acquisition targets adopted";
   const clearsSelectedTargets = resolvedTarget
-    ? meetsTarget(result, resolvedTarget)
+    ? meetsTarget(result, resolvedTarget, values)
     : false;
   const decisionSourceLabel =
     targetSource === "buy-box"
       ? "the captured Buy Box financial targets"
       : targetSource === "starter-criteria"
         ? "the adopted TrueCap starter criteria"
-      : targetSource === "selected-targets"
-        ? "the selected targets"
-        : "the visible screening defaults";
+        : targetSource === "selected-targets"
+          ? "the selected targets"
+          : "the visible screening defaults";
 
   return {
     generatedAt: input.generatedAt ?? new Date(),
@@ -208,6 +218,8 @@ export function buildCanonicalReportData(
       type: values.propertyType,
       yearBuilt: values.yearBuilt ?? null,
       purchasePrice: values.purchasePrice,
+      currentValue: values.currentPropertyValue ?? null,
+      stabilizedValue: values.stabilizedPropertyValue ?? null,
       template:
         input.trustedPresentation?.templateLabel ??
         (values.templateId ? "Template Applied" : "Custom"),
@@ -219,6 +231,25 @@ export function buildCanonicalReportData(
       loanTerm: values.loanTermYears,
       closingCostsPct: result.closingCostsPct,
       closingCosts: result.closingCosts,
+      loanPointsPct: result.loanPointsPct ?? 0,
+      loanPointsAmount: result.loanPointsAmount ?? 0,
+      originationFee: result.originationFee ?? 0,
+      loanFees: result.loanFees ?? 0,
+      initialReserve: result.initialReserve ?? 0,
+      lenderEscrowDeposit: result.lenderEscrowDeposit ?? 0,
+      lenderReserveDeposit: result.lenderReserveDeposit ?? 0,
+      acquisitionCredits: result.acquisitionCredits ?? 0,
+      interestOnlyMonths: result.interestOnlyMonths ?? 0,
+      amortizationTermYears:
+        result.amortizationTermYears ?? values.loanTermYears,
+      maturityTermYears: result.loanMaturityTermYears ?? values.loanTermYears,
+      initialMonthlyPayment:
+        result.initialMonthlyLoanPayment ?? result.monthlyPayment,
+      amortizingMonthlyPayment:
+        result.amortizingMonthlyLoanPayment ?? result.monthlyPayment,
+      balloonPayment: result.balloonPayment ?? 0,
+      balloonMonth: result.balloonMonth ?? values.loanTermYears * 12,
+      rehabBudget: Number(values.rehabBudget ?? 0),
     },
     expenses: {
       propertyTaxPct:
@@ -239,6 +270,29 @@ export function buildCanonicalReportData(
       capexPct: Number(result.capexPctEffective ?? 0),
       hoaMonthly: Number(result.hoaMonthly),
       utilitiesMonthly: Number(result.utilities),
+      recurringOtherIncomeMonthly: Number(
+        result.recurringOtherIncomeMonthly ?? 0,
+      ),
+      recurringOtherExpenseMonthly: Number(
+        result.recurringOtherExpenseMonthly ?? 0,
+      ),
+      turnoverReserveMonthly: Number(result.turnoverReserveMonthly ?? 0),
+      leasingReserveMonthly: Number(result.leasingReserveMonthly ?? 0),
+      landscapingMonthly: Number(result.landscapingMonthly ?? 0),
+      pestControlMonthly: Number(result.pestControlMonthly ?? 0),
+      administrativeMonthly: Number(result.administrativeMonthly ?? 0),
+      ...(result.renovationStartMonth != null
+        ? { renovationStartMonth: result.renovationStartMonth }
+        : {}),
+      ...(result.renovationDurationMonths != null
+        ? { renovationDurationMonths: result.renovationDurationMonths }
+        : {}),
+      ...(result.renovationRentLossPct != null
+        ? { renovationRentLossPct: result.renovationRentLossPct }
+        : {}),
+      ...(result.renovationIncomeLossAnnual != null
+        ? { renovationIncomeLossAnnual: result.renovationIncomeLossAnnual }
+        : {}),
       rentGrowth: Number(values.rentGrowthPct),
       expenseGrowth: Number(values.expenseGrowthPct),
       appreciation: Number(values.appreciationRatePct ?? 3),
@@ -309,13 +363,10 @@ export function buildCanonicalReportData(
       : undefined,
     projection10y: {
       cumulativeCF: projectionRows[projectionRows.length - 1]?.cum ?? 0,
-      bestAnnualAfterTax: projectionRows.length
-        ? Math.max(...projectionRows.map((row) => row.after))
+      bestAnnualPreTax: projectionRows.length
+        ? Math.max(...projectionRows.map((row) => row.net))
         : 0,
-      totalAfterTax: projectionRows.reduce(
-        (total, row) => total + row.after,
-        0,
-      ),
+      year10Equity: projectionRows[projectionRows.length - 1]?.equity ?? 0,
       rows: projectionRows,
     },
     taxStrategy: {
@@ -365,6 +416,7 @@ function buildReportUnits(
           typeof values.avgDailyRate === "number" && values.avgDailyRate > 0
             ? monthlyRentalIncome
             : Number(values.monthlyRent ?? monthlyRentalIncome),
+        stabilizedRent: values.stabilizedMonthlyRent,
       },
     ];
   }
@@ -375,6 +427,7 @@ function buildReportUnits(
     baths: Number(unit.bathrooms ?? 0),
     sqft: Number(unit.sqft ?? 0),
     rent: Number(unit.monthlyRent ?? 0),
+    stabilizedRent: unit.stabilizedMonthlyRent,
     isOwnerOccupied:
       values.propertyType === "owner-occupant" && Boolean(unit.isOwnerOccupied),
   }));

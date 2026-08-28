@@ -26,9 +26,9 @@ const TITLE = "Stessa vs Avail vs Baselane: 3-way landlord ops comparison";
 // window. The on-page <h1> keeps the longer editorial TITLE.
 const SERP_TITLE = "Stessa vs Avail vs Baselane (2026)";
 const DESCRIPTION =
-  "Stessa is accounting. Avail is leasing + rent collection. Baselane bundles both with banking. Honest 3-way comparison plus where TrueCap fits before any of them.";
+  "Stessa spans acquisition, underwriting, accounting, and operations; Avail emphasizes leasing; Baselane combines banking and bookkeeping.";
 const PUBLISHED_AT = "2026-06-07";
-const MODIFIED_AT = "2026-06-07";
+const MODIFIED_AT = "2026-08-27";
 const READING_TIME_MIN = 10;
 
 export const metadata: Metadata = {
@@ -70,11 +70,11 @@ const FAQ_ITEMS = [
   },
   {
     q: `Are all three really free?`,
-    a: `Yes, with caveats. Stessa free covers unlimited properties + bank-feed accounting. Avail free covers listings, applications, lease signing, and ACH rent collection (tenants pay for their own screening). Baselane free covers banking + basic bookkeeping + ACH rent collection (Baselane makes money on interchange + interest spread). Premium tiers add advanced features but the free tiers are genuinely useful.`,
+    a: `Each publishes a free entry point with different limits. Stessa currently lists Essentials plus paid Manage and Pro plans; Avail and Baselane structure their free and paid features differently. Verify current pricing, transaction fees, banking terms, and plan limits on each provider's official site.`,
   },
   {
     q: `Does TrueCap replace any of these?`,
-    a: `No. TrueCap is pre-purchase underwriting—cap rate, DSCR, cash flow, projection, selected-rule fit, and a secondary Screening Index. Stessa, Avail, and Baselane focus on post-purchase operations. They cover different stages of the rental lifecycle.`,
+    a: `Not entirely. TrueCap is a narrower, target-backed acquisition decision workflow. Stessa now overlaps in acquisition through its marketplace, buy boxes, comps, and editable underwriting, then continues into accounting and operations. Avail and Baselane remain more operations-led.`,
   },
   {
     q: `Avail vs Stessa — which one if I can only pick one?`,
@@ -147,7 +147,7 @@ export default function ThreeWayComparisonPost() {
               {DESCRIPTION}
             </p>
             <p className="mt-4 text-xs text-muted-foreground">
-              Published {PUBLISHED_AT}
+              Published {PUBLISHED_AT} · Updated {MODIFIED_AT}
             </p>
           </header>
 
@@ -158,14 +158,14 @@ export default function ThreeWayComparisonPost() {
             </h2>
             <p
               className="text-sm sm:text-base leading-relaxed text-foreground"
-              dangerouslySetInnerHTML={{ __html: `All three are post-purchase landlord ops platforms — they help you run rentals you already own. <strong>Stessa</strong> is the accounting + bookkeeping leader (bank-feed sync, Schedule E). <strong>Avail</strong> (owned by Realtor.com) is the leasing-and-collection leader (listings, applications, screening, lease signing, rent collection). <strong>Baselane</strong> bundles both into one platform plus rental banking (FDIC-insured business checking per property). All three have free tiers. Most landlords end up with two of them, or just one Baselane. <strong>TrueCap</strong> isn&apos;t in this category — it&apos;s the pre-purchase underwriting calculator you&apos;d use BEFORE setting up any of these tools.` }}
+              dangerouslySetInnerHTML={{ __html: `<strong>Stessa</strong> now spans acquisition and operations: its official marketplace materials describe investor filters, map layers, watchlists, buy-box alerts, comps, and editable underwriting before its accounting workflows. <strong>Avail</strong> emphasizes leasing and rent collection. <strong>Baselane</strong> bundles banking, bookkeeping, and rent collection. TrueCap overlaps with Stessa during acquisition but stays narrower and target-backed. Facts reviewed against official sources on 2026-08-27.` }}
             />
           </section>
 
           <div className="prose prose-neutral max-w-none prose-headings:font-extrabold prose-headings:text-foreground prose-p:text-foreground prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:text-foreground prose-li:leading-relaxed">
             <h2>The three in one sentence each</h2>
             <div dangerouslySetInnerHTML={{ __html: `<ul>
-              <li><strong>Stessa</strong> — rental accounting + bookkeeping. Connect your bank, transactions auto-categorize, Schedule E builds itself. Free tier covers unlimited properties. Stessa Pro (~\$12/mo) adds advanced reporting + document organization.</li>
+              <li><strong>Stessa</strong> — investment-property marketplace, buy boxes, sale/rent comps, and editable acquisition assumptions, followed by bank-feed accounting and landlord operations. It currently publishes Essentials, Manage, and Pro plans; check live pricing and limits.</li>
               <li><strong>Avail</strong> — DIY landlord ops: listings (syndicated to Realtor.com / Zillow / Apartments.com), online rental applications, TransUnion-powered tenant screening, state-specific lease templates, ACH rent collection. Free Unlimited tier; Unlimited Plus is ~\$7/unit/month.</li>
               <li><strong>Baselane</strong> — banking + bookkeeping + rent collection. FDIC-insured business checking per property (Thread Bank / Blue Ridge Bank partners), auto-categorized expenses synced with your bank feed, Schedule E reports, ACH rent collection — all in one platform. Free banking + bookkeeping tier; advanced features ~\$22/mo (as of 2026).</li>
             </ul>` }} />
@@ -188,7 +188,7 @@ export default function ThreeWayComparisonPost() {
 
             <h2>Free tier comparison</h2>
             <div dangerouslySetInnerHTML={{ __html: `<ul>
-              <li><strong>Stessa free</strong> — unlimited properties, bank-feed sync, basic Schedule E reports, document storage. Genuinely usable forever.</li>
+              <li><strong>Stessa Essentials</strong> — Stessa publishes a free entry plan, while Schedule E and other features are plan-dependent. Verify the current plan matrix.</li>
               <li><strong>Avail free</strong> (&quot;Unlimited&quot;) — unlimited listings, applications, lease signing, ACH rent collection. Tenants pay for screening (~\$30-55).</li>
               <li><strong>Baselane free</strong> — FDIC-insured business checking, ACH rent collection, basic bookkeeping. Their banking partner pays them via interchange + interest spread, so the &quot;free&quot; is real.</li>
             </ul>
@@ -204,8 +204,15 @@ export default function ThreeWayComparisonPost() {
             </ul>` }} />
 
             <h2>Where TrueCap fits</h2>
-            <div dangerouslySetInnerHTML={{ __html: `<p>Upstream of all three. TrueCap is the pre-purchase underwriting calculator—cap rate, DSCR, cash flow, 10-year projection, selected-rule fit, and a secondary Screening Index. Use it to screen modeled economics and document what to verify; you make the purchase decision. Stessa, Avail, or Baselane can then support operations.</p>
-            <p>The full investor stack (cheapest version): TrueCap free (underwriting) + Stessa free OR Baselane free (accounting/banking) + Avail free (leasing). \$0/month for the basics.</p>` }} />
+            <div dangerouslySetInnerHTML={{ __html: `<p>TrueCap is a narrower acquisition decision workflow—cap rate, DSCR, cash flow, target fit, Offer Ceiling, and a secondary Screening Index. Stessa overlaps during acquisition and then continues into accounting and operations; Avail and Baselane are more operations-led. Choose by workflow and verify current plan terms rather than assuming a strict before/after split.</p>` }} />
+
+            <p>
+              Stessa facts reviewed 2026-08-27 against its{" "}
+              <a href="https://www.stessa.com/investment-property-marketplace/" target="_blank" rel="noopener noreferrer">official marketplace</a>,{" "}
+              <a href="https://support.stessa.com/en/articles/10779191-stessa-investment-properties-marketplace" target="_blank" rel="noopener noreferrer">marketplace help article</a>,{" "}
+              <a href="https://www.stessa.com/rental-returns-and-income-tax-calculator/" target="_blank" rel="noopener noreferrer">returns calculator</a>, and{" "}
+              <a href="https://www.stessa.com/pricing/" target="_blank" rel="noopener noreferrer">pricing page</a>.
+            </p>
 
             <h2>FAQ</h2>
             <div className="not-prose space-y-3">
@@ -231,14 +238,14 @@ export default function ThreeWayComparisonPost() {
             </div>
 
             <h2>Try TrueCap free</h2>
-            <p>Run your next deal through TrueCap (free) before you set up Stessa, Avail, or Baselane. The underwriting tells you whether the property is worth operating in the first place.</p>
+            <p>Run the same acquisition assumptions through TrueCap and Stessa, then choose the workflow whose targets, evidence, and downstream operations match your needs.</p>
             <p className="not-prose">
               <Link
                 href="/"
                 className="inline-flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-5 py-3 font-bold hover:opacity-90"
               >
                 <Calculator className="w-4 h-4" />
-                Run a deal — 60 seconds
+                Analyze a deal free
                 <ArrowUpRight className="w-4 h-4" />
               </Link>
             </p>

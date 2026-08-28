@@ -68,7 +68,6 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     whyItMatters:
       "Cap rate lets you compare properties on an apples-to-apples basis regardless of financing. It's also how commercial properties (5+ units) are valued — buyers price them on NOI ÷ market cap rate.",
     related: ["noi", "coc", "dscr", "onePercentRule"],
-    toolUrl: "/tools/cap-rate-calculator",
     postUrl: "/blog/what-is-a-good-cap-rate",
   },
   coc: {
@@ -85,7 +84,6 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     whyItMatters:
       "Cash-on-cash is the metric leveraged investors should optimize for. It captures the actual return on YOUR money — cap rate doesn't, because it ignores financing.",
     related: ["capRate", "cashFlow", "irr", "dscr"],
-    toolUrl: "/tools/cash-on-cash-calculator",
     postUrl: "/blog/cap-rate-vs-cash-on-cash-vs-dscr",
   },
   cashFlow: {
@@ -100,7 +98,6 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     whyItMatters:
       "Monthly cash flow is what funds your life. Wealth-building investors weight IRR; income investors weight monthly cash flow.",
     related: ["coc", "noi", "afterTaxCF"],
-    toolUrl: "/tools/rental-cash-flow-calculator",
   },
   dscr: {
     term: "DSCR (Debt Service Coverage Ratio)",
@@ -117,7 +114,6 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     whyItMatters:
       "DSCR is the constraint metric on every investment-property loan. Below 1.20–1.25, most lenders won't fund the deal at all. DSCR also tells you how much safety margin the property has.",
     related: ["noi", "capRate", "ltv"],
-    toolUrl: "/tools/dscr-calculator",
     postUrl: "/blog/dscr-loans-explained",
   },
   noi: {
@@ -134,7 +130,6 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     whyItMatters:
       "NOI is the numerator in cap rate, DSCR, and most commercial valuation formulas. It also excludes debt service intentionally — so two investors with different financing on the same property have the same NOI.",
     related: ["capRate", "dscr", "cashFlow"],
-    toolUrl: "/tools/noi-calculator",
   },
   irr: {
     term: "IRR (Internal Rate of Return)",
@@ -206,9 +201,9 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     slug: "tax-savings",
     category: "metric",
     definition:
-      "Illustrative monthly year-1 tax effect at the entered marginal rate: modeled deductions netted against modeled taxable rental income. A positive or negative result is a scenario output, not a determination of the taxpayer's liability or current ability to use a loss.",
+      "An educational scenario that applies an assumed marginal rate to modeled taxable rental income or loss. It is not a determination of liability, eligibility, or whether a loss is currently usable.",
     whyItMatters:
-      "Depreciation can materially change modeled taxable rental income. TrueCap's figure is deliberately simplified: it applies the entered marginal rate and does not decide whether a loss is currently usable under passive-activity, at-risk, or material-participation rules. The estimate also runs both ways, so positive taxable rental income can produce a negative net tax impact.",
+      "Tax treatment can materially affect an investor's outcome, but it depends on the taxpayer, ownership, property use, basis, activity rules, and jurisdiction. TrueCap does not currently expose a tax-specific analysis module; use a qualified professional and taxpayer-specific model.",
     related: ["afterTaxCF", "depreciationYears", "buildingValue"],
   },
   afterTaxCF: {
@@ -216,9 +211,9 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     slug: "after-tax-cash-flow",
     category: "metric",
     definition:
-      "Monthly cash flow plus the estimated year-1 net tax effect — deductions (depreciation, deductible interest, operating expenses) netted against tax owed on the rental income. The same simplified math as the Illustrative Tax Impact panel's year-1 line.",
+      "Pre-tax cash flow adjusted by a taxpayer-specific estimate of income taxes attributable to the rental. TrueCap does not currently expose an after-tax cash-flow module.",
     whyItMatters:
-      "Most investors compare deals on pre-tax cash flow, but the post-tax number can shift the picture in both directions: a leveraged deal's deductions can turn a small pre-tax loss into an after-tax positive, while a strong cash-flower can owe tax on its rental income. TrueCap nets the two rather than counting deductions as a one-way bonus.",
+      "Tax treatment can shift an investor's realized result in either direction, but eligibility and timing depend on facts that a general rental screen cannot determine. Use a qualified professional and taxpayer-specific model.",
     related: ["cashFlow", "taxSavings", "depreciationYears"],
   },
 
@@ -262,13 +257,12 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     also: ["Buy Rehab Rent Refinance Repeat"],
     category: "strategy",
     definition:
-      "Buy, Rehab, Rent, Refinance, Repeat. A strategy that recycles capital across deals by refinancing based on the post-rehab value.",
+      "Buy, Rehab, Rent, Refinance, Repeat. A strategy that seeks to reuse capital through new financing after renovation and lease-up; the result depends on appraisal, lender terms, payoff, costs, timing, and stabilized operations.",
     example:
-      "Buy $80k. Rehab $30k. ARV $150k. Refi at 75% LTV → pull out $112.5k. Net capital in deal after refi: ~$0. Repeat.",
+      "Map acquisition uses, renovation funding and downtime, stabilized operations, the original-loan payoff, refinance fees and proceeds, and the new loan schedule before estimating capital remaining in the deal.",
     whyItMatters:
-      "BRRRR is the highest-leverage strategy in real estate when conditions are right (cheap distressed properties + appraisable rehab gains + capital-friendly refi rates). The trap: most deals fail at the refi step because the appraised ARV doesn't support the planned cash-out.",
+      "A simple ARV-times-LTV shortcut can overstate refinance proceeds and understate capital at risk. TrueCap keeps its BRRRR model unreleased until the full lifecycle reconciles across every result and report surface.",
     related: ["arv", "ltv", "capRate"],
-    toolUrl: "/tools/brrrr-calculator",
     postUrl: "/blog/brrrr-method-explained",
   },
   onePercentRule: {
@@ -295,7 +289,6 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     whyItMatters:
       "Eligible owner-occupants may have lower-down-payment financing options than investors. Down payment, occupancy certification, unit-count eligibility, reserves, mortgage insurance, and any later change in use depend on the specific loan documents and program; a 12-month scenario does not itself authorize conversion to a rental.",
     related: ["downPayment", "cashFlow", "brrrr"],
-    toolUrl: "/tools/house-hacking-calculator",
     postUrl: "/blog/house-hacking-explained",
   },
   exchange1031: {

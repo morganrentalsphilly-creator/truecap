@@ -63,7 +63,7 @@ export function AIInsights({
                 <div className="text-sm font-semibold text-foreground mt-0.5">{riskReturnInsights.highestReturn || "-"}</div>
               </div>
               <div>
-                <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Safest deal</div>
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Highest financed-deal DSCR</div>
                 <div className="text-sm font-semibold text-foreground mt-0.5">{riskReturnInsights.safest || "-"}</div>
               </div>
             </div>

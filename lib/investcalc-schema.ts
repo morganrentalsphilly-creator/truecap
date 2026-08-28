@@ -6,7 +6,7 @@ import {
 import { resolveV1AnalysisDate } from "@/lib/analysis-date";
 
 /** Bump when `investmentFormSchema` shape changes; used for persisted snapshots. */
-export const INVESTCALC_SCHEMA_VERSION = 11;
+export const INVESTCALC_SCHEMA_VERSION = 12;
 /** Product-wide lower bound for a supported residential acquisition price.
  * Keep inverse solvers and coarse preview ranges on the same accepted domain. */
 export const MIN_PURCHASE_PRICE = 10_000;
@@ -180,6 +180,14 @@ export const unitSchema = z.object({
       .min(0, "Rent must be 0 or more")
       .max(MAX_MONTHLY_RENT, "Monthly rent is too large"),
   ),
+  /** Optional stabilized rent for the same physical unit. The released v1
+   * current-rent roll remains `monthlyRent`; missing falls back to that value. */
+  stabilizedMonthlyRent: optionalUnitNumber(
+    z
+      .number({ invalid_type_error: "Enter stabilized monthly rent" })
+      .min(0, "Rent must be 0 or more")
+      .max(MAX_MONTHLY_RENT, "Monthly rent is too large"),
+  ),
   isOwnerOccupied: z.boolean().optional(),
 });
 
@@ -233,9 +241,16 @@ export const investmentFormSchema = z
     rentBasis: rentBasisSchema.optional(),
     currentMonthlyRent: optionalMoneyMo,
     stabilizedMonthlyRent: optionalMoneyMo,
+    currentPropertyValue: optionalPositiveMoney,
+    stabilizedPropertyValue: optionalPositiveMoney,
     acquisitionCredits: optionalMoney,
     recurringOtherIncomeMonthly: optionalMoneyMo,
     recurringOtherExpenseMonthly: optionalMoneyMo,
+    turnoverReserveMonthly: optionalMoneyMo,
+    leasingReserveMonthly: optionalMoneyMo,
+    landscapingMonthly: optionalMoneyMo,
+    pestControlMonthly: optionalMoneyMo,
+    administrativeMonthly: optionalMoneyMo,
 
     // Single-family unit details (optional at parse; required in superRefine when propertyType is single-family).
     // Must tolerate NaN from react-hook-form valueAsNumber on hidden/unmounted inputs after switching property type.
@@ -292,6 +307,24 @@ export const investmentFormSchema = z
     closingCostsFixed: optionalMoney,
     loanFees: optionalMoney,
     initialReserve: optionalMoney,
+    loanPointsPct: optionalPercent,
+    originationFee: optionalMoney,
+    interestOnlyMonths: optionalUnitNumber(
+      z
+        .number({ invalid_type_error: "Enter interest-only months" })
+        .int("Use whole months")
+        .min(0, "Min 0 months")
+        .max(600, "Max 600 months"),
+    ),
+    amortizationTermYears: optionalUnitNumber(
+      z
+        .number({ invalid_type_error: "Enter amortization term" })
+        .int("Use whole years")
+        .min(1, "Min 1 year")
+        .max(50, "Max 50 years"),
+    ),
+    lenderEscrowDeposit: optionalMoney,
+    lenderReserveDeposit: optionalMoney,
     /** Optional PMI / mortgage-insurance annual rate (% of loan balance). When
      * omitted, calc-analysis uses its screening default only for sub-20%-down
      * owner-occupant deals; investor rentals assume 0 unless the lender/template
@@ -302,8 +335,10 @@ export const investmentFormSchema = z
       if (!Number.isFinite(n)) return undefined;
       return n;
     }, z.number().min(0, "Min 0%").max(5, "Max 5%").optional()),
-    /** When true, mortgage insurance does NOT cancel at 80% LTV — models FHA MIP,
-     *  which (with the typical <10% down) runs for the life of the loan. */
+    /** Owner-occupant policy selector. True runs mortgage insurance through
+     * payoff; false uses scheduled 78% conventional termination. Rental-loan
+     * mortgage insurance is conservatively loan-life regardless of this legacy
+     * boolean until a loan-specific cancellation policy is supported. */
     pmiNoCancel: z.boolean().optional(),
 
     // Operating expenses. A deliberate 0 is valid; blank is unknown and blocks
@@ -335,6 +370,53 @@ export const investmentFormSchema = z
       .max(20, "Max 20%"),
     appreciationRatePct: optionalPercent,
     sellingCostPct: optionalPercent,
+    // Optional buy-and-hold lifecycle assumptions. They remain separate from
+    // default-dark BRRRR/fix-and-flip inputs: these fields describe the same
+    // rental hold, never a specialist strategy card.
+    renovationStartMonth: optionalUnitNumber(
+      z
+        .number({ invalid_type_error: "Enter renovation start month" })
+        .int("Use whole months")
+        .min(1, "Min month 1")
+        .max(120, "Max month 120"),
+    ),
+    renovationDurationMonths: optionalUnitNumber(
+      z
+        .number({ invalid_type_error: "Enter renovation duration" })
+        .int("Use whole months")
+        .min(0, "Min 0 months")
+        .max(120, "Max 120 months"),
+    ),
+    renovationRentLossPct: optionalPercent,
+    refinanceMonth: optionalUnitNumber(
+      z
+        .number({ invalid_type_error: "Enter refinance month" })
+        .int("Use whole months")
+        .min(1, "Min month 1")
+        .max(120, "Max month 120"),
+    ),
+    refinanceLtvPct: optionalPercent,
+    refinanceInterestRatePct: optionalInterestRate,
+    refinanceAmortizationTermYears: optionalUnitNumber(
+      z
+        .number({ invalid_type_error: "Enter refinance amortization term" })
+        .int("Use whole years")
+        .min(1, "Min 1 year")
+        .max(50, "Max 50 years"),
+    ),
+    refinanceLoanTermYears: optionalUnitNumber(
+      z
+        .number({ invalid_type_error: "Enter refinance loan term" })
+        .int("Use whole years")
+        .min(1, "Min 1 year")
+        .max(50, "Max 50 years"),
+    ),
+    refinanceClosingCostsPct: optionalUnitNumber(
+      z
+        .number({ invalid_type_error: "Enter refinance closing costs" })
+        .min(0, "Min 0%")
+        .max(20, "Max 20%"),
+    ),
 
     /** Monthly $ overrides when using advanced operating expenses; omitted = use auto estimates / zero. */
     propertyTaxPct: optionalPercent,
@@ -368,7 +450,7 @@ export const investmentFormSchema = z
     rehabBudget: optionalMoneyMo,
     // Durable specialist-model inputs. They remain optional and are ignored by
     // the core rental engine, but they change the persisted editor contract;
-    // schema version 11 records that boundary. BRRRR/flip cards consume them so
+    // schema version 12 records that boundary. BRRRR/flip cards consume them so
     // ARV, refi, hold, and sale assumptions survive draft/save/share/reopen.
     strategyArv: optionalPositiveMoney,
     strategyHoldMonths: optionalUnitNumber(
@@ -420,6 +502,69 @@ export const investmentFormSchema = z
           path: ["yearBuilt"],
           message: "Year too far in future",
         });
+      }
+    }
+
+    // Generic refinance fields are deliberately accepted by the persisted
+    // shape so a future version can name the exact rejected assumption, but a
+    // released buy-and-hold run must not silently ignore them. A trustworthy
+    // refinance requires a second loan schedule, original-loan payoff, costs,
+    // proceeds/distribution treatment, and post-refinance cash-flow/return
+    // parity. Until that complete lifecycle exists, fail closed at parse time.
+    const hasGenericRefinanceAssumptions = [
+      values.refinanceMonth,
+      values.refinanceLtvPct,
+      values.refinanceInterestRatePct,
+      values.refinanceAmortizationTermYears,
+      values.refinanceLoanTermYears,
+      values.refinanceClosingCostsPct,
+    ].some((value) => value !== undefined);
+    if (hasGenericRefinanceAssumptions) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["refinanceMonth"],
+        message:
+          "Refinance lifecycle modeling is not released; remove these assumptions to run the buy-and-hold analysis",
+      });
+    }
+
+    const renovationFields = [
+      values.renovationStartMonth,
+      values.renovationDurationMonths,
+      values.renovationRentLossPct,
+    ];
+    if (renovationFields.some((value) => value !== undefined)) {
+      const requiredRenovation: Array<
+        [
+          (
+            | "renovationStartMonth"
+            | "renovationDurationMonths"
+            | "renovationRentLossPct"
+          ),
+          number | undefined,
+          string,
+        ]
+      > = [
+        [
+          "renovationStartMonth",
+          values.renovationStartMonth,
+          "Enter the renovation start month",
+        ],
+        [
+          "renovationDurationMonths",
+          values.renovationDurationMonths,
+          "Enter the renovation duration",
+        ],
+        [
+          "renovationRentLossPct",
+          values.renovationRentLossPct,
+          "Enter the rent reduction or type 0",
+        ],
+      ];
+      for (const [path, value, message] of requiredRenovation) {
+        if (typeof value !== "number" || !Number.isFinite(value)) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, path: [path], message });
+        }
       }
     }
 
@@ -581,11 +726,37 @@ export const investmentFormSchema = z
           });
         }
       }
-      if (values.financingMode === "cash" && values.loanFees !== 0) {
+      if (values.financingMode === "cash") {
+        const cashOnlyLoanFields: Array<
+          [keyof InvestmentFormValues, number | undefined]
+        > = [
+          ["loanPointsPct", values.loanPointsPct],
+          ["originationFee", values.originationFee],
+          ["loanFees", values.loanFees],
+          ["interestOnlyMonths", values.interestOnlyMonths],
+          ["amortizationTermYears", values.amortizationTermYears],
+          ["lenderEscrowDeposit", values.lenderEscrowDeposit],
+          ["lenderReserveDeposit", values.lenderReserveDeposit],
+        ];
+        for (const [path, value] of cashOnlyLoanFields) {
+          if (typeof value === "number" && value !== 0) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              path: [path],
+              message: "Remove loan-only terms from a cash acquisition",
+            });
+          }
+        }
+      }
+
+      if (
+        typeof values.interestOnlyMonths === "number" &&
+        values.interestOnlyMonths > values.loanTermYears * 12
+      ) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          path: ["loanFees"],
-          message: "Cash acquisitions must use $0 loan fees",
+          path: ["interestOnlyMonths"],
+          message: "Interest-only period cannot exceed loan maturity",
         });
       }
 
@@ -629,19 +800,31 @@ export const investmentFormSchema = z
               : values.financingMode === "percent-down"
                 ? values.purchasePrice * (values.downPaymentPct / 100)
                 : undefined;
-      if (
-        typeof values.acquisitionCredits === "number" &&
+      const v2LoanAmount =
+        typeof downPayment === "number"
+          ? Math.max(0, values.purchasePrice - downPayment)
+          : undefined;
+      const v2AcquisitionCashUses =
         typeof downPayment === "number" &&
         typeof closingCosts === "number" &&
         typeof values.loanFees === "number" &&
         typeof values.rehabBudget === "number" &&
-        typeof values.initialReserve === "number" &&
-        values.acquisitionCredits >
-          downPayment +
+        typeof values.initialReserve === "number"
+          ? downPayment +
             closingCosts +
             values.loanFees +
             values.rehabBudget +
-            values.initialReserve
+            values.initialReserve +
+            (v2LoanAmount ?? 0) * ((values.loanPointsPct ?? 0) / 100) +
+            (values.originationFee ?? 0) +
+            (values.lenderEscrowDeposit ?? 0) +
+            (values.lenderReserveDeposit ?? 0) +
+            (values.strFurnishingCost ?? 0)
+          : undefined;
+      if (
+        typeof values.acquisitionCredits === "number" &&
+        typeof v2AcquisitionCashUses === "number" &&
+        values.acquisitionCredits > v2AcquisitionCashUses
       ) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -653,6 +836,84 @@ export const investmentFormSchema = z
       // v2 uses one explicit property-total scheduled-rent line. Unit rows may
       // still hold property facts, but they cannot silently replace that line.
       return;
+    }
+
+    if (
+      typeof values.interestOnlyMonths === "number" &&
+      values.interestOnlyMonths > values.loanTermYears * 12
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["interestOnlyMonths"],
+        message: "Interest-only period cannot exceed loan maturity",
+      });
+    }
+
+    if (
+      values.closingCostsInputMode === "fixed" &&
+      (typeof values.closingCostsFixed !== "number" ||
+        !Number.isFinite(values.closingCostsFixed))
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["closingCostsFixed"],
+        message: "Enter fixed closing costs or type 0",
+      });
+    }
+
+    const isV1CashAcquisition = values.downPaymentPct >= 100;
+    if (isV1CashAcquisition) {
+      const cashOnlyLoanFields: Array<
+        [keyof InvestmentFormValues, number | undefined]
+      > = [
+        ["loanPointsPct", values.loanPointsPct],
+        ["originationFee", values.originationFee],
+        ["loanFees", values.loanFees],
+        ["interestOnlyMonths", values.interestOnlyMonths],
+        ["amortizationTermYears", values.amortizationTermYears],
+        ["lenderEscrowDeposit", values.lenderEscrowDeposit],
+        ["lenderReserveDeposit", values.lenderReserveDeposit],
+      ];
+      for (const [path, value] of cashOnlyLoanFields) {
+        if (typeof value === "number" && value !== 0) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: [path],
+            message: "Remove loan-only terms from an all-cash acquisition",
+          });
+        }
+      }
+    }
+
+    const v1ClosingCosts =
+      values.closingCostsInputMode === "fixed"
+        ? values.closingCostsFixed
+        : values.purchasePrice * ((values.closingCostsPct ?? 3) / 100);
+    const v1DownPayment = values.purchasePrice * (values.downPaymentPct / 100);
+    const v1LoanAmount = Math.max(0, values.purchasePrice - v1DownPayment);
+    const v1AcquisitionCashUses =
+      typeof v1ClosingCosts === "number"
+        ? v1DownPayment +
+          v1ClosingCosts +
+          v1LoanAmount * ((values.loanPointsPct ?? 0) / 100) +
+          (values.originationFee ?? 0) +
+          (values.loanFees ?? 0) +
+          (values.initialReserve ?? 0) +
+          (values.lenderEscrowDeposit ?? 0) +
+          (values.lenderReserveDeposit ?? 0) +
+          (values.rehabBudget ?? 0) +
+          (values.strFurnishingCost ?? 0)
+        : undefined;
+    if (
+      typeof values.acquisitionCredits === "number" &&
+      typeof v1AcquisitionCashUses === "number" &&
+      values.acquisitionCredits > v1AcquisitionCashUses
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["acquisitionCredits"],
+        message: "Credits cannot exceed modeled acquisition cash uses",
+      });
     }
 
     const addSingleFamilyUnitDetailsIssues = () => {
@@ -758,6 +1019,18 @@ export const investmentFormSchema = z
     };
 
     if (values.propertyType === "single-family") {
+      if (
+        values.operatingScenario === "stabilized" &&
+        (typeof values.stabilizedMonthlyRent !== "number" ||
+          !Number.isFinite(values.stabilizedMonthlyRent) ||
+          values.stabilizedMonthlyRent <= 0)
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["stabilizedMonthlyRent"],
+          message: "Enter stabilized monthly rent greater than 0",
+        });
+      }
       addSingleFamilyUnitDetailsIssues();
       return;
     }
@@ -776,6 +1049,19 @@ export const investmentFormSchema = z
         values.propertyType === "owner-occupant" && !!unit?.isOwnerOccupied;
       if (!isValidRentalUnit(unit, { allowZeroRent })) {
         addUnitRowFieldIssues(unit, index, { allowZeroRent });
+      }
+      if (
+        values.operatingScenario === "stabilized" &&
+        !allowZeroRent &&
+        (typeof unit?.stabilizedMonthlyRent !== "number" ||
+          !Number.isFinite(unit.stabilizedMonthlyRent) ||
+          unit.stabilizedMonthlyRent <= 0)
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["units", index, "stabilizedMonthlyRent"],
+          message: "Enter stabilized monthly rent greater than 0",
+        });
       }
     });
 
@@ -1035,6 +1321,7 @@ function normalizeUnit(raw: unknown): UnitValues {
     bathrooms: asNumber(unit?.bathrooms),
     sqft: asNumber(unit?.sqft),
     monthlyRent: asNumber(unit?.monthlyRent),
+    stabilizedMonthlyRent: asNumber(unit?.stabilizedMonthlyRent),
     isOwnerOccupied: asBoolean(unit?.isOwnerOccupied),
   };
 }
@@ -1068,6 +1355,20 @@ function sanitizeSnapshotFields(
         ? ("monthly" as const)
         : ("percent" as const);
 
+  // Optional additions must stay absent when an older snapshot never carried
+  // them. Writing `{ field: undefined }` is observably different in memory,
+  // and it caused a reopened legacy v1 deal to look as though it had opted in
+  // to the advanced buy-and-hold contract. JSON would eventually drop those
+  // keys, but calculation/result-shape checks run before that boundary.
+  const optionalNumber = <K extends keyof InvestmentFormValues>(
+    key: K,
+  ): Partial<Pick<InvestmentFormValues, K>> => {
+    const value = asNumber(snapshot[key as string]);
+    return value === undefined
+      ? {}
+      : ({ [key]: value } as Partial<Pick<InvestmentFormValues, K>>);
+  };
+
   return {
     propertyType,
     purchasePrice: asNumber(snapshot.purchasePrice),
@@ -1076,10 +1377,43 @@ function sanitizeSnapshotFields(
     bathrooms: asNumber(snapshot.bathrooms),
     sqft: asNumber(snapshot.sqft),
     monthlyRent: asNumber(snapshot.monthlyRent),
+    ...(snapshot.operatingScenario === "current" ||
+    snapshot.operatingScenario === "stabilized"
+      ? { operatingScenario: snapshot.operatingScenario }
+      : {}),
+    ...(snapshot.rentBasis === "in-place" ||
+    snapshot.rentBasis === "market" ||
+    snapshot.rentBasis === "pro-forma"
+      ? { rentBasis: snapshot.rentBasis }
+      : {}),
+    ...optionalNumber("stabilizedMonthlyRent"),
+    ...optionalNumber("currentPropertyValue"),
+    ...optionalNumber("stabilizedPropertyValue"),
+    ...optionalNumber("acquisitionCredits"),
+    ...optionalNumber("recurringOtherIncomeMonthly"),
+    ...optionalNumber("recurringOtherExpenseMonthly"),
+    ...optionalNumber("turnoverReserveMonthly"),
+    ...optionalNumber("leasingReserveMonthly"),
+    ...optionalNumber("landscapingMonthly"),
+    ...optionalNumber("pestControlMonthly"),
+    ...optionalNumber("administrativeMonthly"),
     downPaymentPct: asNumber(snapshot.downPaymentPct),
     interestRate: asNumber(snapshot.interestRate),
     loanTermYears: asNumber(snapshot.loanTermYears),
     closingCostsPct: asNumber(snapshot.closingCostsPct),
+    ...(snapshot.closingCostsInputMode === "percent" ||
+    snapshot.closingCostsInputMode === "fixed"
+      ? { closingCostsInputMode: snapshot.closingCostsInputMode }
+      : {}),
+    ...optionalNumber("closingCostsFixed"),
+    ...optionalNumber("loanFees"),
+    ...optionalNumber("initialReserve"),
+    ...optionalNumber("loanPointsPct"),
+    ...optionalNumber("originationFee"),
+    ...optionalNumber("interestOnlyMonths"),
+    ...optionalNumber("amortizationTermYears"),
+    ...optionalNumber("lenderEscrowDeposit"),
+    ...optionalNumber("lenderReserveDeposit"),
     pmiAnnualRatePct: asNumber(snapshot.pmiAnnualRatePct),
     pmiNoCancel: asBoolean(snapshot.pmiNoCancel),
     maintenancePct: asNumber(snapshot.maintenancePct),
@@ -1110,6 +1444,15 @@ function sanitizeSnapshotFields(
     occupancyPct: asNumber(snapshot.occupancyPct),
     strFurnishingCost: asNumber(snapshot.strFurnishingCost),
     rehabBudget: asNumber(snapshot.rehabBudget),
+    ...optionalNumber("renovationStartMonth"),
+    ...optionalNumber("renovationDurationMonths"),
+    ...optionalNumber("renovationRentLossPct"),
+    ...optionalNumber("refinanceMonth"),
+    ...optionalNumber("refinanceLtvPct"),
+    ...optionalNumber("refinanceInterestRatePct"),
+    ...optionalNumber("refinanceAmortizationTermYears"),
+    ...optionalNumber("refinanceLoanTermYears"),
+    ...optionalNumber("refinanceClosingCostsPct"),
     strategyArv: asNumber(snapshot.strategyArv),
     strategyHoldMonths: asNumber(snapshot.strategyHoldMonths),
     brrrrRefiLtvPct: asNumber(snapshot.brrrrRefiLtvPct),

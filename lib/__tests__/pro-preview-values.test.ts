@@ -57,11 +57,11 @@ describe("buildProPreviewValues", () => {
     expect(tiles).not.toBeNull();
     const projection = result.tenYearProjection;
     const lastYear = projection[projection.length - 1]!;
-    const bestAfterTax = Math.max(...projection.map((y) => y.afterTaxCashFlowAnnual));
-    const totalAfterTax = projection.reduce((sum, y) => sum + y.afterTaxCashFlowAnnual, 0);
+    const bestAnnualCashFlow = Math.max(...projection.map((y) => y.netCashFlowAnnual));
+    const totalOperatingCashFlow = projection.reduce((sum, y) => sum + y.netCashFlowAnnual, 0);
     expect(tiles![0]).toBe(formatProPreviewMoney(lastYear.cumulativeCashFlowAnnual));
-    expect(tiles![1]).toBe(formatProPreviewMoney(bestAfterTax));
-    expect(tiles![2]).toBe(formatProPreviewMoney(totalAfterTax));
+    expect(tiles![1]).toBe(formatProPreviewMoney(bestAnnualCashFlow));
+    expect(tiles![2]).toBe(formatProPreviewMoney(totalOperatingCashFlow));
   });
 
   it("tax-strategy tiles come from the embedded tax-strategy years", () => {

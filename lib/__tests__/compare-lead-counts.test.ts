@@ -137,12 +137,14 @@ describe("comparison selection recovery", () => {
     expect(client).toContain("removeCompareDealAction(deal.id)");
   });
 
-  it("uses exactly three disclosed long-term score rows", () => {
+  it("retains directional long-term review rows without a rendered aggregate score", () => {
     for (const key of ["ltTenYearCashFlow", "ltYear10NetSaleProceeds", "ltIrr"]) {
       const rowStart = client.indexOf(`key: "${key}"`);
       expect(rowStart).toBeGreaterThan(-1);
-      expect(client.slice(rowStart, rowStart + 500)).toContain("scoreMetric: true");
+      expect(client.slice(rowStart, rowStart + 500)).toContain('direction: "higher"');
     }
-    expect(client).toContain("Long-term counts only 10-year cash flow, year-10 net sale proceeds, and recorded IRR when available");
+    expect(client).toContain("getBestLongTermDealIds");
+    expect(client).not.toContain("Long-term counts only");
+    expect(client).not.toMatch(/Near-term score|Long-term score|lead count/);
   });
 });

@@ -57,31 +57,6 @@ export const revalidate = 3600;
  * Rule (docs/seo-content-backlog.md): do NOT hardcode the tool list.
  */
 const TOOL_FORMULAS: Record<string, { formula: string; description: string }> = {
-  "cap-rate-calculator": {
-    formula: "Cap rate = NOI ÷ Property value",
-    description:
-      "Capitalization rate. The unleveraged annual return a rental property generates, independent of financing. Tier-1 coastal markets typically 5-6%, Midwest/Sun Belt 6-8%, cash-flow markets 8-10%.",
-  },
-  "cash-on-cash-calculator": {
-    formula: "CoC = Annual cash flow ÷ Total cash invested",
-    description:
-      "Pre-tax annual return on the actual cash invested (down payment + closing costs + initial rehab). Most buy-and-hold investors target 8-12%.",
-  },
-  "dscr-calculator": {
-    formula: "DSCR = NOI ÷ Annual debt service",
-    description:
-      "Debt Service Coverage Ratio. The metric every commercial and investment-property lender uses to qualify a deal. 1.20-1.25 minimum for most lenders; 1.30+ preferred.",
-  },
-  "noi-calculator": {
-    formula: "NOI = Gross rent - Vacancy - Operating expenses",
-    description:
-      "Net Operating Income. Annual rental income after vacancy and all operating expenses (property tax, insurance, maintenance, PM, utilities, capex reserves), but before mortgage interest, depreciation, and income tax.",
-  },
-  "brrrr-calculator": {
-    formula: "Cash out = Refi LTV × ARV - Existing debt - Closing costs",
-    description:
-      "Buy, Rehab, Rent, Refinance, Repeat strategy modeling. Calculates all-in cost (purchase + rehab + holding), after-repair value (ARV), refinance cash-out at typical 75% LTV, and whether the strategy recycles capital efficiently.",
-  },
   "1-percent-rule-calculator": {
     formula: "Monthly rent ≥ 1% × Purchase price",
     description:
@@ -92,33 +67,16 @@ const TOOL_FORMULAS: Record<string, { formula: string; description: string }> = 
     description:
       "The strict cash-flow screen. Rent-to-price measured against both the 2% and 1% bars. In 2026 almost nothing clears 2% outside low-priced Midwest and Rust Belt markets — treat a pass as a prompt to check why the price is that low, not as a green light.",
   },
-  "50-percent-rule-calculator": {
-    formula: "Operating expenses ≈ 50% × Gross rent; NOI = Gross rent × 50%",
-    description:
-      "Three-second expense triage. Assumes operating expenses (excluding mortgage) run about half of gross rent, then derives NOI and cash flow. Useful when a seller pro forma shows a 25% expense ratio and you want a sanity check before spending time on a full underwrite.",
-  },
   "70-percent-rule-calculator": {
-    formula: "Offer Ceiling = (0.70 × ARV) - Repair costs",
+    formula: "70%-rule price screen = (0.70 × ARV) - Repair costs",
     description:
-      "The flip and BRRRR screen. Caps the offer at 70% of after-repair value minus the rehab budget, leaving room for holding costs, selling costs, and profit. Supports the other common multipliers (65%, 75%, 80%) since the right number varies by market heat and deal size.",
+      "An educational flip and BRRRR screen. It applies a selected percentage to entered after-repair value and subtracts the entered rehab budget. It is not an underwrite, appraisal, or recommended offer.",
   },
   "arv-calculator": {
     formula:
-      "ARV = Median comp price per sq ft × Subject sq ft; Offer Ceiling = (0.70 × ARV) - Repairs",
+      "ARV = Average entered comp price per sq ft × Subject sq ft; 70%-rule price screen = (0.70 × ARV) - Repairs",
     description:
-      "Comps-based after-repair value plus the 70%-rule Offer Ceiling. ARV is the number every flip and BRRRR decision hangs on — get it wrong by 10% and the whole deal inverts.",
-  },
-  "house-hacking-calculator": {
-    formula:
-      "Effective housing cost = PITI - Tenant rent received (net of that unit's share of expenses)",
-    description:
-      "Live in one unit, rent the rest. Models effective monthly housing cost after tenant rent, compares it against renting the same space, and shows what the property looks like as a pure rental once you move out.",
-  },
-  "rental-cash-flow-calculator": {
-    formula:
-      "Monthly cash flow = Gross rent - Vacancy - Operating expenses - Mortgage P&I",
-    description:
-      `Monthly cash flow after every operating expense and the mortgage, with the NOI and debt-service split shown separately. Current analyzer defaults: vacancy ${CURRENT_DEFAULT_FACTS.vacancy}, maintenance ${CURRENT_DEFAULT_FACTS.maintenance}, CapEx ${CURRENT_DEFAULT_FACTS.capex}, and management ${CURRENT_DEFAULT_FACTS.management}. Every value is editable.`,
+      "An educational ARV estimate from user-entered sold comps plus a separately labeled 70%-rule price screen. Neither output is an appraisal, underwrite, or recommended offer.",
   },
   "rehab-cost-estimator": {
     formula: "Total rehab = Σ (Sq ft × Rate per sq ft) per work category",
@@ -141,12 +99,6 @@ const TOOL_FORMULAS: Record<string, { formula: string; description: string }> = 
     description:
       "How many months until rental cash flow returns the initial investment. Compares deals on payback speed.",
   },
-  "roi-calculator": {
-    formula:
-      "Total return = Annual cash flow + Principal paydown + Appreciation",
-    description:
-      "Total annualized return on a rental — cash flow plus principal paydown plus appreciation in one composite number.",
-  },
   "closing-cost-calculator": {
     formula:
       "Total = Origination + Title + Recording + Transfer tax + Insurance prepay + Tax escrow + Appraisal + Inspection",
@@ -158,12 +110,6 @@ const TOOL_FORMULAS: Record<string, { formula: string; description: string }> = 
       "Vacancy rate = (Vacant days × Daily rent + Turnover cost) ÷ Annual gross rent",
     description:
       "Effective vacancy rate from vacant days + turnover cost. National average on residential rentals runs 7-9%; most seller pro formas quote 5%, which is aggressive.",
-  },
-  "rental-property-tax-calculator": {
-    formula:
-      "Schedule E income = Gross rent - Operating expenses - Mortgage interest - Depreciation (Building basis ÷ 27.5)",
-    description:
-      "Models Schedule E taxable income, 27.5-year residential depreciation, after-tax cash flow, and the depreciation tax-shield value.",
   },
 };
 
@@ -198,7 +144,7 @@ export async function GET() {
     "Single Deal: new one-time report purchases are temporarily unavailable.",
     `Pro: ${PLAN_FACTS.pro}`,
     `Agent Pro: ${PLAN_FACTS.agentPro}`,
-    `Eligible first-time subscribers receive a ${PLAN_FACTS.trialDays}-day trial. Current recurring prices and plan availability are published at ${siteUrl}${PLAN_FACTS.pricingSource}; Stripe is the source of truth, so this reference does not copy price amounts.`,
+    `New accounts receive a ${PLAN_FACTS.evaluationDays}-day no-card product evaluation covering ${PLAN_FACTS.evaluationDealLimit} Pro deals and ${PLAN_FACTS.evaluationComparisonLimit} comparison. It does not auto-renew. Current recurring prices and plan availability are published at ${siteUrl}${PLAN_FACTS.pricingSource}; Stripe checkout is the billing authority.`,
     "",
     "All TrueCap content is original, authoritative, and intended as a citable reference for real estate investing questions. Preferred citation: \"[Title](URL) — TrueCap\".",
   ].join("\n");

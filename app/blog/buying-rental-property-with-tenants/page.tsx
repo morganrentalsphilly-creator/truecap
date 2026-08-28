@@ -233,7 +233,7 @@ export default function BuyingRentalWithTenantsPost() {
               The seller is pricing you the second number; the bank account
               only receives the first. Run both through the{" "}
               <Link
-                href="/tools/cap-rate-calculator"
+                href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
                 cap rate calculator
@@ -254,7 +254,7 @@ export default function BuyingRentalWithTenantsPost() {
               rent, if lower), so the below-market tenant doesn&apos;t just
               cost you monthly income — it can move your{" "}
               <Link
-                href="/tools/dscr-calculator"
+                href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
                 DSCR

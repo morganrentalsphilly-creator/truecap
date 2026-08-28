@@ -38,7 +38,7 @@ const FOOTER_COLS: Array<{
       { label: "Free analyzer", href: "/" },
       { label: "Pricing", href: "/pricing" },
       { label: "Why TrueCap", href: "/why-truecap" },
-      { label: "Customer reviews", href: "/reviews" },
+      { label: "Proof & methodology", href: "/reviews" },
       // /methodology (every formula + data source) had zero inbound links
       // from the product itself before the Jul 2026 trust-polish audit —
       // it is the page a skeptical investor wants, so it stays.
@@ -79,9 +79,6 @@ const FOOTER_COLS: Array<{
     links: [
       { label: "Buy-and-hold investors", href: "/for-buy-and-hold" },
       { label: "House hackers", href: "/for-house-hackers" },
-      { label: "BRRRR operators", href: "/for-brrrr" },
-      { label: "Fix & flippers", href: "/for-flippers" },
-      { label: "Real estate agents", href: "/for-agents" },
     ],
   },
   {

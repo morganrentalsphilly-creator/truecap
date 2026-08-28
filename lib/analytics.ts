@@ -60,6 +60,7 @@ export type FunnelEvent =
   | "verification_task_completed"
   | "decision_recorded"
   | "comparison_completed"
+  | "evaluation_comparison_used"
   | "shortlist_item_promoted"
   | "paywall_viewed"
   | "complete_decision_trial_started"
@@ -120,6 +121,15 @@ export type FunnelEvent =
   | "assumptions_opened"
   | "assumptions_updated"
   | "analysis_completed"
+  | "first_analysis_completed"
+  | "account_created"
+  | "product_evaluation_started"
+  | "evaluation_deal_completed"
+  | "second_deal_completed"
+  | "first_value_within_24h"
+  | "save_prompt_shown"
+  | "retained_30d"
+  | "retained_90d"
   | "analyzer_completed"
   | "decision_viewed"
   | "targets_opened"
@@ -168,7 +178,7 @@ export type FunnelEvent =
   // Compare pro_checkout_started rates for sessions with vs without
   // this event to measure whether tasting Pro sells Pro.
   | "sample_pro_preview_viewed" // properties: property_type
-  // One-time $5 lender PDF (Stripe Checkout `payment` mode).
+  // One-time $9 Decision Pack (Stripe Checkout `payment` mode).
   // started → user left for Stripe; purchased → verified paid on return.
   // The gap between the two = one-time checkout drop-off.
   | "one_time_pdf_checkout_started" // properties: property_type
@@ -247,7 +257,7 @@ export type FunnelEvent =
   | "go_deeper_opened"
   | "testimonial_prompt_shown"
   | "testimonial_submitted"
-  | "pack_credit_offer_shown"   // post-purchase "$5 toward Pro" toast
+  | "pack_credit_offer_shown"   // post-purchase "$9 toward Pro" toast
   | "testimonial_prompt_shown"     // properties: source
   | "testimonial_prompt_submitted" // properties: source, consented
   | "testimonial_prompt_dismissed" // properties: via

@@ -36,6 +36,8 @@ export type OfferCeilingConstraintKey =
   | "cash-on-cash"
   | "cash-flow"
   | "dscr"
+  | "irr"
+  | "cash-required"
   | "purchase-price";
 
 export type OfferCeilingConstraint = {

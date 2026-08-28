@@ -68,12 +68,15 @@ type ComparisonCard = {
 // Ordered roughly by audience size + search demand so the most-relevant
 // comparisons land first.
 const COMPARISONS: ComparisonCard[] = [
-  // Direct alternatives — head-to-head calculators
+  // Direct alternatives — overlapping acquisition-analysis workflows
   { slug: "dealcheck", competitor: "DealCheck",
-    tagline: "The other modern rental calculator. Deeper free tier, simpler pricing, and selected-rule fit.",
+    tagline: "A modern rental calculator with different free limits, mobile apps, and strategy coverage; compare the published workflows directly.",
     group: "Direct alternative" },
   { slug: "biggerpockets-calculator", competitor: "BiggerPockets Calculator",
-    tagline: "The household name. We're newer, faster, with a deeper free tier and everything bundled in one Pro tier.",
+    tagline: "A community-bundled calculator compared with TrueCap's no-account preliminary screen and paid decision workflow.",
+    group: "Direct alternative" },
+  { slug: "stessa", competitor: "Stessa",
+    tagline: "Stessa spans acquisition discovery and underwriting through owned-property operations. TrueCap is narrower acquisition decision support.",
     group: "Direct alternative" },
   { slug: "excel", competitor: "Excel / Google Sheets",
     tagline: "A structured, mobile-friendly workflow with one documented engine; keep spreadsheets for custom models that need their flexibility.",
@@ -81,10 +84,7 @@ const COMPARISONS: ComparisonCard[] = [
 
   // Complementary tools — post-purchase ops, accounting, banking
   { slug: "bricked", competitor: "Bricked AI",
-    tagline: "Bricked tells flippers what a house is worth — AI comps, ARV, repairs. TrueCap tells investors what a rental will earn.",
-    group: "Complementary tool" },
-  { slug: "stessa", competitor: "Stessa",
-    tagline: "Stessa is rental accounting for properties you own. TrueCap underwrites the ones you're considering buying.",
+    tagline: "Bricked focuses on flip-oriented comps, ARV, and repairs. TrueCap models rental economics under the assumptions shown.",
     group: "Complementary tool" },
   { slug: "baselane", competitor: "Baselane",
     tagline: "Baselane is rental banking + bookkeeping + rent collection. TrueCap is the pre-purchase underwrite.",
@@ -177,14 +177,8 @@ const COMPARISONS: ComparisonCard[] = [
     tagline: "QuickBooks is general accounting many landlords default to. TrueCap is pre-purchase underwriting.",
     group: "Complementary tool" },
   // Niche use-case slices
-  { slug: "dealcheck-for-brrrr", competitor: "DealCheck for BRRRR",
-    tagline: "BRRRR-specific cut of TrueCap vs DealCheck — cash-out refi math, ARV modeling, infinite-return detection.",
-    group: "Direct alternative" },
   { slug: "biggerpockets-for-house-hacking", competitor: "BiggerPockets for House Hacking",
     tagline: "House-hack cut of TrueCap vs BiggerPockets — owner-occupant unit modeling, FHA financing, effective rent saved.",
-    group: "Direct alternative" },
-  { slug: "dealcheck-for-fix-and-flip", competitor: "DealCheck for Fix & Flip",
-    tagline: "Flipper's cut of TrueCap vs DealCheck — ARV, rehab, holding costs, break-even ARV.",
     group: "Direct alternative" },
   { slug: "dealcheck-for-short-term-rentals", competitor: "DealCheck for STRs",
     tagline: "STR investor's cut of TrueCap vs DealCheck — ADR, occupancy, AirDNA inputs, and tax-model limits.",
@@ -201,7 +195,7 @@ const GROUPS = [
   {
     label: "Direct alternatives",
     description:
-      "Tools that try to do the same job TrueCap does — underwrite a rental deal end-to-end. Compare features, pricing, and free tier depth.",
+      "Tools whose acquisition-analysis workflow overlaps with TrueCap. Compare scope, assumptions, pricing, and free access directly.",
     items: COMPARISONS.filter((c) => c.group === "Direct alternative"),
   },
   {

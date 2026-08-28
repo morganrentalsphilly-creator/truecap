@@ -10,6 +10,7 @@
  */
 
 import { cn } from "@/lib/utils";
+import { formatDscr } from "@/lib/financial-presentation";
 import { useCookieBannerOpen } from "@/lib/use-cookie-banner";
 import { GlossaryTip } from "./glossary-tip";
 import { useEffect, useState, type ReactNode } from "react";
@@ -236,9 +237,10 @@ export function LiveVerdictPanel({
                 </GlossaryTip>
               </div>
               <div className="font-mono text-lg font-bold tabular-nums text-foreground sm:text-xl">
-                {livePreview.monthlyPayment <= 0
-                  ? "—"
-                  : livePreview.dscr.toFixed(2)}
+                {formatDscr(
+                  livePreview.dscr,
+                  livePreview.monthlyPayment > 0,
+                )}
               </div>
             </div>
           </div>
@@ -271,8 +273,8 @@ export function LiveVerdictPanel({
             </p>
           ) : null}
           <p className="mt-2.5 text-[11px] leading-snug text-muted-foreground">
-            Updating as you type — run the full analysis for projections,
-            illustrative tax impact &amp; modeled exits.
+            Updating as you type — run the full analysis for a target-backed
+            Offer Ceiling, sensitivity, and 10-year cash-flow and equity projections.
           </p>
         </div>
       ) : null}

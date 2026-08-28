@@ -17,9 +17,18 @@
  * lib/pdf/vector-charts, and the canvas logo round-trip → lib/pdf/load-image).
  *
  * ─── WHO IS ALLOWED ─────────────────────────────────────────────────────────
- *   1. A signed-in user whose plan carries the `pdf_export` feature, or
- *   2. Anyone recovering a valid, unexpired historical one-time paid claim
- *      whose secret and deal fingerprint both match the ledger.
+ *   1. A browser holding the signed grant for its one exact no-signup deal
+ *      (personal mode only, including after that browser signs in),
+ *   2. A signed-in user whose plan carries the `pdf_export` feature,
+ *   3. A signed-in evaluation user exporting the exact saved, metered deal,
+ *      or
+ *   4. Anyone recovering a valid, unexpired historical one-time paid claim
+ *      whose secret and deal fingerprint both match the ledger (personal mode
+ *      only).
+ *
+ * Lender and partner modes require the paid-plan export entitlement. Agent
+ * mode additionally requires the released Agent Pro configuration and its
+ * agent-only entitlement.
  *
  * Everyone else gets ENTITLEMENT_REQUIRED and no bytes.
  *
@@ -39,6 +48,7 @@ import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe/client";
 import { retrieveDecisionPackStripeAccess } from "@/lib/stripe/decision-pack-access";
 import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
+import { activeMeteredEvaluationDealGrantsAccess } from "@/lib/evaluation-access-server";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import {
   normalizeReleasedInvestmentFormSnapshot,
@@ -66,6 +76,9 @@ import {
 } from "@/lib/analyzer-strategy-persistence";
 import { PDF_CACHE_VERSION } from "@/lib/pdf-export-constants";
 import { signSavedAnalysisPdfArtifact } from "@/lib/pdf/saved-analysis-artifact-attestation";
+import { activeAnonymousDecisionGrantMatches } from "@/lib/anonymous-decision-grant";
+import { reportModeAllowedForAuthority } from "@/lib/pdf-report-mode-access";
+import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 
 export type GenerateReportPdfResult =
   | {
@@ -302,6 +315,10 @@ async function checkGate(
   input: z.infer<typeof inputSchema>,
 ): Promise<GateOutcome> {
   if (
+    reportModeAllowedForAuthority({
+      mode: input.mode,
+      authority: "one_time_claim",
+    }) &&
     input.claim &&
     // Bind the claim to the exact normalized form values the server will
     // calculate and render. Browser-derived report numbers are never part of
@@ -316,6 +333,16 @@ async function checkGate(
     return { allowed: true };
   }
 
+  // The browser's exact no-signup decision remains its first decision after
+  // sign-in; authenticating must not spend one of the three evaluation deals.
+  // Its authority is still personal-mode-only.
+  const anonymousGrantAccess =
+    reportModeAllowedForAuthority({
+      mode: input.mode,
+      authority: "anonymous_grant",
+    }) && (await activeAnonymousDecisionGrantMatches(input.values));
+  if (anonymousGrantAccess) return { allowed: true };
+
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -327,20 +354,58 @@ async function checkGate(
       result: {
         ok: false,
         code: "SIGN_IN_REQUIRED",
-        message: "Please sign in to export this report.",
+        message:
+          "This report is available only for the exact no-signup decision or after signing in.",
       },
     };
   }
 
   const entitlements = await getEntitlementsForUser(supabase, user.id);
-  if (!hasPlanFeature(entitlements, "pdf_export")) {
+  const hasPlanExport = hasPlanFeature(entitlements, "pdf_export");
+  if (
+    hasPlanExport &&
+    reportModeAllowedForAuthority({
+      mode: input.mode,
+      authority: "paid_plan",
+      agentProReleased: isAgentProConfigured(),
+      hasAgentEntitlement: hasPlanFeature(entitlements, "client_buy_box"),
+    })
+  ) {
+    return { allowed: true };
+  }
+
+  // Non-personal reports never inherit a one-deal/evaluation credential.
+  // Their paid-plan (and, for agent mode, Agent Pro) gate above is final.
+  if (input.mode !== "personal") {
     return {
       allowed: false,
       result: {
         ok: false,
         code: "ENTITLEMENT_REQUIRED",
         message:
-          "PDF export is a Pro feature. Upgrade to Pro to export this report.",
+          input.mode === "agent"
+            ? "Agent/client reports require a released Agent Pro plan."
+            : "Lender and partner reports require an active Pro plan.",
+      },
+    };
+  }
+
+  const evaluationDealAccess = await activeMeteredEvaluationDealGrantsAccess(
+    supabase,
+    user.id,
+    input.values,
+  );
+  if (
+    !hasPlanExport &&
+    (!evaluationDealAccess || !input.savedExport)
+  ) {
+    return {
+      allowed: false,
+      result: {
+        ok: false,
+        code: "ENTITLEMENT_REQUIRED",
+        message:
+          "Evaluation reports must come from the exact saved, metered deal. An active Pro plan or valid Decision Pack can also export.",
       },
     };
   }
@@ -400,7 +465,10 @@ async function prepareReportInput(
       values: input.values,
       maxOfferTarget: input.maxOfferTarget,
       maxOfferTargetSource:
-        normalizeExternalOfferCeilingTargetSource(input.maxOfferTargetSource) ??
+        normalizeExternalOfferCeilingTargetSource(
+          input.maxOfferTargetSource,
+          { target: input.maxOfferTarget, values: input.values },
+        ) ??
         input.maxOfferTargetSource,
       analyzerStrategyKey: input.claim
         ? resolveCompatibleAnalyzerStrategyKey(undefined, input.values)
@@ -492,6 +560,10 @@ async function prepareReportInput(
     maxOfferTarget: (resultSnapshot as Record<string, unknown>).maxOfferTarget,
     maxOfferTargetSource: normalizeExternalOfferCeilingTargetSource(
       (resultSnapshot as Record<string, unknown>).maxOfferTargetSource,
+      {
+        target: (resultSnapshot as Record<string, unknown>).maxOfferTarget,
+        values: trustedValues,
+      },
     ),
     trustedPresentation: {
       templateLabel: authority.templateFallback?.templateName ?? null,

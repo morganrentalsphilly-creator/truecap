@@ -127,7 +127,11 @@ describe("offer trust language", () => {
     expect(auth).not.toMatch(/real-time data and investment trends/i);
     expect(auth).not.toMatch(/Stronger returns/i);
     expect(auth).not.toMatch(/always protected/i);
-    expect(auth).toContain("HUD rent benchmarks");
+    // Assert the CONTRACT (named, labeled benchmarks + manual property tax),
+    // not one exact phrasing — the copy legitimately became more precise.
+    expect(auth).toMatch(/HUD rent[^.]*benchmarks/i);
+    expect(auth).toMatch(/labeled and editable/i);
+    expect(auth).toMatch(/[Pp]roperty tax stays a manual/);
     expect(`${auth}\n${logo}`).not.toMatch(/Professional real estate investment (?:calculator|analysis platform)/i);
     expect(logo).toContain("Rental property underwriting");
     expect(landing).not.toMatch(/know exactly what to offer/i);
@@ -135,12 +139,12 @@ describe("offer trust language", () => {
     expect(hero).not.toMatch(/highest price you can pay/i);
   });
 
-  it("retains the homepage process anchor targeted by the hero CTA", () => {
+  it("routes the secondary hero CTA to a genuine sample decision", () => {
     expect(read("components/marketing/hero-address-form.tsx")).toContain(
-      'href="#how-it-works"'
+      'href="/sample-decision-memo"'
     );
-    expect(read("components/marketing/landing-sections.tsx")).toContain(
-      'id="how-it-works"'
+    expect(read("app/sample-decision-memo/page.tsx")).toContain(
+      "calculateSampleDealOutcome"
     );
   });
 

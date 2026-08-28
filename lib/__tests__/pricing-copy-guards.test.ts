@@ -1,7 +1,11 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { TRIAL_DAYS, TRIAL_LABEL, willCheckoutGrantTrial } from "@/lib/trial";
+import {
+  PRODUCT_EVALUATION_COMPARISON_LIMIT,
+  PRODUCT_EVALUATION_DEAL_LIMIT,
+  PRODUCT_EVALUATION_DAYS,
+} from "@/lib/product-access";
 import { featureLimit, tierHas } from "@/lib/entitlements-catalog";
 
 /**
@@ -58,65 +62,53 @@ describe("saved-deal copy — surfaces stay aligned with the runtime gates", () 
   });
 });
 
-describe("trial copy — mirrors the checkout repeat-trial guard", () => {
-  it("willCheckoutGrantTrial matches billing.ts (grantTrial = !priorSubscription)", () => {
-    expect(willCheckoutGrantTrial(false)).toBe(true); // first-timer → trial granted
-    expect(willCheckoutGrantTrial(true)).toBe(false); // ex-subscriber → charged immediately
+describe("no-card product evaluation", () => {
+  it("locks the published duration and usage allowances", () => {
+    expect(PRODUCT_EVALUATION_DAYS).toBe(21);
+    expect(PRODUCT_EVALUATION_DEAL_LIMIT).toBe(3);
+    expect(PRODUCT_EVALUATION_COMPARISON_LIMIT).toBe(1);
   });
 
-  it("TRIAL_LABEL stays in lockstep with TRIAL_DAYS", () => {
-    expect(TRIAL_LABEL).toBe(`${TRIAL_DAYS}-day free trial`);
-  });
-
-  it("checkout has no hidden trial-length override that can contradict public copy", () => {
+  it("keeps Stripe checkout separate from the evaluation", () => {
     const billing = read("../../app/actions/billing.ts");
-    expect(billing).toContain("const proTrialDays = TRIAL_DAYS");
+    expect(billing).toContain("trialDays: 0");
+    expect(billing).not.toContain('from "@/lib/trial"');
     expect(billing).not.toContain("process.env.PRO_TRIAL_DAYS");
   });
 
-  it("/pricing conditions its trial promises on the guard mirror", () => {
-    // The server page computes prior-subscription history…
-    const page = read("../../app/pricing/page.tsx");
-    expect(page).toContain("hasAnySubscriptionHistory");
-    expect(page).toContain("hadPriorSubscription");
-    // …and both card components route every trial mention through the
-    // shared mirror instead of showing TRIAL_LABEL unconditionally.
-    const plans = read("../../components/marketing/pricing-toggle-plans.tsx");
-    expect(plans).toContain("willCheckoutGrantTrial");
-    expect(plans).toContain("hadPriorSubscription");
-    const buttons = read("../../components/marketing/pricing-plan-buttons.tsx");
-    expect(buttons).toContain("willCheckoutGrantTrial");
-    expect(buttons).toContain("hadPriorSubscription");
+  it("does not turn metered PDF access into an unmetered fourth Pro deal", () => {
+    const entitlements = read("../../lib/entitlements.ts");
+    const capabilities = read("../../lib/analyzer-capabilities.ts");
+    expect(entitlements).toContain(
+      '...(access.canAnalyzeProDeal ? ["projections"] : [])',
+    );
+    expect(capabilities).not.toMatch(
+      /canUseProjections:[\s\S]{0,180}hasEvaluationArtifactAccess/,
+    );
   });
 
-  it("treats anonymous and unverifiable trial eligibility as unknown", () => {
-    const page = read("../../app/pricing/page.tsx");
+  it("starts at signup without auto-opening checkout", () => {
     const plans = read("../../components/marketing/pricing-toggle-plans.tsx");
     const buttons = read("../../components/marketing/pricing-plan-buttons.tsx");
+    const signup = read("../../components/auth/sign-up-form.tsx");
+    expect(buttons).toContain("Start {tierName} evaluation — no card");
+    expect(buttons).toContain("plan=${plan}&billing=${billing}");
+    expect(buttons).not.toContain("resolveCheckoutResumeForSlot");
+    expect(plans).toContain("3 Pro deals + 1 comparison · no card");
+    expect(signup).toContain("Nothing auto-renews");
+    expect(signup).toContain("No card is requested and no subscription starts today");
+  });
+
+  it("shows the immediate charge only when the user explicitly subscribes", () => {
+    const buttons = read("../../components/marketing/pricing-plan-buttons.tsx");
+    const plans = read("../../components/marketing/pricing-toggle-plans.tsx");
+    expect(buttons).toContain("Subscribe — {priceLabel ?? \"shown price\"} today");
+    expect(plans).toContain("priceLabel={proChargeToday}");
+    expect(plans).toContain("checkoutReady=");
+  });
+
+  it("fails closed when subscription history cannot be verified", () => {
     const entitlements = read("../../lib/entitlements.ts");
-
-    // Anonymous visitors may be signed-out returning subscribers. Their CTA is
-    // neutral and the card/hero state the first-time eligibility condition.
-    const anonymousBranch = buttons.slice(
-      buttons.indexOf("if (!isAuthenticated)"),
-      buttons.indexOf("// Authenticated free user")
-    );
-    expect(anonymousBranch).toContain("Continue to {tierName}");
-    expect(anonymousBranch).not.toContain("Start");
-    expect(plans).toContain("verifiedTrialEligible");
-    // "New subscribers" is the approved conditional phrasing (2026-08 offer
-    // rollout): it states the first-time eligibility condition in plain words
-    // without the "if eligible" hedge, which is banned site-wide.
-    expect(plans).toContain("New subscribers get a");
-    expect(page).toContain("New subscribers get");
-    expect(page).toMatch(
-      /\{!user \? \([\s\S]*New subscribers get a[\s\S]*\) : hadPriorSubscription \? \(/
-    );
-    expect(plans).not.toContain("if eligible");
-    expect(page).not.toContain("if eligible");
-
-    // A failed history query is not verified eligibility; marketing fails
-    // closed and checkout remains the billing authority.
     const historyHelper = entitlements.slice(
       entitlements.indexOf("export async function hasAnySubscriptionHistory"),
       entitlements.length
@@ -124,15 +116,18 @@ describe("trial copy — mirrors the checkout repeat-trial guard", () => {
     expect(historyHelper).toMatch(/if \(error\)[\s\S]*return true;/);
   });
 
-  it("states the card, billing, cancellation, and repeat-trial terms before checkout", () => {
+  it("drives signed-in evaluation copy from the real record and usage ledger", () => {
+    const page = read("../../app/pricing/page.tsx");
     const plans = read("../../components/marketing/pricing-toggle-plans.tsx");
-    const landing = read("../../components/marketing/landing-sections.tsx");
+    const cancelled = read("../../components/marketing/checkout-cancelled-banner.tsx");
 
-    expect(plans).toContain("Card required at checkout");
-    expect(plans).toContain("Subscription billing starts after");
-    expect(plans).toContain("unless you cancel first");
-    expect(plans).toContain("The free trial is a first-time offer");
-    expect(landing).toContain("not eligible for another free trial");
+    expect(page).toContain("getProductEvaluationAccessForUser(supabase, user.id)");
+    expect(page).toContain("summarizePricingEvaluation(productEvaluationAccess)");
+    expect(page).toContain("evaluation={pricingEvaluation}");
+    expect(plans).not.toContain("evaluationEligible = !hadPriorSubscription");
+    expect(plans).toContain('evaluation.status === "exhausted"');
+    expect(plans).toContain('evaluation.status === "expired"');
+    expect(cancelled).toContain('evaluation.status === "active"');
   });
 });
 
@@ -147,10 +142,11 @@ describe("pricing offer hierarchy", () => {
     expect(agentPage).not.toMatch(/white-label embeds/i);
   });
 
-  it("keeps Free → Pro → Agent order at every viewport", () => {
+  it("puts Pro first in the mobile viewport and keeps Agent behind it", () => {
     const plans = read("../../components/marketing/pricing-toggle-plans.tsx");
-    expect(plans).not.toMatch(/\border-[123]\b/);
-    expect(plans).not.toMatch(/\blg:order-[123]\b/);
+    expect(plans).toContain('id="pro" className="relative order-1');
+    expect(plans).toContain('className="relative order-2');
+    expect(plans).toContain('id="agent-pro" className="relative order-3');
   });
 
   it("does not advertise the temporarily disabled Decision Pack", () => {

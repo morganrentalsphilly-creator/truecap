@@ -18,6 +18,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { RentalCashFlowCalculatorWidget } from "@/components/tools/rental-cash-flow-calculator-widget";
@@ -26,6 +27,7 @@ import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
+import { isCalculatorReleased } from "@/lib/calculator-registry";
 export const metadata: Metadata = {
   title: "Rental Property Cash Flow Calculator | Free Monthly Cash Flow Tool",
   description:
@@ -86,6 +88,8 @@ const FAQS: { q: string; a: string }[] = [
 ];
 
 export default function RentalCashFlowCalculatorPage() {
+  if (!isCalculatorReleased("rental-cash-flow-calculator")) notFound();
+
   const siteUrl = getSiteUrl();
 
   const webAppLd = {
@@ -447,9 +451,9 @@ export default function RentalCashFlowCalculatorPage() {
             <p>
               When a deal survives this screen, run the full analysis at
               TrueCap — the analyzer starts from the same inputs, adds
-              PMI, closing costs, and after-tax effects, and layers on cap
-              rate, cash-on-cash, DSCR, 10-year projections, illustrative tax impact,
-              exit scenarios, selected-rule fit, and a secondary Screening Index.
+              PMI and closing costs, and layers on cap rate, cash-on-cash,
+              DSCR, 10-year cash-flow and equity projections, sensitivity,
+              selected-rule fit, and a secondary Screening Index.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">Frequently asked questions</h2>
@@ -481,15 +485,15 @@ export default function RentalCashFlowCalculatorPage() {
             <p className="text-sm sm:text-base opacity-90 mb-4">
               Monthly cash flow is the screen, not the underwrite. TrueCap
               takes the same inputs and adds PMI, closing costs, cap rate,
-              cash-on-cash, DSCR, 10-year projections, tax savings, exit
-              scenarios, and a secondary Screening Index.
+              cash-on-cash, DSCR, 10-year cash-flow and equity projections,
+              sensitivity, Offer Ceiling, and a secondary Screening Index.
             </p>
             <ul className="text-sm space-y-1.5 mb-5 opacity-90">
               {[
                 "Cash flow, cap rate, CoC, DSCR — auto-calculated",
                 "State property tax + market rent auto-filled from the address",
                 "10-year projection with rent + expense growth (Pro)",
-                "Depreciation modeling and after-tax cash flow (Pro)",
+                "Downside sensitivity and Offer Ceiling (Pro)",
                 "Screening Index with a factor breakdown for triage",
                 "Free to start — no credit card",
               ].map((line) => (
@@ -513,7 +517,7 @@ export default function RentalCashFlowCalculatorPage() {
               tool has no embeddable widget. See the component header. */}
           <ToolEmbedInvite slug="rental-cash-flow-calculator" />
 
-          <ToolsConversionCta calculatorName="Rental cash flow calculator" hook="TrueCap's full analyzer runs the same cash-flow math plus cap rate, cash-on-cash, DSCR, PMI, 10-year projections, tax savings, and exit scenarios — all on the same deal. Save your work, compare deals, share a link." />
+          <ToolsConversionCta calculatorName="Rental cash flow calculator" hook="TrueCap's full analyzer runs the same cash-flow math plus cap rate, cash-on-cash, DSCR, PMI, a 10-year cash-flow and equity projection, sensitivity, and Offer Ceiling. Save your work, compare deals, and share a link." />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}

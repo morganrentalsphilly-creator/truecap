@@ -52,6 +52,15 @@ describe("buildMaoTarget", () => {
     expect(target).toEqual({ maxPurchasePrice: 300_000 });
   });
 
+  it("maps optional IRR and cash-required Buy Box rules into the ceiling", () => {
+    expect(
+      buildMaoTarget(
+        box({ minIrrPct: 12, maxCashRequired: 75_000 }),
+        { isCashPurchase: false },
+      ),
+    ).toEqual({ minIrrPct: 12, maxCashRequired: 75_000 });
+  });
+
   it("falls back to break-even cash flow for a DSCR-only box on a cash deal", () => {
     const target = buildMaoTarget(box({ minDscr: 1.3 }), { isCashPurchase: true });
     expect(target).toEqual({ monthlyCashFlow: 0 });
@@ -67,6 +76,7 @@ describe("buyBoxHasReturnTargets", () => {
   it("is true for any numeric return threshold", () => {
     expect(buyBoxHasReturnTargets(box({ minCapRatePct: 6 }))).toBe(true);
     expect(buyBoxHasReturnTargets(box({ minCashFlowMonthly: 0 }))).toBe(true);
+    expect(buyBoxHasReturnTargets(box({ minIrrPct: 12 }))).toBe(true);
   });
 
   it("treats an explicit $0 cash-flow floor as a set threshold", () => {
@@ -102,6 +112,12 @@ describe("describeMaoTarget", () => {
 
   it("handles a negative cash-flow floor", () => {
     expect(describeMaoTarget({ monthlyCashFlow: -100 })).toBe("cash flow ≥ -$100/mo");
+  });
+
+  it("labels IRR methodology and maximum modeled cash explicitly", () => {
+    expect(
+      describeMaoTarget({ minIrrPct: 12, maxCashRequired: 75_000 }),
+    ).toBe("10-year pre-tax IRR ≥ 12% · cash required ≤ $75,000");
   });
 });
 

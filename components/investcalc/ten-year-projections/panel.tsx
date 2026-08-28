@@ -10,6 +10,7 @@ import { TenYearProjectionCharts } from "@/components/investcalc/ten-year-projec
 import { TenYearProjectionSummaryCards } from "@/components/investcalc/ten-year-projections/summary-cards";
 import { TenYearProjectionTable } from "@/components/investcalc/ten-year-projections/table";
 import type { ProjectionYear, TenYearProjectionInput } from "@/lib/ten-year-projections";
+import { isFeatureReleased } from "@/lib/entitlements-catalog";
 
 export type ProjectionSource = {
   analysisId: string | null;
@@ -23,6 +24,7 @@ export function TenYearProjectionsPanel({
 }: {
   source: ProjectionSource;
 }) {
+  const showTaxMetrics = isFeatureReleased("tax_strategy");
   const [projectionYears, setProjectionYears] = useState<ProjectionYear[]>(
     normalizeProjectionYears(source.initialYears)
   );
@@ -86,7 +88,10 @@ export function TenYearProjectionsPanel({
 
   return (
     <div className="space-y-5">
-      <TenYearProjectionSummaryCards projectionYears={projectionYears} />
+      <TenYearProjectionSummaryCards
+        projectionYears={projectionYears}
+        showTaxMetrics={showTaxMetrics}
+      />
       <PanelInsight>{buildProjectionInsight(projectionYears)}</PanelInsight>
       <SnapshotStatusCard
         title="10-Year Projections"
@@ -94,7 +99,10 @@ export function TenYearProjectionsPanel({
         isLoading={isLoadingSnapshot}
       />
       <TenYearProjectionCharts projectionYears={projectionYears} />
-      <TenYearProjectionTable projectionYears={projectionYears} />
+      <TenYearProjectionTable
+        projectionYears={projectionYears}
+        showTaxMetrics={showTaxMetrics}
+      />
     </div>
   );
 }
@@ -105,6 +113,19 @@ function buildProjectionInsight(years: ProjectionYear[]): ReactNode {
   const final = years[years.length - 1];
   if (!year1 || !final) return null;
   const firstPositive = years.find((y) => y.netCashFlowAnnual >= 0);
+  const balloonYear = years.find((y) => (y.balloonPaymentAnnual ?? 0) > 0);
+  if (balloonYear) {
+    return (
+      <>
+        A contractual balloon of{" "}
+        <strong className="text-foreground">
+          {formatCurrency(balloonYear.balloonPaymentAnnual ?? 0)}
+        </strong>{" "}
+        is due in year {balloonYear.year}. It is shown separately from annual
+        debt service and included in that year&apos;s net and cumulative cash flow.
+      </>
+    );
+  }
   if (year1.netCashFlowAnnual >= 0) {
     return (
       <>
@@ -161,6 +182,24 @@ function normalizeProjectionYears(years: ProjectionYear[]): ProjectionYear[] {
       rentalIncomeAnnual: readNumber(row, ["rentalIncomeAnnual", "rental_income_annual", "rental"]) ?? 0,
       operatingExpensesAnnual: readNumber(row, ["operatingExpensesAnnual", "operating_expenses_annual", "opex"]) ?? 0,
       debtServiceAnnual: readNumber(row, ["debtServiceAnnual", "debt_service_annual", "debt"]) ?? 0,
+      ...(readNumber(row, ["renovationIncomeLossAnnual", "renovation_income_loss_annual"]) != null
+        ? {
+            renovationIncomeLossAnnual:
+              readNumber(row, ["renovationIncomeLossAnnual", "renovation_income_loss_annual"]) ?? 0,
+          }
+        : {}),
+      ...(readNumber(row, ["balloonPaymentAnnual", "balloon_payment_annual", "balloon"]) != null
+        ? {
+            balloonPaymentAnnual:
+              readNumber(row, ["balloonPaymentAnnual", "balloon_payment_annual", "balloon"]) ?? 0,
+          }
+        : {}),
+      ...(readNumber(row, ["financingOutflowAnnual", "financing_outflow_annual"]) != null
+        ? {
+            financingOutflowAnnual:
+              readNumber(row, ["financingOutflowAnnual", "financing_outflow_annual"]) ?? 0,
+          }
+        : {}),
       netCashFlowAnnual,
       taxSavingsAnnual: readNumber(row, ["taxSavingsAnnual", "tax_savings_annual", "tax"]) ?? 0,
       afterTaxCashFlowAnnual: readNumber(row, ["afterTaxCashFlowAnnual", "after_tax_cash_flow_annual", "after"]) ?? 0,

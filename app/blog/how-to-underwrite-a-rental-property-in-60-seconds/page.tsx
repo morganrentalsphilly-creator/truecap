@@ -335,7 +335,7 @@ export default function BlogPost() {
             future price changes differ materially.
           </p>
           <p>
-            <Link href="/tools/cap-rate-calculator" className="text-primary font-semibold hover:underline">
+            <Link href="/#main" className="text-primary font-semibold hover:underline">
               Compute cap rate →
             </Link>
           </p>
@@ -362,7 +362,7 @@ export default function BlogPost() {
             zero; it does not predict future appreciation or choose the next step.
           </p>
           <p>
-            <Link href="/tools/cash-on-cash-calculator" className="text-primary font-semibold hover:underline">
+            <Link href="/#main" className="text-primary font-semibold hover:underline">
               Compute cash-on-cash return →
             </Link>
           </p>
@@ -387,7 +387,7 @@ export default function BlogPost() {
             approval or pricing.
           </p>
           <p>
-            <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">
+            <Link href="/#main" className="text-primary font-semibold hover:underline">
               Compute DSCR →
             </Link>
           </p>

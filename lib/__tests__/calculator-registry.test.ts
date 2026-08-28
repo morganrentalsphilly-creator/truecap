@@ -21,32 +21,36 @@ import {
 const EXPECTED_EMBEDDABLE = [
   "1-percent-rule-calculator",
   "2-percent-rule-calculator",
-  "50-percent-rule-calculator",
   "70-percent-rule-calculator",
   "arv-calculator",
-  "brrrr-calculator",
   "break-even-calculator",
-  "cap-rate-calculator",
-  "cash-on-cash-calculator",
   "closing-cost-calculator",
-  "dscr-calculator",
   "gross-rent-multiplier-calculator",
-  "house-hacking-calculator",
   "mortgage-payment-calculator",
-  "noi-calculator",
-  "rental-cash-flow-calculator",
-  "rental-property-tax-calculator",
-  "roi-calculator",
   "vacancy-rate-calculator",
 ].sort();
 
 describe("calculator registry", () => {
-  it("has 20 calculator pages, 19 embeddable", () => {
-    expect(CALCULATOR_COUNT).toBe(20);
-    expect(EMBEDDABLE_COUNT).toBe(19);
+  it("keeps the unreleased BRRRR tool out of the public registry", () => {
+    expect(CALCULATOR_COUNT).toBe(10);
+    expect(EMBEDDABLE_COUNT).toBe(9);
+    expect(getCalculator("brrrr-calculator")).toBeNull();
+    expect(getCalculator("rental-property-tax-calculator")).toBeNull();
+    for (const slug of [
+      "50-percent-rule-calculator",
+      "cap-rate-calculator",
+      "cash-on-cash-calculator",
+      "dscr-calculator",
+      "house-hacking-calculator",
+      "noi-calculator",
+      "rental-cash-flow-calculator",
+      "roi-calculator",
+    ]) {
+      expect(getCalculator(slug)).toBeNull();
+    }
   });
 
-  it("embeddable set is exactly the expected 19", () => {
+  it("embeddable set is exactly the released set", () => {
     expect(EMBEDDABLE_CALCULATORS.map((c) => c.slug).sort()).toEqual(EXPECTED_EMBEDDABLE);
   });
 
@@ -62,7 +66,7 @@ describe("calculator registry", () => {
   });
 
   it("getCalculator resolves + categories cover every entry", () => {
-    expect(getCalculator("cap-rate-calculator")?.category).toBe("returns");
+    expect(getCalculator("mortgage-payment-calculator")?.category).toBe("finance");
     expect(getCalculator("nope")).toBeNull();
     const grouped = calculatorsByCategory();
     expect(grouped.reduce((n, g) => n + g.items.length, 0)).toBe(CALCULATOR_COUNT);
@@ -70,10 +74,10 @@ describe("calculator registry", () => {
 
   it("derived marketing copy stays in sync with the registry", () => {
     // Spelled-out count used in /tools + OG prose.
-    expect(CALCULATOR_COUNT_WORD).toBe("Twenty");
+    expect(CALCULATOR_COUNT_WORD).toBe("Ten");
     // Names list is generated from the registry, never hand-typed.
     expect(CALCULATOR_NAMES_LIST.split(", ")).toHaveLength(CALCULATOR_COUNT);
-    expect(CALCULATOR_NAMES_LIST).toContain("Cap Rate");
+    expect(CALCULATOR_NAMES_LIST).toContain("Mortgage Payment");
   });
 
   it("footer shortlist is a non-empty subset of the registry", () => {

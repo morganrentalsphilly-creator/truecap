@@ -17,6 +17,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, Calculator, ChevronUp, Loader2 } from "lucide-react";
 
 import type { LivePreviewSnapshot } from "./live-verdict-panel";
+import { formatDscr } from "@/lib/financial-presentation";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -237,9 +238,10 @@ export function StickyCalculateBar({
               DSCR
             </span>
             <span className="font-mono text-sm font-bold tabular-nums text-foreground">
-              {livePreview.monthlyPayment <= 0
-                ? "—"
-                : livePreview.dscr.toFixed(2)}
+              {formatDscr(
+                livePreview.dscr,
+                livePreview.monthlyPayment > 0,
+              )}
             </span>
           </div>
         </div>

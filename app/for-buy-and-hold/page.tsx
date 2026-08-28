@@ -3,10 +3,9 @@
  *
  * This is the largest user segment for TrueCap. Buy-and-hold investors
  * are evaluating dozens of properties per year, often comparing
- * markets and financing structures. Pro features (Sensitivity, Tax
- * Impact, 10-year projections, Exit Scenarios) map directly to the
- * questions they ask: "what's my real IRR including tax?", "what if
- * vacancy ticks up?", "year 7 sell vs hold?"
+ * markets and financing structures. Released Pro features such as
+ * sensitivity, Offer Ceiling, 10-year cash-flow/equity projections, saved
+ * comparisons, and reports support that acquisition workflow.
  */
 
 import type { Metadata } from "next";
@@ -28,7 +27,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 export const metadata: Metadata = {
   title: "For Buy-and-Hold Investors",
   description:
-    "Underwrite rentals for long-term cash flow + appreciation. Cap rate, CoC, DSCR, 10-year projections, and illustrative tax impact.",
+    "Underwrite stabilized rentals for cash flow and equity. Review cap rate, CoC, DSCR, sensitivity, Offer Ceiling, and 10-year planning projections.",
   keywords: [
     "buy and hold calculator",
     "rental property analyzer",
@@ -39,7 +38,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "For Buy-and-Hold Investors — TrueCap",
     description:
-      "The numbers a long-term rental investor actually needs — cap rate, CoC, DSCR, 10-year projection, illustrative tax impact, and modeled exits.",
+      "A source-labeled screen for cap rate, CoC, DSCR, sensitivity, Offer Ceiling, and 10-year cash-flow and equity projections.",
     url: "/for-buy-and-hold",
     type: "website",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap for buy-and-hold investors" }],
@@ -60,8 +59,8 @@ const USE_CASES: { icon: typeof Calculator; title: string; body: string }[] = [
   },
   {
     icon: PiggyBank,
-    title: "See the modeled tax effect",
-    body: "Illustrative Tax Impact (Pro) applies your entered marginal rate to projected rental income, depreciation, and mortgage interest. It is a planning estimate to review with your CPA, not a tax-return calculation.",
+    title: "Track cash flow and equity over time",
+    body: "The 10-year planning view carries editable rent and expense growth through the hold while scheduled debt paydown changes equity. It is a scenario, not a forecast.",
   },
   {
     icon: Target,
@@ -96,8 +95,8 @@ export default function ForBuyAndHoldPage() {
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
             Screen cap rate, cash-on-cash, DSCR, and cash flow free. Pro adds
-            Offer Ceiling, sensitivity, 10-year projections, Illustrative Tax
-            Impact, and modeled exits using labeled, editable starting data.
+            Offer Ceiling, sensitivity, and 10-year cash-flow and equity
+            projections using labeled, editable starting data.
           </p>
 
           {/* CTAs */}
@@ -165,7 +164,7 @@ export default function ForBuyAndHoldPage() {
               "Paste the listing address. Area rent, owner-occupied mortgage-rate, and property-tax screening estimates auto-fill from public sources.",
               "Adjust the financing (down %, term, rate) to match the offer you're considering.",
               "Hit Calculate — cap rate, CoC, DSCR, monthly cash flow appear in 1 second.",
-              "Pro: open the 10-year projection to see how cash flow grows. Open Illustrative Tax Impact for the model's after-tax estimate.",
+              "Pro: open the 10-year planning projection to review cash flow and equity under the entered growth assumptions.",
               "Pro: stress-test in the Sensitivity grid before you write the offer.",
               "Save the deal. The portfolio rollup in My Deals shows your aggregate cash flow across everything you're considering.",
             ].map((step, i) => (
@@ -190,8 +189,8 @@ export default function ForBuyAndHoldPage() {
             </h2>
           </div>
           <ul className="space-y-2 text-sm sm:text-base text-foreground">
-            <li><strong>Multi-year assumptions stay visible.</strong> See depreciation, declining mortgage interest, and rent + expense growth in one reproducible model.</li>
-            <li><strong>Exit modeling matters.</strong> Compare modeled equity, cash flow, and after-tax proceeds across hold years under the same assumptions.</li>
+            <li><strong>Multi-year assumptions stay visible.</strong> See rent growth, expense growth, debt paydown, cash flow, and equity in one reproducible planning view.</li>
+            <li><strong>Scenario boundaries stay explicit.</strong> The projection is not a market forecast, appraisal, sale model, or tax-return calculation.</li>
             <li><strong>Sensitivity is built in.</strong> Hard to do thoroughly in a spreadsheet — trivial here.</li>
             <li><strong>Portfolio view.</strong> Save 10 deals, see total cash flow + weighted cap rate across the book.</li>
             <li><strong>Traceable screening defaults.</strong> HUD/FRED/state estimates show where the first-pass inputs came from; replace them with property-specific evidence before offering.</li>
@@ -218,11 +217,11 @@ export default function ForBuyAndHoldPage() {
               every deductible expense
             </Link>
             , and the standalone{" "}
-            <Link href="/tools/cap-rate-calculator" className="text-primary font-semibold hover:underline">
+            <Link href="/#main" className="text-primary font-semibold hover:underline">
               cap rate
             </Link>{" "}
             and{" "}
-            <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">
+            <Link href="/#main" className="text-primary font-semibold hover:underline">
               DSCR
             </Link>{" "}
             calculators for quick listing triage.
@@ -235,7 +234,7 @@ export default function ForBuyAndHoldPage() {
             Free screens the purchase. Pro solves and stress-tests the offer and hold.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            Free gives you cap rate, CoC, DSCR, monthly cash flow, the 0–100 Screening Index, and read-only share links for a first-pass screen. Pro adds 10-year projections, Illustrative Tax Impact, modeled exits, sensitivity, Offer Ceiling, PDF exports, and co-branded share links.
+            Free gives you cap rate, CoC, DSCR, monthly cash flow, the 0–100 Screening Index, and read-only share links for a first-pass screen. Pro adds 10-year cash-flow and equity projections, sensitivity, Offer Ceiling, saved-deal comparison, PDF exports, and co-branded share links.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -256,24 +255,12 @@ export default function ForBuyAndHoldPage() {
           </div>
         </section>
 
-        {/* Cross-link to other persona pages */}
+        {/* Cross-link only to a released persona workflow. */}
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           <Building2 className="inline-block mr-2 size-4 align-text-bottom" />
-          Different strategy? See pages for{" "}
+          Also evaluating an owner-occupied rental? See TrueCap for{" "}
           <Link href="/for-house-hackers" className="font-bold text-foreground hover:underline">
             house hackers
-          </Link>
-          ,{" "}
-          <Link href="/for-brrrr" className="font-bold text-foreground hover:underline">
-            BRRRR operators
-          </Link>
-          ,{" "}
-          <Link href="/for-flippers" className="font-bold text-foreground hover:underline">
-            fix-and-flippers
-          </Link>
-          , and{" "}
-          <Link href="/for-agents" className="font-bold text-foreground hover:underline">
-            agents
           </Link>
           .
         </footer>

@@ -10,12 +10,14 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { getSiteUrl } from "@/lib/site-url";
 import { DscrCalculatorWidget } from "@/components/tools/dscr-calculator-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
 import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
+import { isCalculatorReleased } from "@/lib/calculator-registry";
 
 export const metadata: Metadata = {
   title: "Free DSCR Calculator — Debt Service Coverage Ratio",
@@ -73,6 +75,8 @@ const FAQS: { q: string; a: string }[] = [
 ];
 
 export default function DscrCalculatorPage() {
+  if (!isCalculatorReleased("dscr-calculator")) notFound();
+
   const siteUrl = getSiteUrl();
   const webAppLd = {
     "@context": "https://schema.org",
@@ -241,7 +245,7 @@ export default function DscrCalculatorPage() {
 
           <ToolsConversionCta
             calculatorName="DSCR calculator"
-            hook="The full TrueCap analyzer connects DSCR to cap rate, CoC, cash flow, 10-year projection, tax savings, and exit scenarios — all on the same deal. Save your work, compare deals, share a link with your lender."
+            hook="The full TrueCap analyzer connects DSCR to cap rate, CoC, cash flow, a 10-year cash-flow and equity projection, sensitivity, and Offer Ceiling. Save your work, compare deals, and share a review link."
           />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">

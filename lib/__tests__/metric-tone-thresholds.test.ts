@@ -37,7 +37,6 @@ describe("metric tone thresholds", () => {
       cocReturn: 6,
       dscr: 1.3,
       capRate: 7,
-      afterTaxCF: 150,
       monthlyPayment: 1200,
       isOwnerOccupant: false,
     };

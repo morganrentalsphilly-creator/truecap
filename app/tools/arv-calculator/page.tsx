@@ -1,6 +1,6 @@
 /**
  * Public SEO landing page for the ARV calculator (after-repair value +
- * the 70%-rule Offer Ceiling) — the head-term tool for the flip/BRRRR
+ * the 70%-rule price screen) — the head-term tool for the flip/BRRRR
  * acquisition cluster.
  *
  * Strategy mirrors /tools/cap-rate-calculator: the working calculator is
@@ -12,7 +12,7 @@
  *
  * Numbers in the copy are the SAME worked example as the
  * how-to-calculate-arv and 70-percent-rule-house-flipping blog posts
- * ($255k ARV / $45k rehab / $133,500 Offer Ceiling / $191,250 refi loan) —
+ * ($255k ARV / $45k rehab / $133,500 70%-rule price screen / $191,250 refi loan) —
  * internal consistency beats novelty, and the widget's default comps are
  * the first three comps from that example.
  */
@@ -28,24 +28,23 @@ import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 export const metadata: Metadata = {
-  title: "ARV Calculator | ARV + 70% Rule Offer Ceiling",
+  title: "ARV Calculator | ARV + 70%-Rule Price Screen",
   description:
-    "Free ARV calculator. Estimate after-repair value from renovated comps and calculate a 70%-rule Offer Ceiling for flips or BRRRR, with clear limitations.",
+    "Free ARV calculator. Estimate after-repair value from entered renovated comps and calculate an early 70%-rule price screen screen, with clear limitations.",
   keywords: [
     "ARV calculator",
     "after repair value calculator",
     "ARV real estate",
     "70 percent rule calculator",
-    "Offer Ceiling calculator",
+    "70%-rule price screen calculator",
     "how to calculate ARV",
     "ARV formula",
-    "house flipping calculator",
   ],
   alternates: { canonical: "/tools/arv-calculator" },
   openGraph: {
     title: "ARV Calculator — After-Repair Value + 70% Rule",
     description:
-      "Estimate ARV from renovated comps and calculate a 70%-rule Offer Ceiling — with comps-method checks and guidance on when 70% is the wrong screen.",
+      "Estimate ARV from renovated comps and calculate a 70%-rule price screen — with comps-method checks and guidance on when 70% is the wrong screen.",
     url: "/tools/arv-calculator",
     type: "website",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap ARV calculator" }],
@@ -59,7 +58,7 @@ export const metadata: Metadata = {
 const FAQS: { q: string; a: string }[] = [
   {
     q: "What is ARV in real estate?",
-    a: "ARV (after-repair value) is what the property might sell for — or appraise at — once the rehab is complete. It is a critical, frequently mis-estimated input in a BRRRR or flip: the Offer Ceiling keys off it, the refinance loan may be sized as a percentage of it, and modeled flip profit is whatever remains after costs. ARV is a forecast, not an appraisal or guarantee, so it should be supported by renovated comparable sales rather than inferred from the rehab budget.",
+    a: "ARV (after-repair value) is what the property might sell for — or appraise at — once the rehab is complete. It is a critical, frequently mis-estimated input in a BRRRR or flip: the 70%-rule price screen keys off it, the refinance loan may be sized as a percentage of it, and modeled flip profit is whatever remains after costs. ARV is a forecast, not an appraisal or guarantee, so it should be supported by renovated comparable sales rather than inferred from the rehab budget.",
   },
   {
     q: "How do you calculate ARV?",
@@ -67,7 +66,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What is the 70% rule?",
-    a: "A rule of thumb that calculates a screening boundary at 70% of ARV minus repairs. On a property modeled at a $300,000 renovated value with $45,000 of work, the 70%-rule Offer Ceiling is (0.70 × $300,000) − $45,000 = $165,000. The 30% held back is not all profit; it covers buying, holding, and selling costs first. This boundary is not a recommended offer or appraisal.",
+    a: "A rule of thumb that calculates a screening boundary at 70% of ARV minus repairs. On a property modeled at a $300,000 renovated value with $45,000 of work, the 70%-rule price screen is (0.70 × $300,000) − $45,000 = $165,000. The 30% held back is not all profit; it covers buying, holding, and selling costs first. This boundary is not a recommended offer or appraisal.",
   },
   {
     q: "Is ARV just the purchase price plus the rehab budget?",
@@ -100,7 +99,7 @@ export default function ArvCalculatorPage() {
     url: `${siteUrl}/tools/arv-calculator`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
     description:
-      "Free online calculator for after-repair value (ARV) from renovated comps, with a 70%-rule Offer Ceiling and 75%-LTV BRRRR refinance line.",
+      "Free online calculator for after-repair value (ARV) from entered renovated comps, with an early 70%-rule price screen screen.",
   };
 
   const faqLd = {
@@ -121,7 +120,7 @@ export default function ArvCalculatorPage() {
     applicationSubCategory: "Real Estate Calculator",
     operatingSystem: "Web",
     description:
-      "Free ARV calculator. Estimate after-repair value from renovated comps and calculate a 70%-rule Offer Ceiling for a flip or BRRRR.",
+      "Free ARV calculator. Estimate after-repair value from entered renovated comps and calculate an early 70%-rule price screen screen.",
     url: `${siteUrl}/tools/arv-calculator`,
     offers: {
       "@type": "Offer",
@@ -136,9 +135,8 @@ export default function ArvCalculatorPage() {
     },
     featureList: [
       "ARV from up to 3 renovated comps ($/sq ft method)",
-      "70%-rule Offer Ceiling with an adjustable multiplier",
+      "70%-rule price screen with an adjustable multiplier",
       "Comps-range sanity check on the estimate",
-      "75% LTV BRRRR refinance loan line",
       "Free, no signup",
     ],
   };
@@ -173,11 +171,10 @@ export default function ArvCalculatorPage() {
               ARV Calculator (After-Repair Value + 70% Rule)
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground mt-2 leading-relaxed">
-              The number every flip and BRRRR is built on — what the property
-              will sell for, or appraise at, once the renovation is done.
-              Enter up to three renovated sold comps and your square footage;
-              the ARV, the 70%-rule Offer Ceiling, and the 75%-LTV refinance line
-              compute live.
+              Estimate what a property may sell for or appraise at after a
+              renovation. Enter up to three renovated sold comps and the
+              subject&apos;s finished square footage to calculate an ARV and an
+              early 70%-rule price screen screen.
             </p>
           </header>
 
@@ -186,6 +183,12 @@ export default function ArvCalculatorPage() {
 
           {/* Long-form content */}
           <article className="prose prose-slate max-w-none mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
+            <p>
+              <strong>Educational guide:</strong> The material below explains
+              how practitioners use ARV and the 70% rule. TrueCap does not
+              currently expose an integrated renovation, flip, or BRRRR
+              lifecycle model.
+            </p>
             <h2 className="text-2xl sm:text-3xl">What is ARV?</h2>
             <p>
               ARV — <em>after-repair value</em> — is what the property would
@@ -323,15 +326,15 @@ export default function ArvCalculatorPage() {
             </p>
 
             <h2 className="text-2xl sm:text-3xl">
-              The 70% rule: turning ARV into an Offer Ceiling
+              The 70% rule: turning ARV into a 70%-rule price screen
             </h2>
             <p>
               ARV&apos;s first job is setting the most you can pay and still
-              leave room to profit — the Offer Ceiling:
+              leave room to profit — the 70%-rule price screen:
             </p>
             <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
               <div className="text-base sm:text-lg font-mono">
-                <span className="font-bold">Offer Ceiling</span> = (ARV × 0.70) −
+                <span className="font-bold">70%-rule price screen</span> = (ARV × 0.70) −
                 Repair costs
               </div>
               <div className="text-sm text-muted-foreground mt-2">
@@ -406,25 +409,27 @@ export default function ArvCalculatorPage() {
               contingency for what demolition reveals.
             </p>
 
-            <h2 className="text-2xl sm:text-3xl">The BRRRR tie-in: the 75% refinance</h2>
+            <h2 className="text-2xl sm:text-3xl">Educational context: ARV and a future refinance</h2>
             <p>
-              Buy-and-hold investors use the same ARV with a different
-              destination. On a{" "}
+              TrueCap&apos;s released ARV calculator stops at the comp-based ARV
+              and 70%-rule screen; it does not model a renovation-to-refinance
+              lifecycle. As educational context, buy-and-hold investors may use
+              the same ARV with a different destination. On a{" "}
               <Link href="/blog/brrrr-method-explained" className="text-primary font-semibold hover:underline">BRRRR</Link>,
               you refinance the finished rental instead of selling it, and a
               cash-out refinance limit on a single-family investment property
               depends on the lender, program, borrower, property, seasoning,
-              eligible value basis, and appraisal. The calculator&apos;s
-              &ldquo;75% LTV refi loan&rdquo; line is an editable scenario assumption,
-              not a quote or approval. On the worked deal: negotiate to $150,000, spend the
+              eligible value basis, and appraisal. A 75% LTV case is only an
+              educational scenario assumption, not a quote or approval. On the
+              worked example: negotiate to $150,000, spend the
               $45,000 rehab, carry $8,000 of closing and holding costs —
               $203,000 all-in. A 75% refinance against the $255,000 appraisal
               produces a $191,250 loan; net of about $4,000 in refi costs you
               recover $187,250, leaving just $15,750 of your cash in a
               stabilized rental. The roughly five-point gap between the 70%
               you paid and the 75% you can refinance is the room the
-              transaction costs need — model the whole cycle in the{" "}
-              <Link href="/tools/brrrr-calculator" className="text-primary font-semibold hover:underline">BRRRR calculator</Link>.
+              transaction costs may need — review the full list of inputs in the{" "}
+              <Link href="/blog/brrrr-method-explained" className="text-primary font-semibold hover:underline">BRRRR workflow guide</Link>.
             </p>
             <p>
               One caution before you count on that refinance: the appraisal is
@@ -469,7 +474,7 @@ export default function ArvCalculatorPage() {
               whether the deal deserves another hour — the ARV and the max
               offer. When a property clears the screen and the endgame is a
               rental, run the stabilized numbers through the full TrueCap
-              analyzer — its Offer Ceiling card solves the rental version of this
+              analyzer — its 70%-rule price screen card solves the rental version of this
               question (the highest price that still hits your target cap
               rate, cash-on-cash, and DSCR), alongside cash flow, 10-year
               projections, selected-rule fit, and a secondary Screening Index. None of this is
@@ -501,21 +506,21 @@ export default function ArvCalculatorPage() {
           {/* CTA */}
           <section className="mt-10 sm:mt-12 rounded-2xl bg-primary text-primary-foreground p-6 sm:p-8">
             <h2 className="text-xl sm:text-2xl font-extrabold mb-2">
-              Run the full analysis — free
+              Continue with the released rental screen — free
             </h2>
             <p className="text-sm sm:text-base opacity-90 mb-4">
-              ARV and the 70% rule get you to a defensible offer. TrueCap
-              takes it from there: the rehab, the refinance, the stabilized
-              cash flow, cap rate, cash-on-cash, DSCR, 10-year projections,
-              and a secondary Screening Index — all from the same inputs.
+              ARV and the 70% rule are early screens, not a defensible offer by
+              themselves. Use separate reviewed rehab and project ledgers for a
+              flip or BRRRR; TrueCap&apos;s released core analyzer can screen the
+              stabilized rental cash flow, cap rate, CoC, and DSCR.
             </p>
             <ul className="text-sm space-y-1.5 mb-5 opacity-90">
               {[
-                "Offer Ceiling — highest modeled price that meets your selected targets; not a recommended offer",
-                "BRRRR + fix-and-flip strategy cards on every deal",
+                "70%-rule price screen — highest modeled price that meets your selected targets; not a recommended offer",
+                "Separate released rehab and stabilized-rental tools",
                 "Cash flow, cap rate, CoC, DSCR — auto-calculated",
                 "10-year projection with rent + expense growth (Pro)",
-                "Sell / refi / hold exit comparison (Pro)",
+                "Downside sensitivity and 70%-rule price screen (Pro)",
                 "Free to start — no credit card",
               ].map((line) => (
                 <li key={line} className="flex items-start gap-2">
@@ -528,7 +533,7 @@ export default function ArvCalculatorPage() {
               href="/"
               className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
-              Open the full TrueCap analyzer
+              Open the released rental analyzer
               <ArrowUpRight className="w-4 h-4" />
             </Link>
           </section>
@@ -538,7 +543,7 @@ export default function ArvCalculatorPage() {
               tool has no embeddable widget. See the component header. */}
           <ToolEmbedInvite slug="arv-calculator" />
 
-          <ToolsConversionCta calculatorName="ARV calculator" hook="TrueCap's full analyzer connects rehab, BRRRR refinance, modeled flip profit, cash flow, and a target-dependent rental Offer Ceiling on the same deal. The boundary is not a recommended offer. Save your work, compare deals, and share a link." />
+          <ToolsConversionCta calculatorName="ARV calculator" hook="Use ARV as one reviewed input, keep the renovation and project timeline in a separate ledger, and use TrueCap's released rental analyzer for stabilized cash flow and a target-dependent Offer Ceiling. The boundary is not a recommended offer." />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}

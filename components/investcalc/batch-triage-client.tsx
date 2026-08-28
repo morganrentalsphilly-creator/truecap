@@ -49,6 +49,7 @@ import {
 } from "@/lib/batch-triage-storage";
 import { verdictScreeningLabel } from "@/lib/verdict-display";
 import { trackEvent } from "@/lib/analytics";
+import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
 import { BuyBoxFitBadge } from "@/components/investcalc/buy-box-fit-badge";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -65,7 +66,7 @@ function pct(n: number | null): string {
   return n == null ? "—" : `${n.toFixed(1)}%`;
 }
 function ratio(n: number | null, isCash: boolean): string {
-  if (isCash) return "Cash";
+  if (isCash) return NO_DEBT_SERVICE_DSCR_LABEL;
   return n == null ? "—" : n.toFixed(2);
 }
 
@@ -123,7 +124,10 @@ function rowAssumptionLabel(row: TriageRowResult): string {
   const context = row.assumptionContext;
   if (!context) return "Legacy screen — re-screen to verify rate and tax";
   const rateSource = context.rateSource === "fred" ? "FRED" : "default";
-  const taxSource = context.taxSource === "state-static" ? `${context.state ?? "state"} data` : "default";
+  const taxSource =
+    context.taxSource === "state-static"
+      ? `${context.state ?? "state"} legacy data`
+      : "generic preliminary fallback";
   return `${context.interestRatePct.toFixed(2)}% rate (${rateSource}) · ${context.propertyTaxPct.toFixed(2)}% tax (${taxSource})`;
 }
 
@@ -390,8 +394,8 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
         <p className="mt-1 text-sm text-muted-foreground">
           Paste up to {MAX_TRIAGE_ROWS} listings — one per line, columns{" "}
           <span className="font-semibold text-foreground">Address · Price · Rent · Beds</span>{" "}
-          (tab, pipe, or comma separated). We use the current FRED rate and state tax data when available,
-          clearly label defaults, and rank the survivors
+          (tab, pipe, or comma separated). We use the current FRED rate when available,
+          disclose the generic preliminary tax fallback, and rank the survivors
           {result?.buyBoxActive ? " against your buy box" : ""}.
         </p>
       </div>

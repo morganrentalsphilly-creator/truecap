@@ -20,6 +20,7 @@ import {
   getStrategyByKey,
   type InvestorStrategy,
 } from "@/lib/investor-strategies";
+import { isSpecialistStrategyEnabled } from "@/lib/feature-flags";
 
 export const DEFAULT_STRATEGY_KEY = "buy-hold";
 
@@ -370,8 +371,10 @@ export function StrategyChips({
           {renderGroup("Secondary", SECONDARY_INVESTOR_STRATEGIES)}
           {renderGroup(
             "Advanced / Beta strategies",
-            ADVANCED_INVESTOR_STRATEGIES,
-            "BRRRR, flip, wholesale, and STR are screening aids. Their rehab, ARV, lender, operating, regulatory, and exit assumptions require separate evidence.",
+            ADVANCED_INVESTOR_STRATEGIES.filter((strategy) =>
+              isSpecialistStrategyEnabled(strategy.key),
+            ),
+            "Advanced strategy screens are secondary aids. Their market, lender, operating, regulatory, and exit assumptions require separate evidence.",
           )}
         </div>
       ) : null}

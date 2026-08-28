@@ -6,8 +6,9 @@
  * Why this file exists: tier truth used to be hand-typed independently on the
  * homepage ladder, the /pricing table, and the plan cards. They drifted, and
  * the drift landed on the two screens where someone decides to pay — the
- * homepage claimed Free couldn't save deals (it can: five) and that the $5 PDF
- * omitted 10-year projections (it doesn't). Both contradicted /pricing.
+ * homepage claimed Free couldn't save deals (it can: five) and that the
+ * one-time Pack omitted 10-year projections (it doesn't). Both contradicted
+ * /pricing.
  *
  * The homepage ladder now DERIVES its cells from the catalog, so it cannot
  * drift by construction. The /pricing table still hand-types its rows (it
@@ -21,7 +22,12 @@
 import { describe, expect, it } from "vitest";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { FEATURE_CATALOG, tierHas, type FeatureKey } from "@/lib/entitlements-catalog";
+import {
+  FEATURE_CATALOG,
+  isFeatureReleased,
+  tierHas,
+  type FeatureKey,
+} from "@/lib/entitlements-catalog";
 import {
   PUBLIC_PRO_ANNUAL_USD,
   PUBLIC_PRO_MONTHLY_USD,
@@ -44,8 +50,6 @@ const PRICING_ROW_TO_FEATURE: { row: string; key: FeatureKey }[] = [
   { row: "Sale + rent comps from the address", key: "comps" },
   { row: "Shareable read-only deal links", key: "share_links" },
   { row: "10-year cash flow projection", key: "projections" },
-  { row: "Illustrative tax impact + depreciation", key: "tax_strategy" },
-  { row: "Modeled exit-year comparison", key: "exit_scenarios" },
   { row: "Buy Box auto-screening", key: "buy_box" },
   { row: "Deal pipeline + tags (CRM)", key: "pipeline" },
   { row: "Save deals", key: "save_deal" },
@@ -88,24 +92,26 @@ describe("homepage ladder is derived, not hand-typed", () => {
 
 describe("catalog matches what the product actually does", () => {
   it("keeps one documented public fallback while Stripe remains billing authority", () => {
-    expect(PUBLIC_PRO_MONTHLY_USD).toBe(29.99);
-    expect(PUBLIC_PRO_ANNUAL_USD).toBe(300);
+    expect(PUBLIC_PRO_MONTHLY_USD).toBe(24);
+    expect(PUBLIC_PRO_ANNUAL_USD).toBe(240);
     expect(roiCalculatorSource).toContain("PUBLIC_PRO_MONTHLY_USD");
     expect(roiCalculatorSource).not.toMatch(/const PRO_MONTHLY_PRICE\s*=/);
   });
 
-  it("the $5 PDF tier includes the sections the generator really writes", () => {
-    // lib/pdf-generator.ts renders projection10y / taxStrategy / exitScenarios
-    // into the export, so the one-time tier must not be marked as excluding
-    // them — claiming otherwise under-sells a paid product and contradicts the
-    // homepage FAQ.
+  it("the $9 Decision Pack includes released sections and fails closed on unsafe ones", () => {
+    // The catalog may pre-provision future entitlements, but runtime release
+    // gates must keep tax and exit pages out of every generated Pack until the
+    // underlying models and disclosures pass launch review.
     const pdf = readFileSync(join(ROOT, "lib/pdf-generator.ts"), "utf8");
-    for (const key of ["projections", "tax_strategy", "exit_scenarios", "mao"] as const) {
-      expect(tierHas("one_time_pdf", key), `${key} in the $5 PDF`).toBe(true);
+    for (const key of ["projections", "mao"] as const) {
+      expect(tierHas("one_time_pdf", key), `${key} in the $9 Decision Pack`).toBe(true);
+      expect(isFeatureReleased(key), `${key} released`).toBe(true);
     }
+    expect(isFeatureReleased("tax_strategy")).toBe(false);
+    expect(isFeatureReleased("exit_scenarios")).toBe(false);
     expect(pdf).toMatch(/projection10y/);
-    expect(pdf).toMatch(/taxStrategy/);
-    expect(pdf).toMatch(/exitScenarios/);
+    expect(pdf).toMatch(/isFeatureReleased\("tax_strategy"\)/);
+    expect(pdf).toMatch(/isFeatureReleased\("exit_scenarios"\)/);
     expect(pdf).toMatch(/maxOffer/);
   });
 

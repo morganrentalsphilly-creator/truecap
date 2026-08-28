@@ -4,6 +4,7 @@ import {
   tierHas,
   featuresForTier,
   featureLimit,
+  ladderCellsForFeature,
   type FeatureKey,
 } from "@/lib/entitlements-catalog";
 
@@ -42,6 +43,13 @@ describe("entitlements catalog — policy guards", () => {
   it("Shareable read-only links are FREE (the growth loop), not Pro-gated", () => {
     expect(tierHas("free", "share_links")).toBe(true);
     expect(tierHas("pro", "share_links")).toBe(true);
+  });
+
+  it("layers the browser-bound first decision above plan-tier entitlements", () => {
+    expect(tierHas("free", "pdf_export")).toBe(false);
+    expect(ladderCellsForFeature("pdf_export")[0]).toBe("One exact deal");
+    expect(ladderCellsForFeature("mao")[0]).toBe("One exact deal");
+    expect(FEATURE_CATALOG.pdf_export.evaluationLimit).toContain("three");
   });
 
   it("$5 one-time report includes Max Offer and export, but not custom branding", () => {

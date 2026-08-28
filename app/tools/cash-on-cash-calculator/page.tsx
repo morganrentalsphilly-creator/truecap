@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { CocCalculatorWidget } from "@/components/tools/coc-calculator-widget";
@@ -8,6 +9,7 @@ import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
+import { isCalculatorReleased } from "@/lib/calculator-registry";
 export const metadata: Metadata = {
   title: "Free Cash-on-Cash Calculator — Mortgage Built In",
   description:
@@ -63,6 +65,8 @@ const FAQS: { q: string; a: string }[] = [
 ];
 
 export default function CoCCalculatorPage() {
+  if (!isCalculatorReleased("cash-on-cash-calculator")) notFound();
+
   const siteUrl = getSiteUrl();
 
   const webAppLd = {
@@ -242,8 +246,9 @@ export default function CoCCalculatorPage() {
             </p>
             <p>
               Use CoC for &ldquo;does this deal beat my other options for
-              cash today?&rdquo; — and use the full TrueCap analyzer for the
-              after-tax, multi-year, exit-aware view. If you currently run
+              cash today?&rdquo; — and use the TrueCap analyzer for a 10-year
+              cash-flow and equity planning view plus sensitivity. It does not
+              currently expose tax-specific or modeled-exit modules. If you run
               this math in another tool, see how TrueCap stacks up against the{" "}
               <Link href="/vs/biggerpockets-calculator" className="font-semibold text-primary hover:underline">BiggerPockets calculator</Link>.
             </p>
@@ -285,17 +290,17 @@ export default function CoCCalculatorPage() {
           <section className="mt-10 sm:mt-12 rounded-2xl bg-primary text-primary-foreground p-6 sm:p-8">
             <h2 className="text-xl sm:text-2xl font-extrabold mb-2">Run the full analysis — free</h2>
             <p className="text-sm sm:text-base opacity-90 mb-4">
-              Cap rate, DSCR, 10-year projections, tax savings, exit
-              scenarios, and a secondary Screening Index—all from the same property
+              Cap rate, DSCR, 10-year cash-flow and equity projections,
+              sensitivity, Offer Ceiling, and a secondary Screening Index—all from the same property
               inputs you used here.
             </p>
             <ul className="text-sm space-y-1.5 mb-5 opacity-90">
               {[
                 "Full cash-flow model with rent + expense growth",
-                "Depreciation modeling and tax savings projection (Pro)",
+                "Downside sensitivity grid (Pro)",
                 "DSCR readout sized to lender thresholds",
-                "Sell / refi / hold exit comparison (Pro)",
-                "BRRRR + fix-and-flip strategy calculators (Pro)",
+                "Target-dependent Offer Ceiling (Pro)",
+                "Saved-deal comparison and review reports (Pro)",
                 "Free to start — no credit card",
               ].map((line) => (
                 <li key={line} className="flex items-start gap-2">
@@ -317,7 +322,7 @@ export default function CoCCalculatorPage() {
           <ToolEmbedInvite slug="cash-on-cash-calculator" />
 
 
-          <ToolsConversionCta calculatorName="Cash-on-cash calculator" hook="The TrueCap analyzer adds 10-year cash flow projection, tax savings, and exit scenarios on top of cash-on-cash — so you can see whether the modest year-1 return becomes a great long-term play." />
+          <ToolsConversionCta calculatorName="Cash-on-cash calculator" hook="The TrueCap analyzer adds a 10-year cash-flow and equity projection, downside sensitivity, and a target-dependent Offer Ceiling on top of cash-on-cash, so you can test the assumptions behind the first-year screen." />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}

@@ -335,7 +335,7 @@ export default function BrrrrMethodPost() {
             roughly $162,000 — about 66% LTV. The DSCR floor, not the LTV
             ceiling, would decide your cash-out. Run your own deal through the{" "}
             <Link
-              href="/tools/dscr-calculator"
+              href="/#main"
               className="text-primary font-semibold hover:underline"
             >
               DSCR calculator
@@ -364,7 +364,7 @@ export default function BrrrrMethodPost() {
             $23,500 in the deal — and on the self-managed numbers that&apos;s
             roughly an 11%{" "}
             <Link
-              href="/tools/cash-on-cash-calculator"
+              href="/#main"
               className="text-primary font-semibold hover:underline"
             >
               cash-on-cash return
@@ -540,13 +540,13 @@ export default function BrrrrMethodPost() {
             Every number in this post is a knob, and the deal lives or dies on
             how they interact. The{" "}
             <Link
-              href="/tools/brrrr-calculator"
+              href="/tools/rehab-cost-estimator"
               className="text-primary font-semibold hover:underline"
             >
-              BRRRR calculator
+              rehab cost estimator
             </Link>{" "}
-            runs the full cycle — purchase, rehab, ARV, refinance LTV, and
-            post-refi cash flow — in about a minute, and the full{" "}
+            helps anchor one early-stage input. TrueCap&apos;s integrated BRRRR
+            lifecycle model is not currently released; the core{" "}
             <Link href="/" className="text-primary font-semibold hover:underline">
               TrueCap analyzer
             </Link>{" "}

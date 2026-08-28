@@ -228,6 +228,6 @@ describe("buildStressSurvivability — DSCR banding vs the 1.20 lender line", ()
     const s = buildStressSurvivability(base, stressed);
     expect(s.dscr.band).toBe("cash");
     expect(s.dscr.value).toBeNull();
-    expect(s.dscr.label).toContain("cash purchase");
+    expect(s.dscr.label).toBe("N/A — no debt service");
   });
 });

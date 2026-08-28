@@ -14,6 +14,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { FiftyPercentRuleWidget } from "@/components/tools/fifty-percent-rule-widget";
@@ -22,6 +23,7 @@ import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
+import { isCalculatorReleased } from "@/lib/calculator-registry";
 export const metadata: Metadata = {
   title: "50% Rule Calculator | Free Rental Expense Triage",
   description:
@@ -77,6 +79,8 @@ const FAQS: { q: string; a: string }[] = [
 ];
 
 export default function FiftyPercentRuleCalculatorPage() {
+  if (!isCalculatorReleased("50-percent-rule-calculator")) notFound();
+
   const siteUrl = getSiteUrl();
 
   const webAppLd = {
@@ -267,9 +271,9 @@ export default function FiftyPercentRuleCalculatorPage() {
               <Link href="/tools/2-percent-rule-calculator" className="text-primary font-semibold hover:underline">2% rule</Link>{" "}
               is the cash-flow-market variant of the income screen. From
               there, replace the guesses with line items: the{" "}
-              <Link href="/tools/rental-cash-flow-calculator" className="text-primary font-semibold hover:underline">rental cash flow calculator</Link>{" "}
+              <Link href="/#main" className="text-primary font-semibold hover:underline">rental cash flow calculator</Link>{" "}
               itemizes every expense the 50% bundle compresses, and the{" "}
-              <Link href="/tools/noi-calculator" className="text-primary font-semibold hover:underline">NOI calculator</Link>{" "}
+              <Link href="/#main" className="text-primary font-semibold hover:underline">NOI calculator</Link>{" "}
               walks the formal NOI (which, unlike the rule&apos;s bundle,
               excludes the CapEx reserve — the convention lenders use).
             </p>

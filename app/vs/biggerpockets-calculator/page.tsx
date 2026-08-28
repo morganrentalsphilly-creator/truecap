@@ -52,7 +52,7 @@ type Row = { workflow: string; truecap: string; bp: string };
 const MATRIX: Row[] = [
   { workflow: "First screen", truecap: "Address-first screen with editable starting assumptions and core economics.", bp: "Detailed rental-property input workflow with report-style results." },
   { workflow: "Underwriting sequence", truecap: "Connects selected-rule fit, Buy Box, Offer Ceiling, downside, and presentation.", bp: "Centers on a detailed calculator and the investor's interpretation of its report." },
-  { workflow: "Scenario depth", truecap: "Includes long-term projection, exit, tax, and downside modules in paid workflows.", bp: "Its rental calculator captures purchase, loan, income, expense, and projection inputs." },
+  { workflow: "Scenario depth", truecap: "Includes a 10-year cash-flow and equity projection plus downside sensitivity in paid workflows.", bp: "Its rental calculator captures purchase, loan, income, expense, and projection inputs." },
   { workflow: "Modeled boundary", truecap: "Offer Ceiling works backward from the selected target and shows threshold alternatives; it is not a recommended offer.", bp: "The calculator supports an offer-price input inside a broader rental analysis." },
   { workflow: "Ecosystem", truecap: "Focused product, methodology, blog, and glossary.", bp: "Calculator inside a large community, education, media, and marketplace ecosystem." },
   { workflow: "Best fit", truecap: "Investors who want a guided address-to-underwrite sequence.", bp: "Investors who value a detailed calculator inside the BiggerPockets ecosystem." },
@@ -246,22 +246,22 @@ export default function VsBiggerPocketsCalculatorPage() {
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             If you only need a specific metric — not a full calculator suite
             — TrueCap also ships standalone tools: the{" "}
-            <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">
+            <Link href="/#main" className="font-semibold text-primary hover:underline">
               cap rate calculator
             </Link>
             , the{" "}
-            <Link href="/tools/dscr-calculator" className="font-semibold text-primary hover:underline">
+            <Link href="/#main" className="font-semibold text-primary hover:underline">
               DSCR calculator
             </Link>
             , the{" "}
-            <Link href="/tools/brrrr-calculator" className="font-semibold text-primary hover:underline">
-              BRRRR calculator
+            <Link href="/blog/brrrr-method-explained" className="font-semibold text-primary hover:underline">
+              BRRRR workflow guide
             </Link>
             , and the{" "}
             <Link href="/tools/1-percent-rule-calculator" className="font-semibold text-primary hover:underline">
               1% rule calculator
             </Link>
-            . All free, all unlimited.
+            . The calculators are free; the BRRRR link is an educational guide.
           </p>
         </section>
 

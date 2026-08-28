@@ -20,7 +20,10 @@ import {
   type AnalysisTemplateInput,
   TEMPLATE_DESCRIPTION_MAX_LENGTH,
 } from "@/lib/analysis-template-schema";
-import { DEFAULT_APPRECIATION_RATE, DEFAULT_SELLING_COST_PCT } from "@/lib/exit-scenarios";
+import {
+  DEFAULT_APPRECIATION_RATE,
+  DEFAULT_SELLING_COST_PCT,
+} from "@/lib/exit-scenarios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -41,6 +44,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
+import { isFeatureReleased } from "@/lib/entitlements-catalog";
+
+const TAX_STRATEGY_RELEASED = isFeatureReleased("tax_strategy");
+const EXIT_SCENARIOS_RELEASED = isFeatureReleased("exit_scenarios");
 
 type NumericTemplateField =
   | "propertyTaxPct"
@@ -97,7 +104,9 @@ function NumberInputField({
       name={name}
       render={({ field }) => (
         <FormItem className="rounded-lg border border-border bg-card px-3 py-2.5">
-          <FormLabel className="text-xs font-semibold text-foreground">{label}</FormLabel>
+          <FormLabel className="text-xs font-semibold text-foreground">
+            {label}
+          </FormLabel>
           <div className="relative mt-1.5">
             <FormControl>
               <Input
@@ -108,7 +117,9 @@ function NumberInputField({
                 value={Number.isFinite(field.value) ? field.value : ""}
                 onChange={(e) => {
                   const next = e.target.value;
-                  field.onChange(next === "" ? (allowEmpty ? undefined : 0) : Number(next));
+                  field.onChange(
+                    next === "" ? (allowEmpty ? undefined : 0) : Number(next),
+                  );
                 }}
                 className="h-10 rounded-md pr-8"
               />
@@ -118,7 +129,9 @@ function NumberInputField({
             </span>
           </div>
           {hint ? (
-            <p className="mt-1 text-[11px] text-muted-foreground min-h-[14px]">{hint}</p>
+            <p className="mt-1 text-[11px] text-muted-foreground min-h-[14px]">
+              {hint}
+            </p>
           ) : (
             <p className="mt-1 min-h-[14px]" />
           )}
@@ -133,7 +146,9 @@ type BuyBoxFieldName =
   | "buyBox.minCapRatePct"
   | "buyBox.minCocPct"
   | "buyBox.minDscr"
+  | "buyBox.minIrrPct"
   | "buyBox.minCashFlowMonthly"
+  | "buyBox.maxCashRequired"
   | "buyBox.maxPurchasePrice";
 
 function BuyBoxField({
@@ -157,7 +172,9 @@ function BuyBoxField({
       name={name}
       render={({ field }) => (
         <FormItem className="rounded-lg border border-border bg-card px-3 py-2.5">
-          <FormLabel className="text-xs font-semibold text-foreground">{label}</FormLabel>
+          <FormLabel className="text-xs font-semibold text-foreground">
+            {label}
+          </FormLabel>
           <div className="relative mt-1.5">
             {prefix ? (
               <span className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-xs font-semibold text-muted-foreground">
@@ -170,9 +187,17 @@ function BuyBoxField({
                 inputMode="decimal"
                 step={step}
                 value={field.value == null ? "" : (field.value as number)}
-                onChange={(e) => field.onChange(e.target.value === "" ? null : Number(e.target.value))}
+                onChange={(e) =>
+                  field.onChange(
+                    e.target.value === "" ? null : Number(e.target.value),
+                  )
+                }
                 placeholder="—"
-                className={cn("h-10 rounded-md", prefix ? "pl-6" : "", suffix ? "pr-8" : "")}
+                className={cn(
+                  "h-10 rounded-md",
+                  prefix ? "pl-6" : "",
+                  suffix ? "pr-8" : "",
+                )}
               />
             </FormControl>
             {suffix ? (
@@ -225,25 +250,34 @@ export function TemplateFormDialog({
     >
       {/* dvh (not vh) so the footer Save button clears iOS Safari's
           expanded toolbar instead of rendering behind the browser chrome. */}
-      <DialogContent showCloseButton={false} className="sm:max-w-6xl h-[92dvh] max-h-[92dvh] overflow-hidden  p-0 flex flex-col">
+      <DialogContent
+        showCloseButton={false}
+        className="sm:max-w-6xl h-[92dvh] max-h-[92dvh] overflow-hidden  p-0 flex flex-col"
+      >
         <DialogHeader className="px-6 pt-6 pb-2 border-b border-border/70">
           <DialogTitle className="flex items-center gap-3">
             <span className="inline-flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <ClipboardList className="w-4 h-4" />
             </span>
-            <span>{editingTemplate ? "Edit Calculation Template" : "Create Calculation Template"}</span>
+            <span>
+              {editingTemplate
+                ? "Edit Calculation Template"
+                : "Create Calculation Template"}
+            </span>
           </DialogTitle>
-          <DialogDescription>{editingTemplate ? editDescription : createDescription}</DialogDescription>
+          <DialogDescription>
+            {editingTemplate ? editDescription : createDescription}
+          </DialogDescription>
           <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              aria-label="Close template dialog"
-              className="absolute right-4 top-4 h-9 w-9 rounded-full border-input bg-background/90"
-              onClick={() => onOpenChange(false)}
-            >
-              <X className="h-4 w-4" aria-hidden />
-            </Button>
+            type="button"
+            variant="outline"
+            size="icon"
+            aria-label="Close template dialog"
+            className="absolute right-4 top-4 h-9 w-9 rounded-full border-input bg-background/90"
+            onClick={() => onOpenChange(false)}
+          >
+            <X className="h-4 w-4" aria-hidden />
+          </Button>
         </DialogHeader>
 
         <div className="flex-1 min-h-0 overflow-y-auto">
@@ -266,7 +300,11 @@ export function TemplateFormDialog({
                     <FormItem>
                       <FormLabel>Template Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="My Rental Template" {...field} className="h-11 rounded-xl" />
+                        <Input
+                          placeholder="My Rental Template"
+                          {...field}
+                          className="h-11 rounded-xl"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -300,8 +338,12 @@ export function TemplateFormDialog({
                     <Home className="w-4 h-4" />
                   </span>
                   <div>
-                    <p className="text-sm font-semibold text-foreground">Property & Insurance</p>
-                    <p className="text-xs text-muted-foreground">Core property and insurance assumptions</p>
+                    <p className="text-sm font-semibold text-foreground">
+                      Property & Insurance
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Core property and insurance assumptions
+                    </p>
                   </div>
                 </div>
 
@@ -317,7 +359,9 @@ export function TemplateFormDialog({
                     name="insuranceInputMode"
                     render={({ field }) => (
                       <FormItem className="sm:col-span-2 xl:col-span-1 rounded-lg border border-border bg-card px-3 py-2.5">
-                        <FormLabel className="text-xs font-semibold text-foreground">Insurance Input</FormLabel>
+                        <FormLabel className="text-xs font-semibold text-foreground">
+                          Insurance Input
+                        </FormLabel>
                         <div className="mt-1.5 flex rounded-lg border border-border bg-muted/40 p-1">
                           {[
                             { value: "percent", label: "Annual %" },
@@ -331,7 +375,7 @@ export function TemplateFormDialog({
                                 "flex-1 rounded-md px-3 py-2 text-xs font-semibold transition-colors",
                                 field.value === option.value
                                   ? "bg-primary text-primary-foreground"
-                                  : "text-muted-foreground hover:text-foreground"
+                                  : "text-muted-foreground hover:text-foreground",
                               )}
                             >
                               {option.label}
@@ -339,7 +383,8 @@ export function TemplateFormDialog({
                           ))}
                         </div>
                         <p className="mt-1 text-[11px] text-muted-foreground min-h-[14px]">
-                          Save insurance assumptions as an annual percent or a flat monthly cost.
+                          Save insurance assumptions as an annual percent or a
+                          flat monthly cost.
                         </p>
                         <FormMessage className="text-[11px]" />
                       </FormItem>
@@ -360,10 +405,26 @@ export function TemplateFormDialog({
                       hint="Fixed monthly insurance cost."
                     />
                   )}
-                  <NumberInputField form={templateForm} name="maintenancePct" label="Maintenance %" />
-                  <NumberInputField form={templateForm} name="vacancyPct" label="Vacancy %" />
-                  <NumberInputField form={templateForm} name="managementPct" label="Management %" />
-                  <NumberInputField form={templateForm} name="capexPct" label="CapEx %" />
+                  <NumberInputField
+                    form={templateForm}
+                    name="maintenancePct"
+                    label="Maintenance %"
+                  />
+                  <NumberInputField
+                    form={templateForm}
+                    name="vacancyPct"
+                    label="Vacancy %"
+                  />
+                  <NumberInputField
+                    form={templateForm}
+                    name="managementPct"
+                    label="Management %"
+                  />
+                  <NumberInputField
+                    form={templateForm}
+                    name="capexPct"
+                    label="CapEx %"
+                  />
                   <NumberInputField
                     form={templateForm}
                     name="closingCostsPct"
@@ -387,8 +448,14 @@ export function TemplateFormDialog({
                       <SlidersHorizontal className="w-4 h-4" />
                     </span>
                     <div>
-                      <p className="text-sm font-semibold text-foreground">Advanced Assumptions</p>
-                      <p className="text-xs text-muted-foreground">Financing, growth, and exit assumptions</p>
+                      <p className="text-sm font-semibold text-foreground">
+                        Advanced Assumptions
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {EXIT_SCENARIOS_RELEASED
+                          ? "Financing, growth, and exit assumptions"
+                          : "Financing and growth assumptions"}
+                      </p>
                     </div>
                   </div>
                   {showAdvanced ? (
@@ -401,88 +468,125 @@ export function TemplateFormDialog({
                 <div id={`${formId}-advanced-assumptions`}>
                   {showAdvanced ? (
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                    <NumberInputField form={templateForm} name="interestRatePct" label="Interest Rate %" />
-                    <NumberInputField form={templateForm} name="downPaymentPct" label="Down Payment %" />
-                    <NumberInputField form={templateForm} name="expenseGrowthPct" label="Expense Growth %" />
-                    <NumberInputField form={templateForm} name="rentGrowthPct" label="Rent Growth %" />
-                    <NumberInputField
-                      form={templateForm}
-                      name="appreciationRatePct"
-                      label="Annual Appreciation % (Optional)"
-                      hint={`Used for exit scenarios. Defaults to ${DEFAULT_APPRECIATION_RATE}% when omitted.`}
-                      allowEmpty
-                    />
-                    <NumberInputField
-                      form={templateForm}
-                      name="sellingCostPct"
-                      label="Selling Cost % (Optional)"
-                      hint={`Defaults to ${DEFAULT_SELLING_COST_PCT}% when omitted.`}
-                      allowEmpty
-                    />
-                    <NumberInputField form={templateForm} name="buildingValuePct" label="Building Value %" />
-                    <NumberInputField
-                      form={templateForm}
-                      name="taxRatePct"
-                      label="Tax Rate % (Optional)"
-                      allowEmpty
-                    />
-                    <FormField
-                      control={templateForm.control}
-                      name="depreciationYears"
-                      render={({ field }) => (
-                        <FormItem className="rounded-lg border border-border bg-card px-3 py-2.5">
-                          <FormLabel className="text-xs font-semibold text-foreground">
-                            Depreciation Period
-                          </FormLabel>
-                          <FormControl>
-                            <select
-                              /* text-base below md: iOS Safari zooms the page
-                                 in on sub-16px form controls (same rule the
-                                 Input primitive encodes). */
-                              className="mt-1.5 w-full h-10 rounded-md border border-border px-3 text-base bg-background md:text-sm"
-                              value={field.value}
-                              onChange={(e) => field.onChange(Number(e.target.value))}
-                            >
-                              <option value={27.5}>27.5 years (Residential)</option>
-                              <option value={39}>39 years (Commercial)</option>
-                            </select>
-                          </FormControl>
-                          <p className="mt-1 min-h-[14px]" />
-                          <FormMessage className="text-[11px]" />
-                        </FormItem>
-                      )}
-                    />
+                      <NumberInputField
+                        form={templateForm}
+                        name="interestRatePct"
+                        label="Interest Rate %"
+                      />
+                      <NumberInputField
+                        form={templateForm}
+                        name="downPaymentPct"
+                        label="Down Payment %"
+                      />
+                      <NumberInputField
+                        form={templateForm}
+                        name="expenseGrowthPct"
+                        label="Expense Growth %"
+                      />
+                      <NumberInputField
+                        form={templateForm}
+                        name="rentGrowthPct"
+                        label="Rent Growth %"
+                      />
+                      {EXIT_SCENARIOS_RELEASED ? (
+                        <>
+                          <NumberInputField
+                            form={templateForm}
+                            name="appreciationRatePct"
+                            label="Annual Appreciation % (Optional)"
+                            hint={`Used for exit scenarios. Defaults to ${DEFAULT_APPRECIATION_RATE}% when omitted.`}
+                            allowEmpty
+                          />
+                          <NumberInputField
+                            form={templateForm}
+                            name="sellingCostPct"
+                            label="Selling Cost % (Optional)"
+                            hint={`Defaults to ${DEFAULT_SELLING_COST_PCT}% when omitted.`}
+                            allowEmpty
+                          />
+                        </>
+                      ) : null}
+                      {TAX_STRATEGY_RELEASED ? (
+                        <>
+                          <NumberInputField
+                            form={templateForm}
+                            name="buildingValuePct"
+                            label="Building Value %"
+                          />
+                          <NumberInputField
+                            form={templateForm}
+                            name="taxRatePct"
+                            label="Tax Rate % (Optional)"
+                            allowEmpty
+                          />
+                          <FormField
+                            control={templateForm.control}
+                            name="depreciationYears"
+                            render={({ field }) => (
+                              <FormItem className="rounded-lg border border-border bg-card px-3 py-2.5">
+                                <FormLabel className="text-xs font-semibold text-foreground">
+                                  Depreciation Period
+                                </FormLabel>
+                                <FormControl>
+                                  <select
+                                    /* text-base below md: iOS Safari zooms the page
+                                     in on sub-16px form controls (same rule the
+                                     Input primitive encodes). */
+                                    className="mt-1.5 w-full h-10 rounded-md border border-border px-3 text-base bg-background md:text-sm"
+                                    value={field.value}
+                                    onChange={(e) =>
+                                      field.onChange(Number(e.target.value))
+                                    }
+                                  >
+                                    <option value={27.5}>
+                                      27.5 years (Residential)
+                                    </option>
+                                    <option value={39}>
+                                      39 years (Commercial)
+                                    </option>
+                                  </select>
+                                </FormControl>
+                                <p className="mt-1 min-h-[14px]" />
+                                <FormMessage className="text-[11px]" />
+                              </FormItem>
+                            )}
+                          />
+                        </>
+                      ) : null}
                     </div>
                   ) : null}
                 </div>
 
-                <FormField
-                  control={templateForm.control}
-                  name="includeInterestDeduction"
-                  render={({ field }) => (
-                    <FormItem className="rounded-lg border border-border bg-card px-4 py-3 flex items-center justify-between gap-3">
-                      <div>
-                        <FormLabel
-                          htmlFor={`${formId}-include-interest-deduction`}
-                          className="text-sm font-semibold text-foreground cursor-pointer"
-                        >
-                          Include Interest Deduction
-                        </FormLabel>
-                        <p className="text-[11px] text-muted-foreground">
-                          Include mortgage interest deduction in cash flow and taxes.
-                        </p>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          id={`${formId}-include-interest-deduction`}
-                          checked={field.value ?? true}
-                          onCheckedChange={field.onChange}
-                          aria-label="Include interest deduction in template tax assumptions"
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+                {TAX_STRATEGY_RELEASED ? (
+                  <FormField
+                    control={templateForm.control}
+                    name="includeInterestDeduction"
+                    render={({ field }) => (
+                      <FormItem className="rounded-lg border border-border bg-card px-4 py-3 flex items-center justify-between gap-3">
+                        <div>
+                          <FormLabel
+                            htmlFor={`${formId}-include-interest-deduction`}
+                            className="text-sm font-semibold text-foreground cursor-pointer"
+                          >
+                            Include Interest Deduction
+                          </FormLabel>
+                          <p className="text-[11px] text-muted-foreground">
+                            Include mortgage interest deduction in cash flow and
+                            taxes.
+                          </p>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            id={`${formId}-include-interest-deduction`}
+                            checked={field.value ?? true}
+                            onCheckedChange={field.onChange}
+                            aria-label="Include interest deduction in template tax assumptions"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                ) : null}
               </div>
 
               {/* Buy box targets - optional acquisition criteria the template
@@ -494,33 +598,94 @@ export function TemplateFormDialog({
                     <Target className="w-4 h-4" />
                   </span>
                   <div>
-                    <p className="text-sm font-semibold text-foreground">Buy box targets (optional)</p>
+                    <p className="text-sm font-semibold text-foreground">
+                      Buy box targets (optional)
+                    </p>
                     <p className="text-xs text-muted-foreground">
                       Criteria this template aims for - leave blank to skip.
                     </p>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-                  <BuyBoxField form={templateForm} name="buyBox.minCapRatePct" label="Min cap rate" suffix="%" step="0.1" />
-                  <BuyBoxField form={templateForm} name="buyBox.minCocPct" label="Min cash-on-cash" suffix="%" step="0.1" />
-                  <BuyBoxField form={templateForm} name="buyBox.minDscr" label="Min DSCR" suffix="×" step="0.05" />
-                  <BuyBoxField form={templateForm} name="buyBox.minCashFlowMonthly" label="Min monthly cash flow" prefix="$" step="25" />
-                  <BuyBoxField form={templateForm} name="buyBox.maxPurchasePrice" label="Max purchase price" prefix="$" step="5000" />
+                  <BuyBoxField
+                    form={templateForm}
+                    name="buyBox.minCapRatePct"
+                    label="Min cap rate"
+                    suffix="%"
+                    step="0.1"
+                  />
+                  <BuyBoxField
+                    form={templateForm}
+                    name="buyBox.minCocPct"
+                    label="Min cash-on-cash"
+                    suffix="%"
+                    step="0.1"
+                  />
+                  <BuyBoxField
+                    form={templateForm}
+                    name="buyBox.minDscr"
+                    label="Min DSCR"
+                    suffix="×"
+                    step="0.05"
+                  />
+                  {EXIT_SCENARIOS_RELEASED ? (
+                    <BuyBoxField
+                      form={templateForm}
+                      name="buyBox.minIrrPct"
+                      label="Min 10-year pre-tax IRR"
+                      suffix="%"
+                      step="0.1"
+                    />
+                  ) : null}
+                  <BuyBoxField
+                    form={templateForm}
+                    name="buyBox.minCashFlowMonthly"
+                    label="Min monthly cash flow"
+                    prefix="$"
+                    step="25"
+                  />
+                  <BuyBoxField
+                    form={templateForm}
+                    name="buyBox.maxCashRequired"
+                    label="Max cash required"
+                    prefix="$"
+                    step="500"
+                  />
+                  <BuyBoxField
+                    form={templateForm}
+                    name="buyBox.maxPurchasePrice"
+                    label="Max purchase price"
+                    prefix="$"
+                    step="5000"
+                  />
                 </div>
               </div>
             </form>
           </Form>
         </div>
         <DialogFooter className="border-t border-border/70 px-6 py-4 bg-background">
-          <Button type="button" variant="outline" disabled={isSaving} onClick={() => onOpenChange(false)} className="rounded-xl">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isSaving}
+            onClick={() => onOpenChange(false)}
+            className="rounded-xl"
+          >
             <X className="w-4 h-4 mr-2" />
             Cancel
           </Button>
-          <Button type="submit" form={formId} disabled={isSaving} className="rounded-xl">
+          <Button
+            type="submit"
+            form={formId}
+            disabled={isSaving}
+            className="rounded-xl"
+          >
             {isSaving ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                {editingTemplate ? "Updating Template..." : "Saving Template..."}
+                {editingTemplate
+                  ? "Updating Template..."
+                  : "Saving Template..."}
               </>
             ) : (
               <>

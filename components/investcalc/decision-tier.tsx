@@ -42,6 +42,7 @@ import {
   type BuyBoxReturnThresholds,
 } from "@/lib/mao-targets";
 import { buildVerdictSentence } from "@/lib/verdict-sentence";
+import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
 import { Verdict } from "@/components/investcalc/verdict";
 import { trackEvent } from "@/lib/analytics";
 
@@ -128,6 +129,14 @@ export function DecisionTier({
   const [dscrInput, setDscrInput] = useState(() =>
     seedTarget ? (seedTarget.dscr != null ? String(seedTarget.dscr) : "") : "1.25"
   );
+  const [irrInput, setIrrInput] = useState(() =>
+    seedTarget?.minIrrPct != null ? String(seedTarget.minIrrPct) : ""
+  );
+  const [maxCashInput, setMaxCashInput] = useState(() =>
+    seedTarget?.maxCashRequired != null
+      ? String(seedTarget.maxCashRequired)
+      : ""
+  );
   const [touched, setTouched] = useState(false);
   const [tuneOpen, setTuneOpen] = useState(false);
 
@@ -140,6 +149,12 @@ export function DecisionTier({
     setCocInput(seedTarget.cocReturn != null ? String(seedTarget.cocReturn) : "");
     setCashFlowInput(seedTarget.monthlyCashFlow != null ? String(seedTarget.monthlyCashFlow) : "");
     setDscrInput(seedTarget.dscr != null ? String(seedTarget.dscr) : "");
+    setIrrInput(seedTarget.minIrrPct != null ? String(seedTarget.minIrrPct) : "");
+    setMaxCashInput(
+      seedTarget.maxCashRequired != null
+        ? String(seedTarget.maxCashRequired)
+        : "",
+    );
     // seedKey serializes the seed so a value-equal object doesn't re-fire.
   }, [seedKey, touched]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -150,15 +165,23 @@ export function DecisionTier({
       monthlyCashFlow: numberOrUndefined(cashFlowInput),
       // Cash deals have no debt service — a DSCR floor could never pass.
       dscr: isCashDeal ? undefined : numberOrUndefined(dscrInput),
+      minIrrPct: numberOrUndefined(irrInput),
+      maxCashRequired: numberOrUndefined(maxCashInput),
+      // The compact tier does not expose a separate price-budget editor, but
+      // it must retain a Buy Box's existing absolute cap while tuning returns.
+      maxPurchasePrice: seedTarget?.maxPurchasePrice,
     }),
-    [capRateInput, cocInput, cashFlowInput, dscrInput, isCashDeal]
+    [capRateInput, cocInput, cashFlowInput, dscrInput, irrInput, maxCashInput, isCashDeal, seedTarget?.maxPurchasePrice]
   );
 
   const noTargetSet =
     target.capRate === undefined &&
     target.cocReturn === undefined &&
     target.monthlyCashFlow === undefined &&
-    target.dscr === undefined;
+    target.dscr === undefined &&
+    target.minIrrPct === undefined &&
+    target.maxCashRequired === undefined &&
+    target.maxPurchasePrice === undefined;
 
   const mao = useMemo(() => {
     if (!values || !result || !canUseMaxOffer || noTargetSet) return null;
@@ -309,7 +332,7 @@ export function DecisionTier({
         </Popover>
       </div>
 
-      {/* 6 — Tune targets: the four inputs, demoted. Recomputes IN PLACE. */}
+      {/* 6 — Tune targets, demoted. Recomputes IN PLACE. */}
       {canUseMaxOffer ? (
         <div className="mt-5 border-t border-border/70 pt-4">
           <button
@@ -334,7 +357,7 @@ export function DecisionTier({
             <p className="mb-2 text-xs text-muted-foreground">
               The Offer Ceiling is the highest modeled price that still meets every target you set under the assumptions shown.
             </p>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
               <div>
                 <Label htmlFor={`${fieldId}-cap`} className="text-xs">
                   Target cap rate
@@ -381,10 +404,44 @@ export function DecisionTier({
                 <Input
                   id={`${fieldId}-dscr`}
                   inputMode="decimal"
-                  placeholder={isCashDeal ? "N/A — cash" : "Any"}
+                  placeholder={isCashDeal ? NO_DEBT_SERVICE_DSCR_LABEL : "Any"}
                   value={isCashDeal ? "" : dscrInput}
                   disabled={isCashDeal}
                   onChange={onTargetChange(setDscrInput)}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor={`${fieldId}-irr`} className="text-xs">
+                  Min 10-year pre-tax IRR
+                </Label>
+                <Input
+                  id={`${fieldId}-irr`}
+                  type="number"
+                  inputMode="decimal"
+                  min={-99.9}
+                  max={1000}
+                  step={0.1}
+                  placeholder="Any"
+                  value={irrInput}
+                  onChange={onTargetChange(setIrrInput)}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor={`${fieldId}-max-cash`} className="text-xs">
+                  Max cash required
+                </Label>
+                <Input
+                  id={`${fieldId}-max-cash`}
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  max={1_000_000_000}
+                  step={500}
+                  placeholder="Any"
+                  value={maxCashInput}
+                  onChange={onTargetChange(setMaxCashInput)}
                   className="mt-1"
                 />
               </div>

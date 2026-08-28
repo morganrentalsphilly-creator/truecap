@@ -13,7 +13,7 @@
  */
 
 export const HOMEPAGE_HEADLINES = {
-  decision_system: "Paste an address. Review what matters. Underwrite the rental.",
+  decision_system: "Know your walk-away price before you make the offer.",
   a: "Screen a rental and compare asking with its target-dependent Offer Ceiling.",
   b: "See how a rental models under the assumptions shown.",
   walkaway: "Review the Offer Ceiling and the targets that produced it.",
@@ -26,17 +26,18 @@ export const HOMEPAGE_HEADLINES = {
 export type HomepageHeadlineVariant = keyof typeof HOMEPAGE_HEADLINES;
 
 export const PRO_OFFER_NAMES = {
-  pro: "TrueCap Pro",
-  offer_engine: "TrueCap Offer Engine",
+  pro: "Investor Pro",
+  // Preserve the old environment key without permitting offer-name drift.
+  offer_engine: "Investor Pro",
 } as const;
 
 export type ProOfferNameVariant = keyof typeof PRO_OFFER_NAMES;
 
 export const SINGLE_DEAL_PRICE_OPTIONS = {
   current: {
-    amount: 5,
-    priceLabel: "$5",
-    stripeEnvKey: "STRIPE_PRICE_PDF_ONE_TIME",
+    amount: 9,
+    priceLabel: "$9",
+    stripeEnvKey: "STRIPE_PRICE_SINGLE_DEAL_9",
   },
   p9: {
     amount: 9,

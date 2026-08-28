@@ -10,6 +10,11 @@
  * the 10-year projection. Estimate only — the user can refine the assumption.
  */
 
+import {
+  buildLoanAmortizationSchedule,
+  loanBalanceAfterPayments,
+} from "@/lib/loan-amortization";
+
 export type OwnedEquityInput = {
   /** What they paid. */
   purchasePrice: number;
@@ -17,8 +22,12 @@ export type OwnedEquityInput = {
   loanAmount: number;
   /** Note rate, annual %, e.g. 6.75. */
   annualRatePct: number;
-  /** Amortization term in years (e.g. 30). */
+  /** Contractual maturity in years (e.g. 30). */
   termYears: number;
+  /** Payment-amortization period. Defaults to contractual maturity. */
+  amortizationTermYears?: number;
+  /** Scheduled interest-only period from origination. */
+  interestOnlyMonths?: number;
   /** Annual appreciation assumption, % (the deal's own assumption). */
   appreciationRatePct: number;
 };
@@ -43,31 +52,33 @@ export type OwnedEquitySummary = {
 };
 
 /**
- * Standard amortizing-loan remaining balance after `monthsElapsed` payments.
- * Handles the 0%-rate edge (linear paydown) and clamps to [0, loanAmount].
+ * Contractual remaining balance after `monthsElapsed` payments. The default
+ * four-argument form preserves the historical fully-amortizing contract;
+ * advanced terms use the same full-precision schedule as the analyzer,
+ * projections, payoff, and reports.
  */
 export function remainingLoanBalance(
   loanAmount: number,
   annualRatePct: number,
   termYears: number,
   monthsElapsed: number,
+  advancedTerms?: Pick<
+    OwnedEquityInput,
+    "amortizationTermYears" | "interestOnlyMonths"
+  >,
 ): number {
-  if (!(loanAmount > 0)) return 0;
-  const n = Math.round(termYears * 12);
-  if (!(n > 0)) return 0;
-  const m = Math.min(Math.max(monthsElapsed, 0), n);
-  if (m >= n) return 0; // fully amortized
-
-  const r = annualRatePct / 100 / 12;
-  if (r === 0) {
-    // No interest → principal pays down linearly.
-    return Math.max(0, loanAmount * (1 - m / n));
-  }
-  // Balance_m = P · [ (1+r)^n − (1+r)^m ] / [ (1+r)^n − 1 ]
-  const pow_n = Math.pow(1 + r, n);
-  const pow_m = Math.pow(1 + r, m);
-  const balance = (loanAmount * (pow_n - pow_m)) / (pow_n - 1);
-  return Math.max(0, balance);
+  const schedule = buildLoanAmortizationSchedule({
+    principal: loanAmount,
+    annualRatePct,
+    termYears,
+    maturityTermYears: termYears,
+    amortizationTermYears: advancedTerms?.amortizationTermYears ?? termYears,
+    interestOnlyMonths: advancedTerms?.interestOnlyMonths ?? 0,
+  });
+  return loanBalanceAfterPayments(
+    schedule,
+    Math.max(0, Math.floor(monthsElapsed)),
+  );
 }
 
 /** Whole months between two dates (asOf − close), floored at 0. */
@@ -89,7 +100,15 @@ export function computeOwnedEquity(
   input: OwnedEquityInput,
   monthsOwned: number,
 ): OwnedEquitySummary | null {
-  const { purchasePrice, loanAmount, annualRatePct, termYears, appreciationRatePct } = input;
+  const {
+    purchasePrice,
+    loanAmount,
+    annualRatePct,
+    termYears,
+    amortizationTermYears,
+    interestOnlyMonths,
+    appreciationRatePct,
+  } = input;
   if (!(purchasePrice > 0)) return null;
 
   const months = Math.max(0, Math.round(monthsOwned));
@@ -98,7 +117,13 @@ export function computeOwnedEquity(
 
   const currentValue = purchasePrice * Math.pow(1 + appr, years);
   const loan = Math.max(0, loanAmount);
-  const loanBalance = remainingLoanBalance(loan, annualRatePct, termYears, months);
+  const loanBalance = remainingLoanBalance(
+    loan,
+    annualRatePct,
+    termYears,
+    months,
+    { amortizationTermYears, interestOnlyMonths },
+  );
   const equity = currentValue - loanBalance;
   const downPayment = Math.max(0, purchasePrice - loan);
 

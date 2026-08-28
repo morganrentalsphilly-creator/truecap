@@ -53,7 +53,6 @@ const MATRIX: Row[] = [
   { feature: "Primary purpose", truecap: "Per-deal underwriting calculator", privy: "Investor MLS search + filtering", winner: "tie" },
   { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", privy: "Listing-level cap rate estimates", winner: "truecap" },
   { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", privy: "Not modeled", winner: "truecap" },
-  { feature: "Illustrative tax impact", truecap: "Pro — depreciation + interest + modeled after-tax CF", privy: "Not modeled", winner: "truecap" },
   { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", privy: "MLS-pulled property data", winner: "truecap" },
   { feature: "Investor-filtered MLS search", truecap: "No", privy: "Yes — cash flow, rehab, motivated", winner: "privy" },
   { feature: "Sale + rent comps", truecap: "One free lookup; Pro includes 50 per month; no AVM", privy: "Yes — MLS-derived comp set", winner: "privy" },
@@ -241,7 +240,7 @@ export default function VsPrivyPage() {
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Want to see just the underwriting half? Try the{" "}
-            <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">
+            <Link href="/#main" className="font-semibold text-primary hover:underline">
               cap rate calculator
             </Link>{" "}
             or the full{" "}
@@ -265,7 +264,7 @@ export default function VsPrivyPage() {
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
-            Pro unlocks projections, sensitivity, illustrative tax impact, modeled exit comparisons,
+            Pro adds 10-year cash-flow and equity projections, sensitivity,
             Offer Ceiling, co-branded share links, and PDF reports with Pro; see live pricing for current terms.
             No card to start.
           </p>
@@ -337,11 +336,11 @@ const PRIVY_FAQ: FaqItem[] = [
     question: "Does Privy underwrite deals?",
     answer: (
       <>
-        Sort of — it shows listing-level cap rate estimates and rehab condition flags, but it doesn&apos;t do per-deal underwriting at TrueCap&apos;s depth (DSCR, sensitivity, projection, and illustrative tax impact). Privy gets you to a shortlist; TrueCap models a shortlisted property from editable assumptions.
+        Sort of — it shows listing-level cap rate estimates and rehab condition flags, while TrueCap adds editable financing, DSCR, sensitivity, and a cash-flow and equity projection for a shortlisted property. TrueCap does not currently expose a tax-specific module.
       </>
     ),
     plainTextAnswer:
-      "Sort of — listing-level cap rate estimates + rehab flags but not deep per-deal underwriting (no DSCR, sensitivity, projection, or illustrative tax impact). Privy: shortlist. TrueCap: editable underwriting.",
+      "Privy provides listing-level cap-rate estimates and rehab flags. TrueCap adds editable financing, DSCR, sensitivity, and a cash-flow and equity projection, but does not currently expose a tax-specific module.",
   },
   {
     question: "Is Privy worth $99/month?",

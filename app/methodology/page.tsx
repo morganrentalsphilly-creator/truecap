@@ -27,11 +27,12 @@ import {
   UNDERWRITING_STANDARD_RELEASE_NOTES,
 } from "@/lib/underwriting-methodology";
 import { TEN_YEAR_PROJECTION_SNAPSHOT_VERSION } from "@/lib/ten-year-projections";
+import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
 
 export const metadata: Metadata = {
   title: "Methodology",
   description:
-    "How TrueCap computes cap rate, CoC, DSCR, the target-dependent Offer Ceiling, Screening Index, projections, illustrative tax impact, and exit scenarios.",
+    "How TrueCap computes released cap rate, CoC, DSCR, Offer Ceiling, Screening Index, and 10-year cash-flow and equity projections, plus archived model notes.",
   keywords: [
     "truecap methodology",
     "how is cap rate calculated",
@@ -46,7 +47,14 @@ export const metadata: Metadata = {
       "The exact formulas, data sources, and conventions TrueCap uses to underwrite rental properties.",
     url: "/methodology",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap methodology" }],
+    images: [
+      {
+        url: "/home.jpg",
+        width: 1200,
+        height: 630,
+        alt: "TrueCap methodology",
+      },
+    ],
   },
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
@@ -63,10 +71,10 @@ export default function MethodologyPage() {
     "@id": `${siteUrl}/methodology#article`,
     headline: "TrueCap Methodology",
     description:
-      "How TrueCap computes cap rate, cash-on-cash, DSCR, the target-dependent Offer Ceiling, Screening Index, projections, illustrative tax impact, and modeled exit scenarios.",
+      "How TrueCap computes released cap rate, cash-on-cash, DSCR, Offer Ceiling, Screening Index, and 10-year cash-flow and equity projections, plus archived model notes.",
     url: `${siteUrl}/methodology`,
     datePublished: "2026-05-24",
-    dateModified: "2026-08-25",
+    dateModified: "2026-08-27",
     author: { "@type": "Organization", name: "TrueCap", url: siteUrl },
     publisher: { "@id": `${siteUrl}/#organization` },
     inLanguage: "en-US",
@@ -91,12 +99,13 @@ export default function MethodologyPage() {
             Methodology
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground mt-2 leading-relaxed">
-            Every formula, every data source, every convention TrueCap
-            uses to underwrite a rental deal. Read this if you want to
-            verify the math before trusting the output.
+            The released formulas, upstream public sources, product defaults,
+            and known limitations behind a TrueCap rental screen. Read this
+            before relying on an output.
           </p>
           <p className="mt-3 inline-flex rounded-full border border-primary/25 bg-primary/5 px-3 py-1 text-xs font-bold text-primary">
-            {TRUECAP_UNDERWRITING_STANDARD_NAME} v{TRUECAP_UNDERWRITING_STANDARD_VERSION}
+            {TRUECAP_UNDERWRITING_STANDARD_NAME} v
+            {TRUECAP_UNDERWRITING_STANDARD_VERSION}
           </p>
         </header>
 
@@ -116,27 +125,28 @@ export default function MethodologyPage() {
             </li>
             <li>
               <strong>Benchmarks are labeled as benchmarks.</strong> HUD Fair
-              Market Rent, the FRED 30-year owner-occupied mortgage series,
-              and state-level effective tax rates are starting points, not
-              property-specific comps, lender quotes, or parcel bills.
+              Market Rent and the FRED 30-year owner-occupied mortgage series
+              are starting points, not property-specific comps or lender
+              quotes. Property tax is manual because a state aggregate is not
+              a parcel bill.
             </li>
             <li>
               <strong>Defaults are visible starting assumptions.</strong> 5%
-              vacancy, 10% maintenance, 8% management, 5% CapEx reserve,
-              and 27.5-year residential depreciation. They are not facts
-              about a property and must be replaced when better evidence is
-              available.
+              vacancy, 10% maintenance, 8% management, 5% CapEx reserve, and
+              27.5-year residential depreciation. The operating and growth
+              percentages are TrueCap planning defaults, not government
+              estimates or facts about a property, and must be reviewed.
             </li>
             <li>
-              <strong>You can override everything.</strong> Every
-              auto-filled number is a starting point. Edit any field and
-              the analysis re-computes live.
+              <strong>Editable assumptions stay visible.</strong> Auto-filled
+              values are starting benchmarks. Edit an available assumption and
+              the released analysis recomputes; formula conventions and
+              unreleased modules are not user controls.
             </li>
           </ul>
         </div>
 
         <article className="prose prose-slate max-w-none [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
-
           <h2 className="text-2xl sm:text-3xl">The core formulas</h2>
 
           <h3>Cap rate</h3>
@@ -144,19 +154,19 @@ export default function MethodologyPage() {
             Cap rate = NOI ÷ Purchase price
           </div>
           <p>
-            Where NOI (Net Operating Income) = effective gross rental
-            income minus operating expenses, BEFORE mortgage P&amp;I and
-            income tax. Effective gross = gross rent × (1 − vacancy %).
-            Operating expenses include property tax, insurance,
-            maintenance, management, HOA, and owner-paid utilities. The
-            vacancy allowance is shown above NOI as a reduction to scheduled
-            income. The CapEx reserve is shown below NOI.
+            Where NOI (Net Operating Income) = effective gross rental income
+            minus operating expenses, BEFORE mortgage P&amp;I and income tax.
+            Effective gross = gross rent × (1 − vacancy %). Operating expenses
+            include property tax, insurance, maintenance, management, HOA, and
+            owner-paid utilities. The vacancy allowance is shown above NOI as a
+            reduction to scheduled income. The CapEx reserve is shown below NOI.
           </p>
           <p>
-            <strong>Other income:</strong> Standard v1.1 does not have a
-            separate laundry, parking, pet, or utility-income line. Do not
-            bury those amounts inside rent without documenting the choice in
-            your own records.
+            <strong>Other income:</strong> Standard v
+            {TRUECAP_UNDERWRITING_STANDARD_VERSION} does not have a separate
+            laundry, parking, pet, or utility-income line. Do not bury those
+            amounts inside rent without documenting the choice in your own
+            records.
           </p>
           <p>
             <strong>How we handle CapEx:</strong> the default 5% reserve does
@@ -173,8 +183,8 @@ export default function MethodologyPage() {
             Cash flow = NOI − CapEx reserve − annual mortgage P&amp;I −
             estimated PMI/MIP. Total cash invested = down payment + closing
             costs + entered rehab + entered short-term-rental furnishing or
-            startup costs (the actual dollars out of your pocket, not the
-            loan amount).
+            startup costs (the actual dollars out of your pocket, not the loan
+            amount).
           </p>
 
           <h3>DSCR (Debt Service Coverage Ratio)</h3>
@@ -182,37 +192,41 @@ export default function MethodologyPage() {
             DSCR = Annual NOI ÷ Annual debt service
           </div>
           <p>
-            Annual debt service is the principal + interest mortgage
-            payment × 12. We do NOT include taxes + insurance in debt
-            service (those are already in opex via NOI). For cash
-            purchases the DSCR readout shows &ldquo;Cash&rdquo; instead
-            of dividing by zero.
+            Annual debt service is the principal + interest mortgage payment ×
+            12. We do NOT include taxes + insurance in debt service (those are
+            already in opex via NOI). For cash purchases the DSCR readout shows
+            &ldquo;{NO_DEBT_SERVICE_DSCR_LABEL}&rdquo; instead of dividing by
+            zero.
           </p>
 
           <h3>Mortgage payment</h3>
-          <p>
-            Standard fully-amortizing fixed-rate formula:
-          </p>
+          <p>Standard fully-amortizing fixed-rate formula:</p>
           <div className="not-prose bg-card border border-border rounded-xl p-4 sm:p-5 my-3 text-center font-mono text-xs sm:text-sm">
             P&amp;I = L × [r(1+r)<sup>n</sup>] ÷ [(1+r)<sup>n</sup> − 1]
           </div>
           <p>
-            Where L = loan amount, r = monthly interest rate (annual
-            rate ÷ 12), n = total payments (loan term × 12). Lender-specific
-            rounding and non-standard payment structures can differ. If you
-            want a standalone version, see the{" "}
-            <Link href="/tools/mortgage-payment-calculator" className="text-primary font-semibold hover:underline">
+            Where L = loan amount, r = monthly interest rate (annual rate ÷ 12),
+            n = total payments (loan term × 12). Lender-specific rounding and
+            non-standard payment structures can differ. If you want a standalone
+            version, see the{" "}
+            <Link
+              href="/tools/mortgage-payment-calculator"
+              className="text-primary font-semibold hover:underline"
+            >
               mortgage payment calculator
             </Link>
             .
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">Decision thresholds and Offer Ceiling</h2>
+          <h2 className="text-2xl sm:text-3xl">
+            Decision thresholds and Offer Ceiling
+          </h2>
           <h3>Screening Index (Balanced)</h3>
           <p>
-            Current Screening Index method: v{TRUECAP_DEAL_SCORE_METHODOLOGY_VERSION}.
-            This secondary score is versioned independently from the
-            TrueCap Underwriting Standard v{TRUECAP_UNDERWRITING_STANDARD_VERSION}
+            Current Screening Index method: v
+            {TRUECAP_DEAL_SCORE_METHODOLOGY_VERSION}. This secondary score is
+            versioned independently from the TrueCap Underwriting Standard v
+            {TRUECAP_UNDERWRITING_STANDARD_VERSION}
             financial formulas; changing the score method does not change the
             cash-flow result.
           </p>
@@ -227,70 +241,83 @@ export default function MethodologyPage() {
             cash-flow component with a 0/25/30-point house-hack scale, so their
             component sum can exceed 100 before the final clamp. A risk modifier
             for vacancy, negative cash flow, property age, reserve assumptions,
-            and property-tax burden can subtract at most 30 points. If Year Built
-            is missing, a conservative age-uncertainty modifier applies instead
-            of treating the property as new construction. If modeled initial cash
-            is zero, cash-on-cash is not applicable and its stored compatibility
-            sentinel is not scored. The remaining applicable components are
-            renormalized to the 100-point scale. The result is
+            and property-tax burden can subtract at most 30 points. If Year
+            Built is missing, a conservative age-uncertainty modifier applies
+            instead of treating the property as new construction. If modeled
+            initial cash is zero, cash-on-cash is not applicable and its stored
+            compatibility sentinel is not scored. The remaining applicable
+            components are renormalized to the 100-point scale. The result is
             rounded to a whole number and clamped from 0 to 100.
           </p>
           <p>
             The projected-return component uses pre-tax operating cash flow,
             appreciation, and loan paydown through a modeled year-10 sale, net
-            selling costs and the exit engine&apos;s federal capital-gain and
-            depreciation-recapture defaults. It excludes the separate
-            illustrative annual personal-tax benefit from the Screening Index.
+            of selling costs. It excludes both the separate illustrative annual
+            personal-tax effect and modeled exit taxes. Negative operating years
+            count as additional contributed capital; when they occur, the annual
+            figure uses a unique money-weighted IRR because a
+            single-contribution CAGR is not applicable.
           </p>
           <p>
             {/* Derived from lib/verdict-display so the published methodology
                 can never state wording the product has moved past. The
                 THRESHOLDS (75/55/35/18) are unchanged. */}
             Recommendation bands are 75+ {VERDICT_DISPLAY["Strong Buy"].label},
-            55–74 {VERDICT_DISPLAY.Buy.label}, 35–54 {VERDICT_DISPLAY.Neutral.label},
-            18–34 {VERDICT_DISPLAY.Risky.label}, and below 18{" "}
-            {VERDICT_DISPLAY.Avoid.label.toLowerCase()}. Cash purchases get
-            full DSCR-component credit because there is no debt service.
-            Owner-occupant deals use a separate near-break-even cash-flow rule.
-            A Balanced or Appreciation score may be held at 40 when a
-            non-owner-occupant deal has more than 8% modeled annualized 10-year
-            return and non-negative before-tax cash flow; that floor is
+            55–74 {VERDICT_DISPLAY.Buy.label}, 35–54{" "}
+            {VERDICT_DISPLAY.Neutral.label}, 18–34 {VERDICT_DISPLAY.Risky.label}
+            , and below 18 {VERDICT_DISPLAY.Avoid.label.toLowerCase()}. Cash
+            purchases get full DSCR-component credit because there is no debt
+            service. Owner-occupant deals use a separate near-break-even
+            cash-flow rule. A Balanced or Appreciation score may be held at 40
+            when a non-owner-occupant deal has more than 8% modeled annualized
+            10-year return and non-negative before-tax cash flow; that floor is
             never used by the Cash Flow lens. The score is a deterministic
             screening model, not a probability of profit, appraisal, or lending
-            decision, evidence-readiness measure, Buy Box result, or investment advice.
+            decision, evidence-readiness measure, Buy Box result, or investment
+            advice.
           </p>
           <p>
             Saved financial outputs retain their top-level Underwriting Standard
             version, while new saved results also record the Screening Index
             method version. Historical scores without that submodel field remain
-            frozen and are labeled as recorded rather than silently recalculated.
+            frozen and are labeled as recorded rather than silently
+            recalculated.
           </p>
 
           <p>
-            Offer Ceiling is not a recommended offer, price prediction, or appraisal. TrueCap runs
-            the complete underwriting engine repeatedly and finds the highest
-            tested purchase price that still clears every selected return or
-            Buy Box threshold. The displayed Offer Ceiling is rounded
+            Offer Ceiling is not a recommended offer, price prediction, or
+            appraisal. TrueCap runs the complete underwriting engine repeatedly
+            and finds the highest tested purchase price that still clears every
+            selected return or Buy Box threshold. The displayed Offer Ceiling is
+            rounded
             <strong> down</strong> to a $500 step and rechecked at that exact
-            displayed value, so rounding cannot move the answer onto the
-            failing side of the threshold.
+            displayed value, so rounding cannot move the answer onto the failing
+            side of the threshold.
           </p>
           <p>
             Required rent is rounded up to the next whole dollar; a maximum
-            affordable interest rate is rounded down to 0.01 percentage
-            point. Closing-cost-reduction language appears only when the modeled cash
+            affordable interest rate is rounded down to 0.01 percentage point.
+            Closing-cost-reduction language appears only when the modeled cash
             constraint supports it and still requires lender/program
-            confirmation. Each solver changes one input at a time and holds
-            the rest fixed.
+            confirmation. Each solver changes one input at a time and holds the
+            rest fixed.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">BRRRR and fix-and-flip models</h2>
+          <h2 className="text-2xl sm:text-3xl">
+            Unreleased BRRRR and fix-and-flip models (reference only)
+          </h2>
+          <p>
+            The integrated lifecycle models described below are archived
+            methodology references. They are not currently exposed in the
+            analyzer, reports, public tools, or subscription offer and should
+            not be treated as shipped product capabilities.
+          </p>
           <p>
             The BRRRR view models acquisition cash, rehab and carrying costs,
-            then a refinance loan equal to entered ARV × entered refinance
-            LTV. Net refinance cash subtracts the modeled original-loan payoff
-            and refinance closing costs; a shortfall increases cash left in
-            the deal instead of disappearing. ARV, timing, lender terms, and
+            then a refinance loan equal to entered ARV × entered refinance LTV.
+            Net refinance cash subtracts the modeled original-loan payoff and
+            refinance closing costs; a shortfall increases cash left in the deal
+            instead of disappearing. ARV, timing, lender terms, and
             post-refinance rent remain user assumptions.
           </p>
           <p>
@@ -301,83 +328,185 @@ export default function MethodologyPage() {
             annualized ROI is a simple hold-period annualization, not IRR.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">Where the auto-fill data comes from</h2>
+          <h2 className="text-2xl sm:text-3xl">
+            Where released benchmark data comes from
+          </h2>
 
           <h3>Rent benchmark — HUD Fair Market Rent</h3>
           <p>
-            HUD (the U.S. Department of Housing and Urban Development)
-            publishes county-level rent estimates annually for setting
-            Section 8 voucher payment standards. We query the HUD API
-            with your property&apos;s county or ZIP + bedroom count and use the
-            returned FMR as an editable benchmark. FMR is a program-market
-            statistic, not a comp for this property. Actual achievable rent
-            can be above or below it; verify with recent, comparable local
-            leases before making an offer.
+            HUD (the U.S. Department of Housing and Urban Development) publishes
+            annual Fair Market Rents for metropolitan FMR areas and
+            nonmetropolitan counties, plus ZIP-level Small Area FMRs where
+            available. HUD uses FMRs as operating parameters in housing
+            assistance programs. TrueCap queries the HUD API using resolved
+            geography and bedroom count and presents the returned value as an
+            editable area benchmark. It is not a property rent comp, lease, or
+            forecast. Verify achievable rent with current comparable evidence.
           </p>
           <p>
-            <strong>Why HUD instead of Zillow Rent Zestimate?</strong>{" "}
-            HUD is methodologically transparent, public, and free. Zillow
-            doesn&apos;t publish their per-property algorithm and rate-
-            limits aggressive querying. We trade off some precision for
-            transparency and rate-limit headroom. That tradeoff is why the
-            result labels HUD as a market benchmark rather than a verified
-            property rent.
+            The released lookup follows HUD&apos;s latest API response; the UI
+            records the returned year and whether the value came from an FMR
+            area or a ZIP-level SAFMR. The FY 2026 source page notes revised
+            FMRs effective May 21, 2026. Provider availability and geographic
+            matching can fail, in which case TrueCap leaves rent for the user
+            to enter.
           </p>
 
           <h3>Mortgage benchmark — FRED 30-year fixed</h3>
           <p>
-            The Federal Reserve Bank of St. Louis (FRED) publishes the
-            weekly 30-year fixed mortgage rate series (MORTGAGE30US,
-            sourced from Freddie Mac&apos;s Primary Mortgage Market
-            Survey). We pull the latest week&apos;s reading and use it
-            as the editable interest-rate benchmark. This series represents
-            owner-occupied conforming mortgages; it is not an investor loan
-            quote and does not know your points, credit profile, property,
-            lender fees, or debt-service-coverage product. Replace it with a
-            current lender quote before treating a deal as offer ready.
+            The Federal Reserve Bank of St. Louis (FRED) publishes the weekly
+            30-year fixed mortgage rate series (MORTGAGE30US, sourced from
+            Freddie Mac&apos;s Primary Mortgage Market Survey). We pull the
+            latest week&apos;s reading and use it as the editable interest-rate
+            benchmark. This series represents owner-occupied conforming
+            mortgages; it is not an investor loan quote and does not know your
+            points, credit profile, property, lender fees, or
+            debt-service-coverage product. Replace it with a current lender
+            quote before treating a deal as offer ready.
           </p>
 
-          <h3>Property tax — state effective rate</h3>
+          <h3>Property tax — manual local input</h3>
           <p>
-            We maintain a state-by-state lookup of effective property
-            tax rates (annual tax as a percentage of assessed value)
-            from a curated dataset of state property tax statistics. We
-            apply this rate to your purchase price. This is the most
-            approximate of our three data sources — actual tax rates
-            vary significantly within a state (Cook County IL vs rural
-            Illinois, for example). Always confirm with the county
-            assessor for the specific property.
+            <strong>Released underwriting does not auto-fill property tax from
+            the former Tax Foundation 2023 state table.</strong> That secondary,
+            state-level aggregate was too stale and coarse to stand in for a
+            parcel bill. Enter an annual local bill or a reviewed local rate.
+            If both are blank, the current formula contract uses a generic 1.1%
+            of purchase price preliminary fallback and labels it for local
+            verification. The fallback is a TrueCap continuity convention, not
+            a sourced estimate for the property. Replace it before relying on
+            NOI, cap rate, cash flow, DSCR, or Offer Ceiling.
           </p>
+
+          <h2 className="text-2xl sm:text-3xl">Primary source register</h2>
+          <p>
+            These are the direct official pages used for the released source
+            claims above and the archived tax/insurance conventions below.
+            Source review date: August 27, 2026.
+          </p>
+          <ul>
+            <li>
+              <strong>HUD Fair Market Rent:</strong>{" "}
+              <a
+                href="https://www.huduser.gov/portal/datasets/fmr.html"
+                className="text-primary font-semibold hover:underline"
+              >
+                HUD USER Fair Market Rents and FY 2026 documentation
+              </a>{" "}
+              (FY 2026 page; revised FMRs effective May 21, 2026), plus the{" "}
+              <a
+                href="https://www.huduser.gov/portal/dataset/fmr-api.html"
+                className="text-primary font-semibold hover:underline"
+              >
+                HUD FMR API documentation
+              </a>
+              . Accessed August 27, 2026.
+            </li>
+            <li>
+              <strong>Mortgage-rate benchmark:</strong>{" "}
+              <a
+                href="https://fred.stlouisfed.org/series/MORTGAGE30US"
+                className="text-primary font-semibold hover:underline"
+              >
+                Federal Reserve Bank of St. Louis FRED series MORTGAGE30US
+              </a>
+              , a weekly national series sourced from Freddie Mac&apos;s Primary
+              Mortgage Market Survey. Accessed August 27, 2026; TrueCap records
+              the observation date returned by the feed.
+            </li>
+            <li>
+              <strong>Conventional PMI termination:</strong>{" "}
+              <a
+                href="https://www.consumerfinance.gov/ask-cfpb/when-can-i-remove-private-mortgage-insurance-pmi-from-my-loan-en-202/"
+                className="text-primary font-semibold hover:underline"
+              >
+                Consumer Financial Protection Bureau PMI guidance
+              </a>
+              , last modified June 30, 2025 and accessed August 27, 2026. The
+              CFPB describes general scheduled 78% automatic termination for
+              covered borrower-paid PMI when payments are current; lender,
+              investor, occupancy, and mortgage-insurance rules can differ.
+            </li>
+            <li>
+              <strong>Residential-rental depreciation:</strong>{" "}
+              <a
+                href="https://www.irs.gov/publications/p527"
+                className="text-primary font-semibold hover:underline"
+              >
+                IRS Publication 527 (2025), Residential Rental Property
+              </a>
+              , for use in preparing 2025 returns and accessed August 27, 2026.
+              It describes the 27.5-year GDS recovery period and applicable
+              convention; it does not supply TrueCap&apos;s 85% building-allocation
+              scenario.
+            </li>
+          </ul>
 
           <h2 className="text-2xl sm:text-3xl">10-year projection</h2>
           <p>
-            We project rent, expenses, and mortgage payments year-by-
-            year. Defaults:
+            We project rent, expenses, and mortgage payments year by year.
+            Defaults:
           </p>
           <ul>
-            <li><strong>Rent growth:</strong> 2.5% annual planning assumption, not a forecast</li>
-            <li><strong>Expense growth:</strong> 2.5% annual planning assumption, editable independently</li>
-            <li><strong>Mortgage:</strong> fully amortized — principal and interest portions recomputed each year</li>
-            <li><strong>PMI / MIP:</strong> method v{TEN_YEAR_PROJECTION_SNAPSHOT_VERSION} checks the scheduled opening balance monthly; cancellable coverage stops at the modeled 80% LTV threshold, while loan-life coverage continues through payoff</li>
-            <li><strong>Appreciation:</strong> 3% annual scenario assumption, not an appraisal or forecast</li>
+            <li>
+              <strong>Rent growth:</strong> 2.5% annual planning assumption, not
+              a forecast
+            </li>
+            <li>
+              <strong>Expense growth:</strong> 2.5% annual planning assumption,
+              editable independently
+            </li>
+            <li>
+              <strong>Mortgage:</strong> fully amortized — principal and
+              interest portions recomputed each year
+            </li>
+            <li>
+              <strong>PMI / MIP:</strong> method v
+              {TEN_YEAR_PROJECTION_SNAPSHOT_VERSION} checks the full-precision
+              scheduled opening balance monthly. Owner-occupant conventional PMI
+              uses scheduled 78% termination as a screening convention for the
+              eligible covered path, subject to being current. Mortgage
+              insurance entered for a rental loan is conservatively carried
+              through payoff because
+              owner-home cancellation rules do not establish the investment-loan
+              policy. Confirm the actual premium and cancellation terms with the
+              lender or servicer.
+            </li>
+            <li>
+              <strong>Appreciation:</strong> 3% annual scenario assumption, not
+              an appraisal or forecast
+            </li>
           </ul>
           <p>
-            All four assumptions are editable on the Pro plan. The
-            10-year output shows cumulative cash flow, cumulative
-            principal paydown, and ending equity year-by-year.
+            Growth and appreciation scenarios are editable on the Pro plan;
+            financing and mortgage-insurance behavior follow the entered terms
+            and the conventions stated above. The 10-year output shows
+            cumulative cash flow, cumulative principal paydown, and ending
+            equity year by year.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">Illustrative tax impact</h2>
+          <h2 className="text-2xl sm:text-3xl">
+            Unreleased illustrative tax model (reference only)
+          </h2>
+          <p>
+            TrueCap does not currently expose this tax-specific module. The
+            archived formulas below remain documented for model review; they are
+            not a released product output or a taxpayer-specific analysis.
+          </p>
           <h3>Depreciation</h3>
           <p>
-            Residential rentals depreciate over 27.5 years straight-line
-            (IRS schedule). We default the building portion to 85% of
-            purchase price (land = 15%, non-depreciable). Annual
-            depreciation = (purchase price × 0.85) ÷ 27.5. This is a
-            paper deduction — it doesn&apos;t affect before-tax cash flow. Its
-            actual availability and value depend on basis allocation,
-            placed-in-service timing, passive-loss rules, participation,
-            income, entity structure, and your tax professional&apos;s advice.
+            Residential rentals depreciate over 27.5 years straight-line (IRS
+            Publication 527&apos;s general GDS recovery period, with tax-year and
+            convention details that the archived simplification does not fully
+            reproduce). TrueCap&apos;s archived scenario defaults the building
+            portion to 85% of purchase price (land = 15%, non-depreciable); that
+            allocation is a product assumption, not an IRS benchmark. Annual
+            scenario depreciation = (purchase price × 0.85) ÷ 27.5. This is a
+            paper deduction — it doesn&apos;t affect
+            before-tax cash flow. Its actual availability and value depend on
+            basis allocation, placed-in-service timing, passive-loss rules,
+            participation, income, entity structure, and your tax
+            professional&apos;s advice.
           </p>
           <h3>Mortgage interest deduction</h3>
           <p>
@@ -388,113 +517,133 @@ export default function MethodologyPage() {
           <h3>Estimated tax effect</h3>
           <p>
             Taxable rental income = rental income − deductible operating
-            expenses − eligible mortgage interest − straight-line
-            depreciation. We multiply the signed taxable amount by the
-            entered marginal rate (24% default): a loss produces an
-            illustrative benefit and positive taxable income produces an
-            illustrative liability. TrueCap does not assume every paper loss
-            can offset other income. This is planning math, not tax advice.
+            expenses − eligible mortgage interest − straight-line depreciation.
+            We multiply the signed taxable amount by the entered marginal rate
+            (24% default): a loss produces an illustrative benefit and positive
+            taxable income produces an illustrative liability. TrueCap does not
+            assume every paper loss can offset other income. This is planning
+            math, not tax advice.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">Exit scenarios</h2>
+          <h2 className="text-2xl sm:text-3xl">
+            Unreleased sale-and-exit model (reference only)
+          </h2>
           <p>
-            We model the sale of the property in years 1 through 10.
-            Each year: projected sale price = current value × (1 +
-            appreciation rate)<sup>years</sup>. Net sale proceeds = sale
-            price − selling costs (default 6%) − remaining loan balance.
-            Total profit = net proceeds + cumulative cash flow + cumulative
-            illustrative tax effect − initial cash invested − estimated exit
-            tax. The optimizer compares hold years under the assumptions you
-            entered; it does not predict the best future sale date. A 1031
-            exchange, primary-residence exclusion, local taxes, improvements,
-            and your actual bracket can materially change the result.
+            TrueCap does not currently expose modeled exit comparisons. The
+            archived method modeled a sale in years 1 through 10. Each year:
+            projected sale price = current value × (1 + appreciation rate)
+            <sup>years</sup>. Net sale proceeds = sale price − selling costs
+            (default 6%) − remaining loan balance. Total profit = net proceeds +
+            cumulative cash flow + cumulative illustrative tax effect − initial
+            cash invested − estimated exit tax. The optimizer compares hold
+            years under the assumptions you entered; it does not predict the
+            best future sale date. A 1031 exchange, primary-residence exclusion,
+            local taxes, improvements, and your actual bracket can materially
+            change the result.
           </p>
 
           {/* id anchor: the founding-pricing banner deep-links here as the
               verifiable proof behind "Methodology v1.0". */}
-          <h2 id="version-history" className="scroll-mt-24 text-2xl sm:text-3xl">Methodology version history</h2>
+          <h2
+            id="version-history"
+            className="scroll-mt-24 text-2xl sm:text-3xl"
+          >
+            Methodology version history
+          </h2>
           <ul>
             {UNDERWRITING_STANDARD_RELEASE_NOTES.map((release) => (
               <li key={release.revision}>
-                <strong>v{release.version} · {release.effectiveDate}:</strong>{" "}
+                <strong>
+                  v{release.version} · {release.effectiveDate}:
+                </strong>{" "}
                 {release.summary}
               </li>
             ))}
           </ul>
 
-          <h2 className="text-2xl sm:text-3xl">Edge cases we handle explicitly</h2>
+          <h2 className="text-2xl sm:text-3xl">
+            Edge cases we handle explicitly
+          </h2>
           <ul>
             <li>
-              <strong>Cash purchases (no loan):</strong> DSCR shows
-              &ldquo;Cash&rdquo; instead of dividing by zero. Cash-on-
-              cash uses total cash purchase amount as the denominator.
+              <strong>Cash purchases (no loan):</strong> DSCR shows &ldquo;
+              {NO_DEBT_SERVICE_DSCR_LABEL}&rdquo; instead of dividing by zero.
+              Cash-on- cash uses total cash purchase amount as the denominator.
             </li>
             <li>
-              <strong>Owner-occupant units:</strong> in house-hack
-              scenarios, we allow the owner-occupied unit to have $0
-              rent (which would normally fail validation) so the
-              calculator correctly models the &ldquo;living for free&rdquo;
-              scenario.
+              <strong>Owner-occupant units:</strong> in house-hack scenarios, we
+              allow the owner-occupied unit to have $0 rent (which would
+              normally fail validation) so the calculator correctly models the
+              &ldquo;living for free&rdquo; scenario.
             </li>
             <li>
-              <strong>Multi-family rent estimation:</strong> HUD FMR is
-              per-unit by bedroom count, not per-property. For 2-4 unit
-              properties we sum the per-unit FMR estimates.
+              <strong>Multi-family rent estimation:</strong> HUD FMR is per-unit
+              by bedroom count, not per-property. For 2-4 unit properties we sum
+              the per-unit FMR estimates.
             </li>
             <li>
-              <strong>Non-US addresses:</strong> Google Places
-              autocomplete is restricted to US results. Manual entry is
-              still allowed but the auto-fill from HUD / FRED / state
-              tax obviously doesn&apos;t fire.
+              <strong>Non-US addresses:</strong> Google Places autocomplete is
+              restricted to US results. Manual entry is still allowed but the
+              auto-fill from HUD / FRED / state tax obviously doesn&apos;t fire.
             </li>
           </ul>
 
-          <h2 className="text-2xl sm:text-3xl">What we deliberately don&apos;t do</h2>
+          <h2 className="text-2xl sm:text-3xl">
+            What we deliberately don&apos;t do
+          </h2>
           <ul>
             <li>
-              <strong>We don&apos;t estimate rehab costs based on
-              property condition</strong> — we&apos;d need an inspection
-              to do that well. The{" "}
-              <Link href="/tools/rehab-cost-estimator" className="text-primary font-semibold hover:underline">
+              <strong>
+                We don&apos;t estimate rehab costs based on property condition
+              </strong>{" "}
+              — we&apos;d need an inspection to do that well. The{" "}
+              <Link
+                href="/tools/rehab-cost-estimator"
+                className="text-primary font-semibold hover:underline"
+              >
                 rehab cost estimator
               </Link>{" "}
-              gives you sq-ft-based defaults for common work items, but
-              the actual number is between you and your contractor.
+              gives you editable illustrative planning amounts for common work
+              items. They are not condition-aware prices, market observations,
+              or contractor bids.
             </li>
             <li>
-              <strong>We don&apos;t model speculative future rent
-              increases</strong> beyond the editable annual growth
-              percentage. No &ldquo;assume you raise rent 15% on
-              turnover&rdquo; — that&apos;s a thumb on the scale we
-              don&apos;t take.
+              <strong>
+                We don&apos;t model speculative future rent increases
+              </strong>{" "}
+              beyond the editable annual growth percentage. No &ldquo;assume you
+              raise rent 15% on turnover&rdquo; — that&apos;s a thumb on the
+              scale we don&apos;t take.
             </li>
             <li>
-              <strong>We don&apos;t include landlord time as an
-              expense</strong> unless you set management % &gt; 0.
-              Most self-managed investors should still input 8-10%
-              management to model the true cost — the day you hand it
-              off to a PM, the deal economics shouldn&apos;t suddenly
-              change.
+              <strong>We don&apos;t include landlord time as an expense</strong>{" "}
+              unless you set management % &gt; 0. Most self-managed investors
+              should still input 8-10% management to model the true cost — the
+              day you hand it off to a PM, the deal economics shouldn&apos;t
+              suddenly change.
             </li>
           </ul>
 
           <h2 className="text-2xl sm:text-3xl">Source of truth</h2>
           <p>
-            The calc-analysis library is internal proprietary code. If
-            you find a specific case where our output diverges from what
-            you&apos;d compute by hand, email{" "}
-            <a href="mailto:hello@usetruecap.com" className="text-primary font-semibold hover:underline">
+            The calc-analysis library is internal proprietary code. If you find
+            a specific case where our output diverges from what you&apos;d
+            compute by hand, email{" "}
+            <a
+              href="mailto:hello@usetruecap.com"
+              className="text-primary font-semibold hover:underline"
+            >
               hello@usetruecap.com
             </a>{" "}
-            with the inputs and we&apos;ll investigate — methodology bugs
-            are the most important kind of bug to us.
+            with the inputs and we&apos;ll investigate — methodology bugs are
+            the most important kind of bug to us.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">Try it</h2>
           <p>
-            Best way to verify the methodology is to run a deal you
-            already understand. Enter the inputs, see what TrueCap
-            outputs, compare to your own math.
+            Best way to verify the methodology is to run a deal you already
+            understand. Enter the inputs, see what TrueCap outputs, compare to
+            your own math.
           </p>
 
           <div className="not-prose mt-6 flex flex-wrap gap-3">
@@ -523,7 +672,7 @@ export default function MethodologyPage() {
         </article>
 
         <footer className="mt-12 pt-8 border-t border-border text-sm text-muted-foreground leading-relaxed">
-          Last updated: August 25, 2026. We update this page whenever the
+          Last updated: August 27, 2026. We update this page whenever the
           methodology materially changes.
         </footer>
       </main>

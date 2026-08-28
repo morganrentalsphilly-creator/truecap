@@ -1,18 +1,15 @@
 /**
- * /reviews — the wall of proof.
+ * /reviews — proof and methodology.
  *
- * Renders ONLY what is real right now: the analysis-runs counter (bare
- * number by founder decision 2026-08-17 — the ticker carries no composition
- * disclosure, so this page's copy must not frame it as independently
- * verifiable), the sourced-data badges, the public versioned methodology,
- * the guarantee, and — once records pass the lib/proof-records.ts
+ * Renders ONLY what is real right now: sourced-data disclosures, the public
+ * versioned methodology, and — once records pass the lib/proof-records.ts
  * verification + approval gate — customer testimonials.
  * The testimonial section self-hides at zero published records; nothing on
  * this page is ever fabricated, and Product/AggregateRating schema is
  * deliberately ABSENT until real reviews exist (adding rating markup over
  * zero records is a fabricated-claim risk and a Google penalty risk).
  *
- * Static + hourly ISR like the homepage (the ticker reads a 1h-cached count).
+ * Static + hourly ISR like the homepage.
  */
 
 import type { Metadata } from "next";
@@ -20,7 +17,6 @@ import Link from "next/link";
 import { Database, FileCheck2 } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
 import { SiteFooter } from "@/components/marketing/site-footer";
-import { DealsAnalyzedTicker } from "@/components/marketing/deals-analyzed-ticker";
 import { TestimonialStrip } from "@/components/marketing/testimonial-card";
 import {
   VERIFIED_TESTIMONIALS,
@@ -35,12 +31,12 @@ export const revalidate = 3600;
 export function generateMetadata(): Metadata {
   const description = "How TrueCap earns trust: labeled starting references, a public versioned methodology, and customer quotes only after verification.";
   return {
-    title: "Reviews & Proof",
+    title: "Proof & methodology",
     description:
       description,
     alternates: { canonical: "/reviews" },
     openGraph: {
-      title: "TrueCap Reviews & Proof",
+      title: "TrueCap Proof & methodology",
       description,
       url: "/reviews",
       type: "website",
@@ -65,7 +61,7 @@ export default async function ReviewsPage() {
     "@type": "WebPage",
     "@id": `${siteUrl}/reviews#page`,
     url: `${siteUrl}/reviews`,
-    name: "TrueCap Reviews & Proof",
+    name: "TrueCap Proof & methodology",
     isPartOf: { "@id": `${siteUrl}/#website` },
     about: { "@id": `${siteUrl}/#organization` },
     inLanguage: "en-US",
@@ -79,7 +75,7 @@ export default async function ReviewsPage() {
         <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-[var(--brand-blue-light)] via-background to-background">
           <div className="mx-auto max-w-3xl px-4 py-14 text-center sm:px-6 sm:py-20">
             <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
-              The wall of proof
+              Proof &amp; methodology
             </p>
             <h1 className="mt-2 text-balance text-3xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl">
               Only what we can substantiate.
@@ -89,14 +85,6 @@ export default async function ReviewsPage() {
               source-labeled operating figures, and customer quotes only after
               verification and publication approval.
             </p>
-            <div className="mt-6 flex justify-center">
-              <DealsAnalyzedTicker
-                source="runs"
-                minimum={1}
-                plus
-                labelSuffix="property analyses run with TrueCap"
-              />
-            </div>
           </div>
         </section>
 
@@ -122,7 +110,7 @@ export default async function ReviewsPage() {
           <h2 className="text-center text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
             Proof you can check yourself
           </h2>
-          <div className="mt-8 grid gap-4 sm:grid-cols-3">
+          <div className="mt-8 grid gap-4 sm:grid-cols-2">
             <div className="rounded-2xl border border-border bg-card p-5">
               <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Database aria-hidden className="size-5" />

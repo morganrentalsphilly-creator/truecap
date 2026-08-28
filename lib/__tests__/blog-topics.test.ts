@@ -8,7 +8,7 @@ describe("blog-topics", () => {
     expect(new Set(slugs).size).toBe(slugs.length);
   });
 
-  it("every topic has copy, posts, and calculators", () => {
+  it("every topic has copy and posts; released calculator links are explicit", () => {
     for (const t of BLOG_TOPICS) {
       expect(t.title.trim().length).toBeGreaterThan(0);
       expect(t.description.trim().length).toBeGreaterThan(0);
@@ -16,7 +16,11 @@ describe("blog-topics", () => {
       expect(t.postSlugs.length).toBeGreaterThan(0);
       // No dupes within a topic.
       expect(new Set(t.postSlugs).size).toBe(t.postSlugs.length);
-      expect(t.calculatorSlugs.length).toBeGreaterThan(0);
+      if (t.slug === "tax") {
+        expect(t.calculatorSlugs).toEqual([]);
+      } else {
+        expect(t.calculatorSlugs.length).toBeGreaterThan(0);
+      }
     }
   });
 

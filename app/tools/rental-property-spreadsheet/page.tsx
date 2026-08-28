@@ -13,11 +13,10 @@
  * as the link-safe asset for forum/Reddit answers where a SaaS link
  * would be modded out.
  *
- * Math conventions in the spreadsheet AND the copy match
- * lib/calc-analysis.ts exactly: NOI/DSCR exclude the CapEx reserve,
- * cash flow includes it, P&I via PMT, and the worked example is the
- * same $250k / $2,400 deal as /tools/rental-cash-flow-calculator so
- * the two pages (and the file) always agree to the dollar.
+ * Core screening conventions in the spreadsheet match the released
+ * buy-and-hold workflow: NOI/DSCR exclude the CapEx reserve, cash flow
+ * includes it, and P&I uses PMT. The workbook is intentionally narrower
+ * than the web analyzer and its scope is disclosed on the page and in-file.
  *
  * NOTE for sitemap/nav: because this page has no calculator-registry
  * entry, it is listed manually in app/sitemap.ts and linked manually
@@ -76,7 +75,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What's actually in the spreadsheet?",
-    a: "Three tabs. Deal Analyzer: type price, rent, financing, and expense assumptions and get monthly cash flow, NOI, cap rate, cash-on-cash return, and DSCR from live formulas. 10-Year Projection: rent and expenses compound at editable growth rates against a fixed mortgage payment. Quick Reference: definitions and screening benchmarks for every metric, plus the bands TrueCap uses for selected-rule fit.",
+    a: "Three tabs. Deal Analyzer: type price, rent, financing, and expense assumptions and get monthly cash flow, NOI, cap rate, cash-on-cash return, and DSCR from live formulas; all-cash DSCR displays 'N/A — no debt service.' 10-Year Projection: rent and expenses compound at editable growth rates against a fixed mortgage payment. Quick Reference: definitions and screening benchmarks for every metric, plus the bands TrueCap uses for selected-rule fit.",
   },
   {
     q: "Why do NOI and DSCR exclude the CapEx reserve?",
@@ -84,11 +83,11 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What does the 10-year projection assume?",
-    a: "By default, rent and operating expenses each grow 2.5% per year (both editable) while the principal-and-interest payment stays fixed. It's deliberately simple: PMI drop-off, principal paydown, appreciation, and after-tax effects are not modeled in the spreadsheet. The full TrueCap analyzer models all of those from the same inputs.",
+    a: "By default, rent and operating expenses each grow 2.5% per year (both editable) while the principal-and-interest payment stays fixed. It's deliberately simple: PMI changes, principal paydown, and appreciation are not modeled in the spreadsheet. The TrueCap analyzer adds a scheduled loan balance and a 10-year cash-flow and equity planning view; it does not currently expose a tax-specific module.",
   },
   {
     q: "Spreadsheet or the TrueCap analyzer — which should I use?",
-    a: "Use the spreadsheet when you want full control of every cell or need to work offline. Use the analyzer when you want speed: type an address and it pre-fills editable, labeled screening benchmarks, then layers on PMI modeling, 10-year projections, illustrative tax impact, modeled exit comparisons, selected-rule fit, and a secondary Screening Index. Neither output is lender approval or investment advice.",
+    a: "Use the spreadsheet when you want full control of every cell or need to work offline. Use the analyzer when you want speed: type an address and it pre-fills editable, labeled screening benchmarks, then layers on PMI modeling, 10-year cash-flow and equity projections, sensitivity, Offer Ceiling, selected-rule fit, and a secondary Screening Index. Neither output is lender approval or investment advice.",
   },
   {
     q: "Can I share or modify the file?",
@@ -107,7 +106,7 @@ export default function RentalPropertySpreadsheetPage() {
     encodingFormat:
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     isAccessibleForFree: true,
-    dateModified: "2026-07-14",
+    dateModified: "2026-08-27",
     description:
       "Free rental property analysis spreadsheet: monthly cash flow, NOI, cap rate, cash-on-cash, DSCR, 10-year projection, and a metric quick-reference. Direct download, no email gate.",
     publisher: {
@@ -172,8 +171,8 @@ export default function RentalPropertySpreadsheetPage() {
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
                   .xlsx · 3 tabs · works in Excel, Google Sheets, Apple
-                  Numbers, and LibreOffice. Same formulas and conventions
-                  as the TrueCap web analyzer.
+                  Numbers, and LibreOffice. Uses TrueCap&apos;s core
+                  buy-and-hold screening conventions.
                 </p>
               </div>
               <a
@@ -207,10 +206,10 @@ export default function RentalPropertySpreadsheetPage() {
               That&apos;s the whole model.
             </p>
             <p>
-              It&apos;s also not a teaser. The workbook uses the same
-              formulas and the same accounting conventions as the TrueCap
-              analyzer itself — nothing is dumbed down or held back to
-              push you toward the app.
+              It&apos;s also not a teaser. The workbook is a transparent,
+              formula-driven buy-and-hold screen with its limits disclosed
+              in-file. The web analyzer adds broader inputs and workflows;
+              it does not make this workbook&apos;s model more complete than it is.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">What&apos;s in each tab</h2>
@@ -241,7 +240,8 @@ export default function RentalPropertySpreadsheetPage() {
               </li>
               <li>
                 <strong>DSCR</strong>{" "}— the coverage ratio lenders
-                underwrite to, computed the way lenders compute it.
+                underwrite to for financed deals. An all-cash purchase renders
+                <strong> N/A — no debt service</strong> instead of a false zero.
               </li>
             </ul>
             <p>
@@ -277,7 +277,7 @@ export default function RentalPropertySpreadsheetPage() {
             <p>
               The spreadsheet ships pre-filled with the same example deal
               as our{" "}
-              <Link href="/tools/rental-cash-flow-calculator" className="text-primary font-semibold hover:underline">rental cash flow calculator</Link>
+              <Link href="/#main" className="text-primary font-semibold hover:underline">rental cash flow calculator</Link>
               : a $250,000 single-family rental at $2,400/mo rent, bought
               with 20% down at 6.75% on a 30-year loan. With honest
               reserves, that deal produces roughly{" "}
@@ -345,8 +345,8 @@ export default function RentalPropertySpreadsheetPage() {
               pre-fills market rent and your state&apos;s property-tax
               rate, runs the same math you see here, and adds the parts a
               spreadsheet makes painful — PMI drop-off modeling, 10-year
-              projections with principal paydown and appreciation, tax
-              strategy, exit scenarios, side-by-side deal comparison, and
+              projections with principal paydown and appreciation, downside
+              sensitivity, Offer Ceiling, side-by-side deal comparison, and
               selected-rule fit and a secondary Screening Index. It&apos;s free to start, and
               because the conventions match, your spreadsheet numbers
               carry over exactly. For the longer version of this
@@ -402,15 +402,15 @@ export default function RentalPropertySpreadsheetPage() {
             <p className="text-sm sm:text-base opacity-90 mb-4">
               The spreadsheet is the manual version. TrueCap takes an
               address, pre-fills market rent and property tax, runs the
-              same math, and adds PMI modeling, 10-year projections, tax
-              savings, exit scenarios, and a secondary Screening Index.
+              same math, and adds PMI modeling, 10-year cash-flow and equity
+              projections, sensitivity, Offer Ceiling, and a secondary Screening Index.
             </p>
             <ul className="text-sm space-y-1.5 mb-5 opacity-90">
               {[
                 "Cash flow, cap rate, CoC, DSCR — auto-calculated",
                 "State property tax + market rent auto-filled from the address",
                 "10-year projection with rent + expense growth (Pro)",
-                "Depreciation modeling and after-tax cash flow (Pro)",
+                "Downside sensitivity and Offer Ceiling (Pro)",
                 "Screening Index with a factor breakdown for triage",
                 "Free to start — no credit card",
               ].map((line) => (
@@ -434,7 +434,7 @@ export default function RentalPropertySpreadsheetPage() {
               tool has no embeddable widget. See the component header. */}
           <ToolEmbedInvite slug="rental-property-spreadsheet" />
 
-          <ToolsConversionCta calculatorName="Rental property spreadsheet" hook="TrueCap's full analyzer runs the same spreadsheet math from just an address — market rent and property tax pre-filled, plus PMI, 10-year projections, tax savings, and exit scenarios. Save your work, compare deals, share a link." />
+          <ToolsConversionCta calculatorName="Rental property spreadsheet" hook="TrueCap's full analyzer uses the same core buy-and-hold screening conventions from an address — labeled rent, rate, and property-tax starting points, plus PMI, 10-year cash-flow and equity projections, sensitivity, and Offer Ceiling. Save your work, compare deals, and share a link." />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}

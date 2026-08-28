@@ -26,7 +26,6 @@ import {
   releasedInvestmentFormSchema,
 } from "@/lib/underwriting-model-release";
 import {
-  flagsForStage,
   isPipelineStage,
   normalizeTags,
   type PipelineStage,
@@ -44,6 +43,7 @@ import {
 import {
   buildInputConfidence,
   normalizeInputVerificationEvidence,
+  normalizePurchasePriceSourceContext,
   normalizeStartingAssumptionOrigins,
   restoreInputConfidenceSourceContext,
 } from "@/lib/input-confidence";
@@ -53,6 +53,7 @@ import {
   type DueDiligenceItem,
 } from "@/lib/due-diligence";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { activeMeteredEvaluationDealGrantsAccess } from "@/lib/evaluation-access-server";
 import {
   DEFAULT_APPRECIATION_RATE,
   DEFAULT_SELLING_COST_PCT,
@@ -77,7 +78,10 @@ import {
   type BuyBoxPdfVerdict,
 } from "@/lib/pdf-buy-box";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
-import { isFeatureEnabled } from "@/lib/feature-flags";
+import {
+  isFeatureEnabled,
+  isSpecialistStrategyEnabled,
+} from "@/lib/feature-flags";
 import {
   financingProfileMatchesAnalysis,
   financingProfileSnapshotSchema,
@@ -120,6 +124,13 @@ import {
   normalizeOfferCeilingDecisionBasis,
   OFFER_CEILING_DECISION_BASIS_FIELD,
 } from "@/lib/offer-ceiling-decision-basis";
+import {
+  DEAL_HISTORY_NOTE_MAX_LENGTH,
+  DEAL_HISTORY_REASON_MAX_LENGTH,
+  normalizeDealHistoryText,
+  type SavedDealHistoryContext,
+} from "@/lib/deal-history";
+import { userDecisionFromPipelineStage } from "@/lib/decision-contract";
 
 export type SaveDealResult =
   | {
@@ -193,6 +204,22 @@ export type GetSavedDealForEditingResult =
       message: string;
     };
 
+/** The failure arm of UpdateSavedDealLifecycleResult. Helpers that can only
+ *  ever produce a failure return THIS, not the whole union — otherwise a
+ *  caller reading `.message` off a validator result cannot narrow, because
+ *  the union still admits `{ ok: true }`. */
+export type UpdateSavedDealLifecycleFailure = {
+  ok: false;
+  code:
+    | "SIGN_IN_REQUIRED"
+    | "ENTITLEMENT_REQUIRED"
+    | "NOT_FOUND"
+    | "VALIDATION_ERROR"
+    | "MIGRATION_PENDING"
+    | "SERVER_ERROR";
+  message: string;
+};
+
 export type UpdateSavedDealLifecycleResult =
   | { ok: true }
   | {
@@ -202,6 +229,7 @@ export type UpdateSavedDealLifecycleResult =
         | "ENTITLEMENT_REQUIRED"
         | "NOT_FOUND"
         | "VALIDATION_ERROR"
+        | "MIGRATION_PENDING"
         | "SERVER_ERROR";
       message: string;
     };
@@ -325,6 +353,10 @@ function freezeSpecialistAnalysisIntoResult(input: {
   result: ReturnType<typeof calculateAnalysis>;
   strategyKey: AnalyzerStrategyKey;
 }): void {
+  if (!isSpecialistStrategyEnabled(input.strategyKey)) {
+    delete input.resultSnapshot[SPECIALIST_ANALYSIS_SNAPSHOT_FIELD];
+    return;
+  }
   const specialistAnalysis = buildSpecialistAnalysisSnapshot(
     input.values,
     input.result,
@@ -336,6 +368,12 @@ function freezeSpecialistAnalysisIntoResult(input: {
   } else {
     delete input.resultSnapshot[SPECIALIST_ANALYSIS_SNAPSHOT_FIELD];
   }
+}
+
+function releaseSafeAnalyzerStrategyKey(
+  strategyKey: AnalyzerStrategyKey,
+): AnalyzerStrategyKey {
+  return isSpecialistStrategyEnabled(strategyKey) ? strategyKey : "buy-hold";
 }
 
 function dbNumber(value: unknown): number | undefined {
@@ -597,7 +635,8 @@ function buildTrustedResultSnapshot(
         normalizedValues,
       )
     : normalizeAnalyzerStrategyKey(snapshot.analyzerStrategyKey);
-  const specialistAnalysis = analyzerStrategyKey
+  const specialistAnalysis =
+    analyzerStrategyKey && isSpecialistStrategyEnabled(analyzerStrategyKey)
     ? readRecordedSpecialistAnalysisSnapshot({
         resultSnapshot: snapshot,
         strategyKey: analyzerStrategyKey,
@@ -651,6 +690,9 @@ export async function saveDealAction(
     /** True only while purchase price is an AVM/rent-multiple screening
      * estimate. This remains value-bound and must survive save/reopen. */
     purchasePriceEstimated?: boolean;
+    /** Value-bound provider lineage for an adopted active-listing price or
+     * AVM. Invalid/malformed objects fail closed to no provider source. */
+    purchasePriceSource?: unknown;
     /** Sentinel from context-aware analyzer clients. When true, an empty
      * provenance object means prior value-bound sources were rechecked and
      * invalidated; older callers omit this and retain the legacy preserve-on-
@@ -731,11 +773,24 @@ export async function saveDealAction(
       message: "Invalid analysis type",
     };
   }
-  const analyzerStrategyKey = resolveAnalyzerStrategyForPersistence({
-    requestedKey: explicitAnalyzerStrategy,
-    requestedKeyProvided: analyzerStrategyOptionProvided,
-    values: sanitizedValues,
-  });
+  if (
+    analyzerStrategyOptionProvided &&
+    explicitAnalyzerStrategy &&
+    !isSpecialistStrategyEnabled(explicitAnalyzerStrategy)
+  ) {
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "This analysis type is not available yet",
+    };
+  }
+  const analyzerStrategyKey = releaseSafeAnalyzerStrategyKey(
+    resolveAnalyzerStrategyForPersistence({
+      requestedKey: explicitAnalyzerStrategy,
+      requestedKeyProvided: analyzerStrategyOptionProvided,
+      values: sanitizedValues,
+    }),
+  );
   const maxOfferTargetOptionProvided = Boolean(
     options && Object.prototype.hasOwnProperty.call(options, "maxOfferTarget"),
   );
@@ -940,10 +995,13 @@ export async function saveDealAction(
       options?.startingAssumptionOrigins,
     ),
     purchasePriceEstimated: options?.purchasePriceEstimated === true,
+    purchasePriceSource: normalizePurchasePriceSourceContext(
+      options?.purchasePriceSource,
+    ),
     verified: normalizeInputVerificationEvidence(options?.inputVerification),
   });
   resultSnapshotWithScore.inputConfidence = inputConfidence;
-  if (options?.purchasePriceEstimated === true) {
+  if (inputConfidence.sourceContext.purchasePriceEstimated === true) {
     resultSnapshotWithScore.purchasePriceEstimated = true;
   }
   if (financingProfileOptionProvided) {
@@ -1140,6 +1198,7 @@ export async function saveDealAction(
         startingAssumptionOrigins:
           restoredInputContext.startingAssumptionOrigins,
         purchasePriceEstimated: restoredInputContext.purchasePriceEstimated,
+        purchasePriceSource: restoredInputContext.purchasePriceSource,
         verified: normalizeInputVerificationEvidence(
           storedInputConfidence?.verificationEvidence,
         ),
@@ -1157,12 +1216,14 @@ export async function saveDealAction(
     // Older/internal callers that do not know about calculator lenses must
     // not erase one on an unrelated update (rate alert, template apply, or
     // another future server-side maintenance action).
-    const updatedAnalyzerStrategyKey = resolveAnalyzerStrategyForPersistence({
-      requestedKey: explicitAnalyzerStrategy,
-      requestedKeyProvided: analyzerStrategyOptionProvided,
-      existingResultSnapshot: existingSnapshot,
-      values: sanitizedValues,
-    });
+    const updatedAnalyzerStrategyKey = releaseSafeAnalyzerStrategyKey(
+      resolveAnalyzerStrategyForPersistence({
+        requestedKey: explicitAnalyzerStrategy,
+        requestedKeyProvided: analyzerStrategyOptionProvided,
+        existingResultSnapshot: existingSnapshot,
+        values: sanitizedValues,
+      }),
+    );
     resultSnapshotWithScore.analyzerStrategyKey = updatedAnalyzerStrategyKey;
     // The specialist result changes atomically with its form, core result,
     // methodology, and strategy identity. An older maintenance caller may
@@ -1859,6 +1920,9 @@ const buyBoxPdfMetricsSchema = z
     cocPct: z.number().finite().nullable(),
     dscr: z.number().finite().nullable(),
     cashFlowMonthly: z.number().finite().nullable(),
+    irrPct: z.number().finite().nullable().optional(),
+    irrStatus: z.enum(["unique", "multiple", "none"]).optional(),
+    cashRequired: z.number().finite().nullable().optional(),
     purchasePrice: z.number().finite().nullable(),
     propertyType: z
       .enum(["single-family", "multi-family", "owner-occupant"])
@@ -1895,6 +1959,18 @@ export async function getBuyBoxPdfVerdictAction(
     };
   }
 
+  // This legacy metrics-only action has no canonical form snapshot, so it
+  // cannot prove an evaluation ledger resource. Current PDF generation keeps
+  // mutable Buy Boxes out of historical reports; retain this action for paid
+  // callers only and fail closed for every evaluation/free direct invocation.
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user || !(await hasPaidPlanSubscription(supabase, user.id))) {
+    return { ok: true, verdict: null, stateResolved: true };
+  }
+
   const listed = await listBuyBoxesAction();
   if (!listed.ok) {
     return { ok: true, verdict: null, stateResolved: false };
@@ -1920,6 +1996,9 @@ export async function getBuyBoxPdfVerdictAction(
     propertyType: parsed.data.propertyType,
     state: deriveStateFromAddress(parsed.data.address),
     isCashPurchase: parsed.data.isCashPurchase,
+    irrPct: parsed.data.irrPct ?? null,
+    irrStatus: parsed.data.irrStatus ?? "none",
+    cashRequired: parsed.data.cashRequired ?? null,
   };
 
   return {
@@ -1988,6 +2067,20 @@ export async function getSavedAnalysisPdfExportAction(
       message: "This underwriting model is not available yet.",
     };
   }
+  let canRegeneratePdf = canGeneratePdf;
+  if (!canGeneratePdf) {
+    const evaluationValues = normalizeReleasedInvestmentFormSnapshot(
+      row.form_snapshot,
+    );
+    canRegeneratePdf = Boolean(
+      evaluationValues &&
+        (await activeMeteredEvaluationDealGrantsAccess(
+          supabase,
+          user.id,
+          evaluationValues,
+        )),
+    );
+  }
   const cachedPdfUrl = dbString(row.pdf_url);
   const cachedVersion = dbNumber(row.pdf_snapshot_version) ?? 0;
 
@@ -1995,7 +2088,7 @@ export async function getSavedAnalysisPdfExportAction(
   // generated. That is the read-only access promised in the Terms: Free can
   // download the stored artifact, but cannot regenerate it from changed
   // inputs, branding, methodology, or report templates.
-  if (!canGeneratePdf) {
+  if (!canRegeneratePdf) {
     if (
       !cachedPdfUrl ||
       cachedVersion < PDF_TRUSTED_PROVENANCE_MIN_CACHE_VERSION
@@ -2398,9 +2491,143 @@ export async function getSavedDealNotesAction(id: string): Promise<
   };
 }
 
+function validateSavedDealHistoryContext(
+  stage: PipelineStage,
+  input: unknown,
+):
+  | { ok: true; reason: string | null; note: string | null }
+  | { ok: false; result: UpdateSavedDealLifecycleFailure } {
+  if (input != null && (typeof input !== "object" || Array.isArray(input))) {
+    return {
+      ok: false,
+      result: {
+        ok: false,
+        code: "VALIDATION_ERROR",
+        message: "Invalid stage-change context.",
+      },
+    };
+  }
+
+  const context = (input ?? {}) as Record<string, unknown>;
+  if (
+    (context.reason != null && typeof context.reason !== "string") ||
+    (context.note != null && typeof context.note !== "string")
+  ) {
+    return {
+      ok: false,
+      result: {
+        ok: false,
+        code: "VALIDATION_ERROR",
+        message: "Invalid stage-change context.",
+      },
+    };
+  }
+
+  const reason = normalizeDealHistoryText(context.reason);
+  const note = normalizeDealHistoryText(context.note);
+  if (reason && reason.length > DEAL_HISTORY_REASON_MAX_LENGTH) {
+    return {
+      ok: false,
+      result: {
+        ok: false,
+        code: "VALIDATION_ERROR",
+        message: `Keep the decision reason under ${DEAL_HISTORY_REASON_MAX_LENGTH} characters.`,
+      },
+    };
+  }
+  if (note && note.length > DEAL_HISTORY_NOTE_MAX_LENGTH) {
+    return {
+      ok: false,
+      result: {
+        ok: false,
+        code: "VALIDATION_ERROR",
+        message: `Keep the transition note under ${DEAL_HISTORY_NOTE_MAX_LENGTH} characters.`,
+      },
+    };
+  }
+  if (stage === "passed" && !reason) {
+    return {
+      ok: false,
+      result: {
+        ok: false,
+        code: "VALIDATION_ERROR",
+        message: "Add a reason before marking this deal as Passed.",
+      },
+    };
+  }
+  return { ok: true, reason, note };
+}
+
+function isDealHistoryMigrationPending(error: {
+  code?: string;
+  message?: string;
+}): boolean {
+  return (
+    error.code === "42P01" ||
+    error.code === "42883" ||
+    error.code === "PGRST202" ||
+    /update_saved_deal_stage_with_history|bulk_archive_saved_deals_with_history|saved_deal_history_events/i.test(
+      error.message ?? "",
+    )
+  );
+}
+
+async function persistSavedDealStageWithHistory(input: {
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>;
+  savedDealId: string;
+  stage: PipelineStage;
+  context?: SavedDealHistoryContext;
+}): Promise<UpdateSavedDealLifecycleResult> {
+  const parsedContext = validateSavedDealHistoryContext(
+    input.stage,
+    input.context,
+  );
+  if (!parsedContext.ok) return parsedContext.result;
+
+  const { data, error } = await input.supabase.rpc(
+    "update_saved_deal_stage_with_history",
+    {
+      p_saved_analysis_id: input.savedDealId,
+      p_new_stage: input.stage,
+      p_reason: parsedContext.reason,
+      p_note: parsedContext.note,
+    },
+  );
+
+  if (error) {
+    if (isDealHistoryMigrationPending(error)) {
+      return {
+        ok: false,
+        code: "MIGRATION_PENDING",
+        message: "Deal history is not available until the latest schema update is applied.",
+      };
+    }
+    if (error.code === "P0002") {
+      return { ok: false, code: "NOT_FOUND", message: "Deal was not found." };
+    }
+    if (error.code === "22023") {
+      return {
+        ok: false,
+        code: "VALIDATION_ERROR",
+        message:
+          input.stage === "passed"
+            ? "Add a valid reason before marking this deal as Passed."
+            : "Invalid stage transition.",
+      };
+    }
+    return toServerErrorResult(error, "saved-deal-history");
+  }
+
+  if (!data || (Array.isArray(data) && data.length === 0)) {
+    return { ok: false, code: "NOT_FOUND", message: "Deal was not found." };
+  }
+  return { ok: true };
+}
+
 export async function updateSavedDealLifecycleStateAction(
   id: string,
   state: "active" | "completed" | "archived",
+  context?: SavedDealHistoryContext,
 ): Promise<UpdateSavedDealLifecycleResult> {
   const supabase = await createServerSupabaseClient();
   const {
@@ -2416,34 +2643,24 @@ export async function updateSavedDealLifecycleStateAction(
   }
 
   const savedDealId = id.trim();
-  if (!savedDealId) {
-    return { ok: false, code: "VALIDATION_ERROR", message: "Invalid deal id." };
-  }
-
-  const updatePayload =
-    {
-      ...persistedLifecycleForSimpleState(state),
-      last_activity_at: new Date().toISOString(),
+  if (
+    !savedDealId ||
+    (state !== "active" && state !== "completed" && state !== "archived")
+  ) {
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "Invalid deal or status.",
     };
-
-  const { data, error } = await supabase
-    .from("saved_analyses")
-    .update(updatePayload)
-    .eq("id", savedDealId)
-    .eq("user_id", user.id)
-    .is("deleted_at", null)
-    .select("id")
-    .maybeSingle();
-
-  if (error) {
-    return toServerErrorResult(error, "saved-analyses");
   }
 
-  if (!data) {
-    return { ok: false, code: "NOT_FOUND", message: "Deal was not found." };
-  }
-
-  return { ok: true };
+  const lifecycle = persistedLifecycleForSimpleState(state);
+  return persistSavedDealStageWithHistory({
+    supabase,
+    savedDealId,
+    stage: lifecycle.pipeline_stage,
+    context,
+  });
 }
 
 /**
@@ -2455,6 +2672,7 @@ export async function updateSavedDealLifecycleStateAction(
 export async function updateSavedDealStageAction(
   id: string,
   stage: PipelineStage,
+  context?: SavedDealHistoryContext,
 ): Promise<UpdateSavedDealLifecycleResult> {
   const supabase = await createServerSupabaseClient();
   const {
@@ -2487,41 +2705,23 @@ export async function updateSavedDealStageAction(
     };
   }
 
-  const { data, error } = await supabase
-    .from("saved_analyses")
-    .update({
-      pipeline_stage: stage,
-      ...flagsForStage(stage),
-      last_activity_at: new Date().toISOString(),
-    })
-    .eq("id", savedDealId)
-    .eq("user_id", user.id)
-    .is("deleted_at", null)
-    .select("id")
-    .maybeSingle();
+  const result = await persistSavedDealStageWithHistory({
+    supabase,
+    savedDealId,
+    stage,
+    context,
+  });
+  if (!result.ok) return result;
 
-  if (error) {
-    return toServerErrorResult(error, "saved-analyses");
-  }
-  if (!data) {
-    return { ok: false, code: "NOT_FOUND", message: "Deal was not found." };
-  }
-  const recordedDecision =
-    stage === "passed"
-      ? "pass"
-      : stage === "negotiating"
-        ? "negotiate"
-        : stage === "offer" || stage === "under_contract" || stage === "closed"
-          ? "pursue"
-          : null;
-  if (recordedDecision) {
+  const recordedDecision = userDecisionFromPipelineStage(stage);
+  if (recordedDecision !== "undecided") {
     await captureServerEvent({
       distinctId: user.id,
       event: "decision_recorded",
       properties: { decision: recordedDecision },
     });
   }
-  return { ok: true };
+  return result;
 }
 
 export type SetCloseDateResult =
@@ -3046,14 +3246,14 @@ export async function updateDealDueDiligenceAction(
  * Bulk archive or delete saved analyses.
  *
  * Why a separate action vs N calls to updateSavedDealLifecycleStateAction:
- *   - Single DB round trip instead of N
- *   - One lifecycle transition shared by every selected row
+ *   - One atomic bulk RPC instead of N independent lifecycle transactions
+ *   - One reason is recorded on every selected row's Deal Log
  *   - Soft-delete (deleted_at = now) for "delete" — preserves history
  *     and lets us restore by clearing deleted_at if a user complains
  *
- * Caller responsibility: pass only IDs owned by the current user. The
- * action double-checks via .eq("user_id", user.id) so cross-user
- * tampering is blocked at the DB layer.
+ * Caller responsibility: pass only IDs owned by the current user. The action
+ * preflights owner scope and the security-definer RPC independently checks
+ * both ownership and the pipeline entitlement at the DB layer.
  *
  * Max 100 IDs per call as a safety cap — bulk ops larger than that
  * indicate a UI bug or a scraping attempt.
@@ -3063,18 +3263,24 @@ export type BulkSavedDealActionResult =
       ok: true;
       affectedCount: number;
       /** Rows that changed lifecycle after validation and were therefore
-       * deliberately left untouched by the conditional archive update. */
+       * deliberately left untouched by the locked bulk transition. */
       skippedCount?: number;
     }
   | {
       ok: false;
-      code: "SIGN_IN_REQUIRED" | "VALIDATION_ERROR" | "SERVER_ERROR";
+      code:
+        | "SIGN_IN_REQUIRED"
+        | "ENTITLEMENT_REQUIRED"
+        | "VALIDATION_ERROR"
+        | "MIGRATION_PENDING"
+        | "SERVER_ERROR";
       message: string;
     };
 
 export async function bulkUpdateSavedDealsAction(
   ids: string[],
-  action: "archive" | "delete" | "activate",
+  action: "archive" | "delete",
+  context?: SavedDealHistoryContext,
 ): Promise<BulkSavedDealActionResult> {
   const supabase = await createServerSupabaseClient();
   const {
@@ -3107,10 +3313,25 @@ export async function bulkUpdateSavedDealsAction(
       message: "Too many deals selected at once (max 100).",
     };
   }
+  if (action !== "archive" && action !== "delete") {
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "Invalid bulk action.",
+    };
+  }
 
   const nowIso = new Date().toISOString();
 
   if (action === "archive") {
+    const parsedContext = validateSavedDealHistoryContext("passed", context);
+    if (!parsedContext.ok) {
+      return {
+        ok: false,
+        code: "VALIDATION_ERROR",
+        message: parsedContext.result.message,
+      };
+    }
     const { data: lifecycleRows, error: lifecycleError } = await supabase
       .from("saved_analyses")
       .select("id, pipeline_stage, is_completed, is_archived")
@@ -3133,42 +3354,74 @@ export async function bulkUpdateSavedDealsAction(
           "Only active deals can be archived. Refresh My Deals and remove completed, passed, already archived, or unavailable deals from the selection.",
       };
     }
+
+    const { data, error } = await supabase.rpc(
+      "bulk_archive_saved_deals_with_history",
+      {
+        p_saved_analysis_ids: cleanedIds,
+        p_reason: parsedContext.reason,
+        p_note: parsedContext.note,
+      },
+    );
+    if (error) {
+      if (isDealHistoryMigrationPending(error)) {
+        return {
+          ok: false,
+          code: "MIGRATION_PENDING",
+          message:
+            "Bulk archiving is not available until the latest Deal Log migration is applied.",
+        };
+      }
+      if (error.code === "42501") {
+        return {
+          ok: false,
+          code: "ENTITLEMENT_REQUIRED",
+          message: "Pipeline archiving is a Pro feature.",
+        };
+      }
+      if (error.code === "22023") {
+        return {
+          ok: false,
+          code: "VALIDATION_ERROR",
+          message: "Add a valid reason before archiving selected deals.",
+        };
+      }
+      return toServerErrorResult(error, "saved-deal-history");
+    }
+
+    const row = Array.isArray(data) ? data[0] : data;
+    const affectedCount = Number(
+      (row as { affected_count?: unknown } | null)?.affected_count ?? 0,
+    );
+    const skippedCount = Number(
+      (row as { skipped_count?: unknown } | null)?.skipped_count ?? 0,
+    );
+    if (
+      !Number.isInteger(affectedCount) ||
+      affectedCount < 0 ||
+      !Number.isInteger(skippedCount) ||
+      skippedCount < 0 ||
+      affectedCount + skippedCount !== cleanedIds.length
+    ) {
+      return {
+        ok: false,
+        code: "SERVER_ERROR",
+        message: "Bulk archive results could not be verified.",
+      };
+    }
+    return {
+      ok: true,
+      affectedCount,
+      ...(skippedCount > 0 ? { skippedCount } : {}),
+    };
   }
 
-  const updatePayload =
-    action === "delete"
-      ? { deleted_at: nowIso }
-      : action === "archive"
-        ? {
-            ...persistedLifecycleForSimpleState("archived"),
-            last_activity_at: nowIso,
-          }
-        : {
-            ...persistedLifecycleForSimpleState("active"),
-            last_activity_at: nowIso,
-          };
-
-  let query = supabase
+  const { data, error } = await supabase
     .from("saved_analyses")
-    .update(updatePayload)
+    .update({ deleted_at: nowIso })
     .in("id", cleanedIds)
-    .eq("user_id", user.id);
-
-  // For non-delete actions, only touch rows not already soft-deleted.
-  // For delete, allow re-deleting already-soft-deleted rows (idempotent).
-  if (action !== "delete") {
-    query = query.is("deleted_at", null);
-  }
-  // These flag predicates close the archive-vs-complete race between the
-  // preflight and this write without letting Archive resurrect a terminal
-  // row. PostgREST multi-row updates are not transactional with that earlier
-  // read, so a concurrent lifecycle change can produce a partial success;
-  // report that truthfully below instead of claiming the whole action failed.
-  if (action === "archive") {
-    query = query.eq("is_completed", false).eq("is_archived", false);
-  }
-
-  const { data, error } = await query.select("id");
+    .eq("user_id", user.id)
+    .select("id");
 
   if (error) {
     return toServerErrorResult(error, "saved-analyses");
@@ -3178,8 +3431,5 @@ export async function bulkUpdateSavedDealsAction(
   return {
     ok: true,
     affectedCount,
-    ...(action === "archive" && affectedCount < cleanedIds.length
-      ? { skippedCount: cleanedIds.length - affectedCount }
-      : {}),
   };
 }

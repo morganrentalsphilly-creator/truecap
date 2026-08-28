@@ -12,7 +12,15 @@ import type { OfferCeilingExactResult } from "@/lib/offer-ceiling-access-contrac
 
 const finite = z.number().finite();
 const constraintSchema = z.object({
-  key: z.enum(["cap-rate", "cash-on-cash", "cash-flow", "dscr", "purchase-price"]),
+  key: z.enum([
+    "cap-rate",
+    "cash-on-cash",
+    "cash-flow",
+    "dscr",
+    "irr",
+    "cash-required",
+    "purchase-price",
+  ]),
   criterion: z.string(),
   normalizedSlack: finite,
 });
@@ -51,6 +59,10 @@ const exactSchema = z.object({
     cocReturn: finite.optional(),
     capRate: finite,
     dscr: finite,
+    monthlyPayment: finite.optional(),
+    totalCashRequired: finite.optional(),
+    irrPct: finite.nullable().optional(),
+    irrStatus: z.enum(["unique", "multiple", "none"]).optional(),
   }),
   makePriceWork: z.object({
     currentMeets: z.boolean(),

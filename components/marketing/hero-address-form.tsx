@@ -32,7 +32,6 @@ import {
   Link2,
   Loader2,
   MapPin,
-  Sparkles,
 } from "lucide-react";
 import {
   AddressAutocomplete,
@@ -101,6 +100,8 @@ export function HeroAddressForm() {
   const [entryMode, setEntryMode] = useState<"address" | "listing">("address");
   const [listingUrl, setListingUrl] = useState("");
   const [listingError, setListingError] = useState<string | null>(null);
+  const [addressError, setAddressError] = useState<string | null>(null);
+  const listingInputRef = useRef<HTMLInputElement | null>(null);
 
   // A native button can be clicked before this client boundary hydrates on a
   // slow device, but no React handler exists yet. Keep action buttons disabled
@@ -142,6 +143,7 @@ export function HeroAddressForm() {
         setListingError(
           "Paste a supported Zillow, Redfin, Realtor.com, Homes.com, or Trulia property link.",
         );
+        listingInputRef.current?.focus();
         return;
       }
 
@@ -174,11 +176,11 @@ export function HeroAddressForm() {
 
     const address = (form.getValues("address") ?? "").trim();
     if (!address) {
-      // Nothing typed — send them to the full calculator to start there.
+      setAddressError("Enter a property address to analyze this deal.");
       form.setFocus("address");
-      scrollToCalculator();
       return;
     }
+    setAddressError(null);
     setSubmitting(true);
     setHandoffStatus("sending");
     const picked = selectedRef.current;
@@ -205,13 +207,6 @@ export function HeroAddressForm() {
     scrollToCalculator();
   };
 
-  const handleTrySample = () => {
-    trackEvent("hero_sample_clicked");
-    trackEvent("hero_sample_opened");
-    dispatchHeroAnalyze({ token: newToken(), address: "", sample: true });
-    scrollToCalculator();
-  };
-
   return (
     <div className="mt-7 w-full max-w-xl">
       <div
@@ -225,6 +220,7 @@ export function HeroAddressForm() {
           onClick={() => {
             setEntryMode("address");
             setListingError(null);
+            setAddressError(null);
             setSubmitting(false);
             setHandoffStatus(null);
             activeHandoffTokenRef.current = null;
@@ -239,6 +235,7 @@ export function HeroAddressForm() {
           aria-pressed={entryMode === "listing"}
           onClick={() => {
             setEntryMode("listing");
+            setAddressError(null);
             selectedRef.current = null;
             setSubmitting(false);
             setHandoffStatus(null);
@@ -251,10 +248,15 @@ export function HeroAddressForm() {
         </button>
       </div>
       <form
+        data-hero-address-form=""
+        noValidate
         onSubmit={handleAnalyze}
         onChangeCapture={(event) => {
           if (!(event.target instanceof HTMLInputElement)) return;
           const target = event.target;
+          if (entryMode === "address" && target.name === "address" && addressError) {
+            setAddressError(null);
+          }
           if (
             entryMode !== "address" ||
             target.name !== "address" ||
@@ -275,21 +277,36 @@ export function HeroAddressForm() {
       >
         <div className="min-w-0 flex-1">
           {entryMode === "address" ? (
-            <AddressAutocomplete
-              form={form}
-              placeholder="Enter a property address"
-              ariaLabel="Property address"
-              inputClassName="h-12 rounded-xl px-4 text-base shadow-sm sm:h-14"
-              onPlaceSelected={(place) => {
-                // Capture the picked suggestion's parsed components so
-                // "Analyze free" can hand them to the calculator for the
-                // same HUD/FRED/state auto-fill an in-form selection gets.
-                selectedRef.current = place;
-                activeHandoffTokenRef.current = null;
-                setSubmitting(false);
-                setHandoffStatus(null);
-              }}
-            />
+            <>
+              <AddressAutocomplete
+                form={form}
+                placeholder="Enter a property address"
+                ariaLabel="Property address"
+                hasError={Boolean(addressError)}
+                errorId="hero-address-error"
+                required
+                inputClassName="h-12 rounded-xl px-4 text-base shadow-sm sm:h-14"
+                onPlaceSelected={(place) => {
+                  // Capture the picked suggestion's parsed components so
+                  // "Analyze free" can hand them to the calculator for the
+                  // same HUD/FRED/state auto-fill an in-form selection gets.
+                  selectedRef.current = place;
+                  setAddressError(null);
+                  activeHandoffTokenRef.current = null;
+                  setSubmitting(false);
+                  setHandoffStatus(null);
+                }}
+              />
+              {addressError ? (
+                <p
+                  id="hero-address-error"
+                  role="alert"
+                  className="mt-1.5 px-1 text-xs font-medium text-destructive"
+                >
+                  {addressError}
+                </p>
+              ) : null}
+            </>
           ) : (
             <div>
               <label htmlFor="hero-listing-url" className="sr-only">
@@ -297,6 +314,7 @@ export function HeroAddressForm() {
               </label>
               <input
                 id="hero-listing-url"
+                ref={listingInputRef}
                 name="listingUrl"
                 type="url"
                 inputMode="url"
@@ -313,6 +331,7 @@ export function HeroAddressForm() {
                 }}
                 placeholder="Paste a Zillow, Redfin, or Realtor.com link"
                 aria-invalid={Boolean(listingError)}
+                aria-required="true"
                 aria-describedby={
                   listingError
                     ? "hero-listing-url-error"
@@ -363,8 +382,8 @@ export function HeroAddressForm() {
                   : handoffStatus === "cancelled"
                     ? "Use this address instead"
                     : entryMode === "listing"
-                      ? "Use listing address"
-                      : "Start with this address"}
+                      ? "Analyze listing free"
+                      : "Analyze a deal free"}
           <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
         </button>
       </form>
@@ -389,45 +408,12 @@ export function HeroAddressForm() {
                   : ""}
       </p>
 
-      {/* Secondary actions. The process link answers the explicit "how does
-          this work?" objection while the sample remains a no-address path.
-          The sample report is elevated from a quiet
-          text link to a clear outline button because a large share of
-          cold/paid traffic lands WITHOUT a specific property to type — for
-          them the address input is a dead end, and the one-click sample
-          verdict is the fastest path to the product's value. So we name the
-          objection directly ("no address yet?"). It stays visually
-          secondary to the primary "Analyze this property" action, and
-          pricing remains the quietest link so the emphasis is on
-          experiencing a deal, not evaluating cost. */}
-      <div className="mt-3 flex flex-wrap items-center justify-start gap-x-4 gap-y-2 text-sm">
-        <a
-          href="#how-it-works"
-          className="group inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-primary/30 bg-card px-4 py-2 font-semibold text-primary shadow-sm transition-colors hover:border-primary/60 hover:bg-[var(--brand-blue-light)]"
-        >
-          See How It Works
-          <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-        </a>
-        <button
-          type="button"
-          onClick={handleTrySample}
-          disabled={!hydrated}
-          className="group inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-border bg-card px-4 py-2 font-medium text-muted-foreground shadow-sm transition-colors hover:border-primary/40 hover:text-foreground disabled:cursor-wait disabled:opacity-60"
-        >
-          <Sparkles className="size-4" />
-          View a Sample Decision
-          <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-        </button>
-        {/* Pill treatment (was a bare text link): sitting beside two real
-            buttons it read as fine print and got skipped (UX walkthrough
-            P2-10). Still visually tertiary — outline only, muted text. */}
-        <Link
-          href="/pricing"
-          className="inline-flex min-h-11 items-center rounded-xl border border-border bg-card px-4 py-2 font-medium text-muted-foreground shadow-sm transition-colors hover:border-primary/40 hover:text-foreground"
-        >
-          See Pro features
-        </Link>
-      </div>
+      <Link
+        href="/sample-decision-memo"
+        className="mt-2 inline-flex min-h-11 items-center rounded-lg text-sm font-semibold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        View a sample decision →
+      </Link>
     </div>
   );
 }

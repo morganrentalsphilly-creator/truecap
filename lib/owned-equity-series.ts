@@ -59,6 +59,9 @@ export function resolveOwnedEquityBasis(row: OwnedEquityRowLike): OwnedDealEquit
       loanAmount: result.loanAmount ?? 0,
       annualRatePct: values.interestRate ?? 0,
       termYears: values.loanTermYears ?? 30,
+      amortizationTermYears:
+        values.amortizationTermYears ?? values.loanTermYears ?? 30,
+      interestOnlyMonths: values.interestOnlyMonths ?? 0,
       appreciationRatePct: values.appreciationRatePct ?? 0,
     },
   };

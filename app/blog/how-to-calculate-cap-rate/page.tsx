@@ -329,7 +329,7 @@ export default function BlogPost() {
 
           <div className="not-prose">
             <Link
-              href="/tools/cap-rate-calculator"
+              href="/#main"
               className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-3 rounded-xl font-bold hover:opacity-95 transition-opacity"
             >
               <Calculator className="w-4 h-4" />

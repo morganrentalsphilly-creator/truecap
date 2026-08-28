@@ -80,7 +80,7 @@ describe("recomputeSavedDealVerdict", () => {
     expect(fresh).not.toBeNull();
 
     const snapshot = toRecomputedSavedAnalysisSnapshot(fresh!);
-    expect(fresh!.scoreMethodologyVersion).toBe("1.2");
+    expect(fresh!.scoreMethodologyVersion).toBe("1.3");
     expect(snapshot.scoreMethodologyVersion).toBe(
       fresh!.scoreMethodologyVersion,
     );

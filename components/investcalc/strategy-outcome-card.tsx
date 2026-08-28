@@ -42,6 +42,7 @@ import {
   RecordedSpecialistAnalysisCard,
   type RecordedSpecialistAnalysisState,
 } from "@/components/investcalc/recorded-specialist-analysis-card";
+import { isSpecialistStrategyEnabled } from "@/lib/feature-flags";
 
 const usd = (n: number) =>
   new Intl.NumberFormat("en-US", {
@@ -200,6 +201,7 @@ export function StrategyOutcomeCard({
   }
 
   // ---- BRRRR / Fix & Flip → the model lives in the Strategies tab ----
+  if (!isSpecialistStrategyEnabled(strategy.key)) return null;
   const isFlip = strategy.key === "fix-flip";
   const Icon = isFlip ? Hammer : Wrench;
 

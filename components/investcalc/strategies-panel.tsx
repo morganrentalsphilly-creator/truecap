@@ -24,6 +24,7 @@ import type {
   StrategyInputField,
   StrategyInputs,
 } from "@/lib/investcalc-schema";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 
 interface StrategiesPanelProps {
   values: InvestmentFormValues | null;
@@ -111,6 +112,7 @@ export function StrategiesPanel({
           </div>
         ) : null}
       </div>
+      {isFeatureEnabled("brrrr_strategy_model") ? (
       <BrrrrCard
         values={values}
         result={result}
@@ -119,6 +121,8 @@ export function StrategiesPanel({
         strategyInputErrors={strategyInputErrors}
         onStrategyInputChange={onStrategyInputChange}
       />
+      ) : null}
+      {isFeatureEnabled("fix_flip_strategy_model") ? (
       <FixFlipCard
         values={values}
         result={result}
@@ -127,6 +131,7 @@ export function StrategiesPanel({
         strategyInputErrors={strategyInputErrors}
         onStrategyInputChange={onStrategyInputChange}
       />
+      ) : null}
     </div>
   );
 }

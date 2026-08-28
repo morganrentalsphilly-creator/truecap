@@ -80,9 +80,8 @@ export default function Image() {
               display: "flex",
             }}
           >
-            Cap rate, cash-on-cash, DSCR, 10-year cash flow, depreciation,
-            exit scenarios — already wired to live HUD rent, FRED rate, and
-            state tax data.
+            Cap rate, cash-on-cash, DSCR, sensitivity, and a 10-year cash-flow
+            and equity view — with labeled HUD, FRED, and state-tax starting points.
           </div>
         </div>
 

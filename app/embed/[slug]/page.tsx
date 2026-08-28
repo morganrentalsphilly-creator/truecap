@@ -27,13 +27,13 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { EmbedResizeReporter } from "@/components/embed/embed-resize-reporter";
 import { EmbedAttributionLink, EmbedReferralTracker } from "@/components/embed/embed-referral-tracker";
-import { EMBED_REGISTRY, getEmbedEntry } from "@/lib/embed-registry";
+import { EMBED_LIST, getEmbedEntry } from "@/lib/embed-registry";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const dynamicParams = false;
 
 export async function generateStaticParams() {
-  return Object.values(EMBED_REGISTRY).map((entry) => ({ slug: entry.slug }));
+  return EMBED_LIST.map((entry) => ({ slug: entry.slug }));
 }
 
 export async function generateMetadata({

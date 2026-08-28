@@ -10,16 +10,17 @@ function read(relativePath: string): string {
 }
 
 describe("trust-language guards", () => {
-  it("labels the simplified tax model as an illustration on decision surfaces", () => {
+  it("labels the simplified tax model where shown without promising it on pricing", () => {
     const taxPanel = read("../../components/investcalc/tax-strategy/panel.tsx");
     const compare = read(
       "../../components/investcalc/compare-deals-client.tsx",
     );
     const pricing = read("../../app/pricing/page.tsx");
 
-    for (const source of [taxPanel, compare, pricing]) {
+    for (const source of [taxPanel, compare]) {
       expect(source).toMatch(/Illustrative Tax Impact/i);
     }
+    expect(pricing).not.toMatch(/Illustrative Tax Impact/i);
     expect(taxPanel).toContain("Passive-loss");
     expect(taxPanel).toContain("mixed personal/rental-use allocation");
     expect(taxPanel).toContain("not tax advice");
@@ -33,9 +34,9 @@ describe("trust-language guards", () => {
     // above it, never an accident — cached PDFs are invalidated by this
     // number, so changing it silently either strands users on a stale
     // document or throws away every cache for nothing.
-    // Bumped to 11 because retained PDF bytes are now server-attested after
-    // v10 made validated inputs the publication authority.
-    expect(constants).toContain("PDF_SNAPSHOT_VERSION = 11");
+    // Bumped to 12 because released PDFs no longer expose the default-dark
+    // tax/exit model or use after-tax cash flow as a headline projection.
+    expect(constants).toContain("PDF_SNAPSHOT_VERSION = 12");
     // The changelog comment must actually document the current version.
     expect(constants).toMatch(/\/\/\s+11 - /);
     expect(generator).toContain("TRUECAP_UNDERWRITING_STANDARD_VERSION");
@@ -58,7 +59,7 @@ describe("trust-language guards", () => {
 
     expect(combined).not.toMatch(/supports accelerated depreciation/i);
     expect(combined).not.toMatch(/12-month seasonal income breakdown/i);
-    expect(combined).toContain("does not determine STR-loophole eligibility");
+    expect(combined).toMatch(/Neither (?:calculator )?determines? STR-loophole eligibility/);
     expect(combined).toContain(
       "Seasonal months require separate saved scenarios",
     );

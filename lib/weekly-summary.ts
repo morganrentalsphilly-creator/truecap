@@ -44,6 +44,7 @@ import {
   type BuyBoxPropertyType,
   type NamedBuyBox,
 } from "@/lib/buy-box";
+import { calculateMaoIrr } from "@/lib/mao-target-evaluation";
 import {
   deriveStageFromFlags,
   isActiveStage,
@@ -95,6 +96,9 @@ export type WeeklySummaryContext = {
   todayISO: string;
   /** As-of instant for owned-equity math. */
   asOf: Date;
+  /** Explicit release control. False/unset until actual and pro-forma data are
+   * stored and labeled separately; callers may not infer release from rows. */
+  ownedPortfolioActualsReleased?: boolean;
 };
 
 export type WeeklySummaryPipeline = {
@@ -247,7 +251,9 @@ export function buildWeeklySummary(
   const activeRows = publishableDeals.filter((r) =>
     isActiveStage(stageForRow(r)),
   );
-  const ownedRows = publishableDeals.filter((r) => stageForRow(r) === "closed");
+  const ownedRows = context.ownedPortfolioActualsReleased === true
+    ? publishableDeals.filter((r) => stageForRow(r) === "closed")
+    : [];
 
   // ── Active pipeline ────────────────────────────────────────────────
   let pipeline: WeeklySummaryPipeline | null = null;
@@ -401,6 +407,7 @@ export function buildWeeklySummary(
     for (const row of activeRows) {
       const fresh = freshById.get(row.id)!;
       const values = normalizedValuesById.get(row.id)!;
+      const irr = calculateMaoIrr(values, fresh.analysisResult);
       const metrics: BuyBoxDealMetrics = {
         capRatePct: fresh.capRatePct,
         cocPct: fresh.cocReturnPct,
@@ -413,6 +420,9 @@ export function buildWeeklySummary(
         state: deriveStateFromAddress(values.address),
         // calc-analysis canon: monthlyPayment <= 0 = cash purchase → DSCR N/A.
         isCashPurchase: fresh.isCashPurchase,
+        cashRequired: fresh.cashToClose,
+        irrPct: irr.primaryIrrPct,
+        irrStatus: irr.status,
       };
       const results = evaluateBuyBoxes(activeBoxes, metrics).filter(
         (r) => r.result.active,
@@ -503,6 +513,8 @@ export function normalizeWeeklyBuyBoxRow(raw: unknown): NamedBuyBox | null {
     minCocPct: num(r.min_coc_pct),
     minDscr: num(r.min_dscr),
     minCashFlowMonthly: num(r.min_cash_flow_monthly),
+    minIrrPct: num(r.min_irr_pct),
+    maxCashRequired: num(r.max_cash_required),
     maxPurchasePrice: num(r.max_purchase_price),
     propertyTypes: strArray(r.property_types).filter(isBuyBoxPropertyType),
     // Filter through the canonical state list (verifier nit: the dashboard

@@ -34,6 +34,16 @@ describe("one-time PDF security contract", () => {
     expect(action).not.toMatch(/success_url:[^\n]+claimSecret/);
   });
 
+  it("creates no Pack checkout unless the configured Stripe Price is exact", () => {
+    expect(action).toContain("decisionPackCheckoutEnabled()");
+    expect(action).toContain("await stripe.prices.retrieve(priceId)");
+    expect(action).toContain('stripePrice.type !== "one_time"');
+    expect(action).toContain('stripePrice.currency.toLowerCase() !== "usd"');
+    expect(action).toContain("stripePrice.unit_amount !== expectedAmountCents");
+    expect(action).not.toContain("ONE_TIME_PDF_PRICE_FALLBACK");
+    expect(action).not.toContain("price_1TgYY33yTn6y2v95pIAe2ABs");
+  });
+
   it("binds redemption to a secret, exact deal, optional user, and an atomic consume", () => {
     expect(action).toContain("claim_secret_hash: claimSecretHash");
     expect(action).toContain("deal_fingerprint: dealFingerprint");

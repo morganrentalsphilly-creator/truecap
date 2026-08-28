@@ -192,11 +192,11 @@ export default function Section8RentalPost() {
             </p>
             <p>
               Run the annual numbers: $18,000 gross rent, minus $2,400 property tax, $1,200 insurance, $2,200 maintenance and capex reserves, $1,800 management (10%), and $720 vacancy (4%) — that&apos;s an NOI of about <strong>$9,680</strong>, a <strong>7.2% cap rate</strong>, a DSCR of roughly <strong>1.19</strong>, and cash flow near <strong>$126/month</strong> after debt service. Check the math yourself with the{" "}
-              <Link href="/tools/cap-rate-calculator" className="text-primary font-semibold hover:underline">
+              <Link href="/#main" className="text-primary font-semibold hover:underline">
                 cap rate calculator
               </Link>{" "}
               and{" "}
-              <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">
+              <Link href="/#main" className="text-primary font-semibold hover:underline">
                 DSCR calculator
               </Link>
               .
@@ -271,7 +271,7 @@ export default function Section8RentalPost() {
             </ul>
             <p>
               Then judge the deal on the same metrics as always — cash flow,{" "}
-              <Link href="/tools/cash-on-cash-calculator" className="text-primary font-semibold hover:underline">
+              <Link href="/#main" className="text-primary font-semibold hover:underline">
                 cash-on-cash
               </Link>
               , cap rate, DSCR. The program changes the inputs, not the framework. If you need the framework itself, start with{" "}

@@ -27,7 +27,7 @@ const SERP_TITLE = "Best rental property calculator 2026: 7 compared";
 const DESCRIPTION =
   "Honest 2026 ranking of the 7 most popular rental property calculators — TrueCap, DealCheck, BiggerPockets, Mashvisor, Stessa, Excel, and Roofstock — across free tier depth, pricing, mobile, and audience fit.";
 const PUBLISHED_AT = "2026-06-07";
-const MODIFIED_AT = "2026-06-07";
+const MODIFIED_AT = "2026-08-27";
 const READING_TIME_MIN = 12;
 
 export const metadata: Metadata = {
@@ -63,21 +63,21 @@ const RANKED_CALCULATORS = [
   {
     rank: 1,
     name: "TrueCap",
-    bestFor: "Best free tier + best single-tier Pro pricing",
+    bestFor: "Address-first screening plus paid decision tools",
     url: "/",
-    pricing: "Free; Pro $29.99/mo (or $300/yr annual)",
+    pricing: "Free core; paid Investor Pro — see live pricing",
     pros: [
-      "Deepest free tier — full cap rate, CoC, DSCR, NCF, monthly cash flow with no signup or analysis cap",
+      "No-account preliminary screen with cap rate, CoC, DSCR, NOI, and monthly cash flow",
       "Address auto-fill from HUD Fair Market Rent + FRED 30-year rate + state property tax (no other tool does all three)",
       "Selected-rule fit, with a secondary Screening Index",
-      "Single $29.99/mo Pro tier bundles 10-year projections, illustrative tax impact, sensitivity, modeled exit comparisons, Offer Ceiling, BRRRR, and fix-and-flip workflows",
+      "Paid Pro plans add 10-year cash-flow and equity projections, sensitivity, Offer Ceiling, saved-deal comparison, and reports; see live pricing for current terms",
       "Lender-facing PDF + shareable read-only deal link with optional custom branding",
     ],
     cons: [
       "PWA, not native iOS/Android apps (DealCheck wins on pure mobile)",
       "Listing import is address-only — paste a Zillow/Redfin link and TrueCap pulls the address, not the listing's price, taxes or photos",
     ],
-    pickIf: "You want the deepest free tier and the most capable Pro tier at the cheapest single price.",
+    pickIf: "You want a no-account preliminary screen connected to a paid target, comparison, and reporting workflow.",
   },
   {
     rank: 2,
@@ -138,20 +138,20 @@ const RANKED_CALCULATORS = [
   {
     rank: 5,
     name: "Stessa",
-    bestFor: "Best post-purchase accounting (not actually a calculator)",
+    bestFor: "Best acquisition-to-operations breadth",
     url: "/vs/stessa",
-    pricing: "Free; Stessa Pro ~$12/mo",
+    pricing: "Free Essentials plus paid Manage and Pro — see live pricing (reviewed 2026-08-27)",
     pros: [
-      "Best-in-class rental accounting + bookkeeping — bank-feed sync, auto-categorization, Schedule E",
-      "Free tier on unlimited properties",
-      "Strong multi-property dashboard for ongoing operations",
+      "Investment-property marketplace with filters, map layers, watchlists, and buy-box alerts",
+      "Listing-level sale/rent comps and editable offer, financing, rent, and operating-cost assumptions",
+      "Accounting, bank feeds, reporting, and landlord operations after acquisition",
     ],
     cons: [
-      "Doesn't underwrite — you can't paste an address and get a cap rate / DSCR / cash flow analysis",
-      "Forward projection only on Pro; primarily a backward-looking actuals tool",
-      "Different category — Stessa is for properties you own, not properties you're considering",
+      "Broader operations product rather than a narrowly focused acquisition decision workflow",
+      "The official sources reviewed do not describe a target-derived Offer Ceiling",
+      "Plan limits and marketplace terms should be checked on Stessa's live pages",
     ],
-    pickIf: "You already own rentals and need to track income + expenses for tax time. Pair with TrueCap for the pre-purchase math.",
+    pickIf: "You want listing discovery and editable acquisition analysis to continue into accounting and landlord operations.",
   },
   {
     rank: 6,
@@ -197,15 +197,15 @@ const RANKED_CALCULATORS = [
 const FAQ_ITEMS = [
   {
     q: "What's the best rental property calculator in 2026?",
-    a: "TrueCap may fit investors who want a deep free tier, one published Pro tier, labeled HUD/FRED/state-tax starting assumptions, selected-rule fit, and a secondary Screening Index. DealCheck may fit users who need native iOS/Android apps. BiggerPockets may fit investors already paying for its community. Verify current pricing and features on each provider's site.",
+    a: "TrueCap may fit investors who want a no-account preliminary screen, labeled HUD/FRED/state-tax starting assumptions, selected-rule fit, and a secondary Screening Index. DealCheck may fit users who need native iOS/Android apps. BiggerPockets may fit investors already paying for its community. Verify current pricing and features on each provider's site.",
   },
   {
     q: "What's the best free rental property calculator?",
-    a: "TrueCap has the deepest free tier of any rental calculator on the market — unlimited analyses, full cap rate / CoC / DSCR / NCF / monthly cash flow with address auto-fill, no signup required, no analysis cap. DealCheck's free tier requires signup and caps saved properties at 15. BiggerPockets gives a few free reports then gates to its $390/year Pro tier.",
+    a: "TrueCap offers unlimited preliminary core screens with cap rate, CoC, DSCR, NOI, and monthly cash flow without signup. DealCheck and BiggerPockets publish different account, report, and saved-property limits. Verify all three providers' current official pages before choosing; complete-decision and paid allowances differ from core screening access.",
   },
   {
     q: "DealCheck vs BiggerPockets vs TrueCap — which is best?",
-    a: "Depends on what you optimize for. TrueCap wins on free tier depth, pricing, and single-tier Pro simplicity. DealCheck wins on native mobile apps and listing-import workflow. BiggerPockets makes sense if you're already paying for the community access bundled with Pro. For the calculator alone, TrueCap has a deeper free tier and bundles everything in one Pro tier.of either.",
+    a: "It depends on the workflow. TrueCap offers a no-account preliminary screen plus target, comparison, and reporting tools. DealCheck publishes native mobile apps and listing-import features. BiggerPockets may make sense if you already value the community bundled with its paid membership. Compare current limits and prices on the official pages.",
   },
   {
     q: "Is Mashvisor a rental property calculator?",
@@ -217,7 +217,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "What about Stessa, RentRedi, or Avail — are those calculators?",
-    a: "No — those are post-purchase landlord operations platforms (accounting, rent collection, leasing). They're complementary to TrueCap / DealCheck / BiggerPockets, not competitors. The full stack for most landlords: a calculator (TrueCap / DealCheck / BP) for pre-purchase underwriting + an ops platform (Stessa / Avail / Baselane) for after closing.",
+    a: "Their scopes differ. Stessa now includes an investment-property marketplace, buy boxes, comps, and editable acquisition underwriting before continuing into accounting and operations. RentRedi and Avail are more operations-led. Compare each provider's current official feature and pricing pages rather than treating all three as one category.",
   },
 ];
 
@@ -298,7 +298,7 @@ export default function BestRentalPropertyCalculator2026Post() {
               {DESCRIPTION}
             </p>
             <p className="mt-4 text-xs text-muted-foreground">
-              Published {PUBLISHED_AT}
+              Published {PUBLISHED_AT} · Updated {MODIFIED_AT}
             </p>
           </header>
 
@@ -307,13 +307,14 @@ export default function BestRentalPropertyCalculator2026Post() {
               Quick answer
             </h2>
             <p className="text-sm sm:text-base leading-relaxed text-foreground">
-              For most investors in 2026: <strong>TrueCap</strong> (deepest
-              free tier, $29.99/mo Pro, address auto-fill from HUD + FRED + state
+              For investors who want address-first acquisition screening: <strong>TrueCap</strong> (a no-account
+              preliminary screen, paid decision tools, and starting benchmarks from HUD + FRED + state
               tax). <strong>DealCheck</strong> if you live on mobile at
               showings. <strong>BiggerPockets</strong> if you already pay for
               the community. <strong>Mashvisor</strong> for market discovery
-              (not per-deal underwriting). <strong>Stessa</strong> for
-              post-purchase accounting (not actually a calculator).
+              (not per-deal underwriting). <strong>Stessa</strong> for a
+              marketplace and editable acquisition analysis that continue
+              into accounting and landlord operations.
               <strong> Excel</strong> only if you have a battle-tested model
               already. <strong>Roofstock</strong> if you want passive turnkey
               ownership with someone else doing the sourcing.
@@ -327,9 +328,9 @@ export default function BestRentalPropertyCalculator2026Post() {
               evaluate when they search &quot;best rental property
               calculator&quot; or &quot;rental analysis tool&quot;. If you just
               want a single metric fast, our free{" "}
-              <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">cap rate calculator</Link>,{" "}
-              <Link href="/tools/cash-on-cash-calculator" className="font-semibold text-primary hover:underline">cash-on-cash return calculator</Link>, and{" "}
-              <Link href="/tools/dscr-calculator" className="font-semibold text-primary hover:underline">DSCR calculator</Link>{" "}
+              <Link href="/#main" className="font-semibold text-primary hover:underline">cap rate calculator</Link>,{" "}
+              <Link href="/#main" className="font-semibold text-primary hover:underline">cash-on-cash return calculator</Link>, and{" "}
+              <Link href="/#main" className="font-semibold text-primary hover:underline">DSCR calculator</Link>{" "}
               each handle one piece of the underwrite with no signup. Ranking
               criteria, weighted roughly by impact on a typical solo investor:
             </p>
@@ -352,7 +353,7 @@ export default function BestRentalPropertyCalculator2026Post() {
                 on your phone?
               </li>
               <li>
-                <strong>Pro feature depth</strong> — projections, illustrative tax impact,
+                <strong>Pro feature depth</strong> — cash-flow and equity projections,
                 sensitivity, co-branded share links, PDF export.
               </li>
               <li>
@@ -427,10 +428,10 @@ export default function BestRentalPropertyCalculator2026Post() {
             <h2>Quick decision matrix</h2>
             <ul>
               <li>
-                <strong>&quot;I want the cheapest Pro tier.&quot;</strong> TrueCap — the deepest free tier, with everything bundled in one $29.99/mo Pro tier.
+                <strong>&quot;I want address-first screening and a target-backed Offer Ceiling.&quot;</strong> Evaluate TrueCap&apos;s current free and Investor Pro terms on the live pricing page.
               </li>
               <li>
-                <strong>&quot;I want the deepest free tier.&quot;</strong> TrueCap — unlimited analyses, no signup, no analysis cap.
+                <strong>&quot;I want a no-account preliminary screen.&quot;</strong> TrueCap includes the core underwriting metrics before signup; complete-decision allowances and paid terms are shown on the live pricing page.
               </li>
               <li>
                 <strong>&quot;I underwrite on my phone at every showing.&quot;</strong> DealCheck — only one with true native iOS / Android apps.
@@ -442,7 +443,7 @@ export default function BestRentalPropertyCalculator2026Post() {
                 <strong>&quot;I&apos;m scouting which city to invest in.&quot;</strong> Mashvisor — heatmaps and neighborhood scores.
               </li>
               <li>
-                <strong>&quot;I already own rentals and need accounting.&quot;</strong> Stessa — it&apos;s not a calculator but it&apos;s the right post-purchase tool. Pair with TrueCap or DealCheck for new acquisitions.
+                <strong>&quot;I want listing discovery, acquisition analysis, and accounting in one product.&quot;</strong> Evaluate Stessa&apos;s current marketplace, underwriting, and plan terms.
               </li>
               <li>
                 <strong>&quot;I want a turnkey rental I don&apos;t have to source or manage.&quot;</strong> Roofstock — but pressure-test the listing pro-forma in TrueCap before offering.

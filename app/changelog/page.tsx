@@ -21,6 +21,7 @@ import { Sparkles, Wrench, Zap, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
 
 export const metadata: Metadata = {
   title: "Changelog",
@@ -346,8 +347,7 @@ const ENTRIES: Entry[] = [
     date: "2026-05-24",
     category: "Fix",
     title: "Mortgage compare: cleaner edge-case behavior",
-    description:
-      "DSCR now shows 'N/A' on cash purchases and 'Negative NOI' (red) when the property is operating at a loss — instead of a confusing negative DSCR number. The '+5pp down' alternative scenario is suppressed when you're already at 95%+ down so the comparison grid stays informative.",
+    description: `DSCR now shows '${NO_DEBT_SERVICE_DSCR_LABEL}' on cash purchases and 'Negative NOI' (red) when the property is operating at a loss — instead of a confusing negative DSCR number. The '+5pp down' alternative scenario is suppressed when you're already at 95%+ down so the comparison grid stays informative.`,
   },
   {
     date: "2026-05-24",
@@ -409,8 +409,7 @@ const ENTRIES: Entry[] = [
     date: "2026-05-24",
     category: "Improvement",
     title: "Owner-occupant scoring labels — corrected",
-    description:
-      "Score breakdown now uses the right thresholds and max-points for owner-occupant deals (30-point cash-flow tier with $300/mo bands, not the investor 25-point / $1,000 band). DSCR breakdown also reads 'N/A — all-cash purchase' on cash deals instead of the misleading 'Above 1.25'.",
+    description: `Score breakdown now uses the right thresholds and max-points for owner-occupant deals (30-point cash-flow tier with $300/mo bands, not the investor 25-point / $1,000 band). DSCR breakdown also reads '${NO_DEBT_SERVICE_DSCR_LABEL}' on cash deals instead of the misleading 'Above 1.25'.`,
   },
   {
     date: "2026-05-24",
@@ -669,6 +668,12 @@ export default function ChangelogPage() {
           <p className="text-base text-muted-foreground mt-2 leading-relaxed">
             What&apos;s new in TrueCap — features, improvements, fixes, and
             content. Updated as we ship.
+          </p>
+          <p className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm leading-relaxed text-foreground">
+            This archive preserves historical release notes. Some older entries
+            describe modules that are now disabled or not currently released,
+            including tax-specific, modeled-exit, BRRRR, and fix-and-flip views.
+            Check the current pricing and product screens for present availability.
           </p>
         </header>
 

@@ -199,7 +199,7 @@ export function RoiCalculatorWidget() {
         className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-md text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="w-4 h-4" />
-        Run the full analysis with these numbers — cash flow, DSCR, 10-year projections, tax, exit — free
+        Run the full analysis with these numbers — cash flow, DSCR, and 10-year cash-flow and equity projections — free
         <ArrowUpRight className="w-4 h-4" />
       </Link>
     </div>

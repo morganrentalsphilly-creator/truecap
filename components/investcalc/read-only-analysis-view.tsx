@@ -43,6 +43,16 @@ import {
   type SpecialistAnalysisSnapshot,
   type SpecialistInputSource,
 } from "@/lib/specialist-analysis-snapshot";
+import {
+  hasAnySpecialistStrategyEnabled,
+  isSpecialistStrategyEnabled,
+} from "@/lib/feature-flags";
+import { formatDscr } from "@/lib/financial-presentation";
+import { isFeatureReleased } from "@/lib/entitlements-catalog";
+import {
+  AdvancedBuyAndHoldSummary,
+  RenovationModelDisclosure,
+} from "@/components/investcalc/advanced-buy-and-hold-summary";
 
 interface ReadOnlyAnalysisViewProps {
   values: InvestmentFormValues;
@@ -598,9 +608,19 @@ export function ReadOnlyAnalysisView({
   const router = useRouter();
   const result = analysis.result;
   const proResult = analysis.access === "pro" ? analysis.result : null;
-  const isSpecialistLens = isSpecialistAnalyzerStrategyKey(analyzerStrategyKey);
+  const showTaxMetrics = Boolean(
+    proResult && isFeatureReleased("tax_strategy"),
+  );
+  const specialistStrategyEnabled =
+    isSpecialistStrategyEnabled(analyzerStrategyKey);
+  const specialistModelsEnabled = hasAnySpecialistStrategyEnabled();
+  const isSpecialistLens =
+    isSpecialistAnalyzerStrategyKey(analyzerStrategyKey) &&
+    specialistStrategyEnabled;
   const authorizedSpecialistAnalysis =
-    proResult && specialistAnalysis?.strategy === analyzerStrategyKey
+    specialistStrategyEnabled &&
+    proResult &&
+    specialistAnalysis?.strategy === analyzerStrategyKey
       ? specialistAnalysis
       : null;
   const adoptedMaoTarget =
@@ -620,7 +640,7 @@ export function ReadOnlyAnalysisView({
     [recordedResult, values],
   );
   const criteriaMet = adoptedMaoTarget
-    ? meetsMaoTarget(result, adoptedMaoTarget)
+    ? meetsMaoTarget(result, adoptedMaoTarget, values)
     : null;
   const decisionLabel =
     criteriaMet == null
@@ -843,11 +863,15 @@ export function ReadOnlyAnalysisView({
       <div
         className={cn(
           "grid grid-cols-2 gap-2 sm:gap-3",
-          proResult ? "sm:grid-cols-3 xl:grid-cols-6" : "sm:grid-cols-4",
+          showTaxMetrics ? "sm:grid-cols-3 xl:grid-cols-6" : "sm:grid-cols-4",
         )}
       >
         <MetricTile
-          label="Monthly Cash Flow"
+          label={
+            (result.balloonPayment ?? 0) > 0
+              ? "Recurring Monthly Cash Flow (excl. balloon)"
+              : "Monthly Cash Flow"
+          }
           value={fmtCash(result.netCashFlow)}
           positive={result.netCashFlow >= 0}
           negative={result.netCashFlow < 0}
@@ -876,10 +900,10 @@ export function ReadOnlyAnalysisView({
           // Cash purchases have no debt service so DSCR is undefined.
           // calc-analysis returns 0 in that case - surface a clear sub
           // rather than a misleading "Underwater" badge.
-          value={result.monthlyPayment <= 0 ? "—" : result.dscr.toFixed(2)}
+          value={formatDscr(result.dscr, result.monthlyPayment > 0)}
           sub={
             result.monthlyPayment <= 0
-              ? "Cash purchase"
+              ? undefined
               : result.dscr >= 1.25
                 ? "Common screening threshold (≥1.25)"
                 : result.dscr >= 1.0
@@ -889,7 +913,7 @@ export function ReadOnlyAnalysisView({
           positive={result.monthlyPayment > 0 && result.dscr >= 1.25}
           negative={result.monthlyPayment > 0 && result.dscr < 1.25}
         />
-        {proResult ? (
+        {showTaxMetrics && proResult ? (
           <>
             <MetricTile
               label="Illustrative Tax Effect"
@@ -910,6 +934,9 @@ export function ReadOnlyAnalysisView({
           </>
         ) : null}
       </div>
+
+      <AdvancedBuyAndHoldSummary result={result} values={values} />
+      <RenovationModelDisclosure values={values} />
 
       {/* The VIEWER's own buy box verdict on this shared deal — renders only
           for a signed-in viewer with an active buy box; anonymous viewers see
@@ -949,17 +976,19 @@ export function ReadOnlyAnalysisView({
         <>
           <SensitivityGrid values={values} />
 
-          <details className="bg-card rounded-2xl border border-border shadow-sm">
-            <summary className="flex min-h-11 cursor-pointer items-center px-5 py-3 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-              Advanced/Beta strategy modeling
-            </summary>
-            <p className="border-t border-border px-5 pt-4 text-xs leading-relaxed text-muted-foreground">
-              Rehab, refinance, flip, and short-term-rental outputs are
-              secondary scenarios with incomplete market, lender, regulatory, or
-              contractor evidence. Verify them independently.
-            </p>
-            <StrategiesPanel values={values} result={proResult} />
-          </details>
+          {specialistModelsEnabled ? (
+            <details className="bg-card rounded-2xl border border-border shadow-sm">
+              <summary className="flex min-h-11 cursor-pointer items-center px-5 py-3 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                Advanced/Beta strategy modeling
+              </summary>
+              <p className="border-t border-border px-5 pt-4 text-xs leading-relaxed text-muted-foreground">
+                Rehab, refinance, flip, and short-term-rental outputs are
+                secondary scenarios with incomplete market, lender, regulatory,
+                or contractor evidence. Verify them independently.
+              </p>
+              <StrategiesPanel values={values} result={proResult} />
+            </details>
+          ) : null}
         </>
       ) : recordedResult ? (
         <section
@@ -987,8 +1016,9 @@ export function ReadOnlyAnalysisView({
             id="shared-pro-analysis-title"
             className="text-base font-bold text-foreground"
           >
-            Exact Offer Ceiling, sensitivity, and advanced strategy modeling are
-            paid tools
+            {specialistModelsEnabled
+              ? "Exact Offer Ceiling, sensitivity, and advanced strategy modeling are paid tools"
+              : "Exact Offer Ceiling and sensitivity are paid tools"}
           </h2>
           <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
             This free shared view includes the deal&rsquo;s core underwriting.

@@ -52,14 +52,14 @@ export async function GET() {
   const comboCount = CITY_STRATEGY_COMBOS.length;
 
   const summary =
-    `${PRODUCT_POSITIONING} Screen a rental from an address in about 60 seconds using editable starting assumptions. Free summarizes modeled economics for triage. Pro connects Buy Box rules, interactive Offer Ceiling, downside, comparisons, and reports across repeated opportunities. Agent Pro applies the workflow to investor clients. New one-time report purchases are temporarily unavailable. The Screening Index is secondary to selected rules and is not evidence readiness, an appraisal, lender approval, or investment advice.`;
+    `${PRODUCT_POSITIONING} Screen a rental from an address in about 60 seconds using editable starting assumptions. Free summarizes modeled economics for triage. Investor Pro connects Buy Box rules, interactive Offer Ceiling, downside, comparisons, and reports across repeated opportunities. Agent Pro and new one-time report purchases are not currently released. The Screening Index is secondary to selected rules and is not evidence readiness, an appraisal, lender approval, or investment advice.`;
 
   const about = [
     "TrueCap publishes original, authoritative educational content built for real estate investors and AI search engines.",
     "Content surfaces:",
     `  - ${glossaryCount}-term glossary with one-sentence definitions, formulas, and worked examples`,
     `  - ${blogCount} long-form blog posts covering rental underwriting, BRRRR strategy, DSCR loans, 1031 exchanges, tax deductions, and more`,
-    `  - ${CALCULATOR_COUNT} free single-purpose calculators with clean math (cap rate, cash-on-cash, DSCR, NOI, BRRRR, etc)`,
+    `  - ${CALCULATOR_COUNT} free single-purpose calculators with clean math (cap rate, cash-on-cash, DSCR, NOI, ARV, etc)`,
     `  - ${stateCount} state-level investment guides and ${comboCount} city + strategy combo guides`,
     "  - Side-by-side comparison pages vs. DealCheck, Stessa, Mashvisor, BiggerPockets, Excel, Rentometer, Zillow rent estimate",
     "  - Methodology page documenting the exact math the analyzer uses",
@@ -88,6 +88,8 @@ export async function GET() {
     .map((s) => `- [Investing in ${s.name}](${siteUrl}/states/${s.slug}): ${s.pitch}`)
     .join("\n");
 
+  // CITY_STRATEGY_COMBOS is release-filtered at its source. This prevents a
+  // dark specialist city guide from being advertised to model crawlers.
   const comboSection = CITY_STRATEGY_COMBOS.map(
     (c) =>
       `- [${c.strategyLabel} in ${c.cityName}, ${c.state}](${siteUrl}/markets/${c.citySlug}/${c.strategy}): ${c.pitch}`
@@ -105,10 +107,9 @@ export async function GET() {
 
   const personasSection = [
     `- [TrueCap for buy-and-hold investors](${siteUrl}/for-buy-and-hold): Cash flow modeling for long-term rentals.`,
-    `- [TrueCap for BRRRR investors](${siteUrl}/for-brrrr): Buy, rehab, rent, refinance scenarios.`,
+    `- [BRRRR education](${siteUrl}/blog/brrrr-method-explained): An assumption-led walkthrough of the buy, rehab, rent, and refinance sequence.`,
     `- [TrueCap for house hackers](${siteUrl}/for-house-hackers): Owner-occupant FHA 3.5% strategy.`,
-    `- [TrueCap for fix-and-flip investors](${siteUrl}/for-flippers): ARV, holding cost, exit modeling.`,
-    `- [TrueCap for real estate agents](${siteUrl}/for-agents): Underwrite listings before showings.`,
+    `- [Fix-and-flip education](${siteUrl}/blog/70-percent-rule-house-flipping): An educational acquisition-screen walkthrough for rehab and resale projects.`,
   ].join("\n");
 
   const reference = [

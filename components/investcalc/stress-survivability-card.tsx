@@ -82,9 +82,10 @@ export function StressSurvivabilityCard({ base, stressed, adjustmentLabel }: Pro
             {s.breakEven.sentence}
           </p>
         ) : null}
-        {s.dscr.band !== "cash" ? (
-          <p className="text-xs leading-relaxed text-muted-foreground">{s.dscr.label}</p>
-        ) : null}
+        <p className="text-xs leading-relaxed text-muted-foreground">
+          {s.dscr.band === "cash" ? "DSCR: " : ""}
+          {s.dscr.label}
+        </p>
       </div>
     </div>
   );

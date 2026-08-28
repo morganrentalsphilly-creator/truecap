@@ -364,14 +364,14 @@ export default function PropertyTaxReassessmentPost() {
               On the seller&apos;s bill the deal looks like a thin but real winner:
               a 6.3%{" "}
               <Link
-                href="/tools/cap-rate-calculator"
+                href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
                 cap rate
               </Link>
               , a{" "}
               <Link
-                href="/tools/dscr-calculator"
+                href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
                 DSCR
@@ -458,7 +458,7 @@ export default function PropertyTaxReassessmentPost() {
               are exactly where an optimistic number hides a bad deal. Run the
               honest figure through an{" "}
               <Link
-                href="/tools/noi-calculator"
+                href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
                 NOI calculator

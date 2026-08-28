@@ -24,6 +24,8 @@ import { buildCanonicalReportData } from "@/lib/report-data-builder";
 import { calculateSampleDealOutcome } from "@/lib/sample-deal-analysis";
 import { SAMPLE_DEAL_FIXTURE } from "@/lib/sample-deal";
 import { resolveSavedAnalysisResult } from "@/lib/saved-analysis-methodology";
+import { buildPublicShareAnalysisPayload } from "@/lib/public-share-analysis-result";
+import { UNDERWRITING_V1_GOLDEN_CORPUS } from "@/lib/__tests__/fixtures/underwriting-v1-golden-corpus";
 import {
   TRUECAP_UNDERWRITING_STANDARD_NAME,
   TRUECAP_UNDERWRITING_STANDARD_VERSION,
@@ -39,6 +41,77 @@ describe("canonical decision output parity across safe adapters", () => {
 
   afterAll(() => {
     vi.useRealTimers();
+  });
+
+  it("keeps every reviewed v1.3 golden case aligned across saved, Compare, share, and PDF adapters", () => {
+    for (const golden of UNDERWRITING_V1_GOLDEN_CORPUS) {
+      const direct = calculateAnalysis(golden.values);
+      const score = computeDealScore(
+        buildDealScoreInputFromAnalysis(golden.values, direct),
+      );
+      const saved = resolveSavedAnalysisResult({
+        methodologyVersion: direct.methodologyVersion,
+        resultSnapshot: {
+          ...direct,
+          score: score.score,
+          recommendation: score.recommendation,
+          riskLevel: score.riskLevel,
+          breakdown: score.breakdown,
+          explanation: score.explanation,
+        },
+        recomputedResult: direct,
+        recomputedExtras: {
+          score: score.score,
+          recommendation: score.recommendation,
+          riskLevel: score.riskLevel,
+          breakdown: score.breakdown,
+          explanation: score.explanation,
+        },
+      });
+      const compare = buildCompareSnapshotPayload(
+        direct,
+        golden.values,
+      ).compareSnapshot;
+      const report = buildCanonicalReportData({
+        values: golden.values,
+        generatedAt: FIXED_NOW,
+      });
+      const coreShare = buildPublicShareAnalysisPayload(direct, false);
+      const proShare = buildPublicShareAnalysisPayload(direct, true);
+
+      expect(saved.result, `${golden.id}: saved snapshot`).toMatchObject({
+        methodologyVersion: direct.methodologyVersion,
+        netCashFlow: direct.netCashFlow,
+        cocReturn: direct.cocReturn,
+        capRate: direct.capRate,
+        dscr: direct.dscr,
+        totalCashRequired: direct.totalCashRequired,
+        score: score.score,
+      });
+      expect(recomputeCompareSnapshotFromForm(golden.values), `${golden.id}: compare`).toEqual(
+        compare,
+      );
+      expect(report.performance, `${golden.id}: report/PDF`).toMatchObject({
+        monthlyCashFlow: direct.netCashFlow,
+        cocReturn: direct.cocReturn,
+        capRate: direct.capRate,
+        dscr: direct.dscr,
+        dealScore: score.score,
+      });
+      expect(report.methodologyVersion, `${golden.id}: report method`).toBe(
+        direct.methodologyVersion,
+      );
+      expect(report.specialistAnalysis, `${golden.id}: disabled specialist`).toBeNull();
+      expect(coreShare.result, `${golden.id}: core share`).toMatchObject({
+        methodologyVersion: direct.methodologyVersion,
+        netCashFlow: direct.netCashFlow,
+        cocReturn: direct.cocReturn,
+        capRate: direct.capRate,
+        dscr: direct.dscr,
+        totalCashRequired: direct.totalCashRequired,
+      });
+      expect(proShare.result, `${golden.id}: Pro share`).toEqual(direct);
+    }
   });
 
   it("keeps the sample, server ceiling, saved workspace, Compare, and PDF report aligned", () => {
@@ -159,7 +232,7 @@ describe("canonical decision output parity across safe adapters", () => {
       "Under your selected targets",
     );
     expect((server.exact?.presentation.ceiling ?? -1) % 500).toBe(0);
-    expect(server.exact?.achieved).toEqual({
+    expect(server.exact?.achieved).toMatchObject({
       netCashFlow: directCeiling?.achieved.netCashFlow,
       cocReturn: directCeiling?.achieved.cocReturn,
       capRate: directCeiling?.achieved.capRate,

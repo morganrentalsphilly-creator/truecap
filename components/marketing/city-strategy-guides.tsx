@@ -29,6 +29,8 @@ export function CityStrategyGuides({
   /** Display name for the section heading (e.g. "Kansas City"). */
   cityName: string;
 }) {
+  // The registry helper filters unreleased specialist models before this
+  // navigation block can create an internal crawl path to them.
   const combos = getCombosForCity(citySlug);
   if (combos.length === 0) return null;
 

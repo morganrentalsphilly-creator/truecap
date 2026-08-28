@@ -29,6 +29,10 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { isFeatureReleased } from "@/lib/entitlements-catalog";
+
+const TAX_STRATEGY_RELEASED = isFeatureReleased("tax_strategy");
+const EXIT_SCENARIOS_RELEASED = isFeatureReleased("exit_scenarios");
 
 /**
  * The 13 defaults, grouped so the form reads as three decisions instead of
@@ -43,7 +47,7 @@ import { Label } from "@/components/ui/label";
  * defaults to 10% (lib/investcalc-schema DEFAULTS, and /methodology states
  * 10%). The caption was simply wrong; the engine is unchanged.
  */
-type DefaultsGroup = "Financing" | "Operating" | "Growth & exit";
+type DefaultsGroup = "Financing" | "Operating" | "Growth";
 
 const FIELDS: Array<{
   key: keyof UserAnalysisDefaults;
@@ -55,6 +59,7 @@ const FIELDS: Array<{
   step?: string;
   /** Only where a field needs a caveat the placeholder can't carry. */
   note?: string;
+  release?: "tax" | "exit";
 }> = [
   {
     key: "downPaymentPct",
@@ -120,12 +125,13 @@ const FIELDS: Array<{
     suffix: "%",
     group: "Operating",
     placeholder: "24",
+    release: "tax",
   },
   {
     key: "rentGrowthPct",
     label: "Rent growth",
     suffix: "%",
-    group: "Growth & exit",
+    group: "Growth",
     placeholder: "2.5",
     step: "0.1",
   },
@@ -133,7 +139,7 @@ const FIELDS: Array<{
     key: "expenseGrowthPct",
     label: "Expense growth",
     suffix: "%",
-    group: "Growth & exit",
+    group: "Growth",
     placeholder: "2.5",
     step: "0.1",
   },
@@ -141,25 +147,29 @@ const FIELDS: Array<{
     key: "appreciationRatePct",
     label: "Appreciation",
     suffix: "%",
-    group: "Growth & exit",
+    group: "Growth",
     placeholder: "3",
     step: "0.1",
+    release: "exit",
   },
   {
     key: "sellingCostPct",
     label: "Selling cost",
     suffix: "%",
-    group: "Growth & exit",
+    group: "Growth",
     placeholder: "6",
     step: "0.1",
+    release: "exit",
   },
 ];
 
-const DEFAULTS_GROUPS: DefaultsGroup[] = [
-  "Financing",
-  "Operating",
-  "Growth & exit",
-];
+const VISIBLE_FIELDS = FIELDS.filter((field) => {
+  if (field.release === "tax") return TAX_STRATEGY_RELEASED;
+  if (field.release === "exit") return EXIT_SCENARIOS_RELEASED;
+  return true;
+});
+
+const DEFAULTS_GROUPS: DefaultsGroup[] = ["Financing", "Operating", "Growth"];
 
 export function UserDefaultsCard() {
   const { toast } = useToast();
@@ -292,7 +302,7 @@ export function UserDefaultsCard() {
             {group}
           </legend>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {FIELDS.filter((f) => f.group === group).map((field) => (
+            {VISIBLE_FIELDS.filter((f) => f.group === group).map((field) => (
               <div key={field.key} className="space-y-1">
                 <Label
                   htmlFor={`user-default-${field.key}`}

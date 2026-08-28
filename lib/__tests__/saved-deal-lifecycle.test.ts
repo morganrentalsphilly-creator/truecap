@@ -95,7 +95,7 @@ describe("archived lifecycle server boundaries", () => {
     expect(opener).toContain("allowArchivedSource: true");
   });
 
-  it("prevalidates bulk Archive and writes canonical lifecycle fields", () => {
+  it("prevalidates bulk Archive and delegates the locked lifecycle write to the Deal Log RPC", () => {
     const actions = read("app/actions/saved-analyses.ts");
     const bulk = actions.slice(
       actions.indexOf("export async function bulkUpdateSavedDealsAction"),
@@ -105,11 +105,14 @@ describe("archived lifecycle server boundaries", () => {
       '.select("id, pipeline_stage, is_completed, is_archived")',
     );
     expect(bulk).toContain("!isSavedDealActive(row)");
-    expect(bulk).toContain('persistedLifecycleForSimpleState("archived")');
-    expect(bulk).toContain('.eq("is_completed", false).eq("is_archived", false)');
+    expect(bulk).toContain('validateSavedDealHistoryContext("passed", context)');
     expect(bulk).toContain(
-      "skippedCount: cleanedIds.length - affectedCount",
+      '"bulk_archive_saved_deals_with_history"',
     );
+    expect(bulk).toContain("p_reason: parsedContext.reason");
+    expect(bulk).toContain("affectedCount + skippedCount !== cleanedIds.length");
+    expect(bulk).not.toContain('persistedLifecycleForSimpleState("archived")');
+    expect(bulk).not.toContain('.eq("is_completed", false).eq("is_archived", false)');
     expect(bulk).not.toContain(
       "One or more deals changed status while Archive was running",
     );

@@ -35,7 +35,8 @@ export type FixFlipResult = {
   grossProfit: number; // ARV - (purchase + acquisition closing + rehab + carrying + selling)
   netProfit: number; // same as gross here; broken out for future tax-aware accounting
   roiOnCashPct: number;
-  annualizedRoiPct: number;
+  /** Simple hold-period annualization; null when holdMonths is zero. */
+  annualizedRoiPct: number | null;
   profitPerDay: number;
 
   // Sensitivity
@@ -106,8 +107,8 @@ export function analyzeFixFlip(inputs: FixFlipInputs): FixFlipResult {
 
   const roiOnCashPct =
     totalCashInvested > 0 ? (netProfit / totalCashInvested) * 100 : 0;
-  const holdYears = Math.max(0.001, holdMonths / 12);
-  const annualizedRoiPct = roiOnCashPct / holdYears;
+  const annualizedRoiPct =
+    holdMonths > 0 ? roiOnCashPct / (holdMonths / 12) : null;
   const holdDays = Math.max(1, Math.round(holdMonths * 30.42));
   const profitPerDay = netProfit / holdDays;
 
@@ -131,7 +132,10 @@ export function analyzeFixFlip(inputs: FixFlipInputs): FixFlipResult {
     grossProfit: Math.round(grossProfit),
     netProfit: Math.round(netProfit),
     roiOnCashPct: Math.round(roiOnCashPct * 10) / 10,
-    annualizedRoiPct: Math.round(annualizedRoiPct * 10) / 10,
+    annualizedRoiPct:
+      annualizedRoiPct == null
+        ? null
+        : Math.round(annualizedRoiPct * 10) / 10,
     profitPerDay: Math.round(profitPerDay),
 
     breakEvenArv: Math.round(breakEvenArv),

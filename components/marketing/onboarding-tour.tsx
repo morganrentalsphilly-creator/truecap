@@ -66,7 +66,7 @@ const STEPS: Step[] = [
     id: "explore-pro",
     icon: CheckCircle2,
     title: "3. Make it yours",
-    body: "Set your Buy Box—target cash flow, cash-on-cash, price range—and each deal shows which of YOUR selected rules the entered assumptions meet or miss. Pro also includes projections, illustrative tax impact, and BRRRR + flip analyzers.",
+    body: "Set your Buy Box—target cash flow, cash-on-cash, price range—and each deal shows which of YOUR selected rules the entered assumptions meet or miss. Pro also includes projections, comparisons, editable sensitivity, and review reports.",
     ctaLabel: "See pricing",
     ctaHref: "/pricing",
   },

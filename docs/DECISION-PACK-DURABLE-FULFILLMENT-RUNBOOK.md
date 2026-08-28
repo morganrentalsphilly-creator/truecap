@@ -50,7 +50,7 @@ environment values:
   intentionally skips `purpose=one_time_pdf`; browser verification currently
   records Pack payment facts. There is no webhook-driven durable artifact.
 - Pack-to-Pro credit is active only when
-  `STRIPE_PACK_CREDIT_COUPON_ID` is configured and the purchase is the `$5`
+  `STRIPE_PACK_CREDIT_900_COUPON_ID` is configured and the purchase is the `$9`
   variant. It is not safe to describe the credit as universally dormant or
   universally enabled without checking that environment gate.
 - `one_time_pdf_purchase_claims` binds the browser secret, exact inputs, target

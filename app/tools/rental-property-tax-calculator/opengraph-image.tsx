@@ -11,13 +11,14 @@
 import { renderToolOgImage, OG_SIZE } from "@/lib/og/tool-og-template";
 
 export const runtime = "edge";
-export const alt = "Rental property tax calculator — TrueCap";
+export const alt = "Rental property tax education — TrueCap";
 export const size = OG_SIZE;
 export const contentType = "image/png";
 
 export default function Image() {
   return renderToolOgImage({
-    name: "Rental property tax calculator",
-    tagline: "Schedule E taxable income, 27.5-year depreciation, mortgage interest, and after-tax cash flow.",
+    name: "Rental property tax education",
+    tagline:
+      "Tax treatment is taxpayer-specific. No property-level tax calculator is currently released.",
   });
 }

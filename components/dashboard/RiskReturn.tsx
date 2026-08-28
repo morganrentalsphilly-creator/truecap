@@ -12,6 +12,7 @@ import {
   ZAxis,
   ReferenceLine,
 } from "recharts";
+import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
 
 /**
  * One point per saved deal, with BOTH candidate return metrics carried so
@@ -127,9 +128,21 @@ function ChartTooltip({
   );
 }
 
-export function RiskReturn({ deals = [] }: { deals?: RiskReturnDeal[] }) {
+export function RiskReturn({
+  deals = [],
+  showLongTermRoi = true,
+}: {
+  deals?: RiskReturnDeal[];
+  showLongTermRoi?: boolean;
+}) {
   const [metric, setMetric] = useState<ReturnMetricId>("coc");
-  const active = RETURN_METRICS.find((m) => m.id === metric) ?? RETURN_METRICS[0];
+  const effectiveMetric: ReturnMetricId = showLongTermRoi ? metric : "coc";
+  const availableMetrics = showLongTermRoi
+    ? RETURN_METRICS
+    : RETURN_METRICS.filter((candidate) => candidate.id === "coc");
+  const active =
+    RETURN_METRICS.find((candidate) => candidate.id === effectiveMetric) ??
+    RETURN_METRICS[0];
   // Dashboard is always light — chart colors are fixed to the light palette.
   const { grid: GRID, axis: AXIS, point: POINT } = CHART_COLORS.light;
 
@@ -138,7 +151,7 @@ export function RiskReturn({ deals = [] }: { deals?: RiskReturnDeal[] }) {
     const cash = deals.filter((d) => d.isCashPurchase).length;
     const plotted: PlottedPoint[] = deals
       .map((d): PlottedPoint | null => {
-        const ret = metric === "coc" ? d.coc : d.roi;
+        const ret = effectiveMetric === "coc" ? d.coc : d.roi;
         // A point only plots when it has BOTH the active return metric AND a
         // DSCR — otherwise its position on one axis would be fabricated.
         if (ret == null || d.dscr == null) return null;
@@ -146,7 +159,7 @@ export function RiskReturn({ deals = [] }: { deals?: RiskReturnDeal[] }) {
       })
       .filter((p): p is PlottedPoint => p !== null);
     return { points: plotted, excludedCount: totalDeals - plotted.length, cashCount: cash, total: totalDeals };
-  }, [deals, metric]);
+  }, [deals, effectiveMetric]);
 
   // sr-only summary so the scatter isn't an opaque image to screen readers.
   const summary =
@@ -168,21 +181,23 @@ export function RiskReturn({ deals = [] }: { deals?: RiskReturnDeal[] }) {
             Each point uses saved assumptions. Right means a higher selected modeled return; up means a higher model DSCR. Neither direction establishes safety or recommends a deal. Dashed lines are fixed comparison references, not your adopted targets.
           </p>
         </div>
-        <div className="flex items-center gap-1 p-1 rounded-lg bg-muted" role="group" aria-label="Return metric">
-          {RETURN_METRICS.map((m) => (
-            <button
-              key={m.id}
-              type="button"
-              aria-pressed={metric === m.id}
-              onClick={() => setMetric(m.id)}
-              className={`px-3 py-2 text-xs font-semibold rounded-md transition sm:py-1 ${
-                metric === m.id ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {m.label}
-            </button>
-          ))}
-        </div>
+        {availableMetrics.length > 1 ? (
+          <div className="flex items-center gap-1 p-1 rounded-lg bg-muted" role="group" aria-label="Return metric">
+            {availableMetrics.map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                aria-pressed={effectiveMetric === m.id}
+                onClick={() => setMetric(m.id)}
+                className={`min-h-11 px-3 py-2 text-xs font-semibold rounded-md transition ${
+                  effectiveMetric === m.id ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
+        ) : null}
       </div>
 
       {points.length > 0 ? (
@@ -237,10 +252,10 @@ export function RiskReturn({ deals = [] }: { deals?: RiskReturnDeal[] }) {
                   label={{ value: `DSCR ${DSCR_LENDER_BAR}`, position: "insideTopLeft", fontSize: 10, fill: AXIS }}
                 />
                 <ReferenceLine
-                  x={RETURN_THRESHOLD[metric]}
+                  x={RETURN_THRESHOLD[effectiveMetric]}
                   stroke={AXIS}
                   strokeDasharray="5 4"
-                  label={{ value: metric === "coc" ? "8% CoC" : "100% ROI", position: "top", fontSize: 10, fill: AXIS }}
+                  label={{ value: effectiveMetric === "coc" ? "8% CoC" : "100% ROI", position: "top", fontSize: 10, fill: AXIS }}
                 />
                 <Tooltip cursor={{ strokeDasharray: "3 3" }} content={<ChartTooltip metricLabel={active.axis} />} />
                 <Scatter data={points} fill={POINT} fillOpacity={0.7} />
@@ -251,7 +266,7 @@ export function RiskReturn({ deals = [] }: { deals?: RiskReturnDeal[] }) {
             <p className="mt-2 text-xs text-muted-foreground">
               Showing {points.length} of {total} deals that have both {active.label} and a DSCR.
               {cashCount > 0
-                ? ` ${cashCount} cash ${cashCount === 1 ? "purchase has" : "purchases have"} no DSCR.`
+                ? ` Cash-purchase DSCR: ${NO_DEBT_SERVICE_DSCR_LABEL} (${cashCount} ${cashCount === 1 ? "deal" : "deals"}).`
                 : ""}
             </p>
           ) : null}
@@ -262,7 +277,7 @@ export function RiskReturn({ deals = [] }: { deals?: RiskReturnDeal[] }) {
           <p className="mt-1 max-w-xs text-xs text-muted-foreground">
             Deals need both a {active.label} value and a DSCR to appear here.
             {cashCount > 0
-              ? ` ${cashCount} cash ${cashCount === 1 ? "purchase has" : "purchases have"} no DSCR.`
+              ? ` Cash-purchase DSCR: ${NO_DEBT_SERVICE_DSCR_LABEL} (${cashCount} ${cashCount === 1 ? "deal" : "deals"}).`
               : " Run a 10-yr projection on a deal to populate its ROI."}
           </p>
         </div>

@@ -15,6 +15,7 @@ import {
   type ExitScenarioYear,
 } from "@/lib/exit-scenarios";
 import { isReleasedUnderwritingSnapshot } from "@/lib/underwriting-model-release";
+import { isFeatureReleased } from "@/lib/entitlements-catalog";
 
 function asRecord(value: unknown): Record<string, unknown> | null {
   if (value && typeof value === "object" && !Array.isArray(value)) return value as Record<string, unknown>;
@@ -41,7 +42,7 @@ export type ExitScenarioSnapshotResult =
     }
   | {
       ok: false;
-      code: "SIGN_IN_REQUIRED" | "ENTITLEMENT_REQUIRED" | "NOT_FOUND" | "SERVER_ERROR";
+      code: "NOT_RELEASED" | "SIGN_IN_REQUIRED" | "ENTITLEMENT_REQUIRED" | "NOT_FOUND" | "SERVER_ERROR";
       message: string;
     };
 
@@ -66,6 +67,14 @@ function mapSnapshotRow(row: SnapshotRow): ExitScenarioSnapshotPayload {
 export async function getExitScenarioSnapshotAction(
   request: ExitScenarioSnapshotRequest
 ): Promise<ExitScenarioSnapshotResult> {
+  if (!isFeatureReleased("exit_scenarios")) {
+    return {
+      ok: false,
+      code: "NOT_RELEASED",
+      message: "Modeled exit scenarios are not currently released.",
+    };
+  }
+
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },

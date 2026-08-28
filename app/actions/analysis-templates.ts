@@ -37,7 +37,7 @@ export type AnalysisTemplateOption = {
   taxRatePct: number;
   /** Optional PMI/MIP override (% of loan); null = calc default. */
   pmiAnnualRatePct: number | null;
-  /** FHA MIP that never cancels at 80% LTV. */
+  /** Loan-life FHA MIP; false follows scheduled 78% automatic termination. */
   pmiNoCancel: boolean;
   isDefault: boolean;
   kind: string | null;
@@ -74,9 +74,19 @@ function normalizeTemplateBuyBox(raw: unknown): AnalysisTemplateBuyBox | null {
     minCocPct: pick(o.minCocPct),
     minDscr: pick(o.minDscr),
     minCashFlowMonthly: pick(o.minCashFlowMonthly),
+    minIrrPct: pick(o.minIrrPct),
+    maxCashRequired: pick(o.maxCashRequired),
     maxPurchasePrice: pick(o.maxPurchasePrice),
   };
-  const hasAny = [bb.minCapRatePct, bb.minCocPct, bb.minDscr, bb.minCashFlowMonthly, bb.maxPurchasePrice].some(
+  const hasAny = [
+    bb.minCapRatePct,
+    bb.minCocPct,
+    bb.minDscr,
+    bb.minCashFlowMonthly,
+    bb.minIrrPct,
+    bb.maxCashRequired,
+    bb.maxPurchasePrice,
+  ].some(
     (v) => v != null
   );
   return hasAny ? bb : null;

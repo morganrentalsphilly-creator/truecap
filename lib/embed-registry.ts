@@ -44,7 +44,6 @@ export type EmbedSlug =
   | "roi-calculator"
   | "closing-cost-calculator"
   | "vacancy-rate-calculator"
-  | "rental-property-tax-calculator"
   | "house-hacking-calculator"
   | "70-percent-rule-calculator"
   | "50-percent-rule-calculator"
@@ -210,16 +209,6 @@ const EMBED_WIDGETS: Record<EmbedSlug, EmbedWidgetSpec> = {
     ),
     defaultHeight: 700,
   },
-  "rental-property-tax-calculator": {
-    Widget: dynamic(
-      () =>
-        import("@/components/tools/rental-property-tax-calculator-widget").then(
-          (m) => m.RentalPropertyTaxCalculatorWidget
-        ),
-      { loading: EmbedLoading }
-    ),
-    defaultHeight: 1100,
-  },
   "house-hacking-calculator": {
     Widget: dynamic(
       () =>
@@ -264,14 +253,12 @@ const EMBED_WIDGETS: Record<EmbedSlug, EmbedWidgetSpec> = {
 
 /** Compose the embed entry by pulling metadata from the canonical
  *  calculator registry + attaching the local widget loader. */
-function buildEmbedEntry(slug: EmbedSlug): EmbedEntry {
+function buildEmbedEntry(slug: EmbedSlug): EmbedEntry | null {
   const meta = getCalculator(slug);
   if (!meta) {
-    // An embeddable widget exists with no calculator-registry entry — this
-    // is a programming error (the two must stay in lockstep). Fail loud.
-    throw new Error(
-      `embed-registry: "${slug}" has no entry in lib/calculator-registry.ts`
-    );
+    // The widget loader remains bundled for a reversible release, but a
+    // default-off calculator is absent from the public registry and embeds.
+    return null;
   }
   const spec = EMBED_WIDGETS[slug];
   return {
@@ -285,11 +272,17 @@ function buildEmbedEntry(slug: EmbedSlug): EmbedEntry {
   };
 }
 
-export const EMBED_REGISTRY: Record<EmbedSlug, EmbedEntry> = Object.fromEntries(
-  (Object.keys(EMBED_WIDGETS) as EmbedSlug[]).map((slug) => [slug, buildEmbedEntry(slug)])
-) as Record<EmbedSlug, EmbedEntry>;
+export const EMBED_REGISTRY: Partial<Record<EmbedSlug, EmbedEntry>> =
+  Object.fromEntries(
+    (Object.keys(EMBED_WIDGETS) as EmbedSlug[]).flatMap((slug) => {
+      const entry = buildEmbedEntry(slug);
+      return entry ? [[slug, entry]] : [];
+    }),
+  );
 
-export const EMBED_LIST: EmbedEntry[] = Object.values(EMBED_REGISTRY);
+export const EMBED_LIST: EmbedEntry[] = Object.values(EMBED_REGISTRY).filter(
+  (entry): entry is EmbedEntry => Boolean(entry),
+);
 
 export function getEmbedEntry(slug: string): EmbedEntry | null {
   return (EMBED_REGISTRY as Record<string, EmbedEntry>)[slug] ?? null;

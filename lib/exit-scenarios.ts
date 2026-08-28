@@ -1,6 +1,15 @@
+import {
+  buildLoanAmortizationSchedule,
+  loanBalanceAfterPayments,
+} from "./loan-amortization";
+
 // Bumped to 2: totalProfit now nets out estimated exit tax (depreciation
 // recapture + capital gains). Cached snapshots at v1 regenerate on read.
-export const EXIT_SCENARIOS_SNAPSHOT_VERSION = 3;
+// v4: remaining principal comes from the shared full-precision contractual
+// schedule rather than a separately rounded monthly approximation.
+// v5: optional interest-only and separate amortization/maturity terms use the
+// same canonical schedule as the acquisition result and projection.
+export const EXIT_SCENARIOS_SNAPSHOT_VERSION = 5;
 export const DEFAULT_APPRECIATION_RATE = 3;
 export const DEFAULT_SELLING_COST_PCT = 6;
 // Exit-tax assumptions. Depreciation taken during the hold is "recaptured" at
@@ -34,6 +43,8 @@ export interface ExitScenarioInput {
   loanAmount: number;
   interestRate: number;
   loanTermYears: number;
+  amortizationTermYears?: number;
+  interestOnlyMonths?: number;
   monthlyPayment: number;
   downPayment: number;
   closingCosts: number;
@@ -60,33 +71,6 @@ export interface ExitScenarioSnapshotPayload {
   version: number;
 }
 
-function buildYearlyRemainingLoanBalanceSchedule(input: ExitScenarioInput): number[] {
-  if (input.loanAmount <= 0 || input.loanTermYears <= 0) {
-    return Array.from({ length: 10 }, () => 0);
-  }
-
-  const monthlyRate = input.interestRate / 100 / 12;
-  const totalMonths = input.loanTermYears * 12;
-  let balance = input.loanAmount;
-  const yearlyBalances: number[] = [];
-
-  for (let month = 1; month <= totalMonths && balance > 0; month += 1) {
-    const interestPortion = monthlyRate > 0 ? Math.round(balance * monthlyRate) : 0;
-    const principalPortion = Math.min(Math.max(input.monthlyPayment - interestPortion, 0), balance);
-    balance = Math.max(0, balance - principalPortion);
-
-    if (month % 12 === 0) {
-      yearlyBalances.push(Math.round(balance));
-    }
-  }
-
-  while (yearlyBalances.length < 10) {
-    yearlyBalances.push(0);
-  }
-
-  return yearlyBalances.slice(0, 10);
-}
-
 /** Canonical appreciation / selling-cost percents for exit scenarios (matches saved-analysis defaults). */
 export function resolveExitScenarioRates(values: {
   appreciationRatePct?: number;
@@ -98,10 +82,19 @@ export function resolveExitScenarioRates(values: {
   };
 }
 
-export function buildExitScenarios(input: ExitScenarioInput): ExitScenarioYear[] {
+export function buildExitScenarios(
+  input: ExitScenarioInput,
+): ExitScenarioYear[] {
   const appreciationFactor = 1 + input.appreciationRate / 100;
   const sellingCostRate = input.sellingCostPct / 100;
-  const remainingLoanBalanceByYear = buildYearlyRemainingLoanBalanceSchedule(input);
+  const loanSchedule = buildLoanAmortizationSchedule({
+    principal: input.loanAmount,
+    annualRatePct: input.interestRate,
+    termYears: input.loanTermYears,
+    maturityTermYears: input.loanTermYears,
+    amortizationTermYears: input.amortizationTermYears ?? input.loanTermYears,
+    interestOnlyMonths: input.interestOnlyMonths ?? 0,
+  });
   // Returns are measured against ALL cash in the deal — including rehab + STR
   // furnishing (calc-analysis's totalCashRequired) — not just down + closing,
   // or IRR/equity-multiple/CAGR overstate every value-add / STR deal.
@@ -113,14 +106,20 @@ export function buildExitScenarios(input: ExitScenarioInput): ExitScenarioYear[]
   const costBasis = input.purchasePrice + input.closingCosts;
   const annualDepreciation = Math.max(0, input.annualDepreciation ?? 0);
   const recaptureRate =
-    (input.recaptureTaxRatePct ?? DEFAULT_DEPRECIATION_RECAPTURE_RATE_PCT) / 100;
+    (input.recaptureTaxRatePct ?? DEFAULT_DEPRECIATION_RECAPTURE_RATE_PCT) /
+    100;
   const capitalGainsRate =
     (input.capitalGainsTaxRatePct ?? DEFAULT_CAPITAL_GAINS_RATE_PCT) / 100;
 
   return Array.from({ length: 10 }, (_, index) => {
     const year = index + 1;
-    const propertyValue = Math.round(input.purchasePrice * Math.pow(appreciationFactor, year));
-    const remainingLoanBalance = remainingLoanBalanceByYear[index] ?? 0;
+    const propertyValue = Math.round(
+      input.purchasePrice * Math.pow(appreciationFactor, year),
+    );
+    const remainingLoanBalance = loanBalanceAfterPayments(
+      loanSchedule,
+      year * 12,
+    );
     const equity = propertyValue - remainingLoanBalance;
     const sellingCost = Math.round(propertyValue * sellingCostRate);
     const netSaleProceeds = propertyValue - remainingLoanBalance - sellingCost;
@@ -131,16 +130,25 @@ export function buildExitScenarios(input: ExitScenarioInput): ExitScenarioYear[]
     // first (capped at the gain), then the remaining gain is long-term
     // capital gains. Gain is measured against the depreciation-adjusted
     // basis and net of selling costs (loan balance is financing, not gain).
-    const cumulativeDepreciation = Math.min(annualDepreciation * year, costBasis);
+    const cumulativeDepreciation = Math.min(
+      annualDepreciation * year,
+      costBasis,
+    );
     const adjustedBasis = costBasis - cumulativeDepreciation;
     const amountRealized = propertyValue - sellingCost;
     const totalGain = Math.max(0, amountRealized - adjustedBasis);
     const recaptureGain = Math.min(cumulativeDepreciation, totalGain);
     const capitalGain = Math.max(0, totalGain - recaptureGain);
-    const exitTax = Math.round(recaptureGain * recaptureRate + capitalGain * capitalGainsRate);
+    const exitTax = Math.round(
+      recaptureGain * recaptureRate + capitalGain * capitalGainsRate,
+    );
 
     const totalProfit =
-      netSaleProceeds + cumulativeCashFlow + cumulativeTaxBenefit - initialInvestment - exitTax;
+      netSaleProceeds +
+      cumulativeCashFlow +
+      cumulativeTaxBenefit -
+      initialInvestment -
+      exitTax;
 
     return {
       year,
@@ -165,15 +173,20 @@ export function buildExitScenarioInputHash(input: ExitScenarioInput): string {
     loanAmount: input.loanAmount,
     interestRate: input.interestRate,
     loanTermYears: input.loanTermYears,
+    amortizationTermYears: input.amortizationTermYears ?? input.loanTermYears,
+    interestOnlyMonths: input.interestOnlyMonths ?? 0,
     monthlyPayment: input.monthlyPayment,
     downPayment: input.downPayment,
     closingCosts: input.closingCosts,
-    initialCashInvested: input.initialCashInvested ?? input.downPayment + input.closingCosts,
+    initialCashInvested:
+      input.initialCashInvested ?? input.downPayment + input.closingCosts,
     cumulativeCashFlowByYear: input.cumulativeCashFlowByYear,
     cumulativeTaxBenefitByYear: input.cumulativeTaxBenefitByYear,
     annualDepreciation: input.annualDepreciation ?? 0,
-    recaptureTaxRatePct: input.recaptureTaxRatePct ?? DEFAULT_DEPRECIATION_RECAPTURE_RATE_PCT,
-    capitalGainsTaxRatePct: input.capitalGainsTaxRatePct ?? DEFAULT_CAPITAL_GAINS_RATE_PCT,
+    recaptureTaxRatePct:
+      input.recaptureTaxRatePct ?? DEFAULT_DEPRECIATION_RECAPTURE_RATE_PCT,
+    capitalGainsTaxRatePct:
+      input.capitalGainsTaxRatePct ?? DEFAULT_CAPITAL_GAINS_RATE_PCT,
     version: EXIT_SCENARIOS_SNAPSHOT_VERSION,
   };
 

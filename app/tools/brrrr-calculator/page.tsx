@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { BrrrrCalculatorWidget } from "@/components/tools/brrrr-calculator-widget";
@@ -8,6 +9,7 @@ import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 export const metadata: Metadata = {
   title: "Free BRRRR Calculator — Refi & Cash Left in Deal",
   description:
@@ -63,6 +65,7 @@ const FAQS = [
 ];
 
 export default function BrrrrCalculatorPage() {
+  if (!isFeatureEnabled("brrrr_strategy_model")) notFound();
   const siteUrl = getSiteUrl();
   const webAppLd = {
     "@context": "https://schema.org",
@@ -146,9 +149,9 @@ export default function BrrrrCalculatorPage() {
               recycle the same capital across multiple properties by buying
               under market, forcing appreciation through rehab, refinancing
               based on the new value, and pulling most of the original
-              capital back out. See the dedicated workflow for{" "}
-              <Link href="/for-brrrr" className="text-primary font-semibold hover:underline">BRRRR operators</Link>{" "}
-              for the full pipeline view.
+              capital back out. Review the{" "}
+              <Link href="/blog/brrrr-method-explained" className="text-primary font-semibold hover:underline">BRRRR sequence and assumptions</Link>{" "}
+              before maintaining a complete project ledger outside this standalone worksheet.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">Each letter in detail</h2>
@@ -171,7 +174,7 @@ export default function BrrrrCalculatorPage() {
             <p>
               The post-rehab rent matters in two ways: it has to support
               the new mortgage payment after refi ({" "}
-              <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">DSCR</Link>{" "}
+              <Link href="/#main" className="text-primary font-semibold hover:underline">DSCR</Link>{" "}
               using the proposed lender&apos;s formula), and it affects the
               long-term hold scenario. A TrueCap ratio does not establish the
               lender&apos;s rent, coverage, eligibility, approval, or whether any

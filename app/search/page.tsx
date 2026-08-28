@@ -25,6 +25,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { GLOSSARY } from "@/lib/glossary";
 import { STATES } from "@/lib/states";
 import { BLOG_POSTS } from "@/app/blog/page";
+import { CALCULATOR_REGISTRY, getCalculator } from "@/lib/calculator-registry";
 
 export const metadata: Metadata = {
   title: "Search",
@@ -45,25 +46,14 @@ type SearchHit = {
   blurb?: string;
 };
 
-// Tool slugs are derived from the directory structure under app/tools/.
-// Hardcoded here so we don't need a filesystem scan at request time —
-// the tools collection rarely changes and the list is small.
-const TOOL_PAGES: Array<{ slug: string; title: string; blurb: string }> = [
-  { slug: "cap-rate-calculator", title: "Cap Rate Calculator", blurb: "Calculate cap rate from price + NOI." },
-  { slug: "cash-on-cash-calculator", title: "Cash-on-Cash Calculator", blurb: "Annual cash flow ÷ cash invested." },
-  { slug: "dscr-calculator", title: "DSCR Calculator", blurb: "Debt service coverage for lender review." },
-  { slug: "brrrr-calculator", title: "BRRRR Calculator", blurb: "Buy-Rehab-Rent-Refinance-Repeat math." },
-  { slug: "noi-calculator", title: "NOI Calculator", blurb: "Net Operating Income from gross rent + expenses." },
-  { slug: "1-percent-rule-calculator", title: "1% Rule Calculator", blurb: "Quick rule-of-thumb screen." },
-  { slug: "mortgage-payment-calculator", title: "Mortgage Payment Calculator", blurb: "Monthly P&I + tax + homeowner insurance + estimated PMI." },
-  { slug: "gross-rent-multiplier-calculator", title: "Gross Rent Multiplier Calculator", blurb: "Price ÷ annual gross rent." },
-  { slug: "roi-calculator", title: "ROI Calculator", blurb: "Total ROI across rent + appreciation + amortization." },
-  { slug: "vacancy-rate-calculator", title: "Vacancy Rate Calculator", blurb: "Effective income after vacancy." },
-  { slug: "break-even-calculator", title: "Break-even Calculator", blurb: "Months until cash invested is recovered." },
-  { slug: "closing-cost-calculator", title: "Closing Cost Calculator", blurb: "All-in cash needed at the table." },
-  { slug: "rental-property-tax-calculator", title: "Rental Property Tax Calculator", blurb: "Annual tax bill by state." },
-  { slug: "rehab-cost-estimator", title: "Rehab Cost Estimator", blurb: "Per-sqft + per-room rehab estimates." },
-];
+// Public search consumes the release-filtered registry directly. Authored dark
+// widgets are not searchable just because their source directories still exist.
+const TOOL_PAGES: Array<{ slug: string; title: string; blurb: string }> =
+  CALCULATOR_REGISTRY.map((tool) => ({
+    slug: tool.slug,
+    title: tool.title,
+    blurb: tool.description,
+  }));
 
 // Market city slugs — hardcoded for the same reason as tools.
 const MARKET_CITIES = [
@@ -194,7 +184,7 @@ export default async function SearchPage({
             name="q"
             defaultValue={query}
             autoFocus
-            placeholder="Cap rate, DSCR, BRRRR, Indianapolis…"
+            placeholder="Cap rate, DSCR, cash flow, Indianapolis…"
             aria-label="Search terms"
             className="w-full h-12 pl-10 pr-4 rounded-lg border border-border bg-card text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
           />
@@ -211,7 +201,9 @@ export default async function SearchPage({
                 { label: "Cap rate", href: "/glossary/cap-rate" },
                 { label: "DSCR", href: "/glossary/dscr" },
                 { label: "Cash-on-cash", href: "/glossary/cash-on-cash-return" },
-                { label: "BRRRR", href: "/tools/brrrr-calculator" },
+                ...(getCalculator("brrrr-calculator")
+                  ? [{ label: "BRRRR", href: "/tools/brrrr-calculator" }]
+                  : []),
                 { label: "Blog", href: "/blog" },
                 { label: "All calculators", href: "/tools" },
               ].map((link) => (

@@ -6,16 +6,14 @@
  * Two calculations, same conventions as the rest of TrueCap:
  *
  *   ARV       = average renovated-comp $/sq ft × subject finished sq ft
- *   Offer Ceiling = (ARV × multiplier%) − repair costs   (the 70% rule)
+ *   Price screen = (ARV × multiplier%) − repair costs   (the 70% rule)
  *
  * The comps method + the worked numbers mirror the how-to-calculate-arv
  * blog post; the max-offer arithmetic mirrors the 70-percent-rule post
  * and lib/fix-flip-analysis.ts (ARV is the resale top line the flip
  * engine subtracts costs from). Like lib/max-allowable-offer.ts, the
  * displayed offer is rounded DOWN to a $500 step — never up, so the
- * widget never quotes a price above the rule's own ceiling. The 75%
- * refi line uses the same LTV convention as lib/brrrr-analysis.ts's
- * default refi inputs on /tools/brrrr-calculator.
+ * widget never quotes a price above the rule's own ceiling.
  */
 
 import { useId, useMemo, useState } from "react";
@@ -65,7 +63,6 @@ export function ArvCalculatorWidget() {
     // (lib/max-allowable-offer.ts convention): rounding to nearest could
     // quote an offer ABOVE the rule's ceiling.
     const mao = computeRuleMaxOffer(arv, num(multiplier), num(repairs));
-    const refiLoan75 = arv * 0.75;
     const compPrices = comps.map((c) => c.price);
     return {
       comps,
@@ -73,16 +70,16 @@ export function ArvCalculatorWidget() {
       avgPpsf,
       arv,
       mao,
-      refiLoan75,
       minCompPrice: Math.min(...compPrices),
       maxCompPrice: Math.max(...compPrices),
     };
   }, [subjectSqft, repairs, multiplier, comp1Price, comp1Sqft, comp2Price, comp2Sqft, comp3Price, comp3Sqft]);
 
-  // Moment-of-result handoff (P2-2 pattern): carry the Offer Ceiling into the
-  // full analyzer as the purchase price — the number the rule says to pay.
+  // Do not carry a rule-of-thumb screen into underwriting as though it were a
+  // verified purchase price. The analyzer starts separately and asks for the
+  // actual price being evaluated.
   const handoffHref = buildAnalyzerHandoffUrl(
-    result && result.mao >= 10000 ? { purchasePrice: result.mao } : {},
+    {},
     { utmSource: "arv-calculator" }
   );
 
@@ -121,16 +118,15 @@ export function ArvCalculatorWidget() {
           </p>
         ) : (
           <>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
               <Metric label="Estimated ARV" value={fmt(result.arv)} />
               <Metric label="Avg comp $/sq ft" value={`$${result.avgPpsf.toFixed(2)}`} />
               <Metric
-                label={`Offer Ceiling (${num(multiplier)}% rule)`}
+                label={`70%-rule price screen (${num(multiplier)}%)`}
                 value={fmt(result.mao)}
                 positive={result.mao > 0}
                 negative={result.mao <= 0}
               />
-              <Metric label="75% LTV refi loan" value={fmt(result.refiLoan75)} />
             </div>
 
             {/* Sanity check straight from the comps method: a credible ARV
@@ -159,7 +155,7 @@ export function ArvCalculatorWidget() {
             {result.mao <= 0 && (
               <p className="text-xs font-semibold text-[var(--metric-negative)]">
                 At this multiplier the repairs consume the entire allowable price —
-                the rule produces no feasible Offer Ceiling for this deal as entered.
+                the rule produces no feasible price screen for this deal as entered.
               </p>
             )}
             {result.mao > 0 && result.arv < 150_000 && (
@@ -193,7 +189,7 @@ export function ArvCalculatorWidget() {
                 bold
               />
               <Row
-                label={`Offer Ceiling — ${num(multiplier)}% of ARV − ${fmt(num(repairs))} repairs, rounded down to $500`}
+                label={`70%-rule price screen — ${num(multiplier)}% of ARV − ${fmt(num(repairs))} repairs, rounded down to $500`}
                 value={fmt(result.mao)}
                 bold
               />
@@ -204,7 +200,7 @@ export function ArvCalculatorWidget() {
 
       <Link href={handoffHref} target="_top" className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline">
         <Sparkles className="w-4 h-4" />
-        Screen the full deal at this price — rehab, refi, cash flow, and Screening Index — free in TrueCap
+        Open the released rental analyzer with a separately verified purchase price
         <ArrowUpRight className="w-4 h-4" />
       </Link>
     </div>

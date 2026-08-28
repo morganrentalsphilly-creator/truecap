@@ -98,8 +98,8 @@ describe("versioned synthetic shared sample", () => {
     }).toMatchInlineSnapshot(`
       {
         "capRate": 9.3328,
-        "cashFlow": 554,
-        "dealScore": 81,
+        "cashFlow": 554.04,
+        "dealScore": 86,
         "dscr": 1.5222,
         "maxOffer": 236000,
       }

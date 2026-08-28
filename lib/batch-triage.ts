@@ -11,9 +11,10 @@
  * v1 scope: single-family listings (address, price, rent, beds). The paste
  * carries one rent, which only maps cleanly onto the single-family flow;
  * multi-family / owner-occupant triage (per-unit rents) is a documented
- * follow-up, not silently-wrong numbers. Enrichment (rate / tax) is layered
- * in by the server action and passed here as plain values — the engine stays
- * pure.
+ * follow-up, not silently-wrong numbers. Released enrichment supplies only a
+ * national rate benchmark. Property tax remains the canonical engine's
+ * disclosed generic preliminary fallback until the row is opened and a local
+ * bill or reviewed rate is entered.
  */
 
 import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
@@ -43,6 +44,7 @@ import {
   describeMaoTarget,
 } from "@/lib/mao-targets";
 import { parseLocationFromAddress } from "@/lib/market-benchmarks";
+import { calculateMaoIrr } from "@/lib/mao-target-evaluation";
 
 /** A single parsed listing (single-family v1). */
 export interface TriageListingInput {
@@ -89,7 +91,9 @@ export interface TriagePreviewRow {
   issues: TriagePreviewIssue[];
 }
 
-/** Assumption overrides the server action fills from enrichment (rate / tax). */
+/** Assumption overrides supplied to the pure triage engine. `state-static` is
+ * retained only so older session payloads can be parsed; released enrichment
+ * no longer creates it. */
 export interface TriageEnrichment {
   interestRate?: number;
   propertyTaxPct?: number;
@@ -393,7 +397,9 @@ function triageAssumptionContext(enrichment?: TriageEnrichment): TriageAssumptio
   return {
     screenedAt: enrichment?.screenedAt ?? null,
     interestRatePct: Number(enrichment?.interestRate ?? defaultValues.interestRate),
-    propertyTaxPct: Number(enrichment?.propertyTaxPct ?? defaultValues.propertyTaxPct),
+    propertyTaxPct: Number(
+      enrichment?.propertyTaxPct ?? defaultValues.propertyTaxPct ?? 1.1,
+    ),
     state: enrichment?.state ?? null,
     enrichmentStatus: enrichment?.status ?? "fallback",
     rateSource: enrichment?.rateSource ?? "default",
@@ -440,10 +446,14 @@ export function triageListing(
   const snapshot = buildTriageSnapshot(input, opts?.enrichment);
   const verdict = recomputeSavedDealVerdict(snapshot);
   if (!verdict) return EMPTY_ROW(input, opts?.enrichment);
+  const values = normalizeInvestmentFormSnapshot(snapshot);
 
   let buyBoxFit: BuyBoxFitSummary | null = null;
   const boxes = opts?.buyBoxes;
   if (boxes && boxes.length > 0) {
+    const irr = values
+      ? calculateMaoIrr(values, verdict.analysisResult)
+      : null;
     const metrics: BuyBoxDealMetrics = {
       capRatePct: verdict.capRatePct ?? null,
       cocPct: verdict.cocReturnPct ?? null,
@@ -453,6 +463,9 @@ export function triageListing(
       propertyType: "single-family",
       state: deriveStateFromAddress(input.address),
       isCashPurchase: verdict.isCashPurchase,
+      cashRequired: verdict.cashToClose,
+      irrPct: irr?.primaryIrrPct ?? null,
+      irrStatus: irr?.status ?? "none",
     };
     const results = evaluateBuyBoxes(boxes, metrics).filter((r) => r.result.active);
     if (results.length > 0) buyBoxFit = summarizeBuyBoxFit(results);
@@ -460,7 +473,6 @@ export function triageListing(
 
   // Decision path — reuse the exact target builder + MAO/inverse solvers used
   // by the full deal workspace. No financial formula is duplicated here.
-  const values = normalizeInvestmentFormSnapshot(snapshot);
   let target: MaoTarget | null = null;
   let targetLabel: string | null = null;
   let maxOffer: number | null = null;

@@ -32,11 +32,14 @@ import {
   type BuyBoxCriteria,
   type BuyBoxDealMetrics,
   type BuyBoxFitCount,
-  type BuyBoxPropertyType,
   type NamedBuyBox,
 } from "@/lib/buy-box";
 import { isStrategyKind } from "@/lib/strategy-kinds";
-import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
+import {
+  getEntitlementsForUser,
+  hasPaidPlanSubscription,
+  hasPlanFeature,
+} from "@/lib/entitlements";
 import {
   recomputeSavedDealVerdict,
   toRecomputedSavedAnalysisSnapshot,
@@ -45,15 +48,23 @@ import { resolveSavedAnalysisSnapshot } from "@/lib/saved-analysis-methodology";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { MAX_PURCHASE_PRICE } from "@/lib/investcalc-schema";
-import { isReleasedUnderwritingSnapshot } from "@/lib/underwriting-model-release";
+import {
+  isReleasedUnderwritingSnapshot,
+  normalizeReleasedInvestmentFormSnapshot,
+  releasedInvestmentFormSchema,
+} from "@/lib/underwriting-model-release";
+import { calculateMaoIrr } from "@/lib/mao-target-evaluation";
+import { getBuyBoxAuthorizedDealIds } from "@/lib/buy-box-access-server";
+import { activeMeteredEvaluationDealGrantsAccess } from "@/lib/evaluation-access-server";
 
 const KNOWN_STATE_ABBRS = new Set(US_STATE_OPTIONS.map((s) => s.abbr));
 const MAX_BUY_BOXES = 12;
 /** Sane cap on the save-feedback evaluation query (active deals only). */
 const FIT_FEEDBACK_DEALS_LIMIT = 200;
 
-const SELECT_COLS =
+const SELECT_COLS_LEGACY =
   "id, name, strategy_kind, min_cap_rate_pct, min_coc_pct, min_dscr, min_cash_flow_monthly, max_purchase_price, property_types, target_states, is_active, is_default, sort_order";
+const SELECT_COLS = `${SELECT_COLS_LEGACY}, min_irr_pct, max_cash_required`;
 /** + client_id (Agent Pro, migration 20260811120000). Selected via a
  *  fallback ladder: try WITH the column, retry legacy on 42703 — so a
  *  pre-migration database keeps working untouched. */
@@ -83,6 +94,8 @@ const boxSchema = z
     minCocPct: nullableNumber(0, 1000),
     minDscr: nullableNumber(0, 100),
     minCashFlowMonthly: nullableNumber(-1_000_000, 1_000_000),
+    minIrrPct: nullableNumber(-99.9, 1000),
+    maxCashRequired: nullableNumber(0, 1_000_000_000),
     maxPurchasePrice: nullableNumber(0, MAX_PURCHASE_PRICE),
     propertyTypes: z
       .array(z.enum(["single-family", "multi-family", "owner-occupant"]))
@@ -124,13 +137,6 @@ export type BuyBoxesActionResult =
       message: string;
     };
 
-function toNum(value: number | string | null): number | null {
-  if (value == null || value === "") return null;
-  const n = typeof value === "number" ? value : Number(value);
-  return Number.isFinite(n) ? n : null;
-}
-
-
 function isMissingTable(error: { code?: string; message?: string }): boolean {
   return error.code === "42P01" || /relation .* does not exist/i.test(error.message ?? "");
 }
@@ -138,14 +144,20 @@ function isMissingTable(error: { code?: string; message?: string }): boolean {
 /** Resolve the signed-in Pro user, or a typed failure result. */
 async function requireProUser(
   supabase: SupabaseClient
-): Promise<{ ok: true; userId: string } | { ok: false; result: BuyBoxesActionResult }> {
+): Promise<
+  | { ok: true; userId: string; hasPaidAccess: boolean }
+  | { ok: false; result: BuyBoxesActionResult }
+> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
     return { ok: false, result: { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." } };
   }
-  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  const [entitlements, hasPaidAccess] = await Promise.all([
+    getEntitlementsForUser(supabase, user.id),
+    hasPaidPlanSubscription(supabase, user.id),
+  ]);
   if (!hasPlanFeature(entitlements, "buy_box")) {
     return {
       ok: false,
@@ -156,14 +168,17 @@ async function requireProUser(
       },
     };
   }
-  return { ok: true, userId: user.id };
+  return { ok: true, userId: user.id, hasPaidAccess };
 }
 
 /** Read + map all of a user's boxes, default-first then by sort order. */
 async function fetchBoxes(
   supabase: SupabaseClient,
   userId: string
-): Promise<{ ok: true; boxes: NamedBuyBox[] } | { ok: false; result: BuyBoxesActionResult }> {
+): Promise<
+  | { ok: true; boxes: NamedBuyBox[]; supportsOfferTargets: boolean }
+  | { ok: false; result: BuyBoxesActionResult }
+> {
   const buildQuery = (cols: string) =>
     supabase
       .from("user_buy_boxes")
@@ -177,6 +192,15 @@ async function fetchBoxes(
   if (isMissingColumn(error)) {
     ({ data, error } = await buildQuery(SELECT_COLS));
   }
+  let supportsOfferTargets = !isMissingColumn(error);
+  if (isMissingColumn(error)) {
+    ({ data, error } = await buildQuery(`${SELECT_COLS_LEGACY}, client_id`));
+    supportsOfferTargets = false;
+  }
+  if (isMissingColumn(error)) {
+    ({ data, error } = await buildQuery(SELECT_COLS_LEGACY));
+    supportsOfferTargets = false;
+  }
 
   if (error) {
     return {
@@ -186,7 +210,13 @@ async function fetchBoxes(
         : toServerErrorResult(error, "user-buy-boxes"),
     };
   }
-  return { ok: true, boxes: ((data ?? []) as unknown[]).map((r) => rowToNamedBuyBox(r as BuyBoxesRow)) };
+  return {
+    ok: true,
+    boxes: ((data ?? []) as unknown[]).map((r) =>
+      rowToNamedBuyBox(r as BuyBoxesRow),
+    ),
+    supportsOfferTargets,
+  };
 }
 
 /**
@@ -209,6 +239,7 @@ async function clearDefaults(supabase: SupabaseClient, userId: string): Promise<
 
 /** Scalar row shape for the save-feedback deals query below. */
 type FitDealRow = {
+  id: string;
   address: string | null;
   property_type: string | null;
   purchase_price: number | null;
@@ -234,6 +265,7 @@ async function computeSavedBoxFit(
   supabase: SupabaseClient,
   userId: string,
   criteria: BuyBoxCriteria,
+  hasPaidAccess: boolean,
   /** Agent Pro: when the box is scoped to a client, only THAT client's deals
    *  are the honest denominator. Measuring one buyer's criteria against every
    *  deal the agent owns made "3 of 40 pass" meaningless. */
@@ -244,7 +276,7 @@ async function computeSavedBoxFit(
     let query = supabase
       .from("saved_analyses")
       .select(
-        "address, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, cap_rate_raw:result_snapshot->>capRate, methodology_version, result_snapshot, form_snapshot"
+        "id, address, property_type, purchase_price, net_cash_flow_monthly, coc_return_pct, cap_rate_raw:result_snapshot->>capRate, methodology_version, result_snapshot, form_snapshot"
       )
       .eq("user_id", userId)
       .is("deleted_at", null)
@@ -256,9 +288,25 @@ async function computeSavedBoxFit(
       .limit(FIT_FEEDBACK_DEALS_LIMIT);
     if (error || !data || data.length === 0) return null;
 
-    const metricsList = (data as unknown as FitDealRow[])
+    const releasedRows = (data as unknown as FitDealRow[])
       .filter((row) => isReleasedUnderwritingSnapshot(row.form_snapshot))
-      .map((row): BuyBoxDealMetrics => {
+      .map((row) => ({
+        row,
+        values: normalizeReleasedInvestmentFormSnapshot(row.form_snapshot),
+      }))
+      .filter(
+        (entry): entry is { row: FitDealRow; values: NonNullable<typeof entry.values> } =>
+          entry.values != null,
+      );
+    const authorizedDealIds = await getBuyBoxAuthorizedDealIds({
+      supabase,
+      userId,
+      hasPaidAccess,
+      deals: releasedRows.map(({ row, values }) => ({ id: row.id, values })),
+    });
+    const metricsList = releasedRows
+      .filter(({ row }) => authorizedDealIds.has(row.id))
+      .map(({ row, values }): BuyBoxDealMetrics => {
         const recomputed = recomputeSavedDealVerdict(row.form_snapshot);
         const resolution = resolveSavedAnalysisSnapshot({
           methodologyVersion: row.methodology_version,
@@ -272,6 +320,9 @@ async function computeSavedBoxFit(
         const capSnap = row.cap_rate_raw != null ? Number(row.cap_rate_raw) : NaN;
         const dscrSnap = Number(snapshot.dscr);
         const monthlyPaymentSnap = Number(snapshot.monthlyPayment);
+        const irr = fresh && values
+          ? calculateMaoIrr(values, fresh.analysisResult)
+          : null;
         return {
           capRatePct: fresh ? fresh.capRatePct : Number.isFinite(capSnap) ? capSnap : null,
           cocPct: fresh ? fresh.cocReturnPct : row.coc_return_pct,
@@ -291,8 +342,12 @@ async function computeSavedBoxFit(
           isCashPurchase: fresh
             ? fresh.isCashPurchase
             : Number.isFinite(monthlyPaymentSnap) && monthlyPaymentSnap <= 0,
+          cashRequired: fresh ? fresh.cashToClose : null,
+          irrPct: irr?.primaryIrrPct ?? null,
+          irrStatus: irr?.status ?? "none",
         };
       });
+    if (metricsList.length === 0) return null;
     return countBuyBoxFit(criteria, metricsList);
   } catch {
     return null;
@@ -308,6 +363,44 @@ export async function listBuyBoxesAction(): Promise<BuyBoxesActionResult> {
 
   const entitlements = await getEntitlementsForUser(supabase, user.id);
   const canUse = hasPlanFeature(entitlements, "buy_box");
+
+  const fetched = await fetchBoxes(supabase, user.id);
+  if (!fetched.ok) return fetched.result;
+  return { ok: true, boxes: fetched.boxes, canUse };
+}
+
+/**
+ * Verdict-specific reader for an arbitrary deal surface (currently public
+ * shares). Unlike the settings/list reader, evaluation access is bound to the
+ * exact SHA-256 deal ledger key; paid users bypass metering.
+ */
+export async function listBuyBoxesForDealAction(
+  input: unknown,
+): Promise<BuyBoxesActionResult> {
+  const parsed = releasedInvestmentFormSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, code: "VALIDATION_ERROR", message: "Invalid deal values." };
+  }
+
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
+
+  const [entitlements, hasPaidAccess] = await Promise.all([
+    getEntitlementsForUser(supabase, user.id),
+    hasPaidPlanSubscription(supabase, user.id),
+  ]);
+  const hasBuyBoxFeature = hasPlanFeature(entitlements, "buy_box");
+  const canUse =
+    hasPaidAccess ||
+    (hasBuyBoxFeature &&
+      (await activeMeteredEvaluationDealGrantsAccess(
+        supabase,
+        user.id,
+        parsed.data,
+      )));
 
   const fetched = await fetchBoxes(supabase, user.id);
   if (!fetched.ok) return fetched.result;
@@ -350,6 +443,16 @@ export async function upsertBuyBoxAction(input: unknown): Promise<BuyBoxesAction
   // Current boxes — for the create cap + the "first box is default" rule.
   const existing = await fetchBoxes(supabase, userId);
   if (!existing.ok) return existing.result;
+  if (
+    !existing.supportsOfferTargets &&
+    (parsed.data.minIrrPct != null || parsed.data.maxCashRequired != null)
+  ) {
+    return {
+      ok: false,
+      code: "MIGRATION_PENDING",
+      message: "The IRR and cash-required criteria need the latest schema update.",
+    };
+  }
 
   const isCreate = !parsed.data.id;
   if (isCreate && existing.boxes.length >= MAX_BUY_BOXES) {
@@ -372,6 +475,12 @@ export async function upsertBuyBoxAction(input: unknown): Promise<BuyBoxesAction
     min_coc_pct: parsed.data.minCocPct,
     min_dscr: parsed.data.minDscr,
     min_cash_flow_monthly: parsed.data.minCashFlowMonthly,
+    ...(existing.supportsOfferTargets
+      ? {
+          min_irr_pct: parsed.data.minIrrPct,
+          max_cash_required: parsed.data.maxCashRequired,
+        }
+      : {}),
     max_purchase_price: parsed.data.maxPurchasePrice,
     property_types: parsed.data.propertyTypes,
     target_states: targetStates,
@@ -420,16 +529,24 @@ export async function upsertBuyBoxAction(input: unknown): Promise<BuyBoxesAction
   // Save feedback (additive): how many of the user's active deals pass the
   // criteria just saved. Evaluated from the SAME normalized values we wrote,
   // so it works for create and update alike without re-reading the row.
-  const fit = await computeSavedBoxFit(supabase, userId, {
-    minCapRatePct: parsed.data.minCapRatePct,
-    minCocPct: parsed.data.minCocPct,
-    minDscr: parsed.data.minDscr,
-    minCashFlowMonthly: parsed.data.minCashFlowMonthly,
-    maxPurchasePrice: parsed.data.maxPurchasePrice,
-    propertyTypes: parsed.data.propertyTypes,
-    targetStates,
-    isActive: parsed.data.isActive,
-  }, parsed.data.clientId ?? null);
+  const fit = await computeSavedBoxFit(
+    supabase,
+    userId,
+    {
+      minCapRatePct: parsed.data.minCapRatePct,
+      minCocPct: parsed.data.minCocPct,
+      minDscr: parsed.data.minDscr,
+      minCashFlowMonthly: parsed.data.minCashFlowMonthly,
+      minIrrPct: parsed.data.minIrrPct,
+      maxCashRequired: parsed.data.maxCashRequired,
+      maxPurchasePrice: parsed.data.maxPurchasePrice,
+      propertyTypes: parsed.data.propertyTypes,
+      targetStates,
+      isActive: parsed.data.isActive,
+    },
+    auth.hasPaidAccess,
+    parsed.data.clientId ?? null,
+  );
   return fit
     ? { ok: true, boxes: final.boxes, canUse: true, fit }
     : { ok: true, boxes: final.boxes, canUse: true };

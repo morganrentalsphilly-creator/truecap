@@ -90,5 +90,9 @@ export function planSlugFromPriceId(priceId: string | null | undefined): PaidPla
  * no pricing surface shows it and checkout rejects it as PLAN_NOT_FOUND.
  */
 export function isAgentProConfigured(): boolean {
-  return getPrimaryPlanPriceId("agent_pro_monthly") != null;
+  return (
+    process.env.TRUECAP_AGENT_PRO_RELEASED === "true" &&
+    getPrimaryPlanPriceId("agent_pro_monthly") != null &&
+    getPrimaryPlanPriceId("agent_pro_annual") != null
+  );
 }

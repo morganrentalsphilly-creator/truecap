@@ -51,6 +51,8 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { StoredRecommendation, StoredRiskLevel } from "@/lib/compare-metrics";
 import { RetryRouteButton } from "@/components/dashboard/retry-route-button";
 import { applicableCashOnCashValue } from "@/lib/cash-on-cash-applicability";
+import { calculateMaoIrr } from "@/lib/mao-target-evaluation";
+import { getBuyBoxAuthorizedDealIds } from "@/lib/buy-box-access-server";
 
 type SortField = "saved" | "cash-flow" | "coc" | "cap-rate" | "price";
 type SortDirection = "asc" | "desc";
@@ -202,6 +204,12 @@ function mapSavedRow(
   });
   const snapshot = resolution.snapshot as NonNullable<SavedAnalysisRow["result_snapshot"]>;
   const fresh = resolution.didRecompute ? recomputed : null;
+  const values = fresh
+    ? normalizeReleasedInvestmentFormSnapshot(row.form_snapshot)
+    : null;
+  const irr = fresh && values
+    ? calculateMaoIrr(values, fresh.analysisResult)
+    : null;
   const methodology = resolveDealMethodologyPresentation({
     storedMethodologyVersion: resolution.storedMethodologyVersion,
     usesRecordedSnapshot: resolution.usesRecordedSnapshot,
@@ -286,6 +294,8 @@ function mapSavedRow(
         ? numberFromSnapshot(snapshot.monthlyPayment)! <= 0
         : undefined,
     cashToClose,
+    irrPct: irr?.primaryIrrPct ?? null,
+    irrStatus: irr?.status ?? "none",
     score: fresh ? fresh.score : Number.isFinite(parsedScore) ? parsedScore : null,
     recommendation: fresh ? fresh.recommendation : storedRecommendation,
     riskLevel: fresh ? fresh.riskLevel : storedRiskLevel,
@@ -483,10 +493,23 @@ export default async function DashboardSavedAnalysesPage({
   }
   // Dynamic string selects (for the labels fallback) defeat Supabase's row-type
   // inference, so the rows come back loosely typed — cast through unknown.
-  const mappedItems = ((rows ?? []) as unknown[])
+  const savedRows = (rows ?? []) as unknown as SavedAnalysisRow[];
+  const authorizedBuyBoxDealIds =
+    activeBuyBoxes.length > 0
+      ? await getBuyBoxAuthorizedDealIds({
+          supabase,
+          userId: user.id,
+          hasPaidAccess: isPremium,
+          deals: savedRows.map((row) => ({
+            id: row.id,
+            values: normalizeReleasedInvestmentFormSnapshot(row.form_snapshot),
+          })),
+        })
+      : new Set<string>();
+  const mappedItems = savedRows
     .map((row) =>
       mapSavedRow(
-        row as SavedAnalysisRow,
+        row,
         activeBuyBoxes,
         canShowMao,
         buyBoxesResolved
@@ -584,6 +607,7 @@ export default async function DashboardSavedAnalysesPage({
             canCompareDeals={hasPlanFeature(entitlements, "compare_deals")}
             canExportPdf={hasPlanFeature(entitlements, "pdf_export")}
             canUsePipeline={hasPlanFeature(entitlements, "pipeline")}
+            buyBoxAuthorizedDealIds={[...authorizedBuyBoxDealIds]}
             agentClients={agentClients}
             clientFilterId={clientFilterId}
             clientFilterName={clientFilterName}

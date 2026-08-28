@@ -84,7 +84,7 @@ function loadGoogleMapsScript(apiKey: string): Promise<void> {
     }
     const script = document.createElement("script");
     script.id = "google-maps-places-script";
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&libraries=places&v=weekly`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&libraries=places&v=weekly&loading=async`;
     script.async = true;
     script.defer = true;
     script.onload = () => resolve();
@@ -194,8 +194,8 @@ export function AddressAutocomplete({
   // committed yet (suggestion pick or typed-address commit consumes it).
   // This is the blur-commit's gate: programmatically-set addresses (loaded
   // saved deal, fork reset, draft restore) must NOT re-enrich on a mere
-  // focus-blur — enrichment overwrites property tax by design, so a
-  // committed loaded deal's hand-tuned tax would be silently clobbered.
+  // focus-blur — enrichment can replace eligible HUD/FRED starting values,
+  // so a committed loaded deal must not be silently re-enriched.
   const typedSinceCommitRef = useRef(false);
 
   // Google Maps Places is DEFERRED from mount to first interaction with the
@@ -474,10 +474,10 @@ export function AddressAutocomplete({
    * fire ONLY from a Google suggestion pick. A pasted or fully-typed address
    * that never touches the dropdown — the common mobile paste-from-Zillow
    * path, and the ONLY path when an ad blocker keeps the Maps script out —
-   * silently skipped the whole auto-fill loop (rate, taxes, rent, receipt).
+   * silently skipped the whole auto-fill loop (rate, rent, receipt).
    * On blur / Enter-without-suggestions, parse state + ZIP straight from the
    * text and hand it to onPlaceSelected like a selection. State-or-ZIP is
-   * required (that's what tax + HUD rent key on; FRED needs nothing), so a
+   * required (that's what HUD rent keys on; FRED needs nothing), so a
    * half-typed street never triggers a junk lookup. Gated on
    * typedSinceCommitRef so only user-typed text commits — and each typing
    * burst commits at most once (the gates below intentionally DON'T consume

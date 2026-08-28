@@ -196,10 +196,10 @@ export default function ClevelandMarketPage() {
               <ArrowUpRight className="size-4" />
             </Link>
             <Link
-              href="/tools/brrrr-calculator"
+              href="/blog/brrrr-method-explained"
               className="inline-flex h-12 items-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted"
             >
-              BRRRR calculator
+              BRRRR workflow guide
             </Link>
           </div>
         </header>

@@ -283,7 +283,7 @@ export default function InvestmentPropertyAppraisalPost() {
               Nothing about the property changed — one opinion of rent moved
               your cost of capital. Check where your deal sits with the{" "}
               <Link
-                href="/tools/dscr-calculator"
+                href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
                 DSCR calculator

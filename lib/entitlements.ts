@@ -1,6 +1,11 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import * as Sentry from "@sentry/nextjs";
 import { z } from "zod";
+import {
+  resolveProductAccessState,
+  type ProductAccessState,
+  type ProductEvaluationRecord,
+} from "@/lib/product-access";
 
 const unlimitedSavedDealsValues = new Set(["unlimited", "none", "null"]);
 
@@ -24,6 +29,77 @@ const defaultFree: PlanEntitlements = {
   max_saved_deals: 0,
   features: ["cash_flow"],
 };
+
+const evaluationFeatures = [
+  "cash_flow",
+  "save_deal",
+  "dashboard_access",
+  "deal_score",
+  "buy_box",
+] as const;
+
+function entitlementsForEvaluation(access: ProductAccessState): PlanEntitlements {
+  return {
+    // Evaluation usage is enforced by the immutable usage ledger, not by the
+    // total number of saved rows (a Free user may already have saved deals).
+    max_saved_deals: 5,
+    features: [
+      ...evaluationFeatures,
+      // Keep deal-level Pro computation tied to the remaining immutable-ledger
+      // allowance. Once three distinct runs are consumed, a fourth free-core
+      // run must not inherit Pro projections merely because the 21-day window
+      // is still active. Exact metered PDF artifacts have their own resource-
+      // bound authorization and therefore do not need this broad feature.
+      ...(access.canAnalyzeProDeal ? ["projections"] : []),
+      ...(access.canRunComparison ? ["compare_deals"] : []),
+    ],
+  };
+}
+
+/**
+ * Read the one-time no-card evaluation and its append-only usage ledger.
+ * A missing migration or query failure fails closed and is reported; it never
+ * silently grants evaluation access.
+ */
+export async function getProductEvaluationAccessForUser(
+  supabase: SupabaseClient,
+  userId: string,
+  now: Date = new Date()
+): Promise<ProductAccessState | null> {
+  const [evaluationQuery, usageQuery] = await Promise.all([
+    supabase
+      .from("product_evaluations")
+      .select("started_at, expires_at")
+      .eq("user_id", userId)
+      .maybeSingle(),
+    supabase
+      .from("product_evaluation_usage")
+      .select("kind")
+      .eq("user_id", userId),
+  ]);
+
+  if (evaluationQuery.error || usageQuery.error) {
+    Sentry.captureException(evaluationQuery.error ?? usageQuery.error, {
+      tags: { feature: "product-evaluation" },
+      extra: { userId, query: "evaluation_and_usage" },
+    });
+    return null;
+  }
+  if (!evaluationQuery.data) return null;
+
+  const usage = (usageQuery.data ?? []) as { kind?: unknown }[];
+  const record: ProductEvaluationRecord = {
+    startedAt: evaluationQuery.data.started_at,
+    expiresAt: evaluationQuery.data.expires_at,
+    dealsUsed: usage.filter((row) => row.kind === "deal").length,
+    comparisonsUsed: usage.filter((row) => row.kind === "comparison").length,
+  };
+  return resolveProductAccessState({
+    isAuthenticated: true,
+    now,
+    evaluation: record,
+  });
+}
 
 function parseEntitlements(raw: unknown): PlanEntitlements | null {
   const parsed = planEntitlementsSchema.safeParse(raw);
@@ -60,6 +136,11 @@ export async function getEntitlementsForUser(
   const plansRow = sub?.plans as { entitlements: unknown } | null | undefined;
   const fromSub = plansRow?.entitlements != null ? parseEntitlements(plansRow.entitlements) : null;
   if (fromSub) return fromSub;
+
+  const evaluationAccess = await getProductEvaluationAccessForUser(supabase, userId);
+  if (evaluationAccess?.kind === "evaluation") {
+    return entitlementsForEvaluation(evaluationAccess);
+  }
 
   const { data: free, error: freeError } = await supabase
     .from("plans")

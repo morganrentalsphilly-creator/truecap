@@ -59,7 +59,6 @@ const MATRIX: Row[] = [
   { feature: "Airbnb / STR market data",          truecap: "Long-term focus; STR-specific fields coming",                                    mashvisor: "Strong — pulls Airbnb occupancy + ADR data by ZIP",                      winner: "mashvisor" },
   { feature: "Sale + rent comps",                truecap: "One free lookup; Pro includes 50 per month; no AVM",                            mashvisor: "Yes — included in their data layer",                                     winner: "mashvisor" },
   { feature: "Property listings discovery",       truecap: "Not the focus — start with an address you found elsewhere",                       mashvisor: "Yes — investment-property marketplace",                                  winner: "mashvisor" },
-  { feature: "Illustrative tax impact",           truecap: "Pro — depreciation + interest + modeled after-tax CF",                            mashvisor: "Basic tax view",                                                         winner: "truecap" },
   { feature: "Sensitivity / stress test",         truecap: "Pro — rent ±10%, vacancy ±5pp, rates ±1pp",                                       mashvisor: "Not the primary use case",                                               winner: "truecap" },
   { feature: "Offer Ceiling solver",              truecap: "Pro — works backward from selected targets",                                  mashvisor: "Not a primary feature",                                                  winner: "truecap" },
   { feature: "Screening Index + breakdown",            truecap: "Free — 0–100 score with per-subscore explanation",                                 mashvisor: "Their own metric",                                                       winner: "tie" },
@@ -130,7 +129,7 @@ export default function VsMashvisorPage() {
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You&apos;ve found a specific property and need to decide if it pencils.</li>
                 <li>You want free core cap rate, CoC, DSCR, and cash-flow analysis.</li>
-                <li>You want stress-test sensitivity + illustrative tax impact + exit modeling.</li>
+                <li>You want stress-test sensitivity and a 10-year cash-flow and equity planning view.</li>
                 <li>You prefer transparent open-data sources (HUD, FRED, state tax) you can audit.</li>
                 <li>You don&apos;t want to pay $$$/mo for market data you may not need.</li>
               </ul>
@@ -209,9 +208,9 @@ export default function VsMashvisorPage() {
           </p>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Once the heatmap points you somewhere, the per-deal math is one address away. Start with the standalone{" "}
-            <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">cap rate calculator</Link>
+            <Link href="/#main" className="font-semibold text-primary hover:underline">cap rate calculator</Link>
             {" "}or{" "}
-            <Link href="/tools/cash-on-cash-calculator" className="font-semibold text-primary hover:underline">cash-on-cash return calculator</Link>
+            <Link href="/#main" className="font-semibold text-primary hover:underline">cash-on-cash return calculator</Link>
             {" "}— same engine as the full analyzer. Our walkthrough on{" "}
             <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">underwriting a rental in 60 seconds</Link>
             {" "}shows the full move from listing to a reviewed underwrite.
@@ -225,7 +224,7 @@ export default function VsMashvisorPage() {
             Underwriting the next deal? Start free.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            TrueCap free covers cap rate, CoC, DSCR, NCF, monthly cash flow, and plain read-only share links. Pro adds co-branding, 10-year projections, illustrative tax impact, sensitivity, Offer Ceiling, strategy analyzers, and included PDFs. No card to start.
+            TrueCap free covers cap rate, CoC, DSCR, NCF, monthly cash flow, and plain read-only share links. Pro adds co-branding, 10-year cash-flow and equity projections, sensitivity, Offer Ceiling, saved-deal comparison, and included PDFs. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link href="/pricing" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">

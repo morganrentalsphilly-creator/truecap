@@ -91,7 +91,6 @@ const CURATED: Term[] = [
       "Annual NOI divided by purchase price. Cap rate measures the property's earning power as if you owned it free-and-clear, with no mortgage. Stripping out financing makes it the right metric for comparing properties to each other and to alternatives like bonds.",
     benchmark:
       "6-10% is healthy in cash-flow markets (Midwest, Sun Belt secondary). 4-6% in balanced markets. 3-5% in coastal Tier-1 where appreciation does the heavy lifting.",
-    toolPath: "/tools/cap-rate-calculator",
     postPath: "/blog/what-is-a-good-cap-rate",
   },
   {
@@ -102,7 +101,6 @@ const CURATED: Term[] = [
       "Annual cash flow divided by total cash invested (down payment + closing costs + initial repairs). Cash-on-cash measures the return on the cash YOU specifically put in, after the lender takes their cut. Unlike cap rate, it does include financing.",
     benchmark:
       "8-10%+ is strong in 2026. 5-7% is acceptable. Below 5% needs an appreciation or tax-savings story.",
-    toolPath: "/tools/cash-on-cash-calculator",
     postPath: "/blog/cap-rate-vs-cash-on-cash-vs-dscr",
   },
   {
@@ -113,7 +111,6 @@ const CURATED: Term[] = [
       "Annual NOI divided by annual debt service (mortgage P&I). DSCR tells you whether the property can cover its own mortgage from operating income. Every lender pulls it, and each lender sets its own bar.",
     benchmark:
       "1.0-1.25 is the typical lender minimum. Most conventional and DSCR-loan products want ≥1.25; 1.5+ unlocks better rate tiers.",
-    toolPath: "/tools/dscr-calculator",
     postPath: "/blog/dscr-loans-explained",
   },
   {
@@ -122,7 +119,6 @@ const CURATED: Term[] = [
     also: ["Net Operating Income"],
     definition:
       "Effective gross rental income minus operating expenses, before mortgage P&I and income tax. NOI is the property's operating performance as if you owned it free-and-clear — it isolates the asset from how you financed it. Cap rate and DSCR both start from NOI.",
-    toolPath: "/tools/noi-calculator",
   },
   {
     slug: "grm",
@@ -149,28 +145,27 @@ const CURATED: Term[] = [
     term: "BRRRR",
     also: ["Buy Rehab Rent Refinance Repeat"],
     definition:
-      "An investment strategy: Buy a distressed property cheap, Rehab it, Rent it out, Refinance based on the new higher appraised value (pulling most of your cash back out), then Repeat with a different property. Done well, you end up owning a cash-flowing rental with most of your original capital still available for the next deal.",
-    toolPath: "/tools/brrrr-calculator",
+      "An investment strategy: buy a property, renovate it, rent it, seek new financing, and repeat. The refinance amount, timing, appraisal, costs, loan payoff, and post-refinance cash flow are uncertain; capital is not necessarily recovered. TrueCap does not currently publish a BRRRR acquisition model.",
   },
   {
     slug: "loan-to-value",
     term: "LTV",
     also: ["Loan to Value"],
     definition:
-      "Mortgage loan amount divided by property value. 75% LTV on a $400k property = $300k loan. Conventional investment-property loans typically max at 80-85% LTV; DSCR loans max at 75-80%. Cash-out refis cap LTV lower (70-75%) to leave the lender margin.",
+      "Mortgage loan amount divided by the lender's accepted property value. A $300,000 loan against a $400,000 value is 75% LTV. Maximum LTV and the value basis vary by lender, occupancy, property, borrower, loan purpose, and program; use the lender's written terms for the deal.",
   },
   {
     slug: "debt-to-income",
     term: "DTI",
     also: ["Debt to Income"],
     definition:
-      "Personal monthly debt obligations divided by personal gross monthly income. Conventional residential lenders cap DTI around 43-50% to approve a loan. DSCR loans bypass DTI entirely — they qualify based on the property's DSCR instead.",
+      "Personal monthly debt obligations divided by personal gross monthly income. Underwriting limits and included obligations vary by lender and program. Some investor-loan programs emphasize property DSCR rather than a traditional DTI test, but may still evaluate credit, liquidity, reserves, guarantors, and other eligibility requirements.",
   },
   {
     slug: "vacancy-rate",
     term: "Vacancy rate",
     definition:
-      "Percentage of the year a unit sits empty. Standard underwriting assumes 5-8% vacancy as a floor — even a stable rental has turnover, repairs between tenants, and the occasional bad tenant. Don't underwrite at 0%; you'll be wrong every time.",
+      "Percentage of potential scheduled rent not collected because a unit is vacant. A screening assumption should reflect the property's leases, turnover, condition, submarket, and evidence; a generic percentage is only a starting point and should be stress-tested.",
   },
   {
     slug: "operating-expense-ratio",
@@ -192,7 +187,7 @@ const CURATED: Term[] = [
     slug: "depreciation",
     term: "Depreciation",
     definition:
-      "The IRS lets you deduct a portion of the building's value (not the land) each year as a paper expense, even though the property isn't actually losing value. Residential rentals depreciate over 27.5 years straight-line. This deduction frequently turns a positive-cash-flow rental into a paper tax loss, sheltering the cash flow from income tax.",
+      "A tax-cost-recovery concept that may allocate eligible building basis over an applicable recovery period; land is not depreciable. Classification, basis, placed-in-service date, personal-use rules, passive-activity limits, and the taxpayer's facts determine timing and usability. TrueCap does not currently publish tax-strategy outputs; consult a qualified tax professional.",
   },
   {
     slug: "appreciation",
@@ -204,7 +199,7 @@ const CURATED: Term[] = [
     slug: "negative-leverage",
     term: "Negative leverage",
     definition:
-      "When your borrowing rate exceeds the property's cap rate, so every borrowed dollar costs more than the property earns. 2026's dominant trap: 6% cap rate financed at 7% mortgage = -1% on each borrowed dollar. Deals can still pencil with appreciation, tax savings, or principal paydown, but you need to know what you're signing up for.",
+      "A screening condition where the property's unlevered yield is below the effective cost of debt. Cap rate and note rate are not a complete comparison because amortization, fees, term, and cash-flow timing also matter. Test the full loan schedule and downside assumptions rather than assuming appreciation will repair the gap.",
     postPath: "/blog/cap-rate-vs-cash-on-cash-vs-dscr",
   },
   {
@@ -212,7 +207,7 @@ const CURATED: Term[] = [
     term: "Rehab",
     also: ["Renovation"],
     definition:
-      "Repairs and updates to a property — cosmetic (paint, flooring, fixtures), systems (HVAC, electrical, plumbing), or structural. BRRRR investors deliberately buy properties that need rehab so the post-renovation appraisal is high enough to refinance most of their cash out.",
+      "Repairs and updates to a property, from cosmetic finishes to systems or structural work. Budget, scope, contingency, funding timing, downtime, permits, and the evidence for any stabilized rent or value should be reviewed separately.",
     toolPath: "/tools/rehab-cost-estimator",
   },
   {
@@ -220,14 +215,14 @@ const CURATED: Term[] = [
     term: "ARV",
     also: ["After Repair Value"],
     definition:
-      "The property's projected value once rehab is complete. ARV drives the BRRRR refinance: most lenders cap the cash-out at 75% of ARV. So a $400k ARV supports a $300k post-refi loan — if your all-in cost is under that, you've achieved infinite return.",
+      "An estimate of a property's value after a defined renovation scope is complete. It is not an appraisal, sale price, or guaranteed lender value. Comparable selection, condition, completion, appraisal methodology, and lender policy can all change the amount available for a sale or refinance.",
   },
   {
     slug: "max-allowable-offer",
     term: "Offer Ceiling",
     also: ["Target-dependent purchase-price boundary"],
     definition:
-      "The highest modeled purchase price that still meets the selected target profile under the assumptions shown. For BRRRR, the boundary can use ARV, refinance LTV, rehab, closing, and holding costs; for buy-and-hold, it can solve against selected DSCR, cap-rate, cash-flow, or return rules. It is not a recommended offer, appraisal, or substitute for verification.",
+      "The highest modeled purchase price that still meets the selected released buy-and-hold targets under the assumptions shown, such as DSCR, cap rate, cash flow, cash-on-cash return, IRR, or cash required. It is not a recommended offer, appraisal, loan approval, or substitute for verification.",
   },
   {
     slug: "pro-forma",
@@ -239,7 +234,7 @@ const CURATED: Term[] = [
     slug: "1031-exchange",
     term: "1031 exchange",
     definition:
-      "A tax-deferred swap of one investment property for another. When you sell an investment property at a gain, you'd normally pay capital gains tax — a 1031 lets you defer that tax indefinitely as long as you reinvest the proceeds into a 'like-kind' investment property within strict deadlines (45 days to identify, 180 days to close).",
+      "A U.S. tax provision that may defer recognition of eligible gain when qualifying real property is exchanged under detailed like-kind, timing, identification, intermediary, and taxpayer rules. It does not erase tax and is outside TrueCap's released model; obtain transaction-specific tax and legal advice before relying on it.",
   },
   {
     slug: "house-hack",

@@ -530,14 +530,22 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
         .first(),
     ).toBeVisible({ timeout: 20_000 });
     await expect(
-      page.getByText(/Tied values share the highlight; no hidden tie-breaker/),
+      page.getByText(/Tied values share the same shading; no hidden tie-breaker/),
     ).toBeVisible();
     await expect(
-      page.getByText(/Near-term lead count uses exactly four/),
+      page.getByRole("button", { name: "As saved", exact: true }),
     ).toBeVisible();
     await expect(
-      page.getByText("Disclosed metric-lead counts", { exact: true }),
+      page.getByRole("button", {
+        name: "Per $100k purchase price",
+        exact: true,
+      }),
     ).toBeVisible();
+    await expect(
+      page.getByText("Review assumption matrix", { exact: true }),
+    ).toBeVisible();
+    await expect(page.getByText("Near-term score", { exact: true })).toHaveCount(0);
+    await expect(page.getByText("Long-term score", { exact: true })).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
 
     await page.goto(`/?savedDeal=${baseDealId}`, {

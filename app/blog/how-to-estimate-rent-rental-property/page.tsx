@@ -434,7 +434,7 @@ export default function HowToEstimateRentPost() {
               monthly cash flow by roughly $128 — from a small loss to a real
               profit — and lifts{" "}
               <Link
-                href="/tools/dscr-calculator"
+                href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
                 DSCR

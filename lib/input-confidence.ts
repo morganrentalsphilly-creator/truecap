@@ -54,6 +54,18 @@ export type StartingAssumptionOrigin = {
   label: string;
 };
 
+/**
+ * Durable lineage for a RentCast value that was actually adopted into the
+ * purchase-price input. The surrounding field fingerprint binds this record
+ * to the exact numeric value; the analyzer separately binds it to the current
+ * property address so the label cannot follow a repurposed form.
+ */
+export type PurchasePriceSourceContext = {
+  kind: "active-listing" | "avm-estimate";
+  provider: "rentcast";
+  fetchedAt: string;
+};
+
 export type InputConfidenceStage = "screened" | "verified" | "offer-ready";
 export type SensitivityRisk = "low" | "moderate" | "high";
 
@@ -111,6 +123,8 @@ export type InputConfidenceSourceContext = {
   >;
   /** Value-bound AVM/rent-multiple flag; never call this an asking price. */
   purchasePriceEstimated?: true;
+  /** Provider lineage for an adopted active-listing price or AVM. */
+  purchasePriceSource?: PurchasePriceSourceContext;
 };
 
 export type RestoredInputConfidenceContext = {
@@ -120,6 +134,7 @@ export type RestoredInputConfidenceContext = {
     Record<InputConfidenceFieldKey, StartingAssumptionOrigin>
   >;
   purchasePriceEstimated: boolean;
+  purchasePriceSource: PurchasePriceSourceContext | null;
 };
 
 export type MergeInputConfidenceSourceContextArgs = {
@@ -131,6 +146,8 @@ export type MergeInputConfidenceSourceContextArgs = {
     Record<InputConfidenceFieldKey, StartingAssumptionOrigin>
   > | null;
   livePurchasePriceEstimated?: boolean | null;
+  /** `undefined` preserves a matching saved source; `null` explicitly clears. */
+  livePurchasePriceSource?: PurchasePriceSourceContext | null;
 };
 
 export type InputConfidenceContext = {
@@ -143,6 +160,7 @@ export type InputConfidenceContext = {
     Record<InputConfidenceFieldKey, StartingAssumptionOrigin>
   > | null;
   purchasePriceEstimated?: boolean;
+  purchasePriceSource?: PurchasePriceSourceContext | null;
   verified?:
     | InputVerificationEvidence
     | readonly InputConfidenceFieldKey[]
@@ -337,12 +355,48 @@ function normalizedProvenance(
   return output;
 }
 
+/** Tolerant, client-safe parser for persisted/server-action price lineage. */
+export function normalizePurchasePriceSourceContext(
+  raw: unknown,
+): PurchasePriceSourceContext | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const record = raw as Record<string, unknown>;
+  const fetchedAt =
+    typeof record.fetchedAt === "string"
+      ? new Date(record.fetchedAt)
+      : null;
+  if (
+    (record.kind !== "active-listing" && record.kind !== "avm-estimate") ||
+    record.provider !== "rentcast" ||
+    !fetchedAt ||
+    !Number.isFinite(fetchedAt.getTime())
+  ) {
+    return null;
+  }
+  return {
+    kind: record.kind,
+    provider: "rentcast",
+    fetchedAt: fetchedAt.toISOString(),
+  };
+}
+
+/** Concise label used beside the purchase-price input and in readiness rows. */
+export function formatPurchasePriceSourceLabel(
+  source: PurchasePriceSourceContext,
+): string {
+  const sourceDate = source.fetchedAt.slice(0, 10);
+  return source.kind === "active-listing"
+    ? `RentCast active listing asking price · source date ${sourceDate}`
+    : `RentCast AVM estimate · source date ${sourceDate}`;
+}
+
 function buildInputConfidenceSourceContext(
   values: InvestmentFormValues,
   provenance: EnrichmentProvenanceInput | null | undefined,
   touchedFields: InputConfidenceContext["touchedFields"],
   startingAssumptionOrigins: InputConfidenceContext["startingAssumptionOrigins"],
   purchasePriceEstimated: boolean,
+  purchasePriceSource: PurchasePriceSourceContext | null,
 ): InputConfidenceSourceContext {
   return {
     methodVersion: INPUT_CONFIDENCE_METHOD_VERSION,
@@ -354,6 +408,7 @@ function buildInputConfidenceSourceContext(
     ...(purchasePriceEstimated
       ? { purchasePriceEstimated: true as const }
       : {}),
+    ...(purchasePriceSource ? { purchasePriceSource } : {}),
     fieldFingerprints: Object.fromEntries(
       INPUT_CONFIDENCE_FIELD_KEYS.map((key) => [
         key,
@@ -467,7 +522,13 @@ export function buildInputConfidence(
   const startingAssumptionOrigins = normalizeStartingAssumptionOrigins(
     context.startingAssumptionOrigins,
   );
-  const purchasePriceEstimated = context.purchasePriceEstimated === true;
+  const purchasePriceSource = normalizePurchasePriceSourceContext(
+    context.purchasePriceSource,
+  );
+  const purchasePriceEstimated =
+    purchasePriceSource !== null
+      ? purchasePriceSource.kind === "avm-estimate"
+      : context.purchasePriceEstimated === true;
   const verified = verifiedSet(context.verified, values, now);
   const financed = (num(values.downPaymentPct) ?? 100) < 100;
   const pricePresent = (num(values.purchasePrice) ?? 0) > 0;
@@ -501,10 +562,21 @@ export function buildInputConfidence(
       explicitVerification(
         "purchasePrice",
         verified.has("purchasePrice"),
-        pricePresent && purchasePriceEstimated
+        pricePresent && purchasePriceSource?.kind === "active-listing"
+          ? {
+              sourceClass: "property-specific",
+              sourceLabel: formatPurchasePriceSourceLabel(purchasePriceSource),
+              reason:
+                "Provider-reported active listing asking price. It remains unverified until you confirm value-bound evidence for this underwrite.",
+              verifyAction: "Confirm asking or contract price",
+              offerReadyRequired: true,
+            }
+          : pricePresent && purchasePriceEstimated
           ? {
               sourceClass: "local-estimate",
-              sourceLabel: "Automated price estimate",
+              sourceLabel: purchasePriceSource
+                ? formatPurchasePriceSourceLabel(purchasePriceSource)
+                : "Automated price estimate",
               reason:
                 "Screening estimate from market/listing data, not a confirmed asking or contract price.",
               verifyAction: "Confirm asking or contract price",
@@ -997,6 +1069,7 @@ export function buildInputConfidence(
       touchedFields,
       startingAssumptionOrigins,
       purchasePriceEstimated,
+      purchasePriceSource,
     ),
     computedAt: now.toISOString(),
   };
@@ -1098,6 +1171,7 @@ export function restoreInputConfidenceSourceContext(
       touchedInputFields: [],
       startingAssumptionOrigins: {},
       purchasePriceEstimated: false,
+      purchasePriceSource: null,
     };
   }
   const record = raw as Record<string, unknown>;
@@ -1107,6 +1181,7 @@ export function restoreInputConfidenceSourceContext(
       touchedInputFields: [],
       startingAssumptionOrigins: {},
       purchasePriceEstimated: false,
+      purchasePriceSource: null,
     };
   }
   const fingerprints =
@@ -1158,15 +1233,20 @@ export function restoreInputConfidenceSourceContext(
     ),
   ) as Partial<Record<InputConfidenceFieldKey, StartingAssumptionOrigin>>;
 
+  const purchasePriceSource = fingerprintMatches("purchasePrice")
+    ? normalizePurchasePriceSourceContext(record.purchasePriceSource)
+    : null;
   const purchasePriceEstimated =
-    record.purchasePriceEstimated === true &&
-    fingerprintMatches("purchasePrice");
+    fingerprintMatches("purchasePrice") &&
+    (record.purchasePriceEstimated === true ||
+      purchasePriceSource?.kind === "avm-estimate");
 
   return {
     provenance,
     touchedInputFields,
     startingAssumptionOrigins,
     purchasePriceEstimated,
+    purchasePriceSource,
   };
 }
 
@@ -1195,6 +1275,10 @@ export function mergeInputConfidenceSourceContext(
     args.livePurchasePriceEstimated == null
       ? restored.purchasePriceEstimated
       : args.livePurchasePriceEstimated === true;
+  const purchasePriceSource =
+    args.livePurchasePriceSource === undefined
+      ? restored.purchasePriceSource
+      : normalizePurchasePriceSourceContext(args.livePurchasePriceSource);
 
   return {
     provenance: {
@@ -1208,7 +1292,11 @@ export function mergeInputConfidenceSourceContext(
       ...restored.startingAssumptionOrigins,
       ...liveStartingAssumptionOrigins,
     },
-    purchasePriceEstimated,
+    purchasePriceEstimated:
+      purchasePriceSource !== null
+        ? purchasePriceSource.kind === "avm-estimate"
+        : purchasePriceEstimated,
+    purchasePriceSource,
   };
 }
 

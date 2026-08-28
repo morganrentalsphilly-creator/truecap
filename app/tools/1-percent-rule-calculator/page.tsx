@@ -232,16 +232,16 @@ export default function OnePercentRulePage() {
               <li>Get a rough rehab estimate if the property needs work</li>
               <li>
                 Run the full underwrite —{" "}
-                <Link href="/tools/cap-rate-calculator" className="text-primary font-semibold hover:underline">cap rate</Link>,{" "}
-                <Link href="/tools/cash-on-cash-calculator" className="text-primary font-semibold hover:underline">CoC</Link>,{" "}
-                <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">DSCR</Link>, cash flow
+                <Link href="/#main" className="text-primary font-semibold hover:underline">cap rate</Link>,{" "}
+                <Link href="/#main" className="text-primary font-semibold hover:underline">CoC</Link>,{" "}
+                <Link href="/#main" className="text-primary font-semibold hover:underline">DSCR</Link>, cash flow
               </li>
             </ol>
             <p>
               TrueCap handles steps 4 and 5 in about four minutes once you
               have the inputs. Two sibling screens are worth knowing too:
               the{" "}
-              <Link href="/tools/50-percent-rule-calculator" className="text-primary font-semibold hover:underline">50% rule calculator</Link>{" "}
+              <Link href="/#main" className="text-primary font-semibold hover:underline">50% rule calculator</Link>{" "}
               triages the expense side (does the rent survive operating
               costs and the mortgage?), and the{" "}
               <Link href="/tools/2-percent-rule-calculator" className="text-primary font-semibold hover:underline">2% rule calculator</Link>{" "}
@@ -268,16 +268,16 @@ export default function OnePercentRulePage() {
             <p className="text-sm sm:text-base opacity-90 mb-4">
               Passing the 1% rule earns a deal a closer look. TrueCap runs
               the full underwrite — cap rate, CoC, DSCR, cash flow, 10-year
-              projections, tax savings, and exit scenarios — in about four
+              cash-flow and equity projections, sensitivity, and Offer Ceiling — in about four
               minutes, free to start.
             </p>
             <ul className="text-sm space-y-1.5 mb-5 opacity-90">
               {[
                 "Cap rate + CoC + DSCR + monthly cash flow",
                 "10-year projection with rent growth (Pro)",
-                "Depreciation tax savings model (Pro)",
-                "Sell / refi / hold exit comparison (Pro)",
-                "BRRRR + fix-and-flip calculators (Pro)",
+                "Downside sensitivity grid (Pro)",
+                "Target-dependent Offer Ceiling (Pro)",
+                "Editable operating and financing assumptions",
                 "Free to start",
               ].map((line) => (
                 <li key={line} className="flex items-start gap-2">
@@ -299,7 +299,7 @@ export default function OnePercentRulePage() {
           <ToolEmbedInvite slug="1-percent-rule-calculator" />
 
 
-          <ToolsConversionCta calculatorName="1% rule calculator" hook="The 1% rule is a 5-second screener. When you want a real underwrite — DSCR, cap rate, projections, tax — open the full TrueCap analyzer. It's free." />
+          <ToolsConversionCta calculatorName="1% rule calculator" hook="The 1% rule is a 5-second screener. When you want a fuller rental screen — DSCR, cap rate, cash flow, and pre-tax projections — open the TrueCap analyzer. It's free." />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}

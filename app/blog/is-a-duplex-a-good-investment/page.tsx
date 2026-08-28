@@ -311,7 +311,7 @@ export default function BlogPost() {
             1.20 threshold, so on a DSCR loan this property would not qualify at
             75% LTV at all — you would be pushed to 30-35% down before the
             coverage worked. Check yours in the{" "}
-            <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">
+            <Link href="/#main" className="text-primary font-semibold hover:underline">
               DSCR calculator
             </Link>{" "}
             before you pay for an appraisal.
@@ -395,7 +395,7 @@ export default function BlogPost() {
             <strong>$38,421 spent</strong> — plus two months of reserves rather
             than six, $6,569, for <strong>$44,990 total</strong>. Size your own
             version in the{" "}
-            <Link href="/tools/house-hacking-calculator" className="text-primary font-semibold hover:underline">
+            <Link href="/?strategy=house-hack#main" className="text-primary font-semibold hover:underline">
               house hacking calculator
             </Link>
             .
@@ -539,7 +539,7 @@ export default function BlogPost() {
           </p>
           <p>
             Run your own pair — the{" "}
-            <Link href="/tools/rental-cash-flow-calculator" className="text-primary font-semibold hover:underline">
+            <Link href="/#main" className="text-primary font-semibold hover:underline">
               rental cash flow calculator
             </Link>{" "}
             takes about a minute per property, and the full analyzer will hold

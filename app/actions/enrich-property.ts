@@ -5,11 +5,10 @@
  *
  * After a user picks an address from Google Places, the client calls this
  * action with the parsed address components + property type + bedrooms.
- * It returns sensible defaults for the form's "Property Tax %", "Interest
- * Rate", and "Monthly Rent" fields.
+ * It returns labeled starting benchmarks for the form's "Interest Rate" and
+ * "Monthly Rent" fields.
  *
  * Sources:
- *   - Property tax: static state-level dataset (Tax Foundation).
  *   - Mortgage rate: FRED API (MORTGAGE30US series, cached 24h).
  *   - Monthly rent: HUD Fair Market Rent API. ZIP-level Small Area FMR
  *     when the matched county/metro is a SAFMR region (most large
@@ -17,13 +16,18 @@
  *     ZIP-level is dramatically more accurate (county-wide Philadelphia
  *     vs a specific ZIP can differ 30-40%+).
  *
- * All three lookups are independent and null-safe: if any one fails
- * (missing API key, network error, no data for the county/state), the
- * other defaults still come back.
+ * The former Tax Foundation 2023 state-rate lookup is intentionally excluded
+ * from released underwriting. A stale state aggregate is not a parcel bill
+ * and can materially misstate NOI. Property tax stays manual; the editor
+ * discloses its generic preliminary fallback until the user enters a local
+ * annual bill or reviewed rate.
+ *
+ * Both remote lookups are independent and null-safe: if either one fails
+ * (missing API key, network error, no data for the county/state), the other
+ * benchmark still comes back.
  */
 
 import { z } from "zod";
-import { getStatePropertyTaxPct } from "@/lib/property-enrichment/state-property-tax";
 import { isSmallAreaEntity, pickZipSafmrRent } from "@/lib/property-enrichment/hud-safmr";
 
 export type EnrichPropertyInput = {
@@ -44,7 +48,8 @@ export type EnrichPropertyInput = {
 
 // Runtime validation for the input. All fields optional (matches the
 // type), but each one is bounded so a malformed client payload can't
-// flow into FRED/HUD/state-tax lookups with surprising shapes. State
+// flow into the FRED/HUD lookups with surprising shapes (the state
+// property-tax lookup was removed; tax is a manual input). State
 // is uppercased + capped at 2 chars; county is trimmed + capped at 80;
 // zip must be 5 digits; bedrooms 0-20.
 //
@@ -84,7 +89,6 @@ const enrichInputSchema = z.object({
 });
 
 export type EnrichPropertyResult = {
-  propertyTaxPct?: number;
   interestRate?: number;
   monthlyRent?: number;
   /**
@@ -95,7 +99,6 @@ export type EnrichPropertyResult = {
   fmrByBedrooms?: Record<number, number>;
   /** Per-field notes so the UI can show "(suggested)" labels. */
   meta: {
-    propertyTax?: { source: "state-static"; state: string };
     mortgageRate?: { source: "fred"; asOf: string };
     rent?: {
       /** hud-safmr = ZIP-level Small Area FMR; hud-fmr = county/metro. */
@@ -130,17 +133,12 @@ export async function enrichPropertyAction(
   if (!parsed.success) return out;
   const validated = parsed.data;
 
-  const [tax, rate, rent, unitFmrs] = await Promise.all([
-    lookupPropertyTax(validated.state),
+  const [rate, rent, unitFmrs] = await Promise.all([
     fetchCurrentMortgageRate(),
     maybeFetchHudRent(validated),
     maybeFetchUnitFmrs(validated),
   ]);
 
-  if (tax) {
-    out.propertyTaxPct = tax.rate;
-    out.meta.propertyTax = { source: "state-static", state: tax.state };
-  }
   if (rate) {
     out.interestRate = rate.rate;
     out.meta.mortgageRate = { source: "fred", asOf: rate.asOf };
@@ -166,15 +164,6 @@ export async function enrichPropertyAction(
   }
 
   return out;
-}
-
-// -------- Property tax (static) --------
-
-function lookupPropertyTax(state?: string): { rate: number; state: string } | null {
-  if (!state) return null;
-  const rate = getStatePropertyTaxPct(state);
-  if (rate === undefined) return null;
-  return { rate, state: state.toUpperCase() };
 }
 
 // -------- Mortgage rate (FRED) --------

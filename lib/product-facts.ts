@@ -8,7 +8,11 @@
  * of truth and /pricing resolves them at request time.
  */
 import { defaultValues } from "@/lib/investcalc-schema";
-import { TRIAL_DAYS } from "@/lib/trial";
+import {
+  PRODUCT_EVALUATION_COMPARISON_LIMIT,
+  PRODUCT_EVALUATION_DEAL_LIMIT,
+  PRODUCT_EVALUATION_DAYS,
+} from "@/lib/product-access";
 import { CALCULATOR_COUNT, EMBEDDABLE_COUNT } from "@/lib/calculator-registry";
 import { MARKET_COUNT } from "@/lib/markets/cities";
 import { STATE_COUNT } from "@/lib/states";
@@ -37,13 +41,17 @@ export const CURRENT_DEFAULT_FACTS = {
 
 export const PLAN_FACTS = {
   free: "No-signup preliminary screen with editable assumptions, core modeled metrics, and selected-rule context.",
-  singleDeal: "New one-property purchases are temporarily unavailable; existing paid report claims remain recoverable.",
+  singleDeal:
+    "New one-property purchases are temporarily unavailable; existing paid report claims remain recoverable.",
   pro: "Repeat underwriting workflow with reusable target profiles, interactive Offer Ceiling, saved opportunities, comparisons, and reports.",
   // No "portals" here: agent_portal is shipped:false (bearer links lack
   // expiry/revocation) and must not be marketed anywhere — including the
   // llms.txt routes that render this string publicly.
-  agentPro: "A separate professional tier for client workflows; it is not part of the primary Buy & Hold analyzer path.",
-  trialDays: TRIAL_DAYS,
+  agentPro:
+    "Not currently released; pricing and checkout remain unavailable until the professional client workflow is explicitly launched.",
+  evaluationDays: PRODUCT_EVALUATION_DAYS,
+  evaluationDealLimit: PRODUCT_EVALUATION_DEAL_LIMIT,
+  evaluationComparisonLimit: PRODUCT_EVALUATION_COMPARISON_LIMIT,
   pricingSource: "/pricing",
 } as const;
 
@@ -57,7 +65,8 @@ export const PUBLIC_CATALOG_FACTS = {
 export const DATA_SOURCE_FACTS = {
   rent: "HUD Fair Market Rent by county or ZIP when available",
   mortgageRate: "FRED 30-year fixed mortgage series",
-  propertyTax: "state-level effective property-tax benchmark",
+  propertyTax:
+    "manual local bill or reviewed rate; a blank field uses a disclosed generic preliminary fallback",
   editable:
     "Every starting assumption is editable and must be independently verified before an investment decision.",
 } as const;

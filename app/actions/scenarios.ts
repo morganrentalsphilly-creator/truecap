@@ -57,15 +57,21 @@ import {
 } from "@/lib/saved-analysis-methodology";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
+  normalizeAnalyzerStrategyKey,
   persistedAnalyzerStrategyKey,
   resolveScenarioAnalyzerStrategyKey,
 } from "@/lib/analyzer-strategy-persistence";
 import {
   buildSpecialistAnalysisSnapshot,
+  parseSpecialistAnalysisSnapshot,
   SPECIALIST_ANALYSIS_SNAPSHOT_FIELD,
 } from "@/lib/specialist-analysis-snapshot";
 import { retargetUnchangedScenarioResultSnapshot } from "@/lib/scenario-result-snapshot";
 import { persistedLifecycleForSimpleState } from "@/lib/saved-deal-lifecycle";
+import {
+  isScenarioStrategyEnabled,
+  isSpecialistStrategyEnabled,
+} from "@/lib/feature-flags";
 
 export type ScenarioSummary = {
   id: string;
@@ -119,6 +125,40 @@ function isMissingSchema(error: { code?: string; message?: string }): boolean {
       error.message ?? "",
     )
   );
+}
+
+/** A scenario is a new persisted row even when it byte-clones an old result.
+ * Preserve the source row itself, but never copy a disabled or malformed
+ * specialist payload into the new row. Dark analyzer identities downgrade to
+ * the canonical buy-and-hold lens. */
+function releaseGateScenarioResultSnapshot(
+  value: unknown,
+): Record<string, unknown> | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+
+  const snapshot = { ...(value as Record<string, unknown>) };
+  const strategyKey = normalizeAnalyzerStrategyKey(
+    snapshot.analyzerStrategyKey,
+  );
+  if (strategyKey && !isSpecialistStrategyEnabled(strategyKey)) {
+    snapshot.analyzerStrategyKey = "buy-hold";
+    delete snapshot[SPECIALIST_ANALYSIS_SNAPSHOT_FIELD];
+    return snapshot;
+  }
+
+  const specialistAnalysis = parseSpecialistAnalysisSnapshot(
+    snapshot[SPECIALIST_ANALYSIS_SNAPSHOT_FIELD],
+  );
+  if (
+    !specialistAnalysis ||
+    specialistAnalysis.strategy !== strategyKey ||
+    !isSpecialistStrategyEnabled(specialistAnalysis.strategy)
+  ) {
+    delete snapshot[SPECIALIST_ANALYSIS_SNAPSHOT_FIELD];
+  } else {
+    snapshot[SPECIALIST_ANALYSIS_SNAPSHOT_FIELD] = specialistAnalysis;
+  }
+  return snapshot;
 }
 
 type DealRow = Record<string, unknown> & {
@@ -339,6 +379,17 @@ export async function addScenarioAction(
     };
   }
 
+  const strategyKind = isStrategyKind(parsed.data.strategyKind)
+    ? parsed.data.strategyKind
+    : null;
+  if (strategyKind && !isScenarioStrategyEnabled(strategyKind)) {
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "This strategy model is not available yet.",
+    };
+  }
+
   // Load the full source row (RLS scopes to owner).
   const { data: source, error: loadErr } = await supabase
     .from("saved_analyses")
@@ -374,9 +425,6 @@ export async function addScenarioAction(
   if (!resolved.ok) return resolved.result;
   const propertyId = resolved.propertyId;
 
-  const strategyKind = isStrategyKind(parsed.data.strategyKind)
-    ? parsed.data.strategyKind
-    : null;
   const scenarioName = (
     parsed.data.scenarioName?.trim() || defaultScenarioName(strategyKind)
   ).slice(0, 80);
@@ -464,6 +512,9 @@ export async function addScenarioAction(
   clone.financing_profile_id = null;
   clone.financing_profile_version = null;
   clone.financing_profile_snapshot = null;
+  clone.result_snapshot = releaseGateScenarioResultSnapshot(
+    clone.result_snapshot,
+  );
 
   // Apply the (conservative) strategy preset to the assumptions and RECOMPUTE
   // the stored metrics, so the new scenario doesn't show the source deal's
@@ -614,7 +665,10 @@ export async function addScenarioAction(
           result,
           analyzerStrategyKey,
         );
-        if (specialistAnalysis) {
+        if (
+          specialistAnalysis &&
+          isSpecialistStrategyEnabled(analyzerStrategyKey)
+        ) {
           recomputedResultSnapshot[SPECIALIST_ANALYSIS_SNAPSHOT_FIELD] =
             specialistAnalysis;
         }
@@ -698,6 +752,12 @@ export async function addScenarioAction(
       }
     }
   }
+
+  // Last-write invariant across every branch above, including byte-for-byte
+  // no-strategy clones and unchanged-result retargeting.
+  clone.result_snapshot = releaseGateScenarioResultSnapshot(
+    clone.result_snapshot,
+  );
 
   const { data: inserted, error: insertErr } = await supabase
     .from("saved_analyses")

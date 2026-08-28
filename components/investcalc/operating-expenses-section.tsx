@@ -33,6 +33,10 @@ import {
   optionalNumberSetValueAs,
 } from "@/components/investcalc/form-field-helpers";
 import { GLOSSARY } from "@/lib/glossary";
+import { isFeatureReleased } from "@/lib/entitlements-catalog";
+
+const TAX_STRATEGY_RELEASED = isFeatureReleased("tax_strategy");
+const EXIT_SCENARIOS_RELEASED = isFeatureReleased("exit_scenarios");
 
 interface OperatingExpensesSectionProps {
   form: UseFormReturn<InvestmentFormValues>;
@@ -243,6 +247,10 @@ export function OperatingExpensesSection({
   // the property has no tax/insurance); show a dash until there's a price.
   const hasPrice = purchasePriceForEstimate > 0;
   const propertyTaxPctEffective = propertyTaxPct ?? 1.1;
+  const hasExplicitPropertyTax =
+    propertyTaxInputMode === "annual"
+      ? propertyTaxAnnual != null
+      : propertyTaxPct != null;
   const propertyTaxPctEst = Math.round(
     (purchasePriceForEstimate * (propertyTaxPctEffective / 100)) / 12,
   );
@@ -314,7 +322,7 @@ export function OperatingExpensesSection({
                   reopened deals override the stock percentages, and calling
                   those "sensible defaults" mislabels the user's own numbers. */}
               {usingStockPctDefaults
-                ? "Using sensible defaults"
+                ? "Using starting assumptions"
                 : "Using your expense assumptions"}
             </span>
           </div>
@@ -327,6 +335,11 @@ export function OperatingExpensesSection({
               </span>{" "}
               <span className="text-sm font-semibold text-foreground">
                 {hasPrice ? `$${propertyTaxEst.toLocaleString()}/mo` : "—"}
+                {!hasExplicitPropertyTax ? (
+                  <span className="ml-1 font-normal text-amber-700">
+                    (generic 1.1% preliminary fallback)
+                  </span>
+                ) : null}
               </span>
             </div>
             <div>
@@ -390,6 +403,18 @@ export function OperatingExpensesSection({
           </p>
         </div>
       )}
+
+      {!hasExplicitPropertyTax ? (
+        <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-amber-300 bg-amber-50 px-3.5 py-2.5">
+          <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-700" />
+          <p className="text-xs leading-relaxed text-amber-950">
+            <span className="font-semibold">Property tax is not verified.</span>{" "}
+            The preliminary result uses a generic 1.1% of purchase price
+            fallback. Enter the local annual bill or a reviewed local rate
+            before relying on NOI, cash flow, cap rate, DSCR, or Offer Ceiling.
+          </p>
+        </div>
+      ) : null}
 
       {/* Expense-realism guard (Phase 2 #2): a multi-unit modeled with $0
           owner-paid utilities is the most common way an underwrite sails
@@ -506,13 +531,7 @@ export function OperatingExpensesSection({
                         step={1}
                         min={0}
                         max={1_000_000}
-                        placeholder={
-                          hasPrice
-                            ? String(
-                                Math.round(purchasePriceForEstimate * 0.011),
-                              )
-                            : "3,000"
-                        }
+                        placeholder="e.g. 3,000"
                         aria-invalid={!!errors.propertyTaxAnnual}
                         aria-describedby={
                           errors.propertyTaxAnnual
@@ -538,7 +557,7 @@ export function OperatingExpensesSection({
                     step="0.01"
                     min={0}
                     max={100}
-                    placeholder="1.1"
+                    placeholder="e.g. 1.35"
                     aria-invalid={!!errors.propertyTaxPct}
                     aria-describedby={
                       errors.propertyTaxPct
@@ -556,8 +575,8 @@ export function OperatingExpensesSection({
               </div>
               <FieldHint>
                 {propertyTaxInputMode === "annual"
-                  ? "The actual annual tax bill from the listing. Leave blank to fall back to the % estimate."
-                  : "Used as annual tax rate on purchase price."}
+                  ? "Enter a local annual bill. Blank falls back to an entered rate, or otherwise the disclosed generic 1.1% preliminary assumption."
+                  : "Enter a reviewed local annual rate on purchase price. Blank uses the disclosed generic 1.1% preliminary assumption."}
               </FieldHint>
               <FieldError
                 id="propertyTaxAmount-error"
@@ -994,82 +1013,86 @@ export function OperatingExpensesSection({
             Advanced Options (Optional)
           </p>
           <div className="grid grid-cols-1 gap-x-6 gap-y-4 md:grid-cols-2 xl:grid-cols-4">
-            <div>
-              <FieldLabel
-                htmlFor="buildingValuePct"
-                label="Building Value %"
-                term="buildingValue"
-              />
-              <div className="relative">
-                <Input
-                  {...register("buildingValuePct", { valueAsNumber: true })}
-                  id="buildingValuePct"
-                  type="number"
-                  inputMode="decimal"
-                  step="0.01"
-                  min={0}
-                  max={100}
-                  placeholder="85"
-                  aria-invalid={!!errors.buildingValuePct}
-                  aria-describedby={
-                    errors.buildingValuePct
-                      ? "buildingValuePct-error"
-                      : undefined
-                  }
-                  className={cn(
-                    inputClassName,
-                    "pr-8",
-                    errors.buildingValuePct && "border-destructive",
-                  )}
-                />
-                <PercentIcon />
-              </div>
-              <FieldHint>
-                Portion of purchase price allocated to depreciable building
-                value.
-              </FieldHint>
-              <FieldError
-                id="buildingValuePct-error"
-                message={errors.buildingValuePct?.message}
-              />
-            </div>
+            {TAX_STRATEGY_RELEASED ? (
+              <>
+                <div>
+                  <FieldLabel
+                    htmlFor="buildingValuePct"
+                    label="Building Value %"
+                    term="buildingValue"
+                  />
+                  <div className="relative">
+                    <Input
+                      {...register("buildingValuePct", { valueAsNumber: true })}
+                      id="buildingValuePct"
+                      type="number"
+                      inputMode="decimal"
+                      step="0.01"
+                      min={0}
+                      max={100}
+                      placeholder="85"
+                      aria-invalid={!!errors.buildingValuePct}
+                      aria-describedby={
+                        errors.buildingValuePct
+                          ? "buildingValuePct-error"
+                          : undefined
+                      }
+                      className={cn(
+                        inputClassName,
+                        "pr-8",
+                        errors.buildingValuePct && "border-destructive",
+                      )}
+                    />
+                    <PercentIcon />
+                  </div>
+                  <FieldHint>
+                    Portion of purchase price allocated to depreciable building
+                    value.
+                  </FieldHint>
+                  <FieldError
+                    id="buildingValuePct-error"
+                    message={errors.buildingValuePct?.message}
+                  />
+                </div>
 
-            <div>
-              <FieldLabel
-                htmlFor="depreciationYears"
-                label="Depreciation Period"
-                term="depreciationYears"
-              />
-              <select
-                {...register("depreciationYears", {
-                  setValueAs: (v) => Number(v),
-                })}
-                id="depreciationYears"
-                aria-invalid={!!errors.depreciationYears}
-                aria-describedby={
-                  errors.depreciationYears
-                    ? "depreciationYears-error"
-                    : undefined
-                }
-                className={cn(
-                  // text-base below md: iOS Safari zooms the whole page in on
-                  // any form control under 16px and never zooms back out.
-                  // Same rule the Input primitive already encodes.
-                  "min-h-11 w-full rounded-lg border border-input bg-background px-3 text-base shadow-sm focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-sm",
-                  errors.depreciationYears && "border-destructive",
-                )}
-              >
-                <option value={27.5}>27.5 years (Residential)</option>
-                <option value={39}>39 years (Commercial)</option>
-              </select>
-              <FieldHint>
-                IRS standard recovery period for depreciation.
-              </FieldHint>
-              <FieldError
-                id="depreciationYears-error"
-                message={errors.depreciationYears?.message}
-              />
-            </div>
+                <div>
+                  <FieldLabel
+                    htmlFor="depreciationYears"
+                    label="Depreciation Period"
+                    term="depreciationYears"
+                  />
+                  <select
+                    {...register("depreciationYears", {
+                      setValueAs: (v) => Number(v),
+                    })}
+                    id="depreciationYears"
+                    aria-invalid={!!errors.depreciationYears}
+                    aria-describedby={
+                      errors.depreciationYears
+                        ? "depreciationYears-error"
+                        : undefined
+                    }
+                    className={cn(
+                      // text-base below md: iOS Safari zooms the whole page in on
+                      // any form control under 16px and never zooms back out.
+                      // Same rule the Input primitive already encodes.
+                      "min-h-11 w-full rounded-lg border border-input bg-background px-3 text-base shadow-sm focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-sm",
+                      errors.depreciationYears && "border-destructive",
+                    )}
+                  >
+                    <option value={27.5}>27.5 years (Residential)</option>
+                    <option value={39}>39 years (Commercial)</option>
+                  </select>
+                  <FieldHint>
+                    IRS standard recovery period for depreciation.
+                  </FieldHint>
+                  <FieldError
+                    id="depreciationYears-error"
+                    message={errors.depreciationYears?.message}
+                  />
+                </div>
+              </>
+            ) : null}
 
             <div>
               <FieldLabel
@@ -1142,171 +1165,183 @@ export function OperatingExpensesSection({
                 message={errors.rentGrowthPct?.message}
               />
             </div>
+            {EXIT_SCENARIOS_RELEASED ? (
+              <>
+                <div>
+                  <FieldLabel
+                    htmlFor="appreciationRatePct"
+                    label="Appreciation Rate % (Exit Scenarios)"
+                    term="appreciation"
+                  />
+                  <div className="relative">
+                    <Input
+                      {...register("appreciationRatePct", {
+                        setValueAs: optionalNumberSetValueAs,
+                      })}
+                      id="appreciationRatePct"
+                      type="number"
+                      inputMode="decimal"
+                      step="0.01"
+                      min={0}
+                      max={100}
+                      placeholder="3"
+                      aria-invalid={!!errors.appreciationRatePct}
+                      aria-describedby={
+                        errors.appreciationRatePct
+                          ? "appreciationRatePct-error"
+                          : undefined
+                      }
+                      className={cn(
+                        inputClassName,
+                        "pr-8",
+                        errors.appreciationRatePct && "border-destructive",
+                      )}
+                    />
+                    <PercentIcon />
+                  </div>
+                  <FieldHint>
+                    Expected annual property appreciation rate.
+                  </FieldHint>
+                  <FieldError
+                    id="appreciationRatePct-error"
+                    message={errors.appreciationRatePct?.message}
+                  />
+                </div>
 
-            <div>
-              <FieldLabel
-                htmlFor="appreciationRatePct"
-                label="Appreciation Rate % (Exit Scenarios)"
-                term="appreciation"
-              />
-              <div className="relative">
-                <Input
-                  {...register("appreciationRatePct", {
-                    setValueAs: optionalNumberSetValueAs,
-                  })}
-                  id="appreciationRatePct"
-                  type="number"
-                  inputMode="decimal"
-                  step="0.01"
-                  min={0}
-                  max={100}
-                  placeholder="3"
-                  aria-invalid={!!errors.appreciationRatePct}
-                  aria-describedby={
-                    errors.appreciationRatePct
-                      ? "appreciationRatePct-error"
-                      : undefined
-                  }
-                  className={cn(
-                    inputClassName,
-                    "pr-8",
-                    errors.appreciationRatePct && "border-destructive",
-                  )}
-                />
-                <PercentIcon />
-              </div>
-              <FieldHint>Expected annual property appreciation rate.</FieldHint>
-              <FieldError
-                id="appreciationRatePct-error"
-                message={errors.appreciationRatePct?.message}
-              />
-            </div>
+                <div>
+                  <FieldLabel
+                    htmlFor="sellingCostPct"
+                    label="Selling Cost % (Exit Scenarios)"
+                    term="sellingCost"
+                  />
+                  <div className="relative">
+                    <Input
+                      {...register("sellingCostPct", {
+                        setValueAs: optionalNumberSetValueAs,
+                      })}
+                      id="sellingCostPct"
+                      type="number"
+                      inputMode="decimal"
+                      step="0.01"
+                      min={0}
+                      max={100}
+                      placeholder="6"
+                      aria-invalid={!!errors.sellingCostPct}
+                      aria-describedby={
+                        errors.sellingCostPct
+                          ? "sellingCostPct-error"
+                          : undefined
+                      }
+                      className={cn(
+                        inputClassName,
+                        "pr-8",
+                        errors.sellingCostPct && "border-destructive",
+                      )}
+                    />
+                    <PercentIcon />
+                  </div>
+                  <FieldHint>
+                    Total selling costs as a percentage of sale price.
+                  </FieldHint>
+                  <FieldError
+                    id="sellingCostPct-error"
+                    message={errors.sellingCostPct?.message}
+                  />
+                </div>
+              </>
+            ) : null}
 
-            <div>
-              <FieldLabel
-                htmlFor="sellingCostPct"
-                label="Selling Cost % (Exit Scenarios)"
-                term="sellingCost"
-              />
-              <div className="relative">
-                <Input
-                  {...register("sellingCostPct", {
-                    setValueAs: optionalNumberSetValueAs,
-                  })}
-                  id="sellingCostPct"
-                  type="number"
-                  inputMode="decimal"
-                  step="0.01"
-                  min={0}
-                  max={100}
-                  placeholder="6"
-                  aria-invalid={!!errors.sellingCostPct}
-                  aria-describedby={
-                    errors.sellingCostPct ? "sellingCostPct-error" : undefined
-                  }
-                  className={cn(
-                    inputClassName,
-                    "pr-8",
-                    errors.sellingCostPct && "border-destructive",
-                  )}
-                />
-                <PercentIcon />
-              </div>
-              <FieldHint>
-                Total selling costs as a percentage of sale price.
-              </FieldHint>
-              <FieldError
-                id="sellingCostPct-error"
-                message={errors.sellingCostPct?.message}
-              />
-            </div>
+            {TAX_STRATEGY_RELEASED ? (
+              <>
+                <div>
+                  <FieldLabel
+                    htmlFor="taxRatePct"
+                    label="Tax Rate % (Optional)"
+                    term="taxSavings"
+                  />
+                  <div className="relative">
+                    <Input
+                      {...register("taxRatePct", {
+                        setValueAs: optionalNumberSetValueAs,
+                      })}
+                      id="taxRatePct"
+                      type="number"
+                      inputMode="decimal"
+                      step="0.01"
+                      min={0}
+                      max={100}
+                      placeholder="24"
+                      aria-invalid={!!errors.taxRatePct}
+                      aria-describedby={
+                        errors.taxRatePct ? "taxRatePct-error" : undefined
+                      }
+                      className={cn(
+                        inputClassName,
+                        "pr-8",
+                        errors.taxRatePct && "border-destructive",
+                      )}
+                    />
+                    <PercentIcon />
+                  </div>
+                  <FieldHint>
+                    Your personal income tax rate for tax savings calculation.
+                  </FieldHint>
+                  <FieldError
+                    id="taxRatePct-error"
+                    message={errors.taxRatePct?.message}
+                  />
+                </div>
 
-            <div>
-              <FieldLabel
-                htmlFor="taxRatePct"
-                label="Tax Rate % (Optional)"
-                term="taxSavings"
-              />
-              <div className="relative">
-                <Input
-                  {...register("taxRatePct", {
-                    setValueAs: optionalNumberSetValueAs,
-                  })}
-                  id="taxRatePct"
-                  type="number"
-                  inputMode="decimal"
-                  step="0.01"
-                  min={0}
-                  max={100}
-                  placeholder="24"
-                  aria-invalid={!!errors.taxRatePct}
-                  aria-describedby={
-                    errors.taxRatePct ? "taxRatePct-error" : undefined
-                  }
-                  className={cn(
-                    inputClassName,
-                    "pr-8",
-                    errors.taxRatePct && "border-destructive",
-                  )}
-                />
-                <PercentIcon />
-              </div>
-              <FieldHint>
-                Your personal income tax rate for tax savings calculation.
-              </FieldHint>
-              <FieldError
-                id="taxRatePct-error"
-                message={errors.taxRatePct?.message}
-              />
-            </div>
-
-            <div className="flex min-h-[94px] min-w-0 flex-col gap-2 pt-1 min-[240px]:flex-row min-[240px]:items-start min-[240px]:justify-between xl:items-center">
-              <div className="min-w-0">
-                <div className="mb-2 flex min-h-11 min-w-0 items-start gap-1.5">
-                  <Label
-                    htmlFor="include-interest-deduction"
-                    className="min-w-0 flex-1 cursor-pointer py-3 text-[11px] font-bold uppercase tracking-wide text-[var(--brand-orange)] [overflow-wrap:anywhere]"
-                  >
-                    Include Interest Deduction
-                  </Label>
-                  <Tooltip delayDuration={150}>
-                    <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-[var(--brand-orange)] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                        aria-label="Include interest deduction guidance"
+                <div className="flex min-h-[94px] min-w-0 flex-col gap-2 pt-1 min-[240px]:flex-row min-[240px]:items-start min-[240px]:justify-between xl:items-center">
+                  <div className="min-w-0">
+                    <div className="mb-2 flex min-h-11 min-w-0 items-start gap-1.5">
+                      <Label
+                        htmlFor="include-interest-deduction"
+                        className="min-w-0 flex-1 cursor-pointer py-3 text-[11px] font-bold uppercase tracking-wide text-[var(--brand-orange)] [overflow-wrap:anywhere]"
                       >
-                        <Info aria-hidden="true" className="size-3.5" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      side="top"
-                      sideOffset={6}
-                      className="max-w-xs border border-border bg-popover px-3 py-2 text-popover-foreground shadow-md"
-                    >
+                        Include Interest Deduction
+                      </Label>
+                      <Tooltip delayDuration={150}>
+                        <TooltipTrigger asChild>
+                          <button
+                            type="button"
+                            className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-[var(--brand-orange)] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            aria-label="Include interest deduction guidance"
+                          >
+                            <Info aria-hidden="true" className="size-3.5" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="top"
+                          sideOffset={6}
+                          className="max-w-xs border border-border bg-popover px-3 py-2 text-popover-foreground shadow-md"
+                        >
+                          Include mortgage interest deduction in cash flow and
+                          taxes.
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <p className="text-[11px] leading-relaxed text-muted-foreground [overflow-wrap:anywhere]">
                       Include mortgage interest deduction in cash flow and
                       taxes.
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-                <p className="text-[11px] leading-relaxed text-muted-foreground [overflow-wrap:anywhere]">
-                  Include mortgage interest deduction in cash flow and taxes.
-                </p>
-              </div>
-              <Controller
-                name="includeInterestDeduction"
-                control={control}
-                render={({ field }) => (
-                  <Switch
-                    id="include-interest-deduction"
-                    checked={field.value ?? true}
-                    onCheckedChange={field.onChange}
-                    aria-label="Include interest deduction in estimated tax savings"
-                    className="self-end min-[240px]:mt-0.5 min-[240px]:self-auto"
+                    </p>
+                  </div>
+                  <Controller
+                    name="includeInterestDeduction"
+                    control={control}
+                    render={({ field }) => (
+                      <Switch
+                        id="include-interest-deduction"
+                        checked={field.value ?? true}
+                        onCheckedChange={field.onChange}
+                        aria-label="Include interest deduction in estimated tax savings"
+                        className="self-end min-[240px]:mt-0.5 min-[240px]:self-auto"
+                      />
+                    )}
                   />
-                )}
-              />
-            </div>
+                </div>
+              </>
+            ) : null}
           </div>
         </div>
       </div>

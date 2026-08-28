@@ -148,6 +148,10 @@ import { RateAlertsToggle } from "@/components/settings/rate-alerts-toggle";
 import { CashFlowWaterfall } from "@/components/investcalc/cash-flow-waterfall";
 import { MortgageScenarioCompare } from "@/components/investcalc/mortgage-scenario-compare";
 import { LoanAmortizationView } from "@/components/investcalc/loan-amortization-view";
+import {
+  AdvancedBuyAndHoldSummary,
+  RenovationModelDisclosure,
+} from "@/components/investcalc/advanced-buy-and-hold-summary";
 import { DealNotesPanel } from "@/components/investcalc/deal-notes-panel";
 import { ShareLinkButton } from "@/components/investcalc/share-link-button";
 import { AnswerHeroCard } from "@/components/investcalc/answer-hero-card";
@@ -182,8 +186,15 @@ import type {
 import type { TaxStrategyInput, TaxStrategyYear } from "@/lib/tax-strategy";
 import type { ExitScenarioInput, ExitScenarioYear } from "@/lib/exit-scenarios";
 import { computeReturnSummaryFromExitYears } from "@/lib/returns";
+import { calculateMaoIrr } from "@/lib/mao-target-evaluation";
 import { isExtremeAnnualizedRoi } from "@/lib/extreme-value-format";
-import { isFeatureEnabled } from "@/lib/feature-flags";
+import {
+  hasAnySpecialistStrategyEnabled,
+  isFeatureEnabled,
+  isSpecialistStrategyEnabled,
+} from "@/lib/feature-flags";
+import { formatDscr } from "@/lib/financial-presentation";
+import { isFeatureReleased } from "@/lib/entitlements-catalog";
 import { SAMPLE_DEAL_FIXTURE } from "@/lib/sample-deal";
 import type { UserDecision } from "@/lib/decision-contract";
 import { cn, scrollBehavior } from "@/lib/utils";
@@ -281,6 +292,9 @@ interface AnalysisDashboardProps {
   canUpdateSavedDeals?: boolean;
   canCompareDeals?: boolean;
   canExportPdf?: boolean;
+  /** Exact no-signup decision grants may export without first creating a
+   * saved row. The server still binds the report to that exact input set. */
+  canExportUnsavedPdf?: boolean;
   canUseProjections?: boolean;
   canUseTaxStrategy?: boolean;
   canUseExitScenarios?: boolean;
@@ -409,6 +423,18 @@ const TABS: {
   { id: "stress-test", label: "Stress Test", icon: Activity, isPro: true },
 ];
 
+const RELEASED_TABS = TABS.filter((tab) => {
+  if (tab.id === "tax-strategy") return isFeatureReleased("tax_strategy");
+  if (tab.id === "exit-scenarios") return isFeatureReleased("exit_scenarios");
+  if (tab.id === "strategies") {
+    return isFeatureReleased("strategies") && hasAnySpecialistStrategyEnabled();
+  }
+  return true;
+});
+const RELEASED_TAB_IDS = new Set<AnalysisDashboardTab>(
+  RELEASED_TABS.map((tab) => tab.id),
+);
+
 const ALL_LEDGER_ROW_IDS: AnalysisLedgerRowId[] = [
   ...TABS.map((t) => t.id),
   "comps",
@@ -422,14 +448,14 @@ function buildInitialOpenRows(
   const rows = Object.fromEntries(
     ALL_LEDGER_ROW_IDS.map((id) => [id, false]),
   ) as Record<AnalysisLedgerRowId, boolean>;
-  rows[lead] = true;
+  rows[RELEASED_TAB_IDS.has(lead) ? lead : "cash-flow"] = true;
   return rows;
 }
 
 /**
  * Is this an "appreciation play" - a financed deal whose year-1 cash flow
- * is negative (usually high leverage) but which still pays off after-tax
- * and projects a strong 10-year total return? These deals read as
+ * is negative (usually high leverage) but projects a strong 10-year pre-tax
+ * total return? These deals read as
  * uniformly red in the year-1 Overview even though they're viable holds;
  * the context banner reframes that without faking the year-1 facts.
  */
@@ -442,7 +468,6 @@ function isAppreciationPlayDeal(
     propertyType !== "owner-occupant" &&
     r.monthlyPayment > 0 &&
     r.netCashFlow < 0 &&
-    r.afterTaxCF >= 0 &&
     (annualizedReturnPct ?? 0) > APPRECIATION_PLAY_MIN_ANNUAL_RETURN_PCT
   );
 }
@@ -489,6 +514,7 @@ export function AnalysisDashboard({
   canUpdateSavedDeals = false,
   canCompareDeals = false,
   canExportPdf = false,
+  canExportUnsavedPdf = false,
   canUseProjections = false,
   canUseTaxStrategy = false,
   canUseExitScenarios = false,
@@ -521,6 +547,8 @@ export function AnalysisDashboard({
   const showDealDecisionPack = isFeatureEnabled("deal_decision_pack");
   const advocacyDecisionContract =
     advocacyContractEligible && isFeatureEnabled("advocacy_decision_contract");
+  const exportNeedsSave =
+    canExportPdf && !canExportUnsavedPdf && !isSaved;
   const resultDisclosureKey = savedDealId
     ? `saved:${savedDealId}`
     : `unsaved:${values?.address ?? ""}:${values?.purchasePrice ?? ""}:${result?.analysisDate ?? ""}:${result?.netCashFlow ?? ""}`;
@@ -586,7 +614,9 @@ export function AnalysisDashboard({
   // When a non-cash-flow strategy is active (Wholesale/BRRRR/Flip), lead the
   // results with that play's real answer instead of the generic buy-box verdict.
   const strategyLeadsOutput =
-    !!activeStrategy && activeStrategy.primaryTab !== "cash-flow";
+    !!activeStrategy &&
+    activeStrategy.primaryTab !== "cash-flow" &&
+    isSpecialistStrategyEnabled(activeStrategy.key);
   // Show only the first 3 recommendation tips by default - beyond that
   // the Recommendation card starts feeling busy. User can expand to see
   // the rest. Resets implicitly when the parent component re-mounts on
@@ -693,8 +723,7 @@ export function AnalysisDashboard({
     setBuyBoxRetryToken((current) => current + 1);
   }, [activeBuyBoxStrategyKey]);
   const buyBoxResolutionUnavailable =
-    requiresBuyBoxTargetResolution &&
-    buyBoxTargetResolutionState === "error";
+    requiresBuyBoxTargetResolution && buyBoxTargetResolutionState === "error";
   // A lookup error fails closed for every target-dependent claim but must not
   // strand the base underwriting workflow. Treat the target editor as ready
   // with no adopted Buy Box so Save/Share/PDF persist only base assumptions.
@@ -724,8 +753,7 @@ export function AnalysisDashboard({
   const resultActionsBlockedReason = targetDraftActionsBlocked
     ? "Apply or cancel your criteria edits before taking another action."
     : targetActionsBlockedReason;
-  const verificationActionsBlocked =
-    resultActionsBlocked;
+  const verificationActionsBlocked = resultActionsBlocked;
   const verificationActionsBlockedReason = targetDraftActionsBlocked
     ? "Apply or cancel your criteria edits before reviewing inputs or opening the checklist."
     : targetActionsBlockedReason;
@@ -837,9 +865,7 @@ export function AnalysisDashboard({
     () =>
       normalizeOfferCeilingDecisionBasis(adoptedDecisionBasis, {
         ...(financingSafeOverride ? { target: financingSafeOverride } : {}),
-        ...(maoTargetOverrideSource
-          ? { source: maoTargetOverrideSource }
-          : {}),
+        ...(maoTargetOverrideSource ? { source: maoTargetOverrideSource } : {}),
         strategyKey: activeBuyBoxStrategyKey,
       }),
     [
@@ -1062,6 +1088,14 @@ export function AnalysisDashboard({
         ? computeReturnSummaryFromExitYears(exitScenarioSource.initialYears)
         : null,
     [exitScenarioSource],
+  );
+  // Buy-box IRR is intentionally the same fixed 10-year, pre-tax,
+  // contribution-aware return used by the Offer Ceiling solver. A custom
+  // exit-scenario summary may use a different horizon and therefore cannot
+  // be substituted for this acceptance criterion.
+  const buyBoxIrr = useMemo(
+    () => (values && result ? calculateMaoIrr(values, result) : null),
+    [values, result],
   );
   const router = useRouter();
   const { toast } = useToast();
@@ -1357,7 +1391,9 @@ export function AnalysisDashboard({
     annualizedReturnPct,
     onMetricSelect: handleMetricJump,
   });
-  const secondaryMetricKeys = getSecondaryMetricKeys();
+  const secondaryMetricKeys = getSecondaryMetricKeys({
+    includeTaxMetrics: isFeatureReleased("tax_strategy"),
+  });
 
   // ── Closed-row summary lines (Phase 5, the Ledger's unique asset) ──
   // ONE truthful line per closed ledger row, derived ONLY from numbers
@@ -1394,10 +1430,12 @@ export function AnalysisDashboard({
         ? `~$${annualTaxSavings.toLocaleString()}/yr modeled tax impact at the entered rate`
         : "See the modeled effect of depreciation and interest",
     "exit-scenarios":
-      returnSummary?.irrPct != null
-        ? `IRR ${returnSummary.irrPct.toFixed(1)}% over ${returnSummary.years} yrs`
-        : "When should you sell? Model the exit",
-    strategies: "Run the BRRRR & fix-and-flip numbers",
+      returnSummary?.irrStatus === "multiple"
+        ? `Multiple IRRs (${returnSummary.irrRootsPct.map((root) => `${root.toFixed(1)}%`).join(", ")}) — review timing`
+        : returnSummary?.irrPct != null
+          ? `IRR ${returnSummary.irrPct.toFixed(1)}% over ${returnSummary.years} yrs`
+          : "When should you sell? Model the exit",
+    strategies: "Run released specialist strategy scenarios",
     "stress-test": deferredWhatIfState?.isAdjusted
       ? `${deferredWhatIfState.result.netCashFlow >= 0 ? "Survives" : "Goes negative under"} ${formatAdjustmentLabel(
           deferredWhatIfState.rentPct,
@@ -1494,9 +1532,7 @@ export function AnalysisDashboard({
         </div>
       ) : null}
 
-      <h1
-        id="analysis-decision-title"
-        className="sr-only">
+      <h1 id="analysis-decision-title" className="sr-only">
         First-pass underwriting
       </h1>
 
@@ -1533,7 +1569,7 @@ export function AnalysisDashboard({
                 Model DSCR
               </p>
               <p className="mt-1 font-mono text-lg font-extrabold tabular-nums text-foreground">
-                {Number.isFinite(result.dscr) ? result.dscr.toFixed(2) : "N/A"}
+                {formatDscr(result.dscr, result.monthlyPayment > 0)}
               </p>
             </div>
           </div>
@@ -1599,11 +1635,11 @@ export function AnalysisDashboard({
             priceIsEstimated={priceIsEstimated}
             onExportPdf={() => handleExportPdf()}
             isExporting={isExporting}
-            isExportDisabled={isExporting || (canExportPdf && !isSaved)}
+            isExportDisabled={isExporting || exportNeedsSave}
             exportHint={
               targetActionsBlocked
                 ? targetActionsBlockedReason
-                : canExportPdf && !isSaved
+                : exportNeedsSave
                   ? (persistedActionsBlockHint ??
                     "Save this analysis before exporting PDF.")
                   : !canExportPdf
@@ -1929,12 +1965,12 @@ export function AnalysisDashboard({
               disabled={
                 targetActionsBlocked ||
                 isExporting ||
-                (canExportPdf && !isSaved)
+                exportNeedsSave
               }
               title={
                 targetActionsBlocked
                   ? targetActionsBlockedReason
-                  : canExportPdf && !isSaved
+                  : exportNeedsSave
                     ? (persistedActionsBlockHint ??
                       "Save this analysis before exporting PDF.")
                     : !canExportPdf
@@ -2238,6 +2274,9 @@ export function AnalysisDashboard({
             propertyType: values.propertyType,
             state: deriveStateFromAddress(values.address),
             isCashPurchase: result.monthlyPayment <= 0,
+            cashRequired: result.totalCashRequired ?? null,
+            irrPct: buyBoxIrr?.primaryIrrPct ?? null,
+            irrStatus: buyBoxIrr?.status ?? "none",
           }}
           values={values}
           analyzerStrategyKey={activeStrategy?.key ?? "buy-hold"}
@@ -2306,9 +2345,12 @@ export function AnalysisDashboard({
                   "en-US",
                 )}
                 /mo · {maoQaContext.achieved.capRate.toFixed(1)}% cap ·{" "}
-                {maoQaContext.achieved.dscr > 0
-                  ? maoQaContext.achieved.dscr.toFixed(2)
-                  : "—"}{" "}
+                {formatDscr(
+                  maoQaContext.achieved.dscr,
+                  (maoQaContext.achieved.monthlyPayment ??
+                    result?.monthlyPayment ??
+                    0) > 0,
+                )}{" "}
                 DSCR
               </p>
               <button
@@ -2330,6 +2372,12 @@ export function AnalysisDashboard({
             </div>
           </div>
         </section>
+      ) : null}
+      {result && values && !strategyLeadsOutput ? (
+        <div className="space-y-2">
+          <AdvancedBuyAndHoldSummary result={result} values={values} />
+          <RenovationModelDisclosure values={values} />
+        </div>
       ) : null}
       {/* Fixed first-year metrics lead here. Long-term returns remain in the
           dedicated Long-term analysis region and secondary disclosure. */}
@@ -2456,8 +2504,7 @@ export function AnalysisDashboard({
 
             {/* Appreciation-play context banner - reframes a deal whose
             year-1 cards read uniformly red (negative cash flow, sub-1
-            DSCR) but which pays off after-tax and projects a strong
-            10-year total return. Sourced from the BASE result + the same
+            DSCR) but projects a strong pre-tax 10-year total return. Sourced from the BASE result + the same
             exit-scenario engine as the Screening Index, so it never contradicts
             them. Does NOT alter the year-1 facts above - it explains them. */}
             {appreciationPlay && result && !deferredWhatIfState?.isAdjusted ? (
@@ -2472,20 +2519,15 @@ export function AnalysisDashboard({
                   </p>
                   <p className="text-xs leading-relaxed text-foreground/70">
                     Year-1 cash flow is negative because of the high leverage.
-                    The simplified tax model produces an illustrative after-tax
-                    estimate of{" "}
-                    <strong className="text-foreground">
-                      +${Math.round(result.afterTaxCF).toLocaleString()}/mo
-                    </strong>
-                    . Whether deductions are currently usable depends on the
-                    taxpayer. The projected 10-year total return is{" "}
+                    The projected pre-tax 10-year total return is{" "}
                     <strong className="text-foreground">
                       ~{Math.round(annualizedReturnPct ?? 0)}%/yr
                     </strong>{" "}
-                    (modeled appreciation + loan paydown). This projection
-                    depends on the stated growth and exit assumptions; it does
-                    not offset the year-1 shortfall or establish that the
-                    property is a suitable investment.
+                    (modeled operating cash flow, appreciation, loan paydown,
+                    and selling costs). This projection depends on the stated
+                    growth and exit assumptions; it does not offset the year-1
+                    shortfall or establish that the property is a suitable
+                    investment.
                   </p>
                 </div>
               </div>
@@ -2687,8 +2729,8 @@ export function AnalysisDashboard({
           shut page reads as an executive summary. The old "Details"
           landmark strip retired - the hero/ledger boundary IS the
           landmark now. */}
-      {/* REGION 4 · GO DEEPER — amortization, projections, tax, exits,
-          BRRRR/flip, stress test, comps. One entry point, reachable from
+      {/* REGION 4 · GO DEEPER — amortization, projections, stress tests,
+          and comps. One entry point, reachable from
           near the top, instead of eight stacked top-level rows. */}
       <ResultsRegionOrFragment
         key={`deeper:${resultDisclosureKey}`}
@@ -2696,7 +2738,7 @@ export function AnalysisDashboard({
         id="go-deeper"
         storageScope={resultDisclosureStorageScope}
         question="Go deeper"
-        payoff="Amortization, projections, tax, exits, stress tests, comps"
+        payoff="Amortization, projections, stress tests, comps"
         openEvent="go_deeper_opened"
       >
         <section
@@ -2712,7 +2754,7 @@ export function AnalysisDashboard({
               : "Long-term analysis"}
           </h2>
           <DrillLedger label="Deeper analysis">
-            {TABS.map((tab) => {
+            {RELEASED_TABS.map((tab) => {
               const Icon = tab.icon;
               return (
                 <DrillRow
@@ -2925,11 +2967,11 @@ const proPreviewCopy: Record<
   projections: {
     title: "10-Year Projections",
     description:
-      "Unlock long-term cash flow, after-tax projections, and income trends.",
+      "Unlock long-term pre-tax cash flow, equity, and income trends.",
     metrics: [
       "Year 10 Cumulative CF",
-      "Best Annual After-Tax CF",
-      "10-Year After-Tax Cash Flow",
+      "Best Annual Cash Flow",
+      "10-Year Operating Cash Flow",
     ],
   },
   "tax-strategy": {
@@ -3573,7 +3615,7 @@ function CashFlowTab({
       {/* Loan amortization - collapsible year-by-year view. Free
           feature, opt-in (click-to-expand). Self-hides on cash
           purchases since there's no debt to amortize. */}
-      <LoanAmortizationView result={result} />
+      {values ? <LoanAmortizationView result={result} values={values} /> : null}
       {/* Compare financing scenarios - Pro feature. Self-hides on
           cash purchases. Click-to-open keeps default surface clean. */}
       <MortgageScenarioCompare result={result} values={values} isPro={isPro} />

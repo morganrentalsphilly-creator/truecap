@@ -11,8 +11,8 @@
  * turns that from a crawl-time discovery into a PR-time failure.
  */
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
-import { join, relative } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { execFileSync } from "node:child_process";
 import { GLOSSARY_SLUGS } from "@/lib/glossary";
 
@@ -25,7 +25,9 @@ function sourceFiles(): string[] {
     ["ls-files", "app/*.tsx", "app/*.ts", "components/*.tsx", "components/*.ts"],
     { cwd: ROOT, encoding: "utf8", maxBuffer: 8 * 1024 * 1024 },
   );
-  return out.split("\n").filter(Boolean);
+  return out
+    .split("\n")
+    .filter((f) => Boolean(f) && existsSync(join(ROOT, f)));
 }
 
 describe("internal /glossary links resolve", () => {

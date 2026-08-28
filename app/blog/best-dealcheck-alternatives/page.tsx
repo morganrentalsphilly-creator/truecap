@@ -35,7 +35,7 @@ const SERP_TITLE = "7 Best DealCheck Alternatives (2026)";
 const DESCRIPTION =
   "Seven real DealCheck alternatives for 2026 — TrueCap, BiggerPockets, Stessa, Mashvisor, RentCast, Rentometer, spreadsheets — plus when to stick with DealCheck.";
 const PUBLISHED_AT = "2026-07-14";
-const MODIFIED_AT = "2026-07-14";
+const MODIFIED_AT = "2026-08-27";
 const READING_TIME_MIN = 11;
 
 export const metadata: Metadata = {
@@ -81,14 +81,14 @@ const TOOLS: Tool[] = [
     name: "TrueCap",
     bestFor: "Free preliminary rental screens with no signup or analysis cap",
     url: "/vs/dealcheck",
-    pricing: "Free; Pro $29.99/mo (or $300/yr annual)",
+    pricing: "Free core; paid Investor Pro — see live pricing",
     disclosure:
       "Full disclosure: TrueCap is our tool, so read this entry as the maker's pitch and check the side-by-side comparison. We put it first for its no-signup preliminary screen and transparent starting assumptions.",
     strengths: [
       "Cap rate, cash-on-cash, DSCR, NCF, and monthly cash flow — free, unlimited, no signup",
       "Labeled HUD rent, published-rate, and state-tax starting benchmarks when available",
       "Selected-rule fit with each metric benchmarked inline and a secondary Screening Index",
-      "Sensitivity grid, BRRRR + fix-and-flip analyzers, Offer Ceiling, and illustrative tax impact on Pro",
+      "Sensitivity grid, Offer Ceiling, 10-year cash-flow and equity projection, and saved-deal comparison on Pro",
     ],
     tradeoffs: [
       "No full property import from listing sites — a pasted Zillow/Redfin link yields the address, then auto-fill uses public data sources",
@@ -120,21 +120,21 @@ const TOOLS: Tool[] = [
   {
     rank: 3,
     name: "Stessa",
-    bestFor: "Best for tracking rentals you already own",
+    bestFor: "Best acquisition-to-operations breadth",
     url: "/vs/stessa",
-    pricing: "Essentials free; Manage $12/mo, Pro $28/mo (billed annually)",
+    pricing: "Essentials free; paid Manage and Pro — verify live pricing",
     strengths: [
-      "Free bookkeeping with automatic bank feeds on unlimited properties",
-      "Schedule E-ready reports at tax time",
-      "Rent collection and portfolio dashboards built in",
+      "Investment-property marketplace, filters, watchlists, and buy-box alerts",
+      "Sale/rent comps plus editable offer, financing, rent, and operating-cost assumptions",
+      "Accounting and landlord operations after acquisition",
     ],
     tradeoffs: [
-      "It's accounting software, not underwriting software — pre-purchase analysis is not the job it does",
-      "No DSCR, sensitivity, or offer-price math",
-      "Deeper reporting sits in the paid tiers",
+      "Broader operations suite rather than a narrowly target-backed decision workflow",
+      "The official sources reviewed do not describe a target-derived Offer Ceiling",
+      "Schedule E and other reporting features are plan-dependent",
     ],
     pickIf:
-      "You already own rentals and want free books. Pair it with a real analyzer for the buying side.",
+      "You want discovery and acquisition analysis to continue into accounting and operations.",
   },
   {
     rank: 4,
@@ -214,7 +214,7 @@ const TOOLS: Tool[] = [
 const FAQ_ITEMS = [
   {
     q: "What is the best free DealCheck alternative?",
-    a: "TrueCap has the deepest free tier of the tools on this list — cap rate, cash-on-cash, DSCR, NOI, and monthly cash flow on unlimited analyses with no signup (disclosure: TrueCap is our tool). DealCheck's own free Starter plan is also genuinely usable if 15 saved properties is enough. For rent data specifically, RentCast has a free plan; for bookkeeping on properties you already own, Stessa Essentials is free.",
+    a: "TrueCap provides cap rate, cash-on-cash, DSCR, NOI, and monthly cash flow on unlimited preliminary screens without signup (disclosure: TrueCap is our tool). DealCheck's free Starter plan supports its own published calculators and limits. For rent data specifically, evaluate RentCast; for bookkeeping on properties you already own, evaluate Stessa. Verify each provider's current official terms.",
   },
   {
     q: "Does DealCheck have a free plan?",
@@ -230,7 +230,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "When should I just stay with DealCheck?",
-    a: "If you're paying for Plus or Pro, live in the native mobile apps while walking properties, and rely on listing-site import to pull property details, switching buys you little. DealCheck is a solid, fairly priced product — the reasons to look elsewhere are a deeper free tier, auto-filled data, or a tool that's purely rent comps or purely bookkeeping.",
+    a: "If you're paying for Plus or Pro, live in the native mobile apps while walking properties, and rely on listing-site import to pull property details, switching buys you little. DealCheck is a solid product; compare account requirements, published limits, labeled starting data, or specialist rent-comp and bookkeeping workflows against what you actually need.",
   },
 ];
 
@@ -319,20 +319,20 @@ export default function BestDealCheckAlternativesPost() {
               we make, clearly labeled — with verified 2026 pricing and an
               honest note on when sticking with DealCheck is the right call.
             </p>
-            <p className="mt-4 text-xs text-muted-foreground">Published {PUBLISHED_AT}</p>
+            <p className="mt-4 text-xs text-muted-foreground">Published {PUBLISHED_AT} · Updated {MODIFIED_AT}</p>
             <BlogByline />
           </header>
 
           <section className="mb-10 rounded-2xl border border-border bg-card p-5 sm:p-6">
             <h2 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">Quick answer</h2>
             <p className="text-sm sm:text-base leading-relaxed text-foreground">
-              For a deeper free tier than DealCheck&apos;s Starter plan,{" "}
+              For a no-account preliminary rental screen,{" "}
               <strong>TrueCap</strong>{" "}
-              (that&apos;s us) runs unlimited preliminary rental screens with no signup.{" "}
+              (that&apos;s us) exposes core rental metrics and labeled starting assumptions before signup.{" "}
               <strong>BiggerPockets</strong>{" "}
               makes sense if you want the community bundled in.{" "}
               <strong>Stessa</strong>{" "}
-              covers free bookkeeping for rentals you already own,{" "}
+              spans an investment-property marketplace, editable acquisition analysis, and ongoing operations,{" "}
               <strong>Mashvisor</strong>{" "}
               covers market research, <strong>RentCast</strong>{" "}
               and <strong>Rentometer</strong>{" "}
@@ -461,9 +461,9 @@ export default function BestDealCheckAlternativesPost() {
               through a free tool and see if anything is missing. TrueCap&apos;s
               core underwriting is free with no signup — or start with a single
               metric via the{" "}
-              <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">cap rate calculator</Link>,{" "}
-              <Link href="/tools/dscr-calculator" className="font-semibold text-primary hover:underline">DSCR calculator</Link>, or{" "}
-              <Link href="/tools/brrrr-calculator" className="font-semibold text-primary hover:underline">BRRRR calculator</Link>. The
+              <Link href="/#main" className="font-semibold text-primary hover:underline">cap rate calculator</Link>,{" "}
+              <Link href="/#main" className="font-semibold text-primary hover:underline">DSCR calculator</Link>, or{" "}
+              <Link href="/blog/brrrr-method-explained" className="font-semibold text-primary hover:underline">BRRRR workflow guide</Link>. The
               full walkthrough is in our guide to{" "}
               <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">underwriting a rental in 60 seconds</Link>.
             </p>

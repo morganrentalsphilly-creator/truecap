@@ -11,19 +11,24 @@
  * Collapsed by default so the Cash Flow tab stays clean - click to
  * expand. Self-hides on cash purchases (no debt to amortize).
  *
- * Pure presentation - derived from AnalysisResult.yearlyInterestSchedule
- * (which the engine already computes for the tax-deduction model) plus
- * the monthly P&I. We compute principal-per-year + remaining balance
- * locally so we don't touch lib/calc-analysis.
+ * Pure presentation over the canonical full-precision loan schedule. This
+ * matters for interest-only periods and balloon maturities: reconstructing
+ * principal as `12 × headline payment − interest` silently misstates both.
  */
 import { ChevronRight } from "lucide-react";
 import type { AnalysisResult } from "@/lib/calc-analysis";
+import type { InvestmentFormValues } from "@/lib/investcalc-schema";
+import {
+  buildLoanAmortizationSchedule,
+  summarizeLoanByYear,
+} from "@/lib/loan-amortization";
 
 type YearRow = {
   year: number;
   interest: number;
   principal: number;
   endingBalance: number;
+  balloon: number;
 };
 
 function fmtUsd(n: number): string {
@@ -35,41 +40,54 @@ function fmtUsd(n: number): string {
 }
 
 function buildAmortization(
-  loanAmount: number,
-  monthlyPayment: number,
-  yearlyInterestSchedule: number[],
+  result: AnalysisResult,
+  values: Pick<
+    InvestmentFormValues,
+    | "interestRate"
+    | "loanTermYears"
+    | "amortizationTermYears"
+    | "interestOnlyMonths"
+  >,
 ): YearRow[] {
-  if (loanAmount <= 0 || monthlyPayment <= 0 || yearlyInterestSchedule.length === 0) {
-    return [];
-  }
-  const annualPayment = monthlyPayment * 12;
-  let balance = loanAmount;
-  const rows: YearRow[] = [];
-  for (let i = 0; i < yearlyInterestSchedule.length; i += 1) {
-    const interest = yearlyInterestSchedule[i]!;
-    // Principal is whatever the year's total P&I that didn't go to
-    // interest. Clamp at the remaining balance (last year is a stub).
-    const principal = Math.min(Math.max(annualPayment - interest, 0), balance);
-    balance = Math.max(0, balance - principal);
-    rows.push({
-      year: i + 1,
-      interest,
-      principal,
-      endingBalance: balance,
-    });
-  }
-  return rows;
+  return summarizeLoanByYear(
+    buildLoanAmortizationSchedule({
+      principal: result.loanAmount,
+      annualRatePct: values.interestRate,
+      termYears: values.loanTermYears,
+      maturityTermYears: result.loanMaturityTermYears ?? values.loanTermYears,
+      amortizationTermYears:
+        result.amortizationTermYears ??
+        values.amortizationTermYears ??
+        values.loanTermYears,
+      interestOnlyMonths:
+        result.interestOnlyMonths ?? values.interestOnlyMonths ?? 0,
+    }),
+  ).map((year) => ({
+    year: year.year,
+    interest: year.interest,
+    principal: Math.max(0, year.principal - year.balloonPrincipal),
+    endingBalance: year.endingBalance,
+    balloon: year.balloonPrincipal,
+  }));
 }
 
-export function LoanAmortizationView({ result }: { result: AnalysisResult }) {
+export function LoanAmortizationView({
+  result,
+  values,
+}: {
+  result: AnalysisResult;
+  values: Pick<
+    InvestmentFormValues,
+    | "interestRate"
+    | "loanTermYears"
+    | "amortizationTermYears"
+    | "interestOnlyMonths"
+  >;
+}) {
   // Self-hide on cash purchase - no debt to amortize.
   if (result.loanAmount <= 0 || result.monthlyPayment <= 0) return null;
 
-  const rows = buildAmortization(
-    result.loanAmount,
-    result.monthlyPayment,
-    result.yearlyInterestSchedule,
-  );
+  const rows = buildAmortization(result, values);
   if (rows.length === 0) return null;
 
   // Show first 10 years in the table to keep it scannable. The full
@@ -77,6 +95,7 @@ export function LoanAmortizationView({ result }: { result: AnalysisResult }) {
   const PREVIEW_YEARS = 10;
   const showFull = rows.length <= PREVIEW_YEARS;
   const previewRows = showFull ? rows : rows.slice(0, PREVIEW_YEARS);
+  const hasBalloon = rows.some((row) => row.balloon > 0);
 
   return (
     <details className="group rounded-xl border border-border bg-card p-3 sm:p-4">
@@ -90,7 +109,15 @@ export function LoanAmortizationView({ result }: { result: AnalysisResult }) {
             Loan amortization
           </span>
           <span className="mt-0.5 block text-[11px] leading-snug text-muted-foreground">
-            Year-by-year interest, principal, balance - {rows.length}-year schedule
+            Year-by-year interest, scheduled principal and balance ·{" "}
+            {values.loanTermYears}-year maturity ·{" "}
+            {result.amortizationTermYears ??
+              values.amortizationTermYears ??
+              values.loanTermYears}
+            -year amortization
+            {(result.interestOnlyMonths ?? values.interestOnlyMonths ?? 0) > 0
+              ? ` · ${result.interestOnlyMonths ?? values.interestOnlyMonths ?? 0} interest-only months`
+              : ""}
           </span>
         </span>
       </summary>
@@ -99,24 +126,49 @@ export function LoanAmortizationView({ result }: { result: AnalysisResult }) {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border text-left">
-              <th scope="col" className="py-2 pr-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <th
+                scope="col"
+                className="py-2 pr-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground"
+              >
                 Year
               </th>
-              <th scope="col" className="py-2 px-3 text-right text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <th
+                scope="col"
+                className="py-2 px-3 text-right text-[10px] font-bold uppercase tracking-widest text-muted-foreground"
+              >
                 Interest paid
               </th>
-              <th scope="col" className="py-2 px-3 text-right text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <th
+                scope="col"
+                className="py-2 px-3 text-right text-[10px] font-bold uppercase tracking-widest text-muted-foreground"
+              >
                 Principal paid
               </th>
-              <th scope="col" className="py-2 pl-3 text-right text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <th
+                scope="col"
+                className="py-2 pl-3 text-right text-[10px] font-bold uppercase tracking-widest text-muted-foreground"
+              >
                 Ending balance
               </th>
+              {hasBalloon ? (
+                <th
+                  scope="col"
+                  className="py-2 pl-3 text-right text-[10px] font-bold uppercase tracking-widest text-muted-foreground"
+                >
+                  Balloon due
+                </th>
+              ) : null}
             </tr>
           </thead>
           <tbody>
             {previewRows.map((row) => (
-              <tr key={row.year} className="border-b border-border/50 last:border-b-0">
-                <td className="py-2 pr-3 text-xs font-bold text-foreground">{row.year}</td>
+              <tr
+                key={row.year}
+                className="border-b border-border/50 last:border-b-0"
+              >
+                <td className="py-2 pr-3 text-xs font-bold text-foreground">
+                  {row.year}
+                </td>
                 <td className="py-2 px-3 text-right tabular-nums text-muted-foreground">
                   {fmtUsd(row.interest)}
                 </td>
@@ -126,14 +178,19 @@ export function LoanAmortizationView({ result }: { result: AnalysisResult }) {
                 <td className="py-2 pl-3 text-right tabular-nums text-foreground">
                   {fmtUsd(row.endingBalance)}
                 </td>
+                {hasBalloon ? (
+                  <td className="py-2 pl-3 text-right tabular-nums font-semibold text-[var(--metric-negative)]">
+                    {row.balloon > 0 ? fmtUsd(row.balloon) : "—"}
+                  </td>
+                ) : null}
               </tr>
             ))}
           </tbody>
         </table>
         {!showFull ? (
           <p className="mt-3 text-[11px] text-muted-foreground">
-            Showing first {PREVIEW_YEARS} of {rows.length} years. Equity grows faster
-            in later years as interest tapers off.
+            Showing first {PREVIEW_YEARS} of {rows.length} years. Equity grows
+            faster in later years as interest tapers off.
           </p>
         ) : null}
       </div>

@@ -10,6 +10,8 @@ const baseDraft = (): TargetInputs => ({
   cocReturn: "",
   monthlyCashFlow: "0",
   dscr: "1.25",
+  minIrrPct: "",
+  maxCashRequired: "",
   maxPurchasePrice: "",
 });
 
@@ -50,6 +52,8 @@ describe("focused Offer Ceiling target draft", () => {
       cocReturn: "",
       monthlyCashFlow: "",
       dscr: "1.25",
+      minIrrPct: "",
+      maxCashRequired: "",
       maxPurchasePrice: "",
     };
     const cash = validateTargetDraft(onlyDscr, { isCashPurchase: true });

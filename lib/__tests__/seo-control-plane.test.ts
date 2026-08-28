@@ -10,6 +10,12 @@ import { canAutopublishProposal, runPageQualityGates, type PageProposal } from "
 import { SEO_SOURCES, sourceById, sourcesDue } from "@/lib/seo/control-plane/sources";
 import { findYearReferences, needsYearRolloverReview } from "@/lib/seo/control-plane/year-rollover";
 import { PUBLIC_CATALOG_FACTS } from "@/lib/product-facts";
+import {
+  CALCULATOR_COUNT,
+  CALCULATOR_REGISTRY,
+  EMBEDDABLE_COUNT,
+  isCalculatorReleased,
+} from "@/lib/calculator-registry";
 
 const ROOT = join(import.meta.dirname, "../..");
 
@@ -158,7 +164,17 @@ describe("year rollover and factual consistency", () => {
   });
 
   it("keeps public catalog counts derived from registries", () => {
-    expect(PUBLIC_CATALOG_FACTS).toEqual({ calculators: 20, embeddableCalculators: 19, markets: 162, states: 33 });
+    // Derive, don't hardcode: gating a calculator must move the public count
+    // with it. The literal 18/17 here survived the release gate and would have
+    // kept advertising 18 free calculators while only 10 were reachable.
+    expect(PUBLIC_CATALOG_FACTS).toEqual({
+      calculators: CALCULATOR_COUNT,
+      embeddableCalculators: EMBEDDABLE_COUNT,
+      markets: 162,
+      states: 33,
+    });
+    expect(CALCULATOR_COUNT).toBe(CALCULATOR_REGISTRY.length);
+    expect(CALCULATOR_REGISTRY.every((c) => isCalculatorReleased(c.slug))).toBe(true);
     const statePage = readFileSync(join(ROOT, "app/states/page.tsx"), "utf8");
     expect(statePage).toContain("STATE_COUNT");
     expect(statePage).not.toMatch(/15-state|Fifteen states|The 15 best states/);

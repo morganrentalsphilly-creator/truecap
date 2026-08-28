@@ -57,11 +57,26 @@ function buildSampleReport(): ReportData {
     const net = rental - opex - debt;
     const tax = Math.round(net * -0.18);
     const after = net + tax;
-    return { y, rental, opex, debt, net, tax, after, cum: 0 };
+    const propertyValue = Math.round(purchasePrice * Math.pow(1.035, y));
+    const loanBalance = Math.max(0, Math.round(212_000 - y * 3_900));
+    const equity = propertyValue - loanBalance;
+    return {
+      y,
+      rental,
+      opex,
+      debt,
+      net,
+      tax,
+      after,
+      cum: 0,
+      propertyValue,
+      loanBalance,
+      equity,
+    };
   });
   let running = 0;
   for (const row of projectionRows) {
-    running += row.after;
+    running += row.net;
     row.cum = running;
   }
 
@@ -85,9 +100,9 @@ function buildSampleReport(): ReportData {
   });
 
   const exitRows = projectionRows.map((r) => {
-    const value = Math.round(purchasePrice * Math.pow(1.035, r.y));
-    const loan = Math.max(0, Math.round(212_000 - r.y * 3_900));
-    const equity = value - loan;
+    const value = r.propertyValue;
+    const loan = r.loanBalance;
+    const equity = r.equity;
     const netSale = Math.round(value * 0.94) - loan;
     const profit = netSale - 53_000 + projectionRows[r.y - 1]!.cum;
     return { y: r.y, value, loan, equity, netSale, profit };
@@ -207,8 +222,8 @@ function buildSampleReport(): ReportData {
     },
     projection10y: {
       cumulativeCF: projectionRows[9]!.cum,
-      bestAnnualAfterTax: Math.max(...projectionRows.map((r) => r.after)),
-      totalAfterTax: projectionRows.reduce((sum, r) => sum + r.after, 0),
+      bestAnnualPreTax: Math.max(...projectionRows.map((r) => r.net)),
+      year10Equity: projectionRows[9]!.equity,
       rows: projectionRows,
     },
     taxStrategy: {
@@ -266,7 +281,7 @@ function variants(): Record<string, () => ReportData> {
       const d = buildSampleReport();
       d.financing = { ...d.financing, downPaymentPct: 100, downPayment: d.property.purchasePrice, interestRate: 0, loanTerm: 0 };
       d.performance = { ...d.performance, dscr: 0 };
-      d.projection10y.rows.forEach((r) => { r.debt = 0; r.net = r.rental - r.opex; r.after = r.net + r.tax; });
+      d.projection10y.rows.forEach((r) => { r.debt = 0; r.net = r.rental - r.opex; r.after = r.net + (r.tax ?? 0); });
       if (d.operatingStatement) {
         d.operatingStatement = { ...d.operatingStatement, isCashPurchase: true, annualDebtService: 0, pmiAnnual: 0, loanAmount: 0, monthlyPayment: 0 };
       }
@@ -274,7 +289,7 @@ function variants(): Record<string, () => ReportData> {
     },
     allZero: () => {
       const d = buildSampleReport();
-      d.projection10y.rows.forEach((r) => { r.rental = 0; r.opex = 0; r.debt = 0; r.net = 0; r.tax = 0; r.after = 0; r.cum = 0; });
+      d.projection10y.rows.forEach((r) => { r.rental = 0; r.opex = 0; r.debt = 0; r.net = 0; r.tax = 0; r.after = 0; r.cum = 0; r.propertyValue = 0; r.loanBalance = 0; r.equity = 0; });
       d.taxStrategy.rows.forEach((r) => { r.opex = 0; r.interest = 0; r.dep = 0; r.taxable = 0; r.savings = 0; });
       d.exitScenarios.rows.forEach((r) => { r.value = 0; r.loan = 0; r.equity = 0; r.netSale = 0; r.profit = 0; });
       return d;
@@ -288,7 +303,7 @@ function variants(): Record<string, () => ReportData> {
     },
     allNegative: () => {
       const d = buildSampleReport();
-      d.projection10y.rows.forEach((r, i) => { r.net = -5000; r.after = -6000; r.cum = -6000 * (i + 1); });
+      d.projection10y.rows.forEach((r, i) => { r.net = -5000; r.after = -6000; r.cum = -5000 * (i + 1); });
       d.exitScenarios.rows.forEach((r) => { r.profit = -50000; r.equity = -2000; });
       d.performance = { ...d.performance, monthlyCashFlow: -900, cocReturn: -40, dscr: 0.4, recommendation: "Avoid" };
       return d;

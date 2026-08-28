@@ -35,7 +35,9 @@ over the whole diff; every confirmed finding was fixed before this report.
   verify-action grants `not_configured→eligible` (best-effort, never blocks
   the PDF), checkout attaches the coupon (outranks campaign/annual coupons,
   Pro tiers only), webhook marks `eligible→applied`. Everything fails closed
-  on `STRIPE_PACK_CREDIT_COUPON_ID`.
+  on the then-current coupon configuration. The 2026-08-27 launch contract
+  supersedes it with a $9 Pack, 30-day credit, and
+  `STRIPE_PACK_CREDIT_900_COUPON_ID`.
 - Buyer email captured from Stripe checkout into `buyer_email`
   (migration `20260817180000`, graceful degradation until applied).
 
@@ -112,8 +114,8 @@ track in the inbox or add a form later).
 
 ## Morgan's activation queue (nothing sends/charges until these)
 
-1. **Stripe coupon**: create $5.00-off, duration "once", USD → set
-   `STRIPE_PACK_CREDIT_COUPON_ID` in Vercel. Until then the credit system is
+1. **Stripe coupon (superseded launch contract)**: create $9.00-off, duration
+   "once", USD → set `STRIPE_PACK_CREDIT_900_COUPON_ID` in Vercel. Until then the credit system is
    fully dark.
 2. **Apply migrations** (SURFACED FOR REVIEW): `20260817180000_pack_buyer_email.sql`,
    `20260817190000_testimonial_submissions.sql` (+ the pre-existing pending

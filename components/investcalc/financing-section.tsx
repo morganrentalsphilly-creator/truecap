@@ -40,6 +40,8 @@ export function FinancingSection({
   // payment is the opposite — fully financed — and must never enter this path.
   const downPaymentPct = form.watch("downPaymentPct");
   const propertyType = form.watch("propertyType");
+  const closingCostsInputMode =
+    form.watch("closingCostsInputMode") === "fixed" ? "fixed" : "percent";
   const usesOwnerOccupantPmiDefault = propertyType === "owner-occupant";
   const isAllCash = isAllCashDownPayment(downPaymentPct);
   // PMI / MIP only applies to a financed loan with < 20% down — show the lever
@@ -214,7 +216,9 @@ export function FinancingSection({
               htmlFor="closingCostsPct"
               className="min-w-0 flex-1 text-xs font-semibold uppercase tracking-wide text-[var(--brand-green)] [overflow-wrap:anywhere]"
             >
-              Closing Costs %{" "}
+              {closingCostsInputMode === "fixed"
+                ? "Closing Costs $"
+                : "Closing Costs %"}{" "}
               <span className="text-[10px] text-muted-foreground sm:text-xs">
                 (Optional)
               </span>
@@ -223,35 +227,109 @@ export function FinancingSection({
               <span className="sr-only">Closing costs guidance</span>
             </GlossaryTip>
           </div>
+          <div
+            role="group"
+            aria-label="Closing costs input mode"
+            className="mb-2 grid grid-cols-2 gap-1 rounded-lg border border-input bg-background p-1"
+          >
+            {([
+              { value: "percent", label: "% of price" },
+              { value: "fixed", label: "Fixed $" },
+            ] as const).map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                aria-pressed={closingCostsInputMode === option.value}
+                onClick={() =>
+                  form.setValue("closingCostsInputMode", option.value, {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  })
+                }
+                className={cn(
+                  "min-h-11 rounded-md px-2 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  closingCostsInputMode === option.value
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
           <div className="relative">
-            <Input
-              {...register("closingCostsPct", {
-                setValueAs: optionalNumberSetValueAs,
-              })}
-              id="closingCostsPct"
-              type="number"
-              inputMode="decimal"
-              step="0.01"
-              min={0}
-              max={100}
-              placeholder="3"
-              aria-invalid={!!errors.closingCostsPct}
-              aria-describedby={
-                errors.closingCostsPct ? "closingCostsPct-error" : undefined
-              }
-              className={cn(
-                "border-input bg-background pr-8 focus-visible:border-ring focus-visible:ring-ring",
-                errors.closingCostsPct && "border-destructive",
-              )}
-            />
-            <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            {closingCostsInputMode === "fixed" ? (
+              <>
+                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Controller
+                  name="closingCostsFixed"
+                  control={control}
+                  render={({ field }) => (
+                    <CurrencyInput
+                      id="closingCostsPct"
+                      name={field.name}
+                      ref={field.ref}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      onBlur={field.onBlur}
+                      min={0}
+                      max={100_000_000}
+                      step={100}
+                      placeholder="9,000"
+                      aria-invalid={!!errors.closingCostsFixed}
+                      aria-describedby={
+                        errors.closingCostsFixed
+                          ? "closingCostsPct-error"
+                          : undefined
+                      }
+                      className={cn(
+                        "border-input bg-background pl-8 focus-visible:border-ring focus-visible:ring-ring",
+                        errors.closingCostsFixed && "border-destructive",
+                      )}
+                    />
+                  )}
+                />
+              </>
+            ) : (
+              <>
+                <Input
+                  {...register("closingCostsPct", {
+                    setValueAs: optionalNumberSetValueAs,
+                  })}
+                  id="closingCostsPct"
+                  type="number"
+                  inputMode="decimal"
+                  step="0.01"
+                  min={0}
+                  max={100}
+                  placeholder="3"
+                  aria-invalid={!!errors.closingCostsPct}
+                  aria-describedby={
+                    errors.closingCostsPct
+                      ? "closingCostsPct-error"
+                      : undefined
+                  }
+                  className={cn(
+                    "border-input bg-background pr-8 focus-visible:border-ring focus-visible:ring-ring",
+                    errors.closingCostsPct && "border-destructive",
+                  )}
+                />
+                <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              </>
+            )}
           </div>
           <p className="mt-1 text-[11px] text-muted-foreground [overflow-wrap:anywhere]">
-            Defaults to 3% of purchase price if left blank.
+            {closingCostsInputMode === "fixed"
+              ? "Exact modeled cash closing costs."
+              : "Defaults to 3% of purchase price if left blank."}
           </p>
           <FieldError
             id="closingCostsPct-error"
-            message={errors.closingCostsPct?.message}
+            message={
+              closingCostsInputMode === "fixed"
+                ? errors.closingCostsFixed?.message
+                : errors.closingCostsPct?.message
+            }
           />
         </div>
 
@@ -353,23 +431,29 @@ export function FinancingSection({
               />
             </div>
 
-            <label
-              htmlFor="pmiNoCancel"
-              className="flex min-h-11 min-w-0 cursor-pointer select-none items-center gap-2.5 sm:mt-7"
-            >
-              <input
-                {...register("pmiNoCancel")}
-                id="pmiNoCancel"
-                type="checkbox"
-                className="size-5 shrink-0 rounded border-input accent-[var(--brand-green)]"
-              />
-              <span className="min-w-0 text-xs leading-snug text-foreground [overflow-wrap:anywhere]">
-                Runs for the life of the loan
-                <span className="block text-[11px] text-muted-foreground">
-                  FHA MIP — doesn&apos;t cancel at 20% equity.
+            {usesOwnerOccupantPmiDefault ? (
+              <label
+                htmlFor="pmiNoCancel"
+                className="flex min-h-11 min-w-0 cursor-pointer select-none items-center gap-2.5 sm:mt-7"
+              >
+                <input
+                  {...register("pmiNoCancel")}
+                  id="pmiNoCancel"
+                  type="checkbox"
+                  className="size-5 shrink-0 rounded border-input accent-[var(--brand-green)]"
+                />
+                <span className="min-w-0 text-xs leading-snug text-foreground [overflow-wrap:anywhere]">
+                  Runs for the life of the loan
+                  <span className="block text-[11px] text-muted-foreground">
+                    Select for loan-life MIP; conventional PMI otherwise uses scheduled 78% termination.
+                  </span>
                 </span>
-              </span>
-            </label>
+              </label>
+            ) : (
+              <p className="rounded-lg border border-amber-300/60 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-950 sm:mt-7 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
+                Rental-loan mortgage insurance is conservatively modeled through payoff. Confirm any earlier cancellation in the written loan terms.
+              </p>
+            )}
           </div>
         </div>
       ) : null}

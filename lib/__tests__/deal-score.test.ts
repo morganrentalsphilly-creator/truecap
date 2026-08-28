@@ -444,17 +444,36 @@ describe("computeTenYearAnnualizedReturnPct — edge branches", () => {
     ).toBeNull();
   });
 
-  it("returns -100 (full loss) when you'd lose more than your basis", () => {
-    const wipeout = {
+  it("uses a money-weighted result when operating losses require later capital", () => {
+    const laterContribution = {
       ...baseResult,
-      purchasePrice: 200_000,
       tenYearProjection: Array.from({ length: 10 }, () => ({
         cumulativeCashFlowAnnual: -400_000,
       })),
       taxStrategyYears: Array.from({ length: 10 }, () => ({ cumulativeTaxBenefitAnnual: 0 })),
     };
+    const pct = computeTenYearAnnualizedReturnPct(
+      { ...baseValues, appreciationRatePct: 0 },
+      laterContribution,
+    );
+    expect(pct).toBeCloseTo(-21.2690838546, 8);
+  });
+
+  it("returns -100 for a complete loss with no distributions", () => {
+    const completeLoss = {
+      ...baseResult,
+      loanAmount: 0,
+      monthlyPayment: 0,
+      tenYearProjection: Array.from({ length: 10 }, () => ({
+        cumulativeCashFlowAnnual: 0,
+      })),
+      taxStrategyYears: Array.from({ length: 10 }, () => ({ cumulativeTaxBenefitAnnual: 0 })),
+    };
     expect(
-      computeTenYearAnnualizedReturnPct({ ...baseValues, appreciationRatePct: 0 }, wipeout)
+      computeTenYearAnnualizedReturnPct(
+        { ...baseValues, purchasePrice: 0, appreciationRatePct: 0 },
+        completeLoss,
+      ),
     ).toBe(-100);
   });
 

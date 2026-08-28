@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { resolveOfferCeilingForAccess } from "@/lib/offer-ceiling-server";
+import { calculateAnalysis } from "@/lib/calc-analysis";
 import {
   invalidateRecordedOfferCeilingForTargetEdit,
   readRecordedOfferCeiling,
@@ -42,6 +43,12 @@ describe("recorded Offer Ceiling", () => {
     expect(captured.target).toEqual(SAMPLE_DEAL_MAO_TARGET);
     expect(captured.source).toBe("selected-targets");
     expect(captured.exact.achieved.cocReturn).toEqual(expect.any(Number));
+    expect(captured.exact.achieved.monthlyPayment).toBe(
+      calculateAnalysis({
+        ...SAMPLE_DEAL_VALUES,
+        purchasePrice: captured.exact.presentation.ceiling,
+      }).monthlyPayment,
+    );
     expect(
       captured.exact.makePriceWork.requiredMonthlyRent?.alreadyMet,
     ).toEqual(expect.any(Boolean));

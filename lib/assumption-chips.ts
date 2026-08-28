@@ -289,6 +289,7 @@ export function buildAssumptionChips(
   const taxAnnualMode =
     values.propertyTaxInputMode === "annual" && taxAnnual != null;
   const taxIsState = Boolean(taxEntry && !taxEntry.manual);
+  const taxUsesGenericFallback = !taxAnnualMode && num(values.propertyTaxPct) == null;
   const templateOwnsActiveTax =
     !taxAnnualMode && templateOwned("propertyTaxPct").length === 1;
   const playOwnsActiveTax =
@@ -301,7 +302,9 @@ export function buildAssumptionChips(
     id: "taxes",
     label: taxAnnualMode
       ? `Taxes $${fmtMoney(taxAnnual)}/yr`
-      : `Taxes ${fmtPct(num(values.propertyTaxPct) ?? 1.1)}% of price/year`,
+      : taxUsesGenericFallback
+        ? "Taxes 1.1% preliminary fallback"
+        : `Taxes ${fmtPct(num(values.propertyTaxPct) ?? 1.1)}% of price/year`,
     badge: taxIsState
       ? {
           kind: "state",
@@ -313,7 +316,7 @@ export function buildAssumptionChips(
           ? { kind: "play", text: play.label }
           : provenance.propertyTaxPct || taxIsCustom
             ? { kind: "yours", text: "yours" }
-            : { kind: "default", text: "TrueCap default" },
+            : { kind: "default", text: "verify locally" },
     target: "expenses",
     focusFieldId: "propertyTaxAmount",
     pulseKey: taxIsState ? "tax:state" : null,

@@ -32,7 +32,7 @@ export function ReturnsExplainer({
         How the {s.years}-yr ROI is built
       </p>
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat label="Cash invested" value={formatCurrency(s.cashInvested)} />
+        <Stat label="Contributed capital" value={formatCurrency(s.totalContributions)} />
         <Stat label={`${s.years}-yr profit`} value={formatCurrency(s.totalProfit)} />
         <Stat label="Equity multiple" value={fmtX(s.equityMultiple)} />
         <Stat label="IRR" value={fmtPct(s.irrPct)} />
@@ -41,8 +41,17 @@ export function ReturnsExplainer({
         {s.roiPct != null ? (
           <>
             {s.years}-yr ROI <strong className="text-foreground">{fmtPct(s.roiPct)}</strong> is{" "}
-            <em>cumulative</em> (total profit ÷ cash invested), not annual - annualized that&apos;s a{" "}
-            <strong className="text-foreground">{fmtPct(s.cagrPct)}</strong> CAGR.{" "}
+            <em>cumulative</em> (net profit ÷ all contributed capital), not annual.{" "}
+            {s.cagrStatus === "available" ? (
+              <>
+                With all capital contributed at acquisition, the equivalent CAGR is{" "}
+                <strong className="text-foreground">{fmtPct(s.cagrPct)}</strong>.{" "}
+              </>
+            ) : s.cagrStatus === "later-contributions" ? (
+              <>
+                CAGR is not applicable because the model requires additional capital after acquisition.{" "}
+              </>
+            ) : null}
             {/* Finding 5: this explainer is where the raw figure lives in
                 full — when it crossed the sanity band, say so here too. */}
             {isExtremeCumulativeRoi(s.roiPct) ? (
@@ -50,7 +59,12 @@ export function ReturnsExplainer({
             ) : null}
           </>
         ) : null}
-        Profit = net sale proceeds + cumulative cash flow + tax benefit − cash invested −{" "}
+        {s.irrStatus === "multiple" ? (
+          <>
+            This cash-flow pattern has multiple valid IRRs ({s.irrRootsPct.map((root) => fmtPct(root)).join(", ")}); no single IRR is decision-safe.{" "}
+          </>
+        ) : null}
+        Profit = positive operating/tax distributions + net sale proceeds − all capital contributions −{" "}
         <strong className="text-foreground">est. exit tax {formatCurrency(s.exitTax)}</strong>{" "}
         (depreciation recapture + capital gains). Assumptions: {appreciationRate}% appreciation,{" "}
         {sellingCostPct}% selling cost, 25%/15% exit-tax rates, {s.years}-yr hold - all estimates.

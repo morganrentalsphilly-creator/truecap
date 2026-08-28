@@ -89,6 +89,15 @@ export function buildReportMaxOffer(args: {
       cocReturn: maxOffer.achieved.cocReturn,
       capRate: maxOffer.achieved.capRate,
       dscr: maxOffer.achieved.dscr,
+      ...(target.maxCashRequired !== undefined
+        ? { totalCashRequired: maxOffer.achieved.totalCashRequired }
+        : {}),
+      ...(target.minIrrPct !== undefined
+        ? {
+            irrPct: maxOffer.achievedIrr?.primaryIrrPct ?? null,
+            irrStatus: maxOffer.achievedIrr?.status ?? "none",
+          }
+        : {}),
     },
     requiredMonthlyRent: requiredMonthlyRent
       ? {
@@ -154,6 +163,15 @@ export function buildRecordedReportMaxOffer(
       cocReturn: achieved.cocReturn,
       capRate: achieved.capRate,
       dscr: achieved.dscr,
+      ...(achieved.totalCashRequired !== undefined
+        ? { totalCashRequired: achieved.totalCashRequired }
+        : {}),
+      ...(achieved.irrStatus !== undefined
+        ? {
+            irrPct: achieved.irrPct ?? null,
+            irrStatus: achieved.irrStatus,
+          }
+        : {}),
     },
     requiredMonthlyRent: makePriceWork.requiredMonthlyRent
       ? {

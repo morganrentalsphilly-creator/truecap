@@ -119,7 +119,7 @@ function parseV2(overrides: Partial<V2Values> = {}): V2Values {
 
 describe("TrueCap Underwriting Standard v2 compatibility boundary", () => {
   it("bumps the persisted editor schema while leaving missing and explicit v1 on identical math", () => {
-    expect(INVESTCALC_SCHEMA_VERSION).toBe(11);
+    expect(INVESTCALC_SCHEMA_VERSION).toBe(12);
 
     const absent = calculateAnalysis(V1_CONTROL);
     const explicit = calculateAnalysis({
@@ -127,13 +127,13 @@ describe("TrueCap Underwriting Standard v2 compatibility boundary", () => {
       underwritingModelVersion: "1.0",
     });
 
-    expect(absent.methodologyVersion).toBe("1.1");
+    expect(absent.methodologyVersion).toBe("1.3");
     expect(explicit).toEqual(absent);
-    // Characterize v1's intentional intermediate rounding so a future cleanup
-    // cannot accidentally route old analyses through exact-annual v2.
+    // v1.3 keeps legacy operating-expense rounding while loan amortization is
+    // full precision; v2 remains a separate exact-annual model.
     expect(absent.propertyTax).toBe(229);
     expect(absent.insurance).toBe(104);
-    expect(absent.monthlyPayment).toBe(1_297);
+    expect(absent.monthlyPayment).toBeCloseTo(1297.1961931364306, 10);
   });
 
   it("does not invent v2 fields while normalizing a legacy snapshot", () => {

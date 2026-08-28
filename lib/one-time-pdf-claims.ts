@@ -173,7 +173,7 @@ export type ClaimedFormIdentity = {
  * but the document is composed from `parsed.data.report` — two independent
  * client-supplied objects that nothing compared. A buyer could keep the claim
  * for the deal they actually paid for and post any other report alongside it,
- * turning one $5 purchase into unlimited paid PDFs for arbitrary properties,
+ * turning one Decision Pack purchase into unlimited paid PDFs for arbitrary properties,
  * signed out, for the life of the claim. The comment on the fingerprint check
  * asserted exactly the property the code did not enforce.
  *

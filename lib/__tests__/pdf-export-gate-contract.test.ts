@@ -30,6 +30,7 @@ function stripComments(source: string): string {
 }
 
 const serverAction = stripComments(read("app/actions/generate-report-pdf.ts"));
+const evaluationAccess = stripComments(read("lib/evaluation-access-server.ts"));
 const generator = stripComments(read("lib/pdf-generator.ts"));
 const analyzer = stripComments(
   read("components/investcalc/investcalc-page.tsx"),
@@ -74,6 +75,22 @@ describe("PDF export gate lives on the server", () => {
     // The gate must run BEFORE the generator is even imported.
     expect(serverAction.indexOf("checkGate")).toBeLessThan(
       serverAction.indexOf("generateInvestmentPDFArtifact"),
+    );
+  });
+
+  it("binds no-card evaluation exports to an already-metered deal", () => {
+    expect(serverAction).toContain("activeMeteredEvaluationDealGrantsAccess");
+    expect(evaluationAccess).toContain("buildEvaluationDealResourceKey(values)");
+    expect(evaluationAccess).toContain('.from("product_evaluations")');
+    expect(evaluationAccess).toContain('.gt("expires_at", now.toISOString())');
+    expect(evaluationAccess).toContain('.from("product_evaluation_usage")');
+    expect(evaluationAccess).toContain('.eq("kind", "deal")');
+    expect(evaluationAccess).toContain('.eq("resource_key", resourceKey)');
+    expect(serverAction.indexOf("activeMeteredEvaluationDealGrantsAccess(")).toBeLessThan(
+      serverAction.indexOf("generateInvestmentPDFArtifact"),
+    );
+    expect(serverAction).toContain(
+      "(!evaluationDealAccess || !input.savedExport)",
     );
   });
 

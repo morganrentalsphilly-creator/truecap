@@ -363,7 +363,7 @@ export default function OnePercentRulePost() {
               property-tax line the 1% rule never reads. That is why you finish
               the job with the metric that actually accounts for your cash:{" "}
               <Link
-                href="/tools/cash-on-cash-calculator"
+                href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
                 cash-on-cash

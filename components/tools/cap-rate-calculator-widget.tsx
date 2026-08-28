@@ -155,7 +155,7 @@ export function CapRateCalculatorWidget() {
         className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="w-4 h-4" />
-        Run the full analysis with these numbers — cash flow, projections, tax, exit — free
+        Run the full analysis with these numbers — cash flow, DSCR, and 10-year cash-flow and equity projections — free
         <ArrowUpRight className="w-4 h-4" />
       </Link>
     </div>

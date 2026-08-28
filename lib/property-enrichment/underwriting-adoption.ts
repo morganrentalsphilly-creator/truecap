@@ -11,19 +11,23 @@ export type UnderwritingEnrichmentAdoption = {
  * Select the enrichment values that may enter the underwriting form.
  *
  * An AVM is comparison evidence, not an asking/contract price, so it never
- * becomes purchasePrice. A verified active-listing price may. RentCast rent
- * remains usable as an explicitly labeled market estimate.
+ * becomes purchasePrice. A provider-reported price may only be adopted when
+ * its accompanying status explicitly says the listing is active. RentCast
+ * rent remains usable as an explicitly labeled market estimate.
  */
 export function selectUnderwritingEnrichment(
   enrichment: PropertyEnrichment
 ): UnderwritingEnrichmentAdoption {
   const listPrice = Number(enrichment.listPrice);
+  const listingIsActive =
+    typeof enrichment.listingStatus === "string" &&
+    enrichment.listingStatus.trim().toLowerCase() === "active";
   const rentEstimate = Number(enrichment.rentEstimate);
+  const mayAdoptListPrice =
+    listingIsActive && Number.isFinite(listPrice) && listPrice > 0;
   return {
-    purchasePrice:
-      Number.isFinite(listPrice) && listPrice > 0 ? Math.round(listPrice) : null,
-    purchasePriceSource:
-      Number.isFinite(listPrice) && listPrice > 0 ? "active-listing" : null,
+    purchasePrice: mayAdoptListPrice ? Math.round(listPrice) : null,
+    purchasePriceSource: mayAdoptListPrice ? "active-listing" : null,
     monthlyRent:
       Number.isFinite(rentEstimate) && rentEstimate > 0
         ? Math.round(rentEstimate)

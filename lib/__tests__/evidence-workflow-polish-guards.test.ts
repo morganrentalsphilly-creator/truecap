@@ -96,8 +96,8 @@ describe("evidence workflow usability guards", () => {
     expect(page).toContain(
       "onTargetDraftBlockingChange={setHasUnappliedTargetDraft}",
     );
-    expect(page).toContain(
-      "const hasPendingDealChanges =\n    hasUnsavedChanges || hasUnappliedTargetDraft",
+    expect(page.replace(/\s+/g, " ")).toContain(
+      "const hasPendingDealChanges = hasUnsavedChanges || hasUnappliedTargetDraft",
     );
     expect(page).toContain(
       "hasUnappliedTargetDraft ||\n      (isAuthenticated && Boolean(savedDealId) && hasUnsavedChanges)",

@@ -20,13 +20,19 @@ import Link from "next/link";
 import { PricingPlanButtons } from "@/components/marketing/pricing-plan-buttons";
 import { trackEvent } from "@/lib/analytics";
 import { decidePricingCardCta } from "@/lib/billing-plan-cta";
-import { TRIAL_DAYS, willCheckoutGrantTrial } from "@/lib/trial";
+import { PRODUCT_EVALUATION_DAYS } from "@/lib/product-access";
 import { featuresForTier } from "@/lib/entitlements-catalog";
 import {
   formatPublicUsd,
+  PUBLIC_AGENT_PRO_ANNUAL_USD,
+  PUBLIC_AGENT_PRO_MONTHLY_USD,
   PUBLIC_PRO_ANNUAL_USD,
   PUBLIC_PRO_MONTHLY_USD,
 } from "@/lib/public-pricing";
+import {
+  formatPricingEvaluationAllowance,
+  type PricingEvaluationSummary,
+} from "@/lib/pricing-evaluation";
 
 type ResolvedPrice = { amountLabel: string; period: string } | null;
 
@@ -40,14 +46,8 @@ interface PricingTogglePlansProps {
   isAuthenticated: boolean;
   /** Exact newest live paid plan, or null for Free. */
   activePaidPlanSlug: string | null;
-  /**
-   * Server-computed mirror of the checkout repeat-trial guard (see
-   * hasAnySubscriptionHistory in lib/entitlements.ts): true when the user has
-   * ANY prior subscription row, so checkout will NOT grant the trial. Swaps
-   * the trial-promising copy for a truthful "Welcome back" variant. Always
-   * false for anonymous visitors.
-   */
-  hadPriorSubscription: boolean;
+  /** Actual server-read evaluation state and remaining immutable-ledger usage. */
+  evaluation: PricingEvaluationSummary;
   /** An unpaid/paused Stripe subscription must be repaired, not duplicated. */
   billingRecoveryRequired?: boolean;
   /**
@@ -107,7 +107,7 @@ const PRO_OUTCOMES: { outcome: string; detail: string }[] = [
   },
   {
     outcome: "See what could break",
-    detail: "Stress rent, vacancy, rate, and price; then inspect the downside, tax, and exit cases.",
+    detail: "Stress rent, vacancy, rate, and price against the assumptions that drive the decision.",
   },
   {
     outcome: "Run a repeatable workflow",
@@ -140,19 +140,29 @@ export function PricingTogglePlans({
   agentAnnual = null,
   isAuthenticated,
   activePaidPlanSlug,
-  hadPriorSubscription,
+  evaluation,
   billingRecoveryRequired = false,
   agentProConfigured = false,
   proOfferName = "TrueCap Pro",
 }: PricingTogglePlansProps) {
   const isPaid = activePaidPlanSlug != null || billingRecoveryRequired;
-  // An explicit trial promise requires BOTH authenticated identity and a clean
-  // subscription-history check. Anonymous visitors may be signed-out returning
-  // customers, so their copy stays conditional until signup confirms identity.
-  const verifiedTrialEligible =
-    isAuthenticated && willCheckoutGrantTrial(hadPriorSubscription);
+  const evaluationAllowance = formatPricingEvaluationAllowance(evaluation);
+  const evaluationBadge = billingRecoveryRequired
+    ? "Billing attention needed"
+    : isPaid
+      ? "Paid access active"
+      : !isAuthenticated
+        ? `${PRODUCT_EVALUATION_DAYS} days · 3 Pro deals + 1 comparison · no card`
+        : evaluation.status === "active" && evaluationAllowance
+          ? `${evaluationAllowance} · no card`
+          : evaluation.status === "exhausted"
+            ? "Included evaluation runs complete"
+            : evaluation.status === "expired"
+              ? "Evaluation ended · Free screening remains"
+              : "Paid access available now";
   // Monthly-first for visitors and Free users: they arrive primed on the
-  // advertised monthly price ($29.99) from ads/FAQ/marketing copy. A current
+  // advertised monthly price from ads/FAQ/marketing copy (the exact amount is
+  // catalog-driven, so this comment does not restate it). A current
   // annual subscriber instead opens on Annual so their exact card is visibly
   // marked Current; the toggle remains under their control.
   const [period, setPeriod] = useState<"monthly" | "annual">(
@@ -196,14 +206,14 @@ export function PricingTogglePlans({
       : null;
 
   // Agent Pro exists on the page only when its price resolved (env configured).
-  const showAgentPro = agentProConfigured || agentMonthly != null || agentAnnual != null;
+  const showAgentPro = agentProConfigured;
   const agentMonthlyAmount = parsePriceAmount(agentMonthly);
   const agentAnnualAmount = parsePriceAmount(agentAnnual);
   const agentAnnualMonthlyEquivalent = agentAnnualAmount != null ? agentAnnualAmount / 12 : null;
   const agentCard =
     period === "monthly" || agentAnnual == null
       ? {
-          priceTop: agentMonthly?.amountLabel ?? "Agent Pro",
+          priceTop: agentMonthly?.amountLabel ?? formatPublicUsd(PUBLIC_AGENT_PRO_MONTHLY_USD),
           priceSub: agentMonthly ? `/${agentMonthly.period}` : "/month",
           subline: "billed monthly",
           slot: "agent_pro_monthly" as const,
@@ -212,7 +222,7 @@ export function PricingTogglePlans({
           priceTop:
             agentAnnualMonthlyEquivalent != null
               ? `$${agentAnnualMonthlyEquivalent.toFixed(agentAnnualMonthlyEquivalent % 1 === 0 ? 0 : 2)}`
-              : (agentAnnual?.amountLabel ?? "Agent Pro"),
+              : formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD / 12),
           priceSub: "/month",
           subline: agentAnnual?.amountLabel ? `billed annually (${agentAnnual.amountLabel})` : "billed annually",
           slot: "agent_pro_annual" as const,
@@ -241,21 +251,29 @@ export function PricingTogglePlans({
         };
   const proCardDecision = decidePricingCardCta(activePaidPlanSlug, proCard.slot);
   const agentCardDecision = decidePricingCardCta(activePaidPlanSlug, agentCard.slot);
+  const proChargeToday =
+    period === "monthly"
+      ? formatPublicUsd(PUBLIC_PRO_MONTHLY_USD)
+      : formatPublicUsd(PUBLIC_PRO_ANNUAL_USD);
+  const agentChargeToday =
+    period === "monthly"
+      ? formatPublicUsd(PUBLIC_AGENT_PRO_MONTHLY_USD)
+      : formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD);
 
   return (
     <>
       {/* The upgrade logic in one line, before the cards. Without it a visitor
           has to infer the difference between the tiers from the feature lists;
           with it, the cards below are just the detail. */}
-      {/* Keep the same Free → Pro → Agent order in the summary and cards. */}
+      {/* Put the recommended plan first, especially in the mobile viewport. */}
       <div className="mb-5 grid gap-2 rounded-2xl border border-border bg-muted/30 p-4 sm:grid-cols-3 sm:gap-4">
-        <p className="text-sm">
-          <span className="font-bold text-foreground">Free</span>{" "}
-          <span className="text-muted-foreground">— screen deals</span>
-        </p>
         <p className="text-sm">
           <span className="font-bold text-foreground">{proOfferName}</span>{" "}
           <span className="text-muted-foreground">— underwrite and document decisions</span>
+        </p>
+        <p className="text-sm">
+          <span className="font-bold text-foreground">Free</span>{" "}
+          <span className="text-muted-foreground">— complete your first decision</span>
         </p>
         {showAgentPro ? (
           <p className="text-sm">
@@ -265,9 +283,7 @@ export function PricingTogglePlans({
         ) : null}
       </div>
       <div className={showAgentPro ? "grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5" : "grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-5"}>
-        {/* Keep the same Free → Pro → Agent order at every viewport so the
-            comparison never changes meaning as the layout wraps. */}
-        <div className="relative rounded-3xl border border-border bg-card p-6 shadow-sm">
+        <div className="relative order-2 rounded-3xl border border-border bg-card p-6 shadow-sm lg:order-1">
           <div className="flex items-baseline justify-between">
             <h3 className="text-lg font-extrabold text-foreground">Free</h3>
             {/* "Current" only means something for a signed-in free user.
@@ -291,7 +307,6 @@ export function PricingTogglePlans({
               slot="free"
               isAuthenticated={isAuthenticated}
               activePaidPlanSlug={activePaidPlanSlug}
-              hadPriorSubscription={hadPriorSubscription}
             />
           </div>
           <ul className="mt-6 space-y-2.5">
@@ -308,7 +323,7 @@ export function PricingTogglePlans({
         </div>
 
         {/* PRO (with toggle) */}
-        <div className="relative -mt-2 rounded-3xl border-2 border-primary bg-card p-6 shadow-[0_24px_70px_rgba(0,112,196,0.18)] lg:scale-[1.03]">
+        <div id="pro" className="relative order-1 -mt-2 scroll-mt-24 rounded-3xl border-2 border-primary bg-card p-6 shadow-[0_24px_70px_rgba(0,112,196,0.18)] lg:order-2 lg:scale-[1.03]">
           {/* Savings badge — prefer the dollar-amount savings when
               available because concrete numbers convert better than
               percentages. Falls back to "X months free" or % savings. */}
@@ -344,7 +359,7 @@ export function PricingTogglePlans({
             )}
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            Turn every address into a defensible acquisition decision.
+            Turn every address into a reviewable acquisition decision.
           </p>
 
           {/* Monthly ↔ Annual toggle */}
@@ -396,15 +411,7 @@ export function PricingTogglePlans({
           <div className="mt-1 text-xs text-muted-foreground">{proCard.subline}</div>
           <div className="mt-3 flex justify-center">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--metric-positive)]/12 px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-foreground">
-               <Sparkles className="size-3" />{
-                 billingRecoveryRequired
-                   ? "Billing attention needed"
-                   : verifiedTrialEligible
-                   ? `Full Pro · ${TRIAL_DAYS} days free`
-                  : !isAuthenticated
-                    ? `Full Pro · ${TRIAL_DAYS}-day trial for new subscribers`
-                    : "Full Pro access"
-              }
+               <Sparkles className="size-3" />{evaluationBadge}
             </span>
           </div>
 
@@ -434,14 +441,15 @@ export function PricingTogglePlans({
                  slot={proCard.slot}
                  isAuthenticated={isAuthenticated}
                  activePaidPlanSlug={activePaidPlanSlug}
-                 hadPriorSubscription={hadPriorSubscription}
+                 priceLabel={proChargeToday}
+                 checkoutReady={period === "monthly" ? monthly != null : annual != null}
                />
              )}
           </div>
           {!isPaid ? (
             <PricingTrialTerms
               isAuthenticated={isAuthenticated}
-              verifiedTrialEligible={verifiedTrialEligible}
+              evaluation={evaluation}
             />
           ) : null}
           <p className="mt-6 text-sm font-semibold text-foreground">Everything in Free, plus four outcomes —</p>
@@ -462,7 +470,7 @@ export function PricingTogglePlans({
             "Everything in Pro" + exactly the agent_pro-only feature labels,
             so this card can never promise something the tier doesn't gate. */}
         {showAgentPro ? (
-          <div className="relative rounded-3xl border border-border bg-card p-6 shadow-sm">
+          <div id="agent-pro" className="relative order-3 scroll-mt-24 rounded-3xl border border-border bg-card p-6 shadow-sm">
             <div className="flex items-baseline justify-between">
               <h3 className="text-lg font-extrabold text-foreground">Agent Pro</h3>
               <div className="flex flex-wrap justify-end gap-1.5">
@@ -488,15 +496,7 @@ export function PricingTogglePlans({
             <div className="mt-1 text-xs text-muted-foreground">{agentCard.subline}</div>
             <div className="mt-3 flex justify-center">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-primary">
-                 <Sparkles className="size-3" />{
-                   billingRecoveryRequired
-                     ? "Billing attention needed"
-                     : verifiedTrialEligible
-                     ? `Agent Pro · ${TRIAL_DAYS} days free`
-                    : !isAuthenticated
-                      ? `${TRIAL_DAYS}-day trial for new subscribers`
-                      : "Agent Pro access"
-                }
+                 <Sparkles className="size-3" />{evaluationBadge}
               </span>
              </div>
              <div className="mt-5">
@@ -512,14 +512,15 @@ export function PricingTogglePlans({
                    slot={agentCard.slot}
                    isAuthenticated={isAuthenticated}
                    activePaidPlanSlug={activePaidPlanSlug}
-                   hadPriorSubscription={hadPriorSubscription}
+                   priceLabel={agentChargeToday}
+                   checkoutReady={period === "monthly" ? agentMonthly != null : agentAnnual != null}
                  />
                )}
             </div>
             {!isPaid ? (
               <PricingTrialTerms
                 isAuthenticated={isAuthenticated}
-                verifiedTrialEligible={verifiedTrialEligible}
+                evaluation={evaluation}
               />
             ) : null}
             <div className="mt-6 rounded-2xl border border-primary/15 bg-primary/[0.04] p-4">
@@ -542,43 +543,59 @@ export function PricingTogglePlans({
 
 function PricingTrialTerms({
   isAuthenticated,
-  verifiedTrialEligible,
+  evaluation,
 }: {
   isAuthenticated: boolean;
-  verifiedTrialEligible: boolean;
+  evaluation: PricingEvaluationSummary;
 }) {
   if (!isAuthenticated) {
     return (
       <>
         <p className="mt-2.5 text-center text-xs text-muted-foreground">
-          <strong className="text-foreground">
-            New subscribers get a {TRIAL_DAYS}-day free trial.
-          </strong>{" "}
-          Card required at checkout. Returning subscribers start paid access immediately.
-          Cancel online anytime; no contract.
+          <strong className="text-foreground">New account: $0 today, no card.</strong>{" "}
+          The {PRODUCT_EVALUATION_DAYS}-day evaluation includes three complete Pro deals and one
+          comparison. Nothing auto-renews; subscribe only if you choose to later.
         </p>
       </>
     );
   }
 
-  if (verifiedTrialEligible) {
+  const allowance = formatPricingEvaluationAllowance(evaluation);
+  if (evaluation.status === "active" && allowance) {
     return (
       <>
         <p className="mt-2.5 text-center text-xs text-muted-foreground">
-          <strong className="text-foreground">Full access now.</strong> Card required at checkout.
-          Subscription billing starts after {TRIAL_DAYS} days unless you cancel first. Your saved
-          work stays in your account if you downgrade.
+          <strong className="text-foreground">Evaluation active: {allowance}.</strong>{" "}
+          You can subscribe at the exact displayed price at any time. Saved work stays in your
+          account if you downgrade.
         </p>
       </>
+    );
+  }
+
+  if (evaluation.status === "exhausted") {
+    return (
+      <p className="mt-2.5 text-center text-xs text-muted-foreground">
+        <strong className="text-foreground">Your included evaluation runs are complete.</strong>{" "}
+        Free screening remains available; subscribe only when you choose to run another complete Pro decision.
+      </p>
+    );
+  }
+
+  if (evaluation.status === "expired") {
+    return (
+      <p className="mt-2.5 text-center text-xs text-muted-foreground">
+        <strong className="text-foreground">Your no-card evaluation has ended.</strong>{" "}
+        Free screening remains available; subscribe only when you choose to continue with Pro.
+      </p>
     );
   }
 
   return (
     <>
       <p className="mt-2.5 text-center text-xs text-muted-foreground">
-        <strong className="text-foreground">Paid access starts immediately.</strong>{" "}
-        <span>The free trial is a first-time offer.</span> Cancel online anytime; no contract. Your saved work stays in your
-        account if you downgrade.
+        <strong className="text-foreground">Subscription access starts with the charge shown above.</strong>{" "}
+        Cancel online anytime; no contract. Your saved work stays in your account if you downgrade.
       </p>
     </>
   );
