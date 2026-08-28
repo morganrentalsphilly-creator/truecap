@@ -59,7 +59,12 @@ export async function GET() {
     "Content surfaces:",
     `  - ${glossaryCount}-term glossary with one-sentence definitions, formulas, and worked examples`,
     `  - ${blogCount} long-form blog posts covering rental underwriting, BRRRR strategy, DSCR loans, 1031 exchanges, tax deductions, and more`,
-    `  - ${CALCULATOR_COUNT} free single-purpose calculators with clean math (cap rate, cash-on-cash, DSCR, NOI, ARV, etc)`,
+    // Examples are derived from the RELEASED registry, never hardcoded: a
+    // gated calculator named here would advertise a 404 to AI crawlers,
+    // which robots.ts explicitly allows to read this file.
+    `  - ${CALCULATOR_COUNT} free single-purpose calculators with clean math (${CALCULATOR_REGISTRY.slice(0, 5)
+      .map((t) => t.shortTitle)
+      .join(", ")}, etc)`,
     `  - ${stateCount} state-level investment guides and ${comboCount} city + strategy combo guides`,
     "  - Side-by-side comparison pages vs. DealCheck, Stessa, Mashvisor, BiggerPockets, Excel, Rentometer, Zillow rent estimate",
     "  - Methodology page documenting the exact math the analyzer uses",

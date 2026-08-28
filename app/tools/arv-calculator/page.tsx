@@ -30,7 +30,7 @@ import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-sch
 export const metadata: Metadata = {
   title: "ARV Calculator | ARV + 70%-Rule Price Screen",
   description:
-    "Free ARV calculator. Estimate after-repair value from entered renovated comps and calculate an early 70%-rule price screen screen, with clear limitations.",
+    "Free ARV calculator. Estimate after-repair value from entered renovated comps and calculate an early 70%-rule price screen, with clear limitations.",
   keywords: [
     "ARV calculator",
     "after repair value calculator",
@@ -99,7 +99,7 @@ export default function ArvCalculatorPage() {
     url: `${siteUrl}/tools/arv-calculator`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
     description:
-      "Free online calculator for after-repair value (ARV) from entered renovated comps, with an early 70%-rule price screen screen.",
+      "Free online calculator for after-repair value (ARV) from entered renovated comps, with an early 70%-rule price screen.",
   };
 
   const faqLd = {
@@ -120,7 +120,7 @@ export default function ArvCalculatorPage() {
     applicationSubCategory: "Real Estate Calculator",
     operatingSystem: "Web",
     description:
-      "Free ARV calculator. Estimate after-repair value from entered renovated comps and calculate an early 70%-rule price screen screen.",
+      "Free ARV calculator. Estimate after-repair value from entered renovated comps and calculate an early 70%-rule price screen.",
     url: `${siteUrl}/tools/arv-calculator`,
     offers: {
       "@type": "Offer",
@@ -174,7 +174,7 @@ export default function ArvCalculatorPage() {
               Estimate what a property may sell for or appraise at after a
               renovation. Enter up to three renovated sold comps and the
               subject&apos;s finished square footage to calculate an ARV and an
-              early 70%-rule price screen screen.
+              early 70%-rule price screen.
             </p>
           </header>
 

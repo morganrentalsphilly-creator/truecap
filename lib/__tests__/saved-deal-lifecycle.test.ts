@@ -127,6 +127,38 @@ describe("archived lifecycle server boundaries", () => {
     expect(workspace).toContain("{!isArchivedDeal ? (");
   });
 
+  it("no authenticated write path sets the trigger-guarded lifecycle columns", () => {
+    // migration 20260827230000 installs saved_analyses_guard_lifecycle_columns,
+    // which raises 42501 when a role of authenticated/anon writes
+    // pipeline_stage / is_completed / is_archived on saved_analyses directly.
+    // The SECURITY DEFINER transition RPCs are the only sanctioned path, so a
+    // literal assignment anywhere in a saved_analyses mutation is a latent
+    // production outage that only appears after the migration lands.
+    //
+    // A type annotation (`pipeline_stage: string | null;`) is fine and an
+    // object-literal assignment (`pipeline_stage: "analyzing",`) is not, so
+    // the discriminator is the line's terminator: `;` declares, `,` writes.
+    const GUARDED = ["pipeline_stage", "is_completed", "is_archived"];
+    const assignments = (source: string) =>
+      source
+        .split("\n")
+        .map((line, i) => ({ line: line.trim(), n: i + 1 }))
+        .filter(
+          ({ line }) =>
+            GUARDED.some((key) => line.startsWith(`${key}:`)) &&
+            !line.endsWith(";"),
+        )
+        .map(({ line, n }) => `${n}: ${line}`);
+
+    expect(assignments(read("app/actions/scenarios.ts"))).toEqual([]);
+    expect(assignments(read("app/actions/saved-analyses.ts"))).toEqual([]);
+
+    // The sanctioned path is still wired.
+    expect(read("app/actions/saved-analyses.ts")).toContain(
+      "persistSavedDealStageWithHistory",
+    );
+  });
+
   it("starts every cloned scenario active without mutating the source lifecycle", () => {
     const scenarios = read("app/actions/scenarios.ts");
     const cloneBoundary = scenarios.slice(
@@ -134,9 +166,17 @@ describe("archived lifecycle server boundaries", () => {
       scenarios.indexOf("clone.pdf_url = null"),
     );
 
-    expect(cloneBoundary).toContain(
-      'Object.assign(clone, persistedLifecycleForSimpleState("active"))',
-    );
+    // The clone must OMIT the lifecycle columns, not set them. `clone` is a
+    // full spread of a select("*") row, so all three arrive from the source
+    // and have to be deleted; re-setting them to "active" would make the
+    // INSERT carry a non-null pipeline_stage, which the
+    // saved_analyses_guard_lifecycle_columns trigger rejects with 42501 once
+    // migration 20260827230000 is applied. Column defaults give the same
+    // semantics (NULL stage reads as DEFAULT_PIPELINE_STAGE).
+    expect(cloneBoundary).toContain("delete clone.pipeline_stage;");
+    expect(cloneBoundary).toContain("delete clone.is_completed;");
+    expect(cloneBoundary).toContain("delete clone.is_archived;");
+    expect(cloneBoundary).not.toContain("persistedLifecycleForSimpleState");
     expect(cloneBoundary).toContain(
       'if ("close_date" in clone) clone.close_date = null',
     );

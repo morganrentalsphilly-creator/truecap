@@ -67,7 +67,6 @@ import {
   SPECIALIST_ANALYSIS_SNAPSHOT_FIELD,
 } from "@/lib/specialist-analysis-snapshot";
 import { retargetUnchangedScenarioResultSnapshot } from "@/lib/scenario-result-snapshot";
-import { persistedLifecycleForSimpleState } from "@/lib/saved-deal-lifecycle";
 import {
   isScenarioStrategyEnabled,
   isSpecialistStrategyEnabled,
@@ -493,7 +492,20 @@ export async function addScenarioAction(
   // The source may donate assumptions from any lifecycle state, but a scenario
   // is always a new deal to evaluate. Never inherit Passed, Closed, or stale
   // compatibility flags that would hide or lock the newly created scenario.
-  Object.assign(clone, persistedLifecycleForSimpleState("active"));
+  //
+  // OMIT rather than assign. `clone` is a full spread of a `select("*")` row,
+  // so all three lifecycle keys arrive from the source and must be removed —
+  // but they must not be re-set to "active" either. The
+  // saved_analyses_guard_lifecycle_columns trigger (migration
+  // 20260827230000_saved_deal_history.sql) raises 42501 when an
+  // authenticated INSERT carries a non-null pipeline_stage, so writing the
+  // stage here would break Add Scenario the moment that migration lands. The
+  // column defaults do exactly what we want: pipeline_stage NULL (read as
+  // DEFAULT_PIPELINE_STAGE by deriveStageFromFlags) and both mirror flags
+  // false. This matches how saveDealAction already inserts a new deal.
+  delete clone.pipeline_stage;
+  delete clone.is_completed;
+  delete clone.is_archived;
   // A scenario is a fresh underwriting branch, not a second owned property.
   // Clear the source close date when that optional column exists so closing
   // the scenario later cannot backdate its equity history to the base deal.
