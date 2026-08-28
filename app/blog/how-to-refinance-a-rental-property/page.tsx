@@ -24,7 +24,7 @@ const SERP_TITLE = "How to refinance a rental property (2026)";
 const DESCRIPTION =
   "Step-by-step on refinancing a rental property: rate-and-term vs cash-out, program-specific LTV and DSCR considerations, illustrative break-even math, and five mistakes to avoid.";
 const PUBLISHED_AT = "2026-05-26";
-const MODIFIED_AT = "2026-08-15";
+const MODIFIED_AT = "2026-08-28";
 const READING_TIME = 10;
 
 export const metadata: Metadata = {
@@ -156,7 +156,7 @@ export default function RefinancePost() {
             the appropriate decision may differ.
           </p>
           <p>
-            See our <Link href="/glossary/interest-rate" className="text-primary font-semibold hover:underline">interest rate</Link> and <Link href="/glossary/loan-term" className="text-primary font-semibold hover:underline">loan term</Link> glossary entries for more on how rate + term interact.
+            See our <Link href="/glossary/interest-rate" className="text-primary font-semibold hover:underline">interest rate</Link> and <Link href="/glossary/loan-term" className="text-primary font-semibold hover:underline">loan term</Link> glossary entries for more on how rate + term interact. Before requesting quotes, run the entered balance, rate, and term through the <Link href="/tools/mortgage-payment-calculator" className="text-primary font-semibold hover:underline">mortgage payment calculator</Link> to see the same PITI breakdown a lender&apos;s estimate will show.
           </p>
 
           <h3 className="text-xl font-bold text-foreground mt-6 mb-2">Reason 2: Cash-out refi to recycle capital</h3>
@@ -262,7 +262,10 @@ export default function RefinancePost() {
             In a simplified illustration that ignores principal paydown, a loan
             initially at 75% LTV would be about 88% LTV after a 15% value
             decline. Actual value and future refinance options may differ.
-            Stress-test a lower appraisal and leave a liquidity buffer.
+            Stress-test a lower appraisal and leave a liquidity buffer. How much
+            cushion to build in depends on the market: appraised values swing
+            further in appreciation-driven metros like{" "}
+            <Link href="/markets/phoenix" className="text-primary font-semibold hover:underline">Phoenix</Link> than in cash-flow markets where price moves less year to year.
           </p>
 
           <h3 className="text-xl font-bold text-foreground mt-6 mb-2">4. Ignoring DSCR options when conventional won&apos;t fit</h3>
