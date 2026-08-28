@@ -566,7 +566,12 @@ export function InputConfidenceCard({
               onClick={onEditAssumptions}
               className="min-h-11 text-xs"
             >
-              Edit assumptions
+              {/* Deliberately NOT "Edit assumptions". The decision summary's
+                  primary control already carries that name, and this row can
+                  render at the same time — two buttons with one accessible
+                  name pointing at the same handler is a screen-reader trap,
+                  and it is what made the page-scoped e2e locator ambiguous. */}
+              Edit inputs
             </Button>
           </div>
           <ul className="grid gap-2 lg:grid-cols-3">

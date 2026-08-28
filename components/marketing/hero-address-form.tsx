@@ -23,8 +23,8 @@
  * captures the address and tells the calculator to take over.
  */
 
-import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { useForm, type DefaultValues } from "react-hook-form";
 import {
   ArrowRight,
@@ -204,6 +204,18 @@ export function HeroAddressForm() {
       county: sameAsPicked ? picked.county : undefined,
       zip: sameAsPicked ? picked.zip : undefined,
     });
+    scrollToCalculator();
+  };
+
+  // Cold paid traffic lands here WITHOUT a property to type, and for them the
+  // address input is a dead end. This runs the real sample in place and scrolls
+  // to the verdict — it is the fastest path from an ad click to seeing what the
+  // product actually produces. (A link to a static memo page is a weaker
+  // promise and leaves the analyzer untouched.)
+  const handleTrySample = () => {
+    trackEvent("hero_sample_clicked");
+    trackEvent("hero_sample_opened");
+    dispatchHeroAnalyze({ token: newToken(), address: "", sample: true });
     scrollToCalculator();
   };
 
@@ -408,12 +420,30 @@ export function HeroAddressForm() {
                   : ""}
       </p>
 
-      <Link
-        href="/sample-decision-memo"
-        className="mt-2 inline-flex min-h-11 items-center rounded-lg text-sm font-semibold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        View a sample decision →
-      </Link>
+      {/* Two distinct paths for a visitor with no address to type, which is a
+          large share of cold paid traffic:
+            - the BUTTON runs the real sample in place and scrolls to the
+              verdict. Fastest route from an ad click to seeing actual output,
+              and the journey e2e/authenticated-product.spec.ts drives.
+            - the LINK is the crawlable one. /sample-decision-memo is in the
+              sitemap, and this is its only internal link — drop it and the
+              page is orphaned (see ux-polish-guards). */}
+      <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
+        <button
+          type="button"
+          onClick={handleTrySample}
+          disabled={!hydrated}
+          className="inline-flex min-h-11 items-center font-semibold text-primary underline decoration-primary/40 underline-offset-4 transition-colors hover:decoration-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-wait disabled:opacity-60"
+        >
+          View a sample decision →
+        </button>
+        <Link
+          href="/sample-decision-memo"
+          className="inline-flex min-h-11 items-center font-medium text-muted-foreground underline decoration-border underline-offset-4 transition-colors hover:text-foreground hover:decoration-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          Read the written memo
+        </Link>
+      </div>
     </div>
   );
 }

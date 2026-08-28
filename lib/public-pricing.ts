@@ -6,8 +6,8 @@
  * Keep these values aligned with the published catalog and update them only as
  * part of an approved pricing release. They never reprice an existing customer.
  */
-export const PUBLIC_PRO_MONTHLY_USD = 24;
-export const PUBLIC_PRO_ANNUAL_USD = 240;
+export const PUBLIC_PRO_MONTHLY_USD = 29.99;
+export const PUBLIC_PRO_ANNUAL_USD = 300;
 export const PUBLIC_AGENT_PRO_MONTHLY_USD = 49;
 export const PUBLIC_AGENT_PRO_ANNUAL_USD = 490;
 export const PUBLIC_DECISION_PACK_USD = 9;

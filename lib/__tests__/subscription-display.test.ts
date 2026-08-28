@@ -65,7 +65,7 @@ describe("buildSubscriptionDisplay", () => {
     expect(buildSubscriptionDisplay(input({
       subscribedPrice: { amountLabel: "$20", period: "month", currency: "USD", unitAmount: 20 },
       standardMonthlyPrice: null,
-    })).detailLines[0]).toBe("Standard price: $24/month");
+    })).detailLines[0]).toBe("Standard price: $29.99/month");
   });
 
   it("labels a live subscription scheduled to cancel", () => {

@@ -9,13 +9,24 @@ import {
 
 describe("committed public pricing catalog", () => {
   it.each([
-    ["pro_monthly", 2_400, "month"],
-    ["pro_annual", 24_000, "year"],
+    ["pro_monthly", 2_999, "month"],
+    ["pro_annual", 30_000, "year"],
     ["agent_pro_monthly", 4_900, "month"],
     ["agent_pro_annual", 49_000, "year"],
   ] as const)("pins %s to its amount and cadence", (slug, cents, interval) => {
     expect(expectedPlanAmountCents(slug)).toBe(cents);
     expect(PLAN_CATALOG[slug].stripeInterval).toBe(interval);
+  });
+
+  it("pins Investor Pro to the amounts the live Stripe Prices actually charge", () => {
+    // These two are the ONLY catalog entries a customer can buy today, and
+    // stripePriceMatchesCatalog fails closed on a mismatch: if the committed
+    // amount drifts from the live Price, /pricing keeps advertising while
+    // checkout returns "temporarily unavailable" — a silent, total loss of
+    // revenue. Moving these requires creating the new Stripe Prices and
+    // repointing STRIPE_PRICE_PRO_MONTHLY / _ANNUAL in the same release.
+    expect(expectedPlanAmountCents("pro_monthly")).toBe(2_999);
+    expect(expectedPlanAmountCents("pro_annual")).toBe(30_000);
   });
 
   it.each(Object.keys(PLAN_CATALOG).filter(

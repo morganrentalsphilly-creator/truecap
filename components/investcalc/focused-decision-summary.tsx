@@ -958,11 +958,10 @@ export function FocusedDecisionSummary({
           onClick={onEditAssumptions}
           disabled={resultActionsBlocked}
           title={resultActionsBlockedReason}
-          aria-label="Edit assumptions"
           className="h-11 w-full gap-2 rounded-xl max-[250px]:h-auto max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight sm:w-auto"
         >
           <Edit3 className="size-4" aria-hidden />
-          Edit inputs
+          Edit assumptions
         </Button>
         <Button
           type="button"

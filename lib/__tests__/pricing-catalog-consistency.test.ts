@@ -92,8 +92,8 @@ describe("homepage ladder is derived, not hand-typed", () => {
 
 describe("catalog matches what the product actually does", () => {
   it("keeps one documented public fallback while Stripe remains billing authority", () => {
-    expect(PUBLIC_PRO_MONTHLY_USD).toBe(24);
-    expect(PUBLIC_PRO_ANNUAL_USD).toBe(240);
+    expect(PUBLIC_PRO_MONTHLY_USD).toBe(29.99);
+    expect(PUBLIC_PRO_ANNUAL_USD).toBe(300);
     expect(roiCalculatorSource).toContain("PUBLIC_PRO_MONTHLY_USD");
     expect(roiCalculatorSource).not.toMatch(/const PRO_MONTHLY_PRICE\s*=/);
   });
