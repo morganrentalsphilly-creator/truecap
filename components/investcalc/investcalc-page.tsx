@@ -263,6 +263,7 @@ import {
 } from "@/components/investcalc/duplicate-address-dialog";
 import {
   isTrueCapSyntheticSampleAddress,
+  sampleProPreviewAddsCapability,
   SAMPLE_DEAL_FIXTURE,
 } from "@/lib/sample-deal";
 import { estimatePurchasePrice } from "@/lib/estimate-price";
@@ -6006,14 +6007,21 @@ export function InvestCalcPage({
     // Consume the sample-deal Pro preview arm flag FIRST so it can never
     // leak onto a later run if anything below throws. One sample click =
     // at most one preview run.
+    //
+    // "Not fully Pro yet" is measured against what this preview can actually
+    // show (see sampleProPreviewAddsCapability). Requiring an UNRELEASED
+    // panel — false for every plan, and not unlocked by the preview either —
+    // made the escape hatch unreachable, so a subscriber who resumed a
+    // Save/Share sign-in on the sample was demoted into demo framing and lost
+    // the property address off their own decision summary.
     const sampleProPreview =
       pendingSamplePreviewRef.current &&
-      !(
-        canUseProjections &&
-        canUseTaxStrategy &&
-        canUseExitScenarios &&
-        canUseDealScore
-      );
+      sampleProPreviewAddsCapability({
+        canUseProjections,
+        canUseTaxStrategy,
+        canUseExitScenarios,
+        canUseDealScore,
+      });
     pendingSamplePreviewRef.current = false;
     const isSampleRun = pendingSampleRunRef.current;
     pendingSampleRunRef.current = false;

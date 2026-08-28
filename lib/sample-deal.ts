@@ -27,6 +27,7 @@
  * surface together.
  */
 
+import { isFeatureReleased, type FeatureKey } from "@/lib/entitlements-catalog";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import type { MaoTarget } from "@/lib/max-allowable-offer";
 
@@ -97,6 +98,54 @@ export function isTrueCapSyntheticSampleAddress(value: unknown): boolean {
   const normalize = (address: string) =>
     address.trim().replace(/\s+/g, " ").toLocaleLowerCase("en-US");
   return normalize(value) === normalize(SAMPLE_DEAL_VALUES.address);
+}
+
+export type SampleProPreviewCapabilities = {
+  canUseProjections: boolean;
+  canUseTaxStrategy: boolean;
+  canUseExitScenarios: boolean;
+  canUseDealScore: boolean;
+};
+
+/**
+ * What the one-shot sample Pro preview can actually demonstrate, paired with
+ * the entitlement that makes it redundant. Keep this list in step with the
+ * panels `sampleProPreview` really unlocks in the analyzer — an entry here
+ * claims the preview shows something a visitor without that entitlement
+ * cannot otherwise see.
+ */
+const SAMPLE_PRO_PREVIEW_FEATURES = [
+  ["projections", "canUseProjections"],
+  ["tax_strategy", "canUseTaxStrategy"],
+  ["exit_scenarios", "canUseExitScenarios"],
+  ["deal_score", "canUseDealScore"],
+] as const satisfies ReadonlyArray<
+  readonly [FeatureKey, keyof SampleProPreviewCapabilities]
+>;
+
+/**
+ * Does an armed sample run still have anything to preview for this visitor?
+ *
+ * The preview is a marketing demo for someone who does NOT already have the
+ * paid report, and it costs the viewer their own framing: the property is
+ * relabelled SAMPLE_DEAL_DISPLAY.shortAddress and the criteria are presented
+ * as product examples. A subscriber who already has every panel it can show
+ * must therefore keep the real analysis — including after a Save/Share
+ * sign-in resumes the sample they were already looking at.
+ *
+ * An UNRELEASED feature (`shipped: false` in the entitlement catalog) is
+ * false for every plan AND is not unlocked by the preview, so it can never be
+ * evidence that this visitor is missing something. Counting one made the
+ * "already has it all" test unsatisfiable and silently demoted paid users
+ * into demo framing.
+ */
+export function sampleProPreviewAddsCapability(
+  capabilities: SampleProPreviewCapabilities,
+): boolean {
+  return SAMPLE_PRO_PREVIEW_FEATURES.some(
+    ([feature, capability]) =>
+      isFeatureReleased(feature) && !capabilities[capability],
+  );
 }
 
 /** Short display strings shared by the hero card. */
