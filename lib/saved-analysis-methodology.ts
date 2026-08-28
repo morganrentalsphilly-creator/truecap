@@ -196,11 +196,38 @@ export function resolveSavedAnalysisResult(input: {
       "analysisDate",
       "tenYearProjectionVersion",
     ]);
+    // A key whose CURRENT value is `undefined` can never appear in a persisted
+    // snapshot: result rows are stored as jsonb, and JSON.stringify drops
+    // undefined-valued keys on the way in. Requiring such a key is therefore
+    // not a compatibility check, it is an impossible condition — every saved
+    // deal fails it and reopens as a blank form with the assumptions restored
+    // and no decision.
+    //
+    // This is exactly what happened when the renovation/valuation result
+    // fields landed: `operatingScenario: "current"` (what resetToNewAnalysis
+    // sets on every new analysis) leaves rentBasis, renovationStartMonth,
+    // renovationDurationMonths, renovationRentLossPct, currentPropertyValue,
+    // stabilizedPropertyValue and balloonMonth undefined, so no deal saved in
+    // that scenario could be reopened at all.
+    //
+    // Skipping them does NOT weaken the check: a key carrying a real value is
+    // still required, and this closes the whole class rather than allow-listing
+    // seven names that the next optional field would reopen.
+    const isPersistableKey = (bag: Record<string, unknown>, key: string) =>
+      bag[key] !== undefined;
+    const recomputedBag = input.recomputedResult as unknown as Record<
+      string,
+      unknown
+    >;
     const requiredKeys = new Set([
       ...Object.keys(input.recomputedResult).filter(
-        (key) => !backwardCompatibleOptionalResultKeys.has(key)
+        (key) =>
+          !backwardCompatibleOptionalResultKeys.has(key) &&
+          isPersistableKey(recomputedBag, key)
       ),
-      ...Object.keys(input.recomputedExtras),
+      ...Object.keys(input.recomputedExtras).filter((key) =>
+        isPersistableKey(input.recomputedExtras, key)
+      ),
     ]);
     const expectsDealScore = [
       "score",

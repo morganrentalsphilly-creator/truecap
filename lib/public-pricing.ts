@@ -5,11 +5,17 @@
  *
  * Keep these values aligned with the published catalog and update them only as
  * part of an approved pricing release. They never reprice an existing customer.
+ *
+ * These four MUST equal the amounts the live Stripe Prices actually charge.
+ * stripePriceMatchesCatalog fails closed on any mismatch, so a drift here does
+ * not show the wrong price — it kills checkout outright while /pricing keeps
+ * advertising. Moving a number means creating the new Stripe Price and
+ * repointing its STRIPE_PRICE_* env var in the same release.
  */
 export const PUBLIC_PRO_MONTHLY_USD = 29.99;
 export const PUBLIC_PRO_ANNUAL_USD = 300;
-export const PUBLIC_AGENT_PRO_MONTHLY_USD = 49;
-export const PUBLIC_AGENT_PRO_ANNUAL_USD = 490;
+export const PUBLIC_AGENT_PRO_MONTHLY_USD = 59.99;
+export const PUBLIC_AGENT_PRO_ANNUAL_USD = 590;
 export const PUBLIC_DECISION_PACK_USD = 9;
 
 export const PLAN_CATALOG = {

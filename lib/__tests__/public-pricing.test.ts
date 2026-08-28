@@ -11,22 +11,24 @@ describe("committed public pricing catalog", () => {
   it.each([
     ["pro_monthly", 2_999, "month"],
     ["pro_annual", 30_000, "year"],
-    ["agent_pro_monthly", 4_900, "month"],
-    ["agent_pro_annual", 49_000, "year"],
+    ["agent_pro_monthly", 5_999, "month"],
+    ["agent_pro_annual", 59_000, "year"],
   ] as const)("pins %s to its amount and cadence", (slug, cents, interval) => {
     expect(expectedPlanAmountCents(slug)).toBe(cents);
     expect(PLAN_CATALOG[slug].stripeInterval).toBe(interval);
   });
 
-  it("pins Investor Pro to the amounts the live Stripe Prices actually charge", () => {
-    // These two are the ONLY catalog entries a customer can buy today, and
-    // stripePriceMatchesCatalog fails closed on a mismatch: if the committed
+  it("pins every SELLING plan to the amount its live Stripe Price charges", () => {
+    // stripePriceMatchesCatalog fails closed on a mismatch: if a committed
     // amount drifts from the live Price, /pricing keeps advertising while
     // checkout returns "temporarily unavailable" — a silent, total loss of
-    // revenue. Moving these requires creating the new Stripe Prices and
-    // repointing STRIPE_PRICE_PRO_MONTHLY / _ANNUAL in the same release.
+    // revenue on that plan. Moving any of these requires creating the new
+    // Stripe Price and repointing its STRIPE_PRICE_* env var in the same
+    // release. Values verified against usetruecap.com/pricing on 2026-08-28.
     expect(expectedPlanAmountCents("pro_monthly")).toBe(2_999);
     expect(expectedPlanAmountCents("pro_annual")).toBe(30_000);
+    expect(expectedPlanAmountCents("agent_pro_monthly")).toBe(5_999);
+    expect(expectedPlanAmountCents("agent_pro_annual")).toBe(59_000);
   });
 
   it.each(Object.keys(PLAN_CATALOG).filter(

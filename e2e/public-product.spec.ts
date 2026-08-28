@@ -100,8 +100,15 @@ test("mobile hero leads with the decision outcome and keeps empty submissions at
   const form = hero.locator('form[data-hero-address-form=""]');
   const address = form.getByLabel("Property address", { exact: true });
   await expect(address).toHaveAttribute("aria-required", "true");
+  // Two distinct no-address paths, deliberately. The BUTTON runs the sample in
+  // place (the journey the authenticated guest specs drive); the LINK is the
+  // only internal link to /sample-decision-memo, which is in the sitemap and
+  // would otherwise be orphaned.
   await expect(
-    hero.getByRole("link", { name: "View a sample decision →", exact: true }),
+    hero.getByRole("button", { name: "View a sample decision →", exact: true }),
+  ).toHaveCount(1);
+  await expect(
+    hero.getByRole("link", { name: "Read the written memo", exact: true }),
   ).toHaveCount(1);
 
   const scrollBefore = await page.evaluate(() => window.scrollY);

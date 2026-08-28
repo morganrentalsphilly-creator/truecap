@@ -80,13 +80,17 @@ describe("agent pro slugs (2026-08 tier)", () => {
     expect([...PAID_PLAN_SLUGS].sort()).toEqual(Object.keys(bag).sort());
   });
 
-  it("isAgentProConfigured requires an explicit release and both billing cadences", () => {
+  it("isAgentProConfigured tracks the Stripe Price alone — no separate release flag", () => {
+    // Agent Pro is a live, selling tier. An extra env gate here would delist a
+    // product that is already taking money the moment a deployment forgets to
+    // set it, which is exactly what production would have done.
     expect(isAgentProConfigured()).toBe(false);
     process.env.STRIPE_PRICE_AGENT_PRO_MONTHLY = "price_agent_59";
-    expect(isAgentProConfigured()).toBe(false);
-    process.env.STRIPE_PRICE_AGENT_PRO_ANNUAL = "price_agent_590";
-    expect(isAgentProConfigured()).toBe(false);
-    process.env.TRUECAP_AGENT_PRO_RELEASED = "true";
     expect(isAgentProConfigured()).toBe(true);
+    process.env.TRUECAP_AGENT_PRO_RELEASED = "false";
+    expect(
+      isAgentProConfigured(),
+      "a stale release flag must not delist a configured, selling tier",
+    ).toBe(true);
   });
 });
