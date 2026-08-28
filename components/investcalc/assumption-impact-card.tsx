@@ -10,7 +10,6 @@ import { useMemo } from "react";
 import { Activity } from "lucide-react";
 import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { computeAssumptionImpact } from "@/lib/assumption-impact";
-import { assumptionMeta, CONFIDENCE_LABEL } from "@/lib/assumption-confidence";
 
 const money = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
 
@@ -29,32 +28,13 @@ export function AssumptionImpactCard({ values }: { values: InvestmentFormValues 
         <span className="font-semibold text-sm text-foreground">What moves this deal</span>
       </div>
       <p className="text-xs text-muted-foreground mb-3">
-        How much monthly cash flow swings when each assumption moves - plus where each number comes from
-        and how confident it is. Verify the top, lowest-confidence ones first.
+        How monthly cash flow changes when each assumption moves. Use the
+        largest swings for stress testing.
       </p>
-
-      {/* Color key for the per-driver confidence dots below - otherwise the
-          red/amber/green is meaningless (and the old hover-only title never
-          fired on touch). */}
-      <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
-        <span className="inline-flex items-center gap-1">
-          <span className="inline-block size-1.5 shrink-0 rounded-full bg-emerald-500" />
-          High confidence
-        </span>
-        <span className="inline-flex items-center gap-1">
-          <span className="inline-block size-1.5 shrink-0 rounded-full bg-amber-500" />
-          Medium
-        </span>
-        <span className="inline-flex items-center gap-1">
-          <span className="inline-block size-1.5 shrink-0 rounded-full bg-red-500" />
-          Low - verify first
-        </span>
-      </div>
 
       <div className="space-y-2.5">
         {top.map((d) => {
           const widthPct = Math.max(4, Math.round((d.cashFlowSwing / max) * 100));
-          const meta = assumptionMeta(d.key);
           return (
             <div key={d.key}>
               <div className="mb-1 flex items-center justify-between text-xs">
@@ -71,23 +51,6 @@ export function AssumptionImpactCard({ values }: { values: InvestmentFormValues 
               <div className="h-2 overflow-hidden rounded-full bg-muted">
                 <div className="h-full rounded-full bg-primary" style={{ width: `${widthPct}%` }} />
               </div>
-              {meta ? (
-                <div className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                  <span
-                    aria-hidden
-                    className={`inline-block size-1.5 shrink-0 rounded-full ${
-                      meta.confidence === "high"
-                        ? "bg-emerald-500"
-                        : meta.confidence === "medium"
-                          ? "bg-amber-500"
-                          : "bg-red-500"
-                    }`}
-                  />
-                  <span className="truncate" title={`${CONFIDENCE_LABEL[meta.confidence]} - ${meta.verify}`}>
-                    {meta.source} · {CONFIDENCE_LABEL[meta.confidence]}
-                  </span>
-                </div>
-              ) : null}
             </div>
           );
         })}

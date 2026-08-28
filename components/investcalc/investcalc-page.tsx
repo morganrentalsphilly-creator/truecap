@@ -1044,6 +1044,8 @@ export function InvestCalcPage({
   const [isCalculating, setIsCalculating] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [isEditingAssumptions, setIsEditingAssumptions] = useState(false);
+  const [pendingVerificationFocusKey, setPendingVerificationFocusKey] =
+    useState<InputConfidenceFieldKey | null>(null);
   // True when a full result is on screen but the CURRENT form no longer
   // parses (e.g. the user cleared Purchase Price to retype it and got
   // interrupted). The live recompute deliberately keeps the last good
@@ -8732,65 +8734,102 @@ export function InvestCalcPage({
     resolveLiveInputConfidenceContext,
   ]);
 
+  useEffect(() => {
+    if (!pendingVerificationFocusKey || !isEditingAssumptions) return;
+
+    const key = pendingVerificationFocusKey;
+    const field = currentInputConfidence?.fields.find(
+      (candidate) => candidate.key === key,
+    );
+    const propertyType = form.getValues("propertyType");
+    const strategyKey = resolveCompatibleAnalyzerStrategyKey(
+      activeStrategyKeyRef.current,
+      form.getValues(),
+    );
+    let frameId = 0;
+    let attempts = 0;
+    let cancelled = false;
+
+    const findVisibleTarget = (): HTMLElement | null => {
+      let target: HTMLElement | null = null;
+      if (key === "rent" && strategyKey === "short-term") {
+        // Monthly rent remains mounted but hidden for STR. Focus the actual
+        // revenue control instead; occupancy is alongside it in the same row.
+        target = document.getElementById("avgDailyRate");
+      } else if (key === "rent" && propertyType !== "single-family") {
+        // Unit income is a rollup. The group focus avoids choosing an
+        // arbitrary unit or the owner-occupied row in a house hack.
+        target = document.getElementById("step-income");
+      } else {
+        target = document.getElementById(INPUT_CONFIDENCE_FORM_FIELD[key]);
+      }
+      return target && target.getClientRects().length > 0 ? target : null;
+    };
+
+    const focusWhenReady = () => {
+      if (cancelled) return;
+      const target = findVisibleTarget();
+      if (target) {
+        target.focus({ preventScroll: true });
+        target.scrollIntoView({
+          behavior: scrollBehavior(),
+          block: "center",
+        });
+        setPendingVerificationFocusKey(null);
+        return;
+      }
+
+      attempts += 1;
+      if (attempts < 20) {
+        frameId = window.requestAnimationFrame(focusWhenReady);
+        return;
+      }
+
+      const fallbackAnchor =
+        key === "rent"
+          ? "step-income"
+          : key === "yearBuilt"
+            ? "step-extras"
+            : field?.editTarget === "financing" ||
+                field?.editTarget === "expenses"
+              ? `step-${field.editTarget}`
+              : "step-property";
+      const fallback = document.getElementById(fallbackAnchor);
+      fallback?.focus({ preventScroll: true });
+      fallback?.scrollIntoView({
+        behavior: scrollBehavior(),
+        block: "start",
+      });
+      setPendingVerificationFocusKey(null);
+    };
+
+    frameId = window.requestAnimationFrame(focusWhenReady);
+    return () => {
+      cancelled = true;
+      window.cancelAnimationFrame(frameId);
+    };
+  }, [
+    advancedOpen,
+    currentInputConfidence,
+    expenseDetailsOpen,
+    form,
+    isEditingAssumptions,
+    pendingVerificationFocusKey,
+  ]);
+
   const handleReviewVerificationInput = useCallback(
     (key: InputConfidenceFieldKey) => {
       const field = currentInputConfidence?.fields.find(
         (candidate) => candidate.key === key,
-      );
-      const propertyType = form.getValues("propertyType");
-      const strategyKey = resolveCompatibleAnalyzerStrategyKey(
-        activeStrategyKeyRef.current,
-        form.getValues(),
       );
       const needsAdvancedPanel = key !== "purchasePrice" && key !== "rent";
 
       setIsEditingAssumptions(true);
       if (needsAdvancedPanel) setAdvancedOpen(true);
       if (field?.editTarget === "expenses") setExpenseDetailsOpen(true);
-
-      requestAnimationFrame(() => {
-        window.setTimeout(() => {
-          const fieldId = INPUT_CONFIDENCE_FORM_FIELD[key];
-          let input: HTMLElement | null = null;
-          if (key === "rent" && strategyKey === "short-term") {
-            // The legacy monthlyRent input stays mounted but CSS-hidden in STR
-            // mode. Focus the visible nightly-rate control instead; occupancy
-            // sits beside it in the same income group.
-            input = document.getElementById("avgDailyRate");
-          } else if (key === "rent" && propertyType !== "single-family") {
-            // Rent is a rollup across every unit. Focus the full income group,
-            // never an arbitrary first row (or the read-only owner unit in a
-            // house hack), so the investor reviews the complete rent roll.
-            input = document.getElementById("step-income");
-          } else {
-            input = document.getElementById(fieldId);
-          }
-          if (input) {
-            input.focus({ preventScroll: true });
-            input.scrollIntoView({
-              behavior: scrollBehavior(),
-              block: "center",
-            });
-            return;
-          }
-
-          const fallbackAnchor =
-            key === "rent"
-              ? "step-income"
-              : key === "yearBuilt"
-                ? "step-extras"
-                : field?.editTarget === "financing" ||
-                    field?.editTarget === "expenses"
-                  ? `step-${field.editTarget}`
-                  : "step-property";
-          document.getElementById(fallbackAnchor)?.scrollIntoView({
-            behavior: scrollBehavior(),
-            block: "start",
-          });
-        }, 70);
-      });
+      setPendingVerificationFocusKey(key);
     },
-    [currentInputConfidence, form],
+    [currentInputConfidence],
   );
 
   const handleToggleInputVerified = useCallback(
@@ -9757,8 +9796,9 @@ export function InvestCalcPage({
                 named for screen readers now that no heading lives inside. */}
               <section
                 id="step-property"
+                tabIndex={-1}
                 aria-label="Analyze a deal"
-                className="scroll-mt-24 bg-card rounded-2xl border border-border shadow-sm p-4 sm:p-6 lg:col-span-3 lg:col-start-1"
+                className="scroll-mt-24 bg-card rounded-2xl border border-border shadow-sm p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:p-6 lg:col-span-3 lg:col-start-1"
               >
                 <div className="space-y-6">
                   <PropertyDetailsSection
@@ -10056,14 +10096,22 @@ export function InvestCalcPage({
                     )}
                   </div>
                 )}
-                <div id="step-financing" className="scroll-mt-24">
+                <div
+                  id="step-financing"
+                  tabIndex={-1}
+                  className="scroll-mt-24 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
                   <FinancingSection
                     form={form}
                     appliedProfile={appliedFinancingProfile}
                     onAppliedProfileChange={handleAppliedFinancingProfileChange}
                   />
                 </div>
-                <div id="step-expenses" className="scroll-mt-24">
+                <div
+                  id="step-expenses"
+                  tabIndex={-1}
+                  className="scroll-mt-24 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
                   <OperatingExpensesSection
                     form={form}
                     purchasePrice={purchasePrice}
@@ -10085,7 +10133,11 @@ export function InvestCalcPage({
                   the extraFields slot — same block, one rendered instance,
                   hidden in strategy mode exactly as showYearBuilt was. */}
                 {propertyType === "single-family" && (
-                  <div id="step-extras" className="scroll-mt-24">
+                  <div
+                    id="step-extras"
+                    tabIndex={-1}
+                    className="scroll-mt-24 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
                     <SingleFamilyUnitSection
                       form={form}
                       fields="secondary"

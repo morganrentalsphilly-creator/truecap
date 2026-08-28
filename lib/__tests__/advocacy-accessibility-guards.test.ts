@@ -62,7 +62,7 @@ describe("advocacy decision accessibility and reflow guards", () => {
     expect(summary).toContain("break-all");
   });
 
-  it("turns the unreachable evidence state into a task-oriented verification plan", () => {
+  it("turns the unreachable evidence state into a compact offer check", () => {
     const advocacyStart = ledger.indexOf("if (advocacyContractEnabled)");
     const advocacyEnd = ledger.indexOf("\n  }\n\n  return (", advocacyStart);
     const advocacyView = ledger.slice(advocacyStart, advocacyEnd);
@@ -70,22 +70,26 @@ describe("advocacy decision accessibility and reflow guards", () => {
     expect(advocacyStart).toBeGreaterThan(-1);
     expect(advocacyEnd).toBeGreaterThan(advocacyStart);
     expect(ledger).toContain('data-verification-plan=""');
-    expect(ledger).toContain("Verify before relying on this deal");
-    expect(ledger).toContain("The math is ready for screening.");
-    expect(ledger).toContain("Review assumptions");
-    expect(ledger).toContain("Save to use checklist");
-    expect(ledger).toContain("#deal-due-diligence");
-    expect(ledger).toContain("See every material assumption");
-    expect(ledger).toContain("onReviewInput(nextMaterialVerification.key)");
-    expect(ledger).toContain("onReviewInput(item.key)");
+    expect(ledger).toContain("Before you offer");
     expect(ledger).toContain(
-      "aria-label={`Review ${verificationLabel(item).toLowerCase()}`}",
+      "Double-check the biggest cash-flow drivers. Edit anything that",
     );
-    expect(ledger).toContain("Check before relying");
+    expect(ledger).toContain("computeAssumptionImpact(values)");
+    expect(ledger).toContain("EDIT_ACTION_LABEL[field.key]");
+    expect(ledger).toContain("onReviewInput(field.key)");
+    expect(ledger).toContain(
+      "aria-label={`${actionLabel}: ${label}`}",
+    );
     expect(ledger).toContain("Nightly rate and occupancy");
-    expect(ledger).toContain("All unit rents");
+    expect(ledger).toContain("Rental-unit rents");
+    expect(ledger).toContain("Unit rents");
     expect(ledger).not.toContain("Start here");
     expect(ledger).not.toContain("Add evidence for");
+    expect(advocacyView).not.toContain("Save to use checklist");
+    expect(advocacyView).not.toContain("Open deal checklist");
+    expect(advocacyView).not.toContain("See every material assumption");
+    expect(advocacyView).not.toContain("evidence complete");
+    expect(advocacyView).not.toContain("<details");
     expect(dashboard).toContain("onReviewInput={onReviewVerificationInput}");
     expect(summary).toContain(
       "onTargetDraftBlockingChange?.(targetDraftBlocksActions)",
@@ -96,16 +100,27 @@ describe("advocacy decision accessibility and reflow guards", () => {
     expect(dashboard).toContain(
       "actionsBlocked={verificationActionsBlocked}",
     );
-    expect(ledger).toContain("disabled={isSaving || actionsBlocked}");
     expect(ledger).toContain("disabled={actionsBlocked}");
-    expect(ledger).toContain("update it if needed");
     expect(calculator).toContain("handleReviewVerificationInput");
     expect(calculator).toContain("INPUT_CONFIDENCE_FORM_FIELD[key]");
     expect(calculator).toContain('strategyKey === "short-term"');
     expect(calculator).toContain('getElementById("avgDailyRate")');
     expect(calculator).toContain('getElementById("step-income")');
     expect(calculator).toContain('id="step-income"');
-    expect(calculator).toContain("tabIndex={-1}");
+    for (const id of [
+      "step-property",
+      "step-income",
+      "step-financing",
+      "step-expenses",
+      "step-extras",
+    ]) {
+      expect(normalizeSource(calculator)).toContain(
+        normalizeSource(`id="${id}" tabIndex={-1}`),
+      );
+    }
+    expect(calculator).toContain("setPendingVerificationFocusKey(key)");
+    expect(calculator).toContain("target.getClientRects().length > 0");
+    expect(calculator).toContain("attempts < 20");
     expect(calculator).toContain(
       "onReviewVerificationInput={handleReviewVerificationInput}",
     );
@@ -123,6 +138,13 @@ describe("advocacy decision accessibility and reflow guards", () => {
     );
     expect(summary).not.toContain("Screening Index");
     expect(summary).not.toContain("dealScoreResult");
+    expect(summary).toContain(
+      "!advocacyContractEnabled && sensitivityLabels.length > 0",
+    );
+    expect(dashboard).toContain(
+      "(!isSampleProPreview && !deferredWhatIfState?.isAdjusted)",
+    );
+    expect(dashboard).toContain("!strategyLeadsOutput &&");
   });
 
   it("presents input provenance without an unreachable confidence grade", () => {
