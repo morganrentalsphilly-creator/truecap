@@ -31,7 +31,6 @@ type Props = {
   confidence: InputConfidenceResult;
   /** Frozen values used for the displayed analysis, never live form edits. */
   values: InvestmentFormValues;
-  dealFitScore?: number | null;
   showOfferReadyStatus?: boolean;
   advocacyContractEnabled?: boolean;
   onEditAssumptions: () => void;
@@ -181,7 +180,6 @@ function offerCheckActionLabel(
 export function InputConfidenceCard({
   confidence,
   values,
-  dealFitScore,
   showOfferReadyStatus = true,
   advocacyContractEnabled = false,
   onEditAssumptions,
@@ -436,7 +434,13 @@ export function InputConfidenceCard({
 
         <div
           role="group"
-          className="grid shrink-0 grid-cols-1 gap-2 min-[360px]:grid-cols-3"
+          // 2 columns in the default branch now that Deal Fit is gone (it
+          // duplicated the Screening Index bar). The advocacy branch above
+          // still renders three tiles, so the column count follows the branch.
+          className={cn(
+            "grid shrink-0 grid-cols-1 gap-2",
+            advocacyContractEnabled ? "min-[360px]:grid-cols-3" : "min-[360px]:grid-cols-2",
+          )}
           aria-label={
             advocacyContractEnabled
               ? "Evidence readiness summary"
@@ -459,14 +463,15 @@ export function InputConfidenceCard({
             </>
           ) : (
             <>
-              <SummaryMetric
-                label="Deal Fit"
-                value={
-                  dealFitScore == null ? "—" : `${Math.round(dealFitScore)}`
-                }
-                suffix={dealFitScore == null ? undefined : "/100"}
-                help="Economics"
-              />
+              {/* No "Deal Fit" tile. It rendered Math.round of the SAME
+                  dealScore the full-width SCREENING INDEX bar shows ~89px
+                  above, from the same payload behind the same gate — they
+                  could never diverge and never appeared apart. Two names for
+                  one number invites the reader to look for the difference and
+                  find none. "Screening Index" is the canonical customer-facing
+                  name (it is what /pricing sells), so the bar keeps the score
+                  with its methodology caveat and this row keeps the two
+                  measures that are genuinely distinct. */}
               <SummaryMetric
                 label="Input Confidence"
                 value={`${confidence.score}%`}

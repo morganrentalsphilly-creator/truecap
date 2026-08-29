@@ -1811,11 +1811,6 @@ export function AnalysisDashboard({
           values={values}
           showOfferReadyStatus={showOfferReadyStatus}
           advocacyContractEnabled={advocacyDecisionContract}
-          dealFitScore={
-            dealScoreResult?.ok && dealScoreResult.tier === "pro"
-              ? dealScoreResult.data.score
-              : null
-          }
           onEditAssumptions={onEditAssumptions}
           onReviewInput={onReviewVerificationInput}
           onToggleVerified={onToggleInputVerified}
