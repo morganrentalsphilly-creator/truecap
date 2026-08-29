@@ -108,6 +108,21 @@ export function CookieConsentBanner() {
     }
   }, [decision]);
 
+  // The banner auto-focuses itself on load, so it is the FIRST thing every
+  // keyboard visitor lands in on every page. That is deliberate (see above) and
+  // it makes the exit path load-bearing: on dismiss the banner unmounts and
+  // focus fell to <body>, so the next Tab restarted at "Skip to main content"
+  // while the viewport sat mid-page. Move focus somewhere meaningful instead.
+  const restoreFocusAfterDismiss = () => {
+    requestAnimationFrame(() => {
+      const main = document.getElementById("main");
+      if (main) {
+        if (!main.hasAttribute("tabindex")) main.setAttribute("tabindex", "-1");
+        main.focus({ preventScroll: true });
+      }
+    });
+  };
+
   const handleAccept = () => {
     writeStoredConsent("granted");
     pushGtagConsent("granted");
@@ -118,6 +133,7 @@ export function CookieConsentBanner() {
     setAnalyticsConsent(true);
     setDecision("granted");
     notifyCookieConsentChanged(); // let secondary bottom bars reappear immediately
+    restoreFocusAfterDismiss();
   };
 
   const handleReject = () => {
@@ -126,6 +142,7 @@ export function CookieConsentBanner() {
     setAnalyticsConsent(false);
     setDecision("denied");
     notifyCookieConsentChanged(); // let secondary bottom bars reappear immediately
+    restoreFocusAfterDismiss();
   };
 
   // Suppress entirely on opt-out paths (e.g. /embed/* — partner site
@@ -142,6 +159,14 @@ export function CookieConsentBanner() {
       aria-label="Cookie consent"
       aria-live="polite"
       tabIndex={-1}
+      // Escape dismisses, recording the same outcome as the X ("counts as
+      // reject"), so this changes nothing about what is stored. Without it the
+      // one dialog every keyboard user is forced into had no keyboard exit.
+      onKeyDown={(event) => {
+        if (event.key !== "Escape") return;
+        event.stopPropagation();
+        handleReject();
+      }}
       className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card/95 px-3 pt-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] shadow-[0_-12px_28px_rgba(15,23,42,0.10)] outline-none backdrop-blur supports-[backdrop-filter]:bg-card/90 sm:px-4 sm:pt-4 sm:pb-[max(env(safe-area-inset-bottom),1rem)]"
     >
       <div className="mx-auto flex max-w-5xl flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
