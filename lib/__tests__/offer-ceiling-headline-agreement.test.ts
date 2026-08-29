@@ -32,7 +32,11 @@ const source = readFileSync(
 
 /** The next-step reason chain, from the targets branch to the verification one. */
 function nextStepChain(): string {
-  const start = source.indexOf('label: "Review the binding target rule"');
+  // The label became a ternary when the binding rule was named inline
+  // ("Review the binding rule: Cash flow ≥ $750/mo"), so anchor on the
+  // expression rather than the old literal. The fallback literal is still
+  // asserted by decision-summary-target-fit.test.ts.
+  const start = source.indexOf("label: bindingCriterionLabel");
   expect(start, "the next-step branch was renamed or removed").toBeGreaterThan(-1);
   const end = source.indexOf("advocacyContractEnabled &&", start);
   expect(end).toBeGreaterThan(start);

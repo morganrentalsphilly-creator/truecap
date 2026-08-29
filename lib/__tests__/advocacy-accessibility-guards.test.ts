@@ -131,10 +131,16 @@ describe("advocacy decision accessibility and reflow guards", () => {
     expect(summary).not.toContain("evidenceLedger");
     expect(summary).toContain("!advocacyContractEnabled &&");
     expect(summary).toContain('"Screening only"');
+    // Same guarantee, new shape: the ternary was inverted when pass/fail chips
+    // were added, so a cash purchase (no debt service) still shows the N/A
+    // label instead of a numeric DSCR — and, now, instead of a false "Misses
+    // 1.25 target" chip on a perfectly good all-cash deal. Assert the property
+    // rather than one literal spelling of it.
     expect(normalizeSource(summary)).toContain(
-      normalizeSource(
-        "result.monthlyPayment <= 0 ? NO_DEBT_SERVICE_DSCR_LABEL : result.dscr.toFixed(2)",
-      ),
+      normalizeSource("const dscrApplies = result.monthlyPayment > 0"),
+    );
+    expect(normalizeSource(summary)).toContain(
+      normalizeSource("dscrApplies ? result.dscr.toFixed(2) : NO_DEBT_SERVICE_DSCR_LABEL"),
     );
     expect(summary).not.toContain("Screening Index");
     expect(summary).not.toContain("dealScoreResult");
