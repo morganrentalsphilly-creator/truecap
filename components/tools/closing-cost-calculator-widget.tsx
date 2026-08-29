@@ -23,6 +23,14 @@ const fmtPct = (n: number) => `${n.toFixed(2)}%`;
 
 export function ClosingCostCalculatorWidget() {
   const [purchasePrice, setPurchasePrice] = useState("300000");
+  // Origination is a LENDER charge quoted against the loan, not the price —
+  // "Usually 0.5-1% of the loan amount" per our own
+  // /blog/closing-costs-investment-property, which works the example
+  // "$250,000 duplex, 25% down ... Loan amount: $187,500 ... origination (1%):
+  // $1,875". The widget had no loan or down-payment input at all and multiplied
+  // the percentage by the purchase price, overstating the fee by 1/(1-down) —
+  // 25% high at 20% down — while disclosing no basis anywhere on the page.
+  const [downPaymentPct, setDownPaymentPct] = useState("20");
   const [originationPct, setOriginationPct] = useState("1.0");
   const [titlePct, setTitlePct] = useState("0.5");
   const [recordingFees, setRecordingFees] = useState("250");
@@ -39,6 +47,11 @@ export function ClosingCostCalculatorWidget() {
         min: 0,
         minExclusive: true,
         max: 100_000_000,
+      }),
+      downPaymentPct: validateToolNumber(downPaymentPct, {
+        label: "Down payment percentage",
+        min: 0,
+        max: 100,
       }),
       originationPct: validateToolNumber(originationPct, {
         label: "Origination percentage",
@@ -83,6 +96,7 @@ export function ClosingCostCalculatorWidget() {
     }),
     [
       appraisal,
+      downPaymentPct,
       inspection,
       insurancePrepay,
       originationPct,
@@ -97,6 +111,7 @@ export function ClosingCostCalculatorWidget() {
   const result = useMemo(() => {
     if (
       !validated.purchasePrice.ok ||
+      !validated.downPaymentPct.ok ||
       !validated.originationPct.ok ||
       !validated.titlePct.ok ||
       !validated.recordingFees.ok ||
@@ -110,7 +125,11 @@ export function ClosingCostCalculatorWidget() {
     }
 
     const price = validated.purchasePrice.value;
-    const origination = (price * validated.originationPct.value) / 100;
+    // Origination is charged on the LOAN; title insurance and transfer tax are
+    // charged on the PRICE. Keeping the two bases distinct is the whole point
+    // of adding a down-payment input.
+    const loanAmount = price * (1 - validated.downPaymentPct.value / 100);
+    const origination = (loanAmount * validated.originationPct.value) / 100;
     const title = (price * validated.titlePct.value) / 100;
     const recording = validated.recordingFees.value;
     const transfer = (price * validated.transferTaxPct.value) / 100;
@@ -120,7 +139,7 @@ export function ClosingCostCalculatorWidget() {
     const inspect = validated.inspection.value;
     const total = origination + title + recording + transfer + insurance + taxes + appr + inspect;
     const pctOfPrice = (total / price) * 100;
-    return { origination, title, recording, transfer, insurance, taxes, appr, inspect, total, pctOfPrice };
+    return { loanAmount, origination, title, recording, transfer, insurance, taxes, appr, inspect, total, pctOfPrice };
   }, [validated]);
 
   const verdict = !result
@@ -150,7 +169,8 @@ export function ClosingCostCalculatorWidget() {
 
       <p className="mt-6 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Loan + title fees</p>
       <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <ToolNumberField id="cc-orig" label="Origination" suffix="%" min={0} max={25} step={0.1} value={originationPct} onChange={(e) => setOriginationPct(e.target.value)} error={validated.originationPct.error} labelClassName="normal-case tracking-normal font-medium" />
+        <ToolNumberField id="cc-down" label="Down payment" suffix="%" min={0} max={100} step={1} value={downPaymentPct} onChange={(e) => setDownPaymentPct(e.target.value)} error={validated.downPaymentPct.error} labelClassName="normal-case tracking-normal font-medium" />
+        <ToolNumberField id="cc-orig" label="Origination (% of loan)" suffix="%" min={0} max={25} step={0.1} value={originationPct} onChange={(e) => setOriginationPct(e.target.value)} error={validated.originationPct.error} labelClassName="normal-case tracking-normal font-medium" />
         <ToolNumberField id="cc-title" label="Title insurance" suffix="%" min={0} max={25} step={0.1} value={titlePct} onChange={(e) => setTitlePct(e.target.value)} error={validated.titlePct.error} labelClassName="normal-case tracking-normal font-medium" />
         <ToolNumberField id="cc-record" label="Recording fees" prefix="$" min={0} max={10_000_000} value={recordingFees} onChange={(e) => setRecordingFees(e.target.value)} error={validated.recordingFees.error} labelClassName="normal-case tracking-normal font-medium" />
         <ToolNumberField id="cc-transfer" label="Transfer tax" suffix="%" min={0} max={25} step={0.1} value={transferTaxPct} onChange={(e) => setTransferTaxPct(e.target.value)} error={validated.transferTaxPct.error} labelClassName="normal-case tracking-normal font-medium" />
@@ -179,7 +199,11 @@ export function ClosingCostCalculatorWidget() {
           <details className="mt-3 group">
             <summary className="inline-flex min-h-11 cursor-pointer items-center rounded-md text-xs font-semibold text-muted-foreground hover:text-foreground">Breakdown</summary>
             <ul className="mt-2 space-y-1 text-xs text-muted-foreground tabular-nums">
-              <li className="flex justify-between"><span>Origination</span><span>{fmtMoney(result.origination)}</span></li>
+              {/* State the loan the origination is charged against. Without it
+                  the reader cannot tell which basis the fee used, which is how
+                  the price-based version went unnoticed. */}
+              <li className="flex justify-between"><span>Loan amount</span><span>{fmtMoney(result.loanAmount)}</span></li>
+              <li className="flex justify-between"><span>Origination (on loan)</span><span>{fmtMoney(result.origination)}</span></li>
               <li className="flex justify-between"><span>Title insurance</span><span>{fmtMoney(result.title)}</span></li>
               <li className="flex justify-between"><span>Recording fees</span><span>{fmtMoney(result.recording)}</span></li>
               <li className="flex justify-between"><span>Transfer tax</span><span>{fmtMoney(result.transfer)}</span></li>
