@@ -90,9 +90,15 @@ const nextConfig = {
       // made it 'cap-rate'). Redirect to the actual cap rate
       // calculator so existing traffic + bookmarks + Google index
       // entries land on a real page.
+      // 2026-08-28: repointed. /tools/cap-rate-calculator is now in
+      // UNRELEASED_UNDERWRITING_CALCULATORS and calls notFound(), so this
+      // redirect was walking ~48 people/day from one dead URL to another via a
+      // 308 — worse than the original 404, because a permanent redirect tells
+      // Google the destination is canonical. /glossary/cap-rate is released,
+      // topically exact, and carries the formula the visitor came for.
       {
         source: "/tools/Y2FwLXJhdG",
-        destination: "/tools/cap-rate-calculator",
+        destination: "/glossary/cap-rate",
         permanent: true,
       },
       // Guessable aliases for real destinations. Nothing in the app links
