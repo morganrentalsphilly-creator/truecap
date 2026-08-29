@@ -288,28 +288,45 @@ textarea,
     }
   }
   /* Fragment navigation aligns the target's block-start with the viewport top,
-     which knows nothing about the app header — a `sticky top-0 z-50` stack in
-     components/investcalc/header.tsx whose row is h-14 sm:h-16. 60 files link
-     to /#main, so without a scroll margin every one of those lands with the
-     analyzer's own heading sitting behind that bar. The .dashboard-shell rules
-     below are MORE specific and keep overriding this for dashboard chrome. */
+     which knows nothing about the app header — a `sticky top-0 z-50` wrapper in
+     components/investcalc/header.tsx. 60 files link to /#main, so without a
+     scroll margin every one lands with the analyzer's heading behind that bar.
+
+     MEASURED ON PRODUCTION, because the first version of this rule guessed the
+     header was just its h-14 sm:h-16 row and was wrong on every phone:
+       375px  -> 56 (row) + 61 (marketing nav) = 118px
+       640px  -> 64 (row) + 61 (marketing nav) = 125px
+       1024px -> 65px (the nav is lg:hidden, so the stack collapses)
+     The flat marketing nav lives INSIDE the same sticky wrapper until lg, so
+     the step down belongs at lg — not at sm, where the first version put it
+     and left mobile 54px short. The .dashboard-shell rules below are more
+     specific and keep overriding all of this for dashboard chrome. */
   #main {
-    scroll-margin-top: 4rem;
+    scroll-margin-top: 7.5rem;
   }
   @media (min-width: 640px) {
+    #main {
+      scroll-margin-top: 8rem;
+    }
+  }
+  @media (min-width: 1024px) {
     #main {
       scroll-margin-top: 4.5rem;
     }
   }
-  /* Signed-in free users also get the h-9 upgrade bar above the header row.
-     Anonymous visitors — who follow nearly all of those /#main links — do not,
-     so the base rule stays tight and only this case pays for the extra bar. */
-  body:has([data-analyzer-announcement-bar]) #main {
-    scroll-margin-top: 6.25rem;
+  /* Signed-in free users also carry the h-9 (36px) upgrade bar. Excluded on
+     .dashboard-shell because :has() on an attribute outranks that override. */
+  body:not(:has(.dashboard-shell)):has([data-analyzer-announcement-bar]) #main {
+    scroll-margin-top: 10rem;
   }
   @media (min-width: 640px) {
-    body:has([data-analyzer-announcement-bar]) #main {
-      scroll-margin-top: 6.75rem;
+    body:not(:has(.dashboard-shell)):has([data-analyzer-announcement-bar]) #main {
+      scroll-margin-top: 10.5rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    body:not(:has(.dashboard-shell)):has([data-analyzer-announcement-bar]) #main {
+      scroll-margin-top: 7rem;
     }
   }
   /* "Skip to content" (root layout + DashboardShell) targets <main id="main">,
