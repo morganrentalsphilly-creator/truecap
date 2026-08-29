@@ -382,7 +382,7 @@ export default function PitiExplainedPost() {
                 href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
-                DSCR calculator
+                TrueCap analyzer
               </Link>
               .
             </p>

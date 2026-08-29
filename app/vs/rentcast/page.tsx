@@ -239,15 +239,16 @@ export default function VsRentcastPage() {
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
-            Want to see just the underwriting half? Try the{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">
-              cap rate calculator
+            Want to turn those two estimates into a verdict? RentCast&apos;s rent
+            and value figures are the only inputs the free{" "}
+            <Link href="/tools/1-percent-rule-calculator" className="font-semibold text-primary hover:underline">
+              1% rule calculator
             </Link>{" "}
-            or the full{" "}
+            needs; the full{" "}
             <Link href="/" className="font-semibold text-primary hover:underline">
               TrueCap analyzer
-            </Link>
-            . Our guide on{" "}
+            </Link>{" "}
+            takes it from there — cap rate, DSCR, and cash flow. Our guide on{" "}
             <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">
               60-second underwriting
             </Link>{" "}

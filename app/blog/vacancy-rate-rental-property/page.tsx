@@ -295,12 +295,12 @@ export default function VacancyRatePost() {
             duplex is really one unit empty for seven weeks — $1,400 of
             missing rent concentrated in two months, not $98 missing evenly
             every month. Hold reserves accordingly. Stress-test your own
-            numbers in the{" "}
+            numbers in the free{" "}
             <Link
               href="/#main"
               className="text-primary font-semibold hover:underline"
             >
-              cash-on-cash calculator
+              TrueCap analyzer
             </Link>{" "}
             at both your base case and base-plus-five.
           </p>
@@ -333,7 +333,7 @@ export default function VacancyRatePost() {
               href="/#main"
               className="text-primary font-semibold hover:underline"
             >
-              DSCR calculator
+              TrueCap analyzer
             </Link>{" "}
             before you treat an approval as validation of the deal.
           </p>

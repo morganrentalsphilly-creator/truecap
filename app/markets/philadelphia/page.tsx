@@ -202,10 +202,10 @@ export default function PhiladelphiaMarketPage() {
               <ArrowUpRight className="size-4" />
             </Link>
             <Link
-              href="/#main"
+              href="/blog/how-to-calculate-cap-rate"
               className="inline-flex h-12 items-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted"
             >
-              Standalone cap rate calculator
+              How to calculate cap rate
             </Link>
           </div>
         </header>

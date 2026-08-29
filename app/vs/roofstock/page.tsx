@@ -272,15 +272,24 @@ export default function VsRoofstockPage() {
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
-            Want to do this in a single calculator? Try the{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">
-              cap rate calculator
+            Want a faster read on a Roofstock listing? The free{" "}
+            <Link href="/tools/gross-rent-multiplier-calculator" className="font-semibold text-primary hover:underline">
+              gross rent multiplier calculator
             </Link>{" "}
-            or{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">
-              cash-on-cash calculator
-            </Link>
-            . For the full workflow, our guide on{" "}
+            triages one in seconds, and when the listing survives that screen the
+            full{" "}
+            <Link href="/" className="font-semibold text-primary hover:underline">
+              TrueCap analyzer
+            </Link>{" "}
+            computes{" "}
+            <Link href="/glossary/cap-rate" className="font-semibold text-primary hover:underline">
+              cap rate
+            </Link>{" "}
+            and{" "}
+            <Link href="/glossary/cash-on-cash-return" className="font-semibold text-primary hover:underline">
+              cash-on-cash return
+            </Link>{" "}
+            from the address. For the full workflow, our guide on{" "}
             <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">
               60-second underwriting
             </Link>{" "}

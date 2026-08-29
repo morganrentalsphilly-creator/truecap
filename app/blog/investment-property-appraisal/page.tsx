@@ -281,12 +281,12 @@ export default function InvestmentPropertyAppraisalPost() {
               cross it going down and the same deal prices 25–50 basis points
               worse, or the lender trims leverage until the ratio clears.
               Nothing about the property changed — one opinion of rent moved
-              your cost of capital. Check where your deal sits with the{" "}
+              your cost of capital. Check where your deal sits in the{" "}
               <Link
                 href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
-                DSCR calculator
+                TrueCap analyzer
               </Link>{" "}
               before the appraisal does it for you.
             </p>

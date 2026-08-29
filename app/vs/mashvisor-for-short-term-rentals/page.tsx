@@ -245,8 +245,9 @@ export default function VsMashvisorForShortTermRentalsPage() {
             <Link href="/blog/short-term-rental-underwriting-playbook" className="font-semibold text-primary hover:underline">short-term rental underwriting playbook</Link>
             {" "}walks through turning revenue projections into a complete modeled underwrite, and the{" "}
             <Link href="/blog/best-short-term-rental-analysis-tool-2026" className="font-semibold text-primary hover:underline">best STR analysis tools of 2026</Link>
-            {" "}rounds up where the data comes from. To check the math on one metric first, try the standalone{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">cap rate calculator</Link>.
+            {" "}rounds up where the data comes from. To put those projections through the deal math yourself, our{" "}
+            <Link href="/#main" className="font-semibold text-primary hover:underline">free deal analyzer</Link>
+            {" "}turns an ADR and occupancy estimate into cap rate and cash flow in one pass.
           </p>
         </section>
 

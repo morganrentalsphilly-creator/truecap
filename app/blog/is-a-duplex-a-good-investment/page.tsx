@@ -310,9 +310,9 @@ export default function BlogPost() {
             of <strong>−2.7%</strong>. A 0.86 DSCR does not clear a lender&apos;s
             1.20 threshold, so on a DSCR loan this property would not qualify at
             75% LTV at all — you would be pushed to 30-35% down before the
-            coverage worked. Check yours in the{" "}
+            coverage worked. Check yours in the free{" "}
             <Link href="/#main" className="text-primary font-semibold hover:underline">
-              DSCR calculator
+              TrueCap analyzer
             </Link>{" "}
             before you pay for an appraisal.
           </p>
@@ -540,10 +540,10 @@ export default function BlogPost() {
           <p>
             Run your own pair — the{" "}
             <Link href="/#main" className="text-primary font-semibold hover:underline">
-              rental cash flow calculator
+              TrueCap analyzer
             </Link>{" "}
-            takes about a minute per property, and the full analyzer will hold
-            both so you can compare standardized economics rather than eyeball spreadsheets.
+            takes about a minute per property and will hold both, so you can
+            compare standardized economics rather than eyeball spreadsheets.
             For the wider property-type question, including where five-plus
             units change the rules,{" "}
             <Link href="/blog/single-family-vs-multi-family-rental" className="text-primary font-semibold hover:underline">

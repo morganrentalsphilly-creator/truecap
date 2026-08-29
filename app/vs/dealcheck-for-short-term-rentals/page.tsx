@@ -256,9 +256,9 @@ export default function VsDealcheckForShortTermRentalsPage() {
             <Link href="/blog/short-term-rental-underwriting-playbook" className="font-semibold text-primary hover:underline">short-term rental underwriting playbook</Link>
             {" "}breaks down seasonal revenue into a defensible analysis, and our roundup of the{" "}
             <Link href="/blog/best-short-term-rental-analysis-tool-2026" className="font-semibold text-primary hover:underline">best short-term rental analysis tools for 2026</Link>
-            {" "}covers where the ADR and occupancy data should come from. For a quick single-metric check, the standalone{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">cap rate calculator</Link>
-            {" "}runs the same engine.
+            {" "}covers where the ADR and occupancy data should come from. For a quick first-pass check, our{" "}
+            <Link href="/#main" className="font-semibold text-primary hover:underline">free deal analyzer</Link>
+            {" "}returns cap rate, cash flow, and DSCR from a single address.
           </p>
         </section>
 

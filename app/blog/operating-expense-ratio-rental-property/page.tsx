@@ -455,21 +455,15 @@ export default function OperatingExpenseRatioPost() {
               <strong>$46,000</strong> of value riding on an eleven-point
               assumption about operating efficiency. Nobody argues over a $46,000
               price cut, but plenty of investors wave through the OER assumption
-              that causes it. The{" "}
+              that causes it. The free{" "}
               <Link
                 href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
-                cap rate calculator
+                TrueCap analyzer
               </Link>{" "}
-              and the{" "}
-              <Link
-                href="/#main"
-                className="text-primary font-semibold hover:underline"
-              >
-                NOI calculator
-              </Link>{" "}
-              let you watch that swing move as you change the expense lines.
+              lets you watch that swing move as you change the expense lines:
+              NOI and cap rate re-price together, line by line.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">

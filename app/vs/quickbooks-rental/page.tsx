@@ -236,15 +236,16 @@ export default function VsQuickbooksRentalPage() {
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
-            Want to see just the underwriting half? Try the{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">
-              cap rate calculator
+            Sizing up a purchase instead of recording one? The free{" "}
+            <Link href="/tools/rental-property-spreadsheet" className="font-semibold text-primary hover:underline">
+              rental property spreadsheet
             </Link>{" "}
-            or the full{" "}
+            lays the numbers out the way you already work, and the full{" "}
             <Link href="/" className="font-semibold text-primary hover:underline">
               TrueCap analyzer
-            </Link>
-            . Our guide on{" "}
+            </Link>{" "}
+            tells you whether a deal is worth bookkeeping for at all — cap rate,
+            cash-on-cash, and DSCR from an address. Our guide on{" "}
             <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">
               60-second underwriting
             </Link>{" "}

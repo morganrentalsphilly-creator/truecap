@@ -260,13 +260,21 @@ export default function BlogPost() {
           </p>
           <ol>
             <li>
-              <strong>Cash flow</strong> — net monthly income after all expenses
-              + mortgage. Run any deal&apos;s number in 30 seconds with the{" "}
+              <strong>
+                <Link
+                  href="/glossary/monthly-cash-flow"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  Cash flow
+                </Link>
+              </strong>{" "}
+              — net monthly income after all expenses + mortgage. Run any
+              deal&apos;s number in 30 seconds in the{" "}
               <Link
                 href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
-                rental cash flow calculator
+                TrueCap analyzer
               </Link>
               .
             </li>

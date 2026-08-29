@@ -237,19 +237,13 @@ export default function VsRentecDirectPage() {
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
-            Want to see just the underwriting half? Try the{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">
-              cap rate calculator
-            </Link>{" "}
-            or the full{" "}
-            <Link href="/" className="font-semibold text-primary hover:underline">
-              TrueCap analyzer
-            </Link>
-            . Our guide on{" "}
-            <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">
-              60-second underwriting
-            </Link>{" "}
-            walks through the workflow end-to-end.
+            Only here for the acquisition math? Our walkthroughs on{" "}
+            <Link href="/blog/how-to-calculate-cap-rate" className="font-semibold text-primary hover:underline">how to calculate cap rate</Link>,{" "}
+            <Link href="/blog/how-to-calculate-dscr" className="font-semibold text-primary hover:underline">how to calculate DSCR</Link>, and{" "}
+            <Link href="/blog/how-to-calculate-noi-rental-property" className="font-semibold text-primary hover:underline">how to calculate NOI</Link> each
+            work an example end to end, so the actuals Rentec Direct reports later have
+            something to be measured against. To skip the arithmetic, run the address
+            through the full <Link href="/" className="font-semibold text-primary hover:underline">TrueCap analyzer</Link>.
           </p>
         </section>
 

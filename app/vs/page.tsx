@@ -30,7 +30,7 @@ import { getSiteUrl } from "@/lib/site-url";
 export const metadata: Metadata = {
   title: "TrueCap vs every rental tool — honest comparisons",
   description:
-    "Side-by-side comparisons of TrueCap and the 10 most popular rental tools — DealCheck, BiggerPockets, Stessa, Mashvisor, Roofstock, and more.",
+    "Side-by-side comparisons of TrueCap and the rental tools investors actually evaluate — DealCheck, BiggerPockets, Stessa, Mashvisor, Roofstock, and more.",
   keywords: [
     "rental property tool comparison",
     "truecap alternatives",
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "TrueCap vs every rental tool — honest comparisons",
     description:
-      "Side-by-side comparisons of TrueCap and the 10 most popular rental tools.",
+      "Side-by-side comparisons of TrueCap and the rental tools investors actually evaluate.",
     url: "/vs",
     type: "website",
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap comparisons" }],
@@ -252,8 +252,8 @@ export default function VsHubPage() {
             TrueCap vs every <span className="text-primary">rental tool</span> that matters.
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-balance text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Ten side-by-side comparisons. Honest feature matrices. Where each
-            tool does the job better. When TrueCap fits, when something else
+            {COMPARISONS.length} side-by-side comparisons. Honest feature
+            matrices. Where each tool does the job better. When TrueCap fits, when something else
             does, and how to combine them.
           </p>
           <div className="mt-7 flex flex-wrap items-center justify-center gap-3">

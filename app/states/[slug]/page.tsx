@@ -315,15 +315,21 @@ export default async function StatePage({
               — if it&apos;s in the ballpark for {state.name}, move on.
             </li>
             <li>
-              Compute returns with the{" "}
+              Compute returns in the full{" "}
               <Link href="/#main" className="text-primary font-semibold hover:underline">
-                cap rate calculator
+                TrueCap analyzer
               </Link>{" "}
-              and the{" "}
-              <Link href="/#main" className="text-primary font-semibold hover:underline">
-                DSCR calculator
+              using local property tax + insurance figures — it returns cap
+              rate, cash-on-cash and DSCR from one address. Want the math
+              first? Read{" "}
+              <Link href="/blog/how-to-calculate-cap-rate" className="text-primary font-semibold hover:underline">
+                how to calculate cap rate
               </Link>{" "}
-              using local property tax + insurance figures.
+              and{" "}
+              <Link href="/blog/how-to-calculate-dscr" className="text-primary font-semibold hover:underline">
+                how to calculate DSCR
+              </Link>
+              .
             </li>
             <li>
               Match the deal to your strategy — see the released workflow for{" "}

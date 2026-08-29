@@ -430,12 +430,12 @@ export default function HowToReadARentRollPost() {
             The ~$16,900/year spread between those two is the <em>entire</em>{" "}
             value-add thesis for this deal, and it is exactly what a seller prices
             into the $520,000 ask. Buy on the stabilized number and you have paid
-            today for work you have not done yet. Send the EGI into the{" "}
+            today for work you have not done yet. Send the EGI into the free{" "}
             <Link
               href="/#main"
               className="text-primary font-semibold hover:underline"
             >
-              NOI calculator
+              TrueCap analyzer
             </Link>{" "}
             with real operating expenses, and decide whether the path from $43,860
             to $60,744 is worth what it costs to walk it.
@@ -561,7 +561,7 @@ export default function HowToReadARentRollPost() {
               href="/#main"
               className="text-primary font-semibold hover:underline"
             >
-              NOI calculator
+              TrueCap analyzer
             </Link>
             , sanity-check the price with the{" "}
             <Link

@@ -239,19 +239,13 @@ export default function VsHostfullyPage() {
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
-            Want to see just the underwriting half? Try the{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">
-              cap rate calculator
-            </Link>{" "}
-            or the full{" "}
-            <Link href="/" className="font-semibold text-primary hover:underline">
-              TrueCap analyzer
-            </Link>
-            . Our guide on{" "}
-            <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">
-              60-second underwriting
-            </Link>{" "}
-            walks through the workflow end-to-end.
+            Not ready for a full underwrite? The free{" "}
+            <Link href="/tools/gross-rent-multiplier-calculator" className="font-semibold text-primary hover:underline">gross rent multiplier calculator</Link>{" "}
+            triages a listing in seconds from price and gross revenue, and our{" "}
+            <Link href="/blog/short-term-rental-underwriting-playbook" className="font-semibold text-primary hover:underline">short-term rental underwriting playbook</Link>{" "}
+            explains which STR assumptions actually move the answer. When you need the cap
+            rate, cash-on-cash and DSCR behind that screen, the full{" "}
+            <Link href="/" className="font-semibold text-primary hover:underline">TrueCap analyzer</Link> computes them from an address.
           </p>
         </section>
 

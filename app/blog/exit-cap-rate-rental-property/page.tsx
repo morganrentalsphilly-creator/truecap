@@ -213,19 +213,19 @@ export default function ExitCapRatePost() {
               want to see how the cap rate and NOI move together on today&apos;s
               side of the trade first, the{" "}
               <Link
-                href="/#main"
-                className="text-primary font-semibold hover:underline"
-              >
-                cap rate calculator
-              </Link>{" "}
-              and the{" "}
-              <Link
                 href="/blog/how-to-calculate-cap-rate"
                 className="text-primary font-semibold hover:underline"
               >
                 guide to calculating cap rate
               </Link>{" "}
-              walk the going-in version step by step.
+              walks the going-in version step by step, and the free{" "}
+              <Link
+                href="/#main"
+                className="text-primary font-semibold hover:underline"
+              >
+                TrueCap analyzer
+              </Link>{" "}
+              does it live on a real address.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -338,7 +338,7 @@ export default function ExitCapRatePost() {
                 href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
-                NOI calculator
+                TrueCap analyzer
               </Link>{" "}
               and watch the exit-year number move.
             </p>

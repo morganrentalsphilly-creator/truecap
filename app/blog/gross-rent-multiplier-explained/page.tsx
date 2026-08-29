@@ -563,12 +563,12 @@ export default function GrossRentMultiplierPost() {
             >
               GRM calculator
             </Link>
-            , confirm the implied cap rate in the{" "}
+            , translate the multiple into an{" "}
             <Link
-              href="/#main"
+              href="/glossary/cap-rate"
               className="text-primary font-semibold hover:underline"
             >
-              cap rate calculator
+              implied cap rate
             </Link>
             , and when a listing survives the screen, run the whole thing — NOI,
             cash flow, DSCR, projections, and selected-rule fit — through

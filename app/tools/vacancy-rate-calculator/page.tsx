@@ -247,32 +247,32 @@ export default function VacancyRateCalculatorPage() {
 
         <section className="mt-12 border-t border-border pt-8">
           <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">
-            Related calculators
+            Where your vacancy number goes next
           </h2>
           <div className="flex flex-wrap gap-2 text-sm">
             <Link
-              href="/#main"
+              href="/tools/break-even-calculator"
               className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
             >
-              Cap rate
+              Break-even calculator
             </Link>
             <Link
-              href="/#main"
+              href="/blog/how-to-calculate-noi-rental-property"
               className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
             >
-              NOI
+              How to calculate NOI
             </Link>
             <Link
-              href="/#main"
+              href="/blog/how-to-calculate-cap-rate"
               className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
             >
-              Cash-on-cash
+              How to calculate cap rate
             </Link>
             <Link
-              href="/glossary/vacancy"
+              href="/blog/how-to-calculate-cash-on-cash-return"
               className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
             >
-              Vacancy rate
+              How to calculate cash-on-cash
             </Link>
           </div>
         </section>

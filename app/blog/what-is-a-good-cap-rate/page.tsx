@@ -8,9 +8,11 @@
  *   - "cap rate benchmarks 2026"
  *   - "what cap rate should i look for"
  *
- * Complements /tools/cap-rate-calculator (computational) and the
+ * Complements /blog/how-to-calculate-cap-rate (computational) and the
  * /blog/cap-rate-vs-cash-on-cash-vs-dscr post (comparative) by going
- * deep on benchmarks + market context.
+ * deep on benchmarks + market context. NOTE: /tools/cap-rate-calculator
+ * is gated by UNRELEASED_UNDERWRITING_CALCULATORS and 404s — never link
+ * it from here; the analyzer (/#main) computes cap rate instead.
  */
 
 import type { Metadata } from "next";
@@ -330,9 +332,9 @@ export default function BlogPost() {
           </div>
 
           <p>
-            Or, if you just want the standalone math:{" "}
-            <Link href="/#main" className="text-primary font-semibold hover:underline">
-              free cap-rate calculator →
+            Or, if you just want the formula worked end to end:{" "}
+            <Link href="/blog/how-to-calculate-cap-rate" className="text-primary font-semibold hover:underline">
+              how to calculate cap rate →
             </Link>
           </p>
 

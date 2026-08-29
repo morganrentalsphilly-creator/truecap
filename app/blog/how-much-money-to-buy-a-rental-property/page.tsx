@@ -616,9 +616,9 @@ export default function BlogPost() {
               The DSCR-loan mechanics
             </Link>{" "}
             are worth reading before you assume the easier qualification is
-            free, and the{" "}
+            free, and the free{" "}
             <Link href="/#main" className="text-primary font-semibold hover:underline">
-              DSCR calculator
+              TrueCap analyzer
             </Link>{" "}
             will tell you whether the property clears 1.20 before you pay for
             an appraisal.
@@ -689,9 +689,9 @@ export default function BlogPost() {
             The cheap defence against both is arithmetic before offers.
             Underwriting a listing takes about a minute in the{" "}
             <Link href="/#main" className="text-primary font-semibold hover:underline">
-              rental cash flow calculator
-            </Link>{" "}
-            or the full analyzer, and the whole point is to spend $0 discovering
+              TrueCap analyzer
+            </Link>
+            , and the whole point is to spend $0 discovering
             that a deal misses by $300 a month rather than $1,300 discovering it
             at the inspection.
           </p>

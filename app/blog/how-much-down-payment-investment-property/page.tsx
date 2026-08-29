@@ -253,11 +253,12 @@ export default function DownPaymentPost() {
               <Link href="/tools/mortgage-payment-calculator" className="text-primary font-semibold hover:underline">
                 mortgage payment calculator
               </Link>{" "}
-              and the{" "}
+              for the P&amp;I, then let the free{" "}
               <Link href="/#main" className="text-primary font-semibold hover:underline">
-                cash-on-cash calculator
-              </Link>
-              . The pattern is the surprising part.
+                TrueCap analyzer
+              </Link>{" "}
+              turn it into cash-on-cash and DSCR. The pattern is the surprising
+              part.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">

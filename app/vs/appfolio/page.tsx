@@ -240,15 +240,16 @@ export default function VsAppfolioPage() {
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
-            Want to see just the underwriting half? Try the{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">
-              cap rate calculator
+            Buying a unit rather than managing one? The free{" "}
+            <Link href="/tools/gross-rent-multiplier-calculator" className="font-semibold text-primary hover:underline">
+              gross rent multiplier calculator
             </Link>{" "}
-            or the full{" "}
+            sorts a listing into yes or no on price alone; when you need the
+            cap rate, cash-on-cash, and DSCR underneath it, the full{" "}
             <Link href="/" className="font-semibold text-primary hover:underline">
               TrueCap analyzer
-            </Link>
-            . Our guide on{" "}
+            </Link>{" "}
+            computes them from an address. Our guide on{" "}
             <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">
               60-second underwriting
             </Link>{" "}

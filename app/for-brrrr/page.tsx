@@ -7,13 +7,13 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 export const metadata: Metadata = {
   title: "BRRRR planning resources",
   description:
-    "Use TrueCap's released rehab, ARV, DSCR, and steady-state rental tools to research a BRRRR deal. The integrated BRRRR lifecycle model is not currently released.",
+    "Research a BRRRR deal stage by stage in the TrueCap analyzer — rehab budget, ARV, DSCR, and stabilized rental returns. The integrated BRRRR lifecycle model is not currently released.",
   robots: { index: false, follow: false },
   alternates: { canonical: "/for-brrrr" },
   openGraph: {
     title: "BRRRR planning resources — TrueCap",
     description:
-      "Released tools for rehab, ARV, DSCR, and stabilized rental screening, with a clear boundary around the unreleased lifecycle model.",
+      "Work through rehab, ARV, DSCR, and stabilized rental returns in the analyzer, with a clear boundary around the unreleased lifecycle model.",
     url: "/for-brrrr",
     type: "website",
     images: [
@@ -48,7 +48,7 @@ const RESOURCES = [
     title: "Check refinance debt coverage",
     body: "Test a lender-specific loan amount, rate, term, and qualifying NOI. Refinance proceeds and requirements vary by lender and borrower.",
     href: "/#main",
-    cta: "Open DSCR calculator",
+    cta: "Check refinance DSCR",
   },
   {
     icon: Calculator,
@@ -78,8 +78,8 @@ export default function ForBrrrrPage() {
             Research each stage without pretending it is one finished model.
           </h1>
           <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-            TrueCap currently offers separate rehab, ARV, DSCR, and rental-screening
-            tools. Its integrated BRRRR lifecycle analysis—including acquisition
+            TrueCap&apos;s analyzer covers rehab budget, ARV, DSCR, and stabilized
+            rental returns as separate steps. Its integrated BRRRR lifecycle analysis—including acquisition
             financing, refinance proceeds, capital recovery, and post-refinance
             returns—is not currently released.
           </p>

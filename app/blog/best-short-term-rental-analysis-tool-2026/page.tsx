@@ -329,11 +329,11 @@ export default function BestShortTermRentalAnalysisTool2026Post() {
               The fastest way to know which tool fits your workflow is to run
               one of your real deals through it. TrueCap is free for the core
               underwriting, takes 60 seconds, no signup required. Pressure-test
-              the financing on a short-term rental with the{" "}
-              <Link href="/#main" className="font-semibold text-primary hover:underline">DSCR calculator</Link>, check
-              the return on your cash with the{" "}
-              <Link href="/#main" className="font-semibold text-primary hover:underline">ROI calculator</Link>, and
-              walk through the full nightly-rate math in our{" "}
+              the financing on a short-term rental and check the return on your
+              cash — the free{" "}
+              <Link href="/#main" className="font-semibold text-primary hover:underline">TrueCap analyzer</Link>{" "}
+              returns DSCR, cash-on-cash and monthly cash flow from one
+              address — then walk through the full nightly-rate math in our{" "}
               <Link href="/blog/short-term-rental-underwriting-playbook" className="font-semibold text-primary hover:underline">short-term rental underwriting playbook</Link>.
             </p>
             <p className="not-prose">

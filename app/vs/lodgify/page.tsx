@@ -238,19 +238,13 @@ export default function VsLodgifyPage() {
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
-            Want to see just the underwriting half? Try the{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">
-              cap rate calculator
-            </Link>{" "}
-            or the full{" "}
-            <Link href="/" className="font-semibold text-primary hover:underline">
-              TrueCap analyzer
-            </Link>
-            . Our guide on{" "}
-            <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">
-              60-second underwriting
-            </Link>{" "}
-            walks through the workflow end-to-end.
+            Want the underwriting half on its own? The free{" "}
+            <Link href="/tools/vacancy-rate-calculator" className="font-semibold text-primary hover:underline">vacancy rate calculator</Link> turns vacant
+            nights and turnover cost into the occupancy haircut an STR pro forma actually
+            needs, and our{" "}
+            <Link href="/blog/short-term-rental-underwriting-playbook" className="font-semibold text-primary hover:underline">short-term rental underwriting playbook</Link>{" "}
+            walks through the rest of the assumptions. Then hand the address to the full{" "}
+            <Link href="/" className="font-semibold text-primary hover:underline">TrueCap analyzer</Link> for cap rate, DSCR and cash flow in one pass.
           </p>
         </section>
 

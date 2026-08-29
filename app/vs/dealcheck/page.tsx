@@ -223,21 +223,21 @@ export default function VsDealCheckPage() {
             <li><strong>Reuse your own criteria.</strong> Buy Box targets stay connected to the verdict and offer calculation.</li>
           </ul>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
-            Prefer to kick the tires on a single metric first? Try the
-            standalone{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">
-              cap rate calculator
+            Prefer to get your head around a single metric first? Our
+            walkthroughs on{" "}
+            <Link href="/blog/how-to-calculate-cap-rate" className="font-semibold text-primary hover:underline">
+              how to calculate cap rate
             </Link>
             ,{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">
-              DSCR calculator
+            <Link href="/blog/how-to-calculate-dscr" className="font-semibold text-primary hover:underline">
+              how to calculate DSCR
             </Link>
-            , or{" "}
+            , and the{" "}
             <Link href="/blog/brrrr-method-explained" className="font-semibold text-primary hover:underline">
               BRRRR workflow guide
             </Link>{" "}
-            — released calculators with narrower scope. For the
-            workflow itself, our guide on{" "}
+            each walk the math end to end before you commit to a full
+            underwrite. For the workflow itself, our guide on{" "}
             <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">
               60-second underwriting
             </Link>{" "}

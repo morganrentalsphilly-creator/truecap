@@ -148,7 +148,7 @@ const FAQ_ITEMS = [
   { q: "Is TrueCap really free for core rental analysis?", a: "Yes. TrueCap's no-account preliminary screen covers cap rate, cash-on-cash, DSCR, NOI, and monthly cash flow. A free account adds up to 5 saved deals, one comps lookup, and the ability to create read-only share links; recipients can view a link without an account. The first complete decision, evaluation allowance, and paid terms are described on the live pricing page." },
   { q: "Is BiggerPockets' rental property calculator free?", a: "The current official BiggerPockets rental-property-calculator page presents calculator results as a Pro feature. Access, trial, and membership terms can change, so verify both the official calculator page and Pro page before choosing it as a free option." },
   { q: "What's the catch with TrueCap's free tier?", a: "Preliminary core metrics are available without signup. Creating read-only share links, saving up to 5 deals, and using the included comps lookup require a free account; recipients can open a shared link without an account. The first complete decision and 21-day account evaluation are usage-limited; Investor Pro adds the repeatable paid workflow described on the live pricing page." },
-  { q: "Can I underwrite a BRRRR or flip on a free calculator?", a: "DealCheck Starter currently includes its BRRRR and flip calculators plus professional reports, subject to published usage limits. TrueCap's released tools can research rehab, ARV, DSCR, and a stabilized rental separately, but its integrated BRRRR and fix-and-flip lifecycle models are not currently released." },
+  { q: "Can I underwrite a BRRRR or flip on a free calculator?", a: "DealCheck Starter currently includes its BRRRR and flip calculators plus professional reports, subject to published usage limits. TrueCap splits the job: released standalone tools cover rehab cost, ARV, and the 70% rule price screen, and the no-signup analyzer screens the stabilized rental — cap rate, cash-on-cash, DSCR, and cash flow — once you enter the post-rehab rent and loan terms. There is no separate DSCR page to run the refinance test in; the integrated BRRRR and fix-and-flip lifecycle models are not currently released either, so keep a project ledger alongside." },
   { q: "How should I compare free calculator plans?", a: "Check which metrics, strategy calculators, reports, saved-property limits, comps, and sharing tools are included before entering a deal. Product access and pricing change, so verify current terms on each provider's official page and confirm every starting assumption with property-specific evidence." },
 ];
 
@@ -363,7 +363,7 @@ export default function BestFreeRentalPropertyCalculator2026Post() {
               full set of{" "}
               <Link href="/tools" className="font-semibold text-primary hover:underline">free rental property calculators</Link>, start
               with the{" "}
-              <Link href="/#main" className="font-semibold text-primary hover:underline">cap rate calculator</Link>, or
+              <Link href="/tools/1-percent-rule-calculator" className="font-semibold text-primary hover:underline">1% rule calculator</Link>, or
               see how the numbers play out in a specific market like our{" "}
               <Link href="/markets/atlanta" className="font-semibold text-primary hover:underline">Atlanta rental market breakdown</Link>.
             </p>

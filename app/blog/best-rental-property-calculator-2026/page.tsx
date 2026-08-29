@@ -328,9 +328,9 @@ export default function BestRentalPropertyCalculator2026Post() {
               evaluate when they search &quot;best rental property
               calculator&quot; or &quot;rental analysis tool&quot;. If you just
               want a single metric fast, our free{" "}
-              <Link href="/#main" className="font-semibold text-primary hover:underline">cap rate calculator</Link>,{" "}
-              <Link href="/#main" className="font-semibold text-primary hover:underline">cash-on-cash return calculator</Link>, and{" "}
-              <Link href="/#main" className="font-semibold text-primary hover:underline">DSCR calculator</Link>{" "}
+              <Link href="/tools/1-percent-rule-calculator" className="font-semibold text-primary hover:underline">1% rule calculator</Link>,{" "}
+              <Link href="/tools/mortgage-payment-calculator" className="font-semibold text-primary hover:underline">mortgage payment calculator</Link>, and{" "}
+              <Link href="/tools/closing-cost-calculator" className="font-semibold text-primary hover:underline">closing cost calculator</Link>{" "}
               each handle one piece of the underwrite with no signup. Ranking
               criteria, weighted roughly by impact on a typical solo investor:
             </p>

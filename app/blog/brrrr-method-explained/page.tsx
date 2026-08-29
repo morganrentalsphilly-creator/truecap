@@ -338,7 +338,7 @@ export default function BrrrrMethodPost() {
               href="/#main"
               className="text-primary font-semibold hover:underline"
             >
-              DSCR calculator
+              TrueCap analyzer
             </Link>{" "}
             before you assume the example&apos;s leverage, then verify the lender&apos;s
             actual formula and full program matrix.

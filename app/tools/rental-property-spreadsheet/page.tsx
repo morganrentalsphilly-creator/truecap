@@ -276,8 +276,8 @@ export default function RentalPropertySpreadsheetPage() {
             <h2 className="text-2xl sm:text-3xl">A worked example</h2>
             <p>
               The spreadsheet ships pre-filled with the same example deal
-              as our{" "}
-              <Link href="/#main" className="text-primary font-semibold hover:underline">rental cash flow calculator</Link>
+              we underwrite in the{" "}
+              <Link href="/#main" className="text-primary font-semibold hover:underline">TrueCap analyzer</Link>
               : a $250,000 single-family rental at $2,400/mo rent, bought
               with 20% down at 6.75% on a 30-year loan. With honest
               reserves, that deal produces roughly{" "}

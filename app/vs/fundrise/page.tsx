@@ -235,15 +235,16 @@ export default function VsFundrisePage() {
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
-            Want to see just the underwriting half? Try the{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">
-              cap rate calculator
-            </Link>{" "}
-            or the full{" "}
+            Curious what underwriting a direct rental actually involves? Start
+            with the{" "}
+            <Link href="/tools" className="font-semibold text-primary hover:underline">
+              free real estate calculators
+            </Link>
+            , or run a real address through the full{" "}
             <Link href="/" className="font-semibold text-primary hover:underline">
               TrueCap analyzer
-            </Link>
-            . Our guide on{" "}
+            </Link>{" "}
+            for cap rate, DSCR, and cash flow. Our guide on{" "}
             <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">
               60-second underwriting
             </Link>{" "}

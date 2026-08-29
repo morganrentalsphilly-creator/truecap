@@ -440,9 +440,9 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
               free tool and compare it against your last BP report. TrueCap&apos;s
               core underwriting is free with no signup and no report count — or
               start with a single metric via the{" "}
-              <Link href="/#main" className="font-semibold text-primary hover:underline">cap rate calculator</Link>,{" "}
-              <Link href="/#main" className="font-semibold text-primary hover:underline">cash-on-cash calculator</Link>, or{" "}
-              <Link href="/#main" className="font-semibold text-primary hover:underline">DSCR calculator</Link>. If
+              <Link href="/tools/1-percent-rule-calculator" className="font-semibold text-primary hover:underline">1% rule calculator</Link>,{" "}
+              <Link href="/tools/rehab-cost-estimator" className="font-semibold text-primary hover:underline">rehab cost estimator</Link>, or{" "}
+              <Link href="/tools/70-percent-rule-calculator" className="font-semibold text-primary hover:underline">70% rule calculator</Link>. If
               you&apos;re comparing paid tools too, the wider roundup is in our{" "}
               <Link href="/blog/best-rental-property-calculator-2026" className="font-semibold text-primary hover:underline">best rental property calculators of 2026</Link>.
             </p>

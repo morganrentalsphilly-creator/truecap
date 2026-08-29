@@ -236,7 +236,7 @@ export default function BuyingRentalWithTenantsPost() {
                 href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
-                cap rate calculator
+                TrueCap analyzer
               </Link>{" "}
               and negotiate from in-place.
             </p>
