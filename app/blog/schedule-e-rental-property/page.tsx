@@ -398,12 +398,12 @@ export default function ScheduleEPost() {
               ($1,905, cash out but not deductible) minus depreciation ($7,273,
               deductible but not cash) equals the $3,703 loss. If you can do
               that bridge in your head, you can read any Schedule E.
-              Sanity-check the operating side with the{" "}
+              Sanity-check the operating side in the free{" "}
               <Link
                 href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
-                NOI calculator
+                TrueCap analyzer
               </Link>{" "}
               and review the reporting distinctions in the{" "}
               <Link

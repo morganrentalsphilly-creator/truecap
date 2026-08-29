@@ -197,10 +197,10 @@ export default function HoustonMarketPage() {
               <ArrowUpRight className="size-4" />
             </Link>
             <Link
-              href="/#main"
+              href="/tools/mortgage-payment-calculator"
               className="inline-flex h-12 items-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted"
             >
-              DSCR calculator
+              Free mortgage payment calculator
             </Link>
           </div>
         </header>

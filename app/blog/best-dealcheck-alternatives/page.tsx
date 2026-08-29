@@ -461,8 +461,8 @@ export default function BestDealCheckAlternativesPost() {
               through a free tool and see if anything is missing. TrueCap&apos;s
               core underwriting is free with no signup — or start with a single
               metric via the{" "}
-              <Link href="/#main" className="font-semibold text-primary hover:underline">cap rate calculator</Link>,{" "}
-              <Link href="/#main" className="font-semibold text-primary hover:underline">DSCR calculator</Link>, or{" "}
+              <Link href="/tools/gross-rent-multiplier-calculator" className="font-semibold text-primary hover:underline">GRM calculator</Link>,{" "}
+              <Link href="/tools/mortgage-payment-calculator" className="font-semibold text-primary hover:underline">mortgage payment calculator</Link>, or{" "}
               <Link href="/blog/brrrr-method-explained" className="font-semibold text-primary hover:underline">BRRRR workflow guide</Link>. The
               full walkthrough is in our guide to{" "}
               <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">underwriting a rental in 60 seconds</Link>.

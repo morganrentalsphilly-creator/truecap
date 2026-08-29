@@ -325,7 +325,7 @@ export default function BlogPost() {
               className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-3 rounded-xl font-bold hover:opacity-95 transition-opacity"
             >
               <Calculator className="w-4 h-4" />
-              Open the DSCR calculator
+              Run a deal — get your DSCR
               <ArrowUpRight className="w-4 h-4" />
             </Link>
           </div>

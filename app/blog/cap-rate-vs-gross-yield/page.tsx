@@ -247,15 +247,12 @@ export default function BlogPost() {
             expenses: <strong>$12,838</strong>, a 44.6% expense ratio. That
             leaves NOI of $28,800 − $12,838 = <strong>$15,962</strong>, and a
             cap rate of $15,962 ÷ $250,000 = <strong>6.4%</strong>. (Run your
-            own line items in the{" "}
+            own line items through the free{" "}
             <Link href="/#main" className="text-primary font-semibold hover:underline">
-              NOI calculator
+              TrueCap analyzer
             </Link>{" "}
-            or go straight to the{" "}
-            <Link href="/#main" className="text-primary font-semibold hover:underline">
-              cap rate calculator
-            </Link>
-            .)
+            and watch the NOI — and the cap rate that falls out of it — move
+            with every expense you change.)
           </p>
           <p>
             Same building, same day: an 11.5% quote, an 8.7 quote, and a 6.4%

@@ -343,12 +343,12 @@ export default function CapexReservesPost() {
             >
               what vacancy rate to assume
             </Link>
-            . Run your own numbers both ways in the{" "}
+            . Run your own numbers both ways in the free{" "}
             <Link
               href="/#main"
               className="text-primary font-semibold hover:underline"
             >
-              cash-on-cash calculator
+              TrueCap analyzer
             </Link>{" "}
             before trusting either one.
           </p>
@@ -367,21 +367,22 @@ export default function CapexReservesPost() {
             — but when you compare your numbers to a listing&apos;s, make
             sure both sides use the same convention. A seller&apos;s
             &quot;7% cap&quot; with no capex line and your 7% cap with
-            $300/month reserved describe two very different properties. The{" "}
+            $300/month reserved describe two very different properties. The
+            glossary entries for{" "}
             <Link
-              href="/#main"
+              href="/glossary/noi"
               className="text-primary font-semibold hover:underline"
             >
-              NOI calculator
+              NOI
             </Link>{" "}
             and{" "}
             <Link
-              href="/#main"
+              href="/glossary/cap-rate"
               className="text-primary font-semibold hover:underline"
             >
-              cap rate calculator
+              cap rate
             </Link>{" "}
-            keep the definitions straight, and{" "}
+            spell out which convention each number follows, and{" "}
             <Link
               href="/blog/rental-property-pro-forma-explained"
               className="text-primary font-semibold hover:underline"

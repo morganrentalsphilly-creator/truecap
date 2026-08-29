@@ -273,19 +273,20 @@ export default function VsRentRediPage() {
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
-            Want to see the underwriting step in action? Try the{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">
-              cap rate calculator
+            Want to see the underwriting step in action? The walkthroughs on{" "}
+            <Link href="/blog/how-to-calculate-cap-rate" className="font-semibold text-primary hover:underline">
+              how to calculate cap rate
             </Link>{" "}
-            or the{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">
-              DSCR calculator
-            </Link>
-            , or read the guide on{" "}
+            and{" "}
+            <Link href="/blog/how-to-calculate-dscr" className="font-semibold text-primary hover:underline">
+              how to calculate DSCR
+            </Link>{" "}
+            show the math a lender checks long before RentRedi ever collects a
+            dollar of rent, and the guide on{" "}
             <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">
               60-second underwriting
-            </Link>
-            .
+            </Link>{" "}
+            runs the whole sequence on a real address.
           </p>
         </section>
 

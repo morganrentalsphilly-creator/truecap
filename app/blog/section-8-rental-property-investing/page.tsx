@@ -191,15 +191,12 @@ export default function Section8RentalPost() {
               For illustration, assume the PHA&apos;s written property-specific approval sets contract rent at <strong>$1,500</strong>, allocates <strong>$700</strong> to the tenant, and schedules <strong>$800</strong> as HAP. Those are hypothetical inputs, not an Indianapolis or nationwide benchmark.
             </p>
             <p>
-              Run the annual numbers: $18,000 gross rent, minus $2,400 property tax, $1,200 insurance, $2,200 maintenance and capex reserves, $1,800 management (10%), and $720 vacancy (4%) — that&apos;s an NOI of about <strong>$9,680</strong>, a <strong>7.2% cap rate</strong>, a DSCR of roughly <strong>1.19</strong>, and cash flow near <strong>$126/month</strong> after debt service. Check the math yourself with the{" "}
+              Run the annual numbers: $18,000 gross rent, minus $2,400 property tax, $1,200 insurance, $2,200 maintenance and capex reserves, $1,800 management (10%), and $720 vacancy (4%) — that&apos;s an NOI of about <strong>$9,680</strong>, a <strong>7.2% cap rate</strong>, a DSCR of roughly <strong>1.19</strong>, and cash flow near <strong>$126/month</strong> after debt service. Check the math yourself in the free{" "}
               <Link href="/#main" className="text-primary font-semibold hover:underline">
-                cap rate calculator
-              </Link>{" "}
-              and{" "}
-              <Link href="/#main" className="text-primary font-semibold hover:underline">
-                DSCR calculator
+                TrueCap analyzer
               </Link>
-              .
+              , which returns the NOI, cap rate, DSCR and cash flow from one
+              address.
             </p>
             <p>
               In this hypothetical, an $800 scheduled HAP is larger than the $680 principal-and-interest payment. That does not prove the property services its full debt or operating costs: taxes, insurance, association dues, maintenance, vacancy, tenant collections, contract timing, and possible abatement still matter. Use the example only to test a scenario with written PHA inputs.

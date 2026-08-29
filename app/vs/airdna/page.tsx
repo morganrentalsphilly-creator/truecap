@@ -240,15 +240,16 @@ export default function VsAirdnaPage() {
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
-            Want to see just the underwriting half? Try the{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">
-              cap rate calculator
-            </Link>{" "}
-            or the full{" "}
+            Want to see just the underwriting half? Check whether the projected
+            STR revenue even covers the note with the free{" "}
+            <Link href="/tools/mortgage-payment-calculator" className="font-semibold text-primary hover:underline">
+              mortgage payment calculator
+            </Link>
+            , then run the full{" "}
             <Link href="/" className="font-semibold text-primary hover:underline">
               TrueCap analyzer
-            </Link>
-            . Our guide on{" "}
+            </Link>{" "}
+            for cap rate, DSCR, and cash flow. Our guide on{" "}
             <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">
               60-second underwriting
             </Link>{" "}

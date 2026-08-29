@@ -233,15 +233,20 @@ export default function VsCrexiPage() {
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
-            Want to see just the underwriting half? Try the{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">
-              cap rate calculator
+            Want the residential underwriting half on its own? The free{" "}
+            <Link href="/tools/closing-cost-calculator" className="font-semibold text-primary hover:underline">
+              closing cost calculator
             </Link>{" "}
-            or the full{" "}
+            sizes the cash you actually need at the table, and the full{" "}
             <Link href="/" className="font-semibold text-primary hover:underline">
               TrueCap analyzer
+            </Link>{" "}
+            returns{" "}
+            <Link href="/glossary/cap-rate" className="font-semibold text-primary hover:underline">
+              cap rate
             </Link>
-            . Our guide on{" "}
+            , DSCR, and cash flow from an address — no CRE model required. Our
+            guide on{" "}
             <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">
               60-second underwriting
             </Link>{" "}

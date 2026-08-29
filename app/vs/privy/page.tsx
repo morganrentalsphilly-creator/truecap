@@ -239,19 +239,13 @@ export default function VsPrivyPage() {
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
-            Want to see just the underwriting half? Try the{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">
-              cap rate calculator
-            </Link>{" "}
-            or the full{" "}
-            <Link href="/" className="font-semibold text-primary hover:underline">
-              TrueCap analyzer
-            </Link>
-            . Our guide on{" "}
-            <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">
-              60-second underwriting
-            </Link>{" "}
-            walks through the workflow end-to-end.
+            Curious how TrueCap lands on a different number than Privy?{" "}
+            <Link href="/blog/how-to-calculate-cap-rate" className="font-semibold text-primary hover:underline">How to calculate cap rate</Link> shows the
+            formula line by line, and{" "}
+            <Link href="/blog/what-is-a-good-cap-rate" className="font-semibold text-primary hover:underline">what counts as a good cap rate</Link> puts the
+            result in context for your market. Once you want that math run against HUD rent
+            and a live rate, paste the address into the{" "}
+            <Link href="/" className="font-semibold text-primary hover:underline">TrueCap analyzer</Link>.
           </p>
         </section>
 

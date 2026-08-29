@@ -456,12 +456,12 @@ export default function PropertyTaxReassessmentPost() {
               </Link>
               , are big, lumpy, and easy to copy wrong from a listing — and both
               are exactly where an optimistic number hides a bad deal. Run the
-              honest figure through an{" "}
+              honest figure through the free{" "}
               <Link
                 href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
-                NOI calculator
+                TrueCap analyzer
               </Link>{" "}
               and you see the cap rate the property really earns, not the one the
               seller&apos;s tax history flatters.

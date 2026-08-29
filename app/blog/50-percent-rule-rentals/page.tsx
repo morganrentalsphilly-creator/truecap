@@ -162,8 +162,8 @@ export default function FiftyPercentRulePost() {
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">How to actually use it</h2>
           <p>
             The 50% rule is a <strong>triage tool, not a final-decision tool</strong>. Use it in 5 seconds to decide whether a property is worth opening the full underwrite (the free{" "}
-            <Link href="/#main" className="text-primary font-semibold hover:underline">50% rule calculator</Link>{" "}
-            runs these steps live, with an adjustable expense ratio for the failure modes above):
+            <Link href="/#main" className="text-primary font-semibold hover:underline">TrueCap analyzer</Link>{" "}
+            runs the same steps on a real address, and swaps the flat 50% for your actual expense lines — exactly the adjustment the failure modes above demand):
           </p>
           <ol>
             <li>Look at gross monthly rent (from listing or rough comps)</li>
@@ -174,9 +174,8 @@ export default function FiftyPercentRulePost() {
             <li>If the rough cash flow is negative or zero: flag the listing for a property-specific underwrite; do not treat the shortcut as a pass decision</li>
           </ol>
           <p>
-            Above all: <strong>do not commit to a deal based on the 50% rule.</strong> Use it to filter out the bottom 80% of listings so you only spend serious time on the top 20%. As a middle step, the free{" "}
-            <Link href="/#main" className="text-primary font-semibold hover:underline">rental cash flow calculator</Link> replaces the 50% guess with your actual expense lines — tax, insurance, vacancy, management, maintenance, CapEx — in under a minute. For the top 20%, run the actual property through{" "}
-            <Link href="/" className="text-primary font-semibold hover:underline">TrueCap</Link> with the address — the analyzer auto-fills the state property tax, HUD rent benchmark, current rate, and pulls every operating expense into a real calculation. Five seconds with the 50% rule, two minutes for the real number.
+            Above all: <strong>do not commit to a deal based on the 50% rule.</strong> Use it to filter out the bottom 80% of listings so you only spend serious time on the top 20%. For that top 20%, run the actual property through{" "}
+            <Link href="/" className="text-primary font-semibold hover:underline">TrueCap</Link> with the address — the analyzer replaces the 50% guess with your actual expense lines (tax, insurance, vacancy, management, maintenance, CapEx) in under a minute, auto-fills the state property tax, HUD rent benchmark and current rate, and pulls every one of them into a real calculation. Five seconds with the 50% rule, two minutes for the real number.
           </p>
 
           <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">A better triage filter</h2>

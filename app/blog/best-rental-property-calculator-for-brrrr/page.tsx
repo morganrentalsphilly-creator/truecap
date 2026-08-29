@@ -56,15 +56,15 @@ const TOOLS = [
     url: "/blog/brrrr-method-explained",
     pricing: "Free released tools; no integrated BRRRR lifecycle model currently",
     freeCovers: [
-      "Standard cap rate / CoC / DSCR / cash flow on BRRRR candidates",
-      "Separate rehab-cost and ARV worksheets",
-      "A standalone DSCR calculator for testing a lender-specific refinance",
-      "Educational guidance on the stages and inputs"
+      "Cap rate, CoC, DSCR and cash flow on a stabilized BRRRR candidate — from the main analyzer, no account needed",
+      "Released standalone worksheets for rehab cost, ARV, and the 70% rule price screen",
+      "Mortgage payment and closing cost tools for the purchase and the refinanced loan",
+      "Step-by-step guides to the DSCR and cap rate math a refinance lender will run"
     ],
     freeGates: [
       "No released integrated ledger for acquisition, renovation, refinance proceeds, later contributions, and post-refinance returns"
     ],
-    pickIf: "You want transparent worksheets for individual inputs and will maintain a separate, complete project cash-flow ledger.",
+    pickIf: "You want transparent worksheets for the rehab and ARV inputs, an analyzer for the stabilized rental, and will maintain a separate, complete project cash-flow ledger.",
   },
   {
     rank: 2,
@@ -123,11 +123,11 @@ const FAQ_ITEMS = [
   { q: "What's 'capital recovered' and why does it matter?", a: "A capital-recovery ratio compares refinance distributions with every contribution made through that date, including acquisition, renovation, carrying, and financing costs. A distribution equal to contributions does not make the investment's return infinite: later contributions, operating cash flows, remaining equity, and time still matter." },
   { q: "What ARV (After Repair Value) should I use in a BRRRR analysis?", a: "Build a range from relevant comparable sales and obtain qualified local valuation support. Stress-test the range, but do not treat a worksheet value as the future appraisal a lender will accept." },
   { q: "What refi LTV should I model for a BRRRR?", a: "Use the eligible value, leverage limit, seasoning rule, debt-coverage requirement, fees, and cash-out limit from an actual lender quote. There is no single LTV that applies to every property, loan, or borrower." },
-  { q: "Can I underwrite BRRRR deals in TrueCap today?", a: "TrueCap's released tools can help research rehab cost, ARV, refinance DSCR, and stabilized rental performance separately. Its integrated BRRRR lifecycle model is not currently released, so use a complete project ledger or another released product for the joined cash-flow analysis." },
+  { q: "Can I underwrite BRRRR deals in TrueCap today?", a: "In pieces, yes. The released standalone tools cover rehab cost, ARV, and the 70% rule price screen, and the main analyzer returns DSCR, cap rate, and cash flow for the stabilized rental once you enter the post-refinance rent and loan terms. There is no separate DSCR calculator page — for the coverage test a lender will run, the how-to-calculate-DSCR walkthrough shows the arithmetic. The integrated BRRRR lifecycle model is not currently released, so use a complete project ledger or another released product for the joined cash-flow analysis." },
 ];
 
 const DECISION_LINES: Array<{ q: string; a: string }> = [
-  { q: "You want separate rehab, ARV, DSCR, and stabilized-rental worksheets.", a: "TrueCap's released tools" },
+  { q: "You want separate rehab, ARV, and 70%-rule worksheets plus a stabilized-rental screen.", a: "TrueCap's released tools" },
   { q: "You underwrite mobile at every showing.", a: "DealCheck" },
   { q: "You're already in the BiggerPockets community.", a: "BiggerPockets bundled" },
   { q: "You have a custom BRRRR model that handles unusual debt structures.", a: "Excel" },
@@ -305,8 +305,9 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
               one of your real deals through it. TrueCap is free for the core
               underwriting, takes about a minute, no signup required. Start with the{" "}
               <Link href="/tools/rehab-cost-estimator" className="font-semibold text-primary hover:underline">rehab cost estimator</Link>,{" "}
-              pressure-test lender-specific debt coverage with the{" "}
-              <Link href="/#main" className="font-semibold text-primary hover:underline">DSCR calculator</Link>, and
+              pressure-test lender-specific debt coverage by running the
+              stabilized rent and refinance terms through the{" "}
+              <Link href="/#main" className="font-semibold text-primary hover:underline">TrueCap analyzer</Link>, and
               review the full workflow in{" "}
               <Link href="/blog/brrrr-method-explained" className="font-semibold text-primary hover:underline">the BRRRR method explained</Link>{" "}
               before assembling a complete project ledger. The integrated TrueCap

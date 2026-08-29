@@ -293,11 +293,11 @@ export default function BestRentalAnalysisToolForHouseHackersPost() {
               The fastest way to know which tool fits your workflow is to run
               one of your real deals through it. TrueCap is free for the core
               underwriting, takes 60 seconds, no signup required. For a house
-              hack, check whether the rented units cover the debt with the{" "}
-              <Link href="/#main" className="font-semibold text-primary hover:underline">DSCR calculator</Link>, see
-              the return on your down payment with the{" "}
-              <Link href="/#main" className="font-semibold text-primary hover:underline">cash-on-cash return calculator</Link>, and
-              follow the owner-occupied math step by step in our{" "}
+              hack, check whether the rented units cover the debt and what the
+              deal returns on your down payment — the free{" "}
+              <Link href="/#main" className="font-semibold text-primary hover:underline">TrueCap analyzer</Link>{" "}
+              gives you DSCR, cash-on-cash and monthly cash flow from one
+              address — then follow the owner-occupied math step by step in our{" "}
               <Link href="/blog/house-hack-underwriting-guide" className="font-semibold text-primary hover:underline">house hack underwriting guide</Link>.
             </p>
             <p className="not-prose">

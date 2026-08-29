@@ -240,10 +240,10 @@ export default function OnePercentRulePage() {
             <p>
               TrueCap handles steps 4 and 5 in about four minutes once you
               have the inputs. Two sibling screens are worth knowing too:
-              the{" "}
-              <Link href="/#main" className="text-primary font-semibold hover:underline">50% rule calculator</Link>{" "}
-              triages the expense side (does the rent survive operating
-              costs and the mortgage?), and the{" "}
+              our{" "}
+              <Link href="/blog/50-percent-rule-rentals" className="text-primary font-semibold hover:underline">50% rule walkthrough</Link>{" "}
+              shows how to triage the expense side (does the rent survive
+              operating costs and the mortgage?), and the{" "}
               <Link href="/tools/2-percent-rule-calculator" className="text-primary font-semibold hover:underline">2% rule calculator</Link>{" "}
               covers the stricter cash-flow-market bar — including why a
               2% deal in 2026 deserves suspicion before celebration.

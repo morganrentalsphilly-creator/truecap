@@ -244,24 +244,39 @@ export default function VsBiggerPocketsCalculatorPage() {
             <li>You already have all your historical deals in BP and don&apos;t want to migrate.</li>
           </ul>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
-            If you only need a specific metric — not a full calculator suite
-            — TrueCap also ships standalone tools: the{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">
-              cap rate calculator
-            </Link>
-            , the{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">
-              DSCR calculator
-            </Link>
-            , the{" "}
-            <Link href="/blog/brrrr-method-explained" className="font-semibold text-primary hover:underline">
-              BRRRR workflow guide
-            </Link>
-            , and the{" "}
+            If you only need one number — not a full calculator suite —
+            TrueCap&apos;s released single-purpose tools cover the screening end
+            for free: the{" "}
             <Link href="/tools/1-percent-rule-calculator" className="font-semibold text-primary hover:underline">
               1% rule calculator
             </Link>
-            . The calculators are free; the BRRRR link is an educational guide.
+            , the{" "}
+            <Link href="/tools/gross-rent-multiplier-calculator" className="font-semibold text-primary hover:underline">
+              gross rent multiplier calculator
+            </Link>
+            , and the{" "}
+            <Link href="/tools/mortgage-payment-calculator" className="font-semibold text-primary hover:underline">
+              mortgage payment calculator
+            </Link>
+            . Cap rate, cash-on-cash and DSCR are not separate pages here — they
+            come out of the{" "}
+            <Link href="/" className="font-semibold text-primary hover:underline">
+              full analyzer
+            </Link>
+            , and if you would rather run the arithmetic yourself, the
+            walkthroughs on{" "}
+            <Link href="/blog/how-to-calculate-cap-rate" className="font-semibold text-primary hover:underline">
+              how to calculate cap rate
+            </Link>{" "}
+            and{" "}
+            <Link href="/blog/how-to-calculate-dscr" className="font-semibold text-primary hover:underline">
+              how to calculate DSCR
+            </Link>{" "}
+            show every step. For the rehab side, start with{" "}
+            <Link href="/blog/brrrr-method-explained" className="font-semibold text-primary hover:underline">
+              the BRRRR workflow guide
+            </Link>
+            .
           </p>
         </section>
 

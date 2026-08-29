@@ -216,15 +216,11 @@ export default function ForBuyAndHoldPage() {
             <Link href="/blog/rental-property-tax-deductions" className="text-primary font-semibold hover:underline">
               every deductible expense
             </Link>
-            , and the standalone{" "}
+            , and the{" "}
             <Link href="/#main" className="text-primary font-semibold hover:underline">
-              cap rate
+              TrueCap analyzer
             </Link>{" "}
-            and{" "}
-            <Link href="/#main" className="text-primary font-semibold hover:underline">
-              DSCR
-            </Link>{" "}
-            calculators for quick listing triage.
+            for quick listing triage — cap rate, cash-on-cash, and DSCR from one address.
           </p>
         </section>
 

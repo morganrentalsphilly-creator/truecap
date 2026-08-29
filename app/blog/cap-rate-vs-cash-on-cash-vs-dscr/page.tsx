@@ -308,7 +308,7 @@ export default function BlogPost() {
               href="/#main"
               className="text-primary font-semibold hover:underline"
             >
-              Use our free cap rate calculator →
+              Compute cap rate →
             </Link>
           </p>
 

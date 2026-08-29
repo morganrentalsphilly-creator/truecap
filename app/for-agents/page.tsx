@@ -285,15 +285,11 @@ export default async function ForAgentsPage() {
             <Link href="/blog/what-is-a-good-cap-rate" className="text-primary font-semibold hover:underline">
               what counts as a good cap rate in 2026
             </Link>
-            , or the standalone{" "}
+            , or the{" "}
             <Link href="/#main" className="text-primary font-semibold hover:underline">
-              cap rate
+              TrueCap analyzer
             </Link>{" "}
-            and{" "}
-            <Link href="/#main" className="text-primary font-semibold hover:underline">
-              DSCR
-            </Link>{" "}
-            calculators. They land on a single, well-cited page — better
+            for cap rate and DSCR from one address. They land on a single, well-cited page — better
             than a long email reply.
           </p>
         </section>

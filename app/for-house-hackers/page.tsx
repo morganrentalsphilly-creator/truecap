@@ -212,15 +212,11 @@ export default function ForHouseHackersPage() {
             </Link>{" "}
             — your effective housing cost after tenant rent, in seconds.
             Once you&apos;ve picked a property, ground the
-            numbers with the{" "}
+            numbers in the{" "}
             <Link href="/#main" className="text-primary font-semibold hover:underline">
-              cap rate
+              TrueCap analyzer
             </Link>{" "}
-            and{" "}
-            <Link href="/#main" className="text-primary font-semibold hover:underline">
-              DSCR
-            </Link>{" "}
-            calculators for the rented portion, then run the year-1 screen
+            — cap rate and DSCR for the rented portion — then run the year-1 screen
             with the{" "}
             <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="text-primary font-semibold hover:underline">
               60-second underwriting workflow

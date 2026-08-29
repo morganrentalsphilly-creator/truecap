@@ -179,11 +179,15 @@ export default function VsExcelPage() {
             <li><strong>You want one calculation definition.</strong> TrueCap applies the same documented engine each time, while a spreadsheet remains as reliable as its formulas, inputs, and review process.</li>
           </ul>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
-            Want to sanity-check one formula before you trust a whole sheet? Run the standalone{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">cap rate calculator</Link>
-            {" "}or{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">DSCR calculator</Link>
-            {" "}— same documented engine as the full analyzer. And if you&apos;re building the income statement by hand, our guide to a{" "}
+            Want to sanity-check one formula before you trust a whole sheet? Check your payment row against the released{" "}
+            <Link href="/tools/mortgage-payment-calculator" className="font-semibold text-primary hover:underline">mortgage payment calculator</Link>
+            , then read your sheet&apos;s cap rate and coverage ratio back against the worked examples in{" "}
+            <Link href="/blog/how-to-calculate-cap-rate" className="font-semibold text-primary hover:underline">how to calculate cap rate</Link>
+            {" "}and{" "}
+            <Link href="/blog/how-to-calculate-dscr" className="font-semibold text-primary hover:underline">how to calculate DSCR</Link>
+            . When you want those numbers produced from an address instead of typed in, the{" "}
+            <Link href="/" className="font-semibold text-primary hover:underline">full TrueCap analyzer</Link>
+            {" "}computes them on one documented engine. And if you&apos;re building the income statement by hand, our guide to a{" "}
             <Link href="/blog/rental-property-pro-forma-explained" className="font-semibold text-primary hover:underline">rental property pro forma</Link>
             {" "}walks through every line a spreadsheet should have.
           </p>

@@ -204,8 +204,9 @@ export default function MortgagePaymentPage() {
             <p>
               A mortgage payment is just one input in a real underwrite.
               You also need to know your DSCR (does the property cover
-              the payment? — run the{" "}
-              <Link href="/#main" className="font-semibold text-primary hover:underline">DSCR calculator</Link>),
+              the payment? —{" "}
+              <Link href="/blog/how-to-calculate-dscr" className="font-semibold text-primary hover:underline">how to calculate DSCR</Link>{" "}
+              walks the exact ratio a lender runs),
               cash-on-cash return (what does your money
               actually earn?), the upfront cash to close (estimate it with the{" "}
               <Link href="/tools/closing-cost-calculator" className="font-semibold text-primary hover:underline">closing cost calculator</Link>),

@@ -225,15 +225,16 @@ export default function VsStessaPage() {
           </p>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             For acquisition specifically, the highest-leverage TrueCap pages
-            are the{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">
-              cap rate calculator
+            are the walkthroughs on{" "}
+            <Link href="/blog/how-to-calculate-cap-rate" className="font-semibold text-primary hover:underline">
+              how to calculate cap rate
+            </Link>{" "}
+            and{" "}
+            <Link href="/blog/how-to-calculate-dscr" className="font-semibold text-primary hover:underline">
+              how to calculate DSCR
             </Link>
-            , the{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">
-              DSCR calculator
-            </Link>
-            , and the longer-form guides on{" "}
+            , which take the math end to end before you commit to a full
+            underwrite, plus the longer-form guides on{" "}
             <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">
               60-second underwriting
             </Link>{" "}

@@ -316,11 +316,9 @@ export default function VsBiggerPocketsForHouseHackingPage() {
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             New to running an owner-occupant deal? Our{" "}
             <Link href="/blog/house-hack-underwriting-guide" className="font-semibold text-primary hover:underline">house hack underwriting guide</Link>
-            {" "}walks through counting only the rental units&apos; income. To pressure-test a single metric, the standalone{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">cap rate calculator</Link>
-            {" "}and{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">cash-on-cash return calculator</Link>
-            {" "}run the same engine as the full analyzer.
+            {" "}walks through counting only the rental units&apos; income. To pressure-test the numbers on your own deal, our{" "}
+            <Link href="/#main" className="font-semibold text-primary hover:underline">free deal analyzer</Link>
+            {" "}returns cap rate and cash-on-cash return for the same owner-occupant setup.
           </p>
         </section>
 

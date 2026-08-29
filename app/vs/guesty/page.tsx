@@ -239,13 +239,18 @@ export default function VsGuestyPage() {
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
-            Want to see just the underwriting half? Try the{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">
-              cap rate calculator
+            Need only the underwriting half? The free{" "}
+            <Link href="/tools/vacancy-rate-calculator" className="font-semibold text-primary hover:underline">
+              vacancy rate calculator
             </Link>{" "}
-            or the full{" "}
+            puts a real number on the downtime that decides a short-term rental,
+            and the full{" "}
             <Link href="/" className="font-semibold text-primary hover:underline">
               TrueCap analyzer
+            </Link>{" "}
+            carries that assumption into cap rate, DSCR, and{" "}
+            <Link href="/glossary/monthly-cash-flow" className="font-semibold text-primary hover:underline">
+              monthly cash flow
             </Link>
             . Our guide on{" "}
             <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">

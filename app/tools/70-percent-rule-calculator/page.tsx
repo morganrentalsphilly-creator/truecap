@@ -313,11 +313,9 @@ export default function SeventyPercentRuleCalculatorPage() {
               a BRRRR — it&apos;s a flip you accidentally kept. Model the
               full cycle with the{" "}
               <Link href="/blog/brrrr-method-explained" className="text-primary font-semibold hover:underline">BRRRR workflow guide</Link>, and
-              check the rental math with the{" "}
-              <Link href="/#main" className="text-primary font-semibold hover:underline">cap rate</Link>{" "}
-              and{" "}
-              <Link href="/#main" className="text-primary font-semibold hover:underline">DSCR</Link>{" "}
-              calculators before you commit.
+              check the rental math in the{" "}
+              <Link href="/#main" className="text-primary font-semibold hover:underline">TrueCap analyzer</Link>{" "}
+              — cap rate and DSCR together — before you commit.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">

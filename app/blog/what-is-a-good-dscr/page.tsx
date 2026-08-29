@@ -11,9 +11,10 @@
  * owns the investor-analysis angle instead: what 1.25 actually means
  * for YOUR offer price, with a max-loan-at-1.25 worked example and the
  * lender-DSCR (rent/PITIA) vs investor-DSCR (NOI/debt service)
- * distinction. Complements /tools/dscr-calculator (computational),
- * /blog/how-to-calculate-dscr (formula how-to), and
- * /blog/dscr-loans-explained (loan product).
+ * distinction. Complements /blog/how-to-calculate-dscr (formula how-to)
+ * and /blog/dscr-loans-explained (loan product). NOTE:
+ * /tools/dscr-calculator is gated by UNRELEASED_UNDERWRITING_CALCULATORS
+ * and 404s — never link it from here; the analyzer (/#main) computes DSCR.
  */
 
 import type { Metadata } from "next";
@@ -320,12 +321,12 @@ export default function BlogPost() {
             slightly, which nudges NOI up — so $224,500 is mildly
             conservative.) This is the negotiating math that a DSCR target
             actually gives you: not a pass/fail grade on the listing, but a
-            defensible ceiling on what you can pay. Our{" "}
+            defensible ceiling on what you can pay. The{" "}
             <Link href="/#main" className="text-primary font-semibold hover:underline">
-              free DSCR calculator
+              TrueCap analyzer
             </Link>{" "}
             runs this in both directions — DSCR at your numbers, and the
-            max loan at any target ratio.
+            Offer Ceiling that a target ratio implies.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">The down-payment lever: how each 5% moves DSCR</h2>
@@ -442,9 +443,9 @@ export default function BlogPost() {
             A good DSCR isn&apos;t just 1.25 today — it&apos;s a ratio that
             stays above 1.0 in the bad year. That&apos;s the standard
             commercial underwriters actually apply, and it&apos;s free to
-            apply yourself with a{" "}
+            apply yourself with the free{" "}
             <Link href="/#main" className="text-primary font-semibold hover:underline">
-              cash flow calculator
+              TrueCap analyzer
             </Link>{" "}
             and ten minutes of pessimism.
           </p>
@@ -499,9 +500,9 @@ export default function BlogPost() {
           </div>
 
           <p>
-            Or, if you just want the standalone ratio:{" "}
-            <Link href="/#main" className="text-primary font-semibold hover:underline">
-              free DSCR calculator →
+            Or, if you just want the formula worked end to end:{" "}
+            <Link href="/blog/how-to-calculate-dscr" className="text-primary font-semibold hover:underline">
+              how to calculate DSCR →
             </Link>
           </p>
 

@@ -169,11 +169,11 @@ export default function ClosingCostCalculatorPage() {
         </section>
 
         <section className="mt-12 border-t border-border pt-8">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">Related calculators</h2>
+          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">Related calculators and terms</h2>
           <div className="flex flex-wrap gap-2 text-sm">
-            <Link href="/tools/mortgage-payment-calculator" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Mortgage payment</Link>
-            <Link href="/#main" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Cash-on-cash</Link>
-            <Link href="/tools/break-even-calculator" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Break-even</Link>
+            <Link href="/tools/mortgage-payment-calculator" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Mortgage payment calculator</Link>
+            <Link href="/tools/break-even-calculator" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Break-even calculator</Link>
+            <Link href="/glossary/cash-on-cash-return" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Cash-on-cash return</Link>
             <Link href="/glossary/down-payment" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Down payment</Link>
           </div>
         </section>

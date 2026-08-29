@@ -236,15 +236,16 @@ export default function VsLandlordStudioPage() {
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
-            Want to see just the underwriting half? Try the{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">
-              cap rate calculator
+            Want to see just the underwriting half? The free{" "}
+            <Link href="/tools/1-percent-rule-calculator" className="font-semibold text-primary hover:underline">
+              1% rule calculator
             </Link>{" "}
-            or the full{" "}
+            screens a listing in seconds, and the full{" "}
             <Link href="/" className="font-semibold text-primary hover:underline">
               TrueCap analyzer
-            </Link>
-            . Our guide on{" "}
+            </Link>{" "}
+            projects the cap rate, cash-on-cash, and cash flow before you own
+            the expenses you&apos;d later be tracking here. Our guide on{" "}
             <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">
               60-second underwriting
             </Link>{" "}

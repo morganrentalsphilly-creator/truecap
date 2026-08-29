@@ -242,19 +242,13 @@ export default function VsPropstreamPage() {
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
-            Want to see just the underwriting half? Try the{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">
-              cap rate calculator
-            </Link>{" "}
-            or the full{" "}
-            <Link href="/" className="font-semibold text-primary hover:underline">
-              TrueCap analyzer
-            </Link>
-            . Our guide on{" "}
-            <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">
-              60-second underwriting
-            </Link>{" "}
-            walks through the workflow end-to-end.
+            Just want the underwriting half? The free{" "}
+            <Link href="/tools/1-percent-rule-calculator" className="font-semibold text-primary hover:underline">1% rule calculator</Link> screens a list of
+            skip-traced addresses down to the handful worth modeling, and our guide to{" "}
+            <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">60-second underwriting</Link>{" "}
+            shows what happens next. When one survives the screen, the full{" "}
+            <Link href="/" className="font-semibold text-primary hover:underline">TrueCap analyzer</Link> prices it — cap rate, DSCR, cash flow — from the
+            address alone.
           </p>
         </section>
 

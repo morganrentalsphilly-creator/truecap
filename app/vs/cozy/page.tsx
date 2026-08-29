@@ -234,15 +234,20 @@ export default function VsCozyPage() {
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
-            Want to see just the underwriting half? Try the{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">
-              cap rate calculator
+            Only need the underwriting piece? The free{" "}
+            <Link href="/tools/break-even-calculator" className="font-semibold text-primary hover:underline">
+              break-even calculator
             </Link>{" "}
-            or the full{" "}
+            tells you how long a property takes to return your cash, and the
+            full{" "}
             <Link href="/" className="font-semibold text-primary hover:underline">
               TrueCap analyzer
+            </Link>{" "}
+            turns an address into cap rate,{" "}
+            <Link href="/glossary/cash-on-cash-return" className="font-semibold text-primary hover:underline">
+              cash-on-cash return
             </Link>
-            . Our guide on{" "}
+            , and DSCR — all free, the way Cozy used to be. Our guide on{" "}
             <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">
               60-second underwriting
             </Link>{" "}

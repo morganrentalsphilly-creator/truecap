@@ -237,19 +237,12 @@ export default function VsYardiBreezePage() {
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
-            Want to see just the underwriting half? Try the{" "}
-            <Link href="/#main" className="font-semibold text-primary hover:underline">
-              cap rate calculator
-            </Link>{" "}
-            or the full{" "}
-            <Link href="/" className="font-semibold text-primary hover:underline">
-              TrueCap analyzer
-            </Link>
-            . Our guide on{" "}
-            <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">
-              60-second underwriting
-            </Link>{" "}
-            walks through the workflow end-to-end.
+            Want the acquisition math on its own?{" "}
+            <Link href="/blog/how-to-calculate-noi-rental-property" className="font-semibold text-primary hover:underline">How to calculate NOI</Link> rebuilds
+            the number Yardi Breeze reports after the fact, and{" "}
+            <Link href="/blog/how-to-calculate-dscr" className="font-semibold text-primary hover:underline">how to calculate DSCR</Link> shows the ratio your
+            lender checks before you get there. When it is time to underwrite the next
+            building, the full <Link href="/" className="font-semibold text-primary hover:underline">TrueCap analyzer</Link> runs both from an address.
           </p>
         </section>
 

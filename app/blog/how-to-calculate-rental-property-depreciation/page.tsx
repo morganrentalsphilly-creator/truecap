@@ -296,12 +296,12 @@ export default function RentalPropertyDepreciationPost() {
               financed with 25% down at 7%, clears about{" "}
               <strong>+$200 a month</strong> after vacancy, operating expenses,
               and the mortgage — $2,400 a year of real cash flow (pressure-test
-              your own deal&apos;s number with the{" "}
+              your own deal&apos;s number in the{" "}
               <Link
                 href="/#main"
                 className="text-primary font-semibold hover:underline"
               >
-                cash flow calculator
+                TrueCap analyzer
               </Link>
               ). Taxable income is a different animal: start from cash flow, add
               back the ~<strong>$1,900</strong> of year-one principal paydown
