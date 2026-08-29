@@ -2,7 +2,7 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { UNRELEASED_UNDERWRITING_CALCULATORS } from "@/lib/calculator-registry";
+import { unusableToolRoutes } from "./unreleased-tool-routes";
 
 /**
  * The /vs comparison pages are competitor-term landing pages, so they are
@@ -24,7 +24,11 @@ import { UNRELEASED_UNDERWRITING_CALCULATORS } from "@/lib/calculator-registry";
  */
 
 const VS_DIR = "app/vs";
-const UNRELEASED = new Set<string>(UNRELEASED_UNDERWRITING_CALCULATORS);
+// Derived from the pages, NOT from the registry list. The list is a subset:
+// it omits brrrr-calculator (notFound) and rental-property-tax-calculator
+// (permanentRedirect to a blog post). Trusting it let a /vs CTA labelled
+// "rental property tax calculator" ship pointing at that redirect.
+const UNRELEASED = new Set<string>(unusableToolRoutes().keys());
 
 function vsPages(): string[] {
   return readdirSync(VS_DIR)
@@ -75,8 +79,12 @@ describe("/vs comparison pages", () => {
         if (UNRELEASED.has(match[1])) offenders.push(`${file} -> /tools/${match[1]}`);
       }
     }
-    expect(offenders, `these CTAs point at pages that call notFound():\n${offenders.join("\n")}`)
-      .toEqual([]);
+    expect(
+      offenders,
+      // Not all of these 404 — one permanentRedirects to a blog post, which is
+      // worse for a CTA because it looks like it worked.
+      `these CTAs point at /tools routes a visitor cannot use (404 or redirected away):\n${offenders.join("\n")}`,
+    ).toEqual([]);
   });
 
   it("do not share one copy-pasted lead-in across three or more pages", () => {

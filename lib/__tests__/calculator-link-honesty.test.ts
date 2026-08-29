@@ -2,6 +2,8 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
+import { unusableToolRoutes } from "./unreleased-tool-routes";
+
 /**
  * A link must not promise a standalone single-metric calculator and then
  * deliver either a 404 (the gated /tools pages) or the generic analyzer form.
@@ -25,17 +27,14 @@ import { describe, expect, it } from "vitest";
 
 const ROOTS = ["app", "components"];
 
-/** /tools slugs that are gated or unreleased — these URLs 404 for visitors. */
-const GATED_TOOL_SLUGS = new Set([
-  "cap-rate-calculator",
-  "noi-calculator",
-  "cash-on-cash-calculator",
-  "dscr-calculator",
-  "50-percent-rule-calculator",
-  "house-hacking-calculator",
-  "rental-cash-flow-calculator",
-  "roi-calculator",
-]);
+/**
+ * /tools slugs a visitor cannot actually use — derived from the pages rather
+ * than hardcoded. The hardcoded list here was missing brrrr-calculator (which
+ * notFound()s) and rental-property-tax-calculator (which permanentRedirects to
+ * a blog post), so a link promising a "rental property tax calculator" passed
+ * this guard while delivering an article.
+ */
+const GATED_TOOL_SLUGS = new Set<string>(unusableToolRoutes().keys());
 
 /**
  * "Open the calculator" on a CTA is honest — the analyzer is a calculator.
