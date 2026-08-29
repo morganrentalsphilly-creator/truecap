@@ -237,10 +237,10 @@ export default function VsLandlordStudioPage() {
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Deciding whether to buy, not how to book it? The free{" "}
-            <Link href="/tools/rental-property-tax-calculator" className="font-semibold text-primary hover:underline">
-              rental property tax calculator
+            <Link href="/tools/break-even-calculator" className="font-semibold text-primary hover:underline">
+              break-even calculator
             </Link>{" "}
-            estimates the bill before there is anything to reconcile, and the full{" "}
+            shows how long before there is a profit to reconcile, and the full{" "}
             <Link href="/" className="font-semibold text-primary hover:underline">
               TrueCap analyzer
             </Link>{" "}
