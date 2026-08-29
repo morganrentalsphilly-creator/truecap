@@ -79,6 +79,11 @@ const FOOTER_COLS: Array<{
     links: [
       { label: "Buy-and-hold investors", href: "/for-buy-and-hold" },
       { label: "House hackers", href: "/for-house-hackers" },
+      // /for-agents had ZERO inbound links from anywhere on the site while
+      // being the only page that explains Agent Pro — the highest-priced plan
+      // at $59.99/mo. An agent could not reach the argument for the tier we
+      // most want them to buy.
+      { label: "Agents", href: "/for-agents" },
     ],
   },
   {

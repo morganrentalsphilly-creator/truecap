@@ -506,11 +506,30 @@ export function FocusedDecisionSummary({
                 ? `The asking price is ${money(offerCeiling.listPriceGap)} above the Offer Ceiling under the selected rules. Record the investment decision yourself.`
                 : "The current price misses at least one selected rule. Record the investment decision yourself.",
           }
-        : {
-            label: "Review the active target rules",
-            reason:
-              "No qualifying Offer Ceiling was found under the current assumptions. Record the investment decision yourself.",
-          }
+        : // Mirror the headline's own logic. This branch used to test only
+          // `offerCeiling` — the EXACT solve — and declare "No qualifying Offer
+          // Ceiling was found" whenever it was null. But exact and preview are
+          // mutually exclusive access modes: on the free path offerCeiling is
+          // always null and a coarse RANGE is what renders. So the card printed
+          // "$250,000–$350,000" while this block, ~330px below in the same
+          // viewport, said no ceiling existed. Same payload, opposite claims,
+          // on the default path most visitors are on.
+          rangePreview?.downsideFeasible && rangePreview.lower != null
+          ? {
+              label: "Review the active target rules",
+              reason: `A modeled range of ${money(rangePreview.lower)}–${money(rangePreview.upper)} still meets the selected rules; the exact Offer Ceiling is not part of this preview. Record the investment decision yourself.`,
+            }
+          : rangePreview
+            ? {
+                label: "Review the active target rules",
+                reason:
+                  "No feasible downside case was found under the current assumptions. Record the investment decision yourself.",
+              }
+            : {
+                label: "Review the active target rules",
+                reason:
+                  "No qualifying Offer Ceiling was found under the current assumptions. Record the investment decision yourself.",
+              }
       : !advocacyContractEnabled &&
           legacyReadinessLabel !== "Ready" &&
           nextVerification
@@ -518,7 +537,14 @@ export function FocusedDecisionSummary({
             label:
               nextVerification.verifyAction ??
               `Verify ${nextVerification.label}`,
-            reason: `${nextVerification.label} is a material ${nextVerification.sourceLabel.toLowerCase()} input`,
+            // sourceLabel is a full provenance PHRASE ("Your entered rent",
+            // "HUD rent benchmark (county)", "TrueCap estimate"), not an
+            // adjective. Interpolating it as one produced "Rent is a material
+            // your entered rent input" on every passing verdict — and
+            // "Rent is a material hud rent benchmark (county) input" whenever
+            // the value auto-filled. Keep the provenance in its own clause and
+            // preserve the label's own capitalisation.
+            reason: `${nextVerification.label} is a material input — current source: ${nextVerification.sourceLabel}.`,
           }
         : {
             label: advocacyContractEnabled

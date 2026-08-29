@@ -10,6 +10,7 @@
  * Server component: no state, renders from props resolved by the page.
  */
 
+import Link from "next/link";
 import { Target, Activity, ShieldCheck, BarChart3, GitCompareArrows, FileText, Users, Handshake } from "lucide-react";
 
 const PRO_STACK = [
@@ -73,6 +74,17 @@ export function PricingValueStack({
                 </li>
               ))}
             </ul>
+            {/* /for-agents is the only page that lays out client rosters,
+                per-client Buy Boxes, deal assignment and co-branded delivery —
+                and it had no inbound link from anywhere on the site. This card
+                is where someone is actually weighing $59.99 against $29.99, so
+                it is where the fuller argument has to be reachable. */}
+            <Link
+              href="/for-agents"
+              className="mt-4 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-primary underline decoration-primary/40 underline-offset-4 transition-colors hover:decoration-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              See how agents use it →
+            </Link>
           </>
         ) : null}
       </div>

@@ -54,7 +54,12 @@ const MATRIX: Row[] = [
   { feature: "Primary job",                       truecap: "Per-deal underwriting — how does this property fit my selected rules?",          mashvisor: "Market research — WHERE should I invest?",                              winner: "tie" },
   { feature: "Free tier depth",                   truecap: "Core cap rate, CoC, DSCR, cash flow, Screening Index, and selected-rule fit",     mashvisor: "Limited free preview; most data requires paid plan",                    winner: "truecap" },
   { feature: "Per-deal cap rate / CoC / DSCR",    truecap: "Yes — live as you type, with inline benchmarks",                                  mashvisor: "Yes — alongside market data",                                            winner: "tie" },
-  { feature: "10-year projection",                truecap: "Pro — full compounding with depreciation",                                        mashvisor: "Available",                                                              winner: "tie" },
+  // NOT "with depreciation". Depreciation output is the tax_strategy feature,
+  // which lib/entitlements-catalog.ts marks shipped:false — no plan, paid
+  // included, can produce it today. Selling it here is a refund conversation on
+  // the page whose whole argument is that we describe things accurately. The
+  // 10-year cash-flow and equity projection IS released; that is what we claim.
+  { feature: "10-year projection",                truecap: "Pro — 10-year cash flow and equity projection",                                   mashvisor: "Available",                                                              winner: "tie" },
   { feature: "Market-level heatmaps",             truecap: "No — focused on the property in front of you",                                    mashvisor: "Yes — neighborhood-level cap rate + rent heatmaps",                      winner: "mashvisor" },
   { feature: "Airbnb / STR market data",          truecap: "Long-term focus; STR-specific fields coming",                                    mashvisor: "Strong — pulls Airbnb occupancy + ADR data by ZIP",                      winner: "mashvisor" },
   { feature: "Sale + rent comps",                truecap: "One free lookup; Pro includes 50 per month; no AVM",                            mashvisor: "Yes — included in their data layer",                                     winner: "mashvisor" },

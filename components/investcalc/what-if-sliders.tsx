@@ -324,11 +324,26 @@ export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
   );
 }
 
+/**
+ * This pill is the word telling the investor how the deal now reads, at 10px
+ * and weight 800 — the least forgiving size for contrast, on the control they
+ * are actively dragging.
+ *
+ * Three states failed WCAG AA as white-on-saturated-fill: Mixed 2.13:1
+ * (white on #FE9A00), Marginal 2.89:1 (white on #FF6900), and Solid 4.13:1
+ * (the /85 opacity composites to #268E57 — measuring the full-opacity token
+ * hides this). Both middle "stop and think" states were the worst of them,
+ * which is precisely where a misread costs the most.
+ *
+ * Switched to the dark-text-on-tint pattern the rest of the result page uses.
+ * Strong and Negative already cleared AA and keep their solid fills so the two
+ * decisive ends stay visually strongest.
+ */
 const TIER_TONE: Record<DealTier, string> = {
   Strong: "bg-[var(--brand-green)] text-white",
-  Solid: "bg-[var(--brand-green)]/85 text-white",
-  Mixed: "bg-amber-500 text-white",
-  Marginal: "bg-orange-500 text-white",
+  Solid: "bg-emerald-100 text-emerald-900",
+  Mixed: "bg-amber-100 text-amber-900",
+  Marginal: "bg-orange-100 text-orange-900",
   Negative: "bg-rose-600 text-white",
 };
 

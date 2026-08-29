@@ -29,12 +29,17 @@ export function TwoPercentRuleWidget() {
   const [price, setPrice] = useState("120000");
   const [rent, setRent] = useState("1500");
 
+  // NULL, not 0, when there is nothing to divide by — see the same fix in
+  // one-percent-rule-widget. A 0 fallback made a cleared price render
+  // "0.00%" and "Below the 1% rule" about a property with no price.
   const { ratio, meetsTwo, meetsOne } = useMemo(() => {
     const p = num(price);
     const r = num(rent);
-    const ratio = p > 0 ? (r / p) * 100 : 0;
-    return { ratio, meetsTwo: ratio >= 2, meetsOne: ratio >= 1 };
+    if (!(p > 0) || !(r > 0)) return { ratio: null, meetsTwo: false, meetsOne: false };
+    const value = (r / p) * 100;
+    return { ratio: value, meetsTwo: value >= 2, meetsOne: value >= 1 };
   }, [price, rent]);
+  const hasResult = ratio !== null;
 
   // Carry the user's price + rent into the full analyzer (P2-2 handoff).
   const handoffHref = buildAnalyzerHandoffUrl(
@@ -97,11 +102,13 @@ export function TwoPercentRuleWidget() {
             Rent / Price
           </div>
           <div className={cn("text-5xl sm:text-6xl font-extrabold mt-2 tabular-nums",
-            meetsOne ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]")}
+            !hasResult
+              ? "text-muted-foreground"
+              : meetsOne ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]")}
           >
-            {ratio.toFixed(2)}%
+            {hasResult ? `${ratio.toFixed(2)}%` : "—"}
           </div>
-          <div className="mt-3 flex flex-col items-center gap-1.5">
+          <div className={cn("mt-3 flex flex-col items-center gap-1.5", !hasResult && "hidden")}>
             {meetsTwo ? (
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-700 font-bold text-sm">
                 <AlertTriangle className="w-4 h-4" /> Meets the 2% rule — verify why
@@ -117,11 +124,13 @@ export function TwoPercentRuleWidget() {
             )}
           </div>
           <p className="text-xs text-muted-foreground mt-4 max-w-xs">
-            {meetsTwo
-              ? "A ratio this high usually signals a distressed area, deferred maintenance, or optimistic rent — underwrite before celebrating."
-              : meetsOne
-                ? "Strong screening territory for a cash-flow market — worth the full underwrite."
-                : "Either an appreciation play, or the price is too high relative to rent."}
+            {!hasResult
+              ? "Enter a purchase price and monthly rent to calculate."
+              : meetsTwo
+                ? "A ratio this high usually signals a distressed area, deferred maintenance, or optimistic rent — underwrite before celebrating."
+                : meetsOne
+                  ? "Strong screening territory for a cash-flow market — worth the full underwrite."
+                  : "Either an appreciation play, or the price is too high relative to rent."}
           </p>
         </div>
       </div>

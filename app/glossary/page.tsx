@@ -414,7 +414,12 @@ export default function GlossaryPage() {
                 <Link
                   href={`/glossary/${t.slug}`}
                   aria-label={`Full definition for ${t.term}`}
-                  className="shrink-0 text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60 hover:text-primary"
+                  // Full token, not /60. At 11px bold the /60 opacity
+                  // composited to #9CA4AD = 2.52:1 on white, against a 4.5:1
+                  // minimum — 44 nodes, and the only axe-detectable WCAG AA
+                  // failure on the page. The full token is #596877 = 5.72:1,
+                  // which clears AA with margin and still reads as secondary.
+                  className="shrink-0 text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary"
                 >
                   PERMALINK →
                 </Link>

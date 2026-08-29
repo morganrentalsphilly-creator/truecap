@@ -156,6 +156,7 @@ import {
   TestimonialPrompt,
   dispatchProofMoment,
 } from "@/components/marketing/testimonial-prompt";
+import * as Sentry from "@sentry/nextjs";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { cn, scrollBehavior } from "@/lib/utils";
@@ -6329,6 +6330,36 @@ export function InvestCalcPage({
           variant: "success",
         });
       }
+    } catch (error) {
+      // This block used to be try/finally with no catch. A throw anywhere above
+      // — an offline fetch, a 5xx from a server action — became an unhandled
+      // promise rejection: the spinner reset, the button re-enabled, and the
+      // page was left EXACTLY as it was. No error, no retry, no scroll. The
+      // user pressed the primary CTA and the product did nothing, twice, in
+      // silence. Failing visibly is the minimum; failing with a way forward is
+      // the point.
+      Sentry.captureException(error, {
+        tags: { feature: "analyzer-run" },
+      });
+      const offline =
+        typeof navigator !== "undefined" && navigator.onLine === false;
+      toast({
+        title: offline ? "You appear to be offline" : "That run didn’t finish",
+        description: offline
+          ? "Your inputs are safe. Reconnect and run it again."
+          : "Something went wrong on our end. Your inputs are safe — try again.",
+        variant: "destructive",
+        action: (
+          <ToastAction
+            altText="Run the analysis again"
+            onClick={() => {
+              void form.handleSubmit(onSubmit, onError)();
+            }}
+          >
+            Try again
+          </ToastAction>
+        ),
+      });
     } finally {
       isCalculatingRef.current = false;
       setIsCalculating(false);

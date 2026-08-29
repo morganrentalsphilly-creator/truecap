@@ -138,8 +138,12 @@ export function GrmCalculatorWidget() {
             <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
               GRM
             </div>
+            {/* classify() already labels grm <= 0 "Invalid", but the headline
+                still printed a precise-looking "0.0" beside it. Show the
+                em-dash placeholder instead — the same contract the 1%, 2% and
+                Break-Even tools use for an input they do not have. */}
             <div className={cn("text-5xl sm:text-6xl font-extrabold mt-1 tabular-nums", c.color)}>
-              {result.grm.toFixed(1)}
+              {result.grm > 0 ? result.grm.toFixed(1) : "—"}
             </div>
             <div className={cn("text-sm font-semibold mt-1", c.color)}>{c.label}</div>
             <p className="text-xs text-muted-foreground mt-1">{c.note}</p>

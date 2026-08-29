@@ -64,6 +64,8 @@ declare global {
     __googleMapsPlacesLoading?: Promise<void>;
     google?: {
       maps?: {
+        /** Present under `loading=async`; the ONLY reliable readiness signal. */
+        importLibrary?: (name: string) => Promise<unknown>;
         places?: PlacesLibrary;
       };
     };
@@ -76,9 +78,25 @@ function loadGoogleMapsScript(apiKey: string): Promise<void> {
   if (window.__googleMapsPlacesLoading) return window.__googleMapsPlacesLoading;
 
   const loading = new Promise<void>((resolve, reject) => {
+    const awaitPlaces = () => {
+      const importLibrary = window.google?.maps?.importLibrary;
+      if (typeof importLibrary !== "function") return resolve();
+      return importLibrary("places").then(
+        () => resolve(),
+        (error: unknown) =>
+          reject(error instanceof Error ? error : new Error("Places library failed to load")),
+      );
+    };
+
     const existing = document.getElementById("google-maps-places-script") as HTMLScriptElement | null;
     if (existing) {
-      existing.addEventListener("load", () => resolve(), { once: true });
+      // Same `loading=async` caveat as the fresh-load path below: the script
+      // being present does not mean the Places symbols exist yet.
+      if (window.google?.maps) {
+        awaitPlaces();
+        return;
+      }
+      existing.addEventListener("load", () => void awaitPlaces(), { once: true });
       existing.addEventListener("error", () => reject(new Error("Script load error")), { once: true });
       return;
     }
@@ -87,7 +105,31 @@ function loadGoogleMapsScript(apiKey: string): Promise<void> {
     script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&libraries=places&v=weekly&loading=async`;
     script.async = true;
     script.defer = true;
-    script.onload = () => resolve();
+    // NOT `resolve()` on load. The src carries `loading=async`, under which
+    // Google resolves the bootstrap BEFORE populating library symbols — so
+    // google.maps.places is still undefined at onload. Awaiting the documented
+    // importLibrary("places") is the only reliable readiness signal.
+    //
+    // This is what broke address autocomplete on the first field a visitor
+    // touched: the caller checked for AutocompleteSuggestion the moment the
+    // script loaded, never found it, showed "Address suggestions are
+    // unavailable" on the product's headline input, and latched there. The
+    // Places API itself was always fine — calling it by hand on the same
+    // "failed" page returned suggestions — which is why the old console
+    // message pointed the fix at Google Cloud Console and wasted the trail.
+    script.onload = () => {
+      const importLibrary = window.google?.maps?.importLibrary;
+      if (typeof importLibrary !== "function") {
+        // Older bootstrap without importLibrary: symbols are already attached.
+        resolve();
+        return;
+      }
+      importLibrary("places").then(
+        () => resolve(),
+        (error: unknown) =>
+          reject(error instanceof Error ? error : new Error("Places library failed to load")),
+      );
+    };
     script.onerror = () => reject(new Error("Failed to load Google Maps script"));
     document.head.appendChild(script);
   });
@@ -214,11 +256,18 @@ export function AddressAutocomplete({
       .then(() => {
         if (!window.google?.maps?.places?.AutocompleteSuggestion) {
           console.warn(
-            "[AddressAutocomplete] AutocompleteSuggestion not in Places library - enable 'Places API (New)' in Google Cloud Console."
+            "[AddressAutocomplete] Places loaded but AutocompleteSuggestion is missing. " +
+              "Check that 'Places API (New)' is enabled for this key — but verify first: " +
+              "the loader now awaits importLibrary('places'), so a bootstrap timing issue " +
+              "is no longer a plausible cause of this branch."
           );
           setAutocompleteWarning(
             "Address suggestions are unavailable. You can still type or paste the full address."
           );
+          // Allow a later focus to retry. Without this the field latches on the
+          // very first focus and never recovers, which is how a transient miss
+          // became a permanent "unavailable" notice on the hero input.
+          loadStartedRef.current = false;
           return;
         }
         setScriptReady(true);

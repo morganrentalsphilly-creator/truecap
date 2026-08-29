@@ -39,9 +39,15 @@ export function RateWatchStrip({
             </span>
             <div>
               <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Rate watch</p>
+              {/* Deliberately NOT "Monitoring N deals". That word promises a
+                  background watch that notifies you, and /settings says the
+                  opposite out loud ("No monitoring or email is active yet").
+                  A dashboard that contradicts settings teaches the reader that
+                  neither can be trusted. What actually happens is a re-check on
+                  this render, so that is what it says. */}
               <p className="text-sm font-semibold text-foreground">
-                Monitoring {monitoredCount === 1 ? "1 active deal" : `${monitoredCount} active deals`} —
-                all steady at today&apos;s {currentRatePct.toFixed(2)}% rate
+                {monitoredCount === 1 ? "1 active deal" : `${monitoredCount} active deals`} re-checked at
+                today&apos;s {currentRatePct.toFixed(2)}% rate — all steady
               </p>
             </div>
           </div>
@@ -58,13 +64,16 @@ export function RateWatchStrip({
             (mobile density audit DH-2). Headline + Manage alerts carry
             the mobile strip alone. */}
         <p className="mt-2.5 hidden text-xs leading-relaxed text-muted-foreground sm:block">
-          We re-underwrite your saved deals whenever the 30-yr rate moves, and flag any whose
-          tier, DSCR band, or cash-flow sign changes.{" "}
-          {/* The re-underwriting above is REAL and runs on every dashboard
-              render. The email delivery is not shipped — and a paid product
-              must not advertise an unshipped feature, so when alerts are
-              dark this line simply says nothing extra. */}
-          {alertsLive ? "Turn on alerts in settings to hear about it by email." : null}
+          {/* The re-underwriting is REAL and runs on every dashboard render, so
+              say WHEN it happens rather than implying a continuous watch. The
+              email delivery is not shipped; when alerts are dark we state that
+              plainly instead of staying silent, because silence next to the
+              word "watch" still reads as a promise. */}
+          Every time you open this dashboard we re-underwrite your saved deals at the current
+          30-yr rate and flag any whose tier, DSCR band, or cash-flow sign changed.{" "}
+          {alertsLive
+            ? "Turn on alerts in settings to hear about it by email."
+            : "Email alerts aren't live yet, so check back here."}
         </p>
       </section>
     );
