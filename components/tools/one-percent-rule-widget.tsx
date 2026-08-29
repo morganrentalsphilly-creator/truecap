@@ -22,12 +22,22 @@ export function OnePercentRuleWidget() {
   const [price, setPrice] = useState("180000");
   const [rent, setRent] = useState("1900");
 
+  // `ratio` is NULL when there is nothing to divide by — never 0.
+  //
+  // It used to fall back to 0, so clearing the pre-filled price (the most
+  // ordinary thing a visitor does before typing their own) rendered "0.00%" in
+  // failure red with the verdict "Fails 1% rule" and a confident reason, about
+  // a property whose price the tool did not have. A free screening tool
+  // asserting a wrong verdict is the worst possible first touch, and this is an
+  // organic-entry page.
   const { ratio, passes } = useMemo(() => {
     const p = num(price);
     const r = num(rent);
-    const ratio = p > 0 ? (r / p) * 100 : 0;
-    return { ratio, passes: ratio >= 1 };
+    if (!(p > 0) || !(r > 0)) return { ratio: null, passes: false };
+    const value = (r / p) * 100;
+    return { ratio: value, passes: value >= 1 };
   }, [price, rent]);
+  const hasResult = ratio !== null;
 
   // Carry the user's price + rent into the full analyzer (P2-2 handoff).
   const handoffHref = buildAnalyzerHandoffUrl(
@@ -90,25 +100,33 @@ export function OnePercentRuleWidget() {
             Rent / Price
           </div>
           <div className={cn("text-5xl sm:text-6xl font-extrabold mt-2 tabular-nums",
-            passes ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]")}
+            !hasResult
+              ? "text-muted-foreground"
+              : passes ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]")}
           >
-            {ratio.toFixed(2)}%
+            {hasResult ? `${ratio.toFixed(2)}%` : "—"}
           </div>
-          <div className="mt-3">
-            {passes ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--brand-green-light)] text-[var(--metric-positive)] font-bold text-sm">
-                <Check className="w-4 h-4" /> Passes 1% rule
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 text-[var(--metric-negative)] font-bold text-sm">
-                <X className="w-4 h-4" /> Fails 1% rule
-              </span>
-            )}
-          </div>
+          {/* No verdict badge without a result. An em-dash placeholder plus a
+              corrective sentence is the contract Break-Even already uses. */}
+          {hasResult ? (
+            <div className="mt-3">
+              {passes ? (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--brand-green-light)] text-[var(--metric-positive)] font-bold text-sm">
+                  <Check className="w-4 h-4" /> Passes 1% rule
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 text-[var(--metric-negative)] font-bold text-sm">
+                  <X className="w-4 h-4" /> Fails 1% rule
+                </span>
+              )}
+            </div>
+          ) : null}
           <p className="text-xs text-muted-foreground mt-4 max-w-xs">
-            {passes
-              ? "Run a full underwrite — this property may cash-flow well."
-              : "Either this is an appreciation play, or the price is too high relative to rent."}
+            {!hasResult
+              ? "Enter a purchase price and monthly rent to calculate."
+              : passes
+                ? "Run a full underwrite — this property may cash-flow well."
+                : "Either this is an appreciation play, or the price is too high relative to rent."}
           </p>
         </div>
       </div>

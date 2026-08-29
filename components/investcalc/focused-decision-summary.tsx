@@ -518,7 +518,14 @@ export function FocusedDecisionSummary({
             label:
               nextVerification.verifyAction ??
               `Verify ${nextVerification.label}`,
-            reason: `${nextVerification.label} is a material ${nextVerification.sourceLabel.toLowerCase()} input`,
+            // sourceLabel is a full provenance PHRASE ("Your entered rent",
+            // "HUD rent benchmark (county)", "TrueCap estimate"), not an
+            // adjective. Interpolating it as one produced "Rent is a material
+            // your entered rent input" on every passing verdict — and
+            // "Rent is a material hud rent benchmark (county) input" whenever
+            // the value auto-filled. Keep the provenance in its own clause and
+            // preserve the label's own capitalisation.
+            reason: `${nextVerification.label} is a material input — current source: ${nextVerification.sourceLabel}.`,
           }
         : {
             label: advocacyContractEnabled

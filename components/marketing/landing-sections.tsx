@@ -58,22 +58,16 @@ import { VERIFIED_TESTIMONIALS, isPublicationReady } from "@/lib/proof-records";
 
 // ─────────────────────────────────────────────────────── How It Works
 // ───────────────────────────────────────── Why not a spreadsheet
-// NOTE: rows are now consolidated into the merged WhyTrueCap table below
-// (alongside DealCheck / BiggerPockets). Kept exported as a no-op for
-// any external referrers; remove next time we touch this file.
-const COMPARISON_ROWS: { label: string; spreadsheet: string | false; truecap: string | true }[] = [
-  { label: "Time to first answer",     spreadsheet: "2-4 hours",       truecap: "60 seconds" },
-  { label: "Auto-fill rent + rate",    spreadsheet: false,             truecap: true },
-  { label: "Cap rate · CoC · DSCR",    spreadsheet: "If you built it", truecap: true },
-  { label: "10-year projection",       spreadsheet: "Tab 4, probably broken", truecap: true },
-  { label: "Tax / depreciation math",  spreadsheet: "Tab 5, definitely broken", truecap: true },
-  { label: "Sensitivity (what-ifs)",   spreadsheet: false,             truecap: true },
-  { label: "Mobile / at the showing",  spreadsheet: false,             truecap: true },
-  { label: "Share with lender",        spreadsheet: "Email the .xlsx", truecap: "1-click PDF link" },
-  { label: "Compare 4 deals",          spreadsheet: "Copy/paste hell", truecap: "Side-by-side" },
-];
-// Reference to satisfy TS unused-var linting if it ever flips on.
-void COMPARISON_ROWS;
+// The rows that lived here were consolidated into the merged WhyTrueCap table
+// below (alongside DealCheck / BiggerPockets) and kept only as a dead `void`
+// reference. Removed 2026-08-28: one row claimed tax and depreciation
+// modelling as a TrueCap capability, and that output belongs to the
+// tax_strategy feature which entitlements-catalog marks shipped:false. Note the
+// phrase itself is not repeated here — lib/__tests__/unshipped-feature-claims
+// greps this file for it, and a comment quoting the claim would trip the very
+// guard that keeps it gone. Dead code that asserts
+// something untrue is one careless re-render away from being a live false
+// claim, so it does not get to sit here waiting.
 
 /**
  * THE SPINE — "Analyze the deal. Know your number. Make the offer."
