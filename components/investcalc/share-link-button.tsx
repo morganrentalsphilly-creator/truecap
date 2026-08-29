@@ -7,7 +7,7 @@
  * copy-to-clipboard button. Deal inputs never enter the URL.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Share2, Copy, Check, Loader2, LogIn, UserPlus } from "lucide-react";
@@ -376,9 +376,18 @@ export function ShareLinkButton({
     ? listedShares
     : listedShares?.slice(0, 5);
 
+  // This Button is NOT a DialogTrigger — the dialog is controlled so the
+  // disclosure and auth choices can live inside it. Radix restores focus on
+  // close to the trigger it holds in context, and with no trigger registered
+  // that restore lands on <body>: a keyboard or screen-reader user who closes
+  // the dialog is dropped at the top of the document, losing their place in
+  // the analysis. Hold the trigger ourselves and return focus explicitly.
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
   return (
     <>
       <Button
+        ref={triggerRef}
         type="button"
         variant="outline"
         onClick={openShare}
@@ -431,7 +440,16 @@ export function ShareLinkButton({
         {/* sm:-prefixed, so the primitive's `max-w-[calc(100%-2rem)]` phone
             gutter survives tailwind-merge (an unprefixed max-w-* deletes it
             and the dialog goes edge-to-edge). */}
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent
+          className="sm:max-w-lg"
+          onCloseAutoFocus={(event) => {
+            // Escape, overlay click and the built-in close button all land
+            // here. Take over from Radix's default (which has no trigger to
+            // aim at) and put focus back on the button that opened this.
+            event.preventDefault();
+            triggerRef.current?.focus();
+          }}
+        >
           <DialogHeader>
             <DialogTitle>
               {context === "client-report"

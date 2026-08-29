@@ -45,6 +45,53 @@ export function formatCurrencyInput(value: number | null | undefined): string {
     : "";
 }
 
+/**
+ * Recover a number from text pasted out of a listing.
+ *
+ * parseCurrencyInput is deliberately strict: it rejects rather than strips, so
+ * a stray character cannot silently change the number a user is underwriting.
+ * That is right for TYPING. It is wrong for PASTING, because updateCurrencyDraft
+ * answers a rejected edit by re-showing the previous display — so pasting
+ * "$450K" or "450,000 USD" off Zillow did nothing at all, with no cursor
+ * movement, no error, and no clue why. The field looked broken.
+ *
+ * This only handles shapes with ONE unambiguous reading. A K/M suffix, a
+ * currency code, surrounding whitespace (including the non-breaking space that
+ * rides along with most web copy), and trailing noise like "/mo" or "*" all
+ * resolve to exactly one number. Anything with two numbers in it ("$450,000 -
+ * $475,000") stays rejected, because guessing which one the user meant is how
+ * you underwrite the wrong price.
+ */
+export function parsePastedCurrency(raw: string): number | null {
+  let text = raw.replace(/\u00a0/g, " ").trim();
+  if (text === "") return null;
+
+  // Drop a leading currency symbol/code and trailing period-noise.
+  text = text
+    .replace(/^(?:us\s*)?\$\s*/i, "")
+    .replace(/\s*(?:usd|dollars?)\b/gi, "")
+    .replace(/\s*(?:\/\s*(?:mo|month|yr|year))\b.*$/i, "")
+    .replace(/[*\u2020\u2021]+\s*$/, "")
+    .trim();
+
+  // A magnitude suffix is only meaningful directly after the digits.
+  const suffix = /^([0-9][0-9,]*(?:\.[0-9]+)?)\s*([km])$/i.exec(text);
+  if (suffix) {
+    const base = Number(suffix[1].replace(/,/g, ""));
+    if (!Number.isFinite(base)) return null;
+    return suffix[2].toLowerCase() === "k" ? base * 1_000 : base * 1_000_000;
+  }
+
+  // Reject anything containing a second number — a range, or price + sqft.
+  const bare = text.replace(/,/g, "");
+  if (!/^[0-9]+(?:\.[0-9]+)?$/.test(bare)) return null;
+
+  const parsed = Number(bare);
+  if (!Number.isFinite(parsed) || parsed < 0) return null;
+  // Currency inputs carry at most two decimals; more means this was not a price.
+  return Math.round(parsed * 100) / 100;
+}
+
 export type CurrencyDraftUpdate =
   | { accepted: true; display: string; value: number | null }
   | { accepted: false; display: string };
@@ -107,6 +154,19 @@ export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputPro
           setIsEditing(true);
           setDisplay(formatCurrencyInput(value));
           onFocus?.(event);
+        }}
+        onPaste={(event) => {
+          // Let the strict typing path handle a paste it would already accept;
+          // only step in when it would otherwise be swallowed silently.
+          const pasted = event.clipboardData.getData("text");
+          if (updateCurrencyDraft(display, pasted).accepted) return;
+          const recovered = parsePastedCurrency(pasted);
+          if (recovered == null) return;
+          event.preventDefault();
+          const next = formatCurrencyInput(recovered);
+          setDisplay(next);
+          latestNumericValueRef.current = recovered;
+          onValueChange(recovered);
         }}
         onChange={(event) => {
           const update = updateCurrencyDraft(
