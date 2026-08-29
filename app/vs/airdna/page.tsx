@@ -240,8 +240,8 @@ export default function VsAirdnaPage() {
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
-            Want to see just the underwriting half? Check whether the projected
-            STR revenue even covers the note with the free{" "}
+            Set the revenue forecast aside for a moment. Check whether projected
+            STR income even covers the note with the free{" "}
             <Link href="/tools/mortgage-payment-calculator" className="font-semibold text-primary hover:underline">
               mortgage payment calculator
             </Link>

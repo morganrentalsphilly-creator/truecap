@@ -239,10 +239,10 @@ export default function VsBatchleadsPage() {
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
-            Want to see just the underwriting half? Screen a fresh lead in
-            seconds with the free{" "}
-            <Link href="/tools/1-percent-rule-calculator" className="font-semibold text-primary hover:underline">
-              1% rule calculator
+            Need to triage a list before you start dialling? Work out your
+            maximum bid on a distressed lead with the free{" "}
+            <Link href="/tools/70-percent-rule-calculator" className="font-semibold text-primary hover:underline">
+              70% rule calculator
             </Link>
             , then paste the address into the full{" "}
             <Link href="/" className="font-semibold text-primary hover:underline">

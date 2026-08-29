@@ -240,12 +240,12 @@ export default function VsAppfolioPage() {
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
-            Want to see just the underwriting half? The free{" "}
+            Buying a unit rather than managing one? The free{" "}
             <Link href="/tools/gross-rent-multiplier-calculator" className="font-semibold text-primary hover:underline">
               gross rent multiplier calculator
             </Link>{" "}
-            triages a listing in seconds; when you need the cap rate,
-            cash-on-cash, and DSCR behind that screen, the full{" "}
+            sorts a listing into yes or no on price alone; when you need the
+            cap rate, cash-on-cash, and DSCR underneath it, the full{" "}
             <Link href="/" className="font-semibold text-primary hover:underline">
               TrueCap analyzer
             </Link>{" "}

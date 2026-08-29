@@ -246,7 +246,7 @@ export default function VsTurbotenantPage() {
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
-            Want to see just the underwriting half? The free{" "}
+            Screening the deal before the tenant? The free{" "}
             <Link href="/tools/1-percent-rule-calculator" className="font-semibold text-primary hover:underline">
               1% rule calculator
             </Link>{" "}

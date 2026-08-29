@@ -236,11 +236,11 @@ export default function VsQuickbooksRentalPage() {
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
-            Want to see just the underwriting half? The free{" "}
-            <Link href="/tools/1-percent-rule-calculator" className="font-semibold text-primary hover:underline">
-              1% rule calculator
+            Sizing up a purchase instead of recording one? The free{" "}
+            <Link href="/tools/rental-property-spreadsheet" className="font-semibold text-primary hover:underline">
+              rental property spreadsheet
             </Link>{" "}
-            screens a listing in seconds, and the full{" "}
+            lays the numbers out the way you already work, and the full{" "}
             <Link href="/" className="font-semibold text-primary hover:underline">
               TrueCap analyzer
             </Link>{" "}

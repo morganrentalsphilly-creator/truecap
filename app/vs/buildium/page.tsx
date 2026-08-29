@@ -240,11 +240,11 @@ export default function VsBuildiumPage() {
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
-            Want to see just the underwriting half? The free{" "}
-            <Link href="/tools/1-percent-rule-calculator" className="font-semibold text-primary hover:underline">
-              1% rule calculator
+            Underwriting a purchase rather than managing one? The free{" "}
+            <Link href="/tools/vacancy-rate-calculator" className="font-semibold text-primary hover:underline">
+              vacancy rate calculator
             </Link>{" "}
-            screens a listing in seconds; the full{" "}
+            puts a number on the downtime you would be administering here; the full{" "}
             <Link href="/" className="font-semibold text-primary hover:underline">
               TrueCap analyzer
             </Link>{" "}

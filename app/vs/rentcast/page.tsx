@@ -239,8 +239,8 @@ export default function VsRentcastPage() {
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
-            Want to see just the underwriting half? RentCast&apos;s rent and
-            value estimates are the only two inputs the free{" "}
+            Want to turn those two estimates into a verdict? RentCast&apos;s rent
+            and value figures are the only inputs the free{" "}
             <Link href="/tools/1-percent-rule-calculator" className="font-semibold text-primary hover:underline">
               1% rule calculator
             </Link>{" "}
