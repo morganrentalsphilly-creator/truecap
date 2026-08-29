@@ -2615,6 +2615,19 @@ async function persistSavedDealStageWithHistory(input: {
             : "Invalid stage transition.",
       };
     }
+    // 42501 is the RPC's own "Pipeline entitlement required." Without this the
+    // generic fallback said "We couldn't complete that action. Please try
+    // again." — an invitation to retry something that can NEVER succeed. Free
+    // and evaluation users reach this after confirming a dialog AND typing a
+    // Pass reason, so the wasted effort is real. bulkUpdateSavedDealsAction
+    // already maps this code; only the single-deal path was missed.
+    if (error.code === "42501") {
+      return {
+        ok: false,
+        code: "ENTITLEMENT_REQUIRED",
+        message: "Changing a deal's status is a Pro feature.",
+      };
+    }
     return toServerErrorResult(error, "saved-deal-history");
   }
 
