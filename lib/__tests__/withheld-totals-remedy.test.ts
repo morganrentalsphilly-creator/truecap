@@ -48,9 +48,22 @@ describe("the withheld-totals notice is not a dead end", () => {
     expect(block).toMatch(/totals come back/i);
   });
 
-  it("tells the reader how to find the affected deals", () => {
+  it("gives the reader a real control, not just prose", () => {
+    // The banner always claimed the list "groups within each version when you
+    // sort by a calculated result" — then left them to find that control. The
+    // main Dashboard's version of this notice has had a button all along; My
+    // Deals, which that button links TO, had none. Reuse the existing grouping
+    // rather than inventing a version filter.
     const block = noticeBlock();
-    expect(block).toMatch(/Recorded v/);
+    expect(block).toContain("/dashboard/saved-analyses?sort=cash-flow&dir=desc");
+    expect(block).toMatch(/Group deals by underwriting version/);
+  });
+
+  it("uses a sort value the page actually accepts", () => {
+    // A typo here degrades silently to the default sort and the grouping the
+    // banner promises never happens.
+    const normalizer = source.slice(source.indexOf("function normalizeSortField"));
+    expect(normalizer.slice(0, 300)).toContain('"cash-flow"');
   });
 
   it("reassures that recorded results are not overwritten", () => {

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
   SavedAnalysesPage,
@@ -599,12 +600,9 @@ export default async function DashboardSavedAnalysesPage({
                           : `${staleMethodologyCount} deals were recorded`}{" "}
                         under an earlier standard.
                       </span>{" "}
-                      Open {staleMethodologyCount === 1 ? "it" : "them"} and
-                      re-underwrite to today&apos;s standard — look for the{" "}
-                      <span className="font-semibold text-foreground">
-                        Recorded v…
-                      </span>{" "}
-                      badge on a row — and totals come back automatically.
+                      Re-underwrite{" "}
+                      {staleMethodologyCount === 1 ? "it" : "them"} to
+                      today&apos;s standard and totals come back automatically.
                       Recorded results stay frozen; re-underwriting saves a new
                       scenario beside them.
                     </>
@@ -615,6 +613,18 @@ export default async function DashboardSavedAnalysesPage({
                     </>
                   )}
                 </p>
+                {/* The banner already said the list "groups within each version
+                    when you sort by a calculated result" — but left the reader
+                    to discover that control themselves. Make the sentence
+                    clickable using the grouping that already exists, rather
+                    than inventing a version filter. */}
+                <Link
+                  href="/dashboard/saved-analyses?sort=cash-flow&dir=desc"
+                  prefetch={false}
+                  className="mt-3 inline-flex min-h-11 items-center rounded-xl border border-border bg-card px-4 text-sm font-semibold text-foreground transition hover:border-primary/40 hover:text-primary"
+                >
+                  Group deals by underwriting version
+                </Link>
               </div>
             </section>
           ) : null}
