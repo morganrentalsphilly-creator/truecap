@@ -359,7 +359,10 @@ export function Header({
         carries the upsell more appropriately. Reduces the 3-bar mobile
         stack to 2 bars for the visitor's first impression. */}
     {user && isPremiumStatusReady && !isPremium && !bannerDismissed && (
-      <div className="bg-primary text-primary-foreground h-9 flex items-center justify-center px-4 relative">
+      <div
+        data-analyzer-announcement-bar=""
+        className="bg-primary text-primary-foreground h-9 flex items-center justify-center px-4 relative"
+      >
         <div className="flex items-center gap-2 text-[12px] sm:text-[13px] font-medium">
           <Zap className="w-3.5 h-3.5 fill-current opacity-90 shrink-0" />
           <span className="hidden sm:inline">

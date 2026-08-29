@@ -287,6 +287,31 @@ textarea,
       padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
     }
   }
+  /* Fragment navigation aligns the target's block-start with the viewport top,
+     which knows nothing about the app header — a `sticky top-0 z-50` stack in
+     components/investcalc/header.tsx whose row is h-14 sm:h-16. 60 files link
+     to /#main, so without a scroll margin every one of those lands with the
+     analyzer's own heading sitting behind that bar. The .dashboard-shell rules
+     below are MORE specific and keep overriding this for dashboard chrome. */
+  #main {
+    scroll-margin-top: 4rem;
+  }
+  @media (min-width: 640px) {
+    #main {
+      scroll-margin-top: 4.5rem;
+    }
+  }
+  /* Signed-in free users also get the h-9 upgrade bar above the header row.
+     Anonymous visitors — who follow nearly all of those /#main links — do not,
+     so the base rule stays tight and only this case pays for the extra bar. */
+  body:has([data-analyzer-announcement-bar]) #main {
+    scroll-margin-top: 6.25rem;
+  }
+  @media (min-width: 640px) {
+    body:has([data-analyzer-announcement-bar]) #main {
+      scroll-margin-top: 6.75rem;
+    }
+  }
   /* "Skip to content" (root layout + DashboardShell) targets <main id="main">,
      and fragment navigation aligns the target's block-start with the viewport
      top — it knows nothing about the dashboard Topbar, which is `fixed h-16`
