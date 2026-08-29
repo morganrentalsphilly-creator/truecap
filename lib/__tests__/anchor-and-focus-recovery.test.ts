@@ -58,10 +58,15 @@ describe("fragment links clear the sticky header", () => {
     //   1024px -> 65px             (needs >= 4.0625rem)
     // Shipping 4rem/4.5rem left mobile 54px short with the heading behind the
     // header. Assert the VALUE, not merely that some rule exists.
+    // Require HEADROOM, not a bare clearance. The first corrected version
+    // cleared by exactly 2px at 375 and 768 — passing a >= assertion while the
+    // heading sat flush against the bar, and one 3px header change away from
+    // the original bug returning silently.
     const REM = 16;
-    expect((marginAt(375) ?? 0) * REM, "375px must clear a 118px header").toBeGreaterThanOrEqual(118);
-    expect((marginAt(768) ?? 0) * REM, "768px must clear a 125px header").toBeGreaterThanOrEqual(125);
-    expect((marginAt(1280) ?? 0) * REM, "1280px must clear a 65px header").toBeGreaterThanOrEqual(65);
+    const HEADROOM = 6;
+    expect((marginAt(375) ?? 0) * REM, "375px: 118px header + headroom").toBeGreaterThanOrEqual(118 + HEADROOM);
+    expect((marginAt(768) ?? 0) * REM, "768px: 126px header + headroom").toBeGreaterThanOrEqual(126 + HEADROOM);
+    expect((marginAt(1280) ?? 0) * REM, "1280px: 65px header + headroom").toBeGreaterThanOrEqual(65 + HEADROOM);
   });
 
   it("steps down at lg, where the marketing nav actually hides", () => {
