@@ -295,18 +295,21 @@ textarea,
      MEASURED ON PRODUCTION, because the first version of this rule guessed the
      header was just its h-14 sm:h-16 row and was wrong on every phone:
        375px  -> 56 (row) + 61 (marketing nav) = 118px
-       640px  -> 64 (row) + 61 (marketing nav) = 125px
+       768px  -> 64 (row) + 61 (marketing nav) = 126px
        1024px -> 65px (the nav is lg:hidden, so the stack collapses)
+     Values carry ~10px of headroom on purpose. Clearing by 1-2px satisfies a
+     >= assertion while leaving the heading flush against the bar, and any
+     later 3px of header growth silently reintroduces the original defect.
      The flat marketing nav lives INSIDE the same sticky wrapper until lg, so
      the step down belongs at lg — not at sm, where the first version put it
      and left mobile 54px short. The .dashboard-shell rules below are more
      specific and keep overriding all of this for dashboard chrome. */
   #main {
-    scroll-margin-top: 7.5rem;
+    scroll-margin-top: 8rem;
   }
   @media (min-width: 640px) {
     #main {
-      scroll-margin-top: 8rem;
+      scroll-margin-top: 8.5rem;
     }
   }
   @media (min-width: 1024px) {
