@@ -16,95 +16,99 @@ const TEXT_SUB = "#475569";
 
 export default function Image() {
   return new ImageResponse(
-    (
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        background: "#F8FAFC",
+        fontFamily: "system-ui",
+        color: TEXT_INK,
+      }}
+    >
+      <div style={{ height: 12, background: BRAND_BLUE, display: "flex" }} />
+
       <div
         style={{
-          width: "100%",
-          height: "100%",
+          padding: "40px 64px 0 64px",
           display: "flex",
-          flexDirection: "column",
-          background: "#F8FAFC",
-          fontFamily: "system-ui",
-          color: TEXT_INK,
+          alignItems: "center",
+          justifyContent: "space-between",
         }}
       >
-        <div style={{ height: 12, background: BRAND_BLUE, display: "flex" }} />
-
         <div
           style={{
-            padding: "40px 64px 0 64px",
+            fontSize: 32,
+            fontWeight: 800,
+            letterSpacing: "-0.01em",
             display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
           }}
         >
-          <div style={{ fontSize: 32, fontWeight: 800, letterSpacing: "-0.01em", display: "flex" }}>
-            TrueCap<span style={{ color: BRAND_BLUE }}>.</span>
-          </div>
-          <div
-            style={{
-              fontSize: 16,
-              fontWeight: 700,
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              color: TEXT_SUB,
-              display: "flex",
-            }}
-          >
-            For buy-and-hold investors
-          </div>
+          TrueCap<span style={{ color: BRAND_BLUE }}>.</span>
         </div>
-
-        <div style={{ padding: "72px 64px 0 64px", display: "flex" }}>
-          <div
-            style={{
-              fontSize: 64,
-              fontWeight: 800,
-              lineHeight: 1.06,
-              letterSpacing: "-0.025em",
-              maxWidth: 1072,
-              display: "flex",
-            }}
-          >
-            The numbers that decide whether to hold — in one screen
-          </div>
-        </div>
-
-        <div style={{ padding: "22px 64px 0 64px", display: "flex" }}>
-          <div
-            style={{
-              fontSize: 24,
-              color: TEXT_SUB,
-              lineHeight: 1.35,
-              maxWidth: 1000,
-              display: "flex",
-            }}
-          >
-            Cap rate, cash-on-cash, DSCR, sensitivity, and a 10-year cash-flow
-            and equity view — with labeled HUD, FRED, and state-tax starting points.
-          </div>
-        </div>
-
         <div
           style={{
-            marginTop: "auto",
-            padding: "0 64px 40px 64px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
+            fontSize: 16,
+            fontWeight: 700,
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
             color: TEXT_SUB,
-            fontSize: 20,
+            display: "flex",
           }}
         >
-          <div style={{ display: "flex" }}>
-            Real estate investment analyzer
-          </div>
-          <div style={{ fontWeight: 700, color: BRAND_BLUE, display: "flex" }}>
-            usetruecap.com
-          </div>
+          For buy-and-hold investors
         </div>
       </div>
-    ),
-    { ...size }
+
+      <div style={{ padding: "72px 64px 0 64px", display: "flex" }}>
+        <div
+          style={{
+            fontSize: 64,
+            fontWeight: 800,
+            lineHeight: 1.06,
+            letterSpacing: "-0.025em",
+            maxWidth: 1072,
+            display: "flex",
+          }}
+        >
+          The numbers that decide whether to hold — in one screen
+        </div>
+      </div>
+
+      <div style={{ padding: "22px 64px 0 64px", display: "flex" }}>
+        <div
+          style={{
+            fontSize: 24,
+            color: TEXT_SUB,
+            lineHeight: 1.35,
+            maxWidth: 1000,
+            display: "flex",
+          }}
+        >
+          Cap rate, cash-on-cash, DSCR, sensitivity, and a 10-year cash-flow and
+          equity view — with labeled HUD and FRED benchmarks plus manual local
+          tax.
+        </div>
+      </div>
+
+      <div
+        style={{
+          marginTop: "auto",
+          padding: "0 64px 40px 64px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          color: TEXT_SUB,
+          fontSize: 20,
+        }}
+      >
+        <div style={{ display: "flex" }}>Real estate investment analyzer</div>
+        <div style={{ fontWeight: 700, color: BRAND_BLUE, display: "flex" }}>
+          usetruecap.com
+        </div>
+      </div>
+    </div>,
+    { ...size },
   );
 }

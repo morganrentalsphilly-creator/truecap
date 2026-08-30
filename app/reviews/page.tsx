@@ -29,18 +29,20 @@ import { getRequestUser } from "@/lib/request-auth";
 export const revalidate = 3600;
 
 export function generateMetadata(): Metadata {
-  const description = "How TrueCap earns trust: labeled starting references, a public versioned methodology, and customer quotes only after verification.";
+  const description =
+    "How TrueCap earns trust: labeled starting references, a public versioned methodology, and customer quotes only after verification.";
   return {
     title: "Proof & methodology",
-    description:
-      description,
+    description: description,
     alternates: { canonical: "/reviews" },
     openGraph: {
       title: "TrueCap Proof & methodology",
       description,
       url: "/reviews",
       type: "website",
-      images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap proof" }],
+      images: [
+        { url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap proof" },
+      ],
     },
     twitter: { card: "summary_large_image", images: ["/home.jpg"] },
   };
@@ -53,8 +55,10 @@ export default async function ReviewsPage() {
 
   const siteUrl = getSiteUrl();
   const publishedCount =
-    VERIFIED_TESTIMONIALS.filter((r) => isPublicationReady(r, "homepage")).length +
-    VERIFIED_AGENT_PROOF.filter((r) => isPublicationReady(r, "homepage")).length;
+    VERIFIED_TESTIMONIALS.filter((r) => isPublicationReady(r, "homepage"))
+      .length +
+    VERIFIED_AGENT_PROOF.filter((r) => isPublicationReady(r, "homepage"))
+      .length;
 
   const reviewsLd = {
     "@context": "https://schema.org",
@@ -115,20 +119,28 @@ export default async function ReviewsPage() {
               <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Database aria-hidden className="size-5" />
               </span>
-              <h3 className="mt-4 font-extrabold text-foreground">Sourced assumptions</h3>
+              <h3 className="mt-4 font-extrabold text-foreground">
+                Sourced assumptions
+              </h3>
               <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                Rent starts from HUD benchmarks, rates from FRED, taxes from
-                state effective-rate data — every field labeled and editable.
+                Rent can start from HUD benchmarks and rates from FRED. Property
+                tax is a manual local input with a disclosed generic fallback
+                when blank — every field is labeled and editable.
               </p>
             </div>
             <div className="rounded-2xl border border-border bg-card p-5">
               <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <FileCheck2 aria-hidden className="size-5" />
               </span>
-              <h3 className="mt-4 font-extrabold text-foreground">Public methodology</h3>
+              <h3 className="mt-4 font-extrabold text-foreground">
+                Public methodology
+              </h3>
               <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
                 Our math is published and versioned — audit every formula at{" "}
-                <Link href="/methodology" className="font-semibold text-primary hover:underline">
+                <Link
+                  href="/methodology"
+                  className="font-semibold text-primary hover:underline"
+                >
                   /methodology
                 </Link>
                 , including its limitations.
@@ -137,10 +149,10 @@ export default async function ReviewsPage() {
           </div>
           <p className="mx-auto mt-8 max-w-2xl text-center text-xs leading-relaxed text-muted-foreground">
             How quotes get here: after a real workflow moment (an exported
-            report, a third saved deal) we ask one question in the product.
-            A quote is published only after we verify it with the customer and
-            they approve publication — that policy is enforced in code, not
-            just promised.
+            report, a third saved deal) we ask one question in the product. A
+            quote is published only after we verify it with the customer and
+            they approve publication — that policy is enforced in code, not just
+            promised.
           </p>
         </section>
 

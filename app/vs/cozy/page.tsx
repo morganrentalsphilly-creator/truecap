@@ -19,7 +19,10 @@ import {
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
-import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-faq";
+import {
+  ComparisonFaq,
+  type FaqItem,
+} from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
@@ -41,7 +44,9 @@ export const metadata: Metadata = {
       "Cozy.co shut down in 2022. TrueCap underwrites deals; here's what replaces Cozy's other features.",
     url: "/vs/cozy",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs Cozy" }],
+    images: [
+      { url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs Cozy" },
+    ],
   },
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
@@ -50,17 +55,72 @@ type Verdict = "truecap" | "cozy" | "tie";
 type Row = { feature: string; truecap: string; cozy: string; winner: Verdict };
 
 const MATRIX: Row[] = [
-  { feature: "Status", truecap: "Active", cozy: "Shut down June 2022", winner: "truecap" },
-  { feature: "Lifecycle stage", truecap: "Pre-purchase — underwrite the deal", cozy: "Was post-purchase landlord ops", winner: "tie" },
-  { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", cozy: "Not modeled (was ops only)", winner: "truecap" },
-  { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", cozy: "Not modeled", winner: "truecap" },
-  { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", cozy: "Not applicable", winner: "truecap" },
-  { feature: "Rental listing distribution", truecap: "No", cozy: "Was syndicated to Apartments.com etc.", winner: "cozy" },
-  { feature: "Online rental application", truecap: "No", cozy: "Was customizable", winner: "cozy" },
-  { feature: "Online rent collection", truecap: "No", cozy: "Was ACH free", winner: "cozy" },
-  { feature: "Tenant screening", truecap: "No", cozy: "Was TransUnion-backed", winner: "cozy" },
-  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", cozy: "Was free", winner: "tie" },
-  { feature: "Pricing", truecap: "Free core; paid Pro — see live pricing", cozy: "Was free (shut down)", winner: "truecap" },
+  {
+    feature: "Status",
+    truecap: "Active",
+    cozy: "Shut down June 2022",
+    winner: "truecap",
+  },
+  {
+    feature: "Lifecycle stage",
+    truecap: "Pre-purchase — underwrite the deal",
+    cozy: "Was post-purchase landlord ops",
+    winner: "tie",
+  },
+  {
+    feature: "Cap rate / CoC / DSCR analysis",
+    truecap: "Yes — full engine, free tier",
+    cozy: "Not modeled (was ops only)",
+    winner: "truecap",
+  },
+  {
+    feature: "10-year projection",
+    truecap: "Pro — rent + expense + appreciation",
+    cozy: "Not modeled",
+    winner: "truecap",
+  },
+  {
+    feature: "Starting values (rent/rate/tax)",
+    truecap: "HUD rent + FRED rate + manual local property tax",
+    cozy: "Not applicable",
+    winner: "truecap",
+  },
+  {
+    feature: "Rental listing distribution",
+    truecap: "No",
+    cozy: "Was syndicated to Apartments.com etc.",
+    winner: "cozy",
+  },
+  {
+    feature: "Online rental application",
+    truecap: "No",
+    cozy: "Was customizable",
+    winner: "cozy",
+  },
+  {
+    feature: "Online rent collection",
+    truecap: "No",
+    cozy: "Was ACH free",
+    winner: "cozy",
+  },
+  {
+    feature: "Tenant screening",
+    truecap: "No",
+    cozy: "Was TransUnion-backed",
+    winner: "cozy",
+  },
+  {
+    feature: "Free tier",
+    truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
+    cozy: "Was free",
+    winner: "tie",
+  },
+  {
+    feature: "Pricing",
+    truecap: "Free core; paid Pro — see live pricing",
+    cozy: "Was free (shut down)",
+    winner: "truecap",
+  },
 ];
 
 export default function VsCozyPage() {
@@ -101,15 +161,21 @@ export default function VsCozyPage() {
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
             TrueCap vs Cozy:{" "}
-            <span className="text-primary">Cozy shut down. Here&apos;s what replaces it.</span>
+            <span className="text-primary">
+              Cozy shut down. Here&apos;s what replaces it.
+            </span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Cozy.co was a free landlord ops platform — listings, online applications, rent collection — until Apartments.com acquired and shut it down in 2022. If you landed here looking for an alternative, the honest answer is: no single tool replaced it. TrueCap covers pre-purchase underwriting (a Cozy didn&apos;t do that), and you&apos;d pair it with TurboTenant, Avail, or RentRedi for the operations Cozy used to handle. Here&apos;s the breakdown.
+            Cozy.co was a free landlord ops platform — listings, online
+            applications, rent collection — until Apartments.com acquired and
+            shut it down in 2022. If you landed here looking for an alternative,
+            the honest answer is: no single tool replaced it. TrueCap covers
+            pre-purchase underwriting (a Cozy didn&apos;t do that), and
+            you&apos;d pair it with TurboTenant, Avail, or RentRedi for the
+            operations Cozy used to handle. Here&apos;s the breakdown.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <ScrollToFormButton
-              className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5"
-            >
+            <ScrollToFormButton className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">
               <Calculator className="size-4" />
               Run a deal — 60 seconds
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
@@ -137,7 +203,10 @@ export default function VsCozyPage() {
                 Use TrueCap when
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
-                <li>You&apos;re evaluating a property before making an offer (Cozy didn&apos;t do this).</li>
+                <li>
+                  You&apos;re evaluating a property before making an offer (Cozy
+                  didn&apos;t do this).
+                </li>
                 <li>You want cap rate, DSCR, cash flow, projection.</li>
                 <li>You want a free tier that doesn&apos;t cap analyses.</li>
               </ul>
@@ -147,8 +216,14 @@ export default function VsCozyPage() {
                 Use Cozy when
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
-                <li>For listings + applications + rent collection (Cozy&apos;s old core): TurboTenant, Avail, or RentRedi.</li>
-                <li>For accounting + Schedule E: Stessa, Baselane, or Landlord Studio.</li>
+                <li>
+                  For listings + applications + rent collection (Cozy&apos;s old
+                  core): TurboTenant, Avail, or RentRedi.
+                </li>
+                <li>
+                  For accounting + Schedule E: Stessa, Baselane, or Landlord
+                  Studio.
+                </li>
                 <li>For tenant screening only: RentSpree.</li>
               </ul>
             </div>
@@ -161,7 +236,8 @@ export default function VsCozyPage() {
             Feature-by-feature
           </h2>
           <p className="text-base text-muted-foreground mb-6 leading-relaxed">
-            Side-by-side on every dimension that matters for a comparison-shopping investor.
+            Side-by-side on every dimension that matters for a
+            comparison-shopping investor.
           </p>
           <div className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
@@ -180,7 +256,10 @@ export default function VsCozyPage() {
               </thead>
               <tbody>
                 {MATRIX.map((row) => (
-                  <tr key={row.feature} className="border-t border-border align-top">
+                  <tr
+                    key={row.feature}
+                    className="border-t border-border align-top"
+                  >
                     <td className="py-3 px-3 text-sm font-semibold text-foreground">
                       <div className="flex items-center gap-2">
                         <WinnerBadge winner={row.winner} side="row" />
@@ -207,7 +286,12 @@ export default function VsCozyPage() {
           <p className="mt-3 text-[11px] text-muted-foreground">
             Cozy details based on publicly available product info as of 2026.
             See{" "}
-            <a href="https://cozy.co" target="_blank" rel="noopener" className="underline">
+            <a
+              href="https://cozy.co"
+              target="_blank"
+              rel="noopener"
+              className="underline"
+            >
               cozy.co
             </a>{" "}
             for their current state.
@@ -221,34 +305,56 @@ export default function VsCozyPage() {
           </h2>
           <ol className="space-y-2.5 text-sm sm:text-base leading-relaxed text-foreground list-decimal pl-5">
             <li>
-              <strong>Pre-purchase underwriting (Cozy never did this).</strong> Use TrueCap (free). Cap rate, DSCR, cash flow, projection.
+              <strong>Pre-purchase underwriting.</strong> TrueCap&apos;s free
+              core screen covers editable cap rate, DSCR, and cash flow;
+              released projections appear only when your evaluation or plan
+              access includes them.
             </li>
             <li>
-              <strong>Listings + applications + rent collection (Cozy&apos;s old core).</strong> TurboTenant (most Cozy-like free tier), Avail (Realtor.com-owned), or RentRedi.
+              <strong>
+                Listings + applications + rent collection (Cozy&apos;s old
+                core).
+              </strong>{" "}
+              TurboTenant (most Cozy-like free tier), Avail (Realtor.com-owned),
+              or RentRedi.
             </li>
             <li>
-              <strong>Accounting + tax-time Schedule E.</strong> Stessa, Baselane, or Landlord Studio. All have free or low-cost tiers.
+              <strong>Accounting + tax-time Schedule E.</strong> Stessa,
+              Baselane, or Landlord Studio. All have free or low-cost tiers.
             </li>
             <li>
-              <strong>Tenant screening only.</strong> RentSpree (tenant pays, free for landlord) or any of the above bundled solutions.
+              <strong>Tenant screening only.</strong> RentSpree (tenant pays,
+              free for landlord) or any of the above bundled solutions.
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Only need the underwriting piece? The free{" "}
-            <Link href="/tools/break-even-calculator" className="font-semibold text-primary hover:underline">
+            <Link
+              href="/tools/break-even-calculator"
+              className="font-semibold text-primary hover:underline"
+            >
               break-even calculator
             </Link>{" "}
             tells you how long a property takes to return your cash, and the
             full{" "}
-            <Link href="/" className="font-semibold text-primary hover:underline">
+            <Link
+              href="/"
+              className="font-semibold text-primary hover:underline"
+            >
               TrueCap analyzer
             </Link>{" "}
             turns an address into cap rate,{" "}
-            <Link href="/glossary/cash-on-cash-return" className="font-semibold text-primary hover:underline">
+            <Link
+              href="/glossary/cash-on-cash-return"
+              className="font-semibold text-primary hover:underline"
+            >
               cash-on-cash return
             </Link>
             , and DSCR — all free, the way Cozy used to be. Our guide on{" "}
-            <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">
+            <Link
+              href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
+              className="font-semibold text-primary hover:underline"
+            >
               60-second underwriting
             </Link>{" "}
             walks through the workflow end-to-end.
@@ -265,8 +371,8 @@ export default function VsCozyPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro adds 10-year cash-flow and equity projections, sensitivity,
-            Offer Ceiling, co-branded share links, and PDF reports with Pro; see live pricing for current terms.
-            No card to start.
+            Offer Ceiling, co-branded share links, and PDF reports with Pro; see
+            live pricing for current terms. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -288,11 +394,26 @@ export default function VsCozyPage() {
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}
-          <Link href="/vs/turbotenant" className="font-bold text-foreground hover:underline">TrueCap vs TurboTenant</Link>
+          <Link
+            href="/vs/turbotenant"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs TurboTenant
+          </Link>
           {" · "}
-          <Link href="/vs/avail" className="font-bold text-foreground hover:underline">TrueCap vs Avail</Link>
+          <Link
+            href="/vs/avail"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs Avail
+          </Link>
           {" · "}
-          <Link href="/vs/rentredi" className="font-bold text-foreground hover:underline">TrueCap vs RentRedi</Link>
+          <Link
+            href="/vs/rentredi"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs RentRedi
+          </Link>
         </footer>
       </main>
       <SiteFooter />
@@ -306,7 +427,11 @@ const COZY_FAQ: FaqItem[] = [
     question: "What happened to Cozy.co?",
     answer: (
       <>
-        Cozy.co was acquired by Apartments.com (a CoStar Group property) in 2018 and shut down in June 2022. Users were migrated to Apartments.com Rental Manager, which kept some of Cozy&apos;s core features (listings, applications, rent collection) under the Apartments.com brand. Many ex-Cozy users found the migration painful and went elsewhere.
+        Cozy.co was acquired by Apartments.com (a CoStar Group property) in 2018
+        and shut down in June 2022. Users were migrated to Apartments.com Rental
+        Manager, which kept some of Cozy&apos;s core features (listings,
+        applications, rent collection) under the Apartments.com brand. Many
+        ex-Cozy users found the migration painful and went elsewhere.
       </>
     ),
     plainTextAnswer:
@@ -316,7 +441,10 @@ const COZY_FAQ: FaqItem[] = [
     question: "Is TrueCap a Cozy alternative?",
     answer: (
       <>
-        Only for the underwriting part — TrueCap calculates cap rate, DSCR, cash flow on a property you&apos;re considering buying. Cozy never did that. For Cozy&apos;s actual core (listings, applications, rent collection), you&apos;ll want TurboTenant, Avail, or RentRedi.
+        Only for the underwriting part — TrueCap calculates cap rate, DSCR, cash
+        flow on a property you&apos;re considering buying. Cozy never did that.
+        For Cozy&apos;s actual core (listings, applications, rent collection),
+        you&apos;ll want TurboTenant, Avail, or RentRedi.
       </>
     ),
     plainTextAnswer:
@@ -326,7 +454,11 @@ const COZY_FAQ: FaqItem[] = [
     question: "What&apos;s the best free Cozy alternative for rent collection?",
     answer: (
       <>
-        TurboTenant and Avail publish free operational features, while RentRedi publishes flat-rate paid plans for unlimited properties and units. Compare current rent collection, lease, listing, screening, support, and payment terms on each official pricing page before choosing a Cozy replacement.
+        TurboTenant and Avail publish free operational features, while RentRedi
+        publishes flat-rate paid plans for unlimited properties and units.
+        Compare current rent collection, lease, listing, screening, support, and
+        payment terms on each official pricing page before choosing a Cozy
+        replacement.
       </>
     ),
     plainTextAnswer:
@@ -336,7 +468,11 @@ const COZY_FAQ: FaqItem[] = [
     question: "Did Apartments.com replace Cozy?",
     answer: (
       <>
-        Technically yes — Apartments.com Rental Manager kept the listings + applications + rent collection workflow. Many ex-Cozy users felt the rebrand was awkward and the UX worse. The free tier is more limited than Cozy&apos;s was. If you tried it and it didn&apos;t work, TurboTenant or Avail are typically the next stops.
+        Technically yes — Apartments.com Rental Manager kept the listings +
+        applications + rent collection workflow. Many ex-Cozy users felt the
+        rebrand was awkward and the UX worse. The free tier is more limited than
+        Cozy&apos;s was. If you tried it and it didn&apos;t work, TurboTenant or
+        Avail are typically the next stops.
       </>
     ),
     plainTextAnswer:
@@ -346,7 +482,10 @@ const COZY_FAQ: FaqItem[] = [
     question: "Can I use TrueCap + a Cozy replacement together?",
     answer: (
       <>
-        Yes — that&apos;s one possible stack. TrueCap (free) covers pre-purchase underwriting, while TurboTenant or Avail (free) covers post-purchase operations. Together they span much of Cozy&apos;s old free-tier coverage and add an underwriting layer.
+        Yes — that&apos;s one possible stack. TrueCap (free) covers pre-purchase
+        underwriting, while TurboTenant or Avail (free) covers post-purchase
+        operations. Together they span much of Cozy&apos;s old free-tier
+        coverage and add an underwriting layer.
       </>
     ),
     plainTextAnswer:
@@ -363,10 +502,14 @@ function WinnerBadge({
 }) {
   if (side === "row") return null;
   if (winner === "tie") {
-    return <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />;
+    return (
+      <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />
+    );
   }
   if (winner === side) {
-    return <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />;
+    return (
+      <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />
+    );
   }
   return <X className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/50" />;
 }

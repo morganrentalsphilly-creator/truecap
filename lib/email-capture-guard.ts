@@ -87,7 +87,7 @@ export type EmailCaptureClaim =
 /** Minimal shape of `supabase.rpc` — injectable so the logic is unit-testable. */
 export type GuardRpc = (
   fn: string,
-  params: Record<string, unknown>
+  params: Record<string, unknown>,
 ) => Promise<{ data: unknown; error: unknown }>;
 
 /** Service-role RPC caller. Constructed lazily so tests never need env vars. */
@@ -109,7 +109,7 @@ const KEY_NAMESPACE = "truecap:email-capture:v1";
 /**
  * Surface namespaces keep per-surface email caps independent: someone who
  * gave their email to the post-analysis checklist ("pae") can still request
- * the Market Intelligence Pack ("mip") — but each surface's own 30-day
+ * the playbook/verification course (historical namespace "mip") — but each surface's own 30-day
  * duplicate cap holds. IP and global buckets are shared across surfaces by
  * passing the same namespace behavior through the SAME RPC, so total
  * outbound volume stays bounded no matter how many surfaces exist.
@@ -119,10 +119,12 @@ export type CaptureSurface = "pae" | "mip";
 export function buildBucketKey(
   kind: "email" | "ip",
   value: string,
-  surface: CaptureSurface = "pae"
+  surface: CaptureSurface = "pae",
 ): string {
   const normalized =
-    kind === "email" ? value.trim().toLowerCase() : value.trim().toLowerCase() || "unknown";
+    kind === "email"
+      ? value.trim().toLowerCase()
+      : value.trim().toLowerCase() || "unknown";
   const digest = createHash("sha256")
     .update(`${KEY_NAMESPACE}:${kind}:${normalized}`)
     .digest("hex")
@@ -141,7 +143,7 @@ export function buildGlobalBucketKey(now: Date = new Date()): string {
 /** Maps the RPC's status string onto a decision. Unknown status → fail closed. */
 export function interpretClaimStatus(
   status: unknown,
-  emailBucketKey: string
+  emailBucketKey: string,
 ): EmailCaptureClaim {
   switch (status) {
     case "ok":
@@ -173,7 +175,11 @@ export async function claimEmailCaptureSlot(args: {
   rpc?: GuardRpc;
   now?: Date;
 }): Promise<EmailCaptureClaim> {
-  const emailBucketKey = buildBucketKey("email", args.email, args.surface ?? "pae");
+  const emailBucketKey = buildBucketKey(
+    "email",
+    args.email,
+    args.surface ?? "pae",
+  );
   const ipBucketKey = buildBucketKey("ip", args.ip, args.surface ?? "pae");
   const globalBucketKey = buildGlobalBucketKey(args.now ?? new Date());
 
@@ -232,7 +238,7 @@ export async function claimEmailCaptureSlot(args: {
  */
 export async function releaseEmailCaptureSlot(
   emailBucketKey: string,
-  rpc?: GuardRpc
+  rpc?: GuardRpc,
 ): Promise<void> {
   try {
     const call = rpc ?? adminRpc();

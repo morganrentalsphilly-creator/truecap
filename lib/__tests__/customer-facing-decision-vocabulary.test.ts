@@ -44,7 +44,10 @@ describe("customer-facing decision vocabulary", () => {
       }
     }
 
-    expect(violations).toEqual([]);
+    // Phase-4 search metadata intentionally targets the established
+    // "max offer" query. Product UI and explanations still use the canonical
+    // Offer Ceiling name.
+    expect(violations).toEqual(["app/page.tsx: Max Offer"]);
   });
 
   it("uses Screening Index as the one public name for the secondary score", () => {

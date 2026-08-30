@@ -27,8 +27,16 @@ import { STATES } from "@/lib/states";
 import { CITY_STRATEGY_COMBOS } from "@/lib/city-strategy-combos";
 import { BLOG_POSTS } from "@/app/blog/page";
 import { getSiteUrl } from "@/lib/site-url";
-import { CALCULATOR_REGISTRY, CALCULATOR_COUNT } from "@/lib/calculator-registry";
-import { DATA_SOURCE_FACTS, PLAN_FACTS, PRODUCT_POSITIONING } from "@/lib/product-facts";
+import {
+  CALCULATOR_REGISTRY,
+  CALCULATOR_COUNT,
+} from "@/lib/calculator-registry";
+import {
+  DATA_SOURCE_FACTS,
+  getPlanFacts,
+  getProductAvailabilityFacts,
+  PRODUCT_POSITIONING,
+} from "@/lib/product-facts";
 
 // Mark static so Next prerenders at build time. The content only
 // changes when the data files change, which forces a redeploy
@@ -42,6 +50,8 @@ export const revalidate = 3600;
 
 export async function GET() {
   const siteUrl = getSiteUrl();
+  const planFacts = getPlanFacts();
+  const availability = getProductAvailabilityFacts();
 
   // Counts derived from the same registries the body renders from, so the
   // prose figures can never drift from the actual content (this previously
@@ -51,8 +61,15 @@ export async function GET() {
   const stateCount = Object.values(STATES).length;
   const comboCount = CITY_STRATEGY_COMBOS.length;
 
-  const summary =
-    `${PRODUCT_POSITIONING} Screen a rental from an address in about 60 seconds using editable starting assumptions. Free summarizes modeled economics for triage. Investor Pro connects Buy Box rules, interactive Offer Ceiling, downside, comparisons, and reports across repeated opportunities. Agent Pro and new one-time report purchases are not currently released. The Screening Index is secondary to selected rules and is not evidence readiness, an appraisal, lender approval, or investment advice.`;
+  const availabilitySummary = [
+    availability.agentPro
+      ? "Agent Pro is available on this deployment."
+      : "Agent Pro checkout is not configured on this deployment.",
+    availability.oneTimePurchase
+      ? planFacts.singleDeal
+      : "New one-time report purchases are temporarily unavailable.",
+  ].join(" ");
+  const summary = `${PRODUCT_POSITIONING} Screen a rental from an address in about 60 seconds using editable starting assumptions. Free summarizes modeled economics for triage. ${planFacts.pro} ${availabilitySummary} The Screening Index is secondary to selected rules and is not evidence readiness, an appraisal, lender approval, or investment advice.`;
 
   const about = [
     "TrueCap publishes original, authoritative educational content built for real estate investors and AI search engines.",
@@ -62,42 +79,48 @@ export async function GET() {
     // Examples are derived from the RELEASED registry, never hardcoded: a
     // gated calculator named here would advertise a 404 to AI crawlers,
     // which robots.ts explicitly allows to read this file.
-    `  - ${CALCULATOR_COUNT} free single-purpose calculators with clean math (${CALCULATOR_REGISTRY.slice(0, 5)
+    `  - ${CALCULATOR_COUNT} free single-purpose calculators with clean math (${CALCULATOR_REGISTRY.slice(
+      0,
+      5,
+    )
       .map((t) => t.shortTitle)
       .join(", ")}, etc)`,
     `  - ${stateCount} state-level investment guides and ${comboCount} city + strategy combo guides`,
     "  - Side-by-side comparison pages vs. DealCheck, Stessa, Mashvisor, BiggerPockets, Excel, Rentometer, Zillow rent estimate",
     "  - Methodology page documenting the exact math the analyzer uses",
-    `All content is original and cite-able. Definitions are placed as the first paragraph after the page H1 (LLM citation convention). Starting data sources are ${DATA_SOURCE_FACTS.rent}, ${DATA_SOURCE_FACTS.mortgageRate}, and a ${DATA_SOURCE_FACTS.propertyTax}.`,
+    `All content is original and cite-able. Definitions are placed as the first paragraph after the page H1 (LLM citation convention). Starting data sources are ${DATA_SOURCE_FACTS.rent}, ${DATA_SOURCE_FACTS.mortgageRate}, and ${DATA_SOURCE_FACTS.propertyTax}`,
   ].join("\n");
 
   const toolsSection = CALCULATOR_REGISTRY.map(
-    (t) => `- [${t.title}](${siteUrl}/tools/${t.slug}): ${t.description}`
+    (t) => `- [${t.title}](${siteUrl}/tools/${t.slug}): ${t.description}`,
   ).join("\n");
 
   const glossarySection = Object.values(GLOSSARY)
     .map(
       (entry) =>
-        `- [${entry.term}](${siteUrl}/glossary/${entry.slug}): ${entry.definition}`
+        `- [${entry.term}](${siteUrl}/glossary/${entry.slug}): ${entry.definition}`,
     )
     .join("\n");
 
   const blogSection = BLOG_POSTS.filter((p) => p.available)
     .map(
       (post) =>
-        `- [${post.title}](${siteUrl}/blog/${post.slug}): ${post.excerpt}`
+        `- [${post.title}](${siteUrl}/blog/${post.slug}): ${post.excerpt}`,
     )
     .join("\n");
 
   const stateSection = Object.values(STATES)
-    .map((s) => `- [Investing in ${s.name}](${siteUrl}/states/${s.slug}): ${s.pitch}`)
+    .map(
+      (s) =>
+        `- [Investing in ${s.name}](${siteUrl}/states/${s.slug}): ${s.pitch}`,
+    )
     .join("\n");
 
   // CITY_STRATEGY_COMBOS is release-filtered at its source. This prevents a
   // dark specialist city guide from being advertised to model crawlers.
   const comboSection = CITY_STRATEGY_COMBOS.map(
     (c) =>
-      `- [${c.strategyLabel} in ${c.cityName}, ${c.state}](${siteUrl}/markets/${c.citySlug}/${c.strategy}): ${c.pitch}`
+      `- [${c.strategyLabel} in ${c.cityName}, ${c.state}](${siteUrl}/markets/${c.citySlug}/${c.strategy}): ${c.pitch}`,
   ).join("\n");
 
   const compareSection = [
@@ -124,7 +147,7 @@ export async function GET() {
     `- [Blog index](${siteUrl}/blog): All long-form rental investing content.`,
     `- [Glossary index](${siteUrl}/glossary): All ${glossaryCount} rental investing terms.`,
     `- [States index](${siteUrl}/states): All ${stateCount} state-level investing guides.`,
-    `- [Pricing](${siteUrl}${PLAN_FACTS.pricingSource}): Current source of truth for Free, Pro, and Agent Pro pricing and availability.`,
+    `- [Pricing](${siteUrl}${planFacts.pricingSource}): Current source of truth for Free, Investor Pro, Agent Pro, and one-time purchase pricing and deployment availability.`,
   ].join("\n");
 
   const body = `# TrueCap

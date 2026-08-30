@@ -26,7 +26,14 @@ export const metadata: Metadata = {
       "Pass / fail the 1% rule in 5 seconds. Plus plain-English guidance on when the rule applies and when it doesn't.",
     url: "/tools/1-percent-rule-calculator",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap 1% rule calculator" }],
+    images: [
+      {
+        url: "/home.jpg",
+        width: 1200,
+        height: 630,
+        alt: "TrueCap 1% rule calculator",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -113,15 +120,33 @@ export default function OnePercentRulePage() {
 
   return (
     <>
-      <ToolBreadcrumbSchema toolPath="/tools/1-percent-rule-calculator" toolName="1% rule calculator" />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }} />
+      <ToolBreadcrumbSchema
+        toolPath="/tools/1-percent-rule-calculator"
+        toolName="1% rule calculator"
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }}
+      />
 
       <div className="min-h-screen bg-background">
-        <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <main
+          id="main"
+          className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12"
+        >
           <header className="mb-6 sm:mb-8">
-            <Link href="/tools" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">
+            <Link
+              href="/tools"
+              className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+            >
               ← TrueCap free tools
             </Link>
             <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">
@@ -129,8 +154,8 @@ export default function OnePercentRulePage() {
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground mt-2 leading-relaxed">
               The 5-second filter for whether a rental property is worth a
-              deeper underwrite. Pass means run the full analysis; fail
-              means either an appreciation market or an overpriced deal.
+              deeper underwrite. Pass means run the full analysis; fail means
+              either an appreciation market or an overpriced deal.
             </p>
           </header>
 
@@ -139,9 +164,9 @@ export default function OnePercentRulePage() {
           <article className="prose prose-slate max-w-none mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
             <h2 className="text-2xl sm:text-3xl">What is the 1% rule?</h2>
             <p>
-              The 1% rule is a back-of-the-envelope screening filter
-              investors use to decide whether a rental property deserves a
-              full underwrite. The rule:
+              The 1% rule is a back-of-the-envelope screening filter investors
+              use to decide whether a rental property deserves a full
+              underwrite. The rule:
             </p>
             <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
               <div className="text-base sm:text-lg font-mono font-bold">
@@ -152,9 +177,14 @@ export default function OnePercentRulePage() {
               </div>
             </div>
             <p>
-              That&apos;s it. No expenses, no financing, no projection — just
-              a 5-second sanity check. For the full deal screen, the{" "}
-              <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="text-primary font-semibold hover:underline">60-second underwriting workflow</Link>{" "}
+              That&apos;s it. No expenses, no financing, no projection — just a
+              5-second sanity check. For the full deal screen, the{" "}
+              <Link
+                href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
+                className="text-primary font-semibold hover:underline"
+              >
+                60-second underwriting workflow
+              </Link>{" "}
               shows what to do next once a property clears this filter.
             </p>
 
@@ -162,19 +192,30 @@ export default function OnePercentRulePage() {
             <p>
               The 1% rule exists because new investors look at <em>too many</em>{" "}
               properties. Reading every listing in detail is slow. A quick
-              gross-rent-to-price filter cuts the universe of properties down
-              to the ones likely to cash-flow, which is where the time
-              investment in full underwriting pays off.
+              gross-rent-to-price filter cuts the universe of properties down to
+              the ones likely to cash-flow, which is where the time investment
+              in full underwriting pays off.
             </p>
             <p>
-              Veteran investors who know their market well often skip the
-              rule entirely — they can eyeball whether a property &ldquo;feels
-              right.&rdquo; New investors and out-of-market buyers benefit
-              from the discipline. For the formal definition (and how it
-              relates to the{" "}
-              <Link href="/glossary/cap-rate" className="text-primary font-semibold hover:underline">cap rate</Link>{" "}
+              Veteran investors who know their market well often skip the rule
+              entirely — they can eyeball whether a property &ldquo;feels
+              right.&rdquo; New investors and out-of-market buyers benefit from
+              the discipline. For the formal definition (and how it relates to
+              the{" "}
+              <Link
+                href="/glossary/cap-rate"
+                className="text-primary font-semibold hover:underline"
+              >
+                cap rate
+              </Link>{" "}
               metric), see the{" "}
-              <Link href="/glossary/1-percent-rule" className="text-primary font-semibold hover:underline">1% rule glossary entry</Link>.
+              <Link
+                href="/glossary/1-percent-rule"
+                className="text-primary font-semibold hover:underline"
+              >
+                1% rule glossary entry
+              </Link>
+              .
             </p>
 
             <h2 className="text-2xl sm:text-3xl">When the 1% rule works</h2>
@@ -186,44 +227,45 @@ export default function OnePercentRulePage() {
               </li>
               <li>
                 <strong>Buy-and-hold investors.</strong> If your strategy
-                depends on monthly cash flow rather than appreciation, you
-                need rent that significantly exceeds expenses.
+                depends on monthly cash flow rather than appreciation, you need
+                rent that significantly exceeds expenses.
               </li>
               <li>
                 <strong>Triage when looking at many properties.</strong> A
-                weekend of scrolling listings is exhausting; the 1% rule
-                makes the scroll productive.
+                weekend of scrolling listings is exhausting; the 1% rule makes
+                the scroll productive.
               </li>
             </ul>
 
             <h2 className="text-2xl sm:text-3xl">When the 1% rule misleads</h2>
             <ul>
               <li>
-                <strong>Coastal / Tier-1 markets.</strong> Almost nothing in
-                SF, NYC, Seattle, or Boston passes the 1% rule. That
-                doesn&apos;t mean the deals are bad — it means cash flow
-                isn&apos;t the goal in those markets. Investors accept lower
-                rent-to-price ratios in exchange for higher long-term
-                appreciation.
+                <strong>Coastal / Tier-1 markets.</strong> Almost nothing in SF,
+                NYC, Seattle, or Boston passes the 1% rule. That doesn&apos;t
+                mean the deals are bad — it means cash flow isn&apos;t the goal
+                in those markets. Investors accept lower rent-to-price ratios in
+                exchange for higher long-term appreciation.
               </li>
               <li>
                 <strong>Properties with unusual expenses.</strong> A high-HOA
-                condo, a property with $20k annual property taxes, or a
-                house needing $60k of rehab can pass the 1% rule and still
-                be a money-loser.
+                condo, a property with $20k annual property taxes, or a house
+                needing $60k of rehab can pass the 1% rule and still be a
+                money-loser.
               </li>
               <li>
                 <strong>Properties with above-market rent.</strong> If the
-                current tenant is paying more than what a new lease would
-                fetch, the 1% rule overstates the real return. Confirm
-                rents are sustainable.
+                current tenant is paying more than what a new lease would fetch,
+                the 1% rule overstates the real return. Confirm rents are
+                sustainable.
               </li>
             </ul>
 
-            <h2 className="text-2xl sm:text-3xl">After the 1% rule: what to check</h2>
+            <h2 className="text-2xl sm:text-3xl">
+              After the 1% rule: what to check
+            </h2>
             <p>
-              A property that passes the 1% rule has earned a closer look.
-              Next steps:
+              A property that passes the 1% rule has earned a closer look. Next
+              steps:
             </p>
             <ol>
               <li>Pull the actual property tax bill (not estimate)</li>
@@ -232,44 +274,80 @@ export default function OnePercentRulePage() {
               <li>Get a rough rehab estimate if the property needs work</li>
               <li>
                 Run the full underwrite —{" "}
-                <Link href="/#main" className="text-primary font-semibold hover:underline">cap rate</Link>,{" "}
-                <Link href="/#main" className="text-primary font-semibold hover:underline">CoC</Link>,{" "}
-                <Link href="/#main" className="text-primary font-semibold hover:underline">DSCR</Link>, cash flow
+                <Link
+                  href="/#main"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  cap rate
+                </Link>
+                ,{" "}
+                <Link
+                  href="/#main"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  CoC
+                </Link>
+                ,{" "}
+                <Link
+                  href="/#main"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  DSCR
+                </Link>
+                , cash flow
               </li>
             </ol>
             <p>
-              TrueCap handles steps 4 and 5 in about four minutes once you
-              have the inputs. Two sibling screens are worth knowing too:
-              our{" "}
-              <Link href="/blog/50-percent-rule-rentals" className="text-primary font-semibold hover:underline">50% rule walkthrough</Link>{" "}
+              TrueCap handles steps 4 and 5 in about four minutes once you have
+              the inputs. Two sibling screens are worth knowing too: our{" "}
+              <Link
+                href="/blog/50-percent-rule-rentals"
+                className="text-primary font-semibold hover:underline"
+              >
+                50% rule walkthrough
+              </Link>{" "}
               shows how to triage the expense side (does the rent survive
               operating costs and the mortgage?), and the{" "}
-              <Link href="/tools/2-percent-rule-calculator" className="text-primary font-semibold hover:underline">2% rule calculator</Link>{" "}
-              covers the stricter cash-flow-market bar — including why a
-              2% deal in 2026 deserves suspicion before celebration.
+              <Link
+                href="/tools/2-percent-rule-calculator"
+                className="text-primary font-semibold hover:underline"
+              >
+                2% rule calculator
+              </Link>{" "}
+              covers the stricter cash-flow-market bar — including why a 2% deal
+              in 2026 deserves suspicion before celebration.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">Frequently asked questions</h2>
             <div className="space-y-4">
               {FAQS.map((f) => (
-                <details key={f.q} className="bg-card border border-border rounded-lg p-4 group">
+                <details
+                  key={f.q}
+                  className="bg-card border border-border rounded-lg p-4 group"
+                >
                   <summary className="font-semibold text-foreground cursor-pointer list-none flex items-start justify-between gap-3">
                     <span>{f.q}</span>
-                    <span className="text-muted-foreground text-xl leading-none group-open:rotate-45 transition-transform">+</span>
+                    <span className="text-muted-foreground text-xl leading-none group-open:rotate-45 transition-transform">
+                      +
+                    </span>
                   </summary>
-                  <p className="text-sm text-muted-foreground leading-relaxed mt-3">{f.a}</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed mt-3">
+                    {f.a}
+                  </p>
                 </details>
               ))}
             </div>
           </article>
 
           <section className="mt-10 sm:mt-12 rounded-2xl bg-primary text-primary-foreground p-6 sm:p-8">
-            <h2 className="text-xl sm:text-2xl font-extrabold mb-2">Take the deal past the 1% rule</h2>
+            <h2 className="text-xl sm:text-2xl font-extrabold mb-2">
+              Take the deal past the 1% rule
+            </h2>
             <p className="text-sm sm:text-base opacity-90 mb-4">
-              Passing the 1% rule earns a deal a closer look. TrueCap runs
-              the full underwrite — cap rate, CoC, DSCR, cash flow, 10-year
-              cash-flow and equity projections, sensitivity, and Offer Ceiling — in about four
-              minutes, free to start.
+              Passing the 1% rule earns a deal a closer look. TrueCap runs the
+              full underwrite — cap rate, CoC, DSCR, cash flow, 10-year
+              cash-flow and equity projections, sensitivity, and Offer Ceiling —
+              in about four minutes, free to start.
             </p>
             <ul className="text-sm space-y-1.5 mb-5 opacity-90">
               {[
@@ -286,7 +364,10 @@ export default function OnePercentRulePage() {
                 </li>
               ))}
             </ul>
-            <Link href="/" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
+            >
               Open the full TrueCap analyzer
               <ArrowUpRight className="w-4 h-4" />
             </Link>
@@ -298,12 +379,19 @@ export default function OnePercentRulePage() {
 
           <ToolEmbedInvite slug="1-percent-rule-calculator" />
 
-
-          <ToolsConversionCta calculatorName="1% rule calculator" hook="The 1% rule is a 5-second screener. When you want a fuller rental screen — DSCR, cap rate, cash flow, and pre-tax projections — open the TrueCap analyzer. It's free." />
+          <ToolsConversionCta
+            calculatorName="1% rule calculator"
+            hook="The 1% rule is a quick gross-rent screen. TrueCap's free core analyzer adds editable DSCR, cap rate, and cash-flow modeling. Released projections appear only when your evaluation or plan access includes them."
+          />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}
-            <Link href="/" className="font-bold text-foreground hover:underline">TrueCap</Link>{" "}
+            <Link
+              href="/"
+              className="font-bold text-foreground hover:underline"
+            >
+              TrueCap
+            </Link>{" "}
             — transparent, editable rental analysis, free to start.
           </footer>
         </main>

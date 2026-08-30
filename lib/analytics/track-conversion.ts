@@ -31,9 +31,9 @@ const GOOGLE_ADS_ID = "AW-8236119484";
  * Conversions screen. Until then the helper silently no-ops, which is
  * the right behavior (no spurious events fired). */
 const LABELS: Record<ConversionKey, string | null> = {
-  calc_completed: null,    // e.g. "AbC_DeFgHi-jKlM_NoP"
-  signup: null,            // e.g. "AbC_DeFgHi-jKlM_NoP"
-  paid_subscribed: "BCFeCPrZlqwcEIri_9JD",  // Purchase conversion (AW-8236119484)
+  calc_completed: null, // e.g. "AbC_DeFgHi-jKlM_NoP"
+  signup: null, // e.g. "AbC_DeFgHi-jKlM_NoP"
+  paid_subscribed: "BCFeCPrZlqwcEIri_9JD", // Purchase conversion (AW-8236119484)
   pdf_exported: null,
   deal_saved: null,
 };
@@ -50,7 +50,7 @@ export interface ConversionOptions {
   value?: number;
   /** ISO currency, default USD. */
   currency?: string;
-  /** Opaque transaction ID for deduplication. */
+  /** Local-only deduplication key. Never forwarded to Google or dataLayer. */
   transactionId?: string;
 }
 
@@ -65,7 +65,7 @@ declare global {
 
 export function trackConversion(
   event: ConversionKey,
-  options: ConversionOptions = {}
+  options: ConversionOptions = {},
 ): void {
   if (typeof window === "undefined") return;
   const label = LABELS[event];
@@ -81,7 +81,6 @@ export function trackConversion(
       send_to: `${GOOGLE_ADS_ID}/${label}`,
       value: options.value ?? 0,
       currency: options.currency ?? "USD",
-      ...(options.transactionId ? { transaction_id: options.transactionId } : {}),
     });
     pushDataLayerEvent(event, options);
   } catch {

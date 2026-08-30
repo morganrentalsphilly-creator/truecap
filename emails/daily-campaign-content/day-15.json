@@ -1,15 +1,14 @@
 {
   "day": 15,
   "send_date": "2026-06-15",
-  "subject": "the 1 percent rule is dead",
-  "preheader": "what replaced it, and why it actually matters.",
-  "headline": "The 1% rule was a heuristic for a different decade.",
+  "subject": "use the 1 percent rule as a screen",
+  "preheader": "the ratio omits the expenses and financing that shape your result.",
+  "headline": "The 1% rule is a quick ratio, not a property verdict.",
   "body": [
-    "The 1% rule: monthly rent should be at least 1% of purchase price. A $200,000 house should rent for $2,000+. Anything less, skip.",
-    "It worked in 2012-2016 because interest rates were 4%, property taxes hadn't doubled yet, and insurance hadn't gone vertical in Florida and Texas. In 2026 the rule is mostly broken. There are basically no metros where a quality property hits 1% — and most of the ones that do are class C with reasons.",
-    "What replaced it: actual DSCR and cap rate analysis. A 0.75% rule deal in Nashville with strong appreciation and a DSCR of 1.30 beats a 1.1% rule deal in a depopulating Rust Belt town with DSCR 1.05 and no rent growth. The headline ratio doesn't tell you anything about whether the loan exists or the numbers compound.",
-    "The new framework: ignore the 1% rule. Run actual DSCR against today's rates. Look at the 10-year projection with realistic rent growth. Check cash-on-cash against your alternatives. The 1% rule was a shortcut around doing the math. The math is now fast enough that you can just do the math.",
-    "TrueCap does all four checks in 60 seconds. The full methodology page walks through exactly which inputs we use and why — worth a read if you want to know what's under the hood."
+    "The 1% rule compares monthly rent with purchase price. A $200,000 property at $2,000 monthly rent meets the ratio, but that says nothing by itself about expenses, financing, condition, evidence quality, or whether the property fits your rules.",
+    "A property can meet the ratio and still miss a selected cash-flow or DSCR threshold; another can miss the ratio and fit a different target under verified inputs. Use the shortcut only to decide what deserves a fuller preliminary model.",
+    "Enter borrower-specific written loan terms when available. TrueCap's starting mortgage-rate value is an editable FRED national owner-occupied benchmark, not today's investor quote or lender approval. Treat cap rate, cash-on-cash, DSCR, and any entitled projection as separate modeled evidence.",
+    "TrueCap calculates the released preliminary metrics under the assumptions shown. The methodology page explains the formulas, starting benchmarks, editable inputs, and limits so you can verify what is under the hood."
   ],
   "cta_text": "Read the methodology",
   "cta_url": "https://usetruecap.com/methodology",

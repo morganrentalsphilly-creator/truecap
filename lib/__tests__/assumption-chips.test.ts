@@ -91,7 +91,7 @@ describe("buildAssumptionChips (input-side assumptions strip)", () => {
     );
   });
 
-  it("badges FRED-filled financing as live and state-filled taxes with the state code", () => {
+  it("badges FRED-filled financing and marks legacy state tax provenance for verification", () => {
     const chips = buildAssumptionChips(
       {
         ...defaultValues,
@@ -109,9 +109,9 @@ describe("buildAssumptionChips (input-side assumptions strip)", () => {
     expect(taxes.label).toBe("Taxes 1.31% of price/year");
     expect(taxes.badge).toEqual({
       kind: "state",
-      text: "PA state benchmark",
+      text: "legacy PA estimate · verify locally",
     });
-    expect(taxes.pulseKey).toBe("tax:state");
+    expect(taxes.pulseKey).toBeNull();
   });
 
   it("flips auto-filled badges to 'yours' once the user overrides the value", () => {

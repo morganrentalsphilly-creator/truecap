@@ -32,7 +32,12 @@ export const metadata: Metadata = {
     url: "/embed",
     type: "website",
     images: [
-      { url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap embeddable calculators" },
+      {
+        url: "/home.jpg",
+        width: 1200,
+        height: 630,
+        alt: "TrueCap embeddable calculators",
+      },
     ],
   },
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
@@ -56,18 +61,20 @@ export default function EmbedHubPage() {
           </h1>
           <p className="text-base text-muted-foreground mt-3 leading-relaxed max-w-2xl">
             Real estate bloggers, agents, course creators, and finance writers:
-            grab the iframe code below and drop any of our {EMBEDDABLE_COUNT} embeddable
-            calculators on your site — {EMBEDDABLE_COUNT} of our {CALCULATOR_COUNT} free
-            tools (the Rehab Cost Estimator runs on TrueCap only). Free to use
-            forever. No signup, no
-            attribution required beyond the small &quot;Powered by TrueCap&quot;
-            footer (which links back to us — so you get a free calculator,
-            we get a backlink).
+            grab the iframe code below and drop any of our {EMBEDDABLE_COUNT}{" "}
+            embeddable calculators on your site — {EMBEDDABLE_COUNT} of our{" "}
+            {CALCULATOR_COUNT} free tools (the Rehab Cost Estimator runs on
+            TrueCap only). Currently free to use. No signup and no attribution
+            required beyond the small &quot;Powered by TrueCap&quot; footer
+            (which links back to us — so you get a free calculator, we get a
+            backlink).
           </p>
 
           <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
             <div className="rounded-xl border border-border bg-card p-3">
-              <p className="font-bold text-foreground">{EMBEDDABLE_COUNT} embeddable</p>
+              <p className="font-bold text-foreground">
+                {EMBEDDABLE_COUNT} embeddable
+              </p>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Of {CALCULATOR_COUNT} TrueCap calculators
               </p>
@@ -85,9 +92,9 @@ export default function EmbedHubPage() {
               </p>
             </div>
             <div className="rounded-xl border border-border bg-card p-3">
-              <p className="font-bold text-foreground">Free forever</p>
+              <p className="font-bold text-foreground">No account needed</p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                No API key, no signup, no rate limits
+                No API key or signup for the published embeds
               </p>
             </div>
           </div>
@@ -102,17 +109,12 @@ export default function EmbedHubPage() {
             <li>Pick the calculator below that fits your post or page.</li>
             <li>Click &quot;Copy&quot; on the embed code.</li>
             <li>
-              Paste the HTML into your page. Works on{" "}
-              <span className="font-semibold">WordPress</span> (Custom HTML
-              block), <span className="font-semibold">Webflow</span>{" "}
-              (Embed element), <span className="font-semibold">Ghost</span>{" "}
-              (HTML card), <span className="font-semibold">Squarespace</span>{" "}
-              (Code block), <span className="font-semibold">Substack</span>,
-              and any CMS that accepts raw HTML.
+              Paste the HTML into a custom-code or embed block in a CMS that
+              permits third-party iframes. Platform and security settings vary,
+              so preview the published page before relying on it.
             </li>
             <li>
-              Save. The calculator renders on your page with auto-sized
-              height.
+              Save. The calculator renders on your page with auto-sized height.
             </li>
           </ol>
           <p className="mt-3 text-xs text-muted-foreground">
@@ -164,6 +166,7 @@ export default function EmbedHubPage() {
                 </p>
                 <EmbedCodeBlock
                   slug={entry.slug}
+                  title={entry.title}
                   siteUrl={siteUrl}
                   defaultHeight={entry.defaultHeight}
                 />
@@ -188,16 +191,16 @@ export default function EmbedHubPage() {
                 a: "Yes. The footer is the only ask in exchange for free, hosted, maintained calculators. It's small, tasteful, and doesn't compete with your content.",
               },
               {
-                q: "Will the calculator slow down my site?",
-                a: "No. The iframe loads lazily (loading=\"lazy\") so it only fetches when scrolled into view. Renders independently of your page so it can't block your content from showing.",
+                q: "How does the embed affect page loading?",
+                a: 'The iframe uses loading="lazy" and renders in its own document, which limits initial work in supporting browsers. Actual performance depends on the host page, browser, placement, and content-security settings, so measure the published page.',
               },
               {
                 q: "Can I track conversions from my embed?",
-                a: "The attribution link uses utm_source=embed plus a per-calculator utm_campaign so we can report aggregate traffic. If you want per-site attribution, add ?ref=<your-site> to the iframe src — we'll forward it on through to TrueCap and pass it to GA.",
+                a: "The attribution link uses utm_source=embed, utm_medium=referral, and a calculator-specific utm_campaign so TrueCap can report aggregate embed traffic. It does not accept partner identity or property data.",
               },
               {
-                q: "What if your calculator math changes?",
-                a: "Embeds auto-update because they load from TrueCap servers. You always get the current version. We commit to backward-compatible URLs — embed code you paste today keeps working forever.",
+                q: "What if the calculator changes?",
+                a: "The iframe loads the currently released TrueCap implementation, so reviewed updates appear without replacing the snippet. Keep the attribution intact and periodically verify the embed as part of your own site checks.",
               },
             ].map((f) => (
               <details key={f.q} className="group p-5">

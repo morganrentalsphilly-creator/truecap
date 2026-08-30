@@ -36,7 +36,14 @@ export const metadata: Metadata = {
       "Compare rental deals in seconds with Gross Rent Multiplier — the fastest screening ratio in real estate.",
     url: "/tools/gross-rent-multiplier-calculator",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap GRM calculator" }],
+    images: [
+      {
+        url: "/home.jpg",
+        width: 1200,
+        height: 630,
+        alt: "TrueCap GRM calculator",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -123,57 +130,88 @@ export default function GrmCalculatorPage() {
 
   return (
     <>
-      <ToolBreadcrumbSchema toolPath="/tools/gross-rent-multiplier-calculator" toolName="GRM calculator" />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }} />
+      <ToolBreadcrumbSchema
+        toolPath="/tools/gross-rent-multiplier-calculator"
+        toolName="GRM calculator"
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }}
+      />
 
       <div className="min-h-screen bg-background">
-        <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <main
+          id="main"
+          className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12"
+        >
           <header className="mb-6 sm:mb-8">
-            <Link href="/tools" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">
+            <Link
+              href="/tools"
+              className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+            >
               ← TrueCap free tools
             </Link>
             <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">
               GRM Calculator
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground mt-2 leading-relaxed">
-              Gross Rent Multiplier — the 10-second screening ratio every
-              real estate investor uses to triage deals before bothering
-              with operating expenses.
+              Gross Rent Multiplier — the 10-second screening ratio every real
+              estate investor uses to triage deals before bothering with
+              operating expenses.
             </p>
           </header>
 
           <GrmCalculatorWidget />
 
           <article className="prose prose-slate max-w-none mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
-            <h2 className="text-2xl sm:text-3xl">Why every investor knows GRM</h2>
+            <h2 className="text-2xl sm:text-3xl">
+              Why every investor knows GRM
+            </h2>
             <p>
-              You&apos;re scrolling Zillow at 11 PM. You see 40 listings in
-              your target zip code. You don&apos;t have property tax,
-              insurance, or maintenance numbers for any of them. What you
-              do have is price and asking rent. GRM is the ratio that lets
-              you sort that list of 40 into the 8 worth actually
-              underwriting, in about 90 seconds. That&apos;s why it&apos;s
-              the first metric every experienced investor reaches for — read{" "}
-              <Link href="/blog/gross-rent-multiplier-explained" className="font-semibold text-primary hover:underline">gross rent multiplier explained</Link>{" "}
+              You&apos;re scrolling Zillow at 11 PM. You see 40 listings in your
+              target zip code. You don&apos;t have property tax, insurance, or
+              maintenance numbers for any of them. What you do have is price and
+              asking rent. GRM is the ratio that lets you sort that list of 40
+              into the 8 worth actually underwriting, in about 90 seconds.
+              That&apos;s why it&apos;s the first metric every experienced
+              investor reaches for — read{" "}
+              <Link
+                href="/blog/gross-rent-multiplier-explained"
+                className="font-semibold text-primary hover:underline"
+              >
+                gross rent multiplier explained
+              </Link>{" "}
               for the full primer, and pair it with the{" "}
-              <Link href="/tools/1-percent-rule-calculator" className="font-semibold text-primary hover:underline">1% rule calculator</Link>{" "}
+              <Link
+                href="/tools/1-percent-rule-calculator"
+                className="font-semibold text-primary hover:underline"
+              >
+                1% rule calculator
+              </Link>{" "}
               as a second fast screen.
             </p>
 
             <h3>The formula</h3>
             <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
               <div className="text-base sm:text-lg font-mono">
-                <span className="font-bold">GRM</span> = Property Price ÷ Annual Gross Rent
+                <span className="font-bold">GRM</span> = Property Price ÷ Annual
+                Gross Rent
               </div>
               <div className="text-sm text-muted-foreground mt-2">
                 where Annual Gross Rent = Monthly Rent × 12
               </div>
             </div>
             <p>
-              Example: a $295,000 duplex renting for $2,950/month gross
-              has a GRM of 295,000 ÷ (2,950 × 12) = 295,000 ÷ 35,400 ≈
+              Example: a $295,000 duplex renting for $2,950/month gross has a
+              GRM of 295,000 ÷ (2,950 × 12) = 295,000 ÷ 35,400 ≈
               <strong> 8.3</strong>. That&apos;s a healthy GRM — typical
               cash-flow market territory.
             </p>
@@ -181,38 +219,36 @@ export default function GrmCalculatorPage() {
             <h2 className="text-2xl sm:text-3xl">GRM benchmarks by market</h2>
             <ul>
               <li>
-                <strong>Under 6</strong> — Very strong / distressed.
-                Verify everything (deferred maintenance, vacancy, title
-                issues, neighborhood trajectory).
+                <strong>Under 6</strong> — Very strong / distressed. Verify
+                everything (deferred maintenance, vacancy, title issues,
+                neighborhood trajectory).
               </li>
               <li>
-                <strong>6–10</strong> — Healthy cash-flow markets.
-                Midwest, Sun Belt secondary markets, older multifamily.
+                <strong>6–10</strong> — Healthy cash-flow markets. Midwest, Sun
+                Belt secondary markets, older multifamily.
               </li>
               <li>
                 <strong>10–14</strong> — Balanced. Mix of cash flow and
                 appreciation. Most U.S. markets land here.
               </li>
               <li>
-                <strong>14–20</strong> — Appreciation market. Returns
-                come from price growth, not cash flow. Coastal and Tier-1
-                metros.
+                <strong>14–20</strong> — Appreciation market. Returns come from
+                price growth, not cash flow. Coastal and Tier-1 metros.
               </li>
               <li>
-                <strong>20+</strong> — Expensive / luxury. Minimal yield;
-                the bet is almost entirely on appreciation and tax
-                benefits.
+                <strong>20+</strong> — Expensive / luxury. Minimal yield; the
+                bet is almost entirely on appreciation and tax benefits.
               </li>
             </ul>
 
             <h2 className="text-2xl sm:text-3xl">GRM vs Cap Rate</h2>
             <p>
-              Both metrics measure the same thing — how much income a
-              property produces relative to its price — but they target
-              different stages of the workflow. GRM uses gross rent and
-              is purely a screening tool. Cap rate uses NOI (gross rent
-              minus opex) and is closer to what an institutional buyer
-              actually pays for. The two are mathematically linked:
+              Both metrics measure the same thing — how much income a property
+              produces relative to its price — but they target different stages
+              of the workflow. GRM uses gross rent and is purely a screening
+              tool. Cap rate uses NOI (gross rent minus opex) and is closer to
+              what an institutional buyer actually pays for. The two are
+              mathematically linked:
             </p>
             <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
               <div className="text-sm sm:text-base font-mono">
@@ -223,41 +259,41 @@ export default function GrmCalculatorPage() {
               </div>
             </div>
             <p>
-              Use GRM when you&apos;re shopping. Use cap rate when
-              you&apos;re writing the offer. Use both together as a
-              sanity check — a property with a great GRM but a terrible
-              cap rate is hiding expensive operating problems
-              (institutional water, unusually high tax, deferred capex).
+              Use GRM when you&apos;re shopping. Use cap rate when you&apos;re
+              writing the offer. Use both together as a sanity check — a
+              property with a great GRM but a terrible cap rate is hiding
+              expensive operating problems (institutional water, unusually high
+              tax, deferred capex).
             </p>
 
             <h2 className="text-2xl sm:text-3xl">Limitations of GRM</h2>
             <h3>1. It ignores operating expenses</h3>
             <p>
-              Two properties with identical GRM can have wildly different
-              real returns if one has $400/month in HOA fees and the
-              other doesn&apos;t. GRM treats every property as if opex
-              is identical — it isn&apos;t.
+              Two properties with identical GRM can have wildly different real
+              returns if one has $400/month in HOA fees and the other
+              doesn&apos;t. GRM treats every property as if opex is identical —
+              it isn&apos;t.
             </p>
             <h3>2. It ignores financing</h3>
             <p>
-              GRM is an all-cash metric. It doesn&apos;t care about
-              interest rates, down payment, or loan terms. Two investors
-              looking at the same GRM-8 property will get totally
-              different cash-on-cash returns depending on their leverage.
+              GRM is an all-cash metric. It doesn&apos;t care about interest
+              rates, down payment, or loan terms. Two investors looking at the
+              same GRM-8 property will get totally different cash-on-cash
+              returns depending on their leverage.
             </p>
             <h3>3. It ignores vacancy</h3>
             <p>
-              GRM uses asking rent, not effective rent. A property with a
-              great GRM in a transient neighborhood with 25% vacancy is
-              not the deal it looks like. Always sanity-check market
-              vacancy before trusting GRM.
+              GRM uses asking rent, not effective rent. A property with a great
+              GRM in a transient neighborhood with 25% vacancy is not the deal
+              it looks like. Always sanity-check market vacancy before trusting
+              GRM.
             </p>
             <h3>4. It ignores condition</h3>
             <p>
-              A turnkey property and a rehab project with the same price
-              and same projected rent have the same GRM — but the rehab
-              needs $40k of work before you collect a dollar. Pair GRM
-              with a condition assessment.
+              A turnkey property and a rehab project with the same price and
+              same projected rent have the same GRM — but the rehab needs $40k
+              of work before you collect a dollar. Pair GRM with a condition
+              assessment.
             </p>
           </article>
 
@@ -267,15 +303,17 @@ export default function GrmCalculatorPage() {
 
           <ToolEmbedInvite slug="gross-rent-multiplier-calculator" />
 
-
           <ToolsConversionCta
             calculatorName="GRM calculator"
-            hook="GRM is a screening tool. Once a deal deserves a fuller underwrite, TrueCap adds cap rate, cash-on-cash, DSCR, cash flow, a 10-year cash-flow and equity projection, sensitivity, and Offer Ceiling. Free to start."
+            hook="GRM is a screening tool. TrueCap's free core analyzer adds editable cap rate, cash-on-cash, model DSCR, and cash flow. Released projections, sensitivity, and Offer Ceiling appear only when your evaluation or plan access includes them."
           />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}
-            <Link href="/" className="font-bold text-foreground hover:underline">
+            <Link
+              href="/"
+              className="font-bold text-foreground hover:underline"
+            >
               TrueCap
             </Link>{" "}
             — transparent, editable rental analysis, free to start.

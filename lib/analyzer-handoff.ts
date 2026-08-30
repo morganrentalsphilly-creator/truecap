@@ -3,8 +3,11 @@
  *
  * A /tools calculator (or an embed of one) can carry the numbers the user
  * already typed into the full TrueCap analyzer, so they don't re-enter them.
- * We pass them as URL query params (?price=&rent=&beds=&address=) rather than
- * localStorage so the handoff works cross-origin from embeds too.
+ * Generated URLs remain backward-compatible, but first-party links stage
+ * exact values in short-lived sessionStorage and render only a scrubbed URL.
+ * A pre-analytics bootstrap consumes old/direct query links before any vendor
+ * script can observe an address or financial input. Cross-origin embeds open
+ * a clean analyzer without carrying exact inputs between storage partitions.
  *
  * Pure and client-safe so it's unit-testable and safe to import on both the
  * client widgets (build the URL) and the analyzer (read the params). Strategy
@@ -20,7 +23,10 @@ import { isSpecialistStrategyEnabled } from "@/lib/feature-flags";
 
 /** The three property types the analyzer supports (mirrors the form enum;
  *  kept local so this module stays dependency-free). */
-export type HandoffPropertyType = "single-family" | "multi-family" | "owner-occupant";
+export type HandoffPropertyType =
+  | "single-family"
+  | "multi-family"
+  | "owner-occupant";
 const HANDOFF_PROPERTY_TYPES: readonly HandoffPropertyType[] = [
   "single-family",
   "multi-family",
@@ -54,8 +60,8 @@ export function isReleasedHandoffStrategy(
 ): value is HandoffStrategyKey {
   return Boolean(
     value &&
-      (HANDOFF_STRATEGY_KEYS as readonly string[]).includes(value) &&
-      isSpecialistStrategyEnabled(value),
+    (HANDOFF_STRATEGY_KEYS as readonly string[]).includes(value) &&
+    isSpecialistStrategyEnabled(value),
   );
 }
 
@@ -88,6 +94,115 @@ export interface AnalyzerHandoff {
    * own property type).
    */
   strategy?: HandoffStrategyKey;
+}
+
+export const ANALYZER_HANDOFF_SESSION_KEY =
+  "truecap_private_analyzer_handoff_v1";
+export const PRIVATE_ANALYZER_HANDOFF_QUERY_PARAMETERS = [
+  "price",
+  "rent",
+  "beds",
+  "rate",
+  "tax",
+  "address",
+] as const;
+const PRIVATE_ANALYZER_HANDOFF_TTL_MS = 5 * 60 * 1000;
+
+type HandoffStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
+
+function splitPrivateHandoffUrl(href: string): {
+  cleanHref: string;
+  privateSearch: string;
+} {
+  const parsed = new URL(href, "https://truecap.invalid");
+  const privateParams = new URLSearchParams();
+  for (const name of PRIVATE_ANALYZER_HANDOFF_QUERY_PARAMETERS) {
+    const value = parsed.searchParams.get(name);
+    if (value !== null) privateParams.set(name, value);
+    parsed.searchParams.delete(name);
+  }
+  return {
+    cleanHref: `${parsed.pathname}${parsed.search}${parsed.hash}`,
+    privateSearch: privateParams.toString(),
+  };
+}
+
+/** Render-safe destination: never puts exact handoff inputs in an anchor. */
+export function scrubAnalyzerHandoffHref(href: string): string {
+  try {
+    return splitPrivateHandoffUrl(href).cleanHref;
+  } catch {
+    return "/";
+  }
+}
+
+/** Stage an exact same-tab handoff just before navigation. */
+export function stageAnalyzerHandoffHref(
+  href: string,
+  storage: HandoffStorage,
+  now = Date.now(),
+): boolean {
+  try {
+    const { privateSearch } = splitPrivateHandoffUrl(href);
+    if (!privateSearch) return false;
+    storage.setItem(
+      ANALYZER_HANDOFF_SESSION_KEY,
+      JSON.stringify({ version: 1, privateSearch, createdAt: now }),
+    );
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function consumeStagedAnalyzerHandoff(
+  storage: HandoffStorage,
+  now = Date.now(),
+): AnalyzerHandoff | null {
+  try {
+    const raw = storage.getItem(ANALYZER_HANDOFF_SESSION_KEY);
+    storage.removeItem(ANALYZER_HANDOFF_SESSION_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    if (
+      parsed.version !== 1 ||
+      typeof parsed.privateSearch !== "string" ||
+      typeof parsed.createdAt !== "number" ||
+      !Number.isFinite(parsed.createdAt) ||
+      now - parsed.createdAt < 0 ||
+      now - parsed.createdAt > PRIVATE_ANALYZER_HANDOFF_TTL_MS
+    ) {
+      return null;
+    }
+    return readAnalyzerHandoff(parsed.privateSearch);
+  } catch {
+    return null;
+  }
+}
+
+/** Consume direct safe params plus one short-lived private same-tab payload. */
+export function consumeAnalyzerHandoff(
+  search: string,
+  storage: HandoffStorage,
+  now = Date.now(),
+): AnalyzerHandoff | null {
+  const staged = consumeStagedAnalyzerHandoff(storage, now);
+  const direct = readAnalyzerHandoff(search);
+  if (!staged) return direct;
+  if (!direct) return staged;
+  return { ...staged, ...direct };
+}
+
+/**
+ * Inline head bootstrap for backward-compatible/direct URLs. It moves exact
+ * inputs to short-lived session storage and removes them from location.href
+ * before Google, Vercel, PostHog, Sentry, or the browser referrer can read
+ * them. Storage failure still strips the URL (privacy-first degradation).
+ */
+export function analyzerHandoffBootstrapScript(): string {
+  const names = JSON.stringify(PRIVATE_ANALYZER_HANDOFF_QUERY_PARAMETERS);
+  const key = JSON.stringify(ANALYZER_HANDOFF_SESSION_KEY);
+  return `(function(){try{var u=new URL(window.location.href);if(u.pathname!=="/")return;var n=${names},p=new URLSearchParams(),f=false;n.forEach(function(k){var v=u.searchParams.get(k);if(v!==null){p.set(k,v);u.searchParams.delete(k);f=true;}});if(!f)return;try{window.sessionStorage.setItem(${key},JSON.stringify({version:1,privateSearch:p.toString(),createdAt:Date.now()}));}catch(_){}window.history.replaceState(window.history.state,"",u.pathname+u.search+u.hash);}catch(_){}})();`;
 }
 
 /**
@@ -157,7 +272,10 @@ export function readAnalyzerHandoff(search: string): AnalyzerHandoff | null {
   // `type` (or the explicit `propertyType`) — validated against the enum;
   // anything else is silently ignored so a bad link never crashes init.
   const rawType = (params.get("type") ?? params.get("propertyType"))?.trim();
-  if (rawType && (HANDOFF_PROPERTY_TYPES as readonly string[]).includes(rawType)) {
+  if (
+    rawType &&
+    (HANDOFF_PROPERTY_TYPES as readonly string[]).includes(rawType)
+  ) {
     out.propertyType = rawType as HandoffPropertyType;
   }
 
@@ -178,7 +296,7 @@ export function readAnalyzerHandoff(search: string): AnalyzerHandoff | null {
  */
 export function buildAnalyzerHandoffUrl(
   input: AnalyzerHandoff,
-  opts?: { base?: string; utmSource?: string }
+  opts?: { base?: string; utmSource?: string },
 ): string {
   const base = opts?.base ?? "/";
   const params = new URLSearchParams();
@@ -192,7 +310,11 @@ export function buildAnalyzerHandoffUrl(
   if (typeof input.bedrooms === "number" && input.bedrooms >= 0) {
     params.set("beds", String(input.bedrooms));
   }
-  if (typeof input.interestRate === "number" && input.interestRate >= 0 && input.interestRate <= 30) {
+  if (
+    typeof input.interestRate === "number" &&
+    input.interestRate >= 0 &&
+    input.interestRate <= 30
+  ) {
     params.set("rate", String(input.interestRate));
   }
   if (

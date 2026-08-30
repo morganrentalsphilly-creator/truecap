@@ -1,61 +1,61 @@
 {
-  "subject": "DSCR loans: when they save the deal, when they're a trap",
-  "preheader": "When DTI doesn't pencil · 8-9% typical rate band · the 1.20 floor that decides everything",
+  "subject": "DSCR financing: compare the lender's formula, quote, and conditions",
+  "preheader": "A property-level screening ratio is only one part of a loan decision",
   "publishedAt": "2026-07-07",
   "weekLabel": "Topic: DSCR financing",
   "marketSnapshot": {
-    "headline": "DSCR loans qualify the property, not you",
-    "body": "DSCR (Debt Service Coverage Ratio) loans are investor-targeted mortgages that qualify based on the property's rental income, not your personal DTI or tax returns. Useful when you're scaling and conventional financing slots run out, or when your W-2 income doesn't support more conventional deals. The tradeoff: rates run 100-200bp higher than conventional, and most DSCR lenders require a 1.20-1.25 DSCR floor. Worth understanding before you assume DSCR is the answer to every financing problem.",
+    "headline": "Model DSCR is a screen, not lender approval",
+    "body": "Debt Service Coverage Ratio compares a defined NOI with a defined debt-service amount. Lenders and programs may use different rent evidence, expenses, adjustments, thresholds, leverage, reserves, credit, property rules, and documentation. Ask for the written method and current terms for the exact loan you are evaluating.",
     "stats": [
       {
-        "label": "DSCR rate vs conventional",
-        "value": "+100-200bp"
+        "label": "Formula",
+        "value": "Program-specific"
       },
       {
-        "label": "Typical DSCR floor",
-        "value": "1.20-1.25"
+        "label": "Pricing",
+        "value": "Current written quote"
       },
       {
-        "label": "Typical cash-out LTV",
-        "value": "70-75%"
+        "label": "Approval",
+        "value": "Multiple conditions"
       }
     ]
   },
   "dealSpotter": [
     {
-      "address": "Example: DSCR-only deal (DTI doesn't pencil)",
-      "headlineNumber": "DSCR 1.23 · rate +130bp vs conventional · works",
-      "verdict": "Decent",
-      "body": "$685k 3-unit. Your W-2 doesn't support another conventional loan after the first few. DSCR lender qualifies the property at 1.23 ratio. You pay ~130bp more on rate, which costs ~$300/mo on the loan vs conventional. Still cash-flow positive. The premium is the cost of being able to keep buying without DTI as a constraint."
+      "address": "Educational scenario: property-cash-flow program",
+      "headlineNumber": "Compare the lender's NOI and debt-service convention",
+      "verdict": "Verify",
+      "body": "Enter the proposed rate, term, fees, leverage, and payment structure from a current quote. Then reconcile TrueCap's preliminary model DSCR with the lender's rent evidence and expense adjustments. A matching ratio still does not establish approval."
     },
     {
-      "address": "Example: conventional also works — take it",
-      "headlineNumber": "DSCR 1.35 · BUT conventional clears DTI too",
-      "verdict": "Take conventional",
-      "body": "$285k SFR. DSCR pencils easily. But your W-2 + existing rental income clears conventional DTI as well. Pricing comparison: DSCR 8.3% vs conventional 6.95% = 135bp spread = ~$320/mo difference. Take conventional. DSCR is a fallback when conventional doesn't work, not a default."
+      "address": "Educational scenario: two financing proposals",
+      "headlineNumber": "Hold property assumptions constant",
+      "verdict": "Compare",
+      "body": "Compare written proposals using the same price, rent, vacancy, tax, insurance, and operating assumptions. Review total cash required, recurring payment, maturity or balloon terms, prepayment provisions, reserves, and closing costs rather than selecting a product from the headline rate alone."
     },
     {
-      "address": "Example: DSCR barely clears 1.0 — Walk",
-      "headlineNumber": "DSCR 1.04 · most lenders won't fund",
-      "verdict": "Skip",
-      "body": "$575k 3/2. The property's gross rent barely covers debt service at DSCR loan rates. DSCR comes in at 1.04 — below the typical 1.20 floor. The lenders who will fund at 1.05+ charge 9.5%+ which actually makes the deal cash-flow negative. The DSCR floor isn't arbitrary — it represents the lender's risk math. When you're scraping under it, the deal is too tight."
+      "address": "Educational scenario: ratio below a quoted threshold",
+      "headlineNumber": "Resolve the gap with the lender",
+      "verdict": "Review",
+      "body": "Confirm whether the difference comes from rent evidence, NOI adjustments, debt-service treatment, leverage, or a different program rule. Test only terms the lender is actually willing to quote. The modeled gap is a due-diligence prompt, not an instruction to buy, skip, or change financing."
     }
   ],
   "blogFeature": {
-    "title": "DSCR loans explained: rates, requirements, and when they make sense",
+    "title": "DSCR loans explained: formulas, evidence, and questions to ask",
     "url": "https://usetruecap.com/blog/dscr-loans-explained",
-    "excerpt": "DSCR loans qualify the property, not you — but the trade-off is +100-200bp over conventional rates and a 1.20-1.25 ratio floor. The cases where DSCR is the only path forward + the cases where it's a trap."
+    "excerpt": "DSCR products vary by lender and program. Compare the written formula, rent evidence, adjustments, pricing, leverage, reserves, and loan documents for the exact proposal."
   },
   "qa": {
-    "question": "I have 3 conventional rental loans already and my DTI is tight. Should I switch to DSCR for my next deal?",
-    "answer": "Probably yes, but understand the trade-off. The +100-200bp rate premium compounds over the holding period — on a $300k loan over 10 years, ~$300/mo of extra interest is $36k of lifetime cost vs. conventional. Math that against the alternative (don't buy at all, wait until you can clear conventional DTI). If you'd otherwise sit on the sidelines for 12-24 months, the DSCR premium is the cost of continuing to deploy capital. Practical tactics that reduce friction: shop multiple DSCR lenders (rate spread across DSCR lenders is wider than conventional — 30-50bp variance is normal), put down 25-30% instead of the minimum (improves DSCR ratio AND lowers rate), and structure for a 5-year interest-only period if available (lower payment = better DSCR + more cash flow during hold)."
+    "question": "Should I switch from conventional financing to a DSCR product?",
+    "answer": "There is no universal answer. Obtain current written proposals for the property and compare cash required, rate and points, payment schedule, maturity or balloon, prepayment terms, recourse, reserves, documentation, closing costs, and the lender's own DSCR calculation. Model the same property assumptions for each proposal and verify legal, tax, title, and financing consequences with qualified professionals. TrueCap's result is a preliminary comparison, not a recommendation or approval."
   },
   "shipNote": {
-    "title": "DSCR ratio shown on every analysis",
+    "title": "Review model DSCR in TrueCap",
     "items": [
-      "Free: TrueCap calculates DSCR alongside cap rate + cash-on-cash on every deal",
-      "Pro: A/B mortgage compare — model the same deal at conventional vs DSCR rates side-by-side",
-      "Know if your deal pencils before you call a lender →"
+      "Free: calculate preliminary model DSCR beside cap rate, cash-on-cash return, and cash flow",
+      "When your access includes comparison features, use only current written financing terms",
+      "Confirm the lender's formula and conditions before relying on the result"
     ]
   }
 }

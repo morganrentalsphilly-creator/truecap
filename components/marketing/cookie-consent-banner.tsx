@@ -56,7 +56,8 @@ function readStoredConsent(): ConsentValue | null {
 
 function writeStoredConsent(value: ConsentValue): void {
   try {
-    if (typeof window !== "undefined") window.localStorage.setItem(STORAGE_KEY, value);
+    if (typeof window !== "undefined")
+      window.localStorage.setItem(STORAGE_KEY, value);
   } catch {
     /* private mode / disabled storage — choice won't persist but UX still works for this session */
   }
@@ -87,7 +88,9 @@ export function CookieConsentBanner() {
 
   // Render nothing until we've checked storage — prevents banner flash
   // for users who already decided previously.
-  const [decision, setDecision] = useState<ConsentValue | "pending" | null>(null);
+  const [decision, setDecision] = useState<ConsentValue | "pending" | null>(
+    null,
+  );
 
   const bannerRef = useRef<HTMLDivElement>(null);
 
@@ -150,7 +153,8 @@ export function CookieConsentBanner() {
   if (HIDE_ON_PATHS.some((p) => pathname.startsWith(p))) return null;
 
   // Hide after a decision is made (or before storage is checked).
-  if (decision === null || decision === "granted" || decision === "denied") return null;
+  if (decision === null || decision === "granted" || decision === "denied")
+    return null;
 
   return (
     <div
@@ -180,14 +184,24 @@ export function CookieConsentBanner() {
             <strong>We use cookies</strong>
             <span className="sm:hidden">
               {" for analytics & ads — "}
-              <Link href="/privacy" className="font-semibold text-primary underline-offset-2 hover:underline">
+              <Link
+                href="/privacy"
+                data-cookie-privacy-link=""
+                className="inline-flex min-h-11 min-w-11 items-center font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
                 privacy policy
               </Link>
               .
             </span>
             <span className="hidden sm:inline">
-              {" for analytics + paid-ad measurement. Reject and only essential session cookies are set. See our "}
-              <Link href="/privacy" className="font-semibold text-primary underline-offset-2 hover:underline">
+              {
+                " for analytics + paid-ad measurement. Reject and only essential session cookies are set. See our "
+              }
+              <Link
+                href="/privacy"
+                data-cookie-privacy-link=""
+                className="inline-flex min-h-11 min-w-11 items-center font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
                 privacy policy
               </Link>
               .

@@ -21,7 +21,10 @@ import { fileURLToPath } from "node:url";
  */
 
 function read(relativePath: string): string {
-  return readFileSync(fileURLToPath(new URL(relativePath, import.meta.url)), "utf8");
+  return readFileSync(
+    fileURLToPath(new URL(relativePath, import.meta.url)),
+    "utf8",
+  );
 }
 
 /**
@@ -79,23 +82,31 @@ describe("mobile layout guards", () => {
   it("the footer clears whatever sticky bottom bar is mounted", () => {
     const css = read("../../app/globals.css");
     // The rule and the markup it selects have to move together.
-    expect(css).toContain("body:has([data-sticky-bottom-bar]) [data-site-footer]");
-    expect(read("../../components/marketing/site-footer.tsx")).toContain('data-site-footer=""');
+    expect(css).toContain(
+      "body:has([data-sticky-bottom-bar]) [data-site-footer]",
+    );
+    expect(read("../../components/marketing/site-footer.tsx")).toContain(
+      'data-site-footer=""',
+    );
     for (const file of [
-      "../../components/marketing/blog-sticky-cta.tsx",
       "../../components/marketing/sticky-conversion-bar.tsx",
-      "../../components/marketing/tools-conversion-cta.tsx",
     ]) {
       expect(read(file)).toContain('data-sticky-bottom-bar=""');
       // …and each one must be conditionally RENDERED, not hidden by a
       // breakpoint class — that is what makes the unconditional rule above
       // safe. A `sm:hidden`/`md:hidden` on the bar itself would leave it
       // mounted-but-invisible and pad the footer for nothing.
-      const barTag = read(file).slice(read(file).indexOf('data-sticky-bottom-bar=""'));
-      expect(barTag.slice(0, barTag.indexOf(">"))).not.toMatch(/\b(sm|md|lg):hidden\b/);
+      const barTag = read(file).slice(
+        read(file).indexOf('data-sticky-bottom-bar=""'),
+      );
+      expect(barTag.slice(0, barTag.indexOf(">"))).not.toMatch(
+        /\b(sm|md|lg):hidden\b/,
+      );
     }
     // The calculator's own submit bar is matched via its existing attribute…
-    const calcBar = read("../../components/investcalc/sticky-calculate-bar.tsx");
+    const calcBar = read(
+      "../../components/investcalc/sticky-calculate-bar.tsx",
+    );
     expect(calcBar).toContain('data-sticky-calc-bar=""');
     // …but it is `lg:hidden`, i.e. it stays MOUNTED with display:none from
     // 1024px up, so :has() matches it in the desktop cockpit too. Its
@@ -103,10 +114,12 @@ describe("mobile layout guards", () => {
     // re-grows 72px of dead footer space at desktop widths.
     expect(calcBar).toContain("lg:hidden fixed");
     expect(css).toMatch(
-      /@media \(max-width: 1023\.9px\) \{\s*body:has\(\[data-sticky-calc-bar\]\) \[data-site-footer\] \{\s*padding-bottom: calc\(4\.5rem \+ env\(safe-area-inset-bottom\)\);\s*\}\s*\}/
+      /@media \(max-width: 1023\.9px\) \{\s*body:has\(\[data-sticky-calc-bar\]\) \[data-site-footer\] \{\s*padding-bottom: calc\(4\.5rem \+ env\(safe-area-inset-bottom\)\);\s*\}\s*\}/,
     );
     // And it must not ALSO appear unscoped anywhere.
-    expect(css).not.toContain("body:has([data-sticky-bottom-bar], [data-sticky-calc-bar])");
+    expect(css).not.toContain(
+      "body:has([data-sticky-bottom-bar], [data-sticky-calc-bar])",
+    );
   });
 
   it("dashboard deep links resolve the RENDERED deal anchor, not the first id match", () => {
@@ -126,7 +139,7 @@ describe("mobile layout guards", () => {
     // Both lookups go through the shared helper.
     const scrollToDeal = home.slice(
       home.indexOf("function scrollToDeal("),
-      home.indexOf("function getDecisionHighlights(")
+      home.indexOf("function getDecisionHighlights("),
     );
     expect(scrollToDeal.match(/findRenderedDealAnchor\(id\)/g)?.length).toBe(2);
     // The null branch (nothing laid out) is what asks TopDeals to expand.
@@ -135,7 +148,9 @@ describe("mobile layout guards", () => {
 
   it("the dashboard skip-link target clears the fixed mobile Topbar", () => {
     const css = read("../../app/globals.css");
-    expect(css).toMatch(/\.dashboard-shell #main \{\s*scroll-margin-top: 4rem;/);
+    expect(css).toMatch(
+      /\.dashboard-shell #main \{\s*scroll-margin-top: 4rem;/,
+    );
     // The shell's skip link must stay viewport-fixed: .dashboard-shell is not
     // positioned, so focus:absolute pins it to the document top instead.
     const shell = read("../../components/dashboard/dashboard-shell.tsx");

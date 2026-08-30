@@ -19,7 +19,10 @@ import {
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
-import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-faq";
+import {
+  ComparisonFaq,
+  type FaqItem,
+} from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
@@ -41,26 +44,91 @@ export const metadata: Metadata = {
       "Lodgify is small-operator STR software. TrueCap underwrites the STR deal before. Different stages.",
     url: "/vs/lodgify",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs Lodgify" }],
+    images: [
+      { url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs Lodgify" },
+    ],
   },
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
 type Verdict = "truecap" | "lodgify" | "tie";
-type Row = { feature: string; truecap: string; lodgify: string; winner: Verdict };
+type Row = {
+  feature: string;
+  truecap: string;
+  lodgify: string;
+  winner: Verdict;
+};
 
 const MATRIX: Row[] = [
-  { feature: "Lifecycle stage", truecap: "Pre-purchase — underwrite the STR deal", lodgify: "Post-purchase — host + manage STRs", winner: "tie" },
-  { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, editable rent input", lodgify: "Not modeled", winner: "truecap" },
-  { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", lodgify: "Not modeled", winner: "truecap" },
-  { feature: "Address auto-fill (rent/rate/tax)", truecap: "Editable HUD, FRED, and state effective-rate starting estimates", lodgify: "Not applicable", winner: "truecap" },
-  { feature: "Direct-booking website builder", truecap: "No", lodgify: "Yes — branded site builder", winner: "lodgify" },
-  { feature: "Channel manager (Airbnb, Vrbo, Booking)", truecap: "No", lodgify: "Yes — unified inbox + calendar", winner: "lodgify" },
-  { feature: "Guest messaging", truecap: "No", lodgify: "Yes — automated messages", winner: "lodgify" },
-  { feature: "Reservation system", truecap: "No", lodgify: "Yes — built-in calendar + payments", winner: "lodgify" },
-  { feature: "Sweet spot", truecap: "1-30 doors, solo investor underwriting", lodgify: "1-10 STRs, solo operator", winner: "tie" },
-  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", lodgify: "No permanent free tier; time-limited trial — confirm current terms", winner: "truecap" },
-  { feature: "Pricing (entry tier)", truecap: "Free core; paid Pro — see live pricing", lodgify: "Paid Basic, Starter, Professional, and Ultimate plans — see live pricing", winner: "truecap" },
+  {
+    feature: "Lifecycle stage",
+    truecap: "Pre-purchase — underwrite the STR deal",
+    lodgify: "Post-purchase — host + manage STRs",
+    winner: "tie",
+  },
+  {
+    feature: "Cap rate / CoC / DSCR analysis",
+    truecap: "Yes — full engine, editable rent input",
+    lodgify: "Not modeled",
+    winner: "truecap",
+  },
+  {
+    feature: "10-year projection",
+    truecap: "Pro — rent + expense + appreciation",
+    lodgify: "Not modeled",
+    winner: "truecap",
+  },
+  {
+    feature: "Starting values (rent/rate/tax)",
+    truecap:
+      "Editable HUD rent and FRED rate benchmarks; manual local property tax",
+    lodgify: "Not applicable",
+    winner: "truecap",
+  },
+  {
+    feature: "Direct-booking website builder",
+    truecap: "No",
+    lodgify: "Yes — branded site builder",
+    winner: "lodgify",
+  },
+  {
+    feature: "Channel manager (Airbnb, Vrbo, Booking)",
+    truecap: "No",
+    lodgify: "Yes — unified inbox + calendar",
+    winner: "lodgify",
+  },
+  {
+    feature: "Guest messaging",
+    truecap: "No",
+    lodgify: "Yes — automated messages",
+    winner: "lodgify",
+  },
+  {
+    feature: "Reservation system",
+    truecap: "No",
+    lodgify: "Yes — built-in calendar + payments",
+    winner: "lodgify",
+  },
+  {
+    feature: "Sweet spot",
+    truecap: "1-30 doors, solo investor underwriting",
+    lodgify: "1-10 STRs, solo operator",
+    winner: "tie",
+  },
+  {
+    feature: "Free tier",
+    truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
+    lodgify:
+      "No permanent free tier; time-limited trial — confirm current terms",
+    winner: "truecap",
+  },
+  {
+    feature: "Pricing (entry tier)",
+    truecap: "Free core; paid Pro — see live pricing",
+    lodgify:
+      "Paid Basic, Starter, Professional, and Ultimate plans — see live pricing",
+    winner: "truecap",
+  },
 ];
 
 export default function VsLodgifyPage() {
@@ -101,15 +169,19 @@ export default function VsLodgifyPage() {
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
             TrueCap vs Lodgify:{" "}
-            <span className="text-primary">underwrite the STR, then run it</span>
+            <span className="text-primary">
+              underwrite the STR, then run it
+            </span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Lodgify is short-term rental software for hosts and property managers — direct-booking website, channel manager across Airbnb / Vrbo / Booking, and reservation tools. TrueCap is a pre-purchase underwriting calculator that helps investors screen an STR acquisition. Different stages, potentially complementary tools.
+            Lodgify is short-term rental software for hosts and property
+            managers — direct-booking website, channel manager across Airbnb /
+            Vrbo / Booking, and reservation tools. TrueCap is a pre-purchase
+            underwriting calculator that helps investors screen an STR
+            acquisition. Different stages, potentially complementary tools.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <ScrollToFormButton
-              className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5"
-            >
+            <ScrollToFormButton className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">
               <Calculator className="size-4" />
               Run a deal — 60 seconds
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
@@ -139,7 +211,9 @@ export default function VsLodgifyPage() {
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You&apos;re evaluating a property as a potential STR.</li>
                 <li>You want cap rate, DSCR, cash flow before buying.</li>
-                <li>You want to compare LTR vs STR scenarios on the same property.</li>
+                <li>
+                  You want to compare LTR vs STR scenarios on the same property.
+                </li>
                 <li>You&apos;re not yet hosting guests.</li>
               </ul>
             </div>
@@ -150,7 +224,10 @@ export default function VsLodgifyPage() {
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You operate STRs and need a website + channel manager.</li>
                 <li>You want to add a direct-booking channel.</li>
-                <li>You have compared its current plan, payment, and channel costs.</li>
+                <li>
+                  You have compared its current plan, payment, and channel
+                  costs.
+                </li>
                 <li>Its hosting workflow fits your team and listing count.</li>
               </ul>
             </div>
@@ -163,7 +240,8 @@ export default function VsLodgifyPage() {
             Feature-by-feature
           </h2>
           <p className="text-base text-muted-foreground mb-6 leading-relaxed">
-            Side-by-side on every dimension that matters for a comparison-shopping investor.
+            Side-by-side on every dimension that matters for a
+            comparison-shopping investor.
           </p>
           <div className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
@@ -182,7 +260,10 @@ export default function VsLodgifyPage() {
               </thead>
               <tbody>
                 {MATRIX.map((row) => (
-                  <tr key={row.feature} className="border-t border-border align-top">
+                  <tr
+                    key={row.feature}
+                    className="border-t border-border align-top"
+                  >
                     <td className="py-3 px-3 text-sm font-semibold text-foreground">
                       <div className="flex items-center gap-2">
                         <WinnerBadge winner={row.winner} side="row" />
@@ -208,7 +289,12 @@ export default function VsLodgifyPage() {
           </div>
           <p className="mt-3 text-[11px] text-muted-foreground">
             Lodgify plan and trial details can change. See{" "}
-            <a href="https://www.lodgify.com/pricing/" target="_blank" rel="noopener" className="underline">
+            <a
+              href="https://www.lodgify.com/pricing/"
+              target="_blank"
+              rel="noopener"
+              className="underline"
+            >
               Lodgify&apos;s official pricing page
             </a>{" "}
             for current terms.
@@ -222,29 +308,53 @@ export default function VsLodgifyPage() {
           </h2>
           <ol className="space-y-2.5 text-sm sm:text-base leading-relaxed text-foreground list-decimal pl-5">
             <li>
-              <strong>Find an STR-friendly property.</strong> MLS, off-market, or existing STR for sale.
+              <strong>Find an STR-friendly property.</strong> MLS, off-market,
+              or existing STR for sale.
             </li>
             <li>
-              <strong>Build an STR revenue range.</strong> Use current market evidence or a third-party STR data source, then verify the assumptions.
+              <strong>Build an STR revenue range.</strong> Use current market
+              evidence or a third-party STR data source, then verify the
+              assumptions.
             </li>
             <li>
-              <strong>Underwrite in TrueCap.</strong> Plug AirDNA&apos;s monthly revenue into the rent field. Run cap rate, DSCR, cash flow.
+              <strong>Underwrite in TrueCap.</strong> Plug AirDNA&apos;s monthly
+              revenue into the rent field. Run cap rate, DSCR, cash flow.
             </li>
             <li>
-              <strong>Continue due diligence.</strong> Verify local STR rules, insurance, financing, taxes, expenses, and revenue evidence before deciding.
+              <strong>Continue due diligence.</strong> Verify local STR rules,
+              insurance, financing, taxes, expenses, and revenue evidence before
+              deciding.
             </li>
             <li>
-              <strong>Set up Lodgify.</strong> Build your direct-booking site, connect Airbnb / Vrbo / Booking, configure your calendar.
+              <strong>Set up Lodgify.</strong> Build your direct-booking site,
+              connect Airbnb / Vrbo / Booking, configure your calendar.
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Want the underwriting half on its own? The free{" "}
-            <Link href="/tools/vacancy-rate-calculator" className="font-semibold text-primary hover:underline">vacancy rate calculator</Link> turns vacant
-            nights and turnover cost into the occupancy haircut an STR pro forma actually
-            needs, and our{" "}
-            <Link href="/blog/short-term-rental-underwriting-playbook" className="font-semibold text-primary hover:underline">short-term rental underwriting playbook</Link>{" "}
-            walks through the rest of the assumptions. Then hand the address to the full{" "}
-            <Link href="/" className="font-semibold text-primary hover:underline">TrueCap analyzer</Link> for cap rate, DSCR and cash flow in one pass.
+            <Link
+              href="/tools/vacancy-rate-calculator"
+              className="font-semibold text-primary hover:underline"
+            >
+              vacancy rate calculator
+            </Link>{" "}
+            turns vacant nights and turnover cost into the occupancy haircut an
+            STR pro forma actually needs, and our{" "}
+            <Link
+              href="/blog/short-term-rental-underwriting-playbook"
+              className="font-semibold text-primary hover:underline"
+            >
+              short-term rental underwriting playbook
+            </Link>{" "}
+            walks through the rest of the assumptions. Then hand the address to
+            the full{" "}
+            <Link
+              href="/"
+              className="font-semibold text-primary hover:underline"
+            >
+              TrueCap analyzer
+            </Link>{" "}
+            for cap rate, DSCR and cash flow in one pass.
           </p>
         </section>
 
@@ -258,8 +368,8 @@ export default function VsLodgifyPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro adds 10-year cash-flow and equity projections, sensitivity,
-            Offer Ceiling, co-branded share links, and PDF reports with Pro; see live pricing for current terms.
-            No card to start.
+            Offer Ceiling, co-branded share links, and PDF reports with Pro; see
+            live pricing for current terms. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -281,11 +391,26 @@ export default function VsLodgifyPage() {
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}
-          <Link href="/vs/hostfully" className="font-bold text-foreground hover:underline">TrueCap vs Hostfully</Link>
+          <Link
+            href="/vs/hostfully"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs Hostfully
+          </Link>
           {" · "}
-          <Link href="/vs/hostaway" className="font-bold text-foreground hover:underline">TrueCap vs Hostaway</Link>
+          <Link
+            href="/vs/hostaway"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs Hostaway
+          </Link>
           {" · "}
-          <Link href="/vs/airdna" className="font-bold text-foreground hover:underline">TrueCap vs AirDNA</Link>
+          <Link
+            href="/vs/airdna"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs AirDNA
+          </Link>
         </footer>
       </main>
       <SiteFooter />
@@ -299,7 +424,9 @@ const LODGIFY_FAQ: FaqItem[] = [
     question: "Is TrueCap a Lodgify alternative?",
     answer: (
       <>
-        No — different stages. Lodgify manages STRs you already own. TrueCap underwrites whether to buy the property as an STR in the first place. Solo STR hosts use both.
+        No — different stages. Lodgify manages STRs you already own. TrueCap
+        underwrites whether to buy the property as an STR in the first place.
+        Solo STR hosts use both.
       </>
     ),
     plainTextAnswer:
@@ -309,7 +436,10 @@ const LODGIFY_FAQ: FaqItem[] = [
     question: "Lodgify vs Hostaway — which one?",
     answer: (
       <>
-        Compare each vendor&apos;s current quote, listing requirements, channel coverage, direct-booking tools, automation, integrations, support, and implementation terms. The better fit depends on the portfolio and workflow; neither has a universal size cutoff.
+        Compare each vendor&apos;s current quote, listing requirements, channel
+        coverage, direct-booking tools, automation, integrations, support, and
+        implementation terms. The better fit depends on the portfolio and
+        workflow; neither has a universal size cutoff.
       </>
     ),
     plainTextAnswer:
@@ -319,7 +449,10 @@ const LODGIFY_FAQ: FaqItem[] = [
     question: "Does Lodgify have a free tier?",
     answer: (
       <>
-        Lodgify does not currently publish a permanent free tier. It publishes a time-limited trial and paid Basic, Starter, Professional, and Ultimate plans. Check its official pricing page for the current rate, trial, property-count rules, and included features.
+        Lodgify does not currently publish a permanent free tier. It publishes a
+        time-limited trial and paid Basic, Starter, Professional, and Ultimate
+        plans. Check its official pricing page for the current rate, trial,
+        property-count rules, and included features.
       </>
     ),
     plainTextAnswer:
@@ -329,7 +462,11 @@ const LODGIFY_FAQ: FaqItem[] = [
     question: "Can TrueCap model STR revenue?",
     answer: (
       <>
-        Yes, indirectly — every input is editable. Plug a conservative monthly STR revenue (gross income ÷ 12, discounted for vacancy + cleaning + STR-specific operating costs) into the rent field. TrueCap doesn&apos;t pull AirDNA or Mashvisor data automatically — you&apos;d use those alongside.
+        Yes, indirectly — every input is editable. Plug a conservative monthly
+        STR revenue (gross income ÷ 12, discounted for vacancy + cleaning +
+        STR-specific operating costs) into the rent field. TrueCap doesn&apos;t
+        pull AirDNA or Mashvisor data automatically — you&apos;d use those
+        alongside.
       </>
     ),
     plainTextAnswer:
@@ -339,7 +476,20 @@ const LODGIFY_FAQ: FaqItem[] = [
     question: "Should I get a Lodgify direct-booking site?",
     answer: (
       <>
-        It can be useful when you can generate direct demand and the net economics work for your portfolio. Compare Lodgify&apos;s current subscription, payment, marketing, support, and operating costs with the channel mix you actually use. <a href="https://www.airbnb.com/help/article/1857" target="_blank" rel="noopener" className="underline">Airbnb publishes multiple service-fee structures</a>, so use your account&apos;s current terms instead of assuming one percentage or guaranteed payback.
+        It can be useful when you can generate direct demand and the net
+        economics work for your portfolio. Compare Lodgify&apos;s current
+        subscription, payment, marketing, support, and operating costs with the
+        channel mix you actually use.{" "}
+        <a
+          href="https://www.airbnb.com/help/article/1857"
+          target="_blank"
+          rel="noopener"
+          className="underline"
+        >
+          Airbnb publishes multiple service-fee structures
+        </a>
+        , so use your account&apos;s current terms instead of assuming one
+        percentage or guaranteed payback.
       </>
     ),
     plainTextAnswer:
@@ -356,10 +506,14 @@ function WinnerBadge({
 }) {
   if (side === "row") return null;
   if (winner === "tie") {
-    return <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />;
+    return (
+      <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />
+    );
   }
   if (winner === side) {
-    return <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />;
+    return (
+      <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />
+    );
   }
   return <X className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/50" />;
 }

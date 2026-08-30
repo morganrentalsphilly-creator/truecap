@@ -10,7 +10,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { permanentRedirect } from "next/navigation";
 import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { CapRateCalculatorWidget } from "@/components/tools/cap-rate-calculator-widget";
@@ -20,6 +20,7 @@ import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { isCalculatorReleased } from "@/lib/calculator-registry";
+import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 export const metadata: Metadata = {
   title: "Free Cap Rate Calculator — What's a Good Cap Rate",
   description:
@@ -40,7 +41,14 @@ export const metadata: Metadata = {
       "Calculate cap rate in seconds. Includes plain-English guidance on what counts as a good cap rate, how to compute NOI, and common investor mistakes.",
     url: "/tools/cap-rate-calculator",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap cap rate calculator" }],
+    images: [
+      {
+        url: "/home.jpg",
+        width: 1200,
+        height: 630,
+        alt: "TrueCap cap rate calculator",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -80,7 +88,9 @@ const FAQS: { q: string; a: string }[] = [
 ];
 
 export default function CapRateCalculatorPage() {
-  if (!isCalculatorReleased("cap-rate-calculator")) notFound();
+  if (!isCalculatorReleased("cap-rate-calculator")) {
+    permanentRedirect(HISTORICAL_TOOL_REDIRECTS["cap-rate-calculator"]);
+  }
 
   const siteUrl = getSiteUrl();
 
@@ -138,7 +148,10 @@ export default function CapRateCalculatorPage() {
 
   return (
     <>
-      <ToolBreadcrumbSchema toolPath="/tools/cap-rate-calculator" toolName="Cap rate calculator" />
+      <ToolBreadcrumbSchema
+        toolPath="/tools/cap-rate-calculator"
+        toolName="Cap rate calculator"
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }}
@@ -153,7 +166,10 @@ export default function CapRateCalculatorPage() {
       />
 
       <div className="min-h-screen bg-background">
-        <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <main
+          id="main"
+          className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12"
+        >
           {/* H1 */}
           <header className="mb-6 sm:mb-8">
             <Link
@@ -167,9 +183,9 @@ export default function CapRateCalculatorPage() {
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground mt-2 leading-relaxed">
               The cleanest single-number measure of a rental property&apos;s
-              return — independent of how you finance the deal. Type in
-              price, rent, and your operating expense assumption; the cap
-              rate computes live.
+              return — independent of how you finance the deal. Type in price,
+              rent, and your operating expense assumption; the cap rate computes
+              live.
             </p>
           </header>
 
@@ -202,8 +218,8 @@ export default function CapRateCalculatorPage() {
             <h2 className="text-2xl sm:text-3xl">How to compute NOI</h2>
             <p>
               Net Operating Income is the annual cash the property generates
-              from rent <em>before</em> debt service and <em>before</em>{" "}
-              income tax. The formula:
+              from rent <em>before</em> debt service and <em>before</em> income
+              tax. The formula:
             </p>
             <p className="font-mono bg-card border border-border rounded-md p-3 text-sm sm:text-base">
               NOI = Annual rent − Annual operating expenses
@@ -222,19 +238,31 @@ export default function CapRateCalculatorPage() {
             <p>
               They <strong>do not</strong> include mortgage principal or
               interest, depreciation, or income taxes — those affect your
-              personal returns, not the property&apos;s operating economics.
-              If you want to walk through NOI on its own, the{" "}
-              <Link href="/tools/noi-calculator" className="text-primary font-semibold hover:underline">NOI calculator</Link>{" "}
+              personal returns, not the property&apos;s operating economics. If
+              you want to walk through NOI on its own, the{" "}
+              <Link
+                href="/blog/how-to-calculate-noi-rental-property"
+                className="text-primary font-semibold hover:underline"
+              >
+                NOI guide
+              </Link>{" "}
               breaks every expense line out step by step, and the{" "}
-              <Link href="/glossary/noi" className="text-primary font-semibold hover:underline">NOI glossary entry</Link>{" "}
+              <Link
+                href="/glossary/noi"
+                className="text-primary font-semibold hover:underline"
+              >
+                NOI glossary entry
+              </Link>{" "}
               covers the edge cases (CapEx, vacancy, management) most newer
               investors miss.
             </p>
 
-            <h2 className="text-2xl sm:text-3xl">What&apos;s a good cap rate?</h2>
+            <h2 className="text-2xl sm:text-3xl">
+              What&apos;s a good cap rate?
+            </h2>
             <p>
-              Cap rate isn&apos;t good or bad in isolation — it&apos;s good
-              or bad relative to your market and risk tolerance. The general
+              Cap rate isn&apos;t good or bad in isolation — it&apos;s good or
+              bad relative to your market and risk tolerance. The general
               benchmarks:
             </p>
             <div className="overflow-x-auto -mx-4 sm:mx-0">
@@ -243,39 +271,59 @@ export default function CapRateCalculatorPage() {
                   <tr className="border-b border-border">
                     <th className="text-left py-2 px-3 font-bold">Range</th>
                     <th className="text-left py-2 px-3 font-bold">Profile</th>
-                    <th className="text-left py-2 px-3 font-bold">Typical markets</th>
+                    <th className="text-left py-2 px-3 font-bold">
+                      Typical markets
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr className="border-b border-border">
                     <td className="py-2 px-3 font-mono">4–6%</td>
-                    <td className="py-2 px-3">Appreciation play, low cash flow</td>
+                    <td className="py-2 px-3">
+                      Appreciation play, low cash flow
+                    </td>
                     <td className="py-2 px-3">SF, LA, Seattle, NYC, Boston</td>
                   </tr>
                   <tr className="border-b border-border">
                     <td className="py-2 px-3 font-mono">6–8%</td>
-                    <td className="py-2 px-3">Healthy cash flow, stable demand</td>
-                    <td className="py-2 px-3">Most Midwest + Sun Belt suburbs</td>
+                    <td className="py-2 px-3">
+                      Healthy cash flow, stable demand
+                    </td>
+                    <td className="py-2 px-3">
+                      Most Midwest + Sun Belt suburbs
+                    </td>
                   </tr>
                   <tr className="border-b border-border">
                     <td className="py-2 px-3 font-mono">8–10%</td>
-                    <td className="py-2 px-3">Cash-flow-heavy, less appreciation</td>
-                    <td className="py-2 px-3">Cleveland, Memphis, Birmingham</td>
+                    <td className="py-2 px-3">
+                      Cash-flow-heavy, less appreciation
+                    </td>
+                    <td className="py-2 px-3">
+                      Cleveland, Memphis, Birmingham
+                    </td>
                   </tr>
                   <tr>
                     <td className="py-2 px-3 font-mono">10%+</td>
                     <td className="py-2 px-3">High risk — verify carefully</td>
-                    <td className="py-2 px-3">Distressed neighborhoods, C-class assets</td>
+                    <td className="py-2 px-3">
+                      Distressed neighborhoods, C-class assets
+                    </td>
                   </tr>
                 </tbody>
               </table>
             </div>
             <p>
-              A great cap rate in San Francisco might be 5%. A great cap rate
-              in Memphis might be 9%. Use the metric for{" "}
-              <em>comparison</em> within a market, not as a universal scoring
-              system. For the full benchmark walk-through, see our guide on{" "}
-              <Link href="/blog/what-is-a-good-cap-rate" className="text-primary font-semibold hover:underline">what counts as a good cap rate in 2026</Link>.
+              A great cap rate in San Francisco might be 5%. A great cap rate in
+              Memphis might be 9%. Use the metric for <em>comparison</em> within
+              a market, not as a universal scoring system. For the full
+              benchmark walk-through, see our guide on{" "}
+              <Link
+                href="/blog/what-is-a-good-cap-rate"
+                className="text-primary font-semibold hover:underline"
+              >
+                what counts as a good cap rate in 2026
+              </Link>
+              .
             </p>
 
             <h2 className="text-2xl sm:text-3xl">
@@ -287,30 +335,46 @@ export default function CapRateCalculatorPage() {
             </p>
             <ul>
               <li>
-                <strong>Cap rate</strong> — How well does the property
-                perform as an asset? Ignores financing.
+                <strong>Cap rate</strong> — How well does the property perform
+                as an asset? Ignores financing.
               </li>
               <li>
-                <strong>Cash-on-cash return</strong> — How hard is the cash
-                I actually invested working? Includes the effect of leverage.
+                <strong>Cash-on-cash return</strong> — How hard is the cash I
+                actually invested working? Includes the effect of leverage.
               </li>
               <li>
-                <strong>Total ROI / IRR</strong> — Including appreciation,
-                tax benefits, and principal paydown, what&apos;s the full
-                annualized return across the hold period?
+                <strong>Total ROI / IRR</strong> — Including appreciation, tax
+                benefits, and principal paydown, what&apos;s the full annualized
+                return across the hold period?
               </li>
             </ul>
             <p>
-              Cap rate is the only one of the three that&apos;s independent
-              of <em>you</em> as the buyer. Two buyers can produce wildly
-              different cash-on-cash returns on the same property by changing
-              the down payment, but the cap rate stays the same. The{" "}
-              <Link href="/blog/cap-rate-vs-cash-on-cash-vs-dscr" className="text-primary font-semibold hover:underline">cap rate vs cash-on-cash vs DSCR deep-dive</Link>{" "}
-              shows how all three numbers move together on a real deal — and
-              you can run the leveraged side with the{" "}
-              <Link href="/tools/cash-on-cash-calculator" className="text-primary font-semibold hover:underline">cash-on-cash calculator</Link>{" "}
+              Cap rate is the only one of the three that&apos;s independent of{" "}
+              <em>you</em> as the buyer. Two buyers can produce wildly different
+              cash-on-cash returns on the same property by changing the down
+              payment, but the cap rate stays the same. The{" "}
+              <Link
+                href="/blog/cap-rate-vs-cash-on-cash-vs-dscr"
+                className="text-primary font-semibold hover:underline"
+              >
+                cap rate vs cash-on-cash vs DSCR deep-dive
+              </Link>{" "}
+              shows how all three numbers move together on a real deal — and you
+              can run the leveraged side with the{" "}
+              <Link
+                href="/blog/how-to-calculate-cash-on-cash-return"
+                className="text-primary font-semibold hover:underline"
+              >
+                cash-on-cash guide
+              </Link>{" "}
               or the{" "}
-              <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">DSCR calculator</Link>.
+              <Link
+                href="/blog/how-to-calculate-dscr"
+                className="text-primary font-semibold hover:underline"
+              >
+                DSCR guide
+              </Link>
+              .
             </p>
 
             <h2 className="text-2xl sm:text-3xl">
@@ -325,37 +389,39 @@ export default function CapRateCalculatorPage() {
             </p>
             <h3>2. Forgetting vacancy and below-NOI CapEx reserves</h3>
             <p>
-              A property doesn&apos;t actually generate 100% of its asking
-              rent. Vacancies happen. Roofs need replacing. The cap rate that
-              ignores 5–10% vacancy is a fiction. TrueCap keeps CapEx below
-              lender-style NOI, but you should still subtract a realistic
-              reserve when judging spendable cash flow.
+              A property doesn&apos;t actually generate 100% of its asking rent.
+              Vacancies happen. Roofs need replacing. The cap rate that ignores
+              5–10% vacancy is a fiction. TrueCap keeps CapEx below lender-style
+              NOI, but you should still subtract a realistic reserve when
+              judging spendable cash flow.
             </p>
             <h3>3. Comparing across markets</h3>
             <p>
-              An 8% cap rate doesn&apos;t mean the same thing in Cleveland
-              and Phoenix. Compare within markets, not across them.
+              An 8% cap rate doesn&apos;t mean the same thing in Cleveland and
+              Phoenix. Compare within markets, not across them.
             </p>
             <h3>4. Ignoring asset class</h3>
             <p>
-              A-class properties in the same zip code trade at lower cap
-              rates than C-class properties. The difference is risk and
-              vacancy exposure, not opportunity.
+              A-class properties in the same zip code trade at lower cap rates
+              than C-class properties. The difference is risk and vacancy
+              exposure, not opportunity.
             </p>
 
-            <h2 className="text-2xl sm:text-3xl">When to use this calculator</h2>
+            <h2 className="text-2xl sm:text-3xl">
+              When to use this calculator
+            </h2>
             <p>
-              Cap rate is the first filter on any deal. Investors who
-              underwrite well will run cap rate on every property they
-              consider — often within 60 seconds of seeing the listing — and
-              only proceed to a full analysis on the ones that clear their
-              hurdle. This calculator gives you that 60-second answer.
+              Cap rate is the first filter on any deal. Investors who underwrite
+              well will run cap rate on every property they consider — often
+              within 60 seconds of seeing the listing — and only proceed to a
+              full analysis on the ones that clear their hurdle. This calculator
+              gives you that 60-second answer.
             </p>
             <p>
-              When you&apos;re ready to go deeper — cash-on-cash, DSCR,
-              monthly cash flow, 10-year cash-flow and equity projections,
-              sensitivity, Offer Ceiling, and a secondary Screening Index — you can run the full analysis
-              free at TrueCap.
+              When you&apos;re ready to go deeper — cash-on-cash, DSCR, monthly
+              cash flow, 10-year cash-flow and equity projections, sensitivity,
+              Offer Ceiling, and a secondary Screening Index — you can run the
+              full analysis free at TrueCap.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">Frequently asked questions</h2>
@@ -385,10 +451,11 @@ export default function CapRateCalculatorPage() {
               Run the full analysis — free
             </h2>
             <p className="text-sm sm:text-base opacity-90 mb-4">
-              Cap rate is a great filter, but real underwriting needs cash
-              flow, cash-on-cash, DSCR, 10-year cash-flow and equity projections,
-              sensitivity, Offer Ceiling, and a secondary Screening Index. TrueCap does all of it from
-              the same property inputs you used here.
+              Cap rate is a great filter, but real underwriting needs cash flow,
+              cash-on-cash, DSCR, 10-year cash-flow and equity projections,
+              sensitivity, Offer Ceiling, and a secondary Screening Index.
+              TrueCap does all of it from the same property inputs you used
+              here.
             </p>
             <ul className="text-sm space-y-1.5 mb-5 opacity-90">
               {[
@@ -419,11 +486,17 @@ export default function CapRateCalculatorPage() {
               tool has no embeddable widget. See the component header. */}
           <ToolEmbedInvite slug="cap-rate-calculator" />
 
-          <ToolsConversionCta calculatorName="Cap rate calculator" hook="TrueCap's full analyzer runs cap rate plus cash-on-cash, DSCR, cash flow, a 10-year cash-flow and equity projection, sensitivity, and Offer Ceiling. Save your work, compare deals, and share a link." />
+          <ToolsConversionCta
+            calculatorName="Cap rate calculator"
+            hook="TrueCap's full analyzer runs cap rate plus cash-on-cash, DSCR, cash flow, a 10-year cash-flow and equity projection, sensitivity, and Offer Ceiling. Save your work, compare deals, and share a link."
+          />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}
-            <Link href="/" className="font-bold text-foreground hover:underline">
+            <Link
+              href="/"
+              className="font-bold text-foreground hover:underline"
+            >
               TrueCap
             </Link>{" "}
             — transparent, editable rental analysis, free to start.

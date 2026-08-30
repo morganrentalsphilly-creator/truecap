@@ -1,19 +1,18 @@
 {
   "day": 22,
   "send_date": "2026-06-22",
-  "subject": "top 5 markets for 2026",
-  "preheader": "nashville, indy, memphis, birmingham, tampa.",
-  "headline": "Where the cap rate plus appreciation math still works.",
+  "subject": "compare five markets with one framework",
+  "preheader": "nashville, indy, memphis, birmingham, and tampa as examples — not rankings.",
+  "headline": "Use the same evidence checklist in every market.",
   "body": [
-    "These are the five markets where, as of mid-2026, you can still buy quality rentals with reasonable cap rates AND credible appreciation upside. Not the cheapest. Not the highest cap. The best combined math.",
-    "Nashville: 5.5-6.5% caps in B-class submarkets, 3-4% rent growth, strong job creation. Davidson County tax is rising but still manageable. The flip side: prices have run hard, so deals require patience.",
-    "Indianapolis: 7-8% caps in B-class areas, 2-3% rent growth, light property tax (~1%), no income tax for landlords structured right. Boring market, in the best way.",
-    "Memphis: 8-9% caps possible, but you're working harder on the operations side. Vacancy can hit 10-12%. PM quality varies wildly. Best for investors with local presence or a great team.",
-    "Birmingham: 7.5-8.5% caps, slow appreciation (1-2%), very low property tax (0.4%), and a quietly improving downtown. The 10-year math is better than the year-one numbers suggest.",
-    "Tampa: 5-6% caps but the appreciation tailwind is real. Insurance is the wildcard — model 12-15% annual premium growth and stress-test the deal. Skip the coastal flood zones unless you really know what you're doing.",
-    "Run any of these through TrueCap and you'll see why the numbers work. Or don't."
+    "Nashville, Indianapolis, Memphis, Birmingham, and Tampa are useful examples of markets with different price, rent, tax, insurance, vacancy, and operating contexts. This list is not a ranking or recommendation, and current conditions require dated local sources.",
+    "For a Nashville address, verify the asking price, achievable property-specific rent, parcel tax, insurance quote, and operating costs instead of importing a metro-wide cap-rate or growth assumption.",
+    "For an Indianapolis or Memphis address, apply the same checks and add property-condition, vacancy, management, and neighborhood evidence specific to the asset.",
+    "For a Birmingham address, separate observed current income and expenses from appreciation or rent-growth projections, then label the source and as-of date for each forward assumption.",
+    "For a Tampa address, obtain property-specific insurance and flood information rather than applying a blanket coastal premium-growth rate or location verdict.",
+    "TrueCap can place those editable inputs into a consistent preliminary screen. It does not establish that a market or property 'works,' predict appreciation, or recommend an investment."
   ],
-  "cta_text": "Try TrueCap free",
+  "cta_text": "Compare the assumptions",
   "cta_url": "https://usetruecap.com/",
   "signature_note": null
 }

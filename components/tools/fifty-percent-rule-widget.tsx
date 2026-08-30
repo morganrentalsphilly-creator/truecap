@@ -18,7 +18,7 @@
  */
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
+import { AnalyzerHandoffLink } from "@/components/analyzer-handoff-link";
 import { ArrowUpRight, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -53,7 +53,7 @@ export function FiftyPercentRuleWidget() {
   // replaces the 50% guess with real expense lines.
   const handoffHref = buildAnalyzerHandoffUrl(
     { monthlyRent: num(rent) },
-    { utmSource: "50-percent-rule-calculator" }
+    { utmSource: "50-percent-rule-calculator" },
   );
 
   return (
@@ -66,11 +66,16 @@ export function FiftyPercentRuleWidget() {
           </h2>
 
           <div>
-            <Label htmlFor="fiftypct-rent" className="text-sm font-medium text-foreground mb-1.5 block">
+            <Label
+              htmlFor="fiftypct-rent"
+              className="text-sm font-medium text-foreground mb-1.5 block"
+            >
               Monthly Rent
             </Label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                $
+              </span>
               <Input
                 id="fiftypct-rent"
                 type="number"
@@ -83,7 +88,10 @@ export function FiftyPercentRuleWidget() {
           </div>
 
           <div>
-            <Label htmlFor="fiftypct-expense-ratio" className="text-sm font-medium text-foreground mb-1.5 block">
+            <Label
+              htmlFor="fiftypct-expense-ratio"
+              className="text-sm font-medium text-foreground mb-1.5 block"
+            >
               Expense Ratio
             </Label>
             <div className="relative">
@@ -96,21 +104,27 @@ export function FiftyPercentRuleWidget() {
                 onChange={(e) => setExpenseRatio(e.target.value)}
                 className="pr-8 border-input bg-background text-base"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">%</span>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                %
+              </span>
             </div>
             <p className="text-xs text-muted-foreground mt-1.5">
-              50% is the classic. Use 55&ndash;60% for pre-1940 housing
-              stock, high-tax states (Texas), or high-insurance markets
-              (Florida).
+              50% is the classic. Use 55&ndash;60% for pre-1940 housing stock,
+              high-tax states (Texas), or high-insurance markets (Florida).
             </p>
           </div>
 
           <div>
-            <Label htmlFor="fiftypct-pi" className="text-sm font-medium text-foreground mb-1.5 block">
+            <Label
+              htmlFor="fiftypct-pi"
+              className="text-sm font-medium text-foreground mb-1.5 block"
+            >
               Monthly Mortgage Payment (P&amp;I)
             </Label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                $
+              </span>
               <Input
                 id="fiftypct-pi"
                 type="number"
@@ -121,8 +135,8 @@ export function FiftyPercentRuleWidget() {
               />
             </div>
             <p className="text-xs text-muted-foreground mt-1.5">
-              Principal + interest only — the rule&apos;s expense bundle
-              already covers tax and insurance.
+              Principal + interest only — the rule&apos;s expense bundle already
+              covers tax and insurance.
             </p>
           </div>
         </div>
@@ -144,11 +158,13 @@ export function FiftyPercentRuleWidget() {
                     "text-5xl sm:text-6xl font-extrabold mt-2 tabular-nums",
                     result.cashFlow >= 0
                       ? "text-[var(--metric-positive)]"
-                      : "text-[var(--metric-negative)]"
+                      : "text-[var(--metric-negative)]",
                   )}
                 >
                   {fmt(result.cashFlow)}
-                  <span className="text-lg font-bold text-muted-foreground">/mo</span>
+                  <span className="text-lg font-bold text-muted-foreground">
+                    /mo
+                  </span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-2 max-w-xs mx-auto">
                   {result.cashFlow >= 0
@@ -163,9 +179,20 @@ export function FiftyPercentRuleWidget() {
                   label={`Estimated operating expenses (${result.ratio}%)`}
                   value={`− ${fmt(result.expenses)}`}
                 />
-                <Row label="Estimated NOI (rule's convention)" value={fmt(result.noi)} bold />
-                <Row label="Mortgage payment (P&I)" value={`− ${fmt(result.pi)}`} />
-                <Row label="Estimated cash flow" value={`${fmt(result.cashFlow)}/mo`} bold />
+                <Row
+                  label="Estimated NOI (rule's convention)"
+                  value={fmt(result.noi)}
+                  bold
+                />
+                <Row
+                  label="Mortgage payment (P&I)"
+                  value={`− ${fmt(result.pi)}`}
+                />
+                <Row
+                  label="Estimated cash flow"
+                  value={`${fmt(result.cashFlow)}/mo`}
+                  bold
+                />
               </div>
               <p className="text-xs text-muted-foreground mt-3">
                 Triage only — the {result.ratio}% bundle lumps vacancy,
@@ -177,23 +204,40 @@ export function FiftyPercentRuleWidget() {
         </div>
       </div>
 
-      <Link
-        href={handoffHref} target="_top"
+      <AnalyzerHandoffLink
+        handoffHref={handoffHref}
+        target="_top"
         className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="w-4 h-4" />
-        Replace the 50% guess with real expense lines — full analysis free in TrueCap
+        Replace the 50% guess with real expense lines — full analysis free in
+        TrueCap
         <ArrowUpRight className="w-4 h-4" />
-      </Link>
+      </AnalyzerHandoffLink>
     </div>
   );
 }
 
-function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
+function Row({
+  label,
+  value,
+  bold,
+}: {
+  label: string;
+  value: string;
+  bold?: boolean;
+}) {
   return (
     <div className="flex justify-between py-0.5 gap-3">
       <span className="text-muted-foreground">{label}</span>
-      <span className={cn("tabular-nums shrink-0", bold ? "font-bold text-foreground" : "text-foreground")}>{value}</span>
+      <span
+        className={cn(
+          "tabular-nums shrink-0",
+          bold ? "font-bold text-foreground" : "text-foreground",
+        )}
+      >
+        {value}
+      </span>
     </div>
   );
 }

@@ -17,7 +17,7 @@
  */
 
 import { useId, useMemo, useState } from "react";
-import Link from "next/link";
+import { AnalyzerHandoffLink } from "@/components/analyzer-handoff-link";
 import { ArrowUpRight, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -67,7 +67,11 @@ function classify(cf: number): { label: string; color: string; note: string } {
   };
 }
 
-function calcMonthlyPayment(principal: number, annualRatePct: number, years: number): number {
+function calcMonthlyPayment(
+  principal: number,
+  annualRatePct: number,
+  years: number,
+): number {
   // Match the defensive guards used by lib/calc-analysis.ts so an empty
   // field can't produce Infinity/NaN in the live readout.
   if (!Number.isFinite(principal) || principal <= 0) return 0;
@@ -129,7 +133,19 @@ export function RentalCashFlowCalculatorWidget() {
       isCashPurchase: piMonthly <= 0,
       pmiLikely: loan > 0 && num(downPct) < 20,
     };
-  }, [price, downPct, ratePct, termYrs, rent, taxPct, insPct, vacancyPct, mgmtPct, maintPct, capexPct]);
+  }, [
+    price,
+    downPct,
+    ratePct,
+    termYrs,
+    rent,
+    taxPct,
+    insPct,
+    vacancyPct,
+    mgmtPct,
+    maintPct,
+    capexPct,
+  ]);
 
   const c = classify(result.cashFlow);
 
@@ -138,7 +154,7 @@ export function RentalCashFlowCalculatorWidget() {
   // re-type them.
   const handoffHref = buildAnalyzerHandoffUrl(
     { purchasePrice: num(price), monthlyRent: num(rent) },
-    { utmSource: "rental-cash-flow-calculator" }
+    { utmSource: "rental-cash-flow-calculator" },
   );
 
   return (
@@ -150,25 +166,68 @@ export function RentalCashFlowCalculatorWidget() {
             Cash Flow Calculator
           </h2>
 
-          <FieldMoney label="Purchase Price" value={price} setValue={setPrice} />
+          <FieldMoney
+            label="Purchase Price"
+            value={price}
+            setValue={setPrice}
+          />
           <FieldMoney label="Monthly Rent" value={rent} setValue={setRent} />
           <div className="grid grid-cols-2 gap-3">
-            <FieldPct label="Down Payment" value={downPct} setValue={setDownPct} />
-            <FieldPct label="Interest Rate" value={ratePct} setValue={setRatePct} step="0.125" />
+            <FieldPct
+              label="Down Payment"
+              value={downPct}
+              setValue={setDownPct}
+            />
+            <FieldPct
+              label="Interest Rate"
+              value={ratePct}
+              setValue={setRatePct}
+              step="0.125"
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <FieldNum label="Loan Term (yrs)" value={termYrs} setValue={setTermYrs} />
-            <FieldPct label="Property Tax (%/yr of price)" value={taxPct} setValue={setTaxPct} step="0.1" />
+            <FieldNum
+              label="Loan Term (yrs)"
+              value={termYrs}
+              setValue={setTermYrs}
+            />
+            <FieldPct
+              label="Property Tax (%/yr of price)"
+              value={taxPct}
+              setValue={setTaxPct}
+              step="0.1"
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <FieldPct label="Insurance (%/yr of price)" value={insPct} setValue={setInsPct} step="0.1" />
-            <FieldPct label="Vacancy (% of rent)" value={vacancyPct} setValue={setVacancyPct} />
+            <FieldPct
+              label="Insurance (%/yr of price)"
+              value={insPct}
+              setValue={setInsPct}
+              step="0.1"
+            />
+            <FieldPct
+              label="Vacancy (% of rent)"
+              value={vacancyPct}
+              setValue={setVacancyPct}
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <FieldPct label="Management (% of rent)" value={mgmtPct} setValue={setMgmtPct} />
-            <FieldPct label="Maintenance (% of rent)" value={maintPct} setValue={setMaintPct} />
+            <FieldPct
+              label="Management (% of rent)"
+              value={mgmtPct}
+              setValue={setMgmtPct}
+            />
+            <FieldPct
+              label="Maintenance (% of rent)"
+              value={maintPct}
+              setValue={setMaintPct}
+            />
           </div>
-          <FieldPct label="CapEx Reserve (% of rent)" value={capexPct} setValue={setCapexPct} />
+          <FieldPct
+            label="CapEx Reserve (% of rent)"
+            value={capexPct}
+            setValue={setCapexPct}
+          />
         </div>
 
         {/* Output */}
@@ -177,21 +236,40 @@ export function RentalCashFlowCalculatorWidget() {
             <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
               Monthly cash flow
             </div>
-            <div className={cn("text-5xl sm:text-6xl font-extrabold mt-1 tabular-nums", c.color)}>
+            <div
+              className={cn(
+                "text-5xl sm:text-6xl font-extrabold mt-1 tabular-nums",
+                c.color,
+              )}
+            >
               {fmtMoney(result.cashFlow)}
             </div>
-            <div className={cn("text-sm font-semibold mt-1", c.color)}>{c.label}</div>
+            <div className={cn("text-sm font-semibold mt-1", c.color)}>
+              {c.label}
+            </div>
             <p className="text-xs text-muted-foreground mt-1">{c.note}</p>
           </div>
 
           <div className="mt-5 pt-5 border-t border-border space-y-1.5 text-xs">
-            <Row label="Monthly NOI (excl. CapEx)" value={fmtMoney(result.noiMonthly)} bold />
+            <Row
+              label="Monthly NOI (excl. CapEx)"
+              value={fmtMoney(result.noiMonthly)}
+              bold
+            />
             <Row
               label="Monthly debt service (P&I)"
-              value={result.isCashPurchase ? "$0 (no loan)" : fmtMoney(result.piMonthly)}
+              value={
+                result.isCashPurchase
+                  ? "$0 (no loan)"
+                  : fmtMoney(result.piMonthly)
+              }
             />
             <Row label="CapEx reserve" value={fmtMoney(result.capex)} />
-            <Row label="Annual cash flow" value={fmtMoney(result.annualCashFlow)} bold />
+            <Row
+              label="Annual cash flow"
+              value={fmtMoney(result.annualCashFlow)}
+              bold
+            />
             <Row
               label="DSCR (NOI ÷ debt service)"
               value={formatDscr(result.dscr, !result.isCashPurchase)}
@@ -206,25 +284,42 @@ export function RentalCashFlowCalculatorWidget() {
         </div>
       </div>
 
-      <Link
-        href={handoffHref} target="_top"
+      <AnalyzerHandoffLink
+        handoffHref={handoffHref}
+        target="_top"
         className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="w-4 h-4" />
-        Run the full analysis with these numbers — cap rate, CoC, DSCR, and cash-flow projections — free
+        Run the free core analysis; projections appear when your access includes
+        them
         <ArrowUpRight className="w-4 h-4" />
-      </Link>
+      </AnalyzerHandoffLink>
     </div>
   );
 }
 
-function FieldMoney({ label, value, setValue }: { label: string; value: string; setValue: (v: string) => void }) {
+function FieldMoney({
+  label,
+  value,
+  setValue,
+}: {
+  label: string;
+  value: string;
+  setValue: (v: string) => void;
+}) {
   const id = useId();
   return (
     <div>
-      <Label htmlFor={id} className="text-sm font-medium text-foreground mb-1.5 block">{label}</Label>
+      <Label
+        htmlFor={id}
+        className="text-sm font-medium text-foreground mb-1.5 block"
+      >
+        {label}
+      </Label>
       <div className="relative">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+          $
+        </span>
         <Input
           id={id}
           type="number"
@@ -238,11 +333,26 @@ function FieldMoney({ label, value, setValue }: { label: string; value: string; 
   );
 }
 
-function FieldPct({ label, value, setValue, step = "0.5" }: { label: string; value: string; setValue: (v: string) => void; step?: string }) {
+function FieldPct({
+  label,
+  value,
+  setValue,
+  step = "0.5",
+}: {
+  label: string;
+  value: string;
+  setValue: (v: string) => void;
+  step?: string;
+}) {
   const id = useId();
   return (
     <div>
-      <Label htmlFor={id} className="text-sm font-medium text-foreground mb-1.5 block">{label}</Label>
+      <Label
+        htmlFor={id}
+        className="text-sm font-medium text-foreground mb-1.5 block"
+      >
+        {label}
+      </Label>
       <div className="relative">
         <Input
           id={id}
@@ -253,17 +363,32 @@ function FieldPct({ label, value, setValue, step = "0.5" }: { label: string; val
           onChange={(e) => setValue(e.target.value)}
           className="pr-8 border-input bg-background text-base"
         />
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">%</span>
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+          %
+        </span>
       </div>
     </div>
   );
 }
 
-function FieldNum({ label, value, setValue }: { label: string; value: string; setValue: (v: string) => void }) {
+function FieldNum({
+  label,
+  value,
+  setValue,
+}: {
+  label: string;
+  value: string;
+  setValue: (v: string) => void;
+}) {
   const id = useId();
   return (
     <div>
-      <Label htmlFor={id} className="text-sm font-medium text-foreground mb-1.5 block">{label}</Label>
+      <Label
+        htmlFor={id}
+        className="text-sm font-medium text-foreground mb-1.5 block"
+      >
+        {label}
+      </Label>
       <Input
         id={id}
         type="number"
@@ -276,11 +401,24 @@ function FieldNum({ label, value, setValue }: { label: string; value: string; se
   );
 }
 
-function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
+function Row({
+  label,
+  value,
+  bold,
+}: {
+  label: string;
+  value: string;
+  bold?: boolean;
+}) {
   return (
     <div className="flex justify-between gap-2">
       <span className="text-muted-foreground">{label}</span>
-      <span className={cn("tabular-nums", bold ? "font-bold text-foreground" : "text-foreground")}>
+      <span
+        className={cn(
+          "tabular-nums",
+          bold ? "font-bold text-foreground" : "text-foreground",
+        )}
+      >
         {value}
       </span>
     </div>

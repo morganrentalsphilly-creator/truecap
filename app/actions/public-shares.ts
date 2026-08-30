@@ -15,6 +15,7 @@
  */
 
 import { z } from "zod";
+import { createHash } from "node:crypto";
 import * as Sentry from "@sentry/nextjs";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
@@ -24,9 +25,12 @@ import {
 } from "@/lib/underwriting-model-release";
 import {
   mintPublicShare,
+  resolvePublicShare,
   type PublicShareAddressVisibility,
   type PublicShareAudience,
 } from "@/lib/public-share";
+import { isWellFormedShareToken } from "@/lib/share-token";
+import { saveDealAction } from "@/app/actions/saved-analyses";
 import { getSiteUrl } from "@/lib/site-url";
 import { isRecordedPriceEstimated } from "@/lib/recorded-price-provenance";
 import { createIpRateLimit, getRequestIp } from "@/lib/ip-rate-limit";
@@ -37,6 +41,7 @@ import {
 } from "@/lib/mao-target-editor";
 import { calculateAnalysis } from "@/lib/calc-analysis";
 import { captureServerEvent } from "@/lib/posthog-server";
+import { canonicalAnalyticsEventId } from "@/lib/analytics/canonical-event-claim";
 import {
   isAdoptedOfferCeilingTargetSource,
   type OfferCeilingTargetSource,
@@ -142,8 +147,7 @@ export async function createPublicShareAction(
     normalizeExternalOfferCeilingTargetSource(parsed.data.maoTargetSource, {
       target: candidateMaoTarget,
       values: parsed.data.values,
-    }) ??
-    (candidateMaoTarget ? "selected-targets" : "screening-defaults");
+    }) ?? (candidateMaoTarget ? "selected-targets" : "screening-defaults");
   const maoTarget =
     candidateMaoTarget &&
     isAdoptedOfferCeilingTargetSource(candidateMaoTargetSource)
@@ -213,9 +217,9 @@ export async function createPublicShareAction(
     // without attaching the old deal's comps/attribution or result snapshot.
     const formSnapshotMatches = Boolean(
       deal &&
-        normalizedSaved?.success &&
-        JSON.stringify(normalizedSaved.data) ===
-          JSON.stringify(parsed.data.values),
+      normalizedSaved?.success &&
+      JSON.stringify(normalizedSaved.data) ===
+        JSON.stringify(parsed.data.values),
     );
     if (deal && normalizedSaved?.success && formSnapshotMatches) {
       valuesToShare = normalizedSaved.data;
@@ -327,6 +331,145 @@ export async function createPublicShareAction(
     id: minted.id,
     dealId: minted.dealId,
   };
+}
+
+export type CopyPublicShareToAccountResult =
+  | { ok: true; id: string }
+  | {
+      ok: false;
+      code:
+        | "SIGN_IN_REQUIRED"
+        | "SHARE_UNAVAILABLE"
+        | "ADDRESS_HIDDEN"
+        | "ENTITLEMENT_REQUIRED"
+        | "SERVER_ERROR";
+      message: string;
+    };
+
+/**
+ * Copy a live opaque share into the recipient's own account as a new scenario.
+ *
+ * The authentication check intentionally happens before token validation or
+ * resolution. The raw token is a revocable capability and is never logged,
+ * persisted in the copied row, or attached to analytics. Resolving it again at
+ * click time makes revocation/expiry authoritative even when the page was
+ * opened earlier. The existing save action remains the entitlement, capacity,
+ * validation, and server-side recomputation boundary.
+ */
+export async function copyPublicShareToAccountAction(
+  input: unknown,
+): Promise<CopyPublicShareToAccountResult> {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return {
+      ok: false,
+      code: "SIGN_IN_REQUIRED",
+      message: "Sign in to save a private copy of this analysis.",
+    };
+  }
+
+  const parsed = z.object({ token: z.string() }).strict().safeParse(input);
+  if (!parsed.success || !isWellFormedShareToken(parsed.data.token)) {
+    return {
+      ok: false,
+      code: "SHARE_UNAVAILABLE",
+      message: "This shared analysis is no longer available.",
+    };
+  }
+
+  // This is a fresh read, not data trusted from the already-rendered client.
+  // resolvePublicShare fails closed for malformed, revoked, expired, stale-
+  // methodology, and unknown shares without revealing which condition failed.
+  const resolved = await resolvePublicShare(parsed.data.token);
+  if (!resolved) {
+    return {
+      ok: false,
+      code: "SHARE_UNAVAILABLE",
+      message: "This shared analysis is no longer available.",
+    };
+  }
+  if (resolved.snapshot.meta.addressVisibility !== "full") {
+    return {
+      ok: false,
+      code: "ADDRESS_HIDDEN",
+      message:
+        "The sharer kept the property address private. Run the assumptions with a property you choose instead.",
+    };
+  }
+
+  // The raw capability never crosses the persistence boundary. Including the
+  // recipient UUID domain-separates two users copying the same share, while the
+  // token's 256 bits make the digest non-enumerable without the live link.
+  const publicShareCopyKey = createHash("sha256")
+    .update("truecap-public-share-copy-v1")
+    .update("\0")
+    .update(user.id)
+    .update("\0")
+    .update(parsed.data.token)
+    .digest("hex");
+
+  const saved = await saveDealAction(
+    resolved.snapshot.values,
+    null,
+    undefined,
+    {
+      saveAsNewScenario: true,
+      publicShareCopyKey,
+      // A copied target is a recipient-owned selected target, never evidence
+      // that it came from the recipient's Buy Box or the sharer's account.
+      ...(resolved.snapshot.maoTarget
+        ? {
+            maxOfferTarget: resolved.snapshot.maoTarget,
+            maxOfferTargetSource: "selected-targets" as const,
+          }
+        : {}),
+      ...(resolved.snapshot.analyzerStrategyKey
+        ? { analyzerStrategyKey: resolved.snapshot.analyzerStrategyKey }
+        : {}),
+      purchasePriceEstimated: resolved.snapshot.meta.priceEstimated === true,
+    },
+  );
+  if (!saved.ok) {
+    if (saved.code === "SIGN_IN_REQUIRED") {
+      return {
+        ok: false,
+        code: "SIGN_IN_REQUIRED",
+        message: "Sign in to save a private copy of this analysis.",
+      };
+    }
+    if (saved.code === "ENTITLEMENT_SAVE") {
+      return {
+        ok: false,
+        code: "ENTITLEMENT_REQUIRED",
+        message:
+          saved.message ??
+          "Your current plan cannot save another analysis right now.",
+      };
+    }
+    return {
+      ok: false,
+      code: "SERVER_ERROR",
+      message: "This analysis could not be copied safely. Please try again.",
+    };
+  }
+
+  // One canonical event, emitted only after the recipient's insert succeeds.
+  // No token, source owner/deal id, address, or financial value is included.
+  await captureServerEvent({
+    distinctId: user.id,
+    event: "shared_analysis_copied",
+    properties: { referral_source: "opaque_share" },
+    // Replays may call capture again, but PostHog deduplicates this stable UUID;
+    // a failed first capture can therefore be repaired without event inflation.
+    eventId: canonicalAnalyticsEventId(
+      "shared_analysis_copied",
+      publicShareCopyKey,
+    ),
+  });
+  return { ok: true, id: saved.id };
 }
 
 export type PublicShareListItem = {

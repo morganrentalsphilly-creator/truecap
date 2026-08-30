@@ -111,8 +111,9 @@ export const UNDERWRITING_FORMULAS: Record<
   propertyTaxes: {
     label: "Property taxes",
     formula:
-      "Entered annual parcel amount ÷ 12, otherwise purchase price × entered/benchmark rate ÷ 12",
-    convention: "The state benchmark is editable and is not a parcel tax bill.",
+      "Entered annual parcel amount ÷ 12, otherwise purchase price × entered rate ÷ 12; a blank rate uses the disclosed generic 1.1% preliminary fallback",
+    convention:
+      "Current analyses do not auto-fill a state tax rate. Enter a reviewed local bill or rate before relying on the result; legacy saves may retain a retired state estimate and must be re-verified.",
   },
   insurance: {
     label: "Insurance",

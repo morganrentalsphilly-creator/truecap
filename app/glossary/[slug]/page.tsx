@@ -13,12 +13,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight } from "lucide-react";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { Header } from "@/components/investcalc/header";
 import { SeoAnalyzerCta } from "@/components/marketing/seo-analyzer-cta";
-import { LeadMagnetInline } from "@/components/marketing/lead-magnet-capture";
 import {
   GLOSSARY,
   GLOSSARY_CATEGORY_LABELS,
@@ -188,130 +186,121 @@ export default async function GlossaryTermPage({
 
       <main id="main">
         <article className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
-        {/* Breadcrumb */}
-        <nav aria-label="Breadcrumb" className="mb-6 text-xs">
-          <ol className="flex flex-wrap items-center gap-2 text-muted-foreground">
-            <li>
-              <Link href="/" className="hover:text-foreground">
-                Home
-              </Link>
-            </li>
-            <li aria-hidden="true">›</li>
-            <li>
-              <Link href="/glossary" className="hover:text-foreground">
-                Glossary
-              </Link>
-            </li>
-            <li aria-hidden="true">›</li>
-            <li className="font-semibold text-foreground">{entry.term}</li>
-          </ol>
-        </nav>
+          {/* Breadcrumb */}
+          <nav aria-label="Breadcrumb" className="mb-6 text-xs">
+            <ol className="flex flex-wrap items-center gap-2 text-muted-foreground">
+              <li>
+                <Link href="/" className="hover:text-foreground">
+                  Home
+                </Link>
+              </li>
+              <li aria-hidden="true">›</li>
+              <li>
+                <Link href="/glossary" className="hover:text-foreground">
+                  Glossary
+                </Link>
+              </li>
+              <li aria-hidden="true">›</li>
+              <li className="font-semibold text-foreground">{entry.term}</li>
+            </ol>
+          </nav>
 
-        {/* Category eyebrow */}
-        <p className="text-[11px] uppercase tracking-widest text-primary font-bold">
-          {GLOSSARY_CATEGORY_LABELS[entry.category]}
-        </p>
+          {/* Category eyebrow */}
+          <p className="text-[11px] uppercase tracking-widest text-primary font-bold">
+            {GLOSSARY_CATEGORY_LABELS[entry.category]}
+          </p>
 
-        {/* H1 */}
-        <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight">
-          {entry.term}
-        </h1>
+          {/* H1 */}
+          <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight">
+            {entry.term}
+          </h1>
 
-        {/* Lead — definition + optional benchmark */}
-        <div className="mt-5 space-y-3 text-lg leading-relaxed text-foreground">
-          <p>{entry.definition}</p>
-          {entry.benchmark ? (
-            <p className="text-muted-foreground italic">{entry.benchmark}</p>
+          {/* Lead — definition + optional benchmark */}
+          <div className="mt-5 space-y-3 text-lg leading-relaxed text-foreground">
+            <p>{entry.definition}</p>
+            {entry.benchmark ? (
+              <p className="text-muted-foreground italic">{entry.benchmark}</p>
+            ) : null}
+          </div>
+
+          {/* Formula */}
+          {entry.formula ? (
+            <section className="mt-10">
+              <h2 className="text-xl font-extrabold text-foreground mb-3">
+                How it&apos;s calculated
+              </h2>
+              <div className="rounded-xl border border-border bg-muted/30 p-5">
+                <code className="text-base text-foreground font-mono">
+                  {entry.formula}
+                </code>
+              </div>
+            </section>
           ) : null}
-        </div>
 
-        {/* Formula */}
-        {entry.formula ? (
-          <section className="mt-10">
-            <h2 className="text-xl font-extrabold text-foreground mb-3">How it&apos;s calculated</h2>
-            <div className="rounded-xl border border-border bg-muted/30 p-5">
-              <code className="text-base text-foreground font-mono">{entry.formula}</code>
-            </div>
-          </section>
-        ) : null}
+          {/* Example */}
+          {entry.example ? (
+            <section className="mt-10">
+              <h2 className="text-xl font-extrabold text-foreground mb-3">
+                Example
+              </h2>
+              <p className="text-foreground leading-relaxed">{entry.example}</p>
+            </section>
+          ) : null}
 
-        {/* Example */}
-        {entry.example ? (
-          <section className="mt-10">
-            <h2 className="text-xl font-extrabold text-foreground mb-3">Example</h2>
-            <p className="text-foreground leading-relaxed">{entry.example}</p>
-          </section>
-        ) : null}
+          {/* Why it matters */}
+          {entry.whyItMatters ? (
+            <section className="mt-10">
+              <h2 className="text-xl font-extrabold text-foreground mb-3">
+                Why {entry.term} matters
+              </h2>
+              <p className="text-foreground leading-relaxed">
+                {entry.whyItMatters}
+              </p>
+            </section>
+          ) : null}
 
-        {/* Why it matters */}
-        {entry.whyItMatters ? (
-          <section className="mt-10">
-            <h2 className="text-xl font-extrabold text-foreground mb-3">
-              Why {entry.term} matters
-            </h2>
-            <p className="text-foreground leading-relaxed">{entry.whyItMatters}</p>
-          </section>
-        ) : null}
+          {/* Related terms */}
+          {relatedEntries.length > 0 ? (
+            <section className="mt-10">
+              <h2 className="text-xl font-extrabold text-foreground mb-4">
+                Related terms
+              </h2>
+              <ul className="grid gap-3 sm:grid-cols-2">
+                {relatedEntries.map((r) => (
+                  <li key={r.slug}>
+                    <Link
+                      href={`/glossary/${r.slug}`}
+                      className="block rounded-xl border border-border bg-card p-4 hover:border-primary/40 transition-colors"
+                    >
+                      <p className="text-sm font-bold text-foreground">
+                        {r.term}
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                        {r.definition.slice(0, 100)}
+                        {r.definition.length > 100 ? "…" : ""}
+                      </p>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
+          <div className="mt-10">
+            <SeoAnalyzerCta
+              context={`the ${entry.term} math on a real deal`}
+              utmSource="glossary"
+            />
+          </div>
 
-        {/* Tool CTA */}
-        {entry.toolUrl ? (
-          <section className="mt-10 rounded-2xl border border-primary/20 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-6 sm:p-8">
-            <h2 className="text-xl font-extrabold text-foreground mb-2">
-              Run the math on a real deal
-            </h2>
-            <p className="text-foreground leading-relaxed mb-5">
-              TrueCap has a free calculator for this. Paste an address or enter
-              numbers manually — get {entry.term} plus all the supporting metrics
-              in 60 seconds.
-            </p>
+          {/* Back to glossary */}
+          <div className="mt-12 pt-6 border-t border-border">
             <Link
-              href={entry.toolUrl}
-              className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground hover:opacity-90"
+              href="/glossary"
+              className="text-sm text-muted-foreground hover:text-foreground font-semibold"
             >
-              Try the free {entry.term} calculator <ArrowRight className="size-4" />
+              ← Back to full glossary
             </Link>
-          </section>
-        ) : null}
-
-        {/* Related terms */}
-        {relatedEntries.length > 0 ? (
-          <section className="mt-10">
-            <h2 className="text-xl font-extrabold text-foreground mb-4">Related terms</h2>
-            <ul className="grid gap-3 sm:grid-cols-2">
-              {relatedEntries.map((r) => (
-                <li key={r.slug}>
-                  <Link
-                    href={`/glossary/${r.slug}`}
-                    className="block rounded-xl border border-border bg-card p-4 hover:border-primary/40 transition-colors"
-                  >
-                    <p className="text-sm font-bold text-foreground">{r.term}</p>
-                    <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                      {r.definition.slice(0, 100)}
-                      {r.definition.length > 100 ? "…" : ""}
-                    </p>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ) : null}
-
-        {/* Analyzer bridge + lead magnet (2026-08 offer rollout, once per
-            template = all 44 term pages). */}
-        <div className="mt-10 space-y-6">
-          <SeoAnalyzerCta context={`the ${entry.term} math on a real deal`} utmSource="glossary" />
-          <LeadMagnetInline source="glossary" />
-        </div>
-
-        {/* Back to glossary */}
-        <div className="mt-12 pt-6 border-t border-border">
-          <Link
-            href="/glossary"
-            className="text-sm text-muted-foreground hover:text-foreground font-semibold"
-          >
-            ← Back to full glossary
-          </Link>
-        </div>
+          </div>
         </article>
       </main>
 

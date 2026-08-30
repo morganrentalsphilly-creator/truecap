@@ -17,20 +17,16 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  ArrowUpRight,
-  Calculator,
-  Sparkles,
-} from "lucide-react";
+import { ArrowUpRight, Calculator, Sparkles } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  title: "TrueCap vs every rental tool — honest comparisons",
+  title: "Rental Property Calculator Comparisons",
   description:
-    "Side-by-side comparisons of TrueCap and the rental tools investors actually evaluate — DealCheck, BiggerPockets, Stessa, Mashvisor, Roofstock, and more.",
+    "Compare TrueCap with rental property calculators, underwriting tools, marketplaces, and landlord software using sourced, side-by-side workflow reviews.",
   keywords: [
     "rental property tool comparison",
     "truecap alternatives",
@@ -38,21 +34,28 @@ export const metadata: Metadata = {
     "rental software comparison",
   ],
   alternates: { canonical: "/vs" },
-  // Noindex — the hub page is no longer surfaced from internal
-  // navigation (footer link + blog card removed at user request).
-  // Individual /vs/<competitor> pages stay indexable as SEO landing
-  // surfaces. The hub URL still resolves for anyone who types it
-  // directly or arrives from a stale internal link.
-  robots: { index: false, follow: true },
   openGraph: {
-    title: "TrueCap vs every rental tool — honest comparisons",
+    title: "Rental Property Calculator Comparisons | TrueCap",
     description:
-      "Side-by-side comparisons of TrueCap and the rental tools investors actually evaluate.",
+      "Compare TrueCap with rental property calculators, underwriting tools, marketplaces, and landlord software using sourced, side-by-side workflow reviews.",
     url: "/vs",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap comparisons" }],
+    images: [
+      {
+        url: "/home.jpg",
+        width: 1200,
+        height: 630,
+        alt: "TrueCap comparisons",
+      },
+    ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: {
+    card: "summary_large_image",
+    title: "Rental Property Calculator Comparisons | TrueCap",
+    description:
+      "Compare TrueCap with rental property calculators, underwriting tools, marketplaces, and landlord software using sourced, side-by-side workflow reviews.",
+    images: ["/home.jpg"],
+  },
 };
 
 type ComparisonCard = {
@@ -69,126 +72,278 @@ type ComparisonCard = {
 // comparisons land first.
 const COMPARISONS: ComparisonCard[] = [
   // Direct alternatives — overlapping acquisition-analysis workflows
-  { slug: "dealcheck", competitor: "DealCheck",
-    tagline: "A modern rental calculator with different free limits, mobile apps, and strategy coverage; compare the published workflows directly.",
-    group: "Direct alternative" },
-  { slug: "biggerpockets-calculator", competitor: "BiggerPockets Calculator",
-    tagline: "A community-bundled calculator compared with TrueCap's no-account preliminary screen and paid decision workflow.",
-    group: "Direct alternative" },
-  { slug: "stessa", competitor: "Stessa",
-    tagline: "Stessa spans acquisition discovery and underwriting through owned-property operations. TrueCap is narrower acquisition decision support.",
-    group: "Direct alternative" },
-  { slug: "excel", competitor: "Excel / Google Sheets",
-    tagline: "A structured, mobile-friendly workflow with one documented engine; keep spreadsheets for custom models that need their flexibility.",
-    group: "Direct alternative" },
+  {
+    slug: "dealcheck",
+    competitor: "DealCheck",
+    tagline:
+      "A modern rental calculator with different free limits, mobile apps, and strategy coverage; compare the published workflows directly.",
+    group: "Direct alternative",
+  },
+  {
+    slug: "biggerpockets-calculator",
+    competitor: "BiggerPockets Calculator",
+    tagline:
+      "A community-bundled calculator compared with TrueCap's no-account preliminary screen and paid decision workflow.",
+    group: "Direct alternative",
+  },
+  {
+    slug: "stessa",
+    competitor: "Stessa",
+    tagline:
+      "Stessa spans acquisition discovery and underwriting through owned-property operations. TrueCap is narrower acquisition decision support.",
+    group: "Direct alternative",
+  },
+  {
+    slug: "excel",
+    competitor: "Excel / Google Sheets",
+    tagline:
+      "A structured, mobile-friendly workflow with one documented engine; keep spreadsheets for custom models that need their flexibility.",
+    group: "Direct alternative",
+  },
 
   // Complementary tools — post-purchase ops, accounting, banking
-  { slug: "bricked", competitor: "Bricked AI",
-    tagline: "Bricked focuses on flip-oriented comps, ARV, and repairs. TrueCap models rental economics under the assumptions shown.",
-    group: "Complementary tool" },
-  { slug: "baselane", competitor: "Baselane",
-    tagline: "Baselane is rental banking + bookkeeping + rent collection. TrueCap is the pre-purchase underwrite.",
-    group: "Complementary tool" },
-  { slug: "rentredi", competitor: "RentRedi",
-    tagline: "RentRedi collects rent. TrueCap models pre-purchase cash flow from reviewed assumptions.",
-    group: "Complementary tool" },
-  { slug: "avail", competitor: "Avail",
-    tagline: "Avail manages your rentals after closing. TrueCap underwrites them before.",
-    group: "Complementary tool" },
-  { slug: "turbotenant", competitor: "TurboTenant",
-    tagline: "TurboTenant runs your rentals (listings, screening, rent collection). TrueCap underwrites before you buy.",
-    group: "Complementary tool" },
-  { slug: "landlord-studio", competitor: "Landlord Studio",
-    tagline: "Landlord Studio tracks expenses + Schedule E after closing. TrueCap is the deal-evaluation step before.",
-    group: "Complementary tool" },
-  { slug: "rentec-direct", competitor: "Rentec Direct",
-    tagline: "Rentec Direct manages 5-100 unit landlord ops. TrueCap underwrites the next deal before you scale.",
-    group: "Complementary tool" },
-  { slug: "rentspree", competitor: "RentSpree",
-    tagline: "RentSpree screens tenants. TrueCap underwrites the property. Agents use both.",
-    group: "Complementary tool" },
-  { slug: "buildium", competitor: "Buildium",
-    tagline: "Buildium manages rentals after purchase. TrueCap underwrites potential acquisitions before purchase.",
-    group: "Complementary tool" },
-  { slug: "appfolio", competitor: "AppFolio",
-    tagline: "AppFolio is post-purchase property management with a published 50-unit Core minimum. TrueCap is pre-purchase underwriting.",
-    group: "Complementary tool" },
+  {
+    slug: "bricked",
+    competitor: "Bricked AI",
+    tagline:
+      "Bricked focuses on flip-oriented comps, ARV, and repairs. TrueCap models rental economics under the assumptions shown.",
+    group: "Complementary tool",
+  },
+  {
+    slug: "baselane",
+    competitor: "Baselane",
+    tagline:
+      "Baselane is rental banking + bookkeeping + rent collection. TrueCap is the pre-purchase underwrite.",
+    group: "Complementary tool",
+  },
+  {
+    slug: "rentredi",
+    competitor: "RentRedi",
+    tagline:
+      "RentRedi collects rent. TrueCap models pre-purchase cash flow from reviewed assumptions.",
+    group: "Complementary tool",
+  },
+  {
+    slug: "avail",
+    competitor: "Avail",
+    tagline:
+      "Avail manages your rentals after closing. TrueCap underwrites them before.",
+    group: "Complementary tool",
+  },
+  {
+    slug: "turbotenant",
+    competitor: "TurboTenant",
+    tagline:
+      "TurboTenant runs your rentals (listings, screening, rent collection). TrueCap underwrites before you buy.",
+    group: "Complementary tool",
+  },
+  {
+    slug: "landlord-studio",
+    competitor: "Landlord Studio",
+    tagline:
+      "Landlord Studio tracks expenses + Schedule E after closing. TrueCap is the deal-evaluation step before.",
+    group: "Complementary tool",
+  },
+  {
+    slug: "rentec-direct",
+    competitor: "Rentec Direct",
+    tagline:
+      "Rentec Direct manages 5-100 unit landlord ops. TrueCap underwrites the next deal before you scale.",
+    group: "Complementary tool",
+  },
+  {
+    slug: "rentspree",
+    competitor: "RentSpree",
+    tagline:
+      "RentSpree screens tenants. TrueCap underwrites the property. Agents use both.",
+    group: "Complementary tool",
+  },
+  {
+    slug: "buildium",
+    competitor: "Buildium",
+    tagline:
+      "Buildium manages rentals after purchase. TrueCap underwrites potential acquisitions before purchase.",
+    group: "Complementary tool",
+  },
+  {
+    slug: "appfolio",
+    competitor: "AppFolio",
+    tagline:
+      "AppFolio is post-purchase property management with a published 50-unit Core minimum. TrueCap is pre-purchase underwriting.",
+    group: "Complementary tool",
+  },
 
   // Specialized tools — single-slice tools (rent, market, listings)
-  { slug: "roofstock", competitor: "Roofstock",
-    tagline: "Roofstock offers individual-investor real-estate services. TrueCap provides a separate, assumption-driven underwrite.",
-    group: "Specialized tool" },
-  { slug: "mashvisor", competitor: "Mashvisor",
-    tagline: "Mashvisor is market discovery (heatmaps, neighborhood scores). TrueCap is per-deal underwriting once you've picked an address.",
-    group: "Specialized tool" },
-  { slug: "propstream", competitor: "PropStream",
-    tagline: "PropStream finds motivated-seller leads. TrueCap underwrites them. The full off-market workflow.",
-    group: "Specialized tool" },
-  { slug: "rentometer", competitor: "Rentometer",
-    tagline: "Rentometer estimates rent. TrueCap underwrites the full deal — including the rent.",
-    group: "Specialized tool" },
-  { slug: "rentcast", competitor: "RentCast",
-    tagline: "RentCast estimates rent + property value with an API. TrueCap underwrites the full deal.",
-    group: "Specialized tool" },
-  { slug: "zillow-rent-estimate", competitor: "Zillow Rent Estimate",
-    tagline: "Compare Zillow's property-specific Rent Zestimate with TrueCap's editable HUD area benchmark and full underwriting workflow.",
-    group: "Specialized tool" },
-  { slug: "hostfully", competitor: "Hostfully",
-    tagline: "Hostfully manages short-term rentals after closing. TrueCap underwrites the STR deal before.",
-    group: "Specialized tool" },
-  { slug: "hostaway", competitor: "Hostaway",
-    tagline: "Hostaway manages STRs at scale (3-100 properties). TrueCap underwrites the STR deal before.",
-    group: "Specialized tool" },
-  { slug: "airdna", competitor: "AirDNA",
-    tagline: "AirDNA is the gold-standard STR revenue data. TrueCap underwrites the full deal using AirDNA's projections.",
-    group: "Specialized tool" },
-  { slug: "dealmachine", competitor: "DealMachine",
-    tagline: "DealMachine is mobile-first driving-for-dollars lead generation. TrueCap underwrites what it surfaces.",
-    group: "Specialized tool" },
-  { slug: "batchleads", competitor: "BatchLeads",
-    tagline: "BatchLeads is lead generation + skip-tracing (PropStream alternative). TrueCap underwrites the deals.",
-    group: "Specialized tool" },
-  { slug: "arrived", competitor: "Arrived",
-    tagline: "Arrived sells fractional rental shares (passive). TrueCap underwrites whole properties you'd own directly.",
-    group: "Specialized tool" },
-  { slug: "yardi-breeze", competitor: "Yardi Breeze",
-    tagline: "Yardi Breeze is small-business property management (1-100 units). TrueCap underwrites the next acquisition.",
-    group: "Complementary tool" },
+  {
+    slug: "roofstock",
+    competitor: "Roofstock",
+    tagline:
+      "Roofstock offers individual-investor real-estate services. TrueCap provides a separate, assumption-driven underwrite.",
+    group: "Specialized tool",
+  },
+  {
+    slug: "mashvisor",
+    competitor: "Mashvisor",
+    tagline:
+      "Mashvisor is market discovery (heatmaps, neighborhood scores). TrueCap is per-deal underwriting once you've picked an address.",
+    group: "Specialized tool",
+  },
+  {
+    slug: "propstream",
+    competitor: "PropStream",
+    tagline:
+      "PropStream finds motivated-seller leads. TrueCap underwrites them. The full off-market workflow.",
+    group: "Specialized tool",
+  },
+  {
+    slug: "rentometer",
+    competitor: "Rentometer",
+    tagline:
+      "Rentometer estimates rent. TrueCap underwrites the full deal — including the rent.",
+    group: "Specialized tool",
+  },
+  {
+    slug: "rentcast",
+    competitor: "RentCast",
+    tagline:
+      "RentCast estimates rent + property value with an API. TrueCap underwrites the full deal.",
+    group: "Specialized tool",
+  },
+  {
+    slug: "zillow-rent-estimate",
+    competitor: "Zillow Rent Estimate",
+    tagline:
+      "Compare Zillow's property-specific Rent Zestimate with TrueCap's editable HUD area benchmark and full underwriting workflow.",
+    group: "Specialized tool",
+  },
+  {
+    slug: "hostfully",
+    competitor: "Hostfully",
+    tagline:
+      "Hostfully manages short-term rentals after closing. TrueCap underwrites the STR deal before.",
+    group: "Specialized tool",
+  },
+  {
+    slug: "hostaway",
+    competitor: "Hostaway",
+    tagline:
+      "Hostaway manages STRs at scale (3-100 properties). TrueCap underwrites the STR deal before.",
+    group: "Specialized tool",
+  },
+  {
+    slug: "airdna",
+    competitor: "AirDNA",
+    tagline:
+      "AirDNA is the gold-standard STR revenue data. TrueCap underwrites the full deal using AirDNA's projections.",
+    group: "Specialized tool",
+  },
+  {
+    slug: "dealmachine",
+    competitor: "DealMachine",
+    tagline:
+      "DealMachine is mobile-first driving-for-dollars lead generation. TrueCap underwrites what it surfaces.",
+    group: "Specialized tool",
+  },
+  {
+    slug: "batchleads",
+    competitor: "BatchLeads",
+    tagline:
+      "BatchLeads is lead generation + skip-tracing (PropStream alternative). TrueCap underwrites the deals.",
+    group: "Specialized tool",
+  },
+  {
+    slug: "arrived",
+    competitor: "Arrived",
+    tagline:
+      "Arrived sells fractional rental shares (passive). TrueCap underwrites whole properties you'd own directly.",
+    group: "Specialized tool",
+  },
+  {
+    slug: "yardi-breeze",
+    competitor: "Yardi Breeze",
+    tagline:
+      "Yardi Breeze is small-business property management (1-100 units). TrueCap underwrites the next acquisition.",
+    group: "Complementary tool",
+  },
   // Round 4 additions
-  { slug: "fundrise", competitor: "Fundrise",
-    tagline: "Fundrise sells diversified non-traded REIT shares (passive). TrueCap underwrites whole properties you'd own directly.",
-    group: "Specialized tool" },
-  { slug: "lodgify", competitor: "Lodgify",
-    tagline: "Lodgify is small-operator STR software (1-10 STRs). TrueCap underwrites the STR deal before.",
-    group: "Specialized tool" },
-  { slug: "guesty", competitor: "Guesty",
-    tagline: "Guesty manages STR operations across Lite, Pro, and Enterprise plans. TrueCap handles pre-purchase underwriting.",
-    group: "Specialized tool" },
-  { slug: "crexi", competitor: "Crexi",
-    tagline: "Crexi is the commercial RE marketplace (LoopNet alternative). TrueCap is residential underwriting.",
-    group: "Specialized tool" },
-  { slug: "reonomy", competitor: "Reonomy",
-    tagline: "Reonomy is enterprise commercial RE intelligence + owner data. TrueCap is residential underwriting.",
-    group: "Specialized tool" },
-  { slug: "privy", competitor: "Privy",
-    tagline: "Privy is investor-filtered MLS search. TrueCap underwrites the deals Privy surfaces.",
-    group: "Specialized tool" },
-  { slug: "quickbooks-rental", competitor: "QuickBooks (for rentals)",
-    tagline: "QuickBooks is general accounting many landlords default to. TrueCap is pre-purchase underwriting.",
-    group: "Complementary tool" },
+  {
+    slug: "fundrise",
+    competitor: "Fundrise",
+    tagline:
+      "Fundrise sells diversified non-traded REIT shares (passive). TrueCap underwrites whole properties you'd own directly.",
+    group: "Specialized tool",
+  },
+  {
+    slug: "lodgify",
+    competitor: "Lodgify",
+    tagline:
+      "Lodgify is small-operator STR software (1-10 STRs). TrueCap underwrites the STR deal before.",
+    group: "Specialized tool",
+  },
+  {
+    slug: "guesty",
+    competitor: "Guesty",
+    tagline:
+      "Guesty manages STR operations across Lite, Pro, and Enterprise plans. TrueCap handles pre-purchase underwriting.",
+    group: "Specialized tool",
+  },
+  {
+    slug: "crexi",
+    competitor: "Crexi",
+    tagline:
+      "Crexi is the commercial RE marketplace (LoopNet alternative). TrueCap is residential underwriting.",
+    group: "Specialized tool",
+  },
+  {
+    slug: "reonomy",
+    competitor: "Reonomy",
+    tagline:
+      "Reonomy is enterprise commercial RE intelligence + owner data. TrueCap is residential underwriting.",
+    group: "Specialized tool",
+  },
+  {
+    slug: "privy",
+    competitor: "Privy",
+    tagline:
+      "Privy is investor-filtered MLS search. TrueCap underwrites the deals Privy surfaces.",
+    group: "Specialized tool",
+  },
+  {
+    slug: "quickbooks-rental",
+    competitor: "QuickBooks (for rentals)",
+    tagline:
+      "QuickBooks is general accounting many landlords default to. TrueCap is pre-purchase underwriting.",
+    group: "Complementary tool",
+  },
   // Niche use-case slices
-  { slug: "biggerpockets-for-house-hacking", competitor: "BiggerPockets for House Hacking",
-    tagline: "House-hack cut of TrueCap vs BiggerPockets — owner-occupant unit modeling, FHA financing, effective rent saved.",
-    group: "Direct alternative" },
-  { slug: "dealcheck-for-short-term-rentals", competitor: "DealCheck for STRs",
-    tagline: "STR investor's cut of TrueCap vs DealCheck — ADR, occupancy, AirDNA inputs, and tax-model limits.",
-    group: "Direct alternative" },
-  { slug: "mashvisor-for-short-term-rentals", competitor: "Mashvisor for STRs",
-    tagline: "STR investor's cut of TrueCap vs Mashvisor — market scoring vs per-deal underwriting.",
-    group: "Specialized tool" },
-  { slug: "cozy", competitor: "Cozy.co (shut down)",
-    tagline: "Cozy shut down in 2022. Here's what replaces it — and how TrueCap fits the underwriting half it never had.",
-    group: "Specialized tool" },
+  {
+    slug: "biggerpockets-for-house-hacking",
+    competitor: "BiggerPockets for House Hacking",
+    tagline:
+      "House-hack cut of TrueCap vs BiggerPockets — owner-occupant unit modeling, FHA financing, effective rent saved.",
+    group: "Direct alternative",
+  },
+  {
+    slug: "dealcheck-for-short-term-rentals",
+    competitor: "DealCheck for STRs",
+    tagline:
+      "STR investor's cut of TrueCap vs DealCheck — ADR, occupancy, AirDNA inputs, and tax-model limits.",
+    group: "Direct alternative",
+  },
+  {
+    slug: "mashvisor-for-short-term-rentals",
+    competitor: "Mashvisor for STRs",
+    tagline:
+      "STR investor's cut of TrueCap vs Mashvisor — market scoring vs per-deal underwriting.",
+    group: "Specialized tool",
+  },
+  {
+    slug: "cozy",
+    competitor: "Cozy.co (shut down)",
+    tagline:
+      "Cozy shut down in 2022. Here's what replaces it — and how TrueCap fits the underwriting half it never had.",
+    group: "Specialized tool",
+  },
 ];
 
 const GROUPS = [
@@ -249,12 +404,13 @@ export default function VsHubPage() {
             Honest comparisons
           </div>
           <h1 className="mx-auto max-w-3xl text-balance text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight">
-            TrueCap vs every <span className="text-primary">rental tool</span> that matters.
+            TrueCap vs every <span className="text-primary">rental tool</span>{" "}
+            that matters.
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-balance text-base sm:text-lg leading-relaxed text-muted-foreground">
             {COMPARISONS.length} side-by-side comparisons. Honest feature
-            matrices. Where each tool does the job better. When TrueCap fits, when something else
-            does, and how to combine them.
+            matrices. Where each tool does the job better. When TrueCap fits,
+            when something else does, and how to combine them.
           </p>
           <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
             <Link
@@ -275,7 +431,10 @@ export default function VsHubPage() {
 
         {/* Comparison cards grouped by category */}
         {GROUPS.map((group, gi) => (
-          <section key={group.label} className={gi === 0 ? "mb-10 sm:mb-14" : "mb-10 sm:mb-14"}>
+          <section
+            key={group.label}
+            className={gi === 0 ? "mb-10 sm:mb-14" : "mb-10 sm:mb-14"}
+          >
             <div className="mb-5">
               <p className="text-[11px] font-bold uppercase tracking-widest text-primary mb-1.5">
                 {group.label}

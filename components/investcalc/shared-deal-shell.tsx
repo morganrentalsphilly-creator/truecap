@@ -27,9 +27,11 @@ import type { SpecialistAnalysisSnapshot } from "@/lib/specialist-analysis-snaps
 
 export type SharedDealLeadCapture = {
   ownerId: string;
+  shareSurface: "opaque_share" | "legacy_share" | "portal_share";
   dealId?: string;
   valuesHash: string;
   sig?: string;
+  opaqueShareToken?: string;
 };
 
 export function SharedDealShell({
@@ -51,6 +53,8 @@ export function SharedDealShell({
   specialistAnalysis = null,
   specialistAnalysisCaptured = false,
   analyzerStrategyKey = "buy-hold",
+  shareSurface,
+  copyShareToken,
 }: {
   values: InvestmentFormValues;
   /** Entitlement-redacted before crossing into the public client renderer. */
@@ -86,6 +90,11 @@ export function SharedDealShell({
    * from a legacy/malformed snapshot without serializing the result itself. */
   specialistAnalysisCaptured?: boolean;
   analyzerStrategyKey?: AnalyzerStrategyKey;
+  /** Coarse analytics source only; never pass a share token or account id. */
+  shareSurface: "opaque_share" | "legacy_share" | "portal_share";
+  /** Present only for a revocable /s capability. The client sends it back to
+   * the auth-gated action, which re-resolves revocation and expiry at click. */
+  copyShareToken?: string;
 }) {
   const tenYearProjectionVersion =
     analysis.access === "pro"
@@ -93,7 +102,7 @@ export function SharedDealShell({
       : undefined;
   return (
     <div className="min-h-screen bg-background">
-      <TrackSharedDealView hasAddress={addressIncluded} />
+      <TrackSharedDealView referralSource={shareSurface} />
       {/* Top banner — agent-branded when a Pro owner shared it, else TrueCap. */}
       {agent ? (
         <div
@@ -184,15 +193,18 @@ export function SharedDealShell({
           specialistAnalysis={specialistAnalysis}
           specialistAnalysisCaptured={specialistAnalysisCaptured}
           analyzerStrategyKey={analyzerStrategyKey}
+          copyShareToken={copyShareToken}
         />
 
         {/* Agent lead capture (co-branded shares) OR the generic Pro upsell. */}
         {agent && leadCapture ? (
           <LeadCaptureForm
+            shareSurface={leadCapture.shareSurface}
             ownerId={leadCapture.ownerId}
             dealId={leadCapture.dealId}
             valuesHash={leadCapture.valuesHash}
             sig={leadCapture.sig}
+            opaqueShareToken={leadCapture.opaqueShareToken}
             agentName={agent.displayName}
             dealAddress={values.address}
             accentColor={agent.primaryColor}
@@ -203,13 +215,15 @@ export function SharedDealShell({
               <Lock className="w-5 h-5 text-primary mt-0.5 shrink-0" />
               <div className="min-w-0 flex-1">
                 <div className="font-bold text-foreground">
-                  See 10-year cash-flow and equity projections, an Offer Ceiling,
-                  downside sensitivity, and the secondary Screening Index
+                  See 10-year cash-flow and equity projections, an Offer
+                  Ceiling, downside sensitivity, and the secondary Screening
+                  Index
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
-                  The full analysis with multi-year cash flow and equity projections,
-                  target review, and downside checks is free to start. Run this property in your own
-                  account — your edits stay private.
+                  The full analysis with multi-year cash flow and equity
+                  projections, target review, and downside checks is free to
+                  start. Run this property in your own account — your edits stay
+                  private.
                 </p>
                 <Link
                   href="/"

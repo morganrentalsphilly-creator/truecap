@@ -6,6 +6,17 @@ import { safeInternalNextPath } from "@/lib/auth-schema";
 import { sendLifecycleEmailNow } from "@/lib/email/send-lifecycle";
 import { getSiteUrl } from "@/lib/site-url";
 import { captureServerEvent } from "@/lib/posthog-server";
+import {
+  canonicalAnalyticsEventId,
+  claimCanonicalAnalyticsEvent,
+  releaseCanonicalAnalyticsEventClaim,
+} from "@/lib/analytics/canonical-event-claim";
+import { createAdminSupabaseClient } from "@/lib/supabase/admin";
+
+const NEW_OAUTH_ACCOUNT_EVENTS = [
+  { event: "account_created" as const },
+  { event: "product_evaluation_started" as const },
+];
 
 /**
  * Fire the instant welcome email after a confirmation establishes a
@@ -14,7 +25,7 @@ import { captureServerEvent } from "@/lib/posthog-server";
  * repeat logins and the daily cron can't duplicate it. Best-effort.
  */
 function scheduleWelcome(
-  user: { id: string; email?: string | null } | null | undefined
+  user: { id: string; email?: string | null } | null | undefined,
 ) {
   const email = user?.email;
   if (!user || !email) return;
@@ -22,8 +33,8 @@ function scheduleWelcome(
   after(() =>
     sendLifecycleEmailNow(
       { userId: id, email, kind: "welcome", key: "welcome" },
-      getSiteUrl()
-    )
+      getSiteUrl(),
+    ),
   );
 }
 
@@ -34,19 +45,52 @@ function scheduleNewOAuthAccountAnalytics(user: User | null | undefined) {
   if (!user || user.app_metadata?.provider !== "google") return;
   const createdAt = Date.parse(user.created_at);
   if (!Number.isFinite(createdAt)) return;
+  const lastSignInAt = Date.parse(user.last_sign_in_at ?? "");
+  // These timestamps establish that this is a genuinely new Google identity;
+  // they are not the dedupe mechanism. Durable (event, user.id) claims below
+  // prevent replayed or parallel callbacks from repeating funnel events.
+  if (
+    !Number.isFinite(lastSignInAt) ||
+    Math.abs(lastSignInAt - createdAt) > 90_000
+  ) {
+    return;
+  }
   const ageMs = Date.now() - createdAt;
   if (ageMs < 0 || ageMs > 10 * 60 * 1000) return;
   after(async () => {
-    await captureServerEvent({
-      distinctId: user.id,
-      event: "account_created",
-      properties: { method: "google", needs_email_confirmation: false },
-    });
-    await captureServerEvent({
-      distinctId: user.id,
-      event: "product_evaluation_started",
-      properties: { source: "account_created" },
-    });
+    try {
+      const admin = createAdminSupabaseClient();
+      for (const analyticsEvent of NEW_OAUTH_ACCOUNT_EVENTS) {
+        const claimInput = {
+          eventName: analyticsEvent.event,
+          dedupeKey: user.id,
+        };
+        let claimState: "claimed" | "duplicate" | "unavailable";
+        try {
+          claimState = (await claimCanonicalAnalyticsEvent(admin, claimInput))
+            ? "claimed"
+            : "duplicate";
+        } catch {
+          claimState = "unavailable";
+        }
+        if (claimState === "duplicate") continue;
+        const captured = await captureServerEvent({
+          distinctId: user.id,
+          event: analyticsEvent.event,
+          eventId: canonicalAnalyticsEventId(
+            claimInput.eventName,
+            claimInput.dedupeKey,
+          ),
+          properties: { referral_source: "google_oauth" },
+        });
+        if (!captured && claimState === "claimed") {
+          await releaseCanonicalAnalyticsEventClaim(admin, claimInput);
+        }
+      }
+    } catch {
+      // Analytics remains best-effort and must never change auth redirects or
+      // session establishment. A later replay can retry any unclaimed event.
+    }
   });
 }
 
@@ -93,14 +137,16 @@ export async function GET(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value),
+          );
           redirectResponse = NextResponse.redirect(`${origin}${next}`);
           cookiesToSet.forEach(({ name, value, options }) =>
-            redirectResponse.cookies.set(name, value, options)
+            redirectResponse.cookies.set(name, value, options),
           );
         },
       },
-    }
+    },
   );
 
   if (code) {
@@ -113,12 +159,15 @@ export async function GET(request: NextRequest) {
       return redirectResponse;
     }
     return NextResponse.redirect(
-      `${origin}/auth/login?error=auth&reason=${encodeURIComponent(error.message)}`
+      `${origin}/auth/login?error=auth&reason=${encodeURIComponent(error.message)}`,
     );
   }
 
   if (tokenHash && type) {
-    const { data, error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
+    const { data, error } = await supabase.auth.verifyOtp({
+      token_hash: tokenHash,
+      type,
+    });
     if (!error) {
       // Only signup/email-confirmation token-hash links should welcome —
       // not password recovery, email change, or invite.
@@ -126,12 +175,14 @@ export async function GET(request: NextRequest) {
       return redirectResponse;
     }
     return NextResponse.redirect(
-      `${origin}/auth/login?error=auth&reason=${encodeURIComponent(error.message)}`
+      `${origin}/auth/login?error=auth&reason=${encodeURIComponent(error.message)}`,
     );
   }
 
   // No code and no token_hash — the link is malformed or stale. Drop the
   // user on the login page with a specific reason so we can show useful
   // guidance instead of a generic error toast.
-  return NextResponse.redirect(`${origin}/auth/login?error=auth&reason=missing_token`);
+  return NextResponse.redirect(
+    `${origin}/auth/login?error=auth&reason=missing_token`,
+  );
 }

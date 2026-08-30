@@ -18,15 +18,15 @@ import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "closing-costs-investment-property";
 const TITLE =
-  "Closing costs on an investment property — the full breakdown (2026)";
+  "Closing costs on an investment property: build the property-specific stack";
 // SERP-facing title (metadata/og only): kept ≤50 chars so the root
 // layout's "%s | TrueCap" template stays inside the ~60-char SERP
 // window. The on-page <h1> keeps the longer editorial TITLE.
-const SERP_TITLE = "Closing costs on an investment property (2026)";
+const SERP_TITLE = "Investment-property closing costs";
 const DESCRIPTION =
-  "Every line item in investment-property closing costs, with real 2026 dollar figures on a $250k rental. What's negotiable, what isn't, and how to fold it into your cash-to-close.";
+  "Build an investment-property cash-to-close estimate from current lender, title, government, insurer, tax, and contract documents, with a hypothetical $250k example.";
 const PUBLISHED_AT = "2026-06-09";
-const MODIFIED_AT = "2026-06-09";
+const MODIFIED_AT = "2026-08-29";
 const READING_TIME = 11;
 
 export const metadata: Metadata = {
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     "rental property closing costs estimate",
     "closing costs vs down payment",
     "what are closing costs on a rental",
-    "buyer closing costs 2026",
+    "buyer closing costs estimate",
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
@@ -57,23 +57,23 @@ export const metadata: Metadata = {
 const FAQS = [
   {
     q: "How much are closing costs on an investment property?",
-    a: "Plan on 2–5% of the purchase price for a financed investment property, on top of your down payment. On a $250,000 rental that's roughly $5,000–$12,500. Lender-related fees (origination, points, appraisal) make up the largest chunk, followed by title and government recording/transfer taxes. The exact figure swings widely by state because transfer taxes and title insurance pricing are state-specific.",
+    a: "There is no reliable national amount or percentage for a particular closing. Build the estimate from the lender's written disclosures, title or settlement quote, current government charges, insurance quote, property-tax information, and purchase contract. Reconcile the estimate again when final documents arrive.",
   },
   {
     q: "Are closing costs higher on an investment property than a primary residence?",
-    a: "Usually a little. The line items are the same, but investment-property loans carry rate add-ons (loan-level price adjustments) that often get bought down with points, and some lenders charge a slightly higher origination fee on non-owner-occupied loans. The appraisal can also cost more because lenders frequently order a rent schedule (Form 1007) alongside the standard appraisal.",
+    a: "They can differ because occupancy, loan program, property type, required reports, pricing, insurance, and escrow terms affect the file. Compare complete written options for the actual borrower and property; do not transfer a primary-residence estimate to an investment purchase.",
   },
   {
     q: "Can you roll closing costs into an investment property loan?",
-    a: "Generally no — not the way you can on some refinances. On a purchase, closing costs are paid out of pocket at the table. You can sometimes reduce them with lender credits (accepting a higher rate in exchange for the lender covering fees) or seller concessions, but conventional investment-property loans cap seller-paid costs at 2% of the price.",
+    a: "Whether any charge can be financed, offset by a lender credit, or covered by a seller concession depends on the loan program, occupancy, loan-to-value, transaction, appraisal, contract, and current lender rules. Ask the lender to show each option's rate, fees, credits, required cash, and concession limit in writing; a credit or concession does not make the cost disappear.",
   },
   {
     q: "Are investment property closing costs tax deductible?",
-    a: "Some are deductible in year one, some get added to your cost basis and depreciated, and some are amortized over the life of the loan. Prepaid property taxes and prorated mortgage interest are typically deductible immediately. Title fees, recording fees, and transfer taxes are added to basis. Loan points and lender fees are amortized over the loan term. Confirm the specifics with your CPA — this isn't tax advice.",
+    a: "Tax classification and timing depend on the actual charge, taxpayer, property use, loan purpose, transaction, accounting method, and current law. Preserve the final settlement statement and invoices, then have a qualified tax professional classify each line instead of applying one treatment to every closing cost.",
   },
   {
     q: "Do you pay closing costs on a cash purchase?",
-    a: "Yes, just fewer of them. A cash purchase skips every lender fee — origination, points, appraisal, lender's title policy — but you still pay title search, owner's title insurance, escrow/settlement fees, recording fees, and transfer taxes. Cash closing costs usually land around 1–2% of the price instead of 2–5%.",
+    a: "A cash purchase removes financing charges but can still involve contract, title, settlement, legal, inspection, insurance, tax, recording, transfer, and other local items. Some diligence choices are optional and others may be required by the contract or jurisdiction. Obtain current local quotes rather than applying a national cash-purchase percentage.",
   },
 ];
 
@@ -98,8 +98,18 @@ export default function ClosingCostsPost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "TrueCap", item: `${siteUrl}/` },
-      { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "TrueCap",
+        item: `${siteUrl}/`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: `${siteUrl}/blog`,
+      },
       { "@type": "ListItem", position: 3, name: TITLE, item: canonicalUrl },
     ],
   };
@@ -151,7 +161,11 @@ export default function ClosingCostsPost() {
               · {READING_TIME} min read
             </p>
             <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
-              Most first-time investors budget for the down payment, then get blindsided at the closing table by a second pile of cash they didn&apos;t fully price in. Closing costs on an investment property run 2–5% of the purchase price — on a $250,000 rental, that&apos;s $5,000 to $12,500 of additional cash to close. Here&apos;s every line item, what each one actually costs in 2026, what&apos;s negotiable, and how to fold it into your underwriting so it never surprises you.
+              Cash to close depends on a property-specific stack of lender,
+              title, government, insurance, tax, contract, and prepaid items.
+              This guide shows how to assemble that stack from current written
+              documents and uses a hypothetical $250,000 purchase to demonstrate
+              the return math. The example is not a quote or national benchmark.
             </p>
           </header>
 
@@ -160,185 +174,356 @@ export default function ClosingCostsPost() {
               The short answer
             </h2>
             <p>
-              For a financed investment property, budget <strong>2–5% of the purchase price</strong> in closing costs, paid at the table on top of your down payment. The range is wide because two of the biggest line items — title insurance and transfer taxes — are priced by your state, not your lender. A buyer in a low-tax state might pay 2%; a buyer in a high transfer-tax state (New York, Pennsylvania, Delaware) can clear 5%.
+              Do not rely on a national percentage to fund a closing. Start with
+              the lender&apos;s written disclosures, title or settlement quote,
+              current state and local charges, insurance quote, property-tax
+              information, and purchase contract. Separate fees from prepaids
+              and escrows, then reconcile every line with the final documents.
             </p>
             <p>
-              For a cash purchase, drop every lender fee and budget closer to <strong>1–2%</strong>. You still owe title, escrow, recording, and transfer taxes — there&apos;s no such thing as a fee-free close.
+              A cash purchase removes financing charges but does not establish a
+              fixed closing-cost percentage. Title, settlement, legal,
+              diligence, insurance, tax, recording, transfer, and contract items
+              depend on the property and jurisdiction. Obtain current local
+              quotes for the choices and requirements that apply.
             </p>
             <p>
-              One framing that keeps investors honest: closing costs are sunk the moment you sign. Unlike a down payment, which becomes equity you can recover at sale or refinance, most closing costs — origination, appraisal, title, transfer tax — are gone for good. That&apos;s exactly why they belong in your return math up front rather than as an afterthought. A deal that needs every dollar of projected cash flow to pencil can&apos;t absorb a surprise $12,000 at the table.
+              For return modeling, include nonrefundable transaction charges in
+              cash invested and track prepaids or escrow deposits separately.
+              Neither a modeled down payment nor a preliminary estimate is the
+              final cash-to-close figure.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The worked example: a $250k duplex, 25% down
+              A hypothetical $250k duplex stack
             </h2>
             <p>
-              Let&apos;s anchor everything to one deal so the numbers stay concrete. A $250,000 duplex, financed at 75% loan-to-value (25% down is the standard minimum for a non-owner-occupied conventional loan), 7% interest on a 30-year fixed. Down payment: $62,500. Loan amount: $187,500.
+              To keep the arithmetic concrete, assume a $250,000 duplex, a 25%
+              down payment, a $187,500 loan, and a 30-year term at an assumed 7%
+              rate. These inputs are illustrative only; minimum down payment,
+              rate, eligibility, and terms vary by borrower, property, program,
+              and lender.
             </p>
             <p>
-              Here&apos;s a realistic closing-cost stack for that deal in a mid-tax state:
+              The following invented line items total $12,600. They demonstrate
+              how a stack works; they are not current, typical, or
+              location-based prices:
             </p>
             <ul>
-              <li><strong>Loan origination fee (1%):</strong> $1,875</li>
-              <li><strong>Discount points (1 point to buy down the rate):</strong> $1,875</li>
-              <li><strong>Appraisal + rent schedule (Form 1007):</strong> $650</li>
-              <li><strong>Credit report, flood cert, tax service:</strong> $150</li>
-              <li><strong>Lender&apos;s title insurance policy:</strong> $700</li>
-              <li><strong>Owner&apos;s title insurance policy:</strong> $1,100</li>
-              <li><strong>Title search + settlement/escrow fee:</strong> $900</li>
-              <li><strong>Recording fees:</strong> $150</li>
-              <li><strong>State/county transfer tax (~1%):</strong> $2,500</li>
-              <li><strong>Prepaid homeowners insurance (1 yr):</strong> $1,400</li>
-              <li><strong>Prepaid property tax escrow (~3 months):</strong> $900</li>
-              <li><strong>Prepaid/prorated mortgage interest:</strong> $400</li>
+              <li>
+                <strong>Loan origination fee (1%):</strong> $1,875
+              </li>
+              <li>
+                <strong>Discount points (1 point to buy down the rate):</strong>{" "}
+                $1,875
+              </li>
+              <li>
+                <strong>Appraisal + rent schedule (Form 1007):</strong> $650
+              </li>
+              <li>
+                <strong>Credit report, flood cert, tax service:</strong> $150
+              </li>
+              <li>
+                <strong>Lender&apos;s title insurance policy:</strong> $700
+              </li>
+              <li>
+                <strong>Owner&apos;s title insurance policy:</strong> $1,100
+              </li>
+              <li>
+                <strong>Title search + settlement/escrow fee:</strong> $900
+              </li>
+              <li>
+                <strong>Recording fees:</strong> $150
+              </li>
+              <li>
+                <strong>State/county transfer tax (~1%):</strong> $2,500
+              </li>
+              <li>
+                <strong>Prepaid homeowners insurance (1 yr):</strong> $1,400
+              </li>
+              <li>
+                <strong>Prepaid property tax escrow (~3 months):</strong> $900
+              </li>
+              <li>
+                <strong>Prepaid/prorated mortgage interest:</strong> $400
+              </li>
             </ul>
             <p>
-              Total: roughly <strong>$12,600</strong>, or about 5% of the purchase price. Skip the discount point and use a lower-tax state and the same deal closes nearer $8,000 (3.2%). That spread — $8k to $12.6k on an identical price — is why a single national &quot;closing costs are X%&quot; number is close to useless. You have to build the stack line by line.
+              In this hypothetical, $12,600 equals about 5% of the purchase
+              price. That percentage describes only the invented stack. Replace
+              every line with the actual written estimate, identify whether it
+              is a fee, credit, prepaid, escrow deposit, or adjustment, and keep
+              a reserve for documented changes allowed before closing.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Group 1: Lender fees (the negotiable pile)
+              Group 1: lender charges and third-party services
             </h2>
             <p>
-              <strong>Origination fee.</strong> Usually 0.5–1% of the loan amount. This is the lender&apos;s charge for processing and underwriting your loan, and it&apos;s the most negotiable line item on the entire sheet. Get loan estimates from two or three lenders and the origination number alone can move $1,000+.
+              <strong>Origination and lender charges.</strong> Use the amount
+              and labels on the written disclosure. Compare complete same-day
+              loan options, because a lower fee may be paired with a different
+              rate, credit, lock, prepayment term, or eligibility rule. Ask the
+              lender to explain each charge and whether it can change.
             </p>
             <p>
-              <strong>Discount points.</strong> Each point costs 1% of the loan amount and buys your rate down by roughly 0.25%. On a $187,500 loan, one point is $1,875 to shave the rate from, say, 7.0% to 6.75%. Whether that&apos;s worth it is pure break-even math: divide the cost of the point by your monthly payment savings to get the months-to-recoup. Run both rate scenarios through the{" "}
-              <Link href="/tools/mortgage-payment-calculator" className="text-primary font-semibold hover:underline">
+              <strong>Discount points and credits.</strong> Confirm whether a
+              quoted point means 1% of the loan amount and whether it is a
+              discount point, origination charge, or another fee. The rate
+              change per point is not fixed. Compare the lender&apos;s written
+              rate, APR, payment, fees, credits, lock terms, and cash to close
+              at each option. A simple screen is point cost divided by monthly
+              payment savings, but also model the expected loan duration and
+              exit. Run the quoted scenarios through the{" "}
+              <Link
+                href="/tools/mortgage-payment-calculator"
+                className="text-primary font-semibold hover:underline"
+              >
                 mortgage payment calculator
               </Link>{" "}
-              before you decide — on a long hold, points often pay off; on a property you plan to refinance in two years, they rarely do.
+              and reconcile its result with the lender&apos;s payment schedule.
             </p>
             <p>
-              <strong>Appraisal.</strong> $500–$800 for a standard residential appraisal, more for 2–4 unit properties. Investment-property lenders almost always order a Form 1007 rent schedule alongside it so they can verify market rent — that&apos;s an extra $100–$200 but it&apos;s genuinely useful data for your own underwriting.
+              <strong>Appraisal and reports.</strong> Ask which appraisal, rent,
+              flood, tax, credit, inspection, or other reports the program
+              requires, who selects the provider, and what each item costs. Do
+              not assume a Form 1007 or any quoted amount applies to every loan
+              or property type.
             </p>
             <p>
-              <strong>Junk fees.</strong> Processing fee, underwriting fee, document prep, application fee — these vary wildly and some are pure padding. They show up on the loan estimate&apos;s &quot;Section A.&quot; Ask the lender to itemize and waive what they can; a competitive lender will trim a few hundred dollars to win your business.
-            </p>
-
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Group 2: Title &amp; settlement (mostly fixed)
-            </h2>
-            <p>
-              <strong>Lender&apos;s title insurance.</strong> Required by your lender, sized to the loan amount, protects the lender if a title defect surfaces later. Non-negotiable if you&apos;re financing.
-            </p>
-            <p>
-              <strong>Owner&apos;s title insurance.</strong> Optional in theory, strongly recommended in practice — it protects <em>you</em> against liens, boundary disputes, and ownership claims the title search missed. Sized to the purchase price. In some states pricing is regulated and identical across providers; in others you can shop it.
-            </p>
-            <p>
-              <strong>Title search &amp; settlement/escrow fee.</strong> The cost of the actual title examination plus the closing agent or attorney who runs the table. In attorney-state closings (much of the Northeast and Southeast) this shows up as a legal fee instead. Combined, expect $700–$1,200.
-            </p>
-            <p>
-              <strong>Recording fees.</strong> What the county charges to record the deed and mortgage in public records. Small and fixed — typically $50–$250.
+              <strong>Processing and other charges.</strong> Review application,
+              underwriting, processing, document, and third-party charges line
+              by line. Rather than labeling a charge legitimate or unnecessary
+              from its name alone, ask what service it covers, whether it is
+              optional or shoppable, and whether it can change or be waived.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Group 3: Government transfer taxes (the wild card)
+              Group 2: title, settlement, and legal items
             </h2>
             <p>
-              This is the line item that makes closing costs unpredictable across markets. Transfer tax (sometimes called deed tax, documentary stamp tax, or conveyance tax) is a percentage of the sale price charged by the state, county, or city — sometimes all three. On a $250,000 purchase, a half-point swing in the combined transfer-tax rate is $1,250 of cash — enough to flip a marginal deal. A few examples of the spread in 2026:
+              <strong>Lender&apos;s title policy.</strong> If the lender or
+              program requires one, use the written premium and coverage
+              information for the actual transaction. Requirements and pricing
+              depend on the lender, jurisdiction, policy, loan amount, and
+              available discounts.
             </p>
-            <ul>
-              <li>Several states (Texas, parts of the Mountain West) charge <strong>no transfer tax at all</strong>.</li>
-              <li>Pennsylvania runs ~2% combined state + local — $5,000 on our $250k duplex, often split with the seller by local custom.</li>
-              <li>Delaware and parts of New York City can exceed 3–4%.</li>
-            </ul>
             <p>
-              Who pays — buyer, seller, or split — is set by local custom and negotiable in the contract. Before you write an offer in a new market, ask your agent or title company for the local transfer-tax rate and who customarily pays it. It can swing your cash-to-close by thousands.
+              <strong>Owner&apos;s title policy.</strong> Coverage, exclusions,
+              premium, availability, and whether the item is optional vary. Ask
+              a title professional or local counsel to explain the title search,
+              exceptions, endorsements, and risks so you can evaluate the quote
+              for this property.
+            </p>
+            <p>
+              <strong>Search, settlement, escrow, and legal services.</strong>
+              Obtain an itemized quote from the permitted or selected provider.
+              The required parties, scope, ability to shop, and fee structure
+              are jurisdiction- and transaction-specific.
+            </p>
+            <p>
+              <strong>Recording charges.</strong> Verify the instruments to be
+              recorded and the current charges with the settlement provider and
+              appropriate local office. Do not carry an amount from another
+              county or transaction into the estimate.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Group 4: Prepaids &amp; escrows (not really &quot;costs&quot;)
+              Group 3: government taxes, charges, and adjustments
             </h2>
             <p>
-              Prepaids are the sneaky part of the closing disclosure, because they inflate your cash-to-close even though they aren&apos;t money lost — they&apos;re expenses you&apos;d pay anyway, just front-loaded.
+              Transfer, deed, documentary, conveyance, mortgage, recording, and
+              other government charges vary by jurisdiction, instrument, price,
+              financing, exemptions, and effective date. Verify the current
+              calculation with the appropriate government source and settlement
+              professional. The purchase contract and applicable law determine
+              allocation; local custom alone is not a substitute for the signed
+              terms or legal guidance.
             </p>
             <p>
-              <strong>Prepaid homeowners insurance.</strong> Lenders require the first full year paid upfront — $1,000–$2,000 for a typical rental, more on the coast.
+              Also reconcile property-tax prorations, assessments, utilities,
+              association balances, and other adjustments shown on the
+              settlement statement. Ask local counsel or the closing
+              professional to explain any legal obligation or allocation you do
+              not understand.
+            </p>
+
+            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+              Group 4: prepaids and initial escrows
+            </h2>
+            <p>
+              Prepaids and initial escrow deposits affect cash to close but are
+              different from transaction fees. Label them separately so a model
+              does not count the same recurring expense twice.
             </p>
             <p>
-              <strong>Property tax escrow.</strong> The lender collects 2–6 months of property taxes upfront to seed the escrow account. On a property with $3,600/yr in taxes, a 3-month cushion is $900.
+              <strong>Insurance.</strong> Obtain the property-specific policy
+              quote and the lender&apos;s evidence-of-insurance and payment
+              requirements. Coverage, premium, payment schedule, deductibles,
+              exclusions, and lender rules vary materially.
             </p>
             <p>
-              <strong>Prorated/prepaid interest.</strong> Interest from your closing date to the end of the month, collected at the table. Close on the 28th and it&apos;s trivial; close on the 2nd and it&apos;s nearly a full month.
+              <strong>Property-tax escrow.</strong> Use the lender&apos;s
+              written initial-escrow calculation and current tax information.
+              The amount depends on due dates, closing date, jurisdiction,
+              exemptions, assessments, and loan terms; it is not a fixed number
+              of months.
             </p>
             <p>
-              The distinction matters for underwriting: these prepaids belong in your <em>cash-to-close</em> but not in your annual operating expenses — you&apos;ll double-count if you include the insurance both here and in your{" "}
-              <Link href="/blog/rental-property-pro-forma-explained" className="text-primary font-semibold hover:underline">
+              <strong>Prepaid or prorated interest.</strong> Verify the dates,
+              daily amount, calculation convention, and first-payment schedule
+              on the lender&apos;s documents. Changing the closing date can
+              affect this line and other prorations, so compare the full
+              settlement statement rather than optimizing one item in isolation.
+            </p>
+            <p>
+              Track these amounts in <em>cash to close</em>, then avoid counting
+              the same insurance or tax period twice in your{" "}
+              <Link
+                href="/blog/rental-property-pro-forma-explained"
+                className="text-primary font-semibold hover:underline"
+              >
                 pro forma operating expenses
               </Link>
               .
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              How closing costs hit your actual returns
+              How the hypothetical stack changes modeled returns
             </h2>
             <p>
-              Here&apos;s the part most guides skip: closing costs don&apos;t change your monthly cash flow — but they absolutely change your return. Cash-on-cash return divides annual pre-tax cash flow by total cash invested, and closing costs are part of that denominator.
+              A cash-on-cash calculation divides modeled annual pre-tax cash
+              flow by the cash invested under the model&apos;s definition.
+              Include relevant acquisition charges in that denominator and state
+              clearly how refundable deposits, reserves, credits, and prepaids
+              are treated.
             </p>
             <p>
-              On our duplex: $62,500 down + $12,600 closing = <strong>$75,100 cash in</strong>. If the property throws off $6,000/yr in cash flow, your{" "}
-              <Link href="/#main" className="text-primary font-semibold hover:underline">
+              Under the invented duplex inputs, $62,500 down plus a $12,600
+              closing stack equals <strong>$75,100 of modeled cash in</strong>.
+              If annual pre-tax cash flow were $6,000, the modeled{" "}
+              <Link
+                href="/#main"
+                className="text-primary font-semibold hover:underline"
+              >
                 cash-on-cash return
               </Link>{" "}
-              is 8.0% against total cash invested — not the 9.6% you&apos;d get if you only counted the down payment. Investors who ignore closing costs systematically overstate their returns by a point or more. Read{" "}
-              <Link href="/blog/how-to-calculate-cash-on-cash-return" className="text-primary font-semibold hover:underline">
+              would be about 8.0% using $75,100, versus about 9.6% using only
+              the down payment. This comparison illustrates denominator choice;
+              it is not a projected return. Read{" "}
+              <Link
+                href="/blog/how-to-calculate-cash-on-cash-return"
+                className="text-primary font-semibold hover:underline"
+              >
                 how to calculate cash-on-cash return
               </Link>{" "}
-              for the full formula and why the denominator is where most people cheat.
+              for the full formula and input checklist.
             </p>
             <p>
-              Closing costs don&apos;t touch your{" "}
-              <Link href="/#main" className="text-primary font-semibold hover:underline">
+              Acquisition charges generally do not enter a modeled{" "}
+              <Link
+                href="/#main"
+                className="text-primary font-semibold hover:underline"
+              >
                 DSCR
               </Link>{" "}
-              — that ratio is about debt service vs. operating income and ignores how much cash you brought to the table — but they do extend the time it takes to recoup your investment. Always underwrite the all-in number, not the down payment.
+              whose stated formula compares net operating income with debt
+              service, but financing choices associated with the closing can
+              change debt service. Confirm the lender&apos;s own DSCR definition
+              and include all relevant cash uses in the return analysis.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              How to lower your closing costs
+              How to compare the available options
             </h2>
             <p>
-              <strong>Shop lenders.</strong> The single biggest lever. Pull loan estimates from three lenders and compare Section A line by line. Origination, points, and junk fees are all negotiable; title and government fees mostly aren&apos;t.
+              <strong>Compare complete lender options.</strong> Review written
+              disclosures line by line, but also compare rate, APR, payment,
+              credits, lock, cash to close, reserves, prepayment terms, and
+              eligibility. A fee difference alone does not identify the less
+              expensive loan over the expected duration.
             </p>
             <p>
-              <strong>Ask for seller concessions.</strong> In a buyer&apos;s market, request the seller cover some closing costs. Conventional investment-property loans cap seller-paid costs at 2% of the purchase price — $5,000 on our duplex — so structure the offer accordingly.
+              <strong>Verify concessions.</strong> If the contract contemplates
+              seller-paid costs, ask the lender and closing professional to
+              confirm the allowed amount, eligible charges, appraisal effects,
+              and treatment of unused credit for the actual program and file.
+              Limits are not universal.
             </p>
             <p>
-              <strong>Consider lender credits.</strong> The inverse of buying points: accept a slightly higher rate and the lender credits you cash toward closing. Good move if you&apos;re short on cash now or plan to{" "}
-              <Link href="/blog/how-to-refinance-a-rental-property" className="text-primary font-semibold hover:underline">
+              <strong>Model lender credits and points.</strong> A credit may be
+              paired with a different rate or other terms, while points require
+              more cash at closing. Compare cumulative cost under several loan-
+              duration scenarios, including a possible sale or{" "}
+              <Link
+                href="/blog/how-to-refinance-a-rental-property"
+                className="text-primary font-semibold hover:underline"
+              >
                 refinance the property
-              </Link>{" "}
-              within a couple of years anyway.
+              </Link>
+              . Do not assume a future refinance will be available or
+              economical.
             </p>
             <p>
-              <strong>Shop title and pick your closing date.</strong> In non-regulated states, title and escrow fees are shoppable. And closing late in the month shrinks the prorated interest line.
+              <strong>Check which services are shoppable.</strong> The written
+              disclosures and local rules identify which providers the buyer may
+              select. Obtain comparable scopes and written quotes. If
+              considering a different closing date, ask for the full revised
+              cash-to-close calculation rather than assuming one line is the
+              only change.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
               Build it into the deal, not after it
             </h2>
             <p>
-              The cleanest habit: estimate closing costs <em>before</em> you write the offer, fold them into your cash-to-close, and judge the deal on the all-in number. A property that pencils on a $62,500 down payment can look very different at $75,100 all-in — and that&apos;s the figure your money actually feels.
+              Build an estimate before committing funds, update it when lender,
+              title, insurance, tax, inspection, and contract information
+              arrives, and reconcile the final disclosure before signing. Keep
+              the down-payment and $75,100 figures above labeled as
+              hypothetical; the actual transaction documents control.
             </p>
             <p>
               Estimate your stack with the{" "}
-              <Link href="/tools/closing-cost-calculator" className="text-primary font-semibold hover:underline">
+              <Link
+                href="/tools/closing-cost-calculator"
+                className="text-primary font-semibold hover:underline"
+              >
                 closing cost calculator
               </Link>
-              , then drop the full deal — price, financing, rent, expenses, and closing costs — into{" "}
-              <Link href="/" className="text-primary font-semibold hover:underline">
+              , then enter the property, financing, rent, expenses, and verified
+              closing-cost inputs into{" "}
+              <Link
+                href="/"
+                className="text-primary font-semibold hover:underline"
+              >
                 TrueCap
               </Link>{" "}
-              to see cash flow, cap rate, cash-on-cash, and DSCR on the real all-in basis in about 60 seconds. For the rest of the underwrite, see{" "}
-              <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="text-primary font-semibold hover:underline">
+              to model cash flow, cap rate, cash-on-cash, and DSCR. TrueCap uses
+              the inputs you provide; it does not retrieve or verify a lender,
+              title, government, insurer, tax, or closing quote. For the rest of
+              the underwriting checklist, see{" "}
+              <Link
+                href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
+                className="text-primary font-semibold hover:underline"
+              >
                 how to underwrite a rental in 60 seconds
               </Link>{" "}
               and the{" "}
-              <Link href="/blog/rental-property-pro-forma-explained" className="text-primary font-semibold hover:underline">
+              <Link
+                href="/blog/rental-property-pro-forma-explained"
+                className="text-primary font-semibold hover:underline"
+              >
                 pro forma guide
               </Link>
               .
+            </p>
+            <p>
+              This article provides general educational examples, not lending,
+              legal, tax, title, insurance, or investment advice. Verify current
+              requirements and amounts with the relevant lender, government
+              office, licensed local professionals, and final transaction
+              documents.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">

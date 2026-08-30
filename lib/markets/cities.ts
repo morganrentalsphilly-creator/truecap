@@ -25,20 +25,24 @@
  */
 
 /** Static bespoke market pages that already exist under app/markets/<slug>/page.tsx. */
-export const BESPOKE_MARKET_SLUGS = new Set<string>([
-  "philadelphia",
-  "atlanta",
-  "charlotte",
-  "cleveland",
-  "dallas",
-  "detroit",
-  "houston",
-  "indianapolis",
-  "kansas-city",
-  "memphis",
-  "phoenix",
-  "tampa",
-]);
+export const BESPOKE_MARKETS = [
+  { slug: "philadelphia", name: "Philadelphia", stateName: "Pennsylvania" },
+  { slug: "atlanta", name: "Atlanta", stateName: "Georgia" },
+  { slug: "charlotte", name: "Charlotte", stateName: "North Carolina" },
+  { slug: "cleveland", name: "Cleveland", stateName: "Ohio" },
+  { slug: "dallas", name: "Dallas", stateName: "Texas" },
+  { slug: "detroit", name: "Detroit", stateName: "Michigan" },
+  { slug: "houston", name: "Houston", stateName: "Texas" },
+  { slug: "indianapolis", name: "Indianapolis", stateName: "Indiana" },
+  { slug: "kansas-city", name: "Kansas City", stateName: "Missouri" },
+  { slug: "memphis", name: "Memphis", stateName: "Tennessee" },
+  { slug: "phoenix", name: "Phoenix", stateName: "Arizona" },
+  { slug: "tampa", name: "Tampa", stateName: "Florida" },
+] as const;
+
+export const BESPOKE_MARKET_SLUGS = new Set<string>(
+  BESPOKE_MARKETS.map((market) => market.slug),
+);
 
 export type MarketNeighborhood = { name: string; why: string };
 
@@ -77,11 +81,24 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Landlord-friendly Ohio law, a large university + state-government employment base, and steady in-migration make Columbus one of the most balanced buy-and-hold markets in the country. Cap rates run healthy without the deep-distress risk of pure cash-flow metros.",
     neighborhoods: [
-      { name: "Hilltop", why: "Lower entry prices, value-add SFR stock, improving demand." },
-      { name: "Linden", why: "Aggressive cash flow with more management intensity — not for first-timers." },
-      { name: "Whitehall", why: "Stable working-class rentals near job centers; reliable tenant pool." },
+      {
+        name: "Hilltop",
+        why: "Lower entry prices, value-add SFR stock, improving demand.",
+      },
+      {
+        name: "Linden",
+        why: "Aggressive cash flow with more management intensity — not for first-timers.",
+      },
+      {
+        name: "Whitehall",
+        why: "Stable working-class rentals near job centers; reliable tenant pool.",
+      },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "best-states-for-rental-investors-2026", "how-to-underwrite-a-rental-property-in-60-seconds"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "best-states-for-rental-investors-2026",
+      "how-to-underwrite-a-rental-property-in-60-seconds",
+    ],
   },
   {
     slug: "cincinnati",
@@ -95,11 +112,24 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Diversified employment (P&G, Kroger, healthcare) and affordable B-class stock make Cincinnati friendly to first deals. The 1% rule still passes in several neighborhoods — rare in 2026.",
     neighborhoods: [
-      { name: "Westwood", why: "Largest neighborhood, deep SFR + small-multi inventory at low prices." },
-      { name: "Northside", why: "Gentrifying, better appreciation, tighter cash flow." },
-      { name: "Price Hill", why: "Strong cash flow, value-add upside, screen tenants carefully." },
+      {
+        name: "Westwood",
+        why: "Largest neighborhood, deep SFR + small-multi inventory at low prices.",
+      },
+      {
+        name: "Northside",
+        why: "Gentrifying, better appreciation, tighter cash flow.",
+      },
+      {
+        name: "Price Hill",
+        why: "Strong cash flow, value-add upside, screen tenants carefully.",
+      },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "spot-bad-rental-in-60-seconds", "cap-rate-vs-cash-on-cash-vs-dscr"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "spot-bad-rental-in-60-seconds",
+      "cap-rate-vs-cash-on-cash-vs-dscr",
+    ],
   },
   {
     slug: "pittsburgh",
@@ -113,11 +143,24 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Universities and hospitals (UPMC, CMU, Pitt) stabilize tenant demand, and cheap rowhouse stock supports strong cash-on-cash. Watch older-home capex — budget reserves honestly.",
     neighborhoods: [
-      { name: "Brookline", why: "Affordable, stable, owner-occupant-heavy — quality long-term tenants." },
-      { name: "Lawrenceville", why: "Gentrified, appreciation-led, lower yields." },
-      { name: "Beechview", why: "Lower entry with upside as transit-adjacent demand grows." },
+      {
+        name: "Brookline",
+        why: "Affordable, stable, owner-occupant-heavy — quality long-term tenants.",
+      },
+      {
+        name: "Lawrenceville",
+        why: "Gentrified, appreciation-led, lower yields.",
+      },
+      {
+        name: "Beechview",
+        why: "Lower entry with upside as transit-adjacent demand grows.",
+      },
     ],
-    relatedPosts: ["capex-maintenance-reserves-rental-property", "what-is-a-good-cap-rate", "brrrr-method-explained"],
+    relatedPosts: [
+      "capex-maintenance-reserves-rental-property",
+      "what-is-a-good-cap-rate",
+      "brrrr-method-explained",
+    ],
   },
   {
     slug: "baltimore",
@@ -131,11 +174,24 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Yields look excellent on paper; the discipline is in block-by-block selection and honest vacancy/turnover assumptions. Strong fit for experienced operators using DSCR financing.",
     neighborhoods: [
-      { name: "Hamilton", why: "Stable northeast SFR pocket, owner-occupant feel, steady tenants." },
-      { name: "Canton", why: "Premium waterfront rowhomes — appreciation and young-professional renters." },
-      { name: "Highlandtown", why: "Value-add rowhomes with upside as the area improves." },
+      {
+        name: "Hamilton",
+        why: "Stable northeast SFR pocket, owner-occupant feel, steady tenants.",
+      },
+      {
+        name: "Canton",
+        why: "Premium waterfront rowhomes — appreciation and young-professional renters.",
+      },
+      {
+        name: "Highlandtown",
+        why: "Value-add rowhomes with upside as the area improves.",
+      },
     ],
-    relatedPosts: ["vacancy-rate-rental-property", "dscr-loans-explained", "what-is-a-good-cap-rate"],
+    relatedPosts: [
+      "vacancy-rate-rental-property",
+      "dscr-loans-explained",
+      "what-is-a-good-cap-rate",
+    ],
   },
   {
     slug: "st-louis",
@@ -149,11 +205,24 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Affordable entry plus durable brick construction lowers long-run capex risk. A good first-market for buy-and-hold investors who want yield without deep rehab exposure.",
     neighborhoods: [
-      { name: "Tower Grove South", why: "Desirable, stable rentals with appreciation upside." },
-      { name: "Dutchtown", why: "High cash flow, value-add, more hands-on management." },
-      { name: "Affton (county)", why: "Owner-occupant-grade SFRs, low vacancy, easy to manage." },
+      {
+        name: "Tower Grove South",
+        why: "Desirable, stable rentals with appreciation upside.",
+      },
+      {
+        name: "Dutchtown",
+        why: "High cash flow, value-add, more hands-on management.",
+      },
+      {
+        name: "Affton (county)",
+        why: "Owner-occupant-grade SFRs, low vacancy, easy to manage.",
+      },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "single-family-vs-multi-family-rental", "how-to-underwrite-a-rental-property-in-60-seconds"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "single-family-vs-multi-family-rental",
+      "how-to-underwrite-a-rental-property-in-60-seconds",
+    ],
   },
   {
     slug: "milwaukee",
@@ -167,11 +236,24 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "The deep supply of small multifamily is the edge here: live in one unit, rent the rest, and let tenants cover the mortgage. Verify lead-paint compliance on pre-1978 stock.",
     neighborhoods: [
-      { name: "Bay View", why: "Popular, walkable, strong rental demand and appreciation." },
-      { name: "Riverwest", why: "Eclectic, renter-heavy, solid duplex inventory." },
-      { name: "West Allis", why: "Affordable suburban-feel duplexes, reliable tenants." },
+      {
+        name: "Bay View",
+        why: "Popular, walkable, strong rental demand and appreciation.",
+      },
+      {
+        name: "Riverwest",
+        why: "Eclectic, renter-heavy, solid duplex inventory.",
+      },
+      {
+        name: "West Allis",
+        why: "Affordable suburban-feel duplexes, reliable tenants.",
+      },
     ],
-    relatedPosts: ["house-hacking-explained", "single-family-vs-multi-family-rental", "what-is-a-good-cap-rate"],
+    relatedPosts: [
+      "house-hacking-explained",
+      "single-family-vs-multi-family-rental",
+      "what-is-a-good-cap-rate",
+    ],
   },
   {
     slug: "san-antonio",
@@ -185,11 +267,24 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Military relocations and a diversified economy keep occupancy high. The catch is Texas property taxes — model the real effective rate, because it can swing cash flow hard.",
     neighborhoods: [
-      { name: "Northeast (near Randolph AFB)", why: "Steady military tenant demand, low vacancy." },
-      { name: "Alamo Heights edges", why: "Premium adjacency at lower entry — appreciation play." },
-      { name: "Far West Side", why: "Newer SFR rentals, family tenants, manageable upkeep." },
+      {
+        name: "Northeast (near Randolph AFB)",
+        why: "Steady military tenant demand, low vacancy.",
+      },
+      {
+        name: "Alamo Heights edges",
+        why: "Premium adjacency at lower entry — appreciation play.",
+      },
+      {
+        name: "Far West Side",
+        why: "Newer SFR rentals, family tenants, manageable upkeep.",
+      },
     ],
-    relatedPosts: ["rental-property-tax-deductions", "what-is-a-good-cap-rate", "rental-property-pro-forma-explained"],
+    relatedPosts: [
+      "rental-property-tax-deductions",
+      "what-is-a-good-cap-rate",
+      "rental-property-pro-forma-explained",
+    ],
   },
   {
     slug: "jacksonville",
@@ -203,11 +298,24 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Growth-market upside with cash flow that still works — but insurance is the swing factor in Florida. Quote it before you offer and underwrite it as a real line item, not an afterthought.",
     neighborhoods: [
-      { name: "Arlington", why: "Affordable SFRs, steady working tenant base." },
-      { name: "Westside", why: "Lower entry, value-add stock, solid rent ratios." },
-      { name: "Riverside/Avondale edges", why: "Appreciation-led, younger renters, tighter yields." },
+      {
+        name: "Arlington",
+        why: "Affordable SFRs, steady working tenant base.",
+      },
+      {
+        name: "Westside",
+        why: "Lower entry, value-add stock, solid rent ratios.",
+      },
+      {
+        name: "Riverside/Avondale edges",
+        why: "Appreciation-led, younger renters, tighter yields.",
+      },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "best-states-for-rental-investors-2026", "spot-bad-rental-in-60-seconds"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "best-states-for-rental-investors-2026",
+      "spot-bad-rental-in-60-seconds",
+    ],
   },
   {
     slug: "birmingham",
@@ -221,11 +329,24 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Low prices + healthy rents produce strong cash-on-cash, which is why out-of-state and turnkey buyers flock here. Vet operators and neighborhoods carefully — averages hide wide block-level spreads.",
     neighborhoods: [
-      { name: "Crestwood", why: "Desirable, stable, appreciation plus solid rents." },
-      { name: "Center Point", why: "Affordable SFRs, strong cash flow, popular with turnkey buyers." },
-      { name: "Hoover (suburb)", why: "Owner-occupant-grade rentals, top schools, low vacancy." },
+      {
+        name: "Crestwood",
+        why: "Desirable, stable, appreciation plus solid rents.",
+      },
+      {
+        name: "Center Point",
+        why: "Affordable SFRs, strong cash flow, popular with turnkey buyers.",
+      },
+      {
+        name: "Hoover (suburb)",
+        why: "Owner-occupant-grade rentals, top schools, low vacancy.",
+      },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "section-8-rental-property-investing", "how-to-underwrite-a-rental-property-in-60-seconds"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "section-8-rental-property-investing",
+      "how-to-underwrite-a-rental-property-in-60-seconds",
+    ],
   },
   {
     slug: "louisville",
@@ -239,11 +360,24 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "A dependable first or second market: prices stay reasonable, the economy is recession-resistant, and B-class SFRs rent quickly. Appreciation is modest but reliable.",
     neighborhoods: [
-      { name: "Germantown", why: "Walkable, popular with renters, steady appreciation." },
-      { name: "Okolona", why: "Affordable SFRs near logistics jobs, low vacancy." },
-      { name: "Shively", why: "Strong cash flow, value-add stock, working-tenant base." },
+      {
+        name: "Germantown",
+        why: "Walkable, popular with renters, steady appreciation.",
+      },
+      {
+        name: "Okolona",
+        why: "Affordable SFRs near logistics jobs, low vacancy.",
+      },
+      {
+        name: "Shively",
+        why: "Strong cash flow, value-add stock, working-tenant base.",
+      },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "single-family-vs-multi-family-rental", "cap-rate-vs-cash-on-cash-vs-dscr"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "single-family-vs-multi-family-rental",
+      "cap-rate-vs-cash-on-cash-vs-dscr",
+    ],
   },
   {
     slug: "nashville",
@@ -257,11 +391,24 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Buy here for appreciation and rent growth, not day-one cash flow — many deals run thin until rents catch up. Best for investors with reserves and a longer hold.",
     neighborhoods: [
-      { name: "Antioch", why: "More affordable SFRs, steady demand, better rent ratios." },
-      { name: "Madison", why: "Value relative to the core, improving area, solid rentals." },
-      { name: "East Nashville edges", why: "Appreciation-led, younger renters, premium pricing." },
+      {
+        name: "Antioch",
+        why: "More affordable SFRs, steady demand, better rent ratios.",
+      },
+      {
+        name: "Madison",
+        why: "Value relative to the core, improving area, solid rentals.",
+      },
+      {
+        name: "East Nashville edges",
+        why: "Appreciation-led, younger renters, premium pricing.",
+      },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "raleigh",
@@ -275,11 +422,24 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "A growth play: vacancy is low and rents keep rising, but entry prices mean modest cash flow up front. Strong for buy-and-hold with a 5+ year horizon.",
     neighborhoods: [
-      { name: "Southeast Raleigh", why: "Lower entry, gentrifying, real upside." },
-      { name: "Garner", why: "Affordable suburb, family renters, stable demand." },
-      { name: "Durham edges", why: "Triangle demand at better acquisition prices." },
+      {
+        name: "Southeast Raleigh",
+        why: "Lower entry, gentrifying, real upside.",
+      },
+      {
+        name: "Garner",
+        why: "Affordable suburb, family renters, stable demand.",
+      },
+      {
+        name: "Durham edges",
+        why: "Triangle demand at better acquisition prices.",
+      },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "how-to-underwrite-a-rental-property-in-60-seconds"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "how-to-underwrite-a-rental-property-in-60-seconds",
+    ],
   },
   {
     slug: "richmond",
@@ -293,11 +453,24 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "A balanced market: decent cash flow with real appreciation and low volatility. A good second market for investors diversifying out of pure cash-flow metros.",
     neighborhoods: [
-      { name: "Southside", why: "Affordable SFRs, value-add, solid rent ratios." },
-      { name: "Church Hill", why: "Historic, gentrifying, appreciation upside." },
-      { name: "Henrico County", why: "Suburban, owner-occupant-grade, low vacancy." },
+      {
+        name: "Southside",
+        why: "Affordable SFRs, value-add, solid rent ratios.",
+      },
+      {
+        name: "Church Hill",
+        why: "Historic, gentrifying, appreciation upside.",
+      },
+      {
+        name: "Henrico County",
+        why: "Suburban, owner-occupant-grade, low vacancy.",
+      },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "single-family-vs-multi-family-rental", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "single-family-vs-multi-family-rental",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "columbia",
@@ -311,11 +484,24 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Affordable entry, steady USC + government tenant demand, and landlord-friendly law. A solid first market for cash-flow-focused buyers.",
     neighborhoods: [
-      { name: "Northeast Columbia", why: "Newer SFRs, family renters, low vacancy." },
-      { name: "West Columbia", why: "Affordable, value-add, good rent ratios." },
-      { name: "Forest Acres", why: "Stable, owner-occupant feel, reliable tenants." },
+      {
+        name: "Northeast Columbia",
+        why: "Newer SFRs, family renters, low vacancy.",
+      },
+      {
+        name: "West Columbia",
+        why: "Affordable, value-add, good rent ratios.",
+      },
+      {
+        name: "Forest Acres",
+        why: "Stable, owner-occupant feel, reliable tenants.",
+      },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "section-8-rental-property-investing", "how-to-underwrite-a-rental-property-in-60-seconds"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "section-8-rental-property-investing",
+      "how-to-underwrite-a-rental-property-in-60-seconds",
+    ],
   },
   {
     slug: "greenville",
@@ -333,7 +519,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Wade Hampton", why: "Stable suburban rentals, family demand." },
       { name: "Mauldin", why: "Growing suburb, newer stock, low vacancy." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "oklahoma-city",
@@ -347,11 +537,21 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Strong rent-to-price ratios make day-one cash flow realistic, and Oklahoma is landlord-friendly. Appreciation is modest, so underwrite for yield, not equity growth.",
     neighborhoods: [
-      { name: "The Village", why: "Affordable SFRs, central, reliable tenants." },
-      { name: "Midwest City", why: "Near Tinker AFB — steady military demand." },
+      {
+        name: "The Village",
+        why: "Affordable SFRs, central, reliable tenants.",
+      },
+      {
+        name: "Midwest City",
+        why: "Near Tinker AFB — steady military demand.",
+      },
       { name: "Del City", why: "Low entry, strong cash flow, value-add." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "spot-bad-rental-in-60-seconds", "cap-rate-vs-cash-on-cash-vs-dscr"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "spot-bad-rental-in-60-seconds",
+      "cap-rate-vs-cash-on-cash-vs-dscr",
+    ],
   },
   {
     slug: "tulsa",
@@ -366,10 +566,20 @@ export const MARKET_CITIES: MarketCity[] = [
       "A pure yield market: cheap acquisition plus solid rents. Tulsa Remote and a diversifying economy add demand stability. Budget capex honestly on older stock.",
     neighborhoods: [
       { name: "Midtown edges", why: "Value-add SFRs, improving demand." },
-      { name: "Broken Arrow", why: "Suburb with newer stock, family renters, low vacancy." },
-      { name: "East Tulsa", why: "Affordable, strong cash flow, more management." },
+      {
+        name: "Broken Arrow",
+        why: "Suburb with newer stock, family renters, low vacancy.",
+      },
+      {
+        name: "East Tulsa",
+        why: "Affordable, strong cash flow, more management.",
+      },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "capex-maintenance-reserves-rental-property", "how-to-underwrite-a-rental-property-in-60-seconds"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "capex-maintenance-reserves-rental-property",
+      "how-to-underwrite-a-rental-property-in-60-seconds",
+    ],
   },
   {
     slug: "omaha",
@@ -384,10 +594,20 @@ export const MARKET_CITIES: MarketCity[] = [
       "Boring in the best way: steady demand, low vacancy, modest but reliable cash flow and appreciation. A strong core-holding market.",
     neighborhoods: [
       { name: "Benson", why: "Revitalizing, younger renters, upside." },
-      { name: "Millard", why: "Suburb with family rentals, top schools, low vacancy." },
-      { name: "South Omaha", why: "Affordable, strong cash flow, steady demand." },
+      {
+        name: "Millard",
+        why: "Suburb with family rentals, top schools, low vacancy.",
+      },
+      {
+        name: "South Omaha",
+        why: "Affordable, strong cash flow, steady demand.",
+      },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "single-family-vs-multi-family-rental", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "single-family-vs-multi-family-rental",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "des-moines",
@@ -403,9 +623,16 @@ export const MARKET_CITIES: MarketCity[] = [
     neighborhoods: [
       { name: "Beaverdale", why: "Desirable, stable, strong tenant demand." },
       { name: "East Des Moines", why: "Affordable SFRs, good rent ratios." },
-      { name: "West Des Moines", why: "Suburb with newer stock, family renters, low vacancy." },
+      {
+        name: "West Des Moines",
+        why: "Suburb with newer stock, family renters, low vacancy.",
+      },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "best-states-for-rental-investors-2026", "how-to-underwrite-a-rental-property-in-60-seconds"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "best-states-for-rental-investors-2026",
+      "how-to-underwrite-a-rental-property-in-60-seconds",
+    ],
   },
   {
     slug: "minneapolis",
@@ -419,11 +646,24 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "A solid metro for buy-and-hold if you model the real tax bill and tenant-protection rules. Duplexes and small multis are plentiful and house-hack well.",
     neighborhoods: [
-      { name: "Northeast Minneapolis", why: "Popular, walkable, strong demand." },
-      { name: "St. Paul (Midway)", why: "Affordable, central, steady rentals." },
-      { name: "Brooklyn Park", why: "Suburb with newer stock, family renters, low vacancy." },
+      {
+        name: "Northeast Minneapolis",
+        why: "Popular, walkable, strong demand.",
+      },
+      {
+        name: "St. Paul (Midway)",
+        why: "Affordable, central, steady rentals.",
+      },
+      {
+        name: "Brooklyn Park",
+        why: "Suburb with newer stock, family renters, low vacancy.",
+      },
     ],
-    relatedPosts: ["house-hacking-explained", "what-is-a-good-cap-rate", "rental-property-tax-deductions"],
+    relatedPosts: [
+      "house-hacking-explained",
+      "what-is-a-good-cap-rate",
+      "rental-property-tax-deductions",
+    ],
   },
   {
     slug: "buffalo",
@@ -439,9 +679,16 @@ export const MARKET_CITIES: MarketCity[] = [
     neighborhoods: [
       { name: "North Buffalo", why: "Desirable, stable, strong demand." },
       { name: "West Side", why: "Gentrifying, upside, value-add." },
-      { name: "Kenmore", why: "Suburb that's owner-occupant-grade, low vacancy." },
+      {
+        name: "Kenmore",
+        why: "Suburb that's owner-occupant-grade, low vacancy.",
+      },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "capex-maintenance-reserves-rental-property"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "capex-maintenance-reserves-rental-property",
+    ],
   },
   {
     slug: "rochester",
@@ -457,9 +704,16 @@ export const MARKET_CITIES: MarketCity[] = [
     neighborhoods: [
       { name: "Park Ave area", why: "Desirable, stable, strong demand." },
       { name: "South Wedge", why: "Walkable, younger renters, upside." },
-      { name: "Irondequoit", why: "Suburb that's owner-occupant-grade, steady tenants." },
+      {
+        name: "Irondequoit",
+        why: "Suburb that's owner-occupant-grade, steady tenants.",
+      },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "vacancy-rate-rental-property", "rental-property-tax-deductions"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "vacancy-rate-rental-property",
+      "rental-property-tax-deductions",
+    ],
   },
   {
     slug: "orlando",
@@ -475,9 +729,16 @@ export const MARKET_CITIES: MarketCity[] = [
     neighborhoods: [
       { name: "Pine Hills", why: "Affordable SFRs, value-add, better ratios." },
       { name: "Kissimmee", why: "STR-friendly pockets, tourist demand." },
-      { name: "East Orlando (near UCF)", why: "Student + family demand, steady rentals." },
+      {
+        name: "East Orlando (near UCF)",
+        why: "Student + family demand, steady rentals.",
+      },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "tucson",
@@ -495,7 +756,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "University area", why: "Student rentals, high occupancy." },
       { name: "Rita Ranch", why: "Newer SFRs near the base, family renters." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "how-to-underwrite-a-rental-property-in-60-seconds"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "how-to-underwrite-a-rental-property-in-60-seconds",
+    ],
   },
   {
     slug: "grand-rapids",
@@ -510,10 +775,17 @@ export const MARKET_CITIES: MarketCity[] = [
       "Low vacancy and consistent demand make this a dependable buy-and-hold market with better appreciation than most cash-flow metros. Inventory is tight, so deals move fast.",
     neighborhoods: [
       { name: "Eastown", why: "Desirable, walkable, strong demand." },
-      { name: "Wyoming", why: "Suburb that's affordable, family renters, low vacancy." },
+      {
+        name: "Wyoming",
+        why: "Suburb that's affordable, family renters, low vacancy.",
+      },
       { name: "Creston", why: "Improving, value-add, good rent ratios." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "single-family-vs-multi-family-rental", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "single-family-vs-multi-family-rental",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "austin",
@@ -527,11 +799,24 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "An appreciation-and-rent-growth play, not a cash-flow market. Model the real Texas property-tax bill carefully — it's the line that sinks otherwise-fine Austin deals.",
     neighborhoods: [
-      { name: "Pflugerville", why: "Suburb with newer SFRs, family renters, low vacancy." },
-      { name: "Round Rock", why: "Tech-job adjacency, steady demand, better value than core." },
-      { name: "East Austin edges", why: "Appreciation-led, younger renters, premium pricing." },
+      {
+        name: "Pflugerville",
+        why: "Suburb with newer SFRs, family renters, low vacancy.",
+      },
+      {
+        name: "Round Rock",
+        why: "Tech-job adjacency, steady demand, better value than core.",
+      },
+      {
+        name: "East Austin edges",
+        why: "Appreciation-led, younger renters, premium pricing.",
+      },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "rental-property-tax-deductions", "what-is-a-good-cap-rate"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "rental-property-tax-deductions",
+      "what-is-a-good-cap-rate",
+    ],
   },
   {
     slug: "fort-worth",
@@ -545,11 +830,21 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Better starting math than Dallas with the same growth tailwind. As always in Texas, underwrite the effective property-tax rate, not the listing's stale number.",
     neighborhoods: [
-      { name: "Far North Fort Worth", why: "Newer SFRs, family renters, low vacancy." },
+      {
+        name: "Far North Fort Worth",
+        why: "Newer SFRs, family renters, low vacancy.",
+      },
       { name: "Riverside", why: "Value-add stock, improving demand." },
-      { name: "Haltom City", why: "Affordable, strong cash flow for the metro." },
+      {
+        name: "Haltom City",
+        why: "Affordable, strong cash flow for the metro.",
+      },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "how-to-underwrite-a-rental-property-in-60-seconds"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "how-to-underwrite-a-rental-property-in-60-seconds",
+    ],
   },
   {
     slug: "denver",
@@ -563,11 +858,21 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Buy for long-term appreciation and rent growth, with reserves to carry thin early cash flow. Not a market for yield-first investors right now.",
     neighborhoods: [
-      { name: "Aurora", why: "More affordable, family renters, steadier ratios." },
+      {
+        name: "Aurora",
+        why: "More affordable, family renters, steadier ratios.",
+      },
       { name: "Montbello", why: "Value-add, lower entry within the metro." },
-      { name: "Lakewood", why: "Stable suburb, low vacancy, reliable tenants." },
+      {
+        name: "Lakewood",
+        why: "Stable suburb, low vacancy, reliable tenants.",
+      },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "colorado-springs",
@@ -581,11 +886,24 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Military relocations keep occupancy high, and entry is friendlier than Denver. A balanced growth-plus-stability market for buy-and-hold.",
     neighborhoods: [
-      { name: "Security-Widefield", why: "Affordable, steady military tenant demand." },
-      { name: "Northeast Springs", why: "Newer SFRs, family renters, low vacancy." },
-      { name: "Fountain", why: "Near Fort Carson, attainable, reliable demand." },
+      {
+        name: "Security-Widefield",
+        why: "Affordable, steady military tenant demand.",
+      },
+      {
+        name: "Northeast Springs",
+        why: "Newer SFRs, family renters, low vacancy.",
+      },
+      {
+        name: "Fountain",
+        why: "Near Fort Carson, attainable, reliable demand.",
+      },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "how-to-underwrite-a-rental-property-in-60-seconds"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "how-to-underwrite-a-rental-property-in-60-seconds",
+    ],
   },
   {
     slug: "salt-lake-city",
@@ -599,11 +917,21 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Demand is exceptional, but pricing means modest day-one cash flow. Check Ogden to the north for better ratios within the same metro economy.",
     neighborhoods: [
-      { name: "West Valley City", why: "Affordable, family renters, steadier ratios." },
-      { name: "Ogden", why: "Better cash flow north of the core, growing demand." },
+      {
+        name: "West Valley City",
+        why: "Affordable, family renters, steadier ratios.",
+      },
+      {
+        name: "Ogden",
+        why: "Better cash flow north of the core, growing demand.",
+      },
       { name: "Magna", why: "Value-add entry, improving area." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "boise",
@@ -621,7 +949,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Caldwell", why: "Value and growth west of Boise." },
       { name: "Meridian", why: "Top schools, low vacancy, premium suburb." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "albuquerque",
@@ -637,9 +969,16 @@ export const MARKET_CITIES: MarketCity[] = [
     neighborhoods: [
       { name: "Northeast Heights", why: "Desirable, stable, strong demand." },
       { name: "Westside", why: "Newer SFRs, family renters." },
-      { name: "International District", why: "Value-add, higher cash flow, more management." },
+      {
+        name: "International District",
+        why: "Value-add, higher cash flow, more management.",
+      },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "single-family-vs-multi-family-rental", "how-to-underwrite-a-rental-property-in-60-seconds"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "single-family-vs-multi-family-rental",
+      "how-to-underwrite-a-rental-property-in-60-seconds",
+    ],
   },
   {
     slug: "las-vegas",
@@ -653,11 +992,21 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Growth and tax advantages are attractive, but the economy is cyclical — underwrite vacancy honestly and keep reserves. Henderson offers more stability.",
     neighborhoods: [
-      { name: "North Las Vegas", why: "Affordable, family renters, newer stock." },
-      { name: "Henderson", why: "Premium suburb, low vacancy, reliable tenants." },
+      {
+        name: "North Las Vegas",
+        why: "Affordable, family renters, newer stock.",
+      },
+      {
+        name: "Henderson",
+        why: "Premium suburb, low vacancy, reliable tenants.",
+      },
       { name: "East Las Vegas", why: "Value-add entry, higher cash flow." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "vacancy-rate-rental-property", "cash-flow-vs-appreciation"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "vacancy-rate-rental-property",
+      "cash-flow-vs-appreciation",
+    ],
   },
   {
     slug: "sacramento",
@@ -671,11 +1020,18 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Appreciation-led with steady government-job demand. Model California's tenant rules and thin day-one yields before committing.",
     neighborhoods: [
-      { name: "North Highlands", why: "Affordable, family renters, better ratios." },
+      {
+        name: "North Highlands",
+        why: "Affordable, family renters, better ratios.",
+      },
       { name: "Rancho Cordova", why: "Job centers, stable demand." },
       { name: "Elk Grove", why: "Suburb, top schools, low vacancy." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "rental-property-tax-deductions", "what-is-a-good-cap-rate"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "rental-property-tax-deductions",
+      "what-is-a-good-cap-rate",
+    ],
   },
   {
     slug: "portland",
@@ -689,11 +1045,21 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Appreciation potential exists, but regulation and eviction timelines raise the risk. Model vacancy and tenant-rule costs conservatively.",
     neighborhoods: [
-      { name: "Gresham", why: "More affordable, family renters, better ratios." },
+      {
+        name: "Gresham",
+        why: "More affordable, family renters, better ratios.",
+      },
       { name: "Beaverton", why: "Job centers, stable demand, low vacancy." },
-      { name: "Outer Southeast Portland", why: "Value-add entry within the metro." },
+      {
+        name: "Outer Southeast Portland",
+        why: "Value-add entry within the metro.",
+      },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "vacancy-rate-rental-property", "what-is-a-good-cap-rate"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "vacancy-rate-rental-property",
+      "what-is-a-good-cap-rate",
+    ],
   },
   {
     slug: "chicago",
@@ -708,10 +1074,20 @@ export const MARKET_CITIES: MarketCity[] = [
       "Yields can be strong, yet the tax bill and tenant rules swing deals hard. This is a market where local knowledge and honest tax modeling decide outcomes.",
     neighborhoods: [
       { name: "Avondale", why: "Appreciating, strong rental demand." },
-      { name: "Portage Park", why: "Stable Northwest Side, owner-occupant feel." },
-      { name: "South suburbs", why: "High cash flow, screen neighborhoods carefully." },
+      {
+        name: "Portage Park",
+        why: "Stable Northwest Side, owner-occupant feel.",
+      },
+      {
+        name: "South suburbs",
+        why: "High cash flow, screen neighborhoods carefully.",
+      },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "rental-property-tax-deductions", "single-family-vs-multi-family-rental"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "rental-property-tax-deductions",
+      "single-family-vs-multi-family-rental",
+    ],
   },
   {
     slug: "madison",
@@ -727,9 +1103,16 @@ export const MARKET_CITIES: MarketCity[] = [
     neighborhoods: [
       { name: "Fitchburg", why: "Suburb, family renters, low vacancy." },
       { name: "Sun Prairie", why: "Growth, newer stock, reliable demand." },
-      { name: "East Madison", why: "Value relative to the core, steady rentals." },
+      {
+        name: "East Madison",
+        why: "Value relative to the core, steady rentals.",
+      },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "house-hacking-explained", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "house-hacking-explained",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "dayton",
@@ -743,11 +1126,21 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Strong cash-on-cash with a stable federal-employment anchor. Appreciation is modest and stock is older, so reserve honestly for capex.",
     neighborhoods: [
-      { name: "Kettering", why: "Suburb, stable, owner-occupant-grade tenants." },
-      { name: "Huber Heights", why: "Family renters near the base, low vacancy." },
+      {
+        name: "Kettering",
+        why: "Suburb, stable, owner-occupant-grade tenants.",
+      },
+      {
+        name: "Huber Heights",
+        why: "Family renters near the base, low vacancy.",
+      },
       { name: "Riverside", why: "Affordable, strong cash flow, value-add." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "capex-maintenance-reserves-rental-property", "spot-bad-rental-in-60-seconds"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "capex-maintenance-reserves-rental-property",
+      "spot-bad-rental-in-60-seconds",
+    ],
   },
   {
     slug: "akron",
@@ -765,7 +1158,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Cuyahoga Falls", why: "Suburb, low vacancy, reliable tenants." },
       { name: "Kenmore", why: "Value-add, higher cash flow." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "capex-maintenance-reserves-rental-property", "cap-rate-vs-cash-on-cash-vs-dscr"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "capex-maintenance-reserves-rental-property",
+      "cap-rate-vs-cash-on-cash-vs-dscr",
+    ],
   },
   {
     slug: "toledo",
@@ -783,7 +1180,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Old Orchard", why: "Owner-occupant feel, low vacancy." },
       { name: "South Toledo", why: "Cash flow, value-add, more management." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "spot-bad-rental-in-60-seconds", "capex-maintenance-reserves-rental-property"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "spot-bad-rental-in-60-seconds",
+      "capex-maintenance-reserves-rental-property",
+    ],
   },
   {
     slug: "lexington",
@@ -801,7 +1202,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "North Lexington", why: "Value-add, improving area." },
       { name: "Hamburg area", why: "Newer stock, low vacancy." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "single-family-vs-multi-family-rental", "how-to-underwrite-a-rental-property-in-60-seconds"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "single-family-vs-multi-family-rental",
+      "how-to-underwrite-a-rental-property-in-60-seconds",
+    ],
   },
   {
     slug: "knoxville",
@@ -819,7 +1224,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Fountain City", why: "Stable, family renters, low vacancy." },
       { name: "Powell", why: "Suburb, newer stock, reliable tenants." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "chattanooga",
@@ -837,7 +1246,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Red Bank", why: "Stable suburb, reliable tenants." },
       { name: "Hixson", why: "Newer stock, low vacancy." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "how-to-underwrite-a-rental-property-in-60-seconds"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "how-to-underwrite-a-rental-property-in-60-seconds",
+    ],
   },
   {
     slug: "huntsville",
@@ -852,10 +1265,17 @@ export const MARKET_CITIES: MarketCity[] = [
       "Few markets pair this caliber of employment growth with attainable entry. Expect balanced returns: real cash flow plus appreciation.",
     neighborhoods: [
       { name: "Madison", why: "Top schools, low vacancy, premium suburb." },
-      { name: "South Huntsville", why: "Stable, family renters, steady demand." },
+      {
+        name: "South Huntsville",
+        why: "Stable, family renters, steady demand.",
+      },
       { name: "North Huntsville", why: "Value-add, higher cash flow." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "little-rock",
@@ -871,9 +1291,16 @@ export const MARKET_CITIES: MarketCity[] = [
     neighborhoods: [
       { name: "West Little Rock", why: "Stable, desirable, reliable tenants." },
       { name: "Maumelle", why: "Suburb, low vacancy, family renters." },
-      { name: "Southwest Little Rock", why: "Cash flow, value-add, more management." },
+      {
+        name: "Southwest Little Rock",
+        why: "Cash flow, value-add, more management.",
+      },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "spot-bad-rental-in-60-seconds", "cap-rate-vs-cash-on-cash-vs-dscr"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "spot-bad-rental-in-60-seconds",
+      "cap-rate-vs-cash-on-cash-vs-dscr",
+    ],
   },
   {
     slug: "new-orleans",
@@ -891,7 +1318,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Gentilly", why: "Value-add, recovering, improving demand." },
       { name: "Algiers", why: "Affordable, ferry access, steadier ratios." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "closing-costs-investment-property"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "closing-costs-investment-property",
+    ],
   },
   {
     slug: "wichita",
@@ -909,7 +1340,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Riverside", why: "Desirable, steady demand." },
       { name: "South Wichita", why: "Cash flow, value-add, more management." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "capex-maintenance-reserves-rental-property", "how-to-underwrite-a-rental-property-in-60-seconds"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "capex-maintenance-reserves-rental-property",
+      "how-to-underwrite-a-rental-property-in-60-seconds",
+    ],
   },
   {
     slug: "greensboro",
@@ -923,11 +1358,18 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Reasonable entry plus diversified demand make for dependable cash flow with some appreciation. A solid, lower-volatility North Carolina market.",
     neighborhoods: [
-      { name: "Northwest Greensboro", why: "Stable, desirable, reliable tenants." },
+      {
+        name: "Northwest Greensboro",
+        why: "Stable, desirable, reliable tenants.",
+      },
       { name: "East Greensboro", why: "Value-add, higher cash flow." },
       { name: "High Point", why: "Nearby, affordable, steady demand." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "single-family-vs-multi-family-rental", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "single-family-vs-multi-family-rental",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "winston-salem",
@@ -945,7 +1387,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Ardmore", why: "Walkable, strong rental demand." },
       { name: "East Winston", why: "Value-add, higher cash flow." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "single-family-vs-multi-family-rental", "how-to-underwrite-a-rental-property-in-60-seconds"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "single-family-vs-multi-family-rental",
+      "how-to-underwrite-a-rental-property-in-60-seconds",
+    ],
   },
   {
     slug: "savannah",
@@ -963,7 +1409,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Midtown Savannah", why: "Stable, central, steady demand." },
       { name: "Southside", why: "Affordable, family renters." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "fort-wayne",
@@ -981,7 +1431,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Northside", why: "Affordable SFRs, family renters." },
       { name: "Waynedale", why: "Quiet, owner-occupant feel, low vacancy." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "spot-bad-rental-in-60-seconds", "cap-rate-vs-cash-on-cash-vs-dscr"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "spot-bad-rental-in-60-seconds",
+      "cap-rate-vs-cash-on-cash-vs-dscr",
+    ],
   },
   {
     slug: "spokane",
@@ -995,11 +1449,18 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "More attainable than the west side of the state with solid demand, but Washington is tenant-friendly — model vacancy and turnover honestly.",
     neighborhoods: [
-      { name: "North Spokane", why: "Affordable SFRs, family renters, low vacancy." },
+      {
+        name: "North Spokane",
+        why: "Affordable SFRs, family renters, low vacancy.",
+      },
       { name: "Spokane Valley", why: "Suburban, steady demand." },
       { name: "West Central", why: "Value-add, improving area." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "vacancy-rate-rental-property"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "vacancy-rate-rental-property",
+    ],
   },
   {
     slug: "reno",
@@ -1013,11 +1474,18 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Growth and rent demand are real, but prices have run up — more appreciation than day-one cash flow. Some submarkets carry Tahoe-area seasonality.",
     neighborhoods: [
-      { name: "Sparks", why: "More affordable, family renters, steady demand." },
+      {
+        name: "Sparks",
+        why: "More affordable, family renters, steady demand.",
+      },
       { name: "Northwest Reno", why: "Newer SFRs, low vacancy." },
       { name: "Midtown", why: "Walkable, younger renters, upside." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "el-paso",
@@ -1031,11 +1499,18 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Low volatility and steady Fort Bliss demand make this a dependable cash-flow market. As always in Texas, model the real property-tax rate.",
     neighborhoods: [
-      { name: "Northeast El Paso", why: "Near Fort Bliss — steady military demand." },
+      {
+        name: "Northeast El Paso",
+        why: "Near Fort Bliss — steady military demand.",
+      },
       { name: "East Side", why: "Newer SFRs, family renters, low vacancy." },
       { name: "Lower Valley", why: "Affordable, value-add." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "rental-property-tax-deductions", "how-to-underwrite-a-rental-property-in-60-seconds"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "rental-property-tax-deductions",
+      "how-to-underwrite-a-rental-property-in-60-seconds",
+    ],
   },
   {
     slug: "corpus-christi",
@@ -1053,7 +1528,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Flour Bluff", why: "Near the naval base, steady demand." },
       { name: "Southside", why: "Newer stock, reliable tenants." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "rental-property-tax-deductions"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "rental-property-tax-deductions",
+    ],
   },
   {
     slug: "baton-rouge",
@@ -1071,7 +1550,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Sherwood Forest", why: "Affordable SFRs, family renters." },
       { name: "Southdowns", why: "Near LSU, reliable demand." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "closing-costs-investment-property", "cash-flow-vs-appreciation"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "closing-costs-investment-property",
+      "cash-flow-vs-appreciation",
+    ],
   },
   {
     slug: "shreveport",
@@ -1089,7 +1572,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Broadmoor", why: "Affordable, family renters." },
       { name: "Shreve Isle", why: "Value-add, steady demand." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "spot-bad-rental-in-60-seconds", "capex-maintenance-reserves-rental-property"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "spot-bad-rental-in-60-seconds",
+      "capex-maintenance-reserves-rental-property",
+    ],
   },
   {
     slug: "jackson",
@@ -1103,11 +1590,18 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Yields look excellent on paper; neighborhood selection and tenant screening make or break it. A market for experienced, hands-on operators.",
     neighborhoods: [
-      { name: "Northeast Jackson", why: "More stable, desirable, reliable tenants." },
+      {
+        name: "Northeast Jackson",
+        why: "More stable, desirable, reliable tenants.",
+      },
       { name: "Fondren", why: "Revitalizing, younger renters." },
       { name: "Byram", why: "Suburb with newer SFRs, family demand." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "section-8-rental-property-investing", "capex-maintenance-reserves-rental-property"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "section-8-rental-property-investing",
+      "capex-maintenance-reserves-rental-property",
+    ],
   },
   {
     slug: "augusta",
@@ -1125,7 +1619,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Martinez", why: "Suburb with top schools, low vacancy." },
       { name: "South Augusta", why: "Affordable, value-add, cash flow." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "how-to-underwrite-a-rental-property-in-60-seconds"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "how-to-underwrite-a-rental-property-in-60-seconds",
+    ],
   },
   {
     slug: "macon",
@@ -1143,7 +1641,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Vineville", why: "Historic, steady demand." },
       { name: "West Macon", why: "Affordable, value-add." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "spot-bad-rental-in-60-seconds", "single-family-vs-multi-family-rental"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "spot-bad-rental-in-60-seconds",
+      "single-family-vs-multi-family-rental",
+    ],
   },
   {
     slug: "lansing",
@@ -1161,7 +1663,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Okemos", why: "Suburb with top schools, low vacancy." },
       { name: "Old Town / REO", why: "Value-add, improving area." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "house-hacking-explained", "cap-rate-vs-cash-on-cash-vs-dscr"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "house-hacking-explained",
+      "cap-rate-vs-cash-on-cash-vs-dscr",
+    ],
   },
   {
     slug: "fort-collins",
@@ -1179,7 +1685,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Old Town edges", why: "Desirable, walkable, premium." },
       { name: "Timnath", why: "Suburb with newer SFRs, family renters." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "provo",
@@ -1197,7 +1707,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Provo Bench", why: "Desirable, steady demand." },
       { name: "Spanish Fork", why: "Suburb with newer stock, growth." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "ogden",
@@ -1215,7 +1729,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Downtown Ogden", why: "Revitalizing, younger renters." },
       { name: "Roy", why: "Suburb; affordable, family renters, low vacancy." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "lincoln",
@@ -1233,7 +1751,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "University area", why: "Student rentals, high occupancy." },
       { name: "Southeast Lincoln", why: "Newer SFRs, family renters." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "single-family-vs-multi-family-rental", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "single-family-vs-multi-family-rental",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "sioux-falls",
@@ -1251,7 +1773,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Southeast", why: "Newer SFRs, family renters, low vacancy." },
       { name: "Whittier", why: "Value-add, improving." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "best-states-for-rental-investors-2026", "how-to-underwrite-a-rental-property-in-60-seconds"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "best-states-for-rental-investors-2026",
+      "how-to-underwrite-a-rental-property-in-60-seconds",
+    ],
   },
   {
     slug: "fargo",
@@ -1269,7 +1795,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "South Fargo", why: "Newer SFRs, low vacancy." },
       { name: "West Fargo", why: "Suburb; growth, family renters." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "capex-maintenance-reserves-rental-property", "single-family-vs-multi-family-rental"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "capex-maintenance-reserves-rental-property",
+      "single-family-vs-multi-family-rental",
+    ],
   },
   {
     slug: "peoria",
@@ -1283,11 +1813,18 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Strong cash-on-cash at low entry, but the local economy can be cyclical and Illinois taxes are high — model both. For yield-focused operators.",
     neighborhoods: [
-      { name: "North Peoria", why: "More stable, desirable, reliable tenants." },
+      {
+        name: "North Peoria",
+        why: "More stable, desirable, reliable tenants.",
+      },
       { name: "West Peoria", why: "Affordable, family renters." },
       { name: "Peoria Heights", why: "Walkable, steady demand." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "rental-property-tax-deductions", "spot-bad-rental-in-60-seconds"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "rental-property-tax-deductions",
+      "spot-bad-rental-in-60-seconds",
+    ],
   },
   {
     slug: "rockford",
@@ -1305,7 +1842,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Northeast", why: "Affordable SFRs, family renters." },
       { name: "Loves Park", why: "Suburb; owner-occupant feel, low vacancy." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "capex-maintenance-reserves-rental-property", "rental-property-tax-deductions"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "capex-maintenance-reserves-rental-property",
+      "rental-property-tax-deductions",
+    ],
   },
   {
     slug: "green-bay",
@@ -1323,7 +1864,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "De Pere", why: "Family renters, low vacancy." },
       { name: "Downtown / Astor", why: "Walkable, steady demand." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "house-hacking-explained", "single-family-vs-multi-family-rental"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "house-hacking-explained",
+      "single-family-vs-multi-family-rental",
+    ],
   },
   {
     slug: "fort-myers",
@@ -1337,11 +1882,18 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Growth and demand are strong, but coastal insurance and hurricane risk are the swing factors — quote them hard before you offer.",
     neighborhoods: [
-      { name: "Cape Coral", why: "Adjacent; newer SFRs, family renters, growth." },
+      {
+        name: "Cape Coral",
+        why: "Adjacent; newer SFRs, family renters, growth.",
+      },
       { name: "Lehigh Acres", why: "Affordable, value-add, better ratios." },
       { name: "McGregor", why: "Desirable, steady demand." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "closing-costs-investment-property"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "closing-costs-investment-property",
+    ],
   },
   {
     slug: "lakeland",
@@ -1355,11 +1907,18 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Central-Florida growth at a discount to Tampa and Orlando, with solid demand. Model Florida insurance as a real line item.",
     neighborhoods: [
-      { name: "South Lakeland", why: "Desirable, family renters, low vacancy." },
+      {
+        name: "South Lakeland",
+        why: "Desirable, family renters, low vacancy.",
+      },
       { name: "Dixieland", why: "Historic, steady demand." },
       { name: "North Lakeland", why: "Affordable, value-add." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "tallahassee",
@@ -1377,7 +1936,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Near FSU", why: "Student rentals, high occupancy." },
       { name: "Southwood", why: "Suburb; newer SFRs, family renters." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "vacancy-rate-rental-property", "cash-flow-vs-appreciation"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "vacancy-rate-rental-property",
+      "cash-flow-vs-appreciation",
+    ],
   },
   {
     slug: "pensacola",
@@ -1393,9 +1956,16 @@ export const MARKET_CITIES: MarketCity[] = [
     neighborhoods: [
       { name: "East Hill", why: "Desirable, historic, steady demand." },
       { name: "Cordova", why: "Central, family renters, low vacancy." },
-      { name: "Pace / Gulf Breeze", why: "Suburbs; newer stock, reliable tenants." },
+      {
+        name: "Pace / Gulf Breeze",
+        why: "Suburbs; newer stock, reliable tenants.",
+      },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "closing-costs-investment-property"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "closing-costs-investment-property",
+    ],
   },
   {
     slug: "clarksville",
@@ -1413,7 +1983,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "St. Bethlehem", why: "Newer SFRs, steady demand." },
       { name: "Near Fort Campbell", why: "Reliable military tenant pool." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "wilmington",
@@ -1431,7 +2005,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Riverside / Northeast", why: "Value-add, higher cash flow." },
       { name: "Newark", why: "Nearby; Univ. of Delaware demand, low vacancy." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "how-to-underwrite-a-rental-property-in-60-seconds"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "how-to-underwrite-a-rental-property-in-60-seconds",
+    ],
   },
   {
     slug: "allentown",
@@ -1449,7 +2027,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Bethlehem", why: "Adjacent; college + steady demand." },
       { name: "Easton", why: "Value-add, walkable, upside." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "harrisburg",
@@ -1467,7 +2049,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Camp Hill", why: "Suburb; desirable, low vacancy." },
       { name: "Allison Hill", why: "Value-add, higher cash flow." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "single-family-vs-multi-family-rental", "how-to-underwrite-a-rental-property-in-60-seconds"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "single-family-vs-multi-family-rental",
+      "how-to-underwrite-a-rental-property-in-60-seconds",
+    ],
   },
   {
     slug: "scranton",
@@ -1485,7 +2071,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Hill Section", why: "Near universities, steady demand." },
       { name: "West Scranton", why: "Affordable, value-add." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "capex-maintenance-reserves-rental-property", "spot-bad-rental-in-60-seconds"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "capex-maintenance-reserves-rental-property",
+      "spot-bad-rental-in-60-seconds",
+    ],
   },
   {
     slug: "worcester",
@@ -1503,7 +2093,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Main South", why: "Student demand, value-add." },
       { name: "Burncoat", why: "Affordable SFRs, steady demand." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "vacancy-rate-rental-property"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "vacancy-rate-rental-property",
+    ],
   },
   {
     slug: "hartford",
@@ -1521,7 +2115,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "West Hartford", why: "Suburb; top schools, low vacancy." },
       { name: "Parkville", why: "Value-add, improving area." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "rental-property-tax-deductions", "cash-flow-vs-appreciation"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "rental-property-tax-deductions",
+      "cash-flow-vs-appreciation",
+    ],
   },
   {
     slug: "new-haven",
@@ -1539,7 +2137,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Westville", why: "Stable, family renters." },
       { name: "Fair Haven", why: "Value-add, higher cash flow." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "vacancy-rate-rental-property"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "vacancy-rate-rental-property",
+    ],
   },
   {
     slug: "providence",
@@ -1557,7 +2159,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Federal Hill", why: "Walkable, steady demand." },
       { name: "Elmhurst", why: "Family renters, value." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "capex-maintenance-reserves-rental-property"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "capex-maintenance-reserves-rental-property",
+    ],
   },
   {
     slug: "manchester",
@@ -1575,7 +2181,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Downtown", why: "Walkable, younger renters." },
       { name: "West Side", why: "Value-add, steady demand." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "syracuse",
@@ -1593,7 +2203,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Eastwood", why: "Stable, family renters." },
       { name: "Strathmore", why: "Desirable, steady demand." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "capex-maintenance-reserves-rental-property"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "capex-maintenance-reserves-rental-property",
+    ],
   },
   {
     slug: "albany",
@@ -1611,7 +2225,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Delmar", why: "Suburb; top schools, low vacancy." },
       { name: "Center Square", why: "Walkable, steady demand." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "single-family-vs-multi-family-rental", "rental-property-tax-deductions"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "single-family-vs-multi-family-rental",
+      "rental-property-tax-deductions",
+    ],
   },
   {
     slug: "youngstown",
@@ -1625,11 +2243,18 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Rock-bottom entry produces eye-catching cash-on-cash, but population has declined and stock is old — neighborhood + tenant selection are everything.",
     neighborhoods: [
-      { name: "Boardman", why: "Suburb; stable, owner-occupant feel, reliable tenants." },
+      {
+        name: "Boardman",
+        why: "Suburb; stable, owner-occupant feel, reliable tenants.",
+      },
       { name: "Canfield", why: "Desirable, low vacancy." },
       { name: "Austintown", why: "Affordable, family renters." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "spot-bad-rental-in-60-seconds", "capex-maintenance-reserves-rental-property"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "spot-bad-rental-in-60-seconds",
+      "capex-maintenance-reserves-rental-property",
+    ],
   },
   {
     slug: "canton",
@@ -1643,11 +2268,18 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Strong yields at low entry; older stock and a flat-growth economy mean reserve for capex and underwrite conservatively. Hands-on operators do well.",
     neighborhoods: [
-      { name: "Jackson Township", why: "Suburb; desirable, low vacancy, reliable tenants." },
+      {
+        name: "Jackson Township",
+        why: "Suburb; desirable, low vacancy, reliable tenants.",
+      },
       { name: "Plain Township", why: "Family renters, steady demand." },
       { name: "Northwest Canton", why: "Value-add, cash flow." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "capex-maintenance-reserves-rental-property", "spot-bad-rental-in-60-seconds"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "capex-maintenance-reserves-rental-property",
+      "spot-bad-rental-in-60-seconds",
+    ],
   },
   {
     slug: "evansville",
@@ -1665,7 +2297,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "North Side", why: "Newer SFRs, low vacancy." },
       { name: "Near University", why: "Student demand." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "single-family-vs-multi-family-rental", "how-to-underwrite-a-rental-property-in-60-seconds"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "single-family-vs-multi-family-rental",
+      "how-to-underwrite-a-rental-property-in-60-seconds",
+    ],
   },
   {
     slug: "south-bend",
@@ -1679,11 +2315,18 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Notre Dame demand plus low prices drive solid cash-on-cash, and Indiana is landlord-friendly. A dependable cash-flow market with a steady demand floor.",
     neighborhoods: [
-      { name: "Near Notre Dame", why: "Student + staff demand, high occupancy." },
+      {
+        name: "Near Notre Dame",
+        why: "Student + staff demand, high occupancy.",
+      },
       { name: "Granger", why: "Suburb; top schools, low vacancy." },
       { name: "Near West Side", why: "Value-add, cash flow." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "house-hacking-explained", "cap-rate-vs-cash-on-cash-vs-dscr"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "house-hacking-explained",
+      "cap-rate-vs-cash-on-cash-vs-dscr",
+    ],
   },
   {
     slug: "fresno",
@@ -1697,11 +2340,18 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Better yields than coastal CA with steady ag-and-logistics demand, but California tenant rules + rent caps need careful modeling. Balanced returns.",
     neighborhoods: [
-      { name: "Northwest Fresno", why: "Desirable, family renters, low vacancy." },
+      {
+        name: "Northwest Fresno",
+        why: "Desirable, family renters, low vacancy.",
+      },
       { name: "Clovis", why: "Suburb; top schools, steady demand." },
       { name: "Tower District", why: "Walkable, value-add." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "rental-property-tax-deductions", "cash-flow-vs-appreciation"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "rental-property-tax-deductions",
+      "cash-flow-vs-appreciation",
+    ],
   },
   {
     slug: "bakersfield",
@@ -1715,11 +2365,18 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "One of the few California markets where cash flow is realistic, anchored by oil and ag. Model CA tenant protections and rent caps.",
     neighborhoods: [
-      { name: "Northwest Bakersfield", why: "Newer SFRs, family renters, low vacancy." },
+      {
+        name: "Northwest Bakersfield",
+        why: "Newer SFRs, family renters, low vacancy.",
+      },
       { name: "Seven Oaks", why: "Desirable, steady demand." },
       { name: "Oildale", why: "Affordable, value-add." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "rental-property-tax-deductions"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "rental-property-tax-deductions",
+    ],
   },
   {
     slug: "stockton",
@@ -1737,7 +2394,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Lincoln Village", why: "Stable, steady demand." },
       { name: "Weston Ranch", why: "Affordable, value-add." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "rental-property-tax-deductions"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "rental-property-tax-deductions",
+    ],
   },
   {
     slug: "modesto",
@@ -1755,7 +2416,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Village One", why: "Newer SFRs, steady demand." },
       { name: "Airport District", why: "Affordable, value-add." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "rental-property-tax-deductions"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "rental-property-tax-deductions",
+    ],
   },
   {
     slug: "salem",
@@ -1773,7 +2438,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "West Salem", why: "Newer SFRs, steady demand." },
       { name: "Northeast Salem", why: "Affordable, value-add." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "vacancy-rate-rental-property"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "vacancy-rate-rental-property",
+    ],
   },
   {
     slug: "tacoma",
@@ -1791,7 +2460,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "University Place", why: "Suburb; top schools, low vacancy." },
       { name: "South Tacoma", why: "Affordable, value-add." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "killeen",
@@ -1806,10 +2479,17 @@ export const MARKET_CITIES: MarketCity[] = [
       "Constant military rotation keeps occupancy high and demand predictable — a classic cash-flow market. Model BAH-driven rents and Texas property taxes.",
     neighborhoods: [
       { name: "Near Fort Cavazos", why: "Reliable military tenant pool." },
-      { name: "Harker Heights", why: "Suburb; desirable, top schools, low vacancy." },
+      {
+        name: "Harker Heights",
+        why: "Suburb; desirable, top schools, low vacancy.",
+      },
       { name: "South Killeen", why: "Affordable, value-add." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "rental-property-tax-deductions"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "rental-property-tax-deductions",
+    ],
   },
   {
     slug: "waco",
@@ -1827,7 +2507,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Woodway", why: "Suburb; desirable, top schools, low vacancy." },
       { name: "East Waco", why: "Value-add, higher cash flow." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "vacancy-rate-rental-property"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "vacancy-rate-rental-property",
+    ],
   },
   {
     slug: "lubbock",
@@ -1842,10 +2526,17 @@ export const MARKET_CITIES: MarketCity[] = [
       "Texas Tech's ~40k students underpin demand and occupancy, with affordable entry. Model Texas taxes; near-campus submarkets are turnover-heavy.",
     neighborhoods: [
       { name: "Tech Terrace", why: "Near campus, high demand, desirable." },
-      { name: "Southwest Lubbock", why: "Newer SFRs, family renters, low vacancy." },
+      {
+        name: "Southwest Lubbock",
+        why: "Newer SFRs, family renters, low vacancy.",
+      },
       { name: "North Lubbock", why: "Affordable, value-add." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "rental-property-tax-deductions"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "rental-property-tax-deductions",
+    ],
   },
   {
     slug: "mobile",
@@ -1863,7 +2554,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Midtown", why: "Historic, walkable, steady demand." },
       { name: "Tillmans Corner", why: "Affordable, value-add." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "closing-costs-investment-property"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "closing-costs-investment-property",
+    ],
   },
   {
     slug: "mcallen",
@@ -1877,10 +2572,17 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Among the most affordable metros in Texas with dependable demand; model Texas property taxes and the lower local wage base.",
     neighborhoods: [
-      { name: "North McAllen", why: "Newer SFRs, family renters, low vacancy." },
+      {
+        name: "North McAllen",
+        why: "Newer SFRs, family renters, low vacancy.",
+      },
       { name: "Edinburg", why: "Adjacent; university demand, growth." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "rental-property-tax-deductions"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "rental-property-tax-deductions",
+    ],
   },
   {
     slug: "brownsville",
@@ -1897,7 +2599,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Southmost", why: "Affordable, steady demand." },
       { name: "North Brownsville", why: "Newer stock, family renters." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "spot-bad-rental-in-60-seconds"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "spot-bad-rental-in-60-seconds",
+    ],
   },
   {
     slug: "laredo",
@@ -1914,7 +2620,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "North Laredo", why: "Newer SFRs, family renters, low vacancy." },
       { name: "Del Mar", why: "Desirable, steady demand." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "how-to-underwrite-a-rental-property-in-60-seconds"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "how-to-underwrite-a-rental-property-in-60-seconds",
+    ],
   },
   {
     slug: "amarillo",
@@ -1931,7 +2641,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Southwest Amarillo", why: "Newer SFRs, family renters." },
       { name: "Wolflin", why: "Desirable, historic, steady demand." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "single-family-vs-multi-family-rental", "rental-property-tax-deductions"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "single-family-vs-multi-family-rental",
+      "rental-property-tax-deductions",
+    ],
   },
   {
     slug: "beaumont",
@@ -1946,9 +2660,16 @@ export const MARKET_CITIES: MarketCity[] = [
       "Industrial jobs support steady demand and strong cash-on-cash. Quote Gulf Coast insurance and model Texas taxes.",
     neighborhoods: [
       { name: "West End", why: "Desirable, family renters, low vacancy." },
-      { name: "Mid-County", why: "Nederland/Port Neches; stable, reliable tenants." },
+      {
+        name: "Mid-County",
+        why: "Nederland/Port Neches; stable, reliable tenants.",
+      },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "closing-costs-investment-property", "cash-flow-vs-appreciation"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "closing-costs-investment-property",
+      "cash-flow-vs-appreciation",
+    ],
   },
   {
     slug: "denton",
@@ -1965,7 +2686,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Near UNT", why: "Student rentals, high occupancy." },
       { name: "South Denton", why: "Newer SFRs, family renters." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "vacancy-rate-rental-property"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "vacancy-rate-rental-property",
+    ],
   },
   {
     slug: "mesa",
@@ -1982,7 +2707,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "East Mesa", why: "Newer SFRs, family renters, low vacancy." },
       { name: "Downtown Mesa", why: "Light-rail, value-add, demand." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "fayetteville",
@@ -1997,9 +2726,16 @@ export const MARKET_CITIES: MarketCity[] = [
       "A rare combination of strong growth and reasonable entry; demand is exceptional. More appreciation than deep cash flow right now.",
     neighborhoods: [
       { name: "Near U of A", why: "Student demand, high occupancy." },
-      { name: "Springdale / Rogers", why: "Adjacent; corporate demand, family renters." },
+      {
+        name: "Springdale / Rogers",
+        why: "Adjacent; corporate demand, family renters.",
+      },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "cedar-rapids",
@@ -2013,10 +2749,17 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Affordable entry and dependable tenants make for steady cash flow with modest appreciation. A clean Midwest core market.",
     neighborhoods: [
-      { name: "Marion", why: "Suburb; desirable, low vacancy, family renters." },
+      {
+        name: "Marion",
+        why: "Suburb; desirable, low vacancy, family renters.",
+      },
       { name: "Northeast Cedar Rapids", why: "Stable, reliable demand." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "single-family-vs-multi-family-rental", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "single-family-vs-multi-family-rental",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "davenport",
@@ -2031,9 +2774,16 @@ export const MARKET_CITIES: MarketCity[] = [
       "Low prices and solid ratios drive strong cash-on-cash; a steady Midwest yield market. Reserve for older stock.",
     neighborhoods: [
       { name: "North Davenport", why: "Newer SFRs, family renters." },
-      { name: "Bettendorf", why: "Adjacent; desirable, top schools, low vacancy." },
+      {
+        name: "Bettendorf",
+        why: "Adjacent; desirable, top schools, low vacancy.",
+      },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "capex-maintenance-reserves-rental-property", "spot-bad-rental-in-60-seconds"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "capex-maintenance-reserves-rental-property",
+      "spot-bad-rental-in-60-seconds",
+    ],
   },
   {
     slug: "topeka",
@@ -2050,7 +2800,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "West Topeka", why: "Desirable, stable, family renters." },
       { name: "College Hill", why: "Walkable, steady demand." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "spot-bad-rental-in-60-seconds", "cap-rate-vs-cash-on-cash-vs-dscr"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "spot-bad-rental-in-60-seconds",
+      "cap-rate-vs-cash-on-cash-vs-dscr",
+    ],
   },
   {
     slug: "olathe",
@@ -2067,7 +2821,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "South Olathe", why: "Newer SFRs, top schools, low vacancy." },
       { name: "Lenexa", why: "Adjacent; corporate demand, family renters." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "single-family-vs-multi-family-rental", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "single-family-vs-multi-family-rental",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "champaign",
@@ -2084,7 +2842,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Near U of I", why: "Student rentals, high occupancy." },
       { name: "Southwest Champaign", why: "Family renters, low vacancy." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "vacancy-rate-rental-property", "rental-property-tax-deductions"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "vacancy-rate-rental-property",
+      "rental-property-tax-deductions",
+    ],
   },
   {
     slug: "flint",
@@ -2098,10 +2860,17 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Eye-catching yields at rock-bottom entry, but population decline and old stock mean neighborhood and tenant selection are everything.",
     neighborhoods: [
-      { name: "Grand Blanc", why: "Suburb; desirable, stable, reliable tenants." },
+      {
+        name: "Grand Blanc",
+        why: "Suburb; desirable, stable, reliable tenants.",
+      },
       { name: "Flint Township", why: "Affordable, steadier demand." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "spot-bad-rental-in-60-seconds", "capex-maintenance-reserves-rental-property"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "spot-bad-rental-in-60-seconds",
+      "capex-maintenance-reserves-rental-property",
+    ],
   },
   {
     slug: "ann-arbor",
@@ -2118,7 +2887,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Near UM Central", why: "Student demand, premium pricing." },
       { name: "Pittsfield Township", why: "Family renters, low vacancy." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "vacancy-rate-rental-property"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "vacancy-rate-rental-property",
+    ],
   },
   {
     slug: "kalamazoo",
@@ -2135,7 +2908,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Westnedge Hill", why: "Desirable, stable, family renters." },
       { name: "Near WMU", why: "Student rentals, high occupancy." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "house-hacking-explained", "single-family-vs-multi-family-rental"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "house-hacking-explained",
+      "single-family-vs-multi-family-rental",
+    ],
   },
   {
     slug: "athens",
@@ -2152,7 +2929,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Five Points", why: "Desirable, near campus, premium." },
       { name: "Eastside Athens", why: "Family renters, value." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "vacancy-rate-rental-property"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "vacancy-rate-rental-property",
+    ],
   },
   {
     slug: "tuscaloosa",
@@ -2169,7 +2950,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Near UA", why: "Student rentals, high occupancy." },
       { name: "East Tuscaloosa", why: "Family renters, steady demand." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "vacancy-rate-rental-property"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "vacancy-rate-rental-property",
+    ],
   },
   {
     slug: "montgomery",
@@ -2183,10 +2968,17 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Government and military demand plus cheap entry drive strong cash-on-cash. Modest appreciation; reserve for older stock.",
     neighborhoods: [
-      { name: "East Montgomery", why: "Desirable, family renters, low vacancy." },
+      {
+        name: "East Montgomery",
+        why: "Desirable, family renters, low vacancy.",
+      },
       { name: "Cloverdale", why: "Historic, walkable, steady demand." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "section-8-rental-property-investing", "spot-bad-rental-in-60-seconds"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "section-8-rental-property-investing",
+      "spot-bad-rental-in-60-seconds",
+    ],
   },
   {
     slug: "gulfport",
@@ -2203,7 +2995,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "North Gulfport", why: "Affordable, family renters." },
       { name: "Biloxi", why: "Adjacent; casino + military demand, steady." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "closing-costs-investment-property", "cash-flow-vs-appreciation"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "closing-costs-investment-property",
+      "cash-flow-vs-appreciation",
+    ],
   },
   {
     slug: "lafayette",
@@ -2220,7 +3016,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "River Ranch", why: "Desirable, walkable, steady demand." },
       { name: "South Lafayette", why: "Newer SFRs, family renters." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "closing-costs-investment-property", "cash-flow-vs-appreciation"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "closing-costs-investment-property",
+      "cash-flow-vs-appreciation",
+    ],
   },
   {
     slug: "durham",
@@ -2237,7 +3037,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Near Duke", why: "Student + staff demand, high occupancy." },
       { name: "South Durham", why: "Family renters, low vacancy." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "how-to-underwrite-a-rental-property-in-60-seconds"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "how-to-underwrite-a-rental-property-in-60-seconds",
+    ],
   },
   {
     slug: "asheville",
@@ -2254,7 +3058,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "West Asheville", why: "Desirable, walkable, demand." },
       { name: "Oakley", why: "Family renters, value." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "norfolk",
@@ -2271,7 +3079,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Ghent", why: "Desirable, historic, steady demand." },
       { name: "Ocean View", why: "Affordable, value-add, near base." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "vacancy-rate-rental-property"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "vacancy-rate-rental-property",
+    ],
   },
   {
     slug: "virginia-beach",
@@ -2288,7 +3100,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Kempsville", why: "Family renters, top schools, low vacancy." },
       { name: "Oceanfront-adjacent", why: "STR + rental demand." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "closing-costs-investment-property"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "closing-costs-investment-property",
+    ],
   },
   {
     slug: "charleston",
@@ -2305,7 +3121,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "West Ashley", why: "Family renters, steady demand." },
       { name: "North Charleston", why: "More affordable, value-add, jobs." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "spartanburg",
@@ -2322,7 +3142,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Eastside Spartanburg", why: "Family renters, low vacancy." },
       { name: "Converse Heights", why: "Historic, desirable, steady demand." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "myrtle-beach",
@@ -2339,7 +3163,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Carolina Forest", why: "Family renters, growth, low vacancy." },
       { name: "Conway", why: "Inland; affordable, steady long-term demand." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "vacancy-rate-rental-property", "cash-flow-vs-appreciation"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "vacancy-rate-rental-property",
+      "cash-flow-vs-appreciation",
+    ],
   },
   {
     slug: "gainesville",
@@ -2356,7 +3184,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Near UF", why: "Student rentals, high occupancy." },
       { name: "Northwest Gainesville", why: "Family renters, low vacancy." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "vacancy-rate-rental-property"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "vacancy-rate-rental-property",
+    ],
   },
   {
     slug: "ocala",
@@ -2373,7 +3205,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Southeast Ocala", why: "Family renters, low vacancy." },
       { name: "Marion Oaks", why: "Affordable, growth, value-add." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "daytona-beach",
@@ -2387,10 +3223,17 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Tourism and growth support demand at lower prices than Orlando; quote coastal insurance as a hard line item.",
     neighborhoods: [
-      { name: "Port Orange", why: "Suburb; family renters, top schools, low vacancy." },
+      {
+        name: "Port Orange",
+        why: "Suburb; family renters, top schools, low vacancy.",
+      },
       { name: "Holly Hill", why: "Affordable, value-add." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "closing-costs-investment-property"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "closing-costs-investment-property",
+    ],
   },
   {
     slug: "sarasota",
@@ -2407,7 +3250,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Gulf Gate", why: "Desirable, steady demand." },
       { name: "North Port", why: "South; growth, family renters, value." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "closing-costs-investment-property"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "closing-costs-investment-property",
+    ],
   },
   {
     slug: "naples",
@@ -2424,7 +3271,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "East Naples", why: "More attainable, family renters." },
       { name: "Golden Gate", why: "Affordable relative to the coast, value." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "closing-costs-investment-property"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "closing-costs-investment-property",
+    ],
   },
   {
     slug: "boulder",
@@ -2441,7 +3292,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Near CU", why: "Student demand, premium pricing." },
       { name: "Gunbarrel", why: "Tech-worker demand, low vacancy." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "vacancy-rate-rental-property"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "vacancy-rate-rental-property",
+    ],
   },
   {
     slug: "pueblo",
@@ -2458,7 +3313,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "University Park", why: "Desirable, steady demand." },
       { name: "Belmont", why: "Family renters, low vacancy." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "greeley",
@@ -2475,7 +3334,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "West Greeley", why: "Newer SFRs, family renters, low vacancy." },
       { name: "Near UNC", why: "Student rentals, occupancy." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "eugene",
@@ -2492,7 +3355,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Near UO", why: "Student rentals, high occupancy." },
       { name: "Santa Clara", why: "Family renters, low vacancy." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "vacancy-rate-rental-property"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "vacancy-rate-rental-property",
+    ],
   },
   {
     slug: "vancouver",
@@ -2506,10 +3373,17 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Tax advantages and Portland spillover support demand and appreciation; cash flow is tight. Washington tenant rules apply.",
     neighborhoods: [
-      { name: "East Vancouver", why: "Newer SFRs, family renters, low vacancy." },
+      {
+        name: "East Vancouver",
+        why: "Newer SFRs, family renters, low vacancy.",
+      },
       { name: "Salmon Creek", why: "Desirable, steady demand." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "bellingham",
@@ -2526,7 +3400,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Near WWU", why: "Student rentals, high occupancy." },
       { name: "Barkley", why: "Family renters, low vacancy." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "vacancy-rate-rental-property"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "vacancy-rate-rental-property",
+    ],
   },
   {
     slug: "nampa",
@@ -2543,7 +3421,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "South Nampa", why: "Newer SFRs, family renters, low vacancy." },
       { name: "Caldwell", why: "Adjacent; affordable, growth, value." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "what-is-a-good-cap-rate", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "what-is-a-good-cap-rate",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "billings",
@@ -2557,10 +3439,17 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "A stable regional hub with reliable demand and steady appreciation; limited inventory keeps vacancy low.",
     neighborhoods: [
-      { name: "West End Billings", why: "Newer SFRs, family renters, low vacancy." },
+      {
+        name: "West End Billings",
+        why: "Newer SFRs, family renters, low vacancy.",
+      },
       { name: "The Heights", why: "Affordable, steady demand." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "best-states-for-rental-investors-2026"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "best-states-for-rental-investors-2026",
+    ],
   },
   {
     slug: "lowell",
@@ -2577,7 +3466,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Belvidere", why: "Desirable, stable, family renters." },
       { name: "Near UMass Lowell", why: "Student rentals, occupancy." },
     ],
-    relatedPosts: ["cash-flow-vs-appreciation", "house-hacking-explained", "what-is-a-good-cap-rate"],
+    relatedPosts: [
+      "cash-flow-vs-appreciation",
+      "house-hacking-explained",
+      "what-is-a-good-cap-rate",
+    ],
   },
   {
     slug: "trenton",
@@ -2594,7 +3487,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Hamilton", why: "Suburb; family renters, low vacancy." },
       { name: "Ewing", why: "Near TCNJ, steady demand." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "rental-property-tax-deductions", "cash-flow-vs-appreciation"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "rental-property-tax-deductions",
+      "cash-flow-vs-appreciation",
+    ],
   },
   {
     slug: "newark",
@@ -2611,7 +3508,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Ironbound", why: "Desirable, walkable, steady demand." },
       { name: "Forest Hill", why: "Historic, family renters." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "single-family-vs-multi-family-rental", "rental-property-tax-deductions"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "single-family-vs-multi-family-rental",
+      "rental-property-tax-deductions",
+    ],
   },
   {
     slug: "paterson",
@@ -2628,7 +3529,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Eastside Paterson", why: "Family renters, steady demand." },
       { name: "Near downtown", why: "Transit, dense rental demand." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "single-family-vs-multi-family-rental", "rental-property-tax-deductions"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "single-family-vs-multi-family-rental",
+      "rental-property-tax-deductions",
+    ],
   },
   {
     slug: "reading",
@@ -2642,10 +3547,17 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Cheap entry and steady demand drive solid cash-on-cash; reserve for older row-home stock and screen neighborhoods.",
     neighborhoods: [
-      { name: "Wyomissing", why: "Suburb; desirable, top schools, low vacancy." },
+      {
+        name: "Wyomissing",
+        why: "Suburb; desirable, top schools, low vacancy.",
+      },
       { name: "West Reading", why: "Walkable, steady demand." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "capex-maintenance-reserves-rental-property", "cash-flow-vs-appreciation"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "capex-maintenance-reserves-rental-property",
+      "cash-flow-vs-appreciation",
+    ],
   },
   {
     slug: "lancaster",
@@ -2662,7 +3574,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Lancaster city core", why: "Walkable, desirable, demand." },
       { name: "Manheim Township", why: "Suburb; top schools, low vacancy." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "single-family-vs-multi-family-rental"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "single-family-vs-multi-family-rental",
+    ],
   },
   {
     slug: "york",
@@ -2679,7 +3595,11 @@ export const MARKET_CITIES: MarketCity[] = [
       { name: "Springettsbury", why: "Suburb; family renters, low vacancy." },
       { name: "York city core", why: "Value-add, higher cash flow." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "capex-maintenance-reserves-rental-property", "cash-flow-vs-appreciation"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "capex-maintenance-reserves-rental-property",
+      "cash-flow-vs-appreciation",
+    ],
   },
   {
     slug: "erie",
@@ -2693,10 +3613,17 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Strong cash-on-cash at low entry; population is flat and stock is old, so screen carefully and reserve for capex.",
     neighborhoods: [
-      { name: "Millcreek", why: "Suburb; desirable, low vacancy, family renters." },
+      {
+        name: "Millcreek",
+        why: "Suburb; desirable, low vacancy, family renters.",
+      },
       { name: "West Erie", why: "Affordable, value-add." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "capex-maintenance-reserves-rental-property", "spot-bad-rental-in-60-seconds"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "capex-maintenance-reserves-rental-property",
+      "spot-bad-rental-in-60-seconds",
+    ],
   },
   {
     slug: "anchorage",
@@ -2710,10 +3637,17 @@ export const MARKET_CITIES: MarketCity[] = [
     investorAngle:
       "Isolated supply and military demand keep occupancy high and rents firm; factor higher operating and heating costs and a cyclical energy economy.",
     neighborhoods: [
-      { name: "South Anchorage", why: "Desirable, family renters, low vacancy." },
+      {
+        name: "South Anchorage",
+        why: "Desirable, family renters, low vacancy.",
+      },
       { name: "Midtown", why: "Central, steady demand." },
     ],
-    relatedPosts: ["what-is-a-good-cap-rate", "cash-flow-vs-appreciation", "capex-maintenance-reserves-rental-property"],
+    relatedPosts: [
+      "what-is-a-good-cap-rate",
+      "cash-flow-vs-appreciation",
+      "capex-maintenance-reserves-rental-property",
+    ],
   },
 ];
 
@@ -2729,7 +3663,9 @@ export function getMarketCity(slug: string): MarketCity | undefined {
 
 /** Slugs to pre-render for the dynamic template — excludes any bespoke collisions as a safety net. */
 export function getMarketCityParams(): { city: string }[] {
-  return MARKET_CITIES.filter((c) => !BESPOKE_MARKET_SLUGS.has(c.slug)).map((c) => ({
-    city: c.slug,
-  }));
+  return MARKET_CITIES.filter((c) => !BESPOKE_MARKET_SLUGS.has(c.slug)).map(
+    (c) => ({
+      city: c.slug,
+    }),
+  );
 }

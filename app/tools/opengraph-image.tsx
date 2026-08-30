@@ -16,7 +16,7 @@ export default function Image() {
     name: "Free real estate calculators",
     tagline: `${CALCULATOR_COUNT} single-purpose educational tools — mortgage, GRM, vacancy, closing costs, rehab, ARV, rent-to-price rules, and more. No signup.`,
     sectionLabel: "Collection",
-    pills: [`${CALCULATOR_COUNT} calculators`, "No signup", "Free forever"],
+    pills: [`${CALCULATOR_COUNT} calculators`, "No signup", "Free tools"],
     footerLeft: "Mortgage · GRM · vacancy · rehab · ARV · rent-to-price",
   });
 }

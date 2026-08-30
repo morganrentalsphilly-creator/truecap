@@ -49,20 +49,31 @@ describe("product feature flags", () => {
       "fix_flip_strategy_model",
       "owned_portfolio_actuals",
       "advocacy_decision_contract",
+      "testimonial_collection",
       "decision_first_results",
       "focused_dashboard",
     ]);
-    expect(Object.keys(DEFAULT_FEATURE_FLAGS).sort()).toEqual([...FEATURE_FLAG_KEYS].sort());
+    expect(Object.keys(DEFAULT_FEATURE_FLAGS).sort()).toEqual(
+      [...FEATURE_FLAG_KEYS].sort(),
+    );
 
     for (const key of FEATURE_FLAG_KEYS) {
-      expect(DEFAULT_FEATURE_FLAGS[key], key).toBe(KILL_SWITCH_FLAGS.includes(key));
+      expect(DEFAULT_FEATURE_FLAGS[key], key).toBe(
+        KILL_SWITCH_FLAGS.includes(key),
+      );
     }
   });
 
   it("kill-switch flags can be turned OFF by an explicit build-time env value", () => {
     for (const key of KILL_SWITCH_FLAGS) {
-      expect(isFeatureEnabled(key, resolveFeatureFlags({ [key]: "0" })), key).toBe(false);
-      expect(isFeatureEnabled(key, resolveFeatureFlags({ [key]: "false" })), key).toBe(false);
+      expect(
+        isFeatureEnabled(key, resolveFeatureFlags({ [key]: "0" })),
+        key,
+      ).toBe(false);
+      expect(
+        isFeatureEnabled(key, resolveFeatureFlags({ [key]: "false" })),
+        key,
+      ).toBe(false);
       // Unset env must NOT disable them — that is the whole difference.
       expect(isFeatureEnabled(key, resolveFeatureFlags({})), key).toBe(true);
     }
@@ -73,7 +84,7 @@ describe("product feature flags", () => {
     (value) => {
       const flags = resolveFeatureFlags({ financing_profiles: value });
       expect(isFeatureEnabled("financing_profiles", flags)).toBe(true);
-    }
+    },
   );
 
   it.each(["0", "false", "FALSE", " no ", "off", "disabled"])(
@@ -81,13 +92,19 @@ describe("product feature flags", () => {
     (value) => {
       const flags = resolveFeatureFlags({ financing_profiles: value });
       expect(isFeatureEnabled("financing_profiles", flags)).toBe(false);
-    }
+    },
   );
 
   it("falls back to each flag's safe release default for empty or unrecognized configuration", () => {
-    expect(resolveFeatureFlags({ input_confidence: "" }).input_confidence).toBe(true);
-    expect(resolveFeatureFlags({ input_confidence: "tru" }).input_confidence).toBe(true);
-    expect(resolveFeatureFlags({ input_confidence: undefined }).input_confidence).toBe(true);
+    expect(resolveFeatureFlags({ input_confidence: "" }).input_confidence).toBe(
+      true,
+    );
+    expect(
+      resolveFeatureFlags({ input_confidence: "tru" }).input_confidence,
+    ).toBe(true);
+    expect(
+      resolveFeatureFlags({ input_confidence: undefined }).input_confidence,
+    ).toBe(true);
     expect(resolveFeatureFlags().input_confidence).toBe(true);
   });
 
@@ -132,8 +149,12 @@ describe("product feature flags", () => {
   });
 
   it("maps every flag to a unique, public build-time environment variable", () => {
-    const keys = FEATURE_FLAG_KEYS.map((flag: FeatureFlagKey) => FEATURE_FLAG_ENV_KEYS[flag]);
+    const keys = FEATURE_FLAG_KEYS.map(
+      (flag: FeatureFlagKey) => FEATURE_FLAG_ENV_KEYS[flag],
+    );
     expect(new Set(keys).size).toBe(FEATURE_FLAG_KEYS.length);
-    expect(keys.every((key) => key.startsWith("NEXT_PUBLIC_TRUECAP_"))).toBe(true);
+    expect(keys.every((key) => key.startsWith("NEXT_PUBLIC_TRUECAP_"))).toBe(
+      true,
+    );
   });
 });

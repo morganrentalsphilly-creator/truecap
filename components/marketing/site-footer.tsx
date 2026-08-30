@@ -79,11 +79,11 @@ const FOOTER_COLS: Array<{
     links: [
       { label: "Buy-and-hold investors", href: "/for-buy-and-hold" },
       { label: "House hackers", href: "/for-house-hackers" },
-      // /for-agents had ZERO inbound links from anywhere on the site while
-      // being the only page that explains Agent Pro — the highest-priced plan
-      // at $59.99/mo. An agent could not reach the argument for the tier we
-      // most want them to buy.
-      { label: "Agents", href: "/for-agents" },
+      // Agent Pro is deployment-configured. The pricing page always returns
+      // 200 and reveals the tier only when its catalog-verified Stripe Price
+      // exists; linking straight to /for-agents while that Price is absent
+      // creates a sitewide redirect hop to this same destination.
+      { label: "Agents", href: "/pricing#plans" },
     ],
   },
   {
@@ -97,7 +97,10 @@ const FOOTER_COLS: Array<{
       })),
       // The un-gated spreadsheet download page is not a registry
       // calculator (no widget), so it's linked manually here.
-      { label: "Rental spreadsheet (Excel)", href: "/tools/rental-property-spreadsheet" },
+      {
+        label: "Rental spreadsheet (Excel)",
+        href: "/tools/rental-property-spreadsheet",
+      },
     ],
   },
   {
@@ -110,7 +113,9 @@ const FOOTER_COLS: Array<{
   },
 ];
 
-export function SiteFooter({ hideAccountLinks = false }: { hideAccountLinks?: boolean } = {}) {
+export function SiteFooter({
+  hideAccountLinks = false,
+}: { hideAccountLinks?: boolean } = {}) {
   // The "Account" column offers Sign in / Create account / Forgot password.
   // Rendering it to a signed-in user invites them to sign in from inside the
   // product. Callers that know the session pass hideAccountLinks.
@@ -119,7 +124,10 @@ export function SiteFooter({ hideAccountLinks = false }: { hideAccountLinks?: bo
     // data-site-footer: globals.css pads the footer's bottom while a sticky
     // bottom bar is mounted, so the legal row below stays tappable instead of
     // sitting permanently under the bar at maximum scroll.
-    <footer data-site-footer="" className="mt-12 border-t border-border bg-card/40">
+    <footer
+      data-site-footer=""
+      className="mt-12 border-t border-border bg-card/40"
+    >
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12">
         {/* The newsletter band used to live here. The newsletter was
             canceled (founder decision, 2026-07-15) and NewsletterSignup
@@ -156,7 +164,9 @@ export function SiteFooter({ hideAccountLinks = false }: { hideAccountLinks?: bo
           </div>
 
           {/* Sitemap columns */}
-          {FOOTER_COLS.filter((col) => !(hideAccountLinks && col.title === "Account")).map((col) => (
+          {FOOTER_COLS.filter(
+            (col) => !(hideAccountLinks && col.title === "Account"),
+          ).map((col) => (
             <div key={col.title}>
               <h3 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
                 {col.title}
@@ -180,17 +190,22 @@ export function SiteFooter({ hideAccountLinks = false }: { hideAccountLinks?: bo
         {/* Honest sub-promise — quiet footnote, doesn't compete with
             the sitemap above or the bottom strip below. */}
         <p className="mt-10 text-center text-[11px] leading-relaxed text-muted-foreground sm:text-xs">
-          <strong className="text-foreground/90">TrueCap is not a financial advisor.</strong>{" "}
-          The analyzer surfaces the math you&apos;d compute yourself in a spreadsheet, with
-          documented formulas and labeled market-data benchmarks, but every assumption is editable and
-          the underwriting decision is yours.
+          <strong className="text-foreground/90">
+            TrueCap is not a financial advisor.
+          </strong>{" "}
+          The analyzer surfaces the math you&apos;d compute yourself in a
+          spreadsheet, with documented formulas and labeled market-data
+          benchmarks, but every assumption is editable and the underwriting
+          decision is yours.
         </p>
 
         {/* Bottom strip — copyright, trust badges, legal links + email,
             all on the same horizontal band so the footer ends with a
             single visually-balanced row instead of trailing dead space. */}
         <div className="mt-6 flex flex-col items-center justify-between gap-4 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row">
-          <p className="order-2 sm:order-1">© {year} TrueCap. All rights reserved.</p>
+          <p className="order-2 sm:order-1">
+            © {year} TrueCap. All rights reserved.
+          </p>
           {/* Trust badges — moved here so the brand column stays compact
               and the badges are still visible on every page. */}
           <ul className="order-1 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[11px] font-semibold sm:order-2">

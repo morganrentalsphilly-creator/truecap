@@ -33,6 +33,9 @@ export const FEATURE_FLAG_KEYS = [
   // rebuilding/redeploying (NEXT_PUBLIC values are build-time); no stored data,
   // formulas, prices, or entitlements depend on this presentation flag.
   "advocacy_decision_contract",
+  // Permissioned testimonial intake remains dark until the forward migration
+  // and durable submission RPC have been applied and verified.
+  "testimonial_collection",
   // Aug-2026 hierarchy rebuild. Both default ON: they ARE the rebuild. As
   // NEXT_PUBLIC build-time values, changing either requires rebuild/redeploy.
   "decision_first_results",
@@ -58,6 +61,7 @@ export const FEATURE_FLAG_ENV_KEYS = {
   fix_flip_strategy_model: "NEXT_PUBLIC_TRUECAP_FIX_FLIP_STRATEGY_MODEL",
   owned_portfolio_actuals: "NEXT_PUBLIC_TRUECAP_OWNED_PORTFOLIO_ACTUALS",
   advocacy_decision_contract: "NEXT_PUBLIC_TRUECAP_ADVOCACY_DECISION_CONTRACT",
+  testimonial_collection: "NEXT_PUBLIC_TRUECAP_TESTIMONIAL_COLLECTION",
   decision_first_results: "NEXT_PUBLIC_TRUECAP_DECISION_FIRST_RESULTS",
   focused_dashboard: "NEXT_PUBLIC_TRUECAP_FOCUSED_DASHBOARD",
 } as const satisfies Record<FeatureFlagKey, `NEXT_PUBLIC_${string}`>;
@@ -83,6 +87,7 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlagState = Object.freeze({
   fix_flip_strategy_model: false,
   owned_portfolio_actuals: false,
   advocacy_decision_contract: false,
+  testimonial_collection: false,
   // These two default TRUE, unlike every flag above. They are not new
   // behavior being introduced dark — they are the shipped Aug-2026
   // information hierarchy, and the flag exists so a regression can be
@@ -95,7 +100,10 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlagState = Object.freeze({
 const TRUE_VALUES = new Set(["1", "true", "yes", "on", "enabled"]);
 const FALSE_VALUES = new Set(["0", "false", "no", "off", "disabled"]);
 
-function parseFeatureFlagValue(value: FeatureFlagOverride, fallback: boolean): boolean {
+function parseFeatureFlagValue(
+  value: FeatureFlagOverride,
+  fallback: boolean,
+): boolean {
   if (typeof value === "boolean") return value;
   if (typeof value !== "string") return fallback;
 
@@ -106,15 +114,15 @@ function parseFeatureFlagValue(value: FeatureFlagOverride, fallback: boolean): b
 }
 
 export function resolveFeatureFlags(
-  overrides: Partial<Record<FeatureFlagKey, FeatureFlagOverride>> = {}
+  overrides: Partial<Record<FeatureFlagKey, FeatureFlagOverride>> = {},
 ): FeatureFlagState {
   return Object.freeze(
     Object.fromEntries(
       FEATURE_FLAG_KEYS.map((key) => [
         key,
         parseFeatureFlagValue(overrides[key], DEFAULT_FEATURE_FLAGS[key]),
-      ])
-    ) as Record<FeatureFlagKey, boolean>
+      ]),
+    ) as Record<FeatureFlagKey, boolean>,
   );
 }
 
@@ -124,29 +132,36 @@ export function resolveFeatureFlags(
 const runtimeOverrides: Partial<Record<FeatureFlagKey, FeatureFlagOverride>> = {
   input_confidence: process.env.NEXT_PUBLIC_TRUECAP_INPUT_CONFIDENCE,
   offer_ready_status: process.env.NEXT_PUBLIC_TRUECAP_OFFER_READY_STATUS,
-  what_needs_to_be_true_v2: process.env.NEXT_PUBLIC_TRUECAP_WHAT_NEEDS_TO_BE_TRUE_V2,
+  what_needs_to_be_true_v2:
+    process.env.NEXT_PUBLIC_TRUECAP_WHAT_NEEDS_TO_BE_TRUE_V2,
   financing_profiles: process.env.NEXT_PUBLIC_TRUECAP_FINANCING_PROFILES,
   deal_decision_pack: process.env.NEXT_PUBLIC_TRUECAP_DEAL_DECISION_PACK,
   three_deal_guarantee: process.env.NEXT_PUBLIC_TRUECAP_THREE_DEAL_GUARANTEE,
   saved_deal_watch: process.env.NEXT_PUBLIC_TRUECAP_SAVED_DEAL_WATCH,
   batch_underwriting: process.env.NEXT_PUBLIC_TRUECAP_BATCH_UNDERWRITING,
   agent_client_matching: process.env.NEXT_PUBLIC_TRUECAP_AGENT_CLIENT_MATCHING,
-  new_homepage_positioning: process.env.NEXT_PUBLIC_TRUECAP_NEW_HOMEPAGE_POSITIONING,
+  new_homepage_positioning:
+    process.env.NEXT_PUBLIC_TRUECAP_NEW_HOMEPAGE_POSITIONING,
   brrrr_strategy_model: process.env.NEXT_PUBLIC_TRUECAP_BRRRR_STRATEGY_MODEL,
-  fix_flip_strategy_model: process.env.NEXT_PUBLIC_TRUECAP_FIX_FLIP_STRATEGY_MODEL,
+  fix_flip_strategy_model:
+    process.env.NEXT_PUBLIC_TRUECAP_FIX_FLIP_STRATEGY_MODEL,
   owned_portfolio_actuals:
     process.env.NEXT_PUBLIC_TRUECAP_OWNED_PORTFOLIO_ACTUALS,
   advocacy_decision_contract:
     process.env.NEXT_PUBLIC_TRUECAP_ADVOCACY_DECISION_CONTRACT,
-  decision_first_results: process.env.NEXT_PUBLIC_TRUECAP_DECISION_FIRST_RESULTS,
+  testimonial_collection:
+    process.env.NEXT_PUBLIC_TRUECAP_TESTIMONIAL_COLLECTION,
+  decision_first_results:
+    process.env.NEXT_PUBLIC_TRUECAP_DECISION_FIRST_RESULTS,
   focused_dashboard: process.env.NEXT_PUBLIC_TRUECAP_FOCUSED_DASHBOARD,
 };
 
-export const featureFlags: FeatureFlagState = resolveFeatureFlags(runtimeOverrides);
+export const featureFlags: FeatureFlagState =
+  resolveFeatureFlags(runtimeOverrides);
 
 export function isFeatureEnabled(
   key: FeatureFlagKey,
-  state: FeatureFlagState = featureFlags
+  state: FeatureFlagState = featureFlags,
 ): boolean {
   return state[key];
 }

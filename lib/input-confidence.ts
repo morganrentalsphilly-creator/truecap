@@ -362,9 +362,7 @@ export function normalizePurchasePriceSourceContext(
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
   const record = raw as Record<string, unknown>;
   const fetchedAt =
-    typeof record.fetchedAt === "string"
-      ? new Date(record.fetchedAt)
-      : null;
+    typeof record.fetchedAt === "string" ? new Date(record.fetchedAt) : null;
   if (
     (record.kind !== "active-listing" && record.kind !== "avm-estimate") ||
     record.provider !== "rentcast" ||
@@ -572,32 +570,33 @@ export function buildInputConfidence(
               offerReadyRequired: true,
             }
           : pricePresent && purchasePriceEstimated
-          ? {
-              sourceClass: "local-estimate",
-              sourceLabel: purchasePriceSource
-                ? formatPurchasePriceSourceLabel(purchasePriceSource)
-                : "Automated price estimate",
-              reason:
-                "Screening estimate from market/listing data, not a confirmed asking or contract price.",
-              verifyAction: "Confirm asking or contract price",
-              offerReadyRequired: true,
-            }
-          : pricePresent
             ? {
-                sourceClass: "property-specific",
-                sourceLabel: "Property asking/contract price",
+                sourceClass: "local-estimate",
+                sourceLabel: purchasePriceSource
+                  ? formatPurchasePriceSourceLabel(purchasePriceSource)
+                  : "Automated price estimate",
                 reason:
-                  "Specific to this property, but not explicitly confirmed.",
+                  "Screening estimate from market/listing data, not a confirmed asking or contract price.",
                 verifyAction: "Confirm asking or contract price",
                 offerReadyRequired: true,
               }
-            : {
-                sourceClass: "missing",
-                sourceLabel: "Missing",
-                reason: "A purchase price is required to underwrite the deal.",
-                verifyAction: "Enter purchase price",
-                offerReadyRequired: true,
-              },
+            : pricePresent
+              ? {
+                  sourceClass: "property-specific",
+                  sourceLabel: "Property asking/contract price",
+                  reason:
+                    "Specific to this property, but not explicitly confirmed.",
+                  verifyAction: "Confirm asking or contract price",
+                  offerReadyRequired: true,
+                }
+              : {
+                  sourceClass: "missing",
+                  sourceLabel: "Missing",
+                  reason:
+                    "A purchase price is required to underwrite the deal.",
+                  verifyAction: "Enter purchase price",
+                  offerReadyRequired: true,
+                },
       ),
     ),
     field(
@@ -675,10 +674,10 @@ export function buildInputConfidence(
             }
           : taxProvenance && !taxProvenance.overridden
             ? {
-                sourceClass: "market-benchmark",
-                sourceLabel: "State tax benchmark",
+                sourceClass: "generic-default",
+                sourceLabel: "Legacy state estimate (retired)",
                 reason:
-                  "Statewide effective rate can differ materially by parcel.",
+                  "Retained only for backward compatibility; current analyses do not auto-fill state tax and this value is not parcel evidence.",
                 verifyAction: "Enter parcel tax bill",
                 offerReadyRequired: true,
               }

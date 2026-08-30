@@ -30,7 +30,7 @@
  */
 
 import { useId, useMemo, useState } from "react";
-import Link from "next/link";
+import { AnalyzerHandoffLink } from "@/components/analyzer-handoff-link";
 import { ArrowUpRight, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -49,7 +49,11 @@ const num = (s: string) => {
 const fmt = (n: number) =>
   `${n < 0 ? "-" : ""}$${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
 
-function calcMonthlyPayment(principal: number, annualRatePct: number, years: number): number {
+function calcMonthlyPayment(
+  principal: number,
+  annualRatePct: number,
+  years: number,
+): number {
   if (!Number.isFinite(principal) || principal <= 0) return 0;
   if (!Number.isFinite(years) || years <= 0) return 0;
   if (!Number.isFinite(annualRatePct) || annualRatePct < 0) return 0;
@@ -118,13 +122,24 @@ export function HouseHackingCalculatorWidget() {
       reserves,
       effectiveCostWithReserves,
     };
-  }, [price, downPct, rate, term, taxPct, insurancePct, rent2, rent3, rent4, unitCount]);
+  }, [
+    price,
+    downPct,
+    rate,
+    term,
+    taxPct,
+    insurancePct,
+    rent2,
+    rent3,
+    rent4,
+    unitCount,
+  ]);
 
   // Moment-of-result handoff: land in the analyzer with the House Hack
   // play pre-selected (owner-occupant form + starter defaults applied).
   const handoffHref = buildAnalyzerHandoffUrl(
     { purchasePrice: num(price), strategy: "house-hack" },
-    { utmSource: "house-hacking-calculator" }
+    { utmSource: "house-hacking-calculator" },
   );
 
   return (
@@ -139,10 +154,17 @@ export function HouseHackingCalculatorWidget() {
           <div>
             {/* Not a <Label>: this names a group of buttons, not a form
                 control, so it wires up via aria-labelledby instead. */}
-            <p id={unitGroupLabelId} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5">
+            <p
+              id={unitGroupLabelId}
+              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5"
+            >
               Property — you live in one unit
             </p>
-            <div className="flex gap-2" role="group" aria-labelledby={unitGroupLabelId}>
+            <div
+              className="flex gap-2"
+              role="group"
+              aria-labelledby={unitGroupLabelId}
+            >
               {UNIT_OPTIONS.map((opt) => (
                 <button
                   key={opt.units}
@@ -153,7 +175,7 @@ export function HouseHackingCalculatorWidget() {
                     "px-3 py-1.5 rounded-full text-sm font-bold border transition-colors",
                     unitCount === opt.units
                       ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-background text-muted-foreground border-border hover:text-foreground"
+                      : "bg-background text-muted-foreground border-border hover:text-foreground",
                   )}
                 >
                   {opt.label}
@@ -162,34 +184,71 @@ export function HouseHackingCalculatorWidget() {
             </div>
           </div>
 
-          <FieldMoney label="Purchase price" value={price} setValue={setPrice} />
+          <FieldMoney
+            label="Purchase price"
+            value={price}
+            setValue={setPrice}
+          />
           <div className="grid grid-cols-2 gap-3">
-            <FieldPct label="Down payment %" value={downPct} setValue={setDownPct} />
-            <FieldPct label="Interest rate" value={rate} setValue={setRate} step="0.125" />
+            <FieldPct
+              label="Down payment %"
+              value={downPct}
+              setValue={setDownPct}
+            />
+            <FieldPct
+              label="Interest rate"
+              value={rate}
+              setValue={setRate}
+              step="0.125"
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <FieldNum label="Loan term (years)" value={term} setValue={setTerm} />
-            <FieldPct label="Property tax (annual)" value={taxPct} setValue={setTaxPct} />
+            <FieldNum
+              label="Loan term (years)"
+              value={term}
+              setValue={setTerm}
+            />
+            <FieldPct
+              label="Property tax (annual)"
+              value={taxPct}
+              setValue={setTaxPct}
+            />
           </div>
-          <FieldPct label="Insurance (annual)" value={insurancePct} setValue={setInsurancePct} />
+          <FieldPct
+            label="Insurance (annual)"
+            value={insurancePct}
+            setValue={setInsurancePct}
+          />
 
           <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground pt-1">
             Rent from the units you don&apos;t live in
           </p>
           <div className="grid grid-cols-2 gap-3">
-            <FieldMoney label="Unit 2 monthly rent" value={rent2} setValue={setRent2} />
+            <FieldMoney
+              label="Unit 2 monthly rent"
+              value={rent2}
+              setValue={setRent2}
+            />
             {unitCount >= 3 && (
-              <FieldMoney label="Unit 3 monthly rent" value={rent3} setValue={setRent3} />
+              <FieldMoney
+                label="Unit 3 monthly rent"
+                value={rent3}
+                setValue={setRent3}
+              />
             )}
             {unitCount >= 4 && (
-              <FieldMoney label="Unit 4 monthly rent" value={rent4} setValue={setRent4} />
+              <FieldMoney
+                label="Unit 4 monthly rent"
+                value={rent4}
+                setValue={setRent4}
+              />
             )}
           </div>
           <p className="text-xs text-muted-foreground">
-            Your own unit counts as $0 income — that&apos;s the
-            owner-occupant convention TrueCap&apos;s full analyzer uses
-            too. Judge the result against what you&apos;d pay to rent a
-            comparable place, not against a pure rental&apos;s cash flow.
+            Your own unit counts as $0 income — that&apos;s the owner-occupant
+            convention TrueCap&apos;s full analyzer uses too. Judge the result
+            against what you&apos;d pay to rent a comparable place, not against
+            a pure rental&apos;s cash flow.
           </p>
         </div>
 
@@ -210,11 +269,13 @@ export function HouseHackingCalculatorWidget() {
                     "text-5xl sm:text-6xl font-extrabold mt-1 tabular-nums",
                     result.effectiveCost <= 0
                       ? "text-[var(--metric-positive)]"
-                      : "text-foreground"
+                      : "text-foreground",
                   )}
                 >
                   {fmt(Math.abs(result.effectiveCost))}
-                  <span className="text-lg font-bold text-muted-foreground">/mo</span>
+                  <span className="text-lg font-bold text-muted-foreground">
+                    /mo
+                  </span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   {result.effectiveCost <= 0
@@ -225,17 +286,31 @@ export function HouseHackingCalculatorWidget() {
 
               <div className="mt-5 pt-5 border-t border-border space-y-1.5 text-xs">
                 <Row label="Loan amount" value={fmt(result.loan)} />
-                <Row label={`Down payment (${num(downPct)}%)`} value={fmt(result.downPayment)} />
+                <Row
+                  label={`Down payment (${num(downPct)}%)`}
+                  value={fmt(result.downPayment)}
+                />
                 <Row label="Monthly P&I" value={fmt(result.monthlyPI)} />
-                <Row label="Monthly tax + insurance" value={fmt(result.monthlyTax + result.monthlyInsurance)} />
+                <Row
+                  label="Monthly tax + insurance"
+                  value={fmt(result.monthlyTax + result.monthlyInsurance)}
+                />
                 {result.monthlyPMI > 0 && (
                   <Row
                     label={`Mortgage insurance — PMI (${DEFAULT_PMI_ANNUAL_RATE_PCT}%/yr under ${PMI_DOWN_PAYMENT_THRESHOLD_PCT}% down)`}
                     value={fmt(result.monthlyPMI)}
                   />
                 )}
-                <Row label="Full payment (PITI)" value={fmt(result.piti)} bold />
-                <Row label="Rent collected from other units" value={`− ${fmt(result.rentCollected)}`} bold />
+                <Row
+                  label="Full payment (PITI)"
+                  value={fmt(result.piti)}
+                  bold
+                />
+                <Row
+                  label="Rent collected from other units"
+                  value={`− ${fmt(result.rentCollected)}`}
+                  bold
+                />
                 <Row
                   label={`Reserves — vacancy, maintenance, CapEx (${RESERVES_PCT}% of rent)`}
                   value={`+ ${fmt(result.reserves)}`}
@@ -258,56 +333,140 @@ export function HouseHackingCalculatorWidget() {
         </div>
       </div>
 
-      <Link
-        href={handoffHref} target="_top"
+      <AnalyzerHandoffLink
+        handoffHref={handoffHref}
+        target="_top"
         className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="w-4 h-4" />
-        Run the full house-hack underwrite — per-unit rents, cash flow, year-2 move-out — free in TrueCap
+        Run the full house-hack underwrite — per-unit rents, cash flow, year-2
+        move-out — free in TrueCap
         <ArrowUpRight className="w-4 h-4" />
-      </Link>
+      </AnalyzerHandoffLink>
     </div>
   );
 }
 
-function FieldMoney({ label, value, setValue }: { label: string; value: string; setValue: (v: string) => void }) {
+function FieldMoney({
+  label,
+  value,
+  setValue,
+}: {
+  label: string;
+  value: string;
+  setValue: (v: string) => void;
+}) {
   const id = useId();
   return (
     <div>
-      <Label htmlFor={id} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">{label}</Label>
+      <Label
+        htmlFor={id}
+        className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
+      >
+        {label}
+      </Label>
       <div className="relative">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">$</span>
-        <Input id={id} type="number" inputMode="numeric" value={value} onChange={(e) => setValue(e.target.value)} className="pl-7 border-input bg-background" />
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+          $
+        </span>
+        <Input
+          id={id}
+          type="number"
+          inputMode="numeric"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          className="pl-7 border-input bg-background"
+        />
       </div>
     </div>
   );
 }
-function FieldPct({ label, value, setValue, step = "0.5" }: { label: string; value: string; setValue: (v: string) => void; step?: string }) {
+function FieldPct({
+  label,
+  value,
+  setValue,
+  step = "0.5",
+}: {
+  label: string;
+  value: string;
+  setValue: (v: string) => void;
+  step?: string;
+}) {
   const id = useId();
   return (
     <div>
-      <Label htmlFor={id} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">{label}</Label>
+      <Label
+        htmlFor={id}
+        className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
+      >
+        {label}
+      </Label>
       <div className="relative">
-        <Input id={id} type="number" inputMode="decimal" step={step} value={value} onChange={(e) => setValue(e.target.value)} className="pr-8 border-input bg-background" />
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
+        <Input
+          id={id}
+          type="number"
+          inputMode="decimal"
+          step={step}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          className="pr-8 border-input bg-background"
+        />
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+          %
+        </span>
       </div>
     </div>
   );
 }
-function FieldNum({ label, value, setValue }: { label: string; value: string; setValue: (v: string) => void }) {
+function FieldNum({
+  label,
+  value,
+  setValue,
+}: {
+  label: string;
+  value: string;
+  setValue: (v: string) => void;
+}) {
   const id = useId();
   return (
     <div>
-      <Label htmlFor={id} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">{label}</Label>
-      <Input id={id} type="number" inputMode="numeric" value={value} onChange={(e) => setValue(e.target.value)} className="border-input bg-background" />
+      <Label
+        htmlFor={id}
+        className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
+      >
+        {label}
+      </Label>
+      <Input
+        id={id}
+        type="number"
+        inputMode="numeric"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        className="border-input bg-background"
+      />
     </div>
   );
 }
-function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
+function Row({
+  label,
+  value,
+  bold,
+}: {
+  label: string;
+  value: string;
+  bold?: boolean;
+}) {
   return (
     <div className="flex justify-between py-0.5 gap-3">
       <span className="text-muted-foreground">{label}</span>
-      <span className={cn("tabular-nums shrink-0", bold ? "font-bold text-foreground" : "text-foreground")}>{value}</span>
+      <span
+        className={cn(
+          "tabular-nums shrink-0",
+          bold ? "font-bold text-foreground" : "text-foreground",
+        )}
+      >
+        {value}
+      </span>
     </div>
   );
 }

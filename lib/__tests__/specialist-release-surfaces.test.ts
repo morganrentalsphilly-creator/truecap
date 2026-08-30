@@ -18,16 +18,18 @@ describe("specialist model release wiring", () => {
     );
     const dashboard = source("components/investcalc/analysis-dashboard.tsx");
     expect(dashboard).toContain("RELEASED_TABS");
-    expect(dashboard).toContain("isSpecialistStrategyEnabled(activeStrategy.key)");
+    expect(dashboard).toContain(
+      "isSpecialistStrategyEnabled(activeStrategy.key)",
+    );
     const panel = source("components/investcalc/strategies-panel.tsx");
     expect(panel).toContain('isFeatureEnabled("brrrr_strategy_model")');
     expect(panel).toContain('isFeatureEnabled("fix_flip_strategy_model")');
   });
 
   it("gates shared, report and public-share calculations", () => {
-    expect(source("components/investcalc/read-only-analysis-view.tsx")).toContain(
-      "specialistStrategyEnabled",
-    );
+    expect(
+      source("components/investcalc/read-only-analysis-view.tsx"),
+    ).toContain("specialistStrategyEnabled");
     expect(source("lib/report-data-builder.ts")).toContain(
       "if (!isSpecialistStrategyEnabled(strategyKey)) return null",
     );
@@ -58,13 +60,21 @@ describe("specialist model release wiring", () => {
     expect(projection).toContain("Projected pre-tax operating cash flow");
     expect(projection).not.toMatch(/after-tax|Tax Effect|\.after\b/i);
     expect(pdf).toContain('if (isFeatureReleased("tax_strategy"))');
-    expect(pdf).toContain('if (mode === "personal" && isFeatureReleased("tax_strategy"))');
-    expect(pdf).toContain('if (mode !== "lender" && isFeatureReleased("exit_scenarios"))');
+    expect(pdf).toContain(
+      'if (mode === "personal" && isFeatureReleased("tax_strategy"))',
+    );
+    expect(pdf).toContain(
+      'if (mode !== "lender" && isFeatureReleased("exit_scenarios"))',
+    );
   });
 
   it("removes the dark BRRRR calculator from route and discovery surfaces", () => {
-    expect(source("app/tools/brrrr-calculator/page.tsx")).toContain(
-      'if (!isFeatureEnabled("brrrr_strategy_model")) notFound()',
+    const brrrrPage = source("app/tools/brrrr-calculator/page.tsx");
+    expect(brrrrPage).toContain(
+      'if (!isFeatureEnabled("brrrr_strategy_model"))',
+    );
+    expect(brrrrPage).toContain(
+      'permanentRedirect(HISTORICAL_TOOL_REDIRECTS["brrrr-calculator"])',
     );
     expect(source("lib/calculator-registry.ts")).toContain(
       'isFeatureEnabled("brrrr_strategy_model")',
@@ -75,12 +85,17 @@ describe("specialist model release wiring", () => {
   });
 
   it("keeps specialist persona routes honest and removes dark handoffs", () => {
-    for (const path of ["app/for-brrrr/page.tsx", "app/for-flippers/page.tsx"]) {
+    for (const path of [
+      "app/for-brrrr/page.tsx",
+      "app/for-flippers/page.tsx",
+    ]) {
       const page = source(path);
       expect(page).toContain(
         "Steady-state rental analysis — use after renovation is complete.",
       );
-      expect(page).toMatch(/integrated .+ (?:is not currently released|models are not currently released)/);
+      expect(page).toMatch(
+        /integrated .+ (?:is not currently released|models are not currently released)/,
+      );
       expect(page).not.toMatch(/strategy=(?:brrrr|fix-flip)/);
       expect(page).not.toContain("/tools/brrrr-calculator");
     }
@@ -94,7 +109,10 @@ describe("specialist model release wiring", () => {
       'permanentRedirect("/blog/70-percent-rule-house-flipping")',
     );
 
-    const discovery = [source("app/vs/page.tsx"), source("app/sitemap.ts")].join("\n");
+    const discovery = [
+      source("app/vs/page.tsx"),
+      source("app/sitemap.ts"),
+    ].join("\n");
     expect(discovery).not.toContain("dealcheck-for-brrrr");
     expect(discovery).not.toContain("dealcheck-for-fix-and-flip");
   });

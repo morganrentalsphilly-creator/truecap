@@ -140,7 +140,7 @@ import {
 import {
   ANALYZER_STRATEGY_EVENT,
   isReleasedHandoffStrategy,
-  readAnalyzerHandoff,
+  consumeAnalyzerHandoff,
   type AnalyzerStrategyEventDetail,
 } from "@/lib/analyzer-handoff";
 import { StickyCalculateBar } from "./sticky-calculate-bar";
@@ -228,6 +228,7 @@ import {
   isFeatureEnabled,
   isSpecialistStrategyEnabled,
 } from "@/lib/feature-flags";
+import { isFeatureReleased } from "@/lib/entitlements-catalog";
 import {
   financingProfileAgeBand,
   financingProfileAnalysisPatch,
@@ -257,11 +258,7 @@ import {
   parseOneTimePdfReturnState,
 } from "@/lib/one-time-pdf-return";
 import { parseOneTimePdfDraft } from "@/lib/one-time-pdf-report-binding";
-import { PdfPurchaseDialog } from "@/components/investcalc/pdf-purchase-dialog";
-import {
-  DuplicateAddressDialog,
-  type DuplicateAddressChoice,
-} from "@/components/investcalc/duplicate-address-dialog";
+import type { DuplicateAddressChoice } from "@/components/investcalc/duplicate-address-dialog";
 import {
   isTrueCapSyntheticSampleAddress,
   sampleProPreviewAddsCapability,
@@ -339,6 +336,26 @@ import {
   SHARE_AUTH_INTENT_STORAGE_KEY,
 } from "@/lib/share-auth-intent";
 import dynamic from "next/dynamic";
+
+// Dialogs below are opened only after explicit post-analysis actions. Keep
+// their UI modules out of the anonymous landing bootstrap, but retain the
+// complete server-rendered hero and pre-run analyzer form. Conditional mounts
+// below are important: mounting a closed dynamic dialog would still request
+// its chunk during hydration.
+const PdfPurchaseDialog = dynamic(
+  () =>
+    import("@/components/investcalc/pdf-purchase-dialog").then(
+      (module) => module.PdfPurchaseDialog,
+    ),
+  { ssr: false },
+);
+const DuplicateAddressDialog = dynamic(
+  () =>
+    import("@/components/investcalc/duplicate-address-dialog").then(
+      (module) => module.DuplicateAddressDialog,
+    ),
+  { ssr: false },
+);
 
 // ── AnalysisDashboard is post-Run-only, so keep it out of the anon
 // landing bundle ────────────────────────────────────────────────────
@@ -828,6 +845,9 @@ const INPUT_TABS: {
     isPro: true,
   },
 ];
+const RELEASED_INPUT_TABS = INPUT_TABS.filter(
+  (tab) => tab.id !== "tax-strategy" || isFeatureReleased("tax_strategy"),
+);
 const SAVED_ANALYSIS_AUTO_EXPORT_PDF_KEY =
   "truecap_saved_analysis_auto_export_pdf";
 
@@ -4608,7 +4628,10 @@ export function InvestCalcPage({
     const duplicateHandoffNonce = handoffParams.get(
       DEAL_DUPLICATE_HANDOFF_PARAM,
     );
-    const analyzerHandoff = readAnalyzerHandoff(window.location.search);
+    const analyzerHandoff = consumeAnalyzerHandoff(
+      window.location.search,
+      window.sessionStorage,
+    );
     const requestedExplicitFreshAnalysis = handoffParams.get("fresh") === "1";
     const hasBillingReturn =
       handoffParams.has("billing") || handoffParams.has("session_id");
@@ -5273,8 +5296,9 @@ export function InvestCalcPage({
       return;
     }
 
-    // Calculator → analyzer handoff (P2-2): /?price=&rent=&beds=&address=
-    // carries the numbers from a /tools calculator (or an embed of one).
+    // Calculator → analyzer handoff (P2-2): exact values arrive through a
+    // short-lived same-tab payload; backward-compatible direct query links
+    // are scrubbed by the pre-analytics head bootstrap before hydration.
     // Higher priority than a stale anon draft; prefills ONLY the provided
     // fields on top of defaults (partial handoffs like price+rent are
     // expected) and returns so the draft restore doesn't clobber them.
@@ -6054,16 +6078,8 @@ export function InvestCalcPage({
       clearPendingMaoTarget();
     }
 
-    // PostHog funnel event - fires the moment the user commits to
-    // analyzing a deal (form passed validation, calculation started).
-    // This is the top of the in-product funnel above analysis_completed.
-    // Properties capture the deal shape so we can later segment funnels
-    // by property type / cash purchase / etc. - no PII (no address).
-    trackEvent("analyzer_started", {
-      property_type: values.propertyType,
-      is_cash_purchase: isAllCashDownPayment(values.downPaymentPct),
-      input_tab: activeInputTab,
-    });
+    // Canonical funnel start: validation passed and calculation is beginning.
+    // Keep this taxonomy-only; underwriting inputs never enter analytics.
     const inputMethod = isSampleRun
       ? "sample"
       : listingUrl.trim()
@@ -6071,9 +6087,8 @@ export function InvestCalcPage({
         : "address";
     trackEvent("property_input_method_selected", { method: inputMethod });
     trackEvent("analysis_started", {
-      property_type: values.propertyType,
-      input_method: inputMethod,
-      is_authenticated: isAuthenticated,
+      route_category: "analyzer",
+      calculator_slug: "rental-property",
     });
     const dirty = form.formState.dirtyFields as Record<string, unknown>;
     const assumptionsChanged =
@@ -6232,21 +6247,11 @@ export function InvestCalcPage({
       // optimize spend against (analyze-an-actual-deal is the
       // micro-conversion that precedes signup).
       trackConversion("calc_completed");
-      // PostHog funnel event - fires once the analysis is rendered.
-      // Properties include the headline metrics so PostHog dashboards
-      // can segment "users who saw a STRONG BUY verdict" vs "users who
-      // saw AVOID" and compare downstream conversion to Pro.
-      // The rebuild's top-of-funnel counterpart to max_offer_viewed: how
-      // many runs actually produce a decision the user sees.
-      trackEvent("analysis_run", {
-        property_type: values.propertyType,
-        is_authenticated: isAuthenticated,
-      });
+      // Canonical funnel completion: calculation succeeded and the result was
+      // committed to visible state. Do not emit aliases for the same moment.
       trackEvent("analysis_completed", {
-        property_type: values.propertyType,
-        verdict: getDealTier(result),
-        is_cash_purchase: result.monthlyPayment <= 0,
-        input_tab: activeInputTab,
+        route_category: "analyzer",
+        calculator_slug: "rental-property",
       });
       try {
         const firstAnalysisKey = "truecap_first_analysis_completed_v1";
@@ -6260,15 +6265,6 @@ export function InvestCalcPage({
         // Storage can be blocked; analysis completion remains instrumented by
         // the canonical event above without risking the product workflow.
       }
-      trackEvent("analyzer_completed", {
-        property_type: values.propertyType,
-        verdict: getDealTier(result),
-        is_cash_purchase: result.monthlyPayment <= 0,
-      });
-      trackEvent("instant_screen_generated", {
-        property_type: values.propertyType,
-        verdict: getDealTier(result),
-      });
       setProjectionSource(builtProjectionSource);
       setTaxStrategySource(builtTaxStrategySource);
       setExitScenarioSource(
@@ -9553,7 +9549,7 @@ export function InvestCalcPage({
             and would force 10px text with tiny tap targets. */}
         {areAnalysisTabsEnabled ? (
           <div className="flex gap-1.5 sm:gap-3 mt-4 sm:mt-6 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 xl:grid-cols-4 scrollbar-none">
-            {INPUT_TABS.map((tab) => (
+            {RELEASED_INPUT_TABS.map((tab) => (
               <button
                 type="button"
                 key={tab.id}
@@ -10490,7 +10486,8 @@ export function InvestCalcPage({
                 </p>
               ) : null}
               {/* Result-state trust strip - names the default sources behind
-                the numbers (HUD/FRED/state) + "all editable", with a jump
+                the starting values (HUD/FRED benchmarks + manual tax) and
+                "all editable", with a jump
                 back to the form. Only once real results exist. */}
               {analysisResult && !isCalculating && priceEstimated ? (
                 <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-border bg-card p-3.5 text-sm shadow-sm">
@@ -10699,42 +10696,46 @@ export function InvestCalcPage({
       <TestimonialPrompt />
       {/* Pro report upgrade - new one-time purchases are temporarily disabled.
           Existing paid-claim recovery remains handled above. */}
-      <PdfPurchaseDialog
-        open={isPdfPurchaseDialogOpen}
-        onOpenChange={setIsPdfPurchaseDialogOpen}
-        returnFocusRef={pdfPurchaseTriggerRef}
-      />
+      {isPdfPurchaseDialogOpen ? (
+        <PdfPurchaseDialog
+          open
+          onOpenChange={setIsPdfPurchaseDialogOpen}
+          returnFocusRef={pdfPurchaseTriggerRef}
+        />
+      ) : null}
       {/* Duplicate-address chooser - opens when saving an address that's
           already in saved deals: overwrite it, keep both, or cancel. */}
-      <DuplicateAddressDialog
-        open={duplicateCollision !== null}
-        onOpenChange={(next) => {
-          if (!next) {
-            const cancelledAutoSave = Boolean(
-              duplicateCollision?.autoAfterAuth,
-            );
-            setDuplicateCollision(null);
-            if (cancelledAutoSave) {
-              // Cancel means "do not complete this automatic save." Release
-              // the focused-results Save controls and acknowledge the intent
-              // so reload does not reopen the same collision forever.
-              autoSaveAfterAuthRef.current = false;
-              setIsAutoSaveResuming(false);
-              clearPendingSaveIntent();
-              clearPendingMaoTarget();
-              toast({
-                title: "Automatic save canceled",
-                description:
-                  "Your analysis is still here. You can save it whenever you’re ready.",
-              });
+      {duplicateCollision ? (
+        <DuplicateAddressDialog
+          open
+          onOpenChange={(next) => {
+            if (!next) {
+              const cancelledAutoSave = Boolean(
+                duplicateCollision.autoAfterAuth,
+              );
+              setDuplicateCollision(null);
+              if (cancelledAutoSave) {
+                // Cancel means "do not complete this automatic save." Release
+                // the focused-results Save controls and acknowledge the intent
+                // so reload does not reopen the same collision forever.
+                autoSaveAfterAuthRef.current = false;
+                setIsAutoSaveResuming(false);
+                clearPendingSaveIntent();
+                clearPendingMaoTarget();
+                toast({
+                  title: "Automatic save canceled",
+                  description:
+                    "Your analysis is still here. You can save it whenever you’re ready.",
+                });
+              }
             }
-          }
-        }}
-        existingTitle={duplicateCollision?.existingTitle}
-        busyChoice={duplicateChoiceBusy}
-        onUpdateExisting={() => void handleDuplicateChoice("update")}
-        onSaveAsScenario={() => void handleDuplicateChoice("scenario")}
-      />
+          }}
+          existingTitle={duplicateCollision.existingTitle}
+          busyChoice={duplicateChoiceBusy}
+          onUpdateExisting={() => void handleDuplicateChoice("update")}
+          onSaveAsScenario={() => void handleDuplicateChoice("scenario")}
+        />
+      ) : null}
       {/* Autofill conflict review — manually entered values remain authoritative
           unless the user explicitly selects the returned estimate. */}
       <Dialog

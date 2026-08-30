@@ -13,8 +13,10 @@ copy test cannot silently reprice a customer.
   - `offer_engine`: “TrueCap Offer Engine”
 - `NEXT_PUBLIC_SINGLE_DEAL_PRICE_VARIANT=current|p9|p15|p19`
   - Historical compatibility only while new Decision Pack sales are
-    temporarily unavailable. `current` preserves recognition of the existing
-    $5 Price; the experimental slots remain dormant and must not be activated.
+    temporarily unavailable. `current` and `p9` both resolve to the catalog's
+    $9 option and require `STRIPE_PRICE_SINGLE_DEAL_9`; the $15 and $19 slots
+    remain dormant and must not be activated without a separately reviewed
+    product release and matching configured Price.
 - `NEXT_PUBLIC_TRUECAP_THREE_DEAL_GUARANTEE=true|false`
   - Off by default and still renders nothing unless
     `NEXT_PUBLIC_TRUECAP_GUARANTEE_TERMS_URL` is a valid HTTPS or local URL.

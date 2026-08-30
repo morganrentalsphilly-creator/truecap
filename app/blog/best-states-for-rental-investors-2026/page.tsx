@@ -620,9 +620,10 @@ export default function BestStatesPost() {
               >
                 TrueCap
               </Link>{" "}
-              with the address — the analyzer starts with a state property-tax
-              estimate, HUD area rent benchmark, and mortgage-rate benchmark.
-              Review those assumptions before using the underwrite.
+              with the address — the analyzer starts with a HUD area rent
+              benchmark, a mortgage-rate benchmark, and editable assumptions.
+              Enter the current local property-tax bill or a reviewed rate and
+              verify every assumption before using the underwrite.
             </p>
           </div>
         </article>

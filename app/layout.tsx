@@ -1,14 +1,15 @@
-import type { Metadata } from 'next'
-import { Plus_Jakarta_Sans, DM_Mono } from 'next/font/google'
-import { Toaster } from '@/components/ui/toaster'
-import { CookieConsentBanner } from '@/components/marketing/cookie-consent-banner'
-import { PostHogProvider } from '@/components/analytics/posthog-provider'
-import { GoogleMeasurement } from '@/components/analytics/google-measurement'
-import { TrueCapVercelAnalytics } from '@/components/analytics/vercel-analytics'
-import { OverlayRecovery } from '@/components/ui/overlay-recovery'
-import { getSiteUrl } from '@/lib/site-url'
-import { oneTimePdfReturnBootstrapScript } from '@/lib/one-time-pdf-return'
-import './globals.css'
+import type { Metadata } from "next";
+import { Plus_Jakarta_Sans, DM_Mono } from "next/font/google";
+import { Toaster } from "@/components/ui/toaster";
+import { CookieConsentBanner } from "@/components/marketing/cookie-consent-banner";
+import { PostHogProvider } from "@/components/analytics/posthog-provider";
+import { GoogleMeasurement } from "@/components/analytics/google-measurement";
+import { TrueCapVercelAnalytics } from "@/components/analytics/vercel-analytics";
+import { OverlayRecovery } from "@/components/ui/overlay-recovery";
+import { getSiteUrl } from "@/lib/site-url";
+import { oneTimePdfReturnBootstrapScript } from "@/lib/one-time-pdf-return";
+import { analyzerHandoffBootstrapScript } from "@/lib/analyzer-handoff";
+import "./globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -128,29 +129,32 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
+        url: "/icon-light-32x32.png",
+        media: "(prefers-color-scheme: light)",
       },
       {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
+        url: "/icon-dark-32x32.png",
+        media: "(prefers-color-scheme: dark)",
       },
       {
         url: "/favicon.ico",
         type: "image/vnd.microsoft.icon",
       },
     ],
-    apple: '/apple-icon.png',
+    apple: "/apple-icon.png",
   },
-}
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${plusJakartaSans.variable} ${dmMono.variable} font-sans`}>
+    <html
+      lang="en"
+      className={`${plusJakartaSans.variable} ${dmMono.variable} font-sans`}
+    >
       <head>
         {/* Runs before every analytics/error-reporting script. It removes the
             new non-secret PDF claim id — and destroys any legacy reusable
@@ -158,22 +162,38 @@ export default function RootLayout({
             either value. The claim binding secret never enters the URL. */}
         <script
           id="one-time-pdf-return-bootstrap"
-          dangerouslySetInnerHTML={{ __html: oneTimePdfReturnBootstrapScript() }}
+          dangerouslySetInnerHTML={{
+            __html: oneTimePdfReturnBootstrapScript(),
+          }}
         />
-        {process.env.NODE_ENV === 'production' && (
+        {/* Exact calculator/address handoff values are moved out of the URL
+            before any analytics, error-reporting, or referrer surface runs. */}
+        <script
+          id="private-analyzer-handoff-bootstrap"
+          dangerouslySetInnerHTML={{ __html: analyzerHandoffBootstrapScript() }}
+        />
+        {process.env.NODE_ENV === "production" && (
           <>
-          {/* Preconnect to the slowest third-party we load — saves
+            {/* Preconnect to the slowest third-party we load — saves
               ~80-200ms on first paint by warming DNS + TLS to gtag's
               CDN before the actual <script src> evaluation starts.
               Materially improves LCP, which is a direct Google
               Quality Score input for paid traffic. */}
-          <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="" />
-          <link rel="dns-prefetch" href="https://www.google-analytics.com" />
-          {/* Google Places address autocomplete uses maps.googleapis.com
+            <link
+              rel="preconnect"
+              href="https://www.googletagmanager.com"
+              crossOrigin=""
+            />
+            <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+            {/* Google Places address autocomplete uses maps.googleapis.com
               — preconnect saves ~50-150ms when the user reaches the
               address field, which is on the calculator's first paint. */}
-          <link rel="preconnect" href="https://maps.googleapis.com" crossOrigin="" />
-          <link rel="dns-prefetch" href="https://maps.gstatic.com" />
+            <link
+              rel="preconnect"
+              href="https://maps.googleapis.com"
+              crossOrigin=""
+            />
+            <link rel="dns-prefetch" href="https://maps.gstatic.com" />
           </>
         )}
       </head>
@@ -274,5 +294,5 @@ export default function RootLayout({
         <TrueCapVercelAnalytics />
       </body>
     </html>
-  )
+  );
 }

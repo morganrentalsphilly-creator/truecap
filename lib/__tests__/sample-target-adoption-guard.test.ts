@@ -46,7 +46,7 @@ describe("sample-seeded targets never survive as user adoption", () => {
 
     const submitConsume = sourceSection(
       "const isSampleRun = pendingSampleRunRef.current;",
-      'trackEvent("analyzer_started"',
+      'trackEvent("analysis_started"',
     );
     expect(submitConsume).toContain("sampleSeededMaoTargetRef.current = true");
   });
@@ -54,7 +54,7 @@ describe("sample-seeded targets never survive as user adoption", () => {
   it("clears sample-seeded adoption on the first non-sample submit", () => {
     const submitConsume = sourceSection(
       "const isSampleRun = pendingSampleRunRef.current;",
-      'trackEvent("analyzer_started"',
+      'trackEvent("analysis_started"',
     );
     expect(submitConsume).toContain(
       "} else if (sampleSeededMaoTargetRef.current) {",

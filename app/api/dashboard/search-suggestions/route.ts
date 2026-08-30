@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getEntitlementsForUser, hasDashboardAccess } from "@/lib/entitlements";
 import { getTypeLabel, type PropertyType } from "@/lib/compare-metrics";
+import { z } from "zod";
 
 export const runtime = "nodejs";
 
@@ -12,9 +13,16 @@ type SavedSuggestionRow = {
   property_type: PropertyType | null;
 };
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const query = searchParams.get("q")?.trim() ?? "";
+const requestSchema = z.object({ q: z.string().trim().max(100) }).strict();
+
+export async function POST(request: Request) {
+  const parsed = requestSchema.safeParse(
+    await request.json().catch(() => null),
+  );
+  if (!parsed.success) {
+    return NextResponse.json({ suggestions: [] }, { status: 400 });
+  }
+  const query = parsed.data.q;
   if (query.length < 2) {
     return NextResponse.json({ suggestions: [] });
   }

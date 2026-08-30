@@ -6,6 +6,7 @@ import {
   sanitizeSensitiveQuery,
   sanitizeSensitiveUrl,
   shouldKeepThirdPartyTelemetryDisabled,
+  hasSensitiveQueryParameter,
 } from "@/lib/sensitive-url";
 import {
   scrubSentryBreadcrumbUrl,
@@ -20,21 +21,37 @@ describe("sensitive URL scrubbing", () => {
   it("removes checkout and OAuth capabilities while preserving attribution", () => {
     expect(
       sanitizeSensitiveUrl(
-        "https://usetruecap.com/?utm_source=google&pdf_purchase=cs_live_secret&pdf_claim=abc&code=oauth-secret#offer"
-      )
+        "https://usetruecap.com/?utm_source=google&pdf_purchase=cs_live_secret&pdf_claim=abc&code=oauth-secret#offer",
+      ),
     ).toBe("https://usetruecap.com/?utm_source=google#offer");
   });
 
   it("sanitizes relative and query-only values", () => {
-    expect(sanitizeSensitiveUrl("/?session_id=cs_test_123&utm_medium=cpc")).toBe(
-      "/?utm_medium=cpc"
-    );
+    expect(
+      sanitizeSensitiveUrl("/?session_id=cs_test_123&utm_medium=cpc"),
+    ).toBe("/?utm_medium=cpc");
     expect(sanitizeSensitiveUrl("?token_hash=secret&safe=1")).toBe("?safe=1");
     expect(
       sanitizeSensitiveUrl(
-        "https://api.stripe.com/v1/checkout/sessions/cs_live_pathBearer"
-      )
+        "https://api.stripe.com/v1/checkout/sessions/cs_live_pathBearer",
+      ),
     ).toBe("https://api.stripe.com/v1/checkout/sessions/cs_[redacted]");
+  });
+
+  it("removes exact analyzer handoff inputs while preserving coarse attribution", () => {
+    expect(
+      sanitizeSensitiveUrl(
+        "/?price=325000&rent=2450&beds=3&rate=6.8&tax=1.4&address=123%20Main%20St&strategy=buy-hold&utm_source=tool",
+      ),
+    ).toBe("/?strategy=buy-hold&utm_source=tool");
+    expect(
+      sanitizeSensitiveQuery({
+        address: "123 Main St",
+        price: 325000,
+        rent: 2450,
+        utm_medium: "referral",
+      }),
+    ).toEqual({ utm_medium: "referral" });
   });
 
   it("redacts encoded analysis and bearer-token route segments", () => {
@@ -43,30 +60,38 @@ describe("sensitive URL scrubbing", () => {
         "https://usetruecap.com/d/private-snapshot",
         "https://usetruecap.com/portal/private-token",
         "https://usetruecap.com/embed/brand/private-token/calculator",
-      ].every((url) => SENSITIVE_PUBLIC_SHARE_ROUTE_PATTERN.test(url))
+      ].every((url) => SENSITIVE_PUBLIC_SHARE_ROUTE_PATTERN.test(url)),
     ).toBe(true);
     expect(
       SENSITIVE_PUBLIC_SHARE_ROUTE_PATTERN.test(
-        "https://usetruecap.com/dashboard/saved-analyses"
-      )
+        "https://usetruecap.com/dashboard/saved-analyses",
+      ),
     ).toBe(false);
     expect(
       sanitizeSensitiveUrl(
-        "https://usetruecap.com/d/encoded-address-and-financials?utm_source=share"
-      )
-    ).toBe(
-      "https://usetruecap.com/d/[shared-analysis]?utm_source=share"
-    );
+        "https://usetruecap.com/d/encoded-address-and-financials?utm_source=share",
+      ),
+    ).toBe("https://usetruecap.com/d/[shared-analysis]?utm_source=share");
     expect(sanitizeSensitiveUrl("/portal/permanent-bearer?view=client")).toBe(
-      "/portal/[token]?view=client"
+      "/portal/[token]?view=client",
     );
+    expect(
+      sanitizeSensitiveUrl(
+        "/portal/permanent-bearer/d/1e8f40a1-f878-45ce-9297-c8f386d8ad67",
+      ),
+    ).toBe("/portal/[token]/d/[deal]");
+    expect(
+      sanitizeSensitiveUrl(
+        "/dashboard/saved-analyses/1e8f40a1-f878-45ce-9297-c8f386d8ad67?utm_source=share",
+      ),
+    ).toBe("/dashboard/saved-analyses/[deal]?utm_source=share");
     expect(sanitizeSensitiveUrl("/embed/brand/private-token/calculator")).toBe(
-      "/embed/brand/[token]/calculator"
+      "/embed/brand/[token]/calculator",
     );
     expect(
       redactSensitiveQueryValuesInText(
-        "GET /d/private-snapshot?utm_medium=referral"
-      )
+        "GET /d/private-snapshot?utm_medium=referral",
+      ),
     ).toBe("GET /d/[shared-analysis]?utm_medium=referral");
   });
 
@@ -75,24 +100,67 @@ describe("sensitive URL scrubbing", () => {
     expect(disabled).toBe(false);
     disabled = shouldKeepThirdPartyTelemetryDisabled(
       "/d/private-snapshot",
-      disabled
+      disabled,
     );
     expect(disabled).toBe(true);
     disabled = shouldKeepThirdPartyTelemetryDisabled("/", disabled);
     expect(disabled).toBe(true);
   });
 
-  it("scrubs raw query strings and objects", () => {
-    expect(sanitizeSensitiveQuery("pdf_claim=id&utm_source=ad")).toBe("utm_source=ad");
+  it("treats every embed, share capability, and sensitive query as a document boundary", () => {
+    for (const location of [
+      "/embed/rental-cash-flow-calculator",
+      "/embed/brand/private-token/calculator",
+      "/s/private-token",
+      "/d/private-snapshot",
+      "/portal/private-token/d/private-deal",
+      "/dashboard/saved-analyses?q=123%20Main%20St",
+      "/auth/login?next=%2Fdashboard%2Fsaved-analyses%2Fprivate-id",
+    ]) {
+      expect(
+        shouldKeepThirdPartyTelemetryDisabled(location, false),
+        location,
+      ).toBe(true);
+    }
+    expect(hasSensitiveQueryParameter("/pricing?utm_source=ad")).toBe(false);
     expect(
-      sanitizeSensitiveQuery({ pdf_purchase: "cs_live", utm_campaign: "fall" })
+      shouldKeepThirdPartyTelemetryDisabled("/pricing?utm_source=ad", false),
+    ).toBe(false);
+  });
+
+  it("scrubs raw query strings and objects", () => {
+    expect(sanitizeSensitiveQuery("pdf_claim=id&utm_source=ad")).toBe(
+      "utm_source=ad",
+    );
+    expect(
+      sanitizeSensitiveQuery({ pdf_purchase: "cs_live", utm_campaign: "fall" }),
     ).toEqual({ utm_campaign: "fall" });
     expect(
       sanitizeSensitiveQuery([
         ["pdf_claim", "claim-id"],
         ["utm_source", "ad"],
-      ])
+      ]),
     ).toEqual([["utm_source", "ad"]]);
+    expect(sanitizeSensitiveQuery("deal_id=private-id&utm_medium=copy")).toBe(
+      "utm_medium=copy",
+    );
+    expect(
+      sanitizeSensitiveUrl(
+        "/dashboard/saved-analyses?q=123%20Main%20St&state=all",
+      ),
+    ).toBe("/dashboard/saved-analyses?state=all");
+    expect(
+      sanitizeSensitiveUrl(
+        "/auth/sign-up?next=%2Fdashboard%2Fsaved-analyses%2Fprivate-id&plan=pro",
+      ),
+    ).toBe("/auth/sign-up?plan=pro");
+    expect(
+      sanitizeSensitiveQuery({
+        purchasePrice: "325000",
+        monthlyRent: "2500",
+        utm_source: "tool",
+      }),
+    ).toEqual({ utm_source: "tool" });
   });
 
   it("scrubs SDK-generated URL fields without touching non-URL analytics", () => {
@@ -103,7 +171,7 @@ describe("sensitive URL scrubbing", () => {
         $pathname: "/portal/private-token",
         landing_page: "/d/private-snapshot",
         property_type: "single-family",
-      })
+      }),
     ).toEqual({
       $current_url: "https://usetruecap.com/?utm_source=ad",
       $referrer: "https://usetruecap.com/",
@@ -135,7 +203,7 @@ describe("sensitive URL scrubbing", () => {
           url: "https://api.stripe.com/v1/checkout/sessions/cs_live_pathBearer?pdf_claim=private&utm_source=ad",
           method: "GET",
         },
-      })
+      }),
     ).toEqual({
       category: "fetch",
       message: "GET /?pdf_claim=[redacted]&utm_source=ad",
@@ -156,8 +224,7 @@ describe("sensitive URL scrubbing", () => {
     };
     scrubSentryRequestHeaders(headers);
     expect(headers).toEqual({
-      referer:
-        "https://usetruecap.com/d/[shared-analysis]?utm_source=share",
+      referer: "https://usetruecap.com/d/[shared-analysis]?utm_source=share",
       Referrer: "https://usetruecap.com/portal/[token]",
       cookie: "[scrubbed]",
       authorization: "[scrubbed]",
@@ -165,15 +232,15 @@ describe("sensitive URL scrubbing", () => {
     });
 
     const cookies = {
-      "ph_project_posthog": "private-path",
+      ph_project_posthog: "private-path",
       "sb-app-auth-token": "secret",
-      "truecap_cookie_consent_v1": "granted",
+      truecap_cookie_consent_v1: "granted",
     };
     scrubSentryRequestCookies(cookies);
     expect(cookies).toEqual({
-      "ph_project_posthog": "[scrubbed]",
+      ph_project_posthog: "[scrubbed]",
       "sb-app-auth-token": "[scrubbed]",
-      "truecap_cookie_consent_v1": "[scrubbed]",
+      truecap_cookie_consent_v1: "[scrubbed]",
     });
   });
 
@@ -183,16 +250,16 @@ describe("sensitive URL scrubbing", () => {
       message: 'button[title="123 Main Street"]',
     };
     expect(
-      scrubSentryBreadcrumbUrl(breadcrumb, "/d/private-snapshot")
+      scrubSentryBreadcrumbUrl(breadcrumb, "/d/private-snapshot"),
     ).toBeNull();
     expect(
-      scrubSentryBreadcrumbUrl(breadcrumb, "/portal/private-token")
+      scrubSentryBreadcrumbUrl(breadcrumb, "/portal/private-token"),
     ).toBeNull();
     expect(
-      scrubSentryBreadcrumbUrl(breadcrumb, "/embed/brand/private-token")
+      scrubSentryBreadcrumbUrl(breadcrumb, "/embed/brand/private-token"),
     ).toBeNull();
     expect(scrubSentryBreadcrumbUrl(breadcrumb, "/pricing")).toEqual(
-      breadcrumb
+      breadcrumb,
     );
   });
 
@@ -209,7 +276,9 @@ describe("sensitive URL scrubbing", () => {
         cookies: { ph_project_posthog: "private" },
       },
       exception: {
-        values: [{ value: "No such checkout.session: cs_live_exceptionBearer" }],
+        values: [
+          { value: "No such checkout.session: cs_live_exceptionBearer" },
+        ],
       },
       extra: {
         pathname: "/portal/private-token",
@@ -230,28 +299,28 @@ describe("sensitive URL scrubbing", () => {
       ],
     });
     expect(event.transaction).toBe(
-      "GET /?pdf_purchase=[redacted]&utm_source=ad"
+      "GET /?pdf_purchase=[redacted]&utm_source=ad",
     );
     expect(event.request?.url).toBe(
-      "https://usetruecap.com/d/[shared-analysis]?utm_source=ad"
+      "https://usetruecap.com/d/[shared-analysis]?utm_source=ad",
     );
     expect(event.request?.headers?.referer).toBe(
-      "https://usetruecap.com/portal/[token]"
+      "https://usetruecap.com/portal/[token]",
     );
     expect(event.request?.headers?.cookie).toBe("[scrubbed]");
     expect(event.request?.cookies?.ph_project_posthog).toBe("[scrubbed]");
     expect(event.exception?.values?.[0]?.value).toBe(
-      "No such checkout.session: cs_[redacted]"
+      "No such checkout.session: cs_[redacted]",
     );
     expect(event.extra).toEqual({
       pathname: "/portal/[token]",
       referrer: "https://usetruecap.com/d/[shared-analysis]",
     });
     expect(event.spans?.[0]?.description).toBe(
-      "GET /portal/[token]?pdf_purchase=[redacted]"
+      "GET /portal/[token]?pdf_purchase=[redacted]",
     );
     expect(event.spans?.[0]?.data["url.full"]).toBe(
-      "https://usetruecap.com/embed/brand/[token]/calculator?utm_source=ad"
+      "https://usetruecap.com/embed/brand/[token]/calculator?utm_source=ad",
     );
 
     expect(
@@ -260,7 +329,7 @@ describe("sensitive URL scrubbing", () => {
         span_id: "b".repeat(16),
         start_timestamp: 1,
         data: { "url.query": "pdf_claim=id&utm_medium=cpc" },
-      }).data["url.query"]
+      }).data["url.query"],
     ).toBe("utm_medium=cpc");
   });
 });
@@ -274,8 +343,12 @@ describe("bearer-token share routes never reach analytics", () => {
    */
   it("redacts the /s/ opaque share token", () => {
     const token = "Xk3p".repeat(10) + "abc";
-    expect(sanitizeSensitiveUrl(`https://usetruecap.com/s/${token}`)).not.toContain(token);
-    expect(sanitizeSensitiveUrl(`https://usetruecap.com/s/${token}`)).toContain("/s/[token]");
+    expect(
+      sanitizeSensitiveUrl(`https://usetruecap.com/s/${token}`),
+    ).not.toContain(token);
+    expect(sanitizeSensitiveUrl(`https://usetruecap.com/s/${token}`)).toContain(
+      "/s/[token]",
+    );
   });
 
   it("disables DOM autocapture on /s/ like the other bearer routes", () => {
@@ -283,9 +356,18 @@ describe("bearer-token share routes never reach analytics", () => {
   });
 
   it("does not over-match sibling routes that merely start with s", () => {
-    for (const path of ["/search", "/states/ohio", "/settings", "/saved-analyses", "/sitemap.xml"]) {
+    for (const path of [
+      "/search",
+      "/states/ohio",
+      "/settings",
+      "/saved-analyses",
+      "/sitemap.xml",
+    ]) {
       expect(SENSITIVE_PUBLIC_SHARE_ROUTE_PATTERN.test(path), path).toBe(false);
-      expect(sanitizeSensitiveUrl(`https://usetruecap.com${path}`), path).toContain(path);
+      expect(
+        sanitizeSensitiveUrl(`https://usetruecap.com${path}`),
+        path,
+      ).toContain(path);
     }
   });
 
@@ -298,7 +380,10 @@ describe("bearer-token share routes never reach analytics", () => {
       ["/portal/tok_abc", "/portal/[token]"],
       ["/embed/brand/tok_abc", "/embed/brand/[token]"],
     ] as const) {
-      expect(sanitizeSensitiveUrl(`https://usetruecap.com${path}`), path).toContain(expected);
+      expect(
+        sanitizeSensitiveUrl(`https://usetruecap.com${path}`),
+        path,
+      ).toContain(expected);
     }
   });
 });

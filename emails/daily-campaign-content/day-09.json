@@ -2,14 +2,14 @@
   "day": 9,
   "send_date": "2026-06-09",
   "subject": "piti is not your expenses",
-  "preheader": "the 50 percent rule and where it actually breaks.",
-  "headline": "PITI covers four things. Operating a rental needs about nine.",
+  "preheader": "the 50 percent rule is a rough screen, not a property fact.",
+  "headline": "PITI and operating expenses answer different questions.",
   "body": [
-    "PITI is principal, interest, taxes, insurance. That's the mortgage payment. New investors often plug PITI into a deal, subtract from rent, and call the rest 'cash flow.' It isn't.",
-    "Real operating expenses also include: property management, vacancy, repairs and maintenance, CapEx reserves, lawn/snow if applicable, utilities you pay (often water/sewer in multifamily), turnover costs, and the random stuff (pest, HOA, etc).",
-    "The 50% rule says: assume operating expenses (everything except debt service) will equal 50% of gross rent over the long run. So a $2,000/mo rental nets about $1,000/mo before mortgage. Whatever's left after PITI is your real cash flow.",
-    "Where it breaks: brand new construction (closer to 35-40%), Class C properties in tough markets (often 55-60%), and high-tax states like NJ or TX (sometimes 55%+ just from property tax). The 50% rule is a sanity check, not a substitute for line-item underwriting.",
-    "TrueCap line-items every expense category by default and pre-fills tax and insurance estimates. You can see the full operating expense number before you decide whether to dig deeper."
+    "PITI means principal, interest, taxes, and insurance. Subtracting only those four items from rent can omit vacancy and other operating costs, so it is not a complete property-level cash-flow model.",
+    "Applicable lines may include management, vacancy, repairs, maintenance, capital reserves, lawn or snow service, owner-paid utilities, turnover, pest service, HOA dues, and other property-specific costs.",
+    "The 50% rule is an educational shortcut that assumes operating expenses before debt service equal half of gross rent. On $2,000 monthly rent, that shortcut leaves $1,000 before debt service. It does not establish the property's actual expenses or cash flow.",
+    "Property age, condition, tax, insurance, utilities, management scope, vacancy, and service obligations can all make the shortcut inaccurate. Use it only as a rough comparison, then replace it with reviewed line items.",
+    "TrueCap line-items every expense category and keeps tax and insurance visible. Enter the local property-tax bill and replace preliminary insurance assumptions with a current quote before relying on the operating-expense result."
   ],
   "cta_text": "See the full picture",
   "cta_url": "https://usetruecap.com/",

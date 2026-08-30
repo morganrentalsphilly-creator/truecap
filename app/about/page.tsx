@@ -19,19 +19,27 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  title: "About",
+  title: { absolute: "About TrueCap & Founder Morgan Page" },
   description:
-    "TrueCap is built by Morgan Page, a Philadelphia rental investor who underwrites his own deals with it. Why the defaults are conservative, what the analyzer does, and how to reach him.",
+    "Meet TrueCap founder Morgan Page and learn why the rental property analyzer uses editable assumptions, conservative defaults, and transparent formulas.",
   alternates: { canonical: "/about" },
   openGraph: {
-    title: "About TrueCap — who builds it and why the math is conservative",
+    title: "About TrueCap & Founder Morgan Page",
     description:
-      "TrueCap is built by Morgan Page, a Philadelphia rental investor who underwrites his own deals with it.",
+      "Meet TrueCap founder Morgan Page and learn why the rental property analyzer uses editable assumptions, conservative defaults, and transparent formulas.",
     url: "/about",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "About TrueCap" }],
+    images: [
+      { url: "/home.jpg", width: 1200, height: 630, alt: "About TrueCap" },
+    ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: {
+    card: "summary_large_image",
+    title: "About TrueCap & Founder Morgan Page",
+    description:
+      "Meet TrueCap founder Morgan Page and learn why the rental property analyzer uses editable assumptions, conservative defaults, and transparent formulas.",
+    images: ["/home.jpg"],
+  },
 };
 
 export default function AboutPage() {
@@ -105,8 +113,8 @@ export default function AboutPage() {
             TrueCap is built by one person: <strong>Morgan Page</strong>, a
             rental investor in Philadelphia. It started as the tool he wanted
             for his own underwriting — a way to get from an address to a
-            source-labeled first-pass answer in about a minute — and it&apos;s still how he
-            runs the deals he considers.
+            source-labeled first-pass answer in about a minute — and it&apos;s
+            still how he runs the deals he considers.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">Why the math is opinionated</h2>
@@ -125,7 +133,10 @@ export default function AboutPage() {
           <p>
             Every formula the analyzer uses is documented, down to the
             conventions, on the{" "}
-            <Link href="/methodology" className="font-bold text-foreground hover:underline">
+            <Link
+              href="/methodology"
+              className="font-bold text-foreground hover:underline"
+            >
               methodology page
             </Link>
             .
@@ -135,12 +146,19 @@ export default function AboutPage() {
           <p>
             Type an address and get a full underwrite in about 60 seconds:
             monthly cash flow, cap rate, cash-on-cash return, DSCR, 10-year
-            projections, a selected-rule fit, and a secondary Screening Index. The{" "}
-            <Link href="/" className="font-bold text-foreground hover:underline">
+            projections, a selected-rule fit, and a secondary Screening Index.
+            The{" "}
+            <Link
+              href="/"
+              className="font-bold text-foreground hover:underline"
+            >
               core analyzer
             </Link>{" "}
             is free with no signup. A{" "}
-            <Link href="/pricing" className="font-bold text-foreground hover:underline">
+            <Link
+              href="/pricing"
+              className="font-bold text-foreground hover:underline"
+            >
               paid plan
             </Link>{" "}
             adds saved deals, a portfolio dashboard, deal comparison, and
@@ -149,9 +167,9 @@ export default function AboutPage() {
 
           <h2 className="text-2xl sm:text-3xl">Get in touch</h2>
           <p>
-            TrueCap is a small operation, which means email actually gets
-            read. Questions about the math, a number that looks off, or
-            something you wish the analyzer did:{" "}
+            TrueCap is a small operation, which means email actually gets read.
+            Questions about the math, a number that looks off, or something you
+            wish the analyzer did:{" "}
             <a
               href="mailto:hello@usetruecap.com"
               className="font-bold text-foreground hover:underline"

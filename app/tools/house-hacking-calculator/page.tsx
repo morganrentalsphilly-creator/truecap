@@ -14,7 +14,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { permanentRedirect } from "next/navigation";
 import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { HouseHackingCalculatorWidget } from "@/components/tools/house-hacking-calculator-widget";
@@ -24,6 +24,7 @@ import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { isCalculatorReleased } from "@/lib/calculator-registry";
+import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 export const metadata: Metadata = {
   title: "Free House Hacking Calculator — Live for Less",
   description:
@@ -44,7 +45,14 @@ export const metadata: Metadata = {
       "Live in one unit, rent the rest. See what's left of the mortgage payment after tenant rent — plus the honest after-reserves number.",
     url: "/tools/house-hacking-calculator",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap house hacking calculator" }],
+    images: [
+      {
+        url: "/home.jpg",
+        width: 1200,
+        height: 630,
+        alt: "TrueCap house hacking calculator",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -84,7 +92,9 @@ const FAQS: { q: string; a: string }[] = [
 ];
 
 export default function HouseHackingCalculatorPage() {
-  if (!isCalculatorReleased("house-hacking-calculator")) notFound();
+  if (!isCalculatorReleased("house-hacking-calculator")) {
+    permanentRedirect(HISTORICAL_TOOL_REDIRECTS["house-hacking-calculator"]);
+  }
 
   const siteUrl = getSiteUrl();
 
@@ -142,7 +152,10 @@ export default function HouseHackingCalculatorPage() {
 
   return (
     <>
-      <ToolBreadcrumbSchema toolPath="/tools/house-hacking-calculator" toolName="House hacking calculator" />
+      <ToolBreadcrumbSchema
+        toolPath="/tools/house-hacking-calculator"
+        toolName="House hacking calculator"
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }}
@@ -157,7 +170,10 @@ export default function HouseHackingCalculatorPage() {
       />
 
       <div className="min-h-screen bg-background">
-        <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <main
+          id="main"
+          className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12"
+        >
           {/* H1 */}
           <header className="mb-6 sm:mb-8">
             <Link
@@ -171,8 +187,8 @@ export default function HouseHackingCalculatorPage() {
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground mt-2 leading-relaxed">
               Live in one unit, rent the others. Type in the price, your
-              financing, and the rent from the units you won&apos;t live
-              in — your effective monthly housing cost computes live.
+              financing, and the rent from the units you won&apos;t live in —
+              your effective monthly housing cost computes live.
             </p>
           </header>
 
@@ -183,10 +199,10 @@ export default function HouseHackingCalculatorPage() {
           <article className="prose prose-slate max-w-none mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
             <h2 className="text-2xl sm:text-3xl">What is house hacking?</h2>
             <p>
-              House hacking is buying a small multifamily property — a
-              duplex, triplex, or fourplex — living in one unit, and
-              renting out the rest to offset part of your housing cost.
-              Eligible borrowers may have lower-down-payment
+              House hacking is buying a small multifamily property — a duplex,
+              triplex, or fourplex — living in one unit, and renting out the
+              rest to offset part of your housing cost. Eligible borrowers may
+              have lower-down-payment
               <strong> owner-occupant financing</strong> options, but lawful
               unit count, occupancy, borrower, reserves, mortgage insurance,
               property standards, and program terms determine eligibility and
@@ -195,53 +211,69 @@ export default function HouseHackingCalculatorPage() {
             <p>
               Potential results include ownership experience and a modeled
               housing-cost offset; neither a lower bill nor lower cash to close
-              is guaranteed. For the
-              full strategy walkthrough, start with{" "}
-              <Link href="/blog/house-hacking-explained" className="text-primary font-semibold hover:underline">house hacking explained</Link>{" "}
+              is guaranteed. For the full strategy walkthrough, start with{" "}
+              <Link
+                href="/blog/house-hacking-explained"
+                className="text-primary font-semibold hover:underline"
+              >
+                house hacking explained
+              </Link>{" "}
               or the persona page for{" "}
-              <Link href="/for-house-hackers" className="text-primary font-semibold hover:underline">house hackers using TrueCap</Link>.
+              <Link
+                href="/for-house-hackers"
+                className="text-primary font-semibold hover:underline"
+              >
+                house hackers using TrueCap
+              </Link>
+              .
             </p>
 
             <h3>The math this calculator runs</h3>
             <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
               <div className="text-base sm:text-lg font-mono">
-                <span className="font-bold">Effective housing cost</span> ={" "}
-                Full payment (PITI) − Rent from the other units
+                <span className="font-bold">Effective housing cost</span> = Full
+                payment (PITI) − Rent from the other units
               </div>
               <div className="text-sm text-muted-foreground mt-2">
                 e.g. $2,850 PITI − $1,500 unit-2 rent = live for $1,350/mo
               </div>
             </div>
             <p>
-              Your own unit counts as <strong>zero income</strong>{" "}while
-              you live in it — the same owner-occupant convention
-              TrueCap&apos;s full analyzer applies when it excludes the
-              occupied unit from rental income. That single convention is
-              what separates honest house-hack math from listing-flyer
-              math: a fourplex&apos;s advertised gross rent includes the
-              unit you&apos;re about to take off the market.
+              Your own unit counts as <strong>zero income</strong> while you
+              live in it — the same owner-occupant convention TrueCap&apos;s
+              full analyzer applies when it excludes the occupied unit from
+              rental income. That single convention is what separates honest
+              house-hack math from listing-flyer math: a fourplex&apos;s
+              advertised gross rent includes the unit you&apos;re about to take
+              off the market.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">
               The right benchmark: housing cost, not cash flow
             </h2>
             <p>
-              A pure rental is judged on cash flow, cap rate, and
-              cash-on-cash return. A house hack is different: while you
-              occupy a unit, the property is producing housing first and
-              income second. Judging it as a rental will talk you out of
-              some candidates if you ignore the housing provided, but neither
-              benchmark alone makes a deal good.
+              A pure rental is judged on cash flow, cap rate, and cash-on-cash
+              return. A house hack is different: while you occupy a unit, the
+              property is producing housing first and income second. Judging it
+              as a rental will talk you out of some candidates if you ignore the
+              housing provided, but neither benchmark alone makes a deal good.
             </p>
             <p>
               The comparison that matters is{" "}
-              <strong>your effective housing cost vs. renting the
-              equivalent</strong>. If a comparable one-bed rents for
-              $2,200/month and a verified duplex scenario nets to $800/month for
-              comparable housing, the modeled difference is $1,400/month before
-              transaction costs, reserves, capital work, and risk — even though a spreadsheet that treats it as a
-              rental would show negative cash flow. The{" "}
-              <Link href="/blog/house-hack-underwriting-guide" className="text-primary font-semibold hover:underline">house-hack underwriting guide</Link>{" "}
+              <strong>
+                your effective housing cost vs. renting the equivalent
+              </strong>
+              . If a comparable one-bed rents for $2,200/month and a verified
+              duplex scenario nets to $800/month for comparable housing, the
+              modeled difference is $1,400/month before transaction costs,
+              reserves, capital work, and risk — even though a spreadsheet that
+              treats it as a rental would show negative cash flow. The{" "}
+              <Link
+                href="/blog/house-hack-underwriting-guide"
+                className="text-primary font-semibold hover:underline"
+              >
+                house-hack underwriting guide
+              </Link>{" "}
               walks through this benchmark in detail, including the
               owner-occupant tax wrinkles worth a CPA conversation.
             </p>
@@ -253,19 +285,19 @@ export default function HouseHackingCalculatorPage() {
               Some residential owner-occupant programs cover eligible 1&ndash;4
               unit properties. Occupancy intent and duration, borrower and
               property eligibility, unit count, reserves, and all other terms
-              must be confirmed in the program and loan documents. Two routes
-              to ask lenders about are:
+              must be confirmed in the program and loan documents. Two routes to
+              ask lenders about are:
             </p>
             <ul>
               <li>
-                <strong>FHA.</strong>{" "}Eligible borrowers may be offered a
-                3.5% minimum down payment. Current mortgage insurance,
+                <strong>FHA.</strong> Eligible borrowers may be offered a 3.5%
+                minimum down payment. Current mortgage insurance,
                 property-condition, occupancy, reserve, and 3&ndash;4 unit Net
                 Self-Sufficiency Rental Income Eligibility requirements apply;
                 the lender, not this calculator, determines the result.
               </li>
               <li>
-                <strong>Conventional owner-occupant.</strong>{" "}Some programs
+                <strong>Conventional owner-occupant.</strong> Some programs
                 offer low-down-payment options. Eligibility, mortgage insurance,
                 occupancy, reserves, appraisal, unit count, and lender overlays
                 are product-specific; a conventional scenario is not a fallback
@@ -273,12 +305,16 @@ export default function HouseHackingCalculatorPage() {
               </li>
             </ul>
             <p>
-              The calculator&apos;s percentages are editable scenario inputs, not
-              program recommendations or quotes. Run the mortgage line items
+              The calculator&apos;s percentages are editable scenario inputs,
+              not program recommendations or quotes. Run the mortgage line items
               through the{" "}
-              <Link href="/tools/mortgage-payment-calculator" className="text-primary font-semibold hover:underline">mortgage payment calculator</Link>{" "}
-              if you want the P&amp;I, tax, and insurance breakdown on its
-              own.
+              <Link
+                href="/tools/mortgage-payment-calculator"
+                className="text-primary font-semibold hover:underline"
+              >
+                mortgage payment calculator
+              </Link>{" "}
+              if you want the P&amp;I, tax, and insurance breakdown on its own.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">
@@ -287,72 +323,98 @@ export default function HouseHackingCalculatorPage() {
             <h3>The headline: PITI minus rent</h3>
             <p>
               This is the &ldquo;live for $X/month&rdquo; number — what a
-              perfect month looks like, with every unit occupied and
-              nothing breaking. It&apos;s the right number for the
-              rent-vs-hack comparison, and it&apos;s the number house-hack
-              listings love to advertise.
+              perfect month looks like, with every unit occupied and nothing
+              breaking. It&apos;s the right number for the rent-vs-hack
+              comparison, and it&apos;s the number house-hack listings love to
+              advertise.
             </p>
             <h3>The honest one: after reserves</h3>
             <p>
-              Tenants move out. Water heaters fail. The after-reserves
-              line sets aside vacancy, maintenance, and CapEx on the
-              rented units — the same reserve categories TrueCap&apos;s
-              house-hack starter template applies — so the number
-              you underwrite with survives a normal year, not just a
-              perfect one. No management fee is included because most
-              house hackers self-manage; if you&apos;d rather not field
-              the 11pm drip-faucet text from the unit next door, add one.
+              Tenants move out. Water heaters fail. The after-reserves line sets
+              aside vacancy, maintenance, and CapEx on the rented units — the
+              same reserve categories TrueCap&apos;s house-hack starter template
+              applies — so the number you underwrite with survives a normal
+              year, not just a perfect one. No management fee is included
+              because most house hackers self-manage; if you&apos;d rather not
+              field the 11pm drip-faucet text from the unit next door, add one.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">
               Common house-hacking mistakes
             </h2>
-            <h3>1. Counting your own unit&apos;s &ldquo;rent&rdquo; as income</h3>
+            <h3>
+              1. Counting your own unit&apos;s &ldquo;rent&rdquo; as income
+            </h3>
             <p>
-              The gross rent on the listing includes the unit you&apos;re
-              taking off the market. Underwrite only the units that will
-              actually have tenants.
+              The gross rent on the listing includes the unit you&apos;re taking
+              off the market. Underwrite only the units that will actually have
+              tenants.
             </p>
             <h3>2. Judging the deal like a pure rental</h3>
             <p>
-              Year-1 house hacks rarely cash flow, and that&apos;s not
-              failure — the benchmark is your housing cost vs. renting.
-              Model the later full-rental cash flow as a separate scenario;
-              the live-in analysis does not switch automatically when you move out.
+              Year-1 house hacks rarely cash flow, and that&apos;s not failure —
+              the benchmark is your housing cost vs. renting. Model the later
+              full-rental cash flow as a separate scenario; the live-in analysis
+              does not switch automatically when you move out.
             </p>
-            <h3>3. Skipping reserves because &ldquo;I&apos;ll be right there&rdquo;</h3>
+            <h3>
+              3. Skipping reserves because &ldquo;I&apos;ll be right
+              there&rdquo;
+            </h3>
             <p>
-              Proximity doesn&apos;t prevent vacancies or roof leaks. It
-              just means you hear about them sooner.
+              Proximity doesn&apos;t prevent vacancies or roof leaks. It just
+              means you hear about them sooner.
             </p>
             <h3>4. Ignoring the year-2 transition</h3>
             <p>
-              The exit plan matters as much as the entry. After satisfying
-              the occupancy terms in their specific loan documents, some
-              house hackers rent their unit and move elsewhere. Whether the
-              building works as a{" "}
-              <em>pure rental</em>{" "}at that point — cash flow, cap rate,
-              DSCR — depends on the rent and costs at that time. Save that
-              full-rental case separately, verify it, and check the math with the{" "}
-              <Link href="/tools/cap-rate-calculator" className="text-primary font-semibold hover:underline">cap rate calculator</Link>{" "}
+              The exit plan matters as much as the entry. After satisfying the
+              occupancy terms in their specific loan documents, some house
+              hackers rent their unit and move elsewhere. Whether the building
+              works as a <em>pure rental</em> at that point — cash flow, cap
+              rate, DSCR — depends on the rent and costs at that time. Save that
+              full-rental case separately, verify it, and check the math with
+              the{" "}
+              <Link
+                href="/blog/how-to-calculate-cap-rate"
+                className="text-primary font-semibold hover:underline"
+              >
+                cap rate guide
+              </Link>{" "}
               and the{" "}
-              <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">DSCR calculator</Link>.
+              <Link
+                href="/blog/how-to-calculate-dscr"
+                className="text-primary font-semibold hover:underline"
+              >
+                DSCR guide
+              </Link>
+              .
             </p>
 
             <h2 className="text-2xl sm:text-3xl">
               When you need more than a quick screen
             </h2>
             <p>
-              This calculator answers the first question — &ldquo;what
-              would I actually pay to live here?&rdquo; — in seconds. The
-              deeper review needs per-unit rents, verified property tax and
-              insurance, and the tax treatment of the rented portion. Start
-              with House Hack mode for the live-in case, then save a separate
-              full-rental scenario with your unit rented to compare the later
-              move-out state explicitly. If you&apos;re weighing tools, see how it{" "}
-              <Link href="/vs/biggerpockets-for-house-hacking" className="text-primary font-semibold hover:underline">compares to BiggerPockets for house hacking</Link>{" "}
+              This calculator answers the first question — &ldquo;what would I
+              actually pay to live here?&rdquo; — in seconds. The deeper review
+              needs per-unit rents, verified property tax and insurance, and the
+              tax treatment of the rented portion. Start with House Hack mode
+              for the live-in case, then save a separate full-rental scenario
+              with your unit rented to compare the later move-out state
+              explicitly. If you&apos;re weighing tools, see how it{" "}
+              <Link
+                href="/vs/biggerpockets-for-house-hacking"
+                className="text-primary font-semibold hover:underline"
+              >
+                compares to BiggerPockets for house hacking
+              </Link>{" "}
               or read{" "}
-              <Link href="/blog/best-rental-analysis-tool-for-house-hackers" className="text-primary font-semibold hover:underline">the best rental analysis tools for house hackers</Link>.
+              <Link
+                href="/blog/best-rental-analysis-tool-for-house-hackers"
+                className="text-primary font-semibold hover:underline"
+              >
+                the best rental analysis tools for house hackers
+              </Link>
+              .
             </p>
 
             <h2 className="text-2xl sm:text-3xl">Frequently asked questions</h2>
@@ -382,11 +444,11 @@ export default function HouseHackingCalculatorPage() {
               Run the live-in house-hack screen — free
             </h2>
             <p className="text-sm sm:text-base opacity-90 mb-4">
-              This page answers &ldquo;what would I pay to live
-              there?&rdquo; TrueCap&apos;s House Hack mode adds per-unit rents,
-              projected cash flow, DSCR, selected-rule fit, and a secondary
-              Screening Index for the live-in case. Save the later full-rental
-              state as a separate scenario instead of mixing the two.
+              This page answers &ldquo;what would I pay to live there?&rdquo;
+              TrueCap&apos;s House Hack mode adds per-unit rents, projected cash
+              flow, DSCR, selected-rule fit, and a secondary Screening Index for
+              the live-in case. Save the later full-rental state as a separate
+              scenario instead of mixing the two.
             </p>
             <ul className="text-sm space-y-1.5 mb-5 opacity-90">
               {[
@@ -417,11 +479,17 @@ export default function HouseHackingCalculatorPage() {
               tool has no embeddable widget. See the component header. */}
           <ToolEmbedInvite slug="house-hacking-calculator" />
 
-          <ToolsConversionCta calculatorName="House hacking calculator" hook="TrueCap's House Hack mode adds per-unit rents and owner-occupant math for the live-in screen. Save a separate full-rental scenario to compare the later move-out state." />
+          <ToolsConversionCta
+            calculatorName="House hacking calculator"
+            hook="TrueCap's House Hack mode adds per-unit rents and owner-occupant math for the live-in screen. Save a separate full-rental scenario to compare the later move-out state."
+          />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}
-            <Link href="/" className="font-bold text-foreground hover:underline">
+            <Link
+              href="/"
+              className="font-bold text-foreground hover:underline"
+            >
               TrueCap
             </Link>{" "}
             — transparent, editable rental analysis, free to start.

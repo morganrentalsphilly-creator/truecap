@@ -2,15 +2,15 @@
   "day": 29,
   "send_date": "2026-06-29",
   "subject": "the 4 numbers that decide every deal",
-  "preheader": "cap rate, cash-on-cash, dscr, net cash flow. miss one and you're guessing.",
-  "headline": "Every rental deal lives or dies on four numbers.",
+  "preheader": "cap rate, cash-on-cash, dscr, and net cash flow answer different questions.",
+  "headline": "Four useful rental metrics—and what they cannot decide.",
   "body": [
-    "If you only run four numbers on a property, run these. Skip any of them and you're guessing.",
-    "Cap rate. NOI divided by purchase price. This is the property's grade — assumes all-cash, ignores your loan. Useful for ranking deals apples-to-apples and benchmarking against the market average. Anything more than 1.5 points above market is probably cooked.",
-    "Cash-on-cash. Annual pre-tax cash flow divided by total cash invested. This is your grade as a leveraged buyer. Cap rate tells you the property is good. Cash-on-cash tells you the deal is good. They are not the same number, and the gap between them is where leverage either helps you or kills you.",
-    "DSCR. NOI divided by annual debt service. This is the lender's gate. Below their floor (typically 1.20-1.25), the loan you modeled doesn't exist. You'll be forced to put more cash in or walk. Run this before you write the offer, not after.",
-    "Net cash flow. Rent minus PITI minus every other operating expense. This is what actually hits your bank account. Not the gross spread, not the napkin math. If net cash flow is positive and DSCR clears the lender's floor, you have a real deal. Two out of four isn't enough.",
-    "TrueCap returns all four numbers from a single address paste. The free tier covers it. Sixty seconds."
+    "These four metrics are useful together, but none replaces property evidence, inspection, appraisal, written loan terms, or the investor's own decision process.",
+    "Cap rate is NOI divided by purchase price. It describes the entered property economics before financing, subject to the NOI convention and assumptions used. Compare only genuinely comparable calculations.",
+    "Cash-on-cash is annual pre-tax cash flow divided by total cash invested. It describes the modeled leveraged cash return, not whether the property or deal is good.",
+    "DSCR is NOI divided by annual debt service. Compare the modeled ratio with the proposed lender's written definition and minimum. A result below a selected floor does not itself establish whether a loan exists, its pricing, or what the lender will require.",
+    "Net cash flow subtracts modeled operating costs, reserves, and debt service from income. Positive cash flow and a threshold-fitting DSCR can indicate modeled cushion, but they do not make a property a real deal or an investment recommendation.",
+    "TrueCap's free preliminary screen calculates these metrics after you paste a supported address, enter the asking price, and review the editable assumptions. Verify every material input before relying on the result."
   ],
   "cta_text": "Run the four numbers",
   "cta_url": "https://usetruecap.com/",

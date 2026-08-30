@@ -1,17 +1,16 @@
 {
   "day": 21,
   "send_date": "2026-06-21",
-  "subject": "the 40k mistake we almost made",
-  "preheader": "a nashville duplex, a dscr of 1.08, and a better deal next door.",
-  "headline": "How TrueCap caught a $40,000 mistake on a Nashville duplex.",
+  "subject": "one stale tax input can change the screen",
+  "preheader": "a hypothetical duplex shows why every material assumption needs evidence.",
+  "headline": "An educational duplex scenario: verify the tax bill before relying on DSCR.",
   "body": [
-    "An investor I know was about to close on a duplex in East Nashville. $385,000, $1,650 per unit, $3,300/mo gross. He'd run the cap rate (looked like 6.2%), liked the location, and was three days from inspection contingency.",
-    "He ran the address through TrueCap on a Saturday morning, mostly to grab a PDF for his lender. The secondary Screening Index band was Mixed, and the modeled DSCR was 1.08—below the 1.20 program floor he had entered. He checked the inputs and ran the numbers in his own spreadsheet. Same modeled answer.",
-    "What had he missed? Property tax. Davidson County had reassessed the area last year and the new assessment was 22% higher than what the seller's prior bill reflected. He'd modeled the seller's old tax bill (about $3,800) instead of the new one (about $4,900). $1,100 of NOI he didn't have. DSCR collapsed.",
-    "He killed the deal. Two weeks later he closed on a smaller duplex three blocks over at $310,000 with $1,500 per unit and a clean DSCR of 1.31. Roughly $40,000 less price, better cash flow, loan got approved without a rate bump.",
-    "The point isn't 'TrueCap is magic.' The point is that one bad assumption (old tax bill instead of reassessed value) was about to cost him $40,000. Sixty seconds caught it."
+    "Hypothetical example only: an investor screens a $385,000 duplex at $3,300 in monthly rent. The first pass uses a $3,800 annual property-tax input and produces a modeled DSCR above the investor's selected screening floor.",
+    "Before relying on that result, the investor reviews the local assessor and treasurer records, asks how a sale may affect the assessment, and replaces the starting tax input with a supported post-purchase estimate. The higher expense lowers NOI and DSCR enough to change the investor's screen.",
+    "TrueCap does not retrieve or predict a parcel's post-sale tax bill. Enter a reviewed local annual bill or effective rate; if the field is left blank, the analyzer discloses a generic 1.1% of purchase-price fallback. Local reassessment rules still require independent verification.",
+    "The lesson is modest but important: one unsupported input can change a modeled result. Reconcile rent, tax, insurance, financing, condition, and recurring-cost assumptions with property-specific evidence before making an investment or lending decision."
   ],
   "cta_text": "Run your own deal",
   "cta_url": "https://usetruecap.com/",
-  "signature_note": "PS — if you've got a deal in progress and want a second pair of eyes on the numbers, paste it and hit reply with the selected-rule fit and assumptions you still need to verify. Happy to talk through anything that looks off."
+  "signature_note": "PS — if you have a deal in progress, paste it and use the result as a checklist of assumptions to verify. TrueCap is a preliminary model, not an appraisal, inspection, lender approval, tax opinion, offer recommendation, or investment advice."
 }

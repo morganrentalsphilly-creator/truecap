@@ -205,7 +205,7 @@ describe("Input Confidence v1.1", () => {
     expect(cleared.purchasePriceEstimated).toBe(false);
   });
 
-  it("labels HUD rent and FRED rates as benchmarks, never verified facts", () => {
+  it("keeps HUD/FRED as benchmarks and fails legacy state-tax provenance closed", () => {
     const result = buildInputConfidence({
       values: values(),
       provenance: {
@@ -231,7 +231,11 @@ describe("Input Confidence v1.1", () => {
     );
     expect(byKey(result, "interestRate").reason).toContain("as of 2026-08-13");
     expect(byKey(result, "interestRate").reason).toContain("methodology");
-    expect(byKey(result, "propertyTax").sourceClass).toBe("market-benchmark");
+    expect(byKey(result, "propertyTax")).toMatchObject({
+      sourceClass: "generic-default",
+      sourceLabel: "Legacy state estimate (retired)",
+      verifyAction: "Enter parcel tax bill",
+    });
     expect(result.stage).not.toBe("offer-ready");
   });
 

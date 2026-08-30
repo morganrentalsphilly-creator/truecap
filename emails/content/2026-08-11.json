@@ -1,61 +1,61 @@
 {
-  "subject": "The 6 lines on your inspection report that actually matter",
-  "preheader": "Roof, electrical, plumbing, foundation, HVAC, mold · how to negotiate vs walk · 3 inspection scenarios",
+  "subject": "Turn an inspection report into a property-specific scope",
+  "preheader": "Prioritize safety, systems, moisture, structure, and written local estimates",
   "publishedAt": "2026-08-11",
   "weekLabel": "Topic: Inspections",
   "marketSnapshot": {
-    "headline": "Six lines on the inspection report decide everything",
-    "body": "Inspection reports run 30-60 pages. Most of it is documentation and photos. Six specific findings actually decide whether to proceed: roof, electrical, plumbing main lines, foundation, HVAC, and mold/moisture. Everything else (minor caulk gaps, GFCI upgrades, paint chips) is small money. The discipline: skim past the small stuff on first read, focus negotiation on the six that matter.",
+    "headline": "The report starts due diligence; it does not price the work",
+    "body": "Inspection findings vary in severity, scope, code impact, insurability, and cost. Group the findings, identify which require specialist review, and obtain local written estimates before changing an acquisition model or negotiating. Do not convert a generic online cost band into a property fact.",
     "stats": [
       {
-        "label": "Roof replacement typical cost",
-        "value": "$8-15k"
+        "label": "Scope",
+        "value": "Property-specific"
       },
       {
-        "label": "Foundation repair typical range",
-        "value": "$5-25k"
+        "label": "Cost",
+        "value": "Local written estimate"
       },
       {
-        "label": "Knob-and-tube remediation",
-        "value": "$4-12k"
+        "label": "Decision",
+        "value": "Contract and evidence"
       }
     ]
   },
   "dealSpotter": [
     {
-      "address": "Example: inspection found $18k of work",
-      "headlineNumber": "Negotiate $17k off ask · deal still strong",
-      "verdict": "Strong (after negotiation)",
-      "body": "Inspector flagged: knob-and-tube wiring in attic (~$4,500 remediation), roof at end-of-life (~$8,000), minor foundation settling (cosmetic, $1,500 monitoring + minor fix). Most buyers walk. The smart move: come back with an offer that absorbs $17,000 of the findings into the price. Sellers with property on market past 45-60 days often accept this. Same property, different deal — depends on how you negotiate."
+      "address": "Educational scenario: several system findings",
+      "headlineNumber": "Separate observed condition from repair scope",
+      "verdict": "Verify",
+      "body": "Ask the appropriate licensed professionals to define the work, timing, permits, access, exclusions, and uncertainty. Reconcile comparable written estimates, then update the model. The inspection alone does not establish the repair price or the correct contract response."
     },
     {
-      "address": "Example: $1,200 fix · easy seller concession",
-      "headlineNumber": "Radon mitigation · sound scarier than it is",
-      "verdict": "Strong",
-      "body": "Inspection found radon at 6.2 pCi/L (EPA action level is 4.0). Mitigation cost: $1,200-1,500. This is one of those 'sounds scary, costs little' findings — easy to negotiate into the contract. Sellers usually pay for radon mitigation when flagged. If they refuse, you absorb the $1,200 and still have a great deal. Don't let scary-sounding-but-cheap items kill a deal."
+      "address": "Educational scenario: environmental or moisture finding",
+      "headlineNumber": "Confirm testing, source, and remediation requirements",
+      "verdict": "Review",
+      "body": "Follow the inspector's referral guidance and applicable local requirements. A mitigation method and cost depend on testing, building conditions, contractor scope, and jurisdiction. Review contract rights and deadlines with the relevant professionals."
     },
     {
-      "address": "Example: structural finding · WALK",
-      "headlineNumber": "Settlement crack with vertical displacement · $12-22k of structural work",
-      "verdict": "Skip",
-      "body": "Structural engineer review revealed foundation work needed. On a small property, structural fixes can be 10-19% of purchase price. The seller refused to absorb any of it. For an absentee or first-time landlord, this isn't the right project to take on. The headline cap rate evaporated in the inspection. Walk."
+      "address": "Educational scenario: possible structural concern",
+      "headlineNumber": "Obtain a qualified structural assessment",
+      "verdict": "Pause and verify",
+      "body": "Do not price or dismiss a structural concern from a photo or generic range. Obtain the appropriate engineering and contractor input, review financing and insurance implications, and keep unresolved scope visible in the acquisition model."
     }
   ],
   "blogFeature": {
-    "title": "Property management yes or no — the actual math",
+    "title": "Property management yes or no — questions for the actual agreement",
     "url": "https://usetruecap.com/blog/property-management-yes-or-no",
-    "excerpt": "Good property managers coordinate the inspection-stage rehab work. Self-managers do it themselves. The inspection-stage capex math is where this difference matters most."
+    "excerpt": "If a manager will coordinate work, compare the quoted scope, approval authority, markup, vendor policy, records, and responsibility in the actual management agreement."
   },
   "qa": {
-    "question": "Six lines decide it — what are they exactly?",
-    "answer": "(1) Roof — age, condition, life remaining. A roof needing replacement in the next 2-3 years is $8-15k that needs to be in your offer math. (2) Electrical — panel age and amp service, presence of knob-and-tube or aluminum branch wiring. Remediation is a $4-12k surprise. (3) Plumbing — main sewer line condition (camera scope is worth the $300), galvanized vs copper supply lines, water heater age. A failed sewer line is $5-15k. (4) Foundation — any 'structural concerns' note triggers a follow-up structural engineer call ($400-800). Don't proceed without that second opinion. (5) HVAC — age and condition of furnace and AC. A 20-year-old system is end-of-life. (6) Mold/moisture — any active moisture in basements or attics signals systemic issues, not point-fixes. Negotiate offer revisions on the six above. Everything else is small money."
+    "question": "Which inspection findings deserve follow-up?",
+    "answer": "Prioritize safety, active water or moisture, structure, roof and envelope, electrical, plumbing and sewer, HVAC, environmental conditions, and any issue the inspector refers to a specialist. Also review permits, code, insurance, financing, and tenant implications. The right follow-up and price are property- and jurisdiction-specific; obtain qualified local assessments and written estimates before relying on revised model assumptions."
   },
   "shipNote": {
-    "title": "Price the inspection findings before re-negotiating",
+    "title": "Update only reviewed assumptions",
     "items": [
-      "Free: enter the renegotiated price and re-run the selected-rule screen and secondary Screening Index",
-      "Pro: rehab estimator with line-item costs — model how a $15k roof or $8k electrical changes the deal before you counter",
-      "Re-underwrite after inspection in 60 seconds →"
+      "Free: revise the price and released operating assumptions, then rerun the preliminary screen",
+      "Keep inspection scope and contractor or specialist estimates outside the model as supporting evidence",
+      "An updated result is not an instruction to proceed, renegotiate, or terminate"
     ]
   }
 }

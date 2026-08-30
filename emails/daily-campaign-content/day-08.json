@@ -1,15 +1,15 @@
 {
   "day": 8,
   "send_date": "2026-06-08",
-  "subject": "the 8 percent vacancy rule",
-  "preheader": "fully occupied is a fantasy. here's what to actually budget.",
+  "subject": "vacancy is an input, not a universal rule",
+  "preheader": "use property history and current leasing evidence.",
   "headline": "Vacancy isn't pessimism. It's accounting.",
   "body": [
-    "Every property is vacant sometimes. Tenant moves out, two weeks to clean and turn, a month to lease. Even a stable rental in a great market loses 3-5% to vacancy and turnover. Most properties lose closer to 8%.",
-    "Markets differ. Class A suburbs in Nashville or Raleigh might genuinely run 4-5% vacancy. Class C properties in soft Midwest markets routinely hit 10-12%. Short-term rentals can hit 30%+ in shoulder months.",
-    "Why this matters: take a $1,800/mo rental, $21,600 gross. At 5% vacancy you lose $1,080/yr. At 10% you lose $2,160/yr. That $1,080 difference is the entire margin between a 'good' and 'mediocre' deal once you net out expenses. People who underwrite at 0% vacancy are lying to themselves by exactly one nice vacation a year.",
-    "My default: I model 8% vacancy unless I have a reason to go lower. If the seller says 'never been vacant', I add 8% anyway. If the market is genuinely tight, I'll go to 5%. Rarely below.",
-    "TrueCap defaults vacancy to a market-specific value when you paste an address. You can override it, but the default is honest."
+    "Tenant turnover, cleaning, repairs, marketing, lease-up time, concessions, and credit loss can reduce collected rent. The appropriate assumption depends on the property and operating plan.",
+    "Review the property's lease and collection history, current comparable listings and leases, time-on-market evidence, planned tenant profile, and any short-term-rental seasonality that actually applies.",
+    "For illustration, $1,800 monthly rent is $21,600 per year. An entered 5% vacancy assumption reduces modeled income by $1,080; an entered 10% assumption reduces it by $2,160. The $1,080 difference shows sensitivity, not which percentage is correct.",
+    "Use more than one scenario when evidence is uncertain, and record why the selected vacancy assumption fits the specific property.",
+    "TrueCap starts a new analysis with a generic 5% vacancy assumption. It is editable, not market-specific, so replace it with evidence from the property's operating history and local leasing conditions before relying on the result."
   ],
   "cta_text": "Try TrueCap free",
   "cta_url": "https://usetruecap.com/",

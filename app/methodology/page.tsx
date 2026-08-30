@@ -126,9 +126,9 @@ export default function MethodologyPage() {
             <li>
               <strong>Benchmarks are labeled as benchmarks.</strong> HUD Fair
               Market Rent and the FRED 30-year owner-occupied mortgage series
-              are starting points, not property-specific comps or lender
-              quotes. Property tax is manual because a state aggregate is not
-              a parcel bill.
+              are starting points, not property-specific comps or lender quotes.
+              Property tax is manual because a state aggregate is not a parcel
+              bill.
             </li>
             <li>
               <strong>Defaults are visible starting assumptions.</strong> 5%
@@ -348,8 +348,8 @@ export default function MethodologyPage() {
             records the returned year and whether the value came from an FMR
             area or a ZIP-level SAFMR. The FY 2026 source page notes revised
             FMRs effective May 21, 2026. Provider availability and geographic
-            matching can fail, in which case TrueCap leaves rent for the user
-            to enter.
+            matching can fail, in which case TrueCap leaves rent for the user to
+            enter.
           </p>
 
           <h3>Mortgage benchmark — FRED 30-year fixed</h3>
@@ -367,15 +367,17 @@ export default function MethodologyPage() {
 
           <h3>Property tax — manual local input</h3>
           <p>
-            <strong>Released underwriting does not auto-fill property tax from
-            the former Tax Foundation 2023 state table.</strong> That secondary,
-            state-level aggregate was too stale and coarse to stand in for a
-            parcel bill. Enter an annual local bill or a reviewed local rate.
-            If both are blank, the current formula contract uses a generic 1.1%
-            of purchase price preliminary fallback and labels it for local
-            verification. The fallback is a TrueCap continuity convention, not
-            a sourced estimate for the property. Replace it before relying on
-            NOI, cap rate, cash flow, DSCR, or Offer Ceiling.
+            <strong>
+              Released underwriting does not auto-fill property tax from the
+              former Tax Foundation 2023 state table.
+            </strong>{" "}
+            That secondary, state-level aggregate was too stale and coarse to
+            stand in for a parcel bill. Enter an annual local bill or a reviewed
+            local rate. If both are blank, the current formula contract uses a
+            generic 1.1% of purchase price preliminary fallback and labels it
+            for local verification. The fallback is a TrueCap continuity
+            convention, not a sourced estimate for the property. Replace it
+            before relying on NOI, cap rate, cash flow, DSCR, or Offer Ceiling.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">Primary source register</h2>
@@ -437,8 +439,8 @@ export default function MethodologyPage() {
               </a>
               , for use in preparing 2025 returns and accessed August 27, 2026.
               It describes the 27.5-year GDS recovery period and applicable
-              convention; it does not supply TrueCap&apos;s 85% building-allocation
-              scenario.
+              convention; it does not supply TrueCap&apos;s 85%
+              building-allocation scenario.
             </li>
           </ul>
 
@@ -467,10 +469,9 @@ export default function MethodologyPage() {
               uses scheduled 78% termination as a screening convention for the
               eligible covered path, subject to being current. Mortgage
               insurance entered for a rental loan is conservatively carried
-              through payoff because
-              owner-home cancellation rules do not establish the investment-loan
-              policy. Confirm the actual premium and cancellation terms with the
-              lender or servicer.
+              through payoff because owner-home cancellation rules do not
+              establish the investment-loan policy. Confirm the actual premium
+              and cancellation terms with the lender or servicer.
             </li>
             <li>
               <strong>Appreciation:</strong> 3% annual scenario assumption, not
@@ -496,13 +497,13 @@ export default function MethodologyPage() {
           <h3>Depreciation</h3>
           <p>
             Residential rentals depreciate over 27.5 years straight-line (IRS
-            Publication 527&apos;s general GDS recovery period, with tax-year and
-            convention details that the archived simplification does not fully
-            reproduce). TrueCap&apos;s archived scenario defaults the building
-            portion to 85% of purchase price (land = 15%, non-depreciable); that
-            allocation is a product assumption, not an IRS benchmark. Annual
-            scenario depreciation = (purchase price × 0.85) ÷ 27.5. This is a
-            paper deduction — it doesn&apos;t affect
+            Publication 527&apos;s general GDS recovery period, with tax-year
+            and convention details that the archived simplification does not
+            fully reproduce). TrueCap&apos;s archived scenario defaults the
+            building portion to 85% of purchase price (land = 15%,
+            non-depreciable); that allocation is a product assumption, not an
+            IRS benchmark. Annual scenario depreciation = (purchase price ×
+            0.85) ÷ 27.5. This is a paper deduction — it doesn&apos;t affect
             before-tax cash flow. Its actual availability and value depend on
             basis allocation, placed-in-service timing, passive-loss rules,
             participation, income, entity structure, and your tax
@@ -584,7 +585,8 @@ export default function MethodologyPage() {
             <li>
               <strong>Non-US addresses:</strong> Google Places autocomplete is
               restricted to US results. Manual entry is still allowed but the
-              auto-fill from HUD / FRED / state tax obviously doesn&apos;t fire.
+              HUD rent and FRED rate enrichment does not run. Property tax
+              remains a manual local input for every address.
             </li>
           </ul>
 

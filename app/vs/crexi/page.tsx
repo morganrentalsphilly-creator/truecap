@@ -19,7 +19,10 @@ import {
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
-import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-faq";
+import {
+  ComparisonFaq,
+  type FaqItem,
+} from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
@@ -41,7 +44,9 @@ export const metadata: Metadata = {
       "Crexi is the commercial RE marketplace (LoopNet alternative). TrueCap is residential underwriting. Different asset classes.",
     url: "/vs/crexi",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs Crexi" }],
+    images: [
+      { url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs Crexi" },
+    ],
   },
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
@@ -50,17 +55,72 @@ type Verdict = "truecap" | "crexi" | "tie";
 type Row = { feature: string; truecap: string; crexi: string; winner: Verdict };
 
 const MATRIX: Row[] = [
-  { feature: "Primary asset class", truecap: "Residential (SFR, small multifamily, owner-occupant)", crexi: "Commercial (office, retail, industrial, large multifamily)", winner: "tie" },
-  { feature: "Lifecycle stage", truecap: "Per-deal underwriting calculator", crexi: "Marketplace + intelligence", winner: "tie" },
-  { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine for residential", crexi: "Listing-level cap rate; no per-deal calc engine", winner: "truecap" },
-  { feature: "10-year projection", truecap: "Pro — residential rent + expense + appreciation", crexi: "Not modeled", winner: "truecap" },
-  { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax (residential)", crexi: "Listing-pulled CRE data", winner: "truecap" },
-  { feature: "CRE listings (office, retail, industrial)", truecap: "No — residential focus", crexi: "Yes — 500k+ active CRE listings", winner: "crexi" },
-  { feature: "CRE sale + lease comps", truecap: "No", crexi: "Yes — national CRE comp database", winner: "crexi" },
-  { feature: "Broker tools (offer management)", truecap: "No", crexi: "Yes — built for CRE brokers", winner: "crexi" },
-  { feature: "Tenant info (CRE)", truecap: "Not applicable", crexi: "Yes — public-record tenant data", winner: "crexi" },
-  { feature: "Free tier", truecap: "Yes — full residential underwriting", crexi: "Free to browse listings; paid for intelligence", winner: "tie" },
-  { feature: "Pricing (entry tier)", truecap: "Free core; paid Pro — see live pricing", crexi: "Free for buyers/browsers; Intelligence ~$100+/mo", winner: "tie" },
+  {
+    feature: "Primary asset class",
+    truecap: "Residential (SFR, small multifamily, owner-occupant)",
+    crexi: "Commercial (office, retail, industrial, large multifamily)",
+    winner: "tie",
+  },
+  {
+    feature: "Lifecycle stage",
+    truecap: "Per-deal underwriting calculator",
+    crexi: "Marketplace + intelligence",
+    winner: "tie",
+  },
+  {
+    feature: "Cap rate / CoC / DSCR analysis",
+    truecap: "Yes — full engine for residential",
+    crexi: "Listing-level cap rate; no per-deal calc engine",
+    winner: "truecap",
+  },
+  {
+    feature: "10-year projection",
+    truecap: "Pro — residential rent + expense + appreciation",
+    crexi: "Not modeled",
+    winner: "truecap",
+  },
+  {
+    feature: "Starting values (rent/rate/tax)",
+    truecap: "HUD rent + FRED rate + manual local property tax (residential)",
+    crexi: "Listing-pulled CRE data",
+    winner: "truecap",
+  },
+  {
+    feature: "CRE listings (office, retail, industrial)",
+    truecap: "No — residential focus",
+    crexi: "Yes — 500k+ active CRE listings",
+    winner: "crexi",
+  },
+  {
+    feature: "CRE sale + lease comps",
+    truecap: "No",
+    crexi: "Yes — national CRE comp database",
+    winner: "crexi",
+  },
+  {
+    feature: "Broker tools (offer management)",
+    truecap: "No",
+    crexi: "Yes — built for CRE brokers",
+    winner: "crexi",
+  },
+  {
+    feature: "Tenant info (CRE)",
+    truecap: "Not applicable",
+    crexi: "Yes — public-record tenant data",
+    winner: "crexi",
+  },
+  {
+    feature: "Free tier",
+    truecap: "Yes — full residential underwriting",
+    crexi: "Free to browse listings; paid for intelligence",
+    winner: "tie",
+  },
+  {
+    feature: "Pricing (entry tier)",
+    truecap: "Free core; paid Pro — see live pricing",
+    crexi: "Free for buyers/browsers; Intelligence ~$100+/mo",
+    winner: "tie",
+  },
 ];
 
 export default function VsCrexiPage() {
@@ -101,15 +161,21 @@ export default function VsCrexiPage() {
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
             TrueCap vs Crexi:{" "}
-            <span className="text-primary">residential underwriting vs commercial marketplace</span>
+            <span className="text-primary">
+              residential underwriting vs commercial marketplace
+            </span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Crexi is a commercial real-estate marketplace + intelligence platform — the modern LoopNet alternative for CRE listings, sale comps, lease data, and broker tools. TrueCap is a residential rental underwriting calculator — single-family, small multifamily, owner-occupant. Different asset classes. Investors who do both residential and commercial may use Crexi for sourcing CRE deals and TrueCap for residential.
+            Crexi is a commercial real-estate marketplace + intelligence
+            platform — the modern LoopNet alternative for CRE listings, sale
+            comps, lease data, and broker tools. TrueCap is a residential rental
+            underwriting calculator — single-family, small multifamily,
+            owner-occupant. Different asset classes. Investors who do both
+            residential and commercial may use Crexi for sourcing CRE deals and
+            TrueCap for residential.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <ScrollToFormButton
-              className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5"
-            >
+            <ScrollToFormButton className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">
               <Calculator className="size-4" />
               Run a deal — 60 seconds
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
@@ -137,9 +203,17 @@ export default function VsCrexiPage() {
                 Use TrueCap when
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
-                <li>You&apos;re underwriting residential rentals (SFR, 2-4 unit multifamily, owner-occupant).</li>
-                <li>You want cap rate, CoC, DSCR, cash flow on a specific residential address.</li>
-                <li>You want financing math + an illustrative tax-impact model.</li>
+                <li>
+                  You&apos;re underwriting residential rentals (SFR, 2-4 unit
+                  multifamily, owner-occupant).
+                </li>
+                <li>
+                  You want cap rate, CoC, DSCR, cash flow on a specific
+                  residential address.
+                </li>
+                <li>
+                  You want financing math + an illustrative tax-impact model.
+                </li>
                 <li>You&apos;re not evaluating commercial deals.</li>
               </ul>
             </div>
@@ -148,10 +222,19 @@ export default function VsCrexiPage() {
                 Use Crexi when
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
-                <li>You&apos;re sourcing commercial real estate (office, retail, industrial, large multifamily).</li>
+                <li>
+                  You&apos;re sourcing commercial real estate (office, retail,
+                  industrial, large multifamily).
+                </li>
                 <li>You need a CRE listings marketplace + comp database.</li>
-                <li>You&apos;re a CRE broker managing listings, offers, and tenants.</li>
-                <li>You&apos;re evaluating commercial deals where Crexi&apos;s data is the comp source.</li>
+                <li>
+                  You&apos;re a CRE broker managing listings, offers, and
+                  tenants.
+                </li>
+                <li>
+                  You&apos;re evaluating commercial deals where Crexi&apos;s
+                  data is the comp source.
+                </li>
               </ul>
             </div>
           </div>
@@ -163,7 +246,8 @@ export default function VsCrexiPage() {
             Feature-by-feature
           </h2>
           <p className="text-base text-muted-foreground mb-6 leading-relaxed">
-            Side-by-side on every dimension that matters for a comparison-shopping investor.
+            Side-by-side on every dimension that matters for a
+            comparison-shopping investor.
           </p>
           <div className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
@@ -182,7 +266,10 @@ export default function VsCrexiPage() {
               </thead>
               <tbody>
                 {MATRIX.map((row) => (
-                  <tr key={row.feature} className="border-t border-border align-top">
+                  <tr
+                    key={row.feature}
+                    className="border-t border-border align-top"
+                  >
                     <td className="py-3 px-3 text-sm font-semibold text-foreground">
                       <div className="flex items-center gap-2">
                         <WinnerBadge winner={row.winner} side="row" />
@@ -209,7 +296,12 @@ export default function VsCrexiPage() {
           <p className="mt-3 text-[11px] text-muted-foreground">
             Crexi details based on publicly available product info as of 2026.
             See{" "}
-            <a href="https://crexi.com" target="_blank" rel="noopener" className="underline">
+            <a
+              href="https://crexi.com"
+              target="_blank"
+              rel="noopener"
+              className="underline"
+            >
               crexi.com
             </a>{" "}
             for their current state.
@@ -223,31 +315,50 @@ export default function VsCrexiPage() {
           </h2>
           <ol className="space-y-2.5 text-sm sm:text-base leading-relaxed text-foreground list-decimal pl-5">
             <li>
-              <strong>If you do both residential and CRE.</strong> TrueCap underwrites your residential deals; Crexi sources and provides comps for your CRE deals.
+              <strong>If you do both residential and CRE.</strong> TrueCap
+              underwrites your residential deals; Crexi sources and provides
+              comps for your CRE deals.
             </li>
             <li>
-              <strong>For CRE underwriting specifically.</strong> Crexi shows you the deal + market comps; you&apos;d run the CRE underwrite in a dedicated CRE calculator (Argus, CrowdStreet&apos;s tools, or a CRE spreadsheet model).
+              <strong>For CRE underwriting specifically.</strong> Crexi shows
+              you the deal + market comps; you&apos;d run the CRE underwrite in
+              a dedicated CRE calculator (Argus, CrowdStreet&apos;s tools, or a
+              CRE spreadsheet model).
             </li>
             <li>
-              <strong>If you&apos;re purely residential.</strong> TrueCap is enough; Crexi is overkill — the residential MLS or Roofstock-style platforms are a better fit.
+              <strong>If you&apos;re purely residential.</strong> TrueCap is
+              enough; Crexi is overkill — the residential MLS or Roofstock-style
+              platforms are a better fit.
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Want the residential underwriting half on its own? The free{" "}
-            <Link href="/tools/closing-cost-calculator" className="font-semibold text-primary hover:underline">
+            <Link
+              href="/tools/closing-cost-calculator"
+              className="font-semibold text-primary hover:underline"
+            >
               closing cost calculator
             </Link>{" "}
             sizes the cash you actually need at the table, and the full{" "}
-            <Link href="/" className="font-semibold text-primary hover:underline">
+            <Link
+              href="/"
+              className="font-semibold text-primary hover:underline"
+            >
               TrueCap analyzer
             </Link>{" "}
             returns{" "}
-            <Link href="/glossary/cap-rate" className="font-semibold text-primary hover:underline">
+            <Link
+              href="/glossary/cap-rate"
+              className="font-semibold text-primary hover:underline"
+            >
               cap rate
             </Link>
             , DSCR, and cash flow from an address — no CRE model required. Our
             guide on{" "}
-            <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">
+            <Link
+              href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
+              className="font-semibold text-primary hover:underline"
+            >
               60-second underwriting
             </Link>{" "}
             walks through the workflow end-to-end.
@@ -264,8 +375,8 @@ export default function VsCrexiPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro adds 10-year cash-flow and equity projections, sensitivity,
-            Offer Ceiling, co-branded share links, and PDF reports with Pro; see live pricing for current terms.
-            No card to start.
+            Offer Ceiling, co-branded share links, and PDF reports with Pro; see
+            live pricing for current terms. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -287,11 +398,26 @@ export default function VsCrexiPage() {
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}
-          <Link href="/vs/roofstock" className="font-bold text-foreground hover:underline">TrueCap vs Roofstock</Link>
+          <Link
+            href="/vs/roofstock"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs Roofstock
+          </Link>
           {" · "}
-          <Link href="/vs/mashvisor" className="font-bold text-foreground hover:underline">TrueCap vs Mashvisor</Link>
+          <Link
+            href="/vs/mashvisor"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs Mashvisor
+          </Link>
           {" · "}
-          <Link href="/vs/propstream" className="font-bold text-foreground hover:underline">TrueCap vs PropStream</Link>
+          <Link
+            href="/vs/propstream"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs PropStream
+          </Link>
         </footer>
       </main>
       <SiteFooter />
@@ -305,7 +431,10 @@ const CREXI_FAQ: FaqItem[] = [
     question: "Is TrueCap a Crexi alternative?",
     answer: (
       <>
-        No — different asset classes. Crexi is commercial real estate (office, retail, industrial, large multifamily). TrueCap is residential (single-family, small multifamily, owner-occupant). The two don&apos;t overlap meaningfully.
+        No — different asset classes. Crexi is commercial real estate (office,
+        retail, industrial, large multifamily). TrueCap is residential
+        (single-family, small multifamily, owner-occupant). The two don&apos;t
+        overlap meaningfully.
       </>
     ),
     plainTextAnswer:
@@ -315,7 +444,11 @@ const CREXI_FAQ: FaqItem[] = [
     question: "Crexi vs LoopNet — which one?",
     answer: (
       <>
-        Both are major CRE marketplaces. Crexi is newer, has more modern UX, and is increasingly the broker-preferred platform. LoopNet (owned by CoStar) has deeper historical listings + integration with CoStar&apos;s broader data. For active buyers, Crexi tends to be faster to search; for institutional research, LoopNet + CoStar is the deeper data source.
+        Both are major CRE marketplaces. Crexi is newer, has more modern UX, and
+        is increasingly the broker-preferred platform. LoopNet (owned by CoStar)
+        has deeper historical listings + integration with CoStar&apos;s broader
+        data. For active buyers, Crexi tends to be faster to search; for
+        institutional research, LoopNet + CoStar is the deeper data source.
       </>
     ),
     plainTextAnswer:
@@ -325,7 +458,11 @@ const CREXI_FAQ: FaqItem[] = [
     question: "Does TrueCap support commercial real estate?",
     answer: (
       <>
-        Not really — we&apos;re built for residential underwriting (SFR, 2-4 unit, owner-occupant). Commercial deals (office, retail, industrial) have entirely different cash-flow math, lease structures, and metrics (NOI multiples, vacancy by tenant type, TI / LC allowances). For CRE underwriting use Argus, RealNex, or a dedicated CRE spreadsheet.
+        Not really — we&apos;re built for residential underwriting (SFR, 2-4
+        unit, owner-occupant). Commercial deals (office, retail, industrial)
+        have entirely different cash-flow math, lease structures, and metrics
+        (NOI multiples, vacancy by tenant type, TI / LC allowances). For CRE
+        underwriting use Argus, RealNex, or a dedicated CRE spreadsheet.
       </>
     ),
     plainTextAnswer:
@@ -335,7 +472,9 @@ const CREXI_FAQ: FaqItem[] = [
     question: "Is Crexi free?",
     answer: (
       <>
-        Free for buyers to browse listings and basic search. Paid for advanced intelligence features (sale comps, lease data, broker tools, advanced analytics) — typically $100+ per month depending on tier.
+        Free for buyers to browse listings and basic search. Paid for advanced
+        intelligence features (sale comps, lease data, broker tools, advanced
+        analytics) — typically $100+ per month depending on tier.
       </>
     ),
     plainTextAnswer:
@@ -345,7 +484,12 @@ const CREXI_FAQ: FaqItem[] = [
     question: "Can I use TrueCap for small multifamily commercial deals?",
     answer: (
       <>
-        Yes — TrueCap supports residential multifamily up to about 4 units. The owner-occupant property type also handles small multifamily configurations. For 5+ unit multifamily that&apos;s classified as commercial financing, the math gets different (commercial loans + DSCR underwriting standards) and you&apos;d want a dedicated multifamily calculator.
+        Yes — TrueCap supports residential multifamily up to about 4 units. The
+        owner-occupant property type also handles small multifamily
+        configurations. For 5+ unit multifamily that&apos;s classified as
+        commercial financing, the math gets different (commercial loans + DSCR
+        underwriting standards) and you&apos;d want a dedicated multifamily
+        calculator.
       </>
     ),
     plainTextAnswer:
@@ -362,10 +506,14 @@ function WinnerBadge({
 }) {
   if (side === "row") return null;
   if (winner === "tie") {
-    return <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />;
+    return (
+      <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />
+    );
   }
   if (winner === side) {
-    return <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />;
+    return (
+      <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />
+    );
   }
   return <X className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/50" />;
 }

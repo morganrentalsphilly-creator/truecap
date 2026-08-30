@@ -19,7 +19,10 @@ import {
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
-import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-faq";
+import {
+  ComparisonFaq,
+  type FaqItem,
+} from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
@@ -40,28 +43,105 @@ export const metadata: Metadata = {
       "Yardi Breeze is small-landlord PM software. TrueCap is the pre-purchase underwrite. Different stages.",
     url: "/vs/yardi-breeze",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs Yardi Breeze" }],
+    images: [
+      {
+        url: "/home.jpg",
+        width: 1200,
+        height: 630,
+        alt: "TrueCap vs Yardi Breeze",
+      },
+    ],
   },
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
 type Verdict = "truecap" | "yardibreeze" | "tie";
-type Row = { feature: string; truecap: string; yardibreeze: string; winner: Verdict };
+type Row = {
+  feature: string;
+  truecap: string;
+  yardibreeze: string;
+  winner: Verdict;
+};
 
 const MATRIX: Row[] = [
-  { feature: "Lifecycle stage", truecap: "Pre-purchase — underwrite the deal", yardibreeze: "Post-purchase — operate the portfolio", winner: "tie" },
-  { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", yardibreeze: "Not modeled", winner: "truecap" },
-  { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", yardibreeze: "Not modeled", winner: "truecap" },
-  { feature: "Secondary Screening Index", truecap: "Free — 0-100 triage score + factor breakdown", yardibreeze: "Not applicable", winner: "truecap" },
-  { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", yardibreeze: "Not applicable", winner: "truecap" },
-  { feature: "Tenant + lease management", truecap: "No", yardibreeze: "Yes — designed for 1-100 units", winner: "yardibreeze" },
-  { feature: "Online rent collection", truecap: "No", yardibreeze: "Yes — ACH + card", winner: "yardibreeze" },
-  { feature: "Maintenance request workflow", truecap: "No", yardibreeze: "Yes — work-order tracking + vendor mgmt", winner: "yardibreeze" },
-  { feature: "Owner / partner portals", truecap: "No", yardibreeze: "Yes — multi-owner statements", winner: "yardibreeze" },
-  { feature: "Full GL accounting", truecap: "Forward projection only", yardibreeze: "Yes — chart of accounts, balance sheet, 1099s", winner: "yardibreeze" },
-  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", yardibreeze: "No — paid only (demo available)", winner: "truecap" },
-  { feature: "Pricing (entry tier)", truecap: "Free core; paid Pro — see live pricing", yardibreeze: "~$1-2/unit/month with $100 minimum (as of 2026)", winner: "tie" },
-  { feature: "Built for solo investors (1-30 doors)", truecap: "Yes", yardibreeze: "Yes — 1-100 sweet spot", winner: "tie" },
+  {
+    feature: "Lifecycle stage",
+    truecap: "Pre-purchase — underwrite the deal",
+    yardibreeze: "Post-purchase — operate the portfolio",
+    winner: "tie",
+  },
+  {
+    feature: "Cap rate / CoC / DSCR analysis",
+    truecap: "Yes — full engine, free tier",
+    yardibreeze: "Not modeled",
+    winner: "truecap",
+  },
+  {
+    feature: "10-year projection",
+    truecap: "Pro — rent + expense + appreciation",
+    yardibreeze: "Not modeled",
+    winner: "truecap",
+  },
+  {
+    feature: "Secondary Screening Index",
+    truecap: "Free — 0-100 triage score + factor breakdown",
+    yardibreeze: "Not applicable",
+    winner: "truecap",
+  },
+  {
+    feature: "Starting values (rent/rate/tax)",
+    truecap: "HUD rent + FRED rate + manual local property tax",
+    yardibreeze: "Not applicable",
+    winner: "truecap",
+  },
+  {
+    feature: "Tenant + lease management",
+    truecap: "No",
+    yardibreeze: "Yes — designed for 1-100 units",
+    winner: "yardibreeze",
+  },
+  {
+    feature: "Online rent collection",
+    truecap: "No",
+    yardibreeze: "Yes — ACH + card",
+    winner: "yardibreeze",
+  },
+  {
+    feature: "Maintenance request workflow",
+    truecap: "No",
+    yardibreeze: "Yes — work-order tracking + vendor mgmt",
+    winner: "yardibreeze",
+  },
+  {
+    feature: "Owner / partner portals",
+    truecap: "No",
+    yardibreeze: "Yes — multi-owner statements",
+    winner: "yardibreeze",
+  },
+  {
+    feature: "Full GL accounting",
+    truecap: "Forward projection only",
+    yardibreeze: "Yes — chart of accounts, balance sheet, 1099s",
+    winner: "yardibreeze",
+  },
+  {
+    feature: "Free tier",
+    truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
+    yardibreeze: "No — paid only (demo available)",
+    winner: "truecap",
+  },
+  {
+    feature: "Pricing (entry tier)",
+    truecap: "Free core; paid Pro — see live pricing",
+    yardibreeze: "~$1-2/unit/month with $100 minimum (as of 2026)",
+    winner: "tie",
+  },
+  {
+    feature: "Built for solo investors (1-30 doors)",
+    truecap: "Yes",
+    yardibreeze: "Yes — 1-100 sweet spot",
+    winner: "tie",
+  },
 ];
 
 export default function VsYardiBreezePage() {
@@ -83,7 +163,10 @@ export default function VsYardiBreezePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <VsBreadcrumbSchema vsPath="/vs/yardi-breeze" pageName="TrueCap vs Yardi Breeze" />
+      <VsBreadcrumbSchema
+        vsPath="/vs/yardi-breeze"
+        pageName="TrueCap vs Yardi Breeze"
+      />
       <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-2">
           <Link
@@ -102,15 +185,19 @@ export default function VsYardiBreezePage() {
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
             TrueCap vs Yardi Breeze:{" "}
-            <span className="text-primary">pre-purchase calculator vs full PM platform</span>
+            <span className="text-primary">
+              pre-purchase calculator vs full PM platform
+            </span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Yardi Breeze is the small-business version of Yardi&apos;s enterprise PM platform — built for residential landlords managing 1-100 units. Tenant management, rent collection, accounting, owner reports. TrueCap models the first-year economics of properties you are considering. Different stages, complementary tools.
+            Yardi Breeze is the small-business version of Yardi&apos;s
+            enterprise PM platform — built for residential landlords managing
+            1-100 units. Tenant management, rent collection, accounting, owner
+            reports. TrueCap models the first-year economics of properties you
+            are considering. Different stages, complementary tools.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <ScrollToFormButton
-              className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5"
-            >
+            <ScrollToFormButton className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">
               <Calculator className="size-4" />
               Run a deal — 60 seconds
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
@@ -138,9 +225,14 @@ export default function VsYardiBreezePage() {
                 Use TrueCap when
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
-                <li>You&apos;re evaluating a property before making an offer.</li>
+                <li>
+                  You&apos;re evaluating a property before making an offer.
+                </li>
                 <li>You want cap rate, DSCR, cash flow, projection.</li>
-                <li>You haven&apos;t yet reached 1-5 units (Yardi Breeze starts to make sense above that).</li>
+                <li>
+                  You haven&apos;t yet reached 1-5 units (Yardi Breeze starts to
+                  make sense above that).
+                </li>
                 <li>You want a free tier — no commitment.</li>
               </ul>
             </div>
@@ -150,8 +242,14 @@ export default function VsYardiBreezePage() {
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You own 5-100 units and need PM-grade ops + accounting.</li>
-                <li>You need rent collection, lease management, work orders, owner reports.</li>
-                <li>You want Yardi-level data quality but priced for small portfolios.</li>
+                <li>
+                  You need rent collection, lease management, work orders, owner
+                  reports.
+                </li>
+                <li>
+                  You want Yardi-level data quality but priced for small
+                  portfolios.
+                </li>
                 <li>You may manage on behalf of other owners.</li>
               </ul>
             </div>
@@ -164,7 +262,8 @@ export default function VsYardiBreezePage() {
             Feature-by-feature
           </h2>
           <p className="text-base text-muted-foreground mb-6 leading-relaxed">
-            Side-by-side on every dimension that matters for a comparison-shopping investor.
+            Side-by-side on every dimension that matters for a
+            comparison-shopping investor.
           </p>
           <div className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
@@ -183,7 +282,10 @@ export default function VsYardiBreezePage() {
               </thead>
               <tbody>
                 {MATRIX.map((row) => (
-                  <tr key={row.feature} className="border-t border-border align-top">
+                  <tr
+                    key={row.feature}
+                    className="border-t border-border align-top"
+                  >
                     <td className="py-3 px-3 text-sm font-semibold text-foreground">
                       <div className="flex items-center gap-2">
                         <WinnerBadge winner={row.winner} side="row" />
@@ -208,9 +310,14 @@ export default function VsYardiBreezePage() {
             </table>
           </div>
           <p className="mt-3 text-[11px] text-muted-foreground">
-            Yardi Breeze details based on publicly available product info as of 2026.
-            See{" "}
-            <a href="https://yardibreeze.com" target="_blank" rel="noopener" className="underline">
+            Yardi Breeze details based on publicly available product info as of
+            2026. See{" "}
+            <a
+              href="https://yardibreeze.com"
+              target="_blank"
+              rel="noopener"
+              className="underline"
+            >
               yardibreeze.com
             </a>{" "}
             for their current state.
@@ -224,25 +331,47 @@ export default function VsYardiBreezePage() {
           </h2>
           <ol className="space-y-2.5 text-sm sm:text-base leading-relaxed text-foreground list-decimal pl-5">
             <li>
-              <strong>Underwrite the next acquisition in TrueCap.</strong> Cap rate, DSCR, cash flow, projection.
+              <strong>Underwrite the next acquisition in TrueCap.</strong> Cap
+              rate, DSCR, cash flow, projection.
             </li>
             <li>
-              <strong>Close + onboard the property in Yardi Breeze.</strong> Set up the unit, accept applications, start rent collection.
+              <strong>Close + onboard the property in Yardi Breeze.</strong> Set
+              up the unit, accept applications, start rent collection.
             </li>
             <li>
-              <strong>Operate in Yardi Breeze.</strong> Rent comes in, expenses get logged, owner reports build themselves.
+              <strong>Operate in Yardi Breeze.</strong> Rent comes in, expenses
+              get logged, owner reports build themselves.
             </li>
             <li>
-              <strong>Annual review in TrueCap.</strong> Pull Yardi Breeze actuals; re-run TrueCap with real numbers. Use the delta as input to the next acquisition.
+              <strong>Annual review in TrueCap.</strong> Pull Yardi Breeze
+              actuals; re-run TrueCap with real numbers. Use the delta as input
+              to the next acquisition.
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Want the acquisition math on its own?{" "}
-            <Link href="/blog/how-to-calculate-noi-rental-property" className="font-semibold text-primary hover:underline">How to calculate NOI</Link> rebuilds
-            the number Yardi Breeze reports after the fact, and{" "}
-            <Link href="/blog/how-to-calculate-dscr" className="font-semibold text-primary hover:underline">how to calculate DSCR</Link> shows the ratio your
-            lender checks before you get there. When it is time to underwrite the next
-            building, the full <Link href="/" className="font-semibold text-primary hover:underline">TrueCap analyzer</Link> runs both from an address.
+            <Link
+              href="/blog/how-to-calculate-noi-rental-property"
+              className="font-semibold text-primary hover:underline"
+            >
+              How to calculate NOI
+            </Link>{" "}
+            rebuilds the number Yardi Breeze reports after the fact, and{" "}
+            <Link
+              href="/blog/how-to-calculate-dscr"
+              className="font-semibold text-primary hover:underline"
+            >
+              how to calculate DSCR
+            </Link>{" "}
+            shows the ratio your lender checks before you get there. When it is
+            time to underwrite the next building, the full{" "}
+            <Link
+              href="/"
+              className="font-semibold text-primary hover:underline"
+            >
+              TrueCap analyzer
+            </Link>{" "}
+            runs both from an address.
           </p>
         </section>
 
@@ -256,8 +385,8 @@ export default function VsYardiBreezePage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro adds 10-year cash-flow and equity projections, sensitivity,
-            Offer Ceiling, co-branded share links, and PDF reports with Pro; see live pricing for current terms.
-            No card to start.
+            Offer Ceiling, co-branded share links, and PDF reports with Pro; see
+            live pricing for current terms. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -279,11 +408,26 @@ export default function VsYardiBreezePage() {
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}
-          <Link href="/vs/buildium" className="font-bold text-foreground hover:underline">TrueCap vs Buildium</Link>
+          <Link
+            href="/vs/buildium"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs Buildium
+          </Link>
           {" · "}
-          <Link href="/vs/rentec-direct" className="font-bold text-foreground hover:underline">TrueCap vs Rentec Direct</Link>
+          <Link
+            href="/vs/rentec-direct"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs Rentec Direct
+          </Link>
           {" · "}
-          <Link href="/vs/appfolio" className="font-bold text-foreground hover:underline">TrueCap vs AppFolio</Link>
+          <Link
+            href="/vs/appfolio"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs AppFolio
+          </Link>
         </footer>
       </main>
       <SiteFooter />
@@ -297,7 +441,9 @@ const YARDI_BREEZE_FAQ: FaqItem[] = [
     question: "Is TrueCap a Yardi Breeze alternative?",
     answer: (
       <>
-        No — different stages. Yardi Breeze operates rentals you own. TrueCap underwrites rentals you&apos;re considering buying. Landlords with 5-100 units typically use both.
+        No — different stages. Yardi Breeze operates rentals you own. TrueCap
+        underwrites rentals you&apos;re considering buying. Landlords with 5-100
+        units typically use both.
       </>
     ),
     plainTextAnswer:
@@ -307,7 +453,10 @@ const YARDI_BREEZE_FAQ: FaqItem[] = [
     question: "Yardi Breeze vs Buildium — which one?",
     answer: (
       <>
-        Close call. Yardi Breeze inherits Yardi&apos;s enterprise data quality + reporting at small-business pricing. Buildium has a slightly cleaner UX and a larger ecosystem of integrations. Both serve 5-100 unit landlords. Pricing structures differ; demo both before committing.
+        Close call. Yardi Breeze inherits Yardi&apos;s enterprise data quality +
+        reporting at small-business pricing. Buildium has a slightly cleaner UX
+        and a larger ecosystem of integrations. Both serve 5-100 unit landlords.
+        Pricing structures differ; demo both before committing.
       </>
     ),
     plainTextAnswer:
@@ -317,7 +466,10 @@ const YARDI_BREEZE_FAQ: FaqItem[] = [
     question: "Does Yardi Breeze have a free tier?",
     answer: (
       <>
-        No — paid only with a demo. Pricing starts around $1-2/unit/month with a $100 minimum (as of 2026), which means even with 1 unit you&apos;d pay $100/month. For solo landlords below 50 units, TurboTenant or Avail (both free) are often more practical entry points.
+        No — paid only with a demo. Pricing starts around $1-2/unit/month with a
+        $100 minimum (as of 2026), which means even with 1 unit you&apos;d pay
+        $100/month. For solo landlords below 50 units, TurboTenant or Avail
+        (both free) are often more practical entry points.
       </>
     ),
     plainTextAnswer:
@@ -327,7 +479,9 @@ const YARDI_BREEZE_FAQ: FaqItem[] = [
     question: "Can Yardi Breeze underwrite new deals?",
     answer: (
       <>
-        No — it&apos;s operational only. Pre-purchase underwriting (cap rate, DSCR, cash flow, projection) needs a separate calculator like TrueCap, DealCheck, or your spreadsheet.
+        No — it&apos;s operational only. Pre-purchase underwriting (cap rate,
+        DSCR, cash flow, projection) needs a separate calculator like TrueCap,
+        DealCheck, or your spreadsheet.
       </>
     ),
     plainTextAnswer:
@@ -337,7 +491,9 @@ const YARDI_BREEZE_FAQ: FaqItem[] = [
     question: "When should I upgrade from TurboTenant to Yardi Breeze?",
     answer: (
       <>
-        Typical signal: 10+ units, you want owner reports for partners or LPs, and you&apos;ve outgrown TurboTenant&apos;s accounting features. Below that threshold, the $100/mo minimum at Yardi Breeze isn&apos;t worth it.
+        Typical signal: 10+ units, you want owner reports for partners or LPs,
+        and you&apos;ve outgrown TurboTenant&apos;s accounting features. Below
+        that threshold, the $100/mo minimum at Yardi Breeze isn&apos;t worth it.
       </>
     ),
     plainTextAnswer:
@@ -354,10 +510,14 @@ function WinnerBadge({
 }) {
   if (side === "row") return null;
   if (winner === "tie") {
-    return <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />;
+    return (
+      <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />
+    );
   }
   if (winner === side) {
-    return <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />;
+    return (
+      <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />
+    );
   }
   return <X className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/50" />;
 }

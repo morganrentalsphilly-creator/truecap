@@ -91,51 +91,51 @@ type SequenceEmail = {
 const SEQUENCE: SequenceEmail[] = [
   {
     delayDays: 0,
-    subject: "Your rental underwriting checklist (the 7 numbers)",
+    subject: "Your preliminary-screen review checklist (7 items)",
     build: ({ addressHtml, siteUrlHtml }) => `<!DOCTYPE html>
 <html><body style="margin:0;padding:0;background:#f6f7fb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#111827;">
 <div style="max-width:560px;margin:32px auto;padding:32px 24px;background:#fff;border-radius:16px;border:1px solid #e5e7eb;">
-  <h1 style="margin:0 0 12px 0;font-size:22px;font-weight:800;line-height:1.2;">The 7 numbers I run before any offer</h1>
+  <h1 style="margin:0 0 12px 0;font-size:22px;font-weight:800;line-height:1.2;">7 items to review after a preliminary screen</h1>
   <p style="margin:0 0 16px 0;color:#374151;line-height:1.6;font-size:15px;">
-    Thanks for running ${addressHtml ? `<strong>${addressHtml}</strong>` : "that deal"} through TrueCap. Here's the checklist it's built on — the numbers that decide whether a rental actually makes money. Steal it for every deal:
+    Thanks for screening ${addressHtml ? `<strong>${addressHtml}</strong>` : "that property"} in TrueCap. These modeled metrics and inputs can organize follow-up questions, but they do not decide whether a rental will make money:
   </p>
   <ol style="margin:0 0 20px 0;padding-left:20px;color:#374151;line-height:1.7;font-size:15px;">
-    <li><strong>Cap rate</strong> — NOI &divide; price (NOI <em>after</em> vacancy + management).</li>
-    <li><strong>Cash-on-cash</strong> — the return on the cash you actually put in.</li>
-    <li><strong>DSCR</strong> — what the lender checks. Under ~1.2 is a hard conversation.</li>
-    <li><strong>Cash flow after reserves</strong> — only real once CapEx + vacancy + maintenance are set aside.</li>
-    <li><strong>Sensitivity</strong> — does it survive a 10% rent drop or a 1-point rate bump?</li>
-    <li><strong>10-year projection</strong> — year-1 cash flow lies; model rent + expense growth.</li>
+    <li><strong>Cap rate</strong> — modeled NOI &divide; price; confirm the income, expense, and reserve convention.</li>
+    <li><strong>Cash-on-cash</strong> — modeled annual pre-tax cash flow &divide; entered cash invested.</li>
+    <li><strong>DSCR</strong> — compare the screen's NOI and debt-service convention with written lender requirements; TrueCap does not predict approval.</li>
+    <li><strong>Cash flow</strong> — review vacancy, maintenance, capital reserves, management, taxes, insurance, utilities, HOA dues, and other applicable lines.</li>
+    <li><strong>Sensitivity</strong> — compare the preset rent, vacancy, and rate scenarios without treating a row as a pass/fail test.</li>
+    <li><strong>10-year planning view</strong> — treat editable rent, expense, value, and financing assumptions as scenarios, not forecasts.</li>
     <li><strong>The evidence</strong> — replace every area-level benchmark with a property-specific quote, record, or inspection finding.</li>
   </ol>
   <p style="margin:0 0 20px 0;color:#374151;line-height:1.6;font-size:15px;">
     The free screen covers cap rate, cash-on-cash, DSCR, cash flow, a secondary Screening Index, and selected-rule fit. The index is for triage—not evidence readiness, an appraisal, lender approval, or investment advice. Pro adds sensitivity, 10-year cash-flow and equity projections, comparison tools, and review reports. Review every starting assumption before relying on the result.
   </p>
   <div style="text-align:center;margin:24px 0;">
-    <a href="${siteUrlHtml}" style="display:inline-block;background:#0070c4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">Run a deal in 60 seconds</a>
+      <a href="${siteUrlHtml}" style="display:inline-block;background:#0070c4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">Review another preliminary screen</a>
   </div>
   <p style="margin:0;color:#9ca3af;font-size:12px;line-height:1.5;text-align:center;">— Morgan, founder · usetruecap.com</p>
 </div></body></html>`,
   },
   {
     delayDays: 2,
-    subject: "5 metrics most investors forget",
+    subject: "5 operating inputs to verify",
     build: ({ siteUrlHtml }) => `<!DOCTYPE html>
 <html><body style="margin:0;padding:0;background:#f6f7fb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#111827;">
 <div style="max-width:560px;margin:32px auto;padding:32px 24px;background:#fff;border-radius:16px;border:1px solid #e5e7eb;">
-  <h1 style="margin:0 0 12px 0;font-size:22px;font-weight:800;line-height:1.2;">5 metrics most investors forget</h1>
+  <h1 style="margin:0 0 12px 0;font-size:22px;font-weight:800;line-height:1.2;">5 operating inputs to verify</h1>
   <p style="margin:0 0 16px 0;color:#374151;line-height:1.6;font-size:15px;">
-    Quick read — the 5 lines that turn a "decent deal" into a money-loser, ranked by how often I see them missed:
+    These categories are easy to omit or estimate too broadly. Verify the ones that apply to the property instead of relying on a universal percentage:
   </p>
   <ol style="margin:0 0 20px 0;padding-left:20px;color:#374151;line-height:1.7;font-size:15px;">
-    <li><strong>Vacancy reserve</strong> — 5–8% of rent. Most spreadsheets pretend it's 0.</li>
-    <li><strong>CapEx reserve</strong> — 5–10% of rent. Roof, HVAC, water heater compound.</li>
-    <li><strong>Real maintenance</strong> — 5–10%, more on older properties.</li>
-    <li><strong>Property management</strong> — 8–10% even if you self-manage (your time isn't free).</li>
+    <li><strong>Vacancy</strong> — use lease history and current local evidence; turnover timing and cost can differ.</li>
+    <li><strong>Capital reserves</strong> — connect the input to property age, condition, inspection findings, and planned work.</li>
+    <li><strong>Maintenance</strong> — distinguish recurring work from capital projects and obtain property-specific evidence.</li>
+    <li><strong>Property management</strong> — use an actual scope and fee quote; a zero cash fee for self-management does not value your time.</li>
     <li><strong>Property-tax changes</strong> — reassessment rules vary by jurisdiction and transfer.</li>
   </ol>
   <p style="margin:0 0 20px 0;color:#374151;line-height:1.6;font-size:15px;">
-    TrueCap starts with editable reserve assumptions and a state-level tax estimate. Replace them with property-specific figures before making an offer.
+    TrueCap starts with editable reserve assumptions and a disclosed generic tax fallback. Enter a local annual tax bill or reviewed rate and replace every estimate with property-specific evidence before making an offer.
   </p>
   <div style="text-align:center;margin:24px 0;">
     <a href="${siteUrlHtml}" style="display:inline-block;background:#0070c4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;">Re-run your deal</a>
@@ -145,11 +145,11 @@ const SEQUENCE: SequenceEmail[] = [
   },
   {
     delayDays: 5,
-    subject: "What does year 10 actually look like?",
+    subject: "Review a 10-year planning scenario",
     build: ({ siteUrlHtml }) => `<!DOCTYPE html>
 <html><body style="margin:0;padding:0;background:#f6f7fb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#111827;">
 <div style="max-width:560px;margin:32px auto;padding:32px 24px;background:#fff;border-radius:16px;border:1px solid #e5e7eb;">
-  <h1 style="margin:0 0 12px 0;font-size:22px;font-weight:800;line-height:1.2;">What does year 10 actually look like?</h1>
+  <h1 style="margin:0 0 12px 0;font-size:22px;font-weight:800;line-height:1.2;">What does the entered year-10 scenario show?</h1>
   <p style="margin:0 0 16px 0;color:#374151;line-height:1.6;font-size:15px;">
     Year-one cash flow is only one part of the acquisition decision. Rent and
     expenses can change and debt pays down, so a longer hold view can differ
@@ -220,8 +220,7 @@ export async function capturePostAnalysisEmail(input: {
     return {
       ok: false,
       code: "VALIDATION_ERROR",
-      message:
-        parsed.error.issues[0]?.message ?? "Please enter a valid email.",
+      message: parsed.error.issues[0]?.message ?? "Please enter a valid email.",
     };
   }
   // Honeypot tripped → pretend it worked, send nothing. Never tell a bot why.
@@ -266,7 +265,8 @@ export async function capturePostAnalysisEmail(input: {
       return {
         ok: false,
         code: "SEND_FAILED",
-        message: "We couldn't send your checklist right now. Please try again in a minute.",
+        message:
+          "We couldn't send your checklist right now. Please try again in a minute.",
       };
     }
     // IP_LIMIT / GLOBAL_LIMIT. The guard charges the global budget only for
@@ -308,7 +308,9 @@ export async function capturePostAnalysisEmail(input: {
   const replyTo = process.env.EMAIL_REPLY_TO || "hello@usetruecap.com";
   // EMAIL_REPLY_TO may carry a display name ("TrueCap <hello@…>"); the
   // List-Unsubscribe mailto: needs the bare address.
-  const unsubscribeMailbox = (replyTo.match(/<([^>]+)>/)?.[1] ?? replyTo).trim();
+  const unsubscribeMailbox = (
+    replyTo.match(/<([^>]+)>/)?.[1] ?? replyTo
+  ).trim();
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://usetruecap.com";
   const postAnalysisOffer = getPostAnalysisOfferConfig();
   const couponCode = postAnalysisOffer.code;
@@ -325,10 +327,15 @@ export async function capturePostAnalysisEmail(input: {
   // day 0 sends immediately (we just don't pass scheduled_at).
   let scheduledCount = 0;
   let day0Sent = false;
-  const failures: Array<{ delayDays: number; status: number | "thrown"; body: string }> = [];
+  const failures: Array<{
+    delayDays: number;
+    status: number | "thrown";
+    body: string;
+  }> = [];
 
   const enabledSequence = SEQUENCE.filter(
-    (item) => !item.requiresConfiguredOffer || postAnalysisOffer.canSendPromotion
+    (item) =>
+      !item.requiresConfiguredOffer || postAnalysisOffer.canSendPromotion,
   );
 
   for (const item of enabledSequence) {
@@ -349,7 +356,9 @@ export async function capturePostAnalysisEmail(input: {
       },
     };
     if (item.delayDays > 0) {
-      const future = new Date(Date.now() + item.delayDays * 24 * 60 * 60 * 1000);
+      const future = new Date(
+        Date.now() + item.delayDays * 24 * 60 * 60 * 1000,
+      );
       payload.scheduled_at = future.toISOString();
     }
     try {
@@ -367,7 +376,11 @@ export async function capturePostAnalysisEmail(input: {
       });
       if (!res.ok) {
         const text = await res.text().catch(() => "");
-        failures.push({ delayDays: item.delayDays, status: res.status, body: text.slice(0, 500) });
+        failures.push({
+          delayDays: item.delayDays,
+          status: res.status,
+          body: text.slice(0, 500),
+        });
         continue;
       }
       scheduledCount += 1;
@@ -403,7 +416,7 @@ export async function capturePostAnalysisEmail(input: {
           // Sentry; the failure pattern (status code + body) is what
           // we need to debug.
         },
-      }
+      },
     );
   }
 
@@ -417,7 +430,8 @@ export async function capturePostAnalysisEmail(input: {
       code: "SEND_FAILED",
       // User-facing message — friendly, no raw status codes. The real
       // detail is in Sentry per the captureMessage above.
-      message: "We couldn't send your analysis right now. Please try again in a minute.",
+      message:
+        "We couldn't send your analysis right now. Please try again in a minute.",
     };
   }
 

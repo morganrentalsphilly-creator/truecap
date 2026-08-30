@@ -25,7 +25,10 @@ import { releasedInvestmentFormSchema } from "@/lib/underwriting-model-release";
 import { resolvePublicShare } from "@/lib/public-share";
 import { getPublicAgentBranding } from "@/lib/agent-share";
 import { getPublicDealComps } from "@/lib/public-deal-comps";
-import { hashShareValues, signShareAttribution } from "@/lib/share-attribution";
+import {
+  hashShareValues,
+  signLeadCaptureAuthorization,
+} from "@/lib/share-attribution";
 import { SharedDealShell } from "@/components/investcalc/shared-deal-shell";
 import { canShowSharedProAnalysis } from "@/lib/public-share-access";
 import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
@@ -118,7 +121,13 @@ export default async function OpaqueSharePage({ params }: Props) {
   // oracle for anyone testing candidate listings.
   const valuesHash = hashShareValues(displayValues);
   const sig = ownerId
-    ? signShareAttribution({ ownerId, dealId, valuesHash })
+    ? signLeadCaptureAuthorization({
+        shareSurface: "opaque_share",
+        ownerId,
+        dealId,
+        valuesHash,
+        dealAddress: displayValues.address,
+      })
     : null;
   const displayMaoTargetSource: OfferCeilingTargetSource =
     resolved.snapshot.maoTargetSource ?? "selected-targets";
@@ -141,6 +150,8 @@ export default async function OpaqueSharePage({ params }: Props) {
 
   return (
     <SharedDealShell
+      shareSurface="opaque_share"
+      copyShareToken={token}
       values={displayValues}
       analysis={buildPublicShareAnalysisPayload(result, showProAnalysis)}
       comps={addressVisible ? comps : null}
@@ -163,7 +174,14 @@ export default async function OpaqueSharePage({ params }: Props) {
       analyzerStrategyKey={resolved.snapshot.analyzerStrategyKey ?? "buy-hold"}
       leadCapture={
         agent && ownerId
-          ? { ownerId, dealId, valuesHash, sig: sig ?? undefined }
+          ? {
+              shareSurface: "opaque_share",
+              ownerId,
+              dealId,
+              valuesHash,
+              sig: sig ?? undefined,
+              opaqueShareToken: token,
+            }
           : undefined
       }
     />

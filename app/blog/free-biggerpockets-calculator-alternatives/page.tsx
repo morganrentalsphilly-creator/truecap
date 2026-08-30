@@ -20,7 +20,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Calculator } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
@@ -58,7 +58,12 @@ export const metadata: Metadata = {
     modifiedTime: MODIFIED_AT,
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: TITLE_PLAIN }],
   },
-  twitter: { card: "summary_large_image", title: TITLE_PLAIN, description: DESCRIPTION, images: ["/home.jpg"] },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE_PLAIN,
+    description: DESCRIPTION,
+    images: ["/home.jpg"],
+  },
 };
 
 type Tool = {
@@ -84,7 +89,7 @@ const TOOLS: Tool[] = [
       "Full disclosure: TrueCap is our tool. We put it first because the free tier does the same job as the BP rental calculator — with no report count to run out of. The side-by-side comparison shows where BiggerPockets still wins.",
     freeCovers: [
       "Cap rate, cash-on-cash, DSCR, NCF, monthly cash flow — unlimited, no signup",
-      "Address auto-fill: HUD rent + FRED mortgage rate + state property tax",
+      "Editable HUD rent + FRED mortgage-rate benchmarks; manual local property tax",
       "Selected-rule fit, with a secondary Screening Index",
       "Every operating expense line the BP form collects",
       "Save up to 5 deals + dashboard access",
@@ -225,7 +230,12 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
     image: [`${siteUrl}/home.jpg`],
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
-    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
+    author: {
+      "@type": "Person",
+      "@id": `${siteUrl}/about#morgan`,
+      name: "Morgan Page",
+      url: `${siteUrl}/about`,
+    },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
   };
@@ -235,7 +245,12 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
-      { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: `${siteUrl}/blog`,
+      },
       { "@type": "ListItem", position: 3, name: TITLE_PLAIN, item: url },
     ],
   };
@@ -263,14 +278,29 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
 
   return (
     <div className="min-h-screen bg-background">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
 
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-2">
-          <Link href="/blog" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">
+          <Link
+            href="/blog"
+            className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+          >
             ← TrueCap Blog
           </Link>
         </div>
@@ -287,31 +317,33 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
               The BiggerPockets calculators are good — the catch is the meter.
               Free members get 5 calculator reports, and after that the
               calculators sit behind BiggerPockets Pro at $39/month or $390/year
-              (as of July 2026). If you&apos;re analyzing deals every week,
-              five reports lasts an afternoon. Here are six genuinely free
+              (as of July 2026). If you&apos;re analyzing deals every week, five
+              reports lasts an afternoon. Here are six genuinely free
               alternatives — including one we make, clearly labeled — plus an
               honest note on when Pro is actually the right buy.
             </p>
-            <p className="mt-4 text-xs text-muted-foreground">Published {PUBLISHED_AT} · Updated {MODIFIED_AT}</p>
+            <p className="mt-4 text-xs text-muted-foreground">
+              Published {PUBLISHED_AT} · Updated {MODIFIED_AT}
+            </p>
             <BlogByline />
           </header>
 
           <section className="mb-10 rounded-2xl border border-border bg-card p-5 sm:p-6">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">Quick answer</h2>
+            <h2 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">
+              Quick answer
+            </h2>
             <p className="text-sm sm:text-base leading-relaxed text-foreground">
-              <strong>TrueCap</strong>{" "}
-              (that&apos;s us) is the closest free replacement — unlimited preliminary
-              rental screens, no signup, with labeled rent, rate, and tax starting points.{" "}
-              <strong>DealCheck&apos;s free Starter plan</strong>{" "}
-              adds saving (up to 15 properties) and native apps.{" "}
-              <strong>Calculator.net</strong>{" "}
-              is the no-signup one-pager, <strong>Stessa</strong>{" "}
-              publishes a marketplace acquisition workflow and a free
-              accounting entry plan, <strong>RentCast</strong>{" "}
-              gives you a free rent number, and a{" "}
-              <strong>spreadsheet</strong>{" "}
-              — including BiggerPockets&apos; own free templates — remains the
-              fully-manual fallback.
+              <strong>TrueCap</strong> (that&apos;s us) is the closest free
+              replacement — unlimited preliminary rental screens, no signup,
+              with labeled rent, rate, and tax starting points.{" "}
+              <strong>DealCheck&apos;s free Starter plan</strong> adds saving
+              (up to 15 properties) and native apps.{" "}
+              <strong>Calculator.net</strong> is the no-signup one-pager,{" "}
+              <strong>Stessa</strong> publishes a marketplace acquisition
+              workflow and a free accounting entry plan,{" "}
+              <strong>RentCast</strong> gives you a free rent number, and a{" "}
+              <strong>spreadsheet</strong> — including BiggerPockets&apos; own
+              free templates — remains the fully-manual fallback.
             </p>
           </section>
 
@@ -322,17 +354,32 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
               <table className="w-full text-sm">
                 <thead className="bg-muted/40">
                   <tr className="text-left">
-                    <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Tool</th>
-                    <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Pricing (July 2026)</th>
-                    <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Best for</th>
+                    <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                      Tool
+                    </th>
+                    <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                      Pricing (July 2026)
+                    </th>
+                    <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                      Best for
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {TABLE_ROWS.map((row) => (
-                    <tr key={row.name} className="border-t border-border align-top">
-                      <td className="py-3 px-3 text-sm font-semibold text-foreground">{row.name}</td>
-                      <td className="py-3 px-3 text-xs leading-relaxed text-foreground/85">{row.pricing}</td>
-                      <td className="py-3 px-3 text-xs leading-relaxed text-foreground/85">{row.bestFor}</td>
+                    <tr
+                      key={row.name}
+                      className="border-t border-border align-top"
+                    >
+                      <td className="py-3 px-3 text-sm font-semibold text-foreground">
+                        {row.name}
+                      </td>
+                      <td className="py-3 px-3 text-xs leading-relaxed text-foreground/85">
+                        {row.pricing}
+                      </td>
+                      <td className="py-3 px-3 text-xs leading-relaxed text-foreground/85">
+                        {row.bestFor}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -342,7 +389,10 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
             <h2>The 6 alternatives, ranked</h2>
 
             {TOOLS.map((t) => (
-              <div key={t.name} className="not-prose mb-8 rounded-2xl border border-border bg-card p-5 sm:p-6">
+              <div
+                key={t.name}
+                className="not-prose mb-8 rounded-2xl border border-border bg-card p-5 sm:p-6"
+              >
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div>
                     <div className="text-[11px] font-bold uppercase tracking-widest text-primary mb-1.5">
@@ -353,12 +403,20 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
                     </h3>
                   </div>
                   {t.url.startsWith("/") ? (
-                    <Link href={t.url} className="shrink-0 inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline">
+                    <Link
+                      href={t.url}
+                      className="shrink-0 inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline"
+                    >
                       Side-by-side
                       <ArrowUpRight className="size-3" />
                     </Link>
                   ) : (
-                    <a href={t.url} target="_blank" rel="noopener" className="shrink-0 inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline">
+                    <a
+                      href={t.url}
+                      target="_blank"
+                      rel="noopener"
+                      className="shrink-0 inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline"
+                    >
                       Visit
                       <ArrowUpRight className="size-3" />
                     </a>
@@ -370,7 +428,8 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
                   </p>
                 ) : null}
                 <p className="text-sm text-muted-foreground mb-4">
-                  <strong className="text-foreground">Pricing:</strong> {t.pricing}
+                  <strong className="text-foreground">Pricing:</strong>{" "}
+                  {t.pricing}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div>
@@ -380,7 +439,9 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
                     <ul className="space-y-1.5 text-sm text-foreground">
                       {t.freeCovers.map((p) => (
                         <li key={p} className="flex gap-2">
-                          <span className="text-[var(--brand-green)] shrink-0">+</span>
+                          <span className="text-[var(--brand-green)] shrink-0">
+                            +
+                          </span>
                           <span>{p}</span>
                         </li>
                       ))}
@@ -393,7 +454,9 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
                     <ul className="space-y-1.5 text-sm text-foreground">
                       {t.freeGates.map((p) => (
                         <li key={p} className="flex gap-2">
-                          <span className="text-muted-foreground/60 shrink-0">−</span>
+                          <span className="text-muted-foreground/60 shrink-0">
+                            −
+                          </span>
                           <span>{p}</span>
                         </li>
                       ))}
@@ -417,19 +480,34 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
               itself before you ever open the rental calculator. Buy it for the
               ecosystem. If the calculator is the only part you&apos;d use, the
               free tools above cover the same math — our{" "}
-              <Link href="/vs/biggerpockets-calculator" className="font-semibold text-primary hover:underline">TrueCap vs BiggerPockets comparison</Link>{" "}
+              <Link
+                href="/vs/biggerpockets-calculator"
+                className="font-semibold text-primary hover:underline"
+              >
+                TrueCap vs BiggerPockets comparison
+              </Link>{" "}
               lists the cases where staying put is the right answer.
             </p>
 
             <h2>FAQ</h2>
             <div className="not-prose space-y-3">
               {FAQ_ITEMS.map((item) => (
-                <details key={item.q} className="group rounded-xl border border-border bg-card p-4 sm:p-5">
+                <details
+                  key={item.q}
+                  className="group rounded-xl border border-border bg-card p-4 sm:p-5"
+                >
                   <summary className="cursor-pointer list-none flex items-start justify-between gap-3 font-bold text-sm sm:text-base text-foreground">
                     <span>{item.q}</span>
-                    <span aria-hidden className="mt-1 size-5 shrink-0 rounded-full border border-border text-muted-foreground text-xs leading-none flex items-center justify-center transition-transform group-open:rotate-45">+</span>
+                    <span
+                      aria-hidden
+                      className="mt-1 size-5 shrink-0 rounded-full border border-border text-muted-foreground text-xs leading-none flex items-center justify-center transition-transform group-open:rotate-45"
+                    >
+                      +
+                    </span>
                   </summary>
-                  <div className="mt-3 text-sm text-muted-foreground leading-relaxed">{item.a}</div>
+                  <div className="mt-3 text-sm text-muted-foreground leading-relaxed">
+                    {item.a}
+                  </div>
                 </details>
               ))}
             </div>
@@ -437,26 +515,48 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
             <h2>Run your next deal free</h2>
             <p>
               The fastest test is your own deal: run the same property through a
-              free tool and compare it against your last BP report. TrueCap&apos;s
-              core underwriting is free with no signup and no report count — or
-              start with a single metric via the{" "}
-              <Link href="/tools/1-percent-rule-calculator" className="font-semibold text-primary hover:underline">1% rule calculator</Link>,{" "}
-              <Link href="/tools/rehab-cost-estimator" className="font-semibold text-primary hover:underline">rehab cost estimator</Link>, or{" "}
-              <Link href="/tools/70-percent-rule-calculator" className="font-semibold text-primary hover:underline">70% rule calculator</Link>. If
-              you&apos;re comparing paid tools too, the wider roundup is in our{" "}
-              <Link href="/blog/best-rental-property-calculator-2026" className="font-semibold text-primary hover:underline">best rental property calculators of 2026</Link>.
-            </p>
-            <p className="not-prose">
-              <Link href="/" className="inline-flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-5 py-3 font-bold hover:opacity-90">
-                <Calculator className="w-4 h-4" />
-                Run a deal — 60 seconds
-                <ArrowUpRight className="w-4 h-4" />
+              free tool and compare it against your last BP report.
+              TrueCap&apos;s core underwriting is free with no signup and no
+              report count — or start with a single metric via the{" "}
+              <Link
+                href="/tools/1-percent-rule-calculator"
+                className="font-semibold text-primary hover:underline"
+              >
+                1% rule calculator
               </Link>
+              ,{" "}
+              <Link
+                href="/tools/rehab-cost-estimator"
+                className="font-semibold text-primary hover:underline"
+              >
+                rehab cost estimator
+              </Link>
+              , or{" "}
+              <Link
+                href="/tools/70-percent-rule-calculator"
+                className="font-semibold text-primary hover:underline"
+              >
+                70% rule calculator
+              </Link>
+              . If you&apos;re comparing paid tools too, the wider roundup is in
+              our{" "}
+              <Link
+                href="/blog/best-rental-property-calculator-2026"
+                className="font-semibold text-primary hover:underline"
+              >
+                best rental property calculators of 2026
+              </Link>
+              .
             </p>
+            <p className="not-prose"></p>
           </div>
 
-          <div className="mt-10"><NewsletterSignup /></div>
-          <div className="mt-10"><RelatedBlogPosts currentSlug={SLUG} limit={3} /></div>
+          <div className="mt-10">
+            <NewsletterSignup />
+          </div>
+          <div className="mt-10">
+            <RelatedBlogPosts currentSlug={SLUG} limit={3} />
+          </div>
         </article>
       </main>
 
