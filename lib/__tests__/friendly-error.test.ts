@@ -26,10 +26,24 @@ describe("friendlyErrorMessage", () => {
     );
   });
 
-  it("maps an RLS denial to a refresh-and-sign-in line", () => {
+  it("maps an RLS denial without blaming the account or prescribing sign-in", () => {
+    const message = friendlyErrorMessage(
+      new Error("new row violates row-level security policy"),
+    );
+    expect(message).toBe(
+      "We couldn't verify access for that action. Nothing was changed. Try again; if it keeps happening, contact support.",
+    );
+    expect(message).not.toMatch(/you don't have access|sign in/i);
+  });
+
+  it("maps a telemetry-safe session verification failure to retryable copy", () => {
     expect(
-      friendlyErrorMessage(new Error("new row violates row-level security policy")),
-    ).toBe("You don't have access to do that. Refresh the page and sign in again.");
+      friendlyErrorMessage(
+        new Error("Browser session verification unavailable during get-user."),
+      ),
+    ).toBe(
+      "We couldn't verify your session right now. Check your connection and try again.",
+    );
   });
 
   it("maps a disabled OAuth provider", () => {
@@ -44,6 +58,14 @@ describe("friendlyErrorMessage", () => {
     expect(friendlyErrorMessage(new Error("JWT expired"))).toBe(
       "Your session expired. Refresh the page and sign in again.",
     );
+  });
+
+  it("maps one-word unauthorized Storage variants to neutral access copy", () => {
+    const message = friendlyErrorMessage(new Error("Unauthorized request"));
+    expect(message).toBe(
+      "We couldn't verify access for that action. Nothing was changed. Try again; if it keeps happening, contact support.",
+    );
+    expect(message).not.toMatch(/sign in|your account/i);
   });
 
   it("maps rate limiting", () => {

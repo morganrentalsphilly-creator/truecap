@@ -62,8 +62,36 @@ describe("revocable public-share copy contract", () => {
     expect(action).toContain("canonicalAnalyticsEventId(");
     expect(action).toContain('"shared_analysis_copied"');
     expect(saved).toContain('.eq("public_share_copy_key", publicShareCopyKey)');
-    expect(saved).toContain('error.code === "23505"');
     expect(saved).toContain("idempotentReplay: true");
+    const scenarioRetryEnd = saved.indexOf(
+      "Several scenarios were added at once",
+    );
+    const insertStart = saved.indexOf(
+      'const { data, error } = await supabase\n    .from("saved_analyses")',
+      scenarioRetryEnd,
+    );
+    const insertEnd = saved.indexOf(
+      "const insertedRevision = parseSavedAnalysisRevision",
+      insertStart,
+    );
+    const insertErrorBlock = saved.slice(insertStart, insertEnd);
+    const replayLookup = insertErrorBlock.indexOf(
+      '.eq("public_share_copy_key", publicShareCopyKey)',
+    );
+    const capacityClassification = insertErrorBlock.indexOf(
+      "isSavedAnalysisPlanCapacityError(error)",
+    );
+    const schemaClassification = insertErrorBlock.indexOf(
+      "isMissingPublicShareCopyKeyColumn(error)",
+    );
+
+    expect(insertStart).toBeGreaterThan(-1);
+    expect(replayLookup).toBeGreaterThan(-1);
+    expect(capacityClassification).toBeGreaterThan(replayLookup);
+    expect(schemaClassification).toBeGreaterThan(replayLookup);
+    expect(insertErrorBlock).not.toContain(
+      'publicShareCopyKey && error.code === "23505"',
+    );
     expect(migration).toContain(
       "create unique index if not exists saved_analyses_public_share_copy_key_unique",
     );

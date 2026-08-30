@@ -18,6 +18,12 @@ describe("strategy scenario persistence", () => {
     );
   });
 
+  it("treats PostgREST schema-cache rollout misses as migration pending", () => {
+    expect(source).toContain('error.code === "PGRST202"');
+    expect(source).toContain('error.code === "PGRST204"');
+    expect(source).toContain("could not find .* in the schema cache");
+  });
+
   it("rejects a changed preset against an incompatible frozen methodology", () => {
     expect(source).toContain("adjusted !== baseValues &&");
     expect(source).toContain(
@@ -101,28 +107,98 @@ describe("strategy scenario persistence", () => {
     );
   });
 
-  it("does not return success until the source link and inserted sibling are visible", () => {
-    expect(source).toContain("const { data: linkedSource, error: linkErr }");
-    expect(source).toContain('.is("deleted_at", null)');
-    expect(source).toContain('.is("property_id", null)');
+  it("atomically claims the source property before inserting a visible sibling", () => {
+    expect(source).toContain(
+      '"claim_saved_analysis_property_for_scenario"',
+    );
+    expect(source).toContain("{ p_source_analysis_id: deal.id }");
+    expect(source).toContain("z.string().uuid().safeParse(data)");
+    expect(source).not.toContain('.from("properties")');
+    expect(source).not.toContain(".update({ property_id:");
     expect(source).toContain('.select("id, property_id")');
     expect(source).toContain(
-      "const { data: currentSource, error: currentSourceErr }",
-    );
-    expect(source).toContain("currentPropertyId === propertyId");
-    expect(source).toContain("propertyId: currentPropertyId");
-    expect(source).not.toContain("Reuse an existing property at this address");
-    expect(compactSource).toContain('.from("properties") .delete()');
-    expect(source).toContain(
       "(inserted as { property_id?: unknown }).property_id !== propertyId",
-    );
-    expect(source).not.toContain(
-      "Link the source deal to the property (best-effort)",
     );
     expect(source).toContain(
       "saved_analyses_active_property_scenario_name_uidx",
     );
     expect(source).toContain('code: "DUPLICATE_SCENARIO_NAME"');
+  });
+
+  it("reconciles a durable request key before any capacity or property mutation", () => {
+    const replayLookup = source.indexOf(
+      "const initialReplay = await findScenarioRequest",
+    );
+    const capacity = source.indexOf("hasSavedDealCapacity(entitlements");
+    const propertyMutation = source.indexOf(
+      "const resolved = await claimScenarioPropertyId",
+    );
+
+    expect(source).toContain("clientRequestId: z.string().uuid()");
+    expect(source).toContain('.eq("scenario_request_key", clientRequestId)');
+    expect(replayLookup).toBeGreaterThan(-1);
+    expect(replayLookup).toBeLessThan(capacity);
+    expect(replayLookup).toBeLessThan(propertyMutation);
+    expect(source).toContain("if (row.deleted_at)");
+    expect(source).toContain(
+      "This scenario request was already completed and later removed.",
+    );
+    expect(source).toContain("delete clone.scenario_request_key");
+    expect(source).toContain(
+      "clone.scenario_request_key = parsed.data.clientRequestId",
+    );
+  });
+
+  it("reconciles same-request races before reporting a scenario-name conflict", () => {
+    const clashReplay = source.indexOf("const requestReplay = (clash ?? []).find");
+    const nameConflict = source.indexOf("const nameTaken = (clash ?? []).some");
+    const requestKeyRace = source.indexOf(
+      "isDuplicateScenarioRequestKeyError(insertErr)",
+    );
+    const nameRace = source.indexOf("isDuplicateScenarioNameError(insertErr)");
+
+    expect(source).toContain(
+      "saved_analyses_user_scenario_request_key_uidx",
+    );
+    expect(clashReplay).toBeGreaterThan(-1);
+    expect(clashReplay).toBeLessThan(nameConflict);
+    expect(requestKeyRace).toBeGreaterThan(-1);
+    expect(requestKeyRace).toBeLessThan(nameRace);
+    expect(source).toContain(
+      "if (replay.status !== \"missing\") return replay.result",
+    );
+  });
+
+  it("reconciles every insert error before mapping a last-slot capacity race", () => {
+    const insert = source.indexOf('.insert(clone)');
+    const insertError = source.indexOf("if (insertErr)", insert);
+    const replay = source.indexOf(
+      "const replay = await findScenarioRequest",
+      insertError,
+    );
+    const capacity = source.indexOf(
+      "isSavedAnalysisPlanCapacityError(insertErr)",
+      replay,
+    );
+    const requestConflict = source.indexOf(
+      "isDuplicateScenarioRequestKeyError(insertErr)",
+      capacity,
+    );
+    const nameConflict = source.indexOf(
+      "isDuplicateScenarioNameError(insertErr)",
+      requestConflict,
+    );
+
+    expect(insertError).toBeGreaterThan(insert);
+    expect(replay).toBeGreaterThan(insertError);
+    expect(capacity).toBeGreaterThan(replay);
+    expect(requestConflict).toBeGreaterThan(capacity);
+    expect(nameConflict).toBeGreaterThan(requestConflict);
+    expect(source).toContain('error.code === "23514"');
+    expect(source).toContain("saved_analyses_plan_capacity");
+    expect(source.slice(capacity, requestConflict)).toContain(
+      'code: "ENTITLEMENT_SAVE"',
+    );
   });
 
   it("recognizes legacy Base case rows as the one base scenario", () => {
@@ -138,7 +214,7 @@ describe("strategy scenario persistence", () => {
     );
     const capacity = source.indexOf("hasSavedDealCapacity(entitlements");
     const propertyMutation = source.indexOf(
-      "const resolved = await resolvePropertyId",
+      "const resolved = await claimScenarioPropertyId",
     );
 
     expect(source).toContain("!deal.property_id ||");
@@ -153,7 +229,7 @@ describe("strategy scenario persistence", () => {
       "const transition = buildScenarioStrategyTransition",
     );
     const propertyMutation = source.indexOf(
-      "const resolved = await resolvePropertyId",
+      "const resolved = await claimScenarioPropertyId",
     );
     const clashCheck = source.indexOf(
       "const { data: clash, error: clashErr }",

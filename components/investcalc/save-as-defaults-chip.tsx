@@ -19,6 +19,7 @@ import { Loader2, Save } from "lucide-react";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { saveUserAnalysisDefaultsAction } from "@/app/actions/user-defaults";
 import { useToast } from "@/hooks/use-toast";
+import { useExpectedAccountUserId } from "@/components/auth/account-session-boundary";
 
 /** Form field → user_analysis_defaults key (the only rename is interestRate). */
 const FIELD_TO_DEFAULT: Array<[keyof InvestmentFormValues, string]> = [
@@ -68,6 +69,7 @@ export function SaveAsDefaultsChip({
   currentDefaults?: Record<string, number> | null;
 }) {
   const { toast } = useToast();
+  const expectedUserId = useExpectedAccountUserId();
   const [saving, setSaving] = useState(false);
   // What's persisted right now — starts at the prop, advances on each save so
   // the chip hides the instant the values match what's saved. State, not a
@@ -93,7 +95,10 @@ export function SaveAsDefaultsChip({
   const onSave = async () => {
     setSaving(true);
     try {
-      const result = await saveUserAnalysisDefaultsAction(live);
+      const result = await saveUserAnalysisDefaultsAction(
+        live,
+        expectedUserId,
+      );
       if (result.ok) {
         setSaved(live);
         toast({

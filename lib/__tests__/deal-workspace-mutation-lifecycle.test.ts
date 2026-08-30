@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { isCurrentDealWorkspaceMutation } from "../deal-workspace-mutation-lifecycle";
+import {
+  isCurrentDealWorkspaceMutation,
+  isCurrentMountedMutation,
+} from "../deal-workspace-mutation-lifecycle";
 
 describe("deal workspace mutation lifecycle", () => {
   it("accepts only the request that still owns the current deal", () => {
@@ -43,6 +46,46 @@ describe("deal workspace mutation lifecycle", () => {
         currentDealId: "deal-a",
         requestToken: stale,
         currentRequestToken: current,
+      }),
+    ).toBe(false);
+  });
+
+  it("rejects a completion after layout cleanup unmounts the workspace", () => {
+    const token = Symbol("unmounted-deal");
+    expect(
+      isCurrentDealWorkspaceMutation({
+        submittedDealId: "deal-a",
+        currentDealId: null,
+        requestToken: token,
+        currentRequestToken: null,
+      }),
+    ).toBe(false);
+  });
+});
+
+describe("mounted mutation lifecycle", () => {
+  it("accepts only the request token owned by the mounted instance", () => {
+    const token = Symbol("current-save");
+    expect(
+      isCurrentMountedMutation({
+        requestToken: token,
+        currentRequestToken: token,
+      }),
+    ).toBe(true);
+  });
+
+  it("rejects completions after unmount or request replacement", () => {
+    const stale = Symbol("stale-save");
+    expect(
+      isCurrentMountedMutation({
+        requestToken: stale,
+        currentRequestToken: null,
+      }),
+    ).toBe(false);
+    expect(
+      isCurrentMountedMutation({
+        requestToken: stale,
+        currentRequestToken: Symbol("replacement-save"),
       }),
     ).toBe(false);
   });

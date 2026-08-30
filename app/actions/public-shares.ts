@@ -58,12 +58,17 @@ import {
   normalizeOfferCeilingDecisionBasis,
   OFFER_CEILING_DECISION_BASIS_FIELD,
 } from "@/lib/offer-ceiling-decision-basis";
+import { isExpectedShareOwner } from "@/lib/share-auth-lifecycle";
 
 export type CreatePublicShareResult =
   | { ok: true; url: string; id: string; dealId: string | null }
   | {
       ok: false;
-      code: "SIGN_IN_REQUIRED" | "VALIDATION_ERROR" | "NOT_CONFIGURED";
+      code:
+        | "SIGN_IN_REQUIRED"
+        | "SESSION_CHANGED"
+        | "VALIDATION_ERROR"
+        | "NOT_CONFIGURED";
       message: string;
     };
 
@@ -96,6 +101,7 @@ export async function createPublicShareAction(
   const parsed = z
     .object({
       values: releasedInvestmentFormSchema,
+      expectedUserId: z.string().uuid(),
       title: z.string().trim().max(200).optional(),
       dealId: z.string().uuid().optional(),
       maoTarget: z.unknown().optional(),
@@ -124,6 +130,14 @@ export async function createPublicShareAction(
       ok: false,
       code: "VALIDATION_ERROR",
       message: "Couldn't read this analysis.",
+    };
+  }
+  if (!isExpectedShareOwner(parsed.data.expectedUserId, user.id)) {
+    return {
+      ok: false,
+      code: "SESSION_CHANGED",
+      message:
+        "Your signed-in account changed. Verify the current account and try again.",
     };
   }
   const parsedMaoTarget =
@@ -430,6 +444,9 @@ export async function copyPublicShareToAccountAction(
         ? { analyzerStrategyKey: resolved.snapshot.analyzerStrategyKey }
         : {}),
       purchasePriceEstimated: resolved.snapshot.meta.priceEstimated === true,
+      // This is a server-to-server call. Bind the nested insert to the exact
+      // freshly resolved recipient rather than trusting public-page UI state.
+      expectedUserId: user.id,
     },
   );
   if (!saved.ok) {
@@ -496,6 +513,7 @@ export type ListPublicSharesResult =
       ok: false;
       code:
         | "SIGN_IN_REQUIRED"
+        | "SESSION_CHANGED"
         | "VALIDATION_ERROR"
         | "NOT_CONFIGURED"
         | "SERVER_ERROR";
@@ -505,7 +523,12 @@ export type ListPublicSharesResult =
 export async function listPublicSharesAction(
   input: unknown,
 ): Promise<ListPublicSharesResult> {
-  const parsed = z.object({ offset: z.number().int().min(0) }).safeParse(input);
+  const parsed = z
+    .object({
+      offset: z.number().int().min(0),
+      expectedUserId: z.string().uuid(),
+    })
+    .safeParse(input);
   if (!parsed.success) {
     return {
       ok: false,
@@ -520,6 +543,14 @@ export async function listPublicSharesAction(
   } = await supabase.auth.getUser();
   if (!user)
     return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
+  if (!isExpectedShareOwner(parsed.data.expectedUserId, user.id)) {
+    return {
+      ok: false,
+      code: "SESSION_CHANGED",
+      message:
+        "Your signed-in account changed. Verify the current account and try again.",
+    };
+  }
 
   // This is deliberately owner-wide rather than scoped to the analysis that
   // opened the dialog. A link can outlive a soft-deleted deal, and an owner
@@ -597,6 +628,7 @@ export type RevokePublicShareResult =
       ok: false;
       code:
         | "SIGN_IN_REQUIRED"
+        | "SESSION_CHANGED"
         | "VALIDATION_ERROR"
         | "NOT_FOUND"
         | "SERVER_ERROR";
@@ -608,7 +640,11 @@ export async function revokePublicShareAction(
   input: unknown,
 ): Promise<RevokePublicShareResult> {
   const parsed = z
-    .object({ id: z.string().uuid(), dealId: z.string().uuid().nullable() })
+    .object({
+      id: z.string().uuid(),
+      dealId: z.string().uuid().nullable(),
+      expectedUserId: z.string().uuid(),
+    })
     .safeParse(input);
   if (!parsed.success)
     return { ok: false, code: "VALIDATION_ERROR", message: "Invalid share." };
@@ -619,6 +655,14 @@ export async function revokePublicShareAction(
   } = await supabase.auth.getUser();
   if (!user)
     return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
+  if (!isExpectedShareOwner(parsed.data.expectedUserId, user.id)) {
+    return {
+      ok: false,
+      code: "SESSION_CHANGED",
+      message:
+        "Your signed-in account changed. Verify the current account and try again.",
+    };
+  }
 
   let query = supabase
     .from("public_shares")

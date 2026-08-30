@@ -56,6 +56,10 @@ import {
 import { calculateMaoIrr } from "@/lib/mao-target-evaluation";
 import { getBuyBoxAuthorizedDealIds } from "@/lib/buy-box-access-server";
 import { activeMeteredEvaluationDealGrantsAccess } from "@/lib/evaluation-access-server";
+import {
+  accountSessionChangedResult,
+  expectedAccountUserMatches,
+} from "@/lib/account-session-binding";
 
 const KNOWN_STATE_ABBRS = new Set(US_STATE_OPTIONS.map((s) => s.abbr));
 const MAX_BUY_BOXES = 12;
@@ -128,6 +132,7 @@ export type BuyBoxesActionResult =
       ok: false;
       code:
         | "SIGN_IN_REQUIRED"
+        | "SESSION_CHANGED"
         | "ENTITLEMENT_REQUIRED"
         | "MIGRATION_PENDING"
         | "VALIDATION_ERROR"
@@ -408,7 +413,10 @@ export async function listBuyBoxesForDealAction(
 }
 
 /** Create (no id) or update (id) a buy box. Pro-gated. Returns the new list. */
-export async function upsertBuyBoxAction(input: unknown): Promise<BuyBoxesActionResult> {
+export async function upsertBuyBoxAction(
+  input: unknown,
+  expectedUserId: unknown,
+): Promise<BuyBoxesActionResult> {
   const parsed = boxSchema.safeParse(input);
   if (!parsed.success) {
     return { ok: false, code: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message ?? "Invalid input." };
@@ -418,6 +426,9 @@ export async function upsertBuyBoxAction(input: unknown): Promise<BuyBoxesAction
   const auth = await requireProUser(supabase);
   if (!auth.ok) return auth.result;
   const userId = auth.userId;
+  if (!expectedAccountUserMatches(expectedUserId, userId)) {
+    return accountSessionChangedResult();
+  }
 
   // A box may only be scoped to a client the CALLER owns. The FK alone can't
   // enforce that (constraint checks bypass RLS), so without this a caller

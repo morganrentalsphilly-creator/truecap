@@ -51,11 +51,16 @@ export function DealStageSelect({
   // which reads as "my change didn't take". Show the picked stage
   // immediately; revert on error; re-sync when the server prop updates.
   const [displayStage, setDisplayStage] = useState<PipelineStage>(stage);
-  const savedDealIdRef = useRef(savedDealId);
+  const savedDealIdRef = useRef<string | null>(savedDealId);
   const mutationRequestRef = useRef<symbol | null>(null);
   useLayoutEffect(() => {
     savedDealIdRef.current = savedDealId;
     mutationRequestRef.current = null;
+    return () => {
+      if (savedDealIdRef.current !== savedDealId) return;
+      savedDealIdRef.current = null;
+      mutationRequestRef.current = null;
+    };
   }, [savedDealId]);
   useLayoutEffect(() => {
     setDisplayStage(stage);

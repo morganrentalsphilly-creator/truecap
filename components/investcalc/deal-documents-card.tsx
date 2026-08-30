@@ -14,15 +14,38 @@ import { Download, Loader2, Paperclip, Trash2, Upload } from "lucide-react";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { friendlyToastError } from "@/lib/friendly-error";
 import { useToast } from "@/hooks/use-toast";
-import { getFreshSessionUserId } from "@/lib/supabase/ensure-fresh-session";
+import {
+  getFreshSessionUser,
+  type FreshSessionUserResult,
+} from "@/lib/supabase/ensure-fresh-session";
+import {
+  fetchStorageObjectWindow,
+  isCurrentStorageOwnerRead,
+} from "@/lib/storage-object-window";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const BUCKET = "deal-documents";
 const MAX_BYTES = 10 * 1024 * 1024; // 10 MB - matches the bucket limit
+const PAGE_SIZE = 100;
+const ACCOUNT_CHANGED_DESCRIPTION =
+  "This deal was opened under another signed-in account. Refresh the page before working with its documents.";
 
 type DocItem = { name: string; path: string; size: number | null; createdAt: string | null };
+type StorageListObject = {
+  id: string | null;
+  name: string;
+  metadata: unknown;
+  created_at?: string | null;
+};
 type DocumentRequest = { dealId: string; requestId: number };
+type DocumentPageCursor = {
+  ownerId: string;
+  dealId: string;
+  nextOffset: number;
+  hasMore: boolean;
+};
+type FreshSessionFailure = Exclude<FreshSessionUserResult, { ok: true }>;
 
 /** Strip the `${timestamp}-` upload prefix for display. */
 function displayName(objectName: string): string {
@@ -41,6 +64,26 @@ function safeFileName(name: string): string {
   return name.replace(/[^A-Za-z0-9._-]+/g, "-").slice(0, 120) || "file";
 }
 
+function sessionFailureTitle(failure: FreshSessionFailure): string {
+  if (failure.reason === "signed_out") return "Session expired";
+  if (failure.reason === "identity_mismatch") return "Account changed";
+  return "Couldn't verify session";
+}
+
+function sessionFailureDescription(
+  failure: FreshSessionFailure,
+  signedOutMessage: string,
+): string {
+  if (failure.reason === "signed_out") return signedOutMessage;
+  if (failure.reason === "identity_mismatch") {
+    return "Your signed-in account changed. Refresh this page and try again.";
+  }
+  return friendlyToastError(failure.error, {
+    feature: "deal-documents-session",
+    fallback: "We couldn't verify your session right now. Check your connection and try again.",
+  });
+}
+
 export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
   // A route can replace savedDealId without unmounting its parent. Keying the
   // stateful card prevents the previous deal's documents, errors, or busy
@@ -55,12 +98,21 @@ function DealDocumentsCardForDeal({ savedDealId }: { savedDealId: string }) {
   const activeDealIdRef = useRef(savedDealId);
   const mountedRef = useRef(true);
   const documentRequestRef = useRef(0);
+  const authIdentityRevisionRef = useRef(0);
+  const documentOwnerIdRef = useRef<string | null>(null);
+  const pageCursorRef = useRef<DocumentPageCursor | null>(null);
+  const loadMoreInFlightRef = useRef(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [docs, setDocs] = useState<DocItem[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [unavailable, setUnavailable] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [downloadFallback, setDownloadFallback] = useState<{ url: string; label: string } | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [downloadFallback, setDownloadFallback] = useState<{
+    path: string;
+    label: string;
+  } | null>(null);
   const [uploading, setUploading] = useState(false);
   // Which row is mid-flight AND which action, so the spinner replaces the
   // icon that was actually pressed (a slow delete used to show nothing).
@@ -84,38 +136,95 @@ function DealDocumentsCardForDeal({ savedDealId }: { savedDealId: string }) {
     return { dealId, requestId: ++documentRequestRef.current };
   };
 
+  const clearDocumentOwner = () => {
+    documentOwnerIdRef.current = null;
+    setUserId(null);
+    setDocs([]);
+    setDownloadFallback(null);
+    pageCursorRef.current = null;
+    setHasMore(false);
+  };
+
+  const documentOwnerChanged = (freshUserId: string): boolean => {
+    const listedOwnerId = documentOwnerIdRef.current ?? userId;
+    if (!listedOwnerId || listedOwnerId === freshUserId) return false;
+    authIdentityRevisionRef.current += 1;
+    documentRequestRef.current += 1;
+    clearDocumentOwner();
+    setLoadError(ACCOUNT_CHANGED_DESCRIPTION);
+    return true;
+  };
+
   const refresh = async (
     knownUserId?: string,
     existingRequest?: DocumentRequest,
   ): Promise<boolean> => {
     const request = existingRequest ?? startDocumentRequest();
     if (!request) return false;
+    const authRevisionAtStart = authIdentityRevisionRef.current;
     try {
-      const uid = knownUserId ?? (await getFreshSessionUserId(supabase));
-      if (!isCurrentDocumentRequest(request)) return false;
-      if (!uid) {
-        setUserId(null);
-        setLoadError("Sign in again to access this deal's documents.");
+      const freshSession = knownUserId
+        ? ({ ok: true, userId: knownUserId } as const)
+        : await getFreshSessionUser(supabase);
+      if (
+        !isCurrentDocumentRequest(request) ||
+        authIdentityRevisionRef.current !== authRevisionAtStart
+      ) {
         return false;
       }
+      if (!freshSession.ok) {
+        if (freshSession.reason !== "unavailable") clearDocumentOwner();
+        setLoadError(
+          sessionFailureDescription(
+            freshSession,
+            "Sign in again to access this deal's documents.",
+          ),
+        );
+        return false;
+      }
+      const uid = freshSession.userId;
+      // Publish the pending owner before launching the private Storage read.
+      // An auth event in this interval must invalidate the request even though
+      // the pagination cursor does not exist until the response is accepted.
+      documentOwnerIdRef.current = uid;
       setUserId(uid);
       const { data, error } = await supabase.storage
         .from(BUCKET)
         .list(prefixFor(uid, request.dealId), {
-          limit: 100,
+          limit: PAGE_SIZE,
+          offset: 0,
           sortBy: { column: "created_at", order: "desc" },
         });
-      if (!isCurrentDocumentRequest(request)) return false;
+      if (
+        !isCurrentDocumentRequest(request) ||
+        !isCurrentStorageOwnerRead({
+          expectedOwnerId: uid,
+          currentOwnerId: documentOwnerIdRef.current,
+          startedAuthRevision: authRevisionAtStart,
+          currentAuthRevision: authIdentityRevisionRef.current,
+        })
+      ) {
+        return false;
+      }
       if (error) {
+        pageCursorRef.current = null;
+        setHasMore(false);
         // Bucket not provisioned yet (migration pending) → hide quietly.
         if (/bucket not found/i.test(error.message)) {
           setUnavailable(true);
         } else {
-          setLoadError("We couldn't load this deal's documents. Your files have not been removed.");
+          setLoadError(
+            friendlyToastError(error, {
+              feature: "deal-documents-list",
+              fallback:
+                "We couldn't load this deal's documents. Your files have not been removed.",
+            }),
+          );
         }
         return false;
       }
-      const items: DocItem[] = (data ?? [])
+      const rows = data ?? [];
+      const items: DocItem[] = rows
         // .list() can include a placeholder folder row with a null id - skip it.
         .filter((o) => o.id !== null)
         .map((o) => ({
@@ -125,11 +234,27 @@ function DealDocumentsCardForDeal({ savedDealId }: { savedDealId: string }) {
           createdAt: o.created_at ?? null,
         }));
       setDocs(items);
+      const cursor: DocumentPageCursor = {
+        ownerId: uid,
+        dealId: request.dealId,
+        nextOffset: rows.length,
+        hasMore: rows.length === PAGE_SIZE,
+      };
+      pageCursorRef.current = cursor;
+      setHasMore(cursor.hasMore);
       setLoadError(null);
       return true;
-    } catch {
+    } catch (error) {
       if (isCurrentDocumentRequest(request)) {
-        setLoadError("We couldn't load this deal's documents. Check your connection and try again.");
+        pageCursorRef.current = null;
+        setHasMore(false);
+        setLoadError(
+          friendlyToastError(error, {
+            feature: "deal-documents-list",
+            fallback:
+              "We couldn't load this deal's documents. Check your connection and try again.",
+          }),
+        );
       }
       return false;
     }
@@ -150,9 +275,38 @@ function DealDocumentsCardForDeal({ savedDealId }: { savedDealId: string }) {
     setDownloadFallback(null);
     setDocs([]);
     setUserId(null);
+    documentOwnerIdRef.current = null;
+    pageCursorRef.current = null;
+    loadMoreInFlightRef.current = false;
+    setHasMore(false);
+    setLoadingMore(false);
     setUploading(false);
     setBusy(null);
     setConfirmPath(null);
+    const {
+      data: { subscription: authSubscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mountedRef.current) return;
+      const listedOwnerId = documentOwnerIdRef.current;
+      if (!listedOwnerId || session?.user?.id === listedOwnerId) return;
+
+      // A fallback signed URL must never outlive the account that minted it.
+      // Invalidate every pending list/mutation continuation and remove private
+      // filenames immediately when another tab signs out or switches users.
+      authIdentityRevisionRef.current += 1;
+      documentRequestRef.current += 1;
+      loadMoreInFlightRef.current = false;
+      clearDocumentOwner();
+      setLoadError(
+        session?.user
+          ? ACCOUNT_CHANGED_DESCRIPTION
+          : "Sign in again to access this deal's documents.",
+      );
+      setUploading(false);
+      setLoadingMore(false);
+      setBusy(null);
+      setConfirmPath(null);
+    });
     void (async () => {
       try {
         await refresh(undefined, request);
@@ -166,6 +320,7 @@ function DealDocumentsCardForDeal({ savedDealId }: { savedDealId: string }) {
     })();
     return () => {
       mountedRef.current = false;
+      authSubscription.unsubscribe();
       if (documentRequestRef.current === request.requestId) {
         documentRequestRef.current += 1;
       }
@@ -175,6 +330,7 @@ function DealDocumentsCardForDeal({ savedDealId }: { savedDealId: string }) {
 
   const handleUpload = async (file: File) => {
     const dealIdAtStart = savedDealId;
+    const authRevisionAtStart = authIdentityRevisionRef.current;
     if (!isActiveDeal(dealIdAtStart)) return;
     if (file.size > MAX_BYTES) {
       toast({ title: "File too large", description: "Max 10 MB per file.", variant: "destructive" });
@@ -185,13 +341,34 @@ function DealDocumentsCardForDeal({ savedDealId }: { savedDealId: string }) {
       // Build the owner-scoped path from the freshly verified identity, not
       // from state captured when this card mounted. A sibling tab can refresh,
       // sign out, or switch accounts while a deal page remains open.
-      const freshUserId = await getFreshSessionUserId(supabase);
-      if (!isActiveDeal(dealIdAtStart)) return;
-      if (!freshUserId) {
-        setUserId(null);
+      const freshSession = await getFreshSessionUser(supabase);
+      if (
+        !isActiveDeal(dealIdAtStart) ||
+        authIdentityRevisionRef.current !== authRevisionAtStart
+      ) {
+        return;
+      }
+      if (!freshSession.ok) {
+        const description = sessionFailureDescription(
+          freshSession,
+          "Sign in again to upload documents.",
+        );
+        if (freshSession.reason !== "unavailable") {
+          clearDocumentOwner();
+          setLoadError(description);
+        }
         toast({
-          title: "Session expired",
-          description: "Sign in again to upload documents.",
+          title: sessionFailureTitle(freshSession),
+          description,
+          variant: "destructive",
+        });
+        return;
+      }
+      const freshUserId = freshSession.userId;
+      if (documentOwnerChanged(freshUserId)) {
+        toast({
+          title: "Account changed",
+          description: ACCOUNT_CHANGED_DESCRIPTION,
           variant: "destructive",
         });
         return;
@@ -199,7 +376,12 @@ function DealDocumentsCardForDeal({ savedDealId }: { savedDealId: string }) {
       setUserId(freshUserId);
       const path = `${prefixFor(freshUserId, dealIdAtStart)}/${Date.now()}-${safeFileName(file.name)}`;
       const { error } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: false });
-      if (!isActiveDeal(dealIdAtStart)) return;
+      if (
+        !isActiveDeal(dealIdAtStart) ||
+        authIdentityRevisionRef.current !== authRevisionAtStart
+      ) {
+        return;
+      }
       if (error) {
         if (/bucket not found/i.test(error.message)) {
           setUnavailable(true);
@@ -229,7 +411,12 @@ function DealDocumentsCardForDeal({ savedDealId }: { savedDealId: string }) {
         });
       }
     } catch (error) {
-      if (!isActiveDeal(dealIdAtStart)) return;
+      if (
+        !isActiveDeal(dealIdAtStart) ||
+        authIdentityRevisionRef.current !== authRevisionAtStart
+      ) {
+        return;
+      }
       toast({
         title: "Upload failed",
         description: friendlyToastError(error, {
@@ -239,12 +426,18 @@ function DealDocumentsCardForDeal({ savedDealId }: { savedDealId: string }) {
         variant: "destructive",
       });
     } finally {
-      if (isActiveDeal(dealIdAtStart)) setUploading(false);
+      if (
+        isActiveDeal(dealIdAtStart) &&
+        authIdentityRevisionRef.current === authRevisionAtStart
+      ) {
+        setUploading(false);
+      }
     }
   };
 
   const handleDownload = async (path: string, label: string) => {
     const dealIdAtStart = savedDealId;
+    const authRevisionAtStart = authIdentityRevisionRef.current;
     if (!isActiveDeal(dealIdAtStart)) return;
     // Open synchronously while this click still has browser user activation.
     // If popups are blocked, render a normal link after the signed URL arrives.
@@ -252,16 +445,36 @@ function DealDocumentsCardForDeal({ savedDealId }: { savedDealId: string }) {
     if (pendingWindow) pendingWindow.opener = null;
     setBusy({ path, kind: "download" });
     try {
-      const freshUserId = await getFreshSessionUserId(supabase);
-      if (!isActiveDeal(dealIdAtStart)) {
+      const freshSession = await getFreshSessionUser(supabase);
+      if (
+        !isActiveDeal(dealIdAtStart) ||
+        authIdentityRevisionRef.current !== authRevisionAtStart
+      ) {
         pendingWindow?.close();
         return;
       }
-      if (!freshUserId) {
-        setUserId(null);
+      if (!freshSession.ok) {
+        const description = sessionFailureDescription(
+          freshSession,
+          "Sign in again to open documents.",
+        );
+        if (freshSession.reason !== "unavailable") {
+          clearDocumentOwner();
+          setLoadError(description);
+        }
         toast({
-          title: "Session expired",
-          description: "Sign in again to open documents.",
+          title: sessionFailureTitle(freshSession),
+          description,
+          variant: "destructive",
+        });
+        pendingWindow?.close();
+        return;
+      }
+      const freshUserId = freshSession.userId;
+      if (documentOwnerChanged(freshUserId)) {
+        toast({
+          title: "Account changed",
+          description: ACCOUNT_CHANGED_DESCRIPTION,
           variant: "destructive",
         });
         pendingWindow?.close();
@@ -288,7 +501,11 @@ function DealDocumentsCardForDeal({ savedDealId }: { savedDealId: string }) {
         return;
       }
       const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(path, 60);
-      if (!isActiveDeal(dealIdAtStart)) {
+      if (
+        !isActiveDeal(dealIdAtStart) ||
+        authIdentityRevisionRef.current !== authRevisionAtStart ||
+        pageCursorRef.current?.ownerId !== freshUserId
+      ) {
         pendingWindow?.close();
         return;
       }
@@ -307,15 +524,22 @@ function DealDocumentsCardForDeal({ savedDealId }: { savedDealId: string }) {
       if (pendingWindow) {
         pendingWindow.location.replace(data.signedUrl);
       } else {
-        setDownloadFallback({ url: data.signedUrl, label });
+        // Do not retain or render the private signed URL. A fresh click must
+        // re-verify the current account and mint a new 60-second URL.
+        setDownloadFallback({ path, label });
         toast({
           title: "New tab blocked",
-          description: "Use the Open document link in the Documents card.",
+          description: "Use the Open document button in the Documents card.",
         });
       }
     } catch (error) {
       pendingWindow?.close();
-      if (!isActiveDeal(dealIdAtStart)) return;
+      if (
+        !isActiveDeal(dealIdAtStart) ||
+        authIdentityRevisionRef.current !== authRevisionAtStart
+      ) {
+        return;
+      }
       toast({
         title: "Couldn't open document",
         description: friendlyToastError(error, {
@@ -325,23 +549,50 @@ function DealDocumentsCardForDeal({ savedDealId }: { savedDealId: string }) {
         variant: "destructive",
       });
     } finally {
-      if (isActiveDeal(dealIdAtStart)) setBusy(null);
+      if (
+        isActiveDeal(dealIdAtStart) &&
+        authIdentityRevisionRef.current === authRevisionAtStart
+      ) {
+        setBusy(null);
+      }
     }
   };
 
   const handleDelete = async (path: string, label: string) => {
     const dealIdAtStart = savedDealId;
+    const authRevisionAtStart = authIdentityRevisionRef.current;
     if (!isActiveDeal(dealIdAtStart)) return;
     setConfirmPath(null);
     setBusy({ path, kind: "delete" });
     try {
-      const freshUserId = await getFreshSessionUserId(supabase);
-      if (!isActiveDeal(dealIdAtStart)) return;
-      if (!freshUserId) {
-        setUserId(null);
+      const freshSession = await getFreshSessionUser(supabase);
+      if (
+        !isActiveDeal(dealIdAtStart) ||
+        authIdentityRevisionRef.current !== authRevisionAtStart
+      ) {
+        return;
+      }
+      if (!freshSession.ok) {
+        const description = sessionFailureDescription(
+          freshSession,
+          "Sign in again to delete documents.",
+        );
+        if (freshSession.reason !== "unavailable") {
+          clearDocumentOwner();
+          setLoadError(description);
+        }
         toast({
-          title: "Session expired",
-          description: "Sign in again to delete documents.",
+          title: sessionFailureTitle(freshSession),
+          description,
+          variant: "destructive",
+        });
+        return;
+      }
+      const freshUserId = freshSession.userId;
+      if (documentOwnerChanged(freshUserId)) {
+        toast({
+          title: "Account changed",
+          description: ACCOUNT_CHANGED_DESCRIPTION,
           variant: "destructive",
         });
         return;
@@ -360,7 +611,12 @@ function DealDocumentsCardForDeal({ savedDealId }: { savedDealId: string }) {
         return;
       }
       const { error } = await supabase.storage.from(BUCKET).remove([path]);
-      if (!isActiveDeal(dealIdAtStart)) return;
+      if (
+        !isActiveDeal(dealIdAtStart) ||
+        authIdentityRevisionRef.current !== authRevisionAtStart
+      ) {
+        return;
+      }
       if (error) {
         toast({
           title: "Couldn't delete document",
@@ -386,7 +642,12 @@ function DealDocumentsCardForDeal({ savedDealId }: { savedDealId: string }) {
         });
       }
     } catch (error) {
-      if (!isActiveDeal(dealIdAtStart)) return;
+      if (
+        !isActiveDeal(dealIdAtStart) ||
+        authIdentityRevisionRef.current !== authRevisionAtStart
+      ) {
+        return;
+      }
       toast({
         title: "Couldn't delete document",
         description: friendlyToastError(error, {
@@ -396,7 +657,145 @@ function DealDocumentsCardForDeal({ savedDealId }: { savedDealId: string }) {
         variant: "destructive",
       });
     } finally {
-      if (isActiveDeal(dealIdAtStart)) setBusy(null);
+      if (
+        isActiveDeal(dealIdAtStart) &&
+        authIdentityRevisionRef.current === authRevisionAtStart
+      ) {
+        setBusy(null);
+      }
+    }
+  };
+
+  const handleLoadMore = async () => {
+    const dealIdAtStart = savedDealId;
+    const authRevisionAtStart = authIdentityRevisionRef.current;
+    const cursor = pageCursorRef.current;
+    if (
+      loadMoreInFlightRef.current ||
+      !isActiveDeal(dealIdAtStart) ||
+      !cursor ||
+      cursor.dealId !== dealIdAtStart ||
+      !cursor.hasMore
+    ) {
+      return;
+    }
+
+    loadMoreInFlightRef.current = true;
+    setLoadingMore(true);
+    try {
+      const freshSession = await getFreshSessionUser(supabase);
+      if (
+        !isActiveDeal(dealIdAtStart) ||
+        authIdentityRevisionRef.current !== authRevisionAtStart ||
+        pageCursorRef.current !== cursor
+      ) {
+        return;
+      }
+      if (!freshSession.ok) {
+        const description = sessionFailureDescription(
+          freshSession,
+          "Sign in again to load more documents.",
+        );
+        if (freshSession.reason !== "unavailable") {
+          clearDocumentOwner();
+          setLoadError(description);
+        }
+        toast({
+          title: sessionFailureTitle(freshSession),
+          description,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (documentOwnerChanged(freshSession.userId)) {
+        toast({
+          title: "Account changed",
+          description: ACCOUNT_CHANGED_DESCRIPTION,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setUserId(freshSession.userId);
+      const request = startDocumentRequest(dealIdAtStart);
+      if (!request || pageCursorRef.current !== cursor) return;
+      // Storage exposes offset pagination but no stable cursor. Rebuild the
+      // complete visible window from zero on every Load more click so a file
+      // deleted before this request cannot shift an unseen object behind the
+      // old offset and make it disappear permanently.
+      const window = await fetchStorageObjectWindow<StorageListObject>({
+        pageSize: PAGE_SIZE,
+        targetCount: cursor.nextOffset + PAGE_SIZE,
+        getKey: (object) => object.name,
+        fetchPage: async (offset, limit) => {
+          const { data, error } = await supabase.storage
+            .from(BUCKET)
+            .list(prefixFor(freshSession.userId, dealIdAtStart), {
+              limit,
+              offset,
+              sortBy: { column: "created_at", order: "desc" },
+            });
+          if (error) throw error;
+          return data ?? [];
+        },
+      });
+      if (
+        !isCurrentDocumentRequest(request) ||
+        authIdentityRevisionRef.current !== authRevisionAtStart ||
+        pageCursorRef.current !== cursor ||
+        cursor.ownerId !== freshSession.userId ||
+        cursor.dealId !== dealIdAtStart
+      ) {
+        return;
+      }
+      const nextItems: DocItem[] = window.rows
+        .filter((object) => object.id !== null)
+        .map((object) => ({
+          name: object.name,
+          path: `${prefixFor(freshSession.userId, dealIdAtStart)}/${object.name}`,
+          size: (object.metadata as { size?: number } | null)?.size ?? null,
+          createdAt: object.created_at ?? null,
+        }));
+      setDocs(nextItems);
+      const nextCursor: DocumentPageCursor = {
+        ownerId: cursor.ownerId,
+        dealId: cursor.dealId,
+        nextOffset: window.nextOffset,
+        hasMore: window.hasMore,
+      };
+      pageCursorRef.current = nextCursor;
+      setHasMore(nextCursor.hasMore);
+    } catch (error) {
+      if (
+        !isActiveDeal(dealIdAtStart) ||
+        authIdentityRevisionRef.current !== authRevisionAtStart
+      ) {
+        return;
+      }
+      if (
+        error &&
+        typeof error === "object" &&
+        "message" in error &&
+        typeof error.message === "string" &&
+        /bucket not found/i.test(error.message)
+      ) {
+        setUnavailable(true);
+        return;
+      }
+      toast({
+        title: "Couldn't load more documents",
+        description: friendlyToastError(error, {
+          feature: "deal-documents-pagination",
+          fallback: "We couldn't load more documents. Please try again.",
+        }),
+        variant: "destructive",
+      });
+    } finally {
+      if (authIdentityRevisionRef.current === authRevisionAtStart) {
+        loadMoreInFlightRef.current = false;
+        if (isActiveDeal(dealIdAtStart)) setLoadingMore(false);
+      }
     }
   };
 
@@ -454,15 +853,17 @@ function DealDocumentsCardForDeal({ savedDealId }: { savedDealId: string }) {
       {downloadFallback ? (
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-primary/25 bg-primary/5 p-3">
           <p className="text-xs text-muted-foreground">Your browser blocked the new tab.</p>
-          <a
-            href={downloadFallback.url}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            type="button"
             className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-semibold text-primary hover:bg-primary/10"
-            onClick={() => setDownloadFallback(null)}
+            onClick={() => {
+              const fallback = downloadFallback;
+              setDownloadFallback(null);
+              void handleDownload(fallback.path, fallback.label);
+            }}
           >
             Open {downloadFallback.label}
-          </a>
+          </button>
         </div>
       ) : null}
 
@@ -552,6 +953,22 @@ function DealDocumentsCardForDeal({ savedDealId }: { savedDealId: string }) {
           })}
         </ul>
       )}
+
+      {!loadError && docs.length > 0 && hasMore ? (
+        <div className="mt-3 flex justify-center">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="min-h-11 gap-1.5"
+            disabled={loadingMore || uploading || busy !== null}
+            onClick={() => void handleLoadMore()}
+          >
+            {loadingMore ? <Loader2 className="size-4 animate-spin" /> : null}
+            {loadingMore ? "Loading documents…" : "Load more documents"}
+          </Button>
+        </div>
+      ) : null}
     </section>
   );
 }

@@ -98,9 +98,9 @@ describe("share links are revocable from the share dialog", () => {
   const shareStore = read("lib/public-share.ts");
 
   it("owner-scopes and paginates every safely described link", () => {
-    expect(shareButton).toContain(
-      "listPublicSharesAction({ offset: 0 })",
-    );
+    expect(shareButton).toContain("listPublicSharesAction({");
+    expect(shareButton).toContain("offset: 0,");
+    expect(shareButton).toContain("expectedUserId,");
     expect(shareButton).toContain("Manage all share links");
     expect(shareButton).toContain("s.propertyLabel");
     expect(shareButton).toContain(
@@ -108,9 +108,8 @@ describe("share links are revocable from the share dialog", () => {
     );
     expect(shareButton).toContain('"another saved deal"');
     expect(shareButton).toContain('"unattached"');
-    expect(shareActions).toContain(
-      ".object({ offset: z.number().int().min(0) })",
-    );
+    expect(shareActions).toContain("offset: z.number().int().min(0)");
+    expect(shareActions).toContain("expectedUserId: z.string().uuid()");
     expect(shareActions).toContain('.eq("owner_id", user.id)');
     expect(shareActions).toContain(".range(parsed.data.offset");
     expect(shareActions).toContain("nextOffset:");
@@ -130,16 +129,13 @@ describe("share links are revocable from the share dialog", () => {
   });
 
   it("requires a full-size confirmation and revokes the exact nullable scope", () => {
-    expect(shareButton).toContain(
-      "revokePublicShareAction({ id, dealId })",
-    );
+    expect(shareButton).toContain("revokePublicShareAction({");
     expect(shareButton).toContain("Revoke this link?");
     expect(shareButton).toContain("It will stop opening immediately");
     expect(shareButton).toContain("Yes, revoke link");
     expect(shareButton).toContain('className="h-auto min-h-11');
-    expect(shareActions).toContain(
-      '.object({ id: z.string().uuid(), dealId: z.string().uuid().nullable() })',
-    );
+    expect(shareActions).toContain("id: z.string().uuid()");
+    expect(shareActions).toContain("dealId: z.string().uuid().nullable()");
     expect(shareActions).toContain('.eq("id", parsed.data.id)');
     expect(shareActions).toContain('.eq("owner_id", user.id)');
   });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useLayoutEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import * as Sentry from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
@@ -9,6 +9,7 @@ import { startCompareAction } from "@/app/actions/compare";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { signalDisplay } from "@/lib/verdict-display";
+import { isCurrentMountedMutation } from "@/lib/deal-workspace-mutation-lifecycle";
 
 /**
  * Inline deal picker for the Compare page's empty state. Previously the empty
@@ -98,6 +99,13 @@ export function CompareDealPicker({
   const [selected, setSelected] = useState<string[]>(initialSelection.selectedIds);
   const [isPending, startTransition] = useTransition();
   const compareRequestInFlightRef = useRef(false);
+  const compareRequestRef = useRef<symbol | null>(null);
+  useLayoutEffect(() => {
+    return () => {
+      compareRequestRef.current = null;
+      compareRequestInFlightRef.current = false;
+    };
+  }, []);
   const [errorMessage, setErrorMessage] = useState<string | null>(() =>
     initialSelection.droppedIds.length > 0
       ? "Some previously selected deals used a different calculation method. They were removed so this comparison cannot name a false leader."
@@ -147,9 +155,17 @@ export function CompareDealPicker({
     if (!canCompare || compareRequestInFlightRef.current || isPending) return;
     setErrorMessage(null);
     compareRequestInFlightRef.current = true;
+    const requestToken = Symbol("compare-picker-save");
+    compareRequestRef.current = requestToken;
+    const requestStillOwnsPicker = () =>
+      isCurrentMountedMutation({
+        requestToken,
+        currentRequestToken: compareRequestRef.current,
+      });
     startTransition(async () => {
       try {
         const result = await startCompareAction(selected);
+        if (!requestStillOwnsPicker()) return;
         if (result.ok) {
           // Cookie is now set server-side; re-run the page's server component so
           // it reads the new selection and renders the comparison in place.
@@ -164,6 +180,7 @@ export function CompareDealPicker({
           });
         }
       } catch (err) {
+        if (!requestStillOwnsPicker()) return;
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, stale-deploy Server Action). Without this the Compare
         // button spinner clears with nothing happening. Tell the user it's
@@ -176,7 +193,10 @@ export function CompareDealPicker({
           variant: "destructive",
         });
       } finally {
-        compareRequestInFlightRef.current = false;
+        if (compareRequestRef.current === requestToken) {
+          compareRequestRef.current = null;
+          compareRequestInFlightRef.current = false;
+        }
       }
     });
   };

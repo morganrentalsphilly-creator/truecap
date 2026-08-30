@@ -22,6 +22,10 @@ import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { isFeatureEnabled } from "@/lib/feature-flags";
 import { getRequestIp } from "@/lib/ip-rate-limit";
+import {
+  accountSessionChangedResult,
+  expectedAccountUserMatches,
+} from "@/lib/account-session-binding";
 
 const submissionSchema = z
   .object({
@@ -66,6 +70,7 @@ export type TestimonialSubmissionResult =
       ok: false;
       code:
         | "FEATURE_DISABLED"
+        | "SESSION_CHANGED"
         | "VALIDATION_ERROR"
         | "RATE_LIMITED"
         | "SERVER_ERROR";
@@ -83,6 +88,7 @@ function buildRateLimitKey(subject: string): string | null {
 
 export async function submitTestimonialAction(
   input: unknown,
+  expectedUserId?: unknown,
 ): Promise<TestimonialSubmissionResult> {
   if (!isFeatureEnabled("testimonial_collection")) {
     return {
@@ -114,6 +120,14 @@ export async function submitTestimonialAction(
       userId = user?.id ?? null;
     } catch {
       userId = null;
+    }
+
+    if (
+      (userId !== null &&
+        !expectedAccountUserMatches(expectedUserId, userId)) ||
+      (userId === null && expectedUserId != null)
+    ) {
+      return accountSessionChangedResult();
     }
 
     const requestSubject = userId

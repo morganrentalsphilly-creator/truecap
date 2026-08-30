@@ -186,7 +186,7 @@ describe("underwriting model release boundary", () => {
     const scenarios = source("app/actions/scenarios.ts");
     expect(scenarios.indexOf("isReleasedUnderwritingSnapshot(deal.form_snapshot)")).toBeGreaterThan(-1);
     expect(scenarios.indexOf("isReleasedUnderwritingSnapshot(deal.form_snapshot)")).toBeLessThan(
-      scenarios.indexOf("const resolved = await resolvePropertyId")
+      scenarios.indexOf("const resolved = await claimScenarioPropertyId")
     );
     expect(scenarios.indexOf("isReleasedUnderwritingSnapshot(deal.form_snapshot)")).toBeLessThan(
       scenarios.indexOf("const clone: Record<string, unknown>")

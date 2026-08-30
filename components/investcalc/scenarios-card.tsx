@@ -42,6 +42,32 @@ const RELEASED_STRATEGY_KINDS = STRATEGY_KINDS.filter((kind) =>
   isScenarioStrategyEnabled(kind),
 );
 
+export type ScenarioClientRequest = {
+  intentKey: string;
+  clientRequestId: string;
+};
+
+export function scenarioRequestIntentKey(input: {
+  savedDealId: string;
+  name: string;
+  strategy: string;
+}): string {
+  return JSON.stringify([
+    input.savedDealId,
+    input.name.trim().toLowerCase(),
+    input.strategy.trim().toLowerCase(),
+  ]);
+}
+
+export function scenarioClientRequestForIntent(
+  current: ScenarioClientRequest | null,
+  intentKey: string,
+  createRequestId: () => string = () => crypto.randomUUID(),
+): ScenarioClientRequest {
+  if (current?.intentKey === intentKey) return current;
+  return { intentKey, clientRequestId: createRequestId() };
+}
+
 export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
   const router = useRouter();
   const { toast } = useToast();
@@ -54,8 +80,9 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
   const [strategy, setStrategy] = useState("");
   const [isSaving, startSaving] = useTransition();
   const loadRequestRef = useRef(0);
-  const savedDealIdRef = useRef(savedDealId);
+  const savedDealIdRef = useRef<string | null>(savedDealId);
   const mutationRequestRef = useRef<symbol | null>(null);
+  const scenarioClientRequestRef = useRef<ScenarioClientRequest | null>(null);
 
   // Dynamic App Router navigation can reuse this client component for another
   // savedDealId. Invalidate old reads/mutations and clear every deal-scoped
@@ -64,6 +91,7 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
   useLayoutEffect(() => {
     savedDealIdRef.current = savedDealId;
     mutationRequestRef.current = null;
+    scenarioClientRequestRef.current = null;
     loadRequestRef.current += 1;
     setLoaded(false);
     setHidden(false);
@@ -72,6 +100,13 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
     setAdding(false);
     setName("");
     setStrategy("");
+    return () => {
+      if (savedDealIdRef.current !== savedDealId) return;
+      savedDealIdRef.current = null;
+      mutationRequestRef.current = null;
+      scenarioClientRequestRef.current = null;
+      loadRequestRef.current += 1;
+    };
   }, [savedDealId]);
 
   const refresh = useMemo(
@@ -124,8 +159,38 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
     };
   }, [refresh]);
 
+  function clearScenarioRequestIfIntentChanged(
+    nextName: string,
+    nextStrategy: string,
+  ) {
+    const pending = scenarioClientRequestRef.current;
+    if (
+      pending &&
+      pending.intentKey !==
+        scenarioRequestIntentKey({
+          savedDealId,
+          name: nextName,
+          strategy: nextStrategy,
+        })
+    ) {
+      scenarioClientRequestRef.current = null;
+    }
+  }
+
   function handleAdd() {
     const dealIdAtSubmit = savedDealId;
+    const nameAtSubmit = name.trim();
+    const strategyAtSubmit = strategy;
+    const intentKey = scenarioRequestIntentKey({
+      savedDealId: dealIdAtSubmit,
+      name: nameAtSubmit,
+      strategy: strategyAtSubmit,
+    });
+    const clientRequest = scenarioClientRequestForIntent(
+      scenarioClientRequestRef.current,
+      intentKey,
+    );
+    scenarioClientRequestRef.current = clientRequest;
     const requestToken = Symbol("scenario-add");
     mutationRequestRef.current = requestToken;
     const requestStillOwnsDeal = () =>
@@ -139,8 +204,9 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
       try {
         const result = await addScenarioAction({
           sourceDealId: dealIdAtSubmit,
-          scenarioName: name.trim() || undefined,
-          strategyKind: strategy || null,
+          clientRequestId: clientRequest.clientRequestId,
+          scenarioName: nameAtSubmit || undefined,
+          strategyKind: strategyAtSubmit || null,
         });
         if (!requestStillOwnsDeal()) return;
         if (!result.ok) {
@@ -151,9 +217,15 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
           toast({ title: "Couldn't add scenario", description: result.message, variant: "destructive" });
           return;
         }
+        if (
+          scenarioClientRequestRef.current?.clientRequestId ===
+          clientRequest.clientRequestId
+        ) {
+          scenarioClientRequestRef.current = null;
+        }
         trackEvent("scenario_added", {
-          has_strategy: Boolean(strategy),
-          strategy_kind: strategy || null,
+          has_strategy: Boolean(strategyAtSubmit),
+          strategy_kind: strategyAtSubmit || null,
         });
         setName("");
         setStrategy("");
@@ -161,8 +233,8 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
         toast({
           title: "Scenario created",
           description:
-            result.strategySetupRequired && strategy
-              ? `The copy is ready. Open its workspace, edit assumptions, and choose ${strategyLabel(strategy)} to complete the visible strategy setup.`
+            result.strategySetupRequired && strategyAtSubmit
+              ? `The copy is ready. Open its workspace, edit assumptions, and choose ${strategyLabel(strategyAtSubmit)} to complete the visible strategy setup.`
               : "It is a separate saved copy. Open its workspace when you are ready to adjust assumptions.",
         });
         refresh();
@@ -208,7 +280,9 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
           toast({ title: "Couldn't compare scenarios", description: result.message, variant: "destructive" });
           return;
         }
-        trackEvent("scenarios_compared", { count: scenarios.length });
+        trackEvent("scenarios_compared", {
+          count: scenarios.filter((scenario) => scenario.isComparable).length,
+        });
         // Use a document navigation after the HttpOnly cookie is committed.
         // Keeping another App Router navigation inside this pending transition
         // can leave it waiting indefinitely even after the route is fetched.
@@ -260,6 +334,8 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
             scenarioName: "Base case",
             strategyKind: null,
             title: null,
+            lifecycleState: "active",
+            isComparable: true,
             isBase: true,
             isSource: true,
           },
@@ -268,6 +344,9 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
     rows.find((row) => row.isSource)?.scenarioName ?? rows[0]?.scenarioName ?? "this analysis";
   const hasBase = rows.some((row) => row.isBase);
   const alternateCount = rows.filter((row) => !row.isBase).length;
+  const comparableScenarioCount = rows.filter(
+    (row) => row.isComparable,
+  ).length;
 
   return (
     <section className="rounded-2xl border border-border bg-card p-5 sm:p-6">
@@ -280,7 +359,7 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
             {alternateCount} {alternateCount === 1 ? "scenario" : "scenarios"}
           </span>
         </div>
-        {scenarios.length >= 2 ? (
+        {comparableScenarioCount >= 2 ? (
           <Button
             type="button"
             size="sm"
@@ -289,7 +368,7 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
             disabled={isSaving}
             className="min-h-11 gap-1.5 text-xs text-primary"
           >
-            <GitCompare aria-hidden className="size-3.5" /> Compare scenarios
+            <GitCompare aria-hidden className="size-3.5" /> Compare active scenarios
           </Button>
         ) : null}
       </div>
@@ -302,6 +381,12 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
       <ul className="space-y-2">
         {rows.map((s) => {
           const kindLabel = s.isBase ? "Base" : "Scenario";
+          const lifecycleLabel =
+            s.lifecycleState === "completed"
+              ? "Closed"
+              : s.lifecycleState === "archived"
+                ? "Passed"
+                : null;
           return (
             <li
               key={s.id}
@@ -319,6 +404,11 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
                       {strategyLabel(s.strategyKind)}
                     </span>
                   ) : null}
+                  {lifecycleLabel ? (
+                    <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                      {lifecycleLabel}
+                    </span>
+                  ) : null}
                   {s.isSource ? (
                     <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
                       Viewing
@@ -326,7 +416,9 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
                   ) : null}
                 </div>
                 <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-                  {s.isBase
+                  {!s.isComparable
+                    ? `${lifecycleLabel ?? "Historical"} scenario — restore it to an active stage before comparing.`
+                    : s.isBase
                     ? "Original saved assumptions for this property."
                     : s.strategyKind &&
                         isScenarioStrategyEnabled(s.strategyKind)
@@ -365,7 +457,10 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
                 id="scenario-name"
                 value={name}
                 placeholder="e.g. Lower-rate case"
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => {
+                  clearScenarioRequestIfIntentChanged(e.target.value, strategy);
+                  setName(e.target.value);
+                }}
                 disabled={isSaving}
                 className="h-11 text-sm"
               />
@@ -377,7 +472,10 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
               <select
                 id="scenario-strategy"
                 value={strategy}
-                onChange={(e) => setStrategy(e.target.value)}
+                onChange={(e) => {
+                  clearScenarioRequestIfIntentChanged(name, e.target.value);
+                  setStrategy(e.target.value);
+                }}
                 disabled={isSaving}
                 /* text-base below md: iOS Safari zooms the page in on sub-16px
                    form controls (the Input primitive encodes the same rule). */
@@ -403,7 +501,10 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
             <Button
               type="button"
               variant="ghost"
-              onClick={() => setAdding(false)}
+              onClick={() => {
+                scenarioClientRequestRef.current = null;
+                setAdding(false);
+              }}
               disabled={isSaving}
               className="min-h-11"
             >

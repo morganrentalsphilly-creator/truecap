@@ -56,7 +56,7 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
   >("idle");
   const notesRef = useRef("");
   const lastSavedNotesRef = useRef("");
-  const savedDealIdRef = useRef(savedDealId);
+  const savedDealIdRef = useRef<string | null>(savedDealId);
   const saveRequestRef = useRef<symbol | null>(null);
   const queuedSaveRequestedRef = useRef(false);
 
@@ -65,6 +65,14 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
     saveRequestRef.current = null;
     queuedSaveRequestedRef.current = false;
     setInitialLoaded(false);
+    return () => {
+      if (savedDealIdRef.current !== savedDealId) return;
+      savedDealIdRef.current = null;
+      saveRequestRef.current = null;
+      queuedSaveRequestedRef.current = false;
+      notesRef.current = "";
+      lastSavedNotesRef.current = "";
+    };
   }, [savedDealId]);
 
   // Lazy-load the current notes on mount / when the saved deal changes.

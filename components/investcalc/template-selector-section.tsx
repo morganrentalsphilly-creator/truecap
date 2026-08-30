@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/command";
 import { TemplateFormDialog } from "@/components/investcalc/template-form-dialog";
 import { cn } from "@/lib/utils";
+import { useExpectedAccountUserId } from "@/components/auth/account-session-boundary";
 
 interface TemplateSelectorSectionProps {
   form: UseFormReturn<InvestmentFormValues>;
@@ -57,6 +58,7 @@ export function TemplateSelectorSection({
   onExplicitTemplateChange,
 }: TemplateSelectorSectionProps) {
   const { toast } = useToast();
+  const expectedUserId = useExpectedAccountUserId();
   const [templates, setTemplates] = useState<AnalysisTemplateOption[]>([]);
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -226,7 +228,11 @@ export function TemplateSelectorSection({
     try {
       const result = editingTemplate
         ? await updateAnalysisTemplateAction(editingTemplate.id, values)
-        : await createAnalysisTemplateAction(values);
+        : await createAnalysisTemplateAction(
+            values,
+            undefined,
+            expectedUserId,
+          );
       if (!result.ok) {
         if (result.code === "ENTITLEMENT_TEMPLATE") {
           toast({

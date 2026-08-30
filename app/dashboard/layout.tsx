@@ -28,6 +28,7 @@ import { getActiveSavedAnalysesCount } from "@/lib/saved-analyses-count";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { loginPathFor } from "@/lib/auth-schema";
 import { getCurrentRequestPath } from "@/lib/request-path";
+import { AccountSessionBoundary } from "@/components/auth/account-session-boundary";
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const supabase = await createServerSupabaseClient();
@@ -48,8 +49,10 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   ];
 
   return (
-    <DashboardShell activeDealCount={activeDealCount} navAccess={navAccess}>
-      {children}
-    </DashboardShell>
+    <AccountSessionBoundary expectedUserId={user.id}>
+      <DashboardShell activeDealCount={activeDealCount} navAccess={navAccess}>
+        {children}
+      </DashboardShell>
+    </AccountSessionBoundary>
   );
 }

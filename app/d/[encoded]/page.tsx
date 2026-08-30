@@ -24,6 +24,7 @@ import { getPublicDealComps } from "@/lib/public-deal-comps";
 import { canShowSharedProAnalysis } from "@/lib/public-share-access";
 import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
 import { buildPublicShareAnalysisPayload } from "@/lib/public-share-analysis-result";
+import { propertyCompsUnderwritingFingerprint } from "@/lib/property-comps-query";
 
 // Next.js 15+ makes `params` async (Promise). Without awaiting it, accessing
 // .encoded synchronously throws in dev and silently breaks in prod.
@@ -112,10 +113,17 @@ export default async function PublicDealPage({ params }: Props) {
         dealAddress: parsed.data.address,
       })
     : null;
+  const compsFingerprint = propertyCompsUnderwritingFingerprint({
+    address: parsed.data.address,
+    propertyType: parsed.data.propertyType,
+    bedrooms: parsed.data.bedrooms,
+    bathrooms: parsed.data.bathrooms,
+    squareFootage: parsed.data.sqft,
+  });
 
   const [agent, comps, showProAnalysis] = await Promise.all([
     getPublicAgentBranding(verifiedOwnerId),
-    getPublicDealComps(verifiedDealId, verifiedOwnerId),
+    getPublicDealComps(verifiedDealId, verifiedOwnerId, compsFingerprint),
     canShowSharedProAnalysis(verifiedOwnerId),
   ]);
 

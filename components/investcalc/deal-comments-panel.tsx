@@ -37,7 +37,7 @@ export function DealCommentsPanel({ savedDealId }: { savedDealId: string }) {
   const [draft, setDraft] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [isBusy, startBusy] = useTransition();
-  const savedDealIdRef = useRef(savedDealId);
+  const savedDealIdRef = useRef<string | null>(savedDealId);
   const mutationRequestRef = useRef<symbol | null>(null);
   const addRequestRef = useRef<{ body: string; requestId: string } | null>(null);
 
@@ -46,6 +46,12 @@ export function DealCommentsPanel({ savedDealId }: { savedDealId: string }) {
     mutationRequestRef.current = null;
     addRequestRef.current = null;
     setLoaded(false);
+    return () => {
+      if (savedDealIdRef.current !== savedDealId) return;
+      savedDealIdRef.current = null;
+      mutationRequestRef.current = null;
+      addRequestRef.current = null;
+    };
   }, [savedDealId]);
 
   useEffect(() => {

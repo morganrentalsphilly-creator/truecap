@@ -37,7 +37,7 @@ export function SavedDealWatchCard({ savedDealId }: { savedDealId: string }) {
   const [loaded, setLoaded] = useState(false);
   const [available, setAvailable] = useState(true);
   const [pending, startTransition] = useTransition();
-  const savedDealIdRef = useRef(savedDealId);
+  const savedDealIdRef = useRef<string | null>(savedDealId);
   const mutationRequestRef = useRef<symbol | null>(null);
 
   useLayoutEffect(() => {
@@ -46,6 +46,11 @@ export function SavedDealWatchCard({ savedDealId }: { savedDealId: string }) {
     setLoaded(false);
     setAvailable(true);
     setSettings(null);
+    return () => {
+      if (savedDealIdRef.current !== savedDealId) return;
+      savedDealIdRef.current = null;
+      mutationRequestRef.current = null;
+    };
   }, [savedDealId]);
 
   useEffect(() => {
@@ -158,8 +163,8 @@ export function SavedDealWatchCard({ savedDealId }: { savedDealId: string }) {
       try {
         const result = await setSavedDealWatchPreferencesAction({
           savedAnalysisId: dealAtSubmit,
-          inAppNotificationsEnabled: optimistic.inAppNotificationsEnabled,
-          emailNotificationsEnabled: optimistic.emailNotificationsEnabled,
+          preference: key,
+          enabled: next,
         });
         if (!requestStillOwnsDeal()) return;
         if (!result.ok) {

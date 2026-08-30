@@ -26,6 +26,16 @@ describe("saved-deal workspace mutation wiring", () => {
       expect(source).toContain("isCurrentDealWorkspaceMutation({");
       expect(source).toContain("currentDealId: savedDealIdRef.current");
       expect(source).toContain("currentRequestToken: mutationRequestRef.current");
+
+      const identityStart = source.indexOf("useLayoutEffect(() =>");
+      const identityEnd = source.indexOf("}, [savedDealId]);", identityStart);
+      const identityBlock = source.slice(identityStart, identityEnd);
+      expect(identityBlock).toContain("return () => {");
+      expect(identityBlock).toContain(
+        "if (savedDealIdRef.current !== savedDealId) return",
+      );
+      expect(identityBlock).toContain("savedDealIdRef.current = null");
+      expect(identityBlock).toContain("mutationRequestRef.current = null");
     },
   );
 
@@ -38,7 +48,24 @@ describe("saved-deal workspace mutation wiring", () => {
     expect(identitySync).toContain("savedDealIdRef.current = savedDealId");
     expect(identitySync).toContain("saveRequestRef.current = null");
     expect(identitySync).toContain("queuedSaveRequestedRef.current = false");
+    expect(identitySync).toContain("return () => {");
+    expect(identitySync).toContain(
+      "if (savedDealIdRef.current !== savedDealId) return",
+    );
+    expect(identitySync).toContain("savedDealIdRef.current = null");
+    expect(identitySync).toContain('notesRef.current = ""');
+    expect(identitySync).toContain('lastSavedNotesRef.current = ""');
     expect(source).toContain("isCurrentDealNotesSave({");
+  });
+
+  it("clears deal-scoped retry and queue identity during layout cleanup", () => {
+    const comments = read("components/investcalc/deal-comments-panel.tsx");
+    const details = read("components/investcalc/deal-details-card.tsx");
+    const scenarios = read("components/investcalc/scenarios-card.tsx");
+
+    expect(comments).toContain("addRequestRef.current = null");
+    expect(details).toContain("queuedSaveKeysRef.current = []");
+    expect(scenarios).toContain("scenarioClientRequestRef.current = null");
   });
 
   it("clears unsaved due-diligence input before a reused route can show it", () => {
@@ -109,6 +136,21 @@ describe("saved-deal workspace mutation wiring", () => {
     );
     expect(source).toContain("sourceDealId: dealIdAtSubmit");
     expect(source).toContain("compareScenariosAction(dealIdAtSubmit)");
+
+    const compareAwait = source.indexOf(
+      "const result = await compareScenariosAction(dealIdAtSubmit)",
+    );
+    const postCompareGuard = source.indexOf(
+      "if (!requestStillOwnsDeal()) return",
+      compareAwait,
+    );
+    const compareNavigation = source.indexOf(
+      'window.location.assign("/dashboard/compare")',
+      postCompareGuard,
+    );
+    expect(compareAwait).toBeGreaterThan(-1);
+    expect(postCompareGuard).toBeGreaterThan(compareAwait);
+    expect(compareNavigation).toBeGreaterThan(postCompareGuard);
   });
 
   it("locks every scenario form exit or edit that could discard an in-flight draft", () => {
@@ -125,29 +167,46 @@ describe("saved-deal workspace mutation wiring", () => {
     expect(strategyStart).toBeGreaterThan(-1);
     expect(nameControl).toContain("disabled={isSaving}");
     expect(strategyControl).toContain("disabled={isSaving}");
-    expect(source).toMatch(
-      /onClick=\{\(\) => setAdding\(false\)\}[\s\S]{0,120}disabled=\{isSaving\}/,
+    const cancelStart = source.indexOf('variant="ghost"', strategyStart);
+    const cancelControl = source.slice(
+      cancelStart,
+      source.indexOf("</Button>", cancelStart),
     );
+    expect(cancelControl).toContain("scenarioClientRequestRef.current = null");
+    expect(cancelControl).toContain("setAdding(false)");
+    expect(cancelControl).toContain("disabled={isSaving}");
   });
 
-  it("keys comp pulls by saved deal as well as address", () => {
+  it("keys comp loads and pulls by the full provider subject plus saved deal", () => {
     const source = read("components/investcalc/property-comps-card.tsx");
     const identitySync = source.slice(
       source.indexOf("useLayoutEffect(() =>"),
       source.indexOf("// On a saved deal"),
     );
     expect(source).toContain(
-      "const savedDealIdRef = useRef<string | null>(savedDealId ?? null)",
+      "const queryFingerprint = propertyCompsUnderwritingFingerprint({",
     );
+    expect(source).toContain("const queryFingerprintRef = useRef(queryFingerprint)");
+    expect(source).toContain("const dataQueryFingerprintRef = useRef<string | null>(null)");
     expect(identitySync).toContain("savedDealIdRef.current = nextDealId");
+    expect(identitySync).toContain("queryFingerprintRef.current = queryFingerprint");
     expect(identitySync).toContain("setData(null)");
     expect(identitySync).toContain("onDataChangeRef.current?.(null)");
+    expect(source).toContain("const pullRequestRef = useRef<symbol | null>(null)");
+    expect(source).toContain("pullRequestRef.current = null");
+    expect(source).toContain("isCurrentMountedMutation({");
+    expect(source).toContain("currentRequestToken: pullRequestRef.current");
     expect(source).toContain("const dealIdAtLoad = savedDealId");
     expect(source).toContain("savedDealIdRef.current === dealIdAtLoad");
-    expect(source).toContain("lastAddressRef.current === addressAtLoad");
+    expect(source).toContain("queryFingerprintRef.current === fingerprintAtLoad");
+    expect(source).toContain("getSavedDealCompsAction({");
     expect(source).toContain("const pulledDealId = savedDealId ?? null");
-    expect(source).toContain("savedDealIdRef.current === pulledDealId");
+    expect(source).toContain("propertyCompsRequestStillOwnsSubject({");
+    expect(source).toContain("requestedFingerprint: pulledFingerprint");
     expect(source).toContain("if (!pullStillOwnsWorkspace()) return");
     expect(source).toContain("dealId: pulledDealId ?? undefined");
+    expect(source).toContain(
+      "if (dataQueryFingerprintRef.current !== queryFingerprintRef.current) return",
+    );
   });
 });

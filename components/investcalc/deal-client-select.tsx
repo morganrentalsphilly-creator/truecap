@@ -40,12 +40,17 @@ export function DealClientSelect({
   const { toast } = useToast();
   const [value, setValue] = useState(clientId ?? UNASSIGNED);
   const [isPending, startTransition] = useTransition();
-  const savedDealIdRef = useRef(savedDealId);
+  const savedDealIdRef = useRef<string | null>(savedDealId);
   const mutationRequestRef = useRef<symbol | null>(null);
 
   useLayoutEffect(() => {
     savedDealIdRef.current = savedDealId;
     mutationRequestRef.current = null;
+    return () => {
+      if (savedDealIdRef.current !== savedDealId) return;
+      savedDealIdRef.current = null;
+      mutationRequestRef.current = null;
+    };
   }, [savedDealId]);
   useLayoutEffect(() => {
     setValue(clientId ?? UNASSIGNED);

@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as Sentry from "@sentry/nextjs";
@@ -54,6 +61,7 @@ import {
   type StoredRecommendation,
   type StoredRiskLevel,
 } from "@/lib/compare-metrics";
+import { isCurrentMountedMutation } from "@/lib/deal-workspace-mutation-lifecycle";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -1239,6 +1247,12 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
   const [selectionError, setSelectionError] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [selectionPending, startSelectionTransition] = useTransition();
+  const selectionRequestRef = useRef<symbol | null>(null);
+  useLayoutEffect(() => {
+    return () => {
+      selectionRequestRef.current = null;
+    };
+  }, []);
   const [normalizationMode, setNormalizationMode] =
     useState<ComparisonNormalizationMode>("as_saved");
   const methodologiesComparable = areDealMethodologiesComparable(deals);
@@ -1258,22 +1272,34 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
   };
 
   const removeDeal = (deal: CompareDealViewModel) => {
-    if (selectionPending) return;
+    if (selectionPending || selectionRequestRef.current !== null) return;
     setSelectionError(null);
     setRemovingId(deal.id);
+    const requestToken = Symbol("compare-selection-remove");
+    selectionRequestRef.current = requestToken;
+    const requestStillOwnsComparison = () =>
+      isCurrentMountedMutation({
+        requestToken,
+        currentRequestToken: selectionRequestRef.current,
+      });
     startSelectionTransition(async () => {
       try {
         const result = await removeCompareDealAction(deal.id);
+        if (!requestStillOwnsComparison()) return;
         if (!result.ok) {
           setSelectionError(result.message);
           return;
         }
         router.refresh();
       } catch (error) {
+        if (!requestStillOwnsComparison()) return;
         Sentry.captureException(error, { tags: { feature: "compare-selection" } });
         setSelectionError("The comparison could not be updated. Your saved deals were not changed; retry when the connection recovers.");
       } finally {
-        setRemovingId(null);
+        if (selectionRequestRef.current === requestToken) {
+          selectionRequestRef.current = null;
+          setRemovingId(null);
+        }
       }
     });
   };

@@ -30,6 +30,10 @@ import {
 import { computeDealOfferLine } from "@/lib/deal-offer-line";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 import { isFeatureReleased } from "@/lib/entitlements-catalog";
+import {
+  accountSessionChangedResult,
+  expectedAccountUserMatches,
+} from "@/lib/account-session-binding";
 
 export type AgentClient = {
   id: string;
@@ -47,6 +51,7 @@ export type AgentClientsActionResult =
       ok: false;
       code:
         | "SIGN_IN_REQUIRED"
+        | "SESSION_CHANGED"
         | "ENTITLEMENT_REQUIRED"
         | "MIGRATION_PENDING"
         | "VALIDATION_ERROR"
@@ -150,7 +155,10 @@ export async function listAgentClientsAction(): Promise<AgentClientsActionResult
 }
 
 /** Create (no id) or update (id) a client. Returns the refreshed roster. */
-export async function upsertAgentClientAction(input: unknown): Promise<AgentClientsActionResult> {
+export async function upsertAgentClientAction(
+  input: unknown,
+  expectedUserId: unknown,
+): Promise<AgentClientsActionResult> {
   const parsed = clientSchema.safeParse(input);
   if (!parsed.success) {
     return { ok: false, code: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message ?? "Invalid input." };
@@ -158,6 +166,9 @@ export async function upsertAgentClientAction(input: unknown): Promise<AgentClie
   const gate = await requireAgentPro();
   if (!gate.ok) return gate.result;
   const { supabase, userId } = gate;
+  if (!expectedAccountUserMatches(expectedUserId, userId)) {
+    return accountSessionChangedResult();
+  }
   const { id, name, email, phone, notes, isArchived } = parsed.data;
 
   if (!id) {

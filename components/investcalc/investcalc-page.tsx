@@ -2,7 +2,14 @@
 
 /* eslint-disable react-hooks/refs, react-hooks/immutability, react-hooks/preserve-manual-memoization -- This legacy, hook-dense calculator intentionally uses refs as async workflow guards. React Compiler is not enabled for the app; keep rules-of-hooks and exhaustive-deps active while the component is incrementally decomposed. */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FieldErrors, useForm } from "react-hook-form";
@@ -169,6 +176,14 @@ import {
   type GetSavedDealForEditingResult,
 } from "@/app/actions/saved-analyses";
 import { parseSavedAnalysisRevision } from "@/lib/saved-analysis-concurrency";
+import { isCurrentMountedMutation } from "@/lib/deal-workspace-mutation-lifecycle";
+import {
+  ACCOUNT_SESSION_CHANGED_MESSAGE,
+  isCurrentAccountMutation,
+} from "@/lib/account-session-binding";
+import { useExpectedAccountUserId } from "@/components/auth/account-session-boundary";
+import { createBrowserSupabaseClient } from "@/lib/supabase/client";
+import { getFreshSessionUser } from "@/lib/supabase/ensure-fresh-session";
 import {
   buildDataConfidence,
   type EnrichmentProvenanceInput,
@@ -974,6 +989,7 @@ export function InvestCalcPage({
   initialSavedDeal?: GetSavedDealForEditingResult | null;
 }) {
   const router = useRouter();
+  const expectedAccountUserId = useExpectedAccountUserId();
   const advocacyDecisionContract =
     advocacyContractEligible && isFeatureEnabled("advocacy_decision_contract");
   const [activeInputTab, setActiveInputTab] = useState<InputTab>("cash-flow");
@@ -1249,6 +1265,8 @@ export function InvestCalcPage({
     existingId: string;
     existingTitle?: string;
     existingUnderwritingRevision?: number;
+    /** Stable across ambiguous retries while this dialog remains open. */
+    scenarioClientRequestId: string;
     autoAfterAuth?: boolean;
   } | null>(null);
   const [duplicateChoiceBusy, setDuplicateChoiceBusy] =
@@ -1260,6 +1278,9 @@ export function InvestCalcPage({
   const [addressChangedPrompt, setAddressChangedPrompt] = useState<{
     targetId: string;
     existingTitle?: string;
+    /** Another scenario/history row shares this property workspace, so only
+     * Save as new deal is safe. */
+    groupedScenarioLocked?: boolean;
   } | null>(null);
   const [addressChangedChoiceBusy, setAddressChangedChoiceBusy] =
     useState<AddressChangedChoice | null>(null);
@@ -1268,6 +1289,8 @@ export function InvestCalcPage({
     useState(false);
   const [underwritingConflict, setUnderwritingConflict] = useState<{
     savedDealId: string;
+    /** Stable across response-loss retries of Save edits as scenario. */
+    scenarioClientRequestId: string;
     autoAfterAuth?: boolean;
   } | null>(null);
   const [loadedPipelineStage, setLoadedPipelineStage] = useState<string | null>(
@@ -1282,6 +1305,7 @@ export function InvestCalcPage({
   const [isComparingDeals, setIsComparingDeals] = useState(false);
   // Same-tick double-click guard for the atomic save → add → navigate flow.
   const compareInFlightRef = useRef(false);
+  const compareRequestRef = useRef<symbol | null>(null);
   // React state does not expose a newly inserted id synchronously. The save
   // path records the exact completed id here so Save & compare never guesses
   // from a stale render or an address collision chooser.
@@ -1363,6 +1387,41 @@ export function InvestCalcPage({
   // State updates do not synchronously disable a button. This ref closes the
   // same-tick window where a double click could otherwise submit two saves.
   const saveInFlightRef = useRef(false);
+  // The request token also owns every post-await continuation. Layout cleanup
+  // clears it before another route/component instance can mount, preventing a
+  // completed save from adding its deal id to the next page's current URL.
+  const saveRequestRef = useRef<symbol | null>(null);
+  const [saveAuthSupabase] = useState(() => createBrowserSupabaseClient());
+  const observedAccountUserIdRef = useRef<string | null>(
+    expectedAccountUserId,
+  );
+  const accountAuthEpochRef = useRef(0);
+  useLayoutEffect(() => {
+    observedAccountUserIdRef.current = expectedAccountUserId;
+    const {
+      data: { subscription },
+    } = saveAuthSupabase.auth.onAuthStateChange((_event, session) => {
+      const nextUserId = session?.user?.id ?? null;
+      if (observedAccountUserIdRef.current === nextUserId) return;
+      observedAccountUserIdRef.current = nextUserId;
+      accountAuthEpochRef.current += 1;
+      // Synchronously revoke every continuation launched by the old tenant.
+      // The app-shell boundary also reloads the document, but the token guard
+      // closes the interval before navigation commits.
+      saveRequestRef.current = null;
+      saveInFlightRef.current = false;
+      setIsSavingDeal(false);
+    });
+    return () => subscription.unsubscribe();
+  }, [expectedAccountUserId, saveAuthSupabase]);
+  useLayoutEffect(() => {
+    return () => {
+      saveRequestRef.current = null;
+      saveInFlightRef.current = false;
+      compareRequestRef.current = null;
+      compareInFlightRef.current = false;
+    };
+  }, []);
   // ── Historical one-time PDF claim recovery ─────────────────────────
   // New checkout is disabled. A previously verified, server-consumed purchase
   // unlocks exactly the deal fingerprinted at checkout. The high-entropy
@@ -3579,6 +3638,7 @@ export function InvestCalcPage({
       const r = await getPropertyCompsAction({
         address: addr,
         propertyType: propertyTypeAtRequest,
+        expectedUserId: expectedAccountUserId ?? undefined,
       });
       if (
         forkGenerationRef.current !== autofillGeneration ||
@@ -3657,7 +3717,14 @@ export function InvestCalcPage({
     } finally {
       setIsAutofilling(false);
     }
-  }, [form, applyComps, findAutofillConflicts, toast, router]);
+  }, [
+    form,
+    applyComps,
+    findAutofillConflicts,
+    toast,
+    router,
+    expectedAccountUserId,
+  ]);
 
   // Paste a Zillow/Redfin/Realtor link → parse the address from the URL slug
   // (we never fetch the page — those sites block bots with a captcha) and run it
@@ -6168,10 +6235,13 @@ export function InvestCalcPage({
           });
           return;
         }
-        const usage = await consumeProductEvaluationUsageAction({
-          kind: "deal",
-          values,
-        });
+        const usage = await consumeProductEvaluationUsageAction(
+          {
+            kind: "deal",
+            values,
+          },
+          expectedAccountUserId,
+        );
         if (!usage.ok) {
           toast({
             title:
@@ -6506,6 +6576,10 @@ export function InvestCalcPage({
     options: {
       existingIdOverride?: string;
       saveAsNewScenario?: boolean;
+      /** Owned row whose property workspace receives the inserted scenario. */
+      scenarioSourceId?: string;
+      /** Stable UUID for durable response-loss/concurrent retry safety. */
+      scenarioClientRequestId?: string;
       /** Ignore the attached savedDealId and insert a fresh deal — the
        *  loaded saved deal stays untouched. */
       forceInsert?: boolean;
@@ -6547,11 +6621,79 @@ export function InvestCalcPage({
     }
 
     if (saveInFlightRef.current) return false;
+    const saveRequestToken = Symbol("analyzer-save");
     saveInFlightRef.current = true;
+    saveRequestRef.current = saveRequestToken;
+    let accountUserIdAtSubmit: string | null = null;
+    let accountAuthEpochAtSubmit: number | null = null;
+    const saveRequestStillOwnsInstance = () =>
+      isCurrentMountedMutation({
+        requestToken: saveRequestToken,
+        currentRequestToken: saveRequestRef.current,
+      }) &&
+      (accountUserIdAtSubmit === null ||
+        (accountAuthEpochAtSubmit !== null &&
+          isCurrentAccountMutation({
+            expectedUserId: accountUserIdAtSubmit,
+            authEpochAtSubmit: accountAuthEpochAtSubmit,
+            currentUserId: observedAccountUserIdRef.current,
+            currentAuthEpoch: accountAuthEpochRef.current,
+          })));
 
     let awaitingResolution = false;
     setIsSavingDeal(true);
     try {
+      // The server-rendered tree belongs to one exact account. Verify the
+      // browser session immediately before capturing local underwriting, then
+      // pass the same id to the server action. This protects both sides of the
+      // A -> B race: a pre-click switch never dispatches, and a switch after
+      // verification is rejected by the action before it writes.
+      const freshSession = await getFreshSessionUser(saveAuthSupabase);
+      if (!isCurrentMountedMutation({
+        requestToken: saveRequestToken,
+        currentRequestToken: saveRequestRef.current,
+      })) {
+        return false;
+      }
+      if (!freshSession.ok) {
+        if (freshSession.reason === "unavailable") {
+          Sentry.captureException(freshSession.error, {
+            tags: { feature: "analyzer-save-session" },
+          });
+          toast({
+            title: "Could not verify your account",
+            description:
+              "Your session could not be verified right now. Check your connection and try again.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Account changed",
+            description: ACCOUNT_SESSION_CHANGED_MESSAGE,
+            variant: "destructive",
+          });
+        }
+        return false;
+      }
+
+      accountUserIdAtSubmit = expectedAccountUserId ?? freshSession.userId;
+      if (freshSession.userId !== accountUserIdAtSubmit) {
+        toast({
+          title: "Account changed",
+          description: ACCOUNT_SESSION_CHANGED_MESSAGE,
+          variant: "destructive",
+        });
+        return false;
+      }
+      // Anonymous-to-auth save recovery has no server account baseline. Once
+      // the fresh identity is verified, adopt it as this request's baseline;
+      // authenticated app-shell renders always keep their original exact id.
+      if (expectedAccountUserId === null) {
+        observedAccountUserIdRef.current = freshSession.userId;
+      }
+      accountAuthEpochAtSubmit = accountAuthEpochRef.current;
+      if (!saveRequestStillOwnsInstance()) return false;
+
       const currentValues = form.getValues();
       const confidenceContext = resolveLiveInputConfidenceContext(
         currentValues,
@@ -6684,6 +6826,12 @@ export function InvestCalcPage({
         confidenceContext.provenance,
         {
           ...(options.saveAsNewScenario ? { saveAsNewScenario: true } : {}),
+          ...(options.scenarioSourceId
+            ? { scenarioSourceId: options.scenarioSourceId }
+            : {}),
+          ...(options.scenarioClientRequestId
+            ? { scenarioClientRequestId: options.scenarioClientRequestId }
+            : {}),
           ...(options.allowAddressChange ? { allowAddressChange: true } : {}),
           ...(targetExistingId && expectedUnderwritingRevision !== null
             ? { expectedUnderwritingRevision }
@@ -6702,8 +6850,10 @@ export function InvestCalcPage({
           maxOfferTargetSource: maxOfferTargetSourceSnapshot,
           offerCeilingDecisionBasis: decisionBasisSnapshot,
           analyzerStrategyKey: activeStrategyKeyRef.current ?? "buy-hold",
+          expectedUserId: accountUserIdAtSubmit,
         },
       );
+      if (!saveRequestStillOwnsInstance()) return false;
       if (result.ok) {
         clearPendingMaoTarget();
         if (options.autoAfterAuth) {
@@ -6772,7 +6922,11 @@ export function InvestCalcPage({
             void getPropertyCompsAction({
               address: parsedValues.data.address,
               propertyType: parsedValues.data.propertyType,
+              bedrooms: parsedValues.data.bedrooms,
+              bathrooms: parsedValues.data.bathrooms,
+              squareFootage: parsedValues.data.sqft,
               dealId: result.id,
+              expectedUserId: accountUserIdAtSubmit,
             });
           }
           // Only fire the conversion event on a true first-save, not
@@ -6962,6 +7116,7 @@ export function InvestCalcPage({
           setAddressChangedPrompt(null);
           setUnderwritingConflict({
             savedDealId: targetExistingId,
+            scenarioClientRequestId: crypto.randomUUID(),
             autoAfterAuth: options.autoAfterAuth,
           });
           return;
@@ -6989,6 +7144,19 @@ export function InvestCalcPage({
           setAddressChangedPrompt({
             targetId: targetExistingId,
             existingTitle: result.existingTitle,
+          });
+          return;
+        }
+      }
+      if (result.code === "GROUPED_ADDRESS_CHANGE") {
+        const groupedTargetId = result.existingId ?? targetExistingId;
+        if (groupedTargetId) {
+          awaitingResolution = true;
+          setDuplicateCollision(null);
+          setAddressChangedPrompt({
+            targetId: groupedTargetId,
+            existingTitle: result.existingTitle,
+            groupedScenarioLocked: true,
           });
           return;
         }
@@ -7062,6 +7230,7 @@ export function InvestCalcPage({
             existingId: result.existingId,
             existingTitle: result.existingTitle,
             existingUnderwritingRevision: result.existingUnderwritingRevision,
+            scenarioClientRequestId: crypto.randomUUID(),
             autoAfterAuth: options.autoAfterAuth,
           });
           return;
@@ -7088,6 +7257,7 @@ export function InvestCalcPage({
         variant: "destructive",
       });
     } catch {
+      if (!saveRequestStillOwnsInstance()) return false;
       if (options.autoAfterAuth) setIsAutoSaveResuming(false);
       // The action REJECTED rather than returning {ok:false} — a network blip
       // mid-save, a cold-start 500, or a tab one deploy behind main (Next 16
@@ -7103,14 +7273,17 @@ export function InvestCalcPage({
         variant: "destructive",
       });
     } finally {
-      saveInFlightRef.current = false;
-      setIsSavingDeal(false);
-      if (
-        options.autoAfterAuth &&
-        !awaitingResolution &&
-        hasPendingSaveIntent()
-      ) {
-        setIsAutoSaveResuming(false);
+      if (saveRequestStillOwnsInstance()) {
+        saveRequestRef.current = null;
+        saveInFlightRef.current = false;
+        setIsSavingDeal(false);
+        if (
+          options.autoAfterAuth &&
+          !awaitingResolution &&
+          hasPendingSaveIntent()
+        ) {
+          setIsAutoSaveResuming(false);
+        }
       }
     }
     return false;
@@ -7209,6 +7382,9 @@ export function InvestCalcPage({
             // attached (the plain duplicate flow), forceInsert is a no-op.
             {
               saveAsNewScenario: true,
+              scenarioSourceId: duplicateCollision.existingId,
+              scenarioClientRequestId:
+                duplicateCollision.scenarioClientRequestId,
               forceInsert: true,
               autoAfterAuth: duplicateCollision.autoAfterAuth,
             },
@@ -7227,6 +7403,12 @@ export function InvestCalcPage({
    *  toasts and leave the dialog open to retry/cancel. */
   const handleAddressChangedChoice = async (choice: AddressChangedChoice) => {
     if (!addressChangedPrompt) return;
+    if (
+      choice === "update-address" &&
+      addressChangedPrompt.groupedScenarioLocked
+    ) {
+      return;
+    }
     setAddressChangedChoiceBusy(choice);
     try {
       await performSaveDeal(
@@ -8246,7 +8428,14 @@ export function InvestCalcPage({
       router.push("/profile#billing");
       return;
     }
+    const requestToken = Symbol("analyzer-compare");
     compareInFlightRef.current = true;
+    compareRequestRef.current = requestToken;
+    const requestStillOwnsInstance = () =>
+      isCurrentMountedMutation({
+        requestToken,
+        currentRequestToken: compareRequestRef.current,
+      });
     setIsComparingDeals(true);
     try {
       let dealIdForCompare = savedDealId;
@@ -8256,6 +8445,7 @@ export function InvestCalcPage({
         // duplicate-address chooser instead of completing.
         lastCompletedSaveDealIdRef.current = null;
         const saved = await handleSaveDeal(maoTarget, source);
+        if (!requestStillOwnsInstance()) return;
         if (saved !== true) return;
         dealIdForCompare = lastCompletedSaveDealIdRef.current;
         if (!dealIdForCompare) {
@@ -8270,6 +8460,7 @@ export function InvestCalcPage({
       }
 
       const result = await addDealToCompareAction(dealIdForCompare);
+      if (!requestStillOwnsInstance()) return;
       if (!result.ok) {
         toast({
           title: "Could not add to compare",
@@ -8287,6 +8478,7 @@ export function InvestCalcPage({
       trackEvent("comparison_completed", { count_bucket: "2" });
       router.push("/dashboard/compare");
     } catch {
+      if (!requestStillOwnsInstance()) return;
       toast({
         title: "Could not start Compare",
         description:
@@ -8294,8 +8486,11 @@ export function InvestCalcPage({
         variant: "destructive",
       });
     } finally {
-      compareInFlightRef.current = false;
-      setIsComparingDeals(false);
+      if (compareRequestRef.current === requestToken) {
+        compareRequestRef.current = null;
+        compareInFlightRef.current = false;
+        setIsComparingDeals(false);
+      }
     }
   };
 
@@ -8624,6 +8819,7 @@ export function InvestCalcPage({
             // Also pull the real for-sale list price (the asking price), not
             // just the AVM estimate — the whole point of pasting the listing.
             includeListing: true,
+            expectedUserId: expectedAccountUserId ?? undefined,
           });
           if (r.ok && handoffStillCurrent()) {
             applyComps(r.enrichment);
@@ -10901,10 +11097,14 @@ export function InvestCalcPage({
               className="min-h-11"
               disabled={isSavingDeal}
               onClick={() => {
-                const autoAfterAuth = underwritingConflict?.autoAfterAuth;
+                const conflict = underwritingConflict;
+                if (!conflict) return;
+                const autoAfterAuth = conflict.autoAfterAuth;
                 void performSaveDeal({
                   forceInsert: true,
                   saveAsNewScenario: true,
+                  scenarioSourceId: conflict.savedDealId,
+                  scenarioClientRequestId: conflict.scenarioClientRequestId,
                   autoAfterAuth,
                 });
               }}
@@ -10928,13 +11128,18 @@ export function InvestCalcPage({
       >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>The address changed</DialogTitle>
+            <DialogTitle>
+              {addressChangedPrompt?.groupedScenarioLocked
+                ? "This scenario shares a property workspace"
+                : "The address changed"}
+            </DialogTitle>
             <DialogDescription>
               {addressChangedPrompt?.existingTitle
                 ? `Your current inputs use a different address than “${addressChangedPrompt.existingTitle}”.`
                 : "Your current inputs use a different address than the saved deal you loaded."}{" "}
-              Save them as their own deal, or move the saved deal to the new
-              address.
+              {addressChangedPrompt?.groupedScenarioLocked
+                ? "Every scenario in this workspace must stay on the same property. Save these inputs as a new deal; the existing scenarios will remain unchanged."
+                : "Save them as their own deal, or move the saved deal to the new address."}
             </DialogDescription>
           </DialogHeader>
 
@@ -10962,28 +11167,32 @@ export function InvestCalcPage({
               ) : null}
             </button>
 
-            {/* Move the saved deal - e.g. an address typo fix or a re-pick
-                whose formatting differs from the stored string. */}
-            <button
-              type="button"
-              onClick={() => void handleAddressChangedChoice("update-address")}
-              disabled={addressChangedChoiceBusy !== null}
-              className="flex w-full items-start justify-between gap-3 rounded-2xl border border-border bg-card p-4 text-left transition hover:border-primary/40 hover:bg-muted/40 disabled:opacity-60"
-            >
-              <div>
-                <p className="flex items-center gap-1.5 text-sm font-bold text-foreground">
-                  <PencilLine className="size-4 text-muted-foreground" />
-                  Update this deal&rsquo;s address
-                </p>
-                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                  Update the saved deal with your current inputs, new address
-                  included. Its notes, comps, and share links stay attached.
-                </p>
-              </div>
-              {addressChangedChoiceBusy === "update-address" ? (
-                <Loader2 className="mt-0.5 size-4 shrink-0 animate-spin text-muted-foreground" />
-              ) : null}
-            </button>
+            {!addressChangedPrompt?.groupedScenarioLocked ? (
+              /* Move the saved deal - e.g. an address typo fix or a re-pick
+                 whose formatting differs from the stored string. */
+              <button
+                type="button"
+                onClick={() =>
+                  void handleAddressChangedChoice("update-address")
+                }
+                disabled={addressChangedChoiceBusy !== null}
+                className="flex w-full items-start justify-between gap-3 rounded-2xl border border-border bg-card p-4 text-left transition hover:border-primary/40 hover:bg-muted/40 disabled:opacity-60"
+              >
+                <div>
+                  <p className="flex items-center gap-1.5 text-sm font-bold text-foreground">
+                    <PencilLine className="size-4 text-muted-foreground" />
+                    Update this deal&rsquo;s address
+                  </p>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                    Update the saved deal with your current inputs, new address
+                    included. Its notes, comps, and share links stay attached.
+                  </p>
+                </div>
+                {addressChangedChoiceBusy === "update-address" ? (
+                  <Loader2 className="mt-0.5 size-4 shrink-0 animate-spin text-muted-foreground" />
+                ) : null}
+              </button>
+            ) : null}
           </div>
 
           <DialogFooter>

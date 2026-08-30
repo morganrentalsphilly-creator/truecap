@@ -8,7 +8,12 @@ import {
   hasPlanFeature,
 } from "@/lib/entitlements";
 import { isFeatureEnabled } from "@/lib/feature-flags";
-import { loosensSavedDealWatchConsent } from "@/lib/saved-deal-watch-consent";
+import {
+  applySavedDealWatchPreferencePatch,
+  loosensSavedDealWatchConsent,
+  SAVED_DEAL_WATCH_PREFERENCE_KEYS,
+  savedDealWatchPreferenceDatabasePatch,
+} from "@/lib/saved-deal-watch-consent";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -22,8 +27,8 @@ const watchToggleSchema = z
 const watchPreferencesSchema = z
   .object({
     savedAnalysisId: z.string().uuid(),
-    inAppNotificationsEnabled: z.boolean(),
-    emailNotificationsEnabled: z.boolean(),
+    preference: z.enum(SAVED_DEAL_WATCH_PREFERENCE_KEYS),
+    enabled: z.boolean(),
   })
   .strict();
 
@@ -327,14 +332,20 @@ export async function setSavedDealWatchPreferencesAction(
       : toServerErrorResult(existingPreferencesError, "saved-deal-watch");
   }
   const retained = existingPreferences as WatchPreferencesRow | null;
+  const retainedConsent = retained
+    ? {
+        inAppNotificationsEnabled:
+          retained.in_app_notifications_enabled,
+        emailNotificationsEnabled: retained.email_notifications_enabled,
+      }
+    : null;
+  const nextConsent = applySavedDealWatchPreferencePatch(retainedConsent, {
+    preference: parsed.data.preference,
+    enabled: parsed.data.enabled,
+  });
   const loosensConsent = loosensSavedDealWatchConsent(
-    retained
-      ? {
-          inAppNotificationsEnabled: retained.in_app_notifications_enabled,
-          emailNotificationsEnabled: retained.email_notifications_enabled,
-        }
-      : null,
-    parsed.data,
+    retainedConsent,
+    nextConsent,
   );
   if (loosensConsent && !auth.canEnableWatch) {
     return watchEntitlementRequired();
@@ -349,21 +360,31 @@ export async function setSavedDealWatchPreferencesAction(
 
   // A downgraded account with no retained row is already fully opted out. Do
   // not turn that no-op into an INSERT that the consent-safe RLS must reject.
-  const { error } = retained
-    ? await supabase
+  const databasePatch = savedDealWatchPreferenceDatabasePatch({
+    preference: parsed.data.preference,
+    enabled: parsed.data.enabled,
+  });
+  let error: { code?: string; message?: string } | null = null;
+  if (retained) {
+    ({ error } = await supabase
+      .from("saved_deal_watch_preferences")
+      .update(databasePatch)
+      .eq("user_id", auth.userId));
+  } else if (auth.canEnableWatch) {
+    ({ error } = await supabase.from("saved_deal_watch_preferences").insert({
+      user_id: auth.userId,
+      ...databasePatch,
+    }));
+    // Two tabs can both observe "no row" and create different first-time
+    // channel choices. The unique-key loser must merge its one field into the
+    // winner's row, not drop the user's intent or overwrite the other field.
+    if (error?.code === "23505") {
+      ({ error } = await supabase
         .from("saved_deal_watch_preferences")
-        .update({
-          in_app_notifications_enabled: parsed.data.inAppNotificationsEnabled,
-          email_notifications_enabled: parsed.data.emailNotificationsEnabled,
-        })
-        .eq("user_id", auth.userId)
-    : auth.canEnableWatch
-      ? await supabase.from("saved_deal_watch_preferences").insert({
-          user_id: auth.userId,
-          in_app_notifications_enabled: parsed.data.inAppNotificationsEnabled,
-          email_notifications_enabled: parsed.data.emailNotificationsEnabled,
-        })
-      : { error: null };
+        .update(databasePatch)
+        .eq("user_id", auth.userId));
+    }
+  }
   if (error) {
     if (error.code === "42501") return watchEntitlementRequired();
     return isMigrationPending(error)

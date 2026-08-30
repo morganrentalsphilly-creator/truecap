@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import {
   ensureFreshSession,
+  getFreshSessionUser,
   getFreshSessionUserId,
 } from "@/lib/supabase/ensure-fresh-session";
 
@@ -36,7 +37,10 @@ describe("fresh browser Supabase session", () => {
       getUser,
     });
 
-    await expect(getFreshSessionUserId(supabase)).resolves.toBe("user-a");
+    await expect(getFreshSessionUser(supabase)).resolves.toEqual({
+      ok: true,
+      userId: "user-a",
+    });
     expect(refreshSession).not.toHaveBeenCalled();
     expect(getUser).toHaveBeenCalledOnce();
   });
@@ -57,7 +61,10 @@ describe("fresh browser Supabase session", () => {
       }),
     });
 
-    await expect(getFreshSessionUserId(supabase)).resolves.toBe("user-a");
+    await expect(getFreshSessionUser(supabase)).resolves.toEqual({
+      ok: true,
+      userId: "user-a",
+    });
     expect(refreshSession).toHaveBeenCalledOnce();
   });
 
@@ -72,21 +79,143 @@ describe("fresh browser Supabase session", () => {
       }),
     });
 
-    await expect(getFreshSessionUserId(supabase)).resolves.toBeNull();
-    await expect(ensureFreshSession(supabase)).resolves.toBe(false);
+    await expect(getFreshSessionUser(supabase)).resolves.toEqual({
+      ok: false,
+      reason: "identity_mismatch",
+    });
   });
 
-  it("fails closed when an absent session cannot be refreshed", async () => {
+  it("classifies a clean no-session refresh as signed out", async () => {
     const supabase = clientWithAuth({
       getSession: vi.fn().mockResolvedValue({ data: { session: null }, error: null }),
       refreshSession: vi.fn().mockResolvedValue({
         data: { session: null },
-        error: new Error("refresh rejected"),
+        error: null,
       }),
       getUser: vi.fn(),
     });
 
+    await expect(getFreshSessionUser(supabase)).resolves.toEqual({
+      ok: false,
+      reason: "signed_out",
+    });
+  });
+
+  it("classifies Supabase's explicit missing-session error as signed out", async () => {
+    const supabase = clientWithAuth({
+      getSession: vi.fn().mockResolvedValue({
+        data: { session: null },
+        error: { name: "AuthSessionMissingError", message: "Auth session missing!" },
+      }),
+      refreshSession: vi.fn(),
+      getUser: vi.fn(),
+    });
+
+    await expect(getFreshSessionUser(supabase)).resolves.toEqual({
+      ok: false,
+      reason: "signed_out",
+    });
+  });
+
+  it("returns a telemetry-safe unavailable result for getSession failures", async () => {
+    const supabase = clientWithAuth({
+      getSession: vi.fn().mockResolvedValue({
+        data: { session: null },
+        error: {
+          name: "AuthRetryableFetchError",
+          code: "request_timeout",
+          status: 503,
+          message: "Failed to fetch https://project.invalid/auth?token=customer-secret",
+        },
+      }),
+      refreshSession: vi.fn(),
+      getUser: vi.fn(),
+    });
+
+    const result = await getFreshSessionUser(supabase);
+    expect(result).toMatchObject({
+      ok: false,
+      reason: "unavailable",
+      error: {
+        name: "FreshSessionVerificationError",
+        step: "get-session",
+        upstreamName: "AuthRetryableFetchError",
+        upstreamCode: "request_timeout",
+        upstreamStatus: 503,
+      },
+    });
+    if (result.ok || result.reason !== "unavailable") throw new Error("Expected unavailable");
+    expect(result.error.message).not.toMatch(/customer-secret|project\.invalid|failed to fetch/i);
+  });
+
+  it("does not misreport a transient refresh failure as a sign-out", async () => {
+    const expiring = session("user-a", 10);
+    const supabase = clientWithAuth({
+      getSession: vi.fn().mockResolvedValue({ data: { session: expiring }, error: null }),
+      refreshSession: vi.fn().mockResolvedValue({
+        data: { session: null },
+        error: { name: "AuthRetryableFetchError", status: 502, message: "Load failed" },
+      }),
+      getUser: vi.fn(),
+    });
+
+    await expect(getFreshSessionUser(supabase)).resolves.toMatchObject({
+      ok: false,
+      reason: "unavailable",
+      error: { step: "refresh-session", upstreamStatus: 502 },
+    });
+  });
+
+  it("does not misreport a transient server verification failure as a sign-out", async () => {
+    const current = session("user-a", 3_600);
+    const supabase = clientWithAuth({
+      getSession: vi.fn().mockResolvedValue({ data: { session: current }, error: null }),
+      refreshSession: vi.fn(),
+      getUser: vi.fn().mockResolvedValue({
+        data: { user: null },
+        error: { name: "AuthRetryableFetchError", status: 503, message: "NetworkError" },
+      }),
+    });
+
+    await expect(getFreshSessionUser(supabase)).resolves.toMatchObject({
+      ok: false,
+      reason: "unavailable",
+      error: { step: "get-user", upstreamStatus: 503 },
+    });
+  });
+
+  it("sanitizes exceptions thrown by the auth client", async () => {
+    const supabase = clientWithAuth({
+      getSession: vi.fn().mockRejectedValue(
+        new Error("Failed to fetch https://project.invalid/auth?token=customer-secret"),
+      ),
+      refreshSession: vi.fn(),
+      getUser: vi.fn(),
+    });
+
+    const result = await getFreshSessionUser(supabase);
+    expect(result).toMatchObject({
+      ok: false,
+      reason: "unavailable",
+      error: { step: "get-session", upstreamName: "Error" },
+    });
+    if (result.ok || result.reason !== "unavailable") throw new Error("Expected unavailable");
+    expect(JSON.stringify(result.error)).not.toMatch(/customer-secret|project\.invalid/i);
+  });
+
+  it("keeps compatibility wrappers fail-closed", async () => {
+    const current = session("stale-user", 3_600);
+    const supabase = clientWithAuth({
+      getSession: vi.fn().mockResolvedValue({ data: { session: current }, error: null }),
+      refreshSession: vi.fn(),
+      getUser: vi.fn().mockResolvedValue({
+        data: { user: { id: "current-user" } },
+        error: null,
+      }),
+    });
+
     await expect(getFreshSessionUserId(supabase)).resolves.toBeNull();
+    await expect(ensureFreshSession(supabase)).resolves.toBe(false);
   });
 
   it("derives the avatar owner path only after verifying the current account", () => {
@@ -95,16 +224,18 @@ describe("fresh browser Supabase session", () => {
       "utf8",
     );
     const verify = profile.indexOf(
-      "const freshUserId = await getFreshSessionUserId(supabase)",
+      "const freshSession = await getFreshSessionUser(supabase)",
     );
-    const accountGuard = profile.indexOf("if (freshUserId !== userId)", verify);
+    const successId = profile.indexOf("const freshUserId = freshSession.userId", verify);
+    const accountGuard = profile.indexOf("if (freshUserId !== userId)", successId);
     const derivePath = profile.indexOf(
       "const path = `${freshUserId}/avatar-${Date.now()}.webp`",
       accountGuard,
     );
 
     expect(verify).toBeGreaterThan(-1);
-    expect(accountGuard).toBeGreaterThan(verify);
+    expect(successId).toBeGreaterThan(verify);
+    expect(accountGuard).toBeGreaterThan(successId);
     expect(derivePath).toBeGreaterThan(accountGuard);
     expect(profile).not.toContain("const path = `${userId}/avatar-");
   });

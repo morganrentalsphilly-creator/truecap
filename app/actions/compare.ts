@@ -104,11 +104,15 @@ async function getCompareSelectionError(
 
 async function consumeComparisonSelection(
   selectedIds: string[],
+  userId: string,
 ): Promise<Extract<CompareActionResult, { ok: false }> | null> {
-  const usage = await consumeProductEvaluationUsageAction({
-    kind: "comparison",
-    dealIds: selectedIds,
-  });
+  const usage = await consumeProductEvaluationUsageAction(
+    {
+      kind: "comparison",
+      dealIds: selectedIds,
+    },
+    userId,
+  );
   if (usage.ok) return null;
   return {
     ok: false,
@@ -194,7 +198,7 @@ export async function startCompareAction(ids: string[]): Promise<CompareActionRe
   if (selectionError) return selectionError;
 
   if (selectedIds.length >= 2) {
-    const usageError = await consumeComparisonSelection(selectedIds);
+    const usageError = await consumeComparisonSelection(selectedIds, user.id);
     if (usageError) return usageError;
   }
 
@@ -243,7 +247,7 @@ export async function addDealToCompareAction(id: string): Promise<CompareActionR
   if (selectionError) return selectionError;
 
   if (selectedIds.length >= 2) {
-    const usageError = await consumeComparisonSelection(selectedIds);
+    const usageError = await consumeComparisonSelection(selectedIds, user.id);
     if (usageError) return usageError;
   }
 
@@ -302,13 +306,17 @@ export async function compareScenariosAction(dealId: string): Promise<CompareAct
 
   const ids = uniqueIds((rows ?? []).map((r) => (r as { id: string }).id));
   if (ids.length < 2) {
-    return { ok: false, code: "INVALID_SELECTION", message: "Add another scenario before comparing." };
+    return {
+      ok: false,
+      code: "INVALID_SELECTION",
+      message: "Add or restore another active scenario before comparing.",
+    };
   }
 
   const selectionError = await getCompareSelectionError(supabase, user.id, ids);
   if (selectionError) return selectionError;
 
-  const usageError = await consumeComparisonSelection(ids);
+  const usageError = await consumeComparisonSelection(ids, user.id);
   if (usageError) return usageError;
 
   await setCompareCookie(ids);

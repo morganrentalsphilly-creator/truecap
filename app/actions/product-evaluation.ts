@@ -11,6 +11,10 @@ import {
 import { releasedInvestmentFormSchema } from "@/lib/underwriting-model-release";
 import { captureServerEvent } from "@/lib/posthog-server";
 import { activeAnonymousDecisionGrantMatches } from "@/lib/anonymous-decision-grant";
+import {
+  accountSessionChangedResult,
+  expectedAccountUserMatches,
+} from "@/lib/account-session-binding";
 
 const usageSchema = z.discriminatedUnion("kind", [
   z
@@ -40,7 +44,13 @@ export type ConsumeProductEvaluationResult =
     }
   | {
       ok: false;
-      code: "SIGN_IN_REQUIRED" | "NOT_ELIGIBLE" | "EXPIRED" | "LIMIT_REACHED" | "SERVER_ERROR";
+      code:
+        | "SIGN_IN_REQUIRED"
+        | "SESSION_CHANGED"
+        | "NOT_ELIGIBLE"
+        | "EXPIRED"
+        | "LIMIT_REACHED"
+        | "SERVER_ERROR";
       message: string;
     };
 
@@ -52,7 +62,8 @@ export type ConsumeProductEvaluationResult =
  * unique constraint make concurrent submissions count once.
  */
 export async function consumeProductEvaluationUsageAction(
-  input: unknown
+  input: unknown,
+  expectedUserId: unknown,
 ): Promise<ConsumeProductEvaluationResult> {
   const parsed = usageSchema.safeParse(input);
   if (!parsed.success) {
@@ -65,6 +76,9 @@ export async function consumeProductEvaluationUsageAction(
   } = await supabase.auth.getUser();
   if (!user) {
     return { ok: false, code: "SIGN_IN_REQUIRED", message: "Create an account to start the evaluation." };
+  }
+  if (!expectedAccountUserMatches(expectedUserId, user.id)) {
+    return accountSessionChangedResult();
   }
 
   if (await hasPaidPlanSubscription(supabase, user.id)) {

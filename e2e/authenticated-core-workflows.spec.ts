@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import {
   buildAnalysisPdfObjectPath,
@@ -8,10 +8,63 @@ import {
 import { resolveAuthenticatedE2EEnvironment } from "./support/auth-environment";
 import {
   acceptCookiesIfShown,
-  deleteRegressionDealsByAddress,
   expectNoHorizontalOverflow,
   saveUniqueSampleDeal,
 } from "./support/product-flows";
+
+function signedDealDocumentObjectPath(
+  responseUrl: string,
+  ownerId: string,
+  dealId: string,
+  displayFileName: string,
+): string | null {
+  let url: URL;
+  try {
+    url = new URL(responseUrl);
+  } catch {
+    return null;
+  }
+
+  if (!url.searchParams.has("token")) return null;
+
+  let pathname: string;
+  try {
+    pathname = decodeURIComponent(url.pathname);
+  } catch {
+    return null;
+  }
+
+  const objectPrefix = `/storage/v1/object/sign/deal-documents/${ownerId}/${dealId}/`;
+  if (!pathname.startsWith(objectPrefix)) return null;
+
+  const objectName = pathname.slice(objectPrefix.length);
+  const storedName = objectName.match(/^\d+-(.+)$/);
+  if (!storedName || storedName[1] !== displayFileName) return null;
+
+  return `${ownerId}/${dealId}/${objectName}`;
+}
+
+async function bestEffortCleanup<T>(
+  operation: () => PromiseLike<T>,
+  timeoutMs = 2_000,
+): Promise<T | null> {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  const operationPromise = Promise.resolve().then(operation);
+  const timeoutPromise = new Promise<never>((_resolve, reject) => {
+    timeout = setTimeout(
+      () => reject(new Error("Best-effort cleanup timed out.")),
+      timeoutMs,
+    );
+  });
+
+  try {
+    return await Promise.race([operationPromise, timeoutPromise]);
+  } catch {
+    return null;
+  } finally {
+    if (timeout) clearTimeout(timeout);
+  }
+}
 
 const authEnvironment = resolveAuthenticatedE2EEnvironment(process.env);
 const authSkipReason = authEnvironment.enabled
@@ -327,15 +380,16 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
   const queuedScenarioNote = `Confirm sewer scope for ${runKey}.`;
   let baseDealId: string | null = null;
   let uploadedDocumentName: string | null = null;
+  let uploadedDocumentObjectPath: string | null = null;
   let notesRoutePattern: string | null = null;
   let storageProbeClient: SupabaseClient | null = null;
+  let storageProbeOwnerId: string | null = null;
+  let openedDocumentPopup: Page | null = null;
   const storageProbeObjects: Array<{ bucket: string; path: string }> = [];
   const notesSaveGate = { release: null as (() => void) | null };
 
   try {
     await page.setViewportSize({ width: 390, height: 844 });
-    baseDealId = await saveUniqueSampleDeal(page, address);
-
     if (!authEnvironment.enabled) {
       throw new Error("The isolated authenticated environment is required.");
     }
@@ -360,6 +414,13 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
     const probeOwnerId = probeAuth.user?.id;
     expect(probeOwnerId).toBeTruthy();
     if (!probeOwnerId) throw new Error("The Storage probe user was not returned.");
+    storageProbeOwnerId = probeOwnerId;
+
+    // Bootstrap the owner-scoped cleanup client before creating any durable
+    // fixture. If the browser save partially succeeds and then throws, finally
+    // can still soft-delete by owner + unique address even without a returned
+    // deal id; failed Storage env/auth bootstrap creates nothing to leak.
+    baseDealId = await saveUniqueSampleDeal(page, address);
 
     // Exercise the byte-limit boundary at Storage itself. The UI has an early
     // guard too, but a hostile client can bypass an input element entirely.
@@ -531,18 +592,30 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
       documents.getByText(validDocumentName, { exact: true }),
     ).toBeVisible();
 
+    const documentDealId = baseDealId;
+    if (!documentDealId) {
+      throw new Error("The saved deal ID was not available for document download.");
+    }
     const signedDocumentResponsePromise = page.context().waitForEvent("response", {
       predicate: (response) => {
-        const url = new URL(response.url());
         return (
           response.request().method() === "GET" &&
-          url.pathname.includes("/storage/v1/object/sign/deal-documents/") &&
-          decodeURIComponent(url.pathname).endsWith(`/${validDocumentName}`)
+          signedDealDocumentObjectPath(
+            response.url(),
+            probeOwnerId,
+            documentDealId,
+            validDocumentName,
+          ) !== null
         );
       },
       timeout: 20_000,
     });
-    const documentPopupPromise = page.waitForEvent("popup", { timeout: 20_000 });
+    const documentPopupPromise = page
+      .waitForEvent("popup", { timeout: 20_000 })
+      .then((popup) => {
+        openedDocumentPopup = popup;
+        return popup;
+      });
     await documents
       .getByRole("button", { name: `Download ${validDocumentName}`, exact: true })
       .click();
@@ -554,7 +627,22 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
     expect(signedDocumentResponse.headers()["content-type"]).toContain(
       "application/pdf",
     );
+    uploadedDocumentObjectPath = signedDealDocumentObjectPath(
+      signedDocumentResponse.url(),
+      probeOwnerId,
+      documentDealId,
+      validDocumentName,
+    );
+    expect(uploadedDocumentObjectPath).not.toBeNull();
+    if (!uploadedDocumentObjectPath) {
+      throw new Error("The signed document response did not expose its object path.");
+    }
+    storageProbeObjects.push({
+      bucket: "deal-documents",
+      path: uploadedDocumentObjectPath,
+    });
     await documentPopup.close();
+    openedDocumentPopup = null;
 
     await documents
       .getByRole("button", { name: `Delete ${validDocumentName}`, exact: true })
@@ -572,7 +660,16 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
     await expect(
       documents.getByText(validDocumentName, { exact: true }),
     ).toHaveCount(0);
+    const uploadedDocumentIndex = storageProbeObjects.findIndex(
+      (object) =>
+        object.bucket === "deal-documents" &&
+        object.path === uploadedDocumentObjectPath,
+    );
+    if (uploadedDocumentIndex >= 0) {
+      storageProbeObjects.splice(uploadedDocumentIndex, 1);
+    }
     uploadedDocumentName = null;
+    uploadedDocumentObjectPath = null;
 
     const commentBody = `E2E seller update ${runKey}`;
     const commentLog = page.getByRole("region", { name: "Deal comments" });
@@ -790,60 +887,80 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
   } finally {
     notesSaveGate.release?.();
     if (notesRoutePattern) {
-      await page.unroute(notesRoutePattern).catch(() => undefined);
+      const routePattern = notesRoutePattern;
+      await bestEffortCleanup(() => page.unroute(routePattern), 1_000);
+    }
+    if (openedDocumentPopup && !openedDocumentPopup.isClosed()) {
+      await bestEffortCleanup(() => openedDocumentPopup!.close(), 1_000);
     }
     if (storageProbeClient) {
-      for (const object of storageProbeObjects.reverse()) {
-        await storageProbeClient.storage
-          .from(object.bucket)
-          .remove([object.path])
-          .catch(() => undefined);
+      if (baseDealId && storageProbeOwnerId && uploadedDocumentName) {
+        // If the upload completed before its signed GET revealed the generated
+        // timestamped key, resolve that exact object through Storage itself.
+        // This never depends on a live Playwright page or browser context.
+        const objectDirectory = `${storageProbeOwnerId}/${baseDealId}`;
+        const listedObjects = await bestEffortCleanup(
+          () =>
+            storageProbeClient!.storage
+              .from("deal-documents")
+              .list(objectDirectory, { limit: 100 }),
+          3_000,
+        );
+        for (const object of listedObjects?.data ?? []) {
+          if (
+            object.name === uploadedDocumentName ||
+            object.name.endsWith(`-${uploadedDocumentName}`)
+          ) {
+            storageProbeObjects.push({
+              bucket: "deal-documents",
+              path: `${objectDirectory}/${object.name}`,
+            });
+          }
+        }
+      }
+
+      const cleanupObjects = Array.from(
+        new Map(
+          storageProbeObjects.map((object) => [
+            `${object.bucket}:${object.path}`,
+            object,
+          ]),
+        ).values(),
+      ).reverse();
+      for (const object of cleanupObjects) {
+        await bestEffortCleanup(
+          () =>
+            storageProbeClient!.storage
+              .from(object.bucket)
+              .remove([object.path]),
+          3_000,
+        );
+      }
+
+      if (storageProbeOwnerId) {
+        // Mirror the product's soft-delete cleanup directly through the same
+        // authenticated, owner-scoped RLS path. Teardown must never navigate
+        // a page that the runner may already have closed after a failure.
+        await bestEffortCleanup(
+          () =>
+            storageProbeClient!
+              .from("saved_analyses")
+              .update({ deleted_at: new Date().toISOString() })
+              .eq("user_id", storageProbeOwnerId!)
+              .eq("address", address)
+              .is("deleted_at", null),
+          3_000,
+        );
       }
       // The probe shares the seeded user's credentials with the browser. A
       // default (global) sign-out revokes the browser session too, which turns
       // successful cleanup into an authentication failure for this test and
       // every retry that reuses the saved state. Only discard this client's
       // in-memory session.
-      await storageProbeClient.auth
-        .signOut({ scope: "local" })
-        .catch(() => undefined);
-    }
-    if (baseDealId && uploadedDocumentName) {
-      // Best-effort object cleanup if an assertion between upload and the
-      // tested delete failed. Deleting the deal row does not cascade into
-      // Supabase Storage.
-      await page
-        .goto(`/dashboard/saved-analyses/${baseDealId}`, {
-          waitUntil: "domcontentloaded",
-        })
-        .then(async () => {
-          const documents = page.getByRole("region", { name: "Deal documents" });
-          const deleteButton = documents.getByRole("button", {
-            name: `Delete ${uploadedDocumentName}`,
-            exact: true,
-          });
-          const objectIsListed = await deleteButton
-            .waitFor({ state: "visible", timeout: 20_000 })
-            .then(() => true)
-            .catch(() => false);
-          if (objectIsListed) {
-            await deleteButton.click();
-            const popover = page
-              .getByText("Delete this document?", { exact: true })
-              .locator("xpath=ancestor::*[@data-radix-popper-content-wrapper]");
-            await popover
-              .getByRole("button", { name: "Delete", exact: true })
-              .click();
-            await page
-              .getByText("Document deleted", { exact: true })
-              .waitFor({ state: "visible", timeout: 30_000 });
-            uploadedDocumentName = null;
-          }
-        })
-        .catch(() => undefined);
-    }
-    if (baseDealId) {
-      await deleteRegressionDealsByAddress(page, address);
+      await bestEffortCleanup(
+        () => storageProbeClient!.auth.signOut({ scope: "local" }),
+        2_000,
+      );
     }
   }
 });

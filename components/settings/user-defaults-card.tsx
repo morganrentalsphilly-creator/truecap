@@ -30,6 +30,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { isFeatureReleased } from "@/lib/entitlements-catalog";
+import { useExpectedAccountUserId } from "@/components/auth/account-session-boundary";
 
 const TAX_STRATEGY_RELEASED = isFeatureReleased("tax_strategy");
 const EXIT_SCENARIOS_RELEASED = isFeatureReleased("exit_scenarios");
@@ -173,6 +174,7 @@ const DEFAULTS_GROUPS: DefaultsGroup[] = ["Financing", "Operating", "Growth"];
 
 export function UserDefaultsCard() {
   const { toast } = useToast();
+  const expectedUserId = useExpectedAccountUserId();
   const [values, setValues] = useState<
     Partial<Record<keyof UserAnalysisDefaults, string>>
   >({});
@@ -228,7 +230,10 @@ export function UserDefaultsCard() {
     }
     startSaving(async () => {
       try {
-        const result = await saveUserAnalysisDefaultsAction(payload);
+        const result = await saveUserAnalysisDefaultsAction(
+          payload,
+          expectedUserId,
+        );
         if (!result.ok) {
           if (result.code === "MIGRATION_PENDING") {
             setMigrationPending(true);

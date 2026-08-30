@@ -44,6 +44,10 @@ import { hasPaidPlanSubscription } from "@/lib/entitlements";
 import { reserveAnthropicCall } from "@/lib/ai-spend-guard";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
+import {
+  accountSessionChangedResult,
+  expectedAccountUserMatches,
+} from "@/lib/account-session-binding";
 
 const inputSchema = z.object({
   question: z.string().trim().min(2).max(DEAL_QA_LIMITS.questionChars),
@@ -57,7 +61,12 @@ export type DealQaResult =
   | { ok: true; answer: string; remainingToday: number | null }
   | {
       ok: false;
-      code: "VALIDATION_ERROR" | "RATE_LIMITED" | "UNAVAILABLE" | "SERVER_ERROR";
+      code:
+        | "SESSION_CHANGED"
+        | "VALIDATION_ERROR"
+        | "RATE_LIMITED"
+        | "UNAVAILABLE"
+        | "SERVER_ERROR";
       message: string;
     };
 
@@ -82,15 +91,24 @@ function takeToken(key: string, limit: number): { allowed: boolean; remaining: n
   return { allowed: true, remaining: limit - counter.count };
 }
 
-async function resolveCallerKeyAndLimit(): Promise<{ key: string; limit: number; isPaid: boolean }> {
+async function resolveCallerKeyAndLimit(
+  expectedUserId: unknown,
+): Promise<
+  | { ok: true; key: string; limit: number; isPaid: boolean }
+  | { ok: false; result: ReturnType<typeof accountSessionChangedResult> }
+> {
   try {
     const supabase = await createServerSupabaseClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
     if (user) {
+      if (!expectedAccountUserMatches(expectedUserId, user.id)) {
+        return { ok: false, result: accountSessionChangedResult() };
+      }
       const isPaid = await hasPaidPlanSubscription(supabase, user.id);
       return {
+        ok: true,
         key: `user:${user.id}`,
         limit: isPaid ? DEAL_QA_LIMITS.pro : DEAL_QA_LIMITS.free,
         isPaid,
@@ -106,10 +124,21 @@ async function resolveCallerKeyAndLimit(): Promise<{ key: string; limit: number;
   } catch {
     // headers() unavailable — keep "unknown" (shared bucket).
   }
-  return { key: `ip:${ip}`, limit: DEAL_QA_LIMITS.free, isPaid: false };
+  if (expectedUserId != null) {
+    return { ok: false, result: accountSessionChangedResult() };
+  }
+  return {
+    ok: true,
+    key: `ip:${ip}`,
+    limit: DEAL_QA_LIMITS.free,
+    isPaid: false,
+  };
 }
 
-export async function askDealQuestionAction(input: unknown): Promise<DealQaResult> {
+export async function askDealQuestionAction(
+  input: unknown,
+  expectedUserId?: unknown,
+): Promise<DealQaResult> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     return {
@@ -124,7 +153,8 @@ export async function askDealQuestionAction(input: unknown): Promise<DealQaResul
     return { ok: false, code: "VALIDATION_ERROR", message: "Invalid question or deal data." };
   }
 
-  const caller = await resolveCallerKeyAndLimit();
+  const caller = await resolveCallerKeyAndLimit(expectedUserId);
+  if (!caller.ok) return caller.result;
   const token = takeToken(caller.key, caller.limit);
   if (!token.allowed) {
     return {

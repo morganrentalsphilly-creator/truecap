@@ -38,7 +38,7 @@ export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
   const [failedPatch, setFailedPatch] = useState<Partial<DealLabels> | null>(null);
   const draftsRef = useRef<DealLabels>(EMPTY);
   const labelsRef = useRef<DealLabels>(EMPTY);
-  const savedDealIdRef = useRef(savedDealId);
+  const savedDealIdRef = useRef<string | null>(savedDealId);
   const mutationRequestRef = useRef<symbol | null>(null);
   const queuedSaveKeysRef = useRef<DealLabelKey[]>([]);
 
@@ -51,6 +51,12 @@ export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
     setLoaded(false);
     setSaveStatus("idle");
     setFailedPatch(null);
+    return () => {
+      if (savedDealIdRef.current !== savedDealId) return;
+      savedDealIdRef.current = null;
+      mutationRequestRef.current = null;
+      queuedSaveKeysRef.current = [];
+    };
   }, [savedDealId]);
 
   useEffect(() => {

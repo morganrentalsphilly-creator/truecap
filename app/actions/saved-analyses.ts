@@ -48,8 +48,8 @@ import {
   restoreInputConfidenceSourceContext,
 } from "@/lib/input-confidence";
 import {
-  defaultDueDiligenceItems,
   normalizeDueDiligenceItems,
+  resolveStoredDueDiligenceItems,
   type DueDiligenceItem,
 } from "@/lib/due-diligence";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -97,7 +97,10 @@ import {
 } from "@/lib/offer-ceiling-contract";
 import { resolveOfferCeilingForAccess } from "@/lib/offer-ceiling-server";
 import { captureServerEvent } from "@/lib/posthog-server";
-import type { PropertyEnrichment } from "@/lib/property-enrichment/rentcast";
+import {
+  readBoundPropertyCompsPayload,
+  savedAnalysisPropertyCompsFingerprint,
+} from "@/lib/property-comps-query";
 import {
   fingerprintSavedAnalysisPdfRender,
   isSavedAnalysisPdfRenderFingerprint,
@@ -132,6 +135,10 @@ import {
   type SavedDealHistoryContext,
 } from "@/lib/deal-history";
 import { userDecisionFromPipelineStage } from "@/lib/decision-contract";
+import {
+  accountSessionChangedResult,
+  expectedAccountUserMatches,
+} from "@/lib/account-session-binding";
 
 export type SaveDealResult =
   | {
@@ -147,12 +154,17 @@ export type SaveDealResult =
       ok: false;
       code:
         | "SIGN_IN_REQUIRED"
+        | "SESSION_CHANGED"
         | "VALIDATION_ERROR"
         | "ENTITLEMENT_SAVE"
         | "DUPLICATE_ADDRESS"
         // Update path: the form's address no longer matches the saved deal
         // (the caller must choose save-as-new vs. allowAddressChange).
         | "ADDRESS_CHANGED"
+        // Update path: this row belongs to a property workspace with another
+        // scenario/history row, so changing only its address would corrupt
+        // the same-property grouping. Save the inputs as a new deal instead.
+        | "GROUPED_ADDRESS_CHANGE"
         // Update path: the row behind existingId is gone (deleted/archived
         // elsewhere). The caller must detach the id and offer save-as-new —
         // never silently fall through to an insert.
@@ -425,6 +437,83 @@ function isMissingPublicShareCopyKeyColumn(error: {
   );
 }
 
+function isMissingScenarioIntegritySchema(error: {
+  code?: string;
+  message?: string;
+}): boolean {
+  return (
+    /scenario_request_key|claim_saved_analysis_property_for_scenario/i.test(
+      error.message ?? "",
+    ) &&
+    (error.code === "42703" ||
+      error.code === "PGRST202" ||
+      error.code === "PGRST204" ||
+      /does not exist|schema cache|could not find the function/i.test(
+        error.message ?? "",
+      ))
+  );
+}
+
+function isGroupedAddressChangeError(error: {
+  code?: string;
+  message?: string;
+  details?: string;
+}): boolean {
+  return (
+    error.code === "23514" &&
+    /saved_analyses_grouped_address_immutable/i.test(
+      `${error.message ?? ""} ${error.details ?? ""}`,
+    )
+  );
+}
+
+function isDuplicateScenarioNameError(error: {
+  code?: string;
+  message?: string;
+  details?: string;
+}): boolean {
+  return (
+    error.code === "23505" &&
+    /saved_analyses_active_property_scenario_name_uidx/i.test(
+      `${error.message ?? ""} ${error.details ?? ""}`,
+    )
+  );
+}
+
+function isSavedAnalysisPlanCapacityError(error: {
+  code?: string;
+  message?: string;
+  details?: string;
+  hint?: string;
+}): boolean {
+  return (
+    error.code === "23514" &&
+    /saved_analyses_plan_capacity|saved deal limit reached/i.test(
+      `${error.message ?? ""} ${error.details ?? ""} ${error.hint ?? ""}`,
+    )
+  );
+}
+
+function normalizedSavedAddress(value: unknown): string | null {
+  return typeof value === "string" && value.trim()
+    ? value.trim().toLowerCase()
+    : null;
+}
+
+function nextScenarioNumber(rows: Array<{ scenario_name?: unknown }>): number {
+  const used = new Set<number>();
+  for (const row of rows) {
+    const name = dbString(row.scenario_name)?.trim();
+    const match = name?.match(/^scenario\s+(\d+)$/i);
+    if (!match) continue;
+    const value = Number(match[1]);
+    if (Number.isSafeInteger(value) && value >= 2) used.add(value);
+  }
+  let candidate = 2;
+  while (used.has(candidate)) candidate += 1;
+  return candidate;
+}
+
 function buildEditFormSnapshotFromRow(
   row: Record<string, unknown>,
 ): Record<string, unknown> {
@@ -695,6 +784,13 @@ export async function saveDealAction(
   // omit them are unchanged.
   options?: {
     saveAsNewScenario?: boolean;
+    /** Owned saved analysis whose property workspace should receive an
+     * explicit duplicate-dialog/stale-conflict scenario. Required together
+     * with scenarioClientRequestId; public-share copies remain standalone. */
+    scenarioSourceId?: unknown;
+    /** Browser-generated UUID retained across ambiguous retries. The
+     * owner-scoped database key is the insert/idempotency authority. */
+    scenarioClientRequestId?: unknown;
     allowAddressChange?: boolean;
     /** Explicit user attestations. Fingerprints are rechecked server-side so
      * changing a value automatically invalidates its prior verification. */
@@ -736,6 +832,10 @@ export async function saveDealAction(
     /** Server-derived opaque digest for an /s copy. A unique database index
      * turns the saved-row insert itself into the idempotency claim. */
     publicShareCopyKey?: unknown;
+    /** Exact server-rendered account that launched this save. Required for
+     * every entry point, including server-to-server callers, so a stale A tab
+     * can never insert its local underwriting into account B. */
+    expectedUserId?: unknown;
   },
 ): Promise<SaveDealResult> {
   const supabase = await createServerSupabaseClient();
@@ -745,6 +845,103 @@ export async function saveDealAction(
 
   if (!user) {
     return { ok: false, code: "SIGN_IN_REQUIRED" };
+  }
+  if (!expectedAccountUserMatches(options?.expectedUserId, user.id)) {
+    return accountSessionChangedResult();
+  }
+
+  const publicShareCopyOptionProvided = Boolean(
+    options &&
+    Object.prototype.hasOwnProperty.call(options, "publicShareCopyKey"),
+  );
+  const workspaceScenarioRequested =
+    options?.saveAsNewScenario === true && !publicShareCopyOptionProvided;
+  const parsedScenarioSourceId = z
+    .string()
+    .uuid()
+    .safeParse(options?.scenarioSourceId);
+  const parsedScenarioRequestKey = z
+    .string()
+    .uuid()
+    .safeParse(options?.scenarioClientRequestId);
+  if (
+    workspaceScenarioRequested &&
+    (!parsedScenarioSourceId.success || !parsedScenarioRequestKey.success)
+  ) {
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message:
+        "This scenario request is incomplete. Close the dialog and try again.",
+    };
+  }
+  if (
+    !workspaceScenarioRequested &&
+    (options?.scenarioSourceId != null ||
+      options?.scenarioClientRequestId != null)
+  ) {
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "Scenario identity can only be used when saving a scenario.",
+    };
+  }
+  const scenarioSourceId = parsedScenarioSourceId.success
+    ? parsedScenarioSourceId.data
+    : null;
+  const scenarioRequestKey = parsedScenarioRequestKey.success
+    ? parsedScenarioRequestKey.data
+    : null;
+
+  // Reconcile an earlier committed delivery before entitlement/capacity
+  // checks or property mutation. A response can be lost after INSERT; the
+  // same browser intent must still receive that exact row instead of creating
+  // another scenario or claiming another capacity slot.
+  if (workspaceScenarioRequested && scenarioRequestKey) {
+    const { data: priorScenario, error: priorScenarioError } = await supabase
+      .from("saved_analyses")
+      .select("id, underwriting_revision, deleted_at")
+      .eq("user_id", user.id)
+      .eq("scenario_request_key", scenarioRequestKey)
+      .maybeSingle();
+    if (priorScenarioError) {
+      if (isMissingScenarioIntegritySchema(priorScenarioError)) {
+        return {
+          ok: false,
+          code: "MIGRATION_PENDING",
+          message:
+            "Scenario saving is paused until the scenario-integrity migration is applied.",
+        };
+      }
+      return toServerErrorResult(priorScenarioError, "saved-analyses");
+    }
+    if (priorScenario) {
+      if ((priorScenario as Record<string, unknown>).deleted_at != null) {
+        return {
+          ok: false,
+          code: "VALIDATION_ERROR",
+          message:
+            "That scenario request was completed and later deleted. Close this dialog and start a new scenario request.",
+        };
+      }
+      const revision = parseSavedAnalysisRevision(
+        (priorScenario as Record<string, unknown>).underwriting_revision,
+      );
+      if (revision === null) {
+        return {
+          ok: false,
+          code: "SERVER_ERROR",
+          message: "The saved scenario revision could not be verified.",
+        };
+      }
+      return {
+        ok: true,
+        id: String(priorScenario.id),
+        mode: "inserted",
+        underwritingRevision: revision,
+        idempotentReplay: true,
+      };
+    }
   }
 
   const parsed = releasedInvestmentFormSchema.safeParse(input);
@@ -765,16 +962,12 @@ export async function saveDealAction(
     };
   }
 
-  const copyKeyOptionProvided = Boolean(
-    options &&
-    Object.prototype.hasOwnProperty.call(options, "publicShareCopyKey"),
-  );
   const publicShareCopyKey =
     typeof options?.publicShareCopyKey === "string" &&
     /^[a-f0-9]{64}$/.test(options.publicShareCopyKey)
       ? options.publicShareCopyKey
       : null;
-  if (copyKeyOptionProvided && !publicShareCopyKey) {
+  if (publicShareCopyOptionProvided && !publicShareCopyKey) {
     return {
       ok: false,
       code: "VALIDATION_ERROR",
@@ -1187,7 +1380,7 @@ export async function saveDealAction(
     const { data: existing, error: existingErr } = await supabase
       .from("saved_analyses")
       .select(
-        "id, address, title, data_confidence, result_snapshot, financing_profile_id, financing_profile_version, financing_profile_snapshot, underwriting_revision, pipeline_stage, is_archived",
+        "id, address, form_snapshot, title, data_confidence, result_snapshot, financing_profile_id, financing_profile_version, financing_profile_snapshot, underwriting_revision, pipeline_stage, is_archived, property_id",
       )
       .eq("id", candidateExistingId)
       .eq("user_id", user.id)
@@ -1388,9 +1581,45 @@ export async function saveDealAction(
       resultSnapshotWithScore.offerCeilingExact = capturedAccess.exact;
     }
 
+    const existingFormSnapshot = asRecord(
+      (existing as Record<string, unknown>).form_snapshot,
+    );
+    const existingCanonicalAddress =
+      normalizedSavedAddress(existingFormSnapshot?.address) ??
+      normalizedSavedAddress(existing.address);
     const addressChanged =
-      (existing.address ?? "").trim().toLowerCase() !==
-      addressTrimmed.toLowerCase();
+      existingCanonicalAddress !== normalizedSavedAddress(addressTrimmed);
+    const existingPropertyId = dbString(
+      (existing as Record<string, unknown>).property_id,
+    );
+    if (addressChanged && existingPropertyId) {
+      // Every row linked to one properties record must describe that same
+      // address. Moving only one sibling would make Compare combine different
+      // properties. Include soft-deleted/history rows in this preflight; the
+      // database trigger repeats it while holding the parent lock to close a
+      // concurrent-insert race.
+      const { data: propertySiblings, error: propertySiblingsError } =
+        await supabase
+          .from("saved_analyses")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("property_id", existingPropertyId)
+          .neq("id", existing.id)
+          .limit(1);
+      if (propertySiblingsError) {
+        return toServerErrorResult(propertySiblingsError, "saved-analyses");
+      }
+      if ((propertySiblings ?? []).length > 0) {
+        return {
+          ok: false,
+          code: "GROUPED_ADDRESS_CHANGE",
+          message:
+            "This analysis shares a property workspace with another scenario or history row. Save these inputs as a new deal; one scenario cannot move to a different property.",
+          existingId: existing.id,
+          existingTitle: dbString(existing.title) ?? undefined,
+        };
+      }
+    }
     if (addressChanged && options?.allowAddressChange !== true) {
       // The form's address diverged from the saved deal's. Updating in
       // place would silently rewrite the old property's row, so the caller
@@ -1585,6 +1814,16 @@ export async function saveDealAction(
       .maybeSingle();
 
     if (error) {
+      if (isGroupedAddressChangeError(error)) {
+        return {
+          ok: false,
+          code: "GROUPED_ADDRESS_CHANGE",
+          message:
+            "Another scenario was added while you were saving. Save these inputs as a new deal; one scenario cannot move to a different property.",
+          existingId: existing.id,
+          existingTitle: dbString(existing.title) ?? undefined,
+        };
+      }
       if (isMissingSavedAnalysisConcurrencyColumn(error)) {
         return {
           ok: false,
@@ -1650,10 +1889,54 @@ export async function saveDealAction(
   }
 
   let insertTitle = title;
-  if (options?.saveAsNewScenario === true) {
+  let scenarioSourceForClaim: { id: string; title: string | null } | null =
+    null;
+  if (workspaceScenarioRequested && scenarioSourceId) {
+    const { data: scenarioSource, error: scenarioSourceError } = await supabase
+      .from("saved_analyses")
+      .select("id, title, address, form_snapshot")
+      .eq("id", scenarioSourceId)
+      .eq("user_id", user.id)
+      .is("deleted_at", null)
+      .maybeSingle();
+    if (scenarioSourceError) {
+      return toServerErrorResult(scenarioSourceError, "saved-analyses");
+    }
+    if (!scenarioSource) {
+      return {
+        ok: false,
+        code: "DEAL_DELETED",
+        message:
+          "The source deal for this scenario was deleted. Refresh and choose a current saved deal.",
+      };
+    }
+    const sourceRecord = scenarioSource as Record<string, unknown>;
+    const sourceSnapshot = asRecord(sourceRecord.form_snapshot);
+    const sourceAddress =
+      normalizedSavedAddress(sourceSnapshot?.address) ??
+      normalizedSavedAddress(sourceRecord.address);
+    if (
+      !sourceAddress ||
+      sourceAddress !== normalizedSavedAddress(addressTrimmed)
+    ) {
+      return {
+        ok: false,
+        code: "ADDRESS_CHANGED",
+        message:
+          "The scenario source no longer matches this property address. Refresh the saved deal and try again.",
+        existingId: String(sourceRecord.id),
+        existingTitle: dbString(sourceRecord.title) ?? undefined,
+      };
+    }
+    scenarioSourceForClaim = {
+      id: String(sourceRecord.id),
+      title: dbString(sourceRecord.title) ?? null,
+    };
+  } else if (options?.saveAsNewScenario === true) {
     // Explicit choice from the duplicate dialog: keep both. Number the title
-    // off the current count of same-address analyses so dashboard rows stay
-    // distinguishable (original = plain address, then Scenario 2, 3, …).
+    // for the legacy standalone public-share copy path. Interactive scenario
+    // requests use a real property workspace below; public-share copying is
+    // intentionally independent and remains idempotent via its copy key.
     const sameAddressLookup = await findSavedAnalysesByAddress(
       supabase,
       user.id,
@@ -1765,6 +2048,186 @@ export async function saveDealAction(
     }
   }
 
+  // Claim the property only after every capacity and Offer Ceiling rejection
+  // above has stayed read-only. The RPC is the first insert-path workspace
+  // mutation for an interactive scenario.
+  let scenarioPropertyId: string | null = null;
+  if (workspaceScenarioRequested && scenarioSourceForClaim) {
+    const { data: claimedPropertyId, error: claimError } = await supabase.rpc(
+      "claim_saved_analysis_property_for_scenario",
+      { p_source_analysis_id: scenarioSourceForClaim.id },
+    );
+    if (claimError) {
+      if (isMissingScenarioIntegritySchema(claimError)) {
+        return {
+          ok: false,
+          code: "MIGRATION_PENDING",
+          message:
+            "Scenario saving is paused until the scenario-integrity migration is applied.",
+        };
+      }
+      return toServerErrorResult(claimError, "saved-analyses");
+    }
+    const parsedPropertyId = z.string().uuid().safeParse(claimedPropertyId);
+    if (!parsedPropertyId.success) {
+      return {
+        ok: false,
+        code: "SERVER_ERROR",
+        message: "The scenario property workspace could not be verified.",
+      };
+    }
+    scenarioPropertyId = parsedPropertyId.data;
+  }
+
+  if (workspaceScenarioRequested && scenarioPropertyId && scenarioRequestKey) {
+    // Different requests may choose the same automatic number concurrently.
+    // The scenario-name index decides the winner; a loser re-reads the live
+    // names and makes a bounded attempt at the next available number. The
+    // request-key index independently guarantees that a replay of THIS intent
+    // always resolves to one row, including after an interrupted response.
+    for (let attempt = 0; attempt < 8; attempt += 1) {
+      const { data: siblingNames, error: siblingNamesError } = await supabase
+        .from("saved_analyses")
+        .select("scenario_name")
+        .eq("user_id", user.id)
+        .eq("property_id", scenarioPropertyId)
+        .is("deleted_at", null);
+      if (siblingNamesError) {
+        return toServerErrorResult(siblingNamesError, "saved-analyses");
+      }
+      const scenarioNumber = nextScenarioNumber(
+        (siblingNames ?? []) as Array<{ scenario_name?: unknown }>,
+      );
+      const scenarioName = `Scenario ${scenarioNumber}`;
+      const scenarioTitle = `${title.slice(0, 180)} — ${scenarioName}`;
+      const { data: insertedScenario, error: insertScenarioError } =
+        await supabase
+          .from("saved_analyses")
+          .insert({
+            user_id: user.id,
+            ...payload,
+            title: scenarioTitle,
+            property_id: scenarioPropertyId,
+            scenario_name: scenarioName,
+            strategy_kind: null,
+            scenario_request_key: scenarioRequestKey,
+            underwriting_revision: INITIAL_SAVED_ANALYSIS_REVISION,
+            notes_revision: INITIAL_SAVED_ANALYSIS_REVISION,
+          })
+          .select("id, property_id, underwriting_revision")
+          .single();
+
+      if (!insertScenarioError && insertedScenario) {
+        if (
+          (insertedScenario as Record<string, unknown>).property_id !==
+          scenarioPropertyId
+        ) {
+          return {
+            ok: false,
+            code: "SERVER_ERROR",
+            message: "The scenario property workspace could not be verified.",
+          };
+        }
+        const insertedRevision = parseSavedAnalysisRevision(
+          (insertedScenario as Record<string, unknown>).underwriting_revision,
+        );
+        if (insertedRevision === null) {
+          return {
+            ok: false,
+            code: "SERVER_ERROR",
+            message: "The saved scenario revision could not be verified.",
+          };
+        }
+        return {
+          ok: true,
+          id: String(insertedScenario.id),
+          mode: "inserted",
+          underwritingRevision: insertedRevision,
+        };
+      }
+
+      if (insertScenarioError) {
+        // Treat every INSERT error as potentially post-commit until the
+        // durable key says otherwise. The serialized capacity trigger can run
+        // before the request-key unique index on a same-request last-slot race.
+        const { data: priorScenario, error: priorScenarioError } =
+          await supabase
+            .from("saved_analyses")
+            .select("id, underwriting_revision, deleted_at")
+            .eq("user_id", user.id)
+            .eq("scenario_request_key", scenarioRequestKey)
+            .maybeSingle();
+        if (priorScenarioError) {
+          if (isMissingScenarioIntegritySchema(priorScenarioError)) {
+            return {
+              ok: false,
+              code: "MIGRATION_PENDING",
+              message:
+                "Scenario saving is paused until the scenario-integrity migration is applied.",
+            };
+          }
+          return toServerErrorResult(priorScenarioError, "saved-analyses");
+        }
+        if (priorScenario) {
+          if ((priorScenario as Record<string, unknown>).deleted_at != null) {
+            return {
+              ok: false,
+              code: "VALIDATION_ERROR",
+              message:
+                "That scenario request was completed and later deleted. Close this dialog and start a new scenario request.",
+            };
+          }
+          const replayRevision = parseSavedAnalysisRevision(
+            (priorScenario as Record<string, unknown>).underwriting_revision,
+          );
+          if (replayRevision === null) {
+            return {
+              ok: false,
+              code: "SERVER_ERROR",
+              message: "The saved scenario revision could not be verified.",
+            };
+          }
+          return {
+            ok: true,
+            id: String(priorScenario.id),
+            mode: "inserted",
+            underwritingRevision: replayRevision,
+            idempotentReplay: true,
+          };
+        }
+
+        if (isSavedAnalysisPlanCapacityError(insertScenarioError)) {
+          return {
+            ok: false,
+            code: "ENTITLEMENT_SAVE",
+            message: `Saved deal limit reached for your plan (${getSavedDealLimitLabel(entitlements)}).`,
+          };
+        }
+        if (isDuplicateScenarioNameError(insertScenarioError)) continue;
+      }
+
+      if (
+        insertScenarioError &&
+        isMissingScenarioIntegritySchema(insertScenarioError)
+      ) {
+        return {
+          ok: false,
+          code: "MIGRATION_PENDING",
+          message:
+            "Scenario saving is paused until the scenario-integrity migration is applied.",
+        };
+      }
+      return toServerErrorResult(insertScenarioError, "saved-analyses");
+    }
+
+    return {
+      ok: false,
+      code: "SERVER_ERROR",
+      message:
+        "Several scenarios were added at once. Refresh the workspace and try again.",
+    };
+  }
+
   const { data, error } = await supabase
     .from("saved_analyses")
     .insert({
@@ -1781,9 +2244,12 @@ export async function saveDealAction(
     .single();
 
   if (error) {
-    if (publicShareCopyKey && error.code === "23505") {
-      // A concurrent delivery won the unique insert. Return its recipient-owned
-      // row instead of creating a second scenario or reporting a false failure.
+    if (publicShareCopyKey) {
+      // The insert can lose the same-key race through either the unique index
+      // or the plan-capacity trigger (for example, when both requests observed
+      // the final available slot). Always reconcile the durable operation key
+      // before classifying the insert error so the loser returns the exact row
+      // committed by the winner instead of reporting a false failure.
       const { data: priorCopy, error: priorCopyError } = await supabase
         .from("saved_analyses")
         .select("id, underwriting_revision")
@@ -1791,20 +2257,43 @@ export async function saveDealAction(
         .eq("public_share_copy_key", publicShareCopyKey)
         .is("deleted_at", null)
         .maybeSingle();
-      if (!priorCopyError && priorCopy) {
+      if (priorCopyError) {
+        if (isMissingPublicShareCopyKeyColumn(priorCopyError)) {
+          return {
+            ok: false,
+            code: "MIGRATION_PENDING",
+            message:
+              "Copying a shared analysis is paused until the copy-idempotency migration is applied.",
+          };
+        }
+        return toServerErrorResult(priorCopyError, "saved-analyses");
+      }
+      if (priorCopy) {
         const revision = parseSavedAnalysisRevision(
           (priorCopy as Record<string, unknown>).underwriting_revision,
         );
-        if (revision !== null) {
+        if (revision === null) {
           return {
-            ok: true,
-            id: String(priorCopy.id),
-            mode: "inserted",
-            underwritingRevision: revision,
-            idempotentReplay: true,
+            ok: false,
+            code: "SERVER_ERROR",
+            message: "The copied underwriting revision could not be verified.",
           };
         }
+        return {
+          ok: true,
+          id: String(priorCopy.id),
+          mode: "inserted",
+          underwritingRevision: revision,
+          idempotentReplay: true,
+        };
       }
+    }
+    if (isSavedAnalysisPlanCapacityError(error)) {
+      return {
+        ok: false,
+        code: "ENTITLEMENT_SAVE",
+        message: `Saved deal limit reached for your plan (${getSavedDealLimitLabel(entitlements)}).`,
+      };
     }
     if (isMissingPublicShareCopyKeyColumn(error)) {
       return {
@@ -2005,8 +2494,18 @@ async function getSavedAnalysisReportComps(
       .eq("user_id", userId)
       .maybeSingle();
     if (error || !data) return null;
+    const { data: savedDeal, error: savedDealError } = await supabase
+      .from("saved_analyses")
+      .select("address, property_type, bedrooms, bathrooms, sqft")
+      .eq("id", savedDealId)
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (savedDealError || !savedDeal) return null;
     return enrichmentToReportComps(
-      (data as { payload?: PropertyEnrichment | null }).payload ?? null,
+      readBoundPropertyCompsPayload(
+        (data as { payload?: unknown }).payload,
+        savedAnalysisPropertyCompsFingerprint(savedDeal),
+      ),
     );
   } catch {
     // Optional reference data must not block a financial report. A missing
@@ -2704,26 +3203,20 @@ async function persistSavedDealStageWithHistory(input: {
   if (!parsedContext.ok) return parsedContext.result;
 
   const { data, error } = input.expectedCurrentStage
-    ? await input.supabase.rpc(
-        "undo_passed_saved_deal_stage_with_history",
-        {
-          p_saved_analysis_id: input.savedDealId,
-          p_restore_stage: input.stage,
-          p_expected_pass_history_event_id:
-            input.expectedCurrentStage.historyEventId,
-          p_reason: parsedContext.reason,
-          p_note: parsedContext.note,
-        },
-      )
-    : await input.supabase.rpc(
-        "update_saved_deal_stage_with_history",
-        {
-          p_saved_analysis_id: input.savedDealId,
-          p_new_stage: input.stage,
-          p_reason: parsedContext.reason,
-          p_note: parsedContext.note,
-        },
-      );
+    ? await input.supabase.rpc("undo_passed_saved_deal_stage_with_history", {
+        p_saved_analysis_id: input.savedDealId,
+        p_restore_stage: input.stage,
+        p_expected_pass_history_event_id:
+          input.expectedCurrentStage.historyEventId,
+        p_reason: parsedContext.reason,
+        p_note: parsedContext.note,
+      })
+    : await input.supabase.rpc("update_saved_deal_stage_with_history", {
+        p_saved_analysis_id: input.savedDealId,
+        p_new_stage: input.stage,
+        p_reason: parsedContext.reason,
+        p_note: parsedContext.note,
+      });
 
   if (error) {
     if (isDealHistoryMigrationPending(error)) {
@@ -2737,7 +3230,10 @@ async function persistSavedDealStageWithHistory(input: {
     if (error.code === "P0002") {
       return { ok: false, code: "NOT_FOUND", message: "Deal was not found." };
     }
-    if (input.expectedCurrentStage?.stage === "passed" && error.code === "40001") {
+    if (
+      input.expectedCurrentStage?.stage === "passed" &&
+      error.code === "40001"
+    ) {
       return {
         ok: false,
         code: "STALE_DATA",
@@ -3364,12 +3860,10 @@ export async function getDealDueDiligenceAction(
     }
     return toServerErrorResult(error, "saved-analyses");
   }
-  const stored = data
-    ? normalizeDueDiligenceItems((data as { items?: unknown }).items)
-    : [];
+  const rawItems = data ? (data as { items?: unknown }).items : undefined;
   return {
     ok: true,
-    items: stored.length > 0 ? stored : defaultDueDiligenceItems(),
+    items: resolveStoredDueDiligenceItems(rawItems, data !== null),
     revision: data
       ? ((data as { updated_at?: string | null }).updated_at ?? null)
       : null,

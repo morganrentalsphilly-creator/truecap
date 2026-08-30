@@ -7,7 +7,8 @@
  */
 export function isCurrentDealWorkspaceMutation(input: {
   submittedDealId: string;
-  currentDealId: string;
+  /** `null` is the layout-cleanup state after the workspace unmounts. */
+  currentDealId: string | null;
   requestToken: symbol;
   currentRequestToken: symbol | null;
 }): boolean {
@@ -15,4 +16,17 @@ export function isCurrentDealWorkspaceMutation(input: {
     input.submittedDealId === input.currentDealId &&
     input.requestToken === input.currentRequestToken
   );
+}
+
+/**
+ * Async work owned by a mounted component instance must stop settling UI as
+ * soon as that instance is replaced. The request token is installed
+ * synchronously before IO and cleared by layout cleanup, so an old completion
+ * cannot toast, mutate the next route, or clear a newer request's busy state.
+ */
+export function isCurrentMountedMutation(input: {
+  requestToken: symbol;
+  currentRequestToken: symbol | null;
+}): boolean {
+  return input.requestToken === input.currentRequestToken;
 }

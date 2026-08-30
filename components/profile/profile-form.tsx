@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useRouter } from "next/navigation";
 import Cropper from "react-easy-crop";
 import type { MediaSize, Size } from "react-easy-crop";
@@ -34,7 +41,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
-import { getFreshSessionUserId } from "@/lib/supabase/ensure-fresh-session";
+import { friendlyToastError } from "@/lib/friendly-error";
+import { getFreshSessionUser } from "@/lib/supabase/ensure-fresh-session";
+import { isCurrentProfileMutation } from "@/lib/profile-mutation-lifecycle";
 
 const profileSchema = z.object({
   firstName: z.string().trim().min(1, "First name is required").max(80, "First name is too long"),
@@ -53,6 +62,8 @@ type ProfileFormProps = {
 };
 
 type AreaPixels = { x: number; y: number; width: number; height: number };
+type ProfileSessionState = "checking" | "ready" | "changed" | "unavailable";
+type ProfileIdentityVerification = "current" | "stale" | "unavailable";
 const AVATAR_BUCKET = "profile-avatars";
 // The stored avatar is a fixed-size square. Avatars render at ~96px on screen,
 // so 512px is plenty for retina without bloating the upload. Fixing the output
@@ -147,6 +158,7 @@ export function ProfileForm({
 }: ProfileFormProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const [supabase] = useState(() => createBrowserSupabaseClient());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>(
     // The initial client render must be byte-for-byte identical to the server
@@ -187,6 +199,129 @@ export function ProfileForm({
   const [resetSent, setResetSent] = useState(false);
   const [resetCaptchaToken, setResetCaptchaToken] = useState<string | null>(null);
   const [resetCaptchaUnavailable, setResetCaptchaUnavailable] = useState(false);
+  const [profileSessionState, setProfileSessionState] =
+    useState<ProfileSessionState>("checking");
+  const [profileSessionRetry, setProfileSessionRetry] = useState(0);
+  const mountedRef = useRef(false);
+  const profileAuthEpochRef = useRef(0);
+  const verifiedProfileUserIdRef = useRef<string | null>(null);
+  const profileAuthVerificationRef = useRef(0);
+  const profileSaveRequestRef = useRef<symbol | null>(null);
+  const profileResetRequestRef = useRef<symbol | null>(null);
+  const observedProfileUserIdRef = useRef<string | null | undefined>(undefined);
+
+  const invalidateProfileSession = useCallback(
+    (nextState: Exclude<ProfileSessionState, "ready">) => {
+      profileAuthVerificationRef.current += 1;
+      profileAuthEpochRef.current += 1;
+      verifiedProfileUserIdRef.current = null;
+      profileSaveRequestRef.current = null;
+      profileResetRequestRef.current = null;
+      setIsSaving(false);
+      setIsSendingReset(false);
+      setResetSent(false);
+      setResetCaptchaToken(null);
+      setProfileSessionState(nextState);
+    },
+    [],
+  );
+
+  const verifyExpectedProfileIdentity = useCallback(
+    async (authEpochAtSubmit: number): Promise<ProfileIdentityVerification> => {
+      const identityStillOwnsProfile = () =>
+        mountedRef.current &&
+        verifiedProfileUserIdRef.current === userId &&
+        profileAuthEpochRef.current === authEpochAtSubmit;
+      if (!identityStillOwnsProfile()) return "stale";
+
+      const fresh = await getFreshSessionUser(supabase);
+      if (!identityStillOwnsProfile()) return "stale";
+      if (!fresh.ok) {
+        if (fresh.reason === "unavailable") {
+          invalidateProfileSession("unavailable");
+          return "unavailable";
+        }
+        invalidateProfileSession("changed");
+        return "stale";
+      }
+      if (fresh.userId !== userId) {
+        invalidateProfileSession("changed");
+        return "stale";
+      }
+      return "current";
+    },
+    [invalidateProfileSession, supabase, userId],
+  );
+
+  useLayoutEffect(() => {
+    mountedRef.current = true;
+
+    const verifyMountedProfileIdentity = async (
+      observedUserId?: string | null,
+    ) => {
+      const verificationToken = ++profileAuthVerificationRef.current;
+      const fresh = await getFreshSessionUser(supabase);
+      if (
+        !mountedRef.current ||
+        profileAuthVerificationRef.current !== verificationToken
+      ) {
+        return;
+      }
+      if (
+        fresh.ok &&
+        fresh.userId === userId &&
+        (observedUserId === undefined || observedUserId === userId)
+      ) {
+        observedProfileUserIdRef.current = userId;
+        verifiedProfileUserIdRef.current = userId;
+        setProfileSessionState("ready");
+        return;
+      }
+      invalidateProfileSession(
+        !fresh.ok && fresh.reason === "unavailable"
+          ? "unavailable"
+          : "changed",
+      );
+    };
+
+    const {
+      data: { subscription: authSubscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mountedRef.current) return;
+      const observedUserId = session?.user?.id ?? null;
+      if (
+        observedProfileUserIdRef.current === observedUserId &&
+        verifiedProfileUserIdRef.current === userId
+      ) {
+        return;
+      }
+      observedProfileUserIdRef.current = observedUserId;
+      profileAuthVerificationRef.current += 1;
+      profileAuthEpochRef.current += 1;
+      verifiedProfileUserIdRef.current = null;
+      profileSaveRequestRef.current = null;
+      profileResetRequestRef.current = null;
+      setIsSaving(false);
+      setIsSendingReset(false);
+      setResetSent(false);
+      setResetCaptchaToken(null);
+      setProfileSessionState(
+        observedUserId === userId ? "checking" : "changed",
+      );
+      if (observedUserId === userId) {
+        void verifyMountedProfileIdentity(observedUserId);
+      }
+    });
+
+    void verifyMountedProfileIdentity();
+    return () => {
+      mountedRef.current = false;
+      profileAuthVerificationRef.current += 1;
+      profileSaveRequestRef.current = null;
+      profileResetRequestRef.current = null;
+      authSubscription.unsubscribe();
+    };
+  }, [invalidateProfileSession, profileSessionRetry, supabase, userId]);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -255,7 +390,7 @@ export function ProfileForm({
   };
 
   const handleFileSelected = (file?: File) => {
-    if (!file) return;
+    if (!file || profileSessionState !== "ready") return;
     const typeOk = file.type
       ? ACCEPTED_IMAGE_TYPES.includes(file.type) || file.type.startsWith("image/")
       : false;
@@ -307,19 +442,38 @@ export function ProfileForm({
       const canvas = await imageToCanvas(rawImage, croppedAreaPixels);
       const blob = await canvasToBlob(canvas, 0.92);
 
-      const supabase = createBrowserSupabaseClient();
       // Same stale-browser-token guard as the deal-documents uploader: the
       // avatar call runs on the client JWT, which can lapse in an old tab
       // while everything cookie-based still works. Verify the exact identity
       // before deriving an owner path; a sibling tab may also switch accounts.
-      const freshUserId = await getFreshSessionUserId(supabase);
-      if (!freshUserId) {
-        throw new Error("Your session expired. Refresh the page and sign in again.");
+      const freshSession = await getFreshSessionUser(supabase);
+      if (!freshSession.ok) {
+        const description =
+          freshSession.reason === "signed_out"
+            ? "Your session expired. Refresh the page and sign in again."
+            : freshSession.reason === "identity_mismatch"
+              ? "Your signed-in account changed. Refresh this page before uploading an avatar."
+              : friendlyToastError(freshSession.error, {
+                  feature: "profile-avatar-session",
+                  fallback:
+                    "We couldn't verify your session right now. Check your connection and try again.",
+                });
+        toast({
+          title: "Avatar upload failed",
+          description,
+          variant: "destructive",
+        });
+        return;
       }
+      const freshUserId = freshSession.userId;
       if (freshUserId !== userId) {
-        throw new Error(
-          "Your signed-in account changed. Refresh this page before uploading an avatar.",
-        );
+        toast({
+          title: "Avatar upload failed",
+          description:
+            "Your signed-in account changed. Refresh this page before uploading an avatar.",
+          variant: "destructive",
+        });
+        return;
       }
       const path = `${freshUserId}/avatar-${Date.now()}.webp`;
       const { error: uploadError } = await supabase.storage
@@ -353,10 +507,12 @@ export function ProfileForm({
       revokeObjectUrl();
       closeCropDialog(false);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Could not upload avatar.";
       toast({
         title: "Avatar upload failed",
-        description: message,
+        description: friendlyToastError(error, {
+          feature: "profile-avatar",
+          fallback: "Could not upload avatar. Please try again.",
+        }),
         variant: "destructive",
       });
     } finally {
@@ -365,72 +521,181 @@ export function ProfileForm({
   };
 
   const handleSendPasswordReset = async () => {
-    if (!initialEmail || isSendingReset) return;
-    setIsSendingReset(true);
-    // Supabase enforces captcha on resetPasswordForEmail project-wide, so this
-    // signed-in surface needs a token too. Without one the send was rejected
-    // and the user saw a raw "no captcha_token found" error.
-    const result = await requestPasswordResetAction({
-      email: initialEmail,
-      captchaToken: resetCaptchaToken ?? undefined,
-    });
-    setIsSendingReset(false);
-    if (!result.ok) {
-      toast({
-        title: "Couldn't send reset link",
-        description: result.message,
-        variant: "destructive",
-      });
+    if (
+      !initialEmail ||
+      isSendingReset ||
+      profileSessionState !== "ready" ||
+      profileResetRequestRef.current !== null
+    ) {
       return;
     }
-    setResetSent(true);
-    toast({
-      title: "Reset link sent",
-      description: `Check ${initialEmail} for the link to set a new password.`,
-    });
+    const requestToken = Symbol("profile-password-reset");
+    const authEpochAtSubmit = profileAuthEpochRef.current;
+    const captchaTokenAtSubmit = resetCaptchaToken ?? undefined;
+    profileResetRequestRef.current = requestToken;
+    const requestStillOwnsProfile = () =>
+      isCurrentProfileMutation({
+        mounted: mountedRef.current,
+        expectedUserId: userId,
+        currentUserId: verifiedProfileUserIdRef.current,
+        authEpochAtSubmit,
+        currentAuthEpoch: profileAuthEpochRef.current,
+        requestToken,
+        currentRequestToken: profileResetRequestRef.current,
+      });
+    setIsSendingReset(true);
+    try {
+      const verification = await verifyExpectedProfileIdentity(
+        authEpochAtSubmit,
+      );
+      if (!requestStillOwnsProfile() || verification !== "current") return;
+
+      // Supabase enforces captcha on resetPasswordForEmail project-wide, so
+      // this signed-in surface needs a token too. Capture it with the exact
+      // verified account before starting the request.
+      const result = await requestPasswordResetAction({
+        email: initialEmail,
+        captchaToken: captchaTokenAtSubmit,
+        profileBinding: {
+          expectedUserId: userId,
+          expectedEmail: initialEmail.trim().toLowerCase(),
+        },
+      });
+      if (!requestStillOwnsProfile()) return;
+      if (!result.ok) {
+        if (result.code === "SESSION_CHANGED") {
+          invalidateProfileSession("changed");
+          return;
+        }
+        toast({
+          title: "Couldn't send reset link",
+          description: result.message,
+          variant: "destructive",
+        });
+        return;
+      }
+      setResetSent(true);
+      toast({
+        title: "Reset link sent",
+        description: `Check ${initialEmail} for the link to set a new password.`,
+      });
+    } catch (error) {
+      if (!requestStillOwnsProfile()) return;
+      toast({
+        title: "Couldn't send reset link",
+        description: friendlyToastError(error, {
+          feature: "profile-password-reset",
+          fallback: "Check your connection and try again.",
+        }),
+        variant: "destructive",
+      });
+    } finally {
+      if (profileResetRequestRef.current === requestToken) {
+        profileResetRequestRef.current = null;
+        setIsSendingReset(false);
+      }
+    }
   };
 
   const onSubmit = async (values: ProfileFormValues) => {
-    setIsSaving(true);
-    const cleanAvatarUrl = avatarUrl ? avatarUrl.split("?")[0] : null;
-    const result = await updateProfileAction({
-      firstName: values.firstName,
-      lastName: values.lastName ?? "",
-      avatarUrl: cleanAvatarUrl,
-    });
-    setIsSaving(false);
-
-    if (!result.ok) {
-      toast({
-        title: "Could not save profile",
-        description: result.message,
-        variant: "destructive",
-      });
+    if (
+      profileSessionState !== "ready" ||
+      profileSaveRequestRef.current !== null
+    ) {
       return;
     }
+    const requestToken = Symbol("profile-save");
+    const authEpochAtSubmit = profileAuthEpochRef.current;
+    profileSaveRequestRef.current = requestToken;
+    const requestStillOwnsProfile = () =>
+      isCurrentProfileMutation({
+        mounted: mountedRef.current,
+        expectedUserId: userId,
+        currentUserId: verifiedProfileUserIdRef.current,
+        authEpochAtSubmit,
+        currentAuthEpoch: profileAuthEpochRef.current,
+        requestToken,
+        currentRequestToken: profileSaveRequestRef.current,
+      });
+    setIsSaving(true);
+    const cleanAvatarUrl = avatarUrl ? avatarUrl.split("?")[0] : null;
+    try {
+      const verification = await verifyExpectedProfileIdentity(
+        authEpochAtSubmit,
+      );
+      if (!requestStillOwnsProfile() || verification !== "current") return;
 
-    if (cleanAvatarUrl && cleanAvatarUrl !== initialAvatarUrlRef.current && pendingDeletePathRef.current) {
-      const supabase = createBrowserSupabaseClient();
-      await supabase.storage.from(AVATAR_BUCKET).remove([pendingDeletePathRef.current]);
-      pendingDeletePathRef.current = null;
+      const result = await updateProfileAction({
+        expectedUserId: userId,
+        firstName: values.firstName,
+        lastName: values.lastName ?? "",
+        avatarUrl: cleanAvatarUrl,
+      });
+      if (!requestStillOwnsProfile()) return;
+
+      if (!result.ok) {
+        if (
+          result.code === "UNAUTHORIZED" ||
+          result.code === "SESSION_CHANGED"
+        ) {
+          invalidateProfileSession("changed");
+          return;
+        }
+        toast({
+          title: "Could not save profile",
+          description: result.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (
+        cleanAvatarUrl &&
+        cleanAvatarUrl !== initialAvatarUrlRef.current &&
+        pendingDeletePathRef.current
+      ) {
+        const pendingDeletePath = pendingDeletePathRef.current;
+        await supabase.storage.from(AVATAR_BUCKET).remove([pendingDeletePath]);
+        if (!requestStillOwnsProfile()) return;
+        if (pendingDeletePathRef.current === pendingDeletePath) {
+          pendingDeletePathRef.current = null;
+        }
+      }
+
+      initialAvatarUrlRef.current = cleanAvatarUrl ?? undefined;
+      setAvatarUrl(
+        cleanAvatarUrl ? `${cleanAvatarUrl}?v=${Date.now()}` : undefined,
+      );
+      window.dispatchEvent(
+        new CustomEvent("profile-updated", {
+          detail: {
+            firstName: values.firstName,
+            lastName: values.lastName ?? "",
+            avatarUrl: cleanAvatarUrl,
+          },
+        }),
+      );
+      router.refresh();
+      toast({
+        title: "Profile updated",
+        description: "Your profile changes have been saved successfully.",
+      });
+    } catch (error) {
+      if (!requestStillOwnsProfile()) return;
+      toast({
+        title: "Could not save profile",
+        description: friendlyToastError(error, {
+          feature: "profile-save",
+          fallback: "Check your connection and try again.",
+        }),
+        variant: "destructive",
+      });
+    } finally {
+      if (profileSaveRequestRef.current === requestToken) {
+        profileSaveRequestRef.current = null;
+        setIsSaving(false);
+      }
     }
-
-    initialAvatarUrlRef.current = cleanAvatarUrl ?? undefined;
-    setAvatarUrl(cleanAvatarUrl ? `${cleanAvatarUrl}?v=${Date.now()}` : undefined);
-    window.dispatchEvent(
-      new CustomEvent("profile-updated", {
-        detail: {
-          firstName: values.firstName,
-          lastName: values.lastName ?? "",
-          avatarUrl: cleanAvatarUrl,
-        },
-      })
-    );
-    router.refresh();
-    toast({
-      title: "Profile updated",
-      description: "Your profile changes have been saved successfully.",
-    });
   };
 
   return (
@@ -440,6 +705,47 @@ export function ProfileForm({
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Profile</h1>
           <p className="text-muted-foreground mt-2">Your account details, profile photo, and billing.</p>
         </div>
+
+        {profileSessionState !== "ready" ? (
+          <div
+            role={profileSessionState === "checking" ? "status" : "alert"}
+            className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4 text-sm text-muted-foreground"
+          >
+            <div className="flex items-center gap-2">
+              {profileSessionState === "checking" ? (
+                <Loader2 className="size-4 animate-spin" aria-hidden />
+              ) : null}
+              <span>
+                {profileSessionState === "checking"
+                  ? "Verifying the account that owns this profile…"
+                  : profileSessionState === "unavailable"
+                    ? "We couldn't verify your session. No profile changes were saved."
+                    : "Your signed-in account changed. Refresh before editing this profile."}
+              </span>
+            </div>
+            {profileSessionState === "unavailable" ? (
+              <Button
+                type="button"
+                variant="outline"
+                className="mt-3 min-h-11"
+                onClick={() =>
+                  setProfileSessionRetry((current) => current + 1)
+                }
+              >
+                Retry session verification
+              </Button>
+            ) : profileSessionState === "changed" ? (
+              <Button
+                type="button"
+                variant="outline"
+                className="mt-3 min-h-11"
+                onClick={() => window.location.reload()}
+              >
+                Refresh profile
+              </Button>
+            ) : null}
+          </div>
+        ) : null}
 
         <Form {...form}>
           <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)} noValidate>
@@ -465,6 +771,7 @@ export function ProfileForm({
               <div className="flex items-center gap-4 sm:gap-5">
                 <button
                   type="button"
+                  disabled={profileSessionState !== "ready"}
                   className="group relative shrink-0 rounded-full"
                   onClick={() => fileInputRef.current?.click()}
                   aria-label="Change profile photo"
@@ -513,7 +820,7 @@ export function ProfileForm({
                   <FormItem>
                     <FormLabel>First name</FormLabel>
                     <FormControl>
-                      <Input className="h-11 rounded-xl" placeholder="First name" disabled={isSaving} {...field} />
+                      <Input className="h-11 rounded-xl" placeholder="First name" disabled={isSaving || profileSessionState !== "ready"} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -530,7 +837,7 @@ export function ProfileForm({
                       <Input
                         className="h-11 rounded-xl"
                         placeholder="Last name"
-                        disabled={isSaving}
+                        disabled={isSaving || profileSessionState !== "ready"}
                         value={field.value ?? ""}
                         onChange={field.onChange}
                         onBlur={field.onBlur}
@@ -563,7 +870,11 @@ export function ProfileForm({
                 )}
               />
 
-              <Button type="submit" disabled={isSaving} className="min-w-40 rounded-xl">
+              <Button
+                type="submit"
+                disabled={isSaving || profileSessionState !== "ready"}
+                className="min-w-40 rounded-xl"
+              >
                 {isSaving ? (
                   <>
                     <Loader2 className="animate-spin" />
@@ -613,6 +924,7 @@ export function ProfileForm({
               disabled={
                 isSendingReset ||
                 resetSent ||
+                profileSessionState !== "ready" ||
                 (captchaEnabled && !resetCaptchaUnavailable && !resetCaptchaToken)
               }
             >
@@ -731,7 +1043,11 @@ export function ProfileForm({
               type="button"
               className="rounded-2xl min-w-44 bg-[#2f658f] hover:bg-[#2f658f]/90 text-white"
               onClick={() => void uploadCroppedAvatar()}
-              disabled={isUploadingAvatar || !croppedAreaPixels}
+              disabled={
+                isUploadingAvatar ||
+                !croppedAreaPixels ||
+                profileSessionState !== "ready"
+              }
             >
               {isUploadingAvatar ? (
                 <>

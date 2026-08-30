@@ -37,14 +37,16 @@ describe("no-card evaluation authorization boundaries", () => {
     expect(action).toContain(
       "buildEvaluationComparisonResourceKey(parsed.data.dealIds)",
     );
-    expect(analyzer).toContain('kind: "deal",\n          values,');
+    expect(analyzer).toMatch(
+      /consumeProductEvaluationUsageAction\(\s*\{\s*kind: "deal",\s*values,\s*\},\s*expectedAccountUserId,\s*\)/,
+    );
     expect(analyzer).not.toContain("buildEvaluationDealResourceKey");
     expect(comparisonClient).not.toContain("consumeProductEvaluationUsageAction");
   });
 
   it("atomically consumes before publishing the selection cookie, never during a page GET", () => {
     const consume = comparisonAction.indexOf(
-      "const usageError = await consumeComparisonSelection(selectedIds)",
+      "const usageError = await consumeComparisonSelection(selectedIds, user.id)",
     );
     const reject = comparisonAction.indexOf(
       "if (usageError) return usageError",

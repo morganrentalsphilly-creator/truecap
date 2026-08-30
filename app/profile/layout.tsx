@@ -32,6 +32,7 @@ import { getActiveSavedAnalysesCount } from "@/lib/saved-analyses-count";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { loginPathFor } from "@/lib/auth-schema";
 import { getCurrentRequestPath } from "@/lib/request-path";
+import { AccountSessionBoundary } from "@/components/auth/account-session-boundary";
 
 type ProfileRow = {
   first_name: string | null;
@@ -74,18 +75,20 @@ export default async function ProfileLayout({ children }: { children: ReactNode 
   const displayName = getDisplayName((profile as ProfileRow | null) ?? null, user.email);
 
   return (
-    <DashboardShell activeDealCount={activeDealCount} navAccess={navAccess}>
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Topbar
-          displayName={displayName}
-          email={user.email ?? ""}
-          initials={getInitials(displayName, user.email ?? "")}
-          avatarSrc={(profile as ProfileRow | null)?.avatar_url ?? undefined}
-          isPremium={isPremium}
-          canAccessDashboard={navAccess.dashboard}
-        />
-        <div className="flex-1">{children}</div>
-      </div>
-    </DashboardShell>
+    <AccountSessionBoundary expectedUserId={user.id}>
+      <DashboardShell activeDealCount={activeDealCount} navAccess={navAccess}>
+        <div className="flex min-w-0 flex-1 flex-col">
+          <Topbar
+            displayName={displayName}
+            email={user.email ?? ""}
+            initials={getInitials(displayName, user.email ?? "")}
+            avatarSrc={(profile as ProfileRow | null)?.avatar_url ?? undefined}
+            isPremium={isPremium}
+            canAccessDashboard={navAccess.dashboard}
+          />
+          <div className="flex-1">{children}</div>
+        </div>
+      </DashboardShell>
+    </AccountSessionBoundary>
   );
 }

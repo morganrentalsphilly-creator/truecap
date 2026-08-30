@@ -20,6 +20,8 @@
 -- forward-only because 20260830130000 is already applied and hash-recorded.
 -- -------------------------------------------------------------------------
 
+begin;
+
 -- Reassert the API-layer limits before replacing any upload policy. These
 -- upserts are idempotent and also converge a clean replay with production.
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
@@ -269,3 +271,5 @@ begin
   end if;
 end;
 $$;
+
+commit;

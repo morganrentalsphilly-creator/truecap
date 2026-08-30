@@ -18,9 +18,11 @@ import {
 } from "@/app/actions/email-preferences";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import { useExpectedAccountUserId } from "@/components/auth/account-session-boundary";
 
 export function WeeklySummaryToggle() {
   const { toast } = useToast();
+  const expectedUserId = useExpectedAccountUserId();
   const [loaded, setLoaded] = useState(false);
   const [available, setAvailable] = useState(true);
   const [enabled, setEnabled] = useState(false);
@@ -61,7 +63,7 @@ export function WeeklySummaryToggle() {
     setEnabled(next); // optimistic
     startTransition(async () => {
       try {
-        const r = await setWeeklySummaryEmailsAction(next);
+        const r = await setWeeklySummaryEmailsAction(next, expectedUserId);
         if (!r.ok) {
           setEnabled(!next); // rollback
           toast({ title: "Couldn't update preference", description: r.message, variant: "destructive" });

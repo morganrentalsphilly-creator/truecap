@@ -11,13 +11,15 @@
  * guards all apply). Merely opening the link never mutates the deal; dismissal
  * is implicit — navigate anywhere (or apply) and the param, and banner, are gone.
  */
-import { useTransition } from "react";
+import { useLayoutEffect, useRef, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Bell } from "lucide-react";
 import { saveDealAction } from "@/app/actions/saved-analyses";
 import { useToast } from "@/hooks/use-toast";
+import { isCurrentDealWorkspaceMutation } from "@/lib/deal-workspace-mutation-lifecycle";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import type { RateAlertMetrics } from "@/lib/rate-alerts";
+import { useExpectedAccountUserId } from "@/components/auth/account-session-boundary";
 
 const fmtMoney = (n: number) =>
   `${n < 0 ? "-" : ""}$${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
@@ -60,17 +62,50 @@ export function RateAlertReUnderwriteBanner({
 }) {
   const router = useRouter();
   const { toast } = useToast();
+  const expectedUserId = useExpectedAccountUserId();
   const [isApplying, startApplying] = useTransition();
+  const activeDealIdRef = useRef<string | null>(savedDealId);
+  const applyRequestRef = useRef<symbol | null>(null);
+
+  // A server action can settle after this banner is reused for another deal
+  // or unmounted altogether. Invalidate its continuation during the route
+  // commit so an old rate apply cannot toast on the new page or navigate the
+  // user back to the prior workspace after they have already left it.
+  useLayoutEffect(() => {
+    activeDealIdRef.current = savedDealId;
+    applyRequestRef.current = null;
+    return () => {
+      if (activeDealIdRef.current === savedDealId) {
+        activeDealIdRef.current = null;
+        applyRequestRef.current = null;
+      }
+    };
+  }, [savedDealId]);
 
   const handleApply = () => {
+    if (applyRequestRef.current !== null) return;
+    const dealIdAtSubmit = savedDealId;
+    const requestToken = Symbol("rate-alert-apply");
+    applyRequestRef.current = requestToken;
+    const requestStillOwnsDeal = () =>
+      isCurrentDealWorkspaceMutation({
+        submittedDealId: dealIdAtSubmit,
+        currentDealId: activeDealIdRef.current,
+        requestToken,
+        currentRequestToken: applyRequestRef.current,
+      });
     startApplying(async () => {
       try {
         const result = await saveDealAction(
           { ...values, interestRate: alertRatePct },
-          savedDealId,
+          dealIdAtSubmit,
           undefined,
-          { expectedUnderwritingRevision: underwritingRevision }
+          {
+            expectedUnderwritingRevision: underwritingRevision,
+            expectedUserId,
+          }
         );
+        if (!requestStillOwnsDeal()) return;
         if (!result.ok) {
           toast({
             title: "Could not apply the rate",
@@ -86,18 +121,23 @@ export function RateAlertReUnderwriteBanner({
         });
         // Strip the ?rate= param (the banner's only mount condition) and
         // re-render the workspace from the just-updated snapshot.
-        router.replace(`/dashboard/saved-analyses/${savedDealId}`, { scroll: false });
+        router.replace(`/dashboard/saved-analyses/${dealIdAtSubmit}`, { scroll: false });
         router.refresh();
       } catch {
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, stale-deploy Server Action). Without this the "Apply"
         // button clears its "Applying…" label with no signal and the saved deal
         // is untouched. Tell the user it's retryable — nothing was mutated.
+        if (!requestStillOwnsDeal()) return;
         toast({
           title: "Could not apply the rate",
           description: "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
+      } finally {
+        if (applyRequestRef.current === requestToken) {
+          applyRequestRef.current = null;
+        }
       }
     });
   };

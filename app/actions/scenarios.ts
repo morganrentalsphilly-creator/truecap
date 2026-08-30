@@ -80,6 +80,9 @@ export type ScenarioSummary = {
   scenarioName: string;
   strategyKind: string | null;
   title: string | null;
+  lifecycleState: "active" | "completed" | "archived";
+  /** Matches the active-row contract enforced by compareScenariosAction. */
+  isComparable: boolean;
   /** The original saved analysis (NULL/blank or legacy "Base case" name). */
   isBase: boolean;
   isSource: boolean;
@@ -123,7 +126,10 @@ function isMissingSchema(error: { code?: string; message?: string }): boolean {
   return (
     error.code === "42P01" || // undefined_table
     error.code === "42703" || // undefined_column
-    /relation .* does not exist|column .* does not exist/i.test(
+    error.code === "42883" || // undefined_function
+    error.code === "PGRST202" || // function absent from PostgREST schema cache
+    error.code === "PGRST204" || // column absent from PostgREST schema cache
+    /relation .* does not exist|column .* does not exist|function .* does not exist|could not find .* in the schema cache|schema cache.*(?:function|column)|(?:function|column).*schema cache/i.test(
       error.message ?? "",
     )
   );
@@ -138,6 +144,33 @@ function isDuplicateScenarioNameError(error: {
     error.code === "23505" &&
     /saved_analyses_active_property_scenario_name_uidx/i.test(
       `${error.message ?? ""} ${error.details ?? ""}`,
+    )
+  );
+}
+
+function isDuplicateScenarioRequestKeyError(error: {
+  code?: string;
+  message?: string;
+  details?: string;
+}): boolean {
+  return (
+    error.code === "23505" &&
+    /saved_analyses_user_scenario_request_key_uidx/i.test(
+      `${error.message ?? ""} ${error.details ?? ""}`,
+    )
+  );
+}
+
+function isSavedAnalysisPlanCapacityError(error: {
+  code?: string;
+  message?: string;
+  details?: string;
+  hint?: string;
+}): boolean {
+  return (
+    error.code === "23514" &&
+    /saved_analyses_plan_capacity|saved deal limit reached/i.test(
+      `${error.message ?? ""} ${error.details ?? ""} ${error.hint ?? ""}`,
     )
   );
 }
@@ -200,18 +233,102 @@ function dealAddress(row: {
     : null;
 }
 
-/** Ensure the source deal has a property, creating + linking one if needed. */
-async function resolvePropertyId(
+function scenarioLifecycleState(row: {
+  is_completed: boolean;
+  is_archived: boolean;
+}): ScenarioSummary["lifecycleState"] {
+  if (row.is_completed) return "completed";
+  if (row.is_archived) return "archived";
+  return "active";
+}
+
+type ScenarioRequestRow = {
+  id: string;
+  deleted_at: string | null;
+  strategy_kind: string | null;
+  form_snapshot: Record<string, unknown> | null;
+  result_snapshot: Record<string, unknown> | null;
+};
+
+type ScenarioRequestLookup =
+  | { status: "missing" }
+  | { status: "found"; result: AddScenarioResult }
+  | { status: "error"; result: AddScenarioResult };
+
+function replayStrategySetupRequired(row: ScenarioRequestRow): boolean {
+  if (!isStrategyKind(row.strategy_kind)) return false;
+  const values = normalizeReleasedInvestmentFormSnapshot(row.form_snapshot);
+  if (!values) return false;
+  return buildScenarioStrategyTransition({
+    baseValues: values,
+    strategyKind: row.strategy_kind,
+    sourceResult: row.result_snapshot,
+  }).setupRequired;
+}
+
+/**
+ * A request key remains reserved even when its scenario is soft-deleted. Read
+ * without a deleted_at filter so an ambiguous retry can never spend capacity
+ * or create a replacement row for an already-completed request.
+ */
+async function findScenarioRequest(
   supabase: SupabaseClient,
   userId: string,
+  clientRequestId: string,
+): Promise<ScenarioRequestLookup> {
+  const { data, error } = await supabase
+    .from("saved_analyses")
+    .select(
+      "id, deleted_at, strategy_kind, form_snapshot, result_snapshot",
+    )
+    .eq("user_id", userId)
+    .eq("scenario_request_key", clientRequestId)
+    .maybeSingle();
+  if (error) {
+    return {
+      status: "error",
+      result: isMissingSchema(error)
+        ? {
+            ok: false,
+            code: "MIGRATION_PENDING",
+            message: "Schema migration pending.",
+          }
+        : toServerErrorResult(error, "scenarios"),
+    };
+  }
+  if (!data) return { status: "missing" };
+
+  const row = data as ScenarioRequestRow;
+  if (row.deleted_at) {
+    return {
+      status: "found",
+      result: {
+        ok: false,
+        code: "NOT_FOUND",
+        message:
+          "This scenario request was already completed and later removed. Start a new scenario request.",
+      },
+    };
+  }
+
+  return {
+    status: "found",
+    result: {
+      ok: true,
+      scenarioId: row.id,
+      strategySetupRequired: replayStrategySetupRequired(row),
+    },
+  };
+}
+
+/** Atomically create-or-adopt the source deal's property parent. */
+async function claimScenarioPropertyId(
+  supabase: SupabaseClient,
   deal: DealRow,
 ): Promise<
   { ok: true; propertyId: string } | { ok: false; result: AddScenarioResult }
 > {
-  if (deal.property_id) return { ok: true, propertyId: deal.property_id };
-
-  const address = dealAddress(deal);
-  if (!address) {
+  if (!deal.property_id && !dealAddress(deal)) {
     return {
       ok: false,
       result: {
@@ -222,113 +339,35 @@ async function resolvePropertyId(
     };
   }
 
-  // An ungrouped saved analysis is its own independent base, even if another
-  // saved deal has the same address. Create a distinct parent, then claim the
-  // source row with a compare-and-set below. Reusing by address can merge two
-  // unrelated bases and violates the one-normalized-base-per-parent invariant.
-  const { data: created, error: createErr } = await supabase
-    .from("properties")
-    .insert({ user_id: userId, address })
-    .select("id")
-    .single();
-  if (createErr || !created) {
+  const { data, error } = await supabase.rpc(
+    "claim_saved_analysis_property_for_scenario",
+    { p_source_analysis_id: deal.id },
+  );
+  if (error) {
     return {
       ok: false,
-      result: isMissingSchema(createErr ?? {})
+      result: isMissingSchema(error)
         ? {
             ok: false,
             code: "MIGRATION_PENDING",
             message: "Schema migration pending.",
           }
-        : toServerErrorResult(createErr, "scenarios"),
+        : toServerErrorResult(error, "scenarios"),
     };
   }
-  const propertyId = created.id as string;
 
-  // The source workspace discovers siblings through its own property_id. This
-  // link is therefore part of scenario creation's success contract: swallowing
-  // a failed update returns a scenario id that immediately disappears when the
-  // source card refreshes. Verify both the write and the returned row.
-  const { data: linkedSource, error: linkErr } = await supabase
-    .from("saved_analyses")
-    .update({ property_id: propertyId })
-    .eq("id", deal.id)
-    .eq("user_id", userId)
-    .is("deleted_at", null)
-    .is("property_id", null)
-    .select("id, property_id")
-    .maybeSingle();
-  if (
-    linkedSource &&
-    (linkedSource as { property_id?: unknown }).property_id === propertyId
-  ) {
-    return { ok: true, propertyId };
-  }
-
-  // A competing first-scenario request may have won the NULL -> property link,
-  // or the update response may have been interrupted after commit. Re-read the
-  // source before cleaning anything up: if it points to our parent, the write
-  // succeeded; if it points elsewhere, adopt the winner and remove only our
-  // unused parent.
-  const { data: currentSource, error: currentSourceErr } = await supabase
-    .from("saved_analyses")
-    .select("id, property_id")
-    .eq("id", deal.id)
-    .eq("user_id", userId)
-    .is("deleted_at", null)
-    .maybeSingle();
-  if (currentSourceErr) {
+  const propertyId = z.string().uuid().safeParse(data);
+  if (!propertyId.success) {
     return {
       ok: false,
-      result: isMissingSchema(currentSourceErr)
-        ? {
-            ok: false,
-            code: "MIGRATION_PENDING",
-            message: "Schema migration pending.",
-          }
-        : toServerErrorResult(currentSourceErr, "scenarios"),
+      result: {
+        ok: false,
+        code: "SERVER_ERROR",
+        message: "The scenario workspace could not be verified.",
+      },
     };
   }
-
-  const currentPropertyId = (currentSource as { property_id?: unknown } | null)
-    ?.property_id;
-  if (currentPropertyId === propertyId) {
-    return { ok: true, propertyId };
-  }
-
-  // The new parent is provably unused by this source. Cleanup stays narrowly
-  // scoped and best-effort; a failed delete leaves only inert owner metadata,
-  // never an incorrectly linked scenario.
-  await supabase
-    .from("properties")
-    .delete()
-    .eq("id", propertyId)
-    .eq("user_id", userId);
-
-  if (typeof currentPropertyId === "string" && currentPropertyId) {
-    return { ok: true, propertyId: currentPropertyId };
-  }
-  if (linkErr) {
-    return {
-      ok: false,
-      result: isMissingSchema(linkErr)
-        ? {
-            ok: false,
-            code: "MIGRATION_PENDING",
-            message: "Schema migration pending.",
-          }
-        : toServerErrorResult(linkErr, "scenarios"),
-    };
-  }
-  return {
-    ok: false,
-    result: {
-      ok: false,
-      code: "NOT_FOUND",
-      message:
-        "The source deal changed before the scenario could be linked. Reload and try again.",
-    },
-  };
+  return { ok: true, propertyId: propertyId.data };
 }
 
 /** List the scenarios that share a deal's property (including the deal itself). */
@@ -348,7 +387,9 @@ export async function listScenariosAction(
 
   const { data: deal, error } = await supabase
     .from("saved_analyses")
-    .select("id, property_id, address, form_snapshot")
+    .select(
+      "id, property_id, address, form_snapshot, title, is_completed, is_archived",
+    )
     .eq("id", parsed.data)
     .eq("user_id", user.id)
     .is("deleted_at", null)
@@ -366,16 +407,41 @@ export async function listScenariosAction(
     return { ok: false, code: "NOT_FOUND", message: "Deal not found." };
 
   const propertyId = (deal as { property_id: string | null }).property_id;
-  const address = dealAddress(deal as DealRow);
+  const address = dealAddress(deal);
 
   if (!propertyId) {
     // Not yet grouped — the deal is its own (only) scenario.
-    return { ok: true, propertyId: null, address, scenarios: [] };
+    const row = deal as {
+      id: string;
+      title: string | null;
+      is_completed: boolean;
+      is_archived: boolean;
+    };
+    const lifecycleState = scenarioLifecycleState(row);
+    return {
+      ok: true,
+      propertyId: null,
+      address,
+      scenarios: [
+        {
+          id: row.id,
+          scenarioName: "Base case",
+          strategyKind: null,
+          title: row.title,
+          lifecycleState,
+          isComparable: lifecycleState === "active",
+          isBase: true,
+          isSource: true,
+        },
+      ],
+    };
   }
 
   const { data: rows, error: listErr } = await supabase
     .from("saved_analyses")
-    .select("id, scenario_name, strategy_kind, title")
+    .select(
+      "id, scenario_name, strategy_kind, title, is_completed, is_archived",
+    )
     .eq("user_id", user.id)
     .eq("property_id", propertyId)
     .is("deleted_at", null)
@@ -396,12 +462,15 @@ export async function listScenariosAction(
       scenario_name: string | null;
       strategy_kind: string | null;
       title: string | null;
+      is_completed: boolean;
+      is_archived: boolean;
     };
     const normalizedScenarioName = row.scenario_name?.trim().toLowerCase();
     const isBase =
       normalizedScenarioName == null ||
       normalizedScenarioName === "" ||
       normalizedScenarioName === "base case";
+    const lifecycleState = scenarioLifecycleState(row);
     return {
       id: row.id,
       scenarioName: isBase ? "Base case" : row.scenario_name!.trim(),
@@ -409,6 +478,8 @@ export async function listScenariosAction(
         ? row.strategy_kind
         : null,
       title: row.title,
+      lifecycleState,
+      isComparable: lifecycleState === "active",
       isBase,
       isSource: row.id === parsed.data,
     };
@@ -419,6 +490,7 @@ export async function listScenariosAction(
 
 const addSchema = z.object({
   sourceDealId: z.string().uuid(),
+  clientRequestId: z.string().uuid(),
   scenarioName: z.string().trim().max(80).optional(),
   strategyKind: z.enum(STRATEGY_KINDS).nullable().optional(),
 });
@@ -446,6 +518,16 @@ export async function addScenarioAction(
   } = await supabase.auth.getUser();
   if (!user)
     return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
+
+  // The browser retains this UUID across typed failures and ambiguous network
+  // rejections. Reconcile it before entitlement/capacity reads and, critically,
+  // before the property-claim RPC can mutate workspace metadata.
+  const initialReplay = await findScenarioRequest(
+    supabase,
+    user.id,
+    parsed.data.clientRequestId,
+  );
+  if (initialReplay.status !== "missing") return initialReplay.result;
 
   const entitlements = await getEntitlementsForUser(supabase, user.id);
   if (!hasPlanFeature(entitlements, "save_deal")) {
@@ -502,7 +584,7 @@ export async function addScenarioAction(
 
   // An ungrouped saved deal is presented as its property's Base case, even
   // before it has a property_id. Reject a second normalized base before
-  // resolvePropertyId can create/link workspace metadata. For an already
+  // the property-claim RPC can create/link workspace metadata. For an already
   // grouped source, this also catches the source row itself when it is Base;
   // a non-base source still uses the sibling preflight below so a malformed
   // legacy property with no base can be repaired deliberately.
@@ -553,6 +635,9 @@ export async function addScenarioAction(
   // share copy key would collide with the source row's partial unique index
   // and make every scenario created from an imported deal fail at INSERT.
   delete clone.public_share_copy_key;
+  // Idempotency belongs to this request, never to the source row. Strip any
+  // inherited key before assigning the browser's stable UUID below.
+  delete clone.scenario_request_key;
   delete clone.underwriting_revision;
   delete clone.notes_revision;
   delete clone.last_activity_at;
@@ -560,6 +645,7 @@ export async function addScenarioAction(
   // and RLS enforces the same invariant. This prevents a future privileged
   // client/helper refactor from accidentally inheriting an ambiguous owner.
   clone.user_id = user.id;
+  clone.scenario_request_key = parsed.data.clientRequestId;
   clone.scenario_name = scenarioName;
   clone.strategy_kind = strategyKind;
   // The source may donate assumptions from any lifecycle state, but a scenario
@@ -858,14 +944,14 @@ export async function addScenarioAction(
   // All capacity, release, methodology, and strategy-snapshot validation above
   // is read-only. Only now create/link the property grouping, so rejected
   // scenarios do not mutate the source workspace as a side effect.
-  const resolved = await resolvePropertyId(supabase, user.id, deal);
+  const resolved = await claimScenarioPropertyId(supabase, deal);
   if (!resolved.ok) return resolved.result;
   const propertyId = resolved.propertyId;
 
   // Unique scenario name per property (case-insensitive, among live rows).
   const { data: clash, error: clashErr } = await supabase
     .from("saved_analyses")
-    .select("id, scenario_name")
+    .select("id, scenario_name, scenario_request_key")
     .eq("user_id", user.id)
     .eq("property_id", propertyId)
     .is("deleted_at", null);
@@ -877,6 +963,20 @@ export async function addScenarioAction(
           message: "Schema migration pending.",
         }
       : toServerErrorResult(clashErr, "scenarios");
+  }
+  // A concurrent copy of this exact request may have committed after the
+  // initial replay read. Reconcile it before treating its name as a conflict.
+  const requestReplay = (clash ?? []).find(
+    (row) =>
+      (row as { scenario_request_key?: unknown }).scenario_request_key ===
+      parsed.data.clientRequestId,
+  );
+  if (requestReplay) {
+    return {
+      ok: true,
+      scenarioId: (requestReplay as { id: string }).id,
+      strategySetupRequired,
+    };
   }
   const nameTaken = (clash ?? []).some(
     (r) => {
@@ -905,24 +1005,54 @@ export async function addScenarioAction(
     // the returned row from either sibling workspace.
     .select("id, property_id")
     .single();
-  if (insertErr || !inserted) {
-    // The preflight keeps the ordinary UX fast; the partial unique index is
-    // the concurrency authority when two tabs submit the same normalized
-    // name at once.
-    if (insertErr && isDuplicateScenarioNameError(insertErr)) {
+  if (insertErr) {
+    // Every INSERT error is ambiguous until the durable request key is read.
+    // In particular, the serialized capacity trigger can reject a same-request
+    // loser before PostgreSQL reaches the request-key unique index.
+    const replay = await findScenarioRequest(
+      supabase,
+      user.id,
+      parsed.data.clientRequestId,
+    );
+    if (replay.status !== "missing") return replay.result;
+
+    if (isSavedAnalysisPlanCapacityError(insertErr)) {
+      return {
+        ok: false,
+        code: "ENTITLEMENT_SAVE",
+        message: `Saved deal limit reached for your plan (${getSavedDealLimitLabel(entitlements)}).`,
+      };
+    }
+    if (isDuplicateScenarioRequestKeyError(insertErr)) {
+      return {
+        ok: false,
+        code: "SERVER_ERROR",
+        message: "The completed scenario request could not be reconciled.",
+      };
+    }
+    // The preflight keeps the ordinary UX fast; the name index remains the
+    // authority when different requests submit the same normalized name.
+    if (isDuplicateScenarioNameError(insertErr)) {
       return {
         ok: false,
         code: "DUPLICATE_SCENARIO_NAME",
         message: `You already have a "${scenarioName}" scenario for this property.`,
       };
     }
-    return isMissingSchema(insertErr ?? {})
+    return isMissingSchema(insertErr)
       ? {
           ok: false,
           code: "MIGRATION_PENDING",
           message: "Schema migration pending.",
         }
       : toServerErrorResult(insertErr, "scenarios");
+  }
+  if (!inserted) {
+    return {
+      ok: false,
+      code: "SERVER_ERROR",
+      message: "The completed scenario request could not be verified.",
+    };
   }
   if ((inserted as { property_id?: unknown }).property_id !== propertyId) {
     return {

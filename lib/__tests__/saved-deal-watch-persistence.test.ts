@@ -112,6 +112,24 @@ describe("Saved Deal Watch server-action boundaries", () => {
     expect(actions).toContain("A downgraded account with no retained row");
   });
 
+  it("accepts and writes a strict single-channel preference patch", () => {
+    expect(actions).toContain(
+      "preference: z.enum(SAVED_DEAL_WATCH_PREFERENCE_KEYS)",
+    );
+    expect(actions).toContain("enabled: z.boolean()");
+    expect(actions).toContain("savedDealWatchPreferenceDatabasePatch({");
+    expect(actions).toContain(".update(databasePatch)");
+    expect(actions).toContain('if (error?.code === "23505")');
+    expect(card).toContain("preference: key");
+    expect(card).toContain("enabled: next");
+    expect(card).not.toContain(
+      "inAppNotificationsEnabled: optimistic.inAppNotificationsEnabled",
+    );
+    expect(card).not.toContain(
+      "emailNotificationsEnabled: optimistic.emailNotificationsEnabled",
+    );
+  });
+
   it("never lets a persisted opt-in claim that operations are live", () => {
     expect(actions).toContain("automaticChecksActive: false");
     expect(actions).toContain("notificationsActive: false");

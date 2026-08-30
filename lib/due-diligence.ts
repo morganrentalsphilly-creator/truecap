@@ -67,6 +67,23 @@ export function normalizeDueDiligenceItems(raw: unknown): DueDiligenceItem[] {
   return out;
 }
 
+/** Resolve the checklist shown by the read action. A literal stored [] is an
+ * intentional empty checklist. A non-empty array that contains no valid items
+ * is corrupt persisted data, so recover with defaults instead of silently
+ * presenting it as an intentional empty checklist. */
+export function resolveStoredDueDiligenceItems(
+  rawItems: unknown,
+  hasStoredRow: boolean,
+): DueDiligenceItem[] {
+  if (!hasStoredRow || !Array.isArray(rawItems)) {
+    return defaultDueDiligenceItems();
+  }
+  if (rawItems.length === 0) return [];
+
+  const normalized = normalizeDueDiligenceItems(rawItems);
+  return normalized.length > 0 ? normalized : defaultDueDiligenceItems();
+}
+
 export function dueDiligenceProgress(items: DueDiligenceItem[]): {
   done: number;
   total: number;

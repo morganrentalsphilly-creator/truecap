@@ -11,6 +11,10 @@ import {
 } from "@/lib/financing-profiles";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import {
+  accountSessionChangedResult,
+  expectedAccountUserMatches,
+} from "@/lib/account-session-binding";
 
 const MAX_FINANCING_PROFILES = 20;
 const PROFILE_COLUMNS =
@@ -23,6 +27,7 @@ export type FinancingProfilesActionResult =
       code:
         | "FEATURE_DISABLED"
         | "SIGN_IN_REQUIRED"
+        | "SESSION_CHANGED"
         | "MIGRATION_PENDING"
         | "VALIDATION_ERROR"
         | "LIMIT_REACHED"
@@ -135,7 +140,8 @@ export async function listFinancingProfilesAction(): Promise<FinancingProfilesAc
 }
 
 export async function createFinancingProfileAction(
-  input: unknown
+  input: unknown,
+  expectedUserId: unknown,
 ): Promise<FinancingProfilesActionResult> {
   const disabled = featureDisabled();
   if (disabled) return disabled;
@@ -151,6 +157,9 @@ export async function createFinancingProfileAction(
   const supabase = await createServerSupabaseClient();
   const auth = await requireUser(supabase);
   if (!auth.ok) return auth.result;
+  if (!expectedAccountUserMatches(expectedUserId, auth.userId)) {
+    return accountSessionChangedResult();
+  }
 
   const existing = await fetchProfiles(supabase, auth.userId);
   if (!existing.ok) return existing;

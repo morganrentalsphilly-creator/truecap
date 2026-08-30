@@ -5,7 +5,7 @@ export type QueuedDealNotesSave = {
 
 export function isCurrentDealNotesSave(input: {
   submittedDealId: string;
-  currentDealId: string;
+  currentDealId: string | null;
   requestToken: symbol;
   currentRequestToken: symbol | null;
 }): boolean {

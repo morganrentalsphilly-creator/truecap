@@ -8,6 +8,10 @@ import { DEFAULT_APPRECIATION_RATE, DEFAULT_SELLING_COST_PCT } from "@/lib/exit-
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { normalizeReleasedInvestmentFormSnapshot } from "@/lib/underwriting-model-release";
 import { saveDealAction } from "@/app/actions/saved-analyses";
+import {
+  accountSessionChangedResult,
+  expectedAccountUserMatches,
+} from "@/lib/account-session-binding";
 
 /** Columns shared with `saved_analyses` / investment form (camelCase in app). */
 export type AnalysisTemplateOption = {
@@ -287,6 +291,7 @@ export type CreateTemplateResult =
       ok: false;
       code:
         | "SIGN_IN_REQUIRED"
+        | "SESSION_CHANGED"
         | "VALIDATION_ERROR"
         | "ENTITLEMENT_TEMPLATE"
         | "DUPLICATE_TEMPLATE_NAME"
@@ -300,6 +305,7 @@ export type UpdateTemplateResult =
       ok: false;
       code:
         | "SIGN_IN_REQUIRED"
+        | "SESSION_CHANGED"
         | "VALIDATION_ERROR"
         | "ENTITLEMENT_TEMPLATE"
         | "NOT_FOUND"
@@ -318,7 +324,8 @@ export type DeleteTemplateResult =
 
 export async function createAnalysisTemplateAction(
   input: unknown,
-  kind?: string | null
+  kind?: string | null,
+  expectedUserId?: unknown,
 ): Promise<CreateTemplateResult> {
   const supabase = await createServerSupabaseClient();
   const {
@@ -331,6 +338,9 @@ export async function createAnalysisTemplateAction(
       code: "SIGN_IN_REQUIRED",
       message: "Please sign in to create and save templates.",
     };
+  }
+  if (!expectedAccountUserMatches(expectedUserId, user.id)) {
+    return accountSessionChangedResult();
   }
 
   const entitlements = await getEntitlementsForUser(supabase, user.id);
@@ -767,7 +777,7 @@ export async function duplicateTemplateAction(templateId: string): Promise<Updat
     buyBox: src.buyBox,
   };
 
-  return createAnalysisTemplateAction(input, src.kind);
+  return createAnalysisTemplateAction(input, src.kind, user.id);
 }
 
 /**
@@ -885,6 +895,7 @@ export async function applyTemplateToDealAction(
     expectedUnderwritingRevision: (
       dealRow as { underwriting_revision?: unknown }
     ).underwriting_revision,
+    expectedUserId: user.id,
   });
   if (!result.ok) {
     return {

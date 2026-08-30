@@ -41,6 +41,7 @@ import {
 } from "@/lib/offer-ceiling-contract";
 import type { OfferCeilingAccessPayload } from "@/lib/offer-ceiling-access-contract";
 import { buildPublicShareAnalysisPayload } from "@/lib/public-share-analysis-result";
+import { propertyCompsUnderwritingFingerprint } from "@/lib/property-comps-query";
 
 type Props = { params: Promise<{ token: string }> };
 
@@ -104,10 +105,17 @@ export default async function OpaqueSharePage({ params }: Props) {
   // owner-readable and must never be an authorization or attribution source.
   const ownerId = resolved.ownerId ?? undefined;
   const dealId = resolved.dealId ?? undefined;
+  const compsFingerprint = propertyCompsUnderwritingFingerprint({
+    address: parsed.data.address,
+    propertyType: parsed.data.propertyType,
+    bedrooms: parsed.data.bedrooms,
+    bathrooms: parsed.data.bathrooms,
+    squareFootage: parsed.data.sqft,
+  });
 
   const [agent, comps, showProAnalysis] = await Promise.all([
     getPublicAgentBranding(ownerId),
-    getPublicDealComps(dealId, ownerId),
+    getPublicDealComps(dealId, ownerId, compsFingerprint),
     canShowSharedProAnalysis(ownerId),
   ]);
 

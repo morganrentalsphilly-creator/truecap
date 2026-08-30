@@ -41,11 +41,18 @@ const KNOWN_ERROR_CLASSES: ReadonlyArray<{ pattern: RegExp; message: string }> =
     pattern: /object not found/i,
     message: "That document is no longer available. Refresh the page and try again.",
   },
-  // RLS denial — almost always a stale session rather than a real
-  // permissions problem for our path-scoped buckets.
+  // A typed browser-session preflight failure. The wrapper deliberately omits
+  // the upstream message so the captured event contains no token, URL, or
+  // customer data while still escaping the global raw-network ignore list.
+  {
+    pattern: /browser session verification unavailable/i,
+    message: "We couldn't verify your session right now. Check your connection and try again.",
+  },
+  // RLS can mean policy/deployment drift even after a freshly verified login.
+  // Do not blame the user's account or prescribe signing in again.
   {
     pattern: /row-level security|not authorized|unauthorized/i,
-    message: "You don't have access to do that. Refresh the page and sign in again.",
+    message: "We couldn't verify access for that action. Nothing was changed. Try again; if it keeps happening, contact support.",
   },
   // Auth: OAuth provider disabled/misconfigured in the Supabase project.
   {

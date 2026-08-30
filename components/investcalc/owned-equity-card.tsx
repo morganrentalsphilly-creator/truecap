@@ -51,7 +51,7 @@ export function OwnedEquityCard({
   const { toast } = useToast();
   const [isSaving, startSaving] = useTransition();
   const [editing, setEditing] = useState(false);
-  const savedDealIdRef = useRef(savedDealId);
+  const savedDealIdRef = useRef<string | null>(savedDealId);
   const mutationRequestRef = useRef<symbol | null>(null);
 
   useLayoutEffect(() => {
@@ -60,6 +60,11 @@ export function OwnedEquityCard({
     // This input is uncontrolled so its in-progress raw value belongs to the
     // deal where editing began. Never carry it into a reused dynamic route.
     setEditing(false);
+    return () => {
+      if (savedDealIdRef.current !== savedDealId) return;
+      savedDealIdRef.current = null;
+      mutationRequestRef.current = null;
+    };
   }, [savedDealId]);
 
   const save = (value: string | null) => {

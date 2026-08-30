@@ -20,9 +20,9 @@ const workspacePolicies = readFileSync(
 
 describe("strategy scenario setup guidance", () => {
   it("turns an incomplete destination into an actionable created-scenario flow", () => {
-    expect(card).toContain("result.strategySetupRequired && strategy");
+    expect(card).toContain("result.strategySetupRequired && strategyAtSubmit");
     expect(card).toContain(
-      "edit assumptions, and choose ${strategyLabel(strategy)}",
+      "edit assumptions, and choose ${strategyLabel(strategyAtSubmit)}",
     );
     expect(card).toContain(
       "open it to verify and complete the strategy inputs",

@@ -19,6 +19,7 @@ import * as Sentry from "@sentry/nextjs";
 import { ArrowUp, Loader2, MessageCircleQuestion, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { askDealQuestionAction } from "@/app/actions/deal-qa";
+import { useExpectedAccountUserId } from "@/components/auth/account-session-boundary";
 import { trackEvent } from "@/lib/analytics";
 import type { DealQaExtraContext } from "@/lib/deal-qa-context";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
@@ -41,6 +42,7 @@ export function DealQaPanel({
    *  can reference the user's own criteria. Absent pieces are omitted. */
   context?: DealQaExtraContext;
 }) {
+  const expectedUserId = useExpectedAccountUserId();
   const [question, setQuestion] = useState("");
   const [turns, setTurns] = useState<Turn[]>([]);
   const [isAsking, setIsAsking] = useState(false);
@@ -71,7 +73,10 @@ export function DealQaPanel({
     setNotice(null);
     trackEvent("deal_qa_asked", { question_length: trimmed.length });
     try {
-      const result = await askDealQuestionAction({ question: trimmed, values, context });
+      const result = await askDealQuestionAction(
+        { question: trimmed, values, context },
+        expectedUserId,
+      );
       if (result.ok) {
         // Clear the input only once an answer is in hand. Clearing before the
         // await meant any failure (rate limit, server error, a thrown/rejected
