@@ -18,6 +18,7 @@ import { Check, ShieldCheck, Sparkles, X } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
 import { CheckoutCancelledBanner } from "@/components/marketing/checkout-cancelled-banner";
 import { PricingTogglePlans } from "@/components/marketing/pricing-toggle-plans";
+import { PricingValueStack } from "@/components/marketing/pricing-value-stack";
 import {
   getEntitlementsForUser,
   getActivePaidPlanSlug,
@@ -423,6 +424,10 @@ export default async function PricingPage() {
 
         {/* Feature comparison */}
         <section className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
+          <PricingValueStack
+            proOfferName={proOfferName}
+            agentProConfigured={agentProConfigured}
+          />
           <h2 className="text-center text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
             What you get
           </h2>

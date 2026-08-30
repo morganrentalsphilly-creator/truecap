@@ -68,6 +68,11 @@ describe("persona and tier pages are reachable", () => {
       fromPricingSurface,
       `/for-agents is linked only from ${from.join(", ")} — add a link where the tier is actually being chosen`,
     ).toBe(true);
+
+    // A link inside an unmounted component is still an orphan in the rendered
+    // site. Keep the value stack wired into /pricing, not merely present in
+    // the source tree (the production crawl caught this exact regression).
+    expect(read("app/pricing/page.tsx")).toContain("<PricingValueStack");
   });
 
   it("the Agent Pro page still exists to be linked to", () => {
