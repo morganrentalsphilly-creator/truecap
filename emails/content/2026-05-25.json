@@ -32,7 +32,7 @@
       "address": "Indianapolis, IN — Mars Hill SFR example",
       "headlineNumber": "7.4% cap · $480 NCF/mo · Decent",
       "verdict": "Decent",
-      "body": "Illustrative $185k 3/1.5 ranch at $1,475 entered rent. TrueCap can start with a HUD area-rent benchmark, an owner-occupied FRED rate benchmark, and a state tax estimate; those are not property comps, a loan quote, or a local tax bill. Verify each assumption before deciding whether the property deserves deeper review."
+      "body": "Illustrative $185k 3/1.5 ranch at $1,475 entered rent. TrueCap can start with a HUD area-rent benchmark and an owner-occupied FRED rate benchmark; property tax remains a manual local input. Those values are not property comps, a loan quote, or a local tax bill. Verify each assumption before deciding whether the property deserves deeper review."
     },
     {
       "address": "Memphis, TN — Berclair triplex example",
@@ -48,7 +48,7 @@
   },
   "qa": {
     "question": "Why should I use TrueCap instead of my spreadsheet (or BiggerPockets, or DealCheck, or Mashvisor)?",
-    "answer": "Three reasons to test it against your current workflow. (1) Speed: address lookup can provide property details plus labeled HUD, FRED, and state-level starting benchmarks, subject to coverage. (2) Transparent math: cap rate, cash-on-cash, DSCR, cash flow, and assumptions stay visible and editable. (3) Paid decision tools: the target-dependent Offer Ceiling, sensitivity, 10-year cash-flow and equity projections, comparison, reports, and repeat-deal workflows. The Offer Ceiling is not a recommended offer. TrueCap is an estimate and screening aid, not a source of property-specific truth or a substitute for your spreadsheet, inspection, lender, appraiser, CPA, or attorney."
+    "answer": "Three reasons to test it against your current workflow. (1) Speed: address lookup can provide property details plus labeled HUD rent and FRED rate benchmarks, subject to coverage; property tax stays manual. (2) Transparent math: cap rate, cash-on-cash, DSCR, cash flow, and assumptions stay visible and editable. (3) Paid decision tools: the target-dependent Offer Ceiling, sensitivity, 10-year cash-flow and equity projections, comparison, reports, and repeat-deal workflows. The Offer Ceiling is not a recommended offer. TrueCap is an estimate and screening aid, not a source of property-specific truth or a substitute for your spreadsheet, inspection, lender, appraiser, CPA, or attorney."
   },
   "shipNote": {
     "title": "Start with the free TrueCap analyzer",

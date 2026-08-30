@@ -1,104 +1,49 @@
-# Newsletter Scheduling — Runbook
+# Newsletter Scheduling — Archived Runbook
 
-## TL;DR
+> **Canceled system — do not schedule or send.** The founder canceled the
+> newsletter on 2026-07-15. The former Resend audience was deleted, newsletter
+> signup surfaces are dark, and `/api/cron/send-weekly-digest` is not registered
+> in `vercel.json`.
 
-You have a hybrid system. Two paths run in parallel:
+There is no active weekly-newsletter cron, automatic fallback, or future send
+queue. Files under `emails/content/` are retained historical content, not a
+schedule. A filename or `publishedAt` date does not cause delivery.
 
-1. **Resend pre-scheduled broadcasts** (next 28 days) — set via the `npm run schedule-broadcasts` script. Resend delivers them on the date with zero further code dependency.
-2. **Vercel cron** (weeks 5+) — fires every Tuesday at 13:00 UTC (9am ET) and creates+sends that week's broadcast immediately. Picks up where the Resend pre-scheduling stops.
+Do not do any of the following without the founder's explicit approval:
 
-Why hybrid: Resend's Broadcasts API rejects `scheduled_at` beyond 30 days. So we pre-schedule what we can (next 4 Tuesdays) and let Vercel cron handle the rest by firing weekly.
+- run `schedule-broadcasts` against a production Resend account;
+- register `/api/cron/send-weekly-digest` in `vercel.json`;
+- invoke the retired route against a real audience;
+- recreate or import a newsletter audience;
+- restore newsletter signup surfaces; or
+- treat old content dates as send authorization.
 
-## One-time setup
+The retained route, renderers, scripts, and JSON files document the former
+system and may support a separately approved revival. They must not be described
+as live or self-sending.
 
-### 1. `.env.local` needs three env vars
+## Historical architecture
 
-```
-RESEND_API_KEY=re_<your full-access key>
-RESEND_AUDIENCE_ID=<your audience UUID>
-CRON_SECRET=<any random string — set the same value in Vercel>
-```
+Before cancellation, the system combined short-window Resend scheduling with a
+Tuesday digest route. That design is archived. It no longer provides a delivery
+buffer because no weekly-digest cron is configured and the former audience no
+longer exists.
 
-To find your audience ID:
+Lifecycle onboarding emails, rate and rent alerts, and the per-user weekly
+summary are separate systems. Their presence does not reactivate the marketing
+newsletter.
 
-```bash
-npm run list-audiences
-```
+## Revival gate
 
-### 2. Set `CRON_SECRET` in Vercel
+A revival requires a new, explicit founder decision and a fresh production
+review. At minimum, that review must confirm:
 
-Vercel dashboard → your project → Settings → Environment Variables → Add:
+1. permissioned audience collection and cadence consent;
+2. signup, privacy, unsubscribe, sender-identity, and physical-address copy;
+3. sourced and dated market claims plus current product/entitlement facts;
+4. schedule ownership, idempotency, kill-switch behavior, and observability;
+5. test delivery to a non-production audience before any real broadcast; and
+6. an approved `vercel.json` change if recurring delivery is intentionally
+   restored.
 
-- Name: `CRON_SECRET`
-- Value: the same random string you put in `.env.local`
-- Environment: Production (and Preview if you want)
-
-This is what authorizes the cron route. Vercel passes it as a Bearer token automatically when the cron fires.
-
-### 3. Verify cron is registered
-
-After your next push, Vercel dashboard → your project → Cron Jobs tab should list `/api/cron/send-weekly-digest` with a "Next execution" time of the upcoming Tuesday 13:00 UTC.
-
-If the tab is empty, the cron config didn't deploy — usually because the `crons` array in `vercel.json` was changed but no production deploy ran after.
-
-## Day-to-day commands
-
-### Schedule whatever's within the 28-day window
-
-```bash
-npm run schedule-broadcasts
-```
-
-Reads `emails/content/*.json`, filters to dates within the next 28 days, creates a broadcast in Resend for each, and schedules it with `scheduled_at`. Dates beyond 28 days are skipped with a notice — they'll get picked up either by the Vercel cron on their week, or by a future re-run of this script as the window slides forward.
-
-### See what'd happen without sending
-
-```bash
-npm run schedule-broadcasts:dry
-```
-
-Prints the plan + which dates are in-window vs too-far-out. No API calls.
-
-### List your Resend audiences
-
-```bash
-npm run list-audiences
-```
-
-Prints each audience name + UUID. Use this when setting `RESEND_AUDIENCE_ID` for the first time.
-
-### Clean up orphan drafts
-
-```bash
-npm run cleanup-drafts
-```
-
-If a previous run created broadcasts but failed to schedule them (e.g. because the date was beyond Resend's 30-day window), they sit in Resend as `draft` status. This command lists every `draft` broadcast whose name starts with "Weekly digest · " and deletes them. Safe to re-run.
-
-## Why this design
-
-Three things broke or are at risk; here's how each is addressed:
-
-| Issue | Mitigation |
-| --- | --- |
-| Resend rejects `scheduled_at` > 30 days | Script filters to 28 days. Vercel cron handles the rest. |
-| Vercel cron might miss a fire | Resend pre-scheduling gives 4 weeks of safety buffer at any time. |
-| Content file date might not match cron day | All content files are named for the Tuesday they send. Schedule is Tuesday 13:00 UTC. Match. |
-
-If Vercel cron stops working at some point, you have 4 weeks of buffer (the Resend-pre-scheduled broadcasts) to notice and fix it. If Resend's API breaks, the Vercel cron is independent and keeps firing.
-
-## Adding more content later
-
-1. Drop a new `emails/content/YYYY-MM-DD.json` file (must be a Tuesday).
-2. If the date is within 28 days: run `npm run schedule-broadcasts` to pre-schedule it now. Otherwise it'll auto-fire via the Vercel cron when its Tuesday arrives.
-
-## Verifying delivery
-
-After scheduling, Resend dashboard → Broadcasts shows each scheduled broadcast with status `Scheduled` + send date. After a cron fire, the broadcast moves to `Sent`.
-
-## Common failure modes
-
-- **"API key is invalid"** — wrong key in `.env.local`, or key doesn't have "Full Access" permission. Generate a new full-access key in Resend.
-- **"scheduled_at must be within 30 days"** — the script now prevents this automatically by filtering to 28 days. If you see it manually, your re-run includes dates too far out.
-- **Cron returns 401 in Vercel logs** — `CRON_SECRET` env var not set in Vercel (or different from what the route expects).
-- **Cron returns `{ ok: true, skipped: true }`** — no content file matches that Tuesday's date. Add a `YYYY-MM-DD.json` file for that Tuesday.
+Until those gates are complete, leave the newsletter canceled.

@@ -28,15 +28,46 @@ export function hashShareValues(values: InvestmentFormValues): string {
 }
 
 function stableStringify(value: unknown): string {
-  if (value === null || typeof value !== "object") return JSON.stringify(value) ?? "null";
+  if (value === null || typeof value !== "object")
+    return JSON.stringify(value) ?? "null";
   if (Array.isArray(value)) return `[${value.map(stableStringify).join(",")}]`;
   const obj = value as Record<string, unknown>;
   const keys = Object.keys(obj).sort();
   return `{${keys.map((k) => `${JSON.stringify(k)}:${stableStringify(obj[k])}`).join(",")}}`;
 }
 
-function payloadString(ownerId: string, dealId: string | null | undefined, valuesHash: string): string {
+function payloadString(
+  ownerId: string,
+  dealId: string | null | undefined,
+  valuesHash: string,
+): string {
   return `${ownerId}.${dealId ?? ""}.${valuesHash}`;
+}
+
+export type LeadCaptureShareSurface =
+  | "legacy_share"
+  | "opaque_share"
+  | "portal_share";
+
+function leadCapturePayloadString(input: {
+  shareSurface: LeadCaptureShareSurface;
+  ownerId: string;
+  dealId?: string | null;
+  valuesHash: string;
+  dealAddress?: string | null;
+}): string {
+  // Domain-separate the short-lived write authorization from the attribution
+  // signature embedded in legacy share payloads. A signature copied from an
+  // old /s page therefore cannot be relabeled as a legacy /d request to bypass
+  // the opaque share's live revocation check.
+  return [
+    "truecap-lead-capture-v1",
+    input.shareSurface,
+    input.ownerId,
+    input.dealId ?? "",
+    input.valuesHash,
+    input.dealAddress ?? "",
+  ].join("\0");
 }
 
 /** Mint the signature. Returns null when SHARE_LINK_SECRET is unset (→ the
@@ -65,6 +96,53 @@ export function verifyShareAttribution(input: {
   if (!secret || !input.ownerId || !input.sig) return false;
   const expected = createHmac("sha256", secret)
     .update(payloadString(input.ownerId, input.dealId, input.valuesHash))
+    .digest("hex");
+  try {
+    const a = Buffer.from(expected, "hex");
+    const b = Buffer.from(input.sig, "hex");
+    return a.length === b.length && timingSafeEqual(a, b);
+  } catch {
+    return false;
+  }
+}
+
+/** Mint a render-time, surface-bound authorization for the anonymous lead
+ * write. Existing legacy links keep their original attribution signature; a
+ * fresh write signature is produced only after that attribution is verified. */
+export function signLeadCaptureAuthorization(input: {
+  shareSurface: LeadCaptureShareSurface;
+  ownerId: string;
+  dealId?: string | null;
+  valuesHash: string;
+  dealAddress?: string | null;
+}): string | null {
+  const secret = process.env.SHARE_LINK_SECRET;
+  if (!secret) return null;
+  return createHmac("sha256", secret)
+    .update(leadCapturePayloadString(input))
+    .digest("hex");
+}
+
+export function verifyLeadCaptureAuthorization(input: {
+  shareSurface: LeadCaptureShareSurface;
+  ownerId?: string | null;
+  dealId?: string | null;
+  valuesHash: string;
+  dealAddress?: string | null;
+  sig?: string | null;
+}): boolean {
+  const secret = process.env.SHARE_LINK_SECRET;
+  if (!secret || !input.ownerId || !input.sig) return false;
+  const expected = createHmac("sha256", secret)
+    .update(
+      leadCapturePayloadString({
+        shareSurface: input.shareSurface,
+        ownerId: input.ownerId,
+        dealId: input.dealId,
+        valuesHash: input.valuesHash,
+        dealAddress: input.dealAddress,
+      }),
+    )
     .digest("hex");
   try {
     const a = Buffer.from(expected, "hex");

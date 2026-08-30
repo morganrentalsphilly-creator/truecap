@@ -10,7 +10,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { permanentRedirect } from "next/navigation";
 import { getSiteUrl } from "@/lib/site-url";
 import { DscrCalculatorWidget } from "@/components/tools/dscr-calculator-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
@@ -18,6 +18,7 @@ import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { isCalculatorReleased } from "@/lib/calculator-registry";
+import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 
 export const metadata: Metadata = {
   title: "Free DSCR Calculator — Debt Service Coverage Ratio",
@@ -39,7 +40,14 @@ export const metadata: Metadata = {
       "Compute DSCR in seconds. Plus what lenders typically require and how DSCR loans work.",
     url: "/tools/dscr-calculator",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap DSCR calculator" }],
+    images: [
+      {
+        url: "/home.jpg",
+        width: 1200,
+        height: 630,
+        alt: "TrueCap DSCR calculator",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -75,7 +83,9 @@ const FAQS: { q: string; a: string }[] = [
 ];
 
 export default function DscrCalculatorPage() {
-  if (!isCalculatorReleased("dscr-calculator")) notFound();
+  if (!isCalculatorReleased("dscr-calculator")) {
+    permanentRedirect(HISTORICAL_TOOL_REDIRECTS["dscr-calculator"]);
+  }
 
   const siteUrl = getSiteUrl();
   const webAppLd = {
@@ -128,111 +138,155 @@ export default function DscrCalculatorPage() {
 
   return (
     <>
-      <ToolBreadcrumbSchema toolPath="/tools/dscr-calculator" toolName="DSCR calculator" />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }} />
+      <ToolBreadcrumbSchema
+        toolPath="/tools/dscr-calculator"
+        toolName="DSCR calculator"
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }}
+      />
 
       <div className="min-h-screen bg-background">
-        <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <main
+          id="main"
+          className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12"
+        >
           <header className="mb-6 sm:mb-8">
-            <Link href="/tools" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">
+            <Link
+              href="/tools"
+              className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+            >
               ← TrueCap free tools
             </Link>
             <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">
               DSCR Calculator
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground mt-2 leading-relaxed">
-              Debt Service Coverage Ratio — the single metric every lender
-              wants to see for an investment loan. Compute it in seconds and
-              see how your DSCR compares with typical lender thresholds
-              before you submit — lenders compute their own.
+              Debt Service Coverage Ratio compares modeled NOI with modeled debt
+              service. Use it as a preliminary screen, then compare the
+              lender&apos;s written formula, inputs, and threshold for the
+              specific loan program.
             </p>
           </header>
 
           <DscrCalculatorWidget />
 
           <article className="prose prose-slate max-w-none mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
-            <h2 className="text-2xl sm:text-3xl">What DSCR actually measures</h2>
+            <h2 className="text-2xl sm:text-3xl">
+              What DSCR actually measures
+            </h2>
             <p>
-              DSCR answers one question lenders care about above all
-              others: <em>if the property runs the way you say it will,
-              can it cover the mortgage?</em> A DSCR of 1.0 means
-              break-even. A DSCR of 1.25 means the property generates
-              25% more in{" "}
-              <Link href="/glossary/noi" className="text-primary font-semibold hover:underline">NOI</Link>{" "}
-              than the mortgage needs — a comfortable cushion that covers
-              a bad month, a brief vacancy, or a surprise expense.
+              DSCR asks how modeled property income compares with modeled debt
+              service under a stated convention. A DSCR of 1.0 means modeled NOI
+              equals modeled debt service. A DSCR of 1.25 means modeled NOI is
+              25% greater than{" "}
+              <Link
+                href="/glossary/noi"
+                className="text-primary font-semibold hover:underline"
+              >
+                NOI
+              </Link>{" "}
+              the modeled debt service. It does not prove that the property can
+              absorb a vacancy or surprise expense, and it does not establish
+              lender approval.
             </p>
 
             <h3>The formula</h3>
             <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
               <div className="text-base sm:text-lg font-mono">
-                <span className="font-bold">DSCR</span> = Annual NOI ÷ Annual Debt Service
+                <span className="font-bold">DSCR</span> = Annual NOI ÷ Annual
+                Debt Service
               </div>
               <div className="text-sm text-muted-foreground mt-2">
                 e.g. $28,000 NOI ÷ $21,500 P&amp;I = 1.30 DSCR
               </div>
             </div>
 
-            <h2 className="text-2xl sm:text-3xl">What lenders look for</h2>
-            <ul>
-              <li><strong>Conventional investment loan:</strong> ≥1.25, typically</li>
-              <li><strong>DSCR loan (no income docs):</strong> 1.0 to 1.25 minimum, with rate / LTV penalties below 1.25</li>
-              <li><strong>Commercial multifamily (5+ unit):</strong> ≥1.20 to ≥1.40 depending on lender</li>
-              <li><strong>Hard money / bridge:</strong> DSCR not always required, but lenders glance at it</li>
-            </ul>
+            <h2 className="text-2xl sm:text-3xl">How lenders may use DSCR</h2>
             <p>
-              Most conventional lenders also have a debt-to-income (DTI)
-              calculation that mixes the property&apos;s DSCR with your
-              personal income. DSCR-only loan products skip the personal
-              side — your tax returns, W-2, and DTI don&apos;t matter as
-              long as the property covers itself. For a full walkthrough
-              of how these loans price, qualify, and close, see our{" "}
-              <Link href="/blog/dscr-loans-explained" className="text-primary font-semibold hover:underline">DSCR loans explained</Link>{" "}
+              Formula, rent treatment, expense adjustments, appraisal inputs,
+              minimum coverage, pricing tiers, LTV, credit, reserves, and
+              documentation vary by lender and program. Some products rely more
+              heavily on property cash flow; that does not mean personal or
+              entity documentation never matters. Request the lender&apos;s
+              written definition and term sheet. For additional educational
+              context, see our{" "}
+              <Link
+                href="/blog/dscr-loans-explained"
+                className="text-primary font-semibold hover:underline"
+              >
+                DSCR loans explained
+              </Link>{" "}
               guide.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">Common mistakes</h2>
             <h3>1. Forgetting to subtract operating expenses from NOI</h3>
             <p>
-              NOI = gross rent <em>after</em> property tax, insurance,
-              vacancy reserve, maintenance, management, CapEx reserve, HOA,
-              utilities — everything except mortgage P&amp;I. New investors
-              often calculate &ldquo;NOI&rdquo; as just gross rent, which
-              inflates DSCR by 40-60%. The dedicated{" "}
-              <Link href="/tools/noi-calculator" className="text-primary font-semibold hover:underline">NOI calculator</Link>{" "}
-              walks through every line so the DSCR you get back is the one
-              a lender will compute, not an optimistic version of it.
+              NOI = gross rent <em>after</em> property tax, insurance, vacancy
+              reserve, maintenance, management, CapEx reserve, HOA, utilities —
+              everything except mortgage P&amp;I. New investors often calculate
+              &ldquo;NOI&rdquo; as just gross rent, which inflates DSCR by
+              40-60%. The dedicated{" "}
+              <Link
+                href="/blog/how-to-calculate-noi-rental-property"
+                className="text-primary font-semibold hover:underline"
+              >
+                NOI guide
+              </Link>{" "}
+              walks through every line so the modeled ratio is internally
+              consistent. A lender may still use different inclusions,
+              exclusions, adjustments, and evidence.
             </p>
             <h3>2. Using nominal rent instead of effective rent</h3>
             <p>
-              Subtract vacancy and credit loss before calling it rent.
-              Asking $2,950 doesn&apos;t mean you collect $35,400/year —
-              you collect $35,400 × (1 − vacancy rate). For a 5% vacancy
-              that&apos;s $33,630 effective rent before any operating
-              expenses.
+              Subtract vacancy and credit loss before calling it rent. Asking
+              $2,950 doesn&apos;t mean you collect $35,400/year — you collect
+              $35,400 × (1 − vacancy rate). For a 5% vacancy that&apos;s $33,630
+              effective rent before any operating expenses.
             </p>
             <h3>3. Ignoring the seasonality of expenses</h3>
             <p>
-              Annual NOI smooths out seasonal swings. A heating-zone
-              rental might be cash-flow-negative in January (heat,
-              vacancy from December move-outs) and cash-flow-positive in
-              August. Lenders look at the annual number. So should you.
+              Annual NOI smooths out seasonal swings. A heating-zone rental
+              might be cash-flow-negative in January (heat, vacancy from
+              December move-outs) and cash-flow-positive in August. Annualizing
+              can make a screen easier to compare, but confirm how the specific
+              lender treats seasonality and trailing performance.
             </p>
 
-            <h2 className="text-2xl sm:text-3xl">DSCR and the rest of your underwriting</h2>
+            <h2 className="text-2xl sm:text-3xl">
+              DSCR and the rest of your underwriting
+            </h2>
             <p>
-              DSCR is a debt-coverage measure. It tells you whether the
-              bank gets paid. It doesn&apos;t tell you whether the deal
-              is good for <em>you</em>. For that you also need{" "}
-              <Link href="/tools/cap-rate-calculator" className="text-primary font-semibold hover:underline">cap rate</Link>{" "}
+              DSCR is a debt-coverage measure. It tells you whether the bank
+              gets paid. It doesn&apos;t tell you whether the deal is good for{" "}
+              <em>you</em>. For that you also need{" "}
+              <Link
+                href="/blog/how-to-calculate-cap-rate"
+                className="text-primary font-semibold hover:underline"
+              >
+                cap rate
+              </Link>{" "}
               (the unleveraged return),{" "}
-              <Link href="/glossary/cash-on-cash-return" className="text-primary font-semibold hover:underline">cash-on-cash</Link>{" "}
-              (the leveraged return on your money), cash flow (the dollars
-              per month), and projection (the 10-year picture). TrueCap&apos;s
-              full analyzer runs all of those at once on the same deal —
-              free to start.
+              <Link
+                href="/glossary/cash-on-cash-return"
+                className="text-primary font-semibold hover:underline"
+              >
+                cash-on-cash
+              </Link>{" "}
+              (the leveraged return on your money), cash flow (the dollars per
+              month), and projection (the 10-year picture). TrueCap&apos;s full
+              analyzer runs all of those at once on the same deal — free to
+              start.
             </p>
           </article>
 
@@ -242,7 +296,6 @@ export default function DscrCalculatorPage() {
 
           <ToolEmbedInvite slug="dscr-calculator" />
 
-
           <ToolsConversionCta
             calculatorName="DSCR calculator"
             hook="The full TrueCap analyzer connects DSCR to cap rate, CoC, cash flow, a 10-year cash-flow and equity projection, sensitivity, and Offer Ceiling. Save your work, compare deals, and share a review link."
@@ -250,7 +303,10 @@ export default function DscrCalculatorPage() {
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}
-            <Link href="/" className="font-bold text-foreground hover:underline">
+            <Link
+              href="/"
+              className="font-bold text-foreground hover:underline"
+            >
               TrueCap
             </Link>{" "}
             — transparent, editable rental analysis, free to start.

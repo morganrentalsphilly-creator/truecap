@@ -9,6 +9,7 @@ over the whole diff; every confirmed finding was fixed before this report.
 ## What shipped, by phase
 
 **Phase 1 — copy & risk reversal** (`bd197b5`)
+
 - `/guarantee` — canonical Never Overpay Guarantee (Pro + conditional Agent
   variant, claim FAQ incl. the 30-day-clock question, FAQPage schema).
 - Guarantee ON by default via `lib/marketing-offer-config.ts`; the published-
@@ -27,6 +28,7 @@ over the whole diff; every confirmed finding was fixed before this report.
   replaced the AnnualPromoBanner mount; `/methodology#version-history` anchor.
 
 **Phase 2 — pricing & credit ladder** (`627995b`)
+
 - Cards anchored Agent Pro → Pro (highlighted, center) → Free; Pro-first on
   phones; degrades to Pro → Free while Agent Pro is unconfigured.
 - `PricingValueStack` (outcome-framed) above the comparison table; $/hr ROI
@@ -42,23 +44,37 @@ over the whole diff; every confirmed finding was fixed before this report.
   (migration `20260817180000`, graceful degradation until applied).
 
 **Phase 3 — social proof engine** (`af51567`)
-- `testimonial_submissions` intake table (migration `20260817190000`,
-  service-role only) + one-question non-modal prompt after a PDF export or
-  third saved deal (once per browser, ever).
+
+- The historical `testimonial_submissions` intake table (migration
+  `20260817190000`, service-role only) remains stored but is not used by the
+  current one-question non-modal prompt after a PDF export or third saved deal
+  (once per browser, ever).
 - Publication stays gated by `lib/proof-records.ts` (verified + customer-
   approved); `/admin/testimonials` review queue renders copy-ready promotion
   skeletons. Display components self-hide at zero records; `/reviews` ships
   with zero fabricated content and deliberately NO AggregateRating schema.
+- The completed permission workflow is in additive forward migration
+  `20260829110000_testimonial_workflow_hardening.sql`. It creates the separate
+  `permissioned_testimonial_submissions` table with an optional quote,
+  display-name format, verification/approval/private notes/withdrawal states,
+  and an atomic HMAC-bucket submission guard. The legacy table and migration
+  remain untouched. Collection remains build-time dark by default and the
+  server action independently checks the same flag.
 
 **Phase 4 — lead capture & email funnel** (`5d383ad`)
-- Market Intelligence Pack: 8-page PDF generated from the live /states +
-  /markets data (`npm run build-intelligence-pack`).
+
+- Historical Market Intelligence Pack: an 8-page PDF was generated from the
+  /states + /markets registries (`npm run build-intelligence-pack`). It is no
+  longer distributed by active capture because those tax/law records require
+  official dependencies and a fresh high-risk review.
 - Capture surfaces once per family: glossary/states/markets templates,
   tools (via `tools-conversion-cta`), blog (via `related-blog-posts`),
   playbook — inline card + desktop exit-intent (non-modal, a11y-pattern).
 - New guard namespace: `mip` email caps are independent of the post-analysis
   `pae` caps; IP + sitewide hourly budget stay shared.
-- 3-email lead-magnet drip (day 0 pack / day 3 playbook / day 5 case-for-Pro),
+- 3-email lead-magnet drip; the current version delivers the public First Offer
+  Playbook, input-verification guidance, and a case-for-Pro without the retired
+  market pack,
   pack-credit countdown emails (day 0 + honest day-5 expiry), trial emails
   (day-1 activation, day-10 pre-billing) — trial flow rides
   `LIFECYCLE_EMAILS_MODE` + `lifecycle_email_log` idempotency.
@@ -67,6 +83,7 @@ over the whole diff; every confirmed finding was fixed before this report.
   `+strategy` on 29 combo pages).
 
 **Phase 5 — homepage & agents** (`f705eb5`)
+
 - Homepage (both lockstep variants): hero → analyzer → problem block →
   how-it-works → proof → sources → offer stack → ladder → guarantee →
   segmented paths → objection-ordered FAQ → final CTA.
@@ -79,6 +96,7 @@ over the whole diff; every confirmed finding was fixed before this report.
 
 **Review fixes** (final commit)
 13 confirmed findings (2 refuted) from the adversarial workflow, deduped to 7 fixes:
+
 1. Anonymous pack buyers were promised an auto-credit redemption can't find —
    credit now grants only to signed-in buyers; pricing copy says "buy while
    signed in"; emails/toast follow the grant.
@@ -107,23 +125,34 @@ New: `founding_banner_clicked` `founding_banner_dismissed`
 `mip_*` sources; `dispatchProofMoment` feeds the testimonial prompt.
 Already covered by existing events: hero submissions (`hero_address_submit`),
 analysis completions, CTA clicks (`homepage_primary_cta` by source), pack
-purchases (`deal_decision_pack_purchased` et al.), trial starts
-(`pro_trial_started`), trial→paid (`pro_subscribed`/`paid_conversion`),
-pricing views. NOT instrumentable: refund requests (claims arrive by email —
-track in the inbox or add a form later).
+purchases (`deal_decision_pack_purchased` et al.), and the canonical billing
+steps (`upgrade_started` → `subscription_started`). NOT instrumentable: refund
+requests (claims arrive by email — track in the inbox or add a form later).
 
 ## Morgan's activation queue (nothing sends/charges until these)
 
 1. **Stripe coupon (superseded launch contract)**: create $9.00-off, duration
    "once", USD → set `STRIPE_PACK_CREDIT_900_COUPON_ID` in Vercel. Until then the credit system is
    fully dark.
-2. **Apply migrations** (SURFACED FOR REVIEW): `20260817180000_pack_buyer_email.sql`,
-   `20260817190000_testimonial_submissions.sql` (+ the pre-existing pending
-   bundle incl. `20260811120000_agent_pro_tier.sql`).
-3. **`LIFECYCLE_EMAILS_MODE=live`** to activate welcome/drip AND the new
-   trial day-1/day-10 emails (one flip for the whole lifecycle estate).
-4. Agent Pro purchasability is unchanged: still needs
-   `STRIPE_PRICE_AGENT_PRO_MONTHLY/ANNUAL` + the agent-pro migration.
+2. **Apply migrations** (SURFACED FOR REVIEW): apply the pending bundle in
+   filename order, including `20260817180000_pack_buyer_email.sql`, the legacy
+   `20260817190000_testimonial_submissions.sql` if still pending, and additive
+   `20260829110000_testimonial_workflow_hardening.sql`. The permissioned
+   workflow does not depend on or alter the legacy table. Verify
+   `permissioned_testimonial_submissions` is FORCE RLS, the
+   `submit_permissioned_testimonial_submission` RPC is service-role only, and a
+   test insert defaults to `verification_status=unverified` and
+   `publication_status=private`. Provision a dedicated random
+   `TESTIMONIAL_RATE_LIMIT_SECRET` of at least 32 bytes. Only after those
+   checks, set `NEXT_PUBLIC_TRUECAP_TESTIMONIAL_COLLECTION=true` and
+   rebuild/redeploy.
+3. **`LIFECYCLE_EMAILS_MODE=live`** activates welcome/drip. Trial day-1/day-10
+   templates are legacy-only and schedule only for an older Checkout Session
+   carrying `trial_granted=true`; current no-card evaluations never schedule
+   those messages.
+4. Agent Pro sales require a configured monthly Agent Price. The annual option
+   appears only when its own Price is configured; each offered cadence must
+   match the checked-in catalog and pass checkout verification.
 5. Regenerate the pack after data updates: `npm run build-intelligence-pack`.
 
 ## Copy decisions that are yours (implemented as directed, flagged honestly)
@@ -141,7 +170,8 @@ track in the inbox or add a form later).
   as any future price change — that event ends the founding window anyway.
 - **/playbook is public**, not email-gated (spec said gated): a gated page
   fights the sitemap/SEO requirement and the public-methodology positioning.
-  The email course + Market Intelligence Pack remain the gated assets.
+  The email course remains the capture asset. The Market Intelligence Pack was
+  later removed from active distribution pending official tax/law dependencies.
 - **Agent scripts** published inline on /for-agents rather than as a gated
   download, same reasoning.
 - **Pack pre-purchase dialog** doesn't mention the credit (it can't read the
@@ -151,9 +181,11 @@ track in the inbox or add a form later).
   spreadsheet) is delivered as free public/email assets, not listed as Pro
   bonuses on the pricing card — listing free things as paid-tier bonuses
   contradicted the truth-guard ethos. Revisit once you want them repackaged.
-- **Trial CTA for anonymous visitors** stays "Continue to Pro" (test-locked):
-  an anonymous visitor may be an ineligible ex-subscriber, so "Start the
-  14-day trial" appears only for verified-eligible signed-in users.
+- **Historical trial note (superseded):** this rollout originally described a
+  card-backed 14-day Stripe trial. Current product policy is a 21-day no-card
+  evaluation for eligible new accounts; it schedules no charge and does not
+  auto-renew. A paid subscription starts only through explicit checkout under
+  the price and billing terms shown there.
 - The 30 day-NN drip JSONs still describe plan facts accurately (nothing in
   this rollout changed entitlements), but they don't yet mention the
   guarantee or credit — worth a content pass when you next touch the drip.

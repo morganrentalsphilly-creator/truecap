@@ -8,7 +8,7 @@
  */
 
 import { useId, useMemo, useState } from "react";
-import Link from "next/link";
+import { AnalyzerHandoffLink } from "@/components/analyzer-handoff-link";
 import { ArrowUpRight, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -23,8 +23,7 @@ const num = (s: string): number => {
 const fmtMoney = (n: number) =>
   `${n < 0 ? "-" : ""}$${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
 
-const fmtPct = (n: number) =>
-  Number.isFinite(n) ? `${n.toFixed(1)}%` : "—";
+const fmtPct = (n: number) => (Number.isFinite(n) ? `${n.toFixed(1)}%` : "—");
 
 export function NoiCalculatorWidget() {
   const [rentInput, setRentInput] = useState("2950");
@@ -59,14 +58,37 @@ export function NoiCalculatorWidget() {
     const annualNoi = effectiveRent - annualOpex;
     const monthlyNoi = annualNoi / 12;
     const annualCashAfterReserve = annualNoi - annualCapexReserve;
-    const opexRatio = effectiveRent > 0 ? (annualOpex / effectiveRent) * 100 : 0;
-    return { monthlyRent, annualGross, annualVacancy, effectiveRent, monthlyOpex, annualOpex, annualCapexReserve, annualNoi, monthlyNoi, annualCashAfterReserve, opexRatio };
-  }, [rentInput, vacancyInput, taxInput, insuranceInput, maintenanceInput, mgmtInput, capexInput, hoaInput, utilitiesInput]);
+    const opexRatio =
+      effectiveRent > 0 ? (annualOpex / effectiveRent) * 100 : 0;
+    return {
+      monthlyRent,
+      annualGross,
+      annualVacancy,
+      effectiveRent,
+      monthlyOpex,
+      annualOpex,
+      annualCapexReserve,
+      annualNoi,
+      monthlyNoi,
+      annualCashAfterReserve,
+      opexRatio,
+    };
+  }, [
+    rentInput,
+    vacancyInput,
+    taxInput,
+    insuranceInput,
+    maintenanceInput,
+    mgmtInput,
+    capexInput,
+    hoaInput,
+    utilitiesInput,
+  ]);
 
   // Carry the user's monthly rent into the full analyzer (P2-2 handoff).
   const handoffHref = buildAnalyzerHandoffUrl(
     { monthlyRent: num(rentInput) },
-    { utmSource: "noi-calculator" }
+    { utmSource: "noi-calculator" },
   );
 
   return (
@@ -78,25 +100,58 @@ export function NoiCalculatorWidget() {
             NOI Calculator
           </h2>
 
-          <FieldMoney label="Monthly Rent (gross)" value={rentInput} setValue={setRentInput} />
-          <FieldPct label="Vacancy Rate" value={vacancyInput} setValue={setVacancyInput} />
+          <FieldMoney
+            label="Monthly Rent (gross)"
+            value={rentInput}
+            setValue={setRentInput}
+          />
+          <FieldPct
+            label="Vacancy Rate"
+            value={vacancyInput}
+            setValue={setVacancyInput}
+          />
 
           <div className="pt-2">
             <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
               Monthly Operating Expenses
             </p>
             <div className="grid grid-cols-2 gap-3">
-              <FieldMoney label="Property Tax" value={taxInput} setValue={setTaxInput} />
-              <FieldMoney label="Insurance" value={insuranceInput} setValue={setInsuranceInput} />
-              <FieldMoney label="Maintenance" value={maintenanceInput} setValue={setMaintenanceInput} />
-              <FieldMoney label="Management" value={mgmtInput} setValue={setMgmtInput} />
+              <FieldMoney
+                label="Property Tax"
+                value={taxInput}
+                setValue={setTaxInput}
+              />
+              <FieldMoney
+                label="Insurance"
+                value={insuranceInput}
+                setValue={setInsuranceInput}
+              />
+              <FieldMoney
+                label="Maintenance"
+                value={maintenanceInput}
+                setValue={setMaintenanceInput}
+              />
+              <FieldMoney
+                label="Management"
+                value={mgmtInput}
+                setValue={setMgmtInput}
+              />
               <FieldMoney label="HOA" value={hoaInput} setValue={setHoaInput} />
-              <FieldMoney label="Utilities (owner)" value={utilitiesInput} setValue={setUtilitiesInput} />
+              <FieldMoney
+                label="Utilities (owner)"
+                value={utilitiesInput}
+                setValue={setUtilitiesInput}
+              />
             </div>
             <div className="mt-3 rounded-xl border border-dashed border-border p-3">
-              <FieldMoney label="CapEx reserve (below NOI)" value={capexInput} setValue={setCapexInput} />
+              <FieldMoney
+                label="CapEx reserve (below NOI)"
+                value={capexInput}
+                setValue={setCapexInput}
+              />
               <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-                Kept below lender-style NOI, but subtracted from cash after reserves.
+                Kept below lender-style NOI, but subtracted from cash after
+                reserves.
               </p>
             </div>
           </div>
@@ -108,51 +163,93 @@ export function NoiCalculatorWidget() {
             <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
               Annual NOI
             </div>
-            <div className={cn(
-              "text-5xl sm:text-6xl font-extrabold mt-1 tabular-nums",
-              result.annualNoi >= 0 ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]"
-            )}>
+            <div
+              className={cn(
+                "text-5xl sm:text-6xl font-extrabold mt-1 tabular-nums",
+                result.annualNoi >= 0
+                  ? "text-[var(--metric-positive)]"
+                  : "text-[var(--metric-negative)]",
+              )}
+            >
               {fmtMoney(result.annualNoi)}
             </div>
             <div className="text-sm font-semibold text-muted-foreground mt-1">
               {fmtMoney(result.monthlyNoi)}/month
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Net Operating Income — before CapEx reserve, mortgage, and income tax.
+              Net Operating Income — before CapEx reserve, mortgage, and income
+              tax.
             </p>
           </div>
 
           <div className="mt-5 pt-5 border-t border-border space-y-1.5 text-xs">
-            <Row label="Annual gross rent" value={fmtMoney(result.annualGross)} />
+            <Row
+              label="Annual gross rent"
+              value={fmtMoney(result.annualGross)}
+            />
             <Row label="Vacancy" value={`-${fmtMoney(result.annualVacancy)}`} />
-            <Row label="Effective rent" value={fmtMoney(result.effectiveRent)} bold />
-            <Row label="Annual operating expenses (excl. CapEx)" value={`-${fmtMoney(result.annualOpex)}`} />
-            <Row label="Operating expense ratio" value={fmtPct(result.opexRatio)} />
-            <Row label="CapEx reserve (below NOI)" value={`-${fmtMoney(result.annualCapexReserve)}`} />
-            <Row label="Cash after CapEx reserve, before debt" value={fmtMoney(result.annualCashAfterReserve)} bold />
+            <Row
+              label="Effective rent"
+              value={fmtMoney(result.effectiveRent)}
+              bold
+            />
+            <Row
+              label="Annual operating expenses (excl. CapEx)"
+              value={`-${fmtMoney(result.annualOpex)}`}
+            />
+            <Row
+              label="Operating expense ratio"
+              value={fmtPct(result.opexRatio)}
+            />
+            <Row
+              label="CapEx reserve (below NOI)"
+              value={`-${fmtMoney(result.annualCapexReserve)}`}
+            />
+            <Row
+              label="Cash after CapEx reserve, before debt"
+              value={fmtMoney(result.annualCashAfterReserve)}
+              bold
+            />
           </div>
         </div>
       </div>
 
-      <Link
-        href={handoffHref} target="_top"
+      <AnalyzerHandoffLink
+        handoffHref={handoffHref}
+        target="_top"
         className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="w-4 h-4" />
-        Run the full analysis with these numbers — cap rate, cash flow, DSCR — free
+        Run the full analysis with these numbers — cap rate, cash flow, DSCR —
+        free
         <ArrowUpRight className="w-4 h-4" />
-      </Link>
+      </AnalyzerHandoffLink>
     </div>
   );
 }
 
-function FieldMoney({ label, value, setValue }: { label: string; value: string; setValue: (v: string) => void }) {
+function FieldMoney({
+  label,
+  value,
+  setValue,
+}: {
+  label: string;
+  value: string;
+  setValue: (v: string) => void;
+}) {
   const id = useId();
   return (
     <div>
-      <Label htmlFor={id} className="text-sm font-medium text-foreground mb-1.5 block">{label}</Label>
+      <Label
+        htmlFor={id}
+        className="text-sm font-medium text-foreground mb-1.5 block"
+      >
+        {label}
+      </Label>
       <div className="relative">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+          $
+        </span>
         <Input
           id={id}
           type="number"
@@ -166,11 +263,24 @@ function FieldMoney({ label, value, setValue }: { label: string; value: string; 
   );
 }
 
-function FieldPct({ label, value, setValue }: { label: string; value: string; setValue: (v: string) => void }) {
+function FieldPct({
+  label,
+  value,
+  setValue,
+}: {
+  label: string;
+  value: string;
+  setValue: (v: string) => void;
+}) {
   const id = useId();
   return (
     <div>
-      <Label htmlFor={id} className="text-sm font-medium text-foreground mb-1.5 block">{label}</Label>
+      <Label
+        htmlFor={id}
+        className="text-sm font-medium text-foreground mb-1.5 block"
+      >
+        {label}
+      </Label>
       <div className="relative">
         <Input
           id={id}
@@ -181,17 +291,32 @@ function FieldPct({ label, value, setValue }: { label: string; value: string; se
           onChange={(e) => setValue(e.target.value)}
           className="pr-8 border-input bg-background text-base"
         />
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">%</span>
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+          %
+        </span>
       </div>
     </div>
   );
 }
 
-function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
+function Row({
+  label,
+  value,
+  bold,
+}: {
+  label: string;
+  value: string;
+  bold?: boolean;
+}) {
   return (
     <div className="flex justify-between gap-2">
       <span className="text-muted-foreground">{label}</span>
-      <span className={cn("tabular-nums", bold ? "font-bold text-foreground" : "text-foreground")}>
+      <span
+        className={cn(
+          "tabular-nums",
+          bold ? "font-bold text-foreground" : "text-foreground",
+        )}
+      >
         {value}
       </span>
     </div>

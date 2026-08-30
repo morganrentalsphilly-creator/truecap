@@ -122,15 +122,11 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
       // to call from anywhere; no-ops if gtag isn't loaded or the
       // conversion label hasn't been wired up in lib/analytics yet.
       trackConversion("signup");
-      trackEvent("signup_completed", {
-        method: "email",
-        needs_email_confirmation: result.needsEmailConfirmation,
-      });
-      trackEvent("account_created", {
-        method: "email",
-        needs_email_confirmation: result.needsEmailConfirmation,
-      });
-      trackEvent("product_evaluation_started", { source: "account_created" });
+      // The analytics wrapper attaches only the session's coarse first-touch
+      // referral taxonomy. The signup method is intentionally not used as a
+      // substitute for acquisition attribution.
+      trackEvent("account_created");
+      trackEvent("product_evaluation_started");
       // Conversion-friendly post-signup flow:
       //  - If Supabase auto-signed the user in (email confirmation OFF):
       //    send them straight to the calculator so they get to value

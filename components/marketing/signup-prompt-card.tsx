@@ -21,7 +21,15 @@
 
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Bookmark, History, Loader2, Share2, Smartphone, X } from "lucide-react";
+import {
+  ArrowRight,
+  Bookmark,
+  History,
+  Loader2,
+  Share2,
+  Smartphone,
+  X,
+} from "lucide-react";
 import { GoogleAuthButton } from "@/components/auth/google-auth-button";
 import { setPendingSaveIntent } from "@/lib/save-intent";
 import { trackEvent } from "@/lib/analytics";
@@ -35,7 +43,11 @@ interface SignupPromptCardProps {
   onPrepareSaveIntent?: () => unknown;
 }
 
-export function SignupPromptCard({ address, isAuthenticated, onPrepareSaveIntent }: SignupPromptCardProps) {
+export function SignupPromptCard({
+  address,
+  isAuthenticated,
+  onPrepareSaveIntent,
+}: SignupPromptCardProps) {
   const [dismissed, setDismissed] = useState(false);
   useEffect(() => {
     if (!isAuthenticated && !dismissed) {
@@ -53,7 +65,9 @@ export function SignupPromptCard({ address, isAuthenticated, onPrepareSaveIntent
 
   const cleanAddress = (address ?? "").trim();
   const dealLabel = cleanAddress
-    ? cleanAddress.length > 36 ? `${cleanAddress.slice(0, 36)}…` : cleanAddress
+    ? cleanAddress.length > 36
+      ? `${cleanAddress.slice(0, 36)}…`
+      : cleanAddress
     : "this analysis";
 
   return (
@@ -62,7 +76,7 @@ export function SignupPromptCard({ address, isAuthenticated, onPrepareSaveIntent
       <div className="flex items-start justify-between gap-3">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--brand-green)] px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest text-white">
           <Bookmark className="size-3" />
-          Free forever
+          Free plan
         </span>
         <button
           type="button"
@@ -79,7 +93,8 @@ export function SignupPromptCard({ address, isAuthenticated, onPrepareSaveIntent
         Create an account to save {dealLabel}
       </h3>
       <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-        Save this underwriting and reopen it anywhere. Create a free account—we&apos;ll save this deal automatically.
+        Save this underwriting and reopen it anywhere. Create a free
+        account—we&apos;ll save this deal automatically.
       </p>
 
       {/* Benefit bullets — stacked on mobile, 3-up on sm+ */}
@@ -111,7 +126,10 @@ export function SignupPromptCard({ address, isAuthenticated, onPrepareSaveIntent
         <Suspense
           fallback={
             <div className="flex h-12 w-full items-center justify-center rounded-xl border border-border bg-card">
-              <Loader2 className="size-4 animate-spin text-muted-foreground" aria-hidden />
+              <Loader2
+                className="size-4 animate-spin text-muted-foreground"
+                aria-hidden
+              />
             </div>
           }
         >
@@ -139,7 +157,7 @@ export function SignupPromptCard({ address, isAuthenticated, onPrepareSaveIntent
 
       {/* Risk-reversal */}
       <p className="mt-4 border-t border-border/60 pt-3 text-[11px] text-muted-foreground">
-        Always free · No card · Already have an account?{" "}
+        Free plan · No card · Already have an account?{" "}
         <Link
           href="/auth/login?next=/dashboard/new"
           onClick={() => beginSignup("sign_in")}
@@ -166,7 +184,9 @@ function BenefitChip({
       <Icon className="mt-0.5 size-4 shrink-0 text-[var(--brand-green)]" />
       <div className="min-w-0">
         <div className="text-sm font-bold text-foreground">{label}</div>
-        <div className="text-[11px] leading-snug text-muted-foreground">{sub}</div>
+        <div className="text-[11px] leading-snug text-muted-foreground">
+          {sub}
+        </div>
       </div>
     </li>
   );

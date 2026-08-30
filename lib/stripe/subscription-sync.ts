@@ -23,7 +23,9 @@ type ProfileBindingRow = {
  * skips stay queryable, and to suppress success-only side effects (the
  * pro_subscribed PostHog funnel event).
  */
-export type SubscriptionSyncResult = { synced: true } | { synced: false; reason: string };
+export type SubscriptionSyncResult =
+  | { synced: true }
+  | { synced: false; reason: string };
 
 const SYNCED: SubscriptionSyncResult = { synced: true };
 
@@ -38,12 +40,12 @@ const SYNCED: SubscriptionSyncResult = { synced: true };
  * handleCheckoutSessionCompleted) so a paying user whose subscription never
  * lands pages someone instead of vanishing.
  *
- * `extra` must contain opaque Stripe/user ids ONLY — never emails or
- * addresses (CLAUDE.md pitfall #4).
+ * `extra` must contain bounded categorical context only — never Stripe ids,
+ * user ids, emails, or addresses (CLAUDE.md pitfall #4).
  */
 function reportUserBindingSkip(
   context: "subscription_sync" | "checkout_completed",
-  extra: Record<string, string | null | undefined>
+  extra: Record<string, string | boolean | null | undefined>,
 ): void {
   Sentry.captureMessage(
     `Stripe webhook sync skipped: user/customer binding could not be verified (${context})`,
@@ -51,13 +53,13 @@ function reportUserBindingSkip(
       level: "error",
       tags: { feature: "stripe-webhook", failure: "user_binding" },
       extra,
-    }
+    },
   );
 }
 
 async function getProfileById(
   admin: SupabaseClient,
-  userId: string
+  userId: string,
 ): Promise<ProfileBindingRow | null> {
   const { data, error } = await admin
     .from("profiles")
@@ -70,7 +72,7 @@ async function getProfileById(
 
 async function getProfileByStripeCustomerId(
   admin: SupabaseClient,
-  customerId: string
+  customerId: string,
 ): Promise<ProfileBindingRow | null> {
   const { data, error } = await admin
     .from("profiles")
@@ -81,26 +83,38 @@ async function getProfileByStripeCustomerId(
   return (data as ProfileBindingRow | null) ?? null;
 }
 
-function getSubscriptionCustomerId(subscription: Stripe.Subscription): string | null {
-  return typeof subscription.customer === "string" ? subscription.customer : subscription.customer?.id ?? null;
+function getSubscriptionCustomerId(
+  subscription: Stripe.Subscription,
+): string | null {
+  return typeof subscription.customer === "string"
+    ? subscription.customer
+    : (subscription.customer?.id ?? null);
 }
 
-function getCheckoutCustomerId(session: Stripe.Checkout.Session): string | null {
-  return typeof session.customer === "string" ? session.customer : session.customer?.id ?? null;
+function getCheckoutCustomerId(
+  session: Stripe.Checkout.Session,
+): string | null {
+  return typeof session.customer === "string"
+    ? session.customer
+    : (session.customer?.id ?? null);
 }
 
 async function resolveVerifiedUserIdForSubscription(
   admin: SupabaseClient,
   subscription: Stripe.Subscription,
-  fallbackUserId?: string | null
+  fallbackUserId?: string | null,
 ): Promise<string | null> {
   const customerId = getSubscriptionCustomerId(subscription);
   const metadataUserId = subscription.metadata?.user_id ?? null;
   const trustedFallbackUserId = fallbackUserId ?? null;
 
-  if (metadataUserId && trustedFallbackUserId && metadataUserId !== trustedFallbackUserId) {
+  if (
+    metadataUserId &&
+    trustedFallbackUserId &&
+    metadataUserId !== trustedFallbackUserId
+  ) {
     console.error(
-      `[billing] Rejecting subscription sync for ${subscription.id}: metadata.user_id does not match fallback user id`
+      "[billing] Rejecting subscription sync: metadata.user_id does not match fallback user id",
     );
     return null;
   }
@@ -108,11 +122,14 @@ async function resolveVerifiedUserIdForSubscription(
   const candidateUserId = trustedFallbackUserId ?? metadataUserId ?? null;
 
   if (customerId) {
-    const profileByCustomer = await getProfileByStripeCustomerId(admin, customerId);
+    const profileByCustomer = await getProfileByStripeCustomerId(
+      admin,
+      customerId,
+    );
     if (profileByCustomer) {
       if (candidateUserId && candidateUserId !== profileByCustomer.id) {
         console.error(
-          `[billing] Rejecting subscription sync for ${subscription.id}: candidate user does not own Stripe customer`
+          "[billing] Rejecting subscription sync: candidate user does not own Stripe customer",
         );
         return null;
       }
@@ -122,21 +139,23 @@ async function resolveVerifiedUserIdForSubscription(
 
   if (!candidateUserId) {
     console.error(
-      `[billing] Skipping subscription sync for ${subscription.id}: cannot resolve verified user for unbound customer`
+      "[billing] Skipping subscription sync: cannot resolve verified user for unbound customer",
     );
     return null;
   }
 
   const profileByUser = await getProfileById(admin, candidateUserId);
   if (!profileByUser) {
-    console.error(`[billing] Skipping subscription sync for ${subscription.id}: candidate user not found`);
+    console.error(
+      "[billing] Skipping subscription sync: candidate user not found",
+    );
     return null;
   }
 
   if (profileByUser.stripe_customer_id) {
     if (!customerId || profileByUser.stripe_customer_id !== customerId) {
       console.error(
-        `[billing] Rejecting subscription sync for ${subscription.id}: stored stripe_customer_id mismatch`
+        "[billing] Rejecting subscription sync: stored stripe_customer_id mismatch",
       );
       return null;
     }
@@ -148,14 +167,14 @@ async function resolveVerifiedUserIdForSubscription(
   }
 
   console.error(
-    `[billing] Skipping subscription sync for ${subscription.id}: user has no Stripe customer binding and no trusted fallback`
+    "[billing] Skipping subscription sync: user has no Stripe customer binding and no trusted fallback",
   );
   return null;
 }
 
 async function resolveVerifiedCheckoutBinding(
   admin: SupabaseClient,
-  session: Stripe.Checkout.Session
+  session: Stripe.Checkout.Session,
 ): Promise<{ userId: string; customerId: string } | null> {
   const customerId = getCheckoutCustomerId(session);
   const metadataUserId = session.metadata?.user_id ?? null;
@@ -166,21 +185,34 @@ async function resolveVerifiedCheckoutBinding(
     return null;
   }
 
-  if (metadataUserId && clientReferenceUserId && metadataUserId !== clientReferenceUserId) {
-    console.error("[billing] checkout.session.completed has mismatched metadata.user_id and client_reference_id");
+  if (
+    metadataUserId &&
+    clientReferenceUserId &&
+    metadataUserId !== clientReferenceUserId
+  ) {
+    console.error(
+      "[billing] checkout.session.completed has mismatched metadata.user_id and client_reference_id",
+    );
     return null;
   }
 
   const candidateUserId = clientReferenceUserId ?? metadataUserId;
   if (!candidateUserId) {
-    console.error("[billing] checkout.session.completed missing resolvable user id");
+    console.error(
+      "[billing] checkout.session.completed missing resolvable user id",
+    );
     return null;
   }
 
-  const profileByCustomer = await getProfileByStripeCustomerId(admin, customerId);
+  const profileByCustomer = await getProfileByStripeCustomerId(
+    admin,
+    customerId,
+  );
   if (profileByCustomer) {
     if (profileByCustomer.id !== candidateUserId) {
-      console.error("[billing] checkout.session.completed customer is already bound to a different user");
+      console.error(
+        "[billing] checkout.session.completed customer is already bound to a different user",
+      );
       return null;
     }
     return { userId: profileByCustomer.id, customerId };
@@ -188,32 +220,48 @@ async function resolveVerifiedCheckoutBinding(
 
   const profileByUser = await getProfileById(admin, candidateUserId);
   if (!profileByUser) {
-    console.error("[billing] checkout.session.completed candidate user profile not found");
+    console.error(
+      "[billing] checkout.session.completed candidate user profile not found",
+    );
     return null;
   }
 
-  if (profileByUser.stripe_customer_id && profileByUser.stripe_customer_id !== customerId) {
-    console.error("[billing] checkout.session.completed profile has mismatched existing Stripe customer id");
+  if (
+    profileByUser.stripe_customer_id &&
+    profileByUser.stripe_customer_id !== customerId
+  ) {
+    console.error(
+      "[billing] checkout.session.completed profile has mismatched existing Stripe customer id",
+    );
     return null;
   }
 
   if (!clientReferenceUserId) {
-    console.error("[billing] checkout.session.completed without client_reference_id cannot safely bind new customer");
+    console.error(
+      "[billing] checkout.session.completed without client_reference_id cannot safely bind new customer",
+    );
     return null;
   }
 
   return { userId: profileByUser.id, customerId };
 }
 
-function isSubscriptionScheduledToCancel(subscription: Stripe.Subscription): boolean {
+function isSubscriptionScheduledToCancel(
+  subscription: Stripe.Subscription,
+): boolean {
   const subscriptionWithCancelAt = subscription as Stripe.Subscription & {
     cancel_at?: number | null;
   };
 
-  return Boolean(subscription.cancel_at_period_end || subscriptionWithCancelAt.cancel_at);
+  return Boolean(
+    subscription.cancel_at_period_end || subscriptionWithCancelAt.cancel_at,
+  );
 }
 
-async function resolvePlanIdBySlug(admin: SupabaseClient, slug: string | null): Promise<string | null> {
+async function resolvePlanIdBySlug(
+  admin: SupabaseClient,
+  slug: string | null,
+): Promise<string | null> {
   if (!slug) return null;
 
   // Throw on query errors instead of falling through to null (see
@@ -228,7 +276,10 @@ async function resolvePlanIdBySlug(admin: SupabaseClient, slug: string | null): 
   return planBySlug?.id ?? null;
 }
 
-async function resolvePlanIdForPrice(admin: SupabaseClient, priceId: string | null): Promise<string | null> {
+async function resolvePlanIdForPrice(
+  admin: SupabaseClient,
+  priceId: string | null,
+): Promise<string | null> {
   if (!priceId) return null;
 
   // Throw on query errors instead of falling through to null: a transient
@@ -258,7 +309,7 @@ async function resolvePlanIdForPrice(admin: SupabaseClient, priceId: string | nu
  */
 async function getExistingSubscriptionPlanId(
   admin: SupabaseClient,
-  stripeSubscriptionId: string
+  stripeSubscriptionId: string,
 ): Promise<string | null> {
   const { data, error } = await admin
     .from("subscriptions")
@@ -272,15 +323,22 @@ async function getExistingSubscriptionPlanId(
 export async function upsertSubscriptionFromStripe(
   admin: SupabaseClient,
   subscription: Stripe.Subscription,
-  fallbackUserId?: string | null
+  fallbackUserId?: string | null,
 ): Promise<SubscriptionSyncResult> {
-  const userId = await resolveVerifiedUserIdForSubscription(admin, subscription, fallbackUserId);
+  const userId = await resolveVerifiedUserIdForSubscription(
+    admin,
+    subscription,
+    fallbackUserId,
+  );
   if (!userId) {
-    console.error(`[billing] Skipping subscription sync for ${subscription.id}: user binding could not be verified`);
+    console.error(
+      "[billing] Skipping subscription sync: user binding could not be verified",
+    );
     reportUserBindingSkip("subscription_sync", {
-      stripe_subscription_id: subscription.id,
-      stripe_customer_id: getSubscriptionCustomerId(subscription),
       subscription_status: subscription.status,
+      has_customer_binding: Boolean(getSubscriptionCustomerId(subscription)),
+      has_metadata_user_id: Boolean(subscription.metadata?.user_id),
+      has_trusted_fallback: Boolean(fallbackUserId),
     });
     return { synced: false, reason: "user binding could not be verified" };
   }
@@ -322,16 +380,24 @@ export async function upsertSubscriptionFromStripe(
   //      preserve and correctly falls through to null (the FREE result).
   // A canceled/incomplete/etc. sub legitimately resolves to null (→ FREE) and
   // needs no rescue — the guard is scoped to the paid status set.
-  const isActivePaidStatus = ["active", "trialing", "past_due"].includes(subscription.status);
+  const isActivePaidStatus = ["active", "trialing", "past_due"].includes(
+    subscription.status,
+  );
   if (planId === null && isActivePaidStatus) {
-    const existingPlanId = await getExistingSubscriptionPlanId(admin, subscription.id);
+    const existingPlanId = await getExistingSubscriptionPlanId(
+      admin,
+      subscription.id,
+    );
 
     // Trust the checkout-time plan_slug stamp ONLY on a first sync (no row yet).
     // A Customer-Portal plan switch never updates it, so for an existing sub it
     // can point at the old plan — prefer the price-derived slug and, failing
     // that, the preserved existing plan below.
     if (existingPlanId === null) {
-      planId = await resolvePlanIdBySlug(admin, subscription.metadata?.plan_slug ?? null);
+      planId = await resolvePlanIdBySlug(
+        admin,
+        subscription.metadata?.plan_slug ?? null,
+      );
     }
 
     if (planId === null) {
@@ -341,14 +407,13 @@ export async function upsertSubscriptionFromStripe(
           level: "error",
           tags: { feature: "billing", kind: "entitlement-mismatch" },
           extra: {
-            stripe_subscription_id: subscription.id,
-            stripe_price_id: priceId,
+            has_stripe_price_id: Boolean(priceId),
             subscription_status: subscription.status,
             plan_slug_metadata: subscription.metadata?.plan_slug ?? null,
             preserved_plan_id: existingPlanId,
             hint: "Populate plans.stripe_price_id for this price (and verify STRIPE_PRICE_PRO_MONTHLY/ANNUAL env).",
           },
-        }
+        },
       );
       planId = existingPlanId;
     }
@@ -365,9 +430,13 @@ export async function upsertSubscriptionFromStripe(
       })
     | undefined;
   const periodStartSec =
-    subscriptionWithPeriods.current_period_start ?? primaryItemWithPeriods?.current_period_start ?? null;
+    subscriptionWithPeriods.current_period_start ??
+    primaryItemWithPeriods?.current_period_start ??
+    null;
   const periodEndSec =
-    subscriptionWithPeriods.current_period_end ?? primaryItemWithPeriods?.current_period_end ?? null;
+    subscriptionWithPeriods.current_period_end ??
+    primaryItemWithPeriods?.current_period_end ??
+    null;
 
   const row = {
     user_id: userId,
@@ -376,13 +445,20 @@ export async function upsertSubscriptionFromStripe(
     stripe_price_id: priceId,
     status: subscription.status,
     current_period_start:
-      periodStartSec != null ? new Date(periodStartSec * 1000).toISOString() : null,
-    current_period_end: periodEndSec != null ? new Date(periodEndSec * 1000).toISOString() : null,
+      periodStartSec != null
+        ? new Date(periodStartSec * 1000).toISOString()
+        : null,
+    current_period_end:
+      periodEndSec != null ? new Date(periodEndSec * 1000).toISOString() : null,
     cancel_at_period_end: isSubscriptionScheduledToCancel(subscription),
     updated_at: new Date().toISOString(),
   };
 
-  if (["active", "trialing", "past_due", "unpaid", "paused"].includes(subscription.status)) {
+  if (
+    ["active", "trialing", "past_due", "unpaid", "paused"].includes(
+      subscription.status,
+    )
+  ) {
     const { error: deactivateError } = await admin
       .from("subscriptions")
       .update({
@@ -396,7 +472,9 @@ export async function upsertSubscriptionFromStripe(
     if (deactivateError) throw deactivateError;
   }
 
-  const { error } = await admin.from("subscriptions").upsert(row, { onConflict: "stripe_subscription_id" });
+  const { error } = await admin
+    .from("subscriptions")
+    .upsert(row, { onConflict: "stripe_subscription_id" });
   if (error) throw error;
 
   return SYNCED;
@@ -404,7 +482,7 @@ export async function upsertSubscriptionFromStripe(
 
 export async function markSubscriptionCanceled(
   admin: SupabaseClient,
-  subscription: Stripe.Subscription
+  subscription: Stripe.Subscription,
 ): Promise<SubscriptionSyncResult> {
   const { data: existing, error: lookupError } = await admin
     .from("subscriptions")
@@ -449,14 +527,16 @@ function getInvoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
     } | null;
   };
   const subscription =
-    flexibleInvoice.subscription ?? flexibleInvoice.parent?.subscription_details?.subscription ?? null;
+    flexibleInvoice.subscription ??
+    flexibleInvoice.parent?.subscription_details?.subscription ??
+    null;
   if (typeof subscription === "string") return subscription;
   return subscription?.id ?? null;
 }
 
 export async function upsertSubscriptionFromInvoice(
   admin: SupabaseClient,
-  invoice: Stripe.Invoice
+  invoice: Stripe.Invoice,
 ): Promise<SubscriptionSyncResult> {
   const subscriptionId = getInvoiceSubscriptionId(invoice);
   // Not a subscription invoice (e.g. a one-off charge) — nothing to sync.
@@ -469,7 +549,7 @@ export async function upsertSubscriptionFromInvoice(
 
 export async function upsertSubscriptionFromInvoicePayment(
   admin: SupabaseClient,
-  invoicePayment: Stripe.InvoicePayment
+  invoicePayment: Stripe.InvoicePayment,
 ): Promise<SubscriptionSyncResult> {
   let invoice: Stripe.Invoice | null = null;
 
@@ -487,7 +567,7 @@ export async function upsertSubscriptionFromInvoicePayment(
 export async function linkStripeCustomerToProfile(
   admin: SupabaseClient,
   userId: string,
-  customerId: string
+  customerId: string,
 ): Promise<void> {
   const profile = await getProfileById(admin, userId);
   if (!profile) {
@@ -498,30 +578,44 @@ export async function linkStripeCustomerToProfile(
   }
   if (profile.stripe_customer_id === customerId) return;
 
-  const { error } = await admin.from("profiles").update({ stripe_customer_id: customerId }).eq("id", userId);
+  const { error } = await admin
+    .from("profiles")
+    .update({ stripe_customer_id: customerId })
+    .eq("id", userId);
   if (error) throw error;
 }
 
 export async function handleCheckoutSessionCompleted(
   admin: SupabaseClient,
-  session: Stripe.Checkout.Session
+  session: Stripe.Checkout.Session,
 ): Promise<SubscriptionSyncResult> {
   const verifiedBinding = await resolveVerifiedCheckoutBinding(admin, session);
   if (!verifiedBinding) {
-    console.error("[billing] checkout.session.completed skipped due to unverifiable user/customer binding");
+    console.error(
+      "[billing] checkout.session.completed skipped due to unverifiable user/customer binding",
+    );
     reportUserBindingSkip("checkout_completed", {
-      stripe_session_id: session.id,
-      stripe_customer_id: getCheckoutCustomerId(session),
-      stripe_subscription_id:
-        typeof session.subscription === "string" ? session.subscription : session.subscription?.id ?? null,
+      has_customer_binding: Boolean(getCheckoutCustomerId(session)),
+      has_subscription: Boolean(session.subscription),
+      has_metadata_user_id: Boolean(session.metadata?.user_id),
+      has_client_reference_id: Boolean(session.client_reference_id),
     });
-    return { synced: false, reason: "checkout user/customer binding could not be verified" };
+    return {
+      synced: false,
+      reason: "checkout user/customer binding could not be verified",
+    };
   }
 
-  await linkStripeCustomerToProfile(admin, verifiedBinding.userId, verifiedBinding.customerId);
+  await linkStripeCustomerToProfile(
+    admin,
+    verifiedBinding.userId,
+    verifiedBinding.customerId,
+  );
 
   const subscriptionId =
-    typeof session.subscription === "string" ? session.subscription : session.subscription?.id;
+    typeof session.subscription === "string"
+      ? session.subscription
+      : session.subscription?.id;
   if (subscriptionId) {
     const stripe = getStripe();
     const sub = await stripe.subscriptions.retrieve(subscriptionId);

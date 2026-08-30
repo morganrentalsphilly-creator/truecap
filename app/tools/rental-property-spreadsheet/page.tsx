@@ -37,9 +37,9 @@ import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-sch
 const DOWNLOAD_PATH = "/downloads/truecap-rental-property-analyzer.xlsx";
 
 export const metadata: Metadata = {
-  title: "Free Rental Property Spreadsheet — No Email",
+  title: "Free Rental Property Analysis Spreadsheet",
   description:
-    "Download a free rental property analysis spreadsheet — Excel template with cash flow, cap rate, cash-on-cash, DSCR, and a 10-year projection. No email gate, no signup.",
+    "Download a free Excel rental property analysis spreadsheet with cash flow, cap rate, cash-on-cash return, DSCR, and a 10-year projection. No email required.",
   keywords: [
     "rental property spreadsheet",
     "rental property excel template",
@@ -51,15 +51,25 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/tools/rental-property-spreadsheet" },
   openGraph: {
-    title: "Free Rental Property Spreadsheet — No Email",
+    title: "Free Rental Property Analysis Spreadsheet | TrueCap",
     description:
-      "A real .xlsx deal analyzer: cash flow, cap rate, cash-on-cash, DSCR, 10-year projection, and a plain-English quick reference. Download it directly — no email gate.",
+      "Download a free Excel rental property analysis spreadsheet with cash flow, cap rate, cash-on-cash return, DSCR, and a 10-year projection. No email required.",
     url: "/tools/rental-property-spreadsheet",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap free rental property spreadsheet" }],
+    images: [
+      {
+        url: "/home.jpg",
+        width: 1200,
+        height: 630,
+        alt: "TrueCap free rental property spreadsheet",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
+    title: "Free Rental Property Analysis Spreadsheet | TrueCap",
+    description:
+      "Download a free Excel rental property analysis spreadsheet with cash flow, cap rate, cash-on-cash return, DSCR, and a 10-year projection. No email required.",
     images: ["/home.jpg"],
   },
 };
@@ -128,7 +138,10 @@ export default function RentalPropertySpreadsheetPage() {
 
   return (
     <>
-      <ToolBreadcrumbSchema toolPath="/tools/rental-property-spreadsheet" toolName="Rental property spreadsheet" />
+      <ToolBreadcrumbSchema
+        toolPath="/tools/rental-property-spreadsheet"
+        toolName="Rental property spreadsheet"
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(spreadsheetLd) }}
@@ -139,7 +152,10 @@ export default function RentalPropertySpreadsheetPage() {
       />
 
       <div className="min-h-screen bg-background">
-        <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <main
+          id="main"
+          className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12"
+        >
           {/* H1 */}
           <header className="mb-6 sm:mb-8">
             <Link
@@ -152,10 +168,10 @@ export default function RentalPropertySpreadsheetPage() {
               Free Rental Property Spreadsheet
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground mt-2 leading-relaxed">
-              A real Excel deal analyzer — cash flow, cap rate,
-              cash-on-cash, DSCR, and a 10-year projection, with honest
-              expense reserves built in. Direct download. No email gate,
-              no signup, no &ldquo;free trial.&rdquo;
+              A real Excel deal analyzer — cash flow, cap rate, cash-on-cash,
+              DSCR, and a 10-year projection, with honest expense reserves built
+              in. Direct download. No email gate, no signup, no &ldquo;free
+              trial.&rdquo;
             </p>
           </header>
 
@@ -170,9 +186,9 @@ export default function RentalPropertySpreadsheetPage() {
                   TrueCap Rental Property Analyzer
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-                  .xlsx · 3 tabs · works in Excel, Google Sheets, Apple
-                  Numbers, and LibreOffice. Uses TrueCap&apos;s core
-                  buy-and-hold screening conventions.
+                  .xlsx · 3 tabs · works in Excel, Google Sheets, Apple Numbers,
+                  and LibreOffice. Uses TrueCap&apos;s core buy-and-hold
+                  screening conventions.
                 </p>
               </div>
               <a
@@ -185,173 +201,211 @@ export default function RentalPropertySpreadsheetPage() {
               </a>
             </div>
             <p className="text-xs text-muted-foreground mt-4">
-              No email required — the button downloads the file directly.
-              Prefer Google Sheets? Upload the file to Drive and open it;
-              every formula converts cleanly.
+              No email required — the button downloads the file directly. Prefer
+              Google Sheets? Upload the file to Drive and open it; every formula
+              converts cleanly.
             </p>
           </section>
 
           {/* Long-form content */}
           <article className="prose prose-slate max-w-none mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
-            <h2 className="text-2xl sm:text-3xl">Why this spreadsheet is un-gated</h2>
+            <h2 className="text-2xl sm:text-3xl">
+              Why this spreadsheet is un-gated
+            </h2>
             <p>
-              Search for &ldquo;rental property spreadsheet&rdquo; and
-              nearly every result makes you trade your email address for
-              an Excel file — then drips marketing at you for months.
-              We&apos;d rather you just have the tool. If the spreadsheet
-              is genuinely useful, some of you will eventually want the
-              faster version (
-              <Link href="/" className="text-primary font-semibold hover:underline">type an address, get the same analysis in 60 seconds</Link>
+              Search for &ldquo;rental property spreadsheet&rdquo; and nearly
+              every result makes you trade your email address for an Excel file
+              — then drips marketing at you for months. We&apos;d rather you
+              just have the tool. If the spreadsheet is genuinely useful, some
+              of you will eventually want the faster version (
+              <Link
+                href="/"
+                className="text-primary font-semibold hover:underline"
+              >
+                type an address, get the same analysis in 60 seconds
+              </Link>
               ), and the rest of you got a good spreadsheet for free.
               That&apos;s the whole model.
             </p>
             <p>
               It&apos;s also not a teaser. The workbook is a transparent,
               formula-driven buy-and-hold screen with its limits disclosed
-              in-file. The web analyzer adds broader inputs and workflows;
-              it does not make this workbook&apos;s model more complete than it is.
+              in-file. The web analyzer adds broader inputs and workflows; it
+              does not make this workbook&apos;s model more complete than it is.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">What&apos;s in each tab</h2>
             <h3>Tab 1 — Deal Analyzer</h3>
             <p>
-              The core underwrite on one screen. You edit the inputs —
-              purchase price, down payment, interest rate, loan term,
-              monthly rent, and the full expense set (property tax,
-              insurance, vacancy, management, maintenance, CapEx, HOA,
-              utilities) — and live formulas compute:
+              The core underwrite on one screen. You edit the inputs — purchase
+              price, down payment, interest rate, loan term, monthly rent, and
+              the full expense set (property tax, insurance, vacancy,
+              management, maintenance, CapEx, HOA, utilities) — and live
+              formulas compute:
             </p>
             <ul>
               <li>
-                <strong>Monthly and annual cash flow</strong>{" "}— rent minus
-                every operating expense minus the mortgage payment (P&amp;I
-                via the standard PMT formula), including PMI when the down
-                payment is under 20%.
+                <strong>Monthly and annual cash flow</strong> — rent minus every
+                operating expense minus the mortgage payment (P&amp;I via the
+                standard PMT formula), including PMI when the down payment is
+                under 20%.
               </li>
               <li>
-                <strong>NOI and cap rate</strong>{" "}— the unleveraged view
-                of the property, for comparing deals regardless of
-                financing.
+                <strong>NOI and cap rate</strong> — the unleveraged view of the
+                property, for comparing deals regardless of financing.
               </li>
               <li>
-                <strong>Cash-on-cash return</strong>{" "}— annual cash flow
-                against the actual cash you bring (down payment plus
-                closing costs).
+                <strong>Cash-on-cash return</strong> — annual cash flow against
+                the actual cash you bring (down payment plus closing costs).
               </li>
               <li>
-                <strong>DSCR</strong>{" "}— the coverage ratio lenders
-                underwrite to for financed deals. An all-cash purchase renders
+                <strong>DSCR</strong> — the coverage ratio lenders underwrite to
+                for financed deals. An all-cash purchase renders
                 <strong> N/A — no debt service</strong> instead of a false zero.
               </li>
             </ul>
             <p>
               The defaults are honest, not optimistic: 5% vacancy, 8%
-              management, 10% maintenance, and a 5% CapEx reserve — the
-              same starting assumptions the TrueCap analyzer uses. Zero
-              them out if you must, but know that&apos;s the underwrite
-              you&apos;re changing, not the formula.
+              management, 10% maintenance, and a 5% CapEx reserve — the same
+              starting assumptions the TrueCap analyzer uses. Zero them out if
+              you must, but know that&apos;s the underwrite you&apos;re
+              changing, not the formula.
             </p>
 
             <h3>Tab 2 — 10-Year Projection</h3>
             <p>
-              Year-by-year rent, operating expenses, NOI, debt service,
-              and cumulative cash flow, with rent and expenses each
-              compounding at an editable growth rate (2.5% per year by
-              default) against a fixed mortgage payment. It answers the
-              question a single-month snapshot can&apos;t: does this deal
-              get better or worse as it ages?
+              Year-by-year rent, operating expenses, NOI, debt service, and
+              cumulative cash flow, with rent and expenses each compounding at
+              an editable growth rate (2.5% per year by default) against a fixed
+              mortgage payment. It answers the question a single-month snapshot
+              can&apos;t: does this deal get better or worse as it ages?
             </p>
 
             <h3>Tab 3 — Quick Reference</h3>
             <p>
               Plain-English definitions and &ldquo;what&apos;s a good
-              number&rdquo; benchmarks for every metric in the workbook —
-              cap rate, cash-on-cash, DSCR, NOI, the 1% rule, and each
-              expense reserve — plus the exact bands TrueCap&apos;s
-              selected-rule classifier uses to group modeled results as Strong, Solid, Mixed,
-              Marginal, or Negative. It&apos;s the tab to hand someone
-              who asks &ldquo;wait, what&apos;s DSCR?&rdquo;
+              number&rdquo; benchmarks for every metric in the workbook — cap
+              rate, cash-on-cash, DSCR, NOI, the 1% rule, and each expense
+              reserve — plus the exact bands TrueCap&apos;s selected-rule
+              classifier uses to group modeled results as Strong, Solid, Mixed,
+              Marginal, or Negative. It&apos;s the tab to hand someone who asks
+              &ldquo;wait, what&apos;s DSCR?&rdquo;
             </p>
 
             <h2 className="text-2xl sm:text-3xl">A worked example</h2>
             <p>
-              The spreadsheet ships pre-filled with the same example deal
-              we underwrite in the{" "}
-              <Link href="/#main" className="text-primary font-semibold hover:underline">TrueCap analyzer</Link>
-              : a $250,000 single-family rental at $2,400/mo rent, bought
-              with 20% down at 6.75% on a 30-year loan. With honest
-              reserves, that deal produces roughly{" "}
-              <strong>$97/mo of cash flow</strong>{" "}— not the $770/mo
-              you&apos;d get by skipping vacancy, management, maintenance,
-              and CapEx the way many listings do. The same workbook shows
-              the split lenders care about: about $18,200 of NOI, a 7.3%
-              cap rate, and a DSCR of 1.17 — positive cash flow, but
-              below the ≥1.25 most lenders want. That&apos;s exactly the
-              kind of nuance a one-number napkin analysis hides, and
-              exactly what the spreadsheet surfaces by default.
+              The spreadsheet ships pre-filled with the same example deal we
+              underwrite in the{" "}
+              <Link
+                href="/#main"
+                className="text-primary font-semibold hover:underline"
+              >
+                TrueCap analyzer
+              </Link>
+              : a $250,000 single-family rental at $2,400/mo rent, bought with
+              20% down at 6.75% on a 30-year loan. With honest reserves, that
+              deal produces roughly <strong>$97/mo of cash flow</strong> — not
+              the $770/mo you&apos;d get by skipping vacancy, management,
+              maintenance, and CapEx the way many listings do. The same workbook
+              shows the split lenders care about: about $18,200 of NOI, a 7.3%
+              cap rate, and a DSCR of 1.17 — positive cash flow, but below the
+              ≥1.25 most lenders want. That&apos;s exactly the kind of nuance a
+              one-number napkin analysis hides, and exactly what the spreadsheet
+              surfaces by default.
             </p>
 
-            <h2 className="text-2xl sm:text-3xl">The conventions, stated plainly</h2>
+            <h2 className="text-2xl sm:text-3xl">
+              The conventions, stated plainly
+            </h2>
             <p>
-              Free templates disagree wildly on where the CapEx reserve
-              belongs, and the disagreement quietly changes your DSCR.
-              This workbook follows the lender-standard convention — the
-              same one used across TrueCap and documented in our{" "}
-              <Link href="/methodology" className="text-primary font-semibold hover:underline">methodology</Link>
+              Free templates disagree wildly on where the CapEx reserve belongs,
+              and the disagreement quietly changes your DSCR. This workbook
+              follows the lender-standard convention — the same one used across
+              TrueCap and documented in our{" "}
+              <Link
+                href="/methodology"
+                className="text-primary font-semibold hover:underline"
+              >
+                methodology
+              </Link>
               :
             </p>
             <ul>
               <li>
-                <Link href="/glossary/noi" className="text-primary font-semibold hover:underline">NOI</Link>{" "}
+                <Link
+                  href="/glossary/noi"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  NOI
+                </Link>{" "}
                 and{" "}
-                <Link href="/glossary/dscr" className="text-primary font-semibold hover:underline">DSCR</Link>{" "}
-                <strong>exclude</strong>{" "}
-                the CapEx reserve — it&apos;s a below-the-line
-                return-of-capital reserve, not an operating expense.
+                <Link
+                  href="/glossary/dscr"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  DSCR
+                </Link>{" "}
+                <strong>exclude</strong> the CapEx reserve — it&apos;s a
+                below-the-line return-of-capital reserve, not an operating
+                expense.
               </li>
               <li>
-                <Link href="/glossary/monthly-cash-flow" className="text-primary font-semibold hover:underline">Cash flow</Link>{" "}
-                <strong>includes</strong>{" "}
-                the CapEx reserve — the roof fund is real money leaving
-                your account every month.
+                <Link
+                  href="/glossary/monthly-cash-flow"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  Cash flow
+                </Link>{" "}
+                <strong>includes</strong> the CapEx reserve — the roof fund is
+                real money leaving your account every month.
               </li>
               <li>
-                PMI applies on financed deals under 20% down and reduces
-                cash flow, but it is not part of the debt service used
-                for DSCR.
+                PMI applies on financed deals under 20% down and reduces cash
+                flow, but it is not part of the debt service used for DSCR.
               </li>
             </ul>
             <p>
-              Every cell that embodies one of these choices says so in
-              its label, so you never have to reverse-engineer the
-              formula bar to know what you&apos;re looking at.
+              Every cell that embodies one of these choices says so in its
+              label, so you never have to reverse-engineer the formula bar to
+              know what you&apos;re looking at.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">
               Or skip the spreadsheet — type an address instead
             </h2>
             <p>
-              Here&apos;s the honest trade-off. A spreadsheet gives you
-              total control, works offline, and produces a file you can
-              email to a lender. What it can&apos;t do is fill itself in:
-              you still hunt down market rent, the county tax rate, and
-              current interest rates for every deal, and you maintain a
-              copy per property.
+              Here&apos;s the honest trade-off. A spreadsheet gives you total
+              control, works offline, and produces a file you can email to a
+              lender. What it can&apos;t do is fill itself in: you still hunt
+              down market rent, the county tax rate, and current interest rates
+              for every deal, and you maintain a copy per property.
             </p>
             <p>
               The{" "}
-              <Link href="/" className="text-primary font-semibold hover:underline">TrueCap analyzer</Link>{" "}
-              starts where the spreadsheet ends: type an address and it
-              pre-fills market rent and your state&apos;s property-tax
-              rate, runs the same math you see here, and adds the parts a
+              <Link
+                href="/"
+                className="text-primary font-semibold hover:underline"
+              >
+                TrueCap analyzer
+              </Link>{" "}
+              starts where the spreadsheet ends: type an address and it can
+              pre-fill editable HUD area rent and the FRED owner-occupied rate
+              benchmark. Enter a local property-tax bill or reviewed rate
+              manually; then it runs the same math and adds the parts a
               spreadsheet makes painful — PMI drop-off modeling, 10-year
               projections with principal paydown and appreciation, downside
               sensitivity, Offer Ceiling, side-by-side deal comparison, and
-              selected-rule fit and a secondary Screening Index. It&apos;s free to start, and
-              because the conventions match, your spreadsheet numbers
-              carry over exactly. For the longer version of this
+              selected-rule fit and a secondary Screening Index. It&apos;s free
+              to start, and because the conventions match, your spreadsheet
+              numbers carry over exactly. For the longer version of this
               comparison, see{" "}
-              <Link href="/vs/excel" className="text-primary font-semibold hover:underline">TrueCap vs. Excel</Link>.
+              <Link
+                href="/vs/excel"
+                className="text-primary font-semibold hover:underline"
+              >
+                TrueCap vs. Excel
+              </Link>
+              .
             </p>
 
             <h2 className="text-2xl sm:text-3xl">Frequently asked questions</h2>
@@ -381,8 +435,8 @@ export default function RentalPropertySpreadsheetPage() {
               Grab the spreadsheet
             </h2>
             <p className="text-sm sm:text-base text-muted-foreground mb-5">
-              Direct .xlsx download — no email, no signup. Yours to keep,
-              copy, and share.
+              Direct .xlsx download — no email, no signup. Yours to keep, copy,
+              and share.
             </p>
             <a
               href={DOWNLOAD_PATH}
@@ -400,15 +454,16 @@ export default function RentalPropertySpreadsheetPage() {
               Run the full analysis — free
             </h2>
             <p className="text-sm sm:text-base opacity-90 mb-4">
-              The spreadsheet is the manual version. TrueCap takes an
-              address, pre-fills market rent and property tax, runs the
-              same math, and adds PMI modeling, 10-year cash-flow and equity
-              projections, sensitivity, Offer Ceiling, and a secondary Screening Index.
+              The spreadsheet is the manual version. TrueCap takes an address,
+              can pre-fill editable rent and rate benchmarks, keeps property tax
+              as a manual local input, runs the same math, and adds PMI
+              modeling, 10-year cash-flow and equity projections, sensitivity,
+              Offer Ceiling, and a secondary Screening Index.
             </p>
             <ul className="text-sm space-y-1.5 mb-5 opacity-90">
               {[
                 "Cash flow, cap rate, CoC, DSCR — auto-calculated",
-                "State property tax + market rent auto-filled from the address",
+                "Editable HUD rent + FRED rate benchmarks; manual local property tax",
                 "10-year projection with rent + expense growth (Pro)",
                 "Downside sensitivity and Offer Ceiling (Pro)",
                 "Screening Index with a factor breakdown for triage",
@@ -434,11 +489,17 @@ export default function RentalPropertySpreadsheetPage() {
               tool has no embeddable widget. See the component header. */}
           <ToolEmbedInvite slug="rental-property-spreadsheet" />
 
-          <ToolsConversionCta calculatorName="Rental property spreadsheet" hook="TrueCap's full analyzer uses the same core buy-and-hold screening conventions from an address — labeled rent, rate, and property-tax starting points, plus PMI, 10-year cash-flow and equity projections, sensitivity, and Offer Ceiling. Save your work, compare deals, and share a link." />
+          <ToolsConversionCta
+            calculatorName="Rental property spreadsheet"
+            hook="TrueCap's full analyzer uses the same core buy-and-hold conventions from an address—labeled HUD rent and FRED rate benchmarks, manual local property tax, plus PMI, released projections, sensitivity, and Offer Ceiling. Save your work, compare deals, and share a link."
+          />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}
-            <Link href="/" className="font-bold text-foreground hover:underline">
+            <Link
+              href="/"
+              className="font-bold text-foreground hover:underline"
+            >
               TrueCap
             </Link>{" "}
             — transparent, editable rental analysis, free to start.

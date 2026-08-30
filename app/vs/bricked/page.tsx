@@ -26,7 +26,10 @@ import {
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
-import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-faq";
+import {
+  ComparisonFaq,
+  type FaqItem,
+} from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
@@ -49,30 +52,118 @@ export const metadata: Metadata = {
       "Bricked: AI comps, ARV, and repair costs. TrueCap: stabilized rental cash flow, cap rate, CoC, and DSCR.",
     url: "/vs/bricked",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs Bricked AI" }],
+    images: [
+      {
+        url: "/home.jpg",
+        width: 1200,
+        height: 630,
+        alt: "TrueCap vs Bricked AI",
+      },
+    ],
   },
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
 type Verdict = "truecap" | "bricked" | "tie";
-type Row = { feature: string; truecap: string; bricked: string; winner: Verdict };
+type Row = {
+  feature: string;
+  truecap: string;
+  bricked: string;
+  winner: Verdict;
+};
 
 const MATRIX: Row[] = [
-  { feature: "Primary purpose", truecap: "Rental returns calculator — is this a good investment?", bricked: "AI valuation — what's it worth, what do repairs cost?", winner: "tie" },
-  { feature: "Built for", truecap: "Buy-and-hold investors, house-hackers, agents", bricked: "Flippers, wholesalers, acquisition teams", winner: "tie" },
-  { feature: "Cash flow / cap rate / CoC / DSCR", truecap: "Yes — full engine, free tier", bricked: "Not modeled", winner: "truecap" },
-  { feature: "10-year cash-flow + equity projection", truecap: "Pro — editable rent, expense, value, and financing assumptions", bricked: "Not modeled", winner: "truecap" },
-  { feature: "Financing math (PITI, amortization, DSCR)", truecap: "Yes — full loan modeling", bricked: "Not included", winner: "truecap" },
-  { feature: "Comps + ARV / market value", truecap: "Purchase price is user input — no AVM", bricked: "Yes — AI-selected comps from MLS + county data, ARV + CMV", winner: "bricked" },
-  { feature: "Repair cost estimates", truecap: "Rehab estimator with sq-ft-based defaults", bricked: "Itemized, ZIP-localized material + labor costs", winner: "bricked" },
-  { feature: "Photo-based condition scoring", truecap: "No", bricked: "Yes — renovated vs as-is detection", winner: "bricked" },
-  { feature: "Rent data", truecap: "HUD ZIP-level Small Area FMR auto-fill", bricked: "Not the focus", winner: "truecap" },
-  { feature: "AI deal Q&A on your numbers", truecap: "Yes — grounded in the computed analysis", bricked: "AI picks comps; no investment Q&A", winner: "truecap" },
-  { feature: "Try without signup", truecap: "Yes — full analysis, no account", bricked: "No — account + 3-day trial", winner: "truecap" },
-  { feature: "Free tier", truecap: "Yes — unlimited core underwriting", bricked: "No — trial only", winner: "truecap" },
-  { feature: "Entry pricing", truecap: "Free core; paid Pro with published limits — see live pricing", bricked: "$49/mo for 100 comps, metered up to $199/mo (as of June 2026)", winner: "truecap" },
-  { feature: "PDF + share links", truecap: "Read-only share links free; PDFs included with Pro", bricked: "Not the focus", winner: "truecap" },
-  { feature: "API access", truecap: "No", bricked: "Yes — Growth tier and up", winner: "bricked" },
+  {
+    feature: "Primary purpose",
+    truecap: "Preliminary rental screen from editable assumptions",
+    bricked: "AI valuation — what's it worth, what do repairs cost?",
+    winner: "tie",
+  },
+  {
+    feature: "Built for",
+    truecap: "Buy-and-hold investors, house-hackers, agents",
+    bricked: "Flippers, wholesalers, acquisition teams",
+    winner: "tie",
+  },
+  {
+    feature: "Cash flow / cap rate / CoC / DSCR",
+    truecap: "Yes — full engine, free tier",
+    bricked: "Not modeled",
+    winner: "truecap",
+  },
+  {
+    feature: "10-year cash-flow + equity projection",
+    truecap: "Pro — editable rent, expense, value, and financing assumptions",
+    bricked: "Not modeled",
+    winner: "truecap",
+  },
+  {
+    feature: "Financing math (PITI, amortization, DSCR)",
+    truecap: "Yes — full loan modeling",
+    bricked: "Not included",
+    winner: "truecap",
+  },
+  {
+    feature: "Comps + ARV / market value",
+    truecap: "Purchase price is user input — no AVM",
+    bricked: "Yes — AI-selected comps from MLS + county data, ARV + CMV",
+    winner: "bricked",
+  },
+  {
+    feature: "Repair cost estimates",
+    truecap: "Rehab estimator with sq-ft-based defaults",
+    bricked: "Itemized, ZIP-localized material + labor costs",
+    winner: "bricked",
+  },
+  {
+    feature: "Photo-based condition scoring",
+    truecap: "No",
+    bricked: "Yes — renovated vs as-is detection",
+    winner: "bricked",
+  },
+  {
+    feature: "Rent data",
+    truecap:
+      "HUD area benchmark — ZIP-level when available, otherwise broader FMR area",
+    bricked: "Not the focus",
+    winner: "truecap",
+  },
+  {
+    feature: "AI deal Q&A on your numbers",
+    truecap: "Yes — grounded in the computed analysis",
+    bricked: "AI picks comps; no investment Q&A",
+    winner: "truecap",
+  },
+  {
+    feature: "Try without signup",
+    truecap: "Yes — full analysis, no account",
+    bricked: "No — account + 3-day trial",
+    winner: "truecap",
+  },
+  {
+    feature: "Free tier",
+    truecap: "Yes — unlimited core underwriting",
+    bricked: "No — trial only",
+    winner: "truecap",
+  },
+  {
+    feature: "Entry pricing",
+    truecap: "Free core; paid Pro with published limits — see live pricing",
+    bricked: "$49/mo for 100 comps, metered up to $199/mo (as of June 2026)",
+    winner: "truecap",
+  },
+  {
+    feature: "PDF + share links",
+    truecap: "Read-only share links free; PDFs included with Pro",
+    bricked: "Not the focus",
+    winner: "truecap",
+  },
+  {
+    feature: "API access",
+    truecap: "No",
+    bricked: "Yes — Growth tier and up",
+    winner: "bricked",
+  },
 ];
 
 export default function VsBrickedPage() {
@@ -94,7 +185,10 @@ export default function VsBrickedPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <VsBreadcrumbSchema vsPath="/vs/bricked" pageName="TrueCap vs Bricked AI" />
+      <VsBreadcrumbSchema
+        vsPath="/vs/bricked"
+        pageName="TrueCap vs Bricked AI"
+      />
       <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-2">
           <Link
@@ -113,19 +207,19 @@ export default function VsBrickedPage() {
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
             TrueCap vs Bricked:{" "}
-            <span className="text-primary">what it&apos;s worth vs what it earns</span>
+            <span className="text-primary">
+              what it&apos;s worth vs what it earns
+            </span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Bricked is an AI valuation tool — it finds comps, estimates repairs, and
-            prices cash offers for flippers and wholesalers working at volume. TrueCap
-            is a rental-screening calculator — it estimates cash flow, cap rate, CoC,
-            and DSCR from reviewed assumptions. Both say
+            Bricked is an AI valuation tool — it finds comps, estimates repairs,
+            and prices cash offers for flippers and wholesalers working at
+            volume. TrueCap is a rental-screening calculator — it estimates cash
+            flow, cap rate, CoC, and DSCR from reviewed assumptions. Both say
             &quot;underwrite in seconds.&quot; They mean different things by it.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <ScrollToFormButton
-              className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5"
-            >
+            <ScrollToFormButton className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">
               <Calculator className="size-4" />
               Run a deal — 60 seconds
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
@@ -153,10 +247,22 @@ export default function VsBrickedPage() {
                 Use TrueCap when
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
-                <li>You&apos;re deciding whether a rental deserves your down payment.</li>
-                <li>You want cash flow, DSCR, cap rate, and CoC — with financing math baked in.</li>
-                <li>You want sensitivity and a 10-year cash-flow and equity planning projection.</li>
-                <li>You analyze a few deals a month and don&apos;t want a $49+ metered plan.</li>
+                <li>
+                  You&apos;re deciding whether a rental deserves your down
+                  payment.
+                </li>
+                <li>
+                  You want cash flow, DSCR, cap rate, and CoC — with financing
+                  math baked in.
+                </li>
+                <li>
+                  You want sensitivity and a 10-year cash-flow and equity
+                  planning projection.
+                </li>
+                <li>
+                  You analyze a few deals a month and don&apos;t want a $49+
+                  metered plan.
+                </li>
               </ul>
             </div>
             <div>
@@ -164,10 +270,17 @@ export default function VsBrickedPage() {
                 Use Bricked when
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
-                <li>You make cash offers at volume and need ARV from comps, fast.</li>
-                <li>You want itemized repair estimates grounded in local costs.</li>
+                <li>
+                  You make cash offers at volume and need ARV from comps, fast.
+                </li>
+                <li>
+                  You want itemized repair estimates grounded in local costs.
+                </li>
                 <li>You need photo-based renovated-vs-as-is comp filtering.</li>
-                <li>You&apos;re a wholesaling / acquisitions team with comp budgets.</li>
+                <li>
+                  You&apos;re a wholesaling / acquisitions team with comp
+                  budgets.
+                </li>
               </ul>
             </div>
           </div>
@@ -179,8 +292,8 @@ export default function VsBrickedPage() {
             Feature-by-feature
           </h2>
           <p className="text-base text-muted-foreground mb-6 leading-relaxed">
-            Side-by-side on every dimension that matters — including the ones where
-            Bricked is genuinely ahead.
+            Side-by-side on every dimension that matters — including the ones
+            where Bricked is genuinely ahead.
           </p>
           <div className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
@@ -199,7 +312,10 @@ export default function VsBrickedPage() {
               </thead>
               <tbody>
                 {MATRIX.map((row) => (
-                  <tr key={row.feature} className="border-t border-border align-top">
+                  <tr
+                    key={row.feature}
+                    className="border-t border-border align-top"
+                  >
                     <td className="py-3 px-3 text-sm font-semibold text-foreground">
                       <div className="flex items-center gap-2">
                         <WinnerBadge winner={row.winner} side="row" />
@@ -224,9 +340,14 @@ export default function VsBrickedPage() {
             </table>
           </div>
           <p className="mt-3 text-[11px] text-muted-foreground">
-            Bricked details based on publicly available product info, verified June 2026.
-            See{" "}
-            <a href="https://bricked.ai" target="_blank" rel="noopener" className="underline">
+            Bricked details based on publicly available product info, verified
+            June 2026. See{" "}
+            <a
+              href="https://bricked.ai"
+              target="_blank"
+              rel="noopener"
+              className="underline"
+            >
               bricked.ai
             </a>{" "}
             for their current state.
@@ -240,31 +361,43 @@ export default function VsBrickedPage() {
           </h2>
           <ol className="space-y-2.5 text-sm sm:text-base leading-relaxed text-foreground list-decimal pl-5">
             <li>
-              <strong>Get ARV and repair costs from Bricked.</strong> Their comps and
-              localized repair estimates answer the valuation question.
+              <strong>Get ARV and repair costs from Bricked.</strong> Their
+              comps and localized repair estimates answer the valuation
+              question.
             </li>
             <li>
-              <strong>Keep ARV and repair costs in a complete project ledger.</strong>{" "}
-              TrueCap&apos;s integrated BRRRR and flip models are not currently released.
+              <strong>
+                Keep ARV and repair costs in a complete project ledger.
+              </strong>{" "}
+              TrueCap&apos;s integrated BRRRR and flip models are not currently
+              released.
             </li>
             <li>
-              <strong>Use TrueCap for the stabilized rental screen.</strong> Enter the
-              expected post-renovation rent, operating expenses, and permanent loan to
-              test cash flow and DSCR separately from the renovation ledger.
+              <strong>Use TrueCap for the stabilized rental screen.</strong>{" "}
+              Enter the expected post-renovation rent, operating expenses, and
+              permanent loan to test cash flow and DSCR separately from the
+              renovation ledger.
             </li>
             <li>
-              <strong>Stress-test each model.</strong> Vary ARV, rehab, timeline,
-              refinance terms, and later capital contributions in the project ledger;
-              use TrueCap&apos;s released grid for rent, vacancy, and rate sensitivity.
+              <strong>Stress-test each model.</strong> Vary ARV, rehab,
+              timeline, refinance terms, and later capital contributions in the
+              project ledger; use TrueCap&apos;s released grid for rent,
+              vacancy, and rate sensitivity.
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Holding instead of flipping? Start with the{" "}
-            <Link href="/" className="font-semibold text-primary hover:underline">
+            <Link
+              href="/"
+              className="font-semibold text-primary hover:underline"
+            >
               free TrueCap analyzer
             </Link>{" "}
             or the{" "}
-            <Link href="/blog/brrrr-method-explained" className="font-semibold text-primary hover:underline">
+            <Link
+              href="/blog/brrrr-method-explained"
+              className="font-semibold text-primary hover:underline"
+            >
               BRRRR workflow guide
             </Link>
             .
@@ -276,13 +409,15 @@ export default function VsBrickedPage() {
         {/* Pricing CTA */}
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">
-            Find out what the deal actually earns — free.
+            Review what the entered assumptions model — free.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            TrueCap&apos;s no-account preliminary screen covers cap rate, CoC, DSCR, and monthly cash flow.
-            The first complete decision and evaluation allowances are shown on the pricing page. Pro adds 10-year cash-flow and equity
-            projections, sensitivity, Offer Ceiling, saved-deal comparison, and PDF reports in
-            one paid plan. See live pricing for the current rate and limits.
+            TrueCap&apos;s no-account preliminary screen covers cap rate, CoC,
+            DSCR, and monthly cash flow. The first complete decision and
+            evaluation allowances are shown on the pricing page. Pro adds
+            10-year cash-flow and equity projections, sensitivity, Offer
+            Ceiling, saved-deal comparison, and PDF reports in one paid plan.
+            See live pricing for the current rate and limits.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -304,11 +439,26 @@ export default function VsBrickedPage() {
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}
-          <Link href="/vs/dealcheck" className="font-bold text-foreground hover:underline">TrueCap vs DealCheck</Link>
+          <Link
+            href="/vs/dealcheck"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs DealCheck
+          </Link>
           {" · "}
-          <Link href="/vs/propstream" className="font-bold text-foreground hover:underline">TrueCap vs PropStream</Link>
+          <Link
+            href="/vs/propstream"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs PropStream
+          </Link>
           {" · "}
-          <Link href="/vs/mashvisor" className="font-bold text-foreground hover:underline">TrueCap vs Mashvisor</Link>
+          <Link
+            href="/vs/mashvisor"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs Mashvisor
+          </Link>
         </footer>
       </main>
       <SiteFooter />
@@ -322,13 +472,13 @@ const BRICKED_FAQ: FaqItem[] = [
     question: "Is TrueCap a Bricked alternative?",
     answer: (
       <>
-        For rental investors, yes — for wholesalers, not really. Bricked is an AI
-        valuation tool: comps, ARV, and repair estimates for people making cash
-        offers at volume. TrueCap is a returns calculator: cash flow, DSCR, cap
-        rate, sensitivity, and 10-year cash-flow and equity projections for people underwriting
-        a rental. If you searched &quot;Bricked alternative&quot; because you
-        wanted to review a property&apos;s modeled returns, TrueCap supports that
-        workflow — and it&apos;s free to start.
+        For rental investors, yes — for wholesalers, not really. Bricked is an
+        AI valuation tool: comps, ARV, and repair estimates for people making
+        cash offers at volume. TrueCap is a returns calculator: cash flow, DSCR,
+        cap rate, sensitivity, and 10-year cash-flow and equity projections for
+        people underwriting a rental. If you searched &quot;Bricked
+        alternative&quot; because you wanted to review a property&apos;s modeled
+        returns, TrueCap supports that workflow — and it&apos;s free to start.
       </>
     ),
     plainTextAnswer:
@@ -340,9 +490,9 @@ const BRICKED_FAQ: FaqItem[] = [
       <>
         No. Bricked produces comps, ARV/market value, repair estimates, and an
         offer price. It does not model rental income, operating expenses,
-        financing, DSCR, cap rate, cash-on-cash, taxes, or long-term projections —
-        the entire question of what the property earns as a rental is out of its
-        scope. That&apos;s the half TrueCap covers.
+        financing, DSCR, cap rate, cash-on-cash, taxes, or long-term projections
+        — the entire question of what the property earns as a rental is out of
+        its scope. That&apos;s the half TrueCap covers.
       </>
     ),
     plainTextAnswer:
@@ -354,18 +504,19 @@ const BRICKED_FAQ: FaqItem[] = [
       <>
         Bricked starts at $49/month for 100 comps, rising to $199/month for 500
         (metered, with a 3-day trial and no free tier) — priced for acquisition
-        teams running volume. TrueCap&apos;s core analyzer is free with no analysis
-        cap and no account required. Pro adds advanced analysis and reporting
-        with published limits, including 50 comp lookups per month and comparison
-        of up to four saved deals. PDF reports are included with Pro. See
-        TrueCap&apos;s live pricing page for current rates and terms.
+        teams running volume. TrueCap&apos;s core analyzer is free with no
+        analysis cap and no account required. Pro adds advanced analysis and
+        reporting with published limits, including 50 comp lookups per month and
+        comparison of up to four saved deals. PDF reports are included with Pro.
+        See TrueCap&apos;s live pricing page for current rates and terms.
       </>
     ),
     plainTextAnswer:
       "Bricked publishes metered comp plans and a trial. TrueCap has unlimited free core analyses and paid Pro with published limits. Check both live pricing pages for current rates and terms.",
   },
   {
-    question: "Are Bricked's repair estimates better than TrueCap's rehab estimator?",
+    question:
+      "Are Bricked's repair estimates better than TrueCap's rehab estimator?",
     answer: (
       <>
         For precision, likely yes — Bricked aggregates local material and labor
@@ -373,8 +524,9 @@ const BRICKED_FAQ: FaqItem[] = [
         estimator uses square-footage-based defaults you adjust yourself.
         TrueCap&apos;s estimator is built for a quick budget inside a hold
         analysis, not contractor-grade scoping. If repair precision drives your
-        deals (heavy rehabs, flips at volume), Bricked&apos;s approach is stronger;
-        plug its number into TrueCap to see what the deal earns after the rehab.
+        deals (heavy rehabs, flips at volume), Bricked&apos;s approach is
+        stronger; plug its number into TrueCap to see what the deal earns after
+        the rehab.
       </>
     ),
     plainTextAnswer:
@@ -387,9 +539,10 @@ const BRICKED_FAQ: FaqItem[] = [
         If you flip at volume, Bricked&apos;s comps + repair engine fits your
         acquisition workflow. If you flip occasionally — or you&apos;re deciding
         between flipping and holding, use a complete project ledger for the flip
-        and TrueCap&apos;s released core analyzer for the stabilized rental fallback.
-        TrueCap&apos;s integrated fix-and-flip and BRRRR models are not currently
-        released. Choose a released workflow that matches the decision you need.
+        and TrueCap&apos;s released core analyzer for the stabilized rental
+        fallback. TrueCap&apos;s integrated fix-and-flip and BRRRR models are
+        not currently released. Choose a released workflow that matches the
+        decision you need.
       </>
     ),
     plainTextAnswer:
@@ -406,10 +559,14 @@ function WinnerBadge({
 }) {
   if (side === "row") return null;
   if (winner === "tie") {
-    return <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />;
+    return (
+      <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />
+    );
   }
   if (winner === side) {
-    return <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />;
+    return (
+      <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />
+    );
   }
   return <X className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/50" />;
 }

@@ -53,7 +53,7 @@
   "shipNote": {
     "title": "Keep property-tax assumptions editable",
     "items": [
-      "Free: paste an address and TrueCap pre-fills a property-tax estimate for the state — so a tax appeal win shows up in your numbers the moment you drop in the lower bill",
+      "Free: paste an address, then enter the current local property-tax bill or a reviewed rate. A successful appeal can be modeled only after you replace the tax input with the final local figure",
       "TrueCap does not currently release a taxpayer-specific depreciation or after-tax module",
       "Use adviser-reviewed tax scenarios outside the screening result →"
     ]

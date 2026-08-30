@@ -19,7 +19,10 @@ import {
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
-import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-faq";
+import {
+  ComparisonFaq,
+  type FaqItem,
+} from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
@@ -41,7 +44,9 @@ export const metadata: Metadata = {
       "Privy is investor MLS search. TrueCap underwrites the deals. Different jobs in the same workflow.",
     url: "/vs/privy",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs Privy" }],
+    images: [
+      { url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs Privy" },
+    ],
   },
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
@@ -50,17 +55,72 @@ type Verdict = "truecap" | "privy" | "tie";
 type Row = { feature: string; truecap: string; privy: string; winner: Verdict };
 
 const MATRIX: Row[] = [
-  { feature: "Primary purpose", truecap: "Per-deal underwriting calculator", privy: "Investor MLS search + filtering", winner: "tie" },
-  { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", privy: "Listing-level cap rate estimates", winner: "truecap" },
-  { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", privy: "Not modeled", winner: "truecap" },
-  { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", privy: "MLS-pulled property data", winner: "truecap" },
-  { feature: "Investor-filtered MLS search", truecap: "No", privy: "Yes — cash flow, rehab, motivated", winner: "privy" },
-  { feature: "Sale + rent comps", truecap: "One free lookup; Pro includes 50 per month; no AVM", privy: "Yes — MLS-derived comp set", winner: "privy" },
-  { feature: "Motivated-seller flagging on MLS", truecap: "No", privy: "Yes — DOM + price reduction signals", winner: "privy" },
-  { feature: "Off-market lead generation", truecap: "No", privy: "Limited (MLS-focused)", winner: "privy" },
-  { feature: "Mortgage + financing math", truecap: "Yes — PITI + DSCR + amortization", privy: "Not included", winner: "truecap" },
-  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", privy: "Trial only; paid from ~$99/mo (as of 2026)", winner: "truecap" },
-  { feature: "Pricing (entry tier)", truecap: "Free core; paid Pro — see live pricing", privy: "~$99/mo + setup fees", winner: "truecap" },
+  {
+    feature: "Primary purpose",
+    truecap: "Per-deal underwriting calculator",
+    privy: "Investor MLS search + filtering",
+    winner: "tie",
+  },
+  {
+    feature: "Cap rate / CoC / DSCR analysis",
+    truecap: "Yes — full engine, free tier",
+    privy: "Listing-level cap rate estimates",
+    winner: "truecap",
+  },
+  {
+    feature: "10-year projection",
+    truecap: "Pro — rent + expense + appreciation",
+    privy: "Not modeled",
+    winner: "truecap",
+  },
+  {
+    feature: "Starting values (rent/rate/tax)",
+    truecap: "HUD rent + FRED rate + manual local property tax",
+    privy: "MLS-pulled property data",
+    winner: "truecap",
+  },
+  {
+    feature: "Investor-filtered MLS search",
+    truecap: "No",
+    privy: "Yes — cash flow, rehab, motivated",
+    winner: "privy",
+  },
+  {
+    feature: "Sale + rent comps",
+    truecap: "One free lookup; Pro includes 50 per month; no AVM",
+    privy: "Yes — MLS-derived comp set",
+    winner: "privy",
+  },
+  {
+    feature: "Motivated-seller flagging on MLS",
+    truecap: "No",
+    privy: "Yes — DOM + price reduction signals",
+    winner: "privy",
+  },
+  {
+    feature: "Off-market lead generation",
+    truecap: "No",
+    privy: "Limited (MLS-focused)",
+    winner: "privy",
+  },
+  {
+    feature: "Mortgage + financing math",
+    truecap: "Yes — PITI + DSCR + amortization",
+    privy: "Not included",
+    winner: "truecap",
+  },
+  {
+    feature: "Free tier",
+    truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
+    privy: "Trial only; paid from ~$99/mo (as of 2026)",
+    winner: "truecap",
+  },
+  {
+    feature: "Pricing (entry tier)",
+    truecap: "Free core; paid Pro — see live pricing",
+    privy: "~$99/mo + setup fees",
+    winner: "truecap",
+  },
 ];
 
 export default function VsPrivyPage() {
@@ -101,15 +161,19 @@ export default function VsPrivyPage() {
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
             TrueCap vs Privy:{" "}
-            <span className="text-primary">filter the MLS vs underwrite the deals</span>
+            <span className="text-primary">
+              filter the MLS vs underwrite the deals
+            </span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Privy is an investor-focused MLS search tool — pull on-market listings filtered by investor criteria like cash flow potential, rehab condition, days on market, and motivated-seller signals. TrueCap is the underwriting calculator that runs the per-deal math on whatever Privy surfaces. Different jobs in the same workflow.
+            Privy is an investor-focused MLS search tool — pull on-market
+            listings filtered by investor criteria like cash flow potential,
+            rehab condition, days on market, and motivated-seller signals.
+            TrueCap is the underwriting calculator that runs the per-deal math
+            on whatever Privy surfaces. Different jobs in the same workflow.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <ScrollToFormButton
-              className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5"
-            >
+            <ScrollToFormButton className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">
               <Calculator className="size-4" />
               Run a deal — 60 seconds
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
@@ -139,7 +203,10 @@ export default function VsPrivyPage() {
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You have an address and want to underwrite it.</li>
                 <li>You want cap rate, DSCR, cash flow, projection.</li>
-                <li>You source deals through agents, MLS access, or referrals (not Privy).</li>
+                <li>
+                  You source deals through agents, MLS access, or referrals (not
+                  Privy).
+                </li>
                 <li>You want a free tier with no monthly cap.</li>
               </ul>
             </div>
@@ -149,9 +216,18 @@ export default function VsPrivyPage() {
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You actively search MLS for investor-friendly deals.</li>
-                <li>You want investor-specific filters (cash flow, rehab condition, motivated signals).</li>
-                <li>You don&apos;t have direct MLS access through an agent license.</li>
-                <li>You&apos;re doing fix-and-flip or BRRRR and need rehab-condition flagging.</li>
+                <li>
+                  You want investor-specific filters (cash flow, rehab
+                  condition, motivated signals).
+                </li>
+                <li>
+                  You don&apos;t have direct MLS access through an agent
+                  license.
+                </li>
+                <li>
+                  You&apos;re doing fix-and-flip or BRRRR and need
+                  rehab-condition flagging.
+                </li>
               </ul>
             </div>
           </div>
@@ -163,7 +239,8 @@ export default function VsPrivyPage() {
             Feature-by-feature
           </h2>
           <p className="text-base text-muted-foreground mb-6 leading-relaxed">
-            Side-by-side on every dimension that matters for a comparison-shopping investor.
+            Side-by-side on every dimension that matters for a
+            comparison-shopping investor.
           </p>
           <div className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
@@ -182,7 +259,10 @@ export default function VsPrivyPage() {
               </thead>
               <tbody>
                 {MATRIX.map((row) => (
-                  <tr key={row.feature} className="border-t border-border align-top">
+                  <tr
+                    key={row.feature}
+                    className="border-t border-border align-top"
+                  >
                     <td className="py-3 px-3 text-sm font-semibold text-foreground">
                       <div className="flex items-center gap-2">
                         <WinnerBadge winner={row.winner} side="row" />
@@ -209,7 +289,12 @@ export default function VsPrivyPage() {
           <p className="mt-3 text-[11px] text-muted-foreground">
             Privy details based on publicly available product info as of 2026.
             See{" "}
-            <a href="https://www.privy.pro/" target="_blank" rel="noopener" className="underline">
+            <a
+              href="https://www.privy.pro/"
+              target="_blank"
+              rel="noopener"
+              className="underline"
+            >
               privy.pro
             </a>{" "}
             for their current state.
@@ -223,29 +308,58 @@ export default function VsPrivyPage() {
           </h2>
           <ol className="space-y-2.5 text-sm sm:text-base leading-relaxed text-foreground list-decimal pl-5">
             <li>
-              <strong>Search MLS in Privy with investor filters.</strong> Filter by cap rate threshold, rehab condition, DOM, price reductions, etc.
+              <strong>Search MLS in Privy with investor filters.</strong> Filter
+              by cap rate threshold, rehab condition, DOM, price reductions,
+              etc.
             </li>
             <li>
-              <strong>Surface a property worth a closer look.</strong> Privy shows you a listing-level cap rate estimate based on its assumptions.
+              <strong>Surface a property worth a closer look.</strong> Privy
+              shows you a listing-level cap rate estimate based on its
+              assumptions.
             </li>
             <li>
-              <strong>Underwrite in TrueCap.</strong> Paste the address. HUD rent, FRED rate, state tax pre-fill. Override Privy&apos;s rent assumption with HUD&apos;s (more conservative) or your local comp.
+              <strong>Underwrite in TrueCap.</strong> Paste the address to start
+              from editable HUD rent and FRED rate benchmarks, then enter local
+              property tax manually. Replace the rent benchmark with your best
+              local comp.
             </li>
             <li>
-              <strong>Compare TrueCap&apos;s cap rate to Privy&apos;s estimate.</strong> If they diverge, dig into the assumptions — usually the difference is rent (Privy uses optimistic rent) or expense ratios.
+              <strong>
+                Compare TrueCap&apos;s cap rate to Privy&apos;s estimate.
+              </strong>{" "}
+              If they diverge, dig into the assumptions — usually the difference
+              is rent (Privy uses optimistic rent) or expense ratios.
             </li>
             <li>
-              <strong>Review the Offer Ceiling in TrueCap Pro.</strong> It works backward from your selected target return; verify the material assumptions before recording a decision.
+              <strong>Review the Offer Ceiling in TrueCap Pro.</strong> It works
+              backward from your selected target return; verify the material
+              assumptions before recording a decision.
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Curious how TrueCap lands on a different number than Privy?{" "}
-            <Link href="/blog/how-to-calculate-cap-rate" className="font-semibold text-primary hover:underline">How to calculate cap rate</Link> shows the
-            formula line by line, and{" "}
-            <Link href="/blog/what-is-a-good-cap-rate" className="font-semibold text-primary hover:underline">what counts as a good cap rate</Link> puts the
-            result in context for your market. Once you want that math run against HUD rent
-            and a live rate, paste the address into the{" "}
-            <Link href="/" className="font-semibold text-primary hover:underline">TrueCap analyzer</Link>.
+            <Link
+              href="/blog/how-to-calculate-cap-rate"
+              className="font-semibold text-primary hover:underline"
+            >
+              How to calculate cap rate
+            </Link>{" "}
+            shows the formula line by line, and{" "}
+            <Link
+              href="/blog/what-is-a-good-cap-rate"
+              className="font-semibold text-primary hover:underline"
+            >
+              what counts as a good cap rate
+            </Link>{" "}
+            puts the result in context for your market. Once you want that math
+            run against HUD rent and a live rate, paste the address into the{" "}
+            <Link
+              href="/"
+              className="font-semibold text-primary hover:underline"
+            >
+              TrueCap analyzer
+            </Link>
+            .
           </p>
         </section>
 
@@ -259,8 +373,8 @@ export default function VsPrivyPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro adds 10-year cash-flow and equity projections, sensitivity,
-            Offer Ceiling, co-branded share links, and PDF reports with Pro; see live pricing for current terms.
-            No card to start.
+            Offer Ceiling, co-branded share links, and PDF reports with Pro; see
+            live pricing for current terms. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -282,11 +396,26 @@ export default function VsPrivyPage() {
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}
-          <Link href="/vs/propstream" className="font-bold text-foreground hover:underline">TrueCap vs PropStream</Link>
+          <Link
+            href="/vs/propstream"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs PropStream
+          </Link>
           {" · "}
-          <Link href="/vs/dealmachine" className="font-bold text-foreground hover:underline">TrueCap vs DealMachine</Link>
+          <Link
+            href="/vs/dealmachine"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs DealMachine
+          </Link>
           {" · "}
-          <Link href="/vs/dealcheck" className="font-bold text-foreground hover:underline">TrueCap vs DealCheck</Link>
+          <Link
+            href="/vs/dealcheck"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs DealCheck
+          </Link>
         </footer>
       </main>
       <SiteFooter />
@@ -300,7 +429,9 @@ const PRIVY_FAQ: FaqItem[] = [
     question: "Is TrueCap a Privy alternative?",
     answer: (
       <>
-        No — they solve different problems. Privy is investor-focused MLS search and filtering. TrueCap is per-deal underwriting once you have an address. Many active MLS-sourcing investors use both.
+        No — they solve different problems. Privy is investor-focused MLS search
+        and filtering. TrueCap is per-deal underwriting once you have an
+        address. Many active MLS-sourcing investors use both.
       </>
     ),
     plainTextAnswer:
@@ -310,7 +441,10 @@ const PRIVY_FAQ: FaqItem[] = [
     question: "Privy vs PropStream — which one?",
     answer: (
       <>
-        Different focuses. Privy is on-market MLS data with investor filters. PropStream is off-market lead generation (skip-tracing, motivated-seller lists, direct mail). If you source through the MLS, Privy. If you source off-market via mail / cold call, PropStream. Some investors run both.
+        Different focuses. Privy is on-market MLS data with investor filters.
+        PropStream is off-market lead generation (skip-tracing, motivated-seller
+        lists, direct mail). If you source through the MLS, Privy. If you source
+        off-market via mail / cold call, PropStream. Some investors run both.
       </>
     ),
     plainTextAnswer:
@@ -320,7 +454,11 @@ const PRIVY_FAQ: FaqItem[] = [
     question: "Why use Privy if I already have MLS access through an agent?",
     answer: (
       <>
-        If you already have MLS access, Privy&apos;s value is more limited — its strength is the investor-specific filtering on top of MLS data, not the MLS data itself. If you&apos;re comfortable using Realtor.com / Zillow / your agent&apos;s MLS portal and applying investor logic mentally, Privy may not add enough.
+        If you already have MLS access, Privy&apos;s value is more limited — its
+        strength is the investor-specific filtering on top of MLS data, not the
+        MLS data itself. If you&apos;re comfortable using Realtor.com / Zillow /
+        your agent&apos;s MLS portal and applying investor logic mentally, Privy
+        may not add enough.
       </>
     ),
     plainTextAnswer:
@@ -330,7 +468,10 @@ const PRIVY_FAQ: FaqItem[] = [
     question: "Does Privy underwrite deals?",
     answer: (
       <>
-        Sort of — it shows listing-level cap rate estimates and rehab condition flags, while TrueCap adds editable financing, DSCR, sensitivity, and a cash-flow and equity projection for a shortlisted property. TrueCap does not currently expose a tax-specific module.
+        Sort of — it shows listing-level cap rate estimates and rehab condition
+        flags, while TrueCap adds editable financing, DSCR, sensitivity, and a
+        cash-flow and equity projection for a shortlisted property. TrueCap does
+        not currently expose a tax-specific module.
       </>
     ),
     plainTextAnswer:
@@ -340,7 +481,11 @@ const PRIVY_FAQ: FaqItem[] = [
     question: "Is Privy worth $99/month?",
     answer: (
       <>
-        Depends on volume. If you&apos;re actively sourcing MLS deals across multiple markets and don&apos;t have agent-grade MLS access, the investor filters pay off in time saved. If you have a great agent and look at 1-3 deals a month, Privy is overkill — TrueCap&apos;s free tier + your agent&apos;s MLS access cover the workflow.
+        Depends on volume. If you&apos;re actively sourcing MLS deals across
+        multiple markets and don&apos;t have agent-grade MLS access, the
+        investor filters pay off in time saved. If you have a great agent and
+        look at 1-3 deals a month, Privy is overkill — TrueCap&apos;s free tier
+        + your agent&apos;s MLS access cover the workflow.
       </>
     ),
     plainTextAnswer:
@@ -357,10 +502,14 @@ function WinnerBadge({
 }) {
   if (side === "row") return null;
   if (winner === "tie") {
-    return <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />;
+    return (
+      <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />
+    );
   }
   if (winner === side) {
-    return <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />;
+    return (
+      <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />
+    );
   }
   return <X className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/50" />;
 }

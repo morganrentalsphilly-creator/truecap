@@ -39,7 +39,12 @@ import {
  * month — at which point it protects nothing.
  */
 
-const BASELINE_PATH = path.join(REPO_ROOT, "docs", "seo", "guard-baseline.json");
+const BASELINE_PATH = path.join(
+  REPO_ROOT,
+  "docs",
+  "seo",
+  "guard-baseline.json",
+);
 
 type Baseline = {
   limits: {
@@ -56,6 +61,54 @@ type Baseline = {
 const baseline: Baseline = JSON.parse(readFileSync(BASELINE_PATH, "utf8"));
 
 const REGEN = "run `node scripts/seo/guard-baseline.mjs --write` to bank it";
+const SOURCE_FIRST_ARTICLE_SOURCE = readFileSync(
+  path.join(REPO_ROOT, "components", "marketing", "source-first-article.tsx"),
+  "utf8",
+);
+const SAFE_MARKET_PAGE_SOURCE = readFileSync(
+  path.join(REPO_ROOT, "components", "marketing", "safe-market-page.tsx"),
+  "utf8",
+);
+
+function objectStringField(
+  source: string,
+  objectName: string,
+  field: string,
+): string | null {
+  const body = source.match(
+    new RegExp(`const ${objectName}\\s*=\\s*\\{([\\s\\S]*?)\\}\\s*as const`),
+  )?.[1];
+  if (!body) return null;
+  return body.match(new RegExp(`${field}:\\s*"([^"]+)"`))?.[1] ?? null;
+}
+
+function declaresSelfCanonical(
+  page: ReturnType<typeof indexablePages>[number],
+) {
+  if (/alternates:\s*\{[^}]*canonical:/.test(page.source)) return true;
+
+  if (/buildSourceFirstArticleMetadata\(ARTICLE\)/.test(page.source)) {
+    const slug = objectStringField(page.source, "ARTICLE", "slug");
+    return (
+      page.route === `/blog/${slug}` &&
+      SOURCE_FIRST_ARTICLE_SOURCE.includes(
+        "alternates: { canonical: `/blog/${article.slug}` }",
+      )
+    );
+  }
+
+  if (/buildSafeMarketMetadata\(MARKET\)/.test(page.source)) {
+    const slug = objectStringField(page.source, "MARKET", "slug");
+    return (
+      page.route === `/markets/${slug}` &&
+      SAFE_MARKET_PAGE_SOURCE.includes(
+        "alternates: { canonical: `/markets/${slug}` }",
+      )
+    );
+  }
+
+  return false;
+}
 
 describe("SEO guards — corpus sanity", () => {
   /**
@@ -95,20 +148,23 @@ describe("HARD GATE: no HTML entities in metadata strings", () => {
    */
   const pages = allPages();
 
-  it.each(pages.map((p) => p.relFile))("%s: metadata is entity-free", (relFile) => {
-    const page = pages.find((p) => p.relFile === relFile)!;
-    for (const field of ["title", "description"] as const) {
-      const value = resolveMetadataString(page.source, field);
-      if (value === null) continue; // unresolvable — see scanner constraint 2
-      const match = value.match(HTML_ENTITY_RE);
-      expect(
-        match,
-        `${relFile}: metadata.${field} contains the literal HTML entity ` +
-          `"${match?.[0]}". Metadata is not JSX — write the real character ` +
-          `(' " & — “ ”) instead.`,
-      ).toBeNull();
-    }
-  });
+  it.each(pages.map((p) => p.relFile))(
+    "%s: metadata is entity-free",
+    (relFile) => {
+      const page = pages.find((p) => p.relFile === relFile)!;
+      for (const field of ["title", "description"] as const) {
+        const value = resolveMetadataString(page.source, field);
+        if (value === null) continue; // unresolvable — see scanner constraint 2
+        const match = value.match(HTML_ENTITY_RE);
+        expect(
+          match,
+          `${relFile}: metadata.${field} contains the literal HTML entity ` +
+            `"${match?.[0]}". Metadata is not JSX — write the real character ` +
+            `(' " & — “ ”) instead.`,
+        ).toBeNull();
+      }
+    },
+  );
 });
 
 describe("HARD GATE: llms-full.txt covers every calculator", () => {
@@ -121,11 +177,17 @@ describe("HARD GATE: llms-full.txt covers every calculator", () => {
     path.join(APP_DIR, "llms-full.txt", "route.ts"),
     "utf8",
   );
+  const formulaSource = routeSource.slice(
+    routeSource.indexOf("const TOOL_FORMULAS"),
+    routeSource.indexOf("const METHODOLOGY_SUMMARY"),
+  );
+  const declaredFormulaSlugs = () =>
+    [...formulaSource.matchAll(/^\s*"([a-z0-9-]+)"\s*:\s*\{/gm)].map(
+      (match) => match[1],
+    );
 
   it("declares a formula for every registry slug", () => {
-    const declared = new Set(
-      [...routeSource.matchAll(/^\s{2}"([a-z0-9-]+)":\s*\{$/gm)].map((m) => m[1]),
-    );
+    const declared = new Set(declaredFormulaSlugs());
     const missing = CALCULATOR_REGISTRY.map((c) => c.slug).filter(
       (slug) => !declared.has(slug),
     );
@@ -139,11 +201,12 @@ describe("HARD GATE: llms-full.txt covers every calculator", () => {
 
   it("declares no formula for a calculator that no longer exists", () => {
     const registrySlugs = new Set(CALCULATOR_REGISTRY.map((c) => c.slug));
-    const declared = [...routeSource.matchAll(/^\s{2}"([a-z0-9-]+)":\s*\{$/gm)].map(
-      (m) => m[1],
-    );
+    const declared = declaredFormulaSlugs();
     const orphaned = declared.filter((slug) => !registrySlugs.has(slug));
-    expect(orphaned, `stale TOOL_FORMULAS entries: ${orphaned.join(", ")}`).toEqual([]);
+    expect(
+      orphaned,
+      `stale TOOL_FORMULAS entries: ${orphaned.join(", ")}`,
+    ).toEqual([]);
   });
 });
 
@@ -154,20 +217,27 @@ describe("HARD GATE: every indexable page is reachable and self-canonical", () =
    */
   const pages = indexablePages();
 
-  it.each(pages.map((p) => p.relFile))("%s: declares a canonical", (relFile) => {
-    const page = pages.find((p) => p.relFile === relFile)!;
-    // Redirect stubs are the documented exception: their whole body is a
-    // redirect() call, so there is nothing to canonicalise.
-    if (/^\s*(?:export default )?(?:async )?function \w+\(\)\s*\{\s*(?:permanent)?[Rr]edirect\(/m.test(page.source)) {
-      return;
-    }
-    expect(
-      // No `s` flag — tsconfig targets ES6 and `[^}]` already spans newlines.
-      /alternates:\s*\{[^}]*canonical:/.test(page.source),
-      `${relFile}: indexable page has no alternates.canonical. Either add one ` +
-        `or mark the page robots:{index:false}.`,
-    ).toBe(true);
-  });
+  it.each(pages.map((p) => p.relFile))(
+    "%s: declares a canonical",
+    (relFile) => {
+      const page = pages.find((p) => p.relFile === relFile)!;
+      // Redirect stubs are the documented exception: their whole body is a
+      // redirect() call, so there is nothing to canonicalise.
+      if (
+        /^\s*(?:export default )?(?:async )?function \w+\(\)\s*\{\s*(?:permanent)?[Rr]edirect\(/m.test(
+          page.source,
+        )
+      ) {
+        return;
+      }
+      expect(
+        // No `s` flag — tsconfig targets ES6 and `[^}]` already spans newlines.
+        declaresSelfCanonical(page),
+        `${relFile}: indexable page has no alternates.canonical. Either add one ` +
+          `or mark the page robots:{index:false}.`,
+      ).toBe(true);
+    },
+  );
 });
 
 describe("HARD GATE: legacy route stubs redirect permanently", () => {
@@ -203,7 +273,10 @@ describe("HARD GATE: every blog post is registered in BLOG_POSTS", () => {
    * automated content workflow, where "add it to BLOG_POSTS" is an
    * instruction to a model rather than something the compiler enforces.
    */
-  const blogIndex = readFileSync(path.join(APP_DIR, "blog", "page.tsx"), "utf8");
+  const blogIndex = readFileSync(
+    path.join(APP_DIR, "blog", "page.tsx"),
+    "utf8",
+  );
   const registered = new Set(
     [...blogIndex.matchAll(/slug:\s*"([a-z0-9-]+)"/g)].map((m) => m[1]),
   );
@@ -237,48 +310,54 @@ describe("HARD GATE: every blog post is registered in BLOG_POSTS", () => {
 describe("RATCHET: SERP title length", () => {
   const pages = indexablePages();
 
-  it.each(pages.map((p) => p.relFile))("%s: title fits the SERP window", (relFile) => {
-    const page = pages.find((p) => p.relFile === relFile)!;
-    const title = resolveMetadataString(page.source, "title");
-    if (title === null) return;
-    if (title.length <= MAX_TITLE_CONST_CHARS) return;
+  it.each(pages.map((p) => p.relFile))(
+    "%s: title fits the SERP window",
+    (relFile) => {
+      const page = pages.find((p) => p.relFile === relFile)!;
+      const title = resolveMetadataString(page.source, "title");
+      if (title === null) return;
+      if (title.length <= MAX_TITLE_CONST_CHARS) return;
 
-    const known = baseline.longTitles[page.route];
-    expect(
-      known,
-      `${relFile}: title is ${title.length} chars (max ${MAX_TITLE_CONST_CHARS} ` +
-        `before the " | TrueCap" template). New pages must fit. Shorten it, or ` +
-        `if this is deliberate, ${REGEN}.`,
-    ).toBeDefined();
-    expect(
-      title.length,
-      `${relFile}: title grew from ${known} to ${title.length} chars — the ` +
-        `ratchet only turns one way.`,
-    ).toBeLessThanOrEqual(known);
-  });
+      const known = baseline.longTitles[page.route];
+      expect(
+        known,
+        `${relFile}: title is ${title.length} chars (max ${MAX_TITLE_CONST_CHARS} ` +
+          `before the " | TrueCap" template). New pages must fit. Shorten it, or ` +
+          `if this is deliberate, ${REGEN}.`,
+      ).toBeDefined();
+      expect(
+        title.length,
+        `${relFile}: title grew from ${known} to ${title.length} chars — the ` +
+          `ratchet only turns one way.`,
+      ).toBeLessThanOrEqual(known);
+    },
+  );
 });
 
 describe("RATCHET: meta description length", () => {
   const pages = indexablePages();
 
-  it.each(pages.map((p) => p.relFile))("%s: description fits the snippet", (relFile) => {
-    const page = pages.find((p) => p.relFile === relFile)!;
-    const description = resolveMetadataString(page.source, "description");
-    if (description === null) return;
-    if (description.length <= MAX_META_DESCRIPTION_CHARS) return;
+  it.each(pages.map((p) => p.relFile))(
+    "%s: description fits the snippet",
+    (relFile) => {
+      const page = pages.find((p) => p.relFile === relFile)!;
+      const description = resolveMetadataString(page.source, "description");
+      if (description === null) return;
+      if (description.length <= MAX_META_DESCRIPTION_CHARS) return;
 
-    const known = baseline.longDescriptions[page.route];
-    expect(
-      known,
-      `${relFile}: description is ${description.length} chars (max ` +
-        `${MAX_META_DESCRIPTION_CHARS}); Google truncates the rest. ` +
-        `lib/utils.ts exports truncateMetaDescription() — or ${REGEN}.`,
-    ).toBeDefined();
-    expect(
-      description.length,
-      `${relFile}: description grew from ${known} to ${description.length} chars.`,
-    ).toBeLessThanOrEqual(known);
-  });
+      const known = baseline.longDescriptions[page.route];
+      expect(
+        known,
+        `${relFile}: description is ${description.length} chars (max ` +
+          `${MAX_META_DESCRIPTION_CHARS}); Google truncates the rest. ` +
+          `lib/utils.ts exports truncateMetaDescription() — or ${REGEN}.`,
+      ).toBeDefined();
+      expect(
+        description.length,
+        `${relFile}: description grew from ${known} to ${description.length} chars.`,
+      ).toBeLessThanOrEqual(known);
+    },
+  );
 });
 
 describe("RATCHET: blog internal linking (docs/SEO-ROADMAP.md §8)", () => {
@@ -331,7 +410,13 @@ describe("RATCHET: FAQPage coverage on blog posts", () => {
 
   it.each(blogSlugs())("%s: has FAQPage JSON-LD", (slug) => {
     const page = blogPage(slug);
-    const hasFaq = page.source.includes('"FAQPage"');
+    const usesSourceFirstArticle = /<SourceFirstArticle\b/.test(page.source);
+    const hasFaq =
+      page.source.includes('"FAQPage"') ||
+      (usesSourceFirstArticle &&
+        /faqs:\s*\[/.test(page.source) &&
+        SOURCE_FIRST_ARTICLE_SOURCE.includes('"@type": "FAQPage"') &&
+        SOURCE_FIRST_ARTICLE_SOURCE.includes("article.faqs.map"));
     if (hasFaq) return;
     expect(
       known.has(slug),
@@ -357,20 +442,26 @@ describe("HARD GATE: sitemap covers every indexable route", () => {
    */
   const sitemapSource = readFileSync(path.join(APP_DIR, "sitemap.ts"), "utf8");
 
-  it.each(indexablePages().map((p) => p.route))("%s appears in sitemap.ts", (route) => {
-    if (route === "/") return; // emitted as the bare base URL
-    const segment = route.replace(/^\//, "");
-    // Match either a literal path string or a derived template that ends in
-    // the route's own folder name (e.g. `${base}/vs/${slug}`).
-    const literal = sitemapSource.includes(`"${route}"`) ||
-      sitemapSource.includes(`\`\${baseUrl}${route}\``) ||
-      sitemapSource.includes(`${route}\``) ||
-      sitemapSource.includes(`"${segment}"`);
-    const derived = new RegExp(`/${segment.split("/")[0]}/`).test(sitemapSource);
-    expect(
-      literal || derived,
-      `${route} exists as an indexable page but nothing in app/sitemap.ts ` +
-        `references it. Add it, or mark the page robots:{index:false}.`,
-    ).toBe(true);
-  });
+  it.each(indexablePages().map((p) => p.route))(
+    "%s appears in sitemap.ts",
+    (route) => {
+      if (route === "/") return; // emitted as the bare base URL
+      const segment = route.replace(/^\//, "");
+      // Match either a literal path string or a derived template that ends in
+      // the route's own folder name (e.g. `${base}/vs/${slug}`).
+      const literal =
+        sitemapSource.includes(`"${route}"`) ||
+        sitemapSource.includes(`\`\${baseUrl}${route}\``) ||
+        sitemapSource.includes(`${route}\``) ||
+        sitemapSource.includes(`"${segment}"`);
+      const derived = new RegExp(`/${segment.split("/")[0]}/`).test(
+        sitemapSource,
+      );
+      expect(
+        literal || derived,
+        `${route} exists as an indexable page but nothing in app/sitemap.ts ` +
+          `references it. Add it, or mark the page robots:{index:false}.`,
+      ).toBe(true);
+    },
+  );
 });

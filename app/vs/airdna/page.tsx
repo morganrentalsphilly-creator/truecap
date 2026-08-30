@@ -19,7 +19,10 @@ import {
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
-import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-faq";
+import {
+  ComparisonFaq,
+  type FaqItem,
+} from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
@@ -41,27 +44,95 @@ export const metadata: Metadata = {
       "AirDNA estimates STR revenue. TrueCap underwrites the full deal. Often used together by STR investors.",
     url: "/vs/airdna",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs AirDNA" }],
+    images: [
+      { url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs AirDNA" },
+    ],
   },
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
 type Verdict = "truecap" | "airdna" | "tie";
-type Row = { feature: string; truecap: string; airdna: string; winner: Verdict };
+type Row = {
+  feature: string;
+  truecap: string;
+  airdna: string;
+  winner: Verdict;
+};
 
 const MATRIX: Row[] = [
-  { feature: "Primary purpose", truecap: "Per-deal underwriting calculator", airdna: "STR market + property revenue data", winner: "tie" },
-  { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", airdna: "Not modeled", winner: "truecap" },
-  { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", airdna: "Forward STR revenue forecast", winner: "tie" },
-  { feature: "Secondary Screening Index", truecap: "Free — 0-100 triage score + factor breakdown", airdna: "Property-level investibility score", winner: "tie" },
-  { feature: "STR revenue projection (ADR + occupancy)", truecap: "Editable input only", airdna: "Yes — best-in-class market data", winner: "airdna" },
-  { feature: "Comparable STR listings nearby", truecap: "No", airdna: "Yes — Airbnb + Vrbo comp set", winner: "airdna" },
-  { feature: "Long-term rent baseline", truecap: "HUD Fair Market Rent", airdna: "Not the focus", winner: "truecap" },
-  { feature: "Mortgage + financing math", truecap: "Yes — PITI + DSCR + amortization", airdna: "Not included", winner: "truecap" },
-  { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", airdna: "STR-specific data only", winner: "truecap" },
-  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", airdna: "Free MarketMinder dashboard with limited data", winner: "tie" },
-  { feature: "Pricing (paid tier)", truecap: "Paid Pro; see live pricing for current rates", airdna: "Rentalizer ~$20-40 per property; Markets subscription $50-200+/mo (as of 2026)", winner: "truecap" },
-  { feature: "Shareable read-only analysis", truecap: "Free — read-only public link; Pro adds co-branding", airdna: "PDF reports on paid tier", winner: "tie" },
+  {
+    feature: "Primary purpose",
+    truecap: "Per-deal underwriting calculator",
+    airdna: "STR market + property revenue data",
+    winner: "tie",
+  },
+  {
+    feature: "Cap rate / CoC / DSCR analysis",
+    truecap: "Yes — full engine, free tier",
+    airdna: "Not modeled",
+    winner: "truecap",
+  },
+  {
+    feature: "10-year projection",
+    truecap: "Pro — rent + expense + appreciation",
+    airdna: "Forward STR revenue forecast",
+    winner: "tie",
+  },
+  {
+    feature: "Secondary Screening Index",
+    truecap: "Free — 0-100 triage score + factor breakdown",
+    airdna: "Property-level investibility score",
+    winner: "tie",
+  },
+  {
+    feature: "STR revenue projection (ADR + occupancy)",
+    truecap: "Editable input only",
+    airdna: "Yes — best-in-class market data",
+    winner: "airdna",
+  },
+  {
+    feature: "Comparable STR listings nearby",
+    truecap: "No",
+    airdna: "Yes — Airbnb + Vrbo comp set",
+    winner: "airdna",
+  },
+  {
+    feature: "Long-term rent baseline",
+    truecap: "HUD Fair Market Rent",
+    airdna: "Not the focus",
+    winner: "truecap",
+  },
+  {
+    feature: "Mortgage + financing math",
+    truecap: "Yes — PITI + DSCR + amortization",
+    airdna: "Not included",
+    winner: "truecap",
+  },
+  {
+    feature: "Starting values (rent/rate/tax)",
+    truecap: "HUD rent + FRED rate + manual local property tax",
+    airdna: "STR-specific data only",
+    winner: "truecap",
+  },
+  {
+    feature: "Free tier",
+    truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
+    airdna: "Free MarketMinder dashboard with limited data",
+    winner: "tie",
+  },
+  {
+    feature: "Pricing (paid tier)",
+    truecap: "Paid Pro; see live pricing for current rates",
+    airdna:
+      "Rentalizer ~$20-40 per property; Markets subscription $50-200+/mo (as of 2026)",
+    winner: "truecap",
+  },
+  {
+    feature: "Shareable read-only analysis",
+    truecap: "Free — read-only public link; Pro adds co-branding",
+    airdna: "PDF reports on paid tier",
+    winner: "tie",
+  },
 ];
 
 export default function VsAirdnaPage() {
@@ -102,15 +173,20 @@ export default function VsAirdnaPage() {
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
             TrueCap vs AirDNA:{" "}
-            <span className="text-primary">STR revenue data vs full underwriting</span>
+            <span className="text-primary">
+              STR revenue data vs full underwriting
+            </span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            AirDNA is the gold standard for short-term rental market data — Airbnb / Vrbo occupancy rates, ADR, RevPAR by market and individual property. TrueCap is the underwriting calculator that turns AirDNA&apos;s revenue projections into a full deal analysis (cap rate, DSCR, cash flow, projection). AirDNA feeds the inputs; TrueCap runs the math.
+            AirDNA is the gold standard for short-term rental market data —
+            Airbnb / Vrbo occupancy rates, ADR, RevPAR by market and individual
+            property. TrueCap is the underwriting calculator that turns
+            AirDNA&apos;s revenue projections into a full deal analysis (cap
+            rate, DSCR, cash flow, projection). AirDNA feeds the inputs; TrueCap
+            runs the math.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <ScrollToFormButton
-              className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5"
-            >
+            <ScrollToFormButton className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">
               <Calculator className="size-4" />
               Run a deal — 60 seconds
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
@@ -138,9 +214,15 @@ export default function VsAirdnaPage() {
                 Use TrueCap when
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
-                <li>You want a full underwriting analysis with cap rate, DSCR, cash flow.</li>
+                <li>
+                  You want a full underwriting analysis with cap rate, DSCR,
+                  cash flow.
+                </li>
                 <li>You want financing math (PITI, amortization).</li>
-                <li>You want to compare LTR and STR scenarios on the same property.</li>
+                <li>
+                  You want to compare LTR and STR scenarios on the same
+                  property.
+                </li>
                 <li>You want a free tier that doesn&apos;t cap analyses.</li>
               </ul>
             </div>
@@ -149,10 +231,22 @@ export default function VsAirdnaPage() {
                 Use AirDNA when
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
-                <li>You want best-in-class STR revenue projections (ADR, occupancy, RevPAR).</li>
-                <li>You&apos;re evaluating multiple STR markets and need comparable data.</li>
-                <li>You want a property-level Rentalizer report from real Airbnb data.</li>
-                <li>You&apos;re scaling STR investments and need market intelligence.</li>
+                <li>
+                  You want best-in-class STR revenue projections (ADR,
+                  occupancy, RevPAR).
+                </li>
+                <li>
+                  You&apos;re evaluating multiple STR markets and need
+                  comparable data.
+                </li>
+                <li>
+                  You want a property-level Rentalizer report from real Airbnb
+                  data.
+                </li>
+                <li>
+                  You&apos;re scaling STR investments and need market
+                  intelligence.
+                </li>
               </ul>
             </div>
           </div>
@@ -164,7 +258,8 @@ export default function VsAirdnaPage() {
             Feature-by-feature
           </h2>
           <p className="text-base text-muted-foreground mb-6 leading-relaxed">
-            Side-by-side on every dimension that matters for a comparison-shopping investor.
+            Side-by-side on every dimension that matters for a
+            comparison-shopping investor.
           </p>
           <div className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
@@ -183,7 +278,10 @@ export default function VsAirdnaPage() {
               </thead>
               <tbody>
                 {MATRIX.map((row) => (
-                  <tr key={row.feature} className="border-t border-border align-top">
+                  <tr
+                    key={row.feature}
+                    className="border-t border-border align-top"
+                  >
                     <td className="py-3 px-3 text-sm font-semibold text-foreground">
                       <div className="flex items-center gap-2">
                         <WinnerBadge winner={row.winner} side="row" />
@@ -210,7 +308,12 @@ export default function VsAirdnaPage() {
           <p className="mt-3 text-[11px] text-muted-foreground">
             AirDNA details based on publicly available product info as of 2026.
             See{" "}
-            <a href="https://airdna.co" target="_blank" rel="noopener" className="underline">
+            <a
+              href="https://airdna.co"
+              target="_blank"
+              rel="noopener"
+              className="underline"
+            >
               airdna.co
             </a>{" "}
             for their current state.
@@ -224,33 +327,53 @@ export default function VsAirdnaPage() {
           </h2>
           <ol className="space-y-2.5 text-sm sm:text-base leading-relaxed text-foreground list-decimal pl-5">
             <li>
-              <strong>Pick a target STR market in AirDNA.</strong> MarketMinder — occupancy rates, ADR, seasonality, regulations.
+              <strong>Pick a target STR market in AirDNA.</strong> MarketMinder
+              — occupancy rates, ADR, seasonality, regulations.
             </li>
             <li>
-              <strong>Run a Rentalizer report on the specific property.</strong> AirDNA&apos;s address-level revenue projection ($20-40 per report).
+              <strong>Run a Rentalizer report on the specific property.</strong>{" "}
+              AirDNA&apos;s address-level revenue projection ($20-40 per
+              report).
             </li>
             <li>
-              <strong>Plug AirDNA&apos;s projected monthly revenue into TrueCap.</strong> Override the HUD long-term rent field with AirDNA&apos;s STR estimate (e.g. annual revenue ÷ 12, discounted for vacancy + cleaning).
+              <strong>
+                Plug AirDNA&apos;s projected monthly revenue into TrueCap.
+              </strong>{" "}
+              Override the HUD long-term rent field with AirDNA&apos;s STR
+              estimate (e.g. annual revenue ÷ 12, discounted for vacancy +
+              cleaning).
             </li>
             <li>
-              <strong>Run the stabilized-rental underwrite in TrueCap.</strong> Cap rate, DSCR, cash flow, sensitivity, and a 10-year cash-flow and equity projection.
+              <strong>Run the stabilized-rental underwrite in TrueCap.</strong>{" "}
+              Cap rate, DSCR, cash flow, sensitivity, and a 10-year cash-flow
+              and equity projection.
             </li>
             <li>
-              <strong>Save the deal + revisit later.</strong> Re-run with updated AirDNA data when market conditions shift.
+              <strong>Save the deal + revisit later.</strong> Re-run with
+              updated AirDNA data when market conditions shift.
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Set the revenue forecast aside for a moment. Check whether projected
             STR income even covers the note with the free{" "}
-            <Link href="/tools/mortgage-payment-calculator" className="font-semibold text-primary hover:underline">
+            <Link
+              href="/tools/mortgage-payment-calculator"
+              className="font-semibold text-primary hover:underline"
+            >
               mortgage payment calculator
             </Link>
             , then run the full{" "}
-            <Link href="/" className="font-semibold text-primary hover:underline">
+            <Link
+              href="/"
+              className="font-semibold text-primary hover:underline"
+            >
               TrueCap analyzer
             </Link>{" "}
             for cap rate, DSCR, and cash flow. Our guide on{" "}
-            <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">
+            <Link
+              href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
+              className="font-semibold text-primary hover:underline"
+            >
               60-second underwriting
             </Link>{" "}
             walks through the workflow end-to-end.
@@ -267,8 +390,8 @@ export default function VsAirdnaPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro adds 10-year cash-flow and equity projections, sensitivity,
-            Offer Ceiling, co-branded share links, and PDF reports with Pro; see live pricing for current terms.
-            No card to start.
+            Offer Ceiling, co-branded share links, and PDF reports with Pro; see
+            live pricing for current terms. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -290,11 +413,26 @@ export default function VsAirdnaPage() {
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}
-          <Link href="/vs/mashvisor" className="font-bold text-foreground hover:underline">TrueCap vs Mashvisor</Link>
+          <Link
+            href="/vs/mashvisor"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs Mashvisor
+          </Link>
           {" · "}
-          <Link href="/vs/hostfully" className="font-bold text-foreground hover:underline">TrueCap vs Hostfully</Link>
+          <Link
+            href="/vs/hostfully"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs Hostfully
+          </Link>
           {" · "}
-          <Link href="/vs/hostaway" className="font-bold text-foreground hover:underline">TrueCap vs Hostaway</Link>
+          <Link
+            href="/vs/hostaway"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs Hostaway
+          </Link>
         </footer>
       </main>
       <SiteFooter />
@@ -308,7 +446,10 @@ const AIRDNA_FAQ: FaqItem[] = [
     question: "Is TrueCap an AirDNA alternative?",
     answer: (
       <>
-        No — they solve different problems. AirDNA is STR market + revenue data; TrueCap is the underwriting calculator. AirDNA feeds revenue inputs; TrueCap runs the cap rate / DSCR / cash flow math on top. STR investors typically use both.
+        No — they solve different problems. AirDNA is STR market + revenue data;
+        TrueCap is the underwriting calculator. AirDNA feeds revenue inputs;
+        TrueCap runs the cap rate / DSCR / cash flow math on top. STR investors
+        typically use both.
       </>
     ),
     plainTextAnswer:
@@ -318,7 +459,11 @@ const AIRDNA_FAQ: FaqItem[] = [
     question: "AirDNA vs Mashvisor — which one for STR data?",
     answer: (
       <>
-        AirDNA is more focused and considered the gold standard for STR-specific data (ADR, occupancy, RevPAR). Mashvisor covers STR too but also includes LTR data and broader market analysis. If STR is your primary strategy, AirDNA wins. If you toggle between LTR and STR, Mashvisor&apos;s broader scope wins.
+        AirDNA is more focused and considered the gold standard for STR-specific
+        data (ADR, occupancy, RevPAR). Mashvisor covers STR too but also
+        includes LTR data and broader market analysis. If STR is your primary
+        strategy, AirDNA wins. If you toggle between LTR and STR,
+        Mashvisor&apos;s broader scope wins.
       </>
     ),
     plainTextAnswer:
@@ -328,7 +473,9 @@ const AIRDNA_FAQ: FaqItem[] = [
     question: "Does AirDNA do cap rate or DSCR calculations?",
     answer: (
       <>
-        No — AirDNA gives you projected STR revenue. You&apos;d plug that revenue into a separate calculator (TrueCap, DealCheck, or your spreadsheet) to compute cap rate, DSCR, and cash flow.
+        No — AirDNA gives you projected STR revenue. You&apos;d plug that
+        revenue into a separate calculator (TrueCap, DealCheck, or your
+        spreadsheet) to compute cap rate, DSCR, and cash flow.
       </>
     ),
     plainTextAnswer:
@@ -338,7 +485,12 @@ const AIRDNA_FAQ: FaqItem[] = [
     question: "How accurate are AirDNA&apos;s revenue projections?",
     answer: (
       <>
-        They&apos;re the industry standard but not perfect. AirDNA&apos;s Rentalizer reports are derived from actual Airbnb + Vrbo data, so they&apos;re tighter than guesses but still depend on the property being a good comp match in the local market. Always run sensitivity (TrueCap Pro&apos;s sensitivity grid lets you stress-test) — what happens if AirDNA&apos;s projection is 20% high?
+        They&apos;re the industry standard but not perfect. AirDNA&apos;s
+        Rentalizer reports are derived from actual Airbnb + Vrbo data, so
+        they&apos;re tighter than guesses but still depend on the property being
+        a good comp match in the local market. Always run sensitivity (TrueCap
+        Pro&apos;s sensitivity grid lets you stress-test) — what happens if
+        AirDNA&apos;s projection is 20% high?
       </>
     ),
     plainTextAnswer:
@@ -348,7 +500,10 @@ const AIRDNA_FAQ: FaqItem[] = [
     question: "Can I use TrueCap free with AirDNA?",
     answer: (
       <>
-        Yes — TrueCap&apos;s free tier covers core cap rate, CoC, DSCR, and cash-flow math. Pull AirDNA&apos;s monthly revenue projection, override TrueCap&apos;s HUD rent field with it, and run the analysis. You don&apos;t need TrueCap Pro for that basic combined workflow.
+        Yes — TrueCap&apos;s free tier covers core cap rate, CoC, DSCR, and
+        cash-flow math. Pull AirDNA&apos;s monthly revenue projection, override
+        TrueCap&apos;s HUD rent field with it, and run the analysis. You
+        don&apos;t need TrueCap Pro for that basic combined workflow.
       </>
     ),
     plainTextAnswer:
@@ -365,10 +520,14 @@ function WinnerBadge({
 }) {
   if (side === "row") return null;
   if (winner === "tie") {
-    return <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />;
+    return (
+      <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />
+    );
   }
   if (winner === side) {
-    return <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />;
+    return (
+      <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />
+    );
   }
   return <X className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/50" />;
 }

@@ -15,7 +15,6 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Calculator } from "lucide-react";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
@@ -120,8 +119,18 @@ export default function BlogPost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "TrueCap", item: `${siteUrl}/` },
-      { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "TrueCap",
+        item: `${siteUrl}/`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: `${siteUrl}/blog`,
+      },
       { "@type": "ListItem", position: 3, name: TITLE, item: canonicalUrl },
     ],
   };
@@ -189,10 +198,22 @@ export default function BlogPost() {
 
   return (
     <div className="min-h-screen bg-background">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToLd) }}
+      />
 
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <header className="mb-8 sm:mb-10">
@@ -224,14 +245,15 @@ export default function BlogPost() {
             A fast first pass can organize a handful of inputs, compute standard
             ratios, and expose the assumptions most likely to change the result.
             It cannot complete the property-specific diligence or choose the
-            investment. This post separates the quick screen from that deeper work.
+            investment. This post separates the quick screen from that deeper
+            work.
           </p>
 
           <p>
             The goal isn&apos;t to make a final buy decision in 60 seconds.
-            It&apos;s to <em>triage</em>: organize the projected metrics, compare
-            them with criteria you choose, and identify the facts that need
-            deeper verification before you decide what to do next.
+            It&apos;s to <em>triage</em>: organize the projected metrics,
+            compare them with criteria you choose, and identify the facts that
+            need deeper verification before you decide what to do next.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">The five numbers you need</h2>
@@ -242,9 +264,9 @@ export default function BlogPost() {
           </p>
           <ol>
             <li>
-              <strong>Purchase price.</strong> The asking price. You&apos;ll later
-              run scenarios against a negotiated price too, but start with what
-              the seller wants.
+              <strong>Purchase price.</strong> The asking price. You&apos;ll
+              later run scenarios against a negotiated price too, but start with
+              what the seller wants.
             </li>
             <li>
               <strong>Monthly gross rent.</strong> If the property is occupied,
@@ -254,11 +276,51 @@ export default function BlogPost() {
               not a floor or a property-specific rent comp.
             </li>
             <li>
-              <strong>Operating expenses (annualized).</strong> <Link href="/glossary/property-tax" className="text-primary font-semibold hover:underline">Property tax</Link>,
-              <Link href="/glossary/insurance" className="text-primary font-semibold hover:underline"> insurance</Link>, <Link href="/glossary/maintenance-reserve" className="text-primary font-semibold hover:underline">maintenance</Link>, management, <Link href="/glossary/vacancy" className="text-primary font-semibold hover:underline">vacancy reserve</Link>, HOA, owner-
-              paid utilities, <Link href="/glossary/capex" className="text-primary font-semibold hover:underline">replacement reserve</Link>. A <Link href="/blog/50-percent-rule-rentals" className="text-primary font-semibold hover:underline">broad expense-ratio rule</Link> can be a
-              labeled triage check, but it must not replace the individual
-              categories or turn missing costs into zero.
+              <strong>Operating expenses (annualized).</strong>{" "}
+              <Link
+                href="/glossary/property-tax"
+                className="text-primary font-semibold hover:underline"
+              >
+                Property tax
+              </Link>
+              ,
+              <Link
+                href="/glossary/insurance"
+                className="text-primary font-semibold hover:underline"
+              >
+                {" "}
+                insurance
+              </Link>
+              ,{" "}
+              <Link
+                href="/glossary/maintenance-reserve"
+                className="text-primary font-semibold hover:underline"
+              >
+                maintenance
+              </Link>
+              , management,{" "}
+              <Link
+                href="/glossary/vacancy"
+                className="text-primary font-semibold hover:underline"
+              >
+                vacancy reserve
+              </Link>
+              , HOA, owner- paid utilities,{" "}
+              <Link
+                href="/glossary/capex"
+                className="text-primary font-semibold hover:underline"
+              >
+                replacement reserve
+              </Link>
+              . A{" "}
+              <Link
+                href="/blog/50-percent-rule-rentals"
+                className="text-primary font-semibold hover:underline"
+              >
+                broad expense-ratio rule
+              </Link>{" "}
+              can be a labeled triage check, but it must not replace the
+              individual categories or turn missing costs into zero.
             </li>
             <li>
               <strong>Financing terms.</strong> Down payment percentage,
@@ -268,10 +330,11 @@ export default function BlogPost() {
               purchase, model no debt service.
             </li>
             <li>
-              <strong>Closing costs and initial cash items.</strong> Enter title,
-              lender and transaction costs, cash-funded immediate repairs, and
-              the initial reserve separately when known. A percentage default
-              is only a starting estimate and must remain labeled as such.
+              <strong>Closing costs and initial cash items.</strong> Enter
+              title, lender and transaction costs, cash-funded immediate
+              repairs, and the initial reserve separately when known. A
+              percentage default is only a starting estimate and must remain
+              labeled as such.
             </li>
           </ol>
 
@@ -280,11 +343,20 @@ export default function BlogPost() {
             actually matter.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">Metric 1: The 1% rule (5 seconds)</h2>
+          <h2 className="text-2xl sm:text-3xl">
+            Metric 1: The 1% rule (5 seconds)
+          </h2>
           <p>
-            The <Link href="/glossary/1-percent-rule" className="text-primary font-semibold hover:underline">1% rule</Link> is the fastest possible screen. Divide monthly gross
-            rent by the purchase price. It compares price with gross rent only;
-            it says nothing about expenses, financing, condition, or actual cash flow.
+            The{" "}
+            <Link
+              href="/glossary/1-percent-rule"
+              className="text-primary font-semibold hover:underline"
+            >
+              1% rule
+            </Link>{" "}
+            is the fastest possible screen. Divide monthly gross rent by the
+            purchase price. It compares price with gross rent only; it says
+            nothing about expenses, financing, condition, or actual cash flow.
           </p>
           <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
             <div className="text-sm sm:text-base font-mono">
@@ -302,12 +374,17 @@ export default function BlogPost() {
             model, then compare the result with the criteria you selected.
           </p>
           <p>
-            <Link href="/tools/1-percent-rule-calculator" className="text-primary font-semibold hover:underline">
+            <Link
+              href="/tools/1-percent-rule-calculator"
+              className="text-primary font-semibold hover:underline"
+            >
               Run the 1% rule on a deal →
             </Link>
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">Metric 2: Cap rate (15 seconds)</h2>
+          <h2 className="text-2xl sm:text-3xl">
+            Metric 2: Cap rate (15 seconds)
+          </h2>
           <p>
             Cap rate (capitalization rate) measures the unleveraged annual
             return — what the property earns as a percentage of its price,
@@ -325,48 +402,41 @@ export default function BlogPost() {
           <p>
             Cap-rate ranges vary by property type, condition, market, lease
             quality, expense conventions, and data date. Compare like with like
-            and verify that NOI excludes financing while including the applicable
-            operating costs.
+            and verify that NOI excludes financing while including the
+            applicable operating costs.
           </p>
           <p>
-            Comparing cap rate with current alternatives can add context, but
-            it is not an apples-to-apples suitability rule: liquidity, leverage,
+            Comparing cap rate with current alternatives can add context, but it
+            is not an apples-to-apples suitability rule: liquidity, leverage,
             workload, transaction costs, taxes, condition risk, and uncertain
             future price changes differ materially.
           </p>
-          <p>
-            <Link href="/#main" className="text-primary font-semibold hover:underline">
-              Compute cap rate →
-            </Link>
-          </p>
-
-          <h2 className="text-2xl sm:text-3xl">Metric 3: Cash-on-cash return (15 seconds)</h2>
+          <h2 className="text-2xl sm:text-3xl">
+            Metric 3: Cash-on-cash return (15 seconds)
+          </h2>
           <p>
             Cap rate ignores financing, which is great for comparing properties
             but useless for your personal investment decision. Cash-on-cash
-            return measures the return on the cash <em>you actually
-            invest</em>, after the mortgage payment.
+            return measures the return on the cash <em>you actually invest</em>,
+            after the mortgage payment.
           </p>
           <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
             <div className="text-sm sm:text-base font-mono">
-              <span className="font-bold">CoC</span> = Annual Cash Flow ÷ Total Cash Invested
+              <span className="font-bold">CoC</span> = Annual Cash Flow ÷ Total
+              Cash Invested
             </div>
             <div className="text-xs text-muted-foreground mt-2">
-              Total Cash Invested = Down Payment + Closing Costs + Initial Repairs
+              Total Cash Invested = Down Payment + Closing Costs + Initial
+              Repairs
             </div>
           </div>
           <p>
             Cash-on-cash is specific to the stated financing and initial-cash
             assumptions. There is no universal acceptable band. A negative
             result means the modeled pre-tax cash flow after reserve is below
-            zero; it does not predict future appreciation or choose the next step.
+            zero; it does not predict future appreciation or choose the next
+            step.
           </p>
-          <p>
-            <Link href="/#main" className="text-primary font-semibold hover:underline">
-              Compute cash-on-cash return →
-            </Link>
-          </p>
-
           <h2 className="text-2xl sm:text-3xl">Metric 4: DSCR (10 seconds)</h2>
           <p>
             Debt Service Coverage Ratio — the metric every lender pulls before
@@ -376,7 +446,8 @@ export default function BlogPost() {
           </p>
           <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
             <div className="text-sm sm:text-base font-mono">
-              <span className="font-bold">DSCR</span> = Annual NOI ÷ Annual Debt Service
+              <span className="font-bold">DSCR</span> = Annual NOI ÷ Annual Debt
+              Service
             </div>
           </div>
           <p>
@@ -386,11 +457,7 @@ export default function BlogPost() {
             written formula and quote; a modeled band does not establish
             approval or pricing.
           </p>
-          <p>
-            <Link href="/#main" className="text-primary font-semibold hover:underline">
-              Compute DSCR →
-            </Link>
-          </p>
+          <p></p>
 
           <h2 className="text-2xl sm:text-3xl">The two sanity checks</h2>
           <p>
@@ -402,30 +469,38 @@ export default function BlogPost() {
           <p>
             What happens to your DSCR and cash flow if rent comes in 10% below
             your estimate, or vacancy spikes from 5% to 10%? If a small miss on
-            either input flips the deal from positive cash flow to negative,
-            the result is highly sensitive to those assumptions. Label that
-            risk and decide how much evidence or margin your criteria require.
+            either input flips the deal from positive cash flow to negative, the
+            result is highly sensitive to those assumptions. Label that risk and
+            decide how much evidence or margin your criteria require.
           </p>
 
           <h3>Sanity check 2: Compare alternatives on the same basis</h3>
           <p>
             A current lower-risk yield can be one reference, but cap rate is not
             a total-return forecast and the risks are different. Record which
-            cash flows, fees, taxes, liquidity limits, leverage, work, and future
-            value assumptions are included before comparing alternatives.
+            cash flows, fees, taxes, liquidity limits, leverage, work, and
+            future value assumptions are included before comparing alternatives.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">Putting it together</h2>
-          <p>
-            The 60-second workflow:
-          </p>
+          <p>The 60-second workflow:</p>
           <ol>
             <li>Record whether the property meets the 1% benchmark.</li>
-            <li>Compute cap rate and compare it with relevant market evidence.</li>
+            <li>
+              Compute cap rate and compare it with relevant market evidence.
+            </li>
             <li>Compute cash-on-cash using the financing you expect.</li>
-            <li>Compute DSCR, then compare it with the written requirements of the lender and program you may use.</li>
-            <li>Stress-test rent and vacancy; label any assumption that changes the cash-flow sign or coverage band.</li>
-            <li>Compare alternatives on a clearly stated, like-for-like basis.</li>
+            <li>
+              Compute DSCR, then compare it with the written requirements of the
+              lender and program you may use.
+            </li>
+            <li>
+              Stress-test rent and vacancy; label any assumption that changes
+              the cash-flow sign or coverage band.
+            </li>
+            <li>
+              Compare alternatives on a clearly stated, like-for-like basis.
+            </li>
           </ol>
 
           <p>
@@ -436,26 +511,22 @@ export default function BlogPost() {
           </p>
 
           <p>
-            <strong>The shortcut:</strong> TrueCap computes the first-pass metrics
-            consistently and can start from labeled HUD, published-rate, and
-            state effective-tax benchmarks when available. Every estimate stays
-            editable and should be replaced with property-specific evidence.
+            <strong>The shortcut:</strong> TrueCap computes the first-pass
+            metrics consistently and can start from labeled HUD and
+            published-rate benchmarks. Property tax is entered from a local
+            annual bill or reviewed rate; a blank field uses a disclosed generic
+            1.1% preliminary fallback. Every estimate stays editable and should
+            be replaced with property-specific evidence.
           </p>
 
-          <div className="not-prose">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-3 rounded-xl font-bold hover:opacity-95 transition-opacity"
-            >
-              <Calculator className="w-4 h-4" />
-              Run a 60-second analysis
-              <ArrowUpRight className="w-4 h-4" />
-            </Link>
-          </div>
+          <div className="not-prose"></div>
 
           <h2 className="text-2xl sm:text-3xl">FAQ</h2>
           {FAQS.map((f, i) => (
-            <details key={i} className="not-prose bg-card border border-border rounded-xl p-4 sm:p-5 mb-3">
+            <details
+              key={i}
+              className="not-prose bg-card border border-border rounded-xl p-4 sm:p-5 mb-3"
+            >
               <summary className="cursor-pointer font-bold text-foreground">
                 {f.q}
               </summary>
@@ -467,16 +538,15 @@ export default function BlogPost() {
         </article>
 
         <RelatedBlogPosts currentSlug={SLUG} />
-      <div className="max-w-3xl mx-auto px-4 sm:px-6"><NewsletterSignup variant="expanded" source="blog" /></div>
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          <NewsletterSignup variant="expanded" source="blog" />
+        </div>
 
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
             TrueCap is a rental property analysis tool used by individual
             investors, agents, and active flippers to underwrite deals in
             seconds. Built by real estate investors, in Philadelphia.{" "}
-            <Link href="/" className="font-bold text-foreground hover:underline">
-              Open the analyzer →
-            </Link>
           </p>
         </footer>
       </main>

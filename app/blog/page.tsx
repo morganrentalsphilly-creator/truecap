@@ -21,21 +21,30 @@ import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker"
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 import { BLOG_TOPICS } from "@/lib/blog-topics";
+import { groupBlogPostsByTopic } from "@/lib/content-hub-groups";
 
 export const metadata: Metadata = {
-  title: "Blog",
+  title: "Rental Property Investing Blog",
   description:
-    "Deep dives on rental property analysis, real estate math, and underwriting best practices from the team behind TrueCap.",
+    "Practical guides to rental property analysis, financing, cash flow, taxes, and underwriting, with formulas, worked examples, and editable assumptions.",
   alternates: { canonical: "/blog" },
   openGraph: {
-    title: "TrueCap Blog — rental property analysis & underwriting",
+    title: "Rental Property Investing Blog | TrueCap",
     description:
-      "Deep dives on rental property analysis, real estate math, and underwriting best practices.",
+      "Practical guides to rental property analysis, financing, cash flow, taxes, and underwriting, with formulas, worked examples, and editable assumptions.",
     url: "/blog",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap blog" }],
+    images: [
+      { url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap blog" },
+    ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: {
+    card: "summary_large_image",
+    title: "Rental Property Investing Blog | TrueCap",
+    description:
+      "Practical guides to rental property analysis, financing, cash flow, taxes, and underwriting, with formulas, worked examples, and editable assumptions.",
+    images: ["/home.jpg"],
+  },
 };
 
 export type BlogPost = {
@@ -92,8 +101,7 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "2-percent-rule-vs-1-percent-rule",
-    title:
-      "2% rule vs 1% rule: which rental screen actually applies in 2026?",
+    title: "2% rule vs 1% rule: which rental screen actually applies in 2026?",
     excerpt:
       "The 1% and 2% rules are the same rent-to-price screen with the bar at two heights — and knowing that tells you when each applies. The GRM and cap-rate math underneath (1% ≈ a 6% cap at the 50% rule; 2% ≈ 12%), a same-dollar comparison where a textbook 1% duplex cash-flows $3/month while a $75K 2% house returns 16.4% cash-on-cash, why the 2% niche carries the risk the spreadsheet doesn't price, and the 0.76% break-even line that turned the 1% rule from a buy signal into a keep-looking line.",
     readingTimeMinutes: 10,
@@ -232,8 +240,7 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "mortgage-points-investment-property",
-    title:
-      "Are mortgage points worth it on an investment property? (2026)",
+    title: "Are mortgage points worth it on an investment property? (2026)",
     excerpt:
       "Points trade cash at closing for a permanently lower rate. At 2026 pricing the break-even runs about five years and the implied return about 20% a year — but only while you keep the loan. The buydown-ladder steepness that actually sets the break-even, the IRS rule that makes you amortize rental points instead of deducting them up front, the two points that lift a $200K-loan deal from a 1.14 to a 1.20 DSCR, and the refinance trap where buying down a rate you abandon in three years quietly costs about $1,600.",
     readingTimeMinutes: 11,
@@ -308,8 +315,7 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "seller-financing-subject-to",
-    title:
-      "Seller financing and subject-to: creative deals explained (2026)",
+    title: "Seller financing and subject-to: creative deals explained (2026)",
     excerpt:
       "When 7% bank loans kill the deal, creative financing moves it. How seller financing and subject-to work, the due-on-sale risk that defines subject-to, where Dodd-Frank does and doesn't apply to investors, and the 2026 rate arbitrage (~$650/month on a 3.5% subject-to loan) underwritten with the downside priced in.",
     readingTimeMinutes: 11,
@@ -376,8 +382,7 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "schedule-e-rental-property",
-    title:
-      "Schedule E for rental property: a line-by-line walkthrough (2026)",
+    title: "Schedule E for rental property: a line-by-line walkthrough (2026)",
     excerpt:
       "Every Schedule E line that matters, a full worked example on a $250K rental, and the exact bridge between +$139/month of cash flow and a $3,703 paper loss — plus the $25K passive loss allowance, its MAGI phase-out, and the four mistakes that cost real money.",
     readingTimeMinutes: 10,
@@ -444,7 +449,8 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "how-to-calculate-cash-on-cash-return",
-    title: "How to calculate cash-on-cash return on a rental property — 2026 guide",
+    title:
+      "How to calculate cash-on-cash return on a rental property — 2026 guide",
     excerpt:
       "Cash-on-cash return = annual cash flow ÷ total cash invested. It's the only metric that tells you the return on the dollars you actually put in. Here's the formula, what counts as 'total cash invested,' three worked examples, and the trap most calculators fall into.",
     readingTimeMinutes: 7,
@@ -471,7 +477,8 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "house-hack-underwriting-guide",
-    title: "House hack underwriting: how to know if a duplex, triplex, or fourplex actually beats renting",
+    title:
+      "House hack underwriting: how to know if a duplex, triplex, or fourplex actually beats renting",
     excerpt:
       "House hacking sounds great in a podcast and confusing in a spreadsheet. The honest math: your housing cost vs. renting the equivalent, factoring in down payment, mortgage paydown, appreciation, and the very real cost of being your tenants' landlord.",
     readingTimeMinutes: 12,
@@ -480,7 +487,8 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "short-term-rental-underwriting-playbook",
-    title: "Short-term rental underwriting playbook: how to model an Airbnb in 2026",
+    title:
+      "Short-term rental underwriting playbook: how to model an Airbnb in 2026",
     excerpt:
       "STR cash flow lives or dies on three numbers: ADR, occupancy, and operating expenses. Here's the full playbook for underwriting a short-term rental in 2026 — what data sources to use, what hidden costs everyone forgets, and how to stress-test for a bad off-season.",
     readingTimeMinutes: 14,
@@ -489,7 +497,8 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "hard-money-vs-dscr-loan",
-    title: "Hard money vs DSCR: which loan product is right for your next deal in 2026",
+    title:
+      "Hard money vs DSCR: which loan product is right for your next deal in 2026",
     excerpt:
       "Hard money and DSCR loans solve different problems. Hard money is short-term capital for a deal you'll rehab and exit; DSCR is long-term capital for a rental you'll hold. Picking the wrong one costs you 4-6 points and 18 months of friction. Here's how to choose.",
     readingTimeMinutes: 11,
@@ -498,7 +507,8 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "bonus-depreciation-rental-property-2026",
-    title: "Bonus depreciation on rental property in 2026: the restored 100% deduction and what qualifies",
+    title:
+      "Bonus depreciation on rental property in 2026: the restored 100% deduction and what qualifies",
     excerpt:
       "Current IRS guidance restored 100% bonus depreciation for eligible property acquired and placed in service after January 19, 2025. The rental building itself usually does not qualify; certain shorter-life components can.",
     readingTimeMinutes: 10,
@@ -518,7 +528,8 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "best-free-rental-property-calculator-2026",
-    title: "Best free rental property calculator 2026: 5 tools that actually work for free",
+    title:
+      "Best free rental property calculator 2026: 5 tools that actually work for free",
     excerpt:
       "Honest 2026 ranking of the 5 best truly-free rental property calculators — TrueCap, BiggerPockets' free reports, Stessa's calculator, Excel templates, and Zillow's mortgage calculator. What each free tier covers and where the gates kick in.",
     readingTimeMinutes: 9,
@@ -546,7 +557,8 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "best-short-term-rental-analysis-tool-2026",
-    title: "Best short-term rental analysis tool 2026: 6 tools STR investors compare",
+    title:
+      "Best short-term rental analysis tool 2026: 6 tools STR investors compare",
     excerpt:
       "Honest 2026 ranking of the best STR analysis tools — AirDNA for revenue data, TrueCap for underwriting, Mashvisor for market discovery, plus PMS platforms STR investors evaluate.",
     readingTimeMinutes: 10,
@@ -555,7 +567,8 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "dealcheck-vs-biggerpockets-vs-truecap",
-    title: "DealCheck vs BiggerPockets vs TrueCap: which rental calculator wins?",
+    title:
+      "DealCheck vs BiggerPockets vs TrueCap: which rental calculator wins?",
     excerpt:
       "Honest 3-way comparison of DealCheck, BiggerPockets Calculator, and TrueCap. Free tier depth, pricing, projections, mobile, and which fits which investor.",
     readingTimeMinutes: 11,
@@ -575,7 +588,8 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "roofstock-vs-mashvisor-vs-propstream",
-    title: "Roofstock vs Mashvisor vs PropStream: 3-way deal discovery comparison",
+    title:
+      "Roofstock vs Mashvisor vs PropStream: 3-way deal discovery comparison",
     excerpt:
       "Roofstock sells turnkey rentals. Mashvisor scores neighborhoods. PropStream finds motivated sellers. Honest 3-way comparison plus where TrueCap fits after they each find you a property.",
     readingTimeMinutes: 10,
@@ -603,7 +617,8 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "single-family-vs-multi-family-rental",
-    title: "Single-family vs multi-family rental property — which actually wins?",
+    title:
+      "Single-family vs multi-family rental property — which actually wins?",
     excerpt:
       "The honest comparison: cash flow, cap rate, financing, tenant quality, exit liquidity, capex risk, and which property type fits your specific stage. Side-by-side numbers with 2026 financing.",
     readingTimeMinutes: 11,
@@ -612,7 +627,8 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "how-to-estimate-rehab-costs",
-    title: "How to estimate rehab costs on a rental property — the honest framework",
+    title:
+      "How to estimate rehab costs on a rental property — the honest framework",
     excerpt:
       "The framework experienced investors use: sq-ft pricing for cosmetic, kitchen, bath, systems work. Plus the 25% contingency rule and on-site walkthrough checklist.",
     readingTimeMinutes: 12,
@@ -621,7 +637,8 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "how-to-refinance-a-rental-property",
-    title: "How to refinance a rental property — rate-and-term, cash-out, and DSCR options",
+    title:
+      "How to refinance a rental property — rate-and-term, cash-out, and DSCR options",
     excerpt:
       "Step-by-step on refinancing a rental property: when refi makes sense, rate-and-term vs cash-out, LTV limits, DSCR loans, the break-even math, and the 5 mistakes most investors make.",
     readingTimeMinutes: 10,
@@ -630,7 +647,8 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "rental-property-pro-forma-explained",
-    title: "How to read a rental property pro forma (and the 7 lies inside most of them)",
+    title:
+      "How to read a rental property pro forma (and the 7 lies inside most of them)",
     excerpt:
       "A pro forma is a seller's projection of how a rental property will perform — and it's almost always optimistic. Here's how to translate seller pro formas into real numbers, and the 7 line items most pro formas understate.",
     readingTimeMinutes: 9,
@@ -639,7 +657,8 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "how-to-find-off-market-rental-properties",
-    title: "How to find off-market rental properties — 8 sources that actually work",
+    title:
+      "How to find off-market rental properties — 8 sources that actually work",
     excerpt:
       "The 8 sources serious rental investors use to find off-market deals — driving for dollars, direct mail, wholesalers, networking, public records, and the underrated channels most investors skip.",
     readingTimeMinutes: 10,
@@ -684,7 +703,8 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "house-hacking-explained",
-    title: "House hacking explained: how to (almost) live for free in a 2-4 unit",
+    title:
+      "House hacking explained: how to (almost) live for free in a 2-4 unit",
     excerpt:
       "The actual math behind house hacking — FHA 3.5% down, owner-occupant rules, year-2 transition planning, and the deal types that make this strategy work in 2026.",
     readingTimeMinutes: 9,
@@ -720,7 +740,8 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "cash-flow-vs-appreciation",
-    title: "Cash flow vs appreciation: which rental strategy actually wins in 2026?",
+    title:
+      "Cash flow vs appreciation: which rental strategy actually wins in 2026?",
     excerpt:
       "A 10-year side-by-side across three market types with 2026 borrowing costs — and the two return components most comparisons silently forget.",
     readingTimeMinutes: 9,
@@ -738,7 +759,8 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "dscr-loans-explained",
-    title: "DSCR loans explained: what they are, when they make sense, what they cost in 2026",
+    title:
+      "DSCR loans explained: what they are, when they make sense, what they cost in 2026",
     excerpt:
       "DSCR programs primarily use property coverage instead of personal DTI as the main ratio, while borrower and property checks still apply. Learn the costs and trade-offs.",
     readingTimeMinutes: 10,
@@ -765,8 +787,17 @@ export const BLOG_POSTS: BlogPost[] = [
   },
 ];
 
+function compactExcerpt(excerpt: string, maxCharacters = 190): string {
+  if (excerpt.length <= maxCharacters) return excerpt;
+  const candidate = excerpt.slice(0, maxCharacters + 1);
+  const lastWordBoundary = candidate.lastIndexOf(" ");
+  return `${candidate.slice(0, lastWordBoundary > 0 ? lastWordBoundary : maxCharacters).trimEnd()}…`;
+}
+
 export default function BlogIndexPage() {
   const siteUrl = getSiteUrl();
+  const availablePosts = BLOG_POSTS.filter((post) => post.available);
+  const postGroups = groupBlogPostsByTopic(availablePosts, BLOG_TOPICS);
   const blogLd = {
     "@context": "https://schema.org",
     "@type": "Blog",
@@ -774,7 +805,7 @@ export default function BlogIndexPage() {
     name: "TrueCap Blog",
     url: `${siteUrl}/blog`,
     publisher: { "@id": `${siteUrl}/#organization` },
-    blogPost: BLOG_POSTS.filter((p) => p.available).map((p) => ({
+    blogPost: availablePosts.map((p) => ({
       "@type": "BlogPosting",
       headline: p.title,
       url: `${siteUrl}/blog/${p.slug}`,
@@ -793,7 +824,7 @@ export default function BlogIndexPage() {
         <header className="mb-8">
           <Link
             href="/"
-            className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+            className="inline-flex min-h-11 min-w-11 items-center text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground"
           >
             ← TrueCap
           </Link>
@@ -817,51 +848,95 @@ export default function BlogIndexPage() {
               <Link
                 key={t.slug}
                 href={`/blog/topics/${t.slug}`}
-                className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+                className="inline-flex min-h-11 min-w-11 items-center rounded-full border border-border bg-card px-3 text-xs font-semibold text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {t.title}
               </Link>
             ))}
             <Link
               href="/blog/topics"
-              className="rounded-full px-3 py-1.5 text-xs font-semibold text-primary hover:underline"
+              className="inline-flex min-h-11 min-w-11 items-center rounded-full px-3 text-xs font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               All topics →
             </Link>
           </div>
         </nav>
 
-        <ul className="space-y-4">
-          {BLOG_POSTS.filter((p) => p.available).map((post) => (
-            <li key={post.slug}>
-              <Link
-                href={`/blog/${post.slug}`}
-                className="group block bg-card border border-border rounded-2xl p-5 sm:p-6 hover:border-primary transition-colors"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <BookOpen className="size-5 text-primary" />
-                  <ArrowUpRight className="size-4 text-muted-foreground group-hover:text-primary transition-colors" />
+        <div className="space-y-12" data-blog-directory="grouped">
+          {postGroups.map((group) => {
+            const topic = BLOG_TOPICS.find(
+              (entry) => entry.slug === group.slug,
+            );
+            const headingId = `blog-group-${group.slug}`;
+
+            return (
+              <section key={group.slug} aria-labelledby={headingId}>
+                <div className="mb-4 border-b border-border pb-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h2
+                      id={headingId}
+                      className="text-xl font-extrabold text-foreground sm:text-2xl"
+                    >
+                      {group.title}
+                    </h2>
+                    {topic ? (
+                      <Link
+                        href={`/blog/topics/${topic.slug}`}
+                        className="inline-flex min-h-11 min-w-11 items-center rounded-md px-1 text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        Topic guide →
+                      </Link>
+                    ) : null}
+                  </div>
+                  <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+                    {group.description}
+                  </p>
                 </div>
-                <h2 className="text-xl sm:text-2xl font-extrabold text-foreground leading-tight">
-                  {post.title}
-                </h2>
-                <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-                  {post.excerpt}
-                </p>
-                <p className="text-[11px] uppercase tracking-widest text-muted-foreground font-bold mt-3">
-                  {post.modifiedAt ? "Updated " : ""}
-                  {new Date(post.modifiedAt ?? post.publishedAt).toLocaleDateString("en-US", {
-                    timeZone: "UTC",
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}{" "}
-                  · {post.readingTimeMinutes} min read
-                </p>
-              </Link>
-            </li>
-          ))}
-        </ul>
+
+                <ul className="grid gap-3 sm:grid-cols-2">
+                  {group.posts.map((post) => (
+                    <li key={post.slug}>
+                      <Link
+                        href={`/blog/${post.slug}`}
+                        data-blog-post-link=""
+                        className="group flex h-full min-h-11 flex-col rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <div className="mb-2 flex items-center justify-between">
+                          <BookOpen
+                            className="size-4 text-primary"
+                            aria-hidden="true"
+                          />
+                          <ArrowUpRight
+                            className="size-4 text-muted-foreground transition-colors group-hover:text-primary"
+                            aria-hidden="true"
+                          />
+                        </div>
+                        <h3 className="text-base font-extrabold leading-snug text-foreground sm:text-lg">
+                          {post.title}
+                        </h3>
+                        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                          {compactExcerpt(post.excerpt)}
+                        </p>
+                        <p className="mt-auto pt-3 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                          {post.modifiedAt ? "Updated " : ""}
+                          {new Date(
+                            post.modifiedAt ?? post.publishedAt,
+                          ).toLocaleDateString("en-US", {
+                            timeZone: "UTC",
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })}{" "}
+                          · {post.readingTimeMinutes} min read
+                        </p>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            );
+          })}
+        </div>
 
         {/* NOTE: /vs hub card removed at user request. The individual
             /vs/<competitor> pages still exist as SEO landing surfaces
@@ -873,13 +948,14 @@ export default function BlogIndexPage() {
             Want the calculator that powers these guides?
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-4">
-            TrueCap turns every concept in these posts into a fully-functional
-            analyzer — cap rate, cash flow, DSCR, projections, tax modeling.
-            Free to start.
+            TrueCap turns released underwriting concepts into an editable
+            preliminary screen — cap rate, cash flow, DSCR, selected-rule fit,
+            and Pro pre-tax cash-flow/equity projections. Tax and exit modules
+            are not released. Free to start.
           </p>
           <Link
             href="/"
-            className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary-foreground px-4 font-bold text-primary transition-opacity hover:opacity-90"
           >
             Open TrueCap
             <ArrowUpRight className="w-4 h-4" />

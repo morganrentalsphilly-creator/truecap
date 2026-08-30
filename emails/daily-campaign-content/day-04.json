@@ -1,17 +1,17 @@
 {
   "day": 4,
   "send_date": "2026-06-04",
-  "subject": "cap rate without the bs",
-  "preheader": "the formula is simple. the inputs are where people lie to themselves.",
-  "headline": "Cap rate is NOI divided by price. That's it. The trick is honest NOI.",
+  "subject": "cap rate without guesswork",
+  "preheader": "the formula is simple; the inputs still need evidence.",
+  "headline": "Cap rate is modeled NOI divided by price. Verify both inputs.",
   "body": [
     "Cap rate = Net Operating Income / Purchase Price. A $250,000 property with $20,000 in NOI is an 8% cap. That's the whole math.",
-    "Where people blow it: they inflate NOI. They use gross rent instead of effective gross rent. They forget vacancy. They skip property management. They pretend CapEx doesn't exist. By the time they're done, an honest 6% cap looks like a fake 9%, and they overpay by 30%.",
-    "What's 'good'? Depends on the market. In Memphis or Birmingham, a 7-8% cap is achievable in 2026. In Nashville or Tampa, 5-6% is normal because appreciation is doing more of the work. In LA or Seattle, you might see 3.5% and the math literally cannot work for a leveraged buyer.",
-    "Rule of thumb: if a seller's pro forma cap rate is more than 1.5 points above the honest market average, they're cooking the books. Run your own NOI.",
-    "I built a free cap rate calculator that forces the right inputs (effective gross, real vacancy, CapEx, management). It takes ten seconds."
+    "A cap-rate comparison is only as useful as its NOI inputs and conventions. Check effective rent after vacancy and every applicable operating-expense line; do not silently treat unknown costs as zero.",
+    "There is no universal 'good' cap rate. Market, property condition, strategy, risk, and the evidence date all matter, so current local comparisons need a cited source and an as-of date.",
+    "Reconcile a seller's pro forma line by line with your own evidence. A difference can reveal different assumptions or definitions; by itself, it does not prove misrepresentation.",
+    "The practical cap-rate guide walks through effective income, vacancy, expense, and reserve assumptions before you run a preliminary property screen in TrueCap."
   ],
-  "cta_text": "Use the cap rate calc",
-  "cta_url": "https://usetruecap.com/tools/cap-rate-calculator",
+  "cta_text": "Read the cap rate guide",
+  "cta_url": "https://usetruecap.com/blog/how-to-calculate-cap-rate",
   "signature_note": null
 }

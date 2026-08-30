@@ -8,7 +8,7 @@
  */
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
+import { AnalyzerHandoffLink } from "@/components/analyzer-handoff-link";
 import { ArrowUpRight, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -23,7 +23,11 @@ const num = (s: string): number => {
 const fmtMoney = (n: number) =>
   `${n < 0 ? "-" : ""}$${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
 
-function classify(dscr: number): { label: string; color: string; note: string } {
+function classify(dscr: number): {
+  label: string;
+  color: string;
+  note: string;
+} {
   if (dscr <= 0)
     return {
       label: "No coverage",
@@ -79,7 +83,10 @@ export function DscrCalculatorWidget() {
   // the other tool widgets). NOI/debt-service don't map onto the analyzer's
   // price/rent inputs, so this is a bare strategy-tagged link — the analyzer
   // computes DSCR from its own financing inputs.
-  const handoffHref = buildAnalyzerHandoffUrl({}, { utmSource: "dscr-calculator" });
+  const handoffHref = buildAnalyzerHandoffUrl(
+    {},
+    { utmSource: "dscr-calculator" },
+  );
 
   return (
     <div className="bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-7">
@@ -91,11 +98,16 @@ export function DscrCalculatorWidget() {
           </h2>
 
           <div>
-            <Label htmlFor="dscr-noi" className="text-sm font-medium text-foreground mb-1.5 block">
+            <Label
+              htmlFor="dscr-noi"
+              className="text-sm font-medium text-foreground mb-1.5 block"
+            >
               Annual NOI (Net Operating Income)
             </Label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                $
+              </span>
               <Input
                 id="dscr-noi"
                 type="number"
@@ -107,16 +119,22 @@ export function DscrCalculatorWidget() {
               />
             </div>
             <p className="text-xs text-muted-foreground mt-1.5">
-              Gross rent minus all operating expenses. Excludes mortgage P&amp;I.
+              Gross rent minus all operating expenses. Excludes mortgage
+              P&amp;I.
             </p>
           </div>
 
           <div>
-            <Label htmlFor="dscr-debt" className="text-sm font-medium text-foreground mb-1.5 block">
+            <Label
+              htmlFor="dscr-debt"
+              className="text-sm font-medium text-foreground mb-1.5 block"
+            >
               Annual Debt Service
             </Label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                $
+              </span>
               <Input
                 id="dscr-debt"
                 type="number"
@@ -128,7 +146,8 @@ export function DscrCalculatorWidget() {
               />
             </div>
             <p className="text-xs text-muted-foreground mt-1.5">
-              Mortgage principal &amp; interest, annualized (monthly P&amp;I × 12).
+              Mortgage principal &amp; interest, annualized (monthly P&amp;I ×
+              12).
             </p>
           </div>
         </div>
@@ -139,38 +158,64 @@ export function DscrCalculatorWidget() {
             <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
               DSCR
             </div>
-            <div className={cn("text-5xl sm:text-6xl font-extrabold mt-1 tabular-nums", c.color)}>
+            <div
+              className={cn(
+                "text-5xl sm:text-6xl font-extrabold mt-1 tabular-nums",
+                c.color,
+              )}
+            >
               {result.dscr.toFixed(2)}
             </div>
-            <div className={cn("text-sm font-semibold mt-1", c.color)}>{c.label}</div>
+            <div className={cn("text-sm font-semibold mt-1", c.color)}>
+              {c.label}
+            </div>
             <p className="text-xs text-muted-foreground mt-1">{c.note}</p>
           </div>
 
           <div className="mt-5 pt-5 border-t border-border space-y-1.5 text-xs">
             <Row label="Annual NOI" value={fmtMoney(result.noi)} />
             <Row label="Annual debt service" value={fmtMoney(result.debt)} />
-            <Row label="Monthly cushion (NOI − debt)" value={`${fmtMoney(result.monthly)}/mo`} bold />
+            <Row
+              label="Monthly cushion (NOI − debt)"
+              value={`${fmtMoney(result.monthly)}/mo`}
+              bold
+            />
           </div>
         </div>
       </div>
 
-      <Link
-        href={handoffHref} target="_top"
+      <AnalyzerHandoffLink
+        handoffHref={handoffHref}
+        target="_top"
         className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="w-4 h-4" />
-        Run a full property analysis — DSCR, cash flow, and cash-flow and equity projections — free
+        Run the free core analysis; projections appear when your access includes
+        them
         <ArrowUpRight className="w-4 h-4" />
-      </Link>
+      </AnalyzerHandoffLink>
     </div>
   );
 }
 
-function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
+function Row({
+  label,
+  value,
+  bold,
+}: {
+  label: string;
+  value: string;
+  bold?: boolean;
+}) {
   return (
     <div className="flex justify-between gap-2">
       <span className="text-muted-foreground">{label}</span>
-      <span className={cn("tabular-nums", bold ? "font-bold text-foreground" : "text-foreground")}>
+      <span
+        className={cn(
+          "tabular-nums",
+          bold ? "font-bold text-foreground" : "text-foreground",
+        )}
+      >
         {value}
       </span>
     </div>

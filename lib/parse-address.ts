@@ -9,8 +9,8 @@
  * land on a dead, empty form (a near-guaranteed bounce on a paid click).
  *
  * This recovers the two things the downstream flow actually needs — the state
- * (drives property tax + the price-to-rent estimate) and the ZIP (sharpens HUD
- * rent) — straight from the typed string, no API call, so it can't be
+ * (supports location-aware routing/context) and the ZIP (sharpens HUD rent) —
+ * straight from the typed string, no API call, so it can't be
  * ad-blocked and needs no extra key. It's intentionally conservative: it
  * returns a state only on a strong signal, so a verdict built on it is
  * grounded, and the result is always editable.
@@ -25,28 +25,68 @@ export interface ParsedAddressLocation {
   zip?: string;
 }
 
-// All 50 states + DC. (lib/states.ts is a CURATED investor-market subset used
-// for price estimation — not usable for location parsing, which must recognize
+// All 50 states + DC. (lib/states.ts is a CURATED investor-market subset and
+// is not usable for location parsing, which must recognize
 // every state, e.g. WV, and not mistake "West Virginia" for "Virginia".)
 const STATE_NAME_TO_ABBR: Record<string, string> = {
-  alabama: "AL", alaska: "AK", arizona: "AZ", arkansas: "AR", california: "CA",
-  colorado: "CO", connecticut: "CT", delaware: "DE", "district of columbia": "DC",
-  florida: "FL", georgia: "GA", hawaii: "HI", idaho: "ID", illinois: "IL",
-  indiana: "IN", iowa: "IA", kansas: "KS", kentucky: "KY", louisiana: "LA",
-  maine: "ME", maryland: "MD", massachusetts: "MA", michigan: "MI",
-  minnesota: "MN", mississippi: "MS", missouri: "MO", montana: "MT",
-  nebraska: "NE", nevada: "NV", "new hampshire": "NH", "new jersey": "NJ",
-  "new mexico": "NM", "new york": "NY", "north carolina": "NC",
-  "north dakota": "ND", ohio: "OH", oklahoma: "OK", oregon: "OR",
-  pennsylvania: "PA", "rhode island": "RI", "south carolina": "SC",
-  "south dakota": "SD", tennessee: "TN", texas: "TX", utah: "UT",
-  vermont: "VT", virginia: "VA", washington: "WA", "west virginia": "WV",
-  wisconsin: "WI", wyoming: "WY",
+  alabama: "AL",
+  alaska: "AK",
+  arizona: "AZ",
+  arkansas: "AR",
+  california: "CA",
+  colorado: "CO",
+  connecticut: "CT",
+  delaware: "DE",
+  "district of columbia": "DC",
+  florida: "FL",
+  georgia: "GA",
+  hawaii: "HI",
+  idaho: "ID",
+  illinois: "IL",
+  indiana: "IN",
+  iowa: "IA",
+  kansas: "KS",
+  kentucky: "KY",
+  louisiana: "LA",
+  maine: "ME",
+  maryland: "MD",
+  massachusetts: "MA",
+  michigan: "MI",
+  minnesota: "MN",
+  mississippi: "MS",
+  missouri: "MO",
+  montana: "MT",
+  nebraska: "NE",
+  nevada: "NV",
+  "new hampshire": "NH",
+  "new jersey": "NJ",
+  "new mexico": "NM",
+  "new york": "NY",
+  "north carolina": "NC",
+  "north dakota": "ND",
+  ohio: "OH",
+  oklahoma: "OK",
+  oregon: "OR",
+  pennsylvania: "PA",
+  "rhode island": "RI",
+  "south carolina": "SC",
+  "south dakota": "SD",
+  tennessee: "TN",
+  texas: "TX",
+  utah: "UT",
+  vermont: "VT",
+  virginia: "VA",
+  washington: "WA",
+  "west virginia": "WV",
+  wisconsin: "WI",
+  wyoming: "WY",
 };
 
 const STATE_ABBRS = new Set(Object.values(STATE_NAME_TO_ABBR));
 // Names longest-first so "West Virginia" is tested before "Virginia".
-const STATE_NAMES: Array<{ name: string; abbr: string }> = Object.entries(STATE_NAME_TO_ABBR)
+const STATE_NAMES: Array<{ name: string; abbr: string }> = Object.entries(
+  STATE_NAME_TO_ABBR,
+)
   .map(([name, abbr]) => ({ name, abbr }))
   .sort((a, b) => b.name.length - a.name.length);
 
@@ -57,7 +97,9 @@ export function parseAddressLocation(raw: string): ParsedAddressLocation {
 
   // ZIP: the last 5-digit run (US addresses end "... ST 78701[, USA]").
   const zipMatches = text.match(/\b\d{5}(?:-\d{4})?\b/g);
-  const zip = zipMatches ? zipMatches[zipMatches.length - 1].slice(0, 5) : undefined;
+  const zip = zipMatches
+    ? zipMatches[zipMatches.length - 1].slice(0, 5)
+    : undefined;
 
   const out: ParsedAddressLocation = {};
   if (zip) out.zip = zip;

@@ -15,7 +15,7 @@
  */
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
+import { AnalyzerHandoffLink } from "@/components/analyzer-handoff-link";
 import { ArrowUpRight, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -90,10 +90,10 @@ export function RentalPropertyTaxCalculatorWidget() {
     result.taxableIncome < 0
       ? "Tax loss"
       : result.taxableIncome < 1000
-      ? "Near zero"
-      : result.taxableIncome < 5000
-      ? "Modest income"
-      : "Taxable income";
+        ? "Near zero"
+        : result.taxableIncome < 5000
+          ? "Modest income"
+          : "Taxable income";
   const verdictColor =
     result.taxableIncome <= 0
       ? "text-[var(--metric-positive)]"
@@ -102,7 +102,7 @@ export function RentalPropertyTaxCalculatorWidget() {
   // Carry the user's price + rent into the full analyzer (P2-2 handoff).
   const handoffHref = buildAnalyzerHandoffUrl(
     { purchasePrice: num(purchasePrice), monthlyRent: num(monthlyRent) },
-    { utmSource: "rental-property-tax-calculator" }
+    { utmSource: "rental-property-tax-calculator" },
   );
 
   return (
@@ -256,7 +256,7 @@ export function RentalPropertyTaxCalculatorWidget() {
         <p
           className={cn(
             "mt-1 text-4xl font-extrabold tabular-nums",
-            verdictColor
+            verdictColor,
           )}
         >
           {fmtMoney(result.taxableIncome)}
@@ -328,19 +328,20 @@ export function RentalPropertyTaxCalculatorWidget() {
 
       <p className="mt-4 text-xs text-muted-foreground leading-relaxed">
         Estimates only. Actual tax outcome depends on passive activity rules,
-        QBI deduction (Section 199A), state tax, and your total income.
-        Always consult a CPA before relying on these numbers for tax
-        planning.
+        QBI deduction (Section 199A), state tax, and your total income. Always
+        consult a CPA before relying on these numbers for tax planning.
       </p>
 
-      <Link
-        href={handoffHref} target="_top"
+      <AnalyzerHandoffLink
+        handoffHref={handoffHref}
+        target="_top"
         className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="w-4 h-4" />
-        Run the released rental screen with these inputs — cash flow, cap rate, CoC, and DSCR — free
+        Run the released rental screen with these inputs — cash flow, cap rate,
+        CoC, and DSCR — free
         <ArrowUpRight className="w-4 h-4" />
-      </Link>
+      </AnalyzerHandoffLink>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 # TrueCap Marketing Playbook — Solo Execution
 
-A weekly playbook you can run yourself, alone, in ~3-5 hours per week. No hiring needed, no ad budget required beyond what you're already spending on Google Ads. The goal: compound organic growth + community presence + email capture, so that paid ads aren't the only thing keeping your funnel alive.
+A draft operating rhythm for reviewed organic content and community participation. The marketing newsletter and its signup capture were canceled on 2026-07-15; nothing in this playbook authorizes restoring them.
 
 This is built around the reality that you have a finite number of hours per week. The plan is structured so you can drop the weekly cadence to bi-weekly during busy periods and still see compounding return.
 
@@ -11,10 +11,10 @@ This is built around the reality that you have a finite number of hours per week
 ```
 Loop 1 (daily, 15-30 min):    Community presence
 Loop 2 (weekly, 2-3 hours):    Content creation
-Loop 3 (monthly, 2 hours):     Distribution + newsletter
+Loop 3 (monthly, 2 hours):     Reviewed distribution
 ```
 
-Each loop produces something the next loop can use. Community presence surfaces topics for content. Content seeds the newsletter. Newsletter drives new community engagement.
+Each loop can inform the next: community questions can suggest content, and reviewed content can be adapted for currently approved channels. Drafting does not authorize publication or a newsletter send.
 
 ---
 
@@ -30,6 +30,7 @@ The platforms where serious real estate investors actually hang out, in order of
 **The daily 15-30 min routine:**
 
 Each morning (or whenever fits your schedule):
+
 - Open Reddit, sort r/realestateinvesting by "new"
 - Scan ~15-20 fresh posts
 - Find 2-3 where you can give a genuinely helpful answer that takes 1-3 paragraphs
@@ -53,9 +54,11 @@ One real piece of content per week. Rotate between three formats so it doesn't g
 You currently have 9 blog posts. Add one per month. Topics that print SEO traffic:
 
 **Already shipped:**
+
 - 60-second rental underwrite, cap rate vs CoC vs DSCR, DSCR loans, what's a good cap rate, cash flow vs appreciation, 7 red flags, CoC vs IRR, house hacking, property management
 
 **Next priority queue (high search volume, low difficulty):**
+
 1. "Best states for rental property investors in 2026"
 2. "Subject-to real estate explained — when it actually makes sense"
 3. "The 50% rule for rentals — is it still useful in 2026?"
@@ -72,6 +75,7 @@ Each post = ~1,500 words, takes you 2-3 hours to write longhand or 1 hour if you
 One real estate calculation breakdown, posted as a thread.
 
 Examples:
+
 - "I just ran a duplex in [neighborhood] through TrueCap. Here's what the numbers look like. 🧵"
 - "Why this DealCheck deal that 'cashflows' actually loses money — thread"
 - "Live BRRRR walkthrough: $58k purchase, $32k rehab, $148k ARV. The honest math:"
@@ -97,9 +101,12 @@ Posting cadence: 1-2 videos per month.
 
 ---
 
-## Loop 3 — Distribution + newsletter (monthly, 2 hours)
+## Loop 3 — Distribution (newsletter channel canceled)
 
-Once a month, send a real investor newsletter. The format:
+The founder canceled the TrueCap marketing newsletter on 2026-07-15. Do not
+create an audience, restore signup forms, or schedule/send a broadcast without
+explicit founder approval. The archived newsletter format below may be used as
+an internal monthly content brief for currently released channels only:
 
 ```
 Subject line: This month in rental investing — [Month] 2026
@@ -111,29 +118,21 @@ Subject line: This month in rental investing — [Month] 2026
 5. PS — what we shipped in TrueCap this month
 ```
 
-**Setup steps (one-time, ~2 hours):**
-
-1. Sign up for Resend (resend.com, free tier covers 3k emails/month)
-2. Create an `Audience` in Resend
-3. Add a newsletter signup form to your site footer + the bottom of every blog post
-4. When users sign up, store them in Resend's audience
-5. Once a month, write the newsletter and broadcast it
-
-I can build the signup form + the Resend wiring for you when you're ready to do this (1-2 hour code lift).
-
-**Lead magnet idea:** "First-Deal Underwriting Checklist" — a 2-page PDF with the 12 things to check before you offer on a rental. Drives newsletter signups. I can write this PDF for you when ready.
-
-**Why monthly, not weekly:** Weekly newsletters are easy to start and hard to maintain. Monthly is a cadence you can sustain for years. Subscribers prefer "valuable monthly" over "obligatory weekly."
+Repurpose the brief into reviewed blog, social, or partner content. Do not use a
+download as a newsletter lead magnet while capture is dark. The former setup and
+revival gates are documented in `docs/NEWSLETTER-SETUP.md` and
+`docs/NEWSLETTER-SCHEDULING.md`.
 
 ---
 
 ## The 90-day check-in
 
-After 90 days of running this:
-- **Comment karma:** should be 2-5x what it was on day 1, with 10+ recognizable mentions in r/realestateinvesting
-- **Organic blog traffic:** should be 200-500 sessions/month from search (check Vercel Analytics or add Plausible if you want better visibility)
-- **Newsletter:** should have 100-300 subscribers from organic site traffic alone (if you ship the signup form)
-- **Conversion attribution:** harder to measure but you should see a slow ramp in non-paid signups on Vercel — your `signup` conversion events with no UTM source
+After 90 days of running this, compare observed results with the baseline instead of using unsupported universal forecasts:
+
+- **Community participation:** record substantive contributions, replies, and attributable visits without predicting a karma or mention multiplier
+- **Organic blog traffic:** compare source-labeled sessions with the pre-period baseline
+- **Reviewed content distribution:** track attributable visits and analyzer CTA use from currently released channels; there is no active newsletter-subscriber target
+- **Conversion attribution:** review privacy-safe, source-labeled funnel events; do not treat missing UTM data as proof that a signup came from this plan
 
 If you're hitting those, double the cadence on what's working most.
 
@@ -164,14 +163,14 @@ If you do nothing else, do this:
 **Monday morning:** 30 min on r/realestateinvesting comments
 **Wednesday morning:** 30 min on r/realestateinvesting comments
 **Friday afternoon:** 2-3 hours writing/recording the week's content piece
-**Last Friday of the month:** 2 hours writing + sending the newsletter
+**Last Friday of the month:** 2 hours turning the internal monthly brief into reviewed content for a currently released channel; do not send a TrueCap newsletter
 
-That's ~5-6 hours per week. Sustainable for 12+ months. Compounds.
+Adjust the time budget to observed capacity and results; no cadence guarantees compounding growth.
 
 ---
 
 ## What I can help with
 
-You write me a one-liner ("write the blog post on 1031 exchanges" or "write the email newsletter for May") and I produce it. You publish. That removes the writing as a bottleneck — most solo-founder content strategies die because the founder gets behind on writing.
+You write me a one-liner ("write the blog post on 1031 exchanges" or "draft the internal May content brief") and I produce a draft for review. Publication remains a separate, channel-specific decision; drafting a brief does not authorize a newsletter send.
 
 Send me a topic from the queue above and I'll have a draft for you the same session.

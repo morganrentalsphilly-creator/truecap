@@ -38,7 +38,8 @@ export type WeeklySummaryEmailProps = {
 const fmtMoney = (n: number) =>
   `${n < 0 ? "-" : ""}$${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
 
-const fmtSignedMoney = (n: number) => `${n >= 0 ? "+" : "-"}$${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
+const fmtSignedMoney = (n: number) =>
+  `${n >= 0 ? "+" : "-"}$${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
 
 const rowStyle = {
   border: "1px solid #E2E8F0",
@@ -70,31 +71,91 @@ const rowSubStyle = {
   margin: "4px 0 0",
 };
 
-export default function WeeklySummaryEmail({ payload, siteUrl }: WeeklySummaryEmailProps) {
-  const { pipeline, owned, rateMover, dueItems, buyBox, methodologyNotes } = payload;
+export default function WeeklySummaryEmail({
+  payload,
+  siteUrl,
+}: WeeklySummaryEmailProps) {
+  const { pipeline, owned, rateMover, dueItems, buyBox, methodologyNotes } =
+    payload;
   return (
     <Html>
       <Head />
       <Preview>
-        {"Your week in deals — the numbers on your pipeline and portfolio, recomputed."}
+        {
+          "Your week in deals — the numbers on your pipeline and portfolio, recomputed."
+        }
       </Preview>
-      <Body style={{ backgroundColor: "#F1F5F9", margin: 0, fontFamily: "-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" }}>
-        <Container style={{ maxWidth: 560, margin: "0 auto", padding: "32px 16px" }}>
-          <Section style={{ backgroundColor: "#FFFFFF", borderRadius: 16, overflow: "hidden" }}>
-            <Section style={{ backgroundColor: BRAND, height: 6, fontSize: 6, lineHeight: "6px" }}>&nbsp;</Section>
+      <Body
+        style={{
+          backgroundColor: "#F1F5F9",
+          margin: 0,
+          fontFamily: "-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif",
+        }}
+      >
+        <Container
+          style={{ maxWidth: 560, margin: "0 auto", padding: "32px 16px" }}
+        >
+          <Section
+            style={{
+              backgroundColor: "#FFFFFF",
+              borderRadius: 16,
+              overflow: "hidden",
+            }}
+          >
+            <Section
+              style={{
+                backgroundColor: BRAND,
+                height: 6,
+                fontSize: 6,
+                lineHeight: "6px",
+              }}
+            >
+              &nbsp;
+            </Section>
             <Section style={{ padding: "28px 32px 8px" }}>
-              <Link href={siteUrl} style={{ color: INK, fontWeight: 800, fontSize: 20, textDecoration: "none" }}>
+              <Link
+                href={siteUrl}
+                style={{
+                  color: INK,
+                  fontWeight: 800,
+                  fontSize: 20,
+                  textDecoration: "none",
+                }}
+              >
                 TrueCap<span style={{ color: BRAND }}>.</span>
               </Link>
-              <Heading as="h1" style={{ color: INK, fontSize: 22, lineHeight: "30px", margin: "20px 0 4px" }}>
+              <Heading
+                as="h1"
+                style={{
+                  color: INK,
+                  fontSize: 22,
+                  lineHeight: "30px",
+                  margin: "20px 0 4px",
+                }}
+              >
                 Your week in deals
               </Heading>
-              <Text style={{ color: SUB, fontSize: 14, lineHeight: "22px", margin: "0 0 8px" }}>
-                The numbers below follow each saved deal&apos;s methodology status,
-                using the same policy as your dashboard.
+              <Text
+                style={{
+                  color: SUB,
+                  fontSize: 14,
+                  lineHeight: "22px",
+                  margin: "0 0 8px",
+                }}
+              >
+                The numbers below follow each saved deal&apos;s methodology
+                status, using the same policy as your dashboard.
               </Text>
               {methodologyNotes.map((note) => (
-                <Text key={note} style={{ color: SUB, fontSize: 11, lineHeight: "17px", margin: "4px 0 0" }}>
+                <Text
+                  key={note}
+                  style={{
+                    color: SUB,
+                    fontSize: 11,
+                    lineHeight: "17px",
+                    margin: "4px 0 0",
+                  }}
+                >
                   {note}
                 </Text>
               ))}
@@ -105,11 +166,17 @@ export default function WeeklySummaryEmail({ payload, siteUrl }: WeeklySummaryEm
                 <Section style={rowStyle}>
                   <Text style={rowTitleStyle}>Active pipeline</Text>
                   <Text style={rowMainStyle}>
-                    {pipeline.count === 1 ? "1 deal" : `${pipeline.count} deals`} ·{" "}
-                    {fmtMoney(pipeline.monthlyCashFlow)}/mo projected cash flow
+                    {pipeline.count === 1
+                      ? "1 deal"
+                      : `${pipeline.count} deals`}{" "}
+                    · {fmtMoney(pipeline.monthlyCashFlow)}/mo projected cash
+                    flow
                   </Text>
                   <Text style={rowSubStyle}>
-                    <Link href={`${siteUrl}/dashboard`} style={{ color: BRAND }}>
+                    <Link
+                      href={`${siteUrl}/dashboard`}
+                      style={{ color: BRAND }}
+                    >
                       See your pipeline →
                     </Link>
                   </Text>
@@ -122,15 +189,23 @@ export default function WeeklySummaryEmail({ payload, siteUrl }: WeeklySummaryEm
                 <Section style={rowStyle}>
                   <Text style={rowTitleStyle}>Owned portfolio</Text>
                   <Text style={rowMainStyle}>
-                    {owned.count === 1 ? "1 property" : `${owned.count} properties`} ·{" "}
-                    {fmtMoney(owned.monthlyCashFlow)}/mo cash flow
+                    {owned.count === 1
+                      ? "1 property"
+                      : `${owned.count} properties`}{" "}
+                    · {fmtMoney(owned.monthlyCashFlow)}/mo cash flow
                   </Text>
                   {owned.totalEquity != null ? (
                     <Text style={rowSubStyle}>
                       Estimated equity {fmtMoney(owned.totalEquity)}
                       {owned.equityGain != null ? (
-                        <span style={{ color: owned.equityGain >= 0 ? POSITIVE : NEGATIVE, fontWeight: 600 }}>
-                          {" "}({fmtSignedMoney(owned.equityGain)} since close)
+                        <span
+                          style={{
+                            color: owned.equityGain >= 0 ? POSITIVE : NEGATIVE,
+                            fontWeight: 600,
+                          }}
+                        >
+                          {" "}
+                          ({fmtSignedMoney(owned.equityGain)} since close)
                         </span>
                       ) : null}
                       {owned.datedCount < owned.count
@@ -145,24 +220,35 @@ export default function WeeklySummaryEmail({ payload, siteUrl }: WeeklySummaryEm
             {rateMover ? (
               <Section style={{ padding: "8px 32px" }}>
                 <Section style={rowStyle}>
-                  <Text style={rowTitleStyle}>Rates this week</Text>
+                  <Text style={rowTitleStyle}>FRED screening benchmark</Text>
                   <Text style={rowMainStyle}>
-                    30-yr fixed {rateMover.currentRatePct.toFixed(2)}%{" "}
-                    <span style={{ color: rateMover.weeklyMovePp <= 0 ? POSITIVE : NEGATIVE, fontWeight: 600 }}>
+                    National owner-occupied 30-year benchmark{" "}
+                    {rateMover.currentRatePct.toFixed(2)}%{" "}
+                    <span
+                      style={{
+                        color:
+                          rateMover.weeklyMovePp <= 0 ? POSITIVE : NEGATIVE,
+                        fontWeight: 600,
+                      }}
+                    >
                       ({rateMover.weeklyMovePp >= 0 ? "+" : ""}
                       {rateMover.weeklyMovePp.toFixed(2)}pp)
                     </span>
                   </Text>
                   {rateMover.topDeal ? (
                     <>
-                      <Text style={{ ...rowSubStyle, color: INK, fontWeight: 600 }}>
-                        Biggest mover: {rateMover.topDeal.label}
+                      <Text
+                        style={{ ...rowSubStyle, color: INK, fontWeight: 600 }}
+                      >
+                        Biggest modeled change: {rateMover.topDeal.label}
                       </Text>
                       {rateMover.topDeal.changes.slice(0, 2).map((change) => (
                         <Text
                           key={change}
                           style={{
-                            color: rateMover.topDeal!.improved ? POSITIVE : NEGATIVE,
+                            color: rateMover.topDeal!.improved
+                              ? POSITIVE
+                              : NEGATIVE,
                             fontSize: 12,
                             fontWeight: 600,
                             margin: "2px 0 0",
@@ -174,12 +260,19 @@ export default function WeeklySummaryEmail({ payload, siteUrl }: WeeklySummaryEm
                     </>
                   ) : (
                     <Text style={rowSubStyle}>
-                      No saved-deal screening bands changed at this week&apos;s rate
-                      ({rateMover.monitoredCount === 1
+                      No saved-deal screening bands changed at this week&apos;s
+                      benchmark (
+                      {rateMover.monitoredCount === 1
                         ? "1 deal monitored"
-                        : `${rateMover.monitoredCount} deals monitored`}).
+                        : `${rateMover.monitoredCount} deals monitored`}
+                      ).
                     </Text>
                   )}
+                  <Text style={rowSubStyle}>
+                    This FRED series is an editable screening input, not an
+                    investment-property quote or approval. Replace it with a
+                    current lender quote before relying on the model.
+                  </Text>
                 </Section>
               </Section>
             ) : null}
@@ -193,14 +286,22 @@ export default function WeeklySummaryEmail({ payload, siteUrl }: WeeklySummaryEm
                       key={`${item.dealId}-${item.itemLabel}-${item.dueDate}`}
                       style={{ ...rowSubStyle, margin: "2px 0 0" }}
                     >
-                      <span style={{ color: item.status === "overdue" ? NEGATIVE : INK, fontWeight: 600 }}>
+                      <span
+                        style={{
+                          color: item.status === "overdue" ? NEGATIVE : INK,
+                          fontWeight: 600,
+                        }}
+                      >
                         {item.status === "overdue" ? "Overdue" : "Due soon"}
                       </span>{" "}
                       · {item.itemLabel} — {item.dealLabel} ({item.dueDate})
                     </Text>
                   ))}
                   <Text style={rowSubStyle}>
-                    <Link href={`${siteUrl}/dashboard/saved-analyses`} style={{ color: BRAND }}>
+                    <Link
+                      href={`${siteUrl}/dashboard/saved-analyses`}
+                      style={{ color: BRAND }}
+                    >
                       Open your deals →
                     </Link>
                   </Text>
@@ -214,7 +315,8 @@ export default function WeeklySummaryEmail({ payload, siteUrl }: WeeklySummaryEm
                   <Text style={rowTitleStyle}>Buy-box fit</Text>
                   <Text style={rowMainStyle}>
                     {buyBox.passingCount} of {buyBox.evaluatedCount} active{" "}
-                    {buyBox.evaluatedCount === 1 ? "deal meets" : "deals meet"} your buy box
+                    {buyBox.evaluatedCount === 1 ? "deal meets" : "deals meet"}{" "}
+                    your buy box
                     {buyBox.boxCount > 1 ? ` (${buyBox.boxCount} boxes)` : ""}.
                   </Text>
                 </Section>
@@ -237,19 +339,40 @@ export default function WeeklySummaryEmail({ payload, siteUrl }: WeeklySummaryEm
               >
                 Open your dashboard
               </Link>
-              <Text style={{ color: SUB, fontSize: 11, lineHeight: "17px", margin: "18px 0 0" }}>
+              <Text
+                style={{
+                  color: SUB,
+                  fontSize: 11,
+                  lineHeight: "17px",
+                  margin: "18px 0 0",
+                }}
+              >
                 You get this weekly summary because you&apos;re a TrueCap Pro
-                member and opted in. Numbers follow the saved-analysis methodology
-                status shown above — not financial advice. Turn it off any time in{" "}
-                <Link href={`${siteUrl}/settings`} style={{ color: SUB, textDecoration: "underline" }}>
+                member and opted in. Numbers follow the saved-analysis
+                methodology status shown above — not financial advice. Turn it
+                off any time in{" "}
+                <Link
+                  href={`${siteUrl}/settings`}
+                  style={{ color: SUB, textDecoration: "underline" }}
+                >
                   Settings
                 </Link>
                 , or reply to this email to stop receiving it.
               </Text>
             </Section>
           </Section>
-          <Text style={{ color: "#94A3B8", fontSize: 11, textAlign: "center" as const, margin: "16px 0 0" }}>
-            TrueCap · Underwrite rentals in 60 seconds · <Link href={siteUrl} style={{ color: "#94A3B8" }}>usetruecap.com</Link>
+          <Text
+            style={{
+              color: "#94A3B8",
+              fontSize: 11,
+              textAlign: "center" as const,
+              margin: "16px 0 0",
+            }}
+          >
+            TrueCap · Underwrite rentals in 60 seconds ·{" "}
+            <Link href={siteUrl} style={{ color: "#94A3B8" }}>
+              usetruecap.com
+            </Link>
           </Text>
         </Container>
       </Body>

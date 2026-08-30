@@ -48,16 +48,12 @@ import { VERIFIED_CASE_STUDIES } from "@/lib/verified-case-studies";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  // Underwriting-led title; keyword-led /tools pages remain the SEO
-  // acquisition layer.
-  // /tools/* pages keep their keyword-led "Free ... Calculator" titles as
-  // the SEO traffic source. `absolute` opts out of the layout's
-  // "%s | TrueCap" template.
+  // `absolute` prevents the root layout from adding a second brand suffix.
   title: {
-    absolute: "TrueCap — Rental Property Underwriting in Minutes",
+    absolute: "Rental Property Calculator & Max Offer | TrueCap",
   },
   description:
-    "Paste an address or supported listing, review editable assumptions, and see first-year cash flow, returns, cash required, and the price that fits your targets.",
+    "Analyze a rental property from an address, edit every assumption, and see cash flow, cap rate, DSCR, cash-on-cash return, and a target-based Offer Ceiling.",
   keywords: [
     "rental property analysis",
     "investment property calculator",
@@ -74,9 +70,9 @@ export const metadata: Metadata = {
     // Keep og:title aligned with the <title> — Google falls back to
     // og:title when rewriting SERP titles, so a mismatched og:title
     // resurfaces stale phrasing on brand queries.
-    title: "TrueCap — Rental Property Underwriting in Minutes",
+    title: "Rental Property Calculator & Max Offer | TrueCap",
     description:
-      "A preliminary rental screen with editable assumptions and a modeled price threshold under explicit user targets.",
+      "Analyze a rental property from an address, edit every assumption, and see cash flow, cap rate, DSCR, cash-on-cash return, and a target-based Offer Ceiling.",
     url: "/",
     type: "website",
     // Re-declare images because page-level openGraph fully replaces the
@@ -87,15 +83,15 @@ export const metadata: Metadata = {
         url: "/home.jpg",
         width: 1200,
         height: 630,
-        alt: "TrueCap — real estate investment analyzer",
+        alt: "TrueCap rental property calculator and Offer Ceiling workflow",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "TrueCap — Rental Property Underwriting in Minutes",
+    title: "Rental Property Calculator & Max Offer | TrueCap",
     description:
-      "A preliminary rental screen with editable assumptions and a modeled price threshold under explicit user targets.",
+      "Analyze a rental property from an address, edit every assumption, and see cash flow, cap rate, DSCR, cash-on-cash return, and a target-based Offer Ceiling.",
     images: ["/home.jpg"],
   },
 };

@@ -59,7 +59,9 @@ describe("trust-language guards", () => {
 
     expect(combined).not.toMatch(/supports accelerated depreciation/i);
     expect(combined).not.toMatch(/12-month seasonal income breakdown/i);
-    expect(combined).toMatch(/Neither (?:calculator )?determines? STR-loophole eligibility/);
+    expect(combined).toMatch(
+      /Neither (?:calculator )?determines? STR-loophole eligibility/,
+    );
     expect(combined).toContain(
       "Seasonal months require separate saved scenarios",
     );
@@ -203,9 +205,15 @@ describe("trust-language guards", () => {
     const combined = `${signup}\n${landing}\n${purchase}\n${changelog}`;
 
     expect(combined).not.toMatch(/lender-ready/i);
-    expect(combined).toContain("Lender-facing");
+    expect(landing).toContain(
+      "Package the underwrite for lenders, partners, clients, or internal review.",
+    );
+    expect(landing).toContain("it is not an appraisal or approval");
     expect(changelog).not.toMatch(/tax strategy/i);
-    expect(changelog).toContain("Illustrative Tax Impact");
+    expect(changelog).toContain("Historical tax-impact projection (retired)");
+    expect(changelog).toContain(
+      "Current Pro projections cover pre-tax cash flow and equity under editable assumptions",
+    );
   });
 
   it("keeps market, voucher, operator, appraisal, and lender outcomes verification-first", () => {
@@ -241,7 +249,12 @@ describe("trust-language guards", () => {
     expect(cityStrategies).not.toMatch(
       /Cincinnati appraisals modestly under-comp/i,
     );
-    expect(cityStrategyPage).toContain("not a forecast, appraisal");
+    expect(cityStrategyPage).toContain(
+      "does not publish an investment recommendation, market range, neighborhood ranking, or promised outcome",
+    );
+    expect(cityStrategyPage).toContain(
+      "registry claims remain hidden pending authoritative dependencies",
+    );
 
     expect(proForma).not.toMatch(/what you(?:'|&apos;)d actually achieve/i);
     expect(`${voucher}\n${philadelphia}`).not.toMatch(

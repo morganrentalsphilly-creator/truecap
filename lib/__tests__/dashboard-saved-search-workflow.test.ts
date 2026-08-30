@@ -47,7 +47,10 @@ describe("durable My Deals search intent", () => {
     const list = read("components/investcalc/saved-analyses-page-v2.tsx");
 
     expect(topbar).toContain("buildDashboardSavedSearchHref(value)");
-    expect(topbar).toContain("router.push(href)");
+    expect(topbar).toContain("window.location.assign(href)");
+    expect(topbar).toContain('fetch("/api/dashboard/search-suggestions"');
+    expect(topbar).toContain('method: "POST"');
+    expect(topbar).not.toContain("search-suggestions?q=");
     expect(topbar).toContain("DASHBOARD_SAVED_SEARCH_RELEASE_EVENT");
     expect(topbar).toContain(
       'router.push("/dashboard/saved-analyses?state=all")',

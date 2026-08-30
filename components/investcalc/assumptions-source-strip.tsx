@@ -43,7 +43,7 @@ const MANUAL: Pick<StripEntry, "source" | "short" | "manual"> = {
 /** Provenance → display rows. Exported for unit tests (pure). */
 export function buildAssumptionEntries(
   provenance: EnrichmentProvenanceInput | null | undefined,
-  expensesEdited: boolean
+  expensesEdited: boolean,
 ): StripEntry[] {
   const rent = provenance?.monthlyRent;
   const rate = provenance?.interestRate;
@@ -69,7 +69,8 @@ export function buildAssumptionEntries(
             ...(rent.fetchedAt
               ? {
                   freshness:
-                    rent.source !== "rentcast-estimate" && /^\d{4}$/.test(rent.fetchedAt)
+                    rent.source !== "rentcast-estimate" &&
+                    /^\d{4}$/.test(rent.fetchedAt)
                       ? `HUD ${rent.fetchedAt}`
                       : `As of ${rent.fetchedAt}`,
                 }
@@ -80,13 +81,23 @@ export function buildAssumptionEntries(
     {
       label: "Mortgage rate",
       ...(rate && !rate.overridden
-        ? { source: "FRED owner-occupied benchmark", short: "FRED", manual: false, ...(rate.fetchedAt ? { freshness: `As of ${rate.fetchedAt}` } : {}) }
+        ? {
+            source: "FRED owner-occupied benchmark",
+            short: "FRED",
+            manual: false,
+            ...(rate.fetchedAt ? { freshness: `As of ${rate.fetchedAt}` } : {}),
+          }
         : MANUAL),
     },
     {
       label: "Property tax",
       ...(tax && !tax.overridden
-        ? { source: "State tax benchmark", short: "state", manual: false, freshness: "State benchmark" }
+        ? {
+            source: "Legacy state estimate — verify locally",
+            short: "legacy",
+            manual: false,
+            freshness: "Retired source",
+          }
         : MANUAL),
     },
     {
@@ -117,7 +128,9 @@ export function AssumptionsSourceStrip({
 }) {
   const [expanded, setExpanded] = useState(false);
   const entries = buildAssumptionEntries(provenance, expensesEdited);
-  const summary = entries.map((e) => `${e.label.split(" ")[0]} ${e.short}`).join(" · ");
+  const summary = entries
+    .map((e) => `${e.label.split(" ")[0]} ${e.short}`)
+    .join(" · ");
 
   return (
     <div
@@ -153,16 +166,21 @@ export function AssumptionsSourceStrip({
         aria-expanded={expanded}
         className="mt-2 flex min-h-11 w-full items-center justify-between gap-2 text-left sm:hidden"
       >
-        <span className="min-w-0 truncate text-xs text-muted-foreground">{summary}</span>
+        <span className="min-w-0 truncate text-xs text-muted-foreground">
+          {summary}
+        </span>
         <ChevronDown
-          className={cn("size-3.5 shrink-0 text-muted-foreground transition-transform", expanded && "rotate-180")}
+          className={cn(
+            "size-3.5 shrink-0 text-muted-foreground transition-transform",
+            expanded && "rotate-180",
+          )}
         />
       </button>
 
       <ul
         className={cn(
           "mt-1 grid-cols-2 gap-x-4 gap-y-2 sm:mt-3 sm:grid sm:grid-cols-4",
-          expanded ? "grid" : "hidden sm:grid"
+          expanded ? "grid" : "hidden sm:grid",
         )}
       >
         {entries.map((s) => (
@@ -173,14 +191,17 @@ export function AssumptionsSourceStrip({
             <div
               className={cn(
                 "truncate text-sm font-semibold",
-                s.manual ? "text-muted-foreground" : "text-foreground"
+                s.manual ? "text-muted-foreground" : "text-foreground",
               )}
               title={s.source}
             >
               {s.source}
             </div>
             {s.freshness ? (
-              <div className="truncate text-[10px] text-muted-foreground" title={s.freshness}>
+              <div
+                className="truncate text-[10px] text-muted-foreground"
+                title={s.freshness}
+              >
                 {s.freshness}
               </div>
             ) : null}
@@ -190,10 +211,12 @@ export function AssumptionsSourceStrip({
       <p
         className={cn(
           "mt-3 border-t border-border/60 pt-2.5 text-[11px] leading-relaxed text-muted-foreground",
-          expanded ? "block" : "hidden sm:block"
+          expanded ? "block" : "hidden sm:block",
         )}
       >
-        Planning benchmarks, not property facts or financial advice — verify rent, financing, taxes, insurance, and condition before recording an investment decision.{" "}
+        Planning benchmarks, not property facts or financial advice — verify
+        rent, financing, taxes, insurance, and condition before recording an
+        investment decision.{" "}
         {/* Quiet provenance link (trust-polish audit): the skeptical-investor
             "is this math real?" path used to dead-end here — /methodology
             documents every formula + data source but had no inbound link

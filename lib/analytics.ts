@@ -68,6 +68,7 @@ export type FunnelEvent =
   | "complete_decision_checkout_started"
   | "complete_decision_purchased"
   | "upgrade_credit_applied"
+  | "upgrade_started"
   | "subscription_checkout_started"
   | "subscription_started"
   | "plan_changed"
@@ -75,6 +76,8 @@ export type FunnelEvent =
   | "decision_memo_generated"
   | "share_created"
   | "share_viewed"
+  | "shared_analysis_opened"
+  | "shared_analysis_copied"
   | "share_revoked"
   | "shared_scenario_forked"
   | "memo_generated"
@@ -96,7 +99,9 @@ export type FunnelEvent =
   | "decision_readiness_changed"
   | "material_change_detected"
   | "calculation_parity_failed"
-  | "organic_landing" // properties: landing_page, referrer_host, attribution_medium
+  | "organic_landing" // properties: route_category, referral_source
+  | "content_cta_clicked" // properties: route_category, content_type, referral_source
+  | "embed_cta_clicked" // properties: calculator_slug, referral_source
   | "calculator_started" // properties: calculator, landing_page?
   | "calculator_completed" // properties: calculator, landing_page?
   | "report_viewed"
@@ -160,18 +165,18 @@ export type FunnelEvent =
   | "deal_compared"
   | "pro_checkout_started"
   | "pro_subscribed"
-  | "deal_saved"        // properties: property_type
-  | "pdf_exported"      // properties: property_type, has_deal_score
+  | "deal_saved" // properties: property_type
+  | "pdf_exported" // properties: property_type, has_deal_score
   | "share_link_copied" // properties: has_address
   // ── Conversion-improvement events ──────────────────────────────
   // Fired by the 5 free-tier conversion improvements shipped after
   // the math audit. Each gives the funnel one more measurable step
   // so we can spot which improvement is actually moving the needle.
-  | "email_capture_shown"     // properties: address_present
+  | "email_capture_shown" // properties: address_present
   | "email_capture_submitted" // properties: address_present, scheduled_count
   | "email_capture_dismissed"
   | "exit_intent_shown"
-  | "exit_intent_clicked"     // properties: variant (always "50_off_annual" for now)
+  | "exit_intent_clicked" // properties: variant (always "50_off_annual" for now)
   | "exit_intent_dismissed"
   // Sample-deal Pro preview — fires when a non-Pro visitor runs the
   // sample deal and the full Pro report is unlocked for the demo.
@@ -184,7 +189,7 @@ export type FunnelEvent =
   | "one_time_pdf_checkout_started" // properties: property_type
   | "one_time_pdf_purchased"
   | "single_deal_checkout_started" // properties: property_type, price_variant
-  | "single_deal_purchased"        // properties: price_variant
+  | "single_deal_purchased" // properties: price_variant
   | "single_deal_checkout_completed"
   // Deal Q&A (AI panel under the recommendation card).
   | "deal_qa_asked" // properties: question_length
@@ -194,10 +199,10 @@ export type FunnelEvent =
   // Granular steps so we can A/B the hero input + minimal analyzer and
   // see exactly where starts drop off. No PII: we never send the typed
   // address string, only coarse signals (state, has_components).
-  | "hero_address_submit"      // properties: has_components (Places state/zip captured)
+  | "hero_address_submit" // properties: has_components (Places state/zip captured)
   | "hero_sample_clicked"
-  | "address_selected"         // properties: has_state (boolean; never location data)
-  | "optional_section_opened"  // properties: source ("toggle" | "edit_link")
+  | "address_selected" // properties: has_state (boolean; never location data)
+  | "optional_section_opened" // properties: source ("toggle" | "edit_link")
   | "result_assumptions_edited"
   // ── Investor-OS saved-deal workflow (P1-12) ────────────────────
   // The Pro buy-box and scenario flows write to the DB but fired no
@@ -205,51 +210,51 @@ export type FunnelEvent =
   // close the attribution gap so we can see buy-box adoption and which
   // strategies investors model as scenarios. No PII — only coarse
   // signals (source, default flag, strategy kind, counts).
-  | "buy_box_saved"      // properties: source ("settings" | "template"), is_new?, is_default, has_strategy
-  | "buy_box_created"    // properties: source, is_default, has_strategy
-  | "scenario_added"     // properties: has_strategy, strategy_kind (kind | null)
+  | "buy_box_saved" // properties: source ("settings" | "template"), is_new?, is_default, has_strategy
+  | "buy_box_created" // properties: source, is_default, has_strategy
+  | "scenario_added" // properties: has_strategy, strategy_kind (kind | null)
   | "scenarios_compared" // properties: count
   // ── Upsell + pricing + share-loop attribution (T3) ─────────────
   // Closes the "saw the upsell → started checkout" gap (the biggest
   // attribution hole), measures the pricing-page funnel, and the share
   // loop's reach (a shared deal viewed = the K-factor numerator). PII-free.
-  | "upsell_prompt_shown"   // properties: feature, placement
+  | "upsell_prompt_shown" // properties: feature, placement
   | "upsell_prompt_clicked" // properties: feature, placement
   | "max_offer_view_attempted" // properties: placement
-  | "upgrade_modal_viewed"     // properties: feature, placement
-  | "pricing_view"          // properties: path
+  | "upgrade_modal_viewed" // properties: feature, placement
+  | "pricing_view" // properties: path
   | "pricing_viewed"
-  | "checkout_started"     // server-side properties: plan_slug only
-  | "checkout_returned"    // properties: plan_tier (pro | agent_pro | unknown)
+  | "checkout_started" // server-side properties: plan_slug only
+  | "checkout_returned" // properties: plan_tier (pro | agent_pro | unknown)
   | "subscription_activated" // server-side properties: plan_slug, trial_granted
-  | "shared_deal_viewed"    // properties: has_address
+  | "shared_deal_viewed" // properties: has_address
   // ── Agent Loop: co-branded share lead capture (T6) ─────────────
-  | "lead_form_shown"       // properties: owner_present
-  | "lead_captured"         // properties: has_message
+  | "lead_form_shown" // properties: owner_present
+  | "lead_captured" // properties: has_message
   // ── Investor strategy chips ("What's your play?") ──────────────
   // Which plays investors pick — measures adoption + which strategy
   // converts to Pro. PII-free; just the strategy key.
-  | "strategy_selected"     // properties: strategy (e.g. "wholesale-mao"), source ("chip" click vs "link" seed)
-  | "comparison_started"    // properties: source
-  | "report_generated"      // properties: report_type
+  | "strategy_selected" // properties: strategy (e.g. "wholesale-mao"), source ("chip" click vs "link" seed)
+  | "comparison_started" // properties: source
+  | "report_generated" // properties: report_type
   | "agent_pro_cta_clicked" // properties: placement
   | "agent_pro_checkout_started"
   | "agent_pro_page_viewed"
   | "guarantee_viewed"
   // ── 2026-08 Grand Slam Offer rollout ────────────────────────────
-  | "founding_banner_clicked"   // properties: target ("methodology" | "pricing")
+  | "founding_banner_clicked" // properties: target ("methodology" | "pricing")
   | "founding_banner_dismissed"
   // ── Aug-2026 hierarchy rebuild: the decision funnel ─────────────
   // Instrumented so the rebuild's premise is measurable: does leading
   // with Max Offer change what people do next?
-  | "analysis_run"              // properties: property_type, is_authenticated
-  | "max_offer_viewed"          // properties: has_offer, tier ("decision")
+  | "analysis_run" // properties: property_type, is_authenticated
+  | "max_offer_viewed" // properties: has_offer, tier ("decision")
   | "tune_targets_opened"
-  | "deal_saved"                // properties: is_update
-  | "deep_analysis_opened"      // properties: row
-  | "shortlist_screened"        // properties: rows
-  | "export_pdf"                // properties: surface
-  | "upgrade_cta_click"         // properties: placement, feature
+  | "deal_saved" // properties: is_update
+  | "deep_analysis_opened" // properties: row
+  | "shortlist_screened" // properties: rows
+  | "export_pdf" // properties: surface
+  | "upgrade_cta_click" // properties: placement, feature
   // Region-level engagement: which QUESTION people open, now that the
   // results page is navigated by intent instead of scroll position.
   | "why_this_number_opened"
@@ -257,8 +262,8 @@ export type FunnelEvent =
   | "go_deeper_opened"
   | "testimonial_prompt_shown"
   | "testimonial_submitted"
-  | "pack_credit_offer_shown"   // post-purchase "$9 toward Pro" toast
-  | "testimonial_prompt_shown"     // properties: source
+  | "pack_credit_offer_shown" // post-purchase "$9 toward Pro" toast
+  | "testimonial_prompt_shown" // properties: source
   | "testimonial_prompt_submitted" // properties: source, consented
   | "testimonial_prompt_dismissed" // properties: via
   | "onboarding_step_completed";
@@ -270,7 +275,8 @@ const POSTHOG_HOST =
 
 /** Same key components/marketing/cookie-consent-banner.tsx writes. */
 const CONSENT_STORAGE_KEY = "truecap_cookie_consent_v1";
-const ORGANIC_ATTRIBUTION_KEY = "truecap_organic_attribution_v1";
+const FIRST_TOUCH_ATTRIBUTION_KEY = "truecap_first_touch_attribution_v1";
+const LEGACY_ORGANIC_ATTRIBUTION_KEY = "truecap_organic_attribution_v1";
 const LEGACY_POSTHOG_INITIAL_KEYS = new Set([
   "$initial_person_info",
   "$initial_campaign_params",
@@ -287,7 +293,7 @@ function sanitizePersistedPostHogNode(value: unknown): unknown {
   return Object.fromEntries(
     Object.entries(value as Record<string, unknown>)
       .filter(([key]) => !LEGACY_POSTHOG_INITIAL_KEYS.has(key))
-      .map(([key, child]) => [key, sanitizePersistedPostHogNode(child)])
+      .map(([key, child]) => [key, sanitizePersistedPostHogNode(child)]),
   );
 }
 
@@ -297,7 +303,7 @@ function sanitizePersistedPostHogNode(value: unknown): unknown {
  * initial-person blobs and redacting any share route/query token recursively.
  */
 export function sanitizeLegacyPostHogPersistenceValue(
-  raw: string | null
+  raw: string | null,
 ): string | null {
   if (!raw) return raw;
   try {
@@ -345,22 +351,44 @@ function preparePostHogPersistence(projectKey: string): void {
   }
 }
 
-export type OrganicAttribution = {
-  landing_page: string;
-  referrer_host: string;
-  attribution_medium: "organic_search" | "organic_ai";
+export const FIRST_TOUCH_REFERRAL_SOURCES = [
+  "direct",
+  "organic_search",
+  "organic_ai",
+  "organic_social",
+  "paid_search",
+  "paid_social",
+  "email",
+  "external_referral",
+  "campaign",
+] as const;
+
+export type FirstTouchReferralSource =
+  (typeof FIRST_TOUCH_REFERRAL_SOURCES)[number];
+
+export type FirstTouchAttribution = {
+  referral_source: FirstTouchReferralSource;
 };
 
-export function setOrganicAttribution(attribution: OrganicAttribution): void {
+const FIRST_TOUCH_REFERRAL_SOURCE_SET = new Set<string>(
+  FIRST_TOUCH_REFERRAL_SOURCES,
+);
+
+/**
+ * Store one coarse acquisition category for this browser session. Raw UTM
+ * values, landing paths, and referrer hosts never enter persistence or an
+ * event payload. The provider classifies those inputs before calling here.
+ */
+export function setFirstTouchAttribution(
+  attribution: FirstTouchAttribution,
+): void {
   if (typeof window === "undefined") return;
   try {
-    if (!window.sessionStorage.getItem(ORGANIC_ATTRIBUTION_KEY)) {
+    window.sessionStorage.removeItem(LEGACY_ORGANIC_ATTRIBUTION_KEY);
+    if (!window.sessionStorage.getItem(FIRST_TOUCH_ATTRIBUTION_KEY)) {
       window.sessionStorage.setItem(
-        ORGANIC_ATTRIBUTION_KEY,
-        JSON.stringify({
-          ...attribution,
-          landing_page: sanitizeSensitiveUrl(attribution.landing_page),
-        })
+        FIRST_TOUCH_ATTRIBUTION_KEY,
+        JSON.stringify(attribution),
       );
     }
   } catch {
@@ -368,16 +396,19 @@ export function setOrganicAttribution(attribution: OrganicAttribution): void {
   }
 }
 
-function organicAttribution(): OrganicAttribution | null {
+function firstTouchAttribution(): FirstTouchAttribution | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = window.sessionStorage.getItem(ORGANIC_ATTRIBUTION_KEY);
+    window.sessionStorage.removeItem(LEGACY_ORGANIC_ATTRIBUTION_KEY);
+    const raw = window.sessionStorage.getItem(FIRST_TOUCH_ATTRIBUTION_KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as OrganicAttribution;
-    return {
-      ...parsed,
-      landing_page: sanitizeSensitiveUrl(parsed.landing_page),
-    };
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    return typeof parsed.referral_source === "string" &&
+      FIRST_TOUCH_REFERRAL_SOURCE_SET.has(parsed.referral_source)
+      ? {
+          referral_source: parsed.referral_source as FirstTouchReferralSource,
+        }
+      : null;
   } catch {
     return null;
   }
@@ -385,7 +416,7 @@ function organicAttribution(): OrganicAttribution | null {
 
 type QueuedCall =
   | { kind: "capture"; event: string; properties?: Record<string, unknown> }
-  | { kind: "identify"; userId: string; properties?: Record<string, unknown> }
+  | { kind: "identify"; userId: string }
   | { kind: "reset" }
   | { kind: "consent"; granted: boolean };
 
@@ -393,6 +424,9 @@ type QueuedCall =
 let client: PostHog | null = null;
 /** Init ran and analytics is off for this session (no key / SDK load failed). */
 let disabled = false;
+/** In-memory only: a sensitive route/query disables this SPA document, but a
+ * clean full reload starts fresh and can honor the user's normal consent. */
+let documentTelemetryDisabled = false;
 let initPromise: Promise<PostHog | null> | null = null;
 
 /**
@@ -414,7 +448,7 @@ function readStoredConsent(): "granted" | "denied" | null {
 }
 
 function enqueue(call: QueuedCall): void {
-  if (disabled) return;
+  if (disabled || documentTelemetryDisabled) return;
   if (queue.length >= MAX_QUEUED_CALLS) return;
   queue.push(call);
 }
@@ -425,7 +459,7 @@ function applyCall(ph: PostHog, call: QueuedCall): void {
       ph.capture(call.event, call.properties);
       break;
     case "identify":
-      ph.identify(call.userId, call.properties);
+      ph.identify(call.userId);
       break;
     case "reset":
       ph.reset();
@@ -460,6 +494,7 @@ function flushQueue(ph: PostHog): void {
  */
 export function initAnalytics(): Promise<PostHog | null> {
   if (typeof window === "undefined") return Promise.resolve(null);
+  if (documentTelemetryDisabled) return Promise.resolve(null);
   if (initPromise) return initPromise;
   initPromise = (async () => {
     const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
@@ -477,7 +512,7 @@ export function initAnalytics(): Promise<PostHog | null> {
           const Sentry = await import("@sentry/nextjs");
           Sentry.captureMessage(
             "[analytics] NEXT_PUBLIC_POSTHOG_KEY missing from the production build — funnel is blind",
-            { level: "warning", tags: { feature: "analytics" } }
+            { level: "warning", tags: { feature: "analytics" } },
           );
         } catch {
           /* Sentry unavailable — nothing more we can do quietly */
@@ -488,6 +523,7 @@ export function initAnalytics(): Promise<PostHog | null> {
     try {
       preparePostHogPersistence(key);
       const { default: posthog } = await import("posthog-js");
+      if (documentTelemetryDisabled) return null;
       if (!posthog.__loaded) {
         posthog.init(key, {
           api_host: POSTHOG_HOST,
@@ -522,7 +558,8 @@ export function initAnalytics(): Promise<PostHog | null> {
             const sanitized = {
               ...event,
               properties:
-                sanitizeAnalyticsUrlProperties(event.properties) ?? event.properties,
+                sanitizeAnalyticsUrlProperties(event.properties) ??
+                event.properties,
             };
             if (sanitized.properties) delete sanitized.properties.title;
             if (event.$set) {
@@ -530,7 +567,9 @@ export function initAnalytics(): Promise<PostHog | null> {
               if (sanitized.$set) delete sanitized.$set.title;
             }
             if (event.$set_once) {
-              sanitized.$set_once = sanitizeAnalyticsUrlProperties(event.$set_once);
+              sanitized.$set_once = sanitizeAnalyticsUrlProperties(
+                event.$set_once,
+              );
               if (sanitized.$set_once) delete sanitized.$set_once.title;
             }
             return sanitized;
@@ -573,23 +612,26 @@ export function initAnalytics(): Promise<PostHog | null> {
 
 function captureRaw(
   event: string,
-  properties?: Record<string, unknown>
+  properties?: Record<string, unknown>,
 ): boolean {
-  if (typeof window === "undefined") return false;
+  if (typeof window === "undefined" || documentTelemetryDisabled) return false;
   try {
-    const attribution = organicAttribution();
+    const attribution = firstTouchAttribution();
+    // Explicit in-product sources (for example an opaque share or embed)
+    // override the session acquisition category for that event. The merged
+    // object still passes through the event's exact property allowlist.
+    const attributedProperties = attribution
+      ? { ...attribution, ...properties }
+      : properties;
     const safeProperties = sanitizeAnalyticsEventProperties(
       event,
-      sanitizeAnalyticsUrlProperties(properties)
+      sanitizeAnalyticsUrlProperties(attributedProperties),
     );
-    const attributedProperties = attribution
-      ? { ...attribution, ...safeProperties }
-      : safeProperties;
     if (client) {
-      client.capture(event, attributedProperties);
+      client.capture(event, safeProperties);
       return true;
     }
-    enqueue({ kind: "capture", event, properties: attributedProperties });
+    enqueue({ kind: "capture", event, properties: safeProperties });
     return false;
   } catch (err) {
     // Analytics must never break user-facing flows. Console-warn only.
@@ -606,7 +648,7 @@ function captureRaw(
  */
 export function trackEvent(
   event: FunnelEvent,
-  properties?: Record<string, unknown>
+  properties?: Record<string, unknown>,
 ): boolean {
   return captureRaw(event, properties);
 }
@@ -629,13 +671,13 @@ export function trackPageview(currentUrl: string): void {
  * The user-id is an opaque Supabase UUID. Never attach email, address, or
  * underwriting inputs to identification.
  */
-export function identifyUser(userId: string, properties?: Record<string, unknown>): void {
-  if (typeof window === "undefined") return;
+export function identifyUser(userId: string): void {
+  if (typeof window === "undefined" || documentTelemetryDisabled) return;
   try {
     if (client) {
-      client.identify(userId, properties);
+      client.identify(userId);
     } else {
-      enqueue({ kind: "identify", userId, properties });
+      enqueue({ kind: "identify", userId });
     }
   } catch (err) {
     console.warn("[analytics] identifyUser failed:", err);
@@ -648,7 +690,7 @@ export function identifyUser(userId: string, properties?: Record<string, unknown
  * a new anonymous distinct_id under the hood.
  */
 export function resetAnalytics(): void {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || documentTelemetryDisabled) return;
   try {
     if (client) {
       client.reset();
@@ -669,7 +711,7 @@ export function resetAnalytics(): void {
  * agree either way.
  */
 export function setAnalyticsConsent(granted: boolean): void {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || documentTelemetryDisabled) return;
   try {
     if (client) {
       if (granted) {
@@ -683,4 +725,13 @@ export function setAnalyticsConsent(granted: boolean): void {
   } catch (err) {
     console.warn("[analytics] setAnalyticsConsent failed:", err);
   }
+}
+
+/** Stop wrapper-driven PostHog activity for the current document only. The
+ * SDK is configured without autocapture, replay, surveys, flags, or pageleave,
+ * so blocking every wrapper call and clearing the pre-init queue closes its
+ * remaining event paths without writing a persistent opt-out. */
+export function disableAnalyticsForDocument(): void {
+  documentTelemetryDisabled = true;
+  queue = [];
 }

@@ -11,7 +11,7 @@
  */
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
+import { AnalyzerHandoffLink } from "@/components/analyzer-handoff-link";
 import { ArrowUpRight, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
@@ -102,7 +102,13 @@ export function RoiCalculatorWidget() {
         max: 100,
       }),
     }),
-    [annualCashFlow, annualPrincipalPaydown, appreciationRate, cashInvested, purchasePrice]
+    [
+      annualCashFlow,
+      annualPrincipalPaydown,
+      appreciationRate,
+      cashInvested,
+      purchasePrice,
+    ],
   );
 
   const result = useMemo(() => {
@@ -137,17 +143,55 @@ export function RoiCalculatorWidget() {
   // This widget collects an annual cash-flow figure, not a monthly rent, so
   // only the purchase price maps cleanly onto the analyzer's inputs.
   const handoffHref = buildAnalyzerHandoffUrl(
-    validated.purchasePrice.ok ? { purchasePrice: validated.purchasePrice.value } : {},
-    { utmSource: "roi-calculator" }
+    validated.purchasePrice.ok
+      ? { purchasePrice: validated.purchasePrice.value }
+      : {},
+    { utmSource: "roi-calculator" },
   );
 
   return (
     <div className="rounded-2xl border border-border bg-card p-5 sm:p-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <ToolNumberField id="roi-price" label="Purchase price" prefix="$" min={0.01} max={100_000_000} value={purchasePrice} onChange={(e) => setPurchasePrice(e.target.value)} error={validated.purchasePrice.error} />
-        <ToolNumberField id="roi-cash" label="Total cash invested" prefix="$" min={0.01} max={100_000_000} value={cashInvested} onChange={(e) => setCashInvested(e.target.value)} error={validated.cashInvested.error} />
-        <ToolNumberField id="roi-cf" label="Annual cash flow" prefix="$" min={-100_000_000} max={100_000_000} value={annualCashFlow} onChange={(e) => setAnnualCashFlow(e.target.value)} error={validated.annualCashFlow.error} />
-        <ToolNumberField id="roi-principal" label="Annual principal paydown" prefix="$" min={0} max={100_000_000} value={annualPrincipalPaydown} onChange={(e) => setAnnualPrincipalPaydown(e.target.value)} error={validated.annualPrincipalPaydown.error} />
+        <ToolNumberField
+          id="roi-price"
+          label="Purchase price"
+          prefix="$"
+          min={0.01}
+          max={100_000_000}
+          value={purchasePrice}
+          onChange={(e) => setPurchasePrice(e.target.value)}
+          error={validated.purchasePrice.error}
+        />
+        <ToolNumberField
+          id="roi-cash"
+          label="Total cash invested"
+          prefix="$"
+          min={0.01}
+          max={100_000_000}
+          value={cashInvested}
+          onChange={(e) => setCashInvested(e.target.value)}
+          error={validated.cashInvested.error}
+        />
+        <ToolNumberField
+          id="roi-cf"
+          label="Annual cash flow"
+          prefix="$"
+          min={-100_000_000}
+          max={100_000_000}
+          value={annualCashFlow}
+          onChange={(e) => setAnnualCashFlow(e.target.value)}
+          error={validated.annualCashFlow.error}
+        />
+        <ToolNumberField
+          id="roi-principal"
+          label="Annual principal paydown"
+          prefix="$"
+          min={0}
+          max={100_000_000}
+          value={annualPrincipalPaydown}
+          onChange={(e) => setAnnualPrincipalPaydown(e.target.value)}
+          error={validated.annualPrincipalPaydown.error}
+        />
         <ToolNumberField
           id="roi-appr"
           label="Appreciation rate (%/yr)"
@@ -164,44 +208,78 @@ export function RoiCalculatorWidget() {
       </div>
 
       <div className="mt-6 rounded-xl border border-border bg-muted/30 p-5">
-        <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        <span
+          className="sr-only"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
           {result && verdict
             ? `${verdict.label}. Total modeled ROI ${fmtPct(result.roi)}. Annual modeled return ${fmtMoney(result.totalReturn)}.`
             : "Fix the highlighted inputs to calculate total modeled ROI."}
         </span>
-        <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Total ROI</p>
-        <p className={cn("mt-1 text-4xl font-extrabold tabular-nums", verdict?.color ?? "text-muted-foreground")}>{result ? fmtPct(result.roi) : "—"}</p>
-        <p className="mt-1 text-sm text-muted-foreground tabular-nums">{result ? `${fmtMoney(result.totalReturn)} annual modeled return on cash invested` : "Fix the highlighted inputs to calculate"}</p>
+        <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+          Total ROI
+        </p>
+        <p
+          className={cn(
+            "mt-1 text-4xl font-extrabold tabular-nums",
+            verdict?.color ?? "text-muted-foreground",
+          )}
+        >
+          {result ? fmtPct(result.roi) : "—"}
+        </p>
+        <p className="mt-1 text-sm text-muted-foreground tabular-nums">
+          {result
+            ? `${fmtMoney(result.totalReturn)} annual modeled return on cash invested`
+            : "Fix the highlighted inputs to calculate"}
+        </p>
         <div className="mt-4 grid grid-cols-3 gap-3 text-[11px]">
           <div>
-            <p className="font-bold uppercase tracking-widest text-muted-foreground">Cash flow</p>
-            <p className="mt-1 text-base font-bold text-foreground tabular-nums">{result ? fmtPct(result.cashFlowPct) : "—"}</p>
+            <p className="font-bold uppercase tracking-widest text-muted-foreground">
+              Cash flow
+            </p>
+            <p className="mt-1 text-base font-bold text-foreground tabular-nums">
+              {result ? fmtPct(result.cashFlowPct) : "—"}
+            </p>
           </div>
           <div>
-            <p className="font-bold uppercase tracking-widest text-muted-foreground">Principal</p>
-            <p className="mt-1 text-base font-bold text-foreground tabular-nums">{result ? fmtPct(result.principalPct) : "—"}</p>
+            <p className="font-bold uppercase tracking-widest text-muted-foreground">
+              Principal
+            </p>
+            <p className="mt-1 text-base font-bold text-foreground tabular-nums">
+              {result ? fmtPct(result.principalPct) : "—"}
+            </p>
           </div>
           <div>
-            <p className="font-bold uppercase tracking-widest text-muted-foreground">Appreciation</p>
-            <p className="mt-1 text-base font-bold text-foreground tabular-nums">{result ? fmtPct(result.apprPct) : "—"}</p>
+            <p className="font-bold uppercase tracking-widest text-muted-foreground">
+              Appreciation
+            </p>
+            <p className="mt-1 text-base font-bold text-foreground tabular-nums">
+              {result ? fmtPct(result.apprPct) : "—"}
+            </p>
           </div>
         </div>
         {verdict ? (
           <p className="mt-4 text-sm">
-            <span className={cn("font-bold", verdict.color)}>{verdict.label}.</span>{" "}
+            <span className={cn("font-bold", verdict.color)}>
+              {verdict.label}.
+            </span>{" "}
             <span className="text-muted-foreground">{verdict.note}</span>
           </p>
         ) : null}
       </div>
 
-      <Link
-        href={handoffHref} target="_top"
+      <AnalyzerHandoffLink
+        handoffHref={handoffHref}
+        target="_top"
         className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-md text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="w-4 h-4" />
-        Run the full analysis with these numbers — cash flow, DSCR, and 10-year cash-flow and equity projections — free
+        Run the free core analysis; projections appear when your access includes
+        them
         <ArrowUpRight className="w-4 h-4" />
-      </Link>
+      </AnalyzerHandoffLink>
     </div>
   );
 }

@@ -10,7 +10,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Calculator } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
@@ -68,7 +68,7 @@ const RANKED_CALCULATORS = [
     pricing: "Free core; paid Investor Pro — see live pricing",
     pros: [
       "No-account preliminary screen with cap rate, CoC, DSCR, NOI, and monthly cash flow",
-      "Address auto-fill from HUD Fair Market Rent + FRED 30-year rate + state property tax (no other tool does all three)",
+      "Editable HUD area-rent + FRED owner-occupied rate benchmarks, with manual local property tax",
       "Selected-rule fit, with a secondary Screening Index",
       "Paid Pro plans add 10-year cash-flow and equity projections, sensitivity, Offer Ceiling, saved-deal comparison, and reports; see live pricing for current terms",
       "Lender-facing PDF + shareable read-only deal link with optional custom branding",
@@ -77,7 +77,8 @@ const RANKED_CALCULATORS = [
       "PWA, not native iOS/Android apps (DealCheck wins on pure mobile)",
       "Listing import is address-only — paste a Zillow/Redfin link and TrueCap pulls the address, not the listing's price, taxes or photos",
     ],
-    pickIf: "You want a no-account preliminary screen connected to a paid target, comparison, and reporting workflow.",
+    pickIf:
+      "You want a no-account preliminary screen connected to a paid target, comparison, and reporting workflow.",
   },
   {
     rank: 2,
@@ -96,7 +97,8 @@ const RANKED_CALCULATORS = [
       "Paid tiers mostly raise caps rather than add analysis depth",
       "No address-based auto-fill (HUD / FRED / state tax) — you bring the data",
     ],
-    pickIf: "You underwrite on mobile at showings all day and want native apps.",
+    pickIf:
+      "You underwrite on mobile at showings all day and want native apps.",
   },
   {
     rank: 3,
@@ -115,7 +117,8 @@ const RANKED_CALCULATORS = [
       "No portfolio rollup across saved deals",
       "Free tier is more limited than TrueCap's",
     ],
-    pickIf: "You're already paying for BiggerPockets for the community and the calculator is a bonus.",
+    pickIf:
+      "You're already paying for BiggerPockets for the community and the calculator is a bonus.",
   },
   {
     rank: 4,
@@ -133,14 +136,16 @@ const RANKED_CALCULATORS = [
       "Listing-level cap rate uses assumed inputs (not your specific assumptions)",
       "Expensive for solo investors (the $300/mo tier is built for active multi-market scouting)",
     ],
-    pickIf: "You're picking which city or neighborhood to invest in next, not underwriting a specific property.",
+    pickIf:
+      "You're picking which city or neighborhood to invest in next, not underwriting a specific property.",
   },
   {
     rank: 5,
     name: "Stessa",
     bestFor: "Best acquisition-to-operations breadth",
     url: "/vs/stessa",
-    pricing: "Free Essentials plus paid Manage and Pro — see live pricing (reviewed 2026-08-27)",
+    pricing:
+      "Free Essentials plus paid Manage and Pro — see live pricing (reviewed 2026-08-27)",
     pros: [
       "Investment-property marketplace with filters, map layers, watchlists, and buy-box alerts",
       "Listing-level sale/rent comps and editable offer, financing, rent, and operating-cost assumptions",
@@ -151,7 +156,8 @@ const RANKED_CALCULATORS = [
       "The official sources reviewed do not describe a target-derived Offer Ceiling",
       "Plan limits and marketplace terms should be checked on Stessa's live pages",
     ],
-    pickIf: "You want listing discovery and editable acquisition analysis to continue into accounting and landlord operations.",
+    pickIf:
+      "You want listing discovery and editable acquisition analysis to continue into accounting and landlord operations.",
   },
   {
     rank: 6,
@@ -171,7 +177,8 @@ const RANKED_CALCULATORS = [
       "Version drift kills collaboration with partners and lenders",
       "Maintenance cost over time is real — every market change requires manual updates",
     ],
-    pickIf: "You have a battle-tested model that handles your specific deal type (syndication waterfalls, custom debt structures) and don't need mobile.",
+    pickIf:
+      "You have a battle-tested model that handles your specific deal type (syndication waterfalls, custom debt structures) and don't need mobile.",
   },
   {
     rank: 7,
@@ -190,14 +197,15 @@ const RANKED_CALCULATORS = [
       "Limited to Roofstock's inventory, not any property",
       "You're paying retail-plus once the buyer fee + seller's margin are factored in",
     ],
-    pickIf: "You want a passive turnkey rental and don't have time to source or operate. Pair with TrueCap to pressure-test the listing pro-forma before offering.",
+    pickIf:
+      "You want a passive turnkey rental and don't have time to source or operate. Pair with TrueCap to pressure-test the listing pro-forma before offering.",
   },
 ];
 
 const FAQ_ITEMS = [
   {
     q: "What's the best rental property calculator in 2026?",
-    a: "TrueCap may fit investors who want a no-account preliminary screen, labeled HUD/FRED/state-tax starting assumptions, selected-rule fit, and a secondary Screening Index. DealCheck may fit users who need native iOS/Android apps. BiggerPockets may fit investors already paying for its community. Verify current pricing and features on each provider's site.",
+    a: "TrueCap may fit investors who want a no-account preliminary screen, labeled HUD rent and FRED rate benchmarks, manual local property tax, selected-rule fit, and a secondary Screening Index. DealCheck may fit users who need native iOS/Android apps. BiggerPockets may fit investors already paying for its community. Verify current pricing and features on each provider's site.",
   },
   {
     q: "What's the best free rental property calculator?",
@@ -243,7 +251,12 @@ export default function BestRentalPropertyCalculator2026Post() {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
-      { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: `${siteUrl}/blog`,
+      },
       { "@type": "ListItem", position: 3, name: TITLE, item: url },
     ],
   };
@@ -271,10 +284,22 @@ export default function BestRentalPropertyCalculator2026Post() {
 
   return (
     <div className="min-h-screen bg-background">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
 
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-2">
@@ -307,14 +332,15 @@ export default function BestRentalPropertyCalculator2026Post() {
               Quick answer
             </h2>
             <p className="text-sm sm:text-base leading-relaxed text-foreground">
-              For investors who want address-first acquisition screening: <strong>TrueCap</strong> (a no-account
-              preliminary screen, paid decision tools, and starting benchmarks from HUD + FRED + state
-              tax). <strong>DealCheck</strong> if you live on mobile at
+              For investors who want address-first acquisition screening:{" "}
+              <strong>TrueCap</strong> (a no-account preliminary screen, paid
+              decision tools, editable HUD/FRED benchmarks, and manual local
+              property tax). <strong>DealCheck</strong> if you live on mobile at
               showings. <strong>BiggerPockets</strong> if you already pay for
               the community. <strong>Mashvisor</strong> for market discovery
               (not per-deal underwriting). <strong>Stessa</strong> for a
-              marketplace and editable acquisition analysis that continue
-              into accounting and landlord operations.
+              marketplace and editable acquisition analysis that continue into
+              accounting and landlord operations.
               <strong> Excel</strong> only if you have a battle-tested model
               already. <strong>Roofstock</strong> if you want passive turnkey
               ownership with someone else doing the sourcing.
@@ -328,16 +354,33 @@ export default function BestRentalPropertyCalculator2026Post() {
               evaluate when they search &quot;best rental property
               calculator&quot; or &quot;rental analysis tool&quot;. If you just
               want a single metric fast, our free{" "}
-              <Link href="/tools/1-percent-rule-calculator" className="font-semibold text-primary hover:underline">1% rule calculator</Link>,{" "}
-              <Link href="/tools/mortgage-payment-calculator" className="font-semibold text-primary hover:underline">mortgage payment calculator</Link>, and{" "}
-              <Link href="/tools/closing-cost-calculator" className="font-semibold text-primary hover:underline">closing cost calculator</Link>{" "}
+              <Link
+                href="/tools/1-percent-rule-calculator"
+                className="font-semibold text-primary hover:underline"
+              >
+                1% rule calculator
+              </Link>
+              ,{" "}
+              <Link
+                href="/tools/mortgage-payment-calculator"
+                className="font-semibold text-primary hover:underline"
+              >
+                mortgage payment calculator
+              </Link>
+              , and{" "}
+              <Link
+                href="/tools/closing-cost-calculator"
+                className="font-semibold text-primary hover:underline"
+              >
+                closing cost calculator
+              </Link>{" "}
               each handle one piece of the underwrite with no signup. Ranking
               criteria, weighted roughly by impact on a typical solo investor:
             </p>
             <ol>
               <li>
-                <strong>Free tier depth</strong> — can you actually underwrite
-                a deal without paying? How many per month?
+                <strong>Free tier depth</strong> — can you actually underwrite a
+                deal without paying? How many per month?
               </li>
               <li>
                 <strong>Pricing</strong> — total cost for the calculator alone,
@@ -349,17 +392,17 @@ export default function BestRentalPropertyCalculator2026Post() {
                 everything up?
               </li>
               <li>
-                <strong>Mobile UX</strong> — can you underwrite at a showing
-                on your phone?
+                <strong>Mobile UX</strong> — can you underwrite at a showing on
+                your phone?
               </li>
               <li>
-                <strong>Pro feature depth</strong> — cash-flow and equity projections,
-                sensitivity, co-branded share links, PDF export.
+                <strong>Pro feature depth</strong> — cash-flow and equity
+                projections, sensitivity, co-branded share links, PDF export.
               </li>
               <li>
                 <strong>Audience fit</strong> — is the tool built for solo
-                investors, scaling landlords, professional managers, or
-                someone else?
+                investors, scaling landlords, professional managers, or someone
+                else?
               </li>
             </ol>
 
@@ -388,7 +431,8 @@ export default function BestRentalPropertyCalculator2026Post() {
                   </Link>
                 </div>
                 <p className="text-sm text-muted-foreground mb-4">
-                  <strong className="text-foreground">Pricing:</strong> {c.pricing}
+                  <strong className="text-foreground">Pricing:</strong>{" "}
+                  {c.pricing}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div>
@@ -398,7 +442,9 @@ export default function BestRentalPropertyCalculator2026Post() {
                     <ul className="space-y-1.5 text-sm text-foreground">
                       {c.pros.map((pro) => (
                         <li key={pro} className="flex gap-2">
-                          <span className="text-[var(--brand-green)] shrink-0">+</span>
+                          <span className="text-[var(--brand-green)] shrink-0">
+                            +
+                          </span>
                           <span>{pro}</span>
                         </li>
                       ))}
@@ -411,7 +457,9 @@ export default function BestRentalPropertyCalculator2026Post() {
                     <ul className="space-y-1.5 text-sm text-foreground">
                       {c.cons.map((con) => (
                         <li key={con} className="flex gap-2">
-                          <span className="text-muted-foreground/60 shrink-0">−</span>
+                          <span className="text-muted-foreground/60 shrink-0">
+                            −
+                          </span>
                           <span>{con}</span>
                         </li>
                       ))}
@@ -428,28 +476,60 @@ export default function BestRentalPropertyCalculator2026Post() {
             <h2>Quick decision matrix</h2>
             <ul>
               <li>
-                <strong>&quot;I want address-first screening and a target-backed Offer Ceiling.&quot;</strong> Evaluate TrueCap&apos;s current free and Investor Pro terms on the live pricing page.
+                <strong>
+                  &quot;I want address-first screening and a target-backed Offer
+                  Ceiling.&quot;
+                </strong>{" "}
+                Evaluate TrueCap&apos;s current free and Investor Pro terms on
+                the live pricing page.
               </li>
               <li>
-                <strong>&quot;I want a no-account preliminary screen.&quot;</strong> TrueCap includes the core underwriting metrics before signup; complete-decision allowances and paid terms are shown on the live pricing page.
+                <strong>
+                  &quot;I want a no-account preliminary screen.&quot;
+                </strong>{" "}
+                TrueCap includes the core underwriting metrics before signup;
+                complete-decision allowances and paid terms are shown on the
+                live pricing page.
               </li>
               <li>
-                <strong>&quot;I underwrite on my phone at every showing.&quot;</strong> DealCheck — only one with true native iOS / Android apps.
+                <strong>
+                  &quot;I underwrite on my phone at every showing.&quot;
+                </strong>{" "}
+                DealCheck — only one with true native iOS / Android apps.
               </li>
               <li>
-                <strong>&quot;I already pay for BiggerPockets.&quot;</strong> Use their calculator — you&apos;re already there.
+                <strong>&quot;I already pay for BiggerPockets.&quot;</strong>{" "}
+                Use their calculator — you&apos;re already there.
               </li>
               <li>
-                <strong>&quot;I&apos;m scouting which city to invest in.&quot;</strong> Mashvisor — heatmaps and neighborhood scores.
+                <strong>
+                  &quot;I&apos;m scouting which city to invest in.&quot;
+                </strong>{" "}
+                Mashvisor — heatmaps and neighborhood scores.
               </li>
               <li>
-                <strong>&quot;I want listing discovery, acquisition analysis, and accounting in one product.&quot;</strong> Evaluate Stessa&apos;s current marketplace, underwriting, and plan terms.
+                <strong>
+                  &quot;I want listing discovery, acquisition analysis, and
+                  accounting in one product.&quot;
+                </strong>{" "}
+                Evaluate Stessa&apos;s current marketplace, underwriting, and
+                plan terms.
               </li>
               <li>
-                <strong>&quot;I want a turnkey rental I don&apos;t have to source or manage.&quot;</strong> Roofstock — but pressure-test the listing pro-forma in TrueCap before offering.
+                <strong>
+                  &quot;I want a turnkey rental I don&apos;t have to source or
+                  manage.&quot;
+                </strong>{" "}
+                Roofstock — but pressure-test the listing pro-forma in TrueCap
+                before offering.
               </li>
               <li>
-                <strong>&quot;I have a custom Excel model that works for my deals.&quot;</strong> Keep it — but consider TrueCap free as a sanity check on the formulas.
+                <strong>
+                  &quot;I have a custom Excel model that works for my
+                  deals.&quot;
+                </strong>{" "}
+                Keep it — but consider TrueCap free as a sanity check on the
+                formulas.
               </li>
             </ul>
 
@@ -480,19 +560,11 @@ export default function BestRentalPropertyCalculator2026Post() {
             <p>
               The fastest way to know which calculator fits your workflow is to
               run one of your real deals through it. TrueCap is free, takes 60
-              seconds, no signup required. Paste an address, accept the
-              auto-filled rent / rate / tax, type purchase price.
+              seconds, no signup required. Paste an address, review the editable
+              rent/rate benchmarks, enter local property tax, and type purchase
+              price.
             </p>
-            <p className="not-prose">
-              <Link
-                href="/"
-                className="inline-flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-5 py-3 font-bold hover:opacity-90"
-              >
-                <Calculator className="w-4 h-4" />
-                Run a deal — 60 seconds
-                <ArrowUpRight className="w-4 h-4" />
-              </Link>
-            </p>
+            <p className="not-prose"></p>
           </div>
 
           <div className="mt-10">

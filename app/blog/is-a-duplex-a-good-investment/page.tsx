@@ -24,7 +24,6 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Calculator } from "lucide-react";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
@@ -138,8 +137,18 @@ export default function BlogPost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "TrueCap", item: `${siteUrl}/` },
-      { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "TrueCap",
+        item: `${siteUrl}/`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: `${siteUrl}/blog`,
+      },
       { "@type": "ListItem", position: 3, name: TITLE, item: canonicalUrl },
     ],
   };
@@ -155,20 +164,36 @@ export default function BlogPost() {
 
   return (
     <div className="min-h-screen bg-background">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
+      />
 
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <header className="mb-8 sm:mb-10">
-          <Link href="/blog" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">
+          <Link
+            href="/blog"
+            className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+          >
             ← TrueCap Blog
           </Link>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight text-balance">
             {TITLE}
           </h1>
           <p className="text-[11px] uppercase tracking-widest text-muted-foreground font-bold mt-3">
-            {new Date(PUBLISHED_AT).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}{" "}
+            {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}{" "}
             · {READING_TIME_MIN} min read
           </p>
           <BlogByline />
@@ -214,43 +239,97 @@ export default function BlogPost() {
             </em>
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">The building we are underwriting</h2>
+          <h2 className="text-2xl sm:text-3xl">
+            The building we are underwriting
+          </h2>
           <p>
             One duplex, priced and rented like real inventory in a balanced
             metro — the kind of two-unit stock that fills whole neighbourhoods
             in{" "}
-            <Link href="/markets/philadelphia" className="text-primary font-semibold hover:underline">
+            <Link
+              href="/markets/philadelphia"
+              className="text-primary font-semibold hover:underline"
+            >
               Philadelphia
             </Link>{" "}
             and{" "}
-            <Link href="/markets/kansas-city" className="text-primary font-semibold hover:underline">
+            <Link
+              href="/markets/kansas-city"
+              className="text-primary font-semibold hover:underline"
+            >
               Kansas City
             </Link>
-            . Both paths below use identical property facts, so every
-            difference in the results comes from the financing.
+            . Both paths below use identical property facts, so every difference
+            in the results comes from the financing.
           </p>
           <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[440px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
-                  <th className="text-left p-3 font-bold text-foreground">Input</th>
-                  <th className="text-right p-3 font-bold text-foreground">Value</th>
+                  <th className="text-left p-3 font-bold text-foreground">
+                    Input
+                  </th>
+                  <th className="text-right p-3 font-bold text-foreground">
+                    Value
+                  </th>
                 </tr>
               </thead>
               <tbody className="[&_td]:p-3 [&_td]:border-b [&_td]:border-border [&_tr:last-child_td]:border-0">
-                <tr><td>Purchase price</td><td className="font-mono text-right">$400,000</td></tr>
-                <tr><td>Rent, per unit</td><td className="font-mono text-right">$1,600</td></tr>
-                <tr><td>Gross scheduled rent</td><td className="font-mono text-right">$3,200/mo · $38,400/yr</td></tr>
-                <tr><td>
-                  <Link href="/glossary/property-tax" className="text-primary font-semibold hover:underline">Property tax</Link>{" "}(1.1%)
-                </td><td className="font-mono text-right">$4,400/yr</td></tr>
-                <tr><td>
-                  <Link href="/glossary/insurance" className="text-primary font-semibold hover:underline">Insurance</Link>
-                </td><td className="font-mono text-right">$2,400/yr</td></tr>
-                <tr><td>
-                  <Link href="/glossary/vacancy" className="text-primary font-semibold hover:underline">Vacancy</Link>{" "}/ maintenance / management /{" "}
-                  <Link href="/glossary/capex" className="text-primary font-semibold hover:underline">capex</Link>
-                </td><td className="font-mono text-right">6% / 8% / 8% / 5%</td></tr>
+                <tr>
+                  <td>Purchase price</td>
+                  <td className="font-mono text-right">$400,000</td>
+                </tr>
+                <tr>
+                  <td>Rent, per unit</td>
+                  <td className="font-mono text-right">$1,600</td>
+                </tr>
+                <tr>
+                  <td>Gross scheduled rent</td>
+                  <td className="font-mono text-right">
+                    $3,200/mo · $38,400/yr
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <Link
+                      href="/glossary/property-tax"
+                      className="text-primary font-semibold hover:underline"
+                    >
+                      Property tax
+                    </Link>{" "}
+                    (1.1%)
+                  </td>
+                  <td className="font-mono text-right">$4,400/yr</td>
+                </tr>
+                <tr>
+                  <td>
+                    <Link
+                      href="/glossary/insurance"
+                      className="text-primary font-semibold hover:underline"
+                    >
+                      Insurance
+                    </Link>
+                  </td>
+                  <td className="font-mono text-right">$2,400/yr</td>
+                </tr>
+                <tr>
+                  <td>
+                    <Link
+                      href="/glossary/vacancy"
+                      className="text-primary font-semibold hover:underline"
+                    >
+                      Vacancy
+                    </Link>{" "}
+                    / maintenance / management /{" "}
+                    <Link
+                      href="/glossary/capex"
+                      className="text-primary font-semibold hover:underline"
+                    >
+                      capex
+                    </Link>
+                  </td>
+                  <td className="font-mono text-right">6% / 8% / 8% / 5%</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -261,7 +340,9 @@ export default function BlogPost() {
             on any two-unit you are shown.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">Path A: the duplex as a pure rental</h2>
+          <h2 className="text-2xl sm:text-3xl">
+            Path A: the duplex as a pure rental
+          </h2>
           <p>
             Non-owner-occupied, 25% down, 7.25% on a 30-year fixed. The loan is
             $300,000 and principal and interest are <strong>$2,046.53</strong> a
@@ -271,47 +352,115 @@ export default function BlogPost() {
             <table className="w-full min-w-[480px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
-                  <th className="text-left p-3 font-bold text-foreground">Line</th>
-                  <th className="text-right p-3 font-bold text-foreground">Annual</th>
-                  <th className="text-left p-3 font-bold text-foreground">Notes</th>
+                  <th className="text-left p-3 font-bold text-foreground">
+                    Line
+                  </th>
+                  <th className="text-right p-3 font-bold text-foreground">
+                    Annual
+                  </th>
+                  <th className="text-left p-3 font-bold text-foreground">
+                    Notes
+                  </th>
                 </tr>
               </thead>
               <tbody className="[&_td]:p-3 [&_td]:border-b [&_td]:border-border [&_tr:last-child_td]:border-0">
-                <tr><td>Gross scheduled rent</td><td className="font-mono text-right">$38,400</td><td>2 × $1,600 × 12</td></tr>
-                <tr><td>Vacancy (6%)</td><td className="font-mono text-right">−$2,304</td><td>One month per unit per two years</td></tr>
-                <tr><td>Property tax</td><td className="font-mono text-right">−$4,400</td><td>One bill, one parcel</td></tr>
-                <tr><td>Insurance</td><td className="font-mono text-right">−$2,400</td><td>One landlord policy</td></tr>
-                <tr><td>Maintenance (8%)</td><td className="font-mono text-right">−$3,072</td><td></td></tr>
-                <tr><td>Management (8%)</td><td className="font-mono text-right">−$3,072</td><td>Two units, one address</td></tr>
-                <tr><td>Capex reserve (5%)</td><td className="font-mono text-right">−$1,920</td><td>Roof, HVAC, water heaters</td></tr>
-                <tr className="bg-muted/30"><td className="font-bold">
-                  <Link href="/glossary/noi" className="text-primary font-semibold hover:underline">NOI</Link>
-                </td><td className="font-mono text-right font-bold">$21,232</td><td>44.7% expense ratio</td></tr>
-                <tr><td>Debt service</td><td className="font-mono text-right">−$24,558</td><td>$2,046.53 × 12</td></tr>
-                <tr className="bg-muted/30"><td className="font-bold">
-                  <Link href="/glossary/monthly-cash-flow" className="text-primary font-semibold hover:underline">Cash flow</Link>
-                </td><td className="font-mono text-right font-bold">−$3,326</td><td>−$277/mo</td></tr>
+                <tr>
+                  <td>Gross scheduled rent</td>
+                  <td className="font-mono text-right">$38,400</td>
+                  <td>2 × $1,600 × 12</td>
+                </tr>
+                <tr>
+                  <td>Vacancy (6%)</td>
+                  <td className="font-mono text-right">−$2,304</td>
+                  <td>One month per unit per two years</td>
+                </tr>
+                <tr>
+                  <td>Property tax</td>
+                  <td className="font-mono text-right">−$4,400</td>
+                  <td>One bill, one parcel</td>
+                </tr>
+                <tr>
+                  <td>Insurance</td>
+                  <td className="font-mono text-right">−$2,400</td>
+                  <td>One landlord policy</td>
+                </tr>
+                <tr>
+                  <td>Maintenance (8%)</td>
+                  <td className="font-mono text-right">−$3,072</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>Management (8%)</td>
+                  <td className="font-mono text-right">−$3,072</td>
+                  <td>Two units, one address</td>
+                </tr>
+                <tr>
+                  <td>Capex reserve (5%)</td>
+                  <td className="font-mono text-right">−$1,920</td>
+                  <td>Roof, HVAC, water heaters</td>
+                </tr>
+                <tr className="bg-muted/30">
+                  <td className="font-bold">
+                    <Link
+                      href="/glossary/noi"
+                      className="text-primary font-semibold hover:underline"
+                    >
+                      NOI
+                    </Link>
+                  </td>
+                  <td className="font-mono text-right font-bold">$21,232</td>
+                  <td>44.7% expense ratio</td>
+                </tr>
+                <tr>
+                  <td>Debt service</td>
+                  <td className="font-mono text-right">−$24,558</td>
+                  <td>$2,046.53 × 12</td>
+                </tr>
+                <tr className="bg-muted/30">
+                  <td className="font-bold">
+                    <Link
+                      href="/glossary/monthly-cash-flow"
+                      className="text-primary font-semibold hover:underline"
+                    >
+                      Cash flow
+                    </Link>
+                  </td>
+                  <td className="font-mono text-right font-bold">−$3,326</td>
+                  <td>−$277/mo</td>
+                </tr>
               </tbody>
             </table>
           </div>
           <p>
             That produces a <strong>5.31% </strong>
-            <Link href="/glossary/cap-rate" className="text-primary font-semibold hover:underline">
+            <Link
+              href="/glossary/cap-rate"
+              className="text-primary font-semibold hover:underline"
+            >
               cap rate
             </Link>
             , a{" "}
-            <Link href="/glossary/dscr" className="text-primary font-semibold hover:underline">
+            <Link
+              href="/glossary/dscr"
+              className="text-primary font-semibold hover:underline"
+            >
               DSCR
             </Link>{" "}
             of <strong>0.86</strong>, and a{" "}
-            <Link href="/glossary/cash-on-cash-return" className="text-primary font-semibold hover:underline">
+            <Link
+              href="/glossary/cash-on-cash-return"
+              className="text-primary font-semibold hover:underline"
+            >
               cash-on-cash return
             </Link>{" "}
-            of <strong>−2.7%</strong>. A 0.86 DSCR does not clear a lender&apos;s
-            1.20 threshold, so on a DSCR loan this property would not qualify at
-            75% LTV at all — you would be pushed to 30-35% down before the
-            coverage worked. Check yours in the free{" "}
-            <Link href="/#main" className="text-primary font-semibold hover:underline">
+            of <strong>−2.7%</strong>. A 0.86 DSCR does not clear a
+            lender&apos;s 1.20 threshold, so on a DSCR loan this property would
+            not qualify at 75% LTV at all — you would be pushed to 30-35% down
+            before the coverage worked. Check yours in the free{" "}
+            <Link
+              href="/#main"
+              className="text-primary font-semibold hover:underline"
+            >
               TrueCap analyzer
             </Link>{" "}
             before you pay for an appraisal.
@@ -321,20 +470,51 @@ export default function BlogPost() {
             <table className="w-full min-w-[440px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
-                  <th className="text-left p-3 font-bold text-foreground">Bucket</th>
-                  <th className="text-right p-3 font-bold text-foreground">Amount</th>
+                  <th className="text-left p-3 font-bold text-foreground">
+                    Bucket
+                  </th>
+                  <th className="text-right p-3 font-bold text-foreground">
+                    Amount
+                  </th>
                 </tr>
               </thead>
               <tbody className="[&_td]:p-3 [&_td]:border-b [&_td]:border-border [&_tr:last-child_td]:border-0">
-                <tr><td>
-                  <Link href="/glossary/down-payment" className="text-primary font-semibold hover:underline">Down payment</Link>{" "}(25%)
-                </td><td className="font-mono text-right">$100,000</td></tr>
-                <tr><td>Closing costs</td><td className="font-mono text-right">$9,700</td></tr>
-                <tr><td>Prepaids + escrow setup</td><td className="font-mono text-right">$4,761</td></tr>
-                <tr><td>Make-ready, two units</td><td className="font-mono text-right">$8,000</td></tr>
-                <tr className="bg-muted/30"><td className="font-bold">Cash actually spent</td><td className="font-mono text-right font-bold">$122,461</td></tr>
-                <tr><td>Reserves (6 × $2,613 PITIA)</td><td className="font-mono text-right">$15,679</td></tr>
-                <tr className="bg-muted/30"><td className="font-bold">Total cash required</td><td className="font-mono text-right font-bold">$138,140</td></tr>
+                <tr>
+                  <td>
+                    <Link
+                      href="/glossary/down-payment"
+                      className="text-primary font-semibold hover:underline"
+                    >
+                      Down payment
+                    </Link>{" "}
+                    (25%)
+                  </td>
+                  <td className="font-mono text-right">$100,000</td>
+                </tr>
+                <tr>
+                  <td>Closing costs</td>
+                  <td className="font-mono text-right">$9,700</td>
+                </tr>
+                <tr>
+                  <td>Prepaids + escrow setup</td>
+                  <td className="font-mono text-right">$4,761</td>
+                </tr>
+                <tr>
+                  <td>Make-ready, two units</td>
+                  <td className="font-mono text-right">$8,000</td>
+                </tr>
+                <tr className="bg-muted/30">
+                  <td className="font-bold">Cash actually spent</td>
+                  <td className="font-mono text-right font-bold">$122,461</td>
+                </tr>
+                <tr>
+                  <td>Reserves (6 × $2,613 PITIA)</td>
+                  <td className="font-mono text-right">$15,679</td>
+                </tr>
+                <tr className="bg-muted/30">
+                  <td className="font-bold">Total cash required</td>
+                  <td className="font-mono text-right font-bold">$138,140</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -344,19 +524,24 @@ export default function BlogPost() {
             the minimum down payment, and it is why the honest answer to this
             question starts with the financing rather than the building. The
             reserve line is money you show rather than spend; the{" "}
-            <Link href="/blog/how-much-money-to-buy-a-rental-property" className="text-primary font-semibold hover:underline">
+            <Link
+              href="/blog/how-much-money-to-buy-a-rental-property"
+              className="text-primary font-semibold hover:underline"
+            >
               full five-bucket cash-to-close breakdown
             </Link>{" "}
             explains which is which.
           </p>
           <p>
-            Break-even, if you want it: NOI of $21,232 supports $1,769 a month of
-            debt service, which at 7.25% is a loan of about{" "}
+            Break-even, if you want it: NOI of $21,232 supports $1,769 a month
+            of debt service, which at 7.25% is a loan of about{" "}
             <strong>$259,000</strong> — <strong>35% down</strong>, or $140,600.
             Ten points above the minimum.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">Path B: the same duplex, owner-occupied</h2>
+          <h2 className="text-2xl sm:text-3xl">
+            Path B: the same duplex, owner-occupied
+          </h2>
           <p>
             Now live in the left unit. The down payment drops to 5%, the rate
             prices at 6.75%, and the lender counts 75% of the appraiser&apos;s
@@ -373,19 +558,53 @@ export default function BlogPost() {
             <table className="w-full min-w-[480px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
-                  <th className="text-left p-3 font-bold text-foreground">Line</th>
-                  <th className="text-right p-3 font-bold text-foreground">Monthly</th>
-                  <th className="text-left p-3 font-bold text-foreground">Notes</th>
+                  <th className="text-left p-3 font-bold text-foreground">
+                    Line
+                  </th>
+                  <th className="text-right p-3 font-bold text-foreground">
+                    Monthly
+                  </th>
+                  <th className="text-left p-3 font-bold text-foreground">
+                    Notes
+                  </th>
                 </tr>
               </thead>
               <tbody className="[&_td]:p-3 [&_td]:border-b [&_td]:border-border [&_tr:last-child_td]:border-0">
-                <tr><td>Principal + interest</td><td className="font-mono text-right">$2,464.68</td><td>$380,000 at 6.75%</td></tr>
-                <tr><td>PMI (0.8%)</td><td className="font-mono text-right">$253.33</td><td>95% LTV</td></tr>
-                <tr><td>Taxes + insurance</td><td className="font-mono text-right">$566.67</td><td></td></tr>
-                <tr className="bg-muted/30"><td className="font-bold">PITIA</td><td className="font-mono text-right font-bold">$3,284.68</td><td></td></tr>
-                <tr><td>Tenant rent, one unit</td><td className="font-mono text-right">−$1,600.00</td><td></td></tr>
-                <tr><td>Vacancy, maintenance, capex on the rented half</td><td className="font-mono text-right">$304.00</td><td>19% of $1,600; you self-manage</td></tr>
-                <tr className="bg-muted/30"><td className="font-bold">Effective housing cost</td><td className="font-mono text-right font-bold">$1,988.68</td><td>What the duplex costs you to live in</td></tr>
+                <tr>
+                  <td>Principal + interest</td>
+                  <td className="font-mono text-right">$2,464.68</td>
+                  <td>$380,000 at 6.75%</td>
+                </tr>
+                <tr>
+                  <td>PMI (0.8%)</td>
+                  <td className="font-mono text-right">$253.33</td>
+                  <td>95% LTV</td>
+                </tr>
+                <tr>
+                  <td>Taxes + insurance</td>
+                  <td className="font-mono text-right">$566.67</td>
+                  <td></td>
+                </tr>
+                <tr className="bg-muted/30">
+                  <td className="font-bold">PITIA</td>
+                  <td className="font-mono text-right font-bold">$3,284.68</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>Tenant rent, one unit</td>
+                  <td className="font-mono text-right">−$1,600.00</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>Vacancy, maintenance, capex on the rented half</td>
+                  <td className="font-mono text-right">$304.00</td>
+                  <td>19% of $1,600; you self-manage</td>
+                </tr>
+                <tr className="bg-muted/30">
+                  <td className="font-bold">Effective housing cost</td>
+                  <td className="font-mono text-right font-bold">$1,988.68</td>
+                  <td>What the duplex costs you to live in</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -395,7 +614,10 @@ export default function BlogPost() {
             <strong>$38,421 spent</strong> — plus two months of reserves rather
             than six, $6,569, for <strong>$44,990 total</strong>. Size your own
             version in the{" "}
-            <Link href="/?strategy=house-hack#main" className="text-primary font-semibold hover:underline">
+            <Link
+              href="/?strategy=house-hack#main"
+              className="text-primary font-semibold hover:underline"
+            >
               house hacking calculator
             </Link>
             .
@@ -410,15 +632,21 @@ export default function BlogPost() {
             control a $400,000 asset for $20,000 down.
           </p>
           <p>
-            That is the honest version of &ldquo;live for free.&rdquo; You do not
-            live for free. You live at roughly the cost of renting, with a
+            That is the honest version of &ldquo;live for free.&rdquo; You do
+            not live for free. You live at roughly the cost of renting, with a
             leveraged asset attached and a landlord&apos;s job on top. Whether
             that trade is worth it is the subject of the{" "}
-            <Link href="/blog/house-hack-underwriting-guide" className="text-primary font-semibold hover:underline">
+            <Link
+              href="/blog/house-hack-underwriting-guide"
+              className="text-primary font-semibold hover:underline"
+            >
               house-hack underwriting guide
             </Link>
             ; the occupancy rules and the one-year exit are in{" "}
-            <Link href="/blog/house-hacking-explained" className="text-primary font-semibold hover:underline">
+            <Link
+              href="/blog/house-hacking-explained"
+              className="text-primary font-semibold hover:underline"
+            >
               house hacking explained
             </Link>
             .
@@ -446,8 +674,8 @@ export default function BlogPost() {
             rental with an owner-occupied loan still attached.
           </p>
           <p>
-            Switch the landlord policy on ($2,700 instead of $2,400) and add
-            8% management, and NOI is <strong>$20,932</strong>. Debt service is
+            Switch the landlord policy on ($2,700 instead of $2,400) and add 8%
+            management, and NOI is <strong>$20,932</strong>. Debt service is
             $29,576 of P&amp;I plus $3,040 of PMI — the balance is still 94% of
             value, nowhere near the 80% where PMI can be cancelled — for{" "}
             <strong>$32,616</strong>.
@@ -456,17 +684,45 @@ export default function BlogPost() {
             <table className="w-full min-w-[520px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
-                  <th className="text-left p-3 font-bold text-foreground">Structure</th>
-                  <th className="text-right p-3 font-bold text-foreground">Loan</th>
-                  <th className="text-right p-3 font-bold text-foreground">Debt service</th>
-                  <th className="text-right p-3 font-bold text-foreground">Cash flow</th>
+                  <th className="text-left p-3 font-bold text-foreground">
+                    Structure
+                  </th>
+                  <th className="text-right p-3 font-bold text-foreground">
+                    Loan
+                  </th>
+                  <th className="text-right p-3 font-bold text-foreground">
+                    Debt service
+                  </th>
+                  <th className="text-right p-3 font-bold text-foreground">
+                    Cash flow
+                  </th>
                 </tr>
               </thead>
               <tbody className="[&_td]:p-3 [&_td]:border-b [&_td]:border-border [&_tr:last-child_td]:border-0">
-                <tr><td>5% down, owner-occ loan (year 2)</td><td className="font-mono text-right">$380,000</td><td className="font-mono text-right">$32,616</td><td className="font-mono text-right">−$11,684</td></tr>
-                <tr><td>20% down, owner-occ, no PMI</td><td className="font-mono text-right">$320,000</td><td className="font-mono text-right">$24,906</td><td className="font-mono text-right">−$3,974</td></tr>
-                <tr><td>25% down investment loan (Path A)</td><td className="font-mono text-right">$300,000</td><td className="font-mono text-right">$24,558</td><td className="font-mono text-right">−$3,326</td></tr>
-                <tr><td>Break-even</td><td className="font-mono text-right">$269,000</td><td className="font-mono text-right">$20,932</td><td className="font-mono text-right">$0</td></tr>
+                <tr>
+                  <td>5% down, owner-occ loan (year 2)</td>
+                  <td className="font-mono text-right">$380,000</td>
+                  <td className="font-mono text-right">$32,616</td>
+                  <td className="font-mono text-right">−$11,684</td>
+                </tr>
+                <tr>
+                  <td>20% down, owner-occ, no PMI</td>
+                  <td className="font-mono text-right">$320,000</td>
+                  <td className="font-mono text-right">$24,906</td>
+                  <td className="font-mono text-right">−$3,974</td>
+                </tr>
+                <tr>
+                  <td>25% down investment loan (Path A)</td>
+                  <td className="font-mono text-right">$300,000</td>
+                  <td className="font-mono text-right">$24,558</td>
+                  <td className="font-mono text-right">−$3,326</td>
+                </tr>
+                <tr>
+                  <td>Break-even</td>
+                  <td className="font-mono text-right">$269,000</td>
+                  <td className="font-mono text-right">$20,932</td>
+                  <td className="font-mono text-right">$0</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -491,7 +747,9 @@ export default function BlogPost() {
             becomes a good rental because you stopped living in it.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">Duplex vs a same-priced single-family</h2>
+          <h2 className="text-2xl sm:text-3xl">
+            Duplex vs a same-priced single-family
+          </h2>
           <p>
             The comparison most people actually want. Same $400,000, same metro,
             both as pure rentals. The single-family rents for $2,600 — a 7.8%
@@ -505,33 +763,86 @@ export default function BlogPost() {
             <table className="w-full min-w-[520px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
-                  <th className="text-left p-3 font-bold text-foreground">Metric</th>
-                  <th className="text-right p-3 font-bold text-foreground">Duplex</th>
-                  <th className="text-right p-3 font-bold text-foreground">Single-family</th>
+                  <th className="text-left p-3 font-bold text-foreground">
+                    Metric
+                  </th>
+                  <th className="text-right p-3 font-bold text-foreground">
+                    Duplex
+                  </th>
+                  <th className="text-right p-3 font-bold text-foreground">
+                    Single-family
+                  </th>
                 </tr>
               </thead>
               <tbody className="[&_td]:p-3 [&_td]:border-b [&_td]:border-border [&_tr:last-child_td]:border-0">
-                <tr><td>Gross rent</td><td className="font-mono text-right">$38,400</td><td className="font-mono text-right">$31,200</td></tr>
-                <tr><td>Gross yield</td><td className="font-mono text-right">9.6%</td><td className="font-mono text-right">7.8%</td></tr>
-                <tr><td>Operating expenses</td><td className="font-mono text-right">$17,168</td><td className="font-mono text-right">$14,824</td></tr>
-                <tr><td>NOI</td><td className="font-mono text-right">$21,232</td><td className="font-mono text-right">$16,376</td></tr>
-                <tr><td>Cap rate</td><td className="font-mono text-right">5.31%</td><td className="font-mono text-right">4.09%</td></tr>
-                <tr><td>Minimum down</td><td className="font-mono text-right">$100,000 (25%)</td><td className="font-mono text-right">$80,000 (20%)</td></tr>
-                <tr><td>Debt service at minimum down</td><td className="font-mono text-right">$24,558</td><td className="font-mono text-right">$26,196</td></tr>
-                <tr><td>Cash flow</td><td className="font-mono text-right">−$3,326</td><td className="font-mono text-right">−$9,820</td></tr>
-                <tr><td>DSCR</td><td className="font-mono text-right">0.86</td><td className="font-mono text-right">0.63</td></tr>
-                <tr className="bg-muted/30"><td className="font-bold">Down payment to break even</td><td className="font-mono text-right font-bold">$140,600 (35%)</td><td className="font-mono text-right font-bold">$200,000 (50%)</td></tr>
+                <tr>
+                  <td>Gross rent</td>
+                  <td className="font-mono text-right">$38,400</td>
+                  <td className="font-mono text-right">$31,200</td>
+                </tr>
+                <tr>
+                  <td>Gross yield</td>
+                  <td className="font-mono text-right">9.6%</td>
+                  <td className="font-mono text-right">7.8%</td>
+                </tr>
+                <tr>
+                  <td>Operating expenses</td>
+                  <td className="font-mono text-right">$17,168</td>
+                  <td className="font-mono text-right">$14,824</td>
+                </tr>
+                <tr>
+                  <td>NOI</td>
+                  <td className="font-mono text-right">$21,232</td>
+                  <td className="font-mono text-right">$16,376</td>
+                </tr>
+                <tr>
+                  <td>Cap rate</td>
+                  <td className="font-mono text-right">5.31%</td>
+                  <td className="font-mono text-right">4.09%</td>
+                </tr>
+                <tr>
+                  <td>Minimum down</td>
+                  <td className="font-mono text-right">$100,000 (25%)</td>
+                  <td className="font-mono text-right">$80,000 (20%)</td>
+                </tr>
+                <tr>
+                  <td>Debt service at minimum down</td>
+                  <td className="font-mono text-right">$24,558</td>
+                  <td className="font-mono text-right">$26,196</td>
+                </tr>
+                <tr>
+                  <td>Cash flow</td>
+                  <td className="font-mono text-right">−$3,326</td>
+                  <td className="font-mono text-right">−$9,820</td>
+                </tr>
+                <tr>
+                  <td>DSCR</td>
+                  <td className="font-mono text-right">0.86</td>
+                  <td className="font-mono text-right">0.63</td>
+                </tr>
+                <tr className="bg-muted/30">
+                  <td className="font-bold">Down payment to break even</td>
+                  <td className="font-mono text-right font-bold">
+                    $140,600 (35%)
+                  </td>
+                  <td className="font-mono text-right font-bold">
+                    $200,000 (50%)
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
           <p>
             The duplex wins on every income measure, and the last row is the one
             that matters: it reaches break-even cash flow with{" "}
-            <strong>$59,400 less capital</strong> than the same-priced house. The
-            extra five points of down payment are the cheapest thing in the
+            <strong>$59,400 less capital</strong> than the same-priced house.
+            The extra five points of down payment are the cheapest thing in the
             table — 1.8 points of extra gross yield buys them back in under two
             years. Both are in{" "}
-            <Link href="/blog/negative-leverage-real-estate" className="text-primary font-semibold hover:underline">
+            <Link
+              href="/blog/negative-leverage-real-estate"
+              className="text-primary font-semibold hover:underline"
+            >
               negative leverage
             </Link>{" "}
             at 2026 rates, which is the normal condition; the duplex is simply
@@ -539,20 +850,28 @@ export default function BlogPost() {
           </p>
           <p>
             Run your own pair — the{" "}
-            <Link href="/#main" className="text-primary font-semibold hover:underline">
+            <Link
+              href="/#main"
+              className="text-primary font-semibold hover:underline"
+            >
               TrueCap analyzer
             </Link>{" "}
             takes about a minute per property and will hold both, so you can
-            compare standardized economics rather than eyeball spreadsheets.
-            For the wider property-type question, including where five-plus
-            units change the rules,{" "}
-            <Link href="/blog/single-family-vs-multi-family-rental" className="text-primary font-semibold hover:underline">
+            compare standardized economics rather than eyeball spreadsheets. For
+            the wider property-type question, including where five-plus units
+            change the rules,{" "}
+            <Link
+              href="/blog/single-family-vs-multi-family-rental"
+              className="text-primary font-semibold hover:underline"
+            >
               single-family vs multi-family
             </Link>{" "}
             goes further than this post does.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">What a duplex structurally gives you</h2>
+          <h2 className="text-2xl sm:text-3xl">
+            What a duplex structurally gives you
+          </h2>
           <h3>Shared fixed costs — about $1,800 a year</h3>
           <p>
             Two units under one roof on one parcel genuinely cost less to run
@@ -570,8 +889,8 @@ export default function BlogPost() {
             taxes follow assessed value, so $400,000 of duplex is taxed like
             $400,000 of house; you do not save there, and that is where most
             people expect the saving to be. Water and sewer often go the wrong
-            way, because many duplexes have a single meter and the landlord
-            eats it.
+            way, because many duplexes have a single meter and the landlord eats
+            it.
           </p>
 
           <h3>Vacancy variance, halved</h3>
@@ -585,7 +904,10 @@ export default function BlogPost() {
           </p>
           <p>
             The expected vacancy rate is the same — assume{" "}
-            <Link href="/blog/vacancy-rate-rental-property" className="text-primary font-semibold hover:underline">
+            <Link
+              href="/blog/vacancy-rate-rental-property"
+              className="text-primary font-semibold hover:underline"
+            >
               6-8% either way
             </Link>{" "}
             — but the distribution is far kinder, and for a first or second
@@ -598,7 +920,10 @@ export default function BlogPost() {
           <p>
             Two units acquired with one appraisal, one title policy, one
             origination fee, and one entry in your{" "}
-            <Link href="/glossary/ltv" className="text-primary font-semibold hover:underline">
+            <Link
+              href="/glossary/ltv"
+              className="text-primary font-semibold hover:underline"
+            >
               LTV
             </Link>{" "}
             and financed-property count. That last point compounds: Fannie
@@ -607,7 +932,9 @@ export default function BlogPost() {
             count as two houses while consuming half the slots.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">What it structurally costs you</h2>
+          <h2 className="text-2xl sm:text-3xl">
+            What it structurally costs you
+          </h2>
           <ol>
             <li>
               <strong>The 25% down payment.</strong> Already priced above —
@@ -646,14 +973,19 @@ export default function BlogPost() {
               stock they tend to fail together because they were installed
               together. The 5% reserve above is a percentage of rent; check it
               against the actual{" "}
-              <Link href="/blog/capex-maintenance-reserves-rental-property" className="text-primary font-semibold hover:underline">
+              <Link
+                href="/blog/capex-maintenance-reserves-rental-property"
+                className="text-primary font-semibold hover:underline"
+              >
                 component-by-component replacement schedule
               </Link>{" "}
               on any duplex built before 1990.
             </li>
           </ol>
 
-          <h2 className="text-2xl sm:text-3xl">So: is a duplex a good investment?</h2>
+          <h2 className="text-2xl sm:text-3xl">
+            So: is a duplex a good investment?
+          </h2>
           <p>Four decision rules, in the order they bind.</p>
           <ol>
             <li>
@@ -673,12 +1005,18 @@ export default function BlogPost() {
               At 9.6% our example loses $277 a month at the minimum down
               payment. Break-even needs 35% down. Below a 10% gross yield you
               are buying appreciation and a{" "}
-              <Link href="/glossary/dscr" className="text-primary font-semibold hover:underline">
+              <Link
+                href="/glossary/dscr"
+                className="text-primary font-semibold hover:underline"
+              >
                 DSCR
               </Link>{" "}
               under 1.0 with capital you could have deployed at coverage above
               1.2 in a{" "}
-              <Link href="/markets/cleveland" className="text-primary font-semibold hover:underline">
+              <Link
+                href="/markets/cleveland"
+                className="text-primary font-semibold hover:underline"
+              >
                 cash-flow market
               </Link>
               .
@@ -688,8 +1026,8 @@ export default function BlogPost() {
                 Never model a 5%-down duplex as a rental without modelling the
                 move-out.
               </strong>{" "}
-              −$974 a month is the year-2 number on our example. Decide the refi,
-              the paydown, or the sale before you sign.
+              −$974 a month is the year-2 number on our example. Decide the
+              refi, the paydown, or the sale before you sign.
             </li>
             <li>
               <strong>Buy where duplexes are ordinary.</strong> The comps-based
@@ -701,35 +1039,38 @@ export default function BlogPost() {
           <p>
             More on the strategy fork — BRRRR, Section 8, house hacking, and how
             each one changes the same building — in the{" "}
-            <Link href="/blog/topics/strategy" className="text-primary font-semibold hover:underline">
+            <Link
+              href="/blog/topics/strategy"
+              className="text-primary font-semibold hover:underline"
+            >
               investing strategies guide
             </Link>
             . For the financing side, the{" "}
-            <Link href="/blog/how-much-down-payment-investment-property" className="text-primary font-semibold hover:underline">
+            <Link
+              href="/blog/how-much-down-payment-investment-property"
+              className="text-primary font-semibold hover:underline"
+            >
               down payment tiers
             </Link>{" "}
             and{" "}
-            <Link href="/tools/mortgage-payment-calculator" className="text-primary font-semibold hover:underline">
+            <Link
+              href="/tools/mortgage-payment-calculator"
+              className="text-primary font-semibold hover:underline"
+            >
               payment calculator
             </Link>{" "}
             will size the two paths against your own numbers in a couple of
             minutes.
           </p>
 
-          <div className="not-prose">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-3 rounded-xl font-bold hover:opacity-95 transition-opacity"
-            >
-              <Calculator className="w-4 h-4" />
-              Underwrite a duplex in 60 seconds
-              <ArrowUpRight className="w-4 h-4" />
-            </Link>
-          </div>
+          <div className="not-prose"></div>
 
           <h2 className="text-2xl sm:text-3xl">FAQ</h2>
           {FAQS.map((f, i) => (
-            <details key={i} className="not-prose bg-card border border-border rounded-xl p-4 sm:p-5 mb-3">
+            <details
+              key={i}
+              className="not-prose bg-card border border-border rounded-xl p-4 sm:p-5 mb-3"
+            >
               <summary className="cursor-pointer font-bold text-foreground">
                 {f.q}
               </summary>
@@ -741,14 +1082,26 @@ export default function BlogPost() {
         </article>
 
         <RelatedBlogPosts currentSlug={SLUG} />
-        <div className="max-w-3xl mx-auto px-4 sm:px-6"><NewsletterSignup variant="expanded" source="blog" /></div>
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          <NewsletterSignup variant="expanded" source="blog" />
+        </div>
 
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
             Related:{" "}
-            <Link href="/blog/single-family-vs-multi-family-rental" className="font-bold text-foreground hover:underline">Single-family vs multi-family rental →</Link>{" "}
+            <Link
+              href="/blog/single-family-vs-multi-family-rental"
+              className="font-bold text-foreground hover:underline"
+            >
+              Single-family vs multi-family rental →
+            </Link>{" "}
             ·{" "}
-            <Link href="/blog/house-hack-underwriting-guide" className="font-bold text-foreground hover:underline">House hack underwriting: does it beat renting? →</Link>
+            <Link
+              href="/blog/house-hack-underwriting-guide"
+              className="font-bold text-foreground hover:underline"
+            >
+              House hack underwriting: does it beat renting? →
+            </Link>
           </p>
         </footer>
       </main>

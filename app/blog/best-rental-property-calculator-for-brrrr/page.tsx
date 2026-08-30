@@ -5,7 +5,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Calculator } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
@@ -45,7 +45,12 @@ export const metadata: Metadata = {
     modifiedTime: MODIFIED_AT,
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: TITLE }],
   },
-  twitter: { card: "summary_large_image", title: SERP_TITLE, description: DESCRIPTION, images: ["/home.jpg"] },
+  twitter: {
+    card: "summary_large_image",
+    title: SERP_TITLE,
+    description: DESCRIPTION,
+    images: ["/home.jpg"],
+  },
 };
 
 const TOOLS = [
@@ -54,17 +59,19 @@ const TOOLS = [
     name: "TrueCap (released tools)",
     bestFor: "Separate input worksheets + a stabilized rental screen",
     url: "/blog/brrrr-method-explained",
-    pricing: "Free released tools; no integrated BRRRR lifecycle model currently",
+    pricing:
+      "Free released tools; no integrated BRRRR lifecycle model currently",
     freeCovers: [
       "Cap rate, CoC, DSCR and cash flow on a stabilized BRRRR candidate — from the main analyzer, no account needed",
       "Released standalone worksheets for rehab cost, ARV, and the 70% rule price screen",
       "Mortgage payment and closing cost tools for the purchase and the refinanced loan",
-      "Step-by-step guides to the DSCR and cap rate math a refinance lender will run"
+      "Step-by-step guides to the DSCR and cap rate math a refinance lender will run",
     ],
     freeGates: [
-      "No released integrated ledger for acquisition, renovation, refinance proceeds, later contributions, and post-refinance returns"
+      "No released integrated ledger for acquisition, renovation, refinance proceeds, later contributions, and post-refinance returns",
     ],
-    pickIf: "You want transparent worksheets for the rehab and ARV inputs, an analyzer for the stabilized rental, and will maintain a separate, complete project cash-flow ledger.",
+    pickIf:
+      "You want transparent worksheets for the rehab and ARV inputs, an analyzer for the stabilized rental, and will maintain a separate, complete project cash-flow ledger.",
   },
   {
     rank: 2,
@@ -75,13 +82,14 @@ const TOOLS = [
     freeCovers: [
       "Solid BRRRR-friendly underwriting",
       "Listing-import from Zillow / Redfin",
-      "Native iOS + Android apps"
+      "Native iOS + Android apps",
     ],
     freeGates: [
       "BRRRR mode behind Plus tier",
-      "ARV sensitivity requires manual re-runs"
+      "ARV sensitivity requires manual re-runs",
     ],
-    pickIf: "You underwrite on mobile at showings all day and want native apps with listing-import.",
+    pickIf:
+      "You underwrite on mobile at showings all day and want native apps with listing-import.",
   },
   {
     rank: 3,
@@ -92,13 +100,14 @@ const TOOLS = [
     freeCovers: [
       "Standard BRRRR-friendly underwriting",
       "Output format recognized by BP-aware private lenders",
-      "Community + courses + forums on BRRRR strategy"
+      "Community + courses + forums on BRRRR strategy",
     ],
     freeGates: [
       "Calculator UX is dated",
-      "No portfolio rollup across saved deals"
+      "No portfolio rollup across saved deals",
     ],
-    pickIf: "You're already paying for BiggerPockets for the BRRRR community access.",
+    pickIf:
+      "You're already paying for BiggerPockets for the BRRRR community access.",
   },
   {
     rank: 4,
@@ -107,30 +116,55 @@ const TOOLS = [
     url: "/vs/excel",
     pricing: "Free (with your existing Office / Workspace)",
     freeCovers: [
-      "Total flexibility — model unusual debt structures, custom LTV, multi-tranche financing"
+      "Total flexibility — model unusual debt structures, custom LTV, multi-tranche financing",
     ],
     freeGates: [
       "Formula errors compound silently across deals",
       "ARV stress-testing requires manual scenarios",
-      "No mobile UX"
+      "No mobile UX",
     ],
-    pickIf: "You have a battle-tested BRRRR spreadsheet that handles unusual financing structures.",
+    pickIf:
+      "You have a battle-tested BRRRR spreadsheet that handles unusual financing structures.",
   },
 ];
 
 const FAQ_ITEMS = [
-  { q: "What makes a BRRRR calculator different from a standard rental calculator?", a: "A BRRRR calculator models the cash-out refinance step — when you refinance after the rehab, what's your new mortgage balance (typically 75% of ARV), how much capital comes back to you, and what's the cash flow on the refinanced loan. Standard rental calculators stop at the initial purchase + financing; BRRRR calculators continue through the refi event." },
-  { q: "What's 'capital recovered' and why does it matter?", a: "A capital-recovery ratio compares refinance distributions with every contribution made through that date, including acquisition, renovation, carrying, and financing costs. A distribution equal to contributions does not make the investment's return infinite: later contributions, operating cash flows, remaining equity, and time still matter." },
-  { q: "What ARV (After Repair Value) should I use in a BRRRR analysis?", a: "Build a range from relevant comparable sales and obtain qualified local valuation support. Stress-test the range, but do not treat a worksheet value as the future appraisal a lender will accept." },
-  { q: "What refi LTV should I model for a BRRRR?", a: "Use the eligible value, leverage limit, seasoning rule, debt-coverage requirement, fees, and cash-out limit from an actual lender quote. There is no single LTV that applies to every property, loan, or borrower." },
-  { q: "Can I underwrite BRRRR deals in TrueCap today?", a: "In pieces, yes. The released standalone tools cover rehab cost, ARV, and the 70% rule price screen, and the main analyzer returns DSCR, cap rate, and cash flow for the stabilized rental once you enter the post-refinance rent and loan terms. There is no separate DSCR calculator page — for the coverage test a lender will run, the how-to-calculate-DSCR walkthrough shows the arithmetic. The integrated BRRRR lifecycle model is not currently released, so use a complete project ledger or another released product for the joined cash-flow analysis." },
+  {
+    q: "What makes a BRRRR calculator different from a standard rental calculator?",
+    a: "A BRRRR calculator models the cash-out refinance step — when you refinance after the rehab, what's your new mortgage balance (typically 75% of ARV), how much capital comes back to you, and what's the cash flow on the refinanced loan. Standard rental calculators stop at the initial purchase + financing; BRRRR calculators continue through the refi event.",
+  },
+  {
+    q: "What's 'capital recovered' and why does it matter?",
+    a: "A capital-recovery ratio compares refinance distributions with every contribution made through that date, including acquisition, renovation, carrying, and financing costs. A distribution equal to contributions does not make the investment's return infinite: later contributions, operating cash flows, remaining equity, and time still matter.",
+  },
+  {
+    q: "What ARV (After Repair Value) should I use in a BRRRR analysis?",
+    a: "Build a range from relevant comparable sales and obtain qualified local valuation support. Stress-test the range, but do not treat a worksheet value as the future appraisal a lender will accept.",
+  },
+  {
+    q: "What refi LTV should I model for a BRRRR?",
+    a: "Use the eligible value, leverage limit, seasoning rule, debt-coverage requirement, fees, and cash-out limit from an actual lender quote. There is no single LTV that applies to every property, loan, or borrower.",
+  },
+  {
+    q: "Can I underwrite BRRRR deals in TrueCap today?",
+    a: "In pieces, yes. The released standalone tools cover rehab cost, ARV, and the 70% rule price screen, and the main analyzer returns DSCR, cap rate, and cash flow for the stabilized rental once you enter the post-refinance rent and loan terms. There is no separate DSCR calculator page — for the coverage test a lender will run, the how-to-calculate-DSCR walkthrough shows the arithmetic. The integrated BRRRR lifecycle model is not currently released, so use a complete project ledger or another released product for the joined cash-flow analysis.",
+  },
 ];
 
 const DECISION_LINES: Array<{ q: string; a: string }> = [
-  { q: "You want separate rehab, ARV, and 70%-rule worksheets plus a stabilized-rental screen.", a: "TrueCap's released tools" },
+  {
+    q: "You want separate rehab, ARV, and 70%-rule worksheets plus a stabilized-rental screen.",
+    a: "TrueCap's released tools",
+  },
   { q: "You underwrite mobile at every showing.", a: "DealCheck" },
-  { q: "You're already in the BiggerPockets community.", a: "BiggerPockets bundled" },
-  { q: "You have a custom BRRRR model that handles unusual debt structures.", a: "Excel" },
+  {
+    q: "You're already in the BiggerPockets community.",
+    a: "BiggerPockets bundled",
+  },
+  {
+    q: "You have a custom BRRRR model that handles unusual debt structures.",
+    a: "Excel",
+  },
 ];
 
 export default function BestRentalPropertyCalculatorForBrrrrPost() {
@@ -155,7 +189,12 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
-      { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: `${siteUrl}/blog`,
+      },
       { "@type": "ListItem", position: 3, name: TITLE, item: url },
     ],
   };
@@ -183,14 +222,29 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
 
   return (
     <div className="min-h-screen bg-background">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
 
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-2">
-          <Link href="/blog" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">
+          <Link
+            href="/blog"
+            className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+          >
             ← TrueCap Blog
           </Link>
         </div>
@@ -206,17 +260,22 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
             <p className="mt-4 text-base sm:text-lg leading-relaxed text-muted-foreground">
               {DESCRIPTION}
             </p>
-            <p className="mt-4 text-xs text-muted-foreground">Published {PUBLISHED_AT}</p>
+            <p className="mt-4 text-xs text-muted-foreground">
+              Published {PUBLISHED_AT}
+            </p>
           </header>
 
           <section className="mb-10 rounded-2xl border border-border bg-card p-5 sm:p-6">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">Quick answer</h2>
+            <h2 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">
+              Quick answer
+            </h2>
             <p className="text-sm sm:text-base leading-relaxed text-foreground">
-              For BRRRR investors specifically, TrueCap currently supplies separate
-              rehab, ARV, DSCR, and stabilized-rental tools—not an integrated lifecycle
-              model. Evaluate DealCheck or another released product if you need a joined
-              acquisition-to-refinance ledger, and use a spreadsheet for financing
-              structures that require custom cash-flow timing.
+              For BRRRR investors specifically, TrueCap currently supplies
+              separate rehab, ARV, DSCR, and stabilized-rental tools—not an
+              integrated lifecycle model. Evaluate DealCheck or another released
+              product if you need a joined acquisition-to-refinance ledger, and
+              use a spreadsheet for financing structures that require custom
+              cash-flow timing.
             </p>
           </section>
 
@@ -224,7 +283,10 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
             <h2>The tools, ranked for BRRRR investors</h2>
 
             {TOOLS.map((t) => (
-              <div key={t.name} className="not-prose mb-8 rounded-2xl border border-border bg-card p-5 sm:p-6">
+              <div
+                key={t.name}
+                className="not-prose mb-8 rounded-2xl border border-border bg-card p-5 sm:p-6"
+              >
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div>
                     <div className="text-[11px] font-bold uppercase tracking-widest text-primary mb-1.5">
@@ -234,13 +296,17 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
                       {t.name}
                     </h3>
                   </div>
-                  <Link href={t.url} className="shrink-0 inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline">
+                  <Link
+                    href={t.url}
+                    className="shrink-0 inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline"
+                  >
                     Deep dive
                     <ArrowUpRight className="size-3" />
                   </Link>
                 </div>
                 <p className="text-sm text-muted-foreground mb-4">
-                  <strong className="text-foreground">Pricing:</strong> {t.pricing}
+                  <strong className="text-foreground">Pricing:</strong>{" "}
+                  {t.pricing}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div>
@@ -250,7 +316,9 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
                     <ul className="space-y-1.5 text-sm text-foreground">
                       {t.freeCovers.map((p) => (
                         <li key={p} className="flex gap-2">
-                          <span className="text-[var(--brand-green)] shrink-0">+</span>
+                          <span className="text-[var(--brand-green)] shrink-0">
+                            +
+                          </span>
                           <span>{p}</span>
                         </li>
                       ))}
@@ -263,7 +331,9 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
                     <ul className="space-y-1.5 text-sm text-foreground">
                       {t.freeGates.map((p) => (
                         <li key={p} className="flex gap-2">
-                          <span className="text-muted-foreground/60 shrink-0">−</span>
+                          <span className="text-muted-foreground/60 shrink-0">
+                            −
+                          </span>
                           <span>{p}</span>
                         </li>
                       ))}
@@ -289,12 +359,22 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
             <h2>FAQ</h2>
             <div className="not-prose space-y-3">
               {FAQ_ITEMS.map((item) => (
-                <details key={item.q} className="group rounded-xl border border-border bg-card p-4 sm:p-5">
+                <details
+                  key={item.q}
+                  className="group rounded-xl border border-border bg-card p-4 sm:p-5"
+                >
                   <summary className="cursor-pointer list-none flex items-start justify-between gap-3 font-bold text-sm sm:text-base text-foreground">
                     <span>{item.q}</span>
-                    <span aria-hidden className="mt-1 size-5 shrink-0 rounded-full border border-border text-muted-foreground text-xs leading-none flex items-center justify-center transition-transform group-open:rotate-45">+</span>
+                    <span
+                      aria-hidden
+                      className="mt-1 size-5 shrink-0 rounded-full border border-border text-muted-foreground text-xs leading-none flex items-center justify-center transition-transform group-open:rotate-45"
+                    >
+                      +
+                    </span>
                   </summary>
-                  <div className="mt-3 text-sm text-muted-foreground leading-relaxed">{item.a}</div>
+                  <div className="mt-3 text-sm text-muted-foreground leading-relaxed">
+                    {item.a}
+                  </div>
                 </details>
               ))}
             </div>
@@ -303,27 +383,41 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
             <p>
               The fastest way to know which tool fits your workflow is to run
               one of your real deals through it. TrueCap is free for the core
-              underwriting, takes about a minute, no signup required. Start with the{" "}
-              <Link href="/tools/rehab-cost-estimator" className="font-semibold text-primary hover:underline">rehab cost estimator</Link>,{" "}
-              pressure-test lender-specific debt coverage by running the
-              stabilized rent and refinance terms through the{" "}
-              <Link href="/#main" className="font-semibold text-primary hover:underline">TrueCap analyzer</Link>, and
-              review the full workflow in{" "}
-              <Link href="/blog/brrrr-method-explained" className="font-semibold text-primary hover:underline">the BRRRR method explained</Link>{" "}
-              before assembling a complete project ledger. The integrated TrueCap
-              BRRRR model is not currently released.
-            </p>
-            <p className="not-prose">
-              <Link href="/" className="inline-flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-5 py-3 font-bold hover:opacity-90">
-                <Calculator className="w-4 h-4" />
-                Run a deal — 60 seconds
-                <ArrowUpRight className="w-4 h-4" />
+              underwriting, takes about a minute, no signup required. Start with
+              the{" "}
+              <Link
+                href="/tools/rehab-cost-estimator"
+                className="font-semibold text-primary hover:underline"
+              >
+                rehab cost estimator
               </Link>
+              , pressure-test lender-specific debt coverage by running the
+              stabilized rent and refinance terms through the{" "}
+              <Link
+                href="/#main"
+                className="font-semibold text-primary hover:underline"
+              >
+                TrueCap analyzer
+              </Link>
+              , and review the full workflow in{" "}
+              <Link
+                href="/blog/brrrr-method-explained"
+                className="font-semibold text-primary hover:underline"
+              >
+                the BRRRR method explained
+              </Link>{" "}
+              before assembling a complete project ledger. The integrated
+              TrueCap BRRRR model is not currently released.
             </p>
+            <p className="not-prose"></p>
           </div>
 
-          <div className="mt-10"><NewsletterSignup /></div>
-          <div className="mt-10"><RelatedBlogPosts currentSlug={SLUG} limit={3} /></div>
+          <div className="mt-10">
+            <NewsletterSignup />
+          </div>
+          <div className="mt-10">
+            <RelatedBlogPosts currentSlug={SLUG} limit={3} />
+          </div>
         </article>
       </main>
 

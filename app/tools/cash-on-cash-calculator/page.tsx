@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { permanentRedirect } from "next/navigation";
 import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { CocCalculatorWidget } from "@/components/tools/coc-calculator-widget";
@@ -10,6 +10,7 @@ import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { isCalculatorReleased } from "@/lib/calculator-registry";
+import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 export const metadata: Metadata = {
   title: "Free Cash-on-Cash Calculator — Mortgage Built In",
   description:
@@ -29,7 +30,14 @@ export const metadata: Metadata = {
       "Compute cash-on-cash return in seconds. Walks through purchase, financing, rent, and expenses — no spreadsheet needed.",
     url: "/tools/cash-on-cash-calculator",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap cash-on-cash calculator" }],
+    images: [
+      {
+        url: "/home.jpg",
+        width: 1200,
+        height: 630,
+        alt: "TrueCap cash-on-cash calculator",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -65,7 +73,9 @@ const FAQS: { q: string; a: string }[] = [
 ];
 
 export default function CoCCalculatorPage() {
-  if (!isCalculatorReleased("cash-on-cash-calculator")) notFound();
+  if (!isCalculatorReleased("cash-on-cash-calculator")) {
+    permanentRedirect(HISTORICAL_TOOL_REDIRECTS["cash-on-cash-calculator"]);
+  }
 
   const siteUrl = getSiteUrl();
 
@@ -121,15 +131,33 @@ export default function CoCCalculatorPage() {
 
   return (
     <>
-      <ToolBreadcrumbSchema toolPath="/tools/cash-on-cash-calculator" toolName="Cash-on-cash return calculator" />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }} />
+      <ToolBreadcrumbSchema
+        toolPath="/tools/cash-on-cash-calculator"
+        toolName="Cash-on-cash return calculator"
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }}
+      />
 
       <div className="min-h-screen bg-background">
-        <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <main
+          id="main"
+          className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12"
+        >
           <header className="mb-6 sm:mb-8">
-            <Link href="/tools" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">
+            <Link
+              href="/tools"
+              className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+            >
               ← TrueCap free tools
             </Link>
             <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">
@@ -137,37 +165,53 @@ export default function CoCCalculatorPage() {
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground mt-2 leading-relaxed">
               How hard is the cash you actually invested working? CoC is the
-              clearest answer — and the metric most buy-and-hold investors
-              use to decide whether a deal beats their other options.
+              clearest answer — and the metric most buy-and-hold investors use
+              to decide whether a deal beats their other options.
             </p>
           </header>
 
           <CocCalculatorWidget />
 
           <article className="prose prose-slate max-w-none mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
-            <h2 className="text-2xl sm:text-3xl">What is cash-on-cash return?</h2>
+            <h2 className="text-2xl sm:text-3xl">
+              What is cash-on-cash return?
+            </h2>
             <p>
               Cash-on-cash return measures the annual cash flow a property
               generates as a percentage of the actual cash you invested to
               acquire it. It&apos;s the &ldquo;return on the money you put
               in&rdquo; — and unlike the{" "}
-              <Link href="/tools/cap-rate-calculator" className="font-semibold text-primary hover:underline">cap rate</Link>,
-              it accounts for financing. For a worked example start to
-              finish, see{" "}
-              <Link href="/blog/how-to-calculate-cash-on-cash-return" className="font-semibold text-primary hover:underline">how to calculate cash-on-cash return</Link>.
+              <Link
+                href="/blog/how-to-calculate-cap-rate"
+                className="font-semibold text-primary hover:underline"
+              >
+                cap rate
+              </Link>
+              , it accounts for financing. For a worked example start to finish,
+              see{" "}
+              <Link
+                href="/blog/how-to-calculate-cash-on-cash-return"
+                className="font-semibold text-primary hover:underline"
+              >
+                how to calculate cash-on-cash return
+              </Link>
+              .
             </p>
 
             <h3>The formula</h3>
             <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
               <div className="text-base sm:text-lg font-mono">
-                <span className="font-bold">CoC</span> = Annual cash flow ÷ Total cash invested
+                <span className="font-bold">CoC</span> = Annual cash flow ÷
+                Total cash invested
               </div>
               <div className="text-sm text-muted-foreground mt-2">
                 e.g. $7,200/yr cash flow ÷ $60,000 down + closing = 12.0% CoC
               </div>
             </div>
 
-            <h2 className="text-2xl sm:text-3xl">What goes into annual cash flow</h2>
+            <h2 className="text-2xl sm:text-3xl">
+              What goes into annual cash flow
+            </h2>
             <p>Start with monthly rent. Subtract every monthly outflow:</p>
             <ul>
               <li>Mortgage principal + interest</li>
@@ -183,7 +227,9 @@ export default function CoCCalculatorPage() {
               above does this automatically using your inputs.
             </p>
 
-            <h2 className="text-2xl sm:text-3xl">What goes into total cash invested</h2>
+            <h2 className="text-2xl sm:text-3xl">
+              What goes into total cash invested
+            </h2>
             <ul>
               <li>Down payment (price × down payment %)</li>
               <li>Closing costs (typically 2–4% of price)</li>
@@ -191,11 +237,13 @@ export default function CoCCalculatorPage() {
               <li>Loan points or origination fees, if paid out of pocket</li>
             </ul>
             <p>
-              Don&apos;t include the mortgage balance — that&apos;s the bank&apos;s
-              money, not yours.
+              Don&apos;t include the mortgage balance — that&apos;s the
+              bank&apos;s money, not yours.
             </p>
 
-            <h2 className="text-2xl sm:text-3xl">What&apos;s a good cash-on-cash return?</h2>
+            <h2 className="text-2xl sm:text-3xl">
+              What&apos;s a good cash-on-cash return?
+            </h2>
             <div className="overflow-x-auto -mx-4 sm:mx-0">
               <table className="w-full text-sm border-collapse my-4">
                 <thead>
@@ -207,23 +255,36 @@ export default function CoCCalculatorPage() {
                 <tbody>
                   <tr className="border-b border-border">
                     <td className="py-2 px-3 font-mono">&lt; 4%</td>
-                    <td className="py-2 px-3">Low modeled current yield; compare the property&apos;s risk and full return case with your alternatives.</td>
+                    <td className="py-2 px-3">
+                      Low modeled current yield; compare the property&apos;s
+                      risk and full return case with your alternatives.
+                    </td>
                   </tr>
                   <tr className="border-b border-border">
                     <td className="py-2 px-3 font-mono">4–8%</td>
-                    <td className="py-2 px-3">Common for appreciation-focused coastal markets.</td>
+                    <td className="py-2 px-3">
+                      Common for appreciation-focused coastal markets.
+                    </td>
                   </tr>
                   <tr className="border-b border-border">
                     <td className="py-2 px-3 font-mono">8–12%</td>
-                    <td className="py-2 px-3">Illustrative range only; whether it is adequate depends on the investor and deal.</td>
+                    <td className="py-2 px-3">
+                      Illustrative range only; whether it is adequate depends on
+                      the investor and deal.
+                    </td>
                   </tr>
                   <tr className="border-b border-border">
                     <td className="py-2 px-3 font-mono">12–20%</td>
-                    <td className="py-2 px-3">Higher modeled current yield; verify rent, expenses, leverage, and risks.</td>
+                    <td className="py-2 px-3">
+                      Higher modeled current yield; verify rent, expenses,
+                      leverage, and risks.
+                    </td>
                   </tr>
                   <tr>
                     <td className="py-2 px-3 font-mono">20%+</td>
-                    <td className="py-2 px-3">Verify rents and reserves — possible over-optimism.</td>
+                    <td className="py-2 px-3">
+                      Verify rents and reserves — possible over-optimism.
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -236,21 +297,29 @@ export default function CoCCalculatorPage() {
               as a guaranteed hurdle or offset.
             </p>
 
-            <h2 className="text-2xl sm:text-3xl">CoC isn&apos;t the whole story</h2>
+            <h2 className="text-2xl sm:text-3xl">
+              CoC isn&apos;t the whole story
+            </h2>
             <p>
               Real estate offers four other return components CoC doesn&apos;t
               capture: appreciation, principal paydown (mortgage amortization
-              builds your equity), tax savings from depreciation, and
-              forced equity from value-add work. Total ROI / IRR over the
-              hold period includes all of these.
+              builds your equity), tax savings from depreciation, and forced
+              equity from value-add work. Total ROI / IRR over the hold period
+              includes all of these.
             </p>
             <p>
-              Use CoC for &ldquo;does this deal beat my other options for
-              cash today?&rdquo; — and use the TrueCap analyzer for a 10-year
+              Use CoC for &ldquo;does this deal beat my other options for cash
+              today?&rdquo; — and use the TrueCap analyzer for a 10-year
               cash-flow and equity planning view plus sensitivity. It does not
               currently expose tax-specific or modeled-exit modules. If you run
               this math in another tool, see how TrueCap stacks up against the{" "}
-              <Link href="/vs/biggerpockets-calculator" className="font-semibold text-primary hover:underline">BiggerPockets calculator</Link>.
+              <Link
+                href="/vs/biggerpockets-calculator"
+                className="font-semibold text-primary hover:underline"
+              >
+                BiggerPockets calculator
+              </Link>
+              .
             </p>
 
             <h2 className="text-2xl sm:text-3xl">Common mistakes</h2>
@@ -263,36 +332,44 @@ export default function CoCCalculatorPage() {
             <h3>2. Forgetting reserves</h3>
             <p>
               Maintenance, vacancy, and CapEx aren&apos;t monthly bills —
-              they&apos;re infrequent but expensive. A property that
-              cash-flows $400/mo before reserves often cash-flows $50/mo
-              after honest ones.
+              they&apos;re infrequent but expensive. A property that cash-flows
+              $400/mo before reserves often cash-flows $50/mo after honest ones.
             </p>
             <h3>3. Comparing across markets</h3>
             <p>
-              A 12% CoC in Cleveland is normal. A 12% CoC in San Francisco
-              is suspicious. Compare CoC within a market, not across markets.
+              A 12% CoC in Cleveland is normal. A 12% CoC in San Francisco is
+              suspicious. Compare CoC within a market, not across markets.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">Frequently asked questions</h2>
             <div className="space-y-4">
               {FAQS.map((f) => (
-                <details key={f.q} className="bg-card border border-border rounded-lg p-4 group">
+                <details
+                  key={f.q}
+                  className="bg-card border border-border rounded-lg p-4 group"
+                >
                   <summary className="font-semibold text-foreground cursor-pointer list-none flex items-start justify-between gap-3">
                     <span>{f.q}</span>
-                    <span className="text-muted-foreground text-xl leading-none group-open:rotate-45 transition-transform">+</span>
+                    <span className="text-muted-foreground text-xl leading-none group-open:rotate-45 transition-transform">
+                      +
+                    </span>
                   </summary>
-                  <p className="text-sm text-muted-foreground leading-relaxed mt-3">{f.a}</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed mt-3">
+                    {f.a}
+                  </p>
                 </details>
               ))}
             </div>
           </article>
 
           <section className="mt-10 sm:mt-12 rounded-2xl bg-primary text-primary-foreground p-6 sm:p-8">
-            <h2 className="text-xl sm:text-2xl font-extrabold mb-2">Run the full analysis — free</h2>
+            <h2 className="text-xl sm:text-2xl font-extrabold mb-2">
+              Run the full analysis — free
+            </h2>
             <p className="text-sm sm:text-base opacity-90 mb-4">
               Cap rate, DSCR, 10-year cash-flow and equity projections,
-              sensitivity, Offer Ceiling, and a secondary Screening Index—all from the same property
-              inputs you used here.
+              sensitivity, Offer Ceiling, and a secondary Screening Index—all
+              from the same property inputs you used here.
             </p>
             <ul className="text-sm space-y-1.5 mb-5 opacity-90">
               {[
@@ -309,7 +386,10 @@ export default function CoCCalculatorPage() {
                 </li>
               ))}
             </ul>
-            <Link href="/" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
+            >
               Open the full TrueCap analyzer
               <ArrowUpRight className="w-4 h-4" />
             </Link>
@@ -321,12 +401,19 @@ export default function CoCCalculatorPage() {
 
           <ToolEmbedInvite slug="cash-on-cash-calculator" />
 
-
-          <ToolsConversionCta calculatorName="Cash-on-cash calculator" hook="The TrueCap analyzer adds a 10-year cash-flow and equity projection, downside sensitivity, and a target-dependent Offer Ceiling on top of cash-on-cash, so you can test the assumptions behind the first-year screen." />
+          <ToolsConversionCta
+            calculatorName="Cash-on-cash calculator"
+            hook="The TrueCap analyzer adds a 10-year cash-flow and equity projection, downside sensitivity, and a target-dependent Offer Ceiling on top of cash-on-cash, so you can test the assumptions behind the first-year screen."
+          />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}
-            <Link href="/" className="font-bold text-foreground hover:underline">TrueCap</Link>{" "}
+            <Link
+              href="/"
+              className="font-bold text-foreground hover:underline"
+            >
+              TrueCap
+            </Link>{" "}
             — transparent, editable rental analysis, free to start.
           </footer>
         </main>

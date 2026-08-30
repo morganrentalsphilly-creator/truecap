@@ -1,19 +1,19 @@
 {
   "day": 30,
   "send_date": "2026-06-30",
-  "subject": "5 deal-killers we catch the most",
-  "preheader": "the patterns that show up in bad deals over and over.",
-  "headline": "Five things TrueCap flags in bad deals — and most amateur underwriting misses.",
+  "subject": "5 assumptions to verify before relying on a rental screen",
+  "preheader": "a practical diligence checklist for the numbers behind the model.",
+  "headline": "Five rental assumptions worth checking with property-specific evidence.",
   "body": [
-    "After thousands of address analyses, the same five problems show up over and over in deals investors were about to buy. Watch for these on the next property you run.",
-    "One: reassessed property tax. Seller's tax bill reflects the old assessment. When you buy at today's price, the county resets your assessment and your tax bill jumps 20-40%. Texas and Florida are the worst for this. Always model the post-sale tax bill, not the seller's bill.",
-    "Two: insurance set at last year's rate. Premiums are rising 10-15% per year nationally, 25-50% in coastal Florida and parts of Texas. Underwriting with a stale quote means year-two NOI evaporates. Get a fresh quote before you close.",
-    "Three: rent comps using listed rents instead of leased rents. Listed rents on Zillow and Apartments.com run 8-12% above what units actually rent for after concessions. Use the lower end of the range, not the median asking price.",
-    "Four: PM fees modeled at 8% with no leasing fee. The real all-in PM cost is closer to 11-13% once you add lease-up, renewals, maintenance markups, and admin. Underestimating PM is a $1,000+/yr NOI mistake on a typical property.",
+    "A preliminary result is only as useful as its inputs. Use this list to identify evidence that still needs to be collected before you rely on a rental model.",
+    "One: property tax. Review the local annual bill or a supported local effective rate, then investigate how the jurisdiction treats a sale, exemptions, and reassessment. TrueCap does not auto-fill a parcel-specific or post-sale tax amount.",
+    "Two: insurance. Replace any rough starting value with a current property-specific quote that reflects the intended occupancy, coverage, deductibles, and known hazards.",
+    "Three: rent. Separate advertised rent, a public benchmark, and reviewed comparable evidence. Account for concessions, condition, unit mix, utilities, and realistic downtime instead of treating a single listing as a lease outcome.",
+    "Four: management and leasing costs. Enter the actual fee structure you expect—including leasing, renewal, maintenance markup, and administrative charges where applicable—rather than assuming one percentage covers everything.",
     "Five: DSCR that only meets the selected screening threshold at base-case rent. Lender definitions and minimums vary. Stress lower rent, then confirm the lender's written rent basis, DSCR calculation, leverage, reserves, and other program rules.",
-    "Run any property through TrueCap and these five get checked automatically. Free tier. Sixty seconds. The pricing page is there if you want the full sensitivity grid and PDF reports."
+    "TrueCap exposes editable assumptions and shows how they affect modeled cash flow, cap rate, cash-on-cash return, and DSCR. It does not automatically verify these five items. Use the preliminary screen to organize diligence, then replace every material input with property-specific evidence."
   ],
-  "cta_text": "Catch the deal-killers",
+  "cta_text": "Analyze a property free",
   "cta_url": "https://usetruecap.com/",
-  "signature_note": "PS — reply if you want the spreadsheet I used to keep doing this manually before I built TrueCap. I'll send it."
+  "signature_note": "PS — keep your own reviewed source records alongside the model so each important assumption can be traced and updated."
 }

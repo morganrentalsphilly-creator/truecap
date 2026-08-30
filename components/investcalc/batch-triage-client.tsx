@@ -14,7 +14,6 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import * as Sentry from "@sentry/nextjs";
-import Link from "next/link";
 import {
   AlertTriangle,
   ArrowUpRight,
@@ -26,7 +25,11 @@ import {
   SlidersHorizontal,
   Sparkles,
 } from "lucide-react";
-import { screenBatchAction, extractTriageListingsAction, type BatchTriageResult } from "@/app/actions/batch-triage";
+import {
+  screenBatchAction,
+  extractTriageListingsAction,
+  type BatchTriageResult,
+} from "@/app/actions/batch-triage";
 import {
   MAX_TRIAGE_ROWS,
   formatScreenableTriageRows,
@@ -51,6 +54,7 @@ import { verdictScreeningLabel } from "@/lib/verdict-display";
 import { trackEvent } from "@/lib/analytics";
 import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
 import { BuyBoxFitBadge } from "@/components/investcalc/buy-box-fit-badge";
+import { AnalyzerHandoffLink } from "@/components/analyzer-handoff-link";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
@@ -99,10 +103,13 @@ function issueFor(row: TriagePreviewRow, field: TriagePreviewField) {
 const triageVerdictLabel = verdictScreeningLabel;
 
 function verdictClasses(rec: string | null): string {
-  if (rec === "Strong Buy") return "bg-success/10 text-success border-success/30";
+  if (rec === "Strong Buy")
+    return "bg-success/10 text-success border-success/30";
   if (rec === "Buy") return "bg-primary/10 text-primary border-primary/30";
-  if (rec === "Neutral" || rec === "Risky") return "bg-warning/15 text-warning-foreground border-warning/30";
-  if (rec === "Avoid") return "bg-destructive/10 text-destructive border-destructive/20";
+  if (rec === "Neutral" || rec === "Risky")
+    return "bg-warning/15 text-warning-foreground border-warning/30";
+  if (rec === "Avoid")
+    return "bg-destructive/10 text-destructive border-destructive/20";
   return "bg-muted text-muted-foreground border-border";
 }
 
@@ -116,7 +123,7 @@ function openUrl(row: TriageRowResult): string {
       interestRate: row.assumptionContext?.interestRatePct,
       propertyTaxPct: row.assumptionContext?.propertyTaxPct,
     },
-    { utmSource: "batch-triage" }
+    { utmSource: "batch-triage" },
   );
 }
 
@@ -126,7 +133,7 @@ function rowAssumptionLabel(row: TriageRowResult): string {
   const rateSource = context.rateSource === "fred" ? "FRED" : "default";
   const taxSource =
     context.taxSource === "state-static"
-      ? `${context.state ?? "state"} legacy data`
+      ? `${context.state ?? "state"} legacy estimate — verify locally`
       : "generic preliminary fallback";
   return `${context.interestRatePct.toFixed(2)}% rate (${rateSource}) · ${context.propertyTaxPct.toFixed(2)}% tax (${taxSource})`;
 }
@@ -153,7 +160,10 @@ function PreviewInput({
   const numeric = field !== "address";
   return (
     <div className="min-w-0">
-      <label htmlFor={inputId} className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-muted-foreground lg:sr-only">
+      <label
+        htmlFor={inputId}
+        className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-muted-foreground lg:sr-only"
+      >
         {label}
       </label>
       <input
@@ -166,11 +176,17 @@ function PreviewInput({
         aria-describedby={issueId}
         className={cn(
           "h-11 w-full min-w-0 rounded-lg border bg-background px-3 text-base text-foreground outline-none transition focus-visible:ring-2 focus-visible:ring-ring md:text-sm",
-          issue?.severity === "error" ? "border-destructive" : "border-border"
+          issue?.severity === "error" ? "border-destructive" : "border-border",
         )}
       />
       {issue ? (
-        <p id={issueId} className={cn("mt-1 text-[10px] leading-snug", issue.severity === "error" ? "text-destructive" : "text-amber-700")}>
+        <p
+          id={issueId}
+          className={cn(
+            "mt-1 text-[10px] leading-snug",
+            issue.severity === "error" ? "text-destructive" : "text-amber-700",
+          )}
+        >
           {issue.message}
         </p>
       ) : null}
@@ -183,14 +199,22 @@ function PreviewRowContext({ row }: { row: TriagePreviewRow }) {
   const rowIssues = row.issues.filter((issue) => issue.field === "row");
   return (
     <div className="mt-2 space-y-1 text-[11px]">
-      <p className={cn("inline-flex items-center gap-1.5", location.label ? "text-muted-foreground" : "text-amber-700")}>
+      <p
+        className={cn(
+          "inline-flex items-center gap-1.5",
+          location.label ? "text-muted-foreground" : "text-amber-700",
+        )}
+      >
         <MapPin className="size-3.5" aria-hidden />
         {location.label
           ? `Assumption location: ${location.label} · ${location.state} tax assumptions`
           : "Location unresolved — verify city/state before screening"}
       </p>
       {rowIssues.map((issue) => (
-        <p key={issue.message} className="flex items-start gap-1.5 text-amber-700">
+        <p
+          key={issue.message}
+          className="flex items-start gap-1.5 text-amber-700"
+        >
           <AlertTriangle className="mt-0.5 size-3 shrink-0" aria-hidden />
           {issue.message}
         </p>
@@ -199,13 +223,22 @@ function PreviewRowContext({ row }: { row: TriagePreviewRow }) {
   );
 }
 
-export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }) {
+export function BatchTriageClient({
+  aiEnabled = false,
+}: {
+  aiEnabled?: boolean;
+}) {
   const { toast } = useToast();
   const [text, setText] = useState("");
   const [pending, startScreening] = useTransition();
   const [extracting, startExtracting] = useTransition();
-  const [result, setResult] = useState<Extract<BatchTriageResult, { ok: true }> | null>(null);
-  const [previewRows, setPreviewRows] = useState<TriagePreviewRow[] | null>(null);
+  const [result, setResult] = useState<Extract<
+    BatchTriageResult,
+    { ok: true }
+  > | null>(null);
+  const [previewRows, setPreviewRows] = useState<TriagePreviewRow[] | null>(
+    null,
+  );
   const [sort, setSort] = useState<TriageSort>("score");
   const [passersOnly, setPassersOnly] = useState(false);
 
@@ -214,7 +247,9 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
   // one-frame empty state is the price of no hydration mismatch.
   useEffect(() => {
     try {
-      const stored = parseStoredTriageBatch(window.sessionStorage.getItem(TRIAGE_STORAGE_KEY));
+      const stored = parseStoredTriageBatch(
+        window.sessionStorage.getItem(TRIAGE_STORAGE_KEY),
+      );
       if (!stored) return;
       setText(stored.text);
       setPreviewRows(parseTriagePreviewInput(stored.text));
@@ -242,7 +277,10 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
       if (text === "" && result === null) {
         window.sessionStorage.removeItem(TRIAGE_STORAGE_KEY);
       } else {
-        window.sessionStorage.setItem(TRIAGE_STORAGE_KEY, serializeTriageBatch({ text, result }));
+        window.sessionStorage.setItem(
+          TRIAGE_STORAGE_KEY,
+          serializeTriageBatch({ text, result }),
+        );
       }
     } catch {
       // Quota / private mode — fail silently (see the rehydrate effect).
@@ -252,14 +290,21 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
   const review = () => {
     const parsed = parseTriagePreviewInput(text);
     if (parsed.length === 0) {
-      toast({ title: "Nothing to review", description: "Paste at least one listing first." });
+      toast({
+        title: "Nothing to review",
+        description: "Paste at least one listing first.",
+      });
       return;
     }
     setPreviewRows(parsed.slice(0, MAX_TRIAGE_ROWS));
     setResult(null);
   };
 
-  const updatePreviewRow = (id: string, field: Exclude<TriagePreviewField, "row">, value: string) => {
+  const updatePreviewRow = (
+    id: string,
+    field: Exclude<TriagePreviewField, "row">,
+    value: string,
+  ) => {
     setPreviewRows((current) => {
       if (!current) return current;
       const next = current.map((row) =>
@@ -271,7 +316,7 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
               // so parser ambiguity is resolved once the row is touched.
               sourceIssue: undefined,
             })
-          : row
+          : row,
       );
       setText(formatTriagePreviewRowsAsText(next));
       return next;
@@ -288,7 +333,8 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
     if (!screenableText) {
       toast({
         title: "Fix the highlighted rows",
-        description: "At least one row needs a complete address, valid purchase price, and monthly rent.",
+        description:
+          "At least one row needs a complete address, valid purchase price, and monthly rent.",
         variant: "warning",
       });
       return;
@@ -297,7 +343,11 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
       try {
         const r = await screenBatchAction({ text: screenableText });
         if (!r.ok) {
-          toast({ title: "Couldn't screen", description: r.message, variant: "destructive" });
+          toast({
+            title: "Couldn't screen",
+            description: r.message,
+            variant: "destructive",
+          });
           return;
         }
         setResult(r);
@@ -313,7 +363,8 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
         Sentry.captureException(err, { tags: { feature: "batch-triage" } });
         toast({
           title: "Couldn't screen",
-          description: "Something interrupted the request. Check your connection and try again.",
+          description:
+            "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
       }
@@ -328,11 +379,18 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
       try {
         const r = await extractTriageListingsAction({ text });
         if (!r.ok) {
-          toast({ title: "Couldn't extract", description: r.message, variant: "destructive" });
+          toast({
+            title: "Couldn't extract",
+            description: r.message,
+            variant: "destructive",
+          });
           return;
         }
         if (r.count === 0) {
-          toast({ title: "No listings found", description: "Couldn't spot any property listings in that text." });
+          toast({
+            title: "No listings found",
+            description: "Couldn't spot any property listings in that text.",
+          });
           return;
         }
         setText(r.text);
@@ -351,7 +409,8 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
         Sentry.captureException(err, { tags: { feature: "batch-triage" } });
         toast({
           title: "Couldn't extract",
-          description: "Something interrupted the request. Check your connection and try again.",
+          description:
+            "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
       }
@@ -365,24 +424,42 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
   }, [result, sort, passersOnly]);
 
   const previewScreenableCount = useMemo(
-    () => previewRows?.filter((row) => previewRowToScreenableListing(row) != null).length ?? 0,
-    [previewRows]
+    () =>
+      previewRows?.filter((row) => previewRowToScreenableListing(row) != null)
+        .length ?? 0,
+    [previewRows],
   );
   const previewErrorCount = useMemo(
-    () => previewRows?.reduce((count, row) => count + row.issues.filter((issue) => issue.severity === "error").length, 0) ?? 0,
-    [previewRows]
+    () =>
+      previewRows?.reduce(
+        (count, row) =>
+          count +
+          row.issues.filter((issue) => issue.severity === "error").length,
+        0,
+      ) ?? 0,
+    [previewRows],
   );
 
   const sortOptions: { id: TriageSort; label: string }[] = [
     { id: "score", label: "Screening Index" },
     { id: "cashFlow", label: "Cash flow" },
-    ...(result?.buyBoxActive ? ([{ id: "fit" as const, label: "Buy-box fit" }]) : []),
+    ...(result?.buyBoxActive
+      ? [{ id: "fit" as const, label: "Buy-box fit" }]
+      : []),
   ];
-  const resultContext = result?.rows.find((row) => row.assumptionContext?.screenedAt)?.assumptionContext;
-  const screenedAtMs = resultContext?.screenedAt ? Date.parse(resultContext.screenedAt) : NaN;
-  const resultIsStale = Number.isFinite(screenedAtMs) && Date.now() - screenedAtMs > 6 * 60 * 60 * 1000;
+  const resultContext = result?.rows.find(
+    (row) => row.assumptionContext?.screenedAt,
+  )?.assumptionContext;
+  const screenedAtMs = resultContext?.screenedAt
+    ? Date.parse(resultContext.screenedAt)
+    : NaN;
+  const resultIsStale =
+    Number.isFinite(screenedAtMs) &&
+    Date.now() - screenedAtMs > 6 * 60 * 60 * 1000;
   const fallbackRows =
-    result?.rows.filter((row) => row.assumptionContext?.enrichmentStatus !== "live").length ?? 0;
+    result?.rows.filter(
+      (row) => row.assumptionContext?.enrichmentStatus !== "live",
+    ).length ?? 0;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
@@ -393,9 +470,12 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Paste up to {MAX_TRIAGE_ROWS} listings — one per line, columns{" "}
-          <span className="font-semibold text-foreground">Address · Price · Rent · Beds</span>{" "}
-          (tab, pipe, or comma separated). We use the current FRED rate when available,
-          disclose the generic preliminary tax fallback, and rank the survivors
+          <span className="font-semibold text-foreground">
+            Address · Price · Rent · Beds
+          </span>{" "}
+          (tab, pipe, or comma separated). We use the current FRED rate when
+          available, disclose the generic preliminary tax fallback, and rank the
+          survivors
           {result?.buyBoxActive ? " against your buy box" : ""}.
         </p>
       </div>
@@ -427,7 +507,11 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
               disabled={extracting || pending || text.trim() === ""}
               className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
             >
-              {extracting ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4 text-primary" />}
+              {extracting ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Sparkles className="size-4 text-primary" />
+              )}
               Auto-extract from text
             </button>
           ) : null}
@@ -452,23 +536,37 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
       </div>
 
       {previewRows ? (
-        <section aria-labelledby="triage-review-heading" className="mt-8 rounded-2xl border border-border bg-card p-4 sm:p-5">
+        <section
+          aria-labelledby="triage-review-heading"
+          className="mt-8 rounded-2xl border border-border bg-card p-4 sm:p-5"
+        >
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h2 id="triage-review-heading" className="text-base font-extrabold text-foreground">
+              <h2
+                id="triage-review-heading"
+                className="text-base font-extrabold text-foreground"
+              >
                 Review before screening
               </h2>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                Confirm the four inputs and the resolved market. Missing rent is kept visible but won&apos;t be underwritten with a made-up default.
+                Confirm the four inputs and the resolved market. Missing rent is
+                kept visible but won&apos;t be underwritten with a made-up
+                default.
               </p>
             </div>
-            <div className="flex flex-wrap items-center gap-2 text-xs" aria-live="polite">
+            <div
+              className="flex flex-wrap items-center gap-2 text-xs"
+              aria-live="polite"
+            >
               <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2.5 py-1 font-semibold text-success">
-                <CheckCircle2 className="size-3.5" aria-hidden /> {previewScreenableCount} included
+                <CheckCircle2 className="size-3.5" aria-hidden />{" "}
+                {previewScreenableCount} included
               </span>
               {previewErrorCount > 0 ? (
                 <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2.5 py-1 font-semibold text-destructive">
-                  <AlertTriangle className="size-3.5" aria-hidden /> {previewErrorCount} {previewErrorCount === 1 ? "error" : "errors"}
+                  <AlertTriangle className="size-3.5" aria-hidden />{" "}
+                  {previewErrorCount}{" "}
+                  {previewErrorCount === 1 ? "error" : "errors"}
                 </span>
               ) : null}
             </div>
@@ -478,17 +576,52 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
               when its four columns fit without horizontal overflow. */}
           <div className="mt-4 space-y-3 lg:hidden">
             {previewRows.map((row, index) => (
-              <article key={row.id} className="rounded-xl border border-border bg-background p-3">
+              <article
+                key={row.id}
+                className="rounded-xl border border-border bg-background p-3"
+              >
                 <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                   Listing {index + 1}
                 </p>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="sm:col-span-2">
-                    <PreviewInput row={row} field="address" label="Address" surface="card" onChange={(value) => updatePreviewRow(row.id, "address", value)} />
+                    <PreviewInput
+                      row={row}
+                      field="address"
+                      label="Address"
+                      surface="card"
+                      onChange={(value) =>
+                        updatePreviewRow(row.id, "address", value)
+                      }
+                    />
                   </div>
-                  <PreviewInput row={row} field="purchasePrice" label="Price" surface="card" onChange={(value) => updatePreviewRow(row.id, "purchasePrice", value)} />
-                  <PreviewInput row={row} field="monthlyRent" label="Monthly rent" surface="card" onChange={(value) => updatePreviewRow(row.id, "monthlyRent", value)} />
-                  <PreviewInput row={row} field="bedrooms" label="Beds" surface="card" onChange={(value) => updatePreviewRow(row.id, "bedrooms", value)} />
+                  <PreviewInput
+                    row={row}
+                    field="purchasePrice"
+                    label="Price"
+                    surface="card"
+                    onChange={(value) =>
+                      updatePreviewRow(row.id, "purchasePrice", value)
+                    }
+                  />
+                  <PreviewInput
+                    row={row}
+                    field="monthlyRent"
+                    label="Monthly rent"
+                    surface="card"
+                    onChange={(value) =>
+                      updatePreviewRow(row.id, "monthlyRent", value)
+                    }
+                  />
+                  <PreviewInput
+                    row={row}
+                    field="bedrooms"
+                    label="Beds"
+                    surface="card"
+                    onChange={(value) =>
+                      updatePreviewRow(row.id, "bedrooms", value)
+                    }
+                  />
                 </div>
                 <PreviewRowContext row={row} />
               </article>
@@ -500,22 +633,68 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
               <caption className="sr-only">Editable listing preview</caption>
               <thead>
                 <tr className="text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                  <th scope="col" className="w-[42%] pb-2 pr-2">Address</th>
-                  <th scope="col" className="w-[18%] px-2 pb-2">Price</th>
-                  <th scope="col" className="w-[18%] px-2 pb-2">Rent</th>
-                  <th scope="col" className="w-[12%] px-2 pb-2">Beds</th>
+                  <th scope="col" className="w-[42%] pb-2 pr-2">
+                    Address
+                  </th>
+                  <th scope="col" className="w-[18%] px-2 pb-2">
+                    Price
+                  </th>
+                  <th scope="col" className="w-[18%] px-2 pb-2">
+                    Rent
+                  </th>
+                  <th scope="col" className="w-[12%] px-2 pb-2">
+                    Beds
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {previewRows.map((row) => (
                   <tr key={row.id} className="align-top">
                     <td className="py-3 pr-2">
-                      <PreviewInput row={row} field="address" label="Address" surface="table" onChange={(value) => updatePreviewRow(row.id, "address", value)} />
+                      <PreviewInput
+                        row={row}
+                        field="address"
+                        label="Address"
+                        surface="table"
+                        onChange={(value) =>
+                          updatePreviewRow(row.id, "address", value)
+                        }
+                      />
                       <PreviewRowContext row={row} />
                     </td>
-                    <td className="px-2 py-3"><PreviewInput row={row} field="purchasePrice" label="Price" surface="table" onChange={(value) => updatePreviewRow(row.id, "purchasePrice", value)} /></td>
-                    <td className="px-2 py-3"><PreviewInput row={row} field="monthlyRent" label="Monthly rent" surface="table" onChange={(value) => updatePreviewRow(row.id, "monthlyRent", value)} /></td>
-                    <td className="px-2 py-3"><PreviewInput row={row} field="bedrooms" label="Beds" surface="table" onChange={(value) => updatePreviewRow(row.id, "bedrooms", value)} /></td>
+                    <td className="px-2 py-3">
+                      <PreviewInput
+                        row={row}
+                        field="purchasePrice"
+                        label="Price"
+                        surface="table"
+                        onChange={(value) =>
+                          updatePreviewRow(row.id, "purchasePrice", value)
+                        }
+                      />
+                    </td>
+                    <td className="px-2 py-3">
+                      <PreviewInput
+                        row={row}
+                        field="monthlyRent"
+                        label="Monthly rent"
+                        surface="table"
+                        onChange={(value) =>
+                          updatePreviewRow(row.id, "monthlyRent", value)
+                        }
+                      />
+                    </td>
+                    <td className="px-2 py-3">
+                      <PreviewInput
+                        row={row}
+                        field="bedrooms"
+                        label="Beds"
+                        surface="table"
+                        onChange={(value) =>
+                          updatePreviewRow(row.id, "bedrooms", value)
+                        }
+                      />
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -528,8 +707,11 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
         <div className="mt-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm font-semibold text-foreground">
-              Screened {result.screenedCount} {result.screenedCount === 1 ? "listing" : "listings"}
-              {result.truncated ? ` (first ${MAX_TRIAGE_ROWS} of your paste)` : ""}
+              Screened {result.screenedCount}{" "}
+              {result.screenedCount === 1 ? "listing" : "listings"}
+              {result.truncated
+                ? ` (first ${MAX_TRIAGE_ROWS} of your paste)`
+                : ""}
               <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
                 {result.buyBoxActive
                   ? "Each Offer Ceiling is the highest modeled price that still meets the adopted Buy Box criteria shown on that row. It is not a recommended offer or appraisal."
@@ -546,14 +728,18 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
                     "inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
                     passersOnly
                       ? "border-[var(--brand-green)]/40 bg-[var(--brand-green-light)] text-[var(--brand-green)]"
-                      : "border-border bg-background text-muted-foreground hover:text-foreground"
+                      : "border-border bg-background text-muted-foreground hover:text-foreground",
                   )}
                 >
                   <SlidersHorizontal className="size-3.5" />
                   Meets my buy box
                 </button>
               ) : null}
-              <div role="group" aria-label="Sort by" className="flex items-center gap-1 rounded-lg bg-muted p-1">
+              <div
+                role="group"
+                aria-label="Sort by"
+                className="flex items-center gap-1 rounded-lg bg-muted p-1"
+              >
                 {sortOptions.map((o) => (
                   <button
                     key={o.id}
@@ -562,7 +748,9 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
                     onClick={() => setSort(o.id)}
                     className={cn(
                       "min-h-11 rounded-md px-3 py-2 text-xs font-semibold outline-none transition focus-visible:ring-2 focus-visible:ring-ring",
-                      sort === o.id ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                      sort === o.id
+                        ? "bg-card text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground",
                     )}
                   >
                     {o.label}
@@ -577,7 +765,7 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
               "mt-3 flex flex-col gap-2 rounded-xl border p-3 text-xs sm:flex-row sm:items-center sm:justify-between",
               fallbackRows > 0 || resultIsStale
                 ? "border-warning/35 bg-warning/10"
-                : "border-border bg-muted/30"
+                : "border-border bg-muted/30",
             )}
           >
             <div>
@@ -587,11 +775,14 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
                   : "Screening assumptions need a refresh"}
               </p>
               <p className="mt-0.5 text-muted-foreground">
-                Exact rate and tax assumptions appear on each row and carry into the full analyzer.
+                Exact rate and tax assumptions appear on each row and carry into
+                the full analyzer.
                 {fallbackRows > 0
                   ? ` ${fallbackRows} ${fallbackRows === 1 ? "row used" : "rows used"} one or more clearly labeled defaults.`
                   : ""}
-                {resultIsStale ? " Rates may have changed since this saved screen." : ""}
+                {resultIsStale
+                  ? " Rates may have changed since this saved screen."
+                  : ""}
               </p>
             </div>
             {resultIsStale || !resultContext?.screenedAt ? (
@@ -608,7 +799,9 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
 
           {rows.length === 0 ? (
             <p className="mt-6 rounded-xl border border-dashed border-border bg-card p-6 text-center text-sm text-muted-foreground">
-              {passersOnly ? "None of these meet your buy box yet." : "Nothing to show."}
+              {passersOnly
+                ? "None of these meet your buy box yet."
+                : "Nothing to show."}
             </p>
           ) : (
             <>
@@ -617,73 +810,140 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
                 <table className="w-full text-sm">
                   <thead className="bg-muted/50 text-left text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
                     <tr>
-                      <th scope="col" className="px-4 py-2.5">Listing</th>
-                      <th scope="col" className="px-3 py-2.5">Screening result</th>
-                      <th scope="col" className="px-3 py-2.5 text-right">Screening Index</th>
-                      <th scope="col" className="px-3 py-2.5 text-right">Cash flow</th>
-                      <th scope="col" className="px-3 py-2.5 text-right">DSCR</th>
-                      <th scope="col" className="px-3 py-2.5 text-right">Offer Ceiling</th>
-                      <th scope="col" className="px-3 py-2.5 text-right">Gap</th>
-                      <th scope="col" className="px-3 py-2.5">Fastest path</th>
-                      <th scope="col" className="px-3 py-2.5"><span className="sr-only">Action</span></th>
+                      <th scope="col" className="px-4 py-2.5">
+                        Listing
+                      </th>
+                      <th scope="col" className="px-3 py-2.5">
+                        Screening result
+                      </th>
+                      <th scope="col" className="px-3 py-2.5 text-right">
+                        Screening Index
+                      </th>
+                      <th scope="col" className="px-3 py-2.5 text-right">
+                        Cash flow
+                      </th>
+                      <th scope="col" className="px-3 py-2.5 text-right">
+                        DSCR
+                      </th>
+                      <th scope="col" className="px-3 py-2.5 text-right">
+                        Offer Ceiling
+                      </th>
+                      <th scope="col" className="px-3 py-2.5 text-right">
+                        Gap
+                      </th>
+                      <th scope="col" className="px-3 py-2.5">
+                        Fastest path
+                      </th>
+                      <th scope="col" className="px-3 py-2.5">
+                        <span className="sr-only">Action</span>
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
                     {rows.map((row, i) => (
-                      <tr key={`${row.input.address}-${i}`} className={cn(!row.ok && "opacity-60")}>
+                      <tr
+                        key={`${row.input.address}-${i}`}
+                        className={cn(!row.ok && "opacity-60")}
+                      >
                         <td className="max-w-[280px] px-4 py-3">
-                          <div className="truncate font-medium text-foreground" title={row.input.address}>
+                          <div
+                            className="truncate font-medium text-foreground"
+                            title={row.input.address}
+                          >
                             {row.input.address}
                           </div>
                           <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
                             <span>{money(row.input.purchasePrice)}</span>
                             <BuyBoxFitBadge fit={row.buyBoxFit ?? undefined} />
                           </div>
-                          <div className={cn("mt-1 text-[10px] leading-snug", row.assumptionContext?.enrichmentStatus === "live" ? "text-muted-foreground" : "text-warning-foreground")}>
+                          <div
+                            className={cn(
+                              "mt-1 text-[10px] leading-snug",
+                              row.assumptionContext?.enrichmentStatus === "live"
+                                ? "text-muted-foreground"
+                                : "text-warning-foreground",
+                            )}
+                          >
                             {rowAssumptionLabel(row)}
                           </div>
                         </td>
                         <td className="px-3 py-3">
                           {row.ok ? (
-                            <span className={cn("inline-flex rounded-full border px-2 py-0.5 text-xs font-semibold", verdictClasses(row.recommendation))}>
-                              {row.recommendation ? triageVerdictLabel(row.recommendation) : "—"}
+                            <span
+                              className={cn(
+                                "inline-flex rounded-full border px-2 py-0.5 text-xs font-semibold",
+                                verdictClasses(row.recommendation),
+                              )}
+                            >
+                              {row.recommendation
+                                ? triageVerdictLabel(row.recommendation)
+                                : "—"}
                             </span>
                           ) : (
-                            <span className="text-xs text-muted-foreground">Needs rent</span>
+                            <span className="text-xs text-muted-foreground">
+                              Needs rent
+                            </span>
                           )}
                         </td>
-                        <td className="px-3 py-3 text-right font-mono tabular-nums text-foreground">{row.score ?? "—"}</td>
-                        <td className={cn("px-3 py-3 text-right font-mono tabular-nums", (row.netCashFlowMonthly ?? 0) >= 0 ? "text-success" : "text-[var(--metric-negative)]")}>
+                        <td className="px-3 py-3 text-right font-mono tabular-nums text-foreground">
+                          {row.score ?? "—"}
+                        </td>
+                        <td
+                          className={cn(
+                            "px-3 py-3 text-right font-mono tabular-nums",
+                            (row.netCashFlowMonthly ?? 0) >= 0
+                              ? "text-success"
+                              : "text-[var(--metric-negative)]",
+                          )}
+                        >
                           {money(row.netCashFlowMonthly)}
                         </td>
-                        <td className="px-3 py-3 text-right font-mono tabular-nums text-foreground">{ratio(row.dscr, row.isCashPurchase)}</td>
-                        <td className="px-3 py-3 text-right font-mono font-semibold tabular-nums text-foreground" title={row.targetLabel ?? undefined}>
-                          <span>{money(row.maxOffer)}</span>
-                          {row.targetLabel ? <span className="mt-0.5 block max-w-40 text-[9px] font-sans font-normal leading-tight text-muted-foreground">{row.targetLabel}</span> : null}
+                        <td className="px-3 py-3 text-right font-mono tabular-nums text-foreground">
+                          {ratio(row.dscr, row.isCashPurchase)}
                         </td>
-                        <td className={cn("px-3 py-3 text-right text-xs font-semibold tabular-nums", (row.askingGap ?? 0) > 0 ? "text-destructive" : "text-success")}>
+                        <td
+                          className="px-3 py-3 text-right font-mono font-semibold tabular-nums text-foreground"
+                          title={row.targetLabel ?? undefined}
+                        >
+                          <span>{money(row.maxOffer)}</span>
+                          {row.targetLabel ? (
+                            <span className="mt-0.5 block max-w-40 text-[9px] font-sans font-normal leading-tight text-muted-foreground">
+                              {row.targetLabel}
+                            </span>
+                          ) : null}
+                        </td>
+                        <td
+                          className={cn(
+                            "px-3 py-3 text-right text-xs font-semibold tabular-nums",
+                            (row.askingGap ?? 0) > 0
+                              ? "text-destructive"
+                              : "text-success",
+                          )}
+                        >
                           {gapToAsking(row)}
                         </td>
                         <td className="max-w-[180px] px-3 py-3 text-xs leading-snug text-foreground">
                           {fastestPath(row)}
                         </td>
                         <td className="px-3 py-3 text-right">
-                          {/* New tab (the My Deals "Open Analysis" convention,
-                              see refresh-on-return.tsx): the screened batch
-                              stays mounted while the user drills into rows. */}
+                          {/* Same-tab navigation is the private handoff boundary:
+                              exact row inputs move through sessionStorage while
+                              the rendered href remains safe to copy or inspect. */}
                           {/* min-h-11 + canceling negative margin/padding = 44px
                               touch band (WCAG 2.5.8) without growing the row —
                               the touch-band convention what-if-sliders.tsx set. */}
-                          <Link
-                            href={openUrl(row)}
+                          <AnalyzerHandoffLink
+                            handoffHref={openUrl(row)}
                             prefetch={false}
-                            target="_blank"
-                            rel="noopener"
-                            onClick={() => trackEvent("shortlist_item_promoted", { source: "triage" })}
+                            onClick={() =>
+                              trackEvent("shortlist_item_promoted", {
+                                source: "triage",
+                              })
+                            }
                             className="-my-2 inline-flex min-h-11 items-center gap-1 rounded-md py-2 text-xs font-semibold text-primary outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
                           >
                             Open <ArrowUpRight className="size-3.5" />
-                          </Link>
+                          </AnalyzerHandoffLink>
                         </td>
                       </tr>
                     ))}
@@ -694,55 +954,147 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
               {/* Mobile cards */}
               <div className="mt-4 space-y-3 lg:hidden">
                 {rows.map((row, i) => (
-                  <div key={`${row.input.address}-${i}`} className={cn("rounded-2xl border border-border bg-card p-4", !row.ok && "opacity-60")}>
+                  <div
+                    key={`${row.input.address}-${i}`}
+                    className={cn(
+                      "rounded-2xl border border-border bg-card p-4",
+                      !row.ok && "opacity-60",
+                    )}
+                  >
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <div className="truncate font-semibold text-foreground" title={row.input.address}>{row.input.address}</div>
-                        <div className="mt-0.5 text-xs text-muted-foreground">{money(row.input.purchasePrice)}</div>
-                        <div className={cn("mt-1 text-[10px] leading-snug", row.assumptionContext?.enrichmentStatus === "live" ? "text-muted-foreground" : "text-warning-foreground")}>
+                        <div
+                          className="truncate font-semibold text-foreground"
+                          title={row.input.address}
+                        >
+                          {row.input.address}
+                        </div>
+                        <div className="mt-0.5 text-xs text-muted-foreground">
+                          {money(row.input.purchasePrice)}
+                        </div>
+                        <div
+                          className={cn(
+                            "mt-1 text-[10px] leading-snug",
+                            row.assumptionContext?.enrichmentStatus === "live"
+                              ? "text-muted-foreground"
+                              : "text-warning-foreground",
+                          )}
+                        >
                           {rowAssumptionLabel(row)}
                         </div>
                       </div>
                       {row.ok ? (
                         <div className="flex shrink-0 flex-col items-end gap-1">
-                          <span className={cn("rounded-full border px-2 py-0.5 text-xs font-semibold", verdictClasses(row.recommendation))}>
-                            {row.recommendation ? triageVerdictLabel(row.recommendation) : "—"}
+                          <span
+                            className={cn(
+                              "rounded-full border px-2 py-0.5 text-xs font-semibold",
+                              verdictClasses(row.recommendation),
+                            )}
+                          >
+                            {row.recommendation
+                              ? triageVerdictLabel(row.recommendation)
+                              : "—"}
                           </span>
                           <span className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
                             Screening Index {row.score ?? "—"}
                           </span>
                         </div>
                       ) : (
-                        <span className="shrink-0 text-xs text-muted-foreground">Needs rent</span>
+                        <span className="shrink-0 text-xs text-muted-foreground">
+                          Needs rent
+                        </span>
                       )}
                     </div>
                     <div className="mt-2 grid grid-cols-3 gap-2 text-center text-xs">
-                      <div><div className="text-[10px] uppercase tracking-wide text-muted-foreground">Cash flow</div><div className={cn("font-mono font-semibold", (row.netCashFlowMonthly ?? 0) >= 0 ? "text-success" : "text-[var(--metric-negative)]")}>{money(row.netCashFlowMonthly)}</div></div>
-                      <div><div className="text-[10px] uppercase tracking-wide text-muted-foreground">CoC</div><div className="font-mono font-semibold text-foreground">{pct(row.cocReturnPct)}</div></div>
-                      <div><div className="text-[10px] uppercase tracking-wide text-muted-foreground">DSCR</div><div className="font-mono font-semibold text-foreground">{ratio(row.dscr, row.isCashPurchase)}</div></div>
+                      <div>
+                        <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                          Cash flow
+                        </div>
+                        <div
+                          className={cn(
+                            "font-mono font-semibold",
+                            (row.netCashFlowMonthly ?? 0) >= 0
+                              ? "text-success"
+                              : "text-[var(--metric-negative)]",
+                          )}
+                        >
+                          {money(row.netCashFlowMonthly)}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                          CoC
+                        </div>
+                        <div className="font-mono font-semibold text-foreground">
+                          {pct(row.cocReturnPct)}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                          DSCR
+                        </div>
+                        <div className="font-mono font-semibold text-foreground">
+                          {ratio(row.dscr, row.isCashPurchase)}
+                        </div>
+                      </div>
                     </div>
                     <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
                       <div className="rounded-xl bg-muted/40 p-3">
-                        <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Offer Ceiling</div>
-                        <div className="mt-0.5 font-mono font-semibold text-foreground" title={row.targetLabel ?? undefined}>{money(row.maxOffer)}</div>
-                        {row.targetLabel ? <div className="mt-1 text-[10px] leading-snug text-muted-foreground">{row.targetLabel}</div> : null}
+                        <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                          Offer Ceiling
+                        </div>
+                        <div
+                          className="mt-0.5 font-mono font-semibold text-foreground"
+                          title={row.targetLabel ?? undefined}
+                        >
+                          {money(row.maxOffer)}
+                        </div>
+                        {row.targetLabel ? (
+                          <div className="mt-1 text-[10px] leading-snug text-muted-foreground">
+                            {row.targetLabel}
+                          </div>
+                        ) : null}
                       </div>
                       <div className="rounded-xl bg-muted/40 p-3">
-                        <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Gap to asking</div>
-                        <div className={cn("mt-0.5 font-semibold", (row.askingGap ?? 0) > 0 ? "text-destructive" : "text-success")}>{gapToAsking(row)}</div>
+                        <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                          Gap to asking
+                        </div>
+                        <div
+                          className={cn(
+                            "mt-0.5 font-semibold",
+                            (row.askingGap ?? 0) > 0
+                              ? "text-destructive"
+                              : "text-success",
+                          )}
+                        >
+                          {gapToAsking(row)}
+                        </div>
                       </div>
                     </div>
                     <div className="mt-2 rounded-xl border border-border bg-background p-3 text-xs">
-                      <span className="font-bold text-foreground">Fastest path: </span>
-                      <span className="text-muted-foreground">{fastestPath(row)}</span>
+                      <span className="font-bold text-foreground">
+                        Fastest path:{" "}
+                      </span>
+                      <span className="text-muted-foreground">
+                        {fastestPath(row)}
+                      </span>
                     </div>
                     <div className="mt-3 flex items-center justify-between gap-2">
                       <BuyBoxFitBadge fit={row.buyBoxFit ?? undefined} />
                       {/* 44px touch band (min-h-11 + canceling -my/py) — this is
                           the card's only action; visual height unchanged. */}
-                      <Link href={openUrl(row)} prefetch={false} target="_blank" rel="noopener" onClick={() => trackEvent("shortlist_item_promoted", { source: "triage" })} className="-my-2 ml-auto inline-flex min-h-11 items-center gap-1 rounded-md py-2 text-xs font-semibold text-primary outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring">
+                      <AnalyzerHandoffLink
+                        handoffHref={openUrl(row)}
+                        prefetch={false}
+                        onClick={() =>
+                          trackEvent("shortlist_item_promoted", {
+                            source: "triage",
+                          })
+                        }
+                        className="-my-2 ml-auto inline-flex min-h-11 items-center gap-1 rounded-md py-2 text-xs font-semibold text-primary outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+                      >
                         Open in analyzer <ArrowUpRight className="size-3.5" />
-                      </Link>
+                      </AnalyzerHandoffLink>
                     </div>
                   </div>
                 ))}
@@ -752,7 +1104,11 @@ export function BatchTriageClient({ aiEnabled = false }: { aiEnabled?: boolean }
 
           {result.parseErrors.length > 0 ? (
             <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
-              <p className="font-semibold">{result.parseErrors.length} line{result.parseErrors.length === 1 ? "" : "s"} couldn&apos;t be read:</p>
+              <p className="font-semibold">
+                {result.parseErrors.length} line
+                {result.parseErrors.length === 1 ? "" : "s"} couldn&apos;t be
+                read:
+              </p>
               <ul className="mt-1 space-y-0.5">
                 {result.parseErrors.slice(0, 5).map((e) => (
                   <li key={e.line} className="truncate">

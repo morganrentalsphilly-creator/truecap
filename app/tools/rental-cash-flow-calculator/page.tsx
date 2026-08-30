@@ -18,7 +18,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { permanentRedirect } from "next/navigation";
 import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { RentalCashFlowCalculatorWidget } from "@/components/tools/rental-cash-flow-calculator-widget";
@@ -28,6 +28,7 @@ import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { isCalculatorReleased } from "@/lib/calculator-registry";
+import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 export const metadata: Metadata = {
   title: "Rental Property Cash Flow Calculator | Free Monthly Cash Flow Tool",
   description:
@@ -48,7 +49,14 @@ export const metadata: Metadata = {
       "Calculate monthly rental cash flow in seconds — price, rent, financing, and the full expense set — plus plain-English guidance on what counts as good cash flow.",
     url: "/tools/rental-cash-flow-calculator",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap rental property cash flow calculator" }],
+    images: [
+      {
+        url: "/home.jpg",
+        width: 1200,
+        height: 630,
+        alt: "TrueCap rental property cash flow calculator",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -83,12 +91,14 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Why does my lender's DSCR look different from my cash flow?",
-    a: "DSCR is NOI divided by debt service — it excludes the CapEx reserve and doesn't care about your down payment beyond how it sizes the loan. A deal can have positive cash flow but a DSCR below the 1.25 most lenders want, or vice versa. This calculator shows both so you can see the deal the way you'll experience it (cash flow) and the way a lender will underwrite it (DSCR).",
+    a: "DSCR is NOI divided by debt service under the calculator's stated convention; the CapEx reserve is excluded here, and down payment affects DSCR through loan size. A property can show positive modeled cash flow and a lower DSCR, or vice versa. Lenders use product-, borrower-, and property-specific definitions and thresholds, so compare the screen with written lender terms rather than treating it as approval analysis.",
   },
 ];
 
 export default function RentalCashFlowCalculatorPage() {
-  if (!isCalculatorReleased("rental-cash-flow-calculator")) notFound();
+  if (!isCalculatorReleased("rental-cash-flow-calculator")) {
+    permanentRedirect(HISTORICAL_TOOL_REDIRECTS["rental-cash-flow-calculator"]);
+  }
 
   const siteUrl = getSiteUrl();
 
@@ -146,7 +156,10 @@ export default function RentalCashFlowCalculatorPage() {
 
   return (
     <>
-      <ToolBreadcrumbSchema toolPath="/tools/rental-cash-flow-calculator" toolName="Rental cash flow calculator" />
+      <ToolBreadcrumbSchema
+        toolPath="/tools/rental-cash-flow-calculator"
+        toolName="Rental cash flow calculator"
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }}
@@ -161,7 +174,10 @@ export default function RentalCashFlowCalculatorPage() {
       />
 
       <div className="min-h-screen bg-background">
-        <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <main
+          id="main"
+          className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12"
+        >
           {/* H1 */}
           <header className="mb-6 sm:mb-8">
             <Link
@@ -174,10 +190,10 @@ export default function RentalCashFlowCalculatorPage() {
               Rental Property Cash Flow Calculator
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground mt-2 leading-relaxed">
-              The number that actually lands in your account each month —
-              after every operating expense, every reserve, and the
-              mortgage. Type in price, rent, and financing; the cash flow
-              (and the NOI / debt-service split behind it) computes live.
+              The number that actually lands in your account each month — after
+              every operating expense, every reserve, and the mortgage. Type in
+              price, rent, and financing; the cash flow (and the NOI /
+              debt-service split behind it) computes live.
             </p>
           </header>
 
@@ -186,46 +202,52 @@ export default function RentalCashFlowCalculatorPage() {
 
           {/* Long-form content */}
           <article className="prose prose-slate max-w-none mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
-            <h2 className="text-2xl sm:text-3xl">What is rental property cash flow?</h2>
+            <h2 className="text-2xl sm:text-3xl">
+              What is rental property cash flow?
+            </h2>
             <p>
               Cash flow is rent minus operating expenses minus the mortgage
               payment — the cash that lands in your account each month.
-              It&apos;s the most intuitive number in rental investing and
-              also the most commonly faked: listings, back-of-napkin math,
-              and optimistic spreadsheets routinely skip the expenses that
-              turn a &ldquo;$500/mo winner&rdquo; into a break-even deal.
-              This calculator includes all of them by default.
+              It&apos;s the most intuitive number in rental investing and also
+              the most commonly faked: listings, back-of-napkin math, and
+              optimistic spreadsheets routinely skip the expenses that turn a
+              &ldquo;$500/mo winner&rdquo; into a break-even deal. This
+              calculator includes all of them by default.
             </p>
 
             <h3>The formula</h3>
             <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
               <div className="text-base sm:text-lg font-mono">
-                <span className="font-bold">Cash flow</span> = Rent −
-                Operating Expenses − Mortgage Payment
+                <span className="font-bold">Cash flow</span> = Rent − Operating
+                Expenses − Mortgage Payment
               </div>
               <div className="text-sm text-muted-foreground mt-2">
                 e.g. $2,400 rent − $1,005 expenses − $1,297 mortgage ≈ $97/mo
               </div>
             </div>
             <p>
-              Two of those three terms are where deals are won or lost.
-              Rent is usually knowable. The mortgage payment is exact math.
-              But &ldquo;operating expenses&rdquo; is a bundle of eight or
-              more line items — and every one you skip inflates the answer.
+              Two of those three terms are where deals are won or lost. Rent is
+              usually knowable. The mortgage payment is exact math. But
+              &ldquo;operating expenses&rdquo; is a bundle of eight or more line
+              items — and every one you skip inflates the answer.
             </p>
 
-            <h2 className="text-2xl sm:text-3xl">The full walkthrough, line by line</h2>
+            <h2 className="text-2xl sm:text-3xl">
+              The full walkthrough, line by line
+            </h2>
             <p>
-              Here&apos;s the calculator&apos;s default example worked out
-              by hand — a $250,000 single-family rental at $2,400/mo rent,
-              bought with 20% down at 6.75% on a 30-year loan:
+              Here&apos;s the calculator&apos;s default example worked out by
+              hand — a $250,000 single-family rental at $2,400/mo rent, bought
+              with 20% down at 6.75% on a 30-year loan:
             </p>
             <div className="overflow-x-auto -mx-4 sm:mx-0">
               <table className="w-full text-sm border-collapse my-4">
                 <thead>
                   <tr className="border-b border-border">
                     <th className="text-left py-2 px-3 font-bold">Line item</th>
-                    <th className="text-left py-2 px-3 font-bold">Assumption</th>
+                    <th className="text-left py-2 px-3 font-bold">
+                      Assumption
+                    </th>
                     <th className="text-right py-2 px-3 font-bold">Monthly</th>
                   </tr>
                 </thead>
@@ -273,133 +295,171 @@ export default function RentalCashFlowCalculatorPage() {
                   <tr>
                     <td className="py-2 px-3 font-bold">Monthly cash flow</td>
                     <td className="py-2 px-3"></td>
-                    <td className="py-2 px-3 text-right font-mono font-bold">≈ $97</td>
+                    <td className="py-2 px-3 text-right font-mono font-bold">
+                      ≈ $97
+                    </td>
                   </tr>
                 </tbody>
               </table>
             </div>
             <p>
-              Notice what the honest version of this deal looks like:
-              roughly $97/mo, not the $770/mo you&apos;d get by computing
-              &ldquo;rent minus tax, insurance, and mortgage&rdquo; the way
-              many listings do. That gap — about $670 of reserves —
-              isn&apos;t pessimism. It&apos;s the vacancy month, the water
-              heater, and the property manager that every rental eventually
-              pays for, averaged into a monthly number.
+              Notice what the honest version of this deal looks like: roughly
+              $97/mo, not the $770/mo you&apos;d get by computing &ldquo;rent
+              minus tax, insurance, and mortgage&rdquo; the way many listings
+              do. That gap — about $670 of reserves — isn&apos;t pessimism.
+              It&apos;s the vacancy month, the water heater, and the property
+              manager that every rental eventually pays for, averaged into a
+              monthly number.
             </p>
             <p>
-              The assumptions also show how sensitive the answer is. Drop
-              the maintenance reserve to 5% for a newer build and cash flow
-              roughly doubles to ~$217/mo. Self-manage and it jumps another
-              $192. That&apos;s why serious investors argue about expense
-              assumptions, not formulas — the formula is trivial, the
-              assumptions are the underwrite.
+              The assumptions also show how sensitive the answer is. Drop the
+              maintenance reserve to 5% for a newer build and cash flow roughly
+              doubles to ~$217/mo. Self-manage and it jumps another $192.
+              That&apos;s why serious investors argue about expense assumptions,
+              not formulas — the formula is trivial, the assumptions are the
+              underwrite.
             </p>
 
             <h3>The NOI / debt-service split</h3>
             <p>
-              Under the headline number, the calculator shows the split
-              lenders care about. <Link href="/glossary/noi" className="text-primary font-semibold hover:underline">Net Operating Income</Link>{" "}
-              is rent minus operating expenses, <em>before</em> the
-              mortgage — $1,515/mo in the example above.{" "}
-              <Link href="/glossary/dscr" className="text-primary font-semibold hover:underline">DSCR</Link>{" "}
-              divides that NOI by the debt service: $1,515 ÷ $1,297 = 1.17.
-              Lenders typically want ≥1.25 for investment loans, so this
-              deal cash-flows for you but sits below the threshold many
-              lenders underwrite to — exactly the kind of nuance a single
-              cash-flow number hides.
+              Under the headline number, the calculator shows the split lenders
+              care about.{" "}
+              <Link
+                href="/glossary/noi"
+                className="text-primary font-semibold hover:underline"
+              >
+                Net Operating Income
+              </Link>{" "}
+              is rent minus operating expenses, <em>before</em> the mortgage —
+              $1,515/mo in the example above.{" "}
+              <Link
+                href="/glossary/dscr"
+                className="text-primary font-semibold hover:underline"
+              >
+                DSCR
+              </Link>{" "}
+              divides that NOI by the debt service: $1,515 ÷ $1,297 = 1.17. This
+              example&apos;s modeled cash flow is positive while its DSCR is
+              1.17. A lender may use different income, expense, debt-service,
+              reserve, and threshold rules, so ask the lender to calculate the
+              property under the specific loan program.
             </p>
             <p>
               One convention worth knowing: following the lender-standard
-              definition, NOI and DSCR here <strong>exclude</strong>{" "}
-              the CapEx reserve (it&apos;s a return-of-capital reserve, not an
-              operating expense), while cash flow still subtracts it. The
-              full TrueCap analyzer uses the same convention, so the numbers
-              you see here carry over exactly.
+              definition, NOI and DSCR here <strong>exclude</strong> the CapEx
+              reserve (it&apos;s a return-of-capital reserve, not an operating
+              expense), while cash flow still subtracts it. The full TrueCap
+              analyzer uses the same convention, so the numbers you see here
+              carry over exactly.
             </p>
 
-            <h2 className="text-2xl sm:text-3xl">What&apos;s good monthly cash flow?</h2>
+            <h2 className="text-2xl sm:text-3xl">
+              What&apos;s good monthly cash flow?
+            </h2>
             <p>
-              There&apos;s no universal magic number — $300/mo means
-              something different on a $120k door in Cleveland than on a
-              $600k door in Phoenix. But the bands TrueCap&apos;s own
-              selected-rule classifier uses are a screening reference:
+              There&apos;s no universal magic number — $300/mo means something
+              different on a $120k door in Cleveland than on a $600k door in
+              Phoenix. But the bands TrueCap&apos;s own selected-rule classifier
+              uses are a screening reference:
             </p>
             <div className="overflow-x-auto -mx-4 sm:mx-0">
               <table className="w-full text-sm border-collapse my-4">
                 <thead>
                   <tr className="border-b border-border">
-                    <th className="text-left py-2 px-3 font-bold">Monthly cash flow</th>
+                    <th className="text-left py-2 px-3 font-bold">
+                      Monthly cash flow
+                    </th>
                     <th className="text-left py-2 px-3 font-bold">Read</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr className="border-b border-border">
                     <td className="py-2 px-3 font-mono">$400+</td>
-                    <td className="py-2 px-3">Strong — when DSCR ≥ 1.25 and cash-on-cash ≥ 10% agree</td>
+                    <td className="py-2 px-3">
+                      Illustrative positive cash flow; review DSCR,
+                      cash-on-cash, reserves, and evidence separately
+                    </td>
                   </tr>
                   <tr className="border-b border-border">
                     <td className="py-2 px-3 font-mono">$100–$400</td>
-                    <td className="py-2 px-3">Solid — real cushion, worth the full underwrite</td>
+                    <td className="py-2 px-3">
+                      Solid — real cushion, worth the full underwrite
+                    </td>
                   </tr>
                   <tr className="border-b border-border">
                     <td className="py-2 px-3 font-mono">$0–$100</td>
-                    <td className="py-2 px-3">Break-even territory — one repair erases the year</td>
+                    <td className="py-2 px-3">
+                      Break-even territory — one repair erases the year
+                    </td>
                   </tr>
                   <tr className="border-b border-border">
                     <td className="py-2 px-3 font-mono">$0 to −$200</td>
-                    <td className="py-2 px-3">Marginal — you subsidize the property monthly</td>
+                    <td className="py-2 px-3">
+                      Marginal — you subsidize the property monthly
+                    </td>
                   </tr>
                   <tr>
                     <td className="py-2 px-3 font-mono">Below −$200</td>
-                    <td className="py-2 px-3">Negative — the numbers don&apos;t support a buy-and-hold thesis as entered</td>
+                    <td className="py-2 px-3">
+                      Negative — the numbers don&apos;t support a buy-and-hold
+                      thesis as entered
+                    </td>
                   </tr>
                 </tbody>
               </table>
             </div>
             <p>
-              Two caveats. First, cash flow scales with deal size — judge
-              it alongside{" "}
-              <Link href="/glossary/cash-on-cash-return" className="text-primary font-semibold hover:underline">cash-on-cash return</Link>{" "}
-              (most buy-and-hold investors target 8–12%) so a big deal
-              can&apos;t hide a weak return behind a big-looking dollar
-              figure. Second, a strong cash-flow number built on thin
-              reserves is fiction. $400/mo with 0% vacancy and 0%
-              maintenance is worse than $150/mo with honest assumptions.
+              Two caveats. First, cash flow scales with deal size — judge it
+              alongside{" "}
+              <Link
+                href="/glossary/cash-on-cash-return"
+                className="text-primary font-semibold hover:underline"
+              >
+                cash-on-cash return
+              </Link>{" "}
+              so a large property cannot be compared on the dollar figure alone.
+              There is no universal cash-on-cash target. Second, a positive
+              cash-flow result built on zero vacancy or maintenance assumptions
+              needs stronger property-specific support than one that includes
+              reviewed reserves.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">The costs beginners forget</h2>
             <h3>1. CapEx — the roof fund</h3>
             <p>
-              Capital expenditures are the big-ticket items that don&apos;t
-              show up monthly but absolutely show up: roof, HVAC, water
-              heater, flooring. A common reserve is 5–10% of rent,
-              more for older properties. Skipping CapEx is the single most
-              common way spreadsheets overstate cash flow — our guide to{" "}
-              <Link href="/blog/capex-maintenance-reserves-rental-property" className="text-primary font-semibold hover:underline">CapEx and maintenance reserves</Link>{" "}
+              Capital expenditures are the big-ticket items that don&apos;t show
+              up monthly but absolutely show up: roof, HVAC, water heater,
+              flooring. A common reserve is 5–10% of rent, more for older
+              properties. Skipping CapEx is the single most common way
+              spreadsheets overstate cash flow — our guide to{" "}
+              <Link
+                href="/blog/capex-maintenance-reserves-rental-property"
+                className="text-primary font-semibold hover:underline"
+              >
+                CapEx and maintenance reserves
+              </Link>{" "}
               breaks down realistic numbers by property age.
             </p>
             <h3>2. Vacancy — rent you don&apos;t collect</h3>
             <p>
-              No property rents 12 months a year forever. A 5–8% vacancy
-              reserve models roughly 2–4 weeks of vacancy per year plus
-              collection loss. In high-turnover neighborhoods or
-              college towns, use more.
+              No property rents 12 months a year forever. A 5–8% vacancy reserve
+              models roughly 2–4 weeks of vacancy per year plus collection loss.
+              In high-turnover neighborhoods or college towns, use more.
             </p>
             <h3>3. Turns — the cost between tenants</h3>
             <p>
               Every move-out costs money: paint, cleaning, small repairs,
-              re-leasing fees, and the vacant weeks while it happens. Turns
-              land across your vacancy and maintenance reserves — which is
-              exactly why zeroing those lines out because &ldquo;the tenant
-              is great&rdquo; eventually produces a very bad quarter.
+              re-leasing fees, and the vacant weeks while it happens. Turns land
+              across your vacancy and maintenance reserves — which is exactly
+              why zeroing those lines out because &ldquo;the tenant is
+              great&rdquo; eventually produces a very bad quarter.
             </p>
             <h3>4. PMI on low-down-payment loans</h3>
             <p>
               Under 20% down, most conventional loans add monthly mortgage
-              insurance on top of P&amp;I. This calculator flags it; the
-              full analyzer models it automatically, including when it
-              drops off as the loan amortizes.
+              insurance on top of P&amp;I. This calculator flags it; the full
+              analyzer models it automatically, including when it drops off as
+              the loan amortizes.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">
@@ -415,45 +475,82 @@ export default function RentalCashFlowCalculatorPage() {
                 month? Absolute dollars; includes financing.
               </li>
               <li>
-                <strong>Cap rate</strong> — How does the property perform
-                as an asset, ignoring financing? Best for comparing
-                properties. Run it with the{" "}
-                <Link href="/tools/cap-rate-calculator" className="text-primary font-semibold hover:underline">cap rate calculator</Link>.
+                <strong>Cap rate</strong> — How does the property perform as an
+                asset, ignoring financing? Best for comparing properties. Run it
+                with the{" "}
+                <Link
+                  href="/blog/how-to-calculate-cap-rate"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  cap rate guide
+                </Link>
+                .
               </li>
               <li>
-                <strong>Cash-on-cash return</strong> — How hard is my
-                invested cash working, as a percentage? Best for comparing
-                against other uses of your money. Run it with the{" "}
-                <Link href="/tools/cash-on-cash-calculator" className="text-primary font-semibold hover:underline">cash-on-cash calculator</Link>.
+                <strong>Cash-on-cash return</strong> — How hard is my invested
+                cash working, as a percentage? Best for comparing against other
+                uses of your money. Run it with the{" "}
+                <Link
+                  href="/blog/how-to-calculate-cash-on-cash-return"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  cash-on-cash guide
+                </Link>
+                .
               </li>
             </ul>
             <p>
-              Cash flow is the one that pays your bills — but it&apos;s
-              also the one that says nothing about scale. The percentage
-              metrics keep it honest, and{" "}
-              <Link href="/tools/dscr-calculator" className="text-primary font-semibold hover:underline">DSCR</Link>{" "}
-              tells you whether a lender will fund the deal at all. For how
-              the whole family of metrics fits together on a real deal, see{" "}
-              <Link href="/blog/cap-rate-vs-cash-on-cash-vs-dscr" className="text-primary font-semibold hover:underline">cap rate vs cash-on-cash vs DSCR</Link>{" "}
+              Cash flow is the one that pays your bills — but it&apos;s also the
+              one that says nothing about scale. The percentage metrics keep it
+              honest, and{" "}
+              <Link
+                href="/blog/how-to-calculate-dscr"
+                className="text-primary font-semibold hover:underline"
+              >
+                DSCR
+              </Link>{" "}
+              shows modeled debt coverage under TrueCap&apos;s disclosed
+              convention. A lender applies its own inputs, formula, and approval
+              criteria. For how the whole family of metrics fits together on a
+              real deal, see{" "}
+              <Link
+                href="/blog/cap-rate-vs-cash-on-cash-vs-dscr"
+                className="text-primary font-semibold hover:underline"
+              >
+                cap rate vs cash-on-cash vs DSCR
+              </Link>{" "}
               and the strategy-level view in{" "}
-              <Link href="/blog/cash-flow-vs-appreciation" className="text-primary font-semibold hover:underline">cash flow vs appreciation</Link>.
+              <Link
+                href="/blog/cash-flow-vs-appreciation"
+                className="text-primary font-semibold hover:underline"
+              >
+                cash flow vs appreciation
+              </Link>
+              .
             </p>
 
-            <h2 className="text-2xl sm:text-3xl">When to use this calculator</h2>
+            <h2 className="text-2xl sm:text-3xl">
+              When to use this calculator
+            </h2>
             <p>
-              Use it the moment a listing catches your eye. Cash flow with
-              honest reserves is the fastest way to sort &ldquo;worth a
-              real underwrite&rdquo; from &ldquo;pass&rdquo; — faster and
-              more accurate than the{" "}
-              <Link href="/blog/50-percent-rule-rentals" className="text-primary font-semibold hover:underline">50% rule</Link>{" "}
+              Use it as an early screening worksheet when a listing catches your
+              eye. Cash flow with explicit reserves can identify which
+              assumptions deserve deeper verification; it does not decide
+              whether to buy or pass. It is more detailed than the{" "}
+              <Link
+                href="/blog/50-percent-rule-rentals"
+                className="text-primary font-semibold hover:underline"
+              >
+                50% rule
+              </Link>{" "}
               once you have real numbers for tax and insurance.
             </p>
             <p>
-              When a deal survives this screen, run the full analysis at
-              TrueCap — the analyzer starts from the same inputs, adds
-              PMI and closing costs, and layers on cap rate, cash-on-cash,
-              DSCR, 10-year cash-flow and equity projections, sensitivity,
-              selected-rule fit, and a secondary Screening Index.
+              When a deal survives this screen, run the full analysis at TrueCap
+              — the analyzer starts from the same inputs, adds PMI and closing
+              costs, and layers on cap rate, cash-on-cash, model DSCR, and a
+              secondary Screening Index. Released projections and sensitivity
+              appear only when your evaluation or plan access includes them.
             </p>
 
             <h2 className="text-2xl sm:text-3xl">Frequently asked questions</h2>
@@ -483,15 +580,15 @@ export default function RentalCashFlowCalculatorPage() {
               Run the full analysis — free
             </h2>
             <p className="text-sm sm:text-base opacity-90 mb-4">
-              Monthly cash flow is the screen, not the underwrite. TrueCap
-              takes the same inputs and adds PMI, closing costs, cap rate,
+              Monthly cash flow is the screen, not the underwrite. TrueCap takes
+              the same inputs and adds PMI, closing costs, cap rate,
               cash-on-cash, DSCR, 10-year cash-flow and equity projections,
               sensitivity, Offer Ceiling, and a secondary Screening Index.
             </p>
             <ul className="text-sm space-y-1.5 mb-5 opacity-90">
               {[
                 "Cash flow, cap rate, CoC, DSCR — auto-calculated",
-                "State property tax + market rent auto-filled from the address",
+                "Editable HUD rent + FRED rate benchmarks; manual local property tax",
                 "10-year projection with rent + expense growth (Pro)",
                 "Downside sensitivity and Offer Ceiling (Pro)",
                 "Screening Index with a factor breakdown for triage",
@@ -517,11 +614,17 @@ export default function RentalCashFlowCalculatorPage() {
               tool has no embeddable widget. See the component header. */}
           <ToolEmbedInvite slug="rental-cash-flow-calculator" />
 
-          <ToolsConversionCta calculatorName="Rental cash flow calculator" hook="TrueCap's full analyzer runs the same cash-flow math plus cap rate, cash-on-cash, DSCR, PMI, a 10-year cash-flow and equity projection, sensitivity, and Offer Ceiling. Save your work, compare deals, and share a link." />
+          <ToolsConversionCta
+            calculatorName="Rental cash flow calculator"
+            hook="TrueCap's full analyzer runs the same cash-flow math plus cap rate, cash-on-cash, DSCR, PMI, a 10-year cash-flow and equity projection, sensitivity, and Offer Ceiling. Save your work, compare deals, and share a link."
+          />
 
           <footer className="mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground">
             Built with{" "}
-            <Link href="/" className="font-bold text-foreground hover:underline">
+            <Link
+              href="/"
+              className="font-bold text-foreground hover:underline"
+            >
               TrueCap
             </Link>{" "}
             — transparent, editable rental analysis, free to start.

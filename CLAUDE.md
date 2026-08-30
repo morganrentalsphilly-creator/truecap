@@ -17,16 +17,16 @@ shareable read-only link.
 - **Audience**: solo / small-portfolio buy-and-hold investors and house-hackers.
 - **Business model**: free tier (run analyses, save up to 5 deals;
   Deal Score is FREE for every user — see `app/actions/deal-score.ts`)
-  + Pro at **$29.99/mo** or **$300/yr** (editing + unlimited saved
-  deals, dashboard, compare, templates, tax strategy, exit scenarios,
-  PDF export, buy box, etc.). Note: plain read-only share links are
-  free, but creating a new revocable link requires sign-in; only the
-  co-branded variant is Pro. The canonical
-  tier/gate map for every feature is `lib/entitlements-catalog.ts`;
-  pricing logic lives in the `plans.entitlements` JSON column — see
-  `lib/entitlements.ts`. New Deal Decision Pack sales are temporarily
-  unavailable. Keep both Pack checkout gates off and retain the historical
-  Price/claim paths only for existing paid-claim recovery.
+  - Pro at **$29.99/mo** or **$300/yr** (editing + unlimited saved
+    deals, dashboard, compare, templates, tax strategy, exit scenarios,
+    PDF export, buy box, etc.). Note: plain read-only share links are
+    free, but creating a new revocable link requires sign-in; only the
+    co-branded variant is Pro. The canonical
+    tier/gate map for every feature is `lib/entitlements-catalog.ts`;
+    pricing logic lives in the `plans.entitlements` JSON column — see
+    `lib/entitlements.ts`. New Deal Decision Pack sales are temporarily
+    unavailable. Keep both Pack checkout gates off and retain the historical
+    Price/claim paths only for existing paid-claim recovery.
 - **Stack**: Next.js 16 (App Router, `--webpack` for prod), React 19,
   TypeScript 5.7 (strict), Supabase (Auth + Postgres + Storage), Stripe
   (subscriptions), Resend (Broadcasts API), Sentry, Tailwind v4,
@@ -77,9 +77,9 @@ final_source_code/
 │   │   ├── billing.ts            # Stripe checkout + portal
 │   │   ├── compare.ts
 │   │   ├── deal-score.ts         # Deal Score scoring (FREE-tier feature)
-│   │   ├── enrich-property.ts    # FRED rate + HUD FMR + state property tax
+│   │   ├── enrich-property.ts    # FRED rate + HUD FMR; property tax stays manual
 │   │   ├── exit-scenarios.ts     # Snapshot-cached
-│   │   ├── newsletter.ts
+│   │   ├── newsletter.ts         # Retired signup boundary; newsletter canceled
 │   │   ├── profile.ts
 │   │   ├── saved-analyses.ts     # Save/edit/load/PDF
 │   │   ├── tax-strategy.ts       # Snapshot-cached
@@ -88,7 +88,7 @@ final_source_code/
 │   │   └── user-defaults.ts
 │   ├── api/
 │   │   ├── stripe/webhooks/route.ts       # Stripe webhook (nodejs runtime)
-│   │   ├── cron/send-weekly-digest/route.ts  # Weekly newsletter cron
+│   │   ├── cron/send-weekly-digest/route.ts  # Retired route; no cron registration
 │   │   ├── dashboard/search-suggestions/route.ts
 │   │   └── email/send-test/route.ts
 │   ├── auth/                     # /login, /sign-up, /forgot-password,
@@ -201,7 +201,7 @@ final_source_code/
 │   │ utils.ts
 │   └── __tests__/                # Vitest unit tests
 ├── scripts/                      # tsx-run operational scripts
-│   ├── schedule-all-broadcasts.ts        # Pre-schedule weekly digests in Resend
+│   ├── schedule-all-broadcasts.ts        # Archived newsletter tool; do not run
 │   ├── schedule-daily-campaign.ts        # 30-day drip campaign scheduler
 │   ├── preview-daily-campaign.ts
 │   ├── count-audience-contacts.ts
@@ -231,17 +231,19 @@ final_source_code/
 Three Supabase clients live in `lib/supabase/`. Choosing wrong is a
 security or bundle bug.
 
-| Helper | Where it runs | Bypasses RLS? | Imports `server-only`? |
-|--------|---------------|---------------|------------------------|
-| `createServerSupabaseClient()` from `lib/supabase/server.ts` | Server Components, Server Actions, Route Handlers (any cookie-aware server code) | No — uses anon key + user session cookie | No (but uses `next/headers` so server-only by construction) |
-| `createBrowserSupabaseClient()` from `lib/supabase/client.ts` | Client components / browser | No — anon key + browser session | No |
-| `createAdminSupabaseClient()` from `lib/supabase/admin.ts` | Stripe webhook, admin scripts, anywhere we must write user-controlled fields | **Yes — service role** | **Yes** (`import "server-only"`) |
+| Helper                                                        | Where it runs                                                                    | Bypasses RLS?                            | Imports `server-only`?                                      |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------- | ---------------------------------------- | ----------------------------------------------------------- |
+| `createServerSupabaseClient()` from `lib/supabase/server.ts`  | Server Components, Server Actions, Route Handlers (any cookie-aware server code) | No — uses anon key + user session cookie | No (but uses `next/headers` so server-only by construction) |
+| `createBrowserSupabaseClient()` from `lib/supabase/client.ts` | Client components / browser                                                      | No — anon key + browser session          | No                                                          |
+| `createAdminSupabaseClient()` from `lib/supabase/admin.ts`    | Stripe webhook, admin scripts, anywhere we must write user-controlled fields     | **Yes — service role**                   | **Yes** (`import "server-only"`)                            |
 
 ```ts
 // lib/supabase/admin.ts
 import "server-only";
 // ...
-export function createAdminSupabaseClient() { /* service-role */ }
+export function createAdminSupabaseClient() {
+  /* service-role */
+}
 ```
 
 **Rules**:
@@ -274,15 +276,24 @@ throw to the client.
 ```ts
 // Canonical shape (see app/actions/exit-scenarios.ts and saved-analyses.ts)
 export type ExitScenarioSnapshotResult =
-  | { ok: true; source: "cache" | "generated"; snapshot: ExitScenarioSnapshotPayload }
+  | {
+      ok: true;
+      source: "cache" | "generated";
+      snapshot: ExitScenarioSnapshotPayload;
+    }
   | {
       ok: false;
-      code: "SIGN_IN_REQUIRED" | "ENTITLEMENT_REQUIRED" | "NOT_FOUND" | "SERVER_ERROR";
+      code:
+        | "SIGN_IN_REQUIRED"
+        | "ENTITLEMENT_REQUIRED"
+        | "NOT_FOUND"
+        | "SERVER_ERROR";
       message: string;
     };
 ```
 
 **Reference panels** for this pattern (each is a "snapshot + server-action + UI" trio):
+
 - `components/investcalc/exit-scenarios/panel.tsx` + `app/actions/exit-scenarios.ts`
 - `components/investcalc/tax-strategy/panel.tsx` + `app/actions/tax-strategy.ts`
 - `components/investcalc/ten-year-projections/panel.tsx` + `app/actions/ten-year-projections.ts`
@@ -306,7 +317,11 @@ import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
 
 const entitlements = await getEntitlementsForUser(supabase, user.id);
 if (!hasPlanFeature(entitlements, "exit_scenarios")) {
-  return { ok: false, code: "ENTITLEMENT_REQUIRED", message: "Upgrade to Pro …" };
+  return {
+    ok: false,
+    code: "ENTITLEMENT_REQUIRED",
+    message: "Upgrade to Pro …",
+  };
 }
 ```
 
@@ -316,6 +331,7 @@ already handles the fallback to the `free` plan when no
 `active/trialing/past_due` subscription exists.
 
 Other helpers in `lib/entitlements.ts`:
+
 - `hasSavedDealCapacity(entitlements, currentCount)`
 - `getSavedDealLimitLabel(entitlements)`
 - `hasDashboardAccess(entitlements)` / `hasDashboardInsightsAccess(entitlements)`
@@ -382,6 +398,7 @@ OG images live next to the page they belong to (`opengraph-image.tsx`)
 and use Next.js's built-in convention.
 
 Constraints (see `app/d/[encoded]/opengraph-image.tsx`):
+
 - `export const runtime = "edge"`
 - Use **only** the `next/og` JSX subset (basic divs + inline styles + text). No Tailwind classes.
 - **No server-only imports.** Allowed: `decodeShareLink`, `calculateAnalysis`,
@@ -410,7 +427,7 @@ mint a new link.
 ```ts
 // lib/share-link.ts
 export type SharePayload = {
-  v: 1;                       // version — bump only if we keep both decoders working
+  v: 1; // version — bump only if we keep both decoders working
   values: InvestmentFormValues;
   meta?: { sharedAt?: string; title?: string };
 };
@@ -426,7 +443,7 @@ export type SharePayload = {
   `meta` (optional) or behind a new `v: 2` decoder that runs alongside
   `v: 1`.
 
-### 3.8 Email — Resend Broadcasts API, idempotent cron, kill switch
+### 3.8 Archived newsletter architecture — canceled, no cron
 
 > **⚠️ NEWSLETTER CANCELED — founder decision 2026-07-15.** The Resend
 > account switch deleted the audience (subscribers unrecoverable) and
@@ -443,7 +460,7 @@ The (retired) `app/api/cron/send-weekly-digest/route.ts` ran Tuesdays at
 13:00 UTC (schedule `0 13 * * 2`, now removed from `vercel.json`). It:
 
 1. **Auth-gates** on `Authorization: Bearer ${CRON_SECRET}`. No secret env var → 500 + Sentry alert. Bad bearer → 401 (silent).
-2. **Kill switch**: `NEWSLETTER_PAUSED=1|true|yes` → skip with a logged no-op. Use this to pause sends without a redeploy. Does **not** cancel broadcasts already pre-scheduled in Resend (cancel those in the Resend dashboard).
+2. **Historical kill switch**: `NEWSLETTER_PAUSED=1|true|yes` makes the retired route skip. Keep it enabled as defense in depth; it is not a scheduling control or authorization to revive sends. Any legacy Resend broadcast must remain canceled in the Resend dashboard.
 3. Looks up `/emails/content/YYYY-MM-DD.json` for "this Tuesday" (files are named for their Tuesday send date). Missing file → 200 no-op (off-weeks are fine).
 4. **Idempotency check** — lists Resend broadcasts; if one with name `Weekly digest · ${today}` already exists (any status), skip. Prevents duplicate sends when `npm run schedule-broadcasts` has pre-scheduled into the 28-day window.
 5. Renders via `lib/email/render-weekly.ts`, then `POST /broadcasts` + `POST /broadcasts/:id/send`. Resend substitutes the per-recipient unsubscribe URL via the `{{{RESEND_UNSUBSCRIBE_URL}}}` placeholder we drop into the template.
@@ -528,6 +545,7 @@ When adding a fourth such feature, replicate this layout. Shared shells
 ## 4. Critical files reference
 
 ### Math + domain logic
+
 - `lib/calc-analysis.ts` — `calculateAnalysis()` is the single source of truth for cash flow, cap rate, CoC, DSCR, monthly payment, 10-year + tax strategy projection embedding. Don't duplicate this math anywhere.
 - `lib/verdict.ts` — `buildAutoVerdict()` + headline classifier (Strong / Solid / Mixed / Marginal / Negative). Cash-purchase branch handled explicitly.
 - `lib/investcalc-schema.ts` — Zod schema + `INVESTCALC_SCHEMA_VERSION` (currently `9`). Bump the version when the shape changes; persisted snapshots key on it.
@@ -537,6 +555,7 @@ When adding a fourth such feature, replicate this layout. Shared shells
 - `lib/compare-metrics.ts`, `lib/compare-assumptions.ts`, `lib/compare-result-snapshot.ts` — deal compare engine.
 
 ### Auth / billing / entitlements
+
 - `lib/entitlements.ts` — `getEntitlementsForUser`, `hasPlanFeature`, capacity + dashboard helpers. Always go through these — never inspect `subscription.status` directly.
 - `lib/supabase/admin.ts` — service-role client. `server-only`. For Stripe webhook + admin scripts only.
 - `lib/supabase/server.ts` — cookie-aware server client for Server Components / Actions / Route Handlers.
@@ -549,6 +568,7 @@ When adding a fourth such feature, replicate this layout. Shared shells
 - `lib/auth-schema.ts` — Zod schemas for auth forms.
 
 ### Server actions (all live in `app/actions/`)
+
 - `auth.ts` — sign in / sign up / reset password.
 - `billing.ts` — Stripe checkout session + customer portal.
 - `saved-analyses.ts` — save / load / list / archive / PDF export. The canonical reference for the full `Result` union shape.
@@ -556,13 +576,14 @@ When adding a fourth such feature, replicate this layout. Shared shells
 - `deal-score.ts` — Deal Score computation (free tier).
 - `exit-scenarios.ts`, `tax-strategy.ts`, `ten-year-projections.ts` — snapshot-cached projection actions (see §3.12 trio pattern).
 - `analysis-templates.ts` — saved analysis templates.
-- `enrich-property.ts` — calls FRED (rate), HUD (FMR), state property tax to pre-fill the form.
-- `newsletter.ts` — newsletter signup.
+- `enrich-property.ts` — calls FRED (rate) and HUD (FMR); property tax remains a manual local input with a disclosed generic fallback when blank.
+- `newsletter.ts` — retired newsletter-signup boundary. The newsletter is canceled; do not restore a capture surface without explicit founder authorization.
 - `profile.ts`, `user-defaults.ts` — profile + per-user defaults.
 
 ### Routes
+
 - `app/api/stripe/webhooks/route.ts` — Stripe webhook (nodejs runtime). Idempotent via `stripe_webhook_events`.
-- `app/api/cron/send-weekly-digest/route.ts` — Vercel cron. Auth + kill switch + Resend Broadcasts.
+- `app/api/cron/send-weekly-digest/route.ts` — retired code path retained for history only. It has no Vercel cron registration and must not be invoked or rescheduled.
 - `app/api/cron/send-rate-alerts/route.ts` — Thursday cron (18:00 UTC). Re-underwrites paid users' saved deals when the FRED 30-yr rate moves ≥0.125pp week-over-week; emails state changes (tier / DSCR band / cash-flow sign) via Resend single sends. Gated by `RATE_ALERTS_MODE` env: off (default) / dry (JSON preview, no sends) / live. Pure logic in `lib/rate-alerts.ts` (unit-tested); template `emails/rate-alert.tsx`.
 - `app/api/cron/send-rent-alerts/route.ts` — Monthly cron (1st, 17:00 UTC). Sibling rent-axis monitor: re-prices paid users' saved **single-family** deals against current market rent (RentCast, via `fetchRentCastRentEstimate`) and emails the same state changes. Gated by `RENT_ALERTS_MODE` (off default / dry / live). Each deal = one paid RentCast call, so it shares the global `RENTCAST_MONTHLY_ENRICHMENT_CAP` budget (`app_counters`) + a per-run `RENT_ALERTS_MAX_LOOKUPS_PER_RUN` ceiling; dry mode does NO lookups unless `RENT_ALERTS_DRY_FETCH=1` (truly-free scale preview). Reuses the `profiles.rate_alert_emails` consent. Pure logic in `lib/rent-alerts.ts` (unit-tested); template `emails/rent-alert.tsx`.
 - `app/api/email/send-test/route.ts` — internal "send me a preview" endpoint.
@@ -572,6 +593,7 @@ When adding a fourth such feature, replicate this layout. Shared shells
 - `app/d/[encoded]/page.tsx` + `opengraph-image.tsx` — public share link viewer + OG card.
 
 ### Frontend entry points
+
 - `components/investcalc/investcalc-page.tsx` — the main calculator (client component, react-hook-form + zodResolver).
 - `components/investcalc/read-only-analysis-view.tsx` — `/d/[encoded]` viewer.
 - `components/investcalc/analysis-dashboard.tsx` — Verdict Ledger result view (accordion rows) that pulls the panels together.
@@ -579,6 +601,7 @@ When adding a fourth such feature, replicate this layout. Shared shells
 - `app/layout.tsx` — root layout + global providers.
 
 ### Build / observability config
+
 - `next.config.mjs` — wraps Next config with `withSentryConfig`. `typescript.ignoreBuildErrors: false`. `automaticVercelMonitors: true`. `tunnelRoute: "/monitoring"`.
 - `instrumentation.ts` — Sentry server init.
 - `instrumentation-client.ts` — Sentry browser init + the `ignoreErrors` allow-list.
@@ -586,13 +609,15 @@ When adding a fourth such feature, replicate this layout. Shared shells
 - `eslint.config.mjs`, `vitest.config.ts`, `postcss.config.mjs`, `components.json` (shadcn) — tooling config.
 
 ### Operational
-- `scripts/schedule-all-broadcasts.ts` — pre-schedule weekly digests into Resend's 28-day window. `npm run schedule-broadcasts[:dry]`.
+
+- `scripts/schedule-all-broadcasts.ts` — archived newsletter utility. Do not run it or use either schedule-broadcasts command while the newsletter remains canceled.
 - `scripts/schedule-daily-campaign.ts` — 30-day onboarding drip. `npm run schedule-daily-campaign[:dry]`.
 - `scripts/preview-daily-campaign.ts`, `scripts/count-audience-contacts.ts`, `scripts/polish-emails.ts`.
 - `lib/reset-passwords.mjs` — invoked by `npm run reset-passwords`.
 - `emails/weekly-digest.tsx` — React Email template (rendered by `lib/email/render-weekly.ts`).
 
 ### Data + content
+
 - `emails/content/YYYY-MM-DD.json` — one per Tuesday's send.
 - `emails/daily-campaign-content/day-NN.json` — 30-day drip days.
 - `supabase/migrations/*.sql` — timestamped, run in order. Don't edit existing migrations; add a new one.
@@ -663,6 +688,7 @@ When adding a fourth such feature, replicate this layout. Shared shells
 `.env.example` is the source of truth. Required vs optional in practice:
 
 ### Required
+
 - `NEXT_PUBLIC_SITE_URL` — base URL for Supabase email links (no trailing slash).
 - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` — Supabase client + server (anon).
 - `SUPABASE_SERVICE_ROLE_KEY` — only the admin client uses it. Server-side only.
@@ -670,17 +696,17 @@ When adding a fourth such feature, replicate this layout. Shared shells
 - `STRIPE_WEBHOOK_SECRET` — `stripe.webhooks.constructEvent` signature verification.
 - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` — checkout redirect.
 - `STRIPE_PRICE_PRO_MONTHLY`, `STRIPE_PRICE_PRO_ANNUAL` — checkout session price IDs.
-- `RESEND_API_KEY` (must be **Full Access**, not "Sending only", to use Broadcasts).
-- `RESEND_AUDIENCE_ID` — newsletter audience.
-- `CRON_SECRET` — bearer token for the weekly cron (`Authorization: Bearer <secret>`).
+- `RESEND_API_KEY` — required only for enabled transactional/per-user email flows; newsletter Broadcast access is not required while the newsletter is canceled.
+- `CRON_SECRET` — bearer token for enabled per-user cron routes (`Authorization: Bearer <secret>`).
 
 ### Optional
+
 - `STRIPE_ANNUAL_DISCOUNT_COUPON_ID` — coupon applied to annual checkout if the annual Price isn't already discounted.
 - `NEXT_PUBLIC_GOOGLE_PLACES_API_KEY` — address autocomplete (restrict by HTTP referrer in GCP console).
 - `FRED_API_KEY` — current 30-yr mortgage rate to pre-fill financing (free key).
 - `HUD_API_KEY` — Fair Market Rent by county for single-family rent pre-fill (free key).
 - `EMAIL_FROM` (default `TrueCap <hello@usetruecap.com>`), `EMAIL_REPLY_TO` (default `hello@usetruecap.com`).
-- `NEWSLETTER_PAUSED` — `1` / `true` / `yes` to pause weekly cron sends without a redeploy.
+- `NEWSLETTER_PAUSED` — keep `1` as defense in depth for the retired route. It does not authorize, schedule, or revive the canceled newsletter.
 - `RATE_ALERTS_MODE` — `off` (default) / `dry` / `live` for the Thursday rate-alert cron. The feature ships dormant; flip to `dry`, review the JSON preview, then `live`.
 
 A missing required var fails closed (the relevant action / cron returns
@@ -691,14 +717,14 @@ fallbacks that mask a missing secret.
 
 ## 7. Testing + verification
 
-| Goal | Command |
-|------|---------|
-| TypeScript check (fast) | `npx tsc --noEmit` |
-| Unit tests (Vitest) | `npm test` |
-| Production build (heavy, slowest) | `npm run build` |
-| Lint | `npm run lint` |
-| Build-chain integrity | `node scripts/verify-build-integrity.mjs` |
-| Dev server | `npm run dev` |
+| Goal                              | Command                                   |
+| --------------------------------- | ----------------------------------------- |
+| TypeScript check (fast)           | `npx tsc --noEmit`                        |
+| Unit tests (Vitest)               | `npm test`                                |
+| Production build (heavy, slowest) | `npm run build`                           |
+| Lint                              | `npm run lint`                            |
+| Build-chain integrity             | `node scripts/verify-build-integrity.mjs` |
+| Dev server                        | `npm run dev`                             |
 
 - **Build-chain integrity guard** — CI job `build-chain-guard` hashes the
   files that execute during `next build` (`next.config.mjs`,
@@ -720,16 +746,18 @@ fallbacks that mask a missing secret.
   `calc-analysis.ts`, `analysis-template-schema.ts`,
   `dashboard-deal-mapping.ts`, `dashboard-risk-return.ts`, or anything
   with a sibling `*.test.ts`.
-- **Sentry dashboard** is the source of truth for production errors.
-  Cron failures go through `Sentry.captureMessage(...)` tagged with
-  `feature: newsletter-cron`.
-- **Resend dashboard** for email delivery status (broadcasts list,
-  open rates, bounces). Match broadcast names against `Weekly digest · YYYY-MM-DD`.
+- **Sentry dashboard** is the source of truth for production errors. The
+  `feature: newsletter-cron` tag belongs to a retired path and should not have
+  scheduled production traffic.
+- **Resend dashboard** remains the place to confirm that any historical weekly
+  broadcasts are canceled. Do not use historical delivery metrics as current
+  campaign proof.
 - **Stripe dashboard** for webhook delivery + retries. Local Stripe
   webhook signature verification can be exercised with `stripe listen`.
 
 Operational dry-runs:
-- `npm run schedule-broadcasts:dry` — list what `schedule-all-broadcasts.ts` would do.
+
+- `npm run schedule-broadcasts:dry` — archived newsletter utility; do not run or use its output as a revival plan.
 - `npm run schedule-daily-campaign:dry` — same for the 30-day drip.
 - `npm run preview-daily-campaign` — render a drip day to local HTML for visual review.
 

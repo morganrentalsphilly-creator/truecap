@@ -10,8 +10,8 @@
  * It deliberately reuses the SAME <AddressAutocomplete> the calculator
  * uses, so the Google Places script (already loaded on this page by the
  * calculator below) is shared — no extra script cost — and a selection
- * here carries the parsed state/county/zip needed for HUD/FRED/state
- * auto-fill.
+ * here carries the parsed state/county/zip needed for HUD/FRED enrichment;
+ * property tax remains manual.
  *
  * Handshake: the hero and calculator live on the SAME page, so a plain
  * sessionStorage-on-mount handoff would miss a click that happens after
@@ -26,13 +26,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useForm, type DefaultValues } from "react-hook-form";
-import {
-  ArrowRight,
-  Calculator,
-  Link2,
-  Loader2,
-  MapPin,
-} from "lucide-react";
+import { ArrowRight, Calculator, Link2, Loader2, MapPin } from "lucide-react";
 import {
   AddressAutocomplete,
   type SelectedAddress,
@@ -266,7 +260,11 @@ export function HeroAddressForm() {
         onChangeCapture={(event) => {
           if (!(event.target instanceof HTMLInputElement)) return;
           const target = event.target;
-          if (entryMode === "address" && target.name === "address" && addressError) {
+          if (
+            entryMode === "address" &&
+            target.name === "address" &&
+            addressError
+          ) {
             setAddressError(null);
           }
           if (
@@ -301,7 +299,7 @@ export function HeroAddressForm() {
                 onPlaceSelected={(place) => {
                   // Capture the picked suggestion's parsed components so
                   // "Analyze free" can hand them to the calculator for the
-                  // same HUD/FRED/state auto-fill an in-form selection gets.
+                  // the same HUD/FRED enrichment an in-form selection gets.
                   selectedRef.current = place;
                   setAddressError(null);
                   activeHandoffTokenRef.current = null;

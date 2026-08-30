@@ -10,7 +10,6 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Calculator } from "lucide-react";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
@@ -78,7 +77,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Where does TrueCap fit in the STR workflow?",
-    a: "Upstream of all three. Use AirDNA or Mashvisor for STR revenue projection on a target property, plug that monthly revenue into TrueCap's rent field, run cap rate / DSCR / cash flow. If the deal pencils, buy it. Then set up Hostfully / Hostaway / Guesty for the ongoing STR ops.",
+    a: "Upstream of property operations. Enter a reviewed STR revenue scenario in TrueCap, run a preliminary cap-rate, model-DSCR, and cash-flow screen, and verify regulations, costs, demand, financing, and property-specific evidence before deciding whether to proceed. An analyzer result is not a recommendation to buy.",
   },
 ];
 
@@ -104,7 +103,12 @@ export default function HostfullyVsHostawayVsGuestyPost() {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
-      { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: `${siteUrl}/blog`,
+      },
       { "@type": "ListItem", position: 3, name: TITLE, item: url },
     ],
   };
@@ -121,9 +125,18 @@ export default function HostfullyVsHostawayVsGuestyPost() {
 
   return (
     <div className="min-h-screen bg-background">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
 
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-2">
@@ -174,70 +187,200 @@ export default function HostfullyVsHostawayVsGuestyPost() {
           <div className="prose prose-neutral max-w-none prose-headings:font-extrabold prose-headings:text-foreground prose-p:text-foreground prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:text-foreground prose-li:leading-relaxed">
             <h2>The three platforms in one sentence each</h2>
             <ul>
-              <li><strong>Hostfully</strong> — STR property management with strong guest-experience features (digital guidebooks, branded direct-booking sites). Sweet spot: 3-50 properties. Pricing starts around $109/month and scales with property count.</li>
-              <li><strong>Hostaway</strong> — STR property management with deep channel integrations (Airbnb, Vrbo, Booking.com, Expedia) and dynamic pricing partnerships (PriceLabs, Wheelhouse, Beyond Pricing). Sweet spot: 3-100 properties. Per-listing pricing typically starts around $10-15/listing/mo and varies by features.</li>
-              <li><strong>Guesty</strong> — STR property management built for professional managers running multi-owner portfolios. Sweet spot: 50+ properties. Two product lines: Guesty Lite (smaller operators) and Guesty for Pros (large managers). Pricing is custom and scales meaningfully with property count.</li>
+              <li>
+                <strong>Hostfully</strong> — STR property management with strong
+                guest-experience features (digital guidebooks, branded
+                direct-booking sites). Sweet spot: 3-50 properties. Pricing
+                starts around $109/month and scales with property count.
+              </li>
+              <li>
+                <strong>Hostaway</strong> — STR property management with deep
+                channel integrations (Airbnb, Vrbo, Booking.com, Expedia) and
+                dynamic pricing partnerships (PriceLabs, Wheelhouse, Beyond
+                Pricing). Sweet spot: 3-100 properties. Per-listing pricing
+                typically starts around $10-15/listing/mo and varies by
+                features.
+              </li>
+              <li>
+                <strong>Guesty</strong> — STR property management built for
+                professional managers running multi-owner portfolios. Sweet
+                spot: 50+ properties. Two product lines: Guesty Lite (smaller
+                operators) and Guesty for Pros (large managers). Pricing is
+                custom and scales meaningfully with property count.
+              </li>
             </ul>
 
             <h2>What each does better</h2>
             <h3>Hostfully</h3>
             <ul>
-              <li>Best-in-class digital guidebooks — Airbnb-grade guest experience without Airbnb-only constraints.</li>
+              <li>
+                Best-in-class digital guidebooks — Airbnb-grade guest experience
+                without Airbnb-only constraints.
+              </li>
               <li>Strong direct-booking website builder with branded URLs.</li>
-              <li>Easier onboarding for first-time STR managers; cleaner UX for non-technical users.</li>
-              <li>Tradeoff: channel manager is solid but not as deep as Hostaway&apos;s; pricing integrations are fewer.</li>
+              <li>
+                Easier onboarding for first-time STR managers; cleaner UX for
+                non-technical users.
+              </li>
+              <li>
+                Tradeoff: channel manager is solid but not as deep as
+                Hostaway&apos;s; pricing integrations are fewer.
+              </li>
             </ul>
 
             <h3>Hostaway</h3>
             <ul>
-              <li>Tightest channel manager — unified inbox across Airbnb / Vrbo / Booking / Expedia / Google Travel.</li>
-              <li>Largest set of pricing tool integrations (PriceLabs, Wheelhouse, Beyond Pricing, RealHost, etc.).</li>
-              <li>Strong automation suite — message templates, auto-reviews, dynamic check-in instructions.</li>
-              <li>Tradeoff: guest-facing features (guidebooks, direct-booking site) are functional but not Hostfully&apos;s level of polish.</li>
+              <li>
+                Tightest channel manager — unified inbox across Airbnb / Vrbo /
+                Booking / Expedia / Google Travel.
+              </li>
+              <li>
+                Largest set of pricing tool integrations (PriceLabs, Wheelhouse,
+                Beyond Pricing, RealHost, etc.).
+              </li>
+              <li>
+                Strong automation suite — message templates, auto-reviews,
+                dynamic check-in instructions.
+              </li>
+              <li>
+                Tradeoff: guest-facing features (guidebooks, direct-booking
+                site) are functional but not Hostfully&apos;s level of polish.
+              </li>
             </ul>
 
             <h3>Guesty</h3>
             <ul>
-              <li>Enterprise-grade infrastructure — handles 1000+ listing portfolios without breaking.</li>
-              <li>Multi-owner portal features for STR managers running properties for other owners (statements, accounting splits).</li>
+              <li>
+                Enterprise-grade infrastructure — handles 1000+ listing
+                portfolios without breaking.
+              </li>
+              <li>
+                Multi-owner portal features for STR managers running properties
+                for other owners (statements, accounting splits).
+              </li>
               <li>Open API for custom integrations.</li>
-              <li>Tradeoff: significant complexity; pricing is custom and not transparent until you talk to sales. Overkill for solo investors.</li>
+              <li>
+                Tradeoff: significant complexity; pricing is custom and not
+                transparent until you talk to sales. Overkill for solo
+                investors.
+              </li>
             </ul>
 
             <h2>Pricing comparison (as of 2026)</h2>
             <ul>
-              <li><strong>Hostfully</strong> — starts around $109/month, scales by property count. No free tier, demo available.</li>
-              <li><strong>Hostaway</strong> — per-listing pricing typically starting around $10-15/listing/month with feature add-ons. No free tier; expect $30-50/month minimum for a 2-3 listing portfolio.</li>
-              <li><strong>Guesty</strong> — custom pricing only (you talk to sales). Expect $50-200+/month per listing depending on features and listing count. Lite version is cheaper but still meaningfully more than Hostaway/Hostfully.</li>
+              <li>
+                <strong>Hostfully</strong> — starts around $109/month, scales by
+                property count. No free tier, demo available.
+              </li>
+              <li>
+                <strong>Hostaway</strong> — per-listing pricing typically
+                starting around $10-15/listing/month with feature add-ons. No
+                free tier; expect $30-50/month minimum for a 2-3 listing
+                portfolio.
+              </li>
+              <li>
+                <strong>Guesty</strong> — custom pricing only (you talk to
+                sales). Expect $50-200+/month per listing depending on features
+                and listing count. Lite version is cheaper but still
+                meaningfully more than Hostaway/Hostfully.
+              </li>
             </ul>
-            <p>For solo STR operators, Hostaway is typically the cheapest entry point. For mid-market operators (5-30 properties), all three are in roughly the same monthly cost bracket. For 50+ properties, Guesty&apos;s features start to justify its price.</p>
+            <p>
+              For solo STR operators, Hostaway is typically the cheapest entry
+              point. For mid-market operators (5-30 properties), all three are
+              in roughly the same monthly cost bracket. For 50+ properties,
+              Guesty&apos;s features start to justify its price.
+            </p>
 
             <h2>What if you have only 1-3 STRs?</h2>
-            <p>Honest answer: none of these. All three assume you&apos;re running an STR business at some scale. For 1-3 properties, look at:</p>
+            <p>
+              Honest answer: none of these. All three assume you&apos;re running
+              an STR business at some scale. For 1-3 properties, look at:
+            </p>
             <ul>
-              <li><strong>Lodgify</strong> — popular with very small operators, builds direct-booking website, channel manager. Cheaper entry point.</li>
-              <li><strong>Smoobu</strong> — even smaller-operator friendly, single-property pricing.</li>
-              <li><strong>Direct Airbnb tools</strong> — if you only list on Airbnb, the platform&apos;s native tools (messaging, calendar, automated reviews) cover most workflows. Pay $0/month.</li>
+              <li>
+                <strong>Lodgify</strong> — popular with very small operators,
+                builds direct-booking website, channel manager. Cheaper entry
+                point.
+              </li>
+              <li>
+                <strong>Smoobu</strong> — even smaller-operator friendly,
+                single-property pricing.
+              </li>
+              <li>
+                <strong>Direct Airbnb tools</strong> — if you only list on
+                Airbnb, the platform&apos;s native tools (messaging, calendar,
+                automated reviews) cover most workflows. Pay $0/month.
+              </li>
             </ul>
 
             <h2>Where TrueCap fits — the underwriting layer</h2>
-            <p>None of the three platforms underwrites whether the property is a good STR investment in the first place. They take ownership for granted. Before you buy an STR, the workflow is:</p>
+            <p>
+              None of the three platforms underwrites whether the property is a
+              good STR investment in the first place. They take ownership for
+              granted. Before you buy an STR, the workflow is:
+            </p>
             <ol>
-              <li>Pick a target market (Mashvisor or AirDNA for regional Airbnb data).</li>
+              <li>
+                Pick a target market (Mashvisor or AirDNA for regional Airbnb
+                data).
+              </li>
               <li>Find a specific property (MLS, off-market, Roofstock).</li>
-              <li>Pull an STR revenue projection for the address (AirDNA Rentalizer report — $20-40).</li>
-              <li>Plug that monthly revenue into TrueCap&apos;s rent field. Override the HUD long-term rent default. Run the full underwrite (cap rate, DSCR, cash flow, 10-year projection).</li>
-              <li>If the deal pencils, buy. Then set up Hostfully / Hostaway / Guesty / Lodgify for the ongoing ops.</li>
+              <li>
+                Pull an STR revenue projection for the address (AirDNA
+                Rentalizer report — $20-40).
+              </li>
+              <li>
+                Plug that monthly revenue into TrueCap&apos;s rent field.
+                Override the HUD long-term rent default. Run the full underwrite
+                (cap rate, DSCR, cash flow, 10-year projection).
+              </li>
+              <li>
+                Review the model, verify local rules and property-specific
+                evidence, and make the acquisition decision outside the
+                analyzer. Set up an operations platform only if you proceed.
+              </li>
             </ol>
-            <p>TrueCap&apos;s sensitivity grid (Pro) is particularly useful for STR underwriting — what if AirDNA&apos;s revenue projection is 20% high? What if your average daily rate drops 15%? The grid stress-tests those scenarios so you know whether the deal still works on the downside.</p>
+            <p>
+              TrueCap&apos;s sensitivity grid, when your access includes it,
+              varies rent by ±10%, vacancy by ±5 percentage points, and interest
+              rate by ±1 percentage point. These are editable model
+              scenarios—not a forecast of STR revenue, ADR, occupancy, or lender
+              pricing.
+            </p>
 
             <h2>Quick decision matrix</h2>
             <ul>
-              <li><strong>&quot;I have 1-3 STRs.&quot;</strong> Lodgify or Smoobu (or direct Airbnb). All three of Hostfully/Hostaway/Guesty are overkill.</li>
-              <li><strong>&quot;I have 3-15 STRs and want the easiest setup.&quot;</strong> Hostfully.</li>
-              <li><strong>&quot;I have 5-50 STRs and want the deepest channel management.&quot;</strong> Hostaway.</li>
-              <li><strong>&quot;I manage 50+ STRs as a business, possibly for other owners.&quot;</strong> Guesty.</li>
-              <li><strong>&quot;I&apos;m about to BUY an STR.&quot;</strong> TrueCap (free) + AirDNA (Rentalizer report). Underwrite first, manage second.</li>
+              <li>
+                <strong>&quot;I have 1-3 STRs.&quot;</strong> Lodgify or Smoobu
+                (or direct Airbnb). All three of Hostfully/Hostaway/Guesty are
+                overkill.
+              </li>
+              <li>
+                <strong>
+                  &quot;I have 3-15 STRs and want the easiest setup.&quot;
+                </strong>{" "}
+                Hostfully.
+              </li>
+              <li>
+                <strong>
+                  &quot;I have 5-50 STRs and want the deepest channel
+                  management.&quot;
+                </strong>{" "}
+                Hostaway.
+              </li>
+              <li>
+                <strong>
+                  &quot;I manage 50+ STRs as a business, possibly for other
+                  owners.&quot;
+                </strong>{" "}
+                Guesty.
+              </li>
+              <li>
+                <strong>&quot;I&apos;m about to BUY an STR.&quot;</strong>{" "}
+                TrueCap (free) + AirDNA (Rentalizer report). Underwrite first,
+                manage second.
+              </li>
             </ul>
 
             <h2>FAQ</h2>
@@ -271,16 +414,7 @@ export default function HostfullyVsHostawayVsGuestyPost() {
               AirDNA tells you whether the property is worth becoming an STR in
               the first place. Run that step first.
             </p>
-            <p className="not-prose">
-              <Link
-                href="/"
-                className="inline-flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-5 py-3 font-bold hover:opacity-90"
-              >
-                <Calculator className="w-4 h-4" />
-                Run a deal — 60 seconds
-                <ArrowUpRight className="w-4 h-4" />
-              </Link>
-            </p>
+            <p className="not-prose"></p>
           </div>
 
           <div className="mt-10">

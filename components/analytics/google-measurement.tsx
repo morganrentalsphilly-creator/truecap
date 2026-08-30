@@ -1,8 +1,8 @@
 "use client";
 
 import Script from "next/script";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import { shouldKeepThirdPartyTelemetryDisabled } from "@/lib/sensitive-url";
 
 const GOOGLE_ADS_ID = "AW-8236119484";
@@ -13,12 +13,14 @@ const GTM_ID = "GTM-TCBNRMBG";
  * even while Consent Mode storage is denied. Never load them on routes whose
  * path contains an encoded analysis snapshot or bearer token.
  */
-export function GoogleMeasurement() {
+function GoogleMeasurementInner() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const location = `${pathname}${searchParams?.size ? `?${searchParams.toString()}` : ""}`;
   const [sensitiveRouteSeen, setSensitiveRouteSeen] = useState(false);
   const disabledForDocument = shouldKeepThirdPartyTelemetryDisabled(
-    pathname ?? "",
-    sensitiveRouteSeen
+    location,
+    sensitiveRouteSeen,
   );
   useEffect(() => {
     if (disabledForDocument && !sensitiveRouteSeen) {
@@ -72,5 +74,15 @@ gtag('config', '${GOOGLE_ADS_ID}');`}
         />
       </noscript>
     </>
+  );
+}
+
+export function GoogleMeasurement() {
+  // Fail closed while Next resolves the initial query string. Rendering a tag
+  // in the fallback would let GTM read an address/capability before hydration.
+  return (
+    <Suspense fallback={null}>
+      <GoogleMeasurementInner />
+    </Suspense>
   );
 }

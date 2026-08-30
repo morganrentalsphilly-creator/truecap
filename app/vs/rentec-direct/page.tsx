@@ -19,7 +19,10 @@ import {
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
-import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-faq";
+import {
+  ComparisonFaq,
+  type FaqItem,
+} from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
@@ -40,28 +43,105 @@ export const metadata: Metadata = {
       "Rentec Direct manages 5-100 unit landlord ops. TrueCap underwrites the deal before. Different stages.",
     url: "/vs/rentec-direct",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs Rentec Direct" }],
+    images: [
+      {
+        url: "/home.jpg",
+        width: 1200,
+        height: 630,
+        alt: "TrueCap vs Rentec Direct",
+      },
+    ],
   },
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
 type Verdict = "truecap" | "rentecdirect" | "tie";
-type Row = { feature: string; truecap: string; rentecdirect: string; winner: Verdict };
+type Row = {
+  feature: string;
+  truecap: string;
+  rentecdirect: string;
+  winner: Verdict;
+};
 
 const MATRIX: Row[] = [
-  { feature: "Lifecycle stage", truecap: "Pre-purchase — underwrite the deal", rentecdirect: "Post-purchase — operate the portfolio", winner: "tie" },
-  { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", rentecdirect: "Not modeled", winner: "truecap" },
-  { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", rentecdirect: "Not modeled", winner: "truecap" },
-  { feature: "Secondary Screening Index", truecap: "Free — 0-100 triage score + factor breakdown", rentecdirect: "Not applicable", winner: "truecap" },
-  { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", rentecdirect: "Not applicable", winner: "truecap" },
-  { feature: "Tenant + lease management", truecap: "No", rentecdirect: "Yes — designed for 5-100 units", winner: "rentecdirect" },
-  { feature: "Online rent collection", truecap: "No", rentecdirect: "Yes — ACH + card", winner: "rentecdirect" },
-  { feature: "Maintenance request workflow", truecap: "No", rentecdirect: "Yes — work order tracking", winner: "rentecdirect" },
-  { feature: "Accounting + Schedule E", truecap: "Forward projection only", rentecdirect: "Yes — full GL + 1099 + Schedule E", winner: "rentecdirect" },
-  { feature: "Owner portals (for partnerships)", truecap: "No", rentecdirect: "Yes — multi-owner statements", winner: "rentecdirect" },
-  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", rentecdirect: "No — paid only (trial available)", winner: "truecap" },
-  { feature: "Pricing (entry tier)", truecap: "Free core; paid Pro — see live pricing", rentecdirect: "~$45/mo for landlords, ~$60+/mo for PMs (as of 2026)", winner: "truecap" },
-  { feature: "Sweet spot", truecap: "1-30 doors, solo investor", rentecdirect: "5-100 units, small PM or scaling landlord", winner: "tie" },
+  {
+    feature: "Lifecycle stage",
+    truecap: "Pre-purchase — underwrite the deal",
+    rentecdirect: "Post-purchase — operate the portfolio",
+    winner: "tie",
+  },
+  {
+    feature: "Cap rate / CoC / DSCR analysis",
+    truecap: "Yes — full engine, free tier",
+    rentecdirect: "Not modeled",
+    winner: "truecap",
+  },
+  {
+    feature: "10-year projection",
+    truecap: "Pro — rent + expense + appreciation",
+    rentecdirect: "Not modeled",
+    winner: "truecap",
+  },
+  {
+    feature: "Secondary Screening Index",
+    truecap: "Free — 0-100 triage score + factor breakdown",
+    rentecdirect: "Not applicable",
+    winner: "truecap",
+  },
+  {
+    feature: "Starting values (rent/rate/tax)",
+    truecap: "HUD rent + FRED rate + manual local property tax",
+    rentecdirect: "Not applicable",
+    winner: "truecap",
+  },
+  {
+    feature: "Tenant + lease management",
+    truecap: "No",
+    rentecdirect: "Yes — designed for 5-100 units",
+    winner: "rentecdirect",
+  },
+  {
+    feature: "Online rent collection",
+    truecap: "No",
+    rentecdirect: "Yes — ACH + card",
+    winner: "rentecdirect",
+  },
+  {
+    feature: "Maintenance request workflow",
+    truecap: "No",
+    rentecdirect: "Yes — work order tracking",
+    winner: "rentecdirect",
+  },
+  {
+    feature: "Accounting + Schedule E",
+    truecap: "Forward projection only",
+    rentecdirect: "Yes — full GL + 1099 + Schedule E",
+    winner: "rentecdirect",
+  },
+  {
+    feature: "Owner portals (for partnerships)",
+    truecap: "No",
+    rentecdirect: "Yes — multi-owner statements",
+    winner: "rentecdirect",
+  },
+  {
+    feature: "Free tier",
+    truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
+    rentecdirect: "No — paid only (trial available)",
+    winner: "truecap",
+  },
+  {
+    feature: "Pricing (entry tier)",
+    truecap: "Free core; paid Pro — see live pricing",
+    rentecdirect: "~$45/mo for landlords, ~$60+/mo for PMs (as of 2026)",
+    winner: "truecap",
+  },
+  {
+    feature: "Sweet spot",
+    truecap: "1-30 doors, solo investor",
+    rentecdirect: "5-100 units, small PM or scaling landlord",
+    winner: "tie",
+  },
 ];
 
 export default function VsRentecDirectPage() {
@@ -83,7 +163,10 @@ export default function VsRentecDirectPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <VsBreadcrumbSchema vsPath="/vs/rentec-direct" pageName="TrueCap vs Rentec Direct" />
+      <VsBreadcrumbSchema
+        vsPath="/vs/rentec-direct"
+        pageName="TrueCap vs Rentec Direct"
+      />
       <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-2">
           <Link
@@ -102,15 +185,19 @@ export default function VsRentecDirectPage() {
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
             TrueCap vs Rentec Direct:{" "}
-            <span className="text-primary">pre-purchase calculator vs landlord ops platform</span>
+            <span className="text-primary">
+              pre-purchase calculator vs landlord ops platform
+            </span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Rentec Direct is property management software targeted at small landlords running 5-100 units — tenant management, rent collection, accounting, owner portals. TrueCap models the pre-purchase economics of properties you are considering. We don&apos;t compete; different halves of the rental lifecycle.
+            Rentec Direct is property management software targeted at small
+            landlords running 5-100 units — tenant management, rent collection,
+            accounting, owner portals. TrueCap models the pre-purchase economics
+            of properties you are considering. We don&apos;t compete; different
+            halves of the rental lifecycle.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <ScrollToFormButton
-              className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5"
-            >
+            <ScrollToFormButton className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">
               <Calculator className="size-4" />
               Run a deal — 60 seconds
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
@@ -150,9 +237,17 @@ export default function VsRentecDirectPage() {
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You own 5-100 units and need PM-grade ops + accounting.</li>
-                <li>You want rent collection, lease management, work orders, owner reports in one tool.</li>
-                <li>You&apos;re scaling past what TurboTenant or Avail can handle.</li>
-                <li>You may want to manage for other owners (semi-pro PM workflow).</li>
+                <li>
+                  You want rent collection, lease management, work orders, owner
+                  reports in one tool.
+                </li>
+                <li>
+                  You&apos;re scaling past what TurboTenant or Avail can handle.
+                </li>
+                <li>
+                  You may want to manage for other owners (semi-pro PM
+                  workflow).
+                </li>
               </ul>
             </div>
           </div>
@@ -164,7 +259,8 @@ export default function VsRentecDirectPage() {
             Feature-by-feature
           </h2>
           <p className="text-base text-muted-foreground mb-6 leading-relaxed">
-            Side-by-side on every dimension that matters for a comparison-shopping investor.
+            Side-by-side on every dimension that matters for a
+            comparison-shopping investor.
           </p>
           <div className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
@@ -183,7 +279,10 @@ export default function VsRentecDirectPage() {
               </thead>
               <tbody>
                 {MATRIX.map((row) => (
-                  <tr key={row.feature} className="border-t border-border align-top">
+                  <tr
+                    key={row.feature}
+                    className="border-t border-border align-top"
+                  >
                     <td className="py-3 px-3 text-sm font-semibold text-foreground">
                       <div className="flex items-center gap-2">
                         <WinnerBadge winner={row.winner} side="row" />
@@ -208,9 +307,14 @@ export default function VsRentecDirectPage() {
             </table>
           </div>
           <p className="mt-3 text-[11px] text-muted-foreground">
-            Rentec Direct details based on publicly available product info as of 2026.
-            See{" "}
-            <a href="https://rentecdirect.com" target="_blank" rel="noopener" className="underline">
+            Rentec Direct details based on publicly available product info as of
+            2026. See{" "}
+            <a
+              href="https://rentecdirect.com"
+              target="_blank"
+              rel="noopener"
+              className="underline"
+            >
               rentecdirect.com
             </a>{" "}
             for their current state.
@@ -224,30 +328,62 @@ export default function VsRentecDirectPage() {
           </h2>
           <ol className="space-y-2.5 text-sm sm:text-base leading-relaxed text-foreground list-decimal pl-5">
             <li>
-              <strong>Underwrite the next property in TrueCap.</strong> Cap rate, DSCR, cash flow, projection.
+              <strong>Underwrite the next property in TrueCap.</strong> Cap
+              rate, DSCR, cash flow, projection.
             </li>
             <li>
-              <strong>Close + onboard the property in Rentec Direct.</strong> Set up the unit, accept applications, sign lease, start rent collection.
+              <strong>Close + onboard the property in Rentec Direct.</strong>{" "}
+              Set up the unit, accept applications, sign lease, start rent
+              collection.
             </li>
             <li>
-              <strong>Operate in Rentec Direct.</strong> Rent comes in, expenses get logged, Schedule E builds itself.
+              <strong>Operate in Rentec Direct.</strong> Rent comes in, expenses
+              get logged, Schedule E builds itself.
             </li>
             <li>
-              <strong>Annual review.</strong> Pull Rentec Direct&apos;s actuals; re-run TrueCap&apos;s projection with real numbers.
+              <strong>Annual review.</strong> Pull Rentec Direct&apos;s actuals;
+              re-run TrueCap&apos;s projection with real numbers.
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Only here for the acquisition math? Our walkthroughs on{" "}
-            <Link href="/blog/how-to-calculate-cap-rate" className="font-semibold text-primary hover:underline">how to calculate cap rate</Link>,{" "}
-            <Link href="/blog/how-to-calculate-dscr" className="font-semibold text-primary hover:underline">how to calculate DSCR</Link>, and{" "}
-            <Link href="/blog/how-to-calculate-noi-rental-property" className="font-semibold text-primary hover:underline">how to calculate NOI</Link> each
-            work an example end to end, so the actuals Rentec Direct reports later have
-            something to be measured against. To skip the arithmetic, run the address
-            through the full <Link href="/" className="font-semibold text-primary hover:underline">TrueCap analyzer</Link>.
+            <Link
+              href="/blog/how-to-calculate-cap-rate"
+              className="font-semibold text-primary hover:underline"
+            >
+              how to calculate cap rate
+            </Link>
+            ,{" "}
+            <Link
+              href="/blog/how-to-calculate-dscr"
+              className="font-semibold text-primary hover:underline"
+            >
+              how to calculate DSCR
+            </Link>
+            , and{" "}
+            <Link
+              href="/blog/how-to-calculate-noi-rental-property"
+              className="font-semibold text-primary hover:underline"
+            >
+              how to calculate NOI
+            </Link>{" "}
+            each work an example end to end, so the actuals Rentec Direct
+            reports later have something to be measured against. To skip the
+            arithmetic, run the address through the full{" "}
+            <Link
+              href="/"
+              className="font-semibold text-primary hover:underline"
+            >
+              TrueCap analyzer
+            </Link>
+            .
           </p>
         </section>
 
-        <ComparisonFaq competitorName="Rentec Direct" items={RENTEC_DIRECT_FAQ} />
+        <ComparisonFaq
+          competitorName="Rentec Direct"
+          items={RENTEC_DIRECT_FAQ}
+        />
 
         {/* Pricing CTA */}
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
@@ -257,8 +393,8 @@ export default function VsRentecDirectPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro adds 10-year cash-flow and equity projections, sensitivity,
-            Offer Ceiling, co-branded share links, and PDF reports with Pro; see live pricing for current terms.
-            No card to start.
+            Offer Ceiling, co-branded share links, and PDF reports with Pro; see
+            live pricing for current terms. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -280,11 +416,26 @@ export default function VsRentecDirectPage() {
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}
-          <Link href="/vs/buildium" className="font-bold text-foreground hover:underline">TrueCap vs Buildium</Link>
+          <Link
+            href="/vs/buildium"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs Buildium
+          </Link>
           {" · "}
-          <Link href="/vs/turbotenant" className="font-bold text-foreground hover:underline">TrueCap vs TurboTenant</Link>
+          <Link
+            href="/vs/turbotenant"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs TurboTenant
+          </Link>
           {" · "}
-          <Link href="/vs/avail" className="font-bold text-foreground hover:underline">TrueCap vs Avail</Link>
+          <Link
+            href="/vs/avail"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs Avail
+          </Link>
         </footer>
       </main>
       <SiteFooter />
@@ -298,7 +449,9 @@ const RENTEC_DIRECT_FAQ: FaqItem[] = [
     question: "Is TrueCap a Rentec Direct alternative?",
     answer: (
       <>
-        No — different stages. Rentec Direct operates rentals you own. TrueCap underwrites rentals you&apos;re considering buying. Landlords running 5-100 units typically use both.
+        No — different stages. Rentec Direct operates rentals you own. TrueCap
+        underwrites rentals you&apos;re considering buying. Landlords running
+        5-100 units typically use both.
       </>
     ),
     plainTextAnswer:
@@ -308,7 +461,11 @@ const RENTEC_DIRECT_FAQ: FaqItem[] = [
     question: "Rentec Direct vs Buildium — which one?",
     answer: (
       <>
-        Rentec Direct is generally cheaper and a better fit for landlords managing their own units (5-100). Buildium leans toward property management companies and scales further. For solo investors growing past TurboTenant or Avail, Rentec Direct is often the next step up before Buildium.
+        Rentec Direct is generally cheaper and a better fit for landlords
+        managing their own units (5-100). Buildium leans toward property
+        management companies and scales further. For solo investors growing past
+        TurboTenant or Avail, Rentec Direct is often the next step up before
+        Buildium.
       </>
     ),
     plainTextAnswer:
@@ -318,7 +475,10 @@ const RENTEC_DIRECT_FAQ: FaqItem[] = [
     question: "Does Rentec Direct have a free tier?",
     answer: (
       <>
-        No — paid only, with a free trial. Pricing starts around $45/month for landlords as of 2026, with per-unit fees scaling up. TrueCap is free for the underwriting layer; if you&apos;re not yet at 5+ units, Rentec Direct may be premature.
+        No — paid only, with a free trial. Pricing starts around $45/month for
+        landlords as of 2026, with per-unit fees scaling up. TrueCap is free for
+        the underwriting layer; if you&apos;re not yet at 5+ units, Rentec
+        Direct may be premature.
       </>
     ),
     plainTextAnswer:
@@ -328,7 +488,9 @@ const RENTEC_DIRECT_FAQ: FaqItem[] = [
     question: "Can I use Rentec Direct for underwriting new deals?",
     answer: (
       <>
-        No — Rentec Direct is operational only. For pre-purchase underwriting (cap rate, DSCR, cash flow, projection), use TrueCap, DealCheck, or your spreadsheet.
+        No — Rentec Direct is operational only. For pre-purchase underwriting
+        (cap rate, DSCR, cash flow, projection), use TrueCap, DealCheck, or your
+        spreadsheet.
       </>
     ),
     plainTextAnswer:
@@ -338,7 +500,9 @@ const RENTEC_DIRECT_FAQ: FaqItem[] = [
     question: "Should I use TurboTenant or Rentec Direct?",
     answer: (
       <>
-        TurboTenant is better for 1-5 units with a strong free tier. Rentec Direct is better once you&apos;re at 5-100 units and need richer accounting + owner reporting. Both pair with TrueCap upstream.
+        TurboTenant is better for 1-5 units with a strong free tier. Rentec
+        Direct is better once you&apos;re at 5-100 units and need richer
+        accounting + owner reporting. Both pair with TrueCap upstream.
       </>
     ),
     plainTextAnswer:
@@ -355,10 +519,14 @@ function WinnerBadge({
 }) {
   if (side === "row") return null;
   if (winner === "tie") {
-    return <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />;
+    return (
+      <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />
+    );
   }
   if (winner === side) {
-    return <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />;
+    return (
+      <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />
+    );
   }
   return <X className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/50" />;
 }

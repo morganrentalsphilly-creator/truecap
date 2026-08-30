@@ -1,17 +1,17 @@
 {
   "day": 7,
   "send_date": "2026-06-07",
-  "subject": "noi mistakes that kill deals",
-  "preheader": "four ways investors overstate noi and regret it later.",
-  "headline": "Most NOI numbers I see are wrong in the same four ways.",
+  "subject": "four NOI inputs to verify",
+  "preheader": "inconsistent income and expense assumptions can overstate a screen.",
+  "headline": "A useful NOI comparison needs consistent inputs.",
   "body": [
-    "Mistake 1: forgetting vacancy. Pro formas show 100% occupancy. The real world is 5-10%. On a $1,800/mo rental, an honest 8% vacancy assumption costs you $1,728/year. Skip it and your NOI is inflated by that amount.",
-    "Mistake 2: forgetting property management. Even if you self-manage today, your NOI should reflect a market PM rate (8-10% of gross rent). Otherwise the property's NOI depends on you working for free, and your cap rate is a fiction.",
-    "Mistake 3: using gross rent instead of effective gross income. Effective gross = gross rent minus vacancy and credit loss. Skipping this step is the single most common reason a deal looks 9% on paper and lives at 7% in reality.",
-    "Mistake 4: ignoring CapEx. Roof, HVAC, water heater, appliances — these aren't optional, they're amortized over 15-20 years. Budget 5-10% of gross rent for CapEx or you'll be surprised twice: once when the roof fails, twice when you realize NOI was wrong all along.",
-    "Free NOI calculator below — it forces all four inputs so you can't skip them."
+    "Check 1: vacancy. A pro forma that assumes full collection may omit turnover and credit loss. For illustration, an entered 8% vacancy assumption on $1,800 monthly rent is $1,728 per year; 8% is an example, not a universal benchmark.",
+    "Check 2: management. Use the proposed management scope and fee when applicable. If you self-manage, a zero cash fee may match the accounting convention, but it does not measure your time or prove the property is easier to operate.",
+    "Check 3: effective income. Keep gross scheduled rent, vacancy, concessions, and other income distinct so two cap-rate comparisons use the same convention.",
+    "Check 4: capital work. TrueCap treats the CapEx reserve below NOI under its disclosed convention, while modeled cash flow still subtracts it. Review roof, HVAC, water heater, appliance, and other condition evidence instead of importing a universal reserve percentage.",
+    "The NOI guide below walks through each input so you can review the math before running the full property in TrueCap."
   ],
-  "cta_text": "Run NOI right",
-  "cta_url": "https://usetruecap.com/tools/noi-calculator",
+  "cta_text": "Read the NOI guide",
+  "cta_url": "https://usetruecap.com/blog/how-to-calculate-noi-rental-property",
   "signature_note": null
 }

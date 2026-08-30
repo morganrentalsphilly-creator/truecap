@@ -43,7 +43,14 @@ export const metadata: Metadata = {
       "Plain-English definitions of every rental-property analysis term. Cross-linked to the calculators.",
     url: "/glossary",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap real estate glossary" }],
+    images: [
+      {
+        url: "/home.jpg",
+        width: 1200,
+        height: 630,
+        alt: "TrueCap real estate glossary",
+      },
+    ],
   },
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
@@ -240,14 +247,14 @@ const CURATED: Term[] = [
     slug: "house-hack",
     term: "House hack",
     definition:
-      "Buying a 2-4 unit property, living in one unit, and renting out the others. The big advantage: owner-occupied financing (3-5% down conventional vs 20-25% for investment property), so your barrier to entry is dramatically lower. After 12 months you can move out, and the property becomes a normal rental.",
+      "Buying a 2-4 unit property, living in one unit, and renting out the others. Eligible owner-occupants may have lower-down-payment options than investors, but down payment, occupancy certification, unit-count eligibility, reserves, mortgage insurance, and any later change in use depend on the specific loan documents and program. A 12-month scenario does not itself authorize conversion to a rental.",
   },
   {
     slug: "fair-market-rent",
     term: "Fair Market Rent",
     also: ["FMR"],
     definition:
-      "HUD's annual estimate of typical rent for a given county and bedroom count, used to set Section 8 voucher payment standards. FMR is a useful 'is the asking rent realistic?' floor — actual market rent in most areas runs slightly above FMR. TrueCap auto-fills FMR from the HUD API when you enter an address.",
+      "HUD's annual estimate of 40th-percentile gross rent for a standard-quality unit in an FMR area and bedroom count. FMR is an area benchmark used in several housing programs, not an address-level market comp, rent floor, payment standard, approved contract rent, or collection promise. TrueCap can start with a HUD benchmark, ZIP-level when available and otherwise at the broader FMR area; replace it with current comparable leases and property-specific program figures where applicable.",
   },
   {
     slug: "principal-paydown",
@@ -302,7 +309,9 @@ const TERMS: Term[] = (() => {
     // The lib definition is deliberately one sentence; whyItMatters is
     // the natural second paragraph, so the hub reads at roughly the
     // same depth as a curated entry when one is joined to the other.
-    definition: e.whyItMatters ? `${e.definition} ${e.whyItMatters}` : e.definition,
+    definition: e.whyItMatters
+      ? `${e.definition} ${e.whyItMatters}`
+      : e.definition,
     benchmark: e.benchmark,
     toolPath: e.toolUrl,
     postPath: e.postUrl,
@@ -319,7 +328,9 @@ const TERMS: Term[] = (() => {
   }).filter((t): t is Term => t !== null);
 
   const seen = new Set(curated.map((t) => t.slug));
-  const categories = Object.keys(GLOSSARY_CATEGORY_LABELS) as GlossaryCategory[];
+  const categories = Object.keys(
+    GLOSSARY_CATEGORY_LABELS,
+  ) as GlossaryCategory[];
   const rest = categories.flatMap((cat) =>
     entries
       .filter((e) => e.category === cat && !seen.has(e.slug))
@@ -362,7 +373,7 @@ export default function GlossaryPage() {
         <header className="mb-8">
           <Link
             href="/"
-            className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+            className="inline-flex min-h-11 min-w-11 items-center text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground"
           >
             ← TrueCap
           </Link>
@@ -370,9 +381,9 @@ export default function GlossaryPage() {
             Real Estate Glossary
           </h1>
           <p className="text-base text-muted-foreground mt-2 leading-relaxed">
-            Plain-English definitions of every rental-property analysis
-            term. Cross-linked to the calculators and the long-form
-            posts so you can dig as deep as you want on any concept.
+            Plain-English definitions of every rental-property analysis term.
+            Cross-linked to the calculators and the long-form posts so you can
+            dig as deep as you want on any concept.
           </p>
         </header>
 
@@ -385,7 +396,7 @@ export default function GlossaryPage() {
             <a
               key={t.slug}
               href={`#${t.slug}`}
-              className="inline-flex items-center rounded-full bg-muted px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary sm:text-xs"
+              className="inline-flex min-h-11 min-w-11 items-center rounded-full bg-muted px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:text-xs"
             >
               {t.term}
             </a>
@@ -419,7 +430,7 @@ export default function GlossaryPage() {
                   // minimum — 44 nodes, and the only axe-detectable WCAG AA
                   // failure on the page. The full token is #596877 = 5.72:1,
                   // which clears AA with margin and still reads as secondary.
-                  className="shrink-0 text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary"
+                  className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-md px-1 text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   PERMALINK →
                 </Link>
@@ -431,7 +442,8 @@ export default function GlossaryPage() {
 
               {t.benchmark ? (
                 <div className="mt-3 rounded-xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-3 text-xs leading-relaxed text-foreground sm:text-sm">
-                  <strong className="text-foreground">Benchmark:</strong> {t.benchmark}
+                  <strong className="text-foreground">Benchmark:</strong>{" "}
+                  {t.benchmark}
                 </div>
               ) : null}
 
@@ -439,7 +451,7 @@ export default function GlossaryPage() {
               <div className="mt-3 flex flex-wrap items-center gap-3 text-sm font-semibold">
                 <Link
                   href={`/glossary/${t.slug}`}
-                  className="inline-flex items-center gap-1 text-primary hover:underline"
+                  className="inline-flex min-h-11 min-w-11 items-center gap-1 rounded-md text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   Full definition, formula, example
                   <ArrowUpRight className="size-3.5" />
@@ -447,7 +459,7 @@ export default function GlossaryPage() {
                 {t.toolPath ? (
                   <Link
                     href={t.toolPath}
-                    className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground hover:underline"
+                    className="inline-flex min-h-11 min-w-11 items-center gap-1 rounded-md text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     Calculator
                   </Link>
@@ -455,7 +467,7 @@ export default function GlossaryPage() {
                 {t.postPath ? (
                   <Link
                     href={t.postPath}
-                    className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground hover:underline"
+                    className="inline-flex min-h-11 min-w-11 items-center gap-1 rounded-md text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <BookOpen className="size-3.5" />
                     Deep dive
@@ -471,13 +483,13 @@ export default function GlossaryPage() {
             Stop looking these up. Use the analyzer.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-4">
-            TrueCap computes every metric on this page live as you type,
-            with inline tooltips that explain each one in context. Free
-            to start — no signup needed.
+            TrueCap computes every metric on this page live as you type, with
+            inline tooltips that explain each one in context. Free to start — no
+            signup needed.
           </p>
           <Link
             href="/"
-            className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary-foreground px-4 font-bold text-primary transition-opacity hover:opacity-90"
           >
             Open TrueCap
             <ArrowUpRight className="w-4 h-4" />

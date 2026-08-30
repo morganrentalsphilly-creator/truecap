@@ -12,7 +12,7 @@
  */
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
+import { AnalyzerHandoffLink } from "@/components/analyzer-handoff-link";
 import { ArrowUpRight, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -82,7 +82,7 @@ export function GrmCalculatorWidget() {
   // Carry the user's price + rent into the full analyzer (P2-2 handoff).
   const handoffHref = buildAnalyzerHandoffUrl(
     { purchasePrice: num(priceInput), monthlyRent: num(rentInput) },
-    { utmSource: "gross-rent-multiplier-calculator" }
+    { utmSource: "gross-rent-multiplier-calculator" },
   );
 
   return (
@@ -95,11 +95,16 @@ export function GrmCalculatorWidget() {
           </h2>
 
           <div>
-            <Label htmlFor="grm-price" className="text-sm font-medium text-foreground mb-1.5 block">
+            <Label
+              htmlFor="grm-price"
+              className="text-sm font-medium text-foreground mb-1.5 block"
+            >
               Property Price
             </Label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                $
+              </span>
               <Input
                 id="grm-price"
                 type="number"
@@ -112,11 +117,16 @@ export function GrmCalculatorWidget() {
           </div>
 
           <div>
-            <Label htmlFor="grm-rent" className="text-sm font-medium text-foreground mb-1.5 block">
+            <Label
+              htmlFor="grm-rent"
+              className="text-sm font-medium text-foreground mb-1.5 block"
+            >
               Monthly Gross Rent
             </Label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                $
+              </span>
               <Input
                 id="grm-rent"
                 type="number"
@@ -127,7 +137,8 @@ export function GrmCalculatorWidget() {
               />
             </div>
             <p className="text-xs text-muted-foreground mt-1.5">
-              Gross rent — not net. Don&apos;t subtract expenses for this metric.
+              Gross rent — not net. Don&apos;t subtract expenses for this
+              metric.
             </p>
           </div>
         </div>
@@ -142,10 +153,17 @@ export function GrmCalculatorWidget() {
                 still printed a precise-looking "0.0" beside it. Show the
                 em-dash placeholder instead — the same contract the 1%, 2% and
                 Break-Even tools use for an input they do not have. */}
-            <div className={cn("text-5xl sm:text-6xl font-extrabold mt-1 tabular-nums", c.color)}>
+            <div
+              className={cn(
+                "text-5xl sm:text-6xl font-extrabold mt-1 tabular-nums",
+                c.color,
+              )}
+            >
               {result.grm > 0 ? result.grm.toFixed(1) : "—"}
             </div>
-            <div className={cn("text-sm font-semibold mt-1", c.color)}>{c.label}</div>
+            <div className={cn("text-sm font-semibold mt-1", c.color)}>
+              {c.label}
+            </div>
             <p className="text-xs text-muted-foreground mt-1">{c.note}</p>
           </div>
 
@@ -157,23 +175,38 @@ export function GrmCalculatorWidget() {
         </div>
       </div>
 
-      <Link
-        href={handoffHref} target="_top"
+      <AnalyzerHandoffLink
+        handoffHref={handoffHref}
+        target="_top"
         className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="w-4 h-4" />
-        Run the full analysis with these numbers — cap rate, cash flow, DSCR, projections — free
+        Run the free core analysis; projections appear when your access includes
+        them
         <ArrowUpRight className="w-4 h-4" />
-      </Link>
+      </AnalyzerHandoffLink>
     </div>
   );
 }
 
-function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
+function Row({
+  label,
+  value,
+  bold,
+}: {
+  label: string;
+  value: string;
+  bold?: boolean;
+}) {
   return (
     <div className="flex justify-between gap-2">
       <span className="text-muted-foreground">{label}</span>
-      <span className={cn("tabular-nums", bold ? "font-bold text-foreground" : "text-foreground")}>
+      <span
+        className={cn(
+          "tabular-nums",
+          bold ? "font-bold text-foreground" : "text-foreground",
+        )}
+      >
         {value}
       </span>
     </div>

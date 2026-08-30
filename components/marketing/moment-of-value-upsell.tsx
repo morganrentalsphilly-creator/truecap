@@ -13,7 +13,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Lock, X, Calculator, Target, TrendingUp, FileDown } from "lucide-react";
+import {
+  ArrowRight,
+  Lock,
+  X,
+  Calculator,
+  Target,
+  TrendingUp,
+  FileDown,
+} from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { scrollBehavior } from "@/lib/utils";
@@ -62,9 +70,18 @@ export function MomentOfValueUpsell({
   useEffect(() => {
     if (isPaid || suppressed || fired.current) return;
     fired.current = true;
-    trackEvent("upsell_prompt_shown", { feature: "moment_of_value", placement: "post_analysis" });
-    trackEvent("upgrade_modal_viewed", { feature: "max_offer", placement: "post_analysis" });
-    trackEvent("max_offer_teaser_viewed", { placement: "post_analysis", decision_tone: decisionTone });
+    trackEvent("upsell_prompt_shown", {
+      feature: "moment_of_value",
+      placement: "post_analysis",
+    });
+    trackEvent("upgrade_modal_viewed", {
+      feature: "max_offer",
+      placement: "post_analysis",
+    });
+    trackEvent("max_offer_teaser_viewed", {
+      placement: "post_analysis",
+      decision_tone: decisionTone,
+    });
   }, [decisionTone, isPaid, suppressed]);
 
   if (isPaid || dismissed || suppressed) return null;
@@ -74,7 +91,8 @@ export function MomentOfValueUpsell({
   const handleKeepEditing = () => {
     if (typeof window === "undefined") return;
     const el = document.getElementById("main");
-    if (el) window.scrollTo({ top: el.offsetTop - 64, behavior: scrollBehavior() });
+    if (el)
+      window.scrollTo({ top: el.offsetTop - 64, behavior: scrollBehavior() });
   };
 
   return (
@@ -145,10 +163,10 @@ export function MomentOfValueUpsell({
           </span>
         </div>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-          Pro unlocks an interactive solver: choose your cash-flow, cash-on-cash,
-          cap-rate, or DSCR criteria, and TrueCap calculates the highest price
-          that clears all of them. The result is a criterion-based ceiling, not
-          a recommended offer.
+          Pro unlocks an interactive solver: choose your cash-flow,
+          cash-on-cash, cap-rate, or DSCR criteria, and TrueCap calculates the
+          highest price that clears all of them. The result is a criterion-based
+          ceiling, not a recommended offer.
         </p>
       </div>
 
@@ -166,33 +184,44 @@ export function MomentOfValueUpsell({
         >
           <Calculator className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
           <span className="text-foreground">
-            <strong>Keep editing</strong> — refine assumptions and rerun the numbers.
+            <strong>Keep editing</strong> — refine assumptions and rerun the
+            numbers.
           </span>
         </button>
 
         <Link
           href="/pricing"
           onClick={() => {
-            trackEvent("max_offer_view_attempted", { placement: "post_analysis" });
-            trackEvent("max_offer_unlock_clicked", { placement: "post_analysis", offer: "pro" });
-            trackEvent("upsell_prompt_clicked", { feature: "max_offer", placement: "post_analysis" });
+            trackEvent("max_offer_view_attempted", {
+              placement: "post_analysis",
+            });
+            trackEvent("max_offer_unlock_clicked", {
+              placement: "post_analysis",
+            });
+            trackEvent("upsell_prompt_clicked", {
+              feature: "max_offer",
+              placement: "post_analysis",
+            });
           }}
           className="group flex w-full items-start gap-2.5 rounded-xl border-2 border-primary/40 bg-primary/5 p-3 text-left text-sm transition-colors hover:bg-primary/10"
         >
           <Lock className="mt-0.5 size-4 shrink-0 text-primary" />
           <span className="flex-1 text-foreground">
-            <strong>Tune the Offer Ceiling with {proOfferName}</strong> — set your Buy Box,
-            stress-test downside, and compare the same operating metrics side by side.
+            <strong>Tune the Offer Ceiling with {proOfferName}</strong> — set
+            your Buy Box, stress-test downside, and compare the same operating
+            metrics side by side.
           </span>
           <ArrowRight className="mt-0.5 size-4 shrink-0 text-primary transition-transform group-hover:translate-x-0.5" />
         </Link>
-          <GuaranteeBadge align="start" className="mt-3" />
+        <GuaranteeBadge align="start" className="mt-3" />
       </div>
 
       {/* Inline note — softens the upsell */}
       <p className="mt-4 border-t border-border/60 pt-3 text-[11px] text-muted-foreground">
-        Cash flow {fmtMoney(netCashFlow)}/mo · cap {capRate.toFixed(1)}% · CoC {totalCashRequired > 0 ? `${cocReturn.toFixed(1)}%` : "N/A"}.
-        Calculations are estimates based on your inputs. Verify assumptions independently before recording or acting on an investment decision.
+        Cash flow {fmtMoney(netCashFlow)}/mo · cap {capRate.toFixed(1)}% · CoC{" "}
+        {totalCashRequired > 0 ? `${cocReturn.toFixed(1)}%` : "N/A"}.
+        Calculations are estimates based on your inputs. Verify assumptions
+        independently before recording or acting on an investment decision.
       </p>
     </div>
   );
@@ -217,7 +246,9 @@ function FeatureChip({
           {label}
         </span>
       </div>
-      <div className="mt-1 text-base font-extrabold tabular-nums text-foreground">{value}</div>
+      <div className="mt-1 text-base font-extrabold tabular-nums text-foreground">
+        {value}
+      </div>
       <div className="text-[11px] text-muted-foreground">{sub}</div>
     </div>
   );

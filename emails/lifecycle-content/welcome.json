@@ -4,7 +4,7 @@
   "preheader": "Paste an address and review cap rate, cash flow, selected-rule fit, and a secondary Screening Index.",
   "headline": "You're in. Start with one property and verify the inputs.",
   "body": [
-    "Welcome to TrueCap. Paste a U.S. address and review cap rate, cash-on-cash, DSCR, monthly cash flow, selected-rule fit, and a secondary Screening Index. Rent, mortgage rate, and property tax can start from labeled estimates, and you can edit anything. Verify every material input before relying on the result.",
+    "Welcome to TrueCap. Paste a U.S. address and review cap rate, cash-on-cash, DSCR, monthly cash flow, selected-rule fit, and a secondary Screening Index. Rent and mortgage rate can start from labeled HUD/FRED benchmarks; property tax is a manual local input. Verify every material input before relying on the result.",
     "Try it on a property you're actually looking at right now. The fastest way to see if TrueCap fits how you work is to run a real deal, not a sample.",
     "Reply to this email and tell me what you're hunting for — market, strategy, price range. I read every one."
   ],

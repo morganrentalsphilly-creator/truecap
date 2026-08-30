@@ -559,12 +559,13 @@ describe("refund/dispute enforcement stays wired to every release gate", () => {
   });
 
   it("revalidates credit at checkout and falls back to the normal coupon path", () => {
-    expect(billing).toContain(
-      "findEligiblePackCredit(admin, user.id, new Date(), stripe)",
-    );
     const lookupStart = billing.indexOf("let packCredit = null");
     const lookupEnd = billing.indexOf("const creditCoupon", lookupStart);
     const lookup = billing.slice(lookupStart, lookupEnd);
+    expect(lookup.match(/findEligiblePackCredit\s*\(/g)).toHaveLength(1);
+    expect(lookup).toMatch(
+      /findEligiblePackCredit\s*\(\s*admin,\s*user\.id,\s*new Date\(\),\s*stripe,?\s*\)/,
+    );
     expect(lookup).toContain("try {");
     expect(lookup).toContain("catch (error)");
     expect(billing).toContain(

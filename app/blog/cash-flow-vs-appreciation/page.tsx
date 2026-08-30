@@ -16,7 +16,6 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Calculator } from "lucide-react";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
@@ -519,16 +518,7 @@ export default function BlogPost() {
             strategy.
           </p>
 
-          <div className="not-prose">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-3 rounded-xl font-bold hover:opacity-95 transition-opacity"
-            >
-              <Calculator className="w-4 h-4" />
-              Screen a property&apos;s operating cash flow
-              <ArrowUpRight className="w-4 h-4" />
-            </Link>
-          </div>
+          <div className="not-prose"></div>
 
           <p>
             TrueCap screens pre-tax operating cash flow, loan coverage, and

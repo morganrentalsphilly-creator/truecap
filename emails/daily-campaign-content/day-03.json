@@ -1,17 +1,17 @@
 {
   "day": 3,
   "send_date": "2026-06-03",
-  "subject": "I almost bought the wrong rental",
-  "preheader": "the deal looked great. the lender disagreed.",
-  "headline": "A story about ignoring DSCR and almost paying 8% over cap.",
+  "subject": "check DSCR assumptions early",
+  "preheader": "modeled financing and lender terms are not the same thing.",
+  "headline": "A DSCR screen is a prompt to verify lender-specific terms.",
   "body": [
-    "Back in 2019 I found a duplex in a market I won't name. Brick. Updated. Tenants in place. $1,650 each side, $325k asking. I ran the cap rate in my head — felt like a 7-something — and decided I loved it.",
-    "I didn't run DSCR. I figured the lender would tell me if there was a problem. Big mistake. I drove to the property twice. Walked the units. Sent the LOI. Got verbal acceptance. Then went to my bank.",
-    "DSCR came back at 1.09. Their floor was 1.25. The loan I'd been modeling in my head (75% LTV, 30-year, 6.5%) didn't exist for this property. The only option was 65% LTV with a rate bump. My cash-on-cash collapsed from a daydream 11% to a real 4.2%.",
-    "I walked away. The lesson wasn't 'lenders are picky.' The lesson was that I'd let myself fall in love with a deal before I'd run the numbers a lender would actually use. Eight percent over a defensible cap rate because I felt good walking the units.",
-    "Run the numbers first. Walk the property second. TrueCap exists so the version of me from 2019 spends 60 seconds checking before he drives four hours."
+    "Consider a hypothetical duplex listed at $325,000 with $1,650 monthly rent per unit. A preliminary screen can calculate cap rate, cash flow, and DSCR from the rent, expense, price, and financing assumptions entered.",
+    "Now suppose the screen uses 75% loan-to-value while a prospective lender requires more cash down or applies a different qualifying rate and expense method. Those changes can materially alter modeled debt service, DSCR, and cash-on-cash return.",
+    "An illustrative 1.09 DSCR would miss a hypothetical 1.25 threshold, but neither number predicts a real lender's terms or approval. Each lender defines qualifying income, expenses, reserves, and minimum coverage for the specific borrower and property.",
+    "The lesson is to validate financing assumptions before relying on the screen, not to treat a consumer calculation as the lender's analysis or an investment verdict.",
+    "TrueCap makes the financing and operating assumptions editable so you can identify what to confirm with the lender and other qualified professionals."
   ],
-  "cta_text": "Run the numbers first",
+  "cta_text": "Review DSCR assumptions",
   "cta_url": "https://usetruecap.com/",
   "signature_note": null
 }

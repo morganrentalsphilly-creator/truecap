@@ -1,10 +1,12 @@
 import "server-only";
 
 /**
- * Trial onboarding emails (2026-08-17 offer rollout, flow 3).
+ * Legacy Stripe-trial onboarding emails.
  *
- * Scheduled ONCE at trial start (Stripe webhook, after pro_trial_started
- * fires) via Resend `scheduled_at`:
+ * Scheduled only when an older Checkout Session carries the historical
+ * `trial_granted=true` marker. Current checkout uses `trialDays: 0`; the
+ * current no-card product evaluation is separate, does not auto-renew, and
+ * never enters this scheduler. Historical sessions use Resend `scheduled_at`:
  *   - trial_day1  (+1 day): activation nudge — the 10-deal guarantee habit
  *   - trial_day10 (+10 days): plain pre-billing reminder + guarantee restated
  *
@@ -33,7 +35,9 @@ const TRIAL_EMAILS = [
 ] as const;
 
 function lifecycleEmailsLive(): boolean {
-  return (process.env.LIFECYCLE_EMAILS_MODE ?? "off").trim().toLowerCase() === "live";
+  return (
+    (process.env.LIFECYCLE_EMAILS_MODE ?? "off").trim().toLowerCase() === "live"
+  );
 }
 
 type Content = {
@@ -48,7 +52,9 @@ type Content = {
 
 async function loadContent(file: string): Promise<Content | null> {
   try {
-    const raw = JSON.parse(await fs.readFile(path.join(CONTENT_DIR, file), "utf8"));
+    const raw = JSON.parse(
+      await fs.readFile(path.join(CONTENT_DIR, file), "utf8"),
+    );
     if (
       typeof raw.subject !== "string" ||
       typeof raw.headline !== "string" ||
@@ -73,9 +79,10 @@ export type TrialEmailsResult = {
 
 export async function scheduleTrialOnboardingEmails(
   admin: SupabaseClient,
-  input: { userId: string; email: string | null | undefined }
+  input: { userId: string; email: string | null | undefined },
 ): Promise<TrialEmailsResult> {
-  if (!lifecycleEmailsLive()) return { scheduled: 0, skipped: 2, reason: "mode_off" };
+  if (!lifecycleEmailsLive())
+    return { scheduled: 0, skipped: 2, reason: "mode_off" };
   // Both approved lifecycle templates currently restate the optional refund
   // guarantee. Never schedule them while that separate marketing promise is
   // dark; a later guarantee-free template can replace this fail-closed gate.
@@ -88,7 +95,9 @@ export async function scheduleTrialOnboardingEmails(
 
   const from = process.env.EMAIL_FROM || "TrueCap <hello@usetruecap.com>";
   const replyTo = process.env.EMAIL_REPLY_TO || "hello@usetruecap.com";
-  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://usetruecap.com").replace(/\/+$/, "");
+  const siteUrl = (
+    process.env.NEXT_PUBLIC_SITE_URL || "https://usetruecap.com"
+  ).replace(/\/+$/, "");
   const manageUrl = `${siteUrl}/settings`;
 
   let scheduled = 0;
@@ -97,10 +106,12 @@ export async function scheduleTrialOnboardingEmails(
   for (const item of TRIAL_EMAILS) {
     // Claim first — the unique (user_id, email_key) row is the idempotency
     // contract shared with the lifecycle cron.
-    const { error: claimError } = await admin.from("lifecycle_email_log").insert({
-      user_id: input.userId,
-      email_key: item.emailKey,
-    });
+    const { error: claimError } = await admin
+      .from("lifecycle_email_log")
+      .insert({
+        user_id: input.userId,
+        email_key: item.emailKey,
+      });
     if (claimError) {
       // 23505 = already scheduled by an earlier webhook delivery. Anything
       // else is unexpected — log it, but never fail the webhook.
@@ -108,7 +119,10 @@ export async function scheduleTrialOnboardingEmails(
         Sentry.captureMessage("Trial email claim failed", {
           level: "error",
           tags: { feature: "trial-emails" },
-          extra: { email_key: item.emailKey, database_code: claimError.code ?? "unknown" },
+          extra: {
+            email_key: item.emailKey,
+            database_code: claimError.code ?? "unknown",
+          },
         });
       }
       skipped += 1;
@@ -146,7 +160,7 @@ export async function scheduleTrialOnboardingEmails(
           signatureNote: content.signature_note ?? null,
           siteUrl,
           manageUrl,
-        })
+        }),
       );
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
@@ -161,7 +175,7 @@ export async function scheduleTrialOnboardingEmails(
           html,
           reply_to: replyTo,
           scheduled_at: new Date(
-            Date.now() + item.delayDays * 24 * 60 * 60 * 1000
+            Date.now() + item.delayDays * 24 * 60 * 60 * 1000,
           ).toISOString(),
           tags: [{ name: "purpose", value: "lifecycle" }],
         }),
@@ -177,7 +191,9 @@ export async function scheduleTrialOnboardingEmails(
         skipped += 1;
         continue;
       }
-      const body = (await res.json().catch(() => null)) as { id?: string } | null;
+      const body = (await res.json().catch(() => null)) as {
+        id?: string;
+      } | null;
       if (body?.id) {
         await admin
           .from("lifecycle_email_log")

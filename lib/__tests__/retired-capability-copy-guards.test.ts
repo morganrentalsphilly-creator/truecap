@@ -160,7 +160,10 @@ describe("retired capability copy and control boundaries", () => {
   it("keeps product and legal facts aligned with current availability", () => {
     const facts = source("lib/product-facts.ts");
     expect(facts).toContain(
-      "Not currently released; pricing and checkout remain unavailable",
+      "New one-property purchases are temporarily unavailable; existing paid report claims remain recoverable.",
+    );
+    expect(facts).toContain(
+      "Agent Pro checkout is not configured on this deployment.",
     );
 
     const terms = source("app/terms/page.tsx");

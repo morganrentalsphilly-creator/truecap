@@ -65,7 +65,7 @@ describe("guest analysis signup continuity", () => {
     expect(calculator).toContain("saveInFlightRef.current = false");
     expect(normalizeSource(calculator)).toContain(
       normalizeSource(
-        "const cancelledAutoSave = Boolean(duplicateCollision?.autoAfterAuth)",
+        "const cancelledAutoSave = Boolean(duplicateCollision.autoAfterAuth)",
       ),
     );
     expect(calculator).toContain('title: "Automatic save canceled"');

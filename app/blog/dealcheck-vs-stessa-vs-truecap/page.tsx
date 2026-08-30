@@ -17,7 +17,6 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Calculator } from "lucide-react";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
@@ -258,9 +257,11 @@ export default function DealCheckVsStessaVsTrueCapPost() {
               <strong>TrueCap free</strong> gives you the full underwriting
               engine — cap rate, CoC, DSCR, NCF, monthly cash flow — on every
               analysis, with no monthly limit and no signup wall. Address
-              auto-fill starts with a HUD area rent benchmark, a FRED
-              owner-occupied 30-year rate benchmark, and a state effective
-              property-tax estimate.
+              auto-fill starts with a HUD area rent benchmark and a FRED
+              owner-occupied 30-year rate benchmark. Property tax remains a
+              manual local input; if left blank, the screen discloses a generic
+              1.1% purchase-price fallback rather than a state or parcel
+              estimate.
             </p>
             <p>
               <strong>DealCheck Starter</strong> includes its core rental,
@@ -541,16 +542,7 @@ export default function DealCheckVsStessaVsTrueCapPost() {
               property values that are still missing, and you&apos;ll see the
               modeled underwrite.
             </p>
-            <p className="not-prose">
-              <Link
-                href="/"
-                className="inline-flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-5 py-3 font-bold hover:opacity-90"
-              >
-                <Calculator className="w-4 h-4" />
-                Try TrueCap free
-                <ArrowUpRight className="w-4 h-4" />
-              </Link>
-            </p>
+            <p className="not-prose"></p>
           </div>
 
           <div className="mt-10">

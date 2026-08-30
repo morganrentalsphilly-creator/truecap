@@ -39,7 +39,9 @@ describe("released public-tool surfaces", () => {
     ]) {
       const page = read(path);
       expect(page, path).toContain("Educational guide:");
-      expect(page, path).toMatch(/does not\s+currently expose[\s\S]{0,100}(?:flip|BRRRR)/i);
+      expect(page, path).toMatch(
+        /does not\s+currently expose[\s\S]{0,100}(?:flip|BRRRR)/i,
+      );
     }
 
     const discovery = read("lib/calculator-registry.ts");
@@ -50,31 +52,31 @@ describe("released public-tool surfaces", () => {
 
 describe("gated calculators expose no public discovery surface", () => {
   it("no unreleased calculator ships an opengraph-image route", async () => {
-    // A tool whose page notFound()s still served /tools/<slug>/opengraph-image
+    // A tool whose page redirects still serves an independently routable
+    // /tools/<slug>/opengraph-image when that file exists.
     // as a real, crawlable, shareable branded card — a public surface implying
     // the tool exists. Route files are independent of the page's 404, so the
     // gate has to remove them too.
     const { existsSync } = await import("node:fs");
-    const { UNRELEASED_UNDERWRITING_CALCULATORS } = await import(
-      "@/lib/calculator-registry"
-    );
+    const { UNRELEASED_UNDERWRITING_CALCULATORS } =
+      await import("@/lib/calculator-registry");
     const leaked = UNRELEASED_UNDERWRITING_CALCULATORS.filter((slug) =>
       existsSync(join(process.cwd(), `app/tools/${slug}/opengraph-image.tsx`)),
     );
-    expect(leaked, `gated tools still serving an OG card: ${leaked.join(", ")}`).toEqual(
-      [],
-    );
+    expect(
+      leaked,
+      `gated tools still serving an OG card: ${leaked.join(", ")}`,
+    ).toEqual([]);
   });
 
   it("every unreleased calculator page fails closed", async () => {
-    const { UNRELEASED_UNDERWRITING_CALCULATORS } = await import(
-      "@/lib/calculator-registry"
-    );
+    const { UNRELEASED_UNDERWRITING_CALCULATORS } =
+      await import("@/lib/calculator-registry");
     for (const slug of UNRELEASED_UNDERWRITING_CALCULATORS) {
       const page = read(`app/tools/${slug}/page.tsx`);
       expect(
         /notFound\(\)|permanentRedirect\(/.test(page),
-        `${slug} page must notFound() or redirect`,
+        `${slug} page must fail closed or redirect`,
       ).toBe(true);
     }
   });

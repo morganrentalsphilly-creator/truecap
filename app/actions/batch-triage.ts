@@ -6,10 +6,11 @@ import { toServerErrorResult } from "@/lib/db-error";
  * market + the user's buy box, server-side. Pro-gated (compare_deals — the
  * other power tool). The heavy lifting is the pure lib/batch-triage engine;
  * this action only supplies the two IO pieces the engine can't: the current
- * FRED rate + state property tax (via the existing enrichPropertyAction, one
- * call per DISTINCT state — rate is address-independent, tax is per-state),
- * and the user's active buy boxes. Rent comes from the paste itself, so no
- * per-address geocoding / HUD lookup is needed for v1.
+ * FRED rate (via the existing enrichPropertyAction, with one call per distinct
+ * state to preserve the cache/handoff shape) and the user's active buy boxes.
+ * Property tax stays on the disclosed generic fallback until the user opens a
+ * row and enters local evidence. Rent comes from the paste itself, so no
+ * per-address geocoding or HUD lookup is needed for v1.
  */
 
 import { z } from "zod";
@@ -19,7 +20,11 @@ import {
   hasPaidPlanSubscription,
   hasPlanFeature,
 } from "@/lib/entitlements";
-import { buyBoxHasCriteria, deriveStateFromAddress, type NamedBuyBox } from "@/lib/buy-box";
+import {
+  buyBoxHasCriteria,
+  deriveStateFromAddress,
+  type NamedBuyBox,
+} from "@/lib/buy-box";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 import { enrichPropertyAction } from "@/app/actions/enrich-property";
 import { reserveAnthropicCall } from "@/lib/ai-spend-guard";
@@ -51,7 +56,11 @@ export type BatchTriageResult =
     }
   | {
       ok: false;
-      code: "SIGN_IN_REQUIRED" | "ENTITLEMENT_REQUIRED" | "EMPTY" | "SERVER_ERROR";
+      code:
+        | "SIGN_IN_REQUIRED"
+        | "ENTITLEMENT_REQUIRED"
+        | "EMPTY"
+        | "SERVER_ERROR";
       message: string;
     };
 
@@ -60,10 +69,16 @@ const inputSchema = z.object({
   sort: z.enum(["score", "cashFlow", "fit"]).optional(),
 });
 
-export async function screenBatchAction(rawInput: unknown): Promise<BatchTriageResult> {
+export async function screenBatchAction(
+  rawInput: unknown,
+): Promise<BatchTriageResult> {
   const parsedInput = inputSchema.safeParse(rawInput);
   if (!parsedInput.success) {
-    return { ok: false, code: "EMPTY", message: "Paste some listings to screen." };
+    return {
+      ok: false,
+      code: "EMPTY",
+      message: "Paste some listings to screen.",
+    };
   }
 
   const supabase = await createServerSupabaseClient();
@@ -82,16 +97,23 @@ export async function screenBatchAction(rawInput: unknown): Promise<BatchTriageR
     return {
       ok: false,
       code: "ENTITLEMENT_REQUIRED",
-      message: "Screen a shortlist is a Pro feature — upgrade to screen listings in bulk.",
+      message:
+        "Screen a shortlist is a Pro feature — upgrade to screen listings in bulk.",
     };
   }
 
   try {
-    const { rows: allRows, errors: parseErrors } = parseTriageInput(parsedInput.data.text);
+    const { rows: allRows, errors: parseErrors } = parseTriageInput(
+      parsedInput.data.text,
+    );
     if (allRows.length === 0) {
       // Only errors (or nothing) — surface the parse errors so the user can fix.
       if (parseErrors.length === 0) {
-        return { ok: false, code: "EMPTY", message: "Paste some listings to screen." };
+        return {
+          ok: false,
+          code: "EMPTY",
+          message: "Paste some listings to screen.",
+        };
       }
       return {
         ok: true,
@@ -123,7 +145,11 @@ export async function screenBatchAction(rawInput: unknown): Promise<BatchTriageR
     const enrichmentByState = new Map<string, TriageEnrichment>();
     const screenedAt = new Date().toISOString();
     const distinctStates = Array.from(
-      new Set(rows.map((r) => deriveStateFromAddress(r.address)).filter((s): s is string => !!s))
+      new Set(
+        rows
+          .map((r) => deriveStateFromAddress(r.address))
+          .filter((s): s is string => !!s),
+      ),
     );
     for (const state of distinctStates) {
       try {
@@ -182,7 +208,12 @@ export type ExtractListingsResult =
   | { ok: true; text: string; count: number }
   | {
       ok: false;
-      code: "SIGN_IN_REQUIRED" | "ENTITLEMENT_REQUIRED" | "UNAVAILABLE" | "EMPTY" | "SERVER_ERROR";
+      code:
+        | "SIGN_IN_REQUIRED"
+        | "ENTITLEMENT_REQUIRED"
+        | "UNAVAILABLE"
+        | "EMPTY"
+        | "SERVER_ERROR";
       message: string;
     };
 
@@ -227,28 +258,43 @@ function extractJsonArray(raw: string): unknown[] | null {
  * absent (graceful-absent, like Deal Q&A). The model output is only ever
  * parsed as JSON + shown for confirmation, never executed.
  */
-export async function extractTriageListingsAction(rawInput: unknown): Promise<ExtractListingsResult> {
+export async function extractTriageListingsAction(
+  rawInput: unknown,
+): Promise<ExtractListingsResult> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    return { ok: false, code: "UNAVAILABLE", message: "Auto-extract isn't configured right now." };
+    return {
+      ok: false,
+      code: "UNAVAILABLE",
+      message: "Auto-extract isn't configured right now.",
+    };
   }
   const parsed = extractInputSchema.safeParse(rawInput);
   if (!parsed.success) {
-    return { ok: false, code: "EMPTY", message: "Paste some listing text to extract." };
+    return {
+      ok: false,
+      code: "EMPTY",
+      message: "Paste some listing text to extract.",
+    };
   }
 
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
+  if (!user)
+    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
 
   const [entitlements, hasPaidPlan] = await Promise.all([
     getEntitlementsForUser(supabase, user.id),
     hasPaidPlanSubscription(supabase, user.id),
   ]);
   if (!hasPaidPlan || !hasPlanFeature(entitlements, "compare_deals")) {
-    return { ok: false, code: "ENTITLEMENT_REQUIRED", message: "Batch triage is a Pro feature." };
+    return {
+      ok: false,
+      code: "ENTITLEMENT_REQUIRED",
+      message: "Batch triage is a Pro feature.",
+    };
   }
 
   // Shared daily Anthropic ceiling — the same dollar bound deal-qa and
@@ -260,7 +306,8 @@ export async function extractTriageListingsAction(rawInput: unknown): Promise<Ex
     return {
       ok: false,
       code: "UNAVAILABLE",
-      message: "Auto-extract has hit today's usage limit. Please try again tomorrow.",
+      message:
+        "Auto-extract has hit today's usage limit. Please try again tomorrow.",
     };
   }
 
@@ -282,11 +329,19 @@ export async function extractTriageListingsAction(rawInput: unknown): Promise<Ex
     });
     if (!res.ok) {
       const body = await res.text().catch(() => "");
-      console.warn(`[batch-triage extract] Anthropic ${res.status}: ${body.slice(0, 200)}`);
-      return { ok: false, code: "SERVER_ERROR", message: "Couldn't extract right now. Please try again." };
+      console.warn(
+        `[batch-triage extract] Anthropic ${res.status}: ${body.slice(0, 200)}`,
+      );
+      return {
+        ok: false,
+        code: "SERVER_ERROR",
+        message: "Couldn't extract right now. Please try again.",
+      };
     }
 
-    const json = (await res.json()) as { content?: Array<{ type: string; text?: string }> };
+    const json = (await res.json()) as {
+      content?: Array<{ type: string; text?: string }>;
+    };
     const textOut = (json.content ?? [])
       .filter((b) => b.type === "text" && typeof b.text === "string")
       .map((b) => b.text)
@@ -295,7 +350,11 @@ export async function extractTriageListingsAction(rawInput: unknown): Promise<Ex
 
     const arr = extractJsonArray(textOut);
     if (!arr) {
-      return { ok: false, code: "SERVER_ERROR", message: "Couldn't read the extracted listings." };
+      return {
+        ok: false,
+        code: "SERVER_ERROR",
+        message: "Couldn't read the extracted listings.",
+      };
     }
 
     const rows: TriageListingInput[] = [];
@@ -315,6 +374,10 @@ export async function extractTriageListingsAction(rawInput: unknown): Promise<Ex
     return { ok: true, text: formatTriageRowsAsText(rows), count: rows.length };
   } catch (err) {
     console.warn("[batch-triage extract] failed:", err);
-    return { ok: false, code: "SERVER_ERROR", message: "Couldn't extract right now. Please try again." };
+    return {
+      ok: false,
+      code: "SERVER_ERROR",
+      message: "Couldn't extract right now. Please try again.",
+    };
   }
 }

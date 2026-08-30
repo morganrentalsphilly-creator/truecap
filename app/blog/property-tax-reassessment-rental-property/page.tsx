@@ -107,8 +107,18 @@ export default function PropertyTaxReassessmentPost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "TrueCap", item: `${siteUrl}/` },
-      { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "TrueCap",
+        item: `${siteUrl}/`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: `${siteUrl}/blog`,
+      },
       { "@type": "ListItem", position: 3, name: TITLE, item: canonicalUrl },
     ],
   };
@@ -164,12 +174,12 @@ export default function PropertyTaxReassessmentPost() {
               expenses in a rental underwrite — and one of the most quietly
               wrong. The number you see is the <em>seller&apos;s</em> bill, set
               against an assessed value that may be a decade stale and may carry
-              an owner-occupant break you will never get. Buy the property and the
-              assessor resets the clock toward what you paid. Copy that listing
-              figure into your pro forma and you can &quot;win&quot; a deal on
-              paper that loses money the moment the real tax bill lands. Here is
-              why it happens, how much it can move, and how to underwrite the
-              number you will actually pay.
+              an owner-occupant break you will never get. Buy the property and
+              the assessor resets the clock toward what you paid. Copy that
+              listing figure into your pro forma and you can &quot;win&quot; a
+              deal on paper that loses money the moment the real tax bill lands.
+              Here is why it happens, how much it can move, and how to
+              underwrite the number you will actually pay.
             </p>
           </header>
 
@@ -179,17 +189,17 @@ export default function PropertyTaxReassessmentPost() {
             </h2>
             <p>
               Property taxes are charged on a property&apos;s{" "}
-              <strong>assessed value</strong>, which is the county&apos;s number,
-              not the market&apos;s. Assessed value drifts away from what a
-              property is actually worth for two everyday reasons. First, most
-              states cap how fast an existing owner&apos;s assessment can climb —
-              California limits the annual increase to 2%, and many other states
-              run their own caps or reassess only every few years. A property
-              held since 2014 can be carried on the rolls at a value that has
-              nothing to do with 2026 prices. Second, owner-occupants often
-              receive a <strong>homestead exemption</strong> that shaves a fixed
-              amount off the taxable value — a benefit that does not apply to a
-              rental.
+              <strong>assessed value</strong>, which is the county&apos;s
+              number, not the market&apos;s. Assessed value drifts away from
+              what a property is actually worth for two everyday reasons. First,
+              most states cap how fast an existing owner&apos;s assessment can
+              climb — California limits the annual increase to 2%, and many
+              other states run their own caps or reassess only every few years.
+              A property held since 2014 can be carried on the rolls at a value
+              that has nothing to do with 2026 prices. Second, owner-occupants
+              often receive a <strong>homestead exemption</strong> that shaves a
+              fixed amount off the taxable value — a benefit that does not apply
+              to a rental.
             </p>
             <p>
               So the seller&apos;s low tax bill is not a market quirk you get to
@@ -213,34 +223,32 @@ export default function PropertyTaxReassessmentPost() {
               <strong>Acquisition-value states.</strong> California&apos;s
               Proposition 13 is the cleanest example: when you buy, the assessor
               sets a new base-year value equal to your purchase price, then caps
-              growth at 2% a year going forward. The reset can be dramatic because
-              you are replacing a base that may date back decades. Michigan
-              &quot;uncaps&quot; taxable value to the state equalized value on
-              transfer; Florida&apos;s Save Our Homes cap likewise resets when a
-              homesteaded property sells or converts to a rental. In all of these,
-              the sale itself is the moment the number jumps.
+              growth at 2% a year going forward. The reset can be dramatic
+              because you are replacing a base that may date back decades.
+              Michigan &quot;uncaps&quot; taxable value to the state equalized
+              value on transfer; Florida&apos;s Save Our Homes cap likewise
+              resets when a homesteaded property sells or converts to a rental.
+              In all of these, the sale itself is the moment the number jumps.
             </p>
             <p>
-              <strong>Cyclical-reassessment states.</strong> Many states reassess
-              on a schedule — annually, or every two, three, or five years —
-              regardless of sales, but a recent sale gives the assessor a fresh,
-              defensible value to apply at the next cycle. The danger here is
-              timing: you may pay the old, low figure for your first year, then
-              watch it leap when the cycle catches up. Underwriting the first-year
-              bill as if it were permanent is a trap.
+              <strong>Cyclical-reassessment states.</strong> Many states
+              reassess on a schedule — annually, or every two, three, or five
+              years — regardless of sales, but a recent sale gives the assessor
+              a fresh, defensible value to apply at the next cycle. The danger
+              here is timing: you may pay the old, low figure for your first
+              year, then watch it leap when the cycle catches up. Underwriting
+              the first-year bill as if it were permanent is a trap.
             </p>
             <p>
-              Either way, the practical rule is the same: assume a purchase resets
-              your taxes toward your purchase price, and treat any year you pay
-              less as a temporary gift, not the baseline.
+              Either way, the practical rule is the same: assume a purchase
+              resets your taxes toward your purchase price, and treat any year
+              you pay less as a temporary gift, not the baseline.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
               The formula — and the shortcut
             </h2>
-            <p>
-              The full mechanic is three numbers multiplied together:
-            </p>
+            <p>The full mechanic is three numbers multiplied together:</p>
             <div className="rounded-xl border border-border bg-muted/30 p-5">
               <code className="text-sm sm:text-base text-foreground font-mono">
                 Annual tax = Assessed value × Assessment ratio × Mill rate
@@ -252,8 +260,8 @@ export default function PropertyTaxReassessmentPost() {
               and the <strong>mill rate</strong> (or millage) is the tax per
               dollar of that taxable base. You can chase all three down at the
               assessor&apos;s office — and for a precise budget you eventually
-              should — but for underwriting there is a faster move that folds them
-              into one number:
+              should — but for underwriting there is a faster move that folds
+              them into one number:
             </p>
             <div className="rounded-xl border border-border bg-muted/30 p-5">
               <code className="text-sm sm:text-base text-foreground font-mono">
@@ -264,11 +272,12 @@ export default function PropertyTaxReassessmentPost() {
               The <strong>effective tax rate</strong> is taxes actually paid
               divided by market value — it already bakes in the assessment ratio
               and the loss of an owner-occupant exemption. You can pull it from
-              the county, or back it out yourself: find a comparable property that
-              sold recently, divide its post-sale tax bill by its sale price, and
-              you have a clean rate to apply to your own deal. Effective rates run
-              roughly from 0.3% in the lowest states to well over 2% in the
-              highest, so this is a local number, not a national one.
+              the county, or back it out yourself: find a comparable property
+              that sold recently, divide its post-sale tax bill by its sale
+              price, and you have a clean rate to apply to your own deal.
+              Effective rates run roughly from 0.3% in the lowest states to well
+              over 2% in the highest, so this is a local number, not a national
+              one.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -276,9 +285,9 @@ export default function PropertyTaxReassessmentPost() {
             </h2>
             <p>
               Take a $400,000 duplex. You put 25% down ($100,000) and finance
-              $300,000 at 7.5% over 30 years — about par for an investment loan in
-              mid-2026. That principal-and-interest payment is roughly $2,098 a
-              month, or about $25,170 a year (check it on the{" "}
+              $300,000 at 7.5% over 30 years — about par for an investment loan
+              in mid-2026. That principal-and-interest payment is roughly $2,098
+              a month, or about $25,170 a year (check it on the{" "}
               <Link
                 href="/tools/mortgage-payment-calculator"
                 className="text-primary font-semibold hover:underline"
@@ -286,17 +295,18 @@ export default function PropertyTaxReassessmentPost() {
                 mortgage payment calculator
               </Link>
               ). Each side rents for $1,600, so gross potential rent is $3,200 a
-              month — $38,400 a year — and at a 5% vacancy assumption you collect
-              about $36,480. Outside of taxes, the property costs $7,800 a year to
-              run: insurance, repairs, capital reserves, and water/lawn/admin.
+              month — $38,400 a year — and at a 5% vacancy assumption you
+              collect about $36,480. Outside of taxes, the property costs $7,800
+              a year to run: insurance, repairs, capital reserves, and
+              water/lawn/admin.
             </p>
             <p>
               The listing shows property taxes of <strong>$3,400</strong> — the
               seller has owned since 2015 and lives in one unit. You, the
-              investor, will be reassessed toward your $400,000 purchase price; at
-              this market&apos;s 1.5% effective rate that is{" "}
-              <strong>$6,000</strong> a year. One line item, wrong by $2,600. Here
-              is what that single number does to the whole underwrite:
+              investor, will be reassessed toward your $400,000 purchase price;
+              at this market&apos;s 1.5% effective rate that is{" "}
+              <strong>$6,000</strong> a year. One line item, wrong by $2,600.
+              Here is what that single number does to the whole underwrite:
             </p>
 
             <div className="overflow-x-auto">
@@ -361,8 +371,8 @@ export default function PropertyTaxReassessmentPost() {
             </div>
 
             <p>
-              On the seller&apos;s bill the deal looks like a thin but real winner:
-              a 6.3%{" "}
+              On the seller&apos;s bill the deal looks like a thin but real
+              winner: a 6.3%{" "}
               <Link
                 href="/#main"
                 className="text-primary font-semibold hover:underline"
@@ -376,38 +386,39 @@ export default function PropertyTaxReassessmentPost() {
               >
                 DSCR
               </Link>{" "}
-              right at 1.00, and a few dollars of monthly cash flow. Underwrite the
-              tax bill you will actually pay and{" "}
+              right at 1.00, and a few dollars of monthly cash flow. Underwrite
+              the tax bill you will actually pay and{" "}
               <Link
                 href="/blog/how-to-calculate-noi-rental-property"
                 className="text-primary font-semibold hover:underline"
               >
                 net operating income
               </Link>{" "}
-              drops $2,600, the cap rate sheds nearly two-thirds of a point, DSCR
-              falls to 0.90 — below the 1.20 floor most lenders want and below the
-              1.0 line where the property stops covering its own loan — and cash
-              flow swings from +$9 to −$208 a month. Same building, same rent, same
-              price. The only thing that changed was using an honest tax number,
-              and it turned a deal you would sign into one you would walk from.
+              drops $2,600, the cap rate sheds nearly two-thirds of a point,
+              DSCR falls to 0.90 — below the 1.20 floor most lenders want and
+              below the 1.0 line where the property stops covering its own loan
+              — and cash flow swings from +$9 to −$208 a month. Same building,
+              same rent, same price. The only thing that changed was using an
+              honest tax number, and it turned a deal you would sign into one
+              you would walk from.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
               The cash you forget at closing: the supplemental bill
             </h2>
             <p>
-              In reassessment-on-sale states there is a second, smaller surprise.
-              The annual bill resets at the next cycle, but the county also wants
-              the difference between the old and new assessment for the part of the
-              year you already own the place. That comes as a one-time{" "}
-              <strong>supplemental tax bill</strong> (California&apos;s name;
-              other states call it an escape or omitted assessment), and it lands
-              weeks or months after closing — long after most buyers have stopped
-              watching for new costs. On our duplex, a $2,600 annual increase
-              prorated over, say, eight remaining months is roughly $1,700 of
-              first-year cash you did not plan for. It is not a recurring expense,
-              so it does not belong in your operating numbers, but it absolutely
-              belongs in your{" "}
+              In reassessment-on-sale states there is a second, smaller
+              surprise. The annual bill resets at the next cycle, but the county
+              also wants the difference between the old and new assessment for
+              the part of the year you already own the place. That comes as a
+              one-time <strong>supplemental tax bill</strong> (California&apos;s
+              name; other states call it an escape or omitted assessment), and
+              it lands weeks or months after closing — long after most buyers
+              have stopped watching for new costs. On our duplex, a $2,600
+              annual increase prorated over, say, eight remaining months is
+              roughly $1,700 of first-year cash you did not plan for. It is not
+              a recurring expense, so it does not belong in your operating
+              numbers, but it absolutely belongs in your{" "}
               <Link
                 href="/blog/closing-costs-investment-property"
                 className="text-primary font-semibold hover:underline"
@@ -421,33 +432,35 @@ export default function PropertyTaxReassessmentPost() {
               How to get the real number before you write the offer
             </h2>
             <p>
-              You do not need the assessor to bless your figure before you make an
-              offer — you need a defensible estimate, and there are three reliable
-              ways to build one. The fastest is the effective-rate shortcut above:
-              purchase price × the local effective tax rate. The most accurate is
-              to pull a <strong>recently sold comparable</strong> — a property that
+              You do not need the assessor to bless your figure before you make
+              an offer — you need a defensible estimate, and there are three
+              reliable ways to build one. The fastest is the effective-rate
+              shortcut above: purchase price × the local effective tax rate. The
+              most accurate is to pull a{" "}
+              <strong>recently sold comparable</strong> — a property that
               changed hands in the last year or two, already reassessed — and
               divide its current tax bill by its sale price; that rate has the
               reset already priced in. And the most authoritative is to call the
-              county assessor with the parcel number and ask what the property will
-              be assessed at on a sale at your price, and what the current mill rate
-              is. Do at least the first two on every deal; do the third before you
-              remove contingencies.
+              county assessor with the parcel number and ask what the property
+              will be assessed at on a sale at your price, and what the current
+              mill rate is. Do at least the first two on every deal; do the
+              third before you remove contingencies.
             </p>
             <p>
-              A few traps to avoid while you are at it. Do not assume an LLC or a
-              clever title structure dodges the reassessment — a purchase is a
-              change of ownership regardless of who signs. Do not forget that the
-              <strong> exemptions vanish</strong> along with the low assessment: a
-              homestead, senior, or veteran exemption the seller held does not
+              A few traps to avoid while you are at it. Do not assume an LLC or
+              a clever title structure dodges the reassessment — a purchase is a
+              change of ownership regardless of who signs. Do not forget that
+              the
+              <strong> exemptions vanish</strong> along with the low assessment:
+              a homestead, senior, or veteran exemption the seller held does not
               transfer to a landlord, and stripping it can raise the bill even
-              before the value resets. And do not treat a low first-year bill in a
-              cyclical state as your run-rate — find out when the next reassessment
-              hits and underwrite to the post-reset number.
+              before the value resets. And do not treat a low first-year bill in
+              a cyclical state as your run-rate — find out when the next
+              reassessment hits and underwrite to the post-reset number.
             </p>
             <p>
-              This is the same discipline that makes the difference on every soft
-              expense line. Taxes, like{" "}
+              This is the same discipline that makes the difference on every
+              soft expense line. Taxes, like{" "}
               <Link
                 href="/blog/rental-property-insurance"
                 className="text-primary font-semibold hover:underline"
@@ -463,8 +476,8 @@ export default function PropertyTaxReassessmentPost() {
               >
                 TrueCap analyzer
               </Link>{" "}
-              and you see the cap rate the property really earns, not the one the
-              seller&apos;s tax history flatters.
+              and you see the cap rate the property really earns, not the one
+              the seller&apos;s tax history flatters.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -483,23 +496,28 @@ export default function PropertyTaxReassessmentPost() {
               The bottom line
             </h2>
             <p>
-              The property-tax line on a listing is the seller&apos;s number, not
-              yours, and underwriting to it is one of the most expensive shortcuts
-              in the business. A purchase usually resets the assessment toward what
-              you paid and strips the owner-occupant breaks you never qualified
-              for, so the bill you inherit is almost always higher than the bill
-              you see. Estimate it the right way — purchase price times the local
-              effective rate, cross-checked against a recently sold comp — and
-              budget the supplemental bill as a closing-year cost. The full{" "}
-              <Link href="/" className="text-primary font-semibold hover:underline">
+              The property-tax line on a listing is the seller&apos;s number,
+              not yours, and underwriting to it is one of the most expensive
+              shortcuts in the business. A purchase usually resets the
+              assessment toward what you paid and strips the owner-occupant
+              breaks you never qualified for, so the bill you inherit is almost
+              always higher than the bill you see. Estimate it the right way —
+              purchase price times the local effective rate, cross-checked
+              against a recently sold comp — and budget the supplemental bill as
+              a closing-year cost. The full{" "}
+              <Link
+                href="/"
+                className="text-primary font-semibold hover:underline"
+              >
                 TrueCap analyzer
               </Link>{" "}
-              pre-fills taxes from your state&apos;s effective rate rather than the
-              seller&apos;s stale figure, then re-runs cap rate, DSCR, and cash
-              flow on the honest number — so you find out a deal is fragile before
-              you sign, not when the first real tax bill arrives. None of this is
-              tax advice; confirm your specific assessment and exemptions with the
-              county and a local professional before you close.
+              keeps tax as a manual local input rather than copying the
+              seller&apos;s figure, then re-runs cap rate, DSCR, and cash flow
+              on the evidence you enter — so you find out a deal is fragile
+              before you sign, not when the first real tax bill arrives. None of
+              this is tax advice; confirm your specific assessment and
+              exemptions with the county and a local professional before you
+              close.
             </p>
           </div>
         </article>

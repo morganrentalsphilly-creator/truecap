@@ -84,8 +84,8 @@ export function ComparisonFaq({
         Common questions about TrueCap vs {competitorName}
       </h2>
       <p className="text-sm text-muted-foreground mb-6 max-w-2xl">
-        Quick answers to the questions investors comparison-shopping
-        these tools actually ask.
+        Quick answers to the questions investors comparison-shopping these tools
+        actually ask.
       </p>
       <div className="tc-reveal space-y-3">
         {items.map((item) => (
@@ -93,7 +93,7 @@ export function ComparisonFaq({
             key={item.question}
             className="group rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/30 sm:p-5"
           >
-            <summary className="cursor-pointer list-none flex items-start justify-between gap-3 font-bold text-sm sm:text-base text-foreground">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-md text-sm font-bold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:text-base">
               <span>{item.question}</span>
               <span
                 aria-hidden
@@ -114,14 +114,17 @@ export function ComparisonFaq({
           competitor lacks a capability they publicly offer, and we date
           the review so stale claims are obvious. */}
       <p className="mt-6 max-w-2xl text-xs leading-relaxed text-muted-foreground">
-        <span className="font-semibold text-foreground/80">Sources &amp; methodology:</span>{" "}
+        <span className="font-semibold text-foreground/80">
+          Sources &amp; methodology:
+        </span>{" "}
         Feature and pricing rows reflect {competitorName}&apos;s publicly listed
-        information, last reviewed {reviewedDate}. Vendors change features
-        and prices often — verify current details on {competitorName}&apos;s own
+        information, last reviewed {reviewedDate}. Vendors change features and
+        prices often — verify current details on {competitorName}&apos;s own
         site. Where TrueCap claims &ldquo;sourced defaults,&rdquo; that refers
-        specifically to auto-filled HUD Fair Market Rent, the FRED 30-year
-        mortgage rate, and state average effective property tax — not a general
-        claim about property-data import, which several of these tools also offer.
+        specifically to an editable HUD area-rent benchmark and the FRED
+        owner-occupied 30-year mortgage-rate benchmark. Property tax is a manual
+        local input with a disclosed generic fallback, not a state-data
+        auto-fill.
       </p>
 
       {/* Price objection, answered directly (2026-08 rollout) — honest
@@ -134,12 +137,12 @@ export function ComparisonFaq({
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
           Tools in this space run from free to well above TrueCap — check{" "}
           {competitorName}&apos;s live pricing for their current number. What
-          TrueCap&apos;s price buys is the decision layer, not more
-          calculation: an Offer Ceiling under your selected targets, rule-fit
-          results for your Buy Box with reasons, the downside stress test, and
-          assumptions that are source-labeled instead of silently defaulted.
-          Whether that workflow justifies the price depends on your volume,
-          verification process, and existing tools.
+          TrueCap&apos;s price buys is the decision layer, not more calculation:
+          an Offer Ceiling under your selected targets, rule-fit results for
+          your Buy Box with reasons, the downside stress test, and assumptions
+          that are source-labeled instead of silently defaulted. Whether that
+          workflow justifies the price depends on your volume, verification
+          process, and existing tools.
         </p>
       </div>
 

@@ -1,15 +1,15 @@
 {
   "day": 6,
   "send_date": "2026-06-06",
-  "subject": "DSCR is brutal right now",
-  "preheader": "the one ratio that decides whether your loan exists.",
-  "headline": "DSCR is the lender's secret formula. Model it before you write the offer.",
+  "subject": "DSCR can change the financing picture",
+  "preheader": "screen debt coverage, then confirm the lender's written rules.",
+  "headline": "Model DSCR early, then verify it against the lender's definition.",
   "body": [
     "Debt Service Coverage Ratio = NOI / Annual Debt Service. A property generating $24,000 NOI with $20,000 in annual mortgage payments has a DSCR of 1.20.",
-    "Lenders care about DSCR more than they care about your tax return. Most non-QM DSCR loans in 2026 want 1.20-1.25 minimum. Some want 1.30. A few aggressive lenders will go to 1.15 with a rate bump and a bigger down payment.",
-    "Here's the trap: at today's rates (6.5-7.5% for investor loans), a lot of cap-rate-decent properties don't clear DSCR. A 7% cap rate property with 75% LTV at 7% interest often comes in at DSCR 1.08-1.15. Lender says no. You're stuck putting more cash down or walking.",
+    "Investor-loan programs do not all use the same minimum, rent basis, expense treatment, leverage, reserves, or interest-rate terms. A screening ratio is useful context, but it cannot establish eligibility or approval.",
+    "Financing assumptions can change the result materially. Stress the rate, down payment, rent, vacancy, and expenses instead of treating one base case as a lender decision.",
     "Model DSCR before relying on a financing scenario. A modeled 1.18 and 1.32 indicate different screening cushions, but neither determines lender eligibility or tells you whether or how to offer. Confirm the lender's written DSCR definition, rent basis, leverage, reserves, and other program rules.",
-    "TrueCap models DSCR against today's investor loan rates by default. Paste an address and you'll see whether the loan you want actually exists at the price you're considering. Free tier."
+    "When available, TrueCap starts with an editable FRED 30-year owner-occupied mortgage-rate benchmark—not an investor loan quote. Replace it with a current written lender quote and confirm the lender's calculation before relying on the modeled DSCR. The preliminary rental screen is available on Free."
   ],
   "cta_text": "Check your DSCR",
   "cta_url": "https://usetruecap.com/",

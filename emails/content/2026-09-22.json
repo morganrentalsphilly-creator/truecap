@@ -1,61 +1,61 @@
 {
-  "subject": "STRs claim 2-3x the cash flow — here's when that's actually true",
-  "preheader": "The regulatory wave that killed STRs in dense urban · 4 markets to skip · the operational tax most don't price in",
+  "subject": "STR or LTR? Verify permission and model separate scenarios",
+  "preheader": "Local rules, property restrictions, revenue evidence, and operating costs come first",
   "publishedAt": "2026-09-22",
   "weekLabel": "Topic: STR vs LTR",
   "marketSnapshot": {
-    "headline": "STR vs LTR — economics that work in some markets, dead in others",
-    "body": "Short-term rental investing (Airbnb / VRBO model) can produce 2-3x the gross revenue of long-term rentals in destination vacation markets. It also requires operational complexity, regulatory awareness, and risk tolerance that most LTR investors aren't prepared for. The math works in vacation-economy markets. It's killed by regulation in dense urban markets. Knowing which one your specific zip code is in before underwriting is more important than the underwrite itself.",
+    "headline": "The same property can have different permitted-use and operating scenarios",
+    "body": "Short-term and long-term rental assumptions should not be blended. Before modeling an STR scenario, verify current zoning, licensing, registration, HOA or condominium restrictions, lease limits, taxes, insurance, lender terms, and transferability with authoritative local sources. Then build revenue and cost assumptions from relevant property-specific evidence.",
     "stats": [
       {
-        "label": "Typical STR vs LTR gross ratio",
-        "value": "1.8-3x"
+        "label": "Permission",
+        "value": "Verify locally"
       },
       {
-        "label": "Markets with STR bans/limits",
-        "value": "Growing"
+        "label": "Revenue",
+        "value": "Evidence-based scenario"
       },
       {
-        "label": "Check regulation FIRST",
-        "value": "Always"
+        "label": "Operating costs",
+        "value": "Itemize separately"
       }
     ]
   },
   "dealSpotter": [
     {
-      "address": "Example: vacation-economy market property",
-      "headlineNumber": "STR cap 11% · LTR cap 5.2% · STR wins by 2.1x",
-      "verdict": "Strong (as STR)",
-      "body": "Cabin in a vacation-rental destination (Smoky Mountains, Lake Tahoe, Outer Banks, Florida Panhandle). STR projections: $84k/yr gross at 68% occupancy, $42k net after cleaning + dynamic pricing + management. Same property as LTR: $31,800/yr gross, $19k net. STR wins decisively in markets where the local economy IS tourism. The trade-off: cleaning fees, guest-management software, regulatory risk."
+      "address": "Educational scenario: destination property",
+      "headlineNumber": "Build the STR case from relevant comps",
+      "verdict": "Verify",
+      "body": "Use dated, comparable revenue and occupancy evidence and itemize management, cleaning, utilities, supplies, platform fees, maintenance, taxes, insurance, furniture, and reserves. A higher gross-revenue scenario does not establish higher net return or future performance."
     },
     {
-      "address": "Example: regulated urban market",
-      "headlineNumber": "STR was viable · ordinance kills it · WALK",
-      "verdict": "Skip",
-      "body": "A condo that USED to do $52k/yr as STR until the city passed restrictive ordinance limiting STR to owner-occupant-only for new permits. Existing permits got grandfathered but are non-transferable. Properties without a permit can only operate as LTR — at half the revenue. The same property is a completely different math problem depending on its specific permit status."
+      "address": "Educational scenario: permit or transfer uncertainty",
+      "headlineNumber": "Resolve legal operation before relying on STR revenue",
+      "verdict": "Pause and verify",
+      "body": "Confirm the current ordinance, property eligibility, permit status, transfer rules, enforcement, and HOA or building restrictions with authoritative sources and local professionals. Model long-term rent separately if that use is permitted; do not let an analyzer decide the legal question."
     },
     {
-      "address": "Example: walkable urban property",
-      "headlineNumber": "STR allowed but margins thinner · LTR works simpler",
-      "verdict": "Strong (as LTR)",
-      "body": "A walkable urban neighborhood property where STR is technically allowed but business license required + specific zone restrictions + demand profile is mid-week business mixed with weekend leisure. The STR economics could work — but the LTR economics already work AND require zero operational complexity. Sometimes the answer is 'don't overcomplicate it.'"
+      "address": "Educational scenario: both uses appear possible",
+      "headlineNumber": "Compare two complete operating models",
+      "verdict": "Compare",
+      "body": "Keep STR and LTR revenue, vacancy or occupancy, costs, management, financing, insurance, and compliance assumptions separate. Review the downside and operational workload for each scenario. The comparison is not a recommendation to choose either use."
     }
   ],
   "blogFeature": {
-    "title": "Cash-on-cash vs IRR — what each tells you about a deal",
+    "title": "Cash-on-cash vs IRR — what each modeled metric measures",
     "url": "https://usetruecap.com/blog/cash-on-cash-vs-irr",
-    "excerpt": "STR investors love IRR (captures the full picture); LTR investors lean on cash-on-cash (immediate return on equity). Two metrics, two different stories."
+    "excerpt": "Cash-on-cash and IRR answer different modeled questions and both depend on the evidence and timing assumptions entered. Neither establishes the right rental strategy."
   },
   "qa": {
-    "question": "Is STR investing still viable, or did regulation kill it?",
-    "answer": "Both, depending on the market. Regulation killed pure-investor STR in dense urban markets — NYC, LA, San Francisco, Seattle, Asheville, Charleston, parts of Nashville, parts of New Orleans, Maui. In those markets, STR requires owner-occupancy or is banned for non-OO investors. STR is still viable in three categories: (a) destination vacation markets where the local economy IS tourism (Smoky Mountains, Lake Tahoe, Outer Banks, Florida Panhandle beaches, ski towns, Joshua Tree, Sedona) — these markets actively welcome STR. (b) Mid-tier urban markets that still allow it with permit limits (Austin, Atlanta, Phoenix outside Scottsdale — varies block by block). (c) Rural college towns with predictable event-week demand. The right mental model isn't 'STR vs LTR' as a strategy — it's 'this specific zip code right now.' Always check current regulation BEFORE running the STR underwrite. A 5-minute Google search saves you 5 hours of building a model on a deal that can't legally operate the way you assumed."
+    "question": "Is an STR strategy viable for this property?",
+    "answer": "That is property- and date-specific. Verify current local law, zoning, licensing, HOA or condominium rules, taxes, insurance, lender requirements, and permit transferability with authoritative sources. Build revenue from relevant dated comps and itemize all operating and setup costs. Also model any permitted long-term use separately. TrueCap can compare entered scenarios, but it does not verify legal permission, forecast bookings, or recommend a strategy."
   },
   "shipNote": {
-    "title": "Underwrite STR + LTR side-by-side",
+    "title": "Keep STR and LTR assumptions separate",
     "items": [
-      "Free: customize rent, vacancy, and management to model LTR and STR scenarios — see if the upside is real after operational cost",
-      "Pro: edit both versions of the deal and compare them side-by-side before you commit to a strategy",
-      "Compare both strategies on the same property →"
+      "Free: enter a reviewed monthly revenue or rent scenario and released operating assumptions",
+      "When your access includes comparison features, compare complete scenarios under the assumptions shown",
+      "Verify permission, revenue evidence, insurance, taxes, and financing outside TrueCap"
     ]
   }
 }

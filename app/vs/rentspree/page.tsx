@@ -19,7 +19,10 @@ import {
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
-import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-faq";
+import {
+  ComparisonFaq,
+  type FaqItem,
+} from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
@@ -41,27 +44,99 @@ export const metadata: Metadata = {
       "RentSpree screens tenants. TrueCap underwrites deals. Different jobs in the rental workflow.",
     url: "/vs/rentspree",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs RentSpree" }],
+    images: [
+      {
+        url: "/home.jpg",
+        width: 1200,
+        height: 630,
+        alt: "TrueCap vs RentSpree",
+      },
+    ],
   },
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
 type Verdict = "truecap" | "rentspree" | "tie";
-type Row = { feature: string; truecap: string; rentspree: string; winner: Verdict };
+type Row = {
+  feature: string;
+  truecap: string;
+  rentspree: string;
+  winner: Verdict;
+};
 
 const MATRIX: Row[] = [
-  { feature: "Primary use", truecap: "Pre-purchase underwriting (cap rate, DSCR, cash flow)", rentspree: "Tenant screening + rental applications", winner: "tie" },
-  { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", rentspree: "Not modeled", winner: "truecap" },
-  { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", rentspree: "Not modeled", winner: "truecap" },
-  { feature: "Secondary Screening Index", truecap: "Free — 0-100 triage score + factor breakdown", rentspree: "Not applicable", winner: "truecap" },
-  { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", rentspree: "Not applicable", winner: "truecap" },
-  { feature: "Tenant credit / criminal reports", truecap: "No", rentspree: "Yes — TransUnion-backed", winner: "rentspree" },
-  { feature: "Online rental applications", truecap: "No", rentspree: "Yes — customizable", winner: "rentspree" },
-  { feature: "Eviction records check", truecap: "No", rentspree: "Yes — court records", winner: "rentspree" },
-  { feature: "Agent / brokerage workflow", truecap: "Yes — agent persona page exists", rentspree: "Yes — built for realtor-managed rentals", winner: "tie" },
-  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", rentspree: "Yes — tenant pays for screening (typical)", winner: "tie" },
-  { feature: "Pricing model", truecap: "Free core; paid Pro — see live pricing", rentspree: "Tenant typically pays $30-40 per application", winner: "tie" },
-  { feature: "Shareable read-only analysis", truecap: "Free — read-only public link; Pro adds co-branding", rentspree: "N/A", winner: "truecap" },
+  {
+    feature: "Primary use",
+    truecap: "Pre-purchase underwriting (cap rate, DSCR, cash flow)",
+    rentspree: "Tenant screening + rental applications",
+    winner: "tie",
+  },
+  {
+    feature: "Cap rate / CoC / DSCR analysis",
+    truecap: "Yes — full engine, free tier",
+    rentspree: "Not modeled",
+    winner: "truecap",
+  },
+  {
+    feature: "10-year projection",
+    truecap: "Pro — rent + expense + appreciation",
+    rentspree: "Not modeled",
+    winner: "truecap",
+  },
+  {
+    feature: "Secondary Screening Index",
+    truecap: "Free — 0-100 triage score + factor breakdown",
+    rentspree: "Not applicable",
+    winner: "truecap",
+  },
+  {
+    feature: "Starting values (rent/rate/tax)",
+    truecap: "HUD rent + FRED rate + manual local property tax",
+    rentspree: "Not applicable",
+    winner: "truecap",
+  },
+  {
+    feature: "Tenant credit / criminal reports",
+    truecap: "No",
+    rentspree: "Yes — TransUnion-backed",
+    winner: "rentspree",
+  },
+  {
+    feature: "Online rental applications",
+    truecap: "No",
+    rentspree: "Yes — customizable",
+    winner: "rentspree",
+  },
+  {
+    feature: "Eviction records check",
+    truecap: "No",
+    rentspree: "Yes — court records",
+    winner: "rentspree",
+  },
+  {
+    feature: "Agent / brokerage workflow",
+    truecap: "Yes — agent persona page exists",
+    rentspree: "Yes — built for realtor-managed rentals",
+    winner: "tie",
+  },
+  {
+    feature: "Free tier",
+    truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
+    rentspree: "Yes — tenant pays for screening (typical)",
+    winner: "tie",
+  },
+  {
+    feature: "Pricing model",
+    truecap: "Free core; paid Pro — see live pricing",
+    rentspree: "Tenant typically pays $30-40 per application",
+    winner: "tie",
+  },
+  {
+    feature: "Shareable read-only analysis",
+    truecap: "Free — read-only public link; Pro adds co-branding",
+    rentspree: "N/A",
+    winner: "truecap",
+  },
 ];
 
 export default function VsRentspreePage() {
@@ -83,7 +158,10 @@ export default function VsRentspreePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <VsBreadcrumbSchema vsPath="/vs/rentspree" pageName="TrueCap vs RentSpree" />
+      <VsBreadcrumbSchema
+        vsPath="/vs/rentspree"
+        pageName="TrueCap vs RentSpree"
+      />
       <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-2">
           <Link
@@ -102,15 +180,20 @@ export default function VsRentspreePage() {
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
             TrueCap vs RentSpree:{" "}
-            <span className="text-primary">underwrite the deal vs screen the tenant</span>
+            <span className="text-primary">
+              underwrite the deal vs screen the tenant
+            </span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            RentSpree is the go-to tenant screening service for real-estate agents and small landlords — TransUnion credit + criminal + eviction reports, online rental applications, agent-friendly workflow. TrueCap models the property&apos;s pre-purchase economics from user-reviewed assumptions. Different jobs. Many agents and investors use both.
+            RentSpree is the go-to tenant screening service for real-estate
+            agents and small landlords — TransUnion credit + criminal + eviction
+            reports, online rental applications, agent-friendly workflow.
+            TrueCap models the property&apos;s pre-purchase economics from
+            user-reviewed assumptions. Different jobs. Many agents and investors
+            use both.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <ScrollToFormButton
-              className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5"
-            >
+            <ScrollToFormButton className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">
               <Calculator className="size-4" />
               Run a deal — 60 seconds
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
@@ -138,8 +221,13 @@ export default function VsRentspreePage() {
                 Use TrueCap when
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
-                <li>You&apos;re underwriting a property before making an offer.</li>
-                <li>You&apos;re an agent sending a deal analysis to a buyer client.</li>
+                <li>
+                  You&apos;re underwriting a property before making an offer.
+                </li>
+                <li>
+                  You&apos;re an agent sending a deal analysis to a buyer
+                  client.
+                </li>
                 <li>You want cap rate, DSCR, projection, Screening Index.</li>
                 <li>You&apos;re not the one screening the tenant.</li>
               </ul>
@@ -149,10 +237,20 @@ export default function VsRentspreePage() {
                 Use RentSpree when
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
-                <li>You own the property (or manage it for an owner) and need to screen applicants.</li>
-                <li>You want TransUnion-backed credit + criminal + eviction reports.</li>
-                <li>You want tenants to pay for their own application + screening.</li>
-                <li>You&apos;re a realtor managing rentals on behalf of clients.</li>
+                <li>
+                  You own the property (or manage it for an owner) and need to
+                  screen applicants.
+                </li>
+                <li>
+                  You want TransUnion-backed credit + criminal + eviction
+                  reports.
+                </li>
+                <li>
+                  You want tenants to pay for their own application + screening.
+                </li>
+                <li>
+                  You&apos;re a realtor managing rentals on behalf of clients.
+                </li>
               </ul>
             </div>
           </div>
@@ -164,7 +262,8 @@ export default function VsRentspreePage() {
             Feature-by-feature
           </h2>
           <p className="text-base text-muted-foreground mb-6 leading-relaxed">
-            Side-by-side on every dimension that matters for a comparison-shopping investor.
+            Side-by-side on every dimension that matters for a
+            comparison-shopping investor.
           </p>
           <div className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
@@ -183,7 +282,10 @@ export default function VsRentspreePage() {
               </thead>
               <tbody>
                 {MATRIX.map((row) => (
-                  <tr key={row.feature} className="border-t border-border align-top">
+                  <tr
+                    key={row.feature}
+                    className="border-t border-border align-top"
+                  >
                     <td className="py-3 px-3 text-sm font-semibold text-foreground">
                       <div className="flex items-center gap-2">
                         <WinnerBadge winner={row.winner} side="row" />
@@ -208,9 +310,14 @@ export default function VsRentspreePage() {
             </table>
           </div>
           <p className="mt-3 text-[11px] text-muted-foreground">
-            RentSpree details based on publicly available product info as of 2026.
-            See{" "}
-            <a href="https://rentspree.com" target="_blank" rel="noopener" className="underline">
+            RentSpree details based on publicly available product info as of
+            2026. See{" "}
+            <a
+              href="https://rentspree.com"
+              target="_blank"
+              rel="noopener"
+              className="underline"
+            >
               rentspree.com
             </a>{" "}
             for their current state.
@@ -224,27 +331,47 @@ export default function VsRentspreePage() {
           </h2>
           <ol className="space-y-2.5 text-sm sm:text-base leading-relaxed text-foreground list-decimal pl-5">
             <li>
-              <strong>Underwrite the deal in TrueCap.</strong> Either you (the agent) or your buyer client runs the address. Generates a defensible analysis to share.
+              <strong>Underwrite the deal in TrueCap.</strong> Either you (the
+              agent) or your buyer client runs the address. Generates a
+              defensible analysis to share.
             </li>
             <li>
-              <strong>Buyer makes the offer + closes.</strong> TrueCap&apos;s job is done.
+              <strong>Buyer makes the offer + closes.</strong> TrueCap&apos;s
+              job is done.
             </li>
             <li>
-              <strong>List the unit + accept applications in RentSpree.</strong> Agent or owner posts the listing; applicants submit + pay for their own screening.
+              <strong>List the unit + accept applications in RentSpree.</strong>{" "}
+              Agent or owner posts the listing; applicants submit + pay for
+              their own screening.
             </li>
             <li>
-              <strong>Review screening reports + select a tenant.</strong> TransUnion-backed credit, criminal, eviction records arrive in your inbox.
+              <strong>Review screening reports + select a tenant.</strong>{" "}
+              TransUnion-backed credit, criminal, eviction records arrive in
+              your inbox.
             </li>
             <li>
-              <strong>Sign the lease.</strong> RentSpree integrates with several lease providers; pair with TurboTenant or Avail for state-specific templates.
+              <strong>Sign the lease.</strong> RentSpree integrates with several
+              lease providers; pair with TurboTenant or Avail for state-specific
+              templates.
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Need only the underwriting half to send a client?{" "}
-            <Link href="/blog/cap-rate-vs-cash-on-cash-vs-dscr" className="font-semibold text-primary hover:underline">Cap rate vs cash-on-cash vs DSCR</Link>{" "}
-            explains in plain language which number answers which question — handy when a
-            buyer asks why the deal works. The full <Link href="/" className="font-semibold text-primary hover:underline">TrueCap analyzer</Link> produces all
-            three from an address, in an analysis you can share.
+            <Link
+              href="/blog/cap-rate-vs-cash-on-cash-vs-dscr"
+              className="font-semibold text-primary hover:underline"
+            >
+              Cap rate vs cash-on-cash vs DSCR
+            </Link>{" "}
+            explains in plain language which number answers which question —
+            handy when a buyer asks why the deal works. The full{" "}
+            <Link
+              href="/"
+              className="font-semibold text-primary hover:underline"
+            >
+              TrueCap analyzer
+            </Link>{" "}
+            produces all three from an address, in an analysis you can share.
           </p>
         </section>
 
@@ -258,8 +385,8 @@ export default function VsRentspreePage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro adds 10-year cash-flow and equity projections, sensitivity,
-            Offer Ceiling, co-branded share links, and PDF reports with Pro; see live pricing for current terms.
-            No card to start.
+            Offer Ceiling, co-branded share links, and PDF reports with Pro; see
+            live pricing for current terms. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -281,11 +408,26 @@ export default function VsRentspreePage() {
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}
-          <Link href="/vs/turbotenant" className="font-bold text-foreground hover:underline">TrueCap vs TurboTenant</Link>
+          <Link
+            href="/vs/turbotenant"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs TurboTenant
+          </Link>
           {" · "}
-          <Link href="/vs/avail" className="font-bold text-foreground hover:underline">TrueCap vs Avail</Link>
+          <Link
+            href="/vs/avail"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs Avail
+          </Link>
           {" · "}
-          <Link href="/vs/rentredi" className="font-bold text-foreground hover:underline">TrueCap vs RentRedi</Link>
+          <Link
+            href="/vs/rentredi"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs RentRedi
+          </Link>
         </footer>
       </main>
       <SiteFooter />
@@ -299,7 +441,10 @@ const RENTSPREE_FAQ: FaqItem[] = [
     question: "Is TrueCap a RentSpree alternative?",
     answer: (
       <>
-        No — different jobs. RentSpree is tenant screening + rental applications for properties you own or manage. TrueCap is pre-purchase underwriting for properties you&apos;re considering buying. Agents who help clients with both ends of the workflow often use both.
+        No — different jobs. RentSpree is tenant screening + rental applications
+        for properties you own or manage. TrueCap is pre-purchase underwriting
+        for properties you&apos;re considering buying. Agents who help clients
+        with both ends of the workflow often use both.
       </>
     ),
     plainTextAnswer:
@@ -309,7 +454,10 @@ const RENTSPREE_FAQ: FaqItem[] = [
     question: "Does TrueCap screen tenants?",
     answer: (
       <>
-        No — we don&apos;t pull credit, criminal, or eviction reports. That&apos;s FCRA-regulated and outside our scope. For tenant screening, RentSpree, TurboTenant, Avail, RentRedi, or TransUnion direct are the right tools.
+        No — we don&apos;t pull credit, criminal, or eviction reports.
+        That&apos;s FCRA-regulated and outside our scope. For tenant screening,
+        RentSpree, TurboTenant, Avail, RentRedi, or TransUnion direct are the
+        right tools.
       </>
     ),
     plainTextAnswer:
@@ -319,7 +467,10 @@ const RENTSPREE_FAQ: FaqItem[] = [
     question: "Is RentSpree really free?",
     answer: (
       <>
-        It&apos;s free for the landlord/agent — the tenant typically pays $30-40 per screening package. RentSpree also offers premium tiers for agents that bundle additional tools (e-signature, listing syndication, etc.) starting around $20/month.
+        It&apos;s free for the landlord/agent — the tenant typically pays $30-40
+        per screening package. RentSpree also offers premium tiers for agents
+        that bundle additional tools (e-signature, listing syndication, etc.)
+        starting around $20/month.
       </>
     ),
     plainTextAnswer:
@@ -329,7 +480,11 @@ const RENTSPREE_FAQ: FaqItem[] = [
     question: "RentSpree vs TurboTenant — which one?",
     answer: (
       <>
-        TurboTenant bundles screening into a broader landlord stack (listings, applications, leases, rent collection). RentSpree is more focused on screening + applications and is popular with realtors managing rentals on behalf of clients. Both are reasonable for small landlords; agents lean RentSpree.
+        TurboTenant bundles screening into a broader landlord stack (listings,
+        applications, leases, rent collection). RentSpree is more focused on
+        screening + applications and is popular with realtors managing rentals
+        on behalf of clients. Both are reasonable for small landlords; agents
+        lean RentSpree.
       </>
     ),
     plainTextAnswer:
@@ -339,7 +494,10 @@ const RENTSPREE_FAQ: FaqItem[] = [
     question: "Can a realtor use both TrueCap + RentSpree?",
     answer: (
       <>
-        Yes — that&apos;s a common combination. Use TrueCap to underwrite + send a deal analysis to your buyer client at the showing; use RentSpree to screen tenants once they own the property and it&apos;s time to fill the unit. Both are agent-friendly.
+        Yes — that&apos;s a common combination. Use TrueCap to underwrite + send
+        a deal analysis to your buyer client at the showing; use RentSpree to
+        screen tenants once they own the property and it&apos;s time to fill the
+        unit. Both are agent-friendly.
       </>
     ),
     plainTextAnswer:
@@ -356,10 +514,14 @@ function WinnerBadge({
 }) {
   if (side === "row") return null;
   if (winner === "tie") {
-    return <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />;
+    return (
+      <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />
+    );
   }
   if (winner === side) {
-    return <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />;
+    return (
+      <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />
+    );
   }
   return <X className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/50" />;
 }

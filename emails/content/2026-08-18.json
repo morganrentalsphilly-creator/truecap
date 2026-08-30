@@ -1,61 +1,61 @@
 {
-  "subject": "Seller financing: how to get a 5% rate when banks want 8%",
-  "preheader": "When sellers say yes · the 4 deal-types where it works · why creative structures save deals",
+  "subject": "Seller financing: verify the note, liens, and exit terms",
+  "preheader": "A comparison framework for property-specific written proposals",
   "publishedAt": "2026-08-18",
   "weekLabel": "Topic: Seller financing",
   "marketSnapshot": {
-    "headline": "Seller financing — when creative structures save the deal",
-    "body": "Seller financing is when the seller acts as the lender, holding a note on the property. It's not rare; it's just under-asked-for. Works particularly well for long-time owners with significant equity who want to spread their capital-gains tax liability across multiple years, OR for properties that have sat on market and the seller is feeling holding costs. Done right, it can let you close deals you couldn't get conventional financing for, AND structure rate/terms better than market.",
+    "headline": "Creative terms still require conventional due diligence",
+    "body": "Seller financing can take many forms, and the legal, tax, title, licensing, disclosure, usury, servicing, lien-priority, default, and due-on-sale consequences vary. Treat every structure as a written proposal that requires review by the relevant lender, title/closing professionals, tax adviser, and local counsel.",
     "stats": [
       {
-        "label": "When sellers most likely to agree",
-        "value": "60+ DOM"
+        "label": "Rate and term",
+        "value": "Negotiated in writing"
       },
       {
-        "label": "Typical down payment",
-        "value": "5-20%"
+        "label": "Lien and title",
+        "value": "Verify before closing"
       },
       {
-        "label": "Typical seller rate vs market",
-        "value": "± 50-100bp"
+        "label": "Exit plan",
+        "value": "Scenario, not promise"
       }
     ]
   },
   "dealSpotter": [
     {
-      "address": "Example: long-time owner, seller carry at favorable rate",
-      "headlineNumber": "5% down · 6.0% seller rate · 7-yr balloon",
-      "verdict": "Strong",
-      "body": "Property purchased originally 18+ years ago, owner wants out but doesn't want the tax hit of an outright sale this year. Structured: 5% down, 95% seller-financed at 6.0%, 7-year balloon. Compared to conventional 25% down at 6.8%: you keep ~20% of capital deployable elsewhere AND save 80bp on rate. The balloon is the only risk — plan a refinance path in years 5-7 from day one."
+      "address": "Educational scenario: seller-held note",
+      "headlineNumber": "Model the actual payment and maturity schedule",
+      "verdict": "Verify",
+      "body": "Enter the proposed down payment, rate, amortization, maturity, balloon, fees, and payment schedule exactly as drafted. Review collateral, default, cure, transfer, prepayment, servicing, insurance, tax, and recording provisions with qualified professionals."
     },
     {
-      "address": "Example: combined first + seller-carry second",
-      "headlineNumber": "10% down · seller-carry second improves CoC",
-      "verdict": "Strong",
-      "body": "Conventional first mortgage covers 75% of purchase, seller carries a 15% second at interest-only for 5 years. You put down 10%. The second's payments don't include principal in years 1-5, which materially improves cash flow during the early hold. The seller benefits by spreading their tax exposure. Win-win structures like this are why being open to creativity expands your buy box."
+      "address": "Educational scenario: first lien plus seller-held junior lien",
+      "headlineNumber": "Confirm both creditors permit the structure",
+      "verdict": "Review",
+      "body": "Do not assume a second lien is permitted or that an interest-only period improves the complete risk picture. Obtain written approval where required and compare total debt service, lien priority, maturity, intercreditor issues, reserves, and refinance risk."
     },
     {
-      "address": "Example: 100% seller-financed deal · WALK",
-      "headlineNumber": "Why are they offering 100% financing? · usually red flag",
-      "verdict": "Skip",
-      "body": "Property listed by a wholesaler/operator offering 100% seller financing. The math looks amazing — zero capital deployed, immediate positive cash flow. The catch is usually one of: hidden tenant problems (non-paying tenant, eviction in progress), undisclosed deferred maintenance, or pricing 10-15% above market. Always ask 'why does the seller want this structure?' If you can't get a clear, plausible answer, the answer is bad. Walk."
+      "address": "Educational scenario: little or no cash down",
+      "headlineNumber": "Investigate price, condition, tenants, title, and terms",
+      "verdict": "Due diligence",
+      "body": "Unusual leverage is neither proof of a bargain nor proof of a hidden defect. Verify market evidence, property condition, leases, collections, title, liens, disclosures, and the seller's authority and motivation. Decide only after the written structure and property evidence are reviewed."
     }
   ],
   "blogFeature": {
-    "title": "Cap rate vs cash-on-cash vs DSCR — which metric actually matters?",
+    "title": "Cap rate vs cash-on-cash vs DSCR — keep the capital stack visible",
     "url": "https://usetruecap.com/blog/cap-rate-vs-cash-on-cash-vs-dscr",
-    "excerpt": "Seller-financed deals often optimize cash-on-cash dramatically by reducing capital deployed. The cap rate doesn't change, but the return on YOUR equity does."
+    "excerpt": "Seller terms can change modeled cash-on-cash return and DSCR without changing the property's unlevered NOI. Compare the full written capital stack, not one output."
   },
   "qa": {
-    "question": "When does it make sense to ASK a seller for financing vs default to conventional?",
-    "answer": "Four scenarios where asking is reasonable. (1) The property has been on market 60+ days — the seller is feeling carrying costs and is open to creative solutions. (2) Long-time owner (5+ years) with significant equity AND known tax exposure — seller financing spreads their capital gains across multiple years. (3) You have strong negotiating cards (cash buyer, fast close, no inspection contingency) you can trade for favorable terms. (4) You'd otherwise not qualify or want to preserve conventional credit slots for other deals. The wrong scenarios: seller has a mortgage they need to pay off at sale (most do — they can't seller-finance), property is brand-new on market (seller hasn't felt pain), or structure introduces a balloon without a credible refinance plan."
+    "question": "When should I ask about seller financing?",
+    "answer": "You can ask whether a seller will consider written terms, but do not infer willingness from days on market, ownership duration, or presumed tax motives. A workable structure depends on the seller, existing debt and due-on-sale provisions, title, applicable law, tax treatment, licensing, servicing, disclosures, and your ability to perform. Have the actual proposal reviewed before relying on modeled payments or a refinance exit."
   },
   "shipNote": {
-    "title": "Model seller terms in TrueCap",
+    "title": "Model proposed terms without treating them as approved",
     "items": [
-      "Free: enter custom interest rate + term — see how seller-financing terms change DSCR and cash flow",
-      "Pro: A/B mortgage compare — show the seller a side-by-side of conventional vs their offer",
-      "Bring real numbers to the negotiation →"
+      "Free: enter a custom rate and term for a preliminary cash-flow and model-DSCR screen",
+      "When your access includes comparison features, compare only written proposals",
+      "Verify documents, title, law, tax treatment, and financing outside TrueCap"
     ]
   }
 }

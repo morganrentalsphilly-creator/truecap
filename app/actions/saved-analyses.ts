@@ -138,6 +138,9 @@ export type SaveDealResult =
       id: string;
       mode: "inserted" | "updated";
       underwritingRevision: number;
+      /** True when a durable copy key returned the row inserted by an earlier
+       * delivery of the same operation. Additive for existing callers. */
+      idempotentReplay?: boolean;
     }
   | {
       ok: false;
@@ -407,6 +410,18 @@ function isMissingSavedAnalysisConcurrencyColumn(error: {
   );
 }
 
+function isMissingPublicShareCopyKeyColumn(error: {
+  code?: string;
+  message?: string;
+}): boolean {
+  return (
+    /public_share_copy_key/i.test(error.message ?? "") &&
+    (error.code === "42703" ||
+      error.code === "PGRST204" ||
+      /does not exist|schema cache/i.test(error.message ?? ""))
+  );
+}
+
 function buildEditFormSnapshotFromRow(
   row: Record<string, unknown>,
 ): Record<string, unknown> {
@@ -637,12 +652,12 @@ function buildTrustedResultSnapshot(
     : normalizeAnalyzerStrategyKey(snapshot.analyzerStrategyKey);
   const specialistAnalysis =
     analyzerStrategyKey && isSpecialistStrategyEnabled(analyzerStrategyKey)
-    ? readRecordedSpecialistAnalysisSnapshot({
-        resultSnapshot: snapshot,
-        strategyKey: analyzerStrategyKey,
-        coreMethodologyVersion: row.methodology_version,
-      })
-    : null;
+      ? readRecordedSpecialistAnalysisSnapshot({
+          resultSnapshot: snapshot,
+          strategyKey: analyzerStrategyKey,
+          coreMethodologyVersion: row.methodology_version,
+        })
+      : null;
   if (analyzerStrategyKey) snapshot.analyzerStrategyKey = analyzerStrategyKey;
   else delete snapshot.analyzerStrategyKey;
   if (specialistAnalysis) {
@@ -715,6 +730,9 @@ export async function saveDealAction(
     /** Revision returned when this exact saved underwriting was opened or
      * last updated. Required on every update; inserts omit it. */
     expectedUnderwritingRevision?: unknown;
+    /** Server-derived opaque digest for an /s copy. A unique database index
+     * turns the saved-row insert itself into the idempotency claim. */
+    publicShareCopyKey?: unknown;
   },
 ): Promise<SaveDealResult> {
   const supabase = await createServerSupabaseClient();
@@ -742,6 +760,62 @@ export async function saveDealAction(
       code: "ENTITLEMENT_SAVE",
       message: "Upgrade required to save deals",
     };
+  }
+
+  const copyKeyOptionProvided = Boolean(
+    options &&
+    Object.prototype.hasOwnProperty.call(options, "publicShareCopyKey"),
+  );
+  const publicShareCopyKey =
+    typeof options?.publicShareCopyKey === "string" &&
+    /^[a-f0-9]{64}$/.test(options.publicShareCopyKey)
+      ? options.publicShareCopyKey
+      : null;
+  if (copyKeyOptionProvided && !publicShareCopyKey) {
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "Invalid public-share copy identity",
+    };
+  }
+  if (publicShareCopyKey) {
+    const { data: priorCopy, error: priorCopyError } = await supabase
+      .from("saved_analyses")
+      .select("id, underwriting_revision")
+      .eq("user_id", user.id)
+      .eq("public_share_copy_key", publicShareCopyKey)
+      .is("deleted_at", null)
+      .maybeSingle();
+    if (priorCopyError) {
+      if (isMissingPublicShareCopyKeyColumn(priorCopyError)) {
+        return {
+          ok: false,
+          code: "MIGRATION_PENDING",
+          message:
+            "Copying a shared analysis is paused until the copy-idempotency migration is applied.",
+        };
+      }
+      return toServerErrorResult(priorCopyError, "saved-analyses");
+    }
+    if (priorCopy) {
+      const revision = parseSavedAnalysisRevision(
+        (priorCopy as Record<string, unknown>).underwriting_revision,
+      );
+      if (revision === null) {
+        return {
+          ok: false,
+          code: "SERVER_ERROR",
+          message: "The copied underwriting revision could not be verified.",
+        };
+      }
+      return {
+        ok: true,
+        id: String(priorCopy.id),
+        mode: "inserted",
+        underwritingRevision: revision,
+        idempotentReplay: true,
+      };
+    }
   }
 
   const values = parsed.data;
@@ -829,20 +903,14 @@ export async function saveDealAction(
   }
   const decisionBasisOptionProvided = Boolean(
     options &&
-      Object.prototype.hasOwnProperty.call(
-        options,
-        "offerCeilingDecisionBasis",
-      ),
+    Object.prototype.hasOwnProperty.call(options, "offerCeilingDecisionBasis"),
   );
   let offerCeilingDecisionBasis = maxOfferTarget
-    ? normalizeOfferCeilingDecisionBasis(
-        options?.offerCeilingDecisionBasis,
-        {
-          target: maxOfferTarget,
-          ...(maxOfferTargetSource ? { source: maxOfferTargetSource } : {}),
-          strategyKey: analyzerStrategyKey,
-        },
-      )
+    ? normalizeOfferCeilingDecisionBasis(options?.offerCeilingDecisionBasis, {
+        target: maxOfferTarget,
+        ...(maxOfferTargetSource ? { source: maxOfferTargetSource } : {}),
+        strategyKey: analyzerStrategyKey,
+      })
     : null;
   if (
     decisionBasisOptionProvided &&
@@ -852,10 +920,15 @@ export async function saveDealAction(
     return {
       ok: false,
       code: "VALIDATION_ERROR",
-      message: "The Offer Ceiling criteria identity no longer matches this analysis",
+      message:
+        "The Offer Ceiling criteria identity no longer matches this analysis",
     };
   }
-  if (maxOfferTarget && maxOfferTargetSource === "buy-box" && !offerCeilingDecisionBasis) {
+  if (
+    maxOfferTarget &&
+    maxOfferTargetSource === "buy-box" &&
+    !offerCeilingDecisionBasis
+  ) {
     // Legacy callers knew only the number and an anonymous source label. Keep
     // the number but never attribute it to whichever live Buy Box exists now.
     maxOfferTargetSource = "selected-targets";
@@ -1535,8 +1608,7 @@ export async function saveDealAction(
         return {
           ok: false,
           code: "DEAL_DELETED",
-          message:
-            "This saved deal was deleted while you were saving.",
+          message: "This saved deal was deleted while you were saving.",
         };
       }
       if (isSavedDealArchived(current as Record<string, unknown>)) {
@@ -1698,11 +1770,47 @@ export async function saveDealAction(
       title: insertTitle,
       underwriting_revision: INITIAL_SAVED_ANALYSIS_REVISION,
       notes_revision: INITIAL_SAVED_ANALYSIS_REVISION,
+      ...(publicShareCopyKey
+        ? { public_share_copy_key: publicShareCopyKey }
+        : {}),
     })
     .select("id, underwriting_revision")
     .single();
 
   if (error) {
+    if (publicShareCopyKey && error.code === "23505") {
+      // A concurrent delivery won the unique insert. Return its recipient-owned
+      // row instead of creating a second scenario or reporting a false failure.
+      const { data: priorCopy, error: priorCopyError } = await supabase
+        .from("saved_analyses")
+        .select("id, underwriting_revision")
+        .eq("user_id", user.id)
+        .eq("public_share_copy_key", publicShareCopyKey)
+        .is("deleted_at", null)
+        .maybeSingle();
+      if (!priorCopyError && priorCopy) {
+        const revision = parseSavedAnalysisRevision(
+          (priorCopy as Record<string, unknown>).underwriting_revision,
+        );
+        if (revision !== null) {
+          return {
+            ok: true,
+            id: String(priorCopy.id),
+            mode: "inserted",
+            underwritingRevision: revision,
+            idempotentReplay: true,
+          };
+        }
+      }
+    }
+    if (isMissingPublicShareCopyKeyColumn(error)) {
+      return {
+        ok: false,
+        code: "MIGRATION_PENDING",
+        message:
+          "Copying a shared analysis is paused until the copy-idempotency migration is applied.",
+      };
+    }
     if (isMissingSavedAnalysisConcurrencyColumn(error)) {
       return {
         ok: false,
@@ -1779,10 +1887,7 @@ export async function getSavedDealForEditingAction(
     };
   }
 
-  if (
-    options?.allowArchivedSource !== true &&
-    isSavedDealArchived(data)
-  ) {
+  if (options?.allowArchivedSource !== true && isSavedDealArchived(data)) {
     return {
       ok: false,
       code: "DEAL_ARCHIVED",
@@ -2074,11 +2179,11 @@ export async function getSavedAnalysisPdfExportAction(
     );
     canRegeneratePdf = Boolean(
       evaluationValues &&
-        (await activeMeteredEvaluationDealGrantsAccess(
-          supabase,
-          user.id,
-          evaluationValues,
-        )),
+      (await activeMeteredEvaluationDealGrantsAccess(
+        supabase,
+        user.id,
+        evaluationValues,
+      )),
     );
   }
   const cachedPdfUrl = dbString(row.pdf_url);
@@ -2599,7 +2704,8 @@ async function persistSavedDealStageWithHistory(input: {
       return {
         ok: false,
         code: "MIGRATION_PENDING",
-        message: "Deal history is not available until the latest schema update is applied.",
+        message:
+          "Deal history is not available until the latest schema update is applied.",
       };
     }
     if (error.code === "P0002") {

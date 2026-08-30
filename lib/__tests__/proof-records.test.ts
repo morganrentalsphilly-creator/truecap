@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { isPublicationReady, type PublicationApproval, type ProofVerification } from "@/lib/proof-records";
+import {
+  isPublicationReady,
+  type PublicationApproval,
+  type ProofVerification,
+} from "@/lib/proof-records";
 
 const verified: ProofVerification = {
   status: "verified",
@@ -24,7 +28,7 @@ describe("customer-proof publication gate", () => {
       isPublicationReady({
         verification: { status: "unverified", evidenceRef: "crm:draft" },
         approval: approved,
-      })
+      }),
     ).toBe(false);
   });
 
@@ -33,7 +37,22 @@ describe("customer-proof publication gate", () => {
       isPublicationReady({
         verification: verified,
         approval: { ...approved, publicDisplay: false },
-      })
+      }),
+    ).toBe(false);
+  });
+
+  it("requires a timestamped approval covering quote and attribution", () => {
+    expect(
+      isPublicationReady({
+        verification: verified,
+        approval: { ...approved, approvedAt: undefined },
+      }),
+    ).toBe(false);
+    expect(
+      isPublicationReady({
+        verification: verified,
+        approval: { ...approved, scope: ["quote"] },
+      }),
     ).toBe(false);
   });
 
@@ -43,5 +62,15 @@ describe("customer-proof publication gate", () => {
     expect(isPublicationReady(record, "homepage")).toBe(true);
     expect(isPublicationReady(record, "caseStudy")).toBe(true);
     expect(isPublicationReady(record, "ads")).toBe(false);
+  });
+
+  it("rejects a previously approved quote after permission is withdrawn", () => {
+    expect(
+      isPublicationReady({
+        verification: verified,
+        approval: approved,
+        withdrawnAt: "2026-08-29",
+      }),
+    ).toBe(false);
   });
 });

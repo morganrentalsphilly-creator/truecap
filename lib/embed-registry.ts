@@ -55,7 +55,7 @@ export type EmbedEntry = {
   shortTitle: string;
   description: string;
   /** The full /tools page URL for the "open in TrueCap" attribution link. */
-  toolUrl: string;
+  toolUrl: `/tools/${EmbedSlug}`;
   /** Lazily-loaded widget component. */
   Widget: ComponentType<unknown>;
   /** Estimated default iframe height. Embedded page also sends real
@@ -66,16 +66,19 @@ export type EmbedEntry = {
 
 /** The only thing that is unique to embeds: the widget loader + the
  *  initial iframe height. Title/description/etc. come from the registry. */
-type EmbedWidgetSpec = { Widget: ComponentType<unknown>; defaultHeight: number };
+type EmbedWidgetSpec = {
+  Widget: ComponentType<unknown>;
+  defaultHeight: number;
+};
 
 const EMBED_WIDGETS: Record<EmbedSlug, EmbedWidgetSpec> = {
   "rental-cash-flow-calculator": {
     Widget: dynamic(
       () =>
         import("@/components/tools/rental-cash-flow-calculator-widget").then(
-          (m) => m.RentalCashFlowCalculatorWidget
+          (m) => m.RentalCashFlowCalculatorWidget,
         ),
-      { loading: EmbedLoading }
+      { loading: EmbedLoading },
     ),
     defaultHeight: 880,
   },
@@ -83,9 +86,9 @@ const EMBED_WIDGETS: Record<EmbedSlug, EmbedWidgetSpec> = {
     Widget: dynamic(
       () =>
         import("@/components/tools/cap-rate-calculator-widget").then(
-          (m) => m.CapRateCalculatorWidget
+          (m) => m.CapRateCalculatorWidget,
         ),
-      { loading: EmbedLoading }
+      { loading: EmbedLoading },
     ),
     defaultHeight: 680,
   },
@@ -93,9 +96,9 @@ const EMBED_WIDGETS: Record<EmbedSlug, EmbedWidgetSpec> = {
     Widget: dynamic(
       () =>
         import("@/components/tools/coc-calculator-widget").then(
-          (m) => m.CocCalculatorWidget
+          (m) => m.CocCalculatorWidget,
         ),
-      { loading: EmbedLoading }
+      { loading: EmbedLoading },
     ),
     defaultHeight: 760,
   },
@@ -103,9 +106,9 @@ const EMBED_WIDGETS: Record<EmbedSlug, EmbedWidgetSpec> = {
     Widget: dynamic(
       () =>
         import("@/components/tools/dscr-calculator-widget").then(
-          (m) => m.DscrCalculatorWidget
+          (m) => m.DscrCalculatorWidget,
         ),
-      { loading: EmbedLoading }
+      { loading: EmbedLoading },
     ),
     defaultHeight: 700,
   },
@@ -113,9 +116,9 @@ const EMBED_WIDGETS: Record<EmbedSlug, EmbedWidgetSpec> = {
     Widget: dynamic(
       () =>
         import("@/components/tools/noi-calculator-widget").then(
-          (m) => m.NoiCalculatorWidget
+          (m) => m.NoiCalculatorWidget,
         ),
-      { loading: EmbedLoading }
+      { loading: EmbedLoading },
     ),
     defaultHeight: 820,
   },
@@ -123,9 +126,9 @@ const EMBED_WIDGETS: Record<EmbedSlug, EmbedWidgetSpec> = {
     Widget: dynamic(
       () =>
         import("@/components/tools/mortgage-payment-widget").then(
-          (m) => m.MortgagePaymentWidget
+          (m) => m.MortgagePaymentWidget,
         ),
-      { loading: EmbedLoading }
+      { loading: EmbedLoading },
     ),
     defaultHeight: 700,
   },
@@ -133,9 +136,9 @@ const EMBED_WIDGETS: Record<EmbedSlug, EmbedWidgetSpec> = {
     Widget: dynamic(
       () =>
         import("@/components/tools/grm-calculator-widget").then(
-          (m) => m.GrmCalculatorWidget
+          (m) => m.GrmCalculatorWidget,
         ),
-      { loading: EmbedLoading }
+      { loading: EmbedLoading },
     ),
     defaultHeight: 560,
   },
@@ -143,9 +146,9 @@ const EMBED_WIDGETS: Record<EmbedSlug, EmbedWidgetSpec> = {
     Widget: dynamic(
       () =>
         import("@/components/tools/one-percent-rule-widget").then(
-          (m) => m.OnePercentRuleWidget
+          (m) => m.OnePercentRuleWidget,
         ),
-      { loading: EmbedLoading }
+      { loading: EmbedLoading },
     ),
     defaultHeight: 480,
   },
@@ -153,9 +156,9 @@ const EMBED_WIDGETS: Record<EmbedSlug, EmbedWidgetSpec> = {
     Widget: dynamic(
       () =>
         import("@/components/tools/brrrr-calculator-widget").then(
-          (m) => m.BrrrrCalculatorWidget
+          (m) => m.BrrrrCalculatorWidget,
         ),
-      { loading: EmbedLoading }
+      { loading: EmbedLoading },
     ),
     defaultHeight: 880,
   },
@@ -163,9 +166,9 @@ const EMBED_WIDGETS: Record<EmbedSlug, EmbedWidgetSpec> = {
     Widget: dynamic(
       () =>
         import("@/components/tools/arv-calculator-widget").then(
-          (m) => m.ArvCalculatorWidget
+          (m) => m.ArvCalculatorWidget,
         ),
-      { loading: EmbedLoading }
+      { loading: EmbedLoading },
     ),
     defaultHeight: 940,
   },
@@ -173,9 +176,9 @@ const EMBED_WIDGETS: Record<EmbedSlug, EmbedWidgetSpec> = {
     Widget: dynamic(
       () =>
         import("@/components/tools/break-even-calculator-widget").then(
-          (m) => m.BreakEvenCalculatorWidget
+          (m) => m.BreakEvenCalculatorWidget,
         ),
-      { loading: EmbedLoading }
+      { loading: EmbedLoading },
     ),
     defaultHeight: 640,
   },
@@ -183,9 +186,9 @@ const EMBED_WIDGETS: Record<EmbedSlug, EmbedWidgetSpec> = {
     Widget: dynamic(
       () =>
         import("@/components/tools/roi-calculator-widget").then(
-          (m) => m.RoiCalculatorWidget
+          (m) => m.RoiCalculatorWidget,
         ),
-      { loading: EmbedLoading }
+      { loading: EmbedLoading },
     ),
     defaultHeight: 760,
   },
@@ -193,9 +196,9 @@ const EMBED_WIDGETS: Record<EmbedSlug, EmbedWidgetSpec> = {
     Widget: dynamic(
       () =>
         import("@/components/tools/closing-cost-calculator-widget").then(
-          (m) => m.ClosingCostCalculatorWidget
+          (m) => m.ClosingCostCalculatorWidget,
         ),
-      { loading: EmbedLoading }
+      { loading: EmbedLoading },
     ),
     defaultHeight: 880,
   },
@@ -203,9 +206,9 @@ const EMBED_WIDGETS: Record<EmbedSlug, EmbedWidgetSpec> = {
     Widget: dynamic(
       () =>
         import("@/components/tools/vacancy-rate-calculator-widget").then(
-          (m) => m.VacancyRateCalculatorWidget
+          (m) => m.VacancyRateCalculatorWidget,
         ),
-      { loading: EmbedLoading }
+      { loading: EmbedLoading },
     ),
     defaultHeight: 700,
   },
@@ -213,9 +216,9 @@ const EMBED_WIDGETS: Record<EmbedSlug, EmbedWidgetSpec> = {
     Widget: dynamic(
       () =>
         import("@/components/tools/house-hacking-calculator-widget").then(
-          (m) => m.HouseHackingCalculatorWidget
+          (m) => m.HouseHackingCalculatorWidget,
         ),
-      { loading: EmbedLoading }
+      { loading: EmbedLoading },
     ),
     defaultHeight: 980,
   },
@@ -223,9 +226,9 @@ const EMBED_WIDGETS: Record<EmbedSlug, EmbedWidgetSpec> = {
     Widget: dynamic(
       () =>
         import("@/components/tools/seventy-percent-rule-widget").then(
-          (m) => m.SeventyPercentRuleWidget
+          (m) => m.SeventyPercentRuleWidget,
         ),
-      { loading: EmbedLoading }
+      { loading: EmbedLoading },
     ),
     defaultHeight: 820,
   },
@@ -233,9 +236,9 @@ const EMBED_WIDGETS: Record<EmbedSlug, EmbedWidgetSpec> = {
     Widget: dynamic(
       () =>
         import("@/components/tools/fifty-percent-rule-widget").then(
-          (m) => m.FiftyPercentRuleWidget
+          (m) => m.FiftyPercentRuleWidget,
         ),
-      { loading: EmbedLoading }
+      { loading: EmbedLoading },
     ),
     defaultHeight: 760,
   },
@@ -243,9 +246,9 @@ const EMBED_WIDGETS: Record<EmbedSlug, EmbedWidgetSpec> = {
     Widget: dynamic(
       () =>
         import("@/components/tools/two-percent-rule-widget").then(
-          (m) => m.TwoPercentRuleWidget
+          (m) => m.TwoPercentRuleWidget,
         ),
-      { loading: EmbedLoading }
+      { loading: EmbedLoading },
     ),
     defaultHeight: 520,
   },

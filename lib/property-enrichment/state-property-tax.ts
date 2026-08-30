@@ -4,8 +4,10 @@
  * accurate; effective rate at the parcel level varies by county, school
  * district, and assessment ratio.
  *
- * Used to pre-fill the Property Tax % field on a fresh analysis. Always
- * editable by the user.
+ * Retained for contextual state and market education pages. Released
+ * underwriting does not import this table or use it to populate a property;
+ * the analyzer requires a manual local tax input and discloses its generic
+ * formula fallback when that input is blank.
  */
 
 export const STATE_EFFECTIVE_PROPERTY_TAX_PCT: Record<string, number> = {
@@ -41,14 +43,14 @@ export const STATE_EFFECTIVE_PROPERTY_TAX_PCT: Record<string, number> = {
   NH: 1.93,
   NJ: 2.23,
   NM: 0.67,
-  NY: 1.40,
+  NY: 1.4,
   NC: 0.82,
   ND: 0.98,
   OH: 1.59,
   OK: 0.89,
   OR: 0.93,
   PA: 1.49,
-  RI: 1.40,
+  RI: 1.4,
   SC: 0.57,
   SD: 1.17,
   TN: 0.67,

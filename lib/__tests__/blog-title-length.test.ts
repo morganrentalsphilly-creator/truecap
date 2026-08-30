@@ -33,6 +33,22 @@ const MAX_TITLE_CONST_CHARS = MAX_SERP_TITLE_CHARS - TEMPLATE_SUFFIX.length;
 const PENDING_OTHER_LANE = new Set<string>([]);
 
 const blogDir = fileURLToPath(new URL("../../app/blog", import.meta.url));
+const sourceFirstArticle = readFileSync(
+  fileURLToPath(
+    new URL(
+      "../../components/marketing/source-first-article.tsx",
+      import.meta.url,
+    ),
+  ),
+  "utf8",
+);
+
+function articleStringField(source: string, field: string): string | null {
+  const articleBody = source.match(
+    /const ARTICLE\s*=\s*\{([\s\S]*?)\}\s*as const/,
+  )?.[1];
+  return articleBody?.match(new RegExp(`${field}:\\s*"([^"]+)"`))?.[1] ?? null;
+}
 
 function postSlugs(): string[] {
   return readdirSync(blogDir, { withFileTypes: true })
@@ -54,10 +70,26 @@ function postSlugs(): string[] {
  */
 function metadataTitle(source: string, slug: string): string {
   const metadataStart = source.indexOf("export const metadata");
-  expect(metadataStart, `${slug}: page.tsx must export metadata`).toBeGreaterThan(-1);
+  expect(
+    metadataStart,
+    `${slug}: page.tsx must export metadata`,
+  ).toBeGreaterThan(-1);
   const afterMetadata = source.slice(metadataStart);
 
-  const titleMatch = afterMetadata.match(/title:\s*("(?:[^"\\]|\\.)*"|[A-Z][A-Z0-9_]*)/);
+  if (/buildSourceFirstArticleMetadata\(ARTICLE\)/.test(afterMetadata)) {
+    const title =
+      articleStringField(source, "seoTitle") ??
+      articleStringField(source, "title");
+    expect(
+      title,
+      `${slug}: source-first metadata needs a plain ARTICLE title or seoTitle`,
+    ).not.toBeNull();
+    return title!;
+  }
+
+  const titleMatch = afterMetadata.match(
+    /title:\s*("(?:[^"\\]|\\.)*"|[A-Z][A-Z0-9_]*)/,
+  );
   expect(titleMatch, `${slug}: metadata must set a title`).not.toBeNull();
   const ref = titleMatch![1];
 
@@ -86,7 +118,10 @@ describe("blog post SERP titles fit the ~60-char SERP window", () => {
     (slug) => {
       const source = readFileSync(path.join(blogDir, slug, "page.tsx"), "utf8");
       const title = metadataTitle(source, slug);
-      if (PENDING_OTHER_LANE.has(slug) && title.length > MAX_TITLE_CONST_CHARS) {
+      if (
+        PENDING_OTHER_LANE.has(slug) &&
+        title.length > MAX_TITLE_CONST_CHARS
+      ) {
         return; // see PENDING_OTHER_LANE — another lane owns this file
       }
       const rendered = `${title}${TEMPLATE_SUFFIX}`;
@@ -96,23 +131,39 @@ describe("blog post SERP titles fit the ~60-char SERP window", () => {
           `shorten the SERP_TITLE const to ≤${MAX_TITLE_CONST_CHARS} chars ` +
           `(keep the editorial TITLE/H1 as-is)`,
       ).toBeLessThanOrEqual(MAX_TITLE_CONST_CHARS);
-      expect(title.trim().length, `${slug}: metadata title must not be empty`).toBeGreaterThan(0);
+      expect(
+        title.trim().length,
+        `${slug}: metadata title must not be empty`,
+      ).toBeGreaterThan(0);
     },
   );
 
-  it.each(slugs)("%s: og:title matches the SERP title when both are set", (slug) => {
-    const source = readFileSync(path.join(blogDir, slug, "page.tsx"), "utf8");
-    // Posts route og:title through the same const as metadata.title so the
-    // SERP and social card never drift; a post that reintroduces
-    // `openGraph: { title: TITLE… }` would re-overflow the window.
-    const ogTitle = source.match(/openGraph:\s*\{[^}]*?title:\s*([A-Z][A-Z0-9_]*)/);
-    if (ogTitle) {
-      const metaTitle = source
-        .slice(source.indexOf("export const metadata"))
-        .match(/title:\s*([A-Z][A-Z0-9_]*)/);
-      expect(ogTitle[1], `${slug}: og:title const should match metadata title const`).toBe(
-        metaTitle?.[1],
+  it.each(slugs)(
+    "%s: og:title matches the SERP title when both are set",
+    (slug) => {
+      const source = readFileSync(path.join(blogDir, slug, "page.tsx"), "utf8");
+      if (/buildSourceFirstArticleMetadata\(ARTICLE\)/.test(source)) {
+        expect(sourceFirstArticle).toContain("title: seoTitle");
+        expect(sourceFirstArticle).toContain(
+          "const seoTitle = article.seoTitle ?? article.title",
+        );
+        return;
+      }
+      // Posts route og:title through the same const as metadata.title so the
+      // SERP and social card never drift; a post that reintroduces
+      // `openGraph: { title: TITLE… }` would re-overflow the window.
+      const ogTitle = source.match(
+        /openGraph:\s*\{[^}]*?title:\s*([A-Z][A-Z0-9_]*)/,
       );
-    }
-  });
+      if (ogTitle) {
+        const metaTitle = source
+          .slice(source.indexOf("export const metadata"))
+          .match(/title:\s*([A-Z][A-Z0-9_]*)/);
+        expect(
+          ogTitle[1],
+          `${slug}: og:title const should match metadata title const`,
+        ).toBe(metaTitle?.[1]);
+      }
+    },
+  );
 });

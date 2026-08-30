@@ -495,9 +495,10 @@ export default function PitiExplainedPost() {
               >
                 TrueCap analyzer
               </Link>{" "}
-              does this automatically — it pulls a current rate, estimates taxes
-              and insurance from the address, layers in vacancy and reserves,
-              and returns cash flow, DSCR, and a selected-rule fit in one pass.
+              starts from a published rate benchmark and editable assumptions,
+              asks you to enter a local tax bill or reviewed rate, layers in
+              vacancy and reserves, and returns cash flow, DSCR, and a
+              selected-rule fit in one pass.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">

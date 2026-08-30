@@ -9,6 +9,7 @@ import { hasPaidPlanSubscription } from "@/lib/entitlements";
 import { getStripe } from "@/lib/stripe/client";
 import { withTrueCapCheckoutBranding } from "@/lib/stripe/checkout-branding";
 import {
+  getCheckoutPlanPriceId,
   getPrimaryPlanPriceId,
   isAgentProConfigured,
   isPaidPlanSlug,
@@ -39,7 +40,12 @@ import {
 } from "@/lib/stripe/subscription-checkout-intent";
 
 const checkoutSchema = z.object({
-  planSlug: z.enum(["pro_monthly", "pro_annual", "agent_pro_monthly", "agent_pro_annual"]),
+  planSlug: z.enum([
+    "pro_monthly",
+    "pro_annual",
+    "agent_pro_monthly",
+    "agent_pro_annual",
+  ]),
   // Optional campaign code from the URL (?coupon=…). Resolved SERVER-SIDE
   // against a whitelist → env coupon id, so a client can never inject an
   // arbitrary Stripe coupon into checkout.
@@ -47,7 +53,12 @@ const checkoutSchema = z.object({
 });
 
 const switchPlanSchema = z.object({
-  targetPlanSlug: z.enum(["pro_monthly", "pro_annual", "agent_pro_monthly", "agent_pro_annual"]),
+  targetPlanSlug: z.enum([
+    "pro_monthly",
+    "pro_annual",
+    "agent_pro_monthly",
+    "agent_pro_annual",
+  ]),
 });
 
 const checkoutReturnSchema = z
@@ -71,7 +82,10 @@ export type BillingActionResult =
     };
 
 function getSiteUrl(): string {
-  return (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+  return (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(
+    /\/$/,
+    "",
+  );
 }
 
 function buildSubscriptionCheckoutSessionParams(args: {
@@ -114,7 +128,9 @@ function buildSubscriptionCheckoutSessionParams(args: {
         user_id: intent.user_id,
         plan_slug: intent.plan_slug,
       },
-      ...(intent.trial_days > 0 ? { trial_period_days: intent.trial_days } : {}),
+      ...(intent.trial_days > 0
+        ? { trial_period_days: intent.trial_days }
+        : {}),
     },
   });
 }
@@ -131,20 +147,27 @@ function isDefinitiveStripeSessionRejection(error: unknown): boolean {
   );
 }
 
-function getPlanPriceId(planSlug: PaidPlanSlug, dbPriceId?: string | null): string | null {
-  // Checkout sells the PRIMARY (first) configured price; the env may list
-  // additional grandfathered prices after it (see lib/stripe/plan-prices),
-  // which are for webhook resolution only, never for new checkouts.
+function getCheckoutReturnPlanPriceId(
+  planSlug: PaidPlanSlug,
+  dbPriceId?: string | null,
+): string | null {
+  // Return verification may outlive a configuration rotation. Prefer the
+  // current deployment's primary Price, then use the persisted catalog value
+  // only to verify a Session that already exists. New checkout never uses the
+  // database fallback; it must be explicitly enabled for the exact cadence.
   return getPrimaryPlanPriceId(planSlug) ?? dbPriceId ?? null;
 }
 
-function getDisplayName(profile: {
-  display_name?: string | null;
-  first_name?: string | null;
-  last_name?: string | null;
-} | null): string | undefined {
+function getDisplayName(
+  profile: {
+    display_name?: string | null;
+    first_name?: string | null;
+    last_name?: string | null;
+  } | null,
+): string | undefined {
   const profileName =
-    profile?.display_name?.trim() || `${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`.trim();
+    profile?.display_name?.trim() ||
+    `${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`.trim();
   return profileName || undefined;
 }
 
@@ -164,7 +187,9 @@ async function getOrCreateStripeCustomer(args: {
     // a replacement customer instead. The cross-user binding check
     // below remains a hard failure — that one is a safety property.
     try {
-      const existingCustomer = await stripe.customers.retrieve(args.existingCustomerId);
+      const existingCustomer = await stripe.customers.retrieve(
+        args.existingCustomerId,
+      );
       if (!("deleted" in existingCustomer && existingCustomer.deleted)) {
         const metadataUserId = existingCustomer.metadata?.user_id;
         if (metadataUserId && metadataUserId !== args.userId) {
@@ -172,22 +197,28 @@ async function getOrCreateStripeCustomer(args: {
         }
         if (!metadataUserId) {
           await stripe.customers.update(existingCustomer.id, {
-            metadata: { ...(existingCustomer.metadata ?? {}), user_id: args.userId },
+            metadata: {
+              ...(existingCustomer.metadata ?? {}),
+              user_id: args.userId,
+            },
           });
         }
         return existingCustomer.id;
       }
       console.warn(
-        `[billing] stored Stripe customer ${args.existingCustomerId} was deleted — creating a replacement`
+        "[billing] stored Stripe customer was deleted — creating a replacement",
       );
     } catch (err) {
-      if (err instanceof Error && err.message.includes("belongs to a different user")) {
+      if (
+        err instanceof Error &&
+        err.message.includes("belongs to a different user")
+      ) {
         throw err;
       }
       const stripeCode = (err as { code?: string } | null)?.code;
       if (stripeCode !== "resource_missing") throw err;
       console.warn(
-        `[billing] stored Stripe customer ${args.existingCustomerId} missing in Stripe — creating a replacement`
+        "[billing] stored Stripe customer is missing in Stripe — creating a replacement",
       );
     }
   }
@@ -207,7 +238,7 @@ async function getOrCreateStripeCustomer(args: {
       // durable intent key makes a retry return that same Customer instead of
       // minting a second, orphaned billing identity.
       idempotencyKey: `truecap-subscription-customer:${args.intentId}`,
-    }
+    },
   );
 
   // Enrichment cannot duplicate a Customer, so it does not share the durable
@@ -230,13 +261,23 @@ async function getOrCreateStripeCustomer(args: {
   return customer.id;
 }
 
-export async function createCheckoutSessionAction(input: unknown): Promise<BillingActionResult> {
+export async function createCheckoutSessionAction(
+  input: unknown,
+): Promise<BillingActionResult> {
   const parsed = checkoutSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, code: "PLAN_NOT_FOUND", message: "Invalid billing plan." };
+    return {
+      ok: false,
+      code: "PLAN_NOT_FOUND",
+      message: "Invalid billing plan.",
+    };
   }
   if (parsed.data.planSlug.startsWith("agent_pro") && !isAgentProConfigured()) {
-    return { ok: false, code: "PLAN_NOT_FOUND", message: "Selected plan is not available." };
+    return {
+      ok: false,
+      code: "PLAN_NOT_FOUND",
+      message: "Selected plan is not available.",
+    };
   }
 
   const supabase = await createServerSupabaseClient();
@@ -245,7 +286,11 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in to subscribe." };
+    return {
+      ok: false,
+      code: "SIGN_IN_REQUIRED",
+      message: "Please sign in to subscribe.",
+    };
   }
 
   // GUARD: never start a NEW subscription checkout for a user who
@@ -253,13 +298,14 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
   // subscription and double-bill them. Plan changes (monthly ↔ annual)
   // go through the billing portal, which prorates correctly. Callers
   // route ALREADY_SUBSCRIBED to the portal.
-  const { data: existingSubscription, error: existingSubscriptionError } = await supabase
-    .from("subscriptions")
-    .select("id")
-    .eq("user_id", user.id)
-    .in("status", ["active", "trialing", "past_due", "unpaid", "paused"])
-    .limit(1)
-    .maybeSingle();
+  const { data: existingSubscription, error: existingSubscriptionError } =
+    await supabase
+      .from("subscriptions")
+      .select("id")
+      .eq("user_id", user.id)
+      .in("status", ["active", "trialing", "past_due", "unpaid", "paused"])
+      .limit(1)
+      .maybeSingle();
   if (existingSubscriptionError) {
     Sentry.captureException(existingSubscriptionError, {
       tags: { feature: "billing-checkout", guard: "local-subscription" },
@@ -268,7 +314,8 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
     return {
       ok: false,
       code: "SERVER_ERROR",
-      message: "We couldn't safely verify your billing status. Please try again shortly.",
+      message:
+        "We couldn't safely verify your billing status. Please try again shortly.",
     };
   }
   if (existingSubscription) {
@@ -280,27 +327,62 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
     };
   }
 
-  const [{ data: profile }, { data: plan, error: planError }] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("stripe_customer_id, display_name, first_name, last_name")
-      .eq("id", user.id)
-      .maybeSingle(),
-    supabase
-      .from("plans")
-      .select("id, slug, stripe_price_id")
-      .eq("slug", parsed.data.planSlug)
-      .eq("is_active", true)
-      .maybeSingle(),
-  ]);
+  const [{ data: profile }, { data: plan, error: planError }] =
+    await Promise.all([
+      supabase
+        .from("profiles")
+        .select("stripe_customer_id, display_name, first_name, last_name")
+        .eq("id", user.id)
+        .maybeSingle(),
+      supabase
+        .from("plans")
+        .select("slug")
+        .eq("slug", parsed.data.planSlug)
+        .eq("is_active", true)
+        .maybeSingle(),
+    ]);
 
   if (planError) {
     console.error("[billing] Failed to load plan:", planError);
-    return { ok: false, code: "SERVER_ERROR", message: "Unable to start checkout. Please try again." };
+    return {
+      ok: false,
+      code: "SERVER_ERROR",
+      message: "Unable to start checkout. Please try again.",
+    };
   }
 
   if (!plan) {
-    return { ok: false, code: "PLAN_NOT_FOUND", message: "Selected plan is not available." };
+    return {
+      ok: false,
+      code: "PLAN_NOT_FOUND",
+      message: "Selected plan is not available.",
+    };
+  }
+
+  // A new checkout is sellable only when this exact cadence is explicitly
+  // configured on the deployment. `plans.stripe_price_id` remains useful for
+  // webhook/return recovery, but must never silently re-enable sales.
+  const priceId = getCheckoutPlanPriceId(parsed.data.planSlug);
+  if (!priceId) {
+    console.error(
+      `[billing] Missing Stripe price id for plan ${parsed.data.planSlug}`,
+    );
+    // A missing price id blocks EVERY new checkout for this plan — that's
+    // revenue = 0 with only a generic toast on the user side. Page on it.
+    Sentry.captureMessage(
+      `billing: missing Stripe price id for plan ${parsed.data.planSlug}`,
+      {
+        level: "error",
+        tags: { feature: "billing-checkout" },
+        extra: { planSlug: parsed.data.planSlug },
+      },
+    );
+    return {
+      ok: false,
+      code: "MISSING_PRICE",
+      message:
+        "This plan is temporarily unavailable. Please try again shortly.",
+    };
   }
 
   // STRIPE-SIDE double-billing backstop: the local-row guard above trusts
@@ -319,7 +401,9 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
         limit: 10,
       });
       const hasLiveStripeSubscription = stripeSubs.data.some((sub) =>
-        ["active", "trialing", "past_due", "unpaid", "paused"].includes(sub.status)
+        ["active", "trialing", "past_due", "unpaid", "paused"].includes(
+          sub.status,
+        ),
       );
       if (hasLiveStripeSubscription) {
         return {
@@ -340,26 +424,10 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
       return {
         ok: false,
         code: "SERVER_ERROR",
-        message: "We couldn't safely verify your Stripe subscriptions. Please try again shortly.",
+        message:
+          "We couldn't safely verify your Stripe subscriptions. Please try again shortly.",
       };
     }
-  }
-
-  const priceId = getPlanPriceId(parsed.data.planSlug, plan.stripe_price_id);
-  if (!priceId) {
-    console.error(`[billing] Missing Stripe price id for plan ${parsed.data.planSlug}`);
-    // A missing price id blocks EVERY new checkout for this plan — that's
-    // revenue = 0 with only a generic toast on the user side. Page on it.
-    Sentry.captureMessage(`billing: missing Stripe price id for plan ${parsed.data.planSlug}`, {
-      level: "error",
-      tags: { feature: "billing-checkout" },
-      extra: { planSlug: parsed.data.planSlug },
-    });
-    return {
-      ok: false,
-      code: "MISSING_PRICE",
-      message: "This plan is temporarily unavailable. Please try again shortly.",
-    };
   }
 
   try {
@@ -371,12 +439,13 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
           level: "error",
           tags: { feature: "billing-checkout", guard: "catalog-match" },
           extra: { planSlug: parsed.data.planSlug },
-        }
+        },
       );
       return {
         ok: false,
         code: "MISSING_PRICE",
-        message: "This plan is temporarily unavailable while billing configuration is verified.",
+        message:
+          "This plan is temporarily unavailable while billing configuration is verified.",
       };
     }
   } catch (error) {
@@ -387,7 +456,8 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
     return {
       ok: false,
       code: "MISSING_PRICE",
-      message: "This plan is temporarily unavailable while billing configuration is verified.",
+      message:
+        "This plan is temporarily unavailable while billing configuration is verified.",
     };
   }
 
@@ -403,12 +473,13 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
       {
         level: "error",
         tags: { feature: "billing-offer-coupon" },
-      }
+      },
     );
     return {
       ok: false,
       code: "SERVER_ERROR",
-      message: "This promotional offer is temporarily unavailable. Please try again later.",
+      message:
+        "This promotional offer is temporarily unavailable. Please try again later.",
     };
   }
 
@@ -429,7 +500,9 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
     // agent_pro_annual must be created in Stripe at its final (already
     // discounted) amount — stacking this coupon on it would double-discount.
     const annualCoupon =
-      parsed.data.planSlug === "pro_annual" ? process.env.STRIPE_ANNUAL_DISCOUNT_COUPON_ID : undefined;
+      parsed.data.planSlug === "pro_annual"
+        ? process.env.STRIPE_ANNUAL_DISCOUNT_COUPON_ID
+        : undefined;
     // Pack credit (founder-approved 2026-08-17): a Deal Decision Pack bought
     // within its 30-day window is credited toward the first Pro invoice. It is
     // money the customer already paid us — NOT a discount offer — so it
@@ -444,13 +517,27 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
     if (packCreditCouponId && !parsed.data.planSlug.startsWith("agent_pro")) {
       try {
         const coupon = await stripe.coupons.retrieve(packCreditCouponId);
-        if ("deleted" in coupon || !stripePackCreditCouponMatchesCatalog(coupon)) {
-          Sentry.captureMessage("Pack credit coupon does not match the $9 launch contract", {
-            level: "error",
-            tags: { feature: "billing-checkout", mismatch: "pack-credit-coupon" },
-          });
+        if (
+          "deleted" in coupon ||
+          !stripePackCreditCouponMatchesCatalog(coupon)
+        ) {
+          Sentry.captureMessage(
+            "Pack credit coupon does not match the $9 launch contract",
+            {
+              level: "error",
+              tags: {
+                feature: "billing-checkout",
+                mismatch: "pack-credit-coupon",
+              },
+            },
+          );
         } else {
-          packCredit = await findEligiblePackCredit(admin, user.id, new Date(), stripe);
+          packCredit = await findEligiblePackCredit(
+            admin,
+            user.id,
+            new Date(),
+            stripe,
+          );
         }
       } catch (error) {
         Sentry.captureException(error, {
@@ -472,7 +559,10 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
       trialDays: 0,
       packCreditClaimId: packCredit?.claimId ?? null,
     };
-    let acquisition = await acquireSubscriptionCheckoutIntent(admin, acquireInput);
+    let acquisition = await acquireSubscriptionCheckoutIntent(
+      admin,
+      acquireInput,
+    );
     const requestedCheckoutConfiguration = {
       planSlug: acquireInput.planSlug,
       stripePriceId: acquireInput.stripePriceId,
@@ -491,10 +581,11 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
     // old Session and allow two parallel subscription checkouts.
     for (let attempt = 0; !acquisition.acquired && attempt < 3; attempt += 1) {
       let existingIntent = acquisition.intent;
-      const configurationMatches = subscriptionCheckoutIntentMatchesConfiguration(
-        existingIntent,
-        requestedCheckoutConfiguration
-      );
+      const configurationMatches =
+        subscriptionCheckoutIntentMatchesConfiguration(
+          existingIntent,
+          requestedCheckoutConfiguration,
+        );
       if (!configurationMatches && existingIntent.status === "creating") {
         if (!subscriptionCheckoutIntentLeaseIsStale(existingIntent)) {
           return {
@@ -506,7 +597,10 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
         }
 
         const reconciliationClaim =
-          await claimStaleSubscriptionCheckoutIntentForReplacement(admin, existingIntent);
+          await claimStaleSubscriptionCheckoutIntentForReplacement(
+            admin,
+            existingIntent,
+          );
         if (!reconciliationClaim.acquired) {
           acquisition = reconciliationClaim;
           continue;
@@ -529,7 +623,7 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
           existingIntent = await bindSubscriptionCheckoutCustomer(
             admin,
             existingIntent.id,
-            recoveredCustomerId
+            recoveredCustomerId,
           );
         }
 
@@ -544,7 +638,9 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
                 customerId: existingIntent.stripe_customer_id,
                 siteUrl,
               }),
-              { idempotencyKey: `truecap-subscription-checkout:${existingIntent.id}` }
+              {
+                idempotencyKey: `truecap-subscription-checkout:${existingIntent.id}`,
+              },
             );
           } catch (error) {
             if (!isDefinitiveStripeSessionRejection(error)) throw error;
@@ -554,14 +650,15 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
             // Any ambiguous Customer read remains fail-closed.
             try {
               const staleCustomer = await stripe.customers.retrieve(
-                existingIntent.stripe_customer_id
+                existingIntent.stripe_customer_id,
               );
               replacementStripeCustomerId =
                 "deleted" in staleCustomer && staleCustomer.deleted
                   ? null
                   : staleCustomer.id;
             } catch (customerError) {
-              if (!isDefinitiveStripeSessionRejection(customerError)) throw customerError;
+              if (!isDefinitiveStripeSessionRejection(customerError))
+                throw customerError;
               replacementStripeCustomerId = null;
             }
             // Stripe definitively rejected before creating a Session, so the
@@ -570,33 +667,51 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
           }
 
           if (staleSession?.status === "open") {
-            if (!isReusableSubscriptionCheckoutSession({
-              session: staleSession,
-              intent: existingIntent,
-            })) {
-              throw new Error("stale checkout-intent Session failed exact binding");
+            if (
+              !isReusableSubscriptionCheckoutSession({
+                session: staleSession,
+                intent: existingIntent,
+              })
+            ) {
+              throw new Error(
+                "stale checkout-intent Session failed exact binding",
+              );
             }
             try {
-              staleSession = await stripe.checkout.sessions.expire(staleSession.id);
+              staleSession = await stripe.checkout.sessions.expire(
+                staleSession.id,
+              );
             } catch (expireError) {
               // Completion may win the expire request. Retrieve Stripe truth;
               // any other error/status remains fail-closed.
-              const currentSession = await stripe.checkout.sessions.retrieve(staleSession.id);
+              const currentSession = await stripe.checkout.sessions.retrieve(
+                staleSession.id,
+              );
               if (currentSession.status === "open") throw expireError;
               staleSession = currentSession;
             }
           }
           if (staleSession?.status === "complete") {
-            await completeSubscriptionCheckoutIntentFromWebhook(admin, staleSession);
+            await completeSubscriptionCheckoutIntentFromWebhook(
+              admin,
+              staleSession,
+            );
             return {
               ok: false,
               code: "ALREADY_SUBSCRIBED",
-              message: "This checkout is already complete. Your subscription is being activated.",
+              message:
+                "This checkout is already complete. Your subscription is being activated.",
             };
           }
           if (staleSession?.status === "expired") {
-            await expireSubscriptionCheckoutIntentFromWebhook(admin, staleSession);
-            acquisition = await acquireSubscriptionCheckoutIntent(admin, acquireInput);
+            await expireSubscriptionCheckoutIntentFromWebhook(
+              admin,
+              staleSession,
+            );
+            acquisition = await acquireSubscriptionCheckoutIntent(
+              admin,
+              acquireInput,
+            );
             continue;
           }
         }
@@ -623,43 +738,65 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
         return {
           ok: false,
           code: "CHECKOUT_IN_PROGRESS",
-          message: "Your secure checkout is already being prepared. Please try again in a moment.",
+          message:
+            "Your secure checkout is already being prepared. Please try again in a moment.",
         };
       }
       if (!existingIntent.stripe_checkout_session_id) {
-        throw new Error("open checkout-intent is missing its Stripe Session id");
+        throw new Error(
+          "open checkout-intent is missing its Stripe Session id",
+        );
       }
 
       const existingSession = await stripe.checkout.sessions.retrieve(
         existingIntent.stripe_checkout_session_id,
-        { expand: ["line_items.data.price", "discounts.coupon"] }
+        { expand: ["line_items.data.price", "discounts.coupon"] },
       );
-      if (isReusableSubscriptionCheckoutSession({ session: existingSession, intent: existingIntent })) {
+      if (
+        isReusableSubscriptionCheckoutSession({
+          session: existingSession,
+          intent: existingIntent,
+        })
+      ) {
         return { ok: true, url: existingSession.url! };
       }
       if (existingSession.status === "complete") {
-        await completeSubscriptionCheckoutIntentFromWebhook(admin, existingSession);
+        await completeSubscriptionCheckoutIntentFromWebhook(
+          admin,
+          existingSession,
+        );
         return {
           ok: false,
           code: "ALREADY_SUBSCRIBED",
-          message: "This checkout is already complete. Your subscription is being activated.",
+          message:
+            "This checkout is already complete. Your subscription is being activated.",
         };
       }
       if (existingSession.status === "expired") {
-        await expireSubscriptionCheckoutIntentFromWebhook(admin, existingSession);
-        acquisition = await acquireSubscriptionCheckoutIntent(admin, acquireInput);
+        await expireSubscriptionCheckoutIntentFromWebhook(
+          admin,
+          existingSession,
+        );
+        acquisition = await acquireSubscriptionCheckoutIntent(
+          admin,
+          acquireInput,
+        );
         continue;
       }
 
-      Sentry.captureMessage("billing: existing Checkout Session failed intent binding", {
-        level: "error",
-        tags: { feature: "billing-checkout", guard: "open-session-binding" },
-        extra: { intentId: existingIntent.id, stripeSessionId: existingSession.id },
-      });
+      Sentry.captureMessage(
+        "billing: existing Checkout Session failed intent binding",
+        {
+          level: "error",
+          tags: { feature: "billing-checkout", guard: "open-session-binding" },
+          extra: { intentId: existingIntent.id },
+        },
+      );
       return {
         ok: false,
         code: "SERVER_ERROR",
-        message: "We couldn't safely resume your existing checkout. Please contact support.",
+        message:
+          "We couldn't safely resume your existing checkout. Please contact support.",
       };
     }
 
@@ -667,12 +804,18 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
       return {
         ok: false,
         code: "CHECKOUT_IN_PROGRESS",
-        message: "Your secure checkout is already being prepared. Please try again in a moment.",
+        message:
+          "Your secure checkout is already being prepared. Please try again in a moment.",
       };
     }
 
     let intent: SubscriptionCheckoutIntent = acquisition.intent;
-    if (!subscriptionCheckoutIntentMatchesConfiguration(intent, requestedCheckoutConfiguration)) {
+    if (
+      !subscriptionCheckoutIntentMatchesConfiguration(
+        intent,
+        requestedCheckoutConfiguration,
+      )
+    ) {
       return {
         ok: false,
         code: "CHECKOUT_IN_PROGRESS",
@@ -685,16 +828,23 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
       checkoutProfileCustomerId &&
       intent.stripe_customer_id !== checkoutProfileCustomerId
     ) {
-      throw new Error("checkout-intent customer disagrees with the user profile");
+      throw new Error(
+        "checkout-intent customer disagrees with the user profile",
+      );
     }
     const customerId = await getOrCreateStripeCustomer({
       intentId: intent.id,
       userId: user.id,
       email: user.email ?? null,
       name: getDisplayName(profile),
-      existingCustomerId: intent.stripe_customer_id ?? checkoutProfileCustomerId,
+      existingCustomerId:
+        intent.stripe_customer_id ?? checkoutProfileCustomerId,
     });
-    intent = await bindSubscriptionCheckoutCustomer(admin, intent.id, customerId);
+    intent = await bindSubscriptionCheckoutCustomer(
+      admin,
+      intent.id,
+      customerId,
+    );
 
     // Recheck immediately before creating a Session. This closes the race
     // where a legacy/open Checkout completes after the earlier guard but
@@ -706,7 +856,9 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
     });
     if (
       stripeSubs.data.some((sub) =>
-        ["active", "trialing", "past_due", "unpaid", "paused"].includes(sub.status)
+        ["active", "trialing", "past_due", "unpaid", "paused"].includes(
+          sub.status,
+        ),
       )
     ) {
       await failSubscriptionCheckoutIntent(admin, intent.id);
@@ -733,46 +885,62 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
       expand: ["data.line_items.data.price", "data.discounts.coupon"],
     });
     for (const recentSession of recentSessions.data.filter(
-      (candidate) => candidate.mode === "subscription"
+      (candidate) => candidate.mode === "subscription",
     )) {
-      if (recentSession.status === "open" &&
+      if (
+        recentSession.status === "open" &&
         isReusableSubscriptionCheckoutSession({
           session: recentSession,
           intent,
         })
       ) {
-        intent = await markSubscriptionCheckoutIntentOpen(admin, intent.id, recentSession);
+        intent = await markSubscriptionCheckoutIntentOpen(
+          admin,
+          intent.id,
+          recentSession,
+        );
         return { ok: true, url: recentSession.url! };
       }
       if (recentSession.status === "complete") {
         if (recentSession.metadata?.checkout_intent_id === intent.id) {
-          await completeSubscriptionCheckoutIntentFromWebhook(admin, recentSession);
+          await completeSubscriptionCheckoutIntentFromWebhook(
+            admin,
+            recentSession,
+          );
         } else {
           await failSubscriptionCheckoutIntent(admin, intent.id);
         }
         return {
           ok: false,
           code: "ALREADY_SUBSCRIBED",
-          message: "A recent checkout is already complete. Your subscription is being activated.",
+          message:
+            "A recent checkout is already complete. Your subscription is being activated.",
         };
       }
       if (recentSession.status === "expired") {
         if (recentSession.metadata?.checkout_intent_id === intent.id) {
-          await expireSubscriptionCheckoutIntentFromWebhook(admin, recentSession);
+          await expireSubscriptionCheckoutIntentFromWebhook(
+            admin,
+            recentSession,
+          );
           return {
             ok: false,
             code: "CHECKOUT_IN_PROGRESS",
-            message: "Your prior checkout just expired. Please try once more to start a fresh one.",
+            message:
+              "Your prior checkout just expired. Please try once more to start a fresh one.",
           };
         }
         continue;
       }
 
-      Sentry.captureMessage("billing: another open subscription Checkout Session blocked creation", {
-        level: "warning",
-        tags: { feature: "billing-checkout", guard: "open-session-list" },
-        extra: { intentId: intent.id, stripeSessionId: recentSession.id },
-      });
+      Sentry.captureMessage(
+        "billing: another open subscription Checkout Session blocked creation",
+        {
+          level: "warning",
+          tags: { feature: "billing-checkout", guard: "open-session-list" },
+          extra: { intentId: intent.id },
+        },
+      );
       return {
         ok: false,
         code: "CHECKOUT_IN_PROGRESS",
@@ -788,69 +956,57 @@ export async function createCheckoutSessionAction(input: unknown): Promise<Billi
         // same hosted Session; a later legitimate subscription gets a new
         // intent id and therefore a new key.
         idempotencyKey: `truecap-subscription-checkout:${intent.id}`,
-      }
+      },
     );
 
     if (!isReusableSubscriptionCheckoutSession({ session, intent })) {
-      Sentry.captureMessage("billing: created Checkout Session failed intent binding", {
-        level: "error",
-        tags: { feature: "billing-checkout", guard: "created-session-binding" },
-        extra: { intentId: intent.id, stripeSessionId: session.id },
-      });
+      Sentry.captureMessage(
+        "billing: created Checkout Session failed intent binding",
+        {
+          level: "error",
+          tags: {
+            feature: "billing-checkout",
+            guard: "created-session-binding",
+          },
+          extra: { intentId: intent.id },
+        },
+      );
       return {
         ok: false,
         code: "SERVER_ERROR",
-        message: "We couldn't safely verify the new checkout. Please contact support.",
+        message:
+          "We couldn't safely verify the new checkout. Please contact support.",
       };
     }
     await markSubscriptionCheckoutIntentOpen(admin, intent.id, session);
 
     if (!session.url) {
       console.error("[billing] Stripe checkout session missing URL");
-      Sentry.captureMessage("billing: Stripe checkout session created without a URL", {
-        level: "error",
-        tags: { feature: "billing-checkout" },
-        extra: { planSlug: parsed.data.planSlug, stripeSessionId: session.id },
-      });
-      return { ok: false, code: "SERVER_ERROR", message: "Unable to start checkout. Please try again." };
+      Sentry.captureMessage(
+        "billing: Stripe checkout session created without a URL",
+        {
+          level: "error",
+          tags: { feature: "billing-checkout" },
+          extra: { planSlug: parsed.data.planSlug },
+        },
+      );
+      return {
+        ok: false,
+        code: "SERVER_ERROR",
+        message: "Unable to start checkout. Please try again.",
+      };
     }
 
-    // PostHog funnel event — fires just before we return the Stripe
-    // redirect URL. Captures conversion INTENT even if the user later
-    // bounces on Stripe's checkout page (the corresponding
-    // `pro_subscribed` event will only fire on actual successful
-    // payment, so the gap between these two = checkout drop-off rate).
+    // Canonical upgrade-start event. The durable checkout-intent claim above
+    // ensures a resumed/retried session does not emit another funnel start.
     await captureServerEvent({
       distinctId: user.id,
-      event: "pro_checkout_started",
+      event: "upgrade_started",
       properties: {
-        plan_slug: parsed.data.planSlug,
+        plan_identifier: parsed.data.planSlug,
+        referral_source: "pricing_checkout",
       },
     });
-    await captureServerEvent({
-      distinctId: user.id,
-      event: "checkout_started",
-      properties: {
-        plan_slug: parsed.data.planSlug,
-      },
-    });
-    await captureServerEvent({
-      distinctId: user.id,
-      event: "subscription_checkout_started",
-      properties: {
-        plan: parsed.data.planSlug,
-        interval: parsed.data.planSlug.endsWith("_annual") ? "annual" : "monthly",
-      },
-    });
-    if (parsed.data.planSlug.startsWith("agent_pro")) {
-      await captureServerEvent({
-        distinctId: user.id,
-        event: "agent_pro_checkout_started",
-        properties: {
-          plan_slug: parsed.data.planSlug,
-        },
-      });
-    }
 
     return { ok: true, url: session.url };
   } catch (error) {
@@ -894,7 +1050,7 @@ export type CheckoutReturnVerificationResult =
  * was processed by an older webhook instance during a rolling deployment.
  */
 export async function verifyCheckoutReturnAction(
-  input: unknown
+  input: unknown,
 ): Promise<CheckoutReturnVerificationResult> {
   const parsed = checkoutReturnSchema.safeParse(input);
   if (!parsed.success) {
@@ -919,9 +1075,12 @@ export async function verifyCheckoutReturnAction(
 
   try {
     const stripe = getStripe();
-    const session = await stripe.checkout.sessions.retrieve(parsed.data.sessionId, {
-      expand: ["line_items"],
-    });
+    const session = await stripe.checkout.sessions.retrieve(
+      parsed.data.sessionId,
+      {
+        expand: ["line_items"],
+      },
+    );
     const metadataPlanSlug = session.metadata?.plan_slug ?? null;
     if (!isPaidPlanSlug(metadataPlanSlug)) {
       return {
@@ -939,13 +1098,19 @@ export async function verifyCheckoutReturnAction(
       .maybeSingle();
     if (planError) throw planError;
 
-    const expectedPriceId = getPlanPriceId(metadataPlanSlug, plan?.stripe_price_id);
+    const expectedPriceId = getCheckoutReturnPlanPriceId(
+      metadataPlanSlug,
+      plan?.stripe_price_id,
+    );
     if (!expectedPriceId) {
-      Sentry.captureMessage("billing: checkout return plan has no current Price", {
-        level: "error",
-        tags: { feature: "billing-checkout-return" },
-        extra: { planSlug: metadataPlanSlug },
-      });
+      Sentry.captureMessage(
+        "billing: checkout return plan has no current Price",
+        {
+          level: "error",
+          tags: { feature: "billing-checkout-return" },
+          extra: { planSlug: metadataPlanSlug },
+        },
+      );
       return {
         ok: false,
         code: "SERVER_ERROR",
@@ -985,7 +1150,7 @@ export async function verifyCheckoutReturnAction(
     // idempotent closure path; the current webhook can still apply Pack credit.
     await completeSubscriptionCheckoutIntentFromWebhook(
       createAdminSupabaseClient(),
-      session
+      session,
     );
 
     return { ok: true, ...verified };
@@ -1022,7 +1187,11 @@ export async function isProActiveAction(): Promise<ProActiveResult> {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in to check your plan." };
+      return {
+        ok: false,
+        code: "SIGN_IN_REQUIRED",
+        message: "Please sign in to check your plan.",
+      };
     }
 
     const active = await hasPaidPlanSubscription(supabase, user.id);
@@ -1031,7 +1200,11 @@ export async function isProActiveAction(): Promise<ProActiveResult> {
     // Transient failure while the caller is polling — no Sentry page here
     // (hasPaidPlanSubscription already reports query failures itself).
     console.error("[billing] isProActiveAction failed:", error);
-    return { ok: false, code: "SERVER_ERROR", message: "Unable to check subscription status." };
+    return {
+      ok: false,
+      code: "SERVER_ERROR",
+      message: "Unable to check subscription status.",
+    };
   }
 }
 
@@ -1042,7 +1215,11 @@ export async function createBillingPortalSessionAction(): Promise<BillingActionR
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in to manage billing." };
+    return {
+      ok: false,
+      code: "SIGN_IN_REQUIRED",
+      message: "Please sign in to manage billing.",
+    };
   }
 
   const { data: profile, error } = await supabase
@@ -1052,8 +1229,15 @@ export async function createBillingPortalSessionAction(): Promise<BillingActionR
     .maybeSingle();
 
   if (error) {
-    console.error("[billing] Failed to load profile for billing portal:", error);
-    return { ok: false, code: "SERVER_ERROR", message: "Unable to open billing portal right now." };
+    console.error(
+      "[billing] Failed to load profile for billing portal:",
+      error,
+    );
+    return {
+      ok: false,
+      code: "SERVER_ERROR",
+      message: "Unable to open billing portal right now.",
+    };
   }
 
   if (!profile?.stripe_customer_id) {
@@ -1088,28 +1272,37 @@ export async function createCancelSubscriptionPortalSessionAction(): Promise<Bil
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in to manage billing." };
+    return {
+      ok: false,
+      code: "SIGN_IN_REQUIRED",
+      message: "Please sign in to manage billing.",
+    };
   }
 
-  const [{ data: profile, error: profileError }, { data: subscription, error: subscriptionError }] =
-    await Promise.all([
-      supabase
-        .from("profiles")
-        .select("stripe_customer_id")
-        .eq("id", user.id)
-        .maybeSingle(),
-      supabase
-        .from("subscriptions")
-        .select("stripe_subscription_id")
-        .eq("user_id", user.id)
-        .in("status", ["active", "trialing", "past_due", "unpaid", "paused"])
-        .order("updated_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
-    ]);
+  const [
+    { data: profile, error: profileError },
+    { data: subscription, error: subscriptionError },
+  ] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("stripe_customer_id")
+      .eq("id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("subscriptions")
+      .select("stripe_subscription_id")
+      .eq("user_id", user.id)
+      .in("status", ["active", "trialing", "past_due", "unpaid", "paused"])
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
 
   if (profileError || subscriptionError) {
-    console.error("[billing] Failed to load cancellation prerequisites:", profileError ?? subscriptionError);
+    console.error(
+      "[billing] Failed to load cancellation prerequisites:",
+      profileError ?? subscriptionError,
+    );
     return {
       ok: false,
       code: "SERVER_ERROR",
@@ -1146,7 +1339,10 @@ export async function createCancelSubscriptionPortalSessionAction(): Promise<Bil
     });
     return { ok: true, url: portal.url };
   } catch (error) {
-    console.error("[billing] createCancelSubscriptionPortalSessionAction failed:", error);
+    console.error(
+      "[billing] createCancelSubscriptionPortalSessionAction failed:",
+      error,
+    );
     return {
       ok: false,
       code: "SERVER_ERROR",
@@ -1181,10 +1377,16 @@ export async function createCancelSubscriptionPortalSessionAction(): Promise<Bil
  * Stripe returns an invalid_request_error here and the user sees the loud
  * error toast (correct) rather than a dead-end generic portal.
  */
-export async function createSwitchPlanPortalSessionAction(input: unknown): Promise<BillingActionResult> {
+export async function createSwitchPlanPortalSessionAction(
+  input: unknown,
+): Promise<BillingActionResult> {
   const parsed = switchPlanSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, code: "PLAN_NOT_FOUND", message: "Invalid target plan." };
+    return {
+      ok: false,
+      code: "PLAN_NOT_FOUND",
+      message: "Invalid target plan.",
+    };
   }
   const targetPlanSlug = parsed.data.targetPlanSlug;
   // This action is directly callable; hiding Agent Pro in the pricing/profile
@@ -1192,7 +1394,11 @@ export async function createSwitchPlanPortalSessionAction(input: unknown): Promi
   // identical to new checkout so a configured-but-unreleased Price cannot be
   // sold through the Customer Portal flow.
   if (targetPlanSlug.startsWith("agent_pro") && !isAgentProConfigured()) {
-    return { ok: false, code: "PLAN_NOT_FOUND", message: "Selected plan is not available." };
+    return {
+      ok: false,
+      code: "PLAN_NOT_FOUND",
+      message: "Selected plan is not available.",
+    };
   }
 
   const supabase = await createServerSupabaseClient();
@@ -1201,7 +1407,11 @@ export async function createSwitchPlanPortalSessionAction(input: unknown): Promi
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in to manage billing." };
+    return {
+      ok: false,
+      code: "SIGN_IN_REQUIRED",
+      message: "Please sign in to manage billing.",
+    };
   }
 
   // Resolve the target price BEFORE touching Stripe. A switch to a plan with
@@ -1210,42 +1420,57 @@ export async function createSwitchPlanPortalSessionAction(input: unknown): Promi
   // PRIMARY (current) price, same as checkout — never a grandfathered id.
   const targetPriceId = getPrimaryPlanPriceId(targetPlanSlug);
   if (!targetPriceId) {
-    console.error(`[billing] Missing Stripe price id for switch target ${targetPlanSlug}`);
-    Sentry.captureMessage(`billing: missing Stripe price id for switch target ${targetPlanSlug}`, {
-      level: "error",
-      tags: { feature: "billing-switch" },
-      extra: { targetPlanSlug },
-    });
+    console.error(
+      `[billing] Missing Stripe price id for switch target ${targetPlanSlug}`,
+    );
+    Sentry.captureMessage(
+      `billing: missing Stripe price id for switch target ${targetPlanSlug}`,
+      {
+        level: "error",
+        tags: { feature: "billing-switch" },
+        extra: { targetPlanSlug },
+      },
+    );
     return {
       ok: false,
       code: "MISSING_PRICE",
-      message: "That plan is temporarily unavailable. Please try again shortly.",
+      message:
+        "That plan is temporarily unavailable. Please try again shortly.",
     };
   }
 
-  const [{ data: profile, error: profileError }, { data: subscription, error: subscriptionError }] =
-    await Promise.all([
-      supabase
-        .from("profiles")
-        .select("stripe_customer_id")
-        .eq("id", user.id)
-        .maybeSingle(),
-      supabase
-        .from("subscriptions")
-        // Only a LIVE subscription can be switched. Match the same active set
-        // getEntitlementsForUser treats as Pro (active/trialing/past_due) —
-        // canceled/unpaid/paused have nothing to prorate.
-        .select("stripe_subscription_id, plans(slug)")
-        .eq("user_id", user.id)
-        .in("status", ["active", "trialing", "past_due"])
-        .order("updated_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
-    ]);
+  const [
+    { data: profile, error: profileError },
+    { data: subscription, error: subscriptionError },
+  ] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("stripe_customer_id")
+      .eq("id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("subscriptions")
+      // Only a LIVE subscription can be switched. Match the same active set
+      // getEntitlementsForUser treats as Pro (active/trialing/past_due) —
+      // canceled/unpaid/paused have nothing to prorate.
+      .select("stripe_subscription_id, plans(slug)")
+      .eq("user_id", user.id)
+      .in("status", ["active", "trialing", "past_due"])
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
 
   if (profileError || subscriptionError) {
-    console.error("[billing] Failed to load switch prerequisites:", profileError ?? subscriptionError);
-    return { ok: false, code: "SERVER_ERROR", message: "Unable to load billing details right now." };
+    console.error(
+      "[billing] Failed to load switch prerequisites:",
+      profileError ?? subscriptionError,
+    );
+    return {
+      ok: false,
+      code: "SERVER_ERROR",
+      message: "Unable to load billing details right now.",
+    };
   }
 
   if (!profile?.stripe_customer_id || !subscription?.stripe_subscription_id) {
@@ -1262,7 +1487,7 @@ export async function createSwitchPlanPortalSessionAction(input: unknown): Promi
   // Guard: already on the requested plan → nothing to prorate. Keeps parity
   // with the checkout ALREADY_SUBSCRIBED guard and stops a no-op portal open.
   const currentPlan = Array.isArray(subscription.plans)
-    ? subscription.plans[0] ?? null
+    ? (subscription.plans[0] ?? null)
     : subscription.plans;
   if (currentPlan?.slug === targetPlanSlug) {
     return {
@@ -1286,29 +1511,39 @@ export async function createSwitchPlanPortalSessionAction(input: unknown): Promi
           level: "error",
           tags: { feature: "billing-switch", guard: "catalog-match" },
           extra: { targetPlanSlug },
-        }
+        },
       );
       return {
         ok: false,
         code: "MISSING_PRICE",
-        message: "That plan is temporarily unavailable while billing configuration is verified.",
+        message:
+          "That plan is temporarily unavailable while billing configuration is verified.",
       };
     }
     // subscription_update_confirm needs the SUBSCRIPTION ITEM id, which only
     // Stripe has — the DB stores the subscription id, not its item id. A
     // single-item subscription is the only shape we sell.
-    const stripeSubscription = await stripe.subscriptions.retrieve(subscription.stripe_subscription_id);
+    const stripeSubscription = await stripe.subscriptions.retrieve(
+      subscription.stripe_subscription_id,
+    );
     const item = stripeSubscription.items.data[0];
     if (!item) {
       console.error(
-        `[billing] Subscription ${subscription.stripe_subscription_id} has no items — cannot build switch flow`
+        "[billing] Stripe subscription has no items — cannot build switch flow",
       );
-      Sentry.captureMessage("billing: switch target subscription has no items", {
-        level: "error",
-        tags: { feature: "billing-switch" },
-        extra: { userId: user.id },
-      });
-      return { ok: false, code: "SERVER_ERROR", message: "Unable to switch plans right now." };
+      Sentry.captureMessage(
+        "billing: switch target subscription has no items",
+        {
+          level: "error",
+          tags: { feature: "billing-switch" },
+          extra: { userId: user.id },
+        },
+      );
+      return {
+        ok: false,
+        code: "SERVER_ERROR",
+        message: "Unable to switch plans right now.",
+      };
     }
 
     const siteUrl = getSiteUrl();
@@ -1331,7 +1566,10 @@ export async function createSwitchPlanPortalSessionAction(input: unknown): Promi
     });
     return { ok: true, url: portal.url };
   } catch (error) {
-    console.error("[billing] createSwitchPlanPortalSessionAction failed:", error);
+    console.error(
+      "[billing] createSwitchPlanPortalSessionAction failed:",
+      error,
+    );
     // A failure here is usually a portal Configuration that doesn't allow
     // subscription updates (or omits the target price from its product list).
     // Page on it — this blocks every plan switch — and surface a loud error

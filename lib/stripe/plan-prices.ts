@@ -22,7 +22,11 @@
  * NEXT_PUBLIC prefix), so every caller runs on the server.
  */
 
-export type PaidPlanSlug = "pro_monthly" | "pro_annual" | "agent_pro_monthly" | "agent_pro_annual";
+export type PaidPlanSlug =
+  | "pro_monthly"
+  | "pro_annual"
+  | "agent_pro_monthly"
+  | "agent_pro_annual";
 
 /** Every paid slug, checkout-display order. Single list so no resolver can forget one. */
 export const PAID_PLAN_SLUGS: readonly PaidPlanSlug[] = [
@@ -33,8 +37,12 @@ export const PAID_PLAN_SLUGS: readonly PaidPlanSlug[] = [
 ] as const;
 
 /** Type guard for the canonical paid-slug list. */
-export function isPaidPlanSlug(s: string | null | undefined): s is PaidPlanSlug {
-  return typeof s === "string" && (PAID_PLAN_SLUGS as readonly string[]).includes(s);
+export function isPaidPlanSlug(
+  s: string | null | undefined,
+): s is PaidPlanSlug {
+  return (
+    typeof s === "string" && (PAID_PLAN_SLUGS as readonly string[]).includes(s)
+  );
 }
 
 function envForSlug(slug: PaidPlanSlug): string | undefined {
@@ -68,11 +76,23 @@ export function getPrimaryPlanPriceId(slug: PaidPlanSlug): string | null {
 }
 
 /**
+ * The only Price a new Checkout Session may sell. This deliberately accepts
+ * no database fallback: removing the exact cadence's environment variable
+ * must disable new sales even when a persisted mapping remains available for
+ * webhook and return recovery.
+ */
+export function getCheckoutPlanPriceId(slug: PaidPlanSlug): string | null {
+  return getPrimaryPlanPriceId(slug);
+}
+
+/**
  * Map a Stripe price id back to its plan slug, matching ANY configured price
  * (current or grandfathered). Returns null when the price belongs to neither
  * plan's list.
  */
-export function planSlugFromPriceId(priceId: string | null | undefined): PaidPlanSlug | null {
+export function planSlugFromPriceId(
+  priceId: string | null | undefined,
+): PaidPlanSlug | null {
   if (!priceId) return null;
   // Iterate the canonical slug list so a future tier CANNOT be forgotten here —
   // this resolver falling through to null is exactly how the 2026-07 incident

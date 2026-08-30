@@ -17,14 +17,17 @@ import { trackEvent } from "@/lib/analytics";
 
 export function LeadCaptureForm({
   ownerId,
+  shareSurface,
   dealId,
   valuesHash,
   sig,
+  opaqueShareToken,
   agentName,
   dealAddress,
   accentColor,
 }: {
   ownerId: string;
+  shareSurface: "legacy_share" | "opaque_share" | "portal_share";
   /** Signed attribution from the share payload ({ownerId, dealId, valuesHash}
    *  HMAC'd with SHARE_LINK_SECRET). The /d page verifies it before rendering
    *  this form; we forward it so the server action can verify it again on the
@@ -32,6 +35,7 @@ export function LeadCaptureForm({
   dealId?: string | null;
   valuesHash: string;
   sig?: string | null;
+  opaqueShareToken?: string;
   agentName: string;
   dealAddress?: string;
   accentColor?: string | null;
@@ -41,7 +45,9 @@ export function LeadCaptureForm({
   const [message, setMessage] = useState("");
   // Honeypot — hidden from humans; bots that fill it are silently dropped.
   const [website, setWebsite] = useState("");
-  const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">(
+    "idle",
+  );
   const [error, setError] = useState("");
   const shown = useRef(false);
 
@@ -51,7 +57,10 @@ export function LeadCaptureForm({
     trackEvent("lead_form_shown", { owner_present: true });
   }, []);
 
-  const accent = accentColor && /^#[0-9A-Fa-f]{6}$/.test(accentColor) ? accentColor : "var(--primary)";
+  const accent =
+    accentColor && /^#[0-9A-Fa-f]{6}$/.test(accentColor)
+      ? accentColor
+      : "var(--primary)";
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -60,10 +69,12 @@ export function LeadCaptureForm({
     setError("");
     try {
       const res = await captureDealLeadAction({
+        shareSurface,
         ownerId,
         dealId: dealId ?? undefined,
         valuesHash,
         sig: sig ?? undefined,
+        opaqueShareToken,
         email,
         name: name || undefined,
         message: message || undefined,
@@ -86,7 +97,9 @@ export function LeadCaptureForm({
       // button so the viewer can retry. Mirrors login-form.tsx's catch.
       Sentry.captureException(err, { tags: { feature: "lead-capture" } });
       setStatus("error");
-      setError("Something interrupted the request. Check your connection and try again.");
+      setError(
+        "Something interrupted the request. Check your connection and try again.",
+      );
     }
   }
 
@@ -96,7 +109,9 @@ export function LeadCaptureForm({
         <div className="mx-auto mb-2 flex size-10 items-center justify-center rounded-full bg-[var(--metric-positive)]/15">
           <Check className="size-5 text-[var(--metric-positive)]" />
         </div>
-        <p className="font-bold text-foreground">Thanks - {agentName} will be in touch.</p>
+        <p className="font-bold text-foreground">
+          Thanks - {agentName} will be in touch.
+        </p>
         <p className="mt-1 text-sm text-muted-foreground">
           Your message was sent. Expect a reply at the email you provided.
         </p>
@@ -105,8 +120,14 @@ export function LeadCaptureForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="mt-6 rounded-2xl border-2 p-5 sm:p-6" style={{ borderColor: accent }}>
-      <h2 className="text-lg font-extrabold text-foreground">Interested in this deal?</h2>
+    <form
+      onSubmit={onSubmit}
+      className="mt-6 rounded-2xl border-2 p-5 sm:p-6"
+      style={{ borderColor: accent }}
+    >
+      <h2 className="text-lg font-extrabold text-foreground">
+        Interested in this deal?
+      </h2>
       <p className="mt-1 text-sm text-muted-foreground">
         Send {agentName} a message and they will follow up with you directly.
       </p>
@@ -149,19 +170,25 @@ export function LeadCaptureForm({
         aria-label="Message"
         className="mt-3 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground"
       />
-      {status === "error" ? <p className="mt-2 text-sm text-destructive">{error}</p> : null}
+      {status === "error" ? (
+        <p className="mt-2 text-sm text-destructive">{error}</p>
+      ) : null}
       <button
         type="submit"
         disabled={status === "sending"}
         className="mt-3 inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
         style={{ background: accent }}
       >
-        {status === "sending" ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
+        {status === "sending" ? (
+          <Loader2 className="size-4 animate-spin" />
+        ) : (
+          <Send className="size-4" />
+        )}
         Send to {agentName}
       </button>
       <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
-        By sending, you agree to share your contact details with {agentName} so they can respond. Your
-        info is not used for anything else.
+        By sending, you agree to share your contact details with {agentName} so
+        they can respond. Your info is not used for anything else.
       </p>
     </form>
   );

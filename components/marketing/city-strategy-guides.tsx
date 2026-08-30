@@ -44,7 +44,7 @@ export function CityStrategyGuides({
           <Link
             key={c.strategy}
             href={`/markets/${c.citySlug}/${c.strategy}`}
-            className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
+            className="inline-flex min-h-11 min-w-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             {c.strategyLabel} in {c.cityName}
           </Link>

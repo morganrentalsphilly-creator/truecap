@@ -1,61 +1,61 @@
 {
-  "subject": "All cash or leveraged? The math at $300k vs $900k",
-  "preheader": "No-debt cash flow vs leveraged compounding · the 'one good deal' problem with paying cash",
+  "subject": "Cash or financed? Model the same deal both ways",
+  "preheader": "A timeless comparison framework for liquidity, debt service, and property-level risk",
   "publishedAt": "2026-07-14",
-  "weekLabel": "Topic: Cash vs leverage",
+  "weekLabel": "Topic: Cash vs financing",
   "marketSnapshot": {
-    "headline": "Cash buy vs financed: different math, different answer",
-    "body": "Some investors buy rental properties in cash. Most use leverage. There's no universal right answer — they optimize for different things. Cash buying maximizes monthly cash flow per property and minimizes risk; leverage maximizes returns on capital and lets you control more property with the same dollars. The decision depends on your capital base, risk tolerance, and what you're optimizing for. The math is more interesting than people think.",
+    "headline": "Cash and financing change the capital stack—not the property",
+    "body": "There is no universal winner. A cash purchase removes scheduled debt service but commits more capital to one asset. Financing preserves liquidity but adds payment, rate, maturity, and lender constraints. Compare both versions with the same property inputs, then replace every financing placeholder with a current quote before making a decision.",
     "stats": [
       {
-        "label": "Typical cash CoC return",
-        "value": "5-8%"
+        "label": "Property assumptions",
+        "value": "Keep equal"
       },
       {
-        "label": "Typical leveraged CoC return",
-        "value": "9-14%"
+        "label": "Financing assumptions",
+        "value": "Change one at a time"
       },
       {
-        "label": "Capital deployed gap",
-        "value": "4x"
+        "label": "Decision inputs",
+        "value": "Property-specific"
       }
     ]
   },
   "dealSpotter": [
     {
-      "address": "Example: cash buy of a single property",
-      "headlineNumber": "$200k all cash · $1,400 NCF/mo · CoC 8.4%",
-      "verdict": "Strong (for risk-off)",
-      "body": "Single SFR purchased cash. Annual NCF $16,800. CoC 8.4% on the $200k deployed. Zero mortgage risk, no DSCR constraint, no foreclosure risk if vacancy hits. The downside: $200k is all in one property in one zip code. Diversification = zero. If that one property faces a major issue (foundation, fire, prolonged vacancy), you have no other income from that capital."
+      "address": "Educational scenario: cash purchase",
+      "headlineNumber": "No scheduled mortgage payment",
+      "verdict": "Compare",
+      "body": "Model the purchase price, closing cash, reserves, rent, vacancy, operating expenses, and future capital needs. Removing debt service can improve modeled monthly cash flow, but it does not remove operating, tenant, insurance, title, liquidity, or concentration risk."
     },
     {
-      "address": "Example: same $200k leveraged across 4 properties",
-      "headlineNumber": "4 SFRs at 25% down · $2,200 NCF/mo combined · CoC 13.2%",
-      "verdict": "Strong (for compounding)",
-      "body": "Same $200k as down payments on 4 separate $200k properties (25% down each). Total combined NCF $2,200/mo. CoC 13.2% on the same capital. Plus: 4 properties of principal paydown, 4 properties of appreciation exposure, geographic diversification. Downside: 4 mortgages, 4 DSCR constraints, 4 risks of rate-driven margin compression."
+      "address": "Educational scenario: financed purchase",
+      "headlineNumber": "Lower initial equity, added debt obligations",
+      "verdict": "Compare",
+      "body": "Use the same property assumptions, then enter the proposed down payment, rate, term, mortgage insurance, fees, and any maturity or balloon terms from the actual financing proposal. Compare cash required, recurring cash flow, DSCR, and cash-on-cash return without treating the model as lender approval."
     },
     {
-      "address": "Example: mixed approach (the realistic middle)",
-      "headlineNumber": "1 cash property + 1 leveraged · balanced risk + return",
-      "verdict": "Strong (for most investors)",
-      "body": "$200k = one $200k cash property + $100k down on a $400k leveraged property. Combined NCF $2,100/mo. The cash property provides anchor stability (no mortgage, no rate risk). The leveraged property provides growth + compounding. Most thoughtful investors end up here over time — a mix that hedges different risks."
+      "address": "Educational scenario: liquidity check",
+      "headlineNumber": "Test reserves after closing",
+      "verdict": "Verify",
+      "body": "A modeled return does not answer how much liquidity you should retain. Stress-test vacancy, repairs, insurance, taxes, and rate changes, then review the resulting cash needs against your broader finances and risk tolerance with qualified professionals where appropriate."
     }
   ],
   "blogFeature": {
-    "title": "Cash-on-cash vs IRR — what each tells you about a deal",
+    "title": "Cash-on-cash vs IRR — what each metric measures",
     "url": "https://usetruecap.com/blog/cash-on-cash-vs-irr",
-    "excerpt": "Cash-on-cash is the metric cash buyers love. IRR is what leveraged investors should optimize for. Two different metrics that answer two different questions about the same deal."
+    "excerpt": "Cash-on-cash focuses on modeled annual cash flow relative to initial cash invested. IRR is a longer-horizon modeled return that depends on timing and exit assumptions. Neither metric is a recommendation."
   },
   "qa": {
-    "question": "I have $300k available. Should I buy one property cash or three properties leveraged?",
-    "answer": "Depends on your goals and risk tolerance. The all-cash play gives you $300k in one property generating ~$2,000-2,500/mo of stable rental income with zero financing risk. The 3-property leveraged play gives you ~$3,500-5,000/mo of combined rental income across three properties with three mortgages, three sets of tenant risk, but also three properties of equity build. The math favor leverage when interest rates are below your cap rates (positive leverage), and unwinds when rates are above your cap rates (negative leverage). At today's rates (mortgages roughly 6-7%, cap rates 6-8% in solid markets), leverage is marginally positive — not the obvious win it was in 2018-2021. The risk-adjusted answer for most investors with $300k: 2 properties leveraged at moderate LTV (60-70%, not maxed at 75-80%). This captures most of the leverage upside while keeping each property cash-flow-strong enough to weather setbacks."
+    "question": "How should I compare an all-cash purchase with a financed purchase?",
+    "answer": "Run the same property twice and change only the financing inputs. Compare total cash required, recurring cash flow, DSCR when debt exists, cash-on-cash return, liquidity remaining after closing, and downside scenarios. Replace the national rate benchmark with current investment-property quotes and include lender fees and loan terms. The appropriate capital structure depends on the property, available financing, reserves, taxes, portfolio concentration, and your risk tolerance; confirm financing, tax, and legal consequences with the relevant professionals."
   },
   "shipNote": {
-    "title": "Model the leverage decision in TrueCap",
+    "title": "Compare the financing assumptions in TrueCap",
     "items": [
-      "Free: switch between cash purchase and financed in one click — see DSCR and cash-on-cash both ways",
-      "Pro: 10-year IRR comparison — when leverage compounds, when it underperforms",
-      "Stop guessing — run both scenarios →"
+      "Free: enter cash or financing assumptions and review the preliminary core metrics",
+      "When your access includes projections, compare longer-horizon modeled outcomes under disclosed assumptions",
+      "Replace every starting benchmark with property-specific evidence before relying on the result"
     ]
   }
 }

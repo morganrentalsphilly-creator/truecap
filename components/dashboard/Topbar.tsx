@@ -3,7 +3,14 @@
 import { Menu, Search, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+  type KeyboardEvent,
+} from "react";
 import { UserMenu } from "@/components/auth/user-menu";
 import { Button } from "@/components/ui/button";
 import { SheetTrigger } from "@/components/ui/sheet";
@@ -27,7 +34,14 @@ type Suggestion = { id: string; address: string; propertyType: string };
 
 const SUGGESTIONS_LISTBOX_ID = "dashboard-search-suggestions";
 
-export function Topbar({ displayName, email, initials, avatarSrc, isPremium = false, canAccessDashboard = true }: TopbarProps) {
+export function Topbar({
+  displayName,
+  email,
+  initials,
+  avatarSrc,
+  isPremium = false,
+  canAccessDashboard = true,
+}: TopbarProps) {
   const router = useRouter();
   const pathname = usePathname() ?? "";
   const searchFormRef = useRef<HTMLFormElement | null>(null);
@@ -52,8 +66,15 @@ export function Topbar({ displayName, email, initials, avatarSrc, isPremium = fa
       setActiveIndex(-1);
       setIsPanelDismissed(true);
     };
-    window.addEventListener(DASHBOARD_SAVED_SEARCH_RELEASE_EVENT, clearReleasedSearch);
-    return () => window.removeEventListener(DASHBOARD_SAVED_SEARCH_RELEASE_EVENT, clearReleasedSearch);
+    window.addEventListener(
+      DASHBOARD_SAVED_SEARCH_RELEASE_EVENT,
+      clearReleasedSearch,
+    );
+    return () =>
+      window.removeEventListener(
+        DASHBOARD_SAVED_SEARCH_RELEASE_EVENT,
+        clearReleasedSearch,
+      );
   }, []);
 
   useEffect(() => {
@@ -75,12 +96,18 @@ export function Topbar({ displayName, email, initials, avatarSrc, isPremium = fa
     setIsLoadingSuggestions(true);
     setSearchError(null);
 
-    fetch(`/api/dashboard/search-suggestions?q=${encodeURIComponent(debouncedQuery)}`, {
+    // Keep a potentially private street address out of request URLs/access
+    // logs. Sentry drops request bodies at its final boundary as well.
+    fetch("/api/dashboard/search-suggestions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ q: debouncedQuery }),
       signal: controller.signal,
       cache: "no-store",
     })
       .then(async (res) => {
-        if (!res.ok) throw new Error(`Saved-deal search failed (${res.status})`);
+        if (!res.ok)
+          throw new Error(`Saved-deal search failed (${res.status})`);
         const payload = (await res.json()) as { suggestions?: Suggestion[] };
         return Array.isArray(payload.suggestions) ? payload.suggestions : [];
       })
@@ -91,7 +118,9 @@ export function Topbar({ displayName, email, initials, avatarSrc, isPremium = fa
       .catch((error: unknown) => {
         if ((error as { name?: string })?.name !== "AbortError") {
           setSuggestions([]);
-          setSearchError("Couldn’t search saved deals. Press Enter to search the full list, or edit the search to try again.");
+          setSearchError(
+            "Couldn’t search saved deals. Press Enter to search the full list, or edit the search to try again.",
+          );
         }
       })
       .finally(() => {
@@ -126,7 +155,10 @@ export function Topbar({ displayName, email, initials, avatarSrc, isPremium = fa
     // Route to the dashboard-shell variant so the sidebar + topbar stay
     // mounted. The bare `/saved-analyses` route uses the marketing layout
     // and would visually kick the user out of the dashboard.
-    router.push(href);
+    // A clean full-document boundary ensures a GTM container loaded on an
+    // earlier SPA route cannot observe the address-bearing history mutation.
+    // The destination detects q before rendering any telemetry provider.
+    window.location.assign(href);
   };
 
   const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -134,8 +166,17 @@ export function Topbar({ displayName, email, initials, avatarSrc, isPremium = fa
     goToSearch(query);
   };
 
-  const showNoResults = debouncedQuery.length >= 2 && !isLoadingSuggestions && !searchError && suggestions.length === 0;
-  const isOpen = !isPanelDismissed && (suggestions.length > 0 || showNoResults || isLoadingSuggestions || Boolean(searchError));
+  const showNoResults =
+    debouncedQuery.length >= 2 &&
+    !isLoadingSuggestions &&
+    !searchError &&
+    suggestions.length === 0;
+  const isOpen =
+    !isPanelDismissed &&
+    (suggestions.length > 0 ||
+      showNoResults ||
+      isLoadingSuggestions ||
+      Boolean(searchError));
   const searchStatus = searchError
     ? "Saved-deal suggestions are unavailable."
     : isLoadingSuggestions
@@ -215,7 +256,12 @@ export function Topbar({ displayName, email, initials, avatarSrc, isPremium = fa
             <Menu className="h-5 w-5" />
           </Button>
         </SheetTrigger>
-        <form ref={searchFormRef} className="relative flex-1 max-w-xl" onSubmit={handleSearchSubmit} role="search">
+        <form
+          ref={searchFormRef}
+          className="relative flex-1 max-w-xl"
+          onSubmit={handleSearchSubmit}
+          role="search"
+        >
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
           <input
             name="dashboard-saved-search"
@@ -239,11 +285,21 @@ export function Topbar({ displayName, email, initials, avatarSrc, isPremium = fa
             // Gated on isOpen as well: when the panel is closed the option
             // elements are unmounted, so pointing at one would be a dangling
             // IDREF on a combobox reporting aria-expanded={false}.
-            aria-activedescendant={isOpen && activeIndex >= 0 && suggestions[activeIndex] ? `sugg-${suggestions[activeIndex]!.id}` : undefined}
+            aria-activedescendant={
+              isOpen && activeIndex >= 0 && suggestions[activeIndex]
+                ? `sugg-${suggestions[activeIndex]!.id}`
+                : undefined
+            }
             autoComplete="off"
             className="w-full h-11 pl-10 pr-4 rounded-lg bg-muted/60 border border-transparent focus:border-primary focus:bg-background outline-none text-base sm:text-sm transition focus-visible:ring-2 focus-visible:ring-ring"
           />
-          <span id="dashboard-search-status" className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+          <span
+            id="dashboard-search-status"
+            className="sr-only"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
             {searchStatus}
           </span>
 
@@ -271,22 +327,41 @@ export function Topbar({ displayName, email, initials, avatarSrc, isPremium = fa
                   onMouseEnter={() => setActiveIndex(index)}
                   onClick={() => goToSearch(item.address)}
                 >
-                  <div className="text-sm font-medium text-foreground truncate">{item.address}</div>
-                  <div className="text-xs text-muted-foreground truncate">{item.propertyType}</div>
+                  <div className="text-sm font-medium text-foreground truncate">
+                    {item.address}
+                  </div>
+                  <div className="text-xs text-muted-foreground truncate">
+                    {item.propertyType}
+                  </div>
                 </button>
               ))}
               {showNoResults ? (
-                <div className="min-h-11 px-3 py-2 text-xs text-muted-foreground" role="option" aria-disabled="true" aria-selected="false">
+                <div
+                  className="min-h-11 px-3 py-2 text-xs text-muted-foreground"
+                  role="option"
+                  aria-disabled="true"
+                  aria-selected="false"
+                >
                   No saved deals match “{debouncedQuery}”.
                 </div>
               ) : null}
               {searchError ? (
-                <div className="min-h-11 px-3 py-2 text-xs font-medium text-destructive" role="option" aria-disabled="true" aria-selected="false">
+                <div
+                  className="min-h-11 px-3 py-2 text-xs font-medium text-destructive"
+                  role="option"
+                  aria-disabled="true"
+                  aria-selected="false"
+                >
                   <span role="alert">{searchError}</span>
                 </div>
               ) : null}
               {isLoadingSuggestions && suggestions.length === 0 ? (
-                <div className="min-h-11 px-3 py-2 text-xs text-muted-foreground" role="option" aria-disabled="true" aria-selected="false">
+                <div
+                  className="min-h-11 px-3 py-2 text-xs text-muted-foreground"
+                  role="option"
+                  aria-disabled="true"
+                  aria-selected="false"
+                >
                   Searching…
                 </div>
               ) : null}

@@ -1,40 +1,34 @@
 /**
- * Dynamic city + strategy combo page at /markets/[city]/[strategy].
+ * Dynamic city + strategy verification page.
  *
- * Each entry in CITY_STRATEGY_COMBOS becomes a dedicated long-tail SEO
- * page. Targets queries like:
- *   - "BRRRR Philadelphia"
- *   - "cash flow Cleveland"
- *   - "house hacking Indianapolis"
- *   - "Section 8 Memphis"
- *   - "turnkey Memphis"
- *
- * Each combo gets a unique ranking URL with sharply-focused intent.
+ * Combo records contain hand-curated price, rent, cap-rate, neighborhood,
+ * timing, legal, and strategy narratives. Those fields are stale-review and
+ * must not render until authoritative dependencies and as-of dates are
+ * attached. The route preserves canonical long-tail URLs and uses only combo
+ * identity fields plus a generic, honest analyzer handoff.
  */
 
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, X } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { AnalyzerHandoffLink } from "@/components/analyzer-handoff-link";
 import { Header } from "@/components/investcalc/header";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
 import {
   CITY_STRATEGY_COMBOS,
   getCityStrategyCombo,
 } from "@/lib/city-strategy-combos";
 import { getSiteUrl } from "@/lib/site-url";
-import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
-import { truncateMetaDescription } from "@/lib/utils";
 
-// A dark specialist entry must not be resolved as an on-demand dynamic route.
-// Only release-filtered build-time params are routable.
 export const dynamicParams = false;
 
 export async function generateStaticParams() {
-  return CITY_STRATEGY_COMBOS.map((c) => ({
-    city: c.citySlug,
-    strategy: c.strategy,
+  return CITY_STRATEGY_COMBOS.map((combo) => ({
+    city: combo.citySlug,
+    strategy: combo.strategy,
   }));
 }
 
@@ -51,25 +45,22 @@ export async function generateMetadata({
       robots: { index: false, follow: false },
     };
   }
-  // Keyword-first ("house hacking philadelphia"-class query) + year,
-  // trimmed to the SERP window: longest combo is 46 chars, so with the
-  // layout's " | TrueCap" the title never gets clipped.
-  const title = `${combo.strategyLabel} investing in ${combo.cityName} (2026)`;
+
+  const title = `${combo.strategyLabel} screening in ${combo.cityName}`;
+  const description = `A source-first checklist for reviewing a specific ${combo.cityName} property under a ${combo.strategyLabel} scenario—without unsourced market ranges or investment verdicts.`;
+
   return {
     title,
-    description: truncateMetaDescription(combo.pitch),
+    description,
     keywords: [
-      `${combo.strategy} ${combo.cityName.toLowerCase()}`,
       `${combo.strategyLabel.toLowerCase()} ${combo.cityName.toLowerCase()}`,
-      `${combo.cityName.toLowerCase()} ${combo.strategy}`,
-      `${combo.strategyLabel.toLowerCase()} investing in ${combo.cityName.toLowerCase()}`,
-      `${combo.cityName.toLowerCase()} rental property ${combo.strategyLabel.toLowerCase()}`,
-      `${combo.strategyLabel.toLowerCase()} in ${combo.state.toLowerCase()}`,
+      `${combo.cityName.toLowerCase()} rental property screening`,
+      `${combo.strategyLabel.toLowerCase()} verification checklist`,
     ],
     alternates: { canonical: `/markets/${combo.citySlug}/${combo.strategy}` },
     openGraph: {
       title,
-      description: combo.pitch,
+      description,
       url: `/markets/${combo.citySlug}/${combo.strategy}`,
       type: "article",
       images: [{ url: "/home.jpg", width: 1200, height: 630, alt: title }],
@@ -89,193 +80,213 @@ export default async function CityStrategyPage({
 
   const siteUrl = getSiteUrl();
   const canonicalUrl = `${siteUrl}/markets/${combo.citySlug}/${combo.strategy}`;
+  const description = `Review property-specific evidence for a ${combo.strategyLabel} scenario in ${combo.cityName}. No hand-curated market range or neighborhood recommendation is published from the stale-review registry.`;
 
   const breadcrumbLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
-      { "@type": "ListItem", position: 2, name: "Markets", item: `${siteUrl}/markets` },
-      { "@type": "ListItem", position: 3, name: combo.cityName, item: `${siteUrl}/markets/${combo.citySlug}` },
-      { "@type": "ListItem", position: 4, name: combo.strategyLabel, item: canonicalUrl },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Markets",
+        item: `${siteUrl}/markets`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: combo.cityName,
+        item: `${siteUrl}/markets/${combo.citySlug}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 4,
+        name: combo.strategyLabel,
+        item: canonicalUrl,
+      },
     ],
   };
-
   const webPageLd = {
     "@context": "https://schema.org",
     "@type": "WebPage",
     "@id": `${canonicalUrl}#page`,
-    name: `${combo.strategyLabel} investing in ${combo.cityName}`,
-    description: combo.pitch,
+    name: `${combo.strategyLabel} screening in ${combo.cityName}`,
+    description,
     url: canonicalUrl,
-    dateModified: "2026-08-15",
+    dateModified: "2026-08-29",
     inLanguage: "en-US",
     isPartOf: { "@id": `${siteUrl}/#website` },
   };
-
   const faqLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     mainEntity: [
       {
         "@type": "Question",
-        name: `What should I verify before using ${combo.strategyLabel} in ${combo.cityName}?`,
-        acceptedAnswer: { "@type": "Answer", text: combo.pitch },
-      },
-      {
-        "@type": "Question",
-        name: `What areas in ${combo.cityName} should I research for ${combo.strategyLabel}?`,
+        name: `Does this page recommend ${combo.strategyLabel} in ${combo.cityName}?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `Areas to research for ${combo.strategyLabel} in ${combo.cityName}: ${combo.neighborhoods.map((n) => n.name).join(", ")}. Verify the block, property, rent, expenses, and local rules before relying on any area-level description.`,
+          text: `No. The page preserves a strategy-specific verification workflow but does not publish an investment recommendation, market range, neighborhood ranking, or promised outcome.`,
         },
       },
       {
         "@type": "Question",
-        name: `What illustrative screening ranges are shown for ${combo.strategyLabel} in ${combo.cityName}?`,
+        name: `What should I verify for a ${combo.cityName} ${combo.strategyLabel} scenario?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `Illustrative screen only. Purchase: ${combo.typicalNumbers.purchasePrice}. Monthly rent: ${combo.typicalNumbers.monthlyRent}. Cap rate: ${combo.typicalNumbers.capRate}. ${combo.typicalNumbers.notes} Replace every range with current property-specific evidence before making an investment or financing decision.`,
+          text: `Verify the supported address, asking price, comparable rent evidence, parcel tax, insurance, condition, operating costs, legal eligibility, timeline, exit or refinance assumptions when applicable, and written financing terms.`,
         },
       },
     ],
   };
 
+  const analyzerStrategy =
+    combo.strategy === "brrrr" || combo.strategy === "house-hack"
+      ? combo.strategy
+      : "buy-hold";
+
   return (
     <div className="min-h-screen bg-background">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
+      />
       <Header />
 
-      <main id="main" className="mx-auto max-w-4xl px-4 sm:px-6 py-8 sm:py-12">
-        {/* Breadcrumb */}
+      <main id="main" className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
         <nav aria-label="Breadcrumb" className="mb-6 text-xs">
           <ol className="flex flex-wrap items-center gap-2 text-muted-foreground">
-            <li><Link href="/" className="hover:text-foreground">Home</Link></li>
+            <li>
+              <Link href="/" className="hover:text-foreground">
+                Home
+              </Link>
+            </li>
             <li aria-hidden="true">›</li>
-            <li><Link href={`/markets/${combo.citySlug}`} className="hover:text-foreground">{combo.cityName}</Link></li>
+            <li>
+              <Link
+                href={`/markets/${combo.citySlug}`}
+                className="hover:text-foreground"
+              >
+                {combo.cityName}
+              </Link>
+            </li>
             <li aria-hidden="true">›</li>
-            <li className="font-semibold text-foreground">{combo.strategyLabel}</li>
+            <li className="font-semibold text-foreground">
+              {combo.strategyLabel}
+            </li>
           </ol>
         </nav>
 
-        <p className="text-[11px] uppercase tracking-widest text-primary font-bold">
-          {combo.cityName}, {combo.state} · {combo.strategyLabel}
+        <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
+          {combo.cityName}, {combo.state} · Source-first strategy guide
         </p>
-        <h1 className="mt-2 text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight">
-          {combo.strategyLabel.charAt(0).toUpperCase() + combo.strategyLabel.slice(1)} investing in {combo.cityName}
+        <h1 className="mt-2 text-3xl font-extrabold leading-[1.05] tracking-tight text-foreground sm:text-5xl">
+          {combo.strategyLabel} screening in {combo.cityName}
         </h1>
-        <p className="mt-5 text-lg leading-relaxed text-muted-foreground">{combo.pitch}</p>
+        <p className="mt-5 text-lg leading-relaxed text-foreground">
+          A city-and-strategy label does not establish a property&apos;s price,
+          rent, cap rate, neighborhood fit, legal eligibility, financing, or
+          outcome. This page keeps the review path public while hand-curated
+          registry claims remain hidden pending authoritative dependencies.
+        </p>
 
-        {/* Why here, why now */}
-        <section className="mt-12">
-          <h2 className="text-2xl font-extrabold text-foreground mb-3">Why investors screen {combo.strategyLabel} in {combo.cityName}</h2>
-          <p className="text-base leading-relaxed text-foreground">{combo.whyHereWhyNow}</p>
-        </section>
-
-        {/* Typical numbers */}
         <section className="mt-10 rounded-2xl border border-border bg-card p-6">
-          <p className="text-[11px] uppercase tracking-widest text-primary font-bold mb-3">Illustrative {combo.strategyLabel} screening ranges in {combo.cityName}</p>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Purchase price</p>
-              <p className="mt-1 text-lg font-extrabold text-foreground">{combo.typicalNumbers.purchasePrice}</p>
-            </div>
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Monthly rent</p>
-              <p className="mt-1 text-lg font-extrabold text-foreground">{combo.typicalNumbers.monthlyRent}</p>
-            </div>
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Cap rate</p>
-              <p className="mt-1 text-lg font-extrabold text-foreground">{combo.typicalNumbers.capRate}</p>
-            </div>
-          </div>
-          <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-            {combo.typicalNumbers.notes} These are orientation ranges, not a forecast, appraisal,
-            quote, or promise of achievable performance. Replace them with current address-level
-            rent comps, taxes, insurance, condition, financing terms, and local requirements.
-          </p>
-        </section>
-
-        {/* Neighborhoods */}
-        <section className="mt-12">
-          <h2 className="text-2xl font-extrabold text-foreground mb-4">Areas to research for {combo.strategyLabel} in {combo.cityName}</h2>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {combo.neighborhoods.map((n) => (
-              <article key={n.name} className="rounded-xl border border-border bg-card p-5">
-                <p className="text-base font-bold text-foreground">{n.name}</p>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{n.why}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        {/* Pitfalls */}
-        <section className="mt-12 rounded-2xl border border-amber-500/30 bg-amber-50/40 p-6">
-          <h2 className="text-xl font-extrabold text-foreground mb-3">Common pitfalls to avoid</h2>
-          <ul className="space-y-2">
-            {combo.pitfalls.map((p) => (
-              <li key={p} className="flex items-start gap-2 text-sm leading-relaxed text-foreground">
-                <X className="mt-0.5 size-4 shrink-0 text-amber-600" />
-                <span>{p}</span>
-              </li>
-            ))}
+          <h2 className="text-xl font-extrabold text-foreground">
+            Evidence to collect for this scenario
+          </h2>
+          <ul className="mt-4 list-disc space-y-2 pl-5 text-sm leading-relaxed text-foreground">
+            <li>
+              A supported property address, asking price, current lease, and
+              comparable rent evidence.
+            </li>
+            <li>
+              Parcel tax, property-specific insurance, condition, inspections,
+              utilities, HOA terms, and operating responsibilities.
+            </li>
+            <li>
+              Current local rules and any strategy-specific legal or program
+              eligibility reviewed with qualified professionals.
+            </li>
+            <li>
+              Written financing terms, including the lender&apos;s income,
+              expense, reserve, valuation, seasoning, refinance, or occupancy
+              rules that apply.
+            </li>
+            <li>
+              Separate base and downside scenarios for uncertain rent, vacancy,
+              cost, value, timeline, and exit assumptions.
+            </li>
           </ul>
         </section>
 
-        {/* Tool CTA */}
-        <section className="mt-12 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
-          <h2 className="text-xl sm:text-2xl font-extrabold mb-2">Run a {combo.cityName} {combo.strategyLabel} deal in 60 seconds</h2>
-          <p className="text-sm sm:text-base opacity-90 mb-5">
-            Paste an address into TrueCap and get cap rate, cash-on-cash, DSCR, and a 10-year scenario — pre-loaded with {combo.cityName}-area screening defaults that you can replace with property-specific evidence.
+        <section className="mt-8 rounded-2xl border border-amber-500/30 bg-amber-50/40 p-6">
+          <h2 className="text-base font-extrabold text-foreground">
+            Stale-review boundary
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-foreground">
+            The page intentionally omits hand-authored purchase-price, rent,
+            cap-rate, neighborhood, timing, legal, and strategy-fit statements.
+            Calling a range illustrative does not make an unsourced current
+            market claim publication-ready.
           </p>
-          <Link
-            // Geo + strategy handoff: brrrr/house-hack map 1:1 to analyzer
-            // plays; the other combo strategies land on buy-and-hold.
-            // #main lands them ON the analyzer, not the top of the homepage.
-            href={`${buildAnalyzerHandoffUrl(
-              {
-                address: `${combo.cityName}, ${combo.state}`,
-                strategy:
-                  combo.strategy === "brrrr" || combo.strategy === "house-hack"
-                    ? combo.strategy
-                    : "buy-hold",
-              },
-              { utmSource: "combo-page" }
-            )}#main`}
-            className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity"
-          >
-            Analyze a property free <ArrowRight className="size-4" />
-          </Link>
         </section>
 
-        {/* Related posts */}
-        {combo.relatedPosts && combo.relatedPosts.length > 0 ? (
-          <section className="mt-12 border-t border-border pt-6">
-            <p className="text-xs uppercase tracking-widest text-muted-foreground font-bold mb-3">Related reading</p>
-            <ul className="space-y-1.5 text-sm">
-              {combo.relatedPosts.map((slug) => (
-                <li key={slug}>
-                  <Link href={`/blog/${slug}`} className="text-primary font-semibold hover:underline">
-                    /blog/{slug.replaceAll("-", " ")} →
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ) : null}
+        <section className="mt-12 rounded-2xl bg-primary p-6 text-primary-foreground sm:p-8">
+          <h2 className="text-xl font-extrabold sm:text-2xl">
+            Start a {combo.cityName} {combo.strategyLabel} screen
+          </h2>
+          <p className="mb-5 mt-2 text-sm opacity-90 sm:text-base">
+            The handoff carries {combo.cityName}, {combo.state} and the closest
+            released analyzer strategy. Enter a supported property address and
+            asking price, then review labeled rent and rate benchmarks plus
+            editable assumptions. A 10-year planning view requires entitled
+            access; this link does not preload market ranges.
+          </p>
+          <AnalyzerHandoffLink
+            handoffHref={`${buildAnalyzerHandoffUrl(
+              {
+                address: `${combo.cityName}, ${combo.state}`,
+                strategy: analyzerStrategy,
+              },
+              { utmSource: "combo-page" },
+            )}#main`}
+            className="inline-flex items-center gap-2 rounded-xl bg-primary-foreground px-4 py-2.5 font-bold text-primary transition-opacity hover:opacity-90"
+          >
+            Analyze a property free <ArrowRight className="size-4" />
+          </AnalyzerHandoffLink>
+        </section>
 
-        {/* Other strategies in this city */}
         <section className="mt-12 border-t border-border pt-6">
-          <p className="text-xs uppercase tracking-widest text-muted-foreground font-bold mb-3">Other {combo.cityName} guides</p>
+          <p className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+            Other {combo.cityName} verification guides
+          </p>
           <div className="flex flex-wrap gap-2 text-sm">
-            <Link href={`/markets/${combo.citySlug}`} className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">
+            <Link
+              href={`/markets/${combo.citySlug}`}
+              className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
+            >
               {combo.cityName} market overview
             </Link>
-            {CITY_STRATEGY_COMBOS.filter((c) => c.citySlug === combo.citySlug && c.strategy !== combo.strategy).map((c) => (
-              <Link key={c.strategy} href={`/markets/${c.citySlug}/${c.strategy}`} className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">
-                {c.strategyLabel} in {c.cityName}
+            {CITY_STRATEGY_COMBOS.filter(
+              (candidate) =>
+                candidate.citySlug === combo.citySlug &&
+                candidate.strategy !== combo.strategy,
+            ).map((candidate) => (
+              <Link
+                key={candidate.strategy}
+                href={`/markets/${candidate.citySlug}/${candidate.strategy}`}
+                className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
+              >
+                {candidate.strategyLabel} in {candidate.cityName}
               </Link>
             ))}
           </div>

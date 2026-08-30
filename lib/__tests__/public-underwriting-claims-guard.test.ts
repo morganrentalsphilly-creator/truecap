@@ -78,7 +78,9 @@ describe("public underwriting claims", () => {
       for (const pattern of FORBIDDEN_PUBLIC_CLAIMS) {
         const match = visibleSource.match(pattern);
         if (match) {
-          violations.push(`${relative(ROOT, file)}: ${match[0].replace(/\s+/g, " ")}`);
+          violations.push(
+            `${relative(ROOT, file)}: ${match[0].replace(/\s+/g, " ")}`,
+          );
         }
       }
     }
@@ -101,7 +103,7 @@ describe("public underwriting claims", () => {
   it("keeps the House Hack live-in screen separate from a later full-rental scenario", () => {
     const page = readFileSync(
       join(ROOT, "app/tools/house-hacking-calculator/page.tsx"),
-      "utf8"
+      "utf8",
     );
 
     expect(page).toContain("TrueCap does not switch occupancy automatically");
@@ -110,48 +112,25 @@ describe("public underwriting claims", () => {
     expect(page).not.toContain("10-year projection for the year-2 transition");
   });
 
-  it("keeps market medians as context instead of address-level investment guidance", () => {
-    const marketPage = withoutComments(
-      readFileSync(join(ROOT, "app/markets/[city]/page.tsx"), "utf8")
-    );
-    const fitCopy = withoutComments(
-      readFileSync(join(ROOT, "lib/market-strategy-fit.ts"), "utf8")
-    );
-
-    expect(marketPage).toContain("Address-level income, expenses, condition, and financing");
-    expect(marketPage).toContain("neither is a property fact or investment conclusion");
-    expect(marketPage).not.toMatch(/Short answer:\s*yes/i);
-    expect(marketPage).not.toMatch(/the play is long-term price growth/i);
-    expect(marketPage).not.toMatch(/above that line is outperforming/i);
-    expect(fitCopy).not.toMatch(/built for monthly cash flow/i);
-    expect(fitCopy).not.toMatch(/the play here is long-term price growth/i);
-  });
-
-  it("does not convert an editorial state tier into a measured cap-rate claim", () => {
-    const fitCopy = withoutComments(
-      readFileSync(join(ROOT, "lib/market-strategy-fit.ts"), "utf8")
-    );
-    const statePage = withoutComments(
-      readFileSync(join(ROOT, "app/states/[slug]/page.tsx"), "utf8")
-    );
-
-    expect(fitCopy).toContain("Editorial tier: cash-flow leaning");
-    expect(fitCopy).toContain("not a measured cap-rate median");
-    expect(statePage).toContain("strategyFitFromTier(state.tier)");
-  });
-
   it("keeps the 60-second article framed as a preliminary screen", () => {
     const page = withoutComments(
       readFileSync(
-        join(ROOT, "app/blog/how-to-underwrite-a-rental-property-in-60-seconds/page.tsx"),
-        "utf8"
-      )
+        join(
+          ROOT,
+          "app/blog/how-to-underwrite-a-rental-property-in-60-seconds/page.tsx",
+        ),
+        "utf8",
+      ),
     );
 
     expect(page).toContain("How to screen a rental property in 60 seconds");
     expect(page).toContain("not a complete underwrite or a decision to buy");
-    expect(page).toContain("unknown unresolved instead of turning it into zero");
-    expect(page).toContain("not a substitute for property-specific rent evidence");
+    expect(page).toContain(
+      "unknown unresolved instead of turning it into zero",
+    );
+    expect(page).toContain(
+      "not a substitute for property-specific rent evidence",
+    );
     expect(page).not.toMatch(/use FMR instead/i);
     expect(page).not.toMatch(/quote-able in 60 seconds/i);
     expect(page).not.toMatch(/otherwise,\s*walk/i);
@@ -160,32 +139,49 @@ describe("public underwriting claims", () => {
 
   it("keeps the 50-percent rule subordinate to the category-level model", () => {
     const page = withoutComments(
-      readFileSync(join(ROOT, "app/tools/50-percent-rule-calculator/page.tsx"), "utf8")
+      readFileSync(
+        join(ROOT, "app/tools/50-percent-rule-calculator/page.tsx"),
+        "utf8",
+      ),
     );
 
-    expect(page).toContain("not a property-specific NOI, cash-flow forecast, or decision rule");
-    expect(page).toContain("Keep the distinction explicit even in a quick screen");
+    expect(page).toContain(
+      "not a property-specific NOI, cash-flow forecast, or decision rule",
+    );
+    expect(page).toContain(
+      "Keep the distinction explicit even in a quick screen",
+    );
     expect(page).not.toMatch(/difference doesn['’]t matter/i);
     expect(page).not.toMatch(/strong candidate for a full underwrite/i);
   });
 
   it("describes the free DealCheck alternative as a preliminary screen", () => {
     const page = withoutComments(
-      readFileSync(join(ROOT, "app/blog/best-dealcheck-alternatives/page.tsx"), "utf8")
+      readFileSync(
+        join(ROOT, "app/blog/best-dealcheck-alternatives/page.tsx"),
+        "utf8",
+      ),
     );
 
-    expect(page).toContain("Free preliminary rental screens with no signup or analysis cap");
-    expect(page).toContain("starting benchmarks when available");
+    expect(page).toContain(
+      "Free preliminary rental screens with no signup or analysis cap",
+    );
+    expect(page).toContain(
+      "Labeled HUD rent and FRED rate benchmarks; manual local property tax",
+    );
     expect(page).not.toMatch(/Best free tier\s*[—-]\s*full underwrite/i);
     expect(page).not.toMatch(/HUD rent[^\n]{0,100}populate live/i);
   });
 
   it("keeps lifecycle onboarding aligned with free access and current guarantee policy", () => {
     const welcome = JSON.parse(
-      readFileSync(join(ROOT, "emails/lifecycle-content/welcome.json"), "utf8")
+      readFileSync(join(ROOT, "emails/lifecycle-content/welcome.json"), "utf8"),
     ) as { cta_text?: string };
     const trialDayOne = JSON.parse(
-      readFileSync(join(ROOT, "emails/lifecycle-content/trial-day1.json"), "utf8")
+      readFileSync(
+        join(ROOT, "emails/lifecycle-content/trial-day1.json"),
+        "utf8",
+      ),
     ) as { preheader?: string };
 
     expect(welcome.cta_text).toBe("Analyze a property free");
@@ -194,32 +190,46 @@ describe("public underwriting claims", () => {
 
   it("uses a no-purchase waitlist state when Agent Pro is not configured", () => {
     const page = withoutComments(
-      readFileSync(join(ROOT, "app/for-agents/page.tsx"), "utf8")
+      readFileSync(join(ROOT, "app/for-agents/page.tsx"), "utf8"),
     );
 
-    expect(page).toContain("mailto:hello@usetruecap.com?subject=Agent%20Pro%20waitlist");
+    expect(page).toContain(
+      "mailto:hello@usetruecap.com?subject=Agent%20Pro%20waitlist",
+    );
     expect(page).toContain('"Email to join Agent Pro waitlist"');
     expect(page).toContain("Agent Pro is not accepting new subscriptions yet.");
-    expect(page).toContain("Sending a waitlist request does not start a trial or subscription");
+    expect(page).toContain(
+      "Sending a waitlist request does not start a trial or subscription",
+    );
     expect(page).not.toMatch(/\bverdict\b/i);
   });
 
   it("documents historical Pack risk enforcement without claiming durable fulfillment", () => {
     const safetyMap = readFileSync(
       join(ROOT, "docs/ADVOCACY_DECISION_SAFETY_MAP.md"),
-      "utf8"
+      "utf8",
     );
     const recoveryContract = readFileSync(
       join(ROOT, "docs/ONE-TIME-PDF-SECURITY.md"),
-      "utf8"
+      "utf8",
     );
 
-    expect(safetyMap).toContain("Partial or full refunds and lost disputes revoke");
+    expect(safetyMap).toContain(
+      "Partial or full refunds and lost disputes revoke",
+    );
     expect(safetyMap).toContain("do not make fulfillment");
-    expect(safetyMap).not.toContain("refund/dispute lifecycle, or Pack reconcile");
-    expect(recoveryContract).toContain("approved the refund/dispute policy on 2026-08-24");
+    expect(safetyMap).not.toContain(
+      "refund/dispute lifecycle, or Pack reconcile",
+    );
+    expect(recoveryContract).toContain(
+      "approved the refund/dispute policy on 2026-08-24",
+    );
     expect(recoveryContract).toContain("do not\nactivate new Pack sales");
-    expect(recoveryContract).not.toContain("the current product always writes\n`not_configured`");
-    expect(recoveryContract).not.toContain("Before activation, the founder must approve");
+    expect(recoveryContract).not.toContain(
+      "the current product always writes\n`not_configured`",
+    );
+    expect(recoveryContract).not.toContain(
+      "Before activation, the founder must approve",
+    );
   });
 });

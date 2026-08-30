@@ -17,7 +17,7 @@
  */
 
 import { useId, useMemo, useState } from "react";
-import Link from "next/link";
+import { AnalyzerHandoffLink } from "@/components/analyzer-handoff-link";
 import { ArrowUpRight, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -73,14 +73,24 @@ export function ArvCalculatorWidget() {
       minCompPrice: Math.min(...compPrices),
       maxCompPrice: Math.max(...compPrices),
     };
-  }, [subjectSqft, repairs, multiplier, comp1Price, comp1Sqft, comp2Price, comp2Sqft, comp3Price, comp3Sqft]);
+  }, [
+    subjectSqft,
+    repairs,
+    multiplier,
+    comp1Price,
+    comp1Sqft,
+    comp2Price,
+    comp2Sqft,
+    comp3Price,
+    comp3Sqft,
+  ]);
 
   // Do not carry a rule-of-thumb screen into underwriting as though it were a
   // verified purchase price. The analyzer starts separately and asks for the
   // actual price being evaluated.
   const handoffHref = buildAnalyzerHandoffUrl(
     {},
-    { utmSource: "arv-calculator" }
+    { utmSource: "arv-calculator" },
   );
 
   return (
@@ -93,11 +103,23 @@ export function ArvCalculatorWidget() {
         Sold comps — renovated, recent, nearby
       </p>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-4">
-        <Money label="Comp 1 sale price" value={comp1Price} setValue={setComp1Price} />
+        <Money
+          label="Comp 1 sale price"
+          value={comp1Price}
+          setValue={setComp1Price}
+        />
         <Plain label="Comp 1 sq ft" value={comp1Sqft} setValue={setComp1Sqft} />
-        <Money label="Comp 2 sale price" value={comp2Price} setValue={setComp2Price} />
+        <Money
+          label="Comp 2 sale price"
+          value={comp2Price}
+          setValue={setComp2Price}
+        />
         <Plain label="Comp 2 sq ft" value={comp2Sqft} setValue={setComp2Sqft} />
-        <Money label="Comp 3 sale price" value={comp3Price} setValue={setComp3Price} />
+        <Money
+          label="Comp 3 sale price"
+          value={comp3Price}
+          setValue={setComp3Price}
+        />
         <Plain label="Comp 3 sq ft" value={comp3Sqft} setValue={setComp3Sqft} />
       </div>
 
@@ -105,9 +127,18 @@ export function ArvCalculatorWidget() {
         Your property + the rule
       </p>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-4">
-        <Plain label="Subject finished sq ft" value={subjectSqft} setValue={setSubjectSqft} />
+        <Plain
+          label="Subject finished sq ft"
+          value={subjectSqft}
+          setValue={setSubjectSqft}
+        />
         <Money label="Repair costs" value={repairs} setValue={setRepairs} />
-        <Pct label="Rule multiplier" value={multiplier} setValue={setMultiplier} step="1" />
+        <Pct
+          label="Rule multiplier"
+          value={multiplier}
+          setValue={setMultiplier}
+          step="1"
+        />
       </div>
 
       <div className="rounded-xl border border-border bg-[var(--background)] p-5 sm:p-6 space-y-4">
@@ -120,7 +151,10 @@ export function ArvCalculatorWidget() {
           <>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
               <Metric label="Estimated ARV" value={fmt(result.arv)} />
-              <Metric label="Avg comp $/sq ft" value={`$${result.avgPpsf.toFixed(2)}`} />
+              <Metric
+                label="Avg comp $/sq ft"
+                value={`$${result.avgPpsf.toFixed(2)}`}
+              />
               <Metric
                 label={`70%-rule price screen (${num(multiplier)}%)`}
                 value={fmt(result.mao)}
@@ -133,36 +167,39 @@ export function ArvCalculatorWidget() {
                 sits inside the range the comps actually sold in. */}
             {result.arv > result.maxCompPrice ? (
               <p className="text-xs font-semibold text-amber-700">
-                Sanity check: this ARV is ABOVE every comp&apos;s actual sale price
-                ({fmt(result.minCompPrice)}–{fmt(result.maxCompPrice)}). Be
-                suspicious — check the subject square footage and whether the comps
-                are truly comparable before trusting it.
+                Sanity check: this ARV is ABOVE every comp&apos;s actual sale
+                price ({fmt(result.minCompPrice)}–{fmt(result.maxCompPrice)}).
+                Be suspicious — check the subject square footage and whether the
+                comps are truly comparable before trusting it.
               </p>
             ) : result.arv < result.minCompPrice ? (
               <p className="text-xs font-semibold text-amber-700">
-                Sanity check: this ARV is below every comp&apos;s actual sale price
-                ({fmt(result.minCompPrice)}–{fmt(result.maxCompPrice)}). That can
-                happen when the subject is much smaller than the comps — stay
-                within about ±20% of your square footage when picking them.
+                Sanity check: this ARV is below every comp&apos;s actual sale
+                price ({fmt(result.minCompPrice)}–{fmt(result.maxCompPrice)}).
+                That can happen when the subject is much smaller than the comps
+                — stay within about ±20% of your square footage when picking
+                them.
               </p>
             ) : (
               <p className="text-xs font-semibold text-[var(--metric-positive)]">
                 Sanity check passed: the ARV sits inside your comps&apos; actual
-                sale range ({fmt(result.minCompPrice)}–{fmt(result.maxCompPrice)}).
+                sale range ({fmt(result.minCompPrice)}–
+                {fmt(result.maxCompPrice)}).
               </p>
             )}
 
             {result.mao <= 0 && (
               <p className="text-xs font-semibold text-[var(--metric-negative)]">
-                At this multiplier the repairs consume the entire allowable price —
-                the rule produces no feasible price screen for this deal as entered.
+                At this multiplier the repairs consume the entire allowable
+                price — the rule produces no feasible price screen for this deal
+                as entered.
               </p>
             )}
             {result.mao > 0 && result.arv < 150_000 && (
               <p className="text-xs font-semibold text-amber-700">
-                Sub-$150k ARV: fixed costs (title, permits, utilities, insurance)
-                eat a big share of a small spread — many flippers drop the
-                multiplier to 60–65% here.
+                Sub-$150k ARV: fixed costs (title, permits, utilities,
+                insurance) eat a big share of a small spread — many flippers
+                drop the multiplier to 60–65% here.
               </p>
             )}
             {result.mao > 0 && result.arv > 600_000 && (
@@ -198,66 +235,169 @@ export function ArvCalculatorWidget() {
         )}
       </div>
 
-      <Link href={handoffHref} target="_top" className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline">
+      <AnalyzerHandoffLink
+        handoffHref={handoffHref}
+        target="_top"
+        className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
+      >
         <Sparkles className="w-4 h-4" />
-        Open the released rental analyzer with a separately verified purchase price
+        Open the released rental analyzer with a separately verified purchase
+        price
         <ArrowUpRight className="w-4 h-4" />
-      </Link>
+      </AnalyzerHandoffLink>
     </div>
   );
 }
 
-function Money({ label, value, setValue }: { label: string; value: string; setValue: (v: string) => void }) {
+function Money({
+  label,
+  value,
+  setValue,
+}: {
+  label: string;
+  value: string;
+  setValue: (v: string) => void;
+}) {
   const id = useId();
   return (
     <div>
-      <Label htmlFor={id} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">{label}</Label>
+      <Label
+        htmlFor={id}
+        className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
+      >
+        {label}
+      </Label>
       <div className="relative">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">$</span>
-        <Input id={id} type="number" inputMode="numeric" value={value} onChange={(e) => setValue(e.target.value)} className="pl-7 border-input bg-background" />
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+          $
+        </span>
+        <Input
+          id={id}
+          type="number"
+          inputMode="numeric"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          className="pl-7 border-input bg-background"
+        />
       </div>
     </div>
   );
 }
-function Pct({ label, value, setValue, step = "0.5" }: { label: string; value: string; setValue: (v: string) => void; step?: string }) {
+function Pct({
+  label,
+  value,
+  setValue,
+  step = "0.5",
+}: {
+  label: string;
+  value: string;
+  setValue: (v: string) => void;
+  step?: string;
+}) {
   const id = useId();
   return (
     <div>
-      <Label htmlFor={id} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">{label}</Label>
+      <Label
+        htmlFor={id}
+        className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
+      >
+        {label}
+      </Label>
       <div className="relative">
-        <Input id={id} type="number" inputMode="decimal" step={step} value={value} onChange={(e) => setValue(e.target.value)} className="pr-8 border-input bg-background" />
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
+        <Input
+          id={id}
+          type="number"
+          inputMode="decimal"
+          step={step}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          className="pr-8 border-input bg-background"
+        />
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+          %
+        </span>
       </div>
     </div>
   );
 }
-function Plain({ label, value, setValue }: { label: string; value: string; setValue: (v: string) => void }) {
+function Plain({
+  label,
+  value,
+  setValue,
+}: {
+  label: string;
+  value: string;
+  setValue: (v: string) => void;
+}) {
   const id = useId();
   return (
     <div>
-      <Label htmlFor={id} className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">{label}</Label>
-      <Input id={id} type="number" inputMode="numeric" value={value} onChange={(e) => setValue(e.target.value)} className="border-input bg-background" />
+      <Label
+        htmlFor={id}
+        className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
+      >
+        {label}
+      </Label>
+      <Input
+        id={id}
+        type="number"
+        inputMode="numeric"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        className="border-input bg-background"
+      />
     </div>
   );
 }
-function Metric({ label, value, positive, negative }: { label: string; value: string; positive?: boolean; negative?: boolean }) {
+function Metric({
+  label,
+  value,
+  positive,
+  negative,
+}: {
+  label: string;
+  value: string;
+  positive?: boolean;
+  negative?: boolean;
+}) {
   return (
     <div>
-      <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">{label}</div>
-      <div className={cn("text-base sm:text-lg font-extrabold mt-0.5 tabular-nums",
-        positive && "text-[var(--metric-positive)]",
-        negative && "text-[var(--metric-negative)]",
-        !positive && !negative && "text-foreground")}>
+      <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
+        {label}
+      </div>
+      <div
+        className={cn(
+          "text-base sm:text-lg font-extrabold mt-0.5 tabular-nums",
+          positive && "text-[var(--metric-positive)]",
+          negative && "text-[var(--metric-negative)]",
+          !positive && !negative && "text-foreground",
+        )}
+      >
         {value}
       </div>
     </div>
   );
 }
-function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
+function Row({
+  label,
+  value,
+  bold,
+}: {
+  label: string;
+  value: string;
+  bold?: boolean;
+}) {
   return (
     <div className="flex justify-between py-0.5 gap-3">
       <span className="text-muted-foreground">{label}</span>
-      <span className={cn("tabular-nums shrink-0", bold ? "font-bold text-foreground" : "text-foreground")}>{value}</span>
+      <span
+        className={cn(
+          "tabular-nums shrink-0",
+          bold ? "font-bold text-foreground" : "text-foreground",
+        )}
+      >
+        {value}
+      </span>
     </div>
   );
 }

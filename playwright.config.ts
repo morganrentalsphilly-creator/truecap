@@ -91,9 +91,19 @@ export default defineConfig({
           ? "npm run start -- --hostname 127.0.0.1 --port 3100"
           : "npm run dev -- --hostname 127.0.0.1 --port 3100",
         url: localBaseUrl,
-        reuseExistingServer: !process.env.CI,
+        // A production server holds prerendered HTML in memory. Reusing it
+        // after another build rewrites `.next` can pair old HTML with new
+        // chunk hashes and silently disable all hydration. Dev reuse remains
+        // convenient; production-mode verification always owns a fresh build.
+        reuseExistingServer: !process.env.CI && !useProductionServer,
         timeout: 120_000,
         env: {
+          // getSiteUrl() is evaluated while static embed pages render. Keep
+          // local dev-server HTML on the same origin Playwright actually
+          // serves instead of baking the normal localhost:3000 fallback into
+          // links while this harness listens on 127.0.0.1:3100.
+          NEXT_PUBLIC_SITE_URL:
+            process.env.NEXT_PUBLIC_SITE_URL?.trim() || localBaseUrl,
           NEXT_PUBLIC_SUPABASE_URL:
             process.env.E2E_SUPABASE_URL?.trim() || "http://127.0.0.1:54321",
           NEXT_PUBLIC_SUPABASE_ANON_KEY:
