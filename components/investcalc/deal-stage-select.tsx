@@ -12,10 +12,13 @@
  * recompute for the new stage. The page only mounts this for users with the
  * pipeline entitlement, mirroring My Deals' canUsePipeline gate.
  */
-import { useEffect, useState, useTransition } from "react";
+import { useLayoutEffect, useRef, useState, useTransition } from "react";
 import * as Sentry from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
-import { updateSavedDealStageAction } from "@/app/actions/saved-analyses";
+import {
+  undoPassedSavedDealStageAction,
+  updateSavedDealStageAction,
+} from "@/app/actions/saved-analyses";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import {
@@ -31,6 +34,7 @@ import {
   promptForPipelinePassReason,
 } from "@/lib/pipeline-pass-confirmation";
 import { trackEvent } from "@/lib/analytics";
+import { isCurrentDealWorkspaceMutation } from "@/lib/deal-workspace-mutation-lifecycle";
 
 export function DealStageSelect({
   savedDealId,
@@ -47,7 +51,15 @@ export function DealStageSelect({
   // which reads as "my change didn't take". Show the picked stage
   // immediately; revert on error; re-sync when the server prop updates.
   const [displayStage, setDisplayStage] = useState<PipelineStage>(stage);
-  useEffect(() => setDisplayStage(stage), [stage]);
+  const savedDealIdRef = useRef(savedDealId);
+  const mutationRequestRef = useRef<symbol | null>(null);
+  useLayoutEffect(() => {
+    savedDealIdRef.current = savedDealId;
+    mutationRequestRef.current = null;
+  }, [savedDealId]);
+  useLayoutEffect(() => {
+    setDisplayStage(stage);
+  }, [savedDealId, stage]);
 
   const handleChange = (value: string) => {
     const next = value as PipelineStage;
@@ -74,16 +86,28 @@ export function DealStageSelect({
       });
       return;
     }
+    const dealAtSubmit = savedDealId;
+    const stageAtSubmit = stage;
+    const requestToken = Symbol("deal-stage-save");
+    mutationRequestRef.current = requestToken;
+    const requestStillOwnsDeal = () =>
+      isCurrentDealWorkspaceMutation({
+        submittedDealId: dealAtSubmit,
+        currentDealId: savedDealIdRef.current,
+        requestToken,
+        currentRequestToken: mutationRequestRef.current,
+      });
     setDisplayStage(next);
     startSaving(async () => {
       try {
         const result = await updateSavedDealStageAction(
-          savedDealId,
+          dealAtSubmit,
           next,
           reason ? { reason } : undefined,
         );
+        if (!requestStillOwnsDeal()) return;
         if (!result.ok) {
-          setDisplayStage(stage);
+          setDisplayStage(stageAtSubmit);
           toast({
             title: "Could not update stage",
             description: result.message,
@@ -91,29 +115,51 @@ export function DealStageSelect({
           });
           return;
         }
+        const passHistoryEventId =
+          next === "passed" ? result.historyEventId : null;
         toast({
           title: next === "passed" ? "Marked as Passed" : "Stage updated",
           description:
             next === "passed"
-              ? `Reason recorded in Deal Log. Undo restores ${pipelineStageLabel(stage)}.`
+              ? passHistoryEventId
+                ? `Reason recorded in Deal Log. Undo restores ${pipelineStageLabel(stageAtSubmit)}.`
+                : "This deal was already marked as Passed."
               : `Moved to ${pipelineStageLabel(next)}.`,
           variant: "success",
           action:
-            next === "passed" ? (
+            next === "passed" && passHistoryEventId ? (
               <ToastAction
                 altText="Undo marking deal as Passed"
                 className="min-h-11"
                 onClick={() => {
-                  setDisplayStage(stage);
+                  if (savedDealIdRef.current !== dealAtSubmit) return;
+                  const undoToken = Symbol("deal-stage-undo");
+                  mutationRequestRef.current = undoToken;
+                  const undoStillOwnsDeal = () =>
+                    isCurrentDealWorkspaceMutation({
+                      submittedDealId: dealAtSubmit,
+                      currentDealId: savedDealIdRef.current,
+                      requestToken: undoToken,
+                      currentRequestToken: mutationRequestRef.current,
+                    });
                   startSaving(async () => {
                     try {
-                      const undo = await updateSavedDealStageAction(
-                        savedDealId,
-                        stage,
+                      const undo = await undoPassedSavedDealStageAction(
+                        dealAtSubmit,
+                        stageAtSubmit,
+                        passHistoryEventId,
                         { note: "Pass decision undone." },
                       );
+                      if (!undoStillOwnsDeal()) return;
                       if (!undo.ok) {
-                        setDisplayStage("passed");
+                        if (undo.code === "STALE_DATA") {
+                          toast({
+                            title: "Undo expired",
+                            description: undo.message,
+                          });
+                          router.refresh();
+                          return;
+                        }
                         toast({
                           title: "Could not undo",
                           description: undo.message,
@@ -121,22 +167,33 @@ export function DealStageSelect({
                         });
                         return;
                       }
+                      setDisplayStage(stageAtSubmit);
+                      toast({
+                        title: "Pass undone",
+                        description: `Restored ${pipelineStageLabel(stageAtSubmit)}.`,
+                        variant: "success",
+                      });
                       trackEvent("pipeline_stage_changed", {
                         from_stage: "passed",
-                        to_stage: stage,
-                        moved_to_offer_ready: stage === "offer_ready",
+                        to_stage: stageAtSubmit,
+                        moved_to_offer_ready: stageAtSubmit === "offer_ready",
                       });
                       router.refresh();
                     } catch (error) {
                       Sentry.captureException(error, {
                         tags: { feature: "deal-stage-pass-undo" },
                       });
-                      setDisplayStage("passed");
+                      if (!undoStillOwnsDeal()) return;
                       toast({
                         title: "Could not undo",
                         description: "Check your connection and try again.",
                         variant: "destructive",
                       });
+                      router.refresh();
+                    } finally {
+                      if (mutationRequestRef.current === undoToken) {
+                        mutationRequestRef.current = null;
+                      }
                     }
                   });
                 }}
@@ -146,7 +203,7 @@ export function DealStageSelect({
             ) : undefined,
         });
         trackEvent("pipeline_stage_changed", {
-          from_stage: stage,
+          from_stage: stageAtSubmit,
           to_stage: next,
           moved_to_offer_ready: next === "offer_ready",
         });
@@ -157,12 +214,17 @@ export function DealStageSelect({
         // still shows the NEW stage — a lie the server never stored — so roll
         // it back to the server-truth prop and tell the user it's retryable.
         Sentry.captureException(err, { tags: { feature: "deal-stage" } });
-        setDisplayStage(stage);
+        if (!requestStillOwnsDeal()) return;
+        setDisplayStage(stageAtSubmit);
         toast({
           title: "Could not update stage",
           description: "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
+      } finally {
+        if (mutationRequestRef.current === requestToken) {
+          mutationRequestRef.current = null;
+        }
       }
     });
   };

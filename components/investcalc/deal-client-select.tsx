@@ -10,7 +10,7 @@
  * other tier sees client chrome on their deal page.
  */
 
-import { useState, useTransition } from "react";
+import { useLayoutEffect, useRef, useState, useTransition } from "react";
 import * as Sentry from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
 import { UserRound } from "lucide-react";
@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { isCurrentDealWorkspaceMutation } from "@/lib/deal-workspace-mutation-lifecycle";
 
 const UNASSIGNED = "__none__";
 
@@ -39,16 +40,37 @@ export function DealClientSelect({
   const { toast } = useToast();
   const [value, setValue] = useState(clientId ?? UNASSIGNED);
   const [isPending, startTransition] = useTransition();
+  const savedDealIdRef = useRef(savedDealId);
+  const mutationRequestRef = useRef<symbol | null>(null);
+
+  useLayoutEffect(() => {
+    savedDealIdRef.current = savedDealId;
+    mutationRequestRef.current = null;
+  }, [savedDealId]);
+  useLayoutEffect(() => {
+    setValue(clientId ?? UNASSIGNED);
+  }, [clientId, savedDealId]);
 
   if (clients.length === 0) return null;
 
   const onChange = (next: string) => {
     const previous = value;
+    const dealAtSubmit = savedDealId;
+    const requestToken = Symbol("deal-client-save");
+    mutationRequestRef.current = requestToken;
+    const requestStillOwnsDeal = () =>
+      isCurrentDealWorkspaceMutation({
+        submittedDealId: dealAtSubmit,
+        currentDealId: savedDealIdRef.current,
+        requestToken,
+        currentRequestToken: mutationRequestRef.current,
+      });
     setValue(next); // optimistic — reverted below if the write fails
     const nextClientId = next === UNASSIGNED ? null : next;
     startTransition(async () => {
       try {
-        const result = await setSavedDealClientAction(savedDealId, nextClientId);
+        const result = await setSavedDealClientAction(dealAtSubmit, nextClientId);
+        if (!requestStillOwnsDeal()) return;
         if (!result.ok) {
           setValue(previous);
           toast({ title: "Could not assign client", description: result.message, variant: "destructive" });
@@ -61,9 +83,14 @@ export function DealClientSelect({
         });
         router.refresh();
       } catch (err) {
-        setValue(previous);
         Sentry.captureException(err, { tags: { feature: "deal-client-select" } });
+        if (!requestStillOwnsDeal()) return;
+        setValue(previous);
         toast({ title: "Could not assign client", description: "Try again in a moment.", variant: "destructive" });
+      } finally {
+        if (mutationRequestRef.current === requestToken) {
+          mutationRequestRef.current = null;
+        }
       }
     });
   };

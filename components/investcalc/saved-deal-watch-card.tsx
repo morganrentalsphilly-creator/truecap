@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useId, useState, useTransition } from "react";
+import {
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import * as Sentry from "@sentry/nextjs";
 import { BellRing, Eye, ShieldCheck } from "lucide-react";
 import {
@@ -12,6 +19,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { trackEvent } from "@/lib/analytics";
+import { isCurrentDealWorkspaceMutation } from "@/lib/deal-workspace-mutation-lifecycle";
 
 /**
  * Persisted, feature-flagged Saved Deal Watch opt-in. This surface is
@@ -29,6 +37,16 @@ export function SavedDealWatchCard({ savedDealId }: { savedDealId: string }) {
   const [loaded, setLoaded] = useState(false);
   const [available, setAvailable] = useState(true);
   const [pending, startTransition] = useTransition();
+  const savedDealIdRef = useRef(savedDealId);
+  const mutationRequestRef = useRef<symbol | null>(null);
+
+  useLayoutEffect(() => {
+    savedDealIdRef.current = savedDealId;
+    mutationRequestRef.current = null;
+    setLoaded(false);
+    setAvailable(true);
+    setSettings(null);
+  }, [savedDealId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -44,6 +62,12 @@ export function SavedDealWatchCard({ savedDealId }: { savedDealId: string }) {
           result.code === "NOT_FOUND"
         ) {
           setAvailable(false);
+        } else {
+          toast({
+            title: "Couldn't load Watch setup",
+            description: result.message,
+            variant: "destructive",
+          });
         }
         setLoaded(true);
       })
@@ -54,18 +78,29 @@ export function SavedDealWatchCard({ savedDealId }: { savedDealId: string }) {
     return () => {
       cancelled = true;
     };
-  }, [savedDealId]);
+  }, [savedDealId, toast]);
 
   const toggleWatch = (next: boolean) => {
     if (!settings) return;
     const previous = settings;
+    const dealAtSubmit = savedDealId;
+    const requestToken = Symbol("saved-deal-watch-toggle");
+    mutationRequestRef.current = requestToken;
+    const requestStillOwnsDeal = () =>
+      isCurrentDealWorkspaceMutation({
+        submittedDealId: dealAtSubmit,
+        currentDealId: savedDealIdRef.current,
+        requestToken,
+        currentRequestToken: mutationRequestRef.current,
+      });
     setSettings({ ...settings, subscriptionEnabled: next });
     startTransition(async () => {
       try {
         const result = await setSavedDealWatchEnabledAction({
-          savedAnalysisId: savedDealId,
+          savedAnalysisId: dealAtSubmit,
           enabled: next,
         });
+        if (!requestStillOwnsDeal()) return;
         if (!result.ok) {
           setSettings(previous);
           toast({
@@ -86,12 +121,17 @@ export function SavedDealWatchCard({ savedDealId }: { savedDealId: string }) {
         }
       } catch (error) {
         Sentry.captureException(error, { tags: { feature: "saved-deal-watch" } });
+        if (!requestStillOwnsDeal()) return;
         setSettings(previous);
         toast({
           title: "Couldn't save Watch setup",
           description: "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
+      } finally {
+        if (mutationRequestRef.current === requestToken) {
+          mutationRequestRef.current = null;
+        }
       }
     });
   };
@@ -103,14 +143,25 @@ export function SavedDealWatchCard({ savedDealId }: { savedDealId: string }) {
     if (!settings) return;
     const previous = settings;
     const optimistic = { ...settings, [key]: next };
+    const dealAtSubmit = savedDealId;
+    const requestToken = Symbol("saved-deal-watch-preference");
+    mutationRequestRef.current = requestToken;
+    const requestStillOwnsDeal = () =>
+      isCurrentDealWorkspaceMutation({
+        submittedDealId: dealAtSubmit,
+        currentDealId: savedDealIdRef.current,
+        requestToken,
+        currentRequestToken: mutationRequestRef.current,
+      });
     setSettings(optimistic);
     startTransition(async () => {
       try {
         const result = await setSavedDealWatchPreferencesAction({
-          savedAnalysisId: savedDealId,
+          savedAnalysisId: dealAtSubmit,
           inAppNotificationsEnabled: optimistic.inAppNotificationsEnabled,
           emailNotificationsEnabled: optimistic.emailNotificationsEnabled,
         });
+        if (!requestStillOwnsDeal()) return;
         if (!result.ok) {
           setSettings(previous);
           toast({
@@ -128,12 +179,17 @@ export function SavedDealWatchCard({ savedDealId }: { savedDealId: string }) {
         });
       } catch (error) {
         Sentry.captureException(error, { tags: { feature: "saved-deal-watch" } });
+        if (!requestStillOwnsDeal()) return;
         setSettings(previous);
         toast({
           title: "Couldn't save notification preference",
           description: "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
+      } finally {
+        if (mutationRequestRef.current === requestToken) {
+          mutationRequestRef.current = null;
+        }
       }
     });
   };
@@ -141,6 +197,13 @@ export function SavedDealWatchCard({ savedDealId }: { savedDealId: string }) {
   // The feature flag is also enforced by the server page and every action.
   // Missing schema or access self-hides instead of presenting a dead control.
   if (!loaded || !available || !settings) return null;
+  // A user who never opted in should not see a paid control after downgrade.
+  // Retained rows remain visible because consent must stay revocable.
+  if (!settings.canEnable && !settings.hasStoredConfiguration) return null;
+  const showNotificationPreferences =
+    settings.subscriptionEnabled ||
+    settings.inAppNotificationsEnabled ||
+    settings.emailNotificationsEnabled;
 
   return (
     <section
@@ -164,7 +227,9 @@ export function SavedDealWatchCard({ savedDealId }: { savedDealId: string }) {
           id={watchSwitchId}
           checked={settings.subscriptionEnabled}
           onCheckedChange={toggleWatch}
-          disabled={pending}
+          disabled={
+            pending || (!settings.canEnable && !settings.subscriptionEnabled)
+          }
           aria-label={settings.subscriptionEnabled ? "Leave Saved Deal Watch waitlist" : "Join Saved Deal Watch waitlist"}
         />
       </div>
@@ -190,10 +255,21 @@ export function SavedDealWatchCard({ savedDealId }: { savedDealId: string }) {
         htmlFor={watchSwitchId}
         className="mt-3 block cursor-pointer text-xs font-semibold text-foreground"
       >
-        {settings.subscriptionEnabled ? "Leave waitlist" : "Join waitlist"}
+        {settings.subscriptionEnabled
+          ? "Leave waitlist"
+          : settings.canEnable
+            ? "Join waitlist"
+            : "Watch requires Pro"}
       </label>
 
-      {settings.subscriptionEnabled ? (
+      {!settings.canEnable ? (
+        <p className="mt-2 text-xs text-muted-foreground">
+          Your current plan cannot add Watch consent. Any retained opt-in or
+          notification preference can still be turned off here.
+        </p>
+      ) : null}
+
+      {showNotificationPreferences ? (
         <div className="mt-5 space-y-4 border-t border-border pt-4">
           <div className="flex items-start justify-between gap-4">
             <label htmlFor={inAppSwitchId} className="min-w-0 cursor-pointer">
@@ -212,7 +288,10 @@ export function SavedDealWatchCard({ savedDealId }: { savedDealId: string }) {
               onCheckedChange={(next) =>
                 updateNotificationPreference("inAppNotificationsEnabled", next)
               }
-              disabled={pending}
+              disabled={
+                pending ||
+                (!settings.canEnable && !settings.inAppNotificationsEnabled)
+              }
               aria-label="Save future in-app Saved Deal Watch alert preference"
             />
           </div>
@@ -234,7 +313,10 @@ export function SavedDealWatchCard({ savedDealId }: { savedDealId: string }) {
               onCheckedChange={(next) =>
                 updateNotificationPreference("emailNotificationsEnabled", next)
               }
-              disabled={pending}
+              disabled={
+                pending ||
+                (!settings.canEnable && !settings.emailNotificationsEnabled)
+              }
               aria-label="Save future email Saved Deal Watch alert preference"
             />
           </div>

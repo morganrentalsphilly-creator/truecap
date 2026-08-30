@@ -18,7 +18,7 @@
  * Defensive: gracefully handles the case where the DB migration hasn't
  * been applied yet - shows a quiet inline notice instead of crashing.
  */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import * as Sentry from "@sentry/nextjs";
 import { Loader2, NotebookPen } from "lucide-react";
 import {
@@ -60,8 +60,11 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
   const saveRequestRef = useRef<symbol | null>(null);
   const queuedSaveRequestedRef = useRef(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     savedDealIdRef.current = savedDealId;
+    saveRequestRef.current = null;
+    queuedSaveRequestedRef.current = false;
+    setInitialLoaded(false);
   }, [savedDealId]);
 
   // Lazy-load the current notes on mount / when the saved deal changes.

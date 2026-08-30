@@ -321,6 +321,7 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
   const scenarioNote = `Verify roof scope for ${runKey}.`;
   const queuedScenarioNote = `Confirm sewer scope for ${runKey}.`;
   let baseDealId: string | null = null;
+  let uploadedDocumentName: string | null = null;
   let notesRoutePattern: string | null = null;
   const notesSaveGate = { release: null as (() => void) | null };
 
@@ -409,6 +410,78 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
       page.getByText("Max 10 MB per file.", { exact: true }),
     ).toBeVisible();
 
+    // The old regression stopped at the client-side size check, so CI never
+    // reached Storage RLS and stayed green while every real upload failed in
+    // production. Exercise the complete private-object lifecycle with a small
+    // valid PDF: upload, list, signed download, confirm-gated delete.
+    const validDocumentName = `e2e-deal-document-${runKey}.pdf`;
+    // Track before the upload starts: if Storage succeeds but the following
+    // toast/list assertion fails, finally still attempts object cleanup.
+    uploadedDocumentName = validDocumentName;
+    await documentInput.setInputFiles({
+      name: validDocumentName,
+      mimeType: "application/pdf",
+      buffer: Buffer.from("%PDF-1.4\n% TrueCap authenticated storage regression\n"),
+    });
+    await expect(
+      page.getByText("Document uploaded", { exact: true }),
+    ).toBeVisible({ timeout: 30_000 });
+    await expect(
+      documents.getByText(validDocumentName, { exact: true }),
+    ).toBeVisible();
+
+    const documentPopupPromise = page.waitForEvent("popup", { timeout: 20_000 });
+    await documents
+      .getByRole("button", { name: `Download ${validDocumentName}`, exact: true })
+      .click();
+    const documentPopup = await documentPopupPromise;
+    await expect
+      .poll(() => documentPopup.url(), { timeout: 20_000 })
+      .toContain("/storage/v1/object/sign/deal-documents/");
+    await documentPopup.close();
+
+    await documents
+      .getByRole("button", { name: `Delete ${validDocumentName}`, exact: true })
+      .click();
+    const deleteDocumentPopover = page
+      .getByText("Delete this document?", { exact: true })
+      .locator("xpath=ancestor::*[@data-radix-popper-content-wrapper]");
+    await expect(deleteDocumentPopover).toBeVisible();
+    await deleteDocumentPopover
+      .getByRole("button", { name: "Delete", exact: true })
+      .click();
+    await expect(
+      page.getByText("Document deleted", { exact: true }),
+    ).toBeVisible({ timeout: 30_000 });
+    await expect(
+      documents.getByText(validDocumentName, { exact: true }),
+    ).toHaveCount(0);
+    uploadedDocumentName = null;
+
+    const commentBody = `E2E seller update ${runKey}`;
+    const commentLog = page.getByRole("region", { name: "Deal comments" });
+    await expect(commentLog).toBeVisible();
+    await commentLog.getByLabel("Add a deal comment").fill(commentBody);
+    await commentLog
+      .getByRole("button", { name: "Add comment", exact: true })
+      .click();
+    await expect(
+      commentLog.getByText(commentBody, { exact: true }),
+    ).toBeVisible({ timeout: 20_000 });
+    await commentLog
+      .getByRole("button", { name: "Delete comment", exact: true })
+      .click();
+    const deleteCommentPopover = page
+      .getByText("Delete this comment?", { exact: true })
+      .locator("xpath=ancestor::*[@data-radix-popper-content-wrapper]");
+    await expect(deleteCommentPopover).toBeVisible();
+    await deleteCommentPopover
+      .getByRole("button", { name: "Delete", exact: true })
+      .click();
+    await expect(
+      commentLog.getByText(commentBody, { exact: true }),
+    ).toHaveCount(0);
+
     const scenarios = page
       .getByRole("heading", { level: 2, name: "Scenarios" })
       .locator("xpath=ancestor::section");
@@ -416,6 +489,12 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
       .getByRole("button", { name: "Add a scenario", exact: true })
       .click();
     await scenarios.getByLabel("Scenario name").fill(scenarioName);
+    await scenarios
+      .getByLabel("Strategy (optional)")
+      .selectOption("house_hack");
+    await expect(
+      scenarios.getByText(/Sets down payment to 3\.5%.*choose House Hack/i),
+    ).toBeVisible();
     await scenarios
       .getByRole("button", { name: "Add scenario", exact: true })
       .click();
@@ -425,7 +504,16 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
       timeout: 30_000,
     });
     await expect(
+      page.getByText(
+        "The copy is ready. Open its workspace, edit assumptions, and choose House hack to complete the visible strategy setup.",
+        { exact: true },
+      ),
+    ).toBeVisible();
+    await expect(
       scenarios.getByText(scenarioName, { exact: true }),
+    ).toBeVisible();
+    await expect(
+      scenarios.getByText("House hack", { exact: true }),
     ).toBeVisible();
 
     await page.reload({ waitUntil: "domcontentloaded" });
@@ -435,6 +523,12 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
         .filter({ visible: true })
         .first(),
     ).toBeVisible({ timeout: 20_000 });
+    await expect(
+      page
+        .getByText("House hack", { exact: true })
+        .filter({ visible: true })
+        .first(),
+    ).toBeVisible();
     const scenarioWorkspaceLink = page.getByRole("link", {
       name: `Open ${scenarioName} workspace`,
     });
@@ -451,6 +545,19 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
       }),
       scenarioWorkspaceLink.click(),
     ]);
+
+    await expect(
+      page
+        .getByText("House hack", { exact: true })
+        .filter({ visible: true })
+        .first(),
+    ).toBeVisible({ timeout: 20_000 });
+    await expect(
+      page.getByText(
+        "Independent House hack starting copy — open it to verify and complete the strategy inputs.",
+        { exact: true },
+      ),
+    ).toBeVisible();
 
     const notes = page.getByRole("textbox", {
       name: "Deal notes",
@@ -568,6 +675,40 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
     notesSaveGate.release?.();
     if (notesRoutePattern) {
       await page.unroute(notesRoutePattern).catch(() => undefined);
+    }
+    if (baseDealId && uploadedDocumentName) {
+      // Best-effort object cleanup if an assertion between upload and the
+      // tested delete failed. Deleting the deal row does not cascade into
+      // Supabase Storage.
+      await page
+        .goto(`/dashboard/saved-analyses/${baseDealId}`, {
+          waitUntil: "domcontentloaded",
+        })
+        .then(async () => {
+          const documents = page.getByRole("region", { name: "Deal documents" });
+          const deleteButton = documents.getByRole("button", {
+            name: `Delete ${uploadedDocumentName}`,
+            exact: true,
+          });
+          const objectIsListed = await deleteButton
+            .waitFor({ state: "visible", timeout: 20_000 })
+            .then(() => true)
+            .catch(() => false);
+          if (objectIsListed) {
+            await deleteButton.click();
+            const popover = page
+              .getByText("Delete this document?", { exact: true })
+              .locator("xpath=ancestor::*[@data-radix-popper-content-wrapper]");
+            await popover
+              .getByRole("button", { name: "Delete", exact: true })
+              .click();
+            await page
+              .getByText("Document deleted", { exact: true })
+              .waitFor({ state: "visible", timeout: 30_000 });
+            uploadedDocumentName = null;
+          }
+        })
+        .catch(() => undefined);
     }
     if (baseDealId) {
       await deleteRegressionDealsByAddress(page, address);

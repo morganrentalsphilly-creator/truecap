@@ -75,6 +75,18 @@ export function FinancingProfileSelector({
             active.find((profile) => profile.isDefault) ??
             active[0];
           setSelectedId(preferred?.id ?? "");
+        } else if (
+          result.code !== "FEATURE_DISABLED" &&
+          result.code !== "SIGN_IN_REQUIRED" &&
+          result.code !== "MIGRATION_PENDING"
+        ) {
+          // The selector is optional, so expected absence stays quiet. A real
+          // server failure must not masquerade as "you have no profiles."
+          toast({
+            title: "Couldn't load financing profiles",
+            description: result.message,
+            variant: "destructive",
+          });
         }
         setLoading(false);
       })
@@ -87,7 +99,7 @@ export function FinancingProfileSelector({
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [toast]);
 
   // Once any engine-applied term diverges, detach the reusable profile. The
   // edited values remain in the form, but a later save must not claim they

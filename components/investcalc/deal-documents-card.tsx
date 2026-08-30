@@ -9,12 +9,12 @@
  * signed URLs. Renders for a saved deal; self-hides if the bucket isn't
  * provisioned yet.
  */
-import { useEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { Download, Loader2, Paperclip, Trash2, Upload } from "lucide-react";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { friendlyToastError } from "@/lib/friendly-error";
 import { useToast } from "@/hooks/use-toast";
-import { ensureFreshSession } from "@/lib/supabase/ensure-fresh-session";
+import { getFreshSessionUserId } from "@/lib/supabase/ensure-fresh-session";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
@@ -22,6 +22,7 @@ const BUCKET = "deal-documents";
 const MAX_BYTES = 10 * 1024 * 1024; // 10 MB - matches the bucket limit
 
 type DocItem = { name: string; path: string; size: number | null; createdAt: string | null };
+type DocumentRequest = { dealId: string; requestId: number };
 
 /** Strip the `${timestamp}-` upload prefix for display. */
 function displayName(objectName: string): string {
@@ -41,9 +42,19 @@ function safeFileName(name: string): string {
 }
 
 export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
+  // A route can replace savedDealId without unmounting its parent. Keying the
+  // stateful card prevents the previous deal's documents, errors, or busy
+  // state from appearing for even one render while the new list is loading.
+  return <DealDocumentsCardForDeal key={savedDealId} savedDealId={savedDealId} />;
+}
+
+function DealDocumentsCardForDeal({ savedDealId }: { savedDealId: string }) {
   const { toast } = useToast();
   const [supabase] = useState(() => createBrowserSupabaseClient());
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const activeDealIdRef = useRef(savedDealId);
+  const mountedRef = useRef(true);
+  const documentRequestRef = useRef(0);
   const [userId, setUserId] = useState<string | null>(null);
   const [docs, setDocs] = useState<DocItem[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -59,13 +70,42 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
   // other irreversible action in the app.
   const [confirmPath, setConfirmPath] = useState<string | null>(null);
 
-  const prefixFor = (uid: string) => `${uid}/${savedDealId}`;
+  const prefixFor = (uid: string, dealId: string = savedDealId) => `${uid}/${dealId}`;
 
-  const refresh = async (uid: string): Promise<boolean> => {
+  const isActiveDeal = (dealId: string) =>
+    mountedRef.current && activeDealIdRef.current === dealId;
+
+  const isCurrentDocumentRequest = (request: DocumentRequest) =>
+    isActiveDeal(request.dealId) &&
+    documentRequestRef.current === request.requestId;
+
+  const startDocumentRequest = (dealId: string = savedDealId): DocumentRequest | null => {
+    if (!isActiveDeal(dealId)) return null;
+    return { dealId, requestId: ++documentRequestRef.current };
+  };
+
+  const refresh = async (
+    knownUserId?: string,
+    existingRequest?: DocumentRequest,
+  ): Promise<boolean> => {
+    const request = existingRequest ?? startDocumentRequest();
+    if (!request) return false;
     try {
+      const uid = knownUserId ?? (await getFreshSessionUserId(supabase));
+      if (!isCurrentDocumentRequest(request)) return false;
+      if (!uid) {
+        setUserId(null);
+        setLoadError("Sign in again to access this deal's documents.");
+        return false;
+      }
+      setUserId(uid);
       const { data, error } = await supabase.storage
         .from(BUCKET)
-        .list(prefixFor(uid), { limit: 100, sortBy: { column: "created_at", order: "desc" } });
+        .list(prefixFor(uid, request.dealId), {
+          limit: 100,
+          sortBy: { column: "created_at", order: "desc" },
+        });
+      if (!isCurrentDocumentRequest(request)) return false;
       if (error) {
         // Bucket not provisioned yet (migration pending) → hide quietly.
         if (/bucket not found/i.test(error.message)) {
@@ -80,7 +120,7 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
         .filter((o) => o.id !== null)
         .map((o) => ({
           name: o.name,
-          path: `${prefixFor(uid)}/${o.name}`,
+          path: `${prefixFor(uid, request.dealId)}/${o.name}`,
           size: (o.metadata as { size?: number } | null)?.size ?? null,
           createdAt: o.created_at ?? null,
         }));
@@ -88,53 +128,67 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
       setLoadError(null);
       return true;
     } catch {
-      setLoadError("We couldn't load this deal's documents. Check your connection and try again.");
+      if (isCurrentDocumentRequest(request)) {
+        setLoadError("We couldn't load this deal's documents. Check your connection and try again.");
+      }
       return false;
     }
   };
 
-  useEffect(() => {
-    let cancelled = false;
+  // Layout cleanup closes the route-commit -> passive-effect window. The keyed
+  // card is unmounted for a different deal, and every old upload/list/signed
+  // URL callback must observe mounted=false before the new workspace paints.
+  useLayoutEffect(() => {
+    mountedRef.current = true;
+    const request: DocumentRequest = {
+      dealId: savedDealId,
+      requestId: ++documentRequestRef.current,
+    };
+    setLoaded(false);
+    setUnavailable(false);
+    setLoadError(null);
+    setDownloadFallback(null);
+    setDocs([]);
+    setUserId(null);
+    setUploading(false);
+    setBusy(null);
+    setConfirmPath(null);
     void (async () => {
       try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (cancelled) return;
-        if (!user) {
-          setLoadError("Sign in again to access this deal's documents.");
-          setLoaded(true);
-          return;
-        }
-        setUserId(user.id);
-        await refresh(user.id);
-        if (!cancelled) setLoaded(true);
+        await refresh(undefined, request);
       } catch {
-        if (!cancelled) {
+        if (isCurrentDocumentRequest(request)) {
           setLoadError("We couldn't verify your document access. Check your connection and try again.");
-          setLoaded(true);
         }
+      } finally {
+        if (isCurrentDocumentRequest(request)) setLoaded(true);
       }
     })();
     return () => {
-      cancelled = true;
+      mountedRef.current = false;
+      if (documentRequestRef.current === request.requestId) {
+        documentRequestRef.current += 1;
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [savedDealId, supabase]);
 
   const handleUpload = async (file: File) => {
-    if (!userId) return;
+    const dealIdAtStart = savedDealId;
+    if (!isActiveDeal(dealIdAtStart)) return;
     if (file.size > MAX_BYTES) {
       toast({ title: "File too large", description: "Max 10 MB per file.", variant: "destructive" });
       return;
     }
     setUploading(true);
     try {
-      // Storage calls run on the BROWSER token, which can silently lapse in a
-      // long-open tab while server-action features keep working — the result
-      // was an RLS toast that read like a permissions bug. Refresh first, and
-      // name the real problem when the session truly is gone.
-      if (!(await ensureFreshSession(supabase))) {
+      // Build the owner-scoped path from the freshly verified identity, not
+      // from state captured when this card mounted. A sibling tab can refresh,
+      // sign out, or switch accounts while a deal page remains open.
+      const freshUserId = await getFreshSessionUserId(supabase);
+      if (!isActiveDeal(dealIdAtStart)) return;
+      if (!freshUserId) {
+        setUserId(null);
         toast({
           title: "Session expired",
           description: "Sign in again to upload documents.",
@@ -142,8 +196,10 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
         });
         return;
       }
-      const path = `${prefixFor(userId)}/${Date.now()}-${safeFileName(file.name)}`;
+      setUserId(freshUserId);
+      const path = `${prefixFor(freshUserId, dealIdAtStart)}/${Date.now()}-${safeFileName(file.name)}`;
       const { error } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: false });
+      if (!isActiveDeal(dealIdAtStart)) return;
       if (error) {
         if (/bucket not found/i.test(error.message)) {
           setUnavailable(true);
@@ -159,7 +215,10 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
         });
         return;
       }
-      const refreshed = await refresh(userId);
+      const refreshRequest = startDocumentRequest(dealIdAtStart);
+      if (!refreshRequest) return;
+      const refreshed = await refresh(freshUserId, refreshRequest);
+      if (!isCurrentDocumentRequest(refreshRequest)) return;
       if (refreshed) {
         toast({ title: "Document uploaded", description: displayName(safeFileName(file.name)) });
       } else {
@@ -170,6 +229,7 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
         });
       }
     } catch (error) {
+      if (!isActiveDeal(dealIdAtStart)) return;
       toast({
         title: "Upload failed",
         description: friendlyToastError(error, {
@@ -179,18 +239,59 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
         variant: "destructive",
       });
     } finally {
-      setUploading(false);
+      if (isActiveDeal(dealIdAtStart)) setUploading(false);
     }
   };
 
   const handleDownload = async (path: string, label: string) => {
+    const dealIdAtStart = savedDealId;
+    if (!isActiveDeal(dealIdAtStart)) return;
     // Open synchronously while this click still has browser user activation.
     // If popups are blocked, render a normal link after the signed URL arrives.
     const pendingWindow = window.open("", "_blank");
     if (pendingWindow) pendingWindow.opener = null;
     setBusy({ path, kind: "download" });
     try {
+      const freshUserId = await getFreshSessionUserId(supabase);
+      if (!isActiveDeal(dealIdAtStart)) {
+        pendingWindow?.close();
+        return;
+      }
+      if (!freshUserId) {
+        setUserId(null);
+        toast({
+          title: "Session expired",
+          description: "Sign in again to open documents.",
+          variant: "destructive",
+        });
+        pendingWindow?.close();
+        return;
+      }
+      setUserId(freshUserId);
+      if (!path.startsWith(`${prefixFor(freshUserId, dealIdAtStart)}/`)) {
+        const refreshRequest = startDocumentRequest(dealIdAtStart);
+        if (!refreshRequest) {
+          pendingWindow?.close();
+          return;
+        }
+        await refresh(freshUserId, refreshRequest);
+        if (!isCurrentDocumentRequest(refreshRequest)) {
+          pendingWindow?.close();
+          return;
+        }
+        toast({
+          title: "Account changed",
+          description: "The document list was refreshed for the current account. Try again.",
+          variant: "destructive",
+        });
+        pendingWindow?.close();
+        return;
+      }
       const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(path, 60);
+      if (!isActiveDeal(dealIdAtStart)) {
+        pendingWindow?.close();
+        return;
+      }
       if (error || !data?.signedUrl) {
         toast({
           title: "Couldn't open document",
@@ -214,6 +315,7 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
       }
     } catch (error) {
       pendingWindow?.close();
+      if (!isActiveDeal(dealIdAtStart)) return;
       toast({
         title: "Couldn't open document",
         description: friendlyToastError(error, {
@@ -223,16 +325,42 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
         variant: "destructive",
       });
     } finally {
-      setBusy(null);
+      if (isActiveDeal(dealIdAtStart)) setBusy(null);
     }
   };
 
   const handleDelete = async (path: string, label: string) => {
-    if (!userId) return;
+    const dealIdAtStart = savedDealId;
+    if (!isActiveDeal(dealIdAtStart)) return;
     setConfirmPath(null);
     setBusy({ path, kind: "delete" });
     try {
+      const freshUserId = await getFreshSessionUserId(supabase);
+      if (!isActiveDeal(dealIdAtStart)) return;
+      if (!freshUserId) {
+        setUserId(null);
+        toast({
+          title: "Session expired",
+          description: "Sign in again to delete documents.",
+          variant: "destructive",
+        });
+        return;
+      }
+      setUserId(freshUserId);
+      if (!path.startsWith(`${prefixFor(freshUserId, dealIdAtStart)}/`)) {
+        const refreshRequest = startDocumentRequest(dealIdAtStart);
+        if (!refreshRequest) return;
+        await refresh(freshUserId, refreshRequest);
+        if (!isCurrentDocumentRequest(refreshRequest)) return;
+        toast({
+          title: "Account changed",
+          description: "The document list was refreshed for the current account. Try again.",
+          variant: "destructive",
+        });
+        return;
+      }
       const { error } = await supabase.storage.from(BUCKET).remove([path]);
+      if (!isActiveDeal(dealIdAtStart)) return;
       if (error) {
         toast({
           title: "Couldn't delete document",
@@ -244,7 +372,10 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
         });
         return;
       }
-      const refreshed = await refresh(userId);
+      const refreshRequest = startDocumentRequest(dealIdAtStart);
+      if (!refreshRequest) return;
+      const refreshed = await refresh(freshUserId, refreshRequest);
+      if (!isCurrentDocumentRequest(refreshRequest)) return;
       if (refreshed) {
         toast({ title: "Document deleted", description: label });
       } else {
@@ -255,6 +386,7 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
         });
       }
     } catch (error) {
+      if (!isActiveDeal(dealIdAtStart)) return;
       toast({
         title: "Couldn't delete document",
         description: friendlyToastError(error, {
@@ -264,7 +396,7 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
         variant: "destructive",
       });
     } finally {
-      setBusy(null);
+      if (isActiveDeal(dealIdAtStart)) setBusy(null);
     }
   };
 
@@ -310,9 +442,8 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
             size="sm"
             variant="outline"
             className="mt-3 min-h-11"
-            disabled={!userId}
             onClick={() => {
-              if (userId) void refresh(userId);
+              void refresh();
             }}
           >
             Try again

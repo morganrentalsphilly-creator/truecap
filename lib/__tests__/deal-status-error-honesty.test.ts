@@ -58,6 +58,18 @@ describe("a status change that cannot succeed says so", () => {
     expect(ladder.slice(at, at + 260)).not.toMatch(/try again/i);
   });
 
+  it("maps only the Passed Undo compare-and-set conflict to typed staleness", () => {
+    const ladder = stageErrorLadder();
+    const at = ladder.indexOf('error.code === "40001"');
+    expect(at).toBeGreaterThan(-1);
+    const branch = ladder.slice(Math.max(0, at - 80), at + 360);
+    expect(branch).toContain(
+      'input.expectedCurrentStage?.stage === "passed"',
+    );
+    expect(branch).toContain('code: "STALE_DATA"');
+    expect(branch).toContain("latest stage was left unchanged");
+  });
+
   it("stays consistent with the bulk path, which always mapped this", () => {
     // If bulk ever loses its mapping the two surfaces disagree about the same
     // database error, which is how this drifted apart in the first place.

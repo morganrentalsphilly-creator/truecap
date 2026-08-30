@@ -99,6 +99,19 @@ describe("Saved Deal Watch server-action boundaries", () => {
     expect(actions).not.toContain("createAdminSupabaseClient");
   });
 
+  it("keeps downgrade revocation open while denying new or loosened consent", () => {
+    expect(actions).toContain("canEnableWatch:");
+    expect(actions).toContain(
+      "if (parsed.data.enabled && !auth.canEnableWatch)",
+    );
+    expect(actions).toContain("parsed.data.enabled,");
+    expect(actions).toContain('.update({ enabled: false })');
+    expect(actions).toContain("const loosensConsent = loosensSavedDealWatchConsent(");
+    expect(actions).toContain("if (loosensConsent && !auth.canEnableWatch)");
+    expect(actions).toContain("loosensConsent,");
+    expect(actions).toContain("A downgraded account with no retained row");
+  });
+
   it("never lets a persisted opt-in claim that operations are live", () => {
     expect(actions).toContain("automaticChecksActive: false");
     expect(actions).toContain("notificationsActive: false");
@@ -106,10 +119,18 @@ describe("Saved Deal Watch server-action boundaries", () => {
 });
 
 describe("Saved Deal Watch workspace UI truthfulness", () => {
-  it("is gated at the server render boundary", () => {
+  it("is feature-gated while retained downgrade consent remains revocable", () => {
     expect(workspace).toMatch(
-      /isFeatureEnabled\("saved_deal_watch"\) && isPremium[\s\S]{0,120}<SavedDealWatchCard/
+      /isFeatureEnabled\("saved_deal_watch"\)[\s\S]{0,120}<SavedDealWatchCard/
     );
+    expect(workspace).not.toMatch(
+      /isFeatureEnabled\("saved_deal_watch"\) && isPremium/
+    );
+    expect(card).toContain("!settings.canEnable && !settings.hasStoredConfiguration");
+    expect(card).toContain("!settings.canEnable && !settings.subscriptionEnabled");
+    expect(card).toContain("!settings.canEnable && !settings.inAppNotificationsEnabled");
+    expect(card).toContain("!settings.canEnable && !settings.emailNotificationsEnabled");
+    expect(card).toContain("Any retained opt-in or");
   });
 
   it("states that no listing monitoring or delivery is active", () => {

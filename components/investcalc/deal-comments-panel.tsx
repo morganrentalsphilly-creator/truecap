@@ -7,18 +7,19 @@
  * annotation; entries are immutable (add / delete). Renders a graceful notice
  * until the deal_comments migration is applied.
  */
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useTransition } from "react";
 import * as Sentry from "@sentry/nextjs";
 import { Loader2, MessageSquare, Send, X } from "lucide-react";
 import {
-  addDealCommentAction,
-  deleteDealCommentAction,
+  addDealCommentV2Action,
+  deleteDealCommentV2Action,
   listDealCommentsAction,
   type DealComment,
 } from "@/app/actions/deal-comments";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { isCurrentDealWorkspaceMutation } from "@/lib/deal-workspace-mutation-lifecycle";
 
 function formatWhen(iso: string): string {
   const d = new Date(iso);
@@ -36,6 +37,16 @@ export function DealCommentsPanel({ savedDealId }: { savedDealId: string }) {
   const [draft, setDraft] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [isBusy, startBusy] = useTransition();
+  const savedDealIdRef = useRef(savedDealId);
+  const mutationRequestRef = useRef<symbol | null>(null);
+  const addRequestRef = useRef<{ body: string; requestId: string } | null>(null);
+
+  useLayoutEffect(() => {
+    savedDealIdRef.current = savedDealId;
+    mutationRequestRef.current = null;
+    addRequestRef.current = null;
+    setLoaded(false);
+  }, [savedDealId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -43,6 +54,9 @@ export function DealCommentsPanel({ savedDealId }: { savedDealId: string }) {
     setLoadError(null);
     setMigrationPending(false);
     setConfirmDeleteId(null);
+    // Never carry an unsent comment into a different deal if the route reuses
+    // this component instance.
+    setDraft("");
     void listDealCommentsAction(savedDealId)
       .then((r) => {
         if (cancelled) return;
@@ -63,63 +77,119 @@ export function DealCommentsPanel({ savedDealId }: { savedDealId: string }) {
     };
   }, [loadAttempt, savedDealId]);
 
-  const apply = (r: Awaited<ReturnType<typeof listDealCommentsAction>>) => {
-    if (r.ok) setComments(r.comments);
-    else if (r.code === "MIGRATION_PENDING") setMigrationPending(true);
-    else toast({ title: "Could not save comment", description: r.message, variant: "destructive" });
+  const showMutationFailure = (result: {
+    code: string;
+    message: string;
+  }) => {
+    if (result.code === "MIGRATION_PENDING") setMigrationPending(true);
+    else
+      toast({
+        title: "Could not save comment",
+        description: result.message,
+        variant: "destructive",
+      });
   };
 
   const add = () => {
     const body = draft.trim();
     if (!body || isBusy) return; // isBusy: ⌘/Ctrl+Enter bypasses the disabled Send
     const dealAtSubmit = savedDealId;
+    // Preserve the key while this exact draft remains in the box. If the
+    // INSERT committed but the response was interrupted, clicking again sends
+    // the same key and the server returns the existing immutable row instead
+    // of appending a duplicate comment.
+    const existingRequest = addRequestRef.current;
+    const requestId =
+      existingRequest?.body === body
+        ? existingRequest.requestId
+        : crypto.randomUUID();
+    addRequestRef.current = { body, requestId };
+    const requestToken = Symbol("deal-comment-add");
+    mutationRequestRef.current = requestToken;
+    const requestStillOwnsDeal = () =>
+      isCurrentDealWorkspaceMutation({
+        submittedDealId: dealAtSubmit,
+        currentDealId: savedDealIdRef.current,
+        requestToken,
+        currentRequestToken: mutationRequestRef.current,
+      });
     startBusy(async () => {
       // The draft is the only copy of what was typed, so it survives until
       // the server confirms the row. Clearing before the await meant any
       // failure (session expiry, archived deal, dropped connection) silently
-      // destroyed the entry. A rejected promise gets its own toast, since
-      // apply() never runs in that case.
-      const r = await addDealCommentAction(dealAtSubmit, body).catch(() => null);
-      if (dealAtSubmit !== savedDealId) return;
-      if (!r) {
+      // destroyed the entry. A rejected promise gets its own retry toast.
+      try {
+        const r = await addDealCommentV2Action(dealAtSubmit, body, requestId);
+        if (!requestStillOwnsDeal()) return;
+        if (!r.ok) {
+          showMutationFailure(r);
+          return;
+        }
+        addRequestRef.current = null;
+        // Only drop what we actually sent - anything typed while the save was
+        // in flight stays put.
+        setDraft((current) => (current.trim() === body ? "" : current));
+        setComments((current) => [
+          r.comment,
+          ...current.filter((comment) => comment.id !== r.comment.id),
+        ]);
+      } catch (error) {
+        if (!requestStillOwnsDeal()) return;
+        Sentry.captureException(error, {
+          tags: { feature: "deal-comments-add" },
+        });
         toast({
           title: "Could not save comment",
           description: "We couldn't reach the server. Your entry is still in the box - try again.",
           variant: "destructive",
         });
-        return;
+      } finally {
+        if (mutationRequestRef.current === requestToken) {
+          mutationRequestRef.current = null;
+        }
       }
-      if (!r.ok) {
-        apply(r);
-        return;
-      }
-      // Only drop what we actually sent - anything typed while the save was
-      // in flight stays put.
-      setDraft((current) => (current.trim() === body ? "" : current));
-      apply(r);
     });
   };
   const remove = (commentId: string) => {
     const dealAtSubmit = savedDealId;
+    const requestToken = Symbol("deal-comment-delete");
+    mutationRequestRef.current = requestToken;
+    const requestStillOwnsDeal = () =>
+      isCurrentDealWorkspaceMutation({
+        submittedDealId: dealAtSubmit,
+        currentDealId: savedDealIdRef.current,
+        requestToken,
+        currentRequestToken: mutationRequestRef.current,
+      });
     startBusy(async () => {
       try {
-        const r = await deleteDealCommentAction(dealAtSubmit, commentId);
-        if (dealAtSubmit === savedDealId) {
-          if (r.ok) setConfirmDeleteId(null);
-          apply(r);
+        const r = await deleteDealCommentV2Action(dealAtSubmit, commentId);
+        if (!requestStillOwnsDeal()) return;
+        if (!r.ok) {
+          showMutationFailure(r);
+          return;
         }
+        setConfirmDeleteId(null);
+        setComments((current) =>
+          current.filter(
+            (comment) => comment.id !== r.deletedCommentId,
+          ),
+        );
       } catch (err) {
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, stale-deploy Server Action). Without this the delete
         // silently no-ops — the row stays on screen with no signal. Mirror the
         // add() path: a retryable toast, and honor the stale-deal guard.
+        if (!requestStillOwnsDeal()) return;
         Sentry.captureException(err, { tags: { feature: "deal-comments" } });
-        if (dealAtSubmit === savedDealId) {
-          toast({
-            title: "Could not delete comment",
-            description: "We couldn't reach the server. Try again.",
-            variant: "destructive",
-          });
+        toast({
+          title: "Could not delete comment",
+          description: "We couldn't reach the server. Try again.",
+          variant: "destructive",
+        });
+      } finally {
+        if (mutationRequestRef.current === requestToken) {
+          mutationRequestRef.current = null;
         }
       }
     });

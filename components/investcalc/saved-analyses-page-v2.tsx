@@ -67,6 +67,7 @@ import { startCompareAction } from "@/app/actions/compare";
 import {
   bulkUpdateSavedDealsAction,
   getSavedAnalysisPdfExportAction,
+  undoPassedSavedDealStageAction,
   updateSavedDealLifecycleStateAction,
   updateSavedDealStageAction,
   updateSavedDealTagsAction,
@@ -2112,15 +2113,19 @@ export function SavedAnalysesPage({
           if (result.code === "NOT_FOUND") router.refresh();
           return;
         }
+        const passHistoryEventId =
+          stage === "passed" ? result.historyEventId : null;
         toast({
           title: stage === "passed" ? "Marked as Passed" : "Stage updated",
           description:
             stage === "passed"
-              ? `Reason recorded in Deal Log. Undo restores ${pipelineStageLabel(previousStage)}.`
+              ? passHistoryEventId
+                ? `Reason recorded in Deal Log. Undo restores ${pipelineStageLabel(previousStage)}.`
+                : "This deal was already marked as Passed."
               : `Moved to ${pipelineStageLabel(stage)}.`,
           variant: "success",
           action:
-            stage === "passed" ? (
+            stage === "passed" && passHistoryEventId ? (
               <ToastAction
                 altText="Undo marking deal as Passed"
                 className="min-h-11"
@@ -2128,12 +2133,21 @@ export function SavedAnalysesPage({
                   setUpdatingDealStatusId(id);
                   startUpdateStatusTransition(async () => {
                     try {
-                      const undo = await updateSavedDealStageAction(
+                      const undo = await undoPassedSavedDealStageAction(
                         id,
                         previousStage,
+                        passHistoryEventId,
                         { note: "Pass decision undone." },
                       );
                       if (!undo.ok) {
+                        if (undo.code === "STALE_DATA") {
+                          toast({
+                            title: "Undo expired",
+                            description: undo.message,
+                          });
+                          router.refresh();
+                          return;
+                        }
                         toast({
                           title: "Could not undo",
                           description: undo.message,
@@ -2156,6 +2170,7 @@ export function SavedAnalysesPage({
                         description: "Check your connection and try again.",
                         variant: "destructive",
                       });
+                      router.refresh();
                     } finally {
                       setUpdatingDealStatusId(null);
                     }

@@ -108,6 +108,42 @@ describe("no-card evaluation authorization boundaries", () => {
     );
   });
 
+  it("authorizes the exact projection resource before the service-role cache write", () => {
+    const ownerRead = projectionsAction.indexOf('.from("saved_analyses")');
+    const exactEvaluationCheck = projectionsAction.indexOf(
+      "activeMeteredEvaluationDealGrantsAccess(supabase, user.id, values)",
+    );
+    const entitlementReject = projectionsAction.indexOf(
+      "if (!paidProjectionAccess && !meteredEvaluationDeal)",
+    );
+    const adminClient = projectionsAction.indexOf(
+      "const admin = createAdminSupabaseClient()",
+    );
+    const scopedPayload = projectionsAction.indexOf(
+      "const upsertPayload = {",
+      entitlementReject,
+    );
+    const cacheWrite = projectionsAction.indexOf(
+      '.from("analysis_projection_snapshots")',
+      adminClient,
+    );
+
+    expect(ownerRead).toBeGreaterThan(-1);
+    expect(exactEvaluationCheck).toBeGreaterThan(ownerRead);
+    expect(entitlementReject).toBeGreaterThan(exactEvaluationCheck);
+    expect(scopedPayload).toBeGreaterThan(entitlementReject);
+    expect(adminClient).toBeGreaterThan(entitlementReject);
+    expect(cacheWrite).toBeGreaterThan(adminClient);
+
+    const privilegedPayload = projectionsAction.slice(scopedPayload, adminClient);
+    expect(privilegedPayload).toContain("analysis_id: analysisId");
+    expect(privilegedPayload).toContain("user_id: user.id");
+    const privilegedWrite = projectionsAction.slice(adminClient);
+    expect(privilegedWrite).toContain(
+      '.upsert(upsertPayload, { onConflict: "analysis_id" })',
+    );
+  });
+
   it("does not let the comparison allowance unlock paid-only batch screening", () => {
     expect(batchAction.match(/!hasPaidPlan \|\|/g)).toHaveLength(2);
     expect(triagePage).toContain("!isPremium ||");

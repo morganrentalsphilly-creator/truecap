@@ -34,7 +34,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
-import { ensureFreshSession } from "@/lib/supabase/ensure-fresh-session";
+import { getFreshSessionUserId } from "@/lib/supabase/ensure-fresh-session";
 
 const profileSchema = z.object({
   firstName: z.string().trim().min(1, "First name is required").max(80, "First name is too long"),
@@ -308,13 +308,20 @@ export function ProfileForm({
       const blob = await canvasToBlob(canvas, 0.92);
 
       const supabase = createBrowserSupabaseClient();
-      const path = `${userId}/avatar-${Date.now()}.webp`;
       // Same stale-browser-token guard as the deal-documents uploader: the
       // avatar call runs on the client JWT, which can lapse in an old tab
-      // while everything cookie-based still works.
-      if (!(await ensureFreshSession(supabase))) {
+      // while everything cookie-based still works. Verify the exact identity
+      // before deriving an owner path; a sibling tab may also switch accounts.
+      const freshUserId = await getFreshSessionUserId(supabase);
+      if (!freshUserId) {
         throw new Error("Your session expired. Refresh the page and sign in again.");
       }
+      if (freshUserId !== userId) {
+        throw new Error(
+          "Your signed-in account changed. Refresh this page before uploading an avatar.",
+        );
+      }
+      const path = `${freshUserId}/avatar-${Date.now()}.webp`;
       const { error: uploadError } = await supabase.storage
         .from("profile-avatars")
         .upload(path, blob, {

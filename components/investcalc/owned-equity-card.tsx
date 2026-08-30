@@ -16,12 +16,13 @@
  * select detects a pending migration), and the action itself degrades to
  * MIGRATION_PENDING — toast, never crash.
  */
-import { useState, useTransition } from "react";
+import { useLayoutEffect, useRef, useState, useTransition } from "react";
 import * as Sentry from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
 import { Landmark } from "lucide-react";
 import { setSavedDealCloseDateAction } from "@/app/actions/saved-analyses";
 import { useToast } from "@/hooks/use-toast";
+import { isCurrentDealWorkspaceMutation } from "@/lib/deal-workspace-mutation-lifecycle";
 import { cn } from "@/lib/utils";
 import type { OwnedEquitySummary } from "@/lib/owned-equity";
 
@@ -50,11 +51,32 @@ export function OwnedEquityCard({
   const { toast } = useToast();
   const [isSaving, startSaving] = useTransition();
   const [editing, setEditing] = useState(false);
+  const savedDealIdRef = useRef(savedDealId);
+  const mutationRequestRef = useRef<symbol | null>(null);
+
+  useLayoutEffect(() => {
+    savedDealIdRef.current = savedDealId;
+    mutationRequestRef.current = null;
+    // This input is uncontrolled so its in-progress raw value belongs to the
+    // deal where editing began. Never carry it into a reused dynamic route.
+    setEditing(false);
+  }, [savedDealId]);
 
   const save = (value: string | null) => {
+    const dealAtSubmit = savedDealId;
+    const requestToken = Symbol("owned-equity-close-date-save");
+    mutationRequestRef.current = requestToken;
+    const requestStillOwnsDeal = () =>
+      isCurrentDealWorkspaceMutation({
+        submittedDealId: dealAtSubmit,
+        currentDealId: savedDealIdRef.current,
+        requestToken,
+        currentRequestToken: mutationRequestRef.current,
+      });
     startSaving(async () => {
       try {
-        const r = await setSavedDealCloseDateAction(savedDealId, value);
+        const r = await setSavedDealCloseDateAction(dealAtSubmit, value);
+        if (!requestStillOwnsDeal()) return;
         if (r.ok) {
           setEditing(false);
           router.refresh();
@@ -69,11 +91,16 @@ export function OwnedEquityCard({
         // input's spinner clears with no signal and the date never persists.
         // Tell the user it's retryable.
         Sentry.captureException(err, { tags: { feature: "owned-equity" } });
+        if (!requestStillOwnsDeal()) return;
         toast({
           title: "Couldn't save close date",
           description: "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
+      } finally {
+        if (mutationRequestRef.current === requestToken) {
+          mutationRequestRef.current = null;
+        }
       }
     });
   };

@@ -157,7 +157,7 @@ describe("saved workspace data safety", () => {
 
   it("preserves comment drafts and confirms permanent deletion", () => {
     const comments = read("components/investcalc/deal-comments-panel.tsx");
-    const submit = comments.indexOf("await addDealCommentAction");
+    const submit = comments.indexOf("await addDealCommentV2Action");
     const clear = comments.indexOf("setDraft", submit);
     expect(clear).toBeGreaterThan(submit);
     expect(comments).toContain("Delete this comment?");
@@ -168,7 +168,8 @@ describe("saved workspace data safety", () => {
   it("keeps controlled detail drafts on failed writes and exposes retry", () => {
     const details = read("components/investcalc/deal-details-card.tsx");
     expect(details).toContain("draftsRef.current");
-    expect(details).toContain("setFailedPatch(patch)");
+    expect(details).toContain("restoreSubmittedKeys()");
+    expect(details).toContain("buildLatestDealLabelPatch(");
     expect(details).toContain("Couldn’t save");
     expect(details).toContain("Retry");
     expect(details).toContain("value={drafts[f.key] ?? \"\"}");

@@ -7,7 +7,13 @@
  * gated for visibility; hides itself if the provider isn't configured yet
  * (NOT_CONFIGURED), keeping it invisible until actually enabled.
  */
-import { useEffect, useRef, useState, useTransition } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import * as Sentry from "@sentry/nextjs";
 import { Building2, Loader2 } from "lucide-react";
 import { getPropertyCompsAction, getSavedDealCompsAction } from "@/app/actions/property-comps";
@@ -100,31 +106,51 @@ export function PropertyCompsCard({
   const [unavailable, setUnavailable] = useState(false);
   const [loading, startLoading] = useTransition();
 
-  // Comps belong to ONE address. When the analyzed address changes, the
-  // previous pull must not survive — on screen OR in the Deal Q&A grounding
-  // context (which hard-claims "the user ran comps on this address"); a
-  // stale set would ground AI answers on the wrong property.
+  // Comps belong to one workspace, not just one address: two distinct saved
+  // deals may intentionally share the same address. Sync identity during the
+  // route commit so an old same-address pull cannot paint, toast, or ground
+  // Deal Q&A on the newly opened deal before passive effects run.
   const lastAddressRef = useRef<string | null>(address);
-  useEffect(() => {
-    if (lastAddressRef.current === address) return;
+  const savedDealIdRef = useRef<string | null>(savedDealId ?? null);
+  const onDataChangeRef = useRef(onDataChange);
+  const onUnavailableChangeRef = useRef(onUnavailableChange);
+  useLayoutEffect(() => {
+    onDataChangeRef.current = onDataChange;
+    onUnavailableChangeRef.current = onUnavailableChange;
+  }, [onDataChange, onUnavailableChange]);
+  useLayoutEffect(() => {
+    const nextDealId = savedDealId ?? null;
+    if (
+      lastAddressRef.current === address &&
+      savedDealIdRef.current === nextDealId
+    ) {
+      return;
+    }
     lastAddressRef.current = address;
+    savedDealIdRef.current = nextDealId;
     setData(null);
     setSource(null);
     setUnavailable(false);
-    onDataChange?.(null);
-    // onDataChange is a stable setter in practice; keying on it would
-    // re-fire the clear on parent re-renders with inline handlers.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [address]);
+    onDataChangeRef.current?.(null);
+    onUnavailableChangeRef.current?.(false);
+  }, [address, savedDealId]);
 
   // On a saved deal, load any previously-saved comp set (no API call / quota).
   useEffect(() => {
     if (!enabled || !savedDealId) return;
+    const dealIdAtLoad = savedDealId;
+    const addressAtLoad = lastAddressRef.current;
     let active = true;
     void (async () => {
       try {
-        const r = await getSavedDealCompsAction(savedDealId);
-        if (active && r.ok && r.enrichment) {
+        const r = await getSavedDealCompsAction(dealIdAtLoad);
+        if (
+          active &&
+          savedDealIdRef.current === dealIdAtLoad &&
+          lastAddressRef.current === addressAtLoad &&
+          r.ok &&
+          r.enrichment
+        ) {
           // Legacy payloads can predate fetchedAt in the enrichment itself —
           // backfill from the row's fetched_at so the freshness hint still works.
           const enrichment =
@@ -133,7 +159,7 @@ export function PropertyCompsCard({
               : r.enrichment;
           setData(enrichment);
           setSource("saved");
-          onDataChange?.(enrichment);
+          onDataChangeRef.current?.(enrichment);
         }
       } catch {
         // Best-effort load of a previously-saved comp set — a thrown action
@@ -155,6 +181,10 @@ export function PropertyCompsCard({
     // same stale-response contract as the saved-comps load effect above
     // (comps ground Deal Q&A answers, so a mismatch is confidently wrong).
     const pulledAddress = address;
+    const pulledDealId = savedDealId ?? null;
+    const pullStillOwnsWorkspace = () =>
+      lastAddressRef.current === pulledAddress &&
+      savedDealIdRef.current === pulledDealId;
     startLoading(async () => {
       try {
         const r = await getPropertyCompsAction({
@@ -163,16 +193,16 @@ export function PropertyCompsCard({
           bedrooms: bedrooms ?? undefined,
           bathrooms: bathrooms ?? undefined,
           squareFootage: squareFootage ?? undefined,
-          dealId: savedDealId ?? undefined,
+          dealId: pulledDealId ?? undefined,
         });
-        // Address changed while the pull was in flight → the result (or its
-        // error) belongs to the previous deal; drop it silently — the
-        // address-change effect above already cleared the display.
-        if (lastAddressRef.current !== pulledAddress) return;
+        // Workspace changed while the pull was in flight → the result (or its
+        // error) belongs to the previous deal; drop it silently. The route
+        // identity effect above already cleared the display.
+        if (!pullStillOwnsWorkspace()) return;
         if (!r.ok) {
           if (r.code === "NOT_CONFIGURED") {
             setUnavailable(true);
-            onUnavailableChange?.(true);
+            onUnavailableChangeRef.current?.(true);
             return;
           }
           // Hitting the plan limit is not an error the user caused — a red
@@ -203,14 +233,14 @@ export function PropertyCompsCard({
         }
         setData(r.enrichment);
         setSource(r.source);
-        onDataChange?.(r.enrichment);
+        onDataChangeRef.current?.(r.enrichment);
       } catch (err) {
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, stale-deploy Server Action). Without this the button
         // spinner clears with no result and no signal. Honor the same stale-
         // address guard, then surface a retryable toast.
+        if (!pullStillOwnsWorkspace()) return;
         Sentry.captureException(err, { tags: { feature: "property-comps" } });
-        if (lastAddressRef.current !== pulledAddress) return;
         toast({
           title: "Couldn't pull comps",
           description: "Something interrupted the request. Check your connection and try again.",

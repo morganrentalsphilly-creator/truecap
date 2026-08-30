@@ -2,6 +2,7 @@
 
 import * as Sentry from "@sentry/nextjs";
 import { z } from "zod";
+import { isOwnedProfileAvatarUrl } from "@/lib/profile-avatar-url";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 const updateProfileSchema = z.object({
@@ -43,6 +44,20 @@ export async function updateProfileAction(input: unknown): Promise<UpdateProfile
   }
 
   const { firstName, lastName, avatarUrl } = parsed.data;
+  if (
+    avatarUrl &&
+    !isOwnedProfileAvatarUrl({
+      avatarUrl,
+      userId: user.id,
+      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    })
+  ) {
+    return {
+      ok: false,
+      code: "VALIDATION",
+      message: "Upload your profile photo through this account before saving it.",
+    };
+  }
   const fullName = `${firstName} ${lastName ?? ""}`.trim();
 
   const { data, error } = await supabase

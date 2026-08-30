@@ -6,29 +6,49 @@
  *
  * Why: browser-side storage calls (deal documents, avatars) authenticate with
  * the CLIENT's in-memory JWT — not the server cookies that keep server actions
- * working. In a long-open tab the client token can silently lapse (the
- * multi-tab Web Locks contention in our own Sentry ignore list starves the
- * auto-refresh), producing the confusing split where notes save fine while
- * every upload dies with an RLS "you don't have access" toast.
+ * working. In a long-open or multi-tab session the client token can lapse or
+ * belong to an account that changed in another tab, producing the confusing
+ * split where a server action works while a direct Storage request is denied.
  *
- * Returns true when a usable session exists after (at most) one refresh
- * attempt. Callers show a clear "sign in again" message on false instead of a
- * misleading permissions error.
+ * `getFreshSessionUserId` returns the server-verified user id after (at most)
+ * one refresh attempt. Storage paths must be built from that value rather than
+ * a user id captured when a long-lived card first mounted: another tab can
+ * sign out or switch accounts while this one remains open.
+ *
+ * `ensureFreshSession` remains as the boolean compatibility wrapper used by
+ * uploaders that do not construct an owner-scoped object path.
  */
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 const EXPIRY_MARGIN_MS = 30_000;
 
-export async function ensureFreshSession(supabase: SupabaseClient): Promise<boolean> {
+export async function getFreshSessionUserId(
+  supabase: SupabaseClient,
+): Promise<string | null> {
   try {
-    const { data } = await supabase.auth.getSession();
-    const session = data.session;
+    const { data, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError) return null;
+    let session = data.session;
     if (session && (session.expires_at ?? 0) * 1000 > Date.now() + EXPIRY_MARGIN_MS) {
-      return true;
+      // Continue to getUser below. getSession reads browser storage and must
+      // not be the authority for the identity embedded in an RLS object path.
+    } else {
+      const { data: refreshed, error } = await supabase.auth.refreshSession();
+      if (error || !refreshed.session) return null;
+      session = refreshed.session;
     }
-    const { data: refreshed, error } = await supabase.auth.refreshSession();
-    return !error && Boolean(refreshed.session);
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+    if (userError || !user || user.id !== session.user.id) return null;
+    return user.id;
   } catch {
-    return false;
+    return null;
   }
+}
+
+export async function ensureFreshSession(supabase: SupabaseClient): Promise<boolean> {
+  return Boolean(await getFreshSessionUserId(supabase));
 }

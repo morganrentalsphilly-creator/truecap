@@ -73,7 +73,8 @@ describe("specialist snapshot integration guards", () => {
 
   it("keeps scenario clones on the same atomic strategy/snapshot contract", () => {
     const scenarios = read("app/actions/scenarios.ts");
-    expect(scenarios).toContain("resolveScenarioAnalyzerStrategyKey");
+    expect(scenarios).toContain("buildScenarioStrategyTransition");
+    expect(scenarios).toContain("transition.analyzerStrategyKey");
     expect(scenarios).toContain("analyzerStrategyKey,");
     expect(scenarios).toContain("buildSpecialistAnalysisSnapshot(");
     expect(scenarios).toContain("SPECIALIST_ANALYSIS_SNAPSHOT_FIELD");

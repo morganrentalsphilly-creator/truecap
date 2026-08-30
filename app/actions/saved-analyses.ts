@@ -106,6 +106,7 @@ import {
 } from "@/lib/saved-analysis-pdf-render-binding";
 import {
   INITIAL_SAVED_ANALYSIS_REVISION,
+  normalizeSavedDealNotesInput,
   parseSavedAnalysisRevision,
 } from "@/lib/saved-analysis-concurrency";
 import {
@@ -217,6 +218,7 @@ export type UpdateSavedDealLifecycleFailure = {
     | "SIGN_IN_REQUIRED"
     | "ENTITLEMENT_REQUIRED"
     | "NOT_FOUND"
+    | "STALE_DATA"
     | "VALIDATION_ERROR"
     | "MIGRATION_PENDING"
     | "SERVER_ERROR";
@@ -224,13 +226,14 @@ export type UpdateSavedDealLifecycleFailure = {
 };
 
 export type UpdateSavedDealLifecycleResult =
-  | { ok: true }
+  | { ok: true; historyEventId: string | null }
   | {
       ok: false;
       code:
         | "SIGN_IN_REQUIRED"
         | "ENTITLEMENT_REQUIRED"
         | "NOT_FOUND"
+        | "STALE_DATA"
         | "VALIDATION_ERROR"
         | "MIGRATION_PENDING"
         | "SERVER_ERROR";
@@ -2453,7 +2456,7 @@ export type UpdateSavedDealNotesResult =
 
 export async function updateSavedDealNotesAction(
   id: string,
-  notes: string,
+  notes: unknown,
   expectedRevision: unknown,
 ): Promise<UpdateSavedDealNotesResult> {
   const supabase = await createServerSupabaseClient();
@@ -2463,7 +2466,14 @@ export async function updateSavedDealNotesAction(
   if (!user) {
     return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
   }
-  const trimmed = (notes ?? "").slice(0, 10_000);
+  const trimmed = normalizeSavedDealNotesInput(notes);
+  if (trimmed === null) {
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "Invalid notes text.",
+    };
+  }
   const savedId = id.trim();
   if (!savedId) {
     return { ok: false, code: "VALIDATION_ERROR", message: "Invalid deal id." };
@@ -2671,7 +2681,7 @@ function isDealHistoryMigrationPending(error: {
     error.code === "42P01" ||
     error.code === "42883" ||
     error.code === "PGRST202" ||
-    /update_saved_deal_stage_with_history|bulk_archive_saved_deals_with_history|saved_deal_history_events/i.test(
+    /update_saved_deal_stage_with_history|undo_passed_saved_deal_stage_with_history|bulk_archive_saved_deals_with_history|saved_deal_history_events/i.test(
       error.message ?? "",
     )
   );
@@ -2682,6 +2692,10 @@ async function persistSavedDealStageWithHistory(input: {
   savedDealId: string;
   stage: PipelineStage;
   context?: SavedDealHistoryContext;
+  expectedCurrentStage?: {
+    stage: "passed";
+    historyEventId: string;
+  };
 }): Promise<UpdateSavedDealLifecycleResult> {
   const parsedContext = validateSavedDealHistoryContext(
     input.stage,
@@ -2689,15 +2703,27 @@ async function persistSavedDealStageWithHistory(input: {
   );
   if (!parsedContext.ok) return parsedContext.result;
 
-  const { data, error } = await input.supabase.rpc(
-    "update_saved_deal_stage_with_history",
-    {
-      p_saved_analysis_id: input.savedDealId,
-      p_new_stage: input.stage,
-      p_reason: parsedContext.reason,
-      p_note: parsedContext.note,
-    },
-  );
+  const { data, error } = input.expectedCurrentStage
+    ? await input.supabase.rpc(
+        "undo_passed_saved_deal_stage_with_history",
+        {
+          p_saved_analysis_id: input.savedDealId,
+          p_restore_stage: input.stage,
+          p_expected_pass_history_event_id:
+            input.expectedCurrentStage.historyEventId,
+          p_reason: parsedContext.reason,
+          p_note: parsedContext.note,
+        },
+      )
+    : await input.supabase.rpc(
+        "update_saved_deal_stage_with_history",
+        {
+          p_saved_analysis_id: input.savedDealId,
+          p_new_stage: input.stage,
+          p_reason: parsedContext.reason,
+          p_note: parsedContext.note,
+        },
+      );
 
   if (error) {
     if (isDealHistoryMigrationPending(error)) {
@@ -2710,6 +2736,14 @@ async function persistSavedDealStageWithHistory(input: {
     }
     if (error.code === "P0002") {
       return { ok: false, code: "NOT_FOUND", message: "Deal was not found." };
+    }
+    if (input.expectedCurrentStage?.stage === "passed" && error.code === "40001") {
+      return {
+        ok: false,
+        code: "STALE_DATA",
+        message:
+          "This Undo expired because the deal stage changed. The latest stage was left unchanged.",
+      };
     }
     if (error.code === "22023") {
       return {
@@ -2740,7 +2774,14 @@ async function persistSavedDealStageWithHistory(input: {
   if (!data || (Array.isArray(data) && data.length === 0)) {
     return { ok: false, code: "NOT_FOUND", message: "Deal was not found." };
   }
-  return { ok: true };
+  const transition = Array.isArray(data) ? data[0] : data;
+  const historyEventId =
+    transition &&
+    typeof transition === "object" &&
+    typeof (transition as Record<string, unknown>).history_event_id === "string"
+      ? ((transition as Record<string, unknown>).history_event_id as string)
+      : null;
+  return { ok: true, historyEventId };
 }
 
 export async function updateSavedDealLifecycleStateAction(
@@ -2833,6 +2874,81 @@ export async function updateSavedDealStageAction(
   if (!result.ok) return result;
 
   const recordedDecision = userDecisionFromPipelineStage(stage);
+  if (recordedDecision !== "undecided") {
+    await captureServerEvent({
+      distinctId: user.id,
+      event: "decision_recorded",
+      properties: { decision: recordedDecision },
+    });
+  }
+  return result;
+}
+
+/**
+ * Revert the immediately preceding Passed decision only while that Passed
+ * state is still current. The dedicated RPC locks and compares the row before
+ * delegating to the canonical history transition, so an old toast can never
+ * overwrite a newer stage chosen in another tab or device.
+ */
+export async function undoPassedSavedDealStageAction(
+  id: string,
+  restoreStage: PipelineStage,
+  expectedPassHistoryEventId: unknown,
+  context?: SavedDealHistoryContext,
+): Promise<UpdateSavedDealLifecycleResult> {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return {
+      ok: false,
+      code: "SIGN_IN_REQUIRED",
+      message: "Please sign in to undo this Passed decision.",
+    };
+  }
+
+  const savedDealId = id.trim();
+  const parsedExpectedEventId = z
+    .string()
+    .uuid()
+    .safeParse(expectedPassHistoryEventId);
+  if (
+    !savedDealId ||
+    !isPipelineStage(restoreStage) ||
+    restoreStage === "passed" ||
+    !parsedExpectedEventId.success
+  ) {
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "Invalid Passed Undo target.",
+    };
+  }
+
+  const entitlements = await getEntitlementsForUser(supabase, user.id);
+  if (!hasPlanFeature(entitlements, "pipeline")) {
+    return {
+      ok: false,
+      code: "ENTITLEMENT_REQUIRED",
+      message: "Pipeline stages are a Pro feature.",
+    };
+  }
+
+  const result = await persistSavedDealStageWithHistory({
+    supabase,
+    savedDealId,
+    stage: restoreStage,
+    context,
+    expectedCurrentStage: {
+      stage: "passed",
+      historyEventId: parsedExpectedEventId.data,
+    },
+  });
+  if (!result.ok) return result;
+
+  const recordedDecision = userDecisionFromPipelineStage(restoreStage);
   if (recordedDecision !== "undecided") {
     await captureServerEvent({
       distinctId: user.id,
@@ -3065,12 +3181,18 @@ export async function setSavedDealClientAction(
   }
 
   if (clientId !== null) {
-    const { data: ownedClient } = await supabase
+    const { data: ownedClient, error: ownedClientError } = await supabase
       .from("agent_clients")
       .select("id")
       .eq("id", clientId)
       .eq("agent_user_id", user.id)
       .maybeSingle();
+    if (ownedClientError) {
+      return toServerErrorResult(
+        ownedClientError,
+        "saved-analyses-client-assignment",
+      );
+    }
     if (!ownedClient) {
       return {
         ok: false,
@@ -3540,6 +3662,7 @@ export async function bulkUpdateSavedDealsAction(
     .update({ deleted_at: nowIso })
     .in("id", cleanedIds)
     .eq("user_id", user.id)
+    .is("deleted_at", null)
     .select("id");
 
   if (error) {

@@ -11,7 +11,14 @@
  *
  * Free per-deal annotation (no entitlement), like Deal Notes.
  */
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import * as Sentry from "@sentry/nextjs";
 import { ChevronDown, ClipboardCheck, Loader2, Plus, X } from "lucide-react";
 import {
@@ -29,6 +36,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { isCurrentDealWorkspaceMutation } from "@/lib/deal-workspace-mutation-lifecycle";
 
 export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
   const { toast } = useToast();
@@ -45,6 +53,22 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
   // the editor opened so blur only persists an ACTUAL change.
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const noteAtOpenRef = useRef<string>("");
+  const savedDealIdRef = useRef(savedDealId);
+  const mutationRequestRef = useRef<symbol | null>(null);
+
+  // Layout phase closes the new-route-commit -> passive-effect window: an old
+  // request cannot resolve against the previous id after the new deal is on
+  // screen.
+  useLayoutEffect(() => {
+    savedDealIdRef.current = savedDealId;
+    mutationRequestRef.current = null;
+    // Both values are unsaved, deal-scoped input. Clear them during the route
+    // commit so a reused dynamic workspace cannot carry a checklist label or
+    // note comparison baseline from deal A into deal B.
+    setNewLabel("");
+    noteAtOpenRef.current = "";
+    setLoaded(false);
+  }, [savedDealId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -99,10 +123,19 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
     const dealIdAtSubmit = savedDealId;
     const previous = items;
     const revisionAtSubmit = revision;
+    const requestToken = Symbol("due-diligence-save");
+    mutationRequestRef.current = requestToken;
+    const requestStillOwnsDeal = () =>
+      isCurrentDealWorkspaceMutation({
+        submittedDealId: dealIdAtSubmit,
+        currentDealId: savedDealIdRef.current,
+        requestToken,
+        currentRequestToken: mutationRequestRef.current,
+      });
     startSaving(async () => {
       try {
         const r = await updateDealDueDiligenceAction(dealIdAtSubmit, next, revisionAtSubmit);
-        if (dealIdAtSubmit !== savedDealId) return; // user switched deals mid-save
+        if (!requestStillOwnsDeal()) return;
         if (!r.ok) {
           if (r.code === "MIGRATION_PENDING") {
             setItems(previous);
@@ -110,7 +143,7 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
             return;
           }
           const fresh = await getDealDueDiligenceAction(dealIdAtSubmit).catch(() => null);
-          if (dealIdAtSubmit !== savedDealId) return;
+          if (!requestStillOwnsDeal()) return;
           if (fresh?.ok) {
             setItems(fresh.items);
             setRevision(fresh.revision);
@@ -135,7 +168,7 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
         // the pre-mutation snapshot (a re-read might also be down), let the
         // caller restore anything it cleared, and surface a retryable toast.
         Sentry.captureException(err, { tags: { feature: "due-diligence" } });
-        if (dealIdAtSubmit !== savedDealId) return;
+        if (!requestStillOwnsDeal()) return;
         setItems(previous);
         onFailure?.();
         toast({
@@ -143,6 +176,10 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
           description: `Something interrupted the request. ${failureHint}`,
           variant: "destructive",
         });
+      } finally {
+        if (mutationRequestRef.current === requestToken) {
+          mutationRequestRef.current = null;
+        }
       }
     });
   };
