@@ -531,14 +531,29 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
       documents.getByText(validDocumentName, { exact: true }),
     ).toBeVisible();
 
+    const signedDocumentResponsePromise = page.context().waitForEvent("response", {
+      predicate: (response) => {
+        const url = new URL(response.url());
+        return (
+          response.request().method() === "GET" &&
+          url.pathname.includes("/storage/v1/object/sign/deal-documents/") &&
+          decodeURIComponent(url.pathname).endsWith(`/${validDocumentName}`)
+        );
+      },
+      timeout: 20_000,
+    });
     const documentPopupPromise = page.waitForEvent("popup", { timeout: 20_000 });
     await documents
       .getByRole("button", { name: `Download ${validDocumentName}`, exact: true })
       .click();
-    const documentPopup = await documentPopupPromise;
-    await expect
-      .poll(() => documentPopup.url(), { timeout: 20_000 })
-      .toContain("/storage/v1/object/sign/deal-documents/");
+    const [documentPopup, signedDocumentResponse] = await Promise.all([
+      documentPopupPromise,
+      signedDocumentResponsePromise,
+    ]);
+    expect(signedDocumentResponse.ok()).toBe(true);
+    expect(signedDocumentResponse.headers()["content-type"]).toContain(
+      "application/pdf",
+    );
     await documentPopup.close();
 
     await documents
@@ -784,7 +799,14 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
           .remove([object.path])
           .catch(() => undefined);
       }
-      await storageProbeClient.auth.signOut().catch(() => undefined);
+      // The probe shares the seeded user's credentials with the browser. A
+      // default (global) sign-out revokes the browser session too, which turns
+      // successful cleanup into an authentication failure for this test and
+      // every retry that reuses the saved state. Only discard this client's
+      // in-memory session.
+      await storageProbeClient.auth
+        .signOut({ scope: "local" })
+        .catch(() => undefined);
     }
     if (baseDealId && uploadedDocumentName) {
       // Best-effort object cleanup if an assertion between upload and the
