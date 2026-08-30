@@ -7,13 +7,20 @@ const read = (path: string) => readFileSync(join(process.cwd(), path), "utf8");
 const migration = read(
   "supabase/migrations/20260830130000_reconcile_workspace_write_policies.sql",
 );
+const storageRuntimeFix = read(
+  "supabase/migrations/20260830220000_fix_storage_upload_runtime_policies.sql",
+);
 
-function between(start: string, end: string): string {
-  const startAt = migration.indexOf(start);
-  const endAt = migration.indexOf(end, startAt + start.length);
+function betweenIn(source: string, start: string, end: string): string {
+  const startAt = source.indexOf(start);
+  const endAt = source.indexOf(end, startAt + start.length);
   expect(startAt, `missing section start: ${start}`).toBeGreaterThanOrEqual(0);
   expect(endAt, `missing section end after: ${start}`).toBeGreaterThan(startAt);
-  return migration.slice(startAt, endAt);
+  return source.slice(startAt, endAt);
+}
+
+function between(start: string, end: string): string {
+  return betweenIn(migration, start, end);
 }
 
 function functionSql(name: string): string {
@@ -22,6 +29,14 @@ function functionSql(name: string): string {
 
 function policySql(name: string, table: string): string {
   return between(`create policy "${name}" on ${table}`, ";\n");
+}
+
+function finalStoragePolicySql(name: string): string {
+  return betweenIn(
+    storageRuntimeFix,
+    `create policy "${name}" on storage.objects`,
+    ";\n",
+  );
 }
 
 describe("workspace write policy reconciliation", () => {
@@ -344,7 +359,7 @@ describe("workspace write policy reconciliation", () => {
     }
   });
 
-  it("keeps document CRUD private, owner/deal-bound, active for writes, and metadata-limited", () => {
+  it("keeps document CRUD private, owner/deal-bound, active for writes, and API-limited", () => {
     const pathGuard = functionSql("truecap_storage_path_is_owned_deal");
     expect(pathGuard).toContain("cardinality(parts) <> 3");
     expect(pathGuard).toContain("parts[1] <> auth.uid()::text");
@@ -362,11 +377,6 @@ describe("workspace write policy reconciliation", () => {
       expect(policy).not.toContain("truecap_current_user_has_paid_plan");
     }
 
-    for (const operation of ["insert", "update"]) {
-      const policy = policySql(`deal_documents_${operation}_own`, "storage.objects");
-      expect(policy).toContain("char_length(split_part(name, '/', 3)) between 1 and 160");
-      expect(policy).toContain("truecap_storage_metadata_allowed");
-    }
     expect(migration).toContain("'deal-documents', 'deal-documents', false, 10485760");
   });
 
@@ -389,14 +399,6 @@ describe("workspace write policy reconciliation", () => {
       expect(policy).toContain("truecap_current_user_has_feature('pdf_export')");
       expect(policy).not.toContain("truecap_current_user_has_active_evaluation");
     }
-    for (const operation of ["insert", "update"]) {
-      const policy = policySql(`analysis_pdfs_${operation}_own`, "storage.objects");
-      expect(policy).toContain(
-        "^investment-analysis-v[0-9]+-[a-f0-9]{32}-[a-f0-9]{64}[.]pdf$",
-      );
-      expect(policy).toContain("truecap_storage_metadata_allowed");
-    }
-
     const currentLeaf = buildAnalysisPdfObjectPath(
       "owner",
       "deal",
@@ -435,6 +437,48 @@ describe("workspace write policy reconciliation", () => {
     expect(metadata).toContain("immutable");
     expect(metadata).toContain("if p_metadata is null then");
     expect(metadata).toContain("return true;");
+  });
+
+  it("keeps transient Storage metadata out of the final upload authorization boundary", () => {
+    for (const policyName of ["analysis_pdfs_insert_own", "analysis_pdfs_update_own"]) {
+      const policy = finalStoragePolicySql(policyName);
+      expect(policy).toContain("bucket_id = 'analysis-pdfs'");
+      expect(policy).toContain("truecap_storage_path_is_owned_deal(name, true)");
+      expect(policy).toContain("truecap_current_user_has_feature('pdf_export')");
+      expect(policy).toContain(
+        "^investment-analysis-v[0-9]+-[a-f0-9]{32}-[a-f0-9]{64}[.]pdf$",
+      );
+      expect(policy).not.toContain("truecap_storage_metadata_allowed");
+    }
+
+    for (const policyName of ["deal_documents_insert_own", "deal_documents_update_own"]) {
+      const policy = finalStoragePolicySql(policyName);
+      expect(policy).toContain("bucket_id = 'deal-documents'");
+      expect(policy).toContain("truecap_storage_path_is_owned_deal(name, true)");
+      expect(policy).toContain(
+        "char_length(split_part(name, '/', 3)) between 1 and 160",
+      );
+      expect(policy).not.toContain("truecap_storage_metadata_allowed");
+    }
+
+    for (const policyName of ["Users can upload own logo", "Users can update own logo"]) {
+      const policy = finalStoragePolicySql(policyName);
+      expect(policy).toContain("bucket_id = 'branding-logos'");
+      expect(policy).toContain("cardinality(string_to_array(name, '/')) = 2");
+      expect(policy).toContain("split_part(name, '/', 1) = auth.uid()::text");
+      expect(policy).toContain("truecap_current_user_has_feature('custom_branding')");
+      expect(policy).not.toContain("truecap_storage_metadata_allowed");
+    }
+
+    expect(storageRuntimeFix).toContain(
+      "'analysis-pdfs', 'analysis-pdfs', false, 10485760",
+    );
+    expect(storageRuntimeFix).toContain(
+      "'deal-documents', 'deal-documents', false, 10485760",
+    );
+    expect(storageRuntimeFix).toContain(
+      "'branding-logos', 'branding-logos', true, 1048576",
+    );
   });
 
   it("matches the app's broad active-evaluation Buy Box grant without opening expired evaluations", () => {

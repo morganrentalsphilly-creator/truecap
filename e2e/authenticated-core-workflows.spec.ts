@@ -1,5 +1,10 @@
 import { readFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import {
+  buildAnalysisPdfObjectPath,
+  PDF_CACHE_VERSION,
+} from "@/lib/pdf-export-constants";
 import { resolveAuthenticatedE2EEnvironment } from "./support/auth-environment";
 import {
   acceptCookiesIfShown,
@@ -323,11 +328,92 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
   let baseDealId: string | null = null;
   let uploadedDocumentName: string | null = null;
   let notesRoutePattern: string | null = null;
+  let storageProbeClient: SupabaseClient | null = null;
+  const storageProbeObjects: Array<{ bucket: string; path: string }> = [];
   const notesSaveGate = { release: null as (() => void) | null };
 
   try {
     await page.setViewportSize({ width: 390, height: 844 });
     baseDealId = await saveUniqueSampleDeal(page, address);
+
+    if (!authEnvironment.enabled) {
+      throw new Error("The isolated authenticated environment is required.");
+    }
+    const storageUrl = process.env.E2E_SUPABASE_URL?.trim();
+    const storageAnonKey = process.env.E2E_SUPABASE_ANON_KEY?.trim();
+    if (!storageUrl || !storageAnonKey) {
+      throw new Error("The isolated Supabase Storage environment is required.");
+    }
+    storageProbeClient = createClient(storageUrl, storageAnonKey, {
+      auth: {
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+        persistSession: false,
+      },
+    });
+    const { data: probeAuth, error: probeAuthError } =
+      await storageProbeClient.auth.signInWithPassword({
+        email: authEnvironment.email,
+        password: authEnvironment.password,
+      });
+    expect(probeAuthError).toBeNull();
+    const probeOwnerId = probeAuth.user?.id;
+    expect(probeOwnerId).toBeTruthy();
+    if (!probeOwnerId) throw new Error("The Storage probe user was not returned.");
+
+    // Exercise the byte-limit boundary at Storage itself. The UI has an early
+    // guard too, but a hostile client can bypass an input element entirely.
+    const oversizedObjectPath = `${probeOwnerId}/${baseDealId}/oversized-${runKey}.pdf`;
+    storageProbeObjects.push({
+      bucket: "deal-documents",
+      path: oversizedObjectPath,
+    });
+    const { error: oversizedStorageError } = await storageProbeClient.storage
+      .from("deal-documents")
+      .upload(oversizedObjectPath, Buffer.alloc(10 * 1024 * 1024 + 1), {
+        contentType: "application/pdf",
+        upsert: false,
+    });
+    expect(oversizedStorageError).not.toBeNull();
+    expect(oversizedStorageError?.message).toMatch(
+      /maximum allowed size|payload too large|entity too large/i,
+    );
+
+    // The PDF cache uses upsert:true. Uploading the exact same authorized key
+    // twice proves both the INSERT and UPDATE RLS probes work with the Storage
+    // service's transient metadata shape.
+    const pdfCachePath = buildAnalysisPdfObjectPath(
+      probeOwnerId,
+      baseDealId,
+      PDF_CACHE_VERSION,
+      "a".repeat(32),
+      "b".repeat(64),
+    );
+    storageProbeObjects.push({ bucket: "analysis-pdfs", path: pdfCachePath });
+    for (const marker of ["initial", "replacement"]) {
+      const { error } = await storageProbeClient.storage
+        .from("analysis-pdfs")
+        .upload(
+          pdfCachePath,
+          Buffer.from(`%PDF-1.4\n% TrueCap ${marker} cache policy probe\n`),
+          { contentType: "application/pdf", upsert: true },
+        );
+      expect(error, `${marker} analysis PDF cache upload`).toBeNull();
+    }
+    const { data: cachedPdf, error: cachedPdfError } =
+      await storageProbeClient.storage.from("analysis-pdfs").download(pdfCachePath);
+    expect(cachedPdfError).toBeNull();
+    expect(cachedPdf).not.toBeNull();
+    if (!cachedPdf) throw new Error("The cached PDF probe was not returned.");
+    await expect(cachedPdf.text()).resolves.toContain("replacement cache policy probe");
+    const { error: removeCachedPdfError } = await storageProbeClient.storage
+      .from("analysis-pdfs")
+      .remove([pdfCachePath]);
+    expect(removeCachedPdfError).toBeNull();
+    const cachedPdfIndex = storageProbeObjects.findIndex(
+      (object) => object.path === pdfCachePath,
+    );
+    if (cachedPdfIndex >= 0) storageProbeObjects.splice(cachedPdfIndex, 1);
 
     await page.goto("/dashboard", { waitUntil: "domcontentloaded" });
     await expect(
@@ -409,6 +495,21 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
     await expect(
       page.getByText("Max 10 MB per file.", { exact: true }),
     ).toBeVisible();
+
+    // `accept` is only a browser hint, so prove the private bucket itself
+    // rejects a disallowed MIME type before testing the valid lifecycle.
+    const blockedDocumentName = `blocked-${runKey}.exe`;
+    await documentInput.setInputFiles({
+      name: blockedDocumentName,
+      mimeType: "application/x-msdownload",
+      buffer: Buffer.from("not an allowed deal document"),
+    });
+    await expect(
+      page.getByText("Upload failed", { exact: true }),
+    ).toBeVisible({ timeout: 30_000 });
+    await expect(
+      documents.getByText(blockedDocumentName, { exact: true }),
+    ).toHaveCount(0);
 
     // The old regression stopped at the client-side size check, so CI never
     // reached Storage RLS and stayed green while every real upload failed in
@@ -675,6 +776,15 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
     notesSaveGate.release?.();
     if (notesRoutePattern) {
       await page.unroute(notesRoutePattern).catch(() => undefined);
+    }
+    if (storageProbeClient) {
+      for (const object of storageProbeObjects.reverse()) {
+        await storageProbeClient.storage
+          .from(object.bucket)
+          .remove([object.path])
+          .catch(() => undefined);
+      }
+      await storageProbeClient.auth.signOut().catch(() => undefined);
     }
     if (baseDealId && uploadedDocumentName) {
       // Best-effort object cleanup if an assertion between upload and the
