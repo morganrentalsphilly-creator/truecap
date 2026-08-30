@@ -2,6 +2,7 @@ import { expect, test, type Browser, type Page } from "@playwright/test";
 import { SAMPLE_DEAL_FIXTURE } from "../lib/sample-deal";
 import { resolveAuthenticatedE2EEnvironment } from "./support/auth-environment";
 import {
+  acceptCookiesIfShown,
   deleteRegressionDealsByAddress,
   replaceSampleAddressForRegression,
 } from "./support/product-flows";
@@ -15,11 +16,6 @@ const authSkipReason = authEnvironment.enabled
 test.beforeEach(() => {
   test.skip(!authEnvironment.enabled, authSkipReason);
 });
-
-async function acceptCookiesIfShown(page: Page) {
-  const acceptCookies = page.getByRole("button", { name: /accept all/i });
-  if (await acceptCookies.isVisible()) await acceptCookies.click();
-}
 
 async function openSampleDecision(page: Page) {
   await page.goto("/", { waitUntil: "domcontentloaded" });
