@@ -91,6 +91,9 @@ type SettledRequest = { request: PendingRequest; result: boolean | string | null
 
 export function ActionConfirmProvider({ children }: { children: ReactNode }) {
   const [active, setActive] = useState<PendingRequest | null>(null);
+  /** The just-settled request, kept so the dialog renders its copy through
+   *  the exit animation. State, not a ref: it is read during render. */
+  const [closing, setClosing] = useState<PendingRequest | null>(null);
   const [promptValue, setPromptValue] = useState("");
   const queueRef = useRef<PendingRequest[]>([]);
   // The active request must resolve exactly once even though both a button
@@ -100,6 +103,7 @@ export function ActionConfirmProvider({ children }: { children: ReactNode }) {
 
   const openNext = useCallback(() => {
     const next = queueRef.current.shift() ?? null;
+    setClosing(null);
     setPromptValue(next?.kind === "prompt" ? (next.options.initialValue ?? "") : "");
     setActive(next);
   }, []);
@@ -132,6 +136,7 @@ export function ActionConfirmProvider({ children }: { children: ReactNode }) {
     setActive((current) => {
       if (current && !settledRef.current) {
         settledRef.current = { request: current, result };
+        setClosing(current);
       }
       return null; // start the Radix close; resolution follows in finishSettle
     });
@@ -206,7 +211,7 @@ export function ActionConfirmProvider({ children }: { children: ReactNode }) {
     [confirmDialog, promptDialog],
   );
 
-  const rendered = active ?? settledRef.current?.request ?? null;
+  const rendered = active ?? closing;
   const options = rendered?.options;
   return (
     <ActionConfirmContext.Provider value={value}>
