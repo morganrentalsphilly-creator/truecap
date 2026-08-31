@@ -157,6 +157,24 @@ export function ActionConfirmProvider({ children }: { children: ReactNode }) {
     // screen readers skipped the page's primary input while sighted users
     // saw nothing wrong. Resolve after the cleanup commit instead.
     setTimeout(() => {
+      // Deterministic restore, not a bet on Radix's internal ordering. The
+      // one-macrotask deferral above still lost the race on production —
+      // hideOthers() undoes its aria-hidden marks only after the exit
+      // animation, and the caller's re-render kept beating it, leaving the
+      // analyzer's primary input marked aria-hidden for screen readers.
+      // Same philosophy as OverlayRecovery: if no Radix layer is open once
+      // we settle, any remaining data-aria-hidden mark is stale by
+      // definition — sweep it. Guarded so a legitimately open modal
+      // elsewhere keeps its marks.
+      const sweepStaleAriaHidden = () => {
+        if (document.querySelector('[data-state="open"][role="dialog"], [data-state="open"][role="alertdialog"]')) {
+          return;
+        }
+        for (const el of document.querySelectorAll('[data-aria-hidden="true"]')) {
+          el.removeAttribute("aria-hidden");
+          el.removeAttribute("data-aria-hidden");
+        }
+      };
       if (settled) {
         const { request, result } = settled;
         if (request.kind === "confirm") {
@@ -166,6 +184,10 @@ export function ActionConfirmProvider({ children }: { children: ReactNode }) {
         }
       }
       openNext();
+      // Once now (covers the common case), once after the exit animation's
+      // worst case, so whichever side of the undo we land on ends clean.
+      sweepStaleAriaHidden();
+      setTimeout(sweepStaleAriaHidden, 350);
     }, 0);
   }, [openNext]);
 
