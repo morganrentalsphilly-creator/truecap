@@ -87,61 +87,97 @@ type PendingRequest =
       resolve: (value: string | null) => void;
     };
 
+type SettledRequest = { request: PendingRequest; result: boolean | string | null };
+
 export function ActionConfirmProvider({ children }: { children: ReactNode }) {
   const [active, setActive] = useState<PendingRequest | null>(null);
   const [promptValue, setPromptValue] = useState("");
   const queueRef = useRef<PendingRequest[]>([]);
   // The active request must resolve exactly once even though both a button
   // handler and Radix's onOpenChange(false) fire on the same dismissal.
-  const settledRef = useRef(false);
+  const settledRef = useRef<SettledRequest | null>(null);
+  const resolveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const dequeue = useCallback(() => {
+  const openNext = useCallback(() => {
     const next = queueRef.current.shift() ?? null;
-    settledRef.current = false;
     setPromptValue(next?.kind === "prompt" ? (next.options.initialValue ?? "") : "");
     setActive(next);
   }, []);
 
-  const enqueue = useCallback(
-    (request: PendingRequest) => {
-      queueRef.current.push(request);
-      setActive((current) => {
-        if (current) return current; // will dequeue when the current one settles
-        const next = queueRef.current.shift() ?? null;
-        settledRef.current = false;
-        setPromptValue(
-          next?.kind === "prompt" ? (next.options.initialValue ?? "") : "",
-        );
-        return next;
-      });
-    },
-    [],
-  );
+  const enqueue = useCallback((request: PendingRequest) => {
+    queueRef.current.push(request);
+    setActive((current) => {
+      if (current) return current; // opens when the current one finishes closing
+      const next = queueRef.current.shift() ?? null;
+      setPromptValue(
+        next?.kind === "prompt" ? (next.options.initialValue ?? "") : "",
+      );
+      return next;
+    });
+  }, []);
 
-  const settle = useCallback(
-    (result: boolean | string | null) => {
-      setActive((current) => {
-        if (current && !settledRef.current) {
-          settledRef.current = true;
-          if (current.kind === "confirm") {
-            current.resolve(Boolean(result));
-          } else {
-            current.resolve(typeof result === "string" ? result : null);
-          }
-        }
-        return current; // closing animation reads the request; dequeue below
-      });
-      // Give the close a tick so Radix unmounts cleanly before the next opens.
-      setTimeout(dequeue, 0);
-    },
-    [dequeue],
-  );
+  /**
+   * Resolving the caller's promise is deliberately deferred to
+   * finishSettle(), which runs from DialogContent's onCloseAutoFocus —
+   * i.e. only after Radix has fully torn the modal down. Resolving
+   * immediately let the caller mutate the page (form resets, router
+   * work) while the overlay was mid-close, and Radix left the rest of
+   * the document stranded under aria-hidden="true" — every input on the
+   * page read as hidden. The browser suite caught it: address.fill()
+   * timed out on an aria-hidden input. This repo's OverlayRecovery
+   * exists for exactly this stranded-overlay class; better not to
+   * strand it at all.
+   */
+  const settle = useCallback((result: boolean | string | null) => {
+    setActive((current) => {
+      if (current && !settledRef.current) {
+        settledRef.current = { request: current, result };
+      }
+      return null; // start the Radix close; resolution follows in finishSettle
+    });
+  }, []);
+
+  const finishSettle = useCallback(() => {
+    if (resolveTimerRef.current) {
+      clearTimeout(resolveTimerRef.current);
+      resolveTimerRef.current = null;
+    }
+    const settled = settledRef.current;
+    settledRef.current = null;
+    if (settled) {
+      const { request, result } = settled;
+      if (request.kind === "confirm") {
+        request.resolve(Boolean(result));
+      } else {
+        request.resolve(typeof result === "string" ? result : null);
+      }
+    }
+    openNext();
+  }, [openNext]);
+
+  // Belt-and-braces: if onCloseAutoFocus never fires (content unmounted by a
+  // route change mid-close), resolve anyway so no caller is stranded.
+  useEffect(() => {
+    if (active == null && settledRef.current) {
+      resolveTimerRef.current = setTimeout(finishSettle, 400);
+      return () => {
+        if (resolveTimerRef.current) clearTimeout(resolveTimerRef.current);
+      };
+    }
+  }, [active, finishSettle]);
 
   // A provider unmount (route change with a dialog open) must not strand
   // callers on a never-settling promise: cancel everything in flight.
   useEffect(() => {
     const queue = queueRef.current;
     return () => {
+      const settled = settledRef.current;
+      settledRef.current = null;
+      if (settled) {
+        const { request, result } = settled;
+        if (request.kind === "confirm") request.resolve(Boolean(result));
+        else request.resolve(typeof result === "string" ? result : null);
+      }
       for (const request of queue.splice(0)) {
         if (request.kind === "confirm") request.resolve(false);
         else request.resolve(null);
@@ -170,7 +206,8 @@ export function ActionConfirmProvider({ children }: { children: ReactNode }) {
     [confirmDialog, promptDialog],
   );
 
-  const options = active?.options;
+  const rendered = active ?? settledRef.current?.request ?? null;
+  const options = rendered?.options;
   return (
     <ActionConfirmContext.Provider value={value}>
       {children}
@@ -180,7 +217,10 @@ export function ActionConfirmProvider({ children }: { children: ReactNode }) {
           if (!open) settle(active?.kind === "prompt" ? null : false);
         }}
       >
-        <DialogContent className="max-w-md">
+        <DialogContent
+          className="max-w-md"
+          onCloseAutoFocus={finishSettle}
+        >
           <DialogHeader>
             <DialogTitle>{options?.title}</DialogTitle>
             {options?.body ? (
@@ -189,15 +229,15 @@ export function ActionConfirmProvider({ children }: { children: ReactNode }) {
               </DialogDescription>
             ) : null}
           </DialogHeader>
-          {active?.kind === "prompt" ? (
+          {rendered?.kind === "prompt" ? (
             <textarea
               autoFocus
               value={promptValue}
               onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) =>
                 setPromptValue(event.target.value)
               }
-              placeholder={active.options.placeholder}
-              maxLength={active.options.maxLength ?? 500}
+              placeholder={rendered.options.placeholder}
+              maxLength={rendered.options.maxLength ?? 500}
               rows={3}
               aria-label={options?.title}
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-base outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] md:text-sm"
@@ -208,20 +248,20 @@ export function ActionConfirmProvider({ children }: { children: ReactNode }) {
               type="button"
               variant="outline"
               className="min-h-11"
-              onClick={() => settle(active?.kind === "prompt" ? null : false)}
+              onClick={() => settle(rendered?.kind === "prompt" ? null : false)}
             >
               {options?.cancelLabel ?? "Cancel"}
             </Button>
             <Button
               type="button"
               variant={
-                active?.kind === "confirm" && active.options.destructive
+                rendered?.kind === "confirm" && rendered.options.destructive
                   ? "destructive"
                   : "default"
               }
               className="min-h-11"
               onClick={() =>
-                settle(active?.kind === "prompt" ? promptValue : true)
+                settle(rendered?.kind === "prompt" ? promptValue : true)
               }
             >
               {options?.confirmLabel ?? "Continue"}

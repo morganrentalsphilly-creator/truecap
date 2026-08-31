@@ -979,8 +979,15 @@ test("one real anonymous deal receives an exact decision and bound PDF, then a s
     name: "Next deal · keep assumptions",
     exact: true,
   });
-  page.once("dialog", (dialog) => dialog.accept());
   await nextDeal.click();
+  const nextDealDialog = page.getByRole("dialog", {
+    name: "Analyze another property?",
+  });
+  await expect(nextDealDialog).toBeVisible();
+  await nextDealDialog
+    .getByRole("button", { name: "Analyze another", exact: true })
+    .click();
+  await expect(nextDealDialog).toBeHidden();
   const second = await runDeal({
     address: "200 Second Test St, Columbus, OH 43215",
     price: "275000",
@@ -1017,14 +1024,18 @@ test("next deal confirms the reset, clears property facts, and keeps reusable as
   });
   await expect(nextDeal).toBeVisible({ timeout: 20_000 });
 
-  let confirmationMessage = "";
-  page.once("dialog", async (dialog) => {
-    confirmationMessage = dialog.message();
-    await dialog.accept();
-  });
   await nextDeal.click();
-
-  expect(confirmationMessage).toContain("Analyze another property?");
+  const anotherDialog = page.getByRole("dialog", {
+    name: "Analyze another property?",
+  });
+  await expect(anotherDialog).toBeVisible();
+  await expect(anotherDialog).toContainText(
+    "Reusable financing and general operating assumptions will remain",
+  );
+  await anotherDialog
+    .getByRole("button", { name: "Analyze another", exact: true })
+    .click();
+  await expect(anotherDialog).toBeHidden();
   await expect(
     page.getByRole("heading", {
       level: 2,
