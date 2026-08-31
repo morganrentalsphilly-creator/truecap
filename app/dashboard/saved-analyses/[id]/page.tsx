@@ -998,7 +998,18 @@ export default async function DealWorkspacePage({
           <DealDetailsCard savedDealId={dealRow.id} />
           {/* Anchor targets clear both the h-16 Topbar and sticky workspace nav. */}
           <div id="deal-scenarios" className="scroll-mt-36">
-            <ScenariosCard savedDealId={dealRow.id} />
+            <ScenariosCard
+              savedDealId={dealRow.id}
+              sourceStrategyValues={
+                evaluationResourceValues
+                  ? {
+                      propertyType: evaluationResourceValues.propertyType,
+                      avgDailyRate: evaluationResourceValues.avgDailyRate,
+                      occupancyPct: evaluationResourceValues.occupancyPct,
+                    }
+                  : null
+              }
+            />
           </div>
           <div id="deal-due-diligence" className="scroll-mt-36">
             <DueDiligenceCard savedDealId={dealRow.id} />

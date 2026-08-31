@@ -32,6 +32,7 @@ import {
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { defaultScenarioName, isStrategyKind } from "@/lib/strategy-kinds";
 import { applyStrategyPreset } from "@/lib/scenario-presets";
+import { requiredAnalyzerStrategyKeyForScenario } from "@/lib/scenario-strategy-eligibility";
 import { calculateAnalysis } from "@/lib/calc-analysis";
 import { INVESTCALC_SCHEMA_VERSION } from "@/lib/investcalc-schema";
 import {
@@ -551,16 +552,12 @@ export async function addScenarioAction(
         sourceResult: deal.result_snapshot,
         values: adjusted,
       });
+      // Single source of truth shared with the dialog's option gating —
+      // lib/scenario-strategy-eligibility.ts. An inline copy here is how the
+      // client and server drift apart and the pre-submit gate stops matching
+      // the post-submit rejection.
       const requiredAnalyzerStrategyKey =
-        strategyKind === "brrrr"
-          ? "brrrr"
-          : strategyKind === "flip"
-            ? "fix-flip"
-            : strategyKind === "house_hack"
-              ? "house-hack"
-              : strategyKind === "str"
-                ? "short-term"
-                : null;
+        requiredAnalyzerStrategyKeyForScenario(strategyKind);
       if (
         requiredAnalyzerStrategyKey &&
         targetAnalyzerStrategyKey !== requiredAnalyzerStrategyKey

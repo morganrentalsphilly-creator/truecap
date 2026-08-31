@@ -22,6 +22,8 @@ import {
 } from "@/app/actions/scenarios";
 import { compareScenariosAction } from "@/app/actions/compare";
 import { STRATEGY_KINDS, strategyLabel } from "@/lib/strategy-kinds";
+import type { AnalyzerStrategyCompatibilityValues } from "@/lib/analyzer-strategy-persistence";
+import { scenarioStrategyDisabledReason } from "@/lib/scenario-strategy-eligibility";
 import { describeStrategyPreset } from "@/lib/scenario-presets";
 import { isScenarioStrategyEnabled } from "@/lib/feature-flags";
 import { trackEvent } from "@/lib/analytics";
@@ -34,7 +36,21 @@ const RELEASED_STRATEGY_KINDS = STRATEGY_KINDS.filter((kind) =>
   isScenarioStrategyEnabled(kind),
 );
 
-export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
+export function ScenariosCard({
+  savedDealId,
+  sourceStrategyValues,
+}: {
+  savedDealId: string;
+  /**
+   * The source deal's analyzer-compatibility facts (property type + short-term
+   * income fields). When present, strategies the server would reject are
+   * disabled in the picker WITH the reason, so the user never fills the form,
+   * presses Add, and gets rejected with an errand the dialog could have
+   * prevented. Absent (legacy snapshot): options stay enabled and the server
+   * check remains the backstop.
+   */
+  sourceStrategyValues?: AnalyzerStrategyCompatibilityValues | null;
+}) {
   const router = useRouter();
   const { toast } = useToast();
   const [loaded, setLoaded] = useState(false);
@@ -303,11 +319,17 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
                 className="h-11 w-full rounded-md border border-input bg-background px-3 text-base md:text-sm"
               >
                 <option value="">No strategy</option>
-                {RELEASED_STRATEGY_KINDS.map((k) => (
-                  <option key={k} value={k}>
-                    {strategyLabel(k)}
-                  </option>
-                ))}
+                {RELEASED_STRATEGY_KINDS.map((k) => {
+                  const reason = scenarioStrategyDisabledReason(
+                    k,
+                    sourceStrategyValues,
+                  );
+                  return (
+                    <option key={k} value={k} disabled={reason != null}>
+                      {reason ? `${strategyLabel(k)} — ${reason}` : strategyLabel(k)}
+                    </option>
+                  );
+                })}
               </select>
             </div>
           </div>
