@@ -11,7 +11,6 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Calculator } from "lucide-react";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
@@ -104,7 +103,12 @@ export default function ThreeWayComparisonPost() {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
-      { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: `${siteUrl}/blog`,
+      },
       { "@type": "ListItem", position: 3, name: TITLE, item: url },
     ],
   };
@@ -121,9 +125,18 @@ export default function ThreeWayComparisonPost() {
 
   return (
     <div className="min-h-screen bg-background">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
 
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-2">
@@ -158,60 +171,114 @@ export default function ThreeWayComparisonPost() {
             </h2>
             <p
               className="text-sm sm:text-base leading-relaxed text-foreground"
-              dangerouslySetInnerHTML={{ __html: `<strong>Stessa</strong> now spans acquisition and operations: its official marketplace materials describe investor filters, map layers, watchlists, buy-box alerts, comps, and editable underwriting before its accounting workflows. <strong>Avail</strong> emphasizes leasing and rent collection. <strong>Baselane</strong> bundles banking, bookkeeping, and rent collection. TrueCap overlaps with Stessa during acquisition but stays narrower and target-backed. Facts reviewed against official sources on 2026-08-27.` }}
+              dangerouslySetInnerHTML={{
+                __html: `<strong>Stessa</strong> now spans acquisition and operations: its official marketplace materials describe investor filters, map layers, watchlists, buy-box alerts, comps, and editable underwriting before its accounting workflows. <strong>Avail</strong> emphasizes leasing and rent collection. <strong>Baselane</strong> bundles banking, bookkeeping, and rent collection. TrueCap overlaps with Stessa during acquisition but stays narrower and target-backed. Facts reviewed against official sources on 2026-08-27.`,
+              }}
             />
           </section>
 
           <div className="prose prose-neutral max-w-none prose-headings:font-extrabold prose-headings:text-foreground prose-p:text-foreground prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:text-foreground prose-li:leading-relaxed">
             <h2>The three in one sentence each</h2>
-            <div dangerouslySetInnerHTML={{ __html: `<ul>
+            <div
+              dangerouslySetInnerHTML={{
+                __html: `<ul>
               <li><strong>Stessa</strong> — investment-property marketplace, buy boxes, sale/rent comps, and editable acquisition assumptions, followed by bank-feed accounting and landlord operations. It currently publishes Essentials, Manage, and Pro plans; check live pricing and limits.</li>
               <li><strong>Avail</strong> — DIY landlord ops: listings (syndicated to Realtor.com / Zillow / Apartments.com), online rental applications, TransUnion-powered tenant screening, state-specific lease templates, ACH rent collection. Free Unlimited tier; Unlimited Plus is ~\$7/unit/month.</li>
               <li><strong>Baselane</strong> — banking + bookkeeping + rent collection. FDIC-insured business checking per property (Thread Bank / Blue Ridge Bank partners), auto-categorized expenses synced with your bank feed, Schedule E reports, ACH rent collection — all in one platform. Free banking + bookkeeping tier; advanced features ~\$22/mo (as of 2026).</li>
-            </ul>` }} />
+            </ul>`,
+              }}
+            />
 
             <h2>Stessa vs Baselane — accounting head-to-head</h2>
-            <div dangerouslySetInnerHTML={{ __html: `<p>This is the closest match. Both do bookkeeping; the difference is whose bank feed.</p>
+            <div
+              dangerouslySetInnerHTML={{
+                __html: `<p>This is the closest match. Both do bookkeeping; the difference is whose bank feed.</p>
             <ul>
               <li><strong>Stessa</strong> connects your existing bank account(s) — you keep banking wherever you already are (a credit union, your current business checking, etc.). Transactions auto-categorize into rental-property buckets. Strong reporting + multi-property dashboards.</li>
               <li><strong>Baselane</strong> bundles a dedicated FDIC-insured business checking account per property. Because Baselane IS the bank, categorization is tighter and reconciliation is automatic. You&apos;d be moving your rental banking to Baselane.</li>
             </ul>
-            <p>If you have rentals across multiple LLCs or already have business banking set up the way you like, Stessa is the less disruptive choice. If you&apos;re starting fresh or willing to switch banks, Baselane&apos;s integrated approach is genuinely faster + simpler.</p>` }} />
+            <p>If you have rentals across multiple LLCs or already have business banking set up the way you like, Stessa is the less disruptive choice. If you&apos;re starting fresh or willing to switch banks, Baselane&apos;s integrated approach is genuinely faster + simpler.</p>`,
+              }}
+            />
 
             <h2>Avail vs Baselane — rent collection head-to-head</h2>
-            <div dangerouslySetInnerHTML={{ __html: `<p>Both collect rent via ACH for free. The difference is what surrounds the rent collection.</p>
+            <div
+              dangerouslySetInnerHTML={{
+                __html: `<p>Both collect rent via ACH for free. The difference is what surrounds the rent collection.</p>
             <ul>
               <li><strong>Avail</strong> bundles rent collection with the leasing workflow (listings + applications + screening + lease). If you&apos;re placing tenants and managing the full lease lifecycle, Avail is more complete.</li>
               <li><strong>Baselane</strong> bundles rent collection with banking + bookkeeping. The rent lands in your Baselane account and is auto-categorized for accounting. If you don&apos;t need leasing tools (e.g. you have long-term tenants already in place), Baselane is more focused.</li>
             </ul>
-            <p>For new landlords filling units, Avail wins. For established landlords focused on bookkeeping + banking, Baselane wins.</p>` }} />
+            <p>For new landlords filling units, Avail wins. For established landlords focused on bookkeeping + banking, Baselane wins.</p>`,
+              }}
+            />
 
             <h2>Free tier comparison</h2>
-            <div dangerouslySetInnerHTML={{ __html: `<ul>
+            <div
+              dangerouslySetInnerHTML={{
+                __html: `<ul>
               <li><strong>Stessa Essentials</strong> — Stessa publishes a free entry plan, while Schedule E and other features are plan-dependent. Verify the current plan matrix.</li>
               <li><strong>Avail free</strong> (&quot;Unlimited&quot;) — unlimited listings, applications, lease signing, ACH rent collection. Tenants pay for screening (~\$30-55).</li>
               <li><strong>Baselane free</strong> — FDIC-insured business checking, ACH rent collection, basic bookkeeping. Their banking partner pays them via interchange + interest spread, so the &quot;free&quot; is real.</li>
             </ul>
-            <p>All three have legitimately useful free tiers. The decision isn&apos;t price — it&apos;s which features you need.</p>` }} />
+            <p>All three have legitimately useful free tiers. The decision isn&apos;t price — it&apos;s which features you need.</p>`,
+              }}
+            />
 
             <h2>Which combo to use?</h2>
-            <div dangerouslySetInnerHTML={{ __html: `<p>For most landlords, here&apos;s how the stacks shake out:</p>
+            <div
+              dangerouslySetInnerHTML={{
+                __html: `<p>For most landlords, here&apos;s how the stacks shake out:</p>
             <ul>
               <li><strong>Stessa + Avail</strong> — Stessa handles accounting, Avail handles leasing + rent collection. Most common pairing. Tradeoff: rent payment data lives in Avail but accounting categorization happens in Stessa, so there&apos;s some friction reconciling.</li>
               <li><strong>Just Baselane</strong> — one platform for banking + bookkeeping + rent collection. Simplest stack. Tradeoff: no leasing / screening / applications, so you&apos;d still need Avail or a separate screening tool when filling units.</li>
               <li><strong>Stessa + Avail + Baselane</strong> — full coverage if you want best-in-class for each, but three logins.</li>
               <li><strong>Baselane + Avail</strong> — Baselane for banking/bookkeeping, Avail for leasing. Avoids Stessa entirely.</li>
-            </ul>` }} />
+            </ul>`,
+              }}
+            />
 
             <h2>Where TrueCap fits</h2>
-            <div dangerouslySetInnerHTML={{ __html: `<p>TrueCap is a narrower acquisition decision workflow—cap rate, DSCR, cash flow, target fit, Offer Ceiling, and a secondary Screening Index. Stessa overlaps during acquisition and then continues into accounting and operations; Avail and Baselane are more operations-led. Choose by workflow and verify current plan terms rather than assuming a strict before/after split.</p>` }} />
+            <div
+              dangerouslySetInnerHTML={{
+                __html: `<p>TrueCap is a narrower acquisition decision workflow—cap rate, DSCR, cash flow, target fit, Offer Ceiling, and a secondary Screening Index. Stessa overlaps during acquisition and then continues into accounting and operations; Avail and Baselane are more operations-led. Choose by workflow and verify current plan terms rather than assuming a strict before/after split.</p>`,
+              }}
+            />
 
             <p>
               Stessa facts reviewed 2026-08-27 against its{" "}
-              <a href="https://www.stessa.com/investment-property-marketplace/" target="_blank" rel="noopener noreferrer">official marketplace</a>,{" "}
-              <a href="https://support.stessa.com/en/articles/10779191-stessa-investment-properties-marketplace" target="_blank" rel="noopener noreferrer">marketplace help article</a>,{" "}
-              <a href="https://www.stessa.com/rental-returns-and-income-tax-calculator/" target="_blank" rel="noopener noreferrer">returns calculator</a>, and{" "}
-              <a href="https://www.stessa.com/pricing/" target="_blank" rel="noopener noreferrer">pricing page</a>.
+              <a
+                href="https://www.stessa.com/investment-property-marketplace/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                official marketplace
+              </a>
+              ,{" "}
+              <a
+                href="https://support.stessa.com/en/articles/10779191-stessa-investment-properties-marketplace"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                marketplace help article
+              </a>
+              ,{" "}
+              <a
+                href="https://www.stessa.com/rental-returns-and-income-tax-calculator/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                returns calculator
+              </a>
+              , and{" "}
+              <a
+                href="https://www.stessa.com/pricing/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                pricing page
+              </a>
+              .
             </p>
 
             <h2>FAQ</h2>
@@ -238,17 +305,12 @@ export default function ThreeWayComparisonPost() {
             </div>
 
             <h2>Try TrueCap free</h2>
-            <p>Run the same acquisition assumptions through TrueCap and Stessa, then choose the workflow whose targets, evidence, and downstream operations match your needs.</p>
-            <p className="not-prose">
-              <Link
-                href="/"
-                className="inline-flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-5 py-3 font-bold hover:opacity-90"
-              >
-                <Calculator className="w-4 h-4" />
-                Analyze a deal free
-                <ArrowUpRight className="w-4 h-4" />
-              </Link>
+            <p>
+              Run the same acquisition assumptions through TrueCap and Stessa,
+              then choose the workflow whose targets, evidence, and downstream
+              operations match your needs.
             </p>
+            <p className="not-prose"></p>
           </div>
 
           <div className="mt-10">

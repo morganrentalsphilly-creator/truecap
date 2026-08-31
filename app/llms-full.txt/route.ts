@@ -30,7 +30,7 @@ import {
   CURRENT_DEFAULT_FACTS,
   DATA_SOURCE_FACTS,
   FOUR_ACQUISITION_ANSWERS,
-  PLAN_FACTS,
+  getPlanFacts,
   PRODUCT_POSITIONING,
 } from "@/lib/product-facts";
 
@@ -56,76 +56,79 @@ export const revalidate = 3600;
  *
  * Rule (docs/seo-content-backlog.md): do NOT hardcode the tool list.
  */
-const TOOL_FORMULAS: Record<string, { formula: string; description: string }> = {
-  "1-percent-rule-calculator": {
-    formula: "Monthly rent ≥ 1% × Purchase price",
-    description:
-      "Quick screening filter. The property's monthly rent should equal or exceed 1% of the purchase price. A pass/fail triage; not a complete underwrite.",
-  },
-  "2-percent-rule-calculator": {
-    formula: "Monthly rent ÷ Purchase price ≥ 2%",
-    description:
-      "The strict cash-flow screen. Rent-to-price measured against both the 2% and 1% bars. In 2026 almost nothing clears 2% outside low-priced Midwest and Rust Belt markets — treat a pass as a prompt to check why the price is that low, not as a green light.",
-  },
-  "70-percent-rule-calculator": {
-    formula: "70%-rule price screen = (0.70 × ARV) - Repair costs",
-    description:
-      "An educational flip and BRRRR screen. It applies a selected percentage to entered after-repair value and subtracts the entered rehab budget. It is not an underwrite, appraisal, or recommended offer.",
-  },
-  "arv-calculator": {
-    formula:
-      "ARV = Average entered comp price per sq ft × Subject sq ft; 70%-rule price screen = (0.70 × ARV) - Repairs",
-    description:
-      "An educational ARV estimate from user-entered sold comps plus a separately labeled 70%-rule price screen. Neither output is an appraisal, underwrite, or recommended offer.",
-  },
-  "rehab-cost-estimator": {
-    formula: "Total rehab = Σ (Sq ft × Rate per sq ft) per work category",
-    description:
-      "Square-foot-based defaults for cosmetic, kitchen, bath, and systems work. Mid-market 2024-25 contractor pricing. Recommended 25% contingency on top of base estimate.",
-  },
-  "mortgage-payment-calculator": {
-    formula:
-      "P&I = Loan × (r × (1+r)^n) / ((1+r)^n - 1), where r = monthly rate, n = months",
-    description:
-      "PITI breakdown: Principal, Interest, Taxes, Insurance. Investment-property rates and amortization. Investment-property loans typically 0.5-1.0% higher rates than owner-occupant loans.",
-  },
-  "gross-rent-multiplier-calculator": {
-    formula: "GRM = Property price ÷ Annual gross rent",
-    description:
-      "10-second screening ratio. Lower is better. Used for triaging deals before a full underwrite. Doesn't account for expenses — only useful with comparable properties in the same market.",
-  },
-  "break-even-calculator": {
-    formula: "Break-even months = Total cash invested ÷ Monthly net cash flow",
-    description:
-      "How many months until rental cash flow returns the initial investment. Compares deals on payback speed.",
-  },
-  "closing-cost-calculator": {
-    formula:
-      "Total = Origination + Title + Recording + Transfer tax + Insurance prepay + Tax escrow + Appraisal + Inspection",
-    description:
-      "Line-item breakdown of closing costs on a rental purchase. Investment-property closing typically runs 2-5% of purchase price.",
-  },
-  "vacancy-rate-calculator": {
-    formula:
-      "Vacancy rate = (Vacant days × Daily rent + Turnover cost) ÷ Annual gross rent",
-    description:
-      "Effective vacancy rate from vacant days + turnover cost. National average on residential rentals runs 7-9%; most seller pro formas quote 5%, which is aggressive.",
-  },
-};
+const TOOL_FORMULAS: Record<string, { formula: string; description: string }> =
+  {
+    "1-percent-rule-calculator": {
+      formula: "Monthly rent ≥ 1% × Purchase price",
+      description:
+        "Quick screening filter. The property's monthly rent should equal or exceed 1% of the purchase price. A pass/fail triage; not a complete underwrite.",
+    },
+    "2-percent-rule-calculator": {
+      formula: "Monthly rent ÷ Purchase price ≥ 2%",
+      description:
+        "The strict cash-flow screen. Rent-to-price measured against both the 2% and 1% bars. In 2026 almost nothing clears 2% outside low-priced Midwest and Rust Belt markets — treat a pass as a prompt to check why the price is that low, not as a green light.",
+    },
+    "70-percent-rule-calculator": {
+      formula: "70%-rule price screen = (0.70 × ARV) - Repair costs",
+      description:
+        "An educational flip and BRRRR screen. It applies a selected percentage to entered after-repair value and subtracts the entered rehab budget. It is not an underwrite, appraisal, or recommended offer.",
+    },
+    "arv-calculator": {
+      formula:
+        "ARV = Average entered comp price per sq ft × Subject sq ft; 70%-rule price screen = (0.70 × ARV) - Repairs",
+      description:
+        "An educational ARV estimate from user-entered sold comps plus a separately labeled 70%-rule price screen. Neither output is an appraisal, underwrite, or recommended offer.",
+    },
+    "rehab-cost-estimator": {
+      formula: "Total rehab = Σ (Sq ft × Rate per sq ft) per work category",
+      description:
+        "An educational square-foot calculation across editable work categories. Defaults are generic planning inputs, not current local contractor quotes or a recommended contingency; replace them with scoped bids.",
+    },
+    "mortgage-payment-calculator": {
+      formula:
+        "P&I = Loan × (r × (1+r)^n) / ((1+r)^n - 1), where r = monthly rate, n = months",
+      description:
+        "A PITI breakdown from entered loan, rate, term, tax, and insurance assumptions. Any displayed FRED rate is a national owner-occupied benchmark, not an investment-property quote or approval; replace it with written lender terms.",
+    },
+    "gross-rent-multiplier-calculator": {
+      formula: "GRM = Property price ÷ Annual gross rent",
+      description:
+        "A gross screening ratio that excludes expenses and financing. A lower value means a lower entered price relative to entered gross rent; it is not an investment conclusion and comparisons require consistent inputs.",
+    },
+    "break-even-calculator": {
+      formula:
+        "Break-even months = Total cash invested ÷ Monthly net cash flow",
+      description:
+        "An illustrative payback quotient when modeled monthly cash flow is positive. It does not forecast recovery of capital and omits timing, taxes, sale value, and other risks.",
+    },
+    "closing-cost-calculator": {
+      formula:
+        "Total = Origination + Title + Recording + Transfer tax + Insurance prepay + Tax escrow + Appraisal + Inspection",
+      description:
+        "An editable line-item total for origination, title, recording, transfer tax, prepaids, escrow, appraisal, and inspection. Obtain property-, lender-, and jurisdiction-specific figures instead of applying a national percentage claim.",
+    },
+    "vacancy-rate-calculator": {
+      formula:
+        "Vacancy rate = (Vacant days × Daily rent + Turnover cost) ÷ Annual gross rent",
+      description:
+        "An effective-vacancy calculation from entered vacant days, rent, and turnover cost. It does not supply a national or seller-pro-forma benchmark; use dated property- and market-specific evidence.",
+    },
+  };
 
 const METHODOLOGY_SUMMARY = [
   "How TrueCap computes the numbers:",
-  `  - Property tax: starts from a ${DATA_SOURCE_FACTS.propertyTax}; it is not represented as a county assessor bill.`,
+  `  - Property tax: ${DATA_SOURCE_FACTS.propertyTax} It is not represented as a county assessor bill.`,
   `  - Rent estimates: ${DATA_SOURCE_FACTS.rent}.`,
   `  - Mortgage rates: ${DATA_SOURCE_FACTS.mortgageRate}. Users can override the value; the schema fallback is ${CURRENT_DEFAULT_FACTS.fallbackInterestRate}.`,
   `  - Operating expenses: configurable by line item. Current defaults are vacancy ${CURRENT_DEFAULT_FACTS.vacancy}, maintenance ${CURRENT_DEFAULT_FACTS.maintenance}, CapEx ${CURRENT_DEFAULT_FACTS.capex}, and management ${CURRENT_DEFAULT_FACTS.management}.`,
   `  - 10-year projection: starts with rent growth ${CURRENT_DEFAULT_FACTS.rentGrowth} and expense growth ${CURRENT_DEFAULT_FACTS.expenseGrowth}; appreciation and selling-cost inputs remain editable rather than being stated here as fixed defaults.`,
   "  - DSCR: NOI ÷ annual debt service. Computed at proposed loan terms.",
-  "  - Sensitivity grid (Pro): shows how cap rate, cash-on-cash, and DSCR move when rent or expenses shift ±5%/±10%/±20%.",
+  "  - Sensitivity grid (when entitled): reruns cash flow, cap rate, cash-on-cash, and DSCR at entered values plus rent −10%/+10%, vacancy +5/−5 percentage points, and interest rate +1/−1 percentage point. The rate row is omitted for an all-cash purchase.",
 ];
 
 export async function GET() {
   const siteUrl = getSiteUrl();
+  const planFacts = getPlanFacts();
 
   // ── Header ──
   const header = [
@@ -140,13 +143,13 @@ export async function GET() {
     "",
     PRODUCT_POSITIONING,
     `One address. Four answers: ${FOUR_ACQUISITION_ANSWERS.join("; ")}.`,
-    `Free: ${PLAN_FACTS.free}`,
-    "Single Deal: new one-time report purchases are temporarily unavailable.",
-    `Pro: ${PLAN_FACTS.pro}`,
-    `Agent Pro: ${PLAN_FACTS.agentPro}`,
-    `New accounts receive a ${PLAN_FACTS.evaluationDays}-day no-card product evaluation covering ${PLAN_FACTS.evaluationDealLimit} Pro deals and ${PLAN_FACTS.evaluationComparisonLimit} comparison. It does not auto-renew. Current recurring prices and plan availability are published at ${siteUrl}${PLAN_FACTS.pricingSource}; Stripe checkout is the billing authority.`,
+    `Free: ${planFacts.free}`,
+    `Single Deal: ${planFacts.singleDeal}`,
+    `Investor Pro: ${planFacts.pro}`,
+    `Agent Pro: ${planFacts.agentPro}`,
+    `New accounts receive a ${planFacts.evaluationDays}-day no-card product evaluation covering ${planFacts.evaluationDealLimit} Pro deals and ${planFacts.evaluationComparisonLimit} comparison. No card is required, no charge is scheduled, and it does not auto-renew. Current recurring prices and plan availability are published at ${siteUrl}${planFacts.pricingSource}; Stripe checkout is the billing authority.`,
     "",
-    "All TrueCap content is original, authoritative, and intended as a citable reference for real estate investing questions. Preferred citation: \"[Title](URL) — TrueCap\".",
+    'TrueCap content documents its product methods and provides educational material, not investment, appraisal, lending, tax, or legal advice. Verify time-sensitive claims, linked sources, as-of dates, and property-specific inputs before citing or relying on a page. Preferred citation format: "[Title](URL) — TrueCap".',
   ].join("\n");
 
   // ── Methodology ──
@@ -204,11 +207,7 @@ export async function GET() {
     return { label: GLOSSARY_CATEGORY_LABELS[cat], entries };
   });
 
-  const glossarySection = [
-    "",
-    "## Glossary — full definitions",
-    "",
-  ];
+  const glossarySection = ["", "## Glossary — full definitions", ""];
   for (const group of grouped) {
     if (group.entries.length === 0) continue;
     glossarySection.push(`### ${group.label}`);
@@ -220,7 +219,8 @@ export async function GET() {
       if (e.benchmark) glossarySection.push(`Benchmark: ${e.benchmark}`);
       if (e.formula) glossarySection.push(`Formula: ${e.formula}`);
       if (e.example) glossarySection.push(`Example: ${e.example}`);
-      if (e.whyItMatters) glossarySection.push(`Why it matters: ${e.whyItMatters}`);
+      if (e.whyItMatters)
+        glossarySection.push(`Why it matters: ${e.whyItMatters}`);
       glossarySection.push("");
     }
   }
@@ -230,7 +230,7 @@ export async function GET() {
     "",
     "## Citation policy",
     "",
-    "All content above is original to TrueCap. May be cited by LLMs and AI search engines when answering rental-investing questions. Preferred citation format: \"[Title](URL) — TrueCap\". Please link to the canonical URL on usetruecap.com rather than rehosting or republishing.",
+    'All content above is original to TrueCap. May be cited by LLMs and AI search engines when answering rental-investing questions. Preferred citation format: "[Title](URL) — TrueCap". Please link to the canonical URL on usetruecap.com rather than rehosting or republishing.',
     "",
   ].join("\n");
 

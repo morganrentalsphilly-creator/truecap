@@ -2,16 +2,16 @@
   "day": 19,
   "send_date": "2026-06-19",
   "subject": "what if rents drop 10 percent",
-  "preheader": "sensitivity analysis is the question most pros never ask.",
-  "headline": "If your deal only works in the base case, it's not a deal.",
+  "preheader": "sensitivity analysis shows how selected input changes affect the model.",
+  "headline": "A base case is only one modeled scenario.",
   "body": [
     "Sensitivity analysis is the practice of asking 'what if I'm wrong?' What if rents drop 10%? What if interest rates rise another point on refinance? What if vacancy doubles? What if insurance jumps 50%?",
-    "A property generating $400/mo cash flow at $2,000 rent generates $200/mo at $1,800 rent. Cut rent another 5% (recession scenario) and you're $0. Cut expenses to keep up? Maintenance doesn't care about your spreadsheet.",
-    "Here's a real sensitivity grid I ran on a deal last month. Base case: $375/mo cash flow at $1,950 rent and 8% vacancy. If rent drops to $1,800 and vacancy goes to 12% (mild recession), cash flow becomes negative $90/mo. If insurance also jumps 20%, negative $230/mo. Same property, plausible adverse scenarios, total swing of $600/mo.",
-    "The pros run this grid before every deal. Most amateurs run a single base case and hope. A property that's cash-flow positive across a reasonable sensitivity grid is a real deal. One that only works in the base case is a bet on optimism.",
-    "TrueCap Pro builds a full sensitivity grid (cap rate, cash flow, DSCR) across rent and expense ranges in one click. The free tier doesn't include the grid — that's part of why Pro exists."
+    "In a simplified illustration with all other modeled amounts fixed, $400 monthly cash flow at $2,000 rent becomes $200 at $1,800 rent. A further 5% reduction from $1,800 is $90, leaving about $110 — not zero. Real variable expenses may change the result.",
+    "An illustrative base case can change materially when rent, vacancy, or the modeled interest rate changes. The point is not that one preset stress case predicts the future; it is to expose which assumption the modeled result depends on most.",
+    "A result that remains positive under selected stresses may have more modeled cushion, but it is not automatically a good investment or an approved loan. Choose ranges that fit the property, verify the evidence, and consider risks the grid does not model.",
+    "When entitled, TrueCap's released sensitivity grid reruns cash flow, cap rate, cash-on-cash, and DSCR at entered values plus rent −10%/+10%, vacancy +5/−5 percentage points, and interest rate +1/−1 percentage point. The interest-rate row is omitted for an all-cash purchase."
   ],
-  "cta_text": "See TrueCap Pro",
+  "cta_text": "See current access",
   "cta_url": "https://usetruecap.com/pricing",
   "signature_note": null
 }

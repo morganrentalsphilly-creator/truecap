@@ -38,7 +38,8 @@ describe("embed invite wiring", () => {
       }
       // A copy-paste that carried a neighbour's slug would silently offer the
       // wrong widget — and the wrong backlink target.
-      if (!src.includes(`<ToolEmbedInvite slug="${slug}"`)) wrongSlug.push(slug);
+      if (!src.includes(`<ToolEmbedInvite slug="${slug}"`))
+        wrongSlug.push(slug);
     }
     expect(missing).toEqual([]);
     expect(wrongSlug).toEqual([]);
@@ -87,7 +88,8 @@ describe("embed invite wiring", () => {
     // The caption anchor is the entire SEO payoff — it must point at the
     // indexed tool page, not the noindexed /embed route, and must not be
     // nofollowed.
-    expect(src).toContain("/tools/${slug}?utm_source=embed");
+    expect(src).toContain("buildEmbedAttributionHref");
+    expect(src).toContain("toolPath: `/tools/${slug}`");
     expect(src).toContain("Calculator by <a");
     expect(src).not.toMatch(/rel=\\?"nofollow/);
   });

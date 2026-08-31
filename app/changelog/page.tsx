@@ -37,10 +37,13 @@ export const metadata: Metadata = {
   alternates: { canonical: "/changelog" },
   openGraph: {
     title: "TrueCap Changelog",
-    description: "What's new in TrueCap — features, improvements, fixes, and content.",
+    description:
+      "What's new in TrueCap — features, improvements, fixes, and content.",
     url: "/changelog",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap changelog" }],
+    images: [
+      { url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap changelog" },
+    ],
   },
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
@@ -54,10 +57,25 @@ type Entry = {
   description: string;
 };
 
-const CATEGORY_STYLES: Record<Category, { icon: typeof Sparkles; color: string; bg: string }> = {
-  Feature: { icon: Sparkles, color: "text-primary", bg: "bg-[var(--brand-blue-light)]" },
-  Improvement: { icon: Zap, color: "text-[var(--brand-green)]", bg: "bg-[var(--brand-green)]/10" },
-  Fix: { icon: Wrench, color: "text-[var(--metric-negative)]", bg: "bg-[var(--metric-negative)]/10" },
+const CATEGORY_STYLES: Record<
+  Category,
+  { icon: typeof Sparkles; color: string; bg: string }
+> = {
+  Feature: {
+    icon: Sparkles,
+    color: "text-primary",
+    bg: "bg-[var(--brand-blue-light)]",
+  },
+  Improvement: {
+    icon: Zap,
+    color: "text-[var(--brand-green)]",
+    bg: "bg-[var(--brand-green)]/10",
+  },
+  Fix: {
+    icon: Wrench,
+    color: "text-[var(--metric-negative)]",
+    bg: "bg-[var(--metric-negative)]/10",
+  },
   Content: { icon: FileText, color: "text-foreground", bg: "bg-muted" },
   Doc: { icon: FileText, color: "text-muted-foreground", bg: "bg-muted/60" },
 };
@@ -248,7 +266,8 @@ const ENTRIES: Entry[] = [
   {
     date: "2026-05-24",
     category: "Feature",
-    title: "Five new market pages — Tampa, Charlotte, Indianapolis, Kansas City, Dallas",
+    title:
+      "Five new market pages — Tampa, Charlotte, Indianapolis, Kansas City, Dallas",
     description:
       "Substantive city-specific guides: neighborhood cap-rate maps, local property-tax math, market-specific risks (Tampa insurance, KC reassessment, DFW MUDs, IN property-tax cap). Each ~1,200 words with FAQs and FAQPage schema.org markup for rich-result eligibility.",
   },
@@ -500,7 +519,7 @@ const ENTRIES: Entry[] = [
     category: "Content",
     title: "/methodology page — every formula and data source",
     description:
-      "Comprehensive transparency page explaining exactly how TrueCap computes cap rate, CoC, DSCR, projections, tax savings, and exit scenarios. Plus where the auto-fill data comes from (HUD FMR, FRED, state property tax) and the conventions we chose.",
+      "Comprehensive transparency page explaining cap rate, CoC, DSCR, released projections, labeled HUD/FRED screening benchmarks, manual property-tax behavior, and the conventions used by the current model.",
   },
   {
     date: "2026-05-24",
@@ -610,44 +629,44 @@ const ENTRIES: Entry[] = [
   {
     date: "2026-05-22",
     category: "Content",
-    title: "Five new SEO calculator pages",
+    title: "Historical calculator-page launch (partly retired)",
     description:
-      "Standalone pages for cap rate, cash-on-cash, BRRRR, 1% rule, and rehab cost estimator — each with a working widget, long-form content, FAQ schema, and a funnel into the full analyzer.",
+      "This release originally included cap rate, cash-on-cash, BRRRR, 1% rule, and rehab pages. BRRRR and other unreleased specialist calculators were later removed from the public registry and now redirect to released educational or analyzer destinations.",
   },
   {
     date: "2026-05-21",
     category: "Feature",
-    title: "Shareable read-only deal links (Pro)",
+    title: "Historical encoded share links (superseded)",
     description:
-      "Generate a one-click read-only link to share an analysis with your lender or partner. Each link renders a dedicated /d/[encoded] page with a custom OG preview image showing address + key metrics + verdict.",
+      "The original /d/[encoded] read-only format remains only for legacy compatibility. New sharing uses opaque, revocable /s links; recipients can run the property with their assumptions, and authenticated eligible recipients can copy a fresh scenario without changing the sender's record.",
   },
   {
     date: "2026-05-20",
     category: "Feature",
-    title: "Address auto-fill (HUD + FRED + state tax)",
+    title: "Address starting values (HUD + FRED)",
     description:
-      "Type a property address; we auto-fill market rent from HUD Fair Market Rent, current 30-yr fixed rate from FRED, and effective property tax from your state's averages. All editable.",
+      "Type a property address to start from editable HUD area rent and the FRED 30-year owner-occupied rate. The former state-average property-tax fill was later retired; current underwriting requires a manual local tax input and labels its generic blank-field fallback.",
   },
   {
     date: "2026-05-19",
     category: "Feature",
-    title: "10-year projection with Illustrative Tax Impact",
+    title: "Historical tax-impact projection (retired)",
     description:
-      "Pro users get a full 10-year cash flow projection including rent growth, expense growth, mortgage paydown, depreciation tax savings, and after-tax cash flow.",
+      "This entry records an earlier tax-impact presentation that is no longer released. Current Pro projections cover pre-tax cash flow and equity under editable assumptions; depreciation deductions and after-tax cash flow are not exposed.",
   },
   {
     date: "2026-05-18",
     category: "Feature",
-    title: "Screening Index + AI verdict (free)",
+    title: "Screening Index explanation (wording corrected)",
     description:
-      "Every analyzed property gets a 0-100 score with risk level (Conservative / Balanced / Aggressive / High Risk) and a plain-English explanation of why the Screening Indexd where it did.",
+      "Released analysis includes a secondary 0-100 Screening Index for consistent triage plus an explanation of its modeled inputs. It is not evidence readiness, an appraisal, lender approval, an offer recommendation, or investment advice.",
   },
   {
     date: "2026-05-17",
     category: "Feature",
-    title: "Lender-facing PDF export (Pro)",
+    title: "PDF decision report (current released scope)",
     description:
-      "Generate a branded multi-page PDF report — cover, verdict, all metrics, 10-year projection, Illustrative Tax Impact, and exit scenarios. Designed for review by lenders, partners, or your future self; recipients independently verify inputs and requirements.",
+      "Entitled reports cover released underwriting metrics and pre-tax projections for review. Tax-impact and exit-scenario modules are not released; recipients must independently verify inputs and any lender or adviser requirements.",
   },
 ];
 
@@ -673,7 +692,8 @@ export default function ChangelogPage() {
             This archive preserves historical release notes. Some older entries
             describe modules that are now disabled or not currently released,
             including tax-specific, modeled-exit, BRRRR, and fix-and-flip views.
-            Check the current pricing and product screens for present availability.
+            Check the current pricing and product screens for present
+            availability.
           </p>
         </header>
 
@@ -683,7 +703,8 @@ export default function ChangelogPage() {
             // somehow doesn't exist in CATEGORY_STYLES (next.config has
             // ignoreBuildErrors: true, so a TS-illegal category value
             // can slip past compile and crash the prerender at runtime).
-            const style = CATEGORY_STYLES[entry.category] ?? CATEGORY_STYLES.Content;
+            const style =
+              CATEGORY_STYLES[entry.category] ?? CATEGORY_STYLES.Content;
             const Icon = style.icon;
             const date = new Date(entry.date);
             return (
@@ -696,7 +717,7 @@ export default function ChangelogPage() {
                     className={cn(
                       "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest",
                       style.bg,
-                      style.color
+                      style.color,
                     )}
                   >
                     <Icon className="size-3" />
@@ -729,8 +750,9 @@ export default function ChangelogPage() {
             Want to be first to see what&apos;s new?
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-4">
-            Sign up for a free account — we&apos;ll surface new features in-product
-            as they ship, and you&apos;ll get to use them immediately.
+            Sign up for a free account — we&apos;ll surface new features
+            in-product as they ship, and you&apos;ll get to use them
+            immediately.
           </p>
           <Link
             href="/auth/sign-up"

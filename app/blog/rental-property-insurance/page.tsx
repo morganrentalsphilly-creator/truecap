@@ -4,14 +4,13 @@
  *
  * Content-gap post (Jun 2026). Targets "landlord insurance", "rental
  * property insurance", "how much is landlord insurance", "dwelling fire
- * policy", "loss of rent coverage". Insurance is the most-underestimated
- * line in a rental underwrite and the "I" in PITI — this post ties it
- * back to NOI, cash flow, and DSCR so it funnels into the analyzer.
+ * policy", "loss of rent coverage". This post connects property-specific
+ * quotes and coverage terms to NOI, cash flow, and DSCR modeling.
  */
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Calculator, Umbrella } from "lucide-react";
+import { Umbrella } from "lucide-react";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
@@ -20,16 +19,15 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "rental-property-insurance";
-const TITLE =
-  "Rental property insurance: landlord coverage and cost in 2026";
+const TITLE = "Rental property insurance: coverage, quotes, and underwriting";
 // SERP-facing title (metadata/og only): kept ≤50 chars so the root
 // layout's "%s | TrueCap" template stays inside the ~60-char SERP
 // window. The on-page <h1> keeps the longer editorial TITLE.
-const SERP_TITLE = "Rental property insurance: coverage & cost (2026)";
+const SERP_TITLE = "Rental property insurance: coverage & quotes";
 const DESCRIPTION =
-  "Landlord insurance is the line most investors guess at — and the fastest-rising operating cost in 2026. What a landlord policy covers vs. homeowners, what it costs this year, how to estimate it before you have a quote, and how the premium flows straight into NOI, cash flow, and DSCR.";
+  "How to collect property-specific landlord-insurance evidence, compare coverage and exclusions, and test a verified premium in NOI, cash flow, and DSCR.";
 const PUBLISHED_AT = "2026-06-23";
-const MODIFIED_AT = "2026-06-23";
+const MODIFIED_AT = "2026-08-29";
 const READING_TIME_MIN = 11;
 
 export const metadata: Metadata = {
@@ -43,7 +41,7 @@ export const metadata: Metadata = {
     "dwelling fire policy",
     "DP-3 policy",
     "loss of rent coverage",
-    "rental property insurance cost 2026",
+    "rental property insurance quote",
   ],
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
@@ -65,24 +63,24 @@ export const metadata: Metadata = {
 
 const FAQS: { q: string; a: string }[] = [
   {
-    q: "How much does landlord insurance cost in 2026?",
-    a: "For a standard single-family rental, expect roughly $1,200 to $1,900 per year nationally — about 15-25% more than a comparable homeowners policy, and up high-single-digits year over year. Coastal Florida, wildfire-exposed California, and Gulf states run far higher; low-risk Midwest markets run lower. Treat any national average as a placeholder until you have a binding quote for the specific address.",
+    q: "How much does landlord insurance cost?",
+    a: "There is no reliable nationwide placeholder for a specific property. Premium and eligibility depend on address, construction, roof and systems, occupancy, use, limits, valuation, deductibles, perils, prior losses, carrier, owner profile, and current market conditions. Obtain written quotes for the actual ownership and occupancy plan and compare the full coverage, exclusions, deductibles, and fees—not premium alone.",
   },
   {
     q: "Does my homeowners policy cover a rental property?",
-    a: "No. A standard homeowners (HO-3) policy is written for an owner-occupant. The moment a property is tenant-occupied, the carrier can deny a claim or void the policy because the occupancy was misrepresented. Rentals need a landlord policy — usually a dwelling fire policy (DP-1, DP-2, or DP-3) plus landlord liability — not a homeowners policy.",
+    a: "Do not assume an owner-occupied policy covers a tenant-occupied use. Occupancy, rental duration, unit count, business activity, endorsements, and policy language can affect eligibility and claims. Disclose the actual use to a licensed agent or carrier and obtain written confirmation of the quoted policy, endorsements, and material conditions before relying on coverage.",
   },
   {
     q: "What is loss of rent (fair rental value) coverage?",
-    a: "It reimburses the rent you lose while a covered loss (fire, storm damage, etc.) makes the unit uninhabitable and it is being repaired. It is one of the most valuable parts of a landlord policy and is frequently underset — make sure the limit reflects your actual rent for a realistic repair timeline, not a token amount.",
+    a: "Some policies or endorsements cover defined lost rental income after a covered loss, subject to limits, waiting periods, restoration periods, exclusions, proof requirements, and the policy's valuation method. Ask the agent to show the exact provision and test its limit against supported rent and more than one repair-duration scenario.",
   },
   {
     q: "Is landlord insurance tax deductible?",
-    a: "Yes. Insurance premiums on a rental are a fully deductible operating expense, reported on Schedule E. So is the premium on a separate flood or umbrella policy tied to the rental. It reduces taxable rental income the same year you pay it.",
+    a: "Premiums allocable to a rental activity may be deductible subject to the policy period, accounting method, mixed use, capitalization, allocation, and other tax rules. Flood, umbrella, prepaid, or multi-property coverage can require additional allocation. Confirm the amount and timing under current tax guidance with a qualified professional.",
   },
   {
     q: "Do I need separate flood insurance?",
-    a: "Often, yes. Standard landlord policies exclude flood entirely — flood is covered by a separate NFIP or private flood policy. If the property sits in a FEMA flood zone and you have a mortgage, the lender will require it. Even outside mapped zones, a meaningful share of flood claims come from 'low-risk' areas, so it is worth pricing.",
+    a: "Flood coverage and lender requirements depend on the policy, flood determination, loan program, location, building, and current rules. Do not infer coverage from a general landlord-policy label or map zone. Obtain the lender's written requirement and separate written flood-coverage options, including limits, deductibles, exclusions, waiting periods, and building-versus-contents treatment.",
   },
 ];
 
@@ -108,8 +106,18 @@ export default function BlogPost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "TrueCap", item: `${siteUrl}/` },
-      { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "TrueCap",
+        item: `${siteUrl}/`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: `${siteUrl}/blog`,
+      },
       { "@type": "ListItem", position: 3, name: TITLE, item: canonicalUrl },
     ],
   };
@@ -125,20 +133,36 @@ export default function BlogPost() {
 
   return (
     <div className="min-h-screen bg-background">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
+      />
 
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <header className="mb-8 sm:mb-10">
-          <Link href="/blog" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">
+          <Link
+            href="/blog"
+            className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+          >
             ← TrueCap Blog
           </Link>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight text-balance">
             {TITLE}
           </h1>
           <p className="text-[11px] uppercase tracking-widest text-muted-foreground font-bold mt-3">
-            {new Date(PUBLISHED_AT).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}{" "}
+            {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}{" "}
             · {READING_TIME_MIN} min read
           </p>
           <p className="text-base sm:text-lg text-muted-foreground mt-4 leading-relaxed">
@@ -148,160 +172,263 @@ export default function BlogPost() {
 
         <article className="prose prose-slate max-w-none [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
           <p>
-            Ask ten investors what insurance costs on a rental and you&apos;ll
-            get ten guesses — usually too low, often just copied from the
-            seller&apos;s old premium. That was a rounding error in 2015. In 2026
-            it&apos;s one of the largest and fastest-moving lines in the whole
-            underwrite, and in some markets it&apos;s the single variable that
-            decides whether a deal cash flows at all.
+            Insurance is a property-specific input, not a safe national average.
+            The seller&apos;s policy, an online estimate, and a quote for a
+            different occupancy or ownership structure may not describe the
+            coverage or premium available to the buyer.
           </p>
           <p>
-            This is the practical version: what a landlord policy actually is,
-            what it covers, what it costs this year, how to estimate it before
-            you have a quote, and — the part most guides skip — how the premium
-            flows straight through{" "}
-            <Link href="/blog/piti-explained-rental-property" className="text-primary font-semibold hover:underline">PITI</Link>{" "}
+            This guide focuses on the evidence to collect, how to compare
+            coverage and exclusions, and how a supported premium flows through{" "}
+            <Link
+              href="/blog/piti-explained-rental-property"
+              className="text-primary font-semibold hover:underline"
+            >
+              PITI
+            </Link>{" "}
             into{" "}
-            <Link href="/blog/how-to-calculate-noi-rental-property" className="text-primary font-semibold hover:underline">NOI</Link>,
-            cash flow, and{" "}
-            <Link href="/glossary/dscr" className="text-primary font-semibold hover:underline">DSCR</Link>.
+            <Link
+              href="/blog/how-to-calculate-noi-rental-property"
+              className="text-primary font-semibold hover:underline"
+            >
+              NOI
+            </Link>
+            , cash flow, and{" "}
+            <Link
+              href="/glossary/dscr"
+              className="text-primary font-semibold hover:underline"
+            >
+              DSCR
+            </Link>
+            .
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">Landlord insurance is not homeowners insurance</h2>
+          <h2 className="text-2xl sm:text-3xl">
+            Landlord insurance is not homeowners insurance
+          </h2>
           <p>
-            The first and most expensive mistake is assuming a rental can ride
-            on a homeowners policy. A standard homeowners policy (an HO-3) is
-            written for an <em>owner-occupant</em>. The moment a property is
-            tenant-occupied, you&apos;ve changed the risk the carrier priced — and
-            if you have a claim, they can deny it or rescind the policy on the
-            grounds that the occupancy was misrepresented.
+            Do not assume an owner-occupied policy covers a rental use. A change
+            in occupancy, rental duration, unit count, services, or ownership
+            can affect eligibility and claim treatment under the actual
+            contract. Disclose the intended use and obtain written carrier or
+            agent confirmation before closing or changing occupancy.
           </p>
           <p>
-            Rentals are insured with a <strong>landlord policy</strong>, which is
-            usually a <strong>dwelling fire policy</strong> (the DP series —
-            DP-1, DP-2, or DP-3) plus landlord liability:
+            Products are often described as landlord or dwelling policies, but
+            form labels alone do not establish coverage. Ask the agent to
+            compare the quoted forms, endorsements, valuation, and exclusions.
+            For orientation only, DP labels are commonly used as follows:
           </p>
           <ul>
-            <li><strong>DP-1</strong> — barebones, named-peril, actual cash value. Cheapest; pays out depreciated value, not replacement cost. Common on low-value or older properties where replacement cost coverage isn&apos;t economical.</li>
-            <li><strong>DP-2</strong> — broader named perils, usually replacement cost on the dwelling.</li>
-            <li><strong>DP-3</strong> — the most common landlord choice: open-peril (covers anything not explicitly excluded), replacement cost. This is the one to anchor on for a typical single-family or small-multi rental.</li>
+            <li>
+              <strong>DP-1</strong> — may use a narrower named-peril form and a
+              different valuation basis.
+            </li>
+            <li>
+              <strong>DP-2</strong> — may cover a broader set of named perils.
+            </li>
+            <li>
+              <strong>DP-3</strong> — may use broader dwelling-peril language.
+            </li>
           </ul>
 
-          <h2 className="text-2xl sm:text-3xl">What a landlord policy actually covers</h2>
-          <p>Four buckets matter, and one of them is the one investors forget:</p>
+          <h2 className="text-2xl sm:text-3xl">
+            What a landlord policy actually covers
+          </h2>
+          <p>
+            Four buckets matter, and one of them is the one investors forget:
+          </p>
           <ol>
-            <li><strong>Dwelling + other structures</strong> — the building itself (and detached garage, fence) up to your coverage limit, ideally at replacement cost.</li>
-            <li><strong>Landlord liability</strong> — if a tenant or visitor is injured and you&apos;re found liable. $300k-$1M is typical; pair it with an umbrella policy if you hold multiple properties.</li>
-            <li><strong>Loss of rent (fair rental value)</strong> — reimburses the rent you lose while a covered loss makes the unit uninhabitable during repairs. This is the line investors chronically underset, and it&apos;s the one that protects your cash flow exactly when you need it.</li>
-            <li><strong>Optional add-ons</strong> — ordinance/law (to rebuild to current code), vandalism/malicious mischief, and equipment breakdown.</li>
+            <li>
+              <strong>Dwelling + other structures</strong> — the building itself
+              (and detached garage, fence) up to your coverage limit, ideally at
+              replacement cost.
+            </li>
+            <li>
+              <strong>Liability</strong> — review covered persons, premises,
+              activities, exclusions, defense, occurrence and aggregate limits,
+              and how any umbrella applies.
+            </li>
+            <li>
+              <strong>Lost rental income</strong> — review the covered cause,
+              limit, waiting period, restoration period, proof, and valuation
+              language.
+            </li>
+            <li>
+              <strong>Optional endorsements</strong> — ask about ordinance or
+              law, water, vandalism, equipment, service line, and other
+              property-specific exposures.
+            </li>
           </ol>
           <p>
-            What it does <strong>not</strong> cover: the tenant&apos;s belongings
-            (that&apos;s on their renters policy — require it in the lease),
-            <strong> flood</strong> (always a separate policy), and in many
-            coastal markets, <strong>wind/named-storm</strong> is carved out into
-            a separate deductible or policy. Read the exclusions page before you
-            trust the headline premium.
+            Do not assume the policy covers tenant property, flood, wind, named
+            storms, water backup, ordinance upgrades, vacancy, or business
+            activities. Coverage and separate-policy requirements vary. Read the
+            quoted forms, endorsements, deductibles, and exclusions, and have
+            the agent answer material questions in writing.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">What it costs in 2026</h2>
+          <h2 className="text-2xl sm:text-3xl">
+            Why a national cost range is not enough
+          </h2>
           <p>
-            National averages for a standard single-family rental land roughly in
-            the <strong>$1,200-$1,900 per year</strong> range — call it
-            ~$100-$160 a month — and landlord coverage typically runs{" "}
-            <strong>15-25% higher</strong> than a comparable homeowners policy,
-            because a rental is considered higher-risk. Premiums are still rising
-            into 2026 at high-single-digit rates year over year, driven by
-            construction-cost inflation, weather losses, and a broad shift to
-            risk-based pricing.
+            Premium comparisons are meaningful only when they use the same
+            address, building and roof data, occupancy, ownership, valuation,
+            limits, deductibles, endorsements, fees, and effective date. A lower
+            premium can reflect less coverage rather than a better quote.
           </p>
-          <p>
-            The averages hide enormous regional spread. The number that matters
-            is the one for <em>your</em> address:
-          </p>
+          <p>Ask each agent or carrier to document at least:</p>
           <ul>
-            <li><strong>Coastal Florida and the Gulf</strong> — post-Ian carrier exits and reinsurance costs have made this the biggest single underwriting variable. A 7% headline cap rate can quietly become 5% net once a binding wind + flood quote lands. See the{" "}
-              <Link href="/states/florida" className="text-primary font-semibold hover:underline">Florida investing guide</Link>{" "}for why insurance — not price — is the FL deal-killer in 2026.</li>
-            <li><strong>Wildfire-exposed California and parts of the West</strong> — non-renewals and FAIR-plan reliance push premiums up and coverage down.</li>
-            <li><strong>Low-risk Midwest</strong> — Indiana, Ohio, and similar inland markets sit at the low end of the range, which is part of why they pencil for cash flow.</li>
+            <li>
+              The rating address, construction, roof and system data, occupancy,
+              and intended use.
+            </li>
+            <li>
+              Dwelling valuation, liability and rental-income limits,
+              deductibles, excluded perils, and optional endorsements.
+            </li>
+            <li>
+              Any wind, flood, wildfire, vacancy, short-term-rental, or other
+              separate-policy requirement.
+            </li>
+            <li>
+              Whether the quote is bindable, what can change after inspection or
+              underwriting, and when it expires.
+            </li>
           </ul>
           <p>
-            <em>Treat every national figure as a placeholder.</em> The seller&apos;s
-            expiring premium is the worst possible estimate — it reflects their
-            claims history, their carrier, and last year&apos;s rates, none of which
-            transfer to you. Get a binding quote before you remove contingencies.
+            Treat the seller&apos;s premium and any screening placeholder as
+            unverified. Obtain current written quotes for the actual transaction
+            early enough to evaluate coverage and contingencies.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">How to estimate it before you have a quote</h2>
+          <h2 className="text-2xl sm:text-3xl">
+            How to screen before a quote arrives
+          </h2>
           <p>
-            You still need a number to screen a deal in 60 seconds, before any
-            broker is involved. Two workable rules of thumb:
+            If a preliminary model needs an insurance input, label it as an
+            assumption and test more than one scenario. Do not convert a
+            percentage of property value or a national premium into a claimed
+            local quote. Record the source and as-of date, then replace it with
+            current written coverage as soon as possible.
           </p>
-          <ul>
-            <li><strong>~0.5% of property value per year</strong> for a low-risk inland market — e.g. ~$1,250 on a $250k property.</li>
-            <li><strong>~0.8-1.5%+ of value per year</strong> for coastal, wind-exposed, wildfire, or older homes — the same $250k property could be $2,500-$4,000+ on the Gulf.</li>
-          </ul>
           <p>
             When you run an address in{" "}
-            <Link href="/" className="text-primary font-semibold hover:underline">TrueCap</Link>, a market-appropriate insurance default is already filled in alongside property tax and rent — so your first-pass cash flow isn&apos;t silently ignoring the line. Then you replace it with the real quote as soon as you have one.
-          </p>
-
-          <h2 className="text-2xl sm:text-3xl">Where the premium actually lands in the underwrite</h2>
-          <p>
-            Insurance isn&apos;t a footnote — it shows up twice and moves the
-            numbers most underwriters care about:
-          </p>
-          <ul>
-            <li>It&apos;s the <strong>&quot;I&quot; in PITI</strong> — part of the monthly payment your lender (and your DSCR) cares about.</li>
-            <li>It&apos;s an <strong>operating expense in NOI</strong>, so it directly lowers your{" "}
-              <Link href="/glossary/cap-rate" className="text-primary font-semibold hover:underline">cap rate</Link>{" "}and cash flow.</li>
-          </ul>
-          <p>
-            Make it concrete. Take a $250,000 single-family rental, $1,650 rent,
-            25% down at 7%. Underwrite insurance at a clean $1,500/year and the
-            deal might show roughly <strong>+$150/month</strong> cash flow. Now
-            put the same property on the Gulf and the binding quote comes back at
-            <strong> $3,500/year</strong> — that&apos;s an extra ~$167/month of
-            expense, which alone flips the deal to roughly{" "}
-            <strong>−$17/month</strong> and drags{" "}
-            <Link href="/glossary/dscr" className="text-primary font-semibold hover:underline">DSCR</Link>{" "}
-            below the 1.20 most lenders want. Same house, same rent, same loan —
-            the insurance line decided it.
-          </p>
-
-          <h2 className="text-2xl sm:text-3xl">Five insurance mistakes that wreck an underwrite</h2>
-          <ol>
-            <li><strong>Using the seller&apos;s premium.</strong> It&apos;s the single most common error and almost always understates your real cost. Quote it fresh.</li>
-            <li><strong>Ignoring flood.</strong> It&apos;s excluded from the landlord policy and required by lenders in FEMA zones. Price it separately; don&apos;t assume the dwelling policy has you covered.</li>
-            <li><strong>Confusing replacement cost with market value.</strong> You insure the cost to <em>rebuild</em>, not the purchase price. In low-cost markets the rebuild cost can exceed the price you paid — underinsuring triggers coinsurance penalties at claim time.</li>
-            <li><strong>Setting loss-of-rent too low.</strong> A token limit won&apos;t carry you through a six-month rebuild. Match it to your actual rent and a realistic timeline.</li>
-            <li><strong>Skipping liability/umbrella.</strong> A single liability claim can exceed the value of the property. For multi-property investors an umbrella policy is cheap relative to the exposure.</li>
-          </ol>
-
-          <div className="not-prose">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-3 rounded-xl font-bold hover:opacity-95 transition-opacity"
+              className="text-primary font-semibold hover:underline"
             >
-              <Calculator className="w-4 h-4" />
-              Run a deal with real insurance numbers
-              <ArrowUpRight className="w-4 h-4" />
+              TrueCap
             </Link>
-          </div>
+            , insurance and property tax remain visible, editable assumptions
+            rather than hidden costs. Enter a current local tax figure and
+            replace the preliminary insurance assumption with a real quote as
+            soon as you have one.
+          </p>
+
+          <h2 className="text-2xl sm:text-3xl">
+            Where the premium actually lands in the underwrite
+          </h2>
+          <p>
+            Insurance appears in both the housing payment and operating-expense
+            view:
+          </p>
+          <ul>
+            <li>
+              It&apos;s the <strong>&quot;I&quot; in PITI</strong> — part of the
+              monthly payment your lender (and your DSCR) cares about.
+            </li>
+            <li>
+              It&apos;s an <strong>operating expense in NOI</strong>, so it
+              directly lowers your{" "}
+              <Link
+                href="/glossary/cap-rate"
+                className="text-primary font-semibold hover:underline"
+              >
+                cap rate
+              </Link>{" "}
+              and cash flow.
+            </li>
+          </ul>
+          <p>
+            For a hypothetical sensitivity, take a $250,000 property, $1,650
+            monthly rent, 25% down, and an entered 7% loan rate. If all other
+            assumptions are held constant, changing the annual insurance input
+            from $1,500 to $3,500 adds about $167 per month of expense. In this
+            model, that moves cash flow from roughly +$150 to −$17 per month and
+            lowers{" "}
+            <Link
+              href="/glossary/dscr"
+              className="text-primary font-semibold hover:underline"
+            >
+              DSCR
+            </Link>
+            . The figures are illustrative inputs, not local premium benchmarks
+            or a lender decision. Compare the output with the lender&apos;s
+            written coverage calculation and threshold.
+          </p>
+
+          <h2 className="text-2xl sm:text-3xl">
+            Five insurance checks before relying on an underwrite
+          </h2>
+          <ol>
+            <li>
+              <strong>Seller&apos;s premium:</strong> treat it as history, not
+              the buyer&apos;s quote.
+            </li>
+            <li>
+              <strong>Flood, wind, wildfire, and water:</strong> obtain written
+              coverage and lender requirements rather than assuming the dwelling
+              form includes them.
+            </li>
+            <li>
+              <strong>Valuation:</strong> ask how the dwelling limit was
+              developed and how replacement-cost, actual-cash-value,
+              coinsurance, and loss-settlement terms apply.
+            </li>
+            <li>
+              <strong>Lost rental income:</strong> compare the policy limit and
+              restoration terms with supported rent and multiple repair-duration
+              scenarios.
+            </li>
+            <li>
+              <strong>Liability and umbrella:</strong> have a licensed
+              professional review limits, exclusions, named insureds, entities,
+              locations, and how policies coordinate.
+            </li>
+          </ol>
+
+          <div className="not-prose"></div>
 
           <p>
-            TrueCap fills in a market-appropriate insurance estimate with your
-            property tax and rent, then lets you drop in the binding quote and
-            watch cap rate, cash flow, and DSCR update on the same screen — so
-            the most volatile line in 2026 underwriting is never the one you
-            guessed at. Premiums are also fully deductible on{" "}
-            <Link href="/blog/schedule-e-rental-property" className="text-primary font-semibold hover:underline">Schedule E</Link>, and they belong in the same monthly-reserve conversation as{" "}
-            <Link href="/blog/capex-maintenance-reserves-rental-property" className="text-primary font-semibold hover:underline">CapEx and maintenance reserves</Link>.
+            TrueCap keeps insurance visible and editable so you can replace a
+            preliminary assumption with a current property-specific quote and
+            compare how the input changes cap rate, cash flow, and DSCR. Tax
+            treatment depends on allocation, policy period, accounting method,
+            use, and other facts; review it with the{" "}
+            <Link
+              href="/blog/schedule-e-rental-property"
+              className="text-primary font-semibold hover:underline"
+            >
+              Schedule E guide
+            </Link>{" "}
+            and a qualified professional. Insurance also belongs in the same
+            evidence and reserve review as{" "}
+            <Link
+              href="/blog/capex-maintenance-reserves-rental-property"
+              className="text-primary font-semibold hover:underline"
+            >
+              CapEx and maintenance reserves
+            </Link>
+            .
           </p>
 
           <h2 className="text-2xl sm:text-3xl">FAQ</h2>
           {FAQS.map((f, i) => (
-            <details key={i} className="not-prose bg-card border border-border rounded-xl p-4 sm:p-5 mb-3">
+            <details
+              key={i}
+              className="not-prose bg-card border border-border rounded-xl p-4 sm:p-5 mb-3"
+            >
               <summary className="cursor-pointer font-bold text-foreground">
                 {f.q}
               </summary>
@@ -321,20 +448,31 @@ export default function BlogPost() {
         </article>
 
         <RelatedBlogPosts currentSlug={SLUG} />
-        <div className="max-w-3xl mx-auto px-4 sm:px-6"><NewsletterSignup variant="expanded" source="blog" /></div>
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          <NewsletterSignup variant="expanded" source="blog" />
+        </div>
 
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
             Related:{" "}
-            <Link href="/blog/piti-explained-rental-property" className="font-bold text-foreground hover:underline">
+            <Link
+              href="/blog/piti-explained-rental-property"
+              className="font-bold text-foreground hover:underline"
+            >
               PITI explained →
             </Link>{" "}
             ·{" "}
-            <Link href="/blog/how-to-calculate-noi-rental-property" className="font-bold text-foreground hover:underline">
+            <Link
+              href="/blog/how-to-calculate-noi-rental-property"
+              className="font-bold text-foreground hover:underline"
+            >
               How to calculate NOI →
             </Link>{" "}
             ·{" "}
-            <Link href="/blog/capex-maintenance-reserves-rental-property" className="font-bold text-foreground hover:underline">
+            <Link
+              href="/blog/capex-maintenance-reserves-rental-property"
+              className="font-bold text-foreground hover:underline"
+            >
               CapEx &amp; reserves →
             </Link>
           </p>

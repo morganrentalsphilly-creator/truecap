@@ -31,6 +31,7 @@ describe("accessibility audit follow-up guards", () => {
     );
     for (const [id, name] of [
       ["testimonial-quote", "quote"],
+      ["testimonial-display-format", "preferredDisplayNameFormat"],
       ["testimonial-display-name", "displayName"],
       ["testimonial-role", "roleSegment"],
     ] as const) {

@@ -28,7 +28,10 @@ export type PublicationApproval = {
 
 export type VerifiedTestimonial = {
   id: string;
-  archetype: "active-investor" | "investor-focused-agent" | "newer-investor-house-hacker";
+  archetype:
+    | "active-investor"
+    | "investor-focused-agent"
+    | "newer-investor-house-hacker";
   quote: string;
   customerName: string;
   customerType: string;
@@ -46,6 +49,8 @@ export type VerifiedTestimonial = {
   videoTestimonialUrl?: string;
   sourceChannel: "interview" | "email" | "support" | "survey";
   observedAt: string;
+  /** Set immediately when publication permission is withdrawn. */
+  withdrawnAt?: string;
   verification: ProofVerification;
   approval: PublicationApproval;
 };
@@ -71,10 +76,21 @@ export const VERIFIED_TESTIMONIALS: readonly VerifiedTestimonial[] = [];
 export const VERIFIED_AGENT_PROOF: readonly VerifiedAgentProof[] = [];
 
 export function isPublicationReady(
-  record: { verification?: ProofVerification; approval?: PublicationApproval },
-  placement?: "homepage" | "ads" | "caseStudy"
+  record: {
+    verification?: ProofVerification;
+    approval?: PublicationApproval;
+    withdrawnAt?: string;
+  },
+  placement?: "homepage" | "ads" | "caseStudy",
 ): boolean {
-  if (record.verification?.status !== "verified" || record.approval?.publicDisplay !== true) {
+  if (
+    record.withdrawnAt ||
+    record.verification?.status !== "verified" ||
+    record.approval?.publicDisplay !== true ||
+    !record.approval.approvedAt ||
+    !record.approval.scope.includes("quote") ||
+    !record.approval.scope.includes("attribution")
+  ) {
     return false;
   }
   return placement ? record.approval[placement] === true : true;

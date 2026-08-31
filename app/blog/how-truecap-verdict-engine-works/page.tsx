@@ -14,7 +14,6 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Calculator } from "lucide-react";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
@@ -109,7 +108,12 @@ export default function HowVerdictEngineWorksPost() {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
-      { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: `${siteUrl}/blog`,
+      },
       { "@type": "ListItem", position: 3, name: TITLE, item: url },
     ],
   };
@@ -126,9 +130,18 @@ export default function HowVerdictEngineWorksPost() {
 
   return (
     <div className="min-h-screen bg-background">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
 
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-2">
@@ -165,38 +178,38 @@ export default function HowVerdictEngineWorksPost() {
             <p className="text-sm sm:text-base leading-relaxed text-foreground">
               TrueCap&apos;s selected-rule classifier is a small set of explicit
               thresholds that groups modeled results into five bands:{" "}
-              <strong>Strong, Solid, Mixed, Marginal, Negative</strong>.
-              Strong needs <strong>$400+/mo cash flow, DSCR ≥ 1.25, and
-              CoC ≥ 10%</strong>. Solid needs <strong>$100+/mo, DSCR ≥
-              1.15, and CoC ≥ 6%</strong>. Negative cash flow or DSCR
-              below 1.0 trips Marginal / Negative. Cash purchases get
-              their own simpler classifier because DSCR doesn&apos;t
-              apply. Everything else is Mixed. The exact thresholds and
-              the rationale are below.
+              <strong>Strong, Solid, Mixed, Marginal, Negative</strong>. Strong
+              needs{" "}
+              <strong>$400+/mo cash flow, DSCR ≥ 1.25, and CoC ≥ 10%</strong>.
+              Solid needs <strong>$100+/mo, DSCR ≥ 1.15, and CoC ≥ 6%</strong>.
+              Negative cash flow or DSCR below 1.0 trips Marginal / Negative.
+              Cash purchases get their own simpler classifier because DSCR
+              doesn&apos;t apply. Everything else is Mixed. The exact thresholds
+              and the rationale are below.
             </p>
           </section>
 
           <div className="prose prose-neutral max-w-none prose-headings:font-extrabold prose-headings:text-foreground prose-p:text-foreground prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:text-foreground prose-li:leading-relaxed">
             <h2>Why we show selected-rule fit</h2>
             <p>
-              A rental analysis spits out numbers — cap rate, cash flow,
-              DSCR, cash-on-cash, IRR — and a new investor stares at
-              them wondering if 6.5% is good. An experienced investor
-              may recognize common rules of thumb (DSCR ≥ 1.25, cap rate
-              ≥ 7% in some contexts) but still needs the assumptions and
-              target basis stated explicitly.
+              A rental analysis spits out numbers — cap rate, cash flow, DSCR,
+              cash-on-cash, IRR — and a new investor stares at them wondering if
+              6.5% is good. An experienced investor may recognize common rules
+              of thumb (DSCR ≥ 1.25, cap rate ≥ 7% in some contexts) but still
+              needs the assumptions and target basis stated explicitly.
             </p>
             <p>
               The selected-rule fit groups the modeled outputs into one of five
-              bands and explains which thresholds were met or missed. It does not
-              answer whether someone should buy, pass, or offer. The Screening
-              Index is a secondary triage aid, not evidence readiness or advice.
+              bands and explains which thresholds were met or missed. It does
+              not answer whether someone should buy, pass, or offer. The
+              Screening Index is a secondary triage aid, not evidence readiness
+              or advice.
             </p>
             <p>
               The whole engine is open — the source code is at{" "}
-              <code>lib/verdict.ts</code> in the codebase that powers
-              this site. This post explains the thresholds with the
-              same numbers the production code uses.
+              <code>lib/verdict.ts</code> in the codebase that powers this site.
+              This post explains the thresholds with the same numbers the
+              production code uses.
             </p>
 
             <h2>The five tiers, in one sentence each</h2>
@@ -206,79 +219,94 @@ export default function HowVerdictEngineWorksPost() {
                 This label does not direct the user to buy or offer.
               </li>
               <li>
-                <strong>Solid</strong> — clears the lower legacy band
-                thresholds with less modeled margin.
+                <strong>Solid</strong> — clears the lower legacy band thresholds
+                with less modeled margin.
               </li>
               <li>
-                <strong>Mixed</strong> — one or more metrics do not clear
-                the higher bands; review the actual targets and assumptions.
+                <strong>Mixed</strong> — one or more metrics do not clear the
+                higher bands; review the actual targets and assumptions.
               </li>
               <li>
-                <strong>Marginal</strong> — cash flow is negative or
-                model DSCR is below 1.0 within the stated range.
+                <strong>Marginal</strong> — cash flow is negative or model DSCR
+                is below 1.0 within the stated range.
               </li>
               <li>
-                <strong>Negative</strong> — cash flow is meaningfully
-                negative or model DSCR is well below 1.0 under the
-                entered assumptions.
+                <strong>Negative</strong> — cash flow is meaningfully negative
+                or model DSCR is well below 1.0 under the entered assumptions.
               </li>
             </ul>
 
             <h2>The exact thresholds (financed purchase)</h2>
             <p>
-              Most rental purchases use financing, so this is the
-              primary legacy path. The classifier checks four metrics and
-              assigns the first matching screening band.
+              Most rental purchases use financing, so this is the primary legacy
+              path. The classifier checks four metrics and assigns the first
+              matching screening band.
             </p>
 
             <h3>Strong</h3>
             <p>All three must hold:</p>
             <ul>
-              <li>Monthly net cash flow ≥ <strong>$400</strong></li>
-              <li>DSCR ≥ <strong>1.25</strong></li>
-              <li>Cash-on-cash ≥ <strong>10%</strong></li>
+              <li>
+                Monthly net cash flow ≥ <strong>$400</strong>
+              </li>
+              <li>
+                DSCR ≥ <strong>1.25</strong>
+              </li>
+              <li>
+                Cash-on-cash ≥ <strong>10%</strong>
+              </li>
             </ul>
             <p>
-              These are TrueCap score-band heuristics. A $400 monthly
-              scenario creates more modeled room than $100, but it does not
-              guarantee coverage of a vacancy or capital event. A 1.25 modeled
-              DSCR does not establish lender DSCR, eligibility, pricing, or
-              approval. Compare the modeled CoC with current, like-for-like
-              alternatives using the same horizon, liquidity, risk, taxes, and
-              transaction costs.
+              These are TrueCap score-band heuristics. A $400 monthly scenario
+              creates more modeled room than $100, but it does not guarantee
+              coverage of a vacancy or capital event. A 1.25 modeled DSCR does
+              not establish lender DSCR, eligibility, pricing, or approval.
+              Compare the modeled CoC with current, like-for-like alternatives
+              using the same horizon, liquidity, risk, taxes, and transaction
+              costs.
             </p>
 
             <h3>Solid</h3>
             <p>All three must hold:</p>
             <ul>
-              <li>Monthly net cash flow ≥ <strong>$100</strong></li>
-              <li>DSCR ≥ <strong>1.15</strong></li>
-              <li>Cash-on-cash ≥ <strong>6%</strong></li>
+              <li>
+                Monthly net cash flow ≥ <strong>$100</strong>
+              </li>
+              <li>
+                DSCR ≥ <strong>1.15</strong>
+              </li>
+              <li>
+                Cash-on-cash ≥ <strong>6%</strong>
+              </li>
             </ul>
             <p>
-              The Solid band has limited modeled margin. A $100/month
-              cash flow buffer disappears the moment vacancy ticks up
-              or a major appliance breaks. 1.15 DSCR is above breakeven
-              but leaves limited modeled coverage. It does not show whether a
-              lender would accept its own calculated ratio or whether more
-              equity changes eligibility. The 6% CoC band is an internal
-              classification, not a required return or market comparison.
+              The Solid band has limited modeled margin. A $100/month cash flow
+              buffer disappears the moment vacancy ticks up or a major appliance
+              breaks. 1.15 DSCR is above breakeven but leaves limited modeled
+              coverage. It does not show whether a lender would accept its own
+              calculated ratio or whether more equity changes eligibility. The
+              6% CoC band is an internal classification, not a required return
+              or market comparison.
             </p>
 
             <h3>Mixed</h3>
             <p>
-              Anything that doesn&apos;t hit Strong or Solid but still
-              has positive cash flow and DSCR ≥ 1.0 lands here. Cash
-              flow is positive but maybe only by a few dollars. DSCR
-              clears breakeven but tightly. CoC may be modest. The output is
-              sensitive to the assumptions and should not be read as a directive.
+              Anything that doesn&apos;t hit Strong or Solid but still has
+              positive cash flow and DSCR ≥ 1.0 lands here. Cash flow is
+              positive but maybe only by a few dollars. DSCR clears breakeven
+              but tightly. CoC may be modest. The output is sensitive to the
+              assumptions and should not be read as a directive.
             </p>
 
             <h3>Marginal</h3>
             <ul>
-              <li>Monthly cash flow is negative but not worse than{" "}
-                <strong>-$200</strong>, <em>or</em></li>
-              <li>DSCR drops between <strong>0.9 and 1.0</strong></li>
+              <li>
+                Monthly cash flow is negative but not worse than{" "}
+                <strong>-$200</strong>, <em>or</em>
+              </li>
+              <li>
+                DSCR drops between <strong>0.9 and 1.0</strong>
+              </li>
             </ul>
             <p>
               Marginal means the entered case misses a cash-flow or coverage
@@ -289,55 +317,57 @@ export default function HowVerdictEngineWorksPost() {
 
             <h3>Negative</h3>
             <ul>
-              <li>Monthly cash flow worse than <strong>-$200</strong>, <em>or</em></li>
-              <li>DSCR below <strong>0.9</strong></li>
+              <li>
+                Monthly cash flow worse than <strong>-$200</strong>, <em>or</em>
+              </li>
+              <li>
+                DSCR below <strong>0.9</strong>
+              </li>
             </ul>
             <p>
-              Negative means the entered assumptions do not produce a
-              positive operating case. Price, rent, expenses, or financing
-              would have to change for the modeled cash-flow result to change;
-              any replacement value should be supported by evidence.
+              Negative means the entered assumptions do not produce a positive
+              operating case. Price, rent, expenses, or financing would have to
+              change for the modeled cash-flow result to change; any replacement
+              value should be supported by evidence.
             </p>
 
             <h2>The cash-purchase path</h2>
             <p>
-              When the analysis says <code>monthlyPayment &lt;= 0</code>{" "}
-              — i.e., there&apos;s no financing — DSCR doesn&apos;t
-              mean anything. There&apos;s no debt service to cover.
-              The selected-rule classifier detects this and switches to a
-              simpler classifier:
+              When the analysis says <code>monthlyPayment &lt;= 0</code> — i.e.,
+              there&apos;s no financing — DSCR doesn&apos;t mean anything.
+              There&apos;s no debt service to cover. The selected-rule
+              classifier detects this and switches to a simpler classifier:
             </p>
             <ul>
               <li>
-                <strong>Strong</strong>: cash flow ≥ $400/mo, cap rate
-                ≥ 7%, CoC ≥ 8%.
+                <strong>Strong</strong>: cash flow ≥ $400/mo, cap rate ≥ 7%, CoC
+                ≥ 8%.
               </li>
               <li>
-                <strong>Solid</strong>: cash flow ≥ $100/mo, cap rate
-                ≥ 5%, CoC ≥ 5%.
+                <strong>Solid</strong>: cash flow ≥ $100/mo, cap rate ≥ 5%, CoC
+                ≥ 5%.
               </li>
               <li>
-                <strong>Mixed</strong>: positive cash flow but below
-                Solid thresholds.
+                <strong>Mixed</strong>: positive cash flow but below Solid
+                thresholds.
               </li>
               <li>
-                <strong>Marginal / Negative</strong>: same negative
-                cash flow cutoffs as financed (-$200 boundary).
+                <strong>Marginal / Negative</strong>: same negative cash flow
+                cutoffs as financed (-$200 boundary).
               </li>
             </ul>
             <p>
-              CoC thresholds are slightly lower than the financed
-              path because cash purchases are giving up leverage —
-              the &quot;same&quot; 8% CoC on cash represents a higher
-              risk-adjusted return than 8% CoC on a financed deal,
-              because there&apos;s no debt-service risk.
+              CoC thresholds are slightly lower than the financed path because
+              cash purchases are giving up leverage — the &quot;same&quot; 8%
+              CoC on cash represents a higher risk-adjusted return than 8% CoC
+              on a financed deal, because there&apos;s no debt-service risk.
             </p>
 
             <h2>How the screening bands group each metric</h2>
             <p>
-              The legacy classifier groups each metric into a band. The
-              current underwriting result keeps these labels secondary to
-              the actual numbers and the user&apos;s selected targets.
+              The legacy classifier groups each metric into a band. The current
+              underwriting result keeps these labels secondary to the actual
+              numbers and the user&apos;s selected targets.
             </p>
 
             <h3>Cap rate sentences</h3>
@@ -374,53 +404,64 @@ export default function HowVerdictEngineWorksPost() {
                 lender&apos;s formula and complete requirements.&quot;
               </li>
               <li>
-                <strong>&lt; 1.0</strong> — &quot;below 1.0 —
-                operating income doesn&apos;t cover debt service, so
-                the owner subsidizes the property each month.&quot;
+                <strong>&lt; 1.0</strong> — &quot;below 1.0 — operating income
+                doesn&apos;t cover debt service, so the owner subsidizes the
+                property each month.&quot;
               </li>
             </ul>
 
             <h3>Cash-on-cash sentences</h3>
             <ul>
-              <li><strong>≥ 12%</strong> — legacy upper CoC band.</li>
-              <li><strong>8 - 12%</strong> — legacy high CoC band.</li>
-              <li><strong>4 - 8%</strong> — legacy middle CoC band.</li>
-              <li><strong>0 - 4%</strong> — legacy lower positive CoC band.</li>
-              <li><strong>&lt; 0%</strong> — negative modeled cash return.</li>
-            </ul>
-
-            <h2>What the screening classification <em>doesn&apos;t</em> do</h2>
-            <p>
-              These are deliberate scope decisions:
-            </p>
-            <ul>
               <li>
-                <strong>No appreciation modeling.</strong> The classification
-                is operations-only and does not predict future value. The Pro
-                tier&apos;s 10-year projection and exit-scenarios
-                modeling cover the appreciation side.
+                <strong>≥ 12%</strong> — legacy upper CoC band.
               </li>
               <li>
-                <strong>No subjective &quot;location quality&quot; score.</strong>{" "}
-                Some tools combine financial output with a
-                neighborhood-vibes rating. We don&apos;t — location
-                quality is what you know about the market, not what an
-                algorithm tells you.
+                <strong>8 - 12%</strong> — legacy high CoC band.
+              </li>
+              <li>
+                <strong>4 - 8%</strong> — legacy middle CoC band.
+              </li>
+              <li>
+                <strong>0 - 4%</strong> — legacy lower positive CoC band.
+              </li>
+              <li>
+                <strong>&lt; 0%</strong> — negative modeled cash return.
+              </li>
+            </ul>
+
+            <h2>
+              What the screening classification <em>doesn&apos;t</em> do
+            </h2>
+            <p>These are deliberate scope decisions:</p>
+            <ul>
+              <li>
+                <strong>No appreciation modeling.</strong> The classification is
+                operations-only and does not predict future value. The Pro
+                tier&apos;s 10-year projection and exit-scenarios modeling cover
+                the appreciation side.
+              </li>
+              <li>
+                <strong>
+                  No subjective &quot;location quality&quot; score.
+                </strong>{" "}
+                Some tools combine financial output with a neighborhood-vibes
+                rating. We don&apos;t — location quality is what you know about
+                the market, not what an algorithm tells you.
               </li>
               <li>
                 <strong>No partial credit.</strong> Strong requires
-                <em>all three</em> thresholds. Two-out-of-three knocks
-                you to Solid. We thought about a weighted score
-                (that&apos;s what the Screening Index does), while this
-                classifier uses explicit cutoffs.
+                <em>all three</em> thresholds. Two-out-of-three knocks you to
+                Solid. We thought about a weighted score (that&apos;s what the
+                Screening Index does), while this classifier uses explicit
+                cutoffs.
               </li>
             </ul>
 
             <h2>How to use the screening bands</h2>
             <p>
               When you run a property through{" "}
-              <Link href="/">the TrueCap analyzer</Link>, start with the
-              core economics and any selected-rule fit. Treat a legacy band as
+              <Link href="/">the TrueCap analyzer</Link>, start with the core
+              economics and any selected-rule fit. Treat a legacy band as
               secondary context:
             </p>
             <ol>
@@ -440,26 +481,25 @@ export default function HowVerdictEngineWorksPost() {
                 the label as a conclusion.
               </li>
               <li>
-                <strong>Marginal / Negative</strong>: the entered case misses
-                a cash-flow or coverage threshold. Change assumptions only
-                when you have evidence for the replacement value.
+                <strong>Marginal / Negative</strong>: the entered case misses a
+                cash-flow or coverage threshold. Change assumptions only when
+                you have evidence for the replacement value.
               </li>
             </ol>
 
             <h2>If you want the math behind the classification</h2>
             <p>
               The underlying calculations come from{" "}
-              <code>lib/calc-analysis.ts</code> — the single source of
-              truth for cap rate, cash-on-cash, DSCR, and monthly cash
-              flow across the entire site. Same engine drives the
-              free analyzer, the saved-deal PDF, the share link, the
-              dashboard, and the OG image. If you&apos;ve seen the
-              number 6.4% as the cap rate in your TrueCap analysis,
-              that&apos;s the same 6.4% the selected-rule classifier reads.
+              <code>lib/calc-analysis.ts</code> — the single source of truth for
+              cap rate, cash-on-cash, DSCR, and monthly cash flow across the
+              entire site. Same engine drives the free analyzer, the saved-deal
+              PDF, the share link, the dashboard, and the OG image. If
+              you&apos;ve seen the number 6.4% as the cap rate in your TrueCap
+              analysis, that&apos;s the same 6.4% the selected-rule classifier
+              reads.
             </p>
             <p>
-              For deeper reading on the individual metrics, our
-              guides on{" "}
+              For deeper reading on the individual metrics, our guides on{" "}
               <Link href="/blog/cap-rate-vs-cash-on-cash-vs-dscr">
                 cap rate vs cash-on-cash vs DSCR
               </Link>{" "}
@@ -467,8 +507,8 @@ export default function HowVerdictEngineWorksPost() {
               <Link href="/blog/what-is-a-good-cap-rate">
                 what is a good cap rate
               </Link>{" "}
-              go into the &quot;what number is good?&quot; question
-              one metric at a time.
+              go into the &quot;what number is good?&quot; question one metric
+              at a time.
             </p>
 
             <h2>FAQ</h2>
@@ -498,19 +538,10 @@ export default function HowVerdictEngineWorksPost() {
             <p>
               TrueCap is free to try: paste an address, review every imported
               fact and starting assumption, then enter or confirm the property
-              values. You&apos;ll see the core economics first, with selected-rule
-              fit only after targets are explicit.
+              values. You&apos;ll see the core economics first, with
+              selected-rule fit only after targets are explicit.
             </p>
-            <p className="not-prose">
-              <Link
-                href="/"
-                className="inline-flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-5 py-3 font-bold hover:opacity-90"
-              >
-                <Calculator className="w-4 h-4" />
-                Underwrite a rental free
-                <ArrowUpRight className="w-4 h-4" />
-              </Link>
-            </p>
+            <p className="not-prose"></p>
           </div>
 
           <div className="mt-10">

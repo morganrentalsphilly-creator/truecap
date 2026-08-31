@@ -289,7 +289,8 @@ export function buildAssumptionChips(
   const taxAnnualMode =
     values.propertyTaxInputMode === "annual" && taxAnnual != null;
   const taxIsState = Boolean(taxEntry && !taxEntry.manual);
-  const taxUsesGenericFallback = !taxAnnualMode && num(values.propertyTaxPct) == null;
+  const taxUsesGenericFallback =
+    !taxAnnualMode && num(values.propertyTaxPct) == null;
   const templateOwnsActiveTax =
     !taxAnnualMode && templateOwned("propertyTaxPct").length === 1;
   const playOwnsActiveTax =
@@ -308,7 +309,7 @@ export function buildAssumptionChips(
     badge: taxIsState
       ? {
           kind: "state",
-          text: `${provenance.propertyTaxPct?.detail ?? "State"} state benchmark`,
+          text: `legacy ${provenance.propertyTaxPct?.detail ?? "state"} estimate · verify locally`,
         }
       : templateOwnsActiveTax
         ? templateBadge
@@ -319,7 +320,7 @@ export function buildAssumptionChips(
             : { kind: "default", text: "verify locally" },
     target: "expenses",
     focusFieldId: "propertyTaxAmount",
-    pulseKey: taxIsState ? "tax:state" : null,
+    pulseKey: null,
   });
 
   // ── Insurance + vacancy: smart defaults unless the user edited them ────

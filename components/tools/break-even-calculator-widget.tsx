@@ -11,7 +11,7 @@
  */
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
+import { AnalyzerHandoffLink } from "@/components/analyzer-handoff-link";
 import { ArrowUpRight, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
@@ -21,7 +21,10 @@ import { validateToolNumber } from "@/lib/public-tool-validation";
 const fmtMoney = (n: number) =>
   `${n < 0 ? "-" : ""}$${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
 
-function classify(months: number | null, cashFlow: number): { label: string; color: string; note: string } {
+function classify(
+  months: number | null,
+  cashFlow: number,
+): { label: string; color: string; note: string } {
   if (cashFlow <= 0) {
     return {
       label: "No cash-flow break-even",
@@ -93,16 +96,17 @@ export function BreakEvenCalculatorWidget() {
         max: 1_000_000,
       }),
     }),
-    [closingCosts, downPayment, monthlyCashFlow, rehab]
+    [closingCosts, downPayment, monthlyCashFlow, rehab],
   );
   const investmentTotal =
-    validated.downPayment.ok &&
-    validated.closingCosts.ok &&
-    validated.rehab.ok
-      ? validated.downPayment.value + validated.closingCosts.value + validated.rehab.value
+    validated.downPayment.ok && validated.closingCosts.ok && validated.rehab.ok
+      ? validated.downPayment.value +
+        validated.closingCosts.value +
+        validated.rehab.value
       : null;
   const hasPositiveInvestment = investmentTotal != null && investmentTotal > 0;
-  const hasInvestmentTotalError = investmentTotal != null && investmentTotal <= 0;
+  const hasInvestmentTotalError =
+    investmentTotal != null && investmentTotal <= 0;
 
   const result = useMemo(() => {
     if (
@@ -115,9 +119,12 @@ export function BreakEvenCalculatorWidget() {
       return null;
     }
     const totalInvested =
-      validated.downPayment.value + validated.closingCosts.value + validated.rehab.value;
+      validated.downPayment.value +
+      validated.closingCosts.value +
+      validated.rehab.value;
     const cashFlow = validated.monthlyCashFlow.value;
-    if (cashFlow <= 0) return { totalInvested, months: null, years: null, cashFlow };
+    if (cashFlow <= 0)
+      return { totalInvested, months: null, years: null, cashFlow };
     const months = totalInvested / cashFlow;
     const years = months / 12;
     return { totalInvested, months, years, cashFlow };
@@ -129,35 +136,95 @@ export function BreakEvenCalculatorWidget() {
   // the other tool widgets). Down payment / closing / rehab don't map onto
   // the analyzer's price/rent handoff fields, so this is a bare tagged link
   // — the analyzer derives cash flow (and break-even) from its own inputs.
-  const handoffHref = buildAnalyzerHandoffUrl({}, { utmSource: "break-even-calculator" });
+  const handoffHref = buildAnalyzerHandoffUrl(
+    {},
+    { utmSource: "break-even-calculator" },
+  );
 
   return (
     <div className="rounded-2xl border border-border bg-card p-5 sm:p-6">
-      <fieldset aria-describedby={hasInvestmentTotalError ? "be-investment-error" : undefined}>
+      <fieldset
+        aria-describedby={
+          hasInvestmentTotalError ? "be-investment-error" : undefined
+        }
+      >
         <legend className="sr-only">Break-even inputs</legend>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <ToolNumberField id="be-down" label="Down payment" prefix="$" min={0} max={100_000_000} value={downPayment} onChange={(e) => setDownPayment(e.target.value)} error={validated.downPayment.error} />
-          <ToolNumberField id="be-closing" label="Closing costs" prefix="$" min={0} max={100_000_000} value={closingCosts} onChange={(e) => setClosingCosts(e.target.value)} error={validated.closingCosts.error} />
-          <ToolNumberField id="be-rehab" label="Rehab / initial repairs" prefix="$" min={0} max={100_000_000} value={rehab} onChange={(e) => setRehab(e.target.value)} error={validated.rehab.error} />
-          <ToolNumberField id="be-cf" label="Monthly net cash flow" prefix="$" min={-1_000_000} max={1_000_000} value={monthlyCashFlow} onChange={(e) => setMonthlyCashFlow(e.target.value)} error={validated.monthlyCashFlow.error} />
+          <ToolNumberField
+            id="be-down"
+            label="Down payment"
+            prefix="$"
+            min={0}
+            max={100_000_000}
+            value={downPayment}
+            onChange={(e) => setDownPayment(e.target.value)}
+            error={validated.downPayment.error}
+          />
+          <ToolNumberField
+            id="be-closing"
+            label="Closing costs"
+            prefix="$"
+            min={0}
+            max={100_000_000}
+            value={closingCosts}
+            onChange={(e) => setClosingCosts(e.target.value)}
+            error={validated.closingCosts.error}
+          />
+          <ToolNumberField
+            id="be-rehab"
+            label="Rehab / initial repairs"
+            prefix="$"
+            min={0}
+            max={100_000_000}
+            value={rehab}
+            onChange={(e) => setRehab(e.target.value)}
+            error={validated.rehab.error}
+          />
+          <ToolNumberField
+            id="be-cf"
+            label="Monthly net cash flow"
+            prefix="$"
+            min={-1_000_000}
+            max={1_000_000}
+            value={monthlyCashFlow}
+            onChange={(e) => setMonthlyCashFlow(e.target.value)}
+            error={validated.monthlyCashFlow.error}
+          />
         </div>
         {hasInvestmentTotalError ? (
-          <p id="be-investment-error" role="alert" className="mt-3 text-xs font-medium text-destructive">
-            Enter a positive amount for down payment, closing costs, or initial repairs.
+          <p
+            id="be-investment-error"
+            role="alert"
+            className="mt-3 text-xs font-medium text-destructive"
+          >
+            Enter a positive amount for down payment, closing costs, or initial
+            repairs.
           </p>
         ) : null}
       </fieldset>
 
       <div className="mt-6 rounded-xl border border-border bg-muted/30 p-5">
-        <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        <span
+          className="sr-only"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
           {result && verdict
             ? result.months == null
               ? `${verdict.label}. ${verdict.note}`
               : `${verdict.label}. Modeled break-even ${Math.round(result.months)} months, or ${result.years?.toFixed(1)} years.`
             : "Fix the highlighted inputs to calculate cash-flow break-even."}
         </span>
-        <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Break-even</p>
-        <p className={cn("mt-1 text-4xl font-extrabold tabular-nums", verdict?.color ?? "text-muted-foreground")}>
+        <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+          Break-even
+        </p>
+        <p
+          className={cn(
+            "mt-1 text-4xl font-extrabold tabular-nums",
+            verdict?.color ?? "text-muted-foreground",
+          )}
+        >
           {result?.months != null ? `${Math.round(result.months)} months` : "—"}
         </p>
         <p className="mt-1 text-sm text-muted-foreground tabular-nums">
@@ -169,20 +236,24 @@ export function BreakEvenCalculatorWidget() {
         </p>
         {verdict ? (
           <p className="mt-3 text-sm">
-            <span className={cn("font-bold", verdict.color)}>{verdict.label}.</span>{" "}
+            <span className={cn("font-bold", verdict.color)}>
+              {verdict.label}.
+            </span>{" "}
             <span className="text-muted-foreground">{verdict.note}</span>
           </p>
         ) : null}
       </div>
 
-      <Link
-        href={handoffHref} target="_top"
+      <AnalyzerHandoffLink
+        handoffHref={handoffHref}
+        target="_top"
         className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-md text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="w-4 h-4" />
-        Run a full property analysis — cash flow, break-even, 10-year projections — free
+        Run the free core property screen; projections appear when your access
+        includes them
         <ArrowUpRight className="w-4 h-4" />
-      </Link>
+      </AnalyzerHandoffLink>
     </div>
   );
 }

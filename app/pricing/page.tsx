@@ -11,7 +11,6 @@
  * the auto-resume treats as mutually exclusive — it never re-fires.
  */
 
-import { PRODUCT_EVALUATION_DAYS } from "@/lib/product-access";
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -19,6 +18,7 @@ import { Check, ShieldCheck, Sparkles, X } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
 import { CheckoutCancelledBanner } from "@/components/marketing/checkout-cancelled-banner";
 import { PricingTogglePlans } from "@/components/marketing/pricing-toggle-plans";
+import { PricingValueStack } from "@/components/marketing/pricing-value-stack";
 import {
   getEntitlementsForUser,
   getActivePaidPlanSlug,
@@ -41,17 +41,22 @@ import {
   formatPricingEvaluationAllowance,
   summarizePricingEvaluation,
 } from "@/lib/pricing-evaluation";
+import { PRODUCT_PLAN_FACTS, PROPERTY_TAX_FACTS } from "@/lib/product-facts";
+
+const EVALUATION_FACTS = PRODUCT_PLAN_FACTS.evaluation;
 export const metadata: Metadata = {
   title: "Pricing — Screen Free, Repeat with Pro",
-  description:
-    `Complete a rental decision free, then create an account for a ${PRODUCT_EVALUATION_DAYS}-day no-card evaluation with three Pro deals and one comparison.`,
+  description: `Complete a rental decision free, then create an account for a ${EVALUATION_FACTS.durationDays}-day no-card evaluation with ${EVALUATION_FACTS.dealLimit} Pro deals and ${EVALUATION_FACTS.comparisonLimit} comparison.`,
   alternates: { canonical: "/pricing" },
   openGraph: {
     title: "TrueCap pricing — Free screening, repeatable Pro underwriting",
-    description: "Screen deals free. Use Pro to apply your targets, calculate an Offer Ceiling, stress-test downside, compare opportunities, and share the underwrite.",
+    description:
+      "Screen deals free. Use Pro to apply your targets, calculate an Offer Ceiling, stress-test downside, compare opportunities, and share the underwrite.",
     url: "/pricing",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap pricing" }],
+    images: [
+      { url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap pricing" },
+    ],
   },
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
@@ -77,7 +82,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "How does the product evaluation work?",
-    a: `A new account receives ${PRODUCT_EVALUATION_DAYS} days to complete three Pro deal analyses and one full comparison. No card is collected, no charge is scheduled, and nothing auto-renews. If you later subscribe, checkout shows the exact charge before you confirm.`,
+    a: `A new account receives ${EVALUATION_FACTS.durationDays} days to complete ${EVALUATION_FACTS.dealLimit} Pro deal analyses and ${EVALUATION_FACTS.comparisonLimit} full comparison. No card is collected, no charge is scheduled, and nothing auto-renews. If you later subscribe, checkout shows the exact charge before you confirm.`,
   },
   {
     q: "Do I keep my saved deals if I downgrade?",
@@ -90,7 +95,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "How accurate is the auto-fill?",
-    a: "Rent uses a HUD area benchmark (ZIP-level when available, otherwise an FMR area), not a property-specific rent comp. The rate uses FRED's national owner-occupied 30-year benchmark, not an investor lender quote. Property tax is manual: enter a local annual bill or reviewed rate; until then the model discloses its generic 1.1% preliminary fallback. Replace every screening assumption with property-specific evidence before relying on the result.",
+    a: `Rent uses a HUD area benchmark (ZIP-level when available, otherwise an FMR area), not a property-specific rent comp. The rate uses FRED's national owner-occupied 30-year benchmark, not an investor lender quote. ${PROPERTY_TAX_FACTS.notAutoFilled} ${PROPERTY_TAX_FACTS.blankFieldBehavior} Replace every screening assumption with property-specific evidence before relying on the result.`,
   },
   {
     q: "Is this for agents, investors, or both?",
@@ -98,11 +103,9 @@ const FAQS: { q: string; a: string }[] = [
   },
 ];
 
-const FEATURE_COMPARISON: Array<[
-  label: string,
-  free: boolean | string,
-  pro: boolean | string,
-]> = [
+const FEATURE_COMPARISON: Array<
+  [label: string, free: boolean | string, pro: boolean | string]
+> = [
   ["Unlimited preliminary core screens", true, true],
   ["Cap rate · CoC · DSCR · cash flow", true, true],
   ["Labeled HUD rent · FRED rate benchmarks", true, true],
@@ -114,11 +117,11 @@ const FEATURE_COMPARISON: Array<[
   ["Buy Box auto-screening", false, true],
   ["Deal pipeline + tags (CRM)", false, true],
   ["Saved analysis templates", false, true],
-  ["Due-diligence checklist + document vault", false, true],
+  ["Due-diligence checklist + document vault", true, true],
   ["Rate-drop alerts on saved deals", false, true],
   ["Decision memo/report", "First decision", true],
   ["Lender · partner report modes", false, true],
-  ["Save deals", "Up to 5", "Unlimited"],
+  ["Save deals", PRODUCT_PLAN_FACTS.free.savedDealLimit, "Unlimited"],
   ["Compare deals side-by-side", false, "Up to 4"],
   ["Priority support", false, true],
 ];
@@ -154,18 +157,29 @@ export default async function PricingPage() {
   ] = await Promise.all([
     loadStripeDisplayPrice("pro_monthly"),
     loadStripeDisplayPrice("pro_annual"),
-    agentProConfigured ? loadStripeDisplayPrice("agent_pro_monthly") : Promise.resolve(null),
-    agentProConfigured ? loadStripeDisplayPrice("agent_pro_annual") : Promise.resolve(null),
+    agentProConfigured
+      ? loadStripeDisplayPrice("agent_pro_monthly")
+      : Promise.resolve(null),
+    agentProConfigured
+      ? loadStripeDisplayPrice("agent_pro_annual")
+      : Promise.resolve(null),
     user ? getActivePaidPlanSlug(supabase, user.id) : Promise.resolve(null),
-    user ? hasAnySubscriptionHistory(supabase, user.id) : Promise.resolve(false),
-    user ? hasCheckoutRecoverySubscription(supabase, user.id) : Promise.resolve(false),
+    user
+      ? hasAnySubscriptionHistory(supabase, user.id)
+      : Promise.resolve(false),
+    user
+      ? hasCheckoutRecoverySubscription(supabase, user.id)
+      : Promise.resolve(false),
     user
       ? getProductEvaluationAccessForUser(supabase, user.id)
       : Promise.resolve(null),
   ]);
   const pricingEvaluation = summarizePricingEvaluation(productEvaluationAccess);
-  const evaluationAllowance = formatPricingEvaluationAllowance(pricingEvaluation);
-  const entitlements = user ? await getEntitlementsForUser(supabase, user.id) : null;
+  const evaluationAllowance =
+    formatPricingEvaluationAllowance(pricingEvaluation);
+  const entitlements = user
+    ? await getEntitlementsForUser(supabase, user.id)
+    : null;
   const siteUrl = getSiteUrl();
   const recurringOffers = [
     ["TrueCap Pro Monthly", monthly],
@@ -181,11 +195,25 @@ export default async function PricingPage() {
     operatingSystem: "Web",
     url: `${siteUrl}/pricing`,
     offers: [
-      { "@type": "Offer", name: "TrueCap Free", price: 0, priceCurrency: "USD", url: `${siteUrl}/` },
+      {
+        "@type": "Offer",
+        name: "TrueCap Free",
+        price: 0,
+        priceCurrency: "USD",
+        url: `${siteUrl}/`,
+      },
       ...recurringOffers.flatMap(([name, price]) =>
         price
-          ? [{ "@type": "Offer", name, price: price.unitAmount, priceCurrency: price.currency, url: `${siteUrl}/pricing` }]
-          : []
+          ? [
+              {
+                "@type": "Offer",
+                name,
+                price: price.unitAmount,
+                priceCurrency: price.currency,
+                url: `${siteUrl}/pricing`,
+              },
+            ]
+          : [],
       ),
     ],
   };
@@ -217,20 +245,21 @@ export default async function PricingPage() {
               Analyze free · No card required
             </div>
             <h1 className="text-balance text-3xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl">
-              From first screen to shareable underwrite. <span className="text-primary">One review workflow.</span>
+              From first screen to shareable underwrite.{" "}
+              <span className="text-primary">One review workflow.</span>
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-balance text-[15px] leading-relaxed text-muted-foreground sm:text-lg">
               {!user
-                ? `Complete your first decision free. Create an account for ${PRODUCT_EVALUATION_DAYS} days, three ${proOfferName} deals, and one comparison — no card.`
+                ? `Complete your first decision free. Create an account for ${EVALUATION_FACTS.durationDays} days, ${EVALUATION_FACTS.dealLimit} ${proOfferName} deals, and ${EVALUATION_FACTS.comparisonLimit} comparison — no card.`
                 : activePaidPlanSlug || billingRecoveryRequired
                   ? `Screen any deal free. Use ${proOfferName} to review rule fit, the Offer Ceiling, what could break, and how to share the underwrite.`
                   : pricingEvaluation.status === "active" && evaluationAllowance
-                  ? `Your no-card evaluation has ${evaluationAllowance}.`
-                  : pricingEvaluation.status === "exhausted"
-                    ? "Your included evaluation runs are complete. Keep screening deals free, or subscribe when you want another complete Pro decision."
-                    : pricingEvaluation.status === "expired"
-                      ? "Your no-card evaluation has ended. Keep screening deals free, or subscribe when you want another complete Pro decision."
-                      : `Screen any deal free. Use ${proOfferName} to review rule fit, the Offer Ceiling, what could break, and how to share the underwrite.`}
+                    ? `Your no-card evaluation has ${evaluationAllowance}.`
+                    : pricingEvaluation.status === "exhausted"
+                      ? "Your included evaluation runs are complete. Keep screening deals free, or subscribe when you want another complete Pro decision."
+                      : pricingEvaluation.status === "expired"
+                        ? "Your no-card evaluation has ended. Keep screening deals free, or subscribe when you want another complete Pro decision."
+                        : `Screen any deal free. Use ${proOfferName} to review rule fit, the Offer Ceiling, what could break, and how to share the underwrite.`}
             </p>
             <div className="mt-6 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
               <Link
@@ -249,25 +278,58 @@ export default async function PricingPage() {
           </div>
         </section>
 
-        <section aria-labelledby="pricing-stage-title" className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-12">
+        <section
+          aria-labelledby="pricing-stage-title"
+          className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-12"
+        >
           <div className="text-center">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-primary">Choose the job</p>
-            <h2 id="pricing-stage-title" className="mt-2 text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
+              Choose the job
+            </p>
+            <h2
+              id="pricing-stage-title"
+              className="mt-2 text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl"
+            >
               Which stage are you at?
             </h2>
           </div>
-          <div className={`mt-7 grid gap-3 ${agentProConfigured ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
+          <div
+            className={`mt-7 grid gap-3 ${agentProConfigured ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}
+          >
             {[
-              { job: "Screen", product: "Free", answer: "Is this worth investigating?" },
-              { job: "Repeat", product: proOfferName, answer: "Reuse the underwriting workflow across every deal." },
+              {
+                job: "Screen",
+                product: "Free",
+                answer: "Is this worth investigating?",
+              },
+              {
+                job: "Repeat",
+                product: proOfferName,
+                answer: "Reuse the underwriting workflow across every deal.",
+              },
               ...(agentProConfigured
-                ? [{ job: "Win investor clients", product: "Agent Pro", answer: "Match, present, and follow up professionally." }]
+                ? [
+                    {
+                      job: "Win investor clients",
+                      product: "Agent Pro",
+                      answer: "Match, present, and follow up professionally.",
+                    },
+                  ]
                 : []),
             ].map((item) => (
-              <div key={item.job} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-primary">{item.product}</p>
-                <h3 className="mt-1 text-lg font-extrabold text-foreground">{item.job}</h3>
-                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{item.answer}</p>
+              <div
+                key={item.job}
+                className="rounded-2xl border border-border bg-card p-4 shadow-sm"
+              >
+                <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
+                  {item.product}
+                </p>
+                <h3 className="mt-1 text-lg font-extrabold text-foreground">
+                  {item.job}
+                </h3>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                  {item.answer}
+                </p>
               </div>
             ))}
           </div>
@@ -279,7 +341,10 @@ export default async function PricingPage() {
             directly compare per-month cost. ~10-15% lift on annual. */}
         {/* id="plans" — scroll target for exit-intent CTAs and any other
             deep link that needs to land directly on the plan toggle. */}
-        <section id="plans" className="mx-auto -mt-2 max-w-5xl px-4 pb-6 sm:px-6">
+        <section
+          id="plans"
+          className="mx-auto -mt-2 max-w-5xl px-4 pb-6 sm:px-6"
+        >
           {/* Abandoned-checkout reassurance — cancel_url (app/actions/billing.ts)
               points back here with ?billing=checkout_cancelled. Suspense keeps
               the page's rendering unaffected by the banner's useSearchParams. */}
@@ -313,8 +378,9 @@ export default async function PricingPage() {
               <strong className="text-foreground">
                 Overpaying by even 3% on a $250,000 rental costs $7,500
               </strong>{" "}
-              — before you collect a dollar of rent. {proOfferName} is {formatPublicUsd(PUBLIC_PRO_MONTHLY_USD)}/month and computes
-              an Offer Ceiling under the selected targets on every deal you review.
+              — before you collect a dollar of rent. {proOfferName} is{" "}
+              {formatPublicUsd(PUBLIC_PRO_MONTHLY_USD)}/month and computes an
+              Offer Ceiling under the selected targets on every deal you review.
             </p>
           </div>
 
@@ -331,21 +397,37 @@ export default async function PricingPage() {
           <div className="mx-auto mt-6 flex max-w-2xl flex-wrap items-center justify-center gap-x-6 gap-y-2 rounded-2xl border border-border bg-card px-5 py-4 text-center text-xs text-muted-foreground sm:text-sm">
             <span className="inline-flex items-center gap-1.5">
               <ShieldCheck className="size-4 text-[var(--metric-positive)]" />
-              <strong className="text-foreground">Free to start — no card</strong>
-            </span>
-            <span aria-hidden className="text-muted-foreground/40">·</span>
-            <span>
               <strong className="text-foreground">
-                {PRODUCT_EVALUATION_DAYS}-day evaluation · 3 Pro deals · 1 comparison
+                Free to start — no card
               </strong>
             </span>
-            <span aria-hidden className="text-muted-foreground/40">·</span>
-            <span><strong className="text-foreground">No card, no auto-renewal</strong></span>
+            <span aria-hidden className="text-muted-foreground/40">
+              ·
+            </span>
+            <span>
+              <strong className="text-foreground">
+                {EVALUATION_FACTS.durationDays}-day evaluation ·{" "}
+                {EVALUATION_FACTS.dealLimit} Pro deals ·{" "}
+                {EVALUATION_FACTS.comparisonLimit} comparison
+              </strong>
+            </span>
+            <span aria-hidden className="text-muted-foreground/40">
+              ·
+            </span>
+            <span>
+              <strong className="text-foreground">
+                No card, no auto-renewal
+              </strong>
+            </span>
           </div>
         </section>
 
         {/* Feature comparison */}
         <section className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
+          <PricingValueStack
+            proOfferName={proOfferName}
+            agentProConfigured={agentProConfigured}
+          />
           <h2 className="text-center text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
             What you get
           </h2>
@@ -357,46 +439,73 @@ export default async function PricingPage() {
               denser semantic table. No narrow viewport has to pan sideways. */}
           <div className="tc-reveal mt-8 space-y-2 sm:hidden">
             {FEATURE_COMPARISON.map(([label, free, pro]) =>
-              !alertsLive && label === "Rate-drop alerts on saved deals" ? null : (
-              <article key={label} className="rounded-2xl border border-border bg-card p-4">
-                <h3 className="text-sm font-bold text-foreground">{label}</h3>
-                <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
-                  <div className="rounded-xl bg-muted/30 p-3">
-                    <dt className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Free</dt>
-                    <dd className="mt-1"><MobileFeatureValue value={free} /></dd>
-                  </div>
-                  <div className="rounded-xl bg-primary/5 p-3">
-                    <dt className="text-[10px] font-bold uppercase tracking-wider text-primary">Pro</dt>
-                    <dd className="mt-1"><MobileFeatureValue value={pro} pro /></dd>
-                  </div>
-                </dl>
-              </article>
-            ))}
+              !alertsLive &&
+              label === "Rate-drop alerts on saved deals" ? null : (
+                <article
+                  key={label}
+                  className="rounded-2xl border border-border bg-card p-4"
+                >
+                  <h3 className="text-sm font-bold text-foreground">{label}</h3>
+                  <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                    <div className="rounded-xl bg-muted/30 p-3">
+                      <dt className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                        Free
+                      </dt>
+                      <dd className="mt-1">
+                        <MobileFeatureValue value={free} />
+                      </dd>
+                    </div>
+                    <div className="rounded-xl bg-primary/5 p-3">
+                      <dt className="text-[10px] font-bold uppercase tracking-wider text-primary">
+                        Pro
+                      </dt>
+                      <dd className="mt-1">
+                        <MobileFeatureValue value={pro} pro />
+                      </dd>
+                    </div>
+                  </dl>
+                </article>
+              ),
+            )}
           </div>
           <div className="tc-reveal mt-8 hidden overflow-x-auto rounded-2xl border border-border bg-card sm:block">
             <table className="w-full text-sm">
-              <caption className="sr-only">Features included with TrueCap Free and TrueCap Pro</caption>
+              <caption className="sr-only">
+                Features included with TrueCap Free and TrueCap Pro
+              </caption>
               <thead>
                 <tr className="border-b border-border bg-muted/30">
-                  <th className="px-4 py-3 text-left font-bold text-foreground sm:px-6">Feature</th>
-                  <th className="px-4 py-3 text-center font-bold text-foreground sm:px-6">Free</th>
-                  <th className="px-4 py-3 text-center font-bold text-primary sm:px-6">Pro</th>
+                  <th className="px-4 py-3 text-left font-bold text-foreground sm:px-6">
+                    Feature
+                  </th>
+                  <th className="px-4 py-3 text-center font-bold text-foreground sm:px-6">
+                    Free
+                  </th>
+                  <th className="px-4 py-3 text-center font-bold text-primary sm:px-6">
+                    Pro
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {FEATURE_COMPARISON.map(([label, free, pro], i) =>
-                  !alertsLive && label === "Rate-drop alerts on saved deals" ? null : (
-                  <tr key={String(label)} className={i % 2 === 0 ? "bg-card" : "bg-muted/20"}>
-                    <td className="px-4 py-3 text-foreground sm:px-6">{String(label)}</td>
-                    <Cell value={free} />
-                    <Cell value={pro} pro />
-                  </tr>
-                ))}
+                  !alertsLive &&
+                  label === "Rate-drop alerts on saved deals" ? null : (
+                    <tr
+                      key={String(label)}
+                      className={i % 2 === 0 ? "bg-card" : "bg-muted/20"}
+                    >
+                      <td className="px-4 py-3 text-foreground sm:px-6">
+                        {String(label)}
+                      </td>
+                      <Cell value={free} />
+                      <Cell value={pro} pro />
+                    </tr>
+                  ),
+                )}
               </tbody>
             </table>
           </div>
         </section>
-
 
         {/* FAQ */}
         <section className="mx-auto max-w-3xl px-4 pb-16 sm:px-6 sm:pb-24">
@@ -415,13 +524,17 @@ export default async function PricingPage() {
                     +
                   </span>
                 </summary>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{faq.a}</p>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  {faq.a}
+                </p>
               </details>
             ))}
           </div>
 
           <div className="mt-10 flex flex-col items-center gap-3 text-center">
-            <p className="text-sm text-muted-foreground">Still have questions?</p>
+            <p className="text-sm text-muted-foreground">
+              Still have questions?
+            </p>
             <Link
               href="/"
               className="inline-flex min-h-11 items-center gap-1.5 rounded text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -461,7 +574,10 @@ function Cell({ value, pro }: { value: boolean | string; pro?: boolean }) {
     <td className="px-4 py-3 text-center sm:px-6">
       {value === true ? (
         <>
-          <Check aria-hidden className={`mx-auto size-4 ${pro ? "text-primary" : "text-[var(--metric-positive)]"}`} />
+          <Check
+            aria-hidden
+            className={`mx-auto size-4 ${pro ? "text-primary" : "text-[var(--metric-positive)]"}`}
+          />
           <span className="sr-only">Included</span>
         </>
       ) : value === false ? (
@@ -470,16 +586,28 @@ function Cell({ value, pro }: { value: boolean | string; pro?: boolean }) {
           <span className="sr-only">Not included</span>
         </>
       ) : (
-        <span className={`text-sm font-semibold ${pro ? "text-primary" : "text-foreground"}`}>{value}</span>
+        <span
+          className={`text-sm font-semibold ${pro ? "text-primary" : "text-foreground"}`}
+        >
+          {value}
+        </span>
       )}
     </td>
   );
 }
 
-function MobileFeatureValue({ value, pro }: { value: boolean | string; pro?: boolean }) {
+function MobileFeatureValue({
+  value,
+  pro,
+}: {
+  value: boolean | string;
+  pro?: boolean;
+}) {
   if (value === true) {
     return (
-      <span className={`inline-flex items-center gap-1.5 font-semibold ${pro ? "text-primary" : "text-foreground"}`}>
+      <span
+        className={`inline-flex items-center gap-1.5 font-semibold ${pro ? "text-primary" : "text-foreground"}`}
+      >
         <Check aria-hidden className="size-4" /> Included
       </span>
     );
@@ -491,5 +619,13 @@ function MobileFeatureValue({ value, pro }: { value: boolean | string; pro?: boo
       </span>
     );
   }
-  return <span className={pro ? "font-semibold text-primary" : "font-semibold text-foreground"}>{value}</span>;
+  return (
+    <span
+      className={
+        pro ? "font-semibold text-primary" : "font-semibold text-foreground"
+      }
+    >
+      {value}
+    </span>
+  );
 }

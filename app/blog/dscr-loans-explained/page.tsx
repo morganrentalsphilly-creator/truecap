@@ -17,7 +17,6 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Calculator } from "lucide-react";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
@@ -27,7 +26,8 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "dscr-loans-explained";
-const TITLE = "DSCR loans explained: what they are, when they make sense, what they cost in 2026";
+const TITLE =
+  "DSCR loans explained: what they are, when they make sense, what they cost in 2026";
 // SERP-facing title (metadata/og only): kept ≤50 chars so the root
 // layout's "%s | TrueCap" template stays inside the ~60-char SERP
 // window. The on-page <h1> keeps the longer editorial TITLE.
@@ -113,7 +113,12 @@ export default function BlogPost() {
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
     // Author points at the /about Person entity (E-E-A-T anchor @id).
-    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
+    author: {
+      "@type": "Person",
+      "@id": `${siteUrl}/about#morgan`,
+      name: "Morgan Page",
+      url: `${siteUrl}/about`,
+    },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: canonicalUrl,
     image: [`${siteUrl}/home.jpg`],
@@ -123,8 +128,18 @@ export default function BlogPost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "TrueCap", item: `${siteUrl}/` },
-      { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "TrueCap",
+        item: `${siteUrl}/`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: `${siteUrl}/blog`,
+      },
       { "@type": "ListItem", position: 3, name: TITLE, item: canonicalUrl },
     ],
   };
@@ -140,20 +155,36 @@ export default function BlogPost() {
 
   return (
     <div className="min-h-screen bg-background">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
+      />
 
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <header className="mb-8 sm:mb-10">
-          <Link href="/blog" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">
+          <Link
+            href="/blog"
+            className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+          >
             ← TrueCap Blog
           </Link>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight text-balance">
             {TITLE}
           </h1>
           <p className="text-[11px] uppercase tracking-widest text-muted-foreground font-bold mt-3">
-            {new Date(PUBLISHED_AT).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}{" "}
+            {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}{" "}
             · {READING_TIME_MIN} min read
           </p>
           <BlogByline />
@@ -164,91 +195,104 @@ export default function BlogPost() {
 
         <article className="prose prose-slate max-w-none [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
           <p>
-            Conventional mortgage underwriting commonly uses documented
-            personal income and debt-to-income ratios. That approach may be a
-            constraint for some self-employed or portfolio investors, even
-            when a proposed rental supports its debt under a separate property
-            analysis. DSCR programs are one non-QM option for that gap, but
-            they still underwrite both the collateral and defined borrower
-            risks.
+            Conventional mortgage underwriting commonly uses documented personal
+            income and debt-to-income ratios. That approach may be a constraint
+            for some self-employed or portfolio investors, even when a proposed
+            rental supports its debt under a separate property analysis. DSCR
+            programs are one non-QM option for that gap, but they still
+            underwrite both the collateral and defined borrower risks.
           </p>
 
           <p>
-            This post walks through what a DSCR loan actually is, who they
-            make sense for, what they cost in 2026&apos;s rate environment,
-            and the specific trade-offs vs. conventional financing.
+            This post walks through what a DSCR loan actually is, who they make
+            sense for, what they cost in 2026&apos;s rate environment, and the
+            specific trade-offs vs. conventional financing.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">What a DSCR loan is</h2>
           <p>
-            <Link href="/glossary/dscr" className="text-primary font-semibold hover:underline">DSCR</Link> stands for <strong>Debt Service Coverage Ratio</strong> —
-            the property&apos;s annual net operating income divided by its
-            annual debt service. A DSCR of 1.25 means the property earns
-            $1.25 of <Link href="/glossary/noi" className="text-primary font-semibold hover:underline">NOI</Link> for every $1.00 of mortgage payment — see
-            our breakdown of <Link href="/blog/what-is-a-good-dscr" className="text-primary font-semibold hover:underline">what counts as a good DSCR</Link> for
-            what that threshold means for your offer price.
+            <Link
+              href="/glossary/dscr"
+              className="text-primary font-semibold hover:underline"
+            >
+              DSCR
+            </Link>{" "}
+            stands for <strong>Debt Service Coverage Ratio</strong> — the
+            property&apos;s annual net operating income divided by its annual
+            debt service. A DSCR of 1.25 means the property earns $1.25 of{" "}
+            <Link
+              href="/glossary/noi"
+              className="text-primary font-semibold hover:underline"
+            >
+              NOI
+            </Link>{" "}
+            for every $1.00 of mortgage payment — see our breakdown of{" "}
+            <Link
+              href="/blog/what-is-a-good-dscr"
+              className="text-primary font-semibold hover:underline"
+            >
+              what counts as a good DSCR
+            </Link>{" "}
+            for what that threshold means for your offer price.
           </p>
           <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
             <div className="text-sm sm:text-base font-mono">
-              <span className="font-bold">DSCR</span> = Annual NOI ÷ Annual Debt Service
+              <span className="font-bold">DSCR</span> = Annual NOI ÷ Annual Debt
+              Service
             </div>
           </div>
           <p>
             A <em>DSCR loan</em> is a non-QM mortgage that qualifies the
-            transaction primarily on property coverage instead of using
-            personal DTI as the main ratio. Many programs do not use W-2s or
-            tax returns to calculate that ratio, but the lender still reviews
-            borrower or guarantor credit, reserves, identity, entity
-            documents, and the property itself. A DSCR above the program
-            minimum satisfies one condition; it does not guarantee approval.
+            transaction primarily on property coverage instead of using personal
+            DTI as the main ratio. Many programs do not use W-2s or tax returns
+            to calculate that ratio, but the lender still reviews borrower or
+            guarantor credit, reserves, identity, entity documents, and the
+            property itself. A DSCR above the program minimum satisfies one
+            condition; it does not guarantee approval.
           </p>
-          <p>
-            <Link href="/#main" className="text-primary font-semibold hover:underline">
-              Compute DSCR on a real property →
-            </Link>
-          </p>
+          <p></p>
 
           <h2 className="text-2xl sm:text-3xl">Who DSCR loans are for</h2>
           <p>
             Four common use cases follow. They identify reasons to compare a
-            DSCR quote—not proof that it is the right or least-expensive
-            product for a particular borrower.
+            DSCR quote—not proof that it is the right or least-expensive product
+            for a particular borrower.
           </p>
 
           <h3>1. Self-employed with paper losses</h3>
           <p>
             You make real money, but your Schedule C / Schedule E shows
-            depreciation, business expenses, and other paper losses that
-            reduce taxable income. Conventional programs apply their own
-            income-calculation rules. A DSCR program may avoid using tax
-            returns to calculate personal DTI, although documentation and
-            exception requirements still vary by lender and program.
+            depreciation, business expenses, and other paper losses that reduce
+            taxable income. Conventional programs apply their own
+            income-calculation rules. A DSCR program may avoid using tax returns
+            to calculate personal DTI, although documentation and exception
+            requirements still vary by lender and program.
           </p>
 
           <h3>2. Already maxed on Fannie/Freddie</h3>
           <p>
-            Agency financed-property rules can constrain an individual
-            borrower with a larger portfolio. Depending on the transaction,
-            alternatives can include DSCR, bank portfolio, commercial, or
-            other financing; the right comparison depends on current program
-            eligibility and total cost.
+            Agency financed-property rules can constrain an individual borrower
+            with a larger portfolio. Depending on the transaction, alternatives
+            can include DSCR, bank portfolio, commercial, or other financing;
+            the right comparison depends on current program eligibility and
+            total cost.
           </p>
 
           <h3>3. Buying through an LLC for asset protection</h3>
           <p>
             Some DSCR and portfolio programs permit eligible entities, often
-            with personal guaranties and specific vesting documents. Agency
-            and conventional title rules differ. Choose an entity with legal
-            and tax advice, then confirm that exact vesting with the lender
-            before signing a purchase contract.
+            with personal guaranties and specific vesting documents. Agency and
+            conventional title rules differ. Choose an entity with legal and tax
+            advice, then confirm that exact vesting with the lender before
+            signing a purchase contract.
           </p>
 
           <h3>4. Strong property, tight personal DTI</h3>
           <p>
-            Sometimes the deal is great but your personal balance sheet
-            (recent job change, high credit card balance, divorce-related
-            debt, etc.) keeps the conventional underwriter from approving.
-            A property-coverage program may remove personal DTI as the primary
+            Sometimes the deal is great but your personal balance sheet (recent
+            job change, high credit card balance, divorce-related debt, etc.)
+            keeps the conventional underwriter from approving. A
+            property-coverage program may remove personal DTI as the primary
             qualifying ratio, but it does not remove credit, liquidity,
             identity, guarantor, or other borrower review.
           </p>
@@ -256,26 +300,33 @@ export default function BlogPost() {
           <h2 className="text-2xl sm:text-3xl">What DSCR loans cost in 2026</h2>
           <p>
             Pricing is quote-specific and can move daily. DSCR loans are often
-            priced above comparable conventional investment-property loans,
-            but a rate-only comparison is incomplete. Compare the same loan
-            amount and lock date, then include points, lender fees, reserves,
+            priced above comparable conventional investment-property loans, but
+            a rate-only comparison is incomplete. Compare the same loan amount
+            and lock date, then include points, lender fees, reserves,
             amortization, recourse, and any prepayment penalty.
           </p>
-          <p>
-            Common pricing and eligibility inputs include:
-          </p>
+          <p>Common pricing and eligibility inputs include:</p>
           <ul>
             <li>
-              <strong>DSCR ratio.</strong> Stronger coverage may improve
-              pricing or leverage under a particular matrix.
+              <strong>DSCR ratio.</strong> Stronger coverage may improve pricing
+              or leverage under a particular matrix.
             </li>
             <li>
-              <strong>Credit profile.</strong> Score, history, and recent
-              credit events can change pricing or eligibility.
+              <strong>Credit profile.</strong> Score, history, and recent credit
+              events can change pricing or eligibility.
             </li>
             <li>
-              <strong><Link href="/glossary/ltv" className="text-primary font-semibold hover:underline">LTV</Link>.</strong> Lower leverage commonly improves pricing,
-              while cash-out and purchase matrices can differ.
+              <strong>
+                <Link
+                  href="/glossary/ltv"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  LTV
+                </Link>
+                .
+              </strong>{" "}
+              Lower leverage commonly improves pricing, while cash-out and
+              purchase matrices can differ.
             </li>
             <li>
               <strong>Reserves.</strong> Required months and eligible asset
@@ -284,31 +335,80 @@ export default function BlogPost() {
             <li>
               <strong>Property and use.</strong> Unit count, short-term-rental
               use, rural or condo status, loan size, and market can affect the
-              matrix. Coverage is easier to clear in high-rent-to-price
-              markets like <Link href="/markets/memphis" className="text-primary font-semibold hover:underline">Memphis</Link> than in appreciation-driven metros
-              where rent lags the purchase price.
+              matrix. Coverage is easier to clear in high-rent-to-price markets
+              like{" "}
+              <Link
+                href="/markets/memphis"
+                className="text-primary font-semibold hover:underline"
+              >
+                Memphis
+              </Link>{" "}
+              than in appreciation-driven metros where rent lags the purchase
+              price.
             </li>
           </ul>
 
-          <h2 className="text-2xl sm:text-3xl">DSCR vs conventional — side by side</h2>
+          <h2 className="text-2xl sm:text-3xl">
+            DSCR vs conventional — side by side
+          </h2>
           <div className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
             <table className="w-full min-w-[560px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
-                  <th className="text-left p-3 font-bold text-foreground">Feature</th>
-                  <th className="text-left p-3 font-bold text-foreground">DSCR loan</th>
-                  <th className="text-left p-3 font-bold text-foreground">Conventional investment</th>
+                  <th className="text-left p-3 font-bold text-foreground">
+                    Feature
+                  </th>
+                  <th className="text-left p-3 font-bold text-foreground">
+                    DSCR loan
+                  </th>
+                  <th className="text-left p-3 font-bold text-foreground">
+                    Conventional investment
+                  </th>
                 </tr>
               </thead>
               <tbody className="[&_td]:p-3 [&_td]:border-b [&_td]:border-border [&_tr:last-child_td]:border-0">
-                <tr><td className="text-muted-foreground">Income underwriting</td><td>Personal DTI often not primary; documents vary</td><td>Documented-income and DTI rules apply</td></tr>
-                <tr><td className="text-muted-foreground">Primary coverage metric</td><td>Program-defined property DSCR</td><td>Personal DTI plus agency underwriting</td></tr>
-                <tr><td className="text-muted-foreground">Eligible title</td><td>Entities often permitted; guaranties common</td><td>Program and vesting rules apply</td></tr>
-                <tr><td className="text-muted-foreground">Portfolio limits</td><td>No agency cap; lender exposure limits can apply</td><td>Agency financed-property rules can apply</td></tr>
-                <tr><td className="text-muted-foreground">Rate and fees</td><td>Quote-specific; often higher</td><td>Quote-specific; often lower if you qualify</td></tr>
-                <tr><td className="text-muted-foreground">Equity required</td><td>Often 20%+; matrix-specific</td><td>Purpose and program-specific</td></tr>
-                <tr><td className="text-muted-foreground">Closing timeline</td><td>Lender and file-specific</td><td>Lender and file-specific</td></tr>
-                <tr><td className="text-muted-foreground">Credit threshold</td><td>Program-specific</td><td>Program and automated-underwriting specific</td></tr>
+                <tr>
+                  <td className="text-muted-foreground">Income underwriting</td>
+                  <td>Personal DTI often not primary; documents vary</td>
+                  <td>Documented-income and DTI rules apply</td>
+                </tr>
+                <tr>
+                  <td className="text-muted-foreground">
+                    Primary coverage metric
+                  </td>
+                  <td>Program-defined property DSCR</td>
+                  <td>Personal DTI plus agency underwriting</td>
+                </tr>
+                <tr>
+                  <td className="text-muted-foreground">Eligible title</td>
+                  <td>Entities often permitted; guaranties common</td>
+                  <td>Program and vesting rules apply</td>
+                </tr>
+                <tr>
+                  <td className="text-muted-foreground">Portfolio limits</td>
+                  <td>No agency cap; lender exposure limits can apply</td>
+                  <td>Agency financed-property rules can apply</td>
+                </tr>
+                <tr>
+                  <td className="text-muted-foreground">Rate and fees</td>
+                  <td>Quote-specific; often higher</td>
+                  <td>Quote-specific; often lower if you qualify</td>
+                </tr>
+                <tr>
+                  <td className="text-muted-foreground">Equity required</td>
+                  <td>Often 20%+; matrix-specific</td>
+                  <td>Purpose and program-specific</td>
+                </tr>
+                <tr>
+                  <td className="text-muted-foreground">Closing timeline</td>
+                  <td>Lender and file-specific</td>
+                  <td>Lender and file-specific</td>
+                </tr>
+                <tr>
+                  <td className="text-muted-foreground">Credit threshold</td>
+                  <td>Program-specific</td>
+                  <td>Program and automated-underwriting specific</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -319,29 +419,35 @@ export default function BlogPost() {
 
           <h2 className="text-2xl sm:text-3xl">The DSCR trap to watch for</h2>
           <p>
-            Lender formulas are not uniform. A program may use appraiser
-            market rent, an eligible lease, or another documented amount,
-            and may divide it by PITIA or a differently defined payment. If
-            the accepted rent comes in below your assumption, the lender&apos;s
-            ratio and available pricing or leverage can change materially.
+            Lender formulas are not uniform. A program may use appraiser market
+            rent, an eligible lease, or another documented amount, and may
+            divide it by PITIA or a differently defined payment. If the accepted
+            rent comes in below your assumption, the lender&apos;s ratio and
+            available pricing or leverage can change materially.
           </p>
           <p>
             Before paying non-refundable fees or locking, ask which rent
             evidence, payment components, and rounding rules the lender will
             use, and what reconsideration process exists. Independent rental
-            comps can inform your own decision but do not compel an appraiser
-            or lender to change a value. If you&apos;re using a DSCR cash-out to pull equity, our guide on <Link href="/blog/how-to-refinance-a-rental-property" className="text-primary font-semibold hover:underline">refinancing a rental property</Link> walks through the post-refi DSCR math.
+            comps can inform your own decision but do not compel an appraiser or
+            lender to change a value. If you&apos;re using a DSCR cash-out to
+            pull equity, our guide on{" "}
+            <Link
+              href="/blog/how-to-refinance-a-rental-property"
+              className="text-primary font-semibold hover:underline"
+            >
+              refinancing a rental property
+            </Link>{" "}
+            walks through the post-refi DSCR math.
           </p>
 
           <h2 className="text-2xl sm:text-3xl">Stress-testing your DSCR</h2>
-          <p>
-            Before you apply, run the DSCR yourself. Three scenarios:
-          </p>
+          <p>Before you apply, run the DSCR yourself. Three scenarios:</p>
           <ul>
             <li>
-              <strong>Base case</strong> — your expected rent and rate.
-              Compare it with the lender&apos;s written threshold and your own
-              operating cushion.
+              <strong>Base case</strong> — your expected rent and rate. Compare
+              it with the lender&apos;s written threshold and your own operating
+              cushion.
             </li>
             <li>
               <strong>Lender appraisal -10% rent</strong> — what if the
@@ -349,9 +455,8 @@ export default function BlogPost() {
               whether the file and your own cash-flow plan still work.
             </li>
             <li>
-              <strong>Rate +0.5pp</strong> — what if rates spike before
-              you lock? DSCR should still be above your lender&apos;s
-              minimum.
+              <strong>Rate +0.5pp</strong> — what if rates spike before you
+              lock? DSCR should still be above your lender&apos;s minimum.
             </li>
           </ul>
           <p>
@@ -361,20 +466,14 @@ export default function BlogPost() {
             base case works, the financing has little modeled room for change.
           </p>
 
-          <div className="not-prose">
-            <Link
-              href="/#main"
-              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-3 rounded-xl font-bold hover:opacity-95 transition-opacity"
-            >
-              <Calculator className="w-4 h-4" />
-              Compute DSCR now
-              <ArrowUpRight className="w-4 h-4" />
-            </Link>
-          </div>
+          <div className="not-prose"></div>
 
           <h2 className="text-2xl sm:text-3xl">FAQ</h2>
           {FAQS.map((f, i) => (
-            <details key={i} className="not-prose bg-card border border-border rounded-xl p-4 sm:p-5 mb-3">
+            <details
+              key={i}
+              className="not-prose bg-card border border-border rounded-xl p-4 sm:p-5 mb-3"
+            >
               <summary className="cursor-pointer font-bold text-foreground">
                 {f.q}
               </summary>
@@ -386,16 +485,15 @@ export default function BlogPost() {
         </article>
 
         <RelatedBlogPosts currentSlug={SLUG} />
-      <div className="max-w-3xl mx-auto px-4 sm:px-6"><NewsletterSignup variant="expanded" source="blog" /></div>
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          <NewsletterSignup variant="expanded" source="blog" />
+        </div>
 
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
             Want to see DSCR on a specific deal before you call a lender?
-            TrueCap computes DSCR live as you type, alongside cash flow,
-            cap rate, and a 10-year projection.{" "}
-            <Link href="/" className="font-bold text-foreground hover:underline">
-              Open the analyzer →
-            </Link>
+            TrueCap computes DSCR live as you type, alongside cash flow, cap
+            rate, and a 10-year projection.{" "}
           </p>
         </footer>
       </main>

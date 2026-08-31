@@ -5,8 +5,9 @@
  * because the real blocker for the almost-investor is courage and process,
  * not math. Published in full and public (consistent with the public
  * methodology — confidence comes from a process you can audit); the
- * email-capture module offers the same content as a paced 5-part course
- * plus the Market Intelligence Pack. Deviation from the rollout spec's
+ * email-capture module offers the playbook plus a short verification course.
+ * The former Market Intelligence Pack is not distributed while its tax/law
+ * records remain high-risk and stale. Deviation from the rollout spec's
  * "gated by email" is deliberate and logged in the rollout report: a
  * fully-gated page fights the sitemap/SEO requirement and the site's
  * transparency positioning.
@@ -39,7 +40,14 @@ export const metadata: Metadata = {
       "Define your Buy Box, source candidates, verify the analysis, review the Offer Ceiling, and make your own documented decision.",
     url: "/playbook",
     type: "article",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "The First Offer Playbook" }],
+    images: [
+      {
+        url: "/home.jpg",
+        width: 1200,
+        height: 630,
+        alt: "The First Offer Playbook",
+      },
+    ],
   },
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
@@ -75,11 +83,12 @@ const STEPS = [
     short: "Read the analysis",
     title: "Read the analysis like an underwriter, not a fan",
     paragraphs: [
-      "When a property meets the first screen, slow down and verify the assumptions before relying on the outputs. TrueCap can start rent from a labeled HUD area benchmark, rate from a labeled FRED national series, and taxes from a labeled state effective-rate benchmark when available. These are editable screening starting points, not verified facts or quotes for the property.",
+      "When a property meets the first screen, slow down and verify the assumptions before relying on the outputs. TrueCap can start rent from a labeled HUD area benchmark and rate from a labeled FRED national series; property tax is a manual local input with a disclosed generic fallback when blank. These are editable screening starting points, not verified facts or quotes for the property.",
       "Replace four numbers with local evidence before you believe any verdict: the rent (pull 3 comparable actual rentals, not asking rents), the tax bill (the county has the real number), insurance (one phone call), and the rate (a written quote for an investor loan, which is not the owner-occupant headline rate). Everything else — vacancy, maintenance, CapEx, management — keep conservative defaults until the property tells you otherwise.",
       "Then read three outputs in order: modeled cash flow with reserves, DSCR against your selected screening threshold, and the downside scenario. A lender may calculate DSCR differently and will apply its own eligibility, valuation, and reserve rules.",
     ],
-    action: "For your best candidate: verify rent, tax, insurance, and rate with real evidence.",
+    action:
+      "For your best candidate: verify rent, tax, insurance, and rate with real evidence.",
   },
   {
     id: "offer-ceiling",
@@ -91,7 +100,8 @@ const STEPS = [
       "The solver works backward from the selected cash-flow, cash-on-cash, cap-rate, DSCR, and price constraints that apply. TrueCap Pro computes this boundary on each compatible analysis and includes it in Pro reports.",
       "If the Offer Ceiling is below asking, the page reports the gap. That comparison does not tell you to make, submit, or avoid an offer. Verify rent, property costs, condition, financing, title, and local requirements, then decide with the advisers relevant to your situation.",
     ],
-    action: "Calculate the Offer Ceiling, record its target profile, and verify the assumptions that could move it.",
+    action:
+      "Calculate the Offer Ceiling, record its target profile, and verify the assumptions that could move it.",
   },
   {
     id: "offer",
@@ -100,11 +110,12 @@ const STEPS = [
     title: "Record your decision — review prompts included",
     paragraphs: [
       "Offer terms, contingencies, deposits, deadlines, and legal effect vary by transaction and jurisdiction. Review the actual agreement with your agent and attorney where appropriate; do not assume a contingency or cancellation right exists unless it is written and enforceable.",
-      "A neutral prompt for your agent: \"I have completed an initial underwrite for [address]. Please help me verify the assumptions, comparable evidence, property disclosures, and financing terms, then review the risks and appropriate contract protections with me before I decide whether and how to offer.\"",
+      'A neutral prompt for your agent: "I have completed an initial underwrite for [address]. Please help me verify the assumptions, comparable evidence, property disclosures, and financing terms, then review the risks and appropriate contract protections with me before I decide whether and how to offer."',
       "For an off-market conversation, keep screening estimates separate from verified facts. A report can document the assumptions, selected rules, gaps, and verification plan, but it does not establish property value, proof of funds, lender approval, or an appropriate offer price.",
       "Then — win or lose — go back to Step 2. The pipeline is the strategy; any single deal is just a rep.",
     ],
-    action: "Record your own decision and rationale after the material assumptions and contract terms are reviewed.",
+    action:
+      "Record your own decision and rationale after the material assumptions and contract terms are reviewed.",
   },
 ];
 
@@ -141,11 +152,14 @@ export default function PlaybookPage() {
               From screening deals to a submitted offer.
             </h1>
             <p className="mt-4 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
-              You&apos;ve analyzed twenty deals and offered on none. The math was
-              never the blocker — the process was. Here is the whole path,
+              You&apos;ve analyzed twenty deals and offered on none. The math
+              was never the blocker — the process was. Here is the whole path,
               written down: five steps, one action each, scripts included.
             </p>
-            <nav aria-label="Playbook steps" className="mt-6 flex flex-wrap gap-2">
+            <nav
+              aria-label="Playbook steps"
+              className="mt-6 flex flex-wrap gap-2"
+            >
               {STEPS.map((s, i) => (
                 <a
                   key={s.id}
@@ -161,7 +175,11 @@ export default function PlaybookPage() {
 
         <article className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
           {STEPS.map((step) => (
-            <section key={step.id} id={step.id} className="mb-12 scroll-mt-24 sm:mb-16">
+            <section
+              key={step.id}
+              id={step.id}
+              className="mb-12 scroll-mt-24 sm:mb-16"
+            >
               <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
                 {step.kicker}
               </p>
@@ -169,25 +187,35 @@ export default function PlaybookPage() {
                 {step.title}
               </h2>
               {step.paragraphs.map((p) => (
-                <p key={p.slice(0, 40)} className="mt-4 text-[15px] leading-relaxed text-foreground/90">
+                <p
+                  key={p.slice(0, 40)}
+                  className="mt-4 text-[15px] leading-relaxed text-foreground/90"
+                >
                   {p}
                 </p>
               ))}
               <p className="mt-4 inline-flex items-start gap-2 rounded-xl border border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] px-4 py-3 text-sm font-semibold text-foreground">
-                <CheckCircle2 aria-hidden className="mt-0.5 size-4 shrink-0 text-[var(--brand-green)]" />
+                <CheckCircle2
+                  aria-hidden
+                  className="mt-0.5 size-4 shrink-0 text-[var(--brand-green)]"
+                />
                 <span>Do this now: {step.action}</span>
               </p>
             </section>
           ))}
 
           <div className="space-y-6 border-t border-border pt-10">
-            <SeoAnalyzerCta context="your first candidate through the playbook" utmSource="playbook" />
+            <SeoAnalyzerCta
+              context="your first candidate through the playbook"
+              utmSource="playbook"
+            />
             <LeadMagnetInline source="playbook" />
             <div className="rounded-2xl border border-border bg-card p-5 text-center sm:p-6">
               <p className="text-sm leading-relaxed text-muted-foreground">
                 Want the reps to be easier? Pro runs the whole playbook on every
-                address — Buy Box verdict, downside test, Offer Ceiling, lender-facing
-                report{getMarketingOfferConfig().guaranteeEnabled
+                address — Buy Box verdict, downside test, Offer Ceiling,
+                lender-facing report
+                {getMarketingOfferConfig().guaranteeEnabled
                   ? " — and the risk is ours, not yours."
                   : "."}
               </p>

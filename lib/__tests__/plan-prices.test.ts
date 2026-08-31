@@ -1,5 +1,13 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { PAID_PLAN_SLUGS, getAllPlanPriceIds, getPrimaryPlanPriceId, isAgentProConfigured, planSlugFromPriceId, type PaidPlanSlug } from "@/lib/stripe/plan-prices";
+import { afterEach, describe, expect, it } from "vitest";
+import {
+  PAID_PLAN_SLUGS,
+  getAllPlanPriceIds,
+  getCheckoutPlanPriceId,
+  getPrimaryPlanPriceId,
+  isAgentProConfigured,
+  planSlugFromPriceId,
+  type PaidPlanSlug,
+} from "@/lib/stripe/plan-prices";
 
 const ORIG_MONTHLY = process.env.STRIPE_PRICE_PRO_MONTHLY;
 const ORIG_ANNUAL = process.env.STRIPE_PRICE_PRO_ANNUAL;
@@ -34,7 +42,11 @@ describe("plan-prices resolution", () => {
     // Webhook resolution recognizes BOTH.
     expect(planSlugFromPriceId("price_2999")).toBe("pro_monthly");
     expect(planSlugFromPriceId("price_grandfathered_20")).toBe("pro_monthly");
-    expect(getAllPlanPriceIds("pro_monthly")).toEqual(["price_2999", "price_grandfathered_20"]);
+    expect(getAllPlanPriceIds("pro_monthly")).toEqual([
+      "price_2999",
+      "price_grandfathered_20",
+    ]);
+    expect(getCheckoutPlanPriceId("pro_monthly")).toBe("price_2999");
   });
 
   it("trims whitespace and ignores empty entries", () => {
@@ -51,17 +63,28 @@ describe("plan-prices resolution", () => {
     expect(planSlugFromPriceId("price_anything")).toBeNull();
     expect(planSlugFromPriceId(null)).toBeNull();
   });
+
+  it("disables the exact requested cadence instead of falling back across cadence or storage", () => {
+    setEnv("price_month", undefined);
+
+    expect(getCheckoutPlanPriceId("pro_monthly")).toBe("price_month");
+    expect(getCheckoutPlanPriceId("pro_annual")).toBeNull();
+  });
 });
 
 describe("agent pro slugs (2026-08 tier)", () => {
-  const AGENT_ENV = ["STRIPE_PRICE_AGENT_PRO_MONTHLY", "STRIPE_PRICE_AGENT_PRO_ANNUAL"] as const;
+  const AGENT_ENV = [
+    "STRIPE_PRICE_AGENT_PRO_MONTHLY",
+    "STRIPE_PRICE_AGENT_PRO_ANNUAL",
+  ] as const;
   afterEach(() => {
     for (const k of AGENT_ENV) delete process.env[k];
     delete process.env.TRUECAP_AGENT_PRO_RELEASED;
   });
 
   it("planSlugFromPriceId resolves agent prices — the incident-class resolver must know every tier", () => {
-    process.env.STRIPE_PRICE_AGENT_PRO_MONTHLY = "price_agent_59,price_agent_legacy";
+    process.env.STRIPE_PRICE_AGENT_PRO_MONTHLY =
+      "price_agent_59,price_agent_legacy";
     process.env.STRIPE_PRICE_AGENT_PRO_ANNUAL = "price_agent_590";
     expect(planSlugFromPriceId("price_agent_59")).toBe("agent_pro_monthly");
     expect(planSlugFromPriceId("price_agent_legacy")).toBe("agent_pro_monthly");
@@ -92,5 +115,13 @@ describe("agent pro slugs (2026-08 tier)", () => {
       isAgentProConfigured(),
       "a stale release flag must not delist a configured, selling tier",
     ).toBe(true);
+  });
+
+  it("does not sell Agent annual through monthly configuration or a legacy mapping", () => {
+    process.env.STRIPE_PRICE_AGENT_PRO_MONTHLY = "price_agent_59";
+    delete process.env.STRIPE_PRICE_AGENT_PRO_ANNUAL;
+
+    expect(isAgentProConfigured()).toBe(true);
+    expect(getCheckoutPlanPriceId("agent_pro_annual")).toBeNull();
   });
 });

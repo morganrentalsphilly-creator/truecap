@@ -19,7 +19,10 @@ import {
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
-import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-faq";
+import {
+  ComparisonFaq,
+  type FaqItem,
+} from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
@@ -41,29 +44,111 @@ export const metadata: Metadata = {
       "Baselane is rental banking + bookkeeping after closing. TrueCap underwrites the deal before. Different stages.",
     url: "/vs/baselane",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs Baselane" }],
+    images: [
+      {
+        url: "/home.jpg",
+        width: 1200,
+        height: 630,
+        alt: "TrueCap vs Baselane",
+      },
+    ],
   },
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
 type Verdict = "truecap" | "baselane" | "tie";
-type Row = { feature: string; truecap: string; baselane: string; winner: Verdict };
+type Row = {
+  feature: string;
+  truecap: string;
+  baselane: string;
+  winner: Verdict;
+};
 
 const MATRIX: Row[] = [
-  { feature: "Lifecycle stage", truecap: "Pre-purchase — underwrite the deal", baselane: "Post-purchase — banking + bookkeeping + ops", winner: "tie" },
-  { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", baselane: "Not modeled", winner: "truecap" },
-  { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", baselane: "Not modeled", winner: "truecap" },
-  { feature: "Secondary Screening Index", truecap: "Free — 0-100 triage score + factor breakdown", baselane: "Not applicable", winner: "truecap" },
-  { feature: "Sensitivity grid", truecap: "Pro — rent ±10%, vacancy ±5pp, rate ±1pp", baselane: "Not modeled", winner: "truecap" },
-  { feature: "Rental business banking", truecap: "No", baselane: "Yes — FDIC-insured business checking", winner: "baselane" },
-  { feature: "Auto-categorized expenses", truecap: "No", baselane: "Yes — synced with bank feed", winner: "baselane" },
-  { feature: "Schedule E P&L reports", truecap: "Forward projection only", baselane: "Yes — actuals from bank feed", winner: "baselane" },
-  { feature: "Rent collection (ACH)", truecap: "No", baselane: "Yes — ACH free", winner: "baselane" },
-  { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", baselane: "Not applicable", winner: "truecap" },
-  { feature: "Pricing (entry tier)", truecap: "Free core; paid Pro — see live pricing", baselane: "Banking + bookkeeping free; advanced ~$22/mo (as of 2026)", winner: "tie" },
-  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", baselane: "Yes — banking + basic bookkeeping", winner: "tie" },
-  { feature: "Shareable read-only deal link", truecap: "Free — read-only public link; Pro adds co-branding", baselane: "Not the use case", winner: "truecap" },
-  { feature: "PDF deal report", truecap: "Included with Pro", baselane: "Schedule E reports for tax filing", winner: "tie" },
+  {
+    feature: "Lifecycle stage",
+    truecap: "Pre-purchase — underwrite the deal",
+    baselane: "Post-purchase — banking + bookkeeping + ops",
+    winner: "tie",
+  },
+  {
+    feature: "Cap rate / CoC / DSCR analysis",
+    truecap: "Yes — full engine, free tier",
+    baselane: "Not modeled",
+    winner: "truecap",
+  },
+  {
+    feature: "10-year projection",
+    truecap: "Pro — rent + expense + appreciation",
+    baselane: "Not modeled",
+    winner: "truecap",
+  },
+  {
+    feature: "Secondary Screening Index",
+    truecap: "Free — 0-100 triage score + factor breakdown",
+    baselane: "Not applicable",
+    winner: "truecap",
+  },
+  {
+    feature: "Sensitivity grid",
+    truecap: "Pro — rent ±10%, vacancy ±5pp, rate ±1pp",
+    baselane: "Not modeled",
+    winner: "truecap",
+  },
+  {
+    feature: "Rental business banking",
+    truecap: "No",
+    baselane: "Yes — FDIC-insured business checking",
+    winner: "baselane",
+  },
+  {
+    feature: "Auto-categorized expenses",
+    truecap: "No",
+    baselane: "Yes — synced with bank feed",
+    winner: "baselane",
+  },
+  {
+    feature: "Schedule E P&L reports",
+    truecap: "Forward projection only",
+    baselane: "Yes — actuals from bank feed",
+    winner: "baselane",
+  },
+  {
+    feature: "Rent collection (ACH)",
+    truecap: "No",
+    baselane: "Yes — ACH free",
+    winner: "baselane",
+  },
+  {
+    feature: "Starting values (rent/rate/tax)",
+    truecap: "HUD rent + FRED rate + manual local property tax",
+    baselane: "Not applicable",
+    winner: "truecap",
+  },
+  {
+    feature: "Pricing (entry tier)",
+    truecap: "Free core; paid Pro — see live pricing",
+    baselane: "Banking + bookkeeping free; advanced ~$22/mo (as of 2026)",
+    winner: "tie",
+  },
+  {
+    feature: "Free tier",
+    truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
+    baselane: "Yes — banking + basic bookkeeping",
+    winner: "tie",
+  },
+  {
+    feature: "Shareable read-only deal link",
+    truecap: "Free — read-only public link; Pro adds co-branding",
+    baselane: "Not the use case",
+    winner: "truecap",
+  },
+  {
+    feature: "PDF deal report",
+    truecap: "Included with Pro",
+    baselane: "Schedule E reports for tax filing",
+    winner: "tie",
+  },
 ];
 
 export default function VsBaselanePage() {
@@ -85,7 +170,10 @@ export default function VsBaselanePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <VsBreadcrumbSchema vsPath="/vs/baselane" pageName="TrueCap vs Baselane" />
+      <VsBreadcrumbSchema
+        vsPath="/vs/baselane"
+        pageName="TrueCap vs Baselane"
+      />
       <main id="main" className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-2">
           <Link
@@ -104,15 +192,20 @@ export default function VsBaselanePage() {
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
             TrueCap vs Baselane:{" "}
-            <span className="text-primary">underwrite before, bank + book after</span>
+            <span className="text-primary">
+              underwrite before, bank + book after
+            </span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Baselane is a rental-property banking + bookkeeping + rent collection platform — FDIC-insured business banking, auto-categorized expenses, Schedule E reports, ACH rent collection. TrueCap is a pre-purchase underwriting calculator that helps screen an acquisition. We don&apos;t compete; we cover different halves of the rental lifecycle.
+            Baselane is a rental-property banking + bookkeeping + rent
+            collection platform — FDIC-insured business banking,
+            auto-categorized expenses, Schedule E reports, ACH rent collection.
+            TrueCap is a pre-purchase underwriting calculator that helps screen
+            an acquisition. We don&apos;t compete; we cover different halves of
+            the rental lifecycle.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <ScrollToFormButton
-              className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5"
-            >
+            <ScrollToFormButton className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">
               <Calculator className="size-4" />
               Run a deal — 60 seconds
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
@@ -140,10 +233,21 @@ export default function VsBaselanePage() {
                 Use TrueCap when
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
-                <li>You&apos;re evaluating a property before making an offer.</li>
-                <li>You want a 10-year planning projection for cash flow and equity.</li>
-                <li>You want standardized economics and rule-fit context to compare 2-3 deals side-by-side.</li>
-                <li>You want source-labeled assumptions for a partner review, with inputs independently verified.</li>
+                <li>
+                  You&apos;re evaluating a property before making an offer.
+                </li>
+                <li>
+                  You want a 10-year planning projection for cash flow and
+                  equity.
+                </li>
+                <li>
+                  You want standardized economics and rule-fit context to
+                  compare 2-3 deals side-by-side.
+                </li>
+                <li>
+                  You want source-labeled assumptions for a partner review, with
+                  inputs independently verified.
+                </li>
               </ul>
             </div>
             <div>
@@ -152,9 +256,18 @@ export default function VsBaselanePage() {
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>You own rentals and want one bank account per property.</li>
-                <li>You want auto-categorized expense tracking + Schedule E reports.</li>
-                <li>You want online rent collection (ACH free, no separate platform).</li>
-                <li>You&apos;re consolidating QuickBooks + Stessa + a checking account into one tool.</li>
+                <li>
+                  You want auto-categorized expense tracking + Schedule E
+                  reports.
+                </li>
+                <li>
+                  You want online rent collection (ACH free, no separate
+                  platform).
+                </li>
+                <li>
+                  You&apos;re consolidating QuickBooks + Stessa + a checking
+                  account into one tool.
+                </li>
               </ul>
             </div>
           </div>
@@ -166,7 +279,8 @@ export default function VsBaselanePage() {
             Feature-by-feature
           </h2>
           <p className="text-base text-muted-foreground mb-6 leading-relaxed">
-            Side-by-side on every dimension that matters for a comparison-shopping investor.
+            Side-by-side on every dimension that matters for a
+            comparison-shopping investor.
           </p>
           <div className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
@@ -185,7 +299,10 @@ export default function VsBaselanePage() {
               </thead>
               <tbody>
                 {MATRIX.map((row) => (
-                  <tr key={row.feature} className="border-t border-border align-top">
+                  <tr
+                    key={row.feature}
+                    className="border-t border-border align-top"
+                  >
                     <td className="py-3 px-3 text-sm font-semibold text-foreground">
                       <div className="flex items-center gap-2">
                         <WinnerBadge winner={row.winner} side="row" />
@@ -210,9 +327,14 @@ export default function VsBaselanePage() {
             </table>
           </div>
           <p className="mt-3 text-[11px] text-muted-foreground">
-            Baselane details based on publicly available product info as of 2026.
-            See{" "}
-            <a href="https://baselane.com" target="_blank" rel="noopener" className="underline">
+            Baselane details based on publicly available product info as of
+            2026. See{" "}
+            <a
+              href="https://baselane.com"
+              target="_blank"
+              rel="noopener"
+              className="underline"
+            >
               baselane.com
             </a>{" "}
             for their current state.
@@ -229,31 +351,48 @@ export default function VsBaselanePage() {
               <strong>Source the deal.</strong> Zillow, MLS, off-market.
             </li>
             <li>
-              <strong>Underwrite in TrueCap.</strong> Address auto-fills HUD rent, FRED rate, state tax. Check cap rate, DSCR, cash flow. Save the deal.
+              <strong>Underwrite in TrueCap.</strong> Start with editable HUD
+              rent and FRED rate benchmarks, then enter a local property-tax
+              bill or reviewed rate. Check cap rate, DSCR, and cash flow. Save
+              the deal.
             </li>
             <li>
-              <strong>Close the property.</strong> Open a Baselane account for the new property — banking + a dedicated checking account.
+              <strong>Close the property.</strong> Open a Baselane account for
+              the new property — banking + a dedicated checking account.
             </li>
             <li>
-              <strong>Operate in Baselane.</strong> Collect rent via ACH; the bank feed auto-categorizes mortgage, taxes, insurance, repairs. Schedule E builds itself.
+              <strong>Operate in Baselane.</strong> Collect rent via ACH; the
+              bank feed auto-categorizes mortgage, taxes, insurance, repairs.
+              Schedule E builds itself.
             </li>
             <li>
-              <strong>Annual tax time.</strong> Pull the Schedule E report from Baselane; pass to your CPA. Re-run the original TrueCap analysis with actual numbers to see how it&apos;s tracking vs projection.
+              <strong>Annual tax time.</strong> Pull the Schedule E report from
+              Baselane; pass to your CPA. Re-run the original TrueCap analysis
+              with actual numbers to see how it&apos;s tracking vs projection.
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Curious about the underwriting half on its own? Start with the free{" "}
-            <Link href="/tools/mortgage-payment-calculator" className="font-semibold text-primary hover:underline">
+            <Link
+              href="/tools/mortgage-payment-calculator"
+              className="font-semibold text-primary hover:underline"
+            >
               mortgage payment calculator
             </Link>{" "}
             to size the PITI that Baselane&apos;s bank feed will later
             categorize, then run the full{" "}
-            <Link href="/" className="font-semibold text-primary hover:underline">
+            <Link
+              href="/"
+              className="font-semibold text-primary hover:underline"
+            >
               TrueCap analyzer
             </Link>{" "}
             for the cap rate, DSCR, and cash flow that sit on top of it. Our
             guide on{" "}
-            <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">
+            <Link
+              href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
+              className="font-semibold text-primary hover:underline"
+            >
               60-second underwriting
             </Link>{" "}
             walks through the workflow end-to-end.
@@ -270,8 +409,8 @@ export default function VsBaselanePage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro adds 10-year cash-flow and equity projections, sensitivity,
-            Offer Ceiling, co-branded share links, and PDF reports with Pro; see live pricing for current terms.
-            No card to start.
+            Offer Ceiling, co-branded share links, and PDF reports with Pro; see
+            live pricing for current terms. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -293,11 +432,26 @@ export default function VsBaselanePage() {
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}
-          <Link href="/vs/stessa" className="font-bold text-foreground hover:underline">TrueCap vs Stessa</Link>
+          <Link
+            href="/vs/stessa"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs Stessa
+          </Link>
           {" · "}
-          <Link href="/vs/avail" className="font-bold text-foreground hover:underline">TrueCap vs Avail</Link>
+          <Link
+            href="/vs/avail"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs Avail
+          </Link>
           {" · "}
-          <Link href="/vs/rentredi" className="font-bold text-foreground hover:underline">TrueCap vs RentRedi</Link>
+          <Link
+            href="/vs/rentredi"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs RentRedi
+          </Link>
         </footer>
       </main>
       <SiteFooter />
@@ -311,7 +465,10 @@ const BASELANE_FAQ: FaqItem[] = [
     question: "Is TrueCap a Baselane alternative?",
     answer: (
       <>
-        No — different stages. Baselane is post-purchase banking + bookkeeping for properties you own. TrueCap is pre-purchase underwriting for properties you&apos;re considering buying. Most landlords end up using both.
+        No — different stages. Baselane is post-purchase banking + bookkeeping
+        for properties you own. TrueCap is pre-purchase underwriting for
+        properties you&apos;re considering buying. Most landlords end up using
+        both.
       </>
     ),
     plainTextAnswer:
@@ -321,7 +478,10 @@ const BASELANE_FAQ: FaqItem[] = [
     question: "Is Baselane FDIC-insured?",
     answer: (
       <>
-        Yes. Baselane partners with FDIC-insured banks (Thread Bank and Blue Ridge Bank as of 2026) for deposit insurance up to standard FDIC limits ($250k per depositor per bank). They&apos;re not a chartered bank themselves — they&apos;re a fintech with bank partners.
+        Yes. Baselane partners with FDIC-insured banks (Thread Bank and Blue
+        Ridge Bank as of 2026) for deposit insurance up to standard FDIC limits
+        ($250k per depositor per bank). They&apos;re not a chartered bank
+        themselves — they&apos;re a fintech with bank partners.
       </>
     ),
     plainTextAnswer:
@@ -331,7 +491,12 @@ const BASELANE_FAQ: FaqItem[] = [
     question: "Should I use Baselane or Stessa?",
     answer: (
       <>
-        Baselane bundles banking + bookkeeping + rent collection. Stessa is more focused on bookkeeping + financial reporting (you connect your existing bank). If you want a dedicated business checking account per property AND simplified bookkeeping, Baselane is the more integrated choice. If you already have business banking set up and just want bookkeeping, Stessa works. Both have free tiers — try both.
+        Baselane bundles banking + bookkeeping + rent collection. Stessa is more
+        focused on bookkeeping + financial reporting (you connect your existing
+        bank). If you want a dedicated business checking account per property
+        AND simplified bookkeeping, Baselane is the more integrated choice. If
+        you already have business banking set up and just want bookkeeping,
+        Stessa works. Both have free tiers — try both.
       </>
     ),
     plainTextAnswer:
@@ -341,7 +506,11 @@ const BASELANE_FAQ: FaqItem[] = [
     question: "Does TrueCap track actual expenses like Baselane?",
     answer: (
       <>
-        No. TrueCap models projected expenses for underwriting (taxes, insurance, vacancy, mgmt %, maintenance, capex). It doesn&apos;t connect to your bank to track actuals. That&apos;s Baselane (or Stessa) territory. Building accounting into TrueCap would dilute the underwriting focus.
+        No. TrueCap models projected expenses for underwriting (taxes,
+        insurance, vacancy, mgmt %, maintenance, capex). It doesn&apos;t connect
+        to your bank to track actuals. That&apos;s Baselane (or Stessa)
+        territory. Building accounting into TrueCap would dilute the
+        underwriting focus.
       </>
     ),
     plainTextAnswer:
@@ -351,7 +520,10 @@ const BASELANE_FAQ: FaqItem[] = [
     question: "Can I share a TrueCap analysis with my CPA via Baselane?",
     answer: (
       <>
-        Not directly — they&apos;re separate tools. TrueCap generates a free read-only share link and includes PDFs with Pro. You can provide the review snapshot alongside Baselane&apos;s historical reports, subject to your CPA&apos;s requested documentation.
+        Not directly — they&apos;re separate tools. TrueCap generates a free
+        read-only share link and includes PDFs with Pro. You can provide the
+        review snapshot alongside Baselane&apos;s historical reports, subject to
+        your CPA&apos;s requested documentation.
       </>
     ),
     plainTextAnswer:
@@ -368,10 +540,14 @@ function WinnerBadge({
 }) {
   if (side === "row") return null;
   if (winner === "tie") {
-    return <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />;
+    return (
+      <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />
+    );
   }
   if (winner === side) {
-    return <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />;
+    return (
+      <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />
+    );
   }
   return <X className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/50" />;
 }

@@ -5,7 +5,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Calculator } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
@@ -41,7 +41,12 @@ export const metadata: Metadata = {
     modifiedTime: MODIFIED_AT,
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: TITLE }],
   },
-  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION, images: ["/home.jpg"] },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: ["/home.jpg"],
+  },
 };
 
 const TOOLS = [
@@ -55,13 +60,14 @@ const TOOLS = [
       "Explicit 'owner-occupant' property type with per-unit setup",
       "Mark which unit you live in — TrueCap excludes it from rent income",
       "FHA 3.5%-down financing configuration",
-      "Effective-rent-saved metric (PITI minus rental unit income)"
+      "Effective-rent-saved metric (PITI minus rental unit income)",
     ],
     freeGates: [
       "10-year projection with post-move-out scenario (Pro)",
-      "General illustrative tax view (Pro; mixed-use allocation is not modeled)"
+      "General illustrative tax view (Pro; mixed-use allocation is not modeled)",
     ],
-    pickIf: "You want a calculator built for house-hacking, not a multifamily calculator you adjust manually.",
+    pickIf:
+      "You want a calculator built for house-hacking, not a multifamily calculator you adjust manually.",
   },
   {
     rank: 2,
@@ -72,13 +78,14 @@ const TOOLS = [
     freeCovers: [
       "Standard multifamily underwriting",
       "Listing import from Zillow / Redfin",
-      "Native iOS + Android apps"
+      "Native iOS + Android apps",
     ],
     freeGates: [
       "No explicit owner-occupant unit logic — you manually exclude your unit's 'rent' from income",
-      "No effective-rent-saved metric"
+      "No effective-rent-saved metric",
     ],
-    pickIf: "You underwrite on mobile and are comfortable manually adjusting multifamily math for house-hacking.",
+    pickIf:
+      "You underwrite on mobile and are comfortable manually adjusting multifamily math for house-hacking.",
   },
   {
     rank: 3,
@@ -88,13 +95,14 @@ const TOOLS = [
     pricing: "BP Pro ~$390/yr",
     freeCovers: [
       "Dedicated house-hack calculator within BP Pro",
-      "Strong house-hacking content in the BP community + courses"
+      "Strong house-hacking content in the BP community + courses",
     ],
     freeGates: [
       "Calculator alone doesn't justify $390/yr unless you use the community",
-      "Limited mobile UX"
+      "Limited mobile UX",
     ],
-    pickIf: "You're already paying for BiggerPockets and want the bundled house-hack calculator.",
+    pickIf:
+      "You're already paying for BiggerPockets and want the bundled house-hack calculator.",
   },
   {
     rank: 4,
@@ -103,22 +111,38 @@ const TOOLS = [
     url: "/vs/excel",
     pricing: "Free (with your existing Office / Workspace)",
     freeCovers: [
-      "Total flexibility — model house-hack-into-rental transitions, unusual FHA scenarios"
+      "Total flexibility — model house-hack-into-rental transitions, unusual FHA scenarios",
     ],
     freeGates: [
       "You do all the math + scenario modeling manually",
-      "Mobile is broken at showings"
+      "Mobile is broken at showings",
     ],
-    pickIf: "You have a battle-tested house-hack model with custom FHA / VA scenarios.",
+    pickIf:
+      "You have a battle-tested house-hack model with custom FHA / VA scenarios.",
   },
 ];
 
 const FAQ_ITEMS = [
-  { q: "What makes a house-hack calculator different from a standard rental calculator?", a: "The owner-occupant unit. In a standard 2-4 unit multifamily underwrite, every unit produces rent. In a house hack, the unit you live in doesn't (you're paying 'rent' to yourself), so the income side needs to exclude that unit. TrueCap's owner-occupant property type handles this automatically. Standard rental calculators (DealCheck, BiggerPockets multifamily mode) require you to manually subtract your unit's rent from the income." },
-  { q: "What's 'effective rent saved' and why does it matter for house hacking?", a: "Your monthly housing cost as a house hacker = PITI minus rent from your rental units. That gap is your 'effective rent saved' versus a regular apartment lease. If your PITI is $2,800/month and your rental units bring in $1,900/month, your effective rent is $900/month — much less than the $1,800/month apartment you'd otherwise rent. TrueCap surfaces this metric explicitly; other calculators require you to compute it." },
-  { q: "Can I model FHA 3.5%-down financing for a house hack?", a: "Yes — TrueCap's down payment field is configurable from 0% to 100%. Set it to 3.5% for FHA, enter the lender's annual premium in the dedicated PMI / MIP field, and select the loan-life option when it applies. Include any unfinanced upfront premium in closing costs. PITI, cash flow, and the long-term projection recalculate automatically." },
-  { q: "How do I model the post-move-out scenario?", a: "Save the live-in underwrite, then create a separate full-rental scenario with your former unit rented and compare the two. TrueCap does not currently include an automatic 'year you move out' switch, so the explicit scenarios keep the assumptions honest and independently reviewable." },
-  { q: "Is house hacking still a good strategy in 2026?", a: "Math still works for the right property in the right market. Tight cash-flow margins make it tougher than 2018-2022, but with FHA 3.5% down and a 2-4 unit property where rental units cover most of PITI, the effective-rent-saved math can still beat renting an equivalent apartment by hundreds per month. Underwrite carefully — TrueCap's sensitivity grid (Pro) stress-tests rent + vacancy + rate so you don't bet on optimistic numbers." },
+  {
+    q: "What makes a house-hack calculator different from a standard rental calculator?",
+    a: "The owner-occupant unit. In a standard 2-4 unit multifamily underwrite, every unit produces rent. In a house hack, the unit you live in doesn't (you're paying 'rent' to yourself), so the income side needs to exclude that unit. TrueCap's owner-occupant property type handles this automatically. Standard rental calculators (DealCheck, BiggerPockets multifamily mode) require you to manually subtract your unit's rent from the income.",
+  },
+  {
+    q: "What's 'effective rent saved' and why does it matter for house hacking?",
+    a: "Your monthly housing cost as a house hacker = PITI minus rent from your rental units. That gap is your 'effective rent saved' versus a regular apartment lease. If your PITI is $2,800/month and your rental units bring in $1,900/month, your effective rent is $900/month — much less than the $1,800/month apartment you'd otherwise rent. TrueCap surfaces this metric explicitly; other calculators require you to compute it.",
+  },
+  {
+    q: "Can I model FHA 3.5%-down financing for a house hack?",
+    a: "Yes — TrueCap's down payment field is configurable from 0% to 100%. Set it to 3.5% for FHA, enter the lender's annual premium in the dedicated PMI / MIP field, and select the loan-life option when it applies. Include any unfinanced upfront premium in closing costs. PITI, cash flow, and the long-term projection recalculate automatically.",
+  },
+  {
+    q: "How do I model the post-move-out scenario?",
+    a: "Save the live-in underwrite, then create a separate full-rental scenario with your former unit rented and compare the two. TrueCap does not currently include an automatic 'year you move out' switch, so the explicit scenarios keep the assumptions honest and independently reviewable.",
+  },
+  {
+    q: "Is house hacking still a good strategy in 2026?",
+    a: "Math still works for the right property in the right market. Tight cash-flow margins make it tougher than 2018-2022, but with FHA 3.5% down and a 2-4 unit property where rental units cover most of PITI, the effective-rent-saved math can still beat renting an equivalent apartment by hundreds per month. Underwrite carefully — TrueCap's sensitivity grid (Pro) stress-tests rent + vacancy + rate so you don't bet on optimistic numbers.",
+  },
 ];
 
 const DECISION_LINES: Array<{ q: string; a: string }> = [
@@ -150,7 +174,12 @@ export default function BestRentalAnalysisToolForHouseHackersPost() {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
-      { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: `${siteUrl}/blog`,
+      },
       { "@type": "ListItem", position: 3, name: TITLE, item: url },
     ],
   };
@@ -178,14 +207,29 @@ export default function BestRentalAnalysisToolForHouseHackersPost() {
 
   return (
     <div className="min-h-screen bg-background">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
 
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-2">
-          <Link href="/blog" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">
+          <Link
+            href="/blog"
+            className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+          >
             ← TrueCap Blog
           </Link>
         </div>
@@ -201,19 +245,31 @@ export default function BestRentalAnalysisToolForHouseHackersPost() {
             <p className="mt-4 text-base sm:text-lg leading-relaxed text-muted-foreground">
               {DESCRIPTION}
             </p>
-            <p className="mt-4 text-xs text-muted-foreground">Published {PUBLISHED_AT}</p>
+            <p className="mt-4 text-xs text-muted-foreground">
+              Published {PUBLISHED_AT}
+            </p>
           </header>
 
           <section className="mb-10 rounded-2xl border border-border bg-card p-5 sm:p-6">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">Quick answer</h2>
-            <p className="text-sm sm:text-base leading-relaxed text-foreground" dangerouslySetInnerHTML={{ __html: `For house hackers specifically: <strong>TrueCap</strong> wins on the explicit owner-occupant property type (auto-excludes your unit from rent income), effective-rent-saved metric, and FHA-friendly down-payment configuration. <strong>DealCheck</strong> and <strong>BiggerPockets</strong> both support house hacking but require manual adjustment of the multifamily math.` }} />
+            <h2 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">
+              Quick answer
+            </h2>
+            <p
+              className="text-sm sm:text-base leading-relaxed text-foreground"
+              dangerouslySetInnerHTML={{
+                __html: `For house hackers specifically: <strong>TrueCap</strong> wins on the explicit owner-occupant property type (auto-excludes your unit from rent income), effective-rent-saved metric, and FHA-friendly down-payment configuration. <strong>DealCheck</strong> and <strong>BiggerPockets</strong> both support house hacking but require manual adjustment of the multifamily math.`,
+              }}
+            />
           </section>
 
           <div className="prose prose-neutral max-w-none prose-headings:font-extrabold prose-headings:text-foreground prose-p:text-foreground prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:text-foreground prose-li:leading-relaxed">
             <h2>The tools, ranked for house hackers</h2>
 
             {TOOLS.map((t) => (
-              <div key={t.name} className="not-prose mb-8 rounded-2xl border border-border bg-card p-5 sm:p-6">
+              <div
+                key={t.name}
+                className="not-prose mb-8 rounded-2xl border border-border bg-card p-5 sm:p-6"
+              >
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div>
                     <div className="text-[11px] font-bold uppercase tracking-widest text-primary mb-1.5">
@@ -223,13 +279,17 @@ export default function BestRentalAnalysisToolForHouseHackersPost() {
                       {t.name}
                     </h3>
                   </div>
-                  <Link href={t.url} className="shrink-0 inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline">
+                  <Link
+                    href={t.url}
+                    className="shrink-0 inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline"
+                  >
                     Deep dive
                     <ArrowUpRight className="size-3" />
                   </Link>
                 </div>
                 <p className="text-sm text-muted-foreground mb-4">
-                  <strong className="text-foreground">Pricing:</strong> {t.pricing}
+                  <strong className="text-foreground">Pricing:</strong>{" "}
+                  {t.pricing}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div>
@@ -239,7 +299,9 @@ export default function BestRentalAnalysisToolForHouseHackersPost() {
                     <ul className="space-y-1.5 text-sm text-foreground">
                       {t.freeCovers.map((p) => (
                         <li key={p} className="flex gap-2">
-                          <span className="text-[var(--brand-green)] shrink-0">+</span>
+                          <span className="text-[var(--brand-green)] shrink-0">
+                            +
+                          </span>
                           <span>{p}</span>
                         </li>
                       ))}
@@ -252,7 +314,9 @@ export default function BestRentalAnalysisToolForHouseHackersPost() {
                     <ul className="space-y-1.5 text-sm text-foreground">
                       {t.freeGates.map((p) => (
                         <li key={p} className="flex gap-2">
-                          <span className="text-muted-foreground/60 shrink-0">−</span>
+                          <span className="text-muted-foreground/60 shrink-0">
+                            −
+                          </span>
                           <span>{p}</span>
                         </li>
                       ))}
@@ -278,12 +342,22 @@ export default function BestRentalAnalysisToolForHouseHackersPost() {
             <h2>FAQ</h2>
             <div className="not-prose space-y-3">
               {FAQ_ITEMS.map((item) => (
-                <details key={item.q} className="group rounded-xl border border-border bg-card p-4 sm:p-5">
+                <details
+                  key={item.q}
+                  className="group rounded-xl border border-border bg-card p-4 sm:p-5"
+                >
                   <summary className="cursor-pointer list-none flex items-start justify-between gap-3 font-bold text-sm sm:text-base text-foreground">
                     <span>{item.q}</span>
-                    <span aria-hidden className="mt-1 size-5 shrink-0 rounded-full border border-border text-muted-foreground text-xs leading-none flex items-center justify-center transition-transform group-open:rotate-45">+</span>
+                    <span
+                      aria-hidden
+                      className="mt-1 size-5 shrink-0 rounded-full border border-border text-muted-foreground text-xs leading-none flex items-center justify-center transition-transform group-open:rotate-45"
+                    >
+                      +
+                    </span>
                   </summary>
-                  <div className="mt-3 text-sm text-muted-foreground leading-relaxed">{item.a}</div>
+                  <div className="mt-3 text-sm text-muted-foreground leading-relaxed">
+                    {item.a}
+                  </div>
                 </details>
               ))}
             </div>
@@ -295,22 +369,31 @@ export default function BestRentalAnalysisToolForHouseHackersPost() {
               underwriting, takes 60 seconds, no signup required. For a house
               hack, check whether the rented units cover the debt and what the
               deal returns on your down payment — the free{" "}
-              <Link href="/#main" className="font-semibold text-primary hover:underline">TrueCap analyzer</Link>{" "}
+              <Link
+                href="/#main"
+                className="font-semibold text-primary hover:underline"
+              >
+                TrueCap analyzer
+              </Link>{" "}
               gives you DSCR, cash-on-cash and monthly cash flow from one
               address — then follow the owner-occupied math step by step in our{" "}
-              <Link href="/blog/house-hack-underwriting-guide" className="font-semibold text-primary hover:underline">house hack underwriting guide</Link>.
-            </p>
-            <p className="not-prose">
-              <Link href="/" className="inline-flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-5 py-3 font-bold hover:opacity-90">
-                <Calculator className="w-4 h-4" />
-                Run a deal — 60 seconds
-                <ArrowUpRight className="w-4 h-4" />
+              <Link
+                href="/blog/house-hack-underwriting-guide"
+                className="font-semibold text-primary hover:underline"
+              >
+                house hack underwriting guide
               </Link>
+              .
             </p>
+            <p className="not-prose"></p>
           </div>
 
-          <div className="mt-10"><NewsletterSignup /></div>
-          <div className="mt-10"><RelatedBlogPosts currentSlug={SLUG} limit={3} /></div>
+          <div className="mt-10">
+            <NewsletterSignup />
+          </div>
+          <div className="mt-10">
+            <RelatedBlogPosts currentSlug={SLUG} limit={3} />
+          </div>
         </article>
       </main>
 

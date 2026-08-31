@@ -2,6 +2,8 @@
  * Canonical site origin for Supabase email links (confirm signup, reset password).
  * Set NEXT_PUBLIC_SITE_URL in production (e.g. https://yourdomain.com).
  */
+export const CANONICAL_SITE_URL = "https://usetruecap.com";
+
 export function getSiteUrl(): string {
   const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim();
   if (explicit) {
@@ -9,7 +11,9 @@ export function getSiteUrl(): string {
   }
   const vercel = process.env.VERCEL_URL?.trim();
   if (vercel) {
-    return vercel.startsWith("http") ? vercel.replace(/\/$/, "") : `https://${vercel.replace(/\/$/, "")}`;
+    return vercel.startsWith("http")
+      ? vercel.replace(/\/$/, "")
+      : `https://${vercel.replace(/\/$/, "")}`;
   }
   return "http://localhost:3000";
 }
@@ -46,7 +50,7 @@ export function getSiteUrl(): string {
  * /robots.txt, /feed.xml, /llms.txt and the OG image routes too, none of
  * which go through Next's metadata layer.
  */
-export const CANONICAL_HOST = "usetruecap.com";
+export const CANONICAL_HOST = new URL(CANONICAL_SITE_URL).hostname;
 
 export function isCanonicalHost(host: string | null | undefined): boolean {
   if (!host) return false;

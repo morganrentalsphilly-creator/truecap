@@ -19,6 +19,11 @@ import {
   expireSubscriptionCheckoutIntentFromWebhook,
 } from "@/lib/stripe/subscription-checkout-intent";
 import { reconcileDecisionPackRiskEvent } from "@/lib/stripe/decision-pack-risk-webhook";
+import {
+  canonicalAnalyticsEventId,
+  claimCanonicalAnalyticsEvent,
+  releaseCanonicalAnalyticsEventClaim,
+} from "@/lib/analytics/canonical-event-claim";
 
 export const runtime = "nodejs";
 
@@ -38,15 +43,24 @@ export async function POST(req: Request) {
     // request. Per CLAUDE.md §6, a missing required var fails loudly: fatal
     // Sentry alert + 500 so Stripe keeps retrying while someone fixes env,
     // instead of a silent 400 that burns the 72h retry window.
-    Sentry.captureMessage("STRIPE_WEBHOOK_SECRET missing — webhook pipeline down", {
-      level: "fatal",
-      tags: { feature: "stripe-webhook" },
-    });
-    return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
+    Sentry.captureMessage(
+      "STRIPE_WEBHOOK_SECRET missing — webhook pipeline down",
+      {
+        level: "fatal",
+        tags: { feature: "stripe-webhook" },
+      },
+    );
+    return NextResponse.json(
+      { error: "Webhook not configured" },
+      { status: 500 },
+    );
   }
 
   if (!sig) {
-    return NextResponse.json({ error: "Missing Stripe signature" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Missing Stripe signature" },
+      { status: 400 },
+    );
   }
 
   let event: Stripe.Event;
@@ -57,10 +71,12 @@ export async function POST(req: Request) {
   }
 
   const admin = createAdminSupabaseClient();
-  const { error: claimError } = await admin.from("stripe_webhook_events").insert({
-    stripe_event_id: event.id,
-    type: event.type,
-  });
+  const { error: claimError } = await admin
+    .from("stripe_webhook_events")
+    .insert({
+      stripe_event_id: event.id,
+      type: event.type,
+    });
 
   if (claimError?.code === "23505") {
     // The event row already exists. This can mean either:
@@ -88,7 +104,8 @@ export async function POST(req: Request) {
       .select("stripe_event_id");
 
     const claimColumnMissing =
-      reclaimError != null && (reclaimError.code === "42703" || reclaimError.code === "PGRST204");
+      reclaimError != null &&
+      (reclaimError.code === "42703" || reclaimError.code === "PGRST204");
 
     if (claimColumnMissing) {
       // claimed_at doesn't exist yet (migration 20260713120000 not applied).
@@ -116,7 +133,10 @@ export async function POST(req: Request) {
         tags: { feature: "stripe-webhook", stage: "claim-reclaim" },
         extra: { stripe_event_id: event.id, stripe_event_type: event.type },
       });
-      return NextResponse.json({ error: "Failed to claim event" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Failed to claim event" },
+        { status: 500 },
+      );
     } else if (!claimedRows || claimedRows.length === 0) {
       // We did not win the claim. Either the event is already processed
       // (→ 200 duplicate, Stripe should stop) or another delivery holds a
@@ -131,7 +151,10 @@ export async function POST(req: Request) {
       if (existing?.processed_at) {
         return NextResponse.json({ received: true, duplicate: true });
       }
-      return NextResponse.json({ error: "Event is already being processed" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Event is already being processed" },
+        { status: 500 },
+      );
     }
     // Claim won — fall through to retry processing.
   } else if (claimError) {
@@ -143,7 +166,10 @@ export async function POST(req: Request) {
       tags: { feature: "stripe-webhook", stage: "claim" },
       extra: { stripe_event_id: event.id, stripe_event_type: event.type },
     });
-    return NextResponse.json({ error: "Failed to record event" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to record event" },
+      { status: 500 },
+    );
   }
 
   // When a paid-event handler SKIPS syncing (a user-binding security
@@ -165,11 +191,24 @@ export async function POST(req: Request) {
         // sale logged a spurious "[billing] checkout.session.completed
         // missing customer id" ERROR from the subscription handler.
         if (session.metadata?.purpose === "one_time_pdf") {
-          console.log(`[billing] one-time PDF session ${session.id} completed — no subscription sync needed`);
           break;
         }
-        const checkoutSyncResult = await handleCheckoutSessionCompleted(admin, session);
-        syncSkippedReason = checkoutSyncResult.synced ? null : checkoutSyncResult.reason;
+        const paymentReady =
+          session.payment_status === "paid" ||
+          session.payment_status === "no_payment_required";
+        // Preserve the existing billing synchronization boundary for every
+        // completed Checkout Session. Delayed-payment methods can emit this
+        // event before funds settle, and the subscription/customer/intent
+        // handlers still need to reconcile that Stripe state. `paymentReady`
+        // gates only the canonical success event below; the later
+        // async_payment_succeeded delivery will claim and emit it once.
+        const checkoutSyncResult = await handleCheckoutSessionCompleted(
+          admin,
+          session,
+        );
+        syncSkippedReason = checkoutSyncResult.synced
+          ? null
+          : checkoutSyncResult.reason;
         const completedIntent = checkoutSyncResult.synced
           ? await completeSubscriptionCheckoutIntentFromWebhook(admin, session)
           : null;
@@ -181,14 +220,16 @@ export async function POST(req: Request) {
           ? completedIntent.pack_credit_claim_id
           : session.metadata?.checkout_intent_id
             ? null
-            : session.metadata?.pack_credit_claim_id ?? null;
+            : (session.metadata?.pack_credit_claim_id ?? null);
         if (checkoutSyncResult.synced && reservedPackCreditClaimId) {
-          const creditedUserId = completedIntent?.user_id ?? [
-            session.client_reference_id,
-            session.metadata?.user_id,
-          ].find((candidate): candidate is string =>
-            typeof candidate === "string" && SUPABASE_USER_ID_RE.test(candidate)
-          ) ?? null;
+          const creditedUserId =
+            completedIntent?.user_id ??
+            [session.client_reference_id, session.metadata?.user_id].find(
+              (candidate): candidate is string =>
+                typeof candidate === "string" &&
+                SUPABASE_USER_ID_RE.test(candidate),
+            ) ??
+            null;
           const creditUpdate = admin
             .from("one_time_pdf_purchase_claims")
             .update({
@@ -201,21 +242,26 @@ export async function POST(req: Request) {
             .eq("pro_credit_status", "eligible");
           const boundCreditUpdate = creditedUserId
             ? creditUpdate.or(
-                `user_id.eq.${creditedUserId},pro_credit_user_id.eq.${creditedUserId}`
+                `user_id.eq.${creditedUserId},pro_credit_user_id.eq.${creditedUserId}`,
               )
             : creditUpdate;
-          const { data: appliedCredit, error: creditApplyError } = await boundCreditUpdate
-            .select("id")
-            .maybeSingle();
+          const { data: appliedCredit, error: creditApplyError } =
+            await boundCreditUpdate.select("id").maybeSingle();
           if (creditApplyError) {
-            Sentry.captureMessage("Pack credit eligible→applied transition failed", {
-              level: "error",
-              tags: { feature: "billing-webhook", stage: "pack-credit-apply" },
-              extra: {
-                claim_id: reservedPackCreditClaimId,
-                database_code: creditApplyError.code ?? "unknown",
+            Sentry.captureMessage(
+              "Pack credit eligible→applied transition failed",
+              {
+                level: "error",
+                tags: {
+                  feature: "billing-webhook",
+                  stage: "pack-credit-apply",
+                },
+                extra: {
+                  claim_id: reservedPackCreditClaimId,
+                  database_code: creditApplyError.code ?? "unknown",
+                },
               },
-            });
+            );
           } else if (appliedCredit && creditedUserId) {
             await captureServerEvent({
               distinctId: creditedUserId,
@@ -226,8 +272,8 @@ export async function POST(req: Request) {
             });
           }
         }
-        // PostHog funnel event — fires once per successful checkout.
-        // `pro_subscribed` is the bottom of the conversion funnel.
+        // Canonical PostHog funnel event — fires once per successfully synced
+        // checkout. The webhook claim prevents duplicate delivery emissions.
         // distinct_id is the Supabase user.id stored in client_reference_id
         // (set by the billing action when the checkout session was created),
         // which links this event to all the anonymous browse + analyzer
@@ -237,90 +283,83 @@ export async function POST(req: Request) {
         // Analytics identity must remain the opaque Supabase UUID already
         // used by the browser provider. A Stripe customer id is payment-system
         // data and must never become PostHog's cross-session distinct id.
-        const distinctId = [
-          session.client_reference_id,
-          session.metadata?.user_id,
-        ].find((candidate): candidate is string =>
-          typeof candidate === "string" && SUPABASE_USER_ID_RE.test(candidate)
-        ) ?? null;
-        if (distinctId && checkoutSyncResult.synced) {
+        const distinctId =
+          [session.client_reference_id, session.metadata?.user_id].find(
+            (candidate): candidate is string =>
+              typeof candidate === "string" &&
+              SUPABASE_USER_ID_RE.test(candidate),
+          ) ?? null;
+        const subscriptionClaimInput = {
+          eventName: "subscription_started" as const,
+          dedupeKey: session.id,
+        };
+        let subscriptionClaim:
+          | "skipped"
+          | "claimed"
+          | "duplicate"
+          | "unavailable" = "skipped";
+        if (paymentReady && distinctId && checkoutSyncResult.synced) {
+          try {
+            subscriptionClaim = (await claimCanonicalAnalyticsEvent(
+              admin,
+              subscriptionClaimInput,
+            ))
+              ? "claimed"
+              : "duplicate";
+          } catch (error) {
+            // Telemetry storage must never turn a synchronized billing event
+            // into a Stripe retry loop. Fall through to a capture carrying a
+            // deterministic opaque PostHog UUID, which deduplicates replays.
+            subscriptionClaim = "unavailable";
+            Sentry.captureException(error, {
+              tags: { feature: "stripe-webhook", stage: "analytics-claim" },
+              extra: { stripe_event_type: event.type },
+            });
+          }
+        }
+        if (
+          distinctId &&
+          checkoutSyncResult.synced &&
+          (subscriptionClaim === "claimed" ||
+            subscriptionClaim === "unavailable")
+        ) {
           // Don't block the webhook response on PostHog — its flush is
           // awaited but capped to a few seconds by the SDK, and errors
           // are swallowed inside captureServerEvent so they can't
           // corrupt the webhook idempotency contract.
-          await captureServerEvent({
-            distinctId,
-            event: "pro_subscribed",
-            properties: {
-              plan_slug: session.metadata?.plan_slug ?? undefined,
-            },
-          });
-          await captureServerEvent({
-            distinctId,
-            event: "subscription_activated",
-            properties: {
-              plan: session.metadata?.plan_slug ?? "unknown",
-              interval: session.metadata?.plan_slug?.endsWith("_annual")
-                ? "annual"
-                : "monthly",
-              trial_granted: session.metadata?.trial_granted === "true",
-            },
-          });
-          await captureServerEvent({
+          const analyticsCaptured = await captureServerEvent({
             distinctId,
             event: "subscription_started",
+            eventId: canonicalAnalyticsEventId(
+              subscriptionClaimInput.eventName,
+              subscriptionClaimInput.dedupeKey,
+            ),
             properties: {
-              plan: session.metadata?.plan_slug ?? "unknown",
-              interval: session.metadata?.plan_slug?.endsWith("_annual")
-                ? "annual"
-                : "monthly",
-              trial_granted: session.metadata?.trial_granted === "true",
+              plan_identifier: session.metadata?.plan_slug ?? "unknown",
+              referral_source: "stripe_checkout",
             },
           });
-          await captureServerEvent({
-            distinctId,
-            event: "pro_subscription_started",
-            properties: {
-              plan_slug: session.metadata?.plan_slug ?? undefined,
-              trial_granted: session.metadata?.trial_granted === "true",
-            },
-          });
-          if (session.metadata?.trial_granted === "true") {
-            await captureServerEvent({
-              distinctId,
-              event: "pro_trial_started",
-              properties: {
-                plan_slug: session.metadata?.plan_slug ?? undefined,
-              },
-            });
-            await captureServerEvent({
-              distinctId,
-              event: "trial_started",
-              properties: {
-                plan_slug: session.metadata?.plan_slug ?? undefined,
-                attribution_source: "stripe_checkout",
-              },
-            });
-            // Trial onboarding emails (day-1 activation nudge, day-10
-            // pre-billing reminder). Dormant until LIFECYCLE_EMAILS_MODE=live;
-            // idempotent via lifecycle_email_log so webhook retries can't
-            // double-schedule; never throws.
-            if (session.metadata?.user_id) {
-              await scheduleTrialOnboardingEmails(admin, {
-                userId: session.metadata.user_id,
-                email: session.customer_details?.email,
-              });
-            }
-          } else {
-            await captureServerEvent({
-              distinctId,
-              event: "paid_conversion",
-              properties: {
-                plan_slug: session.metadata?.plan_slug ?? undefined,
-                attribution_source: "stripe_checkout",
-              },
-            });
+          if (!analyticsCaptured && subscriptionClaim === "claimed") {
+            await releaseCanonicalAnalyticsEventClaim(
+              admin,
+              subscriptionClaimInput,
+            );
           }
+        }
+        // Legacy trial onboarding is a product side effect with its own
+        // lifecycle_email_log idempotency key. Keep it independent of the
+        // optional analytics claim/capture path so telemetry failure or a
+        // duplicate analytics delivery can never suppress email scheduling.
+        if (
+          paymentReady &&
+          checkoutSyncResult.synced &&
+          session.metadata?.trial_granted === "true" &&
+          session.metadata?.user_id
+        ) {
+          await scheduleTrialOnboardingEmails(admin, {
+            userId: session.metadata.user_id,
+            email: session.customer_details?.email,
+          });
         }
         break;
       }
@@ -328,7 +367,7 @@ export async function POST(req: Request) {
         await reconcileDecisionPackRiskEvent(
           admin,
           stripe,
-          event.data.object as Stripe.Charge
+          event.data.object as Stripe.Charge,
         );
         break;
       }
@@ -338,7 +377,7 @@ export async function POST(req: Request) {
         await reconcileDecisionPackRiskEvent(
           admin,
           stripe,
-          event.data.object as Stripe.Refund
+          event.data.object as Stripe.Refund,
         );
         break;
       }
@@ -350,7 +389,7 @@ export async function POST(req: Request) {
         await reconcileDecisionPackRiskEvent(
           admin,
           stripe,
-          event.data.object as Stripe.Dispute
+          event.data.object as Stripe.Dispute,
         );
         break;
       }
@@ -371,25 +410,42 @@ export async function POST(req: Request) {
         const eventSubscription = event.data.object as Stripe.Subscription;
         let subscriptionSyncResult: SubscriptionSyncResult;
         try {
-          const freshSubscription = await stripe.subscriptions.retrieve(eventSubscription.id);
-          subscriptionSyncResult = await upsertSubscriptionFromStripe(admin, freshSubscription);
+          const freshSubscription = await stripe.subscriptions.retrieve(
+            eventSubscription.id,
+          );
+          subscriptionSyncResult = await upsertSubscriptionFromStripe(
+            admin,
+            freshSubscription,
+          );
         } catch (err) {
           const stripeCode = (err as { code?: string } | null)?.code;
           if (stripeCode !== "resource_missing") throw err;
           // The subscription no longer exists in Stripe — treat as deleted.
-          subscriptionSyncResult = await markSubscriptionCanceled(admin, eventSubscription);
+          subscriptionSyncResult = await markSubscriptionCanceled(
+            admin,
+            eventSubscription,
+          );
         }
-        syncSkippedReason = subscriptionSyncResult.synced ? null : subscriptionSyncResult.reason;
+        syncSkippedReason = subscriptionSyncResult.synced
+          ? null
+          : subscriptionSyncResult.reason;
         break;
       }
       case "customer.subscription.deleted": {
         const cancelledSub = event.data.object as Stripe.Subscription;
-        const cancelSyncResult = await markSubscriptionCanceled(admin, cancelledSub);
-        syncSkippedReason = cancelSyncResult.synced ? null : cancelSyncResult.reason;
-        const cancelDistinctId = [cancelledSub.metadata?.user_id].find(
-          (candidate): candidate is string =>
-            typeof candidate === "string" && SUPABASE_USER_ID_RE.test(candidate)
-        ) ?? null;
+        const cancelSyncResult = await markSubscriptionCanceled(
+          admin,
+          cancelledSub,
+        );
+        syncSkippedReason = cancelSyncResult.synced
+          ? null
+          : cancelSyncResult.reason;
+        const cancelDistinctId =
+          [cancelledSub.metadata?.user_id].find(
+            (candidate): candidate is string =>
+              typeof candidate === "string" &&
+              SUPABASE_USER_ID_RE.test(candidate),
+          ) ?? null;
         if (cancelDistinctId) {
           await captureServerEvent({
             distinctId: cancelDistinctId,
@@ -408,17 +464,22 @@ export async function POST(req: Request) {
       case "invoice.payment_action_required": {
         const invoiceSyncResult = await upsertSubscriptionFromInvoice(
           admin,
-          event.data.object as Stripe.Invoice
+          event.data.object as Stripe.Invoice,
         );
-        syncSkippedReason = invoiceSyncResult.synced ? null : invoiceSyncResult.reason;
+        syncSkippedReason = invoiceSyncResult.synced
+          ? null
+          : invoiceSyncResult.reason;
         break;
       }
       case "invoice_payment.paid": {
-        const invoicePaymentSyncResult = await upsertSubscriptionFromInvoicePayment(
-          admin,
-          event.data.object as Stripe.InvoicePayment
-        );
-        syncSkippedReason = invoicePaymentSyncResult.synced ? null : invoicePaymentSyncResult.reason;
+        const invoicePaymentSyncResult =
+          await upsertSubscriptionFromInvoicePayment(
+            admin,
+            event.data.object as Stripe.InvoicePayment,
+          );
+        syncSkippedReason = invoicePaymentSyncResult.synced
+          ? null
+          : invoicePaymentSyncResult.reason;
         break;
       }
       case "checkout.session.expired": {
@@ -437,12 +498,12 @@ export async function POST(req: Request) {
         }
         await expireSubscriptionCheckoutIntentFromWebhook(admin, session);
         // PostHog event so the funnel shows the drop-off.
-        const abandonDistinctId = [
-          session.client_reference_id,
-          session.metadata?.user_id,
-        ].find((candidate): candidate is string =>
-          typeof candidate === "string" && SUPABASE_USER_ID_RE.test(candidate)
-        ) ?? null;
+        const abandonDistinctId =
+          [session.client_reference_id, session.metadata?.user_id].find(
+            (candidate): candidate is string =>
+              typeof candidate === "string" &&
+              SUPABASE_USER_ID_RE.test(candidate),
+          ) ?? null;
         if (abandonDistinctId) {
           await captureServerEvent({
             distinctId: abandonDistinctId,
@@ -470,7 +531,9 @@ export async function POST(req: Request) {
       .from("stripe_webhook_events")
       .update({
         processed_at: new Date().toISOString(),
-        error_message: syncSkippedReason ? `skipped: ${syncSkippedReason}` : null,
+        error_message: syncSkippedReason
+          ? `skipped: ${syncSkippedReason}`
+          : null,
       })
       .eq("stripe_event_id", event.id);
     if (bookkeepingError) {
@@ -478,7 +541,10 @@ export async function POST(req: Request) {
         tags: { feature: "stripe-webhook", stage: "processed-at-update" },
         extra: { stripe_event_id: event.id, stripe_event_type: event.type },
       });
-      return NextResponse.json({ error: "Failed to record processing result" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Failed to record processing result" },
+        { status: 500 },
+      );
     }
   } catch (e) {
     // Webhook handler failure — a real risk for subscription state
@@ -524,7 +590,10 @@ export async function POST(req: Request) {
         extra: { stripe_event_id: event.id, stripe_event_type: event.type },
       });
     }
-    return NextResponse.json({ error: "Webhook handler failed" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Webhook handler failed" },
+      { status: 500 },
+    );
   }
 
   return NextResponse.json({ received: true });

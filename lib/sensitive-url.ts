@@ -14,19 +14,74 @@ export const SENSITIVE_QUERY_PARAMETER_NAMES = Object.freeze([
   "id_token",
   "token_hash",
   "auth_token",
+  "user_id",
+  "owner_id",
+  "deal_id",
+  "customer_id",
+  "subscription_id",
+  // Private workspace/search locators. A dashboard search may be a street
+  // address or user-authored deal label; savedDeal is an account-owned UUID;
+  // next can nest either value inside an auth return path.
+  "q",
+  "savedDeal",
+  "next",
+  "email",
+  "phone",
+  "listing",
+  "listing_url",
+  "listingUrl",
+  "purchasePrice",
+  "monthlyRent",
+  "interestRate",
+  "propertyTaxPct",
+  "downPayment",
+  "downPaymentPct",
+  "price",
+  "rent",
+  "beds",
+  "rate",
+  "tax",
+  "address",
   "code",
 ] as const);
 
 const SENSITIVE_QUERY_PARAMETER_SET = new Set<string>(
-  SENSITIVE_QUERY_PARAMETER_NAMES.map((name) => name.toLowerCase())
+  SENSITIVE_QUERY_PARAMETER_NAMES.map((name) => name.toLowerCase()),
 );
 
 /** Stripe Checkout Session ids are bearer-like even when embedded in a path. */
 const STRIPE_CHECKOUT_SESSION_PATTERN = /\bcs_(?:test|live)_[A-Za-z0-9_]+\b/gi;
 
+/** Database UUIDs in private workspace paths are property/account locators. */
+const UUID_PATH_SEGMENT_PATTERN =
+  /(\/)[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}(?=\/|[?#\s]|$)/gi;
+
 /** Shared snapshots and bearer-token pages must never use DOM autocapture. */
 export const SENSITIVE_PUBLIC_SHARE_ROUTE_PATTERN =
-  /\/(?:d|s|portal)\/[^/?#\s]+|\/embed\/brand\/[^/?#\s]+/i;
+  /\/(?:d|s|portal)\/[^/?#\s]+|\/embed(?:\/|[?#\s]|$)/i;
+
+/** True when a location contains any query value that must not be visible to
+ * an arbitrary third-party script (GTM containers can read location directly,
+ * outside every analytics before-send hook). */
+export function hasSensitiveQueryParameter(value: string): boolean {
+  try {
+    const parsed = new URL(value, "https://truecap.invalid");
+    return Array.from(parsed.searchParams.keys()).some((key) =>
+      SENSITIVE_QUERY_PARAMETER_SET.has(key.toLowerCase()),
+    );
+  } catch {
+    // A malformed URL cannot be proven clean. This predicate controls whether
+    // third-party code loads, so fail privacy-first.
+    return value.includes("?");
+  }
+}
+
+export function isSensitiveTelemetryLocation(value: string): boolean {
+  return (
+    SENSITIVE_PUBLIC_SHARE_ROUTE_PATTERN.test(value) ||
+    hasSensitiveQueryParameter(value)
+  );
+}
 
 /**
  * Once a document has rendered a sensitive public route, third-party scripts
@@ -34,10 +89,10 @@ export const SENSITIVE_PUBLIC_SHARE_ROUTE_PATTERN =
  * unloaded before browser-history listeners observe a later route change.
  */
 export function shouldKeepThirdPartyTelemetryDisabled(
-  pathname: string,
-  wasDisabled: boolean
+  location: string,
+  wasDisabled: boolean,
 ): boolean {
-  return wasDisabled || SENSITIVE_PUBLIC_SHARE_ROUTE_PATTERN.test(pathname);
+  return wasDisabled || isSensitiveTelemetryLocation(location);
 }
 
 /**
@@ -59,6 +114,10 @@ const SENSITIVE_ROUTE_SEGMENTS = Object.freeze([
     replacement: "/s/[token]",
   },
   {
+    pattern: /\/portal\/[^/?#\s]+\/d\/[^/?#\s]+/gi,
+    replacement: "/portal/[token]/d/[deal]",
+  },
+  {
     pattern: /\/portal\/[^/?#\s]+/gi,
     replacement: "/portal/[token]",
   },
@@ -66,17 +125,21 @@ const SENSITIVE_ROUTE_SEGMENTS = Object.freeze([
     pattern: /\/embed\/brand\/[^/?#\s]+/gi,
     replacement: "/embed/brand/[token]",
   },
+  {
+    pattern: /\/dashboard\/saved-analyses\/[^/?#\s]+/gi,
+    replacement: "/dashboard/saved-analyses/[deal]",
+  },
 ] as const);
 
 export function redactSensitiveOpaqueIdentifiers(value: string): string {
   let sanitized = value.replace(
     STRIPE_CHECKOUT_SESSION_PATTERN,
-    "cs_[redacted]"
+    "cs_[redacted]",
   );
   for (const { pattern, replacement } of SENSITIVE_ROUTE_SEGMENTS) {
     sanitized = sanitized.replace(pattern, replacement);
   }
-  return sanitized;
+  return sanitized.replace(UUID_PATH_SEGMENT_PATTERN, "$1[id]");
 }
 
 function removeSensitiveParameters(params: URLSearchParams): void {
@@ -108,7 +171,7 @@ export function sanitizeSensitiveUrl(value: string): string {
     if (isAbsolute) return redactSensitiveOpaqueIdentifiers(parsed.toString());
     if (isProtocolRelative) {
       return redactSensitiveOpaqueIdentifiers(
-        `//${parsed.host}${parsed.pathname}${parsed.search}${parsed.hash}`
+        `//${parsed.host}${parsed.pathname}${parsed.search}${parsed.hash}`,
       );
     }
     if (isQueryOnly) {
@@ -116,11 +179,11 @@ export function sanitizeSensitiveUrl(value: string): string {
     }
     if (isPathLike) {
       return redactSensitiveOpaqueIdentifiers(
-        `${parsed.pathname}${parsed.search}${parsed.hash}`
+        `${parsed.pathname}${parsed.search}${parsed.hash}`,
       );
     }
     return redactSensitiveOpaqueIdentifiers(
-      `${parsed.pathname.replace(/^\//, "")}${parsed.search}${parsed.hash}`
+      `${parsed.pathname.replace(/^\//, "")}${parsed.search}${parsed.hash}`,
     );
   } catch {
     // Never echo a malformed value that may contain a credential. Retaining
@@ -131,7 +194,7 @@ export function sanitizeSensitiveUrl(value: string): string {
 
 /** Remove sensitive keys from a raw query-string or query object. */
 export function sanitizeSensitiveQuery(
-  query: string | Record<string, unknown> | Array<[string, string]> | undefined
+  query: string | Record<string, unknown> | Array<[string, string]> | undefined,
 ): string | Record<string, unknown> | Array<[string, string]> | undefined {
   if (typeof query === "string") {
     const prefixed = query.startsWith("?") ? query : `?${query}`;
@@ -143,12 +206,10 @@ export function sanitizeSensitiveQuery(
   if (Array.isArray(query)) {
     return query
       .filter(([key]) => !SENSITIVE_QUERY_PARAMETER_SET.has(key.toLowerCase()))
-      .map(
-        ([key, value]): [string, string] => [
-          key,
-          redactSensitiveOpaqueIdentifiers(value),
-        ]
-      );
+      .map(([key, value]): [string, string] => [
+        key,
+        redactSensitiveOpaqueIdentifiers(value),
+      ]);
   }
 
   return Object.fromEntries(
@@ -156,8 +217,10 @@ export function sanitizeSensitiveQuery(
       .filter(([key]) => !SENSITIVE_QUERY_PARAMETER_SET.has(key.toLowerCase()))
       .map(([key, value]) => [
         key,
-        typeof value === "string" ? redactSensitiveOpaqueIdentifiers(value) : value,
-      ])
+        typeof value === "string"
+          ? redactSensitiveOpaqueIdentifiers(value)
+          : value,
+      ]),
   );
 }
 
@@ -181,9 +244,9 @@ const URL_PROPERTY_PATTERN =
  * Scrub URL-bearing PostHog properties, including SDK-generated
  * `$current_url` / `$initial_current_url` fields from autocapture events.
  */
-export function sanitizeAnalyticsUrlProperties<T extends Record<string, unknown>>(
-  properties: T | undefined
-): T | undefined {
+export function sanitizeAnalyticsUrlProperties<
+  T extends Record<string, unknown>,
+>(properties: T | undefined): T | undefined {
   if (!properties) return properties;
   const sanitized: Record<string, unknown> = { ...properties };
   for (const [key, value] of Object.entries(sanitized)) {

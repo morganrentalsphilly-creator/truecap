@@ -16,8 +16,17 @@ import {
 const ROOT = join(__dirname, "..", "..");
 const USER_ID = "9ebd77d1-16f5-4e45-8c31-21ff8e401351";
 
+function indexOfPattern(
+  source: string,
+  pattern: RegExp,
+  fromIndex = 0,
+): number {
+  const relativeIndex = source.slice(fromIndex).search(pattern);
+  return relativeIndex < 0 ? -1 : fromIndex + relativeIndex;
+}
+
 function intent(
-  overrides: Partial<SubscriptionCheckoutIntent> = {}
+  overrides: Partial<SubscriptionCheckoutIntent> = {},
 ): SubscriptionCheckoutIntent {
   return {
     id: "ad2e82b7-157c-4d7f-b952-700b1122e21d",
@@ -38,7 +47,9 @@ function intent(
   };
 }
 
-function session(overrides: Record<string, unknown> = {}): Stripe.Checkout.Session {
+function session(
+  overrides: Record<string, unknown> = {},
+): Stripe.Checkout.Session {
   return {
     id: "cs_truecap_1",
     object: "checkout.session",
@@ -75,9 +86,12 @@ function session(overrides: Record<string, unknown> = {}): Stripe.Checkout.Sessi
 
 describe("subscription Checkout Session reuse policy", () => {
   it("reuses only an exact open user/plan/customer/intent/Pack binding", () => {
-    expect(isReusableSubscriptionCheckoutSession({ session: session(), intent: intent() })).toBe(
-      true
-    );
+    expect(
+      isReusableSubscriptionCheckoutSession({
+        session: session(),
+        intent: intent(),
+      }),
+    ).toBe(true);
   });
 
   it.each([
@@ -85,15 +99,31 @@ describe("subscription Checkout Session reuse policy", () => {
     ["no URL", { url: null }],
     ["wrong customer", { customer: "cus_other" }],
     ["wrong client reference", { client_reference_id: "other-user" }],
-    ["wrong metadata user", { metadata: { ...session().metadata, user_id: "other-user" } }],
-    ["wrong plan", { metadata: { ...session().metadata, plan_slug: "pro_annual" } }],
+    [
+      "wrong metadata user",
+      { metadata: { ...session().metadata, user_id: "other-user" } },
+    ],
+    [
+      "wrong plan",
+      { metadata: { ...session().metadata, plan_slug: "pro_annual" } },
+    ],
     [
       "wrong intent",
-      { metadata: { ...session().metadata, checkout_intent_id: "another-intent" } },
+      {
+        metadata: {
+          ...session().metadata,
+          checkout_intent_id: "another-intent",
+        },
+      },
     ],
     [
       "wrong Pack claim",
-      { metadata: { ...session().metadata, pack_credit_claim_id: "another-claim" } },
+      {
+        metadata: {
+          ...session().metadata,
+          pack_credit_claim_id: "another-claim",
+        },
+      },
     ],
     [
       "wrong actual Price",
@@ -104,7 +134,10 @@ describe("subscription Checkout Session reuse policy", () => {
         },
       },
     ],
-    ["wrong actual coupon", { discounts: [{ coupon: "coupon_other", promotion_code: null }] }],
+    [
+      "wrong actual coupon",
+      { discounts: [{ coupon: "coupon_other", promotion_code: null }] },
+    ],
     [
       "wrong trial stamp",
       { metadata: { ...session().metadata, checkout_trial_days: "0" } },
@@ -114,7 +147,7 @@ describe("subscription Checkout Session reuse policy", () => {
       isReusableSubscriptionCheckoutSession({
         session: session(overrides as Record<string, unknown>),
         intent: intent(),
-      })
+      }),
     ).toBe(false);
   });
 
@@ -130,7 +163,10 @@ describe("subscription Checkout Session reuse policy", () => {
       },
     });
     expect(
-      isReusableSubscriptionCheckoutSession({ session: legacySession, intent: intent() })
+      isReusableSubscriptionCheckoutSession({
+        session: legacySession,
+        intent: intent(),
+      }),
     ).toBe(false);
   });
 
@@ -143,26 +179,32 @@ describe("subscription Checkout Session reuse policy", () => {
     expect(
       subscriptionCheckoutIntentLeaseIsStale(
         intent({ status: "creating", lease_expires_at: now.toISOString() }),
-        now
-      )
+        now,
+      ),
     ).toBe(true);
     expect(
       subscriptionCheckoutIntentLeaseIsStale(
-        intent({ status: "creating", lease_expires_at: "2026-08-24T00:00:00.001Z" }),
-        now
-      )
+        intent({
+          status: "creating",
+          lease_expires_at: "2026-08-24T00:00:00.001Z",
+        }),
+        now,
+      ),
     ).toBe(false);
     expect(
       subscriptionCheckoutIntentLeaseIsStale(
-        intent({ status: "open", lease_expires_at: "2026-08-23T23:59:59.999Z" }),
-        now
-      )
+        intent({
+          status: "open",
+          lease_expires_at: "2026-08-23T23:59:59.999Z",
+        }),
+        now,
+      ),
     ).toBe(false);
     expect(
       subscriptionCheckoutIntentLeaseIsStale(
         intent({ status: "creating", lease_expires_at: "not-a-date" }),
-        now
-      )
+        now,
+      ),
     ).toBe(false);
   });
 
@@ -176,71 +218,94 @@ describe("subscription Checkout Session reuse policy", () => {
           stripeDiscountCouponId: "coupon_analyze20",
           trialDays: 14,
           packCreditClaimId: null,
-        }
-      )
+        },
+      ),
     ).toBe(false);
   });
 });
 
 describe("subscription Checkout atomicity contract", () => {
   const migration = readFileSync(
-    join(ROOT, "supabase/migrations/20260823190000_subscription_checkout_intents.sql"),
-    "utf8"
+    join(
+      ROOT,
+      "supabase/migrations/20260823190000_subscription_checkout_intents.sql",
+    ),
+    "utf8",
   );
   const billing = readFileSync(join(ROOT, "app/actions/billing.ts"), "utf8");
-  const webhook = readFileSync(join(ROOT, "app/api/stripe/webhooks/route.ts"), "utf8");
+  const webhook = readFileSync(
+    join(ROOT, "app/api/stripe/webhooks/route.ts"),
+    "utf8",
+  );
 
   it("serializes one active checkout and one Pack-credit reservation in PostgreSQL", () => {
-    expect(migration).toContain("subscription_checkout_intents_one_active_per_user_idx");
-    expect(migration).toMatch(/unique index[\s\S]*\(user_id\)[\s\S]*status in \('creating', 'open'\)/i);
-    expect(migration).toContain("subscription_checkout_intents_one_pack_credit_idx");
+    expect(migration).toContain(
+      "subscription_checkout_intents_one_active_per_user_idx",
+    );
+    expect(migration).toMatch(
+      /unique index[\s\S]*\(user_id\)[\s\S]*status in \('creating', 'open'\)/i,
+    );
+    expect(migration).toContain(
+      "subscription_checkout_intents_one_pack_credit_idx",
+    );
     expect(migration).toMatch(/unique index[\s\S]*\(pack_credit_claim_id\)/i);
   });
 
   it("atomically fences, retires, and replaces a stale changed-configuration creator", () => {
     const replacementFunction = migration.match(
-      /create or replace function public\.replace_stale_subscription_checkout_intent[\s\S]*?\$\$;/i
+      /create or replace function public\.replace_stale_subscription_checkout_intent[\s\S]*?\$\$;/i,
     )?.[0];
     expect(replacementFunction).toBeTruthy();
     expect(replacementFunction).toContain("p_expected_lease_expires_at");
     expect(replacementFunction).toContain("p_expected_stripe_customer_id");
     expect(replacementFunction).toContain("p_replacement_stripe_customer_id");
-    expect(replacementFunction).toMatch(/status = 'creating'[\s\S]*stripe_checkout_session_id is null/i);
     expect(replacementFunction).toMatch(
-      /lease_expires_at = p_expected_lease_expires_at[\s\S]*lease_expires_at > clock_timestamp\(\)/i
+      /status = 'creating'[\s\S]*stripe_checkout_session_id is null/i,
+    );
+    expect(replacementFunction).toMatch(
+      /lease_expires_at = p_expected_lease_expires_at[\s\S]*lease_expires_at > clock_timestamp\(\)/i,
     );
     expect(replacementFunction).toContain(
-      "stripe_customer_id is not distinct from p_expected_stripe_customer_id"
+      "stripe_customer_id is not distinct from p_expected_stripe_customer_id",
     );
     expect(replacementFunction).toMatch(
-      /status = 'failed'[\s\S]*pack_credit_claim_id = null[\s\S]*if not found then[\s\S]*return null[\s\S]*insert into public\.subscription_checkout_intents/i
+      /status = 'failed'[\s\S]*pack_credit_claim_id = null[\s\S]*if not found then[\s\S]*return null[\s\S]*insert into public\.subscription_checkout_intents/i,
     );
     expect(replacementFunction).toMatch(
-      /stripe_customer_id,[\s\S]*p_replacement_stripe_customer_id,[\s\S]*p_pack_credit_claim_id/i
+      /stripe_customer_id,[\s\S]*p_replacement_stripe_customer_id,[\s\S]*p_pack_credit_claim_id/i,
     );
     expect(replacementFunction).toContain("p_pack_credit_claim_id");
   });
 
   it("replays the old Stripe idempotency key before replacing a customer-bound stale row", () => {
-    const changedConfigurationBranch = billing.indexOf(
-      'if (!configurationMatches && existingIntent.status === "creating")'
+    const changedConfigurationBranch = indexOfPattern(
+      billing,
+      /if\s*\(\s*!configurationMatches\s*&&\s*existingIntent\.status\s*===\s*"creating"\s*\)/,
     );
-    const replay = billing.indexOf("buildSubscriptionCheckoutSessionParams({", changedConfigurationBranch);
-    const leaseClaim = billing.indexOf(
-      "claimStaleSubscriptionCheckoutIntentForReplacement(admin",
-      changedConfigurationBranch
+    const leaseClaim = indexOfPattern(
+      billing,
+      /claimStaleSubscriptionCheckoutIntentForReplacement\s*\(\s*admin,\s*existingIntent,?\s*\)/,
+      changedConfigurationBranch,
     );
-    const customerReplay = billing.indexOf(
-      "intentId: existingIntent.id",
-      changedConfigurationBranch
+    const customerReplay = indexOfPattern(
+      billing,
+      /getOrCreateStripeCustomer\s*\(\s*\{\s*intentId:\s*existingIntent\.id,/,
+      changedConfigurationBranch,
     );
-    const customerBind = billing.indexOf(
-      "existingIntent = await bindSubscriptionCheckoutCustomer",
-      changedConfigurationBranch
+    const customerBind = indexOfPattern(
+      billing,
+      /existingIntent\s*=\s*await\s+bindSubscriptionCheckoutCustomer\s*\(\s*admin,\s*existingIntent\.id,\s*recoveredCustomerId,?\s*\)/,
+      changedConfigurationBranch,
     );
-    const replacement = billing.indexOf(
-      "replaceStaleSubscriptionCheckoutIntent(admin",
-      changedConfigurationBranch
+    const replay = indexOfPattern(
+      billing,
+      /stripe\.checkout\.sessions\.create\s*\(\s*buildSubscriptionCheckoutSessionParams\s*\(\s*\{/,
+      changedConfigurationBranch,
+    );
+    const replacement = indexOfPattern(
+      billing,
+      /replaceStaleSubscriptionCheckoutIntent\s*\(\s*admin,/,
+      changedConfigurationBranch,
     );
     expect(changedConfigurationBranch).toBeGreaterThan(-1);
     expect(leaseClaim).toBeGreaterThan(changedConfigurationBranch);
@@ -251,21 +316,23 @@ describe("subscription Checkout atomicity contract", () => {
     expect(replay).toBeGreaterThan(changedConfigurationBranch);
     expect(replacement).toBeGreaterThan(replay);
     expect(billing).toContain(
-      "idempotencyKey: `truecap-subscription-checkout:${existingIntent.id}`"
+      "idempotencyKey: `truecap-subscription-checkout:${existingIntent.id}`",
     );
     expect(billing).toContain('code === "resource_missing"');
     expect(billing).toContain("stripe.customers.retrieve(");
     expect(billing).toContain("replacementStripeCustomerId = null");
-    expect(billing).toContain("stripe.checkout.sessions.expire(staleSession.id)");
+    expect(billing).toMatch(
+      /stripe\.checkout\.sessions\.expire\s*\(\s*staleSession\.id,?\s*\)/,
+    );
   });
 
   it("keeps the ledger unavailable to browser-authenticated roles", () => {
     expect(migration).toContain("force row level security");
     expect(migration).toContain(
-      "revoke all on table public.subscription_checkout_intents from public, anon, authenticated"
+      "revoke all on table public.subscription_checkout_intents from public, anon, authenticated",
     );
     expect(migration).toContain(
-      "grant select, insert, update on table public.subscription_checkout_intents to service_role"
+      "grant select, insert, update on table public.subscription_checkout_intents to service_role",
     );
   });
 
@@ -278,11 +345,61 @@ describe("subscription Checkout atomicity contract", () => {
     expect(billing).toContain('recentSession.status === "open"');
   });
 
+  it("requires the exact deployment Price for new checkout without a DB sales fallback", () => {
+    const checkoutStart = billing.indexOf(
+      "export async function createCheckoutSessionAction",
+    );
+    const returnStart = billing.indexOf(
+      "export async function verifyCheckoutReturnAction",
+      checkoutStart,
+    );
+    const checkoutAction = billing.slice(checkoutStart, returnStart);
+
+    expect(checkoutStart).toBeGreaterThan(-1);
+    expect(returnStart).toBeGreaterThan(checkoutStart);
+    expect(checkoutAction).toContain(
+      "const priceId = getCheckoutPlanPriceId(parsed.data.planSlug);",
+    );
+    expect(checkoutAction).not.toContain("plan.stripe_price_id");
+    expect(checkoutAction).not.toContain("?? dbPriceId");
+
+    const priceResolution = checkoutAction.indexOf(
+      "const priceId = getCheckoutPlanPriceId(parsed.data.planSlug);",
+    );
+    expect(priceResolution).toBeLessThan(
+      checkoutAction.indexOf("stripe.subscriptions.list({"),
+    );
+    expect(priceResolution).toBeLessThan(
+      checkoutAction.indexOf("getStripe().prices.retrieve(priceId)"),
+    );
+    expect(priceResolution).toBeLessThan(
+      checkoutAction.indexOf("acquireSubscriptionCheckoutIntent("),
+    );
+  });
+
+  it("keeps the persisted Price fallback verification-only for an existing return", () => {
+    const returnStart = billing.indexOf(
+      "export async function verifyCheckoutReturnAction",
+    );
+    const returnAction = billing.slice(returnStart);
+
+    expect(returnAction).toContain(
+      "getCheckoutReturnPlanPriceId(\n      metadataPlanSlug,\n      plan?.stripe_price_id,",
+    );
+  });
+
   it("keeps mutable email/name out of the idempotent Customer CREATE replay", () => {
-    const createStart = billing.indexOf("const customer = await stripe.customers.create(");
-    const createEnd = billing.indexOf("const admin = createAdminSupabaseClient();", createStart);
+    const createStart = billing.indexOf(
+      "const customer = await stripe.customers.create(",
+    );
+    const createEnd = billing.indexOf(
+      "const admin = createAdminSupabaseClient();",
+      createStart,
+    );
     const createAndEnrich = billing.slice(createStart, createEnd);
-    const createCallEnd = createAndEnrich.indexOf("await stripe.customers.update");
+    const createCallEnd = createAndEnrich.indexOf(
+      "await stripe.customers.update",
+    );
     const stableCreate = createAndEnrich.slice(0, createCallEnd);
     expect(createStart).toBeGreaterThan(-1);
     expect(createCallEnd).toBeGreaterThan(-1);
@@ -295,11 +412,13 @@ describe("subscription Checkout atomicity contract", () => {
   });
 
   it("closes a new intent on the verified return path during a mixed-version webhook rollout", () => {
-    const verification = billing.indexOf("const verified = verifyCheckoutReturnCandidate");
+    const verification = billing.indexOf(
+      "const verified = verifyCheckoutReturnCandidate",
+    );
     const rejection = billing.indexOf("if (!verified)", verification);
     const closure = billing.indexOf(
       "completeSubscriptionCheckoutIntentFromWebhook(",
-      rejection
+      rejection,
     );
     expect(verification).toBeGreaterThan(-1);
     expect(rejection).toBeGreaterThan(verification);
@@ -308,7 +427,9 @@ describe("subscription Checkout atomicity contract", () => {
 
   it("applies only the DB-reserved Pack claim and releases it on expiry", () => {
     expect(webhook).toContain("completedIntent.pack_credit_claim_id");
-    expect(webhook).toContain("expireSubscriptionCheckoutIntentFromWebhook(admin, session)");
+    expect(webhook).toContain(
+      "expireSubscriptionCheckoutIntentFromWebhook(admin, session)",
+    );
     expect(webhook).toContain('.select("id")');
     expect(webhook).toContain("else if (appliedCredit && creditedUserId)");
   });
@@ -327,7 +448,9 @@ describe("stale checkout replacement RPC mapping", () => {
       ...staleIntent,
       lease_expires_at: "2026-08-24T00:05:00.000Z",
     });
-    const maybeSingle = vi.fn().mockResolvedValue({ data: claimedIntent, error: null });
+    const maybeSingle = vi
+      .fn()
+      .mockResolvedValue({ data: claimedIntent, error: null });
     const builder = {
       update: vi.fn(),
       eq: vi.fn(),
@@ -347,16 +470,19 @@ describe("stale checkout replacement RPC mapping", () => {
     const result = await claimStaleSubscriptionCheckoutIntentForReplacement(
       admin,
       staleIntent,
-      new Date("2026-08-24T00:00:00.000Z")
+      new Date("2026-08-24T00:00:00.000Z"),
     );
 
     expect(result).toEqual({ acquired: true, intent: claimedIntent });
     expect(from).toHaveBeenCalledWith("subscription_checkout_intents");
     expect(builder.eq).toHaveBeenCalledWith("id", staleIntent.id);
-    expect(builder.eq).toHaveBeenCalledWith("lease_expires_at", staleIntent.lease_expires_at);
+    expect(builder.eq).toHaveBeenCalledWith(
+      "lease_expires_at",
+      staleIntent.lease_expires_at,
+    );
     expect(builder.lte).toHaveBeenCalledWith(
       "lease_expires_at",
-      "2026-08-24T00:00:00.000Z"
+      "2026-08-24T00:00:00.000Z",
     );
     expect(builder.is).toHaveBeenCalledWith("stripe_customer_id", null);
   });
@@ -396,18 +522,21 @@ describe("stale checkout replacement RPC mapping", () => {
     });
 
     expect(result).toEqual({ acquired: true, intent: replacement });
-    expect(rpc).toHaveBeenCalledWith("replace_stale_subscription_checkout_intent", {
-      p_stale_intent_id: staleIntent.id,
-      p_expected_lease_expires_at: staleIntent.lease_expires_at,
-      p_expected_stripe_customer_id: staleIntent.stripe_customer_id,
-      p_replacement_stripe_customer_id: staleIntent.stripe_customer_id,
-      p_user_id: USER_ID,
-      p_plan_slug: "pro_annual",
-      p_stripe_price_id: "price_new_annual",
-      p_stripe_discount_coupon_id: null,
-      p_trial_days: 0,
-      p_pack_credit_claim_id: staleIntent.pack_credit_claim_id,
-    });
+    expect(rpc).toHaveBeenCalledWith(
+      "replace_stale_subscription_checkout_intent",
+      {
+        p_stale_intent_id: staleIntent.id,
+        p_expected_lease_expires_at: staleIntent.lease_expires_at,
+        p_expected_stripe_customer_id: staleIntent.stripe_customer_id,
+        p_replacement_stripe_customer_id: staleIntent.stripe_customer_id,
+        p_user_id: USER_ID,
+        p_plan_slug: "pro_annual",
+        p_stripe_price_id: "price_new_annual",
+        p_stripe_discount_coupon_id: null,
+        p_trial_days: 0,
+        p_pack_credit_claim_id: staleIntent.pack_credit_claim_id,
+      },
+    );
   });
 
   it("keeps the missing old Customer as the fence while clearing it on the successor", async () => {
@@ -444,7 +573,7 @@ describe("stale checkout replacement RPC mapping", () => {
       expect.objectContaining({
         p_expected_stripe_customer_id: "cus_deleted_old",
         p_replacement_stripe_customer_id: null,
-      })
+      }),
     );
   });
 });

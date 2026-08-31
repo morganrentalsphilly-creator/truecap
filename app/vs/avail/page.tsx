@@ -24,7 +24,10 @@ import {
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
-import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-faq";
+import {
+  ComparisonFaq,
+  type FaqItem,
+} from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
@@ -47,7 +50,9 @@ export const metadata: Metadata = {
       "Avail is post-purchase landlord ops. TrueCap is pre-purchase underwriting. Different halves of the DIY-landlord lifecycle.",
     url: "/vs/avail",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs Avail" }],
+    images: [
+      { url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs Avail" },
+    ],
   },
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
@@ -56,22 +61,102 @@ type Verdict = "truecap" | "avail" | "tie";
 type Row = { feature: string; truecap: string; avail: string; winner: Verdict };
 
 const MATRIX: Row[] = [
-  { feature: "Lifecycle stage",                    truecap: "Pre-purchase — underwrite the deal",                                   avail: "Post-purchase — operate the property",                                   winner: "tie" },
-  { feature: "Cap rate / CoC / DSCR analysis",      truecap: "Yes — full engine, free tier",                                          avail: "Not modeled",                                                            winner: "truecap" },
-  { feature: "Cash flow projection",                truecap: "Pro — 10-year with rent + expense + appreciation",                       avail: "Not modeled",                                                            winner: "truecap" },
-  { feature: "Sensitivity grid",                    truecap: "Pro — rent ±10%, vacancy ±5pp, rate ±1pp",                                avail: "Not modeled",                                                            winner: "truecap" },
-  { feature: "Secondary Screening Index",               truecap: "Free — 0-100 triage score + factor breakdown",                              avail: "Not applicable",                                                          winner: "truecap" },
-  { feature: "Rental listing distribution",         truecap: "No",                                                                      avail: "Yes — syndicated to Realtor.com, Apartments.com, Zillow, etc.",           winner: "avail" },
-  { feature: "Online rental application",           truecap: "No",                                                                      avail: "Yes — customizable forms",                                               winner: "avail" },
-  { feature: "Tenant screening (credit/criminal)",  truecap: "No",                                                                      avail: "Yes — TransUnion-powered",                                                winner: "avail" },
-  { feature: "Online lease signing",                 truecap: "No",                                                                      avail: "Yes — state-specific lease templates",                                    winner: "avail" },
-  { feature: "Online rent collection",               truecap: "No",                                                                      avail: "Yes — ACH (free) and card",                                              winner: "avail" },
-  { feature: "Maintenance request workflow",         truecap: "No",                                                                      avail: "Yes — tenant portal",                                                    winner: "avail" },
-  { feature: "Pricing (entry tier)",                 truecap: "Free for underwriting",                                                  avail: "Free Unlimited tier + Unlimited Plus ~$7/unit/mo (as of 2026)",          winner: "tie" },
-  { feature: "Free tier covers core job",            truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",                                            avail: "Yes — listing, basic lease, ACH rent collection",                         winner: "tie" },
-  { feature: "Address auto-fill (rent, rate, tax)",   truecap: "Yes — HUD + FRED + state property tax",                                  avail: "Not applicable",                                                          winner: "truecap" },
-  { feature: "Multi-property dashboard",              truecap: "Yes — portfolio rollup of saved deals",                                  avail: "Yes — multi-unit ops dashboard",                                          winner: "tie" },
-  { feature: "Owned by Realtor.com",                  truecap: "No (independent)",                                                       avail: "Yes (since 2020)",                                                       winner: "tie" },
+  {
+    feature: "Lifecycle stage",
+    truecap: "Pre-purchase — underwrite the deal",
+    avail: "Post-purchase — operate the property",
+    winner: "tie",
+  },
+  {
+    feature: "Cap rate / CoC / DSCR analysis",
+    truecap: "Yes — full engine, free tier",
+    avail: "Not modeled",
+    winner: "truecap",
+  },
+  {
+    feature: "Cash flow projection",
+    truecap: "Pro — 10-year with rent + expense + appreciation",
+    avail: "Not modeled",
+    winner: "truecap",
+  },
+  {
+    feature: "Sensitivity grid",
+    truecap: "Pro — rent ±10%, vacancy ±5pp, rate ±1pp",
+    avail: "Not modeled",
+    winner: "truecap",
+  },
+  {
+    feature: "Secondary Screening Index",
+    truecap: "Free — 0-100 triage score + factor breakdown",
+    avail: "Not applicable",
+    winner: "truecap",
+  },
+  {
+    feature: "Rental listing distribution",
+    truecap: "No",
+    avail: "Yes — syndicated to Realtor.com, Apartments.com, Zillow, etc.",
+    winner: "avail",
+  },
+  {
+    feature: "Online rental application",
+    truecap: "No",
+    avail: "Yes — customizable forms",
+    winner: "avail",
+  },
+  {
+    feature: "Tenant screening (credit/criminal)",
+    truecap: "No",
+    avail: "Yes — TransUnion-powered",
+    winner: "avail",
+  },
+  {
+    feature: "Online lease signing",
+    truecap: "No",
+    avail: "Yes — state-specific lease templates",
+    winner: "avail",
+  },
+  {
+    feature: "Online rent collection",
+    truecap: "No",
+    avail: "Yes — ACH (free) and card",
+    winner: "avail",
+  },
+  {
+    feature: "Maintenance request workflow",
+    truecap: "No",
+    avail: "Yes — tenant portal",
+    winner: "avail",
+  },
+  {
+    feature: "Pricing (entry tier)",
+    truecap: "Free for underwriting",
+    avail: "Free Unlimited tier + Unlimited Plus ~$7/unit/mo (as of 2026)",
+    winner: "tie",
+  },
+  {
+    feature: "Free tier covers core job",
+    truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
+    avail: "Yes — listing, basic lease, ACH rent collection",
+    winner: "tie",
+  },
+  {
+    feature: "Starting values (rent, rate, tax)",
+    truecap: "HUD rent + FRED rate + manual local property tax",
+    avail: "Not applicable",
+    winner: "truecap",
+  },
+  {
+    feature: "Multi-property dashboard",
+    truecap: "Yes — portfolio rollup of saved deals",
+    avail: "Yes — multi-unit ops dashboard",
+    winner: "tie",
+  },
+  {
+    feature: "Owned by Realtor.com",
+    truecap: "No (independent)",
+    avail: "Yes (since 2020)",
+    winner: "tie",
+  },
 ];
 
 export default function VsAvailPage() {
@@ -112,19 +197,19 @@ export default function VsAvailPage() {
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
             TrueCap vs Avail:{" "}
-            <span className="text-primary">underwrite the deal, then run the rental</span>
+            <span className="text-primary">
+              underwrite the deal, then run the rental
+            </span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Avail is the DIY-landlord stack: list the unit, screen
-            tenants, sign a state-compliant lease, collect rent online,
-            handle maintenance. TrueCap models whether the reviewed
-            assumptions produce cash flow. Many independent landlords use
-            TrueCap during due diligence and Avail after closing.
+            Avail is the DIY-landlord stack: list the unit, screen tenants, sign
+            a state-compliant lease, collect rent online, handle maintenance.
+            TrueCap models whether the reviewed assumptions produce cash flow.
+            Many independent landlords use TrueCap during due diligence and
+            Avail after closing.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <ScrollToFormButton
-              className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5"
-            >
+            <ScrollToFormButton className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">
               <Calculator className="size-4" />
               Underwrite a deal free
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
@@ -156,7 +241,10 @@ export default function VsAvailPage() {
                 <li>Comparing 2–3 deals you&apos;re seriously considering.</li>
                 <li>10-year cash flow + appreciation projection.</li>
                 <li>Stress-testing rent, vacancy, and rate assumptions.</li>
-                <li>Generating a shareable read-only deal analysis for partners or lenders.</li>
+                <li>
+                  Generating a shareable read-only deal analysis for partners or
+                  lenders.
+                </li>
               </ul>
             </div>
             <div>
@@ -165,7 +253,9 @@ export default function VsAvailPage() {
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
                 <li>Listing a vacant unit across major rental sites.</li>
-                <li>Online rental applications + TransUnion-powered screening.</li>
+                <li>
+                  Online rental applications + TransUnion-powered screening.
+                </li>
                 <li>State-specific lease templates with online signing.</li>
                 <li>Online rent collection (ACH is free).</li>
                 <li>Tenant maintenance requests + ongoing ops.</li>
@@ -173,10 +263,12 @@ export default function VsAvailPage() {
             </div>
           </div>
           <p className="mt-5 text-sm leading-relaxed text-foreground">
-            One way to think about it: <strong>TrueCap is the diligence
-            tool you use during the LOI / inspection period.</strong>{" "}
-            Avail is the operations stack you set up the week after you
-            close.
+            One way to think about it:{" "}
+            <strong>
+              TrueCap is the diligence tool you use during the LOI / inspection
+              period.
+            </strong>{" "}
+            Avail is the operations stack you set up the week after you close.
           </p>
         </section>
 
@@ -186,9 +278,8 @@ export default function VsAvailPage() {
             Feature-by-feature
           </h2>
           <p className="text-base text-muted-foreground mb-6 leading-relaxed">
-            Most rows show clear specialization — TrueCap for underwrite,
-            Avail for ops. Where both have something, the difference is
-            usually scope.
+            Most rows show clear specialization — TrueCap for underwrite, Avail
+            for ops. Where both have something, the difference is usually scope.
           </p>
           <div className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
@@ -207,7 +298,10 @@ export default function VsAvailPage() {
               </thead>
               <tbody>
                 {MATRIX.map((row) => (
-                  <tr key={row.feature} className="border-t border-border align-top">
+                  <tr
+                    key={row.feature}
+                    className="border-t border-border align-top"
+                  >
                     <td className="py-3 px-3 text-sm font-semibold text-foreground">
                       <div className="flex items-center gap-2">
                         <WinnerBadge winner={row.winner} side="row" />
@@ -232,9 +326,14 @@ export default function VsAvailPage() {
             </table>
           </div>
           <p className="mt-3 text-[11px] text-muted-foreground">
-            Avail details based on publicly available product info as of
-            2026. See{" "}
-            <a href="https://www.avail.co" target="_blank" rel="noopener" className="underline">
+            Avail details based on publicly available product info as of 2026.
+            See{" "}
+            <a
+              href="https://www.avail.co"
+              target="_blank"
+              rel="noopener"
+              className="underline"
+            >
               avail.co
             </a>{" "}
             for their current state.
@@ -252,47 +351,64 @@ export default function VsAvailPage() {
               off-market).
             </li>
             <li>
-              <strong>Underwrite in TrueCap.</strong> Paste the address;
-              HUD rent, FRED rate, and state property tax pre-fill.
-              Check cap rate, CoC, DSCR, monthly cash flow against
-              benchmarks. Sensitize the inputs. Save the deal.
+              <strong>Underwrite in TrueCap.</strong> Paste the address; HUD
+              area rent and the FRED owner-occupied rate can pre-fill; property
+              tax remains a manual local input. Check cap rate, CoC, DSCR,
+              monthly cash flow against benchmarks. Sensitize the inputs. Save
+              the deal.
             </li>
             <li>
-              <strong>Verify the material inputs and record your decision.</strong> If you proceed, the transaction and closing workflow happens outside TrueCap.
+              <strong>
+                Verify the material inputs and record your decision.
+              </strong>{" "}
+              If you proceed, the transaction and closing workflow happens
+              outside TrueCap.
             </li>
             <li>
-              <strong>Set up the property in Avail.</strong> List vacant
-              units, accept online applications, screen tenants with
-              TransUnion, sign a state-specific lease online.
+              <strong>Set up the property in Avail.</strong> List vacant units,
+              accept online applications, screen tenants with TransUnion, sign a
+              state-specific lease online.
             </li>
             <li>
-              <strong>Collect rent + handle ops in Avail.</strong> ACH
-              rent collection is free; tenants submit maintenance
-              requests through the portal.
+              <strong>Collect rent + handle ops in Avail.</strong> ACH rent
+              collection is free; tenants submit maintenance requests through
+              the portal.
             </li>
             <li>
               <strong>Annual review back in TrueCap.</strong> Re-run the
-              underwrite with actuals from Avail to see how the property
-              is performing vs the original projection — and feed that
-              learning into the next acquisition.
+              underwrite with actuals from Avail to see how the property is
+              performing vs the original projection — and feed that learning
+              into the next acquisition.
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Want to start with just the underwrite? Two free screens — the{" "}
-            <Link href="/tools/1-percent-rule-calculator" className="font-semibold text-primary hover:underline">
+            <Link
+              href="/tools/1-percent-rule-calculator"
+              className="font-semibold text-primary hover:underline"
+            >
               1% rule calculator
             </Link>{" "}
             and the{" "}
-            <Link href="/tools/gross-rent-multiplier-calculator" className="font-semibold text-primary hover:underline">
+            <Link
+              href="/tools/gross-rent-multiplier-calculator"
+              className="font-semibold text-primary hover:underline"
+            >
               gross rent multiplier calculator
             </Link>{" "}
             — size up a listing in seconds, and the full{" "}
-            <Link href="/" className="font-semibold text-primary hover:underline">
+            <Link
+              href="/"
+              className="font-semibold text-primary hover:underline"
+            >
               TrueCap analyzer
             </Link>{" "}
             computes cap rate, cash-on-cash, and DSCR from an address. Our guide
             on{" "}
-            <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">
+            <Link
+              href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
+              className="font-semibold text-primary hover:underline"
+            >
               60-second underwriting
             </Link>{" "}
             walks through exactly what to do.
@@ -307,11 +423,11 @@ export default function VsAvailPage() {
             Underwrite the next deal — free.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly
-            cash flow and plain read-only share links. Pro adds 10-year
-            cash-flow and equity projections, sensitivity, Offer Ceiling,
-            co-branding, and included PDFs. New one-time PDF checkout is
-            temporarily unavailable. No card to start.
+            TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow
+            and plain read-only share links. Pro adds 10-year cash-flow and
+            equity projections, sensitivity, Offer Ceiling, co-branding, and
+            included PDFs. New one-time PDF checkout is temporarily unavailable.
+            No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -333,15 +449,24 @@ export default function VsAvailPage() {
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}
-          <Link href="/vs/rentredi" className="font-bold text-foreground hover:underline">
+          <Link
+            href="/vs/rentredi"
+            className="font-bold text-foreground hover:underline"
+          >
             TrueCap vs RentRedi
           </Link>{" "}
           ·{" "}
-          <Link href="/vs/stessa" className="font-bold text-foreground hover:underline">
+          <Link
+            href="/vs/stessa"
+            className="font-bold text-foreground hover:underline"
+          >
             TrueCap vs Stessa
           </Link>{" "}
           ·{" "}
-          <Link href="/vs/dealcheck" className="font-bold text-foreground hover:underline">
+          <Link
+            href="/vs/dealcheck"
+            className="font-bold text-foreground hover:underline"
+          >
             TrueCap vs DealCheck
           </Link>
         </footer>
@@ -357,11 +482,10 @@ const AVAIL_FAQ: FaqItem[] = [
     question: "Is TrueCap an Avail alternative?",
     answer: (
       <>
-        No — they cover different stages. Avail is post-purchase
-        landlord operations: listing, screening, leases, rent
-        collection, maintenance. TrueCap is pre-purchase underwriting:
-        cap rate, CoC, DSCR, projection, Screening Index. Most independent
-        landlords end up using both.
+        No — they cover different stages. Avail is post-purchase landlord
+        operations: listing, screening, leases, rent collection, maintenance.
+        TrueCap is pre-purchase underwriting: cap rate, CoC, DSCR, projection,
+        Screening Index. Most independent landlords end up using both.
       </>
     ),
     plainTextAnswer:
@@ -371,11 +495,10 @@ const AVAIL_FAQ: FaqItem[] = [
     question: "Can TrueCap do what Avail's listing or screening does?",
     answer: (
       <>
-        No. TrueCap doesn&apos;t distribute listings, run credit
-        reports, or store rental applications. Those are
-        FCRA-regulated workflows we don&apos;t build. Avail (and
-        similar tools) are the right place for that. TrueCap is
-        explicitly the pre-purchase underwriting layer.
+        No. TrueCap doesn&apos;t distribute listings, run credit reports, or
+        store rental applications. Those are FCRA-regulated workflows we
+        don&apos;t build. Avail (and similar tools) are the right place for
+        that. TrueCap is explicitly the pre-purchase underwriting layer.
       </>
     ),
     plainTextAnswer:
@@ -385,13 +508,13 @@ const AVAIL_FAQ: FaqItem[] = [
     question: "Is Avail free? Is TrueCap?",
     answer: (
       <>
-        Avail&apos;s &quot;Unlimited&quot; tier is free for landlords
-        and includes listings, lease signing, and ACH rent collection.
-        &quot;Unlimited Plus&quot; is ~$7/unit/month (as of 2026) for
-        advanced features. TrueCap is free for core underwriting math;
-        Pro adds 10-year cash-flow and equity projections, sensitivity,
-        co-branded share links, and included PDFs. New one-time PDF checkout
-        is temporarily unavailable; see TrueCap&apos;s live pricing page for current terms.
+        Avail&apos;s &quot;Unlimited&quot; tier is free for landlords and
+        includes listings, lease signing, and ACH rent collection.
+        &quot;Unlimited Plus&quot; is ~$7/unit/month (as of 2026) for advanced
+        features. TrueCap is free for core underwriting math; Pro adds 10-year
+        cash-flow and equity projections, sensitivity, co-branded share links,
+        and included PDFs. New one-time PDF checkout is temporarily unavailable;
+        see TrueCap&apos;s live pricing page for current terms.
       </>
     ),
     plainTextAnswer:
@@ -401,12 +524,12 @@ const AVAIL_FAQ: FaqItem[] = [
     question: "Does Avail's calculator replace TrueCap?",
     answer: (
       <>
-        Avail has some basic financial views in their landlord
-        dashboard (rent collected, payment history) but they don&apos;t
-        do underwriting — no cap rate, no DSCR, no 10-year projection,
-        no sensitivity, no Screening Index. Their financial views are for
-        what&apos;s happening on properties you own. TrueCap models
-        what will happen on properties you&apos;re considering.
+        Avail has some basic financial views in their landlord dashboard (rent
+        collected, payment history) but they don&apos;t do underwriting — no cap
+        rate, no DSCR, no 10-year projection, no sensitivity, no Screening
+        Index. Their financial views are for what&apos;s happening on properties
+        you own. TrueCap models what will happen on properties you&apos;re
+        considering.
       </>
     ),
     plainTextAnswer:
@@ -416,13 +539,12 @@ const AVAIL_FAQ: FaqItem[] = [
     question: "Avail is owned by Realtor.com — does that matter?",
     answer: (
       <>
-        Functionally not much for most landlords — Realtor.com
-        acquired Avail in 2020 and the product has continued. It does
-        mean listings distribute well through Realtor.com&apos;s reach.
-        TrueCap is independent, which some investors prefer for
-        underwriting because we have no listing-side incentive (we
-        don&apos;t benefit from any deal happening — only from giving
-        you a good number on it).
+        Functionally not much for most landlords — Realtor.com acquired Avail in
+        2020 and the product has continued. It does mean listings distribute
+        well through Realtor.com&apos;s reach. TrueCap is independent, which
+        some investors prefer for underwriting because we have no listing-side
+        incentive (we don&apos;t benefit from any deal happening — only from
+        giving you a good number on it).
       </>
     ),
     plainTextAnswer:
@@ -439,10 +561,14 @@ function WinnerBadge({
 }) {
   if (side === "row") return null;
   if (winner === "tie") {
-    return <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />;
+    return (
+      <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />
+    );
   }
   if (winner === side) {
-    return <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />;
+    return (
+      <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />
+    );
   }
   return <X className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/50" />;
 }

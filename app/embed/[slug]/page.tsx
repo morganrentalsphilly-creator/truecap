@@ -26,9 +26,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { EmbedResizeReporter } from "@/components/embed/embed-resize-reporter";
-import { EmbedAttributionLink, EmbedReferralTracker } from "@/components/embed/embed-referral-tracker";
+import {
+  EmbedAttributionLink,
+  EmbedReferralTracker,
+} from "@/components/embed/embed-referral-tracker";
 import { EMBED_LIST, getEmbedEntry } from "@/lib/embed-registry";
 import { getSiteUrl } from "@/lib/site-url";
+import { buildEmbedAttributionHref } from "@/lib/embed-attribution";
 
 export const dynamicParams = false;
 
@@ -62,7 +66,11 @@ export default async function EmbedPage({
   if (!entry) notFound();
 
   const siteUrl = getSiteUrl();
-  const attributionHref = `${siteUrl}${entry.toolUrl}?utm_source=embed&utm_medium=iframe&utm_campaign=${encodeURIComponent(entry.slug)}`;
+  const attributionHref = buildEmbedAttributionHref({
+    siteUrl,
+    toolPath: entry.toolUrl,
+    calculatorSlug: entry.slug,
+  });
 
   const Widget = entry.Widget;
 
@@ -70,10 +78,7 @@ export default async function EmbedPage({
     <div className="min-h-screen bg-background">
       <EmbedResizeReporter slug={entry.slug} />
       <EmbedReferralTracker calculator={entry.slug} />
-      <main
-        id="main"
-        className="mx-auto max-w-2xl px-4 py-4 sm:px-5 sm:py-5"
-      >
+      <main id="main" className="mx-auto max-w-2xl px-4 py-4 sm:px-5 sm:py-5">
         {/* Compact header with title — keeps embed self-explanatory
             when there's no surrounding TrueCap chrome. */}
         <header className="mb-3">
@@ -89,7 +94,10 @@ export default async function EmbedPage({
             Vercel Analytics + GA. */}
         <footer className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-3 text-xs text-muted-foreground">
           <span>Free calculator</span>
-          <EmbedAttributionLink href={attributionHref} calculator={entry.slug} />
+          <EmbedAttributionLink
+            href={attributionHref}
+            calculator={entry.slug}
+          />
         </footer>
       </main>
     </div>

@@ -13,6 +13,7 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "test:e2e:install": "playwright install chromium",
+    "perf:homepage": "node scripts/performance/homepage-transfer.mjs",
     "reset-passwords": "node lib/reset-passwords.mjs",
     "schedule-broadcasts": "npx -y tsx scripts/schedule-all-broadcasts.ts",
     "schedule-broadcasts:dry": "npx -y tsx scripts/schedule-all-broadcasts.ts --dry-run",

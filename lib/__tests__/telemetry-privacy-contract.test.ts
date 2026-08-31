@@ -20,11 +20,12 @@ describe("telemetry privacy contract", () => {
     }
   });
 
-  it("prevents PostHog from persisting initial URLs or page titles", () => {
+  it("prevents PostHog from persisting initial URLs or running on sensitive documents", () => {
     const analytics = read("lib/analytics.ts");
+    const provider = read("components/analytics/posthog-provider.tsx");
     for (const source of [
-      'save_campaign_params: false',
-      'save_referrer: false',
+      "save_campaign_params: false",
+      "save_referrer: false",
       'persistence: "localStorage"',
       'property_denylist: ["title"]',
       "advanced_disable_flags: true",
@@ -36,6 +37,10 @@ describe("telemetry privacy contract", () => {
     }
     expect(analytics).toContain("preparePostHogPersistence(key)");
     expect(analytics).toContain("posthog.unregister(legacyKey)");
+    expect(analytics).toContain("disableAnalyticsForDocument");
+    expect(provider).toContain("shouldKeepThirdPartyTelemetryDisabled");
+    expect(provider).toContain("disableAnalyticsForDocument()");
+    expect(provider).toContain("window.location.reload()");
   });
 
   it("route-gates Google and sanitizes Vercel pageviews", () => {
@@ -43,9 +48,7 @@ describe("telemetry privacy contract", () => {
     const vercel = read("components/analytics/vercel-analytics.tsx");
     const layout = read("app/layout.tsx");
 
-    expect(google).toContain(
-      "shouldKeepThirdPartyTelemetryDisabled"
-    );
+    expect(google).toContain("shouldKeepThirdPartyTelemetryDisabled");
     expect(google).toContain('referrerPolicy="no-referrer"');
     expect(layout).toContain("<GoogleMeasurement />");
     expect(layout).not.toContain("googletagmanager.com/gtm.js");
@@ -54,9 +57,19 @@ describe("telemetry privacy contract", () => {
     expect(vercel).toContain("shouldKeepThirdPartyTelemetryDisabled");
 
     const config = read("next.config.mjs");
-    for (const route of ["/d/:path+", "/s/:path+", "/portal/:path+", "/embed/brand/:path+"]) {
+    for (const route of [
+      "/d/:path+",
+      "/s/:path+",
+      "/portal/:path+",
+      "/embed/brand/:path+",
+    ]) {
       expect(config).toContain(`source: \"${route}\"`);
     }
-    expect(config.match(/value: \"no-referrer\"/g)).toHaveLength(4);
+    expect(config.match(/value: \"no-referrer\"/g)).toHaveLength(5);
+    expect(google).toContain("useSearchParams");
+    expect(vercel).toContain("useSearchParams");
+    expect(config).toMatch(
+      /source: "\/embed\/:path\+"[\s\S]*?value: "no-referrer"/,
+    );
   });
 });

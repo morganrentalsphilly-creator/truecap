@@ -24,6 +24,7 @@ import { useEffect, useRef, useState } from "react";
 import { MessageSquareQuote, X } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { submitTestimonialAction } from "@/app/actions/testimonials";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 
 const PROMPT_KEY = "truecap_testimonial_prompt_v1";
 export const PROOF_MOMENT_EVENT = "truecap:proof-moment";
@@ -32,21 +33,33 @@ type ProofMomentSource = "pdf_export" | "third_save";
 
 export function dispatchProofMoment(source: ProofMomentSource) {
   try {
-    window.dispatchEvent(new CustomEvent(PROOF_MOMENT_EVENT, { detail: { source } }));
+    window.dispatchEvent(
+      new CustomEvent(PROOF_MOMENT_EVENT, { detail: { source } }),
+    );
   } catch {
     // Never let a proof-moment dispatch break the product action itself.
   }
 }
 
 export function TestimonialPrompt() {
+  if (!isFeatureEnabled("testimonial_collection")) return null;
+  return <EnabledTestimonialPrompt />;
+}
+
+function EnabledTestimonialPrompt() {
   const [open, setOpen] = useState(false);
   const [source, setSource] = useState<ProofMomentSource>("pdf_export");
   const [quote, setQuote] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [displayNameFormat, setDisplayNameFormat] = useState<
+    "full_name" | "first_name_last_initial" | "initials" | "anonymous"
+  >("anonymous");
   const [roleSegment, setRoleSegment] = useState<string>("");
   const [consent, setConsent] = useState(false);
   const [honeypot, setHoneypot] = useState("");
-  const [state, setState] = useState<"idle" | "submitting" | "done" | "error">("idle");
+  const [state, setState] = useState<"idle" | "submitting" | "done" | "error">(
+    "idle",
+  );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const firedRef = useRef(false);
   const showTimerRef = useRef<number | null>(null);
@@ -60,7 +73,8 @@ export function TestimonialPrompt() {
         // Storage unavailable → still show at most once per page load.
       }
       firedRef.current = true;
-      const detail = (event as CustomEvent<{ source?: ProofMomentSource }>).detail;
+      const detail = (event as CustomEvent<{ source?: ProofMomentSource }>)
+        .detail;
       if (detail?.source) setSource(detail.source);
       // Small delay so the card never competes with the export/save toast.
       // TRACKED so unmount can cancel it: an uncancelled timer wrote the
@@ -73,7 +87,9 @@ export function TestimonialPrompt() {
           // ignore
         }
         setOpen(true);
-        trackEvent("testimonial_prompt_shown", { source: detail?.source ?? "unknown" });
+        trackEvent("testimonial_prompt_shown", {
+          source: detail?.source ?? "unknown",
+        });
       }, 8000);
     };
     window.addEventListener(PROOF_MOMENT_EVENT, onProofMoment);
@@ -115,15 +131,29 @@ export function TestimonialPrompt() {
     setErrorMessage(null);
     const result = await submitTestimonialAction({
       quote,
-      ...(displayName.trim() ? { displayName: displayName.trim() } : {}),
-      ...(roleSegment ? { roleSegment: roleSegment as "investor" | "house_hacker" | "agent" | "other" } : {}),
+      ...(displayNameFormat !== "anonymous" && displayName.trim()
+        ? { displayName: displayName.trim() }
+        : {}),
+      preferredDisplayNameFormat: displayNameFormat,
+      ...(roleSegment
+        ? {
+            roleSegment: roleSegment as
+              | "investor"
+              | "house_hacker"
+              | "agent"
+              | "other",
+          }
+        : {}),
       consentToPublish: consent,
       sourceEvent: source,
       website: honeypot,
     });
     if (result.ok) {
       setState("done");
-      trackEvent("testimonial_prompt_submitted", { source, consented: consent });
+      trackEvent("testimonial_prompt_submitted", {
+        source,
+        consented: consent,
+      });
       window.setTimeout(() => setOpen(false), 3500);
     } else {
       setState("error");
@@ -159,7 +189,7 @@ export function TestimonialPrompt() {
             <p className="pr-4 text-sm font-bold leading-snug text-foreground">
               Did TrueCap change what you offered — or whether you offered?
               <span className="mt-0.5 block text-xs font-medium text-muted-foreground">
-                Tell us in a sentence.
+                If you&apos;d like, tell us in a sentence. A quote is optional.
               </span>
             </p>
           </div>
@@ -171,16 +201,39 @@ export function TestimonialPrompt() {
             name="quote"
             value={quote}
             onChange={(e) => setQuote(e.target.value)}
-            required
-            minLength={10}
             maxLength={1000}
             rows={3}
-            placeholder="e.g. Passed on 3 deals, offered on the 4th — under asking."
+            placeholder="What, if anything, changed in your process or decision?"
             className="mt-3 w-full rounded-lg border border-border bg-background p-2.5 text-sm text-foreground placeholder:text-muted-foreground/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
           <div className="mt-2 grid grid-cols-2 gap-2">
+            <label htmlFor="testimonial-display-format" className="sr-only">
+              Preferred public display-name format
+            </label>
+            <select
+              id="testimonial-display-format"
+              name="preferredDisplayNameFormat"
+              value={displayNameFormat}
+              onChange={(e) =>
+                setDisplayNameFormat(
+                  e.target.value as
+                    | "full_name"
+                    | "first_name_last_initial"
+                    | "initials"
+                    | "anonymous",
+                )
+              }
+              className="w-full rounded-lg border border-border bg-background px-2 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <option value="anonymous">Display anonymously</option>
+              <option value="full_name">Use full name</option>
+              <option value="first_name_last_initial">
+                First name + last initial
+              </option>
+              <option value="initials">Initials only</option>
+            </select>
             <label htmlFor="testimonial-display-name" className="sr-only">
-              Name (optional)
+              Preferred public name
             </label>
             <input
               id="testimonial-display-name"
@@ -189,7 +242,12 @@ export function TestimonialPrompt() {
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               maxLength={120}
-              placeholder="Name (optional)"
+              placeholder={
+                displayNameFormat === "anonymous"
+                  ? "Name not needed"
+                  : "Preferred public name"
+              }
+              disabled={displayNameFormat === "anonymous"}
               className="w-full rounded-lg border border-border bg-background px-2.5 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
             <label htmlFor="testimonial-role" className="sr-only">
@@ -208,6 +266,10 @@ export function TestimonialPrompt() {
               <option value="agent">Agent</option>
               <option value="other">Other</option>
             </select>
+            <p className="self-center text-[11px] leading-relaxed text-muted-foreground">
+              Nothing is published unless you check permission below and an
+              administrator separately verifies and approves it.
+            </p>
           </div>
           {/* Honeypot — hidden from real users, bots fill it. */}
           <input
@@ -229,12 +291,14 @@ export function TestimonialPrompt() {
               className="mt-0.5 size-3.5 rounded border-border"
             />
             <span>
-              TrueCap may publish this quote (we&apos;ll verify with you first —
-              nothing goes live without your OK).
+              TrueCap may publish my quote using the display format I chose
+              (we&apos;ll verify it first — nothing goes live without approval).
             </span>
           </label>
           {errorMessage ? (
-            <p className="mt-2 text-xs font-semibold text-destructive">{errorMessage}</p>
+            <p className="mt-2 text-xs font-semibold text-destructive">
+              {errorMessage}
+            </p>
           ) : null}
           <button
             type="submit"

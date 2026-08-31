@@ -1,10 +1,10 @@
 {
-  "subject": "Your trial converts to a subscription in about 4 days",
-  "preheader": "A plain heads-up before billing starts, with cancellation details.",
-  "headline": "Heads up: billing starts when your 14-day trial ends.",
+  "subject": "Review the billing date for your legacy Stripe trial",
+  "preheader": "A plain reminder to check the date and amount Stripe showed at checkout.",
+  "headline": "Check your subscription's billing date before the legacy trial ends.",
   "body": [
-    "No surprises: your TrueCap Pro trial converts to a paid subscription at the end of day 14. If Pro isn't earning its keep, cancel online from your profile in one click before then and you pay nothing.",
-    "If you stay, the subscription renews under the billing terms shown at checkout. You can review or cancel the plan from your profile before renewal.",
+    "This reminder applies only to a legacy Stripe trial attached to an earlier subscription checkout. It is separate from TrueCap's current no-card product evaluation, which does not auto-renew or schedule a charge.",
+    "For the exact first-billing date and amount, use the subscription details Stripe showed at checkout or open billing from your profile. If you do not want the legacy subscription to continue, cancel it before that displayed date.",
     "Either way, the deals you've saved stay in your account — Free keeps them readable even if you downgrade later."
   ],
   "cta_text": "Review your plan and billing",

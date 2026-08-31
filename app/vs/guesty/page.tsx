@@ -20,7 +20,10 @@ import {
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ScrollToFormButton } from "@/components/marketing/scroll-to-form-button";
-import { ComparisonFaq, type FaqItem } from "@/components/marketing/comparison-faq";
+import {
+  ComparisonFaq,
+  type FaqItem,
+} from "@/components/marketing/comparison-faq";
 import { getSiteUrl } from "@/lib/site-url";
 import { VsBreadcrumbSchema } from "@/components/marketing/vs-breadcrumb-schema";
 
@@ -42,28 +45,100 @@ export const metadata: Metadata = {
       "Guesty manages short-term rentals after purchase across multiple portfolio sizes. TrueCap handles pre-purchase underwriting.",
     url: "/vs/guesty",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs Guesty" }],
+    images: [
+      { url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap vs Guesty" },
+    ],
   },
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
 
 type Verdict = "truecap" | "guesty" | "tie";
-type Row = { feature: string; truecap: string; guesty: string; winner: Verdict };
+type Row = {
+  feature: string;
+  truecap: string;
+  guesty: string;
+  winner: Verdict;
+};
 
 const MATRIX: Row[] = [
-  { feature: "Primary audience", truecap: "Solo / small-portfolio STR investors (1-30 doors)", guesty: "Lite: 1-3 listings; Pro: 4-199; Enterprise: 200+", winner: "tie" },
-  { feature: "Lifecycle stage", truecap: "Pre-purchase — underwrite the STR deal", guesty: "Post-purchase — operate STR listings", winner: "tie" },
-  { feature: "Cap rate / CoC / DSCR analysis", truecap: "Yes — full engine, free tier", guesty: "Not modeled", winner: "truecap" },
-  { feature: "10-year projection", truecap: "Pro — rent + expense + appreciation", guesty: "Not modeled", winner: "truecap" },
-  { feature: "Address auto-fill (rent/rate/tax)", truecap: "Yes — HUD + FRED + state property tax", guesty: "Not applicable", winner: "truecap" },
-  { feature: "Channel manager (Airbnb/Vrbo/Booking)", truecap: "No", guesty: "Yes — plan-specific capabilities", winner: "guesty" },
-  { feature: "Multi-owner portal + accounting", truecap: "No", guesty: "Yes — owner statements + revenue splits", winner: "guesty" },
-  { feature: "Open API for custom integrations", truecap: "No", guesty: "Yes — full REST API", winner: "guesty" },
-  { feature: "AI assistant + automation", truecap: "No", guesty: "Yes — Guesty AI for guest messaging", winner: "guesty" },
-  { feature: "Dynamic pricing integrations", truecap: "No", guesty: "Yes — full ecosystem", winner: "guesty" },
-  { feature: "Free tier", truecap: "Yes — core cap rate, CoC, DSCR, and cash flow", guesty: "No permanent free tier; Lite trial available", winner: "truecap" },
-  { feature: "Pricing (entry tier)", truecap: "Free core; paid Pro — see live pricing", guesty: "Plan and portfolio dependent — see Guesty's live pricing", winner: "tie" },
-  { feature: "Built for small operators", truecap: "Yes — 1-30 doors", guesty: "Yes — Lite is published for 1-3 listings", winner: "tie" },
+  {
+    feature: "Primary audience",
+    truecap: "Solo / small-portfolio STR investors (1-30 doors)",
+    guesty: "Lite: 1-3 listings; Pro: 4-199; Enterprise: 200+",
+    winner: "tie",
+  },
+  {
+    feature: "Lifecycle stage",
+    truecap: "Pre-purchase — underwrite the STR deal",
+    guesty: "Post-purchase — operate STR listings",
+    winner: "tie",
+  },
+  {
+    feature: "Cap rate / CoC / DSCR analysis",
+    truecap: "Yes — full engine, free tier",
+    guesty: "Not modeled",
+    winner: "truecap",
+  },
+  {
+    feature: "10-year projection",
+    truecap: "Pro — rent + expense + appreciation",
+    guesty: "Not modeled",
+    winner: "truecap",
+  },
+  {
+    feature: "Starting values (rent/rate/tax)",
+    truecap: "HUD rent + FRED rate + manual local property tax",
+    guesty: "Not applicable",
+    winner: "truecap",
+  },
+  {
+    feature: "Channel manager (Airbnb/Vrbo/Booking)",
+    truecap: "No",
+    guesty: "Yes — plan-specific capabilities",
+    winner: "guesty",
+  },
+  {
+    feature: "Multi-owner portal + accounting",
+    truecap: "No",
+    guesty: "Yes — owner statements + revenue splits",
+    winner: "guesty",
+  },
+  {
+    feature: "Open API for custom integrations",
+    truecap: "No",
+    guesty: "Yes — full REST API",
+    winner: "guesty",
+  },
+  {
+    feature: "AI assistant + automation",
+    truecap: "No",
+    guesty: "Yes — Guesty AI for guest messaging",
+    winner: "guesty",
+  },
+  {
+    feature: "Dynamic pricing integrations",
+    truecap: "No",
+    guesty: "Yes — full ecosystem",
+    winner: "guesty",
+  },
+  {
+    feature: "Free tier",
+    truecap: "Yes — core cap rate, CoC, DSCR, and cash flow",
+    guesty: "No permanent free tier; Lite trial available",
+    winner: "truecap",
+  },
+  {
+    feature: "Pricing (entry tier)",
+    truecap: "Free core; paid Pro — see live pricing",
+    guesty: "Plan and portfolio dependent — see Guesty's live pricing",
+    winner: "tie",
+  },
+  {
+    feature: "Built for small operators",
+    truecap: "Yes — 1-30 doors",
+    guesty: "Yes — Lite is published for 1-3 listings",
+    winner: "tie",
+  },
 ];
 
 export default function VsGuestyPage() {
@@ -104,15 +179,19 @@ export default function VsGuestyPage() {
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
             TrueCap vs Guesty:{" "}
-            <span className="text-primary">underwrite the STR vs manage it</span>
+            <span className="text-primary">
+              underwrite the STR vs manage it
+            </span>
           </h1>
           <p className="mt-4 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-            Guesty is short-term rental property management software for post-purchase operations. Its published plan ranges include Lite for 1-3 listings, Pro for 4-199, and Enterprise for 200+. TrueCap is a pre-purchase underwriting calculator. The products address different stages of the lifecycle.
+            Guesty is short-term rental property management software for
+            post-purchase operations. Its published plan ranges include Lite for
+            1-3 listings, Pro for 4-199, and Enterprise for 200+. TrueCap is a
+            pre-purchase underwriting calculator. The products address different
+            stages of the lifecycle.
           </p>
           <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <ScrollToFormButton
-              className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5"
-            >
+            <ScrollToFormButton className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-[0_12px_28px_rgba(0,112,196,0.28)] transition-transform hover:-translate-y-0.5">
               <Calculator className="size-4" />
               Run a deal — 60 seconds
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
@@ -140,10 +219,15 @@ export default function VsGuestyPage() {
                 Use TrueCap when
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
-                <li>You own 1-30 STR properties and want to underwrite the next one.</li>
+                <li>
+                  You own 1-30 STR properties and want to underwrite the next
+                  one.
+                </li>
                 <li>You want cap rate, DSCR, cash flow before buying.</li>
                 <li>You want a free core underwriting tier.</li>
-                <li>You&apos;re not running an STR property management business.</li>
+                <li>
+                  You&apos;re not running an STR property management business.
+                </li>
               </ul>
             </div>
             <div>
@@ -151,9 +235,18 @@ export default function VsGuestyPage() {
                 Use Guesty when
               </p>
               <ul className="space-y-1.5 text-sm leading-relaxed text-foreground">
-                <li>You need post-purchase STR operations for one or more listings.</li>
-                <li>You manage STRs for other owners and need multi-owner accounting.</li>
-                <li>You need channel management, automation, or plan-specific API access.</li>
+                <li>
+                  You need post-purchase STR operations for one or more
+                  listings.
+                </li>
+                <li>
+                  You manage STRs for other owners and need multi-owner
+                  accounting.
+                </li>
+                <li>
+                  You need channel management, automation, or plan-specific API
+                  access.
+                </li>
                 <li>You have a team that needs role-based access control.</li>
               </ul>
             </div>
@@ -166,7 +259,8 @@ export default function VsGuestyPage() {
             Feature-by-feature
           </h2>
           <p className="text-base text-muted-foreground mb-6 leading-relaxed">
-            Side-by-side on every dimension that matters for a comparison-shopping investor.
+            Side-by-side on every dimension that matters for a
+            comparison-shopping investor.
           </p>
           <div className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
@@ -185,7 +279,10 @@ export default function VsGuestyPage() {
               </thead>
               <tbody>
                 {MATRIX.map((row) => (
-                  <tr key={row.feature} className="border-t border-border align-top">
+                  <tr
+                    key={row.feature}
+                    className="border-t border-border align-top"
+                  >
                     <td className="py-3 px-3 text-sm font-semibold text-foreground">
                       <div className="flex items-center gap-2">
                         <WinnerBadge winner={row.winner} side="row" />
@@ -212,7 +309,12 @@ export default function VsGuestyPage() {
           <p className="mt-3 text-[11px] text-muted-foreground">
             Guesty details based on publicly available product info as of 2026.
             See{" "}
-            <a href="https://www.guesty.com/pricing/" target="_blank" rel="noopener" className="underline">
+            <a
+              href="https://www.guesty.com/pricing/"
+              target="_blank"
+              rel="noopener"
+              className="underline"
+            >
               Guesty&apos;s official pricing page
             </a>{" "}
             for their current state.
@@ -226,34 +328,56 @@ export default function VsGuestyPage() {
           </h2>
           <ol className="space-y-2.5 text-sm sm:text-base leading-relaxed text-foreground list-decimal pl-5">
             <li>
-              <strong>Underwrite + buy 1-5 STRs with TrueCap.</strong> Solo investor workflow.
+              <strong>Underwrite + buy 1-5 STRs with TrueCap.</strong> Solo
+              investor workflow.
             </li>
             <li>
-              <strong>Use Lodgify / Hostfully / Hostaway for ops as you scale.</strong> Mid-market tools that fit 1-50 STRs.
+              <strong>
+                Use Lodgify / Hostfully / Hostaway for ops as you scale.
+              </strong>{" "}
+              Mid-market tools that fit 1-50 STRs.
             </li>
             <li>
-              <strong>Choose the Guesty plan that matches the portfolio.</strong> Lite, Pro, and Enterprise publish different listing ranges and capabilities.
+              <strong>
+                Choose the Guesty plan that matches the portfolio.
+              </strong>{" "}
+              Lite, Pro, and Enterprise publish different listing ranges and
+              capabilities.
             </li>
             <li>
-              <strong>Keep TrueCap for new acquisitions.</strong> Guesty doesn&apos;t underwrite. Still need TrueCap or similar for the next property.
+              <strong>Keep TrueCap for new acquisitions.</strong> Guesty
+              doesn&apos;t underwrite. Still need TrueCap or similar for the
+              next property.
             </li>
           </ol>
           <p className="mt-4 text-sm leading-relaxed text-foreground">
             Need only the underwriting half? The free{" "}
-            <Link href="/tools/vacancy-rate-calculator" className="font-semibold text-primary hover:underline">
+            <Link
+              href="/tools/vacancy-rate-calculator"
+              className="font-semibold text-primary hover:underline"
+            >
               vacancy rate calculator
             </Link>{" "}
             puts a real number on the downtime that decides a short-term rental,
             and the full{" "}
-            <Link href="/" className="font-semibold text-primary hover:underline">
+            <Link
+              href="/"
+              className="font-semibold text-primary hover:underline"
+            >
               TrueCap analyzer
             </Link>{" "}
             carries that assumption into cap rate, DSCR, and{" "}
-            <Link href="/glossary/monthly-cash-flow" className="font-semibold text-primary hover:underline">
+            <Link
+              href="/glossary/monthly-cash-flow"
+              className="font-semibold text-primary hover:underline"
+            >
               monthly cash flow
             </Link>
             . Our guide on{" "}
-            <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">
+            <Link
+              href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
+              className="font-semibold text-primary hover:underline"
+            >
               60-second underwriting
             </Link>{" "}
             walks through the workflow end-to-end.
@@ -270,8 +394,8 @@ export default function VsGuestyPage() {
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
             TrueCap free covers cap rate, CoC, DSCR, NCF, and monthly cash flow.
             Pro adds 10-year cash-flow and equity projections, sensitivity,
-            Offer Ceiling, co-branded share links, and PDF reports with Pro; see live pricing for current terms.
-            No card to start.
+            Offer Ceiling, co-branded share links, and PDF reports with Pro; see
+            live pricing for current terms. No card to start.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -293,11 +417,26 @@ export default function VsGuestyPage() {
 
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           Other comparisons:{" "}
-          <Link href="/vs/hostaway" className="font-bold text-foreground hover:underline">TrueCap vs Hostaway</Link>
+          <Link
+            href="/vs/hostaway"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs Hostaway
+          </Link>
           {" · "}
-          <Link href="/vs/hostfully" className="font-bold text-foreground hover:underline">TrueCap vs Hostfully</Link>
+          <Link
+            href="/vs/hostfully"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs Hostfully
+          </Link>
           {" · "}
-          <Link href="/vs/lodgify" className="font-bold text-foreground hover:underline">TrueCap vs Lodgify</Link>
+          <Link
+            href="/vs/lodgify"
+            className="font-bold text-foreground hover:underline"
+          >
+            TrueCap vs Lodgify
+          </Link>
         </footer>
       </main>
       <SiteFooter />
@@ -311,7 +450,10 @@ const GUESTY_FAQ: FaqItem[] = [
     question: "Is TrueCap a Guesty alternative?",
     answer: (
       <>
-        Not directly. Guesty handles post-purchase STR operations across portfolio sizes, including a Lite plan published for 1-3 listings. TrueCap handles pre-purchase underwriting. Some operators may use both at different stages.
+        Not directly. Guesty handles post-purchase STR operations across
+        portfolio sizes, including a Lite plan published for 1-3 listings.
+        TrueCap handles pre-purchase underwriting. Some operators may use both
+        at different stages.
       </>
     ),
     plainTextAnswer:
@@ -321,7 +463,10 @@ const GUESTY_FAQ: FaqItem[] = [
     question: "Is Guesty worth it for a small STR operator?",
     answer: (
       <>
-        It depends on the workflow. Guesty publishes Lite for 1-3 listings and offers a Lite trial. Compare its current features, rates, and terms with other STR operations tools before choosing; TrueCap does not replace those operational features.
+        It depends on the workflow. Guesty publishes Lite for 1-3 listings and
+        offers a Lite trial. Compare its current features, rates, and terms with
+        other STR operations tools before choosing; TrueCap does not replace
+        those operational features.
       </>
     ),
     plainTextAnswer:
@@ -331,7 +476,10 @@ const GUESTY_FAQ: FaqItem[] = [
     question: "Guesty vs Hostaway — which one for a 50+ STR portfolio?",
     answer: (
       <>
-        Compare each vendor&apos;s current quote, channel coverage, accounting, owner-management, automation, API, support, and implementation terms. Guesty publishes Pro for 4-199 listings and Enterprise for 200+; confirm Hostaway&apos;s current fit directly with that vendor.
+        Compare each vendor&apos;s current quote, channel coverage, accounting,
+        owner-management, automation, API, support, and implementation terms.
+        Guesty publishes Pro for 4-199 listings and Enterprise for 200+; confirm
+        Hostaway&apos;s current fit directly with that vendor.
       </>
     ),
     plainTextAnswer:
@@ -341,7 +489,9 @@ const GUESTY_FAQ: FaqItem[] = [
     question: "Does Guesty underwrite deals?",
     answer: (
       <>
-        No — it&apos;s purely operational. You&apos;d use TrueCap or a spreadsheet for pre-purchase underwriting, then ingest the property into Guesty post-closing.
+        No — it&apos;s purely operational. You&apos;d use TrueCap or a
+        spreadsheet for pre-purchase underwriting, then ingest the property into
+        Guesty post-closing.
       </>
     ),
     plainTextAnswer:
@@ -351,7 +501,9 @@ const GUESTY_FAQ: FaqItem[] = [
     question: "How do Guesty's published plans scale?",
     answer: (
       <>
-        Guesty currently publishes Lite for 1-3 listings, Pro for 4-199, and Enterprise for 200+. Features and commercial terms vary by plan, so use Guesty&apos;s live pricing page as the source of truth.
+        Guesty currently publishes Lite for 1-3 listings, Pro for 4-199, and
+        Enterprise for 200+. Features and commercial terms vary by plan, so use
+        Guesty&apos;s live pricing page as the source of truth.
       </>
     ),
     plainTextAnswer:
@@ -368,10 +520,14 @@ function WinnerBadge({
 }) {
   if (side === "row") return null;
   if (winner === "tie") {
-    return <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />;
+    return (
+      <Minus className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />
+    );
   }
   if (winner === side) {
-    return <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />;
+    return (
+      <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--brand-green)]" />
+    );
   }
   return <X className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/50" />;
 }

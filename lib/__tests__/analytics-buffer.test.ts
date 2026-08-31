@@ -77,13 +77,14 @@ beforeEach(() => {
       getItem: (key: string) =>
         key === "truecap_cookie_consent_v1"
           ? storedConsent
-          : storedLocal.get(key) ?? null,
+          : (storedLocal.get(key) ?? null),
       setItem: (key: string, value: string) => storedLocal.set(key, value),
       removeItem: (key: string) => storedLocal.delete(key),
     },
     sessionStorage: {
       getItem: (key: string) => storedSession.get(key) ?? null,
       setItem: (key: string, value: string) => storedSession.set(key, value),
+      removeItem: (key: string) => storedSession.delete(key),
     },
   });
   vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "phc_test_key");
@@ -95,6 +96,19 @@ afterEach(() => {
 });
 
 describe("pre-init buffering", () => {
+  it("fails closed for the current document without persisting an opt-out", async () => {
+    const analytics = await importAnalytics();
+    analytics.trackEvent("landing_view", { path: "/" });
+
+    analytics.disableAnalyticsForDocument();
+    await analytics.initAnalytics();
+
+    expect(posthogMock.init).not.toHaveBeenCalled();
+    expect(posthogMock.capture).not.toHaveBeenCalled();
+    expect(posthogMock.opt_out_capturing).not.toHaveBeenCalled();
+    expect(analytics.trackEvent("analysis_completed")).toBe(false);
+  });
+
   it("buffers trackEvent before init and replays it once init resolves", async () => {
     const analytics = await importAnalytics();
 
@@ -117,7 +131,7 @@ describe("pre-init buffering", () => {
     expect(analytics.trackEvent("analysis_completed")).toBe(true);
     expect(posthogMock.capture).toHaveBeenCalledWith(
       "analysis_completed",
-      undefined
+      undefined,
     );
   });
 
@@ -146,7 +160,7 @@ describe("pre-init buffering", () => {
           title: "123 Main Street",
           $current_url: "https://usetruecap.com/d/private-snapshot",
         },
-      })
+      }),
     ).toEqual({
       event: "$pageview",
       properties: {
@@ -166,7 +180,7 @@ describe("pre-init buffering", () => {
           r: "https://usetruecap.com/d/private-snapshot",
         },
         nested: { url: "/portal/private-token" },
-      })
+      }),
     );
 
     await analytics.initAnalytics();
@@ -175,14 +189,12 @@ describe("pre-init buffering", () => {
       distinct_id: "anonymous-1",
       nested: { url: "/portal/[token]" },
     });
+    expect(posthogMock.unregister).toHaveBeenCalledWith("$initial_person_info");
     expect(posthogMock.unregister).toHaveBeenCalledWith(
-      "$initial_person_info"
+      "$initial_campaign_params",
     );
     expect(posthogMock.unregister).toHaveBeenCalledWith(
-      "$initial_campaign_params"
-    );
-    expect(posthogMock.unregister).toHaveBeenCalledWith(
-      "$initial_referrer_info"
+      "$initial_referrer_info",
     );
   });
 
@@ -221,27 +233,58 @@ describe("pre-init buffering", () => {
     });
   });
 
-  it("never stores or replays an encoded shared-analysis landing path", async () => {
+  it("stores and replays only a coarse first-touch referral taxonomy", async () => {
     const analytics = await importAnalytics();
 
-    analytics.setOrganicAttribution({
-      landing_page: "/d/private-address-and-financial-snapshot",
-      referrer_host: "google.com",
-      attribution_medium: "organic_search",
+    analytics.setFirstTouchAttribution({
+      referral_source: "organic_search",
     });
     expect(
       JSON.parse(
-        storedSession.get("truecap_organic_attribution_v1") ?? "{}"
-      ).landing_page
-    ).toBe("/d/[shared-analysis]");
+        storedSession.get("truecap_first_touch_attribution_v1") ?? "{}",
+      ),
+    ).toEqual({ referral_source: "organic_search" });
+    expect(storedSession.has("truecap_organic_attribution_v1")).toBe(false);
 
-    analytics.trackEvent("landing_view");
+    analytics.trackEvent("organic_landing", {
+      route_category: "shared_analysis",
+      referral_source: "organic_search",
+      landing_page: "/d/private-address-and-financial-snapshot",
+      referrer_host: "private.example.com",
+    });
+    analytics.trackEvent("analysis_completed", {
+      route_category: "analyzer",
+      calculator_slug: "rental-property",
+    });
     await analytics.initAnalytics();
 
-    expect(posthogMock.capture).toHaveBeenCalledWith("landing_view", {
-      landing_page: "/d/[shared-analysis]",
-      referrer_host: "google.com",
-      attribution_medium: "organic_search",
+    expect(posthogMock.capture).toHaveBeenCalledWith("organic_landing", {
+      route_category: "shared_analysis",
+      referral_source: "organic_search",
+    });
+    expect(posthogMock.capture).toHaveBeenCalledWith("analysis_completed", {
+      route_category: "analyzer",
+      calculator_slug: "rental-property",
+      referral_source: "organic_search",
+    });
+  });
+
+  it("fails closed when first-touch session storage is tampered with", async () => {
+    storedSession.set(
+      "truecap_first_touch_attribution_v1",
+      JSON.stringify({ referral_source: "customer@example.com" }),
+    );
+    const analytics = await importAnalytics();
+
+    analytics.trackEvent("analysis_completed", {
+      route_category: "analyzer",
+      calculator_slug: "rental-property",
+    });
+    await analytics.initAnalytics();
+
+    expect(posthogMock.capture).toHaveBeenCalledWith("analysis_completed", {
+      route_category: "analyzer",
+      calculator_slug: "rental-property",
     });
   });
 

@@ -1,32 +1,25 @@
 /**
- * Dynamic state-level investing page at /states/[slug].
+ * Dynamic state verification page at /states/[slug].
  *
- * Targets queries like:
- *   - "investing in [state]"
- *   - "[state] rental properties"
- *   - "best cities to invest in [state]"
- *   - "[state] landlord laws"
- *   - "[state] property tax for landlords"
- *
- * 15+ states = 15+ new ranking URLs. Each driven by lib/states.ts data.
+ * The state registry contains hand-curated tax, legal, insurance, market, and
+ * strategy notes that are explicitly classified STALE_REVIEW_REQUIRED. Until
+ * each claim has an authoritative state/county dependency and as-of date, this
+ * template may use only the record's identity fields (name, abbreviation, and
+ * slug). Exact registry facts must not enter visible copy or JSON-LD.
  */
 
 import type { Metadata } from "next";
-import { SourceMethodologyBox } from "@/components/marketing/source-methodology-box";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, Check, X } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
+import { SeoAnalyzerCta } from "@/components/marketing/seo-analyzer-cta";
 import { SiteFooter } from "@/components/marketing/site-footer";
-import { STATES, getStateBySlug } from "@/lib/states";
-import { strategyFitFromTier } from "@/lib/market-strategy-fit";
-import { LeadMagnetInline } from "@/components/marketing/lead-magnet-capture";
 import { getSiteUrl } from "@/lib/site-url";
-import { truncateMetaDescription } from "@/lib/utils";
+import { STATES, getStateBySlug } from "@/lib/states";
 
 export async function generateStaticParams() {
-  return Object.values(STATES).map((s) => ({ slug: s.slug }));
+  return Object.values(STATES).map((state) => ({ slug: state.slug }));
 }
 
 export async function generateMetadata({
@@ -37,26 +30,33 @@ export async function generateMetadata({
   const { slug } = await params;
   const state = getStateBySlug(slug);
   if (!state) return { title: "State not found" };
-  const title = `Investing in ${state.name} rental property in 2026`;
+
+  const title = `${state.name} rental-property verification guide`;
+  const description = `Review the property-specific rent, tax, insurance, legal, condition, expense, and financing evidence needed for a ${state.name} rental screen.`;
+
   return {
     title,
-    description: truncateMetaDescription(state.pitch),
+    description,
     keywords: [
-      `investing in ${state.name.toLowerCase()}`,
-      `${state.name.toLowerCase()} rental properties`,
-      `${state.name.toLowerCase()} real estate investing`,
-      `best cities to invest in ${state.name.toLowerCase()}`,
-      `${state.name.toLowerCase()} landlord laws`,
-      `${state.name.toLowerCase()} property tax`,
+      `${state.name.toLowerCase()} rental property analysis`,
+      `${state.name.toLowerCase()} property tax verification`,
+      `${state.name.toLowerCase()} landlord law sources`,
       `${state.abbr.toLowerCase()} rental property`,
     ],
     alternates: { canonical: `/states/${state.slug}` },
     openGraph: {
       title,
-      description: state.pitch,
+      description,
       url: `/states/${state.slug}`,
       type: "article",
-      images: [{ url: "/home.jpg", width: 1200, height: 630, alt: title }],
+      images: [
+        {
+          url: "/home.jpg",
+          width: 1200,
+          height: 630,
+          alt: `${state.name} rental-property verification guide`,
+        },
+      ],
     },
     twitter: { card: "summary_large_image", images: ["/home.jpg"] },
   };
@@ -71,35 +71,29 @@ export default async function StatePage({
   const state = getStateBySlug(slug);
   if (!state) notFound();
 
-  // Strategy-fit badge from the curated state tier (P2-3).
-  const fit = strategyFitFromTier(state.tier);
-  const fitToneClass =
-    fit.tone === "cashflow"
-      ? "bg-[var(--brand-green-light)] text-[var(--brand-green)]"
-      : fit.tone === "appreciation"
-        ? "bg-[var(--brand-blue-light)] text-primary"
-        : "bg-muted text-foreground";
-
   const siteUrl = getSiteUrl();
   const canonicalUrl = `${siteUrl}/states/${state.slug}`;
+  const description = `A source-first checklist for reviewing a specific ${state.name} rental property. No statewide tax, legal, insurance, return, or strategy estimate on this page is a property fact.`;
 
-  // Schema: Place + BreadcrumbList + FAQPage + WebPage (for freshness signals)
   const placeLd = {
     "@context": "https://schema.org",
     "@type": "Place",
-    name: `${state.name} rental property investing`,
-    description: state.pitch,
+    name: state.name,
     url: canonicalUrl,
-    address: { "@type": "PostalAddress", addressRegion: state.abbr, addressCountry: "US" },
+    address: {
+      "@type": "PostalAddress",
+      addressRegion: state.abbr,
+      addressCountry: "US",
+    },
   };
   const webPageLd = {
     "@context": "https://schema.org",
     "@type": "WebPage",
     "@id": `${canonicalUrl}#page`,
-    name: `Investing in ${state.name} rental property in 2026`,
-    description: state.pitch,
+    name: `${state.name} rental-property verification guide`,
+    description,
     url: canonicalUrl,
-    dateModified: "2026-06-01",
+    dateModified: "2026-08-29",
     inLanguage: "en-US",
     isPartOf: { "@id": `${siteUrl}/#website` },
   };
@@ -108,8 +102,18 @@ export default async function StatePage({
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
-      { "@type": "ListItem", position: 2, name: "States", item: `${siteUrl}/states` },
-      { "@type": "ListItem", position: 3, name: state.name, item: canonicalUrl },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "States",
+        item: `${siteUrl}/states`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: state.name,
+        item: canonicalUrl,
+      },
     ],
   };
   const faqLd = {
@@ -118,248 +122,189 @@ export default async function StatePage({
     mainEntity: [
       {
         "@type": "Question",
-        name: `Is ${state.name} a good state for rental property investing?`,
-        acceptedAnswer: { "@type": "Answer", text: state.pitch },
-      },
-      {
-        "@type": "Question",
-        name: `What's the property tax rate in ${state.name}?`,
+        name: `Does this page say whether ${state.name} is a good rental-property market?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `${state.name} has an effective property tax rate of approximately ${state.propertyTaxRatePct}% on residential rental properties — verify your specific county for the exact bill.`,
+          text: `No. A state label does not establish a property's economics or recommend an investment. Review the specific address, asking price, rent, expenses, condition, financing, and applicable rules.`,
         },
       },
       {
         "@type": "Question",
-        name: `How landlord-friendly is ${state.name}?`,
+        name: `What property-tax figure should I use for a ${state.name} property?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `${state.name} is rated as ${state.landlord} for landlords. Typical eviction process: ${state.evictionTimelineDays} days from filing to writ.`,
+          text: `Use the current parcel bill or a reviewed local effective rate, then investigate the applicable assessment, exemption, transfer, and appeal rules with authoritative state and local sources. TrueCap does not auto-fill a statewide or parcel tax estimate.`,
         },
       },
       {
         "@type": "Question",
-        name: `What are the best cities to invest in within ${state.name}?`,
+        name: `Does TrueCap summarize ${state.name} landlord law?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `Top investing cities in ${state.name}: ${state.topCities.map((c) => c.name).join(", ")}. Each city has different cap rate, appreciation, and management dynamics.`,
+          text: `No current legal conclusion is published from the stale-review state registry. Check the controlling statute, court rules, agency guidance, and local ordinances with qualified counsel before relying on a legal timeline or classification.`,
         },
       },
     ],
   };
 
-  const landlordToneClass =
-    state.landlord === "Strong"
-      ? "text-[color:var(--brand-green,#0f9d58)]"
-      : state.landlord === "Tenant-leaning"
-        ? "text-[var(--metric-negative,#dc2626)]"
-        : "text-amber-700";
-
   return (
     <div className="min-h-screen bg-background">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(placeLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(placeLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
+      />
       <Header />
 
-      <main id="main" className="mx-auto max-w-4xl px-4 sm:px-6 py-8 sm:py-12">
-        {/* Breadcrumb */}
+      <main id="main" className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
         <nav aria-label="Breadcrumb" className="mb-6 text-xs">
           <ol className="flex flex-wrap items-center gap-2 text-muted-foreground">
-            <li><Link href="/" className="hover:text-foreground">Home</Link></li>
+            <li>
+              <Link href="/" className="hover:text-foreground">
+                Home
+              </Link>
+            </li>
             <li aria-hidden="true">›</li>
-            <li><Link href="/states" className="hover:text-foreground">States</Link></li>
+            <li>
+              <Link href="/states" className="hover:text-foreground">
+                States
+              </Link>
+            </li>
             <li aria-hidden="true">›</li>
             <li className="font-semibold text-foreground">{state.name}</li>
           </ol>
         </nav>
 
-        {/* Eyebrow + H1 */}
-        <div className="flex flex-wrap items-center gap-2">
-          <span
-            className={`inline-flex items-center rounded-full px-3 py-1 text-[11px] font-bold ${fitToneClass}`}
-            title={fit.blurb}
-          >
-            {fit.label}
-          </span>
-          <span className="text-[11px] uppercase tracking-widest text-primary font-bold">
-            {state.abbr} · State guide
-          </span>
-        </div>
-        <h1 className="mt-2 text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight">
-          Investing in {state.name} rental property
+        <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
+          {state.abbr} · Source-first state guide
+        </p>
+        <h1 className="mt-2 text-3xl font-extrabold leading-[1.05] tracking-tight text-foreground sm:text-5xl">
+          {state.name} rental-property verification guide
         </h1>
-        <p className="mt-5 text-lg leading-relaxed text-muted-foreground">{state.pitch}</p>
-        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-          For the broader landscape, see our roundup of the{" "}
-          <Link href="/blog/best-states-for-rental-investors-2026" className="text-primary font-semibold hover:underline">
-            best states for rental investors in 2026
-          </Link>
-          .
+        <p className="mt-5 text-lg leading-relaxed text-foreground">
+          A statewide average or label cannot determine a property&apos;s rent,
+          tax, insurance, legal constraints, operating costs, financing, or
+          investment fit. This page keeps the URL and review workflow public
+          while exact registry claims remain hidden pending authoritative
+          dependencies and as-of dates.
         </p>
 
-        {/* Key metrics row */}
-        <section className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[
-            { label: "Property tax", value: `${state.propertyTaxRatePct}%`, sub: "effective rate" },
-            { label: "State income tax", value: state.topStateIncomeTaxPct === 0 ? "0%" : `${state.topStateIncomeTaxPct}%`, sub: state.topStateIncomeTaxPct === 0 ? "no state tax" : "top bracket" },
-            { label: "Eviction timeline", value: `${state.evictionTimelineDays} days`, sub: "filing → writ" },
-            { label: "Landlord friendliness", value: state.landlord, sub: "based on law" },
-          ].map((m) => (
-            <div key={m.label} className="rounded-xl border border-border bg-card p-4">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{m.label}</p>
-              <p className={`mt-2 text-xl font-extrabold ${m.label === "Landlord friendliness" ? landlordToneClass : "text-foreground"}`}>{m.value}</p>
-              <p className="text-[11px] text-muted-foreground">{m.sub}</p>
-            </div>
-          ))}
-        </section>
-
-        <SourceMethodologyBox
-          className="mt-3"
-          sources={["Tax Foundation (tax rates)", "State landlord-tenant statutes"]}
-          updated="June 2026"
-        />
-
-        {/* Pros + Cons */}
-        <section className="mt-12 grid gap-6 lg:grid-cols-2">
-          <div className="rounded-2xl border border-[color:var(--brand-green,#0f9d58)]/30 bg-[color:var(--brand-green-light,#dcfce7)]/40 p-6">
-            <h2 className="text-xl font-extrabold text-foreground mb-3">Why investors choose {state.name}</h2>
-            <ul className="space-y-2">
-              {state.pros.map((p) => (
-                <li key={p} className="flex items-start gap-2 text-sm leading-relaxed text-foreground">
-                  <Check className="mt-0.5 size-4 shrink-0 text-[color:var(--brand-green,#0f9d58)]" />
-                  <span>{p}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="rounded-2xl border border-border bg-card p-6">
-            <h2 className="text-xl font-extrabold text-foreground mb-3">The honest caveats</h2>
-            <ul className="space-y-2">
-              {state.cons.map((c) => (
-                <li key={c} className="flex items-start gap-2 text-sm leading-relaxed text-foreground">
-                  <X className="mt-0.5 size-4 shrink-0 text-muted-foreground/60" />
-                  <span>{c}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
-        {/* Top cities */}
-        <section className="mt-12">
-          <h2 className="text-2xl font-extrabold text-foreground mb-4">Best cities for rental investing in {state.name}</h2>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {state.topCities.map((c) => (
-              <article key={c.name} className="rounded-xl border border-border bg-card p-5">
-                <p className="text-base font-bold text-foreground">
-                  {c.slug ? (
-                    <Link href={`/markets/${c.slug}`} className="hover:text-primary">{c.name} →</Link>
-                  ) : (
-                    c.name
-                  )}
-                </p>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{c.note}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        {/* Strategy fit */}
-        <section className="mt-12 rounded-2xl border border-primary/20 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-6 sm:p-8">
-          <h2 className="text-xl font-extrabold text-foreground mb-3">Best strategies for {state.name}</h2>
-          <ul className="space-y-2">
-            {state.bestStrategies.map((s) => (
-              <li key={s} className="flex items-start gap-2 text-sm leading-relaxed text-foreground">
-                <ArrowRight className="mt-0.5 size-4 shrink-0 text-primary" />
-                <span>{s}</span>
-              </li>
-            ))}
+        <section className="mt-10 rounded-2xl border border-border bg-card p-6">
+          <h2 className="text-xl font-extrabold text-foreground">
+            Evidence to collect for a {state.name} property
+          </h2>
+          <ul className="mt-4 list-disc space-y-2 pl-5 text-sm leading-relaxed text-foreground">
+            <li>
+              Current comparable leases, the existing lease, and collection
+              history.
+            </li>
+            <li>
+              The parcel bill plus the responsible assessor and taxing
+              jurisdictions.
+            </li>
+            <li>
+              Applicable assessment, exemption, transfer, appeal, and income-tax
+              rules from authoritative sources.
+            </li>
+            <li>
+              Property-specific insurance quotes, covered perils, exclusions,
+              deductibles, and replacement-cost assumptions.
+            </li>
+            <li>
+              Condition, inspections, utilities, HOA or association terms,
+              management scope, and planned work.
+            </li>
+            <li>
+              Written loan terms and the lender&apos;s own income, expense,
+              DSCR, reserve, and approval method.
+            </li>
+            <li>
+              Controlling state statutes, court rules, agency guidance, and
+              local ordinances reviewed with qualified counsel.
+            </li>
           </ul>
         </section>
 
-        {/* Insurance note */}
-        <section className="mt-8 rounded-2xl border border-border bg-muted/30 p-6">
-          <h2 className="text-base font-extrabold text-foreground mb-2">Insurance note for {state.name}</h2>
-          <p className="text-sm leading-relaxed text-muted-foreground">{state.insuranceNote}</p>
-        </section>
-
-        {/* Tool CTA */}
-        <section className="mt-12 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
-          <h2 className="text-xl sm:text-2xl font-extrabold mb-2">Run the math on a {state.name} deal</h2>
-          <p className="text-sm sm:text-base opacity-90 mb-5">
-            Paste an address into TrueCap and get cap rate, cash-on-cash, DSCR, and 10-year projection in 60 seconds. State-specific property tax + insurance estimates included.
+        <section className="mt-8 rounded-2xl border border-amber-500/30 bg-amber-50/40 p-6">
+          <h2 className="text-base font-extrabold text-foreground">
+            Stale-review boundary
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-foreground">
+            Hand-curated property-tax percentages, income-tax rates, eviction
+            timelines, landlord ratings, insurance trends, city rankings,
+            strategy labels, and market narratives are not rendered here. A
+            generic source list does not substantiate those state-specific
+            claims. They require direct official dependencies and a fresh review
+            before publication.
           </p>
-          <Link href="/" className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
-            Analyze a property free <ArrowRight className="size-4" />
-          </Link>
         </section>
 
-        {/* Lead magnet — state pages are exactly the audience for the pack. */}
-        <div className="mt-10">
-          <LeadMagnetInline source="states" />
+        <div className="mt-12">
+          <SeoAnalyzerCta
+            context={`a ${state.name} property`}
+            utmSource="state-page"
+            supportingText={`For a supported address and asking price, start with labeled rent and rate benchmarks plus editable assumptions. Enter ${state.name} property tax and insurance from reviewed local evidence; the result is a preliminary screen, not an appraisal, lender approval, or investment recommendation.`}
+          />
         </div>
 
-        {/* Companion resources */}
         <section className="mt-10 rounded-2xl border border-border bg-card p-6 sm:p-8">
-          <h2 className="text-base font-extrabold text-foreground mb-3">
-            Underwrite a {state.name} deal in three steps
+          <h2 className="text-base font-extrabold text-foreground">
+            Review a {state.name} property in three steps
           </h2>
-          <ol className="list-decimal space-y-2 pl-5 text-sm leading-relaxed text-foreground">
+          <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-relaxed text-foreground">
             <li>
-              Screen the listing with the{" "}
-              <Link href="/tools/1-percent-rule-calculator" className="text-primary font-semibold hover:underline">
-                1% rule calculator
-              </Link>{" "}
-              — if it&apos;s in the ballpark for {state.name}, move on.
+              Collect the property-specific evidence above and record each
+              source and as-of date.
             </li>
             <li>
-              Compute returns in the full{" "}
-              <Link href="/#main" className="text-primary font-semibold hover:underline">
+              Enter a supported address and asking price in the{" "}
+              <Link
+                href="/#main"
+                className="font-semibold text-primary hover:underline"
+              >
                 TrueCap analyzer
-              </Link>{" "}
-              using local property tax + insurance figures — it returns cap
-              rate, cash-on-cash and DSCR from one address. Want the math
-              first? Read{" "}
-              <Link href="/blog/how-to-calculate-cap-rate" className="text-primary font-semibold hover:underline">
-                how to calculate cap rate
-              </Link>{" "}
-              and{" "}
-              <Link href="/blog/how-to-calculate-dscr" className="text-primary font-semibold hover:underline">
-                how to calculate DSCR
               </Link>
-              .
+              , then replace every generic or area-level starting assumption.
             </li>
             <li>
-              Match the deal to your strategy — see the released workflow for{" "}
-              <Link href="/for-buy-and-hold" className="text-primary font-semibold hover:underline">
-                buy-and-hold investors
+              Review the model&apos;s limits in the{" "}
+              <Link
+                href="/methodology"
+                className="font-semibold text-primary hover:underline"
+              >
+                public methodology
               </Link>{" "}
-              or review the educational{" "}
-              <Link href="/blog/brrrr-method-explained" className="text-primary font-semibold hover:underline">
-                BRRRR sequence
-              </Link>
-              .
+              and obtain appropriate local tax, legal, insurance, condition, and
+              lending advice.
             </li>
           </ol>
         </section>
 
-        {/* Other states */}
         <section className="mt-12 border-t border-border pt-6">
-          <p className="text-xs uppercase tracking-widest text-muted-foreground font-bold mb-3">
-            Other states
+          <p className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+            Other state verification guides
           </p>
           <div className="flex flex-wrap gap-2 text-sm">
             {Object.values(STATES)
-              .filter((s) => s.slug !== state.slug)
-              .map((s) => (
+              .filter((candidate) => candidate.slug !== state.slug)
+              .map((candidate) => (
                 <Link
-                  key={s.slug}
-                  href={`/states/${s.slug}`}
+                  key={candidate.slug}
+                  href={`/states/${candidate.slug}`}
                   className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
                 >
-                  {s.name}
+                  {candidate.name}
                 </Link>
               ))}
           </div>

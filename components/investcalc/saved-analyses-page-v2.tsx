@@ -3953,12 +3953,6 @@ export function SavedAnalysesPage({
                       Neighborhood
                     </th>
                   ) : null}
-                  <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">
-                    Status
-                  </th>
-                  <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">
-                    Actions
-                  </th>
                   <SortableTh
                     field="saved"
                     label="Saved"
@@ -3967,6 +3961,17 @@ export function SavedAnalysesPage({
                     onSort={handleSort}
                     className="whitespace-nowrap pr-4"
                   />
+                  <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">
+                    Status
+                  </th>
+                  {/* The table needs 1593px at DEFAULT columns inside a 1119px
+                      container on a 1440px laptop, so Actions — the row's
+                      primary control — sat ~350px past the right edge and was
+                      unreachable without discovering horizontal scroll. Pin it
+                      so Open is always in view; the rest still scrolls. */}
+                  <th className="sticky right-0 z-10 bg-card text-left text-xs uppercase tracking-wider text-muted-foreground font-bold shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.12)]">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -4219,6 +4224,22 @@ export function SavedAnalysesPage({
                             {item.neighborhood?.trim() || "—"}
                           </td>
                         ) : null}
+                        <td className="whitespace-nowrap pr-4 text-muted-foreground">
+                          <span className="inline-flex items-center gap-1.5">
+                            <CalendarClock className="h-3.5 w-3.5" />
+                            <span>
+                              {new Date(item.createdAt).toLocaleDateString(
+                                "en-US",
+                                {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                  timeZone: "UTC",
+                                },
+                              )}
+                            </span>
+                          </span>
+                        </td>
                         <td className="pr-2">
                           <div className="flex flex-col gap-2">
                             {canUsePipeline ? (
@@ -4302,7 +4323,7 @@ export function SavedAnalysesPage({
                             ) : null}
                           </div>
                         </td>
-                        <td className="pr-2">
+                        <td className="sticky right-0 z-10 bg-card pr-2 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.12)]">
                           {/* Consolidated: a single primary "Open Analysis" plus a
                             ⋯ overflow menu for the secondary actions. Previously
                             three full-width buttons here overflowed the row and
@@ -4383,22 +4404,6 @@ export function SavedAnalysesPage({
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </div>
-                        </td>
-                        <td className="whitespace-nowrap pr-4 text-muted-foreground">
-                          <span className="inline-flex items-center gap-1.5">
-                            <CalendarClock className="h-3.5 w-3.5" />
-                            <span>
-                              {new Date(item.createdAt).toLocaleDateString(
-                                "en-US",
-                                {
-                                  month: "short",
-                                  day: "numeric",
-                                  year: "numeric",
-                                  timeZone: "UTC",
-                                },
-                              )}
-                            </span>
-                          </span>
                         </td>
                       </tr>
                     </Fragment>

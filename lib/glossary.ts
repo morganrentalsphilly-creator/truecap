@@ -61,7 +61,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     definition:
       "Net Operating Income ÷ property value. The unleveraged return a property generates, independent of financing.",
     benchmark:
-      "Typical: 5–6% in Tier-1 coastal, 6–8% Midwest / Sun Belt, 8–10% cash-flow markets.",
+      "No universal range is a property fact or investment threshold. Compare consistently calculated cap rates using dated, local evidence and the same expense conventions.",
     formula: "Cap Rate = NOI ÷ Property Value",
     example:
       "A property with $36,000 of NOI ($60k gross rent minus $24k expenses) and a $450,000 purchase price has a cap rate of $36,000 ÷ $450,000 = 8.0%.",
@@ -77,12 +77,13 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     category: "metric",
     definition:
       "Annual cash flow ÷ total cash invested (down payment + closing + rehab). Tells you how hard your money is working.",
-    benchmark: "Most buy-and-hold investors target 8–12%.",
+    benchmark:
+      "There is no universal target. Set a criterion that fits the strategy, financing, liquidity, and risk constraints, then verify every cash-flow and cash-invested input.",
     formula: "CoC = Annual Cash Flow ÷ Total Cash Invested",
     example:
       "If you put $80,000 down on a $400,000 property and collect $8,800/yr in cash flow, your CoC is $8,800 ÷ $80,000 = 11.0%.",
     whyItMatters:
-      "Cash-on-cash is the metric leveraged investors should optimize for. It captures the actual return on YOUR money — cap rate doesn't, because it ignores financing.",
+      "Cash-on-cash incorporates modeled financing and cash invested, while cap rate excludes financing. Review it alongside cash flow, DSCR, risk, and the evidence behind the inputs rather than optimizing one metric in isolation.",
     related: ["capRate", "cashFlow", "irr", "dscr"],
     postUrl: "/blog/cap-rate-vs-cash-on-cash-vs-dscr",
   },
@@ -107,12 +108,12 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     definition:
       "Net Operating Income ÷ mortgage payment. Measures whether the property's income comfortably covers debt service.",
     benchmark:
-      "Lenders typically want ≥1.25 for investment loans; 1.0 means exactly break-even on debt service.",
+      "Under this formula, 1.0 means modeled NOI equals modeled debt service. Lender definitions, qualifying inputs, thresholds, and approval rules vary by product, borrower, and property.",
     formula: "DSCR = NOI ÷ Annual Debt Service",
     example:
       "A property with $36,000 NOI and $24,000 of annual mortgage payments has DSCR = $36,000 ÷ $24,000 = 1.50.",
     whyItMatters:
-      "DSCR is the constraint metric on every investment-property loan. Below 1.20–1.25, most lenders won't fund the deal at all. DSCR also tells you how much safety margin the property has.",
+      "DSCR shows the modeled relationship between NOI and debt service under the stated convention. It can prompt questions for a lender, but TrueCap does not reproduce every lender's calculation or predict approval.",
     related: ["noi", "capRate", "ltv"],
     postUrl: "/blog/dscr-loans-explained",
   },
@@ -151,7 +152,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     category: "metric",
     definition:
       "Total cash returned (cash flow + net sale proceeds) ÷ total cash invested. 2.0× means you doubled your money over the hold.",
-    benchmark: "Buy-and-hold investors typically target 1.8–2.5× over a 10-year hold.",
+    benchmark:
+      "There is no universal target or hold period. The result depends on the full modeled cash-flow and sale assumptions and should be reviewed with IRR and downside scenarios.",
     formula: "Equity Multiple = Total Cash Returned ÷ Total Cash Invested",
     example:
       "Invest $80k, collect $70k of cash flow over 10 years, then net $120k at sale → ($70k + $120k) ÷ $80k = 2.4×.",
@@ -166,7 +168,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     definition:
       "Your estimated average return per year over a 10-year hold, blending cash flow, loan paydown, and appreciation — not just the rent you pocket today.",
     benchmark:
-      "8–12%/yr is a solid long-run target for a leveraged buy-and-hold. It leans on appreciation and rent-growth assumptions, so treat it as a projection, not a promise.",
+      "There is no universal long-run target. The result is highly sensitive to rent, expense, financing, value, and sale assumptions, so treat it as a scenario rather than a forecast.",
     whyItMatters:
       "Cash flow alone undersells a rental: a deal that's near break-even today can still build real wealth through equity paydown and appreciation. This number is the closest single figure to 'what will this actually earn me long-term.'",
     related: ["irr", "coc", "appreciation"],
@@ -311,8 +313,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     definition:
       "Loan amount divided by the lender's eligible value basis. Investment-property cash-out limits vary by lender, program, property, borrower, seasoning, and appraisal.",
     formula: "LTV = Loan Amount ÷ Property Value",
-    example:
-      "A $300,000 loan on a $400,000 property = 75% LTV.",
+    example: "A $300,000 loan on a $400,000 property = 75% LTV.",
     whyItMatters:
       "LTV is one lender risk input. Lower leverage generally creates more equity buffer, but rate, approval, eligible value, and maximum LTV remain program- and borrower-specific.",
     related: ["downPayment", "dscr", "brrrr"],
@@ -372,7 +373,8 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     category: "financing",
     definition:
       "Personal monthly debt obligations ÷ personal gross monthly income.",
-    benchmark: "Conventional residential lenders cap DTI around 43–50% to approve a loan.",
+    benchmark:
+      "Conventional residential lenders cap DTI around 43–50% to approve a loan.",
     whyItMatters:
       "DTI can constrain conventional financing as a portfolio grows. Some DSCR programs use property coverage instead of personal DTI as the primary ratio, but they still apply borrower, credit, reserve, property, and program-specific requirements.",
     related: ["dscr", "ltv", "interestRate"],
@@ -394,7 +396,7 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     slug: "property-tax",
     category: "expense",
     definition:
-      "Annual property tax as a percent of value. Defaults to your state's effective rate (1.49% PA, 1.68% TX, etc.) — adjust for your county.",
+      "Annual property tax as a percent of value. Released underwriting accepts a local annual bill or reviewed local effective rate entered by the user; a blank field uses a disclosed generic 1.1% preliminary fallback.",
     whyItMatters:
       "Property tax is the second-largest expense after mortgage on most deals. State rates vary wildly: 0.3% in Hawaii vs 2.5%+ in some Texas MUD zones. Always pull the ACTUAL current tax bill from the county appraisal district — don't trust Zillow's estimate.",
     related: ["noi", "capRate"],
@@ -589,9 +591,9 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     slug: "selling-cost",
     category: "projection",
     definition:
-      "Realtor commissions + transfer tax + title fees on sale. Typically 6-9% of sale price.",
+      "An editable sale-cost assumption that can include brokerage compensation, transfer taxes, title or legal fees, concessions, and other transaction-specific costs.",
     whyItMatters:
-      "Selling costs eat into your IRR on the exit. A $500k sale at 8% selling cost = $40k of exit friction. This is one of the reasons long-hold strategies win — you avoid the friction by simply not selling.",
+      "Selling costs reduce modeled net sale proceeds and can materially change IRR. For illustration, an entered 8% cost on a $500,000 modeled sale is $40,000; obtain transaction- and jurisdiction-specific estimates rather than treating that example as typical or as a reason to choose a holding strategy.",
     related: ["irr"],
   },
 };
@@ -608,7 +610,7 @@ export function getGlossaryEntryBySlug(slug: string): GlossaryEntry | null {
 
 /** Get all entries in a category. */
 export function getGlossaryEntriesByCategory(
-  category: GlossaryCategory
+  category: GlossaryCategory,
 ): GlossaryEntry[] {
   return Object.values(GLOSSARY)
     .filter((e) => e.category === category)

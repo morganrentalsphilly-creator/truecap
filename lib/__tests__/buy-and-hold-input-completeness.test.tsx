@@ -241,6 +241,24 @@ describe("released buy-and-hold input completeness", () => {
       </>,
     );
     expect(metricHtml).toContain("Recurring Monthly Cash Flow (excl. balloon)");
+    const capRateHtml = renderToStaticMarkup(
+      <>
+        {
+          buildMetricTiles({
+            displayResult: result,
+            result,
+            isLoading: false,
+            address: values.address,
+            propertyType: values.propertyType,
+            annualizedReturnPct: null,
+          }).capRate
+        }
+      </>,
+    );
+    expect(capRateHtml).toContain("Modeled NOI divided by purchase price");
+    expect(capRateHtml).not.toMatch(
+      /Philadelphia|local median|2025 reference/i,
+    );
 
     const report = buildCanonicalReportData({ values, generatedAt: NOW });
     expect(report.financing).toMatchObject({

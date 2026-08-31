@@ -1,5 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { estimatePurchasePrice, NATIONAL_PRICE_TO_RENT } from "@/lib/estimate-price";
+import {
+  estimatePurchasePrice,
+  NATIONAL_PRICE_TO_RENT,
+} from "@/lib/estimate-price";
 
 describe("estimatePurchasePrice", () => {
   it("uses the national multiple when no state is given", () => {
@@ -8,7 +11,8 @@ describe("estimatePurchasePrice", () => {
     // 2000 * 12 * 15 = 360,000 (already a multiple of 5,000)
     expect(est!.price).toBe(2000 * 12 * NATIONAL_PRICE_TO_RENT);
     expect(est!.ratio).toBe(NATIONAL_PRICE_TO_RENT);
-    expect(est!.basis.toLowerCase()).toContain("national");
+    expect(est!.basis).toContain("screening placeholder");
+    expect(est!.basis).toContain("replace with asking price");
   });
 
   it("returns null for non-positive or non-finite rent", () => {
@@ -24,21 +28,16 @@ describe("estimatePurchasePrice", () => {
     expect(est!.price).toBeGreaterThan(0);
   });
 
-  it("uses a market-aware ratio for a known state (within a sane band)", () => {
-    const est = estimatePurchasePrice({ monthlyRent: 1800, state: "TX" });
-    expect(est).not.toBeNull();
-    expect(est!.price % 5000).toBe(0);
-    expect(est!.ratio).toBeGreaterThanOrEqual(6);
-    expect(est!.ratio).toBeLessThanOrEqual(35);
-    expect(est!.basis.toLowerCase()).toContain("texas");
-  });
-
-  it("matches state case-insensitively by abbr, name, or slug", () => {
-    const byAbbr = estimatePurchasePrice({ monthlyRent: 1800, state: "TX" });
-    const byName = estimatePurchasePrice({ monthlyRent: 1800, state: "Texas" });
-    const bySlug = estimatePurchasePrice({ monthlyRent: 1800, state: "texas" });
-    expect(byAbbr!.price).toBe(byName!.price);
-    expect(byName!.price).toBe(bySlug!.price);
+  it("does not let the stale state registry change the released estimate", () => {
+    const texas = estimatePurchasePrice({ monthlyRent: 1800, state: "TX" });
+    const california = estimatePurchasePrice({
+      monthlyRent: 1800,
+      state: "California",
+    });
+    const noState = estimatePurchasePrice({ monthlyRent: 1800 });
+    expect(texas).toEqual(noState);
+    expect(california).toEqual(noState);
+    expect(texas!.basis.toLowerCase()).not.toContain("texas");
   });
 
   it("falls back to the national multiple for an unknown state", () => {

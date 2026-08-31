@@ -53,9 +53,9 @@
   "shipNote": {
     "title": "Re-underwrite with real insurance numbers",
     "items": [
-      "Free: TrueCap pulls a baseline insurance estimate based on property type + location",
-      "Pro: sensitivity grid — see exactly how a $1,500/yr insurance hike moves your cap rate and cash flow",
-      "Quote insurance first, then run the deal →"
+      "TrueCap may start with a generic editable insurance estimate; it does not currently adjust that estimate by property type, state, region, or hazard exposure",
+      "Enter a current property-specific insurance quote and compare the recalculated cap rate and cash flow; insurance is not a preset sensitivity-grid axis",
+      "Verify insurance availability and terms independently before relying on the screen →"
     ]
   }
 }

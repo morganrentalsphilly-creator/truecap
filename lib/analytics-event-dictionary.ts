@@ -8,6 +8,8 @@
  * browser and server PostHog wrappers.
  */
 
+import { ACTIVE_ANALYTICS_EVENT_DEFINITIONS } from "@/lib/analytics-active-event-definitions";
+
 export type AnalyticsPrivacyClass =
   | "anonymous-aggregate"
   | "account-aggregate"
@@ -22,10 +24,15 @@ export type AnalyticsEventDefinition = {
 const define = (
   owner: AnalyticsEventDefinition["owner"],
   privacy: AnalyticsPrivacyClass,
-  allowedProperties: readonly string[] = []
+  allowedProperties: readonly string[] = [],
 ): AnalyticsEventDefinition => ({ owner, privacy, allowedProperties });
 
 export const ANALYTICS_EVENT_DICTIONARY = {
+  $pageview: define("growth", "anonymous-aggregate", ["$current_url"]),
+  organic_landing: define("growth", "anonymous-aggregate", [
+    "route_category",
+    "referral_source",
+  ]),
   landing_view: define("growth", "anonymous-aggregate", ["path"]),
   homepage_viewed: define("growth", "anonymous-aggregate", ["path"]),
   hero_address_submit: define("growth", "anonymous-aggregate", [
@@ -38,90 +45,344 @@ export const ANALYTICS_EVENT_DICTIONARY = {
     "entry_kind",
   ]),
   homepage_primary_cta: define("growth", "anonymous-aggregate", ["source"]),
-  analysis_started: define("growth", "anonymous-aggregate", ["property_type", "input_method", "is_authenticated"]),
-  property_input_method_selected: define("growth", "anonymous-aggregate", ["method"]),
-  analysis_completed: define("growth", "anonymous-aggregate", ["property_type", "verdict", "is_cash_purchase", "input_tab"]),
-  instant_screen_generated: define("growth", "anonymous-aggregate", ["property_type", "verdict"]),
-  first_analysis_completed: define("growth", "anonymous-aggregate", ["is_authenticated"]),
-  account_created: define("growth", "account-aggregate", ["method", "needs_email_confirmation"]),
-  product_evaluation_started: define("product", "account-aggregate", ["source"]),
-  evaluation_deal_completed: define("product", "account-aggregate", ["deal_number"]),
+  // Canonical passive-growth funnel uses anonymous taxonomies only.
+  analysis_started: define("growth", "anonymous-aggregate", [
+    "route_category",
+    "calculator_slug",
+    "referral_source",
+  ]),
+  property_input_method_selected: define("growth", "anonymous-aggregate", [
+    "method",
+  ]),
+  analysis_completed: define("growth", "anonymous-aggregate", [
+    "route_category",
+    "calculator_slug",
+    "referral_source",
+  ]),
+  instant_screen_generated: define("growth", "anonymous-aggregate", [
+    "property_type",
+    "verdict",
+  ]),
+  first_analysis_completed: define("growth", "anonymous-aggregate", [
+    "is_authenticated",
+  ]),
+  account_created: define("growth", "account-aggregate", ["referral_source"]),
+  product_evaluation_started: define("product", "account-aggregate", [
+    "referral_source",
+  ]),
+  evaluation_deal_completed: define("product", "account-aggregate", [
+    "deal_number",
+  ]),
   second_deal_completed: define("growth", "account-aggregate", ["within_days"]),
-  first_value_within_24h: define("growth", "account-aggregate", ["value_event"]),
+  first_value_within_24h: define("growth", "account-aggregate", [
+    "value_event",
+  ]),
   save_prompt_shown: define("growth", "anonymous-aggregate", ["placement"]),
   retained_30d: define("growth", "account-aggregate", ["activity"]),
   retained_90d: define("growth", "account-aggregate", ["activity"]),
-  second_unique_property_analyzed: define("growth", "account-aggregate", ["period"]),
-  buy_box_created: define("product", "account-aggregate", ["source", "is_default", "has_strategy"]),
-  material_assumption_overridden: define("product", "anonymous-aggregate", ["source", "field_group"]),
-  target_context_set: define("product", "account-aggregate", ["model_version", "rule_set_version", "target_source", "surface"]),
-  material_input_reviewed: define("product", "account-aggregate", ["field_key", "source_class", "confirmation_type", "method_version"]),
-  material_input_verified: define("product", "account-aggregate", ["field_key", "evidence_level", "method_version"]),
-  evidence_readiness_changed: define("product", "account-aggregate", ["from_state", "to_state", "contract_version"]),
-  activation_completed: define("product", "account-aggregate", ["definition_version"]),
+  second_unique_property_analyzed: define("growth", "account-aggregate", [
+    "period",
+  ]),
+  buy_box_created: define("product", "account-aggregate", [
+    "source",
+    "is_default",
+    "has_strategy",
+  ]),
+  material_assumption_overridden: define("product", "anonymous-aggregate", [
+    "source",
+    "field_group",
+  ]),
+  target_context_set: define("product", "account-aggregate", [
+    "model_version",
+    "rule_set_version",
+    "target_source",
+    "surface",
+  ]),
+  material_input_reviewed: define("product", "account-aggregate", [
+    "field_key",
+    "source_class",
+    "confirmation_type",
+    "method_version",
+  ]),
+  material_input_verified: define("product", "account-aggregate", [
+    "field_key",
+    "evidence_level",
+    "method_version",
+  ]),
+  evidence_readiness_changed: define("product", "account-aggregate", [
+    "from_state",
+    "to_state",
+    "contract_version",
+  ]),
+  activation_completed: define("product", "account-aggregate", [
+    "definition_version",
+  ]),
 
   decision_viewed: define("product", "anonymous-aggregate", ["property_type"]),
-  offer_ceiling_viewed: define("product", "anonymous-aggregate", ["target_source", "access_level", "decision_readiness", "has_feasible"]),
-  binding_constraint_viewed: define("product", "anonymous-aggregate", ["constraint", "target_source"]),
-  verification_task_created: define("product", "account-aggregate", ["field_key", "priority"]),
-  verification_task_completed: define("product", "account-aggregate", ["field_key", "evidence_level"]),
+  offer_ceiling_viewed: define("product", "anonymous-aggregate", [
+    "target_source",
+    "access_level",
+    "decision_readiness",
+    "has_feasible",
+  ]),
+  binding_constraint_viewed: define("product", "anonymous-aggregate", [
+    "constraint",
+    "target_source",
+  ]),
+  verification_task_created: define("product", "account-aggregate", [
+    "field_key",
+    "priority",
+  ]),
+  verification_task_completed: define("product", "account-aggregate", [
+    "field_key",
+    "evidence_level",
+  ]),
   decision_recorded: define("product", "account-aggregate", ["decision"]),
-  deal_saved: define("product", "account-aggregate", ["property_type", "is_update"]),
-  comparison_completed: define("product", "account-aggregate", ["count_bucket"]),
-  evaluation_comparison_used: define("product", "account-aggregate", ["count_bucket"]),
+  deal_saved: define("product", "account-aggregate", [
+    "property_type",
+    "is_update",
+  ]),
+  comparison_completed: define("product", "account-aggregate", [
+    "count_bucket",
+  ]),
+  evaluation_comparison_used: define("product", "account-aggregate", [
+    "count_bucket",
+  ]),
   shortlist_item_promoted: define("product", "account-aggregate", ["source"]),
 
-  paywall_viewed: define("billing", "anonymous-aggregate", ["trigger", "placement"]),
-  upgrade_modal_viewed: define("billing", "anonymous-aggregate", ["feature", "placement"]),
+  paywall_viewed: define("billing", "anonymous-aggregate", [
+    "trigger",
+    "placement",
+  ]),
+  upgrade_modal_viewed: define("billing", "anonymous-aggregate", [
+    "feature",
+    "placement",
+  ]),
   complete_decision_trial_started: define("billing", "account-aggregate"),
   complete_decision_trial_completed: define("billing", "account-aggregate"),
-  complete_decision_checkout_started: define("billing", "anonymous-aggregate", ["source"]),
+  complete_decision_checkout_started: define("billing", "anonymous-aggregate", [
+    "source",
+  ]),
   complete_decision_purchased: define("billing", "account-aggregate"),
-  upgrade_credit_applied: define("billing", "account-aggregate", ["destination_plan"]),
-  subscription_checkout_started: define("billing", "account-aggregate", ["plan", "interval"]),
-  subscription_started: define("billing", "account-aggregate", ["plan", "interval", "trial_granted"]),
-  subscription_activated: define("billing", "account-aggregate", ["plan", "interval", "trial_granted"]),
-  plan_changed: define("billing", "account-aggregate", ["from_plan", "to_plan", "effective_timing"]),
-  subscription_cancelled: define("billing", "account-aggregate", ["plan", "effective_timing"]),
+  upgrade_credit_applied: define("billing", "account-aggregate", [
+    "destination_plan",
+  ]),
+  upgrade_started: define("billing", "account-aggregate", [
+    "plan_identifier",
+    "referral_source",
+  ]),
+  subscription_checkout_started: define("billing", "account-aggregate", [
+    "plan",
+    "interval",
+  ]),
+  subscription_started: define("billing", "account-aggregate", [
+    "plan_identifier",
+    "referral_source",
+  ]),
+  subscription_activated: define("billing", "account-aggregate", [
+    "plan",
+    "interval",
+    "trial_granted",
+  ]),
+  plan_changed: define("billing", "account-aggregate", [
+    "from_plan",
+    "to_plan",
+    "effective_timing",
+  ]),
+  subscription_cancelled: define("billing", "account-aggregate", [
+    "plan",
+    "effective_timing",
+  ]),
 
-  decision_memo_generated: define("product", "anonymous-aggregate", ["surface", "audience", "methodology_version"]),
-  report_viewed: define("product", "anonymous-aggregate", ["report_type", "surface"]),
-  pdf_exported: define("product", "anonymous-aggregate", ["property_type", "has_deal_score"]),
-  share_created: define("product", "anonymous-aggregate", ["audience", "address_included"]),
-  share_viewed: define("growth", "anonymous-aggregate", ["address_included", "share_format"]),
+  decision_memo_generated: define("product", "anonymous-aggregate", [
+    "surface",
+    "audience",
+    "methodology_version",
+  ]),
+  report_viewed: define("product", "anonymous-aggregate", [
+    "report_type",
+    "surface",
+  ]),
+  pdf_exported: define("product", "anonymous-aggregate", [
+    "property_type",
+    "has_deal_score",
+  ]),
+  share_created: define("product", "anonymous-aggregate", [
+    "audience",
+    "address_included",
+  ]),
+  shared_analysis_opened: define("growth", "anonymous-aggregate", [
+    "referral_source",
+  ]),
+  shared_analysis_copied: define("growth", "account-aggregate", [
+    "referral_source",
+  ]),
+  content_cta_clicked: define("growth", "anonymous-aggregate", [
+    "route_category",
+    "content_type",
+    "referral_source",
+  ]),
+  embed_cta_clicked: define("growth", "anonymous-aggregate", [
+    "calculator_slug",
+    "referral_source",
+  ]),
+  share_viewed: define("growth", "anonymous-aggregate", [
+    "address_included",
+    "share_format",
+  ]),
   share_revoked: define("product", "account-aggregate"),
   shared_scenario_forked: define("product", "account-aggregate"),
-  memo_generated: define("product", "account-aggregate", ["surface", "model_version", "rule_set_version"]),
-  recipient_assumption_challenged: define("product", "account-aggregate", ["source_class", "confirmation_type"]),
-  recipient_evidence_requested: define("product", "account-aggregate", ["source_class", "confirmation_type"]),
-  recipient_scenario_forked: define("product", "account-aggregate", ["model_version", "rule_set_version"]),
-  recipient_response_recorded: define("product", "account-aggregate", ["response_type"]),
+  memo_generated: define("product", "account-aggregate", [
+    "surface",
+    "model_version",
+    "rule_set_version",
+  ]),
+  recipient_assumption_challenged: define("product", "account-aggregate", [
+    "source_class",
+    "confirmation_type",
+  ]),
+  recipient_evidence_requested: define("product", "account-aggregate", [
+    "source_class",
+    "confirmation_type",
+  ]),
+  recipient_scenario_forked: define("product", "account-aggregate", [
+    "model_version",
+    "rule_set_version",
+  ]),
+  recipient_response_recorded: define("product", "account-aggregate", [
+    "response_type",
+  ]),
   second_unique_property: define("growth", "account-aggregate", ["period"]),
-  return_within_7d: define("growth", "account-aggregate", ["activation_surface"]),
+  return_within_7d: define("growth", "account-aggregate", [
+    "activation_surface",
+  ]),
   advocacy_prompt_shown: define("growth", "account-aggregate", ["value_event"]),
   quote_submitted: define("growth", "account-aggregate", ["value_event"]),
-  referral_converted: define("growth", "account-aggregate", ["attribution_surface"]),
-  client_decision_assigned: define("professional", "account-aggregate", ["role"]),
-  client_decision_approved: define("professional", "account-aggregate", ["decision"]),
+  referral_converted: define("growth", "account-aggregate", [
+    "attribution_surface",
+  ]),
+  client_decision_assigned: define("professional", "account-aggregate", [
+    "role",
+  ]),
+  client_decision_approved: define("professional", "account-aggregate", [
+    "decision",
+  ]),
 
-  data_lookup_started: define("data-quality", "operational-no-customer-data", ["provider", "lookup_type"]),
-  data_lookup_succeeded: define("data-quality", "operational-no-customer-data", ["provider", "lookup_type", "evidence_level"]),
-  data_lookup_failed: define("data-quality", "operational-no-customer-data", ["provider", "lookup_type", "failure_class"]),
-  evidence_grade_changed: define("data-quality", "account-aggregate", ["field_key", "from_grade", "to_grade"]),
-  decision_readiness_changed: define("product", "account-aggregate", ["from_stage", "to_stage", "method_version"]),
-  material_change_detected: define("product", "account-aggregate", ["change_type"]),
-  calculation_parity_failed: define("data-quality", "operational-no-customer-data", ["surface", "methodology_version", "failure_class"]),
-  provider_fallback_used: define("data-quality", "operational-no-customer-data", ["provider", "fallback_class", "stale_band", "mismatch_reason"]),
-  model_version_mismatch: define("data-quality", "operational-no-customer-data", ["surface", "stored_version", "running_version", "failure_class"]),
-  historical_snapshot_mutation: define("data-quality", "operational-no-customer-data", ["surface", "methodology_version", "failure_class"]),
-  migration_backfill_progress: define("data-quality", "operational-no-customer-data", ["migration", "phase", "status"]),
-  webhook_reconciliation_failed: define("billing", "operational-no-customer-data", ["object_type", "error_class", "recoverable"]),
-  entitlement_divergence: define("billing", "operational-no-customer-data", ["plan_state", "entitlement_state", "error_class"]),
-  paid_memo_fulfillment_failed: define("billing", "operational-no-customer-data", ["lifecycle_state", "error_class", "recoverable"]),
-  share_authorization_failed: define("product", "operational-no-customer-data", ["route", "failure_class"]),
+  data_lookup_started: define("data-quality", "operational-no-customer-data", [
+    "provider",
+    "lookup_type",
+  ]),
+  data_lookup_succeeded: define(
+    "data-quality",
+    "operational-no-customer-data",
+    ["provider", "lookup_type", "evidence_level"],
+  ),
+  data_lookup_failed: define("data-quality", "operational-no-customer-data", [
+    "provider",
+    "lookup_type",
+    "failure_class",
+  ]),
+  evidence_grade_changed: define("data-quality", "account-aggregate", [
+    "field_key",
+    "from_grade",
+    "to_grade",
+  ]),
+  decision_readiness_changed: define("product", "account-aggregate", [
+    "from_stage",
+    "to_stage",
+    "method_version",
+  ]),
+  material_change_detected: define("product", "account-aggregate", [
+    "change_type",
+  ]),
+  calculation_parity_failed: define(
+    "data-quality",
+    "operational-no-customer-data",
+    ["surface", "methodology_version", "failure_class"],
+  ),
+  provider_fallback_used: define(
+    "data-quality",
+    "operational-no-customer-data",
+    ["provider", "fallback_class", "stale_band", "mismatch_reason"],
+  ),
+  model_version_mismatch: define(
+    "data-quality",
+    "operational-no-customer-data",
+    ["surface", "stored_version", "running_version", "failure_class"],
+  ),
+  historical_snapshot_mutation: define(
+    "data-quality",
+    "operational-no-customer-data",
+    ["surface", "methodology_version", "failure_class"],
+  ),
+  migration_backfill_progress: define(
+    "data-quality",
+    "operational-no-customer-data",
+    ["migration", "phase", "status"],
+  ),
+  webhook_reconciliation_failed: define(
+    "billing",
+    "operational-no-customer-data",
+    ["object_type", "error_class", "recoverable"],
+  ),
+  entitlement_divergence: define("billing", "operational-no-customer-data", [
+    "plan_state",
+    "entitlement_state",
+    "error_class",
+  ]),
+  paid_memo_fulfillment_failed: define(
+    "billing",
+    "operational-no-customer-data",
+    ["lifecycle_state", "error_class", "recoverable"],
+  ),
+  share_authorization_failed: define(
+    "product",
+    "operational-no-customer-data",
+    ["route", "failure_class"],
+  ),
+
+  ...ACTIVE_ANALYTICS_EVENT_DEFINITIONS,
 } as const satisfies Record<string, AnalyticsEventDefinition>;
 
 export type DocumentedAnalyticsEvent = keyof typeof ANALYTICS_EVENT_DICTIONARY;
+
+/** Ordered passive-growth funnel used by the internal analytics runbook. */
+export const PRIVACY_SAFE_FUNNEL_EVENTS = [
+  "analysis_started",
+  "analysis_completed",
+  "account_created",
+  "product_evaluation_started",
+  "upgrade_started",
+  "subscription_started",
+  "content_cta_clicked",
+  "embed_cta_clicked",
+  "shared_analysis_opened",
+  "shared_analysis_copied",
+] as const satisfies readonly DocumentedAnalyticsEvent[];
+
+/**
+ * @deprecated Dashboard-migration vocabulary only. Product code must not emit
+ * these aliases beside the canonical passive-growth events above.
+ */
+export const DEPRECATED_PASSIVE_GROWTH_EVENT_NAMES = [
+  "analyzer_started",
+  "analysis_run",
+  "analyzer_completed",
+  "instant_screen_generated",
+  "signup_completed",
+  "pro_checkout_started",
+  "checkout_started",
+  "subscription_checkout_started",
+  "agent_pro_checkout_started",
+  "pro_subscribed",
+  "subscription_activated",
+  "pro_subscription_started",
+  "pro_trial_started",
+  "trial_started",
+  "paid_conversion",
+  "share_viewed",
+  "shared_scenario_forked",
+] as const;
 
 const ALWAYS_BLOCKED_KEYS = new Set([
   "address",
@@ -152,26 +413,37 @@ function isAlwaysBlockedAnalyticsKey(key: string): boolean {
 }
 
 function safeScalar(value: unknown): value is string | number | boolean | null {
-  return value == null || ["string", "number", "boolean"].includes(typeof value);
+  return (
+    value == null || ["string", "number", "boolean"].includes(typeof value)
+  );
 }
 
-/** Apply the exact allowlist for documented events and a sensitive-key denylist
- * to the legacy namespace. Nested objects/arrays are never accepted. */
+/**
+ * Apply the exact allowlist for documented events. Unknown events fail closed:
+ * their name may still be retained temporarily for dashboard compatibility,
+ * but none of their caller-supplied properties cross the telemetry boundary.
+ * Nested objects/arrays are never accepted.
+ */
 export function sanitizeAnalyticsEventProperties(
   event: string,
-  properties?: Record<string, unknown> | null
+  properties?: Record<string, unknown> | null,
 ): Record<string, string | number | boolean | null> | undefined {
   if (!properties) return undefined;
-  const definition = ANALYTICS_EVENT_DICTIONARY[event as DocumentedAnalyticsEvent];
-  const allowed = definition ? new Set<string>(definition.allowedProperties) : null;
+  const definition =
+    ANALYTICS_EVENT_DICTIONARY[event as DocumentedAnalyticsEvent];
+  if (!definition) return undefined;
+  const allowed = new Set<string>(definition.allowedProperties);
   const entries = Object.entries(properties).filter(
     ([key, value]) =>
       !isAlwaysBlockedAnalyticsKey(key) &&
-      (!allowed || allowed.has(key)) &&
-      safeScalar(value)
+      allowed.has(key) &&
+      safeScalar(value),
   );
   return entries.length > 0
-    ? (Object.fromEntries(entries) as Record<string, string | number | boolean | null>)
+    ? (Object.fromEntries(entries) as Record<
+        string,
+        string | number | boolean | null
+      >)
     : undefined;
 }
 

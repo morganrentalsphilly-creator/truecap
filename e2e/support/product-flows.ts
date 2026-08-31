@@ -119,9 +119,11 @@ export async function saveUniqueSampleDeal(
   await expect(page).toHaveURL(/[?&]savedDeal=[0-9a-f-]{36}(?:&|$)/i, {
     timeout: 30_000,
   });
-  await expect(page.getByText("Deal saved", { exact: true })).toBeVisible({
-    timeout: 30_000,
-  });
+  // The savedDeal URL transition can rerender the result boundary and discard
+  // transient feedback. Verify the persisted state instead of racing a toast.
+  await expect(
+    summary.getByRole("button", { name: "Saved", exact: true }),
+  ).toBeVisible({ timeout: 30_000 });
 
   const savedDealId = new URL(page.url()).searchParams.get("savedDeal");
   if (!savedDealId)

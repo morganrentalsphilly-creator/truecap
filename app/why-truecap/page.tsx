@@ -3,7 +3,10 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
 import { SiteFooter } from "@/components/marketing/site-footer";
-import { HomepageFaq, VsCompetitors } from "@/components/marketing/landing-sections";
+import {
+  HomepageFaq,
+  VsCompetitors,
+} from "@/components/marketing/landing-sections";
 
 /**
  * Dedicated "Why TrueCap" page — houses the competitor comparison matrix
@@ -16,17 +19,17 @@ import { HomepageFaq, VsCompetitors } from "@/components/marketing/landing-secti
  * client-side, same as the homepage.
  */
 export const metadata: Metadata = {
-  title: "Why TrueCap — vs Spreadsheets, DealCheck & BiggerPockets",
+  title: { absolute: "Why TrueCap for Rental Property Analysis" },
   description:
-    "Compare the workflows behind spreadsheets, traditional rental-analysis software, and TrueCap—then choose the approach that fits how you invest.",
+    "Compare TrueCap with spreadsheets and rental analysis tools, including workflow, assumptions, Offer Ceiling, reports, and where each approach fits.",
   alternates: { canonical: "/why-truecap" },
   // Own OG/Twitter card so shares of this "vs competitor" money page show the
   // comparison intent, not the generic homepage card from layout.tsx. Mirrors
   // the /for-agents pattern; /home.jpg already exists.
   openGraph: {
-    title: "Why TrueCap — vs Spreadsheets, DealCheck & BiggerPockets",
+    title: "Why TrueCap for Rental Property Analysis",
     description:
-      "A fair workflow comparison of spreadsheets, traditional rental-analysis software, and TrueCap.",
+      "Compare TrueCap with spreadsheets and rental analysis tools, including workflow, assumptions, Offer Ceiling, reports, and where each approach fits.",
     url: "/why-truecap",
     type: "website",
     images: [
@@ -38,7 +41,13 @@ export const metadata: Metadata = {
       },
     ],
   },
-  twitter: { card: "summary_large_image", images: ["/home.jpg"] },
+  twitter: {
+    card: "summary_large_image",
+    title: "Why TrueCap for Rental Property Analysis",
+    description:
+      "Compare TrueCap with spreadsheets and rental analysis tools, including workflow, assumptions, Offer Ceiling, reports, and where each approach fits.",
+    images: ["/home.jpg"],
+  },
 };
 
 export default function WhyTrueCapPage() {
@@ -52,7 +61,9 @@ export default function WhyTrueCapPage() {
             readers and crawlers use the H1 as the page's name). Rendered sr-only
             so the existing layout is untouched; every section heading below stays
             an H2 nested under it. Mirrors the page <title>. */}
-        <h1 className="sr-only">Why TrueCap — vs spreadsheets, DealCheck &amp; BiggerPockets</h1>
+        <h1 className="sr-only">
+          Why TrueCap — vs spreadsheets, DealCheck &amp; BiggerPockets
+        </h1>
         <VsCompetitors />
         <HomepageFaq structuredData={false} />
         <section className="border-t border-border bg-background">
@@ -61,8 +72,8 @@ export default function WhyTrueCapPage() {
               See it on your own deal.
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">
-              Type an address — get cap rate, cash flow, DSCR, and a plain-English
-              verdict in 60 seconds. No card, no signup.
+              Type an address — get cap rate, cash flow, DSCR, and a
+              plain-English verdict in 60 seconds. No card, no signup.
             </p>
             <Link
               href="/"

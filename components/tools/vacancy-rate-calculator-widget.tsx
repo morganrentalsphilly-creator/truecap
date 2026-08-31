@@ -11,7 +11,7 @@
  */
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
+import { AnalyzerHandoffLink } from "@/components/analyzer-handoff-link";
 import { ArrowUpRight, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -56,23 +56,23 @@ export function VacancyRateCalculatorWidget() {
     result.vacancyPct < 5
       ? "Aggressive (low)"
       : result.vacancyPct < 8
-      ? "Realistic"
-      : result.vacancyPct < 12
-      ? "Conservative"
-      : "Distressed";
+        ? "Realistic"
+        : result.vacancyPct < 12
+          ? "Conservative"
+          : "Distressed";
   const verdictColor =
     result.vacancyPct < 5
       ? "text-amber-700"
       : result.vacancyPct < 12
-      ? "text-[var(--metric-positive)]"
-      : "text-[var(--metric-negative)]";
+        ? "text-[var(--metric-positive)]"
+        : "text-[var(--metric-negative)]";
 
   // Moment-of-result handoff into the full analyzer (P2-2 pattern shared by
   // the other tool widgets) — carries the rent the user already typed so the
   // analyzer prefills it (partial handoffs are supported by design).
   const handoffHref = buildAnalyzerHandoffUrl(
     { monthlyRent: num(monthlyRent) },
-    { utmSource: "vacancy-rate-calculator" }
+    { utmSource: "vacancy-rate-calculator" },
   );
 
   return (
@@ -120,10 +120,7 @@ export function VacancyRateCalculatorWidget() {
       </div>
 
       <div className="mt-4">
-        <Label
-          htmlFor="vr-turn"
-          className="text-xs text-muted-foreground"
-        >
+        <Label htmlFor="vr-turn" className="text-xs text-muted-foreground">
           Turnover cost (cleaning, repairs, listing fees)
         </Label>
         <div className="mt-1 relative">
@@ -149,16 +146,14 @@ export function VacancyRateCalculatorWidget() {
         <p
           className={cn(
             "mt-1 text-4xl font-extrabold tabular-nums",
-            verdictColor
+            verdictColor,
           )}
         >
           {fmtPct(result.vacancyPct)}
         </p>
         <p className="mt-1 text-sm text-muted-foreground tabular-nums">
           {fmtMoney(result.totalLoss)} lost per year ·{" "}
-          <span className={cn("font-semibold", verdictColor)}>
-            {verdict}
-          </span>
+          <span className={cn("font-semibold", verdictColor)}>{verdict}</span>
         </p>
         <details className="mt-3 group">
           <summary className="cursor-pointer text-xs font-semibold text-muted-foreground hover:text-foreground">
@@ -186,19 +181,22 @@ export function VacancyRateCalculatorWidget() {
       </div>
 
       <p className="mt-4 text-xs text-muted-foreground leading-relaxed">
-        National average vacancy on long-term residential rentals runs
-        7-9%. Sellers and listing brochures typically quote 5%. Anything
-        under 5% is aggressive — update the price assumption and rerun the screen.
+        Vacancy varies by property, lease terms, submarket, season, and
+        management. Treat the entered value as an editable scenario, compare it
+        with recent relevant local evidence, and stress-test a less favorable
+        case before relying on the screen.
       </p>
 
-      <Link
-        href={handoffHref} target="_top"
+      <AnalyzerHandoffLink
+        handoffHref={handoffHref}
+        target="_top"
         className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="w-4 h-4" />
-        Run the full analysis with this rent — cash flow, cap rate, DSCR, projections — free
+        Run the free core analysis; projections appear when your access includes
+        them
         <ArrowUpRight className="w-4 h-4" />
-      </Link>
+      </AnalyzerHandoffLink>
     </div>
   );
 }

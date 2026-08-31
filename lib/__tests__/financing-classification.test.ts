@@ -45,11 +45,17 @@ describe("v1 all-cash classification", () => {
     expect(normalizeSource(financing)).toContain(
       normalizeSource("downPaymentPct >= 0 && downPaymentPct < 20"),
     );
-    expect(calculator).toContain(
-      "is_cash_purchase: isAllCashDownPayment(values.downPaymentPct)"
+    expect(normalizeSource(calculator)).toContain(
+      normalizeSource(`trackEvent("analysis_started", {
+        route_category: "analyzer",
+        calculator_slug: "rental-property",
+      })`),
     );
+    expect(calculator).not.toContain("is_cash_purchase:");
     expect(financing).not.toContain("downPaymentPct === 0");
-    expect(calculator).not.toContain("!values.downPaymentPct || values.downPaymentPct >= 100");
+    expect(calculator).not.toContain(
+      "!values.downPaymentPct || values.downPaymentPct >= 100",
+    );
   });
 
   it("does not replace an explicit 0% down payment with 20% in strategy cards", () => {

@@ -6,7 +6,7 @@
  */
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
+import { AnalyzerHandoffLink } from "@/components/analyzer-handoff-link";
 import { ArrowUpRight, Sparkles, Check, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,7 +42,7 @@ export function OnePercentRuleWidget() {
   // Carry the user's price + rent into the full analyzer (P2-2 handoff).
   const handoffHref = buildAnalyzerHandoffUrl(
     { purchasePrice: num(price), monthlyRent: num(rent) },
-    { utmSource: "1-percent-rule-calculator" }
+    { utmSource: "1-percent-rule-calculator" },
   );
 
   return (
@@ -54,11 +54,16 @@ export function OnePercentRuleWidget() {
           </h2>
 
           <div>
-            <Label htmlFor="onepct-price" className="text-sm font-medium text-foreground mb-1.5 block">
+            <Label
+              htmlFor="onepct-price"
+              className="text-sm font-medium text-foreground mb-1.5 block"
+            >
               Purchase Price
             </Label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                $
+              </span>
               <Input
                 id="onepct-price"
                 type="number"
@@ -71,11 +76,16 @@ export function OnePercentRuleWidget() {
           </div>
 
           <div>
-            <Label htmlFor="onepct-rent" className="text-sm font-medium text-foreground mb-1.5 block">
+            <Label
+              htmlFor="onepct-rent"
+              className="text-sm font-medium text-foreground mb-1.5 block"
+            >
               Monthly Rent
             </Label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                $
+              </span>
               <Input
                 id="onepct-rent"
                 type="number"
@@ -88,9 +98,9 @@ export function OnePercentRuleWidget() {
           </div>
 
           <p className="text-xs text-muted-foreground">
-            The 1% rule is a screening filter, not an investment decision. A property
-            that passes is worth a deeper underwrite. A property that fails
-            isn&apos;t necessarily a bad deal — appreciation markets often
+            The 1% rule is a screening filter, not an investment decision. A
+            property that passes is worth a deeper underwrite. A property that
+            fails isn&apos;t necessarily a bad deal — appreciation markets often
             fail the 1% rule for good reason.
           </p>
         </div>
@@ -99,10 +109,15 @@ export function OnePercentRuleWidget() {
           <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
             Rent / Price
           </div>
-          <div className={cn("text-5xl sm:text-6xl font-extrabold mt-2 tabular-nums",
-            !hasResult
-              ? "text-muted-foreground"
-              : passes ? "text-[var(--metric-positive)]" : "text-[var(--metric-negative)]")}
+          <div
+            className={cn(
+              "text-5xl sm:text-6xl font-extrabold mt-2 tabular-nums",
+              !hasResult
+                ? "text-muted-foreground"
+                : passes
+                  ? "text-[var(--metric-positive)]"
+                  : "text-[var(--metric-negative)]",
+            )}
           >
             {hasResult ? `${ratio.toFixed(2)}%` : "—"}
           </div>
@@ -131,14 +146,16 @@ export function OnePercentRuleWidget() {
         </div>
       </div>
 
-      <Link
-        href={handoffHref} target="_top"
+      <AnalyzerHandoffLink
+        handoffHref={handoffHref}
+        target="_top"
         className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
       >
         <Sparkles className="w-4 h-4" />
-        Run the full analysis with these numbers — cap rate, CoC, DSCR, and cash flow — free in TrueCap
+        Run the full analysis with these numbers — cap rate, CoC, DSCR, and cash
+        flow — free in TrueCap
         <ArrowUpRight className="w-4 h-4" />
-      </Link>
+      </AnalyzerHandoffLink>
     </div>
   );
 }

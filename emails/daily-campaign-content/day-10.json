@@ -2,16 +2,16 @@
   "day": 10,
   "send_date": "2026-06-10",
   "subject": "stop guessing, paste an address",
-  "preheader": "free signup, no card, 60 seconds to your first underwrite.",
-  "headline": "Theory is fine. A real underwrite on a real address is better.",
+  "preheader": "start a free preliminary screen with no card.",
+  "headline": "Review the assumptions on a real address.",
   "body": [
-    "Most rental investors I talk to have read more about cap rate and DSCR than they've ever calculated on a real property. The reading is fine. The doing is what changes outcomes.",
-    "Pick any address right now. A listing you're considering. A property you already own. A neighbor's house, out of curiosity. Paste it at usetruecap.com. No card, no install, no spreadsheet. Free.",
-    "What you'll review in 60 seconds: cap rate, cash-on-cash, DSCR, NOI, operating expense breakdown, selected-rule fit, and a secondary Screening Index band — Strong, Solid, Mixed, Marginal, or Negative. The band is triage context, not a probability, appraisal, or buy/pass instruction. You can tweak any assumption and watch the numbers update in real time.",
-    "If the analysis is wrong (it sometimes is — rent comps are imperfect, tax assessments vary), you'll know exactly which assumption to challenge. That's still a 30-minute spreadsheet collapsed into 60 seconds.",
-    "The thing that separates investors who buy good deals from investors who talk about good deals is the number of properties they've actually underwritten. The tool is free. Go use it."
+    "Reading about cap rate and DSCR is different from checking how the calculations respond to the assumptions for a specific property.",
+    "Choose a supported address, enter the asking price, and review the starting assumptions at usetruecap.com. The preliminary screen is free and does not require a card.",
+    "The screen shows cap rate, cash-on-cash return, DSCR, NOI, an operating-expense breakdown, selected-rule fit, and a secondary Screening Index band — Strong, Solid, Mixed, Marginal, or Negative. The band is triage context, not a probability, appraisal, lender approval, or buy/pass instruction. You can edit assumptions and see the modeled numbers update.",
+    "Rent comps, public records, and generic defaults can be incomplete or wrong. The editable breakdown helps you identify which inputs still need current evidence before anyone relies on the result.",
+    "Use the free screen to practice reviewing assumptions across more properties; verify every material input independently."
   ],
-  "cta_text": "Run your first deal",
+  "cta_text": "Run a preliminary screen",
   "cta_url": "https://usetruecap.com/",
   "signature_note": "PS — if you run one and the screening readout surprises you, hit reply and tell me which assumption looks off. I read everything."
 }

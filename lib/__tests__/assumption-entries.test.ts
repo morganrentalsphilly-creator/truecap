@@ -14,7 +14,7 @@ describe("buildAssumptionEntries (truthful assumptions strip)", () => {
     expect(e.map((x) => [x.label, x.source])).toEqual([
       ["Rent", "HUD rent benchmark (county)"],
       ["Mortgage rate", "FRED owner-occupied benchmark"],
-      ["Property tax", "State tax benchmark"],
+      ["Property tax", "Legacy state estimate — verify locally"],
       ["Expenses", "Smart defaults"],
     ]);
     expect(e.every((x) => !x.manual)).toBe(true);
@@ -22,10 +22,17 @@ describe("buildAssumptionEntries (truthful assumptions strip)", () => {
 
   it("says 'You entered it' for a field the user overrode — never HUD", () => {
     const e = buildAssumptionEntries(
-      { ...fullEnrichment, monthlyRent: { source: "hud-fmr", overridden: true } },
-      false
+      {
+        ...fullEnrichment,
+        monthlyRent: { source: "hud-fmr", overridden: true },
+      },
+      false,
     );
-    expect(e[0]).toMatchObject({ label: "Rent", source: "You entered it", manual: true });
+    expect(e[0]).toMatchObject({
+      label: "Rent",
+      source: "You entered it",
+      manual: true,
+    });
     // The untouched fields keep their live sources.
     expect(e[1]!.source).toBe("FRED owner-occupied benchmark");
   });
@@ -41,7 +48,7 @@ describe("buildAssumptionEntries (truthful assumptions strip)", () => {
   it("labels ZIP-level HUD rent distinctly", () => {
     const e = buildAssumptionEntries(
       { monthlyRent: { source: "hud-safmr", detail: "19103" } },
-      false
+      false,
     );
     expect(e[0]!.source).toBe("HUD rent benchmark (ZIP)");
   });
@@ -55,7 +62,7 @@ describe("buildAssumptionEntries (truthful assumptions strip)", () => {
           fetchedAt: "2026-08-25",
         },
       },
-      false
+      false,
     );
     expect(e[0]).toMatchObject({
       source: "RentCast market-rent estimate",
@@ -71,7 +78,7 @@ describe("buildAssumptionEntries (truthful assumptions strip)", () => {
         monthlyRent: { source: "hud-fmr", fetchedAt: "2026" },
         interestRate: { source: "fred", fetchedAt: "2026-06-25" },
       },
-      false
+      false,
     );
     expect(e[0]).toMatchObject({ freshness: "HUD 2026" });
     expect(e[1]).toMatchObject({ freshness: "As of 2026-06-25" });
@@ -79,6 +86,10 @@ describe("buildAssumptionEntries (truthful assumptions strip)", () => {
 
   it("flips Expenses to the user once any expense field is dirty", () => {
     const e = buildAssumptionEntries(fullEnrichment, true);
-    expect(e[3]).toMatchObject({ label: "Expenses", source: "You entered it", manual: true });
+    expect(e[3]).toMatchObject({
+      label: "Expenses",
+      source: "You entered it",
+      manual: true,
+    });
   });
 });

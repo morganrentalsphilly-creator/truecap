@@ -19,66 +19,25 @@ import { DataConfidenceBadge } from "@/components/investcalc/data-confidence-bad
 import type { DataConfidence } from "@/lib/data-confidence";
 import type { AnalysisResult } from "@/lib/calc-analysis";
 import { isExtremeAnnualizedRoi } from "@/lib/extreme-value-format";
-import {
-  getCapRateBenchmark,
-  formatCapRateBenchmarkSubline,
-} from "@/lib/market-benchmarks";
 import type { AnalysisDashboardTab } from "./analysis-dashboard";
 import { APPRECIATION_PLAY_MIN_ANNUAL_RETURN_PCT } from "@/lib/deal-score";
 import { formatDscr } from "@/lib/financial-presentation";
 
 /**
- * Inline market-context labels surfaced under each metric tile.
- *
- * Phase 2: market-aware benchmarks via lib/market-benchmarks. When
- * the address parses to a known metro or state, we surface the
- * local planning estimate, with its period/methodology caveat, rather than
- * presenting a hand-curated reference as an observed market median.
- * strictly more useful than a national band because a 7% cap rate
- * is excellent in California (4-5% typical) and mediocre in
- * Detroit (9-10% typical).
- *
- * Falls back to national bands when the address doesn't parse (free
- * form input, non-US address, no state code detectable).
+ * Cap rate is a property-specific output, not evidence about the surrounding
+ * market. The retired rough-market registry must never turn it into an
+ * "above/below local median" claim. Keep the context purely formulaic and the
+ * color neutral unless the modeled NOI is negative.
  */
-function capRateBenchmarkLabel(
-  capRatePct: number,
-  address?: string | null,
-): string {
-  const benchmark = getCapRateBenchmark(address);
-  if (benchmark && benchmark.scope !== "national") {
-    return formatCapRateBenchmarkSubline(capRatePct, benchmark);
-  }
-  // These are TrueCap planning estimates, not an observed single-source index.
-  const caveat = "TrueCap estimate · 2025 reference; see methodology";
-  if (capRatePct > 8) return `Above 8% (U.S.) · ${caveat}`;
-  if (capRatePct > 5) return `Between 5% and 8% (U.S.) · ${caveat}`;
-  return `Below 5% (U.S.) · ${caveat}`;
+function capRateContextLabel(capRatePct: number): string {
+  return capRatePct < 0
+    ? "Negative modeled NOI relative to purchase price"
+    : "Modeled NOI divided by purchase price";
 }
 
-/**
- * Cap-rate card COLOR - driven by the SAME benchmark the subline uses, so the
- * color and the "Above/Near/Below the X% median" label can never disagree.
- * Green only when the cap rate beats the local median (or the national
- * top-quartile when the address doesn't parse); neutral when near or below;
- * red only when the cap rate is negative. Replaces the old `>= 5 ? green` rule
- * that lit up green on a 5.4% cap sitting BELOW a 7.5% local median.
- */
-function capRateBenchmarkColor(
-  capRatePct: number,
-  address?: string | null,
-): string | undefined {
+function capRateOutputColor(capRatePct: number): string | undefined {
   if (capRatePct < 0) return "text-[var(--metric-negative)]";
-  const benchmark = getCapRateBenchmark(address);
-  if (benchmark && benchmark.scope !== "national") {
-    // Mirror formatCapRateBenchmarkSubline's +/-0.5pt band exactly.
-    return capRatePct - benchmark.median >= 0.5
-      ? "text-[var(--metric-positive)]"
-      : "text-foreground";
-  }
-  // National fallback - green only for the top-quartile (>8%) band, matching
-  // the national subline ("Above 8% - top quartile").
-  return capRatePct > 8 ? "text-[var(--metric-positive)]" : "text-foreground";
+  return undefined;
 }
 
 function cocBenchmarkLabel(cocPct: number): string {
@@ -241,7 +200,6 @@ export function buildMetricTiles({
   result,
   isScenarioActive = false,
   isLoading,
-  address,
   propertyType,
   annualizedReturnPct,
   onMetricSelect,
@@ -343,14 +301,10 @@ export function buildMetricTiles({
         // negative cap rate still shows its "-" via toFixed.
         value={displayResult ? `${displayResult.capRate.toFixed(1)}%` : "—"}
         sub={
-          displayResult
-            ? capRateBenchmarkLabel(displayResult.capRate, address)
-            : undefined
+          displayResult ? capRateContextLabel(displayResult.capRate) : undefined
         }
         color={
-          displayResult
-            ? capRateBenchmarkColor(displayResult.capRate, address)
-            : undefined
+          displayResult ? capRateOutputColor(displayResult.capRate) : undefined
         }
         isLoading={isLoading}
         onSelect={jump("capRate")}

@@ -20,7 +20,10 @@ import { PORTAL_SCOPE } from "@/lib/client-portal";
 import { normalizeReleasedInvestmentFormSnapshot } from "@/lib/underwriting-model-release";
 import { getPublicAgentBranding } from "@/lib/agent-share";
 import { getPublicDealComps } from "@/lib/public-deal-comps";
-import { hashShareValues, signShareAttribution } from "@/lib/share-attribution";
+import {
+  hashShareValues,
+  signLeadCaptureAuthorization,
+} from "@/lib/share-attribution";
 import { SharedDealShell } from "@/components/investcalc/shared-deal-shell";
 import {
   normalizeMaoTarget,
@@ -171,14 +174,17 @@ export default async function PortalDealPage({ params }: Props) {
   ]);
 
   const valuesHash = hashShareValues(values);
-  const sig = signShareAttribution({
+  const sig = signLeadCaptureAuthorization({
+    shareSurface: "portal_share",
     ownerId: agentUserId,
     dealId,
     valuesHash,
+    dealAddress: values.address,
   });
 
   return (
     <SharedDealShell
+      shareSurface="portal_share"
       values={values}
       analysis={buildPublicShareAnalysisPayload(result, showProAnalysis)}
       comps={comps}
@@ -194,7 +200,13 @@ export default async function PortalDealPage({ params }: Props) {
       recordedResult={recordedResult}
       leadCapture={
         agent
-          ? { ownerId: agentUserId, dealId, valuesHash, sig: sig ?? undefined }
+          ? {
+              shareSurface: "portal_share",
+              ownerId: agentUserId,
+              dealId,
+              valuesHash,
+              sig: sig ?? undefined,
+            }
           : undefined
       }
     />

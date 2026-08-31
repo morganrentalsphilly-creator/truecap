@@ -1,12 +1,14 @@
 "use server";
 
 /**
- * Market Intelligence Pack capture (2026-08-17 offer rollout).
+ * First Offer Playbook capture.
  *
- * The email-gated lead magnet for SEO pages: submit an email, get the pack
- * link immediately in the response AND a 3-email sequence (day 0 delivery,
- * day 3 First Offer Playbook pointer, day 5 case-for-Pro with the
- * guarantee). Per-user transactional sends via Resend `scheduled_at` — this
+ * The email-gated lead magnet for SEO pages: submit an email, get the public
+ * playbook link immediately in the response AND a 3-email sequence (day 0
+ * delivery, day 3 input-verification guide, day 5 case-for-Pro). The retired
+ * Market Intelligence PDF is deliberately not distributed: its state tax and
+ * landlord-law records remain high-risk/stale until official dependencies are
+ * attached. Per-user transactional sends via Resend `scheduled_at` — this
  * deliberately does NOT touch the retired newsletter audience/broadcast
  * machinery (founder decision 2026-07-15).
  *
@@ -28,7 +30,7 @@ import {
 } from "@/lib/email-capture-guard";
 import { escapeHtml } from "@/lib/html-escape";
 
-const PACK_PATH = "/downloads/truecap-market-intelligence-pack.pdf";
+const RESOURCE_PATH = "/playbook";
 
 const captureSchema = z
   .object({
@@ -42,7 +44,11 @@ export type LeadMagnetCaptureResult =
   | { ok: true; scheduledCount: number; downloadUrl: string }
   | {
       ok: false;
-      code: "VALIDATION_ERROR" | "RATE_LIMITED" | "SEND_FAILED" | "CONFIG_MISSING";
+      code:
+        | "VALIDATION_ERROR"
+        | "RATE_LIMITED"
+        | "SEND_FAILED"
+        | "CONFIG_MISSING";
       message: string;
     };
 
@@ -55,36 +61,33 @@ const SEQUENCE: Array<{
 }> = [
   {
     delayDays: 0,
-    subject: "Your Market Intelligence Pack (state benchmarks + HUD rents)",
+    subject: "Your First Offer Playbook",
     build: ({ siteUrlHtml }) => `
-      <p>Here it is — state-by-state buy-and-hold screening references, the
-      rent-to-price screen, and HUD rent benchmarks for 150 tracked markets:</p>
-      <p><a href="${siteUrlHtml}${PACK_PATH}"><strong>Download the Market Intelligence Pack (PDF)</strong></a></p>
-      <p>It compiles labeled HUD Fair Market Rent, state tax-rate, and
-      landlord-law reference material. Coverage and dates vary. These are
-      buy-and-hold screening references, not strategy recommendations,
-      property facts, legal advice, or quotes.</p>
+      <p>Here it is — an educational review path from a preliminary rental
+      screen to a documented decision with independent verification:</p>
+      <p><a href="${siteUrlHtml}${RESOURCE_PATH}"><strong>Read the First Offer Playbook</strong></a></p>
+      <p>The playbook covers Buy Box criteria, input review, sensitivity, due
+      diligence, and adviser questions. It is not an appraisal, lender approval,
+      recommended offer, investment recommendation, or substitute for local
+      tax and legal advice.</p>
       <p><a href="${siteUrlHtml}/?utm_source=email&utm_campaign=mip-day0">Analyze any address free — Pro adds a target-dependent Offer Ceiling →</a></p>
     `,
   },
   {
     delayDays: 3,
-    subject: "From screening to a submitted offer (the playbook)",
+    subject: "How to verify a preliminary screen",
     build: ({ siteUrlHtml }) => `
-      <p>The pack helps compare market-level screening references. Property-level
-      inputs, financing terms, condition, title, and contract protections still
-      require verification.</p>
-      <p>We wrote an educational review path: define your Buy Box, source
-      candidates, inspect the analysis, review the Offer Ceiling and its target
-      profile, then make your own documented decision with relevant advisers.</p>
-      <p><a href="${siteUrlHtml}/playbook"><strong>Read the First Offer Playbook</strong></a></p>
-      <p>It's free and public — the same reason our methodology is public.
-      Confident offers come from a process you can audit.</p>
+      <p>Property-level rent, taxes, insurance, condition, financing, title, and
+      contract protections still require current evidence. Area benchmarks and
+      generic defaults are only starting assumptions.</p>
+      <p><a href="${siteUrlHtml}/methodology"><strong>Review TrueCap's public methodology and source labels</strong></a></p>
+      <p>Compare each input with a property-specific quote, record, comp, or
+      inspection finding before anyone relies on the modeled result.</p>
     `,
   },
   {
     delayDays: 5,
-    subject: "The number that protects you from a bad buy",
+    subject: "How the target-dependent Offer Ceiling works",
     build: ({ siteUrlHtml }) => `
       <p>The Offer Ceiling is the highest modeled purchase price that still
       meets a named target profile under the assumptions shown.</p>
@@ -118,8 +121,10 @@ export async function captureLeadMagnetEmail(input: {
       message: parsed.error.issues[0]?.message ?? "Please enter a valid email.",
     };
   }
-  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://usetruecap.com").replace(/\/+$/, "");
-  const downloadUrl = `${siteUrl}${PACK_PATH}`;
+  const siteUrl = (
+    process.env.NEXT_PUBLIC_SITE_URL || "https://usetruecap.com"
+  ).replace(/\/+$/, "");
+  const downloadUrl = `${siteUrl}${RESOURCE_PATH}`;
 
   // Honeypot tripped → pretend it worked, send nothing.
   if (parsed.data.website && parsed.data.website.trim().length > 0) {
@@ -142,22 +147,29 @@ export async function captureLeadMagnetEmail(input: {
       return { ok: true, scheduledCount: 0, downloadUrl };
     }
     if (claim.reason === "UNAVAILABLE") {
-      Sentry.captureMessage("email-capture guard unavailable — lead magnet blocked", {
-        level: "error",
-        tags: { feature: "lead-magnet-capture", guard: "unavailable" },
-        extra: { detail: claim.detail },
-      });
+      Sentry.captureMessage(
+        "email-capture guard unavailable — lead magnet blocked",
+        {
+          level: "error",
+          tags: { feature: "lead-magnet-capture", guard: "unavailable" },
+          extra: { detail: claim.detail },
+        },
+      );
       return {
         ok: false,
         code: "SEND_FAILED",
-        message: "We couldn't send the pack right now. Please try again in a minute.",
+        message:
+          "We couldn't send the pack right now. Please try again in a minute.",
       };
     }
     if (claim.reason === "GLOBAL_LIMIT") {
-      Sentry.captureMessage("email-capture global hourly cap hit (lead magnet)", {
-        level: "warning",
-        tags: { feature: "lead-magnet-capture", guard: "global_limit" },
-      });
+      Sentry.captureMessage(
+        "email-capture global hourly cap hit (lead magnet)",
+        {
+          level: "warning",
+          tags: { feature: "lead-magnet-capture", guard: "global_limit" },
+        },
+      );
     }
     return {
       ok: false,
@@ -168,10 +180,13 @@ export async function captureLeadMagnetEmail(input: {
 
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
-    Sentry.captureMessage("RESEND_API_KEY missing — lead magnet capture disabled", {
-      level: "error",
-      tags: { feature: "lead-magnet-capture" },
-    });
+    Sentry.captureMessage(
+      "RESEND_API_KEY missing — lead magnet capture disabled",
+      {
+        level: "error",
+        tags: { feature: "lead-magnet-capture" },
+      },
+    );
     await releaseEmailCaptureSlot(claim.emailBucketKey);
     return {
       ok: false,
@@ -182,7 +197,9 @@ export async function captureLeadMagnetEmail(input: {
 
   const from = process.env.EMAIL_FROM || "TrueCap <hello@usetruecap.com>";
   const replyTo = process.env.EMAIL_REPLY_TO || "hello@usetruecap.com";
-  const unsubscribeMailbox = (replyTo.match(/<([^>]+)>/)?.[1] ?? replyTo).trim();
+  const unsubscribeMailbox = (
+    replyTo.match(/<([^>]+)>/)?.[1] ?? replyTo
+  ).trim();
   const ctx: SequenceCtx = {
     siteUrlHtml: escapeHtml(siteUrl),
   };
@@ -203,7 +220,7 @@ export async function captureLeadMagnetEmail(input: {
     };
     if (item.delayDays > 0) {
       payload.scheduled_at = new Date(
-        Date.now() + item.delayDays * 24 * 60 * 60 * 1000
+        Date.now() + item.delayDays * 24 * 60 * 60 * 1000,
       ).toISOString();
     }
     try {
@@ -227,7 +244,9 @@ export async function captureLeadMagnetEmail(input: {
         });
       }
     } catch (error) {
-      Sentry.captureException(error, { tags: { feature: "lead-magnet-capture" } });
+      Sentry.captureException(error, {
+        tags: { feature: "lead-magnet-capture" },
+      });
     }
   }
 
@@ -239,11 +258,14 @@ export async function captureLeadMagnetEmail(input: {
   } else if (!day0Sent) {
     // Follow-ups scheduled but the delivery email failed — keep the slot
     // (mail IS queued) and make the broken state visible.
-    Sentry.captureMessage("Lead magnet day-0 send failed but follow-ups scheduled", {
-      level: "warning",
-      tags: { feature: "lead-magnet-capture" },
-      extra: { scheduled_count: scheduledCount },
-    });
+    Sentry.captureMessage(
+      "Lead magnet day-0 send failed but follow-ups scheduled",
+      {
+        level: "warning",
+        tags: { feature: "lead-magnet-capture" },
+        extra: { scheduled_count: scheduledCount },
+      },
+    );
   }
   return { ok: true, scheduledCount, downloadUrl };
 }

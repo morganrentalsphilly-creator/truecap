@@ -104,8 +104,18 @@ export default function OnePercentRulePost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "TrueCap", item: `${siteUrl}/` },
-      { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "TrueCap",
+        item: `${siteUrl}/`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: `${siteUrl}/blog`,
+      },
       { "@type": "ListItem", position: 3, name: TITLE, item: canonicalUrl },
     ],
   };
@@ -160,13 +170,13 @@ export default function OnePercentRulePost() {
               Glance at a listing price and a rent figure and you can screen a
               rental in about three seconds: is the monthly rent at least 1% of
               the purchase price? That is the 1% rule — the most-Googled rule of
-              thumb in real estate investing, and the first filter most investors
-              run before they bother opening a spreadsheet. It is fast, it is
-              famous, and in 2026 it is more contested than ever, because the
-              rule was calibrated in an era of 3–4% mortgages and today money
-              costs nearly twice that. Here is exactly how it works, what it
-              quietly ignores, and how to use it without letting it talk you into
-              a bad deal.
+              thumb in real estate investing, and the first filter most
+              investors run before they bother opening a spreadsheet. It is
+              fast, it is famous, and in 2026 it is more contested than ever,
+              because the rule was calibrated in an era of 3–4% mortgages and
+              today money costs nearly twice that. Here is exactly how it works,
+              what it quietly ignores, and how to use it without letting it talk
+              you into a bad deal.
             </p>
           </header>
 
@@ -183,13 +193,14 @@ export default function OnePercentRulePost() {
             </p>
             <p>
               Flip it around and it becomes a rule-of-thumb Offer Ceiling:
-              <strong>100 × the monthly rent</strong>. This is a screening boundary,
-              not a recommended offer. A house that rents
-              for $1,800/month &quot;passes&quot; at any price up to $180,000; one
+              <strong>100 × the monthly rent</strong>. This is a screening
+              boundary, not a recommended offer. A house that rents for
+              $1,800/month &quot;passes&quot; at any price up to $180,000; one
               that rents for $2,500 passes up to $250,000. That is the whole
               mechanic — no financing, no expenses, no condition. Which is the
-              point: the 1% rule exists to kill obviously bad listings in seconds
-              so you only spend real time on the survivors. Run a few through the{" "}
+              point: the 1% rule exists to kill obviously bad listings in
+              seconds so you only spend real time on the survivors. Run a few
+              through the{" "}
               <Link
                 href="/tools/1-percent-rule-calculator"
                 className="text-primary font-semibold hover:underline"
@@ -207,13 +218,14 @@ export default function OnePercentRulePost() {
             </p>
             <ul>
               <li>
-                <strong>Listing A</strong> — a $220,000 single-family home renting
-                for $2,200/month. Ratio: $2,200 ÷ $220,000 ={" "}
+                <strong>Listing A</strong> — a $220,000 single-family home
+                renting for $2,200/month. Ratio: $2,200 ÷ $220,000 ={" "}
                 <strong>1.00%</strong>. Passes.
               </li>
               <li>
-                <strong>Listing B</strong> — a $250,000 duplex pulling $2,600/month
-                across both units. Ratio: <strong>1.04%</strong>. Passes.
+                <strong>Listing B</strong> — a $250,000 duplex pulling
+                $2,600/month across both units. Ratio: <strong>1.04%</strong>.
+                Passes.
               </li>
               <li>
                 <strong>Listing C</strong> — a $350,000 house in a nicer suburb
@@ -241,11 +253,13 @@ export default function OnePercentRulePost() {
             </h2>
             <p>
               The 1% threshold isn&apos;t magic; it&apos;s a proxy. The idea is
-              that if gross rent is about 1% of price each month — 12% of price a
-              year — there&apos;s usually enough income to cover the mortgage,
+              that if gross rent is about 1% of price each month — 12% of price
+              a year — there&apos;s usually enough income to cover the mortgage,
               taxes, insurance, vacancy, and repairs with a little left over,{" "}
-              <em>at the interest rates that were normal when the rule caught
-              on.</em> It is a rent-to-price ratio dressed up as a pass/fail test.
+              <em>
+                at the interest rates that were normal when the rule caught on.
+              </em>{" "}
+              It is a rent-to-price ratio dressed up as a pass/fail test.
             </p>
             <p>
               That makes it a cousin of the{" "}
@@ -258,10 +272,11 @@ export default function OnePercentRulePost() {
               . Watch the algebra: if price = 100 × monthly rent, then price =
               100 ÷ 12 = <strong>8.3 × annual rent</strong>. So &quot;passes the
               1% rule&quot; is the same statement as &quot;has a gross rent
-              multiplier of about 8.3 or lower.&quot; (The 100 is the price-to-{""}
-              <em>monthly</em>-rent multiple; the GRM you&apos;ll see quoted uses
-              annual rent, which is why the two numbers look so different.) If you
-              prefer thinking in GRM, the{" "}
+              multiplier of about 8.3 or lower.&quot; (The 100 is the price-to-
+              {""}
+              <em>monthly</em>-rent multiple; the GRM you&apos;ll see quoted
+              uses annual rent, which is why the two numbers look so different.)
+              If you prefer thinking in GRM, the{" "}
               <Link
                 href="/tools/gross-rent-multiplier-calculator"
                 className="text-primary font-semibold hover:underline"
@@ -294,10 +309,10 @@ export default function OnePercentRulePost() {
                 <strong>0.57% rent-to-price</strong>.
               </li>
               <li>
-                <strong>At a 7% loan</strong> (2026 investment-property pricing):
-                P&amp;I on the same $75,000 jumps to about $499/month, plus the
-                same $150 — about $649 of fixed carry. Break-even climbs to
-                roughly <strong>0.76% rent-to-price</strong>.
+                <strong>At a 7% loan</strong> (2026 investment-property
+                pricing): P&amp;I on the same $75,000 jumps to about $499/month,
+                plus the same $150 — about $649 of fixed carry. Break-even
+                climbs to roughly <strong>0.76% rent-to-price</strong>.
               </li>
             </ul>
             <p>
@@ -306,40 +321,40 @@ export default function OnePercentRulePost() {
               cushion between &quot;passes the rule&quot; and &quot;loses
               money&quot; shrank from a comfortable 0.43 points to a thin 0.24.
               The deals that quietly broke in this shift are the 0.7–0.8%
-              properties that gushed cash at 3.5% and now barely tread water. This
-              is the same negative-leverage trap that makes a once-safe{" "}
+              properties that gushed cash at 3.5% and now barely tread water.
+              This is the same negative-leverage trap that makes a once-safe{" "}
               <Link
                 href="/blog/what-is-a-good-cap-rate"
                 className="text-primary font-semibold hover:underline"
               >
                 cap rate look fine and still lose to the loan constant
               </Link>
-              . The 1% rule didn&apos;t get wrong — the world underneath it moved,
-              and the rule, being a fixed number, didn&apos;t notice.
+              . The 1% rule didn&apos;t get wrong — the world underneath it
+              moved, and the rule, being a fixed number, didn&apos;t notice.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
               Passing the 1% rule is not the same as a good return
             </h2>
             <p>
-              Even when a property clears 1%, the rule says nothing about how good
-              the return is — because it never looks at the costs that vary most
-              between properties. Take two homes that both hit exactly 1%:
+              Even when a property clears 1%, the rule says nothing about how
+              good the return is — because it never looks at the costs that vary
+              most between properties. Take two homes that both hit exactly 1%:
             </p>
             <ul>
               <li>
-                <strong>Property X:</strong> $150,000, rents for $1,500/month, in
-                a state with a 0.85% property-tax rate.
+                <strong>Property X:</strong> $150,000, rents for $1,500/month,
+                in a state with a 0.85% property-tax rate.
               </li>
               <li>
-                <strong>Property Y:</strong> $300,000, rents for $3,000/month, in
-                a state with a 1.8% property-tax rate.
+                <strong>Property Y:</strong> $300,000, rents for $3,000/month,
+                in a state with a 1.8% property-tax rate.
               </li>
             </ul>
             <p>
-              Both pass the screen identically. But underwrite them with 25% down
-              at 7%, self-managed, with 5% vacancy and 10% for maintenance and
-              capital reserves:
+              Both pass the screen identically. But underwrite them with 25%
+              down at 7%, self-managed, with 5% vacancy and 10% for maintenance
+              and capital reserves:
             </p>
             <ul>
               <li>
@@ -354,8 +369,8 @@ export default function OnePercentRulePost() {
                 <strong>Property Y</strong> carries about $2,097 of PITI ($1,497
                 P&amp;I + $450 taxes + $150 insurance) plus $450 of reserves —
                 roughly $2,547 against $3,000 rent, or{" "}
-                <strong>+$453/month</strong>. But on about $84,000 all-in, that is
-                only a <strong>~6.5% cash-on-cash return</strong>.
+                <strong>+$453/month</strong>. But on about $84,000 all-in, that
+                is only a <strong>~6.5% cash-on-cash return</strong>.
               </li>
             </ul>
             <p>
@@ -382,11 +397,11 @@ export default function OnePercentRulePost() {
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
               What the rule ignores — both halves of the fraction
             </h2>
+            <p>The numerator and the denominator both hide traps.</p>
             <p>
-              The numerator and the denominator both hide traps.
-            </p>
-            <p>
-              <strong>The denominator should be all-in cost, not list price.</strong>{" "}
+              <strong>
+                The denominator should be all-in cost, not list price.
+              </strong>{" "}
               On a fixer or a{" "}
               <Link
                 href="/blog/brrrr-method-explained"
@@ -395,21 +410,23 @@ export default function OnePercentRulePost() {
                 BRRRR deal
               </Link>
               , a $120,000 house that needs $40,000 of work and then rents for
-              $1,400 looks like a screaming 1.17% against the purchase price — but
-              against your true $160,000 all-in, it&apos;s 0.875% and fails.
+              $1,400 looks like a screaming 1.17% against the purchase price —
+              but against your true $160,000 all-in, it&apos;s 0.875% and fails.
               Always run the rule on price plus rehab, or it will flatter a
               property you haven&apos;t finished paying for.
             </p>
             <p>
-              <strong>The numerator should be real market rent, not the
-              listing&apos;s hopeful number.</strong> Sellers and pro formas quote
-              rents that are often 5–15% above what the unit will actually fetch.
-              Pull comps before you trust a rent figure, because a 10% haircut on
-              rent drops a 1.0% property straight to 0.9%. And the rule is silent
-              on everything that decides whether you keep that rent: condition,
-              tenant quality, neighborhood trajectory, the interest rate on your
-              specific loan, and how much you put down. A ratio can&apos;t see any
-              of that.
+              <strong>
+                The numerator should be real market rent, not the listing&apos;s
+                hopeful number.
+              </strong>{" "}
+              Sellers and pro formas quote rents that are often 5–15% above what
+              the unit will actually fetch. Pull comps before you trust a rent
+              figure, because a 10% haircut on rent drops a 1.0% property
+              straight to 0.9%. And the rule is silent on everything that
+              decides whether you keep that rent: condition, tenant quality,
+              neighborhood trajectory, the interest rate on your specific loan,
+              and how much you put down. A ratio can&apos;t see any of that.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -417,61 +434,67 @@ export default function OnePercentRulePost() {
             </h2>
             <p>
               The 2% rule is the same test with the bar doubled: monthly rent of
-              at least 2% of price — a $100,000 house renting for $2,000. In 2026
-              that is effectively extinct outside deep-discount, low-value, or
-              management-intensive properties. When a listing genuinely clears 2%,
-              it&apos;s usually telling you something — a rough block, deferred
-              capex, or a rent number that won&apos;t survive a real lease-up — not
-              that you&apos;ve found a unicorn.
+              at least 2% of price — a $100,000 house renting for $2,000. In
+              2026 that is effectively extinct outside deep-discount, low-value,
+              or management-intensive properties. When a listing genuinely
+              clears 2%, it&apos;s usually telling you something — a rough
+              block, deferred capex, or a rent number that won&apos;t survive a
+              real lease-up — not that you&apos;ve found a unicorn.
             </p>
             <p>
               Where do 1% deals actually live now? Overwhelmingly in the Midwest
               and South, and in the sub-$200,000 price tiers — Ohio, Indiana,
-              Alabama, parts of Texas and the Carolinas. In coastal and high-growth
-              metros (San Diego, Denver, Austin, Seattle), most rentals pencil at
-              0.4–0.6%, and investors there are explicitly betting on appreciation
-              rather than monthly cash flow. Neither approach is wrong; they&apos;re
-              different games, and the 1% rule is only scoring one of them. If
-              cash flow isn&apos;t your goal, a failing ratio isn&apos;t a verdict.
+              Alabama, parts of Texas and the Carolinas. In coastal and
+              high-growth metros (San Diego, Denver, Austin, Seattle), most
+              rentals pencil at 0.4–0.6%, and investors there are explicitly
+              betting on appreciation rather than monthly cash flow. Neither
+              approach is wrong; they&apos;re different games, and the 1% rule
+              is only scoring one of them. If cash flow isn&apos;t your goal, a
+              failing ratio isn&apos;t a verdict.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
               How to use the 1% rule without getting burned
             </h2>
             <p>
-              Treat it as the first gate, not the decision. A practical workflow:
+              Treat it as the first gate, not the decision. A practical
+              workflow:
             </p>
             <ul>
               <li>
                 <strong>Screen fast.</strong> Run the ratio on every listing. In
-                2026&apos;s rate environment, give yourself margin — treat 1.0% as
-                the floor for a cash-flow deal, not the target, since break-even
-                already sits near 0.76%.
+                2026&apos;s rate environment, give yourself margin — treat 1.0%
+                as the floor for a cash-flow deal, not the target, since
+                break-even already sits near 0.76%.
               </li>
               <li>
                 <strong>Use all-in cost and real rent.</strong> Price plus rehab
                 on the bottom, comped market rent on top.
               </li>
               <li>
-                <strong>Then actually underwrite the survivors.</strong> Layer in
-                full PITI, vacancy, maintenance, capital reserves, and management,
-                and check cash-on-cash and DSCR before you write an offer. A deal
-                that passes the 1% rule and then clears a real underwrite is worth
-                pursuing; one that passes only the ratio is worth a second look,
-                not a check.
+                <strong>Then actually underwrite the survivors.</strong> Layer
+                in full PITI, vacancy, maintenance, capital reserves, and
+                management, and check cash-on-cash and DSCR before you write an
+                offer. A deal that passes the 1% rule and then clears a real
+                underwrite is worth pursuing; one that passes only the ratio is
+                worth a second look, not a check.
               </li>
             </ul>
             <p>
               That last step is the whole reason TrueCap exists. Drop in a price
               and a rent and the{" "}
-              <Link href="/" className="text-primary font-semibold hover:underline">
+              <Link
+                href="/"
+                className="text-primary font-semibold hover:underline"
+              >
                 free analyzer
               </Link>{" "}
-              pulls a current rate, estimates taxes and insurance from the
-              address, layers in vacancy and reserves, and hands back cash flow,
-              cap rate, cash-on-cash, DSCR, and selected-rule fit — the
-              entire underwrite the 1% rule was only ever pretending to be a
-              stand-in for. The rule is the napkin; this is the spreadsheet.
+              starts from a published rate benchmark and editable assumptions,
+              asks you to enter a local tax bill or reviewed rate, layers in
+              vacancy and reserves, and hands back cash flow, cap rate,
+              cash-on-cash, DSCR, and selected-rule fit — the entire underwrite
+              the 1% rule was only ever pretending to be a stand-in for. The
+              rule is the napkin; this is the spreadsheet.
             </p>
 
             <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
@@ -491,22 +514,22 @@ export default function OnePercentRulePost() {
             </h2>
             <p>
               The 1% rule earns its fame: it&apos;s the fastest honest screen in
-              real estate, and on a cheap, cash-flow-market rental it still flags
-              the right deals in seconds. But it&apos;s a rent-to-price ratio with
-              a fixed threshold in a world where rates move, and in 2026 the
-              break-even floor has crept up to roughly 0.76%, leaving far less
-              daylight between &quot;passes&quot; and &quot;bleeds.&quot; Use it to
-              decide what to look at, never what to buy. Screen on all-in cost and
-              real rent, then run the survivors through a full underwrite — PITI,
-              reserves,{" "}
+              real estate, and on a cheap, cash-flow-market rental it still
+              flags the right deals in seconds. But it&apos;s a rent-to-price
+              ratio with a fixed threshold in a world where rates move, and in
+              2026 the break-even floor has crept up to roughly 0.76%, leaving
+              far less daylight between &quot;passes&quot; and
+              &quot;bleeds.&quot; Use it to decide what to look at, never what
+              to buy. Screen on all-in cost and real rent, then run the
+              survivors through a full underwrite — PITI, reserves,{" "}
               <Link
                 href="/blog/cap-rate-vs-cash-on-cash-vs-dscr"
                 className="text-primary font-semibold hover:underline"
               >
                 cash-on-cash, and DSCR
               </Link>{" "}
-              — and the 1% rule goes back to doing the one job it&apos;s good at:
-              getting you to a &quot;maybe&quot; fast.
+              — and the 1% rule goes back to doing the one job it&apos;s good
+              at: getting you to a &quot;maybe&quot; fast.
             </p>
           </div>
         </article>

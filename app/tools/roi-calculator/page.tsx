@@ -7,7 +7,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { permanentRedirect } from "next/navigation";
 import { getSiteUrl } from "@/lib/site-url";
 import { RoiCalculatorWidget } from "@/components/tools/roi-calculator-widget";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
@@ -15,6 +15,7 @@ import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
 import { isCalculatorReleased } from "@/lib/calculator-registry";
+import { HISTORICAL_TOOL_REDIRECTS } from "@/lib/historical-tool-redirects";
 
 export const metadata: Metadata = {
   title: "Free Rental Property ROI Calculator — Total Return",
@@ -31,10 +32,18 @@ export const metadata: Metadata = {
   alternates: { canonical: "/tools/roi-calculator" },
   openGraph: {
     title: "Free Rental Property ROI Calculator — Total Return",
-    description: "Model cash flow, principal paydown, and appreciation assumptions in one simple annual ROI estimate.",
+    description:
+      "Model cash flow, principal paydown, and appreciation assumptions in one simple annual ROI estimate.",
     url: "/tools/roi-calculator",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap rental property ROI calculator" }],
+    images: [
+      {
+        url: "/home.jpg",
+        width: 1200,
+        height: 630,
+        alt: "TrueCap rental property ROI calculator",
+      },
+    ],
   },
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
@@ -63,7 +72,9 @@ const FAQS: { q: string; a: string }[] = [
 ];
 
 export default function RoiCalculatorPage() {
-  if (!isCalculatorReleased("roi-calculator")) notFound();
+  if (!isCalculatorReleased("roi-calculator")) {
+    permanentRedirect(HISTORICAL_TOOL_REDIRECTS["roi-calculator"]);
+  }
 
   const siteUrl = getSiteUrl();
   const ld = {
@@ -115,28 +126,53 @@ export default function RoiCalculatorPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }} />
-      <ToolBreadcrumbSchema toolName="ROI Calculator" toolPath="/tools/roi-calculator" />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppLd) }}
+      />
+      <ToolBreadcrumbSchema
+        toolName="ROI Calculator"
+        toolPath="/tools/roi-calculator"
+      />
 
       <main id="main" className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
         <nav aria-label="Breadcrumb" className="mb-6 text-xs">
           <ol className="flex flex-wrap items-center gap-2 text-muted-foreground">
-            <li><Link href="/" className="hover:text-foreground">Home</Link></li>
+            <li>
+              <Link href="/" className="hover:text-foreground">
+                Home
+              </Link>
+            </li>
             <li aria-hidden="true">›</li>
-            <li><Link href="/tools" className="hover:text-foreground">Tools</Link></li>
+            <li>
+              <Link href="/tools" className="hover:text-foreground">
+                Tools
+              </Link>
+            </li>
             <li aria-hidden="true">›</li>
             <li className="font-semibold text-foreground">ROI Calculator</li>
           </ol>
         </nav>
 
-        <p className="text-[11px] uppercase tracking-widest text-primary font-bold">Free calculator</p>
+        <p className="text-[11px] uppercase tracking-widest text-primary font-bold">
+          Free calculator
+        </p>
         <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight">
           Rental Property ROI Calculator
         </h1>
         <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-          Combine entered annual cash flow, principal paydown, and appreciation assumptions, then divide by total cash invested. The result is a modeled simple annual ROI—not IRR, market performance, or a realized return.
+          Combine entered annual cash flow, principal paydown, and appreciation
+          assumptions, then divide by total cash invested. The result is a
+          modeled simple annual ROI—not IRR, market performance, or a realized
+          return.
         </p>
 
         <div className="mt-8">
@@ -144,48 +180,101 @@ export default function RoiCalculatorPage() {
         </div>
 
         <section className="mt-12">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">The ROI formula explained</h2>
+          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">
+            The ROI formula explained
+          </h2>
           <div className="rounded-xl border border-border bg-muted/30 p-5">
             <code className="text-sm sm:text-base text-foreground font-mono">
-              Total ROI = (Cash flow + Principal paydown + Appreciation) ÷ Cash invested
+              Total ROI = (Cash flow + Principal paydown + Appreciation) ÷ Cash
+              invested
             </code>
           </div>
           <p className="mt-4 text-base leading-relaxed text-foreground">
             Three components:
           </p>
           <ul className="mt-3 space-y-2 text-base leading-relaxed text-foreground">
-            <li><strong>Cash flow:</strong> rent minus all operating expenses minus mortgage. This is the money in your pocket each month, annualized.</li>
-            <li><strong>Principal paydown:</strong> the portion of each mortgage payment going to loan balance (not interest). This is equity build — invisible until you sell or refi.</li>
-            <li><strong>Appreciation:</strong> the value change implied by the annual rate you enter. It is uncertain and is not realized unless a future transaction supports it.</li>
+            <li>
+              <strong>Cash flow:</strong> rent minus all operating expenses
+              minus mortgage. This is the money in your pocket each month,
+              annualized.
+            </li>
+            <li>
+              <strong>Principal paydown:</strong> the portion of each mortgage
+              payment going to loan balance (not interest). This is equity build
+              — invisible until you sell or refi.
+            </li>
+            <li>
+              <strong>Appreciation:</strong> the value change implied by the
+              annual rate you enter. It is uncertain and is not realized unless
+              a future transaction supports it.
+            </li>
           </ul>
           <p className="mt-3 text-base leading-relaxed text-foreground">
-            Sum the three and divide by cash invested (down payment + closing + initial rehab) to get a modeled simple annual return under the assumptions entered. It is not IRR or a realized return.
+            Sum the three and divide by cash invested (down payment + closing +
+            initial rehab) to get a modeled simple annual return under the
+            assumptions entered. It is not IRR or a realized return.
           </p>
           <p className="mt-3 text-base leading-relaxed text-foreground">
-            Worked example: $300k property, $75k cash invested. $5,400 annual cash flow + $3,200 principal paydown + $10,500 appreciation (3.5%/yr) = $19,100 total annual return. ROI = $19,100 ÷ $75k = 25.5%.
+            Worked example: $300k property, $75k cash invested. $5,400 annual
+            cash flow + $3,200 principal paydown + $10,500 appreciation
+            (3.5%/yr) = $19,100 total annual return. ROI = $19,100 ÷ $75k =
+            25.5%.
           </p>
         </section>
 
         <section className="mt-12">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-4">Frequently asked questions</h2>
+          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-4">
+            Frequently asked questions
+          </h2>
           <div className="divide-y divide-border rounded-2xl border border-border bg-card">
             {FAQS.map((f) => (
               <details key={f.q} className="group p-5">
-                <summary className="cursor-pointer text-base font-bold text-foreground group-open:text-primary">{f.q}</summary>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{f.a}</p>
+                <summary className="cursor-pointer text-base font-bold text-foreground group-open:text-primary">
+                  {f.q}
+                </summary>
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                  {f.a}
+                </p>
               </details>
             ))}
           </div>
         </section>
 
         <section className="mt-12 border-t border-border pt-8">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">Related metrics</h2>
+          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mb-3">
+            Related metrics
+          </h2>
           <div className="flex flex-wrap gap-2 text-sm">
-            <Link href="/glossary/cash-on-cash-return" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Cash-on-cash return</Link>
-            <Link href="/glossary/irr" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">IRR</Link>
-            <Link href="/glossary/appreciation-rate" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Appreciation rate</Link>
-            <Link href="/tools/cash-on-cash-calculator" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Cash-on-cash calculator</Link>
-            <Link href="/tools/break-even-calculator" className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary">Break-even calculator</Link>
+            <Link
+              href="/glossary/cash-on-cash-return"
+              className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
+            >
+              Cash-on-cash return
+            </Link>
+            <Link
+              href="/glossary/irr"
+              className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
+            >
+              IRR
+            </Link>
+            <Link
+              href="/glossary/appreciation-rate"
+              className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
+            >
+              Appreciation rate
+            </Link>
+            <Link
+              href="/blog/how-to-calculate-cash-on-cash-return"
+              className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
+            >
+              Cash-on-cash guide
+            </Link>
+            <Link
+              href="/tools/break-even-calculator"
+              className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
+            >
+              Break-even calculator
+            </Link>
           </div>
         </section>
 
@@ -194,7 +283,6 @@ export default function RoiCalculatorPage() {
             tool has no embeddable widget. See the component header. */}
 
         <ToolEmbedInvite slug="roi-calculator" />
-
 
         <ToolsConversionCta calculatorName="ROI calculator" />
       </main>

@@ -41,7 +41,14 @@ export const metadata: Metadata = {
       "A source-labeled screen for cap rate, CoC, DSCR, sensitivity, Offer Ceiling, and 10-year cash-flow and equity projections.",
     url: "/for-buy-and-hold",
     type: "website",
-    images: [{ url: "/home.jpg", width: 1200, height: 630, alt: "TrueCap for buy-and-hold investors" }],
+    images: [
+      {
+        url: "/home.jpg",
+        width: 1200,
+        height: 630,
+        alt: "TrueCap for buy-and-hold investors",
+      },
+    ],
   },
   twitter: { card: "summary_large_image", images: ["/home.jpg"] },
 };
@@ -49,13 +56,13 @@ export const metadata: Metadata = {
 const USE_CASES: { icon: typeof Calculator; title: string; body: string }[] = [
   {
     icon: Calculator,
-    title: "Triage 20 listings in an hour, not a weekend",
-    body: "Paste address, see cap rate + cash-on-cash + DSCR in 60 seconds. The 1% rule misses half the math; TrueCap surfaces what actually pencils.",
+    title: "Triage listings with a consistent first pass",
+    body: "For a supported address and asking price, review editable cap rate, cash-on-cash, and DSCR assumptions. The result is a preliminary screen, not a finding that a property pencils.",
   },
   {
     icon: LineChart,
     title: "See year-1 vs year-10 in one view",
-    body: "10-year projection (Pro) shows how rent growth, expense growth, and appreciation actually compound. The deal that looks marginal in year 1 might be the winner by year 5.",
+    body: "The Pro planning view carries editable rent growth, expense growth, appreciation, and financing assumptions through 10 years. It compares scenarios; it does not forecast a winner.",
   },
   {
     icon: PiggyBank,
@@ -65,7 +72,7 @@ const USE_CASES: { icon: typeof Calculator; title: string; body: string }[] = [
   {
     icon: Target,
     title: "Stress-test before you offer",
-    body: "Sensitivity grid (Pro) shows what happens to your return when rent moves ±10%, vacancy moves ±5pp, rates move ±1pp. If the deal still pencils across the grid, the offer is defensible.",
+    body: "The Pro sensitivity grid shows how modeled metrics respond when rent moves ±10%, vacancy moves ±5pp, and rates move ±1pp. It does not determine that a deal pencils or recommend an offer.",
   },
 ];
 
@@ -131,8 +138,8 @@ export default function ForBuyAndHoldPage() {
             Built for the hold strategy
           </h2>
           <p className="text-base text-muted-foreground mb-6 leading-relaxed">
-            Four jobs serious rental investors do over and over —
-            faster, easier to audit, and more consistent.
+            Four jobs serious rental investors do over and over — faster, easier
+            to audit, and more consistent.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
             {USE_CASES.map(({ icon: Icon, title, body }) => (
@@ -161,7 +168,7 @@ export default function ForBuyAndHoldPage() {
           </h2>
           <ol className="mt-4 space-y-3">
             {[
-              "Paste the listing address. Area rent, owner-occupied mortgage-rate, and property-tax screening estimates auto-fill from public sources.",
+              "Paste the listing address. HUD area rent and the FRED owner-occupied mortgage-rate benchmark can pre-fill; enter a local property-tax bill or reviewed rate manually.",
               "Adjust the financing (down %, term, rate) to match the offer you're considering.",
               "Hit Calculate — cap rate, CoC, DSCR, monthly cash flow appear in 1 second.",
               "Pro: open the 10-year planning projection to review cash flow and equity under the entered growth assumptions.",
@@ -189,11 +196,30 @@ export default function ForBuyAndHoldPage() {
             </h2>
           </div>
           <ul className="space-y-2 text-sm sm:text-base text-foreground">
-            <li><strong>Multi-year assumptions stay visible.</strong> See rent growth, expense growth, debt paydown, cash flow, and equity in one reproducible planning view.</li>
-            <li><strong>Scenario boundaries stay explicit.</strong> The projection is not a market forecast, appraisal, sale model, or tax-return calculation.</li>
-            <li><strong>Sensitivity is built in.</strong> Hard to do thoroughly in a spreadsheet — trivial here.</li>
-            <li><strong>Portfolio view.</strong> Save 10 deals, see total cash flow + weighted cap rate across the book.</li>
-            <li><strong>Traceable screening defaults.</strong> HUD/FRED/state estimates show where the first-pass inputs came from; replace them with property-specific evidence before offering.</li>
+            <li>
+              <strong>Multi-year assumptions stay visible.</strong> See rent
+              growth, expense growth, debt paydown, cash flow, and equity in one
+              reproducible planning view.
+            </li>
+            <li>
+              <strong>Scenario boundaries stay explicit.</strong> The projection
+              is not a market forecast, appraisal, sale model, or tax-return
+              calculation.
+            </li>
+            <li>
+              <strong>Sensitivity is built in.</strong> Hard to do thoroughly in
+              a spreadsheet — trivial here.
+            </li>
+            <li>
+              <strong>Portfolio view.</strong> Save 10 deals, see total cash
+              flow + weighted cap rate across the book.
+            </li>
+            <li>
+              <strong>Traceable screening defaults.</strong> HUD rent and FRED
+              rate benchmarks show their sources; property tax stays a manual
+              local input. Replace every first-pass value with property-specific
+              evidence before offering.
+            </li>
           </ul>
         </section>
 
@@ -203,34 +229,52 @@ export default function ForBuyAndHoldPage() {
             Recommended reading for buy-and-hold investors
           </h2>
           <p className="text-sm leading-relaxed text-foreground">
-            The handful of guides and calculators long-term investors return
-            to most often: the{" "}
-            <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="text-primary font-semibold hover:underline">
+            The handful of guides and calculators long-term investors return to
+            most often: the{" "}
+            <Link
+              href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
+              className="text-primary font-semibold hover:underline"
+            >
               60-second underwriting workflow
             </Link>
             , the deep-dive on{" "}
-            <Link href="/blog/cap-rate-vs-cash-on-cash-vs-dscr" className="text-primary font-semibold hover:underline">
+            <Link
+              href="/blog/cap-rate-vs-cash-on-cash-vs-dscr"
+              className="text-primary font-semibold hover:underline"
+            >
               cap rate vs cash-on-cash vs DSCR
             </Link>
             , the breakdown of{" "}
-            <Link href="/blog/rental-property-tax-deductions" className="text-primary font-semibold hover:underline">
+            <Link
+              href="/blog/rental-property-tax-deductions"
+              className="text-primary font-semibold hover:underline"
+            >
               every deductible expense
             </Link>
             , and the{" "}
-            <Link href="/#main" className="text-primary font-semibold hover:underline">
+            <Link
+              href="/#main"
+              className="text-primary font-semibold hover:underline"
+            >
               TrueCap analyzer
             </Link>{" "}
-            for quick listing triage — cap rate, cash-on-cash, and DSCR from one address.
+            for quick listing triage — cap rate, cash-on-cash, and DSCR from one
+            address.
           </p>
         </section>
 
         {/* Pricing */}
         <section className="mb-12 sm:mb-16 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-2">
-            Free screens the purchase. Pro solves and stress-tests the offer and hold.
+            Free screens the purchase. Pro solves and stress-tests the offer and
+            hold.
           </h2>
           <p className="text-sm sm:text-base opacity-90 mb-5 max-w-2xl">
-            Free gives you cap rate, CoC, DSCR, monthly cash flow, the 0–100 Screening Index, and read-only share links for a first-pass screen. Pro adds 10-year cash-flow and equity projections, sensitivity, Offer Ceiling, saved-deal comparison, PDF exports, and co-branded share links.
+            Free gives you cap rate, CoC, DSCR, monthly cash flow, the 0–100
+            Screening Index, and read-only share links for a first-pass screen.
+            Pro adds 10-year cash-flow and equity projections, sensitivity,
+            Offer Ceiling, saved-deal comparison, PDF exports, and co-branded
+            share links.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -255,7 +299,10 @@ export default function ForBuyAndHoldPage() {
         <footer className="border-t border-border pt-6 text-sm text-muted-foreground leading-relaxed">
           <Building2 className="inline-block mr-2 size-4 align-text-bottom" />
           Also evaluating an owner-occupied rental? See TrueCap for{" "}
-          <Link href="/for-house-hackers" className="font-bold text-foreground hover:underline">
+          <Link
+            href="/for-house-hackers"
+            className="font-bold text-foreground hover:underline"
+          >
             house hackers
           </Link>
           .

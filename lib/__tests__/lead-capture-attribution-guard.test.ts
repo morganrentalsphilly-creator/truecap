@@ -1,7 +1,12 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { signShareAttribution, verifyShareAttribution } from "@/lib/share-attribution";
+import {
+  signLeadCaptureAuthorization,
+  signShareAttribution,
+  verifyLeadCaptureAuthorization,
+  verifyShareAttribution,
+} from "@/lib/share-attribution";
 
 /**
  * Aug 2026 security fix. The share-attribution HMAC was enforced on the RENDER
@@ -40,23 +45,54 @@ describe("share attribution is bound to the owner it names", () => {
   it("verifies the tuple it signed", () => {
     const sig = signShareAttribution({ ownerId: ownerA, dealId, valuesHash });
     expect(sig).toBeTruthy();
-    expect(verifyShareAttribution({ ownerId: ownerA, dealId, valuesHash, sig })).toBe(true);
+    expect(
+      verifyShareAttribution({ ownerId: ownerA, dealId, valuesHash, sig }),
+    ).toBe(true);
   });
 
   it("rejects a missing signature — the pre-fix lead-write path", () => {
-    expect(verifyShareAttribution({ ownerId: ownerA, dealId, valuesHash, sig: null })).toBe(false);
-    expect(verifyShareAttribution({ ownerId: ownerA, dealId, valuesHash })).toBe(false);
+    expect(
+      verifyShareAttribution({
+        ownerId: ownerA,
+        dealId,
+        valuesHash,
+        sig: null,
+      }),
+    ).toBe(false);
+    expect(
+      verifyShareAttribution({ ownerId: ownerA, dealId, valuesHash }),
+    ).toBe(false);
   });
 
   it("rejects another owner's signature swapped onto this ownerId", () => {
-    const sigForA = signShareAttribution({ ownerId: ownerA, dealId, valuesHash });
-    expect(verifyShareAttribution({ ownerId: ownerB, dealId, valuesHash, sig: sigForA })).toBe(false);
+    const sigForA = signShareAttribution({
+      ownerId: ownerA,
+      dealId,
+      valuesHash,
+    });
+    expect(
+      verifyShareAttribution({
+        ownerId: ownerB,
+        dealId,
+        valuesHash,
+        sig: sigForA,
+      }),
+    ).toBe(false);
   });
 
   it("rejects a signature lifted onto different deal values", () => {
-    const sigForA = signShareAttribution({ ownerId: ownerA, dealId, valuesHash });
+    const sigForA = signShareAttribution({
+      ownerId: ownerA,
+      dealId,
+      valuesHash,
+    });
     expect(
-      verifyShareAttribution({ ownerId: ownerA, dealId, valuesHash: "ffffffffffffffffffffffff", sig: sigForA })
+      verifyShareAttribution({
+        ownerId: ownerA,
+        dealId,
+        valuesHash: "ffffffffffffffffffffffff",
+        sig: sigForA,
+      }),
     ).toBe(false);
   });
 });
@@ -64,8 +100,8 @@ describe("share attribution is bound to the owner it names", () => {
 describe("the lead WRITE path verifies attribution before inserting", () => {
   const action = read("../../app/actions/capture-deal-lead.ts");
 
-  it("calls verifyShareAttribution before the deal_leads insert", () => {
-    const verifyAt = action.indexOf("verifyShareAttribution(");
+  it("calls the surface-bound verifier before the deal_leads insert", () => {
+    const verifyAt = action.indexOf("verifyLeadCaptureAuthorization(");
     const insertAt = action.indexOf('from("deal_leads").insert');
     expect(verifyAt).toBeGreaterThan(-1);
     expect(insertAt).toBeGreaterThan(-1);
@@ -87,6 +123,59 @@ describe("the lead WRITE path verifies attribution before inserting", () => {
     expect(shell).toMatch(/<LeadCaptureForm[\s\S]*?sig=\{/);
     const page = read("../../app/d/[encoded]/page.tsx");
     expect(page).toMatch(/leadCapture=\{/);
-    expect(page).toMatch(/sig: payload\.meta\?\.sig/);
+    expect(page).toContain("signLeadCaptureAuthorization");
+  });
+
+  it("freshly resolves opaque shares before any private lead write", () => {
+    const resolution = action.indexOf(
+      "await resolvePublicShare(opaqueShareToken)",
+    );
+    const insert = action.indexOf('from("deal_leads").insert');
+    expect(resolution).toBeGreaterThan(-1);
+    expect(resolution).toBeLessThan(insert);
+    expect(action).toContain('shareSurface === "opaque_share"');
+    expect(action).toContain("isWellFormedShareToken(opaqueShareToken)");
+
+    const opaquePage = read("../../app/s/[token]/page.tsx");
+    expect(opaquePage).toContain('shareSurface: "opaque_share"');
+    expect(opaquePage).toContain("opaqueShareToken: token");
+  });
+});
+
+describe("lead-write signatures are surface-bound", () => {
+  const oldSecret = process.env.SHARE_LINK_SECRET;
+  beforeAll(() => {
+    process.env.SHARE_LINK_SECRET = "test-secret-for-surface-bound-lead-write";
+  });
+  afterAll(() => {
+    if (oldSecret === undefined) delete process.env.SHARE_LINK_SECRET;
+    else process.env.SHARE_LINK_SECRET = oldSecret;
+  });
+
+  it("cannot relabel an opaque authorization as a legacy share", () => {
+    const input = {
+      ownerId: "11111111-1111-4111-8111-111111111111",
+      dealId: "33333333-3333-4333-8333-333333333333",
+      valuesHash: "abc123abc123abc123abc123",
+      dealAddress: "123 Main St",
+    };
+    const sig = signLeadCaptureAuthorization({
+      ...input,
+      shareSurface: "opaque_share",
+    });
+    expect(
+      verifyLeadCaptureAuthorization({
+        ...input,
+        shareSurface: "opaque_share",
+        sig,
+      }),
+    ).toBe(true);
+    expect(
+      verifyLeadCaptureAuthorization({
+        ...input,
+        shareSurface: "legacy_share",
+        sig,
+      }),
+    ).toBe(false);
   });
 });

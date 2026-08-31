@@ -4,35 +4,34 @@
 **Contract:** `lib/analytics-event-dictionary.ts`  
 **Collection:** PostHog browser events are consent-gated; billing and durable
 account events use the server wrapper. Documented events use the dictionary's
-exact property allowlist. Unknown legacy events retain only non-sensitive
-scalar properties after the same sensitive-key denylist; their share must be
-monitored and driven toward zero.
+exact property allowlist. Deprecated funnel names remain only as typed
+dashboard-migration vocabulary and are not emitted beside canonical events.
+Any other unknown event still fails closed to no caller-supplied properties.
 
 This is the launch dashboard specification. It can be implemented in PostHog
 without changing event names or inspecting underwriting inputs.
 
 ## Metric definitions
 
-| Metric | Numerator event | Denominator / predecessor | Required breakdown |
-|---|---|---|---|
-| Landing visits | `landing_view` | unique sessions | route, attribution medium |
-| Hero submit rate | `hero_address_submit` | `landing_view` | device class |
-| Valid-property rate | `instant_screen_generated` | `hero_address_submit` | property type, verdict |
-| Analysis completion | `analysis_completed` | `instant_screen_generated` | property type, input tab, cash/financed |
-| Offer Ceiling engagement | `offer_ceiling_viewed` | `analysis_completed` | access level, readiness, feasible/not feasible |
-| Verification engagement | `material_input_verified` or `verification_task_completed` | `offer_ceiling_viewed` | source class / evidence level |
-| Meaningful edit rate | `material_assumption_overridden` | `analysis_completed` | field group and source only |
-| Save rate | `deal_saved` | `analysis_completed` | new versus update |
-| Account creation | `account_created` | `save_prompt_shown` | signup method |
-| Second-deal activation | `second_deal_completed` | `account_created` | completion within the 21-day evaluation |
-| Comparison activation | `comparison_completed` | `second_deal_completed` | two, three, or four deals |
-| Evaluation comparison use | `evaluation_comparison_used` | `product_evaluation_started` | count bucket |
-| Report use | `report_viewed` / `pdf_exported` | `analysis_completed` | report type only |
-| Upgrade exposure | `paywall_viewed` or `upgrade_modal_viewed` | `analysis_completed` | trigger / placement |
-| Checkout start | `subscription_checkout_started` | upgrade exposure | plan, monthly/annual |
-| Evaluation start | `product_evaluation_started` | `account_created` | source |
-| Subscription start | `subscription_activated` | `subscription_checkout_started` | plan, interval, trial must be false for the new offer |
-| Cancellation | `subscription_cancelled` | `subscription_activated` | plan and effective timing |
+| Metric                    | Numerator event                                            | Denominator / predecessor    | Required breakdown                             |
+| ------------------------- | ---------------------------------------------------------- | ---------------------------- | ---------------------------------------------- |
+| Landing visits            | `landing_view`                                             | unique sessions              | coarse route only                              |
+| Hero submit rate          | `hero_address_submit`                                      | `landing_view`               | device class                                   |
+| Analysis completion       | `analysis_completed`                                       | `analysis_started`           | route category, calculator slug                |
+| Offer Ceiling engagement  | `offer_ceiling_viewed`                                     | `analysis_completed`         | access level, readiness, feasible/not feasible |
+| Verification engagement   | `material_input_verified` or `verification_task_completed` | `offer_ceiling_viewed`       | source class / evidence level                  |
+| Meaningful edit rate      | `material_assumption_overridden`                           | `analysis_completed`         | field group and source only                    |
+| Save rate                 | `deal_saved`                                               | `analysis_completed`         | new versus update                              |
+| Account creation          | `account_created`                                          | `save_prompt_shown`          | referral source                                |
+| Second-deal activation    | `second_deal_completed`                                    | `account_created`            | completion within the 21-day evaluation        |
+| Comparison activation     | `comparison_completed`                                     | `second_deal_completed`      | two, three, or four deals                      |
+| Evaluation comparison use | `evaluation_comparison_used`                               | `product_evaluation_started` | count bucket                                   |
+| Report use                | `report_viewed` / `pdf_exported`                           | `analysis_completed`         | report type only                               |
+| Upgrade exposure          | `paywall_viewed` or `upgrade_modal_viewed`                 | `analysis_completed`         | trigger / placement                            |
+| Checkout start            | `upgrade_started`                                          | upgrade exposure             | plan identifier, referral source               |
+| Evaluation start          | `product_evaluation_started`                               | `account_created`            | source                                         |
+| Subscription start        | `subscription_started`                                     | `upgrade_started`            | plan identifier, referral source               |
+| Cancellation              | `subscription_cancelled`                                   | `subscription_started`       | plan and effective timing                      |
 
 The no-card 21-day product evaluation is not a Stripe trial. Legacy
 `trial_started` events may remain for grandfathered Stripe subscriptions and
@@ -41,12 +40,13 @@ must be excluded from the launch-offer funnel.
 ## Saved PostHog insights
 
 1. **Paid-ad acquisition funnel (14-day conversion window):**
-   `landing_view` → `hero_address_submit` → `instant_screen_generated` →
+   `landing_view` → `hero_address_submit` → `analysis_started` →
    `analysis_completed` → `offer_ceiling_viewed` → `account_created` →
    `second_deal_completed` → `comparison_completed` →
-   `subscription_checkout_started` → `subscription_activated`.
-   Use unique users, ordered steps, and split by UTM campaign only through
-   PostHog's sanitized first-touch attribution properties.
+   `upgrade_started` → `subscription_started`.
+   Use unique users, ordered steps, and split only by the allowlisted
+   `referral_source` taxonomy. Raw UTM values, campaign names, referrer hosts,
+   landing paths, and query strings are not retained.
 2. **First-value speed:** median and p75 time from `account_created` to
    `first_value_within_24h`; report the share completed within 24 hours.
 3. **Evaluation utilization:** unique accounts with one, two, and three
@@ -88,7 +88,7 @@ metric, because cleared storage and another device can affect deduplication.
 - Exclude internal/staging traffic through PostHog cohorts, not a customer-data
   property.
 - Review event volume, unknown-event share, duplicate billing events, and the
-  gap between server-authoritative `subscription_activated` and client return
+  gap between server-authoritative `subscription_started` and client return
   events weekly for the first month.
 
 ## Go-live checklist

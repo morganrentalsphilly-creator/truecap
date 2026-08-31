@@ -18,7 +18,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Calculator } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
@@ -60,7 +60,12 @@ export const metadata: Metadata = {
     modifiedTime: MODIFIED_AT,
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: TITLE_PLAIN }],
   },
-  twitter: { card: "summary_large_image", title: SERP_TITLE, description: DESCRIPTION, images: ["/home.jpg"] },
+  twitter: {
+    card: "summary_large_image",
+    title: SERP_TITLE,
+    description: DESCRIPTION,
+    images: ["/home.jpg"],
+  },
 };
 
 type Tool = {
@@ -86,12 +91,12 @@ const TOOLS: Tool[] = [
       "Full disclosure: TrueCap is our tool, so read this entry as the maker's pitch and check the side-by-side comparison. We put it first for its no-signup preliminary screen and transparent starting assumptions.",
     strengths: [
       "Cap rate, cash-on-cash, DSCR, NCF, and monthly cash flow — free, unlimited, no signup",
-      "Labeled HUD rent, published-rate, and state-tax starting benchmarks when available",
+      "Labeled HUD rent and FRED rate benchmarks; manual local property tax",
       "Selected-rule fit with each metric benchmarked inline and a secondary Screening Index",
       "Sensitivity grid, Offer Ceiling, 10-year cash-flow and equity projection, and saved-deal comparison on Pro",
     ],
     tradeoffs: [
-      "No full property import from listing sites — a pasted Zillow/Redfin link yields the address, then auto-fill uses public data sources",
+      "No full property import from listing sites — a supported listing link yields the address, then HUD/FRED enrichment remains subject to coverage",
       "PWA rather than native iOS/Android apps",
       "Free saves up to 5 deals; editing + unlimited saves, comparing, co-branded share links, and PDF export are Pro",
     ],
@@ -252,7 +257,12 @@ export default function BestDealCheckAlternativesPost() {
     image: [`${siteUrl}/home.jpg`],
     datePublished: PUBLISHED_AT,
     dateModified: MODIFIED_AT,
-    author: { "@type": "Person", "@id": `${siteUrl}/about#morgan`, name: "Morgan Page", url: `${siteUrl}/about` },
+    author: {
+      "@type": "Person",
+      "@id": `${siteUrl}/about#morgan`,
+      name: "Morgan Page",
+      url: `${siteUrl}/about`,
+    },
     publisher: { "@id": `${siteUrl}/#organization` },
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
   };
@@ -262,7 +272,12 @@ export default function BestDealCheckAlternativesPost() {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
-      { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: `${siteUrl}/blog`,
+      },
       { "@type": "ListItem", position: 3, name: TITLE_PLAIN, item: url },
     ],
   };
@@ -290,14 +305,29 @@ export default function BestDealCheckAlternativesPost() {
 
   return (
     <div className="min-h-screen bg-background">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
 
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-2">
-          <Link href="/blog" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">
+          <Link
+            href="/blog"
+            className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+          >
             ← TrueCap Blog
           </Link>
         </div>
@@ -319,25 +349,28 @@ export default function BestDealCheckAlternativesPost() {
               we make, clearly labeled — with verified 2026 pricing and an
               honest note on when sticking with DealCheck is the right call.
             </p>
-            <p className="mt-4 text-xs text-muted-foreground">Published {PUBLISHED_AT} · Updated {MODIFIED_AT}</p>
+            <p className="mt-4 text-xs text-muted-foreground">
+              Published {PUBLISHED_AT} · Updated {MODIFIED_AT}
+            </p>
             <BlogByline />
           </header>
 
           <section className="mb-10 rounded-2xl border border-border bg-card p-5 sm:p-6">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">Quick answer</h2>
+            <h2 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">
+              Quick answer
+            </h2>
             <p className="text-sm sm:text-base leading-relaxed text-foreground">
               For a no-account preliminary rental screen,{" "}
-              <strong>TrueCap</strong>{" "}
-              (that&apos;s us) exposes core rental metrics and labeled starting assumptions before signup.{" "}
-              <strong>BiggerPockets</strong>{" "}
-              makes sense if you want the community bundled in.{" "}
-              <strong>Stessa</strong>{" "}
-              spans an investment-property marketplace, editable acquisition analysis, and ongoing operations,{" "}
-              <strong>Mashvisor</strong>{" "}
-              covers market research, <strong>RentCast</strong>{" "}
-              and <strong>Rentometer</strong>{" "}
-              cover rent comps, and a <strong>spreadsheet</strong>{" "}
-              is still the most flexible option if you maintain your own model.
+              <strong>TrueCap</strong> (that&apos;s us) exposes core rental
+              metrics and labeled starting assumptions before signup.{" "}
+              <strong>BiggerPockets</strong> makes sense if you want the
+              community bundled in. <strong>Stessa</strong> spans an
+              investment-property marketplace, editable acquisition analysis,
+              and ongoing operations, <strong>Mashvisor</strong> covers market
+              research, <strong>RentCast</strong> and{" "}
+              <strong>Rentometer</strong> cover rent comps, and a{" "}
+              <strong>spreadsheet</strong> is still the most flexible option if
+              you maintain your own model.
             </p>
           </section>
 
@@ -348,17 +381,32 @@ export default function BestDealCheckAlternativesPost() {
               <table className="w-full text-sm">
                 <thead className="bg-muted/40">
                   <tr className="text-left">
-                    <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Tool</th>
-                    <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Pricing (July 2026)</th>
-                    <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Best for</th>
+                    <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                      Tool
+                    </th>
+                    <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                      Pricing (July 2026)
+                    </th>
+                    <th className="py-3 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                      Best for
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {TABLE_ROWS.map((row) => (
-                    <tr key={row.name} className="border-t border-border align-top">
-                      <td className="py-3 px-3 text-sm font-semibold text-foreground whitespace-nowrap">{row.name}</td>
-                      <td className="py-3 px-3 text-xs leading-relaxed text-foreground/85">{row.pricing}</td>
-                      <td className="py-3 px-3 text-xs leading-relaxed text-foreground/85">{row.bestFor}</td>
+                    <tr
+                      key={row.name}
+                      className="border-t border-border align-top"
+                    >
+                      <td className="py-3 px-3 text-sm font-semibold text-foreground whitespace-nowrap">
+                        {row.name}
+                      </td>
+                      <td className="py-3 px-3 text-xs leading-relaxed text-foreground/85">
+                        {row.pricing}
+                      </td>
+                      <td className="py-3 px-3 text-xs leading-relaxed text-foreground/85">
+                        {row.bestFor}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -368,7 +416,10 @@ export default function BestDealCheckAlternativesPost() {
             <h2>The 7 alternatives, ranked</h2>
 
             {TOOLS.map((t) => (
-              <div key={t.name} className="not-prose mb-8 rounded-2xl border border-border bg-card p-5 sm:p-6">
+              <div
+                key={t.name}
+                className="not-prose mb-8 rounded-2xl border border-border bg-card p-5 sm:p-6"
+              >
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div>
                     <div className="text-[11px] font-bold uppercase tracking-widest text-primary mb-1.5">
@@ -378,7 +429,10 @@ export default function BestDealCheckAlternativesPost() {
                       {t.name}
                     </h3>
                   </div>
-                  <Link href={t.url} className="shrink-0 inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline">
+                  <Link
+                    href={t.url}
+                    className="shrink-0 inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline"
+                  >
                     Side-by-side
                     <ArrowUpRight className="size-3" />
                   </Link>
@@ -389,7 +443,8 @@ export default function BestDealCheckAlternativesPost() {
                   </p>
                 ) : null}
                 <p className="text-sm text-muted-foreground mb-4">
-                  <strong className="text-foreground">Pricing:</strong> {t.pricing}
+                  <strong className="text-foreground">Pricing:</strong>{" "}
+                  {t.pricing}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div>
@@ -399,7 +454,9 @@ export default function BestDealCheckAlternativesPost() {
                     <ul className="space-y-1.5 text-sm text-foreground">
                       {t.strengths.map((p) => (
                         <li key={p} className="flex gap-2">
-                          <span className="text-[var(--brand-green)] shrink-0">+</span>
+                          <span className="text-[var(--brand-green)] shrink-0">
+                            +
+                          </span>
                           <span>{p}</span>
                         </li>
                       ))}
@@ -412,7 +469,9 @@ export default function BestDealCheckAlternativesPost() {
                     <ul className="space-y-1.5 text-sm text-foreground">
                       {t.tradeoffs.map((p) => (
                         <li key={p} className="flex gap-2">
-                          <span className="text-muted-foreground/60 shrink-0">−</span>
+                          <span className="text-muted-foreground/60 shrink-0">
+                            −
+                          </span>
                           <span>{p}</span>
                         </li>
                       ))}
@@ -436,21 +495,36 @@ export default function BestDealCheckAlternativesPost() {
               paid tiers are also cheap for what they unlock ($10–$20/month
               billed annually, as of July 2026). Switch when a specific
               limitation bites — the free-tier property cap, manual data entry,
-              or paying for underwriting features when all you needed was a
-              rent comp. Our full{" "}
-              <Link href="/vs/dealcheck" className="font-semibold text-primary hover:underline">TrueCap vs DealCheck comparison</Link>{" "}
+              or paying for underwriting features when all you needed was a rent
+              comp. Our full{" "}
+              <Link
+                href="/vs/dealcheck"
+                className="font-semibold text-primary hover:underline"
+              >
+                TrueCap vs DealCheck comparison
+              </Link>{" "}
               marks the rows DealCheck wins, because it wins several.
             </p>
 
             <h2>FAQ</h2>
             <div className="not-prose space-y-3">
               {FAQ_ITEMS.map((item) => (
-                <details key={item.q} className="group rounded-xl border border-border bg-card p-4 sm:p-5">
+                <details
+                  key={item.q}
+                  className="group rounded-xl border border-border bg-card p-4 sm:p-5"
+                >
                   <summary className="cursor-pointer list-none flex items-start justify-between gap-3 font-bold text-sm sm:text-base text-foreground">
                     <span>{item.q}</span>
-                    <span aria-hidden className="mt-1 size-5 shrink-0 rounded-full border border-border text-muted-foreground text-xs leading-none flex items-center justify-center transition-transform group-open:rotate-45">+</span>
+                    <span
+                      aria-hidden
+                      className="mt-1 size-5 shrink-0 rounded-full border border-border text-muted-foreground text-xs leading-none flex items-center justify-center transition-transform group-open:rotate-45"
+                    >
+                      +
+                    </span>
                   </summary>
-                  <div className="mt-3 text-sm text-muted-foreground leading-relaxed">{item.a}</div>
+                  <div className="mt-3 text-sm text-muted-foreground leading-relaxed">
+                    {item.a}
+                  </div>
                 </details>
               ))}
             </div>
@@ -461,23 +535,44 @@ export default function BestDealCheckAlternativesPost() {
               through a free tool and see if anything is missing. TrueCap&apos;s
               core underwriting is free with no signup — or start with a single
               metric via the{" "}
-              <Link href="/tools/gross-rent-multiplier-calculator" className="font-semibold text-primary hover:underline">GRM calculator</Link>,{" "}
-              <Link href="/tools/mortgage-payment-calculator" className="font-semibold text-primary hover:underline">mortgage payment calculator</Link>, or{" "}
-              <Link href="/blog/brrrr-method-explained" className="font-semibold text-primary hover:underline">BRRRR workflow guide</Link>. The
-              full walkthrough is in our guide to{" "}
-              <Link href="/blog/how-to-underwrite-a-rental-property-in-60-seconds" className="font-semibold text-primary hover:underline">underwriting a rental in 60 seconds</Link>.
-            </p>
-            <p className="not-prose">
-              <Link href="/" className="inline-flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-5 py-3 font-bold hover:opacity-90">
-                <Calculator className="w-4 h-4" />
-                Run a deal — 60 seconds
-                <ArrowUpRight className="w-4 h-4" />
+              <Link
+                href="/tools/gross-rent-multiplier-calculator"
+                className="font-semibold text-primary hover:underline"
+              >
+                GRM calculator
               </Link>
+              ,{" "}
+              <Link
+                href="/tools/mortgage-payment-calculator"
+                className="font-semibold text-primary hover:underline"
+              >
+                mortgage payment calculator
+              </Link>
+              , or{" "}
+              <Link
+                href="/blog/brrrr-method-explained"
+                className="font-semibold text-primary hover:underline"
+              >
+                BRRRR workflow guide
+              </Link>
+              . The full walkthrough is in our guide to{" "}
+              <Link
+                href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
+                className="font-semibold text-primary hover:underline"
+              >
+                underwriting a rental in 60 seconds
+              </Link>
+              .
             </p>
+            <p className="not-prose"></p>
           </div>
 
-          <div className="mt-10"><NewsletterSignup /></div>
-          <div className="mt-10"><RelatedBlogPosts currentSlug={SLUG} limit={3} /></div>
+          <div className="mt-10">
+            <NewsletterSignup />
+          </div>
+          <div className="mt-10">
+            <RelatedBlogPosts currentSlug={SLUG} limit={3} />
+          </div>
         </article>
       </main>
 

@@ -1,409 +1,167 @@
 import type { MetadataRoute } from "next";
-import { CITY_STRATEGY_COMBOS } from "@/lib/city-strategy-combos";
-import { MARKET_CITIES } from "@/lib/markets/cities";
-import { GLOSSARY } from "@/lib/glossary";
-import { STATES } from "@/lib/states";
-import { getSiteUrl } from "@/lib/site-url";
-import { CALCULATOR_REGISTRY } from "@/lib/calculator-registry";
-import { BLOG_TOPICS } from "@/lib/blog-topics";
+
 import { BLOG_POSTS } from "@/app/blog/page";
+import { BLOG_TOPICS } from "@/lib/blog-topics";
+import { CALCULATOR_REGISTRY } from "@/lib/calculator-registry";
+import { CITY_STRATEGY_COMBOS } from "@/lib/city-strategy-combos";
+import { GLOSSARY } from "@/lib/glossary";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
+import { BESPOKE_MARKETS, MARKET_CITIES } from "@/lib/markets/cities";
+import { CANONICAL_SITE_URL } from "@/lib/site-url";
+import { STATES } from "@/lib/states";
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 
+/**
+ * Sitemap policy
+ *
+ * - Only indexable, canonical HTML pages belong here.
+ * - A last-modified value is emitted only for a reviewed content date we can
+ *   defend. Never stamp deployment time onto evergreen pages.
+ * - Search engines ignore priority/changefreq hints, so neither is emitted.
+ * - Released registries drive generated families; gated and retired routes
+ *   therefore cannot leak into discovery surfaces.
+ */
+
+const CORE_PATHS = [
+  "/",
+  "/pricing",
+  "/sample-decision-memo",
+  "/tools",
+  "/about",
+  "/privacy",
+  "/terms",
+  "/blog",
+  "/embed",
+  "/glossary",
+  "/methodology",
+  "/why-truecap",
+  "/reviews",
+  "/playbook",
+  "/for-buy-and-hold",
+  "/for-house-hackers",
+  "/markets",
+  "/states",
+  "/vs",
+] as const;
+
+/** Comparison pages without a defensible per-page review date. */
+const COMPARISON_PATHS = [
+  "/vs/dealcheck",
+  "/vs/bricked",
+  "/vs/stessa",
+  "/vs/mashvisor",
+  "/vs/biggerpockets-calculator",
+  "/vs/excel",
+  "/vs/rentometer",
+  "/vs/zillow-rent-estimate",
+] as const;
+
+/** Pages released/reviewed in the documented June 2026 comparison batches. */
+const JUNE_2026_COMPARISON_PATHS = [
+  "/vs/roofstock",
+  "/vs/rentredi",
+  "/vs/avail",
+  "/vs/propstream",
+  "/vs/rentcast",
+  "/vs/turbotenant",
+  "/vs/baselane",
+  "/vs/buildium",
+  "/vs/appfolio",
+  "/vs/rentec-direct",
+  "/vs/landlord-studio",
+  "/vs/rentspree",
+  "/vs/hostfully",
+  "/vs/cozy",
+  "/vs/dealmachine",
+  "/vs/batchleads",
+  "/vs/yardi-breeze",
+  "/vs/hostaway",
+  "/vs/airdna",
+  "/vs/arrived",
+  "/vs/fundrise",
+  "/vs/lodgify",
+  "/vs/guesty",
+  "/vs/crexi",
+  "/vs/reonomy",
+  "/vs/privy",
+  "/vs/quickbooks-rental",
+  "/vs/biggerpockets-for-house-hacking",
+  "/vs/dealcheck-for-short-term-rentals",
+  "/vs/mashvisor-for-short-term-rentals",
+] as const;
+
+function sitemapEntry(
+  siteUrl: string,
+  path: string,
+  lastModified?: Date,
+): MetadataRoute.Sitemap[number] {
+  return {
+    url: path === "/" ? `${siteUrl}/` : `${siteUrl}${path}`,
+    ...(lastModified ? { lastModified } : {}),
+  };
+}
+
 export default function sitemap(): MetadataRoute.Sitemap {
-  const siteUrl = getSiteUrl();
+  // Search discovery must never inherit a localhost, preview, or plaintext
+  // origin from email/development configuration.
+  const siteUrl = CANONICAL_SITE_URL;
   const { guaranteeEnabled } = getMarketingOfferConfig();
-  const agentProConfigured = isAgentProConfigured();
 
-  // lastModified policy: only emit a date we can stand behind — a blog
-  // post's publishedAt or a hand-stamped content-release date. The evergreen
-  // pages (tools, glossary, states, markets, hubs, static marketing pages)
-  // used to stamp `lastModified: new Date()`, which re-declared ~250
-  // unchanged URLs as "modified today" on EVERY deploy; once lastmod is
-  // provably wrong, Google ignores it site-wide, devaluing the honest blog
-  // dates on a site whose bottleneck is indexing coverage. Omitting
-  // lastModified is valid per the sitemap spec and more truthful than
-  // inventing dates — do not reintroduce build-time stamps here.
-
-  // Calculator tool pages — derived from lib/calculator-registry.ts (the single
-  // source of truth) so the sitemap can never drift from /tools again.
-  const toolUrls: MetadataRoute.Sitemap = CALCULATOR_REGISTRY.map((c) => ({
-    url: `${siteUrl}/tools/${c.slug}`,
-    changeFrequency: "monthly" as const,
-    priority: 0.8,
-  }));
-
-  // Per-glossary-term pages — one URL per term in lib/glossary.ts.
-  // 30+ pages ranking for "what is X" / "X definition" long-tail queries.
-  const glossaryUrls: MetadataRoute.Sitemap = Object.values(GLOSSARY).map(
-    (entry) => ({
-      url: `${siteUrl}/glossary/${entry.slug}`,
-      changeFrequency: "monthly" as const,
-      priority: 0.6,
-    })
+  const toolUrls = CALCULATOR_REGISTRY.map((calculator) =>
+    sitemapEntry(siteUrl, `/tools/${calculator.slug}`),
   );
-
-  // Per-state investing pages — count derives from STATES, never copied into prose.
-  // and related state-level queries.
-  const stateUrls: MetadataRoute.Sitemap = Object.values(STATES).map((s) => ({
-    url: `${siteUrl}/states/${s.slug}`,
-    changeFrequency: "monthly" as const,
-    priority: 0.7,
-  }));
-
-  // City + strategy combo pages. The imported registry is release-filtered,
-  // so a dark specialist model cannot enter the sitemap even though its
-  // authored content remains ready for a future flag-on build.
-  // Released entries target long-tail URLs ranking for
-  // "BRRRR Philadelphia" / "cash flow Cleveland" / "Section 8 Memphis"
-  // and similar high-intent niche queries.
-  const cityStrategyUrls: MetadataRoute.Sitemap = CITY_STRATEGY_COMBOS.map(
-    (c) => ({
-      url: `${siteUrl}/markets/${c.citySlug}/${c.strategy}`,
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
-    })
+  const glossaryUrls = Object.values(GLOSSARY).map((entry) =>
+    sitemapEntry(siteUrl, `/glossary/${entry.slug}`),
   );
-
-  // Programmatic city market pages — data-driven /markets/[city] pages
-  // from lib/markets/cities.ts (excludes the bespoke static market pages,
-  // which are listed separately below).
-  const marketCityUrls: MetadataRoute.Sitemap = MARKET_CITIES.map((c) => ({
-    url: `${siteUrl}/markets/${c.slug}`,
-    changeFrequency: "monthly" as const,
-    priority: 0.7,
-  }));
-
-  // Blog topic hubs (P2-4) — the /blog/topics index + one hub per topic.
-  const topicHubUrls: MetadataRoute.Sitemap = [
-    {
-      url: `${siteUrl}/blog/topics`,
-      changeFrequency: "monthly" as const,
-      priority: 0.6,
-    },
-    ...BLOG_TOPICS.map((t) => ({
-      url: `${siteUrl}/blog/topics/${t.slug}`,
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
-    })),
+  const stateUrls = Object.values(STATES).map((state) =>
+    sitemapEntry(siteUrl, `/states/${state.slug}`),
+  );
+  const cityStrategyUrls = CITY_STRATEGY_COMBOS.map((combo) =>
+    sitemapEntry(siteUrl, `/markets/${combo.citySlug}/${combo.strategy}`),
+  );
+  const marketCityUrls = MARKET_CITIES.map((city) =>
+    sitemapEntry(siteUrl, `/markets/${city.slug}`),
+  );
+  const bespokeMarketUrls = BESPOKE_MARKETS.map((city) =>
+    sitemapEntry(siteUrl, `/markets/${city.slug}`),
+  );
+  const topicUrls = [
+    sitemapEntry(siteUrl, "/blog/topics"),
+    ...BLOG_TOPICS.map((topic) =>
+      sitemapEntry(siteUrl, `/blog/topics/${topic.slug}`),
+    ),
+  ];
+  const blogUrls = BLOG_POSTS.filter((post) => post.available).map((post) =>
+    sitemapEntry(
+      siteUrl,
+      `/blog/${post.slug}`,
+      new Date(post.modifiedAt ?? post.publishedAt),
+    ),
+  );
+  const comparisonUrls = [
+    ...COMPARISON_PATHS.map((path) => sitemapEntry(siteUrl, path)),
+    ...JUNE_2026_COMPARISON_PATHS.map((path) =>
+      sitemapEntry(siteUrl, path, new Date("2026-06-07")),
+    ),
   ];
 
-  // Blog posts — derived from BLOG_POSTS (app/blog/page.tsx), the single
-  // source of truth that /blog and llms.txt already render from. Deriving
-  // here (not a hardcoded list) means new posts appear in the sitemap
-  // automatically; the two can never drift again. `modifiedAt` is set only
-  // for a material reviewed change and otherwise falls back to `publishedAt`
-  // (Google ignores sitemap priority/changefreq).
-  const blogUrls: MetadataRoute.Sitemap = BLOG_POSTS.filter(
-    (p) => p.available
-  ).map((p) => ({
-    url: `${siteUrl}/blog/${p.slug}`,
-    lastModified: new Date(p.modifiedAt ?? p.publishedAt),
-    changeFrequency: "monthly" as const,
-    priority: 0.8,
-  }));
-
-  const entries: MetadataRoute.Sitemap = [
+  return [
+    ...CORE_PATHS.map((path) => sitemapEntry(siteUrl, path)),
+    sitemapEntry(
+      siteUrl,
+      "/tools/rental-property-spreadsheet",
+      new Date("2026-07-14"),
+    ),
+    ...toolUrls,
     ...glossaryUrls,
     ...stateUrls,
     ...cityStrategyUrls,
     ...marketCityUrls,
-    ...topicHubUrls,
+    ...bespokeMarketUrls,
+    ...topicUrls,
     ...blogUrls,
-    {
-      url: `${siteUrl}/markets`,
-      changeFrequency: "weekly" as const,
-      priority: 0.8,
-    },
-    {
-      url: `${siteUrl}/states`,
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
-    },
-    {
-      url: `${siteUrl}/`,
-      changeFrequency: "daily",
-      priority: 1,
-    },
-    {
-      url: `${siteUrl}/pricing`,
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${siteUrl}/sample-decision-memo`,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${siteUrl}/tools`,
-      changeFrequency: "weekly",
-      priority: 0.7,
-    },
-    ...toolUrls,
-    {
-      // Free un-gated spreadsheet download page — deliberately NOT a
-      // calculator-registry entry (it has no widget), so it can't flow in
-      // via toolUrls above and is listed manually here.
-      url: `${siteUrl}/tools/rental-property-spreadsheet`,
-      lastModified: new Date("2026-07-14"),
-      changeFrequency: "monthly" as const,
-      priority: 0.8,
-    },
-    {
-      // /about — E-E-A-T founder page; anchors the Person @id that blog
-      // Article schema references.
-      url: `${siteUrl}/about`,
-      changeFrequency: "yearly",
-      priority: 0.5,
-    },
-    {
-      url: `${siteUrl}/privacy`,
-      changeFrequency: "yearly",
-      priority: 0.3,
-    },
-    {
-      url: `${siteUrl}/terms`,
-      changeFrequency: "yearly",
-      priority: 0.3,
-    },
-    {
-      url: `${siteUrl}/blog`,
-      changeFrequency: "weekly",
-      priority: 0.7,
-    },
-    // NOTE deliberately absent: /feed.xml, /llms.txt, /llms-full.txt.
-    // A sitemap urlset is for INDEXABLE HTML pages — feeds and llms.txt
-    // are non-HTML resources that show up in GSC as "indexed, though
-    // blocked"-style noise and dilute crawl signals on a young domain.
-    // AI crawlers discover llms.txt by convention + the robots Allow.
-    {
-      url: `${siteUrl}/embed`,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    // /changelog intentionally omitted — de-surfaced from the front-facing
-    // site (2026-08-11). It is noindexed (app/changelog/page.tsx robots) and
-    // has no inbound internal link; listing a noindex URL in the sitemap is a
-    // contradictory signal. The route still resolves for old links.
-    {
-      url: `${siteUrl}/glossary`,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${siteUrl}/methodology`,
-      changeFrequency: "monthly",
-      priority: 0.5,
-    },
-    {
-      url: `${siteUrl}/why-truecap`,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    ...(guaranteeEnabled
-      ? [
-          {
-            // Publish the guarantee in discovery surfaces only while the
-            // matching marketing/refund approval flag is explicitly live.
-            url: `${siteUrl}/guarantee`,
-            changeFrequency: "monthly" as const,
-            priority: 0.6,
-          },
-        ]
-      : []),
-    {
-      // Wall of proof — live counts + methodology + verified quotes only.
-      url: `${siteUrl}/reviews`,
-      changeFrequency: "weekly",
-      priority: 0.6,
-    },
-    {
-      // The First Offer Playbook — long-form conversion content.
-      url: `${siteUrl}/playbook`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    ...(agentProConfigured
-      ? [
-          {
-            url: `${siteUrl}/for-agents`,
-            changeFrequency: "monthly" as const,
-            priority: 0.6,
-          },
-        ]
-      : []),
-    {
-      url: `${siteUrl}/for-buy-and-hold`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${siteUrl}/for-house-hackers`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    // /vs hub intentionally omitted, and it must STAY omitted: the hub
-    // is `robots: { index: false, follow: true }` (app/vs/page.tsx) per
-    // Morgan's request that the comparison hub not be indexed, and
-    // listing a noindex URL in a sitemap is a contradictory signal.
-    //
-    // The individual /vs/<competitor> pages below are indexable and are
-    // reached THROUGH the hub — `follow: true` is what makes that work.
-    // Note that until 2026-08-03 nothing on the site linked to /vs at
-    // all, so the crawler never arrived at the hub and 24 of the 40
-    // comparison pages had no inbound link from anywhere; a footer link
-    // to the hub now restores that path without indexing the hub itself.
-    {
-      url: `${siteUrl}/vs/dealcheck`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${siteUrl}/vs/bricked`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${siteUrl}/vs/stessa`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${siteUrl}/vs/mashvisor`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${siteUrl}/vs/biggerpockets-calculator`,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${siteUrl}/vs/excel`,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${siteUrl}/vs/rentometer`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${siteUrl}/vs/zillow-rent-estimate`,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${siteUrl}/vs/roofstock`,
-      lastModified: new Date("2026-06-07"),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${siteUrl}/vs/rentredi`,
-      lastModified: new Date("2026-06-07"),
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${siteUrl}/vs/avail`,
-      lastModified: new Date("2026-06-07"),
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    // 11 new /vs library expansions (Jun 2026 batch).
-    { url: `${siteUrl}/vs/propstream`,       lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${siteUrl}/vs/rentcast`,         lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${siteUrl}/vs/turbotenant`,      lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${siteUrl}/vs/baselane`,         lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${siteUrl}/vs/buildium`,         lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${siteUrl}/vs/appfolio`,         lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${siteUrl}/vs/rentec-direct`,    lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.6 },
-    { url: `${siteUrl}/vs/landlord-studio`,  lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.6 },
-    { url: `${siteUrl}/vs/rentspree`,        lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.6 },
-    { url: `${siteUrl}/vs/hostfully`,        lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.6 },
-    { url: `${siteUrl}/vs/cozy`,             lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.5 },
-    // Round-3 /vs library expansion (Jun 2026).
-    { url: `${siteUrl}/vs/dealmachine`,      lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${siteUrl}/vs/batchleads`,       lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${siteUrl}/vs/yardi-breeze`,     lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.6 },
-    { url: `${siteUrl}/vs/hostaway`,         lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${siteUrl}/vs/airdna`,           lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${siteUrl}/vs/arrived`,          lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
-    // Round-4 /vs library expansion (Jun 2026).
-    { url: `${siteUrl}/vs/fundrise`,          lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${siteUrl}/vs/lodgify`,           lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.6 },
-    { url: `${siteUrl}/vs/guesty`,            lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.6 },
-    { url: `${siteUrl}/vs/crexi`,             lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.6 },
-    { url: `${siteUrl}/vs/reonomy`,           lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.5 },
-    { url: `${siteUrl}/vs/privy`,             lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.6 },
-    { url: `${siteUrl}/vs/quickbooks-rental`, lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.6 },
-    // Niche use-case /vs pages (long-tail audience slicing).
-    { url: `${siteUrl}/vs/biggerpockets-for-house-hacking`,  lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${siteUrl}/vs/dealcheck-for-short-term-rentals`,   lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${siteUrl}/vs/mashvisor-for-short-term-rentals`,   lastModified: new Date("2026-06-07"), changeFrequency: "monthly", priority: 0.7 },
-    {
-      url: `${siteUrl}/markets/philadelphia`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${siteUrl}/markets/cleveland`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${siteUrl}/markets/atlanta`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${siteUrl}/markets/houston`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${siteUrl}/markets/tampa`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${siteUrl}/markets/charlotte`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${siteUrl}/markets/indianapolis`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${siteUrl}/markets/kansas-city`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${siteUrl}/markets/dallas`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${siteUrl}/markets/detroit`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${siteUrl}/markets/memphis`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${siteUrl}/markets/phoenix`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
+    ...comparisonUrls,
+    ...(guaranteeEnabled ? [sitemapEntry(siteUrl, "/guarantee")] : []),
+    ...(isAgentProConfigured() ? [sitemapEntry(siteUrl, "/for-agents")] : []),
   ];
-
-  return entries;
 }

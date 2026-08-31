@@ -5,7 +5,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Calculator } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
@@ -14,7 +14,8 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
 
 const SLUG = "best-short-term-rental-analysis-tool-2026";
-const TITLE = "Best short-term rental analysis tool 2026: 6 tools STR investors compare";
+const TITLE =
+  "Best short-term rental analysis tool 2026: 6 tools STR investors compare";
 // SERP-facing title (metadata/og only): kept ≤50 chars so the root
 // layout's "%s | TrueCap" template stays inside the ~60-char SERP
 // window. The on-page <h1> keeps the longer editorial TITLE.
@@ -45,7 +46,12 @@ export const metadata: Metadata = {
     modifiedTime: MODIFIED_AT,
     images: [{ url: "/home.jpg", width: 1200, height: 630, alt: TITLE }],
   },
-  twitter: { card: "summary_large_image", title: SERP_TITLE, description: DESCRIPTION, images: ["/home.jpg"] },
+  twitter: {
+    card: "summary_large_image",
+    title: SERP_TITLE,
+    description: DESCRIPTION,
+    images: ["/home.jpg"],
+  },
 };
 
 const TOOLS = [
@@ -54,16 +60,18 @@ const TOOLS = [
     name: "AirDNA (revenue data)",
     bestFor: "Best STR revenue projection per property",
     url: "/vs/airdna",
-    pricing: "Free MarketMinder; Rentalizer ~$20-40 per property; subs $50-200+/mo",
+    pricing:
+      "Free MarketMinder; Rentalizer ~$20-40 per property; subs $50-200+/mo",
     freeCovers: [
       "Free MarketMinder dashboard with limited data",
-      "Industry-standard ADR + occupancy + RevPAR by market"
+      "Industry-standard ADR + occupancy + RevPAR by market",
     ],
     freeGates: [
       "Per-property Rentalizer reports cost $20-40 each",
-      "API + advanced market data on paid tiers"
+      "API + advanced market data on paid tiers",
     ],
-    pickIf: "You need address-level STR revenue projections derived from real Airbnb + Vrbo data.",
+    pickIf:
+      "You need address-level STR revenue projections derived from real Airbnb + Vrbo data.",
   },
   {
     rank: 2,
@@ -74,13 +82,14 @@ const TOOLS = [
     freeCovers: [
       "Plug AirDNA monthly revenue into rent field; run full cap rate / DSCR / cash flow",
       "Compare LTR vs STR scenarios on same property",
-      "No tax-specific module; use a qualified professional for STR eligibility and taxpayer-specific treatment"
+      "No tax-specific module; use a qualified professional for STR eligibility and taxpayer-specific treatment",
     ],
     freeGates: [
       "Sensitivity grid stress-tests STR revenue ±10% (Pro)",
-      "Seasonal months require separate saved scenarios"
+      "Seasonal months require separate saved scenarios",
     ],
-    pickIf: "You have AirDNA's revenue projection and need to turn it into a buy/no-buy decision.",
+    pickIf:
+      "You have AirDNA's revenue projection and need to turn it into a buy/no-buy decision.",
   },
   {
     rank: 3,
@@ -91,12 +100,11 @@ const TOOLS = [
     freeCovers: [
       "Free dashboard with limited data",
       "STR + LTR neighborhood scores",
-      "Heatmaps for cap rate / Airbnb potential"
+      "Heatmaps for cap rate / Airbnb potential",
     ],
-    freeGates: [
-      "Full data + Airbnb-comp depth on paid tiers"
-    ],
-    pickIf: "You're scouting which city or neighborhood to invest in next (not underwriting a specific address).",
+    freeGates: ["Full data + Airbnb-comp depth on paid tiers"],
+    pickIf:
+      "You're scouting which city or neighborhood to invest in next (not underwriting a specific address).",
   },
   {
     rank: 4,
@@ -107,13 +115,14 @@ const TOOLS = [
     freeCovers: [
       "Standard rental underwriting, override rent with STR projection",
       "Listing import from Zillow / Redfin",
-      "Native iOS + Android apps"
+      "Native iOS + Android apps",
     ],
     freeGates: [
       "No LTR vs STR scenario comparison view",
-      "No STR-specific tax loophole modeling"
+      "No STR-specific tax loophole modeling",
     ],
-    pickIf: "You're mobile-first at showings and willing to manually toggle between LTR and STR scenarios.",
+    pickIf:
+      "You're mobile-first at showings and willing to manually toggle between LTR and STR scenarios.",
   },
   {
     rank: 5,
@@ -124,12 +133,11 @@ const TOOLS = [
     freeCovers: [
       "Channel manager across Airbnb / Vrbo / Booking",
       "Guest messaging automation",
-      "Dynamic pricing integrations"
+      "Dynamic pricing integrations",
     ],
-    freeGates: [
-      "NOT underwriting tools — these manage STRs you already own"
-    ],
-    pickIf: "You've already closed and need to operate the property. Use TrueCap to underwrite, then pick a PMS.",
+    freeGates: ["NOT underwriting tools — these manage STRs you already own"],
+    pickIf:
+      "You've already closed and need to operate the property. Use TrueCap to underwrite, then pick a PMS.",
   },
   {
     rank: 6,
@@ -138,30 +146,58 @@ const TOOLS = [
     url: "/vs/excel",
     pricing: "Free",
     freeCovers: [
-      "Total flexibility — model seasonal ADR curves, weekend premiums, off-season vacancy"
+      "Total flexibility — model seasonal ADR curves, weekend premiums, off-season vacancy",
     ],
     freeGates: [
       "You build the seasonality model yourself",
-      "Mobile is broken at showings"
+      "Mobile is broken at showings",
     ],
-    pickIf: "You have a battle-tested STR template with custom seasonal modeling.",
+    pickIf:
+      "You have a battle-tested STR template with custom seasonal modeling.",
   },
 ];
 
 const FAQ_ITEMS = [
-  { q: "What's the best all-in-one STR investment tool?", a: "There isn't one. STR investing requires three different jobs: revenue projection (AirDNA), underwriting (TrueCap or DealCheck), and post-purchase ops (Hostaway / Hostfully / Lodgify). Tools that claim to do all three either do one well and the others poorly, or are enterprise-priced. Most successful STR investors use 2-3 tools in combination." },
-  { q: "AirDNA vs Mashvisor for STR — which one?", a: "AirDNA is more STR-specific and considered the gold standard for ADR / occupancy / RevPAR data. Mashvisor covers both STR and LTR plus broader market analysis. STR-primary investors lean AirDNA. Investors toggling between LTR and STR on the same property lean Mashvisor's broader scope." },
-  { q: "Can TrueCap model short-term rental revenue?", a: "Yes, indirectly — every input in TrueCap is editable. Plug AirDNA's projected monthly STR revenue (gross income ÷ 12, discounted for vacancy + cleaning) into the rent field, run the full underwrite. TrueCap doesn't pull AirDNA data automatically; you copy the number across." },
-  { q: "What management rate should I use for STR underwriting?", a: "Long-term rentals: 8-10%. Short-term rentals: 20-25% with a full-service PM (channel management + guest comms + cleaning coordination). If you self-manage, 0-5% (just covering software + cleaner coordination) but be honest about your time. TrueCap's management field is editable." },
-  { q: "Does TrueCap support the STR tax loophole?", a: "No. TrueCap does not currently expose a tax-specific analysis module, determine STR eligibility, or model cost-segregation components and bonus depreciation. Use a qualified tax professional for material-participation, REPS, cost-segregation, and taxpayer-specific modeling." },
+  {
+    q: "What's the best all-in-one STR investment tool?",
+    a: "There isn't one. STR investing requires three different jobs: revenue projection (AirDNA), underwriting (TrueCap or DealCheck), and post-purchase ops (Hostaway / Hostfully / Lodgify). Tools that claim to do all three either do one well and the others poorly, or are enterprise-priced. Most successful STR investors use 2-3 tools in combination.",
+  },
+  {
+    q: "AirDNA vs Mashvisor for STR — which one?",
+    a: "AirDNA is more STR-specific and considered the gold standard for ADR / occupancy / RevPAR data. Mashvisor covers both STR and LTR plus broader market analysis. STR-primary investors lean AirDNA. Investors toggling between LTR and STR on the same property lean Mashvisor's broader scope.",
+  },
+  {
+    q: "Can TrueCap model short-term rental revenue?",
+    a: "Yes, indirectly — every input in TrueCap is editable. Plug AirDNA's projected monthly STR revenue (gross income ÷ 12, discounted for vacancy + cleaning) into the rent field, run the full underwrite. TrueCap doesn't pull AirDNA data automatically; you copy the number across.",
+  },
+  {
+    q: "What management rate should I use for STR underwriting?",
+    a: "Long-term rentals: 8-10%. Short-term rentals: 20-25% with a full-service PM (channel management + guest comms + cleaning coordination). If you self-manage, 0-5% (just covering software + cleaner coordination) but be honest about your time. TrueCap's management field is editable.",
+  },
+  {
+    q: "Does TrueCap support the STR tax loophole?",
+    a: "No. TrueCap does not currently expose a tax-specific analysis module, determine STR eligibility, or model cost-segregation components and bonus depreciation. Use a qualified tax professional for material-participation, REPS, cost-segregation, and taxpayer-specific modeling.",
+  },
 ];
 
 const DECISION_LINES: Array<{ q: string; a: string }> = [
-  { q: "You need address-level STR revenue projections.", a: "AirDNA Rentalizer" },
-  { q: "You have the revenue and need full underwriting.", a: "TrueCap (free for basic, Pro for sensitivity)" },
+  {
+    q: "You need address-level STR revenue projections.",
+    a: "AirDNA Rentalizer",
+  },
+  {
+    q: "You have the revenue and need full underwriting.",
+    a: "TrueCap (free for basic, Pro for sensitivity)",
+  },
   { q: "You're scouting which city to invest in.", a: "Mashvisor" },
-  { q: "You've already closed and need to operate the STR.", a: "Hostaway or Hostfully (PMS)" },
-  { q: "You want a single all-in-one tool.", a: "No single tool covers the full workflow — use 2-3 in combination" },
+  {
+    q: "You've already closed and need to operate the STR.",
+    a: "Hostaway or Hostfully (PMS)",
+  },
+  {
+    q: "You want a single all-in-one tool.",
+    a: "No single tool covers the full workflow — use 2-3 in combination",
+  },
 ];
 
 export default function BestShortTermRentalAnalysisTool2026Post() {
@@ -186,7 +222,12 @@ export default function BestShortTermRentalAnalysisTool2026Post() {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
-      { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: `${siteUrl}/blog`,
+      },
       { "@type": "ListItem", position: 3, name: TITLE, item: url },
     ],
   };
@@ -214,14 +255,29 @@ export default function BestShortTermRentalAnalysisTool2026Post() {
 
   return (
     <div className="min-h-screen bg-background">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
 
       <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-2">
-          <Link href="/blog" className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground">
+          <Link
+            href="/blog"
+            className="text-xs uppercase tracking-widest text-muted-foreground font-bold hover:text-foreground"
+          >
             ← TrueCap Blog
           </Link>
         </div>
@@ -237,19 +293,31 @@ export default function BestShortTermRentalAnalysisTool2026Post() {
             <p className="mt-4 text-base sm:text-lg leading-relaxed text-muted-foreground">
               {DESCRIPTION}
             </p>
-            <p className="mt-4 text-xs text-muted-foreground">Published {PUBLISHED_AT}</p>
+            <p className="mt-4 text-xs text-muted-foreground">
+              Published {PUBLISHED_AT}
+            </p>
           </header>
 
           <section className="mb-10 rounded-2xl border border-border bg-card p-5 sm:p-6">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">Quick answer</h2>
-            <p className="text-sm sm:text-base leading-relaxed text-foreground" dangerouslySetInnerHTML={{ __html: `STR investors need two tools: one for revenue projection (<strong>AirDNA</strong> or <strong>Mashvisor</strong>) and one for underwriting (<strong>TrueCap</strong>, <strong>DealCheck</strong>, or a spreadsheet). PMS platforms (<strong>Hostfully</strong>, <strong>Hostaway</strong>, <strong>Guesty</strong>) come after the deal closes — they don&apos;t underwrite. The combined stack is the workflow.` }} />
+            <h2 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">
+              Quick answer
+            </h2>
+            <p
+              className="text-sm sm:text-base leading-relaxed text-foreground"
+              dangerouslySetInnerHTML={{
+                __html: `STR investors need two tools: one for revenue projection (<strong>AirDNA</strong> or <strong>Mashvisor</strong>) and one for underwriting (<strong>TrueCap</strong>, <strong>DealCheck</strong>, or a spreadsheet). PMS platforms (<strong>Hostfully</strong>, <strong>Hostaway</strong>, <strong>Guesty</strong>) come after the deal closes — they don&apos;t underwrite. The combined stack is the workflow.`,
+              }}
+            />
           </section>
 
           <div className="prose prose-neutral max-w-none prose-headings:font-extrabold prose-headings:text-foreground prose-p:text-foreground prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:text-foreground prose-li:leading-relaxed">
             <h2>The tools, ranked for short-term rental investors</h2>
 
             {TOOLS.map((t) => (
-              <div key={t.name} className="not-prose mb-8 rounded-2xl border border-border bg-card p-5 sm:p-6">
+              <div
+                key={t.name}
+                className="not-prose mb-8 rounded-2xl border border-border bg-card p-5 sm:p-6"
+              >
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div>
                     <div className="text-[11px] font-bold uppercase tracking-widest text-primary mb-1.5">
@@ -259,13 +327,17 @@ export default function BestShortTermRentalAnalysisTool2026Post() {
                       {t.name}
                     </h3>
                   </div>
-                  <Link href={t.url} className="shrink-0 inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline">
+                  <Link
+                    href={t.url}
+                    className="shrink-0 inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline"
+                  >
                     Deep dive
                     <ArrowUpRight className="size-3" />
                   </Link>
                 </div>
                 <p className="text-sm text-muted-foreground mb-4">
-                  <strong className="text-foreground">Pricing:</strong> {t.pricing}
+                  <strong className="text-foreground">Pricing:</strong>{" "}
+                  {t.pricing}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div>
@@ -275,7 +347,9 @@ export default function BestShortTermRentalAnalysisTool2026Post() {
                     <ul className="space-y-1.5 text-sm text-foreground">
                       {t.freeCovers.map((p) => (
                         <li key={p} className="flex gap-2">
-                          <span className="text-[var(--brand-green)] shrink-0">+</span>
+                          <span className="text-[var(--brand-green)] shrink-0">
+                            +
+                          </span>
                           <span>{p}</span>
                         </li>
                       ))}
@@ -288,7 +362,9 @@ export default function BestShortTermRentalAnalysisTool2026Post() {
                     <ul className="space-y-1.5 text-sm text-foreground">
                       {t.freeGates.map((p) => (
                         <li key={p} className="flex gap-2">
-                          <span className="text-muted-foreground/60 shrink-0">−</span>
+                          <span className="text-muted-foreground/60 shrink-0">
+                            −
+                          </span>
                           <span>{p}</span>
                         </li>
                       ))}
@@ -314,12 +390,22 @@ export default function BestShortTermRentalAnalysisTool2026Post() {
             <h2>FAQ</h2>
             <div className="not-prose space-y-3">
               {FAQ_ITEMS.map((item) => (
-                <details key={item.q} className="group rounded-xl border border-border bg-card p-4 sm:p-5">
+                <details
+                  key={item.q}
+                  className="group rounded-xl border border-border bg-card p-4 sm:p-5"
+                >
                   <summary className="cursor-pointer list-none flex items-start justify-between gap-3 font-bold text-sm sm:text-base text-foreground">
                     <span>{item.q}</span>
-                    <span aria-hidden className="mt-1 size-5 shrink-0 rounded-full border border-border text-muted-foreground text-xs leading-none flex items-center justify-center transition-transform group-open:rotate-45">+</span>
+                    <span
+                      aria-hidden
+                      className="mt-1 size-5 shrink-0 rounded-full border border-border text-muted-foreground text-xs leading-none flex items-center justify-center transition-transform group-open:rotate-45"
+                    >
+                      +
+                    </span>
                   </summary>
-                  <div className="mt-3 text-sm text-muted-foreground leading-relaxed">{item.a}</div>
+                  <div className="mt-3 text-sm text-muted-foreground leading-relaxed">
+                    {item.a}
+                  </div>
                 </details>
               ))}
             </div>
@@ -331,22 +417,31 @@ export default function BestShortTermRentalAnalysisTool2026Post() {
               underwriting, takes 60 seconds, no signup required. Pressure-test
               the financing on a short-term rental and check the return on your
               cash — the free{" "}
-              <Link href="/#main" className="font-semibold text-primary hover:underline">TrueCap analyzer</Link>{" "}
-              returns DSCR, cash-on-cash and monthly cash flow from one
-              address — then walk through the full nightly-rate math in our{" "}
-              <Link href="/blog/short-term-rental-underwriting-playbook" className="font-semibold text-primary hover:underline">short-term rental underwriting playbook</Link>.
-            </p>
-            <p className="not-prose">
-              <Link href="/" className="inline-flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-5 py-3 font-bold hover:opacity-90">
-                <Calculator className="w-4 h-4" />
-                Run a deal — 60 seconds
-                <ArrowUpRight className="w-4 h-4" />
+              <Link
+                href="/#main"
+                className="font-semibold text-primary hover:underline"
+              >
+                TrueCap analyzer
+              </Link>{" "}
+              returns DSCR, cash-on-cash and monthly cash flow from one address
+              — then walk through the full nightly-rate math in our{" "}
+              <Link
+                href="/blog/short-term-rental-underwriting-playbook"
+                className="font-semibold text-primary hover:underline"
+              >
+                short-term rental underwriting playbook
               </Link>
+              .
             </p>
+            <p className="not-prose"></p>
           </div>
 
-          <div className="mt-10"><NewsletterSignup /></div>
-          <div className="mt-10"><RelatedBlogPosts currentSlug={SLUG} limit={3} /></div>
+          <div className="mt-10">
+            <NewsletterSignup />
+          </div>
+          <div className="mt-10">
+            <RelatedBlogPosts currentSlug={SLUG} limit={3} />
+          </div>
         </article>
       </main>
 

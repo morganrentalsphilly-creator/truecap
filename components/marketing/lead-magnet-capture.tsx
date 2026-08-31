@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Market Intelligence Pack capture surfaces.
+ * First Offer Playbook capture surfaces.
  *
  * Two exports, one server action (captureLeadMagnetEmail):
  *   <LeadMagnetInline />      — inline card for SEO-template footers
@@ -67,7 +67,11 @@ function CaptureForm({
     if (state === "submitting") return;
     setState("submitting");
     setMessage(null);
-    const result = await captureLeadMagnetEmail({ email, source, website: honeypot });
+    const result = await captureLeadMagnetEmail({
+      email,
+      source,
+      website: honeypot,
+    });
     if (result.ok) {
       trackEvent("email_capture_submitted", { source: `mip_${source}` });
       onCaptured(result.downloadUrl);
@@ -95,7 +99,7 @@ function CaptureForm({
           className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 rounded-lg bg-primary px-4 text-sm font-bold text-primary-foreground hover:bg-primary/95 disabled:opacity-60"
         >
           <FileDown className="size-4" />
-          {state === "submitting" ? "Sending…" : "Send me the pack"}
+          {state === "submitting" ? "Sending…" : "Send me the playbook"}
         </button>
       </div>
       {/* Honeypot */}
@@ -113,7 +117,7 @@ function CaptureForm({
         <p className="mt-2 text-xs font-semibold text-destructive">{message}</p>
       ) : (
         <p className="mt-2 text-[11px] text-muted-foreground">
-          One download email plus two short follow-ups. Unsubscribe anytime.
+          One link email plus two short follow-ups. Unsubscribe anytime.
         </p>
       )}
     </form>
@@ -130,7 +134,7 @@ function CapturedState({ downloadUrl }: { downloadUrl: string }) {
         target="_blank"
         rel="noopener"
       >
-        Market Intelligence Pack (PDF)
+        First Offer Playbook
       </a>
     </p>
   );
@@ -138,9 +142,7 @@ function CapturedState({ downloadUrl }: { downloadUrl: string }) {
 
 export function LeadMagnetInline({ source = "inline" }: { source?: string }) {
   const [captured, setCaptured] = useCapturedFlag();
-  const [downloadUrl, setDownloadUrl] = useState(
-    "/downloads/truecap-market-intelligence-pack.pdf"
-  );
+  const [downloadUrl, setDownloadUrl] = useState("/playbook");
   const shownRef = useRef(false);
   useEffect(() => {
     if (shownRef.current) return;
@@ -151,15 +153,15 @@ export function LeadMagnetInline({ source = "inline" }: { source?: string }) {
   return (
     <section className="rounded-2xl border-2 border-primary/25 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-5 sm:p-6">
       <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
-        Free download
+        Free guide
       </p>
       <h3 className="mt-1 text-lg font-extrabold tracking-tight text-foreground">
-        The Market Intelligence Pack
+        The First Offer Playbook
       </h3>
       <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-        State-by-state buy-and-hold screening references, the rent-to-price
-        screen, and HUD rent benchmarks for 150 tracked markets. Property-level
-        verification still matters.
+        A review path for Buy Box criteria, editable assumptions, sensitivity,
+        due diligence, and adviser questions. It does not replace property-level
+        verification or tax, legal, lending, or investment advice.
       </p>
       {captured ? (
         <CapturedState downloadUrl={downloadUrl} />
@@ -182,9 +184,7 @@ export function LeadMagnetExitIntent() {
   const cookieBannerOpen = useCookieBannerOpen();
   const [open, setOpen] = useState(false);
   const [captured, setCaptured] = useCapturedFlag();
-  const [downloadUrl, setDownloadUrl] = useState(
-    "/downloads/truecap-market-intelligence-pack.pdf"
-  );
+  const [downloadUrl, setDownloadUrl] = useState("/playbook");
   // The tools/blog families this card ships on own full-width z-40 bottom
   // bars (data-sticky-bottom-bar). The card stays at z-30 per the overlay
   // ladder, so when a bar is mounted at open time we lift the card above
@@ -207,7 +207,9 @@ export function LeadMagnetExitIntent() {
         /* fail open, still one-shot per load via firedRef */
       }
       firedRef.current = true;
-      setBarMounted(Boolean(document.querySelector("[data-sticky-bottom-bar]")));
+      setBarMounted(
+        Boolean(document.querySelector("[data-sticky-bottom-bar]")),
+      );
       setOpen(true);
       trackEvent("email_capture_shown", { source: "mip_exit_intent" });
     };
@@ -233,7 +235,7 @@ export function LeadMagnetExitIntent() {
   return (
     <aside
       role="complementary"
-      aria-label="Free market data download"
+      aria-label="Free rental screening guide"
       className={`fixed ${barMounted ? "bottom-24" : "bottom-4"} right-4 z-30 w-[calc(100vw-2rem)] max-w-sm rounded-2xl border border-primary/25 bg-card p-4 shadow-[0_18px_44px_rgba(15,23,42,0.15)]`}
     >
       <button
@@ -245,11 +247,11 @@ export function LeadMagnetExitIntent() {
         <X className="size-4" />
       </button>
       <p className="pr-6 text-sm font-bold leading-snug text-foreground">
-        Leaving? Take the state-by-state numbers with you.
+        Leaving? Take the First Offer Playbook with you.
       </p>
       <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-        The Market Intelligence Pack: state buy-and-hold screening references,
-        the rent-to-price screen, and HUD rents for 150 tracked markets. Free PDF.
+        A public review path for assumptions, sensitivity, due diligence, and
+        adviser questions. No state-law or property-tax claims are included.
       </p>
       {captured ? (
         <CapturedState downloadUrl={downloadUrl} />

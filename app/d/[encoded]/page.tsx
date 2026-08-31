@@ -18,6 +18,7 @@ import { getPublicAgentBranding } from "@/lib/agent-share";
 import {
   verifyShareAttribution,
   hashShareValues,
+  signLeadCaptureAuthorization,
 } from "@/lib/share-attribution";
 import { getPublicDealComps } from "@/lib/public-deal-comps";
 import { canShowSharedProAnalysis } from "@/lib/public-share-access";
@@ -102,6 +103,15 @@ export default async function PublicDealPage({ params }: Props) {
     ? payload.meta?.ownerId
     : undefined;
   const verifiedDealId = attributionVerified ? payload.meta?.dealId : undefined;
+  const leadCaptureSig = verifiedOwnerId
+    ? signLeadCaptureAuthorization({
+        shareSurface: "legacy_share",
+        ownerId: verifiedOwnerId,
+        dealId: verifiedDealId,
+        valuesHash,
+        dealAddress: parsed.data.address,
+      })
+    : null;
 
   const [agent, comps, showProAnalysis] = await Promise.all([
     getPublicAgentBranding(verifiedOwnerId),
@@ -111,6 +121,7 @@ export default async function PublicDealPage({ params }: Props) {
 
   return (
     <SharedDealShell
+      shareSurface="legacy_share"
       values={parsed.data}
       analysis={buildPublicShareAnalysisPayload(result, showProAnalysis)}
       comps={comps}
@@ -121,10 +132,11 @@ export default async function PublicDealPage({ params }: Props) {
       leadCapture={
         agent && verifiedOwnerId
           ? {
+              shareSurface: "legacy_share",
               ownerId: verifiedOwnerId,
               dealId: verifiedDealId,
               valuesHash,
-              sig: payload.meta?.sig,
+              sig: leadCaptureSig ?? undefined,
             }
           : undefined
       }

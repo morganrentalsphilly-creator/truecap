@@ -12,8 +12,9 @@ subscriptions, or the pinned API version.
 - Keep `STRIPE_PRICE_PRO_MONTHLY` ordered as
   `price_current_2999,price_grandfathered_20`. Checkout sells only the first ID;
   webhook resolution recognizes every listed ID.
-- Preserve the legacy Price mapping in `plans.stripe_price_id`. The environment
-  list and database mapping are complementary recovery paths.
+- Preserve the legacy Price mapping in `plans.stripe_price_id` for webhook and
+  completed-return recovery. It never authorizes a new checkout; only the first
+  Price in the exact cadence's environment list can be sold.
 - Use Stripe test mode for Checkout and portal verification. Do not submit a
   real payment.
 
@@ -27,9 +28,9 @@ In Stripe Dashboard, open Business settings / Public details and confirm:
 - Terms of service: **https://usetruecap.com/terms**.
 - Refund policy matches the live Terms: charges are non-refundable except where
   required by law; billing errors are reviewed through support.
-- Do not advertise the Five-Deal Guarantee while
-  `NEXT_PUBLIC_FIVE_DEAL_GUARANTEE=false` or before counsel and refund operations
-  approve it.
+- Do not advertise a public refund guarantee. Guarantee release is currently
+  hard-disabled in `lib/marketing-offer-config.ts` pending explicit counsel and
+  refund-operations approval.
 
 ## Checkout branding
 
@@ -73,6 +74,7 @@ uses Price IDs, while Product names remain Dashboard presentation:
 | Agent Pro                | `STRIPE_PRICE_AGENT_PRO_ANNUAL`  | Current annual Price                                          |
 | Decision Pack            | `STRIPE_PRICE_PDF_ONE_TIME`      | Historical $5 mapping; not offered for new checkout           |
 | Decision Pack experiment | `STRIPE_PRICE_SINGLE_DEAL_9`     | Dormant; do not activate                                      |
+| Decision Pack experiment | `STRIPE_PRICE_SINGLE_DEAL_15`    | Dormant; do not activate                                      |
 | Decision Pack experiment | `STRIPE_PRICE_SINGLE_DEAL_19`    | Dormant; do not activate                                      |
 
 Renaming a Stripe Product’s display text is safe only when the existing Product
@@ -80,9 +82,10 @@ and Price relationship remains intact. Never replace a Product or Price merely
 to rename “TrueCap Premium” or another legacy label.
 
 Cross-check each recurring Price against both its Vercel environment slot and
-the `plans` row. Confirm the current Price is first in each comma list. Confirm
-the $20 Price remains recognized but is never first and never offered to new
-checkout sessions.
+the `plans` row. Treat the database value as recovery metadata, never as new-
+checkout authority. Confirm the current Price is first in each comma list.
+Confirm the $20 Price remains recognized but is never first and never offered
+to new checkout sessions.
 
 ## Customer Portal
 
@@ -110,7 +113,7 @@ protected-rate warning.
 ## Return and lifecycle verification
 
 - Subscription success URL returns to
-  `/?billing=success&session_id={CHECKOUT_SESSION_ID}`.
+  `/dashboard/new?billing=success&session_id={CHECKOUT_SESSION_ID}`.
 - Subscription cancellation returns to
   `/pricing?billing=checkout_cancelled#plans`.
 - Portal returns to `/profile`; cancel/switch deep links return with their
@@ -153,9 +156,12 @@ operational adjustment` to the billing-operations owner. One warning is
   runbook for the verification and resolution SQL.
   Do not change signature verification or rotate the webhook secret as part of
   this branding review.
-- Confirm a test checkout emits the canonical, PII-free funnel sequence:
-  `pricing_viewed` → `checkout_started` → `checkout_returned` →
-  `subscription_activated`.
+- Confirm a test checkout emits the current PII-free lifecycle sequence:
+  `upgrade_started` after a new hosted Checkout is durably created,
+  `checkout_returned` after the verified return, and `subscription_started`
+  after successful Stripe synchronization. Legacy compatibility events may
+  remain independently allowlisted but must not duplicate the canonical
+  transition.
 
 `pay.usetruecap.com` is an optional later enhancement and is not required for
 production Checkout or portal correctness.

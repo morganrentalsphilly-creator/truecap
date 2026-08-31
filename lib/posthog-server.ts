@@ -66,24 +66,29 @@ export async function captureServerEvent(opts: {
   distinctId: string;
   event: "pro_subscribed" | string;
   properties?: Record<string, unknown>;
-}): Promise<void> {
+  /** Stable opaque event id for downstream ingestion deduplication. */
+  eventId?: string;
+}): Promise<boolean> {
   const ph = getClient();
   if (!ph) {
     // Env not configured — analytics off. Don't throw.
-    return;
+    return false;
   }
   try {
     ph.capture({
       distinctId: opts.distinctId,
       event: opts.event,
       properties: sanitizeAnalyticsEventProperties(opts.event, opts.properties),
+      uuid: opts.eventId,
     });
     // Critical for serverless: drain the buffer before the function
     // can exit. Without this, Vercel function termination can drop
     // the event silently.
     await ph.flush();
+    return true;
   } catch (err) {
     // Analytics must never break the webhook / server action path.
     console.warn("[posthog-server] captureServerEvent failed:", err);
+    return false;
   }
 }

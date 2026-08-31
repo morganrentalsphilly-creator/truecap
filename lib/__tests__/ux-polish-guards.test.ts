@@ -175,7 +175,7 @@ describe("browser capability recovery and crawl path", () => {
   it("redirects the unreleased tax calculator to educational material", () => {
     const source = read("app/tools/rental-property-tax-calculator/page.tsx");
     expect(source).toContain(
-      'permanentRedirect("/blog/rental-property-tax-deductions")',
+      'HISTORICAL_TOOL_REDIRECTS["rental-property-tax-calculator"]',
     );
     expect(source).not.toContain("RentalPropertyTaxCalculatorWidget");
     expect(source).not.toContain("SoftwareApplication");
@@ -215,11 +215,20 @@ describe("conversion touch targets", () => {
     );
   });
 
+  it.each(["components/marketing/seo-analyzer-cta.tsx"])(
+    "keeps audited links at least 44 CSS pixels tall in %s",
+    (path) => {
+      expect(read(path), path).toContain("min-h-11");
+    },
+  );
+
   it.each([
     "components/marketing/blog-sticky-cta.tsx",
-    "components/marketing/seo-analyzer-cta.tsx",
     "components/marketing/tools-conversion-cta.tsx",
-  ])("keeps audited links at least 44 CSS pixels tall in %s", (path) => {
-    expect(read(path), path).toContain("min-h-11");
-  });
+  ])(
+    "delegates audited wrapper links to the accessible shared CTA in %s",
+    (path) => {
+      expect(read(path), path).toContain("<SeoAnalyzerCta");
+    },
+  );
 });

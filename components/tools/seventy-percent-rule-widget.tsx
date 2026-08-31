@@ -19,6 +19,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { AnalyzerHandoffLink } from "@/components/analyzer-handoff-link";
 import { ArrowUpRight, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -65,7 +66,7 @@ export function SeventyPercentRuleWidget() {
   // Never seed this heuristic into the analyzer as a verified purchase price.
   const handoffHref = buildAnalyzerHandoffUrl(
     {},
-    { utmSource: "70-percent-rule-calculator" }
+    { utmSource: "70-percent-rule-calculator" },
   );
 
   return (
@@ -78,17 +79,33 @@ export function SeventyPercentRuleWidget() {
           </h2>
 
           <div>
-            <Label htmlFor="seventypct-arv" className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">
+            <Label
+              htmlFor="seventypct-arv"
+              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
+            >
               After-repair value (ARV)
             </Label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">$</span>
-              <Input id="seventypct-arv" type="number" inputMode="numeric" value={arv} onChange={(e) => setArv(e.target.value)} className="pl-7 border-input bg-background" />
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                $
+              </span>
+              <Input
+                id="seventypct-arv"
+                type="number"
+                inputMode="numeric"
+                value={arv}
+                onChange={(e) => setArv(e.target.value)}
+                className="pl-7 border-input bg-background"
+              />
             </div>
             <p className="text-xs text-muted-foreground mt-1.5">
-              What the property sells for <em>after</em>{" "}the rehab. Don&apos;t
+              What the property sells for <em>after</em> the rehab. Don&apos;t
               have it? Build it from sold comps with the{" "}
-              <Link href="/tools/arv-calculator" target="_top" className="text-primary font-semibold hover:underline">
+              <Link
+                href="/tools/arv-calculator"
+                target="_top"
+                className="text-primary font-semibold hover:underline"
+              >
                 ARV calculator
               </Link>
               .
@@ -96,22 +113,47 @@ export function SeventyPercentRuleWidget() {
           </div>
 
           <div>
-            <Label htmlFor="seventypct-repairs" className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">
+            <Label
+              htmlFor="seventypct-repairs"
+              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
+            >
               Repair costs
             </Label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">$</span>
-              <Input id="seventypct-repairs" type="number" inputMode="numeric" value={repairs} onChange={(e) => setRepairs(e.target.value)} className="pl-7 border-input bg-background" />
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                $
+              </span>
+              <Input
+                id="seventypct-repairs"
+                type="number"
+                inputMode="numeric"
+                value={repairs}
+                onChange={(e) => setRepairs(e.target.value)}
+                className="pl-7 border-input bg-background"
+              />
             </div>
           </div>
 
           <div>
-            <Label htmlFor="seventypct-multiplier" className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">
+            <Label
+              htmlFor="seventypct-multiplier"
+              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
+            >
               Rule multiplier
             </Label>
             <div className="relative">
-              <Input id="seventypct-multiplier" type="number" inputMode="decimal" step="1" value={multiplier} onChange={(e) => setMultiplier(e.target.value)} className="pr-8 border-input bg-background" />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
+              <Input
+                id="seventypct-multiplier"
+                type="number"
+                inputMode="decimal"
+                step="1"
+                value={multiplier}
+                onChange={(e) => setMultiplier(e.target.value)}
+                className="pr-8 border-input bg-background"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                %
+              </span>
             </div>
             <p className="text-xs text-muted-foreground mt-1.5">
               70% is the classic center. Cheap houses (&lt;~$150k ARV) push
@@ -138,7 +180,7 @@ export function SeventyPercentRuleWidget() {
                     "text-5xl sm:text-6xl font-extrabold mt-1 tabular-nums",
                     result.mao > 0
                       ? "text-[var(--metric-positive)]"
-                      : "text-[var(--metric-negative)]"
+                      : "text-[var(--metric-negative)]",
                   )}
                 >
                   {fmt(result.mao)}
@@ -151,13 +193,14 @@ export function SeventyPercentRuleWidget() {
               {result.mao <= 0 ? (
                 <p className="text-xs font-semibold text-[var(--metric-negative)] mt-4">
                   At this multiplier the repairs consume the entire allowable
-                  price — the rule produces no feasible price screen for this deal
-                  as entered.
+                  price — the rule produces no feasible price screen for this
+                  deal as entered.
                 </p>
               ) : (
                 <p className="text-xs text-muted-foreground mt-4">
                   The {fmt(result.spread)} between your all-in cost and the
-                  resale price is <strong className="text-foreground">not all profit</strong>{" "}—
+                  resale price is{" "}
+                  <strong className="text-foreground">not all profit</strong> —
                   buying, holding, and selling costs come out first.
                 </p>
               )}
@@ -181,11 +224,27 @@ export function SeventyPercentRuleWidget() {
                   Price screen at other multipliers
                 </div>
                 {result.ladder.map((step) => (
-                  <div key={step.pct} className="flex justify-between py-0.5 gap-3">
-                    <span className={cn(step.pct === result.mult ? "font-bold text-foreground" : "text-muted-foreground")}>
+                  <div
+                    key={step.pct}
+                    className="flex justify-between py-0.5 gap-3"
+                  >
+                    <span
+                      className={cn(
+                        step.pct === result.mult
+                          ? "font-bold text-foreground"
+                          : "text-muted-foreground",
+                      )}
+                    >
                       {step.pct}% of ARV
                     </span>
-                    <span className={cn("tabular-nums shrink-0", step.pct === result.mult ? "font-bold text-foreground" : "text-foreground")}>
+                    <span
+                      className={cn(
+                        "tabular-nums shrink-0",
+                        step.pct === result.mult
+                          ? "font-bold text-foreground"
+                          : "text-foreground",
+                      )}
+                    >
                       {step.mao > 0 ? fmt(step.mao) : "no feasible ceiling"}
                     </span>
                   </div>
@@ -196,11 +255,16 @@ export function SeventyPercentRuleWidget() {
         </div>
       </div>
 
-      <Link href={handoffHref} target="_top" className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline">
+      <AnalyzerHandoffLink
+        handoffHref={handoffHref}
+        target="_top"
+        className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
+      >
         <Sparkles className="w-4 h-4" />
-        Open the released rental analyzer with a separately verified purchase price
+        Open the released rental analyzer with a separately verified purchase
+        price
         <ArrowUpRight className="w-4 h-4" />
-      </Link>
+      </AnalyzerHandoffLink>
     </div>
   );
 }

@@ -2,16 +2,16 @@
   "day": 5,
   "send_date": "2026-06-05",
   "subject": "cap rate vs cash-on-cash",
-  "preheader": "one tells you the asset. the other tells you what you'll actually earn.",
-  "headline": "Cap rate is the property's grade. Cash-on-cash is your grade.",
+  "preheader": "one screens the asset. the other includes your financing and cash invested.",
+  "headline": "Cap rate excludes financing. Cash-on-cash includes it.",
   "body": [
-    "Cap rate ignores your loan. It assumes you paid all cash. Useful for comparing properties apples to apples — but it doesn't tell you what you'll actually pocket.",
-    "Cash-on-cash is the real cash question for leveraged buyers. It's annual pre-tax cash flow divided by total cash invested (down payment + closing costs + rehab). If you put $70,000 into a deal and it cash flows $7,000/yr, that's a 10% cash-on-cash return.",
-    "Here's why it matters: a 6% cap deal in Nashville with 75% leverage at a decent rate can deliver an 11-12% cash-on-cash. An 8% cap deal in a high-tax state at 7.5% interest might only deliver 6% cash-on-cash because debt service eats the spread.",
-    "Cap rate ranks the property. Cash-on-cash ranks the deal. If you're using leverage (most people are), cash-on-cash is the number you live on.",
-    "TrueCap returns both numbers (and DSCR) from a single address paste. Free tier, no card. The cash-on-cash figure is the one you'll quote your spouse when they ask why you're buying another rental."
+    "Cap rate excludes financing and compares modeled net operating income with property value. It can help compare properties on a common basis, but it does not predict what you will pocket.",
+    "Cash-on-cash return is modeled annual pre-tax cash flow divided by total cash invested. For illustration, $7,000 of modeled annual cash flow on $70,000 invested is 10%. Verify which cash outlays and recurring costs apply to your property.",
+    "Financing can make cash-on-cash return differ sharply from cap rate because debt service and cash invested change the calculation. The direction and size of that difference depend on the inputs; neither metric is an investment verdict.",
+    "Use cap rate, cash-on-cash return, and DSCR as separate screening views, then validate the rent, expenses, financing, and cash-required assumptions behind them.",
+    "For a supported address, TrueCap asks for the asking price and shows editable assumptions before calculating these metrics. The preliminary screen is free and does not require a card."
   ],
-  "cta_text": "Run your numbers",
+  "cta_text": "Run a preliminary screen",
   "cta_url": "https://usetruecap.com/",
   "signature_note": null
 }

@@ -14,7 +14,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { SensitivityGrid } from "@/components/investcalc/sensitivity-grid";
@@ -35,7 +35,7 @@ import {
   type OfferCeilingTargetSource,
 } from "@/lib/offer-ceiling-contract";
 import { computeAssumptionImpact } from "@/lib/assumption-impact";
-import { trackEvent } from "@/lib/analytics";
+import { copyPublicShareToAccountAction } from "@/app/actions/public-shares";
 import type { PublicShareAnalysisPayload } from "@/lib/public-share-analysis-result";
 import type { AnalyzerStrategyKey } from "@/lib/analyzer-strategy-persistence";
 import {
@@ -80,6 +80,9 @@ interface ReadOnlyAnalysisViewProps {
    * entitled to receive its numbers. No financial output crosses that gate. */
   specialistAnalysisCaptured?: boolean;
   analyzerStrategyKey?: AnalyzerStrategyKey;
+  /** Raw capability from /s only. It is sent only to the auth-gated copy
+   * action for a fresh revocation/expiry check and never attached to events. */
+  copyShareToken?: string;
 }
 
 const fmtCash = (n: number) =>
@@ -604,8 +607,11 @@ export function ReadOnlyAnalysisView({
   specialistAnalysis = null,
   specialistAnalysisCaptured = false,
   analyzerStrategyKey = "buy-hold",
+  copyShareToken,
 }: ReadOnlyAnalysisViewProps) {
   const router = useRouter();
+  const [copyPending, setCopyPending] = useState(false);
+  const [copyError, setCopyError] = useState<string | null>(null);
   const result = analysis.result;
   const proResult = analysis.access === "pro" ? analysis.result : null;
   const showTaxMetrics = Boolean(
@@ -676,11 +682,11 @@ export function ReadOnlyAnalysisView({
             ? `${fmtCash(rangePreview.lower - Number(values.purchasePrice))} below preview`
             : "Inside preview range"
       : "Not available";
-  // "Make this mine": hand the FULL deal to the calculator via its autosave
+  // Hand the visible deal to the calculator via its autosave
   // draft (restored on mount via normalizeInvestmentFormSnapshot), so the
   // highest-intent viewer lands on a populated analysis instead of a blank
   // homepage. Key must match CALC_FORM_DRAFT_KEY in investcalc-page.tsx.
-  const makeThisMine = () => {
+  const runWithAssumptions = () => {
     const cloneValues = addressIncluded ? values : { ...values, address: "" };
     try {
       window.localStorage.setItem(
@@ -699,8 +705,34 @@ export function ReadOnlyAnalysisView({
     } else {
       clearPendingMaoTarget();
     }
-    trackEvent("shared_scenario_forked", {});
     router.push("/?utm_source=shared_deal&utm_medium=clone");
+  };
+
+  const copyToAccount = async () => {
+    if (!copyShareToken || copyPending) return;
+    setCopyPending(true);
+    setCopyError(null);
+    try {
+      const copied = await copyPublicShareToAccountAction({
+        token: copyShareToken,
+      });
+      if (!copied.ok) {
+        if (copied.code === "SIGN_IN_REQUIRED") {
+          const returnPath = encodeURIComponent(window.location.pathname);
+          router.push(`/auth/login?next=${returnPath}`);
+          return;
+        }
+        setCopyError(copied.message);
+        return;
+      }
+      router.push(
+        `/dashboard/saved-analyses/${encodeURIComponent(copied.id)}?utm_source=shared_analysis&utm_medium=copy`,
+      );
+    } catch {
+      setCopyError("This analysis could not be copied. Please try again.");
+    } finally {
+      setCopyPending(false);
+    }
   };
   return (
     <div className="space-y-5">
@@ -940,24 +972,56 @@ export function ReadOnlyAnalysisView({
 
       {/* The VIEWER's own buy box verdict on this shared deal — renders only
           for a signed-in viewer with an active buy box; anonymous viewers see
-          nothing here. Sits right above "Make this mine" so a personal miss
+          nothing here. Sits right above the recipient actions so a personal miss
           ("0.8pp short") flows into "import it and adjust". */}
       {addressIncluded ? (
         <SharedDealViewerBuyBox values={values} result={result} />
       ) : null}
 
-      {/* Primary conversion action for a high-intent viewer: clone the deal
-          into the calculator (full inputs preloaded) instead of sending them
-          to a blank homepage. */}
-      <button
-        type="button"
-        onClick={makeThisMine}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+      {/* A durable copy exists only for live, revocable /s shares with the
+          address included. Legacy /d and portal views remain run-only. */}
+      <div
+        className={cn(
+          "grid gap-2",
+          copyShareToken && addressIncluded && "sm:grid-cols-2",
+        )}
       >
-        {addressIncluded
-          ? "Make this deal mine — open it in the calculator →"
-          : "Open these assumptions — add the property address →"}
-      </button>
+        {copyShareToken && addressIncluded ? (
+          <button
+            type="button"
+            onClick={copyToAccount}
+            disabled={copyPending}
+            aria-busy={copyPending}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-wait disabled:opacity-70"
+          >
+            {copyPending
+              ? "Copying to your account…"
+              : "Copy this analysis to your account →"}
+          </button>
+        ) : null}
+        <button
+          type="button"
+          onClick={runWithAssumptions}
+          className={cn(
+            "flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold shadow-sm transition-colors",
+            copyShareToken && addressIncluded
+              ? "border border-primary bg-background text-primary hover:bg-primary/5"
+              : "bg-primary text-primary-foreground hover:bg-primary/90",
+          )}
+        >
+          {addressIncluded
+            ? "Run this property with your assumptions →"
+            : "Run these assumptions with a property you choose →"}
+        </button>
+      </div>
+      {copyError ? (
+        <p
+          role="alert"
+          className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive"
+        >
+          {copyError}
+        </p>
+      ) : null}
 
       {comps ? <SharedDealComps comps={comps} /> : null}
 

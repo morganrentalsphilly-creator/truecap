@@ -2,16 +2,16 @@
   "day": 28,
   "send_date": "2026-06-28",
   "subject": "cash flow vs net cash flow",
-  "preheader": "the line item that separates spreadsheet investors from real ones.",
-  "headline": "Most 'cash flow' numbers I see online aren't actually cash flow.",
+  "preheader": "why rent minus PITI is only a gross-spread shortcut.",
+  "headline": "Modeled cash flow needs more than rent minus PITI.",
   "body": [
-    "When new investors say 'this property cash flows $400/mo,' they almost always mean: rent minus PITI. That's not cash flow. That's gross spread.",
-    "Real cash flow — call it net cash flow — is rent minus PITI minus every other operating cost. Vacancy reserve. Property management. Repairs and maintenance. CapEx reserve. Lawn, utilities you cover, lease-up costs, the random pest and HOA stuff. On a typical single-family rental, those line items eat 25-35% of gross rent before debt service is even in the conversation.",
-    "Run it on a real number. A $2,000/mo rental with a $1,200 mortgage payment looks like $800/mo of cash flow. Subtract 8% vacancy ($160), 10% PM ($200), 5% maintenance ($100), 5% CapEx ($100), and you're at $240/mo net cash flow. Same property. Same rent. A third of what the napkin math said.",
-    "This is why honest underwriting matters. The bank's underwriter is doing net cash flow math against debt service. Their DSCR uses your real NOI, not your fantasy NOI. If you bought the deal on gross-spread math, you bought a property the bank wouldn't have lent on if you'd shown them the real numbers.",
-    "TrueCap calculates net cash flow by default — every operating line is included, vacancy is pre-filled, PM is in the model. You can override anything. The defaults are honest."
+    "Rent minus principal, interest, taxes, and insurance is a gross-spread shortcut. It can omit vacancy and other operating costs that affect modeled cash flow.",
+    "A fuller screen starts with effective rent after vacancy, then accounts for applicable operating expenses and debt service. Review management, repairs, maintenance, capital reserves, utilities, HOA dues, lease-up costs, and other property-specific lines instead of assuming they are zero.",
+    "For example, a $2,000 monthly rent and $1,200 monthly debt payment leave an $800 spread before vacancy and operating expenses. The remaining modeled cash flow depends on the actual assumptions you enter; that example is not a property forecast.",
+    "Lenders may calculate qualifying income, expenses, and DSCR differently from a consumer screening tool. TrueCap does not predict lender approval, so compare its definitions and inputs with the lender's requirements.",
+    "TrueCap starts generic editable assumptions at 5% vacancy and 8% management. Review taxes, insurance, maintenance, capital reserves, utilities, HOA dues, and every other applicable line against current evidence before relying on the modeled cash flow."
   ],
-  "cta_text": "See real cash flow",
+  "cta_text": "Review modeled cash flow",
   "cta_url": "https://usetruecap.com/",
   "signature_note": null
 }

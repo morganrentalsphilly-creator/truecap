@@ -1,7 +1,7 @@
-import { withSentryConfig } from '@sentry/nextjs';
-import { fileURLToPath } from 'node:url';
+import { withSentryConfig } from "@sentry/nextjs";
+import { fileURLToPath } from "node:url";
 
-const projectRoot = fileURLToPath(new URL('.', import.meta.url));
+const projectRoot = fileURLToPath(new URL(".", import.meta.url));
 
 // Observation-only CSP rollout. This does not block traffic; violations are
 // reduced to non-sensitive directive/origin metadata by /api/csp-report so we
@@ -112,8 +112,16 @@ const nextConfig = {
       // redirects cannot read cookies, so an auth-dependent destination
       // would have to be a page-level redirect instead.)
       { source: "/analyze", destination: "/", permanent: false },
-      { source: "/deals", destination: "/dashboard/saved-analyses", permanent: false },
-      { source: "/dashboard/screen", destination: "/dashboard/triage", permanent: false },
+      {
+        source: "/deals",
+        destination: "/dashboard/saved-analyses",
+        permanent: false,
+      },
+      {
+        source: "/dashboard/screen",
+        destination: "/dashboard/triage",
+        permanent: false,
+      },
     ];
   },
 
@@ -152,7 +160,9 @@ const nextConfig = {
               "browsing-topics=()",
             ].join(", "),
           },
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          // Partner identity is not an input to the embed program. Suppress it
+          // at both the generated iframe and response-header boundaries.
+          { key: "Referrer-Policy", value: "no-referrer" },
           { key: "Content-Security-Policy", value: "frame-ancestors *" },
         ],
       },
@@ -267,7 +277,10 @@ const nextConfig = {
         source: "/d/:path+",
         headers: [
           { key: "Referrer-Policy", value: "no-referrer" },
-          { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive, nosnippet" },
+          {
+            key: "X-Robots-Tag",
+            value: "noindex, nofollow, noarchive, nosnippet",
+          },
           { key: "Cache-Control", value: "private, no-store" },
         ],
       },
@@ -278,7 +291,10 @@ const nextConfig = {
         source: "/s/:path+",
         headers: [
           { key: "Referrer-Policy", value: "no-referrer" },
-          { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive, nosnippet" },
+          {
+            key: "X-Robots-Tag",
+            value: "noindex, nofollow, noarchive, nosnippet",
+          },
           { key: "Cache-Control", value: "private, no-store" },
         ],
       },
@@ -302,7 +318,7 @@ const nextConfig = {
       },
     ];
   },
-}
+};
 
 export default withSentryConfig(nextConfig, {
   // For all available options, see:

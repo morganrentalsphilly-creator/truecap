@@ -30,7 +30,12 @@ import { headers } from "next/headers";
 import * as Sentry from "@sentry/nextjs";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { getEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
-import { verifyShareAttribution } from "@/lib/share-attribution";
+import {
+  hashShareValues,
+  verifyLeadCaptureAuthorization,
+} from "@/lib/share-attribution";
+import { resolvePublicShare } from "@/lib/public-share";
+import { isWellFormedShareToken } from "@/lib/share-token";
 
 export type CaptureLeadResult =
   | { ok: true }
@@ -41,12 +46,16 @@ export type CaptureLeadResult =
     };
 
 const leadSchema = z.object({
+  shareSurface: z.enum(["legacy_share", "opaque_share", "portal_share"]),
   ownerId: z.string().uuid("This share link can't receive messages."),
   /** Signed attribution copied from the share payload — see the note above.
    *  `sig` is an HMAC-SHA256 hex digest over {ownerId, dealId, valuesHash}. */
   dealId: z.string().uuid().optional(),
   valuesHash: z.string().trim().max(128).optional(),
   sig: z.string().trim().max(256).optional(),
+  /** Required for /s. Re-resolved on every write so expiry/revocation remains
+   * authoritative after a viewer has left the page open. */
+  opaqueShareToken: z.string().trim().max(128).optional(),
   email: z.string().email("Please enter a valid email."),
   name: z.string().trim().max(100).optional(),
   message: z.string().trim().max(1000).optional(),
@@ -57,7 +66,10 @@ const leadSchema = z.object({
 });
 
 function notificationsLive(): boolean {
-  return (process.env.LEAD_NOTIFICATIONS_MODE ?? "off").trim().toLowerCase() === "live";
+  return (
+    (process.env.LEAD_NOTIFICATIONS_MODE ?? "off").trim().toLowerCase() ===
+    "live"
+  );
 }
 
 // Best-effort per-IP submission limiter (in-memory, per serverless instance) —
@@ -77,25 +89,41 @@ function overLeadLimit(ip: string): boolean {
   }
   b.count += 1;
   if (leadBuckets.size > 5000) {
-    for (const [k, v] of leadBuckets) if (now - v.windowStart > LEAD_WINDOW_MS) leadBuckets.delete(k);
+    for (const [k, v] of leadBuckets)
+      if (now - v.windowStart > LEAD_WINDOW_MS) leadBuckets.delete(k);
   }
   return b.count > LEAD_MAX_PER_WINDOW;
 }
 
-export async function captureDealLeadAction(input: unknown): Promise<CaptureLeadResult> {
+export async function captureDealLeadAction(
+  input: unknown,
+): Promise<CaptureLeadResult> {
   const parsed = leadSchema.safeParse(input);
   if (!parsed.success) {
     return {
       ok: false,
       code: "VALIDATION_ERROR",
-      message: parsed.error.issues[0]?.message ?? "Please check the form and try again.",
+      message:
+        parsed.error.issues[0]?.message ??
+        "Please check the form and try again.",
     };
   }
   // Honeypot tripped → pretend it worked, drop silently (no insert/notify).
   if (parsed.data.website && parsed.data.website.trim().length > 0) {
     return { ok: true };
   }
-  const { ownerId, dealId, valuesHash, sig, email, name, message, dealAddress } = parsed.data;
+  const {
+    shareSurface,
+    ownerId,
+    dealId,
+    valuesHash,
+    sig,
+    opaqueShareToken,
+    email,
+    name,
+    message,
+    dealAddress,
+  } = parsed.data;
 
   // Authorization: the caller must present the share link's signature over this
   // exact {ownerId, dealId, valuesHash}. A legitimate viewer always has it — the
@@ -103,14 +131,74 @@ export async function captureDealLeadAction(input: unknown): Promise<CaptureLead
   // it. A forged/absent signature (or an unset SHARE_LINK_SECRET, in which case
   // co-branding is off entirely and no form exists) is refused with the SAME
   // code + message an ineligible owner gets, so the response leaks nothing.
-  const attributionOk = verifyShareAttribution({
+  const attributionOk = verifyLeadCaptureAuthorization({
+    shareSurface,
     ownerId,
     dealId: dealId ?? null,
     valuesHash: valuesHash ?? "",
+    dealAddress: dealAddress ?? null,
     sig: sig ?? null,
   });
   if (!attributionOk) {
-    return { ok: false, code: "OWNER_NOT_ELIGIBLE", message: "This deal isn't accepting messages." };
+    return {
+      ok: false,
+      code: "OWNER_NOT_ELIGIBLE",
+      message: "This deal isn't accepting messages.",
+    };
+  }
+
+  let authorizedOwnerId = ownerId;
+  let authorizedDealAddress = dealAddress;
+  if (shareSurface === "opaque_share") {
+    if (!opaqueShareToken || !isWellFormedShareToken(opaqueShareToken)) {
+      return {
+        ok: false,
+        code: "OWNER_NOT_ELIGIBLE",
+        message: "This deal isn't accepting messages.",
+      };
+    }
+    // Fresh capability resolution is the write authorization. It fails closed
+    // for revoked, expired, unknown, malformed, or stale-methodology shares.
+    const resolved = await resolvePublicShare(opaqueShareToken);
+    if (!resolved?.ownerId) {
+      return {
+        ok: false,
+        code: "OWNER_NOT_ELIGIBLE",
+        message: "This deal isn't accepting messages.",
+      };
+    }
+    const displayedValues =
+      resolved.snapshot.meta.addressVisibility === "full"
+        ? resolved.snapshot.values
+        : {
+            ...resolved.snapshot.values,
+            address: "Property address hidden by sharer",
+          };
+    if (
+      resolved.ownerId !== ownerId ||
+      (resolved.dealId ?? null) !== (dealId ?? null) ||
+      hashShareValues(displayedValues) !== valuesHash
+    ) {
+      return {
+        ok: false,
+        code: "OWNER_NOT_ELIGIBLE",
+        message: "This deal isn't accepting messages.",
+      };
+    }
+    authorizedOwnerId = resolved.ownerId;
+    // Never let a client recover a hidden address through an owner email.
+    authorizedDealAddress =
+      resolved.snapshot.meta.addressVisibility === "full"
+        ? resolved.snapshot.values.address
+        : undefined;
+  } else if (opaqueShareToken) {
+    // A bearer capability may only travel through its own live-resolution
+    // branch; accepting it on a legacy surface would create ambiguous auth.
+    return {
+      ok: false,
+      code: "OWNER_NOT_ELIGIBLE",
+      message: "This deal isn't accepting messages.",
+    };
   }
 
   // Per-IP rate limit (best-effort). Returns a soft error rather than silently
@@ -123,7 +211,11 @@ export async function captureDealLeadAction(input: unknown): Promise<CaptureLead
     /* headers() unavailable — fall through with the shared bucket */
   }
   if (overLeadLimit(ip)) {
-    return { ok: false, code: "SERVER_ERROR", message: "Too many messages just now — please try again shortly." };
+    return {
+      ok: false,
+      code: "SERVER_ERROR",
+      message: "Too many messages just now — please try again shortly.",
+    };
   }
 
   try {
@@ -131,17 +223,21 @@ export async function captureDealLeadAction(input: unknown): Promise<CaptureLead
 
     // Only Pro owners (those who can co-brand) accept leads. Guards a crafted
     // link pointing at a free/non-existent owner.
-    const entitlements = await getEntitlementsForUser(admin, ownerId);
+    const entitlements = await getEntitlementsForUser(admin, authorizedOwnerId);
     if (!hasPlanFeature(entitlements, "custom_branding")) {
-      return { ok: false, code: "OWNER_NOT_ELIGIBLE", message: "This deal isn't accepting messages." };
+      return {
+        ok: false,
+        code: "OWNER_NOT_ELIGIBLE",
+        message: "This deal isn't accepting messages.",
+      };
     }
 
     const { error: insertError } = await admin.from("deal_leads").insert({
-      owner_user_id: ownerId,
+      owner_user_id: authorizedOwnerId,
       lead_email: email,
       lead_name: name || null,
       message: message || null,
-      deal_address: dealAddress || null,
+      deal_address: authorizedDealAddress || null,
       source: "shared_deal",
     });
 
@@ -152,7 +248,11 @@ export async function captureDealLeadAction(input: unknown): Promise<CaptureLead
           level: "warning",
           tags: { feature: "agent-lead-capture" },
         });
-        return { ok: false, code: "SERVER_ERROR", message: "Couldn't send right now. Try again shortly." };
+        return {
+          ok: false,
+          code: "SERVER_ERROR",
+          message: "Couldn't send right now. Try again shortly.",
+        };
       }
       throw insertError;
     }
@@ -160,7 +260,12 @@ export async function captureDealLeadAction(input: unknown): Promise<CaptureLead
     // Owner-notification email — dormant until LEAD_NOTIFICATIONS_MODE=live.
     // Best-effort: a failed notification must never fail the capture.
     if (notificationsLive()) {
-      await notifyOwner(admin, ownerId, { email, name, message, dealAddress }).catch((err) => {
+      await notifyOwner(admin, authorizedOwnerId, {
+        email,
+        name,
+        message,
+        dealAddress: authorizedDealAddress,
+      }).catch((err) => {
         Sentry.captureMessage("lead owner-notify failed", {
           level: "warning",
           tags: { feature: "agent-lead-capture" },
@@ -172,14 +277,23 @@ export async function captureDealLeadAction(input: unknown): Promise<CaptureLead
     return { ok: true };
   } catch (error) {
     Sentry.captureException(error, { tags: { feature: "agent-lead-capture" } });
-    return { ok: false, code: "SERVER_ERROR", message: "Couldn't send right now. Try again shortly." };
+    return {
+      ok: false,
+      code: "SERVER_ERROR",
+      message: "Couldn't send right now. Try again shortly.",
+    };
   }
 }
 
 async function notifyOwner(
   admin: ReturnType<typeof createAdminSupabaseClient>,
   ownerId: string,
-  lead: { email: string; name?: string; message?: string; dealAddress?: string }
+  lead: {
+    email: string;
+    name?: string;
+    message?: string;
+    dealAddress?: string;
+  },
 ): Promise<void> {
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) return;
@@ -189,7 +303,11 @@ async function notifyOwner(
   if (!to) return;
 
   const from = process.env.EMAIL_FROM ?? "TrueCap <hello@usetruecap.com>";
-  const esc = (s?: string) => (s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const esc = (s?: string) =>
+    (s ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
   const html = `<!DOCTYPE html><html><body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#111827;">
   <div style="max-width:520px;margin:24px auto;padding:24px;border:1px solid #e5e7eb;border-radius:12px;">
     <h2 style="margin:0 0 8px;font-size:18px;">New lead from your shared deal</h2>
@@ -202,7 +320,10 @@ async function notifyOwner(
 
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
-    headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
+    headers: {
+      Authorization: `Bearer ${resendKey}`,
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({
       from,
       to,

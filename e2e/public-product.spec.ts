@@ -2,6 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { SAMPLE_DEAL_FIXTURE } from "../lib/sample-deal";
+import { EMBEDDABLE_CALCULATORS } from "../lib/calculator-registry";
 
 const VIEWPORTS = [
   { width: 390, height: 844 },
@@ -59,6 +60,48 @@ async function waitForCalculatorReady(page: Page) {
     page.locator('form[data-calc-form="true"][data-calculator-ready="true"]'),
   ).toBeAttached({ timeout: 20_000 });
 }
+
+test("every advertised embed and attribution destination is reachable", async ({
+  page,
+  request,
+}) => {
+  for (const calculator of EMBEDDABLE_CALCULATORS) {
+    const response = await page.goto(`/embed/${calculator.slug}`, {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.status(), calculator.slug).toBe(200);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      calculator.title,
+    );
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+      "content",
+      /noindex/,
+    );
+
+    const cta = page.getByRole("link", {
+      name: "Underwrite a full property in TrueCap",
+    });
+    await expect(cta).toHaveAttribute("href", /utm_source=embed/);
+    const href = await cta.getAttribute("href");
+    expect(href).not.toBeNull();
+    const attribution = new URL(href!);
+    expect(attribution.pathname).toBe(`/tools/${calculator.slug}`);
+    expect(Object.fromEntries(attribution.searchParams)).toEqual({
+      utm_source: "embed",
+      utm_medium: "referral",
+      utm_campaign: calculator.slug,
+    });
+    // The rendered href must remain the literal public attribution URL above,
+    // while reachability is checked against the Playwright target. This keeps
+    // local/preview verification off the live site and still proves the exact
+    // destination path is served by the candidate build.
+    expect(
+      (
+        await request.get(`${attribution.pathname}${attribution.search}`)
+      ).status(),
+    ).toBe(200);
+  }
+});
 
 for (const viewport of VIEWPORTS) {
   test(`homepage is usable without horizontal overflow at ${viewport.width}px`, async ({
@@ -881,14 +924,12 @@ test("one real anonymous deal receives an exact decision and bound PDF, then a s
   // fail closed without requiring another explicit Run.
   await first.getByRole("button", { name: "Edit assumptions" }).click();
   const editForm = page.locator('form[data-calc-form="true"]');
-  await editForm
-    .getByLabel("Price to analyze", { exact: true })
-    .fill("255000");
+  await editForm.getByLabel("Price to analyze", { exact: true }).fill("255000");
   await page.getByRole("button", { name: "Done editing" }).click();
   await expect(first).toBeVisible();
-  await expect(
-    first.getByText("Asking $255,000", { exact: true }),
-  ).toBeVisible({ timeout: 20_000 });
+  await expect(first.getByText("Asking $255,000", { exact: true })).toBeVisible(
+    { timeout: 20_000 },
+  );
   await first.locator("summary").filter({ hasText: "More actions" }).click();
   await expect(
     first.getByRole("button", { name: "Export PDF", exact: true }),

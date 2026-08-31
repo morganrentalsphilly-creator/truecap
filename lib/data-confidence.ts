@@ -2,8 +2,8 @@
  * Data confidence — per-input provenance + an overall High/Medium/Low
  * level for an analysis. Pure module (no IO, client-safe).
  *
- * The analyzer captures which fields enrich-property filled (HUD FMR /
- * FRED / state tax) and whether the user later overrode them; this module
+ * The analyzer captures which fields enrichment filled (HUD FMR / FRED)
+ * and whether the user later overrode them; this module
  * turns that into the object we persist (saved_analyses.data_confidence)
  * and render in the confidence badge. It's also used live on the result
  * screen before a deal is saved.
@@ -18,9 +18,18 @@
  *              object remains as a backward-compatible three-field summary.
  */
 
-export type DataConfidenceSource = "hud-fmr" | "hud-safmr" | "rentcast-estimate" | "fred" | "state-static" | "manual";
+export type DataConfidenceSource =
+  | "hud-fmr"
+  | "hud-safmr"
+  | "rentcast-estimate"
+  | "fred"
+  | "state-static"
+  | "manual";
 export type ConfidenceLevel = "high" | "medium" | "low";
-export type DataConfidenceField = "monthlyRent" | "interestRate" | "propertyTaxPct";
+export type DataConfidenceField =
+  | "monthlyRent"
+  | "interestRate"
+  | "propertyTaxPct";
 
 export type FieldProvenance = {
   source: DataConfidenceSource;
@@ -69,7 +78,9 @@ const SOURCE_LABELS: Record<DataConfidenceSource, string> = {
   "hud-safmr": "HUD rent benchmark (ZIP)",
   "rentcast-estimate": "RentCast market-rent estimate",
   fred: "FRED owner-occupied rate benchmark",
-  "state-static": "State tax benchmark",
+  // Kept only so old saved analyses can be read without relabeling their
+  // provenance as current. Released enrichment no longer writes this source.
+  "state-static": "Legacy state estimate — verify locally",
   manual: "You entered it",
 };
 
@@ -88,17 +99,18 @@ function isTrusted(f: FieldProvenance | undefined): boolean {
 
 export function computeConfidenceLevel(
   fields: DataConfidence["fields"],
-  completeness: ConfidenceCompleteness
+  completeness: ConfidenceCompleteness,
 ): ConfidenceLevel {
   if (!completeness.hasRent || !completeness.hasPrice) return "low";
-  if (isTrusted(fields.monthlyRent) && isTrusted(fields.interestRate)) return "high";
+  if (isTrusted(fields.monthlyRent) && isTrusted(fields.interestRate))
+    return "high";
   return "medium";
 }
 
 export function buildDataConfidence(
   input: EnrichmentProvenanceInput | null | undefined,
   completeness: ConfidenceCompleteness,
-  now: Date = new Date()
+  now: Date = new Date(),
 ): DataConfidence {
   const fields: DataConfidence["fields"] = {};
   if (input) {
@@ -106,7 +118,11 @@ export function buildDataConfidence(
       const entry = input[key];
       if (!entry) continue;
       fields[key] = entry.overridden
-        ? { source: "manual", verified: false, detail: "You changed it after auto-fill; not yet verified" }
+        ? {
+            source: "manual",
+            verified: false,
+            detail: "You changed it after auto-fill; not yet verified",
+          }
         : {
             source: entry.source,
             fetchedAt: entry.fetchedAt ?? null,
@@ -159,7 +175,7 @@ export function confidenceLabel(level: ConfidenceLevel): string {
  */
 export function describeConfidenceGap(
   confidence: DataConfidence,
-  opts?: { propertyType?: string | null }
+  opts?: { propertyType?: string | null },
 ): string | null {
   if (confidence.level === "high") return null;
 
@@ -204,7 +220,11 @@ export function normalizeDataConfidence(raw: unknown): DataConfidence | null {
 
   const fieldsRaw = (obj.fields ?? {}) as Record<string, unknown>;
   const fields: DataConfidence["fields"] = {};
-  for (const key of ["monthlyRent", "interestRate", "propertyTaxPct"] as DataConfidenceField[]) {
+  for (const key of [
+    "monthlyRent",
+    "interestRate",
+    "propertyTaxPct",
+  ] as DataConfidenceField[]) {
     const f = fieldsRaw[key];
     if (f && typeof f === "object") {
       const fo = f as Record<string, unknown>;
@@ -230,6 +250,9 @@ export function normalizeDataConfidence(raw: unknown): DataConfidence | null {
   return {
     fields,
     level,
-    computedAt: typeof obj.computedAt === "string" ? obj.computedAt : new Date(0).toISOString(),
+    computedAt:
+      typeof obj.computedAt === "string"
+        ? obj.computedAt
+        : new Date(0).toISOString(),
   };
 }

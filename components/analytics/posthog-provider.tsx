@@ -29,16 +29,78 @@
  * Renders nothing visible.
  */
 
-import { useEffect, useRef, Suspense } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, Suspense } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
   identifyUser,
   initAnalytics,
+  disableAnalyticsForDocument,
   resetAnalytics,
-  setOrganicAttribution,
+  setFirstTouchAttribution,
   trackEvent,
   trackPageview,
+  type FirstTouchReferralSource,
 } from "@/lib/analytics";
+import { shouldKeepThirdPartyTelemetryDisabled } from "@/lib/sensitive-url";
+
+const SEARCH_REFERRER_RE =
+  /(^|\.)(google|bing|yahoo|duckduckgo|ecosia|brave)\./;
+const AI_REFERRER_RE = /(^|\.)(perplexity|chatgpt|openai|copilot|claude)\./;
+const SOCIAL_REFERRER_RE =
+  /(^|\.)(facebook|instagram|linkedin|reddit|tiktok|x|twitter)\./;
+
+function classifyFirstTouchReferralSource(input: {
+  referrerHost: string;
+  currentHost: string;
+  campaignMedium: string;
+}): FirstTouchReferralSource {
+  const { referrerHost, currentHost, campaignMedium } = input;
+  if (["cpc", "ppc", "paid_search", "paidsearch"].includes(campaignMedium)) {
+    return "paid_search";
+  }
+  if (["paid_social", "paidsocial", "social_paid"].includes(campaignMedium)) {
+    return "paid_social";
+  }
+  if (["email", "newsletter"].includes(campaignMedium)) return "email";
+  if (campaignMedium === "organic") {
+    return AI_REFERRER_RE.test(referrerHost) ? "organic_ai" : "organic_search";
+  }
+  if (campaignMedium === "social") return "organic_social";
+  if (campaignMedium === "referral") return "external_referral";
+  // Never forward an unrecognized campaign value. Its presence is useful,
+  // but the taxonomy remains a fixed anonymous bucket.
+  if (campaignMedium) return "campaign";
+
+  if (!referrerHost || referrerHost === currentHost) return "direct";
+  if (AI_REFERRER_RE.test(referrerHost)) return "organic_ai";
+  if (SEARCH_REFERRER_RE.test(referrerHost)) return "organic_search";
+  if (SOCIAL_REFERRER_RE.test(referrerHost)) return "organic_social";
+  return "external_referral";
+}
+
+function routeCategory(pathname: string): string {
+  if (pathname === "/") return "home";
+  if (pathname === "/pricing") return "pricing";
+  if (pathname.startsWith("/tools/")) return "tools";
+  if (
+    pathname.startsWith("/blog/") ||
+    pathname.startsWith("/glossary/") ||
+    pathname.startsWith("/vs/") ||
+    pathname.startsWith("/markets/") ||
+    pathname.startsWith("/states/")
+  ) {
+    return "content";
+  }
+  if (
+    pathname.startsWith("/s/") ||
+    pathname.startsWith("/d/") ||
+    pathname.startsWith("/portal/")
+  ) {
+    return "shared_analysis";
+  }
+  if (pathname.startsWith("/auth/")) return "auth";
+  return "product";
+}
 
 /**
  * Client-side twin of proxy.ts's hasSupabaseAuthCookie (same
@@ -92,10 +154,35 @@ function trackRetentionMilestones(userId: string, createdAt: string): void {
 function PostHogTracker() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const organicLandingFired = useRef(false);
+  const firstTouchClassified = useRef(false);
+  const location = `${pathname}${searchParams?.size ? `?${searchParams.toString()}` : ""}`;
+  const [sensitiveLocationSeen, setSensitiveLocationSeen] = useState(false);
+  const telemetryDisabledForDocument = shouldKeepThirdPartyTelemetryDisabled(
+    location,
+    sensitiveLocationSeen,
+  );
+  // A third-party script that was already present can observe history changes
+  // before React can unmount it. Entering a sensitive URL from a clean SPA
+  // document therefore becomes a hard reload. On the new document this ref is
+  // false from the first render and every telemetry provider stays unmounted.
+  const documentMayHaveTelemetry = useRef(!telemetryDisabledForDocument);
+
+  useLayoutEffect(() => {
+    if (!telemetryDisabledForDocument) {
+      documentMayHaveTelemetry.current = true;
+      return;
+    }
+    disableAnalyticsForDocument();
+    if (!sensitiveLocationSeen) setSensitiveLocationSeen(true);
+    if (documentMayHaveTelemetry.current && typeof window !== "undefined") {
+      documentMayHaveTelemetry.current = false;
+      window.location.reload();
+    }
+  }, [telemetryDisabledForDocument, sensitiveLocationSeen]);
 
   // ── Deferred init: idle-schedule the SDK load ──────
   useEffect(() => {
+    if (telemetryDisabledForDocument) return;
     let idleId: number | null = null;
     let timeoutId: number | null = null;
     const start = () => {
@@ -117,45 +204,61 @@ function PostHogTracker() {
         window.clearTimeout(timeoutId);
       }
     };
-  }, []);
+  }, [telemetryDisabledForDocument]);
 
   // ── Pageview on every App Router transition ────────
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || telemetryDisabledForDocument) return;
     // Query strings can contain Checkout IDs, encoded shared-deal inputs, or
     // campaign-provided personal data. Funnel analysis only needs the route.
     trackPageview(`${window.location.origin}${pathname}`);
-  }, [pathname, searchParams]);
+  }, [pathname, searchParams, telemetryDisabledForDocument]);
 
-  // First-party organic attribution. Store only the landing path and referrer
-  // hostname; never retain the search query or full referrer URL.
+  // First-party attribution. The raw referrer host and UTM value are used only
+  // for this synchronous classification; persistence and event payloads get a
+  // fixed referral taxonomy plus a coarse route category.
   useEffect(() => {
-    if (organicLandingFired.current || typeof window === "undefined") return;
-    organicLandingFired.current = true;
+    if (
+      telemetryDisabledForDocument ||
+      firstTouchClassified.current ||
+      typeof window === "undefined"
+    )
+      return;
+    firstTouchClassified.current = true;
     let host = "";
     try {
-      host = document.referrer ? new URL(document.referrer).hostname.toLowerCase() : "";
+      host = document.referrer
+        ? new URL(document.referrer).hostname.toLowerCase()
+        : "";
     } catch {
       host = "";
     }
-    const medium = searchParams?.get("utm_medium")?.toLowerCase();
-    const searchReferrer = /(^|\.)(google|bing|yahoo|duckduckgo|ecosia|brave)\./.test(host);
-    const aiReferrer = /(^|\.)(perplexity|chatgpt|openai|copilot|claude)\./.test(host);
-    if (!searchReferrer && !aiReferrer && medium !== "organic") return;
+    const referralSource = classifyFirstTouchReferralSource({
+      referrerHost: host,
+      currentHost: window.location.hostname.toLowerCase(),
+      campaignMedium: searchParams?.get("utm_medium")?.toLowerCase() ?? "",
+    });
     const attribution = {
-      landing_page: pathname,
-      referrer_host: host || "utm",
-      attribution_medium: aiReferrer ? "organic_ai" as const : "organic_search" as const,
+      referral_source: referralSource,
     };
-    setOrganicAttribution(attribution);
-    trackEvent("organic_landing", attribution);
-  }, [pathname, searchParams]);
+    setFirstTouchAttribution(attribution);
+    if (
+      referralSource === "organic_search" ||
+      referralSource === "organic_ai" ||
+      referralSource === "organic_social"
+    ) {
+      trackEvent("organic_landing", {
+        route_category: routeCategory(pathname),
+        referral_source: referralSource,
+      });
+    }
+  }, [pathname, searchParams, telemetryDisabledForDocument]);
 
   // Tool-level intent instrumentation without touching 20 independent widget
   // implementations. Start = first interaction. Completion = first form
   // submit or explicit calculate/analyze/run action.
   useEffect(() => {
-    if (!pathname.startsWith("/tools/")) return;
+    if (telemetryDisabledForDocument || !pathname.startsWith("/tools/")) return;
     const calculator = pathname.slice("/tools/".length);
     let started = false;
     let completed = false;
@@ -169,7 +272,11 @@ function PostHogTracker() {
       if (completed) return;
       const target = event.target as HTMLElement | null;
       const isSubmit = event.type === "submit";
-      const isExplicitAction = event.type === "click" && /calculate|analyze|run|estimate|see result/i.test(target?.textContent ?? "");
+      const isExplicitAction =
+        event.type === "click" &&
+        /calculate|analyze|run|estimate|see result/i.test(
+          target?.textContent ?? "",
+        );
       if (!isSubmit && !isExplicitAction) return;
       completed = true;
       trackEvent("calculator_completed", { calculator });
@@ -184,7 +291,7 @@ function PostHogTracker() {
       document.removeEventListener("submit", complete, true);
       document.removeEventListener("click", complete, true);
     };
-  }, [pathname]);
+  }, [pathname, telemetryDisabledForDocument]);
 
   // ── Identify on auth state change (cookie-gated) ───
   // Keyed on pathname (not mount-once) so a client-side sign-in — the
@@ -195,6 +302,7 @@ function PostHogTracker() {
   const identifyCleanupRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
+    if (telemetryDisabledForDocument) return;
     if (identifyStartedRef.current) return;
     if (!hasSupabaseAuthCookie()) return; // anonymous — zero supabase code
     identifyStartedRef.current = true;
@@ -206,9 +314,8 @@ function PostHogTracker() {
 
     void (async () => {
       try {
-        const { createBrowserSupabaseClient } = await import(
-          "@/lib/supabase/client"
-        );
+        const { createBrowserSupabaseClient } =
+          await import("@/lib/supabase/client");
         if (cancelled) return;
         const supabase = createBrowserSupabaseClient();
 
@@ -227,11 +334,14 @@ function PostHogTracker() {
           (event, session) => {
             if (event === "SIGNED_IN" && session?.user) {
               identifyUser(session.user.id);
-              trackRetentionMilestones(session.user.id, session.user.created_at);
+              trackRetentionMilestones(
+                session.user.id,
+                session.user.created_at,
+              );
             } else if (event === "SIGNED_OUT") {
               resetAnalytics();
             }
-          }
+          },
         );
         identifyCleanupRef.current = () => {
           cancelled = true;
@@ -241,7 +351,7 @@ function PostHogTracker() {
         console.warn("[posthog-provider] supabase load failed:", err);
       }
     })();
-  }, [pathname]);
+  }, [pathname, telemetryDisabledForDocument]);
 
   // Unsubscribe only on real unmount — the identify effect above must
   // survive pathname re-runs, so it returns no cleanup of its own.

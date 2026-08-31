@@ -175,7 +175,9 @@ describe("the share-route privacy contract", () => {
     expect(store).toContain(
       "storedMethodologyVersion !== currentResult.methodologyVersion",
     );
-    expect(store).toContain("review/re-underwrite it under the current standard");
+    expect(store).toContain(
+      "review/re-underwrite it under the current standard",
+    );
     expect(store).not.toContain("storedMethodologyIsRenderable");
     expect(store).not.toContain("TRUECAP_UNDERWRITING_STANDARD_V1_2_VERSION");
     expect(store).toContain("Recompute at the read boundary too");
@@ -292,9 +294,7 @@ describe("the share-route privacy contract", () => {
 
     expect(action).toContain("maoTargetFingerprint(shareMaoTarget)");
     expect(action).toContain("maoTargetFingerprint(recordedAdoptedTarget)");
-    expect(action).toContain(
-      "incomingBindingSource === recordedBindingSource",
-    );
+    expect(action).toContain("incomingBindingSource === recordedBindingSource");
     expect(targetMatch).toBeGreaterThanOrEqual(0);
     expect(attribution).toBeGreaterThan(targetMatch);
     expect(action.slice(targetMatch, attribution)).toContain(
@@ -307,7 +307,7 @@ describe("the share-route privacy contract", () => {
     expect(action).toContain("maoTarget: shareMaoTarget ?? undefined");
   });
 
-  it("preserves target provenance through focused share, workspace share, and fork", () => {
+  it("preserves target provenance through focused share, workspace share, and run-only handoff", () => {
     const focused = read("components/investcalc/focused-decision-summary.tsx");
     const workspace = read("app/dashboard/saved-analyses/[id]/page.tsx");
     const shell = read("components/investcalc/shared-deal-shell.tsx");
@@ -321,7 +321,8 @@ describe("the share-route privacy contract", () => {
     expect(workspace).toContain("maoTargetSource={shareMaoTargetSource}");
     expect(shell).toContain("maoTargetSource={maoTargetSource}");
     expect(viewer).toContain("source: maoTargetSource");
-    expect(viewer).toContain('trackEvent("shared_scenario_forked", {})');
+    expect(viewer).toContain("Run this property with your assumptions");
+    expect(viewer).not.toContain('trackEvent("shared_scenario_forked"');
   });
 
   it("legacy /d/ keeps decoding (CLAUDE.md §8.8 — links in the wild)", () => {

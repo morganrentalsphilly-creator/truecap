@@ -13,11 +13,11 @@ describe("Product Overhaul analytics wiring", () => {
   it("wires subscription funnel events with the documented property names", () => {
     const billing = read("app/actions/billing.ts");
     const webhook = read("app/api/stripe/webhooks/route.ts");
-    expect(billing).toContain('event: "subscription_checkout_started"');
-    expect(billing).toContain("plan: parsed.data.planSlug");
+    expect(billing).toContain('event: "upgrade_started"');
+    expect(billing).toContain("plan_identifier: parsed.data.planSlug");
     expect(webhook).toContain('event: "subscription_started"');
-    expect(webhook).toContain('event: "subscription_activated"');
-    expect(webhook).toContain("plan: session.metadata?.plan_slug");
+    expect(webhook).not.toContain('event: "subscription_activated"');
+    expect(webhook).toContain("plan_identifier: session.metadata?.plan_slug");
     expect(webhook).toContain('event: "subscription_cancelled"');
     expect(webhook).toContain('event: "upgrade_credit_applied"');
     expect(webhook).toContain("destination_plan: session.metadata?.plan_slug");
@@ -32,7 +32,14 @@ describe("Product Overhaul analytics wiring", () => {
     expect(shares).toContain('event: "share_revoked"');
     expect(deals).toContain('event: "decision_recorded"');
     expect(deals).toContain('event: "client_decision_assigned"');
-    expect(shortlist).toContain('trackEvent("shortlist_item_promoted", { source: "triage" })');
+    const promotionCalls = shortlist.match(
+      /trackEvent\s*\(\s*"shortlist_item_promoted"\s*,/g,
+    );
+    const privacySafePromotionCalls = shortlist.match(
+      /trackEvent\s*\(\s*"shortlist_item_promoted"\s*,\s*\{\s*source:\s*"triage",?\s*\}\s*\)/g,
+    );
+    expect(promotionCalls?.length).toBeGreaterThan(0);
+    expect(privacySafePromotionCalls).toHaveLength(promotionCalls?.length ?? 0);
     for (const event of [
       "data_lookup_started",
       "data_lookup_succeeded",
@@ -52,9 +59,10 @@ describe("Product Overhaul analytics wiring", () => {
     expect(calculator).toContain('trackEvent("first_analysis_completed", {');
     expect(calculator).toContain('trackEvent("evaluation_deal_completed", {');
     expect(calculator).toContain('trackEvent("second_deal_completed", {');
-    expect(signup).toContain('trackEvent("account_created", {');
+    expect(signup).toContain('trackEvent("account_created")');
+    expect(signup).toContain('trackEvent("product_evaluation_started")');
     expect(callback).toContain('event: "account_created"');
-    expect(callback).toContain('method: "google"');
+    expect(callback).toContain('referral_source: "google_oauth"');
     expect(callback).toContain('event: "product_evaluation_started"');
     expect(provider).toContain('event: "retained_30d" as const');
     expect(provider).toContain('event: "retained_90d" as const');
@@ -69,36 +77,36 @@ describe("Product Overhaul analytics wiring", () => {
     expect(calculator).not.toContain("createOneTimePdfCheckoutAction");
     expect(calculator).not.toContain("handleBuyOneTimePdf");
     expect(calculator).not.toContain(
-      'trackEvent("complete_decision_checkout_started", {'
+      'trackEvent("complete_decision_checkout_started", {',
     );
     expect(calculator).toContain(
-      'trackEvent("complete_decision_purchased", {})'
+      'trackEvent("complete_decision_purchased", {})',
     );
     expect(calculator).toContain("if (!verified.recovered) {");
     expect(calculator).toContain("verifyOneTimePdfPaymentAction({");
     expect(calculator).toContain('trackEvent("material_input_verified", {');
-    expect(calculator).toContain(
-      'trackEvent("decision_readiness_changed", {'
+    expect(calculator).toContain('trackEvent("decision_readiness_changed", {');
+    expect(calculator).not.toContain(
+      'trackEvent("complete_decision_trial_started"',
     );
     expect(calculator).not.toContain(
-      'trackEvent("complete_decision_trial_started"'
-    );
-    expect(calculator).not.toContain(
-      'trackEvent("complete_decision_trial_completed"'
+      'trackEvent("complete_decision_trial_completed"',
     );
   });
 
   it("drops undocumented and sensitive fields at runtime", () => {
-    expect(ANALYTICS_EVENT_DICTIONARY.subscription_activated).toBeDefined();
+    expect(ANALYTICS_EVENT_DICTIONARY.subscription_started).toBeDefined();
     expect(
-      sanitizeAnalyticsEventProperties("subscription_activated", {
-        plan: "pro_monthly",
-        interval: "monthly",
-        trial_granted: false,
+      sanitizeAnalyticsEventProperties("subscription_started", {
+        plan_identifier: "pro_monthly",
+        referral_source: "stripe_checkout",
         plan_slug: "legacy-key",
         email: "private@example.com",
-      })
-    ).toEqual({ plan: "pro_monthly", interval: "monthly", trial_granted: false });
+      }),
+    ).toEqual({
+      plan_identifier: "pro_monthly",
+      referral_source: "stripe_checkout",
+    });
     expect(
       sanitizeAnalyticsEventProperties("legacy_billing_event", {
         claim_id: "claim-secret",
@@ -106,14 +114,14 @@ describe("Product Overhaul analytics wiring", () => {
         customer_id: "cus_secret",
         share_token: "share-secret",
         plan: "pro_monthly",
-      })
-    ).toEqual({ plan: "pro_monthly" });
+      }),
+    ).toBeUndefined();
     expect(
       sanitizeAnalyticsEventProperties("retained_30d", {
         activity: "authenticated_visit",
         user_id: "private-user-id",
         purchase_price: 300_000,
-      })
+      }),
     ).toEqual({ activity: "authenticated_visit" });
   });
 });

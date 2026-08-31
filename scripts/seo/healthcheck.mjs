@@ -27,32 +27,26 @@
  * ---------------------------------------------------------------------------
  * ORPHAN DETECTION — why it is here and why it crawls from `/`
  * ---------------------------------------------------------------------------
- * Measured position as of 2026-08-03: 429 sitemap URLs, roughly 2% indexed,
+ * Measured position as of 2026-08-03: hundreds of sitemap URLs, roughly 2% indexed,
  * ranking for 0 of 10 target queries. Commit 4d799ea repaired the link graph
  * (49 orphans -> 0) after a BFS crawl of a production build found that 49
  * sitemap URLs had no inbound internal link from anywhere on the site —
- * including all 40 /vs/<competitor> pages. A sitemap entry is a *request*;
+ * including every /vs/<competitor> page. A sitemap entry is a *request*;
  * an internal link is the *endorsement* Google actually weights, and
  * "Crawled - currently not indexed" is the documented outcome for pages that
  * only ever arrive via a sitemap. Nothing stopped that repair from silently
  * rotting the next time a footer link or a hub page was edited. This check is
  * that ratchet.
  *
- * THE /vs SUBTLETY. `/vs` is `robots: { index: false, follow: true }`
- * (app/vs/page.tsx) and is deliberately NOT in the sitemap — listing a
- * noindex URL in a sitemap is a contradictory signal. But it IS the only
- * crawl path to the 40 /vs/<competitor> pages, reached from the site footer.
- * Googlebot fetches a noindex,follow page and follows its links; so does this
- * crawler. That is why the frontier is "every same-origin <a href> we find",
- * not "every sitemap URL" — restricting the crawl to sitemap URLs would
- * report all 40 comparison pages as orphans forever, which is precisely the
- * wrong answer. `/vs` is also seeded explicitly, so removing the footer link
- * shows up as 40 orphans rather than as a silent 41.
+ * THE /vs SUBTLETY. `/vs` is an indexable sitemap URL and the crawlable hub
+ * for the /vs/<competitor> pages. The crawler still follows every same-origin
+ * <a href> it finds, rather than restricting the frontier to sitemap URLs,
+ * because internal-link reachability is what this check is measuring.
  *
  * The check is DISABLED (reported as info, never as a finding) whenever the
  * crawl could not be complete: a sampled `--limit` run, a non-200 homepage, or
  * a run that hit the fetch budget. A partial crawl makes every unreached page
- * look orphaned, and 429 false highs is how a guard gets ignored.
+ * look orphaned, and hundreds of false highs is how a guard gets ignored.
  *
  * ---------------------------------------------------------------------------
  * THE TRIPWIRE — truecap-iota.vercel.app
@@ -110,14 +104,14 @@ const flag = (name, fallback = null) => {
 };
 const has = (name) => args.includes(`--${name}`);
 
-const BASE = (flag("base", "https://usetruecap.com")).replace(/\/$/, "");
+const BASE = flag("base", "https://usetruecap.com").replace(/\/$/, "");
 const LIMIT = Number(flag("limit", "0")) || 0;
 const JSON_OUT = flag("json", null);
 const CONCURRENCY = Number(flag("concurrency", "6"));
 const SKIP_ORPHANS = has("skip-orphans");
 /**
- * Fetch budget for the link-graph crawl. The sitemap is ~429 URLs and the
- * reachable set adds maybe 30 non-sitemap pages (/vs, /pricing, /login, the
+ * Fetch budget for the link-graph crawl. The sitemap contains hundreds of URLs and the
+ * reachable set adds non-sitemap pages (/pricing, /login, the
  * legal pages), so 1200 is roughly 2.5x headroom. It exists so a rendering bug
  * that generates infinite paginated URLs cannot turn the weekly job into an
  * unbounded crawl of production.
@@ -148,25 +142,67 @@ const FOREIGN_DEPLOYMENT = "https://truecap-iota.vercel.app/";
  * report becomes something nobody opens.
  */
 const REQUIRED_SCHEMA = [
-  { pattern: /^\/blog\/topics$/, types: [["CollectionPage"], ["BreadcrumbList"]], label: "topic directory" },
-  { pattern: /^\/blog\/(?!topics$)[^/]+$/, types: [["BlogPosting", "Article"], ["BreadcrumbList"]], label: "blog post" },
-  { pattern: /^\/tools\/[^/]+$/, types: [["BreadcrumbList"]], label: "tool page" },
-  { pattern: /^\/vs\/[^/]+$/, types: [["BreadcrumbList"]], label: "comparison page" },
-  { pattern: /^\/glossary\/[^/]+$/, types: [["DefinedTerm"], ["BreadcrumbList"]], label: "glossary term" },
+  {
+    pattern: /^\/blog\/topics$/,
+    types: [["CollectionPage"], ["BreadcrumbList"]],
+    label: "topic directory",
+  },
+  {
+    pattern: /^\/blog\/(?!topics$)[^/]+$/,
+    types: [["BlogPosting", "Article"], ["BreadcrumbList"]],
+    label: "blog post",
+  },
+  {
+    pattern: /^\/tools\/[^/]+$/,
+    types: [["BreadcrumbList"]],
+    label: "tool page",
+  },
+  {
+    pattern: /^\/vs\/[^/]+$/,
+    types: [["BreadcrumbList"]],
+    label: "comparison page",
+  },
+  {
+    pattern: /^\/glossary\/[^/]+$/,
+    types: [["DefinedTerm"], ["BreadcrumbList"]],
+    label: "glossary term",
+  },
 ];
 
-/** Legacy routes that must answer 308, not 307. */
-const PERMANENT_REDIRECTS = ["/compare", "/saved-analyses", "/templates"];
+/** Historical calculator paths redirect only while their release gates are closed. */
+const HISTORICAL_TOOL_REDIRECTS = {
+  "/tools/rental-cash-flow-calculator": "/",
+  "/tools/cap-rate-calculator": "/blog/how-to-calculate-cap-rate",
+  "/tools/cash-on-cash-calculator":
+    "/blog/how-to-calculate-cash-on-cash-return",
+  "/tools/dscr-calculator": "/blog/how-to-calculate-dscr",
+  "/tools/noi-calculator": "/blog/how-to-calculate-noi-rental-property",
+  "/tools/roi-calculator": "/",
+  "/tools/brrrr-calculator": "/blog/brrrr-method-explained",
+  "/tools/house-hacking-calculator": "/for-house-hackers",
+  "/tools/rental-property-tax-calculator":
+    "/blog/rental-property-tax-deductions",
+  "/tools/50-percent-rule-calculator": "/blog/50-percent-rule-rentals",
+};
+
+/** Legacy routes that must answer a single-hop 308, not a temporary redirect. */
+const PERMANENT_REDIRECTS = {
+  "/compare": "/dashboard/compare",
+  "/saved-analyses": "/dashboard/saved-analyses",
+  "/templates": "/dashboard/templates",
+  ...HISTORICAL_TOOL_REDIRECTS,
+};
+const HISTORICAL_REDIRECT_PATHS = new Set(
+  Object.keys(HISTORICAL_TOOL_REDIRECTS),
+);
+const REDIRECT_SOURCE_PATHS = new Set(Object.keys(PERMANENT_REDIRECTS));
 
 /**
- * Crawl seeds. `/` is the real entry point; `/vs` is seeded because it is the
- * hub for 40 otherwise-unreachable pages and is intentionally absent from the
- * sitemap. Seeding it means a broken footer link surfaces as "40 pages lost
- * their only inbound link" rather than as a single missing hub — the /vs pages
- * are what we care about, and they are still legitimately reachable if some
- * other page starts linking the hub.
+ * Crawl seed. `/vs` is now an indexable sitemap URL and must itself be reached
+ * from the public link graph; seeding it separately would hide a broken link to
+ * the hub.
  */
-const CRAWL_SEEDS = ["/", "/vs"];
+const CRAWL_SEEDS = ["/"];
 
 /**
  * Paths robots.txt disallows (app/robots.ts). A crawler that walks into
@@ -179,15 +215,21 @@ const DISALLOWED_PREFIXES = [
   "/dashboard/",
   "/profile/",
   "/settings/",
+  "/admin/",
+  "/s/",
+  "/portal/",
+  "/embed/brand/",
   "/d/",
   "/home-authed",
 ];
 
 /** Non-HTML endpoints that are legitimately linked but have no link graph. */
-const NON_HTML = /\.(?:png|jpe?g|gif|svg|ico|webp|avif|pdf|xml|txt|json|css|js|mp4|webm|zip|csv)$/i;
+const NON_HTML =
+  /\.(?:png|jpe?g|gif|svg|ico|webp|avif|pdf|xml|txt|json|css|js|mp4|webm|zip|csv)$/i;
 
 const findings = [];
-const add = (severity, check, detail) => findings.push({ severity, check, detail });
+const add = (severity, check, detail) =>
+  findings.push({ severity, check, detail });
 
 /**
  * When --base points somewhere other than production, origin assertions are
@@ -203,26 +245,34 @@ const originSeverity = CHECKING_PROD ? "high" : "info";
 async function fetchText(url, options = {}) {
   const response = await fetch(url, {
     redirect: "manual",
-    headers: { "user-agent": "TrueCap-SEO-Healthcheck/1.0 (+https://usetruecap.com)" },
+    headers: {
+      "user-agent": "TrueCap-SEO-Healthcheck/1.0 (+https://usetruecap.com)",
+    },
     ...options,
   });
-  const body = response.status < 400 && response.status >= 300 ? "" : await response.text();
+  const body =
+    response.status < 400 && response.status >= 300
+      ? ""
+      : await response.text();
   return { status: response.status, headers: response.headers, body, url };
 }
 
 async function mapLimit(items, limit, worker) {
   const results = new Array(items.length);
   let cursor = 0;
-  const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (cursor < items.length) {
-      const index = cursor++;
-      try {
-        results[index] = await worker(items[index], index);
-      } catch (error) {
-        results[index] = { error: String(error?.message ?? error) };
+  const runners = Array.from(
+    { length: Math.min(limit, items.length) },
+    async () => {
+      while (cursor < items.length) {
+        const index = cursor++;
+        try {
+          results[index] = await worker(items[index], index);
+        } catch (error) {
+          results[index] = { error: String(error?.message ?? error) };
+        }
       }
-    }
-  });
+    },
+  );
   await Promise.all(runners);
   return results;
 }
@@ -244,7 +294,9 @@ function faqFingerprint(html) {
     /<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/g,
   )) {
     if (!m[1].includes('"FAQPage"')) continue;
-    const questions = [...m[1].matchAll(/"name"\s*:\s*"([^"]{10,})"/g)].map((q) => q[1]);
+    const questions = [...m[1].matchAll(/"name"\s*:\s*"([^"]{10,})"/g)].map(
+      (q) => q[1],
+    );
     if (questions.length) return questions.slice(0, 5).join("|");
   }
   return null;
@@ -266,7 +318,16 @@ function toPath(absoluteUrl) {
   }
 }
 
-const isDisallowed = (path) => DISALLOWED_PREFIXES.some((p) => path.startsWith(p));
+const isDisallowed = (path) =>
+  DISALLOWED_PREFIXES.some(
+    (prefix) => path === prefix.slice(0, -1) || path.startsWith(prefix),
+  );
+
+function normalizedAbsoluteUrl(value, base = CANONICAL_ORIGIN) {
+  const url = new URL(value, base);
+  const pathname = toPath(url.href);
+  return `${url.origin}${pathname}${url.search}${url.hash}`;
+}
 
 /**
  * Every same-origin <a href> on the page, as normalised paths.
@@ -278,9 +339,12 @@ const isDisallowed = (path) => DISALLOWED_PREFIXES.some((p) => path.startsWith(p
  */
 function extractLinkRecords(html, pageUrl, origin) {
   const out = new Map();
-  for (const m of html.matchAll(/<a\b([^>]*)\shref=["']([^"']+)["']([^>]*)>([\s\S]*?)<\/a>/gi)) {
+  for (const m of html.matchAll(
+    /<a\b([^>]*)\shref=["']([^"']+)["']([^>]*)>([\s\S]*?)<\/a>/gi,
+  )) {
     const raw = m[2].trim();
-    if (!raw || raw.startsWith("#") || /^(?:mailto|tel|javascript):/i.test(raw)) continue;
+    if (!raw || raw.startsWith("#") || /^(?:mailto|tel|javascript):/i.test(raw))
+      continue;
     let resolved;
     try {
       resolved = new URL(raw, pageUrl);
@@ -293,9 +357,18 @@ function extractLinkRecords(html, pageUrl, origin) {
     if (NON_HTML.test(path)) continue;
     const index = m.index ?? 0;
     const inOpenElement = (name) =>
-      html.lastIndexOf(`<${name}`, index) > html.lastIndexOf(`</${name}`, index);
-    const placement = inOpenElement("footer") ? "footer" : inOpenElement("nav") ? "navigation" : "contextual";
-    const anchor = m[4].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 240);
+      html.lastIndexOf(`<${name}`, index) >
+      html.lastIndexOf(`</${name}`, index);
+    const placement = inOpenElement("footer")
+      ? "footer"
+      : inOpenElement("nav")
+        ? "navigation"
+        : "contextual";
+    const anchor = m[4]
+      .replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 240);
     const key = `${path}\u0000${anchor}\u0000${placement}`;
     out.set(key, { target: path, anchor, placement });
   }
@@ -313,8 +386,68 @@ try {
   if (sitemap.status !== 200) {
     add("high", "sitemap", `GET /sitemap.xml returned ${sitemap.status}`);
   } else {
-    urls = [...sitemap.body.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].trim());
-    const foreign = urls.filter((u) => !u.startsWith(CANONICAL_ORIGIN));
+    const contentType = sitemap.headers.get("content-type") ?? "";
+    if (!/\bxml\b/i.test(contentType)) {
+      add(
+        "high",
+        "sitemap XML",
+        `Content-Type is "${contentType || "missing"}"; expected XML`,
+      );
+    }
+    const urlOpenCount = countMatches(sitemap.body, /<url(?:\s[^>]*)?>/g);
+    const urlCloseCount = countMatches(sitemap.body, /<\/url>/g);
+    const locOpenCount = countMatches(sitemap.body, /<loc>/g);
+    const locCloseCount = countMatches(sitemap.body, /<\/loc>/g);
+    if (!/<urlset(?:\s[^>]*)?>[\s\S]*<\/urlset>\s*$/i.test(sitemap.body)) {
+      add(
+        "high",
+        "sitemap XML",
+        "response is missing a complete <urlset> root element",
+      );
+    }
+    if (
+      urlOpenCount !== urlCloseCount ||
+      locOpenCount !== locCloseCount ||
+      urlOpenCount !== locOpenCount
+    ) {
+      add(
+        "high",
+        "sitemap XML",
+        `unbalanced entries: ${urlOpenCount} <url>, ${urlCloseCount} </url>, ` +
+          `${locOpenCount} <loc>, ${locCloseCount} </loc>`,
+      );
+    }
+    urls = [...sitemap.body.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) =>
+      m[1].trim(),
+    );
+    const duplicates = [
+      ...new Set(urls.filter((url, index) => urls.indexOf(url) !== index)),
+    ];
+    if (duplicates.length) {
+      add(
+        "high",
+        "sitemap uniqueness",
+        `${duplicates.length} duplicate <loc> value(s). First: ${duplicates[0]}`,
+      );
+    }
+
+    const foreign = [];
+    const malformed = [];
+    const dirty = [];
+    const privateUrls = [];
+    const redirectSources = [];
+    for (const value of urls) {
+      try {
+        const url = new URL(value);
+        const path = toPath(url.href) ?? url.pathname;
+        if (url.origin !== CANONICAL_ORIGIN) foreign.push(value);
+        if (url.search || url.hash || url.pathname !== path) dirty.push(value);
+        if (isDisallowed(path)) privateUrls.push(value);
+        if (REDIRECT_SOURCE_PATHS.has(path)) redirectSources.push(value);
+      } catch {
+        malformed.push(value);
+      }
+    }
     if (foreign.length) {
       add(
         originSeverity,
@@ -322,6 +455,34 @@ try {
         `${foreign.length} sitemap URL(s) do not start with ${CANONICAL_ORIGIN} — ` +
           `NEXT_PUBLIC_SITE_URL is probably unset on this deploy, so getSiteUrl() ` +
           `fell back to VERCEL_URL. First: ${foreign[0]}`,
+      );
+    }
+    if (malformed.length) {
+      add(
+        "high",
+        "sitemap URL",
+        `${malformed.length} malformed URL(s). First: ${malformed[0]}`,
+      );
+    }
+    if (dirty.length) {
+      add(
+        "high",
+        "sitemap URL",
+        `${dirty.length} URL(s) contain a query, fragment, or trailing slash. First: ${dirty[0]}`,
+      );
+    }
+    if (privateUrls.length) {
+      add(
+        "high",
+        "private URL in sitemap",
+        `${privateUrls.length} robots-protected URL(s) are listed. First: ${privateUrls[0]}`,
+      );
+    }
+    if (redirectSources.length) {
+      add(
+        "high",
+        "redirect in sitemap",
+        `${redirectSources.length} redirect source(s) are listed. First: ${redirectSources[0]}`,
       );
     }
     console.error(`  ${urls.length} URLs in sitemap`);
@@ -344,7 +505,25 @@ try {
       );
     }
     if (/^\s*Disallow:\s*\/\s*$/m.test(robots.body)) {
-      add("high", "robots.txt", "contains a blanket `Disallow: /` — the whole site is blocked");
+      add(
+        "high",
+        "robots.txt",
+        "contains a blanket `Disallow: /` — the whole site is blocked",
+      );
+    }
+    const declaredDisallows = new Set(
+      [...robots.body.matchAll(/^\s*Disallow:\s*(\S+)\s*$/gm)].map(
+        (match) => match[1],
+      ),
+    );
+    for (const prefix of DISALLOWED_PREFIXES) {
+      if (!declaredDisallows.has(prefix)) {
+        add(
+          "high",
+          "robots.txt",
+          `is missing the private-path protection \`Disallow: ${prefix}\``,
+        );
+      }
     }
   }
 } catch (error) {
@@ -357,11 +536,18 @@ try {
 // the foreign deployment has nothing to do with which base URL we are
 // checking, and a sampled run is exactly when someone is most likely to be
 // looking. See the header for why there is no off switch.
-const foreignDeployment = { url: FOREIGN_DEPLOYMENT, status: null, live: null, note: null };
+const foreignDeployment = {
+  url: FOREIGN_DEPLOYMENT,
+  status: null,
+  live: null,
+  note: null,
+};
 try {
   const response = await fetch(FOREIGN_DEPLOYMENT, {
     redirect: "manual",
-    headers: { "user-agent": "TrueCap-SEO-Healthcheck/1.0 (+https://usetruecap.com)" },
+    headers: {
+      "user-agent": "TrueCap-SEO-Healthcheck/1.0 (+https://usetruecap.com)",
+    },
   });
   foreignDeployment.status = response.status;
   // 404/410 are the only two states that mean the project is actually gone.
@@ -411,14 +597,25 @@ try {
 const cronResults = [];
 let cronPaths = [];
 try {
-  const raw = readFileSync(new URL("../../vercel.json", import.meta.url), "utf8");
+  const raw = readFileSync(
+    new URL("../../vercel.json", import.meta.url),
+    "utf8",
+  );
   const parsed = JSON.parse(raw);
   cronPaths = (parsed.crons ?? []).map((c) => c.path).filter(Boolean);
   if (!cronPaths.length) {
-    add("medium", "cron liveness", "vercel.json declares no crons — expected 5. Check the file.");
+    add(
+      "medium",
+      "cron liveness",
+      "vercel.json declares no crons — expected 5. Check the file.",
+    );
   }
 } catch (error) {
-  add("high", "cron liveness", `could not read/parse vercel.json: ${error.message}`);
+  add(
+    "high",
+    "cron liveness",
+    `could not read/parse vercel.json: ${error.message}`,
+  );
 }
 
 for (const path of cronPaths) {
@@ -428,7 +625,9 @@ for (const path of cronPaths) {
     // the proof that the route exists, is reachable, and is auth-gated.
     const response = await fetch(`${BASE}${path}`, {
       redirect: "manual",
-      headers: { "user-agent": "TrueCap-SEO-Healthcheck/1.0 (+https://usetruecap.com)" },
+      headers: {
+        "user-agent": "TrueCap-SEO-Healthcheck/1.0 (+https://usetruecap.com)",
+      },
     });
     cronResults.push({ path, status: response.status });
     if (response.status >= 300 && response.status < 400) {
@@ -473,8 +672,16 @@ for (const path of cronPaths) {
       );
     }
   } catch (error) {
-    cronResults.push({ path, status: null, error: String(error?.message ?? error) });
-    add("medium", "cron unreachable", `${path} could not be fetched: ${error.message}`);
+    cronResults.push({
+      path,
+      status: null,
+      error: String(error?.message ?? error),
+    });
+    add(
+      "medium",
+      "cron unreachable",
+      `${path} could not be fetched: ${error.message}`,
+    );
   }
 }
 
@@ -529,20 +736,71 @@ for (const host of ["truecap-pink.vercel.app"]) {
 }
 
 // 4. Permanent-redirect stubs ---------------------------------------------
-for (const route of PERMANENT_REDIRECTS) {
+for (const [route, expectedDestination] of Object.entries(
+  PERMANENT_REDIRECTS,
+)) {
   try {
     const response = await fetch(`${BASE}${route}`, { redirect: "manual" });
-    if (response.status === 404) continue; // route removed
-    if (response.status !== 308 && response.status >= 300 && response.status < 400) {
+    const historicalTool = HISTORICAL_REDIRECT_PATHS.has(route);
+
+    // A historical tool returning 200 has passed its release gate and is now
+    // intentionally live. While unreleased, its fallback must be the exact
+    // single-hop 308 below. Removed legacy dashboard aliases may return 404.
+    if (historicalTool && response.status === 200) continue;
+    if (!historicalTool && response.status === 404) continue;
+
+    if (response.status !== 308) {
       add(
-        "medium",
+        historicalTool ? "high" : "medium",
         "redirect permanence",
-        `${route} returned ${response.status}; expected 308 so Google transfers ` +
-          `the old URL's equity instead of keeping it indexed.`,
+        `${route} returned ${response.status}; expected a permanent 308 to ${expectedDestination}.`,
       );
+      continue;
     }
-  } catch {
-    /* ignore */
+
+    const location = response.headers.get("location");
+    let actualDestination = null;
+    try {
+      actualDestination = location
+        ? toPath(new URL(location, BASE).href)
+        : null;
+    } catch {
+      /* reported below */
+    }
+    if (actualDestination !== expectedDestination) {
+      add(
+        "high",
+        "redirect destination",
+        `${route} redirects to ${location ?? "no Location header"}; expected ${expectedDestination}.`,
+      );
+      continue;
+    }
+
+    if (historicalTool) {
+      const destination = await fetch(`${BASE}${expectedDestination}`, {
+        redirect: "manual",
+      });
+      if (destination.status >= 300 && destination.status < 400) {
+        add(
+          "high",
+          "redirect chain",
+          `${route} redirects to ${expectedDestination}, which returns ${destination.status} ` +
+            `(Location: ${destination.headers.get("location") ?? "?"}).`,
+        );
+      } else if (destination.status !== 200) {
+        add(
+          "high",
+          "redirect destination",
+          `${route} redirects to ${expectedDestination}, which returns ${destination.status}; expected 200.`,
+        );
+      }
+    }
+  } catch (error) {
+    add(
+      "medium",
+      "redirect check",
+      `${route} could not be verified: ${error.message}`,
+    );
   }
 }
 
@@ -575,22 +833,46 @@ const pageResults = [];
 /** Runs every per-URL assertion. Called once per fetched sitemap page. */
 function checkPage(path, page) {
   if (page.status !== 200) {
-    add("high", "broken URL", `${path} is in the sitemap but returned ${page.status}`);
+    add(
+      "high",
+      "broken URL",
+      `${path} is in the sitemap but returned ${page.status}`,
+    );
     return null;
   }
 
   const html = page.body;
 
   // canonical
-  const canonical = html.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']/i)?.[1];
+  const canonical = html.match(
+    /<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']/i,
+  )?.[1];
   if (!canonical) {
     add("medium", "canonical", `${path} has no <link rel="canonical">`);
-  } else if (!canonical.startsWith(CANONICAL_ORIGIN)) {
-    add(
-      originSeverity,
-      "canonical origin",
-      `${path} canonicalises to ${canonical} — not ${CANONICAL_ORIGIN}.`,
-    );
+  } else {
+    try {
+      const normalizedCanonical = normalizedAbsoluteUrl(canonical, BASE);
+      const expectedCanonical = `${CANONICAL_ORIGIN}${path === "/" ? "/" : path}`;
+      if (new URL(normalizedCanonical).origin !== CANONICAL_ORIGIN) {
+        add(
+          originSeverity,
+          "canonical origin",
+          `${path} canonicalises to ${canonical} — not ${CANONICAL_ORIGIN}.`,
+        );
+      } else if (normalizedCanonical !== expectedCanonical) {
+        add(
+          "high",
+          "self-canonical",
+          `${path} canonicalises to ${canonical}; expected exactly ${expectedCanonical}.`,
+        );
+      }
+    } catch {
+      add(
+        "high",
+        "canonical",
+        `${path} has an invalid canonical URL: ${canonical}`,
+      );
+    }
   }
 
   // exactly one h1
@@ -598,15 +880,29 @@ function checkPage(path, page) {
   if (h1s === 0) {
     add("medium", "heading structure", `${path} has no <h1>`);
   } else if (h1s > 1) {
-    add("medium", "heading structure", `${path} has ${h1s} <h1> elements; expected 1`);
+    add(
+      "medium",
+      "heading structure",
+      `${path} has ${h1s} <h1> elements; expected 1`,
+    );
   }
 
   // noindex on a sitemapped URL is a contradiction
-  if (/<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i.test(html)) {
-    add("high", "noindex in sitemap", `${path} is in the sitemap but serves meta robots noindex`);
+  if (
+    /<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i.test(html)
+  ) {
+    add(
+      "high",
+      "noindex in sitemap",
+      `${path} is in the sitemap but serves meta robots noindex`,
+    );
   }
   if (/noindex/i.test(page.headers.get("x-robots-tag") ?? "")) {
-    add("high", "noindex in sitemap", `${path} is in the sitemap but serves X-Robots-Tag noindex`);
+    add(
+      "high",
+      "noindex in sitemap",
+      `${path} is in the sitemap but serves X-Robots-Tag noindex`,
+    );
   }
 
   // required JSON-LD
@@ -644,14 +940,18 @@ function checkPage(path, page) {
   }
 
   // og:image
-  const ogImage = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)?.[1];
+  const ogImage = html.match(
+    /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i,
+  )?.[1];
   if (!ogImage) add("low", "og:image", `${path} has no og:image`);
 
   // title / description presence (length is a source-side ratchet)
   if (!/<title[^>]*>[^<]{5,}<\/title>/i.test(html)) {
     add("high", "title", `${path} has an empty or missing <title>`);
   }
-  if (!/<meta[^>]+name=["']description["'][^>]+content=["'][^"']{20,}/i.test(html)) {
+  if (
+    !/<meta[^>]+name=["']description["'][^>]+content=["'][^"']{20,}/i.test(html)
+  ) {
     add("medium", "description", `${path} has no usable meta description`);
   }
   // Entity leakage into rendered meta tags — the rendered counterpart to the
@@ -659,18 +959,35 @@ function checkPage(path, page) {
   const renderedDescription = html.match(
     /<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["']/i,
   )?.[1];
-  if (renderedDescription && /&(?:apos|quot|lsquo|rsquo|#\d+);/.test(renderedDescription)) {
-    add("high", "entity in meta", `${path} meta description contains a literal HTML entity`);
+  if (
+    renderedDescription &&
+    /&(?:apos|quot|lsquo|rsquo|#\d+);/.test(renderedDescription)
+  ) {
+    add(
+      "high",
+      "entity in meta",
+      `${path} meta description contains a literal HTML entity`,
+    );
   }
 
-  const title = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.replace(/\s+/g, " ").trim() ?? null;
-  const h1 = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1]?.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim() ?? null;
+  const title =
+    html
+      .match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]
+      ?.replace(/\s+/g, " ")
+      .trim() ?? null;
+  const h1 =
+    html
+      .match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1]
+      ?.replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim() ?? null;
   return {
     path,
     ok: true,
     httpStatus: page.status,
     canonical: canonical ?? null,
-    noindex: /<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i.test(html),
+    noindex:
+      /<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i.test(html),
     title,
     h1,
     schemaTypes: [...types].sort(),
@@ -680,9 +997,9 @@ function checkPage(path, page) {
 // --- phase 1: BFS from the seeds -----------------------------------------
 const ORPHANS_POSSIBLE = !SKIP_ORPHANS && !LIMIT && urls.length > 0;
 
-const reached = new Set();          // paths seen as the TARGET of an <a href>
-const visited = new Set();          // paths fetched in phase 1
-const inboundFrom = new Map();      // path -> first page that linked to it
+const reached = new Set(); // paths seen as the TARGET of an <a href>
+const visited = new Set(); // paths fetched in phase 1
+const inboundFrom = new Map(); // path -> first page that linked to it
 const crawlDepth = new Map(CRAWL_SEEDS.map((path) => [path, 0]));
 const internalLinkEdges = new Map();
 let crawlBudgetHit = false;
@@ -719,17 +1036,25 @@ if (ORPHANS_POSSIBLE) {
       try {
         const page = await fetchText(`${BASE}${path === "/" ? "/" : path}`);
         bfsFetches++;
-        if (bfsFetches % 50 === 0) console.error(`  …${bfsFetches} pages walked`);
+        if (bfsFetches % 50 === 0)
+          console.error(`  …${bfsFetches} pages walked`);
         if (path === "/" && page.status !== 200) homepageOk = false;
         if (page.status === 200 && page.body) {
-          for (const link of extractLinkRecords(page.body, `${BASE}${path}`, new URL(BASE).origin)) {
+          for (const link of extractLinkRecords(
+            page.body,
+            `${BASE}${path}`,
+            new URL(BASE).origin,
+          )) {
             const target = link.target;
             reached.add(target);
             if (!inboundFrom.has(target)) inboundFrom.set(target, path);
             const edgeKey = `${path}\u0000${target}\u0000${link.anchor}\u0000${link.placement}`;
             internalLinkEdges.set(edgeKey, { source: path, ...link });
             const candidateDepth = (crawlDepth.get(path) ?? 0) + 1;
-            if (!crawlDepth.has(target) || candidateDepth < crawlDepth.get(target)) {
+            if (
+              !crawlDepth.has(target) ||
+              candidateDepth < crawlDepth.get(target)
+            ) {
               crawlDepth.set(target, candidateDepth);
             }
             enqueue(target);
@@ -745,17 +1070,36 @@ if (ORPHANS_POSSIBLE) {
           const result = checkPage(path, page);
           if (result) pageResults.push(result);
           crawled++;
+        } else if (inboundFrom.has(path)) {
+          const source = inboundFrom.get(path);
+          const location = page.headers.get("location");
+          const redirectDetail =
+            page.status >= 300 && page.status < 400
+              ? ` (Location: ${location ?? "missing"})`
+              : "";
+          add(
+            "high",
+            "non-canonical internal link",
+            `${source} links to ${path}, which returned ${page.status}${redirectDetail}; ` +
+              "public internal anchors must point directly to a 200 destination.",
+          );
         }
       } catch (error) {
         if (path === "/") homepageOk = false;
-        add("medium", "crawl error", `${path} could not be fetched: ${error.message}`);
+        add(
+          "medium",
+          "crawl error",
+          `${path} could not be fetched: ${error.message}`,
+        );
       } finally {
         active--;
       }
     }
   };
   await Promise.all(Array.from({ length: CONCURRENCY }, runner));
-  console.error(`  link graph: ${bfsFetches} pages walked, ${reached.size} distinct link targets`);
+  console.error(
+    `  link graph: ${bfsFetches} pages walked, ${reached.size} distinct link targets`,
+  );
 }
 
 // --- phase 2: sitemap URLs the BFS never reached --------------------------
@@ -774,6 +1118,30 @@ const sweepResults = await mapLimit(unvisited, CONCURRENCY, async (url) => {
 for (const r of sweepResults) if (r?.ok) pageResults.push(r);
 
 const okCount = pageResults.filter((r) => r?.ok).length;
+
+// A sitemap URL must own its canonical. The self-canonical check above catches
+// the usual mismatch; this also produces a direct, paired diagnostic if two
+// pages accidentally converge on the same canonical URL.
+const canonicalOwners = new Map();
+for (const page of pageResults) {
+  if (!page?.canonical) continue;
+  let canonical;
+  try {
+    canonical = normalizedAbsoluteUrl(page.canonical, BASE);
+  } catch {
+    continue;
+  }
+  const firstOwner = canonicalOwners.get(canonical);
+  if (firstOwner && firstOwner !== page.path) {
+    add(
+      "high",
+      "duplicate canonical",
+      `${firstOwner} and ${page.path} both declare ${canonical}.`,
+    );
+  } else {
+    canonicalOwners.set(canonical, page.path);
+  }
+}
 
 // --- the orphan verdict ---------------------------------------------------
 const linkGraph = {
@@ -806,14 +1174,16 @@ if (!ORPHANS_POSSIBLE) {
   );
 } else {
   linkGraph.ran = true;
-  // Non-sitemap pages are not orphan candidates: /vs is noindex-by-design and
-  // login/legal pages are not trying to rank. The question is only ever
+  // Non-sitemap pages are not orphan candidates: login/legal pages are not
+  // trying to rank. The question is only ever
   // "is every page we ASKED Google to index also endorsed from inside the site".
   const orphans = sitemapPaths.filter((p) => !reached.has(p));
   linkGraph.reachable = sitemapPaths.length - orphans.length;
   linkGraph.orphans = orphans;
   linkGraph.edges = [...internalLinkEdges.values()];
-  linkGraph.depth = Object.fromEntries(sitemapPaths.map((path) => [path, crawlDepth.get(path) ?? null]));
+  linkGraph.depth = Object.fromEntries(
+    sitemapPaths.map((path) => [path, crawlDepth.get(path) ?? null]),
+  );
   if (orphans.length) {
     const shown = orphans.slice(0, 25);
     add(
@@ -824,7 +1194,9 @@ if (!ORPHANS_POSSIBLE) {
         `is the sitemap itself, and "Crawled - currently not indexed" is the documented ` +
         `outcome for exactly that. Commit 4d799ea took this from 49 to 0; it has regressed.\n` +
         shown.map((p) => `    - ${p}`).join("\n") +
-        (orphans.length > shown.length ? `\n    …and ${orphans.length - shown.length} more.` : ""),
+        (orphans.length > shown.length
+          ? `\n    …and ${orphans.length - shown.length} more.`
+          : ""),
     );
   }
 }
@@ -893,8 +1265,7 @@ if (linkGraph.ran) {
   lines.push(
     `Link graph: **${linkGraph.reachable}/${linkGraph.sitemapUrls}** sitemap URLs reachable ` +
       `by following \`<a href>\` from \`/\` (${bfsFetches} pages walked). ` +
-      "`/vs` is seeded because it is `noindex, follow` and deliberately absent from the " +
-      "sitemap, yet it is the only crawl path to the 40 `/vs/<competitor>` pages.",
+      "`/vs` is an indexable sitemap hub and must be reached through that same public link graph.",
   );
 }
 if (cronResults.length) {

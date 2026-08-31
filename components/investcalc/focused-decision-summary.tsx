@@ -194,13 +194,41 @@ export function validateTargetDraft(
   return { target, errors, formError: null };
 }
 
+/**
+ * Says whether one metric clears its target, in words as well as colour.
+ *
+ * Without this the two tiles rendered identically whether the number passed or
+ * failed, so a reader had to hold "$554 vs $750" and "1.52 vs 1.25" in their
+ * head to work out WHICH rule the deal missed — on the card whose whole job is
+ * to answer that. Colour alone would not fix it either: the pass/fail word is
+ * what carries the meaning for a colour-blind reader and for a screen reader.
+ */
+function TargetFit({ meets, target }: { meets: boolean; target: string }) {
+  return (
+    <p
+      className={`mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+        meets ? "bg-emerald-100 text-emerald-900" : "bg-amber-100 text-amber-900"
+      }`}
+    >
+      {meets ? "Meets" : "Misses"} {target}
+    </p>
+  );
+}
+
 function FirstYearSnapshot({
   result,
   isScenarioActive,
+  target,
 }: {
   result: AnalysisResult;
   isScenarioActive: boolean;
+  /** Adopted targets, when any. Absent on the no-criteria path. */
+  target?: MaoTarget;
 }) {
+  const cashFlowTarget = target?.monthlyCashFlow;
+  const dscrTarget = target?.dscr;
+  // A cash purchase has no debt service, so DSCR is N/A rather than failing.
+  const dscrApplies = result.monthlyPayment > 0;
   return (
     <div
       className="grid grid-cols-1 gap-3 min-[280px]:grid-cols-2"
@@ -215,20 +243,29 @@ function FirstYearSnapshot({
         <p className="mt-1 font-mono text-xl font-extrabold tabular-nums text-foreground">
           {money(result.netCashFlow)}/mo
         </p>
+        {typeof cashFlowTarget === "number" ? (
+          <TargetFit
+            meets={result.netCashFlow >= cashFlowTarget}
+            target={`${money(cashFlowTarget)}/mo target`}
+          />
+        ) : null}
       </div>
       <div className="rounded-xl border border-border bg-muted/30 p-3">
         <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
           Model DSCR
         </p>
         <p className="mt-1 font-mono text-xl font-extrabold tabular-nums text-foreground">
-          {result.monthlyPayment <= 0
-            ? NO_DEBT_SERVICE_DSCR_LABEL
-            : result.dscr.toFixed(2)}
+          {dscrApplies ? result.dscr.toFixed(2) : NO_DEBT_SERVICE_DSCR_LABEL}
         </p>
-        {result.monthlyPayment <= 0 ? (
+        {!dscrApplies ? (
           <p className="mt-1 text-[10px] text-muted-foreground">
             No modeled debt service
           </p>
+        ) : typeof dscrTarget === "number" ? (
+          <TargetFit
+            meets={result.dscr >= dscrTarget}
+            target={`${dscrTarget.toFixed(2)} target`}
+          />
         ) : null}
       </div>
     </div>
@@ -476,6 +513,18 @@ export function FocusedDecisionSummary({
     .filter((label, index, all) => all.indexOf(label) === index)
     .slice(0, 2);
   const nextVerification = inputConfidence?.verificationQueue[0];
+  // The disclosure further down already prints "Binding: Cash flow ≥ $750/mo"
+  // from this exact data — but it lives inside a collapsed accordion. The
+  // next-step block, which is the line the user actually reads, said "Review
+  // the binding target rule" and never named it. The single most
+  // decision-relevant fact was one click away from the sentence telling you to
+  // go look at it.
+  const bindingCriterionLabel =
+    offerCeiling?.bindingConstraints
+      ?.map((item) => item.criterion)
+      .filter(Boolean)
+      .join(" + ") ?? "";
+
   const legacyResolvedNextAction = !targetAdopted
     ? canTunePriceCeiling
       ? {
@@ -500,11 +549,13 @@ export function FocusedDecisionSummary({
     : !clearsTargets
       ? offerCeiling
         ? {
-            label: "Review the binding target rule",
+            label: bindingCriterionLabel
+              ? `Review the binding rule: ${bindingCriterionLabel}`
+              : "Review the binding target rule",
             reason:
               offerCeiling.listPriceGap > 0
-                ? `The asking price is ${money(offerCeiling.listPriceGap)} above the Offer Ceiling under the selected rules. Record the investment decision yourself.`
-                : "The current price misses at least one selected rule. Record the investment decision yourself.",
+                ? `${bindingCriterionLabel ? `${bindingCriterionLabel} is what caps the price. ` : ""}The asking price is ${money(offerCeiling.listPriceGap)} above the Offer Ceiling under the selected rules. Record the investment decision yourself.`
+                : `${bindingCriterionLabel ? `${bindingCriterionLabel} is the rule being missed. ` : ""}The current price misses at least one selected rule. Record the investment decision yourself.`,
           }
         : // Mirror the headline's own logic. This branch used to test only
           // `offerCeiling` — the EXACT solve — and declare "No qualifying Offer
@@ -932,6 +983,7 @@ export function FocusedDecisionSummary({
           <FirstYearSnapshot
             result={result}
             isScenarioActive={isScenarioActive}
+            target={target}
           />
         ) : null}
       </div>

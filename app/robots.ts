@@ -15,20 +15,23 @@ import { getSiteUrl } from "@/lib/site-url";
  *     welcome ingestion. The "/" default would technically cover
  *     them, but explicit signals improve discoverability and document
  *     intent.
- *   - Point to BOTH the sitemap (for traditional search crawlers) AND
- *     the /llms.txt index (for AI training crawlers — the llmstxt.org
- *     convention) so every crawler finds the right index on first hit.
+ *   - Point to the XML sitemap. AI crawlers discover /llms.txt by convention
+ *     and through their explicit Allow rules; llms.txt is not sitemap XML.
  */
 export default function robots(): MetadataRoute.Robots {
   const siteUrl = getSiteUrl();
 
   const sharedDisallow = [
     "/api/",
+    "/admin/",
     "/auth/",
     "/dashboard/",
     "/profile/",
     "/settings/",
     "/d/",
+    "/s/",
+    "/portal/",
+    "/embed/brand/",
     // Internal rewrite target for the signed-in homepage (see proxy.ts).
     // Duplicate of "/" — noindex'd in its own metadata too; belt and
     // suspenders here.
@@ -46,7 +49,14 @@ export default function robots(): MetadataRoute.Robots {
       // set so private user routes still aren't ingested. Named bots
       // are emerging standards — listing them documents the intent.
       {
-        userAgent: ["GPTBot", "ClaudeBot", "Claude-Web", "PerplexityBot", "Google-Extended", "Applebot-Extended"],
+        userAgent: [
+          "GPTBot",
+          "ClaudeBot",
+          "Claude-Web",
+          "PerplexityBot",
+          "Google-Extended",
+          "Applebot-Extended",
+        ],
         allow: ["/", "/llms.txt", "/llms-full.txt"],
         disallow: sharedDisallow,
       },
