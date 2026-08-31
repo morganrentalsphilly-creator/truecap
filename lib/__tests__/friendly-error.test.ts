@@ -20,6 +20,17 @@ describe("friendlyErrorMessage", () => {
     ).toBe("That file is too large to upload.");
   });
 
+  it("maps a bucket mime rejection to the supported-types line, never to a retry", () => {
+    // Reproduced live: a .zip injected past the picker's accept filter (the
+    // drag-drop path) returned "mime type application/zip is not supported"
+    // and the user was told "Please try again" — which can never work.
+    const message = friendlyErrorMessage(
+      new Error("mime type application/zip is not supported"),
+    );
+    expect(message).toMatch(/file type isn't supported/i);
+    expect(message).not.toMatch(/try again/i);
+  });
+
   it("maps a missing signed-URL target", () => {
     expect(friendlyErrorMessage(new Error("Object not found"))).toBe(
       "That document is no longer available. Refresh the page and try again.",

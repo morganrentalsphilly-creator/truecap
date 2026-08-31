@@ -36,6 +36,16 @@ const KNOWN_ERROR_CLASSES: ReadonlyArray<{ pattern: RegExp; message: string }> =
     pattern: /exceeded the maximum allowed size|payload too large|entity too large/i,
     message: "That file is too large to upload.",
   },
+  // Storage: bucket mime allowlist rejected the file. Battle-tested live on
+  // 2026-08-31: a .zip injected past the picker's accept filter (as drag-drop
+  // would be) came back 400 "mime type application/zip is not supported" and
+  // the toast said "Please try again" — advice that can never fix a type
+  // rejection. Name the real problem and the real remedy instead.
+  {
+    pattern: /mime type .* is not supported|invalid_mime_type|content.?type not allowed/i,
+    message:
+      "That file type isn't supported. Upload a PDF, an image, a Word or Excel file, a CSV, or plain text.",
+  },
   // Storage: signed-URL / download target no longer exists.
   {
     pattern: /object not found/i,
