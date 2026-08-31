@@ -72,6 +72,7 @@ import {
   updateSavedDealTagsAction,
 } from "@/app/actions/saved-analyses";
 import { useToast } from "@/hooks/use-toast";
+import { useActionConfirm } from "@/components/ui/action-confirm-dialog";
 import { ToastAction } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import { useCookieBannerOpen } from "@/lib/use-cookie-banner";
@@ -1429,6 +1430,7 @@ export function SavedAnalysesPage({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { toast } = useToast();
+  const { confirmDialog, promptDialog } = useActionConfirm();
   // The cookie-consent banner is fixed bottom-0 at z-50 and renders over the
   // dashboard too (it's mounted in the ROOT layout), so on a first visit it
   // paints straight over this page's floating bulk-action bar (z-40) and
@@ -1990,7 +1992,7 @@ export function SavedAnalysesPage({
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
-  const handleDealStatusChange = (
+  const handleDealStatusChange = async (
     id: string,
     state: SavedAnalysisListItem["status"],
     previousStage: PipelineStage,
@@ -2002,18 +2004,25 @@ export function SavedAnalysesPage({
           ? "passed"
           : "analyzing";
     if (
-      !confirmPipelineStageChange({
+      !(await confirmPipelineStageChange({
         previousStage,
         nextStage,
-        confirm: (message) => window.confirm(message),
-      })
+        confirm: (title, body) =>
+          confirmDialog({ title, body, confirmLabel: "Mark as Passed" }),
+      }))
     ) {
       return;
     }
-    const reason = promptForPipelinePassReason({
+    const reason = await promptForPipelinePassReason({
       previousStage,
       nextStage,
-      prompt: (message) => window.prompt(message),
+      prompt: (title, body) =>
+        promptDialog({
+          title,
+          body,
+          placeholder: "e.g. Numbers don't clear my buy box at this price",
+          confirmLabel: "Save reason",
+        }),
     });
     if (nextStage === "passed" && !reason) {
       toast({
@@ -2067,24 +2076,31 @@ export function SavedAnalysesPage({
     });
   };
 
-  const handleDealStageChange = (
+  const handleDealStageChange = async (
     id: string,
     stage: PipelineStage,
     previousStage: PipelineStage,
   ) => {
     if (
-      !confirmPipelineStageChange({
+      !(await confirmPipelineStageChange({
         previousStage,
         nextStage: stage,
-        confirm: (message) => window.confirm(message),
-      })
+        confirm: (title, body) =>
+          confirmDialog({ title, body, confirmLabel: "Mark as Passed" }),
+      }))
     ) {
       return;
     }
-    const reason = promptForPipelinePassReason({
+    const reason = await promptForPipelinePassReason({
       previousStage,
       nextStage: stage,
-      prompt: (message) => window.prompt(message),
+      prompt: (title, body) =>
+        promptDialog({
+          title,
+          body,
+          placeholder: "e.g. Numbers don't clear my buy box at this price",
+          confirmLabel: "Save reason",
+        }),
     });
     if (stage === "passed" && !reason) {
       toast({
@@ -2259,15 +2275,18 @@ export function SavedAnalysesPage({
   const [isBulkDeleting, startBulkDeleteTransition] = useTransition();
   const bulkRunning = isBulkArchiving || isBulkDeleting;
 
-  const handleBulkArchive = () => {
+  const handleBulkArchive = async () => {
     if (selectedIds.length === 0 || bulkRunning) return;
-    const reason = promptForPipelinePassReason({
+    const reason = await promptForPipelinePassReason({
       previousStage: "analyzing",
       nextStage: "passed",
       prompt: () =>
-        window.prompt(
-          "Why are you passing on these selected deals? This reason will be recorded in each Deal Log.",
-        ),
+        promptDialog({
+          title: "Why are you passing on these selected deals?",
+          body: "This reason will be recorded in each Deal Log.",
+          placeholder: "e.g. Neighborhood rents came back too soft",
+          confirmLabel: "Save reason",
+        }),
     });
     if (!reason) {
       toast({
@@ -2322,13 +2341,16 @@ export function SavedAnalysesPage({
     });
   };
 
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
     if (selectedIds.length === 0 || bulkRunning) return;
     // Defensive confirm - deletion is irreversible from the UI even
     // though the DB row stays around with deleted_at set.
-    const confirmed = window.confirm(
-      `Delete ${selectedIds.length} deal${selectedIds.length === 1 ? "" : "s"}? This cannot be undone from the UI.`,
-    );
+    const confirmed = await confirmDialog({
+      title: `Delete ${selectedIds.length} deal${selectedIds.length === 1 ? "" : "s"}?`,
+      body: "This cannot be undone from the UI.",
+      confirmLabel: "Delete",
+      destructive: true,
+    });
     if (!confirmed) return;
     startBulkDeleteTransition(async () => {
       try {

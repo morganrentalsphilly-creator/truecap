@@ -37,12 +37,12 @@ describe("listing-to-analyzer handoff", () => {
   it("never combines a new listing address with the previous property's facts", () => {
     const calculator = read("components/investcalc/investcalc-page.tsx");
     expect(calculator).toContain("const preparePropertySwap = useCallback(");
-    expect(calculator).toContain("if (!preparePropertySwap(place)) return;");
+    expect(calculator).toContain("if (!(await preparePropertySwap(place))) return;");
     const heroHandler = calculator.slice(
       calculator.indexOf("heroAnalyzeHandlerRef.current ="),
       calculator.indexOf("Live provenance + raw capture getters"),
     );
-    expect(heroHandler).toContain("if (!preparePropertySwap(nextPlace))");
+    expect(heroHandler).toContain("if (!(await preparePropertySwap(nextPlace)))");
     expect(heroHandler.indexOf("preparePropertySwap(nextPlace)")).toBeLessThan(
       heroHandler.indexOf('form.setValue("address", address'),
     );

@@ -343,16 +343,22 @@ test("a second listing can never inherit the first property's price and rent", a
   await form
     .getByLabel("Paste a listing link", { exact: true })
     .fill(listingUrl);
-  const firstDialogPromise = page.waitForEvent("dialog");
-  const firstSubmitPromise = form
+  await form
     .getByRole("button", { name: "Use address from link", exact: true })
     .click();
-  const firstDialog = await firstDialogPromise;
-  expect(firstDialog.message()).toContain(
+  // The swap guard is an in-app dialog now (it used to be a native
+  // window.confirm rendered as bare OS chrome).
+  const firstDialog = page.getByRole("dialog", {
+    name: "Use this new property?",
+  });
+  await expect(firstDialog).toBeVisible();
+  await expect(firstDialog).toContainText(
     "clear the previous property’s price",
   );
-  await firstDialog.dismiss();
-  await firstSubmitPromise;
+  await firstDialog
+    .getByRole("button", { name: "Keep previous address", exact: true })
+    .click();
+  await expect(firstDialog).toBeHidden();
   await expect(address).toHaveValue(
     "2560 Collins St, Philadelphia, PA 19125, USA",
   );
@@ -363,13 +369,17 @@ test("a second listing can never inherit the first property's price and rent", a
   await form
     .getByLabel("Paste a listing link", { exact: true })
     .fill(listingUrl);
-  const secondDialogPromise = page.waitForEvent("dialog");
-  const secondSubmitPromise = form
+  await form
     .getByRole("button", { name: "Use address from link", exact: true })
     .click();
-  const secondDialog = await secondDialogPromise;
-  await secondDialog.accept();
-  await secondSubmitPromise;
+  const secondDialog = page.getByRole("dialog", {
+    name: "Use this new property?",
+  });
+  await expect(secondDialog).toBeVisible();
+  await secondDialog
+    .getByRole("button", { name: "Use new property", exact: true })
+    .click();
+  await expect(secondDialog).toBeHidden();
   await expect(address).toHaveValue(/909 New Deal St Philadelphia PA 19140/i);
   await expect(price).not.toHaveValue("215,000");
   await expect(rent).not.toHaveValue("1,550");

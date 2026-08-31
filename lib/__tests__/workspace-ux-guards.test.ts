@@ -63,8 +63,10 @@ describe("decision workspace UX guards", () => {
     expect(workspaceWrite).toBeGreaterThan(workspaceConfirmation);
     expect(listConfirmation).toBeGreaterThan(-1);
     expect(listWrite).toBeGreaterThan(listConfirmation);
-    expect(workspace).toContain("confirm: (message) => window.confirm(message)");
-    expect(list).toContain("confirm: (message) => window.confirm(message)");
+    // Both surfaces confirm a Pass through the in-app dialog (the injected
+    // functions moved off window.confirm when native dialogs were retired).
+    expect(workspace).toContain("confirmDialog({ title, body");
+    expect(list).toContain("confirmDialog({ title, body");
     expect(workspace).toContain("promptForPipelinePassReason({");
     expect(list).toContain("promptForPipelinePassReason({");
     expect(workspace).toContain('title: "Pass reason required"');

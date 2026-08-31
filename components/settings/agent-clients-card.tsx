@@ -25,12 +25,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useActionConfirm } from "@/components/ui/action-confirm-dialog";
 import { trackEvent } from "@/lib/analytics";
 
 type Editor = { id?: string; name: string; email: string; phone: string };
 
 export function AgentClientsCard() {
   const { toast } = useToast();
+  const { confirmDialog } = useActionConfirm();
   const [clients, setClients] = useState<AgentClient[] | null>(null);
   const [editor, setEditor] = useState<Editor | null>(null);
   const [isSaving, startSaving] = useTransition();
@@ -82,10 +84,16 @@ export function AgentClientsCard() {
     });
   };
 
-  const remove = (id: string, name: string) => {
+  const remove = async (id: string, name: string) => {
     // Same guard as the Clients workspace: an unconfirmed hard delete sitting
     // beside Edit silently unassigns every deal.
-    if (!window.confirm(`Remove ${name}? Any assigned deals will be unassigned. The deals themselves are kept.`)) return;
+    const confirmed = await confirmDialog({
+      title: `Remove ${name}?`,
+      body: "Any assigned deals will be unassigned. The deals themselves are kept.",
+      confirmLabel: "Remove",
+      destructive: true,
+    });
+    if (!confirmed) return;
     startSaving(async () => {
       try {
         const r = await deleteAgentClientAction({ id });

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, DM_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
+import { ActionConfirmProvider } from "@/components/ui/action-confirm-dialog";
 import { CookieConsentBanner } from "@/components/marketing/cookie-consent-banner";
 import { PostHogProvider } from "@/components/analytics/posthog-provider";
 import { GoogleMeasurement } from "@/components/analytics/google-measurement";
@@ -279,7 +280,10 @@ export default function RootLayout({
             route change) — the "page scrolls but nothing is clickable"
             freeze. No-op unless a lock is actually stranded. */}
         <OverlayRecovery />
-        {children}
+        {/* One in-app confirm/prompt grammar for every destructive or
+            work-clearing action — replaces the fourteen window.confirm /
+            window.prompt sites that rendered as unstyled OS chrome. */}
+        <ActionConfirmProvider>{children}</ActionConfirmProvider>
         <Toaster />
         {/* Cookie consent banner — pairs with the Consent Mode v2
             defaults declared in <head>. Shows once on first visit, then

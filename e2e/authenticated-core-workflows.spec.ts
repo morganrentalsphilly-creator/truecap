@@ -131,12 +131,15 @@ test("mobile investor can set criteria, calculate once, and start a fresh analys
     .locator("header")
     .getByRole("link", { name: "New analysis", exact: true });
   await expect(headerNewAnalysis).toBeVisible();
-  const headerDialogPromise = page.waitForEvent("dialog");
-  const headerClickPromise = headerNewAnalysis.click();
-  const headerDialog = await headerDialogPromise;
-  expect(headerDialog.message()).toContain("Start a new analysis?");
-  await headerDialog.accept();
-  await headerClickPromise;
+  await headerNewAnalysis.click();
+  const headerDialog = page.getByRole("dialog", {
+    name: "Start a new analysis?",
+  });
+  await expect(headerDialog).toBeVisible();
+  await headerDialog
+    .getByRole("button", { name: "Start new analysis", exact: true })
+    .click();
+  await expect(headerDialog).toBeHidden();
   await expect(form).toBeVisible();
   await expect(address).toHaveValue("");
 
@@ -152,12 +155,15 @@ test("mobile investor can set criteria, calculate once, and start a fresh analys
     .getByRole("navigation", { name: "Dashboard (mobile)" })
     .getByRole("link", { name: "New Analysis", exact: true });
   await expect(drawerNewAnalysis).toBeVisible();
-  const drawerDialogPromise = page.waitForEvent("dialog");
-  const drawerClickPromise = drawerNewAnalysis.click();
-  const drawerDialog = await drawerDialogPromise;
-  expect(drawerDialog.message()).toContain("Start a new analysis?");
-  await drawerDialog.accept();
-  await drawerClickPromise;
+  await drawerNewAnalysis.click();
+  const drawerDialog = page.getByRole("dialog", {
+    name: "Start a new analysis?",
+  });
+  await expect(drawerDialog).toBeVisible();
+  await drawerDialog
+    .getByRole("button", { name: "Start new analysis", exact: true })
+    .click();
+  await expect(drawerDialog).toBeHidden();
   await expect(drawer).toBeHidden();
   await expect(address).toHaveValue("");
   await expectNoHorizontalOverflow(page);
