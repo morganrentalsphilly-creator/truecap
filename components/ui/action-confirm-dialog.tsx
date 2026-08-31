@@ -149,15 +149,24 @@ export function ActionConfirmProvider({ children }: { children: ReactNode }) {
     }
     const settled = settledRef.current;
     settledRef.current = null;
-    if (settled) {
-      const { request, result } = settled;
-      if (request.kind === "confirm") {
-        request.resolve(Boolean(result));
-      } else {
-        request.resolve(typeof result === "string" ? result : null);
+    // One more macrotask of separation: onCloseAutoFocus fires BEFORE Radix
+    // finishes its unmount cleanup, and resolving synchronously here let the
+    // caller's re-render race the aria-hidden restore — measured on
+    // production, the analyzer's address input kept aria-hidden="true"
+    // data-aria-hidden="true" (Radix's fingerprint) after a confirm, so
+    // screen readers skipped the page's primary input while sighted users
+    // saw nothing wrong. Resolve after the cleanup commit instead.
+    setTimeout(() => {
+      if (settled) {
+        const { request, result } = settled;
+        if (request.kind === "confirm") {
+          request.resolve(Boolean(result));
+        } else {
+          request.resolve(typeof result === "string" ? result : null);
+        }
       }
-    }
-    openNext();
+      openNext();
+    }, 0);
   }, [openNext]);
 
   // Belt-and-braces: if onCloseAutoFocus never fires (content unmounted by a
