@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useActionConfirm } from "@/components/ui/action-confirm-dialog";
 import { trackEvent } from "@/lib/analytics";
 
 type Editor = { id?: string; name: string; email: string; phone: string };
@@ -66,6 +67,7 @@ export function ClientsWorkspace({
 }) {
   const router = useRouter();
   const { toast } = useToast();
+  const { confirmDialog } = useActionConfirm();
   const [clients, setClients] = useState<AgentClient[]>(initialClients);
   const [editor, setEditor] = useState<Editor | null>(null);
   const [isSaving, startSaving] = useTransition();
@@ -114,13 +116,19 @@ export function ClientsWorkspace({
     });
   };
 
-  const remove = (id: string, name: string, dealCount: number) => {
+  const remove = async (id: string, name: string, dealCount: number) => {
     // Hard delete sitting 2px from Edit, wiping every assignment. Confirm names
     // what is actually lost — the codebase confirms far smaller destructions.
-    const warning = dealCount > 0
-      ? `Remove ${name}? Their ${dealCount} assigned ${dealCount === 1 ? "deal" : "deals"} will be unassigned. The deals themselves are kept.`
-      : `Remove ${name}? Their roster record will be deleted. Any deals you later assign are unaffected.`;
-    if (!window.confirm(warning)) return;
+    const confirmed = await confirmDialog({
+      title: `Remove ${name}?`,
+      body:
+        dealCount > 0
+          ? `Their ${dealCount} assigned ${dealCount === 1 ? "deal" : "deals"} will be unassigned. The deals themselves are kept.`
+          : "Their roster record will be deleted. Any deals you later assign are unaffected.",
+      confirmLabel: "Remove",
+      destructive: true,
+    });
+    if (!confirmed) return;
     startSaving(async () => {
       try {
         const r = await deleteAgentClientAction({ id });

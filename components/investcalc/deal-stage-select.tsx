@@ -17,6 +17,7 @@ import * as Sentry from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
 import { updateSavedDealStageAction } from "@/app/actions/saved-analyses";
 import { useToast } from "@/hooks/use-toast";
+import { useActionConfirm } from "@/components/ui/action-confirm-dialog";
 import { ToastAction } from "@/components/ui/toast";
 import {
   Select,
@@ -49,22 +50,31 @@ export function DealStageSelect({
   const [displayStage, setDisplayStage] = useState<PipelineStage>(stage);
   useEffect(() => setDisplayStage(stage), [stage]);
 
-  const handleChange = (value: string) => {
+  const { confirmDialog, promptDialog } = useActionConfirm();
+
+  const handleChange = async (value: string) => {
     const next = value as PipelineStage;
     if (next === stage) return;
     if (
-      !confirmPipelineStageChange({
+      !(await confirmPipelineStageChange({
         previousStage: stage,
         nextStage: next,
-        confirm: (message) => window.confirm(message),
-      })
+        confirm: (title, body) =>
+          confirmDialog({ title, body, confirmLabel: "Mark as Passed" }),
+      }))
     ) {
       return;
     }
-    const reason = promptForPipelinePassReason({
+    const reason = await promptForPipelinePassReason({
       previousStage: stage,
       nextStage: next,
-      prompt: (message) => window.prompt(message),
+      prompt: (title, body) =>
+        promptDialog({
+          title,
+          body,
+          placeholder: "e.g. Numbers don't clear my buy box at this price",
+          confirmLabel: "Save reason",
+        }),
     });
     if (next === "passed" && !reason) {
       toast({

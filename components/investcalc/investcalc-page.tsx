@@ -158,6 +158,7 @@ import {
 } from "@/components/marketing/testimonial-prompt";
 import * as Sentry from "@sentry/nextjs";
 import { useToast } from "@/hooks/use-toast";
+import { useActionConfirm } from "@/components/ui/action-confirm-dialog";
 import { ToastAction } from "@/components/ui/toast";
 import { cn, scrollBehavior } from "@/lib/utils";
 import {
@@ -974,6 +975,7 @@ export function InvestCalcPage({
   initialSavedDeal?: GetSavedDealForEditingResult | null;
 }) {
   const router = useRouter();
+  const { confirmDialog } = useActionConfirm();
   const advocacyDecisionContract =
     advocacyContractEligible && isFeatureEnabled("advocacy_decision_contract");
   const [activeInputTab, setActiveInputTab] = useState<InputTab>("cash-flow");
@@ -2607,7 +2609,7 @@ export function InvestCalcPage({
    * the same trust contract.
    */
   const preparePropertySwap = useCallback(
-    (nextPlace: SelectedAddress): boolean => {
+    async (nextPlace: SelectedAddress): Promise<boolean> => {
       const selectedPreviousPlace = lastSelectedAddressRef.current;
       const completedPreviousAddress = analysisValues?.address?.trim() ?? "";
       const visiblePreviousAddress = String(
@@ -2675,9 +2677,13 @@ export function InvestCalcPage({
       );
       if (!hasPropertySpecificValues) return true;
 
-      const useNewProperty = window.confirm(
-        "Use this new property?\n\nChoose OK to use it and clear the previous property’s price, rent, bedrooms, and physical details. Financing and general operating assumptions will stay. Choose Cancel to return to the previous address.",
-      );
+      const useNewProperty = await confirmDialog({
+        title: "Use this new property?",
+        body:
+          "Using it will clear the previous property’s price, rent, bedrooms, and physical details. Financing and general operating assumptions will stay.",
+        confirmLabel: "Use new property",
+        cancelLabel: "Keep previous address",
+      });
       if (!useNewProperty) {
         form.setValue("address", previousAddress, {
           shouldDirty: true,
@@ -2798,13 +2804,13 @@ export function InvestCalcPage({
       });
       return true;
     },
-    [analysisValues, form, toast],
+    [analysisValues, confirmDialog, form, toast],
   );
 
   /** Address-selected entry point (passed to PropertyDetailsSection). */
   const handleAddressSelected = useCallback(
     async (place: SelectedAddress) => {
-      if (!preparePropertySwap(place)) return;
+      if (!(await preparePropertySwap(place))) return;
       enrichedUnitsRef.current.clear();
       lastSelectedAddressRef.current = place;
       // runPropertyEnrichment owns the identity check. It clears captures for
@@ -7896,7 +7902,7 @@ export function InvestCalcPage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleNewAnalysis = () => {
+  const handleNewAnalysis = async () => {
     // Workflow protection: if the user has unsaved work in the form
     // (analysis run + un-persisted, OR a saved deal edited but not
     // re-saved), confirm before nuking the form. resetToNewAnalysis
@@ -7907,14 +7913,13 @@ export function InvestCalcPage({
       hasPendingDealChanges ||
       (!savedDealId && (Boolean(analysisResult) || form.formState.isDirty));
     if (shouldConfirm) {
-      const ok =
-        typeof window === "undefined"
-          ? true
-          : window.confirm(
-              hasUnappliedTargetDraft
-                ? "Start a new analysis? Your unapplied criteria edits will be cleared.\n\nCancel, then apply or cancel those edits first."
-                : "Start a new analysis? Your current work will be cleared.\n\nIf you want to keep this deal, cancel and save it first.",
-            );
+      const ok = await confirmDialog({
+        title: "Start a new analysis?",
+        body: hasUnappliedTargetDraft
+          ? "Your unapplied criteria edits will be cleared.\n\nCancel, then apply or cancel those edits first."
+          : "Your current work will be cleared.\n\nIf you want to keep this deal, cancel and save it first.",
+        confirmLabel: "Start new analysis",
+      });
       if (!ok) return;
     }
     // A specialist strategy owns its property model. resetToNewAnalysis clears
@@ -7955,16 +7960,17 @@ export function InvestCalcPage({
    * semantics. Property-specific entries are still user work, so confirm
    * before clearing them just as New Analysis does.
    */
-  const handleAnalyzeAnotherLikeThis = () => {
+  const handleAnalyzeAnotherLikeThis = async () => {
     const shouldConfirm = hasPendingDealChanges || !savedDealId;
     const ok =
-      !shouldConfirm || typeof window === "undefined"
-        ? true
-        : window.confirm(
-            hasUnappliedTargetDraft
-              ? "Analyze another property? Your unapplied criteria edits will be cleared.\n\nCancel, then apply or cancel those edits first."
-              : "Analyze another property? This unsaved result will be cleared.\n\nReusable financing and general operating assumptions will remain. Offer criteria will be matched again for the next property. Save first if you want to keep this deal.",
-          );
+      !shouldConfirm ||
+      (await confirmDialog({
+        title: "Analyze another property?",
+        body: hasUnappliedTargetDraft
+          ? "Your unapplied criteria edits will be cleared.\n\nCancel, then apply or cancel those edits first."
+          : "This unsaved result will be cleared.\n\nReusable financing and general operating assumptions will remain. Offer criteria will be matched again for the next property. Save first if you want to keep this deal.",
+        confirmLabel: "Analyze another",
+      }));
     if (!ok) return;
     isProgrammaticResetRef.current = true;
     const sourceValues = form.getValues();
@@ -8195,19 +8201,36 @@ export function InvestCalcPage({
       ) {
         return;
       }
-      const confirmed = window.confirm(
-        hasUnappliedTargetDraft
-          ? "You have unapplied criteria edits — leave and discard them?"
-          : "You have unsaved changes on this deal — leave without saving?",
-      );
-      if (!confirmed) {
-        event.preventDefault();
-        event.stopPropagation();
-      }
+      // An in-app dialog is asynchronous, and preventDefault() only works
+      // synchronously — so block the navigation FIRST, ask, and re-issue it
+      // ourselves on confirm. router.push preserves the client-side
+      // navigation the intercepted <Link> would have performed.
+      event.preventDefault();
+      event.stopPropagation();
+      void (async () => {
+        const confirmed = await confirmDialog({
+          title: hasUnappliedTargetDraft
+            ? "Leave and discard criteria edits?"
+            : "Leave without saving?",
+          body: hasUnappliedTargetDraft
+            ? "You have unapplied criteria edits on this deal."
+            : "You have unsaved changes on this deal.",
+          confirmLabel: "Leave page",
+          cancelLabel: "Stay",
+          destructive: true,
+        });
+        if (confirmed) {
+          router.push(
+            `${destination.pathname}${destination.search}${destination.hash}`,
+          );
+        }
+      })();
     };
     document.addEventListener("click", handler, true);
     return () => document.removeEventListener("click", handler, true);
   }, [
+    confirmDialog,
+    router,
     hasUnappliedTargetDraft,
     hasUnsavedChanges,
     isAuthenticated,
@@ -8417,7 +8440,7 @@ export function InvestCalcPage({
   // Latest-closure assignment for the hero address handoff (refs declared
   // up top; the listener effect calls this). Runs every render so it always
   // sees the current form + handlers without re-subscribing the listener.
-  heroAnalyzeHandlerRef.current = (detail: HeroAnalyzeDetail) => {
+  heroAnalyzeHandlerRef.current = async (detail: HeroAnalyzeDetail) => {
     if (!detail || typeof detail.token !== "string") return;
     // Idempotency: the same payload can arrive via both the live event and
     // the sessionStorage fallback - handle it once.
@@ -8445,7 +8468,7 @@ export function InvestCalcPage({
       county: detail.county,
       zip: detail.zip ?? parsedLocation.zip,
     };
-    if (!preparePropertySwap(nextPlace)) {
+    if (!(await preparePropertySwap(nextPlace))) {
       setListingImportStatus(null);
       reportHeroAnalyzeStatus({
         token: detail.token,

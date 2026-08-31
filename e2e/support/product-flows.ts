@@ -67,14 +67,16 @@ export async function replaceSampleAddressForRegression(
 ): Promise<void> {
   const form = page.locator('form[data-calc-form="true"]');
   const addressInput = form.getByLabel("Property Address");
-  let addressChangeMessage = "";
-  page.once("dialog", async (dialog) => {
-    addressChangeMessage = dialog.message();
-    await dialog.accept();
-  });
   await addressInput.fill(address);
   await addressInput.press("Tab");
-  expect(addressChangeMessage).toContain("Use this new property?");
+  const swapDialog = page.getByRole("dialog", {
+    name: "Use this new property?",
+  });
+  await expect(swapDialog).toBeVisible();
+  await swapDialog
+    .getByRole("button", { name: "Use new property", exact: true })
+    .click();
+  await expect(swapDialog).toBeHidden();
 
   const price = form.getByLabel("Price to analyze");
   const rent = form.getByLabel("Expected gross monthly rent");
@@ -161,7 +163,6 @@ export async function deleteRegressionDealsByAddress(
   }
   if (selected === 0) return 0;
 
-  page.once("dialog", (dialog) => dialog.accept());
   const selectedActions = page.getByRole("region", {
     name: "Selected deal actions",
   });
@@ -171,6 +172,12 @@ export async function deleteRegressionDealsByAddress(
   await page
     .getByRole("menuitem", { name: "Delete selected", exact: true })
     .click();
+  const deleteDialog = page.getByRole("dialog", { name: /Delete \d+ deal/ });
+  await expect(deleteDialog).toBeVisible();
+  await deleteDialog
+    .getByRole("button", { name: "Delete", exact: true })
+    .click();
+  await expect(deleteDialog).toBeHidden();
   await expect(
     page.getByText(
       new RegExp(`^Deleted ${selected} deal${selected === 1 ? "" : "s"}$`),

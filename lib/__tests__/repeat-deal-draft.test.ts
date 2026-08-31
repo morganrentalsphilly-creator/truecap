@@ -186,7 +186,7 @@ describe("repeat-deal draft", () => {
     );
     const analyzeAnother = sourceSection(
       calculator,
-      "const handleAnalyzeAnotherLikeThis = () =>",
+      "const handleAnalyzeAnotherLikeThis = async () =>",
       "useEffect(() => {\n    if (!autoExportPdfRef.current)",
     );
 
@@ -202,7 +202,9 @@ describe("repeat-deal draft", () => {
     }
     expect(analyzeAnother).toContain('setListingUrl("")');
     expect(analyzeAnother).not.toContain("everything else carried over");
-    expect(analyzeAnother).toContain("window.confirm(");
+    expect(analyzeAnother).toContain(
+      'title: "Analyze another property?"',
+    );
     expect(analyzeAnother).toContain("enrichedUnitsRef.current.clear()");
   });
 

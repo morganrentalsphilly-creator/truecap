@@ -176,7 +176,9 @@ describe("destructive client delete is confirmed on BOTH roster surfaces", () =>
     ["clients workspace", "components/investcalc/clients-workspace.tsx"],
     ["settings card", "components/settings/agent-clients-card.tsx"],
   ])("%s confirms before deleting", (_label, file) => {
-    expect(read(file)).toContain("window.confirm");
+    // The guard moved to the in-app confirm dialog when native dialogs were
+    // retired; the guarantee is unchanged — a confirm precedes the delete.
+    expect(read(file)).toContain("confirmDialog({");
   });
 });
 

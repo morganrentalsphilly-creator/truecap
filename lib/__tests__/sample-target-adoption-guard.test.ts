@@ -188,7 +188,7 @@ describe("sample-seeded targets never survive as user adoption", () => {
 
   it("re-resolves criteria for every in-flow next deal", () => {
     const fork = sourceSection(
-      "const handleAnalyzeAnotherLikeThis = () =>",
+      "const handleAnalyzeAnotherLikeThis = async () =>",
       "forkGenerationRef.current += 1",
     );
     expect(fork).toContain("const carriedMaoTarget = null");

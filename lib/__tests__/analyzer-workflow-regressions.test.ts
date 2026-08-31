@@ -148,9 +148,16 @@ describe("dashboard-shell New Analysis continuity", () => {
     expect(navigationGuard).toContain(
       'destination.pathname === "/dashboard/new"',
     );
+    // The guard now blocks the navigation synchronously, asks through the
+    // in-app dialog, and re-issues the navigation itself on confirm — an
+    // async dialog cannot preventDefault after awaiting.
     expect(navigationGuard.indexOf('destination.pathname === "/dashboard/new"')).toBeLessThan(
-      navigationGuard.indexOf("window.confirm("),
+      navigationGuard.indexOf("confirmDialog({"),
     );
+    expect(navigationGuard.indexOf("event.preventDefault()")).toBeLessThan(
+      navigationGuard.indexOf("confirmDialog({"),
+    );
+    expect(navigationGuard).toContain("router.push(");
   });
 
   it("restores a saved deal from a refresh-safe, owner-scoped dashboard URL", () => {
@@ -310,7 +317,7 @@ describe("pre-run Offer Ceiling criteria", () => {
     );
     const hero = section(
       calculator,
-      "heroAnalyzeHandlerRef.current = (detail: HeroAnalyzeDetail)",
+      "heroAnalyzeHandlerRef.current = async (detail: HeroAnalyzeDetail)",
       "/**\n   * Live provenance + raw capture getters",
     );
 
@@ -438,12 +445,16 @@ describe("address request and enrichment sequencing", () => {
     );
 
     expect(propertySwap).toContain("hasPropertySpecificValues");
-    expect(propertySwap).toContain("Choose Cancel to return to the previous address");
+    // The guard moved from window.confirm to the in-app dialog; the cancel
+    // affordance is now a named button rather than a sentence in the prose.
+    expect(propertySwap).toContain('cancelLabel: "Keep previous address"');
     expect(propertySwap).toContain(
       'form.setValue("address", previousAddress',
     );
     expect(propertySwap).toContain('title: "Kept the previous property"');
-    expect(addressChange).toContain("if (!preparePropertySwap(place)) return");
+    expect(addressChange).toContain(
+      "if (!(await preparePropertySwap(place))) return",
+    );
     expect(addressChange.indexOf("preparePropertySwap(place)")).toBeLessThan(
       addressChange.indexOf("lastSelectedAddressRef.current = place"),
     );

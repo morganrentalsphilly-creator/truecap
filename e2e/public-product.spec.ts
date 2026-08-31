@@ -343,16 +343,22 @@ test("a second listing can never inherit the first property's price and rent", a
   await form
     .getByLabel("Paste a listing link", { exact: true })
     .fill(listingUrl);
-  const firstDialogPromise = page.waitForEvent("dialog");
-  const firstSubmitPromise = form
+  await form
     .getByRole("button", { name: "Use address from link", exact: true })
     .click();
-  const firstDialog = await firstDialogPromise;
-  expect(firstDialog.message()).toContain(
+  // The swap guard is an in-app dialog now (it used to be a native
+  // window.confirm rendered as bare OS chrome).
+  const firstDialog = page.getByRole("dialog", {
+    name: "Use this new property?",
+  });
+  await expect(firstDialog).toBeVisible();
+  await expect(firstDialog).toContainText(
     "clear the previous property’s price",
   );
-  await firstDialog.dismiss();
-  await firstSubmitPromise;
+  await firstDialog
+    .getByRole("button", { name: "Keep previous address", exact: true })
+    .click();
+  await expect(firstDialog).toBeHidden();
   await expect(address).toHaveValue(
     "2560 Collins St, Philadelphia, PA 19125, USA",
   );
@@ -363,13 +369,17 @@ test("a second listing can never inherit the first property's price and rent", a
   await form
     .getByLabel("Paste a listing link", { exact: true })
     .fill(listingUrl);
-  const secondDialogPromise = page.waitForEvent("dialog");
-  const secondSubmitPromise = form
+  await form
     .getByRole("button", { name: "Use address from link", exact: true })
     .click();
-  const secondDialog = await secondDialogPromise;
-  await secondDialog.accept();
-  await secondSubmitPromise;
+  const secondDialog = page.getByRole("dialog", {
+    name: "Use this new property?",
+  });
+  await expect(secondDialog).toBeVisible();
+  await secondDialog
+    .getByRole("button", { name: "Use new property", exact: true })
+    .click();
+  await expect(secondDialog).toBeHidden();
   await expect(address).toHaveValue(/909 New Deal St Philadelphia PA 19140/i);
   await expect(price).not.toHaveValue("215,000");
   await expect(rent).not.toHaveValue("1,550");
@@ -969,8 +979,15 @@ test("one real anonymous deal receives an exact decision and bound PDF, then a s
     name: "Next deal · keep assumptions",
     exact: true,
   });
-  page.once("dialog", (dialog) => dialog.accept());
   await nextDeal.click();
+  const nextDealDialog = page.getByRole("dialog", {
+    name: "Analyze another property?",
+  });
+  await expect(nextDealDialog).toBeVisible();
+  await nextDealDialog
+    .getByRole("button", { name: "Analyze another", exact: true })
+    .click();
+  await expect(nextDealDialog).toBeHidden();
   const second = await runDeal({
     address: "200 Second Test St, Columbus, OH 43215",
     price: "275000",
@@ -1007,14 +1024,18 @@ test("next deal confirms the reset, clears property facts, and keeps reusable as
   });
   await expect(nextDeal).toBeVisible({ timeout: 20_000 });
 
-  let confirmationMessage = "";
-  page.once("dialog", async (dialog) => {
-    confirmationMessage = dialog.message();
-    await dialog.accept();
-  });
   await nextDeal.click();
-
-  expect(confirmationMessage).toContain("Analyze another property?");
+  const anotherDialog = page.getByRole("dialog", {
+    name: "Analyze another property?",
+  });
+  await expect(anotherDialog).toBeVisible();
+  await expect(anotherDialog).toContainText(
+    "Reusable financing and general operating assumptions will remain",
+  );
+  await anotherDialog
+    .getByRole("button", { name: "Analyze another", exact: true })
+    .click();
+  await expect(anotherDialog).toBeHidden();
   await expect(
     page.getByRole("heading", {
       level: 2,
