@@ -2552,7 +2552,7 @@ export function InvestCalcPage({
             rentFingerprint: unitRentRollFingerprint(form.getValues()),
           };
           filled.push(
-            `Rent ~$${enrichment.monthlyRent.toLocaleString()}/mo ${
+            `Rent ~$${Math.round(enrichment.monthlyRent).toLocaleString()}/mo ${
               enrichment.meta.rent?.stateAverage
                 ? "(HUD statewide average)"
                 : "(HUD FMR)"
@@ -3243,7 +3243,7 @@ export function InvestCalcPage({
               shouldValidate: false,
             });
             filledLines.push(
-              `Unit ${idx + 1}: $${result.monthlyRent.toLocaleString()}/mo`,
+              `Unit ${idx + 1}: $${Math.round(result.monthlyRent).toLocaleString()}/mo`,
             );
             if (!filledRentSource) {
               filledRentSource = result.meta.rent?.source ?? "hud-fmr";
@@ -7313,7 +7313,7 @@ export function InvestCalcPage({
     });
     toast({
       title: "Rehab added to the deal",
-      description: `$${amount.toLocaleString()} added to cash invested. Your live result is updating now.`,
+      description: `$${Math.round(amount).toLocaleString()} added to cash invested. Your live result is updating now.`,
     });
   };
 

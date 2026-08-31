@@ -1427,7 +1427,7 @@ export function AnalysisDashboard({
         : "See year-by-year cash flow, equity & returns",
     "tax-strategy":
       result && annualTaxSavings > 0
-        ? `~$${annualTaxSavings.toLocaleString()}/yr modeled tax impact at the entered rate`
+        ? `~$${Math.round(annualTaxSavings).toLocaleString()}/yr modeled tax impact at the entered rate`
         : "See the modeled effect of depreciation and interest",
     "exit-scenarios":
       returnSummary?.irrStatus === "multiple"
@@ -3406,13 +3406,13 @@ function CashFlowTab({
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Rental Income</span>
                 <span className="font-medium text-foreground">
-                  ${result.monthlyRentalIncome.toLocaleString()}
+                  ${Math.round(result.monthlyRentalIncome).toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between text-sm border-t border-border pt-2">
                 <span className="font-semibold text-foreground">Total</span>
                 <span className="font-bold text-[var(--metric-positive)]">
-                  ${result.monthlyRentalIncome.toLocaleString()}
+                  ${Math.round(result.monthlyRentalIncome).toLocaleString()}
                 </span>
               </div>
             </div>
@@ -3474,14 +3474,14 @@ function CashFlowTab({
                 <div key={label} className="flex justify-between text-sm">
                   <span className="text-muted-foreground">{label}</span>
                   <span className="font-medium text-foreground">
-                    ${value.toLocaleString()}
+                    ${Math.round(value).toLocaleString()}
                   </span>
                 </div>
               ))}
               <div className="flex justify-between text-sm border-t border-border pt-2">
                 <span className="font-semibold text-foreground">Total</span>
                 <span className="font-bold text-[var(--metric-negative)]">
-                  ${result.totalOperatingExpenses.toLocaleString()}
+                  ${Math.round(result.totalOperatingExpenses).toLocaleString()}
                 </span>
               </div>
             </div>
@@ -3508,7 +3508,7 @@ function CashFlowTab({
                   Loan Payment (P&amp;I)
                 </span>
                 <span className="font-medium text-foreground">
-                  ${result.monthlyPayment.toLocaleString()}
+                  ${Math.round(result.monthlyPayment).toLocaleString()}
                 </span>
               </div>
               {/* Removed three blocks that were creating noise:
@@ -3538,7 +3538,7 @@ function CashFlowTab({
                   </p>
                 </div>
                 <span className="font-semibold text-foreground">
-                  ${result.downPayment.toLocaleString()}
+                  ${Math.round(result.downPayment).toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between text-sm mb-1">
@@ -3549,7 +3549,7 @@ function CashFlowTab({
                   </p>
                 </div>
                 <span className="font-semibold text-foreground">
-                  ${result.closingCosts.toLocaleString()}
+                  ${Math.round(result.closingCosts).toLocaleString()}
                 </span>
               </div>
               {/* Up-front rehab + STR furnishing are in totalCashRequired too, so
@@ -3567,7 +3567,7 @@ function CashFlowTab({
                   <div className="flex justify-between text-sm mb-3">
                     <p className="text-muted-foreground">Rehab / Furnishing</p>
                     <span className="font-semibold text-foreground">
-                      ${upfrontExtra.toLocaleString()}
+                      ${Math.round(upfrontExtra).toLocaleString()}
                     </span>
                   </div>
                 ) : (
@@ -3579,7 +3579,7 @@ function CashFlowTab({
                   Total Investment
                 </p>
                 <p className="text-xl font-extrabold text-primary-foreground">
-                  ${result.totalCashRequired.toLocaleString()}
+                  ${Math.round(result.totalCashRequired).toLocaleString()}
                 </p>
               </div>
               {/* Lender-reserves note - DISPLAY-ONLY arithmetic over existing
@@ -3602,8 +3602,8 @@ function CashFlowTab({
                   return (
                     <p className="mt-2 text-xs text-muted-foreground">
                       Lenders typically also want ~$
-                      {reservesLow.toLocaleString()}–$
-                      {reservesHigh.toLocaleString()} in reserves (2–6 months of
+                      {Math.round(reservesLow).toLocaleString()}–$
+                      {Math.round(reservesHigh).toLocaleString()} in reserves (2–6 months of
                       PITI) — plan cash beyond closing.
                     </p>
                   );
