@@ -87,6 +87,30 @@ export function resolveCompatibleAnalyzerStrategyKey(
     : "buy-hold";
 }
 
+/** The analysis lens a scenario label is ultimately asking the user to build.
+ * This is intentionally separate from compatibility: a scenario can be a
+ * valid setup copy before its destination strategy's required inputs exist. */
+export function scenarioAnalyzerStrategyKey(
+  strategyKind: string | null,
+): AnalyzerStrategyKey | null {
+  switch (strategyKind) {
+    case "brrrr":
+      return "brrrr";
+    case "flip":
+      return "fix-flip";
+    case "house_hack":
+      return "house-hack";
+    case "str":
+      return "short-term";
+    case "buy_hold":
+    case "section_8":
+    case "mtr":
+      return "buy-hold";
+    default:
+      return null;
+  }
+}
+
 /** Scenario labels can describe a starting point before every required model
  * input exists. Persist a specialist lens only when the cloned form can
  * support it; otherwise keep the general compatible lens until setup is
@@ -96,29 +120,9 @@ export function resolveScenarioAnalyzerStrategyKey(input: {
   sourceResult: Record<string, unknown> | null;
   values: AnalyzerStrategyCompatibilityValues;
 }): AnalyzerStrategyKey {
-  let requested: unknown;
-  switch (input.strategyKind) {
-    case "brrrr":
-      requested = "brrrr";
-      break;
-    case "flip":
-      requested = "fix-flip";
-      break;
-    case "house_hack":
-      requested = "house-hack";
-      break;
-    case "str":
-      requested = "short-term";
-      break;
-    case "buy_hold":
-    case "section_8":
-    case "mtr":
-      requested = "buy-hold";
-      break;
-    default:
-      requested = input.sourceResult?.analyzerStrategyKey;
-      break;
-  }
+  const requested =
+    scenarioAnalyzerStrategyKey(input.strategyKind) ??
+    input.sourceResult?.analyzerStrategyKey;
   return resolveCompatibleAnalyzerStrategyKey(requested, input.values);
 }
 

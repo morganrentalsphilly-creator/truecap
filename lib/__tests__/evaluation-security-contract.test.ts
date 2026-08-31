@@ -37,14 +37,16 @@ describe("no-card evaluation authorization boundaries", () => {
     expect(action).toContain(
       "buildEvaluationComparisonResourceKey(parsed.data.dealIds)",
     );
-    expect(analyzer).toContain('kind: "deal",\n          values,');
+    expect(analyzer).toMatch(
+      /consumeProductEvaluationUsageAction\(\s*\{\s*kind: "deal",\s*values,\s*\},\s*expectedAccountUserId,\s*\)/,
+    );
     expect(analyzer).not.toContain("buildEvaluationDealResourceKey");
     expect(comparisonClient).not.toContain("consumeProductEvaluationUsageAction");
   });
 
   it("atomically consumes before publishing the selection cookie, never during a page GET", () => {
     const consume = comparisonAction.indexOf(
-      "const usageError = await consumeComparisonSelection(selectedIds)",
+      "const usageError = await consumeComparisonSelection(selectedIds, user.id)",
     );
     const reject = comparisonAction.indexOf(
       "if (usageError) return usageError",
@@ -105,6 +107,42 @@ describe("no-card evaluation authorization boundaries", () => {
     );
     expect(projectionsAction).not.toContain(
       "buildTenYearProjection(request.input)",
+    );
+  });
+
+  it("authorizes the exact projection resource before the service-role cache write", () => {
+    const ownerRead = projectionsAction.indexOf('.from("saved_analyses")');
+    const exactEvaluationCheck = projectionsAction.indexOf(
+      "activeMeteredEvaluationDealGrantsAccess(supabase, user.id, values)",
+    );
+    const entitlementReject = projectionsAction.indexOf(
+      "if (!paidProjectionAccess && !meteredEvaluationDeal)",
+    );
+    const adminClient = projectionsAction.indexOf(
+      "const admin = createAdminSupabaseClient()",
+    );
+    const scopedPayload = projectionsAction.indexOf(
+      "const upsertPayload = {",
+      entitlementReject,
+    );
+    const cacheWrite = projectionsAction.indexOf(
+      '.from("analysis_projection_snapshots")',
+      adminClient,
+    );
+
+    expect(ownerRead).toBeGreaterThan(-1);
+    expect(exactEvaluationCheck).toBeGreaterThan(ownerRead);
+    expect(entitlementReject).toBeGreaterThan(exactEvaluationCheck);
+    expect(scopedPayload).toBeGreaterThan(entitlementReject);
+    expect(adminClient).toBeGreaterThan(entitlementReject);
+    expect(cacheWrite).toBeGreaterThan(adminClient);
+
+    const privilegedPayload = projectionsAction.slice(scopedPayload, adminClient);
+    expect(privilegedPayload).toContain("analysis_id: analysisId");
+    expect(privilegedPayload).toContain("user_id: user.id");
+    const privilegedWrite = projectionsAction.slice(adminClient);
+    expect(privilegedWrite).toContain(
+      '.upsert(upsertPayload, { onConflict: "analysis_id" })',
     );
   });
 

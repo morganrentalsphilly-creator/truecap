@@ -37,6 +37,10 @@ import { hasPaidPlanSubscription } from "@/lib/entitlements";
 import { reserveAnthropicCall } from "@/lib/ai-spend-guard";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
+import {
+  accountSessionChangedResult,
+  expectedAccountUserMatches,
+} from "@/lib/account-session-binding";
 
 const inputSchema = z.object({
   values: releasedInvestmentFormSchema,
@@ -49,7 +53,12 @@ export type DealSummaryResult =
   | { ok: true; summary: string; remainingToday: number | null; cached: boolean }
   | {
       ok: false;
-      code: "VALIDATION_ERROR" | "RATE_LIMITED" | "UNAVAILABLE" | "SERVER_ERROR";
+      code:
+        | "SESSION_CHANGED"
+        | "VALIDATION_ERROR"
+        | "RATE_LIMITED"
+        | "UNAVAILABLE"
+        | "SERVER_ERROR";
       message: string;
     };
 
@@ -94,15 +103,24 @@ function writeCache(hash: string, summary: string): void {
   }
 }
 
-async function resolveCallerKeyAndLimit(): Promise<{ key: string; limit: number; isPaid: boolean }> {
+async function resolveCallerKeyAndLimit(
+  expectedUserId: unknown,
+): Promise<
+  | { ok: true; key: string; limit: number; isPaid: boolean }
+  | { ok: false; result: ReturnType<typeof accountSessionChangedResult> }
+> {
   try {
     const supabase = await createServerSupabaseClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
     if (user) {
+      if (!expectedAccountUserMatches(expectedUserId, user.id)) {
+        return { ok: false, result: accountSessionChangedResult() };
+      }
       const isPaid = await hasPaidPlanSubscription(supabase, user.id);
       return {
+        ok: true,
         key: `user:${user.id}`,
         limit: isPaid ? DEAL_SUMMARY_LIMITS.pro : DEAL_SUMMARY_LIMITS.free,
         isPaid,
@@ -118,10 +136,21 @@ async function resolveCallerKeyAndLimit(): Promise<{ key: string; limit: number;
   } catch {
     // headers() unavailable — keep "unknown" (shared bucket).
   }
-  return { key: `ip:${ip}`, limit: DEAL_SUMMARY_LIMITS.free, isPaid: false };
+  if (expectedUserId != null) {
+    return { ok: false, result: accountSessionChangedResult() };
+  }
+  return {
+    ok: true,
+    key: `ip:${ip}`,
+    limit: DEAL_SUMMARY_LIMITS.free,
+    isPaid: false,
+  };
 }
 
-export async function generateDealSummaryAction(input: unknown): Promise<DealSummaryResult> {
+export async function generateDealSummaryAction(
+  input: unknown,
+  expectedUserId?: unknown,
+): Promise<DealSummaryResult> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     return { ok: false, code: "UNAVAILABLE", message: "AI summary isn't configured right now." };
@@ -132,6 +161,9 @@ export async function generateDealSummaryAction(input: unknown): Promise<DealSum
     return { ok: false, code: "VALIDATION_ERROR", message: "Invalid deal data." };
   }
 
+  const caller = await resolveCallerKeyAndLimit(expectedUserId);
+  if (!caller.ok) return caller.result;
+
   // Cache hit → return free, no rate-limit token spent. Keyed on values +
   // grounding context: the same deal WITH comps/buy-box context produces a
   // different (richer) summary than without.
@@ -141,7 +173,6 @@ export async function generateDealSummaryAction(input: unknown): Promise<DealSum
     return { ok: true, summary: cached, remainingToday: null, cached: true };
   }
 
-  const caller = await resolveCallerKeyAndLimit();
   const token = takeToken(caller.key, caller.limit);
   if (!token.allowed) {
     return {

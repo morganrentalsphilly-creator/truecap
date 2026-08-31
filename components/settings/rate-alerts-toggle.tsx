@@ -12,6 +12,7 @@ import { BellRing } from "lucide-react";
 import { getEmailPreferencesAction, setRateAlertEmailsAction } from "@/app/actions/email-preferences";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import { useExpectedAccountUserId } from "@/components/auth/account-session-boundary";
 
 export function RateAlertsToggle({
   variant = "card",
@@ -21,6 +22,7 @@ export function RateAlertsToggle({
   variant?: "card" | "inline";
 } = {}) {
   const { toast } = useToast();
+  const expectedUserId = useExpectedAccountUserId();
   const [loaded, setLoaded] = useState(false);
   const [available, setAvailable] = useState(true);
   const [enabled, setEnabled] = useState(false);
@@ -55,7 +57,7 @@ export function RateAlertsToggle({
     setEnabled(next); // optimistic
     startTransition(async () => {
       try {
-        const r = await setRateAlertEmailsAction(next);
+        const r = await setRateAlertEmailsAction(next, expectedUserId);
         if (!r.ok) {
           setEnabled(!next); // rollback
           toast({ title: "Couldn't update preference", description: r.message, variant: "destructive" });
@@ -90,7 +92,7 @@ export function RateAlertsToggle({
       setEnabled(true); // optimistic
       startTransition(async () => {
         try {
-          const r = await setRateAlertEmailsAction(true);
+          const r = await setRateAlertEmailsAction(true, expectedUserId);
           if (!r.ok) {
             setEnabled(false);
             toast({

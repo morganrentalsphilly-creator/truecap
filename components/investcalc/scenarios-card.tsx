@@ -11,7 +11,14 @@
  * its own deal view.
  */
 
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import * as Sentry from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
 import { FolderOpen, GitCompare, Layers, Loader2, Plus } from "lucide-react";
@@ -24,6 +31,7 @@ import { compareScenariosAction } from "@/app/actions/compare";
 import { STRATEGY_KINDS, strategyLabel } from "@/lib/strategy-kinds";
 import { describeStrategyPreset } from "@/lib/scenario-presets";
 import { isScenarioStrategyEnabled } from "@/lib/feature-flags";
+import { isCurrentDealWorkspaceMutation } from "@/lib/deal-workspace-mutation-lifecycle";
 import { trackEvent } from "@/lib/analytics";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -33,6 +41,32 @@ import { Label } from "@/components/ui/label";
 const RELEASED_STRATEGY_KINDS = STRATEGY_KINDS.filter((kind) =>
   isScenarioStrategyEnabled(kind),
 );
+
+export type ScenarioClientRequest = {
+  intentKey: string;
+  clientRequestId: string;
+};
+
+export function scenarioRequestIntentKey(input: {
+  savedDealId: string;
+  name: string;
+  strategy: string;
+}): string {
+  return JSON.stringify([
+    input.savedDealId,
+    input.name.trim().toLowerCase(),
+    input.strategy.trim().toLowerCase(),
+  ]);
+}
+
+export function scenarioClientRequestForIntent(
+  current: ScenarioClientRequest | null,
+  intentKey: string,
+  createRequestId: () => string = () => crypto.randomUUID(),
+): ScenarioClientRequest {
+  if (current?.intentKey === intentKey) return current;
+  return { intentKey, clientRequestId: createRequestId() };
+}
 
 export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
   const router = useRouter();
@@ -46,17 +80,54 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
   const [strategy, setStrategy] = useState("");
   const [isSaving, startSaving] = useTransition();
   const loadRequestRef = useRef(0);
+  const savedDealIdRef = useRef<string | null>(savedDealId);
+  const mutationRequestRef = useRef<symbol | null>(null);
+  const scenarioClientRequestRef = useRef<ScenarioClientRequest | null>(null);
+
+  // Dynamic App Router navigation can reuse this client component for another
+  // savedDealId. Invalidate old reads/mutations and clear every deal-scoped
+  // field during the route commit, before a prior promise can paint or toast
+  // against the new workspace.
+  useLayoutEffect(() => {
+    savedDealIdRef.current = savedDealId;
+    mutationRequestRef.current = null;
+    scenarioClientRequestRef.current = null;
+    loadRequestRef.current += 1;
+    setLoaded(false);
+    setHidden(false);
+    setLoadError(null);
+    setScenarios([]);
+    setAdding(false);
+    setName("");
+    setStrategy("");
+    return () => {
+      if (savedDealIdRef.current !== savedDealId) return;
+      savedDealIdRef.current = null;
+      mutationRequestRef.current = null;
+      scenarioClientRequestRef.current = null;
+      loadRequestRef.current += 1;
+    };
+  }, [savedDealId]);
 
   const refresh = useMemo(
     () =>
       function load() {
+        const dealIdAtLoad = savedDealId;
+        // An old mutation may still hold the previous render's refresh
+        // closure. Do not let it supersede the current route's request token.
+        if (savedDealIdRef.current !== dealIdAtLoad) return;
         const requestId = ++loadRequestRef.current;
         setLoaded(false);
         setLoadError(null);
         setHidden(false);
-        void listScenariosAction(savedDealId)
+        void listScenariosAction(dealIdAtLoad)
           .then((result) => {
-            if (requestId !== loadRequestRef.current) return;
+            if (
+              requestId !== loadRequestRef.current ||
+              savedDealIdRef.current !== dealIdAtLoad
+            ) {
+              return;
+            }
             if (result.ok) {
               setScenarios(result.scenarios);
             } else if (result.code === "MIGRATION_PENDING") {
@@ -67,7 +138,12 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
             setLoaded(true);
           })
           .catch((err) => {
-            if (requestId !== loadRequestRef.current) return;
+            if (
+              requestId !== loadRequestRef.current ||
+              savedDealIdRef.current !== dealIdAtLoad
+            ) {
+              return;
+            }
             Sentry.captureException(err, { tags: { feature: "scenarios-load" } });
             setLoadError("We couldn't load scenarios. Check your connection and try again.");
             setLoaded(true);
@@ -83,14 +159,56 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
     };
   }, [refresh]);
 
+  function clearScenarioRequestIfIntentChanged(
+    nextName: string,
+    nextStrategy: string,
+  ) {
+    const pending = scenarioClientRequestRef.current;
+    if (
+      pending &&
+      pending.intentKey !==
+        scenarioRequestIntentKey({
+          savedDealId,
+          name: nextName,
+          strategy: nextStrategy,
+        })
+    ) {
+      scenarioClientRequestRef.current = null;
+    }
+  }
+
   function handleAdd() {
+    const dealIdAtSubmit = savedDealId;
+    const nameAtSubmit = name.trim();
+    const strategyAtSubmit = strategy;
+    const intentKey = scenarioRequestIntentKey({
+      savedDealId: dealIdAtSubmit,
+      name: nameAtSubmit,
+      strategy: strategyAtSubmit,
+    });
+    const clientRequest = scenarioClientRequestForIntent(
+      scenarioClientRequestRef.current,
+      intentKey,
+    );
+    scenarioClientRequestRef.current = clientRequest;
+    const requestToken = Symbol("scenario-add");
+    mutationRequestRef.current = requestToken;
+    const requestStillOwnsDeal = () =>
+      isCurrentDealWorkspaceMutation({
+        submittedDealId: dealIdAtSubmit,
+        currentDealId: savedDealIdRef.current,
+        requestToken,
+        currentRequestToken: mutationRequestRef.current,
+      });
     startSaving(async () => {
       try {
         const result = await addScenarioAction({
-          sourceDealId: savedDealId,
-          scenarioName: name.trim() || undefined,
-          strategyKind: strategy || null,
+          sourceDealId: dealIdAtSubmit,
+          clientRequestId: clientRequest.clientRequestId,
+          scenarioName: nameAtSubmit || undefined,
+          strategyKind: strategyAtSubmit || null,
         });
+        if (!requestStillOwnsDeal()) return;
         if (!result.ok) {
           if (result.code === "MIGRATION_PENDING") {
             setHidden(true);
@@ -99,16 +217,25 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
           toast({ title: "Couldn't add scenario", description: result.message, variant: "destructive" });
           return;
         }
+        if (
+          scenarioClientRequestRef.current?.clientRequestId ===
+          clientRequest.clientRequestId
+        ) {
+          scenarioClientRequestRef.current = null;
+        }
         trackEvent("scenario_added", {
-          has_strategy: Boolean(strategy),
-          strategy_kind: strategy || null,
+          has_strategy: Boolean(strategyAtSubmit),
+          strategy_kind: strategyAtSubmit || null,
         });
         setName("");
         setStrategy("");
         setAdding(false);
         toast({
           title: "Scenario created",
-          description: "It is a separate saved copy. Open its workspace when you are ready to adjust assumptions.",
+          description:
+            result.strategySetupRequired && strategyAtSubmit
+              ? `The copy is ready. Open its workspace, edit assumptions, and choose ${strategyLabel(strategyAtSubmit)} to complete the visible strategy setup.`
+              : "It is a separate saved copy. Open its workspace when you are ready to adjust assumptions.",
         });
         refresh();
         // A scenario is a new saved_analyses row: the persistent dashboard
@@ -119,25 +246,43 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
         // cold-start 500, stale-deploy Server Action). Without this the form
         // stays open with the spinner already gone but no signal — the typed
         // name/strategy are preserved, so a retry just re-clicks Add.
+        if (!requestStillOwnsDeal()) return;
         Sentry.captureException(err, { tags: { feature: "scenarios" } });
         toast({
           title: "Couldn't add scenario",
           description: "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
+      } finally {
+        if (mutationRequestRef.current === requestToken) {
+          mutationRequestRef.current = null;
+        }
       }
     });
   }
 
   function handleCompare() {
-    trackEvent("scenarios_compared", { count: scenarios.length });
+    const dealIdAtSubmit = savedDealId;
+    const requestToken = Symbol("scenario-compare");
+    mutationRequestRef.current = requestToken;
+    const requestStillOwnsDeal = () =>
+      isCurrentDealWorkspaceMutation({
+        submittedDealId: dealIdAtSubmit,
+        currentDealId: savedDealIdRef.current,
+        requestToken,
+        currentRequestToken: mutationRequestRef.current,
+      });
     startSaving(async () => {
       try {
-        const result = await compareScenariosAction(savedDealId);
+        const result = await compareScenariosAction(dealIdAtSubmit);
+        if (!requestStillOwnsDeal()) return;
         if (!result.ok) {
           toast({ title: "Couldn't compare scenarios", description: result.message, variant: "destructive" });
           return;
         }
+        trackEvent("scenarios_compared", {
+          count: scenarios.filter((scenario) => scenario.isComparable).length,
+        });
         // Use a document navigation after the HttpOnly cookie is committed.
         // Keeping another App Router navigation inside this pending transition
         // can leave it waiting indefinitely even after the route is fetched.
@@ -146,12 +291,17 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, stale-deploy Server Action). Without this the Compare
         // click silently does nothing. Tell the user it's retryable.
+        if (!requestStillOwnsDeal()) return;
         Sentry.captureException(err, { tags: { feature: "scenarios" } });
         toast({
           title: "Couldn't compare scenarios",
           description: "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
+      } finally {
+        if (mutationRequestRef.current === requestToken) {
+          mutationRequestRef.current = null;
+        }
       }
     });
   }
@@ -184,6 +334,8 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
             scenarioName: "Base case",
             strategyKind: null,
             title: null,
+            lifecycleState: "active",
+            isComparable: true,
             isBase: true,
             isSource: true,
           },
@@ -192,6 +344,9 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
     rows.find((row) => row.isSource)?.scenarioName ?? rows[0]?.scenarioName ?? "this analysis";
   const hasBase = rows.some((row) => row.isBase);
   const alternateCount = rows.filter((row) => !row.isBase).length;
+  const comparableScenarioCount = rows.filter(
+    (row) => row.isComparable,
+  ).length;
 
   return (
     <section className="rounded-2xl border border-border bg-card p-5 sm:p-6">
@@ -204,7 +359,7 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
             {alternateCount} {alternateCount === 1 ? "scenario" : "scenarios"}
           </span>
         </div>
-        {scenarios.length >= 2 ? (
+        {comparableScenarioCount >= 2 ? (
           <Button
             type="button"
             size="sm"
@@ -213,7 +368,7 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
             disabled={isSaving}
             className="min-h-11 gap-1.5 text-xs text-primary"
           >
-            <GitCompare aria-hidden className="size-3.5" /> Compare scenarios
+            <GitCompare aria-hidden className="size-3.5" /> Compare active scenarios
           </Button>
         ) : null}
       </div>
@@ -226,6 +381,12 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
       <ul className="space-y-2">
         {rows.map((s) => {
           const kindLabel = s.isBase ? "Base" : "Scenario";
+          const lifecycleLabel =
+            s.lifecycleState === "completed"
+              ? "Closed"
+              : s.lifecycleState === "archived"
+                ? "Passed"
+                : null;
           return (
             <li
               key={s.id}
@@ -243,6 +404,11 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
                       {strategyLabel(s.strategyKind)}
                     </span>
                   ) : null}
+                  {lifecycleLabel ? (
+                    <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                      {lifecycleLabel}
+                    </span>
+                  ) : null}
                   {s.isSource ? (
                     <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
                       Viewing
@@ -250,9 +416,14 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
                   ) : null}
                 </div>
                 <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-                  {s.isBase
+                  {!s.isComparable
+                    ? `${lifecycleLabel ?? "Historical"} scenario — restore it to an active stage before comparing.`
+                    : s.isBase
                     ? "Original saved assumptions for this property."
-                    : "Independent copy — edits here do not change Base."}
+                    : s.strategyKind &&
+                        isScenarioStrategyEnabled(s.strategyKind)
+                      ? `Independent ${strategyLabel(s.strategyKind)} starting copy — open it to verify and complete the strategy inputs.`
+                      : "Independent copy — edits here do not change Base."}
                 </p>
               </div>
               {s.isSource ? (
@@ -286,7 +457,11 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
                 id="scenario-name"
                 value={name}
                 placeholder="e.g. Lower-rate case"
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => {
+                  clearScenarioRequestIfIntentChanged(e.target.value, strategy);
+                  setName(e.target.value);
+                }}
+                disabled={isSaving}
                 className="h-11 text-sm"
               />
             </div>
@@ -297,7 +472,11 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
               <select
                 id="scenario-strategy"
                 value={strategy}
-                onChange={(e) => setStrategy(e.target.value)}
+                onChange={(e) => {
+                  clearScenarioRequestIfIntentChanged(name, e.target.value);
+                  setStrategy(e.target.value);
+                }}
+                disabled={isSaving}
                 /* text-base below md: iOS Safari zooms the page in on sub-16px
                    form controls (the Input primitive encodes the same rule). */
                 className="h-11 w-full rounded-md border border-input bg-background px-3 text-base md:text-sm"
@@ -322,7 +501,10 @@ export function ScenariosCard({ savedDealId }: { savedDealId: string }) {
             <Button
               type="button"
               variant="ghost"
-              onClick={() => setAdding(false)}
+              onClick={() => {
+                scenarioClientRequestRef.current = null;
+                setAdding(false);
+              }}
               disabled={isSaving}
               className="min-h-11"
             >

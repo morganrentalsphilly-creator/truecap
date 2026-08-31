@@ -12,6 +12,10 @@ import { toServerErrorResult } from "@/lib/db-error";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { rateAlertEmailsLive } from "@/lib/rate-alerts-mode";
 import { weeklySummaryEmailsLive } from "@/lib/weekly-summary-mode";
+import {
+  accountSessionChangedResult,
+  expectedAccountUserMatches,
+} from "@/lib/account-session-binding";
 
 export type EmailPrefsResult =
   | {
@@ -39,7 +43,11 @@ export type EmailPrefsResult =
     }
   | {
       ok: false;
-      code: "SIGN_IN_REQUIRED" | "MIGRATION_PENDING" | "SERVER_ERROR";
+      code:
+        | "SIGN_IN_REQUIRED"
+        | "SESSION_CHANGED"
+        | "MIGRATION_PENDING"
+        | "SERVER_ERROR";
       message: string;
     };
 
@@ -49,7 +57,11 @@ export type WeeklySummaryPrefResult =
   | { ok: true; weeklySummaryEmails: boolean; weeklySummaryLive: boolean }
   | {
       ok: false;
-      code: "SIGN_IN_REQUIRED" | "MIGRATION_PENDING" | "SERVER_ERROR";
+      code:
+        | "SIGN_IN_REQUIRED"
+        | "SESSION_CHANGED"
+        | "MIGRATION_PENDING"
+        | "SERVER_ERROR";
       message: string;
     };
 
@@ -106,13 +118,19 @@ export async function getEmailPreferencesAction(): Promise<EmailPrefsResult> {
   return toServerErrorResult(error, "email-preferences");
 }
 
-export async function setRateAlertEmailsAction(enabled: boolean): Promise<EmailPrefsResult> {
+export async function setRateAlertEmailsAction(
+  enabled: boolean,
+  expectedUserId: unknown,
+): Promise<EmailPrefsResult> {
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
     return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
+  }
+  if (!expectedAccountUserMatches(expectedUserId, user.id)) {
+    return accountSessionChangedResult();
   }
   const { error } = await supabase
     .from("profiles")
@@ -128,7 +146,8 @@ export async function setRateAlertEmailsAction(enabled: boolean): Promise<EmailP
 }
 
 export async function setWeeklySummaryEmailsAction(
-  enabled: boolean
+  enabled: boolean,
+  expectedUserId: unknown,
 ): Promise<WeeklySummaryPrefResult> {
   const supabase = await createServerSupabaseClient();
   const {
@@ -136,6 +155,9 @@ export async function setWeeklySummaryEmailsAction(
   } = await supabase.auth.getUser();
   if (!user) {
     return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
+  }
+  if (!expectedAccountUserMatches(expectedUserId, user.id)) {
+    return accountSessionChangedResult();
   }
   const { error } = await supabase
     .from("profiles")

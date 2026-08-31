@@ -8,6 +8,12 @@ import {
   hasPlanFeature,
 } from "@/lib/entitlements";
 import { isFeatureEnabled } from "@/lib/feature-flags";
+import {
+  applySavedDealWatchPreferencePatch,
+  loosensSavedDealWatchConsent,
+  SAVED_DEAL_WATCH_PREFERENCE_KEYS,
+  savedDealWatchPreferenceDatabasePatch,
+} from "@/lib/saved-deal-watch-consent";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -21,8 +27,8 @@ const watchToggleSchema = z
 const watchPreferencesSchema = z
   .object({
     savedAnalysisId: z.string().uuid(),
-    inAppNotificationsEnabled: z.boolean(),
-    emailNotificationsEnabled: z.boolean(),
+    preference: z.enum(SAVED_DEAL_WATCH_PREFERENCE_KEYS),
+    enabled: z.boolean(),
   })
   .strict();
 
@@ -36,6 +42,10 @@ type WatchErrorCode =
   | "SERVER_ERROR";
 
 export type SavedDealWatchSettings = {
+  /** Whether the current account may add or loosen Watch consent now. */
+  canEnable: boolean;
+  /** Retained row exists, so a downgraded owner must still be able to revoke. */
+  hasStoredConfiguration: boolean;
   subscriptionEnabled: boolean;
   enabledAt: string | null;
   inAppNotificationsEnabled: boolean;
@@ -90,7 +100,7 @@ function isMigrationPending(error: { code?: string; message?: string } | null): 
 async function requireWatchUser(
   supabase: SupabaseClient
 ): Promise<
-  | { ok: true; userId: string }
+  | { ok: true; userId: string; canEnableWatch: boolean }
   | { ok: false; result: SavedDealWatchActionResult }
 > {
   const {
@@ -105,31 +115,35 @@ async function requireWatchUser(
 
   const entitlements = await getEntitlementsForUser(supabase, user.id);
   const hasPaidPlan = await hasPaidPlanSubscription(supabase, user.id);
-  if (!hasPlanFeature(entitlements, "save_deal") || !hasPaidPlan) {
-    return {
-      ok: false,
-      result: {
-        ok: false,
-        code: "ENTITLEMENT_REQUIRED",
-        message: "Saved Deal Watch is available with Pro or Agent Pro.",
-      },
-    };
-  }
-  return { ok: true, userId: user.id };
+  return {
+    ok: true,
+    userId: user.id,
+    canEnableWatch:
+      hasPlanFeature(entitlements, "save_deal") && hasPaidPlan,
+  };
+}
+
+function watchEntitlementRequired(): SavedDealWatchActionResult {
+  return {
+    ok: false,
+    code: "ENTITLEMENT_REQUIRED",
+    message: "Saved Deal Watch is available with Pro or Agent Pro.",
+  };
 }
 
 async function requireOwnedDeal(
   supabase: SupabaseClient,
   userId: string,
-  savedAnalysisId: string
+  savedAnalysisId: string,
+  requireActive: boolean,
 ): Promise<SavedDealWatchActionResult | null> {
-  const { data, error } = await supabase
+  let query = supabase
     .from("saved_analyses")
     .select("id")
     .eq("id", savedAnalysisId)
-    .eq("user_id", userId)
-    .is("deleted_at", null)
-    .maybeSingle();
+    .eq("user_id", userId);
+  if (requireActive) query = query.is("deleted_at", null);
+  const { data, error } = await query.maybeSingle();
 
   if (error) return toServerErrorResult(error, "saved-deal-watch");
   return data
@@ -140,7 +154,8 @@ async function requireOwnedDeal(
 async function loadSettings(
   supabase: SupabaseClient,
   userId: string,
-  savedAnalysisId: string
+  savedAnalysisId: string,
+  canEnableWatch: boolean,
 ): Promise<SavedDealWatchActionResult> {
   const [watchResult, preferencesResult] = await Promise.all([
     supabase
@@ -186,6 +201,8 @@ async function loadSettings(
   return {
     ok: true,
     settings: {
+      canEnable: canEnableWatch,
+      hasStoredConfiguration: Boolean(watch || preferences),
       subscriptionEnabled: Boolean(watch?.enabled),
       enabledAt: watch?.enabled_at ?? null,
       inAppNotificationsEnabled: Boolean(preferences?.in_app_notifications_enabled),
@@ -212,9 +229,19 @@ export async function getSavedDealWatchAction(
   const supabase = await createServerSupabaseClient();
   const auth = await requireWatchUser(supabase);
   if (!auth.ok) return auth.result;
-  const ownershipError = await requireOwnedDeal(supabase, auth.userId, savedAnalysisId.data);
+  const ownershipError = await requireOwnedDeal(
+    supabase,
+    auth.userId,
+    savedAnalysisId.data,
+    false,
+  );
   if (ownershipError) return ownershipError;
-  return loadSettings(supabase, auth.userId, savedAnalysisId.data);
+  return loadSettings(
+    supabase,
+    auth.userId,
+    savedAnalysisId.data,
+    auth.canEnableWatch,
+  );
 }
 
 export async function setSavedDealWatchEnabledAction(
@@ -235,28 +262,44 @@ export async function setSavedDealWatchEnabledAction(
   const supabase = await createServerSupabaseClient();
   const auth = await requireWatchUser(supabase);
   if (!auth.ok) return auth.result;
+  if (parsed.data.enabled && !auth.canEnableWatch) {
+    return watchEntitlementRequired();
+  }
   const ownershipError = await requireOwnedDeal(
     supabase,
     auth.userId,
-    parsed.data.savedAnalysisId
+    parsed.data.savedAnalysisId,
+    parsed.data.enabled,
   );
   if (ownershipError) return ownershipError;
 
-  const { error } = await supabase.from("saved_deal_watch_subscriptions").upsert(
-    {
-      user_id: auth.userId,
-      saved_analysis_id: parsed.data.savedAnalysisId,
-      enabled: parsed.data.enabled,
-    },
-    { onConflict: "saved_analysis_id" }
-  );
+  const { error } = parsed.data.enabled
+    ? await supabase.from("saved_deal_watch_subscriptions").upsert(
+        {
+          user_id: auth.userId,
+          saved_analysis_id: parsed.data.savedAnalysisId,
+          enabled: true,
+        },
+        { onConflict: "saved_analysis_id" },
+      )
+    : await supabase
+        .from("saved_deal_watch_subscriptions")
+        .update({ enabled: false })
+        .eq("saved_analysis_id", parsed.data.savedAnalysisId)
+        .eq("user_id", auth.userId);
   if (error) {
+    if (error.code === "42501") return watchEntitlementRequired();
     return isMigrationPending(error)
       ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
       : toServerErrorResult(error, "saved-deal-watch");
   }
 
-  return loadSettings(supabase, auth.userId, parsed.data.savedAnalysisId);
+  return loadSettings(
+    supabase,
+    auth.userId,
+    parsed.data.savedAnalysisId,
+    auth.canEnableWatch,
+  );
 }
 
 export async function setSavedDealWatchPreferencesAction(
@@ -277,26 +320,82 @@ export async function setSavedDealWatchPreferencesAction(
   const supabase = await createServerSupabaseClient();
   const auth = await requireWatchUser(supabase);
   if (!auth.ok) return auth.result;
+
+  const { data: existingPreferences, error: existingPreferencesError } = await supabase
+    .from("saved_deal_watch_preferences")
+    .select("in_app_notifications_enabled, email_notifications_enabled")
+    .eq("user_id", auth.userId)
+    .maybeSingle();
+  if (existingPreferencesError) {
+    return isMigrationPending(existingPreferencesError)
+      ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
+      : toServerErrorResult(existingPreferencesError, "saved-deal-watch");
+  }
+  const retained = existingPreferences as WatchPreferencesRow | null;
+  const retainedConsent = retained
+    ? {
+        inAppNotificationsEnabled:
+          retained.in_app_notifications_enabled,
+        emailNotificationsEnabled: retained.email_notifications_enabled,
+      }
+    : null;
+  const nextConsent = applySavedDealWatchPreferencePatch(retainedConsent, {
+    preference: parsed.data.preference,
+    enabled: parsed.data.enabled,
+  });
+  const loosensConsent = loosensSavedDealWatchConsent(
+    retainedConsent,
+    nextConsent,
+  );
+  if (loosensConsent && !auth.canEnableWatch) {
+    return watchEntitlementRequired();
+  }
   const ownershipError = await requireOwnedDeal(
     supabase,
     auth.userId,
-    parsed.data.savedAnalysisId
+    parsed.data.savedAnalysisId,
+    loosensConsent,
   );
   if (ownershipError) return ownershipError;
 
-  const { error } = await supabase.from("saved_deal_watch_preferences").upsert(
-    {
+  // A downgraded account with no retained row is already fully opted out. Do
+  // not turn that no-op into an INSERT that the consent-safe RLS must reject.
+  const databasePatch = savedDealWatchPreferenceDatabasePatch({
+    preference: parsed.data.preference,
+    enabled: parsed.data.enabled,
+  });
+  let error: { code?: string; message?: string } | null = null;
+  if (retained) {
+    ({ error } = await supabase
+      .from("saved_deal_watch_preferences")
+      .update(databasePatch)
+      .eq("user_id", auth.userId));
+  } else if (auth.canEnableWatch) {
+    ({ error } = await supabase.from("saved_deal_watch_preferences").insert({
       user_id: auth.userId,
-      in_app_notifications_enabled: parsed.data.inAppNotificationsEnabled,
-      email_notifications_enabled: parsed.data.emailNotificationsEnabled,
-    },
-    { onConflict: "user_id" }
-  );
+      ...databasePatch,
+    }));
+    // Two tabs can both observe "no row" and create different first-time
+    // channel choices. The unique-key loser must merge its one field into the
+    // winner's row, not drop the user's intent or overwrite the other field.
+    if (error?.code === "23505") {
+      ({ error } = await supabase
+        .from("saved_deal_watch_preferences")
+        .update(databasePatch)
+        .eq("user_id", auth.userId));
+    }
+  }
   if (error) {
+    if (error.code === "42501") return watchEntitlementRequired();
     return isMigrationPending(error)
       ? { ok: false, code: "MIGRATION_PENDING", message: "Schema migration pending." }
       : toServerErrorResult(error, "saved-deal-watch");
   }
 
-  return loadSettings(supabase, auth.userId, parsed.data.savedAnalysisId);
+  return loadSettings(
+    supabase,
+    auth.userId,
+    parsed.data.savedAnalysisId,
+    auth.canEnableWatch,
+  );
 }

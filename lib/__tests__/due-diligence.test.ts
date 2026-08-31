@@ -8,6 +8,7 @@ import {
   dueDiligenceProgress,
   makeDueDiligenceItemId,
   normalizeDueDiligenceItems,
+  resolveStoredDueDiligenceItems,
   type DueDiligenceItem,
 } from "@/lib/due-diligence";
 
@@ -63,6 +64,33 @@ describe("normalizeDueDiligenceItems", () => {
     expect(items[0]).toEqual({ id: "a", label: "A", done: false, dueDate: "2026-07-15" });
     expect(items[1]!.dueDate).toBeUndefined();
     expect(items[2]!.dueDate).toBeUndefined();
+  });
+});
+
+describe("resolveStoredDueDiligenceItems", () => {
+  it("keeps an intentionally stored empty checklist empty", () => {
+    expect(resolveStoredDueDiligenceItems([], true)).toEqual([]);
+  });
+
+  it("seeds defaults only when no valid stored row exists", () => {
+    expect(resolveStoredDueDiligenceItems(undefined, false)).toEqual(
+      defaultDueDiligenceItems(),
+    );
+    expect(resolveStoredDueDiligenceItems({ invalid: true }, true)).toEqual(
+      defaultDueDiligenceItems(),
+    );
+    expect(resolveStoredDueDiligenceItems([{}], true)).toEqual(
+      defaultDueDiligenceItems(),
+    );
+  });
+
+  it("normalizes a valid stored checklist without reseeding it", () => {
+    expect(
+      resolveStoredDueDiligenceItems(
+        [{ id: "inspection", label: " Inspection ", done: true }],
+        true,
+      ),
+    ).toEqual([{ id: "inspection", label: "Inspection", done: true }]);
   });
 });
 

@@ -25,6 +25,7 @@ import { MessageSquareQuote, X } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { submitTestimonialAction } from "@/app/actions/testimonials";
 import { isFeatureEnabled } from "@/lib/feature-flags";
+import { useExpectedAccountUserId } from "@/components/auth/account-session-boundary";
 
 const PROMPT_KEY = "truecap_testimonial_prompt_v1";
 export const PROOF_MOMENT_EVENT = "truecap:proof-moment";
@@ -47,6 +48,7 @@ export function TestimonialPrompt() {
 }
 
 function EnabledTestimonialPrompt() {
+  const expectedUserId = useExpectedAccountUserId();
   const [open, setOpen] = useState(false);
   const [source, setSource] = useState<ProofMomentSource>("pdf_export");
   const [quote, setQuote] = useState("");
@@ -129,25 +131,28 @@ function EnabledTestimonialPrompt() {
     if (state === "submitting") return;
     setState("submitting");
     setErrorMessage(null);
-    const result = await submitTestimonialAction({
-      quote,
-      ...(displayNameFormat !== "anonymous" && displayName.trim()
-        ? { displayName: displayName.trim() }
-        : {}),
-      preferredDisplayNameFormat: displayNameFormat,
-      ...(roleSegment
-        ? {
-            roleSegment: roleSegment as
-              | "investor"
-              | "house_hacker"
-              | "agent"
-              | "other",
-          }
-        : {}),
-      consentToPublish: consent,
-      sourceEvent: source,
-      website: honeypot,
-    });
+    const result = await submitTestimonialAction(
+      {
+        quote,
+        ...(displayNameFormat !== "anonymous" && displayName.trim()
+          ? { displayName: displayName.trim() }
+          : {}),
+        preferredDisplayNameFormat: displayNameFormat,
+        ...(roleSegment
+          ? {
+              roleSegment: roleSegment as
+                | "investor"
+                | "house_hacker"
+                | "agent"
+                | "other",
+            }
+          : {}),
+        consentToPublish: consent,
+        sourceEvent: source,
+        website: honeypot,
+      },
+      expectedUserId,
+    );
     if (result.ok) {
       setState("done");
       trackEvent("testimonial_prompt_submitted", {

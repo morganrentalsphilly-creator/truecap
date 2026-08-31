@@ -21,6 +21,7 @@ import {
   upsertBuyBoxAction,
   type BuyBoxesActionResult,
 } from "@/app/actions/user-buy-boxes";
+import { useExpectedAccountUserId } from "@/components/auth/account-session-boundary";
 import {
   US_STATE_OPTIONS,
   buyBoxPropertyTypeLabel,
@@ -135,6 +136,7 @@ function emptyEditor(makeDefault: boolean): EditorState {
 }
 
 export function BuyBoxesCard() {
+  const expectedUserId = useExpectedAccountUserId();
   const { toast } = useToast();
   const [loaded, setLoaded] = useState(false);
   const [canUse, setCanUse] = useState(false);
@@ -255,7 +257,7 @@ export function BuyBoxesCard() {
           targetStates: editor.targetStates,
           isActive: editor.isActive,
           isDefault: editor.isDefault,
-        });
+        }, expectedUserId);
         if (applyResult(result)) {
           const isNew = !editor.id;
           trackEvent("buy_box_saved", {

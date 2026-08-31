@@ -11,7 +11,13 @@
  *
  * Free per-deal annotation (no entitlement), like Deal Notes.
  */
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import * as Sentry from "@sentry/nextjs";
 import { ChevronDown, ClipboardCheck, Loader2, Plus, X } from "lucide-react";
 import {
@@ -29,6 +35,16 @@ import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { isCurrentDealWorkspaceMutation } from "@/lib/deal-workspace-mutation-lifecycle";
+import {
+  coalesceDueDiligenceSave,
+  dueDiligenceAddedItemReachedServer,
+  dueDiligenceSaveReachedServer,
+  reconcileRejectedDueDiligenceSave,
+  runUnsatisfiedDueDiligenceRecoveries,
+  type DueDiligenceRecoverySatisfaction,
+  type QueuedDueDiligenceSave,
+} from "@/lib/due-diligence-save-lifecycle";
 
 export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
   const { toast } = useToast();
@@ -39,12 +55,38 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
   const [migrationPending, setMigrationPending] = useState(false);
   const [revision, setRevision] = useState<string | null>(null);
   const [newLabel, setNewLabel] = useState("");
-  const [isSaving, startSaving] = useTransition();
+  const [isSaving, setIsSaving] = useState(false);
   // WS-3: which row's note editor is open (accordion — one at a time keeps
   // the checklist compact on mobile). The ref holds the note as it was when
   // the editor opened so blur only persists an ACTUAL change.
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const noteAtOpenRef = useRef<string>("");
+  const savedDealIdRef = useRef<string | null>(savedDealId);
+  const mutationRequestRef = useRef<symbol | null>(null);
+  const queuedSaveRef = useRef<QueuedDueDiligenceSave | null>(null);
+
+  // Layout phase closes the new-route-commit -> passive-effect window: an old
+  // request cannot resolve against the previous id after the new deal is on
+  // screen.
+  useLayoutEffect(() => {
+    savedDealIdRef.current = savedDealId;
+    mutationRequestRef.current = null;
+    queuedSaveRef.current = null;
+    // Both values are unsaved, deal-scoped input. Clear them during the route
+    // commit so a reused dynamic workspace cannot carry a checklist label or
+    // note comparison baseline from deal A into deal B.
+    setNewLabel("");
+    noteAtOpenRef.current = "";
+    setLoaded(false);
+    setIsSaving(false);
+    return () => {
+      if (savedDealIdRef.current !== savedDealId) return;
+      savedDealIdRef.current = null;
+      mutationRequestRef.current = null;
+      queuedSaveRef.current = null;
+      noteAtOpenRef.current = "";
+    };
+  }, [savedDealId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -90,61 +132,226 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
    * toast honest when a caller preserves what the user typed. Same
    * rollback-on-error contract as deal-stage-select.tsx.
    */
-  const persist = (
-    next: DueDiligenceItem[],
-    onFailure?: () => void,
-    failureHint = "Your last change was undone."
-  ) => {
-    if (isSaving || loadError) return;
+  function startPersistRequest(
+    request: QueuedDueDiligenceSave,
+    revisionAtSubmit: string | null,
+    previous: DueDiligenceItem[],
+  ) {
     const dealIdAtSubmit = savedDealId;
-    const previous = items;
-    const revisionAtSubmit = revision;
-    startSaving(async () => {
+    const requestToken = Symbol("due-diligence-save");
+    mutationRequestRef.current = requestToken;
+    const requestStillOwnsDeal = () =>
+      isCurrentDealWorkspaceMutation({
+        submittedDealId: dealIdAtSubmit,
+        currentDealId: savedDealIdRef.current,
+        requestToken,
+        currentRequestToken: mutationRequestRef.current,
+      });
+    setIsSaving(true);
+    void (async () => {
+      let chainedSave: {
+        request: QueuedDueDiligenceSave;
+        revision: string | null;
+        previous: DueDiligenceItem[];
+      } | null = null;
+      const takeQueuedSave = () => {
+        const queued = queuedSaveRef.current;
+        queuedSaveRef.current = null;
+        return queued;
+      };
+      const runRecoveries = (
+        queued: QueuedDueDiligenceSave | null,
+        persistedItems?: DueDiligenceItem[],
+      ) => {
+        runUnsatisfiedDueDiligenceRecoveries(
+          request.recoveries,
+          persistedItems,
+        );
+        runUnsatisfiedDueDiligenceRecoveries(
+          queued?.recoveries ?? [],
+          persistedItems,
+        );
+      };
+      const acceptCommittedSnapshot = (
+        snapshot: { items: DueDiligenceItem[]; revision: string | null },
+        queued: QueuedDueDiligenceSave | null,
+      ) => {
+        setRevision(snapshot.revision);
+        if (queued) {
+          chainedSave = {
+            request: queued,
+            revision: snapshot.revision,
+            previous: snapshot.items,
+          };
+        } else {
+          setItems(snapshot.items);
+        }
+      };
       try {
-        const r = await updateDealDueDiligenceAction(dealIdAtSubmit, next, revisionAtSubmit);
-        if (dealIdAtSubmit !== savedDealId) return; // user switched deals mid-save
+        const r = await updateDealDueDiligenceAction(
+          dealIdAtSubmit,
+          request.items,
+          revisionAtSubmit,
+        );
+        if (!requestStillOwnsDeal()) return;
         if (!r.ok) {
           if (r.code === "MIGRATION_PENDING") {
+            const queued = takeQueuedSave();
             setItems(previous);
+            // Keep the old no-toast migration UI, but do not discard text the
+            // user typed into an optimistic add/note before schema drift was
+            // discovered. Recovery hooks reapply that text after rollback.
+            runRecoveries(queued);
             setMigrationPending(true);
             return;
           }
           const fresh = await getDealDueDiligenceAction(dealIdAtSubmit).catch(() => null);
-          if (dealIdAtSubmit !== savedDealId) return;
-          if (fresh?.ok) {
-            setItems(fresh.items);
-            setRevision(fresh.revision);
+          if (!requestStillOwnsDeal()) return;
+          // A stale/error result can itself be the retry after an earlier
+          // response was lost. If the exact requested document is durable,
+          // the user's intent already committed: accept it without restoring
+          // an add label/note that would invite a duplicate retry.
+          const queued = takeQueuedSave();
+          if (
+            fresh?.ok &&
+            dueDiligenceSaveReachedServer(request.items, fresh.items)
+          ) {
+            acceptCommittedSnapshot(fresh, queued);
           } else {
-            setItems(previous);
+            if (fresh?.ok) {
+              setItems(fresh.items);
+              setRevision(fresh.revision);
+            } else {
+              setItems(previous);
+            }
+            // Take the queue after the recovery read. Even a blur dispatched
+            // just before controls became disabled is now part of this terminal
+            // failure unit rather than being stranded with no owner request.
+            runRecoveries(queued, fresh?.ok ? fresh.items : undefined);
+            toast({
+              title: "Could not save checklist",
+              description: `${r.message} ${queued?.failureHint ?? request.failureHint}`,
+              variant: "destructive",
+            });
+            return;
           }
-          onFailure?.();
-          toast({
-            title: "Could not save checklist",
-            description: `${r.message} ${failureHint}`,
-            variant: "destructive",
-          });
-          return;
+        } else {
+          setRevision(r.revision);
+          const queued = takeQueuedSave();
+          if (queued) {
+          // Keep the newest optimistic snapshot on screen. The server-returned
+          // row is the rollback base and its revision is the CAS token for the
+          // one queued follow-up write.
+            chainedSave = {
+              request: queued,
+              revision: r.revision,
+              previous: r.items,
+            };
+          } else {
+            setItems(r.items);
+          }
         }
-        setItems(r.items);
-        setRevision(r.revision);
       } catch (err) {
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, stale-deploy Server Action). The optimistic setItems
-        // already ran, so the card is asserting a change the server never
-        // stored. Reconcile the same way the !r.ok branch does — roll back to
-        // the pre-mutation snapshot (a re-read might also be down), let the
-        // caller restore anything it cleared, and surface a retryable toast.
+        // already ran, but the write may still have committed before its
+        // response was lost. Re-read durable state before rollback so an exact
+        // committed add is not restored into the input and duplicated.
         Sentry.captureException(err, { tags: { feature: "due-diligence" } });
-        if (dealIdAtSubmit !== savedDealId) return;
-        setItems(previous);
-        onFailure?.();
-        toast({
-          title: "Could not save checklist",
-          description: `Something interrupted the request. ${failureHint}`,
-          variant: "destructive",
+        if (!requestStillOwnsDeal()) return;
+        const reconciliation = await reconcileRejectedDueDiligenceSave({
+          requestedItems: request.items,
+          readFresh: async () => {
+            // This is a best-effort durability probe inside the primary
+            // action's rejection path. Guard its own Server Action call too:
+            // a continued transport outage must resolve as "unavailable" so
+            // the outer rollback/recovery path completes and clears saving UI.
+            const fresh = await getDealDueDiligenceAction(
+              dealIdAtSubmit,
+            ).catch(() => null);
+            return fresh?.ok
+              ? { items: fresh.items, revision: fresh.revision }
+              : null;
+          },
         });
+        if (!requestStillOwnsDeal()) return;
+        const queued = takeQueuedSave();
+        if (reconciliation.kind === "committed") {
+          acceptCommittedSnapshot(reconciliation.snapshot, queued);
+        } else {
+          if (reconciliation.kind === "diverged") {
+            setItems(reconciliation.snapshot.items);
+            setRevision(reconciliation.snapshot.revision);
+          } else {
+            setItems(previous);
+          }
+          runRecoveries(
+            queued,
+            reconciliation.kind === "diverged"
+              ? reconciliation.snapshot.items
+              : undefined,
+          );
+          toast({
+            title: "Could not save checklist",
+            description: `Something interrupted the request. ${queued?.failureHint ?? request.failureHint}`,
+            variant: "destructive",
+          });
+        }
+      } finally {
+        if (mutationRequestRef.current === requestToken) {
+          mutationRequestRef.current = null;
+        }
+        // Failure branches may return from inside the try/catch. Clear the
+        // saving indicator here as well so those terminal paths cannot leave
+        // the checklist permanently disabled.
+        if (
+          !chainedSave &&
+          dealIdAtSubmit === savedDealIdRef.current &&
+          mutationRequestRef.current === null
+        ) {
+          setIsSaving(false);
+        }
       }
+      if (
+        chainedSave &&
+        dealIdAtSubmit === savedDealIdRef.current &&
+        mutationRequestRef.current === null
+      ) {
+        startPersistRequest(
+          chainedSave.request,
+          chainedSave.revision,
+          chainedSave.previous,
+        );
+      }
+    })();
+  }
+
+  const persist = (
+    next: DueDiligenceItem[],
+    onFailure?: () => void,
+    failureHint = "Your last change was undone.",
+    recoverySatisfiedBy?: DueDiligenceRecoverySatisfaction,
+  ) => {
+    if (loadError) return;
+    const request = coalesceDueDiligenceSave(null, {
+      items: next,
+      recovery: onFailure,
+      recoverySatisfiedBy,
+      failureHint,
     });
+    if (mutationRequestRef.current !== null) {
+      queuedSaveRef.current = coalesceDueDiligenceSave(
+        queuedSaveRef.current,
+        {
+          items: next,
+          recovery: onFailure,
+          recoverySatisfiedBy,
+          failureHint,
+        },
+      );
+      return;
+    }
+    startPersistRequest(request, revision, items);
   };
 
   const toggle = (id: string) => {
@@ -160,12 +367,23 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
   const add = () => {
     const label = newLabel.trim();
     if (!label) return;
-    const next = [...items, { id: makeDueDiligenceItemId(label, items), label, done: false }];
+    const addedItem: DueDiligenceItem = {
+      id: makeDueDiligenceItemId(label, items),
+      label,
+      done: false,
+    };
+    const next = [...items, addedItem];
     setItems(next);
     setNewLabel("");
     // A failed add rolls the row back out, so the typed label goes back in
     // the input rather than disappearing with it.
-    persist(next, () => setNewLabel(label));
+    persist(
+      next,
+      () => setNewLabel(label),
+      "Your last change was undone.",
+      (persistedItems) =>
+        dueDiligenceAddedItemReachedServer(addedItem, persistedItems),
+    );
   };
   const setDueDate = (id: string, value: string) => {
     // Empty string clears the deadline; otherwise store the YYYY-MM-DD the

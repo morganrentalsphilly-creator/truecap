@@ -47,14 +47,14 @@ const PRESETS: Record<
 const DESCRIPTIONS: Record<StrategyKind, string | null> = {
   buy_hold: null,
   house_hack:
-    "Requires an Owner Occupant analysis with one owner unit, then sets the down payment to 3.5%.",
+    "Sets down payment to 3.5%. If this copy is not Owner Occupant yet, open it and choose House Hack to identify the owner unit and enter rent for the others.",
   brrrr:
-    "Requires a Single Family analysis. Sets 25% down; complete rehab and refinance assumptions in the BRRRR card.",
-  flip: "Requires a Single Family analysis. Starts as a copy — complete the sale assumptions in the Fix & Flip card.",
+    "Sets 25% down. Open the copy and choose BRRRR to complete its property, rehab, and refinance assumptions.",
+  flip: "Starts as a copy. Open it and choose Fix & Flip to complete its property and sale assumptions.",
   section_8:
     "Lowers vacancy to 3% for stable voucher tenancy. Set rent to your area's HUD Fair Market Rent.",
   mtr: "Raises management, vacancy, and maintenance for furnished mid-term operations. Set your furnished monthly rent.",
-  str: "Requires a Short-term analysis with nightly rate and occupancy, then raises management to 22% and vacancy to 28%.",
+  str: "Raises management to 22% and vacancy to 28%. Open the copy and choose Short-Term Rental to enter nightly rate and occupancy.",
 };
 
 /**

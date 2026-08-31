@@ -15,24 +15,50 @@
  * toast, never a broken redirect.
  */
 
-import { useRef, useTransition } from "react";
+import { useLayoutEffect, useRef, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { GitCompare } from "lucide-react";
 import { startCompareAction } from "@/app/actions/compare";
 import { useToast } from "@/hooks/use-toast";
+import { isCurrentDealWorkspaceMutation } from "@/lib/deal-workspace-mutation-lifecycle";
 
 export function CompareWithAnotherDealLink({ savedDealId }: { savedDealId: string }) {
   const router = useRouter();
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
   const compareRequestInFlightRef = useRef(false);
+  const savedDealIdRef = useRef<string | null>(savedDealId);
+  const compareRequestRef = useRef<symbol | null>(null);
+
+  useLayoutEffect(() => {
+    savedDealIdRef.current = savedDealId;
+    compareRequestRef.current = null;
+    compareRequestInFlightRef.current = false;
+    return () => {
+      if (savedDealIdRef.current !== savedDealId) return;
+      savedDealIdRef.current = null;
+      compareRequestRef.current = null;
+      compareRequestInFlightRef.current = false;
+    };
+  }, [savedDealId]);
 
   function handleCompare() {
     if (compareRequestInFlightRef.current || isPending) return;
+    const dealIdAtSubmit = savedDealId;
+    const requestToken = Symbol("workspace-compare");
     compareRequestInFlightRef.current = true;
+    compareRequestRef.current = requestToken;
+    const requestStillOwnsDeal = () =>
+      isCurrentDealWorkspaceMutation({
+        submittedDealId: dealIdAtSubmit,
+        currentDealId: savedDealIdRef.current,
+        requestToken,
+        currentRequestToken: compareRequestRef.current,
+      });
     startTransition(async () => {
       try {
-        const result = await startCompareAction([savedDealId]);
+        const result = await startCompareAction([dealIdAtSubmit]);
+        if (!requestStillOwnsDeal()) return;
         if (!result.ok) {
           toast({
             title: "Couldn't start compare",
@@ -43,6 +69,7 @@ export function CompareWithAnotherDealLink({ savedDealId }: { savedDealId: strin
         }
         router.push("/dashboard/compare");
       } catch {
+        if (!requestStillOwnsDeal()) return;
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, deploy skew). Without this the click is silent —
         // the button just re-enables with no redirect and no signal. Surface
@@ -53,7 +80,10 @@ export function CompareWithAnotherDealLink({ savedDealId }: { savedDealId: strin
           variant: "destructive",
         });
       } finally {
-        compareRequestInFlightRef.current = false;
+        if (compareRequestRef.current === requestToken) {
+          compareRequestRef.current = null;
+          compareRequestInFlightRef.current = false;
+        }
       }
     });
   }

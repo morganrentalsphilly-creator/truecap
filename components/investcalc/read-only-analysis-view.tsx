@@ -14,7 +14,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { SensitivityGrid } from "@/components/investcalc/sensitivity-grid";
@@ -53,6 +53,7 @@ import {
   AdvancedBuyAndHoldSummary,
   RenovationModelDisclosure,
 } from "@/components/investcalc/advanced-buy-and-hold-summary";
+import { isCurrentMountedMutation } from "@/lib/deal-workspace-mutation-lifecycle";
 
 interface ReadOnlyAnalysisViewProps {
   values: InvestmentFormValues;
@@ -612,6 +613,15 @@ export function ReadOnlyAnalysisView({
   const router = useRouter();
   const [copyPending, setCopyPending] = useState(false);
   const [copyError, setCopyError] = useState<string | null>(null);
+  const copyRequestRef = useRef<symbol | null>(null);
+  useLayoutEffect(() => {
+    copyRequestRef.current = null;
+    setCopyPending(false);
+    setCopyError(null);
+    return () => {
+      copyRequestRef.current = null;
+    };
+  }, [copyShareToken]);
   const result = analysis.result;
   const proResult = analysis.access === "pro" ? analysis.result : null;
   const showTaxMetrics = Boolean(
@@ -709,13 +719,21 @@ export function ReadOnlyAnalysisView({
   };
 
   const copyToAccount = async () => {
-    if (!copyShareToken || copyPending) return;
+    if (!copyShareToken || copyPending || copyRequestRef.current !== null) return;
+    const requestToken = Symbol("public-share-copy");
+    copyRequestRef.current = requestToken;
+    const requestStillOwnsView = () =>
+      isCurrentMountedMutation({
+        requestToken,
+        currentRequestToken: copyRequestRef.current,
+      });
     setCopyPending(true);
     setCopyError(null);
     try {
       const copied = await copyPublicShareToAccountAction({
         token: copyShareToken,
       });
+      if (!requestStillOwnsView()) return;
       if (!copied.ok) {
         if (copied.code === "SIGN_IN_REQUIRED") {
           const returnPath = encodeURIComponent(window.location.pathname);
@@ -729,9 +747,13 @@ export function ReadOnlyAnalysisView({
         `/dashboard/saved-analyses/${encodeURIComponent(copied.id)}?utm_source=shared_analysis&utm_medium=copy`,
       );
     } catch {
+      if (!requestStillOwnsView()) return;
       setCopyError("This analysis could not be copied. Please try again.");
     } finally {
-      setCopyPending(false);
+      if (copyRequestRef.current === requestToken) {
+        copyRequestRef.current = null;
+        setCopyPending(false);
+      }
     }
   };
   return (

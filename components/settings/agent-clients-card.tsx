@@ -26,11 +26,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { trackEvent } from "@/lib/analytics";
+import { useExpectedAccountUserId } from "@/components/auth/account-session-boundary";
 
 type Editor = { id?: string; name: string; email: string; phone: string };
 
 export function AgentClientsCard() {
   const { toast } = useToast();
+  const expectedUserId = useExpectedAccountUserId();
   const [clients, setClients] = useState<AgentClient[] | null>(null);
   const [editor, setEditor] = useState<Editor | null>(null);
   const [isSaving, startSaving] = useTransition();
@@ -56,14 +58,17 @@ export function AgentClientsCard() {
     if (!editor) return;
     startSaving(async () => {
       try {
-      const r = await upsertAgentClientAction({
-        id: editor.id,
-        name: editor.name,
-        email: editor.email || null,
-        phone: editor.phone || null,
-        notes: null,
-        isArchived: false,
-      });
+      const r = await upsertAgentClientAction(
+        {
+          id: editor.id,
+          name: editor.name,
+          email: editor.email || null,
+          phone: editor.phone || null,
+          notes: null,
+          isArchived: false,
+        },
+        expectedUserId,
+      );
       if (r.ok) {
         const created = !editor.id;
         setClients(r.clients);

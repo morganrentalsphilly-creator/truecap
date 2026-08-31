@@ -38,6 +38,7 @@ import {
   type SavedDealBrief,
 } from "@/app/actions/saved-analyses";
 import { upsertBuyBoxAction } from "@/app/actions/user-buy-boxes";
+import { useExpectedAccountUserId } from "@/components/auth/account-session-boundary";
 import { trackEvent } from "@/lib/analytics";
 import type { AnalysisTemplateInput } from "@/lib/analysis-template-schema";
 import { isFeatureReleased } from "@/lib/entitlements-catalog";
@@ -167,6 +168,7 @@ export function TemplatesManagementPage({
 }: {
   initialTemplates: AnalysisTemplateOption[];
 }) {
+  const expectedUserId = useExpectedAccountUserId();
   const { toast } = useToast();
   const [templates, setTemplates] = useState(initialTemplates);
   const [searchQuery, setSearchQuery] = useState("");
@@ -269,7 +271,11 @@ export function TemplatesManagementPage({
     try {
       const result = editingTemplate
         ? await updateAnalysisTemplateAction(editingTemplate.id, values)
-        : await createAnalysisTemplateAction(values);
+        : await createAnalysisTemplateAction(
+            values,
+            undefined,
+            expectedUserId,
+          );
 
       if (!result.ok) {
         toast({
@@ -404,7 +410,7 @@ export function TemplatesManagementPage({
         targetStates: [],
         isActive: true,
         isDefault: true,
-      });
+      }, expectedUserId);
       if (!result.ok) {
         toast({
           title: "Couldn't set Buy Box",

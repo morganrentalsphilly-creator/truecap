@@ -1,5 +1,6 @@
 "use server";
 
+import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getSiteUrl } from "@/lib/site-url";
 import {
@@ -12,7 +13,26 @@ import {
 
 export type AuthActionResult =
   | { ok: true; needsEmailConfirmation?: boolean }
-  | { ok: false; message: string };
+  | { ok: false; code?: "SESSION_CHANGED"; message: string };
+
+const normalizedProfileResetEmailSchema = z
+  .string()
+  .trim()
+  .email()
+  .transform((email) => email.toLowerCase());
+
+/** Forgot-password remains intentionally anonymous. The signed-in profile
+ * surface adds this optional consistency binding so a page rendered for
+ * account A cannot send/reset-toast for A after the live session becomes B. */
+const passwordResetRequestSchema = forgotPasswordSchema.extend({
+  profileBinding: z
+    .object({
+      expectedUserId: z.string().uuid(),
+      expectedEmail: normalizedProfileResetEmailSchema,
+    })
+    .strict()
+    .optional(),
+});
 
 function mapAuthError(message: string): string {
   const m = message.toLowerCase();
@@ -103,7 +123,7 @@ export async function signUpAction(
 export async function requestPasswordResetAction(
   input: unknown
 ): Promise<AuthActionResult> {
-  const parsed = forgotPasswordSchema.safeParse(input);
+  const parsed = passwordResetRequestSchema.safeParse(input);
   if (!parsed.success) {
     const msg = parsed.error.flatten().fieldErrors.email?.[0] ?? "Enter a valid email.";
     return { ok: false, message: msg };
@@ -111,7 +131,31 @@ export async function requestPasswordResetAction(
 
   const siteUrl = getSiteUrl();
   const supabase = await createServerSupabaseClient();
-  const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email.trim(), {
+  const targetEmail = parsed.data.email.trim().toLowerCase();
+  const profileBinding = parsed.data.profileBinding;
+  if (profileBinding) {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+    const verifiedEmail = user?.email?.trim().toLowerCase() ?? null;
+    if (
+      userError ||
+      !user ||
+      user.id !== profileBinding.expectedUserId ||
+      verifiedEmail !== profileBinding.expectedEmail ||
+      targetEmail !== profileBinding.expectedEmail
+    ) {
+      return {
+        ok: false,
+        code: "SESSION_CHANGED",
+        message:
+          "Your signed-in account changed. Refresh this page before requesting a reset link.",
+      };
+    }
+  }
+
+  const { error } = await supabase.auth.resetPasswordForEmail(targetEmail, {
     redirectTo: `${siteUrl}/auth/callback?next=/auth/update-password`,
     ...(parsed.data.captchaToken ? { captchaToken: parsed.data.captchaToken } : {}),
   });

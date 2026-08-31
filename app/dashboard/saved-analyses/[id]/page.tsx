@@ -992,7 +992,7 @@ export default async function DealWorkspacePage({
               actions fail closed behind the flag. The card persists explicit
               opt-in while truthfully stating that no provider, polling, or
               delivery is active. */}
-          {isFeatureEnabled("saved_deal_watch") && isPremium ? (
+          {isFeatureEnabled("saved_deal_watch") ? (
             <SavedDealWatchCard savedDealId={dealRow.id} />
           ) : null}
           <DealDetailsCard savedDealId={dealRow.id} />

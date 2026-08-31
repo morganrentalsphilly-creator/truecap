@@ -26,6 +26,7 @@ import {
   type BrandingRow,
   type BrandingValues,
 } from "@/app/actions/branding";
+import { useExpectedAccountUserId } from "@/components/auth/account-session-boundary";
 
 type Status =
   | { kind: "idle" } | { kind: "saving" } | { kind: "saved" } | { kind: "error"; message: string };
@@ -33,6 +34,7 @@ type Status =
 const TRUECAP_BLUE = "#1A4FBA"; // matches lib/pdf-generator.ts COLOR.primary fallback
 
 export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
+  const expectedUserId = useExpectedAccountUserId();
   const [companyName, setCompanyName] = useState(initial?.company_name ?? "");
   const [tagline, setTagline] = useState(initial?.tagline ?? "");
   const [primaryColor, setPrimaryColor] = useState(
@@ -71,7 +73,7 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
     try {
       const fd = new FormData();
       fd.append("file", file);
-      const res = await uploadBrandingLogo(fd);
+      const res = await uploadBrandingLogo(fd, expectedUserId);
       if (res.ok) {
         setLogoUrl(res.url);
       } else {
@@ -101,7 +103,7 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
       logo_url: logoUrl,
     };
     startTransition(async () => {
-      const res = await saveBranding(payload);
+      const res = await saveBranding(payload, expectedUserId);
       if (res.ok) {
         setStatus({ kind: "saved" });
         // Quietly drop the "Saved" toast after 2.5s so the form returns

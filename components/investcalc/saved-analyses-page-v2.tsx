@@ -3,6 +3,7 @@
 import {
   Fragment,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -67,6 +68,7 @@ import { startCompareAction } from "@/app/actions/compare";
 import {
   bulkUpdateSavedDealsAction,
   getSavedAnalysisPdfExportAction,
+  undoPassedSavedDealStageAction,
   updateSavedDealLifecycleStateAction,
   updateSavedDealStageAction,
   updateSavedDealTagsAction,
@@ -149,6 +151,7 @@ import { setSavedDealClientAction } from "@/app/actions/saved-analyses";
 export type AgentClientOption = { id: string; name: string };
 import type { OwnedEquitySummary } from "@/lib/owned-equity";
 import { setSavedDealCloseDateAction } from "@/app/actions/saved-analyses";
+import { isCurrentMountedMutation } from "@/lib/deal-workspace-mutation-lifecycle";
 import { recomputeSavedDealVerdict } from "@/lib/recompute-saved-deal-verdict";
 import {
   isLegacySavedMethodologyVersion,
@@ -1438,6 +1441,13 @@ export function SavedAnalysesPage({
   const cookieBannerOpen = useCookieBannerOpen();
   const [isStartingCompare, startCompareTransition] = useTransition();
   const compareRequestInFlightRef = useRef(false);
+  const compareRequestRef = useRef<symbol | null>(null);
+  useLayoutEffect(() => {
+    return () => {
+      compareRequestRef.current = null;
+      compareRequestInFlightRef.current = false;
+    };
+  }, []);
   const [isUpdatingStatus, startUpdateStatusTransition] = useTransition();
   const [openingDealId, setOpeningDealId] = useState<string | null>(null);
   const [exportingPdfDealId, setExportingPdfDealId] = useState<string | null>(
@@ -2112,15 +2122,19 @@ export function SavedAnalysesPage({
           if (result.code === "NOT_FOUND") router.refresh();
           return;
         }
+        const passHistoryEventId =
+          stage === "passed" ? result.historyEventId : null;
         toast({
           title: stage === "passed" ? "Marked as Passed" : "Stage updated",
           description:
             stage === "passed"
-              ? `Reason recorded in Deal Log. Undo restores ${pipelineStageLabel(previousStage)}.`
+              ? passHistoryEventId
+                ? `Reason recorded in Deal Log. Undo restores ${pipelineStageLabel(previousStage)}.`
+                : "This deal was already marked as Passed."
               : `Moved to ${pipelineStageLabel(stage)}.`,
           variant: "success",
           action:
-            stage === "passed" ? (
+            stage === "passed" && passHistoryEventId ? (
               <ToastAction
                 altText="Undo marking deal as Passed"
                 className="min-h-11"
@@ -2128,12 +2142,21 @@ export function SavedAnalysesPage({
                   setUpdatingDealStatusId(id);
                   startUpdateStatusTransition(async () => {
                     try {
-                      const undo = await updateSavedDealStageAction(
+                      const undo = await undoPassedSavedDealStageAction(
                         id,
                         previousStage,
+                        passHistoryEventId,
                         { note: "Pass decision undone." },
                       );
                       if (!undo.ok) {
+                        if (undo.code === "STALE_DATA") {
+                          toast({
+                            title: "Undo expired",
+                            description: undo.message,
+                          });
+                          router.refresh();
+                          return;
+                        }
                         toast({
                           title: "Could not undo",
                           description: undo.message,
@@ -2156,6 +2179,7 @@ export function SavedAnalysesPage({
                         description: "Check your connection and try again.",
                         variant: "destructive",
                       });
+                      router.refresh();
                     } finally {
                       setUpdatingDealStatusId(null);
                     }
@@ -2642,9 +2666,17 @@ export function SavedAnalysesPage({
       return;
     }
     compareRequestInFlightRef.current = true;
+    const requestToken = Symbol("saved-deals-compare");
+    compareRequestRef.current = requestToken;
+    const requestStillOwnsPage = () =>
+      isCurrentMountedMutation({
+        requestToken,
+        currentRequestToken: compareRequestRef.current,
+      });
     startCompareTransition(async () => {
       try {
         const result = await startCompareAction(selectedIds);
+        if (!requestStillOwnsPage()) return;
         if (!result.ok) {
           toast({
             title:
@@ -2659,6 +2691,7 @@ export function SavedAnalysesPage({
         }
         router.push("/dashboard/compare");
       } catch (err) {
+        if (!requestStillOwnsPage()) return;
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, stale-deploy Server Action). Without this the Compare
         // button spinner clears with no navigation and no signal.
@@ -2670,7 +2703,10 @@ export function SavedAnalysesPage({
           variant: "destructive",
         });
       } finally {
-        compareRequestInFlightRef.current = false;
+        if (compareRequestRef.current === requestToken) {
+          compareRequestRef.current = null;
+          compareRequestInFlightRef.current = false;
+        }
       }
     });
   };

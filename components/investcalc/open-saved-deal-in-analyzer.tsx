@@ -19,11 +19,14 @@
  * intentionally create a second working context. It returns an ok-union
  * instead of toasting so each caller keeps its own error UI.
  */
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Eye, Loader2, PencilLine, RefreshCw } from "lucide-react";
 import { getSavedDealForEditingAction } from "@/app/actions/saved-analyses";
-import { addScenarioAction } from "@/app/actions/scenarios";
+import {
+  addScenarioAction,
+  type AddScenarioResult,
+} from "@/app/actions/scenarios";
 import { useToast } from "@/hooks/use-toast";
 import { normalizeMaoTarget } from "@/lib/mao-target-editor";
 import {
@@ -63,6 +66,31 @@ export const DEAL_DUPLICATE_HANDOFF_PARAM = "dealDuplicate";
  * popup-blocker prompt still finds its payload.
  */
 const HANDOFF_PAYLOAD_TTL_MS = 60 * 60 * 1000;
+
+type AddScenarioFailureCode = Extract<
+  AddScenarioResult,
+  { ok: false }
+>["code"];
+
+/** A typed non-server result proves the scenario INSERT did not ambiguously
+ * commit. Rotate both the generated name and request UUID on the next click;
+ * SERVER_ERROR and thrown/network failures keep the durable retry identity. */
+export function shouldRotateReunderwriteScenarioRequest(
+  code: AddScenarioFailureCode,
+): boolean {
+  switch (code) {
+    case "SIGN_IN_REQUIRED":
+    case "ENTITLEMENT_REQUIRED":
+    case "ENTITLEMENT_SAVE":
+    case "MIGRATION_PENDING":
+    case "NOT_FOUND":
+    case "DUPLICATE_SCENARIO_NAME":
+    case "VALIDATION_ERROR":
+      return true;
+    case "SERVER_ERROR":
+      return false;
+  }
+}
 
 export const POPUP_BLOCKED_MESSAGE =
   "Your browser blocked the new tab. Allow pop-ups for TrueCap, then try again.";
@@ -333,9 +361,49 @@ export function ReunderwriteAsScenarioButton({
 }) {
   const { toast } = useToast();
   const [isOpening, setIsOpening] = useState(false);
+  const pendingScenarioRequestRef = useRef<{
+    sourceDealId: string;
+    scenarioName: string;
+    clientRequestId: string;
+  } | null>(null);
+  const scenarioRequestSequenceRef = useRef(0);
+  const activeSavedDealIdRef = useRef<string | null>(savedDealId);
+  const activeReunderwriteRequestRef = useRef<{
+    dealId: string;
+    requestToken: symbol;
+    targetWindow: Window;
+  } | null>(null);
+
+  useLayoutEffect(() => {
+    const priorRequest = activeReunderwriteRequestRef.current;
+    if (priorRequest && priorRequest.dealId !== savedDealId) {
+      priorRequest.targetWindow.close();
+    }
+    activeSavedDealIdRef.current = savedDealId;
+    activeReunderwriteRequestRef.current = null;
+    pendingScenarioRequestRef.current = null;
+    scenarioRequestSequenceRef.current = 0;
+    setIsOpening(false);
+    return () => {
+      if (activeSavedDealIdRef.current !== savedDealId) return;
+      const activeRequest = activeReunderwriteRequestRef.current;
+      activeSavedDealIdRef.current = null;
+      activeReunderwriteRequestRef.current = null;
+      pendingScenarioRequestRef.current = null;
+      scenarioRequestSequenceRef.current = 0;
+      activeRequest?.targetWindow.close();
+    };
+  }, [savedDealId]);
 
   const handleClick = () => {
-    if (isOpening) return;
+    const dealIdAtStart = savedDealId;
+    if (
+      isOpening ||
+      activeReunderwriteRequestRef.current ||
+      activeSavedDealIdRef.current !== dealIdAtStart
+    ) {
+      return;
+    }
     const targetWindow = openAnalyzerHandoffWindow();
     if (!targetWindow) {
       toast({
@@ -345,26 +413,59 @@ export function ReunderwriteAsScenarioButton({
       });
       return;
     }
+    const requestToken = Symbol("reunderwrite-scenario");
+    activeReunderwriteRequestRef.current = {
+      dealId: dealIdAtStart,
+      requestToken,
+      targetWindow,
+    };
+    const requestStillOwnsDeal = () =>
+      activeSavedDealIdRef.current === dealIdAtStart &&
+      activeReunderwriteRequestRef.current?.requestToken === requestToken;
     setIsOpening(true);
     void (async () => {
       try {
-        const now = new Date();
-        const scenarioName = `Copy ${now.toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-        })} ${now.toLocaleTimeString("en-US", {
-          hour: "numeric",
-          minute: "2-digit",
-          second: "2-digit",
-        })}`;
+        let request = pendingScenarioRequestRef.current;
+        if (!request || request.sourceDealId !== dealIdAtStart) {
+          const now = new Date();
+          const requestSequence = scenarioRequestSequenceRef.current + 1;
+          scenarioRequestSequenceRef.current = requestSequence;
+          const sequenceSuffix =
+            requestSequence > 1 ? ` (${requestSequence})` : "";
+          request = {
+            sourceDealId: dealIdAtStart,
+            scenarioName: `Copy ${now.toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })} ${now.toLocaleTimeString("en-US", {
+              hour: "numeric",
+              minute: "2-digit",
+              second: "2-digit",
+            })}${sequenceSuffix}`,
+            clientRequestId: crypto.randomUUID(),
+          };
+          pendingScenarioRequestRef.current = request;
+        }
         const cloned = await addScenarioAction({
-          sourceDealId: savedDealId,
-          scenarioName,
+          sourceDealId: dealIdAtStart,
+          clientRequestId: request.clientRequestId,
+          scenarioName: request.scenarioName,
           strategyKind: null,
         });
+        if (!requestStillOwnsDeal()) {
+          targetWindow.close();
+          return;
+        }
         if (!cloned.ok) {
           targetWindow?.close();
+          if (
+            shouldRotateReunderwriteScenarioRequest(cloned.code) &&
+            pendingScenarioRequestRef.current?.clientRequestId ===
+              request.clientRequestId
+          ) {
+            pendingScenarioRequestRef.current = null;
+          }
           toast({
             title: "Could not duplicate this deal",
             description: cloned.message,
@@ -376,14 +477,29 @@ export function ReunderwriteAsScenarioButton({
           cloned.scenarioId,
           targetWindow,
         );
+        if (!requestStillOwnsDeal()) {
+          targetWindow.close();
+          return;
+        }
         if (!opened.ok) {
           toast({
             title: "Scenario created, but could not open it",
             description: opened.message,
             variant: "destructive",
           });
+          return;
+        }
+        if (
+          pendingScenarioRequestRef.current?.clientRequestId ===
+          request.clientRequestId
+        ) {
+          pendingScenarioRequestRef.current = null;
         }
       } catch {
+        if (!requestStillOwnsDeal()) {
+          targetWindow.close();
+          return;
+        }
         targetWindow?.close();
         toast({
           title: "Could not duplicate this deal",
@@ -391,7 +507,10 @@ export function ReunderwriteAsScenarioButton({
           variant: "destructive",
         });
       } finally {
-        setIsOpening(false);
+        if (requestStillOwnsDeal()) {
+          activeReunderwriteRequestRef.current = null;
+          setIsOpening(false);
+        }
       }
     })();
   };

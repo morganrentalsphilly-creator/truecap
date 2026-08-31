@@ -12,14 +12,13 @@ import { toServerErrorResult } from "@/lib/db-error";
  */
 
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import {
+  cleanDealLabel,
+  normalizeDealLabelsPatch,
+  type DealLabels,
+} from "@/lib/deal-labels";
 
-const MAX_LABEL = 80;
-
-export type DealLabels = {
-  nickname: string | null;
-  market: string | null;
-  neighborhood: string | null;
-};
+export type { DealLabels } from "@/lib/deal-labels";
 
 export type DealLabelsResult =
   | { ok: true; labels: DealLabels }
@@ -33,17 +32,15 @@ function isMissingLabelColumn(error: { code?: string; message?: string }): boole
   return error.code === "42703" || /column .* does not exist/i.test(error.message ?? "");
 }
 
-function clean(value: unknown): string | null {
-  if (typeof value !== "string") return null;
-  const trimmed = value.trim().slice(0, MAX_LABEL);
-  return trimmed.length > 0 ? trimmed : null;
-}
-
 function readLabels(row: Record<string, unknown>): DealLabels {
   return {
-    nickname: clean(row.nickname),
-    market: clean(row.market),
-    neighborhood: clean(row.neighborhood),
+    nickname:
+      typeof row.nickname === "string" ? cleanDealLabel(row.nickname) : null,
+    market: typeof row.market === "string" ? cleanDealLabel(row.market) : null,
+    neighborhood:
+      typeof row.neighborhood === "string"
+        ? cleanDealLabel(row.neighborhood)
+        : null,
   };
 }
 
@@ -75,7 +72,7 @@ export async function getDealLabelsAction(id: string): Promise<DealLabelsResult>
 
 export async function updateDealLabelsAction(
   id: string,
-  input: { nickname?: string | null; market?: string | null; neighborhood?: string | null }
+  input: unknown,
 ): Promise<DealLabelsResult> {
   const supabase = await createServerSupabaseClient();
   const {
@@ -87,10 +84,15 @@ export async function updateDealLabelsAction(
 
   // PARTIAL update — only touch the keys actually provided, so editing one
   // field on blur never clobbers another field the caller didn't send.
-  const patch: Record<string, string | null> = {};
-  if ("nickname" in input) patch.nickname = clean(input.nickname);
-  if ("market" in input) patch.market = clean(input.market);
-  if ("neighborhood" in input) patch.neighborhood = clean(input.neighborhood);
+  const normalized = normalizeDealLabelsPatch(input);
+  if (!normalized.ok) {
+    return {
+      ok: false,
+      code: "VALIDATION_ERROR",
+      message: "Invalid deal details.",
+    };
+  }
+  const patch = normalized.patch;
   if (Object.keys(patch).length === 0) {
     return getDealLabelsAction(dealId);
   }

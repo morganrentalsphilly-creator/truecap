@@ -17,6 +17,7 @@ import { useState } from "react";
 import { Loader2, Sparkles, WandSparkles } from "lucide-react";
 import Link from "next/link";
 import { generateDealSummaryAction } from "@/app/actions/deal-summary";
+import { useExpectedAccountUserId } from "@/components/auth/account-session-boundary";
 import { trackEvent } from "@/lib/analytics";
 import type { DealQaExtraContext } from "@/lib/deal-qa-context";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
@@ -31,6 +32,7 @@ export function DealSummaryCard({
    *  own criteria. Absent pieces are omitted. */
   context?: DealQaExtraContext;
 }) {
+  const expectedUserId = useExpectedAccountUserId();
   const [summary, setSummary] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -42,7 +44,10 @@ export function DealSummaryCard({
     setNotice(null);
     trackEvent("deal_summary_generated", {});
     try {
-      const result = await generateDealSummaryAction({ values, context });
+      const result = await generateDealSummaryAction(
+        { values, context },
+        expectedUserId,
+      );
       if (result.ok) {
         setSummary(result.summary);
         if (result.remainingToday !== null && result.remainingToday <= 1) {

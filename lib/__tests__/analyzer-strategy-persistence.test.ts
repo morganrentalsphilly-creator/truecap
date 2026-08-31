@@ -11,8 +11,10 @@ import {
   resolveAnalyzerStrategyForPersistence,
   resolveCompatibleAnalyzerStrategyKey,
   resolveScenarioAnalyzerStrategyKey,
+  scenarioAnalyzerStrategyKey,
 } from "@/lib/analyzer-strategy-persistence";
 import { INVESTOR_STRATEGIES } from "@/lib/investor-strategies";
+import { STRATEGY_KINDS } from "@/lib/strategy-kinds";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -128,6 +130,25 @@ describe("analyzer strategy persistence", () => {
         values: { propertyType: "owner-occupant" },
       }),
     ).toBe("house-hack");
+  });
+
+  it("maps every released scenario vocabulary entry to an explicit destination lens", () => {
+    expect(
+      Object.fromEntries(
+        STRATEGY_KINDS.map((kind) => [
+          kind,
+          scenarioAnalyzerStrategyKey(kind),
+        ]),
+      ),
+    ).toEqual({
+      buy_hold: "buy-hold",
+      house_hack: "house-hack",
+      brrrr: "brrrr",
+      flip: "fix-flip",
+      section_8: "buy-hold",
+      mtr: "buy-hold",
+      str: "short-term",
+    });
   });
 
   it("preserves an existing specialist identity when an older update caller omits the option", () => {

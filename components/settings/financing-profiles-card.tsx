@@ -22,6 +22,7 @@ import {
   updateFinancingProfileAction,
   type FinancingProfilesActionResult,
 } from "@/app/actions/financing-profiles";
+import { useExpectedAccountUserId } from "@/components/auth/account-session-boundary";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -190,6 +191,7 @@ function profileTerms(profile: FinancingProfile): string {
 }
 
 export function FinancingProfilesCard() {
+  const expectedUserId = useExpectedAccountUserId();
   const { toast } = useToast();
   const [profiles, setProfiles] = useState<FinancingProfile[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -272,7 +274,7 @@ export function FinancingProfilesCard() {
         const payload = editorToInput(editor);
         const result = editor.id
           ? await updateFinancingProfileAction(editor.id, payload)
-          : await createFinancingProfileAction(payload);
+          : await createFinancingProfileAction(payload, expectedUserId);
         if (applyResult(result, editor.id ? "Financing profile updated" : "Financing profile created")) {
           if (!editor.id) trackEvent("financing_profile_created", { loan_type: payload.loanType });
           closeEditor();

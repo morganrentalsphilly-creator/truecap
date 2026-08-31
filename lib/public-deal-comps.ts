@@ -19,16 +19,25 @@ import "server-only";
 
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { enrichmentToReportComps, type ReportComps } from "@/lib/report-comps";
-import type { PropertyEnrichment } from "@/lib/property-enrichment/rentcast";
+import { readBoundPropertyCompsPayload } from "@/lib/property-comps-query";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function getPublicDealComps(
   dealId: string | undefined | null,
   ownerId: string | undefined | null,
+  expectedUnderwritingFingerprint: string,
 ): Promise<ReportComps | null> {
   // Both are uuid columns — reject malformed ids before any DB round-trip.
-  if (!dealId || !ownerId || !UUID_RE.test(dealId) || !UUID_RE.test(ownerId)) return null;
+  if (
+    !dealId ||
+    !ownerId ||
+    !UUID_RE.test(dealId) ||
+    !UUID_RE.test(ownerId) ||
+    !expectedUnderwritingFingerprint
+  ) {
+    return null;
+  }
   try {
     const admin = createAdminSupabaseClient();
     const { data } = await admin
@@ -38,7 +47,11 @@ export async function getPublicDealComps(
       .maybeSingle();
     // Only show comps that genuinely belong to the link's claimed owner.
     if (!data || data.user_id !== ownerId) return null;
-    return enrichmentToReportComps(data.payload as PropertyEnrichment | null);
+    const enrichment = readBoundPropertyCompsPayload(
+      data.payload,
+      expectedUnderwritingFingerprint,
+    );
+    return enrichmentToReportComps(enrichment);
   } catch {
     return null;
   }

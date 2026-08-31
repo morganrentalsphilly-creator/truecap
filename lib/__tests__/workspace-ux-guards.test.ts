@@ -41,7 +41,7 @@ describe("decision workspace UX guards", () => {
     expect(source).not.toMatch(/>\s*Best upside\s*</i);
   });
 
-  it("confirms a user-recorded Pass and restores the exact prior stage on Undo", () => {
+  it("confirms a user-recorded Pass and conditionally restores the exact prior stage on Undo", () => {
     const workspace = read("components/investcalc/deal-stage-select.tsx");
     const list = read("components/investcalc/saved-analyses-page-v2.tsx");
     const compare = read("components/investcalc/compare-deals-client.tsx");
@@ -52,7 +52,7 @@ describe("decision workspace UX guards", () => {
       "confirmPipelineStageChange({",
     );
     const workspaceWrite = normalizedWorkspace.indexOf(
-      "updateSavedDealStageAction(savedDealId,next,",
+      "updateSavedDealStageAction(dealAtSubmit,next,",
     );
     const listConfirmation = normalizedList.indexOf("confirmPipelineStageChange({");
     const listWrite = normalizedList.indexOf(
@@ -77,17 +77,26 @@ describe("decision workspace UX guards", () => {
     );
     expect(normalizedWorkspace).toContain(
       normalizeSource(
-        'updateSavedDealStageAction(savedDealId, stage, { note: "Pass decision undone." })',
+        'undoPassedSavedDealStageAction(dealAtSubmit, stageAtSubmit, passHistoryEventId, { note: "Pass decision undone." })',
       ),
+    );
+    expect(workspace).toContain(
+      'next === "passed" && passHistoryEventId',
     );
     expect(list).toContain("previousStage: PipelineStage");
     expect(normalizedList).toContain(
       normalizeSource(
-        'updateSavedDealStageAction(id, previousStage, { note: "Pass decision undone." })',
+        'undoPassedSavedDealStageAction(id, previousStage, passHistoryEventId, { note: "Pass decision undone." })',
       ),
     );
+    expect(list).toContain('stage === "passed" && passHistoryEventId');
     expect(list).toContain('altText="Undo marking deal as Passed"');
     expect(list).toContain('className="min-h-11"');
+    for (const source of [workspace, list]) {
+      expect(source).toContain('undo.code === "STALE_DATA"');
+      expect(source).toContain('title: "Undo expired"');
+      expect(source).toContain("router.refresh()");
+    }
     expect(compare).not.toMatch(/Mark all.*Passed/i);
     expect(compare).not.toContain("Near-term score");
     expect(compare).not.toContain("Long-term score");

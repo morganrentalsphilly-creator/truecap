@@ -17,6 +17,10 @@ import { toServerErrorResult } from "@/lib/db-error";
  */
 import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import {
+  accountSessionChangedResult,
+  expectedAccountUserMatches,
+} from "@/lib/account-session-binding";
 
 // NOTE: schema must NOT be exported — Next.js requires "use server"
 // files to export only async functions. A runtime object export
@@ -49,7 +53,12 @@ export type UserDefaultsActionResult =
   | { ok: true; preferences: UserAnalysisDefaults }
   | {
       ok: false;
-      code: "SIGN_IN_REQUIRED" | "MIGRATION_PENDING" | "VALIDATION_ERROR" | "SERVER_ERROR";
+      code:
+        | "SIGN_IN_REQUIRED"
+        | "SESSION_CHANGED"
+        | "MIGRATION_PENDING"
+        | "VALIDATION_ERROR"
+        | "SERVER_ERROR";
       message: string;
     };
 
@@ -92,7 +101,8 @@ export async function getUserAnalysisDefaultsAction(): Promise<UserDefaultsActio
  * subsequent calls overwrite. Returns the saved payload on success.
  */
 export async function saveUserAnalysisDefaultsAction(
-  input: unknown
+  input: unknown,
+  expectedUserId: unknown,
 ): Promise<UserDefaultsActionResult> {
   const parsed = userDefaultsSchema.safeParse(input);
   if (!parsed.success) {
@@ -108,6 +118,9 @@ export async function saveUserAnalysisDefaultsAction(
   } = await supabase.auth.getUser();
   if (!user) {
     return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
+  }
+  if (!expectedAccountUserMatches(expectedUserId, user.id)) {
+    return accountSessionChangedResult();
   }
   const { error } = await supabase
     .from("user_analysis_defaults")

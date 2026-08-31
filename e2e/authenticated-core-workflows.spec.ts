@@ -1,12 +1,70 @@
 import { readFile } from "node:fs/promises";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import {
+  buildAnalysisPdfObjectPath,
+  PDF_CACHE_VERSION,
+} from "@/lib/pdf-export-constants";
 import { resolveAuthenticatedE2EEnvironment } from "./support/auth-environment";
 import {
   acceptCookiesIfShown,
-  deleteRegressionDealsByAddress,
   expectNoHorizontalOverflow,
   saveUniqueSampleDeal,
 } from "./support/product-flows";
+
+function signedDealDocumentObjectPath(
+  responseUrl: string,
+  ownerId: string,
+  dealId: string,
+  displayFileName: string,
+): string | null {
+  let url: URL;
+  try {
+    url = new URL(responseUrl);
+  } catch {
+    return null;
+  }
+
+  if (!url.searchParams.has("token")) return null;
+
+  let pathname: string;
+  try {
+    pathname = decodeURIComponent(url.pathname);
+  } catch {
+    return null;
+  }
+
+  const objectPrefix = `/storage/v1/object/sign/deal-documents/${ownerId}/${dealId}/`;
+  if (!pathname.startsWith(objectPrefix)) return null;
+
+  const objectName = pathname.slice(objectPrefix.length);
+  const storedName = objectName.match(/^\d+-(.+)$/);
+  if (!storedName || storedName[1] !== displayFileName) return null;
+
+  return `${ownerId}/${dealId}/${objectName}`;
+}
+
+async function bestEffortCleanup<T>(
+  operation: () => PromiseLike<T>,
+  timeoutMs = 2_000,
+): Promise<T | null> {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  const operationPromise = Promise.resolve().then(operation);
+  const timeoutPromise = new Promise<never>((_resolve, reject) => {
+    timeout = setTimeout(
+      () => reject(new Error("Best-effort cleanup timed out.")),
+      timeoutMs,
+    );
+  });
+
+  try {
+    return await Promise.race([operationPromise, timeoutPromise]);
+  } catch {
+    return null;
+  } finally {
+    if (timeout) clearTimeout(timeout);
+  }
+}
 
 const authEnvironment = resolveAuthenticatedE2EEnvironment(process.env);
 const authSkipReason = authEnvironment.enabled
@@ -321,12 +379,102 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
   const scenarioNote = `Verify roof scope for ${runKey}.`;
   const queuedScenarioNote = `Confirm sewer scope for ${runKey}.`;
   let baseDealId: string | null = null;
+  let uploadedDocumentName: string | null = null;
+  let uploadedDocumentObjectPath: string | null = null;
   let notesRoutePattern: string | null = null;
+  let storageProbeClient: SupabaseClient | null = null;
+  let storageProbeOwnerId: string | null = null;
+  let openedDocumentPopup: Page | null = null;
+  const storageProbeObjects: Array<{ bucket: string; path: string }> = [];
   const notesSaveGate = { release: null as (() => void) | null };
 
   try {
     await page.setViewportSize({ width: 390, height: 844 });
+    if (!authEnvironment.enabled) {
+      throw new Error("The isolated authenticated environment is required.");
+    }
+    const storageUrl = process.env.E2E_SUPABASE_URL?.trim();
+    const storageAnonKey = process.env.E2E_SUPABASE_ANON_KEY?.trim();
+    if (!storageUrl || !storageAnonKey) {
+      throw new Error("The isolated Supabase Storage environment is required.");
+    }
+    storageProbeClient = createClient(storageUrl, storageAnonKey, {
+      auth: {
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+        persistSession: false,
+      },
+    });
+    const { data: probeAuth, error: probeAuthError } =
+      await storageProbeClient.auth.signInWithPassword({
+        email: authEnvironment.email,
+        password: authEnvironment.password,
+      });
+    expect(probeAuthError).toBeNull();
+    const probeOwnerId = probeAuth.user?.id;
+    expect(probeOwnerId).toBeTruthy();
+    if (!probeOwnerId) throw new Error("The Storage probe user was not returned.");
+    storageProbeOwnerId = probeOwnerId;
+
+    // Bootstrap the owner-scoped cleanup client before creating any durable
+    // fixture. If the browser save partially succeeds and then throws, finally
+    // can still soft-delete by owner + unique address even without a returned
+    // deal id; failed Storage env/auth bootstrap creates nothing to leak.
     baseDealId = await saveUniqueSampleDeal(page, address);
+
+    // Exercise the byte-limit boundary at Storage itself. The UI has an early
+    // guard too, but a hostile client can bypass an input element entirely.
+    const oversizedObjectPath = `${probeOwnerId}/${baseDealId}/oversized-${runKey}.pdf`;
+    storageProbeObjects.push({
+      bucket: "deal-documents",
+      path: oversizedObjectPath,
+    });
+    const { error: oversizedStorageError } = await storageProbeClient.storage
+      .from("deal-documents")
+      .upload(oversizedObjectPath, Buffer.alloc(10 * 1024 * 1024 + 1), {
+        contentType: "application/pdf",
+        upsert: false,
+    });
+    expect(oversizedStorageError).not.toBeNull();
+    expect(oversizedStorageError?.message).toMatch(
+      /maximum allowed size|payload too large|entity too large/i,
+    );
+
+    // The PDF cache uses upsert:true. Uploading the exact same authorized key
+    // twice proves both the INSERT and UPDATE RLS probes work with the Storage
+    // service's transient metadata shape.
+    const pdfCachePath = buildAnalysisPdfObjectPath(
+      probeOwnerId,
+      baseDealId,
+      PDF_CACHE_VERSION,
+      "a".repeat(32),
+      "b".repeat(64),
+    );
+    storageProbeObjects.push({ bucket: "analysis-pdfs", path: pdfCachePath });
+    for (const marker of ["initial", "replacement"]) {
+      const { error } = await storageProbeClient.storage
+        .from("analysis-pdfs")
+        .upload(
+          pdfCachePath,
+          Buffer.from(`%PDF-1.4\n% TrueCap ${marker} cache policy probe\n`),
+          { contentType: "application/pdf", upsert: true },
+        );
+      expect(error, `${marker} analysis PDF cache upload`).toBeNull();
+    }
+    const { data: cachedPdf, error: cachedPdfError } =
+      await storageProbeClient.storage.from("analysis-pdfs").download(pdfCachePath);
+    expect(cachedPdfError).toBeNull();
+    expect(cachedPdf).not.toBeNull();
+    if (!cachedPdf) throw new Error("The cached PDF probe was not returned.");
+    await expect(cachedPdf.text()).resolves.toContain("replacement cache policy probe");
+    const { error: removeCachedPdfError } = await storageProbeClient.storage
+      .from("analysis-pdfs")
+      .remove([pdfCachePath]);
+    expect(removeCachedPdfError).toBeNull();
+    const cachedPdfIndex = storageProbeObjects.findIndex(
+      (object) => object.path === pdfCachePath,
+    );
+    if (cachedPdfIndex >= 0) storageProbeObjects.splice(cachedPdfIndex, 1);
 
     await page.goto("/dashboard", { waitUntil: "domcontentloaded" });
     await expect(
@@ -409,6 +557,144 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
       page.getByText("Max 10 MB per file.", { exact: true }),
     ).toBeVisible();
 
+    // `accept` is only a browser hint, so prove the private bucket itself
+    // rejects a disallowed MIME type before testing the valid lifecycle.
+    const blockedDocumentName = `blocked-${runKey}.exe`;
+    await documentInput.setInputFiles({
+      name: blockedDocumentName,
+      mimeType: "application/x-msdownload",
+      buffer: Buffer.from("not an allowed deal document"),
+    });
+    await expect(
+      page.getByText("Upload failed", { exact: true }),
+    ).toBeVisible({ timeout: 30_000 });
+    await expect(
+      documents.getByText(blockedDocumentName, { exact: true }),
+    ).toHaveCount(0);
+
+    // The old regression stopped at the client-side size check, so CI never
+    // reached Storage RLS and stayed green while every real upload failed in
+    // production. Exercise the complete private-object lifecycle with a small
+    // valid PDF: upload, list, signed download, confirm-gated delete.
+    const validDocumentName = `e2e-deal-document-${runKey}.pdf`;
+    // Track before the upload starts: if Storage succeeds but the following
+    // toast/list assertion fails, finally still attempts object cleanup.
+    uploadedDocumentName = validDocumentName;
+    await documentInput.setInputFiles({
+      name: validDocumentName,
+      mimeType: "application/pdf",
+      buffer: Buffer.from("%PDF-1.4\n% TrueCap authenticated storage regression\n"),
+    });
+    await expect(
+      page.getByText("Document uploaded", { exact: true }),
+    ).toBeVisible({ timeout: 30_000 });
+    await expect(
+      documents.getByText(validDocumentName, { exact: true }),
+    ).toBeVisible();
+
+    const documentDealId = baseDealId;
+    if (!documentDealId) {
+      throw new Error("The saved deal ID was not available for document download.");
+    }
+    const signedDocumentResponsePromise = page.context().waitForEvent("response", {
+      predicate: (response) => {
+        return (
+          response.request().method() === "GET" &&
+          signedDealDocumentObjectPath(
+            response.url(),
+            probeOwnerId,
+            documentDealId,
+            validDocumentName,
+          ) !== null
+        );
+      },
+      timeout: 20_000,
+    });
+    const documentPopupPromise = page
+      .waitForEvent("popup", { timeout: 20_000 })
+      .then((popup) => {
+        openedDocumentPopup = popup;
+        return popup;
+      });
+    await documents
+      .getByRole("button", { name: `Download ${validDocumentName}`, exact: true })
+      .click();
+    const [documentPopup, signedDocumentResponse] = await Promise.all([
+      documentPopupPromise,
+      signedDocumentResponsePromise,
+    ]);
+    expect(signedDocumentResponse.ok()).toBe(true);
+    expect(signedDocumentResponse.headers()["content-type"]).toContain(
+      "application/pdf",
+    );
+    uploadedDocumentObjectPath = signedDealDocumentObjectPath(
+      signedDocumentResponse.url(),
+      probeOwnerId,
+      documentDealId,
+      validDocumentName,
+    );
+    expect(uploadedDocumentObjectPath).not.toBeNull();
+    if (!uploadedDocumentObjectPath) {
+      throw new Error("The signed document response did not expose its object path.");
+    }
+    storageProbeObjects.push({
+      bucket: "deal-documents",
+      path: uploadedDocumentObjectPath,
+    });
+    await documentPopup.close();
+    openedDocumentPopup = null;
+
+    await documents
+      .getByRole("button", { name: `Delete ${validDocumentName}`, exact: true })
+      .click();
+    const deleteDocumentPopover = page
+      .getByText("Delete this document?", { exact: true })
+      .locator("xpath=ancestor::*[@data-radix-popper-content-wrapper]");
+    await expect(deleteDocumentPopover).toBeVisible();
+    await deleteDocumentPopover
+      .getByRole("button", { name: "Delete", exact: true })
+      .click();
+    await expect(
+      page.getByText("Document deleted", { exact: true }),
+    ).toBeVisible({ timeout: 30_000 });
+    await expect(
+      documents.getByText(validDocumentName, { exact: true }),
+    ).toHaveCount(0);
+    const uploadedDocumentIndex = storageProbeObjects.findIndex(
+      (object) =>
+        object.bucket === "deal-documents" &&
+        object.path === uploadedDocumentObjectPath,
+    );
+    if (uploadedDocumentIndex >= 0) {
+      storageProbeObjects.splice(uploadedDocumentIndex, 1);
+    }
+    uploadedDocumentName = null;
+    uploadedDocumentObjectPath = null;
+
+    const commentBody = `E2E seller update ${runKey}`;
+    const commentLog = page.getByRole("region", { name: "Deal comments" });
+    await expect(commentLog).toBeVisible();
+    await commentLog.getByLabel("Add a deal comment").fill(commentBody);
+    await commentLog
+      .getByRole("button", { name: "Add comment", exact: true })
+      .click();
+    await expect(
+      commentLog.getByText(commentBody, { exact: true }),
+    ).toBeVisible({ timeout: 20_000 });
+    await commentLog
+      .getByRole("button", { name: "Delete comment", exact: true })
+      .click();
+    const deleteCommentPopover = page
+      .getByText("Delete this comment?", { exact: true })
+      .locator("xpath=ancestor::*[@data-radix-popper-content-wrapper]");
+    await expect(deleteCommentPopover).toBeVisible();
+    await deleteCommentPopover
+      .getByRole("button", { name: "Delete", exact: true })
+      .click();
+    await expect(
+      commentLog.getByText(commentBody, { exact: true }),
+    ).toHaveCount(0);
+
     const scenarios = page
       .getByRole("heading", { level: 2, name: "Scenarios" })
       .locator("xpath=ancestor::section");
@@ -416,6 +702,12 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
       .getByRole("button", { name: "Add a scenario", exact: true })
       .click();
     await scenarios.getByLabel("Scenario name").fill(scenarioName);
+    await scenarios
+      .getByLabel("Strategy (optional)")
+      .selectOption("house_hack");
+    await expect(
+      scenarios.getByText(/Sets down payment to 3\.5%.*choose House Hack/i),
+    ).toBeVisible();
     await scenarios
       .getByRole("button", { name: "Add scenario", exact: true })
       .click();
@@ -425,7 +717,16 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
       timeout: 30_000,
     });
     await expect(
+      page.getByText(
+        "The copy is ready. Open its workspace, edit assumptions, and choose House hack to complete the visible strategy setup.",
+        { exact: true },
+      ),
+    ).toBeVisible();
+    await expect(
       scenarios.getByText(scenarioName, { exact: true }),
+    ).toBeVisible();
+    await expect(
+      scenarios.getByText("House hack", { exact: true }),
     ).toBeVisible();
 
     await page.reload({ waitUntil: "domcontentloaded" });
@@ -435,6 +736,12 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
         .filter({ visible: true })
         .first(),
     ).toBeVisible({ timeout: 20_000 });
+    await expect(
+      page
+        .getByText("House hack", { exact: true })
+        .filter({ visible: true })
+        .first(),
+    ).toBeVisible();
     const scenarioWorkspaceLink = page.getByRole("link", {
       name: `Open ${scenarioName} workspace`,
     });
@@ -451,6 +758,19 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
       }),
       scenarioWorkspaceLink.click(),
     ]);
+
+    await expect(
+      page
+        .getByText("House hack", { exact: true })
+        .filter({ visible: true })
+        .first(),
+    ).toBeVisible({ timeout: 20_000 });
+    await expect(
+      page.getByText(
+        "Independent House hack starting copy — open it to verify and complete the strategy inputs.",
+        { exact: true },
+      ),
+    ).toBeVisible();
 
     const notes = page.getByRole("textbox", {
       name: "Deal notes",
@@ -567,10 +887,80 @@ test("saved deal moves through dashboard, durable scenario workspace, comparison
   } finally {
     notesSaveGate.release?.();
     if (notesRoutePattern) {
-      await page.unroute(notesRoutePattern).catch(() => undefined);
+      const routePattern = notesRoutePattern;
+      await bestEffortCleanup(() => page.unroute(routePattern), 1_000);
     }
-    if (baseDealId) {
-      await deleteRegressionDealsByAddress(page, address);
+    if (openedDocumentPopup && !openedDocumentPopup.isClosed()) {
+      await bestEffortCleanup(() => openedDocumentPopup!.close(), 1_000);
+    }
+    if (storageProbeClient) {
+      if (baseDealId && storageProbeOwnerId && uploadedDocumentName) {
+        // If the upload completed before its signed GET revealed the generated
+        // timestamped key, resolve that exact object through Storage itself.
+        // This never depends on a live Playwright page or browser context.
+        const objectDirectory = `${storageProbeOwnerId}/${baseDealId}`;
+        const listedObjects = await bestEffortCleanup(
+          () =>
+            storageProbeClient!.storage
+              .from("deal-documents")
+              .list(objectDirectory, { limit: 100 }),
+          3_000,
+        );
+        for (const object of listedObjects?.data ?? []) {
+          if (
+            object.name === uploadedDocumentName ||
+            object.name.endsWith(`-${uploadedDocumentName}`)
+          ) {
+            storageProbeObjects.push({
+              bucket: "deal-documents",
+              path: `${objectDirectory}/${object.name}`,
+            });
+          }
+        }
+      }
+
+      const cleanupObjects = Array.from(
+        new Map(
+          storageProbeObjects.map((object) => [
+            `${object.bucket}:${object.path}`,
+            object,
+          ]),
+        ).values(),
+      ).reverse();
+      for (const object of cleanupObjects) {
+        await bestEffortCleanup(
+          () =>
+            storageProbeClient!.storage
+              .from(object.bucket)
+              .remove([object.path]),
+          3_000,
+        );
+      }
+
+      if (storageProbeOwnerId) {
+        // Mirror the product's soft-delete cleanup directly through the same
+        // authenticated, owner-scoped RLS path. Teardown must never navigate
+        // a page that the runner may already have closed after a failure.
+        await bestEffortCleanup(
+          () =>
+            storageProbeClient!
+              .from("saved_analyses")
+              .update({ deleted_at: new Date().toISOString() })
+              .eq("user_id", storageProbeOwnerId!)
+              .eq("address", address)
+              .is("deleted_at", null),
+          3_000,
+        );
+      }
+      // The probe shares the seeded user's credentials with the browser. A
+      // default (global) sign-out revokes the browser session too, which turns
+      // successful cleanup into an authentication failure for this test and
+      // every retry that reuses the saved state. Only discard this client's
+      // in-memory session.
+      await bestEffortCleanup(
+        () => storageProbeClient!.auth.signOut({ scope: "local" }),
+        2_000,
+      );
     }
   }
 });

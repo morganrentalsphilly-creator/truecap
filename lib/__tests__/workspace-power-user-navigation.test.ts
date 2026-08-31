@@ -36,7 +36,9 @@ describe("saved deal power-user navigation", () => {
     const card = read("components/investcalc/scenarios-card.tsx");
     const actions = read("app/actions/scenarios.ts");
 
-    expect(actions).toContain("isBase: row.scenario_name == null");
+    expect(actions).toContain("const normalizedScenarioName =");
+    expect(actions).toContain('normalizedScenarioName === "base case"');
+    expect(actions).toContain('scenarioName: isBase ? "Base case"');
     expect(card).toContain('isBase: true');
     expect(card).toContain("Base is the original saved analysis");
     expect(card).toContain("changing one never changes Base or another scenario");

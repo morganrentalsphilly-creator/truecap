@@ -64,4 +64,16 @@ describe("deal notes save lifecycle", () => {
       }),
     ).toBe(true);
   });
+
+  it("rejects a completion after layout cleanup unmounts the notes panel", () => {
+    const token = Symbol("unmounted-notes-save");
+    expect(
+      isCurrentDealNotesSave({
+        submittedDealId: "deal-a",
+        currentDealId: null,
+        requestToken: token,
+        currentRequestToken: null,
+      }),
+    ).toBe(false);
+  });
 });

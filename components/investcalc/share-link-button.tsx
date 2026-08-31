@@ -7,7 +7,13 @@
  * copy-to-clipboard button. Deal inputs never enter the URL.
  */
 
-import { useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Share2, Copy, Check, Loader2, LogIn, UserPlus } from "lucide-react";
@@ -40,12 +46,25 @@ import {
   serializeShareAuthIntent,
   SHARE_AUTH_INTENT_STORAGE_KEY,
 } from "@/lib/share-auth-intent";
+import { isCurrentMountedMutation } from "@/lib/deal-workspace-mutation-lifecycle";
+import { shareLinkSubjectFingerprint } from "@/lib/share-link-subject";
+import { createBrowserSupabaseClient } from "@/lib/supabase/client";
+import { getFreshSessionUser } from "@/lib/supabase/ensure-fresh-session";
+import { isCurrentShareAuthRequest } from "@/lib/share-auth-lifecycle";
 
 const SHARE_AUDIENCE_LABEL = {
   "investment-partner": "Partner",
   client: "Client",
   "lender-review": "Lender review",
 } as const;
+
+type ShareAuthIdentity = {
+  userId: string | null;
+  epoch: number;
+  status: "checking" | "ready" | "signed-out" | "unavailable";
+};
+
+type ShareIdentityVerification = "current" | "stale" | "unavailable";
 
 interface ShareLinkButtonProps {
   values: InvestmentFormValues | null;
@@ -94,6 +113,13 @@ export function ShareLinkButton({
   analyzerStrategyKey,
 }: ShareLinkButtonProps) {
   const pathname = usePathname();
+  const [supabase] = useState(() => createBrowserSupabaseClient());
+  const [authIdentity, setAuthIdentity] = useState<ShareAuthIdentity>(() => ({
+    userId: null,
+    epoch: 0,
+    status: isAuthenticated ? "checking" : "signed-out",
+  }));
+  const [authVerificationRetry, setAuthVerificationRetry] = useState(0);
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [shareUrl, setShareUrl] = useState<string>("");
@@ -124,10 +150,262 @@ export function ShareLinkButton({
     null,
   );
   const [showAllShares, setShowAllShares] = useState(false);
+  const firstSharesRequestRef = useRef<symbol | null>(null);
+  const createRequestRef = useRef<symbol | null>(null);
+  const revokeRequestRef = useRef<symbol | null>(null);
+  const olderSharesRequestRef = useRef<symbol | null>(null);
+  const activeShareSubjectRef = useRef<string | null>(null);
+  const authIdentityRef = useRef<ShareAuthIdentity>(authIdentity);
+  const authVerificationRef = useRef(0);
+  const observedAuthUserIdRef = useRef<string | null | undefined>(undefined);
+  const mountedRef = useRef(false);
+  const copiedResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
   const { toast } = useToast();
-  const needsSignIn = !isAuthenticated || sessionAuthRequired;
+  const authReady =
+    authIdentity.status === "ready" && authIdentity.userId !== null;
+  const needsSignIn =
+    authIdentity.status === "signed-out" ||
+    sessionAuthRequired ||
+    (!isAuthenticated && !authReady);
   const returnPath = resolveShareAuthReturnPath(pathname, context);
   const encodedReturnPath = encodeURIComponent(returnPath);
+  const shareSubjectFingerprint = shareLinkSubjectFingerprint({
+    values,
+    savedDealId,
+    maoTarget,
+    maoTargetSource,
+    adoptedDecisionBasis,
+    priceIsEstimated,
+    context,
+    analyzerStrategyKey,
+    isAuthenticated,
+    authenticatedUserId: authIdentity.userId,
+    authSessionEpoch: authIdentity.epoch,
+  });
+
+  // Server-rendered `isAuthenticated` is only a presentation hint. Resolve the
+  // exact browser identity before reading or mutating owner-wide share state,
+  // then invalidate synchronously when another tab signs out or changes users.
+  useLayoutEffect(() => {
+    mountedRef.current = true;
+
+    const clearAuthBoundShareState = () => {
+      activeShareSubjectRef.current = null;
+      firstSharesRequestRef.current = null;
+      createRequestRef.current = null;
+      revokeRequestRef.current = null;
+      olderSharesRequestRef.current = null;
+      if (copiedResetTimeoutRef.current !== null) {
+        clearTimeout(copiedResetTimeoutRef.current);
+        copiedResetTimeoutRef.current = null;
+      }
+      setOpen(false);
+      setCopied(false);
+      setShareUrl("");
+      setIncludeAddress(false);
+      setIsPreparing(false);
+      setSessionAuthRequired(false);
+      setMyShares(null);
+      setSharesListState("idle");
+      setNextSharesOffset(null);
+      setIsLoadingOlderShares(false);
+      setCreatedShare(null);
+      setRevokingId(null);
+      setConfirmingRevokeId(null);
+      setShowAllShares(false);
+    };
+
+    const verifyBrowserIdentity = async (
+      observedUserId?: string | null,
+    ) => {
+      const verificationToken = ++authVerificationRef.current;
+      const fresh = await getFreshSessionUser(supabase);
+      if (
+        !mountedRef.current ||
+        authVerificationRef.current !== verificationToken
+      ) {
+        return;
+      }
+
+      const current = authIdentityRef.current;
+      if (
+        fresh.ok &&
+        (observedUserId === undefined || observedUserId === fresh.userId)
+      ) {
+        const identityChanged =
+          current.userId !== null && current.userId !== fresh.userId;
+        if (identityChanged) clearAuthBoundShareState();
+        const next: ShareAuthIdentity = {
+          userId: fresh.userId,
+          epoch: identityChanged ? current.epoch + 1 : current.epoch,
+          status: "ready",
+        };
+        observedAuthUserIdRef.current = fresh.userId;
+        authIdentityRef.current = next;
+        setAuthIdentity(next);
+        return;
+      }
+
+      const nextStatus =
+        !fresh.ok && fresh.reason === "signed_out"
+          ? "signed-out"
+          : "unavailable";
+      const hadVerifiedIdentity = current.userId !== null;
+      if (hadVerifiedIdentity) clearAuthBoundShareState();
+      const next: ShareAuthIdentity = {
+        userId: null,
+        epoch: hadVerifiedIdentity ? current.epoch + 1 : current.epoch,
+        status: nextStatus,
+      };
+      authIdentityRef.current = next;
+      setAuthIdentity(next);
+    };
+
+    const {
+      data: { subscription: authSubscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mountedRef.current) return;
+      const observedUserId = session?.user?.id ?? null;
+      if (observedAuthUserIdRef.current === observedUserId) return;
+      observedAuthUserIdRef.current = observedUserId;
+
+      authVerificationRef.current += 1;
+      const current = authIdentityRef.current;
+      const next: ShareAuthIdentity = {
+        userId: null,
+        epoch: current.epoch + 1,
+        status: observedUserId ? "checking" : "signed-out",
+      };
+      authIdentityRef.current = next;
+      clearAuthBoundShareState();
+      setAuthIdentity(next);
+      if (observedUserId) void verifyBrowserIdentity(observedUserId);
+    });
+
+    void verifyBrowserIdentity();
+    return () => {
+      mountedRef.current = false;
+      authVerificationRef.current += 1;
+      authSubscription.unsubscribe();
+      activeShareSubjectRef.current = null;
+      firstSharesRequestRef.current = null;
+      createRequestRef.current = null;
+      revokeRequestRef.current = null;
+      olderSharesRequestRef.current = null;
+    };
+  }, [authVerificationRetry, isAuthenticated, supabase]);
+
+  const invalidateForServerAuthMismatch = useCallback(() => {
+    authVerificationRef.current += 1;
+    observedAuthUserIdRef.current = undefined;
+    const next: ShareAuthIdentity = {
+      userId: null,
+      epoch: authIdentityRef.current.epoch + 1,
+      status: "checking",
+    };
+    authIdentityRef.current = next;
+    activeShareSubjectRef.current = null;
+    firstSharesRequestRef.current = null;
+    createRequestRef.current = null;
+    revokeRequestRef.current = null;
+    olderSharesRequestRef.current = null;
+    if (copiedResetTimeoutRef.current !== null) {
+      clearTimeout(copiedResetTimeoutRef.current);
+      copiedResetTimeoutRef.current = null;
+    }
+    setAuthIdentity(next);
+    setCopied(false);
+    setShareUrl("");
+    setIncludeAddress(false);
+    setIsPreparing(false);
+    setSessionAuthRequired(false);
+    setMyShares(null);
+    setSharesListState("idle");
+    setNextSharesOffset(null);
+    setIsLoadingOlderShares(false);
+    setCreatedShare(null);
+    setRevokingId(null);
+    setConfirmingRevokeId(null);
+    setShowAllShares(false);
+    setAuthVerificationRetry((current) => current + 1);
+  }, []);
+
+  const verifyExpectedBrowserIdentity = useCallback(
+    async (
+      expectedUserId: string,
+      expectedAuthEpoch: number,
+    ): Promise<ShareIdentityVerification> => {
+      const identityStillMatches = () => {
+        const current = authIdentityRef.current;
+        return (
+          mountedRef.current &&
+          current.status === "ready" &&
+          current.userId === expectedUserId &&
+          current.epoch === expectedAuthEpoch
+        );
+      };
+      if (!identityStillMatches()) return "stale";
+
+      const fresh = await getFreshSessionUser(supabase);
+      if (!identityStillMatches()) return "stale";
+      if (!fresh.ok) {
+        if (fresh.reason === "unavailable") return "unavailable";
+        invalidateForServerAuthMismatch();
+        return "stale";
+      }
+      if (fresh.userId !== expectedUserId) {
+        invalidateForServerAuthMismatch();
+        return "stale";
+      }
+      return "current";
+    },
+    [invalidateForServerAuthMismatch, supabase],
+  );
+
+  // The button is intentionally reused as the analyzer moves between deals.
+  // Clear every generated capability and disclosure choice during the layout
+  // commit so an A response cannot become B's visible share link.
+  useLayoutEffect(() => {
+    activeShareSubjectRef.current = shareSubjectFingerprint;
+    firstSharesRequestRef.current = null;
+    createRequestRef.current = null;
+    revokeRequestRef.current = null;
+    olderSharesRequestRef.current = null;
+    if (copiedResetTimeoutRef.current !== null) {
+      clearTimeout(copiedResetTimeoutRef.current);
+      copiedResetTimeoutRef.current = null;
+    }
+    setOpen(false);
+    setCopied(false);
+    setShareUrl("");
+    setIncludeAddress(false);
+    setAudience(context === "client-report" ? "client" : "investment-partner");
+    setIsPreparing(false);
+    setSessionAuthRequired(false);
+    setMyShares(null);
+    setSharesListState("idle");
+    setNextSharesOffset(null);
+    setIsLoadingOlderShares(false);
+    setCreatedShare(null);
+    setRevokingId(null);
+    setConfirmingRevokeId(null);
+    setShowAllShares(false);
+    return () => {
+      if (activeShareSubjectRef.current !== shareSubjectFingerprint) return;
+      activeShareSubjectRef.current = null;
+      firstSharesRequestRef.current = null;
+      createRequestRef.current = null;
+      revokeRequestRef.current = null;
+      olderSharesRequestRef.current = null;
+      if (copiedResetTimeoutRef.current !== null) {
+        clearTimeout(copiedResetTimeoutRef.current);
+        copiedResetTimeoutRef.current = null;
+      }
+    };
+  }, [context, shareSubjectFingerprint]);
+
   const prepareAuthNavigation = () => {
     try {
       window.sessionStorage.setItem(
@@ -148,42 +426,151 @@ export function ShareLinkButton({
   // deal would strand links after a deal is soft-deleted or when the user is
   // working in another analysis.
   useEffect(() => {
-    if (!open || needsSignIn) {
+    const expectedUserId = authIdentity.userId;
+    if (!open || needsSignIn || !authReady || !expectedUserId) {
       setMyShares(null);
       setSharesListState("idle");
       setNextSharesOffset(null);
       return;
     }
     let cancelled = false;
+    const requestToken = Symbol("share-list-first");
+    const subjectAtSubmit = shareSubjectFingerprint;
+    const authEpochAtSubmit = authIdentity.epoch;
+    firstSharesRequestRef.current = requestToken;
+    const requestStillOwnsSubject = () =>
+      !cancelled &&
+      isCurrentMountedMutation({
+        requestToken,
+        currentRequestToken: firstSharesRequestRef.current,
+      }) &&
+      isCurrentShareAuthRequest({
+        expectedUserId,
+        authEpochAtSubmit,
+        subjectAtSubmit,
+        currentUserId: authIdentityRef.current.userId,
+        currentAuthEpoch: authIdentityRef.current.epoch,
+        currentSubject: activeShareSubjectRef.current,
+      });
     setMyShares(null);
     setSharesListState("loading");
     setNextSharesOffset(null);
-    listPublicSharesAction({ offset: 0 })
-      .then((r) => {
-        if (!cancelled && r.ok) {
+    void (async () => {
+      try {
+        const verification = await verifyExpectedBrowserIdentity(
+          expectedUserId,
+          authEpochAtSubmit,
+        );
+        if (!requestStillOwnsSubject()) return;
+        if (verification === "unavailable") {
+          setSharesListState("error");
+          return;
+        }
+        if (verification !== "current") return;
+
+        const r = await listPublicSharesAction({
+          offset: 0,
+          expectedUserId,
+        });
+        if (!requestStillOwnsSubject()) return;
+        if (r.ok) {
           setMyShares(r.shares);
           setNextSharesOffset(r.nextOffset);
           setSharesListState("ready");
-        } else if (!cancelled) {
+        } else if (
+          r.code === "SIGN_IN_REQUIRED" ||
+          r.code === "SESSION_CHANGED"
+        ) {
+          invalidateForServerAuthMismatch();
+        } else {
           setSharesListState("error");
         }
-      })
-      .catch(() => {
-        if (!cancelled) setSharesListState("error");
-      });
+      } catch {
+        if (requestStillOwnsSubject()) setSharesListState("error");
+      } finally {
+        if (firstSharesRequestRef.current === requestToken) {
+          firstSharesRequestRef.current = null;
+        }
+      }
+    })();
     return () => {
       cancelled = true;
+      if (firstSharesRequestRef.current === requestToken) {
+        firstSharesRequestRef.current = null;
+      }
     };
-  }, [open, needsSignIn, shareUrl, sharesReloadToken]);
+  }, [
+    authIdentity.epoch,
+    authIdentity.userId,
+    authReady,
+    invalidateForServerAuthMismatch,
+    open,
+    needsSignIn,
+    shareSubjectFingerprint,
+    shareUrl,
+    sharesReloadToken,
+    verifyExpectedBrowserIdentity,
+  ]);
 
   const loadOlderShares = async () => {
-    if (nextSharesOffset === null || isLoadingOlderShares) return;
+    const identityAtSubmit = authIdentityRef.current;
+    const expectedUserId = identityAtSubmit.userId;
+    if (
+      identityAtSubmit.status !== "ready" ||
+      !expectedUserId ||
+      nextSharesOffset === null ||
+      isLoadingOlderShares ||
+      olderSharesRequestRef.current !== null
+    ) {
+      return;
+    }
+    const requestToken = Symbol("share-list-older");
+    const subjectAtSubmit = shareSubjectFingerprint;
+    const authEpochAtSubmit = identityAtSubmit.epoch;
+    olderSharesRequestRef.current = requestToken;
+    const requestStillOwnsSubject = () =>
+      isCurrentMountedMutation({
+        requestToken,
+        currentRequestToken: olderSharesRequestRef.current,
+      }) &&
+      isCurrentShareAuthRequest({
+        expectedUserId,
+        authEpochAtSubmit,
+        subjectAtSubmit,
+        currentUserId: authIdentityRef.current.userId,
+        currentAuthEpoch: authIdentityRef.current.epoch,
+        currentSubject: activeShareSubjectRef.current,
+      });
     setIsLoadingOlderShares(true);
     try {
+      const verification = await verifyExpectedBrowserIdentity(
+        expectedUserId,
+        authEpochAtSubmit,
+      );
+      if (!requestStillOwnsSubject()) return;
+      if (verification === "unavailable") {
+        toast({
+          title: "Couldn't verify your session",
+          description: "Check your connection and try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (verification !== "current") return;
+
       const result = await listPublicSharesAction({
         offset: nextSharesOffset,
+        expectedUserId,
       });
+      if (!requestStillOwnsSubject()) return;
       if (!result.ok) {
+        if (
+          result.code === "SIGN_IN_REQUIRED" ||
+          result.code === "SESSION_CHANGED"
+        ) {
+          invalidateForServerAuthMismatch();
+          return;
+        }
         toast({
           title: "Couldn't load older links",
           description: result.message,
@@ -198,25 +585,79 @@ export function ShareLinkButton({
       });
       setNextSharesOffset(result.nextOffset);
     } catch {
+      if (!requestStillOwnsSubject()) return;
       toast({
         title: "Couldn't load older links",
         description: "Try again in a moment.",
         variant: "destructive",
       });
     } finally {
-      setIsLoadingOlderShares(false);
+      if (olderSharesRequestRef.current === requestToken) {
+        olderSharesRequestRef.current = null;
+        setIsLoadingOlderShares(false);
+      }
     }
   };
 
   const revokeShare = async (id: string, dealId: string | null) => {
+    const identityAtSubmit = authIdentityRef.current;
+    const expectedUserId = identityAtSubmit.userId;
+    if (
+      identityAtSubmit.status !== "ready" ||
+      !expectedUserId ||
+      revokeRequestRef.current !== null
+    ) {
+      return;
+    }
+    const requestToken = Symbol("share-revoke");
+    const subjectAtSubmit = shareSubjectFingerprint;
+    const authEpochAtSubmit = identityAtSubmit.epoch;
+    revokeRequestRef.current = requestToken;
+    const requestStillOwnsSubject = () =>
+      isCurrentMountedMutation({
+        requestToken,
+        currentRequestToken: revokeRequestRef.current,
+      }) &&
+      isCurrentShareAuthRequest({
+        expectedUserId,
+        authEpochAtSubmit,
+        subjectAtSubmit,
+        currentUserId: authIdentityRef.current.userId,
+        currentAuthEpoch: authIdentityRef.current.epoch,
+        currentSubject: activeShareSubjectRef.current,
+      });
     setRevokingId(id);
     try {
-      const r = await revokePublicShareAction({ id, dealId });
+      const verification = await verifyExpectedBrowserIdentity(
+        expectedUserId,
+        authEpochAtSubmit,
+      );
+      if (!requestStillOwnsSubject()) return;
+      if (verification === "unavailable") {
+        toast({
+          title: "Couldn't verify your session",
+          description: "Check your connection and try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (verification !== "current") return;
+
+      const r = await revokePublicShareAction({
+        id,
+        dealId,
+        expectedUserId,
+      });
+      if (!requestStillOwnsSubject()) return;
       if (r.ok) {
         // Only the exact row returned by the mint owns the current copy box.
         // Never clear a different live URL merely because an older row sorts
         // first in the management list.
         if (createdShare?.id === id) {
+          if (copiedResetTimeoutRef.current !== null) {
+            clearTimeout(copiedResetTimeoutRef.current);
+            copiedResetTimeoutRef.current = null;
+          }
           setShareUrl("");
           setCopied(false);
           setCreatedShare(null);
@@ -232,6 +673,11 @@ export function ShareLinkButton({
           title: "Link revoked",
           description: "That share link no longer opens for anyone.",
         });
+      } else if (
+        r.code === "SIGN_IN_REQUIRED" ||
+        r.code === "SESSION_CHANGED"
+      ) {
+        invalidateForServerAuthMismatch();
       } else {
         toast({
           title: "Couldn't revoke",
@@ -240,14 +686,18 @@ export function ShareLinkButton({
         });
       }
     } catch {
+      if (!requestStillOwnsSubject()) return;
       toast({
         title: "Couldn't revoke",
         description: "Try again in a moment.",
         variant: "destructive",
       });
     } finally {
-      setRevokingId(null);
-      setConfirmingRevokeId(null);
+      if (revokeRequestRef.current === requestToken) {
+        revokeRequestRef.current = null;
+        setRevokingId(null);
+        setConfirmingRevokeId(null);
+      }
     }
   };
 
@@ -255,7 +705,7 @@ export function ShareLinkButton({
   // dialog once so the user can finish the Share action they already chose;
   // the stored intent contains no address or financial values.
   useEffect(() => {
-    if (!isAuthenticated || !values) return;
+    if (!authReady || !values) return;
     try {
       const raw = window.sessionStorage.getItem(SHARE_AUTH_INTENT_STORAGE_KEY);
       const intent = parseShareAuthIntent(raw, { currentPath: returnPath });
@@ -278,10 +728,14 @@ export function ShareLinkButton({
     } catch {
       // Storage is optional; the user can still open Share manually.
     }
-  }, [context, isAuthenticated, returnPath, values]);
+  }, [authReady, context, returnPath, values]);
 
   const openShare = () => {
     if (!values) return;
+    if (copiedResetTimeoutRef.current !== null) {
+      clearTimeout(copiedResetTimeoutRef.current);
+      copiedResetTimeoutRef.current = null;
+    }
     setShareUrl("");
     setCopied(false);
     setCreatedShare(null);
@@ -295,30 +749,89 @@ export function ShareLinkButton({
   };
 
   const prepareShare = async () => {
-    if (!values) return;
+    const identityAtSubmit = authIdentityRef.current;
+    const expectedUserId = identityAtSubmit.userId;
+    if (
+      !values ||
+      identityAtSubmit.status !== "ready" ||
+      !expectedUserId ||
+      createRequestRef.current !== null
+    ) {
+      return;
+    }
+    const requestToken = Symbol("share-create");
+    const subjectAtSubmit = shareSubjectFingerprint;
+    const authEpochAtSubmit = identityAtSubmit.epoch;
+    const valuesAtSubmit = values;
+    const includeAddressAtSubmit = includeAddress;
+    const audienceAtSubmit = audience;
+    const maoTargetAtSubmit = maoTarget;
+    const maoTargetSourceAtSubmit = maoTargetSource;
+    const adoptedDecisionBasisAtSubmit = adoptedDecisionBasis;
+    const analyzerStrategyAtSubmit = analyzerStrategyKey;
+    const priceIsEstimatedAtSubmit = priceIsEstimated;
+    const savedDealIdAtSubmit = savedDealId;
+    createRequestRef.current = requestToken;
+    const requestStillOwnsSubject = () =>
+      isCurrentMountedMutation({
+        requestToken,
+        currentRequestToken: createRequestRef.current,
+      }) &&
+      isCurrentShareAuthRequest({
+        expectedUserId,
+        authEpochAtSubmit,
+        subjectAtSubmit,
+        currentUserId: authIdentityRef.current.userId,
+        currentAuthEpoch: authIdentityRef.current.epoch,
+        currentSubject: activeShareSubjectRef.current,
+      });
     setIsPreparing(true);
     try {
+      const verification = await verifyExpectedBrowserIdentity(
+        expectedUserId,
+        authEpochAtSubmit,
+      );
+      if (!requestStillOwnsSubject()) return;
+      if (verification === "unavailable") {
+        toast({
+          title: "Couldn't verify your session",
+          description: "Check your connection and try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (verification !== "current") return;
+
       // Mint a server-backed share whose URL is
       // just a random token — no address, rent, or assumptions in the path.
       // Fail closed if storage is unavailable. Falling back to /d/<base64>
       // would put the address and financial snapshot into browser, referrer,
       // proxy, and telemetry URLs.
       const opaque = await createPublicShareAction({
-        values,
-        title: includeAddress ? values.address || undefined : undefined,
-        dealId: savedDealId ?? undefined,
-        maoTarget: maoTarget ?? undefined,
-        maoTargetSource: maoTargetSource ?? undefined,
-        offerCeilingDecisionBasis: adoptedDecisionBasis ?? undefined,
-        audience,
-        addressVisibility: includeAddress ? "full" : "hidden",
-        analyzerStrategyKey: analyzerStrategyKey ?? "buy-hold",
-        ...(priceIsEstimated ? { priceEstimated: true } : {}),
+        values: valuesAtSubmit,
+        expectedUserId,
+        title: includeAddressAtSubmit
+          ? valuesAtSubmit.address || undefined
+          : undefined,
+        dealId: savedDealIdAtSubmit ?? undefined,
+        maoTarget: maoTargetAtSubmit ?? undefined,
+        maoTargetSource: maoTargetSourceAtSubmit ?? undefined,
+        offerCeilingDecisionBasis:
+          adoptedDecisionBasisAtSubmit ?? undefined,
+        audience: audienceAtSubmit,
+        addressVisibility: includeAddressAtSubmit ? "full" : "hidden",
+        analyzerStrategyKey: analyzerStrategyAtSubmit ?? "buy-hold",
+        ...(priceIsEstimatedAtSubmit ? { priceEstimated: true } : {}),
       });
+      if (!requestStillOwnsSubject()) return;
       if (!opaque.ok) {
         if (opaque.code === "SIGN_IN_REQUIRED") {
           prepareAuthNavigation();
-          setSessionAuthRequired(true);
+          invalidateForServerAuthMismatch();
+          return;
+        }
+        if (opaque.code === "SESSION_CHANGED") {
+          invalidateForServerAuthMismatch();
           return;
         }
         throw new Error(opaque.code);
@@ -327,10 +840,11 @@ export function ShareLinkButton({
       setCreatedShare({ id: opaque.id, dealId: opaque.dealId });
       setCopied(false);
       trackEvent("share_created", {
-        audience,
-        address_included: includeAddress,
+        audience: audienceAtSubmit,
+        address_included: includeAddressAtSubmit,
       });
     } catch (err) {
+      if (!requestStillOwnsSubject()) return;
       // Encoding failure used to be a silent no-op - user clicked Share
       // and nothing happened. Surface a toast so they know to try again,
       // and capture to Sentry so we know when this is happening.
@@ -343,7 +857,10 @@ export function ShareLinkButton({
         variant: "destructive",
       });
     } finally {
-      setIsPreparing(false);
+      if (createRequestRef.current === requestToken) {
+        createRequestRef.current = null;
+        setIsPreparing(false);
+      }
     }
   };
 
@@ -352,7 +869,14 @@ export function ShareLinkButton({
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      if (copiedResetTimeoutRef.current !== null) {
+        clearTimeout(copiedResetTimeoutRef.current);
+      }
+      const subjectAtCopy = shareSubjectFingerprint;
+      copiedResetTimeoutRef.current = setTimeout(() => {
+        if (activeShareSubjectRef.current === subjectAtCopy) setCopied(false);
+        copiedResetTimeoutRef.current = null;
+      }, 2000);
       trackEvent("share_link_copied", { has_address: includeAddress });
       if (context === "client-report") {
         trackEvent("client_report_shared", { report_type: "analysis_link" });
@@ -432,6 +956,13 @@ export function ShareLinkButton({
         onOpenChange={(nextOpen) => {
           setOpen(nextOpen);
           if (!nextOpen) {
+            firstSharesRequestRef.current = null;
+            createRequestRef.current = null;
+            revokeRequestRef.current = null;
+            olderSharesRequestRef.current = null;
+            setIsPreparing(false);
+            setRevokingId(null);
+            setIsLoadingOlderShares(false);
             setConfirmingRevokeId(null);
             setShowAllShares(false);
           }
@@ -459,6 +990,10 @@ export function ShareLinkButton({
             <DialogDescription>
               {needsSignIn
                 ? "Sign in or create a free account to make a new share link. Anyone who receives the link can view it without signing in."
+                : !authReady
+                  ? authIdentity.status === "unavailable"
+                    ? "We couldn't verify which account owns this share workspace. Refresh the page and try again."
+                    : "Verifying the account that will own this share link…"
                 : context === "client-report"
                   ? "Create a read-only link for the assigned client. The exact address stays hidden unless you explicitly include it."
                   : "Choose what to disclose, then create an opaque, expiring link. The exact address stays hidden by default."}
@@ -502,9 +1037,40 @@ export function ShareLinkButton({
                 </Button>
               </div>
             </div>
+          ) : !authReady ? (
+            <div
+              role={authIdentity.status === "unavailable" ? "alert" : "status"}
+              className="min-h-20 rounded-xl border border-border bg-muted/30 p-4 text-sm text-muted-foreground"
+            >
+              <div className="flex items-center gap-3">
+                {authIdentity.status === "checking" ? (
+                  <Loader2
+                    className="h-4 w-4 shrink-0 animate-spin"
+                    aria-hidden
+                  />
+                ) : null}
+                <span>
+                  {authIdentity.status === "unavailable"
+                    ? "Session verification is temporarily unavailable. No share data was loaded or changed."
+                    : "Verifying your signed-in account…"}
+                </span>
+              </div>
+              {authIdentity.status === "unavailable" ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="mt-3 min-h-11 w-full"
+                  onClick={() =>
+                    setAuthVerificationRetry((current) => current + 1)
+                  }
+                >
+                  Retry session verification
+                </Button>
+              ) : null}
+            </div>
           ) : !shareUrl ? (
             <div className="space-y-4">
-              <fieldset>
+              <fieldset disabled={isPreparing}>
                 <legend className="text-sm font-semibold text-foreground">
                   Intended audience
                 </legend>
@@ -538,6 +1104,7 @@ export function ShareLinkButton({
                   type="checkbox"
                   className="mt-0.5"
                   checked={includeAddress}
+                  disabled={isPreparing}
                   onChange={(event) => setIncludeAddress(event.target.checked)}
                 />
                 <span>

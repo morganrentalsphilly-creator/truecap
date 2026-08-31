@@ -18,8 +18,31 @@ describe("saved workspace data safety", () => {
     expect(checklist).not.toContain(".upsert(");
 
     const card = read("components/investcalc/due-diligence-card.tsx");
-    expect(card).toContain("updateDealDueDiligenceAction(dealIdAtSubmit, next, revisionAtSubmit)");
+    expect(card).toContain("const r = await updateDealDueDiligenceAction(");
+    expect(card).toContain("request.items,");
+    expect(card).toContain("revisionAtSubmit,");
     expect(card).toContain("setRevision(fresh.revision)");
+  });
+
+  it("serializes same-render checklist mutations and chains the latest snapshot", () => {
+    const card = read("components/investcalc/due-diligence-card.tsx");
+
+    expect(card).toContain(
+      "const queuedSaveRef = useRef<QueuedDueDiligenceSave | null>(null)"
+    );
+    expect(card).toContain("if (mutationRequestRef.current !== null)");
+    expect(card).toContain("queuedSaveRef.current = coalesceDueDiligenceSave(");
+    expect(card).toContain("revision: r.revision");
+    expect(card).toContain("previous: r.items");
+    expect(card).toContain("startPersistRequest(");
+    expect(card).toContain("queuedSaveRef.current = null");
+    const migrationFailure = card.slice(
+      card.indexOf('if (r.code === "MIGRATION_PENDING")'),
+      card.indexOf("const fresh = await getDealDueDiligenceAction", card.indexOf('if (r.code === "MIGRATION_PENDING")')),
+    );
+    expect(migrationFailure).toContain("const queued = takeQueuedSave()");
+    expect(migrationFailure).toContain("setItems(previous)");
+    expect(migrationFailure).toContain("runRecoveries(queued)");
   });
 
   it.each([
@@ -150,14 +173,136 @@ describe("saved workspace data safety", () => {
       "expectedUnderwritingRevision: ("
     );
     expect(rateBanner).toContain(
-      "{ expectedUnderwritingRevision: underwritingRevision }"
+      "expectedUnderwritingRevision: underwritingRevision"
     );
+    expect(rateBanner).toContain("expectedUserId");
     expect(workspacePage).toContain("underwritingRevision={dealRow.underwriting_revision}");
+  });
+
+  it("drops a rate-alert apply continuation after a route change or unmount", () => {
+    const banner = read(
+      "components/investcalc/rate-alert-reunderwrite-banner.tsx"
+    );
+
+    expect(banner).toContain("useLayoutEffect(() => {");
+    expect(banner).toContain("activeDealIdRef.current = null");
+    expect(banner).toContain("applyRequestRef.current = null");
+    expect(banner).toContain("isCurrentDealWorkspaceMutation({");
+    expect(banner).toContain("const requestStillOwnsDeal = () =>");
+    expect(
+      banner.match(/if \(!requestStillOwnsDeal\(\)\) return;/g)?.length,
+    ).toBeGreaterThanOrEqual(2);
+    expect(banner).toContain(
+      "router.replace(`/dashboard/saved-analyses/${dealIdAtSubmit}`"
+    );
+  });
+
+  it("drops analyzer save continuations after its mounted instance is replaced", () => {
+    const analyzer = read("components/investcalc/investcalc-page.tsx");
+    const saveStart = analyzer.indexOf("const performSaveDeal = async");
+    const saveEnd = analyzer.indexOf("const handleSaveDeal = async", saveStart);
+    const saveHandler = analyzer.slice(saveStart, saveEnd);
+    const awaitedSave = saveHandler.indexOf("const result = await saveDealAction(");
+    const ownershipGuard = saveHandler.indexOf(
+      "if (!saveRequestStillOwnsInstance()) return false;",
+      awaitedSave,
+    );
+    const successBranch = saveHandler.indexOf("if (result.ok)", awaitedSave);
+
+    expect(analyzer).toContain("useLayoutEffect(() => {");
+    expect(analyzer).toContain("const saveRequestRef = useRef<symbol | null>(null)");
+    expect(analyzer).toContain("saveRequestRef.current = null");
+    expect(saveHandler).toContain('const saveRequestToken = Symbol("analyzer-save")');
+    expect(saveHandler).toContain("isCurrentMountedMutation({");
+    expect(ownershipGuard).toBeGreaterThan(awaitedSave);
+    expect(ownershipGuard).toBeLessThan(successBranch);
+    expect(
+      saveHandler.match(
+        /if \(!saveRequestStillOwnsInstance\(\)\) return false;/g,
+      )?.length,
+    ).toBeGreaterThanOrEqual(2);
+    expect(saveHandler).toContain("if (saveRequestStillOwnsInstance()) {");
+  });
+
+  it("keeps delayed compare and share-copy completions on their owning route", () => {
+    const assertGuardPrecedesNavigation = (input: {
+      path: string;
+      handlerStart: string;
+      handlerEnd: string;
+      awaitedAction: string;
+      guard: string;
+      navigation: string;
+    }) => {
+      const source = read(input.path);
+      const start = source.indexOf(input.handlerStart);
+      const end = source.indexOf(input.handlerEnd, start);
+      const handler = source.slice(start, end === -1 ? undefined : end);
+      const awaited = handler.indexOf(input.awaitedAction);
+      const guard = handler.indexOf(input.guard, awaited);
+      const navigation = handler.indexOf(input.navigation, awaited);
+
+      expect(source).toContain("useLayoutEffect");
+      expect(source).toContain("RequestRef.current = null");
+      expect(awaited).toBeGreaterThanOrEqual(0);
+      expect(guard).toBeGreaterThan(awaited);
+      expect(navigation).toBeGreaterThan(guard);
+      expect(handler).toContain("currentRequestToken:");
+      expect(handler).toContain("current === requestToken");
+    };
+
+    assertGuardPrecedesNavigation({
+      path: "components/investcalc/saved-analyses-page-v2.tsx",
+      handlerStart: "const handleCompareSelected = () =>",
+      handlerEnd: "const toggleOne =",
+      awaitedAction: "await startCompareAction(selectedIds)",
+      guard: "if (!requestStillOwnsPage()) return;",
+      navigation: 'router.push("/dashboard/compare")',
+    });
+    assertGuardPrecedesNavigation({
+      path: "components/investcalc/compare-deal-picker.tsx",
+      handlerStart: "const onCompare = () =>",
+      handlerEnd: "return (",
+      awaitedAction: "await startCompareAction(selected)",
+      guard: "if (!requestStillOwnsPicker()) return;",
+      navigation: "router.refresh()",
+    });
+    assertGuardPrecedesNavigation({
+      path: "components/investcalc/compare-deals-client.tsx",
+      handlerStart: "const removeDeal =",
+      handlerEnd: "// Buy-box fit",
+      awaitedAction: "await removeCompareDealAction(deal.id)",
+      guard: "if (!requestStillOwnsComparison()) return;",
+      navigation: "router.refresh()",
+    });
+    assertGuardPrecedesNavigation({
+      path: "components/dashboard/compare-with-another-deal-link.tsx",
+      handlerStart: "function handleCompare()",
+      handlerEnd: "return (",
+      awaitedAction: "await startCompareAction([dealIdAtSubmit])",
+      guard: "if (!requestStillOwnsDeal()) return;",
+      navigation: 'router.push("/dashboard/compare")',
+    });
+    assertGuardPrecedesNavigation({
+      path: "components/investcalc/investcalc-page.tsx",
+      handlerStart: "const handleCompareDeals = async",
+      handlerEnd: '/**\n   * "Try a sample deal"',
+      awaitedAction: "await addDealToCompareAction(dealIdForCompare)",
+      guard: "if (!requestStillOwnsInstance()) return;",
+      navigation: 'router.push("/dashboard/compare")',
+    });
+    assertGuardPrecedesNavigation({
+      path: "components/investcalc/read-only-analysis-view.tsx",
+      handlerStart: "const copyToAccount = async",
+      handlerEnd: "return (",
+      awaitedAction: "await copyPublicShareToAccountAction({",
+      guard: "if (!requestStillOwnsView()) return;",
+      navigation: "router.push(",
+    });
   });
 
   it("preserves comment drafts and confirms permanent deletion", () => {
     const comments = read("components/investcalc/deal-comments-panel.tsx");
-    const submit = comments.indexOf("await addDealCommentAction");
+    const submit = comments.indexOf("await addDealCommentV2Action");
     const clear = comments.indexOf("setDraft", submit);
     expect(clear).toBeGreaterThan(submit);
     expect(comments).toContain("Delete this comment?");
@@ -168,7 +313,8 @@ describe("saved workspace data safety", () => {
   it("keeps controlled detail drafts on failed writes and exposes retry", () => {
     const details = read("components/investcalc/deal-details-card.tsx");
     expect(details).toContain("draftsRef.current");
-    expect(details).toContain("setFailedPatch(patch)");
+    expect(details).toContain("restoreSubmittedKeys()");
+    expect(details).toContain("buildLatestDealLabelPatch(");
     expect(details).toContain("Couldn’t save");
     expect(details).toContain("Retry");
     expect(details).toContain("value={drafts[f.key] ?? \"\"}");

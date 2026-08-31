@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import {
   getEntitlementsForUser,
@@ -227,7 +228,13 @@ export async function getTenYearProjectionSnapshotAction(
     generated_at: generatedAt,
   };
 
-  const { data: savedSnapshot, error: savedSnapshotError } = await supabase
+  // Production RLS intentionally does not grant broad `projections` writes to
+  // a no-card evaluation. The exact saved resource has already passed both
+  // the owner read and metered-deal check above, so bypass RLS only for this
+  // narrowly scoped cache write. Never create the service-role client before
+  // those checks: it must not become an alternate authorization path.
+  const admin = createAdminSupabaseClient();
+  const { data: savedSnapshot, error: savedSnapshotError } = await admin
     .from("analysis_projection_snapshots")
     .upsert(upsertPayload, { onConflict: "analysis_id" })
     .select("analysis_id, version, input_hash, projection_years, generated_at")

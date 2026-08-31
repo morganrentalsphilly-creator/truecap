@@ -7,7 +7,13 @@
  * gated for visibility; hides itself if the provider isn't configured yet
  * (NOT_CONFIGURED), keeping it invisible until actually enabled.
  */
-import { useEffect, useRef, useState, useTransition } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import * as Sentry from "@sentry/nextjs";
 import { Building2, Loader2 } from "lucide-react";
 import { getPropertyCompsAction, getSavedDealCompsAction } from "@/app/actions/property-comps";
@@ -18,6 +24,12 @@ import type { PipelineStage } from "@/lib/pipeline";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { ToastAction } from "@/components/ui/toast";
+import { isCurrentMountedMutation } from "@/lib/deal-workspace-mutation-lifecycle";
+import {
+  propertyCompsRequestStillOwnsSubject,
+  propertyCompsUnderwritingFingerprint,
+} from "@/lib/property-comps-query";
+import { useExpectedAccountUserId } from "@/components/auth/account-session-boundary";
 
 const money = (n: number | null) => (n == null ? "—" : `$${Math.round(n).toLocaleString()}`);
 
@@ -95,45 +107,94 @@ export function PropertyCompsCard({
   onUnavailableChange?: (unavailable: boolean) => void;
 }) {
   const { toast } = useToast();
+  const expectedUserId = useExpectedAccountUserId();
   const [data, setData] = useState<PropertyEnrichment | null>(null);
+  const [dataFingerprint, setDataFingerprint] = useState<string | null>(null);
   const [source, setSource] = useState<"cache" | "live" | "saved" | null>(null);
   const [unavailable, setUnavailable] = useState(false);
   const [loading, startLoading] = useTransition();
+  const queryFingerprint = propertyCompsUnderwritingFingerprint({
+    address,
+    propertyType,
+    bedrooms,
+    bathrooms,
+    squareFootage,
+  });
 
-  // Comps belong to ONE address. When the analyzed address changes, the
-  // previous pull must not survive — on screen OR in the Deal Q&A grounding
-  // context (which hard-claims "the user ran comps on this address"); a
-  // stale set would ground AI answers on the wrong property.
-  const lastAddressRef = useRef<string | null>(address);
-  useEffect(() => {
-    if (lastAddressRef.current === address) return;
-    lastAddressRef.current = address;
+  // Comps belong to one exact provider query and workspace, not just one
+  // address. Sync identity during the route commit so an old same-address pull
+  // with different type/beds/baths/sqft cannot paint, toast, persist, apply, or
+  // ground Deal Q&A on the newly shaped underwriting query.
+  const queryFingerprintRef = useRef(queryFingerprint);
+  const dataQueryFingerprintRef = useRef<string | null>(null);
+  const savedDealIdRef = useRef<string | null>(savedDealId ?? null);
+  const onDataChangeRef = useRef(onDataChange);
+  const onUnavailableChangeRef = useRef(onUnavailableChange);
+  const pullRequestRef = useRef<symbol | null>(null);
+  useLayoutEffect(
+    () => () => {
+      pullRequestRef.current = null;
+    },
+    [],
+  );
+  useLayoutEffect(() => {
+    onDataChangeRef.current = onDataChange;
+    onUnavailableChangeRef.current = onUnavailableChange;
+  }, [onDataChange, onUnavailableChange]);
+  useLayoutEffect(() => {
+    const nextDealId = savedDealId ?? null;
+    if (
+      queryFingerprintRef.current === queryFingerprint &&
+      savedDealIdRef.current === nextDealId
+    ) {
+      return;
+    }
+    queryFingerprintRef.current = queryFingerprint;
+    savedDealIdRef.current = nextDealId;
+    dataQueryFingerprintRef.current = null;
+    pullRequestRef.current = null;
     setData(null);
+    setDataFingerprint(null);
     setSource(null);
     setUnavailable(false);
-    onDataChange?.(null);
-    // onDataChange is a stable setter in practice; keying on it would
-    // re-fire the clear on parent re-renders with inline handlers.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [address]);
+    onDataChangeRef.current?.(null);
+    onUnavailableChangeRef.current?.(false);
+  }, [queryFingerprint, savedDealId]);
 
   // On a saved deal, load any previously-saved comp set (no API call / quota).
   useEffect(() => {
     if (!enabled || !savedDealId) return;
+    const dealIdAtLoad = savedDealId;
+    const fingerprintAtLoad = queryFingerprint;
     let active = true;
     void (async () => {
       try {
-        const r = await getSavedDealCompsAction(savedDealId);
-        if (active && r.ok && r.enrichment) {
+        const r = await getSavedDealCompsAction({
+          dealId: dealIdAtLoad,
+          address,
+          propertyType,
+          bedrooms: bedrooms ?? undefined,
+          bathrooms: bathrooms ?? undefined,
+          squareFootage: squareFootage ?? undefined,
+        });
+        if (
+          active &&
+          savedDealIdRef.current === dealIdAtLoad &&
+          queryFingerprintRef.current === fingerprintAtLoad &&
+          r.ok &&
+          r.enrichment
+        ) {
           // Legacy payloads can predate fetchedAt in the enrichment itself —
           // backfill from the row's fetched_at so the freshness hint still works.
           const enrichment =
             !r.enrichment.fetchedAt && r.fetchedAt
               ? { ...r.enrichment, fetchedAt: r.fetchedAt }
               : r.enrichment;
+          dataQueryFingerprintRef.current = fingerprintAtLoad;
           setData(enrichment);
+          setDataFingerprint(fingerprintAtLoad);
           setSource("saved");
-          onDataChange?.(enrichment);
+          onDataChangeRef.current?.(enrichment);
         }
       } catch {
         // Best-effort load of a previously-saved comp set — a thrown action
@@ -145,9 +206,21 @@ export function PropertyCompsCard({
     return () => {
       active = false;
     };
-  }, [enabled, savedDealId]);
+  }, [
+    address,
+    bathrooms,
+    bedrooms,
+    enabled,
+    propertyType,
+    queryFingerprint,
+    savedDealId,
+    squareFootage,
+  ]);
 
   if (!enabled || !address || unavailable) return null;
+
+  const visibleData =
+    data && dataFingerprint === queryFingerprint ? data : null;
 
   const pull = () => {
     // Captured at click time: a slow RentCast roundtrip must not attach its
@@ -155,6 +228,21 @@ export function PropertyCompsCard({
     // same stale-response contract as the saved-comps load effect above
     // (comps ground Deal Q&A answers, so a mismatch is confidently wrong).
     const pulledAddress = address;
+    const pulledDealId = savedDealId ?? null;
+    const pulledFingerprint = queryFingerprint;
+    const requestToken = Symbol("property-comps-pull");
+    pullRequestRef.current = requestToken;
+    const pullStillOwnsWorkspace = () =>
+      propertyCompsRequestStillOwnsSubject({
+        requestedFingerprint: pulledFingerprint,
+        currentFingerprint: queryFingerprintRef.current,
+        requestedDealId: pulledDealId,
+        currentDealId: savedDealIdRef.current,
+      }) &&
+      isCurrentMountedMutation({
+        requestToken,
+        currentRequestToken: pullRequestRef.current,
+      });
     startLoading(async () => {
       try {
         const r = await getPropertyCompsAction({
@@ -163,16 +251,17 @@ export function PropertyCompsCard({
           bedrooms: bedrooms ?? undefined,
           bathrooms: bathrooms ?? undefined,
           squareFootage: squareFootage ?? undefined,
-          dealId: savedDealId ?? undefined,
+          dealId: pulledDealId ?? undefined,
+          expectedUserId: expectedUserId ?? undefined,
         });
-        // Address changed while the pull was in flight → the result (or its
-        // error) belongs to the previous deal; drop it silently — the
-        // address-change effect above already cleared the display.
-        if (lastAddressRef.current !== pulledAddress) return;
+        // Workspace changed while the pull was in flight → the result (or its
+        // error) belongs to the previous deal; drop it silently. The route
+        // identity effect above already cleared the display.
+        if (!pullStillOwnsWorkspace()) return;
         if (!r.ok) {
           if (r.code === "NOT_CONFIGURED") {
             setUnavailable(true);
-            onUnavailableChange?.(true);
+            onUnavailableChangeRef.current?.(true);
             return;
           }
           // Hitting the plan limit is not an error the user caused — a red
@@ -201,29 +290,39 @@ export function PropertyCompsCard({
           toast({ title: "Couldn't pull comps", description: r.message, variant: "destructive" });
           return;
         }
+        dataQueryFingerprintRef.current = pulledFingerprint;
         setData(r.enrichment);
+        setDataFingerprint(pulledFingerprint);
         setSource(r.source);
-        onDataChange?.(r.enrichment);
+        onDataChangeRef.current?.(r.enrichment);
       } catch (err) {
         // The action REJECTED rather than returning {ok:false} (network blip,
         // cold-start 500, stale-deploy Server Action). Without this the button
         // spinner clears with no result and no signal. Honor the same stale-
         // address guard, then surface a retryable toast.
+        if (!pullStillOwnsWorkspace()) return;
         Sentry.captureException(err, { tags: { feature: "property-comps" } });
-        if (lastAddressRef.current !== pulledAddress) return;
         toast({
           title: "Couldn't pull comps",
           description: "Something interrupted the request. Check your connection and try again.",
           variant: "destructive",
         });
+      } finally {
+        if (pullRequestRef.current === requestToken) {
+          pullRequestRef.current = null;
+        }
       }
     });
   };
 
-  const compWarnings = data ? buildCompWarnings(data, currentRent, currentPrice) : [];
+  const compWarnings = visibleData
+    ? buildCompWarnings(visibleData, currentRent, currentPrice)
+    : [];
   // Stage-aware staleness hint (display-only — the Refresh button above is
   // the action; nothing refetches on its own). No stage = loosest window.
-  const freshness = data ? getCompsFreshness(data.fetchedAt, stage ?? null) : null;
+  const freshness = visibleData
+    ? getCompsFreshness(visibleData.fetchedAt, stage ?? null)
+    : null;
 
   return (
     <section aria-label="Sale and rent comps" className="rounded-2xl border border-border bg-card p-4 sm:p-5">
@@ -235,16 +334,16 @@ export function PropertyCompsCard({
         <Button
           type="button"
           size="sm"
-          variant={data ? "outline" : "default"}
+          variant={visibleData ? "outline" : "default"}
           className="h-8"
           disabled={loading}
           onClick={pull}
         >
-          {loading ? <Loader2 className="size-4 animate-spin" /> : data ? "Refresh" : "Run comps"}
+          {loading ? <Loader2 className="size-4 animate-spin" /> : visibleData ? "Refresh" : "Run comps"}
         </Button>
       </div>
 
-      {!data ? (
+      {!visibleData ? (
         <p className="mt-2 text-xs text-muted-foreground">
           Pull live sale and rental comparables for this address - value + rent estimates from nearby
           properties to sanity-check your assumptions.
@@ -260,22 +359,22 @@ export function PropertyCompsCard({
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-xl border border-border bg-muted/20 p-3">
               <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Est. value</div>
-              <div className="mt-1 text-lg font-bold text-foreground">{money(data.valueEstimate)}</div>
-              {data.valueRange && (data.valueRange.low != null || data.valueRange.high != null) ? (
+              <div className="mt-1 text-lg font-bold text-foreground">{money(visibleData.valueEstimate)}</div>
+              {visibleData.valueRange && (visibleData.valueRange.low != null || visibleData.valueRange.high != null) ? (
                 <div className="text-[11px] text-muted-foreground">
-                  {money(data.valueRange.low)}–{money(data.valueRange.high)}
+                  {money(visibleData.valueRange.low)}–{money(visibleData.valueRange.high)}
                 </div>
               ) : null}
             </div>
             <div className="rounded-xl border border-border bg-muted/20 p-3">
               <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Est. rent</div>
               <div className="mt-1 text-lg font-bold text-foreground">
-                {money(data.rentEstimate)}
-                {data.rentEstimate != null ? <span className="text-xs font-medium text-muted-foreground">/mo</span> : null}
+                {money(visibleData.rentEstimate)}
+                {visibleData.rentEstimate != null ? <span className="text-xs font-medium text-muted-foreground">/mo</span> : null}
               </div>
-              {data.rentRange && (data.rentRange.low != null || data.rentRange.high != null) ? (
+              {visibleData.rentRange && (visibleData.rentRange.low != null || visibleData.rentRange.high != null) ? (
                 <div className="text-[11px] text-muted-foreground">
-                  {money(data.rentRange.low)}–{money(data.rentRange.high)}
+                  {money(visibleData.rentRange.low)}–{money(visibleData.rentRange.high)}
                 </div>
               ) : null}
             </div>
@@ -304,7 +403,8 @@ export function PropertyCompsCard({
               size="sm"
               className="w-full"
               onClick={() => {
-                onApply(data);
+                if (dataQueryFingerprintRef.current !== queryFingerprintRef.current) return;
+                onApply(visibleData);
                 toast({
                   title: "Applied to your analysis",
                   description: "Filled property facts, active-listing price when available, and estimated market rent. The AVM remains reference-only.",
@@ -315,8 +415,8 @@ export function PropertyCompsCard({
             </Button>
           ) : null}
 
-          <CompList title="Sale comps" comps={data.saleComps} />
-          <CompList title="Rent comps" comps={data.rentComps} suffix="/mo" />
+          <CompList title="Sale comps" comps={visibleData.saleComps} />
+          <CompList title="Rent comps" comps={visibleData.rentComps} suffix="/mo" />
 
           <p className="text-[10px] text-muted-foreground">
             Source: RentCast · {source === "live" ? "live" : source === "saved" ? "saved to this deal" : "cached"}.

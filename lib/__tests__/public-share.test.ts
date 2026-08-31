@@ -147,8 +147,10 @@ describe("the share-route privacy contract", () => {
     expect(btn).not.toContain("getSignedShareAttribution");
     expect(btn).toContain('opaque.code === "SIGN_IN_REQUIRED"');
     expect(btn).toContain("throw new Error(opaque.code)");
-    expect(btn).toContain("maoTarget: maoTarget ?? undefined");
-    expect(btn).toContain("maoTargetSource: maoTargetSource ?? undefined");
+    expect(btn).toContain("maoTarget: maoTargetAtSubmit ?? undefined");
+    expect(btn).toContain(
+      "maoTargetSource: maoTargetSourceAtSubmit ?? undefined",
+    );
     expect(action).toContain("normalizeMaoTarget(parsed.data.maoTarget)");
     expect(store).toContain("maoTarget?: MaoTarget");
     expect(route).toContain("maoTarget={displayMaoTarget}");
@@ -156,7 +158,7 @@ describe("the share-route privacy contract", () => {
     expect(route).toContain("resolved.snapshot.maoTargetSource");
     expect(view).not.toContain("calculateMaxAllowableOffer(values, maoTarget)");
     expect(btn).toContain(
-      'addressVisibility: includeAddress ? "full" : "hidden"',
+      'addressVisibility: includeAddressAtSubmit ? "full" : "hidden"',
     );
     expect(btn).toContain("Off by default");
     expect(store).toContain("resultSnapshot: capturedResult");

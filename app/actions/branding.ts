@@ -35,6 +35,10 @@ import {
   getEntitlementsForUser,
   hasPlanFeature,
 } from "@/lib/entitlements";
+import {
+  accountSessionChangedResult,
+  expectedAccountUserMatches,
+} from "@/lib/account-session-binding";
 
 export type { BrandingValues } from "@/lib/branding-values";
 
@@ -59,6 +63,7 @@ export type SaveBrandingResult =
       ok: false;
       code:
         | "SIGN_IN_REQUIRED"
+        | "SESSION_CHANGED"
         | "ENTITLEMENT_REQUIRED"
         | "VALIDATION_ERROR"
         | "SERVER_ERROR";
@@ -71,6 +76,7 @@ export type UploadBrandingLogoResult =
       ok: false;
       code:
         | "SIGN_IN_REQUIRED"
+        | "SESSION_CHANGED"
         | "ENTITLEMENT_REQUIRED"
         | "VALIDATION_ERROR"
         | "UPLOAD_FAILED";
@@ -121,7 +127,8 @@ export async function getBranding(): Promise<GetBrandingResult> {
  * Gated behind the `custom_branding` Pro entitlement.
  */
 export async function saveBranding(
-  rawValues: unknown
+  rawValues: unknown,
+  expectedUserId: unknown,
 ): Promise<SaveBrandingResult> {
   const supabase = await createServerSupabaseClient();
   const {
@@ -133,6 +140,9 @@ export async function saveBranding(
       code: "SIGN_IN_REQUIRED",
       message: "Sign in to save branding.",
     };
+  }
+  if (!expectedAccountUserMatches(expectedUserId, user.id)) {
+    return accountSessionChangedResult();
   }
 
   // Entitlement check
@@ -187,7 +197,8 @@ export async function saveBranding(
  * public URL the caller can save into branding.logo_url via saveBranding.
  */
 export async function uploadBrandingLogo(
-  formData: FormData
+  formData: FormData,
+  expectedUserId: unknown,
 ): Promise<UploadBrandingLogoResult> {
   const supabase = await createServerSupabaseClient();
   const {
@@ -199,6 +210,9 @@ export async function uploadBrandingLogo(
       code: "SIGN_IN_REQUIRED",
       message: "Sign in to upload a logo.",
     };
+  }
+  if (!expectedAccountUserMatches(expectedUserId, user.id)) {
+    return accountSessionChangedResult();
   }
 
   const entitlements = await getEntitlementsForUser(supabase, user.id);

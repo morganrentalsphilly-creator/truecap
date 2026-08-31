@@ -20,6 +20,7 @@ import { PORTAL_SCOPE } from "@/lib/client-portal";
 import { normalizeReleasedInvestmentFormSnapshot } from "@/lib/underwriting-model-release";
 import { getPublicAgentBranding } from "@/lib/agent-share";
 import { getPublicDealComps } from "@/lib/public-deal-comps";
+import { propertyCompsUnderwritingFingerprint } from "@/lib/property-comps-query";
 import {
   hashShareValues,
   signLeadCaptureAuthorization,
@@ -168,9 +169,16 @@ export default async function PortalDealPage({ params }: Props) {
     notFound();
   }
 
+  const compsFingerprint = propertyCompsUnderwritingFingerprint({
+    address: values.address,
+    propertyType: values.propertyType,
+    bedrooms: values.bedrooms,
+    bathrooms: values.bathrooms,
+    squareFootage: values.sqft,
+  });
   const [agent, comps] = await Promise.all([
     getPublicAgentBranding(agentUserId),
-    getPublicDealComps(dealId, agentUserId),
+    getPublicDealComps(dealId, agentUserId, compsFingerprint),
   ]);
 
   const valuesHash = hashShareValues(values);

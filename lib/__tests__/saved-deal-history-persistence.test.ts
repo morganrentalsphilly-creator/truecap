@@ -8,6 +8,9 @@ const read = (path: string) => readFileSync(join(ROOT, path), "utf8");
 const migration = read(
   "supabase/migrations/20260827230000_saved_deal_history.sql",
 );
+const reconciliation = read(
+  "supabase/migrations/20260830130000_reconcile_workspace_write_policies.sql",
+);
 const actions = read("app/actions/saved-analyses.ts");
 const stageSelect = read("components/investcalc/deal-stage-select.tsx");
 const dealList = read("components/investcalc/saved-analyses-page-v2.tsx");
@@ -135,6 +138,61 @@ describe("saved deal history persistence", () => {
     );
   });
 
+  it("routes Passed Undo through an exact-event compare-and-set and returns typed staleness", () => {
+    const transitionFunction = reconciliation.slice(
+      reconciliation.indexOf(
+        "create or replace function public.update_saved_deal_stage_with_history",
+      ),
+      reconciliation.indexOf(
+        "revoke all on function public.update_saved_deal_stage_with_history",
+      ),
+    );
+    const undoFunction = reconciliation.slice(
+      reconciliation.indexOf(
+        "create or replace function public.undo_passed_saved_deal_stage_with_history",
+      ),
+      reconciliation.indexOf(
+        "revoke all on function public.undo_passed_saved_deal_stage_with_history",
+      ),
+    );
+    expect(undoFunction).toContain("for update");
+    expect(undoFunction).toContain(
+      "v_current_stage_history_event_id is distinct from p_expected_pass_history_event_id",
+    );
+    expect(undoFunction).toContain(
+      "event.id = p_expected_pass_history_event_id",
+    );
+    expect(undoFunction).toContain("event.new_stage = 'passed'");
+    expect(undoFunction).toContain("event.old_stage = p_restore_stage");
+    expect(undoFunction).toContain("errcode = '40001'");
+    expect(undoFunction).toContain(
+      "from public.update_saved_deal_stage_with_history(",
+    );
+
+    expect(actions).toContain(
+      '"undo_passed_saved_deal_stage_with_history"',
+    );
+    expect(transitionFunction).toContain(
+      "current_stage_history_event_id = v_event_id",
+    );
+    expect(actions).toContain("historyEventId: string | null");
+    expect(actions).toContain("expectedCurrentStage?: {");
+    expect(actions).toContain('stage: "passed";');
+    expect(actions).toContain("historyEventId: string;");
+    expect(actions).toContain("p_expected_pass_history_event_id:");
+    expect(actions).toContain('code: "STALE_DATA"');
+    expect(actions).toContain(
+      "export async function undoPassedSavedDealStageAction",
+    );
+    for (const source of [stageSelect, dealList]) {
+      expect(source).toContain("undoPassedSavedDealStageAction(");
+      expect(source).toContain("passHistoryEventId");
+      expect(source).toContain("result.historyEventId");
+      expect(source).toContain('undo.code === "STALE_DATA"');
+      expect(source).toContain('title: "Undo expired"');
+    }
+  });
+
   it("archives a selected set atomically with one reasoned event per changed deal", () => {
     expect(migration).toContain(
       "public.bulk_archive_saved_deals_with_history",
@@ -154,6 +212,33 @@ describe("saved deal history persistence", () => {
     expect(bulkRpc).toContain("'pass'");
     expect(bulkRpc).toContain("v_reason");
     expect(bulkRpc).toContain(
+      "grant execute on function public.bulk_archive_saved_deals_with_history(uuid[], text, text)",
+    );
+
+    const reconciledBulk = reconciliation.slice(
+      reconciliation.indexOf(
+        "create or replace function public.bulk_archive_saved_deals_with_history",
+      ),
+      reconciliation.indexOf(
+        "revoke all on function public.bulk_archive_saved_deals_with_history",
+      ),
+    );
+    expect(reconciledBulk).toContain("security definer");
+    expect(reconciledBulk).toContain(
+      "set search_path = pg_catalog, pg_temp",
+    );
+    expect(reconciledBulk).toContain(
+      "public.truecap_current_user_has_feature('pipeline')",
+    );
+    expect(reconciledBulk).not.toContain("from public.subscriptions");
+    expect(reconciledBulk).toContain("v_event_id := gen_random_uuid()");
+    expect(reconciledBulk).toContain(
+      "current_stage_history_event_id = v_event_id",
+    );
+    expect(reconciledBulk).toMatch(
+      /insert into public\.saved_deal_history_events \(\s*id,/,
+    );
+    expect(reconciliation).toContain(
       "grant execute on function public.bulk_archive_saved_deals_with_history(uuid[], text, text)",
     );
 

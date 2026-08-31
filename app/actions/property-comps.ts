@@ -6,8 +6,9 @@
  *
  * - Paid-gated: enrichment costs money per call, so it's for paid plans.
  * - Cache-first: results are cached globally (property_enrichment_cache,
- *   service-role) for 30 days to conserve API quota — the same address
- *   never costs two API calls within the window.
+ *   service-role) for 30 days to conserve API quota. Cache identity includes
+ *   the address and every provider query hint, so unlike queries never share
+ *   a comp set.
  * - Dormant without RENTCAST_API_KEY: returns NOT_CONFIGURED so the UI
  *   stays hidden until Morgan provisions the key.
  */
@@ -17,8 +18,20 @@ import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { hasPaidPlanSubscription } from "@/lib/entitlements";
 import { fetchRentCastEnrichment, type PropertyEnrichment } from "@/lib/property-enrichment/rentcast";
 import { captureServerEvent } from "@/lib/posthog-server";
+import {
+  bindPropertyCompsPayload,
+  propertyCompsProviderType,
+  propertyCompsQueryFingerprint,
+  propertyCompsUnderwritingFingerprint,
+  readBoundPropertyCompsPayload,
+  savedAnalysisPropertyCompsFingerprint,
+} from "@/lib/property-comps-query";
 
 import * as Sentry from "@sentry/nextjs";
+import {
+  accountSessionChangedResult,
+  expectedAccountUserMatches,
+} from "@/lib/account-session-binding";
 
 /** One report per server instance — a structural cache failure is a
  *  standing condition, not a per-request event. */
@@ -61,6 +74,7 @@ const inputSchema = z.object({
    *  /listings/sale). Used by the listing-link paste so the deal gets the
    *  actual asking price, not just the AVM estimate. */
   includeListing: z.boolean().optional(),
+  expectedUserId: z.string().uuid().optional(),
 });
 
 export type PropertyCompsResult =
@@ -69,6 +83,7 @@ export type PropertyCompsResult =
       ok: false;
       code:
         | "SIGN_IN_REQUIRED"
+        | "SESSION_CHANGED"
         | "ENTITLEMENT_REQUIRED"
         | "NOT_CONFIGURED"
         | "NOT_FOUND"
@@ -77,17 +92,6 @@ export type PropertyCompsResult =
         | "SERVER_ERROR";
       message: string;
     };
-
-function addressKey(address: string): string {
-  return address.trim().toLowerCase().replace(/\s+/g, " ");
-}
-
-/** Map our form's property type to a RentCast propertyType hint. */
-function rentCastType(t?: "single-family" | "multi-family" | "owner-occupant"): string | null {
-  if (t === "multi-family") return "Multi-Family";
-  if (t === "single-family" || t === "owner-occupant") return "Single Family";
-  return null;
-}
 
 export async function getPropertyCompsAction(input: unknown): Promise<PropertyCompsResult> {
   const parsed = inputSchema.safeParse(input);
@@ -101,6 +105,9 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
   } = await supabase.auth.getUser();
   if (!user) {
     return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
+  }
+  if (!expectedAccountUserMatches(parsed.data.expectedUserId, user.id)) {
+    return accountSessionChangedResult();
   }
 
   // Pro = unlimited (within the monthly cap). Free users get ONE live lookup
@@ -137,7 +144,9 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
     return { ok: false, code: "NOT_CONFIGURED", message: "Comps aren't enabled yet." };
   }
 
-  const key = addressKey(parsed.data.address);
+  const providerQueryFingerprint = propertyCompsQueryFingerprint(parsed.data);
+  const underwritingFingerprint = propertyCompsUnderwritingFingerprint(parsed.data);
+  const key = providerQueryFingerprint;
   const admin = createAdminSupabaseClient();
 
   // When a dealId is supplied, persist the pulled comp set onto that saved
@@ -148,32 +157,24 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
     if (!dealId) return;
     const { data: owns } = await admin
       .from("saved_analyses")
-      .select("id, address")
+      .select("id, address, property_type, bedrooms, bathrooms, sqft")
       .eq("id", dealId)
       .eq("user_id", user.id)
       .maybeSingle();
     if (!owns) return;
-    // The pulled address must match the deal's stored address: a stale
-    // dealId from a repurposed analyzer form (address typed over a loaded
-    // deal) would otherwise permanently overwrite the ORIGINAL deal's comp
-    // set with another property's comps. Skip persistence only — the caller
-    // still gets the enrichment to display. Rows without a stored address
-    // can't be checked and persist as before.
-    const savedAddress = (owns as { address?: string | null }).address;
-    if (
-      typeof savedAddress === "string" &&
-      savedAddress.trim().length > 0 &&
-      addressKey(savedAddress) !== key
-    ) {
-      return;
-    }
+    // A stale dealId or an underwriting edit made while RentCast was in flight
+    // must not bind the old query's result to the new deal profile. The saved
+    // payload carries the same fingerprint too, so even a write/read race is
+    // rejected by every reader after the deal changes.
+    if (savedAnalysisPropertyCompsFingerprint(owns) !== underwritingFingerprint) return;
+    const boundPayload = bindPropertyCompsPayload(payload, underwritingFingerprint);
     await admin
       .from("deal_comps")
       .upsert(
         {
           analysis_id: dealId,
           user_id: user.id,
-          payload: payload as unknown as Record<string, unknown>,
+          payload: boundPayload as unknown as Record<string, unknown>,
           fetched_at: new Date().toISOString(),
         },
         { onConflict: "analysis_id" }
@@ -424,7 +425,7 @@ export async function getPropertyCompsAction(input: unknown): Promise<PropertyCo
     enrichment = await fetchRentCastEnrichment(
       {
         address: parsed.data.address,
-        propertyType: rentCastType(parsed.data.propertyType),
+        propertyType: propertyCompsProviderType(parsed.data.propertyType),
         bedrooms: parsed.data.bedrooms ?? null,
         bathrooms: parsed.data.bathrooms ?? null,
         squareFootage: parsed.data.squareFootage ?? null,
@@ -515,11 +516,23 @@ export type SavedDealCompsResult =
   | { ok: true; enrichment: PropertyEnrichment | null; fetchedAt: string | null }
   | { ok: false };
 
-/** Load a previously-saved comp set for a deal (no API call, no quota). Returns
- *  the stored set, or null when none exists / the table isn't migrated yet. */
-export async function getSavedDealCompsAction(dealId: unknown): Promise<SavedDealCompsResult> {
-  const id = typeof dealId === "string" ? dealId.trim() : "";
-  if (!id) return { ok: false };
+const savedDealCompsInputSchema = inputSchema
+  .pick({
+    address: true,
+    propertyType: true,
+    bedrooms: true,
+    bathrooms: true,
+    squareFootage: true,
+  })
+  .extend({ dealId: z.string().uuid() })
+  .strict();
+
+/** Load a previously-saved comp set for the deal's exact current underwriting
+ * query (no API call, no quota). An unbound legacy row or a row whose address,
+ * type, beds, baths, or square footage changed is intentionally hidden. */
+export async function getSavedDealCompsAction(input: unknown): Promise<SavedDealCompsResult> {
+  const parsed = savedDealCompsInputSchema.safeParse(input);
+  if (!parsed.success) return { ok: false };
 
   const supabase = await createServerSupabaseClient();
   const {
@@ -527,17 +540,39 @@ export async function getSavedDealCompsAction(dealId: unknown): Promise<SavedDea
   } = await supabase.auth.getUser();
   if (!user) return { ok: false };
 
+  const expectedFingerprint = propertyCompsUnderwritingFingerprint(parsed.data);
+  const { data: savedDeal, error: savedDealError } = await supabase
+    .from("saved_analyses")
+    .select("address, property_type, bedrooms, bathrooms, sqft")
+    .eq("id", parsed.data.dealId)
+    .maybeSingle();
+  if (
+    savedDealError ||
+    !savedDeal ||
+    savedAnalysisPropertyCompsFingerprint(savedDeal) !== expectedFingerprint
+  ) {
+    return { ok: true, enrichment: null, fetchedAt: null };
+  }
+
   const { data, error } = await supabase
     .from("deal_comps")
     .select("payload, fetched_at")
-    .eq("analysis_id", id)
+    .eq("analysis_id", parsed.data.dealId)
     .maybeSingle();
   // Table missing (migration pending) or no row → simply "no saved set".
   if (error || !data) return { ok: true, enrichment: null, fetchedAt: null };
 
+  const enrichment = readBoundPropertyCompsPayload(
+    (data as { payload?: unknown }).payload,
+    expectedFingerprint,
+  );
+  if (!enrichment) {
+    return { ok: true, enrichment: null, fetchedAt: null };
+  }
+
   return {
     ok: true,
-    enrichment: (data as { payload: PropertyEnrichment }).payload,
+    enrichment,
     fetchedAt: (data as { fetched_at: string | null }).fetched_at ?? null,
   };
 }
