@@ -88,6 +88,35 @@ describe("saved-deal workspace mutation wiring", () => {
     expect(source).toContain('setDraft((current) => (current.trim() === body ? "" : current))');
   });
 
+  it("releases comment busy state after every request-owned async outcome", () => {
+    const source = read("components/investcalc/deal-comments-panel.tsx");
+    const addBlock = source.slice(
+      source.indexOf("const add = () =>"),
+      source.indexOf("const remove =", source.indexOf("const add = () =>")),
+    );
+    const removeBlock = source.slice(
+      source.indexOf("const remove ="),
+      source.indexOf("if (!loaded)", source.indexOf("const remove =")),
+    );
+
+    expect(source).not.toContain("useTransition");
+    expect(source).toContain("const [isBusy, setIsBusy] = useState(false)");
+    expect(addBlock).toContain(
+      "if (!body || isBusy || mutationRequestRef.current !== null) return",
+    );
+    expect(removeBlock).toContain(
+      "if (isBusy || mutationRequestRef.current !== null) return",
+    );
+    for (const block of [addBlock, removeBlock]) {
+      expect(block).toContain("setIsBusy(true)");
+      expect(block).toContain("finally {");
+      expect(block).toContain(
+        "if (mutationRequestRef.current === requestToken)",
+      );
+      expect(block).toContain("setIsBusy(false)");
+    }
+  });
+
   it("resynchronizes controlled workspace selectors when the deal changes", () => {
     const stage = read("components/investcalc/deal-stage-select.tsx");
     const client = read("components/investcalc/deal-client-select.tsx");

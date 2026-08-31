@@ -7,7 +7,7 @@
  * annotation; entries are immutable (add / delete). Renders a graceful notice
  * until the deal_comments migration is applied.
  */
-import { useEffect, useLayoutEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import * as Sentry from "@sentry/nextjs";
 import { Loader2, MessageSquare, Send, X } from "lucide-react";
 import {
@@ -36,7 +36,7 @@ export function DealCommentsPanel({ savedDealId }: { savedDealId: string }) {
   const [migrationPending, setMigrationPending] = useState(false);
   const [draft, setDraft] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
-  const [isBusy, startBusy] = useTransition();
+  const [isBusy, setIsBusy] = useState(false);
   const savedDealIdRef = useRef<string | null>(savedDealId);
   const mutationRequestRef = useRef<symbol | null>(null);
   const addRequestRef = useRef<{ body: string; requestId: string } | null>(null);
@@ -45,6 +45,7 @@ export function DealCommentsPanel({ savedDealId }: { savedDealId: string }) {
     savedDealIdRef.current = savedDealId;
     mutationRequestRef.current = null;
     addRequestRef.current = null;
+    setIsBusy(false);
     setLoaded(false);
     return () => {
       if (savedDealIdRef.current !== savedDealId) return;
@@ -98,7 +99,9 @@ export function DealCommentsPanel({ savedDealId }: { savedDealId: string }) {
 
   const add = () => {
     const body = draft.trim();
-    if (!body || isBusy) return; // isBusy: ⌘/Ctrl+Enter bypasses the disabled Send
+    // The ref closes the same-tick window before React can paint isBusy. It
+    // also covers ⌘/Ctrl+Enter, which bypasses the disabled Send button.
+    if (!body || isBusy || mutationRequestRef.current !== null) return;
     const dealAtSubmit = savedDealId;
     // Preserve the key while this exact draft remains in the box. If the
     // INSERT committed but the response was interrupted, clicking again sends
@@ -119,7 +122,8 @@ export function DealCommentsPanel({ savedDealId }: { savedDealId: string }) {
         requestToken,
         currentRequestToken: mutationRequestRef.current,
       });
-    startBusy(async () => {
+    setIsBusy(true);
+    void (async () => {
       // The draft is the only copy of what was typed, so it survives until
       // the server confirms the row. Clearing before the await meant any
       // failure (session expiry, archived deal, dropped connection) silently
@@ -152,11 +156,13 @@ export function DealCommentsPanel({ savedDealId }: { savedDealId: string }) {
       } finally {
         if (mutationRequestRef.current === requestToken) {
           mutationRequestRef.current = null;
+          setIsBusy(false);
         }
       }
-    });
+    })();
   };
   const remove = (commentId: string) => {
+    if (isBusy || mutationRequestRef.current !== null) return;
     const dealAtSubmit = savedDealId;
     const requestToken = Symbol("deal-comment-delete");
     mutationRequestRef.current = requestToken;
@@ -167,7 +173,8 @@ export function DealCommentsPanel({ savedDealId }: { savedDealId: string }) {
         requestToken,
         currentRequestToken: mutationRequestRef.current,
       });
-    startBusy(async () => {
+    setIsBusy(true);
+    void (async () => {
       try {
         const r = await deleteDealCommentV2Action(dealAtSubmit, commentId);
         if (!requestStillOwnsDeal()) return;
@@ -196,9 +203,10 @@ export function DealCommentsPanel({ savedDealId }: { savedDealId: string }) {
       } finally {
         if (mutationRequestRef.current === requestToken) {
           mutationRequestRef.current = null;
+          setIsBusy(false);
         }
       }
-    });
+    })();
   };
 
   if (!loaded) return null;
