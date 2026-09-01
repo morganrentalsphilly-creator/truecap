@@ -378,8 +378,11 @@ export const UNDERWRITING_V1_GOLDEN_CORPUS: UnderwritingV1GoldenCase[] = [
       afterTaxCF: -105.56258789641015,
       year10CumulativeCashFlow: -14684.510547569109,
       year10CumulativeTaxBenefit: 18_708,
-      dealScore: 0,
-      dscrScore: 0,
+      // Reviewed 2026-08-31 (score methodology v1.4, founder-approved
+      // near-miss tiers): DSCR 0.9x earns the 1-point near-miss band and
+      // the risk penalty no longer erases it. Was 0 / 0.
+      dealScore: 2,
+      dscrScore: 1,
     },
   },
   {

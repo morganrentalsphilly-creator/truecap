@@ -35,7 +35,15 @@ export const TRUECAP_UNDERWRITING_STANDARD_NAME =
 /** Screening Index arithmetic is versioned independently from the unchanged
  * v1 financial formulas. New saves record this submodel version while older
  * snapshots remain immutable and are never silently relabeled. */
-export const TRUECAP_DEAL_SCORE_METHODOLOGY_VERSION = "1.3" as const;
+/** v1.4 (2026-08-31, founder-approved): near-miss tiers. Each component
+ *  gained one 1-point band just below its former floor (cash flow
+ *  -$200..-$500, CoC -2..1%, cap 3..4%, DSCR 0.90..0.99) and the risk
+ *  penalty is bounded so it cannot erase that credit — a shortlist keeps
+ *  ORDERING deals that miss every band instead of tying them all at 0.
+ *  All other bands, every recommendation threshold, and all penalties are
+ *  unchanged; scores previously > 0 are unchanged unless the deal held a
+ *  near-miss band. */
+export const TRUECAP_DEAL_SCORE_METHODOLOGY_VERSION = "1.4" as const;
 
 export type UnderwritingFormulaKey =
   | "grossScheduledIncome"

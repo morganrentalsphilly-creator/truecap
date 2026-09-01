@@ -90,7 +90,7 @@ describe("TrueCap Underwriting Standard 1.3", () => {
 
   it("versions the pre-tax, contribution-aware projected return without relabeling v1.2", () => {
     expect(TRUECAP_UNDERWRITING_STANDARD_VERSION).toBe("1.3");
-    expect(TRUECAP_DEAL_SCORE_METHODOLOGY_VERSION).toBe("1.3");
+    expect(TRUECAP_DEAL_SCORE_METHODOLOGY_VERSION).toBe("1.4");
     expect(TRUECAP_UNDERWRITING_STANDARD_V1_2_VERSION).toBe("1.2");
     expect(UNDERWRITING_FORMULAS.dealScore.convention).toContain(
       "The projected return is pre-tax",

@@ -152,12 +152,18 @@ describe("isAppreciationFloorApplied — receipts/popover reconciliation", () =>
     expect(isAppreciationFloorApplied(r.breakdown, r.score)).toBe(false);
   });
 
-  it("stays false when the 0-clamp (not the floor) raised the score above the raw sum", () => {
-    // A genuinely weak deal: components + penalty sum negative, score clamps
-    // to 0. That's the clamp, not the appreciation floor — no floor line.
+  it("stays false on a bottomed-out deal — and the raw sum can no longer go negative", () => {
+    // This test used to construct "components + penalty sums negative, the
+    // 0-clamp raises it" and assert that the clamp doesn't read as the floor.
+    // The near-miss change (2026-08-31) bounds the risk penalty at
+    // -(components - nearMissCredit), and credit <= components always, so a
+    // negative raw sum is now STRUCTURALLY impossible: the score equals the
+    // summed receipt for every deal unless the appreciation floor engages.
+    // Same guarantee, strengthened — the floor detector still reads false,
+    // and the receipt reconciles by plain addition with no clamp involved.
     const r = computeDealScore(
       input({
-        monthlyCashFlow: -400,
+        monthlyCashFlow: -400, // near-miss tier: 1 point
         cashOnCashReturn: -25,
         capRate: 3,
         dscr: 0.7,
@@ -171,8 +177,8 @@ describe("isAppreciationFloorApplied — receipts/popover reconciliation", () =>
         tenYearAnnualizedReturnPct: 2,
       })
     );
-    expect(getScoreBreakdownSum(r.breakdown)).toBeLessThan(0);
-    expect(r.score).toBe(0);
+    expect(getScoreBreakdownSum(r.breakdown)).toBeGreaterThanOrEqual(0);
+    expect(r.score).toBe(Math.round(getScoreBreakdownSum(r.breakdown)));
     expect(isAppreciationFloorApplied(r.breakdown, r.score)).toBe(false);
   });
 
