@@ -206,7 +206,11 @@ function buildSampleReport(): ReportData {
     },
     maxOffer: {
       maxPrice: 241_000,
-      basis: "8% cash-on-cash target",
+      // The ≥ is load-bearing: real basis strings carry it ("DSCR ≥ 1.25"),
+      // and jsPDF's WinAnsi Helvetica mojibaked it (`"e`) in shipped
+      // reports. The sample keeps the glyph so this harness renders the
+      // sanitizer's work, not just ASCII.
+      basis: "8% cash-on-cash target · DSCR ≥ 1.25",
       currentPriceGap: -24_000,
       achieved: { monthlyCashFlow: 512, cocReturn: 8.0, capRate: 8.2, dscr: 1.41 },
       requiredMonthlyRent: { value: 3_940, alreadyMet: false, unreachable: false },
