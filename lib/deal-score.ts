@@ -528,6 +528,13 @@ function getCashFlowScore(input: DealScoreInput): number {
     if (cf > 200) return 14;
     if (cf > 0) return 8;
     if (cf > -200) return 3;
+    // Near-miss tier. Every component used to return a hard 0 below its
+    // last band, so on a shortlist a -$210/mo deal and a -$2,000/mo deal
+    // both pancaked to the same Screening Index and ranked EQUAL — exactly
+    // where a screening tool needs ordering most. One point keeps
+    // "barely underwater" above "catastrophic" without promoting either:
+    // all recommendation thresholds are unchanged.
+    if (cf > -500) return 1;
     return 0;
   }
 
@@ -765,7 +772,9 @@ export function computeDealScore(
             ? 8
             : coc > 1
               ? 3
-              : 0
+              : coc > -2
+                ? 1 // near-miss: breakeven-ish beats deeply negative (see getCashFlowScore)
+                : 0
     : 0;
 
   // Cap rate — 5-tier granular on a 16-pt max. 7% cap is a realistic 2026
@@ -779,7 +788,9 @@ export function computeDealScore(
           ? 9
           : input.capRate > 4
             ? 4
-            : 0;
+            : input.capRate > 3
+              ? 1 // near-miss: a 3.5% cap outranks a 1% cap on the shortlist
+              : 0;
 
   // DSCR — 5-tier on a 17-pt max. Cash purchases get full credit (no debt).
   // >1.30 "loaned without question"; 1.20 "above floor, fundable"; 1.10
@@ -794,7 +805,9 @@ export function computeDealScore(
           ? 7
           : input.dscr >= 1.0
             ? 3
-            : 0;
+            : input.dscr >= 0.9
+              ? 1 // near-miss: 0.95 is a rate-cut from fundable; 0.5 is not
+              : 0;
 
   // Total return — the wealth-building dimension a year-1-only score is
   // blind to. Annualized 10-year total return on invested cash (pre-tax cash
@@ -869,6 +882,27 @@ export function computeDealScore(
   const applicabilityAdjustment = input.cashOnCashApplicable
     ? 0
     : Math.round(normalizedComponents) - unweightedComponentSum;
+  // The penalty is a modifier, not a second scoring engine (see the -30
+  // floor above). Second corollary: it may not ERASE the near-miss ordering
+  // credit. Each component's 1-point tier exists so a shortlist can still
+  // order deals that miss every band, but the -16 negative-cash-flow penalty
+  // alone swallowed all four points and re-tied a -$210/mo, DSCR 0.97 deal
+  // with a -$2,000/mo, DSCR 0.45 one at 0 (measured). Compressing the
+  // penalty here — rather than flooring the final score — keeps the receipt
+  // arithmetic a plain sum and preserves isAppreciationFloorApplied's
+  // invariant that the appreciation floor is the ONLY path raising the score
+  // above component arithmetic. A 1 in a component is unique to its
+  // near-miss tier, so this detection is exact.
+  const nearMissCredit =
+    (cashFlowScore === 1 ? 1 : 0) +
+    (cocScore === 1 ? 1 : 0) +
+    (capRateScore === 1 ? 1 : 0) +
+    (dscrScore === 1 ? 1 : 0);
+  riskPenalty = Math.max(
+    riskPenalty,
+    -Math.max(0, normalizedComponents - nearMissCredit),
+  );
+
   const rawScore = normalizedComponents + riskPenalty;
   let score = Math.max(0, Math.min(100, Math.round(rawScore)));
 

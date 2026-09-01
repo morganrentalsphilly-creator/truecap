@@ -97,7 +97,8 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
             Where the rent goes
           </p>
           <p className="mt-0.5 text-[11px] text-muted-foreground">
-            Monthly - every dollar in, every dollar out
+            Monthly - every dollar in, every dollar out. Percentages are
+            each cost&apos;s share of gross rent.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-4 sm:gap-6">
