@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import type { DashboardDeal } from "@/lib/dashboard-deal-mapping";
 import { sortDealsWithinMethodologyCohorts } from "@/lib/dashboard-deal-mapping";
 import { Verdict } from "@/components/investcalc/verdict";
+import { OfferCriteriaNote } from "@/components/investcalc/offer-criteria-note";
 
 // No timestamp exists on DashboardDeal, so there is no "recently updated"
 // sort to offer. Default to the gap — the column the table exists for.
@@ -386,19 +387,14 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                     ) : null}
                   </td>
                   <td className="px-3 py-2.5 text-right text-foreground">
-                    <div className="whitespace-nowrap font-mono font-bold tabular-nums">
+                    <div className="flex items-center justify-end gap-1 whitespace-nowrap font-mono font-bold tabular-nums">
                       {money(deal.maxOffer)}
+                      {deal.maxOffer != null && deal.maxOfferBasisLabel ? (
+                        <OfferCriteriaNote
+                          basisLabel={deal.maxOfferBasisLabel}
+                        />
+                      ) : null}
                     </div>
-                    {deal.maxOffer != null && deal.maxOfferBasisLabel ? (
-                      <details className="ml-auto mt-0.5 max-w-[220px] text-left text-[10px] leading-tight text-muted-foreground">
-                        <summary className="inline-flex min-h-11 cursor-pointer items-center font-semibold text-primary underline-offset-2 hover:underline">
-                          View exact criteria
-                        </summary>
-                        <p className="mt-1">
-                          Criteria: {deal.maxOfferBasisLabel}
-                        </p>
-                      </details>
-                    ) : null}
                   </td>
                   <td className="whitespace-nowrap px-3 py-2.5 text-right font-mono tabular-nums text-muted-foreground">
                     {money(deal.purchasePrice)}

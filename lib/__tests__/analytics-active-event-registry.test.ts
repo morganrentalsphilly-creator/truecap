@@ -85,7 +85,11 @@ function activeEvents(): ActiveEvent[] {
 }
 
 describe("active analytics event registry", () => {
-  it("documents every literal event and every literal property", () => {
+  // This test TypeScript-parses every tracked source file, which takes ~1s
+  // warm but >10s when the full suite runs with a cold transform cache — the
+  // default 5s timeout made it flake under exactly that load. The timeout is
+  // generous because the work is CPU-bound scanning, not a hang.
+  it("documents every literal event and every literal property", { timeout: 60_000 }, () => {
     for (const { event, properties, location } of activeEvents()) {
       const definition =
         ANALYTICS_EVENT_DICTIONARY[

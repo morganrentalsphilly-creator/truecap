@@ -50,7 +50,11 @@ describe("saved-deal methodology cohorts", () => {
     ).toEqual({
       comparisonKey: "recorded:1.1",
       groupLabel: "Recorded v1.1",
-      badgeLabel: "Recorded v1.1",
+      // Every ordinary saved deal lands here, so a per-row badge repeated
+      // identically down the list and said nothing — suppressed 2026-09-01.
+      // The comparisonKey/groupLabel above still keep the cohort separate;
+      // the STALE cohorts below must keep their visible badges.
+      badgeLabel: null,
       isCurrent: true,
     });
   });
@@ -268,8 +272,19 @@ describe("My Deals methodology truth wiring", () => {
   });
 
   it("keeps exact Offer Ceiling criteria accessible without repeating prose in every resting row", () => {
-    expect(listSource).toContain("<details");
-    expect(listSource).toContain("View exact criteria");
+    // Desktop rows fold the criteria behind the shared ⓘ popover
+    // (OfferCriteriaNote) instead of the former per-row <details> summary,
+    // which repeated an identical 44px "View exact criteria" line on every
+    // deal. Same intent, one line per row.
+    const noteSource = readFileSync(
+      join(process.cwd(), "components/investcalc/offer-criteria-note.tsx"),
+      "utf8",
+    );
+    expect(listSource).toContain("<OfferCriteriaNote");
+    expect(dashboardTableSource).toContain("<OfferCriteriaNote");
+    expect(noteSource).toContain("How this Offer Ceiling is computed");
+    expect(noteSource).toContain("Criteria: {basisLabel");
+    // The dashboard-home MOBILE card keeps its tap-sized disclosure.
     expect(dashboardTableSource).toContain("<details");
     expect(dashboardTableSource).toContain(
       "View exact Offer Ceiling criteria",

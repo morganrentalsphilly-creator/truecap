@@ -133,6 +133,7 @@ import { ScoreBreakdown } from "@/components/investcalc/score-breakdown";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 import { BuyBoxNudge } from "@/components/dashboard/buy-box-nudge";
 import { BuyBoxFitBadge } from "@/components/investcalc/buy-box-fit-badge";
+import { OfferCriteriaNote } from "@/components/investcalc/offer-criteria-note";
 import {
   buyBoxHasCriteria,
   deriveStateFromAddress,
@@ -351,8 +352,8 @@ function OfferLineRow({
             : "Clears your selected targets"
           : "Clears TrueCap’s default targets";
     return (
-      <div className="mt-1.5 text-xs text-muted-foreground">
-        <div>
+      <div className="mt-1.5 flex flex-wrap items-center gap-x-1 text-xs text-muted-foreground">
+        <span>
           <span className="font-semibold text-success">{clearsLabel}</span>
           {offer.maxPrice != null ? (
             <>
@@ -360,18 +361,9 @@ function OfferLineRow({
               <span className="tabular-nums">{fmtMoney0(offer.maxPrice)}</span>
             </>
           ) : null}
-        </div>
+        </span>
         {offer.maxPrice != null && basisLabel ? (
-          <details className="mt-0.5 text-[11px]">
-            <summary className="inline-flex min-h-11 cursor-pointer items-center font-semibold text-primary underline-offset-2 hover:underline">
-              View exact criteria
-            </summary>
-            <p className="mt-1">Criteria: {basisLabel}</p>
-            <p className="mt-1">
-              Highest modeled price that still meets these criteria under the
-              assumptions shown. This is not a recommended offer or appraisal.
-            </p>
-          </details>
+          <OfferCriteriaNote basisLabel={basisLabel} />
         ) : null}
       </div>
     );
@@ -390,8 +382,8 @@ function OfferLineRow({
           : "to meet your selected targets"
         : "to meet TrueCap’s default targets";
   return (
-    <div className="mt-1.5 text-xs text-muted-foreground">
-      <div>
+    <div className="mt-1.5 flex flex-wrap items-center gap-x-1 text-xs text-muted-foreground">
+      <span>
         <span className="font-semibold text-foreground">
           Offer Ceiling:{" "}
           <span className="tabular-nums">{fmtMoney0(offer.maxPrice)}</span>
@@ -408,17 +400,8 @@ function OfferLineRow({
             {gapLabel}
           </>
         ) : null}
-      </div>
-      <details className="mt-0.5 text-[11px]">
-        <summary className="inline-flex min-h-11 cursor-pointer items-center font-semibold text-primary underline-offset-2 hover:underline">
-          View exact criteria
-        </summary>
-        <p className="mt-1">Criteria: {basisLabel ?? "Captured targets"}</p>
-        <p className="mt-1">
-          Highest modeled price that still meets these criteria under the
-          assumptions shown. This is not a recommended offer or appraisal.
-        </p>
-      </details>
+      </span>
+      <OfferCriteriaNote basisLabel={basisLabel} />
     </div>
   );
 }
@@ -4051,8 +4034,18 @@ export function SavedAnalysesPage({
                         </td>
                         <td className="pr-2">
                           <div className="flex items-start gap-2">
-                            <span className="mt-0.5 inline-flex size-7 rounded-full bg-primary/10 text-primary items-center justify-center shrink-0">
+                            {/* The icon carries the property type; the visible
+                              "Single Family" line it used to caption repeated
+                              what the icon already says and cost a line on
+                              every row. Tooltip + sr-only keep it reachable. */}
+                            <span
+                              className="mt-0.5 inline-flex size-7 rounded-full bg-primary/10 text-primary items-center justify-center shrink-0"
+                              title={getTypeLabel(item.propertyType)}
+                            >
                               <PropertyTypeIcon className="w-3.5 h-3.5" />
+                              <span className="sr-only">
+                                {getTypeLabel(item.propertyType)}
+                              </span>
                             </span>
                             <div className="min-w-0">
                               {/* Name click = the deal's workspace (same-tab). The
@@ -4088,9 +4081,6 @@ export function SavedAnalysesPage({
                                 ) : null}
                               </Link>
                               {getStatusBadge(item)}
-                              <p className="text-xs text-muted-foreground truncate">
-                                {getTypeLabel(item.propertyType)}
-                              </p>
                               <OfferLineRow
                                 offer={item.offerLine}
                                 basisLabel={item.offerBasisLabel}
@@ -4122,9 +4112,12 @@ export function SavedAnalysesPage({
                             nothing became unreachable; it just stopped shouting.
                             Falls back to a plain badge when there is nothing to
                             show, so the row never offers a dead click. */}
-                          <div className="flex flex-col items-start gap-1.5">
-                            <div className="flex flex-wrap items-center gap-1.5">
-                              <Popover>
+                          {/* One wrapping badge row. The buy-box fit chip used
+                            to sit on its own line below the verdict, which —
+                            with the methodology chip — made this cell three
+                            stacked elements on every row. */}
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <Popover>
                                 <PopoverTrigger asChild>
                                   <button
                                     type="button"
@@ -4175,20 +4168,19 @@ export function SavedAnalysesPage({
                                   ) : null}
                                 </PopoverContent>
                               </Popover>
-                              {item.methodologyLabel ? (
-                                <Badge
-                                  variant="outline"
-                                  className="rounded-full text-[10px] font-semibold text-muted-foreground"
-                                  title={
-                                    item.methodologyIsCurrent === false
-                                      ? `${item.methodologyLabel}. Re-underwrite this deal before comparing it with the current model.`
-                                      : item.methodologyLabel
-                                  }
-                                >
-                                  {item.methodologyLabel}
-                                </Badge>
-                              ) : null}
-                            </div>
+                            {item.methodologyLabel ? (
+                              <Badge
+                                variant="outline"
+                                className="rounded-full text-[10px] font-semibold text-muted-foreground"
+                                title={
+                                  item.methodologyIsCurrent === false
+                                    ? `${item.methodologyLabel}. Re-underwrite this deal before comparing it with the current model.`
+                                    : item.methodologyLabel
+                                }
+                              >
+                                {item.methodologyLabel}
+                              </Badge>
+                            ) : null}
                             <BuyBoxFitBadge fit={buyBoxFitById?.get(item.id)} />
                           </div>
                         </td>

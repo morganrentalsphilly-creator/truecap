@@ -38,9 +38,16 @@ describe("rental Offer Ceiling surface copy", () => {
 
     const list = read("../../components/investcalc/saved-analyses-page-v2.tsx");
     expect(list).toContain("Offer Ceiling:");
-    expect(list).toContain("Criteria: {basisLabel}");
-    expect(list).toContain(NON_ADVICE);
     expect(list).toContain("basisLabel={item.offerBasisLabel}");
+    // The criteria text + non-advice sentence moved into the shared ⓘ
+    // popover every offer line renders (OfferCriteriaNote) — still
+    // criterion-bound and non-advisory, no longer repeated per resting row.
+    const criteriaNote = read(
+      "../../components/investcalc/offer-criteria-note.tsx",
+    );
+    expect(criteriaNote).toContain("Criteria: {basisLabel");
+    expect(criteriaNote).toContain(NON_ADVICE);
+    expect(list).toContain("<OfferCriteriaNote");
 
     const server = read("../../app/dashboard/saved-analyses/page.tsx");
     expect(server).toContain("offerBasisLabel: offerResult?.basisLabel");
