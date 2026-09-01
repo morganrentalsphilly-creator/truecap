@@ -59,7 +59,13 @@ export function resolveDealMethodologyPresentation(input: {
     return {
       comparisonKey: `recorded:${currentVersion}`,
       groupLabel: `Recorded v${currentVersion}`,
-      badgeLabel: `Recorded v${currentVersion}`,
+      // No per-row badge here: EVERY ordinary newly saved deal lands in this
+      // branch, so the chip repeated identically down the whole list and
+      // carried no signal (founder call, 2026-09-01). The chip stays for the
+      // cohorts a scanner must notice — an older recorded version or an
+      // unversioned legacy row — and the cohort group header still names
+      // this cohort when a methodology-sensitive sort mixes versions.
+      badgeLabel: null,
       // The immutable snapshot is a separate comparison provenance, but it
       // was produced by the currently released formula and remains eligible
       // for current Buy Box screening. Ordinary newly saved deals land here.
