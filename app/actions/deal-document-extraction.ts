@@ -19,12 +19,12 @@
  */
 
 import { z } from "zod";
+import { revalidatePath } from "next/cache";
 import * as Sentry from "@sentry/nextjs";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import {
   extractDealDocumentCandidates,
   type ExtractionCandidate,
-  type ExtractableField,
 } from "@/lib/document-extraction";
 import { normalizeReleasedInvestmentFormSnapshot } from "@/lib/underwriting-model-release";
 import { saveDealAction } from "@/app/actions/saved-analyses";
@@ -224,5 +224,9 @@ export async function applyExtractedValueAction(
         "The value could not be applied. Please try again.",
     };
   }
+  // The workspace header strip renders from the server page; the card's
+  // router.refresh() alone can serve a cached segment, so invalidate the
+  // route server-side too (saveDealAction itself never revalidates paths).
+  revalidatePath(`/dashboard/saved-analyses/${savedDealId}`);
   return { ok: true, savedDealId };
 }

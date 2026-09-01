@@ -128,16 +128,17 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
         description: `Set to $${candidate.value.toLocaleString()} from ${extraction?.fileName ?? "your document"}. The analysis has been re-run.`,
         variant: "success",
       });
-      setExtraction((current) =>
-        current
-          ? {
-              ...current,
-              candidates: current.candidates.filter(
-                (c) => c.field !== candidate.field,
-              ),
-            }
-          : current,
-      );
+      setExtraction((current) => {
+        if (!current) return current;
+        const remaining = current.candidates.filter(
+          (c) => c.field !== candidate.field,
+        );
+        // Applying the last candidate dismisses the panel — otherwise an
+        // empty "Numbers found in …" shell lingered with only its ×.
+        return remaining.length > 0
+          ? { ...current, candidates: remaining }
+          : null;
+      });
       router.refresh();
     } catch (error) {
       toast({

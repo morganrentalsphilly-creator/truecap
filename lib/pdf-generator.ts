@@ -1023,7 +1023,7 @@ function pageCover(
   );
 
   // ---- Title zone ----
-  let y = 196;
+  let y = 170;
   setText(doc, themeColor);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
@@ -1063,11 +1063,17 @@ function pageCover(
   doc.setFontSize(10.5);
   const unitsLabel =
     d.units.length === 1 ? "1 unit" : `${d.units.length} units`;
-  doc.text(
-    `${formatPropertyType(d.property.type)}   ·   Built ${formatYearBuilt(d.property.yearBuilt)}   ·   ${unitsLabel}   ·   ${fmtCurrency(d.property.purchasePrice)}`,
-    M.left,
-    y,
-  );
+  // "Built Unknown" printed on real covers — an unknown year is the absence
+  // of a fact, not a fact worth a slot on the title line.
+  const coverMeta = [
+    formatPropertyType(d.property.type),
+    ...(d.property.yearBuilt
+      ? [`Built ${formatYearBuilt(d.property.yearBuilt)}`]
+      : []),
+    unitsLabel,
+    fmtCurrency(d.property.purchasePrice),
+  ];
+  doc.text(coverMeta.join("   ·   "), M.left, y);
   y += 36;
 
   // ---- "UNDERWRITING RESULT" panel ----
@@ -1107,7 +1113,7 @@ function pageCover(
   py += 22;
   setText(doc, tierColor);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(17);
+  doc.setFontSize(19);
   doc.text(decision.label, panelX + 20, py);
 
   py += 22;
@@ -1694,96 +1700,60 @@ function pageInputs(
 ) {
   let y = M.top;
 
-  // Hero panel background. Three-way decision:
-  //   1) Dark brand color set → use it (custom feel)
-  //   2) Branded but light/no brand color → neutral charcoal (avoids
-  //      having TrueCap's navy show through a Skale-branded report)
-  //   3) No branding at all → COLOR.navy (TrueCap default)
-  // Luminance threshold (0.45) protects against light brand colors
-  // making the white address text unreadable.
-  const hasAnyBrandingForPanel = Boolean(
-    branding?.logoUrl ||
-    branding?.companyName ||
-    branding?.tagline ||
-    branding?.primaryColorHex,
-  );
-  let heroPanelColor: string;
-  if (
-    isValidHex(branding?.primaryColorHex ?? null) &&
-    colorLuminance(branding?.primaryColorHex as string) < 0.45
-  ) {
-    heroPanelColor = branding?.primaryColorHex as string;
-  } else if (hasAnyBrandingForPanel) {
-    // Neutral dark slate — reads as "professional report" without
-    // borrowing TrueCap's signature navy.
-    heroPanelColor = "#1F2937";
-  } else {
-    heroPanelColor = COLOR.navy;
-  }
-  // Resolve theme color ONCE for this page — reused by the Subject
-  // Property kicker, section kickers, stat cards, and any other chrome
-  // that swaps to the user's brand color.
+  // Resolve theme color ONCE for this page — reused by the section
+  // kickers, stat cards, and any other chrome that swaps to the user's
+  // brand color.
   const themeColor = resolveThemeColor(branding);
 
-  // Hero panel — 72pt fits the two-line address treatment (street
-  // headline + city/state subtitle + property details row) without
-  // wasted vertical space. Internal positions tightened proportionally.
-  const heroHeight = 72;
-  setFill(doc, heroPanelColor);
-  doc.roundedRect(M.left, y, SAFE.w, heroHeight, 10, 10, "F");
-
-  // Split "538 Turner St, Philadelphia, PA 19122, USA" into a big
-  // street headline + a smaller city/state subtitle so the address
-  // reads as a proper two-tier typographic hierarchy.
+  // Compact property strip. The cover already made the full-bleed address
+  // statement; repeating it here as a 72pt navy slab restated every fact on
+  // the previous sheet in heavier ink. One bordered line keeps a reader who
+  // receives page 2+ without the cover oriented, at a fraction of the
+  // weight.
+  const stripH = 34;
+  card(doc, M.left, y, SAFE.w, stripH, { soft: true });
   const addressParts = splitAddress(d.property.address);
-
-  setText(doc, "#FFFFFF");
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(22);
-  // TRUNCATED to the panel. The cover's copy of this address wraps via
-  // splitTextToSize, but the hero panel is a fixed-height band, so a long
-  // street line ("2100 Northeast Martin Luther King Junior Boulevard" measures
-  // 544pt at 22pt bold) simply ran off the right edge of the page. The panel
-  // spans M.left..PAGE.w-M.right and the text starts 22pt in, with a matching
-  // 22pt gutter on the right.
-  doc.text(
-    truncateToWidth(doc, addressParts.primary, SAFE.w - 44),
-    M.left + 22,
-    y + 28,
-  );
-
-  if (addressParts.secondary) {
-    setText(doc, "#CBD5E1");
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
-    doc.text(addressParts.secondary, M.left + 22, y + 43);
-  }
-
-  // Thin white inner accent line between address subtitle and property
-  // details row. Editorial divider treatment.
-  setStroke(doc, "#FFFFFF");
-  doc.setLineWidth(0.6);
-  doc.line(M.left + 22, y + 50, M.left + 22 + 28, y + 50);
-
-  setText(doc, "#CBD5E1");
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-  // Singular/plural fix on "unit/units" so a single-family deal doesn't
-  // read as "1 units." Property type formatted to a proper label
-  // ("single-family" → "Single Family").
   const unitsLabel =
     d.units.length === 1 ? "1 unit" : `${d.units.length} units`;
+  // Right side first so the left side knows how much room it has.
+  const priceLabel = `Purchase ${fmtCurrency(d.property.purchasePrice)}`;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  const priceW = doc.getTextWidth(priceLabel);
+  setText(doc, COLOR.ink);
+  doc.text(priceLabel, PAGE.w - M.right - 14, y + 21, { align: "right" });
+
+  const stripMeta = [
+    ...(addressParts.secondary ? [addressParts.secondary] : []),
+    formatPropertyType(d.property.type),
+    // An unknown build year is the absence of a fact — omit, don't print
+    // "Built Unknown".
+    ...(d.property.yearBuilt
+      ? [`Built ${formatYearBuilt(d.property.yearBuilt)}`]
+      : []),
+    unitsLabel,
+  ].join("  ·  ");
+  const leftMax = SAFE.w - 28 - priceW - 18;
+  setText(doc, COLOR.ink);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11.5);
+  const streetText = truncateToWidth(
+    doc,
+    addressParts.primary,
+    Math.max(120, leftMax * 0.45),
+  );
+  doc.text(streetText, M.left + 14, y + 21);
+  const streetW = doc.getTextWidth(streetText);
+  setText(doc, COLOR.sub);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
   doc.text(
-    `${formatPropertyType(d.property.type)}  ·  Built ${formatYearBuilt(d.property.yearBuilt)}  ·  ${unitsLabel}  ·  Purchase ${fmtCurrency(d.property.purchasePrice)}`,
-    M.left + 22,
-    y + 63,
+    truncateToWidth(doc, stripMeta, Math.max(60, leftMax - streetW - 10)),
+    M.left + 14 + streetW + 10,
+    y + 21,
   );
 
-  // Restore stroke defaults for downstream draws
-  setStroke(doc, COLOR.line);
-  doc.setLineWidth(0.5);
-
-  y += heroHeight + 22;
+  y += stripH + 22;
 
   // Performance Summary — section reordering: the headline metrics now
   // appear FIRST after the hero panel, before the inputs that produced
@@ -1791,7 +1761,6 @@ function pageInputs(
   // report — the reader sees "what does this deal do?" before "how was
   // it calculated?"
   y = sectionTitle(doc, "Performance Summary", y, undefined, themeColor);
-  const cw = (SAFE.w - 24) / 3;
   const ch = 60;
   const gap = 10;
   // Cash purchase => no debt service => DSCR isn't applicable. Detect via
@@ -1829,15 +1798,20 @@ function pageInputs(
     ],
     [
       "CoC Return",
+      // No forced "+": the cover prints these unsigned, and "+7.0%" beside
+      // "7.0%" one page apart read as two different numbers.
       d.performance.cocApplicable === false
         ? "N/A"
-        : fmtPct(d.performance.cocReturn, true),
+        : fmtPct(d.performance.cocReturn),
       d.performance.cocApplicable === false ? "neutral" : "primary",
       d.performance.cocApplicable === false
         ? "no modeled cash invested"
         : "year 1",
     ],
-    ["Cap Rate", fmtPct(d.performance.capRate, true), "violet", "NOI basis"],
+    // Neutral, not violet: color on this grid is reserved for semantics
+    // (green/red cash flow, DSCR banding) and the brand (Offer Ceiling,
+    // CoC) — a purple cap rate was a fifth hue carrying no meaning.
+    ["Cap Rate", fmtPct(d.performance.capRate), "neutral", "NOI basis"],
     ["DSCR", dscrValue, dscrTone, dscrSub],
   ];
   if (isFeatureReleased("tax_strategy")) {
@@ -1858,22 +1832,23 @@ function pageInputs(
         : "review inputs",
     ]);
   }
-  cards.forEach((c, i) => {
-    const col = i % 3;
-    const row = Math.floor(i / 3);
-    statCard(
-      doc,
-      M.left + col * (cw + gap),
-      y + row * (ch + gap),
-      cw,
-      ch,
-      c[0],
-      c[1],
-      { tone: c[2], sub: c[3], themeColor },
-    );
+  // Rows of three, and a short final row stretches to fill the width — the
+  // shipped 5-card grid left a card-sized hole after the second row's two
+  // cards, which read as a missing metric rather than a layout choice.
+  const cardRows: (typeof cards)[] = [];
+  for (let i = 0; i < cards.length; i += 3) cardRows.push(cards.slice(i, i + 3));
+  cardRows.forEach((rowCards, r) => {
+    const w = (SAFE.w - (rowCards.length - 1) * gap) / rowCards.length;
+    rowCards.forEach((c, i) => {
+      statCard(doc, M.left + i * (w + gap), y + r * (ch + gap), w, ch, c[0], c[1], {
+        tone: c[2],
+        sub: c[3],
+        themeColor,
+      });
+    });
   });
   if (d.maxOffer) {
-    const criteriaY = y + (ch + gap) * 2 + 2;
+    const criteriaY = y + (ch + gap) * cardRows.length + 2;
     setText(doc, COLOR.sub);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7.5);
@@ -1896,7 +1871,7 @@ function pageInputs(
   // Section spacing rationalized to a consistent +22pt across all
   // page-1 transitions (was +6 here previously, which visibly cramped
   // Property & Inputs immediately below).
-  y += (ch + gap) * 2 + (d.maxOffer ? 53 : 22);
+  y += (ch + gap) * cardRows.length + (d.maxOffer ? 53 : 22);
 
   y = sectionTitle(doc, "Units", y, undefined, themeColor);
   if (d.units.length <= 2) {
@@ -1933,10 +1908,12 @@ function pageInputs(
       doc.setFontSize(11);
       // The owner's unit shows no rent: the engine does not count it, so
       // printing its form value here would restate the contradiction.
+      // Zero beds/baths/sqft means "not entered", not a studio with no
+      // bathroom — shipped reports printed "BATHS 0 · SQ FT 0" as facts.
       [
-        String(u.beds),
-        String(u.baths),
-        String(u.sqft),
+        u.beds ? String(u.beds) : "—",
+        u.baths ? String(u.baths) : "—",
+        u.sqft ? String(u.sqft) : "—",
         u.isOwnerOccupied
           ? "—"
           : u.stabilizedRent != null
@@ -2612,7 +2589,9 @@ function pageProjection(
     64,
     "Year 10 Modeled Equity",
     fmtCurrency(year10Equity),
-    { tone: "violet", themeColor },
+    // Brand, not violet — this row's color budget is semantic green +
+    // brand; a purple third tile was decoration.
+    { tone: "primary", themeColor },
   );
   y += 64 + 20;
 
@@ -2665,24 +2644,28 @@ function pageProjection(
     (box) =>
       drawBarChart(doc, {
         box,
+        // Waterfall palette: brand for the income that starts the story,
+        // quiet slates for the routine deductions, and the semantic
+        // green/red only on the answer. The shipped green/red/orange run
+        // made ordinary expenses look like alarms.
         data: [
           {
             label: "Gross Rent",
             value: wfGross,
             from: 0,
-            color: COLOR.success,
+            color: themeColor,
           },
           {
             label: "Op. Expenses",
             value: wfGross - wfOpex,
             from: wfGross,
-            color: COLOR.danger,
+            color: COLOR.muted,
           },
           {
             label: "P&I + MI",
             value: wfGross - wfOpex - wfDebt,
             from: wfGross - wfOpex,
-            color: COLOR.warn,
+            color: COLOR.sub,
           },
           ...(wfBalloon > 0
             ? [
@@ -2690,6 +2673,8 @@ function pageProjection(
                   label: "Balloon",
                   value: wfGross - wfOpex - wfDebt - wfBalloon,
                   from: wfGross - wfOpex - wfDebt,
+                  // A balloon is a genuine risk event — it keeps the alarm
+                  // color the routine deductions gave up.
                   color: COLOR.danger,
                 },
               ]
@@ -2698,7 +2683,7 @@ function pageProjection(
             label: "Net Cash Flow",
             value: wfNet,
             from: 0,
-            color: wfNet >= 0 ? themeColor : COLOR.danger,
+            color: wfNet >= 0 ? COLOR.success : COLOR.danger,
           },
         ].map((bar, i) => ({ ...bar, valueLabel: fmtChartMoney(wfSteps[i]!) })),
       }),
@@ -2712,7 +2697,9 @@ function pageProjection(
         {
           label: "Cumulative CF",
           values: d.projection10y.rows.map((r) => r.cum),
-          color: COLOR.violet,
+          // Single-series chart: it takes the brand color like its three
+          // siblings on this page instead of introducing purple.
+          color: themeColor,
           fill: true,
         },
       ],
@@ -2855,7 +2842,10 @@ function pageDownside(
     "Stressed Cap Rate",
     fmtPct(stressed.capRate),
     {
-      tone: "primary",
+      // Neutral: its three siblings color by pass/fail semantics, and cap
+      // rate carries no such threshold — the lone brand-blue tile in a row
+      // of reds read as a judgment it wasn't making.
+      tone: "neutral",
       themeColor,
     },
   );
@@ -4337,13 +4327,64 @@ function pageDisclosures(
 }
 
 // ===================== Public API =====================
+
+/**
+ * jsPDF's core Helvetica is WinAnsi-encoded: a glyph outside that set does
+ * not drop — it MOJIBAKES. "DSCR ≥ 1.25" shipped in real reports as
+ * `DSCR "e 1.25`, six times per document. The offending strings arrive in
+ * the DATA (buy-box criteria, binding-constraint labels, verdict rationale
+ * — all composed in the web app where ≥ is house style), so every string in
+ * the payload is mapped to a WinAnsi-safe equivalent at the door. Mapping
+ * BEFORE composition also keeps splitTextToSize measuring the text that is
+ * actually drawn.
+ */
+const WINANSI_SUBSTITUTIONS: ReadonlyArray<[RegExp, string]> = [
+  [/≥/g, ">="], // ≥
+  [/≤/g, "<="], // ≤
+  [/−/g, "-"], // minus sign (U+2212, not the WinAnsi hyphen)
+  [/→/g, "->"], // →
+  [/≈/g, "~"], // ≈
+  [/≠/g, "!="], // ≠
+  [/∞/g, "Infinite"], // ∞
+];
+
+export function toWinAnsiSafe(value: string): string {
+  let out = value;
+  for (const [pattern, replacement] of WINANSI_SUBSTITUTIONS) {
+    out = out.replace(pattern, replacement);
+  }
+  return out;
+}
+
+/** Deep-map every string in a plain-object/array payload through
+ *  toWinAnsiSafe. Non-plain objects (Date, ArrayBuffer, class instances)
+ *  pass through untouched. */
+export function sanitizeStringsForWinAnsi<T>(node: T): T {
+  if (typeof node === "string") return toWinAnsiSafe(node) as unknown as T;
+  if (Array.isArray(node)) {
+    return node.map((item) => sanitizeStringsForWinAnsi(item)) as unknown as T;
+  }
+  if (node !== null && typeof node === "object") {
+    const proto = Object.getPrototypeOf(node);
+    if (proto === Object.prototype || proto === null) {
+      const out: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(node)) {
+        out[key] = sanitizeStringsForWinAnsi(value);
+      }
+      return out as unknown as T;
+    }
+  }
+  return node;
+}
+
 async function buildInvestmentPDFDocument(
   data: ReportData,
   branding?: BrandingConfig | null,
   mode: ReportMode = "personal",
 ) {
   const doc = new jsPDF({ unit: "pt", format: "a4", compress: true });
-  const d = data;
+  const d = sanitizeStringsForWinAnsi(data);
+  branding = branding ? sanitizeStringsForWinAnsi(branding) : branding;
 
   // Document metadata. Without a Title a viewer shows the raw filename in its
   // tab and window chrome, and assistive tech has no document name to announce
