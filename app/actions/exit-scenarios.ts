@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { getVerifiedEntitlementsForUser } from "@/lib/entitlements";
+import { requireVerifiedEntitlements } from "@/lib/entitlements";
 import { toServerErrorResult } from "@/lib/db-error";
 import {
   buildExitScenarioInputHash,
@@ -88,7 +88,9 @@ export async function getExitScenarioSnapshotAction(
     };
   }
 
-  const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
+  const verified = await requireVerifiedEntitlements(supabase, user.id);
+  if (!verified.ok) return verified;
+  const entitlements = verified.entitlements;
   if (!entitlements.features.includes("exit_scenarios")) {
     return {
       ok: false,

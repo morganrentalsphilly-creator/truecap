@@ -156,7 +156,7 @@ export async function applyExtractedValueAction(
   const { savedDealId, field, value } = parsed.data;
   const { data: row, error } = await supabase
     .from("saved_analyses")
-    .select("form_snapshot, property_type")
+    .select("form_snapshot, property_type, underwriting_revision")
     .eq("id", savedDealId)
     .eq("user_id", user.id)
     .is("deleted_at", null)
@@ -198,8 +198,24 @@ export async function applyExtractedValueAction(
     next.insuranceMonthly = value;
   }
 
-  const saved = await saveDealAction(next, savedDealId);
+  // saveDealAction's update path refuses to write without the caller proving
+  // which revision it read (hasOwnProperty check → unconditional STALE_DATA),
+  // so the revision loaded above rides along — same shape as the
+  // apply-template-to-deal call in analysis-templates.
+  const saved = await saveDealAction(next, savedDealId, undefined, {
+    expectedUnderwritingRevision: (
+      row as { underwriting_revision?: unknown }
+    ).underwriting_revision,
+  });
   if (!saved.ok) {
+    if (saved.code === "STALE_DATA") {
+      return {
+        ok: false,
+        code: "STALE_DATA",
+        message:
+          "This deal changed since the numbers were extracted. Refresh the page and run extraction again.",
+      };
+    }
     return {
       ok: false,
       code: saved.code ?? "SERVER_ERROR",

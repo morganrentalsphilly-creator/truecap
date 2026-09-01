@@ -267,14 +267,17 @@ const SAVED_RISK_LEVELS: readonly DealRiskLevel[] = [
   "Balanced",
   "Low Return",
 ];
-const BREAKDOWN_KEYS: readonly (keyof DealScoreBreakdown)[] = [
+// Only the always-present NUMERIC keys — the optional keys
+// (applicabilityAdjustment, riskPenaltyLimited) are recovered individually
+// below because their types and presence rules differ.
+const BREAKDOWN_KEYS = [
   "cashFlowScore",
   "cocScore",
   "capRateScore",
   "dscrScore",
   "totalReturnScore",
   "riskPenalty",
-];
+] as const satisfies readonly (keyof DealScoreBreakdown)[];
 
 /** Strictly recover the saved Deal Score contract without invoking the score
  * engine. Used only for a frozen future version; missing detail fails closed. */
@@ -310,6 +313,11 @@ export function parseFrozenDealScore(snapshotInput: unknown): DealScoreResult | 
       return null;
     }
     breakdown.applicabilityAdjustment = applicabilityAdjustment;
+  }
+  // Recovered so a frozen receipt can never call a compressed penalty a
+  // clean risk profile; anything other than literal true stays absent.
+  if (breakdownRecord.riskPenaltyLimited === true) {
+    breakdown.riskPenaltyLimited = true;
   }
 
   return {

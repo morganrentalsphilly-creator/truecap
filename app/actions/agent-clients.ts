@@ -17,7 +17,7 @@
 import { z } from "zod";
 import * as Sentry from "@sentry/nextjs";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { getVerifiedEntitlementsForUser, hasPlanFeature } from "@/lib/entitlements";
+import { requireVerifiedEntitlements, hasPlanFeature } from "@/lib/entitlements";
 import { mintSignedToken } from "@/lib/signed-token";
 import { PORTAL_SCOPE } from "@/lib/client-portal";
 import { getSiteUrl } from "@/lib/site-url";
@@ -109,7 +109,9 @@ async function requireAgentPro(): Promise<Gate> {
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, result: { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." } };
 
-  const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
+  const verified = await requireVerifiedEntitlements(supabase, user.id);
+  if (!verified.ok) return { ok: false, result: verified };
+  const entitlements = verified.entitlements;
   if (!hasPlanFeature(entitlements, "client_buy_box")) {
     return {
       ok: false,
@@ -260,8 +262,9 @@ export async function getClientPortalLinkAction(
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
 
-  const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
-  if (!hasPlanFeature(entitlements, "agent_portal")) {
+  const verified = await requireVerifiedEntitlements(supabase, user.id);
+  if (!verified.ok) return verified;
+  if (!hasPlanFeature(verified.entitlements, "agent_portal")) {
     return { ok: false, code: "ENTITLEMENT_REQUIRED", message: "The client portal is an Agent Pro feature." };
   }
 

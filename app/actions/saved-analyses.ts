@@ -14,7 +14,7 @@ import {
   hasPaidPlanSubscription,
   hasPlanFeature,
   hasSavedDealCapacity,
-  getVerifiedEntitlementsForUser,
+  requireVerifiedEntitlements,
 } from "@/lib/entitlements";
 import {
   INVESTCALC_SCHEMA_VERSION,
@@ -754,7 +754,9 @@ export async function saveDealAction(
     };
   }
 
-  const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
+  const verified = await requireVerifiedEntitlements(supabase, user.id);
+  if (!verified.ok) return verified;
+  const entitlements = verified.entitlements;
   if (!hasPlanFeature(entitlements, "save_deal")) {
     return {
       ok: false,
@@ -2131,7 +2133,9 @@ export async function getSavedAnalysisPdfExportAction(
     };
   }
 
-  const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
+  const verified = await requireVerifiedEntitlements(supabase, user.id);
+  if (!verified.ok) return verified;
+  const entitlements = verified.entitlements;
   const canGeneratePdf = hasPlanFeature(entitlements, "pdf_export");
 
   const savedDealId = id.trim();
@@ -2319,7 +2323,9 @@ export async function completeSavedAnalysisPdfExportAction(
     };
   }
 
-  const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
+  const verified = await requireVerifiedEntitlements(supabase, user.id);
+  if (!verified.ok) return verified;
+  const entitlements = verified.entitlements;
   if (!hasPlanFeature(entitlements, "pdf_export")) {
     return {
       ok: false,
@@ -2816,7 +2822,9 @@ export async function updateSavedDealStageAction(
     };
   }
 
-  const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
+  const verified = await requireVerifiedEntitlements(supabase, user.id);
+  if (!verified.ok) return verified;
+  const entitlements = verified.entitlements;
   if (!hasPlanFeature(entitlements, "pipeline")) {
     return {
       ok: false,
@@ -2985,7 +2993,9 @@ export async function updateSavedDealTagsAction(
     return { ok: false, code: "VALIDATION_ERROR", message: "Invalid deal id." };
   }
 
-  const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
+  const verified = await requireVerifiedEntitlements(supabase, user.id);
+  if (!verified.ok) return verified;
+  const entitlements = verified.entitlements;
   if (!hasPlanFeature(entitlements, "pipeline")) {
     return {
       ok: false,
@@ -3056,7 +3066,9 @@ export async function setSavedDealClientAction(
     return { ok: false, code: "VALIDATION_ERROR", message: "Invalid client." };
   }
 
-  const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
+  const verified = await requireVerifiedEntitlements(supabase, user.id);
+  if (!verified.ok) return verified;
+  const entitlements = verified.entitlements;
   if (!hasPlanFeature(entitlements, "client_buy_box")) {
     return {
       ok: false,

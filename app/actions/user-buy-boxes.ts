@@ -39,7 +39,7 @@ import {
   getEntitlementsForUser,
   hasPaidPlanSubscription,
   hasPlanFeature,
-  getVerifiedEntitlementsForUser,
+  requireVerifiedEntitlements,
 } from "@/lib/entitlements";
 import {
   recomputeSavedDealVerdict,
@@ -159,10 +159,12 @@ async function requireProUser(
   if (!user) {
     return { ok: false, result: { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." } };
   }
-  const [entitlements, hasPaidAccess] = await Promise.all([
-    getVerifiedEntitlementsForUser(supabase, user.id),
+  const [verified, hasPaidAccess] = await Promise.all([
+    requireVerifiedEntitlements(supabase, user.id),
     hasPaidPlanSubscription(supabase, user.id),
   ]);
+  if (!verified.ok) return { ok: false, result: verified };
+  const entitlements = verified.entitlements;
   if (!hasPlanFeature(entitlements, "buy_box")) {
     return {
       ok: false,
@@ -366,7 +368,9 @@ export async function listBuyBoxesAction(): Promise<BuyBoxesActionResult> {
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
 
-  const entitlements = await getVerifiedEntitlementsForUser(supabase, user.id);
+  const verified = await requireVerifiedEntitlements(supabase, user.id);
+  if (!verified.ok) return verified;
+  const entitlements = verified.entitlements;
   const canUse = hasPlanFeature(entitlements, "buy_box");
 
   const fetched = await fetchBoxes(supabase, user.id);
@@ -398,10 +402,12 @@ export async function listBuyBoxesForDealAction(
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, code: "SIGN_IN_REQUIRED", message: "Please sign in." };
 
-  const [entitlements, hasPaidAccess] = await Promise.all([
-    getVerifiedEntitlementsForUser(supabase, user.id),
+  const [verified, hasPaidAccess] = await Promise.all([
+    requireVerifiedEntitlements(supabase, user.id),
     hasPaidPlanSubscription(supabase, user.id),
   ]);
+  if (!verified.ok) return verified;
+  const entitlements = verified.entitlements;
   const hasBuyBoxFeature = hasPlanFeature(entitlements, "buy_box");
   const canUse =
     hasPaidAccess ||

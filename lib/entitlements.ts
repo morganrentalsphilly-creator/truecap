@@ -147,6 +147,38 @@ export async function getVerifiedEntitlementsForUser(
   return getEntitlementsForUser(supabase, userId);
 }
 
+export const ENTITLEMENTS_UNAVAILABLE_MESSAGE =
+  "We couldn't confirm your plan just now — your access hasn't changed. Please try again in a moment.";
+
+/** getVerifiedEntitlementsForUser converted to a result at the action
+ *  boundary. Server actions never throw to the client, so the failed-probe
+ *  throw becomes { ok: false } HERE, exactly once, instead of every call
+ *  site remembering its own try/catch (two RSC-rendered pages shipped
+ *  without one and crashed to the route error boundary). */
+export async function requireVerifiedEntitlements(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<
+  | { ok: true; entitlements: PlanEntitlements }
+  | { ok: false; code: "SERVER_ERROR"; message: string }
+> {
+  try {
+    return {
+      ok: true,
+      entitlements: await getVerifiedEntitlementsForUser(supabase, userId),
+    };
+  } catch (error) {
+    if (error instanceof EntitlementsUnavailableError) {
+      return {
+        ok: false,
+        code: "SERVER_ERROR",
+        message: ENTITLEMENTS_UNAVAILABLE_MESSAGE,
+      };
+    }
+    throw error;
+  }
+}
+
 export async function getEntitlementsForUser(
   supabase: SupabaseClient,
   userId: string

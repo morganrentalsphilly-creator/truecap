@@ -548,6 +548,13 @@ export const UNDERWRITING_V2_CORE_RELEASE = {
 
 export const UNDERWRITING_STANDARD_RELEASE_NOTES = [
   {
+    revision: "screening-index-v1.4-near-miss-tiers-2026-08-31",
+    version: TRUECAP_UNDERWRITING_STANDARD_VERSION,
+    effectiveDate: "2026-08-31",
+    summary:
+      "Screening Index v1.4 adds one 1-point near-miss band to each core component just below its former floor (cash flow -$200 to -$500/mo, cash-on-cash -2% to 1%, cap rate 3% to 4%, DSCR 0.90 to 0.99) so a shortlist can still order deals that miss every band, and bounds the risk penalty so it cannot erase that ordering credit; a capped penalty is flagged on the score receipt. All other bands, thresholds, and penalties are unchanged, and recorded scores remain immutable.",
+  },
+  {
     revision: "projection-v10-buy-and-hold-contract-2026-08-27",
     version: TRUECAP_UNDERWRITING_STANDARD_VERSION,
     effectiveDate: "2026-08-27",

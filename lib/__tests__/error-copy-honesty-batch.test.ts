@@ -68,7 +68,13 @@ describe("entitlement mutations verify the plan instead of downgrading on a blip
   for (const f of GATED) {
     it(`${f} uses the verified variant`, () => {
       const s = read(f);
-      expect(s).toContain("getVerifiedEntitlementsForUser(supabase");
+      // requireVerifiedEntitlements wraps the verified getter and converts
+      // its throw to { ok:false } at the action boundary — actions never
+      // throw to the client, and two RSC-rendered pages crashed to the
+      // route error boundary when call sites were left to catch it
+      // themselves.
+      expect(s).toContain("requireVerifiedEntitlements(supabase");
+      expect(s).not.toContain("getVerifiedEntitlementsForUser(supabase");
       // The lenient variant silently substitutes the free plan on a DB error,
       // which made every downstream gate tell an already-Pro user to upgrade.
       expect(s).not.toMatch(/[^d]getEntitlementsForUser\(supabase/);
