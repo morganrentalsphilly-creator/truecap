@@ -83,6 +83,8 @@ describe("review card", () => {
 
   it("refreshes the workspace after an apply so the numbers on screen are the saved ones", () => {
     const apply = card.slice(card.indexOf("const handleApply"));
-    expect(apply.slice(0, 1600)).toContain("router.refresh()");
+    // Window sized to hold the whole success path (toast + stale-shell
+    // guard + dismissal) — the refresh must live INSIDE handleApply.
+    expect(apply.slice(0, 2600)).toContain("router.refresh()");
   });
 });

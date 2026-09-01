@@ -108,6 +108,11 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
   };
 
   const handleApply = async (candidate: ExtractionCandidate) => {
+    // Captured so the success updater below can tell whether the extraction
+    // on screen is still the one this apply came from — the user can start
+    // extracting ANOTHER document while this apply is in flight, and the
+    // updater must not dismiss that fresh shell.
+    const appliedPath = extraction?.path;
     setApplyingField(candidate.field);
     try {
       const result = await applyExtractedValueAction({
@@ -129,7 +134,15 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
         variant: "success",
       });
       setExtraction((current) => {
-        if (!current) return current;
+        // A different (or reloading) extraction took the panel over while
+        // this apply was in flight — leave it alone.
+        if (
+          !current ||
+          current.path !== appliedPath ||
+          current.status === "loading"
+        ) {
+          return current;
+        }
         const remaining = current.candidates.filter(
           (c) => c.field !== candidate.field,
         );

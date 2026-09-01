@@ -1908,11 +1908,17 @@ function pageInputs(
       doc.setFontSize(11);
       // The owner's unit shows no rent: the engine does not count it, so
       // printing its form value here would restate the contradiction.
-      // Zero beds/baths/sqft means "not entered", not a studio with no
-      // bathroom — shipped reports printed "BATHS 0 · SQ FT 0" as facts.
+      // Never-entered unit details print as em dashes, not fabricated
+      // zeros ("BATHS 0 · SQ FT 0" shipped as facts) — but 0 beds is a
+      // REAL entry (a studio; the schema accepts .min(0) and the HUD rent
+      // check maps bedrooms===0 to "a studio"). The payload collapses
+      // never-entered to 0, so the only safe never-entered signature is
+      // ALL THREE fields at zero; a studio with a real bath or sqft keeps
+      // its honest "0".
+      const unitDetailsUnentered = !u.beds && !u.baths && !u.sqft;
       [
-        u.beds ? String(u.beds) : "—",
-        u.baths ? String(u.baths) : "—",
+        unitDetailsUnentered ? "—" : String(u.beds),
+        unitDetailsUnentered ? "—" : String(u.baths),
         u.sqft ? String(u.sqft) : "—",
         u.isOwnerOccupied
           ? "—"
@@ -2697,9 +2703,12 @@ function pageProjection(
         {
           label: "Cumulative CF",
           values: d.projection10y.rows.map((r) => r.cum),
-          // Single-series chart: it takes the brand color like its three
-          // siblings on this page instead of introducing purple.
-          color: themeColor,
+          // Brand like its three siblings — but the CONTRAST-GUARDED
+          // variant: drawLineChart renders the endpoint value as TEXT in
+          // the series color, and a light agent brand (yellow, cyan) made
+          // that label invisible on white. themeTextColor IS the brand hex
+          // whenever it clears 4.5:1, so nothing changes for dark brands.
+          color: themeTextColor,
           fill: true,
         },
       ],
